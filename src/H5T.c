@@ -1974,7 +1974,6 @@ H5T_detect_class (H5T_t *dt, H5T_class_t cls)
         case H5T_VLEN:
         case H5T_ENUM:
             HRETURN(H5T_detect_class(dt->parent,cls));
-            break;
 
         default:
             break;

@@ -39,7 +39,6 @@ hid_t	fapl;				/* file access property list */
 
 /* protocols */
 static void test_mpio_overlap_writes(char *filename);
-static void test_mpio_offset(void);
 static void test_mpio_gb_file(char *filename);
 static void test_mpio_gb_file(char *filename);
 static int parse_options(int argc, char **argv);
@@ -151,7 +150,7 @@ test_mpio_overlap_writes(char *filename)
 		if ((buf[i] != expected) &&
 		    (vrfyerrs++ < MAX_ERR_REPORT || verbose))
 			printf("proc %d: found data error at [%ld], expect %d, got %d\n",
-			    mpi_rank, mpi_off+i, expected, buf[i]);
+			    mpi_rank, (long)(mpi_off+i), expected, buf[i]);
 	    }
 	    if (vrfyerrs > MAX_ERR_REPORT && !verbose)
 		printf("proc %d: [more errors ...]\n", mpi_rank);
@@ -346,7 +345,7 @@ test_mpio_gb_file(char *filename)
 		    if ((*(buf+j) != expected) &&
 			(vrfyerrs++ < MAX_ERR_REPORT || verbose))
 			    printf("proc %d: found data error at [%ld+%d], expect %d, got %d\n",
-				mpi_rank, mpi_off, j, expected, *(buf+j));
+				mpi_rank, (long)mpi_off, j, expected, *(buf+j));
 		}
 		if (vrfyerrs > MAX_ERR_REPORT && !verbose)
 		    printf("proc %d: [more errors ...]\n", mpi_rank);

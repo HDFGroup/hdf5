@@ -96,7 +96,7 @@ void multiple_dset_write(char *filename, int ndatasets)
 void multiple_group_write(char *filename, int ngroups)
 {
     int mpi_rank, mpi_size;
-    int i, j, l, m;
+    int l, m;
     char gname[64];
     hid_t fid, gid, plist, memspace, filespace;
     hssize_t chunk_origin[DIM];
@@ -283,11 +283,14 @@ int read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
 {
     int i, j, n, mpi_rank, vrfy_errors=0;
     char dname[32];
-    DATATYPE outdata[SIZE][SIZE], indata[SIZE][SIZE];
+    DATATYPE *outdata, *indata;
     hid_t did;
     hsize_t block[DIM]={SIZE,SIZE};
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    indata = (DATATYPE*)malloc(SIZE*SIZE*sizeof(DATATYPE));
+    outdata = (DATATYPE*)malloc(SIZE*SIZE*sizeof(DATATYPE));
 
     for(n=0; n<NDATASET; n++) {
         sprintf(dname, "dataset%d", n);
@@ -297,14 +300,21 @@ int read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
         H5Dread(did, H5T_NATIVE_INT, memspace, filespace, H5P_DEFAULT, 
                 indata);
 
+        /* this is the original value */
         for(i=0; i<SIZE; i++)
-            for(j=0; j<SIZE; j++) 
-                outdata[i][j] = n*1000 + mpi_rank;
-        
+	    for(j=0; j<SIZE; j++) { 
+	         *outdata = n*1000 + mpi_rank;
+                 outdata++;
+	    }
+        outdata -= SIZE*SIZE;
+
         vrfy_errors = dataset_vrfy(NULL, NULL, NULL, block, indata, outdata);
 	       
         H5Dclose(did);
     }
+
+    free(indata);
+    free(outdata);
 
     return vrfy_errors;
 }

@@ -95,7 +95,7 @@ typedef struct table_t {
 
 /*this struct stores the information that is passed to the find_objs function*/
 typedef struct find_objs_t {
-    int prefix_len; 
+    size_t prefix_len; 
     char *prefix;
     unsigned int threshold; /* should be 0 or 1 */
     table_t *group_table;
@@ -120,6 +120,6 @@ extern char    *get_objectname(table_t*, int);
 extern herr_t   find_objs(hid_t group, const char *name, void *op_data);
 extern int      search_obj(table_t *temp, unsigned long *);
 extern void     init_table(table_t **tbl);
-extern void     init_prefix(char **temp, int);
+extern void     init_prefix(char **temp, size_t );
 
 #endif	/* H5TOOLS_UTILS_H__ */

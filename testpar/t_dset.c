@@ -111,9 +111,9 @@ if (verbose) printf("slab_set wholeset\n");
     }
 if (verbose){
     printf("start[]=(%ld,%ld), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total datapoints=%lu\n",
-	start[0], start[1], count[0], count[1],
-	stride[0], stride[1], block[0], block[1],
-	block[0]*block[1]*count[0]*count[1]);
+	(long)start[0], (long)start[1], (unsigned long)count[0], (unsigned long)count[1],
+	(unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1],
+	(unsigned long)(block[0]*block[1]*count[0]*count[1]));
     }
 }
 
@@ -149,13 +149,13 @@ void dataset_print(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t 
     /* print the column heading */
     printf("%-8s", "Cols:");
     for (j=0; j < block[1]; j++){
-	printf("%3ld ", start[1]+j);
+	printf("%3ld ", (long)(start[1]+j));
     }
     printf("\n");
 
     /* print the slab data */
     for (i=0; i < block[0]; i++){
-	printf("Row %2ld: ", i+start[0]);
+	printf("Row %2ld: ", (long)(i+start[0]));
 	for (j=0; j < block[1]; j++){
 	    printf("%03d ", *dataptr++);
 	}
@@ -169,17 +169,14 @@ void dataset_print(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t 
  */
 int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], DATATYPE *dataset, DATATYPE *original)
 {
-    DATATYPE *dataptr = dataset;
-    DATATYPE *originptr = original;
-
     int i, j, vrfyerrs;
 
     /* print it if verbose */
     if (verbose) {
 	printf("dataset_vrfy dumping:::\n");
 	printf("start(%ld, %ld), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
-	    start[0], start[1], count[0], count[1],
-	    stride[0], stride[1], block[0], block[1]);
+	    (long)start[0], (long)start[1], (unsigned long)count[0], (unsigned long)count[1],
+	    (unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1]);
 	printf("original values:\n");
 	dataset_print(start, count, stride, block, original);
 	printf("compared values:\n");
@@ -238,9 +235,7 @@ dataset_writeInd(char *filename)
     hsize_t block[RANK];			/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
-    int   i, j;
     int mpi_size, mpi_rank;
-    char *fname;
     
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
@@ -370,7 +365,6 @@ dataset_readInd(char *filename)
 {
     hid_t fid;                  /* HDF5 file ID */
     hid_t acc_tpl;		/* File access templates */
-    hid_t sid;   		/* Dataspace ID */
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
@@ -382,7 +376,6 @@ dataset_readInd(char *filename)
     hsize_t block[RANK];			/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
-    int   i, j;
     int mpi_size, mpi_rank;
 
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -716,7 +709,6 @@ dataset_readAll(char *filename)
     hid_t fid;                  /* HDF5 file ID */
     hid_t acc_tpl;		/* File access templates */
     hid_t xfer_plist;		/* Dataset transfer properties list */
-    hid_t sid;   		/* Dataspace ID */
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
@@ -953,9 +945,7 @@ extend_writeInd(char *filename)
     hsize_t 	block[RANK];			/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
-    int   i, j;
     int mpi_size, mpi_rank;
-    char *fname;
     
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
@@ -997,7 +987,7 @@ extend_writeInd(char *filename)
 
     /* set up dataset storage chunk sizes and creation property list */
     if (verbose)
-	printf("chunks[]=%lu,%lu\n", chunk_dims[0], chunk_dims[1]);
+	printf("chunks[]=%lu,%lu\n", (unsigned long)chunk_dims[0], (unsigned long)chunk_dims[1]);
     dataset_pl = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dataset_pl >= 0), "H5Pcreate succeeded");
     ret = H5Pset_chunk(dataset_pl, RANK, chunk_dims);
@@ -1144,7 +1134,6 @@ extend_readInd(char *filename)
 {
     hid_t fid;			/* HDF5 file ID */
     hid_t acc_tpl;		/* File access templates */
-    hid_t sid;   		/* Dataspace ID */
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
@@ -1158,7 +1147,6 @@ extend_readInd(char *filename)
     hsize_t block[RANK];			/* for hyperslab setting */
 
     herr_t ret;         	/* Generic return value */
-    int   i, j;
     int mpi_size, mpi_rank;
 
     MPI_Comm comm = MPI_COMM_WORLD;

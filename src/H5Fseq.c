@@ -154,8 +154,7 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                  */
                 unsigned long max, min, temp;
 
-                temp = seq_len;
-                assert(temp==seq_len);	/* verify no overflow */
+                H5_ASSIGN_OVERFLOW(temp,seq_len,hsize_t,unsigned long);
                 MPI_Allreduce(&temp, &max, 1, MPI_UNSIGNED_LONG, MPI_MAX,
                       H5FD_mpio_communicator(f->shared->lf));
                 MPI_Allreduce(&temp, &min, 1, MPI_UNSIGNED_LONG, MPI_MIN,
@@ -190,8 +189,6 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
         case H5D_CHUNKED:
         {
-            unsigned       leading_partials;       /* Flag set if there are leading partial hyperslabs to take care of */
-
             /*
              * This method is unable to access external raw data files 
              */
@@ -238,12 +235,9 @@ printf("%s: acc=%ld, down_size[%d]=%ld\n",FUNC,(long)acc,i,(long)down_size[i]);
             } /* end for */
 
             /* Compute the hyperslab offset from the address given */
-            leading_partials=0;
             for(i=ndims-1; i>=0; i--) {
                 coords[i]=addr%dset_dims[i];
                 addr/=dset_dims[i];
-                if(i>0 && coords[i]>0)
-                    leading_partials=1;
 #ifdef QAK
 printf("%s: addr=%lu, coords[%d]=%ld\n",FUNC,(unsigned long)addr,i,(long)coords[i]);
 #endif /* QAK */
@@ -251,7 +245,6 @@ printf("%s: addr=%lu, coords[%d]=%ld\n",FUNC,(unsigned long)addr,i,(long)coords[
             coords[ndims]=0;   /* No offset for element info */
 #ifdef QAK
 printf("%s: addr=%lu, coords[%d]=%ld\n",FUNC,(unsigned long)addr,ndims,(long)coords[ndims]);
-printf("%s: leading_partials=%u\n",FUNC,leading_partials);
 #endif /* QAK */
 
             /*
@@ -607,8 +600,7 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                  */
                 unsigned long max, min, temp;
 
-                temp = seq_len;
-                assert(temp==seq_len);	/* verify no overflow */
+                H5_ASSIGN_OVERFLOW(temp,seq_len,hsize_t,unsigned long);
                 MPI_Allreduce(&temp, &max, 1, MPI_UNSIGNED_LONG, MPI_MAX,
                       H5FD_mpio_communicator(f->shared->lf));
                 MPI_Allreduce(&temp, &min, 1, MPI_UNSIGNED_LONG, MPI_MIN,
@@ -643,8 +635,6 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
         case H5D_CHUNKED:
         {
-            unsigned       leading_partials;       /* Flag set if there are leading partial hyperslabs to take care of */
-
             /*
              * This method is unable to access external raw data files 
              */
@@ -691,12 +681,9 @@ printf("%s: acc=%ld, down_size[%d]=%ld\n",FUNC,(long)acc,i,(long)down_size[i]);
             } /* end for */
 
             /* Compute the hyperslab offset from the address given */
-            leading_partials=0;
             for(i=ndims-1; i>=0; i--) {
                 coords[i]=addr%dset_dims[i];
                 addr/=dset_dims[i];
-                if(i>0 && coords[i]>0)
-                    leading_partials=1;
 #ifdef QAK
 printf("%s: addr=%lu, dset_dims[%d]=%ld, coords[%d]=%ld\n",FUNC,(unsigned long)addr,i,(long)dset_dims[i],i,(long)coords[i]);
 #endif /* QAK */
@@ -704,7 +691,6 @@ printf("%s: addr=%lu, dset_dims[%d]=%ld, coords[%d]=%ld\n",FUNC,(unsigned long)a
             coords[ndims]=0;   /* No offset for element info */
 #ifdef QAK
 printf("%s: addr=%lu, coords[%d]=%ld\n",FUNC,(unsigned long)addr,ndims,(long)coords[ndims]);
-printf("%s: leading_partials=%u\n",FUNC,leading_partials);
 #endif /* QAK */
 
             /*

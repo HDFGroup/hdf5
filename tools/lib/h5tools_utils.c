@@ -352,10 +352,9 @@ init_table(table_t **tbl)
  *-------------------------------------------------------------------------
  */
 void
-init_prefix(char **prefix, int prefix_len)
+init_prefix(char **prefix, size_t prefix_len)
 {
-    assert(prefix_len > 0);
-    *prefix = HDcalloc((size_t)prefix_len, 1);
+    *prefix = HDcalloc(prefix_len, 1);
 }
 
 

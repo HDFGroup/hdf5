@@ -24,7 +24,7 @@ static const char  *progname = "h5dump";
 
 static int          d_status = EXIT_SUCCESS;
 static int          unamedtype = 0;     /* shared data type with no name */
-static int          prefix_len = 1024;
+static size_t       prefix_len = 1024;
 static table_t     *group_table = NULL, *dset_table = NULL, *type_table = NULL;
 static char        *prefix;
 static const char  *driver = NULL;      /* The driver to open the file with. */
@@ -1407,7 +1407,7 @@ dump_all(hid_t group, const char *name, void * op_data)
 	    d_status = EXIT_FAILURE;
             ret = FAIL;
 	} else {
-            int new_len = strlen(prefix) + strlen(name) + 2;
+            size_t new_len = strlen(prefix) + strlen(name) + 2;
 
             if (prefix_len <= new_len) {
                 prefix_len = new_len + 1;
@@ -2277,7 +2277,7 @@ handle_groups(hid_t fid, char *group, void * UNUSED data)
                 dump_header_format->groupblockend);
         d_status = EXIT_FAILURE;
     } else {
-        int new_len = strlen(group) + 1;
+        size_t new_len = strlen(group) + 1;
 
         if (prefix_len <= new_len) {
             prefix_len = new_len;
@@ -3526,7 +3526,7 @@ xml_print_datatype(hid_t type)
 	}
 	printf("\" Size=\"");
 	sz = H5Tget_size(type);
-	printf("%d", sz);
+	printf("%u", (unsigned)sz);
 	printf("\" />\n");
 	indent -= COL;
 	indentation(indent);
@@ -3557,12 +3557,12 @@ xml_print_datatype(hid_t type)
 	}
 	printf("\" Size=\"");
 	sz = H5Tget_size(type);
-	printf("%d", sz);
+	printf("%u", (unsigned)sz);
 	H5Tget_fields(type, &spos, &epos, &esize, &mpos, &msize);
-	printf("\" SignBitLocation=\"%d\" ", spos);
-	printf("ExponentBits=\"%d\" ExponentLocation=\"%d\" ", esize, epos);
-	printf("MantissaBits=\"%d\" MantissaLocation=\"%d\" />\n",
-	       msize, mpos);
+	printf("\" SignBitLocation=\"%u\" ", (unsigned)spos);
+	printf("ExponentBits=\"%u\" ExponentLocation=\"%u\" ", (unsigned)esize, (unsigned)epos);
+	printf("MantissaBits=\"%u\" MantissaLocation=\"%u\" />\n",
+	       (unsigned)msize, (unsigned)mpos);
 	indent -= COL;
 	indentation(indent);
 	printf("</AtomicType>\n");
@@ -3631,7 +3631,7 @@ xml_print_datatype(hid_t type)
 	    printf("ERROR_UNKNOWN");
 	}
 	size = H5Tget_size(type);
-	printf("\" Size=\"%d\"/>\n", size);
+	printf("\" Size=\"%u\"/>\n", (unsigned)size);
 	indent -= COL;
 	indentation(indent);
 	printf("</AtomicType>\n");
@@ -3646,7 +3646,7 @@ xml_print_datatype(hid_t type)
 	indentation(indent);
 	printf("<OpaqueType Tag=\"%s\" ", H5Tget_tag(type));
 	size = H5Tget_size(type);
-	printf("Size=\"%d\"/>\n", size);
+	printf("Size=\"%u\"/>\n", (unsigned)size);
 	indent -= COL;
 	indentation(indent);
 	printf("</AtomicType>\n");

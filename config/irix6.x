@@ -53,13 +53,14 @@ case "X-$CC_BASENAME" in
 	    #    1429:  the `long long' type is not standard
 	    #    1685:  turn off warnings about turning off invalid warnings
 	    #    3201:  remark - parameter not referenced
-	    CFLAGS="$CFLAGS -woff 1174,1429,1209,1196,1685,3201"
+#	    CFLAGS="$CFLAGS -woff 1174,1429,1209,1196,1685,3201"
+	    CFLAGS="$CFLAGS -woff 1209,3201"
 
 	    # Always turn off these compiler warnings for the old compiler:
 	    #    799:   the `long long' type is not standard
 	    #    803:   turn off warnings about turning off invalid warnings
 	    #    835:   __vfork() (this is an SGI config problem)
-	    CFLAGS="$CFLAGS -woff 799,803,835"
+#	    CFLAGS="$CFLAGS -woff 799,803,835"
 
 	    # Always turn off these loader warnings:
 	    # (notice the peculiar syntax)
@@ -68,10 +69,13 @@ case "X-$CC_BASENAME" in
 	    #      85:  duplicate definition preemption (from -lnsl)
 	    #     134:  duplicate weak definition preemption (from -lnsl)
 	    CFLAGS="$CFLAGS -Wl,-woff,47,-woff,84,-woff,85,-woff,134"
+
+            # Always turn on full warnings
+	    CFLAGS="$CFLAGS -fullwarn"
 	fi
 
 	# Extra debugging flags
-	DEBUG_CFLAGS="-g -fullwarn"
+	DEBUG_CFLAGS="-g"
 	DEBUG_CPPFLAGS=
 
 	# Extra production flags

@@ -253,7 +253,7 @@ struct options {
     off_t file_size;            /* size of file                         */
     long num_dsets;             /* number of datasets                   */
     long num_files;             /* number of files                      */
-    long num_iters;             /* number of iterations                 */
+    int num_iters;              /* number of iterations                 */
     int max_num_procs;          /* maximum number of processes to use   */
     int min_num_procs;          /* minimum number of processes to use   */
     size_t max_xfer_size;       /* maximum transfer buffer size         */
@@ -705,7 +705,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
 static void
 output_all_info(minmax *mm, int count, int indent_level)
 {
-    register int i;
+    int i;
 
     for (i = 0; i < count; ++i) {
         print_indent(indent_level);
@@ -750,7 +750,7 @@ get_minmax(minmax *mm, double val)
 static minmax
 accumulate_minmax_stuff(minmax *mm, int count)
 {
-    register int i;
+    int i;
     minmax total_mm;
     
     total_mm.sum = 0.0;
@@ -871,7 +871,7 @@ output_results(const struct options *opts, const char *name, minmax *table,
     total_mm = accumulate_minmax_stuff(table, table_size);
 
     print_indent(3);
-    output_report("%s (%d iteration(s)):\n", name,(int)table_size);
+    output_report("%s (%d iteration(s)):\n", name,table_size);
 
     /* Note: The maximum throughput uses the minimum amount of time & vice versa */
 

@@ -52,7 +52,7 @@ void putword(int w, FILE *fp)
 	fputc((w>>8)&0xff,fp);
 }
 
-void usage() {
+static void usage(void) {
 	printf("Usage: h52gif <h5_file> <gif_file> -i <h5_image> [-p <h5_palette>]\n");
 	printf("h52gif expects *at least* one h5_image. You may repeat -i <h5_image> [-p <h5_palette>] at most 50 times (maximum of 50 images).\n");
 }
@@ -68,12 +68,9 @@ int main(int argc , char **argv) {
 	
 	CHAR *HDFName = NULL;
 	CHAR *GIFName = NULL;
-	CHAR *image_path = NULL;
-	CHAR *pal_path = NULL;
 	/* reference variables */
 	
 	int has_local_palette; /* treated as a flag */
-	int loop_times; /* number of times to loop, i'm going to treat it as a yes or no */
 	
 	BYTE* b;
 	
@@ -86,10 +83,8 @@ int main(int argc , char **argv) {
 	/*int   LeftOfs, TopOfs;*/
 	int   ColorMapSize, InitCodeSize, Background, BitsPerPixel;
 	int   j,nc;
-	int	  w,h,i;
+	int	  w,i;
 	int   numcols = 256;
-	int   CountDown;
-	int   curx , cury;
 	int   time_out = 0;		/* time between two images in the animation */
 	int   n_images , index;
 	
@@ -207,19 +202,7 @@ int main(int argc , char **argv) {
                  assert(dim_sizes[1]==(hsize_t)((int)dim_sizes[1]));
                 RWidth = (int)dim_sizes[1];
                 RHeight = (int)dim_sizes[0];
-                w = (int)dim_sizes[1];
-                h = (int)dim_sizes[0];
-                
 
-#ifdef UNUSED
-              /*  w = dim_sizes[1];
-		h = dim_sizes[0];
-
-              */
-		LeftOfs = TopOfs = 0;
-#endif /*UNUSED */
-
-		
 		/* If the first image does not have a palette, I make my own global color table
 		** Obviously this is not the best thing to do, better steps would be:
 		** 1. Check for either a global palette or a global attribute called palette
@@ -266,12 +249,8 @@ int main(int argc , char **argv) {
 		ColorMapSize = 1 << BitsPerPixel;
 		
 		
-		CountDown = w * h;    /* # of pixels we'll be doing */
-		
 		if (BitsPerPixel <= 1) InitCodeSize = 2;
 		else InitCodeSize = BitsPerPixel;
-		
-		curx = cury = 0;
 		
 		if (!fpGif) {
 			fprintf(stderr,  "WriteGIF: file not open for writing\n" );
@@ -285,11 +264,9 @@ int main(int argc , char **argv) {
 			/* Write out the GIF header and logical screen descriptor */
 			if (n_images > 1) {
 				fwrite("GIF89a", 1, 6, fpGif);    /* the GIF magic number */
-				loop_times = 0;
 			}
 			else {
 				fwrite("GIF87a", 1, 6, fpGif);    /* the GIF magic number */
-				loop_times = 1;
 			}
 			
 			putword(RWidth, fpGif);           /* screen descriptor */
@@ -305,7 +282,7 @@ int main(int argc , char **argv) {
 			fputc(0, fpGif);                  /* future expansion byte */
 			
 			
-			/* If loop_times is 0 , put in the application extension to make the gif anime loop
+			/* If time_out>0, put in the application extension to make the gif anime loop
 			** indefinitely
 			*/
 			if (time_out > 0) {

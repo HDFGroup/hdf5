@@ -316,6 +316,13 @@ __DLL__ herr_t H5F_seq_write (H5F_t *f, hid_t dxpl_id,
 
 
 /* Functions that operate on indexed storage */
+#ifdef H5_HAVE_PARALLEL
+__DLL__ herr_t H5F_istore_allocate (H5F_t *f, hid_t dxpl_id,
+				    const struct H5O_layout_t *layout,
+				    const hsize_t *space_dim,
+				    const struct H5O_pline_t *pline,
+				    const struct H5O_fill_t *fill);
+#endif /* H5_HAVE_PARALLEL */
 __DLL__ hsize_t H5F_istore_allocated(H5F_t *f, unsigned ndims, haddr_t addr);
 __DLL__ herr_t H5F_istore_dump_btree(H5F_t *f, FILE *stream, unsigned ndims,
 				     haddr_t addr);

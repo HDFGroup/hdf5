@@ -2,6 +2,9 @@
 #include <stdlib.h>               
 #include "gif.h"                  
 
+static BYTE *
+ReadDataSubBlocks(BYTE **MemGif2 , WORD *DSize);
+
 int EndianOrder;
 int i;
 
@@ -53,7 +56,7 @@ BYTE    **MemGif2;       /* GIF image file input FILE stream */
 	for (i = 0 ; i < 6 ; i++) {
 		GifHead->HeaderDump[i] = *(*MemGif2)++;
 	}
-	if (strncmp(GifHead->HeaderDump , "GIF" , 3)) {
+	if (strncmp((const char *)GifHead->HeaderDump , "GIF" , 3)) {
 		printf("The file does not appear to be a valid GIF file.\n");
 		exit(-1);
 	}
@@ -352,7 +355,9 @@ WORD *DSize;
         bufSize += (dataSize);  /* Running total of the buffer size */
 		*DSize = bufSize;
 
-        /* *ptr1++ = dataSize;			/* Write the data count */
+#ifdef COMMENTED_OUT
+        *ptr1++ = dataSize;			/* Write the data count */
+#endif /* COMMENTED_OUT */
         while (dataSize--)			/* Read/write the Plain Text data */
              *ptr1++ = *(*MemGif2)++;
         
@@ -370,7 +375,6 @@ WORD *DSize;
 	
     }
 
-    /**ptr1++ = (BYTE) NULL;			/* Add NULL to simulate Terminator value */
    	*ptr1++ = '\0';
 	
     return(ptr2);					/* Return a pointer to the sub-block data */

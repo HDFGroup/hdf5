@@ -35,8 +35,8 @@ const char *FILENAME[] = {
 #   define GB8LL	0	/*cannot do the test*/
 #endif
 
-/* Protocols */
-void usage(void);
+/* Prototypes */
+static void usage(void);
 
 
 /*-------------------------------------------------------------------------

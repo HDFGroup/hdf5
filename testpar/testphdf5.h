@@ -116,7 +116,17 @@ extern void *old_client_data;			/*previous error handler arg.*/
 extern int facc_type;				/*Test file access type */
 
 /* prototypes */
-hid_t
-create_faccess_plist(MPI_Comm comm, MPI_Info info, int facc_type );
+hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int facc_type );
+void multiple_dset_write(char *filename, int ndatasets);
+void multiple_group_write(char *filename, int ngroups);
+void multiple_group_read(char *filename, int ngroups);
+void test_split_comm_access(char *filename);
+void dataset_writeInd(char *filename);
+void dataset_writeAll(char *filename);
+void extend_writeInd(char *filename);
+void dataset_readInd(char *filename);
+void dataset_readAll(char *filename);
+void extend_readInd(char *filename);
+int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], DATATYPE *dataset, DATATYPE *original);
 
 #endif /* PHDF5TEST_H */

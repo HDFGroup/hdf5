@@ -15,19 +15,15 @@ char           *cmd;
 
 FILE *fp;
 
+static WORD
+    XC = 0, YC = 0,				/* Output X and Y coords of current pixel */
+    CodeSize,					/* Code size, read from GIF header */
+    InitCodeSize,				/* Starting code size, used during Clear */
+    BytesPerScanline,			/* Bytes per scanline in output raster */
+    IWidth, IHeight;			/* image dimensions */
 static int BitOffset = 0,	/* Bit Offset of next code */
-XC = 0, YC = 0,				/* Output X and Y coords of current pixel */
 Pass = 0,					/* Used by output routine if WORDerlaced pic */
 OutCount = 0,				/* Decompressor output 'stack count' */
-RWidth, RHeight,			/* screen dimensions */
-IWidth, IHeight,			/* image dimensions */
-LeftOfs, TopOfs,			/* image offset */
-BitsPerPixel,				/* Bits per pixel, read from GIF header */
-BytesPerScanline,			/* Bytes per scanline in output raster */
-ColorMapSize,				/* number of colors */
-Background,					/* background color */
-CodeSize,					/* Code size, read from GIF header */
-InitCodeSize,				/* Starting code size, used during Clear */
 Code,						/* Value returned by ReadCode */
 MaxCode,					/* limiting value for current code size */
 ClearCode,					/* GIF clear code */
@@ -73,7 +69,8 @@ int  numused;
 * three BYTEs, compute the bit Offset WORDo our 24-bit chunk, shift to
 * bring the desired code to the bottom, then mask it off and return it. 
 */
-ReadCode()
+static int
+ReadCode(void)
 {
 	int RawCode, ByteOffset;
 	
@@ -87,8 +84,7 @@ ReadCode()
 }
 
 
-AddToPixel(Index)
-BYTE Index;
+static void AddToPixel(BYTE Index)
 {
     if (YC<IHeight)
         *(Image + YC * BytesPerScanline + XC) = Index;
@@ -154,7 +150,7 @@ GIFHEAD      *GifHead;
 	OutCount = 0;
 	BitOffset = 0;
 	
-	DataMask = (WORD)((1L << ((GifHead->PackedField & 0x07) +1)) -1);
+	DataMask = (1 << ((GifHead->PackedField & 0x07) +1)) -1;
 	Raster = GifImageDesc->GIFImage;
 	
 	

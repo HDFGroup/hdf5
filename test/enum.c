@@ -372,18 +372,19 @@ test_tr2(hid_t file)
  *-------------------------------------------------------------------------
  */
 static int
-test_value_dsnt_exist()
+test_value_dsnt_exist(void)
 {
 
     hid_t       datatype_id;  /* identifiers */
-    herr_t      status;
     int val;
     char nam[100];
     size_t size = 100;
+
     TESTING("for non-existing name and value");
+
     /* Turn off error reporting since we expect failure in this test */
- 
     if (H5Eset_auto(NULL, NULL) < 0) goto error; 
+
     if ((datatype_id = H5Tenum_create(H5T_NATIVE_INT))< 0) goto error;
 
     /* These calls should fail, since no memebrs exist yet */ 

@@ -484,6 +484,7 @@ H5S_hyper_block_cache (H5S_hyper_node_t *node,
 static herr_t
 H5S_hyper_block_read (H5S_hyper_node_t *node, H5S_hyper_io_info_t *io_info, hsize_t region_size)
 {
+    size_t tmp_region_size;
     FUNC_ENTER (H5S_hyper_block_read, SUCCEED);
 
     assert(node && node->cinfo.cached);
@@ -504,8 +505,8 @@ H5S_hyper_block_read (H5S_hyper_node_t *node, H5S_hyper_io_info_t *io_info, hsiz
      * offset
      */
     node->cinfo.rpos+=region_size*io_info->elmt_size;
-    H5_ASSIGN_OVERFLOW(node->cinfo.rleft,node->cinfo.rleft-region_size,hsize_t,size_t);
-   /* node->cinfo.rleft-=region_size;*/
+    H5_ASSIGN_OVERFLOW(tmp_region_size,region_size,hsize_t,size_t);
+    node->cinfo.rleft-=tmp_region_size;
 
     /* If we've read in all the elements from the block, throw it away */
     if(node->cinfo.rleft==0 && (node->cinfo.wleft==0 || node->cinfo.wleft==node->cinfo.size)) {
@@ -540,6 +541,7 @@ H5S_hyper_block_write (H5S_hyper_node_t *node,
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
+    size_t      tmp_region_size;
     unsigned u;                   /* Counters */
 
     FUNC_ENTER (H5S_hyper_block_write, SUCCEED);
@@ -559,8 +561,8 @@ H5S_hyper_block_write (H5S_hyper_node_t *node,
      * offset
      */
     node->cinfo.wpos+=region_size*io_info->elmt_size;
-    H5_ASSIGN_OVERFLOW(node->cinfo.wleft,node->cinfo.wleft-region_size,hsize_t,size_t);
-    node->cinfo.wleft-=region_size;
+    H5_ASSIGN_OVERFLOW(tmp_region_size,region_size,hsize_t,size_t);
+    node->cinfo.wleft-=tmp_region_size;
 
     /* If we've read in all the elements from the block, throw it away */
     if(node->cinfo.wleft==0 && (node->cinfo.rleft==0 || node->cinfo.rleft==node->cinfo.size)) {

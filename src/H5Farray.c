@@ -282,8 +282,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                  */
                 unsigned long max, min, temp;
 
-                temp = nelmts;
-                assert(temp==nelmts);	/* verify no overflow */
+                H5_ASSIGN_OVERFLOW(temp,nelmts,hsize_t,unsigned long);
                 MPI_Allreduce(&temp, &max, 1, MPI_UNSIGNED_LONG, MPI_MAX,
                       H5FD_mpio_communicator(f->shared->lf));
                 MPI_Allreduce(&temp, &min, 1, MPI_UNSIGNED_LONG, MPI_MIN,
@@ -564,8 +563,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                  */
                 unsigned long max, min, temp;
 
-                temp = nelmts;
-                assert(temp==nelmts);	/* verify no overflow */
+                H5_ASSIGN_OVERFLOW(temp,nelmts,hsize_t,unsigned long);
                 MPI_Allreduce(&temp, &max, 1, MPI_UNSIGNED_LONG, MPI_MAX,
                       H5FD_mpio_communicator(f->shared->lf));
                 MPI_Allreduce(&temp, &min, 1, MPI_UNSIGNED_LONG, MPI_MIN,

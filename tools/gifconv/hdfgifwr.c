@@ -73,13 +73,10 @@ typedef long int	count_int;
 /* MONO returns total intensity of r,g,b components */
 #define MONO(rd,gn,bl) (((rd)*11 + (gn)*16 + (bl)*5) >> 5)  /*.33R+ .5G+ .17B*/
 
-static int  Width, Height;
-static int  curx, cury;
-static long CountDown;
-static int  Interlace;
-
 #ifdef __STDC__
+#ifdef UNUSED
 static void putword(int, FILE *);
+#endif /* UNUSED */
 static void compress(int, FILE *, byte *, int);
 static void output(int);
 static void cl_block(void);
@@ -88,15 +85,16 @@ static void char_init(void);
 static void char_out(int);
 static void flush_char(void);
 #else
-static void putword(), compress(), output(), cl_block(), cl_hash();
+#ifdef UNUSED
+static void putword();
+#endif /* UNUSED */
+static void compress(), output(), cl_block(), cl_hash();
 static void char_init(), char_out(), flush_char();
 #endif
 
-static byte pc2nc[256],r1[256],g1[256],b1[256];
+static byte pc2nc[256];
 
-void xvbzero(s, len)
-     char *s;
-     int   len;
+static void xvbzero(char *s, size_t len)
 {
   for ( ; len>0; len--) *s++ = 0;
 }
@@ -110,35 +108,17 @@ int hdfWriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, pc2ncmap,  numcols, colo
     int   numcols, colorstyle;
     int	  BitsPerPixel;
 {
-  int   RWidth, RHeight;
-  int   LeftOfs, TopOfs;
-  int   ColorMapSize, InitCodeSize, Background;
+  int   InitCodeSize;
   int   i;
   byte *pic8;
   pic8 = pic;
   
-  Interlace = 0;
-  Background = 0;
-  
   for (i=0; i<256; i++) { 
 	  pc2nc[i] = pc2ncmap[i];
-	  r1[i] = rmap[i];
-	  g1[i] = gmap[i];
-	  b1[i] = bmap[i];
   }
-
-  ColorMapSize = 1 << BitsPerPixel;
-	
-  RWidth  = Width  = w;
-  RHeight = Height = h;
-  LeftOfs = TopOfs = 0;
-	
-  CountDown = w * h;    /* # of pixels we'll be doing */
 
   if (BitsPerPixel <= 1) InitCodeSize = 2;
      else InitCodeSize = BitsPerPixel;
-
-  curx = cury = 0;
 
   if (!fp) {
     fprintf(stderr,  "WriteGIF: file not open for writing\n" );
@@ -155,6 +135,7 @@ int hdfWriteGIF(fp, pic, ptype, w, h, rmap, gmap, bmap, pc2ncmap,  numcols, colo
 
 
 
+#ifdef UNUSED
 /******************************/
 static void putword(w, fp)
 int w;
@@ -166,6 +147,7 @@ FILE *fp;
     
   fputc((w>>8)&0xff,fp);
 }
+#endif /* UNUSED */
 
 
 
