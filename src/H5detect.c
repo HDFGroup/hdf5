@@ -1,7 +1,7 @@
 /*keep this here -RPM*/
 static const char *FileHeader = "\n\
 /*-------------------------------------------------------------------------\n\
- * Copyright (C) 1997	National Center for Supercomputing Applications.   \n\
+ * Copyright (C) 1997-2002 National Center for Supercomputing Applications \n\
  *			All rights reserved.				   \n\
  *									   \n\
  *-------------------------------------------------------------------------";
