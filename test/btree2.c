@@ -164,6 +164,14 @@ test_insert_basic(hid_t fapl)
     /* Should fail */
     if(ret != FAIL) TEST_ERROR;
 
+    /* Attempt to index record in B-tree with no records */
+    idx = 0;
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)0, find_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL) TEST_ERROR;
+
     /*
      * Test inserting record into v2 B-tree 
      */
@@ -186,6 +194,18 @@ test_insert_basic(hid_t fapl)
     /* Attempt to find existant record in B-tree with 1 record */
     idx = 42;
     if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR;
+
+    /* Attempt to index non-existant record in B-tree with 1 record */
+    idx = 0;
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)1, find_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL) TEST_ERROR;
+
+    /* Attempt to index existing record in B-tree with 1 record */
+    idx = 42;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)0, find_cb, &idx)<0) TEST_ERROR;
 
     /*
      * Test inserting second record into v2 B-tree, before all other records
@@ -228,6 +248,24 @@ test_insert_basic(hid_t fapl)
     /* Attempt to find existant record in level-0 B-tree with several record */
     idx = 56;
     if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR;
+
+    /* Attempt to index non-existant record in B-tree with several records */
+    idx = 0;
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)4, find_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL) TEST_ERROR;
+
+    /* Attempt to index existing record in B-tree with several records */
+    idx = 34;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)0, find_cb, &idx)<0) TEST_ERROR;
+    idx = 38;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)1, find_cb, &idx)<0) TEST_ERROR;
+    idx = 42;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)2, find_cb, &idx)<0) TEST_ERROR;
+    idx = 56;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)3, find_cb, &idx)<0) TEST_ERROR;
 
     PASSED();
 
@@ -346,6 +384,26 @@ test_insert_split_root(hid_t fapl)
     /* Attempt to find existant record in leaf of level-1 B-tree */
     idx = 56;
     if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR;
+
+    /* Attempt to index non-existant record in level-1 B-tree */
+    idx = 0;
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)(INSERT_SPLIT_ROOT_NREC+2), find_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL) TEST_ERROR;
+
+    /* Attempt to index existing record in root of level-1 B-tree */
+    idx = 33;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)33, find_cb, &idx)<0) TEST_ERROR;
+
+    /* Attempt to index existing record in left leaf of level-1 B-tree */
+    idx = 0;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)0, find_cb, &idx)<0) TEST_ERROR;
+
+    /* Attempt to index existing record in right leaf of level-1 B-tree */
+    idx = 50;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)50, find_cb, &idx)<0) TEST_ERROR;
 
     PASSED();
 
@@ -929,6 +987,26 @@ test_insert_make_level2(hid_t fapl)
     /* Attempt to find existant record in leaf of level-2 B-tree */
     idx = 346;
     if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR;
+
+    /* Attempt to index non-existant record in level-1 B-tree */
+    idx = 0;
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)(INSERT_SPLIT_ROOT_NREC*12), find_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL) TEST_ERROR;
+
+    /* Attempt to index existing record in root of level-2 B-tree */
+    idx = 433;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)433, find_cb, &idx)<0) TEST_ERROR;
+
+    /* Attempt to index existing record in internal node of level-2 B-tree */
+    idx = 734;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)734, find_cb, &idx)<0) TEST_ERROR;
+
+    /* Attempt to index existing record in leaf of level-2 B-tree */
+    idx = 883;
+    if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)883, find_cb, &idx)<0) TEST_ERROR;
 
     PASSED();
 
@@ -1720,7 +1798,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     /* Make certain that the index is correct */
     if(idx != INSERT_MANY) TEST_ERROR;
 
-    /* Attempt to find non-existant record in level-1 B-tree */
+    /* Attempt to find non-existant record in level-4 B-tree */
     idx = INSERT_MANY*2;
     H5E_BEGIN_TRY {
 	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx);
@@ -1731,10 +1809,27 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     /* Find random records */
     for(u=0; u<FIND_MANY; u++) {
         /* Pick random record */
-        idx = (unsigned)(HDrandom()%INSERT_MANY);
+        idx = (hsize_t)(HDrandom()%INSERT_MANY);
 
-        /* Attempt to find existant record in root of level-2 B-tree */
+        /* Attempt to find existant record in root of level-4 B-tree */
         if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0) TEST_ERROR;
+    } /* end for */
+
+    /* Attempt to index non-existant record in level-4 B-tree */
+    idx = 0;
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, (hsize_t)(INSERT_MANY*3), find_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL) TEST_ERROR;
+
+    /* Find random records */
+    for(u=0; u<FIND_MANY; u++) {
+        /* Pick random record */
+        idx = (hsize_t)(HDrandom()%INSERT_MANY);
+
+        /* Attempt to find existant record in root of level-4 B-tree */
+        if(H5B2_index(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, idx, find_cb, &idx)<0) TEST_ERROR;
     } /* end for */
 
     PASSED();

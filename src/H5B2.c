@@ -75,14 +75,10 @@ static herr_t H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     unsigned depth, const H5B2_node_ptr_t *curr_node, H5B2_operator_t op,
     void *op_data);
 #ifdef H5B2_DEBUG
-static herr_t H5B2_assert_leaf(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared,
-    H5B2_leaf_t *leaf);
-static herr_t H5B2_assert_leaf2(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared,
-    H5B2_leaf_t *leaf, H5B2_leaf_t *leaf2);
-static herr_t H5B2_assert_internal(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared,
-    H5B2_internal_t *internal);
-static herr_t H5B2_assert_internal2(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared,
-    H5B2_internal_t *internal, H5B2_internal_t *internal2);
+static herr_t H5B2_assert_leaf(H5B2_shared_t *shared, H5B2_leaf_t *leaf);
+static herr_t H5B2_assert_leaf2(H5B2_shared_t *shared, H5B2_leaf_t *leaf, H5B2_leaf_t *leaf2);
+static herr_t H5B2_assert_internal(hsize_t parent_all_nrec, H5B2_shared_t *shared, H5B2_internal_t *internal);
+static herr_t H5B2_assert_internal2(hsize_t parent_all_nrec, H5B2_shared_t *shared, H5B2_internal_t *internal, H5B2_internal_t *internal2);
 #endif /* H5B2_DEBUG */
 
 
@@ -538,14 +534,14 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, H5RC_t *bt2_shared)
     new_root->cache_info.is_dirty = TRUE;
 
 #ifdef H5B2_DEBUG
-    H5B2_assert_internal(f,dxpl_id,shared,new_root);
+    H5B2_assert_internal(bt2->root.all_nrec,shared,new_root);
     if(bt2->depth>0) {
-        H5B2_assert_internal2(f,dxpl_id,shared,left_child,right_child);
-        H5B2_assert_internal2(f,dxpl_id,shared,right_child,left_child);
+        H5B2_assert_internal2(new_root->node_ptrs[0].all_nrec,shared,left_child,right_child);
+        H5B2_assert_internal2(new_root->node_ptrs[1].all_nrec,shared,right_child,left_child);
     } /* end if */
     else {
-        H5B2_assert_leaf2(f,dxpl_id,shared,left_child,right_child);
-        H5B2_assert_leaf(f,dxpl_id,shared,right_child);
+        H5B2_assert_leaf2(shared,left_child,right_child);
+        H5B2_assert_leaf(shared,right_child);
     } /* end else */
 #endif /* H5B2_DEBUG */
     /* Release new internal node */
@@ -597,7 +593,7 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
     uint8_t *left_native, *right_native;    /* Pointers to childs' native records */
     H5B2_node_ptr_t *left_node_ptrs=NULL, *right_node_ptrs=NULL;/* Pointers to childs' node pointer info */
     H5B2_shared_t *shared;              /* B-tree's shared info */
-    int left_moved_nrec=0, right_moved_nrec=0; /* Number of records moved, for internal redistrib */
+    hssize_t left_moved_nrec=0, right_moved_nrec=0; /* Number of records moved, for internal redistrib */
     herr_t ret_value=SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_redistribute2)
@@ -668,14 +664,14 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
     } /* end else */
 
 #ifdef H5B2_DEBUG
-    H5B2_assert_internal(f,dxpl_id,shared,internal);
+    H5B2_assert_internal((hsize_t)0,shared,internal);
     if(depth>1) {
-        H5B2_assert_internal2(f,dxpl_id,shared,left_child,right_child);
-        H5B2_assert_internal2(f,dxpl_id,shared,right_child,left_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx].all_nrec,shared,left_child,right_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx+1].all_nrec,shared,right_child,left_child);
     } /* end if */
     else {
-        H5B2_assert_leaf2(f,dxpl_id,shared,left_child,right_child);
-        H5B2_assert_leaf(f,dxpl_id,shared,right_child);
+        H5B2_assert_leaf2(shared,left_child,right_child);
+        H5B2_assert_leaf(shared,right_child);
     } /* end else */
 #endif /* H5B2_DEBUG */
 
@@ -701,14 +697,14 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
 
         /* Handle node pointers, if we have an internal node */
         if(depth>1) {
-            int moved_nrec=move_nrec;   /* Total number of records moved, for internal redistrib */
+            hsize_t moved_nrec=move_nrec;   /* Total number of records moved, for internal redistrib */
             unsigned u;             /* Local index variable */
 
             /* Count the number of records being moved */
             for(u=0; u<move_nrec; u++)
                 moved_nrec += right_node_ptrs[u].all_nrec;
             left_moved_nrec = moved_nrec;
-            right_moved_nrec = -moved_nrec;
+            right_moved_nrec -= moved_nrec;
 
             /* Copy node pointers from right node to left */
             HDmemcpy(&(left_node_ptrs[*left_nrec+1]),&(right_node_ptrs[0]),sizeof(H5B2_node_ptr_t)*move_nrec);
@@ -744,7 +740,7 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
 
         /* Handle node pointers, if we have an internal node */
         if(depth>1) {
-            int moved_nrec=move_nrec;   /* Total number of records moved, for internal redistrib */
+            hsize_t moved_nrec=move_nrec;   /* Total number of records moved, for internal redistrib */
             unsigned u;             /* Local index variable */
 
             /* Slide node pointers in right node up */
@@ -756,7 +752,7 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
             /* Count the number of records being moved */
             for(u=0; u<move_nrec; u++)
                 moved_nrec += right_node_ptrs[u].all_nrec;
-            left_moved_nrec = -moved_nrec;
+            left_moved_nrec -= moved_nrec;
             right_moved_nrec = moved_nrec;
         } /* end if */
 
@@ -780,14 +776,14 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
     } /* end else */
 
 #ifdef H5B2_DEBUG
-    H5B2_assert_internal(f,dxpl_id,shared,internal);
+    H5B2_assert_internal((hsize_t)0,shared,internal);
     if(depth>1) {
-        H5B2_assert_internal2(f,dxpl_id,shared,left_child,right_child);
-        H5B2_assert_internal2(f,dxpl_id,shared,right_child,left_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx].all_nrec,shared,left_child,right_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx+1].all_nrec,shared,right_child,left_child);
     } /* end if */
     else {
-        H5B2_assert_leaf2(f,dxpl_id,shared,left_child,right_child);
-        H5B2_assert_leaf(f,dxpl_id,shared,right_child);
+        H5B2_assert_leaf2(shared,left_child,right_child);
+        H5B2_assert_leaf(shared,right_child);
     } /* end else */
 #endif /* H5B2_DEBUG */
 
@@ -833,8 +829,8 @@ H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
     H5B2_node_ptr_t *left_node_ptrs=NULL, *right_node_ptrs=NULL;/* Pointers to childs' node pointer info */
     H5B2_node_ptr_t *middle_node_ptrs=NULL;/* Pointers to childs' node pointer info */
     H5B2_shared_t *shared;              /* B-tree's shared info */
-    int left_moved_nrec=0, right_moved_nrec=0; /* Number of records moved, for internal split */
-    int middle_moved_nrec=0;            /* Number of records moved, for internal split */
+    hssize_t left_moved_nrec=0, right_moved_nrec=0; /* Number of records moved, for internal split */
+    hsize_t middle_moved_nrec=0;        /* Number of records moved, for internal split */
     herr_t ret_value=SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_split2)
@@ -971,7 +967,7 @@ H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
 
             /* Copy node pointers from left and right nodes into middle node */
             if(depth>1) {
-                int moved_nrec;         /* Total number of records moved, for internal redistrib */
+                hsize_t moved_nrec;         /* Total number of records moved, for internal redistrib */
                 unsigned move_nptrs;    /* Number of node pointers to move */
                 unsigned u;             /* Local index variable */
 
@@ -985,7 +981,7 @@ H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
                 /* Count the number of records being moved from the left node */
                 for(u=0, moved_nrec=0; u<move_nptrs; u++)
                     moved_nrec += middle_node_ptrs[u].all_nrec;
-                left_moved_nrec = -(moved_nrec+(*left_nrec-new_left_nrec));
+                left_moved_nrec -= (moved_nrec+(*left_nrec-new_left_nrec));
                 middle_moved_nrec += moved_nrec;
 
                 /* Copy node pointers from right node */
@@ -995,7 +991,7 @@ H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
                 /* Count the number of records being moved from the right node */
                 for(u=0, moved_nrec=0; u<move_nptrs; u++)
                     moved_nrec += right_node_ptrs[u].all_nrec;
-                right_moved_nrec = -(moved_nrec+(*right_nrec-new_right_nrec));
+                right_moved_nrec -= (moved_nrec+(*right_nrec-new_right_nrec));
                 middle_moved_nrec += moved_nrec;
 
                 /* Slide node pointers in right node down */
@@ -1052,17 +1048,17 @@ H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
     parent_cache_info->is_dirty = TRUE;
 
 #ifdef H5B2_DEBUG
-    H5B2_assert_internal(f,dxpl_id,shared,internal);
+    H5B2_assert_internal((hsize_t)0,shared,internal);
     if(depth>1) {
-        H5B2_assert_internal2(f,dxpl_id,shared,left_child,middle_child);
-        H5B2_assert_internal2(f,dxpl_id,shared,middle_child,left_child);
-        H5B2_assert_internal2(f,dxpl_id,shared,middle_child,right_child);
-        H5B2_assert_internal2(f,dxpl_id,shared,right_child,middle_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx].all_nrec,shared,left_child,middle_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx+1].all_nrec,shared,middle_child,left_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx+1].all_nrec,shared,middle_child,right_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx+2].all_nrec,shared,right_child,middle_child);
     } /* end if */
     else {
-        H5B2_assert_leaf2(f,dxpl_id,shared,left_child,middle_child);
-        H5B2_assert_leaf2(f,dxpl_id,shared,middle_child,right_child);
-        H5B2_assert_leaf(f,dxpl_id,shared,right_child);
+        H5B2_assert_leaf2(shared,left_child,middle_child);
+        H5B2_assert_leaf2(shared,middle_child,right_child);
+        H5B2_assert_leaf(shared,right_child);
     } /* end else */
 #endif /* H5B2_DEBUG */
 
@@ -1109,8 +1105,8 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
     H5B2_shared_t *shared;              /* B-tree's shared info */
     H5B2_node_ptr_t *left_node_ptrs=NULL, *right_node_ptrs=NULL;/* Pointers to childs' node pointer info */
     H5B2_node_ptr_t *middle_node_ptrs=NULL;/* Pointers to childs' node pointer info */
-    int left_moved_nrec=0, right_moved_nrec=0; /* Number of records moved, for internal split */
-    int middle_moved_nrec=0;            /* Number of records moved, for internal split */
+    hssize_t left_moved_nrec=0, right_moved_nrec=0; /* Number of records moved, for internal split */
+    hssize_t middle_moved_nrec=0;       /* Number of records moved, for internal split */
     herr_t ret_value=SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_redistribute3)
@@ -1228,7 +1224,7 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
 
             /* Move node pointers also if this is an internal node */
             if(depth>1) {
-                int moved_nrec;         /* Total number of records moved, for internal redistrib */
+                hsize_t moved_nrec;         /* Total number of records moved, for internal redistrib */
                 unsigned move_nptrs;    /* Number of node pointers to move */
                 unsigned u;             /* Local index variable */
 
@@ -1269,7 +1265,7 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
 
             /* Move node pointers also if this is an internal node */
             if(depth>1) {
-                int moved_nrec;         /* Total number of records moved, for internal redistrib */
+                hsize_t moved_nrec;         /* Total number of records moved, for internal redistrib */
                 unsigned u;             /* Local index variable */
 
                 /* Slide the node pointers in right node up */
@@ -1311,7 +1307,7 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
 
             /* Move node pointers also if this is an internal node */
             if(depth>1) {
-                int moved_nrec;         /* Total number of records moved, for internal redistrib */
+                hsize_t moved_nrec;         /* Total number of records moved, for internal redistrib */
                 unsigned u;             /* Local index variable */
 
                 /* Slide the node pointers in middle node up */
@@ -1349,7 +1345,7 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
 
             /* Move node pointers also if this is an internal node */
             if(depth>1) {
-                int moved_nrec;         /* Total number of records moved, for internal redistrib */
+                hsize_t moved_nrec;         /* Total number of records moved, for internal redistrib */
                 unsigned u;             /* Local index variable */
 
                 /* Move right node pointers into middle node */
@@ -1433,17 +1429,17 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
 }
 #endif /* QAK */
 #ifdef H5B2_DEBUG
-    H5B2_assert_internal(f,dxpl_id,shared,internal);
+    H5B2_assert_internal((hsize_t)0,shared,internal);
     if(depth>1) {
-        H5B2_assert_internal2(f,dxpl_id,shared,left_child,middle_child);
-        H5B2_assert_internal2(f,dxpl_id,shared,middle_child,left_child);
-        H5B2_assert_internal2(f,dxpl_id,shared,middle_child,right_child);
-        H5B2_assert_internal2(f,dxpl_id,shared,right_child,middle_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx-1].all_nrec,shared,left_child,middle_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx].all_nrec,shared,middle_child,left_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx].all_nrec,shared,middle_child,right_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx+1].all_nrec,shared,right_child,middle_child);
     } /* end if */
     else {
-        H5B2_assert_leaf2(f,dxpl_id,shared,left_child,middle_child);
-        H5B2_assert_leaf2(f,dxpl_id,shared,middle_child,right_child);
-        H5B2_assert_leaf(f,dxpl_id,shared,right_child);
+        H5B2_assert_leaf2(shared,left_child,middle_child);
+        H5B2_assert_leaf2(shared,middle_child,right_child);
+        H5B2_assert_leaf(shared,right_child);
     } /* end else */
 #endif /* H5B2_DEBUG */
 
@@ -1496,9 +1492,9 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
     H5B2_node_ptr_t *left_node_ptrs=NULL, *right_node_ptrs=NULL;/* Pointers to childs' node pointer info */
     H5B2_node_ptr_t *middle_node_ptrs=NULL;/* Pointers to childs' node pointer info */
     H5B2_node_ptr_t *new_node_ptrs=NULL;/* Pointers to childs' node pointer info */
-    int left_moved_nrec=0, right_moved_nrec=0; /* Number of records moved, for internal split */
-    int middle_moved_nrec=0;            /* Number of records moved, for internal split */
-    int new_moved_nrec=0;               /* Number of records moved, for internal split */
+    hssize_t left_moved_nrec=0, right_moved_nrec=0; /* Number of records moved, for internal split */
+    hssize_t middle_moved_nrec=0;       /* Number of records moved, for internal split */
+    hsize_t new_moved_nrec=0;           /* Number of records moved, for internal split */
     herr_t ret_value=SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_split3)
@@ -1651,7 +1647,7 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
 
             /* Move node pointers also if this is an internal node */
             if(depth>1) {
-                int moved_nrec;         /* Total number of records moved, for internal redistrib */
+                hsize_t moved_nrec;         /* Total number of records moved, for internal redistrib */
                 unsigned u;             /* Local index variable */
 
                 /* Move right node pointers into new node */
@@ -1660,7 +1656,7 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
                 /* Count the number of records being moved into the new node */
                 for(u=0, moved_nrec=0; u<right_nrec_move; u++)
                     moved_nrec += right_node_ptrs[u].all_nrec;
-                right_moved_nrec = -(moved_nrec+right_nrec_move);
+                right_moved_nrec -= (moved_nrec+right_nrec_move);
                 new_moved_nrec += (moved_nrec+right_nrec_move);
 
                 /* Slide the node pointers in right node down */
@@ -1683,7 +1679,7 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
 
             /* Move node pointers also if this is an internal node */
             if(depth>1) {
-                int moved_nrec;         /* Total number of records moved, for internal redistrib */
+                hsize_t moved_nrec;         /* Total number of records moved, for internal redistrib */
                 unsigned u;             /* Local index variable */
 
                 /* Move middle node pointers into new node */
@@ -1692,7 +1688,7 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
                 /* Count the number of records being moved into the new node */
                 for(u=0, moved_nrec=0; u<new_nrec_move+1; u++)
                     moved_nrec += new_node_ptrs[u].all_nrec;
-                middle_moved_nrec = -(moved_nrec+new_nrec_move);
+                middle_moved_nrec -= (moved_nrec+new_nrec_move+1);
                 new_moved_nrec += (moved_nrec+new_nrec_move);
 
                 /* Slide the node pointers in middle node up */
@@ -1712,7 +1708,7 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
 
             /* Move node pointers also if this is an internal node */
             if(depth>1) {
-                int moved_nrec;         /* Total number of records moved, for internal redistrib */
+                hsize_t moved_nrec;         /* Total number of records moved, for internal redistrib */
                 unsigned u;             /* Local index variable */
 
                 /* Move left node pointers into middle node */
@@ -1721,7 +1717,7 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
                 /* Count the number of records being moved into the middle node */
                 for(u=0, moved_nrec=0; u<left_nrec_move; u++)
                     moved_nrec += middle_node_ptrs[u].all_nrec;
-                left_moved_nrec = -(moved_nrec+left_nrec_move);
+                left_moved_nrec -= (moved_nrec+left_nrec_move);
                 middle_moved_nrec += (moved_nrec+left_nrec_move);
             } /* end if */
         }
@@ -1769,20 +1765,20 @@ H5B2_split3(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
     parent_cache_info->is_dirty = TRUE;
 
 #ifdef H5B2_DEBUG
-    H5B2_assert_internal(f,dxpl_id,shared,internal);
+    H5B2_assert_internal((hsize_t)0,shared,internal);
     if(depth>1) {
-        H5B2_assert_internal2(f,dxpl_id,shared,left_child,middle_child);
-        H5B2_assert_internal2(f,dxpl_id,shared,middle_child,left_child);
-        H5B2_assert_internal2(f,dxpl_id,shared,middle_child,new_child);
-        H5B2_assert_internal2(f,dxpl_id,shared,new_child,middle_child);
-        H5B2_assert_internal2(f,dxpl_id,shared,new_child,right_child);
-        H5B2_assert_internal2(f,dxpl_id,shared,right_child,new_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx-1].all_nrec,shared,left_child,middle_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx].all_nrec,shared,middle_child,left_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx].all_nrec,shared,middle_child,new_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx+1].all_nrec,shared,new_child,middle_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx+1].all_nrec,shared,new_child,right_child);
+        H5B2_assert_internal2(internal->node_ptrs[idx+2].all_nrec,shared,right_child,new_child);
     } /* end if */
     else {
-        H5B2_assert_leaf2(f,dxpl_id,shared,left_child,middle_child);
-        H5B2_assert_leaf2(f,dxpl_id,shared,middle_child,new_child);
-        H5B2_assert_leaf2(f,dxpl_id,shared,new_child,right_child);
-        H5B2_assert_leaf(f,dxpl_id,shared,right_child);
+        H5B2_assert_leaf2(shared,left_child,middle_child);
+        H5B2_assert_leaf2(shared,middle_child,new_child);
+        H5B2_assert_leaf2(shared,new_child,right_child);
+        H5B2_assert_leaf(shared,right_child);
     } /* end else */
 #endif /* H5B2_DEBUG */
 
@@ -1901,7 +1897,7 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
 #ifdef H5B2_DEBUG
-            H5B2_assert_internal(f,dxpl_id,shared,internal);
+            H5B2_assert_internal((hsize_t)0,shared,internal);
 #endif /* H5B2_DEBUG */
 
             /* Set information for current (root) node */
@@ -1990,7 +1986,7 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 
 #ifdef H5B2_DEBUG
             if(parent_cache_info->type==H5AC_BT2_INT)
-                H5B2_assert_internal(f,dxpl_id,shared,parent_ptr);
+                H5B2_assert_internal((hsize_t)0,shared,parent_ptr);
 #endif /* H5B2_DEBUG */
 
             /* Unlock parent node (possibly the B-tree header) */
@@ -2022,7 +2018,7 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 
 #ifdef H5B2_DEBUG
         if(curr_cache_info->type==H5AC_BT2_INT)
-            H5B2_assert_internal(f,dxpl_id,shared,curr_ptr);
+            H5B2_assert_internal((hsize_t)0,shared,curr_ptr);
 #endif /* H5B2_DEBUG */
 
         /* Release current node */
@@ -2101,7 +2097,7 @@ H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 
     /* Release the B-tree leaf node */
 #ifdef H5B2_DEBUG
-H5B2_assert_leaf(f,dxpl_id,shared,leaf);
+H5B2_assert_leaf(shared,leaf);
 #endif /* H5B2_DEBUG */
     if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, leaf_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree leaf node")
@@ -2601,6 +2597,183 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_find() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_index
+ *
+ * Purpose:	Locate the IDX'th record in a B-tree according to the
+ *              ordering used by the B-tree.  The IDX values are 0-based.
+ *              
+ *              The 'OP' routine is called with the record found and the
+ *              OP_DATA pointer, to allow caller to return information about
+ *              the record.
+ *
+ * Return:	Non-negative on success, negative on failure.
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 23 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
+    hsize_t idx, H5B2_found_t op, void *op_data)
+{
+    H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
+    H5RC_t      *bt2_shared=NULL;       /* Pointer to ref-counter for shared B-tree info */
+    H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
+    hbool_t     incr_rc=FALSE;          /* Flag to indicate that we've incremented the B-tree's shared info reference count */
+    H5B2_node_ptr_t curr_node_ptr;      /* Node pointer info for current node */
+    unsigned    depth;                  /* Current depth of the tree */
+    herr_t	ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5B2_index, FAIL)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(type);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(op);
+
+    /* Look up the B-tree header */
+    if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
+
+    /* Safely grab pointer to reference counted shared B-tree info, so we can release the B-tree header if necessary */
+    bt2_shared=bt2->shared;
+    H5RC_INC(bt2_shared);
+    incr_rc=TRUE;
+
+    /* Make copy of the root node pointer to start search with */
+    curr_node_ptr = bt2->root;
+
+    /* Current depth of the tree */
+    depth=bt2->depth;
+
+    /* Release header */
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
+    bt2=NULL;
+
+    /* Get the pointer to the shared B-tree info */
+    shared=H5RC_GET_OBJ(bt2_shared);
+    HDassert(shared);
+
+    /* Check for empty tree */
+    if(curr_node_ptr.node_nrec==0)
+        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree has no records")
+
+    /* Check for index greater than the number of records in the tree */
+    if(idx >= curr_node_ptr.all_nrec)
+        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree doesn't have that many records")
+
+    /* Walk down B-tree to find record or leaf node where record is located */
+    while(depth>0) {
+        H5B2_internal_t *internal;          /* Pointer to internal node in B-tree */
+        H5B2_node_ptr_t next_node_ptr;      /* Node pointer info for next node */
+        unsigned u;                         /* Local index variable */
+
+        /* Lock B-tree current node */
+        if (NULL == (internal = H5AC_protect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, &(curr_node_ptr.node_nrec), bt2_shared, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
+
+        /* Search for record with correct index */
+        for(u=0; u<internal->nrec; u++) {
+            /* Check if record is in child node */
+            if(internal->node_ptrs[u].all_nrec > idx) {
+                /* Get node pointer for next node to search */
+                next_node_ptr=internal->node_ptrs[u];
+
+                /* Unlock current node */
+                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+
+                /* Set pointer to next node to load */
+                curr_node_ptr = next_node_ptr;
+
+                /* Break out of for loop */
+                break;
+            } /* end if */
+
+            /* Check if record is in this node */
+            if(internal->node_ptrs[u].all_nrec == idx) {
+                /* Make callback for current record */
+                if ((op)(H5B2_INT_NREC(internal,shared,u), op_data) <0) {
+                    /* Unlock current node */
+                    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+
+                    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "'found' callback failed for B-tree find operation")
+                } /* end if */
+
+                /* Unlock current node */
+                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+
+                HGOTO_DONE(SUCCEED);
+            } /* end if */
+
+            /* Decrement index we are looking for to account for the node we */
+            /* just advanced past */
+            idx -= (internal->node_ptrs[u].all_nrec + 1);
+        } /* end for */
+
+        /* Check last node pointer */
+        if(u==internal->nrec) {
+            /* Check if record is in child node */
+            if(internal->node_ptrs[u].all_nrec > idx) {
+                /* Get node pointer for next node to search */
+                next_node_ptr=internal->node_ptrs[u];
+
+                /* Unlock current node */
+                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+
+                /* Set pointer to next node to load */
+                curr_node_ptr = next_node_ptr;
+            } /* end if */
+            else
+                /* Index that is greater than the number of records in the tree? */
+                HDassert("Index off end of tree??" && 0);
+        } /* end if */
+
+        /* Decrement depth we're at in B-tree */
+        depth--;
+    } /* end while */
+
+    {
+        H5B2_leaf_t *leaf;          /* Pointer to leaf node in B-tree */
+
+        /* Lock B-tree leaf node */
+        if (NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, &(curr_node_ptr.node_nrec), bt2_shared, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
+
+        /* Sanity check index */
+        HDassert(idx < leaf->nrec);
+
+        /* Make callback for correct record */
+        if ((op)(H5B2_LEAF_NREC(leaf,shared,idx), op_data) <0) {
+            /* Unlock current node */
+            if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+
+            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "'found' callback failed for B-tree find operation")
+        } /* end if */
+
+        /* Unlock current node */
+        if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+    }
+    
+done:
+    /* Check if we need to decrement the reference count for the B-tree's shared info */
+    if(incr_rc)
+        H5RC_DEC(bt2_shared);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2_index() */
+
 #ifdef H5B2_DEBUG
 
 /*-------------------------------------------------------------------------
@@ -2617,7 +2790,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_assert_leaf(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared, H5B2_leaf_t *leaf)
+H5B2_assert_leaf(H5B2_shared_t *shared, H5B2_leaf_t *leaf)
 {
     unsigned u,v;       /* Local index variables */
 
@@ -2627,7 +2800,7 @@ H5B2_assert_leaf(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared, H5B2_leaf_t *le
     /* Sanity checking on records */
     for(u=0; u<leaf->nrec; u++)
         for(v=0; v<u; v++)
-            HDassert((shared->type->compare)(f, dxpl_id, H5B2_LEAF_NREC(leaf,shared,u), H5B2_LEAF_NREC(leaf,shared,v))>0);
+            HDassert((shared->type->compare)(H5B2_LEAF_NREC(leaf,shared,u), H5B2_LEAF_NREC(leaf,shared,v))>0);
 
     return(0);
 } /* end H5B2_assert_leaf() */
@@ -2647,7 +2820,7 @@ H5B2_assert_leaf(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared, H5B2_leaf_t *le
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_assert_leaf2(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared, H5B2_leaf_t *leaf, H5B2_leaf_t *leaf2)
+H5B2_assert_leaf2(H5B2_shared_t *shared, H5B2_leaf_t *leaf, H5B2_leaf_t *leaf2)
 {
     unsigned u,v;       /* Local index variables */
 
@@ -2656,9 +2829,9 @@ H5B2_assert_leaf2(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared, H5B2_leaf_t *l
 
     /* Sanity checking on records */
     for(u=0; u<leaf->nrec; u++) {
-        HDassert((shared->type->compare)(f, dxpl_id, H5B2_LEAF_NREC(leaf2,shared,0), H5B2_LEAF_NREC(leaf,shared,u))>0);
+        HDassert((shared->type->compare)(H5B2_LEAF_NREC(leaf2,shared,0), H5B2_LEAF_NREC(leaf,shared,u))>0);
         for(v=0; v<u; v++)
-            HDassert((shared->type->compare)(f, dxpl_id, H5B2_LEAF_NREC(leaf,shared,u), H5B2_LEAF_NREC(leaf,shared,v))>0);
+            HDassert((shared->type->compare)(H5B2_LEAF_NREC(leaf,shared,u), H5B2_LEAF_NREC(leaf,shared,v))>0);
     } /* end for */
 
     return(0);
@@ -2679,9 +2852,10 @@ H5B2_assert_leaf2(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared, H5B2_leaf_t *l
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_assert_internal(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared, H5B2_internal_t *internal)
+H5B2_assert_internal(hsize_t parent_all_nrec, H5B2_shared_t *shared, H5B2_internal_t *internal)
 {
-    unsigned u,v;       /* Local index variables */
+    hsize_t tot_all_nrec;       /* Total number of records at or below this node */
+    unsigned u,v;               /* Local index variables */
 
     /* General sanity checking on node */
     HDassert(internal->nrec<=shared->split_int_nrec);
@@ -2689,15 +2863,22 @@ H5B2_assert_internal(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared, H5B2_intern
     /* Sanity checking on records */
     for(u=0; u<internal->nrec; u++)
         for(v=0; v<u; v++)
-            HDassert((shared->type->compare)(f, dxpl_id, H5B2_INT_NREC(internal,shared,u), H5B2_INT_NREC(internal,shared,v))>0);
+            HDassert((shared->type->compare)(H5B2_INT_NREC(internal,shared,u), H5B2_INT_NREC(internal,shared,v))>0);
 
     /* Sanity checking on node pointers */
+    tot_all_nrec=internal->nrec;
     for(u=0; u<internal->nrec+1; u++) {
+        tot_all_nrec += internal->node_ptrs[u].all_nrec;
+
         HDassert(H5F_addr_defined(internal->node_ptrs[u].addr));
         HDassert(internal->node_ptrs[u].addr>0);
         for(v=0; v<u; v++)
             HDassert(internal->node_ptrs[u].addr!=internal->node_ptrs[v].addr);
     } /* end for */
+
+    /* Sanity check all_nrec total in parent */
+    if(parent_all_nrec>0)
+        HDassert(tot_all_nrec == parent_all_nrec);
 
     return(0);
 } /* end H5B2_assert_internal() */
@@ -2717,8 +2898,9 @@ H5B2_assert_internal(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared, H5B2_intern
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_assert_internal2(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared, H5B2_internal_t *internal, H5B2_internal_t *internal2)
+H5B2_assert_internal2(hsize_t parent_all_nrec, H5B2_shared_t *shared, H5B2_internal_t *internal, H5B2_internal_t *internal2)
 {
+    hsize_t tot_all_nrec;       /* Total number of records at or below this node */
     unsigned u,v;       /* Local index variables */
 
     /* General sanity checking on node */
@@ -2727,10 +2909,13 @@ H5B2_assert_internal2(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared, H5B2_inter
     /* Sanity checking on records */
     for(u=0; u<internal->nrec; u++)
         for(v=0; v<u; v++)
-            HDassert((shared->type->compare)(f, dxpl_id, H5B2_INT_NREC(internal,shared,u), H5B2_INT_NREC(internal,shared,v))>0);
+            HDassert((shared->type->compare)(H5B2_INT_NREC(internal,shared,u), H5B2_INT_NREC(internal,shared,v))>0);
 
     /* Sanity checking on node pointers */
+    tot_all_nrec=internal->nrec;
     for(u=0; u<internal->nrec+1; u++) {
+        tot_all_nrec += internal->node_ptrs[u].all_nrec;
+
         HDassert(H5F_addr_defined(internal->node_ptrs[u].addr));
         HDassert(internal->node_ptrs[u].addr>0);
         for(v=0; v<u; v++)
@@ -2738,6 +2923,10 @@ H5B2_assert_internal2(H5F_t *f, hid_t dxpl_id, H5B2_shared_t *shared, H5B2_inter
         for(v=0; v<internal2->nrec+1; v++)
             HDassert(internal->node_ptrs[u].addr!=internal2->node_ptrs[v].addr);
     } /* end for */
+
+    /* Sanity check all_nrec total in parent */
+    if(parent_all_nrec>0)
+        HDassert(tot_all_nrec == parent_all_nrec);
 
     return(0);
 } /* end H5B2_assert_internal2() */
