@@ -2382,12 +2382,79 @@ fi
 
 dnl ----------------------------------------------------------------------
 dnl Set the flag to indicate that the machine can accurately convert
-dnl 'unsigned long long' values to 'float' and 'double' values.
+dnl 'unsigned (long) long' values to 'float' and 'double' values.
 dnl (This flag should be set for all machines, except for the SGIs, where
-dnl the cache value is set in the config/irix6.x config file)
+dnl the cache value is set in the config/irix6.x config file) and Solaris
+dnl 64-bit machines, where the short program below tests if round-up is 
+dnl correctly handled.
 dnl
 AC_MSG_CHECKING([if accurately converting unsigned long long to floating-point values works])
-AC_CACHE_VAL([hdf5_cv_sw_ulong_to_fp_bottom_bit_works], [hdf5_cv_sw_ulong_to_fp_bottom_bit_works=yes])
+
+if test ${host_os_novers} = "solaris2.x"; then
+    AC_CACHE_VAL([hdf5_cv_sw_ulong_to_fp_bottom_bit_works],
+    [AC_TRY_RUN([
+    int main(void)
+    {
+        unsigned long l1;
+        unsigned long l2;
+        unsigned long l3;
+        unsigned long l4;
+        unsigned long long ld1;
+        unsigned long long ld2;
+        unsigned long long ld3;
+        unsigned long long ld4;
+        double        d1, d2, d3, d4;
+        unsigned char s[8];
+        int           ret = 0;
+
+        if(sizeof(unsigned long)==8) {
+            l1 = 0xf000000000000b00; /*Round-down case*/
+            l2 = 0xf000000000000401; /*Round-up case*/
+            l3 = 0xf000000000000400; /*Round-down case*/
+            l4 = 0xf000000000000c00; /*Round-up case*/
+            
+            d1 = (double)l1;
+            d2 = (double)l2;
+            d3 = (double)l3;
+            d4 = (double)l4;
+        } else if(sizeof(unsigned long long)==8) { 
+            ld1 = 0xf000000000000b00; /*Round-down case*/
+            ld2 = 0xf000000000000401; /*Round-up case*/
+            ld3 = 0xf000000000000400; /*Round-down case*/
+            ld4 = 0xf000000000000c00; /*Round-up case*/
+            
+            d1 = (double)ld1;
+            d2 = (double)ld2;
+            d3 = (double)ld3;
+            d4 = (double)ld4;
+        } else {
+            ret = 1;
+            goto done;
+        }
+        
+        memcpy(s, &d1, 8);
+        if(s[7]!=1)
+            ret = 1;
+
+        memcpy(s, &d2, 8);
+        if(s[7]!=1)
+            ret = 1;
+
+        memcpy(s, &d3, 8);
+        if(s[7]!=0)
+            ret = 1;
+
+        memcpy(s, &d4, 8);
+        if(s[7]!=2)
+            ret = 1;
+
+done:
+        exit(ret);
+    }
+    ], [hdf5_cv_sw_ulong_to_fp_bottom_bit_works=yes], [hdf5_cv_sw_ulong_to_fp_bottom_bit_works=no],)])
+else
+    AC_CACHE_VAL([hdf5_cv_sw_ulong_to_fp_bottom_bit_works], [hdf5_cv_sw_ulong_to_fp_bottom_bit_works=yes])
+fi
 
 if test ${hdf5_cv_sw_ulong_to_fp_bottom_bit_works} = "yes"; then
   AC_DEFINE([SW_ULONG_TO_FP_BOTTOM_BIT_WORKS], [1],

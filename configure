@@ -33265,12 +33265,111 @@ fi
 
 echo "$as_me:$LINENO: checking if accurately converting unsigned long long to floating-point values works" >&5
 echo $ECHO_N "checking if accurately converting unsigned long long to floating-point values works... $ECHO_C" >&6
-if test "${hdf5_cv_sw_ulong_to_fp_bottom_bit_works+set}" = set; then
+
+if test ${host_os_novers} = "solaris2.x"; then
+    if test "${hdf5_cv_sw_ulong_to_fp_bottom_bit_works+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+    int main(void)
+    {
+        unsigned long l1;
+        unsigned long l2;
+        unsigned long l3;
+        unsigned long l4;
+        unsigned long long ld1;
+        unsigned long long ld2;
+        unsigned long long ld3;
+        unsigned long long ld4;
+        double        d1, d2, d3, d4;
+        unsigned char s[8];
+        int           ret = 0;
+
+        if(sizeof(unsigned long)==8) {
+            l1 = 0xf000000000000b00; /*Round-down case*/
+            l2 = 0xf000000000000401; /*Round-up case*/
+            l3 = 0xf000000000000400; /*Round-down case*/
+            l4 = 0xf000000000000c00; /*Round-up case*/
+
+            d1 = (double)l1;
+            d2 = (double)l2;
+            d3 = (double)l3;
+            d4 = (double)l4;
+        } else if(sizeof(unsigned long long)==8) {
+            ld1 = 0xf000000000000b00; /*Round-down case*/
+            ld2 = 0xf000000000000401; /*Round-up case*/
+            ld3 = 0xf000000000000400; /*Round-down case*/
+            ld4 = 0xf000000000000c00; /*Round-up case*/
+
+            d1 = (double)ld1;
+            d2 = (double)ld2;
+            d3 = (double)ld3;
+            d4 = (double)ld4;
+        } else {
+            ret = 1;
+            goto done;
+        }
+
+        memcpy(s, &d1, 8);
+        if(s[7]!=1)
+            ret = 1;
+
+        memcpy(s, &d2, 8);
+        if(s[7]!=1)
+            ret = 1;
+
+        memcpy(s, &d3, 8);
+        if(s[7]!=0)
+            ret = 1;
+
+        memcpy(s, &d4, 8);
+        if(s[7]!=2)
+            ret = 1;
+
+done:
+        exit(ret);
+    }
+
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  hdf5_cv_sw_ulong_to_fp_bottom_bit_works=yes
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+( exit $ac_status )
+hdf5_cv_sw_ulong_to_fp_bottom_bit_works=no
+fi
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+fi
+
+else
+    if test "${hdf5_cv_sw_ulong_to_fp_bottom_bit_works+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   hdf5_cv_sw_ulong_to_fp_bottom_bit_works=yes
 fi
 
+fi
 
 if test ${hdf5_cv_sw_ulong_to_fp_bottom_bit_works} = "yes"; then
 
