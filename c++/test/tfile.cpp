@@ -62,6 +62,9 @@ using namespace H5;
 #define KB                      1024
 #define FILE4                   "tfile4.h5"
 
+#define FILE5                   "tfile5.h5"
+#define NAME_LEN                64
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_file_create

@@ -2022,7 +2022,9 @@ H5I_find_id(hid_t id)
  *
  * Purpose: Gets a name of an object from its ID. 
  *
- * Return: Success: 0, Failure: -1
+ * Return: Success: The length of name.
+ * 
+ *         Failure: -1
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *

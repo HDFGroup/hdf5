@@ -971,6 +971,7 @@
 ./test/error_test.c
 ./test/err_compat.c
 ./test/file_handle.c
+./test/filename.c
 ./test/fill_old.h5
 ./test/fillval.c
 ./test/flush1.c
