@@ -71,6 +71,9 @@
 #define FILE43  "tvldtypes5.h5"
 #define FILE44  "tfilters.h5"
 #define FILE45  "tnullspace.h5"
+#define FILE46  "tfcontents1.h5"
+#define FILE47  "tfcontents2.h5"
+
 
 
 /*-------------------------------------------------------------------------
@@ -4168,7 +4171,7 @@ static void gent_compound_complex(void)
             }
         }
 
-        Array1[m].e = ( m * .96 );
+        Array1[m].e = (float)( m * .96 );
 
  for (n = 0; n < F41_ARRAY_DIMf; n++) {
             Array1[m].f[n] = ( m * 1024.9637 );
@@ -4431,9 +4434,6 @@ make_external(hid_t fid)
  assert(ret>=0);
 }
 
-
-
-
 /*-------------------------------------------------------------------------
  * Function: gent_filters
  *
@@ -4442,7 +4442,7 @@ make_external(hid_t fid)
  *
  *-------------------------------------------------------------------------
  */
-static void gent_filters()
+static void gent_filters(void)
 {
  hid_t    fid;  /* file id */
  hid_t    dcpl; /* dataset creation property list */
@@ -4842,11 +4842,20 @@ static void gent_filters()
  write_dset(fid,1,dims4,"char",H5T_NATIVE_CHAR,buf4);
 
 /*-------------------------------------------------------------------------
- * a group and a link
+ * links
+ *-------------------------------------------------------------------------
+ */
+ ret=H5Glink (fid, H5G_LINK_SOFT, "all", "slink to all");
+ assert(ret>=0);
+
+ ret=H5Glink (fid, H5G_LINK_HARD, "all", "hlink to all");
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * a group 
  *-------------------------------------------------------------------------
  */
  gid  = H5Gcreate(fid,"g1",0);
- H5Glink (gid, H5G_LINK_SOFT, "somevalue", "slink");
  write_dset(gid,1,dims4,"mydset",H5T_NATIVE_CHAR,buf4);
  ret  = H5Gclose(gid);
  assert(ret>=0);
@@ -4863,7 +4872,6 @@ static void gent_filters()
  * close
  *-------------------------------------------------------------------------
  */
-
  ret=H5Sclose(sid1);
  assert(ret>=0);
 
@@ -4921,6 +4929,93 @@ set_local_myfilter(hid_t dcpl_id, hid_t UNUSED type_id, hid_t UNUSED space_id)
  return(SUCCEED);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function: gent_fcontents
+ *
+ * Purpose: generate several files to list its contents
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_fcontents(void)
+{
+ hid_t    fid;   /* file id */
+ hid_t    gid1;  /* group ID */
+ hid_t    gid2;  /* group ID */
+ hid_t    gid3;  /* group ID */
+ hid_t    tid;   /* datatype ID */
+ hsize_t  dims[1]={4};
+ int      buf[4]={1,2,3,4};
+ int      ret;
+ 
+ /* create a file */
+ fid  = H5Fcreate(FILE46, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ assert(fid>=0);
+
+ write_dset(fid,1,dims,"dset",H5T_NATIVE_INT,buf);
+
+/*-------------------------------------------------------------------------
+ * links
+ *-------------------------------------------------------------------------
+ */
+
+ /* soft link to "dset" */
+ ret=H5Glink (fid, H5G_LINK_SOFT, "dset", "slink to dset");
+ assert(ret>=0);
+
+ /* hard link to "dset" */
+ ret=H5Glink (fid, H5G_LINK_HARD, "dset", "hlink to dset");
+ assert(ret>=0);
+
+ /* soft link to itself */
+ ret=H5Glink (fid, H5G_LINK_SOFT, "link", "link");
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * groups
+ *-------------------------------------------------------------------------
+ */
+ gid1  = H5Gcreate(fid,"g1",0);
+ gid2  = H5Gcreate(gid1,"g2",0);
+ gid3  = H5Gcreate(gid2,"g3",0);
+ write_dset(gid3,1,dims,"dset",H5T_NATIVE_INT,buf);
+ ret  = H5Gclose(gid1);
+ assert(ret>=0);
+ ret  = H5Gclose(gid2);
+ assert(ret>=0);
+ ret  = H5Gclose(gid3);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * datatype 
+ *-------------------------------------------------------------------------
+ */
+ tid=H5Tcopy(H5T_STD_B8LE);
+ ret=H5Tcommit(fid, "mytype", tid);
+ assert(ret>=0);
+ ret=H5Tclose(tid);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * close
+ *-------------------------------------------------------------------------
+ */
+
+ ret=H5Fclose(fid);
+ assert(ret>=0);
+
+ /* create a file for the bootblock test */
+ fid  = H5Fcreate(FILE47, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ assert(fid>=0);
+
+ ret=H5Fclose(fid);
+ assert(ret>=0);
+
+ 
+}
+
+
+
 /*-------------------------------------------------------------------------
  * Function: gent_null_space
  *
@@ -4972,32 +5067,23 @@ int main(void)
     gent_compound_dt();
     gent_all();
     gent_loop();
-
     gent_dataset2();
     gent_compound_dt2();
     gent_loop2();
     gent_many();
-
     gent_str();
     gent_str2();
-
     gent_enum();
-
     gent_objref();
     gent_datareg();
-
     gent_nestcomp();
-
     gent_opaque();
-
     gent_bitfields();
-
     gent_vldatatypes();
     gent_vldatatypes2();
     gent_vldatatypes3();
     gent_vldatatypes4();
     gent_vldatatypes5();
-
     gent_array1();
     gent_array2();
     gent_array3();
@@ -5005,26 +5091,20 @@ int main(void)
     gent_array5();
     gent_array6();
     gent_array7();
-
     gent_empty();
     gent_group_comments();
     gent_split_file();
     gent_family();
     gent_multi();
-
     gent_large_objname();
     gent_vlstr();
     gent_char();
-
     gent_attr_all();
-
     gent_compound_complex();
-
     gent_named_dtype_attr();
-    
     gent_filters();
-
     gent_null_space();
+    gent_fcontents();
 
     return 0;
 }

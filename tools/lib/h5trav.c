@@ -16,14 +16,13 @@
 #include "h5trav.h"
 #include "H5private.h" 
 
-
-
 /* functions for traversal */
 int traverse( hid_t loc_id, 
               const char *group_name, 
               trav_table_t *table, 
               trav_info_t *info, 
-              int *idx );
+              int *idx,
+              int print);
 
 herr_t get_nnames( hid_t loc_id, 
                      const char *group_name );
@@ -49,7 +48,9 @@ herr_t get_name_type( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-int h5trav_getinfo( hid_t file_id, trav_info_t *info )
+int h5trav_getinfo(hid_t file_id, 
+                   trav_info_t *info, 
+                   int print )
 {
 
  trav_table_t  *table=NULL;
@@ -59,7 +60,7 @@ int h5trav_getinfo( hid_t file_id, trav_info_t *info )
  trav_table_init( &table );
 
  /* iterate starting on the root group */
- if (( nnames = traverse( file_id, "/", table, info, &nnames )) < 0 )
+ if (( nnames = traverse( file_id, "/", table, info, &nnames, print )) < 0 )
   return -1;
 
  /* free table */
@@ -89,7 +90,7 @@ int h5trav_gettable(hid_t fid, trav_table_t *travt)
  int nnames=0;
 
  /* iterate starting on the root group */
- if (( nnames = traverse(fid,"/",travt,NULL,&nnames))<0)
+ if (( nnames = traverse(fid,"/",travt,NULL,&nnames,0))<0)
   return -1;
 
  return 0;
@@ -309,7 +310,8 @@ int traverse( hid_t loc_id,
               const char *group_name, 
               trav_table_t *table, 
               trav_info_t *info, 
-              int *idx ) 
+              int *idx,
+              int print) 
 {
  
  char          *name=NULL;
@@ -344,7 +346,7 @@ int traverse( hid_t loc_id,
   H5E_BEGIN_TRY {
 
   /* get info */
-  H5Gget_objinfo( loc_id, path, 1, &statbuf);
+   H5Gget_objinfo( loc_id, path, FALSE, &statbuf);
   } H5E_END_TRY;
 
   /* add to array */
@@ -374,32 +376,37 @@ int traverse( hid_t loc_id,
    {
     /* add object to table */
     trav_table_add(statbuf.objno, path, H5G_GROUP, table );
+
+    /* print it */
+    if (print)
+     printf(" %-10s %s\n", "group", path  );
     
     /* recurse with the absolute name */
-    inserted_objs += traverse( loc_id, path, table, info, idx );
+    inserted_objs += traverse( loc_id, path, table, info, idx, print );
    }
 
-    /* search table
+     /* search table
        group with more than one link to it */
    if (statbuf.nlink > 1) 
    {
     if ((j = trav_table_search(statbuf.objno, table )) < 0 )
      return -1;
 
+    trav_table_addlink(table,j,path);
+
     if ( table->objs[j].displayed == 0 )
     {
      table->objs[j].displayed = 1;
-     trav_table_addlink(table,j,path);
     }
     else
     {
-#if defined (H5_TRAV_DEBUG)
-     printf("<%s> HARDLINK\n", path);
-#endif
-     trav_table_addlink(table,j,path);
+     /* print it */
+     if (print)
+      printf(" %-10s %s %s\n", "group", path, "HARDLINK"  );
     }
 
    }
+   
    
    break;
 
@@ -418,26 +425,30 @@ int traverse( hid_t loc_id,
    {
     /* add object to table */
     trav_table_add(statbuf.objno, path, H5G_DATASET, table );
+
+    /* print it */
+    if (print)
+     printf(" %-10s %s\n", "dataset", path  );
    }
 
-    /* search table
+   /* search table
        dataset with more than one link to it */
    if (statbuf.nlink > 1) 
    {
     if ((j = trav_table_search(statbuf.objno, table )) < 0 )
      return -1;
 
+    trav_table_addlink(table,j,path);
+
     if ( table->objs[j].displayed == 0 )
     {
      table->objs[j].displayed = 1;
-     trav_table_addlink(table,j,path);
     }
     else
     {
-#if defined (H5_TRAV_DEBUG)
-     printf("<%s> HARDLINK\n", path);
-#endif
-     trav_table_addlink(table,j,path);
+     /* print it */
+     if (print)
+      printf(" %-10s %s %s\n", "dataset", path, "(HARDLINK)"  );
     } /* displayed==1 */
    } /* nlink>1 */
   
@@ -459,6 +470,10 @@ int traverse( hid_t loc_id,
    {
     /* add object to table */
     trav_table_add(statbuf.objno, path, H5G_TYPE, table );
+
+     /* print it */
+    if (print)
+     printf(" %-10s %s\n", "datatype", path  );
    }
    
    break;
@@ -470,14 +485,33 @@ int traverse( hid_t loc_id,
    */
  
   case H5G_LINK:
+   {
+    char *targbuf=NULL;
+      
+    /* increment */
+    inserted_objs++;
+    
+    /* add object to table */
+    trav_table_add(statbuf.objno, path, H5G_LINK, table );
 
-   /* increment */
-   inserted_objs++;
-
-   /* add object to table */
-   trav_table_add(statbuf.objno, path, H5G_LINK, table );
-  
+    if (statbuf.linklen>0)
+    {
+     targbuf=malloc(statbuf.linklen);
+     H5Gget_linkval(loc_id,path,statbuf.linklen,targbuf);
+     if (print) 
+      printf(" %-10s %s -> %s\n", "link", path, targbuf);
+     if (targbuf)
+      free(targbuf);
+    }
+    else
+    {
+     if (print)
+      printf(" %-10s %s ->\n", "link", path);
+    }
+   }
+   
    break;
+
 
     
   default:

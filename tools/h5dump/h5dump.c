@@ -54,8 +54,10 @@ static int          display_dcpl      = FALSE; /*dcpl */
 static int          display_fi        = FALSE; /*file index */   
 static int          display_ai        = TRUE;  /*array index */   
 static int          display_escape    = FALSE; /*escape non printable characters */ 
-
-
+static int          display_dsets     = TRUE;  /*display datasets */ 
+static int          display_groups    = TRUE;  /*display groups */
+static int          display_dtypes    = TRUE;  /*display named datatypes */
+static int          display_links     = TRUE;  /*display soft links */
 
 /**
  **  Added for XML  **
@@ -341,7 +343,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
+static const char *s_opts = "hnpeyBHLGTEirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -592,6 +594,10 @@ usage(const char *prog)
     fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named data type\n");
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
+    fprintf(stdout, "     -L                   Do not print soft links\n");
+    fprintf(stdout, "     -G                   Do not print groups\n");
+    fprintf(stdout, "     -T                   Do not print named datatypes\n");
+    fprintf(stdout, "     -E                   Do not print datasets\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
     fprintf(stdout, "     -u, --use-dtd        Output in XML using DTD\n");
     fprintf(stdout, "     -D U, --xml-dtd=U    Use the DTD or schema at U\n");
@@ -1308,6 +1314,7 @@ dump_all(hid_t group, const char *name, void * op_data)
 
     switch (statbuf.type) {
     case H5G_LINK:
+     if (display_links) {
 	indentation(indent);
 	targbuf = malloc(statbuf.linklen);
 
@@ -1396,9 +1403,11 @@ dump_all(hid_t group, const char *name, void * op_data)
 	}
 
 	free(targbuf);
+     }
 	break;
 
     case H5G_GROUP:
+     if (display_groups) {
 	if ((obj = H5Gopen(group, name)) < 0) {
             error_msg(progname, "unable to dump group \"%s\"\n", name);
 	    d_status = EXIT_FAILURE;
@@ -1417,9 +1426,11 @@ dump_all(hid_t group, const char *name, void * op_data)
 	    H5Gclose(obj);
 	}
 
+     }
 	break;
 
     case H5G_DATASET:
+      if (display_dsets) {
 	if ((obj = H5Dopen(group, name)) >= 0) {
 	    /* hard link */
 	    H5Gget_objinfo(obj, ".", TRUE, &statbuf);
@@ -1513,10 +1524,11 @@ dump_all(hid_t group, const char *name, void * op_data)
 	    d_status = EXIT_FAILURE;
             ret = FAIL;
 	}
-
+      }
 	break;
 
     case H5G_TYPE:
+      if (display_dtypes) {
 	if ((obj = H5Topen(group, name)) < 0) {
             error_msg(progname, "unable to dump data type \"%s\"\n", name);
 	    d_status = EXIT_FAILURE;
@@ -1525,7 +1537,7 @@ dump_all(hid_t group, const char *name, void * op_data)
 	    dump_function_table->dump_named_datatype_function(obj, name);
 	    H5Tclose(obj);
 	}
-
+      }
 	break;
 
     default:
@@ -1941,7 +1953,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
  outputformat->pindex=pindex;
  if (outputformat->pindex)
  {
-  outputformat->idx_fmt = "(%s)";
+  outputformat->idx_fmt = "(%s),";
   outputformat->idx_n_fmt = "%lu";
   outputformat->idx_sep = ",";
   outputformat->line_pre  = "        %s ";
@@ -2102,8 +2114,6 @@ static void dump_fill_value(hid_t dcpl,hid_t type_id, hid_t obj_id)
  *
  * Programmer:  pvn
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -2134,7 +2144,6 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
  ioffset=H5Dget_offset(obj_id);
  next=H5Pget_external_count(dcpl_id);
  strcpy(f_name,"\0");
-
  
 /*-------------------------------------------------------------------------
  * STORAGE_LAYOUT	   
@@ -2204,7 +2213,6 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
    indentation(indent + COL);
    printf("%s\n",END);
   }
-  
   else
   {
    /*start indent */
@@ -2226,13 +2234,13 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
  *-------------------------------------------------------------------------
  */
  nfilters = H5Pget_nfilters(dcpl_id);
+
+ indentation(indent + COL);
+ printf("%s %s\n", FILTERS, BEGIN);
+ indent += COL;
+
  if (nfilters)
  {
-  
-  indentation(indent + COL);
-  printf("%s %s\n", FILTERS, BEGIN);
-  indent += COL;
-   
   for (i=0; i<nfilters; i++) 
   {
    cd_nelmts = NELMTS(cd_values);
@@ -2267,7 +2275,6 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
      printf("%s %s\n",SZIP, BEGIN);
      
      /*start indent */
-     
      indent += COL;
      indentation(indent + COL);
      printf("PIXELS_PER_BLOCK %d\n", szip_pixels_per_block);
@@ -2295,7 +2302,6 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
       printf("HEADER %s\n", "RAW");
      
      /*end indent */
-     
      indent -= COL;
      indentation(indent + COL);
      printf("%s\n",END);
@@ -2326,75 +2332,81 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
     break;
    }/*switch*/ 
   } /*i*/
-  
-  indent -= COL;
-  indentation(indent + COL);
-  printf("%s\n",END);
  }/*nfilters*/
+ else 
+ {
+  indentation(indent + COL);
+  printf("NONE\n");
+ }
+ indent -= COL;
+ indentation(indent + COL);
+ printf("%s\n",END);
 
 /*-------------------------------------------------------------------------
  * FILLVALUE
  *-------------------------------------------------------------------------
  */
-
  indentation(indent + COL);
  printf("%s %s\n", FILLVALUE, BEGIN);
-
  /*start indent */
  indent += COL;
-
  indentation(indent + COL);
  printf("FILL_TIME ");
-
  H5Pget_fill_time(dcpl_id, &ft);
  switch ( ft ) 
  {
 	case H5D_FILL_TIME_ALLOC: 
-  printf("%s", "ALLOC\n");
+  printf("%s", "H5D_FILL_TIME_ALLOC\n");
 		break;
 	case H5D_FILL_TIME_NEVER: 
-  printf("%s", "NEVER\n");
+  printf("%s", "H5D_FILL_TIME_NEVER\n");
 		break;
 	case H5D_FILL_TIME_IFSET: 
-  printf("%s", "IFSET\n");
+  printf("%s", "H5D_FILL_TIME_IFSET\n");
 		break;
  }
-
- indentation(indent + COL);
- printf("%s", "ALLOC_TIME ");
- H5Pget_alloc_time(dcpl_id, &at);
-
- switch (at) 
- {
-	case H5D_ALLOC_TIME_EARLY: 
-  printf("%s", "EARLY\n");
-		break;
-	case H5D_ALLOC_TIME_INCR:
-  printf("%s", "INCR\n");
-		break;
-	case H5D_ALLOC_TIME_LATE: 
-  printf("%s", "LATE\n");
-		break;
- }
-
  indentation(indent + COL);
  printf("%s ", "VALUE ");
-
  H5Pfill_value_defined(dcpl_id, &fvstatus);
- 
  if (fvstatus == H5D_FILL_VALUE_UNDEFINED) 
  {
-  printf("%s\n", "UNDEFINED");
+  printf("%s\n", "H5D_FILL_VALUE_UNDEFINED");
  }
  else 
  {
   dump_fill_value(dcpl_id,type_id,obj_id);
  }
-
  /* end indent */ 
  indent -= COL;
  indentation(indent + COL);
  printf("\n");
+ indentation(indent + COL);
+ printf("%s\n",END);
+
+/*-------------------------------------------------------------------------
+ * ALLOCATION_TIME
+ *-------------------------------------------------------------------------
+ */
+ indentation(indent + COL);
+ printf("ALLOCATION_TIME %s\n",BEGIN);
+ /*start indent */
+ indent += COL;
+ indentation(indent + COL);
+ H5Pget_alloc_time(dcpl_id, &at);
+ switch (at) 
+ {
+	case H5D_ALLOC_TIME_EARLY: 
+  printf("%s", "H5D_ALLOC_TIME_EARLY\n");
+		break;
+	case H5D_ALLOC_TIME_INCR:
+  printf("%s", "H5D_ALLOC_TIME_INCR\n");
+		break;
+	case H5D_ALLOC_TIME_LATE: 
+  printf("%s", "H5D_ALLOC_TIME_LATE\n");
+		break;
+ }
+ /* end indent */ 
+ indent -= COL;
  indentation(indent + COL);
  printf("%s\n",END);
 
@@ -2453,7 +2465,11 @@ dump_fcpl(hid_t fid)
  fapl=h5_fileaccess();
  fdriver=H5Pget_driver(fapl);
  H5Pclose(fapl);
- 
+
+/*-------------------------------------------------------------------------
+ * SUPER_BLOCK
+ *-------------------------------------------------------------------------
+ */
  printf("%s %s\n",SUPER_BLOCK, BEGIN);
  indentation(indent + COL);
  printf("%s %d\n","SUPERBLOCK_VERSION", super);
@@ -2463,8 +2479,6 @@ dump_fcpl(hid_t fid)
  printf("%s %d\n","SYMBOLTABLE_VERSION", stab);
  indentation(indent + COL);
  printf("%s %d\n","OBJECTHEADER_VERSION", (int)shhdr);
- indentation(indent + COL);
- HDfprintf(stdout,"%s %Hu\n","USERBLOCK_VERSION", userblock);
  indentation(indent + COL);
  HDfprintf(stdout,"%s %Hd\n","OFFSET_SIZE", (long_long)off_size);
  indentation(indent + COL);
@@ -2517,7 +2531,15 @@ dump_fcpl(hid_t fid)
  printf("%s %s\n","FILE_DRIVER", dname);
  indentation(indent + COL);
  printf("%s %d\n","ISTORE_K", istore_ik);
-  
+ printf("%s\n",END);
+
+/*-------------------------------------------------------------------------
+ * USER_BLOCK
+ *-------------------------------------------------------------------------
+ */
+ printf("USER_BLOCK %s\n",BEGIN);
+ indentation(indent + COL);
+ HDfprintf(stdout,"%s %Hu\n","USERBLOCK_SIZE", userblock);
  printf("%s\n",END);
 }
 
@@ -2534,26 +2556,16 @@ dump_fcpl(hid_t fid)
  *
  *-------------------------------------------------------------------------
  */
-
 static void dump_list(hid_t fid)
 {
- int          nobjects;
- trav_info_t  *info=NULL;
-
- /* get the number of objects in the files */
- nobjects = h5trav_getinfo(fid, NULL);
-
- /* get the list of objects in the files */
- info = (trav_info_t*) malloc( nobjects * sizeof(trav_info_t));
- if (info==NULL)
-  return;
-
- h5trav_getinfo(fid, info);
  printf("%s %s\n",FILE_CONTENTS, BEGIN);
- h5trav_printinfo(nobjects,info);
+
+ /* print objects in the files */
+ h5trav_getinfo(fid, NULL, 1);
+
  printf(" %s\n",END);
- h5trav_freeinfo(info,nobjects);
 }
+
 
 
 
@@ -3042,11 +3054,6 @@ parse_command_line(int argc, const char *argv[])
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
 parse_start:
         switch ((char)opt) {
-#if 0
-        case 'b':
-            /* binary output */
-            break;
-#endif  /* 0 */
         case 'B':
             display_bb = TRUE;
             last_was_dset = FALSE;
@@ -3063,6 +3070,18 @@ parse_start:
             break;
         case 'e':
             display_escape = TRUE;
+            break;
+        case 'L':
+            display_links = FALSE;
+            break;
+        case 'G':
+            display_groups = FALSE;
+            break;
+        case 'T':
+            display_dtypes = FALSE;
+            break;
+        case 'E':
+            display_dsets = FALSE;
             break;
         case 'H':
             display_data = FALSE;
