@@ -2396,7 +2396,8 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     /* Check if fill values should be written to blocks */
     if(fill_time != H5D_FILL_TIME_NEVER) {
         /* Allocate chunk buffer for processes to use when writing fill values */
-        if (NULL==(chunk = H5MM_malloc(chunk_size)))
+        H5_CHECK_OVERFLOW(chunk_size,hsize_t,size_t);
+        if (NULL==(chunk = H5MM_malloc((size_t)chunk_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for chunk");
 
         /* Fill the chunk with the proper values */
@@ -2405,12 +2406,12 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
              * Replicate the fill value throughout the chunk.
              */
             assert(0==chunk_size % fill.size);
-            H5V_array_fill(chunk, fill.buf, fill.size, chunk_size/fill.size);
+            H5V_array_fill(chunk, fill.buf, fill.size, (size_t)chunk_size/fill.size);
         } else {
             /*
              * No fill value was specified, assume all zeros.
              */
-            HDmemset (chunk, 0, chunk_size);
+            HDmemset (chunk, 0, (size_t)chunk_size);
         } /* end else */
     } /* end if */
 

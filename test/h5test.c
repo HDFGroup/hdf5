@@ -442,7 +442,7 @@ h5_fileaccess(void)
 
 	HDmemset(memb_map, 0, sizeof memb_map);
 	HDmemset(memb_fapl, 0, sizeof memb_fapl);
-	HDmemset((void*)(&memb_name[0]), 0, sizeof memb_name);
+	HDmemset(memb_name, 0, sizeof memb_name);
 	HDmemset(memb_addr, 0, sizeof memb_addr);
 
 	assert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
@@ -693,7 +693,7 @@ h5_dump_info_object(MPI_Info info)
     int  	flag;
     int		i, nkeys;
 
-    printf("Dumping MPI Info Object(%d) (up to %d bytes per item):\n", info,
+    printf("Dumping MPI Info Object(%d) (up to %d bytes per item):\n", (int)info,
 	MPI_MAX_INFO_VAL);
     if (info==MPI_INFO_NULL){
 	printf("object is MPI_INFO_NULL\n");

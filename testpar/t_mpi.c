@@ -26,7 +26,6 @@ hid_t	fapl;				/* file access property list */
 /* protocols */
 static void test_mpio_overlap_writes(char *filename);
 static void test_mpio_gb_file(char *filename);
-static void test_mpio_gb_file(char *filename);
 static int parse_options(int argc, char **argv);
 static void usage(void);
 
@@ -282,13 +281,13 @@ test_mpio_gb_file(char *filename)
 	    for (i=ntimes-2; i <= ntimes; i++){
 		mpi_off = (i*mpi_size + mpi_rank)*(MPI_Offset)MB;
 		if (verbose)
-		    printf("proc %d: write to mpi_off=%016llx, %lld\n",
+		    HDfprintf(stdout,"proc %d: write to mpi_off=%016llx, %lld\n",
 			mpi_rank, mpi_off, mpi_off);
 		/* set data to some trivial pattern for easy verification */
 		for (j=0; j<MB; j++)
 		    *(buf+j) = i*mpi_size + mpi_rank;
 		if (verbose)
-		    printf("proc %d: writing %d bytes at offset %lld\n",
+		    HDfprintf(stdout,"proc %d: writing %d bytes at offset %lld\n",
 			mpi_rank, MB, mpi_off);
 		mrc = MPI_File_write_at(fh, mpi_off, buf, MB, MPI_BYTE, &mpi_stat);
 		INFO((mrc==MPI_SUCCESS), "GB size file write");
@@ -321,7 +320,7 @@ test_mpio_gb_file(char *filename)
 	    for (i=ntimes-2; i <= ntimes; i++){
 		mpi_off = (i*mpi_size + (mpi_size - mpi_rank - 1))*(MPI_Offset)MB;
 		if (verbose)
-		    printf("proc %d: read from mpi_off=%016llx, %lld\n",
+		    HDfprintf(stdout,"proc %d: read from mpi_off=%016llx, %lld\n",
 			mpi_rank, mpi_off, mpi_off);
 		mrc = MPI_File_read_at(fh, mpi_off, buf, MB, MPI_BYTE, &mpi_stat);
 		INFO((mrc==MPI_SUCCESS), "GB size file read");

@@ -505,16 +505,16 @@ run_test(iotype iot, parameters parms, struct options *opts)
 
     /* allocate space for tables minmax and that it is sufficient */
     /* to initialize all elements to zeros by calloc.             */
-    write_mpi_mm_table = calloc(parms.num_iters , sizeof(minmax));
-    write_mm_table = calloc(parms.num_iters , sizeof(minmax));
-    write_gross_mm_table = calloc(parms.num_iters , sizeof(minmax));
-    write_raw_mm_table = calloc(parms.num_iters , sizeof(minmax));
+    write_mpi_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+    write_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+    write_gross_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+    write_raw_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
 
     if (!parms.h5_write_only) {
-        read_mpi_mm_table = calloc(parms.num_iters , sizeof(minmax));
-        read_mm_table = calloc(parms.num_iters , sizeof(minmax));
-        read_gross_mm_table = calloc(parms.num_iters , sizeof(minmax));
-        read_raw_mm_table = calloc(parms.num_iters , sizeof(minmax));
+        read_mpi_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_gross_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_raw_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
     }
 
     /* Do IO iteration times, collecting statistics each time */
@@ -779,7 +779,7 @@ static int
 create_comm_world(int num_procs, int *doing_pio)
 {
     /* MPI variables */
-    int     mrc, ret_value;     /* return values                */
+    int     mrc;     /* return values                */
     int     color;              /* for communicator creation    */
     int     myrank, nprocs;
 
@@ -819,7 +819,7 @@ create_comm_world(int num_procs, int *doing_pio)
 
 done:
     *doing_pio = color;
-    return ret_value;
+    return SUCCESS;
 
 error_done:
     destroy_comm_world();
@@ -1116,10 +1116,10 @@ parse_command_line(int argc, char *argv[])
                             buf[i++] = *end;
 
                     if (strlen(buf) > 1 || isdigit(buf[0])) {
-                        register int i;
+                        size_t j;
 
-                        for (i = 0; i < 10 && buf[i] != '\0'; ++i)
-                            if (!isdigit(buf[i])) {
+                        for (j = 0; j < 10 && buf[j] != '\0'; ++j)
+                            if (!isdigit(buf[j])) {
                                 fprintf(stderr, "pio_perf: invalid --debug option %s\n",
                                         buf);
                                 exit(EXIT_FAILURE);

@@ -7921,7 +7921,7 @@ done:
  */
 hid_t
 H5Tarray_create(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
-    const int UNUSED *perm/* ndims */)
+    const int perm[/* ndims */])
 {
     H5T_t	*base = NULL;		/* base data type	*/
     H5T_t	*dt = NULL;		    /* new array data type	*/

@@ -28,7 +28,7 @@
  * ZROW		same as BYROW except process 0 gets 0 rows
  * ZCOL		same as BYCOL except process 0 gets 0 columns
  */
-void
+static void
 slab_set(int mpi_rank, int mpi_size, hssize_t start[], hsize_t count[],
 	 hsize_t stride[], hsize_t block[], int mode)
 {
@@ -108,16 +108,16 @@ if (verbose){
  * Fill the dataset with trivial data for testing.
  * Assume dimension rank is 2 and data is stored contiguous.
  */
-void
-dataset_fill(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], DATATYPE * dataset)
+static void
+dataset_fill(hssize_t start[], hsize_t block[], DATATYPE * dataset)
 {
     DATATYPE *dataptr = dataset;
-    int i, j;
+    hsize_t i, j;
 
     /* put some trivial data in the data_array */
     for (i=0; i < block[0]; i++){
 	for (j=0; j < block[1]; j++){
-	    *dataptr = (i+start[0])*100 + (j+start[1]+1);
+	    *dataptr = (DATATYPE)((i+start[0])*100 + (j+start[1]+1));
 	    dataptr++;
 	}
     }
@@ -127,10 +127,11 @@ dataset_fill(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[
 /*
  * Print the content of the dataset.
  */
-void dataset_print(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], DATATYPE * dataset)
+static void
+dataset_print(hssize_t start[], hsize_t block[], DATATYPE * dataset)
 {
     DATATYPE *dataptr = dataset;
-    int i, j;
+    hsize_t i, j;
 
     /* print the column heading */
     printf("%-8s", "Cols:");
@@ -155,7 +156,8 @@ void dataset_print(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t 
  */
 int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], DATATYPE *dataset, DATATYPE *original)
 {
-    int i, j, vrfyerrs;
+    hsize_t i, j;
+    int vrfyerrs;
 
     /* print it if verbose */
     if (verbose) {
@@ -164,9 +166,9 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t bl
 	    (long)start[0], (long)start[1], (unsigned long)count[0], (unsigned long)count[1],
 	    (unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1]);
 	printf("original values:\n");
-	dataset_print(start, count, stride, block, original);
+	dataset_print(start, block, original);
 	printf("compared values:\n");
-	dataset_print(start, count, stride, block, dataset);
+	dataset_print(start, block, dataset);
     }
 
     vrfyerrs = 0;
@@ -174,9 +176,9 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t bl
 	for (j=0; j < block[1]; j++){
 	    if (*dataset != *original){
 		if (vrfyerrs++ < MAX_ERR_REPORT || verbose){
-		    printf("Dataset Verify failed at [%d][%d](row %d, col %d): expect %d, got %d\n",
-			i, j,
-			(int)(i+start[0]), (int)(j+start[1]),
+		    printf("Dataset Verify failed at [%ld][%ld](row %ld, col %ld): expect %d, got %d\n",
+			(long)i, (long)j,
+			(long)(i+start[0]), (long)(j+start[1]),
 			*(original), *(dataset));
 		}
 		dataset++;
@@ -285,7 +287,7 @@ dataset_writeInd(char *filename)
     slab_set(mpi_rank, mpi_size, start, count, stride, block, BYROW);
 
     /* put some trivial data in the data_array */
-    dataset_fill(start, count, stride, block, data_array1);
+    dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
 
     /* create a file dataspace independently */
@@ -415,7 +417,7 @@ dataset_readInd(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* fill dataset with test data */
-    dataset_fill(start, count, stride, block, data_origin1);
+    dataset_fill(start, block, data_origin1);
 
     /* read data independently */
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
@@ -558,11 +560,11 @@ dataset_writeAll(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* fill the local slab with some trivial data */
-    dataset_fill(start, count, stride, block, data_array1);
+    dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, block, data_array1);
+	dataset_print(start, block, data_array1);
     }
 
     /* set up the collective transfer properties list */
@@ -604,11 +606,11 @@ dataset_writeAll(char *filename)
     slab_set(mpi_rank, mpi_size, start, count, stride, block, BYCOL);
 
     /* put some trivial data in the data_array */
-    dataset_fill(start, count, stride, block, data_array1);
+    dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, block, data_array1);
+	dataset_print(start, block, data_array1);
     }
 
     /* create a file dataspace independently */
@@ -622,11 +624,11 @@ dataset_writeAll(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* fill the local slab with some trivial data */
-    dataset_fill(start, count, stride, block, data_array1);
+    dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, block, data_array1);
+	dataset_print(start, block, data_array1);
     }
 
     /* set up the collective transfer properties list */
@@ -769,11 +771,11 @@ dataset_readAll(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* fill dataset with test data */
-    dataset_fill(start, count, stride, block, data_origin1);
+    dataset_fill(start, block, data_origin1);
     MESG("data_array initialized");
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, block, data_origin1);
+	dataset_print(start, block, data_origin1);
     }
 
     /* set up the collective transfer properties list */
@@ -832,11 +834,11 @@ dataset_readAll(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* fill dataset with test data */
-    dataset_fill(start, count, stride, block, data_origin1);
+    dataset_fill(start, block, data_origin1);
     MESG("data_array initialized");
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, block, data_origin1);
+	dataset_print(start, block, data_origin1);
     }
 
     /* set up the collective transfer properties list */
@@ -1006,11 +1008,11 @@ extend_writeInd(char *filename)
     slab_set(mpi_rank, mpi_size, start, count, stride, block, BYROW);
 
     /* put some trivial data in the data_array */
-    dataset_fill(start, count, stride, block, data_array1);
+    dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, block, data_array1);
+	dataset_print(start, block, data_array1);
     }
 
     /* create a memory dataspace independently */
@@ -1046,11 +1048,11 @@ extend_writeInd(char *filename)
     slab_set(mpi_rank, mpi_size, start, count, stride, block, BYCOL);
 
     /* put some trivial data in the data_array */
-    dataset_fill(start, count, stride, block, data_array1);
+    dataset_fill(start, block, data_array1);
     MESG("data_array initialized");
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, block, data_array1);
+	dataset_print(start, block, data_array1);
     }
 
     /* create a memory dataspace independently */
@@ -1209,10 +1211,10 @@ extend_readInd(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* fill dataset with test data */
-    dataset_fill(start, count, stride, block, data_origin1);
+    dataset_fill(start, block, data_origin1);
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, block, data_array1);
+	dataset_print(start, block, data_array1);
     }
 
     /* read data independently */
@@ -1244,10 +1246,10 @@ extend_readInd(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* fill dataset with test data */
-    dataset_fill(start, count, stride, block, data_origin1);
+    dataset_fill(start, block, data_origin1);
     if (verbose){
 	MESG("data_array created");
-	dataset_print(start, count, stride, block, data_array1);
+	dataset_print(start, block, data_array1);
     }
 
     /* read data independently */

@@ -1029,7 +1029,7 @@ static void test_many(void) {
 		
 		dset1[j].a[idx[3]][idx[2]][idx[1]][idx[0]] = i0+j;
 		dset1[j].b[idx[3]][idx[2]][idx[1]][idx[0]] = (double)(i0+j);
-#if WIN32
+#ifdef WIN32
 		dset1[j].c[idx[3]][idx[2]][idx[1]][idx[0]] = (double)(i0+j+(signed __int64)sdim);
 #else
 		dset1[j].c[idx[3]][idx[2]][idx[1]][idx[0]] = (double)(i0+j+sdim);
@@ -2778,7 +2778,7 @@ void test_multi(void)
 
     HDmemset(memb_map, 0, sizeof memb_map);
     HDmemset(memb_fapl, 0, sizeof memb_fapl);
-    HDmemset((void *)(&memb_name[0]), 0, sizeof memb_name);
+    HDmemset(memb_name, 0, sizeof memb_name);
     HDmemset(memb_addr, 0, sizeof memb_addr);
 
     assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);

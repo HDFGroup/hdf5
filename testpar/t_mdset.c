@@ -280,12 +280,12 @@ void multiple_group_read(char *filename, int ngroups)
          
         /* check the data. */
         if(m != 0)
-            if( error_num = read_dataset(memspace, filespace, gid) )
+            if( (error_num = read_dataset(memspace, filespace, gid))>0)
 	        nerrors += error_num;
         
         /* check attribute.*/ 
         error_num = 0;        
-        if( error_num = read_attribute(gid, is_group, m) )
+        if( (error_num = read_attribute(gid, is_group, m))>0 )
 	    nerrors += error_num;
 
         H5Gclose(gid);
@@ -343,7 +343,7 @@ int read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
         vrfy_errors = check_value(indata, outdata);
 
         /* check attribute.*/  
-        if( attr_errors = read_attribute(did, is_dset, n) )
+        if( (attr_errors = read_attribute(did, is_dset, n))>0 )
             vrfy_errors += attr_errors; 
 	       
         H5Dclose(did);
@@ -455,7 +455,8 @@ int read_attribute(hid_t obj_id, int this_type, int num)
  * hyperslab part only by process ID. */
 int check_value(DATATYPE *indata, DATATYPE *outdata) 
 {
-    int mpi_rank, mpi_size, i, j, err_num=0;
+    int mpi_rank, mpi_size, err_num=0;
+    hsize_t i, j;
     hssize_t chunk_origin[DIM];
     hsize_t  chunk_dims[DIM], count[DIM];
 
@@ -470,7 +471,7 @@ int check_value(DATATYPE *indata, DATATYPE *outdata)
          for(j=chunk_origin[1]; j<(chunk_origin[1]+chunk_dims[1]); j++) {
               if( *indata != *outdata )
 	          if(err_num++ < MAX_ERR_REPORT || verbose)
-		      printf("Dataset Verify failed at [%d][%d](row %d, col%d): expect %d, got %d\n", i, j, i, j, *outdata, *indata); 
+		      printf("Dataset Verify failed at [%ld][%ld](row %ld, col%ld): expect %d, got %d\n", (long)i, (long)j, (long)i, (long)j, *outdata, *indata); 
 	 }
     if(err_num > MAX_ERR_REPORT && !verbose)
         printf("[more errors ...]\n");

@@ -429,7 +429,7 @@ find_objs(hid_t group, const char *name, void *op_data)
     switch (statbuf.type) {
         case H5G_GROUP:
             if ((obj = H5Gopen(group, name)) >= 0) {
-                if (info->prefix_len < (int)(HDstrlen(info->prefix) + HDstrlen(name) + 2)) {
+                if (info->prefix_len < (HDstrlen(info->prefix) + HDstrlen(name) + 2)) {
                     info->prefix_len *= 2;
                     info->prefix = HDrealloc(info->prefix,
                                            info->prefix_len * sizeof(char));
