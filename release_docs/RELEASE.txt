@@ -307,8 +307,14 @@ Documentation
 Platforms Tested
 ================
 
-    AIX 5.1  (32 and 64-bit)      C for AIX Compiler, Version 6.0.0.4
+    AIX 5.1  (32 and 64-bit)      xlc 6.0.0.2
                                   xlf 8.1.0.3
+    				  xlC 6.0.0.4
+				  xlc 5.0.2.5
+				  xlf 7.1.1.2
+				  xlC 5.0.2.5
+				  mpcc_r 5.0.2.5
+				  mpxlf_r 7.1.1.2
                                   poe 3.2.0.10
     Cray T3E sn6606 2.0.6.08      Cray Standard C Version 6.6.0.2
                                   Cray Fortran Version 3.6.0.0.2
@@ -333,12 +339,14 @@ Platforms Tested
                                   g++ 3.2.2, 3.2.3
                                   Intel(R) C++ Version 7.1
                                   Intel(R) Fortran Compiler Version 7.1
-                                  PGI compilers (pgcc, pgf90) version 4.0-2
+                                  PGI compilers (pgcc, pgf90, pgCC) version 4.0-2
                                   MPIch 1.2.4
     OSF1 V5.1                     Compaq C V6.4-014
-                                  Compaq Fortran X5.4A-1684
-                                  Compaq C V6.3-027 , MPI_64bit_R5
-                                  gcc version 3.0 for C++
+                                  Compaq C V6.3-027
+				  Compaq Fortran V5.5-1877
+				  Compaq C++ V6.5-014
+				  MPI_64bit_R5
+                                  g++ version 3.0 for C++
     SunOS 5.7                     WorkShop Compilers 5.0 98/12/15 C 5.0
      (Solaris 2.7)                WorkShop Compilers 5.0 98/12/15 C++ 5.0 
                                   WorkShop Compilers 5.0 98/10/25 
@@ -426,7 +434,7 @@ OSF1 v5.1             y       n       y    n    y        y           y
 T3E                   y       n       n    n    y        y           y
 SV1                   y       n       n    n    y        y           y
 T90 IEEE              y       n       n    n    y        y           n
-TFLOPS                y       n       n    n    n        y           y
+TFLOPS                y       n       n    n    n        n           n
 AIX-5.1 32-bit        y       n       y    n    y        y           y
 AIX-5.1 64-bit        y       n       y    n    y        y           y
 WinXP           (6)   y       n       y    n    n        y           y
