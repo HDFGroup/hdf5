@@ -8,7 +8,7 @@
 
 # Use SGI supplied C compiler by default.  There is no ranlib
 if test "X-" =  "X-$CC"; then
-    CC='cc -64'
+    CC='cc'
     CC_BASENAME=cc
 fi
 RANLIB=:
