@@ -420,7 +420,7 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Tconvert</code>(<em>hid_t</em> <code>src_id</code>,
         <em>hid_t</em> <code>dst_id</code>,
-        <em>size_t</em> <code>nelmts</code>,
+        <em>hsize_t</em> <code>nelmts</code>,
         <em>void *</em><code>buf</code>,
         <em>void *</em><code>background</code>,
         <em>hid_t</em> <code>plist_id</code>
@@ -452,7 +452,7 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
             <dd>Identifier for the source datatype.
         <dt><em>hid_t</em> <code>dst_id</code>
             <dd>Identifier for the destination datatype.
-        <dt><em>size_t</em> <code>nelmts</code>
+        <dt><em>hsize_t</em> <code>nelmts</code>
             <dd>Size of array <code>buf</code>.
         <dt><em>void *</em><code>buf</code>
             <dd>Array containing pre- and post-conversion values.
