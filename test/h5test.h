@@ -42,6 +42,12 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #endif
 
 /*
+ * Print the current location on the standard output stream.
+ */
+#define AT() 		printf ("	 at %s:%d in %s()...\n",	      \
+				__FILE__, __LINE__, __FUNCTION__);
+
+/*
  * The name of the test is printed by saying TESTING("something") which will
  * result in the string `Testing something' being flushed to standard output.
  * If a test passes, fails, or is skipped then the PASSED(), H5_FAILED(), or
@@ -54,12 +60,7 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #define PASSED()	{puts(" PASSED");fflush(stdout);}
 #define H5_FAILED()	{puts("*FAILED*");fflush(stdout);}
 #define SKIPPED()	{puts(" -SKIP-");fflush(stdout);}
-
-/*
- * Print the current location on the standard output stream.
- */
-#define AT() 		printf ("	 at %s:%d in %s()...\n",	      \
-				__FILE__, __LINE__, __FUNCTION__);
+#define TEST_ERROR      {H5_FAILED(); AT(); goto error;}
 
 
 #ifdef __cplusplus
