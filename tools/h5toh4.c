@@ -1251,17 +1251,17 @@ H5T_str_t strpad;
 			status = FAIL;
     		}
 
+		if ((status = H5Tclose(type)) != SUCCEED ) {
+			fprintf(stderr, "Error: Problems closing H5Tclose\n");
+			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_attr", __FILE__, __LINE__);
+			status = FAIL;
+			return status;
+		}
+
 	} else {
 
 		status = FAIL;
 
-	}
-
-	if ((status = H5Tclose(type)) != SUCCEED ) {
-		fprintf(stderr, "Error: Problems closing H5Tclose\n");
-		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_attr", __FILE__, __LINE__);
-		status = FAIL;
-		return status;
 	}
 
 	return status;
@@ -1579,7 +1579,6 @@ convert_all (hid_t group, char *name, op_data_t *op_data)
     default:
         fprintf (stderr,"Unknown Object %s\n", name);
         status = FAIL; 
-        return status;
         break;
 
     }
@@ -1779,7 +1778,7 @@ convert_shared_group (hid_t group, int idx, op_data_t *op_data) {
     int32 vgroup_id;
     int32 vgroup_ref;
     int32 numtagref;
-    int32 status;
+    int32 status = SUCCEED;
     hid_t group2;
     char *group_name=NULL;
     char *group_name2=NULL;
@@ -1791,6 +1790,7 @@ convert_shared_group (hid_t group, int idx, op_data_t *op_data) {
     if ((group_name = get_objectname(H5G_GROUP, idx)) == NULL ) {
 	fprintf(stderr,"Error: get_objectname() did not work\n");
 	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_shared_group", __FILE__, __LINE__);
+        status = FAIL;
 	return (status);
     }
 
