@@ -70,6 +70,7 @@
 #define FILE42  "tnamed_dtype_attr.h5"
 #define FILE43  "tvldtypes5.h5"
 #define FILE44  "tfilters.h5"
+#define FILE45  "tnullspace.h5"
 
 
 /*-------------------------------------------------------------------------
@@ -236,7 +237,6 @@ static void gent_dataset(void)
     hsize_t dims[2];
     int dset1[10][20];
     double dset2[30][20];
-    int dset3 = 10;
     int i, j;
   
     fid = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -264,18 +264,9 @@ static void gent_dataset(void)
               dset2[i][j] = 0.0001*j+i;
 
     H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
-  
     H5Sclose(space);
     H5Dclose(dataset);
 
-    /* dset3 - null space */
-    space = H5Screate(H5S_NULL);
-    dataset = H5Dcreate(fid, "/dset3", H5T_STD_I32BE, space, H5P_DEFAULT);
-    /* nothing should be written */
-    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &dset3);
-
-    H5Sclose(space);
-    H5Dclose(dataset);
     H5Fclose(fid);
 }
 
@@ -386,14 +377,7 @@ static void gent_attribute(void)
     H5Sclose(space);
     H5Aclose(attr);
    
-    /* attribute 6 - null dataspace */
-    space = H5Screate(H5S_NULL);
-    attr = H5Acreate (root, "attr6", H5T_NATIVE_UINT, space, H5P_DEFAULT);
-    H5Awrite(attr, H5T_NATIVE_INT, &point); /* Nothing can be written */
-
     H5Tclose(type);
-    H5Sclose(space);
-    H5Aclose(attr);
     H5Gclose(root);
     H5Fclose(fid);
 }
@@ -4880,8 +4864,41 @@ set_local_myfilter(hid_t dcpl_id, hid_t UNUSED type_id, hid_t UNUSED space_id)
   return(FAIL);
  
  return(SUCCEED);
-} 
+}
 
+/*-------------------------------------------------------------------------
+ * Function: gent_null_space
+ *
+ * Purpose: generates dataset and attribute of null dataspace
+ *-------------------------------------------------------------------------
+ */
+static void gent_null_space(void)
+{
+    hid_t fid, root, dataset, space, attr;
+    int dset_buf = 10;
+    int point = 4;
+    
+    fid = H5Fcreate(FILE45, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    root = H5Gopen (fid, "/");
+  
+    /* null space */
+    space = H5Screate(H5S_NULL);
+
+    /* dataset */
+    dataset = H5Dcreate(fid, "dset", H5T_STD_I32BE, space, H5P_DEFAULT);
+    /* nothing should be written */
+    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &dset_buf);
+
+    /* attribute */
+    attr = H5Acreate (root, "attr", H5T_NATIVE_UINT, space, H5P_DEFAULT);
+    H5Awrite(attr, H5T_NATIVE_INT, &point); /* Nothing can be written */
+
+    H5Dclose(dataset);
+    H5Aclose(attr);
+    H5Gclose(root);
+    H5Sclose(space);
+    H5Fclose(fid);
+}
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -4951,6 +4968,8 @@ int main(void)
     gent_named_dtype_attr();
     
     gent_filters();
+
+    gent_null_space();
 
     return 0;
 }

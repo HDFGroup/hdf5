@@ -44,11 +44,5 @@ GROUP "/" {
          "string attribute"
       }
    }
-   ATTRIBUTE "attr6" {
-      DATATYPE  H5T_STD_U32LE
-      DATASPACE  NULL
-      DATA {
-      }
-   }
 }
 }

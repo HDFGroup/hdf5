@@ -1068,7 +1068,7 @@ dump_dataspace(hid_t space)
 
 	    break;
         case H5S_NULL:
-	    /* nulldataspace */
+	    /* null dataspace */
 	    HDfprintf(stdout, "%s %s",
 		      dump_header_format->dataspacedescriptionbegin, S_NULL);
             break;
@@ -4740,11 +4740,14 @@ xml_dump_dataspace(hid_t space)
 	    printf("</%sSimpleDataspace>\n", xmlnsprefix );
             
             break;
+#ifdef TMP
+        /* Commented out: wait until the schema is updated first */
         case H5S_NULL:
 	    /* null dataspace (just a tag, no XML attrs. defined */
 	    printf("<%sNullDataspace />\n",xmlnsprefix);
 
             break;
+#endif /* TMP */
         case H5S_COMPLEX:
 	    printf("<!-- not yet implemented -->\n");
             

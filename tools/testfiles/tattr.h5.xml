@@ -86,18 +86,5 @@ Expected output for 'h5dump --xml tattr.h5'
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Attribute>
-   <hdf5:Attribute Name="attr6">
-      <hdf5:Dataspace>
-         <hdf5:NullDataspace />
-      </hdf5:Dataspace>
-      <hdf5:DataType>
-         <hdf5:AtomicType>
-            <hdf5:IntegerType ByteOrder="LE" Sign="false" Size="4" />
-         </hdf5:AtomicType>
-      </hdf5:DataType>
-      <hdf5:Data>
-         <hdf5:NoData/>
-      </hdf5:Data>
-   </hdf5:Attribute>
 </hdf5:RootGroup>
 </hdf5:HDF5-File>
