@@ -1181,7 +1181,7 @@ H5G_node_name(H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
     H5G_bt_ud3_t	*bt_udata = (H5G_bt_ud3_t *)_udata;
     size_t		name_off;
     hsize_t             loc_idx;
-    char		*name;   
+    const char		*name;   
     H5G_node_t		*sn = NULL;
     H5B_iterate_t	ret_value = H5B_ITER_CONT;
 
@@ -1202,9 +1202,9 @@ H5G_node_name(H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
     if(bt_udata->idx >= bt_udata->num_objs && bt_udata->idx < (bt_udata->num_objs+sn->nsyms)) {
             loc_idx = bt_udata->idx - bt_udata->num_objs; 
             name_off = sn->entry[loc_idx].name_off;  
-            name = (char*)H5HL_peek (f, bt_udata->group->ent.cache.stab.heap_addr, name_off);
+            name = (const char*)H5HL_peek (f, bt_udata->group->ent.cache.stab.heap_addr, name_off);
             assert (name);
-            bt_udata->name = HDstrdup (name);
+            bt_udata->name = H5MM_strdup (name);
             HGOTO_DONE(H5B_ITER_STOP);
     }
 

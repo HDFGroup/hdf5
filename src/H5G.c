@@ -2467,10 +2467,13 @@ H5G_get_objname_by_idx(H5G_t *grp, hsize_t idx, char* name, size_t size)
     
     ret_value = HDstrlen(udata.name);
     if(name && size>0) {
-        HDstrncpy(name, udata.name, MIN(ret_value+1,size-1));
-        if(ret_value >= size)
+        HDstrncpy(name, udata.name, MIN((size_t)(ret_value+1),size-1));
+        if((size_t)ret_value >= size)
             name[size-1]='\0';
     }
+
+    /* Free the duplicated name */
+    H5MM_xfree(udata.name);
     
 done:
     FUNC_LEAVE(ret_value);
