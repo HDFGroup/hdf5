@@ -122,8 +122,8 @@
 #ifdef HAVE_IO_H
 #   include <io.h>
 #endif
-#ifdef HAVE_WINSOCK_H
-#   include <winsock2.h>
+#ifdef HAVE_WINDOWS_H
+#include <windows.h>
 #endif
 #ifndef F_OK
 #   define F_OK	00
