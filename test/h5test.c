@@ -164,7 +164,7 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 	    if (h5_fixname(base_name[i], fapl, filename, sizeof(filename)) == NULL)
 		continue;
 
-	    driver = H5Pget_driver(fapl);
+            driver = H5Pget_driver(fapl);
 
 	    if (driver == H5FD_FAMILY) {
 		for (j = 0; /*void*/; j++) {
@@ -286,13 +286,10 @@ char *
 h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
     const char     *prefix = NULL;
-    const char     *suffix = ".h5"; /* suffix has default */
+    const char     *suffix = ".h5";     /* suffix has default */
     char           *ptr, last = '\0';
     size_t          i, j;
-#ifdef H5_HAVE_PARALLEL
-    static int	    HDF5_PARAPREFIX_explained=0;
-#endif /* H5_HAVE_PARALLEL */
-    hid_t           driver=(-1);
+    hid_t           driver = -1;
     
     if (!base_name || !fullname || size < 1)
         return NULL;
@@ -300,7 +297,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     memset(fullname, 0, size);
 
     /* figure out the suffix */
-    if (H5P_DEFAULT != fapl){
+    if (H5P_DEFAULT != fapl) {
 	if ((driver = H5Pget_driver(fapl)) < 0)
             return NULL;
 
@@ -311,17 +308,23 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     }
     
     /* Use different ones depending on parallel or serial driver used. */
-    if (H5P_DEFAULT != fapl && H5FD_MPIO == driver){
+    if (H5P_DEFAULT != fapl && (H5FD_MPIO == driver || H5FD_FPHDF5 == driver)) {
 #ifdef H5_HAVE_PARALLEL
-	/* For parallel:
-	 * First use command line option, then the environment variable,
-	 * then try the constant
+	/*
+         * For parallel:
+         *      First use command line option, then the environment
+         *      variable, then try the constant
 	 */
+        static int explained = 0;
+
 	prefix = (paraprefix ? paraprefix : getenv("HDF5_PARAPREFIX"));
-	if (!prefix && !HDF5_PARAPREFIX_explained){
+
+	if (!prefix && !explained) {
 	    /* print hint by process 0 once. */
 	    int mpi_rank;
+
 	    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
 	    if (mpi_rank == 0)
 		printf("*** Hint ***\n"
 		   "You can use environment variable HDF5_PARAPREFIX to "
@@ -330,15 +333,17 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 		   "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
 		   "   export HDF5_PARAPREFIX\n"
 		   "*** End of Hint ***\n");
-	    HDF5_PARAPREFIX_explained++;
+
+	    explained = TRUE;
 #ifdef HDF5_PARAPREFIX
             prefix = HDF5_PARAPREFIX;
 #endif  /* HDF5_PARAPREFIX */
 	}
-#endif
-    }else{
-	/* For serial:
-	 * First use the environment variable, then try the constant
+#endif  /* H5_HAVE_PARALLEL */
+    } else {
+	/*
+         * For serial:
+         *      First use the environment variable, then try the constant
 	 */
 	prefix = HDgetenv("HDF5_PREFIX");
 
@@ -350,14 +355,16 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
     /* Prepend the prefix value to the base name */
     if (prefix && *prefix) {
-        if (H5P_DEFAULT != fapl && H5FD_MPIO == driver) {
+        if (H5P_DEFAULT != fapl && (H5FD_MPIO == driver || H5FD_FPHDF5 == driver)) {
             /* This is a parallel system */
             char *subdir;
 
             if (!HDstrcmp(prefix, HDF5_PARAPREFIX)) {
-                /* If the prefix specifies the HDF5_PARAPREFIX directory, then
+                /*
+                 * If the prefix specifies the HDF5_PARAPREFIX directory, then
                  * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
-                 * directory instead. */
+                 * directory instead.
+                 */
                 char *user, *login;
 
                 user = HDgetenv("USER");
@@ -370,7 +377,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
                     fullname[i++] = '/';
 
-                    for (j = 0; i < size && subdir[j]; i++, j++)
+                    for (j = 0; i < size && subdir[j]; ++i, ++j)
                         fullname[i] = subdir[j];
                 }
             }
@@ -380,17 +387,21 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
                 HDstrncpy(fullname, prefix, MIN(strlen(prefix), size));
 
             if (HDstrlen(fullname) + HDstrlen(base_name) + 1 < size) {
-                /* Append the base_name with a slash first. Multiple slashes are
-                 * handled below. */
+                /*
+                 * Append the base_name with a slash first. Multiple
+                 * slashes are handled below.
+                 */
                 h5_stat_t buf;
 
                 if (HDstat(fullname, &buf) < 0)
                     /* The directory doesn't exist just yet */
-                    if (HDmkdir(fullname, (mode_t)0755) < 0 && errno != EEXIST) {
-                        /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
-                         * Default to PREFIX's original prefix value. */
+                    if (HDmkdir(fullname, (mode_t)0755) < 0 && errno != EEXIST)
+                        /*
+                         * We couldn't make the "/tmp/${USER,LOGIN}"
+                         * subdirectory.  Default to PREFIX's original
+                         * prefix value.
+                         */
                         HDstrcpy(fullname, prefix);
-                    }
 
                 HDstrcat(fullname, "/");
                 HDstrcat(fullname, base_name);
