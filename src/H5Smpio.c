@@ -341,7 +341,7 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size, hbool_t UNUSED prefer
 *  Construct contig type for inner contig dims:
 *******************************************************/
 #ifdef H5Smpi_DEBUG
-    fprintf(stdout, "hyper_type: Making contig type %d MPI_BYTEs\n", elmt_size );
+    fprintf(stdout, "hyper_type: Making contig type %u MPI_BYTEs\n", (unsigned)elmt_size );
     for (i=new_rank-1; i>=0; --i) {
       HDfprintf(stdout, "d[%d].xtent=%Hu \n", i, d[i].xtent);
     }
