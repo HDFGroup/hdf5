@@ -64,6 +64,8 @@ int compare_size_t(const void *s1, const void *s2);
 
 herr_t test_select_hyper_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
 herr_t test_select_point_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
+herr_t test_select_all_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
+herr_t test_select_none_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
 
 /****************************************************************
 **
@@ -376,6 +378,38 @@ test_select_point(void)
 
 /****************************************************************
 **
+**  test_select_all_iter1(): Iterator for checking all iteration
+**  
+** 
+****************************************************************/
+herr_t 
+test_select_all_iter1(void *_elem,hid_t UNUSED type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void *_operator_data)
+{
+    uint8_t *tbuf=(uint8_t *)_elem,     /* temporary buffer pointer */
+            **tbuf2=(uint8_t **)_operator_data; /* temporary buffer handle */
+
+    if(*tbuf!=**tbuf2)
+        return(-1);
+    else {
+        (*tbuf2)++;
+        return(0);
+    }
+}   /* end test_select_all_iter1() */
+
+/****************************************************************
+**
+**  test_select_none_iter1(): Iterator for checking none iteration
+**      (This is never supposed to be called, so it always returns -1)
+** 
+****************************************************************/
+herr_t 
+test_select_none_iter1(void UNUSED *_elem,hid_t UNUSED type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void UNUSED *_operator_data)
+{
+    return(-1);
+}   /* end test_select_none_iter1() */
+
+/****************************************************************
+**
 **  test_select_all(): Test basic H5S (dataspace) selection code.
 **      Tests "all" selections.
 ** 
@@ -395,8 +429,7 @@ test_select_all(void)
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
-               *tbuf,       /* temporary buffer pointer */
-               *tbuf2;      /* temporary buffer pointer */
+               *tbuf;       /* temporary buffer pointer */
     intn        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
     H5S_class_t ext_type;   /* Extent type */
@@ -480,16 +513,16 @@ test_select_all(void)
     ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
     CHECK(ret, FAIL, "H5Dread");
 
-    /* Compare data read with data written out */
-    for(i=0; i<SPACE3_DIM1; i++) {
-        tbuf=wbuf+((i+15)*SPACE2_DIM2);
-        tbuf2=rbuf+(i*SPACE3_DIM2);
-        for(j=0; j<SPACE3_DIM2; j++, tbuf++, tbuf2++) {
-            if(*tbuf!=*tbuf2) {
-                printf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",__LINE__,i,j,(int)*tbuf,(int)*tbuf2);
-            } /* end if */
-        } /* end for */
-    } /* end for */
+    /* Check that the values match with a dataset iterator */
+    tbuf=wbuf+(15*SPACE2_DIM2);
+    ret = H5Diterate(rbuf,H5T_NATIVE_UCHAR,sid2,test_select_all_iter1,&tbuf);
+    CHECK(ret, FAIL, "H5Diterate");
+
+    /* A quick check to make certain that iterating through a "none" selection works */
+    ret = H5Sselect_none(sid2);
+    CHECK(ret, FAIL, "H5Sselect_all");
+    ret = H5Diterate(rbuf,H5T_NATIVE_UCHAR,sid2,test_select_none_iter1,&tbuf);
+    CHECK(ret, FAIL, "H5Diterate");
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -510,7 +543,7 @@ test_select_all(void)
     /* Free memory buffers */
     free(wbuf);
     free(rbuf);
-}   /* test_select_hyper() */
+}   /* test_select_all() */
 
 /****************************************************************
 **
