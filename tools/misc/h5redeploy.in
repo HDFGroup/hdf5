@@ -16,8 +16,9 @@ usage() {
   # A wonderfully informative "usage" message.
   echo "usage: $prog_name [OPTIONS]"
   echo "  OPTIONS:"
-  echo "    -help        This help message."
+  echo "    -help|help   This help message"
   echo "    -echo        Show all the shell commands executed"
+  echo "    -force       No prompt, just do it"
   echo "    -prefix=DIR  New directory to find HDF5 lib/ and include/"
   echo "                   subdirectories [default: current directory]"
   echo "    -tool=TOOL   Tool to update. TOOL must be in the current"
@@ -59,6 +60,7 @@ ERROR()
 #
 # Initialization
 h5tools=h5cc
+fmode=			# default off
 prefix=`(cd ..;pwd)`
 
 # Parse options
@@ -78,6 +80,9 @@ for arg in $@ ; do
       ;;
     -help|help)
       usage
+      ;;
+    -force)
+      fmode=yes
       ;;
     *)
       ERROR "Unknown Option($arg)"
@@ -103,12 +108,15 @@ done
 
 # Show actions to be taken and get consent
 show_action
-echo -n "Continue? (yes/no)"
-read ansx
-ans=`echo $ansx | tr "[A-Z]" "[a-z]"`
-if [ x-$ans != x-yes ]; then
-    echo ABORT.  No tools changed.
-    exit 1
+# Ask confirmation unless fmode is on
+if [ x-$fmode = x- ]; then
+    echo -n "Continue? (yes/no)"
+    read ansx
+    ans=`echo $ansx | tr "[A-Z]" "[a-z]"`
+    if [ x-$ans != x-yes ]; then
+	echo ABORT.  No tools changed.
+	exit 1
+    fi
 fi
 
 
