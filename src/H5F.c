@@ -64,8 +64,7 @@ static char             RcsId[] = "@(#)$Revision$";
 /*
  * Define the default file creation template.
  */
-const H5F_create_t      H5F_create_dflt =
-{
+const H5F_create_t      H5F_create_dflt = {
     0,                          /* Default user-block size */
     4,                          /* Default 1/2 rank for symtab leaf nodes */
     {                           /* Default 1/2 rank for btree intern nodes */
@@ -78,8 +77,8 @@ const H5F_create_t      H5F_create_dflt =
         0,                      /* unused                               */
         0,                      /* unused                               */
     },
-    4,                          /* Default offset size */
-    4,                          /* Default length size */
+    sizeof(size_t),             /* Default offset size */
+    sizeof(size_t),             /* Default length size */
     HDF5_BOOTBLOCK_VERSION,     /* Current Boot-Block version # */
     HDF5_SMALLOBJECT_VERSION,   /* Current Small-Object heap version # */
     HDF5_FREESPACE_VERSION,     /* Current Free-Space info version # */

@@ -86,7 +86,7 @@ H5P_simp_init (const struct H5O_layout_t *layout, const H5P_t *mem_space,
 size_t
 H5P_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 		size_t elmt_size, const H5P_t *file_space,
-		const H5P_number_t *numbering, intn start, intn nelmts,
+		const H5P_number_t *numbering, size_t start, size_t nelmts,
 		void *buf/*out*/)
 {
     size_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
@@ -185,7 +185,7 @@ H5P_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 herr_t
 H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
 		const H5P_t *mem_space, const H5P_number_t *numbering,
-		intn start, intn nelmts, void *buf/*out*/)
+		size_t start, size_t nelmts, void *buf/*out*/)
 {
     size_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
     size_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/
@@ -290,7 +290,7 @@ H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
 size_t
 H5P_simp_mgath (const void *buf, size_t elmt_size,
 		const H5P_t *mem_space, const H5P_number_t *numbering,
-		intn start, intn nelmts, void *tconv_buf/*out*/)
+		size_t start, size_t nelmts, void *tconv_buf/*out*/)
 {
     size_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
     size_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/
@@ -394,7 +394,7 @@ H5P_simp_mgath (const void *buf, size_t elmt_size,
 herr_t
 H5P_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 		size_t elmt_size, const H5P_t *file_space,
-		const H5P_number_t *numbering, intn start, intn nelmts,
+		const H5P_number_t *numbering, size_t start, size_t nelmts,
 		const void *buf)
 {
     size_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
