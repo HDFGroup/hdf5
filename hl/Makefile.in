@@ -12,6 +12,7 @@ top_srcdir=@top_srcdir@
 top_builddir=..
 srcdir=@srcdir@
 
+@COMMENCE@
 
 # Subdirectories in build-order
 SUBDIRS=src test 
