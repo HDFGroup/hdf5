@@ -128,6 +128,7 @@ typedef struct H5T_compnd_t {
     int		nalloc;		/*num entries allocated in MEMB array*/
     int		nmembs;		/*number of members defined in struct*/
     H5T_sort_t	sorted;		/*how are members sorted?	     */
+    hbool_t     packed;		/*are members packed together?       */
     struct H5T_cmemb_t	*memb;	/*array of struct members	     */
 } H5T_compnd_t;
 
@@ -194,7 +195,6 @@ struct H5T_t {
     H5T_class_t		type;	/*which class of type is this?		     */
     size_t		size;	/*total size of an instance of this type     */
     hbool_t		force_conv;/* Set if this type always needs to be converted and H5T_conv_noop cannot be called */
-    hbool_t             packed; /*whether a compound type is packed          */
     struct H5T_t	*parent;/*parent type for derived datatypes	     */
     union {
         H5T_atomic_t	atomic; /* an atomic datatype              */
@@ -873,4 +873,8 @@ H5_DLL htri_t H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc);
 /* Array functions */
 H5_DLL H5T_t * H5T_array_create(H5T_t *base, int ndims,
         const hsize_t dim[/* ndims */], const int perm[/* ndims */]);
+
+/* Compound functions */
+H5_DLL htri_t H5T_is_packed(H5T_t *dt);
+
 #endif

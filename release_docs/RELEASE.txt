@@ -74,6 +74,9 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Allow compound datatypes to grow in size.  SLU - 2003/09/10
+        - Detect if a type is already packed before attempting to pack it
+            again or check if it is locked.  SLU - 2003/09/10
         - Corrected bug when opening a file twice with read-only permission
             for one open and then closing the read-only access file ID would
             generate an error.  QAK - 2003/09/10
