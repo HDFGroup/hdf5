@@ -766,6 +766,7 @@
 ./c++/src/H5StrType.cpp
 ./c++/src/H5StrType.h
 ./c++/src/Makefile.in
+./c++/src/h5c++.in
 
 ./c++/test/Dependencies
 ./c++/test/Makefile.in
