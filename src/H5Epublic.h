@@ -79,7 +79,7 @@ typedef enum H5E_minor_t {
     H5E_OVERFLOW,		/*address overflowed			     */
 
     /* Function entry/exit interface errors */
-    H5E_CANTINIT,               /*Can't initialize interface                 */
+    H5E_CANTINIT,               /*Can't initialize                           */
     H5E_ALREADYINIT,            /*object already initialized                 */
 
     /* Object atom related errors */
@@ -114,17 +114,37 @@ typedef enum H5E_minor_t {
     H5E_LINK                    /*link count failure                         */
 } H5E_minor_t;
 
+/* Information about an error */
+typedef struct H5E_error_t {
+    H5E_major_t maj_num;		/*major error number		     */
+    H5E_minor_t min_num;		/*minor error number		     */
+    const char	*func_name;   		/*function in which error occurred   */
+    const char	*file_name;		/*file in which error occurred       */
+    unsigned	line;			/*line in file where error occurs    */
+    const char	*desc;			/*optional supplied description      */
+} H5E_error_t;
+
+/* Error stack traversal direction */
+typedef enum H5E_direction_t {
+    H5E_WALK_UPWARD	= 0,		/*begin deep, end at API function    */
+    H5E_WALK_DOWNWARD	= 1		/*begin at API function, end deep    */
+} H5E_direction_t;
+
+/* Error stack traversal callback function */
+typedef herr_t (*H5E_walk_t)(int n, H5E_error_t *err_desc, void *client_data);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-hid_t H5Ecreate (uintn initial_stack_nelmts);
-herr_t H5Eclose (hid_t estack_id);
-herr_t H5Epush (hid_t estack_id, H5E_major_t maj_num, H5E_minor_t min_num,
-                const char *function_name, const char *file_name, intn line,
-                const char *desc);
-herr_t H5Eclear (hid_t estack_id);
-herr_t H5Eprint (hid_t estack_id, FILE * file);
+herr_t H5Eset_auto (herr_t (*func)(void*client_data), void *client_data);
+herr_t H5Eget_auto (herr_t (**func)(void*client_data), void **client_data);
+herr_t H5Eclear (void);
+herr_t H5Eprint (FILE *stream);
+herr_t H5Ewalk (H5E_direction_t direction, H5E_walk_t func, void *client_data);
+herr_t H5Ewalk_cb (int n, H5E_error_t *err_desc, void *client_data);
+const char *H5Eget_major (H5E_major_t major_number);
+const char *H5Eget_minor (H5E_minor_t minor_number);
 
 #ifdef __cplusplus
 }

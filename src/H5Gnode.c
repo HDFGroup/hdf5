@@ -957,7 +957,7 @@ H5G_node_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
      * B-tree node.
      */
     if (NULL == (sn = H5AC_protect(f, H5AC_SNODE, addr, NULL, NULL))) {
-	H5ECLEAR;		/*discard that error */
+	H5E_clear(); /*discard that error */
 	status = H5B_debug(f, addr, stream, indent, fwidth, H5B_SNODE, NULL);
 	if (status < 0) {
 	    HRETURN_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL,

@@ -23,8 +23,7 @@
 /* Group values allowed */
 typedef enum {
     BADGROUP             = (-1),/*invalid Group                              */
-    H5_ERR               = 0,   /*group ID for Error stack objects           */
-    H5_FILE,                    /*group ID for File objects                  */
+    H5_FILE              = 0,   /*group ID for File objects                  */
     H5_TEMPLATE_0,              /*group ID for Template objects              */
     H5_TEMPLATE_1,              /*group ID for Template objects              */
     H5_TEMPLATE_2,              /*group ID for Template objects              */

@@ -421,10 +421,14 @@ extern char            *strdup(const char *s);
 extern hbool_t library_initialize_g;   /*good thing C's lazy about extern! */
 extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
 
-#define PRINT(N,S) {							      \
+/* Print S on file N followed by a newline */
+#define H5_PRINT(N,S) {							      \
        write ((N), (S), strlen((S)));					      \
        write ((N), "\n", 1);						      \
 }
+
+/* Is `S' the name of an API function? */
+#define H5_IS_API(S) ('_'!=S[2] && '_'!=S[3] && (!S[4] || '_'!=S[4]))
 
 #define FUNC_ENTER(func_name,err) FUNC_ENTER_INIT(func_name,INTERFACE_INIT,err)
 
@@ -463,10 +467,9 @@ extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
    }									      \
 									      \
    /* Clear thread error stack entering public functions */		      \
-   if (H5E_clearable_g && '_'!=FUNC[2] && '_'!=FUNC[3] &&	              \
-       (!FUNC[4] || '_'!=FUNC[4])) {			                      \
-       PRINT (55, #func_name);						      \
-       H5Eclear (H5E_thrdid_g);						      \
+   if (H5E_clearable_g && H5_IS_API (FUNC)) {		                      \
+       H5_PRINT (55, #func_name);					      \
+       H5E_clear ();							      \
    }									      \
    {
 

@@ -152,6 +152,13 @@ main(int argc, char *argv[])
     setbuf(stdout, NULL);
 #endif
 
+    /*
+     * Turn off automatic error reporting since we do it ourselves.  Besides,
+     * half the functions this test calls are private, so automatic error
+     * reporting wouldn't do much good since it's triggered at the API layer.
+     */
+    H5Eset_auto (NULL, NULL);
+
     /* Tests are generally arranged from least to most complexity... */
     InitTest("metadata", test_metadata, "Encode/decode metadata code");
     InitTest("file", test_file, "Low-Level File I/O");

@@ -710,7 +710,7 @@ H5G_mkroot(H5F_t *f, size_t size_hint)
 	 * but the old root object is no longer the root object.
 	 */
 	H5O_remove(f->shared->root_ent, H5O_NAME, H5O_ALL);
-	H5ECLEAR;		/*who really cares? */
+	H5E_clear();		/*who really cares? */
 
 	*(f->shared->root_ent) = new_root;
 
@@ -777,13 +777,13 @@ H5G_create(H5F_t *f, const char *name, size_t size_hint)
     if ((status = H5G_mkroot(f, H5G_SIZE_HINT)) < 0 && -2 != status) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create root group");
     }
-    H5ECLEAR;
+    H5E_clear();
 
     /* lookup name */
     if (0 == H5G_namei(f, NULL, name, &rest, &grp_ent, NULL)) {
 	HRETURN_ERROR(H5E_SYM, H5E_EXISTS, NULL, "already exists");
     }
-    H5ECLEAR;			/*it's OK that we didn't find it */
+    H5E_clear(); /*it's OK that we didn't find it */
     assert(H5F_addr_defined(&(grp_ent.header)));
 
     /* should be one null-terminated component left */
@@ -1155,7 +1155,7 @@ H5G_insert(const char *name, H5G_entry_t *ent)
     if (H5G_namei(ent->file, NULL, name, &rest, &grp, NULL) >= 0) {
 	HRETURN_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "already exists");
     }
-    H5ECLEAR;			/*it's OK that we didn't find it */
+    H5E_clear(); /*it's OK that we didn't find it */
     rest = H5G_component(rest, &nchars);
 
     if (!rest || !*rest) {
@@ -1217,7 +1217,7 @@ H5G_insert(const char *name, H5G_entry_t *ent)
     if ((status = H5G_mkroot(ent->file, H5G_SIZE_HINT)) < 0 && -2 != status) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create root group");
     }
-    H5ECLEAR;
+    H5E_clear();
     if (update_grp==TRUE)
 	grp = *(ent->file->shared->root_ent);
 

@@ -185,11 +185,6 @@ H5_init_thread(void)
 {
     FUNC_ENTER_INIT(H5_init_thread, NULL, FAIL);
 
-    /* Create/initialize this thread's error stack */
-    if ((H5E_thrdid_g = H5Ecreate(16)) == FAIL)
-        HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
-                      "unable to create thread error stack");
-
     /* Add the "thread termination" routine to the exit chain */
     if (H5_add_exit(&H5_term_thread) == FAIL)
         HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
@@ -218,9 +213,7 @@ H5_init_thread(void)
 --------------------------------------------------------------------------*/
 void
 H5_term_thread(void)
-{
-    H5Eclose(H5E_thrdid_g);
-}                               /* end H5_term_thread() */
+{/*void*/}
 
 /*--------------------------------------------------------------------------
 NAME

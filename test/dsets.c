@@ -11,10 +11,8 @@
 #include <hdf5.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
-
-#include <H5Eprivate.h>
-
 
 #ifndef HAVE_FUNCTION
 #undef __FUNCTION__
@@ -83,12 +81,16 @@ test_create(hid_t file)
         }
         goto error;
     }
+
     /*
      * Try creating a dataset that already exists.  This should fail since a
-     * dataset can only be created once.
+     * dataset can only be created once.  Temporarily turn off error
+     * reporting.
      */
+    H5Eset_auto (NULL, NULL);
     dataset = H5Dcreate(file, DSET_DEFAULT_NAME, H5T_NATIVE_DOUBLE, space,
                         H5P_DEFAULT);
+    H5Eset_auto ((herr_t(*)(void*))H5Eprint, stdout);
     if (dataset >= 0) {
         puts("*FAILED*");
         if (!isatty(1)) {
@@ -97,6 +99,7 @@ test_create(hid_t file)
         }
         goto error;
     }
+    
     /*
      * Open the dataset we created above and then close it.  This is how
      * existing datasets are accessed.
@@ -118,11 +121,15 @@ test_create(hid_t file)
         }
         goto error;
     }
+    
     /*
      * Try opening a non-existent dataset. This should fail since new datasets
-     * cannot be created with this function.
+     * cannot be created with this function.  Temporarily turn off error
+     * reporting.
      */
+    H5Eset_auto (NULL, NULL);
     dataset = H5Dopen(file, "does_not_exist");
+    H5Eset_auto ((herr_t(*)(void*))H5Eprint, stdout);
     if (dataset >= 0) {
         puts("*FAILED*");
         if (!isatty(1)) {
@@ -312,7 +319,6 @@ test_tconv(hid_t file)
     /* Write the data to the dataset */
     status = H5Dwrite(dataset, H5T_NATIVE_INT32, H5S_ALL, H5S_ALL,
                       H5P_DEFAULT, out);
-    if (status<0) H5Eprint (H5E_thrdid_g, stdout);
     assert(status >= 0);
 
     /* Create a new type with the opposite byte order */
@@ -373,6 +379,9 @@ main(void)
 
     status = H5open ();
     assert (status>=0);
+
+    /* Automatic error reporting to standard output */
+    H5Eset_auto ((herr_t(*)(void*))H5Eprint, stdout);
 
     unlink("dataset.h5");
     file = H5Fcreate("dataset.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

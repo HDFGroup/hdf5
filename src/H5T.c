@@ -289,7 +289,7 @@ H5T_term_interface(void)
 		fprintf (stderr, "HDF5-DIAG: conversion function failed "
 			 "to free private data\n");
 #endif
-		H5ECLEAR; /*ignore the error*/
+		H5E_clear(); /*ignore the error*/
 	    }
 	}
     }
@@ -2221,7 +2221,7 @@ H5Tregister_soft(H5T_class_t src_cls, H5T_class_t dst_cls, H5T_conv_t func)
 		    fprintf (stderr, "HDF5-DIAG: conversion function failed "
 			     "to free private data.\n");
 #endif
-		    H5ECLEAR;
+		    H5E_clear();
 		}
 	    }
 	    path->func = func;
@@ -2231,7 +2231,7 @@ H5Tregister_soft(H5T_class_t src_cls, H5T_class_t dst_cls, H5T_conv_t func)
 	/* Release temporary atoms */
 	H5A_dec_ref(src_id);
 	H5A_dec_ref(dst_id);
-	H5ECLEAR;
+	H5E_clear();
     }
 
     FUNC_LEAVE(SUCCEED);
@@ -2293,7 +2293,7 @@ H5Tunregister(H5T_conv_t func)
 		fprintf (stderr, "HDF5-DIAG: conversion function failed to "
 			 "free private data.\n");
 #endif
-		H5ECLEAR;
+		H5E_clear();
 	    }
 	    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
 
@@ -2324,7 +2324,7 @@ H5Tunregister(H5T_conv_t func)
 					 0, NULL, NULL) >= 0) {
 		    path->func = H5T_soft_g[j].func;
 		} else {
-		    H5ECLEAR;
+		    H5E_clear();
 		    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
 		}
 		H5A_dec_ref(src_id);
@@ -3157,7 +3157,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, hbool_t create,
 		fprintf (stderr, "HDF5-DIAG: conversion function init "
 			 "failed\n");
 #endif
-		H5ECLEAR; /*ignore the failure*/
+		H5E_clear(); /*ignore the failure*/
 	    }
 	    H5A_dec_ref(src_id);
 	    H5A_dec_ref(dst_id);
@@ -3179,7 +3179,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, hbool_t create,
 		if ((H5T_soft_g[i].func) (src_id, dst_id, &(path->cdata),
 					  H5T_CONV_INIT, NULL, NULL) < 0) {
 		    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
-		    H5ECLEAR; /*ignore the error*/
+		    H5E_clear(); /*ignore the error*/
 		} else {
 		    path->func = H5T_soft_g[i].func;
 		}

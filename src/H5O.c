@@ -755,7 +755,7 @@ H5O_read(H5G_entry_t *ent, const H5O_class_t *type, intn sequence, void *mesg)
 	retval = (H5O_fast_g[cache_type]) (cache, type, mesg);
 	if (retval)
 	    HRETURN(retval);
-	H5ECLEAR;		/*don't care, try reading from header */
+	H5E_clear(); /*don't care, try reading from header */
     }
 
     /* can we get it from the object header? */
@@ -1393,7 +1393,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 	    if ((idx = H5O_alloc_extend_chunk(oh, chunkno, size)) >= 0) {
 		break;
 	    }
-	    H5ECLEAR;
+	    H5E_clear();
 	}
 
 	/*

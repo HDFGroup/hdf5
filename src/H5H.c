@@ -310,7 +310,7 @@ H5H_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5H_t *heap)
 	    }
 	    heap->addr = new_addr;
 	    H5MF_free(f, &old_addr, heap->disk_alloc);
-	    H5ECLEAR;		/*don't really care if the free failed */
+	    H5E_clear(); /*don't really care if the free failed */
 	    heap->disk_alloc = heap->mem_alloc;
 	}
 
