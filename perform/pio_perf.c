@@ -257,7 +257,6 @@ static void output_results(const struct options *options, const char *name,
 static void output_report(const char *fmt, ...);
 static void print_indent(register int indent);
 static void usage(const char *prog);
-static int parse_environment(void);
 static void report_parameters(struct options *opts);
 
 /*
@@ -927,11 +926,28 @@ recover_size_and_print(long_long val, const char *end)
 }
 
 static void
+print_io_api(long io_types)
+{
+    if (io_types & PIO_POSIX)
+	HDfprintf(output, "posix ");
+    if (io_types & PIO_MPI)
+	HDfprintf(output, "mpiio ");
+    if (io_types & PIO_HDF5)
+	HDfprintf(output, "phdf5 ");
+    HDfprintf(output, "\n");
+}
+
+static void
 report_parameters(struct options *opts)
 {
     int rank;
 
     MPI_Comm_rank(pio_comm_g, &rank);
+
+    HDfprintf(output, "rank %d: ==== Parameters ====\n", rank);
+
+    HDfprintf(output, "rank %d: IO API=", rank);
+    print_io_api(opts->io_types);
 
     HDfprintf(output, "rank %d: File size=", rank);
     recover_size_and_print((long_long)opts->file_size, "\n");
@@ -942,23 +958,24 @@ report_parameters(struct options *opts)
               (long_long)opts->num_dsets);
     HDfprintf(output, "rank %d: Number of iterations=%Hd\n", rank,
               (long_long)opts->num_iters);
-    HDfprintf(output, "rank %d: Number of processes=%Hd:%Hd\n", rank,
-              (long_long)opts->min_num_procs,
-              (long_long)opts->max_num_procs);
+    HDfprintf(output, "rank %d: Number of processes=%d:%d\n", rank,
+              opts->min_num_procs, opts->max_num_procs);
 
     HDfprintf(output, "rank %d: Transfer buffer size=", rank);
     recover_size_and_print((long_long)opts->min_xfer_size, ":");
     recover_size_and_print((long_long)opts->max_xfer_size, "\n");
 
     {
-        char *prefix = getenv("H5_PARAPREFIX");
+        char *prefix = getenv("HDF5_PARAPREFIX");
 
-        HDfprintf(output, "rank %d: H5_PARAPREFIX Environment Var=%s\n", rank,
+        HDfprintf(output, "rank %d: Env HDF5_PARAPREFIX=%s\n", rank,
                   (prefix ? prefix : "not set"));
     }
 
     HDfprintf(output, "rank %d: ", rank);
     h5_dump_info_object(h5_io_info_g);
+
+    HDfprintf(output, "rank %d: ==== End of Parameters ====\n", rank);
     HDfprintf(output, "\n");
 }
 
@@ -980,7 +997,7 @@ parse_command_line(int argc, char *argv[])
 
     cl_opts->output_file = NULL;
     cl_opts->file_size = 64 * ONE_MB;
-    cl_opts->io_types = 0x7;    /* bottom bits indicate default type to run */
+    cl_opts->io_types =  0;    /* will set default after parsing options */
     cl_opts->num_dsets = 1;
     cl_opts->num_files = 1;
     cl_opts->num_iters = 1;
@@ -1144,6 +1161,11 @@ parse_command_line(int argc, char *argv[])
             free(cl_opts);
             return NULL;
         }
+    }
+
+    /* set default if none specified yet */
+    if (!cl_opts->io_types){
+	cl_opts->io_types = PIO_HDF5 | PIO_MPI | PIO_POSIX; /* run all API */
     }
 
     return cl_opts;
