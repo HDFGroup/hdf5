@@ -840,7 +840,11 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDumask(N)		umask(N)
 #define HDuname(S)		uname(S)
 #define HDungetc(C,F)		ungetc(C,F)
+#ifdef WIN32
+#define HDunlink(S)             _unlink(S)
+#else
 #define HDunlink(S)		unlink(S)
+#endif
 #define HDutime(S,T)		utime(S,T)
 #define HDva_arg(A,T)		va_arg(A,T)
 #define HDva_end(A)		va_end(A)
