@@ -51,7 +51,7 @@ extern int              Verbosity;
 	num_errs++;							      \
 	H5Eprint (stdout);						      \
     }									      \
-    H5Eclear();								      \
+    H5Eclear(H5E_DEFAULT);						      \
 } while(0)
 
 #define CHECK_I(ret,where) {						      \
@@ -65,7 +65,7 @@ extern int              Verbosity;
       H5Eprint (stdout);						      \
       num_errs++;							      \
    }									      \
-   H5Eclear ();								      \
+   H5Eclear(H5E_DEFAULT);						      \
 }
 
 #define CHECK_PTR(ret,where) {						      \
@@ -79,7 +79,7 @@ extern int              Verbosity;
       H5Eprint (stdout);						      \
       num_errs++;							      \
    }									      \
-   H5Eclear ();								      \
+   H5Eclear(H5E_DEFAULT);						      \
 }
 
 /* Used to make certain a return value _is_ a value */
@@ -94,7 +94,7 @@ extern int              Verbosity;
 	H5Eprint (stdout);						      \
 	num_errs++;							      \
     }									      \
-    H5Eclear();								      \
+    H5Eclear(H5E_DEFAULT);						      \
 } while(0)
 
 /* Used to document process through a test and to check for errors */
@@ -110,7 +110,7 @@ extern int              Verbosity;
 	H5Eprint (stdout);						      \
 	num_errs++;							      \
     }									      \
-    H5Eclear();								      \
+    H5Eclear(H5E_DEFAULT);						      \
 } while(0)
 
 /* Used to document process through a test */
