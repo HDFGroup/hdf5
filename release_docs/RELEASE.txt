@@ -275,15 +275,15 @@ Known Problems
       Makefile in the tools/h4toh4 and tools/h5toh4 directories to add 
       -DIA64 to the compilation flags.
 
-    * On IA32 ansd IA64 systems, if you use a compiler other than GCC 
-      (such as Intel's ecc compiler), you will need to modify the generated
-      "libtool" program after configuration is finished. On or around line 102 
-      of the libtool file, there are lines which look like:
+	* On IA32 and IA64 systems, if you use a compiler other than GCC (such as
+	  Intel's ecc or icc compilers), you will need to modify the generated
+	  "libtool" program after configuration is finished. On or around line 104
+	  of the libtool file, there are lines which look like:
 
           # How to pass a linker flag through the compiler.
           wl=""
 
-      change the lines to this:
+      change these lines to this:
 
           # How to pass a linker flag through the compiler.
           wl="-Wl,"
