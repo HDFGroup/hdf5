@@ -12,14 +12,17 @@
      INTEGER(HID_T) :: dset_id       ! Dataset identifier 
      INTEGER(HID_T) :: filespace     ! Dataspace identifier in file 
      INTEGER(HID_T) :: memspace      ! Dataspace identifier in memory
-     INTEGER(HID_T) :: plist_id      ! Property list identifier 
+     INTEGER(HID_T) :: plac_id      ! Property list identifier 
+     INTEGER(HID_T) :: plxfer_id      ! Property list identifier 
 
      INTEGER(HSIZE_T), DIMENSION(2) :: dimsf = (/DIM1,DIM2/) ! Dataset dimensions.
 
      INTEGER(HSIZE_T), DIMENSION(2) :: count  
      INTEGER(HSIZE_T), DIMENSION(2) :: offset 
      INTEGER, ALLOCATABLE :: data (:,:)  ! Data to write
+     INTEGER, ALLOCATABLE :: data_out (:,:)  ! Buffer to store data
      INTEGER :: rank = 2 ! Dataset rank 
+     INTEGER :: i, j
 
      INTEGER :: total_error, error  ! Error flags
      !
@@ -35,17 +38,17 @@
      ! 
      ! Setup file access property list with parallel I/O access.
      !
-     CALL h5pcreate_f(H5P_FILE_ACCESS_F, plist_id, error)
+     CALL h5pcreate_f(H5P_FILE_ACCESS_F, plac_id, error)
           CALL check("h5pcreate_f", error, total_error)
-     CALL h5pset_fapl_mpio_f(plist_id, comm, info, error)
+     CALL h5pset_fapl_mpio_f(plac_id, comm, info, error)
           CALL check("h5pset_fapl_mpio_f", error, total_error)
 
      !
      ! Create the file collectively.
      ! 
-     CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error, access_prp = plist_id)
+     CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error, access_prp = plac_id)
           CALL check("h5fcreate_f", error, total_error)
-     CALL h5pclose_f(plist_id, error)
+     CALL h5pclose_f(plac_id, error)
           CALL check("h5pclose_f", error, total_error)
      !
      ! Create the data space for the  dataset. 
@@ -86,16 +89,16 @@
      !
      ! Create property list for collective dataset write
      !
-     CALL h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error) 
+     CALL h5pcreate_f(H5P_DATASET_XFER_F, plxfer_id, error) 
           CALL check("h5pcreate_f", error, total_error)
-     CALL h5pset_dxpl_mpio_f(plist_id, H5FD_MPIO_COLLECTIVE_F, error)
+     CALL h5pset_dxpl_mpio_f(plxfer_id, H5FD_MPIO_COLLECTIVE_F, error)
           CALL check("h5pset_dxpl_mpio_f", error, total_error)
      
      !
      ! Write the dataset collectively. 
      !
      CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, error, &
-                     file_space_id = filespace, mem_space_id = memspace, xfer_prp = plist_id)
+                     file_space_id = filespace, mem_space_id = memspace, xfer_prp = plxfer_id)
           CALL check("h5dwrite_f", error, total_error)
      !
      ! Deallocate data buffer.
@@ -116,7 +119,7 @@
      CALL h5dclose_f(dset_id, error)
           CALL check("h5dclose_f", error, total_error)
 
-     CALL h5pclose_f(plist_id, error)
+     CALL h5pclose_f(plxfer_id, error)
           CALL check("h5pclose_f", error, total_error)
 
      !
@@ -127,13 +130,13 @@
      !
      ! Reopen the file with || access.
      !
-     CALL h5pcreate_f(H5P_FILE_ACCESS_F, plist_id, error)
+     CALL h5pcreate_f(H5P_FILE_ACCESS_F, plac_id, error)
           CALL check("h5pcreate_f", error, total_error)
-     CALL h5pset_fapl_mpio_f(plist_id, comm, info, error)
+     CALL h5pset_fapl_mpio_f(plac_id, comm, info, error)
           CALL check("h5pset_fapl_mpio_f", error, total_error)
-     CALL h5fopen_f(filename, H5F_ACC_RDWR_F, file_id, plist_id)
+     CALL h5fopen_f(filename, H5F_ACC_RDWR_F, file_id, error, plac_id)
           CALL check("h5fopen_f", error, total_error)
-     CALL h5pclose_f(plist_id, error)
+     CALL h5pclose_f(plac_id, error)
           CALL check("h5pclose_f", error, total_error)
      !
      ! Open dataset.
@@ -167,18 +170,26 @@
      !
      ! Create property list for collective dataset write
      !
-     CALL h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error) 
+     CALL h5pcreate_f(H5P_DATASET_XFER_F, plxfer_id, error) 
           CALL check("h5pcreate_f", error, total_error)
-     CALL h5pset_dxpl_mpio_f(plist_id, H5FD_MPIO_COLLECTIVE_F, error)
+     CALL h5pset_dxpl_mpio_f(plxfer_id, H5FD_MPIO_COLLECTIVE_F, error)
           CALL check("h5pset_dxpl_mpio_f", error, total_error)
      
      !
      ! Write the dataset collectively. 
      !
      CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, error, &
-                     file_space_id = filespace, mem_space_id = memspace, xfer_prp = plist_id)
+                     file_space_id = filespace, mem_space_id = memspace, xfer_prp = plxfer_id)
           CALL check("h5dread_f", error, total_error)
-     if( data .ne .data_out) total_error = total_error + 1
+     do j = 1, count(2)
+      do i = 1, count(1)
+        if( data(i,j) .ne. data_out(i,j)) then
+              total_error = total_error + 1
+              goto 100
+        endif
+      enddo 
+     enddo 
+ 100 continue
      !
      ! Deallocate data buffer.
      !
@@ -194,7 +205,7 @@
      !
      ! Close property list.
      !
-     CALL h5pclose_f(plist_id, error)
+     CALL h5pclose_f(plxfer_id, error)
           CALL check("h5pclose_f", error, total_error)
      !
      ! Close dataset.
