@@ -17,9 +17,11 @@
 #include "H5private.h"
 
 /* global variables */
-int      g_nTasks;
+int      g_nTasks = 1;
+unsigned char	 g_Parallel = 0;  /*0 for serial, 1 for parallel */
 char    outBuff[OUTBUFF_SIZE];
 unsigned int     outBuffOffset;
+
 
 /*-------------------------------------------------------------------------
  * Function: parallel_print
@@ -38,7 +40,7 @@ void parallel_print(const char* format, ...)
 
     va_start(ap, format);
 
-    if(g_nTasks < 2)
+    if(!g_Parallel)
 	vprintf(format, ap);
     else
 	outBuffOffset += HDvsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);

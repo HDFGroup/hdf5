@@ -82,14 +82,6 @@ hsize_t  h5diff(const char *fname1,
                 const char *objname2, 
                 diff_opt_t *options);
 
-hsize_t  h5diff_parallel(const char *fname1, 
-                const char *fname2, 
-                const char *objname1, 
-                const char *objname2, 
-                diff_opt_t *options);
-
-
-
 #ifdef __cplusplus
 }
 #endif
@@ -134,14 +126,6 @@ hsize_t diff_compare( hid_t file1_id,
                       diff_opt_t *options );
 
 hsize_t diff_match( hid_t file1_id, 
-                    int nobjects1, 
-                    trav_info_t *info1,
-                    hid_t file2_id, 
-                    int nobjects2, 
-                    trav_info_t *info2, 
-                    diff_opt_t *options );
-
-hsize_t diff_match_parallel( hid_t file1_id, 
                     int nobjects1, 
                     trav_info_t *info1,
                     hid_t file2_id, 

@@ -31,6 +31,7 @@
 #define MPI_TAG_PARALLEL	7
 
 extern int	g_nTasks;
+extern unsigned char g_Parallel;
 extern char    outBuff[OUTBUFF_SIZE];
 extern unsigned int	outBuffOffset;
 
@@ -41,14 +42,7 @@ struct diff_args
     diff_opt_t	options;
 };   
 
-/* temporary disabled. AKC 1/31/2005 */
-#if 0
 #ifdef H5_HAVE_PARALLEL
-#define H5_HAVE_PH5DIFF 1
-#endif 
-#endif
-
-#ifdef H5_HAVE_PH5DIFF
 #include <mpi.h>
 #endif
 

@@ -24,7 +24,7 @@ static int check_f_input( const char* );
 /*-------------------------------------------------------------------------
  * Function: main
  *
- * Purpose: ph5diff main program
+ * Purpose: h5diff/ph5diff main program
  *
  * Return: An  exit status of 0 means no differences were found, 1 means some 
  *   differences were found.
@@ -44,6 +44,10 @@ static int check_f_input( const char* );
  *
  * November 2004: Leon Arber (larber@uiuc.edu)
  * 		  Additions that allow h5diff to be run in parallel
+ *
+ * This function drives the diff process and will do a serial or parallel diff depending 
+ * on the value of the global variable g_Parallel (default is 0), set to 1 when the program
+ * is run as "ph5diff"
  *-------------------------------------------------------------------------
  */
 
@@ -56,27 +60,42 @@ int main(int argc, const char *argv[])
     const char *objname1  = NULL;
     const char *objname2  = NULL;
     hsize_t    nfound=0;
+    int	       nID = 0;
     int        ret;
     diff_opt_t options;
 
-#ifdef H5_HAVE_PH5DIFF
-    int	       nID;
+#ifdef H5_HAVE_PARALLEL
     MPI_Status Status;
+#endif
+
+    /* See what we were called as to determine whether to run serial or parallel version
+     *
+     * It has been determined that:
+     * If argv[0] is greater than 6 characters AND the last 7 equal "ph5diff" we run parallel
+     * In all other cases, we run serial */
+
+    if( (strlen(argv[0]) > strlen("h5diff")) && (strcmp(argv[0] + (strlen(argv[0]) - strlen("ph5diff")), "ph5diff") == 0) )
+	g_Parallel = 1;
 
 
-    /*-------------------------------------------------------------------------
-     * Initialize the MPI environment
-     *-------------------------------------------------------------------------
-     */
-    MPI_Init(&argc, (char***) &argv);
+    if(g_Parallel)
+    {
+#ifdef H5_HAVE_PARALLEL
+	MPI_Init(&argc, (char***) &argv);
 
-    MPI_Comm_rank(MPI_COMM_WORLD, &nID);
-    MPI_Comm_size(MPI_COMM_WORLD, &g_nTasks);
+	MPI_Comm_rank(MPI_COMM_WORLD, &nID);
+	MPI_Comm_size(MPI_COMM_WORLD, &g_nTasks);
+#else
+	printf("You cannot run ph5diff unless you compiles a parallel build of HDF5\n");
+	exit(2);
+#endif
+    }
+    else
+	g_nTasks = 1;
 
     /* Have the manager process the command-line */
     if(nID == 0)
     {
-#endif
 	memset(&options, 0, sizeof (diff_opt_t));
 
 	/*-------------------------------------------------------------------------
@@ -217,12 +236,9 @@ int main(int argc, const char *argv[])
 
 	}/*for*/
 
-	if(g_nTasks < 2)
-	    nfound = h5diff(fname1,fname2,objname1,objname2,&options);
-	else
-	    nfound = h5diff_parallel(fname1,fname2,objname1,objname2,&options);
+	nfound = h5diff(fname1,fname2,objname1,objname2,&options);
 
-#ifdef H5_HAVE_PH5DIFF
+#ifdef H5_HAVE_PARALLEL
 	if(g_nTasks > 1)
 	    MPI_Barrier(MPI_COMM_WORLD);
 #endif
@@ -252,26 +268,27 @@ int main(int argc, const char *argv[])
 	 *-------------------------------------------------------------------------
 	 */
 
-#ifdef H5_HAVE_PH5DIFF
-	MPI_Finalize();
+#ifdef H5_HAVE_PARALLEL
+	if(g_Parallel)
+	    MPI_Finalize();
 #endif
-	
+
 	ret= (nfound==0 ? 0 : 1 );
 	if (options.err_stat)
 	    ret=-1;
 	return ret;
-#ifdef H5_HAVE_PH5DIFF
     }
+#ifdef H5_HAVE_PARALLEL
     /* All the other tasks just sit around and wait to be assigned something to diff */
     else
     {	
 	struct diff_args args;
 	hid_t file1_id, file2_id;	
-	char	filenames[2][255];
+	char	filenames[2][1024];
 
 	outBuffOffset = 0;
-	
-	MPI_Recv(filenames, 255*2, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+
+	MPI_Recv(filenames, 1024*2, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
 	if(Status.MPI_TAG == MPI_TAG_PARALLEL)
 	{
 	    printf("We're in parallel mode...opening the files\n");
