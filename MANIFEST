@@ -248,6 +248,8 @@
 ./src/H5FDcore.h
 ./src/H5FDfamily.c
 ./src/H5FDfamily.h
+./src/H5FDgass.c
+./src/H5FDgass.h
 ./src/H5FDmpio.c
 ./src/H5FDmpio.h
 ./src/H5FDmulti.c
@@ -348,6 +350,9 @@
 ./test/fillval.c
 ./test/flush1.c
 ./test/flush2.c
+./test/gass_append.c
+./test/gass_read.c
+./test/gass_write.c
 ./test/gheap.c
 ./test/h5test.c
 ./test/h5test.h
