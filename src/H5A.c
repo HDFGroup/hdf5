@@ -251,7 +251,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     attr->dt_size=(H5O_DTYPE[0].raw_size)(attr->ent.file,type);
     attr->ds_size=(H5O_SDSPACE[0].raw_size)(attr->ent.file,
 					    &(space->extent.u.simple));
-    attr->data_size=H5S_extent_npoints(space)*H5T_get_size(type);
+    attr->data_size=H5S_get_simple_extent_npoints(space)*H5T_get_size(type);
 
     /* Hold the symbol table entry (and file) open */
     if (H5O_open(&(attr->ent)) < 0) {
@@ -630,7 +630,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf)
     assert(buf);
 
     /* Create buffer for data to store on disk */
-    nelmts=H5S_extent_npoints (attr->ds);
+    nelmts=H5S_get_simple_extent_npoints (attr->ds);
 
     /* Get the memory and file datatype sizes */
     src_type_size = H5T_get_size(mem_type);
@@ -800,7 +800,7 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
     assert(buf);
 
     /* Create buffer for data to store on disk */
-    nelmts=H5S_extent_npoints (attr->ds);
+    nelmts=H5S_get_simple_extent_npoints (attr->ds);
 
     /* Get the memory and file datatype sizes */
     src_type_size = H5T_get_size(attr->dt);

@@ -176,8 +176,8 @@ cklinks(void)
     }
 
     /* Hard link */
-    if (H5Gget_stat(file, "d1", TRUE, &sb1)<0) goto error;
-    if (H5Gget_stat(file, "grp1/hard", TRUE, &sb2)<0) goto error;
+    if (H5Gget_objinfo(file, "d1", TRUE, &sb1)<0) goto error;
+    if (H5Gget_objinfo(file, "grp1/hard", TRUE, &sb2)<0) goto error;
     if (H5G_DATASET!=sb2.type) {
 	puts("*FAILED*");
 	puts("   Unexpected object type should have been a dataset");
@@ -191,7 +191,7 @@ cklinks(void)
     }
 
     /* Symbolic link */
-    if (H5Gget_stat(file, "grp1/soft", TRUE, &sb2)<0) goto error;
+    if (H5Gget_objinfo(file, "grp1/soft", TRUE, &sb2)<0) goto error;
     if (H5G_DATASET!=sb2.type) {
 	puts("*FAILED*");
 	puts("   Unexpected object type should have been a dataset");
@@ -214,14 +214,14 @@ cklinks(void)
 
     /* Dangling link */
     H5E_BEGIN_TRY {
-	status = H5Gget_stat(file, "grp1/dangle", TRUE, &sb2);
+	status = H5Gget_objinfo(file, "grp1/dangle", TRUE, &sb2);
     } H5E_END_TRY;
     if (status>=0) {
 	puts("*FAILED*");
-	puts("   H5Gget_stat() should have failed for a dangling link.");
+	puts("   H5Gget_objinfo() should have failed for a dangling link.");
 	goto error;
     }
-    if (H5Gget_stat(file, "grp1/dangle", FALSE, &sb2)<0) goto error;
+    if (H5Gget_objinfo(file, "grp1/dangle", FALSE, &sb2)<0) goto error;
     if (H5G_LINK!=sb2.type) {
 	puts("*FAILED*");
 	puts("   Unexpected object type should have been a symbolic link");
@@ -238,14 +238,14 @@ cklinks(void)
 
     /* Recursive link */
     H5E_BEGIN_TRY {
-	status = H5Gget_stat(file, "grp1/recursive", TRUE, &sb2);
+	status = H5Gget_objinfo(file, "grp1/recursive", TRUE, &sb2);
     } H5E_END_TRY;
     if (status>=0) {
 	puts("*FAILED*");
-	puts("   H5Gget_stat() should have failed for a recursive link.");
+	puts("   H5Gget_objinfo() should have failed for a recursive link.");
 	goto error;
     }
-    if (H5Gget_stat(file, "grp1/recursive", FALSE, &sb2)<0) goto error;
+    if (H5Gget_objinfo(file, "grp1/recursive", FALSE, &sb2)<0) goto error;
     if (H5G_LINK!=sb2.type) {
 	puts("*FAILED*");
 	puts("   Unexpected object type should have been a symbolic link");

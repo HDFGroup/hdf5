@@ -655,7 +655,7 @@ H5R_write(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 
     /* Get the meta data */
     if (NULL==(mf_space=H5D_get_space(ra->meta)) ||
-	H5S_extent_dims(mf_space, &meta_cur_size, NULL)<0) {
+	H5S_get_simple_extent_dims(mf_space, &meta_cur_size, NULL)<0) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 		    "unable to get current meta data extents");
     }
@@ -685,7 +685,7 @@ H5R_write(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 
     /* Write the part of the data that will fit in the raw dataset */
     if (NULL==(rf_space=H5D_get_space(ra->raw)) ||
-	H5S_extent_dims(rf_space, raw_cur_size, NULL)<0) {
+	H5S_get_simple_extent_dims(rf_space, raw_cur_size, NULL)<0) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 		    "unable to determine current raw data extents");
     }
@@ -823,7 +823,7 @@ H5R_fix_overflow(H5R_t *ra, H5T_t *type, H5R_meta_t *meta, hsize_t nelmts,
 	 * region to the end of the file and be careful to reclaim space.
 	 */
 	if (NULL==(of_space=H5D_get_space(ra->over)) ||
-	    H5S_extent_dims(of_space, &cur_size, NULL)<0) {
+	    H5S_get_simple_extent_dims(of_space, &cur_size, NULL)<0) {
 	    HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 			"unable to get overflow dataset extents");
 	}
@@ -840,7 +840,7 @@ H5R_fix_overflow(H5R_t *ra, H5T_t *type, H5R_meta_t *meta, hsize_t nelmts,
 	/* No space is allocated */
 	assert(nelmts>0);
 	if (NULL==(of_space=H5D_get_space(ra->over)) ||
-	    H5S_extent_dims(of_space, &cur_size, NULL)<0) {
+	    H5S_get_simple_extent_dims(of_space, &cur_size, NULL)<0) {
 	    HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 			"unable to get overflow dataset extents");
 	}
@@ -1021,7 +1021,7 @@ H5R_read(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
     
     /* Read from the raw dataset */
     if (NULL==(rf_space=H5D_get_space(ra->raw)) ||
-	H5S_extent_dims(rf_space, raw_cur_size, NULL)<0) {
+	H5S_get_simple_extent_dims(rf_space, raw_cur_size, NULL)<0) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 		    "unable to determine current raw data extents");
     }
@@ -1059,7 +1059,7 @@ H5R_read(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 		    "memory allocation failed for meta data");
     }
     if (NULL==(mf_space=H5D_get_space(ra->meta)) ||
-	H5S_extent_dims(mf_space, &meta_cur_size, NULL)<0) {
+	H5S_get_simple_extent_dims(mf_space, &meta_cur_size, NULL)<0) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 		    "unable to get current meta data extents");
     }

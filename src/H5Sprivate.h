@@ -204,10 +204,6 @@ typedef struct H5S_mconv_t {
     herr_t (*init)(const struct H5O_layout_t *layout, const H5S_t *space,
 		   H5S_sel_iter_t *iter);
 
-    /* Initialize background element numbering information */
-    herr_t (*binit)(const struct H5O_layout_t *layout, const H5S_t *space,
-		    H5S_sel_iter_t *iter);
-
     /* Gather elements from app buffer to type conversion buffer */
     size_t (*gath)(const void *buf, size_t elmt_size,
 		   const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
@@ -274,10 +270,10 @@ H5S_t *H5S_create (H5S_class_t type);
 H5S_t *H5S_copy (const H5S_t *src);
 herr_t H5S_close_simple (H5S_simple_t *simple);
 herr_t H5S_close (H5S_t *ds);
-hsize_t H5S_extent_npoints (const H5S_t *ds);
+hsize_t H5S_get_simple_extent_npoints (const H5S_t *ds);
 hsize_t H5S_get_npoints_max(const H5S_t *ds);
-intn H5S_extent_ndims (const H5S_t *ds);
-intn H5S_extent_dims (const H5S_t *ds, hsize_t dims[]/*out*/,
+intn H5S_get_simple_extent_ndims (const H5S_t *ds);
+intn H5S_get_simple_extent_dims (const H5S_t *ds, hsize_t dims[]/*out*/,
 		   hsize_t max_dims[]/*out*/);
 herr_t H5S_modify (H5G_entry_t *ent, const H5S_t *space);
 H5S_t *H5S_read (H5G_entry_t *ent);
@@ -298,7 +294,7 @@ herr_t H5S_select_copy (H5S_t *dst, const H5S_t *src);
 herr_t H5S_extent_release (H5S_t *space);
 herr_t H5S_select_release (H5S_t *space);
 herr_t H5S_sel_iter_release (const H5S_t *space,H5S_sel_iter_t *sel_iter);
-hsize_t H5S_select_npoints (const H5S_t *space);
+hsize_t H5S_get_select_npoints (const H5S_t *space);
 intn H5S_extend (H5S_t *space, const hsize_t *size);
 herr_t H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
 			      const hsize_t *max);

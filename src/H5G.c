@@ -631,7 +631,7 @@ H5Gunlink(hid_t __unused__ loc_id, const char __unused__ *name)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gget_stat
+ * Function:	H5Gget_objinfo
  *
  * Purpose:	Returns information about an object.  If FOLLOW_LINK is
  *		non-zero then all symbolic links are followed; otherwise all
@@ -650,12 +650,12 @@ H5Gunlink(hid_t __unused__ loc_id, const char __unused__ *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gget_stat(hid_t loc_id, const char *name, hbool_t follow_link,
+H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link,
 	 H5G_stat_t *statbuf/*out*/)
 {
     H5G_entry_t	*loc = NULL;
     
-    FUNC_ENTER (H5Gget_stat, FAIL);
+    FUNC_ENTER (H5Gget_objinfo, FAIL);
     H5TRACE4("e","isbx",loc_id,name,follow_link,statbuf);
 
     /* Check arguments */
@@ -667,7 +667,7 @@ H5Gget_stat(hid_t loc_id, const char *name, hbool_t follow_link,
     }
 
     /* Get info */
-    if (H5G_stat (loc, name, follow_link, statbuf)<0) {
+    if (H5G_get_objinfo (loc, name, follow_link, statbuf)<0) {
 	HRETURN_ERROR (H5E_ARGS, H5E_CANTINIT, FAIL, "cannot stat object");
     }
 
@@ -2022,7 +2022,7 @@ H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_stat
+ * Function:	H5G_get_objinfo
  *
  * Purpose:	Returns information about an object.
  *
@@ -2039,7 +2039,7 @@ H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_stat (H5G_entry_t *loc, const char *name, hbool_t follow_link,
+H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	  H5G_stat_t *statbuf/*out*/)
 {
     H5O_stab_t		stab_mesg;
@@ -2049,7 +2049,7 @@ H5G_stat (H5G_entry_t *loc, const char *name, hbool_t follow_link,
     H5G_t		*temp_grp = NULL;
     H5T_t		*temp_type = NULL;
     
-    FUNC_ENTER (H5G_stat, FAIL);
+    FUNC_ENTER (H5G_get_objinfo, FAIL);
 
     assert (loc);
     assert (name && *name);

@@ -99,29 +99,30 @@ typedef struct H5G_t H5G_t;
  * Library prototypes...  These are the ones that other packages routinely
  * call.
  */
-H5G_t *H5G_loc (hid_t loc_id);
+H5G_entry_t *H5G_loc (hid_t loc_id);
 herr_t H5G_mkroot (H5F_t *f, H5G_entry_t *root_entry);
 H5G_entry_t *H5G_entof (H5G_t *grp);
 H5F_t *H5G_fileof (H5G_t *grp);
-H5G_t *H5G_create (H5G_t *loc, const char *name, size_t size_hint);
-H5G_t *H5G_open (H5G_t *loc, const char *name);
+H5G_t *H5G_create (H5G_entry_t *loc, const char *name, size_t size_hint);
+H5G_t *H5G_open (H5G_entry_t *loc, const char *name);
 H5G_t *H5G_reopen (H5G_t *grp);
 herr_t H5G_close (H5G_t *grp);
 herr_t H5G_set (H5G_t *grp);
 herr_t H5G_push (H5G_t *grp);
 herr_t H5G_pop (H5F_t *f);
 H5G_t *H5G_getcwg(H5F_t *f);
-herr_t H5G_link (H5G_t *loc, H5G_link_t type, const char *cur_name,
+herr_t H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
 		 const char *new_name);
-herr_t H5G_stat (H5G_t *loc, const char *name, hbool_t follow_link,
+herr_t H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 		 H5G_stat_t *statbuf/*out*/);
-herr_t H5G_linkval (H5G_t *loc, const char *name, size_t size,
+herr_t H5G_linkval (H5G_entry_t *loc, const char *name, size_t size,
 		    char *buf/*out*/);
-herr_t H5G_set_comment(H5G_t *loc, const char *name, const char *buf);
-intn H5G_get_comment(H5G_t *loc, const char *name, size_t bufsize, char *buf);
-herr_t H5G_insert (H5G_t *cwg, const char *name, H5G_entry_t *ent);
-herr_t H5G_find (H5G_t *cwg, const char *name, H5G_entry_t *grp_ent/*out*/,
-                 H5G_entry_t *ent/*out*/);
+herr_t H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf);
+intn H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize,
+		     char *buf);
+herr_t H5G_insert (H5G_entry_t *loc, const char *name, H5G_entry_t *ent);
+herr_t H5G_find (H5G_entry_t *loc, const char *name,
+		 H5G_entry_t *grp_ent/*out*/, H5G_entry_t *ent/*out*/);
 herr_t H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
 			   H5G_entry_t *obj_ent/*in,out*/,
 			   intn *nlinks/*in,out*/);
@@ -144,4 +145,3 @@ herr_t H5G_ent_modified (H5G_entry_t *ent, H5G_type_t cache_type);
 herr_t H5G_ent_debug (H5F_t *f, const H5G_entry_t *ent, FILE * stream,
 		      intn indent, intn fwidth, const haddr_t *heap);
 #endif
-

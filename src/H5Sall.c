@@ -55,7 +55,6 @@ const H5S_mconv_t	H5S_ALL_MCONV[1] = {{
     "all", 					/*name			*/
     H5S_SEL_ALL,				/*selection type	*/
     H5S_all_init,				/*initialize		*/
-    H5S_all_init, 				/*initialize background	*/
     H5S_all_mgath,				/*gather		*/
     H5S_all_mscat, 				/*scatter		*/
 }};
@@ -86,7 +85,7 @@ H5S_all_init (const struct H5O_layout_t __unused__ *layout,
     assert (sel_iter);
 
     /* Initialize the number of elements to iterate over */
-    sel_iter->all.elmt_left=H5S_extent_npoints(space);
+    sel_iter->all.elmt_left=H5S_get_simple_extent_npoints(space);
 
     /* Start at the upper left location */
     sel_iter->all.offset=0;
@@ -130,7 +129,7 @@ H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *sel_iter, size_t max)
      * be split up.  We choose the largest possible strip mine size which is
      * not larger than the desired size.
      */
-    m_ndims = H5S_extent_dims (space, size, NULL);
+    m_ndims = H5S_get_simple_extent_dims (space, size, NULL);
     for (i=m_ndims-1, acc=1; i>0; --i)
         acc *= size[i];
     nelmts = (max/acc) * acc;
@@ -199,7 +198,7 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
      * currently pass sample information into H5F_arr_read() much less
      * H5F_istore_read().
      */
-    if ((space_ndims=H5S_extent_dims (file_space, hsize, NULL))<0) {
+    if ((space_ndims=H5S_get_simple_extent_dims (file_space, hsize, NULL))<0) {
         HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve hyperslab parameters");
     }
@@ -285,7 +284,7 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     /*
      * Get information to determine what elements are being selected.
      */
-    if ((space_ndims=H5S_extent_dims (file_space, hsize, NULL))<0) {
+    if ((space_ndims=H5S_get_simple_extent_dims (file_space, hsize, NULL))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve hyperslab parameters");
     }
@@ -370,14 +369,14 @@ H5S_all_mgath (const void *_buf, size_t elmt_size,
     /*
      * Retrieve information to determine what elements are being selected.
      */
-    if ((space_ndims=H5S_extent_dims (mem_space, hsize, NULL))<0) {
+    if ((space_ndims=H5S_get_simple_extent_dims (mem_space, hsize, NULL))<0) {
         HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve hyperslab parameters");
     }
     if(space_ndims>0) {
         HDmemset(mem_offset,0,sizeof(hssize_t)*space_ndims);
 
-        if (H5S_extent_dims (mem_space, mem_size, NULL)<0) {
+        if (H5S_get_simple_extent_dims (mem_space, mem_size, NULL)<0) {
             HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
                    "unable to retrieve data space dimensions");
         }
@@ -460,7 +459,7 @@ H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
     /*
      * Retrieve information to determine what elements are being selected.
      */
-    if ((space_ndims=H5S_extent_dims (mem_space, hsize, NULL))<0) {
+    if ((space_ndims=H5S_get_simple_extent_dims (mem_space, hsize, NULL))<0) {
         HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve hyperslab parameters");
     }
@@ -468,7 +467,7 @@ H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
     if(space_ndims>0) {
         HDmemset(mem_offset,0,sizeof(hssize_t)*space_ndims);
 
-        if (H5S_extent_dims (mem_space, mem_size, NULL)<0) {
+        if (H5S_get_simple_extent_dims (mem_space, mem_size, NULL)<0) {
             HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
                    "unable to retrieve data space dimensions");
         }

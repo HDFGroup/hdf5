@@ -182,24 +182,24 @@ H5S_select_release (H5S_t *space)
     assert (space);
 
     switch(space->select.type) {
-    case H5S_SEL_POINTS:         /* Sequence of points selected */
-	ret_value=H5S_point_release(space);
-	break;
+        case H5S_SEL_POINTS:         /* Sequence of points selected */
+            ret_value=H5S_point_release(space);
+            break;
 
-    case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
-	ret_value=H5S_hyper_release(space);
-	break;
+        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+            ret_value=H5S_hyper_release(space);
+            break;
 
-    case H5S_SEL_ALL:            /* Entire extent selected */
-	ret_value=H5S_all_release(space);
-	break;
+        case H5S_SEL_ALL:            /* Entire extent selected */
+            ret_value=H5S_all_release(space);
+            break;
 
-    case H5S_SEL_NONE:           /* Nothing selected */
-	break;
+        case H5S_SEL_NONE:           /* Nothing selected */
+            break;
 
-    case H5S_SEL_ERROR:
-    case H5S_SEL_N:
-	break;
+        case H5S_SEL_ERROR:
+        case H5S_SEL_N:
+            break;
     }
 
     /* Reset type of selection to "all" */
@@ -375,10 +375,10 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
                 "can't allocate per-dimension vector");
     } /* end if */
     for(i=0; i<space->extent.u.simple.rank; i++) {
-	diminfo[i].start = start[i];
-	diminfo[i].stride = stride[i];
-	diminfo[i].count = count[i];
-	diminfo[i].block = block[i];
+        diminfo[i].start = start[i];
+        diminfo[i].stride = stride[i];
+        diminfo[i].count = count[i];
+        diminfo[i].block = block[i];
     } /* end for */
     space->select.sel_info.hyper.diminfo = diminfo;
 
@@ -386,22 +386,13 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     printf("%s: check 2.0\n",FUNC);
 #endif /* QAK */
     /* Allocate space for the hyperslab selection information if necessary */
-    if(space->select.type!=H5S_SEL_HYPERSLABS ||
-       space->select.sel_info.hyper.hyper_lst==NULL) {
-        if((space->select.sel_info.hyper.hyper_lst =
-	    H5MM_calloc(sizeof(H5S_hyper_list_t)))==NULL)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			"can't allocate hyperslab information");
-        if((space->select.sel_info.hyper.hyper_lst->lo_bounds =
-	    H5MM_calloc(space->extent.u.simple.rank*
-			sizeof(H5S_hyper_bound_t *)))==NULL)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			"can't allocate hyperslab lo bound information");
-        if((space->select.sel_info.hyper.hyper_lst->hi_bounds =
-	    H5MM_calloc(space->extent.u.simple.rank*
-			sizeof(H5S_hyper_bound_t *)))==NULL)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			"can't allocate hyperslab lo bound information");
+    if(space->select.type!=H5S_SEL_HYPERSLABS || space->select.sel_info.hyper.hyper_lst==NULL) {
+        if((space->select.sel_info.hyper.hyper_lst = H5MM_calloc(sizeof(H5S_hyper_list_t)))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab information");
+        if((space->select.sel_info.hyper.hyper_lst->lo_bounds = H5MM_calloc(space->extent.u.simple.rank* sizeof(H5S_hyper_bound_t *)))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab lo bound information");
+        if((space->select.sel_info.hyper.hyper_lst->hi_bounds = H5MM_calloc(space->extent.u.simple.rank* sizeof(H5S_hyper_bound_t *)))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab lo bound information");
     } /* end if */
 
     /* Generate list of blocks to add/remove based on selection operation */
@@ -671,14 +662,14 @@ H5Sget_select_npoints(hid_t spaceid)
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
     }
 
-    ret_value = H5S_select_npoints(space);
+    ret_value = H5S_get_select_npoints(space);
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_select_npoints() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_select_npoints
+    H5S_get_select_npoints
  PURPOSE
     Get the number of elements in current selection
  USAGE
@@ -694,11 +685,11 @@ H5Sget_select_npoints(hid_t spaceid)
  REVISION LOG
 --------------------------------------------------------------------------*/
 hsize_t
-H5S_select_npoints (const H5S_t *space)
+H5S_get_select_npoints (const H5S_t *space)
 {
     herr_t ret_value=FAIL;  /* return value */
 
-    FUNC_ENTER (H5S_select_npoints, FAIL);
+    FUNC_ENTER (H5S_get_select_npoints, FAIL);
 
     assert(space);
 
@@ -725,7 +716,7 @@ H5S_select_npoints (const H5S_t *space)
     }
 
     FUNC_LEAVE (ret_value);
-}   /* H5S_select_npoints() */
+}   /* H5S_get_select_npoints() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -756,22 +747,22 @@ H5S_sel_iter_release (const H5S_t *space, H5S_sel_iter_t *sel_iter)
     assert (sel_iter);
 
     switch(space->select.type) {
-    case H5S_SEL_POINTS:         /* Sequence of points selected */
-    case H5S_SEL_ALL:            /* Entire extent selected */
-	/* no action needed */
-	ret_value=SUCCEED;
-	break;
+        case H5S_SEL_POINTS:         /* Sequence of points selected */
+        case H5S_SEL_ALL:            /* Entire extent selected */
+            /* no action needed */
+            ret_value=SUCCEED;
+            break;
 
-    case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
-	ret_value=H5S_hyper_sel_iter_release(sel_iter);
-	break;
+        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+            ret_value=H5S_hyper_sel_iter_release(sel_iter);
+            break;
 
-    case H5S_SEL_NONE:           /* Nothing selected */
-	break;
+        case H5S_SEL_NONE:           /* Nothing selected */
+            break;
 
-    case H5S_SEL_ERROR:
-    case H5S_SEL_N:
-	break;
+        case H5S_SEL_ERROR:
+        case H5S_SEL_N:
+            break;
     }
 
     FUNC_LEAVE (ret_value);

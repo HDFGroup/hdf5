@@ -68,7 +68,7 @@ herr_t H5Gmove (hid_t loc_id, const char *src, const char *dst);
 herr_t H5Glink (hid_t loc_id, H5G_link_t type, const char *cur_name,
 		const char *new_name);
 herr_t H5Gunlink (hid_t loc_id, const char *name);
-herr_t H5Gget_stat (hid_t loc_id, const char *name, hbool_t follow_link,
+herr_t H5Gget_objinfo (hid_t loc_id, const char *name, hbool_t follow_link,
 		H5G_stat_t *statbuf/*out*/);
 herr_t H5Gget_linkval (hid_t loc_id, const char *name, size_t size,
 		       char *buf/*out*/);

@@ -676,7 +676,7 @@ H5S_copy(const H5S_t *src)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_extent_npoints
+ * Function:	H5S_get_simple_extent_npoints
  *
  * Purpose:	Determines how many data points a dataset extent has.
  *
@@ -693,12 +693,12 @@ H5S_copy(const H5S_t *src)
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5S_extent_npoints(const H5S_t *ds)
+H5S_get_simple_extent_npoints(const H5S_t *ds)
 {
     hsize_t		    ret_value = 0;
     intn		    i;
 
-    FUNC_ENTER(H5S_extent_npoints, 0);
+    FUNC_ENTER(H5S_get_simple_extent_npoints, 0);
 
     /* check args */
     assert(ds);
@@ -758,7 +758,7 @@ H5Sget_simple_extent_npoints(hid_t space_id)
     if (H5_DATASPACE != H5I_group(space_id) || NULL == (ds = H5I_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
     }
-    ret_value = H5S_extent_npoints(ds);
+    ret_value = H5S_get_simple_extent_npoints(ds);
 
     FUNC_LEAVE(ret_value);
 }
@@ -861,13 +861,13 @@ H5Sget_simple_extent_ndims(hid_t space_id)
 	NULL == (ds = H5I_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
-    ret_value = H5S_extent_ndims(ds);
+    ret_value = H5S_get_simple_extent_ndims(ds);
 
     FUNC_LEAVE(ret_value);
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_extent_ndims
+ * Function:	H5S_get_simple_extent_ndims
  *
  * Purpose:	Returns the number of dimensions in a data space.
  *
@@ -884,11 +884,11 @@ H5Sget_simple_extent_ndims(hid_t space_id)
  *-------------------------------------------------------------------------
  */
 intn
-H5S_extent_ndims(const H5S_t *ds)
+H5S_get_simple_extent_ndims(const H5S_t *ds)
 {
     intn		    ret_value = FAIL;
 
-    FUNC_ENTER(H5S_extent_ndims, FAIL);
+    FUNC_ENTER(H5S_get_simple_extent_ndims, FAIL);
 
     /* check args */
     assert(ds);
@@ -952,13 +952,13 @@ H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
 	NULL == (ds = H5I_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
     }
-    ret_value = H5S_extent_dims(ds, dims, maxdims);
+    ret_value = H5S_get_simple_extent_dims(ds, dims, maxdims);
 
     FUNC_LEAVE(ret_value);
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_extent_dims
+ * Function:	H5S_get_simple_extent_dims
  *
  * Purpose:	Returns the size in each dimension of a data space.  This
  *		function may not be meaningful for all types of data spaces.
@@ -975,12 +975,12 @@ H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
  *-------------------------------------------------------------------------
  */
 intn
-H5S_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
+H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
 {
     intn	ret_value = FAIL;
     intn	i;
 
-    FUNC_ENTER(H5S_extent_dims, FAIL);
+    FUNC_ENTER(H5S_get_simple_extent_dims, FAIL);
 
     /* check args */
     assert(ds);
@@ -1460,7 +1460,7 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
      * We can't do conversion if the source and destination select a
      * different number of data points.
      */
-    if (H5S_select_npoints (mem_space) != H5S_select_npoints (file_space)) {
+    if (H5S_get_select_npoints (mem_space) != H5S_get_select_npoints (file_space)) {
         HRETURN_ERROR (H5E_DATASPACE, H5E_BADRANGE, NULL,
 		       "memory and file data spaces are different sizes");
     }

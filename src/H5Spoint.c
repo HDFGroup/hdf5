@@ -58,7 +58,6 @@ const H5S_mconv_t	H5S_POINT_MCONV[1] = {{
     "point",				/*name				*/
     H5S_SEL_POINTS,			/*selection type		*/
     H5S_point_init,			/*initialize			*/
-    H5S_point_init,			/*initialize background		*/
     H5S_point_mgath,			/*gather			*/
     H5S_point_mscat,			/*scatter			*/
 }};
@@ -514,7 +513,7 @@ H5S_point_mgath (const void *_buf, size_t elmt_size,
 #ifdef QAK
     printf("%s: check 1.0\n",FUNC);
 #endif /* QAK */
-    if ((space_ndims=H5S_extent_dims (mem_space, mem_size, NULL))<0) {
+    if ((space_ndims=H5S_get_simple_extent_dims (mem_space, mem_size, NULL))<0) {
         HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve data space dimensions");
     }
@@ -598,7 +597,7 @@ H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
      * only handle hyperslabs with unit sample because there's currently no
      * way to pass sample information to H5V_hyper_copy().
      */
-    if ((space_ndims=H5S_extent_dims (mem_space, mem_size, NULL))<0) {
+    if ((space_ndims=H5S_get_simple_extent_dims (mem_space, mem_size, NULL))<0) {
         HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve data space dimensions");
     }

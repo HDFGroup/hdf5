@@ -23,7 +23,7 @@
 /*
  * These are the bits that can be passed to the `flags' argument of
  * H5Fcreate() and H5Fopen(). Use the bit-wise OR operator (|) to combine
- * them as needed.  As a side effect, they call H5vers_check() to make sure
+ * them as needed.  As a side effect, they call H5check_version() to make sure
  * that the application is compiled with a version of the hdf5 header files
  * which are compatible with the library to which the application is linked.
  * We're assuming that these constants are used rather early in the hdf5

@@ -120,21 +120,21 @@ main(void)
 
     /*
      * Open the file and get the modification time. We'll test the new
-     * H5Gget_stat() arguments too: being able to stat something without knowing
+     * H5Gget_objinfo() arguments too: being able to stat something without knowing
      * its name.
      */
     if ((file = H5Fopen(FILE_NAME_1, H5F_ACC_RDONLY, H5P_DEFAULT))<0) return 1;
-    if (H5Gget_stat(file, "dset", TRUE, &sb1)<0) return 1;
+    if (H5Gget_objinfo(file, "dset", TRUE, &sb1)<0) return 1;
     if ((dset=H5Dopen(file, "dset"))<0) return 1;
-    if (H5Gget_stat(dset, ".", TRUE, &sb2)<0) return 1;
+    if (H5Gget_objinfo(dset, ".", TRUE, &sb2)<0) return 1;
     if (H5Dclose(dset)<0) return 1;
     if (H5Fclose(file)<0) return 1;
 
-    /* Compare times from the two ways of calling H5Gget_stat() */
+    /* Compare times from the two ways of calling H5Gget_objinfo() */
     if (sb1.objno[0]!=sb2.objno[0] || sb1.objno[1]!=sb2.objno[1] ||
 	sb1.mtime!=sb2.mtime) {
 	puts("*FAILED*");
-	puts("   Calling H5Gget_stat() with the dataset ID returned different");
+	puts("   Calling H5Gget_objinfo() with the dataset ID returned different");
 	puts("   values than calling it with a file and dataset name.");
 	return 1;
     }

@@ -858,7 +858,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 
     /* Total raw data size */
     new_dset->layout.type = new_dset->create_parms->layout;
-    new_dset->layout.ndims = H5S_extent_ndims(space) + 1;
+    new_dset->layout.ndims = H5S_get_simple_extent_ndims(space) + 1;
     assert((unsigned)(new_dset->layout.ndims) <= NELMTS(new_dset->layout.dim));
     new_dset->layout.dim[new_dset->layout.ndims-1] = H5T_get_size(type);
 
@@ -869,7 +869,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 	 * Also, only the slowest varying dimension of a simple data space
 	 * can be extendible.
 	 */
-	if ((ndims=H5S_extent_dims(space, new_dset->layout.dim, max_dim))<0) {
+	if ((ndims=H5S_get_simple_extent_dims(space, new_dset->layout.dim, max_dim))<0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 			"unable to initialize contiguous storage");
 	}
@@ -906,7 +906,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 	 * Chunked storage allows any type of data space extension, so we
 	 * don't even bother checking.
 	 */
-	if (new_dset->create_parms->chunk_ndims != H5S_extent_ndims(space)) {
+	if (new_dset->create_parms->chunk_ndims != H5S_get_simple_extent_ndims(space)) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL,
 		   "dimensionality of chunks doesn't match the data space");
 	}
@@ -1319,7 +1319,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         file_space = free_this_space;
     }
     if (!mem_space) mem_space = file_space;
-    nelmts = H5S_select_npoints(mem_space);
+    nelmts = H5S_get_select_npoints(mem_space);
 
 #ifdef HAVE_PARALLEL
     /*
@@ -1346,7 +1346,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * enough value in xfer_parms since turning off data type conversion also
      * turns off background preservation.
      */
-    if (nelmts!=H5S_select_npoints (file_space)) {
+    if (nelmts!=H5S_get_select_npoints (file_space)) {
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		     "src and dest data spaces have different sizes");
     }
@@ -1426,7 +1426,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "unable to initialize memory selection information");
     } 
-    if ((sconv->m->binit)(&(dataset->layout), mem_space, &bkg_iter)<0) {
+    if ((sconv->m->init)(&(dataset->layout), mem_space, &bkg_iter)<0) {
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "unable to initialize background selection information");
     } 
@@ -1669,7 +1669,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	file_space = free_this_space;
     }
     if (!mem_space) mem_space = file_space;
-    nelmts = H5S_select_npoints(mem_space);
+    nelmts = H5S_get_select_npoints(mem_space);
 
 #ifdef HAVE_PARALLEL
     /*
@@ -1699,7 +1699,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef QAK
     printf("%s: check 0.5, nelmts=%d, mem_space->rank=%d\n",FUNC,(int)nelmts,mem_space->extent.u.simple.rank);
 #endif /* QAK */
-    if (nelmts!=H5S_select_npoints (file_space)) {
+    if (nelmts!=H5S_get_select_npoints (file_space)) {
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		     "src and dest data spaces have different sizes");
     }
@@ -1778,7 +1778,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "unable to initialize memory selection information");
     } 
-    if ((sconv->m->binit)(&(dataset->layout), mem_space, &bkg_iter)<0) {
+    if ((sconv->f->init)(&(dataset->layout), file_space, &bkg_iter)<0) {
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "unable to initialize memory selection information");
     }
@@ -1940,7 +1940,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* Release selection iterators */
     H5S_sel_iter_release(file_space,&file_iter);
     H5S_sel_iter_release(mem_space,&mem_iter);
-    H5S_sel_iter_release(mem_space,&bkg_iter);
+    H5S_sel_iter_release(file_space,&bkg_iter);
 
     if (src_id >= 0) H5I_dec_ref(src_id);
     if (dst_id >= 0) H5I_dec_ref(dst_id);
@@ -2130,7 +2130,7 @@ H5D_allocate (H5D_t *dataset)
 			 "unable to read data space info from dataset header");
 	}
 	/* get current dims of dataset */
-	if ((space_ndims=H5S_extent_dims(space, space_dim, NULL)) <= 0 ||
+	if ((space_ndims=H5S_get_simple_extent_dims(space, space_dim, NULL)) <= 0 ||
 	    space_ndims+1 != layout->ndims){
 	    HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 			"unable to allocate chunk storage");

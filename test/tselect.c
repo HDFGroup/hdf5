@@ -491,6 +491,7 @@ test_select_combo(void)
                *tbuf2;      /* temporary buffer pointer */
     intn        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
+hbool_t	    valid;		/* Generic boolean return value		*/
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Combination of Hyperslab & Element Selection Functions\n"));
@@ -1153,21 +1154,21 @@ test_select_hyper_offset(void)
     ret = H5Soffset_simple(sid1,offset);
     CHECK(ret, FAIL, "H5Soffset_simple");
     valid = H5Sselect_valid(sid1);
-    VERIFY(valid, TRUE, "H5Svalid_offset");
+    VERIFY(valid, TRUE, "H5Sselect_valid");
 
     /* Check an invalid offset */
     offset[0]=10; offset[1]=0; offset[2]=0;
     ret = H5Soffset_simple(sid1,offset);
     CHECK(ret, FAIL, "H5Soffset_simple");
     valid = H5Sselect_valid(sid1);
-    VERIFY(valid, FALSE, "H5Svalid_offset");
+    VERIFY(valid, FALSE, "H5Sselect_valid");
 
     /* Reset offset */
     offset[0]=0; offset[1]=0; offset[2]=0;
     ret = H5Soffset_simple(sid1,offset);
     CHECK(ret, FAIL, "H5Soffset_simple");
     valid = H5Sselect_valid(sid1);
-    VERIFY(valid, TRUE, "H5Svalid_offset");
+    VERIFY(valid, TRUE, "H5Sselect_valid");
 
     /* Select 15x26 hyperslab for memory dataset */
     start[0]=15; start[1]=0;
@@ -1182,7 +1183,7 @@ test_select_hyper_offset(void)
     ret = H5Soffset_simple(sid2,offset);
     CHECK(ret, FAIL, "H5Soffset_simple");
     valid = H5Sselect_valid(sid2);
-    VERIFY(valid, TRUE, "H5Svalid_offset");
+    VERIFY(valid, TRUE, "H5Sselect_valid");
 
     /* Create a dataset */
     dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
@@ -1314,21 +1315,21 @@ test_select_point_offset(void)
     ret = H5Soffset_simple(sid1,offset);
     CHECK(ret, FAIL, "H5Soffset_simple");
     valid = H5Sselect_valid(sid1);
-    VERIFY(valid, TRUE, "H5Svalid_offset");
+    VERIFY(valid, TRUE, "H5Sselect_valid");
 
     /* Check an invalid offset */
     offset[0]=10; offset[1]=0; offset[2]=0;
     ret = H5Soffset_simple(sid1,offset);
     CHECK(ret, FAIL, "H5Soffset_simple");
     valid = H5Sselect_valid(sid1);
-    VERIFY(valid, FALSE, "H5Svalid_offset");
+    VERIFY(valid, FALSE, "H5Sselect_valid");
 
     /* Reset offset */
     offset[0]=0; offset[1]=0; offset[2]=0;
     ret = H5Soffset_simple(sid1,offset);
     CHECK(ret, FAIL, "H5Soffset_simple");
     valid = H5Sselect_valid(sid1);
-    VERIFY(valid, TRUE, "H5Svalid_offset");
+    VERIFY(valid, TRUE, "H5Sselect_valid");
 
     /* Select sequence of ten points for write dataset */
     coord2[0][0]=12; coord2[0][1]= 3;
@@ -1349,7 +1350,7 @@ test_select_point_offset(void)
     ret = H5Soffset_simple(sid2,offset);
     CHECK(ret, FAIL, "H5Soffset_simple");
     valid = H5Sselect_valid(sid2);
-    VERIFY(valid, TRUE, "H5Svalid_offset");
+    VERIFY(valid, TRUE, "H5Sselect_valid");
 
     /* Create a dataset */
     dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);

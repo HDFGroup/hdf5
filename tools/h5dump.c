@@ -386,7 +386,7 @@ dump_all (hid_t group, const char *name, void __unused__ *op_data)
     H5Eset_auto (NULL, NULL);
 
 
-    H5Gget_stat(group, name, FALSE, &statbuf);
+    H5Gget_objinfo(group, name, FALSE, &statbuf);
 
     switch (statbuf.type) {
     case H5G_LINK:

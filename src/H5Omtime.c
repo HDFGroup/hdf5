@@ -136,8 +136,8 @@ H5O_mtime_decode(H5F_t __unused__ *f, const uint8 *p,
      * The catch-all.  If we can't convert a character string universal
      * coordinated time to a time_t value reliably then we can't decode the
      * modification time message. This really isn't as bad as it sounds --
-     * the only way a user can get the modification time is from H5Gget_stat()
-     * and H5G_stat() can gracefully recover.
+     * the only way a user can get the modification time is from H5Gget_objinfo()
+     * and H5G_get_objinfo() can gracefully recover.
      */
 
     /* Irix64 */

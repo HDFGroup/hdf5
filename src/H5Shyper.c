@@ -87,7 +87,6 @@ const H5S_mconv_t	H5S_HYPER_MCONV[1] = {{
     "hslab",					/*name			*/
     H5S_SEL_HYPERSLABS,				/*selection type	*/
     H5S_hyper_init, 				/*initialize		*/
-    H5S_hyper_init,				/*initialize background	*/
     H5S_hyper_mgath,				/*gather		*/
     H5S_hyper_mscat,				/*scatter		*/
 }};
@@ -122,8 +121,7 @@ H5S_hyper_init (const struct H5O_layout_t __unused__ *layout,
     sel_iter->hyp.elmt_left=space->select.num_elem;
 
     /* Allocate the position & initialize to invalid location */
-    sel_iter->hyp.pos = H5MM_malloc(space->extent.u.simple.rank *
-				    sizeof(hssize_t));
+    sel_iter->hyp.pos = H5MM_malloc(space->extent.u.simple.rank * sizeof(hssize_t));
     sel_iter->hyp.pos[0]=(-1);
     H5V_array_fill(sel_iter->hyp.pos, sel_iter->hyp.pos, sizeof(hssize_t),
 		   space->extent.u.simple.rank);
@@ -1722,15 +1720,16 @@ H5S_hyper_release (H5S_t *space)
     space->select.num_elem=0;
 
     /* Release the per-dimension selection info */
-    H5MM_xfree(space->select.sel_info.hyper.diminfo);
+    if(space->select.sel_info.hyper.diminfo!=NULL)
+        H5MM_xfree(space->select.sel_info.hyper.diminfo);
     space->select.sel_info.hyper.diminfo = NULL;
 
     /* Release hi and lo boundary information */
     for(i=0; i<space->extent.u.simple.rank; i++) {
         H5MM_xfree(space->select.sel_info.hyper.hyper_lst->lo_bounds[i]);
-	space->select.sel_info.hyper.hyper_lst->lo_bounds[i] = NULL;
+        space->select.sel_info.hyper.hyper_lst->lo_bounds[i] = NULL;
         H5MM_xfree(space->select.sel_info.hyper.hyper_lst->hi_bounds[i]);
-	space->select.sel_info.hyper.hyper_lst->hi_bounds[i] = NULL;
+        space->select.sel_info.hyper.hyper_lst->hi_bounds[i] = NULL;
     } /* end for */
     H5MM_xfree(space->select.sel_info.hyper.hyper_lst->lo_bounds);
     space->select.sel_info.hyper.hyper_lst->lo_bounds = NULL;

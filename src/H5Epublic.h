@@ -25,7 +25,7 @@
 /*
  * One often needs to temporarily disable automatic error reporting when
  * trying something that's likely or expected to fail.  For instance, to
- * determine if an object exists one can call H5Gget_stat() which will fail if
+ * determine if an object exists one can call H5Gget_objinfo() which will fail if
  * the object doesn't exist.  The code to try can be nested between calls to
  * H5Eget_auto() and H5Eset_auto(), but it's easier just to use this macro
  * like:
