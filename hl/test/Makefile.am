@@ -20,7 +20,7 @@ LDADD=$(LIBH5_HL) $(LIBHDF5)
 
 # Test programs.  These are our main targets.  They should be listed in the
 # order to be executed, generally most specific tests to least specific tests.
-TEST_PROG=test_lite test_image test_table
+TEST_PROG=test_lite test_image test_table test_ds
 check_PROGRAMS=$(TEST_PROG)
 
 include $(top_srcdir)/config/conclude.am

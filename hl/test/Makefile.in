@@ -196,7 +196,7 @@ LDADD = $(LIBH5_HL) $(LIBHDF5)
 
 # Test programs.  These are our main targets.  They should be listed in the
 # order to be executed, generally most specific tests to least specific tests.
-TEST_PROG = test_lite test_image test_table
+TEST_PROG = test_lite test_image test_table test_ds
 check_PROGRAMS = $(TEST_PROG)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
@@ -216,7 +216,13 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 check_PROGRAMS = test_lite$(EXEEXT) test_image$(EXEEXT) \
-	test_table$(EXEEXT)
+	test_table$(EXEEXT) test_ds$(EXEEXT)
+test_ds_SOURCES = test_ds.c
+test_ds_OBJECTS = test_ds.$(OBJEXT)
+test_ds_LDADD = $(LDADD)
+test_ds_DEPENDENCIES = $(top_builddir)/hl/src/libhdf5_hl.la \
+	$(top_builddir)/src/libhdf5.la
+test_ds_LDFLAGS =
 test_image_SOURCES = test_image.c
 test_image_OBJECTS = test_image.$(OBJEXT)
 test_image_LDADD = $(LDADD)
@@ -242,7 +248,7 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
-@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/test_image.Po \
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/test_ds.Po ./$(DEPDIR)/test_image.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/test_lite.Po ./$(DEPDIR)/test_table.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -252,9 +258,9 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CFLAGS = @CFLAGS@
-DIST_SOURCES = test_image.c test_lite.c test_table.c
+DIST_SOURCES = test_ds.c test_image.c test_lite.c test_table.c
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = test_image.c test_lite.c test_table.c
+SOURCES = test_ds.c test_image.c test_lite.c test_table.c
 
 all: all-am
 
@@ -272,6 +278,9 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+test_ds$(EXEEXT): $(test_ds_OBJECTS) $(test_ds_DEPENDENCIES) 
+	@rm -f test_ds$(EXEEXT)
+	$(LINK) $(test_ds_LDFLAGS) $(test_ds_OBJECTS) $(test_ds_LDADD) $(LIBS)
 test_image$(EXEEXT): $(test_image_OBJECTS) $(test_image_DEPENDENCIES) 
 	@rm -f test_image$(EXEEXT)
 	$(LINK) $(test_image_LDFLAGS) $(test_image_OBJECTS) $(test_image_LDADD) $(LIBS)
@@ -288,6 +297,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_ds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_lite.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_table.Po@am__quote@
