@@ -1056,6 +1056,64 @@ display_vlen_type(hid_t type, int ind)
     return TRUE;
 }
 
+/*---------------------------------------------------------------------------
+ * Purpose:     Print information about an array type
+ *
+ * Return:      Success:        TRUE
+ *
+ *              Failure:        FALSE
+ *
+ * Programmer:  Robb Matzke
+ *              Thursday, January 31, 2002
+ *
+ * Modifications:
+ *---------------------------------------------------------------------------
+ */
+static hbool_t
+display_array_type(hid_t type, int ind)
+{
+    hid_t       super;
+    int         ndims, i, *perm=NULL, identity;
+    hsize_t     *dims=NULL;
+
+    if (H5T_ARRAY!=H5Tget_class(type)) return FALSE;
+    ndims = H5Tget_array_ndims(type);
+    if (ndims) {
+        dims = malloc(ndims*sizeof(dims[0]));
+        perm = malloc(ndims*sizeof(perm[0]));
+        H5Tget_array_dims(type, dims, perm);
+
+        /* Print dimensions */
+        for (i=0; i<ndims; i++)
+            HDfprintf(stdout, "%s%Hu" , i?",":"[", dims[i]);
+        putchar(']');
+
+        /* Print permutation vector if not identity */
+        for (i=0, identity=TRUE; identity && i<ndims; i++) {
+            if (i!=perm[i]) identity = FALSE;
+        }
+        if (!identity) {
+            fputs(" perm=[", stdout);
+            for (i=0; i<ndims; i++)
+                HDfprintf(stdout, "%s%d", i?",":"", perm[i]);
+            putchar(']');
+        }
+
+        free(dims);
+        free(perm);
+    } else {
+        fputs(" [SCALAR]", stdout);
+    }
+    
+
+    /* Print parent type */
+    putchar(' ');
+    super = H5Tget_super(type);
+    display_type(super, ind+4);
+    H5Tclose(super);
+    return TRUE;
+}
+            
 
 /*-------------------------------------------------------------------------
  * Function:	display_type
@@ -1110,6 +1168,7 @@ display_type(hid_t type, int ind)
 	display_string_type(type, ind) ||
 	display_reference_type(type, ind) ||
         display_vlen_type(type, ind) ||
+        display_array_type(type, ind) ||
 	display_opaque_type(type, ind)) {
 	return;
     }
