@@ -103,23 +103,54 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;root_group&gt; ::= GROUP "/" { &lt;unamed_datatype&gt;* &lt;group_attribute&gt;* &lt;group_member&gt;* }  
 
-&lt;unamed_datatype&gt ::= DATATYPE "&lt;unamed_type_name&gt;" { &lt;compound_type_def&gt;+ }
+&lt;unamed_datatype&gt ::= DATATYPE "&lt;unamed_type_name&gt;" { &lt;compound_type&gt; }
 
 &lt;unamed_type_name&gt; ::= the assigned name for unamed type is in the form of 
                       #oid1:oid2, where oid1 and oid2 are the object ids of the type
 
-&lt;compound_type_def&gt; ::=  &lt;named_scalar_type&gt; | &lt;named_array_type&gt;
+&lt;compound_type&gt; ::= &lt;member_type_def&gt;+ 
 
-&lt;named_scalar_type&gt; ::= &lt;scalar_type&gt; &lt;field_name&gt; ;
+&lt;member_type_def&gt; ::= &lt;scalar_type_def&gt; | &lt;array_type_def&gt;
 
-&lt;scalar_type&gt; ::= H5T_STD_I8BE | H5T_STD_I8LE | ...
+&lt;scalar_type_def&gt; ::= &lt;atomic_type&gt; "&lt;field_name&gt;" ;
+
+&lt;atomic_type&gt; ::= &lt;integer&gt; | &lt;float&gt; | &lt;time&gt; | &lt;string&gt; | &lt;bitfield&gt; | &lt;opaque&gt;
+
+&lt;integer&gt; ::= H5T_STD_I8LE | H5T_STD_I16BE | H5T_STD_I16LE | H5T_STD_I32BE |
+              H5T_STD_I32LE | H5T_STD_I64BE | H5T_STD_I64LE |  H5T_STD_U8BE |
+              H5T_STD_U8LE | H5T_STD_U16BE | H5T_STD_U16LE | H5T_STD_U32BE |
+              H5T_STD_U32LE | H5T_STD_U64BE | H5T_STD_U64LE | H5T_NATIVE_CHAR |
+              H5T_NATIVE_UCHAR | H5T_NATIVE_SHORT | H5T_NATIVE_USHORT | 
+              H5T_NATIVE_INT | H5T_NATIVE_UINT | H5T_NATIVE_LONG | H5T_NATIVE_ULONG |
+              H5T_NATIVE_LLONG | H5T_NATIVE_ULLONG
+
+&lt;float&gt; ::= H5T_IEEE_F32BE | H5T_IEEE_F32LE | H5T_IEEE_F64BE |  H5T_IEEE_F64LE |
+            H5T_NATIVE_FLOAT |  H5T_NATIVE_DOUBLE | H5T_NATIVE_LDOUBLE
+
+&lt;time&gt; ::= TBD
+
+&lt;string&gt; ::= { STRSIZE &lt;strsize&gt; ;
+               STRPAD &lt;strpad&gt; ;
+               CSET &lt;cset&gt; ;
+               CTYPE &lt;ctype&gt; ; }  
+
+&lt;strsize&gt; ::= an integer
+
+&lt;strpad&gt; ::= H5T_STR_NULLTERM | H5T_STR_NULLPAD | H5T_STR_SPACEPAD
+
+&lt;cset&gt; ::= H5T_CSET_ASCII
+
+&lt;ctype&gt; ::= H5T_C_S1 | H5T_FORTRAN_S1
+
+&lt;bitfield&gt; ::= TBD
+
+&lt;opaque&gt; ::= TBD
 
 &lt;field_name&gt; ::= &lt;identifier&gt;
 
-&lt;named_array_type&gt; ::= &lt;scalar_type&gt; &lt;field_name&gt; &lt;dim_sizes&gt; ;
+&lt;array_type_def&gt; ::= &lt;atomic_type&gt; "&lt;field_name&gt;" &lt;dim_sizes&gt; ;
 
-&lt;dim_sizes&gt; ::= dimension sizes in the form of [dimsize1][dimzise2]..., 
-                where dimsize1, dimsize2 are integers
+&lt;dim_sizes&gt; ::= [dimsize1][dimzise2]..., where dimsize1, dimsize2 are integers
 
 &lt;group_attribute&gt; ::= &lt;attribute&gt; 
 
@@ -128,47 +159,67 @@ This section contains a brief explanation of the symbols used in the DDL.
                                           &lt;data&gt;<FONT SIZE=1.7>opt</FONT>  } 
 // &lt;datatype&gt; and &lt;dataspace&gt; must appear before &lt;data&gt;.
 
-&lt;attr_name&gt; ::=  &lt;identifier&gt;
+&lt;attr_name&gt; ::= &lt;identifier&gt
 
-&lt;datatype&gt; ::= DATATYPE { &lt;named_type&gt; } |        
-               DATATYPE { "&lt;scalar_type&gt;" }  |         
-               DATATYPE { &lt;compound_type_def&gt;+ }
+&lt;datatype&gt; ::= DATATYPE { &lt;atomic_type&gt; }  |         
+               DATATYPE { &lt;compound_type&gt; }
+               DATATYPE { &lt;named_type&gt; } 
 
-&lt;named_type&gt; ::= &lt;hardlink&gt;
+&lt;named_type&gt; ::= "&lt;path_name&gt;"
 
-&lt;hardlink&gt; ::= HARDLINK { "&lt;abs_name&gt;" }  
+&lt;path_name&gt; ::= &lt;identifier&gt
 
-&lt;abs_name&gt; ::= object absolute name
+&lt;dataspace&gt; ::= DATASPACE { SCALAR } |
+                DATASPACE { SIMPLE &lt;current_dims&gt; / &lt;max_dims&gt; } | 
+                DATASPACE { COMPLEX &lt;ds_definition&gt;+ } 
+                DATASPACE { "&lt;dataspace_name&gt;" } |
 
-&lt;dataspace&gt; ::= DATASPACE { "&lt;dataspace_name&gt;" } |
-                DATASPACE { ARRAY &lt;current_dims&gt; &lt;max_dims&gt; } | 
-                DATASPACE { OTHER &lt;ds_definition&gt;+ } 
-
-&lt;dataspace_name&gt; ::= &lt;identifier&gt;
-
-&lt;current_dims&gt; ::= a list of integers in the form of (<i>i<FONT SIZE=1.0>1</i></FONT>, <i>i<FONT SIZE=1.0>2</i></FONT>, ... ),
-                   where <i>i<FONT SIZE=1.0>k</i></FONT> is an integer, <i>k</i> = 1,2,...
+&lt;current_dims&gt; ::= (<i>i<FONT SIZE=1.0>1</i></FONT>, <i>i<FONT SIZE=1.0>2</i></FONT>, ... ), where <i>i<FONT SIZE=1.0>k</i></FONT> is an integer, <i>k</i> = 1,2,...
 
 &lt;max_dims&gt; ::= (<i>i<FONT SIZE=1.0>1</i></FONT>, <i>i<FONT SIZE=1.0>2</i></FONT>, ... ) where <i>i<FONT SIZE=1.0>k</i></FONT> is an integer or H5S_UNLIMITED
 
 &lt;ds_definition&gt; ::= TBD
 
-&lt;data&gt; ::= data {TBD}
+&lt;dataspace_name&gt; ::= &lt;identifier&gt;
+
+&lt;data&gt; ::= DATA { &lt;scalar_space_data&gt; | &lt;simple_space_data&gt; | &lt;complex_space_data&gt; }
+                  
+&lt;scalar_space_data&gt; ::= &lt;atomic_scalar_data&gt; | &lt;compound_scalar_data&gt;
+
+&lt;atomic_scalar_data&gt; :: = the value of data 
+// A string is enclosed in double quotes.
+
+&lt;compound_scalar_data&gt; ::= { [ &lt;member_data&gt; ], [ &lt;member_data&gt; ], ... }
+
+&lt;member_data&gt; ::= &lt;atomic_scalar_data&gt; | &lt;atomic_simple_data&gt; 
+
+&lt;atomic_simple_data&gt; :: = &lt;atomic_element&gt;, &lt;atomic_element&gt;, ...
+
+&lt;atomic_element&gt; ::= &lt;atomic_scalar_data&gt;
+
+&lt;simple_space_data&gt; :: = &lt;atomic_simple_data&gt; | &lt;compound_simple_data&gt;
+
+&lt;compound_simple_data&gt; ::= &lt;compoud_element&gt;, &lt;compound_element&gt;, ...
+
+&lt;compound_element&gt; ::= &lt;compound_scalar_data&gt;
+
+&lt;complex_space_data&gt; ::= TBD
 
 &lt;group_member&gt; ::= &lt;named_datatype&gt; | &lt;named_dataspace&gt; | &lt;group&gt; | &lt;dataset&gt; | 
                    &lt;softlink&gt;
 
-&lt;named_datatype&gt; ::= DATATYPE "&lt;type_name&gt;" { &lt;compound_type_def&gt;+ }
+&lt;named_datatype&gt; ::= DATATYPE "&lt;type_name&gt;" { &lt;compound_type&gt; }
 
-&lt;type_name&gt; ::= "&lt;identifier&gt;"
+&lt;type_name&gt; ::= &lt;identifier&gt;
 
-&lt;named_dataspace&gt; ::= DATASPACE "&lt;dataspace_name&gt;" { ARRAY &lt;current_dims&gt; &lt;max_dims&gt; } |
-                      DATASPACE "&lt;dataspace_name&gt;" { OTHER &lt;ds_definition&gt;+ }
+&lt;named_dataspace&gt; ::= TBD
 
 &lt;group&gt; ::= GROUP "&lt;group_name&gt;" { &lt;hardlink&gt; } |
             GROUP "&lt;group_name&gt;" { &lt;group_attribute&gt;* &lt;group_member&gt;* } 
             
 &lt;group_name&gt; ::= &lt;identifier&gt;
+
+&lt;hardlink&gt; ::= HARDLINK "&lt;path_name&gt;" 
 
 &lt;dataset&gt; ::= DATASET "&lt;dataset_name&gt;" { &lt;hardlink&gt; } |
               DATASET "&lt;dataset_name&gt;" { &lt;datatype&gt;  
