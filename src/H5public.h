@@ -58,6 +58,7 @@ static char             RcsId[] = "@(#)$Revision$";
 #undef SIZEOF_UINT_FAST64_T
 #undef SIZEOF_UINT_LEAST64_T
 
+#undef SIZEOF_LONG_DOUBLE
 #undef SIZEOF___INT64_T
 
 
@@ -82,7 +83,7 @@ static char             RcsId[] = "@(#)$Revision$";
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
 #define H5_VERS_MINOR	2	/* For minor interface/format changes  	     */
 #define H5_VERS_RELEASE	2	/* For tweaks, bug-fixes, or development     */
-#define H5_VERS_SUBRELEASE "-pre0"	/* For pre-releases like -pre1, -beta.       */
+#define H5_VERS_SUBRELEASE "snap0"	/* For pre-releases like snap0       */
 				/* Empty string for real releases.           */
 
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
@@ -171,6 +172,7 @@ extern "C" {
 #undef SIZEOF_UINT_FAST64_T
 #undef SIZEOF_UINT_LEAST64_T
 
+#undef SIZEOF_LONG_DOUBLE
 #undef SIZEOF___INT64_T
 
 /* Functions in H5.c */

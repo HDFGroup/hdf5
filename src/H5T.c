@@ -1395,7 +1395,6 @@ H5T_term_interface(void)
 	/* Mark interface as closed */
 	interface_initialize_g = 0;
 	n = 1; /*H5I*/
-
     }
     return n;
 }
