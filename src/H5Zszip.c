@@ -100,10 +100,6 @@ H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SZIP,&flags,&cd_nelmts, cd_values,0,NULL)<0)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get szip parameters");
 
-    /* Check that no parameters are currently set */
-    if(cd_nelmts!=H5Z_SZIP_USER_NPARMS)
-	HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "incorrect # of szip parameters");
-
     /* Get datatype's size, for checking the "bits-per-pixel" */
     if((dtype_size=(sizeof(unsigned char)*H5Tget_size(type_id)))==0)
 	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
@@ -174,10 +170,6 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SZIP,&flags,&cd_nelmts, cd_values,0,NULL)<0)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get szip parameters");
 
-    /* Check that no parameters are currently set */
-    if(cd_nelmts!=H5Z_SZIP_USER_NPARMS)
-	HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "incorrect # of szip parameters");
-
     /* Get dimensions for dataspace */
     if ((ndims=H5Sget_simple_extent_dims(space_id, dims, NULL))<0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get dataspace dimensions");
@@ -196,6 +188,7 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Set the correct endianness flag for szip */
     /* (Note: this may not handle non-atomic datatypes well) */
+    cd_values[H5Z_SZIP_PARM_MASK] &= ~(SZ_LSB_OPTION_MASK|SZ_MSB_OPTION_MASK);
     switch(dtype_order) {
         case H5T_ORDER_LE:      /* Little-endian byte order */
             cd_values[H5Z_SZIP_PARM_MASK] |= SZ_LSB_OPTION_MASK;
