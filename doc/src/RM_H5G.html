@@ -38,20 +38,22 @@ of objects on disk.
     <li><a href="#Group-Open">H5Gopen</a>
     <li><a href="#Group-Set">H5Gset</a>
     <li><a href="#Group-Close">H5Gclose</a>
+    <li><a href="#Group-Push">H5Gpush</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    <li><a href="#Group-Push">H5Gpush</a>
     <li><a href="#Group-Pop">H5Gpop</a>
     <li><a href="#Group-Link">H5Glink</a>
     <li><a href="#Group-Unlink">H5Gunlink</a>  (NYI)
+    <li><a href="#Group-Iterate">H5Giterate</a>
+    <li><a href="#Group-Move">H5Gmove</a> (NYI)
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    <li><a href="#Group-Iterate">H5Giterate</a>
-    <li><a href="#Group-Move">H5Gmove</a> (NYI)
     <li><a href="#Group-Stat">H5Gstat</a>
     <li><a href="#Group-GetLinkval">H5Gget_linkval</a>
+    <li><a href="#Group-SetComment">H5Gset_comment</a>
+    <li><a href="#Group-GetComment">H5Gget_comment</a>
 </ul>
 </td></tr><tr><td colspan=5 align=right>
 <font size=-2>(NYI = Not yet implemented)</font>
@@ -610,6 +612,92 @@ then be trivial.
         if successful.
         Otherwise returns FAIL (-1).
 </dl>
+
+
+
+
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-SetComment">H5Gset_comment</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Gset_comment</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>const char *</em><code>comment</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets comment for specified object.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Gset_comment</code> sets the comment for the the
+        object <code>name</code> to <code>comment</code>.
+        Any previously existing comment is overwritten.
+        <p>
+        If <code>comment</code> is the empty string or a 
+        null pointer, the comment message is removed from the object. 
+        <p>
+        Comments should be relatively short, null-terminated, 
+        ASCII strings.
+  <dt><strong>Parameters:</strong>
+    <dl>
+      <dt><em>hid_t</em> <code>loc_id</code>
+        <dd>IN: Identifier of the file or group .
+      <dt><em>const char *</em><code>name</code>
+        <dd>IN: Name of the object whose comment is to be set or reset.
+      <dt><em>const char *</em><code>comment</code>
+        <dd>IN: The new comment.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise returns FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-GetComment">H5Gget_comment</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Gget_comment</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>size_t</em> <code>bufsize</code>,
+        <em>char *</em><code>comment</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves comment for specified object.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Gget_comment</code> retrieves the comment for the the
+        object <code>name</code>.  The comment is returned in the buffer 
+        <code>comment</code>.
+        <p>
+        At most <code>bufsize</code> characters, including a null 
+        terminator, are copied.  The result is not null terminated 
+        if the comment is longer than the supplied buffer.  
+        <p>
+        If an object does not have a comment, the empty string 
+        is returned.
+  <dt><strong>Parameters:</strong>
+    <dl>
+      <dt><em>hid_t</em> <code>loc_id</code>
+        <dd>IN: Identifier of the file or group .
+      <dt><em>const char *</em><code>name</code>
+        <dd>IN: Name of the object whose comment is to be set or reset.
+      <dt><em>size_t</em> <code>bufsize</code>
+        <dd>IN: Anticipated size of the buffer required to hold 
+            <code>comment</code>.
+      <dt><em>char *</em><code>comment</code>
+        <dd>OUT: The comment.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns the number of characters in the comment, 
+        counting the null terminator, if successful; the value 
+        returned may be larger than <code>bufsize</code>.
+        Otherwise returns FAIL (-1).
+</dl>
+
+
+
+
+
 
 
 <hr>
