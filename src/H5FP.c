@@ -40,6 +40,7 @@ MPI_Comm H5FP_SAP_BARRIER_COMM; /* Comm if you want to do a barrier     */
 
 unsigned H5FP_sap_rank;         /* The rank of the SAP: Supplied by user*/
 unsigned H5FP_capt_rank;        /* The rank which tells SAP of opens    */
+unsigned H5FP_capt_barrier_rank;/* Rank of captain in barrier comm      */
 
 /* local functions */
 static herr_t H5FP_commit_sap_datatypes(void);
@@ -117,6 +118,18 @@ H5FPinit(MPI_Comm comm, int sap_rank, MPI_Comm *sap_comm, MPI_Comm *sap_barrier_
     /* Get this processes rank */
     if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, (int *)&my_rank)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
+
+    /* Get the rank of the captain in the barrier Comm */
+    if (H5FP_capt_rank == (unsigned)my_rank)
+        if ((mrc = MPI_Comm_rank(H5FP_SAP_BARRIER_COMM,
+                                 (int *)&H5FP_capt_barrier_rank)) != MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
+
+    /* Broadcast the captain's barrier rank */
+    if ((mrc = MPI_Bcast(&H5FP_capt_barrier_rank, 1, MPI_UNSIGNED,
+                         (int)H5FP_capt_rank,
+                         H5FP_SAP_COMM)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mrc);
 
     /* Create the MPI types used for communicating with the SAP */
     if (H5FP_commit_sap_datatypes() != MPI_SUCCESS)
@@ -312,11 +325,12 @@ done:
 static herr_t
 H5FP_commit_sap_datatypes(void)
 {
-    int block_length[5];
+    int block_length[5], i;
     MPI_Aint displs[5];
     MPI_Datatype old_types[5];
-    H5FP_request req;
+    H5FP_request sap_req;
     H5FP_read sap_read;
+    H5FP_alloc sap_alloc;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FP_commit_sap_datatypes, FAIL);
@@ -324,24 +338,23 @@ H5FP_commit_sap_datatypes(void)
     /* Commit the H5FP_request_t datatype */
     block_length[0] = 8;
     block_length[1] = 1;
-    block_length[2] = 1;
-    block_length[3] = 4;
-    block_length[4] = sizeof(req.oid);
+    block_length[2] = 4;
+    block_length[3] = 1;
+    block_length[4] = sizeof(sap_req.oid);
     old_types[0] = MPI_UNSIGNED;
-    old_types[1] = HADDR_AS_MPI_TYPE;
-    old_types[2] = MPI_UNSIGNED_LONG;
-    old_types[3] = MPI_LONG_LONG_INT;
+    old_types[1] = MPI_UNSIGNED_LONG;
+    old_types[2] = MPI_LONG_LONG_INT;
+    old_types[3] = HADDR_AS_MPI_TYPE;
     old_types[4] = MPI_UNSIGNED_CHAR;
-    MPI_Address(&req.req_type, &displs[0]);
-    MPI_Address(&req.addr, &displs[1]);
-    MPI_Address(&req.feature_flags, &displs[2]);
-    MPI_Address(&req.meta_block_size, &displs[3]);
-    MPI_Address(&req.oid, &displs[4]);
-    displs[4] -= displs[3];
-    displs[3] -= displs[2];
-    displs[2] -= displs[1];
-    displs[1] -= displs[0];
-    displs[0] -= displs[0];
+    MPI_Address(&sap_req.req_type, &displs[0]);
+    MPI_Address(&sap_req.feature_flags, &displs[1]);
+    MPI_Address(&sap_req.meta_block_size, &displs[2]);
+    MPI_Address(&sap_req.addr, &displs[3]);
+    MPI_Address(&sap_req.oid, &displs[4]);
+
+    /* Calculate the displacements */
+    for (i = 4; i >= 0; --i)
+        displs[i] -= displs[0];
 
     if (MPI_Type_struct(5, block_length, displs, old_types,
                         &H5FP_request_t) != MPI_SUCCESS)
@@ -369,8 +382,10 @@ H5FP_commit_sap_datatypes(void)
     old_types[1] = HADDR_AS_MPI_TYPE;
     MPI_Address(&sap_read.req_id, &displs[0]);
     MPI_Address(&sap_read.addr, &displs[1]);
-    displs[1] -= displs[0];
-    displs[0] -= displs[0];
+
+    /* Calculate the displacements */
+    for (i = 1; i >= 0; --i)
+        displs[i] -= displs[0];
 
     if (MPI_Type_struct(2, block_length, displs, old_types,
                         &H5FP_read_t) != MPI_SUCCESS)
@@ -384,10 +399,12 @@ H5FP_commit_sap_datatypes(void)
     block_length[1] = 1;
     old_types[0] = MPI_UNSIGNED;
     old_types[1] = HADDR_AS_MPI_TYPE;
-    MPI_Address(&sap_read.req_id, &displs[0]);
-    MPI_Address(&sap_read.addr, &displs[1]);
-    displs[1] -= displs[0];
-    displs[0] -= displs[0];
+    MPI_Address(&sap_alloc.req_id, &displs[0]);
+    MPI_Address(&sap_alloc.addr, &displs[1]);
+
+    /* Calculate the displacements */
+    for (i = 1; i >= 0; --i)
+        displs[i] -= displs[0];
 
     if (MPI_Type_struct(2, block_length, displs, old_types,
                         &H5FP_alloc_t) != MPI_SUCCESS)
