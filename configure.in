@@ -34,11 +34,26 @@ fi
 dnl ----------------------------------------------------------------------
 dnl Source any special files that we need.  These files normally aren't
 dnl present but can be used by the maintainers to fine tune things like
-dnl turning on debug or profiling flags for the compiler.
+dnl turning on debug or profiling flags for the compiler.  The search order
+dnl is:
+dnl
+dnl	CPU-VENDOR-OS
+dnl	VENDOR-OS
+dnl	CPU-OS
+dnl	CPU-VENDOR
+dnl	OS
+dnl	VENDOR
+dnl	CPU
 dnl
 AC_MSG_CHECKING(for site config file)
 site_config="none"
-for f in $host $host_vendor-$host_os $host_os; do
+for f in $host \
+         $host_vendor-$host_os \
+         $host_cpu-$host_os \
+         $host_cpu-$host_vendor \
+	 $host_os \
+	 $host_vendor \
+	 $host_cpu ; do
    if test -f config/$f; then
       site_config=config/$f
       break
