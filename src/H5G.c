@@ -1047,7 +1047,8 @@ H5G_basename(const char *name, size_t *size_p)
  *                    when the library terminates.
  *
 	*	 Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *	 Added a deep copy of the symbol table entry
+ *	 Modified to deep copies of symbol table entries
+ *	 Added `id to name' support.
 	*
  *-------------------------------------------------------------------------
  */
@@ -1064,6 +1065,8 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
     herr_t      ret_value=SUCCEED;       /* Return value */
 
 				H5G_t *tmp_grp;
+				const char		*orig_name = name;
+				H5G_entry_t		tmp_obj_ent;	/*temporary entry for search */
     
     FUNC_ENTER_NOINIT(H5G_namei);
 
@@ -1130,13 +1133,33 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	HDmemset(obj_ent, 0, sizeof(H5G_entry_t));
 	obj_ent->header = HADDR_UNDEF;
 
-	if (H5G_stab_find(grp_ent, H5G_comp_g, obj_ent/*out*/)<0) {
+	/* Temporary entry */
+	tmp_obj_ent = *obj_ent;
+
+	if (H5G_stab_find(grp_ent, H5G_comp_g, &tmp_obj_ent/*out*/)<0) {
 	    /*
 	     * Component was not found in the current symbol table, possibly
 	     * because GRP_ENT isn't a symbol table.
 	     */
 	    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
 	}
+	
+	/* Deep copy of the symbol table entry */
+	if (H5G_ent_copy( &tmp_obj_ent, obj_ent )<0)
+					HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
+
+	/* Remove the 'ID to name' info, if the entry is mot the one we want */
+ if ( tmp_obj_ent.name ) {
+  if (HDstrcmp(orig_name,tmp_obj_ent.name)!=0)
+  {
+   /* Free the ID to name buffers */
+   if ( tmp_obj_ent.name )
+    tmp_obj_ent.name = H5MM_xfree(tmp_obj_ent.name);
+   if ( tmp_obj_ent.old_name )
+    tmp_obj_ent.old_name = H5MM_xfree(tmp_obj_ent.old_name);
+  }
+ }
+
 
 	/*
 	 * If we found a symbolic link then we should follow it.  But if this
@@ -1164,9 +1187,12 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	
 	/* next component */
 	name += nchars;
-    }
-    if (rest)
-        *rest = name; /*final null */
+
+    
+	}
+    
+	if (rest)
+  *rest = name; /*final null */
 
 done:
     FUNC_LEAVE(ret_value);
@@ -2773,6 +2799,9 @@ done:
    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
     "unknown data object");
   }
+
+		if( !ent) 
+			goto done;
   
   
   /* Check if is a mounted file */
