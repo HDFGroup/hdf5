@@ -48,12 +48,11 @@ class H5_DLLCPP AtomType : public DataType {
 	// Sets the bit offset of the first significant bit. 
 	void setOffset( size_t offset ) const;
 
-	// The followings will go into Opaque type when completed
 	// Retrieves the padding type of the least and most-significant bit padding. 
-	// void getPad( H5T_pad_t& lsb, H5T_pad_t& msb ) const;
+	void getPad( H5T_pad_t& lsb, H5T_pad_t& msb ) const;
 
 	// Sets the least and most-significant bits padding types
-	// void setPad( H5T_pad_t lsb, H5T_pad_t msb ) const;
+	void setPad( H5T_pad_t lsb, H5T_pad_t msb ) const;
 
 	// Copy constructor - makes copy of the original object
 	AtomType( const AtomType& original );

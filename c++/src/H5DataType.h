@@ -81,6 +81,9 @@ class H5_DLLCPP DataType : public H5Object {
 	// Gets the tag associated with an opaque datatype. 
 	string getTag() const;
 
+	// Checks whether this datatype contains (or is) a certain type class
+	bool detectClass(H5T_class_t cls) const;
+
 	// Creates a new variable-length datatype - not implemented yet
 	// Will be moved into a subclass when completed
 	//DataType vlenCreate( const DataType& base_type );

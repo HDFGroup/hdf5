@@ -27,16 +27,36 @@
 namespace H5 {
 #endif
 
-// Default constructor
+//--------------------------------------------------------------------------
+// Function:	AtomType default constructor
+///\brief	Default constructor: Creates a stub datatype
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 AtomType::AtomType() : DataType() {}
 
-// Constructor that takes an existing id 
+//--------------------------------------------------------------------------
+// Function:	AtomType overloaded constructor
+///\brief	Creates an AtomType object using an existing id.
+///\param	existing_id - IN: Id of an existing datatype
+///\exception   H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 AtomType::AtomType( const hid_t existing_id ) : DataType( existing_id ) {}
 
-// Copy constructor: makes a copy of the original AtomType object.
+//--------------------------------------------------------------------------
+// Function:	AtomType copy constructor
+///\brief	Copy constructor: makes a copy of the original AtomType object.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 AtomType::AtomType( const AtomType& original ) : DataType( original ) {}
 
-// Sets the total size for an atomic datatype. 
+//--------------------------------------------------------------------------
+// Function:	AtomType::setSize
+///\brief	Sets the total size for an atomic datatype. 
+///\param	size - IN: Size to set
+///\exception   H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void AtomType::setSize( size_t size ) const
 {
    // Call C routine H5Tset_size to set the total size
@@ -47,7 +67,17 @@ void AtomType::setSize( size_t size ) const
    }
 }
 
-// Returns the byte order of an atomic datatype.  Inheritance class???
+//--------------------------------------------------------------------------
+// Function:	AtomType::getOrder
+///\brief	Returns the byte order of an atomic datatype.
+///\param	order_string - OUT: Text description of the returned byte order
+///\return	Byte order, which can be:
+///		\li \c H5T_ORDER_LE
+///		\li \c H5T_ORDER_BE
+///		\li \c H5T_ORDER_VAX
+///\exception   H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 H5T_order_t AtomType::getOrder( string& order_string ) const
 {
    // Call C routine to get the byte ordering
@@ -68,7 +98,16 @@ H5T_order_t AtomType::getOrder( string& order_string ) const
    return( type_order );
 }
 
-// Sets the byte ordering of an atomic datatype.  Inheritance class???
+//--------------------------------------------------------------------------
+// Function:	AtomType::setOrder
+///\brief	Sets the byte ordering of an atomic datatype.
+///\param	order - IN: Byte ordering constant, which can be:
+///		\li \c H5T_ORDER_LE
+///		\li \c H5T_ORDER_BE
+///		\li \c H5T_ORDER_VAX
+///\exception   H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void AtomType::setOrder( H5T_order_t order ) const
 {
    // Call C routine to set the byte ordering
@@ -79,7 +118,17 @@ void AtomType::setOrder( H5T_order_t order ) const
    }
 }
 
-// Returns the precision of an atomic datatype. 
+//--------------------------------------------------------------------------
+// Function:	AtomType::getPrecision
+///\brief	Returns the precision of an atomic datatype. 
+///\return	Number of significant bits 
+///\exception   H5::DataTypeIException
+///\par Description
+///		The precision is the number of significant bits which, 
+///		unless padding is present, is 8 times larger than the 
+///		value returned by \c DataType::getSize().
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 size_t AtomType::getPrecision() const
 {
    size_t num_signi_bits = H5Tget_precision( id );  // C routine
@@ -93,7 +142,16 @@ size_t AtomType::getPrecision() const
    return( num_signi_bits );
 }
 
-// Sets the precision of an atomic datatype. 
+//--------------------------------------------------------------------------
+// Function:	AtomType::setPrecision
+///\brief	Sets the precision of an atomic datatype. 
+///\param	precision - IN: Number of bits of precision
+///\exception   H5::DataTypeIException
+///\par Description
+///		For information, please see C layer Reference Manuat at:
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5T.html#Datatype-SetPrecision
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void AtomType::setPrecision( size_t precision ) const
 {
    // Call C routine to set the datatype precision
@@ -104,10 +162,20 @@ void AtomType::setPrecision( size_t precision ) const
    }
 }
 
-// Retrieves the bit offset of the first significant bit. 
-// 12/05/00: due to C API change
-//	- return type changed from size_t to int
-//	- offset = -1 when failure occurs vs. 0
+//--------------------------------------------------------------------------
+// Function:	AtomType::getOffset
+///\brief	Retrieves the bit offset of the first significant bit. 
+///\return	Offset value
+///\exception   H5::DataTypeIException
+///\par Description
+///		For information, please see C layer Reference Manuat at:
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5T.html#Datatype-GetOffset
+// Programmer	Binh-Minh Ribler - 2000
+// Modification
+//		12/05/00: due to C API change
+//			- return type changed from size_t to int
+//			- offset = -1 when failure occurs vs. 0
+//--------------------------------------------------------------------------
 int AtomType::getOffset() const
 {
    int offset = H5Tget_offset( id );  // C routine
@@ -121,7 +189,16 @@ int AtomType::getOffset() const
    return( offset );
 }
 
-// Sets the bit offset of the first significant bit. 
+//--------------------------------------------------------------------------
+// Function:	AtomType::setOffset
+///\brief	Sets the bit offset of the first significant bit. 
+///\param	offset - IN: Offset of first significant bit
+///\exception   H5::DataTypeIException
+///\par Description
+///		For information, please see C layer Reference Manuat at:
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5T.html#Datatype-SetOffset
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void AtomType::setOffset( size_t offset ) const
 {
    // Call C routine to set the bit offset
@@ -132,30 +209,58 @@ void AtomType::setOffset( size_t offset ) const
    }
 }
 
-// Retrieves the padding type of the least and most-significant bit padding. 
-// these two are for Opaque type
-//void AtomType::getPad( H5T_pad_t& lsb, H5T_pad_t& msb ) const
-//{
+//--------------------------------------------------------------------------
+// Function:	AtomType::getPad
+///\brief	Retrieves the padding type of the least and most-significant 
+///		bit padding. 
+///\param	lsb - OUT: Least-significant bit padding type
+///\param	msb - OUT: Most-significant bit padding type
+///\exception   H5::DataTypeIException
+///\par Description
+///		Possible values for \a lsb and \a msb include:
+///		\li \c H5T_PAD_ZERO (0) - Set background to zeros. 
+///		\li \c H5T_PAD_ONE (1) - Set background to ones. 
+///		\li \c H5T_PAD_BACKGROUND (2) - Leave background alone. 
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void AtomType::getPad( H5T_pad_t& lsb, H5T_pad_t& msb ) const
+{
    // Call C routine to get the padding type
-   //herr_t ret_value = H5Tget_pad( id, &lsb, &msb );
-   //if( ret_value < 0 )
-   //{
-      //throw DataTypeIException("AtomType::getPad", "H5Tget_pad failed");
-   //}
-//}
+   herr_t ret_value = H5Tget_pad( id, &lsb, &msb );
+   if( ret_value < 0 )
+   {
+      throw DataTypeIException("AtomType::getPad", "H5Tget_pad failed");
+   }
+}
 
-// Sets the least and most-significant bits padding types
-//void AtomType::setPad( H5T_pad_t lsb, H5T_pad_t msb ) const
-//{
+//--------------------------------------------------------------------------
+// Function:	AtomType::getPad
+///\brief	Sets the least and most-significant bits padding types.
+///\param	lsb - IN: Least-significant bit padding type
+///\param	msb - IN: Most-significant bit padding type
+///\exception   H5::DataTypeIException
+///\par Description
+///		Valid values for \a lsb and \a msb include:
+///		\li \c H5T_PAD_ZERO (0) - Set background to zeros. 
+///		\li \c H5T_PAD_ONE (1) - Set background to ones. 
+///		\li \c H5T_PAD_BACKGROUND (2) - Leave background alone. 
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void AtomType::setPad( H5T_pad_t lsb, H5T_pad_t msb ) const
+{
    // Call C routine to set the padding type
-   //herr_t ret_value = H5Tset_pad( id, lsb, msb );
-   //if( ret_value < 0 )
-   //{
-      //throw DataTypeIException("AtomType::setPad", "H5Tset_pad failed");
-   //}
-//}
+   herr_t ret_value = H5Tset_pad( id, lsb, msb );
+   if( ret_value < 0 )
+   {
+      throw DataTypeIException("AtomType::setPad", "H5Tset_pad failed");
+   }
+}
 
-// This destructor terminates access to the datatype; it calls ~DataType
+//--------------------------------------------------------------------------
+// Function:    AtomType destructor
+///\brief       Properly terminates access to this object.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 AtomType::~AtomType() {}
 
 #ifndef H5_NO_NAMESPACE
