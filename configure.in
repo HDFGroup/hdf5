@@ -1819,7 +1819,7 @@ no_create=yes
 PARALLEL_MAKE=""
 
 if test -n "$TESTPARALLEL"; then
-  PARALLEL_MAKE="$TESTPARALLEL/Makefile"
+  PARALLEL_MAKE="$TESTPARALLEL/Makefile $TESTPARALLEL/testph5.sh"
 fi
 
 PABLO_MAKE=""

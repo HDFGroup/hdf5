@@ -18,12 +18,17 @@ LIBH5TEST=../test/libh5test.la
 ## These tests are parallel
 RUNTEST=$(RUNPARALLEL)
 
+## Test programs and scripts.
+##
+TEST_PROGS=t_mpi
+TEST_SCRIPTS=testph5.sh
+
 ## These are our main targets
-TEST_PROGS=t_mpi testphdf5
+PROGS=$(TEST_PROGS) testphdf5
 
 ## Temporary files
 MOSTLYCLEAN=ParaEg[123].h5f
-DISTCLEAN=go Makefile
+DISTCLEAN=go Makefile testph5.sh
 
 ## Test source files
 TEST_PHDF5_SRC=testphdf5.c t_dset.c t_file.c t_mdset.c
@@ -33,7 +38,7 @@ TEST_OBJ=$(TEST_SRC:.c=.lo)
 TEST_HDR=testphdf5.h
 
 ## How to build the tests... They all depend on the hdf5 library
-$(TEST_PROGS): $(LIBHDF5) $(LIBH5TEST)
+$(PROGS): $(LIBHDF5) $(LIBH5TEST)
 
 $(TEST_OBJ): $(TEST_HDR)
 
