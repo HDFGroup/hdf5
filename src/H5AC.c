@@ -54,15 +54,61 @@
 #include "H5FDmpio.h"
 #include "H5FDmpiposix.h"
 
-/*
- * Private file-scope variables.
- */
 #define PABLO_MASK      H5AC_mask
 
 /* Interface initialization */
 static int             interface_initialize_g = 0;
 #define INTERFACE_INIT H5AC_init_interface
 static herr_t H5AC_init_interface(void);
+
+/*
+ * Private macros
+ */
+
+/* Hash an address in the file to an offset in the cache */
+#define H5AC_HASH_DIVISOR 8     /* Attempt to spread out the hashing */
+                                /* This should be the same size as the alignment of */
+                                /* of the smallest file format object written to the file.  */
+#define H5AC_HASH(F,ADDR) H5F_addr_hash((ADDR/H5AC_HASH_DIVISOR),(F)->shared->cache->nslots)
+
+/*
+ * Private typedefs & structs
+ */
+
+#ifdef H5AC_DEBUG
+typedef struct H5AC_prot_t {
+    int		nprots;		/*number of things protected	     */
+    int		aprots;		/*nelmts of `prot' array	     */
+    H5AC_info_t	**slot;		/*array of pointers to protected things	     */
+} H5AC_prot_t;
+#endif /* H5AC_DEBUG */
+
+struct H5AC_t {
+    unsigned	nslots;			/*number of cache slots		     */
+    H5AC_info_t **slot;		/*the cache slots, an array of pointers to the cached objects */
+    H5AC_info_t **dslot;	/*"held object" cache slots, an array of pointers to dirty cached objects */
+#ifdef H5AC_DEBUG
+    H5AC_prot_t *prot;		/*the protected slots		     */
+#endif /* H5AC_DEBUG */
+    int	nprots;			/*number of protected objects	     */
+#ifdef H5AC_DEBUG
+    struct {
+	unsigned	nhits;			/*number of cache hits		     */
+	unsigned	nmisses;		/*number of cache misses	     */
+	unsigned	ninits;			/*number of cache inits		     */
+	unsigned	nflushes;		/*number of flushes to disk	     */
+#ifdef H5_HAVE_PARALLEL
+	unsigned	ndestroys;		/*number of cache destroys	     */
+	unsigned	nholds;			/*number of cache holds	     */
+	unsigned	nrestores;		/*number of cache restores	     */
+#endif /* H5_HAVE_PARALLEL */
+    } diagnostics[H5AC_NTYPES];		/*diagnostics for each type of object*/
+#endif /* H5AC_DEBUG */
+};
+
+/*
+ * Private file-scope variables.
+ */
 
 /* Default dataset transfer property list for metadata I/O calls */
 /* (Collective set, "block before metadata write" set and "library internal" set) */
@@ -717,11 +763,11 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
 {
     unsigned                i;
     herr_t                  status;
-    H5AC_flush_func_t       flush=NULL;
+    H5AC_flush_func_t       flush=NULL; /* 'flush' callback for an object */
     H5AC_info_t           **info;
     int                   *map = NULL;
-    hbool_t                 destroy=(flags&H5F_FLUSH_INVALIDATE)>0;
-    hbool_t                 clear_only=(flags&H5F_FLUSH_CLEAR_ONLY)>0;
+    hbool_t                 destroy=(flags&H5F_FLUSH_INVALIDATE)>0;     /* Flag for destroying objects */
+    hbool_t                 clear_only=(flags&H5F_FLUSH_CLEAR_ONLY)>0;  /* Flag for only clearing objects */
     unsigned               nslots;
     H5AC_t                 *cache;
     herr_t ret_value=SUCCEED;      /* Return value */
@@ -828,12 +874,15 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
                 H5AC_subid_t type_id=(*info)->type->id;  /* Remember this for later */
 #endif /* H5AC_DEBUG */
 
-                flush = (*info)->type->flush;
-
                 /* Clear the dirty flag only, if requested */
-                if(clear_only)
-                    (*info)->dirty=0;
+                if(clear_only) {
+                    /* Call the callback routine to clear all dirty flags for object */
+                    if(((*info)->type->clear)(*info)<0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to clear cache");
+                } /* end if */
                 else {
+                    flush = (*info)->type->flush;
+
                     /* Only block for all the processes on the first piece of metadata */
                     if(first_flush && (*info)->dirty) {
                         status = (flush)(f, dxpl_id, destroy, (*info)->addr, (*info));
@@ -844,7 +893,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
                     if (status < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
 #ifdef H5AC_DEBUG
-                cache->diagnostics[type_id].nflushes++;
+                    cache->diagnostics[type_id].nflushes++;
 #endif /* H5AC_DEBUG */
                 } /* end else */
 
@@ -925,8 +974,11 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
              */
 
             /* Clear the dirty flag only, if requested */
-            if(clear_only)
-                (*info)->dirty=0;
+            if(clear_only) {
+                /* Call the callback routine to clear all dirty flags for object */
+                if(((*info)->type->clear)(*info)<0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to clear cache");
+            } /* end if */
             else {
                 flush = (*info)->type->flush;
                 if((flush)(f, dxpl_id, destroy, (*info)->addr, (*info)) < 0)
@@ -1528,6 +1580,8 @@ done:
  *              H5AC_protect().  The TYPE and ADDR arguments should be the
  *              same as the corresponding call to H5AC_protect() and the
  *              THING argument should be the value returned by H5AC_protect().
+ *              If the DELETED flag is set, then this object has been deleted
+ *              from the file and should not be returned to the cache.
  *
  *              If H5AC_DEBUG is defined then this function fails
  *              if the TYPE and ADDR arguments are not what was used when the
@@ -1542,10 +1596,13 @@ done:
  * Modifications:
  * 		Robb Matzke, 1999-07-27
  *		The ADDR argument is passed by value.
+ *
+ * 		Quincey Koziol, 2003-03-19
+ *		Added "deleted" argument
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *thing)
+H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *thing, hbool_t deleted)
 {
     unsigned                idx;
     H5AC_flush_func_t       flush;
@@ -1567,96 +1624,6 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
     idx = H5AC_HASH(f, addr);
     cache = f->shared->cache;
     info = cache->slot + idx;
-
-#ifdef H5_HAVE_PARALLEL
-    /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
-    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
-        H5AC_info_t       **dinfo;
-        H5AC_subid_t        type_id;
-        H5P_genplist_t *dxpl;           /* Dataset transfer property list */
-        H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
-
-        /* Get the dataset transfer property list */
-        if (NULL == (dxpl = H5I_object(dxpl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-
-        /* Get the transfer mode property */
-        if(H5P_get(dxpl, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve xfer mode");
-
-        /* Get pointer to 'held' information */
-        dinfo = cache->dslot + idx;
-
-        /* Sanity check transfer mode */
-        if(xfer_mode==H5FD_MPIO_COLLECTIVE) {
-            /* Check for dirty metadata */
-            if(*dinfo) {
-                H5AC_dest_func_t        dest;
-
-                /* Various sanity checks */
-                assert((*dinfo)->dirty);
-                assert((*info)!=NULL);
-                assert((*info)->dirty==0);
-
-                type_id=(*info)->type->id;  /* Remember this for later */
-
-                /* Destroy 'current' information */
-                dest = (*info)->type->dest;
-                if ((dest)(f, (*info))<0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to free cached object");
-
-                /* Restore 'held' information back to 'current' information */
-                (*info)=(*dinfo);
-
-                /* Clear 'held' information */
-                (*dinfo)=NULL;
-
-#ifdef H5AC_DEBUG
-                cache->diagnostics[type_id].nrestores++;
-#endif /* H5AC_DEBUG */
-            } /* end if */
-        } /* end if */
-        else {
-            /* Sanity check */
-            assert((*dinfo)==NULL);
-            assert(xfer_mode==H5FD_MPIO_INDEPENDENT);
-
-            /* Make certain there will be no write of dirty metadata */
-            if((*info) && (*info)->dirty) {
-                /* Sanity check new item */
-                assert(((H5AC_info_t*)thing)->dirty==0);
-
-                /* 'Hold' the current metadata for later */
-                (*dinfo)=(*info);
-
-                /* Reset the 'current' metadata, so it doesn't get flushed */
-                (*info)=NULL;
-
-#ifdef H5AC_DEBUG
-                cache->diagnostics[(*dinfo)->type->id].nholds++;
-#endif /* H5AC_DEBUG */
-            } /* end if */
-        } /* end else */
-    } /* end if */
-#endif /* H5_HAVE_PARALLEL */
-
-    /*
-     * Flush any object already in the cache at that location.  It had
-     * better not be another copy of the protected object.
-     */
-    if (*info) {
-#ifdef H5AC_DEBUG
-        H5AC_subid_t type_id=(*info)->type->id;  /* Remember this for later */
-#endif /* H5AC_DEBUG */
-
-        assert(H5F_addr_ne((*info)->addr, addr));
-        flush = (*info)->type->flush;
-        if ((flush)(f, dxpl_id, TRUE, (*info)->addr, (*info)) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush object");
-#ifdef H5AC_DEBUG
-        cache->diagnostics[type_id].nflushes++;
-#endif /* H5AC_DEBUG */
-    }
 
 #ifdef H5AC_DEBUG
     /*
@@ -1681,12 +1648,116 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
     }
 #endif /* H5AC_DEBUG */
 
-    /*
-     * Insert the object back into the cache; it is no longer protected.
-     */
-    (*info)=thing;
-    (*info)->type = type;
-    (*info)->addr = addr;
+    /* Don't restore deleted objects to the cache */
+    if(!deleted) {
+#ifdef H5_HAVE_PARALLEL
+        /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
+        if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
+            H5AC_info_t       **dinfo;
+            H5AC_subid_t        type_id;
+            H5P_genplist_t *dxpl;           /* Dataset transfer property list */
+            H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
+
+            /* Get the dataset transfer property list */
+            if (NULL == (dxpl = H5I_object(dxpl_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
+
+            /* Get the transfer mode property */
+            if(H5P_get(dxpl, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve xfer mode");
+
+            /* Get pointer to 'held' information */
+            dinfo = cache->dslot + idx;
+
+            /* Sanity check transfer mode */
+            if(xfer_mode==H5FD_MPIO_COLLECTIVE) {
+                /* Check for dirty metadata */
+                if(*dinfo) {
+                    H5AC_dest_func_t        dest;
+
+                    /* Various sanity checks */
+                    assert((*dinfo)->dirty);
+                    assert((*info)!=NULL);
+                    assert((*info)->dirty==0);
+
+                    type_id=(*info)->type->id;  /* Remember this for later */
+
+                    /* Destroy 'current' information */
+                    dest = (*info)->type->dest;
+                    if ((dest)(f, (*info))<0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to free cached object");
+
+                    /* Restore 'held' information back to 'current' information */
+                    (*info)=(*dinfo);
+
+                    /* Clear 'held' information */
+                    (*dinfo)=NULL;
+
+#ifdef H5AC_DEBUG
+                    cache->diagnostics[type_id].nrestores++;
+#endif /* H5AC_DEBUG */
+                } /* end if */
+            } /* end if */
+            else {
+                /* Sanity check */
+                assert((*dinfo)==NULL);
+                assert(xfer_mode==H5FD_MPIO_INDEPENDENT);
+
+                /* Make certain there will be no write of dirty metadata */
+                if((*info) && (*info)->dirty) {
+                    /* Sanity check new item */
+                    assert(((H5AC_info_t*)thing)->dirty==0);
+
+                    /* 'Hold' the current metadata for later */
+                    (*dinfo)=(*info);
+
+                    /* Reset the 'current' metadata, so it doesn't get flushed */
+                    (*info)=NULL;
+
+#ifdef H5AC_DEBUG
+                    cache->diagnostics[(*dinfo)->type->id].nholds++;
+#endif /* H5AC_DEBUG */
+                } /* end if */
+            } /* end else */
+        } /* end if */
+#endif /* H5_HAVE_PARALLEL */
+
+        /*
+         * Flush any object already in the cache at that location.  It had
+         * better not be another copy of the protected object.
+         */
+        if (*info) {
+#ifdef H5AC_DEBUG
+            H5AC_subid_t type_id=(*info)->type->id;  /* Remember this for later */
+#endif /* H5AC_DEBUG */
+
+            assert(H5F_addr_ne((*info)->addr, addr));
+            flush = (*info)->type->flush;
+            if ((flush)(f, dxpl_id, TRUE, (*info)->addr, (*info)) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush object");
+#ifdef H5AC_DEBUG
+            cache->diagnostics[type_id].nflushes++;
+#endif /* H5AC_DEBUG */
+        }
+
+        /*
+         * Insert the object back into the cache; it is no longer protected.
+         */
+        (*info)=thing;
+        (*info)->type = type;
+        (*info)->addr = addr;
+    } /* end if */
+    else {
+        /* Mark the thing as clean (prerequite for destroy routine) */
+        if((type->clear)(thing)<0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to clear object");
+
+        /* Destroy previously cached thing */
+        if ((type->dest)(f, thing)<0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "unable to free object");
+    } /* end else */
+
+    /* Decrement the number of protected items outstanding */
     cache->nprots -= 1;
 
 done:
