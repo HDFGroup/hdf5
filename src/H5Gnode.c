@@ -1213,14 +1213,38 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent,
     FUNC_LEAVE(SUCCEED);
 }
 
-unsigned H5G_node_k(H5F_t *f)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_k
+ *
+ * Purpose:	Replaced a macro to retrieve the symbol table leaf size,
+ *              now that the generic properties are being used to store
+ *              the values.
+ *
+ * Return:	Success:	Non-negative, and the symbol table leaf size is
+ *                              returned.
+ *
+ * 		Failure:	Negative (should not happen)
+ *
+ * Programmer:	Raymond Lu
+ *		slu@ncsa.uiuc.edu
+ *		Oct 14 2001
+ *
+ * Modifications:
+ *		Quincey Koziol, 2001-10-15
+ *		Added this header and removed unused ret_value variable.
+ *-------------------------------------------------------------------------
+ */
+unsigned H5G_node_k(const H5F_t *f)
 {
-    int sym_leaf_k;
+    unsigned sym_leaf_k;
 
-    FUNC_ENTER(H5G_node_k, FAIL);
+    FUNC_ENTER(H5G_node_k, UFAIL);
+
+    assert(f);
 
     if(H5P_get(f->shared->fcpl_id, H5F_CRT_SYM_LEAF_NAME, &sym_leaf_k) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, UFAIL, 
                       "can't get rank for symbol table leaf node"); 
     
     FUNC_LEAVE(sym_leaf_k);

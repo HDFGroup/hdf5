@@ -284,21 +284,44 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
     FUNC_LEAVE(ret_value);
 }
 
-int H5B_Kvalue(H5F_t *f, const H5B_class_t *type)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B_Kvalue
+ *
+ * Purpose:	Replaced a macro to retrieve a B-tree key value for a certain
+ *              type, now that the generic properties are being used to store
+ *              the B-tree values.
+ *
+ * Return:	Success:	Non-negative, and the B-tree key value is
+ *                              returned.
+ *
+ * 		Failure:	Negative (should not happen)
+ *
+ * Programmer:	Raymond Lu
+ *		slu@ncsa.uiuc.edu
+ *		Oct 14 2001
+ *
+ * Modifications:
+ *		Quincey Koziol, 2001-10-15
+ *		Added this header and removed unused ret_value variable.
+ *-------------------------------------------------------------------------
+ */
+int
+H5B_Kvalue(H5F_t *f, const H5B_class_t *type)
 {
-    int ret_value = FAIL;
-    int btree_k[8]={0};
+    int btree_k[H5B_NUM_BTREE_ID];
 
     FUNC_ENTER(H5B_Kvalue, FAIL);
 
     assert(f);
     assert(type);
+
     if(H5P_get(f->shared->fcpl_id, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
                       "unable to get rank for btree internal nodes");
 
     FUNC_LEAVE(btree_k[type->id]);
-}
+} /* end H5B_Kvalue() */
 
 
 /*-------------------------------------------------------------------------

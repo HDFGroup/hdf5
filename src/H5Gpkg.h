@@ -138,6 +138,6 @@ __DLL__ herr_t H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp,
 __DLL__ herr_t H5G_ent_encode_vec(H5F_t *f, uint8_t **pp,
 				  const H5G_entry_t *ent, int n);
 
-__DLL__ unsigned H5G_node_k(H5F_t *f);
+__DLL__ unsigned H5G_node_k(const H5F_t *f);
 
 #endif

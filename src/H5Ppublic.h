@@ -175,8 +175,8 @@ __DLL__ herr_t H5Pset_sizes(hid_t plist_id, size_t sizeof_addr,
        size_t sizeof_size);
 __DLL__ herr_t H5Pget_sizes(hid_t plist_id, size_t *sizeof_addr/*out*/,
        size_t *sizeof_size/*out*/);
-__DLL__ herr_t H5Pset_sym_k(hid_t plist_id, int ik, int lk);
-__DLL__ herr_t H5Pget_sym_k(hid_t plist_id, int *ik/*out*/, int *lk/*out*/);
+__DLL__ herr_t H5Pset_sym_k(hid_t plist_id, int ik, unsigned lk);
+__DLL__ herr_t H5Pget_sym_k(hid_t plist_id, int *ik/*out*/, unsigned *lk/*out*/);
 __DLL__ herr_t H5Pset_istore_k(hid_t plist_id, int ik);
 __DLL__ herr_t H5Pget_istore_k(hid_t plist_id, int *ik/*out*/);
 __DLL__ herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);

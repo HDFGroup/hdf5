@@ -1356,9 +1356,9 @@ H5Pget_sizes(hid_t plist_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_sym_k(hid_t plist_id, int ik, int lk)
+H5Pset_sym_k(hid_t plist_id, int ik, unsigned lk)
 {
-    int                    btree_k[8]={0};
+    int btree_k[H5B_NUM_BTREE_ID];
 
     FUNC_ENTER(H5Pset_sym_k, FAIL);
     H5TRACE3("e","iIsIs",plist_id,ik,lk);
@@ -1408,9 +1408,9 @@ H5Pset_sym_k(hid_t plist_id, int ik, int lk)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , int *lk /*out */ )
+H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , unsigned *lk /*out */ )
 {
-    int                    btree_k[8];
+    int btree_k[H5B_NUM_BTREE_ID];
 
     FUNC_ENTER(H5Pget_sym_k, FAIL);
     H5TRACE3("e","ixx",plist_id,ik,lk);
@@ -1457,7 +1457,7 @@ H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , int *lk /*out */ )
 herr_t
 H5Pset_istore_k(hid_t plist_id, int ik)
 {
-    int                    btree_k[8]={0};
+    int btree_k[H5B_NUM_BTREE_ID];
 
     FUNC_ENTER(H5Pset_istore_k, FAIL);
     H5TRACE2("e","iIs",plist_id,ik);
@@ -1507,7 +1507,7 @@ H5Pset_istore_k(hid_t plist_id, int ik)
 herr_t
 H5Pget_istore_k(hid_t plist_id, int *ik /*out */ )
 {
-    int                    btree_k[8]={0};
+    int btree_k[H5B_NUM_BTREE_ID];
 
     FUNC_ENTER(H5Pget_istore_k, FAIL);
     H5TRACE2("e","ix",plist_id,ik);

@@ -50,11 +50,6 @@ typedef enum H5B_ins_t {
     H5B_INS_REMOVE	 = 5	/*remove current node			     */
 } H5B_ins_t;
 
-typedef enum H5B_subid_t {
-    H5B_SNODE_ID	 = 0,	/*B-tree is for symbol table nodes	     */
-    H5B_ISTORE_ID	 = 1	/*B-tree is for indexed object storage	     */
-} H5B_subid_t;
-
 /*
  * Each class of object that can be pointed to by a B-link tree has a
  * variable of this type that contains class variables and methods.  Each

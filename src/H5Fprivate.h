@@ -215,8 +215,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_SIZEOF_ADDR(F)      (H5F_sizeof_addr(F))
 #define H5F_SIZEOF_SIZE(F)      (H5F_sizeof_size(F))
 
-__DLL__ size_t H5F_sizeof_addr(H5F_t *f);
-__DLL__ size_t H5F_sizeof_size(H5F_t *f);
+__DLL__ size_t H5F_sizeof_addr(const H5F_t *f);
+__DLL__ size_t H5F_sizeof_size(const H5F_t *f);
 
 /* Macros to encode/decode offset/length's for storing in the file */
 #ifdef NOT_YET
@@ -257,12 +257,12 @@ __DLL__ size_t H5F_sizeof_size(H5F_t *f);
 #define H5F_CRT_USER_BLOCK_DEF       0
 /* Definitions for the 1/2 rank for symbol table leaf nodes */
 #define H5F_CRT_SYM_LEAF_NAME        "symbol_leaf"
-#define H5F_CRT_SYM_LEAF_SIZE        sizeof(int)
+#define H5F_CRT_SYM_LEAF_SIZE        sizeof(unsigned)
 #define H5F_CRT_SYM_LEAF_DEF         4
 /* Definitions for the 1/2 rank for btree internal nodes    */
 #define H5F_CRT_BTREE_RANK_NAME      "btree_rank"
-#define H5F_CRT_BTREE_RANK_SIZE      sizeof(int[8])
-#define H5F_CRT_BTREE_RANK_DEF       {16,32,0}
+#define H5F_CRT_BTREE_RANK_SIZE      sizeof(int[H5B_NUM_BTREE_ID])
+#define H5F_CRT_BTREE_RANK_DEF       {16,32}
 /* Definitions for byte number in an address                */
 #define H5F_CRT_ADDR_BYTE_NUM_NAME   "addr_byte_num"
 #define H5F_CRT_ADDR_BYTE_NUM_SIZE   sizeof(size_t)
@@ -325,8 +325,8 @@ struct H5S_t;
 
 /* Private functions, not part of the publicly documented API */
 __DLL__ herr_t H5F_init(void);
-__DLL__ unsigned H5F_get_intent(H5F_t *f);
-__DLL__ hid_t H5F_get_driver_id(H5F_t *f);
+__DLL__ unsigned H5F_get_intent(const H5F_t *f);
+__DLL__ hid_t H5F_get_driver_id(const H5F_t *f);
 
 /* Functions that operate on array storage */
 __DLL__ herr_t H5F_arr_create(H5F_t *f,

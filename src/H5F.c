@@ -163,8 +163,8 @@ H5F_init_interface(void)
      */
     H5P_genclass_t  *crt_pclass;
     hsize_t         userblock_size      = H5F_CRT_USER_BLOCK_DEF;
-    int             sym_leaf_k          = H5F_CRT_SYM_LEAF_DEF;
-    int             btree_k[8]          = H5F_CRT_BTREE_RANK_DEF;
+    unsigned        sym_leaf_k          = H5F_CRT_SYM_LEAF_DEF;
+    int             btree_k[H5B_NUM_BTREE_ID] = H5F_CRT_BTREE_RANK_DEF;
     size_t          sizeof_addr         = H5F_CRT_ADDR_BYTE_NUM_DEF;
     size_t          sizeof_size         = H5F_CRT_OBJ_BYTE_NUM_DEF;
     int             bootblock_ver       = H5F_CRT_BOOT_VERS_DEF;
@@ -1059,8 +1059,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     int                 share_head_vers;
     size_t              sizeof_addr = 0;
     size_t              sizeof_size = 0;
-    int                 sym_leaf_k = 0;
-    int                 btree_k[8] = {0};
+    unsigned            sym_leaf_k = 0;
+    int                 btree_k[H5B_NUM_BTREE_ID];
     
     FUNC_ENTER(H5F_open, NULL);
 
@@ -1297,7 +1297,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
                         "unable to set rank for symbol table leaf nodes");
 
 	/* Need 'get' call to set other array values */
-        if(H5P_get(shared->fcpl_id, H5F_CRT_BTREE_RANK_NAME, &btree_k)<0)
+        if(H5P_get(shared->fcpl_id, H5F_CRT_BTREE_RANK_NAME, btree_k)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
                         "unable to get rank for btree internal nodes");        
 	UINT16DECODE(p, btree_k[H5B_SNODE_ID]);
@@ -1305,7 +1305,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 	    HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, NULL,
 			"bad 1/2 rank for btree internal nodes");
 	}
-        if(H5P_set(shared->fcpl_id, H5F_CRT_BTREE_RANK_NAME, &btree_k)<0)
+        if(H5P_set(shared->fcpl_id, H5F_CRT_BTREE_RANK_NAME, btree_k)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, 
                         "unable to set rank for btree internal nodes");
 
@@ -1769,7 +1769,8 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     char		driver_name[9];
     int                 boot_vers, freespace_vers, 
                         obj_dir_vers, share_head_vers,
-                        sym_leaf_k, btree_k[8]={0};
+                        btree_k[H5B_NUM_BTREE_ID];
+    unsigned            sym_leaf_k;
     
     
     FUNC_ENTER(H5F_flush, FAIL);
@@ -2606,7 +2607,7 @@ H5Freopen(hid_t file_id)
  *-------------------------------------------------------------------------
  */
 unsigned
-H5F_get_intent(H5F_t *f)
+H5F_get_intent(const H5F_t *f)
 {
     FUNC_ENTER(H5F_get_intent, 0);
 
@@ -2636,7 +2637,7 @@ H5F_get_intent(H5F_t *f)
  *-------------------------------------------------------------------------
  */
 size_t
-H5F_sizeof_addr(H5F_t *f)
+H5F_sizeof_addr(const H5F_t *f)
 {
     size_t sizeof_addr = 0;
 
@@ -2669,12 +2670,14 @@ H5F_sizeof_addr(H5F_t *f)
  *-------------------------------------------------------------------------
  */
 size_t
-H5F_sizeof_size(H5F_t *f)
+H5F_sizeof_size(const H5F_t *f)
 {
     size_t   sizeof_size = 0;
 
     FUNC_ENTER(H5F_sizeof_size, 0);
+
     assert(f);
+
     if(H5P_get(f->shared->fcpl_id, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size)<0)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
                       "can't get byte number for object size");
@@ -2699,7 +2702,7 @@ H5F_sizeof_size(H5F_t *f)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5F_get_driver_id(H5F_t *f)
+H5F_get_driver_id(const H5F_t *f)
 {
     FUNC_ENTER(H5F_get_driver_id, 0);
 
@@ -2969,7 +2972,8 @@ H5F_debug(H5F_t *f, haddr_t UNUSED addr, FILE * stream, int indent,
 	  int fwidth)
 {
     hsize_t userblock_size;
-    int     sym_leaf_k, btree_k[8]={0};
+    int     btree_k[H5B_NUM_BTREE_ID];
+    unsigned sym_leaf_k;
     size_t  sizeof_addr, sizeof_size;
     int     boot_vers, freespace_vers, obj_dir_vers, share_head_vers;
 
@@ -3045,7 +3049,7 @@ H5F_debug(H5F_t *f, haddr_t UNUSED addr, FILE * stream, int indent,
     HDfprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth,
 	      "Size of file haddr_t type:", (unsigned) sizeof_addr);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Symbol table leaf node 1/2 rank:", (unsigned) sym_leaf_k);
+	      "Symbol table leaf node 1/2 rank:", sym_leaf_k);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Symbol table internal node 1/2 rank:",
               (unsigned) (btree_k[H5B_SNODE_ID]));
