@@ -6292,7 +6292,7 @@ H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
     /* Get the datatype size */
     if (NULL==(dt=H5I_object(type_id)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
-    elem_size=H5T_get_size(dt);
+    elmt_size=H5T_get_size(dt);
 
     /* Construct iterator for hyperslab selection */
     if (H5S_hyper_init(space, elmt_size, &iter)<0)
