@@ -31,13 +31,6 @@
 /* Data structure to store each block in free list */
 typedef struct H5FL_reg_node_t {
     struct H5FL_reg_node_t *next;   /* Pointer to next block in free list */
-#ifdef H5FL_DEBUG
-    unsigned inuse;                /* Indicate when object is in use */
-#endif /* H5FL_DEBUG */
-    union {
-        double unused1;         /* Unused normally, just here for aligment */
-        haddr_t unused2;        /* Unused normally, just here for aligment */
-    }align;             /* Bogus union, just here to align following block */
 } H5FL_reg_node_t;
 
 /* Data structure for free list of blocks */
@@ -73,14 +66,12 @@ typedef struct H5FL_reg_head_t {
  * only support fixed sized types, like structs, etc..
  */
 
-/* Data structure to store each block in free list */
-typedef struct H5FL_blk_list_t {
+/* Data structure to store information about each block allocated */
+typedef union H5FL_blk_list_t {
     size_t size;                /* Size of the page */
-    struct H5FL_blk_list_t *next;   /* Pointer to next block in free list */
-    union {
-        double unused1;         /* Unused normally, just here for aligment */
-        haddr_t unused2;        /* Unused normally, just here for aligment */
-    }align;             /* Bogus union, just here to align following block */
+    union H5FL_blk_list_t *next;   /* Pointer to next block in free list */
+    double unused1;         /* Unused normally, just here for aligment */
+    haddr_t unused2;        /* Unused normally, just here for aligment */
 } H5FL_blk_list_t;
 
 /* Data structure for priority queue node of block free lists */
@@ -123,13 +114,11 @@ typedef struct H5FL_blk_head_t {
 #define H5FL_BLK_REALLOC(t,blk,new_size) H5FL_blk_realloc(&(t##_pq),blk,new_size)
 
 /* Data structure to store each array in free list */
-typedef struct H5FL_arr_node_t {
-    struct H5FL_arr_node_t *next;   /* Pointer to next block in free list */
+typedef union H5FL_arr_node_t {
+    union H5FL_arr_node_t *next;   /* Pointer to next block in free list */
     size_t nelem;               /* Number of elements in this array */
-    union {
-        double unused1;         /* Unused normally, just here for aligment */
-        haddr_t unused2;        /* Unused normally, just here for aligment */
-    }align;             /* Bogus union, just here to align following block */
+    double unused1;             /* Unused normally, just here for aligment */
+    haddr_t unused2;            /* Unused normally, just here for aligment */
 } H5FL_arr_node_t;
 
 /* Data structure for free list of array blocks */

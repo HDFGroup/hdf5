@@ -182,6 +182,10 @@ H5FL_reg_init(H5FL_reg_head_t *head)
     /* Indicate that the free list is initialized */
     head->init=1;
 
+    /* Make certain that the space allocated is large enough to store a free list pointer (eventually) */
+    if(head->size<sizeof(void *))
+        head->size=sizeof(void *);
+
     FUNC_LEAVE (ret_value);
 }   /* end H5FL_reg_init() */
 
@@ -222,13 +226,8 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
     /* Make certain that the free list is initialized */
     assert(head->init);
 
-    /* Get the pointer to the info header in front of the block to free */
-    temp=(H5FL_reg_node_t *)((unsigned char *)obj-sizeof(H5FL_reg_node_t));
-
-#ifdef H5FL_DEBUG
-    assert(temp->inuse);
-    temp->inuse=0;
-#endif /* H5FL_DEBUG */
+    /* Alias the pointer to the block to free into a H5FL_reg_node_t node */
+    temp=(H5FL_reg_node_t *)obj;
 
     /* Link into the free list */
     temp->next=head->list;
@@ -276,7 +275,6 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
 void *
 H5FL_reg_alloc(H5FL_reg_head_t *head, unsigned clear)
 {
-    H5FL_reg_node_t *new_obj;   /* Pointer to the new free list node allocated */
     void *ret_value;        /* Pointer to object to return */
 
     FUNC_ENTER (H5FL_reg_alloc, NULL);
@@ -297,11 +295,7 @@ H5FL_reg_alloc(H5FL_reg_head_t *head, unsigned clear)
     /* Check for nodes available on the free list first */
     if(head->list!=NULL) {
         /* Get a pointer to the block on the free list */
-        ret_value=((char *)(head->list))+sizeof(H5FL_reg_node_t);
-
-#ifdef H5FL_DEBUG
-        head->list->inuse=1;
-#endif /* H5FL_DEBUG */
+        ret_value=(void *)(head->list);
 
         /* Remove node from free list */
         head->list=head->list->next;
@@ -316,18 +310,11 @@ H5FL_reg_alloc(H5FL_reg_head_t *head, unsigned clear)
     } /* end if */
     /* Otherwise allocate a node */
     else {
-        if (NULL==(new_obj = H5FL_malloc(sizeof(H5FL_reg_node_t)+head->size)))
+        if (NULL==(ret_value = H5FL_malloc(head->size)))
             HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-
-#ifdef H5FL_DEBUG
-        new_obj->inuse=1;
-#endif /* H5FL_DEBUG */
 
         /* Increment the number of blocks allocated in list */
         head->allocated++;
-
-        /* Get a pointer to the new block */
-        ret_value=((char *)new_obj)+sizeof(H5FL_reg_node_t);
     } /* end else */
 
     /* Clear to zeros, if asked */
@@ -377,10 +364,6 @@ H5FL_reg_gc_list(H5FL_reg_head_t *head)
 
         /* Decrement count of free memory on this list */
         head->list_mem-=head->size;
-
-#ifdef H5FL_DEBUG
-        assert(!free_list->inuse);
-#endif /* H5FL_DEBUG */
 
         H5MM_xfree(free_list);
 
@@ -705,9 +688,15 @@ H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, unsigned clear)
     /* check if there is a free list for blocks of this size */
     /* and if there are any blocks available on the list */
     if((free_list=H5FL_blk_find_list(&(head->head),size))!=NULL && free_list->list!=NULL) {
-        /* Remove the first node from the list and return it */
-        ret_value=((char *)(free_list->list))+sizeof(H5FL_blk_list_t);
+        /* Remove the first node from the free list */
+        temp=free_list->list;
         free_list->list=free_list->list->next;
+
+        /* Restore the size of the block */
+        temp->size=size;        /* Overwrites the 'next' field */
+
+        /* Return the pointer to the data portion */
+        ret_value=((char *)temp)+sizeof(H5FL_blk_list_t);
 
         /* Decrement the number of blocks & memory used on free list */
         head->onlist--;
@@ -728,7 +717,6 @@ H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, unsigned clear)
 
         /* Initialize the block allocated */
         temp->size=size;
-        temp->next=NULL;
 
         /* Set the return value to the block itself */
         ret_value=((char *)temp)+sizeof(H5FL_blk_list_t);
@@ -768,6 +756,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
 {
     H5FL_blk_node_t *free_list;      /* The free list of nodes of correct size */
     H5FL_blk_list_t *temp;      /* Temp. ptr to the new free list node allocated */
+    size_t free_size;           /* Size of the block freed */
 
     FUNC_ENTER(H5FL_blk_free, NULL);
 
@@ -781,6 +770,9 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
     /* Get the pointer to the native block info header in front of the native block to free */
     temp=(H5FL_blk_list_t *)((unsigned char *)block-sizeof(H5FL_blk_list_t));
 
+    /* Save the block's size for later */
+    free_size=temp->size;
+
     /* check if there is a free list for native blocks of this size */
     if((free_list=H5FL_blk_find_list(&(head->head),temp->size))==NULL) {
         /* No free list available, create a new list node and insert it to the queue */
@@ -789,33 +781,25 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
 
     /* Prepend the free'd native block to the front of the free list */
     if(free_list!=NULL) {
-        temp->next=free_list->list;
+        temp->next=free_list->list; /* Overwrites the size field in union */
         free_list->list=temp;
     } /* end if */
 
     /* Increment the number of blocks on free list */
     head->onlist++;
-    head->list_mem+=temp->size;
+    head->list_mem+=free_size;
 
     /* Increment the amount of "block" freed memory globally */
-    H5FL_blk_gc_head.mem_freed+=temp->size;
+    H5FL_blk_gc_head.mem_freed+=free_size;
 
     /* Check for exceeding free list memory use limits */
     /* First check this particular list */
-    if(head->list_mem>H5FL_blk_lst_mem_lim) {
-#ifdef QAK
-printf("%s: temp->size=%u, head->name=%s, head->list_mem=%u, H5FL_blk_gc_head.mem_freed=%u, garbage collecting list\n",FUNC,(unsigned)temp->size,head->name,(unsigned)head->list_mem,(unsigned)H5FL_blk_gc_head.mem_freed);
-#endif /* QAK */
+    if(head->list_mem>H5FL_blk_lst_mem_lim)
         H5FL_blk_gc_list(head);
-    } /* end if */
 
     /* Then check the global amount memory on block free lists */
-    if(H5FL_blk_gc_head.mem_freed>H5FL_blk_glb_mem_lim) {
-#ifdef QAK
-printf("%s: head->name=%s, garbage collecting all block lists\n",FUNC,head->name);
-#endif /* QAK */
+    if(H5FL_blk_gc_head.mem_freed>H5FL_blk_glb_mem_lim)
         H5FL_blk_gc();
-    } /* end if */
 
 #endif /* NO_BLK_FREE_LISTS */
 
@@ -916,10 +900,10 @@ H5FL_blk_gc_list(H5FL_blk_head_t *head)
 
             /* Decrement the number of blocks & memory allocated from this PQ */
             head->allocated--;
-            head->list_mem-=list->size;
+            head->list_mem-=head->head->size;
 
             /* Decrement global count of free memory on "block" lists */
-            H5FL_blk_gc_head.mem_freed-=list->size;
+            H5FL_blk_gc_head.mem_freed-=head->head->size;
 
             /* Free the block */
             H5MM_xfree(list);
@@ -1121,6 +1105,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
 {
     H5FL_arr_node_t *temp;  /* Temp. ptr to the new free list node allocated */
     size_t mem_size;        /* Size of memory being freed */
+    size_t free_nelem;      /* Number of elements in node being free'd */
 
     FUNC_ENTER (H5FL_arr_free, NULL);
 
@@ -1142,20 +1127,23 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
         /* Get the pointer to the info header in front of the block to free */
         temp=(H5FL_arr_node_t *)((unsigned char *)obj-sizeof(H5FL_arr_node_t));
 
+        /* Save the number of elements for later */
+        free_nelem=temp->nelem;
+
         /* Double-check that there is enough room for arrays of this size */
-        assert((int)temp->nelem<=head->maxelem);
+        assert((int)free_nelem<=head->maxelem);
 
         /* Link into the free list */
-        temp->next=head->u.list_arr[temp->nelem];
+        temp->next=head->u.list_arr[free_nelem];
 
         /* Point free list at the node freed */
-        head->u.list_arr[temp->nelem]=temp;
+        head->u.list_arr[free_nelem]=temp;
 
         /* Set the amount of memory being freed */
-        mem_size=temp->nelem*head->size;
+        mem_size=free_nelem*head->size;
 
         /* Increment the number of blocks & memory used on free list */
-        head->onlist[temp->nelem]++;
+        head->onlist[free_nelem]++;
         head->list_mem+=mem_size;
 
         /* Increment the amount of "array" freed memory globally */
@@ -1226,7 +1214,7 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, unsigned clear)
         /* Check for nodes available on the free list first */
         if(head->u.list_arr[elem]!=NULL) {
             /* Get a pointer to the block on the free list */
-            ret_value=((char *)(head->u.list_arr[elem]))+sizeof(H5FL_arr_node_t);
+            new_obj=head->u.list_arr[elem];
 
             /* Remove node from free list */
             head->u.list_arr[elem]=head->u.list_arr[elem]->next;
@@ -1237,6 +1225,12 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, unsigned clear)
 
             /* Decrement the amount of global "array" free list memory in use */
             H5FL_arr_gc_head.mem_freed-=mem_size;
+
+            /* Restore number of elements */
+            new_obj->nelem=elem;
+
+            /* Get the pointer to the data block */
+            ret_value=((char *)new_obj)+sizeof(H5FL_arr_node_t);
 
         } /* end if */
         /* Otherwise allocate a node */
@@ -1249,16 +1243,14 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, unsigned clear)
 
             /* Initialize the new object */
             new_obj->nelem=elem;
-            new_obj->next=NULL;
 
             /* Get a pointer to the new block */
             ret_value=((char *)new_obj)+sizeof(H5FL_arr_node_t);
         } /* end else */
 
         /* Clear to zeros, if asked */
-        if(clear) {
+        if(clear)
             HDmemset(ret_value,0,mem_size);
-        } /* end if */
     } /* end if */
     /* No fixed number of elements, use PQ routine */
     else {
