@@ -48,8 +48,6 @@ static herr_t H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
 			       const H5S_t *mem_space,
 			       H5S_sel_iter_t *mem_iter, hsize_t nelmts,
 			       void *_buf/*out*/);
-static herr_t H5S_select_elements(H5S_t *space, H5S_seloper_t op,
-				   size_t num_elem, const hssize_t **coord);
 
 const H5S_fconv_t	H5S_POINT_FCONV[1] = {{
     "point", 				/*name				*/
@@ -196,16 +194,19 @@ herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hss
 
         /* Put new list in point selection */
         space->select.sel_info.pnt_lst->head=top;
-    }
+    } /* end if */
     else {  /* op==H5S_SELECT_APPEND */
         new_node=space->select.sel_info.pnt_lst->head;
-        if(new_node!=NULL)
+        if(new_node!=NULL) {
             while(new_node->next!=NULL)
                 new_node=new_node->next;
 
-        /* Append new list to point selection */
-        new_node->next=top;
-    }
+            /* Append new list to point selection */
+            new_node->next=top;
+        } /* end if */
+        else 
+            space->select.sel_info.pnt_lst->head=top;
+    } /* end else */
 
     /* Add the number of elements in the new selection */
     space->select.num_elem+=num_elem;
@@ -1155,7 +1156,7 @@ H5S_point_select_contiguous(const H5S_t *space)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
+herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
     const hssize_t **coord)
 {
     herr_t ret_value=SUCCEED;  /* return value */
