@@ -1680,7 +1680,7 @@ H5S_set_extend (H5S_t *space, const hsize_t *size)
     int	ret_value=0;
     unsigned	u;
     
-    FUNC_ENTER (H5S_extend, FAIL);
+    FUNC_ENTER (H5S_set_extend, FAIL);
 
     /* Check args */
     assert (space && H5S_SIMPLE==space->extent.type);
