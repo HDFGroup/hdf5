@@ -474,6 +474,7 @@ main(void)
     if(close_error()<0)
         TEST_ERROR ;
 
+    PASSED();
     printf("All error API test based on native datatype test passed.\n");
     return 0;
 
