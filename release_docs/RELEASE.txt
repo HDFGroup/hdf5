@@ -36,30 +36,35 @@ New Features
 
     Configuration:
     --------------
+        - Added some initial support for making purify (or similar memory
+            checking products) happier by initializing buffers to zero and
+            disabling the internal free list code.  To take advantage of this,
+            define 'H5_USING_PURIFY' in your CFLAGS when building the library.
+            QAK - 2004/07/23
         - Fixed the long compile time of H5detect.c when v7.x Intel Compiler
-	  is used with optimization NOT off.  AKC - 2004/05/20
+	    is used with optimization NOT off.  AKC - 2004/05/20
 	- Fixed configure setting of C++ for OSF1 platform. AKC - 2004/01/06
         - Prefix default is changed from /usr/local to `pwd`/hdf5.
-          AKC - 2003/07/09
+            AKC - 2003/07/09
 
     Library:
     --------
         - 4 new API functions, H5Tencode, H5Tdecode, H5Sencode, H5Sdecode were
-          added to the library.  Given object ID, these functions encode and 
-          decode HDF5 objects(data type and space) information into and from 
-          binary buffer.        SLU - 2004/07/21
+            added to the library.  Given object ID, these functions encode and 
+            decode HDF5 objects(data type and space) information into and from 
+            binary buffer.        SLU - 2004/07/21
         - Modified the way how HDF5 calculates 'pixels_per_scanline' parameter for 
-          SZIP compression. Now there is no restriction on the size and shape of the
-          chunk except that the total number of elements in the chunk cannot be 
-          bigger than 'pixels_per_block' parameter provided by the user.  
+            SZIP compression. Now there is no restriction on the size and shape of the
+            chunk except that the total number of elements in the chunk cannot be 
+            bigger than 'pixels_per_block' parameter provided by the user.  
                                                                      EIP - 2004/07/21  
         - Added support for SZIP without encoder.  Added H5Zget_filter_info
-          and changed H5Pget_filter and H5Pget_filter_by_id to support this
-          change.  JL/NF - 2004/06/30
+            and changed H5Pget_filter and H5Pget_filter_by_id to support this
+            change.  JL/NF - 2004/06/30
         - SZIP always uses K13 compression.  This flag no longer needs to
-          be set when calling H5Pset_szip.  If the flag for CHIP
-          compression is set, it will be ignored (since the two are mutually
-          exclusive).  JL/NF - 2004/6/30
+            be set when calling H5Pset_szip.  If the flag for CHIP
+            compression is set, it will be ignored (since the two are mutually
+            exclusive).  JL/NF - 2004/6/30
         - A new API function H5Fget_name was added.  It returns the name
             of the file by object(file, group, data set, named data type,
             attribute) ID.  SLU - 2004/06/29

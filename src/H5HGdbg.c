@@ -80,7 +80,7 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 	    "Total collection size in file:",
 	    (unsigned long)(h->size));
 
-    for (u=1, nused=0, maxobj=0; u<h->nalloc; u++) {
+    for (u=1, nused=0, maxobj=0; u<h->nused; u++) {
 	if (h->obj[u].begin) {
 	    nused++;
 	    if (u>maxobj) maxobj = u;
@@ -95,7 +95,7 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 	     "Free space:",
 	     (unsigned long)(h->obj[0].size));
 
-    for (u=1; u<h->nalloc; u++) {
+    for (u=1; u<h->nused; u++) {
 	if (h->obj[u].begin) {
 	    sprintf (buf, "Object %u", u);
 	    fprintf (stream, "%*s%s\n", indent, "", buf);

@@ -960,6 +960,9 @@ H5D_istore_init (H5F_t *f, H5D_t *dset)
     assert(shared->sizeof_rnode);
     if(NULL==(shared->page=H5FL_BLK_MALLOC(chunk_page,shared->sizeof_rnode)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
+#ifdef H5_USING_PURIFY
+HDmemset(shared->page,0,shared->sizeof_rnode);
+#endif /* H5_USING_PURIFY */
     if(NULL==(shared->nkey=H5FL_SEQ_MALLOC(size_t,(size_t)(2*H5F_KVALUE(f,H5B_ISTORE)+1))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
 
@@ -1597,6 +1600,10 @@ H5D_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
                     HDmemset (chunk, 0, chunk_size);
                 } /* end else */
             } /* end if */
+#ifdef H5_USING_PURIFY
+else
+    HDmemset(ret_value,0,size);
+#endif /* H5_USING_PURIFY */
             rdcc->ninits++;
         } /* end else */
     }

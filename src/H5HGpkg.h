@@ -81,7 +81,7 @@ struct H5HG_heap_t {
     size_t		size;		/*total size of collection	*/
     uint8_t		*chunk;		/*the collection, incl. header	*/
     size_t		nalloc;		/*numb object slots allocated	*/
-    size_t              next_idx;       /* Object index to use next     */
+    size_t		nused;		/*number of slots used		*/
                                         /* If this value is >65535 then all indices */
                                         /* have been used at some time and the */
                                         /* correct new index should be searched for */
