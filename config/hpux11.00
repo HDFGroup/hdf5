@@ -77,7 +77,7 @@ fi
 case "X-$CXX" in
   X-aCC)
     # +Z for PIC, +A for using archived libraries
-    CXXFLAGS="$CXXFLAGS +Z +A"
+    CXXFLAGS="$CXXFLAGS +Z +A -D_INCLUDE_LONGLONG"
     CFLAGS="$CFLAGS -g +O2"
     DEBUG_CXXFLAGS=-g
     DEBUG_CPPFLAGS=
@@ -87,7 +87,7 @@ case "X-$CXX" in
     ;;
 
   *)
-    CXXFLAGS="$CXXFLAGS"
+    CXXFLAGS="$CXXFLAGS -D_INCLUDE_LONGLONG"
     CFLAGS="$CFLAGS"
     DEBUG_CXXFLAGS=
     DEBUG_CPPFLAGS=
