@@ -42,11 +42,13 @@ New Features
 
     Library:
     --------
+        - Data type conversion(software) from float to integer was added.
+          Conversion from integer to float will be added later.  SLU -2004/2/4
         - Added new H5Premove_filter routine to remove I/O pipeline filters
             from dataset creation property lists.  PVN - 2004/01/26
         - Added new 'compare' callback parameter to H5Pregister & H5Pinsert
             routines.  QAK - 2004/01/07
-        - Data type conversion between integers and floats was added.
+        - Data type conversion(hardware) between integers and floats was added.
             SLU 2003/11/21
         - New function H5Iget_file_id() was added.  It returns file ID given
             an object(dataset, group, or attribute) ID.  SLU 2003/10/29
