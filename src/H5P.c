@@ -908,6 +908,16 @@ H5Pset_space(hid_t sid, intn rank, const size_t *dims)
     }                           /* end switch */
     space->type = H5P_SIMPLE;
 
+    /* Reset hyperslab definition, if one is defined */
+    if(space->hslab_def==TRUE)
+      {
+        H5MM_xfree(space->h.start);
+        H5MM_xfree(space->h.count);
+        H5MM_xfree(space->h.stride);
+        space->hslab=FALSE;
+
+      } /* end if */
+
     if (rank == 0) {            /* scalar variable */
         space->type = H5P_SCALAR;
         space->u.simple.rank = 0;       /* set to scalar rank */
