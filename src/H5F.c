@@ -153,7 +153,6 @@ H5F_init_interface(void)
 #elif (H5F_LOW_DFLT == H5F_LOW_CORE)
     H5F_access_dflt.u.core.increment = 10*1024;
 #elif (H5F_LOW_DFLT == H5F_LOW_MPIO)
-    H5F_access_dflt.u.mpio.access_mode = H5D_XFER_INDEPENDENT;
     H5F_access_dflt.u.mpio.comm = MPI_COMM_SELF;
     H5F_access_dflt.u.mpio.info = MPI_INFO_NULL;
 #elif (H5F_LOW_DFLT == H5F_LOW_SPLIT)
@@ -393,7 +392,7 @@ H5F_locate_signature(H5F_low_t *f_handle, const H5F_access_t *access_parms,
     H5F_low_size(f_handle, &max_addr);
     H5F_addr_reset(addr);
     while (H5F_addr_lt(addr, &max_addr)) {
-	if (H5F_low_read(f_handle, access_parms, addr,
+	if (H5F_low_read(f_handle, access_parms, H5D_XFER_DFLT, addr,
 			 H5F_SIGNATURE_LEN, buf) < 0) {
 	    HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "can't read file");
 	}
@@ -892,8 +891,8 @@ H5F_open(const char *name, uintn flags,
 				 &(f->shared->boot_addr)) < 0) {
 	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL, "can't find signature");
 	}
-	if (H5F_low_read(f->shared->lf, access_parms, &(f->shared->boot_addr),
-			 fixed_size, buf) < 0) {
+	if (H5F_low_read(f->shared->lf, access_parms, H5D_XFER_DFLT,
+			 &(f->shared->boot_addr), fixed_size, buf) < 0) {
 	    HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "can't read boot block");
 	}
 	
@@ -971,8 +970,8 @@ H5F_open(const char *name, uintn flags,
 	assert(variable_size <= sizeof buf);
 	addr1 = f->shared->boot_addr;
 	H5F_addr_inc(&addr1, (hsize_t)fixed_size);
-	if (H5F_low_read(f->shared->lf, access_parms, &addr1, variable_size,
-			 buf) < 0) {
+	if (H5F_low_read(f->shared->lf, access_parms, H5D_XFER_DFLT,
+			 &addr1, variable_size, buf) < 0) {
 	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL,
 			"can't read boot block");
 	}
@@ -1336,6 +1335,7 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     
     /* write the boot block to disk */
     if (H5F_low_write(f->shared->lf, f->shared->access_parms,
+    		      H5D_XFER_DFLT,
 		      &(f->shared->boot_addr), (size_t)(p-buf), buf)<0) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't write header");
     }
@@ -1506,11 +1506,14 @@ H5Fclose(hid_t fid)
  *		Jul 10 1997
  *
  * Modifications:
+ *		June 2, 1998	Albert Cheng
+ *		Added xfer_mode argument
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size, void *buf)
+H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,
+	       const H5D_transfer_t xfer_mode, void *buf)
 {
     haddr_t		    abs_addr;
 
@@ -1523,7 +1526,7 @@ H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size, void *buf)
     H5F_addr_add(&abs_addr, addr);
 
     /* Read the data */
-    if (H5F_low_read(f->shared->lf, f->shared->access_parms,
+    if (H5F_low_read(f->shared->lf, f->shared->access_parms, xfer_mode,
 		     &abs_addr, (size_t)size, buf) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "low-level read failed");
     }
@@ -1550,11 +1553,14 @@ H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size, void *buf)
  *		Jul 10 1997
  *
  * Modifications:
+ *		June 2, 1998	Albert Cheng
+ *		Added xfer_mode argument
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size, const void *buf)
+H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size,
+		const H5D_transfer_t xfer_mode, const void *buf)
 {
     haddr_t		    abs_addr;
 
@@ -1571,7 +1577,7 @@ H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size, const void *buf)
     H5F_addr_add(&abs_addr, addr);
 
     /* Write the data */
-    if (H5F_low_write(f->shared->lf, f->shared->access_parms,
+    if (H5F_low_write(f->shared->lf, f->shared->access_parms, xfer_mode,
 		      &abs_addr, (size_t)size, buf)) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low-level write failed");
     }

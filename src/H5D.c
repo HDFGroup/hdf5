@@ -76,7 +76,7 @@ const H5D_xfer_t	H5D_xfer_dflt = {
     NULL, 			/* Background buffer or NULL		*/
     H5T_BKG_NO,			/* Type of background buffer needed	*/
 #ifdef HAVE_PARALLEL
-    H5D_XFER_INDEPENDENT,      	/* Independent data transfer      	*/
+    H5D_XFER_DFLT,      	/* Independent data transfer      	*/
 #endif
 };
 
@@ -1155,9 +1155,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5T_DEBUG
     H5_timer_t		timer;
 #endif
-#ifdef HAVE_PARALLEL
-    int	access_mode_saved = -1;
-#endif
 
     FUNC_ENTER(H5D_read, FAIL);
 
@@ -1180,29 +1177,9 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	/* can always be simulated by independent access. */
 	/* Nevertheless, must check driver is MPIO before using those */
 	/* access_mode which exists only for MPIO case. */
-	if (dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO){
-	    /* 
-	     * -AKC-
-	     * "plant" the collective access mode into the file information
-	     * so that the lower level mpio routines know to use collective
-	     * access.
-	     * This is not thread-safe, is a klutch for now.
-	     * Should change all the I/O routines to pass along the xfer
-	     * property list to the low level I/O for proper execution.
-	     * Make it to work now.  Must fix it later.
-	     * -AKC-
-	     */
-#ifdef AKC
-	    printf("%s: collective access requested\n", FUNC);
-#endif
-	    access_mode_saved =
-		    dataset->ent.file->shared->access_parms->u.mpio.access_mode;
-	    dataset->ent.file->shared->access_parms->u.mpio.access_mode =
-		    H5D_XFER_COLLECTIVE;
-	}else{
+	if (dataset->ent.file->shared->access_parms->driver != H5F_LOW_MPIO)
 	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "collective access not permissible");
-	}
     }
 #endif /*HAVE_PARALLEL*/
 
@@ -1241,18 +1218,19 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * Check if collective data transfer requested.
      */
     if (xfer_parms->xfer_mode == H5D_XFER_COLLECTIVE){
-	    /* Supports only no conversion, type or space, for now. */
-	    if (H5T_conv_noop==tconv_func &&
-		NULL!=sconv_func->read) {
-		status = (sconv_func->read)(dataset->ent.file, &(dataset->layout),
-					     &(dataset->create_parms->compress),
-					     &(dataset->create_parms->efl),
-					     H5T_get_size (dataset->type), file_space,
-                                             mem_space, buf/*out*/);
-		if (status>=0) goto succeed;
-		HGOTO_ERROR (H5E_DATASET, H5E_READERROR, FAIL,
-		    "collective read failed");
-	    }
+	/* Supports only no conversion, type or space, for now. */
+	if (H5T_conv_noop==tconv_func &&
+	    NULL!=sconv_func->read) {
+	    status = (sconv_func->read)(dataset->ent.file, &(dataset->layout),
+					 &(dataset->create_parms->compress),
+					 &(dataset->create_parms->efl),
+					 H5T_get_size (dataset->type), file_space,
+					 mem_space, xfer_parms->xfer_mode,
+					 buf/*out*/);
+	    if (status>=0) goto succeed;
+	    HGOTO_ERROR (H5E_DATASET, H5E_READERROR, FAIL,
+		"collective read failed");
+	}
     }
 #endif /*HAVE_PARALLEL*/
 
@@ -1268,7 +1246,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				    &(dataset->create_parms->compress),
 				    &(dataset->create_parms->efl),
 				    H5T_get_size (dataset->type), file_space,
-				    mem_space, buf/*out*/);
+				    mem_space, xfer_parms->xfer_mode,
+				    buf/*out*/);
 	if (status>=0) goto succeed;
 #ifdef H5D_DEBUG
 	fprintf (stderr, "H5D: data space conversion could not be optimized "
@@ -1356,6 +1335,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				&(dataset->create_parms->efl), 
 				H5T_get_size (dataset->type), file_space,
 				&numbering, smine_start, smine_nelmts,
+				xfer_parms->xfer_mode,
 				tconv_buf/*out*/)!=smine_nelmts) {
 	    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed");
 	}
@@ -1407,15 +1387,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (bkg_buf && NULL==xfer_parms->bkg_buf) {
 	H5MM_xfree (bkg_buf);
     }
-#ifdef HAVE_PARALLEL
-    /*
-     * Check if collective data transfer requested.
-     * If so, need to restore the access mode.  Shouldnot needed.
-     */
-    if (xfer_parms->xfer_mode == H5D_XFER_COLLECTIVE){
-	dataset->ent.file->shared->access_parms->u.mpio.access_mode = access_mode_saved;
-    }
-#endif /*HAVE_PARALLEL*/
     FUNC_LEAVE(ret_value);
 }
 
@@ -1461,9 +1432,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5T_DEBUG
     H5_timer_t		timer;
 #endif
-#ifdef HAVE_PARALLEL
-    int	access_mode_saved = -1;
-#endif
 
     FUNC_ENTER(H5D_write, FAIL);
 
@@ -1486,30 +1454,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	/* can always be simulated by independent access. */
 	/* Nevertheless, must check driver is MPIO before using those */
 	/* access_mode which exists only for MPIO case. */
-	if (dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO){
-	    /* 
-	     * -AKC-
-	     * "plant" the collective access mode into the file information
-	     * so that the lower level mpio routines know to use collective
-	     * access.
-	     * This is not thread-safe, is a klutch for now.
-	     * Should change all the I/O routines to pass along the xfer
-	     * property list to the low level I/O for proper execution.
-	     * Make it to work now.  Must fix it later.
-	     * -AKC-
-	     */
-#ifdef AKC
-	    printf("%s: collective access requested\n", FUNC);
-#endif
-	    access_mode_saved =
-		    dataset->ent.file->shared->access_parms->u.mpio.access_mode;
-	    dataset->ent.file->shared->access_parms->u.mpio.access_mode =
-		    H5D_XFER_COLLECTIVE;
-	}
-	else{
+	if (dataset->ent.file->shared->access_parms->driver != H5F_LOW_MPIO)
 	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "collective access not permissible");
-	}
     }
 #endif /*HAVE_PARALLEL*/
 
@@ -1543,7 +1490,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 		     "unable to convert from memory to file data space");
     }
     
-#ifdef NO
 #ifdef HAVE_PARALLEL
     /*
      * Check if collective data transfer requested.
@@ -1556,14 +1502,13 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				             &(dataset->create_parms->compress),
 					     &(dataset->create_parms->efl),
 					     H5T_get_size (dataset->type), file_space,
-                                             mem_space, buf);
+                                             mem_space, xfer_parms->xfer_mode, buf);
 		if (status>=0) goto succeed;
 		HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
 		    "collective write failed");
 	    }
     }
 #endif /*HAVE_PARALLEL*/
-#endif
 
     
     /*
@@ -1577,7 +1522,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				     &(dataset->create_parms->compress),
 				     &(dataset->create_parms->efl),
 				     H5T_get_size (dataset->type), file_space,
-				     mem_space, buf);
+				     mem_space, xfer_parms->xfer_mode, buf);
 	if (status>=0) goto succeed;
 #ifdef H5D_DEBUG
 	fprintf (stderr, "H5D: data space conversion could not be optimized "
@@ -1672,6 +1617,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				    &(dataset->create_parms->efl),
 				    H5T_get_size (dataset->type), file_space,
 				    &numbering, smine_start, smine_nelmts,
+				    xfer_parms->xfer_mode,
 				    bkg_buf/*out*/)!=smine_nelmts) {
 		HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			     "file gather failed");
@@ -1703,7 +1649,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				&(dataset->create_parms->efl),
 				H5T_get_size (dataset->type), file_space,
 				&numbering, smine_start, smine_nelmts,
-				tconv_buf)<0) {
+				xfer_parms->xfer_mode, tconv_buf)<0) {
 	    HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed");
 	}
     }
@@ -1720,15 +1666,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (bkg_buf && NULL==xfer_parms->bkg_buf) {
 	H5MM_xfree (bkg_buf);
     }
-#ifdef HAVE_PARALLEL
-    /*
-     * Check if collective data transfer requested.
-     * If so, need to restore the access mode.  Shouldnot needed.
-     */
-    if (xfer_parms->xfer_mode == H5D_XFER_COLLECTIVE){
-	dataset->ent.file->shared->access_parms->u.mpio.access_mode = access_mode_saved;
-    }
-#endif /*HAVE_PARALLEL*/
     FUNC_LEAVE(ret_value);
 }
 

@@ -22,6 +22,7 @@
 
 /* This is a near top-level header! Try not to include much! */
 #include <H5private.h>
+#include <H5Dpublic.h>		/*for the H5D_transfer_t type  		     */
 
 /*
  * Feature: Define this constant to be non-zero if you want to enable code
@@ -266,7 +267,6 @@ typedef struct H5F_access_t {
 #ifdef HAVE_PARALLEL
 	/* Properties for parallel I/O */
 	struct {
-	    uintn access_mode;	/* independent or collective variety?   */
 	    MPI_Comm    comm;   /* communicator for file access         */
 	    MPI_Info    info;   /* optional info for MPI-IO             */
 	} mpio;
@@ -303,9 +303,10 @@ typedef struct H5F_low_class_t {
     herr_t	(*close)(struct H5F_low_t *lf,
 			 const H5F_access_t *access_parms);
     herr_t	(*read)(struct H5F_low_t *lf, const H5F_access_t *access_parms,
+    			const H5D_transfer_t xfer_mode,
 			const haddr_t *addr, size_t size, uint8 *buf);
-    herr_t	(*write)(struct H5F_low_t *lf,
-			 const H5F_access_t *access_parms,
+    herr_t	(*write)(struct H5F_low_t *lf, const H5F_access_t *access_parms,
+			 const H5D_transfer_t xfer_mode,
 			 const haddr_t *addr, size_t size, const uint8 *buf);
     herr_t	(*flush)(struct H5F_low_t *lf,
 			 const H5F_access_t *access_parms);
@@ -502,12 +503,14 @@ herr_t H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 		     const struct H5O_compress_t *comp,
 		     const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
 		     const hsize_t mem_size[], const hssize_t mem_offset[],
-		     const hssize_t file_offset[], void *_buf/*out*/);
+		     const hssize_t file_offset[],
+		     const H5D_transfer_t xfer_mode, void *_buf/*out*/);
 herr_t H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 		      const struct H5O_compress_t *comp,
 		      const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
 		      const hsize_t mem_size[], const hssize_t mem_offset[],
-		      const hssize_t file_offset[], const void *_buf);
+		      const hssize_t file_offset[],
+		      const H5D_transfer_t xfer_mode, const void *_buf);
 
 /* Functions that operate on indexed storage */
 herr_t H5F_istore_init (H5F_t *f);
@@ -525,9 +528,10 @@ herr_t H5F_istore_write(H5F_t *f, const struct H5O_layout_t *layout,
 			const void *buf);
 
 /* Functions that operate on contiguous storage wrt boot block */
-herr_t H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size, void *buf);
+herr_t H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,
+		      const H5D_transfer_t xfer_mode, void *buf);
 herr_t H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size,
-		       const void *buf);
+		       const H5D_transfer_t xfer_mode, const void *buf);
 
 /* Functions that operate directly on low-level files */
 const H5F_low_class_t *H5F_low_class (H5F_driver_t driver);
@@ -543,8 +547,10 @@ H5F_low_t *H5F_low_open(const H5F_low_class_t *type, const char *name,
 H5F_low_t *H5F_low_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 hsize_t H5F_low_size(H5F_low_t *lf, haddr_t *addr);
 herr_t H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+		    const H5D_transfer_t xfer_mode,
 		    const haddr_t *addr, size_t size, uint8 *buf);
 herr_t H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+		     const H5D_transfer_t xfer_mode,
 		     const haddr_t *addr, size_t size, const uint8 *buf);
 herr_t H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 

@@ -33,9 +33,11 @@ static H5F_low_t *H5F_split_open(const char *name,
 				 H5F_search_t *key/*out*/);
 static herr_t H5F_split_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_split_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+			     const H5D_transfer_t xfer_mode,
 			     const haddr_t *addr, size_t size,
 			     uint8 *buf/*out*/);
 static herr_t H5F_split_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+			      const H5D_transfer_t xfer_mode,
 			      const haddr_t *addr, size_t size,
 			      const uint8 *buf);
 static herr_t H5F_split_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
@@ -200,11 +202,14 @@ H5F_split_close(H5F_low_t *lf, const H5F_access_t *access_parms)
  *              Monday, November 13, 1997
  *
  * Modifications:
+ *		June 2, 1998	Albert Cheng
+ *		Added xfer_mode argument
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_split_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+	       const H5D_transfer_t xfer_mode,
 	       const haddr_t *addr, size_t size, uint8 *buf/*out*/)
 {
     haddr_t             tmp_addr;
@@ -217,6 +222,7 @@ H5F_split_read(H5F_low_t *lf, const H5F_access_t *access_parms,
     assert(lf);
     assert(addr && H5F_addr_defined(addr));
     assert(buf);
+    assert(xfer_mode != H5D_XFER_COLLECTIVE);	/* no collective support */
 
     /* Which file to we actually read from? */
     if (addr->offset & lf->u.split.mask) {
@@ -230,7 +236,7 @@ H5F_split_read(H5F_low_t *lf, const H5F_access_t *access_parms,
     }
 
     /* Read the data */
-    status = H5F_low_read(sub, sub_parms, &tmp_addr, size, buf/*out*/);
+    status = H5F_low_read(sub, sub_parms, xfer_mode, &tmp_addr, size, buf/*out*/);
     FUNC_LEAVE(status);
 }
 
@@ -248,11 +254,14 @@ H5F_split_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  *              Monday, November 13, 1997
  *
  * Modifications:
+ *		June 2, 1998	Albert Cheng
+ *		Added xfer_mode argument
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_split_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+	        const H5D_transfer_t xfer_mode,
 		const haddr_t *addr, size_t size, const uint8 *buf)
 {
     haddr_t             tmp_addr;
@@ -265,6 +274,7 @@ H5F_split_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     assert(lf);
     assert(addr && H5F_addr_defined(addr));
     assert(buf);
+    assert(xfer_mode != H5D_XFER_COLLECTIVE);	/* no collective support */
 
     /* Which file to we actually write to? */
     if (addr->offset & lf->u.split.mask) {
@@ -278,7 +288,7 @@ H5F_split_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     }
 
     /* Write the data */
-    status = H5F_low_write(sub, sub_parms, &tmp_addr, size, buf);
+    status = H5F_low_write(sub, sub_parms, xfer_mode, &tmp_addr, size, buf);
     FUNC_LEAVE(status);
 }
 

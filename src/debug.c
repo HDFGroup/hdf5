@@ -90,7 +90,7 @@ main(int argc, char *argv[])
     printf("Reading signature at address ");
     H5F_addr_print(stdout, &addr);
     printf(" (rel)\n");
-    if (H5F_block_read(f, &addr, (hsize_t)sizeof(sig), sig) < 0) {
+    if (H5F_block_read(f, &addr, (hsize_t)sizeof(sig), H5D_XFER_DFLT, sig) < 0) {
         fprintf(stderr, "cannot read signature\n");
         HDexit(3);
     }

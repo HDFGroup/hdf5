@@ -335,7 +335,7 @@ H5O_load(H5F_t *f, const haddr_t *addr, const void __unused__ *_udata1,
 
     /* read fixed-lenth part of object header */
     hdr_size = H5O_SIZEOF_HDR(f);
-    if (H5F_block_read(f, addr, (hsize_t)hdr_size, buf) < 0) {
+    if (H5F_block_read(f, addr, (hsize_t)hdr_size, H5D_XFER_DFLT, buf) < 0) {
 	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL,
 		    "unable to read object header");
     }
@@ -382,7 +382,7 @@ H5O_load(H5F_t *f, const haddr_t *addr, const void __unused__ *_udata1,
 	oh->chunk[chunkno].addr = chunk_addr;
 	oh->chunk[chunkno].size = chunk_size;
 	oh->chunk[chunkno].image = H5MM_xmalloc(chunk_size);
-	if (H5F_block_read(f, &chunk_addr, (hsize_t)chunk_size,
+	if (H5F_block_read(f, &chunk_addr, (hsize_t)chunk_size, H5D_XFER_DFLT,
 			   oh->chunk[chunkno].image) < 0) {
 	    HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL,
 			"unable to read object header data");
@@ -521,7 +521,8 @@ H5O_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 	HDmemset (p, 0, H5O_SIZEOF_HDR(f)-12);
 
 	/* write the object header header */
-	if (H5F_block_write(f, addr, (hsize_t)H5O_SIZEOF_HDR(f), buf) < 0) {
+	if (H5F_block_write(f, addr, (hsize_t)H5O_SIZEOF_HDR(f), 
+			    H5D_XFER_DFLT, buf) < 0) {
 	    HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
 			  "unable to write object header hdr to disk");
 	}
@@ -593,7 +594,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 	    if (oh->chunk[i].dirty) {
 		assert(H5F_addr_defined(&(oh->chunk[i].addr)));
 		if (H5F_block_write(f, &(oh->chunk[i].addr),
-				    (hsize_t)(oh->chunk[i].size),
+				    (hsize_t)(oh->chunk[i].size), H5D_XFER_DFLT,
 				    oh->chunk[i].image) < 0) {
 		    HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
 			      "unable to write object header data to disk");

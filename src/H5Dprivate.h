@@ -55,9 +55,7 @@ typedef struct H5D_xfer_t {
     void		*tconv_buf;	/*type conversion buffer or null     */
     void		*bkg_buf;	/*background buffer or null	     */
     H5T_bkg_t		need_bkg;	/*type of background buffer needed   */
-#ifdef HAVE_PARALLEL
     H5D_transfer_t	xfer_mode;	/*independent or collective transfer */
-#endif
 } H5D_xfer_t;
 
 typedef struct H5D_t H5D_t;

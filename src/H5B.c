@@ -281,7 +281,7 @@ H5B_load(H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
     bt->native = H5MM_xmalloc(total_nkey_size);
     bt->key = H5MM_xmalloc((2 * H5B_K(f, type) + 1) * sizeof(H5B_key_t));
     bt->child = H5MM_xmalloc(2 * H5B_K(f, type) * sizeof(haddr_t));
-    if (H5F_block_read(f, addr, (hsize_t)size, bt->page) < 0) {
+    if (H5F_block_read(f, addr, (hsize_t)size, H5D_XFER_DFLT, bt->page) < 0) {
 	HRETURN_ERROR(H5E_BTREE, H5E_READERROR, NULL,
 		      "can't read B-tree node");
     }
@@ -424,7 +424,8 @@ H5B_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5B_t *bt)
 	 * bother writing data for the child entries that don't exist or
 	 * for the final unchanged children.
 	 */
-	if (H5F_block_write(f, addr, (hsize_t)size, bt->page) < 0) {
+	if (H5F_block_write(f, addr, (hsize_t)size, H5D_XFER_DFLT,
+	    bt->page) < 0) {
 	    HRETURN_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL,
 			  "unable to save B-tree node to disk");
 	}
@@ -828,11 +829,11 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 	HRETURN_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL,
 		      "unable to flush B-tree root node");
     }
-    if (H5F_block_read(f, addr, (hsize_t)size, buf) < 0) {
+    if (H5F_block_read(f, addr, (hsize_t)size, H5D_XFER_DFLT, buf) < 0) {
 	HRETURN_ERROR(H5E_BTREE, H5E_READERROR, FAIL,
 		      "unable to read B-tree root node");
     }
-    if (H5F_block_write(f, &old_root, (hsize_t)size, buf) < 0) {
+    if (H5F_block_write(f, &old_root, (hsize_t)size, H5D_XFER_DFLT, buf) < 0) {
 	HRETURN_ERROR(H5E_BTREE, H5E_WRITEERROR, FAIL,
 		      "unable to move B-tree root node");
     }

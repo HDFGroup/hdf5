@@ -181,7 +181,8 @@ H5HL_load(H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
     assert(!udata1);
     assert(!udata2);
 
-    if (H5F_block_read(f, addr, (hsize_t)H5HL_SIZEOF_HDR(f), hdr) < 0) {
+    if (H5F_block_read(f, addr, (hsize_t)H5HL_SIZEOF_HDR(f),
+		       H5D_XFER_DFLT, hdr) < 0) {
 	HRETURN_ERROR(H5E_HEAP, H5E_READERROR, NULL,
 		      "unable to read heap header");
     }
@@ -214,7 +215,7 @@ H5HL_load(H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
     heap->chunk = H5MM_xcalloc(1, H5HL_SIZEOF_HDR(f) + heap->mem_alloc);
     if (heap->disk_alloc &&
 	H5F_block_read(f, &(heap->addr), (hsize_t)(heap->disk_alloc),
-		       heap->chunk + H5HL_SIZEOF_HDR(f)) < 0) {
+		       H5D_XFER_DFLT, heap->chunk + H5HL_SIZEOF_HDR(f)) < 0) {
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL,
 		    "unable to read heap data");
     }
@@ -345,17 +346,18 @@ H5HL_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5HL_t *heap)
 	    /* The header and data are contiguous */
 	    if (H5F_block_write(f, addr,
 				(hsize_t)(H5HL_SIZEOF_HDR(f)+heap->disk_alloc),
-				heap->chunk) < 0) {
+				H5D_XFER_DFLT, heap->chunk) < 0) {
 		HRETURN_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL,
 			    "unable to write heap header and data to file");
 	    }
 	} else {
 	    if (H5F_block_write(f, addr, (hsize_t)H5HL_SIZEOF_HDR(f),
-				heap->chunk)<0) {
+				H5D_XFER_DFLT, heap->chunk)<0) {
 		HRETURN_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL,
 			      "unable to write heap header to file");
 	    }
 	    if (H5F_block_write(f, &(heap->addr), (hsize_t)(heap->disk_alloc),
+				H5D_XFER_DFLT,
 				heap->chunk + H5HL_SIZEOF_HDR(f)) < 0) {
 		HRETURN_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL,
 			      "unable to write heap data to file");

@@ -43,8 +43,10 @@ static H5F_low_t *H5F_fam_open(const char *name,
 			       H5F_search_t *key/*out*/);
 static herr_t H5F_fam_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+			   const H5D_transfer_t xfer_mode,
 			   const haddr_t *addr, size_t size, uint8 *buf);
 static herr_t H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+			    const H5D_transfer_t xfer_mode,
 			    const haddr_t *addr, size_t size,
 			    const uint8 *buf);
 static herr_t H5F_fam_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
@@ -292,11 +294,14 @@ H5F_fam_close(H5F_low_t *lf, const H5F_access_t *access_parms)
  *		Monday, November 10, 1997
  *
  * Modifications:
+ *		June 2, 1998	Albert Cheng
+ *		Added xfer_mode argument
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+	     const H5D_transfer_t xfer_mode,
 	     const haddr_t *addr, size_t size, uint8 *buf)
 {
     size_t		nbytes;
@@ -324,7 +329,7 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 	    nbytes = MIN(size, member_size.offset-offset.offset);
 	    cur_addr = offset;
 	    if (H5F_low_read(lf->u.fam.memb[membno],
-			     access_parms->u.fam.memb_access,
+			     access_parms->u.fam.memb_access, xfer_mode,
 			     &cur_addr, nbytes, buf) < 0) {
 		HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
 			      "can't read from family member");
@@ -356,11 +361,14 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  *		Monday, November 10, 1997
  *
  * Modifications:
+ *		June 2, 1998	Albert Cheng
+ *		Added xfer_mode argument
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+	      const H5D_transfer_t xfer_mode,
 	      const haddr_t *addr, size_t size, const uint8 *buf)
 {
     size_t		   	nbytes;
@@ -438,7 +446,7 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 
 	/* Write the data to the member */
 	if (H5F_low_write(lf->u.fam.memb[membno],
-			  access_parms->u.fam.memb_access,
+			  access_parms->u.fam.memb_access, xfer_mode,
 			  &cur_addr, nbytes, buf) < 0) {
 	    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
 			  "can't write to family member");
@@ -497,12 +505,12 @@ H5F_fam_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
     H5F_addr_inc(&addr3, (hsize_t)1);
     H5F_low_seteof(lf->u.fam.memb[0], &addr3);	/*prevent a warning */
     if (H5F_low_read(lf->u.fam.memb[0], access_parms->u.fam.memb_access,
-		     &addr1, 1, buf) < 0) {
+		     H5D_XFER_DFLT, &addr1, 1, buf) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
 		      "can't read from first family member");
     }
     if (H5F_low_write(lf->u.fam.memb[0], access_parms->u.fam.memb_access,
-		      &addr1, 1, buf) < 0) {
+		      H5D_XFER_DFLT, &addr1, 1, buf) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
 		      "can't write to first family member");
     }

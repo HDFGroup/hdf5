@@ -214,11 +214,14 @@ H5F_low_close(H5F_low_t *lf, const H5F_access_t *access_parms)
  *		Wednesday, October 22, 1997
  *
  * Modifications:
+ *		June 2, 1998	Albert Cheng
+ *		Added xfer_mode argument
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+	     const H5D_transfer_t xfer_mode,
 	     const haddr_t *addr, size_t size, uint8 *buf/*out*/)
 {
     herr_t		    ret_value = FAIL;
@@ -230,8 +233,8 @@ H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
     assert(buf);
 
     if (lf->type->read) {
-	if ((ret_value = (lf->type->read) (lf, access_parms, addr, size,
-					   buf)) < 0) {
+	if ((ret_value = (lf->type->read) (lf, access_parms, xfer_mode,
+					   addr, size, buf)) < 0) {
 	    HRETURN_ERROR(H5E_IO, H5E_READERROR, ret_value, "read failed");
 	}
     } else {
@@ -263,11 +266,14 @@ H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  *		Wednesday, October 22, 1997
  *
  * Modifications:
+ *		June 2, 1998	Albert Cheng
+ *		Added xfer_mode argument
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+	      const H5D_transfer_t xfer_mode,
 	      const haddr_t *addr, size_t size, const uint8 *buf)
 {
     herr_t		ret_value = FAIL;
@@ -289,8 +295,8 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     
     /* Write the data */
     if (lf->type->write) {
-	if ((ret_value = (lf->type->write) (lf, access_parms, addr, size,
-					    buf)) < 0) {
+	if ((ret_value = (lf->type->write) (lf, access_parms, xfer_mode,
+					    addr, size, buf)) < 0) {
 	    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, ret_value, "write failed");
 	}
     } else {
@@ -340,8 +346,10 @@ H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
     if (addr_defined(&(lf->eof)) && H5F_addr_gt(&(lf->eof), &last_byte)) {
 	last_byte = lf->eof;
 	last_byte.offset -= 1;
-	if (H5F_low_read(lf, access_parms, &last_byte, 1, buf) >= 0) {
-	    H5F_low_write(lf, access_parms, &last_byte, 1, buf);
+	if (H5F_low_read(lf, access_parms, H5D_XFER_DFLT, &last_byte,
+			 1, buf) >= 0) {
+	    H5F_low_write(lf, access_parms, H5D_XFER_DFLT, &last_byte,
+			  1, buf);
 	}
     }
     /* Invoke the subclass the flush method */

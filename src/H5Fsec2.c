@@ -31,9 +31,11 @@ static H5F_low_t *H5F_sec2_open(const char *name,
 				H5F_search_t *key/*out*/);
 static herr_t H5F_sec2_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_sec2_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+			    const H5D_transfer_t xfer_mode,
 			    const haddr_t *addr, size_t size,
 			    uint8 *buf/*out*/);
 static herr_t H5F_sec2_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+			    const H5D_transfer_t xfer_mode,
 			     const haddr_t *addr, size_t size,
 			     const uint8 *buf);
 
@@ -152,11 +154,14 @@ H5F_sec2_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
  *		Wednesday, October 22, 1997
  *
  * Modifications:
+ *		June 2, 1998	Albert Cheng
+ *		Added xfer_mode argument
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_sec2_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
+	      const H5D_transfer_t xfer_mode,
 	      const haddr_t *addr, size_t size, uint8 *buf)
 {
     ssize_t		n;
@@ -256,11 +261,14 @@ H5F_sec2_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
  *		Wednesday, October 22, 1997
  *
  * Modifications:
+ *		June 2, 1998	Albert Cheng
+ *		Added xfer_mode argument
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_sec2_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
+	       const H5D_transfer_t xfer_mode,
 	       const haddr_t *addr, size_t size, const uint8 *buf)
 {
     uint64	mask;

@@ -2230,7 +2230,6 @@ H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info)
 #endif
 
     tmpl->driver = H5F_LOW_MPIO;
-    tmpl->u.mpio.access_mode = H5D_XFER_INDEPENDENT;
     tmpl->u.mpio.comm = comm;
     tmpl->u.mpio.info = info;
 
@@ -2309,6 +2308,10 @@ H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info)
  *			    Use independent I/O access. 
  *			H5D_XFER_COLLECTIVE 
  *			    Use MPI collective I/O access. 
+ *			H5D_XFER_DFLT 
+ *			    Use default I/O access.  Currently,
+ *			    independent is the default mode.
+ *			
  *	     
  * Return:	Success:	SUCCEED
  *
@@ -2338,6 +2341,7 @@ H5Pset_xfer (hid_t tid, H5D_transfer_t data_xfer_mode)
     switch (data_xfer_mode){
     case H5D_XFER_INDEPENDENT:
     case H5D_XFER_COLLECTIVE:
+    case H5D_XFER_DFLT:
 	plist->xfer_mode = data_xfer_mode;
 	break;
     default:

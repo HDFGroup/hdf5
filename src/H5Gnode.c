@@ -340,7 +340,7 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
 	H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms);
 	HDmemset(p, 0, size - (p - buf));
 
-	status = H5F_block_write(f, addr, (hsize_t)size, buf);
+	status = H5F_block_write(f, addr, (hsize_t)size, H5D_XFER_DFLT, buf);
 	buf = H5MM_xfree(buf);
 	if (status < 0)
 	    HRETURN_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL,
@@ -404,7 +404,7 @@ H5G_node_load(H5F_t *f, const haddr_t *addr, const void __unused__ *_udata1,
     sym = H5MM_xcalloc(1, sizeof(H5G_node_t));
     sym->entry = H5MM_xcalloc((intn)(2*H5G_NODE_K(f)), sizeof(H5G_entry_t));
 
-    if (H5F_block_read(f, addr, (hsize_t)size, buf) < 0) {
+    if (H5F_block_read(f, addr, (hsize_t)size, H5D_XFER_DFLT, buf) < 0) {
 	HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL,
 		    "unabel to read symbol table node");
     }

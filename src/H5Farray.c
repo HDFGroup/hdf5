@@ -107,6 +107,8 @@ H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
  *              Friday, January 16, 1998
  *
  * Modifications:
+ *		June 2, 1998	Albert Cheng
+ *		Added xfer_mode argument
  *
  *-------------------------------------------------------------------------
  */
@@ -115,7 +117,7 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 	      const struct H5O_compress_t *comp, const struct H5O_efl_t *efl,
 	      const hsize_t _hslab_size[], const hsize_t mem_size[],
 	      const hssize_t mem_offset[], const hssize_t file_offset[],
-	      void *_buf/*out*/)
+	      const H5D_transfer_t xfer_mode, void *_buf/*out*/)
 {
     uint8	*buf = (uint8 *)_buf;		/*cast for arithmetic	*/
     hssize_t	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
@@ -130,9 +132,6 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
     haddr_t	addr;				/*address in file	*/
     intn	i, j;				/*counters		*/
     hbool_t	carray;				/*carry for subtraction	*/
-#ifdef HAVE_PARALLEL
-    intn	is_collective;			/*collective access flag*/
-#endif
    
     FUNC_ENTER (H5F_arr_read, FAIL);
 
@@ -149,12 +148,7 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
     H5V_vector_cpy (layout->ndims, hslab_size, _hslab_size);
 
 #ifdef HAVE_PARALLEL
-    is_collective = (f->shared->access_parms->driver==H5F_LOW_MPIO
-	&& f->shared->access_parms->u.mpio.access_mode==H5D_XFER_COLLECTIVE);
-    if (is_collective){
-#ifdef AKC
-	printf("%s: collective read requested\n", FUNC);
-#endif
+    if (xfer_mode==H5D_XFER_COLLECTIVE){
 	if (layout->type != H5D_CONTIGUOUS)
 	    HRETURN_ERROR (H5E_DATASET, H5E_READERROR, FAIL,
 			   "collective access on non-contiguous datasets not "
@@ -216,7 +210,7 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 	 * memory.
 	 */
 #ifdef HAVE_PARALLEL
-	if (is_collective){
+	if (xfer_mode==H5D_XFER_COLLECTIVE){
 	    /* Currently supports same number of collective access.
 	     * Need to be changed LATER to combine all reads into one
 	     * collective MPIO call.
@@ -247,7 +241,7 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 		    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 				   "external data read failed");
 		}
-	    } else if (H5F_block_read (f, &addr, elmt_size, buf)<0) {
+	    } else if (H5F_block_read (f, &addr, elmt_size, xfer_mode, buf)<0) {
 		HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 			       "block read failed");
 	    }
@@ -319,6 +313,8 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
  *              Friday, January 16, 1998
  *
  * Modifications:
+ *		June 2, 1998	Albert Cheng
+ *		Added xfer_mode argument
  *
  *-------------------------------------------------------------------------
  */
@@ -327,7 +323,7 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 	       const struct H5O_compress_t *comp, const struct H5O_efl_t *efl,
 	       const hsize_t _hslab_size[], const hsize_t mem_size[],
 	       const hssize_t mem_offset[], const hssize_t file_offset[],
-	       const void *_buf)
+	       const H5D_transfer_t xfer_mode, const void *_buf)
 {
     const uint8	*buf = (const uint8 *)_buf;	/*cast for arithmetic	*/
     hssize_t	file_stride[H5O_LAYOUT_NDIMS];	/*strides through file	*/
@@ -342,9 +338,6 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
     haddr_t	addr;				/*address in file	*/
     intn	i, j;				/*counters		*/
     hbool_t	carray;				/*carry for subtraction	*/
-#ifdef HAVE_PARALLEL
-    intn	is_collective;			/*collective access flag*/
-#endif
    
     FUNC_ENTER (H5F_arr_write, FAIL);
 
@@ -361,12 +354,7 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
     H5V_vector_cpy (layout->ndims, hslab_size, _hslab_size);
 
 #ifdef HAVE_PARALLEL
-    is_collective = (f->shared->access_parms->driver==H5F_LOW_MPIO
-	&& f->shared->access_parms->u.mpio.access_mode==H5D_XFER_COLLECTIVE);
-    if (is_collective){
-#ifdef AKC
-    printf("%s: collective write requested\n", FUNC);
-#endif
+    if (xfer_mode==H5D_XFER_COLLECTIVE){
 	if (layout->type != H5D_CONTIGUOUS)
 	    HRETURN_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
 		"collective access on non-contiguous datasets not supported yet");
@@ -427,7 +415,7 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 	 * disk.
 	 */
 #ifdef HAVE_PARALLEL
-	if (is_collective){
+	if (xfer_mode==H5D_XFER_COLLECTIVE){
 	    /* Currently supports same number of collective access.
 	     * Need to be changed LATER to combine all writes into one
 	     * collective MPIO call.
@@ -457,7 +445,7 @@ printf("nelmts=%lu, min=%lu, max=%lu\n", temp, min, max);
 		    HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
 				   "external data write failed");
 		}
-	    } else if (H5F_block_write (f, &addr, elmt_size, buf)<0) {
+	    } else if (H5F_block_write (f, &addr, elmt_size, xfer_mode, buf)<0) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "block write failed");
 	    }

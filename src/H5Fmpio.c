@@ -68,11 +68,11 @@ static H5F_low_t *H5F_mpio_open(const char *name,
 				H5F_search_t *key/*out*/);
 static herr_t H5F_mpio_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_mpio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
-			    const haddr_t *addr, size_t size,
-			    uint8 *buf/*out*/);
+			    const H5D_transfer_t xfer_mode,
+			    const haddr_t *addr, size_t size, uint8 *buf/*out*/);
 static herr_t H5F_mpio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
-			     const haddr_t *addr, size_t size,
-			     const uint8 *buf);
+			     const H5D_transfer_t xfer_mode,
+			     const haddr_t *addr, size_t size, const uint8 *buf);
 static herr_t H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_MPIOff_to_haddr(MPI_Offset mpi_off, haddr_t *addr);
 static herr_t H5F_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off);
@@ -241,16 +241,6 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
     fprintf(stdout, "Entering H5F_mpio_open name=%s flags=%x\n", name, flags );
 #endif
 
-    switch (access_parms->u.mpio.access_mode){
-    case H5D_XFER_INDEPENDENT:
-    case H5D_XFER_COLLECTIVE:
-	/*void*/
-	break;
-	
-    default:
-	HRETURN_ERROR(H5E_IO, H5E_BADVALUE, NULL, "invalid file access mode");
-    }
-
     /* convert HDF5 flags to MPI-IO flags */
     /* some combinations are illegal; let MPI-IO figure it out */
     mpi_amode  = (flags&H5F_ACC_RDWR) ? MPI_MODE_RDWR : MPI_MODE_RDONLY;
@@ -385,10 +375,14 @@ H5F_mpio_close(H5F_low_t *lf, const H5F_access_t *access_parms)
  * 	rky, 10 Apr 1998
  *	Call independent or collective MPI read, based on ACCESS_PARMS.
  *
+ * 	Albert Cheng, June 1, 1998
+ *	Added xfer_mode to control independent or collective MPI read.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_mpio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+	      const H5D_transfer_t xfer_mode,
 	      const haddr_t *addr, size_t size, uint8 *buf/*out*/)
 {
     MPI_Offset              mpi_off;
@@ -415,13 +409,17 @@ H5F_mpio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
     }
 
     /* Read the data.  */
-    switch (access_parms->u.mpio.access_mode){
+    switch (xfer_mode){
     case H5D_XFER_INDEPENDENT:
+    case H5D_XFER_DFLT:
 	mpierr = MPI_File_read_at     ( lf->u.mpio.f, mpi_off, (void*) buf,
 					size_i, MPI_BYTE, &mpi_stat );
 	break;
 	
     case H5D_XFER_COLLECTIVE:
+#ifdef H5F_MPIO_DEBUG
+	printf("%s: using MPIO collective mode\n", FUNC);
+#endif
 	mpierr = MPI_File_read_at_all ( lf->u.mpio.f, mpi_off, (void*) buf,
 					size_i, MPI_BYTE, &mpi_stat );
 	break;
@@ -501,12 +499,15 @@ H5F_mpio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  * 	rky, 24 April
  *	Removed redundant write from H5F_Mpio_write.
  *
+ * 	Albert Cheng, June 1, 1998
+ *	Added xfer_mode to control independent or collective MPI write.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_mpio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
-	       const haddr_t *addr, size_t size,
-	       const uint8 *buf)
+	       const H5D_transfer_t xfer_mode,
+	       const haddr_t *addr, size_t size, const uint8 *buf)
 {
     MPI_Offset              mpi_off;
     MPI_Status              mpi_stat;
@@ -530,13 +531,17 @@ H5F_mpio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     }
 
     /* Write the data.  */
-    switch (access_parms->u.mpio.access_mode){
+    switch (xfer_mode){
     case H5D_XFER_INDEPENDENT:
+    case H5D_XFER_DFLT:
 	mpierr = MPI_File_write_at    ( lf->u.mpio.f, mpi_off, (void*) buf,
 					size_i, MPI_BYTE, &mpi_stat );
 	break;
 	
     case H5D_XFER_COLLECTIVE:
+#ifdef H5F_MPIO_DEBUG
+	printf("%s: using MPIO collective mode\n", FUNC);
+#endif
 	mpierr = MPI_File_write_at_all( lf->u.mpio.f, mpi_off, (void*) buf,
 					size_i, MPI_BYTE, &mpi_stat );
 	break;
