@@ -98,9 +98,9 @@ converter.*/
 #define IM_CLASS    "IMAGE"
 /*7.5. define interlace mode. */
 #define INTERLACE_MODE "INTERLACE_MODE"
-#define PIXEL_INTERLACE "PIXEL_INTERLACE"
-#define LINE_INTERLACE "LINE_INTERLACE"
-#define PLANE_INTERLACE "PLANE_INTERLACE"
+#define PIXEL_INTERLACE "INTERLACE_PIXEL"
+#define LINE_INTERLACE "INTERLACE_LINE"
+#define PLANE_INTERLACE "INTERLACE_PLANE"
 
 
 /* 8. reserved group name for HDF4 dimensional scale and palette. */
