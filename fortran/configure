@@ -1770,7 +1770,7 @@ fi
 test -n "$F9X" && break
 done
 
-test -z "$CC" && { echo "configure: error: no acceptable f9X compiler found in \$PATH" 1>&2; exit 1; }
+test -z "$F9X" && { echo "configure: error: no acceptable f9X compiler found in \$PATH" 1>&2; exit 1; }
 
 
 echo $ac_n "checking whether the Fortran 9X compiler ($F9X $FFLAGS $LDFLAGS) works""... $ac_c" 1>&6
