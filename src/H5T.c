@@ -2585,7 +2585,7 @@ done:
 htri_t
 H5Tis_variable_str(hid_t dtype_id)
 {
-    H5T_t	*dt = NULL;
+    H5T_t	*dt;            /* Datatype to query */
     htri_t      ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Tis_variable_str, FAIL);
@@ -2630,8 +2630,6 @@ H5T_is_variable_str(H5T_t *dt)
 
     if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
         ret_value = TRUE;
-    else 
-        ret_value = FALSE;
 
 done:
     FUNC_LEAVE(ret_value);   
@@ -2672,10 +2670,10 @@ done:
  */
 hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction)
 {
-    H5T_t       *dt=NULL, *new_dt=NULL;
-    H5T_class_t class;
-    size_t      comp_size=0;
-    hid_t       ret_value;
+    H5T_t       *dt;                /* Datatype to create native datatype from */
+    H5T_t       *new_dt=NULL;       /* Datatype for native datatype created */
+    size_t      comp_size=0;        /* Compound datatype's size */
+    hid_t       ret_value;          /* Return value */
 
     FUNC_ENTER_API(H5Tget_native_type, FAIL);
     H5TRACE1("z","i",type_id);
@@ -2695,6 +2693,12 @@ hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type");
              
 done:
+    /* Error cleanup */
+    if(ret_value<0) {
+        if(new_dt)
+            H5T_close(new_dt);
+    } /* end if */
+    
     FUNC_LEAVE(ret_value);
 }
 
@@ -2717,24 +2721,15 @@ done:
  */
 H5T_t* H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_align, size_t *offset, size_t *comp_size)
 {   
-    H5T_t       *ret_value, *dt;
-    H5T_class_t class;
-    H5T_sign_t  sign;
-    size_t      size;
-    int         nmemb;
-    int         i;
-    H5T_t       *memb_type, *base_type, *super_type, *new_type;
-    hid_t       memb_id, base_id;
-    H5T_t       **memb_list;                   /* List of compound member IDs */
-    size_t      *memb_offset=NULL;              /* List of member offsets in compound type, including member size and alignment */
-    size_t      children_size=0;                /* Total size of compound members */ 
-    size_t      children_st_align=0;            /* The max alignment among compound members.  This'll be the compound alignment */
-    char        **comp_mname;                   /* List of member names in compound type */
-    char        *memb_name;                     
-    void        *memb_value;
-    int         array_rank;
-    hsize_t     *dims = NULL;
-    H5T_class_t child_class;
+    H5T_t       *dt;                /* Datatype to make native */
+    H5T_class_t class;              /* Class of datatype to make native */
+    size_t      size;               /* Size of datatype to make native */
+    int         nmemb;              /* Number of members in compound & enum types */
+    H5T_t       *super_type;        /* Super type of VL, array and enum datatypes */
+    H5T_t       *nat_super_type;    /* Native form of VL, array & enum super datatype */
+    H5T_t       *new_type;          /* New native datatype */
+    int         i;                  /* Local index variable */
+    H5T_t       *ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_get_native_type, NULL);
         
@@ -2748,18 +2743,23 @@ H5T_t* H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *stru
         
     switch(class) {
         case H5T_INTEGER:
-            if((sign =  H5T_get_sign(dtype))==H5T_SGN_ERROR)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid signess");
-        
-            if((ret_value = H5T_get_native_integer(size, sign, direction, struct_align, offset, comp_size))==NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve integer type");
-                
+            {
+                H5T_sign_t  sign;       /* Signedness of integer type */
+
+                if((sign =  H5T_get_sign(dtype))==H5T_SGN_ERROR)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid signess");
+            
+                if((ret_value = H5T_get_native_integer(size, sign, direction, struct_align, offset, comp_size))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve integer type");
+            }
             break;
+            
         case H5T_FLOAT:
             if((ret_value = H5T_get_native_float(size, direction, struct_align, offset, comp_size))==NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
 
             break;
+
         case H5T_STRING:
             if(H5T_is_variable_str(dtype)) {
                 if(NULL==(dt=H5I_object_verify(H5T_C_S1, H5I_DATATYPE)))
@@ -2778,6 +2778,7 @@ H5T_t* H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *stru
             }
             
             break;
+
         case H5T_TIME:
         case H5T_BITFIELD:
         case H5T_OPAQUE:
@@ -2786,151 +2787,171 @@ H5T_t* H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *stru
                  HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
 
             break;
+
         case H5T_COMPOUND:
-            if((nmemb = H5T_get_nmembers(dtype))<=0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "compound data type doesn't have any member");
-            
-            memb_list   = (H5T_t**)HDmalloc(nmemb*sizeof(H5T_t*));
-            memb_offset = (size_t*)HDcalloc(nmemb, sizeof(size_t));
-            comp_mname = (char**)HDmalloc(nmemb*sizeof(char*));
+            {
+                H5T_t       *memb_type;     /* Datatype of member */
+                H5T_t       **memb_list;    /* List of compound member IDs */
+                size_t      *memb_offset;   /* List of member offsets in compound type, including member size and alignment */
+                size_t      children_size=0;/* Total size of compound members */ 
+                size_t      children_st_align=0;    /* The max alignment among compound members.  This'll be the compound alignment */
+                char        **comp_mname;   /* List of member names in compound type */
 
-            /* Construct child compound type and retrieve a list of their IDs, offsets, total size, and alignment for compound type. */  
-            for(i=0; i<nmemb; i++) {
-                if((memb_type = H5T_get_member_type(dtype, i))==NULL)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "member type retrieval failed");
-                    
-                if((comp_mname[i] = H5T_get_member_name(dtype, i))==NULL)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "member type retrieval failed");
-                    
-                if((memb_list[i] = H5T_get_native_type(memb_type, direction, &children_st_align, &(memb_offset[i]), &children_size))==NULL)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "member identifier retrieval failed");
+                if((nmemb = H5T_get_nmembers(dtype))<=0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "compound data type doesn't have any member");
+                
+                if((memb_list   = (H5T_t**)H5MM_malloc(nmemb*sizeof(H5T_t*)))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory"); 
+                if((memb_offset = (size_t*)H5MM_calloc(nmemb*sizeof(size_t)))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory"); 
+                if((comp_mname = (char**)H5MM_malloc(nmemb*sizeof(char*)))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory"); 
 
-                if(H5T_close(memb_type)<0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+                /* Construct child compound type and retrieve a list of their IDs, offsets, total size, and alignment for compound type. */  
+                for(i=0; i<nmemb; i++) {
+                    if((memb_type = H5T_get_member_type(dtype, i))==NULL)
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "member type retrieval failed");
+                        
+                    if((comp_mname[i] = H5T_get_member_name(dtype, i))==NULL)
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "member type retrieval failed");
+                        
+                    if((memb_list[i] = H5T_get_native_type(memb_type, direction, &children_st_align, &(memb_offset[i]), &children_size))==NULL)
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "member identifier retrieval failed");
+
+                    if(H5T_close(memb_type)<0)
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+                }
+               
+                /* The alignment for whole compound type */
+                if(children_st_align && children_size % children_st_align) {
+                    memb_offset[nmemb-1] += children_size % children_st_align;
+                    children_size += children_size % children_st_align;
+                }
+
+                /* Construct new compound type based on native type */   
+                if((new_type=H5T_create(H5T_COMPOUND, children_size))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot create a compound type");
+
+                /* Insert members for the new compound type */       
+                for(i=0; i<nmemb; i++) {
+                    if(H5T_insert(new_type, comp_mname[i], memb_offset[i], memb_list[i])<0)
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot insert member to compound datatype");
+                }
+                
+                /* Update size, offset and compound alignment for parent. */
+                if(offset)
+                    *offset = *comp_size;
+                if(struct_align && *struct_align < children_st_align)
+                    *struct_align = children_st_align;
+                *comp_size += children_size;
+                
+                /* Close member data type */ 
+                for(i=0; i<nmemb; i++) {
+                    if(H5T_close(memb_list[i])<0)
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+
+                    /* Free member names in list */
+                    H5MM_xfree(comp_mname[i]);
+                }
+               
+                /* Free lists for members */
+                H5MM_xfree(memb_list);
+                H5MM_xfree(memb_offset);
+                H5MM_xfree(comp_mname);
+                
+                ret_value = new_type;
             }
-           
-            /* The alignment for whole compound type */
-            if(children_st_align && children_size % children_st_align) {
-                memb_offset[nmemb-1] += children_size % children_st_align;
-                children_size += children_size % children_st_align;
-            }
-
-            /* Construct new compound type based on native type */   
-            if((new_type=H5T_create(H5T_COMPOUND, children_size))==NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot create a compound type");
-
-            /* Insert members for the new compound type */       
-            for(i=0; i<nmemb; i++) {
-                if(H5T_insert(new_type, comp_mname[i], memb_offset[i], memb_list[i])<0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot insert member to compound datatype");
-            }
-            
-            /* Update size, offset and compound alignment for parent. */
-            if(offset)
-                *offset = *comp_size;
-            if(struct_align && *struct_align < children_st_align)
-                *struct_align = children_st_align;
-            *comp_size += children_size;
-            
-            /* Close member data type */ 
-            for(i=0; i<nmemb; i++) {
-                if(H5T_close(memb_list[i])<0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
-
-                /* Free member name list */
-                if(comp_mname[i])
-                    HDfree(comp_mname[i]);
-            }
-           
-            if(memb_list)
-                HDfree(memb_list);
-            if(memb_offset)
-                HDfree(memb_offset);
-            if(comp_mname)
-                HDfree(comp_mname);
-            
-            ret_value = new_type;
 
             break;
+
         case H5T_ENUM:
-            /* Retrieve base type for enumarate type */
-            if((super_type=H5T_get_super(dtype))==NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get base type for enumarate type");
-            if((base_type = H5T_get_native_type(super_type, direction, struct_align, offset, comp_size))==NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "base native type retrieval failed");
-
-            /* Allocate room for the enum values */
-            memb_value = H5MM_malloc(H5T_get_size(super_type));
-            assert(memb_value);
-
-            /* Close super type */
-            if(H5T_close(super_type)<0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
-             
-            /* Construct new enum type based on native type */   
-            if((new_type=H5T_enum_create(base_type))==NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create enum type");
+            {
+                char        *memb_name;         /* Enum's member name */
+                void        *memb_value;        /* Enum's member value */
                 
-            /* Retrieve member info and insert members into new enum type */
-            if((nmemb = H5T_get_nmembers(dtype))<=0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "enumarate data type doesn't have any member");
-            for(i=0; i<nmemb; i++) {
-                if((memb_name=H5T_get_member_name(dtype, i))==NULL)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member name");
-                if(H5T_get_member_value(dtype, i, memb_value)<0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value");
-                if(H5T_enum_insert(new_type, memb_name, memb_value)<0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot insert member");
-                if(memb_name)
-                    HDfree(memb_name);
-            }
-            if(memb_value) 
+                /* Retrieve base type for enumarate type */
+                if((super_type=H5T_get_super(dtype))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get base type for enumarate type");
+                if((nat_super_type = H5T_get_native_type(super_type, direction, struct_align, offset, comp_size))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "base native type retrieval failed");
+
+                /* Allocate room for the enum values */
+                if((memb_value = H5MM_malloc(H5T_get_size(super_type)))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory"); 
+
+                /* Close super type */
+                if(H5T_close(super_type)<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+                 
+                /* Construct new enum type based on native type */   
+                if((new_type=H5T_enum_create(nat_super_type))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create enum type");
+                    
+                /* Retrieve member info and insert members into new enum type */
+                if((nmemb = H5T_get_nmembers(dtype))<=0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "enumarate data type doesn't have any member");
+                for(i=0; i<nmemb; i++) {
+                    if((memb_name=H5T_get_member_name(dtype, i))==NULL)
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member name");
+                    if(H5T_get_member_value(dtype, i, memb_value)<0)
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value");
+                    if(H5T_enum_insert(new_type, memb_name, memb_value)<0)
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot insert member");
+                    H5MM_xfree(memb_name);
+                }
                 H5MM_xfree(memb_value);
 
-            /* Close base type */
-            if(H5T_close(base_type)<0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
-           
-            ret_value = new_type;
+                /* Close base type */
+                if(H5T_close(nat_super_type)<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+               
+                ret_value = new_type;
+            }
 
             break;
+
         case H5T_ARRAY:
-            /* Retrieve dimension information for array data type */
-            if((array_rank=H5T_get_array_ndims(dtype))<=0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get dimension rank");
-            if((dims = (hsize_t*)H5MM_malloc(array_rank*sizeof(hsize_t)))==NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory"); 
-            if(H5T_get_array_dims(dtype, dims, NULL)<0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get dimension size");
+            {
+                int         array_rank;         /* Array's rank */
+                hsize_t     *dims = NULL;       /* Dimension sizes for array */
 
-            /* Retrieve base type for array type */
-            if((super_type=H5T_get_super(dtype))==NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get parent type for enumarate type");
-            if((base_type = H5T_get_native_type(super_type, direction, struct_align, offset, comp_size))==NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "parent native type retrieval failed");
+                /* Retrieve dimension information for array data type */
+                if((array_rank=H5T_get_array_ndims(dtype))<=0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get dimension rank");
+                if((dims = (hsize_t*)H5MM_malloc(array_rank*sizeof(hsize_t)))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory"); 
+                if(H5T_get_array_dims(dtype, dims, NULL)<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get dimension size");
 
-            /* Close super type */
-            if(H5T_close(super_type)<0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+                /* Retrieve base type for array type */
+                if((super_type=H5T_get_super(dtype))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get parent type for enumarate type");
+                if((nat_super_type = H5T_get_native_type(super_type, direction, struct_align, offset, comp_size))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "parent native type retrieval failed");
 
-            /* Create a new array type based on native type */
-            if((new_type=H5T_array_create(base_type, array_rank, dims, NULL))==NULL) 
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create array type");
+                /* Close super type */
+                if(H5T_close(super_type)<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
 
-            /* Close base type */
-            if(H5T_close(base_type)<0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
-            if(dims)
-                HDfree(dims);
-            
-            ret_value = new_type;
+                /* Create a new array type based on native type */
+                if((new_type=H5T_array_create(nat_super_type, array_rank, dims, NULL))==NULL) 
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create array type");
+
+                /* Close base type */
+                if(H5T_close(nat_super_type)<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+                H5MM_xfree(dims);
+                
+                ret_value = new_type;
+            }
 
             break;
+
         case H5T_VLEN:
             /* Retrieve base type for array type */
             if((super_type=H5T_get_super(dtype))==NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get parent type for enumarate type");
-            if((base_type = H5T_get_native_type(super_type, direction, struct_align, offset, comp_size))==NULL)
+            if((nat_super_type = H5T_get_native_type(super_type, direction, struct_align, offset, comp_size))==NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "parent native type retrieval failed");
 
             /* Close super type */
@@ -2938,21 +2959,28 @@ H5T_t* H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *stru
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
 
             /* Create a new array type based on native type */
-            if((new_type=H5T_vlen_create(base_type))==NULL) 
+            if((new_type=H5T_vlen_create(nat_super_type))==NULL) 
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create VL type");
            
             /* Close base type */
-            if(H5T_close(base_type)<0)
+            if(H5T_close(nat_super_type)<0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
             
             ret_value = new_type;
 
             break;   
+
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "data type doesn't match any native type");
     }   
 
 done:
+    /* Error cleanup */
+    if(ret_value==NULL) {
+        if(new_type)
+            H5T_close(new_type);
+    } /* end if */
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -2975,111 +3003,102 @@ done:
  */
 H5T_t* H5T_get_native_integer(size_t size, H5T_sign_t sign, H5T_direction_t direction, size_t *struct_align, size_t *offset, size_t *comp_size)
 {  
-    H5T_t       *dt=NULL, *ret_value=NULL;
-    hid_t       tid;
-    size_t      align=1;
+    H5T_t       *dt;            /* Appropriate native datatype to copy */
+    hid_t       tid;            /* Datatype ID of appropriate native datatype */
+    size_t      align;          /* Alignment necessary for native datatype */
+    enum match_type {           /* The different kinds of integers we can match */
+        H5T_NATIVE_INT_MATCH_CHAR,
+        H5T_NATIVE_INT_MATCH_SHORT,
+        H5T_NATIVE_INT_MATCH_INT,
+        H5T_NATIVE_INT_MATCH_LONG,
+        H5T_NATIVE_INT_MATCH_LLONG,
+        H5T_NATIVE_INT_MATCH_UNKNOWN
+    } match=H5T_NATIVE_INT_MATCH_UNKNOWN;
+    H5T_t       *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_get_native_integer, NULL);
+
+    assert(size>0);
     
     if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {         
-        if(size==sizeof(char)) {
+        if(size==sizeof(char))
+            match=H5T_NATIVE_INT_MATCH_CHAR;
+        else if(size==sizeof(short))
+            match=H5T_NATIVE_INT_MATCH_SHORT;
+        else if(size==sizeof(int))
+            match=H5T_NATIVE_INT_MATCH_INT;
+        else if(size==sizeof(long))
+            match=H5T_NATIVE_INT_MATCH_LONG;
+        else if(size==sizeof(long long))
+            match=H5T_NATIVE_INT_MATCH_LLONG;
+        else   /* If no native type matches the querried datatype, simply choose the type of biggest size. */
+            match=H5T_NATIVE_INT_MATCH_LLONG;
+    } else if(direction == H5T_DIR_DESCEND) {         
+        if(size==sizeof(long long))
+            match=H5T_NATIVE_INT_MATCH_LLONG;
+        else if(size==sizeof(long))
+            match=H5T_NATIVE_INT_MATCH_LONG;
+        else if(size==sizeof(int))
+            match=H5T_NATIVE_INT_MATCH_INT;
+        else if(size==sizeof(short))
+            match=H5T_NATIVE_INT_MATCH_SHORT;
+        else if(size==sizeof(char))
+            match=H5T_NATIVE_INT_MATCH_CHAR;
+        else   /* If no native type matches the querried datatype, simple choose the type of smallest size. */
+            match=H5T_NATIVE_INT_MATCH_CHAR;
+    }
+
+    /* Set the appropriate native datatype information */
+    switch(match) {
+        case H5T_NATIVE_INT_MATCH_CHAR:
             if(sign==H5T_SGN_2)
                 tid = H5T_NATIVE_SCHAR;
             else
                 tid = H5T_NATIVE_UCHAR;
             
             align = H5T_NATIVE_SCHAR_COMP_ALIGN_g; 
-        }
-        else if(size==sizeof(short)) {
+            break;
+            
+        case H5T_NATIVE_INT_MATCH_SHORT:
             if(sign==H5T_SGN_2)
                 tid = H5T_NATIVE_SHORT;
             else
                 tid = H5T_NATIVE_USHORT;
 
             align = H5T_NATIVE_SHORT_COMP_ALIGN_g; 
-        }
-        else if(size==sizeof(int)) {
+            break;
+            
+        case H5T_NATIVE_INT_MATCH_INT:
             if(sign==H5T_SGN_2)
                 tid = H5T_NATIVE_INT;
             else  
                 tid = H5T_NATIVE_UINT;
 
             align = H5T_NATIVE_INT_COMP_ALIGN_g; 
-        }
-        else if(size==sizeof(long)) {
+            break;
+            
+        case H5T_NATIVE_INT_MATCH_LONG:
             if(sign==H5T_SGN_2)
                 tid = H5T_NATIVE_LONG;
             else  
                 tid = H5T_NATIVE_ULONG;
 
             align = H5T_NATIVE_LONG_COMP_ALIGN_g;            
-        }
-        else if(size==sizeof(long long)) {
+            break;
+            
+        case H5T_NATIVE_INT_MATCH_LLONG:
             if(sign==H5T_SGN_2)
                 tid = H5T_NATIVE_LLONG;
             else  
                 tid = H5T_NATIVE_ULLONG;
 
             align = H5T_NATIVE_LLONG_COMP_ALIGN_g;            
-        }
-        else { /* If no native type matches the querried datatype, simply choose the type of biggest size. */
-            if(sign==H5T_SGN_2)
-                tid = H5T_NATIVE_LLONG;
-            else  
-                tid = H5T_NATIVE_ULLONG;
-
-            align = H5T_NATIVE_LLONG_COMP_ALIGN_g;            
-        }
-    } else if(direction == H5T_DIR_DESCEND) {         
-        if(size==sizeof(long long)) {
-            if(sign==H5T_SGN_2)
-                tid = H5T_NATIVE_LLONG;
-            else  
-                tid = H5T_NATIVE_ULLONG;
-
-            align = H5T_NATIVE_LLONG_COMP_ALIGN_g;            
-        }
-        else if(size==sizeof(long)) {
-            if(sign==H5T_SGN_2)
-                tid = H5T_NATIVE_LONG;
-            else  
-                tid = H5T_NATIVE_ULONG;
-
-            align = H5T_NATIVE_LONG_COMP_ALIGN_g;            
-        }
-        else if(size==sizeof(int)) {
-            if(sign==H5T_SGN_2)
-                tid = H5T_NATIVE_INT;
-            else  
-                tid = H5T_NATIVE_UINT;
-
-            align = H5T_NATIVE_INT_COMP_ALIGN_g;            
-        }
-        else if(size==sizeof(short)) {
-            if(sign==H5T_SGN_2)
-                tid = H5T_NATIVE_SHORT;
-            else  
-                tid = H5T_NATIVE_SHORT;
-
-            align = H5T_NATIVE_SHORT_COMP_ALIGN_g;                       
-        }
-        if(size==sizeof(char)) {
-            if(sign==H5T_SGN_2)
-                tid = H5T_NATIVE_SCHAR;
-            else  
-                tid = H5T_NATIVE_UCHAR;
-
-            align = H5T_NATIVE_SCHAR_COMP_ALIGN_g;                       
-        }
-        else { /* If no native type matches the querried datatype, simple choose the type of smallest size. */
-            if(sign==H5T_SGN_2)
-                tid = H5T_NATIVE_SCHAR;
-            else  
-                tid = H5T_NATIVE_UCHAR;
-
-            align = H5T_NATIVE_SCHAR_COMP_ALIGN_g;                       
-        }
-    }
+            break;
+            
+        default:
+            assert(0 && "Unknown native integer match!");
+            break;
+    } /* end switch */
         
     /* Create new native type */
     if(NULL==(dt=H5I_object_verify(tid, H5I_DATATYPE)))
@@ -3088,16 +3107,18 @@ H5T_t* H5T_get_native_integer(size_t size, H5T_sign_t sign, H5T_direction_t dire
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
             
     /* compute size and offset of compound type member. */
-    if(comp_size && offset) {
-         /* Add alignment value */
-         if(align && *comp_size%align) {
-              *offset = *comp_size +  (align - *comp_size%align);
-              size = size + (align - *comp_size%align);
-         } else
-              *offset = *comp_size;
+    if(offset && comp_size) {
+        if(align && *comp_size%align) {
+            /* Add alignment value */
+            *offset = *comp_size +  (align - *comp_size%align);
+            size = size + (align - *comp_size%align);
+        } else
+            *offset = *comp_size;
                   
-              *comp_size += size; 
-         } 
+        /* compute size of compound type member. */
+        *comp_size += size; 
+    } /* end if */
+     
     /* Alignment for whole compound type */
     if(struct_align && *struct_align<align)
          *struct_align = align;
@@ -3125,47 +3146,62 @@ done:
  */
 H5T_t* H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_align, size_t *offset, size_t *comp_size)
 {  
-    H5T_t       *ret_value=NULL, *dt=NULL;
-    hid_t       tid;
-    size_t      align=1;
+    H5T_t       *dt=NULL;       /* Appropriate native datatype to copy */
+    hid_t       tid;            /* Datatype ID of appropriate native datatype */
+    size_t      align;          /* Alignment necessary for native datatype */
+    enum match_type {           /* The different kinds of floating point types we can match */
+        H5T_NATIVE_FLOAT_MATCH_FLOAT,
+        H5T_NATIVE_FLOAT_MATCH_DOUBLE,
+        H5T_NATIVE_FLOAT_MATCH_LDOUBLE,
+        H5T_NATIVE_FLOAT_MATCH_UNKNOWN
+    } match=H5T_NATIVE_FLOAT_MATCH_UNKNOWN;
+    H5T_t       *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_get_native_integer, NULL);
 
+    assert(size>0);
+    
     if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {        
-        if(size==sizeof(float)) {
+        if(size==sizeof(float))
+            match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
+        else if(size==sizeof(double))
+            match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
+        else if(size==sizeof(long double))
+            match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
+        else   /* If not match, return the biggest datatype */
+            match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
+    } else {
+        if(size==sizeof(long double))
+            match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
+        else if(size==sizeof(double))
+            match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
+        else if(size==sizeof(float))
+            match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
+        else
+            match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
+    }
+
+    /* Set the appropriate native floating point information */
+    switch(match) {
+        case H5T_NATIVE_FLOAT_MATCH_FLOAT:
             tid = H5T_NATIVE_FLOAT;
             align = H5T_NATIVE_FLOAT_COMP_ALIGN_g;
-        }
-        else if(size==sizeof(double)) {
+            break;
+
+        case H5T_NATIVE_FLOAT_MATCH_DOUBLE:
             tid = H5T_NATIVE_DOUBLE;
             align = H5T_NATIVE_DOUBLE_COMP_ALIGN_g;
-        }
-        else if(size==sizeof(long double)) {
+            break;
+
+        case H5T_NATIVE_FLOAT_MATCH_LDOUBLE:
             tid = H5T_NATIVE_LDOUBLE;
             align = H5T_NATIVE_LDOUBLE_COMP_ALIGN_g;
-        }
-        else { /* If not match, return the biggest datatype */
-            tid = H5T_NATIVE_LDOUBLE;
-            align = H5T_NATIVE_LDOUBLE_COMP_ALIGN_g;
-        }
-    } else {
-        if(size==sizeof(long double)) {
-            tid = H5T_NATIVE_LDOUBLE;
-            align = H5T_NATIVE_LDOUBLE_COMP_ALIGN_g;
-        }
-        else if(size==sizeof(double)) {
-             tid = H5T_NATIVE_DOUBLE;
-             align = H5T_NATIVE_DOUBLE_COMP_ALIGN_g;     
-        }
-        else if(size==sizeof(float)) {
-             tid = H5T_NATIVE_FLOAT;
-             align = H5T_NATIVE_FLOAT_COMP_ALIGN_g;                    
-        }
-        else {
-             tid = H5T_NATIVE_FLOAT;
-             align = H5T_NATIVE_FLOAT_COMP_ALIGN_g;                               
-        }
-    }
+            break;
+
+        default:
+            assert(0 && "Unknown native floating-point match!");
+            break;
+    } /* end switch */
    
     /* Create new native type */
     if(NULL==(dt=H5I_object_verify(tid, H5I_DATATYPE)))
@@ -3173,17 +3209,19 @@ H5T_t* H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *stru
     if((ret_value=H5T_copy(dt, H5T_COPY_TRANSIENT))==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
       
-    /* compute size and offset of compound type member. */
-    if(comp_size && offset) {
-        /* Add alignment value */
+    /* compute offset of compound type member. */
+    if(offset && comp_size) {
         if(align && *comp_size % align) {
+            /* Add alignment value */
             *offset = *comp_size + (align - *comp_size % align);
             size = size + (align - *comp_size % align);
         } else
             *offset = *comp_size;
-                
-            *comp_size += size;
-    } 
+                    
+        /* compute size of compound type member. */
+        *comp_size += size;
+    } /* end if */
+
     /* Alignment for whole compound type */
     if(struct_align && *struct_align < align)
         *struct_align = align;
@@ -3774,10 +3812,14 @@ H5T_get_sign(H5T_t *dt)
 
     FUNC_ENTER_NOAPI(H5T_get_sign, H5T_SGN_ERROR);
 
+    assert(dt);
+
+    /* Defer to parent */
+    while(dt->parent)
+        dt = dt->parent;
+
     /* Check args */
-    if (!dt)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_SGN_ERROR, "not a valid data type");
-    if (dt->parent)
+    if (H5T_INTEGER!=dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_SGN_ERROR, "operation not defined for data type class");
     
     /* Sign */
@@ -4516,9 +4558,7 @@ H5T_get_nmembers(const H5T_t *dt)
 
     FUNC_ENTER_NOAPI(H5T_get_nmembers, FAIL);
 
-    /* check argument */
-    if (NULL == dt)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid data type");
+    assert(dt);
 
     if (H5T_COMPOUND==dt->type)
 	ret_value = dt->u.compnd.nmembs;
@@ -4598,6 +4638,8 @@ H5T_get_member_name(H5T_t *dt, int membno)
     char	*ret_value;
 
     FUNC_ENTER_NOAPI(H5T_get_member_name, NULL);
+
+    assert(dt);
 
     switch (dt->type) {
         case H5T_COMPOUND:
@@ -4750,11 +4792,8 @@ H5T_get_member_offset(H5T_t *dt, int membno)
 
     FUNC_ENTER_NOAPI(H5T_get_member_offset, 0);
 
-    /* Check args */
-    if (!dt)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a valid data type");
-    if (membno < 0 || membno >= dt->u.compnd.nmembs)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid member number");
+    assert(dt);
+    assert(membno >= 0 && membno < dt->u.compnd.nmembs);
 
     /* Value */
     ret_value = dt->u.compnd.memb[membno].offset;
@@ -4883,11 +4922,8 @@ H5T_get_member_type(H5T_t *dt, int membno)
 
     FUNC_ENTER_NOAPI(H5T_get_member_type, NULL);
 
-    /* Check args */
-    if (!dt)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "data type doesn't exist");
-    if (membno < 0 || membno >= dt->u.compnd.nmembs)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid member number");
+    assert(dt);
+    assert(membno >=0 && membno < dt->u.compnd.nmembs);
     
     /* Copy data type into an atom */
     if (NULL == (ret_value = H5T_copy(dt->u.compnd.memb[membno].type, H5T_COPY_REOPEN)))
@@ -5057,15 +5093,18 @@ done:
 H5T_t *
 H5T_enum_create(H5T_t *parent)
 {
-    H5T_t	*ret_value = NULL;		/*new enumeration data type	*/
+    H5T_t	*ret_value;		/*new enumeration data type	*/
     
     FUNC_ENTER_NOAPI(H5T_enum_create, NULL);
+
+    assert(parent);
 
     /* Build new type */
     if (NULL==(ret_value = H5FL_ALLOC(H5T_t,1)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     ret_value->type = H5T_ENUM;
     ret_value->parent = H5T_copy(parent, H5T_COPY_ALL);
+    assert(ret_value->parent);
     ret_value->size = ret_value->parent->size;
     ret_value->ent.header = HADDR_UNDEF;
 
@@ -5192,6 +5231,8 @@ H5T_get_super(H5T_t *dt)
     
     FUNC_ENTER_NOAPI(H5T_get_super, NULL);
 
+    assert(dt);
+
     if (!dt->parent)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a derived data type");
     if (NULL==(ret_value=H5T_copy(dt->parent, H5T_COPY_ALL)))
@@ -5268,6 +5309,9 @@ H5T_get_member_value(H5T_t *dt, int membno, void *value/*out*/)
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5T_get_member_value, FAIL);
+
+    assert(dt);
+    assert(value);
 
     HDmemcpy(value, dt->u.enumer.value + membno*dt->size, dt->size);
 
@@ -8747,6 +8791,9 @@ H5T_get_array_ndims(H5T_t *dt)
     
     FUNC_ENTER_NOAPI(H5T_get_array_ndims, FAIL);
 
+    assert(dt);
+    assert(dt->type==H5T_ARRAY);
+
     /* Retrieve the number of dimensions */
     ret_value=dt->u.array.ndims;
 
@@ -8775,7 +8822,6 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
 {
     H5T_t	*dt = NULL;		    /* pointer to array data type	*/
     herr_t	ret_value = SUCCEED;	/* return value			*/
-    int    i;                  /* Local index variable */
     
     FUNC_ENTER_API(H5Tget_array_dims, FAIL);
     H5TRACE3("e","i*h*Is",type_id,dims,perm);
@@ -8817,6 +8863,9 @@ H5T_get_array_dims(H5T_t *dt, hsize_t dims[], int perm[])
     int    i;                  /* Local index variable */
     
     FUNC_ENTER_NOAPI(H5T_get_array_dims, FAIL);
+
+    assert(dt);
+    assert(dt->type==H5T_ARRAY);
 
     /* Retrieve the sizes of the dimensions */
     if(dims) 

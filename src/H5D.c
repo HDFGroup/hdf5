@@ -3695,7 +3695,7 @@ done:
  *
  * Return:	Success:        the address of dataset	
  *
- *		Failure:	Zero
+ *		Failure:	HADDR_UNDEF
  *
  * Programmer:  Raymond Lu	
  *              November 6, 2002 
@@ -3710,12 +3710,12 @@ H5Dget_offset(hid_t dset_id)
     H5D_t	*dset=NULL;
     haddr_t	ret_value;      /* Return value */
     
-    FUNC_ENTER_API(H5Dget_offset, 0);
+    FUNC_ENTER_API(H5Dget_offset, HADDR_UNDEF);
     H5TRACE1("h","i",dset_id);
 
     /* Check args */
     if (NULL==(dset=H5I_object_verify(dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "not a dataset");
 
     /* Set return value */
     ret_value = H5D_get_offset(dset);
@@ -3733,7 +3733,7 @@ done:
  *
  * Return:	Success:        the address of dataset	
  *
- *		Failure:	Zero
+ *		Failure:	HADDR_UNDEF
  *
  * Programmer:  Raymond Lu	
  *              November 6, 2002 
@@ -3749,6 +3749,8 @@ H5D_get_offset(H5D_t *dset)
     
     FUNC_ENTER_NOAPI(H5D_get_offset, HADDR_UNDEF);
 
+    assert(dset);
+
     switch(dset->layout.type) {
         case H5D_CHUNKED:
         case H5D_COMPACT:
@@ -3762,7 +3764,7 @@ H5D_get_offset(H5D_t *dset)
             break;
 
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "not a dataset type");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "unknown dataset layout type");
     }
      
 done:
