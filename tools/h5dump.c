@@ -222,16 +222,22 @@ h5dump [-h] [-bb] [-header] [-v] [-V] [-a <names>] [-d <names>] [-g <names>]\n\
   -header       Display header only; no data is displayed.\n\
   -v            Display the object ids\n\
   -V            Display version information and exit.\n\
-  -a <names>    Display the specified attribute(s).\n\
-  -d <names>    Display the specified dataset(s).\n\
-  -g <names>    Display the specified group(s) and all the members.\n\
-  -l <names>    Display the value(s) of the specified soft link(s).\n\
+  -a <path>     Display the specified attribute(s).\n\
+  -d <path>     Display the specified dataset(s).\n\
+  -g <path>     Display the specified group(s) and all the members.\n\
+  -l <path>     Display the value(s) of the specified soft link(s).\n\
   -o <fname>    Display the raw data of datasets to a separate Output file <fname>.\n\
   -t <names>    Display the specified named data type(s).\n\
   -w <number>   Display the information with the specified maximum number of columns.\n\
 \n\
-  <names> is one or more appropriate object names.\n\
   <number> is an integer greater than 1.\n\
+  <path> is the full path from the root group to the object.\n\
+\n\
+  Example:\n\
+\n\
+     Attribute foo of the group /bar_none in file quux.h5\n\
+\n\
+     	h5dump -a /bar_none/foo quux.h5\n\
 \n");
 }
 
