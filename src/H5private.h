@@ -12,7 +12,8 @@
  */
 #ifndef _H5private_H
 #define _H5private_H
-#include <H5public.h>		/* Include Public Definitions	  */
+#include <H5public.h>		/* Include Public Definitions		*/
+#include <H5config.h>		/* Include all configuration info	*/
 
 /*
  * Include ANSI-C header files.

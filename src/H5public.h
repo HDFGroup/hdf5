@@ -23,6 +23,41 @@ static char             RcsId[] = "@(#)$Revision$";
 #ifndef _H5public_H
 #define _H5public_H
 
+/*
+ * Undefine things that might get redefined in the H5config.h file if hdf5 is
+ * being included by other packages that use autoconf. The problem is that
+ * if the C preprocessor emits warning messages about redefinitions then
+ * autoconf will become confused and think that the hdf5 header file doesn't
+ * exist.
+ */
+#undef SIZEOF_INT8_T
+#undef SIZEOF_INT_FAST8_T
+#undef SIZEOF_INT_LEAST8_T
+#undef SIZEOF_UINT8_T
+#undef SIZEOF_UINT_FAST8_T
+#undef SIZEOF_UINT_LEAST8_T
+
+#undef SIZEOF_INT16_T
+#undef SIZEOF_INT_FAST16_T
+#undef SIZEOF_INT_LEAST16_T
+#undef SIZEOF_UINT16_T
+#undef SIZEOF_UINT_FAST16_T
+#undef SIZEOF_UINT_LEAST16_T
+
+#undef SIZEOF_INT32_T
+#undef SIZEOF_INT_FAST32_T
+#undef SIZEOF_INT_LEAST32_T
+#undef SIZEOF_UINT32_T
+#undef SIZEOF_UINT_FAST32_T
+#undef SIZEOF_UINT_LEAST32_T
+
+#undef SIZEOF_INT64_T
+#undef SIZEOF_INT_FAST64_T
+#undef SIZEOF_INT_LEAST64_T
+#undef SIZEOF_UINT64_T
+#undef SIZEOF_UINT_FAST64_T
+#undef SIZEOF_UINT_LEAST64_T
+
 #include <H5config.h>           /*from configure                             */
 #include <sys/types.h>
 #ifdef STDC_HEADERS
@@ -101,6 +136,35 @@ typedef ssize_t			hssize_t;
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Clean up all these symbols */
+#undef SIZEOF_INT8_T
+#undef SIZEOF_INT_FAST8_T
+#undef SIZEOF_INT_LEAST8_T
+#undef SIZEOF_UINT8_T
+#undef SIZEOF_UINT_FAST8_T
+#undef SIZEOF_UINT_LEAST8_T
+
+#undef SIZEOF_INT16_T
+#undef SIZEOF_INT_FAST16_T
+#undef SIZEOF_INT_LEAST16_T
+#undef SIZEOF_UINT16_T
+#undef SIZEOF_UINT_FAST16_T
+#undef SIZEOF_UINT_LEAST16_T
+
+#undef SIZEOF_INT32_T
+#undef SIZEOF_INT_FAST32_T
+#undef SIZEOF_INT_LEAST32_T
+#undef SIZEOF_UINT32_T
+#undef SIZEOF_UINT_FAST32_T
+#undef SIZEOF_UINT_LEAST32_T
+
+#undef SIZEOF_INT64_T
+#undef SIZEOF_INT_FAST64_T
+#undef SIZEOF_INT_LEAST64_T
+#undef SIZEOF_UINT64_T
+#undef SIZEOF_UINT_FAST64_T
+#undef SIZEOF_UINT_LEAST64_T
 
 /* Functions in H5.c */
 __DLL__ herr_t H5open(void);
