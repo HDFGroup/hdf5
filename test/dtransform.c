@@ -72,11 +72,12 @@ const int transformData[ROWS][COLS] =
 
 #define UCOMPARE(TYPE,VAR1,VAR2,TOL)			\
 {							\
-    size_t i;						\
+    size_t i,j;						\
 							\
-    for(i=0; i<ROWS*COLS; i++)				\
+    for(i=0; i<ROWS; i++)				\
+    for(j=0; j<COLS; j++)				\
     {							\
-	if(!( (((VAR1)[i] >= (TYPE)((VAR2)[i])) && ( ((VAR1)[i] - TOL) < (TYPE)((VAR2)[i]))) || (  ((VAR1)[i] <= (TYPE)((VAR2)[i])) && ( ((VAR1)[i] + TOL) > (TYPE)((VAR2)[i])))))	\
+	if(!( (((VAR1)[i][j] >= (TYPE)((VAR2)[i][j])) && ( ((VAR1)[i][j] - TOL) < (TYPE)((VAR2)[i][j]))) || (  ((VAR1)[i][j] <= (TYPE)((VAR2)[i][j])) && ( ((VAR1)[i][j] + TOL) > (TYPE)((VAR2)[i][j])))))	\
 	{						\
 	    H5_FAILED();				\
 	    fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");	\
@@ -88,11 +89,12 @@ const int transformData[ROWS][COLS] =
 
 #define COMPARE(TYPE,VAR1,VAR2,TOL)			\
 {							\
-    size_t i;						\
+    size_t i,j;						\
 							\
-    for(i=0; i<ROWS*COLS; i++)				\
+    for(i=0; i<ROWS; i++)				\
+    for(j=0; j<COLS; j++)				\
     {							\
-	if( !(((VAR1)[i] <= ((TYPE)(VAR2)[i] + TOL)) && ((VAR1)[i] >= ((TYPE)(VAR2)[i] - TOL))) )	\
+	if( !(((VAR1)[i][j] <= ((TYPE)(VAR2)[i][j] + TOL)) && ((VAR1)[i][j] >= ((TYPE)(VAR2)[i][j] - TOL))) )	\
 	{						\
 	    H5_FAILED();				\
 	    fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");	\
@@ -290,16 +292,16 @@ int test_int(const hid_t dxpl_id_c_to_f, const hid_t dxpl_id_polynomial)
     TESTING("data transform, no data type conversion (int->int)")
     /* Read in the integer data with a data transform. */
     if((err = H5Dread(dset_id_int, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFintread))<0) TEST_ERROR;
-    COMPARE(int, *windchillFintread, *windchillFfloat, 2)
+    COMPARE(int, windchillFintread, windchillFfloat, 2)
     
 
    TESTING("data transform, with data type conversion (float->int)")
     if((err = H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFintread))<0) TEST_ERROR;
-    COMPARE(int, *windchillFintread, *windchillFfloat, 2)
+    COMPARE(int, windchillFintread, windchillFfloat, 2)
 
     TESTING("data transform, polynomial transform (float->int)")
     if((err = H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_polynomial, polyintread))<0) TEST_ERROR;
-    COMPARE(int, *polyintread, *polyflres, 2)
+    COMPARE(int, polyintread, polyflres, 2)
 
     return 0;
 
@@ -334,15 +336,15 @@ int test_float(const hid_t dxpl_id_c_to_f, const hid_t dxpl_id_polynomial)
 
     TESTING("data transform, no data type conversion (float->float)")
     if((err = H5Dread(dset_id_float, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFfloatread))<0) TEST_ERROR;
-    COMPARE(float, *windchillFfloatread, *windchillFfloat, 2.0)
+    COMPARE(float, windchillFfloatread, windchillFfloat, 2.0)
 
     TESTING("data transform, with data type conversion (int->float)")
     if((err = H5Dread(dset_id_int, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFfloatread))<0) TEST_ERROR;
-    COMPARE(float, *windchillFfloatread, *windchillFfloat, 2.0)
+    COMPARE(float, windchillFfloatread, windchillFfloat, 2.0)
 
     TESTING("data transform, polynomial transform (int->float)")
     if((err = H5Dread(dset_id_int, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_polynomial, polyflread))<0) TEST_ERROR;
-    COMPARE(float, *polyflread, *polyflres, 2.0)
+    COMPARE(float, polyflread, polyflres, 2.0)
 
     return 0;
 
@@ -360,7 +362,7 @@ int test_uchar(const hid_t dxpl_id_utrans_inv)
     TESTING("data transform, no data type conversion (uchar->uchar)")
 
     if((err = H5Dread(dset_id_uchar, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, dxpl_id_utrans_inv, transformDatauchar))<0) TEST_ERROR;
-    UCOMPARE(unsigned char, *transformDatauchar, *transformData, 4)
+    UCOMPARE(unsigned char, transformDatauchar, transformData, 4)
 
     return 0;
 
@@ -376,7 +378,7 @@ int test_schar(const hid_t dxpl_id_c_to_f)
     
     TESTING("data transform, no data type conversion (schar->schar)")
     if((err = H5Dread(dset_id_schar, H5T_NATIVE_SCHAR, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFschar))<0) TEST_ERROR;
-    COMPARE(signed char, *windchillFschar, *windchillFfloat, 2)
+    COMPARE(signed char, windchillFschar, windchillFfloat, 2)
 
     return 0;
 
@@ -395,7 +397,7 @@ int test_char(const hid_t dxpl_id_utrans_inv)
     TESTING("data transform, no data type conversion (char->char)")
 
     if((err = H5Dread(dset_id_char, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, dxpl_id_utrans_inv, transformDatachar))<0) TEST_ERROR;
-    COMPARE(char, *transformDatachar, *transformData, 4)
+    COMPARE(char, transformDatachar, transformData, 4)
 	
     return 0;
 
@@ -414,7 +416,7 @@ int test_uint(const hid_t dxpl_id_utrans_inv)
     
     TESTING("data transform, no data type conversion (uint->uint)")
     if((err = H5Dread(dset_id_uint, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, dxpl_id_utrans_inv, transformDatauint))<0) TEST_ERROR;
-    UCOMPARE(unsigned int, *transformDatauint, *transformData, 4)
+    UCOMPARE(unsigned int, transformDatauint, transformData, 4)
 
     return 0;
 
@@ -431,7 +433,7 @@ int test_ushort(const hid_t dxpl_id_utrans_inv)
     
     TESTING("data transform, no data type conversion (ushort->ushort)")
     if((err = H5Dread(dset_id_ushort, H5T_NATIVE_USHORT, H5S_ALL, H5S_ALL, dxpl_id_utrans_inv, transformDataushort))<0) TEST_ERROR;
-    UCOMPARE(unsigned short, *transformDataushort, *transformData, 4)
+    UCOMPARE(unsigned short, transformDataushort, transformData, 4)
 
     return 0;
 
@@ -448,7 +450,7 @@ int test_short(const hid_t dxpl_id_c_to_f)
     
     TESTING("data transform, no data type conversion (short->short)")
     if((err = H5Dread(dset_id_short, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFshort))<0) TEST_ERROR;
-    COMPARE(short, *windchillFshort, *windchillFfloat, 2)
+    COMPARE(short, windchillFshort, windchillFfloat, 2)
 
     return 0;
 
@@ -467,7 +469,7 @@ int test_long(const hid_t dxpl_id_c_to_f)
     
     TESTING("data transform, no data type conversion (long->long)")
     if((err = H5Dread(dset_id_long, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFlong))<0) TEST_ERROR;
-    COMPARE(long, *windchillFlong, *windchillFfloat, 2)
+    COMPARE(long, windchillFlong, windchillFfloat, 2)
 
     return 0;
 
@@ -483,7 +485,7 @@ int test_ulong(const hid_t dxpl_id_utrans_inv)
     
     TESTING("data transform, no data type conversion (ulong->ulong)")
     if((err = H5Dread(dset_id_ulong, H5T_NATIVE_ULONG, H5S_ALL, H5S_ALL, dxpl_id_utrans_inv, transformDataulong))<0) TEST_ERROR;
-    UCOMPARE(unsigned long, *transformDataulong, *transformData, 4)
+    UCOMPARE(unsigned long, transformDataulong, transformData, 4)
 
     return 0;
 
@@ -500,7 +502,7 @@ int test_llong(const hid_t dxpl_id_c_to_f)
     
     TESTING("data transform, no data type conversion (llong->llong)")
     if((err = H5Dread(dset_id_llong, H5T_NATIVE_LLONG, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFllong))<0) TEST_ERROR;
-    COMPARE(long_long, *windchillFllong, *windchillFfloat, 2)
+    COMPARE(long_long, windchillFllong, windchillFfloat, 2)
 
     return 0;
 
@@ -517,7 +519,7 @@ int test_ullong(const hid_t dxpl_id_utrans_inv)
     TESTING("data transform, no data type conversion (ullong->ullong)")
 #ifdef H5_ULLONG_TO_FP_CAST_WORKS
     if((err = H5Dread(dset_id_ullong, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, dxpl_id_utrans_inv, transformDataullong))<0) TEST_ERROR;
-    UCOMPARE(unsigned long_long, *transformDataullong, *transformData, 4)
+    UCOMPARE(unsigned long_long, transformDataullong, transformData, 4)
 #else
     SKIPPED();
 #endif
@@ -537,7 +539,7 @@ int test_double(const hid_t dxpl_id_c_to_f)
     
     TESTING("data transform, no data type conversion (double->double)")
     if((err = H5Dread(dset_id_double, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFdouble))<0) TEST_ERROR;
-    COMPARE(double, *windchillFdouble, *windchillFfloat, 2.0)
+    COMPARE(double, windchillFdouble, windchillFfloat, 2.0)
 
     return 0;
 
@@ -553,7 +555,7 @@ int test_ldouble(const hid_t dxpl_id_c_to_f)
     
     TESTING("data transform, no data type conversion (ldouble->ldouble)")
     if((err = H5Dread(dset_id_ldouble, H5T_NATIVE_LDOUBLE, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFldouble))<0) TEST_ERROR;
-    COMPARE(long double, *windchillFldouble, *windchillFfloat, 2.0)
+    COMPARE(long double, windchillFldouble, windchillFfloat, 2.0)
 
     return 0;
 
@@ -589,11 +591,11 @@ int test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_co
   
    TESTING("data transform, linear transform w/ copied property")
     if((err = H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f_copy, windchillFintread))<0) TEST_ERROR;
-   COMPARE(int, *windchillFintread, *windchillFfloat, 2)
+   COMPARE(int, windchillFintread, windchillFfloat, 2)
 
     TESTING("data transform, polynomial transform w/ copied property")
     if((err = H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_polynomial_copy, polyintread))<0) TEST_ERROR;
-   COMPARE(int, *polyintread, *polyflres, 2)
+   COMPARE(int, polyintread, polyflres, 2)
 
     return 0;
 
