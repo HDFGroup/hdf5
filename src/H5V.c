@@ -170,11 +170,11 @@ H5V_hyper_stride(intn n, const hsize_t *size,
 
     /* others */
     for (i=n-2, acc=1; i>=0; --i) {
-	hsize_t tmp = acc * (total_size[i+1] - size[i+1]);
-	assert (tmp<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
-	stride[i] = (hssize_t)tmp; /*overflow checked*/
-	acc *= total_size[i+1];
-	skip += acc * (offset ? offset[i] : 0);
+        hsize_t tmp = acc * (total_size[i+1] - size[i+1]);
+        assert (tmp<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+        stride[i] = (hssize_t)tmp; /*overflow checked*/
+        acc *= total_size[i+1];
+        skip += acc * (offset ? offset[i] : 0);
     }
 
     FUNC_LEAVE(skip);
@@ -410,26 +410,42 @@ H5V_hyper_copy(intn n, const hsize_t *_size,
 	assert(src_size[i] > 0);
     }
 #endif
-#ifdef QAK
-    {
-	intn i;
-
-	printf("%s: n=%d, _dst=%p, _src=%p\n",FUNC,(int)n,_dst,_src);
-	for(i=0; i<n; i++) {
-	    printf("%d: size=%d, dst_size=%d, dst_offset=%d, src_size=%d, "
-		   "src_offset=%d\n",
-		   i, (int)size[i], (int)dst_size[i], (int)dst_offset[i],
-		   (int)src_size[i], (int)src_offset[i]);
-	} /* end for */
-    }
-#endif /* QAK */
 
     /* Copy the size vector so we can modify it */
     H5V_vector_cpy(n, size, _size);
 
     /* Compute stride vectors for source and destination */
+#ifdef NO_INLINED_CODE
     dst_start = H5V_hyper_stride(n, size, dst_size, dst_offset, dst_stride);
     src_start = H5V_hyper_stride(n, size, src_size, src_offset, src_stride);
+#else /* NO_INLINED_CODE */
+    /* in-line version of two calls to H5V_hyper_stride() */
+    {
+        hsize_t	    dst_acc;	/*accumulator				*/
+        hsize_t	    src_acc;	/*accumulator				*/
+        int		    i;		/*counter				*/
+
+        /* init */
+        dst_stride[n-1] = 1;
+        src_stride[n-1] = 1;
+        dst_start = dst_offset ? dst_offset[n-1] : 0;
+        src_start = src_offset ? src_offset[n-1] : 0;
+
+        /* others */
+        for (i=n-2, dst_acc=1, src_acc=1; i>=0; --i) {
+            hsize_t tmp1 = dst_acc * (dst_size[i+1] - size[i+1]);
+            hsize_t tmp2 = src_acc * (src_size[i+1] - size[i+1]);
+            assert (tmp1<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+            assert (tmp2<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+            dst_stride[i] = (hssize_t)tmp1; /*overflow checked*/
+            src_stride[i] = (hssize_t)tmp2; /*overflow checked*/
+            dst_acc *= dst_size[i+1];
+            src_acc *= src_size[i+1];
+            dst_start += dst_acc * (dst_offset ? dst_offset[i] : 0);
+            src_start += src_acc * (src_offset ? src_offset[i] : 0);
+        }
+    }
+#endif /* NO_INLINED_CODE */
 
     /* Optimize the strides as a pair */
     H5V_stride_optimize2(&n, &elmt_size, size, dst_stride, src_stride);

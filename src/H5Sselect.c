@@ -14,6 +14,7 @@
 #include <H5MMprivate.h>
 #include <H5Sprivate.h>
 #include <H5Vprivate.h>
+#include <H5TBprivate.h>
 
 /* Interface initialization */
 #define PABLO_MASK      H5S_select_mask
@@ -293,7 +294,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 		      const hsize_t count[/*space_id*/],
 		      const hsize_t block[/*space_id*/])
 {
-    
+    hid_t stride_id=FAIL,block_id=FAIL; /* Stride & block temp. buffer IDs */
     hsize_t *_stride=NULL;        /* Stride array */
     hsize_t *_block=NULL;        /* Block size array */
     hssize_t slab[H5O_LAYOUT_NDIMS]; /* Location of the block to add for strided selections */
@@ -316,7 +317,8 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     if(stride==NULL) {
         hssize_t fill=1;
 
-        if((_stride = H5MM_malloc(sizeof(hssize_t)*space->extent.u.simple.rank))==NULL)
+        /* Allocate temporary buffer */
+        if((stride_id = H5TB_get_buf(sizeof(hssize_t)*space->extent.u.simple.rank,0,(void **)&_stride)) ==FAIL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate stride vector");
         H5V_array_fill(_stride,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
@@ -327,7 +329,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     if(block==NULL) {
         hssize_t fill=1;
 
-        if((_block = H5MM_malloc(sizeof(hssize_t)*space->extent.u.simple.rank))==NULL)
+        if((block_id = H5TB_get_buf(sizeof(hssize_t)*space->extent.u.simple.rank,0,(void **)&_block))==FAIL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate block vector");
         H5V_array_fill(_block,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
@@ -444,8 +446,8 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 #endif /* QAK */
 
 done:
-    H5MM_xfree(_stride);
-    H5MM_xfree(_block);
+    if(_stride!=NULL) H5TB_release_buf(stride_id);
+    if(_block!=NULL) H5TB_release_buf(block_id);
     FUNC_LEAVE (ret_value);
 }
 

@@ -105,6 +105,8 @@ herr_t H5Pset_cache (hid_t plist_id, int mdc_nelmts, size_t rdcc_nbytes,
 		     double rdcc_w0);
 herr_t H5Pget_cache (hid_t plist_id, int *mdc_nelmts, size_t *rdcc_nbytes,
 		     double *rdcc_w0);
+herr_t H5Pset_hyper_cache(hid_t plist_id, unsigned cache, unsigned limit);
+herr_t H5Pget_hyper_cache(hid_t plist_id, unsigned *cache, unsigned *limit);
 
 #ifdef HAVE_PARALLEL
 herr_t H5Pset_mpi (hid_t plist_id, MPI_Comm comm, MPI_Info info);

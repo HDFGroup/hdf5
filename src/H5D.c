@@ -28,6 +28,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Oprivate.h>		/* Object headers		  	*/
 #include <H5Pprivate.h>		/* Property lists			*/
 #include <H5Sprivate.h>		/* Dataspace functions rky 980813       */
+#include <H5TBprivate.h>	/* Temporary buffers        */
 #include <H5Zprivate.h>		/* Data filters				*/
 
 #ifdef QAK
@@ -71,6 +72,12 @@ const H5D_xfer_t	H5D_xfer_dflt = {
     NULL,			/* Type conversion buffer or NULL	*/
     NULL, 			/* Background buffer or NULL		*/
     H5T_BKG_NO,			/* Type of background buffer needed	*/
+#ifndef HAVE_PARALLEL
+    1,              /* Cache the hyperslab blocks by default */
+#else /* HAVE_PARALLEL */
+    0,              /* Don't cache the hyperslab blocks by default (for parallel) */
+#endif /* HAVE_PARALLEL */
+    0,              /* Default to no upper limit on hyperslab block size to cache */
 #ifdef HAVE_PARALLEL
     H5D_XFER_DFLT,      	/* Independent data transfer      	*/
 #endif
@@ -1280,6 +1287,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     hsize_t		nelmts;			/*number of elements	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
+    hid_t       tconv_id=FAIL, bkg_id=FAIL;   /* Conversion buffer IDs */
     uint8		*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8		*bkg_buf = NULL;	/*background buffer	*/
     H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
@@ -1457,16 +1465,18 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
     }
     if (NULL==(tconv_buf=xfer_parms->tconv_buf)) {
-	if (NULL==(tconv_buf = H5MM_malloc (target_size))) {
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			 "memory allocation failed for type conversion");
-	}
+        /* Allocate temporary buffer */
+        if (FAIL==(tconv_id = H5TB_get_buf (target_size,1,(void **)&tconv_buf))) {
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                 "memory allocation failed for type conversion");
+        }
     }
     if (need_bkg && NULL==(bkg_buf=xfer_parms->bkg_buf)) {
-	if (NULL==(bkg_buf = H5MM_malloc (request_nelmts * dst_type_size))) {
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			 "memory allocation failed for background buffer");
-	}
+        /* Allocate temporary buffer */
+        if (FAIL==(bkg_id = H5TB_get_buf (request_nelmts*dst_type_size,1,(void **)&bkg_buf))) {
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                 "memory allocation failed for type conversion");
+        }
     }
 
 #ifdef QAK
@@ -1497,7 +1507,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 			     &(dataset->create_parms->pline),
 			     &(dataset->create_parms->efl), src_type_size,
 			     file_space, &file_iter, smine_nelmts,
-			     xfer_parms->xfer_mode, tconv_buf/*out*/);
+			     xfer_parms, tconv_buf/*out*/);
 #ifdef H5S_DEBUG
 	H5_timer_end(&(sconv->stats[1].gath_timer), &timer);
 	sconv->stats[1].gath_nbytes += n * src_type_size;
@@ -1599,8 +1609,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
     if (src_id >= 0) H5I_dec_ref(src_id);
     if (dst_id >= 0) H5I_dec_ref(dst_id);
-    if (tconv_buf && NULL==xfer_parms->tconv_buf) H5MM_xfree(tconv_buf);
-    if (bkg_buf && NULL==xfer_parms->bkg_buf) H5MM_xfree (bkg_buf);
+    if (tconv_buf && NULL==xfer_parms->tconv_buf) H5TB_release_buf(tconv_id);
+    if (bkg_buf && NULL==xfer_parms->bkg_buf) H5TB_release_buf (bkg_id);
     if (free_this_space) H5S_close (free_this_space);
     FUNC_LEAVE(ret_value);
 }
@@ -1636,6 +1646,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     hsize_t		nelmts;			/*total number of elmts	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
+    hid_t       tconv_id=FAIL, bkg_id=FAIL;   /* Conversion buffer IDs */
     uint8		*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8		*bkg_buf = NULL;	/*background buffer	*/
     H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
@@ -1821,16 +1832,18 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
     }
     if (NULL==(tconv_buf=xfer_parms->tconv_buf)) {
-	if (NULL==(tconv_buf = H5MM_malloc (target_size))) {
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			 "memory allocation failed for type conversion");
-	}
+        /* Allocate temporary buffer */
+        if (FAIL==(tconv_id = H5TB_get_buf (target_size,1,(void **)&tconv_buf))) {
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                 "memory allocation failed for type conversion");
+        }
     }
     if (need_bkg && NULL==(bkg_buf=xfer_parms->bkg_buf)) {
-	if (NULL==(bkg_buf = H5MM_malloc (request_nelmts * dst_type_size))) {
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			 "memory allocation failed for background buffer");
-	}
+        /* Allocate temporary buffer */
+        if (FAIL==(bkg_id = H5TB_get_buf (request_nelmts*dst_type_size,1,(void **)&bkg_buf))) {
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                 "memory allocation failed for type conversion");
+        }
     }
 
 #ifdef QAK
@@ -1894,8 +1907,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				 &(dataset->create_parms->pline),
 				 &(dataset->create_parms->efl), dst_type_size,
 				 file_space, &bkg_iter, smine_nelmts,
-				 xfer_parms->xfer_mode,
-				 bkg_buf/*out*/);
+				 xfer_parms, bkg_buf/*out*/);
 #ifdef H5S_DEBUG
 	    H5_timer_end(&(sconv->stats[0].bkg_timer), &timer);
 	    sconv->stats[0].bkg_nbytes += n * dst_type_size;
@@ -1923,6 +1935,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                 "data type conversion failed");
         }
+#ifdef QAK
+	printf("%s: check 6.3\n",FUNC);
+#endif
 
         /*
          * Scatter the data out to the file.
@@ -1934,7 +1949,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				  &(dataset->create_parms->pline),
 				  &(dataset->create_parms->efl), dst_type_size,
 				  file_space, &file_iter, smine_nelmts,
-				  xfer_parms->xfer_mode, tconv_buf);
+				  xfer_parms, tconv_buf);
+#ifdef QAK
+	printf("%s: check 6.35\n",FUNC);
+#endif
 #ifdef H5S_DEBUG
 	H5_timer_end(&(sconv->stats[0].scat_timer), &timer);
 	sconv->stats[0].scat_nbytes += smine_nelmts * dst_type_size;
@@ -1945,6 +1963,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         }
     }
 
+#ifdef QAK
+	printf("%s: check 6.4\n",FUNC);
+#endif
     /*
      * Update modification time.  We have to do this explicitly because
      * writing to a dataset doesn't necessarily change the object header.
@@ -1965,8 +1986,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
     if (src_id >= 0) H5I_dec_ref(src_id);
     if (dst_id >= 0) H5I_dec_ref(dst_id);
-    if (tconv_buf && NULL==xfer_parms->tconv_buf) H5MM_xfree(tconv_buf);
-    if (bkg_buf && NULL==xfer_parms->bkg_buf) H5MM_xfree (bkg_buf);
+    if (tconv_buf && NULL==xfer_parms->tconv_buf) H5TB_release_buf(tconv_id);
+    if (bkg_buf && NULL==xfer_parms->bkg_buf) H5TB_release_buf (bkg_id);
     if (free_this_space) H5S_close (free_this_space);
     FUNC_LEAVE(ret_value);
 }

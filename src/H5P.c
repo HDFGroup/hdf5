@@ -2074,6 +2074,90 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Pset_hyper_cache
+ *
+ * Purpose:	Given a dataset transfer property list, indicate whether to cache
+ *      the hyperslab blocks during the I/O (which speeds things up) and the
+ *      maximum size of the hyperslab block to cache.  If a block is smaller
+ *      than to limit, it may still not be cached if no memory is available.
+ *      Setting the limit to 0 indicates no limitation on the size of block
+ *      to attempt to cache.
+ *
+ *      The default is to cache blocks with no limit on block size for serial
+ *          I/O and to not cache blocks for parallel I/O
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, September 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_hyper_cache(hid_t plist_id, unsigned cache, unsigned limit)
+{
+    H5D_xfer_t		*plist = NULL;
+    
+    FUNC_ENTER (H5Pset_hyper_cache, FAIL);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
+	NULL == (plist = H5I_object (plist_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a dataset transfer property list");
+    }
+
+    /* Update property list */
+    plist->cache_hyper = (cache>0) ? 1 : 0;
+    plist->block_limit = limit;
+
+    FUNC_LEAVE (SUCCEED);
+} /* end H5P_set_hyper_cache() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_hyper_cache
+ *
+ * Purpose:	Reads values previously set with H5Pset_hyper_cache().
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, September 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/, unsigned *limit/*out*/)
+{
+    H5D_xfer_t		*plist = NULL;
+    
+    FUNC_ENTER (H5Pget_hyper_cache, 0);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
+	NULL == (plist = H5I_object (plist_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, 0,
+		       "not a dataset transfer property list");
+    }
+
+    /* Return values */
+    if (cache) *cache = plist->cache_hyper;
+    if (limit) *limit = plist->block_limit;
+
+    FUNC_LEAVE (SUCCEED);
+} /* end H5Pget_hyper_cache() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_preserve
  *
  * Purpose:	When reading or writing compound data types and the

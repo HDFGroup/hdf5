@@ -25,10 +25,7 @@ H5.o: \
    H5Gpublic.h \
    H5Oprivate.h \
    H5Opublic.h \
-   H5HGprivate.h \
-   H5HGpublic.h \
-   H5Tprivate.h \
-   H5Tpublic.h
+   H5HGprivate.h
 H5A.o: \
    H5A.c \
    H5private.h \
@@ -166,7 +163,9 @@ H5F.o: \
    H5Eprivate.h \
    H5Epublic.h \
    H5MMprivate.h \
-   H5MMpublic.h
+   H5MMpublic.h \
+   H5Pprivate.h \
+   H5Ppublic.h
 H5Farray.o: \
    H5Farray.c \
    H5private.h \
@@ -1140,8 +1139,4 @@ H5Z.o: \
    H5HGprivate.h \
    H5HGpublic.h \
    H5Tprivate.h \
-   H5Tpublic.h \
-   H5Sprivate.h \
-   H5Spublic.h \
-   H5Zprivate.h \
-   H5Zpublic.h
+   H5Tpublic.h

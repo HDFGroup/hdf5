@@ -71,18 +71,27 @@ typedef struct {
     H5S_pnt_node_t *head;   /* Pointer to head of point list */
 } H5S_pnt_list_t;
 
+/* Node in hyperslab selection list */
+typedef struct H5S_hyper_node_tag {
+    hssize_t *start;    /* Pointer to a corner of a hyperslab closest to the origin */
+    hssize_t *end;      /* Pointer to a corner of a hyperslab furthest from the origin */
+    struct {
+        uintn cached;   /* Flag to indicate that the block is cached (during I/O only) */
+        uintn size;     /* Size of cached block (in elements) */
+        uintn left;     /* Elements left to access in block */
+        hid_t block_id; /* Temporary buffer ID */
+        uint8 *block;   /* Pointer into temporary buffer for cache */
+        uint8 *pos;     /* Pointer to current location within block */
+    } cinfo;
+    struct H5S_hyper_node_tag *next;  /* pointer to next hyperslab in list */
+} H5S_hyper_node_t;
+
 /* Region in dimension */
 typedef struct H5S_hyper_region_tag {
     hssize_t start;    /* The low bound of a region in a dimension */
     hssize_t end;      /* The high bound of a region in a dimension */
+    H5S_hyper_node_t *node; /* pointer to the node the region is in */
 } H5S_hyper_region_t;
-
-/* Node in hyperslab selection list */
-typedef struct H5S_hyper_node_tag {
-    hssize_t *start;   /* Pointer to a corner of a hyperslab closest to the origin */
-    hssize_t *end;     /* Pointer to a corner of a hyperslab furthest from the origin */
-    struct H5S_hyper_node_tag *next;  /* pointer to next hyperslab in list */
-} H5S_hyper_node_t;
 
 /* Information about hyperslab boundary and pointer to hyperslab node */
 typedef struct {
@@ -183,7 +192,7 @@ typedef struct H5S_fconv_t {
 		   const struct H5O_pline_t *pline,
 		   const struct H5O_efl_t *efl, size_t elmt_size,
 		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		   size_t nelmts, const H5D_transfer_t xfer_mode,
+		   size_t nelmts, const void *xfer_parms,
 		   void *tconv_buf/*out*/);
 
     /* Scatter elements from type conversion buffer to disk */
@@ -191,7 +200,7 @@ typedef struct H5S_fconv_t {
 		   const struct H5O_pline_t *pline,
 		   const struct H5O_efl_t *efl, size_t elmt_size,
 		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		   size_t nelmts, const H5D_transfer_t xfer_mode,
+		   size_t nelmts, const void *xfer_parms,
 		   const void *tconv_buf);
 } H5S_fconv_t;
 
@@ -275,10 +284,6 @@ extern const H5S_fconv_t	H5S_ALL_FCONV[];
 extern const H5S_mconv_t	H5S_ALL_MCONV[];
 extern const H5S_fconv_t	H5S_HYPER_FCONV[];
 extern const H5S_mconv_t	H5S_HYPER_MCONV[];
-
-#ifdef LATER_ROBB
-#endif
-
 
 H5S_t *H5S_create (H5S_class_t type);
 H5S_t *H5S_copy (const H5S_t *src);

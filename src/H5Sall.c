@@ -11,6 +11,7 @@
 #include <H5Eprivate.h>
 #include <H5Sprivate.h>
 #include <H5Vprivate.h>
+#include <H5Dprivate.h>
 
 /* Interface initialization */
 #define PABLO_MASK      H5S_all_mask
@@ -26,14 +27,14 @@ static size_t H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 			     const struct H5O_efl_t *efl, size_t elmt_size,
 			     const H5S_t *file_space,
 			     H5S_sel_iter_t *file_iter, size_t nelmts,
-			     const H5D_transfer_t xfer_mode,
+			     const void *_xfer_parms,
 			     void *buf/*out*/);
 static herr_t H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 			     const struct H5O_pline_t *pline,
 			     const struct H5O_efl_t *efl, size_t elmt_size,
 			     const H5S_t *file_space,
 			     H5S_sel_iter_t *file_iter, size_t nelmts,
-			     const H5D_transfer_t xfer_mode,
+			     const void *_xfer_parms,
 			     const void *buf);
 static size_t H5S_all_mgath (const void *_buf, size_t elmt_size,
 			     const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
@@ -170,8 +171,9 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 	       const struct H5O_pline_t *pline, const struct H5O_efl_t *efl,
 	       size_t elmt_size, const H5S_t *file_space,
 	       H5S_sel_iter_t *file_iter, size_t nelmts,
-	       const H5D_transfer_t xfer_mode, void *_buf/*out*/)
+	       const void *_xfer_parms, void *_buf/*out*/)
 {
+    const H5D_xfer_t *xfer_parms=(const H5D_xfer_t *)_xfer_parms;   /* Coerce the type */
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
     hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
@@ -224,7 +226,7 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
      * Gather from file.
      */
     if (H5F_arr_read (f, layout, pline, efl, hsize, hsize, zero, file_offset,
-		      xfer_mode, buf/*out*/)<0) {
+		      xfer_parms->xfer_mode, buf/*out*/)<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0, "read error");
     }
 
@@ -260,8 +262,9 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 	       const struct H5O_pline_t *pline, const struct H5O_efl_t *efl,
 	       size_t elmt_size, const H5S_t *file_space,
 	       H5S_sel_iter_t *file_iter, size_t nelmts,
-	       const H5D_transfer_t xfer_mode, const void *_buf)
+	       const void *_xfer_parms, const void *_buf)
 {
+    const H5D_xfer_t *xfer_parms=(const H5D_xfer_t *)_xfer_parms;   /* Coerce the type */
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
     hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero vector		*/
@@ -310,7 +313,7 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
      * Scatter to file.
      */
     if (H5F_arr_write (f, layout, pline, efl, hsize, hsize, zero,
-		       file_offset, xfer_mode, buf)<0) {
+		       file_offset, xfer_parms->xfer_mode, buf)<0) {
         HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
     }
 

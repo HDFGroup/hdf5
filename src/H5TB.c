@@ -18,11 +18,11 @@
  * Purpose:		Temporary buffer management functions
  *
  * Library Public API Functions:
- *  H5TBget_buf     - Get an ID for a temporary buffer
- *  H5TBbuf_ptr     - Get a pointer to the temporary buffer's memory
- *  H5TBresize_buf  - Resize a temporary buffer
- *  H5TBgarbage_coll- Free all unused temporary buffers
- *  H5TBrelease_buf - Release temporary buffer
+ *  H5TB_get_buf     - Get an ID for a temporary buffer
+ *  H5TB_buf_ptr     - Get a pointer to the temporary buffer's memory
+ *  H5TB_resize_buf  - Resize a temporary buffer
+ *  H5TB_garbage_coll- Free all unused temporary buffers
+ *  H5TB_release_buf - Release temporary buffer
  *
  * Modifications:	
  *
@@ -112,8 +112,25 @@ H5TB_init_interface(void)
 static void
 H5TB_term_interface(void)
 {
+    H5TB_t *curr=H5TB_list_head,       /* pointer to current temp. buffer */
+        *next;                          /* pointer to next temp. buffer */
+
     /* Destroy the atom group */
+    H5I_destroy_group(H5_TEMPBUF);
+
     /* Step through the list and free the buffers */
+    while(curr!=NULL) {
+        next=curr->next;
+
+        if(curr->buf!=NULL)
+            H5MM_xfree(curr->buf);
+        H5MM_xfree(curr);
+
+        curr=next;
+    } /* end while */
+
+    /* Reset head & tail pointers */
+    H5TB_list_head=H5TB_list_tail=NULL;
 }
 
 /*-------------------------------------------------------------------------
@@ -147,14 +164,16 @@ herr_t H5TB_close(H5TB_t *tb)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5TBget_buf
+    H5TB_get_buf
  PURPOSE
     Get an ID for a temporary buffer
  USAGE
-    hid_t H5TBget_buf(size,resize)
+    hid_t H5TB_get_buf(size,resize,ptr)
         hsize_t size;       IN: Minimum size of buffer requested
         hbool_t resize;     IN: Whether to resize an existing buffer or get a
                                 new buffer if one doesn't match the correct size
+        void **ptr;         OUT: Pointer to a pointer to set to the buffer
+                                address, if not NULL
  RETURNS
     Valid buffer ID on success, negative on failure
  DESCRIPTION
@@ -169,17 +188,16 @@ herr_t H5TB_close(H5TB_t *tb)
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5TBget_buf(hsize_t size, hbool_t resize)
+H5TB_get_buf(hsize_t size, hbool_t resize, void **ptr)
 {
     hid_t	ret_value = FAIL;
     H5TB_t *curr=H5TB_list_head,       /* pointer to current temp. buffer */
         *new;                          /* pointer to a newly created temp. buffer */
 
-    FUNC_ENTER (H5TBget_buf, FAIL);
-    H5TRACE2("i","hb",size,resize);
+    FUNC_ENTER (H5TB_get_buf, FAIL);
 
     while(curr!=NULL) {
-        if(!curr->inuse && size<curr->size)
+        if(!curr->inuse && size<=curr->size)
             break;
         curr=curr->next;
     } /* end while */
@@ -250,6 +268,7 @@ H5TBget_buf(hsize_t size, hbool_t resize)
 
                     /* set this so we can fall through to getting the ID */
                     curr=new;
+                    break;
                 } /* end if */
             } /* end for */
 
@@ -270,19 +289,23 @@ H5TBget_buf(hsize_t size, hbool_t resize)
         HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register temp. buffer atom");
     }
 
+    /* Assign the pointer to the buffer, if requested */
+    if(ptr!=NULL)
+        *ptr=curr->buf;
+
 done:
     if (ret_value < 0) {
     }
     FUNC_LEAVE(ret_value);
-} /* H5TBget_buf() */
+} /* H5TB_get_buf() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5TBbuf_ptr
+    H5TB_buf_ptr
  PURPOSE
     Get the pointer to a temp. buffer memory
  USAGE
-    void *H5TBbuf_ptr(tbuf_id)
+    void *H5TB_buf_ptr(tbuf_id)
         hid_t tbuf_id;       IN: Temp. buffer ID
  RETURNS
     Non-NULL pointer to buffer memory on success, NULL on failure
@@ -294,12 +317,12 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 void *
-H5TBbuf_ptr(hid_t tbuf_id)
+H5TB_buf_ptr(hid_t tbuf_id)
 {
     void *ret_value = NULL;
     H5TB_t *tbuf;               /* Pointer to temporary buffer */
 
-    FUNC_ENTER (H5TBbuf_ptr, NULL);
+    FUNC_ENTER (H5TB_buf_ptr, NULL);
 
     if (H5_TEMPBUF != H5I_group(tbuf_id) ||
             NULL == (tbuf = H5I_object(tbuf_id))) {
@@ -314,15 +337,15 @@ done:
     if (ret_value == NULL) {
     }
     FUNC_LEAVE(ret_value);
-} /* H5TBbuf_ptr() */
+} /* H5TB_buf_ptr() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5TBresize_ptr
+    H5TB_resize_buf
  PURPOSE
     Resize a temp. buffer to a new size
  USAGE
-    herr_t H5TBresize_ptr(tbid, size)
+    herr_t H5TB_resize_buf(tbid, size)
         hid_t tbid;       IN: Temp. buffer ID to resize
         hsize_t size;     IN: New size of temp. buffer
  RETURNS
@@ -335,15 +358,14 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5TBresize_ptr(hid_t tbuf_id, hsize_t size)
+H5TB_resize_buf(hid_t tbuf_id, hsize_t size)
 {
     herr_t ret_value = FAIL;
     H5TB_t *tbuf,               /* Pointer to temporary buffer */
         *curr;                  /* Pointer to temp. buffer node */
     void * old_ptr;             /* Pointer to the previous buffer */
 
-    FUNC_ENTER (H5TBresize_ptr, FAIL);
-    H5TRACE2("e","ih",tbuf_id,size);
+    FUNC_ENTER (H5TB_resize_buf, FAIL);
 
     if (H5_TEMPBUF != H5I_group(tbuf_id) ||
             NULL == (tbuf = H5I_object(tbuf_id))) {
@@ -410,15 +432,15 @@ done:
     if (ret_value == FAIL) {
     }
     FUNC_LEAVE(ret_value);
-} /* H5TBresize_ptr() */
+} /* H5TB_resize_buf() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5TBgarbage_coll
+    H5TB_garbage_coll
  PURPOSE
     Release all unused temporary buffers
  USAGE
-    herr_t H5TBgarbase_coll()
+    herr_t H5TB_garbase_coll()
  RETURNS
     non-negative on success, negative on failure
  DESCRIPTION
@@ -430,13 +452,12 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5TBgarbage_coll(void)
+H5TB_garbage_coll(void)
 {
     herr_t ret_value = FAIL;
     H5TB_t *curr,*next;      /* Current temp. buffer node */
 
-    FUNC_ENTER (H5TBgarbage_coll, FAIL);
-    H5TRACE0("e","");
+    FUNC_ENTER (H5TB_garbage_coll, FAIL);
 
     /*
      * Step through the list, remove each unused node, repair the list and
@@ -474,15 +495,15 @@ done:
     if (ret_value == FAIL) {
     }
     FUNC_LEAVE(ret_value);
-}   /* H5TBgarbage_coll() */
+}   /* H5TB_garbage_coll() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5TBrelease_buf
+    H5TB_release_buf
  PURPOSE
     Release a temp. buffer back to the list of unused ones.
  USAGE
-    herr_t H5TBrelease_buf(tbuf_id)
+    herr_t H5TB_release_buf(tbuf_id)
         hid_t tbuf_id;       IN: Temp. buffer ID to release
  RETURNS
     non-negative on success, negative on failure
@@ -494,16 +515,15 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5TBrelease_buf(hid_t tbuf_id)
+H5TB_release_buf(hid_t tbuf_id)
 {
     herr_t ret_value = FAIL;
     H5TB_t *tbuf;               /* Pointer to temporary buffer */
 
-    FUNC_ENTER (H5TBresize_ptr, FAIL);
-    H5TRACE1("e","i",tbuf_id);
+    FUNC_ENTER (H5TB_release_buf, FAIL);
 
     if (H5_TEMPBUF != H5I_group(tbuf_id) ||
-            NULL == (tbuf = H5I_object(tbuf_id))) {
+            NULL == (tbuf = H5I_remove(tbuf_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a temp. buffer");
     }
 
@@ -518,5 +538,5 @@ done:
     if (ret_value == FAIL) {
     }
     FUNC_LEAVE(ret_value);
-} /* H5TBresize_ptr() */
+} /* H5TB_release_buf() */
 

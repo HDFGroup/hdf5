@@ -1051,7 +1051,6 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
     size_t		chunk_alloc=0;		/*allocated chunk size	*/
     herr_t		status;			/*func return status	*/
     void		*chunk=NULL;		/*the file chunk	*/
-    void		*temp=NULL;		/*temporary chunk buffer*/
     void		*ret_value=NULL;	/*return value		*/
     
     FUNC_ENTER (H5F_istore_lock, NULL);
@@ -1216,7 +1215,6 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
     ret_value = chunk;
  done:
     if (!ret_value) H5MM_xfree (chunk);
-    H5MM_xfree (temp);
     FUNC_LEAVE (ret_value);
 }
 

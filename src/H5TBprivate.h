@@ -17,10 +17,10 @@
 #define _H5TBprivate_H
 
 /* Functions defined in H5TB.c */
-hid_t H5TBget_buf(hsize_t size, hbool_t resize);
-void *H5TBbuf_ptr(hid_t tbid);
-herr_t H5TBresize_ptr(hid_t tbid, hsize_t size);
-herr_t H5TBgarbage_coll(void);
-herr_t H5TBrelease_buf(hid_t tbid);
+hid_t H5TB_get_buf(hsize_t size, hbool_t resize, void **ptr);
+void *H5TB_buf_ptr(hid_t tbid);
+herr_t H5TB_resize_buf(hid_t tbid, hsize_t size);
+herr_t H5TB_garbage_coll(void);
+herr_t H5TB_release_buf(hid_t tbid);
 
 #endif
