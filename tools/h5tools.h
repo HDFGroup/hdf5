@@ -223,18 +223,34 @@ typedef struct h5dump_t {
 } h5dump_t;
 
 
-hid_t h5dump_fixtype(hid_t f_type,hbool_t strDUAction);
+hid_t h5dump_fixtype(hid_t f_type);
 int h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type);
 int h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
 	       void *mem);
+int copy_atomic_char(char* output, char* input, int numchar, int freespace);
+
+
+/*if we get a new program that needs to use the library add its name here*/
+typedef enum {
+	UNKNOWN,
+    H5LS,
+    H5DUMP
+} ProgType;
+
 
 /*
 	taken from h5dump.h
   */
 #define DATASET_DATA	1
-#define NCOLS 80
+
 #define COL 3
 extern int indent;
 extern void indentation(int);
-
+extern int nCols;
+/* 
+	used to determine what action to take in certain cases
+	this variable should be set at the beginning of all programs
+	that use the lib
+ */
+extern ProgType programtype; 
 #endif
