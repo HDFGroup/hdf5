@@ -101,6 +101,9 @@ New Features
       tools/gifconv. The convertor supports the ability to create animated
       gifs as well.
     * Parallel HDF5 now runs on the HP V2500 and HP N4000 machines.
+    * Verified correct operation of library on Solaris 2.8 in both 64-bit and
+      32-bit compilation modes.  See INSTALL document for instructions on
+      compiling the distribution with 64-bit support.
 
 Platforms Tested
 ================
