@@ -303,6 +303,15 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	}
 	strcat(temp, OPT(info->cmpd_suf, "}"));
 	
+    } else if (H5T_ENUM==H5Tget_class(type)) {
+	if (H5Tenum_nameof(type, vp, temp, sizeof temp)<0) {
+	    strcpy(temp, "0x");
+	    n = H5Tget_size(type);
+	    for (i=0; i<n; i++) {
+		sprintf(temp+strlen(temp), "%02x", ((unsigned char*)vp)[i]);
+	    }
+	}
+	
     } else {
 	strcpy(temp, "0x");
 	n = H5Tget_size(type);
@@ -362,7 +371,7 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type)
     hsize_t		sm_size[H5S_MAX_RANK];	/*stripmine size	*/
     hsize_t		sm_nbytes;		/*bytes per stripmine	*/
     hsize_t		sm_nelmts;		/*elements per stripmine*/
-    unsigned char	*sm_buf;		/*buffer for raw data	*/
+    unsigned char	*sm_buf=NULL;		/*buffer for raw data	*/
     hid_t		sm_space;		/*stripmine data space	*/
 
     /* Hyperslab info */
@@ -484,6 +493,7 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type)
     }
     H5Sclose(sm_space);
     H5Sclose(f_space);
+    if (sm_buf) free(sm_buf);
     return 0;
 }
 
@@ -606,6 +616,10 @@ h5dump_fixtype(hid_t f_type)
 	    offset = ALIGN(offset, H5Tget_size(memb[i])) +
 		     nelmts * H5Tget_size(memb[i]);
 	}
+	break;
+
+    case H5T_ENUM:
+	m_type = H5Tcopy(f_type);
 	break;
 
     case H5T_TIME:

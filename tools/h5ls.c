@@ -384,10 +384,14 @@ display_int_type(hid_t type, int indent)
     }
 
     /* Sign */
-    if (H5T_SGN_NONE==sign) {
-	sign_s = " unsigned";
-    } else if (H5T_SGN_2==sign) {
-	sign_s = "";
+    if ((sign=H5Tget_sign(type))>=0) {
+	if (H5T_SGN_NONE==sign) {
+	    sign_s = " unsigned";
+	} else if (H5T_SGN_2==sign) {
+	    sign_s = "";
+	} else {
+	    sign_s = " unknown-sign";
+	}
     } else {
 	sign_s = " unknown-sign";
     }
@@ -581,6 +585,106 @@ display_cmpd_type(hid_t type, int indent)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	display_enum_type
+ *
+ * Purpose:	Print info about an enumeration data type.
+ *
+ * Return:	Success:	TRUE
+ *
+ *		Failure:	FALSE, nothing printed
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, December 23, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+display_enum_type(hid_t type, int indent)
+{
+    char	**name=NULL;	/*member names				*/
+    unsigned char *value=NULL;	/*value array				*/
+    int		nmembs;		/*number of members			*/
+    int		nchars;		/*number of output characters		*/
+    hid_t	super;		/*enum base integer type		*/
+    hid_t	native=-1;	/*native integer data type		*/
+    size_t	dst_size;	/*destination value type size		*/
+    int		i;		/*miscellaneous counters		*/
+    size_t	j;
+        
+    if (H5T_ENUM!=H5Tget_class(type)) return FALSE;
+    nmembs = H5Tget_nmembers(type);
+    super = H5Tget_super(type);
+    printf("enum ");
+    display_type(super, indent+4);
+    printf(" {");
+    
+    /*
+     * Determine what data type to use for the native values.  To simplify
+     * things we entertain three possibilities:
+     *  1. long_long -- the largest native signed integer
+     *	2. unsigned long_long -- the largest native unsigned integer
+     *	3. raw format
+     */
+    if (H5Tget_size(type)<=sizeof(long_long)) {
+	dst_size = sizeof(long_long);
+	if (H5T_SGN_NONE==H5Tget_sign(type)) {
+	    native = H5T_NATIVE_ULLONG;
+	} else {
+	    native = H5T_NATIVE_LLONG;
+	}
+    } else {
+	dst_size = H5Tget_size(type);
+    }
+
+    /* Get the names and raw values of all members */
+    name = calloc(nmembs, sizeof(char*));
+    value = calloc(nmembs, MAX(H5Tget_size(type), dst_size));
+    for (i=0; i<nmembs; i++) {
+	name[i] = H5Tget_member_name(type, i);
+	H5Tget_member_value(type, i, value+i*H5Tget_size(type));
+    }
+
+    /* Convert values to native data type */
+    if (native>0) H5Tconvert(super, native, nmembs, value, NULL);
+
+    /* Sort members by increasing value */
+    /*not implemented yet*/
+
+    /* Print members */
+    for (i=0; i<nmembs; i++) {
+	printf("\n%*s", indent+4, "");
+	nchars = display_string(name[i]);
+	printf("%*s = ", MAX(0, 16-nchars), "");
+
+	if (native<0) {
+	    printf("0x");
+	    for (j=0; j<dst_size; j++) {
+		printf("%02x", value[i*dst_size+j]);
+	    }
+	} else if (H5T_SGN_NONE==H5Tget_sign(native)) {
+	    printf("%"PRINTF_LL_WIDTH"u",
+		   *((unsigned long_long*)(value+i*dst_size)));
+	} else {
+	    printf("%"PRINTF_LL_WIDTH"d",
+		   *((long_long*)(value+i*dst_size)));
+	}
+    }
+
+    /* Release resources */
+    for (i=0; i<nmembs; i++) free(name[i]);
+    free(name);
+    free(value);
+    H5Tclose(super);
+
+    if (0==nmembs) printf("\n%*s <empty>", indent+4, "");
+    printf("\n%*s}", indent, "");
+    return TRUE;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	display_string
  *
  * Purpose:	Print information about a string data type.
@@ -733,6 +837,7 @@ display_type(hid_t type, int indent)
 	display_int_type(type, indent) ||
 	display_float_type(type, indent) ||
 	display_cmpd_type(type, indent) ||
+	display_enum_type(type, indent) ||
 	display_string_type(type, indent) ||
 	display_reference_type(type, indent)) {
 	return;
