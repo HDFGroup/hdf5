@@ -2190,6 +2190,7 @@ H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data)
 #ifdef H5_WANT_H5_V1_6_COMPAT
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Eget_auto
  *
  * Purpose:	This function is for backward compatbility.
  *              Returns the current settings for the automatic error stack
