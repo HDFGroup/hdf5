@@ -219,8 +219,18 @@ H5_DLL herr_t H5S_select_offset(H5S_t *space, const hssize_t *offset);
 H5_DLL herr_t H5S_select_copy(H5S_t *dst, const H5S_t *src);
 H5_DLL htri_t H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2);
 H5_DLL herr_t H5S_select_release(H5S_t *ds);
+
+/* Operations on all selections */
 H5_DLL herr_t H5S_select_all(H5S_t *space, unsigned rel_prev);
+
+/* Operations on none selections */
 H5_DLL herr_t H5S_select_none(H5S_t *space);
+
+/* Operations on point selections */
+H5_DLL herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op,
+    size_t num_elem, const hssize_t **coord);
+
+/* Operations on hyperslab selections */
 H5_DLL herr_t H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op, const hssize_t start[],
     const hsize_t *stride, const hsize_t count[], const hsize_t *block);
 H5_DLL herr_t H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock,

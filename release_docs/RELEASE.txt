@@ -34,18 +34,18 @@ CONTENTS
 New Features
 ============
 
-  Configuration:
-  --------------
-    - prefix default is changed from /usr/local to `pwd`/hdf5.  AKC - 2003/07/09
+    Configuration:
+    --------------
+      - prefix default is changed from /usr/local to `pwd`/hdf5.  AKC - 2003/07/09
 
-  Library:
-  --------
+    Library:
+    --------
 
-  Parallel Library:
-  -----------------
+    Parallel Library:
+    -----------------
 
-  Tools:
-  ------
+    Tools:
+    ------
 
 
 Support for new platforms, languages and compilers.
@@ -55,29 +55,31 @@ Support for new platforms, languages and compilers.
 Bug Fixes since HDF5-1.6.0 release
 ==================================
 
-  Library
-  -------
-    - Corrected error with variable-length datatypes and chunked datasets
-        which caused H5Dwrite to fail sometimes.  QAK - 2003/07/19
-    - Modified library and file format to support storing indexed storage
-        (chunked dataset) B-tree's with non-default internal 'K' values.
-        QAK - 2003/07/15
-    - Returned H5T_BKG_TEMP support to library after it was accidentally
-        removed.  QAK - 2003/07/14
+    Library
+    -------
+      - Corrected errors with using point selections to access data in
+          chunked datasets.  QAK - 2003/07/23
+      - Corrected error with variable-length datatypes and chunked datasets
+          which caused H5Dwrite to fail sometimes.  QAK - 2003/07/19
+      - Modified library and file format to support storing indexed storage
+          (chunked dataset) B-tree's with non-default internal 'K' values.
+          QAK - 2003/07/15
+      - Returned H5T_BKG_TEMP support to library after it was accidentally
+          removed.  QAK - 2003/07/14
 
-  Configuration
-  -------------
-    - Fixed the error that cause "make install" to fail because of the
-      macro definition syntax of "prefix?=..."  AKC - 2003/07/22
+    Configuration
+    -------------
+      - Fixed the error that cause "make install" to fail because of the
+        macro definition syntax of "prefix?=..."  AKC - 2003/07/22
 
-  Performance
-  -------------
+    Performance
+    -------------
 
-  Tools
-  -----
+    Tools
+    -----
 
-  Documentation 
-  ------------- 
+    Documentation 
+    ------------- 
 
 
 Platforms Tested

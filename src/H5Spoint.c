@@ -38,8 +38,6 @@
 static int             interface_initialize_g = 0;
 
 /* Static function prototypes */
-static herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op,
-    size_t num_elem, const hssize_t **coord);
 static herr_t H5S_point_iter_coords(const H5S_sel_iter_t *iter, hssize_t *coords);
 static herr_t H5S_point_iter_block(const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end);
 static hsize_t H5S_point_iter_nelmts(const H5S_sel_iter_t *iter);
@@ -522,7 +520,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
+herr_t
 H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
     const hssize_t **coord)
 {
