@@ -369,6 +369,7 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
     H5I_id_group_t	*grp_ptr = NULL;	/* ptr to the atomic group */
     H5I_id_info_t	*cur=NULL, *next=NULL, *prev=NULL;
     intn		ret_value = SUCCEED;
+    uintn       deleted;                /* Flag to indicate objects have been removed from a linked list */
     uintn		i;
 
     FUNC_ENTER(H5I_clear_group, FAIL);
@@ -399,38 +400,49 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
      * object from group regardless if FORCE is non-zero.
      */
     for (i=0; i<grp_ptr->hash_size; i++) {
-	for (cur=grp_ptr->id_list[i]; cur; cur=next) {
-	    /*
-	     * Do nothing to the object if the reference count is larger than
-	     * one and forcing is off.
-	     */
-	    if (!force && cur->count>1) continue;
+        /* Reset the "deleted an object from this list" flag */
+        deleted=0;
 
-	    /* Free the object regardless of reference count */
-	    if (grp_ptr->free_func && (grp_ptr->free_func)(cur->obj_ptr)<0) {
-		if (force) {
+        for (cur=grp_ptr->id_list[i]; cur; cur=next) {
+            /*
+             * Do nothing to the object if the reference count is larger than
+             * one and forcing is off.
+             */
+            if (!force && cur->count>1)
+                continue;
+
+            /* Flag this list as having deleted objects */
+            deleted=1;
+
+            /* Free the object regardless of reference count */
+            if (grp_ptr->free_func && (grp_ptr->free_func)(cur->obj_ptr)<0) {
+                if (force) {
 #if H5I_DEBUG
-		    if (H5DEBUG(I)) {
-			fprintf(H5DEBUG(I), "H5I: free grp=%d obj=0x%08lx "
-				"failure ignored\n", (int)grp,
-				(unsigned long)(cur->obj_ptr));
-		    }
+                    if (H5DEBUG(I)) {
+                    fprintf(H5DEBUG(I), "H5I: free grp=%d obj=0x%08lx "
+                        "failure ignored\n", (int)grp,
+                        (unsigned long)(cur->obj_ptr));
+                    }
 #endif /*H5I_DEBUG*/
-		    /* Add ID struct to free list */
-		    next = cur->next;
-		    H5FL_FREE(H5I_id_info_t,cur);
-		} else {
-		    if (prev) prev->next = cur;
-		    else grp_ptr->id_list[i] = cur;
-		    prev = cur;
-		}
-	    } else {
-		/* Add ID struct to free list */
-		next = cur->next;
-		H5FL_FREE(H5I_id_info_t,cur);
-	    }
-	}
-	if (!prev) grp_ptr->id_list[i]=NULL;
+                    /* Add ID struct to free list */
+                    next = cur->next;
+                    H5FL_FREE(H5I_id_info_t,cur);
+                } else {
+                    if (prev)
+                        prev->next = cur;
+                    else
+                        grp_ptr->id_list[i] = cur;
+                    prev = cur;
+                }
+            } else {
+                /* Add ID struct to free list */
+                next = cur->next;
+                H5FL_FREE(H5I_id_info_t,cur);
+            }
+        }
+        /* 'prev' flag is only valid to check when we've actually deleted objects */
+        if (deleted && !prev)
+            grp_ptr->id_list[i]=NULL;
     }
     
   done:
@@ -468,12 +480,12 @@ H5I_destroy_group(H5I_type_t grp)
     FUNC_ENTER(H5I_destroy_group, FAIL);
 
     if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
-	HGOTO_DONE(FAIL);
+        HGOTO_DONE(FAIL);
     }
     
     grp_ptr = H5I_id_group_list_g[grp];
     if (grp_ptr == NULL || grp_ptr->count <= 0) {
-	HGOTO_DONE(FAIL);
+        HGOTO_DONE(FAIL);
     }
 
     /*
@@ -482,12 +494,12 @@ H5I_destroy_group(H5I_type_t grp)
      * free function is invoked for each atom being freed.
      */
     if (1==grp_ptr->count) {
-	H5I_clear_group(grp, TRUE);
-	H5E_clear(); /*don't care about errors*/
-	H5MM_xfree(grp_ptr->id_list);
-	HDmemset (grp_ptr, 0, sizeof(*grp_ptr));
+        H5I_clear_group(grp, TRUE);
+        H5E_clear(); /*don't care about errors*/
+        H5MM_xfree(grp_ptr->id_list);
+        HDmemset (grp_ptr, 0, sizeof(*grp_ptr));
     } else {
-	--(grp_ptr->count);
+        --(grp_ptr->count);
     }
     
   done:
