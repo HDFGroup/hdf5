@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#ifdef HAVE_UNISTD_H
+#ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #ifdef WIN32

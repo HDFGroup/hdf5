@@ -21,7 +21,7 @@ const char *FILENAME[] = {
 #if SIZEOF_LONG_LONG >= 8
 #   define GB8LL	((unsigned long_long)8*1024*1024*1024)
 #else
-#   define GB8LL	((unsigned long_long)0)	/*cannot do the test*/
+#   define GB8LL	0	/*cannot do the test*/
 #endif
 
 

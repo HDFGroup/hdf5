@@ -1709,6 +1709,12 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			    fprintf(out, " (array)");
 			}
 			break;
+		    case H5I_REFERENCE:
+			fprintf(out, "%ld (reference)", (long)obj);
+			break;
+		    case H5I_VFL:
+			fprintf(out, "%ld (file driver)", (long)obj);
+			break;
 		    default:
 			fprintf(out, "%ld", (long)obj);
 			fprintf (out, " (unknown class)");

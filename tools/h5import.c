@@ -10,19 +10,19 @@
 
 /* See H5private.h for how to include system headers */
 #include <hdf5.h>
-#ifdef STDC_HEADERS
+#ifdef H5_STDC_HEADERS
 #   include <fcntl.h>
 #   include <string.h>
 #   include <stdlib.h>
 #   include <stdio.h>
 #endif
 
-#ifdef HAVE_UNISTD_H
+#ifdef H5_HAVE_UNISTD_H
 #   include <sys/types.h>
 #   include <unistd.h>
 #endif
 
-#ifdef HAVE_SYS_STAT_H
+#ifdef H5_HAVE_SYS_STAT_H
 #   include <sys/stat.h>
 #endif
 

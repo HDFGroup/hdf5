@@ -21,7 +21,7 @@
  * their documented names, so we have #define's to translate them to Silo
  * terminology.
  */
-#ifdef HAVE_LIBSILO
+#ifdef H5_HAVE_LIBSILO
 #   define PD_open			lite_PD_open
 #   define PD_close			lite_PD_close
 #   define PD_ls			lite_PD_ls
