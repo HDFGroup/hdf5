@@ -8,6 +8,7 @@
 #define PIO_PERF_H__
 
 #include "pio_timer.h"
+#include "H5private.h"
 
 typedef enum iotype_ {
     RAW,

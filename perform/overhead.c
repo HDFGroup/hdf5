@@ -11,6 +11,7 @@
 /* See H5private.h for how to include headers */
 #undef NDEBUG
 #include "hdf5.h"
+#include "H5private.h"
 
 #ifdef H5_STDC_HEADERS
 #   include <ctype.h>
@@ -186,7 +187,7 @@ test(fill_t fill_style, const double splits[],
     int		mdc_nelmts;			/*num meta objs to cache*/
     hsize_t	i;
     int		j;
-    struct stat	sb;
+    h5_stat_t	sb;
 
     if (!had) had = calloc((size_t)cur_size[0], sizeof(int));
     if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0) goto error;

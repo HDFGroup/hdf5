@@ -475,10 +475,8 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
     HFILE filehandle;
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
     int results;   
-    struct _stati64 sb;
-#else
-    struct stat sb;
 #endif
+    h5_stat_t sb;
     H5P_genplist_t *plist;      /* Property list */
 
     FUNC_ENTER(H5FD_log_open, NULL);

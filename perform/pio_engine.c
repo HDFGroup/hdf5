@@ -412,7 +412,7 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         if ((strlen(fullname) + strlen(base_name) + 1) < size) {
             /* Append the base_name with a slash first. Multiple slashes are
              * handled below. */
-            struct stat buf;
+            h5_stat_t buf;
 
             if (stat(fullname, &buf) < 0)
                 /* The directory doesn't exist just yet */

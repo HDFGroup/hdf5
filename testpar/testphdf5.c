@@ -50,7 +50,7 @@ void pause_proc(void)
 {
 
     int pid;
-    struct stat statbuf;
+    h5_stat_t statbuf;
     char greenlight[] = "go";
     int maxloop = 10;
     int loops = 0;

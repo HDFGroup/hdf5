@@ -4018,6 +4018,7 @@ H5Dset_extent(hid_t dset_id, const hsize_t *size)
     H5D_t                  *dset = NULL;
 
     FUNC_ENTER(H5Dset_extent, FAIL);
+    H5TRACE2("e","i*h",dset_id,size);
 
     /* Check args */
     if(H5I_DATASET != H5I_get_type(dset_id)

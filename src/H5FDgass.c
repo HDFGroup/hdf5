@@ -332,11 +332,7 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_gass_fapl_t		_fa;
     char *filename = (char *) H5MM_malloc(80 * sizeof(char));
     H5P_genplist_t *plist;      /* Property list pointer */
-#ifdef WIN32
-    struct _stati64 sb;
-#else
-   struct stat sb;
-#endif
+    h5_stat_t sb;
     
     FUNC_ENTER(H5FD_gass_open, NULL);
 
