@@ -1096,6 +1096,13 @@ dump_data (hid_t obj_id, int obj_data) {
 
 	info.obj_hidefileno = 1;
 	info.obj_format = " %lu:%lu";
+
+	info.dset_hidefileno = 1;
+	info.dset_format = "DATASET %lu:%lu ";
+	info.dset_blockformat_pre = "%s";
+	info.dset_ptformat_pre  = "%s";
+
+
     indent += COL;
 	/*the depth will tell us how far we need to indent extra.  we use to just
 	use indent but with the merging of the tools lib we have to do something different

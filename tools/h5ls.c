@@ -1131,6 +1131,17 @@ dump_dataset_values(hid_t dset)
 	info.cmpd_pre = "";
 	info.cmpd_suf = "";
 	info.cmpd_sep = " ";
+
+	info.dset_format =  "DSET-%lu:%lu:%lu:%lu-";
+	info.dset_hidefileno = 0;
+
+	info.obj_format = "-%lu:%lu:%lu:%lu";
+	info.obj_hidefileno = 0;
+
+	info.dset_blockformat_pre = "%sBlk%lu: ";
+	info.dset_ptformat_pre = "%sPt%lu: ";
+
+
 	if (label_g) info.cmpd_name = "%s=";
 	
 	info.elmt_suf1 = " ";

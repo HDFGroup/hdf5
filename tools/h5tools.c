@@ -507,7 +507,7 @@ h5dump_is_zero(const void *_mem, size_t size)
  *-------------------------------------------------------------------------
  */
 static int
-h5dump_region(hid_t region, h5dump_str_t *str/*in,out*/)
+h5dump_region(hid_t region, h5dump_str_t *str/*in,out*/, h5dump_t *info)
 {
     hssize_t	nblocks, npoints, i;
     hsize_t	*ptdata;
@@ -531,7 +531,7 @@ h5dump_region(hid_t region, h5dump_str_t *str/*in,out*/)
 	H5Sget_select_hyper_blocklist(region, 0, nblocks, ptdata);
 	for (i=0; i<nblocks; i++) {
 
-	    h5dump_str_append(str, "%sBlk%lu: ",
+	    h5dump_str_append(str, info->dset_blockformat_pre,
 			      i?","OPTIONAL_LINE_BREAK" ":"",
 			      (unsigned long)i);
 		
@@ -555,7 +555,7 @@ h5dump_region(hid_t region, h5dump_str_t *str/*in,out*/)
 	H5Sget_select_elem_pointlist(region, 0, npoints, ptdata);
 	for (i=0; i<npoints; i++) {
 
-	    h5dump_str_append(str, "%sPt%lu: ",
+	    h5dump_str_append(str, info->dset_ptformat_pre ,
 			      i?","OPTIONAL_LINE_BREAK" ":"",
 			      (unsigned long)i);
 		
@@ -933,10 +933,16 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	    obj = H5Rdereference(container, H5R_DATASET_REGION, vp);
 	    region = H5Rget_region(container, H5R_DATASET_REGION, vp);
 	    H5Gget_objinfo(obj, ".", FALSE, &sb);
-	    h5dump_str_append(str, "DSET-%lu:%lu:%lu:%lu-",
-			      sb.fileno[1], sb.fileno[0],
-			      sb.objno[1], sb.objno[0]);
-	    h5dump_region(region, str);
+		if (info->dset_hidefileno){
+			h5dump_str_append(str, info->dset_format,
+					  sb.objno[1], sb.objno[0]);			
+		}
+		else {
+			h5dump_str_append(str, info->dset_format,
+				      sb.fileno[1], sb.fileno[0],
+					  sb.objno[1], sb.objno[0]);
+		}
+	    h5dump_region(region, str, info);
 	    H5Sclose(region);
 	    H5Dclose(obj);
 	}

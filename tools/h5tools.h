@@ -265,6 +265,14 @@ typedef struct h5dump_t {
 	int obj_hidefileno; /*flag used to hide or show the file number for obj refs*/
 	const char *obj_format; /*string used to format the output for the obje refs*/
 
+	int dset_hidefileno;/*flag used to hide or show the file number for dataset regions*/
+	const char *dset_format; /*string used to format the output for the dataset regions*/
+
+	const char *dset_blockformat_pre;
+	const char *dset_ptformat_pre;
+	const char *dset_ptformat;
+
+
 
 } h5dump_t;
 
