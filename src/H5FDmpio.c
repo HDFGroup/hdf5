@@ -54,6 +54,7 @@ typedef struct H5FD_mpio_t {
     MPI_Info	info;		/*file information			*/
     int         mpi_rank;       /* This process's rank                  */
     int         mpi_size;       /* Total number of processes            */
+    int         mpi_round;      /* Current round robin process (for metadata I/O) */
     hbool_t	allsame;	/*same data for all procs?		*/
     haddr_t	eof;		/*end-of-file marker			*/
     haddr_t	eoa;		/*end-of-address marker			*/
@@ -828,6 +829,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     file->info = fa->info;
     file->mpi_rank = mpi_rank;
     file->mpi_size = mpi_size;
+    file->mpi_round = 0;        /* Start metadata writes with process 0 */
     file->btype = MPI_DATATYPE_NULL;
     file->ftype = MPI_DATATYPE_NULL;
 
@@ -1433,10 +1435,10 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
     file->old_use_types = use_types_this_time;
     file->use_types = 0;
 
-    /* Only p0 will do the actual write if all procs in comm write same data */
+    /* Only p<round> will do the actual write if all procs in comm write same data */
     allsame = H5FD_mpio_tas_allsame(_file, FALSE);
     if (allsame && H5_mpi_1_metawrite_g) {
-        if (file->mpi_rank != 0) {
+        if (file->mpi_rank != file->mpi_round) {
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_Debug[(int)'w']) {
                 fprintf(stdout,
@@ -1501,11 +1503,26 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
     file->eof = HADDR_UNDEF;
     
 done:
-    /* if only p0 writes, need to boardcast the ret_value to other processes */
+    /* if only p<round> writes, need to broadcast the ret_value to other processes */
     if (allsame && H5_mpi_1_metawrite_g) {
 	if (MPI_SUCCESS !=
-	    MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, 0, file->comm))
+	    MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, file->mpi_round, file->comm))
           HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Bcast failed");
+
+        /* Round-robin rotate to the next process */
+        file->mpi_round = (++file->mpi_round)%file->mpi_size;
+#ifdef QAK
+{
+    int max,min;
+
+    MPI_Allreduce(&file->mpi_round, &max, 1, MPI_INT, MPI_MAX, file->comm);
+    MPI_Allreduce(&file->mpi_round, &min, 1, MPI_INT, MPI_MIN, file->comm);
+    if(max!=file->mpi_round)
+        printf("%s: rank=%d, round=%d, max=%d\n",FUNC,file->mpi_rank,file->mpi_round,max);
+    if(min!=file->mpi_round)
+        printf("%s: rank=%d, round=%d, min=%d\n",FUNC,file->mpi_rank,file->mpi_round,min);
+}
+#endif /* QAK */
     }
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
