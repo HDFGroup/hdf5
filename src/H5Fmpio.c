@@ -135,7 +135,7 @@ H5F_mpio_access(char *name, int mode, H5F_search_t *key /*out */ )
     int			   mpi_mode;
 
     FUNC_ENTER(H5F_mpio_access, FAIL);
-#ifdef DEBUG_MPIO
+#ifdef H5F_MPIO_DEBUG
     fprintf(stdout, "Entering H5F_mpio_access name=%s mode=%x\n", name, mode );
 #endif
 
@@ -158,7 +158,7 @@ H5F_mpio_access(char *name, int mode, H5F_search_t *key /*out */ )
     if (mpierr == MPI_SUCCESS) {
 	mpierr = MPI_File_close( &fh );
     	if (mpierr != MPI_SUCCESS)
-	    HRETURN_ERROR(H5E_IO, H5E_ARGS, FAIL, "MPI_File_close failed");
+	    HRETURN_ERROR(H5E_IO, H5E_ARGS, FAIL, "MPI_File_open failed");
 	ret_val = TRUE;
     } else if (mode == F_OK) {
 	/* to see if it exists, this time try to open for write */
@@ -178,7 +178,7 @@ H5F_mpio_access(char *name, int mode, H5F_search_t *key /*out */ )
         key->ino = mpio_inode_num++;
     }
 
-#ifdef DEBUG_MPIO
+#ifdef H5F_MPIO_DEBUG
     if (key)
     	fprintf(stdout,
 	    "Leaving H5F_mpio_access ret_val=%d key->dev=%x key->ino=%d\n",
@@ -220,11 +220,11 @@ H5F_mpio_open(char *name, uintn flags, H5F_search_t *key /*out */ )
     MPI_File                fh;
     int                     mpi_amode;
     char                    mpierrmsg[MPI_MAX_ERROR_STRING];
-    int                     mpierr, msglen, myid;
+    int                     mpierr, msglen;
     MPI_Offset              size;
 
     FUNC_ENTER(H5F_mpio_open, NULL);
-#ifdef DEBUG_MPIO
+#ifdef H5F_MPIO_DEBUG
     fprintf(stdout, "Entering H5F_mpio_open name=%s flags=%x\n", name, flags );
 #endif
 
@@ -240,12 +240,15 @@ H5F_mpio_open(char *name, uintn flags, H5F_search_t *key /*out */ )
 	HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, mpierrmsg );
     }
 
-    /* proc 0 truncates the file, if requested */
-    MPI_Comm_rank( MPI_COMM_WORLD, &myid );
-    if ((myid==0) && (flags&H5F_ACC_TRUNC)) {
+    /* truncate the file, if requested */
+    if (flags&H5F_ACC_TRUNC) {
 	mpierr = MPI_File_set_size( fh, (MPI_Offset)0 );
+	if (mpierr != MPI_SUCCESS) {
+	    MPI_File_close( &fh );
+	    HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL,
+			  "MPI_File_set_size failed trying to truncate file" );
+	}
     }
-    MPI_Barrier( MPI_COMM_WORLD );
 
     /* Build the return value */
     lf = H5MM_xcalloc(1, sizeof(H5F_low_t));
@@ -267,7 +270,7 @@ H5F_mpio_open(char *name, uintn flags, H5F_search_t *key /*out */ )
         key->ino = mpio_inode_num++;
     }
 
-#ifdef DEBUG_MPIO
+#ifdef H5F_MPIO_DEBUG
     if (key)
     	fprintf(stdout,
 	    "Leaving H5F_mpio_open key->dev=%x key->ino=%d\n",
@@ -307,7 +310,7 @@ H5F_mpio_close(H5F_low_t *lf)
     int                     msglen;
 
     FUNC_ENTER(H5F_mpio_close, FAIL);
-#ifdef DEBUG_MPIO
+#ifdef H5F_MPIO_DEBUG
     fprintf(stdout, "Entering H5F_mpio_close\n" );
 #endif
 
@@ -319,7 +322,7 @@ H5F_mpio_close(H5F_low_t *lf)
 	HRETURN_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, mpierrmsg );
     }
 
-#ifdef DEBUG_MPIO
+#ifdef H5F_MPIO_DEBUG
     fprintf(stdout, "Leaving H5F_mpio_close\n" );
 #endif
     FUNC_LEAVE(SUCCEED);
@@ -358,7 +361,7 @@ H5F_mpio_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
     int                     msglen;
 
     FUNC_ENTER(H5F_mpio_read, FAIL);
-#ifdef DEBUG_MPIO
+#ifdef H5F_MPIO_DEBUG
     fprintf(stdout, "Entering H5F_mpio_read\n" );
 #endif
 
@@ -378,7 +381,7 @@ H5F_mpio_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
 
     /* How many bytes were actually read? */
     mpierr = MPI_Get_count( &mpi_stat, MPI_BYTE, &bytes_read );
-#ifdef DEBUG_MPIO
+#ifdef H5F_MPIO_DEBUG
     fprintf(stdout,
 	"In H5F_mpio_read after Get_count size_i=%d bytes_read=%d\n",
 	size_i, bytes_read );
@@ -401,7 +404,7 @@ H5F_mpio_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
 
     /* read zeroes past the end of the file */
     if ((n=(size_i-bytes_read)) > 0) {
-#ifdef DEBUG_MPIO
+#ifdef H5F_MPIO_DEBUG
     fprintf(stdout,
 	"In H5F_mpio_read before HDmemset size_i=%d bytes_read=%d n=%d\n",
 	size_i, bytes_read, n );
@@ -409,7 +412,7 @@ H5F_mpio_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
         HDmemset( buf+bytes_read, 0, (size_t)n );
     }
 
-#ifdef DEBUG_MPIO
+#ifdef H5F_MPIO_DEBUG
     fprintf(stdout, "Leaving H5F_mpio_read\n" );
 #endif
     FUNC_LEAVE(SUCCEED);
@@ -446,7 +449,7 @@ H5F_mpio_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
     int                     msglen;
 
     FUNC_ENTER(H5F_mpio_write, FAIL);
-#ifdef DEBUG_MPIO
+#ifdef H5F_MPIO_DEBUG
     fprintf(stdout, "Entering H5F_mpio_write\n" );
 #endif
 
@@ -463,7 +466,7 @@ H5F_mpio_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, mpierrmsg );
     }
 
-#ifdef DEBUG_MPIO
+#ifdef H5F_MPIO_DEBUG
     fprintf(stdout, "Leaving H5F_mpio_write\n" );
 #endif
     FUNC_LEAVE(SUCCEED);
@@ -475,7 +478,7 @@ H5F_mpio_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
  * Purpose:     Makes sure that all data is on disk.
  *
  * Errors:
- *              IO        WRITEERROR    Fflush failed. 
+ *              IO        WRITEERROR    MPI_File_sync failed. 
  *
  * Return:      Success:        SUCCEED
  *
@@ -496,7 +499,7 @@ H5F_mpio_flush(H5F_low_t *lf)
     int                     msglen;
 
     FUNC_ENTER(H5F_mpio_flush, FAIL);
-#ifdef DEBUG_MPIO
+#ifdef H5F_MPIO_DEBUG
     fprintf(stdout, "Entering H5F_mpio_flush\n" );
 #endif
 
@@ -505,7 +508,7 @@ H5F_mpio_flush(H5F_low_t *lf)
         MPI_Error_string( mpierr, mpierrmsg, &msglen );
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, mpierrmsg );
     }
-#ifdef DEBUG_MPIO
+#ifdef H5F_MPIO_DEBUG
     fprintf(stdout, "Leaving H5F_mpio_flush\n" );
 #endif
     FUNC_LEAVE(SUCCEED);
