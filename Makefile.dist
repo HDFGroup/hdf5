@@ -20,5 +20,5 @@ clean mostlyclean distclean maintainer-clean TAGS: _config
 _config:
 	sh configure
 
-.PHONY: all lib progs test install uninstall dep depend clean mostlyclean    \
+.PHONY: all lib progs test install uninstall dep depend clean mostlyclean     \
 	distclean maintainer-clean _config
