@@ -1847,7 +1847,7 @@ H5Pget_driver(hid_t plist_id)
  *		Rewritten to use the virtual file layer.
  *
  * 		Robb Matzke, 1999-08-05
- *		If the driver ID is -2 then substitute the current value of
+ *		If the driver ID is H5FD_VFD_DEFAULT then substitute the current value of
  *		H5FD_SEC2.
  *-------------------------------------------------------------------------
  */
@@ -1874,7 +1874,7 @@ H5Pget_driver(hid_t plist_id)
 		      "not a file access or data transfer property list");
     }
 
-    if (H5P_DEFAULT==ret_value)
+    if (H5FD_VFD_DEFAULT==ret_value)
         ret_value = H5FD_SEC2;
 
     FUNC_LEAVE(ret_value);

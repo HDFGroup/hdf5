@@ -595,7 +595,7 @@ H5FD_log_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_log_t	*f2 = (const H5FD_log_t*)_f2;
     int ret_value=0;
 
-    FUNC_ENTER(H5FD_log_cmp, -2);
+    FUNC_ENTER(H5FD_log_cmp, H5FD_VFD_DEFAULT);
 
 #ifdef WIN32
     if (f1->fileindexhi < f2->fileindexhi) ret_value= -1;

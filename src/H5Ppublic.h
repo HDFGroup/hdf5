@@ -18,7 +18,7 @@
 #define _H5Ppublic_H
 
 /* Default Template for creation, access, etc. templates */
-#define H5P_DEFAULT     (-2)
+#define H5P_DEFAULT     0
 
 /* Public headers needed by this file */
 #include <H5public.h>

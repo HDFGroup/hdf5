@@ -597,9 +597,9 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
     const H5FD_family_t	*f1 = (const H5FD_family_t*)_f1;
     const H5FD_family_t	*f2 = (const H5FD_family_t*)_f2;
-    int ret_value=(-2);
+    int ret_value=(H5FD_VFD_DEFAULT);
 
-    FUNC_ENTER(H5FD_family_cmp, -2);
+    FUNC_ENTER(H5FD_family_cmp, H5FD_VFD_DEFAULT);
 
     assert(f1->nmembs>=1 && f1->memb[0]);
     assert(f2->nmembs>=1 && f2->memb[0]);

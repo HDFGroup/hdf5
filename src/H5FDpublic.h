@@ -10,6 +10,7 @@
 
 #include <H5public.h>
 #define H5_HAVE_VFL 1 /*define a convenient app feature test*/
+#define H5FD_VFD_DEFAULT 0   /* Default VFL driver value */
 
 /*
  * Types of allocation requests. The values larger than H5FD_MEM_DEFAULT

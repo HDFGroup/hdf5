@@ -1689,7 +1689,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		}
 	    } else {
 		hid_t obj = va_arg (ap, hid_t);
-		if (-2 == obj) {
+		if (H5P_DEFAULT == obj) {
 		    fprintf (out, "H5P_DEFAULT");
 		} else if (obj<0) {
 		    fprintf (out, "FAIL");

@@ -94,7 +94,7 @@ H5D_xfer_t	H5D_xfer_dflt = {
     NULL,                   	/*No information needed for malloc() calls  */
     NULL,                   	/*Use free() for VL data frees		    */
     NULL,                   	/*No information needed for free() calls    */
-    -2,				/*See H5Pget_driver()			    */
+    H5FD_VFD_DEFAULT,			/*See H5Pget_driver()			    */
     NULL,			/*No file driver-specific information yet   */
 #ifdef COALESCE_READS
     0,                          /*coalesce single reads into a read         */
