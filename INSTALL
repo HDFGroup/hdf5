@@ -1,34 +1,34 @@
 This file contains instructions for the installation of HDF5 on
 Unix-like systems.  First, one must obtain a tarball of the HDF5
-release from ---FIXME---->http://hdf5.ncsa.uiuc.edu<----FIXME---
+release from the ftp://hdf.ncsa.uiuc.edu/pub/dist/HDF5
 repository.  The files are available in uncompressed tar, gzip, bzip2,
 and compress formats.
 
 For those that like to live dangerously and don't like to read ;-) you
 can do the following:
 
-	$ tar xf hdf-5.0.0a.tar
-	$ cd hdf-5.0.0a
+	$ tar xf hdf5-1.0.0a.tar
+	$ cd hdf5-1.0.0a
 	$ make test
 	$ make install		# Optional
 
 
 Step 1. Unpack the source tree.
 
-    * The tarball will unpack into an hdf-5.0.0a directory with one of
+    * The tarball will unpack into an hdf5-1.0.0a directory with one of
       the following commands:
 
-	$ tar xf hdf-5.0.0a.tar				OR
-	$ gunzip <hdf-5.0.0a.tar.gz |tar xf -		OR
-	$ bunzip2 <hdf-5.0.0a.tar.bz2 |tar xf -		OR
-	$ uncompress -c <hdf-5.0.0a.tar.Z | tar xf -
+	$ tar xf hdf5-1.0.0a.tar				OR
+	$ gunzip <hdf5-1.0.0a.tar.gz |tar xf -		OR
+	$ bunzip2 <hdf5-1.0.0a.tar.bz2 |tar xf -		OR
+	$ uncompress -c <hdf5-1.0.0a.tar.Z | tar xf -
 
 
 Step 2. Configure makefiles.
 
     * HDF5 uses the GNU autoconf program for configuration.  Most
       installations can be configured by typing just (from the
-      hdf-5.0.0a directory)
+      hdf5-1.0.0a directory)
 
 	$ ./configure
 

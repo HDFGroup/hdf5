@@ -145,7 +145,7 @@ sub release (@) {
 
    # We build the release from above the root of the source tree so the
    # hdf5 directory appears as part of the name in the tar file. We create
-   # a temporary symlink called something like `hdf-5.0.0a' that points to
+   # a temporary symlink called something like `hdf5-1.0.0a' that points to
    # our current working directory.
    $_ = cwd;
    my ($parent,$root) = m%(.*)/(.*)$% or die "cannot split directory";
