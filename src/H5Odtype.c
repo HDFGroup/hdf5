@@ -416,7 +416,6 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
         default:
             HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
                   "unknown datatype class found");
-            break;
     }
 
     FUNC_LEAVE(SUCCEED);

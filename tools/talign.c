@@ -126,21 +126,21 @@ int main(void)
 			|| fnok[0] != fptr[2] || fnok[1] != fptr[3]) {
 		result = 1;
 		printf("%14s (%2d) %6s = %s\n",
-			mname = H5Tget_member_name(fix, 0), H5Tget_member_offset(fix,0),
+			mname = H5Tget_member_name(fix, 0), (int)H5Tget_member_offset(fix,0),
 			string5, (char *)(data + H5Tget_member_offset(fix, 0)));
 		free(mname);
 		fptr = (float *)(data + H5Tget_member_offset(fix, 1));
 		printf("Data comparison:\n"
 			"%14s (%2d) %6f = %f\n"
 			"                    %6f = %f\n",
-			mname = H5Tget_member_name(fix, 1), H5Tget_member_offset(fix,1),
+			mname = H5Tget_member_name(fix, 1), (int)H5Tget_member_offset(fix,1),
 			fok[0], fptr[0],
 			fok[1], fptr[1]);
 		free(mname);
 		fptr = (float *)(data + H5Tget_member_offset(fix, 2));
 		printf("%14s (%2d) %6f = %f\n"
 			"                    %6f = %6f\n",
-			mname = H5Tget_member_name(fix, 2), H5Tget_member_offset(fix,2),
+			mname = H5Tget_member_name(fix, 2), (int)H5Tget_member_offset(fix,2),
 			fnok[0], fptr[0],
 			fnok[1], fptr[1]);
 		free(mname);

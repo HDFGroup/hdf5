@@ -378,7 +378,7 @@ h5_fileaccess(void)
         if ((val = strtok(NULL, " \t\n\r")))
             verbosity = strtol(val, NULL, 0);
 
-        if (H5Pset_fapl_log(fapl, NULL, verbosity) < 0)
+        if (H5Pset_fapl_log(fapl, NULL, (int)verbosity) < 0)
 	    return -1;
     } else {
 	/* Unknown driver */

@@ -247,7 +247,7 @@ h5dump_str_append(h5dump_str_t *str/*in,out*/, const char *fmt, ...)
 
     while (1) {
 	size_t avail = str->nalloc - str->len;
-	size_t nchars = HDvsnprintf(str->s+str->len, avail, fmt, ap);
+	size_t nchars = (size_t)HDvsnprintf(str->s+str->len, avail, fmt, ap);
 
 	if (nchars < avail) {
 	    /* success */
@@ -1533,8 +1533,8 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 	    return -1;
 
 	/* Print the data */
-	flags = ((elmtno == 0 ? START_OF_DATA : 0) |
-		 ((elmtno + hs_nelmts) >= p_nelmts ? END_OF_DATA : 0));
+	flags = (((elmtno == 0) ? START_OF_DATA : 0) |
+		 (((elmtno + hs_nelmts) >= p_nelmts) ? END_OF_DATA : 0));
 	h5dump_simple_data(stream, info, dset, &ctx, flags, hs_nelmts,
                            p_type, sm_buf);
 
