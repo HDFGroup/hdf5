@@ -37,10 +37,10 @@ extern int              Verbosity;
     if (Verbosity>9) print_func("   Call to routine: %15s at line %4d "	      \
 				"in %s returned %ld \n",		      \
 				where, (int)__LINE__, __FILE__,		      \
-				(long)ret);				      \
-    if (ret == val) {							      \
+				(long)(ret));				      \
+    if ((ret) == (val)) {							      \
 	print_func("*** UNEXPECTED RETURN from %s is %ld at line %4d "	      \
-		   "in %s\n", where, (long)ret, (int)__LINE__, __FILE__);     \
+		   "in %s\n", where, (long)(ret), (int)__LINE__, __FILE__);     \
 	num_errs++;							      \
 	H5Eprint (stdout);						      \
     }									      \
@@ -79,11 +79,11 @@ extern int              Verbosity;
 #define VERIFY(x, val, where) do {					      \
     if (Verbosity>9) {							      \
 	print_func("   Call to routine: %15s at line %4d in %s had value "    \
-		   "%ld \n", where, (int)__LINE__, __FILE__, (long)x);	      \
+		   "%ld \n", (where), (int)__LINE__, __FILE__, (long)(x));	      \
     }									      \
-    if (x != val) {							      \
+    if ((x) != (val)) {							      \
 	print_func("*** UNEXPECTED VALUE from %s should be %ld, but is %ld at line %4d "	      \
-		   "in %s\n", where, (long)val, (long)x, (int)__LINE__, __FILE__);	      \
+		   "in %s\n", (where), (long)(val), (long)(x), (int)__LINE__, __FILE__);	      \
 	H5Eprint (stdout);						      \
 	num_errs++;							      \
     }									      \
@@ -94,12 +94,12 @@ extern int              Verbosity;
 #define RESULT(ret,func) do {						      \
     if (Verbosity>8) {							      \
 	print_func("   Call to routine: %15s at line %4d in %s returned "     \
-		   "%ld\n", func, (int)__LINE__, __FILE__, (long)ret);	      \
+		   "%ld\n", func, (int)__LINE__, __FILE__, (long)(ret));	      \
     }									      \
     if (Verbosity>9) HEprint(stdout, 0);				      \
-    if (ret == FAIL) {							      \
+    if ((ret) == FAIL) {							      \
 	print_func("*** UNEXPECTED RETURN from %s is %ld at line %4d "	      \
-		   "in %s\n", func, (long)ret, (int)__LINE__, __FILE__);      \
+		   "in %s\n", func, (long)(ret), (int)__LINE__, __FILE__);      \
 	H5Eprint (stdout);						      \
 	num_errs++;							      \
     }									      \
