@@ -1,0 +1,419 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.61 [en] (Win98; I) [Netscape]">
+</head>
+<body text="#000000" bgcolor="#FFFFFF" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+
+<h2>
+The XML DTD for HDF5:&nbsp; Design Notes</h2>
+April 28, 2000
+<h3>
+<b>1.&nbsp; Introduction</b></h3>
+The XML "Document Type Definition" (DTD) for HDF5 is a markup language
+to describe the contents of an HDF5 file.[<a href="#R1">1</a>]&nbsp; This
+DTD specifies a standard for using XML to describe the structure and contents
+of a <i>single</i> HDF5 file.&nbsp; The DTD can be used in a variety of
+ways, by standard software and by application specific software that builds
+on standard XML features.&nbsp; The DTD will enable descriptions of HDF5
+files to be used with and trasnslated to other similar XML markup languages.
+<p>This document discusses some of the key features of the HDF5 DTD, and
+some of the design decisions that were considered during its development.
+<p>The HDF5 data model is somewhat complex, with a great deal of flexibility
+and expressive power.&nbsp; The DTD is intended to be able to describe
+almost any HDF5 file, and to describe most of the details of the file.&nbsp;
+For these reasons, the HDF5 DTD is more complicated than some similar DTDs,
+such as XDF[<a href="#R7">7</a>] and netCDF[<a href="#R8">8</a>].
+<p>The DTD to some extent is redundant with the previously published "Data
+Definition Language", and the accompanying "h5dump" and related tools.[<a href="#R2">2</a>]&nbsp;
+XML descriptions will contain similar or identical information as the dumper
+DDL.&nbsp; The important difference is that the XML is machine readable,
+but not necessarily human readable, and XML is a standard format that can
+be exchanged with standard tools and other XML languages.
+<p>The DTD defines a formal and machine verifiable <i>syntax</i> which
+is rigorously enforced by validating XML tools.&nbsp; This guarantees that
+the producer and consume can exchange the description.&nbsp; The rules
+of XML will guarantee that the description is syntactically correct and
+follows the grammar defined in the DTD.&nbsp; However, XML cannot assure
+that a particular XML description is a correct description of the HDF5
+file, or even that it follows all the semantic rules of HDF5.&nbsp; For
+example, the XML descritpion can assure that every Dataset element belongs
+to at least one enclosing Group element, but can't assure that the Dataset
+is in the correct Group, or that the Dataset has the correct name, type,
+etc.&nbsp; The overall correctness of the XML description must be assured
+by tools that generate the XML.
+<h3>
+<b>2.&nbsp; Requirements and Use Cases</b></h3>
+An important goal is for the DTD to be useful for a variety of purposes.&nbsp;
+For this reason, we considered a number of "Use Cases".&nbsp; This analysis
+showed that there are indeed many different uses for XML, which have different
+requirements.&nbsp; Our DTD is intended to support as many of these uses
+as possible.&nbsp; In this section, seven use cases are described and discussed.
+<p><b>2.1&nbsp; Case 1:&nbsp; Viewing Structure and Contents of HDF5 File
+Using a Web Browser</b>
+<p>XML descriptions of HDF5 files will be readable by standard Web browsers.&nbsp;
+Some standard Web browsers will be able to display the XML directly, and
+many servers will be able to generate HTML from XML on the fly.&nbsp;&nbsp;
+We will also be able to construct style sheets to control the rendering
+of information about HDF5 files.
+<p>This use of XML will make it easy to get at least a general view of
+the contents of an HDF5 file without any special software.
+<p><b>2.2&nbsp; Case 2:&nbsp; XML as a Catalog Record</b>
+<p>One use of XML will be for catalog records, e.g., at a NASA DAAC or
+similar archive.&nbsp; The contents of HDF-5 files will be described in
+XML records which will be stored in a database or otherwise served through
+search services.&nbsp; The XML will be delivered to clients or proxies
+without the original HDF-5 file.&nbsp; The client will use the records
+to locate and obtain the datasets they want.
+<p>In this use, the XML is likely to be used separately from the original
+HDF-5 file, and any 'pointers' to the file must have complete URLs and
+other information, in order to locate the actual dataset.
+<p>In general, the purpose of these records is not to deliver all the data,
+nor to reconstruct the contents of the file from the XML.&nbsp; However,
+the content of the <i>attributes</i> is likely to be vital.&nbsp; Also,
+there may be a desire for the records to be comparatively compact, as you
+might be searching thousands of candidate datasets, and hence might receive
+thousands of XML descriptions.
+<p>It is difficult to know what kinds of searches will be required.&nbsp;
+However, it seems likely that details such as format version and storage
+strategy are less likely to be of great interest, compared to searches
+on the attributes.
+<p><b>2.3&nbsp; Case 3:&nbsp; XML as an Intermediate Form for Programs</b>
+<p>A second case is using XML as a machine readable description of HDF-5
+files while manipulating the file itself.&nbsp; An HDF5 editor is an example
+of this kind of use.&nbsp; Here, the XML and HDF-5 file are both accessible
+to the program.
+<p>It is difficult to generalize what applications might intend to do.&nbsp;
+For purposes of this use case, assume the following:
+<blockquote>The XML description of the file is used because the application
+wants to use standard XML tools and interfaces to manipulate the objects.&nbsp;
+For instance, standard packages will read XML into DOM objects, which provides
+not only standard data structures for the XML objects, but also standard
+interfaces for manipulating the tree (insert, delete, etc.).&nbsp; There
+are already standard editors for XML trees.</blockquote>
+
+<p><br>The notion of this use case is that you would build tools for HDF-5
+by extending such standard XML functions.&nbsp; The main trick will be
+to keep the XML and the HDF-5 correlated.&nbsp; When an XML object is created
+or changed, the tool will perform the equivalent operation on the file.
+<p>Thus, in this case, it is very important for the XML to be closely related
+to the structure of the HDF-5 file, and that this be maintained.&nbsp;
+This contrasts to Case 2 (a catalog) where the XML might be generated once,
+and possibly used many times without ever accessing the file.&nbsp; Also,
+we definitely want the XML to point to the objects in the file, whether
+the data is in the XML or not.
+<p>Depending on the application, many details of the file may be needed,
+certainly including things like storage strategy.&nbsp; However, since
+the file is available, these things can be obtained from the file rather
+than XML.&nbsp; This means that much of the detail could be optional for
+the XML.
+<p><b>2.4&nbsp; Case 4:&nbsp; Generation, Validation, and Reconstruction
+of HDF-5</b>
+<p>A third case for using XML is as a tool for validating, comparing, or
+generating HDF-5 files.&nbsp; We have proposed tools for checking, correcting,
+and diff-ing HDF-5 files, which might use XML as a canonical description
+of the file.&nbsp; Similarly, an 'h5gen' utility might well use XML as
+the template to create HDF-5 files.
+<p>These applications need to be able to represent essentially everything
+about the HDF-5 file.&nbsp; In the case of a validator or diff-er, even
+boot block information is important.
+<p>Also, it may well be the case that the data must be included in the
+XML, either because the HDF-5 file is not available, or because it must
+be arranged in a canonical form for comparison, e.g., to confirm that two
+files have the same contents.
+<p>While it is necessary for everything (or "everything important") to
+be in the XML, it is not necessary that the XML representation itself follows
+all of the rules of HDF-5.&nbsp; For instance, it is not required that
+the XML objects are in the same order as the HDF-5 objects (if such can
+even be determined), or that storage offsets in th eHDF5 file are faithfully
+represented in the XML.
+<p><b>2.5&nbsp; Case 5:&nbsp; XML as Intermediate to Other Formal Languages
+and File Formats</b>
+<p>XML is ideally suited for automatic transformation into various formal
+languages, either directly or via additional XML languages.&nbsp; For example,
+an XML description of an HDF5 file could be transformed into ODL.[citataion?]&nbsp;
+Similarly, XML can be transformed to other XML languages, such as XDF[7].
+<p>XML may also be a good intermediate language for translating between
+file formats.&nbsp; For example, the XML description of HDF5 could be transformed
+into the XML description for netCDF, and then the data could be written
+as netCDF.
+<p>It is likely that there will be "hub" languages, such as XDF, that are
+very general languages for data.&nbsp; Translating from HDF5-XML to XDF
+will lose information, but will then make the data translatable to any
+other format that can be mapped to XDF.&nbsp; Similarly, data could be
+imported to HDF5 from any format that can be translated to XDF, albeit
+with some loss of information.
+<p>It should also be noted that an XML description of HDF5 could be used
+to transform or translate individual objects from a file.&nbsp; For example,
+an HDF5 file might contain several datasets, one of which can be mapped
+to an OGIS gridded map.&nbsp; In this case, software could read the XML,
+locate the datasets that can be handled, and translate them to OGIS XML
+or other OGIS representations.&nbsp; In this way, similar kinds of data
+can be made to work together regardless of storage format, and without
+requiring that the entire file be limited to a particular kind or format
+of data.&nbsp; This would be a very powerful tool for sharing data.
+<p><b>2.6&nbsp; Case 6:&nbsp; Store XML in Archive or in Dataset as Machine
+Readable Documentation</b>
+<p>The XML description of an HDF5 file is a promising candidate to be a&nbsp;
+machine readable format to be stored in archives.&nbsp; The XML would likely
+be interpretable in the future, and could be mapped to whatever technology
+is available.
+<p>In this scenario, the XML should contain sufficient information to access
+and translate the data if necessary.
+<p>One variation of this theme is to store the descriptions of the files
+in a repository, while the files may reside in some storage media.&nbsp;
+Or the XML might be stored in the file itself, as a machine readable table
+of contents.
+<p><b>2.7&nbsp; Case 7:&nbsp; Templates, Skeleton Files, etc.</b>
+<p>XML can be used as a medium for creating templates or skeletons for
+HDF5 files.&nbsp; For example, the skeleton of a data product could be
+defined in XML, and read by software to produce the file and then fill
+in the specific values.&nbsp; This is a very useful tool for standardization.&nbsp;
+This is very similar to how the HCR tools for HDF-EOS worked.[citation]
+<p>It might also be possible to have XML templates for parts of HDF5 files,
+which can be composed to form datasets.&nbsp; For instance, there could
+be a library of XML templates for storing gridded data of various kinds,
+which would be coordinated with software to efficiently store and retrieve
+the data.&nbsp; A user could compose a data product by selecting appropriate
+templates to construct the dataset.&nbsp; This could also provide code
+modules to create and read the dataset.
+<p><b>2.8&nbsp; Implications</b>
+<p>These different use cases for XML require different (and sometmes conflicting)
+information in the XML.&nbsp; For instance, an XML catalog record is intended
+to be a description of the dataset and its location.&nbsp; This record
+should be compact, and should have all the attributes, and a pointer to
+the dataset at a data service, but the data should not be included.&nbsp;
+By contrast, an XML based validation tool needs to have a complete description
+of the file, including the data (if present).
+<p>The HDF5 DTD is designed to support many uses.&nbsp; In some cases,
+there are alternative descriptions provided, e.g., data in the file can
+be represented by a pointer to the original file or by a description of
+the data values themselves--or both.
+<h3>
+<b>3.&nbsp; Main Components of the HDF5 DTD</b></h3>
+The HDF5 DTD is intended to describe the structure and contents of an HDF5
+file.&nbsp; For the most part, the DTD closely follows the HDF5 data model,
+as described in [<a href="#R4">4</a>] and [2].&nbsp; THe HDF5 data model
+defines the shape and data types of datasets and attributes.&nbsp; These
+descriptions are similar to other general descriptions of scientific data
+[ <a href="#R5">5</a>, <a href="#R6">6</a>, <a href="#R7">7</a>, <a href="#R8">8</a>,
+<a href="#R11">11</a>],
+although HDF5 is more general than some these.&nbsp; The description of
+the HDF5 objects is discussed in Section 3.1.
+<p>An important feature of the HDF5 data model is the Group structure,
+which allows the HDF5 file to be structured as a <i>rooted directed graph,
+</i>analogous
+to a Unix file system.&nbsp; In the HDF5 file objects may be shared, and
+it is possible for objects to be a parent of their own ancestor( i.e.,
+the graph may have loops).&nbsp; In other words, the structure of the HDF5
+file is not limited to be a tree.&nbsp; In contrast, XML descriptions are
+restricted to be a tree, so it was necessary to map the directed graph
+of HDF5 onto a tree of XML elements.&nbsp; This is discussed in Section
+3.2.
+<p>The XML standard does not define numeric types, nor representations
+for arrays, tables, etc.&nbsp; In the case where it is necessary to describe
+actual data values (the value of an attribute, or values of an array),
+there is no current standard to follow, so we were guided by the best practices
+we could find.&nbsp; Still, this is an area where our DTD must evolve in
+the future.&nbsp; These issues are discussed in Section 3.4.
+<p>Finally, the DTD needs to support the ability to describe an HDF5 file
+in detail.&nbsp; This desribe must be able to include storage properties,
+compression properties, and the like.&nbsp; The DTD defines optional elements
+for this information.&nbsp; These are described in Section 3.4.
+<p><b>3.1&nbsp; Description of Datasets (Dataspace and Datatypes, and Attributes)</b>
+<p>The HDF5 data model provides a complete and well defined description
+for most kinds of scientific data.&nbsp; The DTD follows the HDF5 model
+in a simple and clear way.&nbsp; An HDF5 <b>Dataset</b> object is described
+by and XML <tt>&lt;Dataset></tt> element; each <tt>&lt;Dataset></tt> has
+a <tt>&lt;Dataspace></tt> and <tt>&lt;Datatype></tt> object, corresponding
+to the HDF5 model.
+<p>HDF5 has a very elaborate model of types, including arbitrary "compound
+datatypes" (i.e., structured records with heterogeneous components) as
+well as a completely general model of number representation.&nbsp; Expressing
+this in XML was easy, if somewhat elaborate.&nbsp; It should be noted that
+we made some seemingly arbitrary decisions about how to express the attributes
+of a datatype:&nbsp; sometimes an XML element is used and sometimes an
+XML attribute is used.
+<p><b>3.2&nbsp; Description of the Structure (Groups)</b>
+<p>An HDF5 file is a rooted directed graph, with at least one Group, "/".&nbsp;
+Some files are very simple, containing a few datasets, all in the root
+group.&nbsp; Other files have elaborate grouping structures, organizing
+the objects as a tree or graph.&nbsp; Objects can be shared, i.e., they
+can be members of more than one group.&nbsp; In this case, the graph is
+not a tree, because some objects have more than one parent.&nbsp; It is
+also possible for Groups to directly or indirectly contain an ancestor.&nbsp;
+In other words, the graph can have a loop in it.
+<p>XML descriptions are trees, with exactly one root, and objects nested
+in their parent.&nbsp; XML has no concept of elements which have more than
+one owner.&nbsp; This raised the issue of how to map the graph structure
+of the HDF5 file to a tree of XML elements.
+<p>First, there is an issue of what is the desired relationship between
+HDF5 objects and XML elements/objects.&nbsp; It is clear that XML is general
+enough to describe almost any structure.&nbsp; For example, the "Resource
+Description Framework" (RDF) can represent complex semantic networks.[<a href="#R10">10</a>]&nbsp;
+So the issue is not a lack of expressive power in XML.
+<p>The issue here is that standard XML software, e.g., SAX parsers and
+the DOM, naturally create objects (data structures) which correspond to
+the elements of the XML description.&nbsp; To the degree that the objects
+of HDF5 can be mapped to elements of XML, then general purpose XML-based
+software will be presented with an approximation of the semantics of the
+HDF5 objects, simply from the XML itself.&nbsp; In other words, the HDF5
+objects are mapped naturally to XML elements, and general purpose XML tools
+will approximately understand the structure of the HDF5.
+<p>In this approach, the difficult problem is how to represent group membership.&nbsp;
+For a simple HDF5 file in which the objects are structured as a tree, then
+the objects can be represetned as elements, and members of a group can
+be nested in a <tt>&lt;Group></tt> element.&nbsp; The XML nesting directly
+expresses the HDF5 membership in a natural way.&nbsp; But what should be
+done to represent a more general graph, e.g., where a dataset is a member
+of two dfferent groups?
+<p>One possibility is to represent the struture of the file in a general
+set notation, with a set of nodes (vertices) and a set of arcs (edges).&nbsp;
+Each dataset and group is a "node", and the membership is represented as
+"arcs".&nbsp; There are many variants of this basic approach, and it is
+easy to develop that software can read these two sets and construct the
+graph.&nbsp; This sort of representation is very natural for many algorithms
+that manipulate graphs, and can be easily transformed into different data
+structures.&nbsp; However, standard XML software would have no notion of
+the meaning of the edges and vertices, nor any clue to the structure of
+the file.
+<p>These approaches can be combined, nesting the objects as in XML, with
+a special "link" or cross reference to represent a second occurrence of
+the same object.&nbsp; This hybrid approach has the advantage that in simple
+cases the structure of the XML closely follows the structure of the HDF5
+file, while capturing the complex cases when needed.
+<p>After considering each alternative in detail, a hybrid approach was
+chosen.&nbsp;&nbsp; For HDF5 objects that may be shared (Groups, Datasets,
+Named Datatypes) the XML element is defined to be either a description
+of the object or a "pointer" to an element that describes the object.&nbsp;
+A shared object should be described in exactly one element, and all other
+instances should point to that element.
+<p>It should be noted that the XML parser can verify that the "pointer"
+points to a valid XML element, but not that it points to the correct element,
+nor that there is only one description of a given HDF5 object.&nbsp; For
+instance, XML can confirm that a "pointer" has a reference to exactly one
+element (HDF5 object), but that object could be any valid XML element,
+including the link itself or any of the other elements of DTD.&nbsp; This
+makes no sense according to the rules of HDF5, and those rules must be
+enforced by the applications that create and use the XML description.
+<p><b>3.3&nbsp; The Data Values</b>
+<p>While representing metadata with XML was fairly straightforward, it
+was less obvious what should be done with the data values.&nbsp; For different
+purposes, it may be better to:
+<ul>
+<li>
+include the data values as formatted text, e.g., "-7.5"</li>
+
+<li>
+include the data values in some text encoded form, e.g., binhex</li>
+
+<li>
+omit the data values and point to an external XML file</li>
+
+<li>
+omit the data values and point to the HDF5 file</li>
+</ul>
+A second design choice is whether to mark up the data elements or include
+data as a single block of undelimited text.&nbsp; For example, the values
+of a two dimensional array could be included either as a single block of
+values, or tagged with XML elements for each row, or tagged individually
+for each row and column.
+<p>Examination of existing practice shows that there is no outstanding
+agreement on these issues.&nbsp; This is not surprising, since the choice
+depends on the requirements of the intended use.&nbsp; Interesting examples
+of related work include:
+<ul>
+<li>
+XSIL [<a href="#R6">6</a>]</li>
+
+<li>
+XDF [<a href="#R7">7</a>]</li>
+
+<li>
+netCDF DTD [<a href="#R8">8</a>]</li>
+
+<li>
+XML-Data [<a href="#R9">9</a>]</li>
+</ul>
+We wanted to support as many variations as possible, so our design allows
+many representations (including omission) for data values.
+<p>One point to note about the HDF5 DTD:&nbsp; many of the other approaches
+(e.g., XDF) include substantial metadata about the shape and type of arrays.&nbsp;
+This information is provided in great detail by the HDF5 metadata, so our
+markup of the data values is less elaborate than some other DTDs.&nbsp;
+On the other hand, certain facts such as the order of the dimensions and
+elements <i>in the XML description&nbsp;</i> must still be included, because
+the XML is not required to be laid out in the order that the HDF5 file
+specified.
+<p>We were not able to create a satisfactory markup for data in the HDF5
+file for the first release.&nbsp; The initial version of the DTD has a
+limited <tt>&lt;Data> </tt>element, which does not support all the desired
+features.&nbsp; This will be revised in a future release.
+<p>3.4&nbsp; File Format Details
+<p>The DTD must be able to support applications that need to fully describe
+the details of a specific HDF5 file.&nbsp; For example, in order to verify
+the correctness of a specific dataset in an archive, it may be necessary
+to confirm the storage layout and compression parameters are correct, as
+well as the structure, attributes, and data values.
+<p>For these applications, optional elements are included in the DTD, including:
+<ul>
+<li>
+<tt>&lt;UserBlock></tt> and <tt>&lt;BootBlock> </tt>(sic), which are described
+in the HDF5 specification [citation]</li>
+
+<li>
+<tt>&lt;StorageLayout></tt>, which describes the organization of a dataset
+in the file</li>
+
+<li>
+<tt>&lt;Compression></tt>, which describes the compression parameters for
+a dataset, if applicable.</li>
+</ul>
+These elements are only partly defined in the first release of the DTD.
+<h3>
+<b>References</b></h3>
+
+<ol>
+<li>
+<a NAME="R1"></a>HDF5 DTD</li>
+
+<br><a href="http://hdf.ncsa.uiuc.edu/HDF5/XML">http://hdf.ncsa.uiuc.edu/HDF5/XML</a>
+<li>
+<a NAME="R2"></a>DDL in BNF for HDF5</li>
+
+<br><a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/ddl.html">http://hdf.ncsa.uiuc.edu/HDF5/doc/ddl.html</a>
+<li>
+<a NAME="R4"></a>HDF5 Abstract Data Model</li>
+
+<br><a href="http://hdf.ncsa.uiuc.edu/HDF5/ADM_990506/">http://hdf.ncsa.uiuc.edu/HDF5/ADM_990506/</a>
+<li>
+<a NAME="R5"></a>VisAD <a href="http://www.ssec.wisc.edu/~billh/visad.html">http://www.ssec.wisc.edu/~billh/visad.html</a></li>
+
+<li>
+<a NAME="R6"></a>XSIL: Extensible Scientific Interchange Language</li>
+
+<br><a href="http://www.cacr.caltech.edu/SDA/xsil/">http://www.cacr.caltech.edu/SDA/xsil/</a>
+<li>
+<a NAME="R7"></a>XDF (eXtensible Data Format)</li>
+
+<br><a href="http://tarantella.gsfc.nasa.gov/xml/">http://tarantella.gsfc.nasa.gov/xml/</a>
+<li>
+<a NAME="R8"></a>netcdf</li>
+
+<br><a href="http://hdf.ncsa.uiuc.edu/HDF5/XML/NetCDF/netcdf.dtd">http://hdf.ncsa.uiuc.edu/HDF5/XML/NetCDF/netcdf.dtd</a>
+<li>
+<a NAME="R9"></a>XML-data</li>
+
+<br><a href="http://www.w3.org/TR/1998/NOTE-XML-data/">http://www.w3.org/TR/1998/NOTE-XML-data/</a>
+<li>
+<a NAME="R10"></a>Resource Description Framework (RDF)</li>
+
+<br><a href="http://www.w3.org/RDF/">http://www.w3.org/RDF/</a>
+<li>
+<a NAME="R11"></a>Scientific Data Management (SDM)</li>
+
+<br><a href="http://www-xdiv.lanl.gov/XCI/PROJECTS/SDM">http://www-xdiv.lanl.gov/XCI/PROJECTS/SDM</a></ol>
+
+</body>
+</html>
