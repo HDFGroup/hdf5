@@ -29,9 +29,10 @@ PredType::PredType( const PredType& original ) : AtomType( original ) {}
 
 // Makes a copy of the predefined type and stores the new
 // id in the left hand side object.  
-DataType& PredType::operator=( const PredType& rhs )
+PredType& PredType::operator=( const PredType& rhs )
 {
-	return(DataType::operator=(rhs));
+   copy(rhs);
+   return(*this);
 }
 
 const PredType PredType::NotAtexit;	// only for atexit/global dest. problem
