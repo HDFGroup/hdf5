@@ -1,13 +1,13 @@
 
  
-                       HDF5 Release 1.4-Beta3
+                       HDF5 Release 1.4.0
 
 
 INTRODUCTION
 
 This document describes the differences between HDF5-1.2.0 and
-HDF5-1.4-Beta3, and contains information on the platforms tested and
-known problems in HDF5-1.4-Beta3. For more details check the HISTORY.txt
+HDF5-1.4.0, and contains information on the platforms tested and
+known problems in HDF5-1.4.0. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -74,7 +74,17 @@ h4toh5 Utility
     HDF5 Objects":
        http://hdf.ncsa.uiuc.edu/HDF5/papers/H4-H5MappingGuidelines.pdf
 
-    Known Limitations of the h4toh5 beta release
+    Known Bugs:
+
+      The h4toh5 utility produces images that do not correctly conform
+      to the HDF5 Image and Palette Specification. 
+        http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html
+      Several required HDF5 attributes are omitted, and the dataspace 
+      is reversed (i.e., the ht. and width of the image dataset is 
+      incorrectly described.)  For more information, please see:
+        http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
+ 
+    Known Limitations of the h4toh5 release
     ---------------------------------------------
 
     1. Error Handling
@@ -114,7 +124,7 @@ h4toh5 Utility
 
     4. Memory Use
 
-    The beta version of the h4toh5 utility copies data from HDF4 objects
+    This version of the h4toh5 utility copies data from HDF4 objects
     in a single read followed by a single write to the HDF5 object. For
     large objects, this requires a very large amount of memory, which may
     be extremely slow or fail on some platforms.
@@ -125,11 +135,10 @@ h4toh5 Utility
 
     5. Platforms
 
-    The h4toh5 utility requires HDF5.1.4 and HDF4r1.4
+    The h4toh5 utility requires HDF5-1.4.0 and HDF4r1.4
 
-    The beta h4toh5 utility has been tested on Solaris 2.6, Solaris 2.5,
-    Irix 6.5, HPUX 11.0, DEC Unix, FreeBSD, Windows 2000(NT5.0),Windows NT 
-    and Windows 98.
+    h4toh5 utility has been tested on all platforms listed below ( see section
+    "Platforms Tested" ) except TFLOPS.
 
 F90 Support
 ===========
@@ -142,7 +151,7 @@ F90 Support
     Reference Manual for more details.
    
     F90 APIs are available for the Solaris 2.6 and 2.7, Linux, DEC UNIX, 
-    T3E, J90 and O2K (64 bit option only) platforms. The Parallel version of 
+    T3E, SV1 and O2K (64 bit option only) platforms. The Parallel version of 
     the HDF5 F90 Library is supported on the O2K and T3E platforms.
 
     Changes since the last prototype release (July 2000)
@@ -334,6 +343,8 @@ Documentation
 Bug Fixes since HDF5-1.4.0-beta2
 ================================
 
+    * Fixed a bug in the conversion from a little endian double to a big endian float
+      in some special cases.
     * Corrected configuration error which was not including compression support
         correctly.
     * Cleaned up lots of warnings.
@@ -349,12 +360,9 @@ Bug Fixes since HDF5-1.4.0-beta2
 Platforms Tested
 ================
 
- Note: Due to the nature of the bug fixes, only static versions of the
-       library and tools were tested.
 
-
-  AIX 4.3.2 (IBM SP)            mpcc_r 3.6.6
-  Cray T3E sn6711 2.0.5.43      Cray Standard C Version 6.4.0.0
+  AIX 4.3.3.0 (IBM SP powerpc)  mpcc_r 3.6.6
+  Cray T3E sn6711 2.0.5.45      Cray Standard C Version 6.4.0.0
                                 Cray Fortran Version 3.4.0.2
   Cray SV1 sn9605 10.0.0.7      Cray Standard C Version 6.4.0.0
                                 Cray Fortran Version 3.4.0.2
@@ -363,12 +371,14 @@ Platforms Tested
   HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
   HP-UX B.11.00                 HP C  HP92453-01 A.11.00.13
   IRIX 6.5                      MIPSpro cc 7.30
+                                mpich-1.2.1
   IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
                                 mpt.1.4.0.2
                                 mpich-1.2.1
   Linux 2.2.16-3smp             gcc-2.95.2
                                 g++ 2.95.2
                                 pgf90 3.1-3
+                                mpich-1.2.1
   OSF1 V4.0                     DEC-V5.2-040
                                 Digital Fortran 90 V4.1-270
   SunOS 5.6                     WorkShop Compilers 5.0 98/12/15 C 5.0 
@@ -379,12 +389,20 @@ Platforms Tested
   (Solaris 2.7)                 WorkShop Compilers 5.0 99/10/25 Fortran 90
                                        2.0 Patch 107356-04
                                 Workshop Compilers 5.0 98/12/15 C++ 5.0
-  TFLOPS 3.3                    mpich-1.2.0 with local changes
+                                mpich-1.2.1
+  SunOS 5.5.1                   gcc-2.7.2 
+   (Solaris 2.5.1 (x86))
+  TFLOPS r1.0.4 v4.0            mpich-1.2.1 with local changes
   Windows NT4.0, 2000 (NT5.0)   MSVC++ 6.0
   Windows 98                    MSVC++ 6.0
 
 Known Problems
 ==============
+
+* The stream-vfd test uses ip port 10007 for testing.  If another application
+  is already using that port address, the test will hang indefinitely and
+  has to be terminated by the kill command.  To try the test again, change
+  the port address in test/stream_test.c to one not being used in the host.
 
 * The --enable-static-exec configure flag fails to compile for Solaris
   platforms. This is due to the fact that not all of the system
@@ -392,9 +410,20 @@ Known Problems
 
   The --enable-static-exec configure flag also fails to correctly compile
   on Linux platforms using the gcc-2.95.2 compiler.
+
+  The --enable-static-exec configure flag also fails to correctly compile
+  on IBM SP2 platform.
+
+  The compilation fails if configured with --enable-static-exec on IRIX 6.5.
+
+  The executable files in hdf5/bin are dynamic-linked for IRIX64 6.5(64 and
+  n32 modes) and IRIX 6.5, even though they are compiled with static library.
   
   It is suggested that you don't use this option on these platforms
   during configuration.
+
+* testhdf5 got bus error with configuration options --prefix and --with-hdf4
+  on IRIX 6.5.
 
 * With the gcc 2.95.2 compiler, HDF 5 uses the `-ansi' flag during
   compilation. The ANSI version of the compiler complains about not being
@@ -408,9 +437,20 @@ Known Problems
   fail if library is compiled using optimization of any level.
 
 * When building hdf5 tools and applications on windows platform, a linking
-warning: defaultlib "LIBC" conflicts with use of other libs will appear
-on debug version when running VC++6.0. This warning doesn't affect building
-and testing hdf5 applications. We are investigating this now.
+  warning: defaultlib "LIBC" conflicts with use of other libs will appear
+  on debug version when running VC++6.0. This warning doesn't affect building
+  and testing hdf5 applications. We will continue investigating this.
+
+* h5toh4 converter fails two cases(tstr.h5 and tmany.h5) for release dll version on
+  windows 2000 and NT.
+  The reason is possibly due to windows NT DLL convention on freeing memory. It seems   
+  that memory cannot be free across library or DLL. It is still under investigated.
+
+* HDF-GASS testings and testhdf5 in the test directory will get bus error if
+  the configured with --with-gass.
+
+* HDF-SRB testing got segmentation error on Solaris 2.7.
+ 
 * The Stream VFD was not tested yet under Windows.
   It is not supported in the TFLOPS machine.
 
@@ -429,13 +469,21 @@ and testing hdf5 applications. We are investigating this now.
         differences due to the difference in sizes of the objects created on
         those platforms.  h5ls appears to be dumping object references
         correctly.
-    - Cray J90 (and Cray T3E?) give errors during testing when displaying
+    - Cray J90 give errors during testing when displaying
         some floating-point values.  These are benign differences due to the
         different precision in the values displayed and h5ls appears to be
         dumping floating-point numbers correctly.
 
-* Before building HDF5 F90 Library from source on Crays (T3E and J90) 
+* Before building HDF5 F90 Library from source on Crays (T3E and SV1) 
   replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src subdirectory 
   in the top level directory with the Cray-specific files from the 
-  ftp://hdf.ncsa.uiuc.edu/pub/ougoing/hdf5/hdf5-1.4.0-beta/F90_source_for_Crays
+  ftp://hdf.ncsa.uiuc.edu/pub/ougoing/hdf5/hdf5-1.4.0/F90_source_for_Crays
   directory.
+
+* The h4toh5 utility produces images that do not correctly conform
+  to the HDF5 Image and Palette Specification. 
+      http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html
+  Several required HDF5 attributes are omitted, and the dataspace 
+  is reversed (i.e., the ht. and width of the image dataset is 
+  incorrectly described.)  For more information, please see:
+     http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
