@@ -56,6 +56,26 @@ static char		RcsId[] = "$Revision$";
 #define SPACE4_DIM2	13
 #define SPACE4_DIM3	17
 
+/* Number of random hyperslabs to test */
+#define NHYPERSLABS 10
+
+/* Number of random hyperslab tests performed */
+#define NRAND_HYPER 100
+
+/* 5-D dataset with fixed dimensions */
+#define SPACE5_NAME  "Space5"
+#define SPACE5_RANK	5
+#define SPACE5_DIM1	10
+#define SPACE5_DIM2	10
+#define SPACE5_DIM3	10
+#define SPACE5_DIM4	10
+#define SPACE5_DIM5	10
+
+/* 1-D dataset with same size as 5-D dataset */
+#define SPACE6_NAME  "Space6"
+#define SPACE6_RANK	1
+#define SPACE6_DIM1	(SPACE5_DIM1*SPACE5_DIM2*SPACE5_DIM3*SPACE5_DIM4*SPACE5_DIM5)
+
 /* Element selection information */
 #define POINT1_NPOINTS 10
 
@@ -66,6 +86,7 @@ herr_t test_select_hyper_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t 
 herr_t test_select_point_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
 herr_t test_select_all_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
 herr_t test_select_none_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
+herr_t test_select_hyper_iter2(void *_elem, hid_t UNUSED type_id, hsize_t ndim, hssize_t *point, void *_operator_data);
 
 /****************************************************************
 **
@@ -2168,7 +2189,6 @@ test_select_hyper_union_stagger(void)
                          {3,4}};
     int dsetrank=2;     /* File Dataset rank */
     int memrank=2;      /* Memory Dataset rank */
-    int rank;
     int i,j;            /* Local counting variables */
     herr_t error;
     hsize_t stride[2]={1,1};
@@ -2456,6 +2476,179 @@ test_select_hyper_union_3d(void)
 
 /****************************************************************
 **
+**  test_select_hyper_iter2(): Iterator for checking hyperslab iteration
+** 
+****************************************************************/
+herr_t 
+test_select_hyper_iter2(void *_elem, hid_t UNUSED type_id, hsize_t ndim, hssize_t *point, void *_operator_data)
+{
+    int *tbuf=(int *)_elem,     /* temporary buffer pointer */
+        **tbuf2=(int **)_operator_data; /* temporary buffer handle */
+    unsigned u;             /* Local counting variable */
+
+    if(*tbuf!=**tbuf2) {
+        num_errs++;
+        printf("Error in hyperslab iteration!\n");
+        printf("location: { ");
+        for(u=0; u<(unsigned)ndim; u++) {
+            printf("%2d",(int)point[u]);
+            if(u<(unsigned)(ndim-1))
+                printf(", ");
+        } /* end for */
+        printf("}\n");
+        printf("*tbuf=%d, **tbuf2==%d\n",*tbuf,**tbuf2);
+        return(-1);
+    } /* end if */
+    else {
+        (*tbuf2)++;
+        return(0);
+    }
+}   /* end test_select_hyper_iter1() */
+
+/****************************************************************
+**
+**  test_select_hyper_union_random_5d(): Test basic H5S (dataspace) selection code.
+**      Tests random unions of 5-D hyperslabs
+** 
+****************************************************************/
+static void 
+test_select_hyper_union_random_5d(void)
+{
+    hid_t		fid1;		/* HDF5 File IDs		*/
+    hid_t		dataset;	/* Dataset ID			*/
+    hid_t		sid1,sid2;	/* Dataspace ID			*/
+    hsize_t		dims1[] = {SPACE5_DIM1, SPACE5_DIM2, SPACE5_DIM3, SPACE5_DIM4, SPACE5_DIM5};
+    hsize_t		dims2[] = {SPACE6_DIM1};
+    hssize_t	start[SPACE5_RANK];     /* Starting location of hyperslab */
+    hsize_t		count[SPACE5_RANK];     /* Element count of hyperslab */
+    int    *wbuf,          /* buffer to write to disk */
+               *rbuf,       /* buffer read from disk */
+               *tbuf;       /* temporary buffer pointer */
+    intn        i,j,k,l,m;  /* Counters */
+    herr_t		ret;		/* Generic return value		*/
+    hssize_t	npoints,	/* Number of elements in file selection */
+                npoints2;	/* Number of elements in memory selection */
+    unsigned    seed;       /* Random number seed for each test */
+    unsigned    test_num;   /* Count of tests being executed */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Hyperslab Selection Functions with random unions of 5-D hyperslabs\n"));
+
+    /* Allocate write & read buffers */
+    wbuf=malloc(sizeof(int)*SPACE5_DIM1*SPACE5_DIM2*SPACE5_DIM3*SPACE5_DIM4*SPACE5_DIM5);
+    rbuf=calloc(sizeof(int),SPACE5_DIM1*SPACE5_DIM2*SPACE5_DIM3*SPACE5_DIM4*SPACE5_DIM5);
+
+    /* Initialize write buffer */
+    for(i=0, tbuf=wbuf; i<SPACE5_DIM1; i++)
+        for(j=0; j<SPACE5_DIM2; j++)
+            for(k=0; k<SPACE5_DIM3; k++)
+                for(l=0; l<SPACE5_DIM4; l++)
+                    for(m=0; m<SPACE5_DIM4; m++)
+                        *tbuf++=(int)(((((((i*SPACE4_DIM2)+j)*SPACE4_DIM3)+k)*SPACE5_DIM4)+l)*SPACE5_DIM5)+m;
+
+    /* Create file */
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create dataspace for dataset on disk */
+    sid1 = H5Screate_simple(SPACE5_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_INT,sid1,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Write entire dataset to disk */
+    ret=H5Dwrite(dataset,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Create dataspace for reading buffer */
+    sid2 = H5Screate_simple(SPACE6_RANK, dims2, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Get initial random # seed */
+    seed=(unsigned)time(NULL)+(unsigned)clock();
+
+    /* Crunch through a bunch of random hyperslab reads from the file dataset */
+    for(test_num=0; test_num<NRAND_HYPER; test_num++) {
+        /* Save random # seed for later use */
+        /* (Used in case of errors, to regenerate the hyperslab sequence) */
+        seed+=(unsigned)clock();
+        srand(seed);
+
+#ifdef QAK
+printf("test_num=%d, seed=%u\n",test_num,seed);
+#endif /* QAK */
+        for(i=0; i<NHYPERSLABS; i++) {
+#ifdef QAK
+printf("hyperslab=%d\n",i);
+#endif /* QAK */
+            /* Select random hyperslab location & size for selection */
+            for(j=0; j<SPACE5_RANK; j++) {
+                start[j]=rand()%dims1[j];
+                count[j]=(rand()%(dims1[j]-start[j]))+1;
+#ifdef QAK
+printf("start[%d]=%d, count[%d]=%d\n",j,(int)start[j],j,(int)count[j]);
+#endif /* QAK */
+            } /* end for */
+
+            /* Select hyperslab */
+            ret = H5Sselect_hyperslab(sid1,(i==0 ? H5S_SELECT_SET : H5S_SELECT_OR),start,NULL,count,NULL);
+            CHECK(ret, FAIL, "H5Sselect_hyperslab");
+        } /* end for */
+
+        /* Get the number of elements selected */
+        npoints=H5Sget_select_npoints(sid1);
+        CHECK(npoints, 0, "H5Sget_select_npoints");
+
+        /* Select linear 1-D hyperslab for memory dataset */
+        start[0]=0;
+        count[0]=npoints;
+        ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,NULL,count,NULL);
+        CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+        npoints2 = H5Sget_select_npoints(sid2);
+        VERIFY(npoints, npoints2, "H5Sget_select_npoints");
+
+        /* Read selection from disk */
+        ret=H5Dread(dataset,H5T_NATIVE_INT,sid2,sid1,H5P_DEFAULT,rbuf);
+        CHECK(ret, FAIL, "H5Dread");
+
+        /* Compare data read with data written out */
+        tbuf=rbuf;
+        ret = H5Diterate(wbuf,H5T_NATIVE_INT,sid1,test_select_hyper_iter2,&tbuf);
+        if(ret<0) {
+            num_errs++;
+            printf("Random hyperslabs for seed %u failed!\n",seed);
+        }
+
+        /* Set the read buffer back to all zeroes */
+        memset(rbuf,0,SPACE6_DIM1);
+    } /* end for */
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Free memory buffers */
+    free(wbuf);
+    free(rbuf);
+}   /* test_select_hyper_union_random_5d() */
+
+/****************************************************************
+**
 **  test_select(): Main H5S selection testing routine.
 ** 
 ****************************************************************/
@@ -2478,6 +2671,7 @@ test_select(void)
     test_select_hyper_union();  /* Test hyperslab union code */
     test_select_hyper_union_stagger();  /* Test hyperslab union code for staggered slabs */
     test_select_hyper_union_3d();  /* Test hyperslab union code for 3-D dataset */
+    test_select_hyper_union_random_5d();  /* Test hyperslab union code for random 5-D hyperslabs */
 
 }   /* test_select() */
 
