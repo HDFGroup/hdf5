@@ -109,7 +109,7 @@ int main(void)
      * 16  17 20 25 32 41
      */
   
-    /* Create access property list and set the driver to GASS */
+    /* Create access property list and set the driver to SRB */
     fapl = H5Pcreate (H5P_FILE_ACCESS);
          if (fapl < 0) {
              printf (" H5Pcreate failed. \n");
@@ -117,7 +117,7 @@ int main(void)
     }
     status = H5Pset_fapl_srb (fapl, srb_info);
     if (status < 0) {
-         printf ("H5Pset_fapl_gass failed. \n");
+         printf ("H5Pset_fapl_srb failed. \n");
          return -1;
     }
 
