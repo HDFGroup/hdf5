@@ -701,7 +701,7 @@ H5open(void)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API(H5open, FAIL)
+    FUNC_ENTER_API_NOCLEAR(H5open, FAIL)
     H5TRACE0("e","");
     /* all work is done by FUNC_ENTER() */
 done:
