@@ -348,6 +348,8 @@
 ./src/H5Tvlen.c
 ./src/H5TB.c
 ./src/H5TBprivate.h
+./src/H5TS.c
+./src/H5TSprivate.h
 ./src/H5V.c
 ./src/H5Vprivate.h
 ./src/H5Z.c
