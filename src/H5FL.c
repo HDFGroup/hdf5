@@ -34,12 +34,12 @@ static intn		interface_initialize_g = 0;
     Default limits on how much memory can accumulate on each free list before
     it is garbage collected.
  */
-static size_t H5FL_reg_glb_mem_lim=UINT_MAX;  /* Default to no limit on all regular free lists */
-static size_t H5FL_reg_lst_mem_lim=UINT_MAX;  /* Default to no limit on each regular free list */
-static size_t H5FL_arr_glb_mem_lim=UINT_MAX;  /* Default to no limit on all array free lists */
-static size_t H5FL_arr_lst_mem_lim=UINT_MAX;  /* Default to no limit on each array free list */
-static size_t H5FL_blk_glb_mem_lim=UINT_MAX;  /* Default to no limit on all block free lists */
-static size_t H5FL_blk_lst_mem_lim=UINT_MAX;  /* Default to no limit on each block free list */
+static size_t H5FL_reg_glb_mem_lim=1*16*65536;/* Default to 1MB limit on all regular free lists */
+static size_t H5FL_reg_lst_mem_lim=1*65536;   /* Default to 64KB limit on each regular free list */
+static size_t H5FL_arr_glb_mem_lim=4*16*65536;/* Default to 4MB limit on all array free lists */
+static size_t H5FL_arr_lst_mem_lim=4*65536;   /* Default to 256KB limit on each array free list */
+static size_t H5FL_blk_glb_mem_lim=16*16*65536; /* Default to 16MB limit on all block free lists */
+static size_t H5FL_blk_lst_mem_lim=16*65536;  /* Default to 1024KB (1MB) limit on each block free list */
 
 /* A garbage collection node for regular free lists */
 typedef struct H5FL_reg_gc_node_t {
