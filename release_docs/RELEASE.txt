@@ -60,6 +60,9 @@ New Features
 
     C++ API:
     --------
+	- Started using C library's reference counting in place of class
+	  RefCounter, which existed before the C's was available.  As the
+	  result, RefCounter has been removed.  2005/03/12 BMR
 
 
 Support for new platforms, languages and compilers.
