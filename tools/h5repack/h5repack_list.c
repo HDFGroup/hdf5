@@ -28,7 +28,7 @@
  *
  * Return: 0, ok, -1 no
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: September, 23, 2003
  *
@@ -85,7 +85,7 @@ int check_objects(const char* fname,
  {
   char* name=options->op_tbl->objs[i].path;
   if (options->verbose)
-   printf(PFORMAT1,"","",name);
+   printf(" <%s>",name);
   
   /* the input object names are present in the file and are valid */
   if (h5trav_getindext(name,travt)<0)
@@ -120,7 +120,7 @@ out:
  *
  * Return: void
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: October 23, 2003
  *

@@ -277,7 +277,7 @@ const char* get_sfilter(H5Z_filter_t filtn)
  else if (filtn==H5Z_FILTER_SHUFFLE)
   return "SHUFFLE";
  else if (filtn==H5Z_FILTER_FLETCHER32)
-  return "FLETCHERP";
+  return "FLETCHER32";
  else {
   printf("Input error in filter type\n");
   exit(1);

@@ -25,7 +25,7 @@
  *
  * Return: 1 has, 0 does not, -1 error
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: December 19, 2003
  *
@@ -99,7 +99,7 @@ int has_filter(hid_t dcpl_id,
  *
  * Return: 1 has, 0 does not, -1 error
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: December 30, 2003
  *
@@ -157,7 +157,7 @@ int has_layout(hid_t dcpl_id,
  *
  * Return: 1=filter present, 0=filter not present, -1=error
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: December 19, 2003
  *
@@ -344,7 +344,7 @@ error:
  *
  * Return: 1=identical, 0=not identical, -1=error
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: December 31, 2003
  *

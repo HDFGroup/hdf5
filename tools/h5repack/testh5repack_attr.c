@@ -21,7 +21,7 @@
  *
  * Purpose: write attributes in LOC_ID (dataset, group, named datatype) 
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:  pvn@ncsa.uiuc.edu
  *
  * Date: November 12, 2003
  *

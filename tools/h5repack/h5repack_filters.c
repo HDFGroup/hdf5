@@ -42,7 +42,7 @@ static void aux_objinsert_filter(pack_info_t *obj,
  *
  * Return: 0 not found, 1 found
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:  pvn@ncsa.uiuc.edu
  *
  * Date: December 19, 2003
  *
@@ -104,7 +104,7 @@ int filter_this(const char* name,    /* object name from traverse list */
  *
  * Return: 0 success, -1 an error occured
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:  pvn@ncsa.uiuc.edu
  *
  * Date: December 19, 2003
  *
@@ -267,7 +267,7 @@ out:
  *
  * Return: 0, ok, -1 no
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:  pvn@ncsa.uiuc.edu
  *
  * Date: December 19, 2003
  *
@@ -343,7 +343,7 @@ int print_filters(hid_t dcpl_id)
  * Return: 1=can apply the filter
  *         0=cannot apply the filter
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:  pvn@ncsa.uiuc.edu
  *
  * Date: December 23, 2003
  *

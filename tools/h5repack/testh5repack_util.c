@@ -20,7 +20,7 @@
  *
  * Purpose: utility function to create and write a dataset in LOC_ID
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:  pvn@ncsa.uiuc.edu
  *
  * Date: November 12, 2003
  *
@@ -60,7 +60,7 @@ int make_dset(hid_t loc_id,
  *
  * Purpose: utility function to create and write a dataset in LOC_ID
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:  pvn@ncsa.uiuc.edu
  *
  * Date: November 12, 2003
  *
@@ -106,7 +106,7 @@ int write_dset( hid_t loc_id,
  *
  * Purpose: utility function to write an attribute in LOC_ID
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer:  pvn@ncsa.uiuc.edu
  *
  * Date: November 12, 2003
  *

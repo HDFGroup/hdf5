@@ -26,7 +26,7 @@
  *
  * Return: 0, ok, -1 no
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: October, 23, 2003
  *
@@ -129,7 +129,7 @@ out:
  *
  * Return: 0, ok, -1 no
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: October, 23, 2003
  *
@@ -141,22 +141,23 @@ int do_copy_objects(hid_t fidin,
                     trav_table_t *travt,
                     pack_opt_t *options) /* repack options */
 {
- hid_t     grp_in=-1;       /* group ID */ 
- hid_t     grp_out=-1;      /* group ID */ 
- hid_t     dset_in=-1;      /* read dataset ID */ 
- hid_t     dset_out=-1;     /* write dataset ID */ 
- hid_t     type_in=-1;      /* named type ID */ 
- hid_t     type_out=-1;     /* named type ID */ 
- hid_t     dcpl_id=-1;      /* dataset creation property list ID */ 
- hid_t     space_id=-1;     /* space ID */ 
- hid_t     ftype_id=-1;     /* file data type ID */ 
- hid_t     mtype_id=-1;     /* memory data type ID */
+ hid_t     grp_in;       /* group ID */ 
+ hid_t     grp_out;      /* group ID */ 
+ hid_t     dset_in;      /* read dataset ID */ 
+ hid_t     dset_out;     /* write dataset ID */ 
+ hid_t     type_in;      /* named type ID */ 
+ hid_t     type_out;     /* named type ID */ 
+ hid_t     dcpl_id;      /* dataset creation property list ID */ 
+ hid_t     space_id;     /* space ID */ 
+ hid_t     ftype_id;     /* file data type ID */ 
+ hid_t     mtype_id;     /* memory data type ID */
  size_t    msize;        /* memory size of memory type */
  void      *buf=NULL;    /* data buffer */
  hsize_t   nelmts;       /* number of elements in dataset */
  int       rank;         /* rank of dataset */
  hsize_t   dims[H5S_MAX_RANK];/* dimensions of dataset */
  hsize_t   dsize_in;     /* input dataset size before filter */
+ int       next;         /* external files */
 #ifdef LATER
  hsize_t   dsize_out;    /* output dataset size after filter */
 #endif /* LATER */
@@ -235,13 +236,24 @@ int do_copy_objects(hid_t fidin,
     print_filters(dcpl_id);
 
 /*-------------------------------------------------------------------------
+ * check for external files
+ *-------------------------------------------------------------------------
+ */
+   if ((next=H5Pget_external_count (dcpl_id))<0) 
+    goto error;
+
+   if (next) {
+    fprintf(stderr,"Warning: <%s> has external files, ignoring read...\n",travt->objs[i].name );
+   }
+
+/*-------------------------------------------------------------------------
  * check if the dataset creation property list has filters that 
  * are not registered in the current configuration 
  * 1) the external filters GZIP and SZIP might not be available
  * 2) the internal filters might be turned off
  *-------------------------------------------------------------------------
  */
-   if (h5tools_canreadf((options->verbose?travt->objs[i].name:NULL),dcpl_id)==1)
+   if (next==0 && h5tools_canreadf((travt->objs[i].name),dcpl_id)==1)
    {
 
 /*-------------------------------------------------------------------------
@@ -476,7 +488,7 @@ error:
  *
  * Return: 0, ok, -1 no
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: October, 28, 2003
  *
@@ -553,8 +565,6 @@ int copy_attr(hid_t loc_in,
  */
   if ( ! H5Tequal(mtype_id, H5T_STD_REF_OBJ)) 
   {
-   
-   
  /*-------------------------------------------------------------------------
   * read to memory
   *-------------------------------------------------------------------------
@@ -581,7 +591,6 @@ int copy_attr(hid_t loc_in,
    /*close*/
    if (H5Aclose(attr_out)<0) 
     goto error;
-   
    
    if (buf)
     free(buf);

@@ -23,7 +23,7 @@
  */
 static void print_warning(const char *dname, const char *fname)
 {
- printf("Warning: dataset <%s> cannot be read, %s filter is not available\n",
+ fprintf(stderr,"Warning: dataset <%s> cannot be read, %s filter is not available\n",
   dname,fname);
 }
 
@@ -88,7 +88,14 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
   
   switch (filtn)
   {
+/*-------------------------------------------------------------------------
+ * user defined filter	   
+ *-------------------------------------------------------------------------
+ */
   default:
+    if (name)
+     print_warning(name,"user defined");
+    return 0;
    break;
 /*-------------------------------------------------------------------------
  * H5Z_FILTER_DEFLATE	   1 , deflation like gzip	   
