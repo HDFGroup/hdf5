@@ -30436,7 +30436,7 @@ if test "${enable_filters+set}" = set; then
 fi;
 
 
-all_filters="shuffle,adler32"
+all_filters="shuffle,fletcher32"
 case "X-$FILTERS" in
   X-|X-all)
     FILTERS=$all_filters
@@ -30463,10 +30463,10 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
     fi
-    if test $filter = "ADLER32"; then
+    if test $filter = "FLETCHER32"; then
 
 cat >>confdefs.h <<\_ACEOF
-#define HAVE_FILTER_ADLER32 1
+#define HAVE_FILTER_FLETCHER32 1
 _ACEOF
 
     fi

@@ -937,7 +937,7 @@
 ./src/H5V.c
 ./src/H5Vprivate.h
 ./src/H5Z.c
-./src/H5Zadler32.c
+./src/H5Zfletcher32.c
 ./src/H5Zdeflate.c
 ./src/H5Zshuffle.c
 ./src/H5Zprivate.h

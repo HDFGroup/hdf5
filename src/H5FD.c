@@ -1178,7 +1178,7 @@ H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     haddr_t	ret_value = HADDR_UNDEF;
     
     FUNC_ENTER_API(H5FDalloc, HADDR_UNDEF);
-    H5TRACE3("a","xMth",file,type,size);
+    H5TRACE4("a","xMtih",file,type,dxpl_id,size);
 
     /* Check args */
     if (!file || !file->cls)
@@ -1704,7 +1704,7 @@ H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t siz
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5FDfree, FAIL);
-    H5TRACE4("e","xMtah",file,type,addr,size);
+    H5TRACE5("e","xMtiah",file,type,dxpl_id,addr,size);
     
     /* Check args */
     if (!file || !file->cls)
@@ -1985,7 +1985,7 @@ H5FDrealloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr, hsiz
     haddr_t	ret_value=HADDR_UNDEF;
 
     FUNC_ENTER_API(H5FDrealloc, HADDR_UNDEF);
-    H5TRACE5("a","xMtahh",file,type,old_addr,old_size,new_size);
+    H5TRACE6("a","xMtiahh",file,type,dxpl_id,old_addr,old_size,new_size);
 
     /* Check args */
     if (H5P_DEFAULT == dxpl_id)
@@ -2870,7 +2870,7 @@ H5FDflush(H5FD_t *file, hid_t dxpl_id, unsigned closing)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5FDflush, FAIL);
-    H5TRACE2("e","xIu",file,closing);
+    H5TRACE3("e","xiIu",file,dxpl_id,closing);
 
     /* Check args */
     if (!file || !file->cls)

@@ -55,7 +55,7 @@ H5_DLL size_t H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
 			  const unsigned cd_values[], size_t nbytes,
 			  size_t *buf_size, void **buf);
 
-H5_DLL size_t H5Z_filter_adler32(unsigned flags, size_t cd_nelmts, 
+H5_DLL size_t H5Z_filter_fletcher32(unsigned flags, size_t cd_nelmts, 
 			  const unsigned cd_values[], size_t nbytes,
 			  size_t *buf_size, void **buf);
 

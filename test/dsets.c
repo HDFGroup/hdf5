@@ -28,11 +28,11 @@ const char *FILENAME[] = {
 #define DSET_TCONV_NAME		"tconv"
 #define DSET_DEFLATE_NAME	"deflate"
 #define DSET_SHUFFLE_NAME	"shuffle"
-#define DSET_ADLER32_NAME	"adler32"
-#define DSET_ADLER32_NAME_2	"adler32_2"
-#define DSET_ADLER32_NAME_3	"adler32_3"
-#define DSET_SHUF_DEF_FLET_NAME	"shuffle+deflate+adler32"
-#define DSET_SHUF_DEF_FLET_NAME_2	"shuffle+deflate+adler32_2"
+#define DSET_FLETCHER32_NAME	"fletcher32"
+#define DSET_FLETCHER32_NAME_2	"fletcher32_2"
+#define DSET_FLETCHER32_NAME_3	"fletcher32_3"
+#define DSET_SHUF_DEF_FLET_NAME	"shuffle+deflate+fletcher32"
+#define DSET_SHUF_DEF_FLET_NAME_2	"shuffle+deflate+fletcher32_2"
 #define DSET_BOGUS_NAME		"bogus"
 #define DSET_MISSING_NAME	"missing"
 #define DSET_ONEBYTE_SHUF_NAME   "onebyte_shuffle"
@@ -41,8 +41,8 @@ const char *FILENAME[] = {
 #define H5Z_BOGUS		305
 #define H5Z_CORRUPT		306
 
-#define DISABLE_ADLER32         0
-#define ENABLE_ADLER32          1
+#define DISABLE_FLETCHER32      0
+#define ENABLE_FLETCHER32       1
 #define DATA_CORRUPTED          1
 #define DATA_NOT_CORRUPTED      0 
 
@@ -615,7 +615,7 @@ bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
 /*-------------------------------------------------------------------------
  * Function:    corrupt_data	
  *
- * Purpose:     For testing Adler32 checksum.  modify data slightly during 
+ * Purpose:     For testing Fletcher32 checksum.  modify data slightly during 
  *              writing so that when data is read back, the checksum should 
  *              fail. 
  *
@@ -690,7 +690,7 @@ static H5Z_cb_return_t
 filter_cb_cont(H5Z_filter_t filter, void* UNUSED buf, size_t UNUSED buf_size, 
            void* UNUSED op_data)
 {
-    if(H5Z_FILTER_ADLER32==filter)
+    if(H5Z_FILTER_FLETCHER32==filter)
        return H5Z_CB_CONT; 
     else
         return H5Z_CB_FAIL; 
@@ -715,7 +715,7 @@ static H5Z_cb_return_t
 filter_cb_fail(H5Z_filter_t filter, void* UNUSED buf, size_t UNUSED buf_size, 
            void* UNUSED op_data)
 {
-    if(H5Z_FILTER_ADLER32==filter)
+    if(H5Z_FILTER_FLETCHER32==filter)
        return H5Z_CB_FAIL; 
     else
        return H5Z_CB_CONT; 
@@ -743,7 +743,7 @@ filter_cb_fail(H5Z_filter_t filter, void* UNUSED buf, size_t UNUSED buf_size,
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_adler32, 
+test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32, 
                      int corrupted, hsize_t *dset_size)
 {
     hid_t		dataset;        /* Dataset ID */
@@ -766,7 +766,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_adler32,
     if ((dxpl = H5Pcreate (H5P_DATASET_XFER))<0) goto error;
     tconv_buf = malloc (1000);
     if (H5Pset_buffer (dxpl, 1000, tconv_buf, NULL)<0) goto error;
-    if (if_adler32==DISABLE_ADLER32) {
+    if (if_fletcher32==DISABLE_FLETCHER32) {
         if(H5Pset_edc_check(dxpl, H5Z_DISABLE_EDC)<0)
             goto error;
         if(H5Z_DISABLE_EDC != H5Pget_edc_check(dxpl))
@@ -1064,10 +1064,10 @@ error:
  *
  * Modifications:
  *              Moved guts of filter testing out of main routine.
- *              Tests shuffle, deflate, adler32 checksum filters.
+ *              Tests shuffle, deflate, fletcher32 checksum filters.
  *              Quincey Koziol, November 14, 2002
  *
- *              Added Adler32 filter testing
+ *              Added Fletcher32 filter testing
  *              Raymond Lu, Jan 22, 2002
  *
  *-------------------------------------------------------------------------
@@ -1078,19 +1078,19 @@ test_filters(hid_t file)
     hid_t	dc;                 /* Dataset creation property list ID */
     const hsize_t chunk_size[2] = {2, 25};  /* Chunk dimensions */
     hsize_t     null_size;          /* Size of dataset with null filter */
-#ifdef H5_HAVE_FILTER_ADLER32
-    hsize_t     adler32_size;       /* Size of dataset with Adler32 checksum */
+#ifdef H5_HAVE_FILTER_FLETCHER32
+    hsize_t     fletcher32_size;       /* Size of dataset with Fletcher32 checksum */
     unsigned    data_corrupt[3];     /* position and length of data to be corrupted */
-#endif /* H5_HAVE_FILTER_ADLER32 */
+#endif /* H5_HAVE_FILTER_FLETCHER32 */
 #ifdef H5_HAVE_FILTER_DEFLATE
     hsize_t     deflate_size;       /* Size of dataset with deflate filter */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 #ifdef H5_HAVE_FILTER_SHUFFLE
     hsize_t     shuffle_size;       /* Size of dataset with shuffle filter */
 #endif /* H5_HAVE_FILTER_SHUFFLE */
-#if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_ADLER32
+#if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
     hsize_t     combo_size;     /* Size of dataset with shuffle+deflate filter */
-#endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_ADLER32 */
+#endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
     
     /* Test null I/O filter (by itself) */
     puts("Testing 'null' filter");
@@ -1099,48 +1099,48 @@ test_filters(hid_t file)
     if (H5Zregister (H5Z_BOGUS, "bogus", bogus)<0) goto error;
     if (H5Pset_filter (dc, H5Z_BOGUS, 0, 0, NULL)<0) goto error;
 
-    if(test_filter_internal(file,DSET_BOGUS_NAME,dc,DISABLE_ADLER32,DATA_NOT_CORRUPTED,&null_size)<0) goto error;
+    if(test_filter_internal(file,DSET_BOGUS_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&null_size)<0) goto error;
 
     /* Clean up objects used for this test */
     if (H5Pclose (dc)<0) goto error;
 
     /*----------------------------------------------------------
-     * STEP 1: Test Adler32 Checksum by itself.
+     * STEP 1: Test Fletcher32 Checksum by itself.
      *----------------------------------------------------------
      */
-#ifdef H5_HAVE_FILTER_ADLER32
-    puts("Testing Adler32 checksum(enabled for read)");
+#ifdef H5_HAVE_FILTER_FLETCHER32
+    puts("Testing Fletcher32 checksum(enabled for read)");
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
-    if (H5Pset_filter (dc,H5Z_FILTER_ADLER32,0,0,NULL)<0) goto error;
+    if (H5Pset_filter (dc,H5Z_FILTER_FLETCHER32,0,0,NULL)<0) goto error;
 
     /* Enable checksum during read */
-    if(test_filter_internal(file,DSET_ADLER32_NAME,dc,ENABLE_ADLER32,DATA_NOT_CORRUPTED,&adler32_size)<0) goto error;
-    if(adler32_size<=null_size) {
+    if(test_filter_internal(file,DSET_FLETCHER32_NAME,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,&fletcher32_size)<0) goto error;
+    if(fletcher32_size<=null_size) {
         H5_FAILED();
         puts("    Size after checksumming is incorrect.");
         goto error;
     } /* end if */
 
     /* Disable checksum during read */
-    puts("Testing Adler32 checksum(disabled for read)");
-    if(test_filter_internal(file,DSET_ADLER32_NAME_2,dc,DISABLE_ADLER32,DATA_NOT_CORRUPTED,&adler32_size)<0) goto error;
-    if(adler32_size<=null_size) {
+    puts("Testing Fletcher32 checksum(disabled for read)");
+    if(test_filter_internal(file,DSET_FLETCHER32_NAME_2,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&fletcher32_size)<0) goto error;
+    if(fletcher32_size<=null_size) {
         H5_FAILED();
         puts("    Size after checksumming is incorrect.");
         goto error;
     } /* end if */
 
     /* Try to corrupt data and see if checksum fails */
-    puts("Testing Adler32 checksum(when data is corrupted)");
+    puts("Testing Fletcher32 checksum(when data is corrupted)");
     data_corrupt[0] = 52;
     data_corrupt[1] = 33;
     data_corrupt[2] = 27;
 
     if (H5Zregister (H5Z_CORRUPT, "corrupt", corrupt_data)<0) goto error;
     if (H5Pset_filter (dc, H5Z_CORRUPT, 0, 3, data_corrupt)<0) goto error;
-    if(test_filter_internal(file,DSET_ADLER32_NAME_3,dc,ENABLE_ADLER32,DATA_CORRUPTED,&adler32_size)<0) goto error;
-    if(adler32_size<=null_size) {
+    if(test_filter_internal(file,DSET_FLETCHER32_NAME_3,dc,ENABLE_FLETCHER32,DATA_CORRUPTED,&fletcher32_size)<0) goto error;
+    if(fletcher32_size<=null_size) {
         H5_FAILED();
         puts("    Size after checksumming is incorrect.");
         goto error;
@@ -1148,11 +1148,11 @@ test_filters(hid_t file)
 
     /* Clean up objects used for this test */
     if (H5Pclose (dc)<0) goto error;
-#else /* H5_HAVE_FILTER_ADLER32 */
-    TESTING("adler32 checksum");
+#else /* H5_HAVE_FILTER_FLETCHER32 */
+    TESTING("fletcher32 checksum");
     SKIPPED();
-    puts("adler32 checksum not enabled");
-#endif /* H5_HAVE_FILTER_ADLER32 */
+    puts("fletcher32 checksum not enabled");
+#endif /* H5_HAVE_FILTER_FLETCHER32 */
 
     /*----------------------------------------------------------
      * STEP 2: Test deflation by itself.
@@ -1164,7 +1164,7 @@ test_filters(hid_t file)
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
     if (H5Pset_deflate (dc, 6)<0) goto error;
 
-    if(test_filter_internal(file,DSET_DEFLATE_NAME,dc,DISABLE_ADLER32,DATA_NOT_CORRUPTED,&deflate_size)<0) goto error;
+    if(test_filter_internal(file,DSET_DEFLATE_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&deflate_size)<0) goto error;
     /* Clean up objects used for this test */
     if (H5Pclose (dc)<0) goto error;
 #else /* H5_HAVE_FILTER_DEFLATE */
@@ -1183,7 +1183,7 @@ test_filters(hid_t file)
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
     if (H5Pset_shuffle (dc, sizeof(int))<0) goto error;
 
-    if(test_filter_internal(file,DSET_SHUFFLE_NAME,dc,DISABLE_ADLER32,DATA_NOT_CORRUPTED,&shuffle_size)<0) goto error;
+    if(test_filter_internal(file,DSET_SHUFFLE_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&shuffle_size)<0) goto error;
     if(shuffle_size!=null_size) {
         H5_FAILED();
         puts("    Shuffled size not the same as uncompressed size.");
@@ -1202,15 +1202,15 @@ test_filters(hid_t file)
      * STEP 4: Test shuffle + deflate + checksum in any order.
      *----------------------------------------------------------
      */
-#if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_ADLER32 
+#if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32 
     puts("Testing shuffle+deflate+checksum filters(checksum first)");
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
-    if (H5Pset_adler32 (dc)<0) goto error;
+    if (H5Pset_fletcher32 (dc)<0) goto error;
     if (H5Pset_shuffle (dc, sizeof(int))<0) goto error;
     if (H5Pset_deflate (dc, 6)<0) goto error;
 
-    if(test_filter_internal(file,DSET_SHUF_DEF_FLET_NAME,dc,ENABLE_ADLER32,DATA_NOT_CORRUPTED,&combo_size)<0) goto error;
+    if(test_filter_internal(file,DSET_SHUF_DEF_FLET_NAME,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,&combo_size)<0) goto error;
 
     /* Clean up objects used for this test */
     if (H5Pclose (dc)<0) goto error;
@@ -1220,17 +1220,17 @@ test_filters(hid_t file)
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
     if (H5Pset_shuffle (dc, sizeof(int))<0) goto error;
     if (H5Pset_deflate (dc, 6)<0) goto error;
-    if (H5Pset_adler32 (dc)<0) goto error;
+    if (H5Pset_fletcher32 (dc)<0) goto error;
 
-    if(test_filter_internal(file,DSET_SHUF_DEF_FLET_NAME_2,dc,ENABLE_ADLER32,DATA_NOT_CORRUPTED,&combo_size)<0) goto error;
+    if(test_filter_internal(file,DSET_SHUF_DEF_FLET_NAME_2,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,&combo_size)<0) goto error;
 
     /* Clean up objects used for this test */
     if (H5Pclose (dc)<0) goto error;
-#else /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_ADLER32 */
-    TESTING("shuffle+deflate+adler32 filters");
+#else /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
+    TESTING("shuffle+deflate+fletcher32 filters");
     SKIPPED();
-    puts("Deflate, shuffle, or Adler32 checksum filter not enabled");
-#endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_ADLER32 */
+    puts("Deflate, shuffle, or Fletcher32 checksum filter not enabled");
+#endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
     return 0;
 
 error:

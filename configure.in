@@ -1924,7 +1924,7 @@ AC_ARG_ENABLE([filters],
 
 AC_SUBST([FILTERS])
 dnl Eventually: all_filters="shuffle,foo,bar,baz"
-all_filters="shuffle,adler32"
+all_filters="shuffle,fletcher32"
 case "X-$FILTERS" in
   X-|X-all)
     FILTERS=$all_filters
@@ -1949,9 +1949,9 @@ dnl
         AC_DEFINE(HAVE_FILTER_SHUFFLE, 1,
                 [Define if support for shuffle filter is enabled])
     fi
-    if test $filter = "ADLER32"; then
-        AC_DEFINE(HAVE_FILTER_ADLER32, 1,
-                [Define if support for Adler32 checksum is enabled])
+    if test $filter = "FLETCHER32"; then
+        AC_DEFINE(HAVE_FILTER_FLETCHER32, 1,
+                [Define if support for Fletcher32 checksum is enabled])
     fi
   done
 fi

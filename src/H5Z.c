@@ -52,9 +52,9 @@ H5Z_init_interface (void)
 #ifdef H5_HAVE_FILTER_SHUFFLE
     H5Z_register (H5Z_FILTER_SHUFFLE, "shuffle", H5Z_filter_shuffle);
 #endif /* H5_HAVE_FILTER_SHUFFLE */
-#ifdef H5_HAVE_FILTER_ADLER32
-    H5Z_register (H5Z_FILTER_ADLER32, "adler32", H5Z_filter_adler32);
-#endif /* H5_HAVE_FILTER_ADLER32 */
+#ifdef H5_HAVE_FILTER_FLETCHER32
+    H5Z_register (H5Z_FILTER_FLETCHER32, "fletcher32", H5Z_filter_fletcher32);
+#endif /* H5_HAVE_FILTER_FLETCHER32 */
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }

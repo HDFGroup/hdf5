@@ -219,7 +219,7 @@ H5_DLL H5Z_filter_t H5Pget_filter(hid_t plist_id, int filter,
        size_t namelen, char name[]);
 H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned aggression);
 H5_DLL herr_t H5Pset_shuffle(hid_t plist_id, unsigned bytespertype);
-H5_DLL herr_t H5Pset_adler32(hid_t plist_id);
+H5_DLL herr_t H5Pset_fletcher32(hid_t plist_id);
 H5_DLL herr_t H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check);
 H5_DLL H5Z_EDC_t H5Pget_edc_check(hid_t plist_id);
 H5_DLL herr_t H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, 

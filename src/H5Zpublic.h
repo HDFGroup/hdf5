@@ -20,7 +20,7 @@ typedef int H5Z_filter_t;
 #define H5Z_FILTER_NONE		0	/*reserved indefinitely		*/
 #define H5Z_FILTER_DEFLATE	1 	/*deflation like gzip	     	*/
 #define H5Z_FILTER_SHUFFLE      2       /*shuffle the data              */
-#define H5Z_FILTER_ADLER32      3       /*adler32 checksum of EDC       */
+#define H5Z_FILTER_FLETCHER32   3       /*fletcher32 checksum of EDC       */
 #define H5Z_FILTER_RESERVED     256	/*filter ids below this value are reserved */
 #define H5Z_FILTER_MAX		65535	/*maximum filter id		*/
 
