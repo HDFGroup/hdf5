@@ -144,6 +144,10 @@
      CALL H5fflush_f(file_id, H5F_SCOPE_GLOBAL_F, error)
           CALL check("h5fflush_f",error,total_error)
 
+     ! if errors detected, exit with non-zero code. This is not truly fortran
+     ! standard but likely supported by most fortran compilers.
+     IF (total_error .ne. 0) CALL exit (total_error)
+
 
      001 STOP
 

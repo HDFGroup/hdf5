@@ -177,4 +177,8 @@
      CALL h5close_f(error)
          CALL check("h5close_types_f",error,total_error)
      
+     ! if errors detected, exit with non-zero code. This is not truly fortran
+     ! standard but likely supported by most fortran compilers.
+     IF (total_error .ne. 0) CALL exit (total_error)
+
      END PROGRAM FFLUSH2EXAMPLE
