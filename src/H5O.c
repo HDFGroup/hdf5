@@ -59,7 +59,7 @@ static htri_t H5O_exists_real(H5G_entry_t *ent, const H5O_class_t *type,
 static herr_t H5O_share(H5F_t *f, hid_t dxpl_id, const H5O_class_t *type, const void *mesg,
 			 H5HG_t *hobj/*out*/);
 #endif /* NOT_YET */
-static unsigned H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+static unsigned H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
 			     const H5O_class_t **type_p, int sequence);
 static int H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type,
     int overwrite, unsigned flags, unsigned update_time, const void *mesg,
@@ -1523,13 +1523,14 @@ H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mes
 	H5E_clear(); /*don't care, try reading from header */
     }
 
-    /* can we get it from the object header? */
-    if ((idx = H5O_find_in_ohdr(ent->file, dxpl_id, ent->header, &type, sequence)) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, NULL, "unable to find message in object header");
-
     /* copy the message to the user-supplied buffer */
     if (NULL == (oh = H5AC_protect(ent->file, dxpl_id, H5AC_OHDR, ent->header, NULL, NULL)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unable to load object header");
+
+    /* can we get it from the object header? */
+    if ((idx = H5O_find_in_ohdr(ent->file, dxpl_id, oh, &type, sequence)) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, NULL, "unable to find message in object header");
+
     if (oh->mesg[idx].flags & H5O_FLAG_SHARED) {
 	/*
 	 * If the message is shared then then the native pointer points to an
@@ -1579,10 +1580,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static unsigned
-H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5O_class_t **type_p,
+H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t **type_p,
 		 int sequence)
 {
-    H5O_t		*oh = NULL;
     unsigned		u;
     const H5O_class_t	*type = NULL;
     unsigned		ret_value;
@@ -1591,12 +1591,8 @@ H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5O_class_t **type
 
     /* Check args */
     assert(f);
-    assert(H5F_addr_defined(addr));
+    assert(oh);
     assert(type_p);
-
-    /* Load the object header */
-    if (NULL == (oh = H5AC_find(f, dxpl_id, H5AC_OHDR, addr, NULL, NULL)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, UFAIL, "unable to load object header");
 
     /* Scan through the messages looking for the right one */
     for (u = 0; u < oh->nmesgs; u++) {
