@@ -2178,6 +2178,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  doc/html/Tutor/Graphics/Makefile
                  doc/html/Tutor/examples/Makefile
                  doc/html/cpplus/Makefile
+                 doc/html/ed_libs/Makefile
+                 doc/html/ed_styles/Makefile
                  doc/html/fortran/Makefile])
 
 AC_OUTPUT
