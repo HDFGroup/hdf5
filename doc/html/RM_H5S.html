@@ -1236,13 +1236,17 @@ END SUBROUTINE h5sselect_all_f
     <dd>Selects array elements to be included in the selection for a dataspace.
 <dt><strong>Description:</strong>
     <dd><code>H5Sselect_elements</code> selects array elements to be 
-        included in the selection for the <code>space_id</code>   
-        dataspace. The number of elements selected must be set with 
-        the <code>num_elements</code>.  The <code>coord</code> array 
-        is a two-dimensional array of size <em>dataspace rank</em>  
-        by <code>num_elements</code> (ie. a list of coordinates in 
-        the array).  The order of the element coordinates in the 
-        <code>coord</code> array also specifies the order in which  
+        included in the selection for the <code>space_id</code> dataspace. 
+        <p>
+        The number of elements selected is set in the 
+        <code>num_elements</code> parameter.  
+        <p>
+        The <code>coord</code> array is a two-dimensional array of 
+        size <code><i>dataspace_rank</i></code> by <code>num_elements</code> 
+        containing a list of of zero-based values specifying the 
+        coordinates in the dataset of the selected elements.  
+        The order of the element coordinates in the 
+        <code>coord</code> array specifies the order in which  
         the array elements are iterated through when I/O is performed.  
         Duplicate coordinate locations are not checked for.
         <p>
@@ -1255,7 +1259,8 @@ END SUBROUTINE h5sselect_all_f
           <tr><td valign=top>
             <code>H5S_SELECT_SET</code>
             </td><td valign=top>
-            Replaces the existing selection with the parameters from this call.  
+            Replaces the existing selection with the parameters from 
+            this call.
             Overlapping blocks are not supported with this operator.
 <!--      </td></tr><tr><td valign=top>
             <code>H5S_SELECT_OR</code>
@@ -1264,11 +1269,13 @@ END SUBROUTINE h5sselect_all_f
           </td></tr><tr><td valign=top>
             <code>H5S_SELECT_APPEND</code>
             </td><td valign=top>
-            Adds the new selection following the last element of the existing selection.
+            Adds the new selection following the last element of the 
+            existing selection.
           </td></tr><tr><td valign=top>
             <code>H5S_SELECT_PREPEND&nbsp;&nbsp;</code>
             </td><td valign=top>
-            Adds the new selection preceding the first element of the existing selection.
+            Adds the new selection preceding the first element of the 
+            existing selection.
           </td></tr>
         </table>
         </center>
@@ -1281,13 +1288,13 @@ END SUBROUTINE h5sselect_all_f
         <dt><em>hid_t</em> <code>space_id</code>
             <dd>Identifier of the dataspace.
         <dt><em>H5S_seloper_t</em> <code>op</code>
-            <dd>operator specifying how the new selection is to be 
+            <dd>Operator specifying how the new selection is to be 
                 combined with the existing selection for the dataspace.
         <dt><em>const size_t</em> <code>num_elements</code>
             <dd>Number of elements to be selected.
         <dt><em>const hssize_t *</em><code>coord</code>[ ]
-            <dd>A 2-dimensional array specifying the coordinates of the 
-                elements being selected.
+            <dd>A 2-dimensional array of 0-based values specifying the 
+                coordinates of the elements being selected.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful; 
@@ -1800,7 +1807,7 @@ And in this document, the
 Describes HDF5 Release 1.6.1, October 2003
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 21 October 2003");
+document.writeln("Last modified: 29 October 2003");
 -->
 </SCRIPT> 
 
