@@ -390,7 +390,7 @@ H5FD_srb_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
-        *flgs = 0;
+        *flags = 0;
         *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
     }
 
