@@ -1441,7 +1441,7 @@ h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type)
     H5Sclose(f_space);
 
     /* Print the data */
-    status = h5dump_simple_dset(stream, info, dset, p_type, 0);
+    status = h5dump_simple_dset(stream, info, dset, p_type, DATASET_DATA);
     if (p_type!=_p_type) H5Tclose(p_type);
     return status;
 }
