@@ -141,3 +141,7 @@ ac_cv_sizeof_uint_fast32_t=${ac_cv_sizeof_uint_fast32_t='0'}
 ac_cv_sizeof_uint_fast64_t=${ac_cv_sizeof_uint_fast64_t='0'}
 
 hdf5_cv_system_scope_threads=${hdf5_cv_system_scope_threads="no"}
+
+# Hard set MPI_File_set_size() working for files over 2GB to no
+hdf5_cv_mpi_file_set_size_big=${hdf5_cv_mpi_file_set_size_big='no'}
+

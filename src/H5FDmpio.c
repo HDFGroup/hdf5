@@ -2024,7 +2024,7 @@ H5FD_mpio_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
     int			mpi_code;	/* mpi return code */
     MPI_Offset          mpi_off;
     herr_t              ret_value=SUCCEED;
-#ifdef OLD_WAY
+#ifndef H5_MPI_FILE_SET_SIZE_BIG
     uint8_t             byte=0;
     MPI_Status          mpi_stat;
 #endif  /* OLD_WAY */
@@ -2038,7 +2038,7 @@ H5FD_mpio_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
-#ifdef OLD_WAY
+#ifndef H5_MPI_FILE_SET_SIZE_BIG
     /* Portably initialize MPI status variable */
     HDmemset(&mpi_stat,0,sizeof(MPI_Status));
 #endif /* OLD_WAY */
@@ -2048,7 +2048,14 @@ H5FD_mpio_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
      * we can't just check whether EOF<EOA like with other drivers.
      * Therefore we'll just read the byte at EOA-1 and then write it back. */
     if(file->eoa>file->last_eoa) {
-#ifdef OLD_WAY
+#ifdef H5_MPI_FILE_SET_SIZE_BIG
+        if (H5FD_mpio_haddr_to_MPIOff(file->eoa, &mpi_off)<0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset");
+
+        /* Extend the file's size */
+        if (MPI_SUCCESS != (mpi_code=MPI_File_set_size(file->f, mpi_off)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_size failed", mpi_code);
+#else /* H5_MPI_FILE_SET_SIZE_BIG */
         if (0==file->mpi_rank) {
             if (H5FD_mpio_haddr_to_MPIOff(file->eoa-1, &mpi_off)<0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset");
@@ -2057,13 +2064,7 @@ H5FD_mpio_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
             if (MPI_SUCCESS != (mpi_code=MPI_File_write_at(file->f, mpi_off, &byte, 1, MPI_BYTE, &mpi_stat)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code);
         } /* end if */
-#else /* OLD_WAY */
-        if (H5FD_mpio_haddr_to_MPIOff(file->eoa, &mpi_off)<0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset");
-
-        /* Extend the file's size */
-        if (MPI_SUCCESS != (mpi_code=MPI_File_set_size(file->f, mpi_off)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_size failed", mpi_code);
+#endif /* H5_MPI_FILE_SET_SIZE_BIG */
 
 	/* Don't let any proc return until all have extended the file.
          * (Prevents race condition where some processes go ahead and write
@@ -2073,7 +2074,6 @@ H5FD_mpio_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
          */
         if (MPI_SUCCESS!= (mpi_code=MPI_Barrier(file->comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
-#endif /* OLD_WAY */
 
         /* Update the 'last' eoa value */
         file->last_eoa=file->eoa;

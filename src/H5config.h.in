@@ -128,6 +128,9 @@
 /* Define to 1 if you have the `globus_io' library (-lglobus_io). */
 #undef HAVE_LIBGLOBUS_IO
 
+/* Define to 1 if you have the `lmpe' library (-llmpe). */
+#undef HAVE_LIBLMPE
+
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
@@ -178,6 +181,9 @@
 
 /* Define if we have MPE support */
 #undef HAVE_MPE
+
+/* Define to 1 if you have the <mpe.h> header file. */
+#undef HAVE_MPE_H
 
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #undef HAVE_NETINET_TCP_H
@@ -334,8 +340,13 @@
 /* Define if `__tm_gmtoff' is a member of `struct tm' */
 #undef HAVE___TM_GMTOFF
 
-/* Define if your system has a working `malloc' function. */
+/* Define if your system's `malloc' function returns a valid pointer for
+   0-byte allocations. */
 #undef MALLOC_WORKS
+
+/* Define if your system's `MPI_File_set_size' function works for files over
+   2GB. */
+#undef MPI_FILE_SET_SIZE_BIG
 
 /* Define if shared writing must be disabled (CodeWarrior only) */
 #undef NO_SHARED_WRITING
@@ -355,7 +366,7 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* Width for printf() for type `long long' or `__int64', us. `ll' */
+/* Width for printf() for type `long long' or `__int64', use `ll' */
 #undef PRINTF_LL_WIDTH
 
 /* The size of a `char', as computed by sizeof. */
