@@ -26,6 +26,10 @@ if BUILD_PARALLEL_CONDITIONAL
   TEST_PROG_PARA=h5perf
 endif
 
+# h5perf is run as a test in parallel when parallel is available, but it is
+# always installed with the tools during make install.
+bin_PROGRAMS=h5perf
+
 # These are the programs that `make all' or `make tests' will build and which
 # `make check' will run. List them in the order they should be run.
 TEST_PROG = iopipe chunk overhead zip_perf perf_meta

@@ -90,7 +90,7 @@ lib progs:
           fi;                                                           \
 	done
 
-# Make all and make tests also create tests in perform directory
+# Make all, tests, and (un)install also recurse into perform directory
 all-local:
 	cd perform && $(MAKE) $(AM_MAKEFLAGS) all
 tests:
@@ -99,6 +99,11 @@ tests:
 	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
           fi;                                                           \
 	done
+
+install-exec-local:
+	cd perform && $(MAKE) $(AM_MAKEFLAGS) install
+uninstall-local:
+	cd perform && $(MAKE) $(AM_MAKEFLAGS) uninstall
 
 # Clean and mostlyclean need to recurse into docs, examples, and perform
 # directories unless they've already been distcleaned.

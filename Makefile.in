@@ -714,7 +714,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am:
+install-exec-am: install-exec-local
 
 install-info: install-info-recursive
 
@@ -741,7 +741,7 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-info-am
+uninstall-am: uninstall-info-am uninstall-local
 
 uninstall-info: uninstall-info-recursive
 
@@ -753,13 +753,14 @@ uninstall-info: uninstall-info-recursive
 	distclean-recursive distclean-tags distcleancheck distdir \
 	distuninstallcheck dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-exec \
-	install-exec-am install-info install-info-am install-man \
-	install-strip installcheck installcheck-am installcheck-local \
-	installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic maintainer-clean-recursive \
-	mostlyclean mostlyclean-generic mostlyclean-libtool \
-	mostlyclean-local mostlyclean-recursive pdf pdf-am ps ps-am \
-	tags tags-recursive uninstall uninstall-am uninstall-info-am
+	install-exec-am install-exec-local install-info \
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installcheck-local installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic \
+	maintainer-clean-recursive mostlyclean mostlyclean-generic \
+	mostlyclean-libtool mostlyclean-local mostlyclean-recursive \
+	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
+	uninstall-info-am uninstall-local
 
 
 # Define rules for lib, progs, check, and tests.
@@ -773,7 +774,7 @@ lib progs:
           fi;                                                           \
 	done
 
-# Make all and make tests also create tests in perform directory
+# Make all, tests, and (un)install also recurse into perform directory
 all-local:
 	cd perform && $(MAKE) $(AM_MAKEFLAGS) all
 tests:
@@ -782,6 +783,11 @@ tests:
 	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
           fi;                                                           \
 	done
+
+install-exec-local:
+	cd perform && $(MAKE) $(AM_MAKEFLAGS) install
+uninstall-local:
+	cd perform && $(MAKE) $(AM_MAKEFLAGS) uninstall
 
 # Clean and mostlyclean need to recurse into docs, examples, and perform
 # directories unless they've already been distcleaned.
