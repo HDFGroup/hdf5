@@ -14,7 +14,7 @@ srcdir=@srcdir@
 @COMMENCE@
 
 # Subdirectories in build-order (not including `examples')
-SUBDIRS=src test tools @TESTPARALLEL@ @subdirs@
+SUBDIRS=src test tools @TESTPARALLEL@ perform @subdirs@
 
 ##############################################################################
 ##		    T A R G E T S
