@@ -79,15 +79,27 @@ object names.
 <ul>
     <li><a href="#Identify-IncRef">H5Iinc_ref</a>
     <li><a href="#Identify-GetName">H5Iget_name</a>
+    <li><a href="#Identify-ClearType">H5Iclear_type</a>
+    <li><a href="#Identify-GetTypeRef">H5Iget_type_ref</a>
+    <li><a href="#Identify-ObjectVerify">H5Iobject_verify</a>
+    <li><a href="#Identify-RemoveVerify">H5Iremove_verify</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
     <li><a href="#Identify-DecRef">H5Idec_ref</a>
     <li><a href="#Identify-GetType">H5Iget_type</a>
+    <li><a href="#Identify-DecTypeRef">H5Idec_type_ref</a>
+    <li><a href="#Identify-IncTypeRef">H5Iinc_type_ref</a>
+    <li><a href="#Identify-Register">H5Iregister</a>
+    <li><a href="#Identify-Search">H5Isearch</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
     <li><a href="#Identify-GetRef">H5Iget_ref</a>
+    <li><a href="#Identify-DestroyType">H5Idestroy_type</a>
+    <li><a href="#Identify-GetFileId">H5Iget_file_id</a>
+    <li><a href="#Identify-NMembers">H5Inmembers</a>
+    <li><a href="#Identify-RegisterType">H5Iregister_type</a>
 </ul>
 </td></tr>
 </table>
@@ -100,8 +112,12 @@ object names.
   <tr>
     <td valign="top">
 	<ul>
-            <li><a href="#Identify-DecRef">H5Idec_ref</a>
-            <li><a href="#Identify-GetName">H5Iget_name</a>
+        <li><a href="#Identify-ClearType">H5Iclear_type</a>
+        <li><a href="#Identify-DecRef">H5Idec_ref</a>
+        <li><a href="#Identify-DecTypeRef">H5Idec_type_ref</a>
+        <li><a href="#Identify-DestroyType">H5Idestroy_type</a>
+        <li><a href="#Identify-GetFileId">H5Iget_file_id</a>
+        <li><a href="#Identify-GetName">H5Iget_name</a>
 	</ul>     
     </td>
     
@@ -109,8 +125,12 @@ object names.
     
     <td valign="top">
 	<ul>
-            <li><a href="#Identify-GetRef">H5Iget_ref</a>
-            <li><a href="#Identify-GetType">H5Iget_type</a>
+        <li><a href="#Identify-GetRef">H5Iget_ref</a>
+        <li><a href="#Identify-GetType">H5Iget_type</a>
+        <li><a href="#Identify-GetTypeRef">H5Iget_type_ref</a>
+        <li><a href="#Identify-IncRef">H5Iinc_ref</a>
+        <li><a href="#Identify-IncTypeRef">H5Iinc_type_ref</a>
+        <li><a href="#Identify-NMembers">H5Inmembers</a>
 	</ul>
     </td>
     
@@ -118,7 +138,11 @@ object names.
     
     <td valign="top">
 	<ul>
-            <li><a href="#Identify-IncRef">H5Iinc_ref</a>
+        <li><a href="#Identify-ObjectVerify">H5Iobject_verify</a>
+        <li><a href="#Identify-Register">H5Iregister</a>
+        <li><a href="#Identify-RegisterType">H5Iregister_type</a>
+        <li><a href="#Identify-RemoveVerify">H5Iremove_verify</a>
+        <li><a href="#Identify-Search">H5Isearch</a>  
 	</ul>
     </td>
   </tr>
@@ -150,6 +174,54 @@ as the corresponding C function.
 </table>
 
 <!-- NEW PAGE -->
+<!-- HEADER RIGHT " " -->
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iclear_type" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-ClearType">H5Iclear_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Iclear_type</code>(<em>H5I_type_t</em> <code>type</code>, 
+	<em>hbool_t</em> <code>force</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Deletes all IDs of the given type
+<dt><strong>Description:</strong>
+    <dd><code>H5Iclear_type</code> deletes all IDs of the type identified by the argument type.
+        <p>
+        The type’s free function is first called on all of these IDs to free their memory, 
+		then they are removed from the type.
+
+        <p>
+        If the <code>force</code> flag is set to false, only those IDs whose reference 
+		counts are equal to 1 will be deleted, and all other IDs will be entirely unchanged.  
+		If the <code>force</code> flag is true, all IDs of this type will be deleted.
+<dt><strong>Parameters:</strong>
+    <ul>
+	<table>
+	  <tr>
+	    <td valign="top"><em>H5I_type_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+		<td valign="top">IN: Identifier of ID type which is to be cleared of IDs</td>
+	  </tr>
+	  <tr>
+	    <td valign="top"><em>hbool_t</em> <code>force</code></td>
+		<td valign="top">IN: Whether or not to force deletion of all IDs</td>
+	  </tr>
+    </table>
+	</ul>
+<dt><strong>Returns:</strong>
+        <dd>Returns non-negative on success, negative on failure.
+<dt><strong>Fortran90 Interface:</strong>
+        <dd>This function is not supported in FORTRAN 90.
+
+                <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
+
+
+        <img src="Graphics/Java.gif">
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Idec_ref" -->
 <hr>
@@ -221,6 +293,131 @@ END SUBROUTINE h5idec_ref_f
     	<dd>
         
         <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Idec_type_ref" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-DecTypeRef">H5Idec_type_ref</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Idec_type_ref</code>(<em>H5I_type_t</em> <code>type</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Decrements the reference count on an ID type.
+<dt><strong>Description:</strong>
+    <dd><code>H5Idec_type_ref</code> decrements the reference count on an ID type.  
+	    The reference count is used by the library to indicate when an ID type can 
+		be destroyed.  If the reference count reaches zero, this function will destroy it.
+
+        <p>The <code>type</code> parameter is the identifier for the ID type whose 
+		   reference count is to be decremented.  This identifier must have been 
+		   created by a call to <code>H5Iregister_type</code>.
+<dt><strong>Parameters:</strong>
+    <ul>
+	<table>
+	  <tr>
+	    <td valign="top"><em>H5I_type_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+		<td valign="top">IN: The identifier of the type whose reference count is to be decremented</td>
+	  </tr>
+    </table>
+	</ul>
+<dt><strong>Returns:</strong>
+        <dd>Returns the current reference count on success, negative on failure.
+<dt><strong>Fortran90 Interface:</strong>
+        <dd>This function is not supported in FORTRAN 90.
+
+                <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
+
+
+        <img src="Graphics/Java.gif">
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Idestroy_type" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-DestroyType">H5Idestroy_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Idestroy_type</code>(<em>H5I_type_t</em> <code>type</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Removes the type <code>type</code> and all IDs within that type.
+<dt><strong>Description:</strong>
+    <dd><code>H5Idestroy_type</code> deletes an entire ID type.  All IDs of this 
+	    type are destroyed and no new IDs of this type can be registered.
+
+        <p>
+        The type’s free function is called on all of the IDs which are deleted by 
+		this function, freeing their memory.  In addition, all memory used by this 
+		type’s hash table is freed.
+
+        <p>
+        Since the <em>H5I_type_t</em> values of destroyed ID types are reused 
+		when new types are registered, it is a good idea to set the variable 
+		holding the value of the destroyed type to <code>H5I_UNINIT</code>.
+<dt><strong>Parameters:</strong>
+    <ul>
+	<table>
+	  <tr>
+	    <td valign="top"><em>H5I_type_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+		<td valign="top">IN: Identifier of ID type which is to be destroyed</td>
+	  </tr>
+    </table>
+	</ul>
+<dt><strong>Returns:</strong>
+        <dd>Returns non-negative on success, negative on failure.
+<dt><strong>Fortran90 Interface:</strong>
+        <dd>This function is not supported in FORTRAN 90.
+
+                <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
+
+
+        <img src="Graphics/Java.gif">
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iget_file_id" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-GetFileId">H5Iget_file_id</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Iget_file_id</code>(<em>hid_t</em> <code>obj_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the ID of the file associated with the object referenced by <code>obj_id</code>.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iget_file_id</code> returns the ID of the file associated with the 
+	    object referenced by <code>obj_id</code>.  The retrieved file ID must be closed 
+		using <code>H5Fclose</code>.
+
+        <p>
+        Currently, <code>obj_id</code> can be the ID of one of the following objects: 
+		a file, a named datatype, a group, a dataset, or an attribute.
+<dt><strong>Parameters:</strong>
+    <ul>
+	<table>
+	  <tr>
+	    <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+		<td valign="top">IN: Identifier of the object whose associated file ID will be returned.</td>
+	  </tr>
+    </table>
+	</ul>
+<dt><strong>Returns:</strong>
+        <dd>Returns the file ID on success, negative on failure.
+<dt><strong>Fortran90 Interface:</strong>
+        <dd>This function is currently not supported in FORTRAN 90.
+
+                <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
+
+
+        <img src="Graphics/Java.gif">
         <img src="Graphics/C++.gif">
         -->
 </dl>
@@ -428,6 +625,47 @@ END SUBROUTINE h5iget_type_f
 </dl>
 
 <!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iget_type_ref" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-GetTypeRef">H5Iget_type_ref</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Iget_type_ref</code>(<em>H5I_type_t</em> <code>type</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the reference count on an ID type.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iget_type_ref</code> retrieves the reference count on an ID type.  
+	    The reference count is used by the library to indicate when an 
+		ID type can be destroyed.
+
+        <p>
+        The <code>type</code> parameter is the identifier for the ID type whose 
+		reference count is to be retrieved.  This identifier must have been created 
+		by a call to <code>H5Iregister_type</code>.
+<dt><strong>Parameters:</strong>
+    <ul>
+	<table>
+	  <tr>
+	    <td valign="top"><em>H5I_type_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+		<td valign="top">IN: The identifier of the type whose reference count is to be retrieved</td>
+	  </tr>
+	</table>
+    </ul>
+<dt><strong>Returns:</strong>
+        <dd>Returns the current reference count on success, negative on failure.
+<dt><strong>Fortran90 Interface:</strong>
+        <dd>This function is not supported in FORTRAN 90.
+
+                <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
+
+
+        <img src="Graphics/Java.gif">
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Iinc_ref" -->
 <hr>
 <dl>
@@ -501,6 +739,376 @@ END SUBROUTINE h5iinc_ref_f
         -->
 </dl>
 
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iinc_type_ref" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-IncTypeRef">H5Iinc_type_ref</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Iinc_type_ref</code>(<em>H5I_type_t</em> <code>type</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Increments the reference count on an ID type.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iinc_type_ref</code> increments the reference count on an ID type.  
+	The reference count is used by the library to indicate when an ID type can be destroyed.
+
+        <p>
+        The <code>type</code> parameter is the identifier for the ID type whose 
+		reference count is to be incremented.  This identifier must have been created 
+		by a call to <code>H5Iregister_type</code>.
+<dt><strong>Parameters:</strong>
+    <ul>
+	<table>
+	  <tr>
+	    <td valign="top"><em>H5I_type_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+		<td valign="top">IN: The identifier of the type whose reference count is to be incremented</td>
+	  </tr>
+    </table>
+	</ul>
+<dt><strong>Returns:</strong>
+        <dd>Returns the current reference count on success, negative on failure.
+<dt><strong>Fortran90 Interface:</strong>
+        <dd>This function is not supported in FORTRAN 90.
+
+                <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
+
+
+        <img src="Graphics/Java.gif">
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Inmembers" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="#Identify-NMembers">H5Inmembers</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Inmembers</code>(<em>H5I_type_t</em> <code>type</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Returns the number of IDs in a given type.
+<dt><strong>Description:</strong>
+    <dd><code>H5Inmembers</code> returns the number of IDs of a given ID type.  
+	    If no IDs of this type have been registered, H5Inmembers returns 0.  
+		If the type does not exist or has been destroyed, <code>H5Inmembers</code> 
+		also returns 0.
+<dt><strong>Parameters:</strong>
+    <ul>
+	<table>
+	  <tr>
+	    <td valign="top"><em>H5I_type_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+		<td valign="top">IN: Identifier of ID type whose member count will be retrieved</td>
+	  </tr>
+    </table>
+	</ul>
+<dt><strong>Returns:</strong>
+        <dd>Returns number of members on success, zero if type is not a valid ID type.
+<dt><strong>Fortran90 Interface:</strong>
+        <dd>This function is not supported in FORTRAN 90.
+
+                <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
+
+
+        <img src="Graphics/Java.gif">
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iobject_verify" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-ObjectVerify">H5Iobject_verify</a>
+<dt><strong>Signature:</strong>
+    <dd><em>void *</em> <code>H5Iobject_verify</code>(<em>hid_t</em> <code>id</code>, 
+	    <em>H5I_type_t</em> <code>id_type</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Returns the object referenced by id.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iobject_verify</code> returns a pointer to the memory referenced by 
+	    <code>id</code> after verifying that <code>id</code> is of type <code>id_type</code>. 
+		This function is analogous to dereferencing a pointer in C with type checking.
+
+        <p>
+        <code>H5Iregister</code>(<em>H5I_type_t</em> <code>type</code>, 
+		<em>void *</em><code>object</code>) takes an <em>H5I_type_t</em> and a 
+		void pointer to an object, returning an <em>hid_t</em> of that type. 
+		This <em>hid_t</em> can then be passed to <code>H5Iobject_verify</code> 
+		along with its type to retrieve the object.
+
+        <p>
+        <code>H5Iobject_verify</code> does not change the ID it is called on in any 
+		way (as opposed to <code>H5Iremove_verify</code>, which removes the ID from its 
+		type’s hash table).
+<dt><strong>Parameters:</strong>
+    <ul>
+	<table>
+	  <tr>
+	    <td valign="top"><em>hid_t</em> <code>id</code></td>
+		<td valign="top">IN: ID to be dereferenced</td>
+	  </tr>
+	  <tr>
+	    <td valign="top"><em>H5I_type_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+		<td valign="top">IN: ID type to which id should belong</td>
+	  </tr>
+	</table>
+    </ul>
+<dt><strong>Returns:</strong>
+        <dd>Pointer to the object referenced by id on success, <code>NULL</code> on failure.
+<dt><strong>Fortran90 Interface:</strong>
+        <dd>This function is not supported in FORTRAN 90.
+
+                <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
+
+
+        <img src="Graphics/Java.gif">
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iregister" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-Register">H5Iregister</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Iregister</code>(<em>H5I_type_t</em> <code>type</code>, 
+	<em>void *</em><code>object</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Creates and returns a new ID.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iregister</code> allocates space for a new ID and returns an identifier for it.
+	
+        <p>
+        The <code>type</code> parameter is the identifier for the ID type to which 
+		this new ID will belong.  This identifier must have been created by a call 
+		to <code>H5Iregister_type</code>.
+
+        <p>
+        The <code>object</code> parameter is a pointer to the memory which the new 
+		ID will be a reference to.  This pointer will be stored by the library and 
+		returned to you via a call to <code>H5Iobject_verify</code>.
+<dt><strong>Parameters:</strong>
+    <ul>
+	<table>
+	  <tr>
+	    <td valign="top"><em>H5I_type_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+		<td valign="top">IN: The identifier of the type to which the new ID will belong</td>
+	  </tr>
+	  <tr>
+	    <td valign="top"><em>void *</em><code>object</code></td>
+		<td valign="top">IN: Pointer to memory for the library to store</td>
+	  </tr>
+    </table>
+	</ul>
+<dt><strong>Returns:</strong>
+        <dd>Returns the new ID on success, negative on failure.
+<dt><strong>Fortran90 Interface:</strong>
+        <dd>This function is not supported in FORTRAN 90.
+
+                <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
+
+
+        <img src="Graphics/Java.gif">
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iregister_type" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-RegisterType">H5Iregister_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5I_type_t</em> <code>H5Iregister_type</code>(<em>size_t</em> 
+	    <code>hash_size</code>, <em>unsigned</em> <code>reserved</code>, 
+		<em>H5I_free_t</em> <code>free_func</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Creates and returns a new ID type.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iregister_type</code> allocates space for a new ID type and 
+	    returns an identifier for it.
+
+        <p>
+        The <code>hash_size</code> parameter indicates the minimum size of the hash 
+		table used to store IDs in the new type.
+
+        <p>
+        The <code>reserved</code> parameter indicates the number of IDs in this new 
+		type to be reserved.  Reserved IDs are valid IDs which are not associated with 
+		any storage within the library.
+
+        <p>
+        The <code>free_func</code> parameter is a function pointer to a function 
+		which returns an <em>herr_t</em> and accepts a <em>void *</em>. The purpose 
+		of this function is to deallocate memory for a single ID.  It will be called 
+		by <code>H5Iclear_type</code> and <code>H5Idestroy_type</code> on each ID.  
+		This function is NOT called by <code>H5Iremove_verify</code>.  
+		The <em>void *</em> will be the same pointer which was passed in to 
+		the <code>H5Iregister</code> function.  The <code>free_func</code> 
+		function should return 0 on success and -1 on failure.
+<dt><strong>Parameters:</strong>
+    <ul>
+	<table>
+	  <tr>
+	    <td valign="top"><em>size_t</em> <code>hash_size</code></td>
+		<td valign="top">IN: Size of the hash table (in entries) used to store IDs for the new type</td>
+	  </tr>
+	  <tr>
+	    <td valign="top"><em>unsigned</em> <code>reserved</code></td>
+		<td valign="top">IN: Number of reserved IDs for the new type</td>
+	  </tr>
+	  <tr>
+	    <td valign="top"><em>H5I_free_t</em>&nbsp;<code>free_func&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+		<td valign="top">IN: Function used to deallocate space for a single ID</td>
+	  </tr>
+	</table>
+    </ul>
+<dt><strong>Returns:</strong>
+        <dd>Returns the type identifier on success, negative on failure.
+<dt><strong>Fortran90 Interface:</strong>
+        <dd>This function is not supported in FORTRAN 90.
+
+                <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
+
+
+        <img src="Graphics/Java.gif">
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iremove_verify" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-RemoveVerify">H5Iremove_verify</a>
+<dt><strong>Signature:</strong>
+    <dd><em>void *</em><code>H5Iremove_verify</code>(<em>hid_t</em> <code>id</code>, 
+	<em>H5I_type_t</em> <code>id_type</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Removes an ID from internal storage.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iremove_verify</code> first ensures that <code>id</code> belongs to 
+	    <code>id_type</code>.  If so, it removes <code>id</code> from internal storage 
+		and returns the pointer to the memory it referred to.  This pointer is the 
+		same pointer that was placed in storage by <code>H5Iregister</code>.  
+		If <code>id</code> does not belong to <code>id_type</code>, 
+		then <code>NULL</code> is returned.
+
+        <p>
+        The <code>id</code> parameter is the ID which is to be removed from 
+		internal storage. Note: this function does NOT deallocate the memory that 
+		<code>id</code> refers to.  The pointer returned by <code>H5Iregister</code> 
+		must be deallocated by the user to avoid memory leaks.
+
+        <p>
+        The <code>type</code> parameter is the identifier for the ID type 
+		which <code>id</code> is supposed to belong to.  This identifier must 
+		have been created by a call to <code>H5Iregister_type</code>.
+<dt><strong>Parameters:</strong>
+    <ul>
+	<table>
+	<tr>
+	  <td valign="top"><em>hid_t</em> <code>id</code></td>
+	  <td valign="top">IN: The ID to be removed from internal storage</td>
+	</tr>
+	<tr>
+	  <td valign="top"><em>H5I_type_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+	  <td valign="top">IN: The identifier of the type whose reference count is to be retrieved</td>
+	</tr>
+    </table>
+	</ul>
+<dt><strong>Returns:</strong>
+        <dd>Returns a pointer to the memory referred to by <code>id</code> 
+		    on success, <code>NULL</code> on failure.
+<dt><strong>Fortran90 Interface:</strong>
+        <dd>This function is not supported in FORTRAN 90.
+
+                <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
+
+
+        <img src="Graphics/Java.gif">
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Isearch" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-Search">H5Isearch</a>
+<dt><strong>Signature:</strong>
+    <dd><em>void *</em><code>H5Isearch</code>(<em>H5I_type_t</em> <code>type</code>, 
+	    <em>H5I_search_func_t</em> <code>func</code>, <em>void *</em><code>key</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Finds the memory referred to by an ID within the given ID type such that 
+	some criterion is satisfied.
+<dt><strong>Description:</strong>
+    <dd><code>H5Isearch</code> searches through a give ID type to find an object 
+	    that satisfies the criteria defined by <code>func</code>. If such an object 
+		is found, the pointer to the memory containing this object is returned.  
+		Otherwise, <code>NULL</code> is returned.  To do this, <code>func</code> is 
+		called on every member of <code>type</code>.  The first member to satisfy 
+		<code>func</code> is returned.
+
+        <p>
+        The <code>type</code> parameter is the identifier for the ID type which is 
+		to be searched.  This identifier must have been created by a call to 
+		<code>H5Iregister_type</code>.
+
+        <p>
+        The parameter <code>func</code> is a function pointer to a function 
+		which takes three parameters.  The first parameter is a <em>void *</em>.  
+		It will be a pointer the object to be tested.  This is the same object 
+		that was placed in storage using <code>H5Iregister</code>.  The second 
+		parameter is a <em>hid_t</em>.  It is the ID of the object to be tested.  
+		The last parameter is a <em>void *</em>.  This is the <code>key</code> parameter 
+		and can be used however the user finds helpful.  Or it can simply be ignored 
+		if it is not needed. <code>func</code> returns 0 if the object it is testing 
+		does not pass its criteria.  A non-zero value should be returned if the object 
+		does pass its criteria.
+
+        <p>
+        The <code>key</code> parameter will be passed to the search function as a 
+		parameter.  It can be used to further define the search at run-time.
+<dt><strong>Parameters:</strong>
+    <ul>
+	<table>
+	  <tr>
+	    <td valign="top"><em>H5I_type_t</em> <code>type</code></td>
+		<td valign="top">IN: The identifier of the type to be searched</td>
+	  </tr>
+	  <tr>
+	    <td valign="top"><em>H5I_search_func_t</em>&nbsp;<code>func&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+		<td valign="top">IN: The function defining the search criteria</td>
+	  </tr>
+	  <tr>
+	    <td valign="top"><em>void *</em><code>key</code></td>
+		<td valign="top">IN: A key for the search function</td>
+	  </tr>
+    </table>
+	</ul>
+<dt><strong>Returns:</strong>
+        <dd>Returns a pointer to the object which satisfies the search function 
+		    on success, <code>NULL</code> on failure.
+<dt><strong>Fortran90 Interface:</strong>
+        <dd>This function is not supported in FORTRAN 90.
+
+                <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
+
+
+        <img src="Graphics/Java.gif">
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
 <center>
 <table border=0 width=98%>
@@ -540,9 +1148,11 @@ And in this document, the
 Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 10 March 2004");
+document.writeln("Last modified: 21 June 2004");
 -->
 </SCRIPT>
+
+<!-- HEADER RIGHT " " -->
 
 </body>
 </html>
