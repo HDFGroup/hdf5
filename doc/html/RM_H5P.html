@@ -99,8 +99,10 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-GetCore">H5Pget_core</a>
     <li><a href="#Property-SetMPI">H5Pset_mpi</a>&nbsp;&nbsp;&nbsp;||
     <li><a href="#Property-GetMPI">H5Pget_mpi</a>&nbsp;&nbsp;&nbsp;||
+<!--  Not implemented.  Probably never will be.
     <li><a href="#Property-SetFamily">H5Pset_family</a>
     <li><a href="#Property-GetFamily">H5Pget_family</a>
+-->
     <li><a href="#Property-SetCache">H5Pset_cache</a>
     <li><a href="#Property-GetCache">H5Pget_cache</a>
     <li><a href="#Property-SetSplit">H5Pset_split</a>
@@ -109,6 +111,10 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-GetGCReferences">H5Pget_gc_references</a>
     </ul>
 
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
 <br>&nbsp;
 <br>&nbsp;
 <br>
@@ -634,7 +640,7 @@ facilitate moving easily between them.</i>
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of property list to modify
+            <dd>IN: Identifier of property list to modify.
         <dt><em>MPI_Comm</em> <code>comm</code>
             <dd>IN: MPI communicator to be used for file open as defined in
                 MPI_FILE_OPEN of MPI-2.  This function  does not make a
@@ -1108,7 +1114,7 @@ facilitate moving easily between them.</i>
         <dt><em>hid_t</em> <code>plist</code>
             <dd>IN: Identifier of property list to query.
         <dt><em>int</em> <code>max_ndims</code>
-            <dd>OUT: Size of the <code>dims</code> array.
+            <dd>IN: Size of the <code>dims</code> array.
         <dt><em>hsize_t *</em> <code>dims</code>
             <dd>OUT: Array to store the chunk dimensions.
     </dl>
@@ -1138,14 +1144,16 @@ facilitate moving easily between them.</i>
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_alignment</code> sets the alignment properties 
         of a file access property list
-        so that any file object >= THRESHOLD bytes will be aligned on
-        an address which is a multiple of ALIGNMENT.  The addresses
+        so that any file object greater than or equal in size to 
+        <code>threshold</code> bytes will be aligned on an address 
+        which is a multiple of <code>alignment</code>.  The addresses
         are relative to the end of the user block; the alignment is
         calculated by subtracting the user block size from the
         absolute file address and then adjusting the address to be a
-        multiple of ALIGNMENT.
+        multiple of <code>alignment</code>.
         <p>
-        Default values for THRESHOLD and ALIGNMENT are one, implying
+        Default values for <code>threshold</code> and 
+        <code>alignment</code> are one, implying
         no alignment.  Generally the default values will result in
         the best performance for single-process access to the file.
         For MPI-IO and other parallel systems, choose an alignment
@@ -1155,9 +1163,14 @@ facilitate moving easily between them.</i>
         <dt><em>hid_t</em> <code>plist</code>
             <dd>IN: Identifier for a file access property list.
         <dt><em>hsize_t</em> <code>threshold</code>
-            <dd>IN: Threshold value.
+            <dd>IN: Threshold value.  
+                Must be non-negative.
+                Note that setting the threshold value to 0 (zero) has 
+                the effect of a special case, forcing everything 
+                to be aligned.
         <dt><em>hsize_t</em> <code>alignment</code>
-            <dd>IN: Alignment value.
+            <dd>IN: Alignment value.  
+                Must be a positive value.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -1269,7 +1282,7 @@ facilitate moving easily between them.</i>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-GetExternalCount">H5Pget_external_count</a>
   <dt><strong>Signature:</strong>
-    <dd><em>int</em> <code>H5Pget_external_count</code>(<em>hid_t</em> <code>plist</code>,
+    <dd><em>int</em> <code>H5Pget_external_count</code>(<em>hid_t</em> <code>plist</code>
     )
   <dt><strong>Purpose:</strong>
     <dd>Returns the number of external files for a dataset.
@@ -1511,7 +1524,7 @@ facilitate moving easily between them.</i>
             <dd>IN:  Bit vector specifying certain general properties
                 of the filter.
         <dt><em>size_t</em> <code>cd_nelmts</code>
-            <dd>IN: Number of elements in <code>cd_values</code>
+            <dd>IN: Number of elements in <code>cd_values</code>.
         <dt><em>const unsigned int</em> <code>cd_values[]</code>
             <dd>IN: Auxiliary data for the filter.
     </dl>
@@ -1633,7 +1646,7 @@ facilitate moving easily between them.</i>
             <dd>OUT: Bit vector specifying certain general properties
                 of the filter.
         <dt><em>size_t *</em><code>cd_nelmts</code>
-            <dd>IN/OUT: Number of elements in <code>cd_values</code>
+            <dd>IN/OUT: Number of elements in <code>cd_values</code>.
         <dt><em>unsigned int *</em><code>cd_values</code>
             <dd>OUT: Auxiliary data for the filter.
         <dt><em>size_t</em> <code>namelen</code>
@@ -1659,7 +1672,7 @@ facilitate moving easily between them.</i>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-GetDriver">H5Pget_driver</a>
   <dt><strong>Signature:</strong>
-    <dd><em>H5F_driver_t</em> <code>H5Pget_driver</code>(<em>hid_t</em> <code>plist</code>,
+    <dd><em>H5F_driver_t</em> <code>H5Pget_driver</code>(<em>hid_t</em> <code>plist</code>
     )
   <dt><strong>Purpose:</strong>
     <dd>Returns a low-level file driver identifier.
@@ -1761,7 +1774,7 @@ facilitate moving easily between them.</i>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-SetSec2">H5Pset_sec2</a>
   <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_sec2</code>(<em>hid_t</em> <code>plist</code>,
+    <dd><em>herr_t</em> <code>H5Pset_sec2</code>(<em>hid_t</em> <code>plist</code>
     )
   <dt><strong>Purpose:</strong>
     <dd>Sets the low-level file driver to use the declared functions.
@@ -1837,7 +1850,7 @@ facilitate moving easily between them.</i>
         This driver is restricted to temporary files which are not
         larger than the amount of virtual memory available. 
         The <code>increment</code> argument determines the file block size 
-        and memory will be allocated in multiples of INCREMENT bytes. 
+        and memory will be allocated in multiples of <code>increment</code> bytes. 
         A liberal <code>increment</code> results in fewer calls to 
         <code>realloc()</code> and probably less memory fragmentation.
   <dt><strong>Parameters:</strong>
@@ -1845,7 +1858,8 @@ facilitate moving easily between them.</i>
         <dt><em>hid_t</em> <code>plist</code>
             <dd>IN: Identifier of a file access property list.
         <dt><em>size_t</em> <code>increment</code>
-            <dd>IN: File block size in bytes.
+            <dd>IN: File block size in bytes.  
+                Must be a positive value.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -1918,11 +1932,11 @@ facilitate moving easily between them.</i>
         raw data in another file.  The meta file will have a name 
         which is formed by adding <em>meta_extension</em> (recommended 
         default value: <code>.meta</code>) to the end of the base name 
-        and will be accessed according to the <em>meta_properties</em>. 
+        and will be accessed according to the <em>meta_plist</em>. 
         The raw file will have a name which is formed by appending 
         <em>raw_extension</em> (recommended default value: 
         <code>.raw</code>) to the base name and will be accessed according 
-        to the <em>raw_properties</em>.
+        to the <em>raw_plist</em>.
         Additional parameters may be added to this function in the future.
   <dt><strong>Parameters:</strong>
     <dl>
@@ -1960,10 +1974,10 @@ facilitate moving easily between them.</i>
     <dd><em>herr_t</em> <code>H5Pget_split</code>(<em>hid_t</em> <code>plist</code>,
         <em>size_t</em> <code>meta_ext_size</code>,
         <em>char</em> <code>*meta_ext</code>,
-        <em>hid_t</em> <code>*meta_properties</code>,
+        <em>hid_t</em> <code>*meta_plist</code>,
         <em>size_t</em> <code>raw_ext_size</code>,
         <em>char</em> <code>*raw_ext</code>,
-        <em>hid_t</em> <code>*raw_properties</code>
+        <em>hid_t</em> <code>*raw_plist</code>
     )
   <dt><strong>Purpose:</strong>
     <dd>Determines whether the file access property list is set 
@@ -1972,7 +1986,7 @@ facilitate moving easily between them.</i>
     <dd><code>H5Pget_split</code> checks to determine whether the file  
         access property list is set to the split driver.
         On successful return,
-	<code>meta_properties</code> and <code>raw_properties</code> will
+	<code>meta_plist</code> and <code>raw_plist</code> will
 	point to copies of the meta and raw access property lists
 	which should be closed by calling <code>H5Pclose()</code> when
 	the application is finished with them, but if the meta and/or
@@ -1996,14 +2010,14 @@ facilitate moving easily between them.</i>
                 copied to the <code>meta_ext</code> buffer.
         <dt><em>char</em> <code>*meta_ext</code>
             <dd>OUT: Meta file extension.
-        <dt><em>hid_t</em> <code>*meta_properties</code>
+        <dt><em>hid_t</em> <code>*meta_plist</code>
             <dd>OUT: Pointer to a copy of the meta file access property list.
         <dt><em>size_t</em> <code>raw_ext_size</code>
             <dd>IN: Number of characters of the raw file extension to be  
                 copied to the <code>raw_ext</code> buffer.
         <dt><em>char</em> <code>*raw_ext</code>
             <dd>OUT: Raw file extension.
-        <dt><em>hid_t</em> <code>*raw_properties</code>
+        <dt><em>hid_t</em> <code>*raw_plist</code>
             <dd>OUT: Pointer to a copy of the raw file access property list.
     </dl>
   <dt><strong>Returns:</strong>
@@ -2025,7 +2039,7 @@ facilitate moving easily between them.</i>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-SetGCReferences">H5Pset_gc_references</a>
   <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_split</code>(<em>hid_t</em> <code>plist</code>,
+    <dd><em>herr_t</em> <code>H5Pset_gc_reference</code>(<em>hid_t</em> <code>plist</code>,
         <em>unsigned</em> <code>gc_ref</code>
     )
   <dt><strong>Purpose:</strong>
@@ -2050,7 +2064,8 @@ facilitate moving easily between them.</i>
         <dt><em>hid_t</em> <code>plist</code>
             <dd>IN: File access property list identifier.
         <dt><em>unsigned</em> <code>gc_ref</code>
-            <dd>IN: 
+            <dd>IN: Flag setting reference garbage collection to 
+                on (<code>1</code>) or off (<code>0</code>).
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -2069,7 +2084,7 @@ facilitate moving easily between them.</i>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-GetGCReferences">H5Pget_gc_references</a>
   <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pget_split</code>(<em>hid_t</em> <code>plist</code>,
+    <dd><em>herr_t</em> <code>H5Pget_gc_references</code>(<em>hid_t</em> <code>plist</code>,
         <em>unsigned</em> *<code>gc_ref</code>
     )
   <dt><strong>Purpose:</strong>
@@ -2085,7 +2100,10 @@ facilitate moving easily between them.</i>
         <dt><em>hid_t</em> <code>plist</code>
             <dd>IN: File access property list identifier.
         <dt><em>unsigned</em> <code>gc_ref</code>
-            <dd>OUT:
+            <dd>OUT: Flag returning the state of reference garbage collection.
+                A returned value of <code>1</code> indicates that 
+                garbage collection is on while 
+                <code>0</code> indicates that garbage collection is off.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -2101,6 +2119,7 @@ facilitate moving easily between them.</i>
 </dl>
 
 
+<!--  Not implemented.  Probably never will be.
 <hr>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-SetFamily">H5Pset_family</a>
@@ -2110,11 +2129,10 @@ facilitate moving easily between them.</i>
         <em>hid_t</em> <code>memb_plist</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Sets the file access properties list to the <code>family</code>
-	  driver.
+    <dd>Sets the file access properties list to the family driver.
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_family</code> sets the file access properties 
-        to use the <code>family</code> driver; any previously defined 
+        to use the family driver; any previously defined 
         driver properties are erased from the property list.  
         See <a href="Files.html#File_Families">File Families</a>
         in the <cite>HDF5 User's Guide</cite> for a discussion
@@ -2151,14 +2169,11 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
   <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2198,15 +2213,13 @@ facilitate moving easily between them.</i>
     <dd>Returns a non-negative value if the file access property list is set 
         to the family driver.
         Otherwise returns a negative value.
-  <!--
   <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
-        -->
 </dl>
+-->
 
 
 <hr>
@@ -2285,8 +2298,8 @@ facilitate moving easily between them.</i>
   <dt><strong>Description:</strong>
     <dd>Retrieves the maximum possible number of elements in the meta
         data cache and raw data chunk cache, the maximum possible number of 
-        bytes in the raw data chunk cache, and the preemption policy value,
-        <em>rdcc_w0</em>.  
+        bytes in the raw data chunk cache, and the preemption policy value.
+        <p>
         Any (or all) arguments may be null pointers, in which case the 
         corresponding datum is not returned.
   <dt><strong>Parameters:</strong>
@@ -2331,11 +2344,21 @@ facilitate moving easily between them.</i>
         indicates whether to cache hyperslab blocks during I/O, 
         a process which can significantly increase I/O speeds.  
         <p>
+        When working with hyperslab selections, it is possible to 
+        significantly speed up I/O operations by retrieving an 
+        entire hyperslab from the file in one operation and 
+        caching it in memory.  
+        The <code>cache</code> parameter specifies whether to turn 
+        caching on for hyperslab I/O operations.
+        If <code>cache</code> is set to <code>1</code>, 
+        caching is turned on; 
+        if set to <code>0</code>, caching is turned off.
+        <p>
         The parameter <code>limit</code> sets the maximum size of the 
         hyperslab block to cache.  If a block is smaller than that limit, 
         it may still not be cached if no memory is available. 
-        Setting the limit to <code>0</code> (zero) indicates no limitation on the size of 
-        block to attempt to cache.
+        Setting <code>limit</code> to <code>0</code> (zero) indicates 
+        no limitation on the size of block to attempt to cache.
         <p>
         The default is to cache blocks with no limit on block size 
         for serial I/O and to not cache blocks for parallel I/O.
@@ -2344,7 +2367,8 @@ facilitate moving easily between them.</i>
         <dt><em>hid_t</em> <code>plist</code>
             <dd>IN: Dataset transfer property list identifier.
         <dt><em>unsigned</em> <code>cache</code>
-            <dd>IN: 
+            <dd>IN: A flag indicating whether caching is to be 
+                set to on (<code>1</code>) or off (<code>0</code>).
         <dt><em>unsigned</em> <code>limit</code>
             <dd>IN: Maximum size of the hyperslab block to cache. 
                 <code>0</code> (zero) indicates no limit.
@@ -2368,8 +2392,8 @@ facilitate moving easily between them.</i>
   <dt><strong>Name:</strong> <a name="Property-GetHyperCache">H5Pget_hyper_cache</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Pget_hyper_cache</code>(<em>hid_t</em> <code>plist</code>,
-        <em>unsigned</em> <code>cache</code>,
-        <em>unsigned</em> <code>limit</code>
+        <em>unsigned</em> *<code>cache</code>,
+        <em>unsigned</em> *<code>limit</code>
     )
   <dt><strong>Purpose:</strong>
     <dd>Returns information regarding the caching of hyperslab blocks during I/O.
@@ -2381,9 +2405,10 @@ facilitate moving easily between them.</i>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
             <dd>IN: Dataset transfer property list identifier.
-        <dt><em>unsigned</em> <code>cache</code>
-            <dd>OUT: 
-        <dt><em>unsigned</em> <code>limit</code>
+        <dt><em>unsigned</em> *<code>cache</code>
+            <dd>OUT: A flag indicating whether caching is 
+                set to on (<code>1</code>) or off (<code>0</code>).
+        <dt><em>unsigned</em> *<code>limit</code>
             <dd>OUT: Maximum size of the hyperslab block to cache. 
                 <code>0</code> (zero) indicates no limit.
     </dl>
@@ -2535,7 +2560,7 @@ facilitate moving easily between them.</i>
         <dt><em>hid_t</em> <code>plist</code>
             <dd>IN: Identifier for the dataset transfer property list.
         <dt><em>size_t</em> <code>size</code>
-            <dd>IN: Size for the type conversion and background buffers.
+            <dd>IN: Size, in bytes, of the type conversion and background buffers.
         <dt><em>void</em> <code>tconv</code>
             <dd>IN: Pointer to application-allocated type conversion buffer.
         <dt><em>void</em> <code>bkg</code>
@@ -2580,7 +2605,7 @@ facilitate moving easily between them.</i>
                 background buffer.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns buffer size if successful;
+    <dd>Returns buffer size, in bytes, if successful;
         otherwise 0 on failure.
   <!--
   <dt><strong>Non-C API(s):</strong>
@@ -2892,15 +2917,21 @@ facilitate moving easily between them.</i>
         <dt><em>hid_t</em> <code>plist</code>
             <dd>IN: Identifier for the dataset transfer property list.
         <dt><em>H5MM_allocate_t</em> <code>alloc</code>
-            <dd>IN: User's allocate routine, or &nbsp; <code> NULL</code> for system &nbsp; <code> malloc</code>. 
+            <dd>IN: User's allocate routine, or &nbsp; <code> NULL</code> 
+                for system &nbsp; <code> malloc</code>. 
         <dt><em>void</em> *<code>alloc_info</code>
             <dd>IN: Extra parameter for user's allocation routine.  
-                Ignored if preceding parameter is &nbsp; <code> NULL</code>.
+                <br>
+                Contents are ignored if preceding parameter is &nbsp; 
+                <code> NULL</code>.
         <dt><em>H5MM_free_t</em> <code>free</code>
-            <dd>IN: User's free routine, or &nbsp; <code> NULL</code> for system <code>free</code>. 
+            <dd>IN: User's free routine, or &nbsp; <code> NULL</code> 
+                for system <code>free</code>. 
         <dt><em>void</em> *<code>free_info</code>
             <dd>IN: Extra parameter for user's free routine.  
-                Ignored if preceding parameter is &nbsp; <code> NULL</code>.
+                <br>
+                Contents are ignored if preceding parameter is &nbsp; 
+                <code> NULL</code>.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -2928,7 +2959,7 @@ facilitate moving easily between them.</i>
     )
   <dt><strong>Purpose:</strong>
     <dd>Gets the memory manager for variable-length datatype allocation in 
-        <code>H5Dread</code> and <code>H5Treclaim_vlen</code>.
+        <code>H5Dread</code> and <code>H5Dvlen_reclaim</code>.
   <dt><strong>Description:</strong>
     <dd><code>H5Pget_vlen_mem_manager</code> is the companion function to
         <code>H5Pset_vlen_mem_manager</code>, returning the parameters
@@ -2942,13 +2973,17 @@ facilitate moving easily between them.</i>
                 for system &nbsp; <code> malloc</code>. 
         <dt><em>void</em> *<code>alloc_info</code>
             <dd>OUT: Extra parameter for user's allocation routine.  
-                Ignored if preceding parameter is &nbsp; <code> NULL</code>.
+                <br>
+                Contents are ignored if preceding parameter is &nbsp; 
+                <code> NULL</code>.
         <dt><em>H5MM_free_t</em> <code>free</code>
             <dd>OUT: User's free routine, or &nbsp; <code> NULL</code> for 
                 system <code>free</code>. 
         <dt><em>void</em> *<code>free_info</code>
             <dd>OUT: Extra parameter for user's free routine.  
-                Ignored if preceding parameter is &nbsp; <code> NULL</code>.
+                <br>
+                Contents are ignored if preceding parameter is &nbsp; 
+                <code> NULL</code>.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
