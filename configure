@@ -10043,8 +10043,8 @@ IF_YES_NO "$GASS"
 PRINT_N "                           HDF4"
 IF_YES_NO "$HAVE_HDF4"
 
-PRINT_N "        HDF5 v1.4 Compatibility"
-IF_YES_NO "$HDF5_V1_4_COMPAT"
+PRINT_N "        HDF5 v1.2 Compatibility"
+IF_YES_NO "$HDF5_V1_2_COMPAT"
 
 PRINT_N "                        hsize_t"
 case "$HSIZET" in
