@@ -1971,8 +1971,11 @@ test_misc12(void)
         if(HDstrcmp(wdata1[i-MISC12_SPACE1_DIM1],rdata[i]))
             TestErrPrintf("Error on line %d: wdata1[%d]=%s, rdata[%d]=%s\n",__LINE__,i-MISC12_SPACE1_DIM1,wdata1[i-MISC12_SPACE1_DIM1],i,rdata[i]);
 
+    ret = H5Sselect_all (space);
+    CHECK(ret, FAIL, "H5Sselect_all");
+
     /* Reclaim VL data memory */
-    ret = H5Dvlen_reclaim (tid1, sid1, H5P_DEFAULT, rdata);
+    ret = H5Dvlen_reclaim (tid1, space, H5P_DEFAULT, rdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Close Everything */
@@ -3316,7 +3319,7 @@ test_misc20(void)
     hid_t sid;          /* 'Space ID */
     hid_t did;          /* Dataset ID */
     hid_t dcpl;         /* Dataset creation property list ID */
-    unsigned rank=MISC20_SPACE_RANK;    /* Rank of dataspace */
+    int rank=MISC20_SPACE_RANK;    /* Rank of dataspace */
     hsize_t big_dims[MISC20_SPACE_RANK]={MISC20_SPACE_DIM0,MISC20_SPACE_DIM1};      /* Large dimensions */
     hsize_t small_dims[MISC20_SPACE_RANK]={MISC20_SPACE2_DIM0,MISC20_SPACE2_DIM1};      /* Small dimensions */
     unsigned version;   /* Version of storage layout info */
