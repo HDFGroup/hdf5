@@ -3328,7 +3328,8 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
     if(leaf->nrec > 0) {
         /* Pack record out of leaf */
-        HDmemmove(H5B2_LEAF_NREC(leaf,shared,idx),H5B2_LEAF_NREC(leaf,shared,idx+1),shared->type->nrec_size*(leaf->nrec-idx));
+        if(idx<leaf->nrec)
+            HDmemmove(H5B2_LEAF_NREC(leaf,shared,idx),H5B2_LEAF_NREC(leaf,shared,idx+1),shared->type->nrec_size*(leaf->nrec-idx));
     } /* end if */
     else {
         /* Release space for B-tree node on disk */
