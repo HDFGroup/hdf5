@@ -196,7 +196,7 @@ Supported Configuration Features Summary
     WinNT CW       y  n         n    n         n    n          y     y
     FreeBSD        y  n         n    n         y    y          y     y
     Linux 2.2      y  y (1)     y    n         y    y          y     y
-    Linux 2.4      y  n         n    n         y    y          y     y
+    Linux 2.4      y  y (1)     n    n         y    y          y     y
 
 
     Platform       1.2            static-   Thread-  SRB  GASS	STREAM-
@@ -252,7 +252,7 @@ Known Problems
     * The --enable-static-exec configure flag fails to compile for HP-UX
       11.00 platforms.
 
-    * The executable are always dynamic on IRIX64 6.5(64 and n32) and 
+    * The executables are always dynamic on IRIX64 6.5(64 and n32) and 
       IRIX 6.5 even if they are configured with --enable-static-exec.
     
     * After "make install" or "make install-doc" one may need to reload
