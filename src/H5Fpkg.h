@@ -210,5 +210,14 @@ __DLL__ herr_t H5F_contig_readv(H5F_t *f, hsize_t max_data, H5FD_mem_t type, had
 __DLL__ herr_t H5F_contig_writev(H5F_t *f, hsize_t max_data, H5FD_mem_t type, haddr_t addr,
         size_t nseq, size_t size[], hsize_t offset[], hid_t dxpl_id, const void *buf);
 
+/* Functions that operate on compact dataset storage */
+__DLL__ herr_t H5F_compact_readv(H5F_t *f, const struct H5O_layout_t *layout, size_t nseq,      
+                                size_t size_arr[], hsize_t offset_arr[],
+                                hid_t dxpl_id, void *_buf/*out*/);
+__DLL__ herr_t H5F_compact_writev(H5F_t *f, struct H5O_layout_t *layout, size_t nseq,
+                                size_t size_arr[], hsize_t offset_arr[], 
+                                hid_t dxpl_id, const void *_buf);
+
+                                    
 #endif
 

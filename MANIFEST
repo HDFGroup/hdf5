@@ -791,6 +791,7 @@
 ./src/H5F.c
 ./src/H5Farray.c
 ./src/H5Fcontig.c
+./src/H5Fcompact.c
 ./src/H5Fistore.c
 ./src/H5Fpkg.h
 ./src/H5Fprivate.h

@@ -81,7 +81,7 @@ H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5O_layout_t           *mesg = NULL;
     int                    version;
-    unsigned                   u;
+    unsigned               u;
     void                   *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_layout_decode, NULL);
@@ -107,17 +107,30 @@ H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 
     /* Layout class */
     mesg->type = *p++;
-    assert(H5D_CONTIGUOUS == mesg->type || H5D_CHUNKED == mesg->type);
+    assert(H5D_CONTIGUOUS == mesg->type || H5D_CHUNKED == mesg->type || H5D_COMPACT == mesg->type);
 
     /* Reserved bytes */
     p += 5;
 
     /* Address */
-    H5F_addr_decode(f, &p, &(mesg->addr));
+    if(mesg->type!=H5D_COMPACT)
+        H5F_addr_decode(f, &p, &(mesg->addr));
 
     /* Read the size */
     for (u = 0; u < mesg->ndims; u++)
         UINT32DECODE(p, mesg->dim[u]);
+
+    if(mesg->type == H5D_COMPACT) {
+        UINT32DECODE(p, mesg->size);
+        if(mesg->size > 0) {
+            if(NULL==(mesg->buf=H5MM_malloc(mesg->size))) {
+                HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+                              "memory allocation failed for fill value");
+            }
+            HDmemcpy(mesg->buf, p, mesg->size);
+            p += mesg->size;
+        }
+    }
 
     /* Set return value */
     ret_value=mesg;
@@ -155,7 +168,7 @@ static herr_t
 H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
-    unsigned                     u;
+    unsigned               u;
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_layout_encode, FAIL);
@@ -172,7 +185,9 @@ H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
             *p++ = H5O_LAYOUT_VERSION_2;
     	else 
 	    *p++ = H5O_LAYOUT_VERSION_1;
-    } else
+    } else if(mesg->type==H5D_COMPACT) {
+        *p++ = H5O_LAYOUT_VERSION_2;
+    } else 
 	*p++ = H5O_LAYOUT_VERSION_1;
 
     /* number of dimensions */
@@ -186,12 +201,22 @@ H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
         *p++ = 0;
 
     /* data or B-tree address */
-    H5F_addr_encode(f, &p, mesg->addr);
+    if(mesg->type!=H5D_COMPACT)
+        H5F_addr_encode(f, &p, mesg->addr);
 
     /* dimension size */
     for (u = 0; u < mesg->ndims; u++)
         UINT32ENCODE(p, mesg->dim[u]);
 
+    if(mesg->type==H5D_COMPACT) {
+        UINT32ENCODE(p, mesg->size);
+        if(mesg->size>0 && mesg->buf) {
+            H5_CHECK_OVERFLOW(mesg->size,ssize_t,size_t);
+            HDmemcpy(p, mesg->buf, mesg->size);
+            p += mesg->size;
+        }
+    }
+    
 done:
     FUNC_LEAVE(ret_value);
 }
@@ -240,11 +265,58 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_layout_meta_size
+ * 
+ * Purpose:     Returns the size of the raw message in bytes except raw data
+ *              part for compact dataset.  This function doesn't take into 
+ *              account message alignment.
+ *              
+ * Return:      Success:        Message data size in bytes(except raw data
+ *                              for compact dataset)
+ *              Failure:        0
+ *              
+ * Programmer:  Raymond Lu
+ *              August 14, 2002 
+ *              
+ * Modifications:
+ * 
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5O_layout_meta_size(H5F_t *f, const void *_mesg)
+{
+    const H5O_layout_t      *mesg = (const H5O_layout_t *) _mesg;
+    size_t                  ret_value;
+     
+    FUNC_ENTER_NOAPI(H5O_layout_meta_size, 0);
+                                
+    /* check args */
+    assert(f);
+    assert(mesg);
+    assert(mesg->ndims > 0 && mesg->ndims <= H5O_LAYOUT_NDIMS);
+                     
+    ret_value = 1 +                     /* Version number                       */
+                1 +                     /* layout class type                    */
+                1 +                     /* dimensionality                       */
+                5 +                     /* reserved bytes                       */
+                mesg->ndims * 4;        /* size of each dimension               */
+
+    if(mesg->type==H5D_COMPACT)
+        ret_value += 4;        /* size field for compact dataset       */
+    else
+        ret_value += H5F_SIZEOF_ADDR(f); /* file address of data or B-tree for chunked dataset */ 
+
+done:                
+    FUNC_LEAVE(ret_value);
+}   
+                 
+
+/*-------------------------------------------------------------------------
  * Function:    H5O_layout_size
  *
- * Purpose:     Returns the size of the raw message in bytes not counting the
- *              message type or size fields, but only the data fields.  This
- *              function doesn't take into account message alignment.
+ * Purpose:     Returns the size of the raw message in bytes.  If it's 
+ *              compact dataset, the data part is also included.
+ *              This function doesn't take into account message alignment.
  *
  * Return:      Success:        Message data size in bytes
  *
@@ -270,12 +342,9 @@ H5O_layout_size(H5F_t *f, const void *_mesg)
     assert(mesg);
     assert(mesg->ndims > 0 && mesg->ndims <= H5O_LAYOUT_NDIMS);
 
-    ret_value = H5F_SIZEOF_ADDR(f) +    /* B-tree address       */
-        1 +                     /* max dimension index  */
-        1 +                     /* layout class number  */
-        6 +                     /* reserved bytes       */
-        mesg->ndims * 4;        /* alignment            */
-
+    ret_value = H5O_layout_meta_size(f, mesg);
+    if(mesg->type==H5D_COMPACT)
+        ret_value += mesg->size;/* data for compact dataset             */
 done:
     FUNC_LEAVE(ret_value);
 }

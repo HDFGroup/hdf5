@@ -340,6 +340,9 @@ __DLL__ herr_t H5F_init(void);
 __DLL__ unsigned H5F_get_intent(const H5F_t *f);
 __DLL__ hid_t H5F_get_driver_id(const H5F_t *f);
 __DLL__ herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
+__DLL__ herr_t H5F_get_obj_count(H5F_t *f, unsigned types,
+                                 unsigned *obj_id_count);
+__DLL__ herr_t H5F_get_obj_ids(H5F_t *f, unsigned types, hid_t *obj_id_list);
 
 /* Functions that operate on array storage */
 __DLL__ herr_t H5F_arr_create(H5F_t *f,
@@ -352,7 +355,7 @@ __DLL__ herr_t H5F_arr_read (H5F_t *f, hid_t dxpl_id,
                             const hssize_t mem_offset[],
                             const hssize_t file_offset[], void *_buf/*out*/);
 __DLL__ herr_t H5F_arr_write (H5F_t *f, hid_t dxpl_id,
-                            const struct H5O_layout_t *layout,
+                            struct H5O_layout_t *layout,
                             struct H5P_genplist_t *dc_plist,
                             const hsize_t _hslab_size[],
                             const hsize_t mem_size[],
@@ -372,7 +375,7 @@ __DLL__ herr_t H5F_seq_read(H5F_t *f, hid_t dxpl_id,
         const struct H5S_t *file_space, size_t elmt_size, size_t seq_len,
         hsize_t file_offset, void *_buf/*out*/);
 __DLL__ herr_t H5F_seq_write (H5F_t *f, hid_t dxpl_id,
-        const struct H5O_layout_t *layout,
+        struct H5O_layout_t *layout,
         struct H5P_genplist_t *dc_plist,
         const struct H5S_t *file_space, size_t elmt_size, size_t seq_len,
         hsize_t file_offset, const void *_buf);
@@ -384,7 +387,7 @@ __DLL__ herr_t H5F_seq_readv(H5F_t *f, hid_t dxpl_id,
         const struct H5S_t *file_space, size_t elmt_size, size_t nseq,
         size_t seq_len[], hsize_t file_offset[], void *_buf/*out*/);
 __DLL__ herr_t H5F_seq_writev(H5F_t *f, hid_t dxpl_id,
-        const struct H5O_layout_t *layout,
+        struct H5O_layout_t *layout,
         struct H5P_genplist_t *dc_plist,
         const struct H5S_t *file_space, size_t elmt_size, size_t nseq,
         size_t seq_len[], hsize_t file_offset[], const void *_buf);

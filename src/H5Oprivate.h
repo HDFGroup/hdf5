@@ -38,6 +38,7 @@
 #define H5O_ALIGN(X)		(8*(((X)+8-1)/8))
 
 #define H5O_MIN_SIZE	H5O_ALIGN(32)	/*min obj header data size	     */
+#define H5O_MAX_SIZE	65536	        /*max obj header data size	     */
 #define H5O_NMESGS	32		/*initial number of messages	     */
 #define H5O_NCHUNKS	8		/*initial number of chunks	     */
 #define H5O_NEW_MESG	(-1)		/*new message			     */
@@ -165,7 +166,6 @@ typedef struct H5O_fill_new_t {
     htri_t		fill_defined;   /* whether fill value is defined     */	
 } H5O_fill_new_t;
 
-
 /*
  * External File List Message
  */
@@ -197,9 +197,12 @@ __DLLVAR__ const H5O_class_t H5O_LAYOUT[1];
 
 typedef struct H5O_layout_t {
     int		type;			/*type of layout, H5D_layout_t	     */
-    haddr_t	addr;			/*file address of data or B-tree     */
+    haddr_t	addr;			/*file address of data or B-tree     */ 
     unsigned	ndims;			/*num dimensions in stored data	     */
-    hsize_t	dim[H5O_LAYOUT_NDIMS];	/*size of data or chunk		     */
+    hsize_t	dim[H5O_LAYOUT_NDIMS];	/*size of data or chunk in bytes     */
+    hbool_t     dirty;                  /*dirty flag for compact dataset     */ 
+    size_t      size;                   /*size of compact dataset in bytes   */
+    void        *buf;                   /*buffer for compact dataset         */
 } H5O_layout_t;
 
 /*
@@ -311,6 +314,9 @@ __DLL__ herr_t H5O_share(H5F_t *f, const H5O_class_t *type, const void *mesg,
 			 H5HG_t *hobj/*out*/);
 __DLL__ herr_t H5O_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent,
 			 int fwidth);
+
+/* Layout operators */
+__DLL__ size_t H5O_layout_meta_size(H5F_t *f, const void *_mesg);
 
 /* EFL operators */
 __DLL__ hsize_t H5O_efl_total_size(H5O_efl_t *efl);

@@ -28,15 +28,17 @@ void *old_client_data;			/* previous error handler arg.*/
 /* other option flags */
 int doread=1;				/* read test */
 int dowrite=1;				/* write test */
+int docompact=1;                        /* compact dataset test */
 /* FILENAME and filenames must have the same number of names */
-const char *FILENAME[6]={
+const char *FILENAME[7]={
 	    "ParaEg1",
 	    "ParaEg2",
 	    "ParaEg3",
 	    "ParaMdset",
             "ParaMgroup",
+            "ParaCompact",
 	    NULL};
-char	filenames[6][PATH_MAX];
+char	filenames[7][PATH_MAX];
 hid_t	fapl;				/* file access property list */
 
 #ifdef USE_PAUSE
@@ -97,13 +99,14 @@ static void
 usage(void)
 {
     printf("Usage: testphdf5 [-r] [-w] [-v] [-m<n_datasets>] [-n<n_groups>] "
-	"[-f <prefix>] [-d <dim0> <dim1>]\n");
+	"[-o] [-f <prefix>] [-d <dim0> <dim1>]\n");
     printf("\t-r\t\tno read test\n");
     printf("\t-w\t\tno write test\n");
     printf("\t-m<n_datasets>"
 	"\tset number of datasets for the multiple dataset test\n");
     printf("\t-n<n_groups>"
         "\tset number of groups for the multiple group test\n");  
+    printf("\t-o\t\tno compact dataset test\n");
     printf("\t-v\t\tverbose on\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-s\t\tuse Split-file together with MPIO\n");
@@ -151,6 +154,8 @@ parse_options(int argc, char **argv)
                                 nerrors++;
                                 return(1);
 			    }
+                            break;
+                case 'o':   docompact = 0;
                             break;
 		case 'v':   verbose = 1;
 			    break;
@@ -380,7 +385,15 @@ int main(int argc, char **argv)
 	MPI_BANNER("read tests skipped");
     }
 
-    if (!(dowrite || doread || ndatasets || ngroups)){
+    if (docompact){
+        MPI_BANNER("compact dataset test...");
+        compact_dataset(filenames[5]); 
+    }
+    else {
+        MPI_BANNER("compact dataset test skipped");
+    }
+        
+    if (!(dowrite || doread || ndatasets || ngroups || docompact)){
 	usage();
 	nerrors++;
     }

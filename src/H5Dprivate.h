@@ -142,7 +142,7 @@
 #define H5D_XFER_HYPER_VECTOR_SIZE_DEF        1024
 
 typedef struct H5D_t H5D_t;
-
+  
 /* Functions defined in H5D.c */
 __DLL__ herr_t H5D_init(void);
 __DLL__ H5D_t *H5D_create(H5G_entry_t *loc, const char *name, 
@@ -175,6 +175,7 @@ __DLL__ herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id,
                              void *copy_data);
 __DLL__ herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
 __DLL__ herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size);
+__DLL__ herr_t H5D_flush(H5F_t *f);
 
 
 #endif

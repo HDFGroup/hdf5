@@ -882,12 +882,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fclose_degree
  *
- * Purpose:     Returns the current setting for the garbage collection
+ * Purpose:     Returns the degree for the file close behavior. 
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              June, 1999
+ * Programmer:  Raymond Lu 
+ *              November, 2001 
  *
  * Modifications:
  *

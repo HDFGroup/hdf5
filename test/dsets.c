@@ -12,12 +12,15 @@
 
 const char *FILENAME[] = {
     "dataset",
+    "compact_dataset",
     NULL
 };
 
 #define DSET_DEFAULT_NAME	"default"
 #define DSET_CHUNKED_NAME	"chunked"
+#define DSET_COMPACT_NAME       "compact"
 #define DSET_SIMPLE_IO_NAME	"simple_io"
+#define DSET_COMPACT_IO_NAME    "compact_io"
 #define DSET_TCONV_NAME		"tconv"
 #define DSET_COMPRESS_NAME	"compressed"
 #define DSET_BOGUS_NAME		"bogus"
@@ -41,14 +44,17 @@ int	points[100][200], check[100][200];
  *		Tuesday, December  9, 1997
  *
  * Modifications:
+ *              Added test for compact dataset creation.
+ *              Raymond Lu
+ *              August 8, 2002
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_create(hid_t file)
 {
-    hid_t	dataset, space, create_parms;
-    hsize_t	dims[2];
+    hid_t	dataset, space, small_space, create_parms;
+    hsize_t	dims[2], small_dims[2];
     herr_t	status;
     hsize_t	csize[2];
 
@@ -60,6 +66,12 @@ test_create(hid_t file)
     space = H5Screate_simple(2, dims, NULL);
     assert(space>=0);
 
+    /* Create a small data space for compact dataset */
+    small_dims[0] = 16;
+    small_dims[1] = 8;
+    small_space = H5Screate_simple(2, small_dims, NULL);
+    assert(space>=0);
+    
     /*
      * Create a dataset using the default dataset creation properties.	We're
      * not sure what they are, so we won't check.
@@ -148,6 +160,22 @@ test_create(hid_t file)
      */
     if (H5Dclose(dataset) < 0) goto error;
 
+    /*
+     * Create a compact dataset, then close it. 
+     */
+    create_parms = H5Pcreate(H5P_DATASET_CREATE);
+    assert(create_parms >= 0);
+    status = H5Pset_layout(create_parms, H5D_COMPACT);
+    assert(status >= 0);
+    status = H5Pset_space_time(create_parms, H5D_SPACE_ALLOC_EARLY);
+    assert(status >= 0); 
+
+    dataset = H5Dcreate(file, DSET_COMPACT_NAME, H5T_NATIVE_DOUBLE, 
+                        small_space, create_parms);
+    if(dataset < 0) goto error;
+    H5Pclose(create_parms);
+    if(H5Dclose(dataset) <0) goto error;
+
     PASSED();
     return 0;
 
@@ -235,6 +263,108 @@ test_simple_io(hid_t file)
   error:
     return -1;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_compact_io
+ *
+ * Purpose:     Tests compact dataset I/O.  That is, reading and writing a 
+ *              complete multi-dimensional array without data type or data 
+ *              space conversions, without compression, and store in 
+ *              compact dataset.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Raymond Lu 
+ *              August 8, 2002 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_compact_io(void)
+{
+    hid_t       file, dataset, space, plist;
+    hsize_t     dims[2];
+    herr_t      status;
+    int         wbuf[16][8], rbuf[16][8];
+    int         i, j, n;
+
+    TESTING("compact dataset I/O");
+
+    /* Initialize data */
+    n=0;
+    for(i=0; i<16; i++) {
+        for(j=0; j<8; j++) {
+            wbuf[i][j] = n++;
+        }
+    }
+    
+    /* Create a small data space for compact dataset */
+    dims[0] = 16;
+    dims[1] = 8;
+    space = H5Screate_simple(2, dims, NULL);
+    assert(space>=0);
+
+    /* Create a file */
+   if((file=H5Fcreate(FILENAME[1], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
+        goto error;
+
+    /* Create property list for compact dataset creation */
+    plist = H5Pcreate(H5P_DATASET_CREATE);
+    assert(plist >= 0);
+    status = H5Pset_layout(plist, H5D_COMPACT);
+    assert(status >= 0);
+    status = H5Pset_space_time(plist, H5D_SPACE_ALLOC_EARLY); 
+    assert(status >= 0);
+
+    /* Create and write to a compact dataset */
+    if((dataset = H5Dcreate(file, DSET_COMPACT_IO_NAME, H5T_NATIVE_INT, space, 
+                        plist))<0)
+        goto error;
+    if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf)<0)
+        goto error;
+
+    /* Close file */
+    H5Sclose(space);
+    H5Pclose(plist);
+    H5Dclose(dataset);
+    H5Fclose(file);
+
+    /*
+     * Open the file and check data 
+     */
+    if((file=H5Fopen(FILENAME[1], H5F_ACC_RDONLY, H5P_DEFAULT))<0)
+        goto error;
+    if((dataset = H5Dopen(file, DSET_COMPACT_IO_NAME))<0)
+        goto error;
+    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf)<0)
+        goto error;
+
+     /* Check that the values read are the same as the values written */
+     for (i = 0; i < 16; i++) {
+         for (j = 0; j < 8; j++) {
+             if (rbuf[i][j] != wbuf[i][j]) {
+                 H5_FAILED();
+                 printf("    Read different values than written.\n");
+                 printf("    At index %d,%d\n", i, j);
+                 goto error;
+             }
+         }
+     }
+
+     H5Dclose(dataset);
+     H5Fclose(file);
+     PASSED();
+     return 0;
+
+ error:
+     return -1;
+}
+                 
 
 /*-------------------------------------------------------------------------
  * Function:	test_tconv
@@ -868,6 +998,7 @@ main(void)
 
     nerrors += test_create(file)<0 	?1:0;
     nerrors += test_simple_io(file)<0	?1:0;
+    nerrors += test_compact_io()<0      ?1:0;
     nerrors += test_tconv(file)<0	?1:0;
     nerrors += test_compression(file)<0	?1:0;
     nerrors += test_multiopen (file)<0	?1:0;

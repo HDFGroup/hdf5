@@ -80,6 +80,14 @@ H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
                 HGOTO_ERROR (H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage");
             break;
 
+        case H5D_COMPACT:               
+            /* Reserve space in layout header message for the entire array. */
+            assert(layout->size>0);
+            if (NULL==(layout->buf=H5MM_malloc(layout->size)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset");
+            layout->dirty = TRUE;
+            break;
+            
         default:
             assert ("not implemented yet" && 0);
             HGOTO_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL,
@@ -366,7 +374,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_arr_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
+H5F_arr_write(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
             H5P_genplist_t *dc_plist,
             const hsize_t _hslab_size[], const hsize_t mem_size[],
             const hssize_t mem_offset[], const hssize_t file_offset[],

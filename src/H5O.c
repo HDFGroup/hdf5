@@ -584,7 +584,7 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
 
                 id = oh->mesg[u].type->id;
                 UINT16ENCODE(p, id);
-                assert (oh->mesg[u].raw_size<65536);
+                assert (oh->mesg[u].raw_size<H5O_MAX_SIZE);
                 UINT16ENCODE(p, oh->mesg[u].raw_size);
                 *p++ = oh->mesg[u].flags;
                 *p++ = 0; /*reserved*/
@@ -1280,7 +1280,7 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
 	}
 	if (0==(flags & H5O_FLAG_SHARED)) {
 	    size = (type->raw_size) (ent->file, mesg);
-	    if (size>=65536)
+	    if (size>=H5O_MAX_SIZE)
 		HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL, "object header message is too large (16k max)");
 	}
 	idx = H5O_alloc(ent->file, oh, type, size);

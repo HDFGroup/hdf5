@@ -80,6 +80,117 @@ void multiple_dset_write(char *filename, int ndatasets)
     H5Fclose (iof);
 }
 
+/* Example of using PHDF5 to create, write, and read compact dataset.  
+ * Hyperslab is prohibited for write.
+ */
+void compact_dataset(char *filename)
+{
+    int i, j, n, mpi_size, mpi_rank, err_num=0;
+    hid_t iof, plist, dcpl, dxpl, dataset, memspace, filespace;
+    hssize_t chunk_origin [DIM];
+    hsize_t chunk_dims [DIM], file_dims [DIM];
+    hsize_t count[DIM]={1,1};
+    double outme [SIZE][SIZE], inme[SIZE][SIZE];
+    char dname[]="dataset";
+    herr_t ret;
+                                
+    MPI_Comm_rank (MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size (MPI_COMM_WORLD, &mpi_size);
+
+    VRFY((mpi_size <= SIZE), "mpi_size <= SIZE");
+
+    chunk_origin [0] = mpi_rank * (SIZE / mpi_size);
+    chunk_origin [1] = 0;
+    chunk_dims [0] = SIZE / mpi_size;
+    chunk_dims [1] = SIZE;
+
+    for (i = 0; i < DIM; i++)
+         file_dims [i] = SIZE;
+
+    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+    iof = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
+
+    /* Define data space */
+    memspace = H5Screate_simple (DIM, chunk_dims, NULL);
+    filespace = H5Screate_simple (DIM, file_dims, NULL);
+
+    /* Create a compact dataset */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((dcpl>=0), "dataset creation property list succeeded");
+    ret=H5Pset_layout(dcpl, H5D_COMPACT);
+    VRFY((dcpl >= 0), "set property list for compact dataset");
+    ret=H5Pset_space_time(dcpl, H5D_SPACE_ALLOC_EARLY);
+    VRFY((ret >= 0), "set space allocation time for compact dataset");
+
+    dataset = H5Dcreate (iof, dname, H5T_NATIVE_DOUBLE, filespace, dcpl);
+    VRFY((dataset >= 0), "H5Dcreate succeeded");        
+
+    /* Define hyperslab */
+    ret = H5Sselect_hyperslab (filespace, H5S_SELECT_SET, chunk_origin, chunk_dims, count, chunk_dims);    
+    VRFY((ret>=0), "mdata hyperslab selection");
+    
+    /* set up the collective transfer properties list */
+    dxpl = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((dxpl >= 0), "");
+    ret=H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+
+    /* calculate data to write */
+    for (i = 0; i < SIZE; i++)
+         for (j = 0; j < SIZE; j++)
+              outme [i][j] = (i+j)*1000 + mpi_rank;
+
+    /* Test hyperslab writing.  Supposed to fail */
+    H5E_BEGIN_TRY {
+        ret=H5Dwrite(dataset, H5T_NATIVE_DOUBLE, memspace, filespace, dxpl, outme);
+    } H5E_END_TRY;
+    VRFY((ret < 0), "H5Dwrite hyperslab write failed as expected");
+
+    /* Recalculate data to write.  Each process writes the same data. */
+    for (i = 0; i < SIZE; i++)
+         for (j = 0; j < SIZE; j++)
+              outme [i][j] = (i+j)*1000;
+
+    ret=H5Dwrite (dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, dxpl, outme);
+    VRFY((ret >= 0), "H5Dwrite succeeded");
+
+    H5Pclose (dcpl);
+    H5Pclose (plist);
+    H5Dclose (dataset);
+    H5Sclose (filespace);
+    H5Sclose (memspace);
+    H5Fclose (iof);
+
+    /* Open the file and dataset, read and compare the data. */
+    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+    iof = H5Fopen(filename, H5F_ACC_RDONLY, plist);
+    VRFY((iof >= 0), "H5Fopen succeeded");
+
+    /* set up the collective transfer properties list */
+    dxpl = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((dxpl >= 0), "");
+    ret=H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+
+    dataset = H5Dopen(iof, dname);
+    VRFY((dataset >= 0), "H5Dcreate succeeded");
+
+    ret = H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, dxpl, inme);
+    VRFY((ret >= 0), "H5Dread succeeded");
+
+    /* Verify data value */
+    for (i = 0; i < SIZE; i++)
+        for (j = 0; j < SIZE; j++)
+            if(inme[i][j] != outme[i][j])
+                if(err_num++ < MAX_ERR_REPORT || verbose)
+                    printf("Dataset Verify failed at [%d][%d]: expect %f, got %f\n", i, j, outme[i][j], inme[i][j]); 
+                                                            
+    H5Pclose(plist);
+    H5Pclose(dxpl);
+    H5Dclose(dataset);
+    H5Fclose(iof);
+}
+
 /*
  * Example of using PHDF5 to create multiple groups.  Under the root group, 
  * it creates ngroups groups.  Under the first group just created, it creates 

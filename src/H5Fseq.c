@@ -102,7 +102,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_seq_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
+H5F_seq_write(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
         H5P_genplist_t *dc_plist,
         const H5S_t *file_space, size_t elmt_size,
         size_t seq_len, hsize_t file_offset, const void *buf)
@@ -215,7 +215,7 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     }
 
     /* Collective MPIO access is unsupported for non-contiguous datasets */
-    if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode)
+    if (H5D_CHUNKED==layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode)
         HGOTO_ERROR (H5E_DATASET, H5E_READERROR, FAIL, "collective access on non-contiguous datasets not supported yet");
 #endif /* H5_HAVE_PARALLEL */
 
@@ -498,6 +498,13 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 
             break;
 
+        case H5D_COMPACT:
+
+            /* Pass along the vector of sequences to read */
+            if (H5F_compact_readv(f, layout, nseq, seq_len_arr, file_offset_arr, dxpl_id, real_buf)<0)
+                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "block read failed");
+                                                        
+            break;
         default:
             assert("not implemented yet" && 0);
             HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
@@ -532,7 +539,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
+H5F_seq_writev(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
         H5P_genplist_t *dc_plist,
         const H5S_t *file_space, size_t elmt_size,
         size_t nseq, size_t seq_len_arr[], hsize_t file_offset_arr[],
@@ -599,8 +606,8 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     }
 
     /* Collective MPIO access is unsupported for non-contiguous datasets */
-    if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode)
-        HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "collective access on non-contiguous datasets not supported yet");
+    if (H5D_CHUNKED==layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode)
+        HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "collective access on chunked datasets not supported yet");
 #endif /* H5_HAVE_PARALLEL */
 
     /* Get necessary properties from property list */
@@ -878,6 +885,14 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                 real_buf += seq_len_arr[v];
             } /* end for */
 
+            break;
+
+        case H5D_COMPACT:       
+
+            /* Pass along the vector of sequences to write */
+            if (H5F_compact_writev(f, layout, nseq, seq_len_arr, file_offset_arr, dxpl_id, real_buf)<0)
+                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
+                                                        
             break;
 
         default:

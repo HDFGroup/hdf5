@@ -69,9 +69,6 @@ static herr_t H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 			hbool_t alloc_only, hbool_t closing);
 static haddr_t H5F_locate_signature(H5FD_t *file);
 static int H5F_flush_all_cb(H5F_t *f, hid_t fid, const void *_invalidate);
-static herr_t H5F_get_obj_count(H5F_t *f, unsigned types, 
-				unsigned *obj_id_count); 
-static herr_t H5F_get_obj_ids(H5F_t *f, unsigned types, hid_t *obj_id_list);
 static herr_t H5F_get_objects(H5F_t *f, unsigned types, hid_t *obj_id_list, 
 				unsigned *obj_id_count);
 static herr_t H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
@@ -943,7 +940,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5F_get_obj_count(H5F_t *f, unsigned types, unsigned *obj_id_count)
 {
     herr_t   ret_value = SUCCEED;
@@ -1010,7 +1007,7 @@ done:
  *      
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5F_get_obj_ids(H5F_t *f, unsigned types, hid_t *oid_list)
 {
     herr_t      ret_value = SUCCEED;
@@ -2318,7 +2315,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     int                 btree_k[H5B_NUM_BTREE_ID];      /* B-tree size info */
     unsigned            sym_leaf_k;     /* Number of symbols in B-tree leafs */
     H5P_genplist_t *plist;              /* Property list */
-    herr_t      ret_value;              /* Return value */
+    herr_t              ret_value;      /* Return value */
     
     FUNC_ENTER_NOINIT(H5F_flush);
 	
@@ -2346,6 +2343,10 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 
     /* Avoid flushing buffers & caches when alloc_only set */
     if(!alloc_only) {
+        /* flush any cached compact storage raw data */
+        if (H5D_flush(f)<0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache");
+
         /* If we are invalidating everything (which only happens just before
          * the file closes), release the unused portion of the metadata and
          * "small data" blocks back to the free lists in the file.
