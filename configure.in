@@ -235,6 +235,14 @@ AC_PROG_INSTALL
 AC_LIBTOOL_DLOPEN
 AM_PROG_LIBTOOL
 
+dnl Fix up the INSTALL macro if it's a relative path. We want the
+dnl full-path to the binary instead.
+case "$INSTALL" in
+   ../bin/install-sh)
+      INSTALL='\${top_srcdir}'/bin/install-sh
+      ;;
+esac
+
 AC_MSG_CHECKING(make)
 AC_SUBST_FILE(DEPEND)
 if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
