@@ -6584,8 +6584,10 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
     } /* end switch */
 
 done:
-    H5MM_xfree(idx1);
-    H5MM_xfree(idx2);
+    if(idx1!=NULL)
+        H5MM_xfree(idx1);
+    if(idx2!=NULL)
+        H5MM_xfree(idx2);
 
     FUNC_LEAVE(ret_value);
 }
