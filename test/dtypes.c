@@ -787,7 +787,7 @@ test_compound_5(void)
         int     coll_ids[4];
     } dst_type_t;
 
-    hsize_t     dims[1] = {4};
+    size_t      dims[1] = {4};
     hid_t       src_type, dst_type, short_array, int_array, string;
     src_type_t  src[2] = {{"one", 102, {104, 105, 106, 107}},
                           {"two", 202, {204, 205, 206, 207}}};
