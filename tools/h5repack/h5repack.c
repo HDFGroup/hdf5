@@ -73,8 +73,8 @@ int h5repack(const char* infile,
  if (check_objects(infile,options)<0)
   return -1;
  
- /* copy the file  */
- if (copy_file(infile,outfile,options)<0)
+ /* copy the objects  */
+ if (copy_objects(infile,outfile,options)<0)
   return -1;
 
  

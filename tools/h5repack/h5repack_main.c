@@ -22,7 +22,7 @@ static void usage(void);
 
 /*
 Examples of use:
--v -i file1.h5 -o file2.h5 -f "dataset:GZIP 6" -l "dataset:2x2"
+-v -i file1.h5 -o file2.h5 -f "dataset:GZIP 6" -l "dataset:CHUNK 2x2"
 -v -i file1.h5 -o file2.h5 -f "GZIP 6" 
 */
 
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
  
  /* pack it */
  h5repack(infile,outfile,&options);
- 
+
  /* free tables */
  h5repack_end(&options);
 
@@ -110,10 +110,44 @@ int main(int argc, char **argv)
 static 
 void usage(void)
 {
-
+ printf("h5repack -i input -o output [-h] [-v] [-t 'comp_info'] [-c 'chunk_info'][-m number] \n");
+ printf("\n");
+ printf("-i input          Input HDF5 File\n");
+ printf("-o output         Output HDF5 File\n");
+ printf("[-h]              Print usage message\n");
+ printf("[-f 'filter']     Filter type: 'filter' is a string with the format\n");
+ printf("     <list of objects> : <name of filter> <filter parameters>\n");
+ printf("     <list of objects> is a comma separated list of object names\n");
+ printf("       meaning apply compression only to those objects.\n");
+ printf("       if no object names are specified, the filter is applied to all objects\n");
+ printf("     <name of filter> can be:\n");
+ printf("       GZIP, to apply the HDF5 GZIP filter (GZIP compression)\n");
+ printf("       SZIP, to apply the HDF5 SZIP filter (SZIP compression)\n");
+ printf("       SHUF, to apply the HDF5 shuffle filter\n");
+ printf("       FLET, to apply the HDF5 checksum filter\n");
+ printf("       NONE, to remove the filter\n");
+ printf("     <filter parameters> is optional compression info\n");
+ printf("       GZIP, the deflation level\n");
+ printf("       SZIP, the pixels per block parameter\n");
+ printf("[-l 'layout']     Layout type. 'layout' is a string with the format\n");
+ printf("     <list of objects> : <layout type>\n");
+ printf("     <list of objects> is a comma separated list of object names,\n");
+ printf("       meaning that layout information is supplied for those objects.\n");
+ printf("       if no object names are specified, the layout is applied to all objects\n");
+ printf("     <layout type> can be:\n");
+ printf("       CHUNK, to apply chunking layout\n");
+ printf("       COMPA, to apply compact layout\n");
+ printf("       CONTI, to apply continuous layout\n");
+ printf("     <layout parameters> is present for the chunk case only\n");
+ printf("       it is the chunk size of each dimension:\n");
+ printf("       <dim_1 x dim_2 x ... dim_n>\n");
+ printf("\n");
+ printf("-e file           File with the above informatuion info in it (instead of the two above options)\n");
+ printf("-m number         Do not apply the filter to objects which size in bytes is smaller than number.\n");
+ printf("                  If no size is specified a minimum of 1024 bytes is assumed.\n");
+ printf("\n");
 
  exit(1);
 }
-
 
 

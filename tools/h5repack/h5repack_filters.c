@@ -182,7 +182,7 @@ int apply_filters(hid_t dcpl_id,
  unsigned     szip_options_mask=H5_SZIP_NN_OPTION_MASK;
  unsigned     szip_pixels_per_block;
  
- /* get information about filters */
+ /* get information about input filters */
  if ((nfilters = H5Pget_nfilters(dcpl_id))<0) 
   return -1;
  

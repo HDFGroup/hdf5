@@ -139,18 +139,18 @@ int h5repack_cmpdcpl   (const char *fname1,
 int check_objects(const char* fname, 
                   pack_opt_t *options);
 
-int copy_file(const char* fnamein, 
-              const char* fnameout,
-              pack_opt_t *options);
+int copy_objects(const char* fnamein, 
+                 const char* fnameout,
+                 pack_opt_t *options);
 
 void print_objlist(const char *filename, 
                    int nobjects, 
                    trav_info_t *travi );
 
-int do_copy_file(hid_t fidin, 
-                 hid_t fidout, 
-                 trav_table_t *travt,
-                 pack_opt_t *options);
+int do_copy_objects(hid_t fidin, 
+                    hid_t fidout, 
+                    trav_table_t *travt,
+                    pack_opt_t *options);
 
 int copy_attr(hid_t loc_in, 
               hid_t loc_out, 

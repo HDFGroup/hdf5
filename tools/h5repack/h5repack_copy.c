@@ -20,7 +20,7 @@
 #include "h5repack.h"
 
 /*-------------------------------------------------------------------------
- * Function: copy_file
+ * Function: copy_objects
  *
  * Purpose: duplicate all HDF5 objects in the file 
  *
@@ -33,9 +33,9 @@
  *-------------------------------------------------------------------------
  */
 
-int copy_file(const char* fnamein, 
-              const char* fnameout,
-              pack_opt_t *options)
+int copy_objects(const char* fnamein, 
+                 const char* fnameout,
+                 pack_opt_t *options)
 {
  hid_t         fidin; 
  hid_t         fidout; 
@@ -81,7 +81,7 @@ int copy_file(const char* fnamein,
  * do the copy
  *-------------------------------------------------------------------------
  */
- if(do_copy_file(fidin,fidout,travt,options)<0) {
+ if(do_copy_objects(fidin,fidout,travt,options)<0) {
   printf("h5repack: <%s>: Could not copy data to: %s\n", fnamein, fnameout);
   goto out;
  }
@@ -127,7 +127,7 @@ out:
 
 
 /*-------------------------------------------------------------------------
- * Function: do_copy_file
+ * Function: do_copy_objects
  *
  * Purpose: duplicate all HDF5 objects in the file 
  *
@@ -140,10 +140,10 @@ out:
  *-------------------------------------------------------------------------
  */
 
-int do_copy_file(hid_t fidin, 
-                 hid_t fidout, 
-                 trav_table_t *travt,
-                 pack_opt_t *options) /* repack options */
+int do_copy_objects(hid_t fidin, 
+                    hid_t fidout, 
+                    trav_table_t *travt,
+                    pack_opt_t *options) /* repack options */
 {
  hid_t     grp_in;       /* group ID */ 
  hid_t     grp_out;      /* group ID */ 
