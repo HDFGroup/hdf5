@@ -55,6 +55,9 @@ Library
      H5garbage_collect API function
    * Fixed error in H5Giterate which was not updating the "index" parameter
      correctly.
+   * Fixed error in hyperslab iteration which was not walking through the
+     correct sequence of array elements if hyperslabs were staggered in a
+     certain pattern
 
 Configuration
 -------------
