@@ -1041,7 +1041,7 @@ Optional Features:
   --enable-filters=all    Turn on all internal I/O filters. One may also
                           specify a comma-separated list of filters or the
                           word no. The default is all internal I/O filters.
-  --enable-hl             Do not compile the high level library [default=yes]
+  --enable-hl             Enable the high level library [default=yes]
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
