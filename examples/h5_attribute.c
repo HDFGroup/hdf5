@@ -198,7 +198,7 @@ main (void)
  * Operator function.
  */
 herr_t 
-attr_info(hid_t loc_id, const char *name, void UNUSED *opdata)
+attr_info(hid_t loc_id, const char *name, void *opdata)
 {
     hid_t attr, atype, aspace;  /* Attribute, datatype and dataspace identifiers */
     int   rank;
