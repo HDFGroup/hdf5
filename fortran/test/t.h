@@ -29,8 +29,8 @@ char *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 #   define nh5_cleanup_c              FNAME(h5_cleanup_c)
 #endif                                             /* DF_CAPFNAMES */
 
- H5_DLL int_f nh5_fixname_c 
+H5_FCTESTDLL int_f nh5_fixname_c 
 (_fcd base_name, int_f *base_namelen, hid_t_f *fapl, _fcd full_name, int_f *full_namelen);
 
- H5_DLL int_f nh5_cleanup_c 
+H5_FCTESTDLL int_f nh5_cleanup_c 
 (_fcd base_name, int_f *base_namelen, hid_t_f *fapl);
