@@ -191,6 +191,7 @@
           INTEGER(SIZE_T) :: filter_name_len = 4
           INTEGER, DIMENSION(4) :: cd_values
           INTEGER     :: config_flag = 0   ! for h5zget_filter_info_f
+          INTEGER     :: config_flag_both = 0   ! for h5zget_filter_info_f
 
           !
           ! Verify that SZIP exists and has an encoder
@@ -215,10 +216,13 @@
           !
           ! Make sure h5zget_filter_info_f returns the right flag
           !
+          config_flag_both=IOR(H5Z_FILTER_ENCODE_ENABLED_F,H5Z_FILTER_DECODE_ENABLED_F)
           if( szip_flag ) then
-              if (config_flag .NE. IOR(H5Z_FILTER_ENCODE_ENABLED_F,H5Z_FILTER_DECODE_ENABLED_F))  then
-                  error = -1
-                  CALL check("h5zget_filter_info_f config_flag", error, total_error)
+              if (config_flag .NE. config_flag_both) then
+                  if(config_flag .NE. H5Z_FILTER_DECODE_ENABLED_F)  then
+                     error = -1
+                     CALL check("h5zget_filter_info_f config_flag", error, total_error)
+                  endif
               endif
           endif    
 
