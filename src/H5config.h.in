@@ -349,7 +349,8 @@
 /* Define if `__tm_gmtoff' is a member of `struct tm' */
 #undef HAVE___TM_GMTOFF
 
-/* Define if your system has a working `malloc' function. */
+/* Define if your system's `malloc' function returns a valid pointer for
+   0-byte allocations. */
 #undef MALLOC_WORKS
 
 /* Define if your system's `MPI_File_set_size' function works for files over
