@@ -621,12 +621,6 @@
 ./c++/Makefile.in
 
 ./c++/examples/Dependencies
-./c++/examples/Attributes.h5
-./c++/examples/Group.h5
-./c++/examples/SDS.h5
-./c++/examples/SDScompound.h5
-./c++/examples/SDSextendible.h5
-./c++/examples/Select.h5
 ./c++/examples/chunks.cpp
 ./c++/examples/compound.cpp
 ./c++/examples/create.cpp
