@@ -14,7 +14,8 @@ fi
 case "$CXX" in
   aCC)
     # +Z for PIC, +A for using archived libraries
-    CXXFLAGS="$CXXFLAGS +Z +A"
+    # _INCLUDE_LONGLONG for using `long long' for hsize_t and hssize_t
+    CXXFLAGS="$CXXFLAGS +Z +A -D_INCLUDE_LONGLONG"
     CFLAGS="$CFLAGS -g +O2"
     DEBUG_CXXFLAGS=-g
     DEBUG_CPPFLAGS=
@@ -23,7 +24,7 @@ case "$CXX" in
     PROFILE_CPPFLAGS=
     ;;
   *)
-    CXXFLAGS="$CXXFLAGS"
+    CXXFLAGS="$CXXFLAGS -D_INCLUDE_LONGLONG"
     CFLAGS="$CFLAGS"
     DEBUG_CXXFLAGS=-g
     DEBUG_CPPFLAGS=
