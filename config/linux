@@ -8,8 +8,8 @@
 
 # The default compiler is `gcc'.
 if test "X-" =  "X-$CC"; then
-    CC=cc
-    CC_BASENAME=cc
+    CC=gcc
+    CC_BASENAME=gcc
 fi
 
 ARCH="-mcpu=pentiumpro -march=pentiumpro -malign-double"
