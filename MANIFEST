@@ -73,6 +73,8 @@
 ./config/unicos
 ./config/unicosmk
 
+./config/site-specific/BlankForm
+
 ./doc/Makefile.in
 ./doc/html/Attributes.html
 ./doc/html/Big.html
