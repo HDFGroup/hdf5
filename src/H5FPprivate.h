@@ -219,7 +219,7 @@ typedef struct {
     H5FP_status_t   status;     /* Status of the request                    */
     H5FD_mem_t      mem_type;   /* Type of memory updated, if req'd         */
     unsigned        md_size;    /* Size of the metadata sent in next msg    */
-    MPI_Offset      addr;       /* Address of the metadata                  */
+    haddr_t         addr;       /* Address of the metadata                  */
 } H5FP_read_t;
 
 extern MPI_Datatype H5FP_read;  /* MPI datatype for the H5FP_read obj       */
@@ -273,11 +273,11 @@ extern herr_t H5FP_request_release_lock(unsigned sap_file_id, hobj_ref_t oid,
                                         int last, unsigned *req_id,
                                         H5FP_status_t *status);
 extern herr_t H5FP_request_read_metadata(H5FD_t *file, unsigned sap_file_id, hid_t dxpl_id,
-                                         H5FD_mem_t mem_type, MPI_Offset addr,
+                                         H5FD_mem_t mem_type, haddr_t addr,
                                          size_t size, uint8_t **buf, int *bytes_read,
                                          unsigned *req_id, H5FP_status_t *status);
 extern herr_t H5FP_request_write_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
-                                          H5FD_mem_t mem_type, MPI_Offset addr,
+                                          H5FD_mem_t mem_type, haddr_t addr,
                                           int mdata_size, const char *mdata,
                                           unsigned *req_id, H5FP_status_t *status);
 extern herr_t H5FP_request_flush_metadata(H5FD_t *file, unsigned file_id,

@@ -285,7 +285,7 @@ done:
  */
 herr_t
 H5FP_request_read_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
-                           H5FD_mem_t UNUSED mem_type, MPI_Offset addr,
+                           H5FD_mem_t UNUSED mem_type, haddr_t addr,
                            size_t size, uint8_t **buf, int *bytes_read,
                            unsigned *req_id, H5FP_status_t *status)
 {
@@ -385,7 +385,7 @@ done:
  */
 herr_t
 H5FP_request_write_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
-                            H5FD_mem_t mem_type, MPI_Offset addr,
+                            H5FD_mem_t mem_type, haddr_t addr,
                             int mdata_size, const char *mdata,
                             unsigned *req_id, H5FP_status_t *status)
 {

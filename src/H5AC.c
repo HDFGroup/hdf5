@@ -1408,11 +1408,15 @@ done:
  * Modifications:
  *		Robb Matzke, 1999-07-27
  *		The ADDR argument is passed by value.
+ *
+ *              Bill Wendling, 2003-09-10
+ *              Added parameter to indicate whether this is a READ or
+ *              WRITE type of protect.
  *-------------------------------------------------------------------------
  */
 void *
 H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
-	     const void *udata1, void *udata2)
+	     const void *udata1, void *udata2, H5AC_protect_t rw)
 {
     unsigned                idx;                /* Index in cache */
     void                   *thing=NULL;
@@ -1585,6 +1589,8 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 #endif /* H5AC_DEBUG */
 
     cache->nprots += 1;
+
+    rw = rw;    /* Remove compiler warning if no FPHDF5 used */
 
     /* Set return value */
     ret_value=thing;
