@@ -134,8 +134,8 @@ static herr_t H5FD_stdio_write(H5FD_t *lf, H5FD_mem_t type, hid_t fapl_id, haddr
 static herr_t H5FD_stdio_flush(H5FD_t *_file);
 
 static const H5FD_class_t H5FD_stdio_g = {
-    "stdio",				/*name			*/
-    MAXADDR,				/*maxaddr		*/
+    "stdio",				        /*name			*/
+    MAXADDR,				        /*maxaddr		*/
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/
@@ -146,19 +146,19 @@ static const H5FD_class_t H5FD_stdio_g = {
     0,						/*dxpl_size		*/
     NULL,					/*dxpl_copy		*/
     NULL,					/*dxpl_free		*/
-    H5FD_stdio_open,		/*open			*/
-    H5FD_stdio_close,		/*close			*/
-    H5FD_stdio_cmp,			/*cmp			*/
-    H5FD_stdio_query,		/*query			*/
+    H5FD_stdio_open,		                /*open			*/
+    H5FD_stdio_close,		                /*close			*/
+    H5FD_stdio_cmp,			        /*cmp			*/
+    H5FD_stdio_query,		                /*query			*/
     NULL,					/*alloc			*/
     NULL,					/*free			*/
-    H5FD_stdio_get_eoa,		/*get_eoa		*/
-    H5FD_stdio_set_eoa, 	/*set_eoa		*/
-    H5FD_stdio_get_eof,		/*get_eof		*/
-    H5FD_stdio_read,		/*read			*/
-    H5FD_stdio_write,		/*write			*/
-    H5FD_stdio_flush,		/*flush			*/
-    H5FD_FLMAP_SINGLE,		/*fl_map		*/
+    H5FD_stdio_get_eoa,		                /*get_eoa		*/
+    H5FD_stdio_set_eoa, 	                /*set_eoa		*/
+    H5FD_stdio_get_eof,		                /*get_eof		*/
+    H5FD_stdio_read,		                /*read			*/
+    H5FD_stdio_write,		                /*write			*/
+    H5FD_stdio_flush,		                /*flush			*/
+    H5FD_FLMAP_SINGLE,		                /*fl_map		*/
 };
 
 
@@ -426,7 +426,7 @@ H5FD_stdio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  * Function:	H5FD_stdio_query
  *
  * Purpose:	Set the flags that this VFL driver is capable of supporting.
- *      (listed in H5FDpublic.h)
+ *              (listed in H5FDpublic.h)
  *
  * Return:	Success:	non-negative
  *
@@ -447,10 +447,11 @@ H5FD_stdio_query(const H5FD_t *_f, unsigned long *flags /* out */)
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
+        *flags = 0;
         *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
         *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
         *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
-    } /* end if */
+    }
 
     return(0);
 }
