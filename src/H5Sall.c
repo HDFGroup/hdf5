@@ -39,6 +39,8 @@ static int             interface_initialize_g = 0;
 herr_t
 H5S_all_iter_init (const H5S_t *space, size_t UNUSED elmt_size, H5S_sel_iter_t *sel_iter)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_all_iter_init, FAIL);
 
     /* Check args */
@@ -51,7 +53,8 @@ H5S_all_iter_init (const H5S_t *space, size_t UNUSED elmt_size, H5S_sel_iter_t *
     /* Start at the upper left location */
     sel_iter->all.offset=0;
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_all_iter_init() */
 
 
@@ -72,12 +75,18 @@ H5S_all_iter_init (const H5S_t *space, size_t UNUSED elmt_size, H5S_sel_iter_t *
 hsize_t
 H5S_all_iter_nelmts (const H5S_sel_iter_t *sel_iter)
 {
+    hsize_t ret_value;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_all_iter_nelmts, 0);
 
     /* Check args */
     assert (sel_iter);
 
-    FUNC_LEAVE (sel_iter->all.elmt_left);
+    /* Set return value */
+    ret_value=sel_iter->all.elmt_left;
+
+done:
+    FUNC_LEAVE(ret_value);
 }   /* H5S_all_iter_nelmts() */
 
 
@@ -101,12 +110,15 @@ H5S_all_iter_nelmts (const H5S_sel_iter_t *sel_iter)
 herr_t
 H5S_all_iter_release (H5S_sel_iter_t * UNUSED sel_iter)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_all_iter_release, FAIL);
 
     /* Check args */
     assert (sel_iter);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_all_iter_release() */
 
 
@@ -130,12 +142,15 @@ H5S_all_iter_release (H5S_sel_iter_t * UNUSED sel_iter)
 herr_t
 H5S_all_release (H5S_t * UNUSED space)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_all_release, FAIL);
 
     /* Check args */
     assert (space);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_all_release() */
 
 
@@ -171,6 +186,7 @@ H5S_all_npoints (const H5S_t *space)
     for(u=0, ret_value=1; u<space->extent.u.simple.rank; u++)
         ret_value*=space->extent.u.simple.size[u];
     
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_all_npoints() */
 
@@ -198,11 +214,14 @@ H5S_all_npoints (const H5S_t *space)
 htri_t
 H5S_all_is_valid (const H5S_t UNUSED *space)
 {
+    htri_t ret_value=TRUE;      /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_all_is_valid, FAIL);
 
     assert(space);
 
-    FUNC_LEAVE (TRUE);
+done:
+    FUNC_LEAVE (ret_value);
 } /* end H5S_all_is_valid() */
 
 
@@ -240,6 +259,7 @@ H5S_all_serial_size (const H5S_t UNUSED *space)
      */
     ret_value=16;
 
+done:
     FUNC_LEAVE (ret_value);
 } /* end H5S_all_serial_size() */
 
@@ -281,6 +301,7 @@ H5S_all_serialize (const H5S_t *space, uint8_t *buf)
     /* Set success */
     ret_value=SUCCEED;
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_all_serialize() */
 
@@ -369,6 +390,7 @@ H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
         end[i]=space->extent.u.simple.size[i]-1;
     } /* end for */
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_all_bounds() */
 
@@ -394,11 +416,14 @@ H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
 htri_t
 H5S_all_is_contiguous(const H5S_t UNUSED *space)
 {
+    htri_t ret_value=TRUE;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_all_is_contiguous, FAIL);
 
     assert(space);
 
-    FUNC_LEAVE (TRUE);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_all_is_contiguous() */
 
 
@@ -423,11 +448,14 @@ H5S_all_is_contiguous(const H5S_t UNUSED *space)
 htri_t
 H5S_all_is_single(const H5S_t UNUSED *space)
 {
+    htri_t ret_value=TRUE;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_all_is_single, FAIL);
 
     assert(space);
 
-    FUNC_LEAVE (TRUE);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_all_is_single() */
 
 
@@ -453,12 +481,15 @@ H5S_all_is_single(const H5S_t UNUSED *space)
 htri_t
 H5S_all_is_regular(const H5S_t UNUSED *space)
 {
+    htri_t ret_value=TRUE;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_all_is_regular, FAIL);
 
     /* Check args */
     assert(space);
 
-    FUNC_LEAVE (TRUE);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_all_is_regular() */
 
 
@@ -630,9 +661,7 @@ H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_i
     iter->all.elmt_left-=elem_used;
     iter->all.offset+=elem_used;
 
-#ifdef LATER
 done:
-#endif /* LATER */
     FUNC_LEAVE (ret_value);
 } /* end H5S_all_get_seq_list() */
 

@@ -236,6 +236,8 @@ done:
 herr_t
 H5O_open(H5G_entry_t *obj_ent)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5O_open, FAIL);
 
     /* Check args */
@@ -250,7 +252,8 @@ H5O_open(H5G_entry_t *obj_ent)
     /* Increment open-lock counters */
     obj_ent->file->nopen_objs++;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -271,6 +274,8 @@ H5O_open(H5G_entry_t *obj_ent)
 herr_t
 H5O_close(H5G_entry_t *obj_ent)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5O_close, FAIL);
 
     /* Check args */
@@ -301,7 +306,8 @@ H5O_close(H5G_entry_t *obj_ent)
     if (0==obj_ent->file->nopen_objs && obj_ent->file->closing)
 	H5I_dec_ref(obj_ent->file->closing);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -745,6 +751,8 @@ done:
 void *
 H5O_free (const H5O_class_t *type, void *mesg)
 {
+    void * ret_value=NULL;      /* Return value */
+
     FUNC_ENTER_NOAPI(H5O_free, NULL);
     
     if (mesg) {
@@ -755,7 +763,8 @@ H5O_free (const H5O_class_t *type, void *mesg)
             H5MM_xfree (mesg);
     }
 
-    FUNC_LEAVE (NULL);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 

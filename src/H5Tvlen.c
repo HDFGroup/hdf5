@@ -149,13 +149,18 @@ hssize_t
 H5T_vlen_seq_mem_getlen(H5F_t UNUSED *f, void *vl_addr)
 {
     hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
+    hssize_t ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_vlen_seq_mem_getlen, FAIL);
 
     /* check parameters */
     assert(vl);
 
-    FUNC_LEAVE ((hssize_t)vl->len);
+    /* Set return value */
+    ret_value=(hssize_t)vl->len;
+
+done:
+    FUNC_LEAVE(ret_value);
 }   /* end H5T_vlen_seq_mem_getlen() */
 
 
@@ -177,6 +182,7 @@ herr_t
 H5T_vlen_seq_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
 {
     hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_vlen_seq_mem_read, FAIL);
 
@@ -186,7 +192,8 @@ H5T_vlen_seq_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
 
     HDmemcpy(buf,vl->p,len);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* end H5T_vlen_seq_mem_read() */
 
 
@@ -279,13 +286,18 @@ hssize_t
 H5T_vlen_str_mem_getlen(H5F_t UNUSED *f, void *vl_addr)
 {
     char *s=*(char **)vl_addr;   /* Pointer to the user's hvl_t information */
+    hssize_t ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_vlen_str_mem_getlen, FAIL);
 
     /* check parameters */
     assert(s);
 
-    FUNC_LEAVE ( (hssize_t)HDstrlen(s));
+    /* Set return value */
+    ret_value=(hssize_t)HDstrlen(s);
+
+done:
+    FUNC_LEAVE(ret_value);
 }   /* end H5T_vlen_str_mem_getlen() */
 
 
@@ -307,6 +319,7 @@ herr_t
 H5T_vlen_str_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
 {
     char *s=*(char **)vl_addr;   /* Pointer to the user's hvl_t information */
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_vlen_str_mem_read, FAIL);
 
@@ -316,7 +329,8 @@ H5T_vlen_str_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
 
     HDmemcpy(buf,s,len);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* end H5T_vlen_str_mem_read() */
 
 
@@ -409,6 +423,7 @@ H5T_vlen_disk_getlen(H5F_t UNUSED *f, void *vl_addr)
 
     UINT32DECODE(vl, ret_value);
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* end H5T_vlen_disk_getlen() */
 

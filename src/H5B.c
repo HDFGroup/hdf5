@@ -1901,6 +1901,7 @@ H5B_nodesize(H5F_t *f, const H5B_class_t *type,
 	     size_t *total_nkey_size/*out*/, size_t sizeof_rkey)
 {
     size_t	size;
+    size_t ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5B_nodesize, (size_t) 0);
 
@@ -1925,7 +1926,11 @@ H5B_nodesize(H5F_t *f, const H5B_class_t *type,
 	    2 * H5B_Kvalue(f, type) * H5F_SIZEOF_ADDR(f) +	/*child pointers */
 	    (2 * H5B_Kvalue(f, type) + 1) * sizeof_rkey);	/*keys		*/
 
-    FUNC_LEAVE(size);
+    /* Set return value */
+    ret_value=size;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

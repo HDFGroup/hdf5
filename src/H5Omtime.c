@@ -198,6 +198,7 @@ H5O_mtime_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 {
     const time_t	*mesg = (const time_t *) _mesg;
     struct tm		*tm;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_mtime_encode, FAIL);
 
@@ -212,7 +213,8 @@ H5O_mtime_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 	    1900+tm->tm_year, 1+tm->tm_mon, tm->tm_mday,
 	    tm->tm_hour, tm->tm_min, tm->tm_sec);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -282,13 +284,16 @@ done:
 static size_t
 H5O_mtime_size(H5F_t * UNUSED f, const void * UNUSED mesg)
 {
+    size_t ret_value=16;        /* Return value */
+
     FUNC_ENTER_NOAPI(H5O_mtime_size, 0);
 
     /* check args */
     assert(f);
     assert(mesg);
 
-    FUNC_LEAVE(16);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -309,13 +314,16 @@ H5O_mtime_size(H5F_t * UNUSED f, const void * UNUSED mesg)
 static herr_t
 H5O_mtime_free (void *mesg)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5O_mtime_free, FAIL);
 
     assert (mesg);
 
     H5FL_FREE(time_t,mesg);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -341,6 +349,7 @@ H5O_mtime_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
     const time_t	*mesg = (const time_t *)_mesg;
     struct tm		*tm;
     char		buf[128];
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_mtime_debug, FAIL);
 
@@ -358,6 +367,7 @@ H5O_mtime_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	    "Time:", buf);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 

@@ -224,6 +224,7 @@ H5E_t *
 H5E_get_stack(void)
 {
     H5E_t *estack;
+    H5E_t *ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5E_get_stack,NULL);
 
@@ -234,7 +235,11 @@ H5E_get_stack(void)
         pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
     }
 
-    FUNC_LEAVE(estack);
+    /* Set return value */
+    ret_value=estack;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 #endif  /* H5_HAVE_THREADSAFE */
 
@@ -297,13 +302,16 @@ H5E_init_interface (void)
 herr_t
 H5Eset_auto(H5E_auto_t func, void *client_data)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_API(H5Eset_auto, FAIL);
     H5TRACE2("e","xx",func,client_data);
     
     H5E_auto_g = func;
     H5E_auto_data_g = client_data;
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -326,13 +334,16 @@ H5Eset_auto(H5E_auto_t func, void *client_data)
 herr_t
 H5Eget_auto(H5E_auto_t *func, void **client_data)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_API(H5Eget_auto, FAIL);
     H5TRACE2("e","*x*x",func,client_data);
 
     if (func) *func = H5E_auto_g;
     if (client_data) *client_data = H5E_auto_data_g;
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -354,10 +365,14 @@ H5Eget_auto(H5E_auto_t *func, void **client_data)
 herr_t
 H5Eclear(void)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_API(H5Eclear, FAIL);
     H5TRACE0("e","");
     /* FUNC_ENTER() does all the work */
-    FUNC_LEAVE (SUCCEED);
+
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -386,7 +401,7 @@ herr_t
 H5Eprint(FILE *stream)
 {
     H5E_t	*estack = H5E_get_my_stack ();
-    herr_t	status = FAIL;
+    herr_t	ret_value = FAIL;
     
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Eprint, FAIL);
@@ -411,9 +426,11 @@ H5Eprint(FILE *stream)
 #endif
     if (estack && estack->nused>0) fprintf (stream, "  Back trace follows.");
     HDfputc ('\n', stream);
-    status = H5E_walk (H5E_WALK_DOWNWARD, H5E_walk_cb, (void*)stream);
+
+    ret_value = H5E_walk (H5E_WALK_DOWNWARD, H5E_walk_cb, (void*)stream);
     
-    FUNC_LEAVE (status);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -435,15 +452,16 @@ H5Eprint(FILE *stream)
 herr_t
 H5Ewalk(H5E_direction_t direction, H5E_walk_t func, void *client_data)
 {
-    herr_t	status = FAIL;
+    herr_t	ret_value;
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Ewalk, FAIL);
     H5TRACE3("e","Edxx",direction,func,client_data);
 
-    status = H5E_walk (direction, func, client_data);
+    ret_value = H5E_walk (direction, func, client_data);
 
-    FUNC_LEAVE (status);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -692,6 +710,7 @@ H5Epush(const char *file, const char *func, unsigned line, H5E_major_t maj,
 
     ret_value = H5E_push(maj, min, func, file, line, str);
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -714,12 +733,14 @@ herr_t
 H5E_clear(void)
 {
     H5E_t	*estack = H5E_get_my_stack ();
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5E_clear, FAIL);
 
     if (estack) estack->nused = 0;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -755,6 +776,7 @@ H5E_walk (H5E_direction_t direction, H5E_walk_t func, void *client_data)
     H5E_t	*estack = H5E_get_my_stack ();
     int		i;
     herr_t	status;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5E_walk, FAIL);
 
@@ -775,6 +797,7 @@ H5E_walk (H5E_direction_t direction, H5E_walk_t func, void *client_data)
 	}
     }
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 

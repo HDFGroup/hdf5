@@ -139,12 +139,18 @@ static int interface_initialize_g = 0;
 hid_t
 H5FD_family_init(void)
 {
+    hid_t ret_value=H5FD_FAMILY_g;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5FD_family_init, FAIL);
 
     if (H5I_VFL!=H5Iget_type(H5FD_FAMILY_g))
         H5FD_FAMILY_g = H5FDregister(&H5FD_family_g);
 
-    FUNC_LEAVE(H5FD_FAMILY_g);
+    /* Set return value */
+    ret_value=H5FD_FAMILY_g;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -377,13 +383,15 @@ static herr_t
 H5FD_family_fapl_free(void *_fa)
 {
     H5FD_family_fapl_t	*fa = (H5FD_family_fapl_t*)_fa;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_family_fapl_free, FAIL);
 
     H5I_dec_ref(fa->memb_fapl_id);
     H5MM_xfree(fa);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -453,13 +461,15 @@ static herr_t
 H5FD_family_dxpl_free(void *_dx)
 {
     H5FD_family_dxpl_t	*dx = (H5FD_family_dxpl_t*)_dx;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_family_dxpl_free, FAIL);
 
     H5I_dec_ref(dx->memb_dxpl_id);
     H5MM_xfree(dx);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -679,6 +689,7 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     
     ret_value= H5FDcmp(f1->memb[0], f2->memb[0]);
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -716,6 +727,7 @@ H5FD_family_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
         *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
     }
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -742,10 +754,15 @@ static haddr_t
 H5FD_family_get_eoa(H5FD_t *_file)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
+    haddr_t ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_family_get_eoa, HADDR_UNDEF);
 
-    FUNC_LEAVE(file->eoa);
+    /* Set return value */
+    ret_value=file->eoa;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -845,6 +862,7 @@ H5FD_family_get_eof(H5FD_t *_file)
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     haddr_t		eof=0;
     int			i;
+    haddr_t ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_family_get_eof, HADDR_UNDEF);
 
@@ -866,7 +884,11 @@ H5FD_family_get_eof(H5FD_t *_file)
      */
     eof += i*file->memb_size;
 
-    FUNC_LEAVE(MAX(eof, file->eoa));
+    /* Set return value */
+    ret_value=MAX(eof, file->eoa);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

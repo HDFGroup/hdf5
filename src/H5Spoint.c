@@ -47,6 +47,8 @@ H5FL_DEFINE_STATIC(H5S_pnt_list_t);
 herr_t
 H5S_point_iter_init(const H5S_t *space, size_t UNUSED elmt_size, H5S_sel_iter_t *sel_iter)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_point_iter_init, FAIL);
 
     /* Check args */
@@ -59,7 +61,8 @@ H5S_point_iter_init(const H5S_t *space, size_t UNUSED elmt_size, H5S_sel_iter_t 
     /* Start at the head of the list of points */
     sel_iter->pnt.curr=space->select.sel_info.pnt_lst->head;
     
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_point_iter_init() */
 
 
@@ -80,12 +83,18 @@ H5S_point_iter_init(const H5S_t *space, size_t UNUSED elmt_size, H5S_sel_iter_t 
 hsize_t
 H5S_point_iter_nelmts (const H5S_sel_iter_t *sel_iter)
 {
+    hsize_t ret_value;          /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_point_iter_nelmts, 0);
 
     /* Check args */
     assert (sel_iter);
 
-    FUNC_LEAVE (sel_iter->pnt.elmt_left);
+    /* Set return value */
+    ret_value=sel_iter->pnt.elmt_left;
+
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_point_iter_nelmts() */
 
 
@@ -109,12 +118,15 @@ H5S_point_iter_nelmts (const H5S_sel_iter_t *sel_iter)
 herr_t
 H5S_point_iter_release (H5S_sel_iter_t * UNUSED sel_iter)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_point_iter_release, FAIL);
 
     /* Check args */
     assert (sel_iter);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_point_iter_release() */
 
 
@@ -224,6 +236,7 @@ herr_t
 H5S_point_release (H5S_t *space)
 {
     H5S_pnt_node_t *curr, *next;        /* Point selection nodes */
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_point_release, FAIL);
 
@@ -246,7 +259,8 @@ H5S_point_release (H5S_t *space)
     /* Reset the number of elements in the selection */
     space->select.num_elem=0;
     
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_point_release() */
 
 
@@ -270,12 +284,17 @@ H5S_point_release (H5S_t *space)
 hsize_t
 H5S_point_npoints (const H5S_t *space)
 {
+    hsize_t ret_value;          /* Return value */
     FUNC_ENTER_NOAPI(H5S_point_npoints, 0);
 
     /* Check args */
     assert (space);
 
-    FUNC_LEAVE (space->select.num_elem);
+    /* Set return value */
+    ret_value=space->select.num_elem;
+
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_point_npoints() */
 
 
@@ -471,6 +490,7 @@ H5S_point_is_valid (const H5S_t *space)
         curr=curr->next;
     } /* end while */
 
+done:
     FUNC_LEAVE (ret_value);
 } /* end H5S_point_is_valid() */
 
@@ -589,6 +609,7 @@ H5S_point_serial_size (const H5S_t *space)
         curr=curr->next;
     } /* end while */
 
+done:
     FUNC_LEAVE (ret_value);
 } /* end H5S_point_serial_size() */
 
@@ -619,6 +640,7 @@ H5S_point_serialize (const H5S_t *space, uint8_t *buf)
     uint8_t *lenp;          /* pointer to length location for later storage */
     uint32_t len=0;         /* number of bytes used */
     unsigned u;                /* local counting variable */
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_point_serialize, FAIL);
 
@@ -655,7 +677,8 @@ H5S_point_serialize (const H5S_t *space, uint8_t *buf)
     /* Encode length */
     UINT32ENCODE(lenp, (uint32_t)len);  /* Store the length of the extra information */
     
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_point_serialize() */
 
 
@@ -872,6 +895,7 @@ H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
     H5S_pnt_node_t *node;       /* Point node */
     int rank;                   /* Dataspace rank */
     int i;                      /* index variable */
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_point_bounds, FAIL);
 
@@ -900,7 +924,8 @@ H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
         node=node->next;
       } /* end while */
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5Sget_point_bounds() */
 
 
@@ -940,6 +965,7 @@ H5S_point_is_contiguous(const H5S_t *space)
     else	/* More than one point might be contiguous, but it's complex to check and we don't need it right now */
     	ret_value=FALSE;
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_point_is_contiguous() */
 
@@ -977,6 +1003,7 @@ H5S_point_is_single(const H5S_t *space)
     else
     	ret_value=FALSE;
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_point_is_single() */
 
@@ -1018,6 +1045,7 @@ H5S_point_is_regular(const H5S_t *space)
     else
     	ret_value=FALSE;
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_point_is_regular() */
 

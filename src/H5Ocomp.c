@@ -166,6 +166,7 @@ H5O_pline_encode (H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
     size_t		i, j, name_length;
     const char		*name=NULL;
     H5Z_class_t		*cls=NULL;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_pline_encode, FAIL);
 
@@ -210,7 +211,8 @@ H5O_pline_encode (H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
 	    UINT32ENCODE(p, 0);
     }
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -313,6 +315,7 @@ H5O_pline_size (H5F_t UNUSED *f, const void *mesg)
     size_t		i, size, name_len;
     const char		*name = NULL;
     H5Z_class_t		*cls = NULL;
+    size_t ret_value;           /* Return value */
         
     FUNC_ENTER_NOAPI(H5O_pline_size, 0);
 
@@ -340,7 +343,11 @@ H5O_pline_size (H5F_t UNUSED *f, const void *mesg)
             size += 4;
     }
 
-    FUNC_LEAVE (size);
+    /* Set return value */
+    ret_value=size;
+
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -364,6 +371,7 @@ H5O_pline_reset (void *mesg)
 {
     H5O_pline_t	*pline = (H5O_pline_t*)mesg;
     size_t	i;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_pline_reset, FAIL);
 
@@ -376,7 +384,8 @@ H5O_pline_reset (void *mesg)
     H5MM_xfree(pline->filter);
     HDmemset(pline, 0, sizeof *pline);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -397,13 +406,16 @@ H5O_pline_reset (void *mesg)
 static herr_t
 H5O_pline_free (void *mesg)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5O_pline_free, FAIL);
 
     assert (mesg);
 
     H5FL_FREE(H5O_pline_t,mesg);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -429,6 +441,7 @@ H5O_pline_debug (H5F_t UNUSED *f, const void *mesg, FILE *stream,
 {
     const H5O_pline_t	*pline = (const H5O_pline_t *)mesg;
     size_t		i, j;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_pline_debug, FAIL);
 
@@ -474,5 +487,6 @@ H5O_pline_debug (H5F_t UNUSED *f, const void *mesg, FILE *stream,
 	}
     }
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }

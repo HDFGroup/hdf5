@@ -81,8 +81,6 @@ static herr_t H5I_debug(H5I_type_t grp);
 static herr_t 
 H5I_init_interface(void)
 {
-    herr_t		    ret_value = SUCCEED;
-
     FUNC_ENTER_NOINIT(H5I_init_interface);
 
     /*
@@ -91,7 +89,7 @@ H5I_init_interface(void)
      */
     assert(H5I_NGROUPS<=(1<<GROUP_BITS));
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -635,6 +633,7 @@ H5I_object(hid_t id)
         ret_value = id_ptr->obj_ptr;
     } /* end if */
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -673,6 +672,7 @@ H5I_object_verify(hid_t id, H5I_type_t id_type)
         ret_value = id_ptr->obj_ptr;
     } /* end if */
 
+done:
     FUNC_LEAVE(ret_value);
 } /* H5I_object_verify() */
 
@@ -708,6 +708,7 @@ H5I_get_type(hid_t id)
 
     assert(ret_value>=H5I_BADID && ret_value<H5I_NGROUPS);
 
+done:
     FUNC_LEAVE(ret_value);
 }
 

@@ -175,12 +175,18 @@ static int interface_initialize_g = 0;
 hid_t
 H5FD_mpio_init(void)
 {
+    hid_t ret_value=H5FD_MPIO_g;        /* Return value */
+
     FUNC_ENTER_NOAPI(H5FD_mpio_init, FAIL);
 
     if (H5I_VFL!=H5Iget_type(H5FD_MPIO_g))
         H5FD_MPIO_g = H5FDregister(&H5FD_mpio_g);
 
-    FUNC_LEAVE(H5FD_MPIO_g);
+    /* Set return value */
+    ret_value=H5FD_MPIO_g;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -419,7 +425,7 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/)
         *xfer_mode = dx->xfer_mode;
 
 done:
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -443,13 +449,18 @@ MPI_Comm
 H5FD_mpio_communicator(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
+    MPI_Comm ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpio_communicator, MPI_COMM_NULL);
 
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
-    FUNC_LEAVE(file->comm);
+    /* Set return value */
+    ret_value=file->comm;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -472,13 +483,18 @@ int
 H5FD_mpio_mpi_rank(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
+    int ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpio_mpi_rank, FAIL);
 
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
-    FUNC_LEAVE(file->mpi_rank);
+    /* Set return value */
+    ret_value=file->mpi_rank;
+
+done:
+    FUNC_LEAVE(ret_value);
 } /* end H5FD_mpio_mpi_rank() */
 
 
@@ -501,13 +517,18 @@ int
 H5FD_mpio_mpi_size(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
+    int ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpio_mpi_rank, FAIL);
 
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
-    FUNC_LEAVE(file->mpi_size);
+    /* Set return value */
+    ret_value=file->mpi_size;
+
+done:
+    FUNC_LEAVE(ret_value);
 } /* end H5FD_mpio_mpi_size() */
 
 
@@ -1032,6 +1053,7 @@ H5FD_mpio_query(const H5FD_t UNUSED *_file, unsigned long *flags /* out */)
         *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
     } /* end if */
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -1058,13 +1080,18 @@ static haddr_t
 H5FD_mpio_get_eoa(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
+    haddr_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpio_get_eoa, HADDR_UNDEF);
 
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
-    FUNC_LEAVE(file->eoa);
+    /* Set return value */
+    ret_value=file->eoa;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1090,6 +1117,7 @@ static herr_t
 H5FD_mpio_set_eoa(H5FD_t *_file, haddr_t addr)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpio_set_eoa, FAIL);
 
@@ -1098,7 +1126,8 @@ H5FD_mpio_set_eoa(H5FD_t *_file, haddr_t addr)
 
     file->eoa = addr;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1131,13 +1160,18 @@ static haddr_t
 H5FD_mpio_get_eof(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
+    haddr_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpio_get_eof, HADDR_UNDEF);
 
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
 
-    FUNC_LEAVE(file->eof);
+    /* Set return value */
+    ret_value=file->eof;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

@@ -101,9 +101,13 @@ H5FL_BLK_DEFINE_STATIC(vlen_fl_buf);
 herr_t
 H5D_init(void)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5D_init, FAIL);
     /* FUNC_ENTER() does all the work */
-    FUNC_LEAVE(SUCCEED);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3342,7 +3346,7 @@ hsize_t
 H5D_get_storage_size(H5D_t *dset)
 {
     unsigned	u;              /* Index variable */
-    hsize_t	ret_value=0;
+    hsize_t	ret_value;
     
     FUNC_ENTER_NOAPI(H5D_get_storage_size, 0);
 
@@ -3362,6 +3366,7 @@ H5D_get_storage_size(H5D_t *dset)
         } /* end else */
     } /* end else */
 	
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -3521,6 +3526,7 @@ void *
 H5D_vlen_get_buf_size_alloc(size_t size, void *info)
 {
     H5T_vlen_bufsize_t *vlen_bufsize=(H5T_vlen_bufsize_t *)info;
+    void *ret_value;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_vlen_get_buf_size_alloc, NULL);
 
@@ -3528,7 +3534,11 @@ H5D_vlen_get_buf_size_alloc(size_t size, void *info)
     if ((vlen_bufsize->vl_tbuf=H5FL_BLK_REALLOC(vlen_vl_buf,vlen_bufsize->vl_tbuf,size))!=NULL)
         vlen_bufsize->size+=size;
 
-    FUNC_LEAVE(vlen_bufsize->vl_tbuf);
+    /* Set return value */
+    ret_value=vlen_bufsize->vl_tbuf;
+
+done:
+    FUNC_LEAVE(ret_value);
 } /* end H5D_vlen_get_buf_size_alloc() */
 
 

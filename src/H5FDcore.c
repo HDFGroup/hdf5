@@ -144,12 +144,18 @@ static int interface_initialize_g = 0;
 hid_t
 H5FD_core_init(void)
 {
+    hid_t ret_value=H5FD_CORE_g;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5FD_core_init, FAIL);
 
     if (H5I_VFL!=H5Iget_type(H5FD_CORE_g))
         H5FD_CORE_g = H5FDregister(&H5FD_core_g);
 
-    FUNC_LEAVE(H5FD_CORE_g);
+    /* Set return value */
+    ret_value=H5FD_CORE_g;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -527,11 +533,17 @@ done:
 static haddr_t
 H5FD_core_get_eoa(H5FD_t *_file)
 {
+    haddr_t ret_value;   /* Return value */
+
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     
     FUNC_ENTER_NOAPI(H5FD_core_get_eoa, HADDR_UNDEF);
 
-    FUNC_LEAVE(file->eoa);
+    /* Set return value */
+    ret_value=file->eoa;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -594,11 +606,17 @@ done:
 static haddr_t
 H5FD_core_get_eof(H5FD_t *_file)
 {
+    haddr_t ret_value;   /* Return value */
+
     H5FD_core_t	*file = (H5FD_core_t*)_file;
 
     FUNC_ENTER_NOAPI(H5FD_core_get_eof, HADDR_UNDEF);
 
-    FUNC_LEAVE(MAX(file->eof, file->eoa));
+    /* Set return value */
+    ret_value=MAX(file->eof, file->eoa);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

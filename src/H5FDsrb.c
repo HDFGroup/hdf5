@@ -162,12 +162,18 @@ static int interface_initialize_g = 0;
 hid_t 
 H5FD_srb_init(void)
 {
+    hid_t ret_value=H5FD_SRB_g; /* Return value */
+
     FUNC_ENTER_NOAPI(H5FD_srb_init, FAIL);
 
     if(H5I_VFL != H5Iget_type(H5FD_SRB_g))
         H5FD_SRB_g = H5FDregister(&H5FD_srb_g);  
 
-    FUNC_LEAVE(H5FD_SRB_g);
+    /* Set return value */
+    ret_value=H5FD_SRB_g;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -422,6 +428,7 @@ static herr_t
 H5FD_srb_close(H5FD_t *_file)
 {
     H5FD_srb_t *file = (H5FD_srb_t *)_file;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_srb_close, FAIL);
 
@@ -430,7 +437,8 @@ H5FD_srb_close(H5FD_t *_file)
 
     H5MM_xfree(file);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -454,6 +462,8 @@ H5FD_srb_close(H5FD_t *_file)
 static herr_t
 H5FD_srb_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5FD_srb_query, FAIL);
 
     /* Set the VFL feature flags that this driver supports */
@@ -463,7 +473,8 @@ H5FD_srb_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
         *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -488,10 +499,15 @@ static haddr_t
 H5FD_srb_get_eoa(H5FD_t *_file)
 {
     H5FD_srb_t *file = (H5FD_srb_t *)_file;
+    haddr_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_srb_get_eoa, HADDR_UNDEF);
 
-    FUNC_LEAVE(file->eoa);
+    /* Set return value */
+    ret_value=file->eoa; 
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -517,12 +533,14 @@ static herr_t
 H5FD_srb_set_eoa(H5FD_t *_file, haddr_t addr)
 {
     H5FD_srb_t *file = (H5FD_srb_t *)_file;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_srb_set_eoa, FAIL);
 
     file->eoa = addr;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -546,10 +564,15 @@ static haddr_t
 H5FD_srb_get_eof(H5FD_t *_file)
 {
     H5FD_srb_t *file = (H5FD_srb_t *)_file;
+    haddr_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_srb_get_eof, HADDR_UNDEF);
 
-    FUNC_LEAVE(file->eof); 
+    /* Set return value */
+    ret_value=file->eof; 
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

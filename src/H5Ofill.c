@@ -216,6 +216,7 @@ static herr_t
 H5O_fill_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 {
     const H5O_fill_new_t	*mesg = (const H5O_fill_new_t *)_mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_fill_new_encode, FAIL);
 
@@ -240,7 +241,8 @@ H5O_fill_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
             HDmemcpy(p, mesg->buf, (size_t)mesg->size);
         } /* end if */
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -262,6 +264,7 @@ static herr_t
 H5O_fill_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 {
     const H5O_fill_t    *mesg = (const H5O_fill_t *)_mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_fill_encode, FAIL);
 
@@ -273,7 +276,8 @@ H5O_fill_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
     if(mesg->buf)
         HDmemcpy(p, mesg->buf, mesg->size);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -441,6 +445,7 @@ H5O_fill_new_size(H5F_t UNUSED *f, const void *_mesg)
 		4 +		/* Fill value size	 */
 		(mesg->size>0 ? mesg->size : 0);	/* Size of fill value	 */
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -467,13 +472,18 @@ static size_t
 H5O_fill_size(H5F_t UNUSED *f, const void *_mesg)
 {
     const H5O_fill_t    *mesg = (const H5O_fill_t *)_mesg;
+    size_t ret_value;           /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_fill_size, 0);
 
     assert(f);
     assert(mesg);
 
-    FUNC_LEAVE(4+mesg->size);
+    /* Set return value */
+    ret_value=4+mesg->size;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -497,6 +507,7 @@ static herr_t
 H5O_fill_new_reset(void *_mesg)
 {
     H5O_fill_new_t	*mesg = (H5O_fill_new_t *)_mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_fill_new_reset, FAIL);
 
@@ -513,7 +524,8 @@ H5O_fill_new_reset(void *_mesg)
     mesg->fill_time    = (H5D_fill_time_t)0;
     mesg->fill_defined = (H5D_fill_value_t)0; 
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -535,6 +547,7 @@ static herr_t
 H5O_fill_reset(void *_mesg)
 {
     H5O_fill_t  *mesg = (H5O_fill_t *)_mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_fill_reset, FAIL);
 
@@ -548,7 +561,8 @@ H5O_fill_reset(void *_mesg)
         mesg->type = NULL;
     }
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -571,6 +585,7 @@ H5O_fill_new_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
 	       int indent, int fwidth)
 {
     const H5O_fill_new_t	*mesg = (const H5O_fill_new_t *)_mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_fill_new_debug, FAIL);
 
@@ -590,7 +605,8 @@ H5O_fill_new_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
 	fprintf(stream, "<dataset type>\n");
     }
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -613,6 +629,7 @@ H5O_fill_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
 	       int indent, int fwidth)
 {
     const H5O_fill_t	*mesg = (const H5O_fill_t *)_mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_fill_debug, FAIL);
 
@@ -632,7 +649,8 @@ H5O_fill_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
 	fprintf(stream, "<dataset type>\n");
     }
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

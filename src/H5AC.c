@@ -1055,6 +1055,7 @@ H5AC_debug(H5F_t UNUSED *f)
     H5AC_t                 *cache = f->shared->cache;
     double                  miss_rate;
 #endif
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_debug, FAIL);
 
@@ -1114,5 +1115,6 @@ H5AC_debug(H5F_t UNUSED *f)
     }
 #endif
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }

@@ -107,6 +107,7 @@ H5S_hyper_iter_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *sel_i
     H5S_hyper_span_info_t *spans;   /* Pointer to hyperslab span info node */
     unsigned u;                     /* Index variable */
     int i;                          /* Index variable */
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_hyper_iter_init, FAIL);
 
@@ -229,7 +230,8 @@ H5S_hyper_iter_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *sel_i
         } /* end for */
     } /* end else */
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_iter_init() */
 
 
@@ -250,12 +252,18 @@ H5S_hyper_iter_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *sel_i
 hsize_t
 H5S_hyper_iter_nelmts (const H5S_sel_iter_t *sel_iter)
 {
+    hsize_t ret_value;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_hyper_iter_nelmts, 0);
 
     /* Check args */
     assert (sel_iter);
 
-    FUNC_LEAVE (sel_iter->hyp.elmt_left);
+    /* Set return value */
+    ret_value=sel_iter->hyp.elmt_left;
+
+done:
+    FUNC_LEAVE(ret_value);
 }   /* H5S_hyper_iter_nelmts() */
 
 
@@ -279,6 +287,8 @@ H5S_hyper_iter_nelmts (const H5S_sel_iter_t *sel_iter)
 herr_t
 H5S_hyper_iter_release (H5S_sel_iter_t *sel_iter)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_hyper_iter_release, FAIL);
 
     /* Check args */
@@ -310,7 +320,8 @@ H5S_hyper_iter_release (H5S_sel_iter_t *sel_iter)
     if(sel_iter->hyp.span!=NULL)
         H5FL_ARR_FREE(H5S_hyper_span_t,sel_iter->hyp.span);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_iter_release() */
 
 
@@ -442,12 +453,18 @@ H5S_hyper_iter_next (const H5S_t *space, H5S_sel_iter_t *iter)
 hsize_t
 H5S_hyper_npoints (const H5S_t *space)
 {
+    hsize_t ret_value;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_hyper_npoints, 0);
 
     /* Check args */
     assert (space);
 
-    FUNC_LEAVE (space->select.num_elem);
+    /* Set return value */
+    ret_value=space->select.num_elem;
+
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_npoints() */
 
 
@@ -1184,6 +1201,7 @@ H5S_hyper_is_valid (const H5S_t *space)
         ret_value=H5S_hyper_is_valid_helper(space->select.sel_info.hslab.span_lst,space->select.offset,space->extent.u.simple.size,(hsize_t)0);
     } /* end else */
 
+done:
     FUNC_LEAVE (ret_value);
 } /* end H5S_hyper_is_valid() */
 
@@ -1364,6 +1382,7 @@ H5S_hyper_serial_size (const H5S_t *space)
         ret_value+=8*space->extent.u.simple.rank*block_count;
     } /* end else */
 
+done:
     FUNC_LEAVE (ret_value);
 } /* end H5S_hyper_serial_size() */
 
@@ -1482,6 +1501,7 @@ H5S_hyper_serialize (const H5S_t *space, uint8_t *buf)
     int temp_dim;      /* Temporary rank holder */
     int ndims;         /* Rank of the dataspace */
     int done;          /* Whether we are done with the iteration */
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_hyper_serialize, FAIL);
 
@@ -1600,7 +1620,8 @@ H5S_hyper_serialize (const H5S_t *space, uint8_t *buf)
     /* Encode length */
     UINT32ENCODE(lenp, (uint32_t)len);  /* Store the length of the extra information */
     
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_serialize() */
 
 
@@ -2131,6 +2152,7 @@ H5S_hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
         ret_value=H5S_hyper_bounds_helper(space->select.sel_info.hslab.span_lst,space->select.offset,(hsize_t)0,start,end);
     } /* end if */
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_hyper_bounds() */
 
@@ -2313,6 +2335,7 @@ H5S_hyper_is_contiguous(const H5S_t *space)
             ret_value=TRUE;
     } /* end else */
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_is_contiguous() */
 
@@ -2391,6 +2414,7 @@ H5S_hyper_is_single(const H5S_t *space)
         } /* end while */
     } /* end else */
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_is_single() */
 
@@ -2431,6 +2455,7 @@ H5S_hyper_is_regular(const H5S_t *space)
     else
         ret_value=FALSE;
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_is_regular() */
 
@@ -6001,9 +6026,7 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t
         /* Call the general sequence generator routine */
         ret_value=H5S_hyper_get_seq_list_gen(space,iter,elem_size,maxseq,maxbytes,nseq,nbytes,off,len);
 
-#ifdef LATER
 done:
-#endif /* LATER */
     FUNC_LEAVE (ret_value);
 } /* end H5S_hyper_get_seq_list() */
 

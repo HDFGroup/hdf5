@@ -121,6 +121,7 @@ static herr_t
 H5O_name_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 {
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_name_encode, FAIL);
 
@@ -132,7 +133,8 @@ H5O_name_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
     /* encode */
     HDstrcpy((char*)p, mesg->s);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -205,7 +207,7 @@ static size_t
 H5O_name_size(H5F_t UNUSED *f, const void *_mesg)
 {
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
-    size_t                  size;
+    size_t                  ret_value;
 
     FUNC_ENTER_NOAPI(H5O_name_size, 0);
 
@@ -213,9 +215,10 @@ H5O_name_size(H5F_t UNUSED *f, const void *_mesg)
     assert(f);
     assert(mesg);
 
-    size = mesg->s ? HDstrlen(mesg->s) + 1 : 0;
+    ret_value = mesg->s ? HDstrlen(mesg->s) + 1 : 0;
 
-    FUNC_LEAVE(size);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -239,6 +242,7 @@ static herr_t
 H5O_name_reset(void *_mesg)
 {
     H5O_name_t             *mesg = (H5O_name_t *) _mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_name_reset, FAIL);
 
@@ -248,7 +252,8 @@ H5O_name_reset(void *_mesg)
     /* reset */
     mesg->s = H5MM_xfree(mesg->s);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -272,6 +277,7 @@ H5O_name_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
 	       int indent, int fwidth)
 {
     const H5O_name_t	*mesg = (const H5O_name_t *)_mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_name_debug, FAIL);
 
@@ -286,5 +292,6 @@ H5O_name_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
             "Name:",
             mesg->s);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }

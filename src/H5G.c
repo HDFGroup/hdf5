@@ -1513,6 +1513,8 @@ done:
 H5G_t *
 H5G_reopen(H5G_t *grp)
 {
+    H5G_t *ret_value;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5G_reopen, NULL);
 
     assert(grp);
@@ -1520,7 +1522,11 @@ H5G_reopen(H5G_t *grp)
 
     grp->nref++;
 
-    FUNC_LEAVE(grp);
+    /* Set return value */
+    ret_value=grp;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1587,10 +1593,17 @@ done:
 H5G_t *
 H5G_rootof(H5F_t *f)
 {
+    H5G_t *ret_value;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5G_rootof, NULL);
     while (f->mtab.parent)
         f = f->mtab.parent;
-    FUNC_LEAVE(f->shared->root_grp);
+
+    /* Set return value */
+    ret_value=f->shared->root_grp;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1788,7 +1801,7 @@ H5G_entry_t *
 H5G_loc (hid_t loc_id)
 {
     H5F_t	*f;
-    H5G_entry_t	*ret_value;
+    H5G_entry_t	*ret_value=NULL;
     H5G_t	*group=NULL;
     H5T_t	*dt=NULL;
     H5D_t	*dset=NULL;

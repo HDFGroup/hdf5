@@ -361,6 +361,7 @@ H5FD_sb_size(H5FD_t *file)
     if (file->cls->sb_size)
 	ret_value = (file->cls->sb_size)(file);
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -474,6 +475,7 @@ H5FD_fapl_get(H5FD_t *file)
     if (file->cls->fapl_get)
 	ret_value = (file->cls->fapl_get)(file);
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -993,6 +995,7 @@ H5FDcmp(const H5FD_t *f1, const H5FD_t *f2)
     
     ret_value = H5FD_cmp(f1, f2);
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -1076,6 +1079,7 @@ H5FDquery(const H5FD_t *f, unsigned long *flags/*out*/)
     
     ret_value = H5FD_query(f, flags);
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -1112,6 +1116,7 @@ H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/)
     else
         *flags=0;
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -2751,6 +2756,8 @@ done:
 herr_t
 H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5FD_get_fileno, FAIL);
 
     assert(file);
@@ -2759,6 +2766,7 @@ H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum)
     /* Retrieve the file's serial number */
     HDmemcpy(filenum,file->fileno,sizeof(file->fileno));
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 } /* end H5F_get_fileno() */
 

@@ -258,6 +258,7 @@ H5F_istore_decode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
     H5F_istore_key_t	*key = (H5F_istore_key_t *) _key;
     int		i;
     int		ndims = H5F_ISTORE_NDIMS(bt);
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5F_istore_decode_key, FAIL);
 
@@ -271,11 +272,11 @@ H5F_istore_decode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
     /* decode */
     UINT32DECODE(raw, key->nbytes);
     UINT32DECODE(raw, key->filter_mask);
-    for (i=0; i<ndims; i++) {
+    for (i=0; i<ndims; i++)
 	UINT64DECODE(raw, key->offset[i]);
-    }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -299,6 +300,7 @@ H5F_istore_encode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
     H5F_istore_key_t	*key = (H5F_istore_key_t *) _key;
     int		ndims = H5F_ISTORE_NDIMS(bt);
     int		i;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5F_istore_encode_key, FAIL);
 
@@ -312,11 +314,11 @@ H5F_istore_encode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
     /* encode */
     UINT32ENCODE(raw, key->nbytes);
     UINT32ENCODE(raw, key->filter_mask);
-    for (i=0; i<ndims; i++) {
+    for (i=0; i<ndims; i++)
 	UINT64ENCODE(raw, key->offset[i]);
-    }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -341,6 +343,7 @@ H5F_istore_debug_key (FILE *stream, int indent, int fwidth,
     const H5F_istore_key_t	*key = (const H5F_istore_key_t *)_key;
     const H5F_istore_ud1_t	*udata = (const H5F_istore_ud1_t *)_udata;
     unsigned		u;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5F_istore_debug_key, FAIL);
 
@@ -352,12 +355,12 @@ H5F_istore_debug_key (FILE *stream, int indent, int fwidth,
 	      "Filter mask:", key->filter_mask);
     HDfprintf(stream, "%*s%-*s {", indent, "", fwidth,
 	      "Logical offset:");
-    for (u=0; u<udata->mesg.ndims; u++) {
+    for (u=0; u<udata->mesg.ndims; u++)
         HDfprintf (stream, "%s%Hd", u?", ":"", key->offset[u]);
-    }
     HDfputs ("}\n", stream);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -389,7 +392,7 @@ H5F_istore_cmp2(H5F_t UNUSED *f, void *_lt_key, void *_udata,
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
     H5F_istore_key_t	*rt_key = (H5F_istore_key_t *) _rt_key;
     H5F_istore_ud1_t	*udata = (H5F_istore_ud1_t *) _udata;
-    int		cmp;
+    int		ret_value;
 
     FUNC_ENTER_NOAPI(H5F_istore_cmp2, FAIL);
 
@@ -399,9 +402,10 @@ H5F_istore_cmp2(H5F_t UNUSED *f, void *_lt_key, void *_udata,
     assert(udata->mesg.ndims > 0 && udata->mesg.ndims <= H5O_LAYOUT_NDIMS);
 
     /* Compare the offsets but ignore the other fields */
-    cmp = H5V_vector_cmp_s(udata->mesg.ndims, lt_key->offset, rt_key->offset);
+    ret_value = H5V_vector_cmp_s(udata->mesg.ndims, lt_key->offset, rt_key->offset);
 
-    FUNC_LEAVE(cmp);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -441,7 +445,7 @@ H5F_istore_cmp3(H5F_t UNUSED *f, void *_lt_key, void *_udata,
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
     H5F_istore_key_t	*rt_key = (H5F_istore_key_t *) _rt_key;
     H5F_istore_ud1_t	*udata = (H5F_istore_ud1_t *) _udata;
-    int		cmp = 0;
+    int		ret_value = 0;
 
     FUNC_ENTER_NOAPI(H5F_istore_cmp3, FAIL);
 
@@ -452,12 +456,14 @@ H5F_istore_cmp3(H5F_t UNUSED *f, void *_lt_key, void *_udata,
 
     if (H5V_vector_lt_s(udata->mesg.ndims, udata->key.offset,
 			lt_key->offset)) {
-	cmp = -1;
+	ret_value = -1;
     } else if (H5V_vector_ge_s(udata->mesg.ndims, udata->key.offset,
 			     rt_key->offset)) {
-	cmp = 1;
+	ret_value = 1;
     }
-    FUNC_LEAVE(cmp);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2210,6 +2216,7 @@ H5F_istore_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent,
 		 int fwidth, int ndims)
 {
     H5F_istore_ud1_t	udata;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5F_istore_debug, FAIL);
 
@@ -2218,7 +2225,8 @@ H5F_istore_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent,
 
     H5B_debug (f, addr, stream, indent, fwidth, H5B_ISTORE, &udata);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -2749,6 +2757,7 @@ H5F_istore_remove(H5F_t *f, haddr_t addr, void *_lt_key /*in,out */ ,
 	hbool_t *rt_key_changed /*out */ )
 {
     H5F_istore_key_t       *lt_key = (H5F_istore_key_t *)_lt_key;
+    H5B_ins_t ret_value=H5B_INS_REMOVE;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5F_istore_remove,H5B_INS_ERROR);
 
@@ -2756,7 +2765,8 @@ H5F_istore_remove(H5F_t *f, haddr_t addr, void *_lt_key /*in,out */ ,
     *lt_key_changed = FALSE;
     *rt_key_changed = FALSE;
 
-    FUNC_LEAVE(H5B_INS_REMOVE);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

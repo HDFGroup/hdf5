@@ -292,6 +292,7 @@ H5garbage_collect(void)
     /* Call the garbage collection routines in the library */
     H5FL_garbage_coll();
 
+done:
     FUNC_LEAVE(ret_value);
 }   /* end H5garbage_collect() */
 
@@ -336,6 +337,7 @@ H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_lim,
     /* Call the free list function to actually set the limits */
     H5FL_set_free_list_limits(reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim, blk_list_lim);
 
+done:
     FUNC_LEAVE(ret_value);
 }   /* end H5set_free_list_limits() */
 
@@ -467,6 +469,7 @@ H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum)
     if (minnum) *minnum = H5_VERS_MINOR;
     if (relnum) *relnum = H5_VERS_RELEASE;
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -569,9 +572,12 @@ done:
 herr_t
 H5open(void)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_API(H5open, FAIL);
     /* all work is done by FUNC_ENTER() */
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

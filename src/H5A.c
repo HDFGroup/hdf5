@@ -1380,7 +1380,14 @@ done:
 H5G_entry_t *
 H5A_entof(H5A_t *attr)
 {
+    H5G_entry_t *ret_value;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5A_entof, NULL);
     assert(attr);
-    FUNC_LEAVE(&(attr->ent));
+
+    /* Set return value */
+    ret_value=&(attr->ent);
+
+done:
+    FUNC_LEAVE(ret_value);
 }

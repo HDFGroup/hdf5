@@ -164,6 +164,7 @@ H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5O_efl_t	*mesg = (const H5O_efl_t *)_mesg;
     int			i;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_efl_encode, FAIL);
 
@@ -202,7 +203,8 @@ H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 	H5F_ENCODE_LENGTH (f, p, mesg->slot[i].size);
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -302,6 +304,7 @@ H5O_efl_size(H5F_t *f, const void *_mesg)
 			       H5F_SIZEOF_SIZE(f) +	/*file offset	*/
 			       H5F_SIZEOF_SIZE(f));	/*file size	*/
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -326,6 +329,7 @@ H5O_efl_reset(void *_mesg)
 {
     H5O_efl_t	*mesg = (H5O_efl_t *) _mesg;
     int		i;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_efl_reset, FAIL);
 
@@ -339,7 +343,8 @@ H5O_efl_reset(void *_mesg)
     mesg->nused = mesg->nalloc = 0;
     mesg->slot = H5MM_xfree(mesg->slot);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -582,6 +587,7 @@ H5O_efl_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
     const H5O_efl_t	   *mesg = (const H5O_efl_t *) _mesg;
     char		    buf[64];
     int		    i;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_efl_debug, FAIL);
 
@@ -620,5 +626,6 @@ H5O_efl_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
 		   (unsigned long)(mesg->slot[i].size));
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }

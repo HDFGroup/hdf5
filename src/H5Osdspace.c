@@ -181,6 +181,7 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
     const H5S_simple_t	*sdim = (const H5S_simple_t *) mesg;
     unsigned		u;  /* Local counting variable */
     unsigned		flags = 0;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_sdspace_encode, FAIL);
 
@@ -222,7 +223,8 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
 #endif
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -328,6 +330,7 @@ H5O_sdspace_size(H5F_t *f, const void *mesg)
     ret_value += space->perm ? space->rank * 4 : 0;
 #endif
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -351,12 +354,14 @@ static herr_t
 H5O_sdspace_reset(void *_mesg)
 {
     H5S_simple_t	*mesg = (H5S_simple_t*)_mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_sdspace_reset, FAIL);
 
     H5S_release_simple(mesg);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -377,13 +382,16 @@ H5O_sdspace_reset(void *_mesg)
 static herr_t
 H5O_sdspace_free (void *mesg)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5O_sdspace_free, FAIL);
 
     assert (mesg);
 
     H5FL_FREE(H5S_simple_t,mesg);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -411,6 +419,7 @@ H5O_sdspace_debug(H5F_t UNUSED *f, const void *mesg,
 {
     const H5S_simple_t	   *sdim = (const H5S_simple_t *) mesg;
     unsigned		    u;	/* local counting variable */
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_sdspace_debug, FAIL);
 
@@ -455,5 +464,6 @@ H5O_sdspace_debug(H5F_t UNUSED *f, const void *mesg,
     }
 #endif
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }

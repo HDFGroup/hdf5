@@ -342,6 +342,7 @@ H5O_attr_size(H5F_t UNUSED *f, const void *mesg)
 		H5O_ALIGN(attr->ds_size) +	/*data space		*/
 		attr->data_size;		/*the data itself	*/
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -406,6 +407,7 @@ H5O_attr_debug(H5F_t *f, const void *_mesg, FILE * stream, int indent,
 	       int fwidth)
 {
     const H5A_t *mesg = (const H5A_t *)_mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_attr_debug, FAIL);
 
@@ -440,5 +442,6 @@ H5O_attr_debug(H5F_t *f, const void *_mesg, FILE * stream, int indent,
     fprintf(stream, "%*sData space...\n", indent, "");
     H5S_debug(f, mesg->ds, stream, indent+3, MAX(0, fwidth-3));
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }

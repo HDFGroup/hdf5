@@ -137,6 +137,7 @@ H5O_shared_encode (H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
 {
     const H5O_shared_t	*mesg = (const H5O_shared_t *)_mesg;
     unsigned		flags;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_shared_encode, FAIL);
 
@@ -163,7 +164,8 @@ H5O_shared_encode (H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
 	H5G_ent_encode (f, &buf, &(mesg->u.ent));
     }
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -186,16 +188,17 @@ H5O_shared_encode (H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
 static size_t
 H5O_shared_size (H5F_t *f, const void UNUSED *_mesg)
 {
-    size_t	size;
+    size_t	ret_value;
     
     FUNC_ENTER_NOAPI(H5O_shared_size, 0);
 
-    size = 1 +				/*the flags field		*/
+    ret_value = 1 +				/*the flags field		*/
 	   7 +				/*reserved			*/
 	   MAX (H5F_SIZEOF_ADDR(f)+4,	/*sharing via global heap	*/
 		H5G_SIZEOF_ENTRY(f));	/*sharing by another obj hdr	*/
 
-    FUNC_LEAVE (size);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -218,6 +221,7 @@ H5O_shared_debug (H5F_t UNUSED *f, const void *_mesg,
 		  FILE *stream, int indent, int fwidth)
 {
     const H5O_shared_t	*mesg = (const H5O_shared_t *)_mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_shared_debug, FAIL);
 
@@ -246,5 +250,6 @@ H5O_shared_debug (H5F_t UNUSED *f, const void *_mesg,
 		       HADDR_UNDEF);
     }
     
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }

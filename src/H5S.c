@@ -408,6 +408,7 @@ H5S_extent_release(H5S_t *ds)
             break;
     }
 
+done:
     FUNC_LEAVE(ret_value);
 }   /* end H5S_extent_release() */
 
@@ -429,6 +430,8 @@ H5S_extent_release(H5S_t *ds)
 herr_t
 H5S_close(H5S_t *ds)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_close, FAIL);
 
     assert(ds);
@@ -446,7 +449,8 @@ H5S_close(H5S_t *ds)
     /* Release the main structure */
     H5FL_FREE(H5S_t,ds);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -505,6 +509,8 @@ done:
 herr_t
 H5S_release_simple(H5S_simple_t *simple)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_release_simple, FAIL);
 
     assert(simple);
@@ -518,7 +524,8 @@ H5S_release_simple(H5S_simple_t *simple)
         H5FL_ARR_FREE(hsize_t,simple->perm);
 #endif /* LATER */
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -626,6 +633,7 @@ herr_t
 H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
 {
     unsigned u;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_extent_copy, FAIL);
 
@@ -659,7 +667,8 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
             break;
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1260,6 +1269,7 @@ H5S_is_simple(const H5S_t *sdim)
     ret_value = (sdim->extent.type == H5S_SIMPLE ||
 	  sdim->extent.type == H5S_SCALAR) ? TRUE : FALSE;
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -1748,6 +1758,7 @@ H5S_get_simple_extent_type(const H5S_t *space)
 
     ret_value=space->extent.type;
     
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -1937,6 +1948,7 @@ herr_t
 H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth)
 {
     const H5S_t	*mesg = (const H5S_t*)_mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5S_debug, FAIL);
     
@@ -1959,6 +1971,7 @@ H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth)
             break;
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 

@@ -890,6 +890,7 @@ H5S_mpio_spaces_read(H5F_t *f, const H5O_layout_t *layout,
 				     file_space, mem_space, dxpl_id,
 				     buf, 0/*read*/);
 
+done:
     FUNC_LEAVE (ret_value);
 }
 
@@ -929,6 +930,7 @@ H5S_mpio_spaces_write(H5F_t *f, const H5O_layout_t *layout,
 				     file_space, mem_space, dxpl_id,
 				     (void*)buf, 1/*write*/);
 
+done:
     FUNC_LEAVE (ret_value);
 }
 

@@ -170,6 +170,7 @@ H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size)
 {
     hsize_t	val=0;
     size_t	i, hs;
+    hsize_t	ret_value;      /* Return value */
     
     FUNC_ENTER_NOAPI(H5T_bit_get_d, 0);
 
@@ -177,22 +178,26 @@ H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size)
 
     H5T_bit_copy ((uint8_t*)&val, 0, buf, offset, size);
     switch (((H5T_t*)(H5I_object(H5T_NATIVE_INT_g)))->u.atomic.order) {
-    case H5T_ORDER_LE:
-	break;
+        case H5T_ORDER_LE:
+            break;
 
-    case H5T_ORDER_BE:
-	for (i=0, hs=sizeof(val)/2; i<hs; i++) {
-	    uint8_t tmp = ((uint8_t*)&val)[i];
-	    ((uint8_t*)&val)[i] = ((uint8_t*)&val)[sizeof(val)-(i+1)];
-	    ((uint8_t*)&val)[sizeof(val)-(i+1)] = tmp;
-	}
-	break;
+        case H5T_ORDER_BE:
+            for (i=0, hs=sizeof(val)/2; i<hs; i++) {
+                uint8_t tmp = ((uint8_t*)&val)[i];
+                ((uint8_t*)&val)[i] = ((uint8_t*)&val)[sizeof(val)-(i+1)];
+                ((uint8_t*)&val)[sizeof(val)-(i+1)] = tmp;
+            }
+            break;
 
-    default:
-	HDabort ();
+        default:
+            HDabort ();
     }
 
-    FUNC_LEAVE (val);
+    /* Set return value */
+    ret_value=val;
+
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 

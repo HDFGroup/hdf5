@@ -93,9 +93,13 @@ static herr_t H5P_free_prop(H5P_genprop_t *prop);
 herr_t
 H5P_init(void)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5P_init, FAIL);
     /* FUNC_ENTER() does all the work */
-    FUNC_LEAVE(SUCCEED);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -6551,6 +6555,8 @@ H5P_get_nprops_plist(H5P_genplist_t *plist, size_t *nprops)
 --------------------------------------------------------------------------*/
 herr_t H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5P_get_nprops_pclass, FAIL);
 
     assert(pclass);
@@ -6559,7 +6565,8 @@ herr_t H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops)
     /* Get property size */
     *nprops=pclass->nprops;
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5P_get_nprops_pclass() */
 
 
@@ -7462,6 +7469,7 @@ unsigned H5P_peek_unsigned(H5P_genplist_t *plist, const char *name)
     /* Get the value to return, don't worry about the return value, we can't return it */
     H5P_get(plist,name,&ret_value);
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5P_peek_unsigned() */
 
@@ -7505,6 +7513,7 @@ hid_t H5P_peek_hid_t(H5P_genplist_t *plist, const char *name)
     /* Get the value to return, don't worry about the return value, we can't return it */
     H5P_get(plist,name,&ret_value);
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5P_peek_hid_t() */
 
@@ -7548,6 +7557,7 @@ void *H5P_peek_voidp(H5P_genplist_t *plist, const char *name)
     /* Get the value to return, don't worry about the return value, we can't return it */
     H5P_get(plist,name,&ret_value);
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5P_peek_voidp() */
 
@@ -7591,6 +7601,7 @@ hsize_t H5P_peek_hsize_t(H5P_genplist_t *plist, const char *name)
     /* Get the value to return, don't worry about the return value, we can't return it */
     H5P_get(plist,name,&ret_value);
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5P_peek_hsize_t() */
 
@@ -7634,6 +7645,7 @@ size_t H5P_peek_size_t(H5P_genplist_t *plist, const char *name)
     /* Get the value to return, don't worry about the return value, we can't return it */
     H5P_get(plist,name,&ret_value);
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5P_peek_size_t() */
 
@@ -8409,6 +8421,7 @@ char *H5P_get_class_name(H5P_genclass_t *pclass)
     /* Get property size */
     ret_value=HDstrdup(pclass->name);
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5P_get_class_name() */
 

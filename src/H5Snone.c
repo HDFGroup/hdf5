@@ -40,13 +40,16 @@ static int             interface_initialize_g = 0;
 herr_t
 H5S_none_iter_init (const H5S_t UNUSED *space, size_t UNUSED elmt_size, H5S_sel_iter_t UNUSED *sel_iter)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_none_iter_init, FAIL);
 
     /* Check args */
     assert (space && H5S_SEL_NONE==space->select.type);
     assert (sel_iter);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_none_iter_init() */
 
 
@@ -67,12 +70,15 @@ H5S_none_iter_init (const H5S_t UNUSED *space, size_t UNUSED elmt_size, H5S_sel_
 hsize_t
 H5S_none_iter_nelmts (const H5S_sel_iter_t UNUSED *sel_iter)
 {
+    hsize_t ret_value=0;        /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_none_iter_nelmts, 0);
 
     /* Check args */
     assert (sel_iter);
 
-    FUNC_LEAVE (0);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_none_iter_nelmts() */
 
 
@@ -96,12 +102,15 @@ H5S_none_iter_nelmts (const H5S_sel_iter_t UNUSED *sel_iter)
 herr_t
 H5S_none_iter_release (H5S_sel_iter_t * UNUSED sel_iter)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_none_iter_release, FAIL);
 
     /* Check args */
     assert (sel_iter);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_none_iter_release() */
 
 
@@ -125,12 +134,15 @@ H5S_none_iter_release (H5S_sel_iter_t * UNUSED sel_iter)
 herr_t
 H5S_none_release (H5S_t * UNUSED space)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_none_release, FAIL);
 
     /* Check args */
     assert (space);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_none_release() */
 
 
@@ -155,12 +167,15 @@ H5S_none_release (H5S_t * UNUSED space)
 hsize_t
 H5S_none_npoints (const H5S_t UNUSED *space)
 {
+    hsize_t ret_value=0;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_none_npoints, 0);
 
     /* Check args */
     assert (space);
 
-    FUNC_LEAVE (0);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_none_npoints() */
 
 
@@ -187,11 +202,14 @@ H5S_none_npoints (const H5S_t UNUSED *space)
 htri_t
 H5S_none_is_valid (const H5S_t UNUSED *space)
 {
+    htri_t ret_value=TRUE;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_none_is_valid, FAIL);
 
     assert(space);
 
-    FUNC_LEAVE (TRUE);
+done:
+    FUNC_LEAVE (ret_value);
 } /* end H5S_none_is_valid() */
 
 
@@ -217,7 +235,7 @@ H5S_none_is_valid (const H5S_t UNUSED *space)
 hssize_t
 H5S_none_serial_size (const H5S_t UNUSED *space)
 {
-    hssize_t ret_value=FAIL;    /* return value */
+    hssize_t ret_value;    /* return value */
 
     FUNC_ENTER_NOAPI(H5S_none_serial_size, FAIL);
 
@@ -229,6 +247,7 @@ H5S_none_serial_size (const H5S_t UNUSED *space)
      */
     ret_value=16;
 
+done:
     FUNC_LEAVE (ret_value);
 } /* end H5S_none_serial_size() */
 
@@ -255,6 +274,8 @@ H5S_none_serial_size (const H5S_t UNUSED *space)
 herr_t
 H5S_none_serialize (const H5S_t *space, uint8_t *buf)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_none_serialize, FAIL);
 
     assert(space);
@@ -265,7 +286,8 @@ H5S_none_serialize (const H5S_t *space, uint8_t *buf)
     UINT32ENCODE(buf, (uint32_t)0);  /* Store the un-used padding */
     UINT32ENCODE(buf, (uint32_t)0);  /* Store the additional information length */
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_none_serialize() */
 
 
@@ -334,13 +356,16 @@ done:
 herr_t
 H5S_none_bounds(const H5S_t UNUSED *space, hsize_t UNUSED *start, hsize_t UNUSED *end)
 {
+    herr_t ret_value=FAIL;      /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_none_bounds, FAIL);
 
     assert(space);
     assert(start);
     assert(end);
 
-    FUNC_LEAVE (FAIL);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5Sget_none_bounds() */
 
 
@@ -365,11 +390,14 @@ H5S_none_bounds(const H5S_t UNUSED *space, hsize_t UNUSED *start, hsize_t UNUSED
 htri_t
 H5S_none_is_contiguous(const H5S_t UNUSED *space)
 {
+    htri_t ret_value=FALSE;      /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_none_is_contiguous, FAIL);
 
     assert(space);
 
-    FUNC_LEAVE (FALSE);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_none_is_contiguous() */
 
 
@@ -394,11 +422,14 @@ H5S_none_is_contiguous(const H5S_t UNUSED *space)
 htri_t
 H5S_none_is_single(const H5S_t UNUSED *space)
 {
+    htri_t ret_value=FALSE;      /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_none_is_single, FAIL);
 
     assert(space);
 
-    FUNC_LEAVE (FALSE);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_none_is_single() */
 
 
@@ -424,12 +455,15 @@ H5S_none_is_single(const H5S_t UNUSED *space)
 htri_t
 H5S_none_is_regular(const H5S_t UNUSED *space)
 {
+    htri_t ret_value=TRUE;      /* Return value */
+
     FUNC_ENTER_NOAPI(H5S_none_is_regular, FAIL);
 
     /* Check args */
     assert(space);
 
-    FUNC_LEAVE (TRUE);
+done:
+    FUNC_LEAVE (ret_value);
 }   /* H5S_none_is_regular() */
 
 
@@ -560,6 +594,8 @@ H5S_none_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_
     size_t UNUSED elem_size, size_t UNUSED maxseq, size_t UNUSED maxbytes, size_t *nseq, size_t *nbytes,
     hsize_t UNUSED *off, size_t UNUSED *len)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI (H5S_none_get_seq_list, FAIL);
 
     /* Check args */
@@ -579,5 +615,6 @@ H5S_none_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_
     /* The don't use any bytes, either */
     *nbytes=0;
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 } /* end H5S_all_get_seq_list() */

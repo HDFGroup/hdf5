@@ -108,9 +108,13 @@ H5FL_BLK_EXTERN(sieve_buf);
 herr_t
 H5F_init(void)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5F_init, FAIL);
     /* FUNC_ENTER() does all the work */
-    FUNC_LEAVE(SUCCEED);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -672,11 +676,14 @@ H5F_flush_all_cb(H5F_t *f, hid_t UNUSED fid, const void *_invalidate)
 herr_t
 H5F_flush_all(hbool_t invalidate)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5F_flush_all, FAIL);
 
     H5I_search(H5I_FILE,(H5I_search_func_t)H5F_flush_all_cb,(void*)&invalidate);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3026,6 +3033,7 @@ H5F_mountpoint(H5G_entry_t *find/*in,out*/)
     H5F_t	*parent = find->file;
     int	lt, rt, md=(-1), cmp;
     H5G_entry_t	*ent = NULL;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5F_mountpoint, FAIL);
 
@@ -3062,7 +3070,8 @@ H5F_mountpoint(H5G_entry_t *find/*in,out*/)
 	}
     } while (!cmp);
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

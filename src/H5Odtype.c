@@ -849,7 +849,7 @@ H5O_dtype_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode type");
 
 done:
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -985,6 +985,7 @@ H5O_dtype_size(H5F_t *f, const void *mesg)
             break;
     }
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -1043,13 +1044,16 @@ done:
 static herr_t
 H5O_dtype_free (void *mesg)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5O_dtype_free, FAIL);
 
     assert (mesg);
 
     H5FL_FREE(H5T_t,mesg);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -1111,6 +1115,7 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
 		     const H5O_shared_t *sh)
 {
     H5T_t	*dt = (H5T_t *)_mesg;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_dtype_set_share, FAIL);
 
@@ -1121,7 +1126,8 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
     dt->ent = sh->u.ent;
     dt->state = H5T_STATE_NAMED;
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -1153,6 +1159,7 @@ H5O_dtype_debug(H5F_t *f, const void *mesg, FILE *stream,
     char		buf[256];
     int		i;
     size_t		k;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5O_dtype_debug, FAIL);
 
@@ -1411,5 +1418,6 @@ H5O_dtype_debug(H5F_t *f, const void *mesg, FILE *stream,
 	}
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }

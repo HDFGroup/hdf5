@@ -156,6 +156,7 @@ H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     unsigned                     u;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_layout_encode, FAIL);
 
@@ -191,7 +192,8 @@ H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     for (u = 0; u < mesg->ndims; u++)
         UINT32ENCODE(p, mesg->dim[u]);
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -274,6 +276,7 @@ H5O_layout_size(H5F_t *f, const void *_mesg)
         6 +                     /* reserved bytes       */
         mesg->ndims * 4;        /* alignment            */
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -295,13 +298,16 @@ H5O_layout_size(H5F_t *f, const void *_mesg)
 static herr_t
 H5O_layout_free (void *mesg)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5O_layout_free, FAIL);
 
     assert (mesg);
 
     H5FL_FREE(H5O_layout_t,mesg);
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -325,6 +331,7 @@ H5O_layout_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     unsigned                    u;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_layout_debug, FAIL);
 
@@ -351,5 +358,6 @@ H5O_layout_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
     }
     HDfprintf(stream, "}\n");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }

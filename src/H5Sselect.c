@@ -255,6 +255,7 @@ H5S_select_deserialize (H5S_t *space, const uint8_t *buf)
             break;
     }
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_select_deserialize() */
 

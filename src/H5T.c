@@ -231,11 +231,16 @@ static H5T_t * H5T_vlen_create(H5T_t *base);
 herr_t
 H5T_init(void)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5T_init, FAIL);
     /* FUNC_ENTER() does all the work */
-    FUNC_LEAVE(SUCCEED);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
+
 /*--------------------------------------------------------------------------
 NAME
    H5T_init_interface -- Initialize interface-specific information
@@ -2442,6 +2447,7 @@ H5T_get_class(const H5T_t *dt)
     else
         ret_value=dt->type;
 
+done:
     FUNC_LEAVE(ret_value);
 }   /* end H5T_get_class() */
 
@@ -2637,7 +2643,7 @@ H5Tset_size(hid_t type_id, size_t size)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set size for data type");
 
 done:
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -4860,6 +4866,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
     H5T_soft_t	*soft = NULL;		/*soft conversion information	*/
     int	nprint=0;		/*number of paths shut down	*/
     int	i;			/*counter			*/
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_unregister, FAIL);
 
@@ -4914,7 +4921,8 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
         H5E_clear(); /*ignore all shutdown errors*/
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }   /* end H5T_unregister() */
 
 
@@ -5128,12 +5136,15 @@ done:
 herr_t
 H5Tset_overflow(H5T_overflow_t func)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_API(H5Tset_overflow, FAIL);
     H5TRACE1("e","x",func);
 
     H5T_overflow_g = func;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -5665,6 +5676,8 @@ done:
 herr_t
 H5T_lock (H5T_t *dt, hbool_t immutable)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5T_lock, FAIL);
     assert (dt);
 
@@ -5682,7 +5695,8 @@ H5T_lock (H5T_t *dt, hbool_t immutable)
             break;
     }
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -5799,6 +5813,7 @@ H5T_is_atomic(const H5T_t *dt)
     else
 	ret_value = FALSE;
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -6329,6 +6344,7 @@ H5T_sort_value(H5T_t *dt, int *map)
     size_t	size;
     hbool_t	swapped;
     uint8_t	tbuf[32];
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_sort_value, FAIL);
 
@@ -6409,7 +6425,8 @@ H5T_sort_value(H5T_t *dt, int *map)
 	}
     }
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -6438,6 +6455,7 @@ H5T_sort_name(H5T_t *dt, int *map)
     size_t	size;
     hbool_t	swapped;
     uint8_t	tbuf[32];
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_sort_name, FAIL);
 
@@ -6514,7 +6532,8 @@ H5T_sort_name(H5T_t *dt, int *map)
 	}
     }
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -7510,6 +7529,7 @@ H5T_is_immutable(H5T_t *dt)
     if(dt->state == H5T_STATE_IMMUTABLE)
 	ret_value = TRUE;
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -7546,6 +7566,7 @@ H5T_get_ref_type(const H5T_t *dt)
     if(dt->type==H5T_REFERENCE)
         ret_value=dt->u.atomic.u.r.rtype;
 
+done:
     FUNC_LEAVE(ret_value);
 }   /* end H5T_get_ref_type() */
 
@@ -7815,6 +7836,7 @@ H5T_is_sensible(const H5T_t *dt)
             break;
     } /* end switch */
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -7905,6 +7927,7 @@ H5T_debug(const H5T_t *dt, FILE *stream)
     int		i;
     size_t	k, base_size;
     uint64_t	tmp;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_debug, FAIL);
 
@@ -8090,6 +8113,7 @@ H5T_debug(const H5T_t *dt, FILE *stream)
     }
     fprintf(stream, "}");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 

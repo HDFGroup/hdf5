@@ -219,6 +219,8 @@ static int interface_initialize_g = 0;
  */
 hid_t H5FD_stream_init (void)
 {
+  hid_t ret_value=H5FD_STREAM_g;        /* Return value */
+
   FUNC_ENTER_NOAPI(H5FD_stream_init, FAIL);
 
   if (H5I_VFL != H5Iget_type (H5FD_STREAM_g)) {
@@ -233,7 +235,11 @@ hid_t H5FD_stream_init (void)
 #endif
   }
 
-  FUNC_LEAVE (H5FD_STREAM_g);
+    /* Set return value */
+    ret_value=H5FD_STREAM_g;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -346,7 +352,7 @@ H5FD_stream_fapl_get (H5FD_t *_stream)
 {
   H5FD_stream_t      *stream = (H5FD_stream_t *) _stream;
   H5FD_stream_fapl_t *fapl;
-  H5FD_t      *ret_value;
+  void      *ret_value;
 
   FUNC_ENTER_NOAPI(H5FD_stream_fapl_get, NULL);
 
@@ -381,9 +387,9 @@ H5FD_stream_open_socket (const char *filename, int o_flags,
   /* Parse "hostname:port" from filename argument */
   for (separator = filename; *separator != ':' && *separator; separator++)
       ;
-  if (separator == filename || !*separator)
+  if (separator == filename || !*separator) {
     HGOTO_ERROR(H5E_ARGS,H5E_BADVALUE,H5FD_STREAM_INVALID_SOCKET,"invalid host address");
-  else {
+  } else {
     tmp = separator;
     if (! tmp[1])
         HGOTO_ERROR(H5E_ARGS,H5E_BADVALUE,H5FD_STREAM_INVALID_SOCKET,"no port number");
@@ -407,9 +413,9 @@ H5FD_stream_open_socket (const char *filename, int o_flags,
   server.sin_family = AF_INET;
   server.sin_port = htons (fapl->port);
 
-  if (! (he = gethostbyname (hostname)))
+  if (! (he = gethostbyname (hostname))) {
     HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to get host address");
-  else if (H5FD_STREAM_ERROR_CHECK (sock = socket (AF_INET, SOCK_STREAM, 0)))
+  } else if (H5FD_STREAM_ERROR_CHECK (sock = socket (AF_INET, SOCK_STREAM, 0)))
     HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to open socket");
 
     if (O_RDONLY == o_flags) {
@@ -423,15 +429,15 @@ H5FD_stream_open_socket (const char *filename, int o_flags,
     }
     else {
       server.sin_addr.s_addr = INADDR_ANY;
-      if (H5FD_STREAM_IOCTL_SOCKET (sock, FIONBIO, &on) < 0)
+      if (H5FD_STREAM_IOCTL_SOCKET (sock, FIONBIO, &on) < 0) {
         HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to set non-blocking mode for socket");
-      else if (setsockopt (sock, IPPROTO_TCP, TCP_NODELAY, (const char *) &on,
-                           sizeof(on)) < 0)
+      } else if (setsockopt (sock, IPPROTO_TCP, TCP_NODELAY, (const char *) &on,
+                           sizeof(on)) < 0) {
         HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to set socket option TCP_NODELAY");
-      else if (setsockopt (sock, SOL_SOCKET, SO_REUSEADDR, (const char *) &on,
-                           sizeof(on)) < 0)
+      } else if (setsockopt (sock, SOL_SOCKET, SO_REUSEADDR, (const char *) &on,
+                           sizeof(on)) < 0) {
         HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,H5FD_STREAM_INVALID_SOCKET,"unable to set socket option SO_REUSEADDR");
-      else {
+      } else {
         /* Try to bind the socket to the given port.
            If maxhunt is given try some successive ports also. */
         first_port = fapl->port;
@@ -558,7 +564,7 @@ H5FD_stream_open (const char *filename,
 #ifdef WIN32
   WSADATA wsadata;
 #endif
-  H5P_genplist_t *plist;        /* Property list pointer */
+  H5P_genplist_t *plist=NULL;        /* Property list pointer */
   H5FD_t *ret_value;       /* Function return value */
 
   FUNC_ENTER_NOAPI(H5FD_stream_open, NULL);
@@ -695,6 +701,7 @@ H5FD_stream_flush (H5FD_t *_stream, unsigned UNUSED closing)
   struct sockaddr from;
   socklen_t fromlen;
   H5FD_STREAM_SOCKET_TYPE sock;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
   FUNC_ENTER_NOAPI(H5FD_stream_flush, FAIL);
 
@@ -735,7 +742,8 @@ H5FD_stream_flush (H5FD_t *_stream, unsigned UNUSED closing)
     stream->dirty = FALSE;
   }
 
-  FUNC_LEAVE (SUCCEED);
+done:
+  FUNC_LEAVE (ret_value);
 }
 
 
@@ -797,9 +805,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_stream_query(const H5FD_t * UNUSED _f,
+H5FD_stream_query(const H5FD_t UNUSED * _f,
                   unsigned long *flags/*out*/)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5FD_stream_query, SUCCEED);
 
     /* Set the VFL feature flags that this driver supports */
@@ -810,7 +820,8 @@ H5FD_stream_query(const H5FD_t * UNUSED _f,
         *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
     }
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -835,10 +846,15 @@ static haddr_t
 H5FD_stream_get_eoa (H5FD_t *_stream)
 {
   H5FD_stream_t *stream = (H5FD_stream_t *) _stream;
+  haddr_t ret_value;            /* Return value */
 
   FUNC_ENTER_NOAPI(H5FD_stream_get_eoa, HADDR_UNDEF);
 
-  FUNC_LEAVE (stream->eoa);
+    /* Set return value */
+    ret_value=stream->eoa;
+
+done:
+  FUNC_LEAVE (ret_value);
 }
 
 
@@ -900,10 +916,15 @@ static haddr_t
 H5FD_stream_get_eof (H5FD_t *_stream)
 {
   H5FD_stream_t        *stream = (H5FD_stream_t *) _stream;
+  haddr_t ret_value;    /* Return value */
 
   FUNC_ENTER_NOAPI(H5FD_stream_get_eof, HADDR_UNDEF);
 
-  FUNC_LEAVE (MAX (stream->eof, stream->eoa));
+    /* Set return value */
+    ret_value= MAX (stream->eof, stream->eoa);
+
+done:
+  FUNC_LEAVE (ret_value);
 }
 
 

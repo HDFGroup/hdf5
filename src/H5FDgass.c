@@ -184,6 +184,8 @@ static int interface_initialize_g = 0;
 hid_t
 H5FD_gass_init(void)
 {
+    hid_t ret_value=H5FD_GASS_g;        /* Return value */
+
     FUNC_ENTER_NOAPI(H5FD_gass_init, FAIL);
 
     if (!H5FD_GASS_g)
@@ -192,10 +194,14 @@ H5FD_gass_init(void)
     globus_module_activate (GLOBUS_COMMON_MODULE);
     globus_module_activate (GLOBUS_GASS_FILE_MODULE);
 
-    FUNC_LEAVE(H5FD_GASS_g);
+    /* Set return value */
+    ret_value=H5FD_GASS_g;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_fapl_gass
  *
@@ -301,7 +307,7 @@ done:
     FUNC_LEAVE(ret_value);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_gass_open
  *
@@ -431,6 +437,7 @@ done:
     FUNC_LEAVE(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_gass_close
  *
@@ -464,10 +471,9 @@ H5FD_gass_close (H5FD_t *_file)
     H5MM_xfree(file);
 
 done:
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(ret_value);
 }
 
-	
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_gass_query
@@ -500,6 +506,7 @@ H5FD_gass_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
         *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
     }
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -526,10 +533,15 @@ static haddr_t
 H5FD_gass_get_eoa(H5FD_t *_file)
 {
     H5FD_gass_t *file = (H5FD_gass_t *)_file;
+    haddr_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_gass_get_eoa, HADDR_UNDEF);
 
-    FUNC_LEAVE(file->eoa);
+    /* Set return value */
+    ret_value=file->eoa;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -553,15 +565,17 @@ static herr_t
 H5FD_gass_set_eoa(H5FD_t *_file, haddr_t addr)
 {
     H5FD_gass_t *file = (H5FD_gass_t *)_file;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_gass_set_eoa, FAIL);
 
     file->eoa = addr;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_gass_get_eof
  *
@@ -586,10 +600,15 @@ static haddr_t
 H5FD_gass_get_eof(H5FD_t *_file)
 {
     H5FD_gass_t *file = (H5FD_gass_t*)_file;
+    haddr_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_gass_get_eof, HADDR_UNDEF);
 
-    FUNC_LEAVE(MAX(file->eof, file->eoa));
+    /* Set return value */
+    ret_value=MAX(file->eof, file->eoa);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 

@@ -202,6 +202,7 @@ void *
 H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
 {
     H5FL_reg_node_t *temp;      /* Temp. ptr to the new free list node allocated */
+    void *ret_value=NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FL_reg_free, NULL);
 
@@ -241,7 +242,8 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
     if(H5FL_reg_gc_head.mem_freed>H5FL_reg_glb_mem_lim)
         H5FL_reg_gc();
 
-    FUNC_LEAVE(NULL);
+done:
+    FUNC_LEAVE(ret_value);
 }   /* end H5FL_reg_free() */
 
 
@@ -733,6 +735,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
     H5FL_blk_node_t *free_list;      /* The free list of nodes of correct size */
     H5FL_blk_list_t *temp;      /* Temp. ptr to the new free list node allocated */
     size_t free_size;           /* Size of the block freed */
+    void *ret_value=NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FL_blk_free, NULL);
 
@@ -774,7 +777,8 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
     if(H5FL_blk_gc_head.mem_freed>H5FL_blk_glb_mem_lim)
         H5FL_blk_gc();
 
-    FUNC_LEAVE(NULL);
+done:
+    FUNC_LEAVE(ret_value);
 } /* end H5FL_blk_free() */
 
 
@@ -1279,6 +1283,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, size_t new_elem)
             ret_value=H5FL_blk_realloc(&(head->u.queue),obj,head->size*new_elem);
     } /* end else */
 
+done:
     FUNC_LEAVE (ret_value);
 }   /* end H5FL_arr_realloc() */
 
@@ -1565,6 +1570,7 @@ H5FL_set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_l
     /* limit on each block free list */
     H5FL_blk_lst_mem_lim=(blk_list_lim==-1 ? UINT_MAX : (size_t)blk_list_lim);
 
+done:
     FUNC_LEAVE(ret_value);
 }   /* end H5FL_set_free_list_limits() */
 

@@ -80,6 +80,8 @@ done:
 herr_t
 H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
 {
+    herr_t ret_value=SUCCEED;   /* Return value */
+
     FUNC_ENTER_NOAPI(H5G_ent_modified, FAIL);
 
     assert(ent);
@@ -88,7 +90,8 @@ H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
         ent->type = cache_type;
     ent->dirty = TRUE;
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -166,6 +169,7 @@ H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
 {
     const uint8_t	*p_ret = *pp;
     uint32_t		tmp;
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_ent_decode, FAIL);
 
@@ -203,8 +207,11 @@ H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
     }
 
     *pp = p_ret + H5G_SIZEOF_ENTRY(f);
-    FUNC_LEAVE(SUCCEED);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5G_ent_encode_vec
@@ -282,6 +289,7 @@ herr_t
 H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
 {
     uint8_t		*p_ret = *pp + H5G_SIZEOF_ENTRY(f);
+    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_ent_encode, FAIL);
 
@@ -325,8 +333,10 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
     while (*pp < p_ret) *(*pp)++ = 0;
     *pp = p_ret;
     
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5G_ent_debug
@@ -351,6 +361,7 @@ H5G_ent_debug(H5F_t UNUSED *f, const H5G_entry_t *ent, FILE * stream,
 	      int indent, int fwidth, haddr_t heap)
 {
     const char		*lval = NULL;
+    herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_ent_debug, FAIL);
 
@@ -399,5 +410,6 @@ H5G_ent_debug(H5F_t UNUSED *f, const H5G_entry_t *ent, FILE * stream,
         break;
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
