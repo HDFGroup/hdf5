@@ -631,8 +631,17 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		    double x = va_arg (ap, double);
 		    n = fprintf (stream, template, x);
 		} else {
+		    /*
+		     * Some compilers complain when `long double' and
+		     * `double' are the same thing.
+		     */
+#if SIZEOF_LONG_DOUBLE != SIZEOF_DOUBLE
 		    long double x = va_arg (ap, long double);
 		    n = fprintf (stream, template, x);
+#else
+		    double x = va_arg (ap, double);
+		    n = fprintf (stream, template, x);
+#endif
 		}
 		break;
 

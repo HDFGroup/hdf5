@@ -209,6 +209,7 @@
 ./test/.distdep
 ./test/Makefile.in
 ./test/big.c
+./test/bittests.c
 ./test/chunk.c
 ./test/cmpd_dset.c
 ./test/dsets.c

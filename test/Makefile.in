@@ -11,10 +11,10 @@ CPPFLAGS=-I. -I../src @CPPFLAGS@
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
-PROGS=testhdf5 gheap hyperslab istore dtypes dsets cmpd_dset extend external \
-      shtype iopipe big links chunk
-TESTS=testhdf5 gheap hyperslab istore dtypes dsets cmpd_dset extend external \
-      shtype links
+PROGS=testhdf5 gheap hyperslab istore bittests dtypes dsets cmpd_dset extend \
+      external shtype iopipe big links chunk
+TESTS=testhdf5 gheap hyperslab istore bittests dtypes dsets cmpd_dset extend \
+      external shtype links
 TIMINGS=iopipe chunk
 
 # Temporary files
@@ -32,7 +32,7 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 # overlap with other tests.
 PROG_SRC=testhdf5.c tattr.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5s.c \
 	dtypes.c hyperslab.c istore.c dsets.c cmpd_dset.c extend.c external.c \
-	iopipe.c gheap.c shtype.c big.c links.c chunk.c
+	iopipe.c gheap.c shtype.c big.c links.c chunk.c bittests.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 
 TESTHDF5_SRC=testhdf5.c tattr.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5s.c
@@ -43,6 +43,9 @@ GHEAP_OBJ=$(GHEAP_SRC:.c=.o)
 
 DSETS_SRC=dsets.c
 DSETS_OBJ=$(DSETS_SRC:.c=.o)
+
+BITTESTS_SRC=bittests.c
+BITTESTS_OBJ=$(BITTESTS_SRC:.c=.o)
 
 DTYPES_SRC=dtypes.c
 DTYPES_OBJ=$(DTYPES_SRC:.c=.o)
@@ -102,6 +105,9 @@ gheap: $(GHEAP_OBJ) ../src/libhdf5.a
 
 dsets: $(DSETS_OBJ) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ $(DSETS_OBJ) ../src/libhdf5.a $(LIBS)
+
+bittests: $(BITTESTS_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(BITTESTS_OBJ) ../src/libhdf5.a $(LIBS)
 
 dtypes: $(DTYPES_OBJ) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ $(DTYPES_OBJ) ../src/libhdf5.a $(LIBS)

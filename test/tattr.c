@@ -134,7 +134,7 @@ test_attr_basic_write(void)
     VERIFY(ret, FAIL, "H5Acreate");
 
     /* Write attribute information */
-    ret=H5Awrite(attr,H5T_NATIVE_INT32,&attr_data1);
+    ret=H5Awrite(attr,H5T_NATIVE_INT32,attr_data1);
     CHECK(ret, FAIL, "H5Awrite");
 
     /* Close attribute */
@@ -167,7 +167,7 @@ test_attr_basic_write(void)
     VERIFY(ret, FAIL, "H5Acreate");
 
     /* Write attribute information */
-    ret=H5Awrite(attr,H5T_NATIVE_INT32,&attr_data2);
+    ret=H5Awrite(attr,H5T_NATIVE_INT32,attr_data2);
     CHECK(ret, FAIL, "H5Awrite");
 
     /* Close attribute */
@@ -224,7 +224,7 @@ test_attr_basic_read(void)
     CHECK(attr, FAIL, "H5Aopen_name");
 
     /* Read attribute information */
-    ret=H5Aread(attr,H5T_NATIVE_INT32,&read_data1);
+    ret=H5Aread(attr,H5T_NATIVE_INT32,read_data1);
     CHECK(ret, FAIL, "H5Aread");
 
     /* Verify values read in */
@@ -253,7 +253,7 @@ test_attr_basic_read(void)
     CHECK(attr, FAIL, "H5Aopen_name");
 
     /* Read attribute information */
-    ret=H5Aread(attr,H5T_NATIVE_INT32,&read_data2);
+    ret=H5Aread(attr,H5T_NATIVE_INT32,read_data2);
     CHECK(ret, FAIL, "H5Aread");
 
     /* Verify values read in */
@@ -339,7 +339,7 @@ test_attr_compound_write(void)
     VERIFY(ret, FAIL, "H5Acreate");
 
     /* Write complex attribute data */
-    ret=H5Awrite(attr,tid1,&attr_data4);
+    ret=H5Awrite(attr,tid1,attr_data4);
     CHECK(ret, FAIL, "H5Awrite");
 
     /* Close attribute */
@@ -480,7 +480,7 @@ test_attr_compound_read(void)
     H5Tclose(field);
 
     /* Read attribute information */
-    ret=H5Aread(attr,type,&read_data4);
+    ret=H5Aread(attr,type,read_data4);
     CHECK(ret, FAIL, "H5Aread");
 
     /* Verify values read in */
@@ -681,7 +681,7 @@ test_attr_mult_write(void)
     VERIFY(ret, FAIL, "H5Acreate");
 
     /* Write 1st attribute data */
-    ret=H5Awrite(attr,H5T_NATIVE_INT32,&attr_data1);
+    ret=H5Awrite(attr,H5T_NATIVE_INT32,attr_data1);
     CHECK(ret, FAIL, "H5Awrite");
 
     /* Close 1st attribute */
@@ -705,7 +705,7 @@ test_attr_mult_write(void)
     VERIFY(ret, FAIL, "H5Acreate");
 
     /* Write 2nd attribute information */
-    ret=H5Awrite(attr,H5T_NATIVE_INT32,&attr_data2);
+    ret=H5Awrite(attr,H5T_NATIVE_INT32,attr_data2);
     CHECK(ret, FAIL, "H5Awrite");
 
     /* Close 2nd attribute */
@@ -729,7 +729,7 @@ test_attr_mult_write(void)
     VERIFY(ret, FAIL, "H5Acreate");
 
     /* Write 3rd attribute information */
-    ret=H5Awrite(attr,H5T_NATIVE_DOUBLE,&attr_data3);
+    ret=H5Awrite(attr,H5T_NATIVE_DOUBLE,attr_data3);
     CHECK(ret, FAIL, "H5Awrite");
 
     /* Close 3rd attribute */
@@ -819,7 +819,7 @@ test_attr_mult_read(void)
     H5Tclose(type);
 
     /* Read attribute information */
-    ret=H5Aread(attr,H5T_NATIVE_INT32,&read_data1);
+    ret=H5Aread(attr,H5T_NATIVE_INT32,read_data1);
     CHECK(ret, FAIL, "H5Aread");
 
     /* Verify values read in */
@@ -884,7 +884,7 @@ test_attr_mult_read(void)
     H5Tclose(type);
 
     /* Read attribute information */
-    ret=H5Aread(attr,H5T_NATIVE_INT32,&read_data2);
+    ret=H5Aread(attr,H5T_NATIVE_INT32,read_data2);
     CHECK(ret, FAIL, "H5Aread");
 
     /* Verify values read in */
@@ -954,7 +954,7 @@ test_attr_mult_read(void)
     H5Tclose(type);
 
     /* Read attribute information */
-    ret=H5Aread(attr,H5T_NATIVE_DOUBLE,&read_data3);
+    ret=H5Aread(attr,H5T_NATIVE_DOUBLE,read_data3);
     CHECK(ret, FAIL, "H5Aread");
 
     /* Verify values read in */

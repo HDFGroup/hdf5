@@ -148,6 +148,7 @@ AC_CHECK_SIZEOF(long, 4)
 AC_CHECK_SIZEOF(long long, 8)
 AC_CHECK_SIZEOF(float, 4)
 AC_CHECK_SIZEOF(double, 8)
+AC_CHECK_SIZEOF(long double, 8)
 AC_CHECK_SIZEOF(size_t, 4)
 cat >>confdefs.h <<\EOF
 #include <sys/types.h> /*for off_t definition*/

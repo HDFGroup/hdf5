@@ -46,6 +46,9 @@
 /* The number of bytes in a long.  */
 #undef SIZEOF_LONG
 
+/* The number of bytes in a long double.  */
+#undef SIZEOF_LONG_DOUBLE
+
 /* The number of bytes in a long long.  */
 #undef SIZEOF_LONG_LONG
 
@@ -84,6 +87,9 @@
 
 /* Define if you have the coug library (-lcoug).  */
 #undef HAVE_LIBCOUG
+
+/* Define if you have the m library (-lm).  */
+#undef HAVE_LIBM
 
 /* Define if you have the mpi library (-lmpi).  */
 #undef HAVE_LIBMPI

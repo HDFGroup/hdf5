@@ -64,32 +64,33 @@
 
 /* number of members in an array */
 #ifndef NELMTS
-#    define NELMTS(X)    (sizeof(X)/sizeof(X[0]))
+#    define NELMTS(X)		(sizeof(X)/sizeof(X[0]))
 #endif
 
-/* minimum of two values */
+/* minimum of two, three, or four values */
 #ifndef MIN
-#   define MIN(a,b)    (((a)<(b)) ? (a) : (b))
+#   define MIN(a,b)		(((a)<(b)) ? (a) : (b))
+#   define MIN2(a,b)		MIN(a,b)
+#   define MIN3(a,b,c)		MIN(a,MIN(b,c))
+#   define MIN4(a,b,c,d)	MIN(MIN(a,b),MIN(c,d))
 #endif
 
-/* maximum of two values */
+/* maximum of two, three, or four values */
 #ifndef MAX
-#   define MAX(a,b)    (((a)>(b)) ? (a) : (b))
+#   define MAX(a,b)    		(((a)>(b)) ? (a) : (b))
+#   define MAX2(a,b)		MAX(a,b)
+#   define MAX3(a,b,c)		MAX(a,MAX(b,c))
+#   define MAX4(a,b,c,d)	MAX(MAX(a,b),MAX(c,d))
 #endif
 
 /* absolute value */
 #ifndef ABS
-#   define ABS(a)    (((a)>=0) ? (a) : -(a))
+#   define ABS(a)		(((a)>=0) ? (a) : -(a))
 #endif
 
 /* sign of argument */
 #ifndef SIGN
-#   define SIGN(a)    ((a)>0 ? 1 : (a)<0 ? -1 : 0)
-#endif
-
-/* maximum of three values */
-#ifndef MAX3
-#   define MAX3(a,b,c)   MAX(MAX(a,b),c)
+#   define SIGN(a)		((a)>0 ? 1 : (a)<0 ? -1 : 0)
 #endif
 
 /* maximum value of various types */

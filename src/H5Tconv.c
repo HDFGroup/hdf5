@@ -657,7 +657,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	     */
 	    sfirst = H5T_bit_find (s, src->u.atomic.offset, src->u.atomic.prec,
 				   H5T_BIT_MSB, TRUE);
-	    first = (size_t)first;
+	    first = (size_t)sfirst;
 
 	    if (sfirst<0) {
 		/*
@@ -759,7 +759,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 					    FALSE);
 		size_t fz = (size_t)sfz;
 		
-		if (sfz>=0 && fz+2>=dst->u.atomic.prec) {
+		if (sfz>=0 && fz+1>=dst->u.atomic.prec) {
 		    /*underflow*/
 		    H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec-1,
 				 FALSE);
@@ -784,7 +784,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		 * case the destination is set to the largest possible
 		 * positive value.
 		 */
-		if (first+2>=dst->u.atomic.prec) {
+		if (first+1>=dst->u.atomic.prec) {
 		    /*overflow*/
 		    H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec-1,
 				 TRUE);
@@ -796,6 +796,10 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 				  src->u.atomic.prec);
 		    H5T_bit_set (d, dst->u.atomic.offset+src->u.atomic.prec,
 				 dst->u.atomic.prec-src->u.atomic.prec, FALSE);
+		} else {
+		    H5T_bit_copy (d, dst->u.atomic.offset,
+				  s, src->u.atomic.offset,
+				  dst->u.atomic.prec);
 		}
 	    }
 
