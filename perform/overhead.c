@@ -199,7 +199,7 @@ test(fill_t fill_style, const double splits[],
     }
     if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk(dcpl, 1, ch_size)<0) goto error;
-    if ((xfer=H5Pcreate(H5P_DATASET_XFER))<0) goto error;
+    if ((xfer=H5Pcreate_list(H5P_DATASET_XFER_NEW))<0) goto error;
     if (H5Pset_btree_ratios(xfer, splits[0], splits[1], splits[2])<0) {
 	goto error;
     }
@@ -275,6 +275,7 @@ test(fill_t fill_style, const double splits[],
     H5Sclose(mspace);
     H5Sclose(fspace);
     H5Pclose(dcpl);
+    H5Pclose_list(xfer);
     H5Fclose(file);
 
     if (!verbose) {
@@ -320,6 +321,7 @@ test(fill_t fill_style, const double splits[],
     H5Sclose(mspace);
     H5Sclose(fspace);
     H5Pclose(dcpl);
+    H5Pclose_list(xfer);
     H5Fclose(file);
     free(had);
     close(fd);
@@ -354,11 +356,11 @@ main(int argc, char *argv[])
 
     /* Default split ratios */
     H5Eset_auto(display_error_cb, NULL);
-    if ((xfer=H5Pcreate(H5P_DATASET_XFER))<0) goto error;
+    if ((xfer=H5Pcreate_list(H5P_DATASET_XFER_NEW))<0) goto error;
     if (H5Pget_btree_ratios(xfer, splits+0, splits+1, splits+2)<0) {
 	goto error;
     }
-    if (H5Pclose(xfer)<0) goto error;
+    if (H5Pclose_list(xfer)<0) goto error;
     
     /* Parse command-line options */
     for (i=1, j=0; i<argc; i++) {
