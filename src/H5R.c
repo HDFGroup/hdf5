@@ -138,12 +138,14 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
     switch(ref_type) {
         case H5R_OBJECT:
         {
+            haddr_t addr;
             hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Get pointer to correct type of reference struct */
             uint8 *p;       /* Pointer to OID to store */
 
             /* Set information for reference */
             p=(uint8 *)ref->oid;
-            H5F_addr_encode(loc->file,&p,(const haddr_t *)sb.objno);
+            H5F_addr_pack(loc->file,&addr,&sb.objno[0]);
+            H5F_addr_encode(loc->file,&p,&addr);
             break;
         }
 

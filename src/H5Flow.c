@@ -1000,3 +1000,31 @@ H5F_addr_hash(const haddr_t *addr, uintn mod)
 
     return (unsigned)(addr->offset % mod);  /*ignore file number */
 }
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_addr_pack
+ *
+ * Purpose:	Converts a long[2] array (usually returned from H5G_get_objinfo)
+ *      back into a haddr_t
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, October  23, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_addr_pack(H5F_t *f, haddr_t *addr, const long objno[2])
+{
+    assert(f);
+    assert(objno);
+    assert(addr);
+
+    addr->offset=objno[0];
+    addr->offset|=((uint64)objno[1])<<(8*sizeof(long));
+    
+    return(SUCCEED);
+}
