@@ -44,6 +44,7 @@
 ./examples/h5_write.c
 ./html/Attributes.html
 ./html/Big.html
+./html/Caching.html
 ./html/CodeReview.html
 ./html/Coding.html
 ./html/Compression.html
@@ -80,6 +81,7 @@
 ./html/group_p2.obj
 ./html/group_p3.gif
 ./html/group_p3.obj
+./html/h5s.examples
 ./html/ph5design.html
 ./html/ph5example.c
 ./html/ph5implement.txt
