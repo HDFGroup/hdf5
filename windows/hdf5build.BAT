@@ -23,9 +23,9 @@ echo ***************************************************************************
 echo                         Build H5Tinit.exe >> build_results.txt
 echo ***************************************************************************** >> build_results.txt
 
-cd misc\typegen\h5tinit
-msdev h5tinit.dsp  /make "h5tinit - Win32 Debug" /Rebuild /out ..\..\..\h5tinit.log
-cd ..\..\..\
+cd windows\misc\typegen\h5tinit
+msdev h5tinit.dsp  /make "h5tinit - Win32 Debug" /Rebuild /out ..\..\..\..\h5tinit.log
+cd ..\..\..\..\
 more h5tinit.log >> build_results.txt
 del h5tinit.log
 
@@ -36,9 +36,9 @@ echo ***************************************************************************
 cd src
 h5tinit.exe > h5tinit.c
 
-cd ..\proj\all
-msdev all.dsw /make "all - ALL" /Rebuild /out ..\..\all.log
-cd ..\..
+cd ..\windows\proj\all
+msdev all.dsw /make "all - ALL" /Rebuild /out ..\..\..\all.log
+cd ..\..\..\
 more all.log >> build_results.txt
 del all.log
 GOTO END
@@ -49,9 +49,9 @@ echo ***************************************************************************
 echo                         Build H5Tinit.exe >> build_results.txt
 echo ***************************************************************************** >> build_results.txt
 
-cd misc\typegen\h5tinit
-msdev h5tinit.dsp  /make "h5tinit - Win32 Debug" /Rebuild /out ..\..\..\h5tinit.log
-cd ..\..\..\
+cd windows\misc\typegen\h5tinit
+msdev h5tinit.dsp  /make "h5tinit - Win32 Debug" /Rebuild /out ..\..\..\..\h5tinit.log
+cd ..\..\..\..\
 more h5tinit.log >> build_results.txt
 del h5tinit.log
 
@@ -62,9 +62,9 @@ echo ***************************************************************************
 cd src
 h5tinit.exe > h5tinit.c
 
-cd ..\proj\all
-msdev all.dsw /make "testhdf5_cppdll - ALL" "testhdf5_cpp - ALL" "dsets_cppdll - ALL" "dsets_cpp - ALL" "all - ALL" /Rebuild /out ..\..\all.log
-cd ..\..
+cd ..\windows\proj\all
+msdev all.dsw /make "testhdf5_cppdll - ALL" "testhdf5_cpp - ALL" "dsets_cppdll - ALL" "dsets_cpp - ALL" "all - ALL" /Rebuild /out ..\..\..\all.log
+cd ..\..\..\
 more all.log >> build_results.txt
 del all.log
 GOTO END
@@ -75,9 +75,9 @@ echo ***************************************************************************
 echo                         Build H5Tinit.exe >> build_results.txt
 echo ***************************************************************************** >> build_results.txt
 
-cd misc\typegen\h5tinit
-msdev h5tinit.dsp  /make "h5tinit - Win32 Debug" /Rebuild /out ..\..\..\h5tinit.log
-cd ..\..\..\
+cd windows\misc\typegen\h5tinit
+msdev h5tinit.dsp  /make "h5tinit - Win32 Debug" /Rebuild /out ..\..\..\..\h5tinit.log
+cd ..\..\..\..\
 more h5tinit.log >> build_results.txt
 del h5tinit.log
 
@@ -88,9 +88,9 @@ echo ***************************************************************************
 cd src
 h5tinit.exe > h5tinit.c
 
-cd ..\proj\all
-msdev all.dsw /make "hl_test_image_fortran - ALL" "hl_test_lite_fortran - ALL" "hl_test_table_fortran - ALL" "testhdf5_fortrandll - ALL" "testhdf5_fortran - ALL" "flush2_fortrandll - ALL" "flush2_fortran - ALL" "flush1_fortrandll - ALL" "flush1_fortran - ALL" "all - ALL" /Rebuild /out ..\..\all.log
-cd ..\..
+cd ..\windows\proj\all
+msdev all.dsw /make "hl_test_image_fortran - ALL" "hl_test_lite_fortran - ALL" "hl_test_table_fortran - ALL" "testhdf5_fortrandll - ALL" "testhdf5_fortran - ALL" "flush2_fortrandll - ALL" "flush2_fortran - ALL" "flush1_fortrandll - ALL" "flush1_fortran - ALL" "all - ALL" /Rebuild /out ..\..\..\all.log
+cd ..\..\..\
 more all.log >> build_results.txt
 del all.log
 GOTO END
@@ -101,9 +101,9 @@ echo ***************************************************************************
 echo                         Build H5Tinit.exe >> build_results.txt
 echo ***************************************************************************** >> build_results.txt
 
-cd misc\typegen\h5tinit
-msdev h5tinit.dsp  /make "h5tinit - Win32 Debug" /Rebuild /out ..\..\..\h5tinit.log
-cd ..\..\..\
+cd windows\misc\typegen\h5tinit
+msdev h5tinit.dsp  /make "h5tinit - Win32 Debug" /Rebuild /out ..\..\..\..\h5tinit.log
+cd ..\..\..\..\
 more h5tinit.log >> build_results.txt
 del h5tinit.log
 
@@ -114,9 +114,9 @@ echo ***************************************************************************
 cd src
 h5tinit.exe > h5tinit.c
 
-cd ..\proj\all
-msdev all.dsw /make "hl_test_image_fortran - ALL" "hl_test_lite_fortran - ALL" "hl_test_table_fortran - ALL" "testhdf5_fortrandll - ALL" "testhdf5_fortran - ALL" "flush2_fortrandll - ALL" "flush2_fortran - ALL" "flush1_fortrandll - ALL" "flush1_fortran - ALL" "testhdf5_cppdll - ALL" "testhdf5_cpp - ALL" "dsets_cppdll - ALL" "dsets_cpp - ALL" "all - ALL" /Rebuild /out ..\..\all.log
-cd ..\..
+cd ..\windows\proj\all
+msdev all.dsw /make "hl_test_image_fortran - ALL" "hl_test_lite_fortran - ALL" "hl_test_table_fortran - ALL" "testhdf5_fortrandll - ALL" "testhdf5_fortran - ALL" "flush2_fortrandll - ALL" "flush2_fortran - ALL" "flush1_fortrandll - ALL" "flush1_fortran - ALL" "testhdf5_cppdll - ALL" "testhdf5_cpp - ALL" "dsets_cppdll - ALL" "dsets_cpp - ALL" "all - ALL" /Rebuild /out ..\..\..\all.log
+cd ..\..\..\
 more all.log >> build_results.txt
 del all.log
 GOTO END
