@@ -130,14 +130,17 @@ typedef __int64 ssize_t;
 #   if H5_SIZEOF_LONG_LONG>=8
 typedef unsigned long long 	hsize_t;
 typedef signed long long	hssize_t;
+#       define H5_SIZEOF_HSIZE_T H5_SIZEOF_LONG_LONG
 #   elif H5_SIZEOF___INT64>=8
 typedef unsigned __int64	hsize_t;
 typedef signed __int64		hssize_t;
+#       define H5_SIZEOF_HSIZE_T H5_SIZEOF___INT64
 #   endif
-#else
+#else /* H5_HAVE_LARGE_HSIZET */
 typedef size_t			hsize_t;
 typedef ssize_t			hssize_t;
-#endif
+#       define H5_SIZEOF_HSIZE_T H5_SIZEOF_SIZE_T
+#endif /* H5_HAVE_LARGE_HSIZET */
 
 /*
  * File addresses have there own types.
