@@ -493,10 +493,13 @@ Platforms Tested
                                   Intel(R) C++ Version 7.0
                                   Intel(R) Fortran Compiler Version 7.0
     Windows 2000 (NT5.0)          MSVC++ 6.0
+                                  MSVC++ .NET
                                   DEC Visual Fortran 6.0
                                   Intel C and F90 compilers version 7.1
 				  Code Warrior 8.0
-    Windows XP                    MSVC++.NET
+    Windows XP                    MSVC++ 6.0
+				  MSVC++ .NET
+                                  DEC Visual Fortran 6.6
     MAC OS X                      Darwin 6.5
                                   gcc and g++ Apple Computer, Inc. GCC 
                                   version 1161, based on gcc version 3.1
