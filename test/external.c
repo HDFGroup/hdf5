@@ -582,7 +582,7 @@ test_2 (hid_t fapl)
 	    part[j] = (int)(i*25+j);
 	}
 	sprintf (filename, "extern_%lua.raw", (unsigned long)i+1);
-	fd = open (filename, O_RDWR|O_CREAT|O_TRUNC, 0666);
+	fd = HDopen (filename, O_RDWR|O_CREAT|O_TRUNC, 0666);
 	assert (fd>=0);
 	n = lseek (fd, (off_t)(i*10), SEEK_SET);
 	assert (n>=0 && (size_t)n==i*10);
