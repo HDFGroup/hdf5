@@ -80,8 +80,12 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Single hyperslab selections (which were set with only one call to
+            H5Sselect_hyperslab) that had dimensions that could be "flattened"
+            but were interspersed with dimensions that could not be flattened
+            were not correctly handled, causing core dumps.  QAK - 2003/10/25
         - Fixed incorrect datatype of the third parameter to the Fortran90
-          h5pset(get)_cache_f subroutine (INTEGER to INTEGER(SIZE_T)) 
+            h5pset(get)_cache_f subroutine (INTEGER to INTEGER(SIZE_T)) 
                                                           EIP - 2003/10/13
         - Fixed problems with accessing variable-length data datatypes on
             Crays.  QAK - 2003/10/10
