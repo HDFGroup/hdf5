@@ -20,7 +20,7 @@ CPPFLAGS=-I. -I../src $(MPI_INC)
 RM=rm -f
 
 # temporary test files that can be cleaned away
-MOSTLYCLEAN=ParaEg1.h5f ParaEg2.h5f go
+MOSTLYCLEAN=ParaEg1.h5f ParaEg2.h5f
 
 # The default is to build the library and programs.
 all: testphdf5

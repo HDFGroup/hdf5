@@ -26,7 +26,7 @@ CPPFLAGS=-I. -I../src $(MPI_INC) $(MPIO_INC)
 RM=rm -f
 
 # temporary test files that can be cleaned away
-MOSTLYCLEAN=/pfs/multi/tmp_1/your_own/Eg1.h5f /pfs/multi/tmp_1/your_own/Eg2.h5f go
+MOSTLYCLEAN=/pfs/multi/tmp_1/your_own/Eg1.h5f /pfs/multi/tmp_1/your_own/Eg2.h5f
 
 # The default is to build the library and programs.
 all: testphdf5 shdf5
