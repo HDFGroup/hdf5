@@ -213,6 +213,9 @@ TOOLTEST h5diff_55.txt file6.h5 file6.h5 dset5a dset5b
 # 5.6
 TOOLTEST h5diff_56.txt file6.h5 file6.h5 dset6a dset6b
 
+# 5.7
+TOOLTEST h5diff_57.txt file6.h5 file6.h5 dset7a dset7b
+
 # ##############################################################################
 # # Error messages
 # ##############################################################################

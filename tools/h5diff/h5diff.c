@@ -51,44 +51,46 @@ typedef struct options_t
  *-------------------------------------------------------------------------
  */
 
-int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name, 
-                  const char *obj2_name, options_t options );
-int diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj2_name, 
-           options_t options, int type );
-int compare( hid_t file1_id, const char *file1_name, const char *obj1_name, 
-              int nobjects1, info_t *info1,
-              hid_t file2_id, const char *file2_name, const char *obj2_name, 
-              int nobjects2, info_t *info2,
-              options_t options );
-int match( hid_t file1_id, const char *file1_name, int nobjects1, info_t *info1,
-            hid_t file2_id, const char *file2_name, int nobjects2, info_t *info2,
-            options_t options );
-int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims, 
-                options_t options, const char *obj1, const char *obj2,
-                hid_t m_type );
+static int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name, 
+ const char *obj2_name, options_t options );
+static int diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj2_name, 
+ options_t options, int type );
+static int compare( hid_t file1_id, const char *file1_name, const char *obj1_name, 
+ int nobjects1, info_t *info1,
+ hid_t file2_id, const char *file2_name, const char *obj2_name, 
+ int nobjects2, info_t *info2,
+ options_t options );
+static int match( hid_t file1_id, int nobjects1, info_t *info1,
+ hid_t file2_id, int nobjects2, info_t *info2, options_t options );
+static int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims, 
+ options_t options, const char *obj1, const char *obj2,
+ hid_t m_type );
 
 /*-------------------------------------------------------------------------
  * utility functions
  *-------------------------------------------------------------------------
  */
 
-void list( const char *filename, int nobjects, info_t *info );
-void print_pos( int *ph, int p, unsigned int curr_pos, int *acc, 
-                int *pos, int rank, const char *obj1, const char *obj2 );
-hid_t fixtype( hid_t f_type );
-void print_datatype(hid_t type);
-int check_n_input( const char* );
-int check_f_input( const char* );
-int get_index( const char *obj, int nobjects, info_t *info );
-int compare_object( char *obj1, char *obj2 );
-void usage(void);
-const char* h5diff_basename(const char *name);
-const char* get_type(int type);
-const char* get_class(H5T_class_t tclass);
-void print_dims( int r, hsize_t *d );
-void print_sizes( const char *obj1, const char *obj2,
-                  hid_t f_type1, hid_t f_type2,
-                  hid_t m_type1, hid_t m_type2 );
+static void list( const char *filename, int nobjects, info_t *info );
+static hid_t fixtype( hid_t f_type );
+static void print_datatype(hid_t type);
+static int check_n_input( const char* );
+static int check_f_input( const char* );
+static int get_index( const char *obj, int nobjects, info_t *info );
+static int compare_object( char *obj1, char *obj2 );
+static void usage(void);
+static const char* h5diff_basename(const char *name);
+static const char* get_type(int type);
+static const char* get_class(H5T_class_t tclass);
+static const char* get_sign(H5T_sign_t sign);
+static void print_dims( int r, hsize_t *d );
+static void print_pos( int *ph, int p, unsigned int curr_pos, int *acc, 
+ int *pos, int rank, const char *obj1, const char *obj2 );
+#if defined (H5DIFF_DEBUG)
+static void print_sizes( const char *obj1, const char *obj2,
+ hid_t f_type1, hid_t f_type2,
+ hid_t m_type1, hid_t m_type2 );
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -104,6 +106,7 @@ void print_sizes( const char *obj1, const char *obj2,
  *
  *-------------------------------------------------------------------------
  */
+static 
 void usage(void)
 {
  printf("Usage: h5diff file1 file2 [OPTIONS] [obj1[obj2]] \n");
@@ -371,8 +374,8 @@ int main(int argc, const char *argv[])
 
  else 
  {
-  nfound=match(file1_id,file1_name,nobjects1,info1,
-               file2_id,file2_name,nobjects2,info2,options);
+  nfound=match(file1_id,nobjects1,info1,
+               file2_id,nobjects2,info2,options);
  }
  
  /* close */
@@ -405,7 +408,7 @@ int main(int argc, const char *argv[])
  *
  *-------------------------------------------------------------------------
  */
-
+static 
 int check_n_input( const char *str )
 {
  unsigned i;
@@ -443,7 +446,7 @@ int check_n_input( const char *str )
  *
  *-------------------------------------------------------------------------
  */
-
+static 
 int check_f_input( const char *str )
 {
  unsigned i;
@@ -480,7 +483,7 @@ int check_f_input( const char *str )
  *
  *-------------------------------------------------------------------------
  */
-
+static 
 void list( const char *filename, int nobjects, info_t *info )
 {
  int i;
@@ -528,7 +531,7 @@ void list( const char *filename, int nobjects, info_t *info )
  *
  *-------------------------------------------------------------------------
  */
-
+static 
 int compare_object( char *obj1, char *obj2 )
 {
  int cmp;
@@ -557,10 +560,9 @@ int compare_object( char *obj1, char *obj2 )
  *
  *-------------------------------------------------------------------------
  */
-
-int match( hid_t file1_id, const char *file1_name, int nobjects1, info_t *info1,
-            hid_t file2_id, const char *file2_name, int nobjects2, info_t *info2,
-            options_t options )
+static 
+int match( hid_t file1_id, int nobjects1, info_t *info1,
+            hid_t file2_id, int nobjects2, info_t *info2, options_t options )
 {
  int  cmp;
  int  more_names_exist = (nobjects1>0 && nobjects2>0) ? 1 : 0;
@@ -724,7 +726,7 @@ int get_index( const char *obj, int nobjects, info_t *info )
  *-------------------------------------------------------------------------
  */
 
-
+static 
 int compare( hid_t file1_id, const char *file1_name, const char *obj1_name, 
               int nobjects1, info_t *info1,
               hid_t file2_id, const char *file2_name, const char *obj2_name, 
@@ -789,7 +791,7 @@ int compare( hid_t file1_id, const char *file1_name, const char *obj1_name,
  *-------------------------------------------------------------------------
  */
 
-
+static 
 int diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj2_name, 
            options_t options, int type )
 {
@@ -831,7 +833,7 @@ int diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj
  *
  *-------------------------------------------------------------------------
  */
-
+static 
 int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name, 
                   const char *obj2_name, options_t options )
 {
@@ -844,6 +846,7 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  hid_t   m_type1=-1, m_type2=-1; /* memory data type */
  size_t  f_size1, f_size2;       /* size of type in file */
  size_t  m_size1, m_size2;       /* size of type in memory */
+ H5T_sign_t sign1, sign2;        /* sign of type */
  int     rank1, rank2; 
  void    *buf1=NULL, *buf2=NULL;
  hsize_t tot_cnt1, tot_cnt2;
@@ -1090,6 +1093,21 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  print_sizes(obj1_name,obj2_name,f_type1,f_type2,m_type1,m_type2);
 #endif 
 
+/*-------------------------------------------------------------------------
+ * check for different signed/unsigned types
+ *-------------------------------------------------------------------------
+ */
+
+ sign1=H5Tget_sign(m_type1);
+ sign2=H5Tget_sign(m_type2);
+ if ( sign1 != sign2 )
+ {
+  printf("Comparison not supported\n");
+  printf("<%s> has sign %s\n", obj1_name, get_sign(sign1));
+  printf("<%s> has sign %s", obj2_name, get_sign(sign2));
+  goto out;
+ }
+
 
 /*-------------------------------------------------------------------------
  * "upgrade" the smaller memory size 
@@ -1191,7 +1209,7 @@ out:
  *
  *-------------------------------------------------------------------------
  */
- 
+static  
 int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims, 
                 options_t options, const char *obj1, const char *obj2,
                 hid_t m_type )
@@ -1247,7 +1265,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
  *-------------------------------------------------------------------------
  */
   
-  if (H5Tequal(m_type, H5T_NATIVE_SCHAR)) 
+  if (H5Tequal(m_type, H5T_NATIVE_SCHAR)||H5Tequal(m_type, H5T_NATIVE_UCHAR)) 
   {
    assert(type_size==sizeof(char));
    for ( i = 0; i < tot_cnt; i++)
@@ -1330,7 +1348,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
  *-------------------------------------------------------------------------
  */
   
-  else if (H5Tequal(m_type, H5T_NATIVE_SHORT)) 
+  else if (H5Tequal(m_type, H5T_NATIVE_SHORT)||H5Tequal(m_type, H5T_NATIVE_USHORT))
   {
    assert(type_size==sizeof(short));
    for ( i = 0; i < tot_cnt; i++)
@@ -1413,7 +1431,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
  *-------------------------------------------------------------------------
  */
   
-  else if (H5Tequal(m_type, H5T_NATIVE_INT)) 
+  else if (H5Tequal(m_type, H5T_NATIVE_INT)||H5Tequal(m_type, H5T_NATIVE_UINT)) 
   {
    assert(type_size==sizeof(int));
    for ( i = 0; i < tot_cnt; i++)
@@ -1495,7 +1513,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
  *-------------------------------------------------------------------------
  */
   
-  else if (H5Tequal(m_type, H5T_NATIVE_LONG)) 
+  else if (H5Tequal(m_type, H5T_NATIVE_LONG)||H5Tequal(m_type, H5T_NATIVE_ULONG)) 
   {
    assert(type_size==sizeof(long));
    for ( i = 0; i < tot_cnt; i++)
@@ -1771,6 +1789,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
  *
  *-------------------------------------------------------------------------
  */
+static 
 hid_t fixtype(hid_t f_type)
 {
  hid_t   m_type = -1;
@@ -1883,7 +1902,7 @@ hid_t fixtype(hid_t f_type)
  *
  *-------------------------------------------------------------------------
  */
-
+static 
 void print_pos( int *ph, int p, unsigned int curr_pos, int *acc, 
                 int *pos, int rank, const char *obj1, const char *obj2 )
 {
@@ -1937,6 +1956,7 @@ void print_pos( int *ph, int p, unsigned int curr_pos, int *acc,
  *
  *-------------------------------------------------------------------------
  */
+static 
 void print_dims( int r, hsize_t *d )
 {
  int i;
@@ -1962,7 +1982,7 @@ void print_dims( int r, hsize_t *d )
  *
  *-------------------------------------------------------------------------
  */
-
+static 
 void print_datatype(hid_t type)
 {
  switch (H5Tget_class(type)) 
@@ -2065,7 +2085,7 @@ void print_datatype(hid_t type)
  *
  *-------------------------------------------------------------------------
  */
-
+static 
 const char*
 h5diff_basename(const char *name)
 {
@@ -2096,7 +2116,7 @@ h5diff_basename(const char *name)
  *
  *-------------------------------------------------------------------------
  */
-
+static 
 const char*
 get_type(int type)
 {
@@ -2116,6 +2136,35 @@ get_type(int type)
 }
 
 /*-------------------------------------------------------------------------
+ * Function: get_sign
+ *
+ * Purpose: Returns the sign as a string
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: May 9, 2003
+ *
+ * Comments: 
+ *
+ *-------------------------------------------------------------------------
+ */
+static 
+const char*
+get_sign(H5T_sign_t sign)
+{
+ switch (sign)
+ {
+ default:
+  return("H5T_SGN_ERROR");
+ case H5T_SGN_NONE:
+  return("H5T_SGN_NONE");
+ case H5T_SGN_2:
+  return("H5T_SGN_2");
+ } 
+}
+
+
+/*-------------------------------------------------------------------------
  * Function: get_class
  *
  * Purpose: Returns the class as a string
@@ -2128,7 +2177,7 @@ get_type(int type)
  *
  *-------------------------------------------------------------------------
  */
-
+static 
 const char*
 get_class(H5T_class_t tclass)
 {
@@ -2169,7 +2218,7 @@ get_class(H5T_class_t tclass)
  *
  *-------------------------------------------------------------------------
  */
-
+static 
 void print_sizes( const char *obj1, const char *obj2,
                   hid_t f_type1, hid_t f_type2,
                   hid_t m_type1, hid_t m_type2 )      

@@ -17,19 +17,27 @@
 
 #include "hdf5.h"
 
+#if !defined(H5_HAVE_ATTRIBUTE) || defined __cplusplus
+#   undef __attribute__
+#   define __attribute__(X) /*void*/
+#   define UNUSED /*void*/
+#else
+#   define UNUSED __attribute__((unused))
+#endif
+
 
 
 /* diff test*/
-int do_test_1(const char *file1, const char *file2);
-int do_test_2(const char *file1, const char *file2);
-int do_test_3(const char *file1, const char *file2);
-int do_test_4(const char *file1, const char *file2);
-int do_test_5(const char *file1, const char *file2);
-int write_dataset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
-                   hid_t type_id, void *buf );
+static int do_test_1(const char *file1, const char *file2);
+static int do_test_2(const char *file1, const char *file2);
+static int do_test_3(const char *file1, const char *file2);
+static int do_test_4(const char *file1, const char *file2);
+static int do_test_5(const char *file1, const char *file2);
+static int write_dataset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
+                          hid_t type_id, void *buf );
 
 
-int main(int argc, const char *argv[])
+int main(int UNUSED argc, const UNUSED char *argv[])
 {
  
  do_test_1("file1.h5","file2.h5");
@@ -56,6 +64,7 @@ int main(int argc, const char *argv[])
  *-------------------------------------------------------------------------
  */
 
+static 
 int write_dataset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
                    hid_t type_id, void *buf )
 {
@@ -317,14 +326,14 @@ int write_dataset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
 
  file1.h6 file2.h6
 
-/*
+*/
 
 
 /*-------------------------------------------------------------------------
  * Basic review tests
  *-------------------------------------------------------------------------
  */
-
+static 
 int do_test_1(const char *file1, const char *file2)
 {
 
@@ -374,8 +383,8 @@ int do_test_1(const char *file1, const char *file2)
  * Compare different types: H5G_DATASET, H5G_TYPE, H5G_GROUP, H5G_LINK
  *-------------------------------------------------------------------------
  */
-
-int do_test_2(const char *file1, const char *file2)
+static 
+int do_test_2(const char *file1, const char UNUSED *file2)
 {
 
  hid_t   file1_id; 
@@ -447,8 +456,8 @@ int do_test_2(const char *file1, const char *file2)
  * H5T_ENUM, H5T_VLEN, H5T_ARRAY
  *-------------------------------------------------------------------------
  */
-
-int do_test_3(const char *file1, const char *file2)
+static 
+int do_test_3(const char *file1, const char UNUSED *file2)
 {
 
  hid_t   file1_id; 
@@ -573,8 +582,8 @@ int do_test_3(const char *file1, const char *file2)
  * Dimension issues
  *-------------------------------------------------------------------------
  */
-
-int do_test_4(const char *file1, const char *file2)
+static 
+int do_test_4(const char *file1, const char UNUSED *file2)
 {
 
  hid_t   file1_id; 
@@ -637,8 +646,8 @@ int do_test_4(const char *file1, const char *file2)
  * Datasets datatypes 
  *-------------------------------------------------------------------------
  */
-
-int do_test_5(const char *file1, const char *file2)
+static 
+int do_test_5(const char *file1, const char UNUSED *file2)
 {
 
  hid_t   file1_id; 
@@ -657,7 +666,16 @@ int do_test_5(const char *file1, const char *file2)
  double  buf6a[3][2] = {{1,1},{1,1},{1,1}};
  double  buf6b[3][2] = {{1,1},{3,4},{5,6}};
 
-
+ /*unsigned/signed test
+   signed char -128 to 127 
+   unsigned char 0 to 255 
+  */
+ char          buf7a[3][2] = {{-1,-128},{-1,-1},{-1,-1}};
+ unsigned char buf7b[3][2] = {{1,128},{1,1},{1,1}};
+ unsigned char buf8a[3][2] = {{1,1},{1,1},{1,1}};
+ unsigned char buf8b[3][2] = {{1,1},{3,4},{5,6}};
+ 
+ 
 /*-------------------------------------------------------------------------
  * Create a file
  *-------------------------------------------------------------------------
@@ -714,6 +732,22 @@ int do_test_5(const char *file1, const char *file2)
 
  write_dataset(file1_id,2,dims,"dset6a",H5T_NATIVE_DOUBLE,buf6a);
  write_dataset(file1_id,2,dims,"dset6b",H5T_NATIVE_DOUBLE,buf6b);
+
+/*-------------------------------------------------------------------------
+ * H5T_NATIVE_CHAR and H5T_NATIVE_UCHAR
+ *-------------------------------------------------------------------------
+ */
+
+ write_dataset(file1_id,2,dims,"dset7a",H5T_NATIVE_CHAR,buf7a);
+ write_dataset(file1_id,2,dims,"dset7b",H5T_NATIVE_UCHAR,buf7b);
+
+/*-------------------------------------------------------------------------
+ * H5T_NATIVE_UCHAR
+ *-------------------------------------------------------------------------
+ */
+
+ write_dataset(file1_id,2,dims,"dset8a",H5T_NATIVE_UCHAR,buf8a);
+ write_dataset(file1_id,2,dims,"dset8b",H5T_NATIVE_UCHAR,buf8b);
 
 /*-------------------------------------------------------------------------
  * Close 
