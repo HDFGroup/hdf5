@@ -75,7 +75,32 @@ Release information for hdf5-1.0.0a
 * The library automatically checks that the application was compiled
   with the correct version of header files.
 
-* Parallel feature changes...(?)
+
+		    Parallel HDF5 Changes
+
+* Parallel support for fixed dimension datasets with contiguous or
+  chunked storages.  Also, support unlimited dimension datasets which
+  must use chunk storage.  No parallel support for compressed datasets.
+
+* Collective data transfer for H5Dread/H5Dwrite.  Collective access
+  support for datasets with contiguous storage only, thus only fixed
+  dimension datasets for now.
+
+* H5Pset_mpi and H5Pget_mpi no longer have the access_mode
+  argument.  It is taken over by the data-transfer property list
+  of H5Dread/H5Dwrite.
+
+* New functions H5Pset_xfer and H5Pget_xfer to handle the
+  specification of independent or collective data transfer_mode
+  in the dataset transfer properties list.  The properties
+  list can be used to specify data transfer mode in the H5Dwrite
+  and H5Dread function calls.
+
+* Added parallel support for datasets with chunked storage layout.
+  When a dataset is extend in a PHDF5 file, all processes that open
+  the file must collectively call H5Dextend with identical new dimension
+  sizes.
+
 
 			LIST OF API FUNCTIONS
 
