@@ -30305,7 +30305,10 @@ rm -f conftest.$ac_objext conftest.$ac_ext
 if test "$have_gettime" = "yes" -a "$have_struct_tz" = "yes"; then
    echo "$as_me:$LINENO: checking whether gettimeofday() gives timezone" >&5
 echo $ECHO_N "checking whether gettimeofday() gives timezone... $ECHO_C" >&6
-   if test "$cross_compiling" = yes; then
+   if test "${hdf5_cv_gettimeofday_tz+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test "$cross_compiling" = yes; then
   { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
 echo "$as_me: error: cannot run test program while cross compiling" >&2;}
    { (exit 1); exit 1; }; }
@@ -30314,20 +30317,20 @@ else
 #line $LINENO "configure"
 #include "confdefs.h"
 
-      #include <time.h>
-      #include <sys/time.h>
-      int main(void)
-      {
-         struct timeval tv;
-         struct timezone tz;
-         tz.tz_minuteswest = 7777;  /* Initialize to an unreasonable number */
-         tz.tz_dsttime = 7;
-         gettimeofday(&tv, &tz);
-            /* Check whether the function returned any value at all */
-         if(tz.tz_minuteswest == 7777 && tz.tz_dsttime == 7)
-            exit(1);
-         else exit (0);
-      }
+          #include <time.h>
+          #include <sys/time.h>
+          int main(void)
+          {
+             struct timeval tv;
+             struct timezone tz;
+             tz.tz_minuteswest = 7777;  /* Initialize to an unreasonable number */
+             tz.tz_dsttime = 7;
+             gettimeofday(&tv, &tz);
+                /* Check whether the function returned any value at all */
+             if(tz.tz_minuteswest == 7777 && tz.tz_dsttime == 7)
+                exit(1);
+             else exit (0);
+          }
 _ACEOF
 rm -f conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
@@ -30340,18 +30343,20 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  hdf5_use_tz="yes"
+  hdf5_cv_gettimeofday_tz=yes
 else
   echo "$as_me: program exited with status $ac_status" >&5
 echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
 ( exit $ac_status )
-hdf5_use_tz="no"
+hdf5_cv_gettimeofday_tz=no
 fi
 rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
+fi
 
-   if test "$hdf5_use_tz" = "yes"; then
+
+   if test ${hdf5_cv_gettimeofday_tz} = "yes"; then
       echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
 
