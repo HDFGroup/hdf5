@@ -173,7 +173,7 @@ Group::~Group()
     try {
         decRefCount();
     }
-    catch (Exception close_error) { // thrown by p_close
+    catch (Exception close_error) { 
         cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
     }
 

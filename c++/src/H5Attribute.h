@@ -44,11 +44,6 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	// Copy constructor: makes a copy of an existing Attribute object.
 	Attribute( const Attribute& original );
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-	// Used by the API to appropriately close an attribute
-	virtual void p_close() const;
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-
 	// Destructor: properly terminates access to this attribute.
 	virtual ~Attribute();
 

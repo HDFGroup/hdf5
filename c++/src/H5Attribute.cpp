@@ -256,26 +256,6 @@ string Attribute::getName() const
    return( attr_name ); 
 }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-//--------------------------------------------------------------------------
-// Function:    Attribute::p_close (private)
-// Purpose:     Closes this attribute.
-// Exception    H5::AttributeIException
-// Description
-//              This function will be obsolete because its functionality
-//              is recently handled by the C library layer. - May, 2004
-// Programmer   Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-void Attribute::p_close() const
-{
-   herr_t ret_value = H5Aclose( id );
-   if( ret_value < 0 )
-   {
-      throw AttributeIException(0, "H5Aclose failed");
-   }
-}
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-
 //--------------------------------------------------------------------------
 // Function:	Attribute destructor
 ///\brief	Properly terminates access to this attribute.
