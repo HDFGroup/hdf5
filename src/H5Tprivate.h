@@ -93,6 +93,8 @@ H5_DLL htri_t H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc);
 H5_DLL htri_t H5T_is_sensible(const H5T_t *dt);
 H5_DLL htri_t H5T_committed(H5T_t *type);
 H5_DLL int H5T_link(const H5T_t *type, int adjust, hid_t dxpl_id);
+H5_DLL herr_t H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc);
+H5_DLL H5T_t *H5T_decode(unsigned char *buf);
 
 /* Reference specific functions */
 H5_DLL H5R_type_t H5T_get_ref_type(const H5T_t *dt);

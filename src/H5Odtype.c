@@ -875,7 +875,7 @@ H5O_dtype_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
     FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_encode);
 
     /* check args */
-    assert(f);
+    /*assert(f);*/
     assert(p);
     assert(dt);
 

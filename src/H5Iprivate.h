@@ -26,6 +26,7 @@
 
 /* Private headers needed by this file */
 #include "H5private.h"
+#include "H5Oprivate.h"
 
 /* Macro to determine if a H5I_type_t is a "library type" */
 #define H5I_IS_LIB_TYPE( type ) (type > 0 && type < H5I_NTYPES)
@@ -65,4 +66,5 @@ H5_DLL int H5I_dec_ref(hid_t id);
 H5_DLL int H5I_inc_type_ref(H5I_type_t type);
 H5_DLL herr_t H5I_dec_type_ref(H5I_type_t type);
 H5_DLL int H5I_get_type_ref(H5I_type_t type);
+
 #endif

@@ -65,6 +65,7 @@ const char *FILENAME[] = {
     "dtypes3",
     "dtypes4",
     "dtypes5",
+    "dtypes6",
     NULL
 };
 
@@ -1859,23 +1860,23 @@ test_compound_10(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_query
+ * Function:    test_encode
  *
- * Purpose:     Tests query functions of compound and enumeration types.
+ * Purpose:     Tests functions of encoding and decoding data type.
  *
  * Return:      Success:        0
  *      
  *              Failure:        number of errors
  *
  * Programmer:  Raymond Lu
- *              Thursday, April 4, 2002
+ *              July 14, 2004
  *  
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static int 
-test_query(void)
+test_encode(void)
 {
     struct s1 {
         int    a;
@@ -1884,17 +1885,25 @@ test_query(void)
         double d;
     };
     hid_t       file=-1, tid1=-1, tid2=-1;
+    hid_t       decoded_tid1, decoded_tid2;
     char        filename[1024];
     char        compnd_type[]="Compound_type", enum_type[]="Enum_type";
     short       enum_val;
+    size_t      cmpd_buf_size = 0;
+    size_t      enum_buf_size = 0;
+    unsigned char       *cmpd_buf, *enum_buf;
 
-    TESTING("query functions of compound and enumeration types");
+    TESTING("functions of encoding and decoding data types");
 
     /* Create File */
-    h5_fixname(FILENAME[2], H5P_DEFAULT, filename, sizeof filename);
+    h5_fixname(FILENAME[5], H5P_DEFAULT, filename, sizeof filename);
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
         goto error;
 
+    /*-----------------------------------------------------------------------
+     * Create compound and enumerate data types
+     *-----------------------------------------------------------------------
+     */
     /* Create a compound datatype */
     if((tid1=H5Tcreate(H5T_COMPOUND, sizeof(struct s1)))<0) { 
         H5_FAILED();
@@ -1953,31 +1962,86 @@ test_query(void)
         printf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
+    
+    /*-----------------------------------------------------------------------
+     * Test encoding and decoding compound and enumerate data types
+     *-----------------------------------------------------------------------
+     */
+    /* Encode compound type in a buffer */
+    if(H5Tencode(tid1, NULL, &cmpd_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode compound type\n");
+        goto error;
+    } /* end if */
+
+    if(cmpd_buf_size>0)
+        cmpd_buf = (unsigned char*)calloc(1, cmpd_buf_size);
+
+    if(H5Tencode(tid1, cmpd_buf, &cmpd_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode compound type\n");
+        goto error;
+    } /* end if */
+
+    /* Decode from the compound buffer and return an object handle */
+    if((decoded_tid1=H5Tdecode(cmpd_buf))<0) {
+        H5_FAILED();
+        printf("Can't decode compound type\n");
+        goto error;
+    } /* end if */
 
     /* Query member number and member index by name, for compound type. */
-    if(H5Tget_nmembers(tid1)!=4) {
+    if(H5Tget_nmembers(decoded_tid1)!=4) {
         H5_FAILED();
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if(H5Tget_member_index(tid1, "c")!=2) {
+    if(H5Tget_member_index(decoded_tid1, "c")!=2) {
         H5_FAILED();
         printf("Can't get correct index number\n");
+        goto error;
+    } /* end if */
+
+   
+    /* Encode enumerate type in a buffer */
+    if(H5Tencode(tid2, NULL, &enum_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode enumerate type\n");
+        goto error;
+    } /* end if */
+
+    if(enum_buf_size>0)
+        enum_buf = (unsigned char*)calloc(1, enum_buf_size);
+
+    if(H5Tencode(tid2, enum_buf, &enum_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode enumerate type\n");
+        goto error;
+    } /* end if */
+
+    /* Decode from the enumerate buffer and return an object handle */
+    if((decoded_tid2=H5Tdecode(enum_buf))<0) {
+        H5_FAILED();
+        printf("Can't decode enumerate type\n");
         goto error;
     } /* end if */
 
     /* Query member number and member index by name, for enumeration type. */
-    if(H5Tget_nmembers(tid2)!=5) {
+    if(H5Tget_nmembers(decoded_tid2)!=5) {
         H5_FAILED();
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if(H5Tget_member_index(tid2, "ORANGE")!=3) {
+    if(H5Tget_member_index(decoded_tid2, "ORANGE")!=3) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;
     } /* end if */
 
+    /*-----------------------------------------------------------------------
+     * Commit and reopen the compound and enumerate data types
+     *-----------------------------------------------------------------------
+     */
     /* Commit compound datatype and close it */
     if(H5Tcommit(file, compnd_type, tid1)<0) {
         H5_FAILED();
@@ -1989,6 +2053,13 @@ test_query(void)
         printf("Can't close datatype\n");
         goto error;
     } /* end if */
+    if(H5Tclose(decoded_tid1)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+    free(cmpd_buf);
+    cmpd_buf_size = 0;
 
     /* Commit enumeration datatype and close it */
     if(H5Tcommit(file, enum_type, tid2)<0) {
@@ -2001,6 +2072,13 @@ test_query(void)
         printf("Can't close datatype\n");
         goto error;
     } /* end if */
+    if(H5Tclose(decoded_tid2)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+    free(enum_buf);
+    enum_buf_size = 0;
 
     /* Open the dataytpe for query */
     if((tid1=H5Topen(file, compnd_type))<0) {
@@ -2014,30 +2092,85 @@ test_query(void)
         goto error;
     } /* end if */
 
-    /* Query member number and member index by name, for compound type */
-    if(H5Tget_nmembers(tid1)!=4) {
+
+    /* Encode compound type in a buffer */
+    if(H5Tencode(tid1, NULL, &cmpd_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode compound type\n");
+        goto error;
+    } /* end if */
+
+    if(cmpd_buf_size>0)
+        cmpd_buf = (unsigned char*)calloc(1, cmpd_buf_size);
+
+    if(H5Tencode(tid1, cmpd_buf, &cmpd_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode compound type\n");
+        goto error;
+    } /* end if */
+
+    /* Decode from the compound buffer and return an object handle */
+    if((decoded_tid1=H5Tdecode(cmpd_buf))<0) {
+        H5_FAILED();
+        printf("Can't decode compound type\n");
+        goto error;
+    } /* end if */
+
+    /* Query member number and member index by name, for compound type. */
+    if(H5Tget_nmembers(decoded_tid1)!=4) {
         H5_FAILED();
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if(H5Tget_member_index(tid1, "c")!=2) {
+    if(H5Tget_member_index(decoded_tid1, "c")!=2) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;
     } /* end if */
 
-    /* Query member number and member index by name, for enumeration type */
-    if(H5Tget_nmembers(tid2)!=5) {
+    /*-----------------------------------------------------------------------
+     * Test encoding and decoding compound and enumerate data types
+     *-----------------------------------------------------------------------
+     */
+    /* Encode enumerate type in a buffer */
+    if(H5Tencode(tid2, NULL, &enum_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode enumerate type\n");
+        goto error;
+    } /* end if */
+
+    if(enum_buf_size>0)
+        enum_buf = (unsigned char*)calloc(1, enum_buf_size);
+
+    if(H5Tencode(tid2, enum_buf, &enum_buf_size)<0) {
+        H5_FAILED();
+        printf("Can't encode enumerate type\n");
+        goto error;
+    } /* end if */
+
+    /* Decode from the enumerate buffer and return an object handle */
+    if((decoded_tid2=H5Tdecode(enum_buf))<0) {
+        H5_FAILED();
+        printf("Can't decode enumerate type\n");
+        goto error;
+    } /* end if */
+
+    /* Query member number and member index by name, for enumeration type. */
+    if(H5Tget_nmembers(decoded_tid2)!=5) {
         H5_FAILED();
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if(H5Tget_member_index(tid2, "ORANGE")!=3) {
+    if(H5Tget_member_index(decoded_tid2, "ORANGE")!=3) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;
     } /* end if */
 
+    /*-----------------------------------------------------------------------
+     * Close and release
+     *-----------------------------------------------------------------------
+     */
     /* Close data type and file */
     if(H5Tclose(tid1)<0) {
         H5_FAILED();
@@ -2050,11 +2183,25 @@ test_query(void)
         goto error;
     } /* end if */
 
+    if(H5Tclose(decoded_tid1)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+    if(H5Tclose(decoded_tid2)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+
     if(H5Fclose(file)<0) {
         H5_FAILED();
         printf("Can't close file\n");
         goto error;
     } /* end if */
+
+    free(cmpd_buf);
+    free(enum_buf);
 
     PASSED();
     return 0;
@@ -2063,6 +2210,8 @@ test_query(void)
     H5E_BEGIN_TRY {
         H5Tclose (tid1);
         H5Tclose (tid2);
+        H5Tclose (decoded_tid1);
+        H5Tclose (decoded_tid2);
         H5Fclose (file);
     } H5E_END_TRY;
     return 1;
@@ -6182,9 +6331,9 @@ main(void)
     nerrors += test_copy();
     nerrors += test_detect();
     nerrors += test_compound_1();
-    nerrors += test_query();
     nerrors += test_transient (fapl);
     nerrors += test_named (fapl);
+    nerrors += test_encode();
     h5_cleanup(FILENAME, fapl); /*must happen before first reset*/
     reset_hdf5();
 

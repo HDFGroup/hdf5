@@ -3427,6 +3427,103 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_encode
+ *
+ * Purpose:	Encode an object(data type and simple data space only) 
+ *              description into a buffer.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *		slu@ncsa.uiuc.edu
+ *		July 13, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_encode(unsigned char *buf, void *obj, size_t *nalloc, hid_t type_id)
+{
+    const H5O_class_t   *type;            /* Actual H5O class type for the ID */
+    size_t              size;             /* size of the message*/
+    herr_t 	        ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_encode,FAIL);
+
+    /* check args */
+    if(type_id<0 || type_id>=(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object type");
+
+    /* map the type ID to the actual type object */
+    if((type=message_type_g[type_id])==NULL)
+        HGOTO_ERROR (H5E_OHDR, H5E_BADTYPE, FAIL, "unable to find object type");
+
+    /* check buffer size */
+    if ((size=(type->raw_size)(NULL, obj))<0)
+        HGOTO_ERROR (H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode message");
+
+    /* Don't encode if buffer size isn't big enough */
+    if(!buf || *nalloc<size) {
+        *nalloc = size;
+	HGOTO_DONE(ret_value);
+    }
+    
+    /* Encode */    
+    if ((type->encode)(NULL, buf, obj)<0)
+        HGOTO_ERROR (H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode message");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_decode
+ *
+ * Purpose:	Decode a binary object(data type and data space only) 
+ *              description and return a new object handle.
+ *
+ * Return:	Success:	Object ID(non-negative)
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *		slu@ncsa.uiuc.edu
+ *		July 14, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void*
+H5O_decode(unsigned char *buf, hid_t type_id)
+{
+    const H5O_class_t   *type;            /* Actual H5O class type for the ID */
+    size_t              size;             /* size of the message*/
+    void 	        *ret_value=NULL;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_decode,NULL);
+
+    /* check args */
+    if(type_id<0 || type_id>=(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, NULL, "invalid object type");
+
+    /* map the type ID to the actual type object */
+    if((type=message_type_g[type_id])==NULL)
+        HGOTO_ERROR (H5E_OHDR, H5E_BADTYPE, NULL, "unable to find object type");
+
+    /* decode */
+    ret_value = (type->decode)(NULL, 0, buf, NULL);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_debug_id
  *
  * Purpose:	Act as a proxy for calling the 'debug' method for a

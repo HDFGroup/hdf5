@@ -2550,10 +2550,158 @@ done:
     FUNC_LEAVE_API(ret_value);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tencode
+ *
+ * Purpose:	Given an datatype ID, converts the object description into 
+ *              binary in a buffer.
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Raymond Lu
+ *              slu@ncsa.uiuc.edu
+ *              July 14, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tencode(hid_t obj_id, unsigned char* buf, size_t* nalloc)
+{
+    H5T_t       *dtype;
+    herr_t      ret_value;
+    
+    FUNC_ENTER_API (H5Tencode, FAIL);
+
+    /* Check argument and retrieve object */
+    if (NULL==(dtype=H5I_object_verify(obj_id, H5I_DATATYPE)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+
+    ret_value = H5T_encode(dtype, buf, nalloc);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tdecode
+ *
+ * Purpose:	Decode a binary object description and return a new object
+ *              handle.
+ *
+ * Return:	Success:	datatype ID(non-negative)
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Raymond Lu
+ *              slu@ncsa.uiuc.edu
+ *              July 14, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Tdecode(unsigned char* buf)
+{
+    H5T_t       *dt;
+    hid_t       ret_value;
+    
+    FUNC_ENTER_API (H5Tdecode, FAIL);
+
+    if (buf==NULL)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "empty buffer")
+
+    if((dt = H5T_decode(buf))==NULL)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");
+    
+    /* Register the type and return the ID */
+    if ((ret_value=H5I_register (H5I_DATATYPE, dt))<0)
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
 /*-------------------------------------------------------------------------
  * API functions are above; library-private functions are below...
  *------------------------------------------------------------------------- 
  */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_encode
+ *
+ * Purpose:	Private function for H5Tencode.  Converts an object 
+ *              description into binary in a buffer.
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Raymond Lu
+ *              slu@ncsa.uiuc.edu
+ *              July 14, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
+{
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5T_encode, FAIL);
+
+    if(H5O_encode(buf, obj, nalloc, H5O_DTYPE_ID)<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode object");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_decode
+ *
+ * Purpose:	Private function for H5Tdecode.  Reconstructs a binary
+ *              description of datatype and returns a new object handle. 
+ *
+ * Return:	Success:	datatype ID(non-negative)
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Raymond Lu
+ *              slu@ncsa.uiuc.edu
+ *              July 14, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t*
+H5T_decode(unsigned char *buf)
+{
+    H5T_t       *dt;
+    H5T_t       *ret_value;
+
+    FUNC_ENTER_NOAPI(H5T_decode, NULL);
+
+    if((dt = H5O_decode(buf, H5O_DTYPE_ID))==NULL)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
+
+    /* Set return value */
+    ret_value=dt;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
 
 
 /*-------------------------------------------------------------------------

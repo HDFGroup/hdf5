@@ -183,6 +183,8 @@
 #define color_H5Tcommitted "red"
 #define color_H5Tinsert "red"
 #define color_H5Tpack "red"
+#define color_H5Tencode "red"
+#define color_H5Tdecode "red"
 #define color_H5Tenum_create "red"
 #define color_H5Tenum_insert "red"
 #define color_H5Tenum_nameof "red"

@@ -249,6 +249,8 @@ H5_DLL herr_t H5O_remove(H5G_entry_t *ent, hid_t type_id, int sequence,
     hid_t dxpl_id);
 H5_DLL herr_t H5O_reset(hid_t type_id, void *native);
 H5_DLL void *H5O_free(hid_t type_id, void *mesg);
+H5_DLL herr_t H5O_encode(unsigned char *buf, void *obj, size_t *nalloc, hid_t type_id);
+H5_DLL void* H5O_decode(unsigned char *buf, hid_t type_id);
 H5_DLL void *H5O_copy(hid_t type_id, const void *mesg, void *dst);
 H5_DLL size_t H5O_raw_size(hid_t type_id, H5F_t *f, const void *mesg);
 H5_DLL herr_t H5O_get_share(hid_t type_id, H5F_t *f, const void *mesg, H5O_shared_t *share);
