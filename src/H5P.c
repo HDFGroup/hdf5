@@ -5168,7 +5168,6 @@ done:
 herr_t
 H5Pclose(hid_t plist_id)
 {
-    H5P_genplist_t	*plist;    /* Property list created */
     herr_t ret_value=SUCCEED;      /* return value */
 
     FUNC_ENTER_API(H5Pclose, FAIL);
@@ -5178,16 +5177,12 @@ H5Pclose(hid_t plist_id)
         HGOTO_DONE(SUCCEED);
 
     /* Check arguments. */
-    if (NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if (H5I_GENPROP_LST != H5I_get_type(plist_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Close the property list */
-    if (H5P_close(plist) < 0)
+    if (H5I_dec_ref(plist_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
-
-    /* Remove the property list from the ID manager now */
-    if (NULL == H5I_remove(plist_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTDELETE, FAIL, "can't delete property list");
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -5562,18 +5557,17 @@ done:
 herr_t
 H5Pclose_class(hid_t cls_id)
 {
-    H5P_genclass_t	*pclass;        /* Property list class created */
     hid_t	ret_value = SUCCEED;    /* Return value			*/
 
     FUNC_ENTER_API(H5Pclose_class, FAIL);
     H5TRACE1("e","i",cls_id);
 
     /* Check arguments */
-    if (H5I_GENPROP_CLS != H5I_get_type(cls_id) || NULL == (pclass = H5I_remove(cls_id)))
+    if (H5I_GENPROP_CLS != H5I_get_type(cls_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
-    /* Delete the property list class */
-    if (H5P_close_class(pclass) < 0)
+    /* Close the property list class */
+    if (H5I_dec_ref(cls_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
 
 done:
