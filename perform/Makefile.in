@@ -22,7 +22,7 @@ TEST_PROGS=iopipe chunk overhead \
 
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
-CLEAN=*.h5
+CLEAN=*.h5 *.raw *.dat x-gnuplot
 
 ## List all source files here.  The list of object files will be
 ## created by replacing the `.c' with a `.o'.  This list is necessary
