@@ -182,7 +182,7 @@ void t_span_tree()
     }
 
     /* ret = H5Dwrite(dataset, H5T_NATIVE_INT, mid1, fid, xfer_plist, vector);*/
-    ret = H5Dwrite(dataset, H5T_NATIVE_INT, mid1, fid, H5P_DEFAULT, vector);
+    ret = H5Dwrite(dataset, H5T_NATIVE_INT, mid1, fid, xfer_plist, vector);
     if(ret < 0) printf("failing to write data .\n");
 
     /* 
