@@ -50,36 +50,36 @@ check tests test _test: $(PROGS)
 	done
 
 uninstall:
-	@@SETX@; for d in $(SUBDIRS); do                                      \
+	@@SETX@; for d in lib $(SUBDIRS); do                                  \
 	   (cd $$d && $(MAKE) $@) || exit 1;                                  \
 	done
 
 install:
-	@@SETX@; for d in $(SUBDIRS); do                                      \
+	@@SETX@; for d in lib $(SUBDIRS); do                                  \
 	   (cd $$d && $(MAKE) $@) || exit 1;                                  \
 	done
 
 install-doc:
-	@@SETX@; for d in $(SUBDIRS); do                                      \
+	@@SETX@; for d in lib $(SUBDIRS); do                                  \
 	   (cd $$d && $(MAKE) $@);                                            \
 	done
 
-.PHONY: all lib progs test _test install uninstall dep depend clean       \
+.PHONY: all lib progs test _test install uninstall dep depend clean           \
 	mostlyclean distclean maintainer-clean
 
 clean mostlyclean:
-	@@SETX@; for d in $(SUBDIRS); do                                      \
+	@@SETX@; for d in lib $(SUBDIRS); do                                  \
 	   (cd $$d && $(MAKE) $@);                                            \
 	done
 
 distclean:
-	@@SETX@; for d in $(SUBDIRS); do                                      \
+	@@SETX@; for d in lib $(SUBDIRS); do                                  \
 	   (cd $$d && $(MAKE) $@);                                            \
 	done
 	-$(RM) Makefile
 
 maintainer-clean:
-	@@SETX@; for d in $(SUBDIRS); do                                      \
+	@@SETX@; for d in lib $(SUBDIRS); do                                  \
 	   (cd $$d && $(MAKE) $@);                                            \
 	done
 
