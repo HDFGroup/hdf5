@@ -40,9 +40,9 @@ static intn interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 size_t
-H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
-		    const unsigned cd_values[], size_t nbytes,
-		    size_t *buf_size, void **buf)
+H5Z_filter_deflate (unsigned UNUSED flags, size_t cd_nelmts,
+		    const unsigned cd_values[], size_t UNUSED nbytes,
+		    size_t * UNUSED buf_size, void ** UNUSED buf)
 {
     size_t	ret_value = 0;
     void	*outbuf = NULL;
