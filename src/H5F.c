@@ -509,13 +509,11 @@ H5F_compare_files(void * _obj, const void * _key)
 
     FUNC_ENTER(H5F_compare_files, FALSE);
 #if WIN32
-	ret_value = stricmp(key->path, obj->shared->key.path);
-	if (ret_value){
-		ret_value = FALSE;
-	}
-	else {
-		ret_value = TRUE;
-	}
+
+	ret_value = (obj->shared->key.dev == key->dev && 
+		obj->shared->key.fileindexhi == key->fileindexhi &&
+		obj->shared->key.fileindexlo == key->fileindexlo);
+
 #else
     ret_value = (obj->shared->key.dev == key->dev &&
 		 obj->shared->key.ino == key->ino);	
@@ -1829,10 +1827,6 @@ H5F_close(H5F_t *f)
 			  "unable to flush cache");
 	}
     }
-#ifdef WIN32
-    /*free up the memory for path*/
-    free(f->shared->key.path);
-#endif
 
     /*
      * Destroy the H5F_t struct and decrement the reference count for the

@@ -302,7 +302,18 @@ typedef struct H5F_access_t {
 typedef struct H5F_search_t {
     dev_t	dev;		/* Device number containing file	*/
     ino_t	ino;		/* Unique file number on device		*/
-    char	*path;		/* File name used only in Win32		*/
+#if WIN32
+/*
+	Specifies the low-order word of a unique identifier associated with the file. 
+	This identifier and the volume serial number uniquely identify a file. This number 
+	may change when the system is restarted or when the file is opened. After a process 
+	opens a file, the identifier is constant until the file is closed. An application can 
+	use this identifier and the volume serial number to determine whether two handles refer 
+	to the same file. 
+*/
+	int fileindexlo;
+	int fileindexhi;
+#endif
 } H5F_search_t;
 
 /* For determining what the last file operation was */

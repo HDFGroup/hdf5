@@ -97,41 +97,37 @@ H5F_sec2_open(const char *name, const H5F_access_t UNUSED *access_parms,
 
     if (key) {
 #if WIN32
-	/*
-	 * some windows specific types. the LPSTR is just a char*  
-	 */
-	LPSTR pathbuf = NULL; 
-	LPSTR *namebuf = NULL; 
-	int bufsize = 0;
 
-	/*
-	 * gets the full path of the file name.  the if statement below is to
-	 * try to distinguish if we have the ablosute path already
-	 */
-	if ((*(name+1) != ':') && (*(name+2)!= '\\')){ 
-	    /*
-	     * if the size of the buffer is too small it will return
-	     * the appropriate size of the buffer not including the null
-	     */
-	    bufsize = GetFullPathName(name,bufsize,pathbuf,namebuf);
-	    if (bufsize != 0){
-		pathbuf = malloc(sizeof(char) * (bufsize + 1));
-		namebuf = malloc(sizeof(char) * (bufsize + 1));
-		bufsize++;
-		GetFullPathName(name,bufsize,pathbuf,namebuf); 
-	    } else {
-		pathbuf = NULL;
-	    }
-	} else {
-	    pathbuf = malloc(strlen(name));
-	    strcpy(pathbuf,name);
+	int fd;
+	HFILE filehandle;
+	struct _BY_HANDLE_FILE_INFORMATION fileinfo;
+	int results;
+
+
+	fd = HDopen(name,_O_RDONLY,0);
+	filehandle = _get_osfhandle(fd);
+	results = GetFileInformationByHandle(filehandle, &fileinfo);
+
+	/*returns a 0 on failure*/
+	
+	if (!results) {			
+		lf = NULL;		
+	}	
+	
+	else {		
+		HDstat(name,&sb);		
+		key->dev = sb.st_dev;		
+		key->ino = 0;		
+		key->fileindexhi = fileinfo.nFileIndexHigh;		
+		key->fileindexlo = fileinfo.nFileIndexLow;		
 	}
-	key->path = pathbuf;
+	
+	HDclose(fd);	
+
 #else
-	key->path = NULL;
-#endif
 	key->dev = sb.st_dev;
 	key->ino = sb.st_ino;
+#endif
     }
     FUNC_LEAVE(lf);
 }
