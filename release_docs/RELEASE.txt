@@ -34,17 +34,18 @@ CONTENTS
 New Features
 ============
 
-Configuration:
---------------
+    Configuration:
+    --------------
 
-Library:
---------
+    Library:
+    --------
 
-Parallel Library:
------------------
+    Parallel Library:
+    -----------------
 
-Tools:
-------
+    Tools:
+    ------
+
 
 Support for new platforms, languages and compilers.
 =======================================
@@ -53,31 +54,27 @@ Support for new platforms, languages and compilers.
 Bug Fixes since HDF5-1.6.0 release
 ==================================
 
-Library
--------
-    - Modified library and file format to support storing indexed storage
-        (chunked dataset) B-tree's with non-default internal 'K' values.
-        QAK - 2003/07/15
-    - Returned H5T_BKG_TEMP support to library after it was accidentally
-        removed.  QAK - 2003/07/14
+    Library
+    -------
+        - Corrected error with variable-length datatypes and chunked datasets
+            which caused H5Dwrite to fail sometimes.  QAK - 2003/07/19
+        - Modified library and file format to support storing indexed storage
+            (chunked dataset) B-tree's with non-default internal 'K' values.
+            QAK - 2003/07/15
+        - Returned H5T_BKG_TEMP support to library after it was accidentally
+            removed.  QAK - 2003/07/14
 
-Configuration
--------------
+    Configuration
+    -------------
 
-Performance
--------------
+    Performance
+    -------------
 
-Tools
------
+    Tools
+    -----
 
-
-
-Documentation 
-------------- 
-
-
-
-
+    Documentation 
+    ------------- 
 
 
 Platforms Tested
