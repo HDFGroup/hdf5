@@ -629,7 +629,7 @@ AC_ARG_WITH(hdf4,
 case "$withval" in
   yes)
     failed="no"
-    AC_CHECK_LIB(z, compress,, failed="yes")
+    AC_CHECK_LIB(z, compress2,, failed="yes")
     if test "$failed" = "no"; then
       HAVE_ZLIB="yes"
       AC_CHECK_LIB(jpeg, jpeg_start_compress,, failed="yes")
@@ -680,7 +680,7 @@ case "$withval" in
     fi
 
     if test "$failed" = "no"; then
-      AC_CHECK_LIB(z, compress,, failed="yes")
+      AC_CHECK_LIB(z, compress2,, failed="yes")
     fi
     if test "$failed" = "no"; then
       AC_CHECK_LIB(jpeg, jpeg_start_compress,, failed="yes")
@@ -721,7 +721,7 @@ case $withval in
   yes)
     HAVE_ZLIB="yes"
     AC_CHECK_HEADERS(zlib.h)
-    AC_CHECK_LIB(z, compress,, unset HAVE_ZLIB)
+    AC_CHECK_LIB(z, compress2,, unset HAVE_ZLIB)
     ;;
   no)
     HAVE_ZLIB="no"
@@ -756,7 +756,7 @@ case $withval in
       LDFLAGS="$LDFLAGS -L$zlib_lib"
     fi
 
-    AC_CHECK_LIB(z, compress,, LDFLAGS="$saved_LDFLAGS"; unset HAVE_ZLIB)
+    AC_CHECK_LIB(z, compress2,, LDFLAGS="$saved_LDFLAGS"; unset HAVE_ZLIB)
     ;;
 esac
 
@@ -1852,7 +1852,7 @@ IF_ENABLED_DISABLED() {
   fi
 }
 
-PRINT ""
+PRINT "Configure Summary"
 PRINT "Compiling Options:"
 
 PRINT_N "               Compilation Mode"
@@ -1887,7 +1887,6 @@ else
   PRINT "No"
 fi
 
-PRINT ""
 PRINT "Features:"
 
 PRINT_N "                            C++"

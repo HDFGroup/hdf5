@@ -4377,9 +4377,9 @@ fi
 case "$withval" in
   yes)
     failed="no"
-    echo $ac_n "checking for compress in -lz""... $ac_c" 1>&6
-echo "configure:4382: checking for compress in -lz" >&5
-ac_lib_var=`echo z'_'compress | sed 'y%./+-%__p_%'`
+    echo $ac_n "checking for compress2 in -lz""... $ac_c" 1>&6
+echo "configure:4382: checking for compress2 in -lz" >&5
+ac_lib_var=`echo z'_'compress2 | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4391,10 +4391,10 @@ cat > conftest.$ac_ext <<EOF
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
     builtin and then its argument prototype would still apply.  */
-char compress();
+char compress2();
 
 int main() {
-compress()
+compress2()
 ; return 0; }
 EOF
 if { (eval echo configure:4401: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
@@ -4657,9 +4657,9 @@ done
     fi
 
     if test "$failed" = "no"; then
-      echo $ac_n "checking for compress in -lz""... $ac_c" 1>&6
-echo "configure:4662: checking for compress in -lz" >&5
-ac_lib_var=`echo z'_'compress | sed 'y%./+-%__p_%'`
+      echo $ac_n "checking for compress2 in -lz""... $ac_c" 1>&6
+echo "configure:4662: checking for compress2 in -lz" >&5
+ac_lib_var=`echo z'_'compress2 | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4671,10 +4671,10 @@ cat > conftest.$ac_ext <<EOF
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
     builtin and then its argument prototype would still apply.  */
-char compress();
+char compress2();
 
 int main() {
-compress()
+compress2()
 ; return 0; }
 EOF
 if { (eval echo configure:4681: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
@@ -4920,9 +4920,9 @@ else
 fi
 done
 
-    echo $ac_n "checking for compress in -lz""... $ac_c" 1>&6
-echo "configure:4925: checking for compress in -lz" >&5
-ac_lib_var=`echo z'_'compress | sed 'y%./+-%__p_%'`
+    echo $ac_n "checking for compress2 in -lz""... $ac_c" 1>&6
+echo "configure:4925: checking for compress2 in -lz" >&5
+ac_lib_var=`echo z'_'compress2 | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4934,10 +4934,10 @@ cat > conftest.$ac_ext <<EOF
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
     builtin and then its argument prototype would still apply.  */
-char compress();
+char compress2();
 
 int main() {
-compress()
+compress2()
 ; return 0; }
 EOF
 if { (eval echo configure:4944: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
@@ -5043,9 +5043,9 @@ done
       LDFLAGS="$LDFLAGS -L$zlib_lib"
     fi
 
-    echo $ac_n "checking for compress in -lz""... $ac_c" 1>&6
-echo "configure:5048: checking for compress in -lz" >&5
-ac_lib_var=`echo z'_'compress | sed 'y%./+-%__p_%'`
+    echo $ac_n "checking for compress2 in -lz""... $ac_c" 1>&6
+echo "configure:5048: checking for compress2 in -lz" >&5
+ac_lib_var=`echo z'_'compress2 | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5057,10 +5057,10 @@ cat > conftest.$ac_ext <<EOF
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
     builtin and then its argument prototype would still apply.  */
-char compress();
+char compress2();
 
 int main() {
-compress()
+compress2()
 ; return 0; }
 EOF
 if { (eval echo configure:5067: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
@@ -10360,7 +10360,7 @@ IF_ENABLED_DISABLED() {
   fi
 }
 
-PRINT ""
+PRINT "Configure Summary"
 PRINT "Compiling Options:"
 
 PRINT_N "               Compilation Mode"
@@ -10395,7 +10395,6 @@ else
   PRINT "No"
 fi
 
-PRINT ""
 PRINT "Features:"
 
 PRINT_N "                            C++"
