@@ -1,6 +1,6 @@
 ## Top-level HDF5 Makefile(.in)
 ##
-## Copyright (C) 1997, 1998, 1999, 2000, 2001
+## Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002
 ##    National Center for Supercomputing Applications
 ##    All rights reserved.
 ##
@@ -76,6 +76,10 @@ install-all:
 	@$(MAKE) install-doc
 	@$(LT) --mode=finish $(libdir)
 
+uninstall-all:
+	@$(MAKE) uninstall
+	@$(MAKE) uninstall-doc
+
 install:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
@@ -104,6 +108,7 @@ install-doc:
 	(cd doc && $(MAKE) $@) || exit 1;
 
 uninstall-doc:
+	@$(MAKE) uninstall-examples
 	(cd doc && $(MAKE) $@) || exit 1;
 
 ## Number format detection

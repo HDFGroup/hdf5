@@ -211,6 +211,9 @@ uninstall-doc:
 	@if test -n "$(PUB_DOCS)"; then 				      \
 	   set -x; cd $(DOCDIR) && $(RM) $(PUB_DOCS);			      \
 	fi
+	@if test -n "$(PUB_SUBDOCS)"; then						\
+		set -x; cd $(DOCDIR) && $(RM) $(PUB_SUBDOCS);			    \
+	fi
 
 ## Removes temporary files without removing the final target files.  That is,
 ## remove things like object files but not libraries or executables.

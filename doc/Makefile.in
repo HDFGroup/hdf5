@@ -37,7 +37,9 @@ install-doc:
 	done
 
 uninstall-doc:
-	-$(RM) -r $(DOCDIR)/hdf5
+	@@SETX@; for d in $(SUBDIRS); do                                      \
+		(cd $$d && $(MAKE) $@) || exit 1;                                  \
+	done
 
 .PHONY: all lib progs test _test install uninstall dep depend clean           \
 	mostlyclean distclean maintainer-clean
