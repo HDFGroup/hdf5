@@ -550,6 +550,7 @@
 ./fortran/examples/grpsexample.f90
 ./fortran/examples/hyperslab.f90
 ./fortran/examples/mountexample.f90
+./fortran/examples/ph5example.f90
 ./fortran/examples/refobjexample.f90
 ./fortran/examples/refregexample.f90
 ./fortran/examples/rwdsetexample.f90
