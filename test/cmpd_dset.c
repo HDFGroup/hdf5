@@ -153,7 +153,6 @@ main (void)
     static hsize_t	dim[] = {NX, NY};
     hssize_t 		f_offset[2];	/*offset of hyperslab in file	*/
     hsize_t 		h_size[2];	/*size of hyperslab		*/
-    hsize_t 		h_sample[2];	/*hyperslab sampling		*/
     size_t		memb_size[1] = {4};
 
     /* Create the file */
@@ -586,20 +585,23 @@ STEP 10: Read middle third of hyperslab into middle third of memory array\n\
 	}
     }
 		
-#ifdef OLD_WAY
     /*
      *######################################################################
      * Step 11: Write an array into the middle third of the dataset
      * initializeing only members `b' and `d' to -1.
      */
+#if 0
     printf ("\
 STEP 11: Write an array back to the middle third of the dataset to\n\
          initialize the `b' and `d' members to -1.\n");
     fflush (stdout);
     
     /* Create the memory array and initialize all fields to zero */
-    ndims = H5Sget_hyperslab (s8_f_sid, f_offset, h_size, h_sample);
-    assert (ndims==2);
+    ndims = 2;
+    f_offset[0] = NX/3;
+    f_offset[1] = NY/3;
+    h_size[0] = 2*NX/3 - f_offset[0];
+    h_size[1] = 2*NY/3 - f_offset[1];
     s11 = malloc ((size_t)h_size[0]*(size_t)h_size[1]*sizeof(s4_t));
     assert (s11);
 
@@ -641,8 +643,7 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
 	    }
 	}
     }
-#endif /* OLD_WAY */
-    
+#endif
 
 
 
