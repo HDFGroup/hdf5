@@ -20,9 +20,14 @@
 #include "hdf5.h"
 #include "h5trav.h"
 
+#if 0
+#define H5DIFF_DEBUG
+#endif
+
+
 #define FFORMAT "%-15g %-15g %-15g\n"
 #define IFORMAT "%-15d %-15d %-15d\n"
-#define LIFORMAT "%-15ld %-15ld %-15d\n"
+#define LIFORMAT "%-15ld %-15ld %-15ld\n"
 #define SPACES  "          "
 
 
@@ -45,9 +50,9 @@ typedef struct options_t
 
 int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name, 
                   const char *obj2_name, options_t options );
-int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank,
-                 hsize_t *dims, options_t options, const char *obj1, const char *obj2,
-																	size_t size_mem);
+int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims, 
+                options_t options, const char *obj1, const char *obj2,
+                hid_t m_type );
 void print_class( H5T_class_t tclass, char *sclass );
 void list( const char *filename, int nobjects, info_t *info );
 void diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj2_name, 
@@ -87,7 +92,7 @@ void leave(void);
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: April 9, 2003
+ * Date: May 9, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -132,7 +137,7 @@ void leave(void)
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: October 8, 2002
+ * Date: May 9, 2003
  *
  * Comments:
  *
@@ -379,13 +384,13 @@ int main(int argc, const char *argv[])
 /*-------------------------------------------------------------------------
  * Function: check_n_input
  *
- * Purpose: 
+ * Purpose: check for valid input
  *
  * Return: 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: March 10, 2003
+ * Date: May 9, 2003
  *
  * Comments:
  *
@@ -411,13 +416,13 @@ int check_n_input( const char *str )
 /*-------------------------------------------------------------------------
  * Function: check_f_input
  *
- * Purpose: 
+ * Purpose: check for valid input
  *
  * Return: 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: March 10, 2003
+ * Date: May 9, 2003
  *
  * Comments:
  *
@@ -454,7 +459,7 @@ int check_f_input( const char *str )
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: March 10, 2003
+ * Date: May 9, 2003
  *
  * Comments:
  *
@@ -496,13 +501,13 @@ void list( const char *filename, int nobjects, info_t *info )
 /*-------------------------------------------------------------------------
  * Function: get_index
  *
- * Purpose: 
+ * Purpose: get index in list
  *
  * Return: 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: March 10, 2003
+ * Date: May 9, 2003
  *
  * Comments:
  *
@@ -536,13 +541,13 @@ int get_index( const char *obj, int nobjects, info_t *info )
 /*-------------------------------------------------------------------------
  * Function: compare
  *
- * Purpose: 
+ * Purpose: get objects form list, and check for the same type
  *
  * Return: 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: March 10, 2003
+ * Date: May 9, 2003
  *
  * Comments:
  *
@@ -595,13 +600,13 @@ void compare( hid_t file1_id, const char *file1_name, const char *obj1_name,
 /*-------------------------------------------------------------------------
  * Function: diff
  *
- * Purpose: 
+ * Purpose: switch between types and choose the diff function
  *
  * Return: 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: March 10, 2003
+ * Date: May 9, 2003
  *
  * Comments:
  *
@@ -645,13 +650,13 @@ void diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *ob
 /*-------------------------------------------------------------------------
  * Function: compare_object
  *
- * Purpose: 
+ * Purpose: do the compare criteria
  *
  * Return: 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: March 10, 2003
+ * Date: May 9, 2003
  *
  * Comments:
  *
@@ -672,13 +677,15 @@ int compare_object( char *obj1, char *obj2 )
 /*-------------------------------------------------------------------------
  * Function: match
  *
- * Purpose: 
+ * Purpose: Find commom objects; the algorithm used for this search is the 
+	*  cosequential match algorithm and is described in 
+ *  Folk, Michael; Zoellick, Bill. (1992). File Structures. Addison-Wesley.
  *
  * Return: 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: March 10, 2003
+ * Date: May 9, 2003
  *
  * Comments:
  *
@@ -763,13 +770,14 @@ void match( hid_t file1_id, const char *file1_name, int nobjects1, info_t *info1
 /*-------------------------------------------------------------------------
  * Function: diff_dataset
  *
- * Purpose: 
+ * Purpose: check for comparable datasets and read into a compatible 
+	*  memory type
  *
  * Return: Success: 0, Failure: -1
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: October 8, 2002
+ * Date: May 9, 2003
  *
  * Comments:
  *
@@ -782,25 +790,26 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
                   const char *obj2_name, options_t options )
 {
 
- hid_t   dset1_id, dset2_id; 
- hid_t   space1_id, space2_id; 
- hid_t   type1_id, type2_id;
- hid_t   rank1, rank2; 
- void    *buf1, *buf2;
- hsize_t tot_cnt, tot_cnt1, tot_cnt2;
+ hid_t   dset1_id  =-1;
+ hid_t   dset2_id  =-1;
+ hid_t   space1_id =-1;
+ hid_t   space2_id =-1;
+	hid_t   f_type1=-1, f_type2=-1; /* file data type */ 
+ hid_t   m_type1=-1, m_type2=-1; /* memory data type */
+ size_t  f_size1, f_size2;       /* size of type in file */
+ size_t  m_size1, m_size2;       /* size of type in memory */
+ int     rank1, rank2; 
+ void    *buf1=NULL, *buf2=NULL;
+ hsize_t tot_cnt1, tot_cnt2;
  hsize_t dims1[32], dims2[32], maxdim1[32], maxdim2[32];
- int     i, j;
- herr_t  status;
  H5T_class_t tclass1;
  H5T_class_t tclass2;
+ int     i, j;
  char    sclass1[20];
  char    sclass2[20];
  int     nfound;
- hid_t   type_mem =-1; /* read to memory type */
-	size_t  size_mem;     /* size of type in memory */
  void    *edata;
  hid_t   (*func)(void*);
- htri_t  is1, is2;
 
  /* disable error reporting */
  H5Eget_auto(&func, &edata);
@@ -815,13 +824,13 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  if ( (dset1_id = H5Dopen(file1_id,obj1_name)) < 0 )
  {
   printf("Cannot open dataset <%s>\n", obj1_name );
-  return -1;
+  goto out;
  }
 
  if ( (dset2_id = H5Dopen(file2_id,obj2_name)) < 0 )
  {
   printf("Cannot open dataset <%s>\n", obj2_name );
-  return -1;
+  goto out;
  }
 
  printf( "Comparing <%s> with <%s>\n", obj1_name, obj2_name );
@@ -829,29 +838,21 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  /* enable error reporting */
  H5Eset_auto(func, edata);
 
- /* Get the datatype */
- if ( (type1_id = H5Dget_type(dset1_id)) < 0 )
-  goto out;
-
- /* Get the datatype */
- if ( (type2_id = H5Dget_type(dset2_id)) < 0 )
-  goto out;
-
   /* Get the dataspace handle */
  if ( (space1_id = H5Dget_space(dset1_id)) < 0 )
-  return -1;
+  goto out;
 
  /* Get rank */
  if ( (rank1 = H5Sget_simple_extent_ndims(space1_id)) < 0 )
-  return -1;
+  goto out;
 
  /* Get the dataspace handle */
  if ( (space2_id = H5Dget_space(dset2_id)) < 0 )
-  return -1;
+  goto out;
 
  /* Get rank */
  if ( (rank2 = H5Sget_simple_extent_ndims(space2_id)) < 0 )
-  return -1;
+  goto out;
 
  /* Get dimensions */
  if ( H5Sget_simple_extent_dims(space1_id,dims1,maxdim1) < 0 )
@@ -861,16 +862,29 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  if ( H5Sget_simple_extent_dims(space2_id,dims2,maxdim2) < 0 )
   goto out;
 
+/*-------------------------------------------------------------------------
+ * Get the file data type 
+ *-------------------------------------------------------------------------
+ */
+ 
+ /* Get the data type */
+ if ( (f_type1 = H5Dget_type(dset1_id)) < 0 )
+  goto out;
+
+ /* Get the data type */
+ if ( (f_type2 = H5Dget_type(dset2_id)) < 0 )
+  goto out;
+
 
 /*-------------------------------------------------------------------------
  * check for the same class 
  *-------------------------------------------------------------------------
  */
 
- if ((tclass1=H5Tget_class(type1_id))<0) 
+ if ((tclass1=H5Tget_class(f_type1))<0) 
   goto out;
 
- if ((tclass2=H5Tget_class(type2_id))<0) 
+ if ((tclass2=H5Tget_class(f_type2))<0) 
   goto out;
 
  if ( tclass1 != tclass2 )
@@ -925,13 +939,13 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  *-------------------------------------------------------------------------
  */
 
- if ( (H5Tequal(type1_id, type2_id)==0) ) 
+ if ( (H5Tequal(f_type1, f_type2)==0) ) 
  {
   printf("Warning: <%s> has different storage datatype than <%s>\n", obj1_name, obj2_name );
   printf("<%s> has datatype ", obj1_name);
-  print_datatype(type1_id);
+  print_datatype(f_type1);
   printf(" and <%s> has datatype ", obj2_name);
-  print_datatype(type2_id);
+  print_datatype(f_type2);
   printf("\n");
  }
 
@@ -1005,15 +1019,11 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
   }
  }
 
-
+ 
 /*-------------------------------------------------------------------------
- * check for simple dataspace
+ * get number of elements
  *-------------------------------------------------------------------------
  */
-
- is1 = H5Sis_simple(space1_id);
- is2 = H5Sis_simple(space2_id);
- 
 
  tot_cnt1 = 1;
  for (i = 0; i < rank1; i++) 
@@ -1027,50 +1037,104 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
   tot_cnt2 *= dims2[i];
  }
 
- buf1 = (void *) malloc((unsigned) (tot_cnt1*H5Tget_size(type1_id)));
- buf2 = (void *) malloc((unsigned) (tot_cnt2*H5Tget_size(type2_id)));
+ assert(tot_cnt1==tot_cnt2);
+
+/*-------------------------------------------------------------------------
+ * memory type and sizes
+ *-------------------------------------------------------------------------
+ */
+
+ m_type1 = fixtype( f_type1 );
+ m_type2 = fixtype( f_type2 );
+
+ f_size1 = H5Tget_size( f_type1 );
+ f_size2 = H5Tget_size( f_type2 );
+ m_size1 = H5Tget_size( m_type1 );
+ m_size2 = H5Tget_size( m_type2 );
+
+#if defined (H5DIFF_DEBUG)
+ printf("\n");
+ printf("------------------\n");
+ printf("sizeof(char)   %u\n", sizeof(char) );
+ printf("sizeof(short)  %u\n", sizeof(short) );
+ printf("sizeof(int)    %u\n", sizeof(int) );
+ printf("sizeof(long)   %u\n", sizeof(long) );
+ printf("<%s> ------------------\n", obj1_name);
+ printf("type on file   ");
+ print_datatype(f_type1);
+ printf("\n");
+ printf("size on file   %u\n", f_size1 );
+
+ printf("type on memory ");
+ print_datatype(m_type1);
+ printf("\n");
+ printf("size on memory %u\n", m_size1 );
+
+ printf("<%s> ------------------\n", obj2_name);
+ printf("type on file   ");
+ print_datatype(f_type2);
+ printf("\n");
+ printf("size on file   %u\n", f_size2 );
+
+ printf("type on memory ");
+ print_datatype(m_type2);
+ printf("\n");
+ printf("size on memory %u\n", m_size2 );
+#endif /*H5DIFF_DEBUG*/
+
+
+/*-------------------------------------------------------------------------
+ * "upgrade" the smaller memory size 
+ *-------------------------------------------------------------------------
+ */
+
+ if ( m_size1 != m_size2 )
+ {
+  if ( m_size1 < m_size2 )
+  {
+   assert( (H5Tclose(m_type1)) >=0);
+   m_type1 = fixtype( f_type2 );
+   m_size1 = H5Tget_size( m_type1 );
+  }
+  else
+  {
+   assert( (H5Tclose(m_type2)) >=0);
+   m_type2 = fixtype( f_type1 );
+   m_size2 = H5Tget_size( m_type2 );
+  }
+  
+ }
+  
+ assert(m_size1==m_size2);
+ 
+
+#if defined (H5DIFF_DEBUG)
+ printf("fixed size on memory %u\n", m_size1 );
+ printf("\n");
+#endif 
+
+ buf1 = (void *) malloc((unsigned) (tot_cnt1*m_size1));
+ buf2 = (void *) malloc((unsigned) (tot_cnt2*m_size2));
 
  if ( buf1 == NULL || buf2 == NULL )
  {
   printf( "cannot read into memory\n" );
-  if ( buf1) free((char *) buf1);
-  if ( buf2) free((char *) buf2);
   goto out;
  }
-
-/*-------------------------------------------------------------------------
- * memory type
- *-------------------------------------------------------------------------
- */
-
- type_mem = fixtype( type1_id );
-	/* Get the size. */
- size_mem = H5Tget_size( type_mem );
-
 
 /*-------------------------------------------------------------------------
  * read
  *-------------------------------------------------------------------------
  */
 
- if ( H5Dread(dset1_id,type_mem,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf1) < 0 )
+ if ( H5Dread(dset1_id,m_type1,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf1) < 0 )
   goto out;
 
- if ( H5Dread(dset2_id,type_mem,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf2) < 0 )
+ if ( H5Dread(dset2_id,m_type2,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf2) < 0 )
   goto out;
- 
- if (tot_cnt1 > tot_cnt2)
-  tot_cnt = tot_cnt2;
- else
-  tot_cnt = tot_cnt1; 
 
- nfound = array_diff(buf1,buf2,tot_cnt,type1_id,rank1,dims1,options,
-		        obj1_name,obj2_name,size_mem);
+ nfound = array_diff(buf1,buf2,tot_cnt1,rank1,dims1,options,obj1_name,obj2_name,m_type1);
  printf("%d differences found\n", nfound );
-
-
- free((char *) buf1);
- free((char *) buf2);
 
 /*-------------------------------------------------------------------------
  * close
@@ -1078,14 +1142,19 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  */
 
 out:
+
+ if ( buf1) free((char *) buf1);
+ if ( buf2) free((char *) buf2);
  
  /* Close */
- status = H5Dclose(dset1_id);
- status = H5Dclose(dset2_id);
- status = H5Sclose(space1_id);
- status = H5Sclose(space2_id);
- status = H5Tclose(type1_id);
- status = H5Tclose(type2_id);
+	if ( dset1_id!=-1 )  assert( (H5Dclose(dset1_id)) >=0);
+	if ( dset2_id!=-1 )  assert( (H5Dclose(dset2_id)) >=0);
+	if ( space1_id!=-1 ) assert( (H5Sclose(space1_id)) >=0);
+	if ( space2_id!=-1 ) assert( (H5Sclose(space2_id)) >=0);
+	if ( f_type1!=-1 )   assert( (H5Tclose(f_type1)) >=0);
+	if ( f_type2!=-1 )   assert( (H5Tclose(f_type2)) >=0);
+	if ( m_type1!=-1 )   assert( (H5Tclose(m_type1)) >=0);
+	if ( m_type2!=-1 )   assert( (H5Tclose(m_type2)) >=0);
  
  return 0;
 
@@ -1094,13 +1163,13 @@ out:
 /*-------------------------------------------------------------------------
  * Function: array_diff
  *
- * Purpose: 
+ * Purpose: compare array in memory
  *
  * Return: 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: October 8, 2002
+ * Date: May 9, 2003
  *
  * Comments:
  *
@@ -1109,9 +1178,9 @@ out:
  *-------------------------------------------------------------------------
  */
  
-int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank,
-                 hsize_t *dims, options_t options, const char *obj1, const char *obj2,
-																	size_t size_mem )
+int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims, 
+                options_t options, const char *obj1, const char *obj2,
+                hid_t m_type )
 {
  char   *i1ptr1, *i1ptr2;
  short  *i2ptr1, *i2ptr2;
@@ -1121,8 +1190,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
  double *dptr1, *dptr2;
  int    nfound=0; /* number of differences found */
  int    ph=1;     /* print header  */
- int    i8diff; 
-	int    v=0;
+ int    v=0;
 
  /* accumulator and matrix position */
  int          acc[32];
@@ -1139,16 +1207,10 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
  }
 
  /* Get the class. */
- type_class = H5Tget_class( type_id );
+ type_class = H5Tget_class( m_type );
 
  /* Get the size. */
- type_size = H5Tget_size( type_id );
-
-	if (v && size_mem!=type_size)
-	{
-  printf("memory type size is %d\n", size_mem);
-		printf("disk type size is %d\n", type_size);
-	}
+ type_size = H5Tget_size( m_type );
 
  
  switch(type_class)
@@ -1158,8 +1220,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
 
   case H5T_INTEGER:
 
-
-   switch(size_mem)
+   switch(type_size)
    {
 
   /*-------------------------------------------------------------------------
@@ -1436,7 +1497,6 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
    case 8:
     i8ptr1 = (long *) buf1;
     i8ptr2 = (long *) buf2;
-    i8diff = (int)(*i8ptr1 - *i8ptr2);
  
     for ( i = 0; i < tot_cnt; i++)
     {
@@ -1445,13 +1505,13 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      {
       if ( options.n_ && nfound>=options.n_number_count)
        return nfound;
-      if ( abs(i8diff) > options.d_delta )
+      if ( labs(*i8ptr1 - *i8ptr2) > (long)options.d_delta )
       {
        if ( options.r_==0 ) 
        {
         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
         printf(SPACES);
-        printf(LIFORMAT, *i8ptr1, *i8ptr2, i8diff);
+        printf(LIFORMAT, *i8ptr1, *i8ptr2, labs(*i8ptr1 - *i8ptr2));
        }
        nfound++;
       }
@@ -1462,7 +1522,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      {
       if (*i8ptr1!=0)
       {
-       if ( abs((int)(1 - *i8ptr2 / *i8ptr1)) > options.p_relative  )
+       if ( labs((1 - *i8ptr2 / *i8ptr1)) > (long)options.p_relative  )
        {
         if ( options.n_ && nfound>=options.n_number_count)
          return nfound;
@@ -1470,7 +1530,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
         {
          print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
          printf(SPACES);
-         printf(LIFORMAT, *i8ptr1, *i8ptr2, i8diff);
+         printf(LIFORMAT, *i8ptr1, *i8ptr2, labs(*i8ptr1 - *i8ptr2));
         }
         nfound++;
        }
@@ -1482,8 +1542,8 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      {
       if (*i8ptr1!=0)
       {
-       if ( abs((int)(1 - *i8ptr2 / *i8ptr1)) > options.p_relative &&
-        abs(i8diff) > options.d_delta )
+       if ( labs((1 - *i8ptr2 / *i8ptr1)) > (long)options.p_relative &&
+        labs(*i8ptr1 - *i8ptr2) > (long)options.d_delta )
        {
         if ( options.n_ && nfound>=options.n_number_count)
          return nfound;
@@ -1491,7 +1551,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
         {
          print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
          printf(SPACES);
-         printf(LIFORMAT, *i8ptr1, *i8ptr2, i8diff);
+         printf(LIFORMAT, *i8ptr1, *i8ptr2, labs(*i8ptr1 - *i8ptr2));
         }
         nfound++;
        }
@@ -1508,7 +1568,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
       {
        print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
        printf(SPACES);
-       printf(LIFORMAT, *i8ptr1, *i8ptr2, i8diff);
+       printf(LIFORMAT, *i8ptr1, *i8ptr2, labs(*i8ptr1 - *i8ptr2));
       }
       nfound++;
       
@@ -1528,7 +1588,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
 
    case H5T_FLOAT:
 
-   switch(size_mem)
+   switch(type_size)
    {
 
   /*-------------------------------------------------------------------------
@@ -1730,7 +1790,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: December 19, 2002
+ * Date: May 9, 2003
  *
  * Comments:
  *
@@ -1779,7 +1839,7 @@ void print_pos( int *ph, unsigned int curr_pos, int *acc,
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: February 24, 2003
+ * Date: May 9, 2003
  *
  * Comments:
  *
@@ -1842,7 +1902,7 @@ void print_class( H5T_class_t tclass, char *sclass )
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: March 5, 2003
+ * Date: May 9, 2003
  *
  * Comments: Adapted from h5tools_fixtype
  *
@@ -1854,7 +1914,7 @@ hid_t fixtype(hid_t f_type)
 {
  hid_t   m_type = -1;
  size_t  size;
-	int     v=0;
+ int     v=0;
  
  size = H5Tget_size(f_type);
  
@@ -1871,7 +1931,7 @@ hid_t fixtype(hid_t f_type)
  */
   if (size <= sizeof(char)) {
    m_type = H5Tcopy(H5T_NATIVE_SCHAR);
-			if (v) printf("using memory type H5T_NATIVE_SCHAR\n");
+   if (v) printf("using memory type H5T_NATIVE_SCHAR\n");
   } else if (size <= sizeof(short)) {
    m_type = H5Tcopy(H5T_NATIVE_SHORT);
    if (v) printf("using memory type H5T_NATIVE_SHORT\n");
@@ -1923,7 +1983,7 @@ hid_t fixtype(hid_t f_type)
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: April 17, 2003
+ * Date: May 9, 2003
  *
  * Comments: Adapted from h5dump for H5T_INTEGER and H5T_FLOAT classes only
  *
