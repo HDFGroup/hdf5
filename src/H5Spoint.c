@@ -399,8 +399,11 @@ H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hssize_t *
             space->select.sel_info.pnt_lst->head=top;
     } /* end else */
 
-    /* Add the number of elements in the new selection */
-    space->select.num_elem+=num_elem;
+    /* Set the number of elements in the new selection */
+    if(op==H5S_SELECT_SET)
+        space->select.num_elem=num_elem;
+    else
+        space->select.num_elem+=num_elem;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -458,40 +461,6 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_point_npoints
- PURPOSE
-    Compute number of elements in current selection
- USAGE
-    hsize_t H5S_point_npoints(space)
-        H5S_t *space;       IN: Pointer to dataspace
- RETURNS
-    The number of elements in selection on success, 0 on failure
- DESCRIPTION
-    Compute number of elements in current selection.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-hsize_t
-H5S_point_npoints (const H5S_t *space)
-{
-    hsize_t ret_value;          /* Return value */
-    FUNC_ENTER_NOAPI(H5S_point_npoints, 0);
-
-    /* Check args */
-    assert (space);
-
-    /* Set return value */
-    ret_value=space->select.num_elem;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* H5S_point_npoints() */
-
-
-/*--------------------------------------------------------------------------
- NAME
     H5S_select_elements
  PURPOSE
     Specify a series of elements in the dataspace to select
@@ -535,8 +504,8 @@ H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
     assert(op==H5S_SELECT_SET || op==H5S_SELECT_APPEND || op==H5S_SELECT_PREPEND);
 
     /* If we are setting a new selection, remove current selection first */
-    if(op==H5S_SELECT_SET) {
-        if((*space->select.release)(space)<0)
+    if(op==H5S_SELECT_SET || space->select.type!=H5S_SEL_POINTS) {
+        if(H5S_SELECT_RELEASE(space)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release point selection");
     } /* end if */
 
@@ -555,7 +524,6 @@ H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
 
     /* Set selection methods */
     space->select.get_seq_list=H5S_point_get_seq_list;
-    space->select.get_npoints=H5S_point_npoints;
     space->select.release=H5S_point_release;
     space->select.is_valid=H5S_point_is_valid;
     space->select.serial_size=H5S_point_serial_size;
@@ -687,38 +655,6 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_get_select_elem_npoints
- PURPOSE
-    Get the number of points in current element selection
- USAGE
-    hssize_t H5S_get_select_elem_npoints(space)
-        H5S_t *space;             IN: Dataspace ptr of selection to query
- RETURNS
-    The number of element points in selection on success, negative on failure
- DESCRIPTION
-    Returns the number of element points in current selection for dataspace.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static hssize_t
-H5S_get_select_elem_npoints(H5S_t *space)
-{
-    hssize_t ret_value=FAIL;        /* return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_get_select_elem_npoints);
-
-    assert(space);
-
-    ret_value = space->select.num_elem;
-
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* H5Sget_select_elem_npoints() */
-
-
-/*--------------------------------------------------------------------------
- NAME
     H5Sget_select_elem_npoints
  PURPOSE
     Get the number of points in current element selection
@@ -749,7 +685,7 @@ H5Sget_select_elem_npoints(hid_t spaceid)
     if(space->select.type!=H5S_SEL_POINTS)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an element selection");
 
-    ret_value = H5S_get_select_elem_npoints(space);
+    ret_value = H5S_GET_SELECT_NPOINTS(space);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1282,15 +1218,15 @@ H5Sselect_elements(hid_t spaceid, H5S_seloper_t op, size_t num_elem,
 
     /* Check args */
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-    if (H5S_SCALAR==H5S_get_simple_extent_type(space))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_SCALAR space");
-    if (H5S_NULL==H5S_get_simple_extent_type(space))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_NULL space");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
+    if (H5S_SCALAR==H5S_GET_SIMPLE_EXTENT_TYPE(space))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "point doesn't support H5S_SCALAR space");
+    if (H5S_NULL==H5S_GET_SIMPLE_EXTENT_TYPE(space))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "point doesn't support H5S_NULL space");
     if(coord==NULL || num_elem==0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "elements not specified");
     if(!(op==H5S_SELECT_SET || op==H5S_SELECT_APPEND || op==H5S_SELECT_PREPEND))
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "operations other than H5S_SELECT_SET not supported currently");
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "unsupported operation attempted");
 
     /* Call the real element selection routine */
     if((ret_value=H5S_select_elements(space,op,num_elem,coord))<0)

@@ -2161,7 +2161,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
         new_dset->alloc_time=H5D_ALLOC_TIME_EARLY;
    
     /* Set up layout information */
-    if((ndims=H5S_get_simple_extent_ndims(new_dset->space))<0)
+    if((ndims=H5S_GET_SIMPLE_EXTENT_NDIMS(new_dset->space))<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to get rank")
     new_dset->layout.ndims = (unsigned)ndims + 1;
     assert((unsigned)(new_dset->layout.ndims) <= NELMTS(new_dset->layout.dim));
@@ -2207,7 +2207,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
              * Chunked storage allows any type of data space extension, so we
              * don't even bother checking.
              */
-            if(chunk_ndims != (unsigned)H5S_get_simple_extent_ndims(new_dset->space))
+            if(chunk_ndims != (unsigned)H5S_GET_SIMPLE_EXTENT_NDIMS(new_dset->space))
                 HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "dimensionality of chunks doesn't match the data space")
             if (new_dset->efl.nused>0)
                 HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL, "external storage not supported with chunked layout")

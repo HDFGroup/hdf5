@@ -466,7 +466,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
 	/* Check for valid selection */
-	if(H5S_select_valid(mem_space)!=TRUE)
+	if(H5S_SELECT_VALID(mem_space)!=TRUE)
 	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
     }
     if (H5S_ALL != file_space_id) {
@@ -474,7 +474,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
 	/* Check for valid selection */
-	if(H5S_select_valid(file_space)!=TRUE)
+	if(H5S_SELECT_VALID(file_space)!=TRUE)
 	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
     }
     
@@ -557,7 +557,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
 	/* Check for valid selection */
-	if (H5S_select_valid(mem_space)!=TRUE)
+	if (H5S_SELECT_VALID(mem_space)!=TRUE)
 	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
     }
     if (H5S_ALL != file_space_id) {
@@ -565,7 +565,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
 	/* Check for valid selection */
-	if (H5S_select_valid(file_space)!=TRUE)
+	if (H5S_SELECT_VALID(file_space)!=TRUE)
 	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
     }
 
@@ -662,7 +662,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         file_space = dataset->space;
     if (!mem_space)
         mem_space = file_space;
-    if((snelmts = H5S_get_select_npoints(mem_space))<0)
+    if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space))<0)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
     H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
 
@@ -682,7 +682,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Make certain that the number of elements in each selection is the same */
-    if (nelmts!=(hsize_t)H5S_get_select_npoints(file_space))
+    if (nelmts!=(hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
 
     /* Retrieve dataset properties */
@@ -889,7 +889,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         file_space = dataset->space;
     if (!mem_space)                                                                                                                      
         mem_space = file_space;                                                                                                         
-    if((snelmts = H5S_get_select_npoints(mem_space))<0)
+    if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space))<0)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
     H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
 
@@ -905,7 +905,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Make certain that the number of elements in each selection is the same */
-    if (nelmts!=(hsize_t)H5S_get_select_npoints(file_space))
+    if (nelmts!=(hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
 
     /* Retrieve dataset properties */
@@ -1082,7 +1082,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
 #endif
   	/* Sanity check dataset, then read it */
         assert(dataset->layout.addr!=HADDR_UNDEF || dataset->efl.nused>0 || 
-            H5S_NULL == H5S_get_simple_extent_type(file_space) ||
+            H5S_NULL == H5S_GET_SIMPLE_EXTENT_TYPE(file_space) ||
              dataset->layout.type==H5D_COMPACT);
         H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
         status = (sconv->read)(dataset->ent.file, &(dataset->layout), 
@@ -1166,7 +1166,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
     /* Start strip mining... */
     for (smine_start=0; smine_start<nelmts; smine_start+=smine_nelmts) {
         /* Go figure out how many elements to read from the file */
-        assert(H5S_select_iter_nelmts(&file_iter)==(nelmts-smine_start));
+        assert(H5S_SELECT_ITER_NELMTS(&file_iter)==(nelmts-smine_start));
         smine_nelmts = MIN(request_nelmts, (nelmts-smine_start));
 	
         /*
@@ -1246,15 +1246,15 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
 done:
     /* Release selection iterators */
     if(file_iter_init) {
-        if(H5S_select_iter_release(&file_iter)<0)
+        if(H5S_SELECT_ITER_RELEASE(&file_iter)<0)
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
     } /* end if */
     if(mem_iter_init) {
-        if(H5S_select_iter_release(&mem_iter)<0)
+        if(H5S_SELECT_ITER_RELEASE(&mem_iter)<0)
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
     } /* end if */
     if(bkg_iter_init) {
-        if(H5S_select_iter_release(&bkg_iter)<0)
+        if(H5S_SELECT_ITER_RELEASE(&bkg_iter)<0)
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
     } /* end if */
 
@@ -1411,7 +1411,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
     /* Start strip mining... */
     for (smine_start=0; smine_start<nelmts; smine_start+=smine_nelmts) {
         /* Go figure out how many elements to read from the file */
-        assert(H5S_select_iter_nelmts(&file_iter)==(nelmts-smine_start));
+        assert(H5S_SELECT_ITER_NELMTS(&file_iter)==(nelmts-smine_start));
         smine_nelmts = MIN(request_nelmts, (nelmts-smine_start));
 	
         /*
@@ -1490,15 +1490,15 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
 done:
     /* Release selection iterators */
     if(file_iter_init) {
-        if(H5S_select_iter_release(&file_iter)<0)
+        if(H5S_SELECT_ITER_RELEASE(&file_iter)<0)
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
     } /* end if */
     if(mem_iter_init) {
-        if(H5S_select_iter_release(&mem_iter)<0)
+        if(H5S_SELECT_ITER_RELEASE(&mem_iter)<0)
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
     } /* end if */
     if(bkg_iter_init) {
-        if(H5S_select_iter_release(&bkg_iter)<0)
+        if(H5S_SELECT_ITER_RELEASE(&bkg_iter)<0)
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
     } /* end if */
 
@@ -1697,7 +1697,7 @@ UNUSED
            
         for (smine_start=0; smine_start<chunk_info->chunk_points; smine_start+=smine_nelmts) {
             /* Go figure out how many elements to read from the file */
-            assert(H5S_select_iter_nelmts(&file_iter)==(chunk_info->chunk_points-smine_start));
+            assert(H5S_SELECT_ITER_NELMTS(&file_iter)==(chunk_info->chunk_points-smine_start));
             smine_nelmts = MIN(request_nelmts, (chunk_info->chunk_points-smine_start));
         
             /*
@@ -1771,17 +1771,17 @@ UNUSED
 
         /* Release selection iterators */
         if(file_iter_init) {
-            if(H5S_select_iter_release(&file_iter)<0)
+            if(H5S_SELECT_ITER_RELEASE(&file_iter)<0)
                 HGOTO_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
             file_iter_init=0;
         } /* end if */
         if(mem_iter_init) {
-            if(H5S_select_iter_release(&mem_iter)<0)
+            if(H5S_SELECT_ITER_RELEASE(&mem_iter)<0)
                 HGOTO_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
             mem_iter_init=0;
         } /* end if */
         if(bkg_iter_init) {
-            if(H5S_select_iter_release(&bkg_iter)<0)
+            if(H5S_SELECT_ITER_RELEASE(&bkg_iter)<0)
                 HGOTO_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
             bkg_iter_init=0;
         } /* end if */
@@ -1793,15 +1793,15 @@ UNUSED
 done:
     /* Release selection iterators, if necessary */
     if(file_iter_init) {
-        if(H5S_select_iter_release(&file_iter)<0)
+        if(H5S_SELECT_ITER_RELEASE(&file_iter)<0)
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
         } /* end if */
     if(mem_iter_init) {
-        if(H5S_select_iter_release(&mem_iter)<0)
+        if(H5S_SELECT_ITER_RELEASE(&mem_iter)<0)
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
     } /* end if */
     if(bkg_iter_init) {
-        if(H5S_select_iter_release(&bkg_iter)<0)
+        if(H5S_SELECT_ITER_RELEASE(&bkg_iter)<0)
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
     } /* end if */
 
@@ -2046,7 +2046,7 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
        
         for (smine_start=0; smine_start<chunk_info->chunk_points; smine_start+=smine_nelmts) {
             /* Go figure out how many elements to read from the file */
-            assert(H5S_select_iter_nelmts(&file_iter)==(chunk_info->chunk_points-smine_start));
+            assert(H5S_SELECT_ITER_NELMTS(&file_iter)==(chunk_info->chunk_points-smine_start));
             smine_nelmts = MIN(request_nelmts, (chunk_info->chunk_points-smine_start));
             
             /*
@@ -2122,17 +2122,17 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
         /* Release selection iterators */
         if(file_iter_init) {
-            if(H5S_select_iter_release(&file_iter)<0)
+            if(H5S_SELECT_ITER_RELEASE(&file_iter)<0)
                 HGOTO_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
             file_iter_init=0;
         } /* end if */
         if(mem_iter_init) {
-            if(H5S_select_iter_release(&mem_iter)<0)
+            if(H5S_SELECT_ITER_RELEASE(&mem_iter)<0)
                 HGOTO_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
             mem_iter_init=0;
         } /* end if */
         if(bkg_iter_init) {
-            if(H5S_select_iter_release(&bkg_iter)<0)
+            if(H5S_SELECT_ITER_RELEASE(&bkg_iter)<0)
                 HGOTO_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
             bkg_iter_init=0;
         } /* end if */
@@ -2144,15 +2144,15 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 done:
     /* Release selection iterators, if necessary */
     if(file_iter_init) {
-        if(H5S_select_iter_release(&file_iter)<0)
+        if(H5S_SELECT_ITER_RELEASE(&file_iter)<0)
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
     } /* end if */
     if(mem_iter_init) {
-        if(H5S_select_iter_release(&mem_iter)<0)
+        if(H5S_SELECT_ITER_RELEASE(&mem_iter)<0)
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
     } /* end if */
     if(bkg_iter_init) {
-        if(H5S_select_iter_release(&bkg_iter)<0)
+        if(H5S_SELECT_ITER_RELEASE(&bkg_iter)<0)
             HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
     } /* end if */
  
@@ -2318,7 +2318,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     fm->layout = &(dataset->layout);
     
     /* Check if the memory space is scalar & make equivalent memory space */
-    if((sm_ndims = H5S_get_simple_extent_ndims(mem_space))<0)
+    if((sm_ndims = H5S_GET_SIMPLE_EXTENT_NDIMS(mem_space))<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number")
     if(sm_ndims==0) {
         hsize_t dims[H5O_LAYOUT_NDIMS];    /* Temporary dimension information */
@@ -2382,9 +2382,9 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     fm->mem_space_copy=equiv_mspace_init;       /* Make certain to copy memory dataspace if necessary */
 
     /* Get type of selection on disk & in memory */
-    if((fsel_type=H5S_get_select_type(file_space))<0)
+    if((fsel_type=H5S_GET_SELECT_TYPE(file_space))<0)
         HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to convert from file to memory data space")
-    if((fm->msel_type=H5S_get_select_type(equiv_mspace))<0)
+    if((fm->msel_type=H5S_GET_SELECT_TYPE(equiv_mspace))<0)
         HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to convert from file to memory data space")
 
     /* Check if file selection is a point selection */
@@ -2534,7 +2534,7 @@ done:
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template")
     } /* end if */
     if(iter_init) {
-        if (H5S_select_iter_release(&(fm->mem_iter))<0)
+        if (H5S_SELECT_ITER_RELEASE(&(fm->mem_iter))<0)
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
     }
     if(f_tid!=(-1)) {
@@ -2666,11 +2666,11 @@ H5D_create_chunk_file_map_hyper(fm_map *fm)
     assert(fm->f_ndims>0);
 
     /* Get number of elements selected in file */
-    if((sel_points=H5S_get_select_npoints(fm->file_space))<0)
+    if((sel_points=H5S_GET_SELECT_NPOINTS(fm->file_space))<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection # of elements")
 
     /* Get bounding box for selection (to reduce the number of chunks to iterate over) */
-    if(H5S_get_select_bounds(fm->file_space, sel_start, sel_end)<0)
+    if(H5S_SELECT_BOUNDS(fm->file_space, sel_start, sel_end)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
 
     /* Set initial chunk location & hyperslab size */
@@ -2755,7 +2755,7 @@ H5D_create_chunk_file_map_hyper(fm_map *fm)
             } /* end if */
 
             /* Get number of elements selected in chunk */
-            if((schunk_points=H5S_get_select_npoints(tmp_fchunk))<0)
+            if((schunk_points=H5S_GET_SELECT_NPOINTS(tmp_fchunk))<0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection # of elements")
             H5_ASSIGN_OVERFLOW(new_chunk_info->chunk_points,schunk_points,hssize_t,size_t);
 
@@ -2879,11 +2879,11 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
     } /* end if */
     else {
         /* Get bounding box for file selection */
-        if(H5S_get_select_bounds(fm->file_space, file_sel_start, file_sel_end)<0)
+        if(H5S_SELECT_BOUNDS(fm->file_space, file_sel_start, file_sel_end)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
 
         /* Get bounding box for memory selection */
-        if(H5S_get_select_bounds(fm->mem_space, mem_sel_start, mem_sel_end)<0)
+        if(H5S_SELECT_BOUNDS(fm->mem_space, mem_sel_start, mem_sel_end)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
 
         /* Calculate the adjustment for memory selection from file selection */
@@ -2923,7 +2923,7 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
 
             /* Release the current selection */
-            if(H5S_select_release(chunk_info->mspace)<0)
+            if(H5S_SELECT_RELEASE(chunk_info->mspace)<0)
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection")
 
             /* Copy the file chunk's selection */
@@ -3176,7 +3176,7 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize_
     } /* end else */
 
     /* Get coordinates of selection iterator for memory */
-    if(H5S_select_iter_coords(&fm->mem_iter,coords_in_mem)<0)
+    if(H5S_SELECT_ITER_COORDS(&fm->mem_iter,coords_in_mem)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get iterator coordinates")
 
     /* Add point to memory selection for chunk */
@@ -3190,7 +3190,7 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize_
     } /* end else */
 
     /* Move memory selection iterator to next element in selection */
-    if(H5S_select_iter_next(&fm->mem_iter,1)<0)
+    if(H5S_SELECT_ITER_NEXT(&fm->mem_iter,1)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to move to next iterator location")
 
 done:

@@ -984,41 +984,6 @@ H5S_hyper_iter_release (H5S_sel_iter_t *iter)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_hyper_npoints
- PURPOSE
-    Compute number of elements in current selection
- USAGE
-    hsize_t H5S_hyper_npoints(space)
-        H5S_t *space;       IN: Pointer to dataspace
- RETURNS
-    The number of elements in selection on success, 0 on failure
- DESCRIPTION
-    Compute number of elements in current selection.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-hsize_t
-H5S_hyper_npoints (const H5S_t *space)
-{
-    hsize_t ret_value;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5S_hyper_npoints, 0);
-
-    /* Check args */
-    assert (space);
-
-    /* Set return value */
-    ret_value=space->select.num_elem;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* H5S_hyper_npoints() */
-
-
-/*--------------------------------------------------------------------------
- NAME
     H5S_hyper_new_span
  PURPOSE
     Make a new hyperslab span node
@@ -3396,7 +3361,6 @@ H5S_hyper_add_span_element(H5S_t *space, unsigned rank, hssize_t *coords)
 
         /* Set selection methods */
         space->select.get_seq_list=H5S_hyper_get_seq_list;
-        space->select.get_npoints=H5S_hyper_npoints;
         space->select.release=H5S_hyper_release;
         space->select.is_valid=H5S_hyper_is_valid;
         space->select.serial_size=H5S_hyper_serial_size;
@@ -5754,7 +5718,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 
     if(op==H5S_SELECT_SET) {
         /* If we are setting a new selection, remove current selection first */
-        if((*space->select.release)(space)<0)
+        if(H5S_SELECT_RELEASE(space)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release hyperslab");
 
         /* Save the diminfo */
@@ -5802,7 +5766,6 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 
     /* Set selection methods */
     space->select.get_seq_list=H5S_hyper_get_seq_list;
-    space->select.get_npoints=H5S_hyper_npoints;
     space->select.release=H5S_hyper_release;
     space->select.is_valid=H5S_hyper_is_valid;
     space->select.serial_size=H5S_hyper_serial_size;
@@ -5858,9 +5821,9 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
     /* Check args */
     if (NULL == (space=H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-    if (H5S_SCALAR==H5S_get_simple_extent_type(space))
+    if (H5S_SCALAR==H5S_GET_SIMPLE_EXTENT_TYPE(space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_SCALAR space");
-    if (H5S_NULL==H5S_get_simple_extent_type(space))
+    if (H5S_NULL==H5S_GET_SIMPLE_EXTENT_TYPE(space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_NULL space");
     if(start==NULL || count==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified");
@@ -6134,7 +6097,7 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
         space->select.sel_info.hslab.span_lst=NULL;
 
         /* Reset the other dataspace selection information */
-        if((*space->select.release)(space)<0)
+        if(H5S_SELECT_RELEASE(space)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection");
     } /* end if */
 
@@ -6316,7 +6279,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 
     if(op==H5S_SELECT_SET) {
         /* If we are setting a new selection, remove current selection first */
-        if((*space->select.release)(space)<0)
+        if(H5S_SELECT_RELEASE(space)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release hyperslab");
 
         /* Save the diminfo */
@@ -6362,7 +6325,6 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 
     /* Set selection methods */
     space->select.get_seq_list=H5S_hyper_get_seq_list;
-    space->select.get_npoints=H5S_hyper_npoints;
     space->select.release=H5S_hyper_release;
     space->select.is_valid=H5S_hyper_is_valid;
     space->select.serial_size=H5S_hyper_serial_size;
@@ -6417,9 +6379,9 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
     /* Check args */
     if (NULL == (space=H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-    if (H5S_SCALAR==H5S_get_simple_extent_type(space))
+    if (H5S_SCALAR==H5S_GET_SIMPLE_EXTENT_TYPE(space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_SCALAR space");
-    if (H5S_NULL==H5S_get_simple_extent_type(space))
+    if (H5S_NULL==H5S_GET_SIMPLE_EXTENT_TYPE(space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_NULL space");
     if(start==NULL || count==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified");
@@ -6553,7 +6515,7 @@ H5S_combine_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to copy data space");
 
     /* Free the current selection for the new dataspace */
-    if((*new_space->select.release)(new_space)<0)
+    if(H5S_SELECT_RELEASE(new_space)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, NULL, "can't release selection");
 
     /* Combine space1 & space2, with the result in new_space */
@@ -6678,7 +6640,7 @@ H5S_select_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
     space1->select.sel_info.hslab.span_lst=NULL;
 
     /* Reset the other dataspace selection information */
-    if((*space1->select.release)(space1)<0)
+    if(H5S_SELECT_RELEASE(space1)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection");
 
     /* Combine tmp_spans (from space1) & spans from space2, with the result in space1 */

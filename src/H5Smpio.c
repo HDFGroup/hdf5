@@ -485,7 +485,7 @@ empty:
 done:
     /* Release selection iterator */
     if(sel_iter_init) {
-        if (H5S_select_iter_release(&sel_iter)<0)
+        if (H5S_SELECT_ITER_RELEASE(&sel_iter)<0)
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     } /* end if */
 
@@ -837,8 +837,8 @@ H5S_mpio_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const un
         HGOTO_DONE(FALSE);
 
     /* Check whether both selections are "regular" */
-    c1=(*file_space->select.is_regular)(file_space);
-    c2=(*mem_space->select.is_regular)(mem_space);
+    c1=H5S_SELECT_IS_REGULAR(file_space);
+    c2=H5S_SELECT_IS_REGULAR(mem_space);
     if(c1==FAIL || c2==FAIL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for single selection blocks");
     if(c1==FALSE || c2==FALSE)

@@ -71,7 +71,7 @@ H5S_all_iter_init (H5S_sel_iter_t *iter, const H5S_t *space)
     assert (iter);
 
     /* Initialize the number of elements to iterate over */
-    iter->elmt_left=H5S_get_simple_extent_npoints(space);
+    iter->elmt_left=H5S_GET_SELECT_NPOINTS(space);
 
     /* Start at the upper left location */
     iter->u.all.elmt_offset=0;
@@ -342,6 +342,9 @@ H5S_all_release (H5S_t UNUSED * space)
     /* Check args */
     assert (space);
 
+    /* Reset the number of elements in the selection */
+    space->select.num_elem=0;
+    
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_all_release() */
@@ -349,37 +352,39 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_all_npoints
+    H5S_all_copy
  PURPOSE
-    Compute number of elements in current selection
+    Copy a selection from one dataspace to another
  USAGE
-    hsize_t H5S_all_npoints(space)
-        H5S_t *space;       IN: Pointer to dataspace
+    herr_t H5S_all_copy(dst, src)
+        H5S_t *dst;  OUT: Pointer to the destination dataspace
+        H5S_t *src;  IN: Pointer to the source dataspace
  RETURNS
-    The number of elements in selection on success, 0 on failure
+    Non-negative on success/Negative on failure
  DESCRIPTION
-    Compute number of elements in current selection.  For "all" selections,
-    this is the same as the number of points in the extent.
+    Copies the 'all' selection information from the source
+    dataspace to the destination dataspace.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hsize_t
-H5S_all_npoints (const H5S_t *space)
+herr_t
+H5S_all_copy (H5S_t *dst, const H5S_t *src)
 {
-    hsize_t ret_value;
+    herr_t ret_value=SUCCEED;  /* return value */
 
-    FUNC_ENTER_NOAPI(H5S_all_npoints, 0);
+    FUNC_ENTER_NOAPI(H5S_all_copy, FAIL);
 
-    /* Check args */
-    assert (space);
+    assert(src);
+    assert(dst);
 
-    ret_value=(hsize_t)H5S_get_simple_extent_npoints(space);
-    
+    /* Set number of elements in selection */
+    dst->select.num_elem=(hsize_t)H5S_get_simple_extent_npoints(dst);
+
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}   /* H5S_all_npoints() */
+} /* end H5S_all_copy() */
 
 
 /*--------------------------------------------------------------------------
@@ -714,15 +719,17 @@ H5S_select_all (H5S_t *space, unsigned rel_prev)
 
     /* Remove current selection first */
     if(rel_prev)
-        if((*space->select.release)(space)<0)
+        if(H5S_SELECT_RELEASE(space)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection");
+
+    /* Set number of elements in selection */
+    space->select.num_elem=(hsize_t)H5S_get_simple_extent_npoints(space);
 
     /* Set selection type */
     space->select.type=H5S_SEL_ALL;
 
     /* Set selection methods */
     space->select.get_seq_list=H5S_all_get_seq_list;
-    space->select.get_npoints=H5S_all_npoints;
     space->select.release=H5S_all_release;
     space->select.is_valid=H5S_all_is_valid;
     space->select.serial_size=H5S_all_serial_size;
