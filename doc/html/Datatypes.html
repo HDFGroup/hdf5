@@ -4,7 +4,69 @@
     <title>The Data Type Interface (H5T)</title>
   </head>
 
-  <body>
+  <body bgcolor="#FFFFFF">
+
+
+<hr>
+<center>
+<table border=0 width=98%>
+<tr><td valign=top align=left>
+   <a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
+   <a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;<br>
+   <a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
+   <!--
+   <a href="Glossary.html">Glossary</a><br>
+   -->
+</td>
+<td valign=top align=right>
+   And in this document, the 
+   <a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
+      <a href="Files.html">Files</a>&nbsp;&nbsp;
+      <br>
+      <a href="Datasets.html">Datasets</a>&nbsp;&nbsp;
+      Data Types&nbsp;&nbsp;
+      <a href="Dataspaces.html">Dataspaces</a>&nbsp;&nbsp;
+      <a href="Groups.html">Groups</a>&nbsp;&nbsp;
+      <a href="References.html">References</a>&nbsp;&nbsp;
+      <br>
+      <a href="Attributes.html">Attributes</a>&nbsp;&nbsp;
+      <a href="Properties.html">Property Lists</a>&nbsp;&nbsp;
+      <a href="Errors.html">Error Handling</a>&nbsp;&nbsp;
+      <a href="Filters.html">Filters</a>&nbsp;&nbsp;
+      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
+      <br>
+      <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
+      <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
+      <a href="Environment.html">Environment</a>&nbsp;&nbsp;
+      <a href="ddl.html">DDL</a>&nbsp;&nbsp;
+      <a href="Ragged.html">Ragged Arrays</a>&nbsp;&nbsp;
+<!--
+<hr>
+And in this document, the 
+<a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
+      <a href="Attributes.html">H5A</a>&nbsp;&nbsp;
+      <a href="Datasets.html">H5D</a>&nbsp;&nbsp;
+      <a href="Errors.html">H5E</a>&nbsp;&nbsp;
+      <a href="Files.html">H5F</a>&nbsp;&nbsp;
+      <a href="Groups.html">H5G</a>&nbsp;&nbsp;
+      <a href="Properties.html">H5P</a>&nbsp;&nbsp;
+      <a href="References.html">H5R & H5I</a>&nbsp;&nbsp;
+      <a href="Ragged.html">H5RA</a>&nbsp;&nbsp;
+      <a href="Dataspaces.html">H5S</a>&nbsp;&nbsp;
+      <a href="Datatypes.html">H5T</a>&nbsp;&nbsp;
+      <a href="Filters.html">H5Z</a>&nbsp;&nbsp;
+      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
+      <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
+      <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
+      <a href="Environment.html">Environment</a>&nbsp;&nbsp;
+      <a href="ddl.html">DDL</a>&nbsp;&nbsp;
+-->
+</td></tr>
+</table>
+</center>
+<hr>
+
+
     <h1>The Data Type Interface (H5T)</h1>
 
     <h2>1. Introduction</h2>
@@ -358,9 +420,6 @@
       <em>19971205162530</em>; as an integer value in Unix time(2)
       format; or other variations.
 
-    <p>I'm deferring definition until later since they're probably not
-      as important as the other data types.
-
     <h3>3.4. Properties of Character String Atomic Types</h3>
 
     <p>Fixed-length character string types are used to store textual
@@ -436,6 +495,88 @@
       create novel data types not directly supported by the library,
       but the application is responsible for data conversion of these
       types.
+
+    <h3>3.7 Character and String Datatype Issues</h3>
+
+      The <code>H5T_NATIVE_CHAR</code> and <code>H5T_NATIVE_UCHAR</code> 
+      data types are actually numeric data (1-byte integers).  If the 
+      application wishes to store character data, then an HDF5 
+      <em>string</em> data type should be derived from 
+      <code>H5T_C_S1</code> instead.
+
+        <h4>Motivation</h4>
+
+          HDF5 defines at least three classes of data types: 
+          integer data, floating point data, and character data.  
+          However, the C language defines only integer and 
+          floating point data types; character data in C is 
+          overloaded on the 8- or 16-bit integer types and 
+          character strings are overloaded on arrays of those 
+          integer types which, by convention, are terminated with 
+          a zero element.
+
+          In C, the variable <code>unsigned char s[256]</code> is 
+          either an array of numeric data, a single character string 
+          with at most 255 characters, or an array of 256 characters, 
+          depending entirely on usage.  For uniformity with the 
+          other <code>H5T_NATIVE_</code> types, HDF5 uses the 
+          numeric interpretation of <code>H5T_NATIVE_CHAR</code> 
+          and <code>H5T_NATIVE_UCHAR</code>.
+
+
+        <h4>Usage</h4>
+
+          To store <code>unsigned char s[256]</code> data as an 
+          array of integer values, use the HDF5 data type 
+          <code>H5T_NATIVE_UCHAR</code> and a data space that 
+          describes the 256-element array. Some other application 
+          that reads the data will then be able to read, say, a 
+          256-element array of 2-byte integers and HDF5 will 
+          perform the numeric translation.
+
+          To store <code>unsigned char s[256]</code> data as a 
+          character string, derive a fixed length string data type 
+          from <code>H5T_C_S1</code> by increasing its size to 
+          256 characters. Some other application that reads the 
+          data will be able to read, say, a space padded string 
+          of 16-bit characters and HDF5 will perform the character 
+          and padding translations.
+
+          <pre>
+                hid_t s256 = H5Tcopy(H5T_C_S1);
+                             H5Tset_size(s256, 256);
+          </pre>
+
+          To store <code>unsigned char s[256]</code> data as 
+          an array of 256 ASCII characters, use an 
+          HDF5 data space to describe the array and derive a 
+          one-character string type from <code>H5T_C_S1</code>. 
+          Some other application will be able to read a subset 
+          of the array as 16-bit characters and HDF5 will 
+          perform the character translations.  
+          The <code>H5T_STR_NULLPAD</code> is necessary because 
+          if <code>H5T_STR_NULLTERM</code> were used 
+          (the default) then the single character of storage 
+          would be for the null terminator and no useful data 
+          would actually be stored (unless the length were 
+          incremented to more than one character).
+
+          <pre>
+                hid_t s1 = H5Tcopy(H5T_C_S1);
+                           H5Tset_strpad(s1, H5T_STR_NULLPAD);
+          </pre>
+
+        <h4>Summary</h4>
+
+          The C language uses the term <code>char</code> to 
+          represent one-byte numeric data and does not make 
+          character strings a first-class data type.  
+          HDF5 makes a distinction between integer and 
+          character data and maps the C <code>signed char</code> 
+          (<code>H5T_NATIVE_CHAR</code>) and 
+          <code>unsigned char</code> (<code>H5T_NATIVE_UCHAR</code>) 
+          data types to the HDF5 integer type class.
+
 
     <h2>4. Properties of Compound Types</h2>
 
@@ -1412,15 +1553,77 @@ H5Tregister(H5T_PERS_SOFT, "cus2be",
       conversion path whether that conversion path was actually used
       or not.
 
+<<<<<<< Datatypes.html
 
-    <hr>
-    <address>
-      <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
-    </address>
+
+<hr>
+<center>
+<table border=0 width=98%>
+<tr><td valign=top align=left>
+   <a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
+   <a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;<br>
+   <a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
+   <!--
+   <a href="Glossary.html">Glossary</a><br>
+   -->
+</td>
+<td valign=top align=right>
+   And in this document, the 
+   <a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
+      <a href="Files.html">Files</a>&nbsp;&nbsp;
+      <br>
+      <a href="Datasets.html">Datasets</a>&nbsp;&nbsp;
+      Data Types&nbsp;&nbsp;
+      <a href="Dataspaces.html">Dataspaces</a>&nbsp;&nbsp;
+      <a href="Groups.html">Groups</a>&nbsp;&nbsp;
+      <a href="References.html">References</a>&nbsp;&nbsp;
+      <br>
+      <a href="Attributes.html">Attributes</a>&nbsp;&nbsp;
+      <a href="Properties.html">Property Lists</a>&nbsp;&nbsp;
+      <a href="Errors.html">Error Handling</a>&nbsp;&nbsp;
+      <a href="Filters.html">Filters</a>&nbsp;&nbsp;
+      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
+      <br>
+      <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
+      <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
+      <a href="Environment.html">Environment</a>&nbsp;&nbsp;
+      <a href="ddl.html">DDL</a>&nbsp;&nbsp;
+      <a href="Ragged.html">Ragged Arrays</a>&nbsp;&nbsp;
+<!--
+<hr>
+And in this document, the 
+<a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
+      <a href="Attributes.html">H5A</a>&nbsp;&nbsp;
+      <a href="Datasets.html">H5D</a>&nbsp;&nbsp;
+      <a href="Errors.html">H5E</a>&nbsp;&nbsp;
+      <a href="Files.html">H5F</a>&nbsp;&nbsp;
+      <a href="Groups.html">H5G</a>&nbsp;&nbsp;
+      <a href="Properties.html">H5P</a>&nbsp;&nbsp;
+      <a href="References.html">H5R & H5I</a>&nbsp;&nbsp;
+      <a href="Ragged.html">H5RA</a>&nbsp;&nbsp;
+      <a href="Dataspaces.html">H5S</a>&nbsp;&nbsp;
+      <a href="Datatypes.html">H5T</a>&nbsp;&nbsp;
+      <a href="Filters.html">H5Z</a>&nbsp;&nbsp;
+      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
+      <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
+      <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
+      <a href="Environment.html">Environment</a>&nbsp;&nbsp;
+      <a href="ddl.html">DDL</a>&nbsp;&nbsp;
+-->
+</td></tr>
+</table>
+</center>
+
+
+<hr>
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
+</address>
 <!-- Created: Thu Dec  4 14:57:32 EST 1997 -->
 <!-- hhmts start -->
 Last modified: Wed Dec 16 13:04:58 EST 1998
 <!-- hhmts end -->
-    
-  </body>
+
+
+</body>
 </html>

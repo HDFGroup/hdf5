@@ -1,12 +1,26 @@
 <html>
 <head><title>
-HDF5 Draft API Specification
+HDF5 API Specification
 </title></head>
-<body>
+<body bgcolor="#FFFFFF">
+
 
 <hr>
 <center>
-HDF5 Reference Manual&nbsp;
+<table cellspacing=0 cellpadding=0 border=0 width=98%>
+<tr><td valign=top align=left>
+<a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
+<a href="H5.user.html">HDF5 User Guide</a>&nbsp;<br>
+<a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
+<!--
+<a href="Glossary.html">Glossary</a><br>
+-->
+</td>
+<td valign=top align=right>
+<!--
+And in this document, the 
+HDF5 Reference Manual&nbsp;&nbsp;
+<br>
 <a href="RM_H5.html">H5</a>&nbsp;&nbsp;
 <a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
 <a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
@@ -14,6 +28,7 @@ HDF5 Reference Manual&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
 <a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
+<br>
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
 <a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
 <a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
@@ -21,46 +36,92 @@ HDF5 Reference Manual&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
 <a href="Tools.html">Tools</a>&nbsp;&nbsp;
-<!--
-<a href="Glossary.html">Glossary</a>
 -->
+</td></tr>
+</table>
 </center>
 <hr>
+
 
 <center>
 <h1>HDF5: API Specification<br>Reference Manual</h1>
 </center>
-
-The HDF5 libraries provide several interfaces, each of which provides the 
+The HDF5 library provides several interfaces, each of which provides the 
 tools required to meet specific aspects of the HDF5 data-handling requirements.
 
-<ul>
+<center>
+<table border=0>
 
-<li><a href="RM_H5.html">Library Functions</a> -- The general-purpose <strong>H5</strong> functions.
-<li><a href="RM_H5A.html">Annotation Interface</a> -- The <strong>H5A</strong> API for annotations.
-<li><a href="RM_H5D.html">Dataset Interface</a> -- The <strong>H5D</strong> API for manipulating scientific datasets. 
-<li><a href="RM_H5E.html">Error Interface</a> -- The <strong>H5E</strong> API for error handling.
-<li><a href="RM_H5F.html">File Interface</a> -- The <strong>H5F</strong> API for accessing HDF files.
-<li><a href="RM_H5G.html">Group Interface</a> -- The <strong>H5G</strong> API for creating physical groups of objects on disk.
-<li><a href="RM_H5I.html">Identifier Interface</a> -- The <strong>H5I</strong> API for working with object identifiers.
-<li><a href="RM_H5P.html">Property List Interface</a> -- The <strong>H5P</strong> API for manipulating object property lists.
-<li><a href="RM_H5R.html">Reference Interface</a> -- The <strong>H5R</strong> API for references.
-<li><a href="RM_H5S.html">Dataspace Interface</a> -- The <strong>H5S</strong> API for defining dataset dataspace.
-<li><a href="RM_H5T.html">Datatype Interface</a> -- The <strong>H5T</strong> API for defining dataset element information.
-<li><a href="RM_H5Z.html">Compression Interface</a> -- The <strong>H5Z</strong> API for compression.
-<li><a href="Tools.html">Tools</a> -- Interactive tools for the examination of existing HDF5 files.
+<tr><td valign=top><a href="RM_H5.html">Library Functions</a>
+    </td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>The general-purpose <strong>H5</strong> functions.
+</td></tr>
+<tr><td valign=top><a href="RM_H5A.html">Annotation Interface</a>
+    </td><td></td><td valign=top>The <strong>H5A</strong> API for annotations.
+</td></tr>
+<tr><td valign=top><a href="RM_H5D.html">Dataset Interface</a>
+    </td><td></td><td valign=top>The <strong>H5D</strong> API for manipulating scientific datasets. 
+</td></tr>
+<tr><td valign=top><a href="RM_H5E.html">Error Interface</a>
+    </td><td></td><td valign=top>The <strong>H5E</strong> API for error handling.
+</td></tr>
+<tr><td valign=top><a href="RM_H5F.html">File Interface</a>
+    </td><td></td><td valign=top>The <strong>H5F</strong> API for accessing HDF files.
+</td></tr>
+<tr><td valign=top><a href="RM_H5G.html">Group Interface</a>
+    </td><td></td><td valign=top>The <strong>H5G</strong> API for creating physical groups of objects on disk.
+</td></tr>
+<tr><td valign=top><a href="RM_H5I.html">Identifier Interface</a>
+    </td><td></td><td valign=top>The <strong>H5I</strong> API for working with object identifiers.
+</td></tr>
+<tr><td valign=top><a href="RM_H5P.html">Property List Interface</a>
+    </td><td></td><td valign=top>The <strong>H5P</strong> API for manipulating object property lists.
+</td></tr>
+<tr><td valign=top><a href="RM_H5R.html">Reference Interface</a>
+    </td><td></td><td valign=top>The <strong>H5R</strong> API for references.
+</td></tr>
+<tr><td valign=top><a href="RM_H5S.html">Dataspace Interface</a>
+    </td><td></td><td valign=top>The <strong>H5S</strong> API for defining dataset dataspace.
+</td></tr>
+<tr><td valign=top><a href="RM_H5T.html">Datatype Interface</a>
+    </td><td></td><td valign=top>The <strong>H5T</strong> API for defining dataset element information.
+</td></tr>
+<tr><td valign=top><a href="RM_H5Z.html">Compression Interface</a>
+    </td><td></td><td valign=top>The <strong>H5Z</strong> API for compression.
+</td></tr>
+<tr><td valign=top><a href="Tools.html">Tools</a>
+    </td><td></td><td valign=top>Interactive tools for the examination of existing HDF5 files.
 <!--
-<li><a href="Glossary.html">Glossary</a> -- A glossary of data-types used in the APIs.
+</td></tr>
+<tr><td valign=top><a href="Glossary.html">Glossary</a>
+    </td><td></td><td valign=top>A glossary of data-types used in the APIs.
 -->
-<hr width=300 align=left>
-<li>Experimental interface:<a href="RM_H5RA.html">Ragged Arrays</a>&nbsp;&nbsp; -- The <strong>H5RA</strong> API for ragged arrays.
+</td></tr>
+<tr><td valign=top><hr noshade size=1>Experimental interface:<br><a href="RM_H5RA.html">Ragged Arrays</a>&nbsp;&nbsp;
+    </td><td></td><td valign=top><hr noshade size=1><br>The <strong>H5RA</strong> API for ragged arrays.
 
 
-</ul>
+</td></tr>
+</table>
+</center>
+
+
 
 <hr>
 <center>
-HDF5 Reference Manual&nbsp;
+<table border=0 width=98%>
+<tr><td valign=top align=left>
+<a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
+<a href="H5.user.html">HDF5 User Guide</a>&nbsp;<br>
+<a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
+<!--
+<a href="Glossary.html">Glossary</a><br>
+-->
+</td>
+<td valign=top align=right>
+<!--
+And in this document, the 
+HDF5 Reference Manual&nbsp;&nbsp;
+<br>
 <a href="RM_H5.html">H5</a>&nbsp;&nbsp;
 <a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
 <a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
@@ -68,6 +129,7 @@ HDF5 Reference Manual&nbsp;
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
 <a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
+<br>
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
 <a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
 <a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
@@ -75,18 +137,19 @@ HDF5 Reference Manual&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
 <a href="Tools.html">Tools</a>&nbsp;&nbsp;
-<!--
-<a href="Glossary.html">Glossary</a>
 -->
+</td></tr>
+</table>
 </center>
 <hr>
+
 
 <address>
 <table width=100% border=0>
 <tr><td align=left valign=top>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
-Last modified:  27 October 1998
+Last modified:  30 October 1998
 
 </td><td align=right valign=top>
 <a href="Copyright.html">Copyright</a>&nbsp;&nbsp;

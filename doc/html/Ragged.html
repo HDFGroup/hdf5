@@ -4,8 +4,70 @@
     <title>Ragged Arrays</title>
   </head>
 
-  <body>
-    <h1>Ragged Arrays</h1>
+  <body bgcolor="#FFFFFF">
+
+
+<hr>
+<center>
+<table border=0 width=98%>
+<tr><td valign=top align=left>
+   <a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
+   <a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;<br>
+   <a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
+   <!--
+   <a href="Glossary.html">Glossary</a><br>
+   -->
+</td>
+<td valign=top align=right>
+   And in this document, the 
+   <a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
+      <a href="Files.html">Files</a>&nbsp;&nbsp;
+      <br>
+      <a href="Datasets.html">Datasets</a>&nbsp;&nbsp;
+      <a href="Datatypes.html">Data Types</a>&nbsp;&nbsp;
+      <a href="Dataspaces.html">Dataspaces</a>&nbsp;&nbsp;
+      <a href="Groups.html">Groups</a>&nbsp;&nbsp;
+      <a href="References.html">References</a>&nbsp;&nbsp;
+      <br>
+      <a href="Attributes.html">Attributes</a>&nbsp;&nbsp;
+      <a href="Properties.html">Property Lists</a>&nbsp;&nbsp;
+      <a href="Errors.html">Error Handling</a>&nbsp;&nbsp;
+      <a href="Filters.html">Filters</a>&nbsp;&nbsp;
+      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
+      <br>
+      <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
+      <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
+      <a href="Environment.html">Environment</a>&nbsp;&nbsp;
+      <a href="ddl.html">DDL</a>&nbsp;&nbsp;
+      Ragged Arrays&nbsp;&nbsp;
+<!--
+<hr>
+And in this document, the 
+<a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
+      <a href="Attributes.html">H5A</a>&nbsp;&nbsp;
+      <a href="Datasets.html">H5D</a>&nbsp;&nbsp;
+      <a href="Errors.html">H5E</a>&nbsp;&nbsp;
+      <a href="Files.html">H5F</a>&nbsp;&nbsp;
+      <a href="Groups.html">H5G</a>&nbsp;&nbsp;
+      <a href="Properties.html">H5P</a>&nbsp;&nbsp;
+      <a href="References.html">H5R & H5I</a>&nbsp;&nbsp;
+      <a href="Ragged.html">H5RA</a>&nbsp;&nbsp;
+      <a href="Dataspaces.html">H5S</a>&nbsp;&nbsp;
+      <a href="Datatypes.html">H5T</a>&nbsp;&nbsp;
+      <a href="Filters.html">H5Z</a>&nbsp;&nbsp;
+      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
+      <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
+      <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
+      <a href="Environment.html">Environment</a>&nbsp;&nbsp;
+      <a href="ddl.html">DDL</a>&nbsp;&nbsp;
+-->
+</td></tr>
+</table>
+</center>
+<hr>
+
+
+    <h1>The Ragged Array Interface (H5RA)</h1>
 
 <table border=1>
 <tr><th align=left>
@@ -140,6 +202,66 @@ Do not create any archives using this interface!</center>
 	the entire row. This function returns negative for failures
 	with <em>buf</em> containing the original input values.
     </dl>
+
+
+<hr>
+<center>
+<table border=0 width=98%>
+<tr><td valign=top align=left>
+   <a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
+   <a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;<br>
+   <a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
+   <!--
+   <a href="Glossary.html">Glossary</a><br>
+   -->
+</td>
+<td valign=top align=right>
+   And in this document, the 
+   <a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
+      <a href="Files.html">Files</a>&nbsp;&nbsp;
+      <br>
+      <a href="Datasets.html">Datasets</a>&nbsp;&nbsp;
+      <a href="Datatypes.html">Data Types</a>&nbsp;&nbsp;
+      <a href="Dataspaces.html">Dataspaces</a>&nbsp;&nbsp;
+      <a href="Groups.html">Groups</a>&nbsp;&nbsp;
+      <a href="References.html">References</a>&nbsp;&nbsp;
+      <br>
+      <a href="Attributes.html">Attributes</a>&nbsp;&nbsp;
+      <a href="Properties.html">Property Lists</a>&nbsp;&nbsp;
+      <a href="Errors.html">Error Handling</a>&nbsp;&nbsp;
+      <a href="Filters.html">Filters</a>&nbsp;&nbsp;
+      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
+      <br>
+      <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
+      <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
+      <a href="Environment.html">Environment</a>&nbsp;&nbsp;
+      <a href="ddl.html">DDL</a>&nbsp;&nbsp;
+      Ragged Arrays&nbsp;&nbsp;
+<!--
+<hr>
+And in this document, the 
+<a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
+      <a href="Attributes.html">H5A</a>&nbsp;&nbsp;
+      <a href="Datasets.html">H5D</a>&nbsp;&nbsp;
+      <a href="Errors.html">H5E</a>&nbsp;&nbsp;
+      <a href="Files.html">H5F</a>&nbsp;&nbsp;
+      <a href="Groups.html">H5G</a>&nbsp;&nbsp;
+      <a href="Properties.html">H5P</a>&nbsp;&nbsp;
+      <a href="References.html">H5R & H5I</a>&nbsp;&nbsp;
+      <a href="Ragged.html">H5RA</a>&nbsp;&nbsp;
+      <a href="Dataspaces.html">H5S</a>&nbsp;&nbsp;
+      <a href="Datatypes.html">H5T</a>&nbsp;&nbsp;
+      <a href="Filters.html">H5Z</a>&nbsp;&nbsp;
+      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
+      <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
+      <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
+      <a href="Environment.html">Environment</a>&nbsp;&nbsp;
+      <a href="ddl.html">DDL</a>&nbsp;&nbsp;
+-->
+</td></tr>
+</table>
+</center>
+
       
 <!--
     <hr>
@@ -157,7 +279,7 @@ Last modified: Fri Aug 28 14:27:19 EDT 1998
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
 </address>
 
-Last modified:  21 October 1998
+Last modified:  30 October 1998
                                         
   </body>
 </html>
