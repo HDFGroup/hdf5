@@ -54,35 +54,12 @@
     }                                                   \
 } while(0)
 
-#ifndef HDopen
-#  ifdef O_BINARY
-#    define HDopen(S,F,M)       open(S,F|_O_BINARY,M)
-#  else   /* O_BINARY */
-#    define HDopen(S,F,M)       open(S,F,M)
-#  endif  /* !O_BINARY */
-#endif  /* !HDopen */
-
-#ifndef HDclose
-#  define HDclose(F)            close(F)
-#endif  /* !HDclose */
-
-#ifndef HDseek
-#  define HDseek(F,L,W)         lseek(F,L,W)
-#endif  /* !HDseek */
-
-#ifndef HDwrite
-#  define HDwrite(F,B,S)        write(F,B,S)
-#endif  /* !HDwrite */
-
-#ifndef HDread
-#  define HDread(F,B,S)         read(F,B,S)
-#endif  /* !HDread */
 
 /* Raw I/O macros */
 #define RAWCREATE(fn)           HDopen(fn, O_CREAT|O_TRUNC|O_RDWR, 0600)
 #define RAWOPEN(fn, F)          HDopen(fn, F, 0600)
 #define RAWCLOSE(F)             HDclose(F)
-#define RAWSEEK(F,L)            HDseek(F,(off_t) L,SEEK_SET)
+#define RAWSEEK(F,L)            HDlseek(F, L, SEEK_SET)
 #define RAWWRITE(F,B,S)         HDwrite(F,B,S)
 #define RAWREAD(F,B,S)          HDread(F,B,S)
 
@@ -166,6 +143,25 @@ do_pio(parameters param)
     herr_t          hrc;                /*HDF5 return code              */
 
     /* Sanity check parameters */
+
+    /* debug */
+    if (pio_debug_level>=4) {
+	if (pio_info_g==MPI_INFO_NULL){
+	    printf("INFO object is MPI_INFO_NULL\n");
+	}
+	else {
+	    char value[128];
+	    int  flag;
+	    MPI_Info_get(pio_info_g, "IBM_largeblock_io", 127, value, &flag);
+	    printf("after MPI_Info_get, flag=%d\n", flag);
+	    if (flag){
+		printf("found IBM_largeblock_io=%s, in info object\n", value);
+	    }else{
+		printf("could not find IBM_largeblock_io in info object\n");
+	    }
+
+	}
+    }
 
     /* IO type */
     iot = param.io_type;
@@ -952,9 +948,9 @@ do_fopen(iotype iot, char *fname, file_descr *fd /*out*/, int flags)
 
     case MPIO:
         if (flags & (PIO_CREATE | PIO_WRITE)) {
-            MPI_File_delete(fname, MPI_INFO_NULL);
+            MPI_File_delete(fname, pio_info_g);
             mrc = MPI_File_open(pio_comm_g, fname, MPI_MODE_CREATE | MPI_MODE_RDWR,
-                                MPI_INFO_NULL, &fd->mpifd);
+                                pio_info_g, &fd->mpifd);
 
             if (mrc != MPI_SUCCESS) {
                 fprintf(stderr, "MPI File Open failed(%s)\n", fname);
@@ -971,7 +967,7 @@ do_fopen(iotype iot, char *fname, file_descr *fd /*out*/, int flags)
             }
         } else {
             mrc = MPI_File_open(pio_comm_g, fname, MPI_MODE_RDONLY,
-                                MPI_INFO_NULL, &fd->mpifd);
+                                pio_info_g, &fd->mpifd);
 
             if (mrc != MPI_SUCCESS) {
                 fprintf(stderr, "MPI File Open failed(%s)\n", fname);
@@ -989,7 +985,7 @@ do_fopen(iotype iot, char *fname, file_descr *fd /*out*/, int flags)
             GOTOERROR(FAIL);
         }
 
-        hrc = H5Pset_fapl_mpio(acc_tpl, pio_comm_g, MPI_INFO_NULL);     
+        hrc = H5Pset_fapl_mpio(acc_tpl, pio_comm_g, pio_info_g);     
 
         if (hrc < 0) {
             fprintf(stderr, "HDF5 Property List Set failed\n");
@@ -1101,7 +1097,7 @@ do_cleanupfile(iotype iot, char *fname)
             break;
         case MPIO:
         case PHDF5:
-            MPI_File_delete(fname, MPI_INFO_NULL);
+            MPI_File_delete(fname, pio_info_g);
             break;
         }
     }
