@@ -78,6 +78,8 @@ if (!$fast) {
 
 print "="x36, "\n";
 printf("Write: %8d calls, %10d total bytes, %10g average bytes\n",
-       $total_writes, $total_bytes_out, $total_bytes_out/$total_writes);
+       $total_writes, $total_bytes_out, $total_bytes_out/$total_writes)
+  if $total_writes;
 printf("Read:  %8d calls, %10d total bytes, %10g average bytes\n",
-       $total_reads, $total_bytes_in, $total_bytes_in/$total_reads);
+       $total_reads, $total_bytes_in, $total_bytes_in/$total_reads)
+  if $total_reads;

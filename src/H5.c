@@ -1139,6 +1139,9 @@ H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
  *		Added the `a' type letter for haddr_t arguments and `Mt' for
  *		H5FD_mem_t arguments.
  *
+ * 		Robb Matzke, 1999-10-25
+ *		The `Ej' and `En' types are H5E_major_t and H5E_minor_t error
+ *		types. We only print the integer value here.
  *-------------------------------------------------------------------------
  */
 void
@@ -1358,6 +1361,32 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		} else {
 		    H5E_error_t *error = va_arg (ap, H5E_error_t*);
 		    fprintf (out, "0x%lx", (unsigned long)error);
+		}
+		break;
+
+	    case 'j':
+		if (ptr) {
+		    if (vp) {
+			fprintf(out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5E_major_t n = va_arg(ap, H5E_major_t);
+		    fprintf(out, "%d", (int)n);
+		}
+		break;
+
+	    case 'n':
+		if (ptr) {
+		    if (vp) {
+			fprintf(out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5E_minor_t n = va_arg(ap, H5E_minor_t);
+		    fprintf(out, "%d", (int)n);
 		}
 		break;
 		

@@ -7,8 +7,6 @@
 top_srcdir=@top_srcdir@
 top_builddir=..
 srcdir=@srcdir@
-VPATH=.:@srcdir@
-.PATH: . @srcdir@
 @COMMENCE@
 
 ## Add the include directory to the C preprocessor flags the the hdf5 library

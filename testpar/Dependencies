@@ -1,0 +1,8 @@
+testphdf5.lo: \
+   H5config.h
+t_dset.lo: \
+   H5config.h
+t_file.lo: \
+   H5config.h
+t_mpi.lo: \
+   H5config.h

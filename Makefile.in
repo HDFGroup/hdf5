@@ -11,8 +11,6 @@
 top_srcdir=@top_srcdir@
 top_builddir=.
 srcdir=@srcdir@
-VPATH=.:@srcdir@
-.PATH: . @srcdir@
 @COMMENCE@
 
 # Subdirectories in build-order (not including `examples')

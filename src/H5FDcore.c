@@ -175,8 +175,8 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
     H5FD_core_fapl_t	fa;
 
     FUNC_ENTER(H5FD_set_fapl_core, FAIL);
+    H5TRACE3("e","izb",fapl_id,increment,backing_store);
 
-    /* NO TRACE */
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
     fa.increment = increment;
@@ -212,8 +212,8 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/,
     H5FD_core_fapl_t	*fa;
 
     FUNC_ENTER(H5Pget_fapl_core, FAIL);
+    H5TRACE3("e","ixx",fapl_id,increment,backing_store);
 
-    /* NO TRACE */
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
     if (H5FD_CORE!=H5Pget_driver(fapl_id))
@@ -253,7 +253,8 @@ H5FD_core_fapl_get(H5FD_t *_file)
     FUNC_ENTER(H5FD_core_fapl_get, NULL);
 
     if (NULL==(fa=H5MM_calloc(sizeof(H5FD_core_fapl_t))))
-        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+		      "memory allocation failed");
 
     fa->increment = file->increment;
     fa->backing_store = (file->fd>=0);
@@ -301,12 +302,14 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
     /* Open backing store */
     if (fa && fa->backing_store && name &&
             (fd=open(name, O_CREAT|O_TRUNC|O_RDWR, 0666))<0) {
-        HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open backing store");
+        HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+		      "unable to open backing store");
     }
 
     /* Create the new file struct */
     if (NULL==(file=H5MM_calloc(sizeof(H5FD_core_t))))
-        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate file struct");
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+		      "unable to allocate file struct");
     file->fd = fd;
     if (name && *name) {
         file->name = HDstrdup(name);
@@ -354,13 +357,15 @@ H5FD_core_flush(H5FD_t *_file)
         unsigned char *ptr = file->mem;
 
         if (0!=lseek(file->fd, 0, SEEK_SET))
-            HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store");
+            HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL,
+			  "error seeking in backing store");
 
         while (size) {
             ssize_t n = write(file->fd, ptr, size);
             if (n<0 && EINTR==errno) continue;
             if (n<0)
-                HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "error writing backing store");
+                HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
+			      "error writing backing store");
             ptr += (size_t)n;
             size -= (size_t)n;
         }
@@ -398,7 +403,7 @@ H5FD_core_close(H5FD_t *_file)
 
     /* Flush */
     if (H5FD_core_flush(_file)<0)
-        HRETURN_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "can't flush file");
+        HRETURN_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file");
 
     /* Release resources */
     if (file->fd>=0) close(file->fd);
@@ -434,23 +439,21 @@ H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
     const H5FD_core_t	*f1 = (const H5FD_core_t*)_f1;
     const H5FD_core_t	*f2 = (const H5FD_core_t*)_f2;
+    int			ret_value;
 
     FUNC_ENTER(H5FD_core_cmp, FAIL);
 
     if (NULL==f1->name && NULL==f2->name) {
-        if (f1<f2)
-            HRETURN(-1);
-        if (f1>f2)
-            HRETURN(1);
+        if (f1<f2) HRETURN(-1);
+        if (f1>f2) HRETURN(1);
         HRETURN(0);
     }
     
-    if (NULL==f1->name)
-        HRETURN(-1);
-    if (NULL==f2->name)
-        HRETURN(1);
+    if (NULL==f1->name) HRETURN(-1);
+    if (NULL==f2->name) HRETURN(1);
 
-    FUNC_LEAVE(HDstrcmp(f1->name, f2->name));
+    ret_value = HDstrcmp(f1->name, f2->name);
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -652,7 +655,8 @@ H5FD_core_write(H5FD_t *_file, hid_t UNUSED dxpl_id, haddr_t addr,
         if (NULL==file->mem) x = H5MM_malloc(new_eof);
         else x = H5MM_realloc(file->mem, new_eof);
         if (!x)
-            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate memory block");
+            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			  "unable to allocate memory block");
         file->mem = x;
         file->eof = new_eof;
     }

@@ -220,7 +220,6 @@ fix_type(PDBfile *pdb, const char *s)
 	mpos = nbits - (d->format[5]+msize);
 	H5Tset_fields(type, spos, epos, esize, mpos, msize);
 	H5Tset_ebias(type, d->format[7]);
-	
     }
     return type;
 }
@@ -347,6 +346,7 @@ traverse(PDBfile *pdb, const char *pdb_file_name, hid_t hdf)
 		fprintf(stderr, "cannot traverse out of PDB %s\n", list[i]);
 		goto error;
 	    }
+	    H5Gclose(group);
 	    
 	} else {
 	    /* This is some non-directory PDB object */
@@ -382,6 +382,11 @@ traverse(PDBfile *pdb, const char *pdb_file_name, hid_t hdf)
 	}
 	
     }
+
+    for (i=0; i<nitems; i++) {
+	SC_free(list[i]);
+    }
+    SC_free(list);
     return 0;
 
  error:
@@ -479,7 +484,7 @@ main(int argc, char *argv[])
 		exit(1);
 	    }
 	    H5Pclose(fapl);
-
+	    
 	    /*
 	     * Traverse the PDB file to create the HDF5 file.
 	     */

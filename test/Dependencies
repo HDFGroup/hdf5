@@ -1,3 +1,6 @@
+## This file is machine generated on GNU systems.
+## Only temporary changes may be made here.
+
 h5test.lo: \
    h5test.c \
    h5test.h \
@@ -500,7 +503,8 @@ gheap.lo: \
    H5Tprivate.h \
    H5Gprivate.h \
    H5Bprivate.h \
-   H5Eprivate.h
+   H5Eprivate.h \
+   H5Iprivate.h
 hyperslab.lo: \
    hyperslab.c \
    H5private.h \
@@ -586,8 +590,7 @@ istore.lo: \
    H5Sprivate.h \
    H5Zprivate.h \
    H5Iprivate.h \
-   H5Pprivate.h \
-   H5MMprivate.h
+   H5Pprivate.h
 lheap.lo: \
    lheap.c \
    h5test.h \
@@ -628,8 +631,7 @@ lheap.lo: \
    H5Rprivate.h \
    H5Tprivate.h \
    H5Gprivate.h \
-   H5Bprivate.h \
-   H5HLprivate.h
+   H5Bprivate.h
 links.lo: \
    links.c \
    h5test.h \
@@ -897,8 +899,7 @@ stab.lo: \
    H5Rprivate.h \
    H5Tprivate.h \
    H5Gprivate.h \
-   H5Bprivate.h \
-   H5Gpkg.h
+   H5Bprivate.h
 tattr.lo: \
    tattr.c \
    testhdf5.h \
@@ -931,7 +932,8 @@ tattr.lo: \
    H5FDfamily.h \
    H5FDmpio.h \
    H5FDsec2.h \
-   H5FDstdio.h
+   H5FDstdio.h \
+   H5FDgass.h
 testhdf5.lo: \
    testhdf5.c \
    testhdf5.h \
@@ -939,8 +941,7 @@ testhdf5.lo: \
    H5public.h \
    H5config.h \
    H5api_adpt.h \
-   H5Eprivate.h \
-   H5Epublic.h
+   H5Eprivate.h
 tfile.lo: \
    tfile.c \
    testhdf5.h \
@@ -988,7 +989,9 @@ th5s.lo: \
    H5Tpublic.h \
    H5Rprivate.h \
    H5Rpublic.h \
-   H5Zprivate.h
+   H5Zprivate.h \
+   H5Zpublic.h \
+   H5Pprivate.h
 tmeta.lo: \
    tmeta.c \
    testhdf5.h \
@@ -1033,7 +1036,8 @@ trefer.lo: \
    H5FDfamily.h \
    H5FDmpio.h \
    H5FDsec2.h \
-   H5FDstdio.h
+   H5FDstdio.h \
+   H5FDgass.h
 tselect.lo: \
    tselect.c \
    testhdf5.h \
@@ -1066,7 +1070,8 @@ tselect.lo: \
    H5FDfamily.h \
    H5FDmpio.h \
    H5FDsec2.h \
-   H5FDstdio.h
+   H5FDstdio.h \
+   H5FDgass.h
 tvltypes.lo: \
    tvltypes.c \
    testhdf5.h \
@@ -1099,7 +1104,8 @@ tvltypes.lo: \
    H5FDfamily.h \
    H5FDmpio.h \
    H5FDsec2.h \
-   H5FDstdio.h
+   H5FDstdio.h \
+   H5FDgass.h
 tvlstr.lo: \
    tvlstr.c \
    testhdf5.h \
@@ -1132,7 +1138,8 @@ tvlstr.lo: \
    H5FDfamily.h \
    H5FDmpio.h \
    H5FDsec2.h \
-   H5FDstdio.h
+   H5FDstdio.h \
+   H5FDgass.h
 unlink.lo: \
    unlink.c \
    h5test.h \
@@ -1288,7 +1295,9 @@ gass_read.lo: \
    H5HGprivate.h \
    H5Fprivate.h \
    H5Rprivate.h \
-   H5Tprivate.h
+   H5Tprivate.h \
+   H5Gprivate.h \
+   H5Bprivate.h
 gass_append.lo: \
    gass_append.c \
    h5test.h \

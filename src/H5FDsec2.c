@@ -213,8 +213,8 @@ H5Pset_fapl_sec2(hid_t fapl_id)
 {
     herr_t ret_value=FAIL;
 
-    /*NO TRACE*/
     FUNC_ENTER(H5FD_set_fapl_sec2, FAIL);
+    H5TRACE1("e","i",fapl_id);
     
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
@@ -275,24 +275,25 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
 
     /* Open the file */
     if ((fd=HDopen(name, o_flags, 0666))<0)
-        HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file");
+        HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file");
     if (fstat(fd, &sb)<0) {
         close(fd);
-        HRETURN_ERROR(H5E_FILE, H5E_BADFILE, NULL, "can't fstat file");
+        HRETURN_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
     }
 
     /* Create the new file struct */
     if (NULL==(file=H5MM_calloc(sizeof(H5FD_sec2_t))))
-        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate file struct");
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+		      "unable to allocate file struct");
     file->fd = fd;
     file->eof = sb.st_size;
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
 #ifdef WIN32
-	filehandle = _get_osfhandle(fd);
-	results = GetFileInformationByHandle(filehandle, &fileinfo);
-	file->fileindexhi = fileinfo.nFileIndexHigh;
-	file->fileindexlo = fileinfo.nFileIndexLow;
+    filehandle = _get_osfhandle(fd);
+    results = GetFileInformationByHandle(filehandle, &fileinfo);
+    file->fileindexhi = fileinfo.nFileIndexHigh;
+    file->fileindexlo = fileinfo.nFileIndexLow;
 #else
     file->device = sb.st_dev;
     file->inode = sb.st_ino;
@@ -325,9 +326,9 @@ H5FD_sec2_close(H5FD_t *_file)
     FUNC_ENTER(H5FD_sec2_close, FAIL);
 
     if (H5FD_sec2_flush(_file)<0)
-        HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't flush file");
+        HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to flush file");
     if (close(file->fd)<0)
-        HRETURN_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "can't close file");
+        HRETURN_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
     H5MM_xfree(file);
 
@@ -516,7 +517,8 @@ H5FD_sec2_read(H5FD_t *_file, hid_t UNUSED dxpl_id, haddr_t addr,
             file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0) {
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
-        HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "can't seek to proper position");
+        HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL,
+		      "unable to seek to proper position");
     }
 
     /*
@@ -595,7 +597,8 @@ H5FD_sec2_write(H5FD_t *_file, hid_t UNUSED dxpl_id, haddr_t addr,
             file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0) {
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
-        HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "can't seek to proper position");
+        HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL,
+		      "unable to seek to proper position");
     }
 
     /*
@@ -655,7 +658,8 @@ H5FD_sec2_flush(H5FD_t *_file)
 
     if (file->eoa>file->eof) {
         if (-1==file_seek(file->fd, file->eoa-1, SEEK_SET))
-            HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "can't seek to proper position");
+            HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL,
+			  "unable to seek to proper position");
         if (write(file->fd, "", 1)!=1)
             HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
         file->eof = file->eoa;

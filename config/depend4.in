@@ -1,0 +1,7 @@
+##							       -*- makefile -*-
+
+## Since automatic dependencies are not being used, we attempt to include the
+## `.distdep' file from the source tree. This file was automatically generated 
+## on some system that satisfies the above requirements.
+
+include $(srcdir)/Dependencies

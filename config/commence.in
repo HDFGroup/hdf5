@@ -9,6 +9,9 @@
 .SUFFIXES: .c .o .lo
 @SET_MAKE@
 
+## Directories to serch
+@SEARCH@
+
 ## Programs
 SHELL=/bin/sh
 CC=@CC@
@@ -105,10 +108,14 @@ all:
 STAMP1=$(top_builddir)/config/stamp1
 STAMP2=$(top_builddir)/config/stamp2
 
-MAKEFILE_PARTS=$(srcdir)/Makefile.in					      \
-	       $(top_srcdir)/config/commence.in				      \
-	       $(top_srcdir)/config/conclude.in				      \
-	       $(top_srcdir)/config/depend.in
+MAKEFILE_PARTS=$(srcdir)/Makefile.in		\
+	       $(top_srcdir)/config/commence.in	\
+	       $(top_srcdir)/config/conclude.in	\
+	       $(top_srcdir)/config/depend1.in	\
+	       $(top_srcdir)/config/depend2.in	\
+	       $(top_srcdir)/config/depend3.in	\
+	       $(top_srcdir)/config/depend4.in	\
+	       $(top_srcdir)/config/dependN.in
 
 $(STAMP1): $(top_srcdir)/configure.in
 	touch $(STAMP1)

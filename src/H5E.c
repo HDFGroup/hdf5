@@ -539,19 +539,23 @@ H5E_push(H5E_major_t maj_num, H5E_minor_t min_num, const char *function_name,
  * Programmer:	Quincey Koziol
  *		Monday, October 18, 1999
  *
- * Notes: Basically a public API wrapper around the H5E_push function.
+ * Notes: 	Basically a public API wrapper around the H5E_push function.
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-__DLL__ herr_t H5Epush(const char *file, const char *func,
-            unsigned line, H5E_major_t maj, H5E_minor_t min, const char *str)
+herr_t
+H5Epush(const char *file, const char *func, unsigned line, H5E_major_t maj,
+	H5E_minor_t min, const char *str)
 {
+    herr_t	ret_value;
+    
     FUNC_ENTER(H5Epush, FAIL);
-
-    FUNC_LEAVE(H5E_push(maj,min,func,file,line,str));
-}   /* end H5Epush() */
+    H5TRACE6("e","ssIuEjEns",file,func,line,maj,min,str);
+    ret_value = H5E_push(maj, min, func, file, line, str);
+    FUNC_LEAVE(ret_value);
+}
 
 
 /*-------------------------------------------------------------------------

@@ -10,7 +10,7 @@
  * Notes:  Ported to the new H5FD architecture on 10/18/99 - QAK
  *
  */
-#include "hdf5.h"
+#include <hdf5.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -198,15 +198,19 @@ H5FD_stdio_init(void)
 herr_t
 H5Pset_fapl_stdio(hid_t fapl_id)
 {
-    static const char *func="H5FDset_fapl_stdio";  /* Function Name for error reporting */
+    static const char *func="H5FDset_fapl_stdio";  /*for error reporting*/
+
+    /*NO TRACE*/
 
     /* Clear the error stack */
     H5Eclear();
 
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
-        H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1);
-
-    return(H5Pset_driver(fapl_id, H5FD_STDIO, NULL));
+    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id)) {
+        H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE,
+		    "not a file access property list", -1);
+    }
+    
+    return H5Pset_driver(fapl_id, H5FD_STDIO, NULL);
 }
 
 

@@ -112,14 +112,126 @@ if test "X$AR" = "X"; then
 fi
 AC_SUBST(AR)
 
-AC_MSG_CHECKING(for GNU Make)
+AC_MSG_CHECKING(make)
+AC_SUBST_FILE(DEPEND)
 if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
   sed -n 1p|cut -c1-8`" = "GNU Make"; then
-   AC_MSG_RESULT(yes)
-   GMAKE=yes
+    AC_MSG_RESULT(GNU make)
+    GMAKE=yes
+    if test "X$GCC" = "Xyes"; then
+	DEPEND=config/depend1
+    else
+	DEPEND=config/depend2
+    fi
 else
-   AC_MSG_RESULT(no)
+    AC_MSG_RESULT(generic)
 fi
+
+dnl How do we include another file into a Makefile?
+if test "X" = "X$DEPEND"; then
+    AC_MSG_CHECKING(how to include a makefile)
+
+    dnl The include file contains the target for `foo'
+    cat >makeinc <<EOF
+foo:
+	@:
+EOF
+
+    while true; do #for break
+
+	dnl pmake. We have to be careful because some pmake think that the
+	dnl contents of the MAKE environment variable is a target.
+	echo '.include <makeinc>' >maketest
+	if (MAKE= ${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+	    AC_MSG_RESULT([.include <FILE>])
+	    DEPEND=config/depend3
+	    break
+	fi
+
+	dnl Most make's use `include FILE'
+	echo 'include makeinc' >maketest
+	if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+	    AC_MSG_RESULT(include FILE)
+	    DEPEND=config/depend4
+	    break;
+	fi
+
+	dnl default
+	AC_MSG_RESULT(you have a deficient make command)
+	DEPEND=config/dependN
+	break
+    done
+    rm makeinc maketest
+fi
+
+dnl Sometimes makes think the `.PATH:' appearing before the first rule
+dnl with an action should override the `all' default target. So we have
+dnl to decide what the proper syntax is.
+dnl
+AC_MSG_CHECKING(how make searches directories)
+while true; do #for break
+    # The most common method is `VPATH=DIR1 DIR2 ...'
+    cat >maketest <<EOF
+VPATH=$srcdir/config $srcdir/src $srcdir/bin
+.c.o:
+	cp $< H5.o
+
+foo: H5.o
+	rm H5.o
+	@echo works
+EOF
+    if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+	SEARCH_RULE='VPATH='
+	SEARCH_SEP=' '
+	AC_MSG_RESULT([VPATH=DIR1 DIR2 ...])
+	break
+    fi
+
+    # The second most common method is like above except with the
+    # directories separated by colons.
+    cat >maketest <<EOF
+VPATH=$srcdir/config:$srcdir/src:$srcdir/bin
+.c.o:
+	cp $< H5.o
+
+foo: H5.o
+	rm H5.o
+	@echo works
+EOF
+    if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+	SEARCH_RULE='VPATH='
+	SEARCH_SEP=':'
+	AC_MSG_RESULT([VPATH=DIR1:DIR2:...])
+	break
+    fi
+
+    # pmake uses the construct `.PATH: DIR1 DIR2
+    cat >maketest <<EOF
+.PATH: $srcdir/config $srcdir/src $srcdir/bin
+.c.o:
+	cp $< H5.o
+
+foo: H5.o
+	rm H5.o
+	@echo works
+EOF
+    if (MAKE= ${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+	SEARCH_RULE='.PATH: '
+    	SEARCH_SEP=' '
+	AC_MSG_RESULT([.PATH: DIR1 DIR2 ...])
+    	break
+    fi
+
+    # No way for make to search directories
+    SEARCH_RULE='## SEARCH DISABLED: '
+    SEARCH_SEP=' '
+    AC_MSG_RESULT([it doesn't])
+    if test ! -f configure; then
+	AC_MSG_ERROR(${MAKE-make} requires the build and source directories to be the same)
+    fi
+    break
+done
+rm maketest
 
 dnl ----------------------------------------------------------------------
 dnl Turn on warning flags for gcc.
@@ -878,17 +990,10 @@ dnl
 AC_SUBST_FILE(COMMENCE) COMMENCE=config/commence
 AC_SUBST_FILE(CONCLUDE) CONCLUDE=config/conclude
 
-if test "X$GCC" = "Xyes" && test "X$GMAKE" = "Xyes"; then
-   AC_SUBST_FILE(DEPEND1) DEPEND1=config/depend
-   AC_SUBST_FILE(DEPEND2) DEPEND2=/dev/null
-   AC_SUBST_FILE(DEPEND3) DEPEND3=/dev/null
-   AC_SUBST_FILE(DEPEND4) DEPEND4=/dev/null
-else
-   AC_SUBST_FILE(DEPEND1) DEPEND1=$srcdir/src/.distdep
-   AC_SUBST_FILE(DEPEND2) DEPEND2=$srcdir/test/.distdep
-   AC_SUBST_FILE(DEPEND3) DEPEND3=$srcdir/testpar/.distdep
-   AC_SUBST_FILE(DEPEND4) DEPEND4=$srcdirtools/.distdep
-fi
+dnl The directory search list
+AC_SUBST(SEARCH) SEARCH='$(srcdir) $(top_builddir)/src $(top_srcdir)/src'
+cmd='echo $SEARCH |sed "s/ /'$SEARCH_SEP'/g"'
+SEARCH="$SEARCH_RULE`eval $cmd`"
 
 dnl We don't need to say when we're entering directories if we're using
 dnl GNU make becuase make does it for us.
@@ -924,9 +1029,10 @@ touch ./config/stamp1
 # Then the config.status file (but not makefiles)
 saved_no_create=$no_create
 no_create=yes
-AC_OUTPUT(src/libhdf5.settings config/depend config/commence config/conclude \
-          Makefile src/Makefile pablo/Makefile test/Makefile \
-          testpar/Makefile tools/Makefile examples/Makefile \
+AC_OUTPUT(src/libhdf5.settings config/depend1 config/depend2 config/depend3
+	  config/depend4 config/dependN config/commence config/conclude
+          Makefile src/Makefile pablo/Makefile test/Makefile
+          testpar/Makefile tools/Makefile examples/Makefile
 	  doc/Makefile doc/html/Makefile doc/html/Tutor/Makefile)
 no_create=$saved_no_create
 

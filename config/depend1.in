@@ -20,13 +20,14 @@
 ## otherwise the file is changed and a backup is saved by appending a
 ## tilde to the file name.
 ##
-.PRECIOUS: .depend .distdep
-dep depend: .distdep
+.PRECIOUS: $(srcdir)/Dependencies
+$(srcdir)/Dependencies: .depend
+	-@echo '## This file is machine generated on GNU systems.' >$@
+	-@echo '## Only temporary changes may be made here.' >>@
+	-@echo >>@
+	-srcdir=$(srcdir) perl -p $(top_srcdir)/bin/distdep .depend >>$@
 
-.distdep: .depend
-	touch .distdep
-	-srcdir=$(srcdir) perl -p $(top_srcdir)/bin/distdep .depend >.distdep
-
+.PRECIOUS: .depend
 .depend: $(LIB_SRC) $(TEST_SRC) $(PROG_SRC)
 	@touch .depend
 	@for dep in $? dummy; do					      \
@@ -39,7 +40,12 @@ dep depend: .distdep
 	          sed 's/\.o/.lo/' >>$@;	      			      \
 	   fi;								      \
 	done;
-	-perl -p $(top_srcdir)/bin/distdep .depend >$(srcdir)/.distdep
+	-@echo '## This file is machine generated on GNU systems.' \
+		>$(srcdir)/Dependencies
+	-@echo '## Only temporary changes may be made here.' \
+		>>$(srcdir)/Dependencies
+	-@echo >>$(srcdir)/Dependencies
+	-perl -p $(top_srcdir)/bin/distdep .depend >>$(srcdir)/Dependencies
 
 -include .depend
 

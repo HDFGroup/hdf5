@@ -7,8 +7,6 @@
 top_srcdir=@top_srcdir@
 top_builddir=..
 srcdir=@srcdir@
-VPATH=.:@srcdir@
-.PATH: . @srcdir@
 @COMMENCE@
 
 ## Add include directory to the C preprocessor flags and the h5test and hdf5
@@ -167,4 +165,3 @@ gass_append: gass_append.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ gass_append.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@
-

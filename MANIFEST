@@ -46,7 +46,11 @@
 ./config/conclude.in
 ./config/dec-flags
 ./config/dec-osf4.x
-./config/depend.in
+./config/depend1.in
+./config/depend2.in
+./config/depend3.in
+./config/depend4.in
+./config/dependN.in
 ./config/freebsd
 ./config/gnu-flags
 ./config/hpux10.20

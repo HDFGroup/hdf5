@@ -169,8 +169,8 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
     herr_t ret_value=FAIL;
     H5FD_family_fapl_t	fa;
     
-    /*NO TRACE*/
     FUNC_ENTER(H5FD_set_fapl_family, FAIL);
+    H5TRACE3("e","ihi",fapl_id,memb_size,memb_fapl_id);
     
     /* Check arguments */
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
@@ -215,8 +215,8 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
 {
     H5FD_family_fapl_t	*fa;
     
-    /*NO TRACE*/
     FUNC_ENTER(H5Pget_fapl_family, FAIL);
+    H5TRACE3("e","ixx",fapl_id,memb_size,memb_fapl_id);
 
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
@@ -257,7 +257,8 @@ H5FD_family_fapl_get(H5FD_t *_file)
     FUNC_ENTER(H5FD_family_fapl_get, NULL);
 
     if (NULL==(fa=H5MM_calloc(sizeof(H5FD_family_fapl_t))))
-        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+		      "memory allocation failed");
 
     fa->memb_size = file->memb_size;
     fa->memb_fapl_id = H5Pcopy(file->memb_fapl_id);
@@ -291,7 +292,8 @@ H5FD_family_fapl_copy(const void *_old_fa)
     FUNC_ENTER(H5FD_family_fapl_copy, NULL);
 
     if (NULL==(new_fa=H5MM_malloc(sizeof(H5FD_family_fapl_t))))
-        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+		      "memory allocation failed");
 
     memcpy(new_fa, old_fa, sizeof(H5FD_family_fapl_t));
     new_fa->memb_fapl_id = H5Pcopy(old_fa->memb_fapl_id);
@@ -355,7 +357,8 @@ H5FD_family_dxpl_copy(const void *_old_dx)
     FUNC_ENTER(H5FD_family_dxpl_copy, NULL);
 
     if (NULL==(new_dx=H5MM_malloc(sizeof(H5FD_family_dxpl_t))))
-        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+		      "memory allocation failed");
 
     memcpy(new_dx, old_dx, sizeof(H5FD_family_dxpl_t));
     new_dx->memb_dxpl_id = H5Pcopy(old_dx->memb_dxpl_id);
@@ -432,7 +435,8 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /* Initialize file from file access properties */
     if (NULL==(file=H5MM_calloc(sizeof(H5FD_family_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate file struct");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+		    "unable to allocate file struct");
     if (H5P_DEFAULT==fapl_id) {
         file->memb_fapl_id = H5P_DEFAULT;
         file->memb_size = 1024*1024*1024; /*1GB*/
@@ -460,7 +464,8 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
             int n = MAX(64, 2*file->amembs);
             H5FD_t **x = H5MM_realloc(file->memb, n*sizeof(H5FD_t*));
             if (!x)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't reallocate members");
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+			    "unable to reallocate members");
             file->amembs = n;
             file->memb = x;
         }
@@ -478,7 +483,8 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
         } H5E_END_TRY;
         if (!file->memb[file->nmembs]) {
             if (0==file->nmembs)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open member file");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+			    "unable to open member file");
             H5Eclear();
             break;
         }
@@ -550,7 +556,8 @@ H5FD_family_close(H5FD_t *_file)
         }
     }
     if (nerrors)
-        HRETURN_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close member files");
+        HRETURN_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
+		      "unable to close member files");
 
     /* Clean up other stuff */
     H5Pclose(file->memb_fapl_id);
@@ -662,7 +669,8 @@ H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa)
             int n = MAX(64, 2*file->amembs);
             H5FD_t **x = H5MM_realloc(file->memb, n*sizeof(H5FD_t*));
             if (!x)
-                HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate memory block");
+                HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			      "unable to allocate memory block");
             file->amembs = n;
             file->memb = x;
             file->nmembs = i;
@@ -677,7 +685,8 @@ H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa)
                          file->memb_fapl_id, file->memb_size);
             } H5E_END_TRY;
             if (NULL==file->memb[i])
-                HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't open member file");
+                HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
+			      "unable to open member file");
         }
         
         /* Set the EOA marker for the member */
@@ -797,7 +806,8 @@ H5FD_family_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
         assert(i<file->nmembs);
 
         if (H5FDread(file->memb[i], memb_dxpl_id, sub, req, buf)<0)
-            HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "member file read failed");
+            HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
+			  "member file read failed");
 
         addr += req;
         buf += req;
@@ -859,7 +869,8 @@ H5FD_family_write(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
         assert(i<file->nmembs);
 
         if (H5FDwrite(file->memb[i], memb_dxpl_id, sub, req, buf)<0)
-            HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "member file write failed");
+            HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
+			  "member file write failed");
 
         addr += req;
         buf += req;
@@ -899,7 +910,8 @@ H5FD_family_flush(H5FD_t *_file)
             nerrors++;
 
     if (nerrors)
-        HRETURN_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "can't flush member files");
+        HRETURN_ERROR(H5E_IO, H5E_BADVALUE, FAIL,
+		      "unable to flush member files");
 
     FUNC_LEAVE(SUCCEED);
 }

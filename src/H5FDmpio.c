@@ -235,8 +235,8 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     herr_t ret_value=FAIL;
     H5FD_mpio_fapl_t	fa;
     
-    /*NO TRACE*/
     FUNC_ENTER(H5FD_set_fapl_mpio, FAIL);
+    H5TRACE3("e","iMcMi",fapl_id,comm,info);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
@@ -288,8 +288,8 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
 {
     H5FD_mpio_fapl_t	*fa;
     
-    /*NO TRACE*/
     FUNC_ENTER(H5Pget_fapl_mpio, FAIL);
+    H5TRACE3("e","ixx",fapl_id,comm,info);
 
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
@@ -337,8 +337,8 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
     herr_t ret_value=FAIL;
     H5FD_mpio_dxpl_t	dx;
 
-    /*NO TRACE*/
     FUNC_ENTER(H5Pset_dxpl_mpio, FAIL);
+    H5TRACE2("e","iDt",dxpl_id,xfer_mode);
     
     /* Check arguments */
     if (H5P_DATA_XFER!=H5Pget_class(dxpl_id))
@@ -381,8 +381,8 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/)
 {
     H5FD_mpio_dxpl_t	*dx;
 
-    /*NO TRACE*/
     FUNC_ENTER(H5Pget_dxpl_mpio, FAIL);
+    H5TRACE2("e","ix",dxpl_id,xfer_mode);
 
     if (H5P_DATA_XFER!=H5Pget_class(dxpl_id)) 
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");

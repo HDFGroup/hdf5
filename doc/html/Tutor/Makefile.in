@@ -7,20 +7,11 @@
 top_srcdir=@top_srcdir@
 top_builddir=../../..
 srcdir=@srcdir@
-VPATH=.:@srcdir@
 @COMMENCE@
 
 # Subdirectories in build-order (not including `examples')
 SUBDIRS=
 DOCDIR=$(docdir)/hdf5/Tutor
-
-TRACE=perl $(top_srcdir)/bin/trace
-
-# Add `-I.' to the C preprocessor flags.
-CPPFLAGS=-I. -I@srcdir@ @CPPFLAGS@
-
-# Temporary files
-MOSTLYCLEAN=
 
 # Public doc files (to be installed)...
 PUB_DOCS=

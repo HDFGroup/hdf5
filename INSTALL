@@ -228,6 +228,7 @@
 
 	One may also use various environment variables to change the
 	behavior of the compiler.  E.g., to ask for -n32 ABI:
+
 	    $ SGI_ABI=-n32
 	    $ export SGI_ABI
 	    $ ./configure

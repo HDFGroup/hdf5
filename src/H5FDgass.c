@@ -210,7 +210,6 @@ H5Pset_fapl_gass(hid_t fapl_id, GASS_Info info)
     herr_t ret_value=FAIL;
     H5FD_gass_fapl_t	fa;
     
-    /*NO TRACE*/
     FUNC_ENTER(H5FD_set_fapl_gass, FAIL);
     
     /* Check arguments */
@@ -256,8 +255,8 @@ H5Pget_fapl_gass(hid_t fapl_id, GASS_Info *info/*out*/)
 {
     H5FD_gass_fapl_t	*fa;
     
-    /*NO TRACE*/
     FUNC_ENTER(H5Pget_fapl_gass, FAIL);
+    H5TRACE2("e","ix",fapl_id,info);
 
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");

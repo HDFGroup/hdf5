@@ -7,8 +7,6 @@
 top_srcdir=@top_srcdir@
 top_builddir=..
 srcdir=@srcdir@
-VPATH=.:@srcdir@
-.PATH: . @srcdir@
 @COMMENCE@
 TRACE=perl ../bin/trace
 ###############################################################################
