@@ -883,7 +883,6 @@ H5Ccopy(hid_t tid)
     const void             *tmpl = NULL;
     void                   *new_tmpl = NULL;
     H5C_class_t             type;
-    size_t                  size;
     hid_t                   ret_value = FAIL;
     group_t                 group;
 
@@ -896,6 +895,46 @@ H5Ccopy(hid_t tid)
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL,
                       "can't unatomize template");
     }
+
+    /* Copy it */
+    if (NULL==(new_tmpl=H5C_copy (type, tmpl))) {
+	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
+		       "unable to copy template");
+    }
+
+    /* Register the atom for the new template */
+    if ((ret_value = H5A_register(group, new_tmpl)) < 0) {
+        HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
+                      "unable to atomize template pointer");
+    }
+    FUNC_LEAVE(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5C_copy
+ *
+ * Purpose:	Creates a new template and initializes it with some other
+ *		template.
+ *
+ * Return:	Success:	Ptr to new template
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, February  3, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5C_copy (H5C_class_t type, const void *src)
+{
+    size_t	size;
+    void	*dst = NULL;
+    
+    FUNC_ENTER (H5C_copy, NULL);
+    
     /* How big is the template */
     switch (type) {
     case H5C_FILE_CREATE:
@@ -903,7 +942,7 @@ H5Ccopy(hid_t tid)
         break;
 
     case H5C_FILE_ACCESS:
-        HRETURN_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
+        HRETURN_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, NULL,
                       "file access properties are not implemented yet");
 
     case H5C_DATASET_CREATE:
@@ -915,18 +954,13 @@ H5Ccopy(hid_t tid)
         break;
 
     default:
-        HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
+        HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL,
                       "unknown template class");
     }
 
     /* Create the new template */
-    new_tmpl = H5MM_xmalloc(size);
-    HDmemcpy(new_tmpl, tmpl, size);
+    dst = H5MM_xmalloc(size);
+    HDmemcpy(dst, src, size);
 
-    /* Register the atom for the new template */
-    if ((ret_value = H5A_register(group, new_tmpl)) < 0) {
-        HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
-                      "unable to atomize template pointer");
-    }
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE (dst);
 }

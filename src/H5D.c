@@ -409,6 +409,56 @@ H5Dget_type (hid_t dataset_id)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Dget_create_parms
+ *
+ * Purpose:	Returns a copy of the dataset creation template.
+ *
+ * Return:	Success:	ID for a copy of the dataset creation
+ *				template.  The template should be released by
+ *				calling H5Cclose().
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, February  3, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Dget_create_parms (hid_t dataset_id)
+{
+    H5D_t		*dataset = NULL;
+    H5D_create_t	*copied_parms = NULL;
+    hid_t		ret_value = FAIL;
+    
+    FUNC_ENTER (H5Dget_create_parms, FAIL);
+
+    /* Check args */
+    if (H5_DATASET!=H5A_group (dataset_id) ||
+	NULL==(dataset=H5A_object (dataset_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    }
+
+    /* Copy the creation template */
+    if (NULL==(copied_parms=H5C_copy (H5C_DATASET_CREATE,
+				      &(dataset->create_parms)))) {
+	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		       "unable to copy the creation template");
+    }
+
+    /* Create an atom */
+    if ((ret_value=H5A_register ((group_t)(H5_TEMPLATE_0+H5C_DATASET_CREATE),
+				 copied_parms))<0) {
+	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
+		       "unable to register creation template");
+    }
+
+    FUNC_LEAVE (ret_value);
+}
+
+/*-------------------------------------------------------------------------
  * Function:	H5Dread
  *
  * Purpose:	Reads (part of) a DATASET from the file into application

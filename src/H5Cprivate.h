@@ -23,4 +23,6 @@
 #include <H5Fprivate.h>
 
 hid_t H5C_create (H5C_class_t type, void *tmpl);
+void *H5C_copy (H5C_class_t type, const void *src);
+
 #endif
