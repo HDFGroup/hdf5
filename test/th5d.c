@@ -81,12 +81,10 @@ static void test_h5d_basic_write(void)
     hatom_t tid1;   /* Datatype ID */
     hatom_t sid1;   /* Dataspace ID */
     uint32 dims1[]={SPACE1_DIM1,SPACE1_DIM2,SPACE1_DIM3};   /* dataspace dim sizes */
-#ifdef DATASET2
     hatom_t did2;   /* Dataset ID */
     hatom_t tid2;   /* Datatype ID */
     hatom_t sid2;   /* Dataspace ID */
     uint32 dims2[]={SPACE2_DIM1,SPACE2_DIM2,SPACE2_DIM3,SPACE2_DIM4};   /* dataspace dim sizes */
-#endif /* DATASET2 */
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
@@ -123,7 +121,6 @@ static void test_h5d_basic_write(void)
     ret=H5Mrelease(tid1);
     CHECK(ret,FAIL,"H5Mrelease");
     
-#ifdef DATASET2
     sid2=H5Mcreate(fid1,H5_DATASPACE,SPACE2_NAME);
     CHECK(sid1,FAIL,"H5Mcreate");
 
@@ -153,7 +150,6 @@ static void test_h5d_basic_write(void)
     
     ret=H5Mrelease(sid2);
     CHECK(ret,FAIL,"H5Mrelease");
-#endif /* DATASET2 */
     
     ret=H5Mrelease(sid1);
     CHECK(ret,FAIL,"H5Mrelease");
@@ -189,7 +185,7 @@ static void test_h5d_basic_read(void)
     fid1=H5Fopen(FILE,0,0);
     CHECK(fid1,FAIL,"H5Fopen");
 
-    oid1=H5Mfind_name(fid1,H5_DATASET,SPACE1_NAME);
+    oid1=H5Mfind_name(fid1,H5_DATASET,DATA1_NAME);
     CHECK(oid1,FAIL,"H5Mfind_name");
 
     did1=H5Maccess(oid1);

@@ -120,12 +120,12 @@ static void test_file_create(void)
     ret=H5Csetparm(tmpl1,H5_USERBLOCK_SIZE,&parm);
     CHECK(ret,FAIL,"H5Csetparm");
 
-    parm=F2_OFFSET_SIZE;
-    ret=H5Csetparm(tmpl1,H5_OFFSET_SIZE,&parm);
+    parm2=F2_OFFSET_SIZE;
+    ret=H5Csetparm(tmpl1,H5_OFFSET_SIZE,&parm2);
     CHECK(ret,FAIL,"H5Csetparm");
 
-    parm=F2_LENGTH_SIZE;
-    ret=H5Csetparm(tmpl1,H5_LENGTH_SIZE,&parm);
+    parm2=F2_LENGTH_SIZE;
+    ret=H5Csetparm(tmpl1,H5_LENGTH_SIZE,&parm2);
     CHECK(ret,FAIL,"H5Csetparm");
 
     parm=F2_SYM_LEAF_K;
