@@ -106,10 +106,15 @@ parse_options(int argc, char **argv){
 
 main(int argc, char **argv)
 {
-    char    *filenames[]={  "ParaEg1.h5f",
-			    "ParaEg2.h5f",
-			    "ParaEg3.h5f"
-			 };
+#ifdef POOMA_ARCH
+    char    *filenames[]={ "pfs:/pfs/multi/tmp_1/your_own/ParaEg1.h5f",
+			   "pfs:/pfs/multi/tmp_1/your_own/ParaEg2.h5f",
+			   "pfs:/pfs/multi/tmp_1/your_own/ParaEg3.h5f" };
+#else
+    char    *filenames[]={ "ParaEg1.h5f",
+			   "ParaEg2.h5f",
+			   "ParaEg3.h5f" };
+#endif
 
     int mpi_size, mpi_rank;				/* mpi variables */
 

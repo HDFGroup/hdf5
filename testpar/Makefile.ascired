@@ -21,7 +21,7 @@ LIBS = -lnoop_stubs
 
 CC=cicc
 # 1429 -- long long non-standard
-CFLAGS=-g
+CFLAGS=-g -DPOOMA_ARCH=TFLOP
 CPPFLAGS=-I. -I../src $(MPI_INC) $(MPIO_INC)
 RM=rm -f
 
