@@ -1342,6 +1342,9 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 	    info.line_pre = "            %s \"";
 	    info.line_suf = "\"";
 	}
+	/* values of type reference */
+	info.obj_format = "-%lu:%lu:%lu:%lu";
+ info.obj_hidefileno = 0;
 	if (hexdump_g) {
 	    p_type = H5Tcopy(type);
 	} else {
