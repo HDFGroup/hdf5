@@ -231,7 +231,7 @@ done:
     if(ret_value<0) {
         if(memb_dt!=NULL)
             if(H5T_close(memb_dt)<0)
-	        HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "can't close datatype")
+	        HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "can't close datatype")
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
