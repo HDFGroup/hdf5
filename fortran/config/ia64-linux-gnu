@@ -64,7 +64,8 @@ case $F9X in
     *efc)
 	# this is for efc v7.  Older efc do not work with these.
 	# -Vaxlib is for non-standard fortran calls like exit().
-	FFLAGS='-fpp -DDEC$=DEC_ -DMS$=MS_ -Vaxlib'
+	MORE_FFLAGS='-fpp -DDEC$=DEC_ -DMS$=MS_ -Vaxlib'
+	FFLAGS="$FFLAGS $MORE_FFLAGS"
 	HSIZE_T='SELECTED_INT_KIND(R_LARGE)'
 	HSSIZE_T='SELECTED_INT_KIND(R_LARGE)'
 	HID_T='SELECTED_INT_KIND(R_INTEGER)'
@@ -86,7 +87,7 @@ esac
 if test -z "$f9x_flags_set"; then
     F9XSUFFIXFLAG=""
     FSEARCH_DIRS=""
-    FFLAGS=""
+    FFLAGS="$FFLAGS"
     DEBUG_FFLAGS=""
     PROD_FFLAGS=""
     PROFILE_FFLAGS=""
