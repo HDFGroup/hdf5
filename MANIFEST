@@ -37,7 +37,6 @@
 ./src/H5Bprivate.h
 ./src/H5Bpublic.h
 ./src/H5C.c
-./src/H5config.h
 ./src/H5config.h.in
 ./src/H5Cprivate.h
 ./src/H5Cpublic.h
