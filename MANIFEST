@@ -28,7 +28,7 @@
 ./bin/debug-ohdr			_DO_NOT_DISTRIBUTE_
 ./bin/dependencies
 ./bin/distdep
-./bin/error_test			_DO_NOT_DISTRIBUTE_
+./bin/errors			        _DO_NOT_DISTRIBUTE_
 ./bin/h5vers
 ./bin/install-sh
 ./bin/iostats
