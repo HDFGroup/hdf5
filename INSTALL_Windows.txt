@@ -34,16 +34,23 @@ To build the HDF5 and tests, it is assumed that you have done the following:
 
 
 STEP II: Building the Libraries and tests.
+        1. Rename the directory under C:\myHDFstuff\ from hdf5xxx to hdf5.  
 
-        1. Unpack all.zip in 'hdf5' and move the zlib.dll from 
+        2. Unpack all.zip in 'hdf5' and move the zlib.dll from 
 	     c:\myHDFstuff\hdf5\src\dll to the Windows system directory.
 
-        2. Invoke Microsoft Visual C++, go to "File" and select
+           NOTE TO ALPHA USERS- the version of zlib that is packaged in all.zip 
+           is for Intel platforms.  The Alpha versions of the libraries can be
+           obtained from ftp://hdf.ncsa.uiuc.edu/HDF5/.  The file to download
+           is Alphazlib.zip.  After the file is downloaded replace the src\zlib
+           directory with the files from Alphazlib.zip.
+
+        3. Invoke Microsoft Visual C++, go to "File" and select
            the "Open Workspace" option. 
 
            Then open the c:\myHDFstuff\hdf5\proj\all\all.dsw workspace. 
 
-        3. Select "Build", then Select "Set Active Configuration".
+        4. Select "Build", then Select "Set Active Configuration".
 
            On Windows platform select as the active configuration
 
@@ -52,6 +59,15 @@ STEP II: Building the Libraries and tests.
             or
 
            "all -- Win32 Release" to build release versions of single-threaded
+                                static libraries, and tests.
+
+           On the Alpha platform select as the active configuration
+
+           "all -- Win32 AlphaDbg" to build debug versions of single-threaded
+                                static libraries, and tests. 
+            or
+
+           "all -- Win32 AlphaRel" to build release versions of single-threaded
                                 static libraries, and tests.
 
            Select "Build" and "Build all.exe" to
@@ -74,6 +90,12 @@ STEP II: Building the Libraries and tests.
 
 			hdf5.lib- the hdf5 library
 
+            c:\MyHDFstuff\hdf5\proj\hdf5dll\debug - 
+            c:\MyHDFstuff\hdf5\proj\hdf5dll\release - 
+
+			hdf5.dll- the hdf5 library
+                  hdf5.lib- the dll export library
+
            	c:\MyHDFstuff\hdf5\test\"test directory"-
             where test directory is one of the following:
 
@@ -89,6 +111,8 @@ STEP II: Building the Libraries and tests.
 			dsets
 
 			dtypes
+			
+			enum
 
 			extend
 
@@ -110,15 +134,17 @@ STEP II: Building the Libraries and tests.
 
 			links
 
-			mount (not supported in this release)
+			mount 
 
 			mtime
+
+			ohdr
 
 			overhead
 
 			ragged 
 
-			shtype 
+			stab
 
 			testhdf5 
 
@@ -133,19 +159,25 @@ STEP III:   TESTING THE BUILD
 
 
 In a command prompt window run the test batch file which 
-resides in the hdf5 directory to make sure that the library
+resides in the hdf5\test directory to make sure that the library
 was built correctly.
 
 The hdf5testDBG.bat file tests the debug version of the library and 
 hdf5testREL.bat tests the release version of the library.
- 
+
+The hdf5testdllDBG.bat file tests the debug version of the dll and 
+hdf5testdllREL.bat tests the release version of the dll.  The dll should be
+placed in the Windows\system directory before the dll tests are run.
+
+NOTE: The debug dll tests on the Alpha platform currently are not completely
+      working.  The release dll is fine though.
 
         
 STEP IV: BUILDING THE EXAMPLES
 
      1. Invoke Microsoft Visual C++, go to "File" and select
         the "Open Workspace" option. 
-        Then open the c:\myHDFstuff\hdf5\examples\allexamples.dsw
+        Then open the c:\myHDFstuff\hdf5\examples\allexamples\allexamples.dsw
         workspace. 
 
       2. Select "Build", then Select "Set Active Configuration".
@@ -156,6 +188,14 @@ STEP IV: BUILDING THE EXAMPLES
 		or
 	
            "allexamples -- Win32 Release" to build release versions the            		examples.
+
+         On Alpha platform select as the active configuration
+           "allexamples -- Win32 AlphaDbg" to build debug versions of the         					examples. 
+            
+		or
+	
+           "allexamples -- Win32 AlphaRel" to build release versions the           
+                              examples.
 
            Select "Build" and "Build allexamples.exe" to
            build the corresponding version of the examples.
@@ -183,7 +223,7 @@ STEP IV: BUILDING THE EXAMPLES
 
 	3. Run the batch file "InstallExamples.bat" which resides in the top
  	   level directory.  This file creates 2 new directories, examplesREL and
-	   examplesDEB, in the examples directory and places all the executables 
+	   examplesDBG, in the examples directory and places all the executables 
 	   in it.  Both the release and debug versions of the examples should be
 	   built before this step is done.  The examples should be tested in these
 	   2 new directories due to some dependencies between the examples.
