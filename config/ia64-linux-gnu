@@ -99,3 +99,36 @@ if test "X$f9x_flags_set" = "X"; then
   PROFILE_FFLAGS=""
   f9x_flags_set=yes
 fi
+
+
+# The Default settings for C++
+if test -z "$CXX"; then
+    CXX=ecc
+    CXX_BASENAME=ecc
+fi
+
+
+case $CXX_BASENAME in
+    g++)
+	CXXFLAGS="$CXXFLAGS -Wsign-compare" #Only works for some versions
+	DEBUG_CXXFLAGS="-g -fverbose-asm"
+	DEBUG_CPPFLAGS=
+	PROD_CXXFLAGS="-O3 -fomit-frame-pointer"
+	PROD_CPPFLAGS=
+	PROFILE_CXXFLAGS="-pg"
+	PROFILE_CPPFLAGS=
+	;;
+
+    *)
+	# Default to C99 standard.
+	CXXFLAGS="${CXXFLAGS:-std=c99}"
+	DEBUG_CXXFLAGS="-g -w2 -Wall"
+	DEBUG_CPPFLAGS=
+	PROD_CXXFLAGS=""     #Default optimization O2 is used
+	PROD_CPPFLAGS=
+	PROFILE_CXXFLAGS="-pg"
+	PROFILE_CPPFLAGS=
+	;;
+esac
+
+
