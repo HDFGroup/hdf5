@@ -23,18 +23,24 @@ PABLO_FLAGS = -I. -I../src -I$(PABLO_INC) -DHAVE_PABLO $(PABLO_MPIO_FLAGS)
 ## This is our main target:
 LIB=libhdf5-inst.a
 
-SRCDIRS := ./. ../src/.
+#SRCDIRS := ./. ../src/.
+SRCDIRS = ./. ../src/.
 # Took out the GNU'isms for the SRCFILES and LIB_SRC variables.
 #  This may cause problems in two ways: any changes to the SRCDIRS variable
 #  should be make to the SRCFILES macro also and the LIB_SRC variable now has
 #  directory paths included in it (which may cause problems somewhere). - QAK
 #SRCFILES := $(foreach DIR,$(SRCDIRS),$(wildcard $(DIR)/*.c))
-SRCFILES := *.c ../src/*.c
+#SRCFILES := *.c ../src/*.c
+SRCFILES = *.c ../src/*.c
 #LIB_SRC     := $(notdir $(SRCFILES))
-LIB_SRC     := $(SRCFILES)
-LIB_COBJ := $(LIB_SRC:.c=.o)
-LIB_FOBJ := PabloHDFff.o     
-LIB_OBJ  := $(LIB_FOBJ) $(LIB_COBJ)
+#LIB_SRC     := $(SRCFILES)
+LIB_SRC     = $(SRCFILES)
+#LIB_COBJ := $(LIB_SRC:.c=.o)
+LIB_COBJ = $(LIB_SRC:.c=.o)
+#LIB_FOBJ := PabloHDFff.o     
+LIB_FOBJ = PabloHDFff.o     
+#LIB_OBJ  := $(LIB_FOBJ) $(LIB_COBJ)
+LIB_OBJ  = $(LIB_FOBJ) $(LIB_COBJ)
 
 copy_src: 
 	cp ../src/*.c .
