@@ -10007,7 +10007,7 @@ PRINT_N "                     Debug Mode"
 
 if test "X$DEBUG_PKG" = "X$all_packages"; then
   PRINT "All"
-elif test -z $DEBUG_PKG; then
+elif test "X$DEBUG_PKG" = "X"; then
   PRINT "None"
 else
   PRINT $DEBUG_PKG
