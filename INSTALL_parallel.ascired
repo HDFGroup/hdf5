@@ -26,12 +26,12 @@ CC=cicc
 debug="-g -UH5O_DEBUG -DH5F_OPT_SEEK=0"
 default_mode="-DDOS386 $debug -DH5F_LOW_DFLT=H5F_LOW_SEC2"
 
-MPICH="/usr/community/mpi-io/romio/mpich_1.1.0"
+MPICH=""
 ROMIO="/usr/community/mpi-io/romio/current"
-mpi1_inc="-I$MPICH/include"
-mpi1_lib="-L$MPICH/lib/tflops/ptls"
+mpi1_inc=""
+mpi1_lib=""
 mpio_inc="-I$ROMIO/include"
-mpio_lib="-L$ROMIO/lib/tflops"
+mpio_lib="-L$ROMIO/lib/tflop"
 
 MPI_INC="$mpi1_inc $mpio_inc"
 MPI_LIB="$mpi1_lib $mpio_lib"
