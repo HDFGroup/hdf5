@@ -159,11 +159,8 @@ __DLL__ herr_t H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space,
                             H5D_operator_t op, void *operator_data);
 __DLL__ herr_t H5S_all_select_fill(const void *fill, size_t fill_size,
                 const H5S_t *space, void *buf);
-#if 0
-    /* declared in H5Sprivate.h */
 __DLL__ htri_t H5S_all_opt_possible(const H5S_t *mem_space,
                             const H5S_t *file_space, const unsigned flags);
-#endif  /* 0 */
 
 /* Hyperslab selection functions */
 __DLL__ herr_t H5S_hyper_release(H5S_t *space);

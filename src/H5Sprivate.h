@@ -227,12 +227,6 @@ __DLL__ herr_t H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op, const hssiz
                 const hsize_t block[]);
 
 #ifdef H5_HAVE_PARALLEL
-
-/* MPI-IO function to check whether its possible to transfer directly
- * from app buffer to file */
-__DLL__ htri_t H5S_all_opt_possible(const H5S_t *mem_space,
-                            const H5S_t *file_space, const unsigned flags);
-
 /* MPI-IO function to read directly from app buffer to file rky980813 */
 __DLL__ herr_t H5S_mpio_spaces_read(H5F_t *f,
 				    const struct H5O_layout_t *layout,
