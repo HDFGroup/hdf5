@@ -747,11 +747,14 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
     if ( (IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file) || IS_H5FD_FPHDF5(dataset->ent.file)) &&
-            H5T_get_class(mem_type)==H5T_VLEN)
+            H5T_detect_class(mem_type, H5T_VLEN)>0)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing VL datatypes yet");
     /* If MPIO, MPIPOSIX, or FPHDF5 is used, no dataset region reference datatype support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
+    /* We should really use H5T_detect_class() here, but it will be difficult
+     * to detect the type of the reference if it is nested... -QAK
+     */
     if ((IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file) || IS_H5FD_FPHDF5(dataset->ent.file)) &&
             H5T_get_class(mem_type)==H5T_REFERENCE &&
             H5T_get_ref_type(mem_type)==H5R_DATASET_REGION)
