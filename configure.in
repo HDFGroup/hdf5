@@ -207,6 +207,9 @@ AC_CHECK_SIZEOF(float, 4)
 AC_CHECK_SIZEOF(double, 8)
 AC_CHECK_SIZEOF(long double, 8)
 
+dnl Checkpoint the cache
+AC_CACHE_SAVE
+
 dnl Posix.1g types (C9x)
 cat >>confdefs.h <<\EOF
 #include <sys/types.h>
@@ -272,6 +275,9 @@ case $HSIZET in
         AC_DEFINE(HAVE_LARGE_HSIZET)
 	;;
 esac
+
+dnl Checkpoint the cache
+AC_CACHE_SAVE
 
 dnl ----------------------------------------------------------------------
 dnl Is HDF4 present?  If so then we can compile the h5toh4 converter. We
@@ -365,6 +371,9 @@ case $withval in
 	fi
 	;;
 esac
+
+dnl Checkpoint the cache
+AC_CACHE_SAVE
 
 dnl ----------------------------------------------------------------------
 dnl How does one figure out the local time zone?  Anyone know of a
@@ -565,6 +574,9 @@ else
    TRACE_API=no
    CPPFLAGS="$CPPFLAGS -UH5_DEBUG_API"
 fi
+
+dnl Checkpoint the cache
+AC_CACHE_SAVE
 
 dnl ----------------------------------------------------------------------
 dnl The following variables are used to distinguish between building a
