@@ -53,6 +53,39 @@ FILE       *rawdatastream;	/* should initialize to stdout but gcc moans about it
 
 /* module-scoped variables */
 static int  h5tools_init_g;     /* if h5tools lib has been initialized */
+static int  h5tools_mpi_init_g; /* if MPI_Init() has been called */
+
+/* Names of VFDs */
+static const char *drivernames[]={
+    "sec2",
+    "family",
+    "split",
+    "multi",
+#ifdef H5_HAVE_STREAM
+    "stream",
+#endif	/* H5_HAVE_STREAM */
+#ifdef H5_HAVE_PARALLEL
+    "mpio",
+    "mpiposix"
+#endif /* H5_HAVE_PARALLEL */
+};
+
+/* This enum should match the entries in the above drivers_list since they
+ * are indexes into the drivers_list array. */
+enum {
+    SEC2_IDX = 0
+   ,FAMILY_IDX
+   ,SPLIT_IDX
+   ,MULTI_IDX
+#ifdef H5_HAVE_STREAM
+   ,STREAM_IDX
+#endif	/* H5_HAVE_STREAM */
+#ifdef H5_HAVE_PARALLEL
+   ,MPIO_IDX
+   ,MPIPOSIX_IDX
+#endif /* H5_HAVE_PARALLEL */
+} driver_idx;
+#define NUM_DRIVERS     (sizeof(drivernames) / sizeof(drivernames[0]))
 
 /*-------------------------------------------------------------------------
  * Audience:    Public
@@ -107,8 +140,115 @@ h5tools_close(void)
 		rawdatastream = NULL;
 	}
 
+        /* Shut down the library */
+        H5close();
+
+#ifdef H5_HAVE_PARALLEL
+        /* Check if we need to shut down MPI */
+        if(h5tools_mpi_init_g) {
+            MPI_Finalize();
+            h5tools_mpi_init_g=0;
+        } /* end if */
+#endif
+
 	h5tools_init_g = 0;
     }
+}
+
+/*-------------------------------------------------------------------------
+ * Audience:    Private
+ * Chapter:     H5Tools Library
+ * Purpose:	Get a FAPL for a driver
+ * Description:
+ *      Get a FAPL for a given VFL driver name.
+ * Return:
+ *      None
+ * Programmer:
+ *      Quincey Koziol, 2004-02-04
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+h5tools_get_fapl(const char *driver, unsigned *drivernum, int argc, const char *argv[])
+{
+    hid_t               fapl = H5P_DEFAULT;
+
+    /* Determine which driver the user wants to open the file with. Try
+     * that driver. If it can't open it, then fail. */
+    if (!strcmp(driver, drivernames[SEC2_IDX])) {
+        if(drivernum)
+            *drivernum = SEC2_IDX;
+    } else if (!strcmp(driver, drivernames[FAMILY_IDX])) {
+        /* FAMILY Driver */
+        if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
+            H5Pset_fapl_family(fapl, (hsize_t)0, H5P_DEFAULT);
+
+            if(drivernum)
+                *drivernum = FAMILY_IDX;
+        } /* end if */
+    } else if (!strcmp(driver, drivernames[SPLIT_IDX])) {
+        /* SPLIT Driver */
+        if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
+            H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
+
+            if(drivernum)
+                *drivernum = SPLIT_IDX;
+        } /* end if */
+    } else if (!strcmp(driver, drivernames[MULTI_IDX])) {
+        /* MULTI Driver */
+        if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
+            H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE);
+
+            if(drivernum)
+                *drivernum = MULTI_IDX;
+        } /* end if */
+#ifdef H5_HAVE_STREAM
+    } else if (!strcmp(driver, drivernames[STREAM_IDX])) {
+        /* STREAM Driver */
+        if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
+            H5Pset_fapl_stream(fapl, NULL);
+
+            if(drivernum)
+                *drivernum = STREAM_IDX;
+        } /* end if */
+#endif	/* H5_HAVE_STREAM */
+#ifdef H5_HAVE_PARALLEL
+    } else if (!strcmp(driver, drivernames[MPIO_IDX])) {
+        /* MPI-I/O Driver */
+        if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
+            H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
+
+            /* Initialize the MPI library, if it wasn't already */
+            if(!h5tools_mpi_init_g) {
+                MPI_Init(&argc, &argv);
+
+                h5tools_mpi_init_g=1;
+            } /* end if */
+
+            if(drivernum)
+                *drivernum = MPIO_IDX;
+        } /* end if */
+    } else if (!strcmp(driver, drivernames[MPIPOSIX_IDX])) {
+        /* MPI-I/O Driver */
+        if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
+            H5Pset_fapl_mpiposix(fapl, MPI_COMM_WORLD, TRUE);
+
+            /* Initialize the MPI library, if it wasn't already */
+            if(!h5tools_mpi_init_g) {
+                MPI_Init(&argc, &argv);
+
+                h5tools_mpi_init_g=1;
+            } /* end if */
+
+            if(drivernum)
+                *drivernum = MPIPOSIX_IDX;
+        } /* end if */
+#endif /* H5_HAVE_PARALLEL */
+    } else {
+        fapl=(-1);
+    }
+
+    return(fapl);
 }
 
 /*-------------------------------------------------------------------------
@@ -168,177 +308,49 @@ h5tools_close(void)
  */
 hid_t
 h5tools_fopen(const char *fname, const char *driver, char *drivername,
-              size_t drivername_size)
+              size_t drivername_size, int argc, const char *argv[])
 {
-    static struct d_list {
-        const char     *name;
-        hid_t		fapl;
-    } drivers_list[] = {
-        { "sec2", FAIL }
-        ,{ "family", FAIL }
-        ,{ "split", FAIL }
-        ,{ "multi", FAIL }
-#ifdef H5_HAVE_STREAM
-        ,{ "stream", FAIL }
-#endif	/* H5_HAVE_STREAM */
-#ifdef H5_HAVE_PARALLEL
-        ,{ "mpio", FAIL }
-        ,{ "mpiposix", FAIL }
-#endif /* H5_HAVE_PARALLEL */
-    };
-    /* This enum should match the entries in the above drivers_list since they
-     * are indexes into the drivers_list array. */
-    enum {
-        SEC2_IDX = 0
-       ,FAMILY_IDX
-       ,SPLIT_IDX
-       ,MULTI_IDX
-#ifdef H5_HAVE_STREAM
-       ,STREAM_IDX
-#endif	/* H5_HAVE_STREAM */
-#ifdef H5_HAVE_PARALLEL
-       ,MPIO_IDX
-       ,MPIPOSIX_IDX
-#endif /* H5_HAVE_PARALLEL */
-    };
-#define NUM_DRIVERS     (sizeof(drivers_list) / sizeof(struct d_list))
-
-    static int          initialized = 0;
-    register unsigned   drivernum;
-    hid_t               fid = FAIL;
-    hid_t               fapl = H5P_DEFAULT;
-
-    if (!initialized) {
-        /* Build a list of file access property lists which we should try
-         * when opening the file.  Eventually we'd like some way for the
-         * user to augment/replace this list interactively. */
-        ++initialized;
-
-        /* SEC2 Driver */
-        drivers_list[SEC2_IDX].fapl = H5P_DEFAULT;
-        
-        /* FAMILY Driver */
-        drivers_list[FAMILY_IDX].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_family(fapl, (hsize_t)0, H5P_DEFAULT);
-
-        /* SPLIT Driver */
-        drivers_list[SPLIT_IDX].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
-
-        /* MULTI Driver */
-        drivers_list[MULTI_IDX].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE);
-
-#ifdef H5_HAVE_STREAM
-        /* STREAM Driver */
-        drivers_list[STREAM_IDX].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_stream(fapl, NULL);
-#endif	/* H5_HAVE_STREAM */
-
-#ifdef H5_HAVE_PARALLEL
-        /* MPI-IO Driver */
-        drivers_list[MPIO_IDX].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
-
-        /* MPI-POSIX Driver */
-        drivers_list[MPIPOSIX_IDX].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_fapl_mpiposix(fapl, MPI_COMM_WORLD, TRUE);
-#endif /* H5_HAVE_PARALLEL */
-    }
+    unsigned    drivernum;
+    hid_t       fid = FAIL;
+    hid_t       fapl = H5P_DEFAULT;
 
     if (driver && *driver) {
-        /* Determine which driver the user wants to open the file with. Try
-         * that driver. If it can't open it, then fail. */
-        if (!strcmp(driver, drivers_list[SEC2_IDX].name)) {
-            H5E_BEGIN_TRY {
-                fid = H5Fopen(fname, H5F_ACC_RDONLY,
-                              drivers_list[SEC2_IDX].fapl);
-            } H5E_END_TRY;
-
-            if (fid == FAIL)
-                goto done;
-
-            drivernum = SEC2_IDX;
-        } else if (!strcmp(driver, drivers_list[FAMILY_IDX].name)) {
-            H5E_BEGIN_TRY {
-                fid = H5Fopen(fname, H5F_ACC_RDONLY,
-                              drivers_list[FAMILY_IDX].fapl);
-            } H5E_END_TRY;
-
-            if (fid == FAIL)
-                goto done;
-
-            drivernum = FAMILY_IDX;
-        } else if (!strcmp(driver, drivers_list[SPLIT_IDX].name)) {
-            H5E_BEGIN_TRY {
-                fid = H5Fopen(fname, H5F_ACC_RDONLY,
-                              drivers_list[SPLIT_IDX].fapl);
-            } H5E_END_TRY;
-
-            if (fid == FAIL)
-                goto done;
-
-            drivernum = SPLIT_IDX;
-        } else if (!strcmp(driver, drivers_list[MULTI_IDX].name)) {
-            H5E_BEGIN_TRY {
-                fid = H5Fopen(fname, H5F_ACC_RDONLY,
-                              drivers_list[MULTI_IDX].fapl);
-            } H5E_END_TRY;
-
-            if (fid == FAIL)
-                goto done;
-
-            drivernum = MULTI_IDX;
-#ifdef H5_HAVE_STREAM
-        } else if (!strcmp(driver, drivers_list[STREAM_IDX].name)) {
-            H5E_BEGIN_TRY {
-                fid = H5Fopen(fname, H5F_ACC_RDONLY,
-                              drivers_list[STREAM_IDX].fapl);
-            } H5E_END_TRY;
-
-            if (fid == FAIL)
-                goto done;
-
-            drivernum = STREAM_IDX;
-#endif	/* H5_HAVE_STREAM */
-#ifdef H5_HAVE_PARALLEL
-        } else if (!strcmp(driver, drivers_list[MPIO_IDX].name)) {
-            H5E_BEGIN_TRY {
-                fid = H5Fopen(fname, H5F_ACC_RDONLY,
-                              drivers_list[MPIO_IDX].fapl);
-            } H5E_END_TRY;
-            if (fid == FAIL)
-                goto done;
-            drivernum = MPIO_IDX;
-        } else if (!strcmp(driver, drivers_list[MPIPOSIX_IDX].name)) {
-            H5E_BEGIN_TRY {
-                fid = H5Fopen(fname, H5F_ACC_RDONLY,
-                              drivers_list[MPIO_IDX].fapl);
-            } H5E_END_TRY;
-            if (fid == FAIL)
-                goto done;
-            drivernum = MPIPOSIX_IDX;
-#endif /* H5_HAVE_PARALLEL */
-        } else {
+        /* Get the correct FAPL for the given driver */
+        if((fapl=h5tools_get_fapl(driver,&drivernum,argc,argv))<0)
             goto done;
-        }
+
+        H5E_BEGIN_TRY {
+            fid = H5Fopen(fname, H5F_ACC_RDONLY, fapl);
+        } H5E_END_TRY;
+
+        if (fid == FAIL)
+            goto done;
+
     } else {
         /* Try to open the file using each of the drivers */
         for (drivernum = 0; drivernum < NUM_DRIVERS; drivernum++) {
+            /* Get the correct FAPL for the given driver */
+            if((fapl=h5tools_get_fapl(drivernames[drivernum],NULL,argc,argv))<0)
+                goto done;
+
             H5E_BEGIN_TRY {
-                fid = H5Fopen(fname, H5F_ACC_RDONLY,
-                              drivers_list[drivernum].fapl);
+                fid = H5Fopen(fname, H5F_ACC_RDONLY, fapl);
             } H5E_END_TRY;
 
             if (fid != FAIL)
                 break;
+            else {
+                /* Close the FAPL */
+                H5Pclose(fapl);
+                fapl=H5P_DEFAULT;
+            } /* end else */
         }
     }
 
     /* Save the driver name */
     if (drivername && drivername_size) {
         if (fid != FAIL) {
-            strncpy(drivername, drivers_list[drivernum].name, drivername_size);
+            strncpy(drivername, drivernames[drivernum], drivername_size);
             drivername[drivername_size - 1] = '\0';
         } else {
             /*no file opened*/
@@ -347,6 +359,8 @@ h5tools_fopen(const char *fname, const char *driver, char *drivername,
     }
 
 done:
+    if(fapl!=H5P_DEFAULT)
+        H5Pclose(fapl);
     return fid;
 }
 

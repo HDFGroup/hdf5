@@ -1974,10 +1974,8 @@ get_width(void)
 static void
 leave(int ret)
 {
-    H5close();
-#ifdef H5_HAVE_PARALLEL
-    MPI_Finalize();
-#endif
+    h5tools_close();
+    
     exit(ret);
 }
 
@@ -1999,7 +1997,7 @@ leave(int ret)
  *-------------------------------------------------------------------------
  */
 int
-main (int argc, char *argv[])
+main (int argc, const char *argv[])
 {
     hid_t file=-1, root=-1;
     char *fname=NULL, *oname=NULL, *x;
@@ -2012,10 +2010,6 @@ main (int argc, char *argv[])
     static char root_name[] = "/";
     char        drivername[50];
     char                *preferred_driver=NULL;
-
-#ifdef H5_HAVE_PARALLEL
-    MPI_Init(&argc, &argv);
-#endif
 
     /* Initialize h5tools lib */
     h5tools_init();
@@ -2198,7 +2192,7 @@ main (int argc, char *argv[])
         file = -1;
 
         while (fname && *fname) {
-            file = h5tools_fopen(fname, preferred_driver, drivername, sizeof drivername);
+            file = h5tools_fopen(fname, preferred_driver, drivername, sizeof drivername, argc, argv);
 
             if (file>=0) {
                 if (verbose_g) {
@@ -2244,11 +2238,5 @@ main (int argc, char *argv[])
         }
         H5Fclose(file);
     }
-    h5tools_close();
-    
-    H5close();
-#ifdef H5_HAVE_PARALLEL
-    MPI_Finalize();
-#endif
-    return 0;
+    leave(0);
 }

@@ -542,10 +542,8 @@ static const dump_functions *dump_function_table;
 static void
 leave(int ret)
 {
-    H5close();
-#ifdef H5_HAVE_PARALLEL
-    MPI_Finalize();
-#endif
+    h5tools_close();
+
     exit(ret);
 }
 
@@ -2784,10 +2782,6 @@ main(int argc, const char *argv[])
     struct handler_t   *hand;
     int                 i;
 
-#ifdef H5_HAVE_PARALLEL
-    MPI_Init(&argc, &argv);
-#endif
-
     dump_header_format = &standardformat;
     dump_function_table = &ddl_function_table;
 
@@ -2841,7 +2835,7 @@ main(int argc, const char *argv[])
     }
     fname = argv[opt_ind];
 
-    fid = h5tools_fopen(fname, driver, NULL, 0);
+    fid = h5tools_fopen(fname, driver, NULL, 0, argc, argv);
 
     if (fid < 0) {
         error_msg(progname, "unable to open file \"%s\"\n", fname);
@@ -3010,19 +3004,13 @@ done:
 
     /* To Do:  clean up XML table */
 
-    h5tools_close();
 #ifdef H5_WANT_H5_V1_6_COMPAT
     H5Eset_auto(func, edata);
 #else
     H5Eset_auto(H5E_DEFAULT, func, edata);
 #endif /* H5_WANT_H5_V1_6_COMPAT */
     
-    H5close();
-#ifdef H5_HAVE_PARALLEL
-    MPI_Finalize();
-#endif
-
-    return d_status;
+    leave(d_status);
 }
 
 /*-------------------------------------------------------------------------
