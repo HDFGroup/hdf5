@@ -645,3 +645,51 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5BT_remove() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5BT_delete
+ *
+ * Purpose:	Delete a block tracker from a file
+ *
+ * Return:	Non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar 14 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5BT_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
+{
+    H5BT_t *bt = NULL;                  /* The new B-tree header information */
+    herr_t ret_value=SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5BT_delete, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Look up the block tracker header */
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BLTR, addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_BLKTRK, H5E_CANTPROTECT, FAIL, "unable to load block tracker info")
+
+    /* Delete B-tree */
+    if (H5B2_delete(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr) < 0)
+        HGOTO_ERROR(H5E_BLKTRK, H5E_CANTDELETE, FAIL, "Couldn't delete underlying B-tree")
+
+    /* Release space for block tracker info on disk */
+    if (H5MF_xfree(f, H5FD_MEM_BLKTRK, dxpl_id, addr, (hsize_t)H5BT_SIZE(f))<0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free block tracker info")
+    
+done:
+    /* Release the block tracker info */
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__DELETED_FLAG) < 0)
+        HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
+    
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5BT_remove() */
+
