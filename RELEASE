@@ -98,6 +98,9 @@ Tools
     * The test script for h5toh4 used to not able to detect the hdp
       dumper command was not valid.  It now detects and reports the
       failure of hdp execution.
+    * Merged the tools with the 1.2.2 branch.  Required adding new macros, VERSION12
+      and VERSION13, used in conditional compilation.  Updated the Windows project files
+      for the tools.            
 
 Documentation
 -------------
