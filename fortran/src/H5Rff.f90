@@ -90,9 +90,9 @@
           SUBROUTINE h5rcreate_object_f(loc_id, name, ref, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5rcreate_object_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5rcreate_object_f
+!DEC$endif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! Location identifier 
@@ -110,10 +110,10 @@
             INTERFACE
               INTEGER FUNCTION h5rcreate_object_c(ref_f, loc_id, name, namelen)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5RCREATE_OBJECT_C':: h5rcreate_object_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: name 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5RCREATE_OBJECT_C':: h5rcreate_object_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name 
 !              INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2
               INTEGER :: ref_f(REF_OBJ_BUF_LEN)
               INTEGER(HID_T), INTENT(IN) :: loc_id  
@@ -160,9 +160,9 @@
           SUBROUTINE h5rcreate_region_f(loc_id, name, space_id, ref, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5rcreate_region_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5rcreate_region_f
+!DEC$endif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! Location identifier 
@@ -181,10 +181,10 @@
             INTERFACE
               INTEGER FUNCTION h5rcreate_region_c(ref_f, loc_id, name, namelen, space_id)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5RCREATE_REGION_C':: h5rcreate_region_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: name 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5RCREATE_REGION_C':: h5rcreate_region_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name 
 !              INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3 
               INTEGER :: ref_f(REF_REG_BUF_LEN)
               INTEGER(HID_T), INTENT(IN) :: loc_id  
@@ -233,9 +233,9 @@
           SUBROUTINE h5rdereference_object_f(dset_id, ref, obj_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5rdereference_object_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5rdereference_object_f
+!DEC$endif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
@@ -252,9 +252,9 @@
             INTERFACE
               INTEGER FUNCTION h5rdereference_object_c(dset_id, ref_f, obj_id)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-           !FooMSSATTRIBUTES C,reference,alias:'_H5RDEREFERENCE_OBJECT_C':: h5rdereference_object_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+           !MS$ATTRIBUTES C,reference,alias:'_H5RDEREFERENCE_OBJECT_C':: h5rdereference_object_c
+              !DEC$ ENDIF
 !              INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2
               INTEGER(HID_T), INTENT(IN) :: dset_id  
               INTEGER :: ref_f(REF_OBJ_BUF_LEN)
@@ -299,9 +299,9 @@
           SUBROUTINE h5rdereference_region_f(dset_id, ref, obj_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5rdereference_region_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5rdereference_region_f
+!DEC$endif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
@@ -318,9 +318,9 @@
             INTERFACE
               INTEGER FUNCTION h5rdereference_region_c(dset_id, ref_f, obj_id)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-           !FooMSSATTRIBUTES C,reference,alias:'_H5RDEREFERENCE_REGION_C':: h5rdereference_region_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+           !MS$ATTRIBUTES C,reference,alias:'_H5RDEREFERENCE_REGION_C':: h5rdereference_region_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id  
 !              INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3 
               INTEGER :: ref_f(REF_REG_BUF_LEN)
@@ -367,9 +367,9 @@
           SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5rget_region_region_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5rget_region_region_f
+!DEC$endif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
@@ -384,9 +384,9 @@
             INTERFACE
               INTEGER FUNCTION h5rget_region_region_c(dset_id, ref_f, space_id)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-           !FooMSSATTRIBUTES C,reference,alias:'_H5RGET_REGION_REGION_C':: h5rget_region_region_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+           !MS$ATTRIBUTES C,reference,alias:'_H5RGET_REGION_REGION_C':: h5rget_region_region_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id  
 !              INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3 
               INTEGER :: ref_f(REF_REG_BUF_LEN)
@@ -437,9 +437,9 @@
           SUBROUTINE h5rget_object_type_obj_f(dset_id, ref, obj_type, hdferr) 
 !
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5rget_object_type_obj_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5rget_object_type_obj_f
+!DEC$endif
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
@@ -460,9 +460,9 @@
             INTERFACE
               INTEGER FUNCTION h5rget_object_type_obj_c(dset_id, ref_f, obj_type)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-           !FooMSSATTRIBUTES C,reference,alias:'_H5RGET_OBJECT_TYPE_OBJ_C':: h5rget_object_type_obj_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+           !MS$ATTRIBUTES C,reference,alias:'_H5RGET_OBJECT_TYPE_OBJ_C':: h5rget_object_type_obj_c
+              !DEC$ ENDIF
 !              INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2
               INTEGER(HID_T), INTENT(IN) :: dset_id  
               INTEGER :: ref_f(REF_OBJ_BUF_LEN)

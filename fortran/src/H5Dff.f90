@@ -155,9 +155,9 @@
           SUBROUTINE h5dcreate_f(loc_id, name, type_id, space_id, dset_id, & 
                                  hdferr, creation_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dcreate_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dcreate_f
+!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the dataset 
@@ -178,10 +178,10 @@
               INTEGER FUNCTION h5dcreate_c(loc_id, name, namelen, type_id, &
                                            space_id, creation_prp_default, dset_id)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DCREATE_C'::h5dcreate_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: name
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DCREATE_C'::h5dcreate_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER :: namelen
@@ -227,9 +227,9 @@
 
           SUBROUTINE h5dopen_f(loc_id, name, dset_id, hdferr)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dopen_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dopen_f
+!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the dataset 
@@ -243,10 +243,10 @@
             INTERFACE
               INTEGER FUNCTION h5dopen_c(loc_id, name, namelen, dset_id)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DOPEN_C'::h5dopen_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: name
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DOPEN_C'::h5dopen_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER :: namelen
@@ -285,9 +285,9 @@
 
           SUBROUTINE h5dclose_f(dset_id, hdferr)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dclose_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dclose_f
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id ! Dataset identifier
@@ -299,9 +299,9 @@
             INTERFACE
               INTEGER FUNCTION h5dclose_c(dset_id)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DCLOSE_C'::h5dclose_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DCLOSE_C'::h5dclose_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               END FUNCTION h5dclose_c
             END INTERFACE
@@ -313,9 +313,9 @@
           SUBROUTINE h5dwrite_reference_obj(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_reference_obj
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_reference_obj
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -344,9 +344,9 @@
                                                   mem_space_id_default, &
                                file_space_id_default, xfer_prp_default, ref_buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_REF_OBJ_C'::h5dwrite_ref_obj_c  
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_REF_OBJ_C'::h5dwrite_ref_obj_c  
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id   
               INTEGER(HID_T), INTENT(IN) :: mem_type_id 
               INTEGER(HID_T) :: xfer_prp_default
@@ -385,9 +385,9 @@
           SUBROUTINE h5dwrite_reference_dsetreg(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_reference_dsetreg
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_reference_dsetreg
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -416,9 +416,9 @@
                                                   mem_space_id_default, &
                                file_space_id_default, xfer_prp_default, ref_buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_REF_REG_C'::h5dwrite_ref_reg_c  
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_REF_REG_C'::h5dwrite_ref_reg_c  
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id   
               INTEGER(HID_T), INTENT(IN) :: mem_type_id 
               INTEGER(HID_T) :: xfer_prp_default
@@ -459,9 +459,9 @@
           SUBROUTINE h5dwrite_integer_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_integer_scalar
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_integer_scalar
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -489,9 +489,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -519,9 +519,9 @@
           SUBROUTINE h5dwrite_integer_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_integer_1
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_integer_1
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -550,9 +550,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -581,9 +581,9 @@
           SUBROUTINE h5dwrite_integer_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_integer_2
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_integer_2
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -612,9 +612,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -644,9 +644,9 @@
           SUBROUTINE h5dwrite_integer_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_integer_3
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_integer_3
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -675,9 +675,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -707,9 +707,9 @@
           SUBROUTINE h5dwrite_integer_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_integer_4
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_integer_4
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -738,9 +738,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -769,9 +769,9 @@
           SUBROUTINE h5dwrite_integer_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_integer_5
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_integer_5
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -800,9 +800,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -833,9 +833,9 @@
           SUBROUTINE h5dwrite_integer_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_integer_6
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_integer_6
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -864,9 +864,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -896,9 +896,9 @@
           SUBROUTINE h5dwrite_integer_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_integer_7
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_integer_7
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -927,9 +927,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -959,9 +959,9 @@
           SUBROUTINE h5dwrite_char_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_char_scalar
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_char_scalar
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -989,10 +989,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1020,9 +1020,9 @@
           SUBROUTINE h5dwrite_char_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_char_1
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_char_1
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1051,10 +1051,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1083,9 +1083,9 @@
           SUBROUTINE h5dwrite_char_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_char_2
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_char_2
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1114,10 +1114,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1146,9 +1146,9 @@
           SUBROUTINE h5dwrite_char_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_char_3
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_char_3
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1177,10 +1177,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1209,9 +1209,9 @@
           SUBROUTINE h5dwrite_char_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_char_4
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_char_4
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1240,10 +1240,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1272,9 +1272,9 @@
           SUBROUTINE h5dwrite_char_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_char_5
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_char_5
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1303,10 +1303,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1335,9 +1335,9 @@
           SUBROUTINE h5dwrite_char_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_char_6
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_char_6
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1366,10 +1366,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1398,9 +1398,9 @@
           SUBROUTINE h5dwrite_char_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_char_7
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_char_7
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1429,10 +1429,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITEC_C'::h5dwritec_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1460,9 +1460,9 @@
           SUBROUTINE h5dwrite_real_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_real_scalar
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_real_scalar
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1489,9 +1489,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1518,9 +1518,9 @@
           SUBROUTINE h5dwrite_real_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_real_1
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_real_1
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1549,9 +1549,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1580,9 +1580,9 @@
           SUBROUTINE h5dwrite_real_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_real_2
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_real_2
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1611,9 +1611,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1642,9 +1642,9 @@
           SUBROUTINE h5dwrite_real_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_real_3
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_real_3
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1672,9 +1672,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1703,9 +1703,9 @@
           SUBROUTINE h5dwrite_real_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_real_4
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_real_4
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1733,9 +1733,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1764,9 +1764,9 @@
           SUBROUTINE h5dwrite_real_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_real_5
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_real_5
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1794,9 +1794,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1825,9 +1825,9 @@
           SUBROUTINE h5dwrite_real_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_real_6
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_real_6
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1855,9 +1855,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1886,9 +1886,9 @@
           SUBROUTINE h5dwrite_real_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_real_7
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_real_7
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1916,9 +1916,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -1947,9 +1947,9 @@
           SUBROUTINE h5dwrite_double_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_double_scalar
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_double_scalar
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -1977,9 +1977,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2007,9 +2007,9 @@
           SUBROUTINE h5dwrite_double_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_double_1
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_double_1
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -2038,9 +2038,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2069,9 +2069,9 @@
           SUBROUTINE h5dwrite_double_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_double_2
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_double_2
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -2100,9 +2100,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2131,9 +2131,9 @@
           SUBROUTINE h5dwrite_double_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_double_3
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_double_3
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -2162,9 +2162,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2193,9 +2193,9 @@
           SUBROUTINE h5dwrite_double_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_double_4
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_double_4
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -2224,9 +2224,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2255,9 +2255,9 @@
           SUBROUTINE h5dwrite_double_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_double_5
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_double_5
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -2286,9 +2286,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2317,9 +2317,9 @@
           SUBROUTINE h5dwrite_double_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_double_6
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_double_6
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -2349,9 +2349,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2380,9 +2380,9 @@
           SUBROUTINE h5dwrite_double_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_double_7
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_double_7
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -2412,9 +2412,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_C'::h5dwrite_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2482,9 +2482,9 @@
           SUBROUTINE h5dread_reference_obj(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_reference_obj
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_reference_obj
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -2514,9 +2514,9 @@
                                                   mem_space_id_default, &
                                file_space_id_default, xfer_prp_default, ref_buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_REF_OBJ_C'::h5dread_ref_obj_c  
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_REF_OBJ_C'::h5dread_ref_obj_c  
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id   
               INTEGER(HID_T), INTENT(IN) :: mem_type_id 
               INTEGER(HID_T) :: xfer_prp_default
@@ -2554,9 +2554,9 @@
           SUBROUTINE h5dread_reference_dsetreg(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_reference_dsetreg
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_reference_dsetreg
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -2586,9 +2586,9 @@
                                                   mem_space_id_default, &
                                file_space_id_default, xfer_prp_default, ref_buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_REF_REG_C'::h5dread_ref_reg_c  
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_REF_REG_C'::h5dread_ref_reg_c  
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id   
               INTEGER(HID_T), INTENT(IN) :: mem_type_id 
               INTEGER(HID_T) :: xfer_prp_default
@@ -2628,9 +2628,9 @@
           SUBROUTINE h5dread_integer_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_integer_scalar
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_integer_scalar
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -2658,9 +2658,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2688,9 +2688,9 @@
           SUBROUTINE h5dread_integer_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_integer_1
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_integer_1
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -2719,9 +2719,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2750,9 +2750,9 @@
           SUBROUTINE h5dread_integer_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_integer_2
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_integer_2
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -2781,9 +2781,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2813,9 +2813,9 @@
           SUBROUTINE h5dread_integer_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_integer_3
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_integer_3
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -2844,9 +2844,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2876,9 +2876,9 @@
           SUBROUTINE h5dread_integer_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_integer_4
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_integer_4
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -2907,9 +2907,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -2939,9 +2939,9 @@
           SUBROUTINE h5dread_integer_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_integer_5
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_integer_5
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -2970,9 +2970,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3002,9 +3002,9 @@
           SUBROUTINE h5dread_integer_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_integer_6
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_integer_6
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3033,9 +3033,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3065,9 +3065,9 @@
           SUBROUTINE h5dread_integer_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_integer_7
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_integer_7
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3096,9 +3096,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3127,9 +3127,9 @@
           SUBROUTINE h5dread_char_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_char_scalar
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_char_scalar
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3157,10 +3157,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3188,9 +3188,9 @@
           SUBROUTINE h5dread_char_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_char_1
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_char_1
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3219,10 +3219,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3251,9 +3251,9 @@
           SUBROUTINE h5dread_char_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_char_2
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_char_2
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3282,10 +3282,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3314,9 +3314,9 @@
           SUBROUTINE h5dread_char_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_char_3
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_char_3
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3345,10 +3345,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3377,9 +3377,9 @@
           SUBROUTINE h5dread_char_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_char_4
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_char_4
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3408,10 +3408,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3440,9 +3440,9 @@
           SUBROUTINE h5dread_char_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_char_5
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_char_5
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3471,10 +3471,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3503,9 +3503,9 @@
           SUBROUTINE h5dread_char_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_char_6
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_char_6
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3534,10 +3534,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3566,9 +3566,9 @@
           SUBROUTINE h5dread_char_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_char_7
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_char_7
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3597,10 +3597,10 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf 
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREADC_C'::h5dreadc_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf 
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3628,9 +3628,9 @@
           SUBROUTINE h5dread_real_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_real_scalar
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_real_scalar
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3657,9 +3657,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3687,9 +3687,9 @@
           SUBROUTINE h5dread_real_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_real_1
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_real_1
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3717,9 +3717,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3748,9 +3748,9 @@
           SUBROUTINE h5dread_real_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_real_2
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_real_2
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3778,9 +3778,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3809,9 +3809,9 @@
           SUBROUTINE h5dread_real_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_real_3
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_real_3
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3839,9 +3839,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3870,9 +3870,9 @@
           SUBROUTINE h5dread_real_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_real_4
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_real_4
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3900,9 +3900,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3931,9 +3931,9 @@
           SUBROUTINE h5dread_real_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_real_5
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_real_5
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -3961,9 +3961,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -3992,9 +3992,9 @@
           SUBROUTINE h5dread_real_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_real_6
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_real_6
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -4022,9 +4022,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4053,9 +4053,9 @@
           SUBROUTINE h5dread_real_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_real_7
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_real_7
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -4084,9 +4084,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4114,9 +4114,9 @@
           SUBROUTINE h5dread_double_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_double_scalar
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_double_scalar
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -4144,9 +4144,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4174,9 +4174,9 @@
           SUBROUTINE h5dread_double_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_double_1
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_double_1
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -4205,9 +4205,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4236,9 +4236,9 @@
           SUBROUTINE h5dread_double_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_double_2
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_double_2
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -4267,9 +4267,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4298,9 +4298,9 @@
           SUBROUTINE h5dread_double_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_double_3
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_double_3
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -4329,9 +4329,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4360,9 +4360,9 @@
           SUBROUTINE h5dread_double_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_double_4
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_double_4
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -4392,9 +4392,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4423,9 +4423,9 @@
           SUBROUTINE h5dread_double_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_double_5
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_double_5
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -4454,9 +4454,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4485,9 +4485,9 @@
           SUBROUTINE h5dread_double_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_double_6
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_double_6
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -4517,9 +4517,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4548,9 +4548,9 @@
           SUBROUTINE h5dread_double_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_double_7
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_double_7
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -4580,9 +4580,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_C'::h5dread_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4634,9 +4634,9 @@
 !----------------------------------------------------------------------
           SUBROUTINE h5dget_space_f(dataset_id, dataspace_id, hdferr) 
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dget_space_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dget_space_f
+!DEC$endif
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HID_T), INTENT(OUT) :: dataspace_id   ! Dataspace identifier
@@ -4648,9 +4648,9 @@
             INTERFACE
               INTEGER FUNCTION h5dget_space_c(dataset_id, dataspace_id)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DGET_SPACE_C'::h5dget_space_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DGET_SPACE_C'::h5dget_space_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dataset_id
               INTEGER(HID_T), INTENT(OUT) :: dataspace_id
               END FUNCTION h5dget_space_c
@@ -4687,9 +4687,9 @@
 
           SUBROUTINE h5dget_type_f(dataset_id, datatype_id, hdferr) 
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dget_type_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dget_type_f
+!DEC$endif
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HID_T), INTENT(OUT) :: datatype_id    ! Datatype identifier
@@ -4700,9 +4700,9 @@
             INTERFACE
               INTEGER FUNCTION h5dget_type_c (dataset_id, datatype_id)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DGET_TYPE_C'::h5dget_type_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DGET_TYPE_C'::h5dget_type_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dataset_id
               INTEGER(HID_T), INTENT(OUT) :: datatype_id
               END FUNCTION h5dget_type_c
@@ -4740,9 +4740,9 @@
 
           SUBROUTINE h5dextend_f(dataset_id, size, hdferr) 
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dextend_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dextend_f
+!DEC$endif
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN)  :: size
@@ -4756,9 +4756,9 @@
             INTERFACE
               INTEGER FUNCTION h5dextend_c(dataset_id, size)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DEXTEND_C'::h5dextend_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DEXTEND_C'::h5dextend_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dataset_id
               INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN)  :: size
               END FUNCTION h5dextend_c
@@ -4797,9 +4797,9 @@
 
           SUBROUTINE h5dget_create_plist_f(dataset_id, plist_id, hdferr) 
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dget_create_plist_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dget_create_plist_f
+!DEC$endif
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HID_T), INTENT(OUT) :: plist_id    ! Dataset creation
@@ -4812,9 +4812,9 @@
             INTERFACE
               INTEGER FUNCTION h5dget_create_plist_c(dataset_id, plist_id)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DGET_CREATE_PLIST_C'::h5dget_create_plist_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DGET_CREATE_PLIST_C'::h5dget_create_plist_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dataset_id
               INTEGER(HID_T), INTENT(OUT) :: plist_id
               END FUNCTION h5dget_create_plist_c
@@ -4849,9 +4849,9 @@
 
           SUBROUTINE h5dget_storage_size_f(dataset_id, size, hdferr) 
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dget_storage_size_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dget_storage_size_f
+!DEC$endif
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HSIZE_T),  INTENT(OUT)  :: size
@@ -4862,9 +4862,9 @@
             INTERFACE
               INTEGER FUNCTION h5dget_storage_size_c(dataset_id, size)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DGET_STORAGE_SIZE_C'::h5dget_storage_size_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DGET_STORAGE_SIZE_C'::h5dget_storage_size_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dataset_id
               INTEGER(HSIZE_T), INTENT(OUT)  :: size
               END FUNCTION h5dget_storage_size_c
@@ -4901,9 +4901,9 @@
 
           SUBROUTINE h5dvlen_get_max_len_f(dataset_id, type_id, space_id, len,  hdferr) 
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dvlen_get_max_len_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dvlen_get_max_len_f
+!DEC$endif
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: type_id         ! Datatype identifier
@@ -4914,9 +4914,9 @@
             INTERFACE
               INTEGER FUNCTION h5dvlen_get_max_len_c(dataset_id, type_id, space_id, len)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DVLEN_GET_MAX_LEN_C'::h5dvlen_get_max_len_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DVLEN_GET_MAX_LEN_C'::h5dvlen_get_max_len_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dataset_id
               INTEGER(HID_T), INTENT(IN) :: type_id 
               INTEGER(HID_T), INTENT(IN) :: space_id     
@@ -4931,9 +4931,9 @@
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_vl_integer
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_vl_integer
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -4962,9 +4962,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims, len)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_VL_INTEGER_C'::h5dwrite_vl_integer_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_VL_INTEGER_C'::h5dwrite_vl_integer_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -4996,9 +4996,9 @@
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_vl_integer
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_vl_integer
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -5030,9 +5030,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims, len)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_VL_INTEGER_C'::h5dread_vl_integer_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_VL_INTEGER_C'::h5dread_vl_integer_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -5064,9 +5064,9 @@
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_vl_real
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_vl_real
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -5095,9 +5095,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims, len)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_VL_REAL_C'::h5dwrite_vl_real_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_VL_REAL_C'::h5dwrite_vl_real_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -5129,9 +5129,9 @@
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_vl_real
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_vl_real
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -5163,9 +5163,9 @@
                                           file_space_id_default, &
                                           xfer_prp_default, buf, dims, len)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_VL_REAL_C'::h5dread_vl_real_c
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_VL_REAL_C'::h5dread_vl_real_c
+              !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -5197,9 +5197,9 @@
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dwrite_vl_string
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dwrite_vl_string
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -5231,10 +5231,10 @@
 !                                          xfer_prp_default, tmp_buf, dims, str_len)
                                           xfer_prp_default, buf, dims, str_len)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DWRITE_VL_STRING_C'::h5dwrite_vl_string_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DWRITE_VL_STRING_C'::h5dwrite_vl_string_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -5274,9 +5274,9 @@
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dread_vl_string
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dread_vl_string
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
@@ -5308,10 +5308,10 @@
 !                                          xfer_prp_default, tmp_buf, dims, str_len)
                                           xfer_prp_default, buf, dims, str_len)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DREAD_VL_STRING_C'::h5dread_vl_string_c
-              !FooDECS ENDIF
-              !FooDECSATTRIBUTES reference :: buf
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DREAD_VL_STRING_C'::h5dread_vl_string_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf
               INTEGER(HID_T), INTENT(IN) :: dset_id
               INTEGER(HID_T), INTENT(IN) :: mem_type_id
               INTEGER(HID_T)  :: mem_space_id_default
@@ -5373,9 +5373,9 @@
 
           SUBROUTINE h5dfill_integer(fill_value, space_id, buf,  hdferr)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dfill_integer
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dfill_integer
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER, INTENT(IN) :: fill_value  ! Fill value
@@ -5393,9 +5393,9 @@
               INTEGER FUNCTION h5dfill_c(fill_value, fill_type_id, space_id, &
                                          buf, mem_type_id)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DFILL_C'::h5dfill_c  
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DFILL_C'::h5dfill_c  
+              !DEC$ ENDIF
               INTEGER, INTENT(IN) :: fill_value  ! Fill value
               INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
               INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -5437,9 +5437,9 @@
 
           SUBROUTINE h5dfill_real(fill_valuer, space_id, buf,  hdferr)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dfill_real
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dfill_real
+!DEC$endif
 
             IMPLICIT NONE
             REAL, INTENT(IN) :: fill_valuer  ! Fill value
@@ -5457,9 +5457,9 @@
               INTEGER FUNCTION h5dfill_c(fill_valuer, fill_type_id, space_id, &
                                          buf, mem_type_id)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DFILL_C'::h5dfill_c  
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DFILL_C'::h5dfill_c  
+              !DEC$ ENDIF
               REAL, INTENT(IN) :: fill_valuer  ! Fill value
               INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
               INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -5500,9 +5500,9 @@
 
           SUBROUTINE h5dfill_double(fill_value, space_id, buf,  hdferr)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dfill_double
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dfill_double
+!DEC$endif
 
             IMPLICIT NONE
             DOUBLE PRECISION, INTENT(IN) :: fill_value  ! Fill value
@@ -5520,9 +5520,9 @@
               INTEGER FUNCTION h5dfill_c(fill_value, fill_type_id, space_id, &
                                          buf, mem_type_id)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DFILL_C'::h5dfill_c  
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DFILL_C'::h5dfill_c  
+              !DEC$ ENDIF
               DOUBLE PRECISION, INTENT(IN) :: fill_value  ! Fill value
               INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
               INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -5565,9 +5565,9 @@
 
           SUBROUTINE h5dfill_char(fill_value, space_id, buf,  hdferr)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dfill_integer
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dfill_integer
+!DEC$endif
 
             IMPLICIT NONE
             CHARACTER, INTENT(IN) :: fill_value  ! Fill value
@@ -5585,9 +5585,9 @@
               INTEGER FUNCTION h5dfillc_c(fill_value, fill_type_id, space_id, &
                                          buf, mem_type_id)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DFILLC_C'::h5dfillc_c  
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DFILLC_C'::h5dfillc_c  
+              !DEC$ ENDIF
               CHARACTER, INTENT(IN) :: fill_value  ! Fill value
               INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
               INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -5627,9 +5627,9 @@
 
           SUBROUTINE h5dget_space_status_f(dset_id, flag, hdferr)
 !This definition is needed for Windows DLLs
-!FooDECSif defined(BUILD_HDF5_DLL)
-!FooDECSattributes dllexport :: h5dget_space_status_f
-!FooDECSendif
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5dget_space_status_f
+!DEC$endif
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id  ! Dataspace identifier
@@ -5642,9 +5642,9 @@
             INTERFACE
               INTEGER FUNCTION h5dget_space_status_c(dset_id, flag)
               USE H5GLOBAL
-              !FooDECS IF DEFINED(HDF5F90_WINDOWS)
-              !FooMSSATTRIBUTES C,reference,alias:'_H5DGET_SPACE_STATUS_C'::h5dget_space_status_c  
-              !FooDECS ENDIF
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5DGET_SPACE_STATUS_C'::h5dget_space_status_c  
+              !DEC$ ENDIF
               INTEGER(HID_T) :: dset_id
               INTEGER        :: flag
               END FUNCTION h5dget_space_status_c
