@@ -2271,13 +2271,8 @@ init_table(table_t** temp)
 void
 init_prefix(char **prefix, int prefix_len)
 {
-    char *temp;
-
-    assert(prefix_len>0);
-    temp = malloc((size_t)prefix_len);
-
-    *temp = '\0';
-    *prefix = temp;
+    assert(prefix_len > 0);
+    *prefix = calloc((size_t)prefix_len, 1);
 }
 
 /*-------------------------------------------------------------------------
@@ -2618,6 +2613,10 @@ get_objectname(table_t* table, int idx)
  *
  *              Thomas Radke, 2000-09-12
  *              Added Stream VFD to the driver[] array.
+ *
+ *              Bill Wendling, 2001-01-10
+ *              Changed macro behavior so that if we have a version other
+ *              than 1.2.x (i.e., > 1.2), then we do the drivers check.
  *-----------------------------------------------------------------------*/
 hid_t
 h5dump_fopen(const char *fname, char *drivername, size_t drivername_size)
@@ -2628,7 +2627,7 @@ h5dump_fopen(const char *fname, char *drivername, size_t drivername_size)
     } driver[16];
     static int          ndrivers = 0;
     hid_t               fid=(-1);
-#ifdef VERSION13
+#ifndef VERSION12
     hid_t               fapl = H5P_DEFAULT;
 #endif
     int                 drivernum;
@@ -2641,7 +2640,7 @@ h5dump_fopen(const char *fname, char *drivername, size_t drivername_size)
         driver[ndrivers].fapl = H5P_DEFAULT;
         ndrivers++;
         
-#ifdef VERSION13
+#ifndef VERSION12
         driver[ndrivers].name = "family";
         driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
         H5Pset_fapl_family(fapl, 0, H5P_DEFAULT);
@@ -2663,7 +2662,7 @@ h5dump_fopen(const char *fname, char *drivername, size_t drivername_size)
         H5Pset_fapl_stream(fapl, NULL);
         ndrivers++;
 #endif	/* H5_HAVE_STREAM */
-#endif	/* VERSION13 */
+#endif	/* !VERSION12 */
     }
 
     /* Try to open the file using each of the drivers */
