@@ -379,8 +379,6 @@ __DLL__ herr_t H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space,
 				      H5D_operator_t op, void *operator_data);
 
 /* Hyperslab selection functions */
-__DLL__ herr_t H5S_hyper_add(H5S_t *space, const hssize_t *start,
-			     const hsize_t *end);
 __DLL__ herr_t H5S_hyper_release(H5S_t *space);
 __DLL__ herr_t H5S_hyper_sel_iter_release(H5S_sel_iter_t *sel_iter);
 __DLL__ hsize_t H5S_hyper_npoints(const H5S_t *space);
