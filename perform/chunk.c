@@ -33,7 +33,7 @@
 #endif
 
 
-#ifndef H5_HAVE_ATTRIBUTE
+#if !defined(H5_HAVE_ATTRIBUTE) || defined __cplusplus
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
 #   define UNUSED /*void*/

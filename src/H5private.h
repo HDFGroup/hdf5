@@ -186,12 +186,17 @@
  * suppresses warnings about unused function arguments.	 It's no big deal if
  * we don't.
  */
+#ifdef __cplusplus
+#   define __attribute__(X)	/*void*/
+#   define UNUSED		/*void*/
+#else /* __cplusplus */
 #ifdef H5_HAVE_ATTRIBUTE
 #   define UNUSED		__attribute__((unused))
 #else
 #   define __attribute__(X)	/*void*/
 #   define UNUSED		/*void*/
 #endif
+#endif /* __cplusplus */
 
 /*
  * Does the compiler expand __FUNCTION__ to be the name of the function

@@ -88,7 +88,8 @@ static H5P_genclass_t *H5P_create_class(H5P_genclass_t *par_class,
      H5P_cls_close_func_t cls_close, void *close_data);
 static herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name);
 static H5P_genprop_t *H5P_dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type);
-static void H5P_free_prop(H5P_genprop_t *prop);
+static herr_t H5P_free_prop(H5P_genprop_t *prop);
+static void H5P_free_prop_void(void *_prop);
 
 
 /*--------------------------------------------------------------------------
@@ -1054,7 +1055,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static void
+static herr_t
 H5P_free_prop(H5P_genprop_t *prop)
 {
     FUNC_ENTER_NOINIT(H5P_free_prop);
@@ -1071,8 +1072,42 @@ H5P_free_prop(H5P_genprop_t *prop)
 
     H5FL_FREE(H5P_genprop_t,prop);
 
-    FUNC_LEAVE_NOAPI_VOID;
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5P_free_prop() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_free_prop_void
+ PURPOSE
+    Internal routine to destroy a property node  (Wrapper for compatibility
+    with H5TB_dfree)
+ USAGE
+    void H5P_free_prop(prop)
+        void *prop;    IN: Pointer to property to destroy
+ RETURNS
+    No return value
+ DESCRIPTION
+    Releases all the memory for a property list.  Does _not_ call the
+    properties 'close' callback, that should already have been done.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static void
+H5P_free_prop_void(void *_prop)
+{
+    H5P_genprop_t *prop=(H5P_genprop_t *)_prop;
+
+    FUNC_ENTER_NOINIT(H5P_free_prop_void);
+
+    assert(prop);
+
+    H5P_free_prop(prop);
+
+    FUNC_LEAVE_NOAPI_VOID;
+}   /* H5P_free_prop_void() */
 
 
 /*--------------------------------------------------------------------------
@@ -5138,7 +5173,7 @@ H5P_close(void *_plist)
     H5TB_dfree(plist->del,free,NULL);
 
     /* Free the property tree itself */
-    H5TB_dfree(plist->props,H5P_free_prop,NULL);
+    H5TB_dfree(plist->props,H5P_free_prop_void,NULL);
 
     /* Destroy property list object */
     H5FL_FREE(H5P_genplist_t,plist);

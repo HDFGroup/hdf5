@@ -50,6 +50,10 @@ typedef hid_t H5P_class_t;      /* Alias H5P_class_t to hid_t */
 #define H5P_DATA_XFER H5P_DATASET_XFER
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Define property list class callback function pointer types */
 typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
 typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id, 
@@ -68,10 +72,6 @@ typedef H5P_prp_cb1_t H5P_prp_close_func_t;
 
 /* Define property list iteration function type */
 typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data); 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /*
  * The library created property list classes

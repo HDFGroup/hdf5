@@ -39,7 +39,7 @@
  *	    the error reporting won't be properly restored!
  */
 #define H5E_BEGIN_TRY {							      \
-    herr_t (*H5E_saved_efunc)(void*);					      \
+    H5E_auto_t H5E_saved_efunc;						      \
     void *H5E_saved_edata;						      \
     H5Eget_auto (&H5E_saved_efunc, &H5E_saved_edata);			      \
     H5Eset_auto (NULL, NULL);
@@ -225,13 +225,13 @@ typedef enum H5E_direction_t {
     H5E_WALK_DOWNWARD	= 1		/*begin at API function, end deep    */
 } H5E_direction_t;
 
-/* Error stack traversal callback function */
-typedef herr_t (*H5E_walk_t)(int n, H5E_error_t *err_desc, void *client_data);
-typedef herr_t (*H5E_auto_t)(void *client_data);
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Error stack traversal callback function */
+typedef herr_t (*H5E_walk_t)(int n, H5E_error_t *err_desc, void *client_data);
+typedef herr_t (*H5E_auto_t)(void *client_data);
 
 H5_DLL herr_t H5Eset_auto (H5E_auto_t func, void *client_data);
 H5_DLL herr_t H5Eget_auto (H5E_auto_t *func, void **client_data);

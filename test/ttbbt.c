@@ -42,7 +42,7 @@
 
 #define RandInt(a,b) ((rand()%(((b)-(a))+1))+(a))
 
-int tcompare (void * k1, void * k2, int cmparg);
+int tcompare (const void * k1, const void * k2, int cmparg);
 
 static void swap_arr(int *arr, int a, int b)
 {
@@ -57,11 +57,11 @@ static void swap_arr(int *arr, int a, int b)
 }   /* end swap_arr() */
 
 int
-tcompare(void * k1, void * k2, int cmparg)
+tcompare(const void * k1, const void * k2, int cmparg)
 {
     /* shut compiler up */
     cmparg=cmparg;
-    return ((int) ((*(int *) k1) - (*(int *) k2)));
+    return ((int) ((*(const int *) k1) - (*(const int *) k2)));
 }
 
 void

@@ -174,6 +174,10 @@ typedef struct {
 /* Variable Length String information */
 #define H5T_VARIABLE    ((size_t)(-1))  /* Indicate that a string is variable length (null-terminated in C, instead of fixed length) */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* All data type conversion functions are... */
 typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
       hsize_t nelmts, size_t buf_stride, size_t bkg_stride, void *buf,
@@ -191,10 +195,6 @@ typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 typedef herr_t (*H5T_overflow_t)(hid_t src_id, hid_t dst_id,
 				 void *src_buf, void *dst_buf);
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /* When this header is included from H5Tprivate.h, don't make calls to H5open() */
 #undef H5OPEN
