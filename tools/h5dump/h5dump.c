@@ -1185,7 +1185,7 @@ dump_selected_attr(hid_t loc_id, const char *name)
 	    dump_oid(attr_id);
 
 	if (display_data || display_attr_data)
-	    dump_data(attr_id, ATTRIBUTE_DATA, NULL, 0);
+	    dump_data(attr_id, ATTRIBUTE_DATA, NULL, display_ai);
 
 	H5Tclose(type);
 	H5Sclose(space);
@@ -1470,10 +1470,7 @@ dump_all(hid_t group, const char *name, void * op_data)
          goto done;
         } else {
          dset_table->objs[i].displayed = 1;
-         strcat(tmp, "/");
-         strcat(tmp, name);
-         free(dset_table->objs[i].objname);
-         dset_table->objs[i].objname = HDstrdup(tmp);
+        
         }
        }
        
@@ -1608,8 +1605,7 @@ dump_group(hid_t gid, const char *name)
 	    indentation(indent);
 	    printf("%s \"%s\"\n", HARDLINK, group_table->objs[i].objname);
 	} else {
-	    free(group_table->objs[i].objname);
-	    group_table->objs[i].objname = HDstrdup(prefix);
+	   
 	    group_table->objs[i].displayed = 1;
 	    H5Aiterate(gid, NULL, dump_attr, NULL);
 	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
@@ -2814,8 +2810,7 @@ handle_datasets(hid_t fid, char *dset, void *data)
                 end_obj(dump_header_format->datasetend,
                         dump_header_format->datasetblockend);
             } else {
-                free(dset_table->objs[idx].objname);
-                dset_table->objs[idx].objname = HDstrdup(dset);
+              
                 dset_table->objs[idx].displayed = 1;
                 dump_dataset(dsetid, dset, sset);
             }

@@ -70,10 +70,10 @@
 #define FILE42  "tnamed_dtype_attr.h5"
 #define FILE43  "tvldtypes5.h5"
 #define FILE44  "tfilters.h5"
+/* FILE45  not defined in this version */
 #define FILE46  "tfcontents1.h5"
 #define FILE47  "tfcontents2.h5"
-#define FILE48  "tfdriver1.h5"
-#define FILE49  "tfdriver2.h5"
+#define FILE48  "tfvalues.h5"
 
 
 /*-------------------------------------------------------------------------
@@ -4676,8 +4676,6 @@ static void gent_filters(void)
  ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
  assert(ret>=0);
 
-
-
 /*-------------------------------------------------------------------------
  * make an external dataset
  *-------------------------------------------------------------------------
@@ -4685,59 +4683,11 @@ static void gent_filters(void)
  make_external(fid);
 
 /*-------------------------------------------------------------------------
- * make datasets with fill value combinations
- * H5D_FILL_TIME_IFSET
- *-------------------------------------------------------------------------
- */
- ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET);
- assert(ret>=0);
-
- ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
- assert(ret>=0);
-
- ret=make_dset(fid,"fill_time_ifset",sid,dcpl,buf1);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * H5D_FILL_TIME_ALLOC
- *-------------------------------------------------------------------------
- */
- ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC);
- assert(ret>=0);
-
- ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
- assert(ret>=0);
- 
- ret=make_dset(fid,"fill_time_alloc",sid,dcpl,buf1);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * H5D_FILL_TIME_NEVER
- *-------------------------------------------------------------------------
- */
- ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
- assert(ret>=0);
-
- ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
- assert(ret>=0);
-
- ret=make_dset(fid,"fill_time_never",sid,dcpl,buf1);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
  * H5D_ALLOC_TIME_EARLY 
  *-------------------------------------------------------------------------
  */
-
- ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET);
- assert(ret>=0);
-
  ret=H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY);
  assert(ret>=0);
-
- ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
- assert(ret>=0);
-
  ret=make_dset(fid,"alloc_time_early",sid,dcpl,buf1);
  assert(ret>=0);
 
@@ -4747,10 +4697,6 @@ static void gent_filters(void)
  */
  ret=H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_INCR);
  assert(ret>=0);
-
- ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
- assert(ret>=0);
-
  ret=make_dset(fid,"alloc_time_incr",sid,dcpl,buf1);
  assert(ret>=0);
 
@@ -4760,10 +4706,6 @@ static void gent_filters(void)
  */
  ret=H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE);
  assert(ret>=0);
-
- ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
- assert(ret>=0);
-
  ret=make_dset(fid,"alloc_time_late",sid,dcpl,buf1);
  assert(ret>=0);
 
@@ -4934,7 +4876,6 @@ set_local_myfilter(hid_t dcpl_id, hid_t UNUSED type_id, hid_t UNUSED space_id)
  return(SUCCEED);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function: gent_fcontents
  *
@@ -4946,53 +4887,67 @@ static void gent_fcontents(void)
 {
  hid_t    fid;   /* file id */
  hid_t    gid1;  /* group ID */
- hid_t    gid2;  /* group ID */
- hid_t    gid3;  /* group ID */
  hid_t    tid;   /* datatype ID */
  hsize_t  dims[1]={4};
  int      buf[4]={1,2,3,4};
  int      ret;
- 
+
+
  /* create a file */
  fid  = H5Fcreate(FILE46, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
  assert(fid>=0);
 
+
  write_dset(fid,1,dims,"dset",H5T_NATIVE_INT,buf);
+
 
 /*-------------------------------------------------------------------------
  * links
  *-------------------------------------------------------------------------
  */
 
- /* soft link to "dset" */
- ret=H5Glink (fid, H5G_LINK_SOFT, "dset", "softlink");
- assert(ret>=0);
 
  /* hard link to "dset" */
- ret=H5Glink (fid, H5G_LINK_HARD, "dset", "dset1");
+ gid1 = H5Gcreate (fid, "/g1", 0);
+ H5Glink (gid1, H5G_LINK_HARD, "/dset", "dset1");
+ H5Gclose(gid1);
+
+
+ /* hard link to "dset" */
+ gid1 = H5Gcreate (fid, "/g2", 0);
+ H5Glink (gid1, H5G_LINK_HARD, "/dset", "dset2");
+ H5Gclose(gid1);
+
+
+ /* hard link to "g2" */
+ gid1 = H5Gopen(fid, "/g1");
+ H5Glink (gid1, H5G_LINK_HARD, "/g2", "g1.1");
+ H5Gclose(gid1);
+
+
+ /* hard link to "dset" */
+ ret=H5Glink (fid, H5G_LINK_HARD, "/dset", "dset3");
  assert(ret>=0);
+
+
+ /* hard link to "dset" */
+ ret=H5Glink (fid, H5G_LINK_HARD, "/dset", "dset4");
+ assert(ret>=0);
+
 
  /* soft link to itself */
  ret=H5Glink (fid, H5G_LINK_SOFT, "mylink", "mylink");
  assert(ret>=0);
 
-/*-------------------------------------------------------------------------
- * groups
- *-------------------------------------------------------------------------
- */
- gid1  = H5Gcreate(fid,"g1",0);
- gid2  = H5Gcreate(gid1,"g2",0);
- gid3  = H5Gcreate(gid2,"g3",0);
- write_dset(gid3,1,dims,"dset",H5T_NATIVE_INT,buf);
- ret  = H5Gclose(gid1);
- assert(ret>=0);
- ret  = H5Gclose(gid2);
- assert(ret>=0);
- ret  = H5Gclose(gid3);
+
+ /* soft link to "dset" */
+ ret=H5Glink (fid, H5G_LINK_SOFT, "/dset", "softlink");
  assert(ret>=0);
 
+
+
 /*-------------------------------------------------------------------------
- * datatypes 
+ * datatypes
  *-------------------------------------------------------------------------
  */
  tid=H5Tcopy(H5T_NATIVE_INT);
@@ -5000,6 +4955,7 @@ static void gent_fcontents(void)
  assert(ret>=0);
  ret=H5Tclose(tid);
  assert(ret>=0);
+
 
  /* no name datatype */
  tid=H5Tcopy(H5T_NATIVE_INT);
@@ -5011,30 +4967,105 @@ static void gent_fcontents(void)
  ret=H5Tclose(tid);
  assert(ret>=0);
 
+
 /*-------------------------------------------------------------------------
  * close
  *-------------------------------------------------------------------------
  */
 
+
  ret=H5Fclose(fid);
  assert(ret>=0);
+
 
  /* create a file for the bootblock test */
  fid  = H5Fcreate(FILE47, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
  assert(fid>=0);
 
+
  ret=H5Fclose(fid);
  assert(ret>=0);
 }
 
-
 /*-------------------------------------------------------------------------
- * Function: gent_fdrivers
+ * Function: gent_fvalues
  *
- * Purpose: file drivers test
+ * Purpose: generate a file for the fill values test
  *
  *-------------------------------------------------------------------------
  */
+static void gent_fvalues(void)
+{
+ hid_t    fid;  /* file id */
+ hid_t    dcpl; /* dataset creation property list */
+ hid_t    sid;  /* dataspace ID */
+ hsize_t  dims[1]={4};
+ int      buf[4]={1,2,3,4};
+ int      ret, fillval = -99;
+
+ /* create a file */
+ fid  = H5Fcreate(FILE48, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ assert(fid>=0);
+ 
+ /* create a space */
+ sid = H5Screate_simple(1, dims, NULL);
+
+ /* create a dataset creation property list; the same DCPL is used for all dsets */
+ dcpl = H5Pcreate(H5P_DATASET_CREATE);
+
+/*-------------------------------------------------------------------------
+ * make datasets with fill value combinations
+ * H5D_FILL_TIME_IFSET
+ *-------------------------------------------------------------------------
+ */
+ ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET);
+ assert(ret>=0);
+
+ ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
+ assert(ret>=0);
+
+ ret=make_dset(fid,"fill_time_ifset",sid,dcpl,buf);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * H5D_FILL_TIME_ALLOC
+ *-------------------------------------------------------------------------
+ */
+ ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC);
+ assert(ret>=0);
+
+ ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
+ assert(ret>=0);
+ 
+ ret=make_dset(fid,"fill_time_alloc",sid,dcpl,buf);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * H5D_FILL_TIME_NEVER
+ *-------------------------------------------------------------------------
+ */
+ ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
+ assert(ret>=0);
+
+ ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
+ assert(ret>=0);
+
+ ret=make_dset(fid,"fill_time_never",sid,dcpl,buf);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * close
+ *-------------------------------------------------------------------------
+ */
+ ret=H5Sclose(sid);
+ assert(ret>=0);
+ ret=H5Pclose(dcpl);
+ assert(ret>=0);
+ ret=H5Fclose(fid);
+ assert(ret>=0);
+}
+
+#ifdef LATER
 static void gent_fdrivers(void)
 {
  hid_t    fid;   /* file id */
@@ -5048,22 +5079,19 @@ static void gent_fdrivers(void)
  assert(ret>=0);
 
  /* create a file */
- fid  = H5Fcreate(FILE48, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+ fid  = H5Fcreate(FILE49, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
  assert(fid>=0);
 
  ret=H5Fclose(fid);
  assert(ret>=0);
-
-
 /*-------------------------------------------------------------------------
  * close
  *-------------------------------------------------------------------------
  */
  ret=H5Pclose(fapl);
  assert(ret>=0);
-
-
 }
+#endif
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -5132,8 +5160,8 @@ int main(void)
     gent_named_dtype_attr();
 
     gent_filters();
+    gent_fvalues();
     gent_fcontents();
-    gent_fdrivers();
 
     return 0;
 }
