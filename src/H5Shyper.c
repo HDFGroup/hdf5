@@ -4122,19 +4122,23 @@ H5S_hyper_normalize_offset(H5S_t *space)
 
     assert(space);
 
-    /* Check if there is an offset currently */
-    if(space->select.offset) {
-        /* Invert the selection offset */
-        for(u=0; u<space->extent.u.simple.rank; u++)
-            space->select.offset[u] =- space->select.offset[u];
+    /* Check for 'all' selection, instead of a hyperslab selection */
+    /* (Technically, this check shouldn't be in the "hyperslab" routines...) */
+    if(space->select.type!=H5S_SEL_ALL) {
+        /* Check if there is an offset currently */
+        if(space->select.offset) {
+            /* Invert the selection offset */
+            for(u=0; u<space->extent.u.simple.rank; u++)
+                space->select.offset[u] =- space->select.offset[u];
 
-        /* Call the existing 'adjust' routine */
-        if(H5S_hyper_adjust(space, space->select.offset)<0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab normalization");
+            /* Call the existing 'adjust' routine */
+            if(H5S_hyper_adjust(space, space->select.offset)<0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab normalization");
 
-        /* Zero out the selection offset */
-        for(u=0; u<space->extent.u.simple.rank; u++)
-            space->select.offset[u] = 0;
+            /* Zero out the selection offset */
+            for(u=0; u<space->extent.u.simple.rank; u++)
+                space->select.offset[u] = 0;
+        } /* end if */
     } /* end if */
 
 done:
