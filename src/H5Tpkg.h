@@ -232,6 +232,9 @@ typedef enum H5T_sdir_t {
     H5T_BIT_MSB				/*search msb toward lsb		     */
 } H5T_sdir_t;
 
+/* The native endianess of the platform */
+H5_DLLVAR H5T_order_t H5T_native_order_g;
+
 /* The overflow handler */
 H5_DLLVAR H5T_overflow_t H5T_overflow_g;
 

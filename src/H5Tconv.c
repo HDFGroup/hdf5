@@ -683,14 +683,8 @@ H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
         /* Check for "no op" reference conversion */
         if(src->type==H5T_REFERENCE) {
-            H5T_t *native_int;          /* Native integer datatype */
-
             /* Sanity check */
             assert(dst->type==H5T_REFERENCE);
-
-            /* Get pointer to native integer type */
-            if (NULL==(native_int=H5I_object(H5T_NATIVE_INT_g)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
 
             /* Check if we are on a little-endian machine (the order that
              * the addresses in the file must be) and just get out now, there
@@ -701,7 +695,7 @@ H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
              * "native" hobj_ref_t datatype and I think that would break a
              * lot of existing programs.  -QAK
              */
-            if(native_int->u.atomic.order == H5T_ORDER_LE)
+            if(H5T_native_order_g == H5T_ORDER_LE)
                 break;
         } /* end if */
 

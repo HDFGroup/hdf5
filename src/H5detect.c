@@ -479,7 +479,7 @@ sigbus_handler(int UNUSED signo)
 static void
 print_results(int nd, detected_t *d, int na, malign_t *misc_align)
 {
-
+    int         byte_order;
     int		i, j;
 
     /* Include files */
@@ -523,6 +523,18 @@ H5TN_init_interface(void)\n\
 \n\
     FUNC_ENTER_NOAPI(H5TN_init_interface, FAIL);\n");
 
+    /* The native endianess of this machine */
+    /* (Use the byte-order of a reasonably large type) */
+    for (i = 0; i < nd; i++)
+        if(d[i].size>1) {
+            byte_order=d[i].perm[0];
+            break;
+        } /* end if */
+    printf("\n\
+    /* Set the native order for this machine */\n\
+    H5T_native_order_g = H5T_ORDER_%s;\n",
+	       byte_order ? "BE" : "LE");	/*byte order		*/
+
     for (i = 0; i < nd; i++) {
 
 	/* Print a comment to describe this section of definitions. */
@@ -548,6 +560,7 @@ H5TN_init_interface(void)\n\
 	       d[i].perm[0] ? "BE" : "LE",	/*byte order		*/
 	       d[i].offset,			/*offset		*/
 	       d[i].precision);			/*precision		*/
+    assert(d[i].size<2 || (d[i].perm[0]>0)==(byte_order>0));   /* Double-check that byte-order doesn't change */
 
 	if (0 == d[i].msize) {
 	    /* The part unique to fixed point types */

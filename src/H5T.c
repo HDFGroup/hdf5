@@ -241,6 +241,9 @@ static struct {
     H5T_soft_t	*soft;		/*unsorted array of soft conversions	*/
 } H5T_g;
 
+/* The native endianess of the platform */
+H5T_order_t H5T_native_order_g = H5T_ORDER_ERROR;
+
 /* The overflow handler */
 H5T_overflow_t H5T_overflow_g = NULL;
 
@@ -514,7 +517,7 @@ H5T_init_inf(void)
     dst = &dst_p->u.atomic;
 
     /* Check that we can re-order the bytes correctly */
-    if (H5T_ORDER_LE!=dst->order && H5T_ORDER_BE!=dst->order)
+    if (H5T_ORDER_LE!=H5T_native_order_g && H5T_ORDER_BE!=H5T_native_order_g)
         HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
 
     /* +Inf */
@@ -524,7 +527,7 @@ H5T_init_inf(void)
     H5T_bit_set (d, dst->u.f.mpos, dst->u.f.msize, FALSE);
 
     /* Swap the bytes if the machine architecture is big-endian */
-    if (H5T_ORDER_BE==dst->order) {
+    if (H5T_ORDER_BE==H5T_native_order_g) {
         half_size = dst_p->size/2;
         for (u=0; u<half_size; u++) {
             uint8_t tmp = d[dst_p->size-(u+1)];
@@ -540,7 +543,7 @@ H5T_init_inf(void)
     H5T_bit_set (d, dst->u.f.mpos, dst->u.f.msize, FALSE);
 
     /* Swap the bytes if the machine architecture is big-endian */
-    if (H5T_ORDER_BE==dst->order) {
+    if (H5T_ORDER_BE==H5T_native_order_g) {
         half_size = dst_p->size/2;
         for (u=0; u<half_size; u++) {
             uint8_t tmp = d[dst_p->size-(u+1)];
@@ -555,7 +558,7 @@ H5T_init_inf(void)
     dst = &dst_p->u.atomic;
 
     /* Check that we can re-order the bytes correctly */
-    if (H5T_ORDER_LE!=dst->order && H5T_ORDER_BE!=dst->order)
+    if (H5T_ORDER_LE!=H5T_native_order_g && H5T_ORDER_BE!=H5T_native_order_g)
         HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
 
     /* +Inf */
@@ -565,7 +568,7 @@ H5T_init_inf(void)
     H5T_bit_set (d, dst->u.f.mpos, dst->u.f.msize, FALSE);
 
     /* Swap the bytes if the machine architecture is big-endian */
-    if (H5T_ORDER_BE==dst->order) {
+    if (H5T_ORDER_BE==H5T_native_order_g) {
         half_size = dst_p->size/2;
         for (u=0; u<half_size; u++) {
             uint8_t tmp = d[dst_p->size-(u+1)];
@@ -581,7 +584,7 @@ H5T_init_inf(void)
     H5T_bit_set (d, dst->u.f.mpos, dst->u.f.msize, FALSE);
 
     /* Swap the bytes if the machine architecture is big-endian */
-    if (H5T_ORDER_BE==dst->order) {
+    if (H5T_ORDER_BE==H5T_native_order_g) {
         half_size = dst_p->size/2;
         for (u=0; u<half_size; u++) {
             uint8_t tmp = d[dst_p->size-(u+1)];
