@@ -164,40 +164,43 @@ H5S_hyper_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *sel_iter)
     /* Initialize the number of points to iterate over */
     sel_iter->hyp.elmt_left=space->select.num_elem;
 
-/* Initialize the information needed for non-regular hyperslab I/O */
-    /* Make a copy of the span tree to iterate over */
-    sel_iter->hyp.spans=H5S_hyper_copy_span(space->select.sel_info.hslab.span_lst);
-
-    /* Set the nelem & pstride values according to the element size */
-    H5S_hyper_span_precompute(sel_iter->hyp.spans,elmt_size);
-
-    /* Allocate the span tree pointers, span pointers and positions */
-    sel_iter->hyp.span = H5FL_ARR_ALLOC(H5S_hyper_span_t,space->extent.u.simple.rank,0);
-    sel_iter->hyp.off = H5FL_ARR_ALLOC(hsize_t,space->extent.u.simple.rank,0);
-
-    /* Initialize the starting span_info's and spans */
-    spans=sel_iter->hyp.spans;
-    for(u=0; u<space->extent.u.simple.rank; u++) {
-        /* Set the pointers to the initial span in each dimension */
-        assert(spans);
-        assert(spans->head);
-
-        /* Set the pointer to the first span in the list for this node */
-        sel_iter->hyp.span[u] = spans->head;
-
-        /* Set the initial offset to low bound of span */
-        sel_iter->hyp.off[u]=sel_iter->hyp.span[u]->low;
-
-        /* Get the pointer to the next level down */
-        spans=spans->head->down;
-    } /* end for */
-
+    /* Check for the special case of just one H5Sselect_hyperslab call made */
+    if(space->select.sel_info.hslab.diminfo!=NULL) {
 /* Initialize the information needed for regular hyperslab I/O */
-    /* Allocate the position & initialize to invalid location */
-    sel_iter->hyp.pos = H5FL_ARR_ALLOC(hsize_t,space->extent.u.simple.rank,0);
-    sel_iter->hyp.pos[0]=(-1);
-    H5V_array_fill(sel_iter->hyp.pos, sel_iter->hyp.pos, sizeof(hssize_t),
-		   space->extent.u.simple.rank);
+        /* Allocate the position & initialize to initial location */
+        sel_iter->hyp.off = H5FL_ARR_ALLOC(hsize_t,space->extent.u.simple.rank,0);
+        for(u=0; u<space->extent.u.simple.rank; u++)
+            sel_iter->hyp.off[u]=space->select.sel_info.hslab.diminfo[u].start;
+    } /* end if */
+    else {
+/* Initialize the information needed for non-regular hyperslab I/O */
+        /* Make a copy of the span tree to iterate over */
+        sel_iter->hyp.spans=H5S_hyper_copy_span(space->select.sel_info.hslab.span_lst);
+
+        /* Set the nelem & pstride values according to the element size */
+        H5S_hyper_span_precompute(sel_iter->hyp.spans,elmt_size);
+
+        /* Allocate the span tree pointers, span pointers and positions */
+        sel_iter->hyp.span = H5FL_ARR_ALLOC(H5S_hyper_span_t,space->extent.u.simple.rank,0);
+        sel_iter->hyp.off = H5FL_ARR_ALLOC(hsize_t,space->extent.u.simple.rank,0);
+
+        /* Initialize the starting span_info's and spans */
+        spans=sel_iter->hyp.spans;
+        for(u=0; u<space->extent.u.simple.rank; u++) {
+            /* Set the pointers to the initial span in each dimension */
+            assert(spans);
+            assert(spans->head);
+
+            /* Set the pointer to the first span in the list for this node */
+            sel_iter->hyp.span[u] = spans->head;
+
+            /* Set the initial offset to low bound of span */
+            sel_iter->hyp.off[u]=sel_iter->hyp.span[u]->low;
+
+            /* Get the pointer to the next level down */
+            spans=spans->head->down;
+        } /* end for */
+    } /* end else */
 
     FUNC_LEAVE (SUCCEED);
 }   /* H5S_hyper_init() */
@@ -228,6 +231,10 @@ H5S_hyper_sel_iter_release (H5S_sel_iter_t *sel_iter)
     /* Check args */
     assert (sel_iter);
 
+    /* Release the array of offsets/positions */
+    if(sel_iter->hyp.off!=NULL)
+        H5FL_ARR_FREE(hsize_t,sel_iter->hyp.off);
+
 /* Release the information needed for non-regular hyperslab I/O */
     /* Free the copy of the selections span tree */
     if(sel_iter->hyp.spans!=NULL)
@@ -236,15 +243,6 @@ H5S_hyper_sel_iter_release (H5S_sel_iter_t *sel_iter)
     /* Release the array of pointers to span nodes */
     if(sel_iter->hyp.span!=NULL)
         H5FL_ARR_FREE(H5S_hyper_span_t,sel_iter->hyp.span);
-
-    /* Release the array of offsets */
-    if(sel_iter->hyp.off!=NULL)
-        H5FL_ARR_FREE(hsize_t,sel_iter->hyp.off);
-
-/* Release the information needed for regular hyperslab I/O */
-    /* Release the hyperslab position */
-    if(sel_iter->hyp.pos!=NULL)
-        H5FL_ARR_FREE(hsize_t,sel_iter->hyp.pos);
 
     FUNC_LEAVE (SUCCEED);
 }   /* H5S_hyper_sel_iter_release() */
@@ -316,12 +314,12 @@ H5S_hyper_iter_next (const H5S_t *file_space, H5S_sel_iter_t *file_iter)
     /* Calculate the offset and block count for each dimension */
     for(i=0; i<ndims; i++) {
         if(file_space->select.sel_info.hslab.diminfo[i].stride==1) {
-            iter_offset[i]=file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start;
+            iter_offset[i]=file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start;
             iter_count[i]=0;
         } /* end if */
         else {
-            iter_offset[i]=(file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
-            iter_count[i]=(file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
+            iter_offset[i]=(file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
+            iter_count[i]=(file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
         } /* end else */
     } /* end for */
 
@@ -365,7 +363,7 @@ H5S_hyper_iter_next (const H5S_t *file_space, H5S_sel_iter_t *file_iter)
 
     /* Translate current iter_offset and iter_count into iterator position */
     for(i=0; i<ndims; i++)
-        file_iter->hyp.pos[i]=file_space->select.sel_info.hslab.diminfo[i].start+(file_space->select.sel_info.hslab.diminfo[i].stride*iter_count[i])+iter_offset[i];
+        file_iter->hyp.off[i]=file_space->select.sel_info.hslab.diminfo[i].start+(file_space->select.sel_info.hslab.diminfo[i].stride*iter_count[i])+iter_offset[i];
 
     FUNC_LEAVE (SUCCEED);
 } /* H5S_hyper_iter_next() */
@@ -874,12 +872,6 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
 
     FUNC_ENTER (H5S_hyper_fread_opt, 0);
 
-    /* Check if this is the first element read in from the hyperslab */
-    if(file_iter->hyp.pos[0]==(-1)) {
-        for(u=0; u<file_space->extent.u.simple.rank; u++)
-            file_iter->hyp.pos[u]=file_space->select.sel_info.hslab.diminfo[u].start;
-    } /* end if */
-
     /* Get the hyperslab vector size */
     if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a file access property list");
@@ -906,22 +898,22 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
     H5_ASSIGN_OVERFLOW(io_left,nelmts,hsize_t,size_t);
 
     /* Check if we stopped in the middle of a sequence of elements */
-    if((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
-        ((file_iter->hyp.pos[fast_dim]!=file_space->select.sel_info.hslab.diminfo[fast_dim].start) && file_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
+    if((file_iter->hyp.off[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
+        ((file_iter->hyp.off[fast_dim]!=file_space->select.sel_info.hslab.diminfo[fast_dim].start) && file_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
         hsize_t leftover;  /* The number of elements left over from the last sequence */
 
         /* Calculate the number of elements left in the sequence */
         if(file_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)
-            leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-(file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start);
+            leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-(file_iter->hyp.off[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start);
         else
-            leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride);
+            leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-((file_iter->hyp.off[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't read too many */
         actual_read=MIN(leftover,io_left);
         actual_bytes=actual_read*elmt_size;
 
         /* Copy the location of the point to get */
-        HDmemcpy(offset, file_iter->hyp.pos,ndims*sizeof(hssize_t));
+        HDmemcpy(offset, file_iter->hyp.off,ndims*sizeof(hssize_t));
         offset[ndims] = 0;
 
         /* Add in the selection offset */
@@ -954,7 +946,7 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
             H5S_hyper_iter_next(file_space,file_iter);
         } /* end if */
         else {
-            file_iter->hyp.pos[fast_dim]+=actual_read; /* whole sequence not read in, just advance fastest dimension offset */
+            file_iter->hyp.off[fast_dim]+=actual_read; /* whole sequence not read in, just advance fastest dimension offset */
         } /* end if */
     } /* end if */
 
@@ -966,7 +958,7 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
     if(io_left>0) { /* Just in case the "remainder" above filled the buffer */
         /* Compute the arrays to perform I/O on */
         /* Copy the location of the point to get */
-        HDmemcpy(offset, file_iter->hyp.pos,ndims*sizeof(hssize_t));
+        HDmemcpy(offset, file_iter->hyp.off,ndims*sizeof(hssize_t));
         offset[ndims] = 0;
 
         /* Add in the selection offset */
@@ -975,8 +967,8 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
 
         /* Compute the current "counts" for this location */
         for(i=0; i<ndims; i++) {
-            tmp_count[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
-            tmp_block[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
+            tmp_count[i] = (file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
+            tmp_block[i] = (file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
         } /* end for */
 
         /* Compute the initial buffer offset */
@@ -1323,7 +1315,7 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
             offset[i] -= file_space->select.offset[i];
 
         /* Update the iterator with the location we stopped */
-        HDmemcpy(file_iter->hyp.pos, offset, ndims*sizeof(hssize_t));
+        HDmemcpy(file_iter->hyp.off, offset, ndims*sizeof(hssize_t));
     } /* end if */
 
     /* Decrement the number of elements left in selection */
@@ -1904,12 +1896,6 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
 
     FUNC_ENTER (H5S_hyper_fwrite_opt, 0);
 
-    /* Check if this is the first element written from the hyperslab */
-    if(file_iter->hyp.pos[0]==(-1)) {
-        for(u=0; u<file_space->extent.u.simple.rank; u++)
-            file_iter->hyp.pos[u]=file_space->select.sel_info.hslab.diminfo[u].start;
-    } /* end if */
-
     /* Get the hyperslab vector size */
     if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a file access property list");
@@ -1936,22 +1922,22 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
     H5_ASSIGN_OVERFLOW(io_left,nelmts,hsize_t,size_t);
 
     /* Check if we stopped in the middle of a sequence of elements */
-    if((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
-        ((file_iter->hyp.pos[fast_dim]!=file_space->select.sel_info.hslab.diminfo[fast_dim].start) && file_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
+    if((file_iter->hyp.off[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
+        ((file_iter->hyp.off[fast_dim]!=file_space->select.sel_info.hslab.diminfo[fast_dim].start) && file_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
         hsize_t leftover;  /* The number of elements left over from the last sequence */
 
         /* Calculate the number of elements left in the sequence */
         if(file_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)
-            leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-(file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start);
+            leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-(file_iter->hyp.off[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start);
         else
-            leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride);
+            leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-((file_iter->hyp.off[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't write too many */
         actual_write=MIN(leftover,io_left);
         actual_bytes=actual_write*elmt_size;
 
         /* Copy the location of the point to get */
-        HDmemcpy(offset, file_iter->hyp.pos,ndims*sizeof(hssize_t));
+        HDmemcpy(offset, file_iter->hyp.off,ndims*sizeof(hssize_t));
         offset[ndims] = 0;
 
         /* Add in the selection offset */
@@ -1984,7 +1970,7 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
             H5S_hyper_iter_next(file_space,file_iter);
         } /* end if */
         else {
-            file_iter->hyp.pos[fast_dim]+=actual_write; /* whole sequence not written out, just advance fastest dimension offset */
+            file_iter->hyp.off[fast_dim]+=actual_write; /* whole sequence not written out, just advance fastest dimension offset */
         } /* end if */
     } /* end if */
 
@@ -1996,7 +1982,7 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
     if(io_left>0) { /* Just in case the "remainder" above emptied the buffer */
         /* Compute the arrays to perform I/O on */
         /* Copy the location of the point to get */
-        HDmemcpy(offset, file_iter->hyp.pos,ndims*sizeof(hssize_t));
+        HDmemcpy(offset, file_iter->hyp.off,ndims*sizeof(hssize_t));
         offset[ndims] = 0;
 
         /* Add in the selection offset */
@@ -2005,8 +1991,8 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
 
         /* Compute the current "counts" for this location */
         for(i=0; i<ndims; i++) {
-            tmp_count[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
-            tmp_block[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
+            tmp_count[i] = (file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
+            tmp_block[i] = (file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
         } /* end for */
 
         /* Compute the initial buffer offset */
@@ -2353,7 +2339,7 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
             offset[i] -= file_space->select.offset[i];
 
         /* Update the iterator with the location we stopped */
-        HDmemcpy(file_iter->hyp.pos, offset, ndims*sizeof(hssize_t));
+        HDmemcpy(file_iter->hyp.off, offset, ndims*sizeof(hssize_t));
     } /* end if */
 
     /* Decrement the number of elements left in selection */
@@ -2839,7 +2825,6 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
     int temp_dim;  /* Temporary rank holder */
     hsize_t	acc;	/* Accumulator */
     int i;         /* Counters */
-    unsigned u;         /* Counters */
     int   	ndims;      /* Number of dimensions of dataset */
     size_t actual_read;     /* The actual number of elements to read in */
     size_t actual_bytes;    /* The actual number of bytes to copy */
@@ -2849,12 +2834,6 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
 #endif /* NO_DUFFS_DEVICE */
 
     FUNC_ENTER (H5S_hyper_mread_opt, 0);
-
-    /* Check if this is the first element read in from the hyperslab */
-    if(mem_iter->hyp.pos[0]==(-1)) {
-        for(u=0; u<mem_space->extent.u.simple.rank; u++)
-            mem_iter->hyp.pos[u]=mem_space->select.sel_info.hslab.diminfo[u].start;
-    } /* end if */
 
     /* Set the aliases for a few important dimension ranks */
     fast_dim=mem_space->extent.u.simple.rank-1;
@@ -2874,22 +2853,22 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
     H5_ASSIGN_OVERFLOW(io_left,nelmts,hsize_t,size_t);
 
     /* Check if we stopped in the middle of a sequence of elements */
-    if((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
-            ((mem_iter->hyp.pos[fast_dim]!=mem_space->select.sel_info.hslab.diminfo[fast_dim].start) && mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
+    if((mem_iter->hyp.off[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
+            ((mem_iter->hyp.off[fast_dim]!=mem_space->select.sel_info.hslab.diminfo[fast_dim].start) && mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
         size_t leftover;  /* The number of elements left over from the last sequence */
 
         /* Calculate the number of elements left in the sequence */
         if(mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)
-            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-(mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start);
+            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-(mem_iter->hyp.off[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start);
         else
-            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride);
+            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-((mem_iter->hyp.off[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't write too many */
         actual_read=MIN(leftover,io_left);
         actual_bytes=actual_read*elmt_size;
 
         /* Copy the location of the point to get */
-        HDmemcpy(offset, mem_iter->hyp.pos,ndims*sizeof(hssize_t));
+        HDmemcpy(offset, mem_iter->hyp.off,ndims*sizeof(hssize_t));
         offset[ndims] = 0;
 
         /* Add in the selection offset */
@@ -2920,7 +2899,7 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
             H5S_hyper_iter_next(mem_space,mem_iter);
         } /* end if */
         else {
-            mem_iter->hyp.pos[fast_dim]+=actual_read; /* whole sequence not written out, just advance fastest dimension offset */
+            mem_iter->hyp.off[fast_dim]+=actual_read; /* whole sequence not written out, just advance fastest dimension offset */
         } /* end if */
     } /* end if */
 
@@ -2932,7 +2911,7 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
     if(io_left>0) { /* Just in case the "remainder" above filled the buffer */
         /* Compute the arrays to perform I/O on */
         /* Copy the location of the point to get */
-        HDmemcpy(offset, mem_iter->hyp.pos,ndims*sizeof(hssize_t));
+        HDmemcpy(offset, mem_iter->hyp.off,ndims*sizeof(hssize_t));
         offset[ndims] = 0;
 
         /* Add in the selection offset */
@@ -2941,8 +2920,8 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
 
         /* Compute the current "counts" for this location */
         for(i=0; i<ndims; i++) {
-            tmp_count[i] = (mem_iter->hyp.pos[i]-mem_space->select.sel_info.hslab.diminfo[i].start)%mem_space->select.sel_info.hslab.diminfo[i].stride;
-            tmp_block[i] = (mem_iter->hyp.pos[i]-mem_space->select.sel_info.hslab.diminfo[i].start)/mem_space->select.sel_info.hslab.diminfo[i].stride;
+            tmp_count[i] = (mem_iter->hyp.off[i]-mem_space->select.sel_info.hslab.diminfo[i].start)%mem_space->select.sel_info.hslab.diminfo[i].stride;
+            tmp_block[i] = (mem_iter->hyp.off[i]-mem_space->select.sel_info.hslab.diminfo[i].start)/mem_space->select.sel_info.hslab.diminfo[i].stride;
         } /* end for */
 
         /* Compute the initial buffer offset */
@@ -3199,7 +3178,7 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
             offset[i] -= mem_space->select.offset[i];
 
         /* Update the iterator with the location we stopped */
-        HDmemcpy(mem_iter->hyp.pos, offset, ndims*sizeof(hssize_t));
+        HDmemcpy(mem_iter->hyp.off, offset, ndims*sizeof(hssize_t));
     } /* end if */
 
     /* Decrement the number of elements left in selection */
@@ -3674,7 +3653,6 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
     int temp_dim;  /* Temporary rank holder */
     hsize_t	acc;	/* Accumulator */
     int i;         /* Counters */
-    unsigned u;         /* Counters */
     int   	ndims;      /* Number of dimensions of dataset */
     size_t actual_write;       /* The actual number of elements to read in */
     size_t actual_bytes;     /* The actual number of bytes to copy */
@@ -3684,12 +3662,6 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
 #endif /* NO_DUFFS_DEVICE */
 
     FUNC_ENTER (H5S_hyper_mwrite_opt, 0);
-
-    /* Check if this is the first element read in from the hyperslab */
-    if(mem_iter->hyp.pos[0]==(-1)) {
-        for(u=0; u<mem_space->extent.u.simple.rank; u++)
-            mem_iter->hyp.pos[u]=mem_space->select.sel_info.hslab.diminfo[u].start;
-    } /* end if */
 
     /* Set the aliases for a few important dimension ranks */
     fast_dim=mem_space->extent.u.simple.rank-1;
@@ -3709,22 +3681,22 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
     H5_ASSIGN_OVERFLOW(io_left,nelmts,hsize_t,size_t);
 
     /* Check if we stopped in the middle of a sequence of elements */
-    if((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
-            ((mem_iter->hyp.pos[fast_dim]!=mem_space->select.sel_info.hslab.diminfo[fast_dim].start) && mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
+    if((mem_iter->hyp.off[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
+            ((mem_iter->hyp.off[fast_dim]!=mem_space->select.sel_info.hslab.diminfo[fast_dim].start) && mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)) {
         size_t leftover;  /* The number of elements left over from the last sequence */
 
         /* Calculate the number of elements left in the sequence */
         if(mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)
-            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-(mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start);
+            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-(mem_iter->hyp.off[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start);
         else
-            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride);
+            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-((mem_iter->hyp.off[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't write too many */
         actual_write=MIN(leftover,io_left);
         actual_bytes=actual_write*elmt_size;
 
         /* Copy the location of the point to get */
-        HDmemcpy(offset, mem_iter->hyp.pos,ndims*sizeof(hssize_t));
+        HDmemcpy(offset, mem_iter->hyp.off,ndims*sizeof(hssize_t));
         offset[ndims] = 0;
 
         /* Add in the selection offset */
@@ -3755,7 +3727,7 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
             H5S_hyper_iter_next(mem_space,mem_iter);
         } /* end if */
         else {
-            mem_iter->hyp.pos[fast_dim]+=actual_write; /* whole sequence not written out, just advance fastest dimension offset */
+            mem_iter->hyp.off[fast_dim]+=actual_write; /* whole sequence not written out, just advance fastest dimension offset */
         } /* end if */
     } /* end if */
 
@@ -3767,7 +3739,7 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
     if(io_left>0) { /* Just in case the "remainder" above filled the buffer */
         /* Compute the arrays to perform I/O on */
         /* Copy the location of the point to get */
-        HDmemcpy(offset, mem_iter->hyp.pos,ndims*sizeof(hssize_t));
+        HDmemcpy(offset, mem_iter->hyp.off,ndims*sizeof(hssize_t));
         offset[ndims] = 0;
 
         /* Add in the selection offset */
@@ -3776,8 +3748,8 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
 
         /* Compute the current "counts" for this location */
         for(i=0; i<ndims; i++) {
-            tmp_count[i] = (mem_iter->hyp.pos[i]-mem_space->select.sel_info.hslab.diminfo[i].start)%mem_space->select.sel_info.hslab.diminfo[i].stride;
-            tmp_block[i] = (mem_iter->hyp.pos[i]-mem_space->select.sel_info.hslab.diminfo[i].start)/mem_space->select.sel_info.hslab.diminfo[i].stride;
+            tmp_count[i] = (mem_iter->hyp.off[i]-mem_space->select.sel_info.hslab.diminfo[i].start)%mem_space->select.sel_info.hslab.diminfo[i].stride;
+            tmp_block[i] = (mem_iter->hyp.off[i]-mem_space->select.sel_info.hslab.diminfo[i].start)/mem_space->select.sel_info.hslab.diminfo[i].stride;
         } /* end for */
 
         /* Compute the initial buffer offset */
@@ -4034,7 +4006,7 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
             offset[i] -= mem_space->select.offset[i];
 
         /* Update the iterator with the location we stopped */
-        HDmemcpy(mem_iter->hyp.pos, offset, ndims*sizeof(hssize_t));
+        HDmemcpy(mem_iter->hyp.off, offset, ndims*sizeof(hssize_t));
     } /* end if */
 
     /* Decrement the number of elements left in selection */
@@ -8429,7 +8401,7 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
 
     FUNC_LEAVE (SUCCEED);
 } /* end H5Sselect_hyperslab() */
-#else /* OLD_WAY */ /* Works */
+#else /* NEW_HYPERSLAB_API */ /* Works */
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_operate_hyperslab
@@ -9251,4 +9223,4 @@ H5Sselect_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
 done:
     FUNC_LEAVE (ret_value);
 } /* end H5Sselect_select() */
-#endif /* OLD_WAY */ /* Works */
+#endif /* NEW_HYPERSLAB_API */ /* Works */

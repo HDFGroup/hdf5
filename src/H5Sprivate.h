@@ -57,8 +57,7 @@ typedef struct {
     hsize_t elmt_left;      /* Number of elements left to iterate over */
     H5S_hyper_span_info_t *spans;  /* Pointer to copy of the span tree */
     H5S_hyper_span_t **span;  /* Array of pointers to span nodes */
-    hssize_t *off;          /* Offset in span node */
-    hssize_t *pos;          /* Position to start iterating at */
+    hssize_t *off;          /* Offset in span node (position for regular hyperslabs) */
 } H5S_hyper_iter_t;
 
 /* "All" selection iteration container */
