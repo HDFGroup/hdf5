@@ -69,7 +69,7 @@ Cray T3E
 
 #!/bin/sh
 
-RUNPARALLEL="mpirun -np 2"
+RUNPARALLEL="mpirun -np 3"
 export RUNPARALLEL
 LIBS="-lmpi"
 export LIBS
@@ -100,7 +100,7 @@ CPPFLAGS=$MPI_INC
 export CPPFLAGS
 LDFLAGS=$MPI_LIB
 export LDFLAGS
-RUNPARALLEL="mpirun -np 2"
+RUNPARALLEL="mpirun -np 3"
 export RUNPARALLEL
 LIBS="-lmpio -lmpi"
 export LIBS
@@ -145,8 +145,8 @@ RUNPARALLEL then configure chooses `mpirun' from the same
 directory as `mpicc':
 
     RUNSERIAL:    /usr/local/mpi/bin/mpirun -np 1
-    RUNPARALLEL:  /usr/local/mpi/bin/mpirun -np $${NPROCS:=2}
+    RUNPARALLEL:  /usr/local/mpi/bin/mpirun -np $${NPROCS:=3}
 
-The `$${NPROCS:=2}' will be substituted with the value of the
+The `$${NPROCS:=3}' will be substituted with the value of the
 NPROCS environment variable at the time `make check' is run
-(or the value 2).
+(or the value 3).

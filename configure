@@ -9279,7 +9279,7 @@ echo "configure:9266: checking for mpirun" >&5
          echo "$ac_t""$path/mpirun" 1>&6
          RUNSERIAL="${RUNSERIAL:-none}"
          if test -z "$RUNPARALLEL"; then
-            RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
+            RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=3}"
          fi
       else
          echo "$ac_t""none" 1>&6
@@ -9311,7 +9311,7 @@ echo "configure:9293: checking for mpirun_lam or mpirun" >&5
 	 echo "$ac_t""$path/$cmd" 1>&6;
          RUNSERIAL="${RUNSERIAL:-none}"
          if test -z "$RUNPARALLEL"; then
-            RUNPARALLEL="$path/$cmd -np \$\${NPROCS:=2}"
+            RUNPARALLEL="$path/$cmd -np \$\${NPROCS:=3}"
          fi
       else
 	 echo "$ac_t""none" 1>&6
@@ -9477,7 +9477,7 @@ rm -f conftest*
       fi
 
             if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
-         RUNPARALLEL="mpirun -np \$\${NPROCS:=2}"
+         RUNPARALLEL="mpirun -np \$\${NPROCS:=3}"
       fi
       ;;
 
