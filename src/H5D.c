@@ -984,8 +984,13 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 		     "memory allocation failed");
     }
 
+    /* Check if the datatype is "sensible" for use in a dataset */
+    if(H5T_is_sensible(type)!=TRUE)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "datatype is not sensible");
+
     /* Copy datatype for dataset */
-    new_dset->type = H5T_copy(type, H5T_COPY_ALL);
+    if((new_dset->type = H5T_copy(type, H5T_COPY_ALL))==NULL)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy datatype");
 
     /* Mark any VL datatypes as being on disk now */
     if (H5T_vlen_mark(new_dset->type, f, H5T_VLEN_DISK)<0) {
