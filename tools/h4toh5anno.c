@@ -79,7 +79,7 @@ int Annofil_h4_to_h5(int32 file_id,hid_t h5group){
       printf("error in allocating memory. \n");
       return FAIL;
     }
-    bzero(ann_buf,(ann_length+1)*sizeof(char));
+    h4toh5_ZeroMemory(ann_buf,(ann_length+1)*sizeof(char));
     istat      = ANreadann(ann_id,ann_buf,ann_length+1);
 
     if(istat==FAIL) {
@@ -176,7 +176,7 @@ int Annofil_h4_to_h5(int32 file_id,hid_t h5group){
       ANendaccess(ann_id);
       return FAIL;
     }
-    bzero(ann_buf,ann_length+1);
+    h4toh5_ZeroMemory(ann_buf,ann_length+1);
 
     istat      = ANreadann(ann_id,ann_buf,ann_length+1);
 
@@ -357,7 +357,7 @@ int Annoobj_h4_to_h5(int32 file_id,int32 obj_ref, int32 obj_tag,
 	ANend(an_id);
 	return FAIL;
       }
-      bzero(ann_buf,(ann_length+1)*sizeof(char));
+      h4toh5_ZeroMemory(ann_buf,(ann_length+1)*sizeof(char));
       status = ANreadann(ann_id,ann_buf,ann_length+1);
       if(status == FAIL) {
 	printf("error in reading data.\n");
@@ -466,7 +466,7 @@ int Annoobj_h4_to_h5(int32 file_id,int32 obj_ref, int32 obj_tag,
 	return FAIL;
       }
       
-      bzero(ann_buf,(ann_length+1)*sizeof(char));
+      h4toh5_ZeroMemory(ann_buf,(ann_length+1)*sizeof(char));
       ANreadann(ann_id,ann_buf,ann_length+1);
 
       if ((sh5str_type = mkstr(ann_length+1,H5T_STR_NULLTERM))<0) {

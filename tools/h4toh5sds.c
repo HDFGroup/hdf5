@@ -26,7 +26,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
   int32   sds_ref;
   int32   istat;
   int     i;
-  int     empty;
   int32   num_sdsattrs;
   void*   sds_data;
 
@@ -44,8 +43,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
   hid_t   h5d_sid;
   hid_t   h5ty_id;
   hid_t   h5_memtype;
-  hid_t   h5str_type;
-  hid_t   h5str_memtype;
 
   hsize_t h5dims[MAX_VAR_DIMS];
   char*   h5csds_name;
@@ -555,7 +552,6 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
   int32   sdsdim_id;
   int32   sdsdim_type = 0;
   int32   sds_dimscasize[1];
-  int32   sds_dimrank;
   int32   istat;
   int     i;
   int     j;
@@ -563,12 +559,10 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
 
   int     check_gloattr;
   int32   num_sdsdimattrs;
-  int     empty;
   int     check_sdsdim;
   void*   dim_scadata; 
   
-  char    sdsdim_name[MAX_NC_NAME];
-  char    sds_name[MAX_NC_NAME];
+  char    sdsdim_name[MAX_NC_NAME+1];
   char*   cor_sdsdimname;
   size_t  h4dim_memsize;
   size_t  h4dim_size;
@@ -593,13 +587,15 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
   hsize_t h5dimscas[1];
   hsize_t h5dim_dims[1];
   hsize_t attr_refDims[1];
-  hobj_ref_t  dim_refdat;
-  hobj_ref_t* alldim_refdat;
+  
+   hobj_ref_t  dim_refdat;
 
+  hobj_ref_t* alldim_refdat;
+  
   char*   h5sdsdim_name;
-  char    h5sdsdim_allname[MAX_VAR_DIMS * MAX_NC_NAME];
-  char    h5newsdsdim_name[MAX_NC_NAME];
-  char    h5dimpath_name[MAX_NC_NAME];
+  char    h5sdsdim_allname[MAX_VAR_DIMS * MAX_DIM_NAME];
+  char    h5newsdsdim_name[MAX_DIM_NAME];
+  char    h5dimpath_name[MAX_DIM_NAME];
   herr_t  ret;
 
   h5dim_dims[0] = (hsize_t)sds_rank;
@@ -653,7 +649,7 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
       return FAIL;							      
     }
     free(cor_sdsdimname);
-    strcpy(&h5sdsdim_allname[k*MAX_NC_NAME],h5sdsdim_name);
+    strcpy(&h5sdsdim_allname[k*MAX_DIM_NAME],h5sdsdim_name);
 
     /*if it is not touched, get name of the dimensional scale data. */     
     if (check_sdsdim == 1){/* the dimension is touched. */
@@ -784,8 +780,9 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
      }
 
      for(i=0;i<j;i++){
-       bzero(h5newsdsdim_name,MAX_NC_NAME);
-       strcpy(h5newsdsdim_name,&h5sdsdim_allname[i*MAX_NC_NAME]);
+       h4toh5_ZeroMemory(h5newsdsdim_name,MAX_DIM_NAME);
+       strcpy(h5newsdsdim_name,&h5sdsdim_allname[i*MAX_DIM_NAME]);
+       
        ret              = H5Rcreate(&dim_refdat,sh5_dimgroup,h5newsdsdim_name,
 				    H5R_OBJECT,-1);
        if(ret <0) {
@@ -796,6 +793,7 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
 	 return FAIL;
        }
        alldim_refdat[i] = dim_refdat;
+       
      }
 
      attribID      = H5Acreate(sh5dset,DIMSCALE,attr_refType,attr_refSpace,
@@ -808,7 +806,10 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
        printf("error in generating H5 attribute ID. \n");
        return FAIL;
      }
+
      ret           = H5Awrite(attribID,attr_refType,(void *)alldim_refdat);
+
+     
      H5Sclose(attr_refSpace);
      H5Tclose(attr_refType);
      H5Aclose(attribID);
@@ -823,7 +824,7 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
       return FAIL;
     }
 
-    h5str_dimntype   = mkstr(MAX_NC_NAME,H5T_STR_NULLTERM);	
+    h5str_dimntype   = mkstr(MAX_DIM_NAME,H5T_STR_NULLTERM);	
     if(h5str_dimntype < 0) {
       H5Sclose(h5dim_namesid);
       printf("error in generating H5T_STRING type.\n");

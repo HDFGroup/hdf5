@@ -705,7 +705,7 @@ int h4toh5lonevgs(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
      }
 	
      /*obtain group name and class name.*/
-     bzero(vgroup_class,VGNAMELENMAX);
+     h4toh5_ZeroMemory(vgroup_class,VGNAMELENMAX);
      istat = Vgetclass(vgroup_id,vgroup_class);
      if(istat == FAIL) {
        printf("error in getting vgroup class.\n");
@@ -714,7 +714,7 @@ int h4toh5lonevgs(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
        return FAIL;
      }
 
-     bzero(vgroup_name,VGNAMELENMAX);
+     h4toh5_ZeroMemory(vgroup_name,VGNAMELENMAX);
      istat = Vgetname(vgroup_id,vgroup_name);
      if(istat == FAIL ) {
        printf("error in getting vgroup name. \n");
@@ -863,7 +863,7 @@ int h4toh5vgrings(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
 	return FAIL;
       }
 
-      bzero(vgroup_name,VGNAMELENMAX);
+      h4toh5_ZeroMemory(vgroup_name,VGNAMELENMAX);
       istat = Vgetname(vgroup_id,vgroup_name);
       if(istat ==FAIL) {
 	printf("error in obtaining vgroup names. \n");
@@ -871,7 +871,7 @@ int h4toh5vgrings(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
 	return FAIL;
       }
 
-      bzero(vgroup_class,VGNAMELENMAX);
+      h4toh5_ZeroMemory(vgroup_class,VGNAMELENMAX);
       if(Vgetclass(vgroup_id,vgroup_class) == FAIL) {
         printf("error in obtaining vgroup class name. \n");
 	Vdetach(vgroup_id);
@@ -1061,7 +1061,7 @@ int h4toh5lonevds(int32 file_id, hid_t h5group){
 	     return FAIL;
 	   }
 	   
-           bzero(vdata_class,VGNAMELENMAX);
+           h4toh5_ZeroMemory(vdata_class,VGNAMELENMAX);
 	   istat = VSgetclass(vdata_id,vdata_class);
 	   if(istat == FAIL) {
 	     printf("error in getting vdata class name.\n");
@@ -1070,7 +1070,7 @@ int h4toh5lonevds(int32 file_id, hid_t h5group){
 	     return FAIL;
 	   }
 	
-	    bzero(vdata_name,VGNAMELENMAX);
+	    h4toh5_ZeroMemory(vdata_name,VGNAMELENMAX);
 	   istat = VSQueryname(vdata_id,vdata_name);
 	   if(istat == FAIL) {
 	     printf("error in getting vdata name. \n");
