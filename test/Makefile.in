@@ -15,7 +15,8 @@ PROGS=testhdf5  hyperslab istore dtypes dsets cmpd_dset
 TESTS=$(PROGS)
 
 # Temporary files
-MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 istore.h5
+MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 istore.h5 tfile1.h5 tfile2.h5 \
+	    tfile3.h5 th5p1.h5 theap.h5 tohdr.h5 tstab1.h5 tstab2.h5
 
 # Source and object files for programs...  The PROG_SRC list contains all the
 # source files and is used for things like dependencies, archiving, etc.  The

@@ -1072,7 +1072,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     /*
      * Compute the size of the request and allocate scratch buffers.
      */
-    nelmts = H5P_get_npoints(dataset->space);
+    nelmts = H5P_get_npoints(mem_space);
 #ifndef LATER
     /*
      * Note: This prototype version allocates a buffer large enough to

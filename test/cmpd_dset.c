@@ -6,8 +6,10 @@
  *              Friday, January 23, 1998
  */
 #include <assert.h>
-#include <stdio.h>
 #include <hdf5.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* The first dataset */
 typedef struct s1_t {
@@ -50,8 +52,13 @@ typedef struct s5_t {
 } s5_t;
 
 
-#define NX	100
-#define NY	2000
+#if 1
+#  define NX	100
+#  define NY	2000
+#else
+#  define NX	12
+#  define NY    9
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -105,8 +112,15 @@ main (void)
     hid_t		s8_f_sid;	/*file data space		*/
     hid_t		s8_m_sid;	/*memory data space		*/
 
+    /* Ninth dataset */
+
+    /* Tenth dataset */
+
+    /* Eleventh dataset */
+    s5_t		*s11 = NULL;
+
     /* Other variables */
-    int			i;
+    int			i, j, ndims;
     hid_t		file, dataset, space;
     herr_t		status;
     static size_t	dim[] = {NX, NY};
@@ -130,7 +144,7 @@ main (void)
      * STEP 1: Save the original dataset natively.
      */
     printf ("\
-STEP 1: Initialize dataset `s1' and store it on disk in native order.\n");
+STEP  1: Initialize dataset `s1' and store it on disk in native order.\n");
     fflush (stdout);
     
     /* Initialize the dataset */
@@ -166,8 +180,8 @@ STEP 1: Initialize dataset `s1' and store it on disk in native order.\n");
      *	       in fact, we could have used s1_tid.
      */
     printf ("\
-STEP 2: Read the dataset from disk into a new memory buffer which has the\n\
-        same data type and space. This will be the typical case.\n");
+STEP  2: Read the dataset from disk into a new memory buffer which has the\n\
+         same data type and space. This will be the typical case.\n");
     fflush (stdout);
     
 
@@ -200,7 +214,7 @@ STEP 2: Read the dataset from disk into a new memory buffer which has the\n\
      *	       data type is a struct whose members are in the opposite order.
      */
     printf ("\
-STEP 3: Read the dataset again with members in a different order.\n");
+STEP  3: Read the dataset again with members in a different order.\n");
     fflush (stdout);
     
     /* Create a data type for s3 */
@@ -231,7 +245,7 @@ STEP 3: Read the dataset again with members in a different order.\n");
      *         stored on disk we'll read <b,d>.
      */
     printf ("\
-STEP 4: Read a subset of the members.\n");
+STEP  4: Read a subset of the members.\n");
     fflush (stdout);
 
     /* Create a datatype for s4 */
@@ -256,7 +270,7 @@ STEP 4: Read a subset of the members.\n");
      * 	       which have already been initialized.
      */
     printf ("\
-STEP 5: Read members into a superset which is partially initialized.\n");
+STEP  5: Read members into a superset which is partially initialized.\n");
     fflush (stdout);
 
     /* Initialize some members */
@@ -304,8 +318,8 @@ STEP 5: Read members into a superset which is partially initialized.\n");
      *	       buffers.
      */
     printf ("\
-STEP 6: Update fields `b' and `d' on the file, leaving the other fields\n\
-        unchanged.\n");
+STEP  6: Update fields `b' and `d' on the file, leaving the other fields\n\
+         unchanged.\n");
     fflush (stdout);
 
     /* Initialize `s4' with new values */
@@ -338,7 +352,7 @@ STEP 6: Update fields `b' and `d' on the file, leaving the other fields\n\
      * library.
      */
     printf ("\
-STEP 7: Reading original dataset with explicit data space.\n");
+STEP  7: Reading original dataset with explicit data space.\n");
     fflush (stdout);
 
     /* Create the data space */
@@ -365,7 +379,7 @@ STEP 7: Reading original dataset with explicit data space.\n");
      * The hyperslab is the middle third of the array.
      */
     printf ("\
-STEP 8: Read middle third hyperslab into memory array.\n");
+STEP  8: Read middle third hyperslab into memory array.\n");
     fflush (stdout);
 
     /* Create the file data space */
@@ -374,7 +388,7 @@ STEP 8: Read middle third hyperslab into memory array.\n");
     f_offset[0] = NX/3;
     f_offset[1] = NY/3;
     h_size[0] = 2*NX/3 - f_offset[0];
-    h_size[1] = 2*NY/3 - f_offset[0];
+    h_size[1] = 2*NY/3 - f_offset[1];
     h_sample[0] = 1;
     h_sample[1] = 1;
     status = H5Pset_hyperslab (s8_f_sid, f_offset, h_size, h_sample);
@@ -386,10 +400,167 @@ STEP 8: Read middle third hyperslab into memory array.\n");
 
     /* Read the dataset */
     s8 = calloc (h_size[0]*h_size[1], sizeof(s1_t));
+    assert (s8);
     status = H5Dread (dataset, s1_tid, s8_m_sid, s8_f_sid, H5C_DEFAULT, s8);
     assert (status>=0);
+
+    /* Compare */
+    for (i=0; i<h_size[0]; i++) {
+	for (j=0; j<h_size[1]; j++) {
+	    s1_t *ps1 = s1 + (f_offset[0]+i)*NY + f_offset[1] + j;
+	    s1_t *ps8 = s8 + i*h_size[1] + j;
+
+	    assert (ps8->a == ps1->a);
+	    assert (ps8->b == ps1->b);
+	    assert (ps8->c == ps1->c);
+	    assert (ps8->d == ps1->d);
+	    assert (ps8->e == ps1->e);
+	}
+    }
+
+    free (s8);
+    s8 = NULL;
+
+
+    /*
+     *######################################################################
+     * STEP 9.  Read a hyperslab of the file into a hyperslab of memory.  The
+     * part of memory not read is already initialized and must not change.
+     */
+    printf ("\
+STEP  9: Read middle third of hyperslab into middle third of memory array.\n");
+    fflush (stdout);
+
+    /* Initialize with some bit pattern */
+    memset (s2, 0xFF, NX*NY*sizeof(s2_t));
+    
+    /* Read the hyperslab */
+    status = H5Dread (dataset, s2_tid, s8_f_sid, s8_f_sid, H5C_DEFAULT, s2);
+    assert (status>=0);
+
+    /* Compare */
+    for (i=0; i<NX; i++) {
+	for (j=0; j<NY; j++) {
+	    s1_t *ps1 = s1 + i*NY + j;
+	    s2_t *ps2 = s2 + i*NY + j;
+	    if (i>=f_offset[0] && i<f_offset[0]+h_size[0] &&
+		j>=f_offset[1] && j<f_offset[1]+h_size[1]) {
+		assert (ps2->a == ps1->a);
+		assert (ps2->b == ps1->b);
+		assert (ps2->c == ps1->c);
+		assert (ps2->d == ps1->d);
+		assert (ps2->e == ps1->e);
+	    } else {
+		assert (ps2->a == -1);
+		assert (ps2->b == -1);
+		assert (ps2->c == -1);
+		assert (ps2->d == -1);
+		assert (ps2->e == -1);
+	    }
+	}
+    }
+    
+    /*
+     *######################################################################
+     * STEP 10. Same as step 9 except the memory array contains some members
+     * which are already initialized, like step 5.
+     */
+    printf ("\
+STEP 10: Read middle third of hyperslab into middle third of memory array\n\
+         where some of the struct members are already initialized.\n");
+    fflush (stdout);
+
+    /* Initialize with some bit pattern */
+    memset (s5, 0xFF, NX*NY*sizeof(s5_t));
+    
+    /* Read the hyperslab */
+    status = H5Dread (dataset, s5_tid, s8_f_sid, s8_f_sid, H5C_DEFAULT, s5);
+    assert (status>=0);
+
+    /* Compare */
+    for (i=0; i<NX; i++) {
+	for (j=0; j<NY; j++) {
+	    s1_t *ps1 = s1 + i*NY + j;
+	    s5_t *ps5 = s5 + i*NY + j;
+	    if (i>=f_offset[0] && i<f_offset[0]+h_size[0] &&
+		j>=f_offset[1] && j<f_offset[1]+h_size[1]) {
+		assert (ps5->pre == -1);
+		assert (ps5->a == ps1->a);
+		assert (ps5->b == ps1->b);
+		assert (ps5->mid1 == -1);
+		assert (ps5->c == ps1->c);
+		assert (ps5->mid2 == -1);
+		assert (ps5->d == ps1->d);
+		assert (ps5->e == ps1->e);
+		assert (ps5->post == -1);
+	    } else {
+		assert (ps5->pre == -1);
+		assert (ps5->a == -1);
+		assert (ps5->b == -1);
+		assert (ps5->mid1 == -1);
+		assert (ps5->c == -1);
+		assert (ps5->mid2 == -1);
+		assert (ps5->d == -1);
+		assert (ps5->e == -1);
+		assert (ps5->post == -1);
+	    }
+	}
+    }
+		
+    /*
+     *######################################################################
+     * Step 11: Write an array into the middle third of the dataset
+     * initializeing only members `b' and `d' to -1.
+     */
+    printf ("\
+STEP 11: Write an array back to the middle third of the dataset to\n\
+         initialize the `b' and `d' members to -1.\n");
+    fflush (stdout);
+    
+    /* Create the memory array and initialize all fields to zero */
+    ndims = H5Pget_hyperslab (s8_f_sid, f_offset, h_size, h_sample);
+    assert (ndims==2);
+    s11 = malloc (h_size[0]*h_size[1]*sizeof(s4_t));
+    assert (s11);
+    memset (s11, 0xff, h_size[0]*h_size[1]*sizeof(s4_t));
+    
+    /* Write to disk */
+    status = H5Dwrite (dataset, s4_tid, s8_m_sid, s8_f_sid, H5C_DEFAULT, s11);
+    assert (status>=0);
+
+    /* Read the whole thing */
+    status = H5Dread (dataset, s1_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s1);
+    assert (status>=0);
+
+    /* Compare */
+    for (i=0; i<NX; i++) {
+	for (j=0; j<NY; j++) {
+	    s1_t *ps1 = s1 + i*NY + j;
+	    
+	    assert (ps1->a == 5*(i*NY+j)+0);
+	    assert (ps1->c == 5*(i*NY+j)+2);
+	    assert (ps1->e == 5*(i*NY+j)+4);
+	    if (i>=f_offset[0] && i<f_offset[0]+h_size[0] &&
+		j>=f_offset[1] && j<f_offset[1]+h_size[1]) {
+		assert (ps1->b == -1);
+		assert (ps1->d == -1);
+	    } else {
+		assert (ps1->b == 5*(i*NY+j)+1);
+		assert (ps1->d == 5*(i*NY+j)+3);
+	    }
+	}
+    }
     
 
+
+
+
+
+
+
+
+
+    
     /*
      * Release resources.
      */

@@ -758,7 +758,7 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr,
     offset = H5H_insert(f, &(bt_udata->heap_addr), HDstrlen(bt_udata->name)+1,
 			bt_udata->name);
     bt_udata->ent.name_off = offset;
-    if (offset <= 0) {
+    if (0==offset || (size_t)(-1)==offset) {
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5B_INS_ERROR,
 		    "unable to insert symbol name into heap");
     }
