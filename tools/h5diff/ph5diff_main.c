@@ -53,7 +53,6 @@ static void ph5diff_worker(int );
 
 int main(int argc, const char *argv[])
 {
-    int        i;
     int	       nID = 0;
     const char *fname1 = NULL;
     const char *fname2 = NULL;
@@ -61,7 +60,6 @@ int main(int argc, const char *argv[])
     const char *objname2  = NULL;
     hsize_t    nfound=0;
     diff_opt_t options;
-    MPI_Status Status;
  
     outBuffOffset = 0;
     g_Parallel = 1;
@@ -133,8 +131,8 @@ ph5diff_worker(int nID)
     char	filenames[2][1024];
     char	out_data[PRINT_DATA_MAX_SIZE] = {0};
     hsize_t    nfound=0;
+    int i;
     MPI_Status Status;
-    int 	i;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &nID);
     outBuffOffset = 0;

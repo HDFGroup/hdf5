@@ -17,7 +17,7 @@
 
 
 #define PRINT_DATA_MAX_SIZE 	512
-#define OUTBUFF_SIZE 		PRINT_DATA_MAX_SIZE*2
+#define OUTBUFF_SIZE 		PRINT_DATA_MAX_SIZE*4
 /* Send from manager to workers */
 #define MPI_TAG_ARGS		1	
 #define MPI_TAG_PRINT_TOK	2

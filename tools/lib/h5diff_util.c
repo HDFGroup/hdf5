@@ -49,17 +49,20 @@ void parallel_print(const char* format, ...)
 	if(overflow_file == NULL) /*no overflow has occurred yet */
 	{
 	    bytes_written = HDvsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
-
-	    va_end(ap);
+	    
+            va_end(ap);
 	    va_start(ap, format);
 
-	    if(bytes_written >=  (OUTBUFF_SIZE-outBuffOffset))
+#ifdef VSNPRINTF_WORKS
+	    if(bytes_written >= (OUTBUFF_SIZE-outBuffOffset))
+#else
+	    if((bytes_written+1) == (OUTBUFF_SIZE-outBuffOffset))
+#endif 
 	    {
 		/* Delete the characters that were written to outBuff since they will be written to the overflow_file */
-		memset(outBuff+outBuffOffset, 0, OUTBUFF_SIZE - outBuffOffset);  
-
+		memset(outBuff+outBuffOffset, 0, OUTBUFF_SIZE - outBuffOffset); 
+		
 		overflow_file = tmpfile(); 
-
 		if(overflow_file == NULL)
 		    printf("Warning: Could not create overflow file.  Output may be truncated.\n");
 		else
@@ -70,7 +73,6 @@ void parallel_print(const char* format, ...)
 	}
 	else
 	    bytes_written = HDvfprintf(overflow_file, format, ap); 
-
 
     }
     va_end(ap);
