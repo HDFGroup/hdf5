@@ -172,7 +172,10 @@ typedef enum H5T_conv_except_t {
     H5T_CONV_EXCEPT_RANGE_HI       = 0,   /*source value is greater than destination's range */
     H5T_CONV_EXCEPT_RANGE_LOW      = 1,   /*source value is less than destination's range    */
     H5T_CONV_EXCEPT_PRECISION      = 2,   /*source value loses precision in destination      */
-    H5T_CONV_EXCEPT_TRUNCATE       = 3   /*source value is truncated in destination         */
+    H5T_CONV_EXCEPT_TRUNCATE       = 3,   /*source value is truncated in destination         */
+    H5T_CONV_EXCEPT_PINF           = 4,   /*source value is positive infinity(floating number) */
+    H5T_CONV_EXCEPT_NINF           = 5,   /*source value is negative infinity(floating number) */
+    H5T_CONV_EXCEPT_NAN            = 6    /*source value is NaN(floating number)             */
 } H5T_conv_except_t;
 
 /* The return value from conversion callback function H5T_conv_except_func_t */

@@ -3373,6 +3373,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     hssize_t	expo_max;		/*maximum possible dst exponent	*/
     size_t	msize=0;		/*useful size of mantissa in src*/
     size_t	mpos;			/*offset to useful mant is src	*/
+    hssize_t    sign;                   /*source sign bit value         */
     size_t	mrsh;			/*amount to right shift mantissa*/
     hbool_t	carry=0;		/*carry after rounding mantissa	*/
     size_t	i;			/*miscellaneous counters	*/
@@ -3494,6 +3495,11 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 }
 
                 /*
+                 * Find the sign bit value of the source.
+                 */
+                sign = H5T_bit_get_d(s, src.u.f.sign, 1);
+
+                /*
                  * Check for special cases: +0, -0, +Inf, -Inf, NaN
                  */
                 if (H5T_bit_find (s, src.u.f.mpos, src.u.f.msize,
@@ -3508,14 +3514,33 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     } else if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
                                              H5T_BIT_LSB, FALSE)<0) {
                         /* +Inf or -Inf */
-                        H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, 1);
-                        H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
-                        H5T_bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
-                        /*If the destination no implied mantissa bit, we'll need to set 
-                         *the 1st bit of mantissa to 1.  The Intel-Linux long double is
-                         *this case.*/ 
-                        if (H5T_NORM_NONE==dst.u.f.norm)
-                            H5T_bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, 1, TRUE);
+                        if(cb_struct.func) { /*If user's exception handler is present, use it*/
+                            /*reverse order first*/
+                            H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                            if(sign)
+                                except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_NINF,
+                                    src_id, dst_id, src_rev, d, cb_struct.user_data);
+                            else
+                                except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_PINF,
+                                    src_id, dst_id, src_rev, d, cb_struct.user_data);
+                        }
+
+                        if(except_ret == H5T_CONV_UNHANDLED) {
+                            H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, 1);
+                            H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
+                            H5T_bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
+                            /*If the destination no implied mantissa bit, we'll need to set 
+                             *the 1st bit of mantissa to 1.  The Intel-Linux long double is
+                             *this case.*/ 
+                            if (H5T_NORM_NONE==dst.u.f.norm)
+                                H5T_bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, 1, TRUE);
+                        } else if(except_ret == H5T_CONV_HANDLED) {
+                            /*No need to reverse the order of destination because user handles it*/
+                            reverse = FALSE;
+                            goto next;
+                        } else if(except_ret == H5T_CONV_ABORT)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
+
                         goto padding;
                     }
                 } else if (H5T_NORM_NONE==src.u.f.norm && H5T_bit_find (s, src.u.f.mpos, src.u.f.msize-1,
@@ -3525,23 +3550,61 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      *If the exponent bits are all 1s and only the 1st bit of mantissa 
                      *is set to 1.  It's infinity. The Intel-Linux "long double" is this case.*/
                     /* +Inf or -Inf */
-                    H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, 1);
-                    H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
-                    H5T_bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
-                    /*If the destination no implied mantissa bit, we'll need to set 
-                     *the 1st bit of mantissa to 1.*/ 
-                    if (H5T_NORM_NONE==dst.u.f.norm)
-                        H5T_bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, 1, TRUE);
+                    if(cb_struct.func) { /*If user's exception handler is present, use it*/
+                        /*reverse order first*/
+                        H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                        if(sign)
+                            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_NINF,
+                                src_id, dst_id, src_rev, d, cb_struct.user_data);
+                        else
+                            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_PINF,
+                                src_id, dst_id, src_rev, d, cb_struct.user_data);
+                    }
+
+                    if(except_ret == H5T_CONV_UNHANDLED) {
+                        H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, 1);
+                        H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
+                        H5T_bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
+                        /*If the destination no implied mantissa bit, we'll need to set 
+                         *the 1st bit of mantissa to 1.  The Intel-Linux long double is
+                         *this case.*/ 
+                        if (H5T_NORM_NONE==dst.u.f.norm)
+                            H5T_bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, 1, TRUE);
+                    } else if(except_ret == H5T_CONV_HANDLED) {
+                        /*No need to reverse the order of destination because user handles it*/
+                        reverse = FALSE;
+                        goto next;
+                    } else if(except_ret == H5T_CONV_ABORT)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
+
                     goto padding;
                 } else if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
                                          H5T_BIT_LSB, FALSE)<0) {
-                    /*
-                     * NaN. There are many NaN values, so we just set all bits of
-                     * the significand.
-                     */
-                    H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, 1);
-                    H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
-                    H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, TRUE);
+                    /* NaN */
+                    if(cb_struct.func) { /*If user's exception handler is present, use it*/
+                        /*reverse order first*/
+                        H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                        if(sign)
+                            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_NINF,
+                                src_id, dst_id, src_rev, d, cb_struct.user_data);
+                        else
+                            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_PINF,
+                                src_id, dst_id, src_rev, d, cb_struct.user_data);
+                    }
+
+                    if(except_ret == H5T_CONV_UNHANDLED) {
+                        /* There are many NaN values, so we just set all bits of
+                         * the significand. */
+                        H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, 1);
+                        H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
+                        H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, TRUE);
+                    } else if(except_ret == H5T_CONV_HANDLED) {
+                        /*No need to reverse the order of destination because user handles it*/
+                        reverse = FALSE;
+                        goto next;
+                    } else if(except_ret == H5T_CONV_ABORT)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
+
                     goto padding;
                 }
 
@@ -9670,21 +9733,109 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                              H5T_BIT_LSB, FALSE)<0) {
                         /* +Infinity or -Infinity */
                         if(sign) { /* -Infinity */
+                            if(cb_struct.func) { /*If user's exception handler is present, use it*/
+                                /*reverse order first*/
+                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                                except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_NINF,
+                                        src_id, dst_id, src_rev, d, cb_struct.user_data);
+                            }
+
+                            if(except_ret == H5T_CONV_UNHANDLED) {
+                                if (H5T_SGN_2==dst.u.i.sign) 
+                                    H5T_bit_set (d, dst.prec-1, 1, TRUE);
+                            } else if(except_ret == H5T_CONV_HANDLED) {
+                                /*No need to reverse the order of destination because user handles it*/
+                                reverse = FALSE;
+                                goto next;
+                            } else if(except_ret == H5T_CONV_ABORT)
+                                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
+                        } else { /* +Infinity */
+                            if(cb_struct.func) { /*If user's exception handler is present, use it*/
+                                /*reverse order first*/
+                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                                except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_PINF,
+                                        src_id, dst_id, src_rev, d, cb_struct.user_data);
+                            }
+
+                            if(except_ret == H5T_CONV_UNHANDLED) {
+                                if (H5T_SGN_NONE==dst.u.i.sign) 
+                                    H5T_bit_set (d, dst.offset, dst.prec, TRUE);
+                                else if (H5T_SGN_2==dst.u.i.sign) 
+                                    H5T_bit_set (d, dst.offset, dst.prec-1, TRUE);
+                            } else if(except_ret == H5T_CONV_HANDLED) {
+                                /*No need to reverse the order of destination because user handles it*/
+                                reverse = FALSE;
+                                goto next;
+                            } else if(except_ret == H5T_CONV_ABORT)
+                                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
+                        }        
+                        goto padding;
+                    }
+                } else if (H5T_NORM_NONE==src.u.f.norm && H5T_bit_find (s, src.u.f.mpos, src.u.f.msize-1,
+                                  H5T_BIT_LSB, TRUE)<0 && H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
+                                  H5T_BIT_LSB, FALSE)<0) {
+                    /*This is a special case for the source of no implied mantissa bit.
+                     *If the exponent bits are all 1s and only the 1st bit of mantissa 
+                     *is set to 1.  It's infinity. The Intel-Linux "long double" is this case.*/
+                    /* +Infinity or -Infinity */
+                    if(sign) { /* -Infinity */
+                        if(cb_struct.func) { /*If user's exception handler is present, use it*/
+                            /*reverse order first*/
+                            H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_NINF, 
+                                    src_id, dst_id, src_rev, d, cb_struct.user_data);
+                        }
+
+                        if(except_ret == H5T_CONV_UNHANDLED) {
                             if (H5T_SGN_2==dst.u.i.sign) 
                                 H5T_bit_set (d, dst.prec-1, 1, TRUE);
-                        } else { /* +Infinity */
+                        } else if(except_ret == H5T_CONV_HANDLED) {
+                            /*No need to reverse the order of destination because user handles it*/
+                            reverse = FALSE;
+                            goto next;
+                        } else if(except_ret == H5T_CONV_ABORT)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
+                    } else { /* +Infinity */
+                        if(cb_struct.func) { /*If user's exception handler is present, use it*/
+                            /*reverse order first*/
+                            H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_PINF,
+                                    src_id, dst_id, src_rev, d, cb_struct.user_data);
+                        }
+
+                        if(except_ret == H5T_CONV_UNHANDLED) {
                             if (H5T_SGN_NONE==dst.u.i.sign) 
                                 H5T_bit_set (d, dst.offset, dst.prec, TRUE);
                             else if (H5T_SGN_2==dst.u.i.sign) 
                                 H5T_bit_set (d, dst.offset, dst.prec-1, TRUE);
-                        }        
-                        goto padding;
-                    }
+                        } else if(except_ret == H5T_CONV_HANDLED) {
+                            /*No need to reverse the order of destination because user handles it*/
+                            reverse = FALSE;  
+                            goto next;
+                        } else if(except_ret == H5T_CONV_ABORT)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
+                    }        
+                    goto padding;
                 } else if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
                                          H5T_BIT_LSB, FALSE)<0) {
-                    /*
-                     * NaN.  Just set all bits to zero. 
-                     */
+                    /* NaN */
+                    if(cb_struct.func) { /*If user's exception handler is present, use it*/
+                        /*reverse order first*/
+                        H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
+                        except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_NAN,
+                                src_id, dst_id, src_rev, d, cb_struct.user_data);
+                    }
+
+                    if(except_ret == H5T_CONV_UNHANDLED) {
+                        /*Just set all bits to zero.*/
+                        goto padding;
+                    } else if(except_ret == H5T_CONV_HANDLED) {
+                        /*No need to reverse the order of destination because user handles it*/
+                        reverse = FALSE;
+                        goto next;
+                    } else if(except_ret == H5T_CONV_ABORT)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
+
                     goto padding;
                 }
                 
@@ -9771,9 +9922,11 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                     src_id, dst_id, src_rev, d, cb_struct.user_data);
                             if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
-                            else if(except_ret == H5T_CONV_HANDLED)
+                            else if(except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
+                                goto next;
+                            }
                         }
                     } else { /*source is positive*/
                         if (first>=dst.prec) {
@@ -9786,10 +9939,11 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                             if(except_ret == H5T_CONV_UNHANDLED)  
                                 H5T_bit_set (d, dst.offset, dst.prec, TRUE);
-                            else if(except_ret == H5T_CONV_HANDLED)
+                            else if(except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
-                            else if(except_ret == H5T_CONV_ABORT)
+                                goto next;
+                            } else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         } else if (first <dst.prec) {
                             if(truncated && cb_struct.func) { /*If user's exception handler is present, use it*/
@@ -9801,10 +9955,11 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             if(except_ret == H5T_CONV_UNHANDLED)  
                                 /*copy source value into it if case is ignored by user handler*/    
                                 H5T_bit_copy (d, dst.offset, int_buf, 0, first+1);
-                            else if(except_ret == H5T_CONV_HANDLED)
+                            else if(except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
-                            else if(except_ret == H5T_CONV_ABORT)
+                                goto next;
+                            } else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         }
                     } 
@@ -9827,9 +9982,11 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 H5T_bit_set (d, (dst.offset + dst.prec-1), 1, TRUE);
                             } else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
-                            else if(except_ret == H5T_CONV_HANDLED)
+                            else if(except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
+                                goto next;
+                            }
                         } else {
                             /* if underflows and no callback, do nothing except turn on 
                              * the sign bit because 0x80...00 is the biggest negative value.
@@ -9845,9 +10002,11 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 H5T_bit_set (d, (dst.offset + dst.prec-1), 1, TRUE);
                             else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
-                            else if(except_ret == H5T_CONV_HANDLED)
+                            else if(except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
+                                goto next;
+                            }
                         }
                     } else { /*source is positive*/
                         if (first >= dst.prec-1) {
@@ -9863,9 +10022,11 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 H5T_bit_set (d, dst.offset, dst.prec-1, TRUE);
                             else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
-                            else if(except_ret == H5T_CONV_HANDLED)
+                            else if(except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
+                                goto next;
+                            }
                         } else if(first < dst.prec-1) {
                             if(truncated && cb_struct.func) { /*If user's exception handler is present, use it*/
                                 /*reverse order first*/
@@ -9879,9 +10040,11 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 H5T_bit_copy (d, dst.offset, int_buf, 0, first+1);
                             } else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
-                            else if(except_ret == H5T_CONV_HANDLED)
+                            else if(except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
+                                goto next;
+                            }
                         }
                     }
                 }
@@ -9913,7 +10076,8 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         d[i] = tmp;
                     }
                 }
-
+                
+            next:
                 /*
                  * If we had used a temporary buffer for the destination then we
                  * should copy the value to the true destination buffer.
