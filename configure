@@ -33294,20 +33294,20 @@ else
         int           ret = 0;
 
         if(sizeof(unsigned long)==8) {
-            l1 = 0xf000000000000b00; /*Round-down case*/
-            l2 = 0xf000000000000401; /*Round-up case*/
-            l3 = 0xf000000000000400; /*Round-down case*/
-            l4 = 0xf000000000000c00; /*Round-up case*/
+            l1 = 0xf000000000000b00UL; /*Round-down case*/
+            l2 = 0xf000000000000401UL; /*Round-up case*/
+            l3 = 0xf000000000000400UL; /*Round-down case*/
+            l4 = 0xf000000000000c00UL; /*Round-up case*/
 
             d1 = (double)l1;
             d2 = (double)l2;
             d3 = (double)l3;
             d4 = (double)l4;
         } else if(sizeof(unsigned long long)==8) {
-            ld1 = 0xf000000000000b00; /*Round-down case*/
-            ld2 = 0xf000000000000401; /*Round-up case*/
-            ld3 = 0xf000000000000400; /*Round-down case*/
-            ld4 = 0xf000000000000c00; /*Round-up case*/
+            ld1 = 0xf000000000000b00ULL; /*Round-down case*/
+            ld2 = 0xf000000000000401ULL; /*Round-up case*/
+            ld3 = 0xf000000000000400ULL; /*Round-down case*/
+            ld4 = 0xf000000000000c00ULL; /*Round-up case*/
 
             d1 = (double)ld1;
             d2 = (double)ld2;
@@ -33401,8 +33401,8 @@ else
 
     int main(void)
     {
-        float  f = 111.60;
-        double d = 222.55;
+        float  f = 111.60f;
+        double d = 222.55L;
         unsigned long long l1 = (unsigned long long)f;
         unsigned long long l2 = (unsigned long long)d;
         int           ret = 0;
@@ -33472,13 +33472,19 @@ else
     int main(void)
     {
         float  f = 9701917572145405952.00f;
-        double d = 9701917572145405952.00;
+        double d1 = 9701917572145405952.00L;
+        double d2 = 2e40L;
         unsigned long long l1 = (unsigned long long)f;
-        unsigned long long l2 = (unsigned long long)d;
-        unsigned long long l3 = 0x7fffffffffffffffLLU;
+        unsigned long long l2 = (unsigned long long)d1;
+        unsigned long long l3;
+        unsigned long long l4 = 0x7fffffffffffffffLLU;
         int           ret = 0;
 
-        if(l1 <= l3 || l2 <= l3)
+        if(l1 <= l4 || l2 <= l4)
+            ret = 1;
+
+        l3 = (unsigned long long)d2;
+        if(l3 <= l4)
             ret = 1;
 
 done:
