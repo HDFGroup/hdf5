@@ -75,6 +75,7 @@ elements of a dataset.
     <li><a href="#Dataspace-ExtentCopy">H5Sextent_copy</a>
     <li><a href="#Dataspace-SetExtentSimple">H5Sset_extent_simple</a>
     <li><a href="#Dataspace-SetExtentNone">H5Sset_extent_none</a>
+    <li><a href="#Dataspace-GetSelectType">H5Sget_select_type</a>
     <li><a href="#Dataspace-SelectNpoints">H5Sget_select_npoints</a>
     <li><a href="#Dataspace-SelectHyperNBlocks">H5Sget_select_hyper_nblocks</a>
     <li><a href="#Dataspace-SelectHyperBlockList">H5Sget_select_hyper_blocklist</a>
@@ -87,10 +88,9 @@ elements of a dataset.
     <li><a href="#Dataspace-SelectNone">H5Sselect_none</a>
     <li><a href="#Dataspace-SelectValid">H5Sselect_valid</a>
     <li><a href="#Dataspace-SelectHyperslab">H5Sselect_hyperslab</a>
-    <li><a href="#Dataspace-CombineHyperslab">H5Scombine_hyperslab</a>
-    <li><a href="#Dataspace-CombineSelect">H5Scombine_select</a>
-    <li><a href="#Dataspace-SelectSelect">H5Sselect_select</a>
-    <li><a href="#Dataspace-GetSelectType">H5Sget_select_type</a>
+<!--<li><a href="#Dataspace-CombineHyperslab">H5Scombine_hyperslab</a>    -->
+<!--<li><a href="#Dataspace-CombineSelect">H5Scombine_select</a>          -->
+<!--<li><a href="#Dataspace-SelectSelect">H5Sselect_select</a>            -->
 </td></tr>
 </table>
 
@@ -118,31 +118,31 @@ facilitate moving easily between them.</i>
     <li><a href="#Dataspace-IsSimple">h5sis_simple_f</a>
     <li><a href="#Dataspace-OffsetSimple">h5soffset_simple_f</a>
     <li><a href="#Dataspace-ExtentDims">h5sget_simple_extent_dims_f</a>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
     <li><a href="#Dataspace-ExtentNdims">h5sget_simple_extent_ndims_f</a>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
     <li><a href="#Dataspace-ExtentNpoints">h5sget_simple_extent_npoints_f</a>
     <li><a href="#Dataspace-ExtentType">h5sget_simple_extent_type_f</a>
 <!--		NOT YET IMPLEMENTED (R1.2 -- 9908)
-    <li><a href="#Dataspace-ExtentClass">h5sextent_class_f</a>                            -->
+    <li><a href="#Dataspace-ExtentClass">h5sextent_class_f</a>            -->
     <li><a href="#Dataspace-ExtentCopy">h5sextent_copy_f</a>
     <li><a href="#Dataspace-SetExtentSimple">h5sset_extent_simple_f</a>
     <li><a href="#Dataspace-SetExtentNone">h5sset_extent_none_f</a>
+    <li><a href="#Dataspace-GetSelectType">h5sget_select_type_f</a>
     <li><a href="#Dataspace-SelectNpoints">h5sget_select_npoints_f</a>
     <li><a href="#Dataspace-SelectHyperNBlocks">h5sget_select_hyper_nblocks_f</a>
     <li><a href="#Dataspace-SelectHyperBlockList">h5sget_select_hyper_blocklist_f</a>
+<!--<li><a href="#Dataspace-SelectBounds">h5sget_select_bounds_f</a>      -->
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
     <li><a href="#Dataspace-SelectElemNPoints">h5sget_select_elem_npoints_f</a>
     <li><a href="#Dataspace-SelectElemPointList">h5sget_select_elem_pointlist_f</a>
-<!--<li><a href="#Dataspace-SelectBounds">h5sget_select_bounds_f</a>                      -->
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
     <li><a href="#Dataspace-SelectElements">h5sselect_elements_f</a>
     <li><a href="#Dataspace-SelectAll">h5sselect_all_f</a>
     <li><a href="#Dataspace-SelectNone">h5sselect_none_f</a>
     <li><a href="#Dataspace-SelectValid">h5sselect_valid_f</a>
     <li><a href="#Dataspace-SelectHyperslab">h5sselect_hyperslab_f</a>
-    <li><a href="#Dataspace-CombineHyperslab">h5scombine_hyperslab_f</a>
-    <li><a href="#Dataspace-CombineSelect">h5scombine_select_f</a>
-    <li><a href="#Dataspace-SelectSelect">h5sselect_select_f</a>
-    <li><a href="#Dataspace-GetSelectType">h5sget_select_type_f</a>
+<!--<li><a href="#Dataspace-CombineHyperslab">h5scombine_hyperslab_f</a>  -->
+<!--<li><a href="#Dataspace-CombineSelect">h5scombine_select_f</a>        -->
+<!--<li><a href="#Dataspace-SelectSelect">h5sselect_select_f</a>          -->
 </td></tr>
 </table>
 
@@ -315,13 +315,13 @@ of the <cite>HDF5 User's Guide.</cite>.
         <code>coord</code> array also specifies the order in which  
         the array elements are iterated through when I/O is performed.  
         Duplicate coordinate locations are not checked for.
-        <P>
+        <p>
         The selection operator <code>op</code> determines how the 
         new selection is to be combined with the previously existing
         selection for the dataspace.  
         The following operators are supported:
-        <dir>
-        <table width=80% border=0>
+        <center>
+        <table width=90% border=0>
           <tr><td valign=top>
             <code>H5S_SELECT_SET</code>
             </td><td valign=top>
@@ -331,12 +331,20 @@ of the <cite>HDF5 User's Guide.</cite>.
             <code>H5S_SELECT_OR</code>
             </td><td valign=top>
             Adds the new selection to the existing selection.
+          </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_APPEND</code>
+            </td><td valign=top>
+            Adds the new selection following the last element of the existing selection.
+          </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_PREPEND&nbsp;&nbsp;</code>
+            </td><td valign=top>
+            Adds the new selection preceding the first element of the existing selection.
           </td></tr>
         </table>
-        </dir>
-        When operators other than <code>H5S_SELECT_SET</code> 
-        are used to combine a new selection with an existing selection,
-        the selection ordering is reset to 'C' array ordering.
+        </center>
+        When operator <code>H5S_SELECT_OR</code> 
+        is used to combine a new selection with an existing selection,
+        the selection ordering is reset to C array ordering.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>space_id</code>
@@ -863,10 +871,9 @@ of the <cite>HDF5 User's Guide.</cite>.
         The selection operator <code>op</code> determines how the new 
         selection is to be combined with the already existing selection 
         for the dataspace.  
-        <p>
         The following operators are supported:
-        <dir>
-        <table width=80% border=0>
+        <center>
+        <table width=90% border=0>
           <tr><td valign=top>
             <code>H5S_SELECT_SET</code>
             </td><td valign=top>
@@ -876,53 +883,77 @@ of the <cite>HDF5 User's Guide.</cite>.
             <code>H5S_SELECT_OR</code>
             </td><td valign=top>
             Adds the new selection to the existing selection.
+	    &nbsp;&nbsp;
+	    (Binary OR)
+          </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_AND</code>
+            </td><td valign=top>
+            Retains only the overlapping portions of the new selection and 
+	    the existing selection.
+	    &nbsp;&nbsp;
+	    (Binary AND)
+          </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_XOR</code>
+            </td><td valign=top>
+            Retains only the elements that are members of the new selection or 
+	    the existing selection, excluding elements that are members of 
+	    both selections.
+	    &nbsp;&nbsp;
+	    (Binary exclusive-OR, XOR)
+          </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_NOTB&nbsp;&nbsp;</code>
+            </td><td valign=top>
+            Retains only elements of the existing selection that are not in 
+	    the new selection.
+          </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_NOTA</code>
+            </td><td valign=top>
+            Retains only elements of the new selection that are not in 
+	    the existing selection.
           </td></tr>
         </table>
-        </dir>
+        </center>
    
-<P>
-The <code>start</code> array determines the starting coordinates 
-of the hyperslab
-to select.  
-<p>
-The <code>stride</code> array chooses array locations 
-from the dataspace
-with each value in the <code>stride</code> array determining how 
-many elements to move
-in each dimension.  Setting a value in the <code>stride</code> 
-array to 1 moves to
-each element in that dimension of the dataspace; setting a value of 2 in a
-location in the <code>stride</code> array moves to every other 
-element in that
-dimension of the dataspace.  In other words, the <code>stride</code> 
-determines the
-number of elements to move from the <code>start</code> location 
-in each dimension.
-Stride values of 0 are not allowed.  If the <code>stride</code> 
-parameter is <code>NULL</code>,
-a contiguous hyperslab is selected (as if each value in the 
-<code>stride</code> array
-was set to all 1's).  
-<p>
-The <code>count</code> array determines how many blocks to
-select from the dataspace, in each dimension.
-<p>  
-The <code>block</code> array determines
-the size of the element block selected from the dataspace.  
-If the <code>block</code>
-parameter is set to <code>NULL</code>, the block size defaults 
-to a single element
-in each dimension (as if the <code>block</code> array was set to all 1's).
-<P>
-For example, in a 2-dimensional dataspace, setting 
-<code>start</code> to [1,1],
-<code>stride</code> to [4,4], <code>count</code> to [3,7], and 
-<code>block</code> to [2,2] selects
-21 2x2 blocks of array elements starting with location (1,1) and selecting
-blocks at locations (1,1), (5,1), (9,1), (1,5), (5,5), etc.
-<P>
-Regions selected with this function call default to C order iteration when
-I/O is performed.
+        <p>
+        The <code>start</code> array determines the starting coordinates 
+        of the hyperslab to select.  
+        <p>
+        The <code>stride</code> array chooses array locations 
+        from the dataspace with each value in the <code>stride</code> 
+        array determining how many elements to move in each dimension.  
+        Setting a value in the <code>stride</code> array to 1 moves to
+        each element in that dimension of the dataspace; setting a value 
+	of <code>2</code> in alocation in the <code>stride</code> array 
+	moves to every other element in that dimension of the dataspace.  
+	In other words, the <code>stride</code> determines the
+        number of elements to move from the <code>start</code> location 
+        in each dimension.
+        Stride values of <code>0</code> are not allowed.  
+	If the <code>stride</code> parameter is <code>NULL</code>,
+        a contiguous hyperslab is selected (as if each value in the 
+        <code>stride</code> array were set to all 1's).  
+        <p>
+        The <code>count</code> array determines how many blocks to
+        select from the dataspace, in each dimension.
+        <p>  
+        The <code>block</code> array determines
+        the size of the element block selected from the dataspace.  
+        If the <code>block</code> parameter is set to <code>NULL</code>, 
+        the block size defaults to a single element in each dimension 
+        (as if the <code>block</code> array were set to all 
+	<code>1</code>'s).
+        <p>
+        For example, in a 2-dimensional dataspace, setting 
+        <code>start</code> to [1,1],
+        <code>stride</code> to [4,4], 
+	<code>count</code> to [3,7], and 
+        <code>block</code> to [2,2] 
+	selects 21 2x2 blocks of array elements starting with 
+	location (1,1) and selecting blocks at locations 
+	(1,1), (5,1), (9,1), (1,5), (5,5), etc.
+        <p>
+        Regions selected with this function call default to C order 
+        iteration when I/O is performed.
 <dt><strong>Parameters:</strong>
     <dl> 
         <dt><em>hid_t</em> <code>space_id</code>
@@ -1186,52 +1217,97 @@ I/O is performed.
 
 
 
-<hr>
+<!--<hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataspace-CombineHyperslab">H5Scombine_hyperslab</a>
+
+
+
 
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5s_FORTRAN.html#h5scombine_hyperslab_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+ -->    <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
-</dl>
+<!--</dl>
+-->
 
 
-<hr>
+<!--<hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataspace-CombineSelect">H5Scombine_select</a>
 
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5s_FORTRAN.html#h5scombine_select_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+-->     <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
-</dl>
+<!--</dl>
+-->
 
 
-<hr>
+<!--<hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataspace-SelectSelect">H5Sselect_select</a>
 
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5s_FORTRAN.html#h5sselect_select_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+-->     <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
-</dl>
+<!--</dl>
+-->
 
 
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataspace-GetSelectType">H5Sget_select_type</a>
-
+<dt><strong>Signature:</strong>
+    <dd><em>H5S_sel_type</em> <code>H5Sget_select_type</code>(<em>hid_t</em> <code>space_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Determines the type of the dataspace selection.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sget_select_type</code> retrieves the  
+        type of selection currently defined for the dataspace 
+	<code>space_id</code>.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>Dataspace identifier.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the dataspace selection type, a value of       
+        the  enumerated datatype <code>H5S_sel_type</code>, 
+	if successful.
+	Valid return values are as follows:
+        <center>
+        <table width=90% border=0>
+          <tr><td valign=top>
+            <code>H5S_SEL_NONE</code>
+            </td><td valign=top>
+            No selection is defined.
+          </td></tr><tr><td valign=top>
+            <code>H5S_SEL_POINTS</code>
+            </td><td valign=top>
+            A sequence of points is selected.
+          </td></tr><tr><td valign=top>
+            <code>H5S_SEL_HYPERSLABS</code>
+            </td><td valign=top>
+            A hyperslab or compound hyperslab is selected.
+          </td></tr><tr><td valign=top>
+            <code>H5S_SEL_ALL</code>
+            </td><td valign=top>
+            The entire dataset is selected.
+          </td></tr>
+        </table>
+        </center>
+        Otherwise returns a negative value.
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5s_FORTRAN.html#h5sget_select_type_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
@@ -1240,9 +1316,6 @@ I/O is performed.
         <img src="Graphics/C++.gif">
         -->
 </dl>
-
-
-
 
 
 <hr>
@@ -1316,7 +1389,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem --> 
 
-Last modified: 7 April 2003 
+Last modified: 17 April 2003 
 
 </body>
 </html>
