@@ -2774,6 +2774,7 @@ H5D_create_chunk_file_map_hyper(fm_map *fm)
             do {
                 /* Reset current dimension's location to 0 */
                 coords[curr_dim]=start_coords[curr_dim]; /*lint !e771 The start_coords will always be initialized */
+                end[curr_dim]=(coords[curr_dim]+(hssize_t)fm->chunk_dim[curr_dim])-1;
 
                 /* Decrement current dimension */
                 curr_dim--;
