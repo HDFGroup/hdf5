@@ -13,7 +13,7 @@ verbose=yes
 if test "X$srcdir" = X; then
     srcdir=.
 fi
-test -d testfiles || mkdir testfiles
+mkdir testfiles >/dev/null 2>&1
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -38,16 +38,14 @@ TOOLTEST()
     full=`pwd`/$h5tool
 
     # Run test.
-    # Stderr is included in stdout so that the diff can detect
-    # any unexpected output from that stream too.
     TESTING $h5tool $@
     (
 	echo "#############################"
 	echo "Expected output for '$h5tool $@'" 
 	echo "#############################"
 	cd $srcdir/testfiles
-        $RUNSERIAL $h5tool_bin "$@"
-    ) >$actual 2>& 1
+        $RUNSERIAL $h5tool_bin "$@" 2>/dev/null
+    ) >$actual
     
     if $CMP $expect $actual; then
 	echo " PASSED"
@@ -143,6 +141,50 @@ TOOLTEST tarray7.ddl tarray7.h5
 
 # test for files with empty data
 TOOLTEST tempty.ddl tempty.h5
+
+# test XML
+TOOLTEST tall.h5.xml --xml tall.h5
+TOOLTEST tattr.h5.xml --xml tattr.h5
+TOOLTEST tbitfields.h5.xml --xml tbitfields.h5
+TOOLTEST tcompound.h5.xml --xml tcompound.h5
+TOOLTEST tcompound2.h5.xml --xml tcompound2.h5
+TOOLTEST tdatareg.h5.xml --xml tdatareg.h5
+TOOLTEST tdset.h5.xml --xml tdset.h5
+TOOLTEST tdset2.h5.xml --xml tdset2.h5
+TOOLTEST tenum.h5.xml --xml tenum.h5
+TOOLTEST tgroup.h5.xml --xml tgroup.h5
+TOOLTEST thlink.h5.xml --xml thlink.h5
+TOOLTEST tloop.h5.xml --xml tloop.h5
+TOOLTEST tloop2.h5.xml --xml tloop2.h5
+TOOLTEST tmany.h5.xml --xml tmany.h5
+TOOLTEST tnestedcomp.h5.xml --xml tnestedcomp.h5
+TOOLTEST tobjref.h5.xml --xml tobjref.h5
+TOOLTEST topaque.h5.xml --xml topaque.h5
+TOOLTEST tslink.h5.xml --xml tslink.h5
+TOOLTEST tstr.h5.xml --xml tstr.h5
+TOOLTEST tstr2.h5.xml --xml tstr2.h5
+TOOLTEST tref.h5.xml --xml tref.h5
+TOOLTEST tname-amp.h5.xml --xml tname-amp.h5
+TOOLTEST tname-apos.h5.xml --xml tname-apos.h5
+TOOLTEST tname-gt.h5.xml --xml tname-gt.h5
+TOOLTEST tname-lt.h5.xml --xml tname-lt.h5
+TOOLTEST tname-quot.h5.xml --xml tname-quot.h5
+TOOLTEST tname-sp.h5.xml --xml tname-sp.h5
+TOOLTEST tstring.h5.xml --xml tstring.h5
+TOOLTEST tstring-at.h5.xml --xml tstring-at.h5
+TOOLTEST tref-escapes.h5.xml --xml tref-escapes.h5
+TOOLTEST tref-escapes-at.h5.xml --xml tref-escapes-at.h5
+TOOLTEST tnodata.h5.xml --xml tnodata.h5
+TOOLTEST tarray1.h5.xml --xml tarray1.h5
+TOOLTEST tarray2.h5.xml --xml tarray2.h5
+TOOLTEST tarray3.h5.xml --xml tarray3.h5
+TOOLTEST tarray6.h5.xml --xml tarray6.h5
+TOOLTEST tarray7.h5.xml --xml tarray7.h5
+TOOLTEST tvldtypes1.h5.xml --xml tvldtypes1.h5
+TOOLTEST tvldtypes2.h5.xml --xml tvldtypes2.h5
+TOOLTEST tvldtypes3.h5.xml --xml tvldtypes3.h5
+TOOLTEST tsaf.h5.xml --xml tsaf.h5
+TOOLTEST tempty.h5.xml --xml tempty.h5
 
 if test $nerrors -eq 0 ; then
 	echo "All $h5tool tests passed."

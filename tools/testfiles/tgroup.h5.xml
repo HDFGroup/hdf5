@@ -1,0 +1,35 @@
+#############################
+Expected output for 'h5dump --xml tgroup.h5'
+#############################
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
+<HDF5-File>
+<RootGroup OBJ-XID="root">
+   <Group Name="g1" OBJ-XID="/g1" Parents="/" >
+      <Group Name="g1.1" OBJ-XID="/g1/g1.1" Parents="/g1" >
+      </Group>
+      <Group Name="g1.2" OBJ-XID="/g1/g1.2" Parents="/g1" >
+      </Group>
+   </Group>
+   <Group Name="g2" OBJ-XID="/g2" Parents="/" >
+      <Group Name="g2.1" OBJ-XID="/g2/g2.1" Parents="/g2" >
+         <Group Name="g2.1.1" OBJ-XID="/g2/g2.1/g2.1.1" Parents="/g2/g2.1" >
+         </Group>
+         <Group Name="g2.1.2" OBJ-XID="/g2/g2.1/g2.1.2" Parents="/g2/g2.1" >
+         </Group>
+         <Group Name="g2.1.3" OBJ-XID="/g2/g2.1/g2.1.3" Parents="/g2/g2.1" >
+         </Group>
+      </Group>
+   </Group>
+   <Group Name="g3" OBJ-XID="/g3" Parents="/" >
+      <Group Name="g3.1" OBJ-XID="/g3/g3.1" Parents="/g3" >
+      </Group>
+      <Group Name="g3.2" OBJ-XID="/g3/g3.2" Parents="/g3" >
+      </Group>
+      <Group Name="g3.3" OBJ-XID="/g3/g3.3" Parents="/g3" >
+      </Group>
+      <Group Name="g3.4" OBJ-XID="/g3/g3.4" Parents="/g3" >
+      </Group>
+   </Group>
+</RootGroup>
+</HDF5-File>

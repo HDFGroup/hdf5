@@ -1,0 +1,17 @@
+#############################
+Expected output for 'h5dump --xml tloop2.h5'
+#############################
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
+<HDF5-File>
+<RootGroup OBJ-XID="root">
+   <Group Name="g1" OBJ-XID="/g1" Parents="/" >
+      <Group Name="g1.1" OBJ-XID="/g1/g1.1" Parents="/g1" >
+         <SoftLink LinkName="g2.1" Target="/g1" TargetObj="/g1" OBJ-XID="g2.1" Source="/g1/g1.1"/>
+      </Group>
+   </Group>
+   <Group Name="g2" OBJ-XID="/g2" Parents="/" >
+         <GroupPtr OBJ-XID="/g1/g1.1"/>
+   </Group>
+</RootGroup>
+</HDF5-File>

@@ -1,0 +1,338 @@
+#############################
+Expected output for 'h5dump --xml tmany.h5'
+#############################
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
+<HDF5-File>
+<RootGroup OBJ-XID="root">
+   <Group Name="g1" OBJ-XID="/g1" Parents="/" >
+      <Group Name="g1.1" OBJ-XID="/g1/g1.1" Parents="/g1" >
+         <Dataset Name="dset1" OBJ-XID="/g1/g1.1/dset1" Parents="/g1/g1.1">
+            <StorageLayout>
+               <ChunkedLayout Ndims="1">
+                  <ChunkDimension DimSize="2" />
+               </ChunkedLayout>
+            </StorageLayout>
+            <Dataspace>
+               <SimpleDataspace Ndims="1">
+                  <Dimension  DimSize="6" MaxDimSize="UNLIMITED"/>
+               </SimpleDataspace>
+            </Dataspace>
+            <DataType> 
+               <CompoundType>
+                  <Field FieldName="a_array">
+                     <DataType>
+                        <ArrayType Ndims="4">
+                           <ArrayDimension DimSize="2" DimPerm="0"/>
+                           <ArrayDimension DimSize="2" DimPerm="1"/>
+                           <ArrayDimension DimSize="2" DimPerm="2"/>
+                           <ArrayDimension DimSize="2" DimPerm="3"/>
+                           <DataType>
+                              <AtomicType>
+                                 <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                              </AtomicType>
+                           </DataType>
+                        </ArrayType>
+                     </DataType>
+                  </Field>
+                  <Field FieldName="b_array">
+                     <DataType>
+                        <ArrayType Ndims="4">
+                           <ArrayDimension DimSize="2" DimPerm="0"/>
+                           <ArrayDimension DimSize="2" DimPerm="1"/>
+                           <ArrayDimension DimSize="2" DimPerm="2"/>
+                           <ArrayDimension DimSize="2" DimPerm="3"/>
+                           <DataType>
+                              <AtomicType>
+                                 <FloatType ByteOrder="BE" Size="8" SignBitLocation="63" ExponentBits="11" ExponentLocation="52" MantissaBits="52" MantissaLocation="0" />
+                              </AtomicType>
+                           </DataType>
+                        </ArrayType>
+                     </DataType>
+                  </Field>
+                  <Field FieldName="c_array">
+                     <DataType>
+                        <ArrayType Ndims="4">
+                           <ArrayDimension DimSize="2" DimPerm="0"/>
+                           <ArrayDimension DimSize="2" DimPerm="1"/>
+                           <ArrayDimension DimSize="2" DimPerm="2"/>
+                           <ArrayDimension DimSize="2" DimPerm="3"/>
+                           <DataType>
+                              <AtomicType>
+                                 <FloatType ByteOrder="BE" Size="8" SignBitLocation="63" ExponentBits="11" ExponentLocation="52" MantissaBits="52" MantissaLocation="0" />
+                              </AtomicType>
+                           </DataType>
+                        </ArrayType>
+                     </DataType>
+                  </Field>
+               </CompoundType>
+            </DataType>
+            <Attribute Name="attr1">
+               <Dataspace>
+                  <SimpleDataspace Ndims="1">
+                     <Dimension  DimSize="10" MaxDimSize="10"/>
+                  </SimpleDataspace>
+               </Dataspace>
+               <DataType> 
+                  <AtomicType>
+                     <IntegerType ByteOrder="BE" Sign="true" Size="1" />
+                  </AtomicType>
+               </DataType>
+               <Data>
+                  <DataFromFile>
+                  97 98 99 100 101 102 103 104 105 0
+                  </DataFromFile>
+               </Data>
+            </Attribute>
+            <Attribute Name="attr2">
+               <Dataspace>
+                  <SimpleDataspace Ndims="2">
+                     <Dimension  DimSize="2" MaxDimSize="2"/>
+                     <Dimension  DimSize="2" MaxDimSize="2"/>
+                  </SimpleDataspace>
+               </Dataspace>
+               <DataType> 
+                  <AtomicType>
+                     <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                  </AtomicType>
+               </DataType>
+               <Data>
+                  <DataFromFile>
+                  0 1 
+                  2 3
+                  </DataFromFile>
+               </Data>
+            </Attribute>
+            <Attribute Name="attr3">
+               <Dataspace>
+                  <SimpleDataspace Ndims="1">
+                     <Dimension  DimSize="10" MaxDimSize="10"/>
+                  </SimpleDataspace>
+               </Dataspace>
+               <DataType> 
+                  <AtomicType>
+                     <FloatType ByteOrder="BE" Size="8" SignBitLocation="63" ExponentBits="11" ExponentLocation="52" MantissaBits="52" MantissaLocation="0" />
+                  </AtomicType>
+               </DataType>
+               <Data>
+                  <DataFromFile>
+                  0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
+                  </DataFromFile>
+               </Data>
+            </Attribute>
+         <!-- Note: format of compound data not specified -->
+            <Data>
+               <DataFromFile>
+                0 1 
+                     0 1 
+                     0 1 
+                     0 1 
+                     0 1 
+                     0 1 
+                     0 1 
+                     0 1   0 1 
+                     0 1 
+                     0 1 
+                     0 1 
+                     0 1 
+                     0 1 
+                     0 1 
+                     0 1   6 7 
+                     6 7 
+                     6 7 
+                     6 7 
+                     6 7 
+                     6 7 
+                     6 7 
+                     6 7  
+                1 2 
+                     1 2 
+                     1 2 
+                     1 2 
+                     1 2 
+                     1 2 
+                     1 2 
+                     1 2   1 2 
+                     1 2 
+                     1 2 
+                     1 2 
+                     1 2 
+                     1 2 
+                     1 2 
+                     1 2   7 8 
+                     7 8 
+                     7 8 
+                     7 8 
+                     7 8 
+                     7 8 
+                     7 8 
+                     7 8  
+                2 3 
+                     2 3 
+                     2 3 
+                     2 3 
+                     2 3 
+                     2 3 
+                     2 3 
+                     2 3   2 3 
+                     2 3 
+                     2 3 
+                     2 3 
+                     2 3 
+                     2 3 
+                     2 3 
+                     2 3   8 9 
+                     8 9 
+                     8 9 
+                     8 9 
+                     8 9 
+                     8 9 
+                     8 9 
+                     8 9  
+                3 4 
+                     3 4 
+                     3 4 
+                     3 4 
+                     3 4 
+                     3 4 
+                     3 4 
+                     3 4   3 4 
+                     3 4 
+                     3 4 
+                     3 4 
+                     3 4 
+                     3 4 
+                     3 4 
+                     3 4   9 10 
+                     9 10 
+                     9 10 
+                     9 10 
+                     9 10 
+                     9 10 
+                     9 10 
+                     9 10  
+                4 5 
+                     4 5 
+                     4 5 
+                     4 5 
+                     4 5 
+                     4 5 
+                     4 5 
+                     4 5   4 5 
+                     4 5 
+                     4 5 
+                     4 5 
+                     4 5 
+                     4 5 
+                     4 5 
+                     4 5   10 11 
+                     10 11 
+                     10 11 
+                     10 11 
+                     10 11 
+                     10 11 
+                     10 11 
+                     10 11  
+                5 6 
+                     5 6 
+                     5 6 
+                     5 6 
+                     5 6 
+                     5 6 
+                     5 6 
+                     5 6   5 6 
+                     5 6 
+                     5 6 
+                     5 6 
+                     5 6 
+                     5 6 
+                     5 6 
+                     5 6   11 12 
+                     11 12 
+                     11 12 
+                     11 12 
+                     11 12 
+                     11 12 
+                     11 12 
+                     11 12 
+               </DataFromFile>
+            </Data>
+         </Dataset>
+      </Group>
+      <Group Name="g1.2" OBJ-XID="/g1/g1.2" Parents="/g1" >
+         <Dataset Name="link1" OBJ-XID="/g1/g1.2" Parents="/g1/g1.2">
+            <DatasetPtr OBJ-XID="/g1/g1.1/dset1"/>
+         </Dataset>
+      </Group>
+   </Group>
+   <Group Name="g2" OBJ-XID="/g2" Parents="/" >
+      <SoftLink LinkName="slink2" Target="/g1" TargetObj="/g1" OBJ-XID="slink2" Source="/g2"/>
+   </Group>
+   <Group Name="g3" OBJ-XID="/g3" Parents="/" >
+      <Dataset Name="link3" OBJ-XID="/g3/link3" Parents="/g3">
+         <Dataspace>
+            <SimpleDataspace Ndims="2">
+               <Dimension  DimSize="10" MaxDimSize="10"/>
+               <Dimension  DimSize="10" MaxDimSize="10"/>
+            </SimpleDataspace>
+         </Dataspace>
+         <DataType> 
+            <AtomicType>
+               <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+            </AtomicType>
+         </DataType>
+         <Data>
+            <DataFromFile>
+            0 1 2 3 4 5 6 7 8 9 
+            0 1 2 3 4 5 6 7 8 9 
+            0 1 2 3 4 5 6 7 8 9 
+            0 1 2 3 4 5 6 7 8 9 
+            0 1 2 3 4 5 6 7 8 9 
+            0 1 2 3 4 5 6 7 8 9 
+            0 1 2 3 4 5 6 7 8 9 
+            0 1 2 3 4 5 6 7 8 9 
+            0 1 2 3 4 5 6 7 8 9 
+            0 1 2 3 4 5 6 7 8 9
+            </DataFromFile>
+         </Data>
+      </Dataset>
+   </Group>
+   <Group Name="g4" OBJ-XID="/g4" Parents="/" >
+      <Dataset Name="dset2" OBJ-XID="/g4" Parents="/g4">
+         <DatasetPtr OBJ-XID="/g3/link3"/>
+      </Dataset>
+   </Group>
+   <Group Name="g5" OBJ-XID="/g5" Parents="/" >
+      <SoftLink LinkName="slink4" Target="/g6/dset3" TargetObj="/g6/dset3" OBJ-XID="slink4" Source="/g5"/>
+   </Group>
+   <Group Name="g6" OBJ-XID="/g6" Parents="/" >
+      <Dataset Name="dset3" OBJ-XID="/g6/dset3" Parents="/g6">
+         <Dataspace>
+            <SimpleDataspace Ndims="2">
+               <Dimension  DimSize="10" MaxDimSize="10"/>
+               <Dimension  DimSize="10" MaxDimSize="10"/>
+            </SimpleDataspace>
+         </Dataspace>
+         <DataType> 
+            <AtomicType>
+               <IntegerType ByteOrder="BE" Sign="true" Size="4" />
+            </AtomicType>
+         </DataType>
+         <Data>
+            <DataFromFile>
+            0 0 0 0 0 0 0 0 0 0 
+            1 1 1 1 1 1 1 1 1 1 
+            2 2 2 2 2 2 2 2 2 2 
+            3 3 3 3 3 3 3 3 3 3 
+            4 4 4 4 4 4 4 4 4 4 
+            5 5 5 5 5 5 5 5 5 5 
+            6 6 6 6 6 6 6 6 6 6 
+            7 7 7 7 7 7 7 7 7 7 
+            8 8 8 8 8 8 8 8 8 8 
+            9 9 9 9 9 9 9 9 9 9
+            </DataFromFile>
+         </Data>
+      </Dataset>
+   </Group>
+</RootGroup>
+</HDF5-File>

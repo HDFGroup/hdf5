@@ -1,0 +1,27 @@
+#############################
+Expected output for 'h5dump --xml topaque.h5'
+#############################
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
+<HDF5-File>
+<RootGroup OBJ-XID="root">
+   <Dataset Name="opaque test" OBJ-XID="/opaque test" Parents="root">
+      <Dataspace>
+         <SimpleDataspace Ndims="1">
+            <Dimension  DimSize="2" MaxDimSize="2"/>
+         </SimpleDataspace>
+      </Dataspace>
+      <DataType> 
+         <AtomicType>
+            <OpaqueType Tag="test opaque type" Size="200"/>
+         </AtomicType>
+      </DataType>
+      <Data>
+         <DataFromFile>
+         0x0063016202610360045f055e065d075c085b095a0a590b580c570d560e550f541053115212511350144f154e164d174c184b194a1a491b481c471d461e451f442043214222412340243f253e263d273c283b293a2a392b382c372d362e352f343033313232313330342f352e362d372c382b392a3a293b283c273d263e253f244023412242214320441f451e461d471c481b491a4a194b184c174d164e154f145013511252115310540f550e560d570c580b590a5a095b085c075d065e055f046003610262016300 
+         0x3800002c3c000027340001ea04000012000000000008a4640000000000000000000000000000000000000000ef7ec9c000000001effffa84effffa8c0003fc000000000000000000effffa2000012e84effffa2000012e5800000003effffa8400000004effffa8c00000005effffaf0000000000000000000000001effffa84effffa8c0003fc0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+         </DataFromFile>
+      </Data>
+   </Dataset>
+</RootGroup>
+</HDF5-File>
