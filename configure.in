@@ -1617,6 +1617,7 @@ AC_OUTPUT(src/libhdf5.settings
           tools/h5ls/Makefile
           tools/lib/Makefile
           tools/misc/Makefile
+          tools/gifconv/Makefile
           $EXTRA_H4_MAKEFILES
           examples/Makefile
           doc/Makefile

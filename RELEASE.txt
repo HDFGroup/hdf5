@@ -92,7 +92,9 @@ New Features
       an hdf5 library or hdf5 application binary.
       Also added a verification of the consistency between H5_lib_vers_info_g
       and other version information in the source code.
-
+    * H5 <-> GIF convertor has been added. This is available under 
+      tools/gifconv. The convertor supports the ability to create animated
+      gifs as well.
 
 Platforms Tested
 ================
