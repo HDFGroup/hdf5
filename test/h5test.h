@@ -68,6 +68,13 @@
 #define VERBOSE_HI	(GetTestVerbosity()>=VERBO_HI)
 
 /*
+ * Test controls definitions.
+ */
+#define SKIPTEST	1	/* Skip this test */
+#define ONLYTEST	2	/* Do only this test */
+#define BEGINTEST	3	/* Skip all tests before this test */
+
+/*
  * This contains the filename prefix specificied as command line option for
  * the parallel test files. 
  */
@@ -129,6 +136,8 @@ H5TEST_DLL void ParseTestVerbosity(char *argv);
 H5TEST_DLL int  GetTestNumErrs(void);
 H5TEST_DLL void *GetTestParameters(void);
 H5TEST_DLL int  TestErrPrintf(const char *format, ...);
+H5TEST_DLL void SetTest(const char *testname, int action);
+
 
 #ifdef H5_HAVE_PARALLEL
 H5TEST_DLL int h5_set_info_object(void);
