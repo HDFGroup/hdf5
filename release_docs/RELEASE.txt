@@ -35,6 +35,8 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Fixed data corruption problem which could occur when fill values were
+      written to a contiguously stored dataset in parallel.  QAK - 2002/08/27
     * Fixed metadata corruption problem which could occur when many objects
       are created in a file during parallel I/O.  QAK - 2002/07/19
     * Fixed VL memory leak when data is overwritten.  The heap objects holding
@@ -217,6 +219,10 @@ Documentation
 New Features
 ============
 
+    * Added "H5D_SPACE_ALLOC_INCR" setting to H5D_SPACE_ALLOC_EARLY and
+      H5D_SPACE_ALLOC_LATE for H5Dset_space_time().  This allows chunked
+      datasets to be incrementally allocated as in the 1.4.x branch.
+      QAK - 2007/08/27
     * Compact dataset is added to the library.  The data will be stored in 
       the header message of dataset layout.  Space allocation time has to be
       EARLY.  No hyperslab is supported for parallel collective write.  There
