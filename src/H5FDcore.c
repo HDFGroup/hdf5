@@ -85,6 +85,7 @@ static haddr_t H5FD_core_get_eoa(H5FD_t *_file);
 static herr_t H5FD_core_set_eoa(H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_core_get_eof(H5FD_t *_file);
 static herr_t  H5FD_core_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
+static H5F_close_degree_t H5FD_core_get_fc_degree(H5FD_t *_file);
 static herr_t H5FD_core_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			     size_t size, void *buf);
 static herr_t H5FD_core_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
@@ -652,7 +653,7 @@ H5FD_core_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
 done:   
     FUNC_LEAVE(ret_value);
 }   
-            
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_read

@@ -2046,8 +2046,13 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         else
             shared->fc_degree = fc_degree;
     } else if(shared->nrefs > 1) {
-        if(fc_degree != shared->fc_degree)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match");
+        if(fc_degree==H5F_CLOSE_DEFAULT) { 
+            if(shared->fc_degree != H5F_CLOSE_DEFAULT && shared->fc_degree!=shared->lf->cls->fc_degree)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match");
+        } else {
+            if(fc_degree != shared->fc_degree)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match");
+        }
     }
 
     /* Success */

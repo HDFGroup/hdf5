@@ -511,7 +511,7 @@ test_file_close(void)
     fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
     VERIFY(fid2, FAIL, "H5Fopen");
 
-    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_WEAK);
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_DEFAULT);
     CHECK(ret, FAIL, "H5Pset_fclose_degree");
 
     /* should succeed */
