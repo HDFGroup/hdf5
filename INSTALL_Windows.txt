@@ -174,7 +174,13 @@ before using the dlls.
 
 NOTE: The debug dll tests on the Alpha platform currently are not completely
       working.  The release dll is fine though.
+
 NOTE: The dll versions of h5dump are currently not working correctly.
+
+NOTE: There is an error in the external test.  The external file feature
+      is working correctly but there is an error in logic for the test which
+      only appears under certain operating systems.  The external test fails
+      for the last case "Testing write external dataset"
         
 STEP IV: BUILDING THE EXAMPLES
 
