@@ -12,9 +12,9 @@ if test "X-" =  "X-$CC"; then
     CC_BASENAME=cc
 fi
 
-# Architecture dependent flags
-ARCH=${ARCH:='-arch host -tune host'}
-
-# Try compiler flags.
+# Try GNU compiler flags.
 . ./config/gnu-flags
+
+# Try native DEC compiler
+ARCH=${ARCH:='-arch host -tune host'}
 . ./config/dec-flags

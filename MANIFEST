@@ -56,9 +56,9 @@
 ./config/linux-gnu
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
-./config/powerpc-ibm-aix4.2.1.0
-./config/rs6000-ibm-aix4.1.4.0
-./config/solaris2.5
+./config/powerpc-ibm-aix4.x
+./config/rs6000-ibm-aix4.x
+./config/solaris2.x
 ./config/unicosmk
 
 ./doc/html/Attributes.html
@@ -199,10 +199,11 @@
 ./pablo/HDF5record_RT.h
 ./pablo/HDFentries.txt
 ./pablo/Makefile.in
-./pablo/PabloHDF.c
+./pablo/PabloHDF5.c
 ./pablo/PabloHDF_RT.c
 ./pablo/PabloHDF_SDDF.c
 ./pablo/ProcIDs.h
+./pablo/ProcTrace.h
 
 ./src/.distdep
 ./src/.indent.pro			_DO_NOT_DISTRIBUTE_

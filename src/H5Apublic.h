@@ -36,7 +36,7 @@ __DLL__ herr_t H5Aread(hid_t attr_id, hid_t type_id, void *buf);
 __DLL__ herr_t H5Aclose(hid_t attr_id);
 __DLL__ hid_t H5Aget_space(hid_t attr_id);
 __DLL__ hid_t H5Aget_type(hid_t attr_id);
-__DLL__ hssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
+__DLL__ ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
 __DLL__ int H5Aget_num_attrs(hid_t loc_id);
 __DLL__ int H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op,
 		       void *op_data);

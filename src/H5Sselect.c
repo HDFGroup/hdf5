@@ -1188,6 +1188,7 @@ H5Sget_select_hyper_nblocks(hid_t spaceid)
     hssize_t ret_value=FAIL;        /* return value */
 
     FUNC_ENTER (H5Sget_select_hyper_nblocks, FAIL);
+    H5TRACE1("Hs","i",spaceid);
 
     /* Check args */
     if (H5I_DATASPACE != H5I_get_type(spaceid) ||
@@ -1257,6 +1258,7 @@ H5Sget_select_elem_npoints(hid_t spaceid)
     hssize_t ret_value=FAIL;        /* return value */
 
     FUNC_ENTER (H5Sget_select_elem_npoints, FAIL);
+    H5TRACE1("Hs","i",spaceid);
 
     /* Check args */
     if (H5I_DATASPACE != H5I_get_type(spaceid) ||
@@ -1367,6 +1369,7 @@ H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numbloc
     herr_t ret_value=FAIL;        /* return value */
 
     FUNC_ENTER (H5Sget_select_hyper_blocklist, FAIL);
+    H5TRACE4("e","ihh*h",spaceid,startblock,numblocks,buf);
 
     /* Check args */
     if(buf==NULL)
@@ -1476,6 +1479,7 @@ H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoint
     herr_t ret_value=FAIL;        /* return value */
 
     FUNC_ENTER (H5Sget_select_elem_pointlist, FAIL);
+    H5TRACE4("e","ihh*h",spaceid,startpoint,numpoints,buf);
 
     /* Check args */
     if(buf==NULL)
@@ -1595,6 +1599,7 @@ H5Sget_select_bounds(hid_t spaceid, hsize_t *start, hsize_t *end)
     herr_t ret_value=FAIL;        /* return value */
 
     FUNC_ENTER (H5Sget_select_bounds, FAIL);
+    H5TRACE3("e","i*h*h",spaceid,start,end);
 
     /* Check args */
     if(start==NULL || end==NULL)

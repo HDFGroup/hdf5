@@ -51,6 +51,9 @@ dnl
 dnl If the `OS' ends with a version number then remove it. For instance,
 dnl `freebsd3.1' would become `freebsd'
 case $host_os in
+    aix4.*)
+	host_os_novers=aix4.x
+	;;
     freebsd*)
 	host_os_novers=freebsd
 	;;
@@ -63,16 +66,23 @@ case $host_os in
     osf4.*)
 	host_os_novers=osf4.x
 	;;
+    solaris2.*)
+	host_os_novers=solaris2.x
+	;;
     *)
 	host_os_novers=$host_os
 	;;
 esac
 
 host_config="none"
-for f in $host_cpu-$host_vendor-$host_os_novers \
+for f in $host_cpu-$host_vendor-$host_os \
+	 $host_cpu-$host_vendor-$host_os_novers \
+	 $host_vendor-$host_os \
          $host_vendor-$host_os_novers \
+	 $host_cpu-$host_os \
          $host_cpu-$host_os_novers \
          $host_cpu-$host_vendor \
+	 $host_os \
 	 $host_os_novers \
 	 $host_vendor \
 	 $host_cpu ; do
@@ -575,9 +585,7 @@ case "$CC_BASENAME" in
 	# Is there an mpirun at that path?
 	if test -x $path/mpirun; then
 	    AC_MSG_RESULT($path/mpirun)
-	    if test "X-" = "X-$RUNSERIAL"; then
-	        RUNSERIAL="$path/mpirun -np 1"
-            fi
+	    RUNSERIAL="${RUNSERIAL:-none}"
 	    if test "X-" = "X-$RUNPARALLEL"; then
 	        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
 	    fi
@@ -617,7 +625,14 @@ case "X-$enable_parallel" in
 	AC_MSG_RESULT(skipped)
 	;;
 
-    X-yes|X-mpich)
+    X-yes)
+	# We want to compile a parallel library with a compiler that
+	# already knows how to link with MPI and MPI-IO.
+	AC_MSG_RESULT(provided by compiler)
+	PARALLEL=yes
+	;;
+
+    X-mpich)
 	# For normal mpich installation the compiler, mpicc, should know
 	# where the MPI and MPI-IO header files are located and know which
 	# extra libraries need to be linked and will supply appropriate
@@ -655,10 +670,18 @@ if test "X-" != "X-$PARALLEL"; then
     AC_DEFINE(HAVE_PARALLEL)
 
     # Display what we found about running programs
-    AC_MSG_CHECKING(how to run on one processor)
+    AC_MSG_CHECKING(prefix for running on one processor)
     AC_MSG_RESULT($RUNSERIAL)
-    AC_MSG_CHECKING(how to run in parallel)
+    AC_MSG_CHECKING(prefix for running in parallel)
     AC_MSG_RESULT($RUNPARALLEL)
+
+    # Check that we can link a simple MPI and MPI-IO application
+    AC_MSG_CHECKING(whether a simple MPI-IO program can be linked)
+    AC_TRY_LINK(,[MPI_Init();MPI_File_open();],
+		AC_MSG_RESULT(yes),
+		AC_MSG_RESULT(no)
+	        AC_MSG_ERROR('unable to link a simple MPI-IO application'))
+
 
     # There *must* be some way to run in parallel even if it's just the
     # word `none'.

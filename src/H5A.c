@@ -970,37 +970,39 @@ H5Aget_type(hid_t attr_id)
     the string terminator is stored in the last position of the buffer to
     properly terminate the string.
 --------------------------------------------------------------------------*/
-hssize_t
+ssize_t
 H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
 {
     H5A_t		*attr = NULL;
-    size_t              copy_len=0;
-    hssize_t		ret_value = FAIL;
+    size_t              copy_len, nbytes;
+    ssize_t		ret_value = FAIL;
 
     FUNC_ENTER(H5Aget_name, FAIL);
-    H5TRACE3("Hs","izs",attr_id,buf_size,buf);
+    H5TRACE3("Zs","izs",attr_id,buf_size,buf);
 
     /* check arguments */
     if (H5I_ATTR != H5I_get_type(attr_id) ||
 	(NULL == (attr = H5I_object(attr_id)))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
     }
-    if (!buf || buf_size==0) {
+    if (!buf || buf_size<1) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer");
     }
 
     /* get the real attribute length */
-    ret_value=(hssize_t)HDstrlen(attr->name);
+    nbytes = HDstrlen(attr->name);
+    assert((ssize_t)nbytes>=0); /*overflow, pretty unlikey --rpm*/
 
     /* compute the string length which will fit into the user's buffer */
-    copy_len=MIN(buf_size-1,ret_value);
+    copy_len = MIN(buf_size-1, nbytes);
 
     /* Copy all/some of the name */
-    HDmemcpy(buf,attr->name,copy_len);
+    HDmemcpy(buf, attr->name, copy_len);
 
     /* Terminate the string */
     buf[copy_len]='\0';
 
+    ret_value = (ssize_t)nbytes;
     FUNC_LEAVE(ret_value);
 } /* H5Aget_type() */
 
