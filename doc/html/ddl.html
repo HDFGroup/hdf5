@@ -31,8 +31,12 @@ of the some symbols used.
 
 &lt;boot_block_content&gt; ::= TBD
 
-&lt;root_group&gt; ::= group "/" { &lt;group_attribute&gt;* &lt;group_member&gt;* }  
-// Attributes and members can be in any order.
+&lt;root_group&gt; ::= group "/" { &lt;nlink&gt;<FONT SIZE=1.7>opt</FONT> &lt;group_attribute&gt;* &lt;group_member&gt;* }  
+// nlink must appear before attributes and members.
+
+&lt;nlink&gt;<FONT SIZE=1.7>opt</FONT> ::= { nlink &lt;no_of_hardlinks&gt; }
+
+&lt;no_of_hardlinks&gt; ::= an integer larger than 1
 
 &lt;group_attribute&gt; ::= &lt;attribute&gt; 
 
@@ -57,7 +61,7 @@ of the some symbols used.
 &lt;field_name&gt; ::= &lt;identifier&gt;
 
 &lt;dataspace&gt; ::= dataspace { "&lt;dataspace_name&gt;" } |
-                dataspace { array &lt;current_dims&gt; &lt;max_dims&gt;} | 
+                dataspace { array &lt;current_dims&gt; &lt;max_dims&gt; } | 
                 dataspace { other &lt;ds_definition&gt;+ } 
 
 &lt;dataspace_name&gt; ::= &lt;identifier&gt;
@@ -70,19 +74,19 @@ of the some symbols used.
 
 &lt;data&gt; ::= data {TBD}
 
-&lt;group_member&gt; ::= &lt;named_datatype&gt; | &lt;named_dataspace&gt; | &lt;group&gt; | &lt;dataset&gt; | &lt;link&gt;
+&lt;group_member&gt; ::= &lt;named_datatype&gt; | &lt;named_dataspace&gt; | &lt;group&gt; | &lt;dataset&gt; | &lt;softlink&gt;
 
 &lt;named_datatype&gt; ::= datatype "&lt;datatype_name&gt;" { &lt;dt_definition&gt;+ }
 
-&lt;named_dataspace&gt; ::= dataspace "&lt;dataspace_name&gt;" {array &lt;current_dims&gt; &lt;max_dims&gt; } |
-                     dataspace "&lt;dataspace_name&gt;" { other &lt;ds_definition&gt;+ }
+&lt;named_dataspace&gt; ::= dataspace "&lt;dataspace_name&gt;" { array &lt;current_dims&gt; &lt;max_dims&gt; } |
+                      dataspace "&lt;dataspace_name&gt;" { other &lt;ds_definition&gt;+ }
 
-&lt;group&gt; ::= group "&lt;group_name&gt;" { &lt;group_attribute&gt;* &lt;group_member&gt;* }  
-// Attributes and members can be in any order.
+&lt;group&gt; ::= group "&lt;group_name&gt;" { &lt;nlink&gt;<FONT SIZE=1.7>opt</FONT> &lt;group_attribute&gt;* &lt;group_member&gt;* }  
 
 &lt;group_name&gt; ::= &lt;identifier&gt;
 
-&lt;dataset&gt; ::= dataset "&lt;dataset_name&gt;" { &lt;datatype&gt;  
+&lt;dataset&gt; ::= dataset "&lt;dataset_name&gt;" { &lt;nlink&gt;<FONT SIZE=1.7>opt</FONT>
+                                         &lt;datatype&gt;  
                                          &lt;dataspace&gt; 
                                          &lt;storagelayout&gt;<FONT SIZE=1.7>opt</FONT>
                                          &lt;compression&gt;<FONT SIZE=1.7>opt</FONT>
@@ -90,6 +94,7 @@ of the some symbols used.
                                          &lt;data&gt;<FONT SIZE=1.7>opt</FONT>  } 
 // Any order is ok as long as &lt;data&gt; and &lt;dataset_attribute&gt; are 
 // after &lt;datatype&gt; and &lt;dataspace&gt;.
+// nlink must appear before others.
 
 &lt;dataset_name&gt; ::= &lt;identifier&gt;
 
@@ -118,17 +123,11 @@ of the some symbols used.
 
 &lt;dataset_attribute&gt; ::= &lt;attribute&gt; 
 
-&lt;link&gt; ::= &lt;hardlink&gt; | &lt;softlink&gt;
-
-&lt;hardlink&gt; ::= hardlink "&lt;hardlink_name&gt;" { linktarget "&lt;target&gt;" }
-
-&lt;hardlink_name&gt; ::= &lt;identifier&gt;
-
-&lt;target&gt; ::= &lt;identifier&gt;
-
 &lt;softlink&gt; ::= softlink "&lt;softlink_name&gt;" { linktarget "&lt;target&gt;" }
 
 &lt;softlink_name&gt; ::= &lt;identifier&gt;
+
+&lt;target&gt; ::= &lt;identifier&gt;
 
 &lt;identifier&gt; ::= string   
 // character "/" should be used with care. 
