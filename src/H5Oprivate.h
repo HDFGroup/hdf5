@@ -329,6 +329,7 @@ typedef struct H5O_fphdf5_t {
     H5O_layout_t *layout;               /* Dataset layout                   */
     H5O_name_t *group;                  /* Group name                       */
     H5O_name_t *dset;                   /* Dataset name                     */
+    H5O_efl_t *efl;                     /* External file layout             */
     struct H5P_genplist_t *plist;       /* Property list of the object      */
 } H5O_fphdf5_t;
 
