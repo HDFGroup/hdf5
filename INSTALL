@@ -414,10 +414,12 @@
     for further details.
 
 5.3.12. Backward compatibility
-    The 1.4 version of the HDF5 library can be configured to enable
-    access to functions that were present in the 1.2 version, but removed
-    from the current version with the '--enable-hdf5v1_2' configure
-    flag.
+    The 1.4 version of the HDF5 library can be configured to operate
+    identically to the v1.2 library with the '--enable-hdf5v1_2' configure
+    flag.  This allows existing code to be compiled with the v1.4 library
+    without requiring immediate changes to the application source code.
+    This flag will only be supported in the v1.4 branch of the library,
+    it will not be available in v1.5+.
 
 5.3.13. Network stream capability
     The HDF5 library can be configured with a network stream file
