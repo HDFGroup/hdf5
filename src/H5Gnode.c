@@ -30,6 +30,10 @@
 #define H5G_PACKAGE /*suppress error message about including H5Gpkg.h */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5G_node_mask
+
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
@@ -58,8 +62,6 @@ typedef struct H5G_node_key_t {
 /* Private macros */
 #define H5G_NODE_VERS   1               /*symbol table node version number   */
 #define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
-
-#define PABLO_MASK	H5G_node_mask
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf);
@@ -1484,7 +1486,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
     if (NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
     nsyms = sn->nsyms;
-    if (NULL==(name_off = H5MM_malloc (nsyms*sizeof(name_off[0]))))
+    if (NULL==(name_off = H5FL_SEQ_MALLOC(size_t, nsyms)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed");
     for (i=0; i<nsyms; i++)
         name_off[i] = sn->entry[i].name_off;
@@ -1541,7 +1543,9 @@ done:
     if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) != SUCCEED)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
 
-    name_off = H5MM_xfree (name_off);
+    if(name_off)
+        H5FL_SEQ_FREE(size_t,name_off);
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1789,7 +1793,7 @@ done:
 herr_t
 H5G_node_close(const H5F_t *f)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_node_close)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_close)
 
     /* Check arguments. */
     assert(f);

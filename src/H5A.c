@@ -55,6 +55,9 @@ static herr_t H5A_find_idx_by_name(const void *mesg, unsigned idx, void *op_data
 /* Declare the free lists for H5A_t's */
 H5FL_DEFINE(H5A_t);
 
+/* Declare a free list to manage blocks of type conversion data */
+H5FL_BLK_DEFINE(attr_buf);
+
 
 /*--------------------------------------------------------------------------
 NAME
@@ -686,7 +689,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
 
             /* Get the maximum buffer size needed and allocate it */
             buf_size=nelmts*MAX(src_type_size,dst_type_size);
-            if (NULL==(tconv_buf = H5MM_malloc (buf_size)) || NULL==(bkg_buf = H5MM_calloc(buf_size)))
+            if (NULL==(tconv_buf = H5FL_BLK_MALLOC (attr_buf, buf_size)) || NULL==(bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
             /* Copy the user's data into the buffer for conversion */
@@ -698,7 +701,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
 
             /* Free the previous attribute data buffer, if there is one */
             if(attr->data)
-                H5MM_xfree(attr->data);
+                H5FL_BLK_FREE(attr_buf, attr->data);
 
             /* Set the pointer to the attribute data to the converted information */
             attr->data=tconv_buf;
@@ -709,7 +712,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
 
                 /* Allocate the attribute buffer, if there isn't one */
                 if(attr->data==NULL)
-                    if (NULL==(attr->data = H5MM_malloc (dst_type_size*nelmts)))
+                    if (NULL==(attr->data = H5FL_BLK_MALLOC(attr_buf, dst_type_size*nelmts)))
                         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                 /* Copy the attribute data into the user's buffer */
@@ -735,7 +738,7 @@ done:
     if (dst_id >= 0) 
         (void)H5I_dec_ref(dst_id);
     if (bkg_buf)
-        H5MM_xfree(bkg_buf);
+        H5FL_BLK_FREE(attr_buf, bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_write() */
@@ -852,7 +855,7 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
 
                 /* Get the maximum buffer size needed and allocate it */
                 buf_size=nelmts*MAX(src_type_size,dst_type_size);
-                if (NULL==(tconv_buf = H5MM_malloc (buf_size)) || NULL==(bkg_buf = H5MM_calloc(buf_size)))
+                if (NULL==(tconv_buf = H5FL_BLK_MALLOC(attr_buf, buf_size)) || NULL==(bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                 /* Copy the attribute data into the buffer for conversion */
@@ -882,9 +885,9 @@ done:
     if (dst_id >= 0) 
         (void)H5I_dec_ref(dst_id);
     if (tconv_buf)
-        H5MM_xfree(tconv_buf);
+        H5FL_BLK_FREE(attr_buf, tconv_buf);
     if (bkg_buf)
-	H5MM_xfree(bkg_buf);
+	H5FL_BLK_FREE(attr_buf, bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_read() */
@@ -1556,7 +1559,7 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr, unsigned update_flags)
     } /* end if */
     if(old_attr->data) {
         if(!(update_flags&H5O_UPDATE_DATA_ONLY) || new_attr->data==NULL) {
-            if (NULL==(new_attr->data=H5MM_malloc(old_attr->data_size)))
+            if (NULL==(new_attr->data=H5FL_BLK_MALLOC(attr_buf,old_attr->data_size)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         } /* end if */
         HDmemcpy(new_attr->data,old_attr->data,old_attr->data_size);
@@ -1609,7 +1612,7 @@ H5A_free(H5A_t *attr)
         if(H5S_close(attr->ds)<0)
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info")
     if(attr->data)
-        H5MM_xfree(attr->data);
+        H5FL_BLK_FREE(attr_buf, attr->data);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1641,7 +1644,7 @@ H5A_close(H5A_t *attr)
 
     /* Check if the attribute has any data yet, if not, fill with zeroes */
     if(attr->ent_opened && !attr->initialized) {
-        uint8_t *tmp_buf=H5MM_calloc(attr->data_size);
+        uint8_t *tmp_buf=H5FL_BLK_CALLOC(attr_buf, attr->data_size);
         if (NULL == tmp_buf)
             HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed for attribute fill-value")
 
@@ -1650,7 +1653,7 @@ H5A_close(H5A_t *attr)
             HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute")
 
         /* Free temporary buffer */
-        H5MM_xfree(tmp_buf);
+        H5FL_BLK_FREE(attr_buf, tmp_buf);
     } /* end if */
 
     /* Free dynamicly allocated items */
