@@ -37,7 +37,9 @@
 # (We use csh here, but of course you can adapt to whatever shell you like.)
 
 # compile for MPI jobs
-setenv CC mpcc
+# setenv CC mpcc						(for IBM's MPI)
+# setenv CC "/usr/local/mpich-1.1.1/lib/rs6000/ch_mpl/mpicc"	(for mpich)
+setenv CC "/usr/local/mpich-1.1.1/lib/rs6000/ch_mpl/mpicc"
 
 # These compiler flags work on ASCI baby blue pacific (IBM SP),
 # using IBM's MPI and Argonne's MPI-IO (ROMIO):
@@ -47,9 +49,9 @@ setenv CC mpcc
 # The following flags are only needed when compiling/linking a user program
 # for execution.
 #  -bI:/usr/include/piofs/piofs.exp	this MPI-IO uses PIOFS file system
-#  -L/usr/local/mpio/lib/ibm -lmpio	link to this MPI-IO lib
+#  -L/usr  /local/mpio/lib/ibm -lmpio	link to this MPI-IO lib
 #
-setenv CFLAGS "-g -D_LARGE_FILES -DHAVE_FUNCTION -I/usr/local/mpio/include/ibm -bI:/usr/include/piofs/piofs.exp -L/usr/local/mpio/lib/ibm -lmpio"
+setenv CFLAGS "-g -qfullpath -bnoobjreorder -D_LARGE_FILES -DHAVE_FUNCTION"
 
 # The configure/make process needs to be able to run some programs,
 # need to specify a processor pool.
