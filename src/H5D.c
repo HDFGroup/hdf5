@@ -140,7 +140,7 @@ static herr_t
 H5D_init_interface(void)
 {
     H5P_genclass_t	*pclass;    /* Property list class to modify */
-    hsize_t def_max_temp_buf=H5D_XFER_MAX_TEMP_BUF_DEF;        /* Default value for maximum temp buffer size */
+    size_t def_max_temp_buf=H5D_XFER_MAX_TEMP_BUF_DEF;        /* Default value for maximum temp buffer size */
     void *def_tconv_buf=H5D_XFER_TCONV_BUF_DEF;        /* Default value for type conversion buffer */
     void *def_bkgr_buf=H5D_XFER_BKGR_BUF_DEF;        /* Default value for background buffer */
     H5T_bkg_t def_bkgr_buf_type=H5D_XFER_BKGR_BUF_TYPE_DEF;        /* Default value for background buffer type */
@@ -1956,7 +1956,7 @@ printf("%s: check 1.2, \n",FUNC);
 
     src_type_size = H5T_get_size(dataset->type);
     dst_type_size = H5T_get_size(mem_type);
-    target_size = H5P_peek_hsize_t(dxpl_id,H5D_XFER_MAX_TEMP_BUF_NAME);
+    target_size = H5P_peek_size_t(dxpl_id,H5D_XFER_MAX_TEMP_BUF_NAME);
 #ifdef QAK
 printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUNC,(int)src_type_size,(int)dst_type_size,(int)target_size);
 #endif /* QAK */
@@ -2432,7 +2432,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      
     src_type_size = H5T_get_size(mem_type);
     dst_type_size = H5T_get_size(dataset->type);
-    target_size = H5P_peek_hsize_t(dxpl_id,H5D_XFER_MAX_TEMP_BUF_NAME);
+    target_size = H5P_peek_size_t(dxpl_id,H5D_XFER_MAX_TEMP_BUF_NAME);
 #ifdef QAK
 printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUNC,(int)src_type_size,(int)dst_type_size,(int)target_size);
 #endif /* QAK */

@@ -2278,7 +2278,7 @@ H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
  *
  *-------------------------------------------------------------------------
  */
-hsize_t
+size_t
 H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
 {
     size_t size;                /* Type conversion buffer size */
@@ -5088,6 +5088,7 @@ herr_t H5Pset(hid_t plist_id, const char *name, void *value)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalied property value");
 
     /* Create the new property list class */
+printf("%s: name, value=%u\n",FUNC,name,*(size_t *)(value));
     if ((ret_value=H5P_set(plist_id,name,value))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to set value in plist");
 
@@ -6375,52 +6376,14 @@ done:
 --------------------------------------------------------------------------*/
 uintn H5P_peek_uintn(hid_t plist_id, const char *name)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    H5P_genprop_t *prop;        /* Temporary property pointer */
     uintn ret_value;            /* return value */
 
     FUNC_ENTER (H5P_peek_uintn, UFAIL);
 
     assert(name);
 
-    /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
-        assert(0 && "not a property list");
-
-    /* Find property */
-    if((prop=H5P_find_prop(plist->props,plist->pclass->hashsize,name))==NULL)
-        assert(0 && "property doesn't exist");
-
-    /* Check for property size >0 */
-    if(prop->size==0)
-        assert(0 && "property has zero size");
-
-    /* Check for property size not the same as the return type */
-    if(prop->size!=sizeof(uintn))
-        assert(0 && "property has incorrect size");
-
-    /* Make a copy of the value and pass to 'get' callback */
-    if(prop->get!=NULL) {
-        void *tmp_value;            /* Temporary value for property */
-
-        /* Make a copy of the current value, in case the callback fails */
-        if (NULL==(tmp_value=H5MM_malloc(prop->size)))
-            assert(0 && "memory allocation failed temporary property value");
-        HDmemcpy(tmp_value,prop->value,prop->size);
-
-        /* Call user's callback */
-        if((*(prop->get))(plist_id,name,prop->size,tmp_value)<0)
-            assert(0 && "can't get property value");
-
-        /* Copy new [possibly unchanged] value into return value */
-        HDmemcpy(&ret_value,tmp_value,sizeof(uintn));
-
-        /* Free the temporary value buffer */
-        H5MM_xfree(tmp_value);
-    } /* end if */
-    /* No 'get' callback, just copy value */
-    else
-        HDmemcpy(&ret_value,prop->value,sizeof(uintn));
+    /* Get the value to return, don't worry about the return value, we can't return it */
+    H5P_get(plist_id,name,&ret_value);
 
     FUNC_LEAVE (ret_value);
 }   /* H5P_peek_uintn() */
@@ -6455,52 +6418,14 @@ uintn H5P_peek_uintn(hid_t plist_id, const char *name)
 --------------------------------------------------------------------------*/
 hid_t H5P_peek_hid_t(hid_t plist_id, const char *name)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    H5P_genprop_t *prop;        /* Temporary property pointer */
     hid_t ret_value;            /* return value */
 
     FUNC_ENTER (H5P_peek_hid_t, FAIL);
 
     assert(name);
 
-    /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
-        assert(0 && "not a property list");
-
-    /* Find property */
-    if((prop=H5P_find_prop(plist->props,plist->pclass->hashsize,name))==NULL)
-        assert(0 && "property doesn't exist");
-
-    /* Check for property size >0 */
-    if(prop->size==0)
-        assert(0 && "property has zero size");
-
-    /* Check for property size not the same as the return type */
-    if(prop->size!=sizeof(hid_t))
-        assert(0 && "property has incorrect size");
-
-    /* Make a copy of the value and pass to 'get' callback */
-    if(prop->get!=NULL) {
-        void *tmp_value;            /* Temporary value for property */
-
-        /* Make a copy of the current value, in case the callback fails */
-        if (NULL==(tmp_value=H5MM_malloc(prop->size)))
-            assert(0 && "memory allocation failed temporary property value");
-        HDmemcpy(tmp_value,prop->value,prop->size);
-
-        /* Call user's callback */
-        if((*(prop->get))(plist_id,name,prop->size,tmp_value)<0)
-            assert(0 && "can't get property value");
-
-        /* Copy new [possibly unchanged] value into return value */
-        HDmemcpy(&ret_value,tmp_value,sizeof(hid_t));
-
-        /* Free the temporary value buffer */
-        H5MM_xfree(tmp_value);
-    } /* end if */
-    /* No 'get' callback, just copy value */
-    else
-        HDmemcpy(&ret_value,prop->value,sizeof(hid_t));
+    /* Get the value to return, don't worry about the return value, we can't return it */
+    H5P_get(plist_id,name,&ret_value);
 
     FUNC_LEAVE (ret_value);
 }   /* H5P_peek_hid_t() */
@@ -6535,52 +6460,14 @@ hid_t H5P_peek_hid_t(hid_t plist_id, const char *name)
 --------------------------------------------------------------------------*/
 void *H5P_peek_voidp(hid_t plist_id, const char *name)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    H5P_genprop_t *prop;        /* Temporary property pointer */
     void * ret_value;            /* return value */
 
-    FUNC_ENTER (H5P_peek_hid_t, NULL);
+    FUNC_ENTER (H5P_peek_voidp_t, NULL);
 
     assert(name);
 
-    /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
-        assert(0 && "not a property list");
-
-    /* Find property */
-    if((prop=H5P_find_prop(plist->props,plist->pclass->hashsize,name))==NULL)
-        assert(0 && "property doesn't exist");
-
-    /* Check for property size >0 */
-    if(prop->size==0)
-        assert(0 && "property has zero size");
-
-    /* Check for property size not the same as the return type */
-    if(prop->size!=sizeof(void *))
-        assert(0 && "property has incorrect size");
-
-    /* Make a copy of the value and pass to 'get' callback */
-    if(prop->get!=NULL) {
-        void *tmp_value;            /* Temporary value for property */
-
-        /* Make a copy of the current value, in case the callback fails */
-        if (NULL==(tmp_value=H5MM_malloc(prop->size)))
-            assert(0 && "memory allocation failed temporary property value");
-        HDmemcpy(tmp_value,prop->value,prop->size);
-
-        /* Call user's callback */
-        if((*(prop->get))(plist_id,name,prop->size,tmp_value)<0)
-            assert(0 && "can't get property value");
-
-        /* Copy new [possibly unchanged] value into return value */
-        HDmemcpy(&ret_value,tmp_value,sizeof(void *));
-
-        /* Free the temporary value buffer */
-        H5MM_xfree(tmp_value);
-    } /* end if */
-    /* No 'get' callback, just copy value */
-    else
-        HDmemcpy(&ret_value,prop->value,sizeof(void *));
+    /* Get the value to return, don't worry about the return value, we can't return it */
+    H5P_get(plist_id,name,&ret_value);
 
     FUNC_LEAVE (ret_value);
 }   /* H5P_peek_voidp() */
@@ -6615,55 +6502,59 @@ void *H5P_peek_voidp(hid_t plist_id, const char *name)
 --------------------------------------------------------------------------*/
 hsize_t H5P_peek_hsize_t(hid_t plist_id, const char *name)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    H5P_genprop_t *prop;        /* Temporary property pointer */
     hsize_t ret_value;            /* return value */
 
-    FUNC_ENTER (H5P_peek_hid_t, UFAIL);
+    FUNC_ENTER (H5P_peek_hsize_t, UFAIL);
 
     assert(name);
 
-    /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
-        assert(0 && "not a property list");
-
-    /* Find property */
-    if((prop=H5P_find_prop(plist->props,plist->pclass->hashsize,name))==NULL)
-        assert(0 && "property doesn't exist");
-
-    /* Check for property size >0 */
-    if(prop->size==0)
-        assert(0 && "property has zero size");
-
-    /* Check for property size not the same as the return type */
-    if(prop->size!=sizeof(hsize_t))
-        assert(0 && "property has incorrect size");
-
-    /* Make a copy of the value and pass to 'get' callback */
-    if(prop->get!=NULL) {
-        void *tmp_value;            /* Temporary value for property */
-
-        /* Make a copy of the current value, in case the callback fails */
-        if (NULL==(tmp_value=H5MM_malloc(prop->size)))
-            assert(0 && "memory allocation failed temporary property value");
-        HDmemcpy(tmp_value,prop->value,prop->size);
-
-        /* Call user's callback */
-        if((*(prop->get))(plist_id,name,prop->size,tmp_value)<0)
-            assert(0 && "can't get property value");
-
-        /* Copy new [possibly unchanged] value into return value */
-        HDmemcpy(&ret_value,tmp_value,sizeof(hsize_t));
-
-        /* Free the temporary value buffer */
-        H5MM_xfree(tmp_value);
-    } /* end if */
-    /* No 'get' callback, just copy value */
-    else
-        HDmemcpy(&ret_value,prop->value,sizeof(hsize_t));
+    /* Get the value to return, don't worry about the return value, we can't return it */
+    H5P_get(plist_id,name,&ret_value);
 
     FUNC_LEAVE (ret_value);
 }   /* H5P_peek_hsize_t() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_peek_size_t
+ PURPOSE
+    Internal routine to quickly retrieve the value of a property in a property list.
+ USAGE
+    hsize_t H5P_peek_size_t(plist_id, name)
+        hid_t plist_id;         IN: Property list to check
+        const char *name;       IN: Name of property to query
+ RETURNS
+    Directly returns the value of the property in the list
+ DESCRIPTION
+        This function directly returns the value of a property in a property
+    list.  Because this function is only able to just copy a particular property
+    value to the return value, there is no way to check for errors.  We attempt
+    to make certain that bad things don't happen by validating that the size of
+    the property is the same as the size of the return type, but that can't
+    catch all errors.
+        This function does call the user's 'get' callback routine still.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    No error checking!
+    Use with caution!
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+size_t H5P_peek_size_t(hid_t plist_id, const char *name)
+{
+    size_t ret_value;            /* return value */
+
+    FUNC_ENTER (H5P_peek_size_t, UFAIL);
+
+    assert(name);
+
+    /* Get the value to return, don't worry about the return value, we can't return it */
+    H5P_get(plist_id,name,&ret_value);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5P_peek_size_t() */
 
 
 /*--------------------------------------------------------------------------

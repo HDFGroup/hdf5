@@ -120,5 +120,6 @@ __DLL__ uintn H5P_peek_uintn(hid_t plist_id, const char *name);
 __DLL__ hid_t H5P_peek_hid_t(hid_t plist_id, const char *name);
 __DLL__ void *H5P_peek_voidp(hid_t plist_id, const char *name);
 __DLL__ hsize_t H5P_peek_hsize_t(hid_t plist_id, const char *name);
+__DLL__ size_t H5P_peek_size_t(hid_t plist_id, const char *name);
 
 #endif

@@ -54,7 +54,7 @@ typedef struct H5D_create_t {
 /* Data transfer properties */
 /* Definitions for maximum temp buffer size property */
 #define H5D_XFER_MAX_TEMP_BUF_NAME       "max_temp_buf"
-#define H5D_XFER_MAX_TEMP_BUF_SIZE       sizeof(hsize_t)
+#define H5D_XFER_MAX_TEMP_BUF_SIZE       sizeof(size_t)
 #define H5D_XFER_MAX_TEMP_BUF_DEF  (1024*1024)
 /* Definitions for type conversion buffer property */
 #define H5D_XFER_TCONV_BUF_NAME       "tconv_buf"
