@@ -1,15 +1,14 @@
 
  
-                       HDF5 Release 1.3.x
-    			Under Development
+                       HDF5 Release 1.4-Beta1
 
 
 INTRODUCTION
 
 This document describes the differences between HDF5-1.2.0 and
-HDF5-1.3.x, and contains information on the platforms where HDF5-1.3.x
-was tested (????? careful, under construction) and known problems in
-HDF5-1.3.x. For more details check the HISTORY file in the HDF5 source.
+HDF5-1.4-Beta1, and contains information on the platforms tested and
+known problems in HDF5-1.4-Beta1. For more details check the HISTORY 
+file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
 (ftp.ncsa.uiuc.edu) in the directory:
@@ -27,17 +26,17 @@ If you have any questions or comments, please send them to:
 
 CONTENTS
 
-- New features
-- New h4toh5 utility
+- New Features
+- h4toh5 Utility 
 - F90 Support
 - C++ Support
-- Bug fixes since HDF5-1.2.0 
+- Bug Fixes since HDF5-1.2.0 
 - Platforms Tested
 - Known Problems
 
-New features
+New Features
 ============
-   * The Virtual File Layer, VFL, is added to replace the old file
+   * The Virtual File Layer, VFL, was added to replace the old file
      drivers. It also provides an API for user defined file drivers.
    * New features added to snapshots. Use 'snapshot help' to see a
      complete list of features.
@@ -46,8 +45,8 @@ New features
    * Added Thread-Safe support. Phase I implemented.
    * Added data sieve buffering to raw data I/O path. This is enabled
      for all VFL drivers except the mpio & core drivers. Setting the
-     sieve buffer size is controlled with new API functions:
-     H5Pset_sieve_buf_size() and retrieved with H5Pget_sieve_buf_size().
+     sieve buffer size is controlled with the new API function,
+     H5Pset_sieve_buf_size(), and retrieved with H5Pget_sieve_buf_size().
    * Added new Virtual File Driver, Stream VFD, to send/receive entire
      HDF5 files via socket connections.
    * As parts of VFL, HDF-GASS and HDF-SRB are also added to this
@@ -61,39 +60,40 @@ New features
    * Added a new array datatype to the datatypes which can be created.  Removed
      "array fields" from compound datatypes (use an array datatype instead).
 
-Release Notes for h4toh5 beta
-=============================
+h4toh5 Utility 
+==============
 
-    The h4toh5 utility converts an HDF4 file to an HDF5 file.  See the
-    document, "Mapping HDF4 Objects to HDF5 Objects",
-    http://hdf.ncsa.uiuc.edu/HDF5/papers/H4-H5MappingGuidelines.pdf
+    The h4toh5 utility is a new utility that converts an HDF4 file to an 
+    HDF5 file.  For details, see the document, "Mapping HDF4 Objects to 
+    HDF5 Objects":
+       http://hdf.ncsa.uiuc.edu/HDF5/papers/H4-H5MappingGuidelines.pdf
 
     Known Limitations of the h4toh5 beta release
     ---------------------------------------------
 
-    1. Error handling
+    1. Error Handling
 
     Error reporting is minimal.
 
-    2. String datatype
+    2. String Datatype
 
     HDF4 has no 'string' type. String valued data are usually defined as
     an array of 'char' in HDF4. The h4toh5 utility will generally map
     these to HDF5 'String' types rather than array of char, with the
     following additional rules:
 
-       * For the data of HDF4 SDS, image, and palette, if the data is
+       * For the data of an HDF4 SDS, image, and palette, if the data is
 	 declared 'DFNT_CHAR8' it will be assumed to be integer and
 	 will be an H5T_INTEGER type.
        * For attributes of any HDF4 object, data of type 'DFNT_CHAR8'
 	 will be converted to an HDF5 'H5T_STRING' type.
-       * For Vdata of HDF4, it is difficult to determine whether data 
-	 of type 'DFNT_CHAR8' is intended to be bytes or charaters.
-	 The h4toh5 utility will consider them as C character, and
+       * For an HDF4 Vdata, it is difficult to determine whether data 
+	 of type 'DFNT_CHAR8' is intended to be bytes or characters.
+	 The h4toh5 utility will consider them to be C characters, and
 	 will convert them to an HDF5 'H5T_STRING' type.
 
 
-    3. Compression, Chunking and External storage
+    3. Compression, Chunking and External Storage
 
     Chunking is supported, but compression and external storage is not.
 
@@ -103,10 +103,10 @@ Release Notes for h4toh5 beta
     An HDF4 object that uses compression will be converted to an
     uncompressed HDF5 object.  
 
-    An HDF4 object that uses external storage will be converted to an an
+    An HDF4 object that uses external storage will be converted to an
     HDF5 object without external storage.  
 
-    4. Memory use
+    4. Memory Use
 
     The beta version of the h4toh5 utility copies data from HDF4 objects
     in a single read followed by a single write to the HDF5 object. For
@@ -124,24 +124,27 @@ Release Notes for h4toh5 beta
     The beta h4toh5 utility has been tested on Solaris 2.6, Solaris 2.5,
     Irix 6.5, HPUX 11.0, DEC Unix, FreeBSD, and Windows 2000.
 
-F90 support
-============
+F90 Support
+===========
  
-    This is the first release of the HDF5 Library wil fully integrated F90 API support.
-    The Fortran Library is created when the --enable-fortran flag is specified during
-    configuration.
+    This is the first release of the HDF5 Library with fully integrated 
+    F90 API support.  The Fortran Library is created when the 
+    --enable-fortran flag is specified during configuration.
 
-    Not all F90 subroutines are implemented. Please refer to the HDF5 Reference Manual 
-    for more details.
+    Not all F90 subroutines are implemented. Please refer to the HDF5 
+    Reference Manual for more details.
    
-    F90 APIs are available for the Solaris 2.6 and 2.7, Linux, DEC UNIX, T3E, J90 
-    and O2K (64 bit option only) platforms. Parallel version of the HDF5 F90 Library
-    is supported on the O2K and T3E platforms.
+    F90 APIs are available for the Solaris 2.6 and 2.7, Linux, DEC UNIX, 
+    T3E, J90 and O2K (64 bit option only) platforms. The Parallel version of 
+    the HDF5 F90 Library is supported on the O2K and T3E platforms.
 
-    Changes since last prototype release (July 2000).
+    Changes since the last prototype release (July 2000)
+    ----------------------------------------------------
 
-       * h5open_f and h5close_f must be called instead of h5init_types and h5close_types.
-       * The following subroutines cannot be used anymore: 
+       * h5open_f and h5close_f must be called instead of h5init_types and 
+         h5close_types.
+
+       * The following subroutines are no longer available: 
              h5pset_xfer_f
              h5pget_xfer_f
              h5pset_mpi_f
@@ -161,25 +164,26 @@ F90 support
              h5pset_dxpl_mpio_f
              h5pget_dxpl_mpio_f
         
-       * In the previous HDF5 F90 releases, implementation of object references 
-         and dataset region references was not portable. This release introduces
-         portable implementation, but it also introduces changes to read/write APIs
-         that handles references.
-         If object or dataset region references are written or read to/from
-         an HDF5 file, h5dwrite_f and h5dread_f must use extra parameter n - buffer size, i.e
+       * In the previous HDF5 F90 releases, the implementation of object 
+         references and dataset region references was not portable. This 
+         release introduces a portable implementation, but it also introduces 
+         changes to the read/write APIs that handle references.  If object or 
+         dataset region references are written or read to/from an HDF5 file, 
+         h5dwrite_f and h5dread_f must use the extra parameter, n, for the 
+         buffer size:
 
-         h5dwrite(read)_f(dset_id, mem_type_id, buf, n, hdferr, &
-                                                    ^^^ 
-                          mem_space_id, file_space_id, xfer_prp)
+            h5dwrite(read)_f(dset_id, mem_type_id, buf, n, hdferr, &
+                                                       ^^^ 
+                             mem_space_id, file_space_id, xfer_prp)
 
-         For other datatypes APIs were not changed. 
+         For other datatypes the APIs were not changed. 
               
              
-C++ support
-============
+C++ Support
+===========
 
         This is the first release of the HDF5 Library with fully integrated 
-        C++ APIs support. The HDF5 C++ Library is built when the --enable-cxx
+        C++ API support. The HDF5 C++ library is built when the --enable-cxx
         flag is specified during configuration.
 
         Check the HDF5 Reference Manual for available C++ documentation.
@@ -187,8 +191,7 @@ C++ support
         C++ APIs are available for Solaris 2.6 and 2.7, Linux, and FreeBSD. 
  
 
-Bug fixes since HDF5-1.2.0
-
+Bug Fixes since HDF5-1.2.0
 ==========================
 
 Library
@@ -255,7 +258,7 @@ Configuration
      For Solaris, added -lsocket to the LIBS list of libraries.
 
 Tools
-------
+-----
     * h5dump correctly displays compound datatypes.
     * Corrected an error in h5toh4 which did not convert the 32bits
       int from HDF5 to HDF4 corectly for the T3E platform.
@@ -286,35 +289,52 @@ Documentation
       See doc/html/PSandPDF/index.html for more details. 
 
    
-Platforms Tested:
+Platforms Tested
 ================
- Note: Due to the nature of bug fixes, only static versions of the
+
+ Note: Due to the nature of the bug fixes, only static versions of the
        library and tools were tested.
 
 
   AIX 4.3.2 (IBM SP)            3.6.6
-  Cray T3E 2.0.4.81             cc 6.3.0.1
-                                mpt.1.3
+  Cray T3E sn6711 2.0.539b      Cray Standard C Version 6.3.0.2
+                                Cray Fortran Version 3.4.0.2
   FreeBSD 3.3-STABLE            gcc 2.95.2
-  HP-UX B.10.20                 HP C  HP92453-01 A.10.32
+  HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
   HP-UX B.11.00                 HP C  HP92453-01 A.11.00.13
   IRIX 6.5                      MIPSpro cc 7.30
   IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
                                 mpt.1.3 (SGI MPI 3.2.0.0)
-
-  Linux 2.2.10 SuSE             egcs-2.91.66               configured with
-  (i686-pc-linux-gnu)                                      --disable-hsizet
-                                mpich-1.2.0 egcs-2.91.66 19990314/Linux 
-  Linux 2.2.16 RedHat		gcc-2.95.2
-
+  Linux 2.2.16-3smp		gcc-2.95.2
+                                g++ 2.95.2
+                                pgf90 3.1-3
   OSF1 V4.0                     DEC-V5.2-040
-  SunOS 5.6                     cc WorkShop Compilers 4.2  no optimization
-  SunOS 5.7                     cc WorkShop Compilers 5.0
+                                Digital Fortran 90 V4.1-270
+  SunOS 5.6                     WorkShop Compilers 5.0 98/12/15 C 5.0 
+  (Solaris 2.6)                 WorkShop Compilers 5.0 99/10/25 Fortran 90
+                                       2.0 Patch 107356-04
+                                Workshop Compilers 5.0 98/12/15 C++ 5.0
+  SunOS 5.7                     WorkShop Compilers 5.0 98/12/15 C 5.0
+  (Solaris 2.7)                 WorkShop Compilers 5.0 99/10/25 Fortran 90
+                                       2.0 Patch 107356-04
+                                Workshop Compilers 5.0 98/12/15 C++ 5.0
   TFLOPS 3.3                    mpich-1.2.0 with local changes
-  Windows NT4.0 sp5             MSVC++ 6.0
+  Windows NT4.0, 2000 (NT5.0)   MSVC++ 6.0
 
-Known Problems:
+Known Problems
 ==============
+
+* When building the HDF5 test project on Windows NT 4.0 (testhdf5
+  and testhdf5dll), the compiler fails to compile tvstr.c within
+  the whole project; however, when separately selecting the 
+  tvstr.c source code, it passes the compiler and everything that
+  depends on tvstr.obj links correctly.
+
+* h4toh5 fails on object references on the Cray T3E.
+
+* The installation of the DEC Fortran binaries fails.  It can be
+  done manually by copying the *.mod files from the fortran/src
+  directory.
 
 * SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
   fail if library is compiled using optimization of any level.
