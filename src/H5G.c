@@ -2044,7 +2044,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	if (H5G_CACHED_SLINK==obj_ent.type) {
 	    /* Named object is a symbolic link */
 	    if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg) ||
-		NULL==(s=H5HL_peek (grp_ent.file, stab_mesg.heap_addr, 
+                    NULL==(s=H5HL_peek (grp_ent.file, stab_mesg.heap_addr, 
 				    obj_ent.cache.slink.lval_offset))) {
 		HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
 			       "unable to read symbolic link value");
@@ -2069,11 +2069,15 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	    if (NULL==H5O_read(&obj_ent, H5O_MTIME, 0, &(statbuf->mtime))) {
 		H5E_clear();
 		statbuf->mtime = 0;
-	    }
+	    } /* end if */
 	    statbuf->type = H5G_get_type(&obj_ent);
 	    H5E_clear(); /*clear errors resulting from checking type*/
-	}
-    }
+	} /* end else */
+
+        /* Common code to retrieve the file's fileno */
+        if(H5F_get_fileno(obj_ent.file,statbuf->fileno)<0)
+            HRETURN_ERROR (H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno");
+    } /* end if */
 
     FUNC_LEAVE (SUCCEED);
 }
