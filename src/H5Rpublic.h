@@ -33,17 +33,9 @@ typedef enum {
 
 /* Reference structure for user's code */
 typedef struct {
-    H5R_type_t  type;           /* Type of reference information in union */
-    unsigned long objno[2];     /* OID of object referenced */
-    struct H5F_t *file;         /* Pointer to the file the reference is in */
-    union {     /* union to hold structs */
-        struct {
-        } obj;                  /* Object reference structure */
-        struct {
-        } dreg;                 /* Dataset Region reference structure */
-        struct {
-        } intrl;                /* Internal reference structure */
-    }u;
+    unsigned long oid[2];       /* OID of object referenced */
+    unsigned long region[2];    /* heap ID of region in object */
+    unsigned long file[2];      /* heap ID of external filename */
 } href_t;
 
 /* Publicly visible datastructures */
@@ -55,9 +47,8 @@ extern "C" {
 /* Functions in H5R.c */
 herr_t H5Rcreate(href_t *ref, hid_t loc_id, const char *name,
         H5R_type_t ref_type, hid_t space_id);
-hid_t H5Rdereference(href_t *ref);
+hid_t H5Rdereference(hid_t dataset, href_t *ref);
 hid_t H5Rget_space(href_t *ref);
-H5R_type_t H5Rget_type(href_t *ref);
 
 #ifdef __cplusplus
 }

@@ -209,6 +209,7 @@ extern hid_t H5T_IEEE_F64LE_g;
 #define H5T_STD_B32LE		(H5open(), H5T_STD_B32LE_g)
 #define H5T_STD_B64BE		(H5open(), H5T_STD_B64BE_g)
 #define H5T_STD_B64LE		(H5open(), H5T_STD_B64LE_g)
+#define H5T_STD_PTR_OBJ	    (H5open(), H5T_STD_PTR_OBJ_g)
 extern hid_t H5T_STD_I8BE_g;
 extern hid_t H5T_STD_I8LE_g;
 extern hid_t H5T_STD_I16BE_g;
@@ -233,6 +234,7 @@ extern hid_t H5T_STD_B32BE_g;
 extern hid_t H5T_STD_B32LE_g;
 extern hid_t H5T_STD_B64BE_g;
 extern hid_t H5T_STD_B64LE_g;
+extern hid_t H5T_STD_PTR_OBJ_g;
 
 /*
  * Types which are particular to Unix.
@@ -347,7 +349,6 @@ extern hid_t H5T_FORTRAN_S1_g;
 #define H5T_NATIVE_HSSIZE	(H5open(), H5T_NATIVE_HSSIZE_g)
 #define H5T_NATIVE_HERR		(H5open(), H5T_NATIVE_HERR_g)
 #define H5T_NATIVE_HBOOL	(H5open(), H5T_NATIVE_HBOOL_g)
-#define H5T_NATIVE_PTR_OBJ	(H5open(), H5T_NATIVE_PTR_OBJ_g)
 extern hid_t H5T_NATIVE_CHAR_g;
 extern hid_t H5T_NATIVE_UCHAR_g;
 extern hid_t H5T_NATIVE_SHORT_g;
@@ -370,7 +371,6 @@ extern hid_t H5T_NATIVE_HSIZE_g;
 extern hid_t H5T_NATIVE_HSSIZE_g;
 extern hid_t H5T_NATIVE_HERR_g;
 extern hid_t H5T_NATIVE_HBOOL_g;
-extern hid_t H5T_NATIVE_PTR_OBJ_g;
    
 /* Operations defined on all data types */
 hid_t H5Topen (hid_t loc_id, const char *name);

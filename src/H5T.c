@@ -59,6 +59,7 @@ hid_t H5T_STD_B32BE_g = FAIL;
 hid_t H5T_STD_B32LE_g = FAIL;
 hid_t H5T_STD_B64BE_g = FAIL;
 hid_t H5T_STD_B64LE_g = FAIL;
+hid_t H5T_STD_PTR_OBJ_g = FAIL;
 
 hid_t H5T_UNIX_D32BE_g = FAIL;
 hid_t H5T_UNIX_D32LE_g = FAIL;
@@ -91,7 +92,6 @@ hid_t H5T_NATIVE_HSIZE_g = FAIL;
 hid_t H5T_NATIVE_HSSIZE_g = FAIL;
 hid_t H5T_NATIVE_HERR_g = FAIL;
 hid_t H5T_NATIVE_HBOOL_g = FAIL;
-hid_t H5T_NATIVE_PTR_OBJ_g = FAIL;
 
 /* The path database */
 static intn H5T_npath_g = 0;			/*num paths defined	*/
@@ -221,9 +221,11 @@ H5T_init_interface(void)
     dt->u.atomic.offset = 0;
 
     /* Object pointer (i.e. object header address in file) */
-    dt = H5I_object (H5T_NATIVE_PTR_OBJ_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt = H5I_object (H5T_STD_PTR_OBJ_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->type = H5T_POINTER;
     dt->state = H5T_STATE_IMMUTABLE;
     dt->size = sizeof(haddr_t);
+    dt->u.atomic.u.r.rtype = H5R_OBJECT;
     dt->u.atomic.prec = 8*dt->size;
     dt->u.atomic.offset = 0;
 
@@ -4116,7 +4118,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
     intn	i, j, tmp;
     hbool_t	swapped;
 
-    FUNC_ENTER(H5T_equal, 0);
+    FUNC_ENTER(H5T_cmp, 0);
 
     /* the easy case */
     if (dt1 == dt2) HGOTO_DONE(0);
@@ -4330,6 +4332,20 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 	    /*void */
 	    break;
 
+	case H5T_POINTER:
+        if (dt1->u.atomic.u.r.rtype < dt2->u.atomic.u.r.rtype) HGOTO_DONE(-1);
+        if (dt1->u.atomic.u.r.rtype > dt2->u.atomic.u.r.rtype) HGOTO_DONE(1);
+
+        switch(dt1->u.atomic.u.r.rtype) {
+            case H5R_OBJECT:
+                /*void */
+                break;
+
+            default:
+                assert("not implemented yet" && 0);
+        } /* end switch */
+	    break;
+
 	default:
 	    assert("not implemented yet" && 0);
 	}
@@ -4378,23 +4394,27 @@ H5T_find(const H5T_t *src, const H5T_t *dst, H5T_bkg_t need_bkg,
 
     FUNC_ENTER(H5T_find, NULL);
 
+printf("%s: check 1.0\n",FUNC);
     if (!noop_cdata.stats &&
 	NULL==(noop_cdata.stats = H5MM_calloc (sizeof(H5T_stats_t)))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
 
+printf("%s: check 2.0, src->type=%d, dst->type=%d\n",FUNC,(int)src->type,(int)dst->type);
     /* No-op case */
     if (need_bkg<H5T_BKG_YES && 0==H5T_cmp(src, dst)) {
 	*pcdata = &noop_cdata;
 	HRETURN(H5T_conv_noop);
     }
     
+printf("%s: check 3.0\n",FUNC);
     /* Find it */
     if (NULL == (path = H5T_path_find(NULL, src, dst, TRUE, NULL))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
 		      "unable to create conversion path");
     }
+printf("%s: path=%p\n",FUNC,path);
 
     if ((ret_value=path->func)) {
 	*pcdata = &(path->cdata);
@@ -4448,114 +4468,119 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
 
     /* Binary search */
     while (lt < rt) {
-	md = (lt + rt) / 2;
-	assert (H5T_path_g[md]);
+        md = (lt + rt) / 2;
+        assert (H5T_path_g[md]);
 
-	cmp = H5T_cmp(src, H5T_path_g[md]->src);
-	if (0 == cmp) cmp = H5T_cmp(dst, H5T_path_g[md]->dst);
+        cmp = H5T_cmp(src, H5T_path_g[md]->src);
+        if (0 == cmp) cmp = H5T_cmp(dst, H5T_path_g[md]->dst);
 
-	if (cmp < 0) {
-	    rt = md;
-	} else if (cmp > 0) {
-	    lt = md + 1;
-	} else {
-	    HRETURN(H5T_path_g[md]);
-	}
+        if (cmp < 0) {
+            rt = md;
+        } else if (cmp > 0) {
+            lt = md + 1;
+        } else {
+            HRETURN(H5T_path_g[md]);
+        }
     }
+printf("%s: check 2.0, create=%d, md=%d\n",FUNC,(int)create,md);
 
     /* Insert */
     if (create) {
-	if (H5T_npath_g >= H5T_apath_g) {
-	    size_t na = MAX(64, 2 * H5T_apath_g);
-	    H5T_path_t **x = H5MM_realloc (H5T_path_g,
-					   na*sizeof(H5T_path_t*));
-	    if (!x) {
-		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-			       "memory allocation failed");
-	    }
-	    H5T_apath_g = (intn)na;
-	    H5T_path_g = x;
-	}
-	if (cmp > 0) md++;
+        if (H5T_npath_g >= H5T_apath_g) {
+            size_t na = MAX(64, 2 * H5T_apath_g);
+            H5T_path_t **x = H5MM_realloc (H5T_path_g,
+                           na*sizeof(H5T_path_t*));
+            if (!x) {
+            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+                       "memory allocation failed");
+            }
+            H5T_apath_g = (intn)na;
+            H5T_path_g = x;
+        }
+        if (cmp > 0) md++;
 
-	/* make room */
-	HDmemmove(H5T_path_g + md + 1, H5T_path_g + md,
-		  (H5T_npath_g - md) * sizeof(H5T_path_t*));
-	H5T_npath_g++;
+        /* make room */
+        HDmemmove(H5T_path_g + md + 1, H5T_path_g + md,
+              (H5T_npath_g - md) * sizeof(H5T_path_t*));
+        H5T_npath_g++;
 
-	/* insert */
-	if (NULL==(path=H5T_path_g[md]=H5MM_calloc (sizeof(H5T_path_t)))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-			   "memory allocation failed");
-	}
-	path->src = H5T_copy(src, H5T_COPY_ALL);
-	path->dst = H5T_copy(dst, H5T_COPY_ALL);
+        /* insert */
+        if (NULL==(path=H5T_path_g[md]=H5MM_calloc (sizeof(H5T_path_t)))) {
+            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+                   "memory allocation failed");
+        }
+printf("%s: check 3.0, src=%p, dst=%p\n",FUNC,src,dst);
+printf("%s: check 3.0, src->type=%d, dst->type=%d\n",FUNC,(int)src->type,(int)dst->type);
+        path->src = H5T_copy(src, H5T_COPY_ALL);
+        path->dst = H5T_copy(dst, H5T_COPY_ALL);
 
-	/* Associate a function with the path if possible */
-	if (func) {
-	    HDstrncpy (path->name, name, H5T_NAMELEN);
-	    path->name[H5T_NAMELEN-1] = '\0';
-	    path->func = func;
-	    path->is_hard = TRUE;
-	    path->cdata.command = H5T_CONV_INIT;
-	    if (NULL==(path->cdata.stats=H5MM_calloc(sizeof(H5T_stats_t)))) {
-		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-			       "memory allocation failed");
-	    }
-	    if ((src_id=H5I_register(H5I_DATATYPE,
-				     H5T_copy(path->src, H5T_COPY_ALL))) < 0 ||
-		(dst_id=H5I_register(H5I_DATATYPE,
-				     H5T_copy(path->dst, H5T_COPY_ALL))) < 0) {
-		HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
-			      "unable to register conv types for query");
-	    }
-	    if ((func)(src_id, dst_id, &(path->cdata), 0, NULL, NULL)<0) {
+printf("%s: check 3.5, func=%p, name=%s\n",FUNC,func,(name!=NULL ? name : "NULL"));
+        /* Associate a function with the path if possible */
+        if (func) {
+            HDstrncpy (path->name, name, H5T_NAMELEN);
+            path->name[H5T_NAMELEN-1] = '\0';
+            path->func = func;
+            path->is_hard = TRUE;
+            path->cdata.command = H5T_CONV_INIT;
+            if (NULL==(path->cdata.stats=H5MM_calloc(sizeof(H5T_stats_t)))) {
+            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+                       "memory allocation failed");
+            }
+            if ((src_id=H5I_register(H5I_DATATYPE,
+                         H5T_copy(path->src, H5T_COPY_ALL))) < 0 ||
+            (dst_id=H5I_register(H5I_DATATYPE,
+                         H5T_copy(path->dst, H5T_COPY_ALL))) < 0) {
+            HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
+                      "unable to register conv types for query");
+            }
+            if ((func)(src_id, dst_id, &(path->cdata), 0, NULL, NULL)<0) {
 #ifdef H5T_DEBUG
-		if (H5DEBUG(T)) {
-		    fprintf (H5DEBUG(T), "H5T: conversion function init "
-			     "failed\n");
-		}
+            if (H5DEBUG(T)) {
+                fprintf (H5DEBUG(T), "H5T: conversion function init "
+                     "failed\n");
+            }
 #endif
-		H5E_clear(); /*ignore the failure*/
-	    }
-	    H5I_dec_ref(src_id);
-	    H5I_dec_ref(dst_id);
-	} else {
-	    /* Locate a soft function */
-	    for (i=H5T_nsoft_g-1; i>=0 && !path->func; --i) {
-		if (src->type!=H5T_soft_g[i].src ||
-		    dst->type!=H5T_soft_g[i].dst) {
-		    continue;
-		}
-		if ((src_id=H5I_register(H5I_DATATYPE,
-					 H5T_copy(path->src,
-						  H5T_COPY_ALL))) < 0 ||
-		    (dst_id=H5I_register(H5I_DATATYPE,
-					 H5T_copy(path->dst,
-						  H5T_COPY_ALL))) < 0) {
-		    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
-				  "unable to register conv types for query");
-		}
-		path->cdata.command = H5T_CONV_INIT;
-		path->cdata.stats = H5MM_calloc (sizeof(H5T_stats_t));
-		if (NULL==path->cdata.stats) {
-		    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-				   "memory allocation failed");
-		}
-		if ((H5T_soft_g[i].func) (src_id, dst_id, &(path->cdata),
-					  H5T_CONV_INIT, NULL, NULL) < 0) {
-		    H5MM_xfree(path->cdata.stats);
-		    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
-		    H5E_clear(); /*ignore the error*/
-		} else {
-		    HDstrcpy (path->name, H5T_soft_g[i].name);
-		    path->func = H5T_soft_g[i].func;
-		}
-		H5I_dec_ref(src_id);
-		H5I_dec_ref(dst_id);
-	    }
-	}
+            H5E_clear(); /*ignore the failure*/
+            }
+            H5I_dec_ref(src_id);
+            H5I_dec_ref(dst_id);
+        } else {
+            /* Locate a soft function */
+            for (i=H5T_nsoft_g-1; i>=0 && !path->func; --i) {
+            if (src->type!=H5T_soft_g[i].src ||
+                dst->type!=H5T_soft_g[i].dst) {
+                continue;
+            }
+            if ((src_id=H5I_register(H5I_DATATYPE,
+                         H5T_copy(path->src,
+                              H5T_COPY_ALL))) < 0 ||
+                (dst_id=H5I_register(H5I_DATATYPE,
+                         H5T_copy(path->dst,
+                              H5T_COPY_ALL))) < 0) {
+                HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
+                      "unable to register conv types for query");
+            }
+            path->cdata.command = H5T_CONV_INIT;
+            path->cdata.stats = H5MM_calloc (sizeof(H5T_stats_t));
+            if (NULL==path->cdata.stats) {
+                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+                       "memory allocation failed");
+            }
+            if ((H5T_soft_g[i].func) (src_id, dst_id, &(path->cdata),
+                          H5T_CONV_INIT, NULL, NULL) < 0) {
+                H5MM_xfree(path->cdata.stats);
+                HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
+                H5E_clear(); /*ignore the error*/
+            } else {
+                HDstrcpy (path->name, H5T_soft_g[i].name);
+                path->func = H5T_soft_g[i].func;
+            }
+            H5I_dec_ref(src_id);
+            H5I_dec_ref(dst_id);
+            }
+        }
     }
+printf("%s: leaving path=%p\n",FUNC,path);
     FUNC_LEAVE(path);
 }
 

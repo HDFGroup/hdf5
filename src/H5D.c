@@ -1865,6 +1865,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 			"unable to register types for conversion");
 	}
     }
+printf("%s: after H5T_find, tconv_func=%p\n",FUNC,tconv_func);
     if (NULL==(sconv=H5S_find(mem_space, file_space))) {
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "unable to convert from memory to file data space");

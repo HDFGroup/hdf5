@@ -34,9 +34,8 @@ static void		H5R_term_interface(void);
 /* Static functions */
 static herr_t H5R_create(href_t *ref, H5G_entry_t *loc, const char *name,
         H5R_type_t ref_type, H5S_t *space);
-static hid_t H5R_dereference(href_t *ref);
+static hid_t H5R_dereference(H5D_t *dset, href_t *ref);
 static H5S_t * H5R_get_space(href_t *ref);
-static H5R_type_t H5R_get_type(href_t *ref);
 
 
 /*--------------------------------------------------------------------------
@@ -136,10 +135,8 @@ H5R_create(href_t *ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type,
         HGOTO_ERROR (H5E_REFERENCE, H5E_NOTFOUND, FAIL, "unable to stat object");
 
     /* Set information for reference */
-    ref->type=ref_type;
-    ref->objno[0]=sb.objno[0];
-    ref->objno[1]=sb.objno[1];
-    ref->file=loc->file;
+    ref->oid[0]=sb.objno[0];
+    ref->oid[1]=sb.objno[1];
 
     /* Return success */
     ret_value=SUCCEED;
@@ -216,6 +213,7 @@ done:
     Opens the HDF5 object referenced.
  USAGE
     hid_t H5R_dereference(ref)
+        H5D_t *dset;        IN: Dataset reference object is in.
         href_t *ref;        IN: Reference to open.
         
  RETURNS
@@ -230,7 +228,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hid_t
-H5R_dereference(href_t *ref)
+H5R_dereference(H5D_t *dset, href_t *ref)
 {
     H5D_t *dataset;             /* Pointer to dataset to open */
     H5G_entry_t ent;            /* Symbol table entry */
@@ -240,6 +238,7 @@ H5R_dereference(href_t *ref)
 
     assert(ref);
 
+printf("%s: ref->oid=%ld-%ld\n",FUNC,(long)ref->oid[0],ref->oid[1]);
     /*
      * Switch on object type, when we implement that feature, always try to
      *  open a dataset for now
@@ -252,9 +251,9 @@ H5R_dereference(href_t *ref)
 
     /* Initialize the symbol table entry */
     HDmemset(&ent,0,sizeof(H5G_entry_t));
-    HDmemcpy(&(ent.header),ref->objno,sizeof(haddr_t));
+    HDmemcpy(&(ent.header),ref->oid,sizeof(haddr_t));
     ent.type=H5G_NOTHING_CACHED;
-    ent.file=ref->file;
+/* ent.file=ref->file; */
 
     /* Open the dataset object */
     if (H5D_open_oid(dataset, &ent) < 0) {
@@ -267,6 +266,7 @@ H5R_dereference(href_t *ref)
         HRETURN_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
 		      "can't register dataset");
     }
+printf("%s: ret_value=%ld\n",FUNC,(long)ret_value);
 
 done:
     FUNC_LEAVE(ret_value);
@@ -280,6 +280,7 @@ done:
     Opens the HDF5 object referenced.
  USAGE
     hid_t H5Rdereference(ref)
+        hid_t dataset;      IN: Dataset reference object is in.
         href_t *ref;        IN: Reference to open.
         
  RETURNS
@@ -293,19 +294,22 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5Rdereference(href_t *ref)
+H5Rdereference(hid_t dataset, href_t *ref)
 {
+    H5D_t		   *dset = NULL;	/* dataset object */
     hid_t ret_value = FAIL;
 
     FUNC_ENTER(H5Rdereference, FAIL);
-    H5TRACE1("i","*r",ref);
+    H5TRACE2("i","i*r",dataset,ref);
 
     /* Check args */
+    if (H5I_DATASET != H5I_get_type(dataset) || NULL == (dset = H5I_object(dataset)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     if(ref==NULL)
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer");
 
     /* Create reference */
-    if ((ret_value=H5R_dereference(ref))<0)
+    if ((ret_value=H5R_dereference(dset, ref))<0)
         HGOTO_ERROR (H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable dereference object");
 
 done:
@@ -393,81 +397,4 @@ H5Rget_space(href_t *ref)
 done:
     FUNC_LEAVE(ret_value);
 }   /* end H5Rget_space() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5R_get_type
- PURPOSE
-    Retrieves the type of a reference.
- USAGE
-    H5R_type_t H5R_get_type(ref)
-        href_t *ref;        IN: Reference to open.
-        
- RETURNS
-    Reference type on success, <0 on failure
- DESCRIPTION
-    Given a reference to some object, returns the type of reference.  See
-    list of valid H5R_type_t in H5Rpublic.h
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static H5R_type_t
-H5R_get_type(href_t *ref)
-{
-    H5R_type_t ret_value = H5R_BADTYPE;
-
-    FUNC_ENTER(H5R_get_type, H5R_BADTYPE);
-
-    assert(ref);
-
-    ret_value=ref->type;
-
-#ifdef LATER
-done:
-#endif /* LATER */
-    FUNC_LEAVE(ret_value);
-}   /* end H5R_get_type() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Rget_type
- PURPOSE
-    Retrieves the type of a reference.
- USAGE
-    H5R_type_t H5Rget_space(ref)
-        href_t *ref;        IN: Reference to open.
-        
- RETURNS
-    Valid reference type on success, <0 on failure
- DESCRIPTION
-    Given a reference to some object, returns the type of reference.  See
-    list of valid H5R_type_t in H5Rpublic.h
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-H5R_type_t
-H5Rget_type(href_t *ref)
-{
-    H5R_type_t ret_value = H5R_BADTYPE;
-
-    FUNC_ENTER(H5Rget_type, FAIL);
-    H5TRACE1("Rt","*r",ref);
-
-    /* Check args */
-    if(ref==NULL)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer");
-
-    /* Create reference */
-    if ((ret_value=H5R_get_type(ref))<0)
-        HGOTO_ERROR (H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to check reference type");
-
-done:
-    FUNC_LEAVE(ret_value);
-}   /* end H5Rget_type() */
 

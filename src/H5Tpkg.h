@@ -24,6 +24,7 @@
 #endif
 
 #include <H5HGprivate.h>
+#include <H5Rprivate.h>
 #include <H5Tprivate.h>
 
 #define H5T_NAMELEN	10	/*length of debugging name buffer	     */
@@ -54,6 +55,10 @@ typedef struct H5T_atomic_t {
 	    H5T_cset_t	cset;	/*character set				     */
 	    H5T_str_t	pad;	/*space or null padding of extra bytes	     */
 	} s;
+
+	struct {
+	    H5R_type_t	rtype;	/* Type of reference stored */
+	} r;
     } u;
 } H5T_atomic_t;
 

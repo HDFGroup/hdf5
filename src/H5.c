@@ -1938,33 +1938,14 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	case 'r':
 	    if (ptr) {
-		if (vp) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
-		} else {
-		    fprintf(out, "NULL");
-		}
+            if (vp) {
+                fprintf (out, "0x%lx", (unsigned long)vp);
+            } else {
+                fprintf(out, "NULL");
+            }
 	    } else {
-		href_t ref = va_arg (ap, href_t);
-		switch (ref.type) {
-		case H5R_BADTYPE:
-		    fprintf (out, "H5R_BADTYPE");
-		    break;
-		case H5R_OBJECT:
-		    fprintf (out, "H5R_OBJECT");
-		    break;
-		case H5R_DATASET_REGION:
-		    fprintf (out, "H5R_DATASET_REGION");
-		    break;
-		case H5R_INTERNAL:
-		    fprintf (out, "H5R_INTERNAL");
-		    break;
-		case H5R_MAXTYPE:
-		    fprintf (out, "H5R_MAXTYPE");
-		    break;
-		default:
-		    fprintf (out, "BADTYPE(%ld)", (long)ref.type);
-		    break;
-		}
+            href_t ref = va_arg (ap, href_t);
+            fprintf (out, "Reference Object=%p", &ref);
 	    }
 	    break;
 
