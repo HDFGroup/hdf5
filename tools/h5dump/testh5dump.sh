@@ -146,6 +146,12 @@ TOOLTEST tarray7.ddl tarray7.h5
 # test for files with empty data
 TOOLTEST tempty.ddl tempty.h5
 
+# test Subsetting
+TOOLTEST tall-4s.ddl --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5
+TOOLTEST tall-5s.ddl -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5
+TOOLTEST tdset-3s.ddl -d "/dset1[1,1;;;]" tdset.h5
+TOOLTEST tdset2-1s.ddl -d "/dset1[;3 2;4 4;1 4]" tdset2.h5
+
 # test XML
 TOOLTEST tall.h5.xml --xml tall.h5
 TOOLTEST tattr.h5.xml --xml tattr.h5
