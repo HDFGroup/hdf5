@@ -4915,7 +4915,7 @@ hid_t H5Pget_class_new(hid_t plist_id)
 
     /* Increment the outstanding references to the class object */
     if(H5P_access_class(pclass,H5P_MOD_INC_REF)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't increment class ID ref count");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't increment class ID ref count");
 
     /* Get an atom for the class */
     if ((ret_value = H5I_register(H5I_GENPROP_CLS, pclass))<0)
@@ -6283,7 +6283,7 @@ hid_t H5Pget_class_parent(hid_t pclass_id)
 
     /* Increment the outstanding references to the class object */
     if(H5P_access_class(parent,H5P_MOD_INC_REF)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't increment class ID ref count");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't increment class ID ref count");
 
     /* Get an atom for the class */
     if ((ret_value = H5I_register(H5I_GENPROP_CLS, parent))<0)
