@@ -136,7 +136,7 @@ New Features
 
   o Support for new platforms and languages
   =========================================
-    * HDF5 C++ Library is supported on Windows platforms.
+    * HDF5 C++ Library is supported on Windows platforms (shared and static)
     * HDF5 F90 shared library is supported on Windows platforms.
     * HDF5 C Library is supported on IA32 and IA64 platforms.
 

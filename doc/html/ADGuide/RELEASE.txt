@@ -1,4 +1,4 @@
-HDF5 version 1.4.4-snap3 released on Sat Apr 27 07:28:14 CDT 2002
+HDF5 version 1.4.4-snap4 released on Sat May 18 07:47:49 CDT 2002
 ==============================================================================
 
 
@@ -44,20 +44,34 @@ New Features
     --------- 
       * Fill-value's forward-compatibility with 1.5 was added.  SLU -
 	2002/04/11
-      * Added serial multi-gigabyte file size test.  "test/big -h" shows
-        the help page.  AKC - 2002/03/29
       * A new query function H5Tget_member_index has been added for compound
 	and enumeration data types, to retrieve member's index by name.
 	SLU - 2002/04/05
+      * Added serial multi-gigabyte file size test.  "test/big -h" shows
+        the help page.  AKC - 2002/03/29
  
     o APIs
     ------
+      * F90 subroutines h5dwrite_f, h5dread_f, h5awrite_f and h5aread_f were overloaded
+        with "dims" argument to be assumed size array of type INTEGER(HSIZE_T). We 
+        recommend to use the subroutines with the new type. Module subroutines that
+        accept "dims" as INTEGER array of size 7 will be depricated in 1.6 release.
+        EIP - 2002/05/06
  
     o Performance
     -------------
 
   o Parallel Library
   ==================
+    * Changed method for allocating chunked dataset blocks to only allocate
+      blocks that don't already exist, instead of attempting to create all the
+      blocks all the time.  This improves performance for chunked
+      datasets.  QAK - 2002/05/17
+    * Allowed the call to MPI_File_sync to be avoided when the file is going to
+      immediately be closed, improving performance.  QAK - 2002/05/13
+    * Allow the metadata writes to be shared among all processes, easing the
+      burden on process 0.  QAK - 2002/05/10
+
 
   o Tools
   =======
@@ -65,11 +79,17 @@ New Features
 
   o Support for new platforms and languages
   =========================================
-
+      * Parallel Fortran Library works now on HP-UX B.11.00 Sys V
+        EIP - 2002/05/06
 
 
 Bug Fixes since HDF5-1.4.3 Release
 ==================================
+    * Fixed bug where read/write intent in file IDs created with H5Freopen
+        was not being kept the same as the original file.  QAK - 2002/05/14
+    * Fixed bug where selection offsets were not being used when iterating
+        through point and hyperslab selections with
+        H5Diterate().  QAK - 2002/04/29
     * Fixed bug where the data for several level deep nested compound &
         variable-length datatypes used for datasets were getting corrupted when
         written to the file.  QAK - 2002/04/17
@@ -177,7 +197,7 @@ Supported Configuration Features Summary
     IRIX64_6.5 32  y  y (2)     n    n         n     y          y     y
     HPUX10.20      y  n         y    n         n     y          y     y
     HPUX11.00      y  y         y    n         n     y          y     y
-    HPUX11 SysV    y  y         y    n         n     y          y     y
+    HPUX11 SysV    y  y         y    y         n     y          y     y
     DECOSF         y  n         y    n         y     y          y     y
     T3E            y  y         y    y         n     n          y     y
     SV1            y  n         y    n         n     n          y     y
@@ -266,15 +286,15 @@ Known Problems
       Makefile in the tools/h4toh4 and tools/h5toh4 directories to add 
       -DIA64 to the compilation flags.
 
-    * On IA32 ansd IA64 systems, if you use a compiler other than GCC 
-      (such as Intel's ecc compiler), you will need to modify the generated
-      "libtool" program after configuration is finished. On or around line 102 
-      of the libtool file, there are lines which look like:
+	* On IA32 and IA64 systems, if you use a compiler other than GCC (such as
+	  Intel's ecc or icc compilers), you will need to modify the generated
+	  "libtool" program after configuration is finished. On or around line 104
+	  of the libtool file, there are lines which look like:
 
           # How to pass a linker flag through the compiler.
           wl=""
 
-      change the lines to this:
+      change these lines to this:
 
           # How to pass a linker flag through the compiler.
           wl="-Wl,"
