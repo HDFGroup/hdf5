@@ -44,6 +44,27 @@ cache%2\%1\cache%2
 
 echo.
 echo ============================
+echo Testing btree2 
+echo ============================
+
+btree2%2\%1\btree2%2
+
+echo.
+echo ============================
+echo Testing blocktrack 
+echo ============================
+
+blocktrack%2\%1\blocktrack%2
+
+echo.
+echo ============================
+echo Testing sheap 
+echo ============================
+
+sheap%2\%1\sheap%2
+
+echo.
+echo ============================
 echo Testing hyperslab 
 echo ============================
 
