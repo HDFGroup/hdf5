@@ -40,7 +40,7 @@ case "X-$CC_BASENAME" in
 
 	# Extra production flags
 	# Note: higher optimizations relax alignment requirements needed.
-	PROD_CFLAGS=-O
+	PROD_CFLAGS="-O -s"
 	PROD_CPPFLAGS=
 
 	# Extra profiling flags

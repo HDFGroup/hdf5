@@ -9,7 +9,7 @@
 #
 lib: $(LIB)
 $(LIB) __no_library__: $(LIB_OBJ)
-	@$(LT_LINK_LIB) -o $@ $(CFLAGS) $(LIB_OBJ) $(LIBS)
+	@$(LT_LINK_LIB) -o $@ $(CFLAGS) $(LIB_OBJ) $(LDFLAGS) $(LIBS)
 
 progs: $(LIB) $(PROGS)
 
