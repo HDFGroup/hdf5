@@ -15,6 +15,7 @@
 #ifndef H5FDFPHDF5_H__
 #define H5FDFPHDF5_H__
 
+#include "H5FDmpio.h"
 #include "H5FDpublic.h"
 #include "H5Ipublic.h"
 
@@ -42,16 +43,37 @@
 extern "C" {
 #endif  /* __cplusplus */
 
-H5_DLL hid_t H5FD_fphdf5_init(void);
-H5_DLL herr_t H5Pset_fapl_fphdf5(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
-H5_DLL herr_t H5Pget_fapl_fphdf5(hid_t fapl_id, MPI_Comm *comm/*out*/,
-                                 MPI_Info *info/*out*/);
+/*
+ *==--------------------------------------------------------------------------==
+ *                               API Functions
+ *==--------------------------------------------------------------------------==
+ */
+H5_DLL herr_t   H5Pset_dxpl_fphdf5(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode);
+H5_DLL herr_t   H5Pget_dxpl_fphdf5(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode);
+H5_DLL herr_t   H5Pset_fapl_fphdf5(hid_t fapl_id, MPI_Comm comm,
+                                   MPI_Comm barrier_comm, MPI_Info info,
+                                   unsigned sap_rank);
+H5_DLL herr_t   H5Pget_fapl_fphdf5(hid_t fapl_id, MPI_Comm *comm,
+                                   MPI_Comm *barrier_comm, MPI_Info *info,
+                                   unsigned *sap_rank, unsigned *capt_rank);
+
+/*
+ *==--------------------------------------------------------------------------==
+ *                         Private Library Functions
+ *==--------------------------------------------------------------------------==
+ */
+H5_DLL hid_t    H5FD_fphdf5_init(void);
 H5_DLL MPI_Comm H5FD_fphdf5_communicator(H5FD_t *_file);
-H5_DLL herr_t H5FD_fphdf5_setup(hid_t dxpl_id, MPI_Datatype btype,
-                                MPI_Datatype ftype, unsigned use_view);
-H5_DLL herr_t H5FD_fphdf5_teardown(hid_t dxpl_id);
-H5_DLL int H5FD_fphdf5_mpi_rank(H5FD_t *_file);
-H5_DLL int H5FD_fphdf5_mpi_size(H5FD_t *_file);
+H5_DLL MPI_Comm H5FD_fphdf5_barrier_communicator(H5FD_t *_file);
+H5_DLL herr_t   H5FD_fphdf5_setup(hid_t dxpl_id, MPI_Datatype btype,
+                                  MPI_Datatype ftype, unsigned use_view);
+H5_DLL herr_t   H5FD_fphdf5_teardown(hid_t dxpl_id);
+H5_DLL int      H5FD_fphdf5_mpi_rank(H5FD_t *_file);
+H5_DLL int      H5FD_fphdf5_mpi_size(H5FD_t *_file);
+
+H5_DLL herr_t   H5FD_fphdf5_write_real(H5FD_t *_file, H5FD_mem_t type,
+                                       hid_t dxpl_id, MPI_Offset mpi_off,
+                                       int size, const void *buf);
 
 #ifdef __cplusplus
 }
