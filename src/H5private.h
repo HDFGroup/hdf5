@@ -140,13 +140,6 @@
 #define VC_EXTRALEAN		/*Exclude rarely-used stuff from Windows headers */
 #include <windows.h>
 
-/* H5_inline */
-
-/* remove any previous defs made by configure in unix */
-#ifdef H5_inline 
-# undef H5_inline
-#endif
-
 /*
 inline is now in C but in the C99 standard and not the old C89 version so
 MS doesn't recognize it yet (as of April 2001)
@@ -157,9 +150,13 @@ MS doesn't recognize it yet (as of April 2001)
 # define H5_inline 
 #endif
 
+#endif /*WIN32*/
 
-#endif 
-/*WIN32*/
+/* H5_inline */
+#ifndef H5_inline
+#define H5_inline
+#endif /* H5_inline */
+
 
 #ifndef F_OK
 #   define F_OK	00
