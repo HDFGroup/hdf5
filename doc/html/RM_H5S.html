@@ -755,7 +755,7 @@ I/O is performed.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Identifier of dataspace to query.
+            <dd>IN: Identifier of dataspace to query.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns the number of hyperslab blocks in 
@@ -831,7 +831,7 @@ I/O is performed.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Identifier of dataspace to query.
+            <dd>IN: Identifier of dataspace to query.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns the number of element points in the current dataspace selection if successful.
@@ -900,10 +900,10 @@ I/O is performed.
         <em>hsize_t *</em><code>end</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>Gets the bounding box containing the selection.
+    <dd>Gets the bounding box containing the current selection.
 <dt><strong>Description:</strong>
     <dd><code>H5Sget_select_bounds</code> retrieves the coordinates of 
-        bounding box containing the current selection and places
+        the bounding box containing the current selection and places
         them into user-supplied buffers.  
         <p>
         The <code>start</code> and <code>end</code> buffers must be large
@@ -911,21 +911,21 @@ I/O is performed.
         <p>
         The bounding box exactly contains the selection.  
         I.e., if a 2-dimensional element selection is currently
-        defined with the points (4,5), (6,8), and (10,7), then the 
-        bounding box will be (4, 5), (10, 8).  
-        <p>
-        Calling this function on a <code>none</code> selection returns 
-        <code>FAIL</code>.
+        defined as containing the points (4,5), (6,8), and (10,7), 
+        then the bounding box will be (4, 5), (10, 8).  
         <p>
         The bounding box calculation includes the current offset of the
         selection within the dataspace extent.
+        <p>
+        Calling this function on a <code>none</code> selection will 
+        return <code>FAIL</code>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Identifier of dataspace to query.
-        <em>hsize_t *</em><code>start</code>
+            <dd>IN: Identifier of dataspace to query.
+        <dt><em>hsize_t *</em><code>start</code>
             <dd>OUT: Starting coordinates of the bounding box.
-        <em>hsize_t *</em><code>end</code>
+        <dt><em>hsize_t *</em><code>end</code>
             <dd>OUT: Ending coordinates of the bounding box, 
                 i.e., the coordinates of the diagonally opposite corner.
     </dl>
