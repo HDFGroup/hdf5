@@ -1,4 +1,4 @@
-HDF5 version 1.4.4-snap4 released on Sat May 18 07:47:49 CDT 2002
+HDF5 version 1.4.4-snap5 released on Tue May 28 09:01:34 CDT 2002
 ==============================================================================
 
 
