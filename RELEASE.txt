@@ -33,6 +33,7 @@ CONTENTS
 - Pablo Support 
 - Bug Fixes since HDF5-1.2.0 
 - Bug Fixes since HDF5-1.4.0-beta2
+- Bug Fixes since HDF5-1.4.0
 - Documentation
 - Platforms Tested
 - Supported Configuration Features
@@ -370,6 +371,15 @@ Bug Fixes since HDF5-1.4.0-beta2
    * Removed ragged array code from library.
    * F90 library and module files are installed properly now on all supported 
      platforms.
+
+
+Bug Fixes since HDF5-1.4.0 Release
+==================================
+
+   * Fixed bug with contiguous hyperslabs not being detected, causing
+     slower I/O than necessary.
+   * Fixed bug where non-aligned hyperslab I/O on chunked datasets was
+     causing errors during I/O
 
 
 Documentation
