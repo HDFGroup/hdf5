@@ -1761,7 +1761,9 @@ H5T_init_interface(void)
     status |= H5T_register(H5T_PERS_SOFT, "s_s", string, string, H5T_conv_s_s);
     status |= H5T_register(H5T_PERS_SOFT, "b_b", bitfield, bitfield, H5T_conv_b_b);
     status |= H5T_register(H5T_PERS_SOFT, "ibo", fixedpt, fixedpt, H5T_conv_order);
+    status |= H5T_register(H5T_PERS_SOFT, "ibo(opt)", fixedpt, fixedpt, H5T_conv_order_opt);
     status |= H5T_register(H5T_PERS_SOFT, "fbo", floatpt, floatpt, H5T_conv_order);
+    status |= H5T_register(H5T_PERS_SOFT, "fbo(opt)", floatpt, floatpt, H5T_conv_order_opt);
     status |= H5T_register(H5T_PERS_SOFT, "struct(no-opt)", compound, compound, H5T_conv_struct);
     status |= H5T_register(H5T_PERS_SOFT, "struct(opt)", compound, compound, H5T_conv_struct_opt);
     status |= H5T_register(H5T_PERS_SOFT, "enum", enum_type, enum_type, H5T_conv_enum);
