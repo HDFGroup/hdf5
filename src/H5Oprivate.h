@@ -25,7 +25,7 @@
 #include <H5Tprivate.h>
 #include <H5Pprivate.h>
 
-#define H5O_MIN_SIZE	16		/*min obj header data size	*/
+#define H5O_MIN_SIZE	32		/*min obj header data size	*/
 #define H5O_NMESGS	32		/*initial number of messages	*/
 #define H5O_NCHUNKS	8		/*initial number of chunks	*/
 #define H5O_NEW_MESG	(-1)		/*new message			*/
@@ -175,7 +175,8 @@ intn H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
 		 hbool_t *ent_modified, const H5O_class_t *type,
 		 intn overwrite, const void *mesg);
 herr_t H5O_remove (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
-		   const H5O_class_t *type, intn sequence);
+		   hbool_t *ent_modified, const H5O_class_t *type,
+		   intn sequence);
 herr_t H5O_reset (const H5O_class_t *type, void *native);
 herr_t H5O_debug (hdf5_file_t *f, haddr_t addr, FILE *stream,
 		  intn indent, intn fwidth);

@@ -863,8 +863,7 @@ herr_t
 H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 		intn fwidth, haddr_t heap)
 {
-   int		i, j;
-   char		buf[64];
+   int		i;
    H5G_node_t	*sn = NULL;
    herr_t	status;
    const char	*s;
@@ -909,56 +908,7 @@ H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 		  "Name:",
 		  s);
       }
-      fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	       "Name offset into private heap:",
-	       (unsigned long)(sn->entry[i].name_off));
-      fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	       "Object header address:",
-	       (unsigned long)(sn->entry[i].header));
-      
-      fprintf (stream, "%*s%-*s ", indent, "", fwidth,
-	       "Symbol type:");
-      switch (sn->entry[i].type) {
-      case H5G_NOTHING_CACHED:
-	 fprintf (stream, "Nothing Cached\n");
-	 break;
-	 
-      case H5G_CACHED_SDATA:
-	 fprintf (stream, "S-data\n");
-	 fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
-		  "Number type length:",
-		  (unsigned)(sn->entry[i].cache.sdata.nt.length));
-	 fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
-		  "Number type architecture:",
-		  (unsigned)(sn->entry[i].cache.sdata.nt.arch));
-	 fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
-		  "Number type type:",
-		  (unsigned)(sn->entry[i].cache.sdata.nt.type));
-	 fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
-		  "Dimensionality:",
-		  (unsigned)(sn->entry[i].cache.sdata.ndim));
-	 for (j=0; j<sn->entry[i].cache.sdata.ndim && j<4; j++) {
-	    sprintf (buf, "Dimension %d", j);
-	    fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
-		     buf,
-		     (unsigned)(sn->entry[i].cache.sdata.dim[j]));
-	 }
-	 break;
-	 
-      case H5G_CACHED_STAB:
-	 fprintf (stream, "Symbol Table\n");
-	 fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-		  "B-tree address:",
-		  (unsigned long)(sn->entry[i].cache.stab.btree));
-	 fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-		  "Heap address:",
-		  (unsigned long)(sn->entry[i].cache.stab.heap));
-	 break;
-
-      default:
-	 fprintf (stream, "*** Unknown symbol type %d\n", sn->entry[i].type);
-	 break;
-      }
+      H5G_debug (f, sn->entry+i, stream, indent, fwidth);
    }
 
    FUNC_LEAVE (SUCCEED);

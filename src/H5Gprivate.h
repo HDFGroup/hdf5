@@ -170,6 +170,8 @@ herr_t H5G_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent);
 herr_t H5G_decode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n);
 herr_t H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent);
 herr_t H5G_encode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n);
+herr_t H5G_debug (hdf5_file_t *f, H5G_entry_t *ent, FILE *stream, intn indent,
+		  intn fwidth);
 
 #endif
 

@@ -47,9 +47,9 @@ static intn interface_initialize_g = FALSE;
 /* ID to type mapping */
 static const H5O_class_t *const message_type_g[] = {
    H5O_NULL,		/*0x0000 Null 					*/
-   NULL,		/*0x0001 Simple dimensionality			*/
+   H5O_SIM_DIM,		/*0x0001 Simple dimensionality			*/
    NULL,		/*0x0002 Data space (fiber bundle?)		*/
-   NULL,		/*0x0003 Simple data type			*/
+   H5O_SIM_DTYPE,	/*0x0003 Simple data type			*/
    NULL,		/*0x0004 Compound data type			*/
    NULL,		/*0x0005 Data storage -- standard object	*/
    NULL,		/*0x0006 Data storage -- compact object		*/
@@ -253,16 +253,25 @@ H5O_load (hdf5_file_t *f, haddr_t addr, const void *_data)
 	    HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, NULL);
 	 }
 
-	 mesgno = oh->nmesgs++;
-	 if (mesgno>=nmesgs) {
-	    HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL);
+	 if (H5O_NULL_ID==id && oh->nmesgs>0 &&
+	     H5O_NULL_ID==oh->mesg[oh->nmesgs-1].type->id &&
+	     oh->mesg[oh->nmesgs-1].chunkno==chunkno) {
+	    /* combine adjacent null messages */
+	    mesgno = oh->nmesgs - 1;
+	    oh->mesg[mesgno].raw_size += 4 + mesg_size;
+	 } else {
+	    /* new message */
+	    mesgno = oh->nmesgs++;
+	    if (mesgno>=nmesgs) {
+	       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL);
+	    }
+	    oh->mesg[mesgno].type = message_type_g[id];
+	    oh->mesg[mesgno].dirty = FALSE;
+	    oh->mesg[mesgno].native = NULL;
+	    oh->mesg[mesgno].raw = p;
+	    oh->mesg[mesgno].raw_size = mesg_size;
+	    oh->mesg[mesgno].chunkno = chunkno;
 	 }
-	 oh->mesg[mesgno].type = message_type_g[id];
-	 oh->mesg[mesgno].dirty = FALSE;
-	 oh->mesg[mesgno].native = NULL;
-	 oh->mesg[mesgno].raw = p;
-	 oh->mesg[mesgno].raw_size = mesg_size;
-	 oh->mesg[mesgno].chunkno = chunkno;
       }
       assert (p == oh->chunk[chunkno].image + chunk_size);
 
@@ -403,10 +412,8 @@ H5O_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 
       /* destroy messages */
       for (i=0; i<oh->nmesgs; i++) {
-	 if (oh->mesg[i].native) {
-	    H5O_reset (oh->mesg[i].type, oh->mesg[i].native);
-	    oh->mesg[i].native = H5MM_xfree (oh->mesg[i].native);
-	 }
+	 H5O_reset (oh->mesg[i].type, oh->mesg[i].native);
+	 oh->mesg[i].native = H5MM_xfree (oh->mesg[i].native);
       }
       oh->mesg = H5MM_xfree (oh->mesg);
 
@@ -441,14 +448,16 @@ herr_t
 H5O_reset (const H5O_class_t *type, void *native)
 {
    FUNC_ENTER (H5O_reset, NULL, FAIL);
-   
-   if (type->reset) {
-      if ((type->reset)(native)<0) {
-	 /* reset class method failed */
-	 HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL);
+
+   if (native) {
+      if (type->reset) {
+	 if ((type->reset)(native)<0) {
+	    /* reset class method failed */
+	    HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL);
+	 }
+      } else {
+	 HDmemset (native, 0, type->native_size);
       }
-   } else {
-      HDmemset (native, 0, type->native_size);
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -776,6 +785,15 @@ H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
  *		the sequence numbers to change for subsequent messages of
  *		the same type.
  *
+ * 		If the messaage was cached in the symbol table entry then
+ *		the type field of the symbol table entry is changed to
+ *		H5G_NOTHING_CACHED and the ENT_MODIFIED argument will point
+ *		to non-zero (the ENT_MODIFIED argument is unchanged if
+ *		the ENT type field doesn't change).
+ *
+ * 		No attempt is made to join adjacent free areas of the
+ *		object header into a single larger free area.
+ *
  * Return:	Success:	SUCCEED
  *
  *		Failure:	FAIL
@@ -790,11 +808,43 @@ H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
  */
 herr_t
 H5O_remove (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
-	    const H5O_class_t *type, intn sequence)
+	    hbool_t *ent_modified, const H5O_class_t *type, intn sequence)
 {
+   H5O_t	*oh = NULL;
+   intn		i, seq;
+   
    FUNC_ENTER (H5O_remove, NULL, FAIL);
 
-   fprintf (stderr, "H5O_remove: not implemented yet (no-op)!\n");
+   /* check args */
+   assert (f);
+   assert (addr>=0);
+   assert (type);
+
+   /* load the object header */
+   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL))) {
+      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL);
+   }
+
+   for (i=seq=0; i<oh->nmesgs; i++) {
+      if (type->id != oh->mesg[i].type->id) continue;
+      if (seq++ == sequence || H5O_ALL==sequence) {
+
+	 /* clear symbol table entry cache */
+	 if (ent && type->cache && H5G_NOTHING_CACHED!=ent->type) {
+	    ent->type = H5G_NOTHING_CACHED;
+	    if (ent_modified) *ent_modified = TRUE;
+	 }
+
+	 /* change message type to nil and zero it */
+	 oh->mesg[i].type = H5O_NULL;
+	 HDmemset (oh->mesg[i].raw, 0, oh->mesg[i].raw_size);
+	 H5O_reset (type, oh->mesg[i].native);
+	 oh->mesg[i].native = H5MM_xfree (oh->mesg[i].native);
+
+	 oh->mesg[i].dirty = TRUE;
+	 oh->dirty = TRUE;
+      }
+   }
 
    FUNC_LEAVE (SUCCEED);
 }
@@ -1113,6 +1163,16 @@ H5O_alloc (hdf5_file_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 	  oh->mesg[idx].raw_size>=size) break;
    }
 
+#ifdef LATER
+   /*
+    * Perhaps if we join adjacent null messages we could make one
+    * large enough... we leave this as an exercise for future
+    * programmers :-)  This isn't a high priority because when an
+    * object header is read from disk the null messages are combined
+    * anyway.
+    */
+#endif
+   
    /* if we didn't find one, then allocate more header space */
    if (idx>=oh->nmesgs) {
 

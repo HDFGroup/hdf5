@@ -327,12 +327,17 @@ H5G_mkroot (hdf5_file_t *f, size_t size_hint)
       if (H5O_read (f, f->root_sym->header, f->root_sym, H5O_STAB, 0, &stab)) {
 	 /* root directory already exists */
 	 HRETURN_ERROR (H5E_DIRECTORY, H5E_EXISTS, FAIL);
+	 
       } else if (H5O_read (f, f->root_sym->header, f->root_sym, H5O_NAME,
 			   0, &name)) {
-	 root = *(f->root_sym);
-	 root_name = name.s; /*dont reset name until root_name is done*/
+	 /*dont reset name until root_name is done*/
+	 root_name = name.s;
 	 reset = TRUE;
-	 H5O_remove (f, f->root_sym->header, f->root_sym, H5O_NAME, H5O_ALL);
+
+	 /* remove all name messages -- don't care if it fails */
+	 root = *(f->root_sym);
+	 H5O_remove (f, root.header, &root, NULL, H5O_NAME, H5O_ALL);
+	 
       } else {
 	 root = *(f->root_sym);
 	 root_name = "Root Object";
@@ -1260,4 +1265,83 @@ H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
    FUNC_LEAVE (SUCCEED);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_debug
+ *
+ * Purpose:	Prints debugging information about a symbol table entry.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug 29 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_debug (hdf5_file_t *f, H5G_entry_t *ent, FILE *stream, intn indent,
+	   intn fwidth)
+{
+   int		i;
+   char		buf[64];
+   
+   FUNC_ENTER (H5G_debug, NULL, FAIL);
 
+   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    "Name offset into private heap:",
+	    (unsigned long)(ent->name_off));
+   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    "Object header address:",
+	    (unsigned long)(ent->header));
+      
+   fprintf (stream, "%*s%-*s ", indent, "", fwidth,
+	    "Symbol type:");
+   switch (ent->type) {
+   case H5G_NOTHING_CACHED:
+      fprintf (stream, "Nothing Cached\n");
+      break;
+	 
+   case H5G_CACHED_SDATA:
+      fprintf (stream, "S-data\n");
+      fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+	       "Number type length:",
+	       (unsigned)(ent->cache.sdata.nt.length));
+      fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+	       "Number type architecture:",
+	       (unsigned)(ent->cache.sdata.nt.arch));
+      fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+	       "Number type type:",
+	       (unsigned)(ent->cache.sdata.nt.type));
+      fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+	       "Dimensionality:",
+	       (unsigned)(ent->cache.sdata.ndim));
+      for (i=0; i<ent->cache.sdata.ndim && i<4; i++) {
+	 sprintf (buf, "Dimension %d", i);
+	 fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+		  buf,
+		  (unsigned)(ent->cache.sdata.dim[i]));
+      }
+      break;
+	 
+   case H5G_CACHED_STAB:
+      fprintf (stream, "Symbol Table\n");
+      fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	       "B-tree address:",
+	       (unsigned long)(ent->cache.stab.btree));
+      fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	       "Heap address:",
+	       (unsigned long)(ent->cache.stab.heap));
+      break;
+
+   default:
+      fprintf (stream, "*** Unknown symbol type %d\n", ent->type);
+      break;
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}

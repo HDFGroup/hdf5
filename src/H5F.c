@@ -53,6 +53,7 @@ static intn interface_initialize_g = FALSE;
 static herr_t H5F_init_interface(void);
 static hdf5_file_t *H5F_new (void);
 static hdf5_file_t *H5F_dest (hdf5_file_t *f);
+static herr_t H5F_flush (hdf5_file_t *f, hbool_t invalidate);
 
 /*--------------------------------------------------------------------------
 NAME
@@ -415,13 +416,15 @@ H5F_dest (hdf5_file_t *f)
     Robb Matzke, 18 Jul 1997
     File struct creation and destruction is through H5F_new() H5F_dest().
     Writing the root symbol table entry is done with H5G_encode().
+
+    Robb Matzke, 29 Aug 1997
+    Moved creation of the boot block to H5F_flush().
 --------------------------------------------------------------------------*/
 hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_t access_temp)
 {
     hdf5_file_t *new_file=NULL;     /* file struct for new file */
     hdf_file_t f_handle=H5F_INVALID_FILE;  /* file handle */
     const file_create_temp_t *f_create_parms;    /* pointer to the parameters to use when creating the file */
-    uint8 temp_buf[H5F_BOOTBLOCK_SIZE], *p;  /* temporary buffer for encoding header */
     intn file_exists=0;             /* flag to indicate that file exists already */
     hatom_t ret_value = FAIL;
 
@@ -485,46 +488,10 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
     HDmemcpy(&new_file->file_access_parms,f_access_parms,sizeof(file_access_temp_t));
 #endif /* LATER */
 
-    /* Create the basic skeleton of the file */
-
-    /* Seek to the correct offset to write out the file signature & boot-block */
-    if(new_file->file_create_parms.userblock_size>0)
-        if(H5F_SEEK(new_file->file_handle,new_file->file_create_parms.userblock_size)==FAIL)
-            HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL);
-    
-    /* Write out the file-signature */
-    if(H5F_WRITE(new_file->file_handle,H5F_SIGNATURE,H5F_SIGNATURE_LEN)==FAIL)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL);
-
-    /* Encode the boot block */
-    p=temp_buf;
-    *p++=f_create_parms->bootblock_ver;    /* Encode Boot-block version # */
-    *p++=f_create_parms->smallobject_ver;  /* Encode Small-Object Heap version # */
-    *p++=f_create_parms->freespace_ver;    /* Encode Free-Space Info version # */
-    *p++=f_create_parms->objectdir_ver;    /* Encode Object Directory Format version # */
-    *p++=f_create_parms->sharedheader_ver; /* Encode Shared-Header Info version # */
-    *p++=f_create_parms->offset_size; /* Encode the number of bytes for the offset */
-    *p++=f_create_parms->length_size; /* Encode the number of bytes for the length */
-    *p++=0;                         /* Encode the reserved byte :-) */
-    UINT16ENCODE(p,f_create_parms->sym_leaf_k);	/*symbol table leaf node 1/2 rank */
-    UINT16ENCODE(p,f_create_parms->btree_k[H5B_SNODE_ID]);/*stab internal node 1/2 rank */
-    UINT32ENCODE(p,new_file->consist_flags);       /* Encode File-Consistancy flags */
-    H5F_encode_offset(new_file,p,new_file->smallobj_off);  /* Encode offset of global small-object heap */
-    H5F_encode_offset(new_file,p,new_file->freespace_off);  /* Encode offset of global free-space heap */
-    /* Predict the header length and encode it: */
-    H5F_encode_length(new_file,p,((p-temp_buf) +
-				  H5F_SIZEOF_SIZE(new_file) +
-				  H5G_SIZEOF_ENTRY(new_file)));
-    
-    /* Encode the uninitialized root symbol-table entry, by adding it to the boot block */
-    if (H5G_encode (new_file, &p, new_file->root_sym)<0)
-       HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
-
-    /* Write out the boot block */
-    if(H5F_WRITE(new_file->file_handle,temp_buf,(size_t)(p-temp_buf))==FAIL)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL);
-    new_file->logical_len = p - temp_buf;
-    
+    /* Flush the file signature and boot block */
+    if (H5F_flush (new_file, FALSE)<0) {
+       HGOTO_ERROR (H5E_IO, H5E_CANTINIT, FAIL); /*can't write file boot block*/
+    }
 
     /* Get an atom for the file */
     if((ret_value=H5Aregister_atom(H5_FILE, new_file))==FAIL)
@@ -735,6 +702,115 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5Fflush
+ PURPOSE
+    Flush all cached data to disk and optionally invalidates all cached
+    data.
+ USAGE
+    herr_t H5Fclose(fid, invalidate)
+        hatom_t fid;      	IN: File ID of file to close.
+        hbool_t invalidate;	IN: Invalidate all of the cache?
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+        This function flushes all cached data to disk and, if INVALIDATE
+    is non-zero, removes cached objects from the cache so they must be
+    re-read from the file on the next access to the object.
+
+ MODIFICATIONS:
+--------------------------------------------------------------------------*/
+herr_t
+H5Fflush (hatom_t fid, hbool_t invalidate)
+{
+   hdf5_file_t	*file = NULL;
+
+   FUNC_ENTER (H5Fflush, H5F_init_interface, FAIL);
+   H5ECLEAR;
+
+   /* check arguments */
+   if (H5_FILE!=H5Aatom_group (fid)) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a file atom*/
+   }
+   if (NULL==(file=H5Aatom_object (fid))) {
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL); /*can't get file struct*/
+   }
+
+   /* do work */
+   if (H5F_flush (file, invalidate)<0) {
+      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL); /*flush failed*/
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_flush
+ *
+ * Purpose:	Flushes (and optionally invalidates) cached data plus the
+ *		file boot block.  If the logical file size field is zero
+ *		then it is updated to be the length of the boot block.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug 29 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_flush (hdf5_file_t *f, hbool_t invalidate)
+{
+   uint8	buf[2048], *p=buf;
+   
+   FUNC_ENTER (H5F_flush, H5F_init_interface, FAIL);
+
+   /* nothing to do if the file is read only */
+   if (0==(H5ACC_WRITE & f->acc_perm)) HRETURN (SUCCEED);
+
+   /* flush (and invalidate) the entire cache */
+   if (H5AC_flush (f, NULL, 0, invalidate)<0) {
+      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL); /*can't flush cache*/
+   }
+
+   /* encode the file boot block */
+   HDmemcpy (p, H5F_SIGNATURE, H5F_SIGNATURE_LEN);
+   p += H5F_SIGNATURE_LEN;
+   
+   *p++ = f->file_create_parms.bootblock_ver;
+   *p++ = f->file_create_parms.smallobject_ver;
+   *p++ = f->file_create_parms.freespace_ver;
+   *p++ = f->file_create_parms.objectdir_ver;
+   *p++ = f->file_create_parms.sharedheader_ver;
+   *p++ = H5F_SIZEOF_OFFSET (f);
+   *p++ = H5F_SIZEOF_SIZE (f);
+   *p++ = 0; /*reserved*/
+   UINT16ENCODE (p, f->file_create_parms.sym_leaf_k);
+   UINT16ENCODE (p, f->file_create_parms.btree_k[H5B_SNODE_ID]);
+   UINT32ENCODE (p, f->consist_flags);
+   H5F_encode_offset (f, p, f->smallobj_off);
+   H5F_encode_offset (f, p, f->freespace_off);
+   H5F_encode_length (f, p, f->logical_len);
+   H5G_encode (f, &p, f->root_sym);
+
+   /* write the boot block to disk */
+   if (H5F_block_write (f, 0, p-buf, buf)<0) {
+      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL); /*can't write header*/
+   }
+
+   /* update file length if necessary */
+   if (f->logical_len<=0) f->logical_len = p-buf;
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+/*--------------------------------------------------------------------------
+ NAME
     H5Fclose
  PURPOSE
     Close an open HDF5 file.
@@ -751,6 +827,10 @@ done:
  MODIFICATIONS:
     Robb Matzke, 18 Jul 1997
     File struct destruction is through H5F_dest().
+
+    Robb Matzke, 29 Aug 1997
+    The file boot block is flushed to disk since it's contents may have
+    changed.
 --------------------------------------------------------------------------*/
 herr_t H5Fclose(hatom_t fid)
 {
@@ -771,8 +851,8 @@ herr_t H5Fclose(hatom_t fid)
     /* Decrement the ref. count and recycle the file structure */
     if((--file->ref_count)==0)
       {
-        H5AC_flush (file, NULL, 0, TRUE);
         if(file->file_handle!=H5F_INVALID_FILE) {
+	   H5F_flush (file, TRUE);
            H5F_CLOSE(file->file_handle);
         }
         H5F_dest (file);
@@ -955,6 +1035,9 @@ H5F_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
    fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Shared header version number:",
 	    (unsigned)(f->file_create_parms.sharedheader_ver));
+
+   fprintf (stream, "%*sRoot symbol table entry:\n", indent, "");
+   H5G_debug (f, f->root_sym, stream, indent+3, MAX(0, fwidth-3));
 	    
    FUNC_LEAVE (SUCCEED);
 }

@@ -36,6 +36,7 @@ hbool_t H5Fis_hdf5(const char *filename);
 hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_template, hatom_t access_template);
 hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_template);
 herr_t H5Fclose(hatom_t fid);
+herr_t H5Fflush (hatom_t fid, hbool_t invalidate);
 hatom_t H5Fget_create_template(hatom_t fid);
 
 #ifdef __cplusplus
