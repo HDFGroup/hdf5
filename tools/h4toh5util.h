@@ -56,12 +56,13 @@ converter.*/
 #define HDF4_OBJECT_TYPE    "HDF4_OBJECT_TYPE"
 #define HDF4_REF_NUM        "HDF4_REF_NUM"
 #define HDF4_VGROUP_CLASS   "HDF4_VGROUP_CLASS"
-#define HDF4_IMAGE_CLASS    "HDF4_IMAGE_CLASS"
-#define HDF4_IMAGE_SUBCLASS "HDF4_IMAGE_SUBCLASS"
-#define HDF4_PALETTE_CLASS  "HDF4_PALETTE_CLASS"
+#define HDF4_IMAGE_CLASS    "CLASS"
+#define HDF4_IMAGE_SUBCLASS "IMAGE_SUBCLASS"
+#define HDF4_PALETTE_CLASS  "CLASS"
 #define HDF4_PALETTE_TYPE   "PAL_TYPE"
 #define PAL_TYPE            "STANDARD8"
-
+#define PAL_COLORMODEL      "PAL_COLORMODEL"
+#define RGB                 "RGB"
 /* 3. reserved name for HDF5 object name when meeting with name clashing. */
 
 #define HDF4_VGROUP         "HDF4_VGROUP"
@@ -129,7 +130,12 @@ converter.*/
 #define MAXREF_LENGTH  5
 /*considering the string size of HDF4_DIMGROUP. we add this into 276.*/
 #define MAX_DIM_NAME   276
-
+#define MAX_PAL_NAME   32
+/*11. adding a specified vdata class name to deal with the situation when
+independent vdata is hdf chunking table _HDF_CHK_TBL_CLASS, if it becomes
+public constant for hdf lib, this constant can be released.*/
+#define _HDF_CHK_TBL_CLASS "_HDF_CHK_TBL_"
+ 
 extern int32 estnum_vg;
 extern int32 estnum_vd;
 extern int32 num_sds;
