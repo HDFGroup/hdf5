@@ -29,7 +29,9 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Pprivate.h>		/* Property lists			*/
 #include <H5Zprivate.h>		/* Data compression			*/
 
+#ifdef QAK
 int qak_debug=0;
+#endif /* QAK */
 
 #define PABLO_MASK	H5D_mask
 
@@ -1375,7 +1377,7 @@ printf("%s: check 2.0\n",FUNC);
     } 
     if (FAIL == (sconv_func.binit)(&(dataset->layout), mem_space, &bkg_iter)) {
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-             "unable to initialize memory selection information");
+             "unable to initialize background selection information");
     } 
 #ifdef QAK
 printf("%s: check 3.0, request_nelmts=%d\n",FUNC,(int)request_nelmts);
@@ -1517,13 +1519,16 @@ printf("%s: check 9.0\n",FUNC);
  done:
     if (src_id >= 0) H5I_dec_ref(src_id);
     if (dst_id >= 0) H5I_dec_ref(dst_id);
-    if (tconv_buf && NULL==xfer_parms->tconv_buf) {
-	H5MM_xfree(tconv_buf);
-    }
-    if (bkg_buf && NULL==xfer_parms->bkg_buf) {
-	H5MM_xfree (bkg_buf);
-    }
-    if (free_this_space) H5S_close (free_this_space);
+    if (tconv_buf && NULL==xfer_parms->tconv_buf)
+        H5MM_xfree(tconv_buf);
+    if (bkg_buf && NULL==xfer_parms->bkg_buf)
+        H5MM_xfree (bkg_buf);
+    if (free_this_space)
+        H5S_close (free_this_space);
+    /* Release selection iterators */
+    H5S_sel_iter_release(file_space,&file_iter);
+    H5S_sel_iter_release(mem_space,&mem_iter);
+    H5S_sel_iter_release(mem_space,&bkg_iter);
     FUNC_LEAVE(ret_value);
 }
 
@@ -1854,13 +1859,16 @@ printf("%s: check 6.0\n",FUNC);
  done:
     if (src_id >= 0) H5I_dec_ref(src_id);
     if (dst_id >= 0) H5I_dec_ref(dst_id);
-    if (tconv_buf && NULL==xfer_parms->tconv_buf) {
+    if (tconv_buf && NULL==xfer_parms->tconv_buf)
         H5MM_xfree(tconv_buf);
-    }
-    if (bkg_buf && NULL==xfer_parms->bkg_buf) {
+    if (bkg_buf && NULL==xfer_parms->bkg_buf)
         H5MM_xfree (bkg_buf);
-    }
-    if (free_this_space) H5S_close (free_this_space);
+    if (free_this_space)
+        H5S_close (free_this_space);
+    /* Release selection iterators */
+    H5S_sel_iter_release(file_space,&file_iter);
+    H5S_sel_iter_release(mem_space,&mem_iter);
+    H5S_sel_iter_release(mem_space,&bkg_iter);
     FUNC_LEAVE(ret_value);
 }
 
