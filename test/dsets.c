@@ -1782,7 +1782,7 @@ test_filters(hid_t file)
     hsize_t     deflate_size;       /* Size of dataset with deflate filter */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
-#if (defined H5_HAVE_FILTER_SZIP) && (defined H5_SZIP_CAN_ENCODE)
+#ifdef H5_HAVE_FILTER_SZIP 
     hsize_t     szip_size;       /* Size of dataset with szip filter */
     unsigned szip_options_mask=H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block=4;
@@ -1886,26 +1886,27 @@ test_filters(hid_t file)
      */
 #ifdef H5_HAVE_FILTER_SZIP
     TESTING("szip filter (with encoder)");
-    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
-    if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
+    if ( h5_szip_can_encode() == 1) {
+        if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+        if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
  
-#ifdef H5_SZIP_CAN_ENCODE
 	puts("");
 	if (H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block)<0) goto error;
 	if(test_filter_internal(file,DSET_SZIP_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&szip_size)<0) goto error;
-#else
+        if (H5Pclose (dc)<0) goto error;
+    } else {
 	SKIPPED();
-#endif
+    }
 
-	TESTING("szip filter (without encoder)");
-#ifndef H5_SZIP_CAN_ENCODE
+    TESTING("szip filter (without encoder)");
+
+    if ( h5_szip_can_encode() != 1) {
 	puts("");
 	if(test_filter_noencoder(NOENCODER_SZIP_DATASET) < 0) goto error;
-#else
+    } else {
 	SKIPPED();
-#endif
+    }
 
-    if (H5Pclose (dc)<0) goto error;
 #else /* H5_HAVE_FILTER_SZIP */
     TESTING("szip filter");
     SKIPPED();
@@ -1987,29 +1988,30 @@ test_filters(hid_t file)
     if (H5Pset_shuffle (dc)<0) goto error;
 
 	/* Make sure encoding is enabled */
-#ifdef H5_SZIP_CAN_ENCODE
+    if ( h5_szip_can_encode() == 1) {
 	puts("");
 	if (H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block)<0) goto error;
 	if(test_filter_internal(file,DSET_SHUF_SZIP_FLET_NAME,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,&combo_size)<0) goto error;
-#else
+    } else {
 		SKIPPED();
-#endif
+    }
 
-	TESTING("shuffle+szip+checksum filters(checksum first, without encoder)");
-#ifndef H5_SZIP_CAN_ENCODE
+    TESTING("shuffle+szip+checksum filters(checksum first, without encoder)");
+
+    if ( h5_szip_can_encode() != 1) {
 	puts("");
 	if (test_filter_noencoder(NOENCODER_SZIP_SHUFF_FLETCH_DATASET) < 0) goto error;
-#else
+    } else {
 		SKIPPED();
-#endif
+    }
 
     /* Clean up objects used for this test */
     if (H5Pclose (dc)<0) goto error;
 	
 	TESTING("shuffle+szip+checksum filters(checksum last, with encoder)");
 	/* Make sure encoding is enabled */
-#ifdef H5_SZIP_CAN_ENCODE
 
+    if ( h5_szip_can_encode() == 1) {
 	puts("");
 	if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
 	if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
@@ -2022,9 +2024,9 @@ test_filters(hid_t file)
 	/* Clean up objects used for this test */
 	if (H5Pclose (dc)<0) goto error;
 
-#else
+    } else {
 	SKIPPED();
-#endif /* H5_SZIP_CAN_ENCODE */
+    }
 
 #else /* H5_HAVE_FILTER_SZIP && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
     TESTING("shuffle+szip+fletcher32 filters");
@@ -2758,10 +2760,10 @@ static herr_t
 test_can_apply_szip(hid_t
 #ifndef H5_HAVE_FILTER_SZIP
 UNUSED
-#endif /* H5_HAVE_FILTER_SSZIP */
+#endif /* H5_HAVE_FILTER_SZIP */
 file)
 {
-#if (defined H5_HAVE_FILTER_SZIP) & (defined H5_SZIP_CAN_ENCODE)
+#ifdef H5_HAVE_FILTER_SZIP
     hid_t       dsid;           /* Dataset ID */
     hid_t       sid;            /* Dataspace ID */
     hid_t       dcpl;           /* Dataspace creation property list ID */
@@ -2772,160 +2774,157 @@ file)
     const hsize_t chunk_dims[2] = {250, 2048};  /* Chunk dimensions */
     const hsize_t chunk_dims2[2] = {2, 1};      /* Chunk dimensions */
     herr_t      ret;            /* Status value */
-#else /* H5_HAVE_FILTER_SZIP & H5_SZIP_CAN_ENCODE */
- #ifdef H5_HAVE_FILTER_SZIP
-    const char          *not_supported= "    Szip encoding is not enabled.";
- #else /* H5_HAVE_FILTER_SZIP */
-    const char		*not_supported= "    Szip filter is not enabled.";
- #endif /* H5_HAVE_FILTER_SZIP */
-#endif /* H5_HAVE_FILTER_SSZIP & H5_SZIP_CAN_ENCODE */
+#endif /* H5_HAVE_FILTER_SZIP */
 
     TESTING("dataset szip filter 'can apply' callback");
 
-#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
+#ifdef H5_HAVE_FILTER_SZIP
 
+    if (h5_szip_can_encode() == 1) {
     /* Create the data space */
-    if ((sid = H5Screate_simple(2, dims, NULL))<0) {
+      if ((sid = H5Screate_simple(2, dims, NULL))<0) {
         H5_FAILED();
         printf("    Line %d: Can't open dataspace\n",__LINE__);
         goto error;
-    } /* end if */
+      } /* end if */
 
-    /* Create dcpl with special filter */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) {
+      /* Create dcpl with special filter */
+      if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) {
         H5_FAILED();
         printf("    Line %d: Can't create dcpl\n",__LINE__);
         goto error;
-    } /* end if */
-    if(H5Pset_chunk(dcpl, 2, chunk_dims)<0) {
+      } /* end if */
+      if(H5Pset_chunk(dcpl, 2, chunk_dims)<0) {
         H5_FAILED();
         printf("    Line %d: Can't set chunk sizes\n",__LINE__);
         goto error;
-    } /* end if */
+      } /* end if */
 
-    /* Set (invalid at property set time) szip parameters */
-    szip_pixels_per_block=3;
-    H5E_BEGIN_TRY {
+      /* Set (invalid at property set time) szip parameters */
+      szip_pixels_per_block=3;
+      H5E_BEGIN_TRY {
         ret=H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block);
-    } H5E_END_TRY;
-    if(ret>=0) {
+      } H5E_END_TRY;
+      if(ret>=0) {
         H5_FAILED();
         printf("    Line %d: Shouldn't be able to set szip filter\n",__LINE__);
         goto error;
-    }
+      }
 
-    /* Set (invalid at property set time) szip parameters */
-    szip_pixels_per_block=512;
-    H5E_BEGIN_TRY {
+      /* Set (invalid at property set time) szip parameters */
+      szip_pixels_per_block=512;
+      H5E_BEGIN_TRY {
         ret=H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block);
-    } H5E_END_TRY;
-    if(ret>=0) {
+      } H5E_END_TRY;
+      if(ret>=0) {
         H5_FAILED();
         printf("    Line %d: Shouldn't be able to set szip filter\n",__LINE__);
         goto error;
-    }
+      }
 
-    /* Set (invalid at dataset creation time) szip parameters */
-    szip_pixels_per_block=2;
-    if(H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block)<0) {
+      /* Set (invalid at dataset creation time) szip parameters */
+      szip_pixels_per_block=2;
+      if(H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block)<0) {
         H5_FAILED();
         printf("    Line %d: Can't set szip filter\n",__LINE__);
         goto error;
-    }
+      }
 
-    /* Create new dataset */
-    /* (Should succeed; according to the new algorithm, scanline should be reset 
+      /* Create new dataset */
+      /* (Should succeed; according to the new algorithm, scanline should be reset 
         to 2*128 satisfying 'maximum blocks per scanline' condition) */
-    H5E_BEGIN_TRY {
+      H5E_BEGIN_TRY {
         dsid = H5Dcreate(file, DSET_CAN_APPLY_SZIP_NAME, H5T_NATIVE_INT, sid, dcpl);
-    } H5E_END_TRY;
-    if (dsid <=0) {
+      } H5E_END_TRY;
+      if (dsid <=0) {
         H5_FAILED();
         printf("    Line %d: Should have created dataset!\n",__LINE__);
         goto error;
-    } /* end if */
+      } /* end if */
 
-    /* Close dataset */
-    if(H5Dclose(dsid)<0) {
+      /* Close dataset */
+      if(H5Dclose(dsid)<0) {
         H5_FAILED();
         printf("    Line %d: Can't close dataset\n",__LINE__);
         goto error;
-    } /* end if */
+      } /* end if */
 
-    /* Close dataspace */
-    if(H5Sclose(sid)<0) {
+      /* Close dataspace */
+      if(H5Sclose(sid)<0) {
         H5_FAILED();
         printf("    Line %d: Can't close dataspace\n",__LINE__);
         goto error;
-    } /* end if */
+      } /* end if */
 
-    /* Close dataset creation property list */
-    if(H5Pclose(dcpl)<0) {
+      /* Close dataset creation property list */
+      if(H5Pclose(dcpl)<0) {
         H5_FAILED();
         printf("    Line %d: Can't close dcpl\n",__LINE__);
         goto error;
-    } /* end if */
+      } /* end if */
 
-    /* Create another data space */
-    if ((sid = H5Screate_simple(2, dims2, NULL))<0) {
+      /* Create another data space */
+      if ((sid = H5Screate_simple(2, dims2, NULL))<0) {
         H5_FAILED();
         printf("    Line %d: Can't open dataspace\n",__LINE__);
         goto error;
-    } /* end if */
+      } /* end if */
 
-    /* Create dcpl with special filter */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) {
+      /* Create dcpl with special filter */
+      if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) {
         H5_FAILED();
         printf("    Line %d: Can't create dcpl\n",__LINE__);
         goto error;
-    } /* end if */
-    if(H5Pset_chunk(dcpl, 2, chunk_dims2)<0) {
+      } /* end if */
+      if(H5Pset_chunk(dcpl, 2, chunk_dims2)<0) {
         H5_FAILED();
         printf("    Line %d: Can't set chunk sizes\n",__LINE__);
         goto error;
-    } /* end if */
+      } /* end if */
 
-    /* Set (invalid at dataset creation time) szip parameters */
-    szip_pixels_per_block=32;
-    if(H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block)<0) {
+      /* Set (invalid at dataset creation time) szip parameters */
+      szip_pixels_per_block=32;
+      if(H5Pset_szip (dcpl, szip_options_mask, szip_pixels_per_block)<0) {
         H5_FAILED();
         printf("    Line %d: Can't set szip filter\n",__LINE__);
         goto error;
-    }
+      }
 
-    /* Create new dataset */
-    /* (Should fail because the 'can apply' filter should indicate inappropriate combination) */
-    H5E_BEGIN_TRY {
+      /* Create new dataset */
+      /* (Should fail because the 'can apply' filter should indicate inappropriate combination) */
+      H5E_BEGIN_TRY {
         dsid = H5Dcreate(file, DSET_CAN_APPLY_SZIP_NAME, H5T_NATIVE_INT, sid, dcpl);
-    } H5E_END_TRY;
-    if (dsid >=0) {
+      } H5E_END_TRY;
+      if (dsid >=0) {
         H5_FAILED();
         printf("    Line %d: Shouldn't have created dataset!\n",__LINE__);
         H5Dclose(dsid);
         goto error;
-    } /* end if */
+      } /* end if */
 
-    /* Close dataspace */
-    if(H5Sclose(sid)<0) {
+      /* Close dataspace */
+      if(H5Sclose(sid)<0) {
         H5_FAILED();
         printf("    Line %d: Can't close dataspace\n",__LINE__);
         goto error;
-    } /* end if */
+      } /* end if */
 
-    /* Close dataset creation property list */
-    if(H5Pclose(dcpl)<0) {
+      /* Close dataset creation property list */
+      if(H5Pclose(dcpl)<0) {
         H5_FAILED();
         printf("    Line %d: Can't close dcpl\n",__LINE__);
         goto error;
-    } /* end if */
-
+      } /* end if */
 
     PASSED();
-#else /* H5_HAVE_FILTER_SZIP and H5_SZIP_CAN_ENCODE */
+} else {
     SKIPPED();
-    puts(not_supported);
+    puts("    Szip encoding is not enabled.");
+}
+#else /* H5_HAVE_FILTER_SZIP */
+    SKIPPED();
+    puts("    Szip filter is not enabled.");
 #endif /* H5_HAVE_FILTER_SZIP */
-
     return 0;
 
 #ifdef H5_HAVE_FILTER_SZIP
@@ -2933,6 +2932,7 @@ error:
     return -1;
 #endif /* H5_HAVE_FILTER_SZIP */
 } /* end test_can_apply_szip() */
+
 
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_SET_LOCAL[1] = {{

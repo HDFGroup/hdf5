@@ -3499,7 +3499,8 @@ test_misc20(void)
    and encoder is available.
                             EIP 2004/8/04
 */    
-#if defined H5_HAVE_FILTER_SZIP && defined H5_SZIP_CAN_ENCODE
+#if defined H5_HAVE_FILTER_SZIP 
+
 /****************************************************************
 **
 **  test_misc21(): Test that late allocation time is treated the same
@@ -3517,6 +3518,7 @@ test_misc21(void)
         chunk_size[2]={MISC21_CHUNK_DIM0,MISC21_CHUNK_DIM1};
     herr_t ret;         /* Generic return value */
 
+    if (h5_szip_can_encode() != 1) return;
     /* Output message about test being performed */
     MESSAGE(5, ("Testing late allocation time w/chunks & filters\n"));
 
@@ -3595,6 +3597,7 @@ test_misc22(void)
     unsigned int cd_values[32];
     int correct;
 
+    if (h5_szip_can_encode() != 1) return;
     idts[0]=H5Tcopy(H5T_NATIVE_UINT8);
     idts[1]=H5Tcopy(H5T_NATIVE_UINT16);
     idts[2]=H5Tcopy(H5T_NATIVE_UINT32);
@@ -3708,7 +3711,7 @@ test_misc22(void)
 
     HDfree(buf);
 } /* end test_misc22() */
-#endif /* H5_SZIP_CAN_ENCODE & H5_HAVE_FILTER_SZIP */
+#endif /* H5_HAVE_FILTER_SZIP */
 
 /****************************************************************
 **
@@ -3741,10 +3744,10 @@ test_misc(void)
     test_misc18();      /* Test new object header information in H5G_stat_t struct */
     test_misc19();      /* Test incrementing & decrementing ref count on IDs */
     test_misc20();      /* Test problems with truncated dimensions in version 2 of storage layout message */
-#if defined H5_HAVE_FILTER_SZIP & defined H5_SZIP_CAN_ENCODE
+#if defined H5_HAVE_FILTER_SZIP 
     test_misc21();      /* Test that "late" allocation time is treated the same as "incremental", for chunked datasets w/a filters */
     test_misc22();     /* check szip bits per pixel */
-#endif /* H5_SZIP_CAN_ENCODE & H5_HAVE_FILTER_SZIP */
+#endif /* H5_HAVE_FILTER_SZIP */
 
 } /* test_misc() */
 
@@ -3789,8 +3792,9 @@ cleanup_misc(void)
     HDremove(MISC18_FILE);
     HDremove(MISC19_FILE);
     HDremove(MISC20_FILE);
-#if defined H5_HAVE_FILTER_SZIP & defined H5_SZIP_CAN_ENCODE
+#if defined H5_HAVE_FILTER_SZIP 
     HDremove(MISC21_FILE);
     HDremove(MISC22_FILE);
-#endif /* H5_SZIP_CAN_ENCODE & H5_HAVE_FILTER_SZIP */
+#endif /* H5_HAVE_FILTER_SZIP */
 }
+
