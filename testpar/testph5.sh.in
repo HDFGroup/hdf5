@@ -56,8 +56,6 @@ TOOLTEST() {
 ##############################################################################
 ##############################################################################
 
-# Baseline testphdf5 test
-TOOLTEST
 # testphdf5 test using the MPI-POSIX VFL driver
 TOOLTEST -p
 

@@ -29,11 +29,11 @@ RUNTEST=$(RUNPARALLEL)
 
 ## Test programs and scripts.
 ##
-TEST_PROGS_PARA=t_mpi t_fphdf5
+TEST_PROGS_PARA=t_mpi t_fphdf5 testphdf5
 TEST_SCRIPTS=testph5.sh
 
 ## These are our main targets
-PROGS=$(TEST_PROGS_PARA) testphdf5
+PROGS=$(TEST_PROGS_PARA)
 
 ## Temporary files
 ## MPItest.h5 is from t_mpi
