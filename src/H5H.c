@@ -24,8 +24,8 @@
 
 #define H5H_MAGIC	"HEAP"		/*heap magic number		*/
 #define H5H_FREE_NULL	1		/*end of free list on disk	*/
-#define H5H_HDR_SIZE(F)	(4+SIZEOF_SIZE(F)+2*SIZEOF_OFFSET(F))
-#define H5H_SIZEOF_FREE(F) (SIZEOF_SIZE(F)+SIZEOF_OFFSET(F))
+#define H5H_HDR_SIZE(F)	(4+H5F_SIZEOF_SIZE(F)+2*H5F_SIZEOF_OFFSET(F))
+#define H5H_SIZEOF_FREE(F) (H5F_SIZEOF_SIZE(F)+H5F_SIZEOF_OFFSET(F))
 
 typedef struct H5H_free_t {
    off_t	offset;			/*offset of free block		*/
@@ -36,23 +36,23 @@ typedef struct H5H_free_t {
 
 typedef struct H5H_t {
    intn		dirty;
-   off_t	addr;			/*address of data		*/
+   haddr_t	addr;			/*address of data		*/
    size_t	disk_alloc;		/*data bytes allocated on disk	*/
    size_t	mem_alloc;		/*data bytes allocated in mem	*/
    uint8	*chunk;			/*the chunk, including header	*/
    H5H_free_t	*freelist;		/*the free list			*/
 } H5H_t;
 
-static H5H_t *H5H_load (hdf5_file_t *f, off_t addr, const void *udata);
-static herr_t H5H_flush (hdf5_file_t *f, hbool_t dest, off_t addr,
+static H5H_t *H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata);
+static herr_t H5H_flush (hdf5_file_t *f, hbool_t dest, haddr_t addr,
 			 H5H_t *heap);
 
 /*
  * H5H inherits cache-like properties from H5AC
  */
 static const H5AC_class_t H5AC_HEAP[1] = {{
-   (void*(*)(hdf5_file_t*,off_t,const void*))H5H_load,
-   (herr_t(*)(hdf5_file_t*,hbool_t,off_t,void*))H5H_flush,
+   (void*(*)(hdf5_file_t*,haddr_t,const void*))H5H_load,
+   (herr_t(*)(hdf5_file_t*,hbool_t,haddr_t,void*))H5H_flush,
 }};
 
 
@@ -78,12 +78,12 @@ static const H5AC_class_t H5AC_HEAP[1] = {{
  *
  *-------------------------------------------------------------------------
  */
-off_t
+haddr_t
 H5H_new (hdf5_file_t *f, size_t size_hint)
 {
    H5H_t	*heap = NULL;
    size_t	total_size;		/*total heap size on disk	*/
-   off_t	addr;			/*heap file address		*/
+   haddr_t	addr;			/*heap file address		*/
    
    assert (f);
    size_hint = MAX (0, size_hint);
@@ -138,12 +138,12 @@ H5H_new (hdf5_file_t *f, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 static H5H_t *
-H5H_load (hdf5_file_t *f, off_t addr, const void *udata)
+H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata)
 {
    uint8	hdr[20], *p;
    H5H_t	*heap = H5MM_xcalloc (1, sizeof(H5H_t));
    H5H_free_t	*fl=NULL, *tail=NULL;
-   off_t	free_block;
+   haddr_t	free_block;
 
    assert (addr>0);
    assert (H5H_HDR_SIZE(f) <= sizeof hdr);
@@ -220,7 +220,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5H_flush (hdf5_file_t *f, hbool_t destroy, off_t addr, H5H_t *heap)
+H5H_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
 {
    uint8	*p = heap->chunk;
    H5H_free_t	*fl = heap->freelist;
@@ -325,7 +325,7 @@ H5H_flush (hdf5_file_t *f, hbool_t destroy, off_t addr, H5H_t *heap)
  *-------------------------------------------------------------------------
  */
 void *
-H5H_read (hdf5_file_t *f, off_t addr, off_t offset, size_t size, void *buf)
+H5H_read (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
 {
    H5H_t	*heap = H5AC_find (f, H5AC_HEAP, addr, NULL);
 
@@ -369,7 +369,7 @@ H5H_read (hdf5_file_t *f, off_t addr, off_t offset, size_t size, void *buf)
  *-------------------------------------------------------------------------
  */
 const void *
-H5H_peek (hdf5_file_t *f, off_t addr, off_t offset)
+H5H_peek (hdf5_file_t *f, haddr_t addr, off_t offset)
 {
    H5H_t	*heap = H5AC_find (f, H5AC_HEAP, addr, NULL);
 
@@ -421,7 +421,7 @@ H5H_remove_free (H5H_t *heap, H5H_free_t *fl)
  *-------------------------------------------------------------------------
  */
 off_t
-H5H_insert (hdf5_file_t *f, off_t addr, size_t size, const void *buf)
+H5H_insert (hdf5_file_t *f, haddr_t addr, size_t size, const void *buf)
 {
    H5H_t	*heap = H5AC_find (f, H5AC_HEAP, addr, NULL);
    H5H_free_t	*fl=NULL, *max_fl=NULL;
@@ -537,7 +537,7 @@ H5H_insert (hdf5_file_t *f, off_t addr, size_t size, const void *buf)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5H_write (hdf5_file_t *f, off_t addr, off_t offset, size_t size,
+H5H_write (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size,
 	   const void *buf)
 {
    H5H_t	*heap = H5AC_find (f, H5AC_HEAP, addr, NULL);
@@ -581,7 +581,7 @@ H5H_write (hdf5_file_t *f, off_t addr, off_t offset, size_t size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5H_remove (hdf5_file_t *f, off_t addr, off_t offset, size_t size)
+H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size)
 {
    H5H_t	*heap = H5AC_find (f, H5AC_HEAP, addr, NULL);
    H5H_free_t	*fl = heap->freelist, *fl2 = NULL;

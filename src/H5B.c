@@ -112,22 +112,22 @@
 #define true 1
 
 /* PRIVATE PROTOTYPES */
-static off_t H5B_insert_helper (hdf5_file_t *f, off_t addr,
-				const H5B_class_t *type,
-				uint8 *lt_key, intn *lt_key_changed,
-				uint8 *md_key, void *udata,
-				uint8 *rt_key, intn *rt_key_changed);
-static herr_t H5B_flush (hdf5_file_t *f, hbool_t destroy, off_t addr,
+static haddr_t H5B_insert_helper (hdf5_file_t *f, haddr_t addr,
+				  const H5B_class_t *type,
+				  uint8 *lt_key, intn *lt_key_changed,
+				  uint8 *md_key, void *udata,
+				  uint8 *rt_key, intn *rt_key_changed);
+static herr_t H5B_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr,
 			 H5B_t *b);
-static H5B_t *H5B_load (hdf5_file_t *f, off_t addr, const void *_data);
+static H5B_t *H5B_load (hdf5_file_t *f, haddr_t addr, const void *_data);
 static herr_t H5B_decode_key (hdf5_file_t *f, H5B_t *bt, intn idx);
 static size_t H5B_nodesize (hdf5_file_t *f, const H5B_class_t *type,
 			    size_t *total_nkey_size, size_t sizeof_rkey);
 
 /* H5B inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_BT[1] = {{
-   (void*(*)(hdf5_file_t*,off_t,const void*))H5B_load,
-   (herr_t(*)(hdf5_file_t*,hbool_t,off_t,void*))H5B_flush,
+   (void*(*)(hdf5_file_t*,haddr_t,const void*))H5B_load,
+   (herr_t(*)(hdf5_file_t*,hbool_t,haddr_t,void*))H5B_flush,
 }};
 
 
@@ -138,7 +138,7 @@ static const H5AC_class_t H5AC_BT[1] = {{
  *
  * Return:	Success:	address of new node.
  *
- *		Failure:	0
+ *		Failure:	-1
  *
  * Programmer:	Robb Matzke
  *		robb@maya.nuance.com
@@ -148,11 +148,11 @@ static const H5AC_class_t H5AC_BT[1] = {{
  *
  *-------------------------------------------------------------------------
  */
-off_t
+haddr_t
 H5B_new (hdf5_file_t *f, const H5B_class_t *type, size_t sizeof_rkey)
 {
    H5B_t	*bt=NULL;
-   off_t	addr;
+   haddr_t	addr;
    size_t	size;
    size_t	total_native_keysize;
    intn		offset, i;
@@ -161,7 +161,7 @@ H5B_new (hdf5_file_t *f, const H5B_class_t *type, size_t sizeof_rkey)
     * Allocate file and memory data structures.
     */
    size = H5B_nodesize (f, type, &total_native_keysize, sizeof_rkey);
-   if ((addr = H5MF_alloc (f, size))<=0) return 0;
+   if ((addr = H5MF_alloc (f, size))<=0) return -1;
    bt = H5MM_xmalloc (sizeof(H5B_t));
    bt->type = type;
    bt->sizeof_rkey = sizeof_rkey;
@@ -173,7 +173,7 @@ H5B_new (hdf5_file_t *f, const H5B_class_t *type, size_t sizeof_rkey)
    bt->nchildren = 0;
    bt->page = H5MM_xmalloc (size);
    bt->native = H5MM_xmalloc (total_native_keysize);
-   bt->child = H5MM_xmalloc (2*type->k * sizeof(off_t));
+   bt->child = H5MM_xmalloc (2*type->k * sizeof(haddr_t));
    bt->key = H5MM_xmalloc ((2*type->k+1) * sizeof(H5B_key_t));
 
    /*
@@ -183,7 +183,7 @@ H5B_new (hdf5_file_t *f, const H5B_class_t *type, size_t sizeof_rkey)
     */
    for (i=0,offset=H5B_HDR_SIZE(f);
 	i<2*type->k;
-	i++,offset+=bt->sizeof_rkey+SIZEOF_OFFSET(f)) {
+	i++,offset+=bt->sizeof_rkey+H5F_SIZEOF_OFFSET(f)) {
 
       bt->key[i].dirty = 0;
       bt->key[i].rkey = bt->page + offset;
@@ -213,7 +213,7 @@ H5B_new (hdf5_file_t *f, const H5B_class_t *type, size_t sizeof_rkey)
  *
  * Return:	Success:	Pointer to a new B-tree node.
  *
- *		Failure:	0
+ *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
  *		robb@maya.nuance.com
@@ -224,7 +224,7 @@ H5B_new (hdf5_file_t *f, const H5B_class_t *type, size_t sizeof_rkey)
  *-------------------------------------------------------------------------
  */
 static H5B_t *
-H5B_load (hdf5_file_t *f, off_t addr, const void *_data)
+H5B_load (hdf5_file_t *f, haddr_t addr, const void *_data)
 {
    const H5B_class_t 	*type = (const H5B_class_t *)_data;
    size_t		size, total_nkey_size;
@@ -244,7 +244,7 @@ H5B_load (hdf5_file_t *f, off_t addr, const void *_data)
    bt->page = H5MM_xmalloc (size);
    bt->native = H5MM_xmalloc (total_nkey_size);
    bt->key = H5MM_xmalloc ((2*type->k+1) * sizeof(H5B_key_t));
-   bt->child = H5MM_xmalloc (2 * type->k * sizeof(off_t));
+   bt->child = H5MM_xmalloc (2 * type->k * sizeof(haddr_t));
    H5F_block_read (f, addr, size, bt->page);
    p = bt->page;
 
@@ -275,7 +275,7 @@ H5B_load (hdf5_file_t *f, off_t addr, const void *_data)
 	 H5F_decode_offset (f, p, bt->child[i]);
       } else {
 	 bt->child[i] = 0;
-	 p += SIZEOF_OFFSET(f);
+	 p += H5F_SIZEOF_OFFSET(f);
       }
    }
 
@@ -314,7 +314,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B_flush (hdf5_file_t *f, hbool_t destroy, off_t addr, H5B_t *bt)
+H5B_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5B_t *bt)
 {
    intn		i;
    size_t	size = H5B_nodesize (f, bt->type, NULL, bt->sizeof_rkey);
@@ -357,7 +357,7 @@ H5B_flush (hdf5_file_t *f, hbool_t destroy, off_t addr, H5B_t *bt)
 	 if (i<bt->ndirty) {
 	    H5F_encode_offset (f, p, bt->child[i]);
 	 } else {
-	    p += SIZEOF_OFFSET(f);
+	    p += H5F_SIZEOF_OFFSET(f);
 	 }
       }
 
@@ -409,7 +409,7 @@ H5B_flush (hdf5_file_t *f, hbool_t destroy, off_t addr, H5B_t *bt)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B_find (hdf5_file_t *f, const H5B_class_t *type, off_t addr, void *udata)
+H5B_find (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 {
    H5B_t	*bt=NULL;
    uint8	lt_key[256], rt_key[256];
@@ -474,7 +474,7 @@ H5B_find (hdf5_file_t *f, const H5B_class_t *type, off_t addr, void *udata)
  *
  * Return:	Success:	Address of the new node.
  *
- *		Failure:	0
+ *		Failure:	-1
  *
  * Programmer:	Robb Matzke
  *		robb@maya.nuance.com
@@ -484,16 +484,16 @@ H5B_find (hdf5_file_t *f, const H5B_class_t *type, off_t addr, void *udata)
  *
  *-------------------------------------------------------------------------
  */
-static off_t
-H5B_split (hdf5_file_t *f, const H5B_class_t *type, off_t addr, intn anchor)
+static haddr_t
+H5B_split (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, intn anchor)
 {
    H5B_t	*old = H5AC_find (f, H5AC_BT, addr, type);
    H5B_t 	*bt = H5MM_xmalloc (sizeof(H5B_t));
    size_t	total_nkey_size, size;
    intn		i, offset;
    intn		delta = H5B_ANCHOR_LT==anchor ? type->k : 0;
-   size_t	recsize = old->sizeof_rkey + SIZEOF_OFFSET(f);
-   off_t	tmp_addr, new_addr;
+   size_t	recsize = old->sizeof_rkey + H5F_SIZEOF_OFFSET(f);
+   haddr_t	tmp_addr, new_addr;
    H5B_t	*tmp=NULL;
 
    /*
@@ -507,7 +507,7 @@ H5B_split (hdf5_file_t *f, const H5B_class_t *type, off_t addr, intn anchor)
    bt->nchildren = type->k;
    bt->page = H5MM_xmalloc (size);
    bt->native = H5MM_xmalloc (total_nkey_size);
-   bt->child = H5MM_xmalloc (2*type->k * sizeof(off_t));
+   bt->child = H5MM_xmalloc (2*type->k * sizeof(haddr_t));
    bt->key = H5MM_xmalloc ((2*type->k+1) * sizeof(H5B_key_t));
 
    /*
@@ -663,7 +663,7 @@ H5B_decode_key (hdf5_file_t *f, H5B_t *bt, intn idx)
  *				B-tree root address may change if the old
  *				root is split.
  *
- *		Failure:	0
+ *		Failure:	-1
  *
  * Programmer:	Robb Matzke
  *		robb@maya.nuance.com
@@ -673,12 +673,12 @@ H5B_decode_key (hdf5_file_t *f, H5B_t *bt, intn idx)
  *
  *-------------------------------------------------------------------------
  */
-off_t
-H5B_insert (hdf5_file_t *f, const H5B_class_t *type, off_t addr, void *udata)
+haddr_t
+H5B_insert (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 {
    uint8	lt_key[256], md_key[256], rt_key[256];
    intn		lt_key_changed=false, rt_key_changed=false;
-   off_t	child, new_root;
+   haddr_t	child, new_root;
    intn		level;
    H5B_t	*bt;
 
@@ -687,7 +687,7 @@ H5B_insert (hdf5_file_t *f, const H5B_class_t *type, off_t addr, void *udata)
 
    child = H5B_insert_helper (f, addr, type, lt_key, &lt_key_changed,
 			      md_key, udata, rt_key, &rt_key_changed);
-   if (child<0) return 0;
+   if (child<0) return -1;
    if (0==child) return addr;
 
    /* the current root */
@@ -714,7 +714,7 @@ H5B_insert (hdf5_file_t *f, const H5B_class_t *type, off_t addr, void *udata)
        */
       size_t size = H5B_nodesize (f, type, NULL, bt->sizeof_rkey);
       uint8 *buf = H5MM_xmalloc (size);
-      off_t tmp_addr = H5MF_alloc (f, size);
+      haddr_t tmp_addr = H5MF_alloc (f, size);
 
       H5AC_flush (f, H5AC_BT, addr, FALSE);
       H5F_block_read (f, addr, size, buf);
@@ -787,8 +787,8 @@ H5B_insert (hdf5_file_t *f, const H5B_class_t *type, off_t addr, void *udata)
  *-------------------------------------------------------------------------
  */
 static void
-H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, off_t addr,
-		  intn idx, off_t child, intn anchor, void *md_key)
+H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
+		  intn idx, haddr_t child, intn anchor, void *md_key)
 {
    H5B_t	*bt;
    size_t	recsize;
@@ -797,7 +797,7 @@ H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, off_t addr,
    bt = H5AC_find (f, H5AC_BT, addr, type);
    assert (bt);
    bt->dirty += 1;
-   recsize = bt->sizeof_rkey + SIZEOF_OFFSET(f);
+   recsize = bt->sizeof_rkey + H5F_SIZEOF_OFFSET(f);
    
    if (H5B_ANCHOR_LT==anchor) {
       /*
@@ -843,7 +843,7 @@ H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, off_t addr,
 
    memmove (bt->child + idx + 1,
 	    bt->child + idx,
-	    (bt->nchildren - idx) * sizeof(off_t));
+	    (bt->nchildren - idx) * sizeof(haddr_t));
 
    bt->child[idx] = child;
    bt->nchildren += 1;
@@ -883,8 +883,8 @@ H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, off_t addr,
  *
  *-------------------------------------------------------------------------
  */
-static off_t
-H5B_insert_helper (hdf5_file_t *f, off_t addr, const H5B_class_t *type,
+static haddr_t
+H5B_insert_helper (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type,
 		   uint8 *lt_key, intn *lt_key_changed,
 		   uint8 *md_key, void *udata,
 		   uint8 *rt_key, intn *rt_key_changed)
@@ -892,7 +892,7 @@ H5B_insert_helper (hdf5_file_t *f, off_t addr, const H5B_class_t *type,
    H5B_t	*bt;
    intn		lt=0, idx=-1, rt, cmp=-1;
    intn		anchor;
-   off_t	child, twin=0;
+   haddr_t	child, twin=0;
 
    assert (type);
    assert (type->decode);
@@ -1093,13 +1093,13 @@ error:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B_list (hdf5_file_t *f, const H5B_class_t *type, off_t addr, void *udata)
+H5B_list (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 {
    H5B_t	*bt;
-   off_t	*child=NULL;
-   off_t	twin;
+   haddr_t	*child=NULL;
+   haddr_t	twin;
    intn		i, nchildren, status;
-   herr_t	(*list)(hdf5_file_t*,off_t,void*);
+   herr_t	(*list)(hdf5_file_t*,haddr_t,void*);
 
    assert (type);
    assert (type->list);
@@ -1110,7 +1110,7 @@ H5B_list (hdf5_file_t *f, const H5B_class_t *type, off_t addr, void *udata)
    if (bt->level>0) {
       return H5B_list (f, type, bt->child[0], udata);
    } else {
-      child = H5MM_xmalloc (2 * type->k * sizeof(off_t));
+      child = H5MM_xmalloc (2 * type->k * sizeof(haddr_t));
       list = type->list;
       twin = addr;
       
@@ -1122,7 +1122,7 @@ H5B_list (hdf5_file_t *f, const H5B_class_t *type, off_t addr, void *udata)
 	 }
 	 nchildren = bt->nchildren;
 	 twin = bt->right;
-	 HDmemcpy (child, bt->child, nchildren * sizeof(off_t));
+	 HDmemcpy (child, bt->child, nchildren * sizeof(haddr_t));
 	 bt = NULL; /*list callback may invalidate the cache*/
 	 
 	 for (i=0; i<nchildren; i++) {
@@ -1171,7 +1171,7 @@ H5B_nodesize (hdf5_file_t *f, const H5B_class_t *type,
    }
 
    return (H5B_HDR_SIZE(f) +				/*node header	*/
-	   2 * type->k * SIZEOF_OFFSET(f) +		/*child pointers*/
+	   2 * type->k * H5F_SIZEOF_OFFSET(f) +		/*child pointers*/
 	   (2*type->k+1) * sizeof_rkey);		/*keys		*/
 }
 

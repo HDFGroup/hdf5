@@ -40,10 +40,10 @@
  *
  *-------------------------------------------------------------------------
  */
-off_t
+haddr_t
 H5MF_alloc (hdf5_file_t *f, size_t size)
 {
-   off_t	addr;
+   haddr_t	addr;
    
    assert (f);
    assert (f->logical_len>0);
@@ -76,7 +76,7 @@ H5MF_alloc (hdf5_file_t *f, size_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_free (hdf5_file_t *f, off_t addr, size_t size)
+H5MF_free (hdf5_file_t *f, haddr_t addr, size_t size)
 {
    if (addr<=0 || 0==size) return 0;
 

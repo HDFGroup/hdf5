@@ -99,13 +99,13 @@ H5AC_dest (hdf5_file_t *f)
  *-------------------------------------------------------------------------
  */
 void *
-H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, off_t addr,
+H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
 	   const void *udata)
 {
    unsigned	idx = HASH(addr);
    herr_t	status;
    void		*thing = NULL;
-   herr_t	(*flush)(hdf5_file_t*,hbool_t,off_t,void*)=NULL;
+   herr_t	(*flush)(hdf5_file_t*,hbool_t,haddr_t,void*)=NULL;
 
    assert (type);
    assert (type->load);
@@ -175,12 +175,12 @@ H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, off_t addr,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, off_t addr,
+H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
 	    hbool_t destroy)
 {
    uintn	i = HASH(addr);
    herr_t	status;
-   herr_t	(*flush)(hdf5_file_t*,hbool_t,off_t,void*)=NULL;
+   herr_t	(*flush)(hdf5_file_t*,hbool_t,haddr_t,void*)=NULL;
 
    if (!type || 0==addr) {
       /*
@@ -232,11 +232,11 @@ H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, off_t addr,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_set (hdf5_file_t *f, const H5AC_class_t *type, off_t addr, void *thing)
+H5AC_set (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
 {
    herr_t	status;
    uintn	idx = HASH (addr);
-   herr_t	(*flush)(hdf5_file_t*,hbool_t,off_t,void*)=NULL;
+   herr_t	(*flush)(hdf5_file_t*,hbool_t,haddr_t,void*)=NULL;
 
    assert (type);
    assert (type->flush);
@@ -274,11 +274,11 @@ H5AC_set (hdf5_file_t *f, const H5AC_class_t *type, off_t addr, void *thing)
  */
 herr_t
 H5AC_rename (hdf5_file_t *f, const H5AC_class_t *type,
-	     off_t old_addr, off_t new_addr)
+	     haddr_t old_addr, haddr_t new_addr)
 {
    uintn	old_idx = HASH (old_addr);
    uintn	new_idx = HASH (new_addr);
-   herr_t	(*flush)(hdf5_file_t*, hbool_t, off_t, void*);
+   herr_t	(*flush)(hdf5_file_t*, hbool_t, haddr_t, void*);
    herr_t	status;
 
    assert (type);

@@ -35,27 +35,27 @@
 static void H5G_node_decode_key (hdf5_file_t *f, uint8 *raw, void *_key);
 static void H5G_node_encode_key (hdf5_file_t *f, uint8 *raw, void *_key);
 static size_t H5G_node_size (hdf5_file_t *f);
-static off_t H5G_node_new (hdf5_file_t *f, void *_lt_key, void *_udata,
-			   void *_rt_key);
-static herr_t H5G_node_flush (hdf5_file_t *f, hbool_t destroy, off_t addr,
+static haddr_t H5G_node_new (hdf5_file_t *f, void *_lt_key, void *_udata,
+			     void *_rt_key);
+static herr_t H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr,
 			      H5G_node_t *sym);
-static H5G_node_t *H5G_node_load (hdf5_file_t *f, off_t addr,
+static H5G_node_t *H5G_node_load (hdf5_file_t *f, haddr_t addr,
 				  const void *_data);
 static intn H5G_node_cmp (hdf5_file_t *f, void *_lt_key, void *_udata,
 			  void *_rt_key);
-static herr_t H5G_node_found (hdf5_file_t *f, off_t addr, void *_lt_key,
+static herr_t H5G_node_found (hdf5_file_t *f, haddr_t addr, void *_lt_key,
 			      void *_udata, void *_rt_key);
-static off_t H5G_node_insert (hdf5_file_t *f, off_t addr, intn *anchor,
-			      void *_lt_key, hbool_t *lt_key_changed,
-			      void *_md_key, void *_udata,
-			      void *_rt_key, hbool_t *rt_key_changed);
-static herr_t H5G_node_list (hdf5_file_t *f, off_t addr, void *_udata);
+static haddr_t H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
+				void *_lt_key, hbool_t *lt_key_changed,
+				void *_md_key, void *_udata,
+				void *_rt_key, hbool_t *rt_key_changed);
+static herr_t H5G_node_list (hdf5_file_t *f, haddr_t addr, void *_udata);
 static size_t H5G_node_sizeof_rkey (hdf5_file_t *f);
 
 /* H5G inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_SNODE[1] = {{
-      (void*(*)(hdf5_file_t*,off_t,const void*))H5G_node_load,
-      (herr_t(*)(hdf5_file_t*,hbool_t,off_t,void*))H5G_node_flush,
+      (void*(*)(hdf5_file_t*,haddr_t,const void*))H5G_node_load,
+      (herr_t(*)(hdf5_file_t*,hbool_t,haddr_t,void*))H5G_node_flush,
 }};
 
 /* H5G inherits B-tree like properties from H5B */
@@ -95,7 +95,7 @@ static const H5B_class_t H5B_SNODE[1] = {{
 static size_t
 H5G_node_sizeof_rkey (hdf5_file_t *f)
 {
-   return SIZEOF_OFFSET(f);
+   return H5F_SIZEOF_OFFSET(f);
 }
 
 
@@ -167,7 +167,7 @@ H5G_node_encode_key (hdf5_file_t *f, uint8 *raw, void *_key)
 static size_t
 H5G_node_size (hdf5_file_t *f)
 {
-   return H5G_HDR_SIZE(f) + (2*H5G_NODE_K) * (2*SIZEOF_OFFSET(f));
+   return H5G_HDR_SIZE(f) + (2*H5G_NODE_K) * (2*H5F_SIZEOF_OFFSET(f));
 }
 
 
@@ -191,14 +191,14 @@ H5G_node_size (hdf5_file_t *f)
  *
  *-------------------------------------------------------------------------
  */
-static off_t
+static haddr_t
 H5G_node_new (hdf5_file_t *f, void *_lt_key, void *_udata, void *_rt_key)
 {
    H5G_node_key_t	*lt_key = (H5G_node_key_t*)_lt_key;
    H5G_node_key_t	*rt_key = (H5G_node_key_t*)_rt_key;
    H5G_node_t		*sym = H5MM_xcalloc (1, sizeof(H5G_node_t));
    size_t		size = H5G_node_size (f);
-   off_t		addr = H5MF_alloc (f, size);
+   haddr_t		addr = H5MF_alloc (f, size);
 
    sym->dirty = 1;
    sym->entry = H5MM_xcalloc (2 * H5G_NODE_K, sizeof(H5G_entry_t));
@@ -234,7 +234,7 @@ H5G_node_new (hdf5_file_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_flush (hdf5_file_t *f, hbool_t destroy, off_t addr, H5G_node_t *sym)
+H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
 {
    uint8	*buf=NULL, *p=NULL;
    size_t	size;
@@ -291,7 +291,7 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, off_t addr, H5G_node_t *sym)
  *-------------------------------------------------------------------------
  */
 static H5G_node_t *
-H5G_node_load (hdf5_file_t *f, off_t addr, const void *_udata)
+H5G_node_load (hdf5_file_t *f, haddr_t addr, const void *_udata)
 {
    H5G_node_t	*sym = H5MM_xcalloc (1, sizeof(H5G_node_t));
    size_t	size = H5G_node_size (f);
@@ -399,7 +399,7 @@ H5G_node_cmp (hdf5_file_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_found (hdf5_file_t *f, off_t addr, void *_lt_key, void *_udata,
+H5G_node_found (hdf5_file_t *f, haddr_t addr, void *_lt_key, void *_udata,
 		void *_rt_key)
 {
    H5G_node_ud1_t	*udata = (H5G_node_ud1_t *)_udata;
@@ -469,8 +469,8 @@ H5G_node_found (hdf5_file_t *f, off_t addr, void *_lt_key, void *_udata,
  *
  *-------------------------------------------------------------------------
  */
-static off_t
-H5G_node_insert (hdf5_file_t *f, off_t addr, intn *anchor,
+static haddr_t
+H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
 		 void *_lt_key, hbool_t *lt_key_changed,
 		 void *_md_key, void *_udata,
 		 void *_rt_key, hbool_t *rt_key_changed)
@@ -481,7 +481,7 @@ H5G_node_insert (hdf5_file_t *f, off_t addr, intn *anchor,
    
    H5G_node_t		*sn;
    H5G_entry_t 		ent[2*H5G_NODE_K];
-   off_t		new_node=0, offset;
+   haddr_t		new_node=0, offset;
    const char		*s;
    intn			idx=-1, nsyms, cmp=1;
    intn			lt=0, rt;		/*binary search cntrs	*/
@@ -613,7 +613,7 @@ H5G_node_insert (hdf5_file_t *f, off_t addr, intn *anchor,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_list (hdf5_file_t *f, off_t addr, void *_udata)
+H5G_node_list (hdf5_file_t *f, haddr_t addr, void *_udata)
 {
    H5G_node_list_t	*udata = (H5G_node_list_t *)_udata;
    H5G_entry_t 		*ent;

@@ -102,7 +102,7 @@ void H5F_encode_length_unusual(const hdf5_file_t *f, uint8 **p, uint8 *l)
 #ifdef LATER
     CONSTR(FUNC, "H5F_encode_length_unusual");
 #endif /* LATER */
-    intn i=f->file_create_parms.length_size;
+    intn i = H5F_SIZEOF_SIZE (f);
 
 /* For non-little-endian platforms, encode each byte in memory backwards */
 #if ((DF_MT&0xFFF0)!=0x4440)
@@ -143,7 +143,7 @@ void H5F_encode_offset_unusual(const hdf5_file_t *f, uint8 **p, uint8 *o)
 #ifdef LATER
     CONSTR(FUNC, "H5F_encode_offset_unusual");
 #endif /* LATER */
-    intn i=f->file_create_parms.offset_size;
+    intn i = H5F_SIZEOF_OFFSET(f);
 
 /* For non-little-endian platforms, encode each byte in memory backwards */
 #if ((DF_MT&0xFFF0)!=0x4440)
@@ -263,9 +263,9 @@ done:
 hbool_t H5Fis_hdf5(const char *filename)
 {
     CONSTR(FUNC, "H5Fis_hdf5");        /* for HERROR */
-    hdf_file_t f_handle=H5FI_INVALID_FILE;      /* file handle */
+    hdf_file_t f_handle=H5F_INVALID_FILE;      /* file handle */
     uint8 temp_buf[HDF5_FILE_SIGNATURE_LEN];    /* temporary buffer for checking file signature */
-    size_t curr_off=0;          /* The current offset to check in the file */
+    haddr_t curr_off=0;          /* The current offset to check in the file */
     size_t file_len=0;          /* The length of the file we are checking */
     hbool_t ret_value = BFALSE;
 
@@ -277,21 +277,21 @@ hbool_t H5Fis_hdf5(const char *filename)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, BFAIL);
 
     /* Open the file */
-    f_handle=H5FI_OPEN(filename,0);
-    if(H5FI_OPENERR(f_handle))
+    f_handle=H5F_OPEN(filename,0);
+    if(H5F_OPENERR(f_handle))
         HGOTO_ERROR(H5E_FILE, H5E_BADFILE, BFAIL);
 
     /* Get the length of the file */
-    if(H5FI_SEEKEND(f_handle)==FAIL)
+    if(H5F_SEEKEND(f_handle)==FAIL)
         HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, BFAIL);
-    file_len=H5FI_TELL(f_handle);
+    file_len=H5F_TELL(f_handle);
 
     /* Check the offsets where the file signature is possible */
     while(curr_off<file_len)
       {
-        if(H5FI_SEEK(f_handle,curr_off)==FAIL)
+        if(H5F_SEEK(f_handle,curr_off)==FAIL)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL);
-        if(H5FI_READ(f_handle,temp_buf, HDF5_FILE_SIGNATURE_LEN)==FAIL)
+        if(H5F_READ(f_handle,temp_buf, HDF5_FILE_SIGNATURE_LEN)==FAIL)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL);
         if(HDmemcmp(temp_buf,HDF5_FILE_SIGNATURE,HDF5_FILE_SIGNATURE_LEN)==0)
           {
@@ -303,15 +303,15 @@ hbool_t H5Fis_hdf5(const char *filename)
         else
             curr_off*=2;
       } /* end while */
-    H5FI_CLOSE(f_handle);   /* close the file we opened */
+    H5F_CLOSE(f_handle);   /* close the file we opened */
 
 done:
   if(ret_value == BFAIL)
     { /* Error condition cleanup */
 
       /* Check if we left a dangling file handle */
-      if(f_handle!=H5FI_INVALID_FILE)
-        H5FI_CLOSE(f_handle);   /* close the file we opened */
+      if(f_handle!=H5F_INVALID_FILE)
+        H5F_CLOSE(f_handle);   /* close the file we opened */
 
     } /* end if */
 
@@ -425,7 +425,7 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
 {
     CONSTR(FUNC, "H5Fcreate");      /* for HERROR */
     hdf5_file_t *new_file=NULL;     /* file struct for new file */
-    hdf_file_t f_handle=H5FI_INVALID_FILE;  /* file handle */
+    hdf_file_t f_handle=H5F_INVALID_FILE;  /* file handle */
     const file_create_temp_t *f_create_parms;    /* pointer to the parameters to use when creating the file */
     uint8 temp_buf[2048], *p;       /* temporary buffer for encoding header */
     intn file_exists=0;             /* flag to indicate that file exists already */
@@ -443,12 +443,12 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
         HGOTO_ERROR(H5E_FILE, H5E_FILEOPEN, FAIL);
 
     /* Check if the file already exists */
-    f_handle=H5FI_OPEN(filename,0);
-    if(!H5FI_OPENERR(f_handle))
+    f_handle=H5F_OPEN(filename,0);
+    if(!H5F_OPENERR(f_handle))
       {
         file_exists=1;  /* set the flag to indicate that the file already exists */
-        H5FI_CLOSE(f_handle);   /* close the file we opened */
-        f_handle=H5FI_INVALID_FILE;
+        H5F_CLOSE(f_handle);   /* close the file we opened */
+        f_handle=H5F_INVALID_FILE;
       } /* end if */
 
     /* throw an error if the file exists and we aren't allowed to overwrite it */
@@ -456,8 +456,8 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
         HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, FAIL);
 
     /* OK to create/overwrite the file */
-    f_handle=H5FI_CREATE(filename);
-    if(H5FI_OPENERR(f_handle))
+    f_handle=H5F_CREATE(filename);
+    if(H5F_OPENERR(f_handle))
         HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL);
 
     /* Create the file node */
@@ -493,11 +493,11 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
 
     /* Seek to the correct offset to write out the file signature & boot-block */
     if(new_file->file_create_parms.userblock_size>0)
-        if(H5FI_SEEK(new_file->file_handle,new_file->file_create_parms.userblock_size)==FAIL)
+        if(H5F_SEEK(new_file->file_handle,new_file->file_create_parms.userblock_size)==FAIL)
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL);
     
     /* Write out the file-signature */
-    if(H5FI_WRITE(new_file->file_handle,HDF5_FILE_SIGNATURE,HDF5_FILE_SIGNATURE_LEN)==FAIL)
+    if(H5F_WRITE(new_file->file_handle,HDF5_FILE_SIGNATURE,HDF5_FILE_SIGNATURE_LEN)==FAIL)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL);
 
     /* Encode the boot block */
@@ -523,7 +523,7 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
     }
 
     /* Write out the boot block */
-    if(H5FI_WRITE(new_file->file_handle,temp_buf,(size_t)(p-temp_buf))==FAIL)
+    if(H5F_WRITE(new_file->file_handle,temp_buf,(size_t)(p-temp_buf))==FAIL)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL);
     new_file->logical_len = p - temp_buf;
     
@@ -537,8 +537,8 @@ done:
     { /* Error condition cleanup */
 
       /* Check if we left a dangling file handle */
-      if(f_handle!=H5FI_INVALID_FILE)
-        H5FI_CLOSE(f_handle);   /* close the file we opened */
+      if(f_handle!=H5F_INVALID_FILE)
+        H5F_CLOSE(f_handle);   /* close the file we opened */
 
       /* Check if we left a dangling file struct */
       if (new_file) H5F_dest (new_file);
@@ -581,11 +581,11 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
 {
     CONSTR(FUNC, "H5Fopen");        /* for HERROR */
     hdf5_file_t *new_file=NULL;     /* file struct for new file */
-    hdf_file_t f_handle=H5FI_INVALID_FILE;  /* file handle */
+    hdf_file_t f_handle=H5F_INVALID_FILE;  /* file handle */
     hatom_t create_temp;            /* file-creation template ID */
     const file_create_temp_t *f_create_parms;    /* pointer to the parameters to use when creating the file */
     uint8 temp_buf[2048], *p;       /* temporary buffer for encoding header */
-    size_t curr_off=0;          /* The current offset to check in the file */
+    haddr_t curr_off=0;          /* The current offset to check in the file */
     size_t file_len=0;          /* The length of the file we are checking */
     hatom_t ret_value = FAIL;
 
@@ -617,8 +617,8 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL);
 
     /* Check if the file already exists */
-    f_handle=H5FI_OPEN(filename,flags);
-    if(H5FI_OPENERR(f_handle))
+    f_handle=H5F_OPEN(filename,flags);
+    if(H5F_OPENERR(f_handle))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPEN, FAIL);
 
     /* Create the file node */
@@ -648,16 +648,16 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
 
     /* Seek to the correct offset to read in the file signature & boot-block */
     /* Get the length of the file */
-    if(H5FI_SEEKEND(new_file->file_handle)==FAIL)
+    if(H5F_SEEKEND(new_file->file_handle)==FAIL)
         HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, BFAIL);
-    file_len=H5FI_TELL(new_file->file_handle);
+    file_len=H5F_TELL(new_file->file_handle);
 
     /* Check the offsets where the file signature is possible */
     while(curr_off<file_len)
       {
-        if(H5FI_SEEK(new_file->file_handle,curr_off)==FAIL)
+        if(H5F_SEEK(new_file->file_handle,curr_off)==FAIL)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL);
-        if(H5FI_READ(new_file->file_handle,temp_buf, HDF5_FILE_SIGNATURE_LEN)==FAIL)
+        if(H5F_READ(new_file->file_handle,temp_buf, HDF5_FILE_SIGNATURE_LEN)==FAIL)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL);
         if(HDmemcmp(temp_buf,HDF5_FILE_SIGNATURE,HDF5_FILE_SIGNATURE_LEN)==0)
           {
@@ -673,7 +673,7 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL);
     
     /* Read in the fixed-size part of the boot-block */
-    if(H5FI_READ(new_file->file_handle,temp_buf,16)==FAIL)
+    if(H5F_READ(new_file->file_handle,temp_buf,16)==FAIL)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL);
 
     /* Decode the boot block */
@@ -706,8 +706,8 @@ done:
     { /* Error condition cleanup */
 
       /* Check if we left a dangling file handle */
-      if(f_handle!=H5FI_INVALID_FILE)
-        H5FI_CLOSE(f_handle);   /* close the file we opened */
+      if(f_handle!=H5F_INVALID_FILE)
+        H5F_CLOSE(f_handle);   /* close the file we opened */
 
       /* Check if we left a dangling file struct */
       if(new_file) HDfree(new_file);
@@ -758,8 +758,8 @@ herr_t H5Fclose(hatom_t fid)
     if((--file->ref_count)==0)
       {
         H5AC_flush (file, NULL, 0, TRUE);
-        if(file->file_handle!=H5FI_INVALID_FILE) {
-	   H5FI_CLOSE(file->file_handle);
+        if(file->file_handle!=H5F_INVALID_FILE) {
+	   H5F_CLOSE(file->file_handle);
 	}
 	H5F_dest (file);
         if(H5Aremove_atom(fid)==NULL) {
@@ -797,7 +797,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_block_read (hdf5_file_t *f, off_t addr, size_t size, void *buf)
+H5F_block_read (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
 {
     CONSTR(FUNC, "H5F_block_read");       /* for HERROR */
 
@@ -806,9 +806,9 @@ H5F_block_read (hdf5_file_t *f, off_t addr, size_t size, void *buf)
     if (0==size) return 0;
     addr += f->file_create_parms.userblock_size;
    
-    if (H5FI_SEEK (f->file_handle, addr)<0)
+    if (H5F_SEEK (f->file_handle, addr)<0)
         HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL);
-    if (H5FI_READ (f->file_handle, buf, size)<0)
+    if (H5F_READ (f->file_handle, buf, size)<0)
         HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL);
     PABLO_TRACE_OFF(H5F_mask, ID_H5F_block_read);
     return SUCCEED;
@@ -834,7 +834,7 @@ H5F_block_read (hdf5_file_t *f, off_t addr, size_t size, void *buf)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_block_write (hdf5_file_t *f, off_t addr, size_t size, void *buf)
+H5F_block_write (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
 {
     CONSTR(FUNC, "H5F_block_write");       /* for HERROR */
      
@@ -843,9 +843,9 @@ H5F_block_write (hdf5_file_t *f, off_t addr, size_t size, void *buf)
     if (0==size) return 0;
     addr += f->file_create_parms.userblock_size;
 
-    if (H5FI_SEEK (f->file_handle, addr)<0)
+    if (H5F_SEEK (f->file_handle, addr)<0)
         HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL);
-    if (H5FI_WRITE (f->file_handle, buf, size)<0)
+    if (H5F_WRITE (f->file_handle, buf, size)<0)
         HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL);
     PABLO_TRACE_OFF(H5F_mask, ID_H5F_block_write);
     return SUCCEED;

@@ -22,7 +22,7 @@
 
 
 #define H5B_MAGIC	"TREE"	/* tree node magic number		*/
-#define H5B_HDR_SIZE(F)	(8+2*SIZEOF_OFFSET(F))
+#define H5B_HDR_SIZE(F)	(8+2*H5F_SIZEOF_OFFSET(F))
 
 #define H5B_ANCHOR_LT	0	/* left node is anchored, right is new	*/
 #define H5B_ANCHOR_RT	1	/* right node is anchored, left is new	*/
@@ -37,12 +37,12 @@ typedef struct H5B_class_t {
    intn		k;		/* max children is 2k			*/
    size_t	sizeof_nkey;	/*size of native (memory) key		*/
    size_t	(*get_sizeof_rkey)(hdf5_file_t*);
-   off_t	(*new)(hdf5_file_t*,void*,void*,void*);
+   haddr_t	(*new)(hdf5_file_t*,void*,void*,void*);
    intn		(*cmp)(hdf5_file_t*,void*,void*,void*);
-   herr_t	(*found)(hdf5_file_t*,off_t,void*,void*,void*);
-   off_t	(*insert)(hdf5_file_t*,off_t,int*,void*,int*,void*,void*,
+   herr_t	(*found)(hdf5_file_t*,haddr_t,void*,void*,void*);
+   haddr_t	(*insert)(hdf5_file_t*,haddr_t,int*,void*,int*,void*,void*,
 			  void*,int*);
-   herr_t	(*list)(hdf5_file_t*,off_t,void*);
+   herr_t	(*list)(hdf5_file_t*,haddr_t,void*);
    void		(*decode)(hdf5_file_t*,uint8*,void*);
    void		(*encode)(hdf5_file_t*,uint8*,void*);
 } H5B_class_t;
@@ -62,24 +62,27 @@ typedef struct H5B_t {
    intn		dirty;		/*something in the tree is dirty	*/
    intn		ndirty;		/*num child ptrs to emit		*/
    intn		level;		/*node level				*/
-   off_t	left;		/*address of left sibling		*/
-   off_t	right;		/*address of right sibling		*/
+   haddr_t	left;		/*address of left sibling		*/
+   haddr_t	right;		/*address of right sibling		*/
    intn		nchildren;	/*number of child pointers		*/
    uint8	*page;		/*disk page				*/
    uint8	*native;	/*array of keys in native format	*/
    H5B_key_t	*key;		/*2k+1 key entries			*/
-   off_t	*child;		/*2k child pointers			*/
+   haddr_t	*child;		/*2k child pointers			*/
 } H5B_t;
 
 
 /*
  * Library prototypes.
  */
-herr_t H5B_debug (hdf5_file_t *f, off_t addr, const H5B_class_t *type);
-off_t H5B_new (hdf5_file_t *f, const H5B_class_t *type, size_t sizeof_rkey);
-herr_t H5B_find (hdf5_file_t *f, const H5B_class_t *type, off_t addr, void *udata);
-off_t H5B_insert (hdf5_file_t *f, const H5B_class_t *type, off_t addr, void *udata);
-herr_t H5B_list (hdf5_file_t *f, const H5B_class_t *type, off_t addr, void *udata);
+herr_t H5B_debug (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type);
+haddr_t H5B_new (hdf5_file_t *f, const H5B_class_t *type, size_t sizeof_rkey);
+herr_t H5B_find (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
+		 void *udata);
+haddr_t H5B_insert (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
+		    void *udata);
+herr_t H5B_list (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
+		 void *udata);
 
 
 #endif /* !_H5Bprivate_H */

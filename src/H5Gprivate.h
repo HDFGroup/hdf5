@@ -46,7 +46,7 @@ typedef enum H5G_type_t {
  */
 typedef struct H5G_entry_t {
    off_t	name_off;	/*offset of name within name heap	*/
-   off_t	header;		/*file address of object header		*/
+   haddr_t	header;		/*file address of object header		*/
    H5G_type_t	type;		/*type of information cached		*/
 
    union {
@@ -57,8 +57,8 @@ typedef struct H5G_entry_t {
       } sdata;
 
       struct {
-	 off_t	btree;		/*file address of symbol table B-tree	*/
-	 off_t	heap;		/*file address of symtab name heap	*/
+	 haddr_t btree;		/*file address of symbol table B-tree	*/
+	 haddr_t heap;		/*file address of symtab name heap	*/
       } symtab;
    } cache;			/*cached data from object header	*/
 } H5G_entry_t;
@@ -92,7 +92,7 @@ typedef struct H5G_node_ud1_t {
 
    /* downward */
    char		*name;		/*points to temporary memory		*/
-   off_t	heap;		/*symbol table heap address		*/
+   haddr_t	heap;		/*symbol table heap address		*/
 
    /* upward */
    H5G_entry_t	entry;		/*symbol table entry			*/
@@ -105,7 +105,7 @@ typedef struct H5G_node_list_t {
    H5G_entry_t	*entry;		/*array of entries, alloc'd by caller	*/
    char		**name;		/*array of string ptrs, allocd by caller*/
    intn		nentries;	/*size of the ADDR and NAME arrays	*/
-   off_t	heap;		/*heap address				*/
+   haddr_t	heap;		/*heap address				*/
 
    /* upward */
    intn		nused;		/*num. symbols processed		*/

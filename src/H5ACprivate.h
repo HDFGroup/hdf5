@@ -37,8 +37,9 @@
  *		by the LOAD method if the DEST argument is non-zero.
  */
 typedef struct H5AC_class_t {
-   void		*(*load)(hdf5_file_t*, off_t addr, const void *udata);
-   herr_t	(*flush)(hdf5_file_t*, hbool_t dest, off_t addr, void *thing);
+   void		*(*load)(hdf5_file_t*, haddr_t addr, const void *udata);
+   herr_t	(*flush)(hdf5_file_t*, hbool_t dest, haddr_t addr,
+			 void *thing);
 } H5AC_class_t;
 
 /*
@@ -50,7 +51,7 @@ typedef struct H5AC_class_t {
 
 typedef struct H5AC_cache_t {
    const H5AC_class_t *type;	/*type of object stored here		*/
-   off_t	addr;		/*file address for object		*/
+   haddr_t	addr;		/*file address for object		*/
    void		*thing;		/*the thing which is cached		*/
 } H5AC_cache_t;
 
@@ -58,14 +59,14 @@ typedef struct H5AC_cache_t {
  * Library prototypes.
  */
 herr_t H5AC_dest (hdf5_file_t *f);
-void *H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, off_t addr,
+void *H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
 		 const void *udata);
-herr_t H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, off_t addr,
+herr_t H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
 		   hbool_t destroy);
 herr_t H5AC_new (hdf5_file_t *f);
 herr_t H5AC_rename (hdf5_file_t *f, const H5AC_class_t *type,
-		    off_t old, off_t new);
-herr_t H5AC_set (hdf5_file_t *f, const H5AC_class_t *type, off_t addr,
+		    haddr_t old, haddr_t new);
+herr_t H5AC_set (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
 		 void *thing);
 
 #endif /* !_H5ACprivate_H */
