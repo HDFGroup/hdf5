@@ -62,7 +62,7 @@ H5T_init_strpad_interface(void)
  *		Fortran left-justifies and space-pads strings.	This property
  *		defines the storage mechanism for the string.
  *		
- * Return:	Success:	The character set of an H5T_STRING type.
+ * Return:	Success:	The character set of a string type.
  *
  *		Failure:	H5T_STR_ERROR (Negative)
  *
@@ -87,10 +87,9 @@ H5Tget_strpad(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_STR_ERROR, "not a data type");
-    /* Don't see any reason for this.  Causes problem for variable-length
-     *  string. -SLU (& QAK) */
-    /* if (dt->parent) dt = dt->parent;*/ /*defer to parent*/
-    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)))
+    while (dt->parent && !H5T_IS_STRING(dt))
+        dt = dt->parent;  /*defer to parent*/
+    if (!H5T_IS_STRING(dt))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_STR_ERROR, "operation not defined for data type class");
     
     /* result */
@@ -151,10 +150,9 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     if (strpad < 0 || strpad >= H5T_NSTR)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal string pad type");
-    /* Don't see any reason for this.  Causes problem for variable-length
-     *  string. -SLU (& QAK) */
-    /* if (dt->parent) dt = dt->parent;*/ /*defer to parent*/
-    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)))
+    while (dt->parent && !H5T_IS_STRING(dt))
+        dt = dt->parent;  /*defer to parent*/
+    if (!H5T_IS_STRING(dt))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
     
     /* Commit */

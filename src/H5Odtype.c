@@ -270,12 +270,8 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                  * Set the "force conversion" flag if VL datatype fields exist in this
                  * type or any component types
                  */
-                if(temp_type->type==H5T_VLEN || temp_type->force_conv==TRUE)
+                if(temp_type->force_conv==TRUE)
                     dt->force_conv=TRUE;
-
-                /* Set the "has array" flag if array datatype fields exist in this type */
-                if(temp_type->type==H5T_ARRAY)
-                    dt->u.compnd.has_array=TRUE;
 
                 /* Member size */
                 dt->u.compnd.memb[i].size = temp_type->size;
@@ -424,6 +420,7 @@ done:
 static herr_t
 H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 {
+    htri_t has_array=FALSE;       /* Whether a compound datatype has an array inside it */
     unsigned		flags = 0;
     char		*hdr = (char *)*pp;
     int		i, j;
@@ -613,6 +610,10 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             break;
 
         case H5T_COMPOUND:
+            /* Check for an array datatype somewhere within the compound type */
+            if((has_array=H5T_detect_class(dt,H5T_ARRAY))<0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't detect array class");
+
             /*
              * Compound data types...
              */
@@ -633,7 +634,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                  * member information, for better backward compatibility
                  * Write out all zeros for the array information, though...
                  */
-                if(!dt->u.compnd.has_array) {
+                if(!has_array) {
                     /* Dimensionality */
                     *(*pp)++ = 0;
 
@@ -756,7 +757,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             break;
     }
 
-    *hdr++ = ((unsigned)(dt->type) & 0x0f) | (((dt->type==H5T_COMPOUND && dt->u.compnd.has_array) ? H5O_DTYPE_VERSION_UPDATED : H5O_DTYPE_VERSION_COMPAT )<<4);
+    *hdr++ = ((unsigned)(dt->type) & 0x0f) | (((dt->type==H5T_COMPOUND && has_array) ? H5O_DTYPE_VERSION_UPDATED : H5O_DTYPE_VERSION_COMPAT )<<4);
     *hdr++ = (flags >> 0) & 0xff;
     *hdr++ = (flags >> 8) & 0xff;
     *hdr++ = (flags >> 16) & 0xff;

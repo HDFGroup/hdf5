@@ -91,9 +91,9 @@ H5Tget_precision(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
-    if (dt->parent)
+    while (dt->parent)
         dt = dt->parent;	/*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type)
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for specified data type");
     
     /* Precision */
@@ -152,6 +152,10 @@ H5Tset_precision(hid_t type_id, size_t prec)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "precision must be positive");
     if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
+    if (H5T_STRING==dt->type)
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "precision for this type is read-only");
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified data type");
 
     /* Do the work */
     if (H5T_set_precision(dt, prec)<0)
@@ -202,53 +206,55 @@ H5T_set_precision(H5T_t *dt, size_t prec)
     /* Check args */
     assert(dt);
     assert(prec>0);
-    assert(H5T_ENUM!=dt->type || 0==dt->u.enumer.nmembs);
+    assert(H5T_OPAQUE!=dt->type);
+    assert(H5T_COMPOUND!=dt->type);
+    assert(H5T_STRING!=dt->type);
+    assert(!(H5T_ENUM==dt->type && 0==dt->u.enumer.nmembs));
 
     if (dt->parent) {
 	if (H5T_set_precision(dt->parent, prec)<0)
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set precision for base type");
-	dt->size = dt->parent->size;
+
+        /* Adjust size of datatype appropriately */
+        if(dt->type==H5T_ARRAY)
+            dt->size = dt->parent->size * dt->u.array.nelem;
+        else if(dt->type!=H5T_VLEN)
+            dt->size = dt->parent->size;
     } else {
-	if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type) {
-	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified data type");
-	} else if (H5T_ENUM==dt->type) {
-	    /*nothing*/
-	} else if (H5T_is_atomic(dt)) {
+	if (H5T_is_atomic(dt)) {
 	    /* Adjust the offset and size */
 	    offset = dt->u.atomic.offset;
 	    size = dt->size;
 	    if (prec > 8*size)
                 offset = 0;
-	    else if (offset+prec > 8 * size) offset = 8 * size - prec;
+	    else if (offset+prec > 8 * size)
+                offset = 8 * size - prec;
 	    if (prec > 8*size)
                 size = (prec+7) / 8;
 
 	    /* Check that things are still kosher */
 	    switch (dt->type) {
-	    case H5T_INTEGER:
-	    case H5T_TIME:
-	    case H5T_BITFIELD:
-		/* nothing to check */
-		break;
+                case H5T_INTEGER:
+                case H5T_TIME:
+                case H5T_BITFIELD:
+                    /* nothing to check */
+                    break;
 
-	    case H5T_STRING:
-		HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "precision for this type is read-only");
+                case H5T_FLOAT:
+                    /*
+                     * The sign, mantissa, and exponent fields should be adjusted
+                     * first when decreasing the precision of a floating point
+                     * type.
+                     */
+                    if (dt->u.atomic.u.f.sign >= prec ||
+                        dt->u.atomic.u.f.epos + dt->u.atomic.u.f.esize > prec ||
+                        dt->u.atomic.u.f.mpos + dt->u.atomic.u.f.msize > prec) {
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "adjust sign, mantissa, and exponent fields first");
+                    }
+                    break;
 
-	    case H5T_FLOAT:
-		/*
-		 * The sign, mantissa, and exponent fields should be adjusted
-		 * first when decreasing the precision of a floating point
-		 * type.
-		 */
-		if (dt->u.atomic.u.f.sign >= prec ||
-		    dt->u.atomic.u.f.epos + dt->u.atomic.u.f.esize > prec ||
-		    dt->u.atomic.u.f.mpos + dt->u.atomic.u.f.msize > prec) {
-		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "adjust sign, mantissa, and exponent fields first");
-		}
-		break;
-
-	    default:
-		assert("not implemented yet" && 0);
+                default:
+                    assert("not implemented yet" && 0);
 	    }
 
 	    /* Commit */
@@ -258,6 +264,8 @@ H5T_set_precision(H5T_t *dt, size_t prec)
 		dt->u.atomic.prec = prec;
 	    }
 	}
+        else
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified datatype");
     }
     
 done:

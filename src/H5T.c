@@ -2069,7 +2069,7 @@ H5Tcreate(H5T_class_t type, size_t size)
     H5TRACE2("i","Ttz",type,size);
 
     /* check args */
-    if (size <= 0)
+    if (size == 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid size");
 
     /* create the type */
@@ -2480,13 +2480,16 @@ H5T_detect_class (const H5T_t *dt, H5T_class_t cls)
     switch(dt->type) {
         case H5T_COMPOUND:
             for (i=0; i<dt->u.compnd.nmembs; i++) {
+                htri_t nested_ret;      /* Return value from nested call */
+
                 /* Check if this field's type is the correct type */
                 if(dt->u.compnd.memb[i].type->type==cls)
                     HGOTO_DONE(TRUE);
 
-                /* Recurse if it's VL, compound or array */
-                if(dt->u.compnd.memb[i].type->type==H5T_COMPOUND || dt->u.compnd.memb[i].type->type==H5T_VLEN || dt->u.compnd.memb[i].type->type==H5T_ARRAY)
-                    HGOTO_DONE(H5T_detect_class(dt->u.compnd.memb[i].type,cls));
+                /* Recurse if it's VL, compound, enum or array */
+                if(H5T_IS_COMPLEX(dt->u.compnd.memb[i].type->type))
+                    if((nested_ret=H5T_detect_class(dt->u.compnd.memb[i].type,cls))!=FALSE)
+                        HGOTO_DONE(nested_ret);
             } /* end for */
             break;
 
@@ -2615,7 +2618,7 @@ done:
  * Function:	H5Tset_size
  *
  * Purpose:	Sets the total size in bytes for a data type (this operation
- *		is not permitted on compound data types).  If the size is
+ *		is not permitted on reference data types).  If the size is
  *		decreased so that the significant bits of the data type
  *		extend beyond the edge of the new size, then the `offset'
  *		property is decreased toward zero.  If the `offset' becomes
@@ -2657,9 +2660,9 @@ H5Tset_size(hid_t type_id, size_t size)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size must be positive");
     if (size == H5T_VARIABLE && dt->type!=H5T_STRING)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "only strings may be variable length");
-    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
+    if ((H5T_ENUM==dt->type && dt->u.enumer.nmembs>0) || (H5T_COMPOUND==dt->type && dt->u.compnd.nmembs>0))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
-    if (H5T_COMPOUND==dt->type || H5T_ARRAY==dt->type)
+    if (H5T_REFERENCE==dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for this datatype");
 
     /* Do the work */
@@ -3316,7 +3319,7 @@ H5T_create(H5T_class_t type, size_t size)
 
     FUNC_ENTER_NOAPI(H5T_create, NULL);
 
-    assert(size > 0);
+    assert(size != 0);
 
     switch (type) {
         case H5T_INTEGER:
@@ -3925,8 +3928,7 @@ H5T_is_atomic(const H5T_t *dt)
 
     assert(dt);
 
-    if (H5T_COMPOUND!=dt->type && H5T_ENUM!=dt->type &&	H5T_VLEN!=dt->type &&
-            H5T_OPAQUE!=dt->type && H5T_ARRAY!=dt->type)
+    if (!H5T_IS_COMPLEX(dt->type) && H5T_OPAQUE!=dt->type)
 	ret_value = TRUE;
     else
 	ret_value = FALSE;
@@ -3940,7 +3942,7 @@ done:
  * Function:	H5T_set_size
  *
  * Purpose:	Sets the total size in bytes for a data type (this operation
- *		is not permitted on compound data types).  If the size is
+ *		is not permitted on reference data types).  If the size is
  *		decreased so that the significant bits of the data type
  *		extend beyond the edge of the new size, then the `offset'
  *		property is decreased toward zero.  If the `offset' becomes
@@ -3977,12 +3979,19 @@ H5T_set_size(H5T_t *dt, size_t size)
     /* Check args */
     assert(dt);
     assert(size!=0);
-    assert(H5T_ENUM!=dt->type || 0==dt->u.enumer.nmembs);
+    assert(H5T_REFERENCE!=dt->type);
+    assert(!(H5T_ENUM==dt->type && 0==dt->u.enumer.nmembs));
+    assert(!(H5T_COMPOUND==dt->type && 0==dt->u.compnd.nmembs));
 
     if (dt->parent) {
         if (H5T_set_size(dt->parent, size)<0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set size for parent data type");
-        dt->size = dt->parent->size;
+
+        /* Adjust size of datatype appropriately */
+        if(dt->type==H5T_ARRAY)
+            dt->size = dt->parent->size * dt->u.array.nelem;
+        else if(dt->type!=H5T_VLEN)
+            dt->size = dt->parent->size;
     } else {
         if (H5T_is_atomic(dt)) {
             offset = dt->u.atomic.offset;
@@ -4001,15 +4010,11 @@ H5T_set_size(H5T_t *dt, size_t size)
         }
 
         switch (dt->type) {
-            case H5T_COMPOUND:
-            case H5T_ARRAY:
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set size of specified data type");
-
             case H5T_INTEGER:
             case H5T_TIME:
             case H5T_BITFIELD:
-            case H5T_ENUM:
             case H5T_OPAQUE:
+            case H5T_COMPOUND:
                 /* nothing to check */
                 break;
 
@@ -4068,18 +4073,24 @@ H5T_set_size(H5T_t *dt, size_t size)
                 }
                 break;
 
+            case H5T_ENUM:
+            case H5T_VLEN:
+            case H5T_ARRAY:
+                assert("can't happen" && 0);
+            case H5T_REFERENCE:
+                assert("invalid type" && 0);
             default:
                 assert("not implemented yet" && 0);
         }
 
-        /* Commit */
+        /* Commit (if we didn't convert this type to a VL string) */
         if(dt->type!=H5T_VLEN) {
             dt->size = size;
             if (H5T_is_atomic(dt)) {
                 dt->u.atomic.offset = offset;
                 dt->u.atomic.prec = prec;
             }
-        }
+        } /* end if */
     }
     
 done:

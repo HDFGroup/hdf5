@@ -83,6 +83,8 @@ H5Tset_tag(hid_t type_id, const char *tag)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (H5T_STATE_TRANSIENT!=dt->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+    while (dt->parent)
+        dt = dt->parent; /*defer to parent*/
     if (H5T_OPAQUE!=dt->type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an opaque data type");
     if (!tag)
@@ -123,8 +125,7 @@ H5Tget_tag(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
-
-    if (dt->parent)
+    while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_OPAQUE != dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "operation not defined for data type class");

@@ -91,7 +91,7 @@ H5Tget_fields(hid_t type_id, size_t *spos/*out*/,
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (dt->parent)
+    while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
@@ -145,7 +145,7 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (H5T_STATE_TRANSIENT!=dt->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    if (dt->parent)
+    while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
@@ -206,7 +206,7 @@ H5Tget_ebias(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
-    if (dt->parent)
+    while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for data type class");
@@ -249,7 +249,7 @@ H5Tset_ebias(hid_t type_id, size_t ebias)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (H5T_STATE_TRANSIENT!=dt->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    if (dt->parent)
+    while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
@@ -293,7 +293,7 @@ H5Tget_norm(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NORM_ERROR, "not a data type");
-    if (dt->parent)
+    while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_NORM_ERROR, "operation not defined for data type class");
@@ -339,7 +339,7 @@ H5Tset_norm(hid_t type_id, H5T_norm_t norm)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     if (norm < 0 || norm > H5T_NORM_NONE)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal normalization");
-    if (dt->parent)
+    while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
@@ -385,7 +385,7 @@ H5Tget_inpad(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_PAD_ERROR, "not a data type");
-    if (dt->parent)
+    while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_PAD_ERROR, "operation not defined for data type class");
@@ -433,7 +433,7 @@ H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     if (pad < 0 || pad >= H5T_NPAD)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal internal pad type");
-    if (dt->parent)
+    while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");

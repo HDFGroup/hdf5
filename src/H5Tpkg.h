@@ -47,6 +47,12 @@
 /* Length of debugging name buffer */
 #define H5T_NAMELEN		32
 
+/* Macro to ease detecting "complex" datatypes (i.e. those with base types or fields) */
+#define H5T_IS_COMPLEX(t)      ((t)==H5T_COMPOUND || (t)==H5T_ENUM || (t)==H5T_VLEN || (t)==H5T_ARRAY)
+
+/* Macro to ease detecting fixed or variable-length "string" datatypes */
+#define H5T_IS_STRING(dt)      (H5T_STRING == (dt)->type || (H5T_VLEN == (dt)->type && H5T_VLEN_STRING == (dt)->u.vlen.type))
+
 /* Statistics about a conversion function */
 struct H5T_stats_t {
     unsigned	ncalls;			/*num calls to conversion function   */
@@ -118,9 +124,6 @@ typedef struct H5T_compnd_t {
     int		nalloc;		/*num entries allocated in MEMB array*/
     int		nmembs;		/*number of members defined in struct*/
     H5T_sort_t		sorted;		/*how are members sorted?	     */
-    hbool_t     has_array;  /* Set if this type has an array datatype member */
-                            /* and should be written with the new version of */
-                            /* the datatype object header message */
     struct H5T_cmemb_t	*memb;		/*array of struct members	     */
 } H5T_compnd_t;
 
@@ -302,7 +305,7 @@ H5_DLL herr_t H5T_insert(H5T_t *parent, const char *name, size_t offset,
 H5_DLL H5T_t *H5T_enum_create(H5T_t *parent);
 H5_DLL herr_t H5T_enum_insert(H5T_t *dt, const char *name, void *value);
 H5_DLL int    H5T_get_array_ndims(H5T_t *dt);
-H5_DLL herr_t H5T_get_array_dims(H5T_t *dt, hsize_t dims[], int perm[]);
+H5_DLL int    H5T_get_array_dims(H5T_t *dt, hsize_t dims[], int perm[]);
 H5_DLL herr_t H5T_sort_value(H5T_t *dt, int *map);
 H5_DLL herr_t H5T_sort_name(H5T_t *dt, int *map);
 H5_DLL herr_t H5T_set_size(H5T_t *dt, size_t size);

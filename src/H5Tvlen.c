@@ -723,8 +723,8 @@ H5T_vlen_reclaim_recurse(void *elem, H5T_t *dt, H5MM_free_t free_func, void *fre
     /* Check the datatype of this element */
     switch(dt->type) {
         case H5T_ARRAY:
-            /* Recurse on each element, if the array's base type is array, VL or compound */
-            if(dt->parent->type==H5T_COMPOUND || dt->parent->type==H5T_VLEN || dt->parent->type==H5T_ARRAY) {
+            /* Recurse on each element, if the array's base type is array, VL, enum or compound */
+            if(H5T_IS_COMPLEX(dt->parent->type)) {
                 void *off;     /* offset of field */
 
                 /* Calculate the offset member and recurse on it */
@@ -737,10 +737,10 @@ H5T_vlen_reclaim_recurse(void *elem, H5T_t *dt, H5MM_free_t free_func, void *fre
             break;
 
         case H5T_COMPOUND:
-            /* Check each field and recurse on VL, compound or array ones */
+            /* Check each field and recurse on VL, compound, enum or array ones */
             for (i=0; i<dt->u.compnd.nmembs; i++) {
-                /* Recurse if it's VL, compound or array */
-                if(dt->u.compnd.memb[i].type->type==H5T_COMPOUND || dt->u.compnd.memb[i].type->type==H5T_VLEN || dt->u.compnd.memb[i].type->type==H5T_ARRAY) {
+                /* Recurse if it's VL, compound, enum or array */
+                if(H5T_IS_COMPLEX(dt->u.compnd.memb[i].type->type)) {
                     void *off;     /* offset of field */
 
                     /* Calculate the offset member and recurse on it */
@@ -752,14 +752,14 @@ H5T_vlen_reclaim_recurse(void *elem, H5T_t *dt, H5MM_free_t free_func, void *fre
             break;
 
         case H5T_VLEN:
-            /* Recurse on the VL information if it's VL, compound or array, then free VL sequence */
+            /* Recurse on the VL information if it's VL, compound, enum or array, then free VL sequence */
             if(dt->u.vlen.type==H5T_VLEN_SEQUENCE) {
                 hvl_t *vl=(hvl_t *)elem;    /* Temp. ptr to the vl info */
 
                 /* Check if there is anything actually in this sequence */
                 if(vl->len!=0) {
-                    /* Recurse if it's VL or compound */
-                    if(dt->parent->type==H5T_COMPOUND || dt->parent->type==H5T_VLEN || dt->parent->type==H5T_ARRAY) {
+                    /* Recurse if it's VL, array, enum or compound */
+                    if(H5T_IS_COMPLEX(dt->parent->type)) {
                         void *off;     /* offset of field */
 
                         /* Calculate the offset of each array element and recurse on it */
@@ -899,7 +899,7 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
         case H5T_ARRAY:  /* Recurse on VL, compound and array base element type */
             /* Recurse if it's VL, compound or array */
             /* (If the type is compound and the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
-            if((dt->parent->type==H5T_COMPOUND && dt->parent->force_conv) || dt->parent->type==H5T_VLEN || dt->parent->type==H5T_ARRAY) {
+            if(dt->parent->force_conv && H5T_IS_COMPLEX(dt->parent->type)) {
                 /* Keep the old base element size for later */
                 old_size=dt->parent->size;
 
@@ -927,13 +927,13 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
                     /* Apply the accumulated size change to the offset of the field */
                     dt->u.compnd.memb[i].offset += accum_change;
 
-                    /* Recurse if it's VL, compound or array */
-                    /* (If the type is compound and the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
-                    if((dt->u.compnd.memb[i].type->type==H5T_COMPOUND && dt->u.compnd.memb[i].type->force_conv) || dt->u.compnd.memb[i].type->type==H5T_VLEN || dt->u.compnd.memb[i].type->type==H5T_ARRAY) {
+                    /* Recurse if it's VL, compound, enum or array */
+                    /* (If the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
+                    if(dt->u.compnd.memb[i].type->force_conv && H5T_IS_COMPLEX(dt->u.compnd.memb[i].type->type)) {
                         /* Keep the old field size for later */
                         old_size=dt->u.compnd.memb[i].type->size;
 
-                        /* Mark the VL, compound or array type */
+                        /* Mark the VL, compound, enum or array type */
                         if((vlen_changed=H5T_vlen_mark(dt->u.compnd.memb[i].type,f,loc))<0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                         if(vlen_changed>0)
@@ -957,8 +957,8 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
 
         case H5T_VLEN: /* Recurse on the VL information if it's VL, compound or array, then free VL sequence */
             /* Recurse if it's VL, compound or array */
-            /* (If the type is compound and the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
-            if((dt->parent->type==H5T_COMPOUND && dt->parent->force_conv) || dt->parent->type==H5T_VLEN || dt->parent->type==H5T_ARRAY) {
+            /* (If the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
+            if(dt->parent->force_conv && H5T_IS_COMPLEX(dt->parent->type)) {
                 if((vlen_changed=H5T_vlen_mark(dt->parent,f,loc))<0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                 if(vlen_changed>0)

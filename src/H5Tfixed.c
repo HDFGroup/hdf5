@@ -168,7 +168,7 @@ H5Tset_sign(hid_t type_id, H5T_sign_t sign)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal sign type");
     if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
-    if (dt->parent)
+    while (dt->parent)
         dt = dt->parent; /*defer to parent*/
     if (H5T_INTEGER!=dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");

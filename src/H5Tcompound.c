@@ -447,15 +447,10 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     parent->u.compnd.nmembs++;
 
     /*
-     * Set the "force conversion" flag if VL datatype fields exist in this type
-     * or any component types
+     * Set the "force conversion" flag if the field's datatype indicates
      */
-    if(member->type==H5T_VLEN || member->force_conv==TRUE)
+    if(member->force_conv==TRUE)
         parent->force_conv=TRUE;
-
-    /* Set the flag for this compound type, if the field is an array */
-    if(member->type==H5T_ARRAY)
-        parent->u.compnd.has_array=TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
