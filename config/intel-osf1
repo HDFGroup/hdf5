@@ -3,7 +3,7 @@
 CC=cicc
 AR=xar
 RANLIB=true
-LIBS="-L./ -L../"
+LIBS="-L./ -L../ -lnoop_stubs"
 RUNTEST=yod
 export CC AR RANLIB LIBS RUNTEST
 
