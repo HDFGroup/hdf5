@@ -2,6 +2,25 @@
 		    Using HDF5 with OpenMP
 		    ----------------------
 
+
+I.    Introduction to OpenMP
+
+    - For shared-memory parallelism
+    - A combination of library and directives
+    - Available for C/C++ and Fortran
+    - SGI leading effort
+    - Information at http://www.openmp.org and 
+      http://www.sgi.com/software/openmp
+
+II.   Programming(SGI MPISpro compiler and C language)
+
+    - Turn on compiler '-mp' option
+    - Include 'omp.h' library in program
+    - Use library functions, directives and environment variables
+
+
+III.  Sample Programs
+
 Attached are three OpenMP-HDF5 test programs.  The purpose of these tests is to 
 experience OpenMP parallelism with HDF5.  All the tests were run on modi4 with 
 SGI MPISpro compiler(cc) and make.   The first one is the working 
