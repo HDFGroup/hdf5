@@ -39,7 +39,7 @@ typedef enum {
 /* Define structure to hold property information */
 typedef struct H5P_genprop_tag {
     /* Values for this property */
-    uintn xor;          /* XOR'ed version of the name, for faster comparisons */
+    uintn xor_val;      /* XOR'ed version of the name, for faster comparisons */
     char *name;         /* Name of property */
     size_t size;        /* Size of property value */
     void *value;        /* Pointer to property value */

@@ -4051,7 +4051,7 @@ H5P_create_prop(const char *name, size_t size, void *def_value, void *value,
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Set the property initial values */
-    prop->xor = H5P_xor_name(name); /* Generate the XOR'd value for the name */
+    prop->xor_val = H5P_xor_name(name); /* Generate the XOR'd value for the name */
     prop->name = HDstrdup(name); /* Duplicate name */
     prop->size=size;
     /* Duplicate value, if it exists */
@@ -4173,7 +4173,7 @@ H5P_find_prop(H5P_genprop_t *hash[], uintn hashsize, const char *name)
 {
     H5P_genprop_t *ret_value;   /* Property pointer return value */
     uintn loc;                  /* Hash table location */
-    uintn xor;                  /* XOR'ed value of the name to look for */
+    uintn xor_val;              /* XOR'ed value of the name to look for */
 
     FUNC_ENTER (H5P_add_prop, NULL);
 
@@ -4185,13 +4185,13 @@ H5P_find_prop(H5P_genprop_t *hash[], uintn hashsize, const char *name)
     loc=H5P_hash_name(name,hashsize);
     
     /* Get the XOR'ed value for the name to search for, to speed up comparisons */
-    xor=H5P_xor_name(name);
+    xor_val=H5P_xor_name(name);
     
     /* Locate property in list */
     ret_value=hash[loc];
     while(ret_value!=NULL) {
         /* Check for name matching */
-        if(ret_value->xor==xor && HDstrcmp(ret_value->name,name)==0)
+        if(ret_value->xor_val==xor_val && HDstrcmp(ret_value->name,name)==0)
             break;
     } /* end while */
 
