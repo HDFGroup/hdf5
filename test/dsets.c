@@ -34,6 +34,7 @@ const char *FILENAME[] = {
     "dataset",
     "compact_dataset",
     "dset_offset",
+    "max_compact_dataset",
     NULL
 };
 
@@ -45,6 +46,8 @@ const char *FILENAME[] = {
 #define DSET_COMPACT_NAME       "compact"
 #define DSET_SIMPLE_IO_NAME	"simple_io"
 #define DSET_COMPACT_IO_NAME    "compact_io"
+#define DSET_COMPACT_MAX_NAME   "max_compact"
+#define DSET_COMPACT_MAX2_NAME   "max_compact_2"
 #define DSET_TCONV_NAME		"tconv"
 #define DSET_DEFLATE_NAME	"deflate"
 #define DSET_SZIP_NAME          "szip"
@@ -66,6 +69,7 @@ const char *FILENAME[] = {
 #define DSET_ONEBYTE_SHUF_NAME   "onebyte_shuffle"
 
 #define USER_BLOCK              1024
+#define SIXTY_FOUR_KB           65536 
 
 /* Temporary filter IDs used for testing */
 #define H5Z_FILTER_BOGUS	305
@@ -563,6 +567,139 @@ test_compact_io(hid_t fapl)
      return -1;
 }
                  
+
+/*-------------------------------------------------------------------------
+ * Function:    test_max_compact
+ *
+ * Purpose:     Tests compact dataset of maximal size.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Raymond Lu 
+ *              August 8, 2002 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_max_compact(hid_t fapl)
+{
+    hid_t       file, dataset, space, plist;
+    hsize_t     dims[1];
+    hsize_t     compact_size;
+    herr_t      status;
+    int         *wbuf, *rbuf;
+    char	filename[1024];
+    int         i, j, n;
+
+    TESTING("compact dataset of maximal size");
+
+    /* Test compact dataset of size 64KB-64 */
+
+    /* Initialize data */
+    compact_size = (SIXTY_FOUR_KB-64)/sizeof(int);
+    
+    wbuf = (int*)HDmalloc(sizeof(int)*compact_size);
+    rbuf = (int*)HDmalloc(sizeof(int)*compact_size);
+
+    n=0;
+    for(i=0; i<compact_size; i++)
+            wbuf[i] = n++;
+    
+    /* Create a small data space for compact dataset */
+    dims[0] = compact_size;
+    space = H5Screate_simple(1, dims, NULL);
+    assert(space>=0);
+
+    /* Create a file */
+    h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+        goto error;
+
+    /* Create property list for compact dataset creation */
+    plist = H5Pcreate(H5P_DATASET_CREATE);
+    assert(plist >= 0);
+    status = H5Pset_layout(plist, H5D_COMPACT);
+    assert(status >= 0);
+
+    /* Create and write to a compact dataset */
+    if((dataset = H5Dcreate(file, DSET_COMPACT_MAX_NAME, H5T_NATIVE_INT, space, 
+                        plist))<0)
+        goto error;
+
+    if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf)<0)
+        goto error;
+
+    /* Close file */
+    H5Sclose(space);
+    H5Pclose(plist);
+    H5Dclose(dataset);
+    H5Fclose(file);
+
+    /*
+     * Open the file and check data 
+     */
+    if((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0)
+        goto error;
+    if((dataset = H5Dopen(file, DSET_COMPACT_MAX_NAME))<0)
+        goto error;
+    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf)<0)
+        goto error;
+
+     /* Check that the values read are the same as the values written */
+     for (i = 0; i < compact_size; i++) {
+        if (rbuf[i] != wbuf[i]) {
+            H5_FAILED();
+            printf("    Read different values than written.\n");
+            printf("    At index %d,%d\n", i);
+            goto error;
+        }
+     }
+
+     H5Dclose(dataset);
+     H5Fclose(file);
+     HDfree(wbuf);
+     HDfree(rbuf);
+
+
+     /* Test compact dataset of size 64KB */
+    
+     /* Create a data space for compact dataset */
+     compact_size = SIXTY_FOUR_KB/sizeof(int);
+     dims[0] = compact_size;
+     space = H5Screate_simple(1, dims, NULL);
+     assert(space>=0);
+
+     /* Open file */
+     if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0)
+         goto error;
+
+     /* Create property list for compact dataset creation */
+     plist = H5Pcreate(H5P_DATASET_CREATE);
+     assert(plist >= 0);
+     status = H5Pset_layout(plist, H5D_COMPACT);
+     assert(status >= 0);
+
+     /* Create and write to a compact dataset */
+     H5E_BEGIN_TRY {
+         H5Dcreate(file, DSET_COMPACT_MAX2_NAME, H5T_NATIVE_INT, space, plist);
+     } H5E_END_TRY;
+    
+     /* Close file */
+     H5Sclose(space);
+     H5Pclose(plist);
+     H5Fclose(file);
+
+     PASSED();
+     return 0;
+
+error:
+     return -1;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_tconv
@@ -2675,6 +2812,7 @@ main(void)
     nerrors += test_create(file)<0 	?1:0;
     nerrors += test_simple_io(file, filename)<0	?1:0;
     nerrors += test_compact_io(fapl)<0  ?1:0;
+    nerrors += test_max_compact(fapl)<0  ?1:0;
     nerrors += test_tconv(file)<0	?1:0; 
     nerrors += test_filters(file)<0	?1:0;
     nerrors += test_onebyte_shuffle(file)<0 ?1:0;
