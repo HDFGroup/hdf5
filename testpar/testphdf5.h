@@ -47,8 +47,8 @@
 /* End of Define some handy debugging shorthands, routines, ... */
 
 /* Constants definitions */
-#define DIM0		1024 	/* Default dataset sizes. */
-#define DIM1		1280	/* Values are from a monitor pixel sizes */
+#define DIM0		600 	/* Default dataset sizes. */
+#define DIM1		800	/* Values are from a monitor pixel sizes */
 #define RANK		2
 #define DATASETNAME1	"Data1"
 #define DATASETNAME2	"Data2"

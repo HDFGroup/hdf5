@@ -19,22 +19,28 @@ LIBH5TEST=../test/libh5test.la
 RUNTEST=$(RUNPARALLEL)
 
 ## These are our main targets
-TEST_PROGS=testphdf5
+TEST_PROGS=t_mpi testphdf5
 
 ## Temporary files
 MOSTLYCLEAN=ParaEg[123].h5f
 DISTCLEAN=go
 
 ## Test source files
-TEST_SRC=testphdf5.c t_dset.c t_file.c t_mpi.c t_mdset.c
+TEST_PHDF5_SRC=testphdf5.c t_dset.c t_file.c t_mdset.c
+TEST_PHDF5_OBJ=$(TEST_PHDF5_SRC:.c=.lo)
+TEST_SRC=t_mpi.c $(TEST_PHDF5_SRC)
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 TEST_HDR=testphdf5.h
 
 ## How to build the tests... They all depend on the hdf5 library
 $(TEST_PROGS): $(LIBHDF5) $(LIBH5TEST)
 
-testphdf5: $(TEST_OBJ)
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TEST_OBJ) $(LIBH5TEST) $(LIBHDF5) $(LDFLAGS) $(LIBS)
-
 $(TEST_OBJ): $(TEST_HDR)
+
+t_mpi: t_mpi.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ t_mpi.lo $(LIBH5TEST) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+testphdf5: $(TEST_PHDF5_OBJ)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TEST_PHDF5_OBJ) $(LIBH5TEST) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
 @CONCLUDE@

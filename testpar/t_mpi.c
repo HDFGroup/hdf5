@@ -14,6 +14,15 @@
 
 #include <testphdf5.h>
 
+/* FILENAME and filenames must have the same number of names */
+const char *FILENAME[2]={
+	    "MPItest",
+	    NULL};
+char	filenames[2][200];
+int	nerrors;
+int	verbose;
+hid_t	fapl;				/* file access property list */
+
 #define MPIO_TEST_WRITE_SIZE 1024*1024     /* 1 MB */
 
 void
@@ -138,5 +147,117 @@ test_mpio_overlap_writes(char *filename)
      */
     mrc = MPI_Barrier(MPI_COMM_WORLD);
     VRFY((mrc==MPI_SUCCESS), "Sync before leaving test");
+}
+
+
+/*
+ * parse the command line options
+ */
+int
+parse_options(int argc, char **argv)
+{
+    while (--argc){
+	if (**(++argv) != '-'){
+	    break;
+	}else{
+	    switch(*(*argv+1)){
+		case 'v':   verbose = 1;
+			    break;
+		case 'f':   if (--argc < 1) {
+				nerrors++;
+				return(1);
+			    }
+			    if (**(++argv) == '-') {
+				nerrors++;
+				return(1);
+			    }
+			    paraprefix = *argv;
+			    break;
+		case 'h':   /* print help message--return with nerrors set */
+			    return(1);
+		default:    nerrors++;
+			    return(1);
+	    }
+	}
+    } /*while*/
+
+    /* compose the test filenames */
+    {
+	int i, n;
+	hid_t plist;
+
+	plist = H5Pcreate (H5P_FILE_ACCESS);
+	H5Pset_fapl_mpio(plist, MPI_COMM_WORLD, MPI_INFO_NULL);
+	n = sizeof(FILENAME)/sizeof(FILENAME[0]) - 1;	/* exclude the NULL */
+
+	for (i=0; i < n; i++)
+	    if (h5_fixname(FILENAME[i],plist,filenames[i],sizeof(filenames[i]))
+		== NULL){
+		printf("h5_fixname failed\n");
+		nerrors++;
+		return(1);
+	    }
+	H5Pclose(plist);
+	printf("Test filenames are:\n");
+	for (i=0; i < n; i++)
+	    printf("    %s\n", filenames[i]);
+    }
+
+    return(0);
+}
+
+
+/*
+ * Show command usage
+ */
+void
+usage(void)
+{
+    printf("Usage: t_mpi [-v] [-f <prefix>]\n");
+    printf("\t-v\t\tverbose on\n");
+    printf("\t-f <prefix>\tfilename prefix\n");
+    printf("\n");
+}
+
+
+main(int argc, char **argv)
+{
+    int mpi_size, mpi_rank;				/* mpi variables */
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    if (MAINPROCESS){
+	printf("===================================\n");
+	printf("MPI functionality tests\n");
+	printf("===================================\n");
+    }
+    fapl = H5Pcreate (H5P_FILE_ACCESS);
+    H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
+
+    if (parse_options(argc, argv) != 0){
+	if (MAINPROCESS)
+	    usage();
+	goto finish;
+    }
+
+	MPI_BANNER("MPIO independent overlapping writes...");
+	test_mpio_overlap_writes(filenames[0]);
+
+finish:
+    if (MAINPROCESS){		/* only process 0 reports */
+	printf("===================================\n");
+	if (nerrors){
+	    printf("***MPI tests detected %d errors***\n", nerrors);
+	}
+	else{
+	    printf("MPI tests finished with no errors\n");
+	}
+	printf("===================================\n");
+    }
+    MPI_Finalize();
+    h5_cleanup(FILENAME, fapl);
+    return(nerrors);
 }
 

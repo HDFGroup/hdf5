@@ -29,6 +29,7 @@ const char *FILENAME[5]={
 	    "ParaMdset",
 	    NULL};
 char	filenames[5][200];
+hid_t	fapl;				/* file access property list */
 
 
 
@@ -254,27 +255,19 @@ parse_options(int argc, char **argv)
     /* compose the test filenames */
     {
 	int i, n;
-	hid_t plist;
 
-	plist = H5Pcreate (H5P_FILE_ACCESS);
-	H5Pset_fapl_mpio(plist, MPI_COMM_WORLD, MPI_INFO_NULL);
 	n = sizeof(FILENAME)/sizeof(FILENAME[0]) - 1;	/* exclude the NULL */
 
 	for (i=0; i < n; i++)
-	    if (h5_fixname(FILENAME[i],plist,filenames[i],sizeof(filenames[i]))
+	    if (h5_fixname(FILENAME[i],fapl,filenames[i],sizeof(filenames[i]))
 		== NULL){
 		printf("h5_fixname failed\n");
 		nerrors++;
-		H5Pclose(plist);
 		return(1);
 	    }
-	H5Pclose(plist);
-	if (verbose){
-	    int i;
-	    printf("Test filenames are:\n");
-	    for (i=0; i < n; i++)
-		printf("    %s\n", filenames[i]);
-	}
+	printf("Test filenames are:\n");
+	for (i=0; i < n; i++)
+	    printf("    %s\n", filenames[i]);
     }
 
     return(0);
@@ -294,6 +287,8 @@ main(int argc, char **argv)
 	printf("PHDF5 TESTS START\n");
 	printf("===================================\n");
     }
+    fapl = H5Pcreate (H5P_FILE_ACCESS);
+    H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
 
     if (parse_options(argc, argv) != 0){
 	if (MAINPROCESS)
@@ -302,9 +297,6 @@ main(int argc, char **argv)
     }
 
     if (dowrite){
-	MPI_BANNER("MPIO independent overlapping writes...");
-	test_mpio_overlap_writes(filenames[0]);
-
 	MPI_BANNER("dataset using split communicators...");
 	test_split_comm_access(filenames[0]);
 
@@ -360,7 +352,10 @@ finish:
 	printf("===================================\n");
     }
     MPI_Finalize();
-
+    if (dowrite)
+	h5_cleanup(FILENAME, fapl);
+    else
+	H5Pclose(fapl);
     return(nerrors);
 }
 
