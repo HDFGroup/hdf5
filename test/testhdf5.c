@@ -156,6 +156,7 @@ main(int argc, char *argv[])
     H5Eset_auto (NULL, NULL);
 
     /* Tests are generally arranged from least to most complexity... */
+    InitTest("configure", test_configure, cleanup_configure, "Configure definitions");
     InitTest("metadata", test_metadata, cleanup_metadata, "Encode/decode metadata code");
     InitTest("tbbt", test_tbbt, NULL,  "Threaded, Balanced, Binary Trees");
     InitTest("file", test_file, cleanup_file, "Low-Level File I/O");

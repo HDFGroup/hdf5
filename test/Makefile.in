@@ -43,7 +43,7 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 	    extern_1.h5 extern_2.h5 extern_3.h5 extern_1a.raw extern_1b.raw  \
 	    extern_2a.raw extern_2b.raw extern_3a.raw extern_3b.raw          \
 	    extern_4a.raw extern_4b.raw gheap0.h5       \
-	    gheap1.h5 gheap2.h5 gheap3.h5 gheap4.h5 links.h5 \
+	    gheap1.h5 gheap2.h5 gheap3.h5 gheap4.h5 links.h5        \
 	    big.data big[0-9][0-9][0-9][0-9][0-9].h5 dtypes1.h5 dtypes2.h5   \
             tattr.h5 tselect.h5 mtime.h5 unlink.h5 \
             fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 \
@@ -58,8 +58,8 @@ CLEAN=$(TIMINGS)
 
 TEST_SRC=big.c bittests.c cmpd_dset.c dsets.c dtypes.c extend.c      \
      external.c fillval.c flush1.c flush2.c gheap.c h5test.c hyperslab.c \
-     istore.c lheap.c links.c mount.c mtime.c ohdr.c \
-     stab.c tarray.c tattr.c testhdf5.c testmeta.c tfile.c tgenprop.c th5s.c \
+     istore.c lheap.c links.c mount.c mtime.c ohdr.c stab.c tarray.c \
+     tattr.c tconfig.c testhdf5.c testmeta.c tfile.c tgenprop.c th5s.c \
      titerate.c tmeta.c trefer.c tselect.c ttime.c ttbbt.c tvltypes.c tvlstr.c \
      unlink.c enum.c ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c \
      ttsafe_acreate.c gass_write.c gass_read.c gass_append.c dpss_read.c \
@@ -83,9 +83,9 @@ timings _timings: $(TIMINGS)
 ## How to build the tests...  They all depend on the test and hdf5 libraries.
 $(TEST_PROGS): $(LIB) $(LIBHDF5)
 
-TESTHDF5_OBJ=testhdf5.lo tarray.lo tattr.lo tfile.lo tgenprop.lo th5s.lo \
-    titerate.lo tmeta.lo ttime.lo trefer.lo tselect.lo ttbbt.lo tvltypes.lo \
-    tvlstr.lo 
+TESTHDF5_OBJ=testhdf5.lo tarray.lo tattr.lo tconfig.lo tfile.lo tgenprop.lo \
+    th5s.lo titerate.lo tmeta.lo ttime.lo trefer.lo tselect.lo ttbbt.lo     \
+    tvltypes.lo tvlstr.lo 
 
 TTS_OBJ=ttsafe.lo ttsafe_dcreate.lo ttsafe_error.lo ttsafe_cancel.lo \
         ttsafe_acreate.lo
