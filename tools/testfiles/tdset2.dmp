@@ -4,10 +4,13 @@ File name: testfiles/tdset2.hdf
 Vgroup:0
      tag = 1965; reference = 2;
      name = /; class = HDF5;
-     number of entries = 0;
+     number of entries = 2;
    number of attributes = 0 
 Entries:-
-     None.
+     #0 (Numeric Data Group)
+	tag = 720; reference = 3;
+     #1 (Numeric Data Group)
+	tag = 720; reference = 5;
 
 
 Vgroup:1
@@ -163,7 +166,8 @@ Entries:-
 Graphical representation of the file:-
 (vg#: vgroup;   vd: vdata)
 
-   vg0 
+   vg0 	-- Numeric Data Group  
+	-- Numeric Data Group  
 
    vg1 	-- vd  
 

@@ -14,6 +14,8 @@
 #define FILE8 "tdset2.h5"
 #define FILE9 "tcompound2.h5"
 #define FILE10 "tloop.h5"
+#define FILE11 "tloop2.h5"
+#define FILE12 "tmany.h5"
 
 static void test_group(void) {
 hid_t fid, group;
@@ -734,6 +736,17 @@ float dset2_1[10], dset2_2[3][5];
 
 }
 
+/*
+            o
+          /___\
+      g1 o/   \o g2
+          \___/  
+
+   
+o - group objects
+
+*/
+
 static void test_loop(void) {
 hid_t fid, group;
 
@@ -750,6 +763,204 @@ hid_t fid, group;
   H5Fclose(fid);
 }
 
+static void test_loop2(void) {
+hid_t fid, group;
+
+  fid = H5Fcreate(FILE11, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+  /* create group object g1 and implcit path from root object */
+  group = H5Gcreate (fid, "/g1", 0);
+  H5Gclose(group);
+
+  /* create group object g2 and implcit path from root object */
+  group = H5Gcreate (fid, "/g2", 0);
+  H5Gclose(group);
+
+  /* create path from object at /g1 to object at /g2 and name it g1.1 */
+  H5Glink (fid, H5G_LINK_HARD, "/g2", "/g1/g1.1"); /* 
+
+  /* create path from object at /g2 to object at /g1 and name it g2.1 */
+  H5Glink (fid, H5G_LINK_SOFT, "/g1", "/g2/g2.1");
+
+  H5Fclose(fid);
+
+}
+
+/*
+                  /
+     |       |       |   \    \    \
+     g1     g2      g3   g4   g5    g6
+    / \      |       |    \     \    \
+ g1.1 g1.2 slink2  link3 dset2 slink4 dset3
+  |    |    (g1)  (dset2)      (dset3)
+ dset1 link1
+      (dset1)
+*/
+
+static void test_many(void) {
+hid_t fid, group, attr, dataset, space, space2, type, create_plist;
+hsize_t dims[2];
+int data[2][2], dset2[10][10], dset3[10][10];
+double d[10];
+
+char buf[60];
+int i, j;
+int i0, i1, i2, i3;
+int a[2][2][2][2];
+double b[2][2][2][2];
+double c[2][2][2][2];
+hsize_t sdim, maxdim;
+
+typedef struct {	/* compound type has members with rank > 1	*/
+  int a[2][2][2][2];	/* arrays are 2x2x2x2				*/
+  double b[2][2][2][2];
+  double c[2][2][2][2];
+} dset1_t;
+dset1_t dset1[6];
+
+size_t dim[4];
+int index[4] = {0,1,2,3};  /* normal indicies */
+const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
+
+  fid = H5Fcreate(FILE12, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+  group = H5Gcreate (fid, "/g1", 0);
+  H5Gclose(group);
+
+  create_plist = H5Pcreate(H5P_DATASET_CREATE);
+
+  sdim = 2;
+  H5Pset_chunk(create_plist, 1, &sdim);
+
+  group = H5Gcreate (fid, "/g1/g1.1", 0);
+
+  type = H5Tcreate (H5T_COMPOUND, sizeof(dset1[0]));
+
+  dim[0] = dim[1] = dim[2] = dim[3] = 2;
+  H5Tinsert_array(type, "a_array", HOFFSET(dset1_t, a), 4, dim, perm, H5T_STD_I32BE);
+  H5Tinsert_array(type, "b_array", HOFFSET(dset1_t, b), 4, dim, perm, H5T_IEEE_F64BE);
+  H5Tinsert_array(type, "c_array", HOFFSET(dset1_t, c), 4, dim, perm, H5T_IEEE_F64BE);
+
+/*
+  H5Tcommit(group, "type1", type);
+*/
+
+  /* dset1 */
+  sdim = 6;
+  maxdim = H5S_UNLIMITED;
+  space = H5Screate_simple(1, &sdim, &maxdim);
+  dataset = H5Dcreate(group, "dset1", type, space, create_plist);
+
+  /* add attributes to dset1 */
+  dims[0] = 10;
+  space2 = H5Screate_simple(1, dims, NULL);
+  attr = H5Acreate (dataset, "attr1", H5T_NATIVE_CHAR, space2, H5P_DEFAULT);
+  sprintf(buf, "abcdefghi");
+  H5Awrite(attr, H5T_NATIVE_CHAR, buf);
+  H5Sclose(space2);
+  H5Aclose(attr);
+
+  dims[0] = 2; dims[1] = 2;
+  space2 = H5Screate_simple(2, dims, NULL);
+  attr = H5Acreate (dataset, "attr2", H5T_STD_I32BE, space2, H5P_DEFAULT);
+  data[0][0] = 0; data[0][1] = 1; data[1][0] = 2; data[1][1] = 3;
+  H5Awrite(attr, H5T_STD_I32BE, data);
+  H5Sclose(space2);
+  H5Aclose(attr);
+
+  dims[0] = 10;
+  space2 = H5Screate_simple(1, dims, NULL);
+  attr = H5Acreate (dataset, "attr3", H5T_IEEE_F64BE, space2, H5P_DEFAULT);
+  for (i = 0; i < 10; i++) d[i] = 0.1 * i;
+  H5Awrite(attr, H5T_IEEE_F64BE, d);
+  H5Sclose(space2);
+  H5Aclose(attr);
+
+  for (j=0; j<sdim; j++) {
+	for (i3 = 0; i3 < 2; i3++) {
+		index[perm[3]] = i3;
+	for (i2 = 0; i2 < 2; i2++) {
+		index[perm[2]] = i2;
+	for (i1 = 0; i1 < 2; i1++) {
+		index[perm[1]] = i1;
+	for (i0 = 0; i0 < 2; i0++) {
+		index[perm[0]] = i0;
+		
+		dset1[j].a[index[3]][index[2]][index[1]][index[0]] = i0+j;
+		dset1[j].b[index[3]][index[2]][index[1]][index[0]] = (double)(i0+j);
+		dset1[j].c[index[3]][index[2]][index[1]][index[0]] = (double)(i0+j+sdim);
+	}
+	}
+	}
+	}
+  }
+
+  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+
+  H5Dclose(dataset);
+  H5Sclose(space);
+
+  H5Tclose(type);
+  H5Gclose(group);
+
+  group = H5Gcreate (fid, "/g1/g1.2", 0);
+  H5Glink (group, H5G_LINK_HARD, "/g1/g1.1/dset1", "link1");
+  H5Gclose(group);
+
+  group = H5Gcreate (fid, "/g2", 0);
+  H5Glink (group, H5G_LINK_SOFT, "/g1", "slink2");
+  H5Gclose(group);
+
+  group = H5Gcreate (fid, "/g3", 0);
+  H5Gclose(group);
+
+  group = H5Gcreate (fid, "/g4", 0);
+
+  /* dset2 */
+  dims[0] = 10; dims[1] = 10;
+  space = H5Screate_simple(2, dims, NULL);
+
+  dataset = H5Dcreate(group, "dset2", H5T_STD_I32BE, space, H5P_DEFAULT);
+  for (i = 0; i < 10; i++)
+       for (j = 0; j < 10; j++)
+            dset2[i][j] = j;
+  H5Dwrite(dataset, H5T_STD_I32BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
+
+  H5Dclose(dataset);
+
+  H5Sclose(space);
+  H5Gclose(group);
+
+  group = H5Gopen(fid, "/g3");
+  H5Glink (group, H5G_LINK_HARD, "/g4/dset2", "link3");
+  H5Gclose(group);
+
+  group = H5Gcreate (fid, "/g5", 0);
+  H5Gclose(group);
+
+  group = H5Gcreate (fid, "/g6", 0);
+  /* dset3 */
+  dims[0] = 10; dims[1] = 10;
+  space = H5Screate_simple(2, dims, NULL);
+
+  dataset = H5Dcreate(group, "dset3", H5T_STD_I32BE, space, H5P_DEFAULT);
+  for (i = 0; i < 10; i++)
+       for (j = 0; j < 10; j++)
+            dset3[i][j] = i;
+  H5Dwrite(dataset, H5T_STD_I32BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset3);
+
+  H5Dclose(dataset);
+
+  H5Sclose(space);
+  H5Gclose(group);
+
+  group = H5Gopen(fid, "/g5");
+  H5Glink (group, H5G_LINK_SOFT, "/g6/dset3", "slink4");
+  H5Gclose(group);
+
+  H5Fclose(fid);
+
+}
 
 int main(void){
 
@@ -757,12 +968,16 @@ test_group();
 test_attribute();
 test_softlink();
 test_dataset();
-test_dataset2();
 test_hardlink();
 test_compound_dt();
-test_compound_dt2();
-test_loop();
 test_all();
+test_loop();
+
+test_dataset2();
+test_compound_dt2();
+test_loop2();
+test_many();
+
 return 0;
 
 }

@@ -4,60 +4,56 @@ File name: testfiles/thlink.hdf
 Vgroup:0
      tag = 1965; reference = 2;
      name = /; class = HDF5;
-     number of entries = 2;
+     number of entries = 3;
    number of attributes = 0 
 Entries:-
-     #0 (Vgroup)
+     #0 (Numeric Data Group)
+	tag = 720; reference = 3;
+     #1 (Vgroup)
 	tag = 1965;reference = 5;
-	number of entries = 1;
+	number of entries = 2;
 	name = g1; class = HDF5
    number of attributes = 0 
-     #1 (Vgroup)
-	tag = 1965;reference = 11;
-	number of entries = 0;
-	name = g2; class = HDF5
+     #2 (Vgroup)
+	tag = 1965;reference = 6;
+	number of entries = 1;
+	name = g1.1; class = HDF5
    number of attributes = 0 
 
 
 Vgroup:1
      tag = 1965; reference = 5;
      name = g1; class = HDF5;
-     number of entries = 1;
+     number of entries = 2;
    number of attributes = 0 
 Entries:-
-     #0 (Vgroup)
+     #0 (Numeric Data Group)
+	tag = 720; reference = 3;
+     #1 (Vgroup)
 	tag = 1965;reference = 6;
-	number of entries = 0;
-	name = link1; class = HDF5
+	number of entries = 1;
+	name = g1.1; class = HDF5
    number of attributes = 0 
 
 
 Vgroup:2
      tag = 1965; reference = 6;
-     name = link1; class = HDF5;
-     number of entries = 0;
+     name = g1.1; class = HDF5;
+     number of entries = 1;
    number of attributes = 0 
 Entries:-
-     None.
+     #0 (Numeric Data Group)
+	tag = 720; reference = 3;
 
 
 Vgroup:3
-     tag = 1965; reference = 11;
-     name = g2; class = HDF5;
-     number of entries = 0;
-   number of attributes = 0 
-Entries:-
-     None.
-
-
-Vgroup:4
-     tag = 1965; reference = 15;
+     tag = 1965; reference = 8;
      name = fakeDim0; class = Dim0.0;
      number of entries = 1;
    number of attributes = 0 
 Entries:-
      #0 (Vdata)
-	tag = 1962; reference = 14; 
+	tag = 1962; reference = 7; 
 	number of records = 1; interlace = 0;
 	fields = [Values];
 	record size (in bytes) = 4;
@@ -65,247 +61,68 @@ Entries:-
 	total number of attributes = 0.
 
 
-Vgroup:5
-     tag = 1965; reference = 17;
-     name = fakeDim1; class = Dim0.0;
-     number of entries = 1;
-   number of attributes = 0 
-Entries:-
-     #0 (Vdata)
-	tag = 1962; reference = 16; 
-	number of records = 1; interlace = 0;
-	fields = [Values];
-	record size (in bytes) = 4;
-	name = fakeDim1; class = DimVal0.1;
-	total number of attributes = 0.
-
-
-Vgroup:6
-     tag = 1965; reference = 19;
-     name = fakeDim2; class = Dim0.0;
-     number of entries = 1;
-   number of attributes = 0 
-Entries:-
-     #0 (Vdata)
-	tag = 1962; reference = 18; 
-	number of records = 1; interlace = 0;
-	fields = [Values];
-	record size (in bytes) = 4;
-	name = fakeDim2; class = DimVal0.1;
-	total number of attributes = 0.
-
-
-Vgroup:7
-     tag = 1965; reference = 21;
-     name = fakeDim3; class = Dim0.0;
-     number of entries = 1;
-   number of attributes = 0 
-Entries:-
-     #0 (Vdata)
-	tag = 1962; reference = 20; 
-	number of records = 1; interlace = 0;
-	fields = [Values];
-	record size (in bytes) = 4;
-	name = fakeDim3; class = DimVal0.1;
-	total number of attributes = 0.
-
-
-Vgroup:8
-     tag = 1965; reference = 23;
-     name = dset; class = Var0.0;
+Vgroup:4
+     tag = 1965; reference = 10;
+     name = dset1; class = Var0.0;
      number of entries = 5;
    number of attributes = 0 
 Entries:-
      #0 (Vgroup)
-	tag = 1965;reference = 15;
+	tag = 1965;reference = 8;
 	number of entries = 1;
 	name = fakeDim0; class = Dim0.0
    number of attributes = 0 
      #1 (Scientific Data)
 	tag = 702; reference = 4;
      #2 (Number type)
-	tag = 106; reference = 22;
+	tag = 106; reference = 9;
      #3 (SciData dimension record)
-	tag = 701; reference = 22;
+	tag = 701; reference = 9;
      #4 (Numeric Data Group)
 	tag = 720; reference = 3;
 
 
-Vgroup:9
-     tag = 1965; reference = 25;
-     name = link3; class = Var0.0;
-     number of entries = 5;
-   number of attributes = 0 
-Entries:-
-     #0 (Vgroup)
-	tag = 1965;reference = 17;
-	number of entries = 1;
-	name = fakeDim1; class = Dim0.0
-   number of attributes = 0 
-     #1 (Scientific Data)
-	tag = 702; reference = 8;
-     #2 (Number type)
-	tag = 106; reference = 24;
-     #3 (SciData dimension record)
-	tag = 701; reference = 24;
-     #4 (Numeric Data Group)
-	tag = 720; reference = 7;
-
-
-Vgroup:10
-     tag = 1965; reference = 27;
-     name = link2; class = Var0.0;
-     number of entries = 5;
-   number of attributes = 0 
-Entries:-
-     #0 (Vgroup)
-	tag = 1965;reference = 19;
-	number of entries = 1;
-	name = fakeDim2; class = Dim0.0
-   number of attributes = 0 
-     #1 (Scientific Data)
-	tag = 702; reference = 10;
-     #2 (Number type)
-	tag = 106; reference = 26;
-     #3 (SciData dimension record)
-	tag = 701; reference = 26;
-     #4 (Numeric Data Group)
-	tag = 720; reference = 9;
-
-
-Vgroup:11
-     tag = 1965; reference = 29;
-     name = link3; class = Var0.0;
-     number of entries = 5;
-   number of attributes = 0 
-Entries:-
-     #0 (Vgroup)
-	tag = 1965;reference = 21;
-	number of entries = 1;
-	name = fakeDim3; class = Dim0.0
-   number of attributes = 0 
-     #1 (Scientific Data)
-	tag = 702; reference = 13;
-     #2 (Number type)
-	tag = 106; reference = 28;
-     #3 (SciData dimension record)
-	tag = 701; reference = 28;
-     #4 (Numeric Data Group)
-	tag = 720; reference = 12;
-
-
-Vgroup:12
-     tag = 1965; reference = 30;
+Vgroup:5
+     tag = 1965; reference = 11;
      name = thlink.hdf; class = CDF0.0;
-     number of entries = 8;
+     number of entries = 2;
    number of attributes = 0 
 Entries:-
      #0 (Vgroup)
-	tag = 1965;reference = 15;
+	tag = 1965;reference = 8;
 	number of entries = 1;
 	name = fakeDim0; class = Dim0.0
    number of attributes = 0 
      #1 (Vgroup)
-	tag = 1965;reference = 17;
-	number of entries = 1;
-	name = fakeDim1; class = Dim0.0
-   number of attributes = 0 
-     #2 (Vgroup)
-	tag = 1965;reference = 19;
-	number of entries = 1;
-	name = fakeDim2; class = Dim0.0
-   number of attributes = 0 
-     #3 (Vgroup)
-	tag = 1965;reference = 21;
-	number of entries = 1;
-	name = fakeDim3; class = Dim0.0
-   number of attributes = 0 
-     #4 (Vgroup)
-	tag = 1965;reference = 23;
+	tag = 1965;reference = 10;
 	number of entries = 5;
-	name = dset; class = Var0.0
-   number of attributes = 0 
-     #5 (Vgroup)
-	tag = 1965;reference = 25;
-	number of entries = 5;
-	name = link3; class = Var0.0
-   number of attributes = 0 
-     #6 (Vgroup)
-	tag = 1965;reference = 27;
-	number of entries = 5;
-	name = link2; class = Var0.0
-   number of attributes = 0 
-     #7 (Vgroup)
-	tag = 1965;reference = 29;
-	number of entries = 5;
-	name = link3; class = Var0.0
+	name = dset1; class = Var0.0
    number of attributes = 0 
 
 
 Graphical representation of the file:-
 (vg#: vgroup;   vd: vdata)
 
-   vg0 	-- vg1 	-- vg2 
-	-- vg3 
+   vg0 	-- Numeric Data Group  
+	-- vg1 	-- Numeric Data Group  
+		-- vg2 	-- Numeric Data Group  
+	-- vg2 	-- Numeric Data Group  
 
-   vg1 	-- vg2 
+   vg1 	-- Numeric Data Group  
+	-- vg2 	-- Numeric Data Group  
 
-   vg2 
+   vg2 	-- Numeric Data Group  
 
-   vg3 
+   vg3 	-- vd  
 
-   vg4 	-- vd  
-
-   vg5 	-- vd  
-
-   vg6 	-- vd  
-
-   vg7 	-- vd  
-
-   vg8 	-- vg4 	-- vd  
+   vg4 	-- vg3 	-- vd  
 	-- Scientific Data  
 	-- Number type  
 	-- SciData dimension record  
 	-- Numeric Data Group  
 
-   vg9 	-- vg5 	-- vd  
-	-- Scientific Data  
-	-- Number type  
-	-- SciData dimension record  
-	-- Numeric Data Group  
-
-   vg10 	-- vg6 	-- vd  
-	-- Scientific Data  
-	-- Number type  
-	-- SciData dimension record  
-	-- Numeric Data Group  
-
-   vg11 	-- vg7 	-- vd  
-	-- Scientific Data  
-	-- Number type  
-	-- SciData dimension record  
-	-- Numeric Data Group  
-
-   vg12 	-- vg4 	-- vd  
-	-- vg5 	-- vd  
-	-- vg6 	-- vd  
-	-- vg7 	-- vd  
-	-- vg8 	-- vg4 	-- vd  
-		-- Scientific Data  
-		-- Number type  
-		-- SciData dimension record  
-		-- Numeric Data Group  
-	-- vg9 	-- vg5 	-- vd  
-		-- Scientific Data  
-		-- Number type  
-		-- SciData dimension record  
-		-- Numeric Data Group  
-	-- vg10 	-- vg6 	-- vd  
-		-- Scientific Data  
-		-- Number type  
-		-- SciData dimension record  
-		-- Numeric Data Group  
-	-- vg9 	-- vg5 	-- vd  
+   vg5 	-- vg3 	-- vd  
+	-- vg4 	-- vg3 	-- vd  
 		-- Scientific Data  
 		-- Number type  
 		-- SciData dimension record  
@@ -314,7 +131,7 @@ Graphical representation of the file:-
 File name: testfiles/thlink.hdf 
 
 Vdata: 0
-   tag = 1962; reference = 14;
+   tag = 1962; reference = 7;
    number of records = 1; interlace = 0;
    fields = [Values];
    record size (in bytes) = 4;
@@ -325,93 +142,15 @@ Vdata: 0
 Loc.     Data
 0        5  ; 
 
-Vdata: 1
-   tag = 1962; reference = 16;
-   number of records = 1; interlace = 0;
-   fields = [Values];
-   record size (in bytes) = 4;
-   name = fakeDim1; class = DimVal0.1;
-   number of attributes = 0 
-- field index 0: [Values], type=24, order=1
-   number of attributes = 0 
-Loc.     Data
-0        5  ; 
-
-Vdata: 2
-   tag = 1962; reference = 18;
-   number of records = 1; interlace = 0;
-   fields = [Values];
-   record size (in bytes) = 4;
-   name = fakeDim2; class = DimVal0.1;
-   number of attributes = 0 
-- field index 0: [Values], type=24, order=1
-   number of attributes = 0 
-Loc.     Data
-0        5  ; 
-
-Vdata: 3
-   tag = 1962; reference = 20;
-   number of records = 1; interlace = 0;
-   fields = [Values];
-   record size (in bytes) = 4;
-   name = fakeDim3; class = DimVal0.1;
-   number of attributes = 0 
-- field index 0: [Values], type=24, order=1
-   number of attributes = 0 
-Loc.     Data
-0        5  ; 
-
 File name: testfiles/thlink.hdf 
 
-Variable Name = dset
+Variable Name = dset1
 	 Index = 0
 	 Type= 32-bit signed integer
 	 Ref. = 3
 	 Rank = 1
 	 Number of attributes = 0
 	 Dim0: Name=fakeDim0
-		 Size = 5
-		 Scale Type = number-type not set
-		 Number of attributes = 0
-	 Data : 
-                0 1 2 3 4 
-
-
-Variable Name = link3
-	 Index = 1
-	 Type= 32-bit signed integer
-	 Ref. = 7
-	 Rank = 1
-	 Number of attributes = 0
-	 Dim0: Name=fakeDim1
-		 Size = 5
-		 Scale Type = number-type not set
-		 Number of attributes = 0
-	 Data : 
-                0 1 2 3 4 
-
-
-Variable Name = link2
-	 Index = 2
-	 Type= 32-bit signed integer
-	 Ref. = 9
-	 Rank = 1
-	 Number of attributes = 0
-	 Dim0: Name=fakeDim2
-		 Size = 5
-		 Scale Type = number-type not set
-		 Number of attributes = 0
-	 Data : 
-                0 1 2 3 4 
-
-
-Variable Name = link3
-	 Index = 3
-	 Type= 32-bit signed integer
-	 Ref. = 12
-	 Rank = 1
-	 Number of attributes = 0
-	 Dim0: Name=fakeDim3
 		 Size = 5
 		 Scale Type = number-type not set
 		 Number of attributes = 0

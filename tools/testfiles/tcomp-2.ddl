@@ -8,7 +8,7 @@ DATATYPE "/type1" {
 }
 DATATYPE "/type2" {
    H5T_STD_I32BE int_array[4];
-   H5T_STD_I32BE float_array[5][6];
+   H5T_IEEE_F32BE float_array[5][6];
 }
 DATATYPE "/group1/type3" {
    H5T_STD_I32BE int;

@@ -18,7 +18,7 @@ Entries:-
    number of attributes = 0 
      #1 (Vgroup)
 	tag = 1965;reference = 13;
-	number of entries = 0;
+	number of entries = 2;
 	name = g2; class = HDF5
    number of attributes = 0 
 
@@ -31,7 +31,7 @@ Vgroup:1
 Entries:-
      #0 (Vgroup)
 	tag = 1965;reference = 6;
-	number of entries = 0;
+	number of entries = 2;
 	name = g1.1; class = HDF5
    number of attributes = 0 
      #1 (Vgroup)
@@ -44,10 +44,13 @@ Entries:-
 Vgroup:2
      tag = 1965; reference = 6;
      name = g1.1; class = HDF5;
-     number of entries = 0;
+     number of entries = 2;
    number of attributes = 0 
 Entries:-
-     None.
+     #0 (Numeric Data Group)
+	tag = 720; reference = 7;
+     #1 (Numeric Data Group)
+	tag = 720; reference = 9;
 
 
 Vgroup:3
@@ -75,10 +78,13 @@ Entries:-
 Vgroup:5
      tag = 1965; reference = 13;
      name = g2; class = HDF5;
-     number of entries = 0;
+     number of entries = 2;
    number of attributes = 0 
 Entries:-
-     None.
+     #0 (Numeric Data Group)
+	tag = 720; reference = 14;
+     #1 (Numeric Data Group)
+	tag = 720; reference = 16;
 
 
 Vgroup:6
@@ -340,20 +346,25 @@ Entries:-
 Graphical representation of the file:-
 (vg#: vgroup;   vd: vdata)
 
-   vg0 	-- vg1 	-- vg2 
+   vg0 	-- vg1 	-- vg2 	-- Numeric Data Group  
+			-- Numeric Data Group  
 		-- vg3 	-- vg4 
-	-- vg5 
+	-- vg5 	-- Numeric Data Group  
+		-- Numeric Data Group  
 
-   vg1 	-- vg2 
+   vg1 	-- vg2 	-- Numeric Data Group  
+		-- Numeric Data Group  
 	-- vg3 	-- vg4 
 
-   vg2 
+   vg2 	-- Numeric Data Group  
+	-- Numeric Data Group  
 
    vg3 	-- vg4 
 
    vg4 
 
-   vg5 
+   vg5 	-- Numeric Data Group  
+	-- Numeric Data Group  
 
    vg6 	-- vd  
 

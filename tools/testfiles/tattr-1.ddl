@@ -24,5 +24,19 @@ GROUP "/" {
          0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9
       }
    }
+   ATTRIBUTE "attr4" {
+      DATATYPE { "H5T_STD_I32BE" }
+      DATASPACE { ARRAY ( 0 ) ( 0 ) }
+      DATA {
+         100
+      }
+   }
+   ATTRIBUTE "attr5" {
+      DATATYPE { "undefined string" }
+      DATASPACE { ARRAY ( 0 ) ( 0 ) }
+      DATA {
+         Unable to print data.
+      }
+   }
 }
 }

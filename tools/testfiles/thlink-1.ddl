@@ -3,7 +3,7 @@ Expected output for 'h5dump thlink.h5'
 #############################
 HDF5 "thlink.h5" {
 GROUP "/" {
-   DATASET "dset" {
+   DATASET "dset1" {
       DATATYPE { "H5T_STD_I32BE" }
       DATASPACE { ARRAY ( 5 ) ( 5 ) }
       DATA {
@@ -11,17 +11,17 @@ GROUP "/" {
       }
    }
    GROUP "g1" {
-      GROUP "link1" {
-         DATASET "link3" {
-            HARDLINK { "/dset" }
-         }
+      DATASET "dset2" {
+         HARDLINK { "/dset1" }
       }
-      DATASET "link2" {
-         HARDLINK { "/dset" }
+      GROUP "g1.1" {
+         DATASET "dset3" {
+            HARDLINK { "/dset1" }
+         }
       }
    }
    GROUP "g2" {
-      HARDLINK { "/g1/link1" }
+      HARDLINK { "/g1/g1.1" }
    }
 }
 }

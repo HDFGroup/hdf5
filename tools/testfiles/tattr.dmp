@@ -5,7 +5,7 @@ Vgroup:0
      tag = 1965; reference = 2;
      name = /; class = HDF5;
      number of entries = 0;
-   number of attributes = 3 
+   number of attributes = 4 
     attr0: name=attr1 type=20 count=24 size=24
 	97 116 116 114 105 98 117 116 101 32 111 102 32 114 111 
 	111 116 32 103 114 111 117 112 0 
@@ -14,6 +14,8 @@ Vgroup:0
     attr2: name=attr3 type=6 count=10 size=80
 	0.000000 0.100000 0.200000 0.300000 0.400000 0.500000 0.600000 
 	0.700000 0.800000 0.900000 
+    attr3: name=attr4 type=24 count=1 size=4
+	100 
 Entries:-
      None.
 
@@ -60,5 +62,17 @@ Vdata: 2
    number of attributes = 0 
 Loc.     Data
 0        0.000000 0.100000 0.200000 0.300000 0.400000 0.500000 0.600000 0.700000 0.800000 0.900000  ; 
+
+Vdata: 3
+   tag = 1962; reference = 6;
+   number of records = 1; interlace = 0;
+   fields = [VALUES];
+   record size (in bytes) = 4;
+   name = attr4; class = Attr0.0;
+   number of attributes = 0 
+- field index 0: [VALUES], type=24, order=1
+   number of attributes = 0 
+Loc.     Data
+0        100  ; 
 
 File name: testfiles/tattr.hdf 
