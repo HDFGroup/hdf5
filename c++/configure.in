@@ -203,6 +203,23 @@ EOF
 fi
 
 dnl ----------------------------------------------------------------------
+dnl If we should build only static executables
+dnl
+AC_MSG_CHECKING(if should build only statically linked executables)
+AC_ARG_ENABLE(static_exec,
+   [  --enable-static-exec    Build only statically linked executables [default=no]],
+   STATIC_EXEC=$enableval)
+
+if test "X$STATIC_EXEC" = "Xyes"; then
+   echo "yes"
+   LT_STATIC_EXEC="-all-static"
+else
+   echo "no"
+   LT_STATIC_EXEC=""
+fi
+AC_SUBST(LT_STATIC_EXEC)
+
+dnl ----------------------------------------------------------------------
 dnl Checks for compiler characteristics.
 dnl
 AC_LANG_CPLUSPLUS
