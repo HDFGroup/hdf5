@@ -322,13 +322,13 @@ H5_DLL herr_t H5T_free(H5T_t *dt);
 H5_DLL H5T_sign_t H5T_get_sign(H5T_t const *dt);
 H5_DLL H5T_t *H5T_get_super(H5T_t *dt);
 H5_DLL char  *H5T_get_member_name(H5T_t const *dt, unsigned membno);
-H5_DLL herr_t H5T_get_member_value(H5T_t *dt, unsigned membno, void *value);
+H5_DLL herr_t H5T_get_member_value(const H5T_t *dt, unsigned membno, void *value);
 H5_DLL H5T_t *H5T_get_member_type(H5T_t *dt, unsigned membno);
 H5_DLL int H5T_get_nmembers(const H5T_t *dt);
 H5_DLL herr_t H5T_insert(H5T_t *parent, const char *name, size_t offset,
         const H5T_t *member);
-H5_DLL H5T_t *H5T_enum_create(H5T_t *parent);
-H5_DLL herr_t H5T_enum_insert(H5T_t *dt, const char *name, void *value);
+H5_DLL H5T_t *H5T_enum_create(const H5T_t *parent);
+H5_DLL herr_t H5T_enum_insert(H5T_t *dt, const char *name, const void *value);
 H5_DLL int    H5T_get_array_ndims(H5T_t *dt);
 H5_DLL int    H5T_get_array_dims(H5T_t *dt, hsize_t dims[], int perm[]);
 H5_DLL herr_t H5T_sort_value(H5T_t *dt, int *map);

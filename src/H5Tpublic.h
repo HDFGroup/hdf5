@@ -485,8 +485,8 @@ H5_DLL herr_t H5Tpack(hid_t type_id);
 
 /* Operations defined on enumeration datatypes */
 H5_DLL hid_t H5Tenum_create(hid_t base_id);
-H5_DLL herr_t H5Tenum_insert(hid_t type, const char *name, void *value);
-H5_DLL herr_t H5Tenum_nameof(hid_t type, void *value, char *name/*out*/,
+H5_DLL herr_t H5Tenum_insert(hid_t type, const char *name, const void *value);
+H5_DLL herr_t H5Tenum_nameof(hid_t type, const void *value, char *name/*out*/,
 			     size_t size);
 H5_DLL herr_t H5Tenum_valueof(hid_t type, const char *name,
 			      void *value/*out*/);

@@ -1,3 +1,6 @@
+// Define the __FUNCTION__ so we don't get warnings about using it.
+-d__FUNCTION__="NoFunctionName"
+
 // Turn off warnings about not using the return value from these functions:
 -esym(534, HDfprintf, HDsnprintf, HDvsnprintf)
 -esym(534, H5E_clear, H5E_push)
@@ -91,6 +94,7 @@
         H5FL.c
         H5FO.c
 
+        H5Tenum.c
         H5Tfields.c
         H5Tfixed.c
         H5Tfloat.c
