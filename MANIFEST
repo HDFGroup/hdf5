@@ -1329,6 +1329,7 @@
 ./tools/testfiles/tvlstr.ddl
 ./tools/testfiles/tattr2.h5
 ./tools/testfiles/tall-2A.ddl
+./tools/testfiles/tall-2B.ddl
 ./tools/testfiles/tcontents.ddl
 ./tools/testfiles/tfilters.h5
 ./tools/testfiles/tchunked.ddl
