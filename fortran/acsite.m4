@@ -73,13 +73,14 @@ dnl AC_LANG_FORTRAN9X()
 dnl
 dnl	Generic macro to setup the Fortran 9X specific env variables.
 dnl
-AC_DEFUN(AC_LANG_FORTRAN9X, [
-define([AC_LANG], [FORTRAN9X])
-ac_ext=f90
+m4_define([AC_LANG(FORTRAN9X)],
+[ac_ext=f90
 ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&AC_FD_CC'
 ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&AC_FD_CC'
 cross_compiling=$ac_cv_prog_f9x_cross
 ])
+
+AU_DEFUN([AC_LANG_FORTRAN9X], [AC_LANG(FORTRAN9X)])
 
 dnl -------------------------------------------------------------------------
 dnl AC_LANG_F9X_WORKS()
@@ -173,7 +174,8 @@ if test -n "$flags"; then
 else
   echo "none" 1>&6
 fi
-rm -f conftest*])
+rm -f conftest*
+])
 
 dnl -------------------------------------------------------------------------
 dnl AC_F9X_MODS()

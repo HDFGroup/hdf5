@@ -1,8 +1,9 @@
 dnl ----------------------------------------------------------------------
 dnl Process this file with autoconf to produce configure.
 dnl
-dnl Copyright (C) 2000-2001 National Center for Supercomputing Applications
-dnl                         All rights reserved.
+dnl Copyright (C) 2000, 2001, 2002
+dnl     National Center for Supercomputing Applications.
+dnl     All rights reserved.
 dnl ----------------------------------------------------------------------
 
 dnl ----------------------------------------------------------------------
@@ -86,6 +87,12 @@ case "$host_os" in
       host_os_novers=$host_os
       ;;
 esac
+
+dnl Different compilers may need default libraries. They are specified in
+dnl the config/* files, so we put this statement here so that it'll be
+dnl set by the code which follows...
+dnl
+AC_SUBST(DEFAULT_LIBS) DEFAULT_LIBS=""
 
 host_config="none"
 for f in $host_cpu-$host_vendor-$host_os \
@@ -269,8 +276,26 @@ dnl Checks for compiler characteristics.
 dnl
 AC_LANG_CPLUSPLUS
 
+AC_MSG_CHECKING(if $CXX needs old style header files in includes)
+AC_TRY_RUN([
+#include <iostream>
+
+int main(void) { return 0; }
+], [
+   echo no
+], [
+   echo yes
+   CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
+])
+
 AC_MSG_CHECKING(if $CXX can handle namespaces)
 AC_TRY_RUN([
+#ifdef OLD_HEADER_FILENAME
+#include <iostream.h>
+#else
+#include <iostream>
+#endif
+
 using namespace std;
 
 namespace H5 {
@@ -287,18 +312,6 @@ int main(void) {
 ], [
    echo no
    CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
-])
-
-AC_MSG_CHECKING(if $CXX needs old style header files in includes)
-AC_TRY_RUN([
-#include <iostream>
-
-int main(void) { return 0; }
-], [
-   echo no
-], [
-   echo yes
-   CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
 ])
 
 AC_MSG_CHECKING(if $CXX supports bool types)
