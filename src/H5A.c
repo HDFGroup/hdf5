@@ -173,7 +173,7 @@ intn H5Ainit_group(group_t grp,      /* IN: Group to initialize */
         grp_ptr->wrapped=0;
         grp_ptr->atoms=0;
         grp_ptr->nextid=reserved;
-        grp_ptr->free_func=free;
+        grp_ptr->free_func=free_func;
         if((grp_ptr->atom_list=(atom_info_t **)HDcalloc(hash_size,sizeof(atom_info_t *)))==NULL)
             HGOTO_DONE(FAIL);
       } /* end if */
@@ -617,7 +617,7 @@ intn H5Adec_ref(hid_t atm   /* IN: Atom to decrement reference count for */
 
         /* If the reference count is zero, remove the object from the group */
         if(atm_ptr->count==0 && (obj=H5Aremove_atom(atm))!=NULL)
-            grp_ptr->free_func(obj); /* call the user's 'free' function for the atom's information */
+            (*grp_ptr->free_func)(obj); /* call the user's 'free' function for the atom's information */
         ret_value=SUCCEED;
       } /* end if */
 
