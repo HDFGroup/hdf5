@@ -267,4 +267,35 @@ extern int nCols;
 	that use the lib
  */
 extern ProgType programtype; 
+
+
+
+/* taken from h5dump.h*/
+#define BOOT_BLOCK	"BOOT_BLOCK"
+#define GROUPNAME	"GROUP"
+#define DATASET		"DATASET"
+#define ATTRIBUTE	"ATTRIBUTE"
+#define	DATATYPE	"DATATYPE"
+#define DATASPACE	"DATASPACE"
+#define DATA		"DATA"
+#define SCALAR		"SCALAR"
+#define SIMPLE		"SIMPLE"
+#define COMPLEX		"COMPLEX"
+#define STORAGELAYOUT	"STORAGELAYOUT"
+#define COMPRESSION	"COMPRESSION"
+#define EXTERNAL	"EXTERNAL"
+#define SOFTLINK	"SOFTLINK"
+#define HARDLINK	"HARDLINK"
+#define NLINK		"NLINK"
+#define FILENO		"FILENO"
+#define OBJNO		"OBJNO"
+#define STRSIZE		"STRSIZE"
+#define STRPAD		"STRPAD"
+#define CSET		"CSET"
+#define CTYPE		"CTYPE"
+#define CONCATENATOR "//"
+#define DATASET "DATASET"
+#define TYPE "TYPE"
+#define BEGIN		"{"
+#define END		"}"
 #endif
