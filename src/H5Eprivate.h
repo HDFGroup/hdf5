@@ -57,7 +57,6 @@ typedef struct H5E_print_t {
 /* HDF5 error class */
 #define    H5E_CLS_NAME         "HDF5"
 #define    H5E_CLS_LIB_NAME     "HDF5"
-#define    H5E_CLS_LIB_VERS     ""              /* How to find out version number? */
 
 /* HDF5 error class: major errors */
 #define    H5E_MAJ_ARGS_MSG		"Function arguments"
@@ -249,26 +248,10 @@ typedef struct H5E_print_t {
  */
 #define HGOTO_DONE(ret_val) {ret_value = ret_val; goto done;}
 
-H5_DLL hid_t   H5E_register_class(const char *cls_name, const char *lib_name, 
-                                const char *version);
-H5_DLL herr_t  H5E_unregister_class(H5E_cls_t *cls);
-H5_DLL herr_t  H5E_close_msg(H5E_msg_t *err);
-H5_DLL hid_t   H5E_create_msg(hid_t cls_id, H5E_type_t msg_type, const char *msg);
-H5_DLL hid_t   H5E_get_current_stack(void);
-H5_DLL herr_t  H5E_close_stack(H5E_t *err_stack);
-H5_DLL ssize_t H5E_get_class_name(H5E_cls_t *cls, char *name, size_t size);
-H5_DLL ssize_t H5E_get_msg(H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg, size_t size);
-H5_DLL int     H5E_get_num(H5E_t *err_stack);
-H5_DLL herr_t  H5E_set_current_stack(H5E_t *estack);
+/* Library-private functions defined in H5E package */
 H5_DLL herr_t  H5E_push(H5E_t *estack, const char *file, const char *func, unsigned line, 
                             hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc);
-H5_DLL herr_t  H5E_pop(H5E_t *err_stack, size_t count);
 H5_DLL herr_t  H5E_clear(H5E_t *estack);
-H5_DLL herr_t  H5E_print(H5E_t *estack, FILE *stream);
-H5_DLL herr_t  H5E_walk (H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, 
-                             void *client_data);
-H5_DLL herr_t  H5E_get_auto(H5E_t *estack, H5E_auto_t *func, void **client_data);
-H5_DLL herr_t  H5E_set_auto(H5E_t *estack, H5E_auto_t func, void *client_data);
 H5_DLL herr_t  H5E_dump_api_stack(int is_api);
 
 #ifdef H5_HAVE_PARALLEL

@@ -187,8 +187,6 @@ init_error(void)
     
     if((ERR_CLS = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS))<0)
         TEST_ERROR;
-    if((ERR_CLS = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS))<0)
-        TEST_ERROR;
 
     if(cls_size != H5Eget_class_name(ERR_CLS, cls_name, (size_t)cls_size) + 1) 
         TEST_ERROR;

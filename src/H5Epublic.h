@@ -32,10 +32,8 @@
 
 /* Take out _new later */
 typedef enum H5E_type_t {
-    H5E_LLIMIT   =-1,
     H5E_MAJOR,
-    H5E_MINOR,
-    H5E_ULIMIT
+    H5E_MINOR
 } H5E_type_t;
 
 /* Information about an error; element of error stack */
