@@ -1045,7 +1045,10 @@ TABLE.list TD { border:none; }
             <tr>
               <td>Bytes 4-8:</td>
               <td>Filter mask, a 32-bit bitfield indicating which 
-                filters have been applied to that chunk.</td>
+                filters have been skipped for this chunk.  Each filter
+                has an index number in the pipeline (starting at 0, with
+                the first filter to apply) and if that filter is skipped,
+                the bit corresponding to it's index is set.</td>
             </tr>
             <tr>
               <td><em>N</em> 64-bit fields:</td>
