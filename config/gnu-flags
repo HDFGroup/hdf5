@@ -89,6 +89,7 @@ EOF
 
 fi
 
+arch=
 # Architecture-specific flags
 case "$host_os-$host_cpu" in
     # FreeBSD sets the information from "uname -m" to the general machine
@@ -100,25 +101,20 @@ case "$host_os-$host_cpu" in
         case "$host_cpu_model" in
             # Hmm.. this might not catch Celerons, but it won't hurt them either...
             *Pro*|*II*|*III*|*IV*|*Athlon*)
-                ARCH=${ARCH:="-march=i686"}
+                arch="-march=i686"
             ;;
         esac
         ;;
 
     *-i686)
-        ARCH=${ARCH:="-march=i686"}
+        arch="-march=i686"
         ;;
 esac
 
 # Host-specific flags
 case "`hostname`" in
     sleipnir.ncsa.uiuc.edu)
-#        case "$cc_vendor-$cc_version" in
-#            gcc-3*)
-#                ARCH="`echo $ARCH | sed -e 's/i686/athlon-mp/g'`"
-#            ;;
-#        esac
-        ARCH="$ARCH -pipe"
+        arch="$arch -pipe"
         ;;
 esac
 
@@ -126,7 +122,7 @@ esac
 case "$cc_vendor-$cc_version" in
   gcc*|egcs*|pgcc*)
     # General
-    CFLAGS="$CFLAGS $ARCH -ansi -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline"
+    CFLAGS="$CFLAGS $arch -ansi -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline"
 
     # Production
     case "$cc_vendor-$cc_version" in
