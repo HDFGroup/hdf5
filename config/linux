@@ -45,7 +45,7 @@ debug="-g -DH5AC_DEBUG -DH5B_DEBUG -DH5F_DEBUG -DH5G_DEBUG -UH5O_DEBUG -DH5T_DEB
 
 production="-O3 -DNDEBUG -finline-functions -funroll-loops -malign-double -fomit-frame-pointer"
 
-default_mode='$debug $warn -pipe -DH5F_LOW_DFLT=H5F_LOW_SEC2'
+default_mode='-ansi $debug $warn -pipe -DH5F_LOW_DFLT=H5F_LOW_SEC2'
 
 # Don't set CFLAGS if the user already did.
 if test -z "$CFLAGS"; then

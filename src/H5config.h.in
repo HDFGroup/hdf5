@@ -25,6 +25,12 @@
 /* Define if the compiler understands the __FUNCTION__ keyword. */
 #undef HAVE_FUNCTION
 
+/* Define if we have parallel support  THIS WILL GO AWAY SHORTLY!!! */
+#undef PHDF5
+
+/* Define if we have parallel support */
+#undef HAVE_PARALLEL
+
 /* The number of bytes in a double.  */
 #undef SIZEOF_DOUBLE
 
@@ -42,3 +48,9 @@
 
 /* The number of bytes in a short.  */
 #undef SIZEOF_SHORT
+
+/* Define if you have the mpi library (-lmpi).  */
+#undef HAVE_LIBMPI
+
+/* Define if you have the mpio library (-lmpio).  */
+#undef HAVE_LIBMPIO

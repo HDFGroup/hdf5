@@ -24,7 +24,7 @@ test _test: $(PROGS)
 	@for test in $(TESTS) dummy; do			                      \
 	   if test $$test != dummy; then				      \
 	      echo "Testing $$test $(TEST_FLAGS)";			      \
-	      ./$$test $(TEST_FLAGS) || exit 1;				      \
+	      $(RUNTEST) ./$$test $(TEST_FLAGS) || exit 1;		      \
 	   fi;								      \
 	done;
 

@@ -124,6 +124,46 @@ AC_TRY_COMPILE(,[int f(void){return __FUNCTION__;}],
 		     AC_MSG_RESULT(no))
 
 
+dnl ----------------------------------------------------------------------
+dnl Check for parallel support
+dnl
+AC_ARG_ENABLE(parallel,
+  --enable-parallel=mpio    Enable parallel support with MPIO,
+  PARALLEL=$enableval)
+AC_MSG_CHECKING(for parallel support);
+AC_SUBST(PARALLEL_SRC)
+AC_SUBST(RUNTEST) RUNTEST=""
+
+case "X-$PARALLEL" in
+
+   X-|X-no)
+      # Parallel support is not enabled
+      AC_MSG_RESULT(disabled)
+      ;;
+
+   X-mpio|X-yes)
+      # Use MPIO.  Define PHDF5 in src/H5config.h (comes from ./acconfig.h)
+      # and augment the include and library search paths (it doesn't hurt
+      # to have extra paths).  Then check for header files and libraries.
+      # Some extra source files are added to the list also so we don't have
+      # to ifdef out the whole file.
+      AC_MSG_RESULT(mpio)
+      AC_DEFINE(PHDF5)	dnl THIS WILL GO AWAY SHORTLY!!!
+      AC_DEFINE(HAVE_PARALLEL)
+      PARALLEL_SRC='$(PARALLEL_SRC)'
+      CFLAGS="$CFLAGS -I/foo/bar/parallel/include"
+      CFLAGS="$CFLAGS -L/foo/bar/parallel/lib"
+      AC_CHECK_LIB(mpi,main)  dnl Replace `main' with some function
+      AC_CHECK_LIB(mpio,main) dnl Replace `main' with some function
+      RUNTEST=mpirun
+      ;;
+
+   *)
+      AC_MSG_ERROR(unknown parallel support: $PARALLEL)
+      ;;
+esac
+        
+
 
 dnl ----------------------------------------------------------------------
 dnl Build the Makefiles.  Almost every Makefile.in will begin with the line

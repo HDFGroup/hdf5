@@ -317,7 +317,7 @@ H5Dclose(hid_t dataset_id)
  *
  * Return:	Success:	ID for a copy of the data space.  The data
  *				space should be released by calling
- *				H5Dclose().
+ *				H5Pclose().
  *
  *		Failure:	FAIL
  *
@@ -353,6 +353,56 @@ H5Dget_space (hid_t dataset_id)
     if ((ret_value=H5A_register (H5_DATASPACE, copied_space))<0) {
 	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		       "unable to register data space");
+    }
+
+    FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Dget_type
+ *
+ * Purpose:	Returns a copy of the file data type for a dataset.
+ *
+ * Return:	Success:	ID for a copy of the data type.  The data
+ *				type should be released by calling
+ *				H5Tclose().
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, February  3, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Dget_type (hid_t dataset_id)
+{
+    
+    H5D_t	*dataset = NULL;
+    H5T_t	*copied_type = NULL;
+    hid_t	ret_value = FAIL;
+    
+    FUNC_ENTER (H5Dget_type, FAIL);
+
+    /* Check args */
+    if (H5_DATASET!=H5A_group (dataset_id) ||
+	NULL==(dataset=H5A_object (dataset_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    }
+
+    /* Copy the data type */
+    if (NULL==(copied_type=H5T_copy (dataset->type))) {
+	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		       "unable to copy the data type");
+    }
+
+    /* Create an atom */
+    if ((ret_value=H5A_register (H5_DATATYPE, copied_type))<0) {
+	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
+		       "unable to register data type");
     }
 
     FUNC_LEAVE (ret_value);
