@@ -64,7 +64,7 @@ static void
 usage (const char *progname)
 {
     fprintf(stderr, "\
-usage: %s [OPTIONS] FILE [GROUP]\n\
+usage: %s [OPTIONS] FILE [OBJECTS...]\n\
    OPTIONS\n\
       -h, -?, --help   Print a usage message and exit\n\
       -d, --dump       Print the values of datasets\n\
@@ -74,9 +74,12 @@ usage: %s [OPTIONS] FILE [GROUP]\n\
    FILE\n\
       The file name may include a printf(3C) integer format such as\n\
       \"%%05d\" to open a file family.\n\
-   GROUP\n\
-      If a group name is not specified then the contents of the root group\n\
-      \"/\" are displayed.\n", progname);
+   OBJECTS\n\
+      The names of zero or more objects about which information should be\n\
+      displayed.  If a group is mentioned then information about each of its\n\
+      members is displayed.  If no object names are specified then\n\
+      information about all of the objects in the root group is displayed.\n",
+	    progname);
 }
 
 
