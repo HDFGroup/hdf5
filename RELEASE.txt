@@ -45,13 +45,14 @@ Library
      definition are removed since we have not used it consistently before.
    * Fixed bug with non-zero userblock sizes causing raw data to not write
      correctly. 
+   * Fixed build on Linux systems with --enable-static-exec flag. It now
+     works correctly.
 
 Configuration
 -------------
-    * Changed the default value of $NPROCS from 2 to 3 since 3 processes
-      have a much bigger chance catching parallel errors than just 2.
-    * Basic port to Compaq (nee DEC) Alpha OSF 5.
-
+   * Changed the default value of $NPROCS from 2 to 3 since 3 processes
+     have a much bigger chance catching parallel errors than just 2.
+   * Basic port to Compaq (nee DEC) Alpha OSF 5.
 
 
 Tools
@@ -64,21 +65,21 @@ Documentation
 New Features
 ============
 
-    * C++ API:
-	- Added two new member functions: Exception::getFuncName() and
-	  Exception::getCFuncName() to provide the name of the member
-	  function, where an exception is thrown.
-	- IdComponent::operator= becomes a virtual function because DataType,
-	  DataSpace, and PropList provide their own implementation.  The new
-	  operator= functions invoke H5Tcopy, H5Scopy, and H5Pcopy to make a
-	  copy of a datatype, dataspace, and property list, respectively.
-    * F90 API:
-        - Added aditional parameter "dims" to the h5dread/h5dwrite and
-          h5aread/h5awrite subroutines. This parameter is 1D array of size 7 and
-          contains the sizes of the data buffer dimensions. 
-
-    * F90 static library is available on Windows platforms. See INSTALL_Windows.txt
-      for details.
+   * C++ API:
+       - Added two new member functions: Exception::getFuncName() and
+         Exception::getCFuncName() to provide the name of the member
+         function, where an exception is thrown.
+       - IdComponent::operator= becomes a virtual function because
+         DataType, DataSpace, and PropList provide their own
+         implementation.  The new operator= functions invoke H5Tcopy,
+         H5Scopy, and H5Pcopy to make a copy of a datatype, dataspace,
+         and property list, respectively.
+   * F90 API:
+       - Added aditional parameter "dims" to the h5dread/h5dwrite and
+         h5aread/h5awrite subroutines. This parameter is 1D array of size
+         7 and contains the sizes of the data buffer dimensions. 
+   * F90 static library is available on Windows platforms. See
+     INSTALL_Windows.txt for details.
 
 
 Platforms Tested
@@ -127,9 +128,6 @@ Known Problems
   platforms. This is due to the fact that not all of the system
   libraries on Solaris are available in a static format.
 
-  The --enable-static-exec configure flag also fails to correctly compile
-  on Linux platforms using the gcc-2.95.2 compiler.
-  
   The --enable-static-exec configure flag also fails to correctly compile
   on IBM SP2 platform for the serial mode.  The parallel mode works fine
   with this option.
