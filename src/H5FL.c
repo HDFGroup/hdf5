@@ -370,7 +370,7 @@ H5FL_term(void)
     /* Terminating this layer never affects other layers; rather, other layers affect
      * the termination of this layer. */
     return 0;
-}
+}   /* end H5FL_term() */
 
 
 /*-------------------------------------------------------------------------
@@ -694,7 +694,8 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size)
 
         /* check if we are actually changing the size of the buffer */
         if(new_size!=temp->size) {
-            ret_value=H5FL_blk_alloc(head,new_size,0);
+            if((ret_value=H5FL_blk_alloc(head,new_size,0))==NULL)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for block");
             HDmemcpy(ret_value,block,MIN(new_size,temp->size));
             H5FL_blk_free(head,block);
         } /* end if */
@@ -706,6 +707,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size)
         ret_value=H5FL_blk_alloc(head,new_size,0);
 #endif /* NO_BLK_FREE_LISTS */
 
+done:
     FUNC_LEAVE(ret_value);
 } /* end H5FL_blk_realloc() */
 
