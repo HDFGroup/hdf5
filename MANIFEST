@@ -729,6 +729,8 @@
 ./tools/testfiles/tstr-1.ddl
 ./tools/testfiles/tstr.h5
 ./tools/testfiles/tstr2.h5
+./tools/testfiles/tvldtypes.h5
+./tools/testfiles/tvldtypes.ddl
 ./tools/testfiles/vg.hdf
 ./tools/testfiles/anfile.hdf
 ./tools/testfiles/anno_obj.hdf
