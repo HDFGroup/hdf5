@@ -96,7 +96,7 @@ void usage( const char *progname )
   FILE2_NAME        File name of the second HDF5 file\n"
 
  fprintf(stderr,
-  "h5diff [OBJ1_NAME] [OBJ2_NAME] [-h] [-l] [-r] [-d] [-n count] [-d delta] [-p relativet] FILE1_NAME FILE2_NAME\n%s",
+  "h5diff [OBJ1_NAME] [OBJ2_NAME] [-h] [-l] [-r] [-d] [-n count] [-d delta] [-p relative] FILE1_NAME FILE2_NAME\n%s",
   USAGE);
  fprintf(stderr,"\n");
  fprintf(stderr,"Items in [ ] are optional \n");

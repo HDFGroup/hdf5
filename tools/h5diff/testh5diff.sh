@@ -93,6 +93,8 @@ TOOLTEST() {
 # test1: Check if the command line number of arguments is less than 3
 TOOLTEST h5diff_1.txt h5diff_test1.h5 
 
+# test2: Check for invalid options
+TOOLTEST h5diff_2.txt -x h5diff_test1.h5 h5diff_test2.h5
 
 if test $nerrors -eq 0 ; then
    echo "All $H5DIFF tests passed."
