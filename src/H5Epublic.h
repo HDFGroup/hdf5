@@ -84,6 +84,7 @@ typedef enum
     /* Cache related errors */
       H5E_CANTFLUSH,	       /* Can't flush object from cache */
       H5E_CANTLOAD,	       /* Can't load object into cache */
+      H5E_PROTECT,	       /* Protected object error */
 
     /* B-tree related errors */
       H5E_NOTFOUND,	       /* Object not found */

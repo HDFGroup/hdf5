@@ -458,7 +458,7 @@ H5G_new (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
    if (!ent) ent = &_child;
 
    /* Create root directory if necessary */
-   H5G_mkroot (f, size_hint);
+   H5G_mkroot (f, H5G_SIZE_HINT);
    H5ECLEAR;
 
    /* lookup name */
@@ -834,10 +834,10 @@ H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init)
    init = MAX(init, H5H_SIZEOF_FREE(f)+2);
 
    /* Create symbol table private heap */
-   if ((stab.heap = H5H_new (f, H5H_LOCAL, init))<0) {
+   if ((stab.heap_addr = H5H_new (f, H5H_LOCAL, init))<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create heap*/
    }
-   if ((name = H5H_insert (f, stab.heap, 1, "")<0)) {
+   if ((name = H5H_insert (f, stab.heap_addr, 1, "")<0)) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't initialize heap*/
    }
    if (0!=name) {
@@ -849,7 +849,7 @@ H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init)
    }
 
    /* Create the B-tree */
-   if ((stab.btree = H5B_new (f, H5B_SNODE))<0) {
+   if ((stab.btree_addr = H5B_new (f, H5B_SNODE))<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create B-tree*/
    }
 
@@ -919,10 +919,10 @@ H5G_stab_find (hdf5_file_t *f, H5G_entry_t *self, const char *name,
    }
    udata.operation = H5G_OPER_FIND;
    udata.name = name;
-   udata.heap = stab.heap;
+   udata.heap_addr = stab.heap_addr;
 
    /* search the B-tree */
-   if (H5B_find (f, H5B_SNODE, stab.btree, &udata)<0) {
+   if (H5B_find (f, H5B_SNODE, stab.btree_addr, &udata)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL); /*not found*/
    }
 
@@ -977,11 +977,11 @@ H5G_stab_modify (hdf5_file_t *f, H5G_entry_t *self, const char *name,
    }
    udata.operation = H5G_OPER_MODIFY;
    udata.name = name;
-   udata.heap = stab.heap;
+   udata.heap_addr = stab.heap_addr;
    udata.entry = *ent;
 
    /* search and modify the B-tree */
-   if (H5B_find (f, H5B_SNODE, stab.btree, &udata)<0) {
+   if (H5B_find (f, H5B_SNODE, stab.btree_addr, &udata)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL); /*not found*/
    }
 
@@ -1032,11 +1032,11 @@ H5G_stab_insert (hdf5_file_t *f, H5G_entry_t *self, const char *name,
       HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL); /*can't read message*/
    }
    udata.name = name;
-   udata.heap = stab.heap;
+   udata.heap_addr = stab.heap_addr;
    udata.entry = *ent;
 
    /* insert */
-   if (H5B_insert (f, H5B_SNODE, stab.btree, &udata)<0) {
+   if (H5B_insert (f, H5B_SNODE, stab.btree_addr, &udata)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL); /*can't insert entry*/
    }
 
@@ -1098,13 +1098,13 @@ H5G_stab_list (hdf5_file_t *f, H5G_entry_t *self, intn maxentries,
    }
    udata.entry = entries;
    udata.name = names;
-   udata.heap = stab.heap;
+   udata.heap_addr = stab.heap_addr;
    udata.maxentries = maxentries;
    udata.nsyms = 0;
    if (names) HDmemset (names, 0, maxentries);
 
    /* list */
-   if (H5B_list (f, H5B_SNODE, stab.btree, &udata)<0) {
+   if (H5B_list (f, H5B_SNODE, stab.btree_addr, &udata)<0) {
       if (names) {
 	 for (i=0; i<maxentries; i++) H5MM_xfree (names[i]);
       }
@@ -1215,8 +1215,8 @@ H5G_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
       break;
 
    case H5G_CACHED_STAB:
-      UINT32DECODE (*pp, ent->cache.stab.btree);
-      UINT32DECODE (*pp, ent->cache.stab.heap);
+      UINT32DECODE (*pp, ent->cache.stab.btree_addr);
+      UINT32DECODE (*pp, ent->cache.stab.heap_addr);
       break;
 
    default:
@@ -1333,8 +1333,8 @@ H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
       break;
 
    case H5G_CACHED_STAB:
-      UINT32ENCODE (*pp, ent->cache.stab.btree);
-      UINT32ENCODE (*pp, ent->cache.stab.heap);
+      UINT32ENCODE (*pp, ent->cache.stab.btree_addr);
+      UINT32ENCODE (*pp, ent->cache.stab.heap_addr);
       break;
 
    default:
@@ -1417,10 +1417,10 @@ H5G_debug (hdf5_file_t *f, H5G_entry_t *ent, FILE *stream, intn indent,
       fprintf (stream, "Symbol Table\n");
       fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	       "B-tree address:",
-	       (unsigned long)(ent->cache.stab.btree));
+	       (unsigned long)(ent->cache.stab.btree_addr));
       fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	       "Heap address:",
-	       (unsigned long)(ent->cache.stab.heap));
+	       (unsigned long)(ent->cache.stab.heap_addr));
       break;
 
    default:

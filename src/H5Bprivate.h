@@ -54,7 +54,7 @@ typedef struct H5B_class_t {
    size_t	(*get_sizeof_rkey)(hdf5_file_t*);
    haddr_t	(*new)(hdf5_file_t*,void*,void*,void*);
    intn		(*cmp)(hdf5_file_t*,void*,void*,void*);
-   herr_t	(*found)(hdf5_file_t*,haddr_t,void*,void*,void*);
+   herr_t	(*found)(hdf5_file_t*,haddr_t,const void*,void*,const void*);
    haddr_t	(*insert)(hdf5_file_t*,haddr_t,int*,void*,int*,void*,void*,
 			  void*,int*);
    herr_t	(*list)(hdf5_file_t*,haddr_t,void*);
@@ -66,7 +66,7 @@ typedef struct H5B_class_t {
  * The B-tree node as stored in memory...
  */
 typedef struct H5B_key_t {
-   intn		dirty;		/*native key is more recent than raw key*/
+   hbool_t	dirty;		/*native key is more recent than raw key*/
    uint8	*rkey;		/*ptr into node->page for raw key	*/
    void		*nkey;		/*null or ptr into node->native for key	*/
 } H5B_key_t;
@@ -74,7 +74,7 @@ typedef struct H5B_key_t {
 typedef struct H5B_t {
    const H5B_class_t *type;	/*type of tree				*/
    size_t	sizeof_rkey;	/*size of raw (disk) key		*/
-   intn		dirty;		/*something in the tree is dirty	*/
+   hbool_t	dirty;		/*something in the tree is dirty	*/
    intn		ndirty;		/*num child ptrs to emit		*/
    intn		level;		/*node level				*/
    haddr_t	left;		/*address of left sibling		*/

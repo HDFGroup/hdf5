@@ -72,8 +72,8 @@ typedef struct H5G_entry_t {
       } sdata;
 
       struct {
-	 haddr_t btree;		/*file address of symbol table B-tree	*/
-	 haddr_t heap;		/*file address of stab name heap	*/
+	 haddr_t btree_addr;	/*file address of symbol table B-tree	*/
+	 haddr_t heap_addr;	/*file address of stab name heap	*/
       } stab;
    } cache;			/*cached data from object header	*/
 } H5G_entry_t;
@@ -113,7 +113,7 @@ typedef struct H5G_node_ud1_t {
    /* downward */
    H5G_oper_t	operation;	/*what operation to perform		*/
    const char	*name;		/*points to temporary memory		*/
-   haddr_t	heap;		/*symbol table heap address		*/
+   haddr_t	heap_addr;	/*symbol table heap address		*/
 
    /* upward for H5G_OPER_FIND, downward for H5G_OPER_MODIFY */
    H5G_entry_t	entry;		/*symbol table entry			*/
@@ -126,7 +126,7 @@ typedef struct H5G_node_list_t {
    H5G_entry_t	*entry;		/*array of entries, alloc'd by caller	*/
    char		**name;		/*array of string ptrs, allocd by caller*/
    intn		maxentries;	/*size of the ADDR and NAME arrays	*/
-   haddr_t	heap;		/*heap address				*/
+   haddr_t	heap_addr;	/*heap address				*/
 
    /* upward */
    intn		nsyms;		/*num. symbols processed		*/

@@ -159,8 +159,8 @@ typedef struct H5O_cont_t {
 extern const H5O_class_t H5O_STAB[1];
 
 typedef struct H5O_stab_t {
-   haddr_t	btree;			/*address of B-tree		*/
-   haddr_t	heap;			/*address of name heap		*/
+   haddr_t	btree_addr;		/*address of B-tree		*/
+   haddr_t	heap_addr;		/*address of name heap		*/
 } H5O_stab_t;
 
 

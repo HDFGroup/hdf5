@@ -292,7 +292,7 @@ H5H_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
        */
       HDmemcpy (p, H5H_MAGIC, H5H_SIZEOF_MAGIC); p += H5H_SIZEOF_MAGIC;
       H5F_encode_length (f, p, heap->mem_alloc);
-      H5F_encode_offset (f, p, fl?fl->offset:-1);
+      H5F_encode_offset (f, p, fl?fl->offset:H5H_FREE_NULL);
       H5F_encode_offset (f, p, heap->addr);
 
       /*

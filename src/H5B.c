@@ -101,9 +101,12 @@
 /* PRIVATE PROTOTYPES */
 static haddr_t H5B_insert_helper (hdf5_file_t *f, haddr_t addr,
 				  const H5B_class_t *type,
-				  uint8 *lt_key, intn *lt_key_changed,
+				  uint8 *lt_key, hbool_t *lt_key_changed,
 				  uint8 *md_key, void *udata,
-				  uint8 *rt_key, intn *rt_key_changed);
+				  uint8 *rt_key, hbool_t *rt_key_changed);
+static herr_t H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type,
+				H5B_t *bt, intn idx, haddr_t child,
+				intn anchor, void *md_key);
 static herr_t H5B_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr,
 			 H5B_t *b);
 static H5B_t *H5B_load (hdf5_file_t *f, haddr_t addr, const void *_data);
@@ -166,13 +169,13 @@ H5B_new (hdf5_file_t *f, const H5B_class_t *type)
    bt = H5MM_xmalloc (sizeof(H5B_t));
    bt->type = type;
    bt->sizeof_rkey = sizeof_rkey;
-   bt->dirty = 1;
+   bt->dirty = TRUE;
    bt->ndirty = 0;
    bt->type = type;
    bt->level = 0;
    bt->left = bt->right = 0;
    bt->nchildren = 0;
-   bt->page = H5MM_xmalloc (size);
+   bt->page = H5MM_xcalloc (1, size); /*use calloc() to keep file clean*/
    bt->native = H5MM_xmalloc (total_native_keysize);
    bt->child = H5MM_xmalloc (2*H5B_K(f,type) * sizeof(haddr_t));
    bt->key = H5MM_xmalloc ((2*H5B_K(f,type)+1) * sizeof(H5B_key_t));
@@ -186,7 +189,7 @@ H5B_new (hdf5_file_t *f, const H5B_class_t *type)
 	i<2*H5B_K(f,type);
 	i++,offset+=bt->sizeof_rkey+H5F_SIZEOF_OFFSET(f)) {
 
-      bt->key[i].dirty = 0;
+      bt->key[i].dirty = FALSE;
       bt->key[i].rkey = bt->page + offset;
       bt->key[i].nkey = NULL;
       bt->child[i] = 0;
@@ -195,7 +198,7 @@ H5B_new (hdf5_file_t *f, const H5B_class_t *type)
    /*
     * The last possible key...
     */
-   bt->key[2*H5B_K(f,type)].dirty = 0;
+   bt->key[2*H5B_K(f,type)].dirty = FALSE;
    bt->key[2*H5B_K(f,type)].rkey = bt->page + offset;
    bt->key[2*H5B_K(f,type)].nkey = NULL;
 
@@ -248,7 +251,7 @@ H5B_load (hdf5_file_t *f, haddr_t addr, const void *_data)
    bt->sizeof_rkey = (type->get_sizeof_rkey)(f);
    size = H5B_nodesize (f, type, &total_nkey_size, bt->sizeof_rkey);
    bt->type = type;
-   bt->dirty = 0;
+   bt->dirty = FALSE;
    bt->ndirty = 0;
    bt->page = H5MM_xmalloc (size);
    bt->native = H5MM_xmalloc (total_nkey_size);
@@ -277,7 +280,7 @@ H5B_load (hdf5_file_t *f, haddr_t addr, const void *_data)
    /* the child/key pairs */
    for (i=0; i<2*H5B_K(f,type); i++) {
 
-      bt->key[i].dirty = 0;
+      bt->key[i].dirty = FALSE;
       bt->key[i].rkey = p;
       p += bt->sizeof_rkey;
       bt->key[i].nkey = NULL;
@@ -290,7 +293,7 @@ H5B_load (hdf5_file_t *f, haddr_t addr, const void *_data)
       }
    }
 
-   bt->key[2*H5B_K(f,type)].dirty = 0;
+   bt->key[2*H5B_K(f,type)].dirty = FALSE;
    bt->key[2*H5B_K(f,type)].rkey = p;
    bt->key[2*H5B_K(f,type)].nkey = NULL;
    FUNC_LEAVE (bt);
@@ -372,7 +375,7 @@ H5B_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5B_t *bt)
 		  HRETURN_ERROR (H5E_BTREE, H5E_CANTENCODE, FAIL);
 	       }
 	    }
-	    bt->key[i].dirty = 0;
+	    bt->key[i].dirty = FALSE;
 	 }
 	 p += bt->sizeof_rkey;
 
@@ -392,7 +395,7 @@ H5B_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5B_t *bt)
       if (H5F_block_write (f, addr, size, bt->page)<0) {
 	 HRETURN_ERROR (H5E_BTREE, H5E_CANTFLUSH, FAIL);
       }
-      bt->dirty = 0;
+      bt->dirty = FALSE;
       bt->ndirty = 0;
    }
 
@@ -438,9 +441,8 @@ herr_t
 H5B_find (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 {
    H5B_t	*bt=NULL;
-   uint8	lt_key[256], rt_key[256];
    intn		idx=-1, lt=0, rt, cmp=1;
-   int		retval = FAIL;
+   int		ret_value = FAIL;
 
    FUNC_ENTER (H5B_find, NULL, FAIL);
 
@@ -449,7 +451,6 @@ H5B_find (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     */
    assert (f);
    assert (type);
-   assert (type->sizeof_nkey < sizeof lt_key);
    assert (type->decode);
    assert (type->cmp);
    assert (type->found);
@@ -457,63 +458,59 @@ H5B_find (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
    
    /*
     * Perform a binary search to locate the child which contains
-    * the thing for which we're searching.  The comparison function
-    * may preempt the B-tree node from the cache.
+    * the thing for which we're searching.
     */
-   if (NULL==(bt=H5AC_find (f, H5AC_BT, addr, type))) {
-      HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
+   if (NULL==(bt=H5AC_protect (f, H5AC_BT, addr, type))) {
+      HGOTO_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
    }
    rt = bt->nchildren;
 
    while (lt<rt && cmp) {
       idx = (lt + rt) / 2;
-      if (NULL==(bt=H5AC_find (f, H5AC_BT, addr, type))) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
-      }
 
       /* the left key */
       if (!bt->key[idx].nkey && H5B_decode_key (f, bt, idx)<0) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
+	 HGOTO_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
       }
-      HDmemcpy (lt_key, bt->key[idx].nkey, type->sizeof_nkey);
 
       /* the right key */
       if (!bt->key[idx+1].nkey && H5B_decode_key (f, bt, idx+1)<0) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
+	 HGOTO_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
       }
-      HDmemcpy (rt_key, bt->key[idx+1].nkey, type->sizeof_nkey);
 
       /* compare */
-      if ((cmp=(type->cmp)(f, lt_key, udata, rt_key))<0) {
+      if ((cmp=(type->cmp)(f, bt->key[idx].nkey, udata,
+			   bt->key[idx+1].nkey))<0) {
 	 rt = idx;
       } else {
 	 lt = idx+1;
       }
    }
    if (cmp) {
-      HRETURN_ERROR (H5E_BTREE, H5E_NOTFOUND, FAIL);
+      HGOTO_ERROR (H5E_BTREE, H5E_NOTFOUND, FAIL);
    }
 
    /*
     * Follow the link to the subtree or to the data node.
     */
-   if (NULL==(bt=H5AC_find (f, H5AC_BT, addr, type))) {
-      HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
-   }
    assert (idx>=0 && idx<bt->nchildren);
    if (bt->level > 0) {
-      retval = H5B_find (f, type, bt->child[idx], udata);
-      if (retval<0) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_NOTFOUND, FAIL);
+      if ((ret_value = H5B_find (f, type, bt->child[idx], udata))<0) {
+	 HGOTO_ERROR (H5E_BTREE, H5E_NOTFOUND, FAIL);
       }
    } else {
-      retval = (type->found)(f, bt->child[idx], lt_key, udata, rt_key);
-      if (retval<0) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_NOTFOUND, FAIL);
+      ret_value = (type->found)(f, bt->child[idx], bt->key[idx].nkey,
+				udata, bt->key[idx+1].nkey);
+      if (ret_value<0) {
+	 HGOTO_ERROR (H5E_BTREE, H5E_NOTFOUND, FAIL);
       }
    }
 
-   FUNC_LEAVE (retval);
+done:
+   if (bt && H5AC_unprotect (f, H5AC_BT, addr, bt)<0) {
+      HRETURN_ERROR (H5E_BTREE, H5E_PROTECT, FAIL);
+   }
+   FUNC_LEAVE (ret_value);
 }
 
 
@@ -524,6 +521,9 @@ H5B_find (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
  *		H5B_ANCHOR_LT then the new node gets the right half of
  *		the old node.  If anchor is H5B_ANCHOR_RT then the
  *		new node gets the left half of the old node.
+ *
+ * 		The OLD_BT argument is a pointer to a protected B-tree
+ *		node.
  *
  * Return:	Success:	Address of the new node.
  *
@@ -538,16 +538,13 @@ H5B_find (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5B_split (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, intn anchor)
+H5B_split (hdf5_file_t *f, const H5B_class_t *type, H5B_t *old_bt,
+	   haddr_t old_addr, intn anchor)
 {
-   H5B_t	*old = NULL;
-   H5B_t 	*bt = NULL;
-   size_t	total_nkey_size, size;
-   intn		i, offset;
-   intn		delta = H5B_ANCHOR_LT==anchor ? H5B_K(f,type) : 0;
+   H5B_t	*new_bt=NULL, *tmp_bt=NULL;
+   haddr_t	ret_value=FAIL, new_addr=FAIL;
+   intn		i, delta;
    size_t	recsize = 0;
-   haddr_t	tmp_addr, new_addr;
-   H5B_t	*tmp=NULL;
 
    FUNC_ENTER (H5B_split, NULL, FAIL);
 
@@ -556,157 +553,125 @@ H5B_split (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, intn anchor)
     */
    assert (f);
    assert (type);
-   assert (addr>=0);
+   assert (old_addr>=0);
 
    /*
-    * Initialize variables
+    * Initialize variables.
     */
-   if (NULL==(old=H5AC_find (f, H5AC_BT, addr, type))) {
-      HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
-   }
-   assert (old->nchildren == 2*H5B_K(f,type));
-   bt = H5MM_xmalloc (sizeof(H5B_t));
-   recsize = old->sizeof_rkey + H5F_SIZEOF_OFFSET(f);
+   assert (old_bt->nchildren == 2*H5B_K(f,type));
+   recsize = old_bt->sizeof_rkey + H5F_SIZEOF_OFFSET(f);
+   delta = H5B_ANCHOR_LT==anchor ? H5B_K(f,type) : 0;
 
    /*
     * Create the new B-tree node.
     */
-   size = H5B_nodesize (f, type, &total_nkey_size, old->sizeof_rkey);
-   bt->dirty = 1;
-   bt->sizeof_rkey = old->sizeof_rkey;
-   bt->ndirty = BOUND (0, old->ndirty-delta, H5B_K(f,type));
-   bt->type = type;
-   bt->level = old->level;
-   bt->nchildren = H5B_K(f,type);
-   bt->page = H5MM_xcalloc (size, 1); /*use calloc() to keep file clean*/
-   bt->native = H5MM_xmalloc (total_nkey_size);
-   bt->child = H5MM_xmalloc (2*H5B_K(f,type) * sizeof(haddr_t));
-   bt->key = H5MM_xmalloc ((2*H5B_K(f,type)+1) * sizeof(H5B_key_t));
+   if ((new_addr = H5B_new (f, type))<0) {
+      HGOTO_ERROR (H5E_BTREE, H5E_CANTINIT, FAIL);
+   }
+   if (NULL==(new_bt=H5AC_protect (f, H5AC_BT, new_addr, type))) {
+      HGOTO_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
+   }
+   new_bt->level = old_bt->level;
 
    /*
-    * Copy data into the new node from the old node.
+    * Copy data from the old node to the new node.
     */
-   HDmemcpy (bt->page + H5B_SIZEOF_HDR(f),
-	     old->page + H5B_SIZEOF_HDR(f) + delta*recsize,
-	     H5B_K(f,type) * recsize + bt->sizeof_rkey);
-   HDmemcpy (bt->native,
-	     old->native + delta * type->sizeof_nkey,
+   HDmemcpy (new_bt->page + H5B_SIZEOF_HDR(f),
+	     old_bt->page + H5B_SIZEOF_HDR(f) + delta*recsize,
+	     H5B_K(f,type) * recsize + new_bt->sizeof_rkey);
+   HDmemcpy (new_bt->native,
+	     old_bt->native + delta * type->sizeof_nkey,
 	     (H5B_K(f,type)+1) * type->sizeof_nkey);
 
-   for (i=0, offset=H5B_SIZEOF_HDR(f);
-	i<=2*H5B_K(f,type);
-	i++,offset+=recsize) {
-
+   for (i=0; i<=2*H5B_K(f,type); i++) {
       /* key */
       if (i<=H5B_K(f,type)) {
-	 bt->key[i].dirty = old->key[delta+i].dirty;
-	 bt->key[i].rkey = bt->page + offset;
-	 if (old->key[delta+i].nkey) {
-	    bt->key[i].nkey = bt->native + i*type->sizeof_nkey;
-	 } else {
-	    bt->key[i].nkey = NULL;
+	 new_bt->key[i].dirty = old_bt->key[delta+i].dirty;
+	 if (old_bt->key[delta+i].nkey) {
+	    new_bt->key[i].nkey = new_bt->native + i*type->sizeof_nkey;
 	 }
-      } else {
-	 bt->key[i].dirty = 0;
-	 bt->key[i].rkey = bt->page + offset;
-	 bt->key[i].nkey = NULL;
       }
-
       /* child */
       if (i<H5B_K(f,type)) {
-	 bt->child[i] = old->child[delta+i];
-      } else if (i<2*H5B_K(f,type)) {
-	 bt->child[i] = 0;
+	 new_bt->child[i] = old_bt->child[delta+i];
       }
    }
-
+   new_bt->ndirty = BOUND (0, old_bt->ndirty-delta, H5B_K(f,type));
+   new_bt->nchildren = H5B_K(f,type);
 
    /*
     * Truncate the old node.
     */
    delta = H5B_ANCHOR_LT==anchor ? 0 : H5B_K(f,type);
-   old->dirty += 1;
-   old->ndirty = BOUND (0, old->ndirty-delta, H5B_K(f,type));
-   old->nchildren = H5B_K(f,type);
+   old_bt->dirty = TRUE;
+   old_bt->ndirty = BOUND (0, old_bt->ndirty-delta, H5B_K(f,type));
+   old_bt->nchildren = H5B_K(f,type);
    
    if (H5B_ANCHOR_RT==anchor) {
-      HDmemcpy (old->page + H5B_SIZEOF_HDR(f),
-		old->page + H5B_SIZEOF_HDR(f) + delta*recsize,
+      HDmemcpy (old_bt->page + H5B_SIZEOF_HDR(f),
+		old_bt->page + H5B_SIZEOF_HDR(f) + delta*recsize,
 		H5B_K(f,type) * recsize);
-      HDmemmove (old->native,
-		 old->native + delta * type->sizeof_nkey,
+      HDmemmove (old_bt->native,
+		 old_bt->native + delta * type->sizeof_nkey,
 		 (H5B_K(f,type)+1) * type->sizeof_nkey);
 
       for (i=0; i<=2*H5B_K(f,type); i++) {
 
 	 if (i<=H5B_K(f,type)) {
-	    old->key[i].dirty = old->key[delta+i].dirty;
-	    if (old->key[delta+i].nkey) {
-	       old->key[i].nkey = old->native + i * type->sizeof_nkey;
+	    old_bt->key[i].dirty = old_bt->key[delta+i].dirty;
+	    if (old_bt->key[delta+i].nkey) {
+	       old_bt->key[i].nkey = old_bt->native + i * type->sizeof_nkey;
 	    } else {
-	       old->key[i].nkey = NULL;
+	       old_bt->key[i].nkey = NULL;
 	    }
 	 } else {
-	    old->key[i].nkey = NULL;
+	    old_bt->key[i].nkey = NULL;
 	 }
 	 if (i<H5B_K(f,type)) {
-	    old->child[i] = old->child[delta+i];
+	    old_bt->child[i] = old_bt->child[delta+i];
 	 } else if (i<2*H5B_K(f,type)) {
-	    old->child[i] = 0;
+	    old_bt->child[i] = 0;
 	 }
       }
    }
 
    /*
-    * Update sibling pointers of new node.
+    * Update sibling pointers.
     */
    if (H5B_ANCHOR_LT==anchor) {
-      bt->left = addr;
-      bt->right = old->right;
-   } else {
-      bt->left = old->left;
-      bt->right = addr;
-   }
+      new_bt->left = old_addr;
+      new_bt->right = old_bt->right;
 
-   /*
-    * Add the new node to the cache.
-    */
-   new_addr = H5MF_alloc (f, size);
-   if (H5AC_set (f, H5AC_BT, new_addr, bt)<0) {
-      HRETURN_ERROR (H5E_BTREE, H5E_CANTINIT, FAIL);
-   }
-
-   /*
-    * Update sibling pointers of old nodes.
-    */
-   if (NULL==(old = H5AC_find (f, H5AC_BT, addr, type))) {
-      HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
-   }
-   if (H5B_ANCHOR_LT==anchor) {
-      old->dirty += 1;
-      tmp_addr = old->right;
-      old->right = new_addr;
-      if (tmp_addr) {
-	 if (NULL==(tmp = H5AC_find (f, H5AC_BT, tmp_addr, type))) {
-	    HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
+      if (old_bt->right) {
+	 if (NULL==(tmp_bt=H5AC_find (f, H5AC_BT, old_bt->right, type))) {
+	    HGOTO_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
 	 }
-	 tmp->dirty += 1;
-	 tmp->left = new_addr;
+	 tmp_bt->dirty = TRUE;
+	 tmp_bt->left = new_addr;
       }
+      old_bt->right = new_addr;
    } else {
-      old->dirty += 1;
-      tmp_addr = old->left;
-      old->left = new_addr;
-      if (tmp_addr) {
-	 if (NULL==(tmp = H5AC_find (f, H5AC_BT, tmp_addr, type))) {
-	    HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
+      new_bt->left = old_bt->left;
+      new_bt->right = old_addr;
+
+      if (old_bt->left) {
+	 if (NULL==(tmp_bt=H5AC_find (f, H5AC_BT, old_bt->left, type))) {
+	    HGOTO_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
 	 }
-	 tmp->dirty += 1;
-	 tmp->right = new_addr;
+	 tmp_bt->dirty = TRUE;
+	 tmp_bt->right = new_addr;
+      }
+      old_bt->left = new_addr;
+   }
+   HGOTO_DONE (new_addr);
+
+done:
+   {
+      if (new_bt && H5AC_unprotect (f, H5AC_BT, new_addr, new_bt)<0) {
+	 HRETURN_ERROR (H5E_BTREE, H5E_PROTECT, FAIL);
       }
    }
-
-   FUNC_LEAVE (new_addr);
+   FUNC_LEAVE (ret_value);
 }
 
 
@@ -765,7 +730,7 @@ haddr_t
 H5B_insert (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 {
    uint8	lt_key[256], md_key[256], rt_key[256];
-   intn		lt_key_changed=FALSE, rt_key_changed=FALSE;
+   hbool_t	lt_key_changed=FALSE, rt_key_changed=FALSE;
    haddr_t	child, new_root;
    intn		level;
    H5B_t	*bt;
@@ -846,14 +811,14 @@ H5B_insert (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
    if (NULL==(bt=H5AC_find (f, H5AC_BT, child, type))) {
       HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
    }
-   bt->dirty += 1;
+   bt->dirty = TRUE;
    bt->left = addr;
 
    /* clear the old root at the old address */
    if (NULL==(bt=H5AC_find (f, H5AC_BT, new_root, type))) {
       HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
    }
-   bt->dirty += 1;
+   bt->dirty = TRUE;
    bt->ndirty = 0;
    bt->left = 0;
    bt->right = 0;
@@ -864,22 +829,22 @@ H5B_insert (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
    if (NULL==(bt = H5AC_find (f, H5AC_BT, new_root, type))) {
       HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
    }
-   bt->dirty += 1;
+   bt->dirty = TRUE;
    bt->ndirty = 2;
    bt->level = level+1;
    bt->nchildren = 2;
    
    bt->child[0] = addr;
-   bt->key[0].dirty = 1;
+   bt->key[0].dirty = TRUE;
    bt->key[0].nkey = bt->native;
    HDmemcpy (bt->key[0].nkey, lt_key, type->sizeof_nkey);
 
    bt->child[1] = child;
-   bt->key[1].dirty = 1;
+   bt->key[1].dirty = TRUE;
    bt->key[1].nkey = bt->native + type->sizeof_nkey;
    HDmemcpy (bt->key[1].nkey, md_key, type->sizeof_nkey);
 
-   bt->key[2].dirty = 1;
+   bt->key[2].dirty = TRUE;
    bt->key[2].nkey = bt->native + 2 * type->sizeof_nkey;
    HDmemcpy (bt->key[2].nkey, rt_key, type->sizeof_nkey);
 
@@ -891,7 +856,8 @@ H5B_insert (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
  * Function:	H5B_insert_child
  *
  * Purpose:	Insert a child at the specified address with the
- *		specified left or right key.
+ *		specified left or right key.  The BT argument is a pointer
+ *		to a protected B-tree node.
  *
  * Return:	Success:	SUCCEED
  *
@@ -906,19 +872,16 @@ H5B_insert (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
+H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, H5B_t *bt,
 		  intn idx, haddr_t child, intn anchor, void *md_key)
 {
-   H5B_t	*bt;
    size_t	recsize;
    intn		i;
 
    FUNC_ENTER (H5B_insert_child, NULL, FAIL);
+   assert (bt);
 
-   if (NULL==(bt=H5AC_find (f, H5AC_BT, addr, type))) {
-      HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
-   }
-   bt->dirty += 1;
+   bt->dirty = TRUE;
    recsize = bt->sizeof_rkey + H5F_SIZEOF_OFFSET(f);
    
    if (H5B_ANCHOR_LT==anchor) {
@@ -941,7 +904,7 @@ H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
 	    bt->key[i+1].nkey = NULL;
 	 }
       }
-      bt->key[idx].dirty = 1;
+      bt->key[idx].dirty = TRUE;
       bt->key[idx].nkey = bt->native + idx * type->sizeof_nkey;
       HDmemcpy (bt->key[idx].nkey, md_key, type->sizeof_nkey);
 
@@ -967,7 +930,7 @@ H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
 	    bt->key[i+1].nkey = NULL;
 	 }
       }
-      bt->key[idx+1].dirty = 1;
+      bt->key[idx+1].dirty = TRUE;
       bt->key[idx+1].nkey = bt->native + (idx+1) * type->sizeof_nkey;
       HDmemcpy (bt->key[idx+1].nkey, md_key, type->sizeof_nkey);
    }
@@ -1018,14 +981,14 @@ H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
  */
 static haddr_t
 H5B_insert_helper (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type,
-		   uint8 *lt_key, intn *lt_key_changed,
+		   uint8 *lt_key, hbool_t *lt_key_changed,
 		   uint8 *md_key, void *udata,
-		   uint8 *rt_key, intn *rt_key_changed)
+		   uint8 *rt_key, hbool_t *rt_key_changed)
 {
-   H5B_t	*bt;
+   H5B_t	*bt=NULL, *twin=NULL, *tmp_bt=NULL;
    intn		lt=0, idx=-1, rt, cmp=-1;
+   haddr_t	child_addr=0, twin_addr=0, ret_value=FAIL;
    intn		anchor;
-   haddr_t	child, twin=0;
 
    FUNC_ENTER (H5B_insert_helper, NULL, FAIL);
 
@@ -1045,104 +1008,88 @@ H5B_insert_helper (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type,
 
    /*
     * Use a binary search to find the child that will receive the new
-    * data.  The comparison function may preempt the B-tree node from
-    * the cache each time through the loop.  When the search completes
-    * IDX points to the child that should get the new data.
+    * data.  When the search completes IDX points to the child that
+    * should get the new data.
     */
-   if (NULL==(bt=H5AC_find (f, H5AC_BT, addr, type))) {
-      HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
+   if (NULL==(bt=H5AC_protect (f, H5AC_BT, addr, type))) {
+      HGOTO_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
    }
    rt = bt->nchildren;
 
    while (lt<rt && cmp) {
       idx = (lt + rt) / 2;
-      if (NULL==(bt=H5AC_find (f, H5AC_BT, addr, type))) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
-      }
 
       /* left key */
       if (!bt->key[idx].nkey && H5B_decode_key (f, bt, idx)<0) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
+	 HGOTO_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
       }
-      HDmemcpy (lt_key, bt->key[idx].nkey, type->sizeof_nkey);
 
       /* right key */
       if (!bt->key[idx+1].nkey && H5B_decode_key (f, bt, idx+1)<0) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
+	 HGOTO_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
       }
-      HDmemcpy (rt_key, bt->key[idx+1].nkey, type->sizeof_nkey);
 
       /* compare */
-      if ((cmp=(type->cmp)(f, lt_key, udata, rt_key))<0) {
+      if ((cmp=(type->cmp)(f, bt->key[idx].nkey, udata,
+			   bt->key[idx+1].nkey))<0) {
 	 rt = idx;
       } else {
 	 lt = idx+1;
       }
    }
 
-   /*
-    * Adjust for boundary conditions.  If adjusting at the leaf level
-    * update the left and right key buffers since the data node insert
-    * function needs them as input.  Don't worry about it at higher node
-    * levels because this function uses them for output only.
-    */
-   if (NULL==(bt=H5AC_find (f, H5AC_BT, addr, type))) {
-      HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
-   }
    if (cmp<0 && idx<=0) {
+      /*
+       * Boundary condition: the value to insert is the new minimum
+       * value in the B-tree.  Insert the value in the left-most node.
+       */
       idx = 0;
       cmp = 0;
-      if (0==bt->level && bt->nchildren) {
-	 if (!bt->key[idx].nkey && H5B_decode_key (f, bt, idx)<0) {
-	    HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
-	 }
-	 HDmemcpy (lt_key, bt->key[idx].nkey, type->sizeof_nkey);
-	 if (!bt->key[idx+1].nkey && H5B_decode_key (f, bt, idx+1)<0) {
-	    HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
-	 }
-	 HDmemcpy (rt_key, bt->key[idx+1].nkey, type->sizeof_nkey);
-      }
+
    } else if (cmp>0 && idx+1>=bt->nchildren) {
+      /*
+       * Boundary condition: the value to insert is the new maximum
+       * value in the B-tree.  Insert the value in the right-most node.
+       */
       idx = bt->nchildren-1;
       cmp = 0;
-      if (0==bt->level && bt->nchildren) {
-	 if (!bt->key[idx].nkey && H5B_decode_key (f, bt, idx)<0) {
-	    HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
-	 }
-	 HDmemcpy (lt_key, bt->key[idx].nkey, type->sizeof_nkey);
-	 if (!bt->key[idx+1].nkey && H5B_decode_key (f, bt, idx+1)<0) {
-	    HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
-	 }
-	 HDmemcpy (rt_key, bt->key[idx+1].nkey, type->sizeof_nkey);
-      }
    }
    assert (0==cmp);
-   
+
+   /*
+    * Ensure that both native keys exist since we may have made boundary
+    * condition adjustments.
+    */
+   if (bt->nchildren) {
+      if (!bt->key[idx].nkey && H5B_decode_key (f, bt, idx)<0) {
+	 HGOTO_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
+      }
+      if (!bt->key[idx+1].nkey && H5B_decode_key (f, bt, idx+1)<0) {
+	 HGOTO_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
+      }
+   }
+
    /*
     * If there are no children, then create a new child. This can only
-    * happen at the root of the B-tree.  Creating a new child may
-    * preempt the B-tree node from the cache.  The left and right key
-    * buffers are output values.
+    * happen at the root of the B-tree.  The left and right native keys
+    * are output values from the node creation function.
     */
    if (0==bt->nchildren) {
-      if ((child = (type->new)(f, lt_key, udata, rt_key))<0) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_CANTINIT, FAIL);
-      }
-      if (NULL==(bt=H5AC_find (f, H5AC_BT, addr, type))) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
+      bt->key[0].nkey = bt->native;
+      bt->key[1].nkey = bt->native + type->sizeof_nkey;
+      
+      if ((child_addr=(type->new)(f, bt->key[0].nkey, udata,
+				  bt->key[1].nkey))<0) {
+	 bt->key[0].nkey = bt->key[1].nkey = NULL;
+	 HGOTO_ERROR (H5E_BTREE, H5E_CANTINIT, FAIL);
       }
       bt->nchildren = 1;
-      bt->dirty += 1;
+      bt->dirty = TRUE;
       bt->ndirty = 1;
-      bt->child[0] = child;
+      bt->child[0] = child_addr;
       
-      bt->key[0].dirty = 1;
-      bt->key[0].nkey = bt->native;
-      HDmemcpy (bt->key[0].nkey, lt_key, type->sizeof_nkey);
-
-      bt->key[1].dirty = 1;
-      bt->key[1].nkey = bt->native + type->sizeof_nkey;
-      HDmemcpy (bt->key[1].nkey, rt_key, type->sizeof_nkey);
+      bt->key[0].dirty = TRUE;
+      bt->key[1].dirty = TRUE;
       idx = 0;
    }
 
@@ -1150,96 +1097,106 @@ H5B_insert_helper (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type,
     * Insert the new data in the child B-tree node or in the data node.
     */
    if (bt->level > 0) {
-      child = H5B_insert_helper (f, bt->child[idx], type,
-				 lt_key, lt_key_changed,
-				 md_key, udata,
-				 rt_key, rt_key_changed);
+      child_addr = H5B_insert_helper (f, bt->child[idx], type,
+				      bt->key[idx].nkey, lt_key_changed,
+				      md_key, udata,
+				      bt->key[idx+1].nkey, rt_key_changed);
       anchor = H5B_ANCHOR_LT;
    } else {
-      child = (type->insert)(f, bt->child[idx], &anchor,
-			     lt_key, lt_key_changed,
-			     md_key, udata,
-			     rt_key, rt_key_changed);
+      child_addr = (type->insert)(f, bt->child[idx], &anchor,
+				  bt->key[idx].nkey, lt_key_changed,
+				  md_key, udata,
+				  bt->key[idx+1].nkey, rt_key_changed);
    }
-   if (child<0) HRETURN_ERROR (H5E_BTREE, H5E_CANTINSERT, FAIL);
-   if (NULL==(bt=H5AC_find (f, H5AC_BT, addr, type))) {
-      HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
-   }
+   if (child_addr<0) HGOTO_ERROR (H5E_BTREE, H5E_CANTINSERT, FAIL);
 
    /*
-    * Update the left and right keys.
+    * Update the left and right keys of the current node.
     */
    if (*lt_key_changed) {
-      bt->key[idx].nkey = bt->native + idx * type->sizeof_nkey;
-      HDmemcpy (bt->key[idx].nkey, lt_key, type->sizeof_nkey);
-      bt->dirty += 1;
-      bt->key[idx].dirty = 1;
-      if (idx>0) *lt_key_changed = FALSE;
+      bt->dirty = TRUE;
+      bt->key[idx].dirty = TRUE;
+      if (idx>0) {
+	 *lt_key_changed = FALSE;
+      } else {
+	 HDmemcpy (lt_key, bt->key[idx].nkey, type->sizeof_nkey);
+      }
    }
    if (*rt_key_changed) {
-      bt->key[idx+1].nkey = bt->native +
-			    (idx+1) * type->sizeof_nkey;
-      HDmemcpy (bt->key[idx+1].nkey, rt_key, type->sizeof_nkey);
-      bt->dirty += 1;
-      bt->key[idx+1].dirty = 1;
-      if (idx+1<bt->nchildren) *rt_key_changed = FALSE;
+      bt->dirty = TRUE;
+      bt->key[idx+1].dirty = TRUE;
+      if (idx+1<bt->nchildren) {
+	 *rt_key_changed = FALSE;
+      } else {
+	 HDmemcpy (rt_key, bt->key[idx+1].nkey, type->sizeof_nkey);
+      }
    }
 
    /*
-    * If the child split and the left node is anchored, then the new
-    * child node gets inserted to the right of our current position.
+    * Insert the child, splitting the current node if necessary.
     */
-   if (child && H5B_ANCHOR_LT==anchor) idx++;
-      
-   /*
-    * Split this node if the child node split and this node is full.
-    * Make sure `addr' points to the node that gets the new child
-    * and that `idx' is adjusted appropriately.
-    */
-   if (child && bt->nchildren==2*H5B_K(f,type)) {
-      if ((twin = H5B_split (f, type, addr, anchor))<0) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_CANTSPLIT, FAIL);
-      }
-      if (idx<=H5B_K(f,type)) {
-	 addr = H5B_ANCHOR_LT==anchor ? addr : twin;
+   if (child_addr) {
+      /*
+       * If the child split and the left node is anchored, then the new
+       * child node gets inserted to the right of our current position.
+       */
+      if (H5B_ANCHOR_LT==anchor) idx++;
+
+      if (bt->nchildren==2*H5B_K(f,type)) {
+	 /* Split the current node */
+	 if ((twin_addr = H5B_split (f, type, bt, addr, anchor))<0) {
+	    HGOTO_ERROR (H5E_BTREE, H5E_CANTSPLIT, FAIL);
+	 }
+	 if (NULL==(twin=H5AC_protect (f, H5AC_BT, twin_addr, type))) {
+	    HGOTO_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
+	 }
+
+	 if (idx<=H5B_K(f,type)) {
+	    tmp_bt = H5B_ANCHOR_LT==anchor ? bt : twin;
+	 } else {
+	    idx -= H5B_K (f, type);
+	    tmp_bt = H5B_ANCHOR_LT==anchor ? twin : bt;
+	 }
       } else {
-	 idx -= H5B_K(f,type);
-	 addr = H5B_ANCHOR_LT==anchor ? twin : addr;
+	 tmp_bt = bt;
+      }
+
+      if (H5B_insert_child (f, type, tmp_bt, idx, child_addr, anchor,
+			    md_key)<0) {
+	 HGOTO_ERROR (H5E_BTREE, H5E_CANTINSERT, FAIL);
       }
    }
-   
-   /*
-    * If the child split, then insert the new child.
-    */
-   if (child) {
-      if (H5B_insert_child (f, type, addr, idx, child, anchor, md_key)<0) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_CANTINSERT, FAIL);
-      }
-   }
+
 
    /*
     * If this node split, return the mid key (the one that is shared
     * by the left and right node).
     */
    if (twin) {
-      if (NULL==(bt=H5AC_find (f, H5AC_BT, twin, type))) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
-      }
       if (H5B_ANCHOR_LT==anchor) {
+	 if (!twin->key[0].nkey && H5B_decode_key (f, twin, 0)<0) {
+	    HGOTO_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
+	 }
+	 HDmemcpy (md_key, twin->key[0].nkey, type->sizeof_nkey);
+      } else {
 	 if (!bt->key[0].nkey && H5B_decode_key (f, bt, 0)<0) {
-	    HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
+	    HGOTO_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
 	 }
 	 HDmemcpy (md_key, bt->key[0].nkey, type->sizeof_nkey);
-      } else {
-	 if (!bt->key[bt->nchildren].nkey &&
-	     H5B_decode_key (f, bt, bt->nchildren)<0) {
-	    HRETURN_ERROR (H5E_BTREE, H5E_CANTDECODE, FAIL);
-	 }
-	 HDmemcpy (md_key, bt->key[bt->nchildren].nkey, type->sizeof_nkey);
+      }
+   }
+   HGOTO_DONE (twin_addr);
+
+done:
+   {
+      herr_t e1 = (bt && H5AC_unprotect (f, H5AC_BT, addr, bt)<0);
+      herr_t e2 = (twin && H5AC_unprotect (f, H5AC_BT, twin_addr, twin)<0);
+      if (e1 || e2) { /*use vars to prevent short-circuit of side effects*/
+	 HRETURN_ERROR (H5E_BTREE, H5E_PROTECT, FAIL);
       }
    }
 
-   FUNC_LEAVE (twin);
+   FUNC_LEAVE (ret_value);
 }
 
 
@@ -1264,11 +1221,10 @@ H5B_insert_helper (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type,
 herr_t
 H5B_list (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 {
-   H5B_t	*bt;
-   haddr_t	*child=NULL;
-   haddr_t	twin;
-   intn		i, nchildren;
-   herr_t	(*list)(hdf5_file_t*,haddr_t,void*) = NULL;
+   H5B_t	*bt=NULL;
+   haddr_t	next_addr;
+   intn		i;
+   herr_t	ret_value = FAIL;
 
    FUNC_ENTER (H5B_list, NULL, FAIL);
 
@@ -1284,7 +1240,7 @@ H5B_list (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
    if (NULL==(bt = H5AC_find (f, H5AC_BT, addr, type))) {
       HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
    }
-
+   
    if (bt->level>0) {
       if (H5B_list (f, type, bt->child[0], udata)<0) {
 	 HRETURN_ERROR (H5E_BTREE, H5E_CANTLIST, FAIL);
@@ -1292,31 +1248,32 @@ H5B_list (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 	 HRETURN (SUCCEED);
       }
    } else {
-      child = H5MM_xmalloc (2 * H5B_K(f,type) * sizeof(haddr_t));
-      list = type->list;
-      twin = addr;
-      
-      while (twin) { /*for each leaf node*/
-	 if (NULL==(bt=H5AC_find (f, H5AC_BT, twin, type))) {
-	    H5MM_xfree (child);
-	    HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
+
+      for (/*void*/; addr>0; addr=next_addr) {
+	 if (NULL==(bt=H5AC_protect (f, H5AC_BT, addr, type))) {
+	    HGOTO_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
 	 }
-	 nchildren = bt->nchildren;
-	 twin = bt->right;
-	 HDmemcpy (child, bt->child, nchildren * sizeof(haddr_t));
-	 bt = NULL; /*list callback may invalidate the cache*/
 	 
-	 for (i=0; i<nchildren; i++) {
-	    if ((list)(f, child[i], udata)<0) {
-	       H5MM_xfree (child);
-	       HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
+	 for (i=0; i<bt->nchildren; i++) {
+	    if ((type->list)(f, bt->child[i], udata)<0) {
+	       HGOTO_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
 	    }
 	 }
-      }
-      H5MM_xfree (child);
-   }
 
-   FUNC_LEAVE (SUCCEED);
+	 next_addr = bt->right;
+	 if (H5AC_unprotect (f, H5AC_BT, addr, bt)<0) {
+	    HRETURN_ERROR (H5E_BTREE, H5E_PROTECT, FAIL);
+	 }
+	 bt = NULL;
+      }
+   }
+   HGOTO_DONE (SUCCEED);
+
+done:
+   if (bt && H5AC_unprotect (f, H5AC_BT, addr, bt)<0) {
+      HRETURN_ERROR (H5E_BTREE, H5E_PROTECT, FAIL);
+   }
+   FUNC_LEAVE (ret_value);
 }
 
 
@@ -1428,9 +1385,9 @@ H5B_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
    fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Size of raw (disk) key:",
 	    (unsigned long)(bt->sizeof_rkey));
-   fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
+   fprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
 	    "Dirty flag:",
-	    (int)(bt->dirty));
+	    bt->dirty?"True":"False");
    fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
 	    "Number of initial dirty children:",
 	    (int)(bt->ndirty));

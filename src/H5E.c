@@ -89,6 +89,7 @@ static const hdf_min_error_messages_t hdf_min_error_messages[] =
     {H5E_CANTREGISTER,  "Can't register new atom"},
     {H5E_CANTFLUSH,	"Can't flush object from cache"},
     {H5E_CANTLOAD,	"Can't load object into cache"},
+    {H5E_PROTECT,	"Protected object error"},
     {H5E_NOTFOUND,	"Object not found"},
     {H5E_EXISTS,	"Object already exists"},
     {H5E_CANTENCODE,	"Can't encode value"},

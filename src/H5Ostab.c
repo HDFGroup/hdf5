@@ -84,8 +84,8 @@ H5O_stab_decode (hdf5_file_t *f, size_t raw_size, const uint8 *p)
 
    /* decode */
    stab = H5MM_xcalloc (1, sizeof(H5O_stab_t));
-   H5F_decode_offset (f, p, stab->btree);
-   H5F_decode_offset (f, p, stab->heap);
+   H5F_decode_offset (f, p, stab->btree_addr);
+   H5F_decode_offset (f, p, stab->heap_addr);
 
    FUNC_LEAVE (stab);
 }
@@ -122,8 +122,8 @@ H5O_stab_encode (hdf5_file_t *f, size_t raw_size, uint8 *p, const void *_mesg)
    assert (stab);
 
    /* encode */
-   H5F_encode_offset (f, p, stab->btree);
-   H5F_encode_offset (f, p, stab->heap);
+   H5F_encode_offset (f, p, stab->btree_addr);
+   H5F_encode_offset (f, p, stab->heap_addr);
 
    FUNC_LEAVE (SUCCEED);
 }
@@ -160,8 +160,8 @@ H5O_stab_fast (const H5G_entry_t *ent, void *_mesg)
 
    if (H5G_CACHED_STAB==ent->type) {
       if (!stab) stab = H5MM_xcalloc (1, sizeof(H5O_stab_t));
-      stab->btree = ent->cache.stab.btree;
-      stab->heap = ent->cache.stab.heap;
+      stab->btree_addr = ent->cache.stab.btree_addr;
+      stab->heap_addr = ent->cache.stab.heap_addr;
    } else {
       stab = NULL;
    }
@@ -209,17 +209,17 @@ H5O_stab_cache (H5G_entry_t *ent, const void *_mesg)
    if (H5G_CACHED_STAB != ent->type) {
       modified = TRUE;
       ent->type = H5G_CACHED_STAB;
-      ent->cache.stab.btree = stab->btree;
-      ent->cache.stab.heap = stab->heap;
+      ent->cache.stab.btree_addr = stab->btree_addr;
+      ent->cache.stab.heap_addr = stab->heap_addr;
    } else {
-      if (ent->cache.stab.btree != stab->btree) {
+      if (ent->cache.stab.btree_addr != stab->btree_addr) {
 	 modified = TRUE;
-	 ent->cache.stab.btree = stab->btree;
+	 ent->cache.stab.btree_addr = stab->btree_addr;
       }
 
-      if (ent->cache.stab.heap != stab->heap) {
+      if (ent->cache.stab.heap_addr != stab->heap_addr) {
 	 modified = TRUE;
-	 ent->cache.stab.heap = stab->heap;
+	 ent->cache.stab.heap_addr = stab->heap_addr;
       }
    }
 
@@ -325,10 +325,10 @@ H5O_stab_debug (hdf5_file_t *f, const void *_mesg, FILE *stream,
 
    fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "B-tree address:",
-	    (unsigned long)(stab->btree));
+	    (unsigned long)(stab->btree_addr));
    fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Name heap address:",
-	    (unsigned long)(stab->heap));
+	    (unsigned long)(stab->heap_addr));
 
    FUNC_LEAVE (SUCCEED);
 }

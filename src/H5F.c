@@ -373,7 +373,7 @@ H5F_new (void)
    hdf5_file_t	*f = H5MM_xcalloc (1, sizeof(hdf5_file_t));
 
    /* Create a cache */
-   H5AC_new (f);
+   H5AC_new (f, H5AC_NSLOTS);
 
    /* Create a root symbol slot */
    f->root_sym = H5MM_xcalloc (1, sizeof (H5G_entry_t));
@@ -918,6 +918,7 @@ H5F_flush (hdf5_file_t *f, hbool_t invalidate)
     ARGS      BADTYPE       Not a file atom. 
     ATOM      BADATOM       Can't remove atom. 
     ATOM      BADATOM       Can't unatomize file. 
+    CACHE     CANTFLUSH     Can't flush cache. 
 
  RETURNS
     SUCCEED/FAIL
@@ -955,7 +956,10 @@ herr_t H5Fclose(hatom_t fid)
     if((--file->ref_count)==0)
       {
         if(file->file_handle!=H5F_INVALID_FILE) {
-	   H5F_flush (file, TRUE);
+	   if (H5F_flush (file, TRUE)<0) {
+	      /*can't flush cache*/
+	      HGOTO_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
+	   }
            H5F_CLOSE(file->file_handle);
         }
         H5F_dest (file);

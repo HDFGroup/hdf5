@@ -298,7 +298,7 @@ typedef struct {
     haddr_t smallobj_off;    	/* Offset of small-obj heap within the file */
     haddr_t freespace_off;   	/* Offset of free-space info within the file */
     size_t logical_len;     	/* Logical length of file 		*/
-    struct H5AC_cache_t *cache; /* The object cache 			*/
+    struct H5AC_t *cache; 	/* The object cache 			*/
     file_create_temp_t file_create_parms; /* File-creation template 	*/
 #ifdef LATER
     file_access_temp_t file_access_parms; /* File-access template	*/
