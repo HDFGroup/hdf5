@@ -10,15 +10,15 @@ INSTALL.ascired for instructions.
 	format uncompressed or compressed with compress, gzip, or
 	bzip2.
 
-	The HDF team also makes snapshots of the source code available 
-	on a regular basis but these. These snapshots are unsupported
-	(that is, the HDF team will not release a bug-fix on a
-	particular snapshot; rather any bug fixes will be rolled into
-	the next snapshot). Furthermore, the snapshots have only been
-	tested on a few machines and may not test correctly for
-	parallel applications. Snapshots can be found at
+	The HDF team also makes snapshots of the source code available
+	on a regular basis. These snapshots are unsupported (that is,
+	the HDF team will not release a bug-fix on a particular
+	snapshot; rather any bug fixes will be rolled into the next
+	snapshot). Furthermore, the snapshots have only been tested on
+	a few machines and may not test correctly for parallel
+	applications. Snapshots can be found at
 	ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/snapshots in a
-	limited number for formats.
+	limited number of formats.
 
 * Warnings about compilers
 	OUTPUT FROM THE FOLLOWING COMPILERS SHOULD BE EXTREMELY
@@ -58,8 +58,8 @@ INSTALL.ascired for instructions.
 	library, header files, and support programs.
 
 
-	$ gunzip <hdf5-1.0.0.tar.gz |tar xf -
-	$ cd hdf5-1.0.0
+	$ gunzip <hdf5-1.2.0.tar.gz |tar xf -
+	$ cd hdf5-1.2.0
 	$ make check
 	$ make install
 
@@ -67,7 +67,7 @@ INSTALL.ascired for instructions.
 ** Zlib
 	The HDF5 library has a predefined compression filter that uses 
 	the "deflate" method for chunked datatsets. If zlib-1.1.2 or
-	later is found then hdf5 will use it, otherwise HDF5's
+	later is found then HDF5 will use it, otherwise HDF5's
 	predefined compression method will degenerate to a no-op (the
 	compression filter will succeed but the data will not be
 	compressed).
@@ -82,19 +82,19 @@ INSTALL.ascired for instructions.
 ** Unpacking the distribution
 	The HDF5 source code is distributed in a variety of formats
 	which can be unpacked with the following commands, each of
-	which creates an `hdf5-1.0.0' directory.
+	which creates an `hdf5-1.2.0' directory.
 
 *** Non-compressed tar archive (*.tar)
-	$ tar xf hdf5-1.0.0.tar
+	$ tar xf hdf5-1.2.0.tar
 
 *** Compressed tar archive (*.tar.Z)
-	$ uncompress -c <hdf5-1.0.0.tar.Z |tar xf -
+	$ uncompress -c <hdf5-1.2.0.tar.Z |tar xf -
 
 *** Gzip'd tar archive (*.tar.gz)
-	$ gunzip <hdf5-1.0.0.tar.gz |tar xf -
+	$ gunzip <hdf5-1.2.0.tar.gz |tar xf -
 
 *** Bzip'd tar archive (*.tar.bz2)
-	$ bunzip2 <hdf5-1.0.0.tar.gz |tar xf -
+	$ bunzip2 <hdf5-1.2.0.tar.gz |tar xf -
 
 ** Configuring
 	HDF5 uses the GNU autoconf system for configuration, which
@@ -121,7 +121,7 @@ INSTALL.ascired for instructions.
 	than /usr/local specify the path with the `--prefix=PATH'
 	switch:
 
-	    $ ./configure --prefix=/home/robb
+	    $ ./configure --prefix=$HOME
 
 	If shared libraries are being built (the default) then the
 	final home of the shared library must be specified with this
