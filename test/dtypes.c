@@ -2054,7 +2054,6 @@ test_compound_11(void)
 static int
 test_compound_12(void)
 {
-    complex_t               tmp;
     hid_t                   complex_id;
     size_t                  size = 0;
     size_t                  offset, new_size;
@@ -3681,10 +3680,10 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		switch (src_type) {
 		case INT_CHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
-		    hw_char = (char)(*((signed char*)aligned));
+		    hw_char = (char)(*((char*)aligned));
 		    break;
 		case INT_UCHAR:
-		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
+		    HDmemcpy(aligned, saved+j*sizeof(unsigned char), sizeof(unsigned char));
 		    hw_char = (char)(*((unsigned char*)aligned));
 		    break;
 		case INT_SHORT:
@@ -3726,8 +3725,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_uchar;
 		switch (src_type) {
 		case INT_CHAR:
-		    HDmemcpy(aligned, saved+j*sizeof(signed char), sizeof(signed char));
-		    hw_uchar = (unsigned char)(*((signed char*)aligned));
+		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
+		    hw_uchar = (unsigned char)(*((char*)aligned));
 		    break;
 		case INT_UCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(unsigned char), sizeof(unsigned char));
@@ -3772,8 +3771,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_short;
 		switch (src_type) {
 		case INT_CHAR:
-		    HDmemcpy(aligned, saved+j*sizeof(signed char), sizeof(signed char));
-		    hw_short = (short)(*((signed char*)aligned));
+		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
+		    hw_short = (short)(*((char*)aligned));
 		    break;
 		case INT_UCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(unsigned char), sizeof(unsigned char));
@@ -3818,11 +3817,11 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_ushort;
 		switch (src_type) {
 		case INT_CHAR:
-		    HDmemcpy(aligned, saved+j*sizeof(signed char), sizeof(signed char));
-		    hw_ushort = (unsigned short)(*((signed char*)aligned));
+		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
+		    hw_ushort = (unsigned short)(*((char*)aligned));
 		    break;
 		case INT_UCHAR:
-		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(unsigned char));
+		    HDmemcpy(aligned, saved+j*sizeof(unsigned char), sizeof(unsigned char));
 		    hw_ushort = (unsigned short)(*((unsigned char*)aligned));
 		    break;
 		case INT_SHORT:
@@ -3864,8 +3863,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_int;
 		switch (src_type) {
 		case INT_CHAR:
-		    HDmemcpy(aligned, saved+j*sizeof(signed char), sizeof(signed char));
-		    hw_int = (int)(*((signed char*)aligned));
+		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
+		    hw_int = (int)(*((char*)aligned));
 		    break;
 		case INT_UCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(unsigned char), sizeof(unsigned char));
@@ -3910,8 +3909,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_uint;
 		switch (src_type) {
 		case INT_CHAR:
-		    HDmemcpy(aligned, saved+j*sizeof(signed char), sizeof(signed char));
-		    hw_uint = (unsigned int)(*((signed char*)aligned));
+		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
+		    hw_uint = (unsigned int)(*((char*)aligned));
 		    break;
 		case INT_UCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(unsigned char), sizeof(unsigned char));
@@ -3956,8 +3955,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_long;
 		switch (src_type) {
 		case INT_CHAR:
-		    HDmemcpy(aligned, saved+j*sizeof(signed char), sizeof(signed char));
-		    hw_long = (long int)(*((signed char*)aligned));
+		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
+		    hw_long = (long int)(*((char*)aligned));
 		    break;
 		case INT_UCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(unsigned char), sizeof(unsigned char));
@@ -4002,8 +4001,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_ulong;
 		switch (src_type) {
 		case INT_CHAR:
-		    HDmemcpy(aligned, saved+j*sizeof(signed char), sizeof(signed char));
-		    hw_ulong = (unsigned long)(*((signed char*)aligned));
+		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
+		    hw_ulong = (unsigned long)(*((char*)aligned));
 		    break;
 		case INT_UCHAR:
 		    HDmemcpy(aligned, saved+j*sizeof(unsigned char), sizeof(unsigned char));
@@ -4048,11 +4047,11 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		hw = (unsigned char*)&hw_llong;
 		switch (src_type) {
 		case INT_CHAR:
-		    HDmemcpy(aligned, saved+j*sizeof(signed char), sizeof(signed char));
-		    hw_llong = (long_long)(*((signed char*)aligned));
+		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
+		    hw_llong = (long_long)(*((char*)aligned));
 		    break;
 		case INT_UCHAR:
-		    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(unsigned char));
+		    HDmemcpy(aligned, saved+j*sizeof(unsigned char), sizeof(unsigned char));
 		    hw_llong = (long_long)(*((unsigned char*)aligned));
 		    break;
 		case INT_SHORT:
@@ -4138,14 +4137,15 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		}
 	    }
 
-        /* Make certain that there isn't some weird number of destination bits */
-        assert(dst_nbits%8==0);
+            /* Make certain that there isn't some weird number of destination bits */
+            assert(dst_nbits%8==0);
 
-	    /* Are the two results the same */
-        for (k=(dst_size-(dst_nbits/8)); k<dst_size; k++) {
-            if (buf[j*dst_size+k]!=hw[k]) break;
-	    }
-	    if (k==dst_size) continue; /*no error*/
+	    /* Are the two results the same? */
+            for (k=(dst_size-(dst_nbits/8)); k<dst_size; k++)
+                if (buf[j*dst_size+k]!=hw[k])
+                    break;
+	    if (k==dst_size)
+                continue; /*no error*/
 
 	    /*
 	     * Convert the source and destination values to little endian
@@ -4153,16 +4153,11 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	     * certain things.  These routines have already been tested by
 	     * the `bittests' program.
 	     */
-	    for (k=0; k<src_size; k++) {
-		src_bits[src_size-(k+1)] = saved[j*src_size+
-						 ENDIAN(src_size, k)];
-	    }
+	    for (k=0; k<src_size; k++)
+		src_bits[src_size-(k+1)] = saved[j*src_size+ENDIAN(src_size, k)];
 	    
-	    for (k=0; k<dst_size; k++) {
-		dst_bits[dst_size-(k+1)] = buf[j*dst_size+
-					       ENDIAN(dst_size, k)];
-	    }
-
+	    for (k=0; k<dst_size; k++)
+		dst_bits[dst_size-(k+1)] = buf[j*dst_size+ENDIAN(dst_size, k)];
 
 	    /*
 	     * Hardware usually doesn't handle overflows too gracefully. The
@@ -4170,256 +4165,237 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	     * so we must handle those cases differetly when checking results.
 	     */
 	    if (H5T_SGN_2==H5Tget_sign(src) && H5T_SGN_2==H5Tget_sign(dst)) {
-            if (src_nbits>dst_nbits) {
-                if(0==H5T_bit_get_d(src_bits, src_nbits-1, 1) &&
-                    H5T_bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits),
-                        H5T_BIT_MSB, 1)>=0) {
+                if (src_nbits>dst_nbits) {
+                    if(0==H5T_bit_get_d(src_bits, src_nbits-1, 1) &&
+                            H5T_bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits),
+                                H5T_BIT_MSB, 1)>=0) {
+                        /*
+                         * Source is positive and the magnitude is too large for
+                         * the destination.  The destination should be set to the
+                         * maximum possible value: 0x7f...f
+                         */
+                        if (0==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
+                                H5T_bit_find(dst_bits, 0, dst_nbits-1, H5T_BIT_LSB, 0)<0)
+                            continue; /*no error*/
+                    } else if (1==H5T_bit_get_d(src_bits, src_nbits-1, 1) &&
+                           H5T_bit_find(src_bits, 0, src_nbits-1, H5T_BIT_MSB,
+                                0)+1>=(ssize_t)dst_nbits) {
+                        /*
+                         * Source is negative but the magnitude is too large for
+                         * the destination. The destination should be set to the
+                         * smallest possible value: 0x80...0
+                         */
+                        if (1==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
+                                H5T_bit_find(dst_bits, 0, dst_nbits-1, H5T_BIT_LSB, 1)<0)
+                            continue; /*no error*/
+                    }
+                } else if(src_nbits<dst_nbits) {
+                    /* Source is smaller than the destination */
+                    if(0==H5T_bit_get_d(src_bits, src_nbits-1, 1)) {
+                        /*
+                         * Source is positive, so the excess bits in the
+                         * destination should be set to 0's.
+                         */
+                        if (0==H5T_bit_get_d(dst_bits, src_nbits-1, 1) &&
+                                H5T_bit_find(dst_bits, src_nbits, dst_nbits-src_nbits, H5T_BIT_LSB, 1)<0)
+                            continue; /*no error*/
+                    } else {
+                        /*
+                         * Source is negative, so the excess bits in the
+                         * destination should be set to 1's.
+                         */
+                        if (1==H5T_bit_get_d(dst_bits, src_nbits-1, 1) &&
+                                H5T_bit_find(dst_bits, src_nbits, dst_nbits-src_nbits, H5T_BIT_LSB, 0)<0)
+                            continue; /*no error*/
+                    }
+                }
+	    } else if (H5T_SGN_2==H5Tget_sign(src) && H5T_SGN_NONE==H5Tget_sign(dst)) {
+                if (H5T_bit_get_d(src_bits, src_nbits-1, 1)) {
                     /*
-                     * Source is positive and the magnitude is too large for
-                     * the destination.  The destination should be set to the
-                     * maximum possible value: 0x7f...f
+                     * The source is negative so the result should be zero.
+                     * The source is negative if the most significant bit is
+                     * set.  The destination is zero if all bits are zero.
+                     */
+                    if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 1)<0)
+                        continue; /*no error*/
+                } else if (src_nbits>dst_nbits &&
+                       H5T_bit_find(src_bits, dst_nbits-1,
+                            src_nbits-dst_nbits, H5T_BIT_LSB, 1)>=0) {
+                    /*
+                     * The source is a value with a magnitude too large for
+                     * the destination.  The destination should be the
+                     * largest possible value: 0xff...f
+                     */
+                    if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 0)<0)
+                        continue; /*no error*/
+                }
+	    } else if (H5T_SGN_NONE==H5Tget_sign(src) && H5T_SGN_2==H5Tget_sign(dst)) {
+                if (src_nbits>=dst_nbits &&
+                        H5T_bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits)+1,
+                            H5T_BIT_LSB, 1)>=0) {
+                    /*
+                     * The source value has a magnitude that is larger than
+                     * the destination can handle.  The destination should be
+                     * set to the largest possible positive value: 0x7f...f
                      */
                     if (0==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
-                            H5T_bit_find(dst_bits, 0, dst_nbits-1,
-                                 H5T_BIT_LSB, 0)<0) {
+                            H5T_bit_find(dst_bits, 0, dst_nbits-1, H5T_BIT_LSB, 0)<0)
                         continue; /*no error*/
-                    }
-                } else if (1==H5T_bit_get_d(src_bits, src_nbits-1, 1) &&
-                   H5T_bit_find(src_bits, 0, src_nbits-1, H5T_BIT_MSB,
-                        0)+1>=(ssize_t)dst_nbits) {
-                    /*
-                     * Source is negative but the magnitude is too large for
-                     * the destination. The destination should be set to the
-                     * smallest possible value: 0x80...0
-                     */
-                    if (1==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
-                            H5T_bit_find(dst_bits, 0, dst_nbits-1,
-                                 H5T_BIT_LSB, 1)<0) {
-                        continue; /*no error*/
-                    }
                 }
-            } else if(src_nbits<dst_nbits) {
-                /* Source is smaller than the destination */
-                if(0==H5T_bit_get_d(src_bits, src_nbits-1, 1)) {
-                    /*
-                     * Source is positive, so the excess bits in the
-                     * destination should be set to 0's.
-                     */
-                    if (0==H5T_bit_get_d(dst_bits, src_nbits-1, 1) &&
-                            H5T_bit_find(dst_bits, src_nbits, dst_nbits-src_nbits,
-                                 H5T_BIT_LSB, 1)<0) {
-                        continue; /*no error*/
-                    }
-                } else {
-                    /*
-                     * Source is negative, so the excess bits in the
-                     * destination should be set to 1's.
-                     */
-                    if (1==H5T_bit_get_d(dst_bits, src_nbits-1, 1) &&
-                            H5T_bit_find(dst_bits, src_nbits, dst_nbits-src_nbits,
-                                 H5T_BIT_LSB, 0)<0) {
-                        continue; /*no error*/
-                    }
-                }
-            }
-	    } else if (H5T_SGN_2==H5Tget_sign(src) && H5T_SGN_NONE==H5Tget_sign(dst)) {
-            if (H5T_bit_get_d(src_bits, src_nbits-1, 1)) {
-                /*
-                 * The source is negative so the result should be zero.
-                 * The source is negative if the most significant bit is
-                 * set.  The destination is zero if all bits are zero.
-                 */
-                if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 1)<0)
-                    continue; /*no error*/
-            } else if (src_nbits>dst_nbits &&
-                   H5T_bit_find(src_bits, dst_nbits-1,
-                        src_nbits-dst_nbits, H5T_BIT_LSB,
-                        1)>=0) {
-                /*
-                 * The source is a value with a magnitude too large for
-                 * the destination.  The destination should be the
-                 * largest possible value: 0xff...f
-                 */
-                if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 0)<0) {
-                    continue; /*no error*/
-                }
-            }
-            
-	    } else if (H5T_SGN_NONE==H5Tget_sign(src) && H5T_SGN_2==H5Tget_sign(dst)) {
-            if (src_nbits>=dst_nbits &&
-                    H5T_bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits)+1,
-                        H5T_BIT_LSB, 1)>=0) {
-                /*
-                 * The source value has a magnitude that is larger than
-                 * the destination can handle.  The destination should be
-                 * set to the largest possible positive value: 0x7f...f
-                 */
-                if (0==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
-                        H5T_bit_find(dst_bits, 0, dst_nbits-1, H5T_BIT_LSB, 0)<0) {
-                    continue; /*no error*/
-                }
-            }
-            
 	    } else {
-            if (src_nbits>dst_nbits &&
-                H5T_bit_find(src_bits, dst_nbits, src_nbits-dst_nbits,
-                     H5T_BIT_LSB, 1)>=0) {
-                /*
-                 * The unsigned source has a value which is too large for
-                 * the unsigned destination.  The destination should be
-                 * set to the largest possible value: 0xff...f
-                 */
-                if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 0)<0) {
-                    continue; /*no error*/
+                if (src_nbits>dst_nbits &&
+                        H5T_bit_find(src_bits, dst_nbits, src_nbits-dst_nbits,
+                             H5T_BIT_LSB, 1)>=0) {
+                    /*
+                     * The unsigned source has a value which is too large for
+                     * the unsigned destination.  The destination should be
+                     * set to the largest possible value: 0xff...f
+                     */
+                    if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 0)<0)
+                        continue; /*no error*/
                 }
-            }
 	    }
 
 	    /* Print errors */
-	    if (0==fails_this_test++) H5_FAILED();
+	    if (0==fails_this_test++)
+                H5_FAILED();
 	    printf("    test %u elmt %u\n", (unsigned)i+1, (unsigned)j);
 
 	    printf("        src = ");
-	    for (k=0; k<src_size; k++) {
+	    for (k=0; k<src_size; k++)
 		printf(" %02x", saved[j*src_size+ENDIAN(src_size, k)]);
-	    }
-	    printf("%*s", (int)(3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size)),
-		   "");
+	    printf("%*s", (int)(3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size)), "");
 	    switch (src_type) {
-	    case INT_CHAR:
-		HDmemcpy(aligned, saved+j*sizeof(signed char), sizeof(signed char));
-		printf(" %29d\n", *((signed char*)aligned));
-		break;
-	    case INT_UCHAR:
-		HDmemcpy(aligned, saved+j*sizeof(unsigned char), sizeof(unsigned char));
-		printf(" %29u\n", *((unsigned char*)aligned));
-		break;
-	    case INT_SHORT:
-		HDmemcpy(aligned, saved+j*sizeof(short), sizeof(short));
-		printf(" %29hd\n", *((short*)aligned));
-		break;
-	    case INT_USHORT:
-		HDmemcpy(aligned, saved+j*sizeof(unsigned short), sizeof(unsigned short));
-		printf(" %29hu\n", *((unsigned short*)aligned));
-		break;
-	    case INT_INT:
-		HDmemcpy(aligned, saved+j*sizeof(int), sizeof(int));
-		printf(" %29d\n", *((int*)aligned));
-		break;
-	    case INT_UINT:
-		HDmemcpy(aligned, saved+j*sizeof(unsigned), sizeof(unsigned));
-		printf(" %29u\n", *((unsigned*)aligned));
-		break;
-	    case INT_LONG:
-		HDmemcpy(aligned, saved+j*sizeof(long), sizeof(long));
-		printf(" %29ld\n", *((long*)aligned));
-		break;
-	    case INT_ULONG:
-		HDmemcpy(aligned, saved+j*sizeof(unsigned long), sizeof(unsigned long));
-		printf(" %29lu\n", *((unsigned long*)aligned));
-		break;
-	    case INT_LLONG:
-		HDmemcpy(aligned, saved+j*sizeof(long_long), sizeof(long_long));
-		HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"d\n", *((long_long*)aligned));
-		break;
-	    case INT_ULLONG:
-		HDmemcpy(aligned, saved+j*sizeof(unsigned long_long), sizeof(unsigned long_long));
-		HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long_long*)aligned));
-		break;
-	    case INT_OTHER:
-		break;
+                case INT_CHAR:
+                    HDmemcpy(aligned, saved+j*sizeof(char), sizeof(char));
+                    printf(" %29d\n", (int)*((char*)aligned));
+                    break;
+                case INT_UCHAR:
+                    HDmemcpy(aligned, saved+j*sizeof(unsigned char), sizeof(unsigned char));
+                    printf(" %29u\n", (unsigned)*((unsigned char*)aligned));
+                    break;
+                case INT_SHORT:
+                    HDmemcpy(aligned, saved+j*sizeof(short), sizeof(short));
+                    printf(" %29hd\n", *((short*)aligned));
+                    break;
+                case INT_USHORT:
+                    HDmemcpy(aligned, saved+j*sizeof(unsigned short), sizeof(unsigned short));
+                    printf(" %29hu\n", *((unsigned short*)aligned));
+                    break;
+                case INT_INT:
+                    HDmemcpy(aligned, saved+j*sizeof(int), sizeof(int));
+                    printf(" %29d\n", *((int*)aligned));
+                    break;
+                case INT_UINT:
+                    HDmemcpy(aligned, saved+j*sizeof(unsigned), sizeof(unsigned));
+                    printf(" %29u\n", *((unsigned*)aligned));
+                    break;
+                case INT_LONG:
+                    HDmemcpy(aligned, saved+j*sizeof(long), sizeof(long));
+                    printf(" %29ld\n", *((long*)aligned));
+                    break;
+                case INT_ULONG:
+                    HDmemcpy(aligned, saved+j*sizeof(unsigned long), sizeof(unsigned long));
+                    printf(" %29lu\n", *((unsigned long*)aligned));
+                    break;
+                case INT_LLONG:
+                    HDmemcpy(aligned, saved+j*sizeof(long_long), sizeof(long_long));
+                    HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"d\n", *((long_long*)aligned));
+                    break;
+                case INT_ULLONG:
+                    HDmemcpy(aligned, saved+j*sizeof(unsigned long_long), sizeof(unsigned long_long));
+                    HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long_long*)aligned));
+                    break;
+                case INT_OTHER:
+                    break;
 	    }
 	    
 	    printf("        dst = ");
-	    for (k=0; k<dst_size; k++) {
+	    for (k=0; k<dst_size; k++)
 		printf(" %02x", buf[j*dst_size+ENDIAN(dst_size, k)]);
-	    }
-	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)),
-		   "");
+	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
 	    switch (dst_type) {
-	    case INT_CHAR:
-		HDmemcpy(aligned, buf+j*sizeof(signed char), sizeof(signed char));
-		printf(" %29d\n", *((signed char*)aligned));
-		break;
-	    case INT_UCHAR:
-		HDmemcpy(aligned, buf+j*sizeof(unsigned char), sizeof(unsigned char));
-		printf(" %29u\n", *((unsigned char*)aligned));
-		break;
-	    case INT_SHORT:
-		HDmemcpy(aligned, buf+j*sizeof(short), sizeof(short));
-		printf(" %29d\n", *((short*)aligned));
-		break;
-	    case INT_USHORT:
-		HDmemcpy(aligned, buf+j*sizeof(unsigned short), sizeof(unsigned short));
-		printf(" %29u\n", *((unsigned short*)aligned));
-		break;
-	    case INT_INT:
-		HDmemcpy(aligned, buf+j*sizeof(int), sizeof(int));
-		printf(" %29d\n", *((int*)aligned));
-		break;
-	    case INT_UINT:
-		HDmemcpy(aligned, buf+j*sizeof(unsigned), sizeof(unsigned));
-		printf(" %29u\n", *((unsigned*)aligned));
-		break;
-	    case INT_LONG:
-		HDmemcpy(aligned, buf+j*sizeof(long), sizeof(long));
-		printf(" %29ld\n", *((long*)aligned));
-		break;
-	    case INT_ULONG:
-		HDmemcpy(aligned, buf+j*sizeof(unsigned long), sizeof(unsigned long));
-		printf(" %29lu\n", *((unsigned long*)aligned));
-		break;
-	    case INT_LLONG:
-		HDmemcpy(aligned, buf+j*sizeof(long_long), sizeof(long_long));
-		HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"d\n", *((long_long*)aligned));
-		break;
-	    case INT_ULLONG:
-		HDmemcpy(aligned, buf+j*sizeof(long_long), sizeof(unsigned long_long));
-		HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long_long*)aligned));
-		break;
-	    case INT_OTHER:
-		break;
+                case INT_CHAR:
+                    HDmemcpy(aligned, buf+j*sizeof(char), sizeof(char));
+                    printf(" %29d\n", (int)*((char*)aligned));
+                    break;
+                case INT_UCHAR:
+                    HDmemcpy(aligned, buf+j*sizeof(unsigned char), sizeof(unsigned char));
+                    printf(" %29u\n", (unsigned)*((unsigned char*)aligned));
+                    break;
+                case INT_SHORT:
+                    HDmemcpy(aligned, buf+j*sizeof(short), sizeof(short));
+                    printf(" %29hd\n", *((short*)aligned));
+                    break;
+                case INT_USHORT:
+                    HDmemcpy(aligned, buf+j*sizeof(unsigned short), sizeof(unsigned short));
+                    printf(" %29hu\n", *((unsigned short*)aligned));
+                    break;
+                case INT_INT:
+                    HDmemcpy(aligned, buf+j*sizeof(int), sizeof(int));
+                    printf(" %29d\n", *((int*)aligned));
+                    break;
+                case INT_UINT:
+                    HDmemcpy(aligned, buf+j*sizeof(unsigned), sizeof(unsigned));
+                    printf(" %29u\n", *((unsigned*)aligned));
+                    break;
+                case INT_LONG:
+                    HDmemcpy(aligned, buf+j*sizeof(long), sizeof(long));
+                    printf(" %29ld\n", *((long*)aligned));
+                    break;
+                case INT_ULONG:
+                    HDmemcpy(aligned, buf+j*sizeof(unsigned long), sizeof(unsigned long));
+                    printf(" %29lu\n", *((unsigned long*)aligned));
+                    break;
+                case INT_LLONG:
+                    HDmemcpy(aligned, buf+j*sizeof(long_long), sizeof(long_long));
+                    HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"d\n", *((long_long*)aligned));
+                    break;
+                case INT_ULLONG:
+                    HDmemcpy(aligned, buf+j*sizeof(long_long), sizeof(unsigned long_long));
+                    HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long_long*)aligned));
+                    break;
+                case INT_OTHER:
+                    break;
 	    }
 	    
 	    printf("        ans = ");
-	    for (k=0; k<dst_size; k++) {
+	    for (k=0; k<dst_size; k++)
 		printf(" %02x", hw[ENDIAN(dst_size, k)]);
-	    }
-	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)),
-		   "");
+	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
 	    switch (dst_type) {
-	    case INT_CHAR:
-		printf(" %29d\n", *((signed char*)hw));
-		break;
-	    case INT_UCHAR:
-		printf(" %29u\n", *((unsigned char*)hw));
-		break;
-	    case INT_SHORT:
-		printf(" %29d\n", *((short*)hw));
-		break;
-	    case INT_USHORT:
-		printf(" %29u\n", *((unsigned short*)hw));
-		break;
-	    case INT_INT:
-		printf(" %29d\n", *((int*)hw));
-		break;
-	    case INT_UINT:
-		printf(" %29u\n", *((unsigned*)hw));
-		break;
-	    case INT_LONG:
-		printf(" %29ld\n", *((long*)hw));
-		break;
-	    case INT_ULONG:
-		printf(" %29lu\n", *((unsigned long*)hw));
-		break;
-	    case INT_LLONG:
-		HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"d\n", *((long_long*)hw));
-		break;
-	    case INT_ULLONG:
-		HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long_long*)hw));
-		break;
-	    case INT_OTHER:
-		break;
+                case INT_CHAR:
+                    printf(" %29d\n", (int)*((char*)hw));
+                    break;
+                case INT_UCHAR:
+                    printf(" %29u\n", (unsigned)*((unsigned char*)hw));
+                    break;
+                case INT_SHORT:
+                    printf(" %29hd\n", *((short*)hw));
+                    break;
+                case INT_USHORT:
+                    printf(" %29hu\n", *((unsigned short*)hw));
+                    break;
+                case INT_INT:
+                    printf(" %29d\n", *((int*)hw));
+                    break;
+                case INT_UINT:
+                    printf(" %29u\n", *((unsigned*)hw));
+                    break;
+                case INT_LONG:
+                    printf(" %29ld\n", *((long*)hw));
+                    break;
+                case INT_ULONG:
+                    printf(" %29lu\n", *((unsigned long*)hw));
+                    break;
+                case INT_LLONG:
+                    HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"d\n", *((long_long*)hw));
+                    break;
+                case INT_ULLONG:
+                    HDfprintf(stdout," %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long_long*)hw));
+                    break;
+                case INT_OTHER:
+                    break;
 	    }
 
 	    if (++fails_all_tests>=max_fails) {
@@ -4436,7 +4412,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     }
 #endif
 
- done:
+done:
     if (buf) aligned_free(buf);
     if (saved) aligned_free(saved);
     if (aligned) HDfree(aligned);
@@ -4444,7 +4420,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     reset_hdf5();	/*print statistics*/
     return (int)fails_all_tests;
 
- error:
+error:
     if (buf) aligned_free(buf);
     if (saved) aligned_free(saved);
     if (aligned) HDfree(aligned);
