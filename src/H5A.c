@@ -990,7 +990,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     }
 
     /* get the real attribute length */
-    ret_value=HDstrlen(attr->name);
+    ret_value=(hssize_t)HDstrlen(attr->name);
 
     /* compute the string length which will fit into the user's buffer */
     copy_len=MIN(buf_size-1,ret_value);

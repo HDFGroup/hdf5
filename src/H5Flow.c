@@ -1033,8 +1033,10 @@ H5F_addr_pack(H5F_t __unused__ *f, haddr_t *addr, const unsigned long objno[2])
     assert(objno);
     assert(addr);
 
-    addr->offset=objno[0];
-    addr->offset|=((uint64_t)objno[1])<<(8*sizeof(long));
+    addr->offset = objno[0];
+#if SIZEOF_LONG<SIZEOF_UINT64_T
+    addr->offset |= ((uint64_t)objno[1]) << (8*sizeof(long));
+#endif
     
     return(SUCCEED);
 }

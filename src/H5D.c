@@ -2324,7 +2324,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 {
     intn		ndims;
     hsize_t		dim[H5O_LAYOUT_NDIMS];
-    hssize_t    npoints, ptsperbuf;
+    hssize_t    	npoints, ptsperbuf;
     size_t		size, bufsize=8*1024;
     hid_t		buf_id = -1;
     haddr_t		addr;
@@ -2350,7 +2350,8 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 	     * this quite efficiently by making sure we copy the fill value
 	     * in relatively large pieces.
 	     */
-	    ptsperbuf = MAX(1, bufsize/dset->create_parms->fill.size);
+	    ptsperbuf = (hssize_t)MAX(1,
+				      bufsize/dset->create_parms->fill.size);
 	    bufsize = ptsperbuf * dset->create_parms->fill.size;
 	    if ((buf_id=H5TB_get_buf(bufsize, TRUE, &buf))<0) {
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,

@@ -191,7 +191,8 @@ test_tr1(hid_t file)
 {
     hid_t	cwg=-1, m_type=-1, f_type=-1, space=-1, dset=-1;
     hsize_t	i, ds_size[1]={10};
-    c_e1	val;
+    c_e1	eval;
+    int		ival;
     static c_e1	data1[10]={E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,
 			   E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED};
     c_e1	data2[10];
@@ -200,18 +201,19 @@ test_tr1(hid_t file)
     if ((cwg=H5Gcreate(file, "test_tr1", 0))<0) goto error;
 
     if ((m_type = H5Tcreate(H5T_ENUM, sizeof(c_e1)))<0) goto error;
-    if (H5Tenum_insert(m_type, "RED",   CPTR(val, E1_RED  ))<0) goto error;
-    if (H5Tenum_insert(m_type, "GREEN", CPTR(val, E1_GREEN))<0) goto error;
-    if (H5Tenum_insert(m_type, "BLUE",  CPTR(val, E1_BLUE ))<0) goto error;
-    if (H5Tenum_insert(m_type, "WHITE", CPTR(val, E1_WHITE))<0) goto error;
-    if (H5Tenum_insert(m_type, "BLACK", CPTR(val, E1_BLACK))<0) goto error;
+    if (H5Tenum_insert(m_type, "RED",   CPTR(eval, E1_RED  ))<0) goto error;
+    if (H5Tenum_insert(m_type, "GREEN", CPTR(eval, E1_GREEN))<0) goto error;
+    if (H5Tenum_insert(m_type, "BLUE",  CPTR(eval, E1_BLUE ))<0) goto error;
+    if (H5Tenum_insert(m_type, "WHITE", CPTR(eval, E1_WHITE))<0) goto error;
+    if (H5Tenum_insert(m_type, "BLACK", CPTR(eval, E1_BLACK))<0) goto error;
 
+    assert(sizeof(c_e1)==sizeof(int));
     if ((f_type = H5Tcreate(H5T_ENUM, sizeof(c_e1)))<0) goto error;
-    if (H5Tenum_insert(f_type, "RED",   CPTR(val, 105))<0) goto error;
-    if (H5Tenum_insert(f_type, "GREEN", CPTR(val, 104))<0) goto error;
-    if (H5Tenum_insert(f_type, "BLUE",  CPTR(val, 103))<0) goto error;
-    if (H5Tenum_insert(f_type, "WHITE", CPTR(val, 102))<0) goto error;
-    if (H5Tenum_insert(f_type, "BLACK", CPTR(val, 101))<0) goto error;
+    if (H5Tenum_insert(f_type, "RED",   CPTR(ival, 105))<0) goto error;
+    if (H5Tenum_insert(f_type, "GREEN", CPTR(ival, 104))<0) goto error;
+    if (H5Tenum_insert(f_type, "BLUE",  CPTR(ival, 103))<0) goto error;
+    if (H5Tenum_insert(f_type, "WHITE", CPTR(ival, 102))<0) goto error;
+    if (H5Tenum_insert(f_type, "BLACK", CPTR(ival, 101))<0) goto error;
 
     if ((space=H5Screate_simple(1, ds_size, NULL))<0) goto error;
     if ((dset=H5Dcreate(cwg, "color_table", f_type, space, H5P_DEFAULT))<0)

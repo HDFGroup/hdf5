@@ -1181,7 +1181,8 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
     assert(split_ratios);
 
     if (rdcc->nslots>0) {
-	idx = layout->addr.offset;
+	/* We don't care about loss of precision in the following statement. */
+	idx = (uintn)(layout->addr.offset);
 	H5F_MIXUP(idx);
 	for (i=0; i<layout->ndims; i++) {
 	    idx += offset[i];

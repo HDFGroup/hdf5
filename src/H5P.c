@@ -2316,7 +2316,7 @@ H5Pget_nfilters(hid_t plist_id)
 		      "not a dataset creation property list");
     }
 
-    FUNC_LEAVE(plist->pline.nfilters);
+    FUNC_LEAVE((int)(plist->pline.nfilters));
 }
 
 

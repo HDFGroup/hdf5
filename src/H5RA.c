@@ -543,14 +543,12 @@ H5RA_open(H5G_entry_t *loc, const char *name)
 herr_t
 H5RAclose(hid_t array_id)
 {
-    H5RA_t	*ra=NULL;
-    
     FUNC_ENTER(H5RAclose, FAIL);
     H5TRACE1("e","i",array_id);
 
     /* Check args */
     if (H5I_RAGGED!=H5I_get_type(array_id) ||
-	NULL==(ra=H5I_object(array_id))) {
+	NULL==H5I_object(array_id)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a ragged array");
     }
     

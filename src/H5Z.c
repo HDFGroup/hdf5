@@ -501,22 +501,22 @@ H5Z_filter_deflate (uintn flags, size_t cd_nelmts, const uintn cd_values[],
 		    size_t nbytes, size_t *buf_size, void **buf)
 {
     size_t	ret_value = 0;
-    int		aggression = 6;
     void	*outbuf = NULL;
 #if defined(HAVE_COMPRESS2)
+    int		aggression = 6;
     int		status;
 #endif
     
     FUNC_ENTER (H5Z_filter_deflate, 0);
 
-    /* Get aggression level */
+    /* Check arguments */
     if (cd_nelmts!=1 || cd_values[0]>9) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0,
 		    "invalid deflate aggression level");
     }
-    aggression = cd_values[0];
 
 #if defined(HAVE_COMPRESS2)
+    aggression = cd_values[0];
     if (flags & H5Z_FLAG_REVERSE) {
 	/* Input; uncompress */
 	z_stream	z_strm;

@@ -44,7 +44,7 @@ main(void)
     H5F_t	*f=NULL;
     char	filename[1024];
     H5G_entry_t	oh_ent;
-    H5O_stab_t	stab, ro, *ptr=NULL;
+    H5O_stab_t	stab, ro;
     int		i;
 
     /* Reset library */
@@ -83,7 +83,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==(ptr=H5O_read(&oh_ent, H5O_STAB, 0, &ro))) {
+    if (NULL==H5O_read(&oh_ent, H5O_STAB, 0, &ro)) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -115,7 +115,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==(ptr=H5O_read(&oh_ent, H5O_STAB, 0, &ro))) {
+    if (NULL==H5O_read(&oh_ent, H5O_STAB, 0, &ro)) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -148,7 +148,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==(ptr=H5O_read(&oh_ent, H5O_STAB, 1, &ro))) {
+    if (NULL==H5O_read(&oh_ent, H5O_STAB, 1, &ro)) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -180,7 +180,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==(ptr=H5O_read(&oh_ent, H5O_STAB, 1, &ro))) {
+    if (NULL==H5O_read(&oh_ent, H5O_STAB, 1, &ro)) {
 	FAILED();
 	H5Eprint(stdout);
 	goto error;

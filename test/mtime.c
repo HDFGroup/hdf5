@@ -95,9 +95,9 @@ main(void)
     } else if (fabs(HDdifftime(now, sb1.mtime))>60.0) {
 	FAILED();
 	tm = localtime(&(sb1.mtime));
-	strftime(buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);
+	strftime((char*)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);
 	tm = localtime(&now);
-	strftime(buf2, sizeof buf2, "%Y-%m-%d %H:%M:%S", tm);
+	strftime((char*)buf2, sizeof buf2, "%Y-%m-%d %H:%M:%S", tm);
 	printf("    got: %s\n    ans: %s\n", buf1, buf2);
 	return 1;
     }

@@ -251,7 +251,7 @@ H5F_term_interface(intn status)
 static intn
 H5F_flush_all_cb(H5F_t *f, const void *_invalidate)
 {
-    hbool_t	invalidate = (hbool_t)_invalidate;
+    hbool_t	invalidate = *((const hbool_t*)_invalidate);
     H5F_flush(f, H5F_SCOPE_LOCAL, invalidate);
     return 0;
 }
@@ -279,7 +279,7 @@ H5F_flush_all(hbool_t invalidate)
 {
     FUNC_ENTER(H5F_flush_all, FAIL);
     H5I_search(H5I_FILE, (H5I_search_func_t)H5F_flush_all_cb,
-	       (void*)invalidate);
+	       (void*)&invalidate);
     FUNC_LEAVE(SUCCEED);
 }
 

@@ -126,7 +126,7 @@ static intn interface_initialize_g = 0;
 #define H5T_CONV_sS(S_ALIGN,D_ALIGN,ST,DT) {				      \
     assert(sizeof(ST)<=sizeof(DT));					      \
     CI_BEGIN(S_ALIGN, D_ALIGN, ST, DT, nelmts-1, --) {			      \
-	*d = *s;							      \
+	*d = (DT)(*s);							      \
     } CI_END;								      \
 }
 
@@ -139,7 +139,7 @@ static intn interface_initialize_g = 0;
 		*d = 0;							      \
 	    }								      \
 	} else {							      \
-	    *d = *s;							      \
+	    *d = (DT)(*s);						      \
 	}								      \
     } CI_END;								      \
 }
@@ -153,7 +153,7 @@ static intn interface_initialize_g = 0;
 		*d = (D_MAX);						      \
 	    }								      \
 	} else {							      \
-	    *d = *s;							      \
+	    *d = (DT)(*s);						      \
 	}								      \
     } CI_END;								      \
 }
@@ -161,7 +161,7 @@ static intn interface_initialize_g = 0;
 #define H5T_CONV_uU(STYPE,DTYPE,ST,DT) {				      \
     assert(sizeof(ST)<=sizeof(DT));					      \
     CI_BEGIN(STYPE, DTYPE, ST, DT, nelmts-1, --) {			      \
-	*d = *s;							      \
+	*d = (DT)(*s);							      \
     } CI_END;								      \
 }
 
@@ -179,7 +179,7 @@ static intn interface_initialize_g = 0;
 		*d = (D_MIN);						      \
 	    }								      \
 	} else {							      \
-	    *d = *s;							      \
+	    *d = (DT)(*s);						      \
 	}								      \
     } CI_END;								      \
 }
@@ -199,7 +199,7 @@ static intn interface_initialize_g = 0;
 		*d = (D_MAX);						      \
 	    }								      \
 	} else {							      \
-	    *d = *s;							      \
+	    *d = (DT)(*s);						      \
 	}								      \
     } CI_END;								      \
 }
@@ -213,7 +213,7 @@ static intn interface_initialize_g = 0;
 		*d = (D_MAX);						      \
 	    }								      \
 	} else {							      \
-	    *d = *s;							      \
+	    *d = (DT)(*s);						      \
 	}								      \
     } CI_END;								      \
 }
@@ -227,7 +227,7 @@ static intn interface_initialize_g = 0;
 		*d = (D_MAX);						      \
 	    }								      \
 	} else {							      \
-	    *d = *s;							      \
+	    *d = (DT)(*s);						      \
 	}								      \
     } CI_END;								      \
 }
@@ -241,7 +241,7 @@ static intn interface_initialize_g = 0;
 		*d = 0;							      \
 	    }								      \
 	} else {							      \
-	    *d = *s;							      \
+	    *d = (DT)(*s);						      \
 	}								      \
     } CI_END;								      \
 }
@@ -255,7 +255,7 @@ static intn interface_initialize_g = 0;
 		*d = (D_MAX);						      \
 	    }								      \
 	} else {							      \
-	    *d = *s;							      \
+	    *d = (DT)(*s);						      \
 	}								      \
     } CI_END;								      \
 }
@@ -1100,12 +1100,12 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	 * Direction of conversion.
 	 */
 	if (dst->size <= src->size) {
-	    src_delta = src->size;
-	    dst_delta = dst->size;
+	    src_delta = (int)src->size; /*overflow shouldn't be possible*/
+	    dst_delta = (int)dst->size; /*overflow shouldn't be possible*/
 	    s = d = buf;
 	} else {
-	    src_delta = -(src->size);
-	    dst_delta = -(dst->size);
+	    src_delta = -(int)src->size; /*overflow shouldn't be possible*/
+	    dst_delta = -(int)dst->size; /*overflow shouldn't be possible*/
 	    s = buf + (nelmts-1) * src->size;
 	    d = buf + (nelmts-1) * dst->size;
 	}
@@ -2013,14 +2013,18 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	    direction = 1;
 	    olap = 0;
 	} else if (src->size>=dst->size) {
+	    double olapd = HDceil((double)(dst->size)/
+				  (double)(src->size-dst->size));
+	    olap = (size_t)olapd;
 	    sp = dp = (uint8_t*)buf;
 	    direction = 1;
-	    olap = HDceil((double)(dst->size)/(double)(src->size-dst->size));
 	} else {
+	    double olapd = HDceil((double)(src->size)/
+				  (double)(dst->size-src->size));
+	    olap = (size_t)olapd;
 	    sp = (uint8_t*)buf + (nelmts-1) * src->size;
 	    dp = (uint8_t*)buf + (nelmts-1) * dst->size;
 	    direction = -1;
-	    olap = HDceil((double)(src->size)/(double)(dst->size-src->size));
 	}
 
 	/* Allocate the overlap buffer */
@@ -2034,7 +2038,7 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
 	    /*
 	     * If the source and destination buffers overlap then use a
-	     * temporary buffer fot eh destination.
+	     * temporary buffer for the destination.
 	     */
 	    if (direction>0) {
 		s = sp;

@@ -594,7 +594,6 @@ display_float_type(hid_t type, int indent)
 	   indent, "", (unsigned long)esize, 1==esize?"":"s",
 	   (unsigned long)epos, (unsigned long)ebias);
     printf("\n%*s(sign bit at %lu)", indent, "", (unsigned long)spos);
-    return TRUE;
 
     /* Display internal padding */
     if (1+esize+msize<H5Tget_precision(type)) {
@@ -1590,7 +1589,7 @@ get_width(void)
      * value is sometimes wrong.
      */
     if ((s=getenv("COLUMNS")) && *s && isdigit(*s)) {
-	width = strtol(s, NULL, 0);
+	width = (int)strtol(s, NULL, 0);
     }
 
 #if defined(HAVE_STRUCT_VIDEOCONFIG) && defined(HAVE__GETVIDEOCONFIG)
@@ -1712,7 +1711,7 @@ main (int argc, char *argv[])
 	} else if (!strcmp(argv[argno], "--string")) {
 	    string_g = TRUE;
 	} else if (!strncmp(argv[argno], "--width=", 8)) {
-	    width_g = strtol(argv[argno]+8, &rest, 0);
+	    width_g = (int)strtol(argv[argno]+8, &rest, 0);
 	    if (width_g<=0 || *rest) {
 		usage(progname);
 		exit(1);
@@ -1732,7 +1731,7 @@ main (int argc, char *argv[])
 	    } else {
 		s = argv[++argno];
 	    }
-	    width_g = strtol(s, &rest, 0);
+	    width_g = (int)strtol(s, &rest, 0);
 	    if (width_g<=0 || *rest) {
 		usage(progname);
 		exit(1);

@@ -170,7 +170,7 @@ H5I_term_interface(intn status)
     H5I_type_t		grp;
 
     if (interface_initialize_g>0) {
-	for (grp=0; grp<H5I_NGROUPS; grp++) {
+	for (grp=(H5I_type_t)0; grp<H5I_NGROUPS; grp++) {
 	    /*
 	     * Destroy each group regardless of reference count. This removes
 	     * any objects which might still be defined in the group. Then

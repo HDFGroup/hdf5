@@ -179,7 +179,7 @@ H5O_pline_encode (H5F_t __unused__ *f, uint8_t *p/*out*/, const void *mesg)
     assert (mesg);
 
     *p++ = H5O_PLINE_VERSION;
-    *p++ = pline->nfilters;
+    *p++ = (uint8_t)(pline->nfilters);
     *p++ = 0;	/*reserved 1*/
     *p++ = 0;	/*reserved 2*/
     *p++ = 0;	/*reserved 3*/

@@ -122,7 +122,6 @@ main (void)
 
     /* Eleventh dataset */
     s4_t		*s11 = NULL;
-    int			ndims;
 
     /* Other variables */
     unsigned int	i, j;
@@ -621,7 +620,6 @@ main (void)
     TESTING("hyperslab part initialized write");
     
     /* Create the memory array and initialize all fields to zero */
-    ndims = 2;
     f_offset[0] = NX/3;
     f_offset[1] = NY/3;
     h_size[0] = 2*NX/3 - f_offset[0];

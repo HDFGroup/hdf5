@@ -159,7 +159,6 @@ static herr_t
 test_simple_io(hid_t file)
 {
     hid_t		dataset, space, xfer;
-    herr_t		status;
     int			points[100][200], check[100][200];
     int			i, j, n;
     hsize_t		dims[2];
@@ -183,7 +182,7 @@ test_simple_io(hid_t file)
     tconv_buf = malloc (1000);
     xfer = H5Pcreate (H5P_DATASET_XFER);
     assert (xfer>=0);
-    if ((status = H5Pset_buffer (xfer, 1000, tconv_buf, NULL))<0) goto error;
+    if (H5Pset_buffer (xfer, 1000, tconv_buf, NULL)<0) goto error;
 
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_SIMPLE_IO_NAME, H5T_NATIVE_INT, space,
@@ -722,16 +721,19 @@ int
 main(void)
 {
     hid_t		file, grp, fapl;
-    int			nerrors=0, mdc_nelmts;
+    int			nerrors=0;
     char		filename[1024];
 
     h5_reset();
     fapl = h5_fileaccess();
     
 #if 0
-    /* Turn off raw data cache */
-    if (H5Pget_cache(fapl, &mdc_nelmts, NULL, NULL, NULL)<0) goto error;
-    if (H5Pset_cache(fapl, mdc_nelmts, 0, 0, 0.0)<0) goto error;
+    {
+	/* Turn off raw data cache */
+	int mdc_nelmts;
+	if (H5Pget_cache(fapl, &mdc_nelmts, NULL, NULL, NULL)<0) goto error;
+	if (H5Pset_cache(fapl, mdc_nelmts, 0, 0, 0.0)<0) goto error;
+    }
 #endif
     
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);

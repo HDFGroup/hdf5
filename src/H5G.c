@@ -873,14 +873,13 @@ H5G_component(const char *name, size_t *size_p)
 static const char *
 H5G_basename(const char *name, size_t *size_p)
 {
-    size_t	i, end;
+    size_t	i;
     
     FUNC_ENTER(H5G_basename, NULL);
 
     /* Find the end of the base name */
     i = strlen(name);
     while (i>0 && '/'==name[i-1]) --i;
-    end = i;
 
     /* Skip backward over base name */
     while (i>0 && '/'!=name[i-1]) --i;
@@ -1770,6 +1769,7 @@ H5G_loc (hid_t loc_id)
     case H5I_NGROUPS:
     case H5I_BADID:
     case H5I_FILE_CLOSING:
+    case H5I_REFERENCE:
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object ID");
     }
 
@@ -2005,10 +2005,12 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	} else {
 	    /* Some other type of object */
 	    statbuf->objno[0] = (unsigned long)(obj_ent.header.offset);
-	    if (sizeof(obj_ent.header.offset)>sizeof(long)) {
-		statbuf->objno[1] = (unsigned long)(obj_ent.header.offset >>
-						    8*sizeof(long));
-	    }
+#if SIZEOF_UINT64_T>SIZEOF_LONG
+	    statbuf->objno[1] = (unsigned long)(obj_ent.header.offset >>
+						8*sizeof(long));
+#else
+	    statbuf->objno[1] = 0;
+#endif
 	    statbuf->nlink = H5O_link (&obj_ent, 0);
 	    statbuf->type = H5G_LINK;
 	    if (NULL==H5O_read(&obj_ent, H5O_MTIME, 0, &(statbuf->mtime))) {

@@ -6221,7 +6221,7 @@ H5T_entof (H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_print_stats(H5T_path_t __unused__ *path, intn *nprint/*in,out*/)
+H5T_print_stats(H5T_path_t __unused__ *path, intn __unused__ *nprint/*in,out*/)
 {
 #ifdef H5T_DEBUG
     hsize_t	nbytes;
@@ -6449,8 +6449,8 @@ H5T_debug(H5T_t *dt, FILE *stream)
 	for (i=0; i<dt->u.enumer.nmembs; i++) {
 	    fprintf(stream, "\n\"%s\" = 0x", dt->u.enumer.name[i]);
 	    for (k=0; k<base_size; k++) {
-		fprintf(stream, "%02x",
-			(unsigned)(dt->u.enumer.value+i*base_size+k));
+		fprintf(stream, "%02lx",
+			(unsigned long)(dt->u.enumer.value+i*base_size+k));
 	    }
 	}
 	fprintf(stream, "\n");

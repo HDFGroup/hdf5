@@ -8,7 +8,7 @@
 
 # Use SGI supplied C compiler by default.  There is no ranlib
 if test "X-" =  "X-$CC"; then
-    CC=cc
+    CC='cc -64'
     CC_BASENAME=cc
 fi
 RANLIB=:
@@ -26,18 +26,36 @@ case "X-$CC_BASENAME" in
 	;;
 
     *)
-	# Always turn off these compiler warnings:
+        CFLAGS="$CFLAGS -ansi"
+
+	# Always turn off these compiler warnings for the -64 compiler:
 	#    1174:  function declared but not used
 	#    1429:  the `long long' type is not standard
 	#    1209:  constant expressions
 	#    1196:  __vfork() (this is an SGI config problem)
+	#    1685:  turn off warnings about turning off invalid warnings
+	CFLAGS="$CFLAGS -woff 1174,1429,1209,1196,1685"
+
+	# Always turn off these compiler warnings for the old compiler:
+	#    799:   the `long long' type is not standard
+	#    803:   turn off warnings about turning off invalid warnings
+        #    835:   __vfork() (this is an SGI config problem)
+	CFLAGS="$CFLAGS -woff 799,803,835"
+
 	# Always turn off these loader warnings:
+	#      47:  branch instructions that degrade performance on R4000
 	#      84:  a library is not used
-	CFLAGS="$CFLAGS -ansi -64 -woff 1174,1429,1209,1196 -Wl,-woff,84"
+	CFLAGS="$CFLAGS -Wl,-woff,47,84"
+
+	# Extra debugging flags
 	DEBUG_CFLAGS="-g -fullwarn"
 	DEBUG_CPPFLAGS=
+
+	# Extra production flags
 	PROD_CFLAGS=-O
 	PROD_CPPFLAGS=
+
+	# Extra profiling flags
 	PROFILE_CFLAGS=-pg
 	PROFILE_CPPFLAGS=
 	;;

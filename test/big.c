@@ -128,7 +128,7 @@ enough_room(hid_t fapl)
 	if ((fd[i]=open(name, O_RDWR|O_CREAT|O_TRUNC, 0666))<0) {
 	    goto done;
 	}
-	if ((ssize_t)size != lseek(fd[i], size, SEEK_SET)) {
+	if ((off_t)size != lseek(fd[i], (off_t)size, SEEK_SET)) {
 	    goto done;
 	}
 	if (1!=write(fd[i], "X", 1)) {

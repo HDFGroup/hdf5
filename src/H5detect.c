@@ -249,6 +249,7 @@ precision (detected_t *d)
     pid_t	_child;							      \
     int		_status;						      \
 									      \
+    srand((unsigned int)_val); /*suppress "set but unused" warning*/	      \
     for (_ano=0; _ano<NELMTS(align_g); _ano++) {			      \
         fflush(stdout);							      \
         fflush(stderr);							      \
