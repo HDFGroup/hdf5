@@ -102,7 +102,7 @@ H5AC_init_interface(void)
     assert(H5P_CLS_DATASET_XFER_g!=(-1));
 
     /* Get the dataset transfer property list class object */
-    if (H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_DATASET_XFER_g) || NULL == (xfer_pclass = H5I_object(H5P_CLS_DATASET_XFER_g)))
+    if (NULL == (xfer_pclass = H5I_object_verify(H5P_CLS_DATASET_XFER_g, H5I_GENPROP_CLS)))
         HRETURN_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get property list class");
 
     /* Create a new dataset transfer property list */

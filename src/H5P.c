@@ -29,6 +29,7 @@
 /* Default file driver - see H5Pget_driver() */
 #include "H5FDsec2.h"		/* Posix unbuffered I/O	file driver	*/
 
+/* Pablo mask */
 #define PABLO_MASK	H5P_mask
 
 /* Is the interface initialized? */
@@ -1809,7 +1810,7 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
     
     FUNC_ENTER_NOAPI(H5P_set_driver, FAIL);
 
-    if (H5I_VFL!=H5I_get_type(new_driver_id) || NULL==H5I_object(new_driver_id))
+    if (NULL==H5I_object_verify(new_driver_id, H5I_VFL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID");
 
     if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
@@ -1911,9 +1912,9 @@ H5Pset_driver(hid_t plist_id, hid_t new_driver_id, const void *new_driver_info)
     H5TRACE3("e","iix",plist_id,new_driver_id,new_driver_info);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-    if (H5I_VFL!=H5I_get_type(new_driver_id) || NULL==H5I_object(new_driver_id))
+    if (NULL==H5I_object_verify(new_driver_id, H5I_VFL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID");
 
     /* Set the driver */
@@ -2021,7 +2022,7 @@ H5Pget_driver(hid_t plist_id)
     FUNC_ENTER_API(H5Pget_driver, FAIL);
     H5TRACE1("i","i",plist_id);
 
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     ret_value = H5P_get_driver(plist);
@@ -2113,7 +2114,7 @@ H5Pget_driver_info(hid_t plist_id)
 
     FUNC_ENTER_API(H5Pget_driver_info, NULL);
 
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list");
 
     if((ret_value=H5P_get_driver_info(plist))==NULL)
@@ -3265,8 +3266,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset fill value");
 
     if(value) {
-	if (H5I_DATATYPE!=H5I_get_type(type_id) || 
-	    NULL==(type=H5I_object(type_id)))
+	if (NULL==(type=H5I_object_verify(type_id, H5I_DATATYPE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
 	/* Set the fill value */
@@ -3332,7 +3332,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     /* Check arguments */
     if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation proprety list");
-    if (H5I_DATATYPE!=H5I_get_type(type_id) || NULL==(type=H5I_object(type_id)))
+    if (NULL==(type=H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (!value)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,"no fill value output buffer");
@@ -5358,7 +5358,7 @@ hid_t H5Pcreate(hid_t cls_id)
     FUNC_ENTER_API(H5Pcreate, FAIL);
 
     /* Check arguments. */
-    if (H5I_GENPROP_CLS != H5I_get_type(cls_id) || NULL == (pclass = H5I_object(cls_id)))
+    if (NULL == (pclass = H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
     /* Create the new property list */
@@ -5725,7 +5725,7 @@ herr_t H5Pregister(hid_t cls_id, const char *name, size_t size, void *def_value,
     FUNC_ENTER_API(H5Pregister, FAIL);
 
     /* Check arguments. */
-    if (H5I_GENPROP_CLS != H5I_get_type(cls_id) || NULL == (pclass = H5I_object(cls_id)))
+    if (NULL == (pclass = H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid class name");
@@ -6012,7 +6012,7 @@ herr_t H5Pinsert(hid_t plist_id, const char *name, size_t size, void *value,
     FUNC_ENTER_API(H5Pinsert, FAIL);
 
     /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+    if (NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
@@ -6148,7 +6148,7 @@ herr_t H5Pset(hid_t plist_id, const char *name, void *value)
     FUNC_ENTER_API(H5Pset, FAIL);
 
     /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+    if (NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
@@ -6524,7 +6524,7 @@ hid_t H5Pget_class(hid_t plist_id)
     FUNC_ENTER_API(H5Pget_class, FAIL);
 
     /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+    if (NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Retrieve the property list class */
@@ -7096,9 +7096,9 @@ htri_t H5P_isa_class(hid_t plist_id, hid_t pclass_id)
     FUNC_ENTER_NOAPI(H5P_isa_class, FAIL);
 
     /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+    if (NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-    if (H5I_GENPROP_CLS != H5I_get_type(pclass_id) || NULL == (pclass = H5I_object(pclass_id)))
+    if (NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
 
     /* Compare the property list's class against the other class */
@@ -7311,7 +7311,7 @@ H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func, void *iter_
     assert(iter_func);
 
     /* Get the property list object */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+    if (NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Iterate through the properties in the property list */
@@ -7385,7 +7385,7 @@ H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_t iter_func, void *ite
     assert(iter_func);
 
     /* Get the property list object */
-    if (H5I_GENPROP_CLS != H5I_get_type(pclass_id) || NULL == (pclass = H5I_object(pclass_id)))
+    if (NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
 
     /* Iterate through the properties in the property list */
@@ -7809,7 +7809,7 @@ herr_t H5Pget(hid_t plist_id, const char *name, void * value)
     FUNC_ENTER_API(H5Pget, FAIL);
 
     /* Check arguments. */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
@@ -7954,7 +7954,7 @@ herr_t H5Premove(hid_t plist_id, const char *name)
     FUNC_ENTER_API(H5Premove, FAIL);
 
     /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+    if (NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
@@ -8327,7 +8327,7 @@ herr_t H5Punregister(hid_t pclass_id, const char *name)
     FUNC_ENTER_API(H5Punregister, FAIL);
 
     /* Check arguments. */
-    if (H5I_GENPROP_CLS != H5I_get_type(pclass_id) || NULL == (pclass = H5I_object(pclass_id)))
+    if (NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
@@ -8428,7 +8428,7 @@ herr_t H5Pclose(hid_t plist_id)
         HGOTO_DONE(SUCCEED);
 
     /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+    if (NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Close the property list */
@@ -8507,7 +8507,7 @@ char *H5Pget_class_name(hid_t pclass_id)
     FUNC_ENTER_API(H5Pget_class_name, NULL);
 
     /* Check arguments. */
-    if (H5I_GENPROP_CLS != H5I_get_type(pclass_id) || NULL == (pclass = H5I_object(pclass_id)))
+    if (NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property class");
 
     /* Get the property list class name */
@@ -8582,7 +8582,7 @@ hid_t H5Pget_class_parent(hid_t pclass_id)
     FUNC_ENTER_API(H5Pget_class_parent, FAIL);
 
     /* Check arguments. */
-    if (H5I_GENPROP_CLS != H5I_get_type(pclass_id) || NULL == (pclass = H5I_object(pclass_id)))
+    if (NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
 
     /* Retrieve the property class's parent */

@@ -469,7 +469,7 @@ H5Sclose(hid_t space_id)
     H5TRACE1("e","i",space_id);
 
     /* Check args */
-    if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == H5I_object(space_id))
+    if (NULL == H5I_object_verify(space_id,H5I_DATASPACE))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     /* When the reference count reaches zero the resources are freed */
@@ -540,7 +540,7 @@ H5Scopy(hid_t space_id)
     H5TRACE1("i","i",space_id);
 
     /* Check args */
-    if (H5I_DATASPACE!=H5I_get_type (space_id) || NULL==(src=H5I_object (space_id)))
+    if (NULL==(src=H5I_object_verify(space_id, H5I_DATASPACE)))
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     /* Copy */
@@ -580,9 +580,9 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
     H5TRACE2("e","ii",dst_id,src_id);
 
     /* Check args */
-    if (H5I_DATASPACE!=H5I_get_type (src_id) || NULL==(src=H5I_object (src_id)))
+    if (NULL==(src=H5I_object_verify(src_id, H5I_DATASPACE)))
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-    if (H5I_DATASPACE!=H5I_get_type (dst_id) || NULL==(dst=H5I_object (dst_id)))
+    if (NULL==(dst=H5I_object_verify(dst_id, H5I_DATASPACE)))
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     /* Copy */
@@ -767,7 +767,7 @@ H5Sget_simple_extent_npoints(hid_t space_id)
     H5TRACE1("Hs","i",space_id);
 
     /* Check args */
-    if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == (ds = H5I_object(space_id)))
+    if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "not a data space");
 
     ret_value = H5S_get_simple_extent_npoints(ds);
@@ -868,7 +868,7 @@ H5Sget_simple_extent_ndims(hid_t space_id)
     H5TRACE1("Is","i",space_id);
 
     /* Check args */
-    if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == (ds = H5I_object(space_id)))
+    if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     ret_value = H5S_get_simple_extent_ndims(ds);
@@ -960,7 +960,7 @@ H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
     H5TRACE3("Is","ixx",space_id,dims,maxdims);
 
     /* Check args */
-    if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == (ds = H5I_object(space_id)))
+    if (NULL == (ds = H5I_object_verify(space_id, H5I_DATASPACE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
 
     ret_value = H5S_get_simple_extent_dims(ds, dims, maxdims);
@@ -1258,7 +1258,7 @@ H5Sis_simple(hid_t space_id)
     H5TRACE1("b","i",space_id);
 
     /* Check args and all the boring stuff. */
-    if ((space = H5I_object(space_id)) == NULL)
+    if ((space = H5I_object_verify(space_id,H5I_DATASPACE)) == NULL)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
 
     ret_value = H5S_is_simple(space);
@@ -1304,7 +1304,7 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
     H5TRACE4("e","iIs*[a1]h*[a1]h",space_id,rank,dims,max);
 
     /* Check args */
-    if ((space = H5I_object(space_id)) == NULL)
+    if ((space = H5I_object_verify(space_id,H5I_DATASPACE)) == NULL)
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     if (rank > 0 && dims == NULL)
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
@@ -1733,7 +1733,7 @@ H5Sget_simple_extent_type(hid_t sid)
     H5TRACE1("Sc","i",sid);
 
     /* Check arguments */
-    if (H5I_DATASPACE != H5I_get_type(sid) || NULL == (space = H5I_object(sid)))
+    if (NULL == (space = H5I_object_verify(sid, H5I_DATASPACE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5S_NO_CLASS, "not a dataspace");
 
     ret_value=H5S_get_simple_extent_type(space);
@@ -1765,7 +1765,7 @@ H5Sset_extent_none(hid_t space_id)
     H5TRACE1("e","i",space_id);
 
     /* Check args */
-    if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == (space = H5I_object(space_id)))
+    if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
 
     /* Clear the previous extent from the dataspace */
@@ -1803,7 +1803,7 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
     H5TRACE2("e","i*Hs",space_id,offset);
 
     /* Check args */
-    if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == (space = H5I_object(space_id)))
+    if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     if (offset == NULL)
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no offset specified");

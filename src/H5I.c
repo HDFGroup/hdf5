@@ -189,20 +189,17 @@ H5I_init_group(H5I_type_t grp, size_t hash_size, unsigned reserved,
     FUNC_ENTER_NOAPI(H5I_init_group, FAIL);
 
     /* Check arguments */
-    if ((grp <= H5I_BADID || grp >= H5I_NGROUPS) && hash_size > 0) {
-	HGOTO_DONE(FAIL);
-    }
+    if ((grp <= H5I_BADID || grp >= H5I_NGROUPS) && hash_size > 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
 #ifdef HASH_SIZE_POWER_2
     if (!POWER_OF_TWO(hash_size) || hash_size == 1)
-	HGOTO_DONE(FAIL);
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid hash size");
 #endif /* HASH_SIZE_POWER_2 */
 
     if (H5I_id_group_list_g[grp] == NULL) {
 	/* Allocate the group information for new group */
-	if (NULL==(grp_ptr = H5MM_calloc(sizeof(H5I_id_group_t)))) {
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			 "memory allocation failed");
-	}
+	if (NULL==(grp_ptr = H5MM_calloc(sizeof(H5I_id_group_t))))
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 	H5I_id_group_list_g[grp] = grp_ptr;
     } else {
 	/* Get the pointer to the existing group */
@@ -218,16 +215,14 @@ H5I_init_group(H5I_type_t grp, size_t hash_size, unsigned reserved,
 	grp_ptr->nextid = reserved;
 	grp_ptr->free_func = free_func;
 	grp_ptr->id_list = H5MM_calloc(hash_size*sizeof(H5I_id_info_t *));
-	if (NULL==grp_ptr->id_list) {
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			 "memory allocation failed");
-	}
+	if (NULL==grp_ptr->id_list)
+	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     }
     
     /* Increment the count of the times this group has been initialized */
     grp_ptr->count++;
 
-  done:
+done:
     if (ret_value<0) {
 	/* Error condition cleanup */
 	if (grp_ptr != NULL) {
@@ -267,18 +262,15 @@ H5I_nmembers(H5I_type_t grp)
 
     FUNC_ENTER_NOAPI(H5I_nmembers, FAIL);
 
-    if (grp<=H5I_BADID || grp>=H5I_NGROUPS) {
+    if (grp<=H5I_BADID || grp>=H5I_NGROUPS)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
-    }
-    if (NULL==(grp_ptr=H5I_id_group_list_g[grp]) || grp_ptr->count<=0) {
+    if (NULL==(grp_ptr=H5I_id_group_list_g[grp]) || grp_ptr->count<=0)
 	HRETURN(0);
-    }
 
-    for (i=0; i<grp_ptr->hash_size; i++) {
-	for (cur=grp_ptr->id_list[i]; cur; cur=cur->next) {
+    for (i=0; i<grp_ptr->hash_size; i++)
+	for (cur=grp_ptr->id_list[i]; cur; cur=cur->next)
 	    n++;
-	}
-    }
+
     FUNC_LEAVE(n);
 }
 
@@ -325,23 +317,20 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
 
     FUNC_ENTER_NOAPI(H5I_clear_group, FAIL);
 
-    if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
-	HGOTO_DONE(FAIL);
-    }
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
     
     grp_ptr = H5I_id_group_list_g[grp];
-    if (grp_ptr == NULL || grp_ptr->count <= 0) {
-	HGOTO_DONE(FAIL);
-    }
+    if (grp_ptr == NULL || grp_ptr->count <= 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid group");
 
 #ifdef IDS_ARE_CACHED
     /*
      * Remove atoms from the global atom cache.
      */
     for (i=0; i<ID_CACHE_SIZE; i++) {
-	if (H5I_cache_g[i] && H5I_GROUP(H5I_cache_g[i]->id) == grp) {
+	if (H5I_cache_g[i] && H5I_GROUP(H5I_cache_g[i]->id) == grp)
 	    H5I_cache_g[i] = NULL;
-	}
     }
 #endif /* IDS_ARE_CACHED */
 
@@ -470,14 +459,12 @@ H5I_destroy_group(H5I_type_t grp)
 
     FUNC_ENTER_NOAPI(H5I_destroy_group, FAIL);
 
-    if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
-        HGOTO_DONE(FAIL);
-    }
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
     
     grp_ptr = H5I_id_group_list_g[grp];
-    if (grp_ptr == NULL || grp_ptr->count <= 0) {
-        HGOTO_DONE(FAIL);
-    }
+    if (grp_ptr == NULL || grp_ptr->count <= 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid group");
 
     /*
      * Decrement the number of users of the atomic group.  If this is the
@@ -534,16 +521,13 @@ H5I_register(H5I_type_t grp, void *object)
     FUNC_ENTER_NOAPI(H5I_register, FAIL);
 
     /* Check arguments */
-    if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
-	HGOTO_DONE(FAIL);
-    }
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
     grp_ptr = H5I_id_group_list_g[grp];
-    if (grp_ptr == NULL || grp_ptr->count <= 0) {
-	HGOTO_DONE(FAIL);
-    }
-    if ((id_ptr = H5FL_ALLOC(H5I_id_info_t,0)) == NULL) {
-	HGOTO_DONE(FAIL);
-    }
+    if (grp_ptr == NULL || grp_ptr->count <= 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid group");
+    if ((id_ptr = H5FL_ALLOC(H5I_id_info_t,0)) == NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* Create the struct & it's ID */
     new_id = H5I_MAKE(grp, grp_ptr->nextid);
@@ -554,9 +538,8 @@ H5I_register(H5I_type_t grp, void *object)
 
     /* hash bucket already full, prepend to front of chain */
     hash_loc = grp_ptr->nextid % (unsigned) grp_ptr->hash_size;
-    if (grp_ptr->id_list[hash_loc] != NULL) {
+    if (grp_ptr->id_list[hash_loc] != NULL)
 	id_ptr->next = grp_ptr->id_list[hash_loc];
-    }
 
     /* Insert into the group */
     grp_ptr->id_list[hash_loc] = id_ptr;
@@ -586,28 +569,29 @@ H5I_register(H5I_type_t grp, void *object)
 	 */
 	for (i=grp_ptr->reserved; i<ID_MASK; i++) {
 	    /* Handle end of range by wrapping to beginning */
-	    if (grp_ptr->nextid>(unsigned)ID_MASK) {
+	    if (grp_ptr->nextid>(unsigned)ID_MASK)
 		grp_ptr->nextid = grp_ptr->reserved;
-	    }
 
 	    /* new ID to check for */
 	    next_id = H5I_MAKE(grp, grp_ptr->nextid);
 	    hash_loc = H5I_LOC (grp_ptr->nextid, grp_ptr->hash_size);
 	    curr_id = grp_ptr->id_list[hash_loc];
-	    if (curr_id == NULL) break; /* Ha! this is not likely... */
+	    if (curr_id == NULL)
+                break; /* Ha! this is not likely... */
 
 	    while (curr_id) {
-		if (curr_id->id == next_id) break;
+		if (curr_id->id == next_id)
+                    break;
 		curr_id = curr_id->next;
 	    }
-	    if (!curr_id) break; /* must not have found a match */
+	    if (!curr_id)
+                break; /* must not have found a match */
 	    grp_ptr->nextid++;
 	}
 
-	if (i>=(unsigned)ID_MASK) {
+	if (i>=(unsigned)ID_MASK)
 	    /* All the IDs are gone! */
-	    HGOTO_DONE(FAIL);
-	}
+            HGOTO_ERROR(H5E_ATOM, H5E_NOIDS, FAIL, "no IDs available in group");
     }
     ret_value = new_id;
 
@@ -648,6 +632,44 @@ H5I_object(hid_t id)
 
     FUNC_LEAVE(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_object_verify
+ *
+ * Purpose:	Find an object pointer for the specified ID, verifying that
+ *                  its in a particular group.
+ *
+ * Return:	Success:	Non-null object pointer associated with the
+ *				specified ID.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, July 31, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void * 
+H5I_object_verify(hid_t id, H5I_type_t id_type)
+{
+    H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new atom	*/
+    void		*ret_value = NULL;	/*return value		*/
+
+    FUNC_ENTER_NOAPI(H5I_object_verify, NULL);
+
+    assert(id_type>=H5I_FILE && id_type<H5I_NGROUPS);
+
+    /* Verify that the group of the ID is correct & lookup the ID */
+    if(id_type == H5I_GROUP(id) && NULL!=(id_ptr = H5I_find_id(id))) {
+        /* Get the object pointer to return */
+        ret_value = id_ptr->obj_ptr;
+    } /* end if */
+
+    FUNC_LEAVE(ret_value);
+} /* H5I_object_verify() */
 
 
 /*-------------------------------------------------------------------------
@@ -715,10 +737,8 @@ H5Iget_type(hid_t id)
 
     ret_value = H5I_get_type(id);
 
-    if (ret_value <= H5I_BADID || ret_value >= H5I_NGROUPS ||
-	NULL==H5I_object(id)) {
+    if (ret_value <= H5I_BADID || ret_value >= H5I_NGROUPS || NULL==H5I_object(id))
 	HGOTO_DONE(H5I_BADID);
-    }
 
 done:
     FUNC_LEAVE(ret_value);
@@ -760,16 +780,16 @@ H5I_remove(hid_t id)
     /* Check arguments */
     grp = H5I_GROUP(id);
     if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
-        HGOTO_DONE(NULL);
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "invalid group number");
     grp_ptr = H5I_id_group_list_g[grp];
     if (grp_ptr == NULL || grp_ptr->count <= 0)
-        HGOTO_DONE(NULL);
+	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "invalid group");
 
     /* Get the bucket in which the ID is located */
     hash_loc = (unsigned) H5I_LOC(id, grp_ptr->hash_size);
     curr_id = grp_ptr->id_list[hash_loc];
     if (curr_id == NULL)
-        HGOTO_DONE(NULL);
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "invalid ID");
 
     last_id = NULL;
     while (curr_id != NULL) {
@@ -799,13 +819,13 @@ H5I_remove(hid_t id)
         H5FL_FREE(H5I_id_info_t,curr_id);
     } else {
         /* couldn't find the ID in the proper place */
-        HGOTO_DONE(NULL);
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "invalid ID");
     }
 
     /* Decrement the number of IDs in the group */
     (grp_ptr->ids)--;
 
-  done:
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -860,9 +880,8 @@ H5I_dec_ref(hid_t id)
 
     /* Check arguments */
     grp_ptr = H5I_id_group_list_g[grp];
-    if (grp_ptr == NULL || grp_ptr->count <= 0) {
-	HRETURN(FAIL);
-    }
+    if (grp_ptr == NULL || grp_ptr->count <= 0)
+	HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
     
     /* General lookup of the ID */
     if ((id_ptr=H5I_find_id(id))) {
@@ -918,12 +937,15 @@ H5I_inc_ref(hid_t id)
     FUNC_ENTER_NOAPI(H5I_inc_ref, FAIL);
 
     /* Check arguments */
-    if (id<0) HRETURN(FAIL);
+    if (id<0)
+	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID");
     grp_ptr = H5I_id_group_list_g[grp];
-    if (!grp_ptr || grp_ptr->count<=0) HRETURN(FAIL);
+    if (!grp_ptr || grp_ptr->count<=0)
+	HRETURN_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid group");
 
     /* General lookup of the ID */
-    if (NULL==(id_ptr=H5I_find_id(id))) HRETURN(FAIL);
+    if (NULL==(id_ptr=H5I_find_id(id)))
+	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID");
     id_ptr->count++;
 
     FUNC_LEAVE(id_ptr->count);
@@ -966,26 +988,23 @@ H5I_search(H5I_type_t grp, H5I_search_func_t func, const void *key)
     FUNC_ENTER_NOAPI(H5I_search, NULL);
 
     /* Check arguments */
-    if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
-	HGOTO_DONE(NULL);
-    }
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "invalid group number");
     grp_ptr = H5I_id_group_list_g[grp];
-    if (grp_ptr == NULL || grp_ptr->count <= 0) {
-	HGOTO_DONE(NULL);
-    }
+    if (grp_ptr == NULL || grp_ptr->count <= 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "invalid group");
 
     /* Start at the beginning of the array */
     for (i=0; i<grp_ptr->hash_size; i++) {
 	id_ptr = grp_ptr->id_list[i];
 	while (id_ptr) {
-	    if ((*func)(id_ptr->obj_ptr, id_ptr->id, key)) {
+	    if ((*func)(id_ptr->obj_ptr, id_ptr->id, key))
 		HGOTO_DONE(id_ptr->obj_ptr);	/*found the item*/
-	    }
 	    id_ptr = id_ptr->next;
 	}
     }
 
-  done:
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -1022,13 +1041,11 @@ H5I_find_id(hid_t id)
 
     /* Check arguments */
     grp = H5I_GROUP(id);
-    if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
-	HGOTO_DONE(NULL);
-    }
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "invalid group number");
     grp_ptr = H5I_id_group_list_g[grp];
-    if (grp_ptr == NULL || grp_ptr->count <= 0) {
-	HGOTO_DONE(NULL);
-    }
+    if (grp_ptr == NULL || grp_ptr->count <= 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "invalid group");
 
 #ifdef IDS_ARE_CACHED
     /*
@@ -1057,13 +1074,13 @@ H5I_find_id(hid_t id)
     /* Get the bucket in which the ID is located */
     hash_loc = (unsigned)H5I_LOC(id, grp_ptr->hash_size);
     id_ptr = grp_ptr->id_list[hash_loc];
-    if (id_ptr == NULL) {
-	HGOTO_DONE(NULL);
-    }
+    if (id_ptr == NULL)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "invalid ID");
 
     /* Scan the bucket's linked list for a match */
     while (id_ptr) {
-	if (id_ptr->id == id) break;
+	if (id_ptr->id == id)
+            break;
 	id_ptr = id_ptr->next;
     }
     ret_value = id_ptr;
@@ -1073,7 +1090,7 @@ H5I_find_id(hid_t id)
     H5I_cache_g[ID_CACHE_SIZE-1] = id_ptr;
 #endif /* IDS_ARE_CACHED */
 
-  done:
+done:
     FUNC_LEAVE(ret_value);
 }
 

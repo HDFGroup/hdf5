@@ -676,7 +676,7 @@ H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED
     assert(H5I_DATATYPE == H5I_get_type(type_id));
 
     /* Check args */
-    if (H5I_DATATYPE!=H5I_get_type(type_id) || NULL==(dt=H5I_object(type_id)))
+    if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
     /* Get the default dataset transfer property list if the user didn't provide one */

@@ -299,7 +299,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type");
     if(ref_type!=H5R_OBJECT && ref_type!=H5R_DATASET_REGION)
         HRETURN_ERROR (H5E_ARGS, H5E_UNSUPPORTED, FAIL, "reference type not supported");
-    if (space_id!=(-1) && (H5I_DATASPACE!=H5I_get_type (space_id) || NULL==(space=H5I_object (space_id))))
+    if (space_id!=(-1) && (NULL==(space=H5I_object_verify(space_id,H5I_DATASPACE))))
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
 
     /* Create reference */

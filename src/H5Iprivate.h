@@ -130,6 +130,7 @@ __DLL__ herr_t H5I_clear_group(H5I_type_t grp, hbool_t force);
 __DLL__ herr_t H5I_destroy_group(H5I_type_t grp);
 __DLL__ hid_t H5I_register(H5I_type_t grp, void *object);
 __DLL__ void *H5I_object(hid_t id);
+__DLL__ void *H5I_object_verify(hid_t id, H5I_type_t id_type);
 __DLL__ H5I_type_t H5I_get_type(hid_t id);
 __DLL__ void *H5I_remove(hid_t id);
 __DLL__ void *H5I_search(H5I_type_t grp, H5I_search_func_t func,

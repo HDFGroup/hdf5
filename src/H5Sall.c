@@ -543,7 +543,7 @@ herr_t H5Sselect_all (hid_t spaceid)
     FUNC_ENTER_API(H5Sselect_all, FAIL);
 
     /* Check args */
-    if (H5I_DATASPACE != H5I_get_type(spaceid) || NULL == (space=H5I_object(spaceid)))
+    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     /* Call internal routine to do the work */

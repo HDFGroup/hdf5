@@ -267,17 +267,12 @@ H5FDunregister(hid_t driver_id)
     H5TRACE1("e","i",driver_id);
 
     /* Check arguments */
-    if (H5I_VFL!=H5I_get_type(driver_id) ||
-	NULL==H5I_object(driver_id)) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file driver");
-    }
+    if (NULL==H5I_object_verify(driver_id,H5I_VFL))
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver");
 
     /* The H5FD_class_t struct will be freed by this function */
-    if (H5I_dec_ref(driver_id)<0) {
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
-		      "unable to unregister file driver");
-    }
+    if (H5I_dec_ref(driver_id)<0)
+	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to unregister file driver");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -518,11 +513,10 @@ H5FD_fapl_copy(hid_t driver_id, const void *old_fapl)
     FUNC_ENTER_NOAPI(H5FD_fapl_copy, NULL);
 
     /* Check args */
-    if (H5I_VFL!=H5I_get_type(driver_id) ||
-	NULL==(driver=H5I_object(driver_id))) {
+    if (NULL==(driver=H5I_object_verify(driver_id,H5I_VFL)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver ID");
-    }
-    if (!old_fapl) HRETURN(NULL); /*but no error*/
+    if (!old_fapl)
+        HRETURN(NULL); /*but no error*/
 
     /* Allow the driver to copy or do it ourselves */
     if (driver->fapl_copy) {
@@ -563,10 +557,8 @@ H5FD_fapl_free(hid_t driver_id, void *fapl)
     FUNC_ENTER_NOAPI(H5FD_fapl_free, FAIL);
 
     /* Check args */
-    if (H5I_VFL!=H5I_get_type(driver_id) ||
-	NULL==(driver=H5I_object(driver_id))) {
+    if (NULL==(driver=H5I_object_verify(driver_id,H5I_VFL)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID");
-    }
     
     /* Allow driver to free or do it ourselves */
     if (fapl && driver->fapl_free) {
@@ -611,12 +603,10 @@ H5FD_dxpl_copy(hid_t driver_id, const void *old_dxpl)
     FUNC_ENTER_NOAPI(H5FD_dxpl_copy, NULL);
 
     /* Check args */
-    if (H5I_VFL!=H5I_get_type(driver_id) ||
-	NULL==(driver=H5I_object(driver_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
-		      "not a driver ID");
-    }
-    if (!old_dxpl) HRETURN(NULL); /*but no error*/
+    if (NULL==(driver=H5I_object_verify(driver_id,H5I_VFL)))
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver ID");
+    if (!old_dxpl)
+        HRETURN(NULL); /*but no error*/
 
     /* Allow the driver to copy or do it ourselves */
     if (driver->dxpl_copy) {
@@ -657,10 +647,8 @@ H5FD_dxpl_free(hid_t driver_id, void *dxpl)
     FUNC_ENTER_NOAPI(H5FD_dxpl_free, FAIL);
 
     /* Check args */
-    if (H5I_VFL!=H5I_get_type(driver_id) ||
-	NULL==(driver=H5I_object(driver_id))) {
+    if (NULL==(driver=H5I_object_verify(driver_id,H5I_VFL)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID");
-    }
     
     /* Allow driver to free or do it ourselves */
     if (dxpl && driver->dxpl_free) {
@@ -793,7 +781,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
 
     /* Get driver info */
-    if (H5I_VFL!=H5I_get_type(driver_id) || NULL==(driver=H5I_object(driver_id)))
+    if (NULL==(driver=H5I_object_verify(driver_id,H5I_VFL)))
 	HRETURN_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list");
     if (NULL==driver->open)
 	HRETURN_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `open' method");

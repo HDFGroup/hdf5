@@ -193,7 +193,7 @@ H5D_init_interface(void)
     assert(H5P_CLS_DATASET_XFER_g!=(-1));
 
     /* Get the pointer to the dataset transfer class */
-    if (H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_DATASET_XFER_g) || NULL == (xfer_pclass = H5I_object(H5P_CLS_DATASET_XFER_g)))
+    if (NULL == (xfer_pclass = H5I_object_verify(H5P_CLS_DATASET_XFER_g, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
     /* Get the number of properties in the class */
@@ -273,7 +273,7 @@ H5D_init_interface(void)
     assert(H5P_CLS_DATASET_CREATE_g != -1);
     
     /* Get the pointer to the dataset creation class */
-    if(H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_DATASET_CREATE_g) || NULL == (crt_pclass = H5I_object(H5P_CLS_DATASET_CREATE_g)))
+    if(NULL == (crt_pclass = H5I_object_verify(H5P_CLS_DATASET_CREATE_g, H5I_GENPROP_CLS)))
        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
         
     /* Get the number of properties in the class */
@@ -692,44 +692,39 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5T_t		   *type = NULL;
     H5S_t		   *space = NULL;
     H5D_t		   *new_dset = NULL;
-    hid_t		    ret_value = FAIL;
+    hid_t		    ret_value;
 
     FUNC_ENTER_API(H5Dcreate, FAIL);
     H5TRACE5("i","isiii",loc_id,name,type_id,space_id,plist_id);
 
     /* Check arguments */
-    if (NULL == (loc = H5G_loc(loc_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
-    }
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (type = H5I_object(type_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type");
-    }
-    if (H5I_DATASPACE != H5I_get_type(space_id) ||
-	NULL == (space = H5I_object(space_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-    }
+    if (NULL == (loc = H5G_loc(loc_id)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
+    if (NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type");
+    if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     if(H5P_DEFAULT == plist_id)
         plist_id = H5P_DATASET_CREATE_DEFAULT;
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-        TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
-                      "not dataset create property list");
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id) || TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list");
 
     /* build and open the new dataset */
-    if (NULL == (new_dset = H5D_create(loc, name, type, space, plist_id))) {
-	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-		      "unable to create dataset");
-    }
+    if (NULL == (new_dset = H5D_create(loc, name, type, space, plist_id)))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset");
+
     /* Register the new dataset to get an ID for it */
-    if ((ret_value = H5I_register(H5I_DATASET, new_dset)) < 0) {
-	H5D_close(new_dset);
-	HRETURN_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
-		      "unable to register dataset");
-    }
+    if ((ret_value = H5I_register(H5I_DATASET, new_dset)) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register dataset");
+
+done:
+    if(ret_value<0) {
+        if(new_dset!=NULL)
+            H5D_close(new_dset);
+    } /* end if */
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -759,33 +754,35 @@ H5Dopen(hid_t loc_id, const char *name)
 {
     H5G_entry_t	*loc = NULL;		/*location holding the dataset	*/
     H5D_t	*dataset = NULL;	/*the dataset			*/
-    hid_t	ret_value = FAIL;
+    hid_t	ret_value;
 
     FUNC_ENTER_API(H5Dopen, FAIL);
     H5TRACE2("i","is",loc_id,name);
 
     /* Check args */
-    if (NULL == (loc = H5G_loc(loc_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    }
-    if (!name || !*name) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
-    }
+    if (NULL == (loc = H5G_loc(loc_id)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
     
     /* Find the dataset */
-    if (NULL == (dataset = H5D_open(loc, name))) {
-	HRETURN_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "dataset not found");
-    }
+    if (NULL == (dataset = H5D_open(loc, name)))
+	HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "dataset not found");
     
     /* Create an atom for the dataset */
-    if ((ret_value = H5I_register(H5I_DATASET, dataset)) < 0) {
-	H5D_close(dataset);
-	HRETURN_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
-		      "can't register dataset");
-    }
+    if ((ret_value = H5I_register(H5I_DATASET, dataset)) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register dataset");
+
+done:
+    if(ret_value<0) {
+        if(dataset!=NULL)
+            H5D_close(dataset);
+    } /* end if */
+
     FUNC_LEAVE(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Dclose
  *
@@ -809,26 +806,29 @@ H5Dopen(hid_t loc_id, const char *name)
 herr_t
 H5Dclose(hid_t dset_id)
 {
-    H5D_t		   *dset = NULL;	/* dataset object to release */
+    H5D_t	*dset = NULL;	        /* Dataset object to release */
+    herr_t       ret_value=SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(H5Dclose, FAIL);
     H5TRACE1("e","i",dset_id);
 
     /* Check args */
-    if (H5I_DATASET != H5I_get_type(dset_id) ||
-	NULL == (dset = H5I_object(dset_id)) ||
-	NULL == dset->ent.file) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
-    }
+    if (NULL == (dset = H5I_object_verify(dset_id, H5I_DATASET)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    if (NULL == dset->ent.file)
+	HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset");
+
     /*
      * Decrement the counter on the dataset.  It will be freed if the count
      * reaches zero.
      */
-    if (H5I_dec_ref(dset_id) < 0) {
-	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't free");
-    }
-    FUNC_LEAVE(SUCCEED);
+    if (H5I_dec_ref(dset_id) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't free");
+
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Dget_space
@@ -855,29 +855,28 @@ H5Dget_space(hid_t dset_id)
 {
     H5D_t	*dset = NULL;
     H5S_t	*space = NULL;
-    hid_t	ret_value = FAIL;
+    hid_t	ret_value;
     
     FUNC_ENTER_API(H5Dget_space, FAIL);
     H5TRACE1("i","i",dset_id);
 
     /* Check args */
-    if (H5I_DATASET!=H5I_get_type (dset_id) ||
-	NULL==(dset=H5I_object (dset_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
-    }
+    if (NULL==(dset=H5I_object_verify(dset_id, H5I_DATASET)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
 
     /* Read the data space message and return a data space object */
-    if (NULL==(space=H5D_get_space (dset))) {
-	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		       "unable to get data space");
-    }
+    if (NULL==(space=H5D_get_space (dset)))
+	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get data space");
 
     /* Create an atom */
-    if ((ret_value=H5I_register (H5I_DATASPACE, space))<0) {
-	H5S_close(space);
-	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
-		       "unable to register data space");
-    }
+    if ((ret_value=H5I_register (H5I_DATASPACE, space))<0)
+	HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data space");
+
+done:
+    if(ret_value<0) {
+        if(space!=NULL)
+            H5S_close(space);
+    } /* end if */
 
     FUNC_LEAVE (ret_value);
 }
@@ -907,10 +906,8 @@ H5D_get_space(H5D_t *dset)
     FUNC_ENTER_NOAPI(H5D_get_space, NULL);
     assert(dset);
 
-    if (NULL==(space=H5S_read(&(dset->ent)))) {
-	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
-		      "unable to load space info from dataset header");
-    }
+    if (NULL==(space=H5S_read(&(dset->ent))))
+	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to load space info from dataset header");
 
     FUNC_LEAVE(space);
 }
@@ -940,7 +937,7 @@ herr_t H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
     FUNC_ENTER_API(H5Dget_space_status, FAIL);
 
     /* Check arguments */
-    if(H5I_DATASET != H5I_get_type(dset_id) || NULL==(dset=H5I_object(dset_id)))
+    if(NULL==(dset=H5I_object_verify(dset_id, H5I_DATASET)))
 	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
 
     /* Read data space address and return */
@@ -1052,32 +1049,30 @@ H5Dget_type(hid_t dset_id)
     H5TRACE1("i","i",dset_id);
 
     /* Check args */
-    if (H5I_DATASET!=H5I_get_type (dset_id) ||
-	NULL==(dset=H5I_object (dset_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
-    }
+    if (NULL==(dset=H5I_object_verify(dset_id, H5I_DATASET)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
 
     /* Copy the data type and mark it read-only */
-    if (NULL==(copied_type=H5T_copy (dset->type, H5T_COPY_REOPEN))) {
-	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		       "unable to copy the data type");
-    }
+    if (NULL==(copied_type=H5T_copy (dset->type, H5T_COPY_REOPEN)))
+	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy the data type");
+
     /* Mark any VL datatypes as being in memory now */
-	if (H5T_vlen_mark(copied_type, NULL, H5T_VLEN_MEMORY)<0) {
-        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
-    }
-    if (H5T_lock (copied_type, FALSE)<0) {
-	H5T_close (copied_type);
-	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		       "unable to lock transient data type");
-    }
+    if (H5T_vlen_mark(copied_type, NULL, H5T_VLEN_MEMORY)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
+
+    /* Unlock copied type */
+    if (H5T_lock (copied_type, FALSE)<0)
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient data type");
     
     /* Create an atom */
-    if ((ret_value=H5I_register (H5I_DATATYPE, copied_type))<0) {
-	H5T_close (copied_type);
-	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
-		       "unable to register data type");
-    }
+    if ((ret_value=H5I_register (H5I_DATATYPE, copied_type))<0)
+	HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data type");
+
+done:
+    if(ret_value<0) {
+        if(copied_type!=NULL)
+            H5T_close (copied_type);
+    } /* end if */
 
     FUNC_LEAVE (ret_value);
 }
@@ -1113,35 +1108,45 @@ H5Dget_create_plist(hid_t dset_id)
     H5O_fill_t          copied_fill={NULL,0,NULL};
     H5P_genplist_t      *dcpl_plist;
     H5P_genplist_t      *new_plist;
+    hid_t		new_dcpl_id = FAIL;
     hid_t		ret_value = FAIL;
     
     FUNC_ENTER_API(H5Dget_create_plist, FAIL);
     H5TRACE1("i","i",dset_id);
 
     /* Check args */
-    if (H5I_DATASET!=H5I_get_type (dset_id) || NULL==(dset=H5I_object (dset_id)))
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    if (NULL==(dset=H5I_object_verify(dset_id, H5I_DATASET)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     if (NULL == (dcpl_plist = H5I_object(dset->dcpl_id)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list");
 
     /* Copy the creation property list */
-    if((ret_value = H5P_copy_plist(dcpl_plist)) < 0)
-        HRETURN_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to copy the creation property list");
-    if (NULL == (new_plist = H5I_object(ret_value)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list");
+    if((new_dcpl_id = H5P_copy_plist(dcpl_plist)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to copy the creation property list");
+    if (NULL == (new_plist = H5I_object(new_dcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list");
 
     /* Get the fill value property */
     if(H5P_get(new_plist, H5D_CRT_FILL_VALUE_NAME, &copied_fill) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value");
 
     /* Copy the dataset type into the fill value message */
     if(copied_fill.type==NULL)
         if(NULL==(copied_fill.type=H5T_copy(dset->type, H5T_COPY_TRANSIENT)))
-            HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy dataset data type for fill value");
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy dataset data type for fill value");
 
     /* Set back the fill value property to property list */
     if(H5P_set(new_plist, H5D_CRT_FILL_VALUE_NAME, &copied_fill) < 0)
-        HRETURN_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set property list fill value");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set property list fill value");
+
+    /* Set the return value */
+    ret_value=new_dcpl_id;
+
+done:
+    if(ret_value<0) {
+        if(new_dcpl_id>0)
+            H5Pclose(new_dcpl_id);
+    } /* end if */
 
     FUNC_LEAVE (ret_value);
 }
@@ -1195,59 +1200,51 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     const H5T_t		   *mem_type = NULL;
     const H5S_t		   *mem_space = NULL;
     const H5S_t		   *file_space = NULL;
+    herr_t                  ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(H5Dread, FAIL);
     H5TRACE6("e","iiiiix",dset_id,mem_type_id,mem_space_id,file_space_id,
              plist_id,buf);
 
     /* check arguments */
-    if (H5I_DATASET != H5I_get_type(dset_id) ||
-            NULL == (dset = H5I_object(dset_id)) ||
-            NULL == dset->ent.file) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
-    }
-    if (H5I_DATATYPE != H5I_get_type(mem_type_id) ||
-            NULL == (mem_type = H5I_object(mem_type_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
+    if (NULL == (dset = H5I_object_verify(dset_id, H5I_DATASET)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    if (NULL == dset->ent.file)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    if (NULL == (mem_type = H5I_object_verify(mem_type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (H5S_ALL != mem_space_id) {
-	if (H5I_DATASPACE != H5I_get_type(mem_space_id) ||
-                NULL == (mem_space = H5I_object(mem_space_id))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-	}
+	if (NULL == (mem_space = H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
 	/* Check for valid selection */
-	if((*mem_space->select.is_valid)(mem_space)!=TRUE) {
-	    HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
-			  "selection+offset not within extent");
-	}
+	if((*mem_space->select.is_valid)(mem_space)!=TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
     }
     if (H5S_ALL != file_space_id) {
-	if (H5I_DATASPACE != H5I_get_type(file_space_id) ||
-                NULL == (file_space = H5I_object(file_space_id))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-	}
+	if (NULL == (file_space = H5I_object_verify(file_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
 	/* Check for valid selection */
-	if((*file_space->select.is_valid)(file_space)!=TRUE) {
-	    HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
-			  "selection+offset not within extent");
-	}
+	if((*file_space->select.is_valid)(file_space)!=TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
     }
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == plist_id)
         plist_id= H5P_DATASET_XFER_DEFAULT;
 
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     if (!buf)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
 
     /* read raw data */
     if (H5D_read(dset, mem_type, mem_space, file_space, plist_id, buf/*out*/) < 0)
-	HRETURN_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
+	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -1293,60 +1290,53 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     const H5T_t		   *mem_type = NULL;
     const H5S_t		   *mem_space = NULL;
     const H5S_t		   *file_space = NULL;
+    herr_t                  ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(H5Dwrite, FAIL);
     H5TRACE6("e","iiiiix",dset_id,mem_type_id,mem_space_id,file_space_id,
              plist_id,buf);
 
     /* check arguments */
-    if (H5I_DATASET != H5I_get_type(dset_id) ||
-            NULL == (dset = H5I_object(dset_id)) ||
-            NULL == dset->ent.file) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
-    }
-    if (H5I_DATATYPE != H5I_get_type(mem_type_id) ||
-            NULL == (mem_type = H5I_object(mem_type_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
+    if (NULL == (dset = H5I_object_verify(dset_id, H5I_DATASET)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    if (NULL == dset->ent.file)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    if (NULL == (mem_type = H5I_object_verify(mem_type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (H5S_ALL != mem_space_id) {
-	if (H5I_DATASPACE != H5I_get_type(mem_space_id) ||
-                NULL == (mem_space = H5I_object(mem_space_id))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-	}
+	if (NULL == (mem_space = H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
 	/* Check for valid selection */
-	if ((*mem_space->select.is_valid)(mem_space)!=TRUE) {
-	    HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
-			  "selection+offset not within extent");
-	}
+	if ((*mem_space->select.is_valid)(mem_space)!=TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
     }
     if (H5S_ALL != file_space_id) {
-	if (H5I_DATASPACE != H5I_get_type(file_space_id) ||
-                NULL == (file_space = H5I_object(file_space_id))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-	}
+	if (NULL == (file_space = H5I_object_verify(file_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
 	/* Check for valid selection */
-	if ((*file_space->select.is_valid)(file_space)!=TRUE) {
-	    HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
-			  "selection+offset not within extent");
-	}
+	if ((*file_space->select.is_valid)(file_space)!=TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
     }
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == plist_id)
         plist_id= H5P_DATASET_XFER_DEFAULT;
 
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     if (!buf)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
 
     /* write raw data */
     if (H5D_write(dset, mem_type, mem_space, file_space, plist_id, buf) < 0)
-	HRETURN_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
+	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Dextend
@@ -1368,26 +1358,23 @@ herr_t
 H5Dextend(hid_t dset_id, const hsize_t *size)
 {
     H5D_t	*dset = NULL;
+    herr_t       ret_value=SUCCEED;  /* Return value */
     
     FUNC_ENTER_API(H5Dextend, FAIL);
     H5TRACE2("e","i*h",dset_id,size);
 
     /* Check args */
-    if (H5I_DATASET!=H5I_get_type(dset_id) ||
-	NULL==(dset=H5I_object(dset_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
-    }
-    if (!size) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified");
-    }
+    if (NULL==(dset=H5I_object_verify(dset_id, H5I_DATASET)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    if (!size)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified");
 
     /* Increase size */
-    if (H5D_extend (dset, size)<0) {
-	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		       "unable to extend dataset");
-    }
+    if (H5D_extend (dset, size)<0)
+	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to extend dataset");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -1593,11 +1580,8 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
              * Also, only the slowest varying dimension of a simple data space
              * can be extendible.
              */
-	    if ((ndims=H5S_get_simple_extent_dims(space, new_dset->layout.dim,
-                                                  max_dim))<0) {
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
-                    "unable to initialize contiguous storage");
-            }
+	    if ((ndims=H5S_get_simple_extent_dims(space, new_dset->layout.dim, max_dim))<0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize contiguous storage");
             for (i=1; i<ndims; i++) {
                 if (max_dim[i]>new_dset->layout.dim[i])
                     HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "only the first dimension can be extendible");
@@ -1685,20 +1669,18 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
    
     if(fill.fill_defined == FALSE && fill_time != H5D_FILL_TIME_NEVER)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,NULL, "unable to create dataset");
-    /* Write new fill value message */
-    if (H5O_modify(&(new_dset->ent), H5O_FILL_NEW, 0, H5O_FLAG_CONSTANT, 
-			&fill) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to update fill value header message");        
 
+    /* Write new fill value message */
+    if (H5O_modify(&(new_dset->ent), H5O_FILL_NEW, 0, H5O_FLAG_CONSTANT, &fill) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to update fill value header message");        
     H5O_reset(H5O_FILL, &fill_prop);
     if(fill.buf && (NULL==H5O_copy(H5O_FILL, &fill, &fill_prop)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,NULL,"unable to copy fill value");
     H5O_reset(H5O_FILL_NEW, &fill);
+
     /* Write old fill value */
-    if (fill_prop.buf && H5O_modify(&(new_dset->ent), H5O_FILL, 0, 
-	H5O_FLAG_CONSTANT, &fill_prop) < 0)        
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, 
-			"unable to update fill value header message");
+    if (fill_prop.buf && H5O_modify(&(new_dset->ent), H5O_FILL, 0, H5O_FLAG_CONSTANT, &fill_prop) < 0)        
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to update fill value header message");
     if(H5P_set(new_plist, H5D_CRT_FILL_VALUE_NAME, &fill_prop) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't set fill value");  
 
@@ -1740,8 +1722,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 	new_dset->layout.addr = HADDR_UNDEF;
 #else /*H5_HAVE_PARALLEL*/
     if (0==efl.nused) {
-        if(dcpl_layout==H5D_CHUNKED || (dcpl_layout==H5D_CONTIGUOUS && 
-                space_time==H5D_SPACE_ALLOC_EARLY)) {
+        if(dcpl_layout==H5D_CHUNKED || (dcpl_layout==H5D_CONTIGUOUS && space_time==H5D_SPACE_ALLOC_EARLY)) {
             if (H5F_arr_create(f, &(new_dset->layout))<0)
             	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage"); 
         } /* end if */
@@ -1787,8 +1768,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     if (H5D_init_storage(new_dset, space)<0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage");
 #else /*H5_HAVE_PARALLEL*/
-    if(fill_time==H5D_FILL_TIME_ALLOC &&
-        ((space_time==H5D_SPACE_ALLOC_EARLY && !efl.nused) || (efl.nused)))
+    if(fill_time==H5D_FILL_TIME_ALLOC && ((space_time==H5D_SPACE_ALLOC_EARLY && !efl.nused) || (efl.nused)))
 	if (H5D_init_storage(new_dset, space)<0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage");
 #endif /*H5_HAVE_PARALLEL*/
@@ -1805,6 +1785,7 @@ done:
         new_dset->ent.file = NULL;
         H5FL_FREE(H5D_t,new_dset);
     }
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -1832,6 +1813,7 @@ htri_t
 H5D_isa(H5G_entry_t *ent)
 {
     htri_t	exists;
+    htri_t	ret_value=TRUE;         /* Return value */
     
     FUNC_ENTER_NOAPI(H5D_isa, FAIL);
 
@@ -1839,25 +1821,24 @@ H5D_isa(H5G_entry_t *ent)
 
     /* Data type */
     if ((exists=H5O_exists(ent, H5O_DTYPE, 0))<0) {
-	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-		      "unable to read object header");
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header");
     } else if (!exists) {
 	HRETURN(FALSE);
     }
 
     /* Layout */
     if ((exists=H5O_exists(ent, H5O_LAYOUT, 0))<0) {
-	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-		      "unable to read object header");
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header");
     } else if (!exists) {
 	HRETURN(FALSE);
     }
     
 
-    
-    FUNC_LEAVE(TRUE);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
+
 /*
  *------------------------------------------------------------------------- 
  * Function:	H5D_open
@@ -1897,13 +1878,12 @@ H5D_open(H5G_entry_t *loc, const char *name)
     assert (name && *name);
     
     /* Find the dataset object */
-    if (H5G_find(loc, name, NULL, &ent) < 0) {
+    if (H5G_find(loc, name, NULL, &ent) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found");
-    }
+
     /* Open the dataset object */
-    if ((dataset=H5D_open_oid(&ent)) ==NULL) {
+    if ((dataset=H5D_open_oid(&ent)) ==NULL)
         HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found");
-    }
 
     /* Success */
     ret_value = dataset;
@@ -1912,6 +1892,7 @@ done:
     FUNC_LEAVE(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5D_open_oid
  *
@@ -2073,8 +2054,7 @@ H5D_open_oid(H5G_entry_t *ent)
      * This is especially important for parallel I/O where the B-tree must
      * be fully populated before I/O can happen.
      */
-    if ((H5F_get_intent(dataset->ent.file) & H5F_ACC_RDWR) &&
-            H5D_CHUNKED==dataset->layout.type) {
+    if ((H5F_get_intent(dataset->ent.file) & H5F_ACC_RDWR) && H5D_CHUNKED==dataset->layout.type) {
         if (H5D_init_storage(dataset, space)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize file storage");
     }
@@ -2096,6 +2076,7 @@ done:
     FUNC_LEAVE(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5D_close
  *
@@ -2260,7 +2241,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
 
     /* Get the dataset transfer property list */
-    if (NULL == (dx_plist = H5I_object(dxpl_id)))
+    if (NULL == (dx_plist = H5I_object_verify(dxpl_id,H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
 
     if (!file_space) {
@@ -2674,7 +2655,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
 
     /* Get the dataset transfer property list */
-    if (NULL == (dx_plist = H5I_object(dxpl_id)))
+    if (NULL == (dx_plist = H5I_object_verify(dxpl_id,H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
 
 #ifdef H5_HAVE_PARALLEL
@@ -3033,7 +3014,7 @@ done:
 herr_t
 H5D_extend (H5D_t *dataset, const hsize_t *size)
 {
-    herr_t	changed, ret_value=FAIL;
+    herr_t	changed, ret_value=SUCCEED;
     H5S_t	*space = NULL;
     H5O_fill_t  fill;
     H5P_genplist_t *plist;      /* Property list */
@@ -3082,8 +3063,6 @@ H5D_extend (H5D_t *dataset, const hsize_t *size)
 	if (H5D_init_storage(dataset, space)<0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value");
     } /* end if */
-
-    ret_value = SUCCEED;
 
 done:
     H5S_close(space);
@@ -3324,11 +3303,11 @@ H5Dget_storage_size(hid_t dset_id)
     H5TRACE1("h","i",dset_id);
 
     /* Check args */
-    if (H5I_DATASET!=H5I_get_type(dset_id) || NULL==(dset=H5I_object(dset_id))) {
+    if (NULL==(dset=H5I_object_verify(dset_id, H5I_DATASET)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset");
-    }
 
     size = H5D_get_storage_size(dset);
+
     FUNC_LEAVE(size);
 }
 
@@ -3444,24 +3423,24 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
         void *operator_data)
 {
     H5S_t		   *space = NULL;
-    herr_t ret_value=FAIL;
+    herr_t ret_value;
 
     FUNC_ENTER_API(H5Diterate, FAIL);
     H5TRACE5("e","xiixx",buf,type_id,space_id,op,operator_data);
 
     /* Check args */
     if (NULL==op)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid operator");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid operator");
     if (buf==NULL)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer");
     if (H5I_DATATYPE != H5I_get_type(type_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype");
-    if (H5I_DATASPACE != H5I_get_type(space_id) ||
-            NULL == (space = H5I_object(space_id)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype");
+    if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace");
 
     ret_value=H5S_select_iterate(buf,type_id,space,op,operator_data);
 
+done:
     FUNC_LEAVE(ret_value);
 }   /* end H5Diterate() */
 
@@ -3486,7 +3465,7 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
 herr_t
 H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
 {
-    herr_t ret_value=FAIL;
+    herr_t ret_value;
 
     FUNC_ENTER_API(H5Dvlen_reclaim, FAIL);
     H5TRACE4("e","iiix",type_id,space_id,plist_id,buf);
@@ -3495,21 +3474,23 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
     if (H5I_DATATYPE!=H5I_get_type(type_id) ||
             H5I_DATASPACE!=H5I_get_type(space_id) ||
             buf==NULL)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == plist_id)
         plist_id= H5P_DATASET_XFER_DEFAULT;
 
     if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
 
     /* Call H5Diterate with args, etc. */
     ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,&plist_id);
 
+done:
     FUNC_LEAVE(ret_value);
 }   /* end H5Dvlen_reclaim() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5D_vlen_get_buf_size_alloc
  *
@@ -3574,7 +3555,7 @@ H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, hsize_t UNUSED ndim, hss
 {
     H5T_vlen_bufsize_t *vlen_bufsize=(H5T_vlen_bufsize_t *)op_data;
     H5T_t	*dt = NULL;
-    herr_t ret_value=FAIL;
+    herr_t ret_value=0;         /* The correct return value, if this function succeeds */
 
     FUNC_ENTER_NOAPI(H5D_vlen_get_buf_size, FAIL);
 
@@ -3597,11 +3578,7 @@ H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, hsize_t UNUSED ndim, hss
     if(H5Dread(vlen_bufsize->dataset_id,type_id,vlen_bufsize->mspace_id,vlen_bufsize->fspace_id,vlen_bufsize->xfer_pid,vlen_bufsize->fl_tbuf)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point");
 
-    /* Set the correct return value, if we get this far */
-    ret_value=0;
-
 done:
-
     FUNC_LEAVE(ret_value);
 }   /* end H5D_vlen_get_buf_size() */
 
@@ -3836,11 +3813,11 @@ H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_
     /* Check args */
     if (buf==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer");
-    if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == (space=H5I_object(space_id)))
+    if (NULL == (space=H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataspace");
-    if (H5I_DATATYPE != H5I_get_type(fill_type_id) || NULL == (fill_type=H5I_object(fill_type_id)))
+    if (NULL == (fill_type=H5I_object_verify(fill_type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
-    if (H5I_DATATYPE != H5I_get_type(buf_type_id) || NULL == (buf_type=H5I_object(buf_type_id)))
+    if (NULL == (buf_type=H5I_object_verify(buf_type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
 
     /* Fill the selection in the memory buffer */
@@ -3875,22 +3852,23 @@ herr_t
 H5Dset_extent(hid_t dset_id, const hsize_t *size)
 {
     H5D_t                  *dset = NULL;
+    herr_t                  ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(H5Dset_extent, FAIL);
     H5TRACE2("e","i*h",dset_id,size);
 
     /* Check args */
-    if(H5I_DATASET != H5I_get_type(dset_id)
-	    || NULL == (dset = H5I_object(dset_id)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    if(NULL == (dset = H5I_object_verify(dset_id, H5I_DATASET)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     if(!size)
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified");
 
     /* Private function */
     if(H5D_set_extent(dset, size) < 0)
-	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extend dataset");
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extend dataset");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3918,7 +3896,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size)
 {
     hsize_t                 curr_dims[H5O_LAYOUT_NDIMS];	/* Current dimension sizes */
     int                     rank;	/* Dataspace # of dimensions */
-    herr_t                  ret_value = FAIL;
+    herr_t                  ret_value = SUCCEED;        /* Return value */
     H5S_t                  *space = NULL;
     H5P_genplist_t         *plist;
     int                     u;
@@ -3977,19 +3955,9 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size)
   *-------------------------------------------------------------------------
   */
     if(shrink && H5D_CHUNKED == dset->layout.type) {
-#if defined (PVN)
-	H5F_istore_dump_btree(dset->ent.file, stdout, dset->layout.ndims,
-		dset->layout.addr);
-#endif
-
         /* Remove excess chunks */
 	if(H5F_istore_prune_by_extent(dset->ent.file, &dset->layout, space) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks ");
-
-#if defined (PVN)
-	H5F_istore_dump_btree(dset->ent.file, stdout, dset->layout.ndims,
-		dset->layout.addr);
-#endif
 
         /* Get the dataset creation property list */
 	if(NULL == (plist = H5I_object(dset->dcpl_id)))
@@ -3999,8 +3967,6 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size)
 	if(H5F_istore_initialize_by_extent(dset->ent.file, &dset->layout, plist, space) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to initialize chunks ");
     } /* end if */
-
-    ret_value = SUCCEED;
 
 done:
     if(space)
@@ -4035,18 +4001,14 @@ H5Ddebug(hid_t dset_id, unsigned UNUSED flags)
     H5TRACE2("e","iIu",dset_id,flags);
 
     /* Check args */
-    if (H5I_DATASET!=H5I_get_type(dset_id) ||
-	NULL==(dset=H5I_object(dset_id))) {
+    if (NULL==(dset=H5I_object_verify(dset_id, H5I_DATASET)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
-    }
 
     /* Print B-tree information */
     if (H5D_CHUNKED==dset->layout.type) {
-	H5F_istore_dump_btree(dset->ent.file, stdout, dset->layout.ndims,
-			      dset->layout.addr);
+	H5F_istore_dump_btree(dset->ent.file, stdout, dset->layout.ndims, dset->layout.addr);
     } else if (H5D_CONTIGUOUS==dset->layout.type) {
-	HDfprintf(stdout, "    %-10s %a\n", "Address:",
-		  dset->layout.addr);
+	HDfprintf(stdout, "    %-10s %a\n", "Address:", dset->layout.addr);
     }
     
     FUNC_LEAVE(SUCCEED);

@@ -143,9 +143,11 @@ typedef enum H5E_minor_t {
 
     /* Object atom related errors */
     H5E_BADATOM,                /*Can't find atom information                */
+    H5E_BADGROUP,               /*Can't find group information               */
     H5E_CANTREGISTER,           /*Can't register new atom                    */
     H5E_CANTINC,                /*Can't increment reference count            */
     H5E_CANTDEC,                /*Can't decrement reference count            */
+    H5E_NOIDS,                  /*Out of IDs for group                       */
 
     /* Cache related errors */
     H5E_CANTFLUSH,              /*Can't flush object from cache              */

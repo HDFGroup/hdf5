@@ -541,7 +541,7 @@ H5Sget_select_elem_npoints(hid_t spaceid)
     H5TRACE1("Hs","i",spaceid);
 
     /* Check args */
-    if (H5I_DATASPACE != H5I_get_type(spaceid) || NULL == (space=H5I_object(spaceid)))
+    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     if(space->select.type!=H5S_SEL_POINTS)
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an element selection");
@@ -839,7 +839,7 @@ H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoint
     /* Check args */
     if(buf==NULL)
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer");
-    if (H5I_DATASPACE != H5I_get_type(spaceid) || NULL == (space=H5I_object(spaceid)))
+    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     if(space->select.type!=H5S_SEL_POINTS)
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a point selection");
@@ -1073,7 +1073,7 @@ H5Sselect_elements (hid_t spaceid, H5S_seloper_t op, size_t num_elem,
     FUNC_ENTER_API(H5Sselect_elements, FAIL);
 
     /* Check args */
-    if (H5I_DATASPACE != H5I_get_type(spaceid) || NULL == (space=H5I_object(spaceid)))
+    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     if(coord==NULL || num_elem==0)
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "elements not specified");

@@ -174,14 +174,10 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if (!name || !*name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
     }
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (type = H5I_object(type_id))) {
+    if (NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type");
-    }
-    if (H5I_DATASPACE != H5I_get_type(space_id) ||
-	NULL == (space = H5I_object(space_id))) {
+    if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-    }
 
     /* Go do the real work for attaching the attribute to the dataset */
     if ((ret_value=H5A_create(ent,name,type,space))<0) {
@@ -561,14 +557,10 @@ H5Awrite(hid_t attr_id, hid_t type_id, const void *buf)
     H5TRACE3("e","iix",attr_id,type_id,buf);
 
     /* check arguments */
-    if (H5I_ATTR != H5I_get_type(attr_id) ||
-	(NULL == (attr = H5I_object(attr_id)))) {
+    if (NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
-    }
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (mem_type = H5I_object(type_id))) {
+    if (NULL == (mem_type = H5I_object_verify(type_id, H5I_DATATYPE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (NULL == buf) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer");
     }
@@ -715,14 +707,10 @@ H5Aread(hid_t attr_id, hid_t type_id, void *buf)
     H5TRACE3("e","iix",attr_id,type_id,buf);
 
     /* check arguments */
-    if (H5I_ATTR != H5I_get_type(attr_id) ||
-	(NULL == (attr = H5I_object(attr_id)))) {
+    if (NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
-    }
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (mem_type = H5I_object(type_id))) {
+    if (NULL == (mem_type = H5I_object_verify(type_id, H5I_DATATYPE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (NULL == buf) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer");
     }
@@ -860,10 +848,8 @@ H5Aget_space(hid_t attr_id)
     H5TRACE1("i","i",attr_id);
 
     /* check arguments */
-    if (H5I_ATTR != H5I_get_type(attr_id) ||
-	(NULL == (attr = H5I_object(attr_id)))) {
+    if (NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
-    }
 
     /* Copy the attribute's dataspace */
     if (NULL==(dst=H5S_copy (attr->ds))) {
@@ -917,10 +903,8 @@ H5Aget_type(hid_t attr_id)
     H5TRACE1("i","i",attr_id);
 
     /* check arguments */
-    if (H5I_ATTR != H5I_get_type(attr_id) ||
-	(NULL == (attr = H5I_object(attr_id)))) {
+    if (NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
-    }
 
     /*
      * Copy the attribute's data type.  If the type is a named type then
@@ -987,10 +971,8 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     H5TRACE3("Zs","izs",attr_id,buf_size,buf);
 
     /* check arguments */
-    if (H5I_ATTR != H5I_get_type(attr_id) ||
-	(NULL == (attr = H5I_object(attr_id)))) {
+    if (NULL == (attr = H5I_object_verify(attr_id, H5I_ATTR)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
-    }
     if (!buf || buf_size<1) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer");
     }
@@ -1273,12 +1255,12 @@ H5Aclose(hid_t attr_id)
     H5TRACE1("e","i",attr_id);
 
     /* check arguments */
-    if (H5I_ATTR != H5I_get_type(attr_id) || NULL == H5I_object(attr_id)) {
+    if (NULL == H5I_object_verify(attr_id, H5I_ATTR))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
-    }
 
     /* Decrement references to that atom (and close it) */
     H5I_dec_ref (attr_id);
+
     FUNC_LEAVE(SUCCEED);
 } /* H5Aclose() */
 

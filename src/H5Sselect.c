@@ -148,7 +148,7 @@ H5Sget_select_npoints(hid_t spaceid)
     H5TRACE1("Hs","i",spaceid);
 
     /* Check args */
-    if (H5I_DATASPACE != H5I_get_type(spaceid) || NULL == (space=H5I_object(spaceid)))
+    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
 
     ret_value = (*space->select.get_npoints)(space);
@@ -187,7 +187,7 @@ H5Sselect_valid(hid_t spaceid)
     H5TRACE1("b","i",spaceid);
 
     /* Check args */
-    if (H5I_DATASPACE != H5I_get_type(spaceid) || NULL == (space=H5I_object(spaceid)))
+    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
 
     ret_value = (*space->select.is_valid)(space);
@@ -295,7 +295,7 @@ H5Sget_select_bounds(hid_t spaceid, hsize_t *start, hsize_t *end)
     /* Check args */
     if(start==NULL || end==NULL)
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer");
-    if (H5I_DATASPACE != H5I_get_type(spaceid) || NULL == (space=H5I_object(spaceid)))
+    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     ret_value = (*space->select.bounds)(space,start,end);
@@ -381,7 +381,7 @@ H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
 
     /* Get the datatype size */
-    if (NULL==(dt=H5I_object(type_id)))
+    if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
     if((elmt_size=H5T_get_size(dt))==0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "datatype size invalid");
@@ -496,7 +496,7 @@ H5Sget_select_type(hid_t space_id)
     H5TRACE1("St","i",space_id);
 
     /* Check args */
-    if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == (space = H5I_object(space_id)))
+    if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, H5S_SEL_ERROR, "not a data space");
 
     FUNC_LEAVE(space->select.type);

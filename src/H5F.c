@@ -240,7 +240,7 @@ H5F_init_interface(void)
     assert(H5P_CLS_FILE_CREATE_g!=-1);
 
     /* Get the pointer to file creation class */
-    if(H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_FILE_CREATE_g) || NULL == (crt_pclass = H5I_object(H5P_CLS_FILE_CREATE_g)))
+    if(NULL == (crt_pclass = H5I_object_verify(H5P_CLS_FILE_CREATE_g, H5I_GENPROP_CLS)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
     /* Get the number of properties in the class */
@@ -323,7 +323,7 @@ H5F_init_interface(void)
     assert(H5P_CLS_FILE_ACCESS_g!=-1);
 
     /* Get the pointer to file creation class */
-    if(H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_FILE_ACCESS_g) || NULL == (acs_pclass = H5I_object(H5P_CLS_FILE_ACCESS_g)))
+    if(NULL == (acs_pclass = H5I_object_verify(H5P_CLS_FILE_ACCESS_g, H5I_GENPROP_CLS)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
     /* Get the number of properties in the class */
@@ -397,7 +397,7 @@ H5F_init_interface(void)
     assert(H5P_CLS_MOUNT_g!=-1);
 
     /* Get the pointer to file mount class */
-    if(H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_MOUNT_g) || NULL == (mnt_pclass = H5I_object(H5P_CLS_MOUNT_g)))
+    if(NULL == (mnt_pclass = H5I_object_verify(H5P_CLS_MOUNT_g, H5I_GENPROP_CLS)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
     /* Get the number of properties in the class */
@@ -600,9 +600,9 @@ H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, void UNUSED *copy_data)
 
     FUNC_ENTER_NOAPI(H5F_acs_copy, FAIL);
 
-    if(H5I_GENPROP_LST != H5I_get_type(new_fapl_id) || H5I_GENPROP_LST != H5I_get_type(old_fapl_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-    if(NULL == (new_plist = H5I_object(new_fapl_id)) || NULL == (old_plist = H5I_object(old_fapl_id)))
+    if(NULL == (new_plist = H5I_object_verify(new_fapl_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list");
+    if(NULL == (old_plist = H5I_object_verify(old_fapl_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list");
 
     /* Get values from old property list */
@@ -780,7 +780,7 @@ H5Fget_create_plist(hid_t file_id)
     H5TRACE1("i","i",file_id);
 
     /* check args */
-    if (H5I_FILE!=H5I_get_type(file_id) || NULL==(file=H5I_object(file_id)))
+    if (NULL==(file=H5I_object_verify(file_id, H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     if(NULL == (plist = H5I_object(file->shared->fcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
@@ -828,7 +828,7 @@ H5Fget_access_plist(hid_t file_id)
     H5TRACE1("i","i",file_id);
 
     /* Check args */
-    if (H5I_FILE!=H5I_get_type(file_id) || NULL==(f=H5I_object(file_id)))
+    if (NULL==(f=H5I_object_verify(file_id, H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
 
     /* Make a copy of the default file access property list */
@@ -905,8 +905,7 @@ H5Fget_obj_count(hid_t file_id, unsigned types, unsigned *obj_id_count)
     FUNC_ENTER_API(H5Fget_obj_counts, FAIL);
     H5TRACE3("e","iIu*Iu",file_id,types,obj_id_count);
 
-    if( file_id != H5F_OBJ_ALL && (H5I_FILE != H5I_get_type(file_id) || 
-        NULL==(f=H5I_object(file_id))) )
+    if( file_id != H5F_OBJ_ALL && (NULL==(f=H5I_object_verify(file_id,H5I_FILE))) )
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id");
     if( (types&H5F_OBJ_ALL)==0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type");
@@ -973,8 +972,7 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, hid_t *oid_list)
 
     FUNC_ENTER_API(H5Fget_obj_ids, FAIL);
     H5TRACE3("e","iIu*i",file_id,types,oid_list);
-    if( file_id != H5F_OBJ_ALL && (H5I_FILE != H5I_get_type(file_id) || 
-	NULL==(f=H5I_object(file_id))) )
+    if( file_id != H5F_OBJ_ALL && (NULL==(f=H5I_object_verify(file_id,H5I_FILE))) )
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id");
     if( (types&H5F_OBJ_ALL)==0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type");
@@ -2776,7 +2774,7 @@ H5Fclose(hid_t file_id)
     H5TRACE1("e","i",file_id);
 
     /* Check/fix arguments. */
-    if (H5I_FILE != H5I_get_type(file_id) || NULL==H5I_object(file_id))
+    if (NULL==H5I_object_verify(file_id,H5I_FILE))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file atom");
 
     /*
@@ -3108,7 +3106,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     if (!name || !*name)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
-    if (H5I_FILE!=H5I_get_type(child_id) || NULL==(child=H5I_object(child_id)))
+    if (NULL==(child=H5I_object_verify(child_id,H5I_FILE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     if(H5P_DEFAULT == plist_id)
         plist_id = H5P_MOUNT_DEFAULT;
@@ -3202,7 +3200,7 @@ H5Freopen(hid_t file_id)
     FUNC_ENTER_API(H5Freopen, FAIL);
     H5TRACE1("i","i",file_id);
 
-    if (H5I_FILE!=H5I_get_type(file_id) || NULL==(old_file=H5I_object(file_id)))
+    if (NULL==(old_file=H5I_object_verify(file_id, H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
 
     /* Get a new "top level" file struct, sharing the same "low level" file struct */

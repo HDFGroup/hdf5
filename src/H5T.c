@@ -2238,10 +2238,8 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
     if (!name || !*name) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
     }
-    if (H5I_DATATYPE!=H5I_get_type (type_id) ||
-	NULL==(type=H5I_object (type_id))) {
+    if (NULL==(type=H5I_object_verify(type_id, H5I_DATATYPE)))
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
 
     /* Commit the type */
     if (H5T_commit (loc, name, type)<0) {
@@ -2278,10 +2276,8 @@ H5Tcommitted(hid_t type_id)
     H5TRACE1("b","i",type_id);
 
     /* Check arguments */
-    if (H5I_DATATYPE!=H5I_get_type (type_id) ||
-	NULL==(type=H5I_object (type_id))) {
+    if (NULL==(type=H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
 
     FUNC_LEAVE (H5T_STATE_OPEN==type->state || H5T_STATE_NAMED==type->state);
 }
@@ -2378,10 +2374,8 @@ H5Tclose(hid_t type_id)
     H5TRACE1("e","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_STATE_IMMUTABLE==dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable data type");
     }
@@ -2424,12 +2418,10 @@ H5Tequal(hid_t type1_id, hid_t type2_id)
     H5TRACE2("b","ii",type1_id,type2_id);
 
     /* check args */
-    if (H5I_DATATYPE != H5I_get_type(type1_id) ||
-	NULL == (dt1 = H5I_object(type1_id)) ||
-	H5I_DATATYPE != H5I_get_type(type2_id) ||
-	NULL == (dt2 = H5I_object(type2_id))) {
+    if (NULL == (dt1 = H5I_object_verify(type1_id,H5I_DATATYPE)) ||
+            NULL == (dt2 = H5I_object_verify(type2_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
+
     ret_value = (0 == H5T_cmp(dt1, dt2)) ? TRUE : FALSE;
 
     FUNC_LEAVE(ret_value);
@@ -2469,10 +2461,8 @@ H5Tlock(hid_t type_id)
     H5TRACE1("e","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_STATE_NAMED==dt->state || H5T_STATE_OPEN==dt->state) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "unable to lock named data type");
@@ -2512,10 +2502,8 @@ H5Tget_class(hid_t type_id)
     H5TRACE1("Tt","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type");
-    }
     
     FUNC_LEAVE(H5T_get_class(dt));
 }
@@ -2582,10 +2570,8 @@ H5Tdetect_class(hid_t type, H5T_class_t cls)
     H5TRACE2("b","iTt",type,cls);
     
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type) ||
-            NULL == (dt = H5I_object(type))) {
+    if (NULL == (dt = H5I_object_verify(type,H5I_DATATYPE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type");
-    }
     if (!(cls>H5T_NO_CLASS && cls<H5T_NCLASSES)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type class");
     }
@@ -2678,7 +2664,7 @@ H5Tget_size(hid_t type_id)
     H5TRACE1("z","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) || NULL == (dt = H5I_object(type_id)))
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
     
     /* size */
@@ -2725,10 +2711,8 @@ H5Tset_size(hid_t type_id, size_t size)
     H5TRACE2("e","iz",type_id,size);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
@@ -2785,12 +2769,11 @@ H5Tget_order(hid_t type_id)
     H5TRACE1("To","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_ORDER_ERROR,
-		      "not a data type");
-    }
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_ORDER_ERROR, "not a data type");
+
+    if (dt->parent)
+        dt = dt->parent; /*defer to parent*/
     if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY ==dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR,
 		      "operation not defined for specified data type");
@@ -2829,10 +2812,8 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
     H5TRACE2("e","iTo",type_id,order);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
@@ -2888,10 +2869,8 @@ H5Tget_precision(hid_t type_id)
     H5TRACE1("z","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
-    }
     if (dt->parent) dt = dt->parent;	/*defer to parent*/
     if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0,
@@ -2944,10 +2923,8 @@ H5Tset_precision(hid_t type_id, size_t prec)
     H5TRACE2("e","iz",type_id,prec);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
@@ -3014,10 +2991,8 @@ H5Tget_offset(hid_t type_id)
     H5TRACE1("Is","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
-    }
     if (dt->parent) dt = dt->parent; /*defer to parent*/
     if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
@@ -3080,10 +3055,8 @@ H5Tset_offset(hid_t type_id, size_t offset)
     H5TRACE2("e","iz",type_id,offset);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
-    }
     if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
@@ -3133,10 +3106,8 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
     H5TRACE3("e","ixx",type_id,lsb,msb);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (dt->parent) dt = dt->parent; /*defer to parent*/
     if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
@@ -3177,10 +3148,8 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
     H5TRACE3("e","iTpTp",type_id,lsb,msb);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
@@ -3233,11 +3202,8 @@ H5Tget_sign(hid_t type_id)
     H5TRACE1("Ts","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_SGN_ERROR,
-		      "not an integer data type");
-    }
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_SGN_ERROR, "not an integer data type");
     if (dt->parent) dt = dt->parent; /*defer to parent*/
     if (H5T_INTEGER!=dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_SGN_ERROR,
@@ -3276,10 +3242,8 @@ H5Tset_sign(hid_t type_id, H5T_sign_t sign)
     H5TRACE2("e","iTs",type_id,sign);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an integer data type");
-    }
     if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
@@ -3336,11 +3300,10 @@ H5Tget_fields(hid_t type_id, size_t *spos/*out*/,
     H5TRACE6("e","ixxxxx",type_id,spos,epos,esize,mpos,msize);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
-    if (dt->parent) dt = dt->parent; /*defer to parent*/
+    if (dt->parent)
+        dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "operation not defined for data type class");
@@ -3389,10 +3352,8 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
     H5TRACE6("e","izzzzz",type_id,spos,epos,esize,mpos,msize);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
@@ -3467,10 +3428,8 @@ H5Tget_ebias(hid_t type_id)
     H5TRACE1("z","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
-    }
     if (dt->parent) dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0,
@@ -3509,10 +3468,8 @@ H5Tset_ebias(hid_t type_id, size_t ebias)
     H5TRACE2("e","iz",type_id,ebias);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
@@ -3558,11 +3515,8 @@ H5Tget_norm(hid_t type_id)
     H5TRACE1("Tn","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NORM_ERROR,
-		      "not a data type");
-    }
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NORM_ERROR, "not a data type");
     if (dt->parent) dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_NORM_ERROR,
@@ -3602,10 +3556,8 @@ H5Tset_norm(hid_t type_id, H5T_norm_t norm)
     H5TRACE2("e","iTn",type_id,norm);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
@@ -3655,11 +3607,8 @@ H5Tget_inpad(hid_t type_id)
     H5TRACE1("Tp","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_PAD_ERROR,
-		      "not a data type");
-    }
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_PAD_ERROR, "not a data type");
     if (dt->parent) dt = dt->parent; /*defer to parent*/
     if (H5T_FLOAT != dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_PAD_ERROR,
@@ -3701,10 +3650,8 @@ H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
     H5TRACE2("e","iTp",type_id,pad);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
@@ -3754,11 +3701,8 @@ H5Tget_cset(hid_t type_id)
     H5TRACE1("Tc","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_CSET_ERROR,
-		      "not a data type");
-    }
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_CSET_ERROR, "not a data type");
     /* Don't see any reason for this.  Causes problem for variable-length
      *  string. -SLU (& QAK) */
     /*if (dt->parent) dt = dt->parent;*/ /*defer to parent*/
@@ -3808,10 +3752,8 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
     H5TRACE2("e","iTc",type_id,cset);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
@@ -3872,10 +3814,8 @@ H5Tget_strpad(hid_t type_id)
     H5TRACE1("Tz","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_STR_ERROR, "not a data type");
-    }
     /* Don't see any reason for this.  Causes problem for variable-length
      *  string. -SLU (& QAK) */
     /* if (dt->parent) dt = dt->parent;*/ /*defer to parent*/
@@ -3936,10 +3876,8 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
     H5TRACE2("e","iTz",type_id,strpad);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
@@ -3998,10 +3936,8 @@ H5Tget_nmembers(hid_t type_id)
     H5TRACE1("Is","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
 
     if (H5T_COMPOUND==dt->type) {
 	ret_value = dt->u.compnd.nmembs;
@@ -4046,10 +3982,8 @@ H5Tget_member_name(hid_t type_id, int membno)
     FUNC_ENTER_API(H5Tget_member_name, NULL);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
-    }
 
     switch (dt->type) {
     case H5T_COMPOUND:
@@ -4108,7 +4042,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
 
     /* Check arguments */
     assert(name);
-    if(H5I_DATATYPE!=H5I_get_type(type_id) || NULL==(dt=H5I_object(type_id)))
+    if(NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
     /* Locate member by name */
@@ -4167,11 +4101,9 @@ H5Tget_member_offset(hid_t type_id, int membno)
     H5TRACE2("z","iIs",type_id,membno);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id)) ||
-	H5T_COMPOUND != dt->type) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) ||
+            H5T_COMPOUND != dt->type)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a compound data type");
-    }
     if (membno < 0 || membno >= dt->u.compnd.nmembs) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid member number");
     }
@@ -4209,8 +4141,7 @@ H5Tget_member_class(hid_t type_id, int membno)
     H5TRACE2("Tt","iIs",type_id,membno);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-            NULL == (dt = H5I_object(type_id)) || H5T_COMPOUND != dt->type)
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->type)
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a compound data type");
     if (membno < 0 || membno >= dt->u.compnd.nmembs)
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, H5T_NO_CLASS, "invalid member number");
@@ -4256,11 +4187,8 @@ H5Tget_member_type(hid_t type_id, int membno)
     H5TRACE2("i","iIs",type_id,membno);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id)) ||
-	H5T_COMPOUND != dt->type) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->type)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
-    }
     if (membno < 0 || membno >= dt->u.compnd.nmembs) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number");
     }
@@ -4317,21 +4245,17 @@ H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)
     /* Check args */
     if (parent_id==member_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't insert compound datatype within itself");
-    if (H5I_DATATYPE != H5I_get_type(parent_id) ||
-	NULL == (parent = H5I_object(parent_id)) ||
-	H5T_COMPOUND != parent->type) {
+    if (NULL == (parent = H5I_object_verify(parent_id,H5I_DATATYPE)) ||
+            H5T_COMPOUND != parent->type)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
-    }
     if (H5T_STATE_TRANSIENT!=parent->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "parent type read-only");
     }
     if (!name || !*name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no member name");
     }
-    if (H5I_DATATYPE != H5I_get_type(member_id) ||
-	NULL == (member = H5I_object(member_id))) {
+    if (NULL == (member = H5I_object_verify(member_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
 
     /* Insert */
     if (H5T_insert(parent, name, offset, member) < 0) {
@@ -4367,11 +4291,9 @@ H5Tpack(hid_t type_id)
     H5TRACE1("e","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id)) ||
-	H5T_COMPOUND != dt->type) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) ||
+            H5T_COMPOUND != dt->type)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
-    }
     if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "data type is read-only");
     }
@@ -4414,11 +4336,9 @@ H5Tenum_create(hid_t parent_id)
     H5TRACE1("i","i",parent_id);
 
     /* Check args */
-    if (H5I_DATATYPE!=H5I_get_type(parent_id) ||
-	NULL==(parent=H5I_object(parent_id)) ||
-	H5T_INTEGER!=parent->type) {
+    if (NULL==(parent=H5I_object_verify(parent_id,H5I_DATATYPE)) ||
+            H5T_INTEGER!=parent->type)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an integer data type");
-    }
 
     /* Build new type */
     if (NULL==(dt = H5FL_ALLOC(H5T_t,1))) {
@@ -4470,10 +4390,8 @@ H5Tenum_insert(hid_t type, const char *name, void *value)
     H5TRACE3("e","isx",type,name,value);
 
     /* Check args */
-    if (H5I_DATATYPE!=H5I_get_type(type) ||
-	NULL==(dt=H5I_object(type))) {
+    if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_ENUM!=dt->type) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not an enumeration data type");
@@ -4521,10 +4439,8 @@ H5Tget_super(hid_t type)
     FUNC_ENTER_API(H5Tget_super, FAIL);
     H5TRACE1("i","i",type);
 
-    if (H5I_DATATYPE!=H5I_get_type(type) ||
-	NULL==(dt=H5I_object(type))) {
+    if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (!dt->parent) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a derived data type");
     }
@@ -4567,10 +4483,8 @@ H5Tget_member_value(hid_t type, int membno, void *value/*out*/)
     FUNC_ENTER_API(H5Tget_member_value, FAIL);
     H5TRACE3("i","iIsx",type,membno,value);
 
-    if (H5I_DATATYPE!=H5I_get_type(type) ||
-	NULL==(dt=H5I_object(type))) {
+    if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_ENUM!=dt->type) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "operation not defined for data type class");
@@ -4619,10 +4533,8 @@ H5Tenum_nameof(hid_t type, void *value, char *name/*out*/, size_t size)
     H5TRACE4("e","ixxz",type,value,name,size);
 
     /* Check args */
-    if (H5I_DATATYPE!=H5I_get_type(type) ||
-	NULL==(dt=H5I_object(type))) {
+    if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_ENUM!=dt->type) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not an enumeration data type");
@@ -4669,10 +4581,8 @@ H5Tenum_valueof(hid_t type, const char *name, void *value/*out*/)
     H5TRACE3("e","isx",type,name,value);
 
     /* Check args */
-    if (H5I_DATATYPE!=H5I_get_type(type) ||
-	NULL==(dt=H5I_object(type))) {
+    if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_ENUM!=dt->type) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not an enumeration data type");
@@ -4775,7 +4685,7 @@ H5Tvlen_create(hid_t base_id)
     H5TRACE1("i","i",base_id);
 
     /* Check args */
-    if (H5I_DATATYPE!=H5I_get_type(base_id) || NULL==(base=H5I_object(base_id)))
+    if (NULL==(base=H5I_object_verify(base_id,H5I_DATATYPE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
 
     /* Create up VL datatype */
@@ -4813,10 +4723,8 @@ H5Tset_tag(hid_t type_id, const char *tag)
     H5TRACE2("e","is",type_id,tag);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) ||
-	NULL == (dt = H5I_object(type_id))) {
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
     if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
@@ -4858,7 +4766,7 @@ H5Tget_tag(hid_t type_id)
     FUNC_ENTER_API(H5Tget_tag, NULL);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) || NULL == (dt = H5I_object(type_id)))
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
 
     if (dt->parent)
@@ -5077,9 +4985,9 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid function persistence");
     if (!name || !*name)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "conversion must have a name for debugging");
-    if (H5I_DATATYPE!=H5I_get_type(src_id) || NULL==(src=H5I_object(src_id)))
+    if (NULL==(src=H5I_object_verify(src_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (H5I_DATATYPE!=H5I_get_type(dst_id) || NULL==(dst=H5I_object(dst_id)))
+    if (NULL==(dst=H5I_object_verify(dst_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (!func)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no conversion function specified");
@@ -5205,12 +5113,9 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
     H5TRACE5("e","Tesiix",pers,name,src_id,dst_id,func);
 
     /* Check arguments */
-    if (src_id>0 && (H5I_DATATYPE!=H5I_get_type(src_id) ||
-            NULL==(src=H5I_object(src_id)))) {
+    if (src_id>0 && (NULL==(src=H5I_object_verify(src_id,H5I_DATATYPE))))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "src is not a data type");
-    }
-    if (dst_id>0 && (H5I_DATATYPE!=H5I_get_type(dst_id) ||
-            NULL==(dst=H5I_object(dst_id)))) {
+    if (dst_id>0 && (NULL==(dst=H5I_object_verify(dst_id,H5I_DATATYPE)))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dst is not a data type");
     }
 
@@ -5252,12 +5157,9 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
     H5TRACE3("x","iix",src_id,dst_id,pcdata);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(src_id) ||
-	NULL == (src = H5I_object(src_id)) ||
-	H5I_DATATYPE != H5I_get_type(dst_id) ||
-	NULL == (dst = H5I_object(dst_id))) {
+    if (NULL == (src = H5I_object_verify(src_id,H5I_DATATYPE)) ||
+            NULL == (dst = H5I_object_verify(dst_id,H5I_DATATYPE)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
-    }
     if (!pcdata) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, NULL,
 		       "no address to receive cdata pointer");
@@ -5313,11 +5215,10 @@ H5Tconvert(hid_t src_id, hid_t dst_id, hsize_t nelmts, void *buf,
     H5TRACE6("e","iihxxi",src_id,dst_id,nelmts,buf,background,plist_id);
 
     /* Check args */
-    if (H5I_DATATYPE!=H5I_get_type(src_id) || NULL==(src=H5I_object(src_id)) ||
-        H5I_DATATYPE!=H5I_get_type(dst_id) || NULL==(dst=H5I_object(dst_id)) ||
-        (H5P_DEFAULT!=plist_id && TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))) {
+    if (NULL==(src=H5I_object_verify(src_id,H5I_DATATYPE)) ||
+            NULL==(dst=H5I_object_verify(dst_id,H5I_DATATYPE)) ||
+            (H5P_DEFAULT!=plist_id && TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
 
     /* Find the conversion function */
     if (NULL==(tpath=H5T_path_find(src, dst, NULL, NULL))) {
@@ -7939,7 +7840,7 @@ H5Tarray_create(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
     for(i=0; i<ndims; i++)
         if(!(dim[i]>0))
             HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "zero-sized dimension specified");
-    if (H5I_DATATYPE!=H5I_get_type(base_id) || NULL==(base=H5I_object(base_id)))
+    if (NULL==(base=H5I_object_verify(base_id,H5I_DATATYPE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
 
     /* Create the actual array datatype */
@@ -8050,7 +7951,7 @@ H5Tget_array_ndims(hid_t type_id)
     H5TRACE1("Is","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE!=H5I_get_type(type_id) || NULL==(dt=H5I_object(type_id)))
+    if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
     if(dt->type!=H5T_ARRAY)
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype");
@@ -8088,7 +7989,7 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
     H5TRACE3("e","i*h*Is",type_id,dims,perm);
 
     /* Check args */
-    if (H5I_DATATYPE!=H5I_get_type(type_id) || NULL==(dt=H5I_object(type_id)))
+    if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
     if(dt->type!=H5T_ARRAY)
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype");
