@@ -48,6 +48,7 @@ HDF5 Reference Manual&nbsp;&nbsp;
 </center>
 The HDF5 library provides several interfaces, each of which provides the 
 tools required to meet specific aspects of the HDF5 data-handling requirements.
+<i>(See <a href="#NotDocced">below</a> for a list of functions that are not yet documented in this HDF5 Reference Manual.)</i>
 
 <center>
 <table border=0>
@@ -103,6 +104,464 @@ tools required to meet specific aspects of the HDF5 data-handling requirements.
 </td></tr>
 </table>
 </center>
+<a name="NotDocced">
+<hr>
+</a>
+
+<pre>
+SPECIAL NOTE
+HDF5 Release 1.2 Beta
+
+The following HDF5 functions are not documented in the HDF5 Reference 
+Manual that accompanies this Beta release; they will be documented in 
+the final Release 1.2.  Brief descriptions, as extracted from comments 
+in the source code, are appended below.
+
+	H5Dget_storage_size
+	H5Diterate
+	H5Ddebug
+
+	H5Pset_hyper_cache
+	H5Pget_hyper_cache
+	H5Pset_btree_ratios
+	H5Pget_btree_ratios
+	H5Pset_gc_references
+	H5Pget_gc_reference
+	H5Pget_vlen_mem_manager
+
+	H5Rget_object_type
+
+	H5Sget_select_hyper_nblocks
+	H5Sget_select_elem_npoints
+	H5Sget_select_hyper_blocklist
+	H5Sget_select_elem_pointlist
+	H5Sget_select_bounds
+
+	H5Tenum_create
+	H5Tenum_insert
+	H5Tenum_nameof
+	H5Tenum_valueof
+	H5Tset_tag
+	H5Tget_tag
+	H5Tget_super
+	H5Tget_member_value
+	H5Tregister
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Dget_storage_size
+ *
+ * Purpose:	Returns the amount of storage that is required for the
+ *		dataset. For chunked datasets this is the number of allocated
+ *		chunks times the chunk size.
+ *
+ * Return:	Success:	The amount of storage space allocated for the
+ *				dataset, not counting meta data. The return
+ *				value may be zero if no data has been stored.
+ *
+ *		Failure:	Zero
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Diterate
+ *
+ * Purpose:	This routine iterates over all the elements selected in a memory
+ *      buffer.  The callback function is called once for each element selected
+ *      in the dataspace.  The selection in the dataspace is modified so
+ *      that any elements already iterated over are removed from the selection
+ *      if the iteration is interrupted (by the H5D_operator_t function
+ *      returning non-zero) in the "middle" of the iteration and may be
+ *      re-started by the user where it left off.
+ *
+ *      NOTE: Until "subtracting" elements from a selection is implemented,
+ *          the selection is not modified.
+ *
+ * Parameters:
+ *      void *buf;          IN/OUT: Pointer to the buffer in memory containing
+ *                              the elements to iterate over.
+ *      hid_t type_id;      IN: Datatype ID for the elements stored in BUF.
+ *      hid_t space_id;     IN: Dataspace ID for BUF, also contains the
+ *                              selection to iterate over.
+ *      H5D_operator_t operator; IN: Function pointer to the routine to be
+ *                              called for each element in BUF iterated over.
+ *      void *operator_data;    IN/OUT: Pointer to any user-defined data
+ *                              associated with the operation.
+ *
+ * Operation information:
+ *      H5D_operator_t is defined as:
+ *          typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id,
+ *              hsize_t ndim, hssize_t *point, void *operator_data);
+ *
+ *      H5D_operator_t parameters:
+ *          void *elem;         IN/OUT: Pointer to the element in memory containing
+ *                                  the current point.
+ *          hid_t type_id;      IN: Datatype ID for the elements stored in ELEM.
+ *          hsize_t ndim;       IN: Number of dimensions for POINT array
+ *          hssize_t *point;    IN: Array containing the location of the element
+ *                                  within the original dataspace.
+ *          void *operator_data;    IN/OUT: Pointer to any user-defined data
+ *                                  associated with the operation.
+ *
+ *      The return values from an operator are: 
+ *          Zero causes the iterator to continue, returning zero when all
+ *              elements have been processed. 
+ *          Positive causes the iterator to immediately return that positive
+ *              value, indicating short-circuit success.  The iterator can be
+ *              restarted at the next element. 
+ *          Negative causes the iterator to immediately return that value,
+ *              indicating failure. The iterator can be restarted at the next
+ *              element.
+ *
+ * Return:	Returns the return value of the last operator if it was non-zero,
+ *          or zero if all elements were processed. Otherwise returns a
+ *          negative value.
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Ddebug
+ *
+ * Purpose:	Prints various information about a dataset.  This function is
+ *		not to be documented in the API at this time.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_hyper_cache
+ *
+ * Purpose:	Given a dataset transfer property list, indicate whether to
+ *		cache the hyperslab blocks during the I/O (which speeds
+ *		things up) and the maximum size of the hyperslab block to
+ *		cache.  If a block is smaller than to limit, it may still not
+ *		be cached if no memory is available. Setting the limit to 0
+ *		indicates no limitation on the size of block to attempt to
+ *		cache.
+ *
+ *		The default is to cache blocks with no limit on block size
+ *		for serial I/O and to not cache blocks for parallel I/O
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_hyper_cache
+ *
+ * Purpose:	Reads values previously set with H5Pset_hyper_cache().
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_btree_ratios
+ *
+ * Purpose:	Sets B-tree split ratios for a dataset transfer property
+ *		list. The split ratios determine what percent of children go
+ *		in the first node when a node splits.  The LEFT ratio is
+ *		used when the splitting node is the left-most node at its
+ *		level in the tree; the RIGHT ratio is when the splitting node
+ *		is the right-most node at its level; and the MIDDLE ratio for
+ *		all other cases.  A node which is the only node at its level
+ *		in the tree uses the RIGHT ratio when it splits.  All ratios
+ *		are real numbers between 0 and 1, inclusive.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_btree_ratios
+ *
+ * Purpose:	Queries B-tree split ratios.  See H5Pset_btree_ratios().
+ *
+ * Return:	Success:	Non-negative with split ratios returned through
+ *				the non-null arguments.
+ *		Failure:	Negative
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_gc_references
+ *
+ * Purpose:	Sets the flag for garbage collecting references for the file.
+ *      Dataset region references (and other reference types probably) use
+ *      space in the file heap.  If garbage collection is on and the user
+ *      passes in an uninitialized value in a reference structure, the heap
+ *      might get corrupted.  When garbage collection is off however and the
+ *      user re-uses a reference, the previous heap block will be orphaned and
+ *      not returned to the free heap space.  When garbage collection is on,
+ *      the user must initialize the reference structures to 0 or risk heap
+ *      corruption.
+ *
+ *		Default value for garbage collecting references is off, just to be
+ *      on the safe side.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_gc_refernces
+ *
+ * Purpose:	Returns the current setting for the garbage collection refernces
+ *      property from a file access property list.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_vlen_mem_manager
+ *
+ * Purpose:	The inverse of H5Pset_vlen_mem_manager()
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Rget_object_type
+ PURPOSE
+    Retrieves the type of object that an object reference points to
+ USAGE
+    intn H5Rget_object_type(id, ref)
+        hid_t id;       IN: Dataset reference object is in or location ID of
+                            object that the dataset is located within.
+        void *ref;          IN: Reference to query.
+ RETURNS
+    Success:	An object type defined in H5Gpublic.h
+    Failure:	H5G_UNKNOWN
+ DESCRIPTION
+    Given a reference to some object, this function returns the type of object
+    pointed to.
+--------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sget_select_hyper_nblocks
+ PURPOSE
+    Get the number of hyperslab blocks in current hyperslab selection
+ USAGE
+    hssize_t H5Sget_select_hyper_nblocks(dsid)
+        hid_t dsid;             IN: Dataspace ID of selection to query
+ RETURNS
+    The number of hyperslab blocks in selection on success, negative on failure
+ DESCRIPTION
+    Returns the number of hyperslab blocks in current selection for dataspace.
+--------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sget_select_elem_npoints
+ PURPOSE
+    Get the number of points in current element selection
+ USAGE
+    hssize_t H5Sget_select_elem_npoints(dsid)
+        hid_t dsid;             IN: Dataspace ID of selection to query
+ RETURNS
+    The number of element points in selection on success, negative on failure
+ DESCRIPTION
+    Returns the number of element points in current selection for dataspace.
+--------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sget_select_hyper_blocklist
+ PURPOSE
+    Get the list of hyperslab blocks currently selected
+ USAGE
+    herr_t H5Sget_select_hyper_blocklist(dsid, hsize_t *buf)
+        hid_t dsid;             IN: Dataspace ID of selection to query
+        hsize_t startblock;     IN: Hyperslab block to start with
+        hsize_t numblocks;      IN: Number of hyperslab blocks to get
+        hsize_t *buf;           OUT: List of hyperslab blocks selected
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+        Puts a list of the hyperslab blocks into the user's buffer.  The blocks
+    start with the 'startblock'th block in the list of blocks and put
+    'numblocks' number of blocks into the user's buffer (or until the end of
+    the list of blocks, whichever happen first)
+        The block coordinates have the same dimensionality (rank) as the
+    dataspace they are located within.  The list of blocks is formatted as
+    follows: <"start" coordinate> immediately followed by <"opposite" corner
+    coordinate>, followed by the next "start" and "opposite" coordinate, etc.
+    until all the block information requested has been put into the user's
+    buffer.
+        No guarantee of any order of the blocks is implied.
+--------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sget_select_elem_pointlist
+ PURPOSE
+    Get the list of element points currently selected
+ USAGE
+    herr_t H5Sget_select_elem_pointlist(dsid, hsize_t *buf)
+        hid_t dsid;             IN: Dataspace ID of selection to query
+        hsize_t startpoint;     IN: Element point to start with
+        hsize_t numpoints;      IN: Number of element points to get
+        hsize_t *buf;           OUT: List of element points selected
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+        Puts a list of the element points into the user's buffer.  The points
+    start with the 'startpoint'th block in the list of points and put
+    'numpoints' number of points into the user's buffer (or until the end of
+    the list of points, whichever happen first)
+        The point coordinates have the same dimensionality (rank) as the
+    dataspace they are located within.  The list of points is formatted as
+    follows: <coordinate> followed by the next coordinate, etc. until all the
+    point information in the selection have been put into the user's buffer.
+        The points are returned in the order they will be iterated through
+    when a selection is read/written from/to disk.
+--------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sget_select_bounds
+ PURPOSE
+    Gets the bounding box containing the selection.
+ USAGE
+    herr_t H5S_get_select_bounds(space, start, end)
+        hid_t dsid;             IN: Dataspace ID of selection to query
+        hsize_t *start;         OUT: Starting coordinate of bounding box
+        hsize_t *end;           OUT: Opposite coordinate of bounding box
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Retrieves the bounding box containing the current selection and places
+    it into the user's buffers.  The start and end buffers must be large
+    enough to hold the dataspace rank number of coordinates.  The bounding box
+    exactly contains the selection, ie. if a 2-D element selection is currently
+    defined with the following points: (4,5), (6,8) (10,7), the bounding box
+    with be (4, 5), (10, 8).  Calling this function on a "none" selection
+    returns fail.
+        The bounding box calculations _does_ include the current offset of the
+    selection within the dataspace extent.
+--------------------------------------------------------------------------*/
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tenum_create
+ *
+ * Purpose:	Create a new enumeration data type based on the specified
+ *		TYPE, which must be an integer type.
+ *
+ * Return:	Success:	ID of new enumeration data type
+ *		Failure:	Negative
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tenum_insert
+ *
+ * Purpose:	Insert a new enumeration data type member into an enumeration
+ *		type. TYPE is the enumeration type, NAME is the name of the
+ *		new member, and VALUE points to the value of the new member.
+ *		The NAME and VALUE must both be unique within the TYPE. VALUE
+ *		points to data which is of the data type defined when the
+ *		enumeration type was created.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tenum_nameof
+ *
+ * Purpose:	Finds the symbol name that corresponds to the specified VALUE
+ *		of an enumeration data type TYPE. At most SIZE characters of
+ *		the symbol name are copied into the NAME buffer. If the
+ *		entire symbol name and null terminator do not fit in the NAME
+ *		buffer then as many characters as possible are copied (not
+ *		null terminated) and the function fails.
+ *
+ * Return:	Success:	Non-negative.
+ *		Failure:	Negative, first character of NAME is set to
+ *				null if SIZE allows it.
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tenum_valueof
+ *
+ * Purpose:	Finds the value that corresponds to the specified NAME f an
+ *		enumeration TYPE. The VALUE argument should be at least as
+ *		large as the value of H5Tget_size(type) in order to hold the
+ *		result.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tset_tag
+ *
+ * Purpose:	Tag an opaque datatype with a unique ASCII identifier.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tget_tag
+ *
+ * Purpose:	Get the tag associated with an opaque datatype.
+ *
+ * Return:	A pointer to an allocated string. The caller should free
+ *              the string. NULL is returned for errors.
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tget_super
+ *
+ * Purpose:	Returns the type from which TYPE is derived. In the case of
+ *		an enumeration type the return value is an integer type.
+ *
+ * Return:	Success:	Type ID for base data type.
+ *		Failure:	negative
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tget_member_value
+ *
+ * Purpose:	Return the value for an enumeration data type member.
+ *
+ * Return:	Success:	non-negative with the member value copied
+ *				into the memory pointed to by VALUE.
+ *		Failure:	negative, VALUE memory is undefined.
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tregister
+ *
+ * Purpose:	Register a hard or soft conversion function for a data type
+ *		conversion path.  The path is specified by the source and
+ *		destination data types SRC_ID and DST_ID (for soft functions
+ *		only the class of these types is important). If FUNC is a
+ *		hard function then it replaces any previous path; if it's a
+ *		soft function then it replaces all existing paths to which it
+ *		applies and is used for any new path to which it applies as
+ *		long as that path doesn't have a hard function.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+
+</pre>
+
+
 
 
 
