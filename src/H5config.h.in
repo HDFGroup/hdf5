@@ -99,6 +99,10 @@
 /* Define to 1 if you have the <gpfs.h> header file. */
 #undef HAVE_GPFS_H
 
+/* Define if library will contain instrumentation to detect correct
+   optimization operation */
+#undef HAVE_INSTRUMENTED_LIBRARY
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 

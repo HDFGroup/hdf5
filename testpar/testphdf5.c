@@ -475,7 +475,7 @@ int main(int argc, char **argv)
     AddTest("coll. chunked 2", coll_chunk2,NULL,
 	    "noncontiguous collective chunk io",filenames[11]);
     AddTest("coll. chunked 3", coll_chunk3,NULL,
-	    "muliti-chunk collective chunk io",filenames[12]);
+	    "multi-chunk collective chunk io",filenames[12]);
     AddTest("coll. chunked 4", coll_chunk4,NULL,
 	    "collective to independent chunk io",filenames[13]);
     /* Display testing information */

@@ -1901,6 +1901,40 @@ case "X-$TRACE" in
     ;;
 esac
 
+dnl ----------------------------------------------------------------------
+dnl Enable instrumenting of the library's internal operations
+dnl This must come after the enable-debug since it depends on debug.
+dnl
+AC_SUBST([INSTRUMENT_LIBRARY])
+AC_MSG_CHECKING([for instrumented library]);
+AC_ARG_ENABLE([instrument],
+              [AC_HELP_STRING([--enable-instrument],
+                              [Enable library instrumentation of optimization
+                                tracing.  Default=no if debug is disabled.])],
+              INSTRUMENT=$enableval)
+
+dnl Default to no if debug is disabled
+if test "X-$INSTRUMENT" = X- ; then
+  if test -z "$DEBUG_PKG" ; then
+    INSTRUMENT=no
+  else
+    INSTRUMENT=yes
+  fi
+fi
+
+case "X-$INSTRUMENT" in
+  X-yes)
+    AC_MSG_RESULT([yes])
+    INSTRUMENT_LIBRARY=yes
+    AC_DEFINE([HAVE_INSTRUMENTED_LIBRARY], [1],
+              [Define if library will contain instrumentation to detect correct optimization operation])
+    ;;
+  X-no|*)
+    AC_MSG_RESULT([no])
+    INSTRUMENT_LIBRARY=no
+    ;;
+esac
+
 dnl Checkpoint the cache
 AC_CACHE_SAVE
 
@@ -2989,6 +3023,9 @@ IF_YES_NO "$STATIC_EXEC"
 
 PRINT_N "                        Tracing"
 IF_YES_NO "$TRACE_API"
+
+PRINT_N "   Optimization Instrumentation"
+IF_YES_NO "$INSTRUMENT"
 
 PRINT "Languages:"
 

@@ -13,6 +13,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "testphdf5.h"
+#include "H5Dprivate.h"
 
 /*#define SPACE_DIM1 256
 #define SPACE_DIM2 256
@@ -21,8 +22,20 @@
 #define DSET_COLLECTIVE_CHUNK_NAME "coll_chunk_name"
 */
 
+/* some commonly used routines for collective chunk IO tests*/
+static void ccslab_set(int mpi_rank,int mpi_size,hssize_t start[],hsize_t count[],
+		hsize_t stride[],hsize_t block[],int mode);
 
-void coll_chunktest(char* filename,int chunk_factor,int select_factor);
+static void ccdataset_fill(hssize_t start[],hsize_t count[],             
+                 hsize_t stride[],hsize_t block[],DATATYPE*dataset);    
+
+static void ccdataset_print(hssize_t start[],hsize_t block[],DATATYPE*dataset);
+
+static int ccdataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[],     
+                 hsize_t block[], DATATYPE *dataset, DATATYPE *original); 
+
+static void coll_chunktest(char* filename,int chunk_factor,int select_factor);
+
 /*-------------------------------------------------------------------------
  * Function:	coll_chunk1
  *
@@ -40,7 +53,8 @@ void coll_chunktest(char* filename,int chunk_factor,int select_factor);
  *-------------------------------------------------------------------------
  */
 void
-coll_chunk1(){
+coll_chunk1(void)
+{
 
   char *filename;
   filename = (char *) GetTestParameters();
@@ -49,7 +63,8 @@ coll_chunk1(){
 }
 
 void
-coll_chunk2(){
+coll_chunk2(void)
+{
 
   char *filename;
   filename = (char *) GetTestParameters();
@@ -59,7 +74,8 @@ coll_chunk2(){
 
 
 void
-coll_chunk3(){
+coll_chunk3(void)
+{
 
   char *filename;
   filename = (char *) GetTestParameters();
@@ -67,40 +83,37 @@ coll_chunk3(){
 
 }
 
-
 void
-coll_chunk4(){
+coll_chunk4(void)
+{
 
   char *filename;
   filename = (char *) GetTestParameters();
   coll_chunktest(filename,4,BYROW_DISCONT);
 
 }
-void
+
+static void
 coll_chunktest(char* filename,int chunk_factor,int select_factor) {
 
   hid_t	   file,dataset, file_dataspace;
   hid_t    acc_plist,xfer_plist,crp_plist;
   hsize_t  dims[RANK], chunk_dims[RANK];
-  int      i,j;
   int*     data_array1  = NULL;    
   int*     data_origin1 = NULL;
   herr_t   status;
   hssize_t start[RANK];
   hsize_t  count[RANK],stride[RANK],block[RANK];
-  int      prop_value;
-
-  /*  char * filename;*/
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+  unsigned prop_value;
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
   int mpi_size,mpi_rank;
-
   MPI_Comm comm = MPI_COMM_WORLD;
   MPI_Info info = MPI_INFO_NULL;
 
-  /*   filename = (char *) GetTestParameters();*/
-
    /* set up MPI parameters */
-  MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
-  MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+  MPI_Comm_size(comm,&mpi_size);
+  MPI_Comm_rank(comm,&mpi_rank);
 
   /* Create the data space */
   acc_plist = H5Pcreate(H5P_FILE_ACCESS);
@@ -174,34 +187,39 @@ coll_chunktest(char* filename,int chunk_factor,int select_factor) {
 
     status = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((status>= 0),"MPIO collective transfer property succeeded");
-    prop_value = 1;
-    status = H5Pinsert(xfer_plist,PROP_NAME,sizeof(int),&prop_value,
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    prop_value = H5D_XFER_COLL_CHUNK_DEF;
+#ifdef H5_WANT_H5_V1_6_COMPAT
+    status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
                        NULL,NULL,NULL,NULL,NULL);
+#else /* H5_WANT_H5_V1_6_COMPAT */
+    status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
+                       NULL,NULL,NULL,NULL,NULL,NULL);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
     VRFY((status >= 0),"testing property list inserted succeeded");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
     /* write data collectively */
     status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, file_dataspace,
 	    xfer_plist, data_array1);
     VRFY((status >= 0),"dataset write succeeded");
 
-    status = H5Pget(xfer_plist,PROP_NAME,&prop_value);
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,&prop_value);
     VRFY((status >= 0),"testing property list get succeeded");
     if(chunk_factor == 4 && select_factor == BYROW_DISCONT) { /* suppose to use independent */
-      if(prop_value == 1) 
-        printf("H5Dwrite shouldn't use MPI Collective IO call, something is wrong \n");
+        VRFY((prop_value == 0), "H5Dwrite shouldn't use MPI Collective IO call");
     }
     else {
-       if(prop_value == 0) 
-        printf("H5Dwrite doesn't use MPI Collective IO call, something is wrong \n");
+        VRFY((prop_value == 1), "H5Dwrite didn't use MPI Collective IO call");
     }
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
     status = H5Dclose(dataset);
-     VRFY((status >= 0),""); 
+    VRFY((status >= 0),""); 
 
     /* check whether using collective IO */
     /* Should use H5Pget and H5Pinsert to handle this test. */
 
-    status = H5Premove(xfer_plist,PROP_NAME);
-    VRFY((status >= 0),"property list removed");
     status = H5Pclose(xfer_plist);
     VRFY((status >= 0),"property list closed"); 
 
@@ -255,34 +273,39 @@ coll_chunktest(char* filename,int chunk_factor,int select_factor) {
     VRFY((xfer_plist >= 0),"");          
     status = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((status>= 0),"MPIO collective transfer property succeeded");
-    prop_value = 1;
-    status = H5Pinsert(xfer_plist,PROP_NAME,sizeof(int),&prop_value,
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    prop_value = H5D_XFER_COLL_CHUNK_DEF;
+#ifdef H5_WANT_H5_V1_6_COMPAT
+    status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
                        NULL,NULL,NULL,NULL,NULL);
+#else /* H5_WANT_H5_V1_6_COMPAT */
+    status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
+                       NULL,NULL,NULL,NULL,NULL,NULL);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
     VRFY((status >= 0),"testing property list inserted succeeded");
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
     status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, file_dataspace,
                       xfer_plist, data_array1);
     VRFY((status >=0),"dataset read succeeded");
-    status = H5Pget(xfer_plist,PROP_NAME,&prop_value);
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+    status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,&prop_value);
     VRFY((status >= 0),"testing property list get succeeded");
     if(chunk_factor == 4 && select_factor == BYROW_DISCONT) { /* suppose to use independent */
-      if(prop_value == 1) 
-        printf("H5Dread shouldn't use MPI Collective IO call, something is wrong \n");
+        VRFY((prop_value == 0), "H5Dread shouldn't use MPI Collective IO call");
     }
     else {
-       if(prop_value == 0) 
-        printf("H5Dread doesn't use MPI Collective IO call, something is wrong \n");
+        VRFY((prop_value == 1), "H5Dread didn't use MPI Collective IO call");
     }
+#endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
     /* verify the read data with original expected data */
 
     status = ccdataset_vrfy(start, count, stride, block, data_array1, data_origin1);
     if (status) nerrors++;
 
-     status = H5Premove(xfer_plist,PROP_NAME);            
-     VRFY((status >= 0),"property list removed");     
+    status = H5Pclose(xfer_plist);
+    VRFY((status >= 0),"property list closed");
 
-     status = H5Pclose(xfer_plist);
-     VRFY((status >= 0),"property list closed");
     /* close dataset collectively */
     status=H5Dclose(dataset);
     VRFY((status >= 0), "");
@@ -300,7 +323,7 @@ coll_chunktest(char* filename,int chunk_factor,int select_factor) {
 }
 
 
-void
+static void
 ccslab_set(int mpi_rank, int mpi_size, hssize_t start[], hsize_t count[],
 	 hsize_t stride[], hsize_t block[], int mode)
 {
@@ -357,44 +380,27 @@ if (VERBOSE_MED){
  * Fill the dataset with trivial data for testing.
  * Assume dimension rank is 2 and data is stored contiguous.
  */
-void
-ccdataset_fill(hssize_t start[], hsize_t stride[], hsize_t count[],hsize_t block[], DATATYPE * dataset)
+static void
+ccdataset_fill(hssize_t start[], hsize_t stride[], hsize_t count[], hsize_t block[], DATATYPE * dataset)
 {
-    DATATYPE *tmptr;
     DATATYPE *dataptr = dataset;
-    DATATYPE temp;
-    int i, j,k1,k2;
+    DATATYPE *tmptr;
+    hsize_t i, j,k1,k2;
 
     /* put some trivial data in the data_array */
-
     tmptr = dataptr;
-    /*for(i=0;i<SPACE_DIM1;i++){
-      for(j=0;j<SPACE_DIM2;j++){
-	*dataptr = 0;
-	dataptr++;
-      }
-    }*/
-
-    dataptr = tmptr;
 
     /* assign the disjoint block (two-dimensional)data array value
        through the pointer */
-     for (k1 = 0; k1 < count[0];k1++) {
-      for(i = 0;i < block[0];i++) {
-        for(k2 = 0; k2<count[1];k2++) {
-          for(j=0;j<block[1];j++) {
+     for (k1 = 0; k1 < count[0]; k1++) {
+      for(i = 0;i < block[0]; i++) {
+        for(k2 = 0; k2<count[1]; k2++) {
+          for(j=0;j<block[1]; j++) {
 
             dataptr = tmptr + ((start[0]+k1*stride[0]+i)*SPACE_DIM2+
 			       start[1]+k2*stride[1]+j);
              
-         /*    printf("i,j,k1,k2 %lu %lu %lu %lu \n",i,j,k1,k2);
-             printf("Address of dataptr");
-             printf("= 0x%p\n",dataptr);
-         */
 	      *dataptr = (DATATYPE)(k1+k2+i+j);
-             /*temp = *dataptr;
-             printf("data %03d\n",temp);
-            */
           }
          }
       } 
@@ -405,7 +411,7 @@ ccdataset_fill(hssize_t start[], hsize_t stride[], hsize_t count[],hsize_t block
 /*
  * Print the first block of the content of the dataset.
  */
-void
+static void
 ccdataset_print(hssize_t start[], hsize_t block[], DATATYPE * dataset)
 {
     DATATYPE *dataptr = dataset;
@@ -433,7 +439,8 @@ ccdataset_print(hssize_t start[], hsize_t block[], DATATYPE * dataset)
 /*
  * Print the content of the dataset.
  */
-int ccdataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], DATATYPE *dataset, DATATYPE *original)
+static int
+ccdataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], DATATYPE *dataset, DATATYPE *original)
 {
     hsize_t i, j,k1,k2;
     int vrfyerrs;

@@ -1479,8 +1479,8 @@ const H5O_layout_t *layout
             /* Check if we can use the optimized parallel I/O routines */
             if(opt==TRUE) {
                 /* Set the pointers to the MPI-specific routines */
-                H5S_conv_g[i]->read = H5S_mpio_spaces_read;
-                H5S_conv_g[i]->write = H5S_mpio_spaces_write;
+                H5S_conv_g[i]->read = H5D_mpio_spaces_read;
+                H5S_conv_g[i]->write = H5D_mpio_spaces_write;
 
                 /* Indicate that the I/O will be parallel */
                 *use_par_opt_io=TRUE;
@@ -1521,8 +1521,8 @@ const H5O_layout_t *layout
     /* Check if we can use the optimized parallel I/O routines */
     if(opt==TRUE) {
         /* Set the pointers to the MPI-specific routines */
-        path->read = H5S_mpio_spaces_read;
-        path->write = H5S_mpio_spaces_write;
+        path->read = H5D_mpio_spaces_read;
+        path->write = H5D_mpio_spaces_write;
 
         /* Indicate that the I/O will be parallel */
         *use_par_opt_io=TRUE;
