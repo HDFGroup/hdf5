@@ -1297,11 +1297,9 @@ H5Pset_scaleoffset(hid_t plist_id, unsigned min_bits)
     if(NULL == (plist = H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    if(min_bits < 0)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "minimum number of bits can't be positive");
-    
-    /* Set the parameter for the filter */
-    /* if min_bits is zero, the scaleoffset filter will automatically calculate min_bits */
+    /* Set the parameter for the filter 
+     * if min_bits is zero, the scaleoffset filter will automatically calculate min_bits 
+     */
     cd_values[0] = min_bits;
 
     /* Add the scaleoffset filter */
