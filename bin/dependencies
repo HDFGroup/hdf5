@@ -13,13 +13,13 @@ my $top_builddir;
 while ($_ = shift @ARGV) {
     if (/^--srcdir=([^ \t\n]*)/) {
         $srcdir = $1;
-        $srcdir = "\\$srcdir" if $srcdir =~ /^\./;
+        $srcdir =~ s/\./\\\./g;
     } elsif (/^--top_srcdir=([^ \t\n]*)/) {
         $top_srcdir = $1;
-        $top_srcdir = "\\$top_srcdir" if $top_srcdir =~ /^\./;
+        $top_srcdir =~ s/\./\\\./g;
     } elsif (/^--top_builddir=([^ \t\n]*)/) {
         $top_builddir = $1;
-        $top_builddir = "\\$top_builddir" if $top_builddir =~ /^\./;
+        $top_builddir =~ s/\./\\\./g;
     } else {
         $depend_file = $_;
         $new_depend_file = "$_.new";
