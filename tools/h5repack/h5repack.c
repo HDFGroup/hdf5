@@ -55,7 +55,7 @@ static void aux_initglb_filter(pack_opt_t *options)
  *
  * Return: 0, ok, -1, fail
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: September, 22, 2003
  *
@@ -224,7 +224,7 @@ int h5repack_addlayout(const char* str,
  *
  * Return: void, return -1 on error
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: September, 22, 2003
  *
@@ -382,7 +382,7 @@ static int check_options(pack_opt_t *options)
  *
  * Return: void, exit on error
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: September, 22, 2003
  *

@@ -308,8 +308,6 @@ void write_dset_in(hid_t loc_id,
                    hid_t file_id,
                    int make_diffs /* flag to modify data buffers */);
 
-int make_filters(hid_t loc_id);
-int make_layout(hid_t loc_id);
 
 
 /*-------------------------------------------------------------------------

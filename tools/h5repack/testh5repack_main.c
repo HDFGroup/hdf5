@@ -29,7 +29,7 @@
  * Return: Success: zero
  *  Failure: non-zero
  *
- * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
+ * Programmer:  <pvn@ncsa.uiuc.edu>
  *             January, 6, 2004
  *
  *-------------------------------------------------------------------------
@@ -399,7 +399,7 @@ TESTING("    addding shuffle filter to all");
   TEST_ERROR;
 #endif
 
-#if defined (H5_SZIP_CAN_ENCODE) || !defined (H5_HAVE_FILTER_SZIP)
+#if defined (H5_SZIP_CAN_ENCODE) &&  defined (H5_HAVE_FILTER_SZIP)
  if (h5repack_addfilter("dset1:SZIP=8",&pack_options)<0)
   TEST_ERROR;
 #endif

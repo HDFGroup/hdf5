@@ -667,7 +667,7 @@ int make_all(hid_t loc_id)
   goto out;
 #endif
 
-#if defined (H5_SZIP_CAN_ENCODE) || !defined (H5_HAVE_FILTER_SZIP)
+#if defined (H5_SZIP_CAN_ENCODE) && defined (H5_HAVE_FILTER_SZIP)
  /* set szip data */
  if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
   goto out;
