@@ -57,8 +57,10 @@ static void test_h5p_basic(void)
 {
     hid_t fid1;   /* HDF5 File IDs */
     hid_t sid1,sid2;   /* Dataspace ID */
+    uint32 rank;        /* Logical rank of dataspace */
     uint32 dims1[]={SPACE1_DIM1,SPACE1_DIM2,SPACE1_DIM3},   /* dataspace dim sizes */
-        dims2[]={SPACE2_DIM1,SPACE2_DIM2,SPACE2_DIM3,SPACE2_DIM4};
+        dims2[]={SPACE2_DIM1,SPACE2_DIM2,SPACE2_DIM3,SPACE2_DIM4},
+        tdims[4];       /* Dimension array to test with */
     uintn n;            /* number of dataspace elements */
     herr_t ret;         /* Generic return value */
 
@@ -79,6 +81,14 @@ static void test_h5p_basic(void)
     CHECK(n,UFAIL,"H5Pnelem");
     VERIFY(n,SPACE1_DIM1*SPACE1_DIM2*SPACE1_DIM3,"H5Pnelem");
     
+    rank=H5Pget_lrank(sid1);
+    CHECK(rank,UFAIL,"H5Pget_lrank");
+    VERIFY(rank,SPACE1_RANK,"H5Pget_lrank");
+    
+    ret=H5Pget_ldims(sid1,tdims);
+    CHECK(ret,FAIL,"H5Pget_ldims");
+    VERIFY(HDmemcmp(tdims,dims1,SPACE1_RANK*sizeof(uint32)),0,"H5Pget_ldims");
+    
     sid2=H5Mcreate(fid1,H5_DATASPACE,SPACE2_NAME);
     CHECK(sid2,FAIL,"H5Mcreate");
 
@@ -88,6 +98,14 @@ static void test_h5p_basic(void)
     n=H5Pnelem(sid2);
     CHECK(n,UFAIL,"H5Pnelem");
     VERIFY(n,SPACE2_DIM1*SPACE2_DIM2*SPACE2_DIM3*SPACE2_DIM4,"H5Pnelem");
+    
+    rank=H5Pget_lrank(sid2);
+    CHECK(rank,UFAIL,"H5Pget_lrank");
+    VERIFY(rank,SPACE2_RANK,"H5Pget_lrank");
+    
+    ret=H5Pget_ldims(sid2,tdims);
+    CHECK(ret,FAIL,"H5Pget_ldims");
+    VERIFY(HDmemcmp(tdims,dims2,SPACE2_RANK*sizeof(uint32)),0,"H5Pget_ldims");
     
     ret=H5Mrelease(sid1);
     CHECK(ret,FAIL,"H5Mrelease");
