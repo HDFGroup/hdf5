@@ -200,6 +200,10 @@ Library
 Configuration
 -------------
 
+    * IA64 platform has its own configure setting and use Intel Compilers as
+      the default compilers (were gcc and pgf90 before.)  This also eliminated
+      the segmentation fault in the fortran test.  The missing reference of
+      "exit" is fixed too.  AKC - 2003/04/02
     * Added "--with-dmalloc" flag, to easily enable support for the 'dmalloc'
       debugging malloc implementation. -QAK, 2002/07/15
     * Can use just enable-threadsafe if the C compiler has builtin pthreads
