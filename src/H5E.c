@@ -373,7 +373,7 @@ H5Eget_auto(H5E_auto_t *func, void **client_data)
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Eget_auto, FAIL);
-    H5TRACE2("e","*x*x",func,client_data);
+    H5TRACE2("e","*xx",func,client_data);
 
     if (func) *func = H5E_auto_g;
     if (client_data) *client_data = H5E_auto_data_g;
