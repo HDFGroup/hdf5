@@ -55,6 +55,8 @@ void phdiff_dismiss_workers(void)
 	MPI_Send(NULL, 0, MPI_BYTE, i, MPI_TAG_END, MPI_COMM_WORLD);
 }
 
+#endif
+
 /*-------------------------------------------------------------------------
  * Function: print_manager_output
  *
@@ -80,8 +82,6 @@ void print_manager_output(void)
 	  outBuffOffset = 0;
       }
 }
-
-#endif
 
 /*-------------------------------------------------------------------------
  * Function: h5diff
