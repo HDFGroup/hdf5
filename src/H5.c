@@ -484,11 +484,23 @@ H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum)
 /*-------------------------------------------------------------------------
  * Function:	H5check_version
  *
- * Purpose:	Verifies that the arguments match the version numbers
- *		compiled into the library.  This function is intended to be
- *		called from user to verify that the versions of header files
+ * Purpose:	Verifies the library versions are consistent.  It consists of
+ *		two parts:
+ *		1. Verifies that the arguments match the version numbers
+ *		compiled into the library.  This is intended to be called
+ *		from user to verify that the versions of header files
  *		compiled into the application match the version of the hdf5
- *		library.
+ *		library with which it links.
+ *		NOTE that this does not verify the Sub-release value
+ *		which should be an empty string for any official release.
+ *		This requires that any incompatible library version must
+ *              have different {major,minor,release} values. (Notice the
+ *              reverse is not necessarily true.)
+ *		2. Verifies that the five library version information of
+ *		H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
+ *		H5_VERS_SUBRELEASE and H5_VERS_INFO are consistent.
+ *		This catches source code inconsistency but is not a potential
+ *		fatal error as the error in part 1.
  *
  * Return:	Success:	SUCCEED
  *
@@ -512,6 +524,26 @@ H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
 
     /* Don't initialize the library quite yet */
     
+    /*
+     *This catches link-time version errors--an application that
+     *compiles with one version of HDF5 headers file and links
+     *with a different version of HDF5 library, will trip the alarm here.
+     *This is a fatal error because it has the potential to corrupt an
+     *existing valid HDF5 file.
+     *This must be checked repeatedly because it is possible that an
+     *application may contain different modules that are compiled with
+     *different versions of HDF5 headers.  E.g., an application prog.c
+     *calls hdf5 library directly and also calls lib-Y which calls
+     *the hdf5 library.
+     *   prog.c  is compiled with hdf5 version X
+     *   lib-Y   is compiled with hdf5 version Y
+     *   hdf5 library is version X
+     *
+     *The following code will catch the version inconsistency
+     *even if prog.c calls the hdf5 library first and then calls
+     *lib-Y which calls the hdf5 library.
+     */   
+
     if (H5_VERS_MAJOR!=majnum || H5_VERS_MINOR!=minnum ||
 	H5_VERS_RELEASE!=relnum) {
 	HDfputs ("Warning! The HDF5 header files included by this application "
@@ -534,6 +566,11 @@ H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
      *verify if H5_VERS_INFO is consistent with the other version information.
      *Check only the first sizeof(lib_str) char.  Assume the information
      *will fit within this size or enough significance.
+     *This catches the error if someone changes only some of the
+     *five H5_VERS_XXX macros in H5public.h.  E.g., if one changes
+     *H5_VERS_SUBRELEASE but did not update H5_VERS_INFO too, this code
+     *will bark.  This does not apply to link-version error as the
+     *above code.
      */
     sprintf(lib_str, "HDF5 library version: %d.%d.%d",
 	H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
