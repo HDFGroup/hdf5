@@ -10,27 +10,157 @@
 *                                                                           *
 ****************************************************************************/
 
-/* $Id$ */
+/*
+ * Module Info: This module contains the functionality for variable-length
+ *      datatypes in the H5T interface.
+ */
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	     */
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"     /* Errors */
-#include "H5HGprivate.h"    /* Global Heaps */
-#include "H5Iprivate.h"     /* IDs */
-#include "H5Pprivate.h"     /* Property Lists */
-#include "H5MMprivate.h"    /* Memory Allocation */
-#include "H5Tpkg.h"         /* Datatypes */
+#include "H5Eprivate.h"         /* Errors */
+#include "H5FLprivate.h"	/* Free Lists	  */
+#include "H5HGprivate.h"        /* Global Heaps */
+#include "H5Iprivate.h"         /* IDs */
+#include "H5MMprivate.h"        /* Memory Allocation */
+#include "H5Pprivate.h"         /* Property Lists */
+#include "H5Tpkg.h"             /* Datatypes */
 
 #define PABLO_MASK	H5Tvlen_mask
 
 /* Interface initialization */
 static int interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
+#define INTERFACE_INIT H5T_init_vlen_interface
+static herr_t H5T_init_vlen_interface(void);
+
+/* Declare extern the free list for H5T_t's */
+H5FL_EXTERN(H5T_t);
 
 /* Local functions */
 static htri_t H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc);
 static herr_t H5T_vlen_reclaim_recurse(void *elem, H5T_t *dt, H5MM_free_t free_func, void *free_info);
+
+
+/*--------------------------------------------------------------------------
+NAME
+   H5T_init_vlen_interface -- Initialize interface-specific information
+USAGE
+    herr_t H5T_init_vlen_interface()
+   
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.  (Just calls
+    H5T_init_iterface currently).
+
+--------------------------------------------------------------------------*/
+static herr_t
+H5T_init_vlen_interface(void)
+{
+    FUNC_ENTER_NOINIT(H5T_init_vlen_interface);
+
+    FUNC_LEAVE_NOAPI(H5T_init_interface());
+} /* H5T_init_vlen_interface() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tvlen_create
+ *
+ * Purpose:	Create a new variable-length data type based on the specified
+ *		BASE_TYPE.
+ *
+ * Return:	Success:	ID of new VL data type
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, May 20, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Tvlen_create(hid_t base_id)
+{
+    H5T_t	*base = NULL;		/*base data type	*/
+    H5T_t	*dt = NULL;		/*new data type	*/
+    hid_t	ret_value;	        /*return value			*/
+    
+    FUNC_ENTER_API(H5Tvlen_create, FAIL);
+    H5TRACE1("i","i",base_id);
+
+    /* Check args */
+    if (NULL==(base=H5I_object_verify(base_id,H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
+
+    /* Create up VL datatype */
+    if ((dt=H5T_vlen_create(base))==NULL)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
+
+    /* Atomize the type */
+    if ((ret_value=H5I_register(H5I_DATATYPE, dt))<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_vlen_create
+ *
+ * Purpose:	Create a new variable-length data type based on the specified
+ *		BASE_TYPE.
+ *
+ * Return:	Success:	new VL data type
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November 20, 2001
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t *
+H5T_vlen_create(H5T_t *base)
+{
+    H5T_t	*dt = NULL;		/*new VL data type	*/
+    H5T_t	*ret_value;	/*return value			*/
+    
+    FUNC_ENTER_NOINIT(H5T_vlen_create);
+
+    /* Check args */
+    assert(base);
+
+    /* Build new type */
+    if (NULL==(dt = H5FL_CALLOC(H5T_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    dt->ent.header = HADDR_UNDEF;
+    dt->type = H5T_VLEN;
+
+    /*
+     * Force conversions (i.e. memory to memory conversions should duplicate
+     * data, not point to the same VL sequences)
+     */
+    dt->force_conv = TRUE;
+    dt->parent = H5T_copy(base, H5T_COPY_ALL);
+
+    /* This is a sequence, not a string */
+    dt->u.vlen.type = H5T_VLEN_SEQUENCE;
+
+    /* Set up VL information */
+    if (H5T_vlen_mark(dt, NULL, H5T_VLEN_MEMORY)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
+
+    /* Set return value */
+    ret_value=dt;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
 
 
 /*-------------------------------------------------------------------------

@@ -241,6 +241,28 @@ H5_DLLVAR size_t	H5T_NATIVE_UINT_LEAST64_ALIGN_g;
 H5_DLLVAR size_t	H5T_NATIVE_INT_FAST64_ALIGN_g;
 H5_DLLVAR size_t	H5T_NATIVE_UINT_FAST64_ALIGN_g;
 
+/* Common functions */
+H5_DLL herr_t H5T_init_interface(void);
+H5_DLL H5T_t *H5T_create(H5T_class_t type, size_t size);
+H5_DLL herr_t H5T_free(H5T_t *dt);
+H5_DLL H5T_sign_t H5T_get_sign(H5T_t *dt);
+H5_DLL H5T_t *H5T_get_super(H5T_t *dt);
+H5_DLL char  *H5T_get_member_name(H5T_t *dt, int membno);
+H5_DLL herr_t H5T_get_member_value(H5T_t *dt, int membno, void *value);
+H5_DLL H5T_t *H5T_get_member_type(H5T_t *dt, int membno);
+H5_DLL int H5T_get_nmembers(const H5T_t *dt);
+H5_DLL htri_t H5T_is_variable_str(H5T_t *dt);
+H5_DLL htri_t H5T_is_atomic(const H5T_t *dt);
+H5_DLL herr_t H5T_insert(H5T_t *parent, const char *name, size_t offset,
+        const H5T_t *member);
+H5_DLL H5T_t *H5T_enum_create(H5T_t *parent);
+H5_DLL herr_t H5T_enum_insert(H5T_t *dt, const char *name, void *value);
+H5_DLL int    H5T_get_array_ndims(H5T_t *dt);
+H5_DLL herr_t H5T_get_array_dims(H5T_t *dt, hsize_t dims[], int perm[]);
+H5_DLL herr_t H5T_sort_value(H5T_t *dt, int *map);
+H5_DLL herr_t H5T_sort_name(H5T_t *dt, int *map);
+H5_DLL herr_t H5T_set_size(H5T_t *dt, size_t size);
+
 /* Conversion functions */
 H5_DLL herr_t H5T_conv_noop(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			     hsize_t nelmts, size_t buf_stride,
@@ -778,6 +800,7 @@ H5_DLL ssize_t H5T_bit_find(uint8_t *buf, size_t offset, size_t size,
 H5_DLL htri_t H5T_bit_inc(uint8_t *buf, size_t start, size_t size);
 
 /* VL functions */
+H5_DLL H5T_t * H5T_vlen_create(H5T_t *base);
 H5_DLL hssize_t H5T_vlen_seq_mem_getlen(H5F_t *f, void *vl_addr);
 H5_DLL herr_t H5T_vlen_seq_mem_read(H5F_t *f, hid_t dxpl_id, void *vl_addr, void *_buf, size_t len);
 H5_DLL herr_t H5T_vlen_seq_mem_write(H5F_t *f, hid_t dxpl_id, void *vl_addr, void *_buf, void *bg_addr, hsize_t seq_len, hsize_t base_size);
