@@ -545,7 +545,11 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
         unsigned int i;
 
         quote = '\0';
-        size = H5Tget_size(type);
+        if(H5Tis_variable_str(type)) {
+            size = HDstrlen(cp_vp);
+        } else {
+            size = H5Tget_size(type);
+        }
         pad = H5Tget_strpad(type);
 
         for (i = 0; i < size && (cp_vp[i] != '\0' || pad != H5T_STR_NULLTERM); i++) {

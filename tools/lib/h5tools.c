@@ -457,6 +457,7 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
                                           *this var to count elements and
                                           *break after we see a number equal
                                           *to the ctx->size_last_dim.   */
+    unsigned char       *tmp=NULL;
 
     /* Setup */
     memset(&buffer, 0, sizeof(h5tools_str_t));
@@ -470,7 +471,12 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
     for (i = 0; i < nelmts; i++, ctx->cur_elmt++, elmt_counter++) {
         /* Render the element */
         h5tools_str_reset(&buffer);
-        h5tools_str_sprint(&buffer, info, container, type, mem + i * size, ctx);
+        if(H5Tis_variable_str(type)) {
+            tmp = ((unsigned char**)mem)[i];  
+            h5tools_str_sprint(&buffer, info, container, type, tmp, ctx);
+        
+        } else
+            h5tools_str_sprint(&buffer, info, container, type, mem + i * size, ctx);
 
         if (i + 1 < nelmts || (flags & END_OF_DATA) == 0)
             h5tools_str_append(&buffer, "%s", OPT(info->elmt_suf1, ","));
@@ -785,7 +791,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     hsize_t		sm_nelmts;		/*elements per stripmine*/
     unsigned char      *sm_buf = NULL;		/*buffer for raw data	*/
     hid_t		sm_space;		/*stripmine data space	*/
-
+    
     /* Hyperslab info */
     hssize_t		hs_offset[H5S_MAX_RANK];/*starting offset	*/
     hsize_t		hs_size[H5S_MAX_RANK];	/*size this pass	*/
@@ -820,9 +826,6 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
             ctx.p_min_idx[i] = 0;
 
     H5Sget_simple_extent_dims(f_space, total_size, NULL);
-    /* printf("total_size[ctx.ndims-1]%d\n",total_size[ctx.ndims-1]);
-     printf("total_size cast %d\n",(int)(total_size[ctx.ndims-1])); */
-	/*assert(total_size[ctx.ndims - 1]==(hsize_t)((int)(total_size[ctx.ndims - 1])));*/
     ctx.size_last_dim = (total_size[ctx.ndims - 1]);
 
     /* calculate the number of elements we're going to print */
@@ -858,6 +861,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 
     assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
     sm_buf = malloc((size_t)sm_nbytes);
+            
     sm_nelmts = sm_nbytes / p_type_nbytes;
     sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
 
@@ -896,10 +900,10 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
         flags = (elmtno == 0) ? START_OF_DATA : 0;
         flags |= ((elmtno + hs_nelmts) >= p_nelmts) ? END_OF_DATA : 0;
         h5tools_dump_simple_data(stream, info, dset, &ctx, flags, hs_nelmts,
-                                 p_type, sm_buf);
+                             p_type, sm_buf);
 
         /* Reclaim any VL memory, if necessary */
-        if (vl_data)
+        if(vl_data)
             H5Dvlen_reclaim(p_type, sm_space, H5P_DEFAULT, sm_buf);
 
         /* Calculate the next hyperslab offset */
@@ -925,7 +929,9 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 
     H5Sclose(sm_space);
     H5Sclose(f_space);
+    
     free(sm_buf);
+
     return SUCCEED;
 }
 
@@ -967,7 +973,7 @@ h5tools_dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
 
     ctx.indent_level = indentlevel;
     ctx.need_prefix = 1;
-
+    
     /* Assume entire data space to be printed */
     for (i = 0; i < (hsize_t)ctx.ndims; i++)
         ctx.p_min_idx[i] = 0;
@@ -976,7 +982,7 @@ h5tools_dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
 
     for (i = 0, nelmts = 1; ctx.ndims != 0 && i < (hsize_t)ctx.ndims; i++)
         nelmts *= ctx.p_max_idx[i] - ctx.p_min_idx[i];
- 
+    
     if (nelmts == 0)
         return SUCCEED; /*nothing to print*/
     assert(ctx.p_max_idx[ctx.ndims - 1]==(hsize_t)((int)ctx.p_max_idx[ctx.ndims - 1]));
@@ -1075,8 +1081,13 @@ h5tools_fixtype(hid_t f_type)
 	 * strDUAction == TRUE. if it is false we will do the original action
 	 * here.
 	 */
-	m_type = H5Tcopy(f_type);
-	H5Tset_cset(m_type, H5T_CSET_ASCII);
+        if(H5Tis_variable_str(f_type)) {
+	   m_type = H5Tcopy(H5T_C_S1);
+	   H5Tset_size(m_type, H5T_VARIABLE);
+        } else {
+	   m_type = H5Tcopy(f_type);
+	   H5Tset_cset(m_type, H5T_CSET_ASCII);
+        }
 	break;
 
     case H5T_COMPOUND:

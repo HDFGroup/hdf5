@@ -63,6 +63,7 @@
 #define FILE35  "tfamily%05d.h5"
 #define FILE36  "tmulti"
 #define FILE37  "tlarge_objname.h5"
+#define FILE38  "tvlstr.h5"
 
 #define LENSTR		50
 #define LENSTR2		11
@@ -107,6 +108,9 @@ typedef struct s1_t {
 #define ARRAY3_RANK	2
 #define ARRAY3_DIM1 6
 #define ARRAY3_DIM2 3
+
+/* VL string datatype name */
+#define VLSTR_TYPE      "vl_string_type"
 
 static void gent_group(void)
 {
@@ -2838,6 +2842,55 @@ static void gent_large_objname(void)
     H5Fclose(fid);
 }
 
+static void gent_vlstr(void)
+{
+    const char *wdata[SPACE1_DIM1]= {
+        "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
+        "conceived in liberty and dedicated to the proposition that all men are created equal.",
+        "Now we are engaged in a great civil war,",
+        "testing whether that nation or any nation so conceived and so dedicated can long endure."
+        };   /* Information to write */
+    char *string_att= "This is the string for the attribute";
+    hid_t		fid1;		/* HDF5 File IDs		*/
+    hid_t		dataset, root;	/* Dataset ID			*/
+    hid_t		sid1, dataspace;/* Dataspace ID			*/
+    hid_t		tid1, att;      /* Datatype ID			*/
+    hsize_t		dims1[] = {SPACE1_DIM1};
+
+    /* Create file */
+    fid1 = H5Fcreate(FILE38, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+
+    /* Create a VL string datatype to refer to */
+    tid1 = H5Tcopy (H5T_C_S1);
+    H5Tset_size (tid1,H5T_VARIABLE);
+
+    /* Create a dataset and write VL string to it. */
+    dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,H5P_DEFAULT);
+    H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    H5Dclose(dataset);
+
+    /* Create a named VL string type.  Change padding of datatype */
+    H5Tset_strpad(tid1, H5T_STR_NULLPAD);
+    H5Tcommit(fid1, "vl_string_type", tid1);
+
+    /* Create an group attribute of VL string type */
+    root = H5Gopen(fid1, "/");
+    dataspace = H5Screate(H5S_SCALAR);
+
+    att = H5Acreate(root, "test_scalar", tid1, dataspace, H5P_DEFAULT);
+    H5Awrite(att, tid1, &string_att);
+
+    /* Close */
+    H5Tclose(tid1);
+    H5Sclose(sid1);
+    H5Sclose(dataspace);
+    H5Aclose(att);
+    H5Gclose(root);
+    H5Fclose(fid1);
+}
+
 int main(void)
 {
     gent_group();
@@ -2888,6 +2941,7 @@ int main(void)
     gent_multi();
 
     gent_large_objname();
+    gent_vlstr();
 
     return 0;
 }

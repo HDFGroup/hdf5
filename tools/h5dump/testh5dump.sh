@@ -144,6 +144,9 @@ TOOLTEST tvldtypes2.ddl tvldtypes2.h5
 TOOLTEST tvldtypes3.ddl tvldtypes3.h5
 TOOLTEST tvldtypes4.ddl tvldtypes4.h5
 
+#test for file with variable length string data
+TOOLTEST tvlstr.ddl tvlstr.h5
+
 # test for files with array data
 TOOLTEST tarray1.ddl tarray1.h5
 TOOLTEST tarray2.ddl tarray2.h5
@@ -218,6 +221,7 @@ TOOLTEST tarray7.h5.xml --xml tarray7.h5
 TOOLTEST tvldtypes1.h5.xml --xml tvldtypes1.h5
 TOOLTEST tvldtypes2.h5.xml --xml tvldtypes2.h5
 TOOLTEST tvldtypes3.h5.xml --xml tvldtypes3.h5
+TOOLTEST tvlstr.h5.xml --xml tvlstr.h5
 TOOLTEST tsaf.h5.xml --xml tsaf.h5
 TOOLTEST tempty.h5.xml --xml tempty.h5
 

@@ -677,12 +677,14 @@ print_datatype(hid_t type)
     char       *fname;
     hid_t       nmembers, mtype, str_type;
     int         i, j, ndims, perm[H5DUMP_MAX_RANK];
-    size_t      size;
+    size_t      size=0;
     hsize_t     dims[H5DUMP_MAX_RANK];
     H5T_str_t   str_pad;
     H5T_cset_t  cset;
     H5G_stat_t  statbuf;
     hid_t       super;
+    hid_t       tmp_type;
+    htri_t      is_vlstr=FALSE;
 
     switch (H5Tget_class(type)) {
     case H5T_INTEGER:
@@ -770,15 +772,23 @@ print_datatype(hid_t type)
 	break;
 
     case H5T_STRING:
-	size = H5Tget_size(type);
-	str_pad = H5Tget_strpad(type);
-	cset = H5Tget_cset(type);
+        /* Make a copy of type in memory in case when TYPE is on disk, the size
+         * will be bigger than in memory.  This makes it easier to compare 
+         * types in memory. */
+        tmp_type = H5Tcopy(type);
+	size = H5Tget_size(tmp_type);
+	str_pad = H5Tget_strpad(tmp_type);
+	cset = H5Tget_cset(tmp_type);
+        is_vlstr = H5Tis_variable_str(tmp_type);
 
 	printf("H5T_STRING %s\n", dump_header_format->strblockbegin);
 	indent += COL;
 
 	indentation(indent + COL);
-	printf("%s %d;\n", STRSIZE, (int) size);
+        if(is_vlstr)
+            printf("%s H5T_VARIABLE;\n", STRSIZE);
+        else
+	    printf("%s %d;\n", STRSIZE, (int) size);
 
 	indentation(indent + COL);
 	printf("%s ", STRPAD);
@@ -800,14 +810,17 @@ print_datatype(hid_t type)
 	    printf("unknown_cset;\n");
 
 	str_type = H5Tcopy(H5T_C_S1);
+        if(is_vlstr)
+            H5Tset_size(str_type, H5T_VARIABLE);
+        else
+	    H5Tset_size(str_type, size);
 	H5Tset_cset(str_type, cset);
-	H5Tset_size(str_type, size);
 	H5Tset_strpad(str_type, str_pad);
 
 	indentation(indent + COL);
 	printf("%s ", CTYPE);
 
-	if (H5Tequal(type, str_type)) {
+	if (H5Tequal(tmp_type, str_type)) {
 	    printf("H5T_C_S1;\n");
 	    H5Tclose(str_type);
 	} else {
@@ -817,7 +830,7 @@ print_datatype(hid_t type)
 	    H5Tset_size(str_type, size);
 	    H5Tset_strpad(str_type, str_pad);
 
-	    if (H5Tequal(type, str_type)) {
+	    if (H5Tequal(tmp_type, str_type)) {
 		printf("H5T_FORTRAN_S1;\n");
 	    } else {
 		printf("unknown_one_character_type;\n ");
@@ -826,6 +839,8 @@ print_datatype(hid_t type)
 
 	    H5Tclose(str_type);
 	}
+
+        H5Tclose(tmp_type);
 
 	indent -= COL;
 	indentation(indent + COL);
@@ -1887,13 +1902,14 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset)
 
         alloc_size = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
         assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+        
         buf = malloc((size_t)alloc_size);
         assert(buf);
 
         if (H5Aread(obj_id, p_type, buf) >= 0)
             status = h5tools_dump_mem(stdout, outputformat, obj_id, p_type,
-                                      space, buf, depth);
-
+                                    space, buf, depth);
+        
         free(buf);
         H5Tclose(p_type); 
         H5Sclose(space);
@@ -2857,10 +2873,25 @@ done:
 	d_status = EXIT_FAILURE;
 
     free_handler(hand, argc);
-
+    
+    for(i=0; i<info.group_table->nobjs; i++) {
+        if(info.group_table->objs[i].objname)
+            free(info.group_table->objs[i].objname);
+    }
     free(group_table->objs);
+    
+    for(i=0; i<info.dset_table->nobjs; i++) {
+        if(info.dset_table->objs[i].objname)
+            free(info.dset_table->objs[i].objname);
+    }
     free(dset_table->objs);
+    
+    for(i=0; i<info.type_table->nobjs; i++) {
+        if(info.type_table->objs[i].objname)
+            free(info.type_table->objs[i].objname);
+    }
     free(type_table->objs);
+    
     free(prefix);
     free(info.prefix);
 
@@ -4557,12 +4588,14 @@ xml_print_strs(hid_t did, int source)
 {
     herr_t                  e;
     hid_t                   type, space;
-    char                   *buf;
+    void                   *buf;
     char                   *bp;
     char                   *onestring;
     hsize_t                 ssiz;
-    size_t                  tsiz;
+    size_t                  tsiz, str_size;
     size_t                  i;
+    htri_t                  is_vlstr;
+
     if (source == DATASET_DATA) {
 	type = H5Dget_type(did);
     } else if (source == ATTRIBUTE_DATA) {
@@ -4575,12 +4608,14 @@ xml_print_strs(hid_t did, int source)
 	/* return an error */
 	return FAIL;
     }
+    is_vlstr = H5Tis_variable_str(type);
+
     if (source == DATASET_DATA) {
 	space = H5Dget_space(did);
 	ssiz = H5Sget_simple_extent_npoints(space);
 	ssiz *= H5Tget_size(type);
 
-	buf = calloc((size_t)ssiz, sizeof(char));
+	buf = malloc((size_t)ssiz);
 
 	if (buf == NULL) {
 	    return FAIL;
@@ -4596,11 +4631,12 @@ xml_print_strs(hid_t did, int source)
 	space = H5Aget_space(did);
 	ssiz = H5Sget_simple_extent_npoints(space);
 	ssiz *= H5Tget_size(type);
-
-	buf = calloc((size_t)ssiz, sizeof(char));
+        
+	buf = malloc((size_t)ssiz);
 	if (buf == NULL) {
 	    return FAIL;
 	}
+
 	e = H5Aread(did, type, buf);
 	if (e < 0) {
 	    free(buf);
@@ -4611,28 +4647,36 @@ xml_print_strs(hid_t did, int source)
 	return FAIL;
     }
 
-/*  pull out each string... */
+    /* pull out each string... */
     ssiz = H5Sget_simple_extent_npoints(space);
 
     tsiz = H5Tget_size(type);
-    onestring = (char *) calloc((size_t)tsiz, sizeof(char));
-    bp = buf;
+    bp = (char*)buf;
+    if(!is_vlstr)
+        onestring = (char *) calloc(tsiz, sizeof(char));
 
     for (i = 0; i < ssiz; i++) {
-	strncpy(onestring, bp, tsiz);
+        if(is_vlstr) {
+            onestring = *(char **)bp;
+            str_size = (size_t)strlen(onestring);
+        } else {    
+    	    strncpy(onestring, bp, tsiz);
+            str_size = tsiz;
+        }
 	indentation(indent + COL);
 
 	if (!onestring) {
 	    printf("\"%s\"\n", "NULL");
 	} else {
-            char *t_onestring = xml_escape_the_string(onestring, (int)tsiz);
+            char *t_onestring = xml_escape_the_string(onestring, (int)str_size);
 
-	    printf("\"%s\"\n", xml_escape_the_string(onestring, (int)tsiz));
+	    printf("\"%s\"\n", t_onestring);
             free(t_onestring);
 	}
-
-	bp += tsiz;
+        
+       bp += tsiz;
     }
+
     return SUCCEED;
 }
 

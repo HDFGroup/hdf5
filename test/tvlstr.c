@@ -239,13 +239,17 @@ static void test_vlstring_type(void)
     H5T_cset_t          cset;
     H5T_str_t           pad;
     herr_t              ret;
+    size_t              size;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing VL String type\n"));
 
     /* Create file */
-    fid = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(fid, FAIL, "H5Fcreate");
+    /*fid = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");*/
+
+    fid = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
 
     /* Create a datatype to refer to */
     tid_vlstr = H5Tcopy(H5T_C_S1);
@@ -280,8 +284,20 @@ static void test_vlstring_type(void)
     /* Close datatype */
     ret = H5Tclose(tid_vlstr);
     CHECK(ret, FAIL, "H5Tclose");
+    
+    tid_vlstr = H5Topen(fid, VLSTR_TYPE);
+    CHECK(tid_vlstr, FAIL, "H5Topen");
+
+    ret = H5Tclose(tid_vlstr);
+    CHECK(ret, FAIL, "H5Tclose");
+    
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");   
 
 
+    fid = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+    
     /* Open the variable-length string datatype just created */ 
     tid_vlstr = H5Topen(fid, VLSTR_TYPE);
     CHECK(tid_vlstr, FAIL, "H5Topen");
@@ -313,8 +329,8 @@ static void test_write_vl_string_attribute(void)
     herr_t ret;
     char *string_att_check;
 
-    file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(file, FAIL, "H5Fcreate");
+    file = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fopen");
 
     /* Create a datatype to refer to. */
     type = H5Tcopy (H5T_C_S1);
@@ -375,6 +391,9 @@ static void test_read_vl_string_attribute(void)
     hid_t type;
     herr_t ret;
     char *string_att_check;
+    hsize_t size[64];
+    hid_t   space;
+    int     ndims;
 
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
@@ -391,6 +410,9 @@ static void test_read_vl_string_attribute(void)
 
     att = H5Aopen_name(root, "test_scalar");
     CHECK(att, FAIL, "H5Aopen_name");
+    
+    space = H5Aget_space(att);
+    ndims = H5Sget_simple_extent_dims(space, size, NULL);
 
     ret = H5Aread(att, type, &string_att_check);
     CHECK(ret, FAIL, "H5Aread");
@@ -433,7 +455,7 @@ test_vlstrings(void)
     test_vlstrings_basic();
     test_vlstring_type();         
 
-    /* Test using VL strings in attributes */
+    /*Test using VL strings in attributes */
     test_write_vl_string_attribute();
     test_read_vl_string_attribute();
 }   /* test_vlstrings() */

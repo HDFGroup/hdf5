@@ -198,6 +198,8 @@ Configuration
 Tools
 -----
 
+    * The VL string bug(data and datatype cannot be shown) in h5dump is fixed.
+      -SLU - 2002/11/18
     * Fixed segfault if h5dump was invoked with some options but no file (e.g.,
       h5dump -H). -AKC, 2002/10/15
     * Fixed limitation in h5dumper with object names which reached over 1024
