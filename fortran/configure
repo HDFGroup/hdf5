@@ -793,7 +793,7 @@ echo "configure:788: checking for config $f" >&5
   echo "$ac_t""no" 1>&6
 done
 if test "X$host_config" != "Xnone"; then
-  CC_BASENAME="`echo $CC |cut -f1 -d' ' |xargs basename 2>/dev/null`"
+  CC_BASENAME="`echo $CC | cut -f1 -d' ' | xargs basename 2>/dev/null`"
   . $host_config
 fi
 
@@ -1823,7 +1823,7 @@ echo "configure:1821: checking whether the Fortran 9X compiler ($F9X $FFLAGS $LD
 
 ac_ext=f90
 ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -1926,7 +1926,7 @@ echo "configure:1924: checking what $F9X does with modules" >&5
 
 ac_ext=f90
 ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -2290,14 +2290,14 @@ rm -f confcache
 
 ac_ext=f90
 ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
-
-
-
-
+ PARALLEL=""
+ RUNSERIAL=""
+ RUNPARALLEL=""
+ TESTPARALLEL=""
 
 case "$F9X" in
   mpif90)
@@ -2359,7 +2359,7 @@ case "X-$enable_parallel" in
 
 ac_ext=f90
 ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -2371,12 +2371,11 @@ cat >conftest.$ac_ext <<EOF
         program conftest
           include 'mpif.h'
           
-        integer ierr
-        call MPI_INIT( ierr )
+        call mpi_file_open( ierr )
         end
 EOF
 
-if { (eval echo configure:__oline__: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; } && { (eval echo configure:2380: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:__oline__: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; } && { (eval echo configure:2379: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   :
   
 else
@@ -2386,7 +2385,7 @@ else
 
 ac_ext=f90
 ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -2398,8 +2397,7 @@ cat >conftest.$ac_ext <<EOF
         program conftest
           
           include 'mpif.h'
-          integer ierr
-          call MPI_INIT( ierr )
+          call mpi_file_open( ierr )
         end
 EOF
 
@@ -2408,7 +2406,7 @@ if test -n "mpi"; then
   LDFLAGS="$LDFLAGS -lmpi"
 fi
 
-if { (eval echo configure:__oline__: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; } && { (eval echo configure:2412: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:__oline__: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; } && { (eval echo configure:2410: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   :
   
 else
@@ -2429,7 +2427,7 @@ rm -rf conftest*
 
 ac_ext=f90
 ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -2441,19 +2439,21 @@ cat >conftest.$ac_ext <<EOF
         program conftest
           include 'mpif.h'
           
-          integer ierr
-          call MPI_INIT( ierr )
+          call mpi_file_open( ierr )
         end
 EOF
 
-if { (eval echo configure:__oline__: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; } && { (eval echo configure:2450: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:__oline__: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; } && { (eval echo configure:2447: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  :
+  
+else
   :
   
 
 
 ac_ext=f90
 ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -2465,8 +2465,7 @@ cat >conftest.$ac_ext <<EOF
         program conftest
           
             include 'mpif.h'
-            integer ierr
-            call MPI_INIT( ierr )
+            call mpi_file_open( ierr )
         end
 EOF
 
@@ -2475,7 +2474,7 @@ if test -n "mpio"; then
   LDFLAGS="$LDFLAGS -lmpio"
 fi
 
-if { (eval echo configure:__oline__: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; } && { (eval echo configure:2479: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:__oline__: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; } && { (eval echo configure:2478: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   :
   
 else
@@ -2485,9 +2484,6 @@ fi
 cd ..
 rm -rf conftest*
 
-else
-  :
-  
 fi
 cd ..
 rm -rf conftest*
@@ -2509,7 +2505,7 @@ rm -rf conftest*
 
 ac_ext=f90
 ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -2521,8 +2517,7 @@ cat >conftest.$ac_ext <<EOF
         program conftest
           
         include 'mpif.h'
-        integer ierr
-        call MPI_INIT( ierr )
+        call mpi_file_open( ierr )
         end
 EOF
 
@@ -2531,7 +2526,7 @@ if test -n "fmpich"; then
   LDFLAGS="$LDFLAGS -lfmpich"
 fi
 
-if { (eval echo configure:__oline__: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; } && { (eval echo configure:2535: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:__oline__: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; } && { (eval echo configure:2530: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   :
   
 else
@@ -2556,20 +2551,20 @@ fi
 ADD_PARALLEL_FILES="no"
 if test -n "$PARALLEL"; then
     echo $ac_n "checking prefix for running on one processor""... $ac_c" 1>&6
-echo "configure:2560: checking prefix for running on one processor" >&5
+echo "configure:2555: checking prefix for running on one processor" >&5
   echo "$ac_t""$RUNSERIAL" 1>&6
   echo $ac_n "checking prefix for running in parallel""... $ac_c" 1>&6
-echo "configure:2563: checking prefix for running in parallel" >&5
+echo "configure:2558: checking prefix for running in parallel" >&5
   echo "$ac_t""$RUNPARALLEL" 1>&6
 
     echo $ac_n "checking whether a simple MPI-IO program can be linked""... $ac_c" 1>&6
-echo "configure:2567: checking whether a simple MPI-IO program can be linked" >&5
+echo "configure:2562: checking whether a simple MPI-IO program can be linked" >&5
   
 
 
 ac_ext=f90
 ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -2581,12 +2576,11 @@ cat >conftest.$ac_ext <<EOF
         program conftest
           include 'mpif.h'
           
-      integer ierr
-      call MPI_INIT( ierr )
+      call mpi_file_open( ierr )
         end
 EOF
 
-if { (eval echo configure:__oline__: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; } && { (eval echo configure:2590: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+if { (eval echo configure:__oline__: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; } && { (eval echo configure:2584: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
   :
   echo "$ac_t""yes" 1>&6
 else
@@ -2614,7 +2608,7 @@ fi
 
 
 echo $ac_n "checking make""... $ac_c" 1>&6
-echo "configure:2618: checking make" >&5
+echo "configure:2612: checking make" >&5
 
 if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
       sed -n 1p|cut -c1-8`" = "GNU Make"; then
@@ -2631,7 +2625,7 @@ fi
 
 if test -z "$DEPEND"; then
   echo $ac_n "checking how to include a makefile""... $ac_c" 1>&6
-echo "configure:2635: checking how to include a makefile" >&5
+echo "configure:2629: checking how to include a makefile" >&5
 
     cat >makeinc <<EOF
 foo:

@@ -121,7 +121,7 @@ for f in $host_cpu-$host_vendor-$host_os \
   AC_MSG_RESULT(no)
 done
 if test "X$host_config" != "Xnone"; then
-  CC_BASENAME="`echo $CC |cut -f1 -d' ' |xargs basename 2>/dev/null`"
+  CC_BASENAME="`echo $CC | cut -f1 -d' ' | xargs basename 2>/dev/null`"
   . $host_config
 fi
 
@@ -361,10 +361,10 @@ dnl			   protect the expansion until make executes the
 dnl			   command).  The value of this variable is
 dnl			   substituted in *.in files.
 dnl
-AC_SUBST(PARALLEL)
-AC_SUBST(RUNSERIAL)
-AC_SUBST(RUNPARALLEL)
-AC_SUBST(TESTPARALLEL)
+AC_SUBST(PARALLEL) PARALLEL=""
+AC_SUBST(RUNSERIAL) RUNSERIAL=""
+AC_SUBST(RUNPARALLEL) RUNPARALLEL=""
+AC_SUBST(TESTPARALLEL) TESTPARALLEL=""
 
 dnl ----------------------------------------------------------------------
 dnl If the compiler is obviously a parallel compiler then we're building
@@ -444,23 +444,19 @@ case "X-$enable_parallel" in
 
     dnl Try link a simple MPI program.  If fail, try again with -lmpi.
     AC_TRY_FLINK(mpif.h, [
-        integer ierr
-        call MPI_INIT( ierr )],,
+        call mpi_file_open( ierr )],,
         AC_CHECK_FLIB(mpi, [
           include 'mpif.h'
-          integer ierr
-          call MPI_INIT( ierr )],, PARALLEL=no))
+          call mpi_file_open( ierr )],, PARALLEL=no))
 
     dnl Then try link a simple MPI-IO program.  If fail, try again with
     dnl -lmpio.
     if test "X$PARALLEL" = "Xyes"; then
       AC_TRY_FLINK(mpif.h, [
-          integer ierr
-          call MPI_INIT( ierr )],
+          call mpi_file_open( ierr )],,
           AC_CHECK_FLIB(mpio, [
             include 'mpif.h'
-            integer ierr
-            call MPI_INIT( ierr )],, PARALLEL=no))
+            call mpi_file_open( ierr )],, PARALLEL=no))
     fi
 
     dnl Set RUNPARALLEL to mpirun if not set yet.
@@ -485,8 +481,7 @@ case "X-$enable_parallel" in
     PARALLEL=mpich
     AC_CHECK_FLIB(fmpich, [
         include 'mpif.h'
-        integer ierr
-        call MPI_INIT( ierr )],, AC_MSG_ERROR(no mpich library))
+        call mpi_file_open( ierr )],, AC_MSG_ERROR(no mpich library))
     ;;
 
   *)
@@ -516,8 +511,7 @@ if test -n "$PARALLEL"; then
   dnl Check that we can link a simple MPI and MPI-IO application
   AC_MSG_CHECKING(whether a simple MPI-IO program can be linked)
   AC_TRY_FLINK(mpif.h,[
-      integer ierr
-      call MPI_INIT( ierr )],
+      call mpi_file_open( ierr )],
             AC_MSG_RESULT(yes),
             AC_MSG_RESULT(no)
             AC_MSG_ERROR('unable to link a simple MPI-IO application'))
