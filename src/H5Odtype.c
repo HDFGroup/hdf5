@@ -103,6 +103,19 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
         UINT16DECODE(*pp, dt->u.atomic.prec);
         break;
 
+    case H5T_STRING:
+	/*
+	 * Character string types...
+	 */
+	dt->u.atomic.order = H5T_ORDER_NONE;
+	dt->u.atomic.prec = 8 * dt->size;
+	dt->u.atomic.offset = 0;
+	dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+	dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+	dt->u.atomic.u.s.cset = H5T_CSET_ASCII;
+	dt->u.atomic.u.s.pad = H5T_STR_NULL;
+	break;
+
     case H5T_FLOAT:
         /*
          * Floating-point types...
@@ -270,6 +283,19 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
         UINT16ENCODE(*pp, dt->u.atomic.offset);
         UINT16ENCODE(*pp, dt->u.atomic.prec);
         break;
+
+    case H5T_STRING:
+	/*
+	 * Character string types... (not fully implemented)
+	 */
+	assert (dt->u.atomic.order == H5T_ORDER_NONE);
+	assert (dt->u.atomic.prec == 8 * dt->size);
+	assert (dt->u.atomic.offset == 0);
+	assert (dt->u.atomic.lsb_pad == H5T_PAD_ZERO);
+	assert (dt->u.atomic.msb_pad == H5T_PAD_ZERO);
+	assert (dt->u.atomic.u.s.cset == H5T_CSET_ASCII);
+	assert (dt->u.atomic.u.s.pad == H5T_STR_NULL);
+	break;
 
     case H5T_FLOAT:
         /*
