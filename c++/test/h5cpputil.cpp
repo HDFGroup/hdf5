@@ -71,3 +71,20 @@ int test_report( int nerrors, const string& testname )
       return 0;
    }
 }
+
+template <class Type1, class Type2>
+    void verify_val1(Type1 x, Type2 value, const char* message)
+{
+    if (GetTestVerbosity()>=VERBO_HI) 
+    {                                     
+        print_func("   Call to routine: %15s at line %4d in %s had value \
+                   %ld \n", (where), (int)__LINE__, __FILE__, (long)(x));
+    }                                                                    
+    if (x != value) 
+    {
+        TestErrPrintf("*** UNEXPECTED VALUE from %s should be %s, but is %s \
+		at line %4d in %s\n", where, val, x, (int)__LINE__, __FILE__); 
+        H5Eprint (stdout);                                            
+    }                                                                
+}
+

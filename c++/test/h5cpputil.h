@@ -29,4 +29,21 @@ int test_report (int, const std::string&);
 int test_report (int, const string&);
 #endif
 
+template <class Type>
+    void verify_val(Type x, Type value, const char* where, int line, const char* file_name)
+{
+    if (GetTestVerbosity()>=VERBO_HI)
+    {
+        cout << "   Call to routine: " << where << " at line " << line
+	     << " in " << file_name <<  " had value " << x << endl;
+    }
+    if (x != value)
+    {
+        cout << "*** UNEXPECTED VALUE from " << where << " should be "
+	     << value << ", but is " << x << " at line " << line
+	     << " in " << file_name << endl;
+        H5Eprint (stdout);
+    }
+}
+
 #endif
