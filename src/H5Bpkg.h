@@ -53,9 +53,11 @@ struct H5B_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
     const H5B_class_t	*type;		/*type of tree			     */
+    size_t		sizeof_node;	/*size of raw (disk) node	     */
     size_t		sizeof_rkey;	/*size of raw (disk) key	     */
+    size_t		total_native_keysize;	/*size of native keys	     */
     unsigned		ndirty;		/*num child ptrs to emit	     */
-    int			level;		/*node level			     */
+    unsigned		level;		/*node level			     */
     haddr_t		left;		/*address of left sibling	     */
     haddr_t		right;		/*address of right sibling	     */
     unsigned		nchildren;	/*number of child pointers	     */
