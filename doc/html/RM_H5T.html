@@ -61,7 +61,8 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr><!-- #EndLibraryItem --><center>
+<hr>
+<!-- #EndLibraryItem --><center>
 <h1>H5T: Datatype Interface</h1>
 </center>
 
@@ -165,9 +166,9 @@ of a dataset.
 <br>
 
 <i>Alphabetical Listing</i>
-<table border="0">
+<table border="0" width=100%>
   <tr>
-    <td valign="top">
+    <td valign="top" width=30%>
       <li><a href="#Datatype-ArrayCreate">H5Tarray_create</a>
       <li><a href="#Datatype-Close">H5Tclose</a>
       <li><a href="#Datatype-Commit">H5Tcommit</a>
@@ -191,9 +192,9 @@ of a dataset.
       <li><a href="#Datatype-GetInpad">H5Tget_inpad</a>    
     </td>
     
-    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+    <td width=3%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
-    <td valign="top">      
+    <td valign="top" width=30%>      
       <li><a href="#Datatype-GetMemberClass">H5Tget_member_class</a>
       <li><a href="#Datatype-GetMemberIndex">H5Tget_member_index</a>
       <li><a href="#Datatype-GetMemberName">H5Tget_member_name</a>
@@ -217,7 +218,7 @@ of a dataset.
       <li><a href="#Datatype-IsVariableString">H5Tis_variable_str</a>
     </td>
     
-    <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+    <td width=3%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">      
       <li><a href="#Datatype-Lock">H5Tlock</a>
@@ -247,17 +248,9 @@ of a dataset.
 <br>
 <strong>The FORTRAN90 Interfaces:</strong>
 <br>
-
-<font size=-1>
-<i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below (electronic versions only) go to the C function 
-descriptions, which serve as general descriptions for both.  A button, 
-under <strong>Non-C API(s)</strong> at the end of the C function description,
-opens an external browser window displaying the FORTRAN90-specific 
-information.  You will probably want to adjust the size and location of 
-this external window so that both browser windows are visible and to 
-facilitate moving easily between them.</i>
-</font><br>
+In general, each FORTRAN90 subroutine performs exactly the same task 
+as the corresponding C function.  
+<br>
 
 <table border=0>
 <tr><td valign=top width=32%>
@@ -433,10 +426,23 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tarray_create_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tarray_create_f
+    <dd>
+	<pre>
+SUBROUTINE h5tarray_create_f(base_id, rank, dims, type_id, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: base_id   ! Identifier of array base datatype
+  INTEGER, INTENT(IN)        ::  rank     ! Rank of the array
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims 
+                                          ! Sizes of each array dimension
+  INTEGER(HID_T), INTENT(OUT) :: type_id  ! Identifier of the array datatype
+  INTEGER, INTENT(OUT)        :: hdferr   ! Error code
+END SUBROUTINE h5tarray_create_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -464,10 +470,20 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tclose_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tclose_f
+    <dd>
+	<pre>
+SUBROUTINE h5tclose_f(type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5tclose_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -503,10 +519,22 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tcommit_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tcommit_f
+    <dd>
+	<pre>
+SUBROUTINE h5tcommit_f(loc_id, name, type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Datatype name within file or group
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5tcommit_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -539,10 +567,19 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
         if the datatype has been committed, or <code>0</code> (zero), 
         for <code>FALSE</code>, if the datatype has not been committed.
         Otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tcommitted_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tcommitted_f
+    <dd>
+	<pre>
+SUBROUTINE h5tcommitted_f(type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tcommitted_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -600,11 +637,17 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tconvert_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -696,10 +739,21 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a datatype identifier if successful;
         otherwise returns a negative value
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tcopy_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tcopy_f
+    <dd>
+	<pre>
+SUBROUTINE h5tcopy_f(type_id, new_type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id      ! Datatype identifier 
+  INTEGER(HID_T), INTENT(OUT) :: new_type_id ! Identifier of datatype's copy 
+  INTEGER, INTENT(OUT) :: hdferr             ! Error code
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5tcopy_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -741,10 +795,24 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns datatype identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tcreate_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tcreate_f
+    <dd>
+	<pre>
+SUBROUTINE h5tcreate_f(class, size, type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER, INTENT(IN) :: class             ! Datatype class can be one of
+                                           !    H5T_COMPOUND_F (6)
+                                           !    H5T_ENUM_F     (8)
+                                           !    H5T_OPAQUE_F   (9)
+  INTEGER(SIZE_T), INTENT(IN) :: size      ! Size of the datatype
+  INTEGER(HID_T), INTENT(OUT) :: type_id   ! Datatype identifier
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+END SUBROUTINE h5tcreate_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -783,10 +851,18 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns <code>TRUE</code> or <code>FALSE</code> if successful;
         otherwise returns a negative value.
-<!--<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tdetect_class_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -814,10 +890,22 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns the datatype identifier for the new enumeration datatype if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tenum_create_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tenum_create_f
+    <dd>
+	<pre>
+SUBROUTINE h5tenum_create_f(parent_id, new_type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: parent_id     ! Datatype identifier for
+                                              ! the  base datatype
+  INTEGER(HID_T), INTENT(OUT) :: new_type_id  ! Datatype identifier for the
+                                              ! new enumeration datatype    
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code
+END SUBROUTINE h5tenum_create_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -860,10 +948,21 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tenum_insert_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tenum_insert_f
+    <dd>
+	<pre>
+SUBROUTINE h5tenum_insert_f(type_id,  name, value, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of the new member
+  INTEGER, INTENT(IN) :: value          ! Value of the new member
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tenum_insert_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -910,10 +1009,22 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
         and, if <code>size</code> allows it, 
         the first character of <code>name</code> is 
         set to <code>NULL</code>.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tenum_nameof_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tenum_nameof_f
+    <dd>
+	<pre>
+SUBROUTINE h5tenum_nameof_f(type_id,  name, namelen, value, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  CHARACTER(LEN=*), INTENT(OUT) :: name  ! Name of the  enumeration datatype
+  INTEGER(SIZE_T), INTENT(IN) :: namelen ! Length of the name
+  INTEGER, INTENT(IN) :: value           ! Value of the  enumeration datatype
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5tenum_nameof_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -951,10 +1062,21 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tenum_valueof_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tenum_valueof_f
+    <dd>
+	<pre>
+SUBROUTINE h5tenum_valueof_f(type_id,  name, value, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of the enumeration datatype
+  INTEGER, INTENT(OUT) :: value         ! Value of the enumeration datatype
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tenum_valueof_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -986,10 +1108,22 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
         if the datatype identifiers refer to the same datatype, 
         or <code>0</code> (zero), for <code>FALSE</code>.
         Otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tequal_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tequal_f
+    <dd>
+	<pre>
+SUBROUTINE h5tequal_f(type1_id, type2_id, flag, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type1_id ! Datatype identifier 
+  INTEGER(HID_T), INTENT(IN) :: type2_id ! Datatype identifier 
+  LOGICAL, INTENT(OUT) :: flag           ! TRUE/FALSE flag to indicate 
+                                         ! if two datatypes are equal
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5tequal_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1027,11 +1161,17 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a pointer to a suitable conversion function if successful.
         Otherwise returns NULL.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tfind_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1069,10 +1209,21 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns the non-negative number of dimensions of the array type if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_array_dims_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_array_dims_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_array_dims_f(type_id, dims, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id      ! Identifier of the array datatype
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) ::  dims 
+                                             ! Buffer to store array datatype
+  INTEGER, INTENT(OUT)  :: hdferr            ! Error code
+END SUBROUTINE h5tget_array_dims_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1100,10 +1251,20 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns the rank of the array if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_array_ndims_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_array_ndims_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_array_ndims_f(type_id, ndims, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Identifier of the array datatype
+  INTEGER, INTENT(OUT)       ::  ndims   ! Number of array dimensions
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+END SUBROUTINE h5tget_array_ndims_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1143,10 +1304,31 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns datatype class identifier if successful;
         otherwise <code>H5T_NO_CLASS</code> (-1).
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_class_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_class_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_class_f(type_id, class, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: class          ! Datatype class, possible values are:
+                                         !    H5T_NO_CLASS_F 
+                                         !    H5T_INTEGER_F 
+                                         !    H5T_FLOAT_F
+                                         !    H5T_TIME_F
+                                         !    H5T_STRING_F
+                                         !    H5T_BITFIELD_F
+                                         !    H5T_OPAQUE_F
+                                         !    H5T_COMPOUND_F
+                                         !    H5T_REFERENCE_F
+                                         !    H5T_ENUM_F
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5tget_class_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1177,10 +1359,23 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a valid character set type if successful;
         otherwise <code>H5T_CSET_ERROR</code> (-1).
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_cset_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_cset_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_cset_f(type_id, cset, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: cset          ! Character set type of a string 
+                                        ! datatype 
+                                        ! Possible values of padding type are:
+                                        !    H5T_CSET_ASCII_F = 0
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_cset_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1206,10 +1401,21 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns the bias if successful;
         otherwise 0.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_ebiass_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_ebias_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_ebias_f(type_id, ebias, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: ebias         ! Datatype exponent bias 
+                                        ! of a floating-point type
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_ebias_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1254,10 +1460,23 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_fields_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_fields_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_fields_f(type_id, epos, esize, mpos, msize, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: epos          ! Exponent bit-position 
+  INTEGER, INTENT(OUT) :: esize         ! Size of exponent in bits
+  INTEGER, INTENT(OUT) :: mpos          ! Mantissa bit-position 
+  INTEGER, INTENT(OUT) :: msize         ! Size of mantissa in bits
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_fields_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1293,10 +1512,25 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a valid padding type if successful;
         otherwise <code>H5T_PAD_ERROR</code> (-1).
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_inpad_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_inpad_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_inpad_f(type_id, padtype, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: padtype       ! Padding type for unused bits 
+                                        ! in floating-point datatypes
+                                        ! Possible values of padding type are:
+                                        !     H5T_PAD_ZERO_F = 0
+                                        !     H5T_PAD_ONE_F = 1
+                                        !     H5T_PAD_BACKGROUND_F = 2
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_inpad_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1328,12 +1562,16 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns the datatype class, a non-negative value, if successful;
         otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5txxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->
-        <!--
+	<pre>
+
+	</pre>		
+-->	
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1370,12 +1608,17 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a valid field or member index if successful;
         otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_member_index_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+	<pre>
+
+	</pre>		
 -->
-        <!--
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1418,10 +1661,24 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
     <dd>Returns a valid pointer to a string allocated with 
         <code>malloc()</code> if successful; 
         otherwise returns NULL.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_member_name_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_member_name_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_member_name_f(type_id,index, member_name,  namelen, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id        ! Datatype identifier 
+  INTEGER, INTENT(IN) :: index                 ! Field index (0-based) of 
+                                               ! the field name to retrieve 
+  CHARACTER(LEN=*), INTENT(OUT) :: member_name ! Name of a field of
+                                               ! a compound datatype 
+  INTEGER, INTENT(OUT) :: namelen              ! Length of the name 
+  INTEGER, INTENT(OUT) :: hdferr               ! Error code
+END SUBROUTINE h5tget_member_name_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1456,10 +1713,23 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
         Note that zero is a valid offset and that this function 
         will fail only if a call to <code>H5Tget_member_class()</code> 
         fails with the same arguments.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_member_offset_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_member_offset_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_member_offset_f(type_id, member_no, offset, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id    ! Datatype identifier 
+  INTEGER, INTENT(IN) :: member_no         ! Number of the field  
+                                           ! whose offset is requested
+  INTEGER(SIZE_T), INTENT(OUT) :: offset   ! Byte offset of the the 
+                                           ! beginning of the field
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+END SUBROUTINE h5tget_member_offset_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1490,10 +1760,23 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
     <dd>Returns the identifier of a copy of the datatype of the field
         if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_member_type_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_member_type_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_member_type_f(type_id,  field_idx, datatype, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id   ! Datatype identifier 
+  INTEGER, INTENT(IN) :: field_idx        ! Field index (0-based) of the 
+                                          ! field type to retrieve
+  INTEGER(HID_T), INTENT(OUT) :: datatype ! Identifier of a copy of 
+                                          ! the datatype of the field 
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+END SUBROUTINE h5tget_member_type_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1530,10 +1813,22 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_member_value_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_member_value_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_member_value_f(type_id,  member_no, value, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(IN) :: member_no      ! Number of the enumeration 
+                                        ! datatype member
+  INTEGER, INTENT(OUT) :: value         ! Value of the enumeration datatype
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_member_value_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1618,11 +1913,17 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
     <dd>Returns the native datatype identifier for the  
         specified dataset datatype if successful;
         otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_native_type_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1650,10 +1951,21 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns the number of elements if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_nmembers_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_nmembers_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_nmembers_f(type_id, num_members, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: num_members   ! Number of fields in a 
+                                        ! compound datatype 
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_nmembers_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1688,10 +2000,30 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a valid normalization type if successful;
         otherwise <code>H5T_NORM_ERROR</code> (-1).
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_norm_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_norm_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_norm_f(type_id, norm, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  
+                                 ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: norm   ! Mantissa normalization of a 
+                                 ! floating-point datatype
+                                 ! Valid normalization types are:
+                                 !    H5T_NORM_IMPLIED_F(0) 
+                                 !        MSB of mantissa is not 
+                                 !        stored, always 1
+                                 !    H5T_NORM_MSBSET_F(1) 
+                                 !        MSB of mantissa is always 1 
+                                 !    H5T_NORM_NONE_F(2) 
+                                 !        Mantissa is not normalized
+  INTEGER, INTENT(OUT) :: hdferr ! Error code
+END SUBROUTINE h5tget_norm_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1763,10 +2095,21 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns an offset value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_offset_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_offset_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_offset_f(type_id, offset, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: offset        ! Datatype bit offset of the
+                                        ! first significant bit
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_offset_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1803,10 +2146,25 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a byte order constant if successful;
         otherwise <code>H5T_ORDER_ERROR</code> (-1).
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_order_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_order_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_order_f(type_id, order, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: order         ! Datatype byte order 
+                                        ! Possible values are:
+                                        !    H5T_ORDER_LE_F 
+                                        !    H5T_ORDER_BE_F 
+                                        !    H5T_ORDER_VAX_F  
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5tget_order_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1837,11 +2195,17 @@ H5Tget_overflow ()
     <dd>Returns a pointer to an application-defined function if successful.
         Otherwise returns NULL; this can happen if no overflow handling
         function is registered.  
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_overflow_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1884,10 +2248,30 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_pad_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_pad_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_pad_f(type_id, lsbpad, msbpad, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: lsbpad        ! Padding type of the  
+                                        ! least significant bit
+  INTEGER, INTENT(OUT) :: msbpad        ! Padding type of the 
+                                        ! most significant bit
+                                        ! Possible values of 
+                                        ! padding type are:
+                                        !    H5T_PAD_ZERO_F = 0
+                                        !    H5T_PAD_ONE_F = 1
+                                        !    H5T_PAD_BACKGROUND_F = 2
+                                        !    H5T_PAD_ERROR_F = -1
+                                        !    H5T_PAD_NPAD_F = 3
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_pad_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1915,10 +2299,20 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns the number of significant bits if successful;
         otherwise 0.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_precision_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_precision_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_precision_f(type_id, precision, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: precision     ! Datatype precision
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_precision_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1951,10 +2345,28 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a valid sign type if successful;
         otherwise <code>H5T_SGN_ERROR</code> (-1).
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_sign_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_sign_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_sign_f(type_id, sign, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: sign           ! Sign type for an integer type
+                                         ! Possible values are:
+                                         !    Unsigned integer type 
+                                         !        H5T_SGN_NONE_F = 0
+                                         !    Two's complement signed 
+                                         !        integer type
+                                         !        H5T_SGN_2_F = 1
+                                         !    or error value
+                                         !         H5T_SGN_ERROR_F = -1 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5tget_sign_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -1980,10 +2392,21 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns the size of the datatype in bytes if successful;
         otherwise 0.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_size_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_size_f(type_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER(SIZE_T), INTENT(OUT) :: size  ! Datatype size
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5tget_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2011,10 +2434,26 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a valid string storage mechanism if successful;
         otherwise <code>H5T_STR_ERROR</code> (-1).
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_strpad_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_strpad_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_strpad_f(type_id, strpad, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id    
+                                  ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: strpad  ! String padding method for a string datatype 
+                                  ! Possible values of padding type are:
+                                  !    Pad with zeros (as C does): 
+                                  !        H5T_STR_NULL_F(0) 
+                                  !    Pad with spaces (as FORTRAN does): 
+                                  !        H5T_STR_SPACE_F(1)
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+END SUBROUTINE h5tget_strpad_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2043,10 +2482,20 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns the datatype identifier for the base datatype if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_super_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_super_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_super_f(type_id, base_type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  INTEGER(HID_T), INTENT(OUT) :: type_id ! Base datatype identifier 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5tget_super_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2076,10 +2525,22 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a pointer to an allocated string if successful;
         otherwise returns <code>NULL</code>.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_tag_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tget_tag_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_tag_f(type_id, tag,taglen, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  CHARACTER(LEN=*), INTENT(OUT) :: tag   ! Unique ASCII string with which the
+                                         ! opaque datatype is to be tagged
+  INTEGER, INTENT(OUT) :: taglen         ! Length of tag 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5tget_tag_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2122,10 +2583,24 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tinsert_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tinsert_f
+    <dd>
+	<pre>
+SUBROUTINE h5tinsert_f(type_id,  name, offset, field_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the field to insert
+  INTEGER(SIZE_T), INTENT(IN) :: offset  ! Offset in memory structure 
+                                         ! of the field to insert
+  INTEGER(HID_T), INTENT(IN) :: field_id ! Datatype identifier of the 
+                                         ! new member
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5tinsert_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2155,10 +2630,23 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns <code>TRUE</code> or <code>FALSE</code> if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tis_variable_str_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tis_variable_str_f
+    <dd>
+	<pre>
+SUBROUTINE h5tis_variable_str_f(type_id, status, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id   ! Datatype identifier 
+  LOGICAL, INTENT(OUT)       :: status    ! Logical flag:
+                                          !    .TRUE. if datatype is a 
+                                          !         varibale string
+                                          !    .FALSE. otherwise 
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+END SUBROUTINE h5tis_variable_str_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2189,11 +2677,17 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tlock_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2226,10 +2720,23 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a named datatype identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5topen_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5topen_f
+    <dd>
+	<pre>
+SUBROUTINE h5topen_f(loc_id, name, type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id    ! File or group identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name    ! Datatype name within file or
+                                          ! group
+  INTEGER(HID_T), INTENT(out) :: type_id  ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5topen_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2256,10 +2763,19 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tpack_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tpack_f
+    <dd>
+	<pre>
+SUBROUTINE h5tpack_f(type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tpack_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2353,11 +2869,17 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tregister_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2394,10 +2916,23 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_cset_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tset_cset_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_cset_f(type_id, cset, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id 
+                                  ! Datatype identifier 
+  INTEGER, INTENT(IN) :: cset     ! Character set type of a string datatype  
+                                  ! Possible values of padding type are:
+                                  !    H5T_CSET_ASCII_F = 0
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+END SUBROUTINE h5tset_cset_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2426,10 +2961,22 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_ebiass_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tset_ebias_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_ebias_f(type_id, ebias, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(IN) :: ebias          ! Datatype exponent bias 
+                                        ! of a floating-point type, 
+                                        ! which cannot be 0
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tset_ebias_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2477,10 +3024,23 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_fields_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tset_fields_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_fields_f(type_id, epos, esize, mpos, msize, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
+  INTEGER, INTENT(IN) :: epos           ! Exponent bit-position 
+  INTEGER, INTENT(IN) :: esize          ! Size of exponent in bits
+  INTEGER, INTENT(IN) :: mpos           ! Mantissa bit-position 
+  INTEGER, INTENT(IN) :: msize          ! Size of mantissa in bits
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tset_fields_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2521,10 +3081,26 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_inpad_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tset_inpad_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_inpad_f(type_id, padtype, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id 
+                                  ! Datatype identifier 
+  INTEGER, INTENT(IN) :: padtype  ! Padding type for unused bits 
+                                  ! in floating-point datatypes.
+                                  ! Possible values of padding type are:
+                                  !    H5T_PAD_ZERO_F = 0
+                                  !    H5T_PAD_ONE_F = 1
+                                  !    H5T_PAD_BACKGROUND_F = 2
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+END SUBROUTINE h5tset_inpad_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2562,10 +3138,30 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_norm_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tset_norm_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_norm_f(type_id, norm, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  
+                                  ! Datatype identifier 
+  INTEGER, INTENT(IN) :: norm     ! Mantissa normalization of a 
+                                  ! floating-point datatype
+                                  ! Valid normalization types are:
+                                  !    H5T_NORM_IMPLIED_F(0)
+                                  !       MSB of mantissa is not stored,
+                                  !       always 1 
+                                  !    H5T_NORM_MSBSET_F(1) 
+                                  !       MSB of mantissa is always 1 
+                                  !    H5T_NORM_NONE_F(2)
+                                  !       Mantissa is not normalized
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+END SUBROUTINE h5tset_norm_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2647,10 +3243,21 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_offset_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tset_offset_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_offset_f(type_id, offset, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(IN) :: offset         ! Datatype bit offset of 
+                                        ! the first significant bit
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tset_offset_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2688,10 +3295,25 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_order_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tset_order_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_order_f(type_id, order, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id   ! Datatype identifier 
+  INTEGER, INTENT(IN) :: order            ! Datatype byte order 
+                                          ! Possible values are:
+                                          !    H5T_ORDER_LE_F 
+                                          !    H5T_ORDER_BE_F 
+                                          !    H5T_ORDER_VAX_F  
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5tset_order_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2729,11 +3351,17 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_overflow_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2773,10 +3401,30 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_pad_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tset_pad_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_pad_f(type_id, lsbpad, msbpad, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(IN) :: lsbpad         ! Padding type of the 
+                                        ! least significant bit
+  INTEGER, INTENT(IN) :: msbpad         ! Padding type of the 
+                                        ! most significant bit
+                                        ! Possible values of padding 
+                                        ! type are:
+                                        !    H5T_PAD_ZERO_F = 0
+                                        !    H5T_PAD_ONE_F = 1
+                                        !    H5T_PAD_BACKGROUND_F = 2
+                                        !    H5T_PAD_ERROR_F = -1
+                                        !    H5T_PAD_NPAD_F = 3
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tset_pad_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2815,10 +3463,20 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_precision_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tset_precision_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_precision_f(type_id, precision, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(IN) :: precision      ! Datatype precision
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tset_precision_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2837,15 +3495,15 @@ zero.
     <dd>Sets the sign property for an integer type.
 <dt><strong>Description:</strong>
     <dd><code>H5Tset_sign</code> sets the sign property for an integer type.
-        <ul> <dl>
-            <dt>H5T_SGN_NONE (<code>0</code>)
-               <dd>Unsigned integer type.
-            <dt>H5T_SGN_2 (<code>1</code>)
-               <dd>Two's complement signed integer type.
-        </dl> </ul>
+        <dl> 
+          <dt>H5T_SGN_NONE (<code>0</code>)
+            <dd>Unsigned integer type.
+          <dt>H5T_SGN_2 (<code>1</code>)
+            <dd>Two's complement signed integer type.
+         </dl>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
+        <dl>
+		<dt><em>hid_t</em> <code>type_id</code>
             <dd>Identifier of datatype to set.
         <dt><em>H5T_sign_t</em> <code>sign</code>
             <dd>Sign type.
@@ -2853,10 +3511,28 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_sign_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tset_sign_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_sign_f(type_id, sign, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  
+                                  ! Datatype identifier 
+  INTEGER, INTENT(IN) :: sign     ! Sign type for an integer type 
+                                  ! Possible values are:
+                                  !    Unsigned integer type 
+                                  !       H5T_SGN_NONE_F = 0
+                                  !    Two's complement signed integer type
+                                  !       H5T_SGN_2_F = 1
+                                  !    or error value 
+                                  !       H5T_SGN_ERROR_F=-1 
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+END SUBROUTINE h5tset_sign_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2896,10 +3572,21 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_size_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tset_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_size_f(type_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  INTEGER(SIZE_T), INTENT(IN) :: size    ! Datatype size
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5tset_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2957,10 +3644,26 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_strpad_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tset_strpad_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_strpad_f(type_id, strpad, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id 
+                                 ! Datatype identifier 
+  INTEGER, INTENT(IN) :: strpad  ! String padding method for a string datatype 
+                                 ! Possible values of padding type are:
+                                 !    Pad with zeros (as C does): 
+                                 !       H5T_STR_NULL_F(0)
+                                 !    Pad with spaces (as FORTRAN does): 
+                                 !       H5T_STR_SPACE_F(1)
+  INTEGER, INTENT(OUT) :: hdferr ! Error code
+END SUBROUTINE h5tset_strpad_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2991,10 +3694,21 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_tag_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tset_tag_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_tag_f(type_id, tag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: tag   ! Unique ASCII string with which the
+                                        ! opaque datatype is to be tagged 
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tset_tag_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -3023,11 +3737,17 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tunregister_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -3067,10 +3787,21 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns datatype identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tvlen_create_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5tvlen_create_f
+    <dd>
+	<pre>
+SUBROUTINE h5tvlen_create_f(type_id, vltype_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id    ! Datatype identifier of base type 
+                                           ! Base type can only be atomic 
+  INTEGER(HID_T), INTENT(OUT) :: vltype_id ! VL datatype identifier 
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+END SUBROUTINE h5tvlen_create_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -3109,13 +3840,14 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr>
+<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
-Describes HDF5 Release 1.6.0, July 2003
+Describes HDF5 Release 1.6.1, October 2003
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 8 October 2003");
+document.writeln("Last modified: 23 October 2003");
 -->
 </SCRIPT>
  
