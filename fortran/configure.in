@@ -1,8 +1,8 @@
 dnl ----------------------------------------------------------------------
 dnl Process this file with autoconf to produce configure.
 dnl
-dnl Copyright (C) 2000 National Center for Supercomputing Applications.
-dnl                    All rights reserved.
+dnl Copyright (C) 2000-2001 National Center for Supercomputing Applications
+dnl                         All rights reserved.
 dnl ----------------------------------------------------------------------
 
 dnl ----------------------------------------------------------------------
@@ -11,7 +11,7 @@ dnl
 AC_REVISION($Id$)
 AC_INIT(src/HDF5.f90)
 AC_CONFIG_HEADER(src/H5config.h)
-AC_CONFIG_AUX_DIR(bin)
+AC_CONFIG_AUX_DIR(../bin)
 AC_CANONICAL_HOST
 AC_SUBST(CPPFLAGS)
 

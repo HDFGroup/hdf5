@@ -1,8 +1,8 @@
 dnl ----------------------------------------------------------------------
 dnl Process this file with autoconf to produce configure.
 dnl
-dnl Copyright (C) 2000 National Center for Supercomputing Applications.
-dnl                    All rights reserved.
+dnl Copyright (C) 2000-2001 National Center for Supercomputing Applications
+dnl                         All rights reserved.
 dnl ----------------------------------------------------------------------
 
 dnl ----------------------------------------------------------------------
@@ -10,7 +10,7 @@ dnl Initialize configure.
 dnl
 AC_REVISION($Id$)
 AC_INIT(src/H5Library.cpp)
-AC_CONFIG_AUX_DIR(bin)
+AC_CONFIG_AUX_DIR(../bin)
 AC_CANONICAL_HOST
 AC_SUBST(CPPFLAGS)
 
