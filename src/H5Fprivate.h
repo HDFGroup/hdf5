@@ -461,8 +461,6 @@ H5_DLL herr_t H5F_istore_delete(H5F_t *f, hid_t dxpl_id,
 H5_DLL void H5F_addr_encode(H5F_t *, uint8_t** /*in,out*/, haddr_t);
 H5_DLL void H5F_addr_decode(H5F_t *, const uint8_t** /*in,out*/,
 			     haddr_t* /*out*/);
-H5_DLL herr_t H5F_addr_pack(H5F_t *f, haddr_t *addr_p /*out*/,
-			     const unsigned long objno[2]);
 
 /* Callback functions for file access class */
 H5_DLL herr_t H5F_acs_create(hid_t fapl_id, void *close_data);
