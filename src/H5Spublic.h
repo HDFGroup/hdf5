@@ -64,6 +64,7 @@ herr_t H5Sselect_elements (hid_t space_id, H5S_seloper_t op, size_t num_elemn,
 H5S_class_t H5Sextent_class (hid_t space_id);
 herr_t H5Sset_extent_none (hid_t space_id);
 herr_t H5Sextent_copy (hid_t dst_id,hid_t src_id);
+herr_t H5Sselect_all (hid_t spaceid);
 
 #ifdef __cplusplus
 }

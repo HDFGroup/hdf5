@@ -396,7 +396,7 @@ H5Sextent_copy (hid_t dst_id,hid_t src_id)
 
     /* Copy */
     if (H5S_extent_copy(&(dst->extent),&(src->extent))<0)
-        HRETURN_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent");
+        HRETURN_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy extent");
 
     FUNC_LEAVE (ret_value);
 }
