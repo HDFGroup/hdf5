@@ -53,8 +53,14 @@ error_msg(const char *progname, const char *fmt, ...)
 
     va_start(ap, fmt);
     fflush(stdout);
+#ifdef WIN32
+    fprintf(stdout, "%s error: ", progname);
+    vfprintf(stdout, fmt, ap);
+#else
     fprintf(stderr, "%s error: ", progname);
     vfprintf(stderr, fmt, ap);
+#endif
+    
     va_end(ap);
 }
 
