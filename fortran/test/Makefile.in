@@ -26,7 +26,6 @@ CPPFLAGS=-I. -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
 
 ## Add include directory to the C preprocessor flags and the h5test and hdf5
 ## libraries to the library list.
-LT_LINK_FLIB=$(LT) --mode=link $(F9X) -static -rpath $(libdir)
 FLIB=../src/libhdf5_fortran.la
 HDF5LIB=$(hdf5_builddir)/libhdf5.la
 TCLIB=../../test/.libs/libh5test.a
@@ -53,12 +52,12 @@ MOSTLYCLEAN=*.h5 *.tmp
 $(TEST_PROGS): $(LIB) $(FLIB) 
 
 fortranlib_test: $(FORTLIBTEST_OBJ)
-	@$(LT_LINK_FEXE) -static $(FFLAGS) -o $@ $(FORTLIBTEST_OBJ) $(LIB) $(TCLIB) $(FLIB) $(LIBS) $(HDF5LIB)
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ $(FORTLIBTEST_OBJ) $(LIB) $(TCLIB) $(FLIB) $(LIBS) $(HDF5LIB)
 
 fflush1: fflush1.lo 
-	@$(LT_LINK_FEXE) -static $(FFLAGS) -o $@ fflush1.lo $(LIB) $(TCLIB) $(FLIB) $(LIBS) $(HDF5LIB)
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush1.lo $(LIB) $(TCLIB) $(FLIB) $(LIBS) $(HDF5LIB)
 
 fflush2: fflush2.lo 
-	@$(LT_LINK_FEXE) -static $(FFLAGS) -o $@ fflush2.lo $(LIB) $(TCLIB) $(FLIB) $(LIBS) $(HDF5LIB)
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush2.lo $(LIB) $(TCLIB) $(FLIB) $(LIBS) $(HDF5LIB)
 
 @CONCLUDE@

@@ -24,7 +24,6 @@ hdf5_builddir=$(top_builddir)/src
 
 ## Add the include directory to the C preprocessor flags the the hdf5 library
 ## to the library list.
-LT_LINK_LIB=$(LT) --mode=link $(F9X) -static -rpath $(libdir)
 LIBFORTRAN=../src/libhdf5_fortran.la
 LIBHDF5=$(hdf5_builddir)/libhdf5.la
 FTLIB=../test/libh5test_fortran.la
@@ -58,6 +57,6 @@ thyperslab_wr.lo:	    $(srcdir)/thyperslab_wr.f90 thdf5.lo
 ptesthdf5_fortran.lo:	    $(srcdir)/ptesthdf5_fortran.f90 thdf5.lo
 
 ptesthdf5_fortran: thdf5.lo thyperslab_wr.lo ptesthdf5_fortran.lo
-	@$(LT_LINK_FEXE) -static $(FFLAGS) -o $@ ptesthdf5_fortran.lo thdf5.lo thyperslab_wr.lo $(FTLIB) $(CTLIB) $(LIBFORTRAN) $(LIBHDF5) $(LIBS)
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ ptesthdf5_fortran.lo thdf5.lo thyperslab_wr.lo $(FTLIB) $(CTLIB) $(LIBFORTRAN) $(LIBHDF5) $(LIBS)
 
 @CONCLUDE@

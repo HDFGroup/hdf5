@@ -72,8 +72,8 @@ LT_UNINSTALL=$(LT) --mode=uninstall $(RM)
 
 # Fortran compilation/linking stuff
 LT_FCOMPILE=$(LT) --mode=compile $(F9X)
-LT_LINK_FLIB=$(LT) --mode=link $(F9X) -static $(DYNAMIC_DIRS)
-LT_LINK_FEXE=$(LT) --mode=link $(F9X) $(LT_STATIC_EXEC) $(DYNAMIC_DIRS)
+LT_LINK_FLIB=$(LT) --mode=link $(F9X) -static -rpath $(libdir) $(DYNAMIC_DIRS)
+LT_LINK_FEXE=$(LT) --mode=link $(F9X) -static $(LT_STATIC_EXEC) $(DYNAMIC_DIRS)
 
 # C++ compilation/linking stuff
 LT_CXX_COMPILE=$(LT) --mode=compile $(CXX)
