@@ -691,6 +691,9 @@
 ./c++/config/rs6000-ibm-aix4.x
 ./c++/config/solaris2.x
 ./c++/config/irix6.x
+./c++/config/sv1-cray
+./c++/config/unicos10.0.X
+./c++/config/unicosmk2.0.6.X
 
 ./c++/examples/Dependencies
 ./c++/examples/Attributes.h5
