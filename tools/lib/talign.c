@@ -1,12 +1,13 @@
 /*
  * Small program to illustrate the "misalignment" of members within a compound
- * datatype, in a datatype fixed by h5dump_fixtype().
+ * datatype, in a datatype fixed by h5tools_fixtype().
  */
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>	/* Required for unlink() */
 
 #include "hdf5.h"
+#include "h5tools.h"
 
 const char *fname = "talign.h5";
 const char *setname = "align";
@@ -17,8 +18,6 @@ const char *setname = "align";
  * H5T_NATIVE_FLOAT, and they are placed within the compound next to one
  * another per construction)
  */
-
-extern hid_t h5dump_fixtype(hid_t);
 
 int main(void)
 {
@@ -73,7 +72,7 @@ int main(void)
 	H5Tinsert(cmp, "Not Ok", sizeof(fok) + sizeof(string5), array_dt);
     H5Tclose(array_dt);
 
-	fix = h5dump_fixtype(cmp);
+	fix = h5tools_fixtype(cmp);
 
 	cmp1 = H5Tcreate(H5T_COMPOUND, sizeof(fok));
 
