@@ -1,19 +1,17 @@
 	    Installation instructions for Parallel HDF5
 	    -------------------------------------------
-		(last updated: April 22, 1998)
+		(last updated: May 21, 1999)
 
+1. Overview
+-----------
 This file contains instructions for the installation of parallel
 HDF5.  Platforms supported by this release are SGI Origin 2000,
 IBM SP2, and the Intel TFLOP.  The steps are kind of unnatural and
 will be more automized in the next release.   If you have difficulties
 installing the software in your system, please send mail to
 	hdfparallel@ncsa.uiuc.edu
-
-Note:
-For the users of the Intel TFLOPS machine, a special sequence of steps
-for the parallel install may be found in the file:  INSTALL.ascired.
-Also, MPI/MPIO information similar to that found below may be found in
-INSTALL_parallel.ascired.
+In your mail, please enclose the output of "uname -a".  Also attach the
+content of "config.log" if you have run the "configure" command.
 
 First, you must obtain and unpack the HDF5 source as
 described in the file INSTALL.  You also need to obtain the
@@ -21,21 +19,69 @@ information of the include and library paths of MPI and MPIO
 software installed in your system since the parallel HDF5 library
 uses them for parallel I/O access.
 
-For an IBM SP2 system, follow the instructions in INSTALL.ibm.sp.parallel.
-For an SGI Origin 2000 system, use the following shell commands.  (The
-one shown here is what works in the NCSA O2K machine in which MPI library
-is installed in system area but no official MPIO software is available.
-I use a private installation of ROMIO for it.)
 
-mpi1_inc=""					#mpi-1 include
-mpi1_lib=""					#mpi-1 library
-mpio_inc="-I$HOME/ROMIO/include"		#mpio include
-mpio_lib="-L$HOME/ROMIO/lib/IRIX64/"		#mpio library
+2. Quick Instruction for known systems
+--------------------------------------
+The following shows particular steps to run the parallel HDF5
+configure for a few machines we tested.  If your particular platform
+is not shown or somehow the steps do not work for yours, please go
+to the next section for more detail explanations.
 
-MPI_INC="$mpi1_inc $mpio_inc"
-export MPI_INC
-MPI_LIB="$mpi1_lib $mpio_lib"
-export MPI_LIB
+IBM SP2: follow the instructions in INSTALL.ibm.sp.parallel.
 
-./configure --enable-parallel
+TFLOPS: follow the instuctions in INSTALL.ascired.
+
+SGI Origin 2000:
+Cray T3E:
+(where MPI-IO is part of system MPI library such as mpt 1.3)
+
+#!/bin/sh
+
+RUNPARALLEL="mpirun -np 2"
+export RUNPARALLEL
+LIBS="-lmpi"
+export LIBS
+./configure --enable-parallel --disable-shared --prefix=$PWD/installdir
+make
+make check
+make install
+
+
+SGI Origin 2000:
+Cray T3E:
+(where MPI-IO is not part of system MPI library or I want to
+use my own version of MPIO)
+
+
+mpi1_inc=""                                     #mpi-1 include
+mpi1_lib=""                                     #mpi-1 library
+mpio_inc=-I$HOME/ROMIO/include                  #mpio include
+mpio_lib="-L$HOME/ROMIO/lib/IRIX64"             #mpio library
+
+MPI_INC="$mpio_inc $mpi1_inc"
+MPI_LIB="$mpio_lib $mpi1_lib"
+
+#for version 1.1
+CPPFLAGS=$MPI_INC
+export CPPFLAGS
+LDFLAGS=$MPI_LIB
+export LDFLAGS
+RUNPARALLEL="mpirun -np 2"
+export RUNPARALLEL
+LIBS="-lmpio -lmpi"
+export LIBS
+
+./configure --enable-parallel --disable-shared --prefix=$PWD/installdir
+make
+make check
+make install
+
+
+3. Detail explanation
+---------------------
+[Work in progress.  Please send mail to hdfparallel@ncsa.uiuc.edu.]
+
+
+
+
 
