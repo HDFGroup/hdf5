@@ -1213,13 +1213,28 @@ else
     BYTESEX="little-endian"
 fi
 
-# Are we compiling static libraries, shared libraries, or both?
+# Are we compiling static libraries, shared libraries, or both?  This is only
+# used for the libhdf5.settings file. We can't just look at $enable_static and
+# $enable_shared because if they're yes the ltconfig might have decided that
+# one or the other is simply not possible.  Therefore we have to look in the
+# generated `libtool' shell script for lines that set the value of
+# `build_libtool_libs' (shared) and `build_old_libs' (static).
 AC_SUBST(STATIC_SHARED)
-if test "X-$enable_static" = "X-yes" && test "X-$enable_shared" = "X-yes"; then
+if (grep '^build_libtool_libs=yes' libtool >/dev/null); then
+    enable_shared=yes
+else
+    enable_shared=no
+fi
+if (grep '^build_old_libs=yes' libtool >/dev/null); then
+    enable_static=yes
+else
+    enable_static=no
+fi
+if test $enable_static = yes && test $enable_shared = yes; then
     STATIC_SHARED="static, shared"
-elif test "X-$enable_static" = "X-yes"; then
+elif test $enable_static = yes; then
     STATIC_SHARED="static"
-elif test "X-$enable_shared" = "X-yes"; then
+elif test $enable_shared = yes; then
     STATIC_SHARED="shared"
 else
     STATIC_SHARED="none"
