@@ -20,7 +20,7 @@ $H4DUMP -H > $tmpfile
 if test -s "$tmpfile"; then
     # Find out which version of hdp is being used.  Over simplified
     # algorithm but will do the job for now.
-    if ( grep -s 'NCSA HDF Version 4.1 Release 3' $tmpfile > /dev/null )
+    if ( grep -s 'NCSA HDF Version 4.1 Release [3-9]' $tmpfile > /dev/null )
     then
 	H4DUMPVER=413
     else
