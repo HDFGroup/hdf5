@@ -301,6 +301,7 @@ test_vltypes_vlen_compound(void)
     ret=H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
+
     /* Make certain the VL memory has been freed */
     VERIFY(mem_used,0,"H5Dvlen_reclaim");
 
@@ -609,10 +610,9 @@ test_vltypes(void)
 
     /* These next tests use the same file */
     test_vltypes_vlen_atomic();       /* Test VL atomic datatypes */
-    test_vltypes_vlen_compound();     /* Test VL compound datatypes */
-    test_vltypes_compound_vlen_atomic();     /* Test compound datatypes with VL atomic components */
-    test_vltypes_vlen_vlen_atomic();  /* Test VL datatype with VL atomic components */
-
+    test_vltypes_compound_vlen_atomic();     /* Test compound datatypes with VL atomic components */  
+	test_vltypes_vlen_vlen_atomic();  /* Test VL datatype with VL atomic components */ 
+	test_vltypes_vlen_compound();     /* Test VL compound datatypes */
 }   /* test_vltypes() */
 
 
