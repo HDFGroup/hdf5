@@ -946,7 +946,9 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
     intn fast_dim;  /* Rank of the fastest changing dimension for the dataspace */
     intn temp_dim;  /* Temporary rank holder */
     hsize_t	acc;	/* Accumulator */
-    hssize_t	buf_off;  /* Buffer offset for copying memory */
+    hssize_t	buf_off;  /* Current buffer offset for copying memory */
+    hssize_t	last_buf_off;   /* Last buffer offset for copying memory */
+    size_t      buf_size;       /* Current size of the buffer to write */
     intn i;         /* Counters */
     intn   	ndims;      /* Number of dimensions of dataset */
     size_t actual_read;      /* The actual number of elements to read in */
@@ -1078,6 +1080,10 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
         (int)i,(int)file_space->select.sel_info.hslab.diminfo[i].count);
 #endif /* QAK */
 
+        /* Set the last location & length to invalid numbers */
+        last_buf_off=-1;
+        buf_size=0;
+
         /* Read in data until an entire sequence can't be read in any longer */
         while(num_read<nelmts) {
             /* Check if we are running out of room in the buffer */
@@ -1092,14 +1098,37 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
     printf("%s: tmp_count[%d]=%d, offset[%d]=%d\n",FUNC,(int)i,(int)tmp_count[i],(int)i,(int)offset[i]);
 #endif /* QAK */
 
-            /* Read in the sequence */
-            if (H5F_seq_read(f, dxpl_id, layout, pline, fill, efl, file_space,
-                elmt_size, actual_bytes, 0, buf_off, buf/*out*/)<0) {
-                HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
-            }
+            /* check for the first read */
+            if(last_buf_off<0) {
+                last_buf_off=buf_off;
+                buf_size=actual_bytes;
+            } /* end if */
+            else {
+                /* Check if we are extending the buffer to read */
+                if((last_buf_off+buf_size)==buf_off) {
+                    buf_size+=actual_bytes;
+                } /* end if */
+                /*
+                 * We've moved to another section of the dataset, read in the
+                 *  previous piece and change the last position and length to
+                 *  the current position and length
+                 */
+                else {
+                    /* Read in the sequence */
+                    if (H5F_seq_read(f, dxpl_id, layout, pline, fill, efl, file_space,
+                        elmt_size, buf_size, 0, last_buf_off, buf/*out*/)<0) {
+                        HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
+                    } /* end if */
 
-            /* Increment the offset of the buffer */
-            buf+=elmt_size*actual_read;
+                    /* Increment the offset of the buffer */
+                    buf+=buf_size;
+
+                    /* Updated the last position and length */
+                    last_buf_off=buf_off;
+                    buf_size=actual_bytes;
+
+                } /* end else */
+            } /* end else */
 
             /* Increment the count read */
             num_read+=actual_read;
@@ -1171,6 +1200,15 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                 temp_dim--;
             } /* end while */
         } /* end while */
+
+        /* check for the last read */
+        if(last_buf_off>=0) {
+            /* Read in the sequence */
+            if (H5F_seq_read(f, dxpl_id, layout, pline, fill, efl, file_space,
+                elmt_size, buf_size, 0, last_buf_off, buf/*out*/)<0) {
+                HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
+            } /* end if */
+        } /* end if */
 
         /* Update the iterator with the location we stopped */
         HDmemcpy(file_iter->hyp.pos, offset, ndims*sizeof(hssize_t));
@@ -1467,6 +1505,8 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
     intn temp_dim;  /* Temporary rank holder */
     hsize_t	acc;	/* Accumulator */
     hssize_t	buf_off;  /* Buffer offset for copying memory */
+    hssize_t	last_buf_off;   /* Last buffer offset for copying memory */
+    size_t      buf_size;       /* Current size of the buffer to write */
     intn i;         /* Counters */
     intn   	ndims;      /* Number of dimensions of dataset */
     size_t actual_write;     /* The actual number of elements to read in */
@@ -1598,6 +1638,10 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
         (int)i,(int)file_space->select.sel_info.hslab.diminfo[i].count);
 #endif /* QAK */
 
+        /* Set the last location & length to invalid numbers */
+        last_buf_off=-1;
+        buf_size=0;
+
         /* Read in data until an entire sequence can't be written out any longer */
         while(num_write<nelmts) {
             /* Check if we are running out of room in the buffer */
@@ -1612,14 +1656,37 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
     printf("%s: tmp_count[%d]=%d, offset[%d]=%d\n",FUNC,(int)i,(int)tmp_count[i],(int)i,(int)offset[i]);
 #endif /* QAK */
 
-            /* Read in the sequence */
-            if (H5F_seq_write(f, dxpl_id, layout, pline, fill, efl, file_space,
-                elmt_size, actual_bytes, 0, buf_off, buf)<0) {
-                HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
-            }
+            /* check for the first write */
+            if(last_buf_off<0) {
+                last_buf_off=buf_off;
+                buf_size=actual_bytes;
+            } /* end if */
+            else {
+                /* Check if we are extending the buffer to write */
+                if((last_buf_off+buf_size)==buf_off) {
+                    buf_size+=actual_bytes;
+                } /* end if */
+                /*
+                 * We've moved to another section of the dataset, write out the
+                 *  previous piece and change the last position and length to
+                 *  the current position and length
+                 */
+                else {
+                    /* Write out the sequence */
+                    if (H5F_seq_write(f, dxpl_id, layout, pline, fill, efl, file_space,
+                        elmt_size, buf_size, 0, last_buf_off, buf)<0) {
+                        HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
+                    } /* end if */
 
-            /* Increment the offset of the buffer */
-            buf+=elmt_size*actual_write;
+                    /* Increment the offset of the buffer */
+                    buf+=buf_size;
+
+                    /* Updated the last position and length */
+                    last_buf_off=buf_off;
+                    buf_size=actual_bytes;
+
+                } /* end else */
+            } /* end else */
 
             /* Increment the count write */
             num_write+=actual_write;
@@ -1691,6 +1758,15 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                 temp_dim--;
             } /* end while */
         } /* end while */
+
+        /* check for the last write */
+        if(last_buf_off>=0) {
+            /* Write out the sequence */
+            if (H5F_seq_write(f, dxpl_id, layout, pline, fill, efl, file_space,
+                elmt_size, buf_size, 0, last_buf_off, buf)<0) {
+                HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
+            } /* end if */
+        } /* end if */
 
         /* Update the iterator with the location we stopped */
         HDmemcpy(file_iter->hyp.pos, offset, ndims*sizeof(hssize_t));
