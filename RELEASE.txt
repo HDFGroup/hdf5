@@ -408,6 +408,9 @@ Known Problems
   The --enable-static-exec configure flag also fails to correctly compile
   on Linux platforms using the gcc-2.95.2 compiler.
 
+  The --enable-static-exec configure flag also fails to correctly compile
+  on IBM SP2 platform.
+
   The compilation fails if configured with --enable-static-exec on IRIX 6.5.
 
   The executable files in hdf5/bin are dynamic-linked for IRIX64 6.5(64 and
