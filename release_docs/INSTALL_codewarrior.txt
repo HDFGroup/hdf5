@@ -1,5 +1,5 @@
 
-Instructions to build the HDF5 library, tests and tools on on Metrowerks Code Warrior.
+Instructions to build the HDF5 library, tests and tools on Metrowerks Code Warrior.
 --------------------------------------------------------------------------------------
 
 
@@ -24,7 +24,7 @@ These instructions assume you have some basic knowledge of the Code Warrior comp
 
 --------------------------------------------------------------------------------------
 The HDF Software development group
-We would like to thank Ron Liechty of the Metrowerks help support for all the help made during the development of this project
+We would like to thank Ron Liechty of the Metrowerks help support for all the help provided during the development of this project
 
 
 
