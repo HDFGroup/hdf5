@@ -1,0 +1,17 @@
+			CHANGES of HDF5 API
+			-------------------
+			(Updated: June 22, 1998)
+
+
+Changes Since Version 1.0.0a
+----------------------------
+
+1) H5Pset_mpi and H5Pget_mpi no longer have the access_mode
+argument.  (that is taken over by transfer template during
+data read/write.)
+
+2) new functions H5Pset_xfer and H5Pget_xfer to handle the
+specification of independent or collective data transfer_mode
+in the dataset transfer properties list.  The properties
+list can be used to specify data transfer mode in the H5Dwrite
+and H5Dread function calls.
