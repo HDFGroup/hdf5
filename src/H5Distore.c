@@ -1977,7 +1977,7 @@ H5F_istore_allocated(H5F_t *f, int ndims, haddr_t *addr)
     HDmemset(&udata, 0, sizeof udata);
     udata.mesg.ndims = ndims;
     if (H5B_iterate(f, H5B_ISTORE, addr, &udata)<0) {
-	HRETURN_ERROR(H5E_IO, H5E_INTERNAL, 0,
+	HRETURN_ERROR(H5E_IO, H5E_CANTINIT, 0,
 		      "unable to iterate over chunk B-tree");
     }
     FUNC_LEAVE(udata.total_storage);
@@ -2011,7 +2011,7 @@ H5F_istore_dump_btree(H5F_t *f, FILE *stream, int ndims, haddr_t *addr)
     udata.mesg.ndims = ndims;
     udata.stream = stream;
     if (H5B_iterate(f, H5B_ISTORE, addr, &udata)<0) {
-	HRETURN_ERROR(H5E_IO, H5E_INTERNAL, 0,
+	HRETURN_ERROR(H5E_IO, H5E_CANTINIT, 0,
 		      "unable to iterate over chunk B-tree");
     }
     FUNC_LEAVE(SUCCEED);
