@@ -13,7 +13,7 @@
 #ifndef _H5private_H
 #define _H5private_H
 #include <H5public.h>		/* Include Public Definitions	  */
-#include <H5api_adpt.h>
+
 /*
  * Include ANSI-C header files.
  */
@@ -404,7 +404,8 @@ typedef struct {
 
 HDF5API void H5_timer_reset (H5_timer_t *timer);
 HDF5API void H5_timer_begin (H5_timer_t *timer);
-HDF5API void H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/);
+HDF5API void H5_timer_end (H5_timer_t *sum/*in,out*/,
+			   H5_timer_t *timer/*in,out*/);
 HDF5API void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 
 /*

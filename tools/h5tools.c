@@ -331,10 +331,10 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 
 
 /*-------------------------------------------------------------------------
- * Function:	h5dump_simple
+ * Function:	h5dump_simple_dset
  *
  * Purpose:	Print some values from a dataset with a simple data space.
- *		This is a special case of h5dump().
+ *		This is a special case of h5dump_dset().
  *
  * Return:	Success:	0
  *
@@ -348,7 +348,8 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
  *-------------------------------------------------------------------------
  */
 static int
-h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type)
+h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
+		   hid_t p_type)
 {
     hid_t		f_space;		/*file data space	*/
     int			ndims;			/*dimensionality	*/
@@ -499,6 +500,104 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	h5dump_simple_mem
+ *
+ * Purpose:	Print some values from memory with a simple data space.
+ *		This is a special case of h5dump_mem().
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, July 23, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t type,
+		  hid_t space, void *_mem)
+{
+    unsigned char	*mem = (unsigned char*)_mem;
+    int			ndims;			/*dimensionality	*/
+    hsize_t		i;			/*counters		*/
+    int			need_prefix=1;		/*indices need printing	*/
+
+    /* Print info */
+    hsize_t		p_min_idx[H5S_MAX_RANK];/*min selected index	*/
+    hsize_t		p_max_idx[H5S_MAX_RANK];/*max selected index	*/
+    size_t		p_type_nbytes;		/*size of memory type	*/
+    hsize_t		p_nelmts;		/*total selected elmts	*/
+    char		p_buf[8192];		/*output string		*/
+    size_t		p_column=0;		/*output column		*/
+    size_t		p_ncolumns=80;		/*default num columns	*/
+    char 		p_prefix[1024];		/*line prefix string	*/
+
+    /*
+     * Check that everything looks okay.  The dimensionality must not be too
+     * great and the dimensionality of the items selected for printing must
+     * match the dimensionality of the dataset.
+     */
+    ndims = H5Sget_simple_extent_ndims(space);
+    if ((size_t)ndims>NELMTS(p_min_idx)) return -1;
+
+    /* Assume entire data space to be printed */
+    for (i=0; i<(hsize_t)ndims; i++) p_min_idx[i] = 0;
+    H5Sget_simple_extent_dims(space, p_max_idx, NULL);
+    for (i=0, p_nelmts=1; i<(hsize_t)ndims; i++) {
+	p_nelmts *= p_max_idx[i]-p_min_idx[i];
+    }
+    if (0==p_nelmts) return 0; /*nothing to print*/
+    p_type_nbytes = H5Tget_size(type);
+
+    /* Local things */
+    if (info->line_ncols>0) p_ncolumns = info->line_ncols;
+
+    for (i=0; i<p_nelmts; i++) {
+	/* Render the element */
+	h5dump_sprint(p_buf, info, type, mem+i*p_type_nbytes);
+	if (i+1<p_nelmts) {
+	    strcat(p_buf, OPT(info->elmt_suf1, ","));
+	}
+
+	/* Print the prefix */
+	if ((p_column +
+	     strlen(p_buf) +
+	     strlen(OPT(info->elmt_suf2, " ")) +
+	     strlen(OPT(info->line_suf, ""))) > p_ncolumns) {
+	    need_prefix = 1;
+	}
+	if (need_prefix) {
+	    h5dump_prefix(p_prefix, info, i, ndims, p_min_idx, p_max_idx);
+	    if (p_column) {
+		fputs(OPT(info->line_suf, ""), stream);
+		putc('\n', stream);
+		fputs(OPT(info->line_sep, ""), stream);
+	    }
+	    fputs(p_prefix, stream);
+	    p_column = strlen(p_prefix);
+	    need_prefix = 0;
+	} else {
+	    fputs(OPT(info->elmt_suf2, " "), stream);
+	    p_column += strlen(OPT(info->elmt_suf2, " "));
+	}
+	    
+	fputs(p_buf, stream);
+	p_column += strlen(p_buf);
+    }
+
+    if (p_column) {
+	fputs(OPT(info->line_suf, ""), stream);
+	putc('\n', stream);
+	fputs(OPT(info->line_sep, ""), stream);
+    }
+    return 0;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	h5dump_fixtype
  *
  * Purpose:	Given a file data type choose a memory data type which is
@@ -515,7 +614,7 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type)
  *
  *-------------------------------------------------------------------------
  */
-static hid_t
+hid_t
 h5dump_fixtype(hid_t f_type)
 {
     hid_t	m_type=-1, f_memb;
@@ -652,7 +751,7 @@ h5dump_fixtype(hid_t f_type)
 
 
 /*-------------------------------------------------------------------------
- * Function:	h5dump
+ * Function:	h5dump_dset
  *
  * Purpose:	Print some values from a dataset DSET to the file STREAM
  *		after converting all types to P_TYPE (which should be a
@@ -671,7 +770,7 @@ h5dump_fixtype(hid_t f_type)
  *-------------------------------------------------------------------------
  */
 int
-h5dump(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type)
+h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type)
 {
     hid_t	f_space;
     hid_t	p_type = _p_type;
@@ -698,7 +797,44 @@ h5dump(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type)
     H5Sclose(f_space);
 
     /* Print the data */
-    status = h5dump_simple(stream, info, dset, p_type);
+    status = h5dump_simple_dset(stream, info, dset, p_type);
     if (p_type!=_p_type) H5Tclose(p_type);
     return status;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	h5dump_mem
+ *
+ * Purpose:	Displays the data contained in MEM. MEM must have the
+ *		specified data TYPE and SPACE.  Currently only simple data
+ *		spaces are allowed and only the `all' selection.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, January 20, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
+	   void *mem)
+{
+    h5dump_t	info_dflt;
+    
+    /* Use default values */
+    if (!stream) stream = stdout;
+    if (!info) {
+	memset(&info_dflt, 0, sizeof info_dflt);
+	info = &info_dflt;
+    }
+
+    /* Check the data space */
+    if (H5Sis_simple(space)<=0) return -1;
+    return h5dump_simple_mem(stream, info, type, space, mem);
 }

@@ -366,12 +366,13 @@ herr_t H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 /* Bit twiddling functions */
 HDF5API void H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
-		   size_t src_offset, size_t size);
-HDF5API void H5T_bit_set (uint8_t *buf, size_t offset, size_t size, hbool_t value);
+			   size_t src_offset, size_t size);
+HDF5API void H5T_bit_set (uint8_t *buf, size_t offset, size_t size,
+			  hbool_t value);
 HDF5API hsize_t H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size);
 void H5T_bit_set_d (uint8_t *buf, size_t offset, size_t size, hsize_t val);
 HDF5API ssize_t H5T_bit_find (uint8_t *buf, size_t offset, size_t size,
-		      H5T_sdir_t direction, hbool_t value);
+			      H5T_sdir_t direction, hbool_t value);
 htri_t H5T_bit_inc(uint8_t *buf, size_t start, size_t size);
 
 #endif

@@ -18,7 +18,7 @@
 #define _H5Oprivate_H
 
 #include <H5Opublic.h>
-#include <H5api_adpt.h>
+
 /* Private headers needed by this file */
 #include <H5private.h>
 #include <H5Fprivate.h>
@@ -268,25 +268,27 @@ typedef struct H5O_stab_t {
 } H5O_stab_t;
 
 /* General message operators */
-HDF5API herr_t H5O_create (H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/);
+HDF5API herr_t H5O_create (H5F_t *f, size_t size_hint,
+			   H5G_entry_t *ent/*out*/);
 herr_t H5O_open (H5G_entry_t *ent);
 HDF5API herr_t H5O_close (H5G_entry_t *ent);
 intn H5O_link (H5G_entry_t *ent, intn adjust);
 intn H5O_count (H5G_entry_t *ent, const H5O_class_t *type);
 htri_t H5O_exists(H5G_entry_t *ent, const H5O_class_t *type, intn sequence);
-HDF5API void *H5O_read (H5G_entry_t *ent, const H5O_class_t *type, intn sequence,
-		void *mesg);
-HDF5API intn H5O_modify (H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
-		 uintn flags, const void *mesg);
+HDF5API void *H5O_read (H5G_entry_t *ent, const H5O_class_t *type,
+			intn sequence, void *mesg);
+HDF5API intn H5O_modify (H5G_entry_t *ent, const H5O_class_t *type,
+			 intn overwrite, uintn flags, const void *mesg);
 herr_t H5O_touch(H5G_entry_t *ent, hbool_t force);
-HDF5API herr_t H5O_remove (H5G_entry_t *ent, const H5O_class_t *type, intn sequence);
+HDF5API herr_t H5O_remove (H5G_entry_t *ent, const H5O_class_t *type,
+			   intn sequence);
 herr_t H5O_reset (const H5O_class_t *type, void *native);
 void *H5O_free (const H5O_class_t *type, void *mesg);
 void *H5O_copy (const H5O_class_t *type, const void *mesg, void *dst);
 herr_t H5O_share (H5F_t *f, const H5O_class_t *type, const void *mesg,
 		  H5HG_t *hobj/*out*/);
-HDF5API herr_t H5O_debug (H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
-		  intn fwidth);
+HDF5API herr_t H5O_debug (H5F_t *f, const haddr_t *addr, FILE * stream,
+			  intn indent, intn fwidth);
 
 /* EFL operators */
 hsize_t H5O_efl_total_size (H5O_efl_t *efl);

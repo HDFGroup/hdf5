@@ -550,28 +550,33 @@ H5F_t *H5F_open(const char *name, uintn flags,
 		const H5F_create_t *create_parms,
 		const H5F_access_t *access_parms);
 herr_t H5F_close(H5F_t *f);
-HDF5API herr_t H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
-		 intn fwidth);
+HDF5API herr_t H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
+			 intn indent, intn fwidth);
 HDF5API herr_t H5F_istore_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
-			intn indent, intn fwidth, int ndims);
+				intn indent, intn fwidth, int ndims);
 herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
 
 /* Functions that operate on array storage */
-HDF5API herr_t H5F_arr_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);
+HDF5API herr_t H5F_arr_create(H5F_t *f,
+			      struct H5O_layout_t *layout /*in,out*/);
 HDF5API herr_t H5F_arr_read (H5F_t *f, const struct H5D_xfer_t *xfer,
-		     const struct H5O_layout_t *layout,
-		     const struct H5O_pline_t *pline,
-		     const struct H5O_fill_t *fill,
-		     const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
-		     const hsize_t mem_size[], const hssize_t mem_offset[],
-		     const hssize_t file_offset[], void *_buf/*out*/);
+			     const struct H5O_layout_t *layout,
+			     const struct H5O_pline_t *pline,
+			     const struct H5O_fill_t *fill,
+			     const struct H5O_efl_t *efl,
+			     const hsize_t _hslab_size[],
+			     const hsize_t mem_size[],
+			     const hssize_t mem_offset[],
+			     const hssize_t file_offset[], void *_buf/*out*/);
 HDF5API herr_t H5F_arr_write (H5F_t *f, const struct H5D_xfer_t *xfer,
-		      const struct H5O_layout_t *layout,
-		      const struct H5O_pline_t *pline,
-		      const struct H5O_fill_t *fill,
-		      const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
-		      const hsize_t mem_size[], const hssize_t mem_offset[],
-		      const hssize_t file_offset[], const void *_buf);
+			      const struct H5O_layout_t *layout,
+			      const struct H5O_pline_t *pline,
+			      const struct H5O_fill_t *fill,
+			      const struct H5O_efl_t *efl,
+			      const hsize_t _hslab_size[],
+			      const hsize_t mem_size[],
+			      const hssize_t mem_offset[],
+			      const hssize_t file_offset[], const void *_buf);
 
 /* Functions that operate on indexed storage */
 herr_t H5F_istore_init (H5F_t *f);
@@ -600,7 +605,7 @@ herr_t H5F_istore_allocate (H5F_t *f,
 
 /* Functions that operate on contiguous storage wrt boot block */
 HDF5API herr_t H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,
-		      const H5D_transfer_t xfer_mode, void *buf);
+			      const H5D_transfer_t xfer_mode, void *buf);
 herr_t H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size,
 		       const H5D_transfer_t xfer_mode, const void *buf);
 

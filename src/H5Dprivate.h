@@ -17,7 +17,7 @@
 #define _H5Dprivate_H
 
 #include <H5Dpublic.h>
-#include <H5api_adpt.h>
+
 /* Private headers needed by this file */
 #include <H5private.h>
 #include <H5Fprivate.h>		/*for the H5F_t type			     */

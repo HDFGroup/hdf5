@@ -52,7 +52,8 @@ typedef size_t (*H5Z_func_t)(unsigned int flags, size_t cd_nelmts,
 extern "C" {
 #endif
 
-HDF5API herr_t H5Zregister(H5Z_filter_t id, const char *comment, H5Z_func_t filter);
+HDF5API herr_t H5Zregister(H5Z_filter_t id, const char *comment,
+			   H5Z_func_t filter);
 
 #ifdef __cplusplus
 }

@@ -9,7 +9,7 @@
 #define H5Vprivate_H
 
 #include <H5private.h>
-#include <H5api_adpt.h>
+
 /* Vector comparison functions like Fortran66 comparison operators */
 #define H5V_vector_eq_s(N,V1,V2) (H5V_vector_cmp_s (N, V1, V2)==0)
 #define H5V_vector_lt_s(N,V1,V2) (H5V_vector_cmp_s (N, V1, V2)<0)
@@ -41,19 +41,21 @@ htri_t H5V_hyper_disjointp(intn n, const hssize_t *offset1,
 			   const hsize_t *size1, const hssize_t *offset2,
 			   const hsize_t *size2);
 htri_t H5V_hyper_eq(intn n, const hssize_t *offset1, const hsize_t *size1,
-		     const hssize_t *offset2, const hsize_t *size2);
-HDF5API herr_t H5V_hyper_fill(intn n, const hsize_t *_size, const hsize_t *total_size,
-		      const hssize_t *offset, void *_dst, uintn fill_value);
+		    const hssize_t *offset2, const hsize_t *size2);
+HDF5API herr_t H5V_hyper_fill(intn n, const hsize_t *_size,
+			      const hsize_t *total_size,
+			      const hssize_t *offset, void *_dst,
+			      uintn fill_value);
 HDF5API herr_t H5V_hyper_copy(intn n, const hsize_t *size,
-		      const hsize_t *dst_total_size,
-		      const hssize_t *dst_offset, void *_dst,
-		      const hsize_t *src_total_size,
-		      const hssize_t *src_offset, const void *_src);
+			      const hsize_t *dst_total_size,
+			      const hssize_t *dst_offset, void *_dst,
+			      const hsize_t *src_total_size,
+			      const hssize_t *src_offset, const void *_src);
 herr_t H5V_stride_fill(intn n, hsize_t elmt_size, const hsize_t *size,
 		       const hssize_t *stride, void *_dst, uintn fill_value);
 HDF5API herr_t H5V_stride_copy(intn n, hsize_t elmt_size, const hsize_t *_size,
-		       const hssize_t *dst_stride, void *_dst,
-		       const hssize_t *src_stride, const void *_src);
+			       const hssize_t *dst_stride, void *_dst,
+			       const hssize_t *src_stride, const void *_src);
 herr_t H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size, intn dst_n,
 			const hsize_t *dst_size, const hssize_t *dst_stride,
 			void *_dst, intn src_n, const hsize_t *src_size,

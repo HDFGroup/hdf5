@@ -35,6 +35,7 @@ static char             RcsId[] = "@(#)$Revision$";
 #  include <mpio.h>
 #endif
 #include <H5api_adpt.h>
+
 /* Version numbers */
 #define H5_VERS_MAJOR	1       /* For major interface/format changes  	     */
 #define H5_VERS_MINOR	1       /* For minor interface/format changes  	     */
@@ -101,8 +102,10 @@ extern "C" {
 HDF5API herr_t H5open (void);
 HDF5API herr_t H5close (void);
 HDF5API herr_t H5dont_atexit (void);
-HDF5API herr_t H5get_libversion (unsigned *majnum, unsigned *minnum, unsigned *relnum);
-HDF5API herr_t H5check_version (unsigned majnum, unsigned minnum, unsigned relnum);
+HDF5API herr_t H5get_libversion (unsigned *majnum, unsigned *minnum,
+				 unsigned *relnum);
+HDF5API herr_t H5check_version (unsigned majnum, unsigned minnum,
+				unsigned relnum);
 
 #ifdef __cplusplus
 }

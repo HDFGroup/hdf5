@@ -395,16 +395,18 @@ HDF5API htri_t H5Tcommitted (hid_t type_id);
 /* Operations defined on compound data types */
 HDF5API herr_t H5Tinsert (hid_t parent_id, const char *name, size_t offset,
                   hid_t member_id);
-HDF5API herr_t H5Tinsert_array (hid_t parent_id, const char *name, size_t offset,
-			int ndims, const size_t dim[], const int *perm,
-			hid_t member_id);
+HDF5API herr_t H5Tinsert_array (hid_t parent_id, const char *name,
+				size_t offset, int ndims, const size_t dim[],
+				const int *perm, hid_t member_id);
 HDF5API herr_t H5Tpack (hid_t type_id);
 
 /* Operations defined on enumeration data types */
 HDF5API hid_t H5Tenum_create(hid_t base_id);
 HDF5API herr_t H5Tenum_insert(hid_t type, const char *name, void *value);
-HDF5API hid_t H5Tenum_nameof(hid_t type, void *value, char *name/*out*/, size_t size);
-HDF5API hid_t H5Tenum_valueof(hid_t type, const char *name, void *value/*out*/);
+HDF5API hid_t H5Tenum_nameof(hid_t type, void *value, char *name/*out*/,
+			     size_t size);
+HDF5API hid_t H5Tenum_valueof(hid_t type, const char *name,
+			      void *value/*out*/);
 
 /* Querying property values */
 HDF5API hid_t H5Tget_super(hid_t type);
@@ -414,11 +416,11 @@ HDF5API H5T_order_t H5Tget_order(hid_t type_id);
 HDF5API size_t H5Tget_precision(hid_t type_id);
 HDF5API size_t H5Tget_offset(hid_t type_id);
 HDF5API herr_t H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/,
-                  H5T_pad_t *msb/*out*/);
+			  H5T_pad_t *msb/*out*/);
 HDF5API H5T_sign_t H5Tget_sign(hid_t type_id);
 HDF5API herr_t H5Tget_fields(hid_t type_id, size_t *spos/*out*/,
-                     size_t *epos/*out*/, size_t *esize/*out*/,
-                     size_t *mpos/*out*/, size_t *msize/*out*/);
+			     size_t *epos/*out*/, size_t *esize/*out*/,
+			     size_t *mpos/*out*/, size_t *msize/*out*/);
 HDF5API size_t H5Tget_ebias(hid_t type_id);
 HDF5API H5T_norm_t H5Tget_norm(hid_t type_id);
 HDF5API H5T_pad_t H5Tget_inpad(hid_t type_id);
@@ -427,9 +429,10 @@ HDF5API int H5Tget_nmembers(hid_t type_id);
 HDF5API char *H5Tget_member_name(hid_t type_id, int membno);
 HDF5API size_t H5Tget_member_offset(hid_t type_id, int membno);
 HDF5API int H5Tget_member_dims(hid_t type_id, int membno, size_t dims[]/*out*/,
-		       int perm[]/*out*/);
+			       int perm[]/*out*/);
 HDF5API hid_t H5Tget_member_type(hid_t type_id, int membno);
-HDF5API herr_t H5Tget_member_value(hid_t type_id, int membno, void *value/*out*/);
+HDF5API herr_t H5Tget_member_value(hid_t type_id, int membno,
+				   void *value/*out*/);
 HDF5API H5T_cset_t H5Tget_cset(hid_t type_id);
 
 /* Setting property values */
@@ -439,8 +442,8 @@ HDF5API herr_t H5Tset_precision (hid_t type_id, size_t prec);
 HDF5API herr_t H5Tset_offset (hid_t type_id, size_t offset);
 HDF5API herr_t H5Tset_pad (hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb);
 HDF5API herr_t H5Tset_sign (hid_t type_id, H5T_sign_t sign);
-HDF5API herr_t H5Tset_fields (hid_t type_id, size_t spos, size_t epos, size_t esize,
-                      size_t mpos, size_t msize);
+HDF5API herr_t H5Tset_fields (hid_t type_id, size_t spos, size_t epos,
+			      size_t esize, size_t mpos, size_t msize);
 HDF5API herr_t H5Tset_ebias (hid_t type_id, size_t ebias);
 HDF5API herr_t H5Tset_norm (hid_t type_id, H5T_norm_t norm);
 HDF5API herr_t H5Tset_inpad (hid_t type_id, H5T_pad_t pad);
@@ -449,12 +452,12 @@ HDF5API herr_t H5Tset_strpad (hid_t type_id, H5T_str_t strpad);
 
 /* Type conversion database */
 HDF5API herr_t H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id,
-		   hid_t dst_id, H5T_conv_t func);
+			   hid_t dst_id, H5T_conv_t func);
 HDF5API herr_t H5Tunregister (H5T_pers_t pers, const char *name, hid_t src_id,
-		      hid_t dst_id, H5T_conv_t func);
+			      hid_t dst_id, H5T_conv_t func);
 HDF5API H5T_conv_t H5Tfind (hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata);
-HDF5API herr_t H5Tconvert (hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
-		   void *background);
+HDF5API herr_t H5Tconvert (hid_t src_id, hid_t dst_id, size_t nelmts,
+			   void *buf, void *background);
 HDF5API H5T_overflow_t H5Tget_overflow(void);
 HDF5API herr_t H5Tset_overflow(H5T_overflow_t func);
 

@@ -54,23 +54,27 @@ extern "C" {
 /* Functions in H5S.c */
 HDF5API hid_t H5Screate(H5S_class_t type);
 HDF5API hid_t H5Screate_simple (int rank, const hsize_t dims[],
-			const hsize_t maxdims[]);
-HDF5API herr_t H5Sset_extent_simple (hid_t space_id, int rank, const hsize_t dims[],
-			     const hsize_t max[]);
+				const hsize_t maxdims[]);
+HDF5API herr_t H5Sset_extent_simple (hid_t space_id, int rank,
+				     const hsize_t dims[],
+				     const hsize_t max[]);
 HDF5API hid_t H5Scopy (hid_t space_id);
 HDF5API herr_t H5Sclose (hid_t space_id);
 HDF5API hsize_t H5Sget_simple_extent_npoints (hid_t space_id);
 HDF5API int H5Sget_simple_extent_ndims (hid_t space_id);
 HDF5API int H5Sget_simple_extent_dims (hid_t space_id, hsize_t dims[],
-			       hsize_t maxdims[]);
+				       hsize_t maxdims[]);
 HDF5API htri_t H5Sis_simple (hid_t space_id);
 HDF5API herr_t H5Sset_space (hid_t space_id, int rank, const hsize_t *dims);
 HDF5API hssize_t H5Sget_select_npoints (hid_t spaceid);
 HDF5API herr_t H5Sselect_hyperslab (hid_t space_id, H5S_seloper_t op,
-			    const hssize_t start[], const hsize_t _stride[],
-			    const hsize_t count[], const hsize_t _block[]);
-HDF5API herr_t H5Sselect_elements (hid_t space_id, H5S_seloper_t op, size_t num_elemn,
-			   const hssize_t **coord);
+				    const hssize_t start[],
+				    const hsize_t _stride[],
+				    const hsize_t count[],
+				    const hsize_t _block[]);
+HDF5API herr_t H5Sselect_elements (hid_t space_id, H5S_seloper_t op,
+				   size_t num_elemn,
+				   const hssize_t **coord);
 HDF5API H5S_class_t H5Sget_simple_extent_type (hid_t space_id);
 HDF5API herr_t H5Sset_extent_none (hid_t space_id);
 HDF5API herr_t H5Sextent_copy (hid_t dst_id,hid_t src_id);

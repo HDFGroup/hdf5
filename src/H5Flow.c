@@ -481,7 +481,9 @@ H5F_low_access(const H5F_low_class_t *type, const char *name,
 {
     htri_t		ret_value;
     struct stat		sb;
+#ifdef WIN32
     int			fid;
+#endif
 
     FUNC_ENTER(H5F_low_size, FAIL);
     assert(type);

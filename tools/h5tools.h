@@ -122,6 +122,9 @@ typedef struct h5dump_t {
 } h5dump_t;
 
 
-int h5dump(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type);
+hid_t h5dump_fixtype(hid_t f_type);
+int h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type);
+int h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
+	       void *mem);
 
 #endif

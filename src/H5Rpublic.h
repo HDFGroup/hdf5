@@ -67,7 +67,7 @@ extern "C" {
 
 /* Functions in H5R.c */
 HDF5API herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name,
-		 H5R_type_t ref_type, hid_t space_id);
+			 H5R_type_t ref_type, hid_t space_id);
 HDF5API hid_t H5Rdereference(hid_t dataset, H5R_type_t ref_type, void *ref);
 HDF5API hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, void *ref);
 
