@@ -76,6 +76,7 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Allow partial parallel writing to compact datasets.  QAK - 2003/10/06
         - Correctly create reference to shared datatype in attribute, instead
             of making a copy of the shared datatype in the attribute.
             QAK - 2003/10/01
