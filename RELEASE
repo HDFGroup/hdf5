@@ -125,6 +125,10 @@ Tools
     * h5dump displays opaque and bitfield data correctly.
     * h5dump and h5ls can browse files created with the Stream VFD
       (eg. "h5ls <hostname>:<port>").
+    * h5dump has a new feature "-o <filename>" which outputs the raw data
+      of the dataset into ascii text file <filename>.
+    * h5toh4 used to converts hdf5 strings type to hdf4 DFNT_INT8 type.
+      Corrected to produce hdf4 DFNT_CHAR type instead.
 
 Documentation
 -------------
