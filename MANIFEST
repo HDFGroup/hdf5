@@ -998,6 +998,7 @@
 ./test/dangle.c
 ./test/deflate.h5
 ./test/dsets.c
+./test/dt_atomic.c
 ./test/dtypes.c
 ./test/dtransform.c
 ./test/enum.c
