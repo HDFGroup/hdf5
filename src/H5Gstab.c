@@ -312,39 +312,37 @@ done:
 static herr_t 
 H5G_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
 {
-    char *new_user_path;        /* Pointer to new user path */
-    char *new_canon_path;       /* Pointer to new canonical path */
     size_t  name_len;           /* Length of name to append */
-    size_t  user_path_len;      /* Length of location's user path name */
-    size_t  canon_path_len;     /* Length of location's canonical path name */
     herr_t  ret_value = SUCCEED;       
  
-    FUNC_ENTER_NOAPI(H5G_insert_name, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_insert_name);
 
     assert(loc);
     assert(obj);
     assert(name);
  
-    /* Only attempt to build a new name if the location's name exists */
-    if(loc->canon_path_r) {
-        const char *loc_user_path;      /* Pointer to raw string for user path */
-        const char *loc_canon_path;     /* Pointer to raw string for canonical path */
+    /* Reset the object's previous names, if they exist */
+    if(obj->user_path_r) {
+        H5RS_decr(obj->user_path_r);
+        obj->user_path_r=NULL;
+    } /* end if */
+    if(obj->canon_path_r) {
+        H5RS_decr(obj->canon_path_r);
+        obj->canon_path_r=NULL;
+    } /* end if */
+    obj->user_path_hidden=0;
 
-        /* Reset the object's previous names, if they exist */
-        if(obj->user_path_r) {
-            H5RS_decr(obj->user_path_r);
-            obj->user_path_r=NULL;
-        } /* end if */
-        if(obj->canon_path_r) {
-            H5RS_decr(obj->canon_path_r);
-            obj->canon_path_r=NULL;
-        } /* end if */
-        obj->user_path_hidden=0;
+    /* Get the length of the new name */
+    name_len = HDstrlen(name);
+
+    /* Modify the object's user path, if a user path exists in the location */
+    if(loc->user_path_r) {
+        const char *loc_user_path;      /* Pointer to raw string for user path */
+        size_t  user_path_len;      /* Length of location's user path name */
+        char *new_user_path;        /* Pointer to new user path */
 
         /* Get the length of the strings involved */
         user_path_len = H5RS_len(loc->user_path_r);
-        canon_path_len = H5RS_len(loc->canon_path_r);
-        name_len = HDstrlen(name);
 
         /* Modify the object's user path */
 
@@ -372,6 +370,16 @@ H5G_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
         /* Give ownership of the user path to the entry */
         obj->user_path_r=H5RS_own(new_user_path);
         assert(obj->user_path_r);
+    } /* end if */
+
+    /* Modify the object's canonical path, if a canonical path exists in the location */
+    if(loc->canon_path_r) {
+        const char *loc_canon_path;     /* Pointer to raw string for canonical path */
+        size_t  canon_path_len;     /* Length of location's canonical path name */
+        char *new_canon_path;       /* Pointer to new canonical path */
+
+        /* Get the length of the strings involved */
+        canon_path_len = H5RS_len(loc->canon_path_r);
 
         /* Modify the object's canonical path */
 
