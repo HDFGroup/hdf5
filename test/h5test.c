@@ -747,3 +747,32 @@ h5_dump_info_object(MPI_Info info)
     }
 }
 #endif	/* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	h5_get_file_size
+ *
+ * Purpose:	Get the current size of a file (in bytes)
+ *
+ * Return:	Success:	Size of file in bytes (could be 0)
+ *		Failure:	0
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, March 22, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+off_t
+h5_get_file_size(const char *filename)
+{
+    h5_stat_t	sb;
+
+    /* Get the file's statistics */
+    if (HDstat(filename, &sb)>=0)
+        return(sb.st_size);
+
+    return(0);
+} /* end get_file_size() */
+

@@ -79,6 +79,7 @@ H5TEST_DLL void h5_show_hostname(void);
 int h5_set_info_object(void);
 void h5_dump_info_object(MPI_Info info);
 #endif
+H5TEST_DLL off_t h5_get_file_size(const char *filename);
 
 #ifdef __cplusplus
 }
