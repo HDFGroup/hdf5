@@ -2837,7 +2837,8 @@ H5Tinsert_array (hid_t parent_id, const char *name, size_t offset,
     intn	i;
 
     FUNC_ENTER(H5Tinsert_array, FAIL);
-    H5TRACE7("e","iszIs*z*Isi",parent_id,name,offset,ndims,dim,perm,member_id);
+    H5TRACE7("e","iszIs*[a3]z*Isi",parent_id,name,offset,ndims,dim,perm,
+             member_id);
 
     /* Check args */
     if (H5_DATATYPE != H5I_group(parent_id) ||
