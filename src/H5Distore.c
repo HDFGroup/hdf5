@@ -154,7 +154,7 @@ static haddr_t H5D_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *
     const hssize_t offset[], H5D_istore_ud1_t *_udata);
 static void *H5D_istore_chunk_alloc(size_t size, const H5O_pline_t *pline);
 static void *H5D_istore_chunk_xfree(void *chk, const H5O_pline_t *pline);
-static herr_t H5D_istore_page_free (void *page);
+static herr_t H5D_istore_shared_free (void *page);
 
 /* B-tree iterator callbacks */
 static int H5D_istore_iter_allocated(H5F_t *f, hid_t dxpl_id, void *left_key, haddr_t addr,
@@ -166,7 +166,7 @@ static int H5D_istore_prune_extent(H5F_t *f, hid_t dxpl_id, void *_lt_key, haddr
 
 /* B-tree callbacks */
 static size_t H5D_istore_sizeof_rkey(H5F_t *f, const void *_udata);
-static void *H5D_istore_get_page(H5F_t *f, const void *_udata);
+static H5RC_t *H5D_istore_get_shared(H5F_t *f, const void *_udata);
 static herr_t H5D_istore_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t, void *_lt_key,
 				  void *_udata, void *_rt_key,
 				  haddr_t *addr_p /*out*/);
@@ -197,7 +197,7 @@ H5B_class_t H5B_ISTORE[1] = {{
     H5B_ISTORE_ID,		/*id			*/
     sizeof(H5D_istore_key_t),	/*sizeof_nkey		*/
     H5D_istore_sizeof_rkey, 	/*get_sizeof_rkey	*/
-    H5D_istore_get_page,	/*get_page		*/
+    H5D_istore_get_shared,	/*get_shared		*/
     H5D_istore_new_node,	/*new			*/
     H5D_istore_cmp2,		/*cmp2			*/
     H5D_istore_cmp3,		/*cmp3			*/
@@ -211,6 +211,9 @@ H5B_class_t H5B_ISTORE[1] = {{
     H5D_istore_debug_key,	/*debug			*/
 }};
 
+/* Declare a free list to manage the H5B_shared_t struct */
+H5FL_EXTERN(H5B_shared_t);
+
 /* Declare a free list to manage H5F_rdcc_ent_t objects */
 H5FL_DEFINE_STATIC(H5D_rdcc_ent_t);
 
@@ -219,6 +222,9 @@ H5FL_SEQ_DEFINE_STATIC(H5D_rdcc_ent_ptr_t);
 
 /* Declare a free list to manage the chunk sequence information */
 H5FL_BLK_DEFINE_STATIC(chunk);
+
+/* Declare a free list to manage the native key offset sequence information */
+H5FL_SEQ_DEFINE_STATIC(size_t);
 
 /* Declare a free list to manage the raw page information */
 H5FL_BLK_DEFINE_STATIC(chunk_page);
@@ -263,9 +269,9 @@ H5D_istore_sizeof_rkey(H5F_t UNUSED *f, const void *_udata)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_istore_get_page
+ * Function:	H5D_istore_get_shared
  *
- * Purpose:	Returns the raw data page for the specified UDATA.
+ * Purpose:	Returns the shared B-tree info for the specified UDATA.
  *
  * Return:	Success:	Pointer to the raw B-tree page for this dataset
  *
@@ -278,23 +284,23 @@ H5D_istore_sizeof_rkey(H5F_t UNUSED *f, const void *_udata)
  *
  *-------------------------------------------------------------------------
  */
-static void *
-H5D_istore_get_page(H5F_t UNUSED *f, const void *_udata)
+static H5RC_t *
+H5D_istore_get_shared(H5F_t UNUSED *f, const void *_udata)
 {
     const H5D_istore_ud1_t *udata = (const H5D_istore_ud1_t *) _udata;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_get_page);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_get_shared);
 
     assert(udata);
     assert(udata->mesg);
-    assert(udata->mesg->u.chunk.rc_page);
+    assert(udata->mesg->u.chunk.btree_shared);
 
-    /* Increment reference count on B-tree node */
-    H5RC_INC(udata->mesg->u.chunk.rc_page);
+    /* Increment reference count on B-tree info */
+    H5RC_INC(udata->mesg->u.chunk.btree_shared);
 
-    /* Get the pointer to the ref-count object */
-    FUNC_LEAVE_NOAPI(udata->mesg->u.chunk.rc_page);
-} /* end H5D_istore_get_page() */
+    /* Return the pointer to the ref-count object */
+    FUNC_LEAVE_NOAPI(udata->mesg->u.chunk.btree_shared);
+} /* end H5D_istore_get_shared() */
 
 
 /*-------------------------------------------------------------------------
@@ -315,23 +321,27 @@ static herr_t
 H5D_istore_decode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
 {
     H5D_istore_key_t	*key = (H5D_istore_key_t *) _key;
-    int		i;
-    int		ndims = H5D_ISTORE_NDIMS(bt);
+    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
+    unsigned		u;
+    unsigned		ndims;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_decode_key);
 
     /* check args */
     assert(f);
     assert(bt);
+    shared=H5RC_GET_OBJ(bt->rc_shared);
+    HDassert(shared);
     assert(raw);
     assert(key);
-    assert(ndims>0 && ndims<=H5O_LAYOUT_NDIMS);
+    ndims = H5D_ISTORE_NDIMS(shared);
+    assert(ndims<=H5O_LAYOUT_NDIMS);
 
     /* decode */
     UINT32DECODE(raw, key->nbytes);
     UINT32DECODE(raw, key->filter_mask);
-    for (i=0; i<ndims; i++)
-	UINT64DECODE(raw, key->offset[i]);
+    for (u=0; u<ndims; u++)
+	UINT64DECODE(raw, key->offset[u]);
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5D_istore_decode_key() */
@@ -355,23 +365,27 @@ static herr_t
 H5D_istore_encode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
 {
     H5D_istore_key_t	*key = (H5D_istore_key_t *) _key;
-    int		ndims = H5D_ISTORE_NDIMS(bt);
-    int		i;
+    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
+    unsigned		ndims;
+    unsigned		u;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_encode_key);
 
     /* check args */
     assert(f);
     assert(bt);
+    shared=H5RC_GET_OBJ(bt->rc_shared);
+    HDassert(shared);
     assert(raw);
     assert(key);
-    assert(ndims>0 && ndims<=H5O_LAYOUT_NDIMS);
+    ndims = H5D_ISTORE_NDIMS(shared);
+    assert(ndims<=H5O_LAYOUT_NDIMS);
 
     /* encode */
     UINT32ENCODE(raw, key->nbytes);
     UINT32ENCODE(raw, key->filter_mask);
-    for (i=0; i<ndims; i++)
-	UINT64ENCODE(raw, key->offset[i]);
+    for (u=0; u<ndims; u++)
+	UINT64ENCODE(raw, key->offset[u]);
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5D_istore_encode_key() */
@@ -506,13 +520,31 @@ H5D_istore_cmp3(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
     assert(udata);
     assert(udata->mesg->u.chunk.ndims > 0 && udata->mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
 
-    if (H5V_vector_lt_s(udata->mesg->u.chunk.ndims, udata->key.offset,
-			lt_key->offset)) {
-	ret_value = -1;
-    } else if (H5V_vector_ge_s(udata->mesg->u.chunk.ndims, udata->key.offset,
-			     rt_key->offset)) {
-	ret_value = 1;
-    }
+#ifdef NEW_WAY
+    /* Special case for faster checks on 1-D chunks */
+    /* (Checking for ndims==2 because last dimension is the datatype size) */
+    if(udata->mesg->u.chunk.ndims==2) {
+        if(udata->key.offset[0]>=rt_key->offset[0])
+            ret_value=1;
+        else if(udata->key.offset[0]<lt_key->offset[0])
+            ret_value=(-1);
+    } /* end if */
+    else {
+        if (H5V_vector_ge_s(udata->mesg->u.chunk.ndims, udata->key.offset,
+                                 rt_key->offset))
+            ret_value = 1;
+        else if (H5V_vector_lt_s(udata->mesg->u.chunk.ndims, udata->key.offset,
+                            lt_key->offset))
+            ret_value = -1;
+    } /* end else */
+#else /* NEW_WAY */
+    if (H5V_vector_ge_s(udata->mesg->u.chunk.ndims, udata->key.offset,
+                             rt_key->offset))
+        ret_value = 1;
+    else if (H5V_vector_lt_s(udata->mesg->u.chunk.ndims, udata->key.offset,
+                        lt_key->offset))
+        ret_value = -1;
+#endif /* NEW_WAY */
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_istore_cmp3() */
@@ -908,10 +940,9 @@ herr_t
 H5D_istore_init (H5F_t *f, H5D_t *dset)
 {
     H5D_istore_ud1_t	udata;
-    size_t		sizeof_rkey;    /* Single raw key size */
-    size_t              size;           /* Raw B-tree node size */
+    H5B_shared_t *shared;               /* Shared B-tree node info */
+    size_t	u;                      /* Local index variable */
     H5D_rdcc_t	*rdcc = &(dset->cache.chunk);
-    void        *page;                  /* Buffer for raw B-tree node */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5D_istore_init, FAIL);
@@ -928,17 +959,28 @@ H5D_istore_init (H5F_t *f, H5D_t *dset)
     /* Initialize "user" data for B-tree callbacks, etc. */
     udata.mesg = &dset->layout;
 
-    /* Set up the "global" information for this dataset's chunks */
-    sizeof_rkey = H5D_istore_sizeof_rkey(f, &udata);
-    assert(sizeof_rkey);
-    size = H5B_nodesize(f, H5B_ISTORE, NULL, sizeof_rkey);
-    assert(size);
-    if(NULL==(page=H5FL_BLK_MALLOC(chunk_page,size)))
+    /* Allocate space for the shared structure */
+    if(NULL==(shared=H5FL_MALLOC(H5B_shared_t)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for shared B-tree info")
+
+    /* Set up the "global" information for this file's groups */
+    shared->type= H5B_ISTORE;
+    shared->sizeof_rkey = H5D_istore_sizeof_rkey(f, &udata);
+    assert(shared->sizeof_rkey);
+    shared->sizeof_rnode = H5B_nodesize(f, H5B_ISTORE, &shared->sizeof_keys, shared->sizeof_rkey);
+    assert(shared->sizeof_rnode);
+    if(NULL==(shared->page=H5FL_BLK_MALLOC(chunk_page,shared->sizeof_rnode)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
+    if(NULL==(shared->nkey=H5FL_SEQ_MALLOC(size_t,(size_t)(2*H5F_KVALUE(f,H5B_ISTORE)+1))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
 
-    /* Make page buffer reference counted */
-    if(NULL==(dset->layout.u.chunk.rc_page=H5RC_create(page,H5D_istore_page_free)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for page")
+    /* Initialize the offsets into the native key buffer */
+    for(u=0; u<(2*H5F_KVALUE(f,H5B_ISTORE)+1); u++)
+        shared->nkey[u]=u*H5B_ISTORE->sizeof_nkey;
+
+    /* Make shared B-tree info reference counted */
+    if(NULL==(dset->layout.u.chunk.btree_shared=H5RC_create(shared,H5D_istore_shared_free)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1235,7 +1277,7 @@ H5D_istore_dest (H5F_t *f, hid_t dxpl_id, H5D_t *dset)
     HDmemset (rdcc, 0, sizeof(H5D_rdcc_t));
 
     /* Free the raw B-tree node buffer */
-    if(H5RC_DEC(dset->layout.u.chunk.rc_page)<0)
+    if(H5RC_DEC(dset->layout.u.chunk.btree_shared)<0)
 	HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page");
 
 done:
@@ -1244,9 +1286,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_istore_page_free
+ * Function:	H5D_istore_shared_free
  *
- * Purpose:	Free a B-tree node
+ * Purpose:	Free B-tree shared info
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1258,14 +1300,23 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_istore_page_free (void *page)
+H5D_istore_shared_free (void *_shared)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_page_free)
+    H5B_shared_t *shared = (H5B_shared_t *)_shared;
 
-    H5FL_BLK_FREE(chunk_page,page);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_shared_free)
+
+    /* Free the raw B-tree node buffer */
+    H5FL_BLK_FREE(chunk_page,shared->page);
+
+    /* Free the B-tree native key offsets buffer */
+    H5FL_SEQ_FREE(size_t,shared->nkey);
+
+    /* Free the shared B-tree info */
+    H5FL_FREE(H5B_shared_t,shared);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5D_istore_page_free() */
+} /* end H5D_istore_shared_free() */
 
 
 /*-------------------------------------------------------------------------

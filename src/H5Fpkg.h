@@ -127,7 +127,7 @@ typedef struct H5F_file_t {
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5F_close_degree_t fc_degree;   /* File close behavior degree	*/
-    H5RC_t      *rc_page;       /* Pointer to ref-counted raw B-tree node buffer    */
+    H5RC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
 } H5F_file_t;
 
 /* A record of the mount table */

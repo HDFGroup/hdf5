@@ -34,6 +34,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Fprivate.h"		/* File access				*/
+#include "H5RCprivate.h"	/* Reference counted object functions	*/
 
 /*
  * Feature: Define this constant if you want to check B-tree consistency
@@ -72,6 +73,18 @@ typedef int (*H5B_operator_t)(H5F_t *f, hid_t, void *_lt_key, haddr_t addr,
 /* Typedef for B-tree in memory (defined in H5Bpkg.h) */
 typedef struct H5B_t H5B_t;
 
+/* Each B-tree has certain information that can be shared across all
+ * the instances of nodes in that B-tree.
+ */
+typedef struct H5B_shared_t {
+    const struct H5B_class_t	*type;	/* Type of tree			     */
+    size_t		sizeof_rkey;	/* Size of raw (disk) key	     */
+    size_t		sizeof_rnode;	/* Size of raw (disk) node	     */
+    size_t		sizeof_keys;	/* Size of native (memory) key node  */
+    uint8_t	        *page;	        /* Disk page */
+    size_t              *nkey;          /* Offsets of each native key in native key buffer */
+} H5B_shared_t;
+
 /*
  * Each class of object that can be pointed to by a B-link tree has a
  * variable of this type that contains class variables and methods.  Each
@@ -84,7 +97,7 @@ typedef struct H5B_class_t {
     H5B_subid_t id;					/*id as found in file*/
     size_t	sizeof_nkey;			/*size of native (memory) key*/
     size_t	(*get_sizeof_rkey)(H5F_t*, const void*);    /*raw key size   */
-    void *	(*get_page)(H5F_t*, const void*);    /*raw disk page for node */
+    H5RC_t *    (*get_shared)(H5F_t*, const void*);    /*shared info for node */
     herr_t	(*new_node)(H5F_t*, hid_t, H5B_ins_t, void*, void*, void*, haddr_t*);
     int         (*cmp2)(H5F_t*, hid_t, void*, void*, void*);	    /*compare 2 keys */
     int         (*cmp3)(H5F_t*, hid_t, void*, void*, void*);	    /*compare 3 keys */
