@@ -24,6 +24,23 @@ FROM SASN100,
 1) cd <hdf5>
 
 2) ./configure tflop
+2.1) Due to a bug, you must first edit the files, src/Makefile and
+     test/Makefile with the following shell commands before doing make.
+
+# Patch up various Makefile's.
+# patch up src/Makefile
+ed - src/Makefile <<'EOF'
+/^LT_RUN=.*/s//LT_RUN=$(RUNTEST)/
+w
+q
+EOF
+# patch up test/Makefile
+ed - test/Makefile <<'EOF'
+/^RUNTEST=$(LT_RUN)/s/^/#/
+w
+q
+EOF
+
 
 3) make H5detect
 
@@ -44,17 +61,16 @@ When everything is finished compiling and linking,
 you can run the tests by
 FROM JANUS, 
 
-7.1) Due to a bug, you must first remove the following line from
-     the file test/Makefile before the next step.
-     RUNTEST=$(LT_RUN)
-7.2) make check 
-7.3) Sometimes the "make check" fails in the sub-directories of test
-     or tools with a message as "print not found".  This is due to the
-     "make" of Janus thinking some binary code needs to be recompiled.
-     The easiest way to fix it is
-     FROM SASN100
-     cd <hdf5>/test	# or cd <hdf5>/tools
-     make clean; make   # re-make all binary
+7) make check 
+   Note: Sometimes the "make check" fails in the sub-directories of test
+   or tools with a message as "print not found".  This is due to the
+   "make" of Janus thinking some binary code needs to be recompiled.
+   I suspect it may be due to file timestamp problems between SASN100
+   and JANUS.  The easiest way to fix it is
+
+   FROM SASN100
+   cd <hdf5>/test	# or cd <hdf5>/tools
+   make clean; make   # re-make all binary
 
 
 Once satisfied with the test results, you can install
@@ -79,7 +95,26 @@ FROM SASN100,
 
 1) cd <hdf5>
 
-2) sh bin/config_para_tflops.sh   /* this is different from the sequential version */
+2) CC=/usr/community/mpich/mpich-1.1.2/bin/mpicc ./configure --enable-parallel 
+   /* If you want to use your own MPI and/or MPIO libraries, */
+   /* you may check the file bin/config_para_tflops.sh for details. */
+2.1) Due to a bug, you must first edit the files, src/Makefile and
+     test/Makefile with the following shell commands before doing make.
+
+# Patch up various Makefile's.
+# patch up src/Makefile
+ed - src/Makefile <<'EOF'
+/^LT_RUN=.*/s//LT_RUN=$(RUNTEST)/
+w
+q
+EOF
+# patch up test/Makefile
+ed - test/Makefile <<'EOF'
+/^RUNTEST=$(LT_RUN)/s/^/#/
+w
+q
+EOF
+
 
 3) make H5detect
 
@@ -99,17 +134,16 @@ FROM SASN100,
 When everything is finished compiling and linking,
 FROM JANUS, 
 
-7.1) Due to a bug, you must first remove the following line from
-     the file test/Makefile before the next step.
-     RUNTEST=$(LT_RUN)
-7.2) make check 
-7.3) Sometimes the "make check" fails in the sub-directories of test
-     or tools with a message as "print not found".  This is due to the
-     "make" of Janus thinking some binary code needs to be recompiled.
-     The easiest way to fix it is
-     FROM SASN100
-     cd <hdf5>/test	# or cd <hdf5>/tools
-     make clean; make   # re-make all binary
+7) make check 
+   Note: Sometimes the "make check" fails in the sub-directories of test
+   or tools with a message as "print not found".  This is due to the
+   "make" of Janus thinking some binary code needs to be recompiled.
+   I suspect it may be due to file timestamp problems between SASN100
+   and JANUS.  The easiest way to fix it is
+
+   FROM SASN100
+   cd <hdf5>/test	# or cd <hdf5>/tools
+   make clean; make   # re-make all binary
 
 
 Once satisfied with the parallel test results, as long as you 
