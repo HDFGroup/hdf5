@@ -590,6 +590,9 @@ dnl If HDF4 components are checked first and the libz is not found, it will
 dnl cause the later checking of ZLIB componenets to fail too.  But in this
 dnl case, one can configure again without the optional with-hdf4 option.
 dnl
+AC_SUBST(HAVE_HDF4) HAVE_HDF4="no"
+AC_SUBST(HAVE_ZLIB) HAVE_ZLIB="no"
+
 AC_SUBST(H5TOH4) H5TOH4=h5toh4
 AC_SUBST(TESTH5TOH4) TESTH5TOH4='$(srcdir)/testh5toh4.sh'
 
@@ -600,11 +603,24 @@ AC_SUBST(TESTH4TOH5) TESTH4TOH5='$(srcdir)/testh4toh5.sh'
 AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=no)
 case "$withval" in
   yes)
-    AC_CHECK_HEADERS(mfhdf.h,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-    AC_CHECK_LIB(z,compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-    AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-    AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-    AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
+    failed="no"
+    AC_CHECK_LIB(z, compress,, failed="yes")
+    if test "$failed" = "no"; then
+      HAVE_ZLIB="yes"
+      AC_CHECK_LIB(jpeg, jpeg_start_compress,, failed="yes")
+    fi
+    if test "$failed" = "no"; then
+      AC_CHECK_LIB(df, Hstartaccess,, failed="yes")
+    fi
+    if test "$failed" = "no"; then
+      AC_CHECK_LIB(mfhdf, SDstart,, failed="yes")
+    fi
+
+    if test "$failed" = "yes"; then
+      unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5
+    else
+      HAVE_HDF4="yes"
+    fi
     ;;
   no)
     AC_MSG_CHECKING(for HDF4)
@@ -612,30 +628,52 @@ case "$withval" in
     unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5
     ;;
   *)
-    hdf4_inc="`echo $withval |cut -f1 -d,`"
+    case "$withval" in
+      *,*)
+        hdf4_inc="`echo $withval |cut -f1 -d,`"
+        hdf4_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          hdf4_inc="$withval/include"
+          hdf4_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
     if test -n "$hdf4_inc"; then
-      saved_CPPFLAGS="$CPPFLAGS"
       CPPFLAGS="$CPPFLAGS -I$hdf4_inc"
-      AC_CHECK_HEADERS(mfhdf.h,,
-                       CPPFLAGS="$saved_CPPFLAGS"
-                       unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-    else
-      AC_CHECK_HEADERS(mfhdf.h)
     fi
 
-    hdf4_lib="`echo $withval |cut -f2 -d, -s`"
+    failed="no"
+    AC_CHECK_HEADERS(mfhdf.h,, failed="yes")
+
     if test -n "$hdf4_lib"; then
-      saved_LDFLAGS="$LDFLAGS"
       LDFLAGS="$LDFLAGS -L$hdf4_lib"
-      AC_CHECK_LIB(z,compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-      AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-      AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-      AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
+    fi
+
+    if test "$failed" = "no"; then
+      AC_CHECK_LIB(z, compress,, failed="yes")
+    fi
+    if test "$failed" = "no"; then
+      AC_CHECK_LIB(jpeg, jpeg_start_compress,, failed="yes")
+      HAVE_ZLIB="yes"
+    fi
+    if test "$failed" = "no"; then
+      AC_CHECK_LIB(df, Hstartaccess,, failed="yes")
+    fi
+    if test "$failed" = "no"; then
+      AC_CHECK_LIB(mfhdf, SDstart,, failed="yes")
+    fi
+
+    if test "$failed" = "yes"; then
+      CPPFLAGS="$saved_CPPFLAGS"
+      LDFLAGS="$saved_LDFLAGS"
+      unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5
     else
-      AC_CHECK_LIB(z,compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-      AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-      AC_CHECK_LIB(df,Hstartaccess)
-      AC_CHECK_LIB(mfhdf,SDstart)
+      HAVE_HDF4="yes"
     fi
     ;;
 esac
@@ -652,30 +690,40 @@ AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],,
 case $withval in
   yes)
     AC_CHECK_HEADERS(zlib.h)
-    AC_CHECK_LIB(z, compress)
+    AC_CHECK_LIB(z, compress, HAVE_ZLIB="yes")
     ;;
   no)
     AC_MSG_CHECKING(for GNU zlib)
     AC_MSG_RESULT(suppressed)
     ;;
   *)
-    zlib_inc="`echo $withval |cut -f1 -d,`"
+    case "$withval" in
+      *,*)
+        zlib_inc="`echo $withval |cut -f1 -d,`"
+        zlib_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          zlib_inc="$withval/include"
+          zlib_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+
     if test -n "$zlib_inc"; then
-      saved_CPPFLAGS="$CPPFLAGS"
       CPPFLAGS="$CPPFLAGS -I$zlib_inc"
-      AC_CHECK_HEADERS(zlib.h,,CPPFLAGS="$saved_CPPFLAGS")
-    else
-      AC_CHECK_HEADERS(zlib.h)
     fi
 
-    zlib_lib="`echo $withval |cut -f2 -d, -s`"
+    AC_CHECK_HEADERS(zlib.h,, CPPFLAGS="$saved_CPPFLAGS")
+
     if test -n "$zlib_lib"; then
-      saved_LDFLAGS="$LDFLAGS"
       LDFLAGS="$LDFLAGS -L$zlib_lib"
-      AC_CHECK_LIB(z, compress,,LDFLAGS="$saved_LDFLAGS")
-    else
-      AC_CHECK_LIB(z, compress)
     fi
+
+    AC_CHECK_LIB(z, compress, HAVE_ZLIB="yes", LDFLAGS="$saved_LDFLAGS")
     ;;
 esac
 
@@ -1691,3 +1739,110 @@ cat >> src/H5config.h <<EOF
 #endif
 EOF
 
+PRINT() {
+  SPACES="                                  "
+  msg="$SPACES $1:  "
+  msg_len="`echo \"$msg\" | wc -c | sed -e 's/ //g'`" 
+  let "begin_msg=$msg_len-34"
+  echo "$msg" | cut -c$begin_msg- | tr -d '\012'
+}
+
+IF_YES_NO() {
+  if test "$1" = "yes"; then
+    echo "Yes"
+  else
+    echo "No"
+  fi
+}
+
+IF_ENABLED_DISABLED() {
+  if test "$1" = "yes"; then
+    echo "Enabled"
+  else
+    echo "Disabled"
+  fi
+}
+
+echo ""
+echo "Compiling Options:"
+
+PRINT "Compilation Mode"
+case "X-$enable_production" in
+   X-yes)           echo "Production" ;;
+   X-|X-no)         echo "Development" ;;
+   X-pg|X-profile)  echo "Profile" ;;
+   *)               echo "$enable_production" ;;
+esac
+
+PRINT "Debug Mode"
+case "X-$DEBUG_PKG" in
+  X-|X-yes)     echo "Default" ;;
+  X-all)        echo "All" ;;
+  X-no|X-none)  echo "None" ;;
+  *)            echo "$DEBUG_PKG" ;;
+esac
+
+PRINT "Shared Libraries"
+IF_YES_NO "$enable_shared"
+
+PRINT "Static Libraries"
+IF_YES_NO "$enable_static"
+
+PRINT "Statically Linked Executables"
+IF_YES_NO "$STATIC_EXEC"
+
+PRINT "Tracing"
+if test -z "$TRACE" -o "X$TRACE" = "Xyes"; then
+  echo "Yes"
+else
+  echo "No"
+fi
+
+echo ""
+echo "Features:"
+
+PRINT "C++"
+IF_YES_NO "$HDF_CXX"
+
+PRINT "Fortran"
+IF_YES_NO "$HDF_FORTRAN"
+
+PRINT "GASS"
+IF_YES_NO "$GASS"
+
+PRINT "GridStorage"
+IF_YES_NO "$GRIDSTORAGE"
+
+PRINT "HDF4"
+IF_YES_NO "$HAVE_HDF4"
+
+PRINT "HDF5 v1.4 Compatibility"
+IF_YES_NO "$HDF5_V1_4_COMPAT"
+
+PRINT "hsize_t"
+case "$HSIZET" in
+  no|small)  echo "Small" ;;
+  *)         echo "Large" ;;
+esac
+
+PRINT "Linux Large File Support (LFS)"
+IF_ENABLED_DISABLED "$LINUX_LFS"
+
+PRINT "Parallel HDF5"
+if test "$PARALLEL" != "no"; then
+  echo "Yes"
+else
+  echo "No"
+fi
+
+PRINT "SRB"
+IF_YES_NO "$SRB"
+
+PRINT "Stream VFD"
+IF_ENABLED_DISABLED "$STREAM_VFD"
+
+PRINT "Threadsafety"
+IF_ENABLED_DISABLED "$THREADSAFE"
+
+PRINT "Zlib-compression"
+IF_YES_NO "$HAVE_ZLIB"
