@@ -2431,6 +2431,20 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
              */
             HDmemset (chunk, 0, (size_t)chunk_size);
         } /* end else */
+
+        /* Check if there are filters which need to be applied to the chunk */
+        if (pline.nfilters>0) {
+            unsigned filter_mask=0;
+            size_t buf_size=chunk_size;
+            size_t nbytes=(size_t)chunk_size;
+
+            /* Push the chunk through the filters */
+            if (H5Z_pipeline(f, &pline, 0, &filter_mask, &nbytes, &buf_size, &chunk)<0)
+                HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed");
+
+            /* Keep the number of bytes the chunk turned in to */
+            chunk_size=nbytes;
+        } /* end if */
     } /* end if */
 
     /* Loop over all chunks */
