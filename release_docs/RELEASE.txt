@@ -56,6 +56,8 @@ Library
       set for datasets whose dimensions were too large for the 'all' selection
       code to handle.  Any size dimensioned datasets should be handled
       correctly now.
+    * Changed behavior of H5Tget_member_type to correctly emulate HDF5 v1.2.x
+      when --enable-hdf5v1_2 configure flag is enabled.
 
 Configuration
 -------------
