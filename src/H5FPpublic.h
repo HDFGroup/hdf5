@@ -16,7 +16,14 @@
 
 #include "H5public.h"
 
-extern herr_t H5FPinit(MPI_Comm comm, int sap_rank);
-extern herr_t H5FPfinalize(void);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+H5_DLL herr_t H5FPinit(MPI_Comm comm, int sap_rank);
+H5_DLL herr_t H5FPfinalize(void);
+
+#ifdef __cplusplus
+}
+#endif
 #endif  /* H5FPPUBLIC_H__ */

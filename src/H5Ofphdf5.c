@@ -22,9 +22,9 @@
 #include "H5FLprivate.h"        /* Free lists                               */
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Oprivate.h"         /* Object headers                           */
-#include "H5Rprivate.h"
-#include "H5Ppkg.h"
-#include "H5Spkg.h"
+#include "H5Ppkg.h"		/* Property lists		  	    */
+#include "H5Rprivate.h"         /* References                               */
+#include "H5Spkg.h"		/* Dataspace functions			    */
 
 #if defined (WIN32) && !defined (__MWERKS__) 
 #include <sys/types.h>
@@ -33,6 +33,7 @@
 
 #ifdef H5_HAVE_FPHDF5
 
+/* Pablo mask */
 #define PABLO_MASK  H5O_fphdf5_mask
 
 /* local prototypes */
@@ -64,7 +65,6 @@ const H5O_class_t H5O_FPHDF5[1] = {{
 
 /* Is the interface initialized? */
 static int interface_initialize_g = 0;
-
 #define INTERFACE_INIT          NULL
 
 /* Define the free list for H5O_fphdf5_t's */
@@ -110,11 +110,7 @@ H5O_fphdf5_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     fmeta = H5FL_ALLOC(H5O_fphdf5_t, 1);
 
     /* decode the OID first */
-    for (i = 0; i < sizeof(fmeta->oid); ++i)
-        fmeta->oid[i] = p[i];
-
-    /* jump past the OID part */
-    p += sizeof(fmeta->oid);
+    NBYTEDECODE(fmeta->oid,p,sizeof(fmeta->oid));
 
     /* decode the dataspace dimensions next */
     fmeta->sdim = H5O_SDSPACE[0].decode(f, p, NULL);
@@ -223,11 +219,7 @@ H5O_fphdf5_encode(H5F_t *f, uint8_t *p, const void *mesg)
     assert(fmeta);
 
     /* encode the OID first */
-    for (i = 0; i < sizeof(fmeta->oid); ++i)
-        p[i] = fmeta->oid[i];
-
-    /* jump past the OID part */
-    p += sizeof(fmeta->oid);
+    NBYTEENCODE(p,fmeta->oid,sizeof(fmeta->oid));
 
     /* encode the dataspace dimensions next */
     ret_value = H5O_SDSPACE[0].encode(f, p, fmeta->sdim);
@@ -303,7 +295,6 @@ H5O_fphdf5_copy(const void *mesg, void *dest)
     const H5O_fphdf5_t *src = (const H5O_fphdf5_t *)mesg;
     H5O_fphdf5_t *dst = (H5O_fphdf5_t *)dest;
     void *ret_value;
-    unsigned int i;
 
     FUNC_ENTER_NOAPI(H5O_fphdf5_copy, NULL);
 
@@ -314,8 +305,7 @@ H5O_fphdf5_copy(const void *mesg, void *dest)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* copy the individual metadata*/
-    for (i = 0; i < sizeof(src->oid); ++i)
-        dst->oid[i] = src->oid[i];
+    HDmemcpy(dst->oid,src->oid,sizeof(src->oid));
 
     H5O_SDSPACE[0].copy(src->sdim, dst->sdim);
     H5O_DTYPE[0].copy(src->dtype, dst->dtype);
@@ -394,8 +384,7 @@ H5O_fphdf5_reset(void *mesg)
     FUNC_ENTER_NOAPI(H5O_fphdf5_reset, FAIL);
 
     /* reset the metadata */
-    for (i = 0; i < sizeof(fmeta->oid); ++i)
-        fmeta->oid[i] = '\0';
+    HDmemset(fmeta->oid,0,sizeof(fmeta->oid));
 
     if (H5O_SDSPACE[0].reset)
         ret_value = H5O_SDSPACE[0].reset(fmeta->sdim);
@@ -439,7 +428,6 @@ H5O_fphdf5_free(void *mesg)
     FUNC_ENTER_NOAPI(H5O_fphdf5_free, FAIL);
     assert(fmeta);
 
-    /* reset the metadata */
     if (H5O_SDSPACE[0].free)
         ret_value = H5O_SDSPACE[0].free(fmeta->sdim);
 

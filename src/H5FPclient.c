@@ -11,31 +11,24 @@
  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #define H5S_PACKAGE             /*suppress error about including H5Spkg */
-
-#include "H5Spkg.h"
 
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5Eprivate.h"         /* Error Handling                       */
 #include "H5Oprivate.h"         /* Object Headers                       */
+#include "H5Spkg.h"		/* Dataspace functions			*/
 #include "H5TBprivate.h"        /* Threaded, Balanced, Binary Trees     */
 
 #ifdef H5_HAVE_FPHDF5
 
 #include "H5FPprivate.h"        /* Flexible Parallel Functions          */
 
-#include "mpi.h"
-
 /* Pablo mask */
 #define PABLO_MASK      H5FPclient_mask
 
 /* Is the interface initialized? */
 static int interface_initialize_g = 0;
-
 #define INTERFACE_INIT  NULL
 
 MPI_Datatype SAP_request_t;     /* MPI datatype for the SAP_request obj */
@@ -70,6 +63,7 @@ static herr_t H5FP_update_metadata_cache(hid_t file_id, struct SAP_sync *sap_syn
  * Programmer:  Bill Wendling, 28. August, 2002
  * Modifications:
  */
+/* FIXME: This seems to be only related to opening a file, not an object, contrary to the comments above... -QAK */
 herr_t
 H5FP_request_open(const char *mdata, int md_len, enum sap_obj_type obj_type,
                   unsigned *file_id, unsigned *req_id)
@@ -171,6 +165,7 @@ H5FP_request_lock(unsigned int sap_file_id, unsigned char *obj_oid,
         *status = sap_reply.status;
 
         if (sap_reply.status != H5FP_STATUS_LOCK_ACQUIRED)
+            /* FIXME: Shouldn't this issue an error also? - QAK */
             HGOTO_DONE(FAIL);
     }
 
@@ -429,6 +424,7 @@ H5FP_update_metadata_cache(hid_t file_id, struct SAP_sync *sap_sync, H5O_fphdf5_
     case H5FP_ACT_CREATE:
     case H5FP_ACT_EXTEND:
         if (sap_sync->obj_type == H5FP_OBJ_DATASET) {
+            /* FIXME: These shouldn't be calling API functions. -QAK */
             gid = H5Gopen(file_id, fmeta->group->s);
             dset_id = H5Dopen(gid, fmeta->dset->s);
 

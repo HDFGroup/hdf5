@@ -17,14 +17,6 @@
 #include "H5FPpublic.h"         /* Flexible Parallel HDF5               */
 #include "H5Rprivate.h"         /* References                           */
 
-#ifndef TRUE
-#define TRUE    1
-#endif  /* !TRUE */
-
-#ifndef FALSE
-#define FALSE   0
-#endif  /* !FALSE */
-
 #define H5FP_BYTE_BITS   8
 
 /* Different types of requests */
@@ -44,15 +36,15 @@
  * for that object.
  */
 enum sap_request {
-    H5FP_REQ_OPEN,
-    H5FP_REQ_LOCK,
-    H5FP_REQ_LOCK_END,
-    H5FP_REQ_RELEASE,
-    H5FP_REQ_RELEASE_END,
-    H5FP_REQ_CHANGE,
-    H5FP_REQ_SYNC,
-    H5FP_REQ_CLOSE,
-    H5FP_REQ_STOP
+    H5FP_REQ_OPEN,              /* Open a file (or eventually an object) */
+    H5FP_REQ_LOCK,              /* Lock an object (in a sequence) */
+    H5FP_REQ_LOCK_END,          /* Last lock request in lock sequence */
+    H5FP_REQ_RELEASE,           /* Unlock an object (in a sequence) */
+    H5FP_REQ_RELEASE_END,       /* Last unlock request in unlock sequence */
+    H5FP_REQ_CHANGE,            /* Change an object */
+    H5FP_REQ_SYNC,              /* Syncronize changes in file */
+    H5FP_REQ_CLOSE,             /* Close a file (or eventually an object) */
+    H5FP_REQ_STOP               /* Stop SAP */
 };
 
 /* Actions to take when performing a change */
@@ -150,7 +142,7 @@ extern MPI_Datatype SAP_sync_t; /* MPI datatype for the SAP_sync obj    */
  * search for it after getting the appropriate request.
  */
 enum {
-    H5FP_TAG_REQUEST = 37,
+    H5FP_TAG_REQUEST = 37,      /* FIXME: Why is this 37? -QAK */
     H5FP_TAG_REPLY,
     H5FP_TAG_SYNC,
     H5FP_TAG_METADATA,

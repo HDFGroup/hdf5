@@ -11,10 +11,8 @@
  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
+/* Private header files */
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5Eprivate.h"         /* Error Handling                       */
 #include "H5Oprivate.h"         /* Object Headers                       */
@@ -24,12 +22,11 @@
 
 #include "H5FPprivate.h"        /* Flexible Parallel Functions          */
 
-#include "mpi.h"
+/* Pablo mask */
+#define PABLO_MASK          H5FP_mask
 
 /* Interface initialization */
-#define PABLO_MASK          H5FP_mask
 #define INTERFACE_INIT      NULL
-
 static int interface_initialize_g = 0;
 
 MPI_Datatype SAP_request_t;     /* MPI datatype for the SAP_request obj */
@@ -68,22 +65,28 @@ H5FPinit(MPI_Comm comm, int sap_rank)
 
     FUNC_ENTER_API(H5FPinit, FAIL);
     H5TRACE2("e","McIs",comm,sap_rank);
+
+    /* Set the global variable to track the SAP's rank */
     H5FP_sap_rank = sap_rank;
 
+    /* Make a private copy of the communicator we were passed */
     if (MPI_Comm_dup(comm, &H5FP_SAP_COMM) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_dup failed");
 
     if (MPI_Comm_group(H5FP_SAP_COMM, &sap_group) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_group failed");
 
+    /* Exclude the SAP from the barrier group group */
     if (MPI_Group_excl(sap_group, 1, (int *)&H5FP_sap_rank, &sap_barrier_group)
             != MPI_SUCCESS)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_group failed");
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Group_excl failed");
 
+    /* Create communicator for barrier group (all processes except the SAP) */
     if (MPI_Comm_create(H5FP_SAP_COMM, sap_barrier_group, &H5FP_SAP_BARRIER_COMM)
             != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_create failed");
 
+    /* Get the size of all the processes (including the SAP) */
     if (MPI_Comm_size(H5FP_SAP_COMM, &H5FP_comm_size) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_size failed");
 
@@ -92,14 +95,19 @@ H5FPinit(MPI_Comm comm, int sap_rank)
      * we mod it so that we don't go over the size of the communicator. */
     H5FP_capt_rank = (H5FP_sap_rank + 1) % H5FP_comm_size;
 
+    /* Get this processes rank */
     if (MPI_Comm_rank(H5FP_SAP_COMM, (int *)&H5FP_my_rank) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_rank failed");
 
+    /* Create the MPI types used for communicating with the SAP */
     if (H5FP_commit_sap_datatypes() != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "H5FP_commit_sap_datatypes failed");
 
+    /* Go loop, if we are the SAP */
     if (H5FP_my_rank == H5FP_sap_rank)
         H5FP_sap_receive_loop();
+
+    /* Fall through and return to user, if not SAP */
 
 done:
     if (sap_group != MPI_GROUP_NULL)
@@ -129,10 +137,12 @@ H5FPfinalize(void)
     FUNC_ENTER_API(H5FPfinalize, FAIL);
     H5TRACE0("e","");
 
+    /* Stop the SAP */
     if (H5FP_my_rank != H5FP_sap_rank)
         if (H5FP_request_sap_stop() < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Error stopping the SAP");
 
+    /* Release the MPI types we created */
     if (MPI_Type_free(&SAP_request_t) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
 
@@ -142,11 +152,13 @@ H5FPfinalize(void)
     if (MPI_Type_free(&SAP_sync_t) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
 
+    /* Release the barrier communicator */
     if (H5FP_SAP_BARRIER_COMM != MPI_COMM_NULL)
         /* this comm will be NULL for the SAP */
         if (MPI_Comm_free(&H5FP_SAP_BARRIER_COMM) != MPI_SUCCESS)
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_free failed");
 
+    /* Release the FPH5 communicator */
     if (MPI_Comm_free(&H5FP_SAP_COMM) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_free failed");
 

@@ -25,10 +25,6 @@
  *      handle requests from clients.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5Eprivate.h"         /* Error Handling                       */
 #include "H5Oprivate.h"         /* Object Headers                       */
@@ -38,14 +34,11 @@
 
 #include "H5FPprivate.h"        /* Flexible Parallel Functions          */
 
-#include "mpi.h"
-
 /* Pablo mask */
 #define PABLO_MASK      H5FPserver_mask
 
 /* Is the interface initialized? */
 static int interface_initialize_g = 0;
-
 #define INTERFACE_INIT  NULL
 
 MPI_Datatype SAP_request_t;     /* MPI datatype for the SAP_request obj */
@@ -819,6 +812,7 @@ H5FP_sap_handle_open_request(struct SAP_request req, char *mdata, int md_len)
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL, "can't insert file structure into tree");
 
         /* broadcast the file id to all processes */
+        /* FIXME: Isn't there some way to broadcast this result to the barrier group? -QAK */
         for (i = 0; i < H5FP_comm_size; ++i)
             if ((unsigned)i != H5FP_sap_rank)
                 if ((mrc = MPI_Send(&new_file_id, 1, MPI_UNSIGNED, i,

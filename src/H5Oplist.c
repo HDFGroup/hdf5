@@ -22,14 +22,14 @@
 #include "H5Iprivate.h"		/* IDs                                      */
 #include "H5MMprivate.h"        /* Memory management                        */
 #include "H5Oprivate.h"         /* Object headers                           */
-#include "H5Pprivate.h"         /* Property lists                           */
-#include "H5Ppkg.h"
+#include "H5Ppkg.h"             /* Property lists                           */
 
 #if defined (WIN32) && !defined (__MWERKS__) 
 #include <sys/types.h>
 #include <sys/timeb.h>
 #endif
 
+/* Pablo mask */
 #define PABLO_MASK  H5O_plist_mask
 
 /* local prototypes */
@@ -60,7 +60,6 @@ const H5O_class_t H5O_PLIST[1] = {{
 
 /* Is the interface initialized? */
 static int interface_initialize_g = 0;
-
 #define INTERFACE_INIT          NULL
 
 /* Declare external the free list for hsize_t arrays */
