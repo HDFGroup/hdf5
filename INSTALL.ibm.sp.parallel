@@ -37,9 +37,18 @@
 # (We use csh here, but of course you can adapt to whatever shell you like.)
 
 # compile for MPI jobs
-# setenv CC mpcc						(for IBM's MPI)
-# setenv CC "/usr/local/mpich-1.1.1/lib/rs6000/ch_mpl/mpicc"	(for mpich)
-setenv CC "/usr/local/mpich-1.1.1/lib/rs6000/ch_mpl/mpicc"
+#setenv CC "/usr/local/mpich-1.1.2+romio_lgfiles/bin/mpicc"
+
+#
+# next 4 for IBM mpi
+#
+setenv CC /usr/lpp/ppe.poe/bin/mpcc_r
+
+#
+# for both
+#
+setenv MP_PROCS 1
+
 
 # These compiler flags work on ASCI baby blue pacific (IBM SP),
 # using IBM's MPI and Argonne's MPI-IO (ROMIO):
@@ -51,7 +60,7 @@ setenv CC "/usr/local/mpich-1.1.1/lib/rs6000/ch_mpl/mpicc"
 #  -bI:/usr/include/piofs/piofs.exp	this MPI-IO uses PIOFS file system
 #  -L/usr  /local/mpio/lib/ibm -lmpio	link to this MPI-IO lib
 #
-setenv CFLAGS "-g -qfullpath -bnoobjreorder -D_LARGE_FILES -DHAVE_FUNCTION"
+setenv CFLAGS "-D_LARGE_FILES $CFLAGS"
 
 # The configure/make process needs to be able to run some programs,
 # need to specify a processor pool.
@@ -61,11 +70,18 @@ setenv MP_RMPOOL 0
 setenv MP_LABELIO no
 
 # Once these variables are set to the proper values for your installation,
-# you can run the configure program (i.e., ./configure --enable-parallel=mpio)
+# you can run the configure program (i.e., ./configure)
 # to set up the Makefiles, etc.
 # After configuring, run the make as described in the INSTALL file.
 # Once the configuration is complete, you can set any of your
 # environment variables to whatever you like.
+
+# the files in the config directory, such as 
+# config/powerpc-ibm-aix4.2.1.0  
+# config/powerpc-ibm-aix4.x 
+# config/powerpc-ibm-aix4.3.2.0
+# sometimes will need some help depending on subtlties of the installation
+
 
 # When compiling and linking your application, don't forget to compile with
 # mpcc and link to the MPI-IO library and the parallel version of the HDF5
