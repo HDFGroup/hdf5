@@ -169,12 +169,15 @@ data compression.
 	<pre>
 SUBROUTINE h5zfilter_avail_f(filter, status, hdferr)
   IMPLICIT NONE
-  INTEGER, INTENT(IN)  :: filter     ! Filter; one of the possible values:
+  INTEGER, INTENT(IN)  :: filter     ! Filter
+                                     ! Valid values are:
                                      !    H5Z_FILTER_DEFLATE_F
                                      !    H5Z_FILTER_SHUFFLE_F
                                      !    H5Z_FILTER_FLETCHER32_F
-  LOGICAL, INTENT(OUT) :: status     ! Flag, idicates if filter
-                                     ! is availble (.TRUE. or .FALSE.)
+  LOGICAL, INTENT(OUT) :: status     ! Flag indicating whether 
+                                     ! filter is availble: 
+                                     !    .TRUE.
+                                     !    .FALSE.
 END SUBROUTINE h5zfilter_avail_f
 	</pre>		
 		
@@ -485,7 +488,7 @@ And in this document, the
 Describes HDF5 Release 1.6.0, July 2003
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified:  23 October 2003");
+document.writeln("Last modified:  24 October 2003");
 -->
 </SCRIPT>
  
