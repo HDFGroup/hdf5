@@ -1,8 +1,53 @@
--*- outline -*-
 
-This file contains instructions for the installation of HDF5 software.
+	Instructions for the Installation of HDF5 Software
+	==================================================
 
-* Obtaining HDF5
+	CONTENTS
+	--------
+	1. Obtaining HDF5
+
+	2. Warnings about compilers
+	2.1. GNU (Intel platforms)
+	2.2. DEC
+	2.3. SGI (Irix64 6.2)
+	2.4. Windows/NT
+
+	3. Quick installation
+	3.1. TFLOPS
+	3.2. Windows
+
+	4. HDF5 dependencies
+	4.1. Zlib
+	4.2. MPI and MPI-IO
+
+	5. Full installation instructions for source distributions
+	5.1. Unpacking the distribution
+	5.1.1. Non-compressed tar archive (*.tar)
+	5.1.2. Compressed tar archive (*.tar.Z)
+	5.1.3. Gzip'd tar archive (*.tar.gz)
+	5.1.4. Bzip'd tar archive (*.tar.bz2)
+	5.2. Source vs. Build Directories
+	5.3. Configuring
+	5.3.1. Specifying the installation directories
+	5.3.2. Using an alternate C compiler
+	5.3.3. Additional compilation flags
+	5.3.4. Specifying other programs
+	5.3.5. Specifying other libraries and headers
+	5.3.6. Static versus shared linking
+	5.3.7. Optimization versus symbolic debugging
+	5.3.8. Large (>2GB) vs. small (<2GB) file capability
+	5.3.9. Parallel vs. serial library
+	5.4. Building
+	5.5. Testing
+	5.6. Installing
+
+	6. Using the Library
+
+	7. Support
+
+*****************************************************************************
+
+1. Obtaining HDF5
 	The latest supported public release of HDF5 is available from
 	ftp://hdf.ncsa.uiuc.edu/pub/dist/HDF5.  For Unix platforms, it
         is available in tar format uncompressed or compressed with
@@ -19,14 +64,14 @@ This file contains instructions for the installation of HDF5 software.
 	ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/snapshots in a
 	limited number of formats.
 
-* Warnings about compilers
+2. Warnings about compilers
 	OUTPUT FROM THE FOLLOWING COMPILERS SHOULD BE EXTREMELY
 	SUSPECT WHEN USED TO COMPILE THE HDF5 LIBRARY, ESPECIALLY IF
 	OPTIMIZATIONS ARE ENABLED. IN ALL CASES, HDF5 ATTEMPTS TO WORK
 	AROUND THE COMPILER BUGS BUT THE HDF5 DEVELOPMENT TEAM MAKES
 	NO GUARANTEES THAT THERE ARE OTHER CODE GENERATION PROBLEMS.
 
-** GNU (Intel platforms)
+2.1. GNU (Intel platforms)
 	Versions before 2.8.1 have serious problems allocating
 	registers when functions contain operations on `long long'
 	data types. Supplying the `--disable-hsizet' switch to
@@ -34,24 +79,24 @@ This file contains instructions for the installation of HDF5 software.
 	`long long' data types in situations that are known not to
 	work, but it limits the hdf5 address space to 2GB.
 
-** DEC
+2.2. DEC
 	The V5.2-038 compiler (and possibly others) occasionally
 	generates incorrect code for memcpy() calls when optimizations
 	are enabled, resulting in unaligned access faults. HDF5 works
 	around the problem by casting the second argument to `char*'.
 
-** SGI (Irix64 6.2)
+2.3. SGI (Irix64 6.2)
 	The Mongoose 7.00 compiler has serious optimization bugs and
 	should be upgraded to MIPSpro 7.2.1.2m. Patches are available
 	from SGI.
 
-** Windows/NT
+2.4. Windows/NT
 	The MicroSoft Win32 5.0 compiler is unable to cast unsigned
 	long long values to doubles. HDF5 works around this bug by
 	first casting to signed long long and then to double.
 
 
-* Quick installation
+3. Quick installation
 	For those that don't like to read ;-) the following steps can
 	be used to configure, build, test, and install the HDF5
 	library, header files, and support programs.
@@ -62,16 +107,16 @@ This file contains instructions for the installation of HDF5 software.
 	$ make check
 	$ make install
 
-** TFLOPS
+3.1. TFLOPS
 	Users of the Intel TFLOPS machine, after reading this file,
-	should see the INSTALL.ascired for more instructions.
+	should see the INSTALL_TFLOPS for more instructions.
 
-** Windows
+3.2. Windows
 	Users of Microsoft Windows should see the INSTALL_Windows.txt
 	for detailed instructions.
 
-* HDF5 dependencies
-** Zlib
+4. HDF5 dependencies
+4.1. Zlib
 	The HDF5 library has a predefined compression filter that uses 
 	the "deflate" method for chunked datatsets. If zlib-1.1.2 or
 	later is found then HDF5 will use it, otherwise HDF5's
@@ -79,31 +124,31 @@ This file contains instructions for the installation of HDF5 software.
 	compression filter will succeed but the data will not be
 	compressed).
 
-** MPI and MPI-IO
+4.2. MPI and MPI-IO
 	The parallel version of the library is built upon the
 	foundation provided by MPI and MPI-IO. If these libraries are
 	not available when HDF5 is configured then only a serial
 	version of HDF5 can be built.
 
-* Full installation instructions for source distributions
-** Unpacking the distribution
+5. Full installation instructions for source distributions
+5.1. Unpacking the distribution
 	The HDF5 source code is distributed in a variety of formats
 	which can be unpacked with the following commands, each of
 	which creates an `hdf5-1.2.0' directory.
 
-*** Non-compressed tar archive (*.tar)
+5.1.1. Non-compressed tar archive (*.tar)
 	$ tar xf hdf5-1.2.0.tar
 
-*** Compressed tar archive (*.tar.Z)
+5.1.2. Compressed tar archive (*.tar.Z)
 	$ uncompress -c <hdf5-1.2.0.tar.Z |tar xf -
 
-*** Gzip'd tar archive (*.tar.gz)
+5.1.3. Gzip'd tar archive (*.tar.gz)
 	$ gunzip <hdf5-1.2.0.tar.gz |tar xf -
 
-*** Bzip'd tar archive (*.tar.bz2)
+5.1.4. Bzip'd tar archive (*.tar.bz2)
 	$ bunzip2 <hdf5-1.2.0.tar.gz |tar xf -
 
-** Source vs. Build Directories
+5.2. Source vs. Build Directories
 	On most systems the build can occur in a directory other than
 	the source directory, allowing multiple concurrent builds
 	and/or read-only source code. In order to accomplish this, one 
@@ -115,7 +160,7 @@ This file contains instructions for the installation of HDF5 software.
 	(6.5? and later) because that `make' doesn't understand the
 	VPATH variable.  This will be fixed in the next release.
 
-** Configuring
+5.3. Configuring
 	HDF5 uses the GNU autoconf system for configuration, which
 	detects various features of the host system and creates the
 	Makefiles.  On most systems it should be sufficient to say:
@@ -133,7 +178,7 @@ This file contains instructions for the installation of HDF5 software.
 	influences the behavior of configure by setting or augmenting
 	shell variables.
 
-*** Specifying the installation directories
+5.3.1. Specifying the installation directories
 	Typing `make install' will install the HDF5 library, header
 	files, and support programs in /usr/local/lib,
 	/usr/local/include, and /usr/local/bin.  To use a path other
@@ -146,7 +191,7 @@ This file contains instructions for the installation of HDF5 software.
 	final home of the shared library must be specified with this
 	switch before the library and executables are built.
 
-*** Using an alternate C compiler
+5.3.2. Using an alternate C compiler
 	By default, configure will look for the C compiler by trying
 	`gcc' and `cc'. However, if the environment variable "CC" is
 	set then its value is used as the C compiler (users of csh and
@@ -175,7 +220,7 @@ This file contains instructions for the installation of HDF5 software.
 	    $ export SGI_ABI
 	    $ ./configure
 
-*** Additional compilation flags
+5.3.3. Additional compilation flags
 	If addtional flags must be passed to the compilation commands
 	then specify those flags with the CFLAGS variable. For
 	instance, to enable symbolic debugging of a production version 
@@ -183,7 +228,7 @@ This file contains instructions for the installation of HDF5 software.
 
 	    $ CFLAGS=-g ./confgure --enable-production
 
-*** Specifying other programs
+5.3.4. Specifying other programs
 	The build system has been tuned for use with GNU make but
 	works also with other versions of make.  If the `make' command 
 	runs a non-GNU version but a GNU version is available under a
@@ -220,7 +265,7 @@ This file contains instructions for the installation of HDF5 software.
 	       program to also change file ownership and/or access
 	       permissions.
 
-*** Specifying other libraries and headers
+5.3.5. Specifying other libraries and headers
 	Configure searches the standard places (those places known by
 	the systems compiler) for include files and header
 	files. However, additional directories can be specified by
@@ -254,7 +299,7 @@ This file contains instructions for the installation of HDF5 software.
         version of hdf4 the confidence testing will fail in the tools
         directory.
 
-*** Static versus shared linking
+5.3.6. Static versus shared linking
 	The build process will create static libraries on all systems
 	and shared libraries on systems that support dynamic linking
 	to a sufficient degree.  Either form of library may be
@@ -262,7 +307,7 @@ This file contains instructions for the installation of HDF5 software.
 
 	    $ ./configure --disable-shared
 
-*** Optimization versus symbolic debugging
+5.3.7. Optimization versus symbolic debugging
 	The library can be compiled to provide symbolic debugging
 	support so it can be debugged with gdb, dbx, ddd, etc or it
 	can be compiled with various optimizations.  To compile for
@@ -301,7 +346,7 @@ This file contains instructions for the installation of HDF5 software.
 	releases). The tracing must also be enabled at runtime to see
 	any output (see Debugging.html).
 
-*** Large (>2GB) vs. small (<2GB) file capability
+5.3.8. Large (>2GB) vs. small (<2GB) file capability
 	In order to read or write files that could potentially be
 	larger than 2GB it is necessary to use the non-ANSI `long
 	long' data type on some platforms. However, some compilers
@@ -312,13 +357,13 @@ This file contains instructions for the installation of HDF5 software.
 
 	    $ ./configure --disable-hsizet
 
-*** Parallel vs. serial library
+5.3.9. Parallel vs. serial library
 	The HDF5 library can be configured to use MPI and MPI-IO for
 	parallelizm on a distributed multi-processor system.  Read the
 	file INSTALL_parallel for detailed explanations.
 
 
-** Building
+5.4. Building
 	The library, confidence tests, and programs can be build by
 	saying just
 
@@ -335,7 +380,7 @@ This file contains instructions for the installation of HDF5 software.
 
 	    $ make -j -l6
 
-** Testing
+5.5. Testing
 	HDF5 comes with various test suites, all of which can be run
 	by saying
 
@@ -351,7 +396,7 @@ This file contains instructions for the installation of HDF5 software.
 	fails. To prevent deletion of the files define the
 	HDF5_NOCLEANUP environment variable.
 
-** Installing
+5.6. Installing
 	The HDF5 library, include files, and support programs can be
 	installed in a (semi-)public place by saying `make
 	install'. The files are installed under the directory
@@ -385,7 +430,7 @@ This file contains instructions for the installation of HDF5 software.
 	    ./tools/h5debug	(low-level file debugging)
 	    ./tools/h5import	(a demo)
 
-* Using the Library
+6. Using the Library
 	Please see the User Manual in the doc/html directory.
 
 	Most programs will include <hdf5.h> and link with
@@ -397,6 +442,6 @@ This file contains instructions for the installation of HDF5 software.
 	libhdf5.settings file in the same directory as the static
 	and/or shared hdf5 libraries.
 
-* Support
+7. Support
 	Support is described in the README file.
 
