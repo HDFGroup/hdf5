@@ -1393,6 +1393,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
     unsigned null_grp;          /* Flag to indicate this function was called with grp_ent set to NULL */
     unsigned group_copy = 0;    /* Flag to indicate that the group entry is copied */
     unsigned last_comp = 0;     /* Flag to indicate that a component is the last component in the name */
+    unsigned did_insert = 0;     /* Flag to indicate that H5G_stab_insert was called */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI_NOINIT(H5G_namei);
@@ -1515,6 +1516,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
                     }
                 } /* end if */
                 else {
+                    did_insert = 1;
                     if (H5G_stab_insert(grp_ent, H5G_comp_g, ent, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert name");
                     HGOTO_DONE(SUCCEED);
@@ -1550,6 +1552,11 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
     /* Update the "rest of name" pointer */
     if (rest)
         *rest = name; /*final null */
+
+    /* If this was an insert, make sure that the insert function was actually
+     * called (this catches no-op names like "/" and ".")  */
+     if(action == H5G_NAMEI_INSERT && !did_insert)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group already exists");
 
 done:
     /* If we started with a NULL obj_ent, free the entry information */

@@ -41,14 +41,6 @@ New Features
 
     Library:
     --------
-        - A new API function H5Fget_name was added.  It returns the name
-          of the file by object(file, group, data set, named data type,
-          attribute) ID.  SLU - 2004/06/29
-        - A new API function H5Fget_filesize was added.  It returns the
-          actual file size of the opened file.  SLU - 2004/06/24
-	- Added option that if $HDF5_DISABLE_VERSION_CHECK is set to 2,
-	  will suppress all library version mismatch warning messages.
-	  AKC - 2004/4/14
         - HDF5 can now link to SZIP with or without szip's encoder.
           The new API function H5Zget_filter_info can be used to check
           szip's status.  Attempting to assign szip to a dataset property
@@ -58,6 +50,14 @@ New Features
           be set when calling H5Pset_szip.  If the flag for CHIP
           compression is set, it will be ignored (since the two are mutually
           exclusive).  JL/NF - 2004/6/30
+        - A new API function H5Fget_name was added.  It returns the name
+          of the file by object(file, group, data set, named data type,
+          attribute) ID.  SLU - 2004/06/29
+        - A new API function H5Fget_filesize was added.  It returns the
+          actual file size of the opened file.  SLU - 2004/06/24
+	- Added option that if $HDF5_DISABLE_VERSION_CHECK is set to 2,
+	  will suppress all library version mismatch warning messages.
+	  AKC - 2004/4/14
 
     Parallel Library:
     -----------------
@@ -82,6 +82,11 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+        - Calling H5Gcreate() on "/" or "." throws an error instead of
+          failing quietly. JML - 2004/07/19
+        - Fixed bug where setting file address size to be very small could
+          trigger an assert if the file grew to more than 64 KB.  Now throws
+          an error and data can be recovered. JL/NF - 2004/07/14
         - Fixed bug where "resurrecting" a dataset was failing.
           QAK - 2004/07/14
         - Fixed bug where incorrect data could be read from a chunked dataset
