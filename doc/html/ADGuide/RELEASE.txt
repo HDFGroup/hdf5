@@ -1,4 +1,4 @@
-HDF5 version 1.5.55 released on Thu Jun  5 12:41:33 CDT 2003
+HDF5 version 1.5.56 released on Fri Jun  6 09:43:17 CDT 2003
 ================================================================================
 
 
@@ -206,6 +206,8 @@ Bug Fixes since HDF5-1.4.0 release
 
 Library
 -------
+    * Don't attempt to perform collective I/O on chunked datasets with
+      parallel I/O.  QAK - 2003/06/05
     * The library now correctly reuses space when objects are deleted in the
       file.  This should be handled correctly for every situation, except
       datasets with variable-length datatypes are not returning the space they
