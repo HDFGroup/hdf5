@@ -552,7 +552,7 @@ test_skiplist_string(void)
 
     /* Insert objects into the skip list */
     for(u=0; u<10; u++) {
-        ret=H5SL_insert(slist,&data[u],&data[u].s);
+        ret=H5SL_insert(slist,&data[u],data[u].s);
         CHECK(ret, FAIL, "H5SL_insert");
     } /* end for */
 

@@ -38,7 +38,7 @@
 #include "H5Pprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5TBprivate.h"	/* Threaded, balanced, binary trees (TBBTs) */
+#include "H5SLprivate.h"	/* Skip lists				*/
 
 /* Define enum for type of object that property is within */
 typedef enum {
@@ -89,7 +89,7 @@ struct H5P_genclass_t {
     unsigned   internal;   /* Whether this class is internal to the library or not */
     unsigned   deleted;    /* Whether this class has been deleted and is waiting for dependent classes & proplists to close */
     unsigned   revision;   /* Revision number of a particular class (global) */
-    H5TB_TREE *props;   /* TBBT containing properties */
+    H5SL_t *props;      /* Skip list containing properties */
 
     /* Callback function pointers & info */
     H5P_cls_create_func_t create_func;  /* Function to call when a property list is created */
@@ -106,12 +106,12 @@ struct H5P_genplist_t {
     hid_t   plist_id;       /* Copy of the property list ID (for use in close callback) */
     size_t  nprops;         /* Number of properties in class */
     unsigned   class_init:1;   /* Whether the class initialization callback finished successfully */
-    H5TB_TREE *del;     /* TBBT containing names of deleted properties */
-    H5TB_TREE *props;   /* TBBT containing properties */
+    H5SL_t *del;        /* Skip list containing names of deleted properties */
+    H5SL_t *props;      /* Skip list containing properties */
 };
 
 /* Private functions, not part of the publicly documented API */
-H5_DLL herr_t H5P_add_prop(H5TB_TREE *props, H5P_genprop_t *prop);
+H5_DLL herr_t H5P_add_prop(H5SL_t *props, H5P_genprop_t *prop);
 H5_DLL herr_t H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod);
 H5_DLL char *H5P_get_class_path(H5P_genclass_t *pclass);
 H5_DLL H5P_genclass_t *H5P_open_class_path(const char *path);
