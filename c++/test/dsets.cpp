@@ -445,7 +445,7 @@ test_compression(H5File& file)
 	DataSet* dataset = new DataSet (file.createDataSet 
 	    (DSET_COMPRESS_NAME, PredType::NATIVE_INT, space1, dscreatplist));
   
-#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
+#ifdef H5_HAVE_COMPRESSION
     PASSED();
 #else
     SKIPPED();
@@ -471,7 +471,7 @@ test_compression(H5File& file)
 		}
 	    }
 	}
-#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
+#ifdef H5_HAVE_COMPRESSION
     PASSED();
 #else
     SKIPPED();
@@ -496,7 +496,7 @@ test_compression(H5File& file)
 	//if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, points)<0) goto error;
 	dataset->write ((void*) points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
-#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
+#ifdef H5_HAVE_COMPRESSION
     PASSED();
 #else
     SKIPPED();
@@ -520,7 +520,7 @@ test_compression(H5File& file)
 		if (status == -1) goto error;
 	    }
 
-#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
+#ifdef H5_HAVE_COMPRESSION
     PASSED();
 #else
     SKIPPED();
@@ -556,7 +556,7 @@ test_compression(H5File& file)
 		if (status == -1) goto error;
 	    }
 
-#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
+#ifdef H5_HAVE_COMPRESSION
     PASSED();
 #else
     SKIPPED();
@@ -585,7 +585,7 @@ test_compression(H5File& file)
 		if (status == -1) goto error;
 	    }
 
-#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
+#ifdef H5_HAVE_COMPRESSION
     PASSED();
 #else
     SKIPPED();
@@ -628,7 +628,7 @@ test_compression(H5File& file)
 	    }
 	}
 	}
-#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
+#ifdef H5_HAVE_COMPRESSION
     PASSED();
 #else
     SKIPPED();

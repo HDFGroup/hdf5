@@ -38,7 +38,7 @@
 #include "hdf5.h"
 #include "h5tools_utils.h"
 
-#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
+#ifdef H5_HAVE_COMPRESSION
 
 #include <zlib.h>
 
@@ -673,4 +673,4 @@ main(void)
     return EXIT_SUCCESS;
 }
 
-#endif  /* !(H5_HAVE_COMPRESS2 && H5_HAVE_ZLIB_H && H5_HAVE_LIBZ) */
+#endif  /* !H5_HAVE_COMPRESSION */

@@ -131,13 +131,15 @@ static void do_cleanupfile(iotype iot, char *fname);
 
 /* GPFS-specific functions */
 #ifdef H5_HAVE_GPFS
-static void access_range(int handle, off_t start, off_t length, int is_write);
-static void free_range(int handle, off_t start, off_t length);
-static void clear_file_cache(int handle);
-static void cancel_hints(int handle);
-static void start_data_shipping(int handle, int num_insts);
-static void stop_data_shipping(int handle);
-static void invalidate_file_cache(const char *filename);
+static void gpfs_access_range(int handle, off_t start, off_t length, int is_write);
+static void gpfs_free_range(int handle, off_t start, off_t length);
+static void gpfs_clear_file_cache(int handle);
+static void gpfs_cancel_hints(int handle);
+static void gpfs_start_data_shipping(int handle, int num_insts);
+static void gpfs_start_data_ship_map(int handle, int partition_size,
+                                     int agent_count, int *agent_node_num);
+static void gpfs_stop_data_shipping(int handle);
+static void gpfs_invalidate_file_cache(const char *filename);
 #endif /* H5_HAVE_GPFS */
 
 /*
@@ -1659,7 +1661,7 @@ do_cleanupfile(iotype iot, char *fname)
     /* Descriptions here come from the IBM GPFS Manual */
 
 /*
- * Function:    access_range
+ * Function:    gpfs_access_range
  * Purpose:     Declares an access range within a file for an
  *              application.
  *
@@ -1678,16 +1680,17 @@ do_cleanupfile(iotype iot, char *fname)
  *              Subsequent GPFS_ACCESS_RANGE hints will replace a hint
  *              passed earlier.
  *
- *                  START  - The start of the access range offset, in
- *                           bytes, from the beginning of the file.
- *                  LENGTH - Length of the access range. 0 indicates to
- *                           the end of the file.
+ *                  START    - The start of the access range offset, in
+ *                             bytes, from the beginning of the file
+ *                  LENGTH   - Length of the access range. 0 indicates to
+ *                             the end of the file
+ *                  IS_WRITE - 0 indicates READ access, 1 indicates WRITE access
  * Return:      Nothing
  * Programmer:  Bill Wendling, 03. June 2002
  * Modifications:
  */
 static void
-access_range(int handle, off_t start, off_t length, int is_write)
+gpfs_access_range(int handle, off_t start, off_t length, int is_write)
 {
     struct {
         gpfsFcntlHeader_t hdr;
@@ -1712,7 +1715,7 @@ access_range(int handle, off_t start, off_t length, int is_write)
 }
 
 /*
- * Function:    free_range
+ * Function:    gpfs_free_range
  * Purpose:     Undeclares an access range within a file for an
  *              application.
  *
@@ -1736,7 +1739,7 @@ access_range(int handle, off_t start, off_t length, int is_write)
  * Modifications:
  */
 static void
-free_range(int handle, off_t start, off_t length)
+gpfs_free_range(int handle, off_t start, off_t length)
 {
     struct {
         gpfsFcntlHeader_t hdr;
@@ -1761,7 +1764,7 @@ free_range(int handle, off_t start, off_t length)
 }
 
 /*
- * Function:    clear_file_cache
+ * Function:    gpfs_clear_file_cache
  * Purpose:     Indicates file access in the near future is not expected.
  *
  *              The application does not expect to make any further
@@ -1780,7 +1783,7 @@ free_range(int handle, off_t start, off_t length)
  * Modifications:
  */
 static void
-clear_file_cache(int handle)
+gpfs_clear_file_cache(int handle)
 {
     struct {
         gpfsFcntlHeader_t hdr;
@@ -1802,7 +1805,7 @@ clear_file_cache(int handle)
 }
 
 /*
- * Function:    cancel_hints
+ * Function:    gpfs_cancel_hints
  * Purpose:     Indicates to remove any hints against the open file
  *              handle.
  *
@@ -1826,7 +1829,7 @@ clear_file_cache(int handle)
  * Modifications:
  */
 static void
-cancel_hints(int handle)
+gpfs_cancel_hints(int handle)
 {
     struct {
         gpfsFcntlHeader_t hdr;
@@ -1848,17 +1851,31 @@ cancel_hints(int handle)
 }
 
 /*
- * Function:    start_data_shipping
- * Purpose:     Start up data shipping. The second parameter is the total
- *              number of open instances on all nodes that will be
- *              operating on the file. Must be called for every such
- *              instance with the same value of NUM_INSTS.
+ * Function:    gpfs_start_data_shipping
+ * Purpose:     Initiates data shipping mode.
+ *
+ *              Once all participating threads have issued this directive
+ *              for a file, GPFS enters a mode where it logically
+ *              partitions the blocks of the file among a group of agent
+ *              nodes. The agents are those nodes on which one or more
+ *              threads have issued the GPFS_DATA_SHIP_START directive.
+ *              Each thread that has issued a GPFS_DATA_SHIP_START
+ *              directive and the associated agent nodes are referred to
+ *              as the data shipping collective.
+ *
+ *              The second parameter is the total number of open
+ *              instances on all nodes that will be operating on the
+ *              file. Must be called for every such instance with the
+ *              same value of NUM_INSTS.
+ *
+ *                  NUM_INSTS - The number of open file instances, on all
+ *                              nodes, collaborating to operate on the file
  * Return:      Nothing
  * Programmer:  Bill Wendling, 28. May 2002
  * Modifications:
  */
 static void
-start_data_shipping(int handle, int num_insts)
+gpfs_start_data_shipping(int handle, int num_insts)
 {
     struct {
         gpfsFcntlHeader_t hdr;
@@ -1882,15 +1899,79 @@ start_data_shipping(int handle, int num_insts)
 }
 
 /*
- * Function:    stop_data_shipping
- * Purpose:     Shut down data shipping. Must be called for every handle
- *              for which start_data_shipping was called.
+ * Function:    gpfs_start_data_ship_map
+ * Purpose:     Indicates which agent nodes are to be used for data
+ *              shipping. GPFS recognizes which agent nodes to use for
+ *              data shipping.
+ *
+ *                  PARTITION_SIZE - The number of contiguous bytes per
+ *                                   server. This value must be a
+ *                                   multiple of the number of bytes in a
+ *                                   single file system block
+ *                  AGENT_COUNT    - The number of entries in the
+ *                                   agentNodeNumber array
+ *                  AGENT_NODE_NUM - The data ship agent node numbers as
+ *                                   listed in the SDT or the global ODM
+ *
+ * Return:      Nothing
+ * Programmer:  Bill Wendling, 10. Jul 2002
+ * Modifications:
+ */
+static void
+gpfs_start_data_ship_map(int handle, int partition_size, int agent_count,
+                         int *agent_node_num)
+{
+    int i;
+    struct {
+        gpfsFcntlHeader_t hdr;
+        gpfsDataShipMap_t map;
+    } ds_map;
+
+    ds_map.hdr.totalLength = sizeof(ds_map);
+    ds_map.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
+    ds_map.hdr.fcntlReserved = 0;
+    ds_map.map.structLen = sizeof(gpfsDataShipMap_t);
+    ds_map.map.structType = GPFS_DATA_SHIP_MAP;
+    ds_map.map.partitionSize = partition_size;
+    ds_map.map.agentCount = agent_count;
+
+    for (i = 0; i < agent_count; ++i)
+        ds_map.map.agentNodeNumber[i] = agent_node_num[i];
+
+    if (gpfs_fcntl(handle, &ds_map) != 0) {
+        fprintf(stderr,
+                "gpfs_fcntl DS map directive failed. errno=%d errorOffset=%d\n",
+                errno, ds_map.hdr.errorOffset);
+        exit(EXIT_FAILURE);
+    }
+}
+
+/*
+ * Function:    gpfs_stop_data_shipping
+ * Purpose:     Takes a file out of the data shipping mode.
+ *
+ *              - GPFS waits for all threads that issued the
+ *                GPFS_DATA_SHIP_START directive to issue this directive,
+ *                then flushes the dirty file data to disk.
+ *
+ *              - While a gpfs_cntl() call is blocked for other threads,
+ *                the call can be interrupted by any signal. If a signal
+ *                is delivered to any of the waiting calls, all waiting
+ *                calls on every node will be interrupted and will return
+ *                EINTR. GPFS will not cancel data shipping mode if such
+ *                a signal occurs. It is the responsibility of the
+ *                application to mask off any signals that might normally
+ *                occur while waiting for another node in the data
+ *                shipping collective. Several libraries use SIGALRM; the
+ *                thread that makes the gpfs_fcntl() call should use
+ *                sigthreadmask to mask off delivery of this signal while
+ *                inside the call.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 28. May 2002
  * Modifications:
  */
 static void
-stop_data_shipping(int handle)
+gpfs_stop_data_shipping(int handle)
 {
     struct {
         gpfsFcntlHeader_t hdr;
@@ -1910,7 +1991,7 @@ stop_data_shipping(int handle)
 }
 
 /*
- * Function:    invalidate_file_cache
+ * Function:    gpfs_invalidate_file_cache
  * Purpose:     Invalidate all cached data held on behalf of a file on
  *              this node.
  * Return:      Nothing
@@ -1918,7 +1999,7 @@ stop_data_shipping(int handle)
  * Modifications:
  */
 static void
-invalidate_file_cache(const char *filename)
+gpfs_invalidate_file_cache(const char *filename)
 {
     int handle;
     struct {
@@ -1951,7 +2032,7 @@ invalidate_file_cache(const char *filename)
     /* Close the file */
     if (close(handle) == -1) {
         fprintf(stderr,
-                "could not close file '%s' after flushing file cache,",
+                "could not close file '%s' after flushing file cache, ",
                 filename);
         fprintf(stderr, "errno=%d\n", errno);
         exit(1);
@@ -1965,43 +2046,51 @@ invalidate_file_cache(const char *filename)
 /* H5_HAVE_GPFS isn't defined...stub functions */
 
 static void
-access_range(int UNUSED handle, off_t UNUSED start, off_t UNUSED length, int UNUSED is_write)
+gpfs_access_range(int UNUSED handle, off_t UNUSED start, off_t UNUSED length,
+                  int UNUSED is_write)
 {
     return;
 }
 
 static void
-free_range(int UNUSED handle, off_t UNUSED start, off_t UNUSED length)
+gpfs_free_range(int UNUSED handle, off_t UNUSED start, off_t UNUSED length)
 {
     return;
 }
 
 static void
-clear_file_cache(int UNUSED handle)
+gpfs_clear_file_cache(int UNUSED handle)
 {
     return;
 }
 
 static void
-cancel_hints(int UNUSED handle)
+gpfs_cancel_hints(int UNUSED handle)
 {
     return;
 }
 
 static void
-start_data_shipping(int UNUSED handle, int UNUSED num_insts)
+gpfs_start_data_shipping(int UNUSED handle, int UNUSED num_insts)
 {
     return;
 }
 
 static void
-stop_data_shipping(int UNUSED handle)
+gpfs_stop_data_shipping(int UNUSED handle)
 {
     return;
 }
 
 static void
-invalidate_file_cache(const char UNUSED *filename)
+gpfs_start_data_ship_map(int UNUSED handle, int UNUSED partition_size,
+                         int UNUSED agent_count, int UNUSED *agent_node_num)
+{
+    return;
+}
+
+static void
+gpfs_invalidate_file_cache(const char UNUSED *filename)
 {
     return;
 }

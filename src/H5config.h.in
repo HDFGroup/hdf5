@@ -9,8 +9,8 @@
 /* Define to 1 if you have the `BSDgettimeofday' function. */
 #undef HAVE_BSDGETTIMEOFDAY
 
-/* Define to 1 if you have the `compress2' function. */
-#undef HAVE_COMPRESS2
+/* Define if we have zlib compression support */
+#undef HAVE_COMPRESSION
 
 /* Define to 1 if you have the `difftime' function. */
 #undef HAVE_DIFFTIME
@@ -39,9 +39,6 @@
 /* Define to 1 if you have the `GetConsoleScreenBufferInfo' function. */
 #undef HAVE_GETCONSOLESCREENBUFFERINFO
 
-/* Define to 1 if you have the `getdents64' function. */
-#undef HAVE_GETDENTS64
-
 /* Define to 1 if you have the `gethostname' function. */
 #undef HAVE_GETHOSTNAME
 
@@ -59,6 +56,12 @@
 
 /* Define to 1 if you have the <globus_common.h> header file. */
 #undef HAVE_GLOBUS_COMMON_H
+
+/* Define if we have GPFS support */
+#undef HAVE_GPFS
+
+/* Define to 1 if you have the <gpfs.h> header file. */
+#undef HAVE_GPFS_H
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
