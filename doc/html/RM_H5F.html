@@ -529,9 +529,8 @@ facilitate moving easily between them.</i>
 <dl>
 <dt><strong>Name:</strong> <a name="File-GetObjCount">H5Fget_obj_count</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Fget_obj_count</code>(<em>hid_t</em> <code>file_id</code>,
-	    <em>unsigned int</em> <code>types</code>,
-            <em>unsigned int *</em><code>obj_id_count</code>
+    <dd><em>int </em><code>H5Fget_obj_count</code>(<em>hid_t</em> <code>file_id</code>,
+	    <em>unsigned int</em> <code>types</code>
             )
 <dt><strong>Purpose:</strong>
         <dd>Returns the number of open object identifiers for an open file.
@@ -566,12 +565,17 @@ facilitate moving easily between them.</i>
             </td><td valign=top>
             Named datatypes only
           </td></tr><tr><td valign=top>
+            <code>H5F_OBJ_ATTR&nbsp;&nbsp;</code>
+            </td><td valign=top>
+            Attributes only
+          </td></tr><tr><td valign=top>
             <code>H5F_OBJ_ALL</code>
             </td><td valign=top>
             All of the above
 	    <br>
 	    (I.e., <code>H5F_OBJ_FILE</code> | <code>H5F_OBJ_DATASET</code> | 
-	    <code>H5F_OBJ_GROUP</code> | <code>H5F_OBJ_DATATYPE</code> )
+	    <code>H5F_OBJ_GROUP</code> | <code>H5F_OBJ_DATATYPE</code> 
+	    | <code>H5F_OBJ_ATTR</code> )
           </td></tr>
         </table>
 	</center>
@@ -586,11 +590,9 @@ facilitate moving easily between them.</i>
 	        <code>H5F_OBJ_ALL</code> for all currently-open HDF5 files. 
         <dt><em>unsigned int</em> <code>types</code>
             <dd>IN: Type of object for which identifiers are to be returned. 
-        <dt><em>unsigned int *</em><code>obj_id_count</code>
-            <dd>OUT: Pointer to the returned list of open object identifiers. 
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns a file access property list identifier if successful;
+    <dd>Returns a the number of open objects if successful;
         otherwise returns a negative value.
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5f_FORTRAN.html#h5fget_obj_count_f" 
@@ -606,8 +608,9 @@ facilitate moving easily between them.</i>
 <dl>
 <dt><strong>Name:</strong> <a name="File-GetObjIDs">H5Fget_obj_ids</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Fget_obj_ids</code>(<em>hid_t</em> <code>file_id</code>,
+    <dd><em>int </em><code>H5Fget_obj_ids</code>(<em>hid_t</em> <code>file_id</code>,
             <em>unsigned int</em> <code>types</code>,
+            <em>int</em> <code>max_objs</code>,
             <em>hid_t *</em><code>obj_id_list</code>
             )
 <dt><strong>Purpose:</strong>
@@ -625,6 +628,9 @@ facilitate moving easily between them.</i>
         The types of object identifiers to be retrieved are specified 
 	in <code>types</code> using the codes listed for the same 
 	parameter in <a href="#File-GetObjCount"><code>H5Fget_obj_count</code></a>
+        <p>
+        To retrieve identifiers for all open objects, pass a negative value
+        for the <code>max_objs</code>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>file_id</code>
@@ -632,11 +638,13 @@ facilitate moving easily between them.</i>
 	        <code>H5F_OBJ_ALL</code> for all currently-open HDF5 files. 
         <dt><em>unsigned int</em> <code>types</code>
             <dd>IN: Type of object for which identifiers are to be returned. 
+        <dt><em>int</em> <code>max_objs</code>
+            <dd>IN: Maximum number of object identifiers to place into <code>obj_id_list</code>.
         <dt><em>hid_t *</em><code>obj_id_list</code>
             <dd>OUT: Pointer to the returned list of open object identifiers. 
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
+    <dd>Returns number of objects placed into <code>obj_id_list</code> if successful;
         otherwise returns a negative value.
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5f_FORTRAN.html#h5fget_obj_ids_f" 

@@ -77,7 +77,7 @@ H5_DLL int_f nh5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id);
 
 H5_DLL int_f nh5fget_obj_count_c (hid_t_f *file_id, int_f *obj_type, int_f *obj_count);
 
-H5_DLL int_f nh5fget_obj_ids_c (hid_t_f *file_id, int_f *obj_type, int_f *obj_ids);
+H5_DLL int_f nh5fget_obj_ids_c (hid_t_f *file_id, int_f *obj_type, int_f *max_objs, int_f *obj_ids);
 H5_DLL int_f nh5fflush_c (hid_t_f *obj_id, int_f *scope);
 
 /*

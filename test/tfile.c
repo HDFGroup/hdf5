@@ -713,7 +713,7 @@ static void
 create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1, 
 		hid_t *ret_gid2, hid_t *ret_gid3)
 {
-    unsigned	oid_count;
+    int	oid_count;
     herr_t	ret;
 
     /* Check reference counts of file IDs and opened object IDs.
@@ -721,22 +721,20 @@ create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
      * is changed, remember to check this part and update the macros.
      */
     {
-       ret = H5Fget_obj_count(fid1, H5F_OBJ_ALL, &oid_count);
-       CHECK(ret, FAIL, "H5Fget_obj_count");
+       oid_count = H5Fget_obj_count(fid1, H5F_OBJ_ALL);
+       CHECK(oid_count, FAIL, "H5Fget_obj_count");
        VERIFY(oid_count, OBJ_ID_COUNT_2, "H5Fget_obj_count");
 
-       ret = H5Fget_obj_count(fid1, H5F_OBJ_DATASET|H5F_OBJ_GROUP|
-				H5F_OBJ_DATATYPE, &oid_count);
-       CHECK(ret, FAIL, "H5Fget_obj_count");
+       oid_count = H5Fget_obj_count(fid1, H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE|H5F_OBJ_ATTR);
+       CHECK(oid_count, FAIL, "H5Fget_obj_count");
        VERIFY(oid_count, OBJ_ID_COUNT_0, "H5Fget_obj_count");
 
-       ret = H5Fget_obj_count(fid2, H5F_OBJ_ALL, &oid_count);
-       CHECK(ret, FAIL, "H5Fget_obj_count");
+       oid_count = H5Fget_obj_count(fid2, H5F_OBJ_ALL);
+       CHECK(oid_count, FAIL, "H5Fget_obj_count");
        VERIFY(oid_count, OBJ_ID_COUNT_2, "H5Fget_obj_count");
 
-       ret = H5Fget_obj_count(fid2, H5F_OBJ_DATASET|H5F_OBJ_GROUP|
-                                H5F_OBJ_DATATYPE, &oid_count);
-       CHECK(ret, FAIL, "H5Fget_obj_count");
+       oid_count = H5Fget_obj_count(fid2, H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE|H5F_OBJ_ATTR);
+       CHECK(oid_count, FAIL, "H5Fget_obj_count");
        VERIFY(oid_count, OBJ_ID_COUNT_0, "H5Fget_obj_count");
     }
 
@@ -779,14 +777,17 @@ create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
     {
         hid_t   gid1, gid2, gid3;
         gid1 = H5Gcreate(fid2, "/group", 0);
+        CHECK(gid1, FAIL, "H5Gcreate");
         if(ret_gid1 != NULL)
             *ret_gid1 = gid1;
 
         gid2 = H5Gopen(fid2, "/group");
+        CHECK(gid2, FAIL, "H5Gopen");
         if(ret_gid2 != NULL)
             *ret_gid2 = gid2;
 
         gid3 = H5Gopen(fid2, "/group");
+        CHECK(gid3, FAIL, "H5Gopen");
         if(ret_gid3 != NULL)
             *ret_gid3 = gid3;
     }
@@ -796,22 +797,20 @@ create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
      * is changed, remember to check this part and update the macros.
      */
     {
-       ret = H5Fget_obj_count(fid1, H5F_OBJ_ALL, &oid_count);
-       CHECK(ret, FAIL, "H5Fget_obj_count");
+       oid_count = H5Fget_obj_count(fid1, H5F_OBJ_ALL);
+       CHECK(oid_count, FAIL, "H5Fget_obj_count");
        VERIFY(oid_count, OBJ_ID_COUNT_6, "H5Fget_obj_count");
 
-       ret = H5Fget_obj_count(fid1, H5F_OBJ_DATASET|H5F_OBJ_GROUP|
-                                H5F_OBJ_DATATYPE, &oid_count);
-       CHECK(ret, FAIL, "H5Fget_obj_count");
+       oid_count = H5Fget_obj_count(fid1, H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE|H5F_OBJ_ATTR);
+       CHECK(oid_count, FAIL, "H5Fget_obj_count");
        VERIFY(oid_count, OBJ_ID_COUNT_4, "H5Fget_obj_count");
 
-       ret = H5Fget_obj_count(fid2, H5F_OBJ_ALL, &oid_count);
-       CHECK(ret, FAIL, "H5Fget_obj_count");
+       oid_count = H5Fget_obj_count(fid2, H5F_OBJ_ALL);
+       CHECK(oid_count, FAIL, "H5Fget_obj_count");
        VERIFY(oid_count, OBJ_ID_COUNT_6, "H5Fget_obj_count");
 
-       ret = H5Fget_obj_count(fid2, H5F_OBJ_DATASET|H5F_OBJ_GROUP|
-                                H5F_OBJ_DATATYPE, &oid_count);
-       CHECK(ret, FAIL, "H5Fget_obj_count");
+       oid_count = H5Fget_obj_count(fid2, H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE|H5F_OBJ_ATTR);
+       CHECK(oid_count, FAIL, "H5Fget_obj_count");
        VERIFY(oid_count, OBJ_ID_COUNT_4, "H5Fget_obj_count");
     }
 }
@@ -826,7 +825,7 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
 			hid_t gid2, hid_t gid3)
 {
     hid_t    fid3, fid4;
-    unsigned oid_count;
+    int oid_count;
     herr_t   ret;
 
     /* Create two new files */
@@ -836,38 +835,43 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
     CHECK(fid4, FAIL, "H5Fcreate");
 
     /* test object count of all files IDs open */
-    ret = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_FILE, &oid_count);
-    CHECK(ret, FAIL, "H5Fget_obj_count");
+    oid_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_FILE);
+    CHECK(oid_count, FAIL, "H5Fget_obj_count");
     VERIFY(oid_count, OBJ_ID_COUNT_4, "H5Fget_obj_count");
 
-    /* test object count of all dataset open */
-    ret = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_DATASET, &oid_count);
-    CHECK(ret, FAIL, "H5Fget_obj_count");
+    /* test object count of all datasets open */
+    oid_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_DATASET);
+    CHECK(oid_count, FAIL, "H5Fget_obj_count");
     VERIFY(oid_count, OBJ_ID_COUNT_1, "H5Fget_obj_count");
 
-    /* test object count of all group open */
-    ret = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_GROUP, &oid_count);
-    CHECK(ret, FAIL, "H5Fget_obj_count");
+    /* test object count of all groups open */
+    oid_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_GROUP);
+    CHECK(oid_count, FAIL, "H5Fget_obj_count");
     VERIFY(oid_count, OBJ_ID_COUNT_3, "H5Fget_obj_count");
 
-    /* test object count of all datatype open */
-    ret = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_DATATYPE, &oid_count);
-    CHECK(ret, FAIL, "H5Fget_obj_count");
+    /* test object count of all named datatypes open */
+    oid_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_DATATYPE);
+    CHECK(oid_count, FAIL, "H5Fget_obj_count");
+    VERIFY(oid_count, OBJ_ID_COUNT_0, "H5Fget_obj_count");
+
+    /* test object count of all attributes open */
+    oid_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ATTR);
+    CHECK(oid_count, FAIL, "H5Fget_obj_count");
     VERIFY(oid_count, OBJ_ID_COUNT_0, "H5Fget_obj_count");
 
     /* test object count of all objects currently open */
-    ret = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL, &oid_count);
-    CHECK(ret, FAIL, "H5Fget_obj_count");
+    oid_count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL);
+    CHECK(oid_count, FAIL, "H5Fget_obj_count");
     VERIFY(oid_count, OBJ_ID_COUNT_8, "H5Fget_obj_count");
 
     {
         hid_t      *oid_list;
-        unsigned   i;
+        int   i;
         H5I_type_t id_type;
 
-        oid_list = (hid_t*)calloc(oid_count, sizeof(hid_t));
+        oid_list = (hid_t*)calloc((size_t)oid_count, sizeof(hid_t));
         if(oid_list != NULL) {
-	    ret = H5Fget_obj_ids(H5F_OBJ_ALL, H5F_OBJ_ALL, oid_list);
+	    ret = H5Fget_obj_ids(H5F_OBJ_ALL, H5F_OBJ_ALL, oid_count, oid_list);
 	    CHECK(ret, FAIL, "H5Fget_obj_ids");
         }
 

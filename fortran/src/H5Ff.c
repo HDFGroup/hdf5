@@ -417,12 +417,12 @@ nh5fget_obj_count_c ( hid_t_f *file_id , int_f *obj_type, int_f * obj_count)
   int ret_value = 0;
   hid_t c_file_id;
   unsigned c_obj_type;
-  unsigned c_obj_count;
+  int c_obj_count;
   
 
   c_file_id = (hid_t)*file_id;
   c_obj_type = (unsigned) *obj_type;
-  if ( H5Fget_obj_count(c_file_id, c_obj_type, &c_obj_count) < 0  ) ret_value = -1;
+  if ( (c_obj_count=H5Fget_obj_count(c_file_id, c_obj_type)) < 0  ) ret_value = -1;
   *obj_count = (int_f)c_obj_count;
   return ret_value;
 }
@@ -439,14 +439,16 @@ nh5fget_obj_count_c ( hid_t_f *file_id , int_f *obj_type, int_f * obj_count)
  *---------------------------------------------------------------------------*/
 
 int_f 
-nh5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, hid_t_f *obj_ids)
+nh5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, int_f *max_objs, hid_t_f *obj_ids)
 {
   int ret_value = 0;
   hid_t c_file_id;
   unsigned c_obj_type;
+  int c_max_objs;
 
   c_file_id = (hid_t)*file_id;
   c_obj_type = (unsigned) *obj_type;
-  if ( H5Fget_obj_ids(c_file_id, c_obj_type, (hid_t *)obj_ids) < 0  ) ret_value = -1;
+  c_max_objs = (int)*max_objs;
+  if ( H5Fget_obj_ids(c_file_id, c_obj_type, c_max_objs, (hid_t *)obj_ids) < 0  ) ret_value = -1;
   return ret_value;
 }

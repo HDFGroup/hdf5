@@ -771,7 +771,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
           
-          SUBROUTINE h5fget_obj_ids_f(file_id, obj_type, obj_ids, hdferr)
+          SUBROUTINE h5fget_obj_ids_f(file_id, obj_type, max_objs, obj_ids, hdferr)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -782,23 +782,25 @@
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: file_id ! File identifier
             INTEGER, INTENT(IN)  :: obj_type   ! Object type
+            INTEGER, INTENT(IN)  :: max_objs   ! Maximum # of objects to retrieve
             INTEGER(HID_T), DIMENSION(*), INTENT(INOUT) :: obj_ids
                                                ! Array of open objects iidentifiers
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
 
             INTERFACE
-              INTEGER FUNCTION h5fget_obj_ids_c(file_id, obj_type, obj_ids)
+              INTEGER FUNCTION h5fget_obj_ids_c(file_id, obj_type, max_objs, obj_ids)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
        !MS$ATTRIBUTES C,reference,alias:'_H5FGET_OBJ_IDS_C':: h5fget_obj_ids_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: file_id
               INTEGER, INTENT(IN)  :: obj_type      
+              INTEGER, INTENT(IN)  :: max_objs
               INTEGER(HID_T), DIMENSION(*), INTENT(INOUT) :: obj_ids  
               END FUNCTION h5fget_obj_ids_c
             END INTERFACE
 
-            hdferr = h5fget_obj_ids_c(file_id, obj_type, obj_ids)
+            hdferr = h5fget_obj_ids_c(file_id, obj_type, max_objs, obj_ids)
 
           END SUBROUTINE h5fget_obj_ids_f
       END MODULE H5F

@@ -300,7 +300,7 @@ FORTRAN File API -- h5f
 
 <dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5fget_obj_ids_f</strong>
 <pre>
-         SUBROUTINE h5fget_obj_ids_f(file_id, obj_type, obj_ids, hdferr)
+         SUBROUTINE h5fget_obj_ids_f(file_id, obj_type, max_objs, obj_ids, hdferr)
 
            IMPLICIT NONE 
            INTEGER(HID_T), INTENT(IN)   :: file_id  ! File identifier
@@ -310,6 +310,7 @@ FORTRAN File API -- h5f
 						    ! H5F_OBJ_DATASET_F
 						    ! H5F_OBJ_DATATYPE_F
 						    ! H5F_OBJ_ALL_F
+           INTEGER, INTENT(IN)          :: max_objs ! Maximum # of object IDs to retrieve
            INTEGER(HID_T), DIMENSION(*), INTENT(OUT) :: obj_ids
                                                     ! array of requested object identifiers
            INTEGER, INTENT(OUT)        :: hdferr    ! Error code 
