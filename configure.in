@@ -477,6 +477,21 @@ EOF
     ;;
 esac
 
+dnl As of Libtool 1.5.14, libtool officially doesn't know how to create
+dnl shared libraries with pgcc.  In fact, it is able to do so on a number
+dnl of platforms, but not all (e.g., pgcc 5.2-4 on mir).  There is discussion
+dnl online which will hopefully resolve this issue, but in the meantime
+dnl we disable support for shared libraries using pgcc because this issue
+dnl is difficult to detect.  -JL 03/2005
+if (${CC-cc} -V 2>&1 | grep '^pgcc') > /dev/null; then
+  echo 'disabling shared libraries for pgcc'
+ed - $ofile <<EOF 2> /dev/null
+/^build_libtool_libs=yes/s//build_libtool_libs=no/
+w
+q
+EOF
+fi
+
 dnl Fix up the INSTALL macro if it's a relative path. We want the
 dnl full-path to the binary instead.
 case "$INSTALL" in

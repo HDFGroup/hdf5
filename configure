@@ -20499,6 +20499,15 @@ EOF
     ;;
 esac
 
+if (${CC-cc} -V 2>&1 | grep '^pgcc') > /dev/null; then
+  echo 'disabling shared libraries for pgcc'
+ed - $ofile <<EOF 2> /dev/null
+/^build_libtool_libs=yes/s//build_libtool_libs=no/
+w
+q
+EOF
+fi
+
 case "$INSTALL" in
   *install-sh*)
     INSTALL='\${top_srcdir}/bin/install-sh -c'
