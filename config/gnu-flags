@@ -50,14 +50,16 @@ EOF
 # Current EGCS compilers have problems with `long long' and register
 # allocation when optimizations are turned on for x86 systems.
 elif test egcs = $cc_vendor -a $cc_vers_all -le 2091066; then
-    cat <<EOF
+    if test "$HSIZET" != "large"; then
+       cat <<EOF
     **
     ** This compiler may have problems allocating registers when
     ** optimizations are enabled on some platforms. Specifying
     ** --disable-hsizet usually avoids the bug.
     **
 EOF
-    sleep 5
+       sleep 5
+    fi
 
 # All current versions of PGCC have problems also.
 elif test pgcc = $cc_vendor -a $cc_vers_all -le 2091066; then	    
