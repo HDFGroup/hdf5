@@ -409,6 +409,8 @@
 ./doc/html/cpplus/Dependencies
 ./doc/html/cpplus/Makefile.in
 
+./doc/html/cpplus_RM/Dependencies
+./doc/html/cpplus_RM/Makefile.in
 ./doc/html/cpplus_RM/H5AbstractDs_8cpp.html
 ./doc/html/cpplus_RM/H5AbstractDs_8h-source.html
 ./doc/html/cpplus_RM/H5AbstractDs_8h.html
