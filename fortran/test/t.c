@@ -34,7 +34,6 @@ nh5_fixname_c(_fcd base_name, int_f *base_namelen, hid_t_f* fapl, _fcd full_name
      int ret_value = -1;
      char *c_base_name;
      int c_base_namelen;
-     int c_full_namelen;
      char *c_full_name;
      hid_t c_fapl;
 

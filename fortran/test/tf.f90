@@ -18,6 +18,10 @@
 !    This file contains subroutines which are used in
 !    all the hdf5 fortran tests
 !
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: check
+!DEC$endif
 
          SUBROUTINE check(string,error,total_error)
             CHARACTER(LEN=*) :: string
@@ -51,6 +55,10 @@
 !----------------------------------------------------------------------
           SUBROUTINE h5_fixname_f(base_name, full_name, fapl, hdferr)
 !
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5_fixname_f
+!DEC$endif
             USE H5GLOBAL           
             IMPLICIT NONE
             CHARACTER(LEN=*), INTENT(IN) :: base_name   ! base name 
@@ -107,6 +115,10 @@
 !----------------------------------------------------------------------
           SUBROUTINE h5_cleanup_f(base_name, fapl, hdferr)
 !
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5_cleanup_f
+!DEC$endif
             USE H5GLOBAL           
             IMPLICIT NONE
             CHARACTER(LEN=*), INTENT(IN) :: base_name   ! base name 
