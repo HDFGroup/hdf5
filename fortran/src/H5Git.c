@@ -49,7 +49,7 @@ typedef struct retval {
  *
  *-------------------------------------------------------------------------
  */
-int 
+int
 H5Gn_members( hid_t loc_id, char *group_name )
 {
 	int res;
@@ -100,7 +100,7 @@ H5Gn_members( hid_t loc_id, char *group_name )
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5Gget_obj_info_idx( hid_t loc_id, char *group_name, int idx, char **objname, int *type )
 {
 	int res;

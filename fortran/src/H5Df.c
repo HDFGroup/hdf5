@@ -112,14 +112,14 @@ nh5dopen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *dset_id)
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5dwritec_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf)
+nh5dwritec_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, int_f *dims)
 {
      int ret_value = -1;
      
      /*
       * Call h5dwrite_c  function.
       */
-     ret_value = nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf));
+     ret_value = nh5dwrite_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
 
      return ret_value;
 }
@@ -139,7 +139,7 @@ nh5dwritec_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5dwrite_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf)
+nh5dwrite_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, int_f *dims)
 {
      int ret_value = -1;
      herr_t ret;
@@ -187,7 +187,7 @@ nh5dwrite_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, int_f *n)
+nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, int_f *dims)
 {
      int ret_value = -1;
      herr_t ret;
@@ -197,7 +197,8 @@ nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
      hid_t c_file_space_id;
      hid_t c_xfer_prp;
      hobj_ref_t *buf_c;
-     int i;
+     int i, n;
+     n = (int)*dims;
 
      /*
       * Define transfer property
@@ -210,9 +211,9 @@ nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
      /*
       * Allocate temporary buffer and copy references from Fortran.
       */
-      buf_c = (hobj_ref_t*)HDmalloc(sizeof(hobj_ref_t)*(*n));
+      buf_c = (hobj_ref_t*)HDmalloc(sizeof(hobj_ref_t)*(n));
       if ( buf_c != NULL ) {
-      for (i = 0; i < *n; i++) {
+      for (i = 0; i < n; i++) {
            HDmemcpy(buf_c[i].oid, buf, H5R_OBJ_REF_BUF_SIZE);
            buf = buf + REF_OBJ_BUF_LEN_F;
       }
@@ -249,7 +250,7 @@ nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, int_f *n)
+nh5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, int_f *dims)
 {
      int ret_value = -1;
      herr_t ret;
@@ -259,8 +260,9 @@ nh5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
      hid_t c_file_space_id;
      hid_t c_xfer_prp;
      hdset_reg_ref_t *buf_c;
-     int i;
+     int i, n;
 
+      n = (int)*dims;
      /*
       * Define transfer property
       */
@@ -272,9 +274,9 @@ nh5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
      /*
       * Allocate temporary buffer and copy references from Fortran.
       */
-      buf_c = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t)*(*n));
+      buf_c = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t)*(n));
       if ( buf_c != NULL ) {
-      for (i = 0; i < *n; i++) {
+      for (i = 0; i < n; i++) {
            HDmemcpy(buf_c[i].heapid, buf, H5R_DSET_REG_REF_BUF_SIZE);
            buf = buf + REF_REG_BUF_LEN_F;
       }
@@ -312,14 +314,14 @@ nh5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5dreadc_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf)
+nh5dreadc_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, int_f *dims)
 {
      int ret_value = -1;
      
      /*
       * Call h5dread_c  function.
       */
-     ret_value = nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf));
+     ret_value = nh5dread_c(dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, _fcdtocp(buf), dims);
 
      return ret_value;
 }
@@ -339,7 +341,7 @@ nh5dreadc_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf)
+nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, int_f *dims)
 {
      int ret_value = -1;
      herr_t ret;
@@ -387,7 +389,7 @@ nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f * buf, int_f *n)
+nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f * buf, int_f *dims)
 {
      int ret_value = -1;
      herr_t ret;
@@ -397,8 +399,8 @@ nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
      hid_t c_file_space_id;
      hid_t c_xfer_prp;
      hobj_ref_t *buf_c;
-     int i;
-
+     int i, n;
+     n = (int)*dims;
      /*
       * Define transfer property
       */
@@ -410,7 +412,7 @@ nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
      /*
       * Allocate temporary buffer.
       */
-     buf_c = (hobj_ref_t*)HDmalloc(sizeof(hobj_ref_t)*(*n));
+     buf_c = (hobj_ref_t*)HDmalloc(sizeof(hobj_ref_t)*(n));
      if ( buf_c != NULL ) {
      /*
       * Call H5Dread function.
@@ -421,7 +423,7 @@ nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
      c_file_space_id = (hid_t)*file_space_id;
      ret = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf_c);
      if (ret >=0) {
-        for (i = 0; i < *n; i++) {
+        for (i = 0; i < n; i++) {
            HDmemcpy(buf, buf_c[i].oid, H5R_OBJ_REF_BUF_SIZE);
            buf = buf + REF_OBJ_BUF_LEN_F;
         }  
@@ -449,7 +451,7 @@ nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5dread_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f * buf, int_f *n)
+nh5dread_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f * buf, int_f *dims)
 {
      int ret_value = -1;
      herr_t ret;
@@ -459,8 +461,8 @@ nh5dread_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
      hid_t c_file_space_id;
      hid_t c_xfer_prp;
      hdset_reg_ref_t *buf_c;
-     int i;
-
+     int i, n;
+     n = (int)*dims;
      /*
       * Define transfer property
       */
@@ -472,7 +474,7 @@ nh5dread_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
      /*
       * Allocate temporary buffer.
       */
-     buf_c = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t)*(*n));
+     buf_c = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t)*(n));
      if ( buf_c != NULL ) {
      /*
       * Call H5Dread function.
@@ -483,7 +485,7 @@ nh5dread_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
      c_file_space_id = (hid_t)*file_space_id;
      ret = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf_c);
      if (ret >=0) {
-        for (i = 0; i < *n; i++) {
+        for (i = 0; i < n; i++) {
            HDmemcpy(buf, buf_c[i].heapid, H5R_DSET_REG_REF_BUF_SIZE);
            buf = buf + REF_REG_BUF_LEN_F;
         }  

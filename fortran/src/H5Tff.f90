@@ -34,6 +34,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5topen_f(loc_id, name, type_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5topen_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  
@@ -90,6 +96,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tcommit_f(loc_id, name, type_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tcommit_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  
@@ -144,6 +156,12 @@
 
 
           SUBROUTINE h5tcopy_f(type_id, new_type_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tcopy_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER(HID_T), INTENT(OUT) :: new_type_id 
@@ -194,6 +212,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tequal_f(type1_id, type2_id, flag, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tequal_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type1_id ! Datatype identifier 
             INTEGER(HID_T), INTENT(IN) :: type2_id ! Datatype identifier 
@@ -245,6 +269,12 @@
 
 
           SUBROUTINE h5tclose_f(type_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tclose_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
@@ -300,6 +330,12 @@
 
 
           SUBROUTINE h5tget_class_f(type_id, class, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_class_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(OUT) :: class 
@@ -358,6 +394,12 @@
 
 
           SUBROUTINE h5tget_size_f(type_id, size, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_size_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER(SIZE_T), INTENT(OUT) :: size ! Datatype size
@@ -371,7 +413,7 @@
               USE H5GLOBAL
               !MS$ATTRIBUTES C,reference,alias:'_H5TGET_SIZE_C'::h5tget_size_c
               INTEGER(HID_T), INTENT(IN) :: type_id
-              INTEGER, INTENT(OUT) :: size
+              INTEGER(SIZE_T), INTENT(OUT) :: size
               END FUNCTION h5tget_size_c
             END INTERFACE
 
@@ -405,6 +447,12 @@
 
 
           SUBROUTINE h5tset_size_f(type_id, size, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tset_size_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER(SIZE_T), INTENT(IN) :: size ! Datatype size
@@ -418,7 +466,7 @@
               USE H5GLOBAL
               !MS$ATTRIBUTES C,reference,alias:'_H5TSET_SIZE_C'::h5tset_size_c
               INTEGER(HID_T), INTENT(IN) :: type_id
-              INTEGER, INTENT(IN) :: size
+              INTEGER(SIZE_T), INTENT(IN) :: size
               END FUNCTION h5tset_size_c
             END INTERFACE
 
@@ -456,6 +504,12 @@
 
 
           SUBROUTINE h5tget_order_f(type_id, order, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_order_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(OUT) :: order 
@@ -511,6 +565,12 @@
 
 
           SUBROUTINE h5tset_order_f(type_id, order, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tset_order_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(IN) :: order ! Datatype byte order, bossible values
@@ -562,6 +622,12 @@
 
 
           SUBROUTINE h5tget_precision_f(type_id, precision, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_precision_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER(SIZE_T), INTENT(OUT) :: precision ! Datatype precision
@@ -608,6 +674,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tset_precision_f(type_id, precision, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tset_precision_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER(SIZE_T), INTENT(IN) :: precision ! Datatype precision
@@ -654,6 +726,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_offset_f(type_id, offset, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_offset_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER(SIZE_T), INTENT(OUT) :: offset ! Datatype bit offset of the
@@ -701,6 +779,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tset_offset_f(type_id, offset, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tset_offset_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER(SIZE_T), INTENT(IN) :: offset ! Datatype bit offset of the
@@ -756,6 +840,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_pad_f(type_id, lsbpad, msbpad, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_pad_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(OUT) :: lsbpad ! padding type of the 
@@ -820,6 +910,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tset_pad_f(type_id, lsbpad, msbpad, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tset_pad_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(IN) :: lsbpad ! padding type of the 
@@ -881,6 +977,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_sign_f(type_id, sign, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_sign_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(OUT) :: sign ! sign type for an integer type
@@ -937,6 +1039,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tset_sign_f(type_id, sign, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tset_sign_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(IN) :: sign !sign type for an integer type 
@@ -991,6 +1099,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_fields_f(type_id, epos, esize, mpos, msize, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_fields_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(OUT) :: epos   ! exponent bit-position 
@@ -1047,6 +1161,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tset_fields_f(type_id, epos, esize, mpos, msize, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tset_fields_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
             INTEGER, INTENT(IN) :: epos   ! exponent bit-position 
@@ -1099,6 +1219,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_ebias_f(type_id, ebias, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_ebias_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER(SIZE_T), INTENT(OUT) :: ebias ! Datatype exponent bias of a floating-point type
@@ -1146,6 +1272,12 @@
 
 
           SUBROUTINE h5tset_ebias_f(type_id, ebias, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tset_ebias_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER(SIZE_T), INTENT(IN) :: ebias !Datatype exponent bias of a floating-point type
@@ -1196,6 +1328,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_norm_f(type_id, norm, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_norm_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(OUT) :: norm !mantissa normalization of a floating-point datatype
@@ -1251,6 +1389,12 @@
 
 
           SUBROUTINE h5tset_norm_f(type_id, norm, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tset_norm_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(IN) :: norm !mantissa normalization of a floating-point datatype
@@ -1307,6 +1451,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_inpad_f(type_id, padtype, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_inpad_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(OUT) :: padtype ! padding type for unused bits 
@@ -1363,6 +1513,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tset_inpad_f(type_id, padtype, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tset_inpad_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(IN) :: padtype ! padding type for unused bits 
@@ -1416,6 +1572,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_cset_f(type_id, cset, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_cset_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(OUT) :: cset ! character set type of a string datatype 
@@ -1466,6 +1628,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tset_cset_f(type_id, cset, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tset_cset_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(IN) :: cset !character set type of a string datatype  
@@ -1519,6 +1687,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_strpad_f(type_id, strpad, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_strpad_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(OUT) :: strpad 
@@ -1570,6 +1744,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tset_strpad_f(type_id, strpad, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tset_strpad_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(IN) :: strpad ! string padding method for a string datatype 
@@ -1617,6 +1797,12 @@
 
 
           SUBROUTINE h5tget_nmembers_f(type_id, num_members, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_nmembers_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(OUT) :: num_members !number of fields in a compound datatype 
@@ -1665,6 +1851,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_member_name_f(type_id,index, member_name,  namelen, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_member_name_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(IN) :: index !Field index (0-based) of the field name to retrieve 
@@ -1718,6 +1910,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_member_offset_f(type_id, member_no, offset, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_member_offset_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(IN) :: member_no !Number of the field  
@@ -1731,7 +1929,7 @@
             INTERFACE
               INTEGER FUNCTION h5tget_member_offset_c(type_id, member_no, offset )
               USE H5GLOBAL
-              !MS$ATTRIBUTES C,reference,alias:'_H5Tget_member_offset_C'::h5tget_member_offset_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_MEMBER_OFFSET_C'::h5tget_member_offset_c
               INTEGER(HID_T), INTENT(IN) :: type_id
               INTEGER, INTENT(IN) :: member_no
               INTEGER(SIZE_T), INTENT(OUT) :: offset
@@ -1765,6 +1963,12 @@
 !----------------------------------------------------------------------
 
 !          SUBROUTINE h5tget_member_dims_f(type_id, field_idx,dims, field_dims, perm, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_member_dims_f
+!DEC$endif
+!
 !            IMPLICIT NONE
 !            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
 !            INTEGER, INTENT(IN) :: field_idx !Field index (0-based) of 
@@ -1808,6 +2012,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_array_dims_f(type_id, dims, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_array_dims_f
+!DEC$endif
+!
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Array datatype identifier 
@@ -1857,6 +2067,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_array_ndims_f(type_id, ndims, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_array_ndims_f
+!DEC$endif
+!
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Array datatype identifier 
@@ -1905,6 +2121,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_super_f(type_id, base_type_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_super_f
+!DEC$endif
+!
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! datatype identifier 
@@ -1956,6 +2178,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_member_type_f(type_id,  field_idx, datatype, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_member_type_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(IN) :: field_idx !Field index (0-based) of the field type to retrieve
@@ -2010,6 +2238,12 @@
 
 
           SUBROUTINE h5tcreate_f(class, size, type_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tcreate_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER, INTENT(IN) :: class ! Datatype class can be one of
                                          ! H5T_COMPOUND_F
@@ -2064,6 +2298,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tinsert_f(type_id,  name, offset, field_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tinsert_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name !Name of the field to insert
@@ -2119,6 +2359,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tpack_f(type_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tpack_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
@@ -2161,6 +2407,12 @@
 !----------------------------------------------------------------------
 
 !          SUBROUTINE h5tinsert_array_f(parent_id,name,offset, ndims, dims, member_id, hdferr, perm) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tinsert_array_f
+!DEC$endif
+!
 !            IMPLICIT NONE
 !            INTEGER(HID_T), INTENT(IN) :: parent_id ! identifier of the parent compound datatype
 !            CHARACTER(LEN=*), INTENT(IN) :: name !Name of the new member
@@ -2215,6 +2467,12 @@
 !----------------------------------------------------------------------
          
           SUBROUTINE h5tarray_create_f(base_id, rank, dims, type_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tarray_create_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: base_id ! identifier of array base datatype
             INTEGER, INTENT(IN) ::  rank ! Rank of the array
@@ -2268,6 +2526,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tenum_create_f(parent_id, new_type_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tenum_create_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: parent_id  ! Datatype identifier for
                                                      ! the  base datatype
@@ -2316,6 +2580,12 @@
 !----------------------------------------------------------------------
             
           SUBROUTINE h5tenum_insert_f(type_id,  name, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tenum_insert_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  !Name of  the new member
@@ -2371,6 +2641,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tenum_nameof_f(type_id,  value, namelen, name, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tenum_nameof_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             CHARACTER(LEN=*), INTENT(OUT) :: name  !Name of the  enumeration datatype.
@@ -2384,7 +2660,7 @@
             INTERFACE
               INTEGER FUNCTION h5tenum_nameof_c(type_id, value, name, namelen)
               USE H5GLOBAL
-              !MS$ATTRIBUTES C,reference,alias:'_H5Tenum_nameof_C'::h5tenum_nameof_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5TENUM_NAMEOF_C'::h5tenum_nameof_c
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: type_id 
               CHARACTER(LEN=*), INTENT(OUT) :: name
@@ -2424,6 +2700,12 @@
 !----------------------------------------------------------------------
             
           SUBROUTINE h5tenum_valueof_f(type_id,  name, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tenum_valueof_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  !Name of the  enumeration datatype.
@@ -2437,11 +2719,11 @@
             INTERFACE
               INTEGER FUNCTION h5tenum_valueof_c(type_id, name, namelen,  value)
               USE H5GLOBAL
-              !MS$ATTRIBUTES C,reference,alias:'_H5Tenum_valueof_C'::h5tenum_valueof_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5TENUM_VALUEOF_C'::h5tenum_valueof_c
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: type_id 
               CHARACTER(LEN=*), INTENT(IN) :: name
-              INTEGER(SIZE_T), INTENT(IN) :: namelen 
+              INTEGER, INTENT(IN) :: namelen 
               INTEGER, INTENT(OUT) :: value
               END FUNCTION h5tenum_valueof_c
             END INTERFACE
@@ -2477,6 +2759,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_member_value_f(type_id,  member_no, value, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_member_value_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(IN) :: member_no !Number of the enumeration datatype member
@@ -2526,6 +2814,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tset_tag_f(type_id, tag, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tset_tag_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             CHARACTER(LEN=*), INTENT(IN) :: tag !Unique ASCII string with which 
@@ -2578,6 +2872,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5tget_tag_f(type_id, tag,taglen, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_tag_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             CHARACTER(LEN=*), INTENT(OUT) :: tag !Unique ASCII string with which 

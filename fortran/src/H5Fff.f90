@@ -36,6 +36,12 @@
 !----------------------------------------------------------------------
           SUBROUTINE h5fcreate_f(name, access_flags, file_id, hdferr, &
                                  creation_prp, access_prp)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fcreate_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
@@ -112,6 +118,12 @@
 ! Comment:		
 !----------------------------------------------------------------------
           SUBROUTINE h5fflush_f(object_id, scope, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fflush_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: object_id !identifier for any object
@@ -177,6 +189,12 @@
 !----------------------------------------------------------------------
  
           SUBROUTINE h5fmount_f(loc_id, name, child_id, hdferr, access_prp)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fmount_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! Identifier for file or group 
@@ -243,6 +261,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5funmount_f(loc_id, name, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5funmount_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! Identifier for file or group 
@@ -300,6 +324,12 @@
 !----------------------------------------------------------------------
           SUBROUTINE h5fopen_f(name, access_flags, file_id, hdferr, &
                                access_prp)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fopen_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
@@ -364,6 +394,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5freopen_f(file_id, ret_file_id, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5freopen_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: file_id      ! File identifier 
@@ -413,6 +449,12 @@
 !----------------------------------------------------------------------
           
           SUBROUTINE h5fget_create_plist_f(file_id, prop_id, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fget_create_plist_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: file_id    ! File identifier 
@@ -463,6 +505,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5fget_access_plist_f(file_id, access_id, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fget_access_plist_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: file_id      ! File identifier 
@@ -513,6 +561,12 @@
 !----------------------------------------------------------------------
  
           SUBROUTINE h5fis_hdf5_f(name, status, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fis_hdf5_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
@@ -569,6 +623,12 @@
 !----------------------------------------------------------------------
           
           SUBROUTINE h5fclose_f(file_id, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fclose_f
+!DEC$endif
+!
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: file_id ! File identifier

@@ -36,40 +36,40 @@
 !
         INTERFACE
           INTEGER FUNCTION h5open_c()
-          !MS$ATTRIBUTES C,reference,alias:'_H5OPEN_C'::h5dopen_c
+          !MS$ATTRIBUTES C,reference,alias:'_H5OPEN_C'::h5open_c
           END FUNCTION h5open_c
         END INTERFACE
         INTERFACE
-          INTEGER FUNCTION h5init_types_c(predef_types, floating_types, integer_types)
+          INTEGER FUNCTION h5init_types_c(p_types, f_types, i_types)
           USE H5GLOBAL
-          INTEGER(HID_T), DIMENSION(PREDEF_TYPES_LEN) :: predef_types
-          INTEGER(HID_T), DIMENSION(FLOATING_TYPES_LEN) :: floating_types
-          INTEGER(HID_T), DIMENSION(INTEGER_TYPES_LEN) :: integer_types   
+          INTEGER(HID_T), DIMENSION(PREDEF_TYPES_LEN) :: p_types
+          INTEGER(HID_T), DIMENSION(FLOATING_TYPES_LEN) :: f_types
+          INTEGER(HID_T), DIMENSION(INTEGER_TYPES_LEN) :: i_types   
           !MS$ATTRIBUTES C,reference,alias:'_H5INIT_TYPES_C'::h5init_types_c
           END FUNCTION h5init_types_c
         END INTERFACE
         INTERFACE
-          INTEGER FUNCTION h5init_flags_c(H5D_flags, &
-                                H5E_flags, &
-                                H5F_flags, &
-                                H5FD_flags, &
-                                H5G_flags, &
-                                H5I_flags, &
-                                H5P_flags, &
-                                H5R_flags, &
-                                H5S_flags, &
-                                H5T_flags  )
+          INTEGER FUNCTION h5init_flags_c(i_H5D_flags, &
+                                i_H5E_flags, &
+                                i_H5F_flags, &
+                                i_H5FD_flags, &
+                                i_H5G_flags, &
+                                i_H5I_flags, &
+                                i_H5P_flags, &
+                                i_H5R_flags, &
+                                i_H5S_flags, &
+                                i_H5T_flags  )
           USE H5GLOBAL
-          INTEGER H5F_flags(H5F_FLAGS_LEN)
-          INTEGER H5G_flags(H5G_FLAGS_LEN)
-          INTEGER H5D_flags(H5D_FLAGS_LEN)
-          INTEGER H5FD_flags(H5FD_FLAGS_LEN)
-          INTEGER H5E_flags(H5E_FLAGS_LEN)
-          INTEGER H5I_flags(H5I_FLAGS_LEN)
-          INTEGER H5P_flags(H5P_FLAGS_LEN)
-          INTEGER H5R_flags(H5R_FLAGS_LEN)
-          INTEGER H5S_flags(H5S_FLAGS_LEN)
-          INTEGER H5T_flags(H5T_FLAGS_LEN)
+          INTEGER i_H5F_flags(H5F_FLAGS_LEN)
+          INTEGER i_H5G_flags(H5G_FLAGS_LEN)
+          INTEGER i_H5D_flags(H5D_FLAGS_LEN)
+          INTEGER i_H5FD_flags(H5FD_FLAGS_LEN)
+          INTEGER i_H5E_flags(H5E_FLAGS_LEN)
+          INTEGER i_H5I_flags(H5I_FLAGS_LEN)
+          INTEGER i_H5P_flags(H5P_FLAGS_LEN)
+          INTEGER i_H5R_flags(H5R_FLAGS_LEN)
+          INTEGER i_H5S_flags(H5S_FLAGS_LEN)
+          INTEGER i_H5T_flags(H5T_FLAGS_LEN)
 
           !MS$ATTRIBUTES C,reference,alias:'_H5INIT_FLAGS_C'::h5init_flags_c
           END FUNCTION h5init_flags_c
@@ -126,16 +126,16 @@
           END FUNCTION h5close_c
         END INTERFACE
         INTERFACE
-          INTEGER FUNCTION h5close_types_c(predef_types, PREDEF_TYPES_LEN, &
-                                         floating_types, FLOATING_TYPES_LEN, &
-                                         integer_types, INTEGER_TYPES_LEN )
+          INTEGER FUNCTION h5close_types_c(p_types, P_TYPES_LEN, &
+                                         f_types, F_TYPES_LEN, &
+                                         i_types, I_TYPES_LEN )
           USE H5GLOBAL
-          INTEGER PREDEF_TYPES_LEN
-          INTEGER FLOATING_TYPES_LEN
-          INTEGER INTEGER_TYPES_LEN
-          INTEGER(HID_T), DIMENSION(PREDEF_TYPES_LEN) :: predef_types
-          INTEGER(HID_T), DIMENSION(FLOATING_TYPES_LEN) :: floating_types
-          INTEGER(HID_T), DIMENSION(INTEGER_TYPES_LEN) :: integer_types   
+          INTEGER P_TYPES_LEN
+          INTEGER F_TYPES_LEN
+          INTEGER I_TYPES_LEN
+          INTEGER(HID_T), DIMENSION(P_TYPES_LEN) :: p_types
+          INTEGER(HID_T), DIMENSION(F_TYPES_LEN) :: f_types
+          INTEGER(HID_T), DIMENSION(I_TYPES_LEN) :: i_types   
           !MS$ATTRIBUTES C,reference,alias:'_H5CLOSE_TYPES_C'::h5close_types_c
           END FUNCTION h5close_types_c
         END INTERFACE

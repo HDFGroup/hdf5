@@ -38,6 +38,12 @@
 ! Comment:		
 !----------------------------------------------------------------------
           SUBROUTINE h5iget_type_f(obj_id, type, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5iget_type_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
             INTEGER, INTENT(OUT) :: type !type of an object. 

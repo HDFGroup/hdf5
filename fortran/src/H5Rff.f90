@@ -74,6 +74,12 @@
 !----------------------------------------------------------------------
   
           SUBROUTINE h5rcreate_object_f(loc_id, name, ref, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5rcreate_object_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! Location identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the object at location specified
@@ -136,6 +142,12 @@
 !----------------------------------------------------------------------
   
           SUBROUTINE h5rcreate_region_f(loc_id, name, space_id, ref, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5rcreate_region_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! Location identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the dataset at location specified
@@ -201,6 +213,12 @@
   
           
           SUBROUTINE h5rdereference_object_f(dset_id, ref, obj_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5rdereference_object_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
             TYPE(hobj_ref_t_f), INTENT(IN) :: ref   ! Object reference 
@@ -259,6 +277,12 @@
   
           
           SUBROUTINE h5rdereference_region_f(dset_id, ref, obj_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5rdereference_region_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
             TYPE(hdset_reg_ref_t_f), INTENT(IN) :: ref   ! Object reference 
@@ -319,6 +343,12 @@
           
           
           SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5rget_region_region_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
             TYPE(hdset_reg_ref_t_f), INTENT(IN) :: ref   ! Dataset region reference 
@@ -381,6 +411,12 @@
   
 
           SUBROUTINE h5rget_object_type_obj_f(dset_id, ref, obj_type, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5rget_object_type_obj_f
+!DEC$endif
+!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
             TYPE(hobj_ref_t_f), INTENT(IN) :: ref   ! Object reference 

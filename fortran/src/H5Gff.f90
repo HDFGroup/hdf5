@@ -34,6 +34,12 @@
 ! Comment:		
 !----------------------------------------------------------------------
           SUBROUTINE h5gcreate_f(loc_id, name, grp_id, hdferr, size_hint)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5gcreate_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
@@ -100,6 +106,12 @@
 ! Comment:		
 !----------------------------------------------------------------------
           SUBROUTINE h5gopen_f(loc_id, name, grp_id, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5gopen_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
@@ -153,6 +165,12 @@
 ! Comment:		
 !----------------------------------------------------------------------
           SUBROUTINE h5gclose_f(grp_id, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5gclose_f
+!DEC$endif
+!
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: grp_id  ! Group identifier
@@ -204,6 +222,12 @@
 !----------------------------------------------------------------------
           SUBROUTINE h5gget_obj_info_idx_f(loc_id, name, idx, &
                                            obj_name, obj_type, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5gget_obj_info_idx_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
@@ -271,6 +295,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5gn_members_f(loc_id, name, nmembers, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5gn_members_f
+!DEC$endif
+!
            
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
@@ -335,6 +365,12 @@
 
           SUBROUTINE h5glink_f(loc_id, link_type, current_name, &
                                                    new_name, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5glink_f
+!DEC$endif
+!
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
@@ -405,6 +441,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5gunlink_f(loc_id, name, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5gunlink_f
+!DEC$endif
+!
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
@@ -459,6 +501,12 @@
 
           
           SUBROUTINE h5gmove_f(loc_id, name, new_name, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5gmove_f
+!DEC$endif
+!
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
@@ -522,6 +570,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5gget_linkval_f(loc_id, name, size, buffer, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5gget_linkval_f
+!DEC$endif
+!
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
@@ -583,6 +637,12 @@
 !----------------------------------------------------------------------
 
            SUBROUTINE h5gset_comment_f(loc_id, name, comment, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5gset_comment_f
+!DEC$endif
+!
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
@@ -644,6 +704,12 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5gget_comment_f(loc_id, name, size, buffer, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5gget_comment_f
+!DEC$endif
+!
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
