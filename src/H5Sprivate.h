@@ -110,7 +110,6 @@ typedef struct {
     size_t count;               /* Number of nodes in list */
     H5S_hyper_node_t *head;     /* Pointer to head of hyperslab list */
     H5S_hyper_bound_t **lo_bounds;    /* Lower (closest to the origin) bound array for each dimension */
-    H5S_hyper_bound_t **hi_bounds;    /* Upper (farthest from the origin) bound array for each dimension */
 } H5S_hyper_list_t;
 
 /* Information about one dimension in a hyperslab selection */
