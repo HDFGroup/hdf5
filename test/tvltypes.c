@@ -309,7 +309,6 @@ test_vltypes_vlen_compound(void)
     ret=H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
-
     /* Make certain the VL memory has been freed */
     VERIFY(mem_used,0,"H5Dvlen_reclaim");
 
@@ -410,11 +409,9 @@ test_vltypes_compound_vlen_atomic(void)
     dataset=H5Dcreate(fid1,"Dataset1",tid2,sid1,H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
-printf("Before writing data to disk\n");
     /* Write dataset to disk */
     ret=H5Dwrite(dataset,tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
     CHECK(ret, FAIL, "H5Dwrite");
-printf("After writing data to disk\n");
 
     /* Change to the custom memory allocation routines for reading VL data */
     xfer_pid=H5Pcreate(H5P_DATASET_XFER);
@@ -423,11 +420,9 @@ printf("After writing data to disk\n");
     ret=H5Pset_vlen_mem_manager(xfer_pid,test_vltypes_alloc_custom,&mem_used,test_vltypes_free_custom,&mem_used);
     CHECK(ret, FAIL, "H5Pset_vlen_mem_manager");
 
-printf("Before reading data from disk\n");
     /* Read dataset from disk */
     ret=H5Dread(dataset,tid2,H5S_ALL,H5S_ALL,xfer_pid,rdata);
     CHECK(ret, FAIL, "H5Dread");
-printf("After reading data from disk\n");
 
     /* Make certain the correct amount of memory has been used */
     /* 10 elements allocated = 1 + 2 + 3 + 4 elements for each array position */
@@ -460,16 +455,14 @@ printf("After reading data from disk\n");
     } /* end for */
 
     /* Reclaim the VL data */
-#ifdef QAK
     ret=H5Dvlen_reclaim(tid2,sid1,xfer_pid,rdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Make certain the VL memory has been freed */
     VERIFY(mem_used,0,"H5Dvlen_reclaim");
-#endif /* QAK */
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Close Dataset */
@@ -606,7 +599,7 @@ test_vltypes_vlen_vlen_atomic(void)
     VERIFY(mem_used,0,"H5Dvlen_reclaim");
 
     /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Close Dataset */
@@ -649,9 +642,7 @@ test_vltypes(void)
     /* These next tests use the same file */
     test_vltypes_vlen_atomic();       /* Test VL atomic datatypes */
     test_vltypes_vlen_compound();     /* Test VL compound datatypes */
-#ifdef QAK
     test_vltypes_compound_vlen_atomic();     /* Test compound datatypes with VL atomic components */
-#endif
     test_vltypes_vlen_vlen_atomic();  /* Test VL datatype with VL atomic components */
 }   /* test_vltypes() */
 

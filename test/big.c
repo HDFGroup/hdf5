@@ -79,6 +79,7 @@ is_sparse(void)
     if ((fd=open("x.h5", O_RDWR|O_TRUNC|O_CREAT, 0666))<0) return 0;
     if (lseek(fd, 1024*1024, SEEK_SET)!=1024*1024) return 0;
     if (5!=write(fd, "hello", 5)) return 0;
+    if (close(fd)<0) return 0;
     if (stat("x.h5", &sb)<0) return 0;
     if (unlink("x.h5")<0) return 0;
 #ifdef HAVE_STAT_ST_BLOCKS
