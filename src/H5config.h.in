@@ -239,9 +239,6 @@
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
 
-/* Define if you have the strdup function.  */
-#undef HAVE_STRDUP
-
 /* Define if you have the ioctl function.  */
 #undef HAVE_IOCTL
 
@@ -262,6 +259,9 @@
 
 /* Define if you have the snprintf function.  */
 #undef HAVE_SNPRINTF
+
+/* Define if you have the strdup function.  */
+#undef HAVE_STRDUP
 
 /* Define if you have the system function.  */
 #undef HAVE_SYSTEM
