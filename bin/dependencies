@@ -45,4 +45,7 @@ while (<DEPEND>) {
     print NEW $_;
 }
 
+close(DEPEND);
+close(NEW);
+
 `mv $new_depend_file $depend_file`;
