@@ -20,7 +20,6 @@
 
 #ifdef H5_HAVE_STREAM
 
-#include <H5pubconf.h>
 #include <H5Ipublic.h>
 
 /* check what sockets type we have (Unix or Windows sockets)
