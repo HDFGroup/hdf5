@@ -285,6 +285,7 @@
 ./pablo/PabloHDF.c
 ./pablo/PabloHDF_RT.c
 ./pablo/PabloHDF_SDDF.c
+./pablo/PabloHDFff.f
 ./pablo/ProcIDs.h
 ./pablo/PabloSedscr
 ./pablo/ProcTrace.h
