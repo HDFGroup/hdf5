@@ -111,7 +111,10 @@ H5Pset_small_data_block_size
     <h3>Fortran90 Library</h3>
     <dir>
 
-      There were no changes to the public Fortran90 APIs for this release.
+      <code>h5dwrite_f, h5dread_f, h5awrite_f, h5aread_f </code>were  overloaded 
+      with <code>dims</code> argument to be assumed size array of type <code>INTEGER(HSIZE_T).</code> 
+      We recommend to use the subroutines with the new type.  Module subroutines 
+      that accept <code>dims</code> as <code>INTEGER</code> array of size <code>7</code> will be deprecated in the 1.6 release.
 
     </dir>
 </dir>
