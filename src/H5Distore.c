@@ -2336,6 +2336,7 @@ H5D_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
 {
     hssize_t	chunk_offset[H5O_LAYOUT_NDIMS]; /* Offset of current chunk */
     hsize_t	chunk_size;     /* Size of chunk in bytes */
+    unsigned filter_mask=0;     /* Filter mask for chunks that have them */
     H5O_pline_t pline;          /* I/O pipeline information */
     H5O_fill_t fill;            /* Fill value information */
     H5D_fill_time_t fill_time;  /* When to write fill values */
@@ -2457,7 +2458,6 @@ H5D_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
 
         /* Check if there are filters which need to be applied to the chunk */
         if (pline.nused>0) {
-            unsigned filter_mask=0;
             size_t buf_size=(size_t)chunk_size;
             size_t nbytes=(size_t)chunk_size;
 
@@ -2496,7 +2496,7 @@ H5D_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
         if(!chunk_exists) {
             /* Initialize the chunk information */
             udata.mesg = &dset->layout;
-            udata.key.filter_mask = 0;
+            udata.key.filter_mask = filter_mask;
             udata.addr = HADDR_UNDEF;
             H5_CHECK_OVERFLOW(chunk_size,hsize_t,size_t);
             udata.key.nbytes = (size_t)chunk_size;
