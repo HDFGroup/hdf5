@@ -219,7 +219,6 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
     bt->sizeof_rkey = sizeof_rkey;
     bt->dirty = TRUE;
     bt->ndirty = 0;
-    bt->type = type;
     bt->level = 0;
     bt->left = HADDR_UNDEF;
     bt->right = HADDR_UNDEF;
