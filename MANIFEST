@@ -1247,5 +1247,6 @@
 ./tools/testfiles/tvldtypes3.h5.xml
 
 ./windows/all.zip
+./windows/all_lang.zip
 ./windows/all_withf90.zip
 ./windows/all_withhdf4.zip
