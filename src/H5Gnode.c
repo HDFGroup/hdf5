@@ -80,6 +80,7 @@ H5B_class_t H5B_SNODE[1] = {{
     H5G_node_insert,		/*insert		*/
     TRUE,			/*follow min branch?	*/
     TRUE,			/*follow max branch?	*/
+    NULL,			/*remove		*/
     H5G_node_iterate,		/*list			*/
     H5G_node_decode_key,	/*decode		*/
     H5G_node_encode_key,	/*encode		*/

@@ -121,6 +121,7 @@ herr_t H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf);
 intn H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize,
 		     char *buf);
 herr_t H5G_insert (H5G_entry_t *loc, const char *name, H5G_entry_t *ent);
+herr_t H5G_unlink(H5G_entry_t *loc, const char *name);
 herr_t H5G_find (H5G_entry_t *loc, const char *name,
 		 H5G_entry_t *grp_ent/*out*/, H5G_entry_t *ent/*out*/);
 herr_t H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,

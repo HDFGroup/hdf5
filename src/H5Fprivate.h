@@ -400,7 +400,7 @@ typedef struct H5F_low_t {
 
 /* What types of low-level files are there? */
 #ifndef H5F_LOW_DFLT
-#  define H5F_LOW_DFLT	H5F_LOW_STDIO	/* The default type	  */
+#  define H5F_LOW_DFLT	H5F_LOW_SEC2	/* The default type	  */
 #endif
 extern const H5F_low_class_t H5F_LOW_SEC2_g[];	/* Posix section 2	*/
 extern const H5F_low_class_t H5F_LOW_STDIO_g[];	/* Posix stdio		*/
@@ -419,7 +419,9 @@ typedef struct H5F_rdcc_t {
     uintn		nflushes;/* Number of cache flushes		*/
     size_t		nbytes;	/* Current cached raw data in bytes	*/
     intn		nslots;	/* Number of chunk slots allocated	*/
+#ifndef H5F_RDCC_NEW
     intn		nused;	/* Number of chunk slots in use		*/
+#endif
     struct H5F_rdcc_ent_t *slot; /* Chunk slots, each points to a chunk	*/
 } H5F_rdcc_t;
 

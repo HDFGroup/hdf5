@@ -349,7 +349,7 @@ H5Z_find(H5Z_filter_t id)
 
     for (i=0; i<H5Z_table_used_g; i++) {
 	if (H5Z_table_g[i].id == id) {
-	    return H5Z_table_g + i;
+	    HRETURN(H5Z_table_g+i);
 	}
     }
 

@@ -501,10 +501,10 @@ H5F_split_alloc (H5F_low_t *lf, intn op, hsize_t alignment, hsize_t threshold,
 
     switch (op) {
     case H5MF_META:
-	if (blk->addr.offset & lf->u.split.mask) return FAIL;
+	if (blk->addr.offset & lf->u.split.mask) HRETURN(FAIL);
 	break;
     case H5MF_RAW:
-	if (0==(blk->addr.offset & lf->u.split.mask)) return FAIL;
+	if (0==(blk->addr.offset & lf->u.split.mask)) HRETURN(FAIL);
 	break;
     }
 

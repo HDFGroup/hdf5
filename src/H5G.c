@@ -618,13 +618,25 @@ H5Glink(hid_t loc_id, H5G_link_t type, const char *cur_name,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gunlink(hid_t __unused__ loc_id, const char __unused__ *name)
+H5Gunlink(hid_t loc_id, const char *name)
 {
+    H5G_entry_t	*loc = NULL;
+    
     FUNC_ENTER (H5Gunlink, FAIL);
     H5TRACE2("e","is",loc_id,name);
 
-    HRETURN_ERROR (H5E_SYM, H5E_UNSUPPORTED, FAIL,
-		   "unable to unlink name (not implemented yet)");
+    /* Check arguments */
+    if (NULL==(loc=H5G_loc(loc_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    }
+    if (!name || !*name) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
+    }
+
+    /* Unlink */
+    if (H5G_unlink(loc, name)<0) {
+	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to unlink object");
+    }
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -907,6 +919,50 @@ H5G_component(const char *name, size_t *size_p)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_basename
+ *
+ * Purpose:	Returns a pointer to the last component of the specified
+ *		name. The length of the component is returned through SIZE_P.
+ *		The base name is followed by zero or more slashes and a null
+ *		terminator, but SIZE_P does not count the slashes or the null
+ *		terminator.
+ *
+ * Note:	The base name of the root directory is a single slash.
+ *
+ * Return:	Success:	Ptr to base name.
+ *
+ *		Failure:	Ptr to the null terminator.
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, September 17, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static const char *
+H5G_basename(const char *name, size_t *size_p)
+{
+    size_t	i, end;
+    
+    FUNC_ENTER(H5G_basename, NULL);
+
+    /* Find the end of the base name */
+    i = strlen(name);
+    while (i>0 && '/'==name[i-1]) --i;
+    end = i;
+
+    /* Skip backward over base name */
+    while (i>0 && '/'!=name[i-1]) --i;
+
+    /* Watch out for root special case */
+    if ('/'==name[i] && size_p) *size_p = 1;
+
+    FUNC_LEAVE(name+i);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_namei
  *
  * Purpose:	Translates a name to a symbol table entry.
@@ -930,9 +986,9 @@ H5G_component(const char *name, size_t *size_p)
  *		undefined object header address if the search failed at the
  *		root object. For instance, if NAME is `/foo/bar/baz' and the
  *		root directory exists and contains an entry for `foo', and
- *		foo is a group that contains an entry for baz, but baz is not
+ *		foo is a group that contains an entry for bar, but bar is not
  *		a group, then the results will be that REST points to `baz',
- *		GRP_ENT has an undefined object header address, and GRP_ENT
+ *		OBJ_ENT has an undefined object header address, and GRP_ENT
  *		is the symbol table entry for `bar' in `/foo'.
  *
  *		Every file has a root group whose name is `/'.  Components of
@@ -1131,7 +1187,7 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
  *
  * Purpose:	Creates a root group in an empty file and opens it.  If a
  *		root group is already open then this function immediately
- *		returnes.   If ENT is non-null then it's the symbol table
+ *		returns.   If ENT is non-null then it's the symbol table
  *		entry for an existing group which will be opened as the root
  *		group.  Otherwise a new root group is created and then
  *		opened.
@@ -1158,7 +1214,7 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
 
     /* check args */
     assert(f);
-    if (f->shared->root_grp) return SUCCEED;
+    if (f->shared->root_grp) HRETURN(SUCCEED);
 
     /*
      * If there is no root object then create one. The root group always has
@@ -1663,7 +1719,7 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
     }
 
     /*
-     * The object into a symbol table.
+     * Insert the object into a symbol table.
      */
     if (H5O_link(ent, 1) < 0) {
 	HRETURN_ERROR(H5E_SYM, H5E_LINK, FAIL, "link inc failure");
@@ -2278,3 +2334,52 @@ H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf)
     FUNC_LEAVE(retval);
 }
     
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_unlink
+ *
+ * Purpose:	Unlink a name from a group.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, September 17, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_unlink(H5G_entry_t *loc, const char *name)
+{
+    H5G_entry_t		grp_ent, obj_ent;
+    size_t		len;
+    const char		*base=NULL;
+    
+    FUNC_ENTER(H5G_unlink, FAIL);
+    assert(loc);
+    assert(name && *name);
+
+    /* Get the entry for the group that contains the object to be unlinked */
+    if (H5G_namei(loc, name, NULL, &grp_ent, &obj_ent, FALSE, NULL)<0) {
+	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
+    }
+    if (!H5F_addr_defined(&(grp_ent.header))) {
+	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
+		      "no containing group specified");
+    }
+    if (NULL==(base=H5G_basename(name, &len)) || '/'==*base) {
+	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
+		      "problems obtaining object base name");
+    }
+    
+    /* Remove the name from the symbol table */
+    if (H5G_stab_remove(&grp_ent, base)<0) {
+	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+		      "unable to unlink name from symbol table");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}

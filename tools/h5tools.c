@@ -108,14 +108,19 @@ static void
 h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 {
     size_t	i, n, offset, size, dims[4], nelmts;
-    char	temp[1024], *name;
+    unsigned	overflow = 0xaaaaaaaa;
+    char	temp[8192];
+    char	*name, quote='\0';
     hid_t	memb;
     int		nmembs, j, k, ndims;
+    const int	repeat_threshold = 8;
     
     if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
 	sprintf(temp, "%g", *((double*)vp));
+	
     } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
 	sprintf(temp, "%g", *((float*)vp));
+	
     } else if (H5Tequal(type, H5T_NATIVE_CHAR) ||
 	       H5Tequal(type, H5T_NATIVE_UCHAR)) {
 	switch (*((char*)vp)) {
@@ -145,18 +150,93 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	    else sprintf(temp, "\\%03o", *((unsigned char*)vp));
 	    break;
 	}
+	
+    } else if (H5T_STRING==H5Tget_class(type)) {
+	size = H5Tget_size(type);
+	temp[0] = '\0';
+	quote = '\0';
+
+	for (i=0; i<size; i++) {
+
+	    /* Count how many times the next character repeats */
+	    j=1;
+	    while (i+j<size && ((char*)vp)[i]==((char*)vp)[i+j]) j++;
+
+	    /*
+	     * Print the opening quote.  If the repeat count is high enough
+	     * to warrant printing the number of repeats instead of
+	     * enumerating the characters, then make sure the character to be
+	     * repeated is in it's own quote.
+	     */
+	    if (j>repeat_threshold) {
+		if (quote) sprintf(temp+strlen(temp),  "%c", quote);
+		quote = '\'';
+		sprintf(temp+strlen(temp), "%s%c", i?" ":"", quote);
+	    } else if (!quote) {
+		quote = '"';
+		sprintf(temp+strlen(temp), "%s%c", i?" ":"", quote);
+	    }
+
+	    /* Print the character */
+	    switch (((char*)vp)[i]) {
+	    case '"':
+		strcat(temp, "\\\"");
+		break;
+	    case '\\':
+		strcat(temp, "\\\\");
+		break;
+	    case '\b':
+		strcat(temp, "\\b");
+		break;
+	    case '\f':
+		strcat(temp, "\\f");
+		break;
+	    case '\n':
+		strcat(temp, "\\n");
+		break;
+	    case '\r':
+		strcat(temp, "\\r");
+		break;
+	    case '\t':
+		strcat(temp, "\\t");
+		break;
+	    default:
+		if (isprint(((char*)vp)[i])) {
+		    sprintf(temp+strlen(temp), "%c", ((char*)vp)[i]);
+		} else {
+		    sprintf(temp+strlen(temp), "\\%03o",
+			    ((unsigned char*)vp)[i]);
+		}
+		break;
+	    }
+
+	    /* Print the repeat count */
+	    if (j>repeat_threshold) {
+		sprintf(temp+strlen(temp), "%c repeats %d times", quote, j-1);
+		quote = '\0';
+		i += j-1;
+	    }
+	}
+	if (quote) sprintf(temp+strlen(temp), "%c", quote);
+
     } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
 	sprintf(temp, "%d", *((short*)vp));
+	
     } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
 	sprintf(temp, "%u", *((unsigned short*)vp));
+	
     } else if (H5Tequal(type, H5T_NATIVE_INT)) {
 	sprintf(temp, "%d", *((int*)vp));
+	
     } else if (H5Tequal(type, H5T_NATIVE_UINT)) {
 	sprintf(temp, "%u", *((unsigned*)vp));
+	
     } else if (H5Tequal(type, H5T_NATIVE_LONG)) {
 	sprintf(temp, "%ld", *((long*)vp));
+	
     } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
 	sprintf(temp, "%lu", *((unsigned long*)vp));
+	
     } else if (H5Tequal(type, H5T_NATIVE_HSSIZE)) {
 	if (sizeof(hssize_t)==sizeof(long)) {
 	    sprintf(temp, "%ld", *((long*)vp));
@@ -167,6 +247,7 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	    strcat(fmt, "d");
 	    sprintf(temp, fmt, *((long long*)vp));
 	}
+	
     } else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
 	if (sizeof(hsize_t)==sizeof(long)) {
 	    sprintf(temp, "%lu", *((unsigned long*)vp));
@@ -177,6 +258,7 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	    strcat(fmt, "u");
 	    sprintf(temp, fmt, *((unsigned long long*)vp));
 	}
+	
     } else if (H5T_COMPOUND==H5Tget_class(type)) {
 	nmembs = H5Tget_nmembers(type);
 	strcpy(temp, OPT(info->cmpd_pre, "{"));
@@ -206,6 +288,7 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	    H5Tclose(memb);
 	}
 	strcat(temp, OPT(info->cmpd_suf, "}"));
+	
     } else {
 	strcpy(temp, "0x");
 	n = H5Tget_size(type);
@@ -215,6 +298,12 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
     }
 
     sprintf(s, OPT(info->elmt_fmt, "%s"), temp);
+
+    /*
+     * We should really fix this so it's not possible to overflow the `temp'
+     * buffer.
+     */
+    assert(overflow==0xaaaaaaaa);
 }
 
 
@@ -250,7 +339,7 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type)
     hsize_t		p_max_idx[8];		/*max selected index	*/
     size_t		p_type_nbytes;		/*size of memory type	*/
     hsize_t		p_nelmts;		/*total selected elmts	*/
-    char		p_buf[256];		/*output string		*/
+    char		p_buf[8192];		/*output string		*/
     size_t		p_column=0;		/*output column		*/
     size_t		p_ncolumns=80;		/*default num columns	*/
     char 		p_prefix[1024];		/*line prefix string	*/
@@ -444,6 +533,12 @@ h5dump_fixtype(hid_t f_type)
 	}
 	break;
 
+    case H5T_STRING:
+	m_type = H5Tcopy(f_type);
+	H5Tset_cset(m_type, H5T_CSET_ASCII);
+	H5Tset_strpad(m_type, H5T_STR_NULLPAD);
+	break;
+
     case H5T_COMPOUND:
 	/*
 	 * We have to do this in two steps.  The first step scans the file
@@ -494,7 +589,6 @@ h5dump_fixtype(hid_t f_type)
 	break;
 
     case H5T_TIME:
-    case H5T_STRING:
     case H5T_BITFIELD:
     case H5T_OPAQUE:
 	/*

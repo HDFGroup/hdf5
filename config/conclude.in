@@ -69,7 +69,7 @@ uninstall:
 # remove things like object files but not libraries or executables.
 #
 mostlyclean:
-	$(RM) $(LIB_OBJ) $(PROG_OBJ) $(MOSTLYCLEAN)
+	$(RM) $(LIB_OBJ) $(TEST_OBJ) $(PROG_OBJ) $(MOSTLYCLEAN)
 
 # Like `mostlyclean' except it also removes the final targets: things like
 # libraries and executables.  This target doesn't remove any file that

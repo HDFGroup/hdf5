@@ -70,8 +70,9 @@ typedef struct H5G_cwgstk_t {
  * H5G_node layer through the B-tree layer.
  */
 typedef enum H5G_oper_t {
-    H5G_OPER_FIND        = 0,   /*find a symbol                              */
-    H5G_OPER_INSERT      = 1    /*insert a new symbol                        */
+    H5G_OPER_FIND       = 0,   	/*find a symbol                              */
+    H5G_OPER_INSERT     = 1,	/*insert a new symbol                        */
+    H5G_OPER_REMOVE	= 2	/*remove existing symbol		     */
 } H5G_oper_t;
 
 /*
@@ -125,6 +126,8 @@ herr_t H5G_stab_find (H5G_entry_t *grp_ent, const char *name,
                       H5G_entry_t *obj_ent/*out*/);
 herr_t H5G_stab_insert (H5G_entry_t *grp_ent, const char *name,
                         H5G_entry_t *obj_ent);
+herr_t H5G_stab_remove(H5G_entry_t *grp_ent, const char *name);
+
 /*
  * Functions that understand symbol table entries.
  */

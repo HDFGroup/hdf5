@@ -203,10 +203,8 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
 			       "memory allocation failed");
 	    }
 	    H5F_addr_undef (&(dt->u.compnd.memb[i].type->ent.header));
-            if (H5O_dtype_decode_helper(pp, dt->u.compnd.memb[i].type) < 0 ||
-                H5T_COMPOUND == dt->u.compnd.memb[i].type->type) {
-                for (j = 0; j <= i; j++)
-                    H5MM_xfree(dt->u.compnd.memb[i].name);
+            if (H5O_dtype_decode_helper(pp, dt->u.compnd.memb[i].type)<0) {
+                for (j=0; j<=i; j++) H5MM_xfree(dt->u.compnd.memb[j].name);
                 H5MM_xfree(dt->u.compnd.memb);
                 HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL,
                               "can't decode member type");

@@ -203,10 +203,54 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent)
 
     /* insert */
     if (H5B_insert(grp_ent->file, H5B_SNODE, &(stab.btree_addr), &udata) < 0) {
-	HRETURN_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert entry");
+	HRETURN_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert entry");
     }
     
     /* update the name offset in the entry */
     obj_ent->name_off = udata.ent.name_off;
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_stab_remove
+ *
+ * Purpose:	Remove NAME from a symbol table.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, September 17, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_stab_remove(H5G_entry_t *grp_ent, const char *name)
+{
+    H5O_stab_t		stab;		/*symbol table message		*/
+    H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
+    
+    FUNC_ENTER(H5G_stab_remove, FAIL);
+    assert(grp_ent && grp_ent->file);
+    assert(name && *name);
+
+    /* initialize data to pass through B-tree */
+    if (NULL==H5O_read(grp_ent, H5O_STAB, 0, &stab)) {
+	HRETURN_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
+    }
+    udata.operation = H5G_OPER_REMOVE;
+    udata.name = name;
+    udata.heap_addr = stab.heap_addr;
+    HDmemset(&(udata.ent), 0, sizeof(udata.ent));
+
+    /* remove */
+    if (H5B_remove(grp_ent->file, H5B_SNODE, &(stab.btree_addr), &udata)<0) {
+	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to remove entry");
+    }
+
     FUNC_LEAVE(SUCCEED);
 }
