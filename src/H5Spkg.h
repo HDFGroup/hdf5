@@ -141,7 +141,7 @@ typedef herr_t (*H5S_sel_iter_init_func_t)(H5S_sel_iter_t *sel_iter, const H5S_t
 /* Selection information object */
 typedef struct {
     H5S_sel_type type;  /* Type of selection (list of points or hyperslabs) */
-    hssize_t *offset;   /* Offset within the extent (NULL means a 0 offset) */
+    hssize_t offset[H5S_MAX_RANK];   /* Offset within the extent */
     hsize_t *order;     /* Selection order.  (NULL means a specific ordering of points) */
     hsize_t num_elem;   /* Number of elements in selection */
     union {

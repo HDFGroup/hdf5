@@ -85,12 +85,6 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
     assert(space->extent.u.simple.rank);
     assert(offset);
 
-    /* Allocate space for new offset */
-    if(space->select.offset==NULL) {
-        if (NULL==(space->select.offset = H5FL_ARR_MALLOC(hssize_t,space->extent.u.simple.rank)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    }
-
     /* Copy the offset over */
     HDmemcpy(space->select.offset,offset,sizeof(hssize_t)*space->extent.u.simple.rank);
 
@@ -138,18 +132,6 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src, hbool_t share_selection)
     HDmemcpy(&dst->select,&src->select,sizeof(H5S_select_t));
 
 /* Need to copy permutation order information still */
-
-    /* Copy offset information */
-    if(src->extent.u.simple.rank>0) {
-        if (NULL==(dst->select.offset = H5FL_ARR_MALLOC(hssize_t,src->extent.u.simple.rank)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        if(src->select.offset==NULL)
-            HDmemset(dst->select.offset,0,(src->extent.u.simple.rank*sizeof(hssize_t)));
-        else
-            HDmemcpy(dst->select.offset,src->select.offset,(src->extent.u.simple.rank*sizeof(hssize_t)));
-    } /* end if */
-    else
-        dst->select.offset=NULL;
 
     /* Perform correct type of copy based on the type of selection */
     switch (src->extent.type) {
@@ -215,10 +197,6 @@ H5S_select_release(H5S_t *ds)
     FUNC_ENTER_NOAPI(H5S_select_release, FAIL);
 
     assert(ds);
-
-    /* If there was a previous offset for the selection, release it */
-    if(ds->select.offset!=NULL)
-        ds->select.offset=H5FL_ARR_FREE(hssize_t,ds->select.offset);
 
     /* Call the selection type's release function */
     (*ds->select.release)(ds);

@@ -4026,20 +4026,17 @@ H5S_hyper_normalize_offset(H5S_t *space)
     /* Check for 'all' selection, instead of a hyperslab selection */
     /* (Technically, this check shouldn't be in the "hyperslab" routines...) */
     if(space->select.type!=H5S_SEL_ALL) {
-        /* Check if there is an offset currently */
-        if(space->select.offset) {
-            /* Invert the selection offset */
-            for(u=0; u<space->extent.u.simple.rank; u++)
-                space->select.offset[u] =- space->select.offset[u];
+        /* Invert the selection offset */
+        for(u=0; u<space->extent.u.simple.rank; u++)
+            space->select.offset[u] =- space->select.offset[u];
 
-            /* Call the existing 'adjust' routine */
-            if(H5S_hyper_adjust(space, space->select.offset)<0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab normalization");
+        /* Call the existing 'adjust' routine */
+        if(H5S_hyper_adjust(space, space->select.offset)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab normalization");
 
-            /* Zero out the selection offset */
-            for(u=0; u<space->extent.u.simple.rank; u++)
-                space->select.offset[u] = 0;
-        } /* end if */
+        /* Zero out the selection offset */
+        for(u=0; u<space->extent.u.simple.rank; u++)
+            space->select.offset[u] = 0;
     } /* end if */
 
 done:
@@ -5920,7 +5917,7 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
     hsize_t loc_off;    /* Element offset in the dataspace */
     hsize_t last_span_end=0; /* The offset of the end of the last span */
     hssize_t *abs_arr;  /* Absolute hyperslab span position */
-    hssize_t *off_arr;  /* Offset within the dataspace extent */
+    const hssize_t *off_arr;  /* Offset within the dataspace extent */
     size_t span_size=0; /* Number of bytes in current span to actually process */
     size_t io_left;     /* Number of elements left to process */
     size_t io_bytes_left;   /* Number of bytes left to process */
@@ -6348,7 +6345,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
 {
     hsize_t *mem_size;                  /* Size of the source buffer */
     hsize_t slab[H5O_LAYOUT_NDIMS];     /* Hyperslab size */
-    hssize_t *sel_off;                  /* Selection offset in dataspace */
+    const hssize_t *sel_off;            /* Selection offset in dataspace */
     hssize_t offset[H5O_LAYOUT_NDIMS];  /* Coordinate offset in dataspace */
     hsize_t tmp_count[H5O_LAYOUT_NDIMS];/* Temporary block count */
     hsize_t tmp_block[H5O_LAYOUT_NDIMS];/* Temporary block offset */

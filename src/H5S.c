@@ -1212,14 +1212,6 @@ H5S_read(H5G_entry_t *ent, hid_t dxpl_id)
     if(H5S_select_all(ds,0)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
 
-    /* Allocate space for the offset and set it to zeros */
-    if(ds->extent.u.simple.rank>0) {
-        if (NULL==(ds->select.offset = H5FL_ARR_CALLOC(hssize_t,ds->extent.u.simple.rank)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    } /* end if */
-    else
-        ds->select.offset = NULL;
-
     /* Set the value for successful return */
     ret_value=ds;
 
@@ -1392,17 +1384,8 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
     assert(rank<=H5S_MAX_RANK);
     assert(0==rank || dims);
     
-    /* If there was a previous offset for the selection, release it */
-    if(space->select.offset!=NULL)
-        space->select.offset=H5FL_ARR_FREE(hssize_t,space->select.offset);
-
-    /* Allocate space for the offset and set it to zeros */
-    if(rank>0) {
-        if (NULL==(space->select.offset = H5FL_ARR_CALLOC(hssize_t,rank)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    } /* end if */
-    else
-        space->select.offset = NULL;
+    /* Set offset to zeros */
+    HDmemset(space->select.offset,0,sizeof(hssize_t)*rank);
 
     /* shift out of the previous state to a "simple" dataspace */
     switch (space->extent.type) {
