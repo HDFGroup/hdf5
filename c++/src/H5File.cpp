@@ -468,6 +468,7 @@ DataSpace H5File::getRegion(void *ref, H5R_type_t ref_type) const
    DataSpace dataspace(p_get_region(ref, ref_type));
    return(dataspace);
 }
+
 //--------------------------------------------------------------------------
 // Function:	H5File::getLocId
 // Purpose:	Get the id of this file
@@ -479,6 +480,23 @@ DataSpace H5File::getRegion(void *ref, H5R_type_t ref_type) const
 hid_t H5File::getLocId() const
 {
    return( getId() );
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::getFileSize
+///\brief	Retrieves the file size of the HDF5 file. This function 
+///             is called after an existing file is opened in order
+///		to learn the true size of the underlying file.
+///\exception	H5::FileIException
+// Programmer   Raymond Lu - June 24, 2004
+//--------------------------------------------------------------------------
+haddr_t H5File::getFileSize(void) const
+{
+   haddr_t ret_value = H5Fget_filesize(id);
+   if( ret_value < 0 )
+   {
+      throw FileIException("H5File::getFileSize", "H5Fget_filesize failed");
+   }
 }
 
 //--------------------------------------------------------------------------

@@ -72,6 +72,9 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
+        // Retrieves the file size of an opened file.
+        haddr_t getFileSize() const;
+        
 	// Reopens this file
 	void reopen();
 
