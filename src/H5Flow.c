@@ -481,7 +481,6 @@ H5F_low_access(const H5F_low_class_t *type, const char *name,
 {
     htri_t		    ret_value;
     struct stat		    sb;
-
 	int fid;
 
     FUNC_ENTER(H5F_low_size, FAIL);
@@ -489,6 +488,9 @@ H5F_low_access(const H5F_low_class_t *type, const char *name,
 
     if (type->access) {
 	ret_value = (type->access) (name, access_parms, mode, key /*out*/);
+    } else {
+	ret_value = (0 == HDaccess(name, mode) ? TRUE : FALSE);
+	if (key) {
 #ifdef WIN32
 		/*
 			this extra block is needed because windows sets the st_dev member of sb
@@ -500,11 +502,7 @@ H5F_low_access(const H5F_low_class_t *type, const char *name,
 		close(fid);
 #else
 	    HDstat(name, &sb);
-#endif
-    } else {
-	ret_value = (0 == HDaccess(name, mode) ? TRUE : FALSE);
-	if (key) {
-	    HDstat(name, &sb);
+#endif	 
 	    key->dev = sb.st_dev;
 	    key->ino = sb.st_ino;
 	}
