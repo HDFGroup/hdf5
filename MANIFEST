@@ -1305,6 +1305,8 @@
 ./tools/testfiles/tvldtypes3.h5
 ./tools/testfiles/tvldtypes4.ddl
 ./tools/testfiles/tvldtypes4.h5
+./tools/testfiles/tvldtypes5.ddl
+./tools/testfiles/tvldtypes5.h5
 ./tools/testfiles/tvlstr.h5
 ./tools/testfiles/tvlstr.ddl
 ./tools/testfiles/tattr2.h5
@@ -1376,6 +1378,8 @@
 ./tools/testfiles/tvldtypes1.h5.xml
 ./tools/testfiles/tvldtypes2.h5.xml
 ./tools/testfiles/tvldtypes3.h5.xml
+./tools/testfiles/tvldtypes4.h5.xml
+./tools/testfiles/tvldtypes5.h5.xml
 ./tools/testfiles/tvlstr.h5.xml
 ./tools/testfiles/tempty-dtd.h5.xml
 ./tools/testfiles/tempty-dtd-uri.h5.xml
