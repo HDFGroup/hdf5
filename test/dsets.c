@@ -74,8 +74,12 @@ const char *FILENAME[] = {
 #define DSET_SET_LOCAL_NAME	"set_local"
 #define DSET_SET_LOCAL_NAME_2	"set_local_2"
 #define DSET_ONEBYTE_SHUF_NAME   "onebyte_shuffle"
-#define DSET_NBIT_NAME           "nbit"
-#define DSET_NBIT_FLOAT_NAME     "nbit_float"
+#define DSET_NBIT_INT_NAME          "nbit_int"
+#define DSET_NBIT_ARRAY_NAME        "nbit_array"
+#define DSET_NBIT_ARRAY_NAME_2      "nbit_array_2"
+#define DSET_NBIT_COMPOUND_NAME     "nbit_compound"
+#define DSET_NBIT_COMPOUND_NAME_2   "nbit_compound_2"
+#define DSET_NBIT_FLOAT_NAME        "nbit_float"
 #define DSET_COMPARE_DCPL_NAME	"compare_dcpl"
 #define DSET_COMPARE_DCPL_NAME_2	"compare_dcpl_2"
 
@@ -2499,9 +2503,9 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_nbit_simple
+ * Function:    test_nbit_int
  *
- * Purpose:     Tests the simple version of nbit filter
+ * Purpose:     Tests the integer datatype for nbit filter
  *
  * Return:      Success:        0
  *
@@ -2515,29 +2519,188 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_nbit_simple(hid_t file, char *fname)
+test_nbit_int(hid_t file)
 {
 #ifdef H5_HAVE_FILTER_NBIT
-    hid_t               dataset, datatype, space, dc;
-    const hsize_t       size[2] = {10, 20};
-    const hsize_t       chunk_size[2] = {10, 20};
-    int                 orig_data[10][20];
-    int                 new_data[10][20];
+    hid_t               dataset, datatype, mem_datatype, space, dc;
+    const hsize_t       size[2] = {2, 5};
+    const hsize_t       chunk_size[2] = {2,5};
+    int                 orig_data[2][5];
+    int                 new_data[2][5];
     size_t              precision, offset;
     hsize_t             i, j;
 #else /* H5_HAVE_FILTER_NBIT */
     const char          *not_supported= "    Nbit is not enabled.";
 #endif /* H5_HAVE_FILTER_NBIT */
 
-    TESTING("nbit simple (setup)");
+    TESTING("nbit int (setup)");
 #ifdef H5_HAVE_FILTER_NBIT
-    /* Define data type (integer), and set precision, offset, order */
+    /* Define dataset datatype (integer), and set precision, offset */
     datatype = H5Tcopy(H5T_NATIVE_INT);
-    if(H5Tset_order(datatype, H5T_ORDER_BE)<0) goto error;
-    precision = 24;
+    precision = 16; 
     if(H5Tset_precision(datatype,precision)<0) goto error;
-    offset = 0;
+    offset = 4;
     if(H5Tset_offset(datatype,offset)<0) goto error;
+
+    /* Copy to memory datatype before setting order */
+    mem_datatype = H5Tcopy(datatype);
+
+    /* Set order of dataset datatype */
+    if(H5Tset_order(datatype, H5T_ORDER_BE)<0) goto error;
+
+    /* Create the data space */
+    if ((space = H5Screate_simple(2, size, NULL))<0) goto error;
+
+    /* Use nbit filter  */
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
+    /*if (H5Pset_nbit(dc)<0) goto error;*/
+
+    /* Create the dataset */
+    if ((dataset = H5Dcreate(file, DSET_NBIT_INT_NAME, datatype,
+                             space,dc))<0) goto error;
+
+    for (i= 0;i< size[0]; i++)
+      for (j = 0; j < size[1]; j++) 
+        orig_data[i][j] = ((long_long)HDrandom() % 
+                           (long_long)HDpow(2, precision - 1)) << offset;
+
+    /*printf("\n");
+    for (i= 0;i< size[0]; i++)
+      for (j = 0; j < size[1]; j++) {
+        printf("orig[%d]", i); printf("[%d]: ", j);  
+        printf("%08x ", orig_data[i][j]);
+        if((i*size[1]+j+1)%4 == 0) printf("\n");
+      }
+    printf("\n"); */
+
+    PASSED();
+    /*printf("*** Dataset datatype precision is %d, offset is %d\n", precision, offset);*/
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 1: Test nbit by setting up a chunked dataset and writing
+     * to it.
+     *----------------------------------------------------------------------
+     */
+    TESTING("nbit int (write)");
+
+#ifdef H5_HAVE_FILTER_NBIT
+    if (H5Dwrite(dataset, mem_datatype /*H5T_NATIVE_UINT*/, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 orig_data)<0)
+        goto error;
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 2: Try to read the data we just wrote.
+     *----------------------------------------------------------------------
+     */
+    TESTING("nbit int (read)");
+
+#ifdef H5_HAVE_FILTER_NBIT
+    /* Read the dataset back */
+    if (H5Dread(dataset, mem_datatype /*H5T_NATIVE_UINT*/, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                new_data)<0)
+        goto error;
+
+    /* Check that the values read are the same as the values written */
+    /*printf("\n");*/
+    for (i=0; i<size[0]; i++) {
+        for (j=0; j<size[1]; j++) {
+            if (new_data[i][j] != orig_data[i][j]) {
+                H5_FAILED();
+                printf("    Read different values than written.\n");
+                printf("    At index %lu,%lu\n",
+                       (unsigned long)i, (unsigned long)j);
+                /*printf("    orig: %08x  new: %08x\n", orig_data[i][j], new_data[i][j]);*/
+                goto error;
+            } /*else*/
+        }
+    }
+
+    /*----------------------------------------------------------------------
+     * Cleanup
+     *----------------------------------------------------------------------
+     */
+
+    if (H5Tclose(datatype)<0) goto error;
+    if (H5Tclose(mem_datatype)<0) goto error;
+    if (H5Pclose (dc)<0) goto error;
+    if (H5Dclose(dataset)<0) goto error;
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+    return 0;
+
+error:
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_nbit_array
+ *
+ * Purpose:     Tests the simple version array datatype for nbit filter
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Xiaowen Wu
+ *              Wednesday, , 2004 Dec. 23th
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_nbit_array(hid_t file)
+{
+#ifdef H5_HAVE_FILTER_NBIT
+    hid_t               dataset, base_datatype, array_datatype, space, dc;
+    hid_t               mem_base_datatype, mem_array_datatype;
+    const hsize_t       size[2] = {2, 5};
+    const hsize_t       adims[] = {3, 2}; 
+    const hsize_t       chunk_size[2] = {2,5};
+    unsigned int        orig_data[2][5][3][2];
+    unsigned int        new_data[2][5][3][2];
+    size_t              precision, offset;
+    hsize_t             i, j, m, n;
+#else /* H5_HAVE_FILTER_NBIT */
+    const char          *not_supported= "    Nbit is not enabled.";
+#endif /* H5_HAVE_FILTER_NBIT */
+
+    TESTING("nbit array (setup)");
+#ifdef H5_HAVE_FILTER_NBIT
+    /* Define dataset array datatype's base datatype and set precision, offset */
+    base_datatype = H5Tcopy(H5T_NATIVE_UINT);
+    precision = 22; 
+    if(H5Tset_precision(base_datatype,precision)<0) goto error;
+    offset = 7;
+    if(H5Tset_offset(base_datatype,offset)<0) goto error;
+
+    /* Copy to memory array datatype's base datatype before setting order */
+    mem_base_datatype = H5Tcopy(base_datatype);
+
+    /* Set order of dataset array datatype's base datatype */
+    if(H5Tset_order(base_datatype, H5T_ORDER_BE)<0) goto error;
+
+    /* Create dataset array datatype */
+    array_datatype = H5Tarray_create(base_datatype, 2, adims, NULL);
+
+    /* Create memory array datatype */
+    mem_array_datatype = H5Tarray_create(mem_base_datatype, 2, adims, NULL);
+
     /* Create the data space */
     if ((space = H5Screate_simple(2, size, NULL))<0) goto error;
 
@@ -2547,12 +2710,28 @@ test_nbit_simple(hid_t file, char *fname)
     if (H5Pset_nbit(dc)<0) goto error; 
 
     /* Create the dataset */
-    if ((dataset = H5Dcreate(file, fname, datatype,
+    if ((dataset = H5Dcreate(file, DSET_NBIT_ARRAY_NAME, array_datatype,
                              space,dc))<0) goto error;
 
-    for (i= 0;i< 10; i++)
-      for (j = 0; j < 20; j++)
-        orig_data[i][j] = ((long long int)random() % (long long int)pow(2, precision)) << offset;
+    for (i= 0;i< size[0]; i++)
+      for (j = 0; j < size[1]; j++) 
+        for (m = 0; m < adims[0]; m++)
+          for (n = 0; n < adims[1]; n++)
+            orig_data[i][j][m][n] = ((long_long)HDrandom() % 
+                                     (long_long)HDpow(2, precision)) << offset;
+    /*
+    printf("\n");
+    for (i= 0;i< size[0]; i++)
+      for (j = 0; j < size[1]; j++)   
+        for (m = 0; m < adims[0]; m++)
+          for (n = 0; n < adims[1]; n++) {
+            printf("orig[%d]", i); printf("[%d]", j);
+            printf("[%d]", m); printf("[%d]: ", n);
+            printf("%08x ", orig_data[i][j][m][n]);
+            if((i*size[1]*adims[0]*adims[1]+j*adims[0]*adims[1]+m*adims[1]+n+1)%3 == 0) 
+              printf("\n");
+          }
+    printf("\n");*/
 
     PASSED();
 #else
@@ -2565,14 +2744,13 @@ test_nbit_simple(hid_t file, char *fname)
      * to it.
      *----------------------------------------------------------------------
      */
-    TESTING("nbit simple (write)");
+    TESTING("nbit array (write)");
 
 #ifdef H5_HAVE_FILTER_NBIT
-    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+    if (H5Dwrite(dataset, mem_array_datatype/*H5T_NATIVE_UINT*/, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                  orig_data)<0)
         goto error;
 
-    if (H5Dclose(dataset)<0) goto error;
     PASSED();
 #else
     SKIPPED();
@@ -2583,35 +2761,39 @@ test_nbit_simple(hid_t file, char *fname)
      * STEP 2: Try to read the data we just wrote.
      *----------------------------------------------------------------------
      */
-    TESTING("nbit simple (read)");
+    TESTING("nbit array (read)");
 
 #ifdef H5_HAVE_FILTER_NBIT
-    if ((dataset = H5Dopen(file, fname))<0) goto error;
     /* Read the dataset back */
-    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+    if (H5Dread(dataset, mem_array_datatype/*H5T_NATIVE_UINT*/, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                 new_data)<0)
         goto error;
 
     /* Check that the values read are the same as the values written */
-    for (i=0; i<size[0]; i++) {
-        for (j=0; j<size[1]; j++) {
-            if (new_data[i][j] != orig_data[i][j]) {
+    /*printf("\n");*/
+    for (i=0; i<size[0]; i++) 
+      for (j=0; j<size[1]; j++) 
+        for (m = 0; m < adims[0]; m++)
+          for (n = 0; n < adims[1]; n++) { 
+            if (new_data[i][j][m][n]!= orig_data[i][j][m][n]) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
-                printf("    At index %lu,%lu\n",
-                       (unsigned long)i, (unsigned long)j);
+                printf("    At index %lu,%lu,%lu,%lu\n",
+                (unsigned long)i, (unsigned long)j, (unsigned long)m, (unsigned long)n);
                 goto error;
-            }
-                /*printf("    orig: %08x  new: %08x\n", orig_data[i][j], new_data[i][j]);*/
-        }
-    }
+            } /*else
+               printf("  orig: %08x  new: %08x\n", orig_data[i][j][m][n], new_data[i][j][m][n]);*/
+          }
 
     /*----------------------------------------------------------------------
      * Cleanup
      *----------------------------------------------------------------------
      */
 
-    if (H5Tclose(datatype)<0) goto error;
+    if (H5Tclose(array_datatype)<0) goto error;
+    if (H5Tclose(base_datatype)<0) goto error;
+    if (H5Tclose(mem_array_datatype)<0) goto error;
+    if (H5Tclose(mem_base_datatype)<0) goto error;
     if (H5Pclose (dc)<0) goto error;
     if (H5Dclose(dataset)<0) goto error;
 
@@ -2628,16 +2810,504 @@ error:
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function:    test_nbit_compound
+ *
+ * Purpose:     Tests a simple version of compound datatype of nbit filter
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Xiaowen Wu
+ *              Wednesday, , 2004 Dec. 23th
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 static herr_t
-test_nbit_float(hid_t file, char *fname)
+test_nbit_compound(hid_t file)
+{
+#ifdef H5_HAVE_FILTER_NBIT
+    typedef struct {     /* Struct with atomic fields */
+        int i;
+        char c;
+        short s;
+    } atomic;
+    hid_t               i_tid, c_tid, s_tid;
+    hid_t               cmpd_tid1; /* atomic compound datatype */
+    hid_t               mem_cmpd_tid1; /* memory atomic compound datatype */
+    size_t              precision[3] = {15, 7, 10};
+    size_t              offset[3] = {9, 0, 3};
+    hid_t               dataset, space, dc;
+    const hsize_t       size[2] = {2, 5};
+    const hsize_t       chunk_size[2] = {2,5};
+    atomic              orig_data[2][5];
+    atomic              new_data[2][5];
+    hsize_t             i, j;
+
+#else /* H5_HAVE_FILTER_NBIT */
+    const char          *not_supported= "    Nbit is not enabled.";
+#endif /* H5_HAVE_FILTER_NBIT */
+
+    TESTING("nbit compound (setup)");
+#ifdef H5_HAVE_FILTER_NBIT
+    /* Define datatypes of members of compound datatype */
+    i_tid=H5Tcopy(H5T_NATIVE_INT);
+    c_tid=H5Tcopy(H5T_NATIVE_CHAR);
+    s_tid=H5Tcopy(H5T_NATIVE_SHORT);
+
+    /* Set precision and offset */
+    if(H5Tset_precision(i_tid,precision[0])<0) goto error;
+    if(H5Tset_offset(i_tid,offset[0])<0) goto error;
+
+    if(H5Tset_precision(c_tid,precision[1])<0) goto error;
+    if(H5Tset_offset(c_tid,offset[1])<0) goto error;
+
+    if(H5Tset_precision(s_tid,precision[2])<0) goto error;
+    if(H5Tset_offset(s_tid,offset[2])<0) goto error;
+
+    /* Create a memory compound datatype before setting the order */
+    mem_cmpd_tid1 = H5Tcreate(H5T_COMPOUND, sizeof(atomic));
+    if(H5Tinsert(mem_cmpd_tid1, "i", HOFFSET(atomic, i), i_tid)<0) goto error;
+    if(H5Tinsert(mem_cmpd_tid1, "c", HOFFSET(atomic, c), c_tid)<0) goto error;
+    if(H5Tinsert(mem_cmpd_tid1, "s", HOFFSET(atomic, s), s_tid)<0) goto error;
+
+    /* Set order of dataset compound member datatype */
+    if(H5Tset_order(i_tid, H5T_ORDER_BE)<0) goto error;
+    if(H5Tset_order(c_tid, H5T_ORDER_BE)<0) goto error;
+    if(H5Tset_order(s_tid, H5T_ORDER_BE)<0) goto error;
+
+    /* Create a dataset compound datatype and insert some atomic types */
+    cmpd_tid1 = H5Tcreate(H5T_COMPOUND, sizeof(atomic));
+    if(H5Tinsert(cmpd_tid1, "i", HOFFSET(atomic, i), i_tid)<0) goto error;
+    if(H5Tinsert(cmpd_tid1, "c", HOFFSET(atomic, c), c_tid)<0) goto error;
+    if(H5Tinsert(cmpd_tid1, "s", HOFFSET(atomic, s), s_tid)<0) goto error;
+
+    /* Create the data space */
+    if ((space = H5Screate_simple(2, size, NULL))<0) goto error;
+
+    /* Use nbit filter  */
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
+    if (H5Pset_nbit(dc)<0) goto error; 
+
+    /* Create the dataset */
+    if ((dataset = H5Dcreate(file, DSET_NBIT_COMPOUND_NAME, cmpd_tid1,
+                             space,dc))<0) goto error;
+
+    for (i= 0;i< size[0]; i++)
+      for (j = 0; j < size[1]; j++) {
+        orig_data[i][j].i = ((long_long)HDrandom() % 
+                             (long_long)HDpow(2, precision[0])) << offset[0];
+        orig_data[i][j].c = ((long_long)HDrandom() % 
+                             (long_long)HDpow(2, precision[1])) << offset[1];
+        orig_data[i][j].s = ((long_long)HDrandom() % 
+                             (long_long)HDpow(2, precision[2])) << offset[2];
+      }
+/*
+    printf("\n");
+    for (i= 0;i< size[0]; i++)
+      for (j = 0; j < size[1]; j++) {
+        printf("orig[%d]", i); printf("[%d]: ", j);
+        printf("i: %08x  ", orig_data[i][j].i);
+        printf("c: %02x  ", (unsigned char)orig_data[i][j].c);
+        printf("s: %04x  \n", (unsigned short)orig_data[i][j].s);
+      }
+    printf("\n"); */
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 1: Test nbit by setting up a chunked dataset and writing
+     * to it.
+     *----------------------------------------------------------------------
+     */
+    TESTING("nbit compound (write)");
+
+#ifdef H5_HAVE_FILTER_NBIT
+    if (H5Dwrite(dataset, mem_cmpd_tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 orig_data)<0)
+        goto error;
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 2: Try to read the data we just wrote.
+     *----------------------------------------------------------------------
+     */
+    TESTING("nbit compound (read)");
+
+#ifdef H5_HAVE_FILTER_NBIT
+    /* Read the dataset back */
+    if (H5Dread(dataset, mem_cmpd_tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                new_data)<0)
+        goto error;
+
+    /* Check that the values read are the same as the values written */
+    /*printf("\n");*/
+    for (i=0; i<size[0]; i++) {
+        for (j=0; j<size[1]; j++) {
+            if (new_data[i][j].i != orig_data[i][j].i || 
+                new_data[i][j].c != orig_data[i][j].c || 
+                new_data[i][j].s != orig_data[i][j].s) {
+                H5_FAILED();
+                printf("    Read different values than written.\n");
+                printf("    At index %lu,%lu\n",
+                       (unsigned long)i, (unsigned long)j);
+                goto error;
+            } 
+        }
+    }
+
+    /*----------------------------------------------------------------------
+     * Cleanup
+     *----------------------------------------------------------------------
+     */
+
+    if (H5Tclose(cmpd_tid1)<0) goto error;
+    if (H5Tclose(mem_cmpd_tid1)<0) goto error;
+    if (H5Pclose (dc)<0) goto error;
+    if (H5Dclose(dataset)<0) goto error;
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+    return 0;
+
+error:
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_nbit_compound_2
+ *
+ * Purpose:     Tests a complex version of compound datatype of nbit filter
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Xiaowen Wu
+ *              Wednesday, , 2004 Dec. 23th
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_nbit_compound_2(hid_t file)
+{
+#ifdef H5_HAVE_FILTER_NBIT
+    typedef struct {     /* Struct with atomic fields */
+        int i;
+        char c;
+        short s;
+    } atomic;
+
+    typedef struct {     /* Struct with complex fields */
+        atomic a;
+        unsigned int v;
+        char   b[2][2];
+        atomic d[2][2];
+    } complex;
+
+    hid_t               i_tid, c_tid, s_tid, v_tid;    
+    hid_t               cmpd_tid1; /* atomic compound datatype */
+    hid_t               cmpd_tid2; /* complex compound datatype */
+    hid_t               mem_cmpd_tid1; /* memory atomic compound datatype */
+    hid_t               mem_cmpd_tid2; /* memory complex compound datatype */
+    hid_t               base_tid;      /* simple array datatype's base datatype */
+    hid_t               array_tid;     /* simple array datatype */
+    hid_t               array_cmplx_tid;     /* complex array datatype */
+    hid_t               mem_array_cmplx_tid; /* memory complex array datatype */
+    const hsize_t       array_dims[2] = {2, 2};
+    size_t              precision[5] = {31, 8, 10, 23, 8};
+    size_t              offset[5] = {1, 0, 3, 5, 0};
+    hid_t               dataset, space, dc;
+    const hsize_t       size[2] = {2, 3};
+    const hsize_t       chunk_size[2] = {2, 3};
+    complex             orig_data[2][3];
+    complex             new_data[2][3];
+    hsize_t             i, j, m, n, b_failed, d_failed;
+
+#else /* H5_HAVE_FILTER_NBIT */
+    const char          *not_supported= "    Nbit is not enabled.";
+#endif /* H5_HAVE_FILTER_NBIT */
+
+    TESTING("nbit compound complex (setup)");
+#ifdef H5_HAVE_FILTER_NBIT
+    /* Define datatypes of members of compound datatype */
+    i_tid=H5Tcopy(H5T_NATIVE_INT);
+    c_tid=H5Tcopy(H5T_NATIVE_CHAR);
+    s_tid=H5Tcopy(H5T_NATIVE_SHORT);
+    v_tid=H5Tcopy(H5T_NATIVE_UINT);
+
+    /* Set precision and offset of atomic compound datatype members */
+    if(H5Tset_precision(i_tid,precision[0])<0) goto error;
+    if(H5Tset_offset(i_tid,offset[0])<0) goto error;
+
+    if(H5Tset_precision(c_tid,precision[1])<0) goto error;
+    if(H5Tset_offset(c_tid,offset[1])<0) goto error;
+
+    if(H5Tset_precision(s_tid,precision[2])<0) goto error;
+    if(H5Tset_offset(s_tid,offset[2])<0) goto error;
+
+    /* Create a memory atomic compound datatype before setting the order */
+    mem_cmpd_tid1 = H5Tcreate(H5T_COMPOUND, sizeof(atomic));
+    if(H5Tinsert(mem_cmpd_tid1, "i", HOFFSET(atomic, i), i_tid)<0) goto error;
+    if(H5Tinsert(mem_cmpd_tid1, "c", HOFFSET(atomic, c), c_tid)<0) goto error;
+    if(H5Tinsert(mem_cmpd_tid1, "s", HOFFSET(atomic, s), s_tid)<0) goto error;
+
+    /* Set order of dataset atomic compound member datatype */
+    if(H5Tset_order(i_tid, H5T_ORDER_BE)<0) goto error;
+    if(H5Tset_order(c_tid, H5T_ORDER_BE)<0) goto error;
+    if(H5Tset_order(s_tid, H5T_ORDER_BE)<0) goto error;
+
+    /* Create a dataset atomic compound datatype and insert some atomic types */
+    cmpd_tid1 = H5Tcreate(H5T_COMPOUND, sizeof(atomic));
+    if(H5Tinsert(cmpd_tid1, "i", HOFFSET(atomic, i), i_tid)<0) goto error;
+    if(H5Tinsert(cmpd_tid1, "c", HOFFSET(atomic, c), c_tid)<0) goto error;
+    if(H5Tinsert(cmpd_tid1, "s", HOFFSET(atomic, s), s_tid)<0) goto error;
+
+    /* Set precision and offset of the other data member */
+    if(H5Tset_precision(v_tid,precision[3])<0) goto error;
+    if(H5Tset_offset(v_tid,offset[3])<0) goto error;
+
+    /* Create the simple array datatype */
+    base_tid = H5Tcopy(H5T_NATIVE_CHAR);
+    if(H5Tset_precision(base_tid,precision[4])<0) goto error;
+    if(H5Tset_offset(base_tid,offset[4])<0) goto error;
+    array_tid = H5Tarray_create(base_tid, 2, array_dims, NULL);    
+
+    /* Create the complex memory and dataset array datatype */
+    array_cmplx_tid = H5Tarray_create(cmpd_tid1, 2, array_dims, NULL);    
+    mem_array_cmplx_tid = H5Tarray_create(mem_cmpd_tid1, 2, array_dims, NULL); 
+
+    /* Create a memory complex compound datatype before setting the order */
+    mem_cmpd_tid2 = H5Tcreate(H5T_COMPOUND, sizeof(complex));
+    if(H5Tinsert(mem_cmpd_tid2, "a", HOFFSET(complex, a), mem_cmpd_tid1)<0) goto error;
+    if(H5Tinsert(mem_cmpd_tid2, "v", HOFFSET(complex, v), v_tid)<0) goto error;
+    if(H5Tinsert(mem_cmpd_tid2, "b", HOFFSET(complex, b), array_tid)<0) goto error;
+    if(H5Tinsert(mem_cmpd_tid2, "d", HOFFSET(complex, d), mem_array_cmplx_tid)<0) goto error;
+    
+    /* Set order of dataset other complex compound member datatype */
+    if(H5Tset_order(v_tid, H5T_ORDER_BE)<0) goto error;
+
+    /* Create a dataset complex compound datatype and insert members */
+    cmpd_tid2 = H5Tcreate(H5T_COMPOUND, sizeof(complex));
+    if(H5Tinsert(cmpd_tid2, "a", HOFFSET(complex, a), cmpd_tid1)<0) goto error;
+    if(H5Tinsert(cmpd_tid2, "v", HOFFSET(complex, v), v_tid)<0) goto error;
+    if(H5Tinsert(cmpd_tid2, "b", HOFFSET(complex, b), array_tid)<0) goto error;
+    if(H5Tinsert(cmpd_tid2, "d", HOFFSET(complex, d), array_cmplx_tid)<0) goto error;
+
+    /* Create the data space */
+    if ((space = H5Screate_simple(2, size, NULL))<0) goto error;
+
+    /* Use nbit filter  */
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
+    if (H5Pset_nbit(dc)<0) goto error; 
+
+    /* Create the dataset */
+    if ((dataset = H5Dcreate(file, DSET_NBIT_COMPOUND_NAME_2, cmpd_tid2,
+                             space,dc))<0) goto error;
+
+    for (i= 0;i< size[0]; i++)
+      for (j = 0; j < size[1]; j++) {
+        orig_data[i][j].a.i = ((long_long)HDrandom() % 
+                               (long_long)HDpow(2, precision[0])) << offset[0];
+        orig_data[i][j].a.c = ((long_long)HDrandom() % 
+                               (long_long)HDpow(2, precision[1])) << offset[1];
+        orig_data[i][j].a.s = ((long_long)HDrandom() % 
+                               (long_long)HDpow(2, precision[2])) << offset[2];
+
+        orig_data[i][j].v = ((long_long)HDrandom() % 
+                             (long_long)HDpow(2, precision[3])) << offset[3];
+
+        for(m = 0; m < array_dims[0]; m++)
+          for(n = 0; n < array_dims[1]; n++)
+            orig_data[i][j].b[m][n] = ((long_long)HDrandom() %
+                                       (long_long)HDpow(2, precision[4])) << offset[4];
+
+        for(m = 0; m < array_dims[0]; m++)
+          for(n = 0; n < array_dims[1]; n++) {
+            orig_data[i][j].d[m][n].i = ((long_long)HDrandom() %
+                                         (long_long)HDpow(2, precision[0])) << offset[0];
+            orig_data[i][j].d[m][n].c = ((long_long)HDrandom() %
+                                         (long_long)HDpow(2, precision[1])) << offset[1];
+            orig_data[i][j].d[m][n].s = ((long_long)HDrandom() %
+                                         (long_long)HDpow(2, precision[2])) << offset[2];
+          }
+      }
+/*
+    printf("\n");
+    for (i= 0;i< size[0]; i++)
+      for (j = 0; j < size[1]; j++) {
+        printf("orig[%d]", i); printf("[%d]: ", j);
+        printf("a.i: %08x  ", orig_data[i][j].a.i);
+        printf("a.c: %02x  ", (unsigned char)orig_data[i][j].a.c);
+        printf("a.s: %04x\n", (unsigned short)orig_data[i][j].a.s);
+
+        printf("            v: %08x\n", orig_data[i][j].v);
+
+        printf("            ");
+        for(m = 0; m < array_dims[0]; m++)
+          for(n = 0; n < array_dims[1]; n++) {
+             printf("b[%d]", m); printf("[%d]: ", n);
+             printf("%02x  ", (unsigned char)orig_data[i][j].b[m][n]);
+          }
+        printf("\n");
+
+        for(m = 0; m < array_dims[0]; m++)
+          for(n = 0; n < array_dims[1]; n++){
+             printf("            d[%d]", m); printf("[%d].i: ", n);
+             printf("%08x  ", orig_data[i][j].d[m][n].i);
+             printf("d[%d]", m); printf("[%d].c: ", n);
+             printf("%02x  ", (unsigned char)orig_data[i][j].d[m][n].c);
+             printf("d[%d]", m); printf("[%d].s: ", n);
+             printf("%04x\n", (unsigned short)orig_data[i][j].d[m][n].s);
+          }
+      }
+    printf("\n");
+*/
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 1: Test nbit by setting up a chunked dataset and writing
+     * to it.
+     *----------------------------------------------------------------------
+     */
+    TESTING("nbit compound complex (write)");
+
+#ifdef H5_HAVE_FILTER_NBIT
+    if (H5Dwrite(dataset, mem_cmpd_tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 orig_data)<0)
+        goto error;
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 2: Try to read the data we just wrote.
+     *----------------------------------------------------------------------
+     */
+    TESTING("nbit compound complex (read)");
+
+#ifdef H5_HAVE_FILTER_NBIT
+    /* Read the dataset back */
+    if (H5Dread(dataset, mem_cmpd_tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                new_data)<0)
+        goto error;
+
+    /* Check that the values read are the same as the values written */
+    /*printf("\n");*/
+    for (i=0; i<size[0]; i++) {
+      for (j=0; j<size[1]; j++) {
+        b_failed = 0;
+        for(m = 0; m < array_dims[0]; m++)
+          for(n = 0; n < array_dims[1]; n++)
+             if(new_data[i][j].b[m][n] != orig_data[i][j].b[m][n]) {
+                b_failed = 1;
+                goto out;
+             }
+
+        d_failed = 0;
+        for(m = 0; m < array_dims[0]; m++)
+          for(n = 0; n < array_dims[1]; n++)
+             if(new_data[i][j].d[m][n].i != orig_data[i][j].d[m][n].i ||
+                new_data[i][j].d[m][n].c != orig_data[i][j].d[m][n].c ||
+                new_data[i][j].d[m][n].s != orig_data[i][j].d[m][n].s) {
+                d_failed = 1;
+                goto out;
+             }
+
+        out:
+        if(new_data[i][j].a.i != orig_data[i][j].a.i || 
+           new_data[i][j].a.c != orig_data[i][j].a.c || 
+           new_data[i][j].a.s != orig_data[i][j].a.s ||
+           new_data[i][j].v   != orig_data[i][j].v   || 
+           b_failed || d_failed) {
+           H5_FAILED();
+           printf("    Read different values than written.\n");
+           printf("    At index %lu,%lu\n",
+                       (unsigned long)i, (unsigned long)j);
+           goto error;
+        } 
+      }
+    }
+    
+    /*----------------------------------------------------------------------
+     * Cleanup
+     *----------------------------------------------------------------------
+     */
+
+    if (H5Tclose(cmpd_tid2)<0) goto error;
+    if (H5Tclose(cmpd_tid1)<0) goto error;
+    if (H5Tclose(mem_cmpd_tid2)<0) goto error;
+    if (H5Tclose(mem_cmpd_tid1)<0) goto error;
+    if (H5Tclose(array_tid)<0) goto error;
+    if (H5Tclose(base_tid)<0) goto error;
+    if (H5Tclose(array_cmplx_tid)<0) goto error;
+    if (H5Tclose(mem_array_cmplx_tid)<0) goto error;
+    if (H5Pclose (dc)<0) goto error;
+    if (H5Dclose(dataset)<0) goto error;
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+    return 0;
+
+error:
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_nbit_float
+ *
+ * Purpose:     Tests the float datatype of nbit filter
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Xiaowen Wu
+ *              Wednesday, , 2004 Dec. 23th
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_nbit_float(hid_t file)
 {
 /* assume unsigned int and float has the same number of bytes */
 #ifdef H5_HAVE_FILTER_NBIT
-    hid_t               dataset, datatype, space, dc;
-    const hsize_t       size[2] = {10, 20};
-    const hsize_t       chunk_size[2] = {10, 20};
-    float               orig_data[10][20];
-    float               new_data[10][20];
+    hid_t               dataset, datatype, mem_datatype, space, dc;
+    const hsize_t       size[2] = {2, 5};
+    const hsize_t       chunk_size[2] = {2, 5};
+    float               orig_data[2][5];
+    float               new_data[2][5];
     int                 ival;
     float               *pfval;
     size_t              precision, offset;
@@ -2648,15 +3318,22 @@ test_nbit_float(hid_t file, char *fname)
 
     TESTING("nbit float (setup)");
 #ifdef H5_HAVE_FILTER_NBIT
-    /* Define data type (integer), and set precision, offset, order */
+    /* Define dataset datatype and set precision, offset, order */
     datatype = H5Tcopy(H5T_NATIVE_FLOAT);
-    if(H5Tset_order(datatype, H5T_ORDER_BE)<0) goto error;
-    if(H5Tset_fields(datatype, 28, 25, 3, 5, 19)<0) goto error; 
 /*    if(H5Tset_fields(datatype, 31, 23, 8, 0, 23)<0) goto error; */
-    precision = 24;
-    if(H5Tset_precision(datatype,precision)<0) goto error;
-    offset = 8;
+    if(H5Tset_fields(datatype, 28, 20, 8, 7, 13)<0) goto error;
+    offset = /*0*/ 7;
     if(H5Tset_offset(datatype,offset)<0) goto error; 
+    precision = /*32*/ 22;
+    if(H5Tset_precision(datatype,precision)<0) goto error;
+    if(H5Tset_size(datatype, 4)<0) goto error; 
+    if(H5Tset_ebias(datatype, HDpow(2, 8 - 1) - 1)<0) goto error;
+
+    /* Copy to memory datatype before setting order */
+    mem_datatype = H5Tcopy(datatype);
+
+    /* Set order of datatype */
+    if(H5Tset_order(datatype, H5T_ORDER_BE)<0) goto error;
 
     /* Create the data space */
     if ((space = H5Screate_simple(2, size, NULL))<0) goto error;
@@ -2667,14 +3344,18 @@ test_nbit_float(hid_t file, char *fname)
     if (H5Pset_nbit(dc)<0) goto error;
 
     /* Create the dataset */
-    if ((dataset = H5Dcreate(file, fname, datatype,
+    if ((dataset = H5Dcreate(file, DSET_NBIT_FLOAT_NAME, datatype,
                              space,dc))<0) goto error;
 
-    for (i= 0;i< 10; i++)
-      for (j = 0; j < 20; j++) {
-        ival = ((long long int)random() % (long long int)pow(2, precision)) << offset;
-        pfval = (float *)(&ival);
+    /*printf("\n");*/
+    for (i= 0;i< size[0]; i++)
+      for (j = 0; j < size[1]; j++) {
+        ival = ((long_long)HDrandom() % 
+                (long_long)HDpow(2, precision-1)) << offset;
+        pfval = (float *)(&ival); 
         orig_data[i][j] = *pfval;
+         
+        /*printf("orig: %08x  ", *((int *)&orig_data[i][j]));*/
     }
     PASSED();
 #else
@@ -2690,7 +3371,7 @@ test_nbit_float(hid_t file, char *fname)
     TESTING("nbit float (write)");
 
 #ifdef H5_HAVE_FILTER_NBIT
-    if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+    if (H5Dwrite(dataset, mem_datatype/*H5T_NATIVE_FLOAT*/, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                  orig_data)<0)
         goto error;
 
@@ -2708,11 +3389,12 @@ test_nbit_float(hid_t file, char *fname)
 
 #ifdef H5_HAVE_FILTER_NBIT
     /* Read the dataset back */
-    if (H5Dread(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+    if (H5Dread(dataset, mem_datatype/*H5T_NATIVE_FLOAT*/, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                 new_data)<0)
         goto error;
 
     /* Check that the values read are the same as the values written */
+    /*printf("\n");*/
     for (i=0; i<size[0]; i++) {
         for (j=0; j<size[1]; j++) {
             if (*((int *)&new_data[i][j]) != *((int *)&orig_data[i][j])) {
@@ -2720,9 +3402,9 @@ test_nbit_float(hid_t file, char *fname)
                 printf("    Read different values than written.\n");
                 printf("    At index %lu,%lu\n",
                        (unsigned long)i, (unsigned long)j);
-                printf("    orig: %f  new: %f\n", orig_data[i][j], new_data[i][j]);
-                goto error; 
+                goto error;
             }
+        /*printf("    orig: %f  new: %f\n", orig_data[i][j], new_data[i][j]);*/
         }
     }
 
@@ -4138,8 +4820,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-int
-main(void)
+int main(void)
 {
     hid_t		file, grp, fapl;
     int mdc_nelmts;
@@ -4154,6 +4835,9 @@ main(void)
     
     /* Set the random # seed */
     HDsrandom((unsigned long)HDtime(NULL)); 
+    /*unsigned long seed = 1104813331 1106320343 HDtime(NULL);
+    HDsrandom(seed);
+    printf("SEED: %d\n", seed);*/
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
@@ -4180,8 +4864,13 @@ main(void)
     nerrors += test_tconv(file)<0	?1:0; 
     nerrors += test_filters(file)<0	?1:0;
     nerrors += test_onebyte_shuffle(file)<0 ?1:0;
-/*    nerrors += test_nbit_simple(file, "dataset1")<0        ?1:0; 
-    nerrors += test_nbit_float(file, "float1")<0         ?1:0; */ 
+/*
+    nerrors += test_nbit_int(file)<0 ?1:0;
+    nerrors += test_nbit_array(file)<0 ?1:0;
+    nerrors += test_nbit_compound(file)<0 ?1:0; 
+    nerrors += test_nbit_compound_2(file)<0 ?1:0; 
+    nerrors += test_nbit_float(file)<0         ?1:0; 
+*/
     nerrors += test_multiopen (file)<0	?1:0;
     nerrors += test_types(file)<0       ?1:0;
     nerrors += test_userblock_offset(fapl)<0     ?1:0;
