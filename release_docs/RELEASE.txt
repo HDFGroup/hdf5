@@ -170,6 +170,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed memory overwrite when encoding "multi" file driver information
+            for file's superblock.  QAK - 2004/08/05
         - Fixed obscure bug where a filter which failed during chunk allocation
             could allow library to write uncompressed data to disk but think
             the data was compressed.  QAK - 2004/07/29
