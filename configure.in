@@ -516,10 +516,10 @@ dnl cause the later checking of ZLIB componenets to fail too.  But in this
 dnl case, one can configure again without the optional with-hdf4 option.
 dnl
 AC_SUBST(H5TOH4) H5TOH4=h5toh4
-AC_SUBST(TESTH5TOH4) TESTH5TOH4='$(srcdir)/testh5toh4'
+AC_SUBST(TESTH5TOH4) TESTH5TOH4='$(srcdir)/testh5toh4.sh'
 
 AC_SUBST(H4TOH5) H4TOH5=h4toh5
-AC_SUBST(TESTH4TOH5) TESTH4TOH5='$(srcdir)/testh4toh5'
+AC_SUBST(TESTH4TOH5) TESTH4TOH5='$(srcdir)/testh4toh5.sh'
 
 AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=no)
 case "$withval" in

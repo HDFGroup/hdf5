@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 1997 National Center for Supercomputing Applications.
+# Copyright (C) 2001 National Center for Supercomputing Applications.
 #                    All rights reserved.
 #
 # Test script for the h4toh5 tests.

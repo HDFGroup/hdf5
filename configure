@@ -4062,10 +4062,10 @@ rm -f confcache
 
 
  H5TOH4=h5toh4
- TESTH5TOH4='$(srcdir)/testh5toh4'
+ TESTH5TOH4='$(srcdir)/testh5toh4.sh'
 
  H4TOH5=h4toh5
- TESTH4TOH5='$(srcdir)/testh4toh5'
+ TESTH4TOH5='$(srcdir)/testh4toh5.sh'
 
 # Check whether --with-hdf4 or --without-hdf4 was given.
 if test "${with_hdf4+set}" = set; then
