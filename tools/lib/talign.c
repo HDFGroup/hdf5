@@ -4,9 +4,10 @@
  */
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>	/* Required for unlink() */
+/*#include <unistd.h>	*//* Required for unlink() */
 
 #include "hdf5.h"
+#include "H5private.h"
 #include "h5tools.h"
 
 const char *fname = "talign.h5";
@@ -43,7 +44,7 @@ int main(void)
 	printf("%-70s", "Testing alignment in compound datatypes");
 
 	strcpy(string5, "Hi!");
-	unlink(fname);
+	HDunlink(fname);
 	fil = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
 	if (fil < 0) {
