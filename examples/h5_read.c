@@ -1,7 +1,7 @@
 /*  
  *   This example reads hyperslab from the SDS.h5 file 
  *   created by h5_write.c program into two-dimensional
- *   plane of the tree-dimensional array. 
+ *   plane of the three-dimensional array. 
  *   Information about dataset in the SDS.h5 file is obtained. 
  */
  
@@ -74,7 +74,7 @@ main (void)
 	   (unsigned long)(dims_out[0]), (unsigned long)(dims_out[1]));
 
     /* 
-     * Define hyperslab in the datatset. 
+     * Define hyperslab in the dataset. 
      */
     offset[0] = 1;
     offset[1] = 2;

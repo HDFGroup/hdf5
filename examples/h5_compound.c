@@ -22,7 +22,7 @@ main(void)
 	double c; 
     } s1_t;
     s1_t       s1[LENGTH];
-    hid_t      s1_tid;     /* File datatype hadle */
+    hid_t      s1_tid;     /* File datatype identifier */
 
     /* Second structure (subset of s1_t)  and dataset*/
     typedef struct s2_t {

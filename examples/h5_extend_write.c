@@ -45,7 +45,7 @@ main (void)
 				{3, 3} };
 
     /*
-     * Create the data space with ulimited dimensions. 
+     * Create the data space with unlimited dimensions. 
      */
     dataspace = H5Screate_simple(RANK, dims, maxdims); 
 

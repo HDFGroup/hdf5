@@ -126,7 +126,7 @@ main (void)
    ret = H5Awrite(attr3, atype, string); 
 
    /*
-    * Close attribute and file datapsaces.
+    * Close attribute and file dataspaces.
     */
    ret = H5Sclose(aid1); 
    ret = H5Sclose(aid2); 
