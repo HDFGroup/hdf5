@@ -1,4 +1,4 @@
-HDF5 version 1.7.34 released on Sun Aug 15 04:04:09 CDT 2004
+HDF5 version 1.7.35 released on Sun Aug 22 04:04:42 CDT 2004
 ================================================================================
 
 
@@ -122,6 +122,7 @@ New Features
 
     Fortran Library:
     ----------------
+         
          - added new functions h5fget_name_f and h5fget_filesize_f 
                                                  EIP 2004/07/08
          - h5dwrite/read_f and h5awrite/read_f functions only accept dims parameter
@@ -151,6 +152,8 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
+        - PGI Fortran compiler is supported on Linux64 systems (x86_64)
+                            EIP - 2004/08/19
         - Absoft compiler f95 v9.0 supported on Linux 2.4
                             EIP - 2004/07/29
         - HDF5 Fortran APIs are supported on Mac OSX with IBM XL Fortran
