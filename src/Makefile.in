@@ -84,11 +84,11 @@ H5Tinit.c: H5detect
 	    ($(RM) $@ ; exit 1)
 
 ## no $(LIB) in the action below since that's being made now.
-## No optimization since many compilers (e.g., Intel) takes a long time
-## to compile it with any optimization on.  H5detect is used to generate
-## H5Tinit.c once. So, optimization is not critical.
+## Use -g to force no optimization since many compilers (e.g., Intel) takes
+## a long time to compile it with any optimization on.  H5detect is used
+## to generate H5Tinit.c once. So, optimization is not critical.
 H5detect: $(srcdir)/H5detect.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -O0 $(srcdir)/H5detect.c \
+	$(CC) $(CFLAGS) $(CPPFLAGS) -g $(srcdir)/H5detect.c \
 	    $(LDFLAGS) $(LIBS) -o $@
 
 
