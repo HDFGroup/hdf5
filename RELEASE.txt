@@ -30,6 +30,7 @@ CONTENTS
 - h4toh5 Utility 
 - F90 Support
 - C++ Support
+- Pablo Support 
 - Bug Fixes since HDF5-1.2.0 
 - Bug Fixes since HDF5-1.4.0-beta2
 - Platforms Tested
@@ -206,6 +207,12 @@ C++ Support
 
         C++ APIs are available for Solaris 2.6 and 2.7, Linux, and FreeBSD. 
  
+Pablo Support
+=============
+	This version does not allow proper building of the Pablo-instrumented
+        version of the library.  A version supporting the pablo build is
+	available on the Pablo Website at 
+	www-pablo.cs.uiuc.edu/pub/Pablo.Release.5/HDFLibrary/hdf5_v1.4.tar.gz
 
 Bug Fixes since HDF5-1.2.0
 ==========================
