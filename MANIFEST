@@ -636,9 +636,20 @@
 ./tools/h5toh4.h
 ./tools/h5tools.c
 ./tools/h5tools.h
+./tools/h4toh5main.c
+./tools/h4toh5main.h
+./tools/h4toh5pal.c
+./tools/h4toh5sds.c
+./tools/h4toh5util.c
+./tools/h4toh5util.h
+./tools/h4toh5image.c
+./tools/h4toh5vgroup.c
+./tools/h4toh5vdata.c
+./tools/h4toh5anno.c
 ./tools/pdb2hdf.c
 ./tools/testh5dump.sh
 ./tools/testh5toh4
+./tools/testh4toh5
 
 ./tools/testfiles/tall-1.ddl
 ./tools/testfiles/tall-2.ddl
@@ -688,6 +699,7 @@
 ./tools/testfiles/tstr-1.ddl
 ./tools/testfiles/tstr.h5
 ./tools/testfiles/tstr2.h5
+./tools/testfiles/vg.hdf
 
 ./tools/testfiles/Expected/tall.hdf
 ./tools/testfiles/Expected/tattr.hdf
@@ -702,3 +714,4 @@
 ./tools/testfiles/Expected/tslink.hdf
 ./tools/testfiles/Expected/tstr.hdf
 ./tools/testfiles/Expected/tstr2.hdf
+./tools/testfiles/Expected/vg.h5
