@@ -432,9 +432,39 @@ hsize_t diff( hid_t      file1_id,
  *-------------------------------------------------------------------------
  */
  case H5G_DATASET:
-   nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
-   if (print_objname(options,nfound))
+
+  /* always print name */
+  if (options->m_verbose)
+  {
+   if (print_objname(options,1))
     printf( "Dataset:     <%s> and <%s>\n",path1,path2);
+   nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
+   
+  }
+  /* check first if we have differences */
+  else
+  {
+   if (options->m_quiet==0)
+   {
+    /* shut up temporarily */
+    options->m_quiet=1;
+    nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
+    /* print again */
+    options->m_quiet=0;
+    if (nfound) 
+    {
+     if (print_objname(options,nfound))
+      printf( "Dataset:     <%s> and <%s>\n",path1,path2);
+     nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
+    } /*if*/
+   } /*if*/
+   /* in quiet mode, just count differences */
+   else
+   {
+    nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
+   }
+  }/*else*/
+
   break;
 
 /*-------------------------------------------------------------------------

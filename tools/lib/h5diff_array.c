@@ -24,12 +24,13 @@ static hbool_t is_zero(const void *_mem, size_t size);
 /*-------------------------------------------------------------------------
  * Function: print_data
  *
- * Purpose: print data only in report or verbose modes
+ * Purpose: print data only in report or verbose modes,
+ *  and do not print in quiet mode
  *-------------------------------------------------------------------------
  */
 static int print_data(diff_opt_t *options)
-{
- return (options->m_report || options->m_verbose==1)?1:0;
+{ 
+ return ( (options->m_report || options->m_verbose) && !options->m_quiet)?1:0;
 }
 
 /*-------------------------------------------------------------------------
@@ -208,7 +209,7 @@ hsize_t diff_datum(void       *_mem1,
  H5G_stat_t    sb1;
  H5G_stat_t    sb2;
  hsize_t       nfound=0;   /* differences found */
- int           ret;
+ int           ret=0;      /* check return error */
 
  /* Build default formats for long long types */
  sprintf(fmt_llong,  "%%%sd              %%%sd               %%%sd\n", 
