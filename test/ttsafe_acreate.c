@@ -13,6 +13,9 @@
  *        dataset), there is a small chance that consecutive reads occur
  *        before a write to that shared variable.
  *
+ * HDF5 APIs exercised in thread:
+ * H5Acreate, H5Awrite, H5Aclose.
+ *
  * Created: Oct 5 1999
  * Programmer: Chee Wai LEE
  *
