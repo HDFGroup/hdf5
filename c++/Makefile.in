@@ -1,7 +1,7 @@
 ## Top-level HDF5-C++ Makefile(.in)
 ##
-## Copyright (C) 2000 National Center for Supercomputing Applications.
-##                    All rights reserved.
+## Copyright (C) 2000-2001 National Center for Supercomputing Applications.
+##                         All rights reserved.
 ##
 ## 
 ## This makefile mostly just reinvokes make in the various subdirectories
@@ -17,7 +17,7 @@ srcdir=@srcdir@
 # Subdirectories in build-order (not including `examples')
 # We include examples now since those are our "tests" at this time. We
 # can remove it later.
-SUBDIRS=src test examples
+SUBDIRS=src test
 
 ##############################################################################
 ##		    T A R G E T S
@@ -72,9 +72,8 @@ lib progs check test _test uninstall:
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
-##	@@SETX@; for d in $(SUBDIRS) examples; do
 tests TAGS dep depend:
-	@@SETX@; for d in $(SUBDIRS); do				      \
+	@@SETX@; for d in $(SUBDIRS) examples; do		      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
@@ -87,16 +86,14 @@ install:
 .PHONY: all lib progs test _test install uninstall dep depend clean           \
 	mostlyclean distclean maintainer-clean
 
-##	@@SETX@; for d in $(SUBDIRS) examples; do
 clean mostlyclean:
-	@@SETX@; for d in $(SUBDIRS); do				      \
+	@@SETX@; for d in $(SUBDIRS) examples; do		      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) conftest conftest.c
 
-##	@@SETX@; for d in $(SUBDIRS) examples; do
 distclean:
-	@@SETX@; for d in $(SUBDIRS); do				      \
+	@@SETX@; for d in $(SUBDIRS) examples; do				      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) config/commence config/conclude

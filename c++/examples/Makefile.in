@@ -1,7 +1,7 @@
 ## HDF5-C++ examples/Makefile(.in)
 ##
-## Copyright (C) 2000 National Center for Supercomputing Applications.
-##                    All rights reserved.
+## Copyright (C) 2000-2001 National Center for Supercomputing Applications.
+##                         All rights reserved.
 ##
 ##
 top_srcdir=@top_srcdir@/..
@@ -29,7 +29,7 @@ TEST_OBJ=$(TEST_SRC:.cpp=.lo)
 ## `make check' will run. List them in the order they should be run.
 TEST_PROGS=$(TEST_SRC:.cpp=)
 
-TEST_SCRIPTS=$(srcdir)/testexamples.sh
+##TEST_SCRIPTS=$(srcdir)/testexamples.sh
 
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
