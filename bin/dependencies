@@ -1,0 +1,41 @@
+#!/usr/bin/perl -w
+#
+# Copyright (C) 2001
+#     National Center for Supercomputing Applications.
+#     All rights reserved.
+#
+my $depend_file;
+my $new_depend_file;
+my $srcdir;
+my $top_srcdir;
+my $top_builddir;
+
+while ($_ = shift @ARGV) {
+    if (/^--srcdir=([^ \t\n]*)/) {
+        $srcdir = $1;
+        $srcdir = "\\$srcdir" if $srcdir =~ /^\./;
+    } elsif (/^--top_srcdir=([^ \t\n]*)/) {
+        $top_srcdir = $1;
+        $top_srcdir = "\\$top_srcdir" if $top_srcdir =~ /^\./;
+    } elsif (/^--top_builddir=([^ \t\n]*)/) {
+        $top_builddir = $1;
+        $top_builddir = "\\$top_builddir" if $top_builddir =~ /^\./;
+    } else {
+        $depend_file = $_;
+        $new_depend_file = "$_.new";
+        last;
+    }
+}
+
+open(DEPEND, "<$depend_file") || die "cannot open file $depend_file: $!\n";
+open(NEW, ">$new_depend_file") || die "cannot open file $new_depend_file: $!\n";
+
+while (<DEPEND>) {
+    s/\.o/\.lo/g;
+    s/ $srcdir/ \$\(srcdir\)/g;
+    s/ $top_srcdir/ \$\(top_srcdir\)/g;
+    s/ $top_builddir/ \$\(top_builddir\)/g;
+    print NEW $_;
+}
+
+`mv $new_depend_file $depend_file`;

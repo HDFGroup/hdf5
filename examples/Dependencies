@@ -351,3 +351,5 @@ h5_reference.lo: \
    $(top_srcdir)/src/H5FDstream.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5FDlog.h
+ph5example.lo: \
+   $(srcdir)/ph5example.c

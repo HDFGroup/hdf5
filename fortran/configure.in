@@ -137,6 +137,15 @@ AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AM_PROG_LIBTOOL
 
+dnl ----------------------------------------------------------------------
+dnl Check if they have Perl installed on their system. We only need Perl
+dnl if they're using a GNU compiler.
+dnl
+AC_SUBST(PERL) PERL=""
+if test "X$GCC" = "Xyes"; then
+  AC_CHECK_PROGS(PERL, perl,, $PATH)
+fi
+
 if test -z "$AR"; then
    AC_CHECK_PROGS(AR,ar xar,:,$PATH)
 fi

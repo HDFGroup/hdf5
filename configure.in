@@ -102,15 +102,15 @@ AC_MSG_CHECKING(for sizeof hsize_t and hssize_t)
 
 AC_SUBST(HSIZET)
 case $HSIZET in
-   no|small)
-      AC_MSG_RESULT(small)
-      HSIZET=small
-      ;;
-   *)
-      AC_MSG_RESULT(large)
-      HSIZET=large
-      AC_DEFINE(HAVE_LARGE_HSIZET)
-      ;;
+  no|small)
+    AC_MSG_RESULT(small)
+    HSIZET=small
+    ;;
+  *)
+    AC_MSG_RESULT(large)
+    HSIZET=large
+    AC_DEFINE(HAVE_LARGE_HSIZET)
+    ;;
 esac
 
 host_config="none"
@@ -125,33 +125,33 @@ for f in $host_cpu-$host_vendor-$host_os \
 	 $host_os_novers \
 	 $host_vendor \
 	 $host_cpu ; do
-   AC_MSG_CHECKING(for config $f)
-   if test -f "$srcdir/config/$f"; then
-      host_config=$srcdir/config/$f
-      AC_MSG_RESULT(found)
-      break
-   fi
-   AC_MSG_RESULT(no)
+  AC_MSG_CHECKING(for config $f)
+  if test -f "$srcdir/config/$f"; then
+    host_config=$srcdir/config/$f
+    AC_MSG_RESULT(found)
+    break
+  fi
+  AC_MSG_RESULT(no)
 done
 if test $host_config != "none"; then
-   CC_BASENAME="`echo $CC |cut -f1 -d' ' |xargs basename 2>/dev/null`"
-   . $host_config
+  CC_BASENAME="`echo $CC |cut -f1 -d' ' |xargs basename 2>/dev/null`"
+  . $host_config
 fi
 
 dnl Source any special site-specific file
 hname="`hostname`"
 while test -n "$hname"; do
-   file=$srcdir/config/site-specific/host-$hname
-   AC_MSG_CHECKING(for config $file)
-   if test -f "$file"; then
-      . $file
-      AC_MSG_RESULT(found)
-      break
-   fi
-   AC_MSG_RESULT(no)
-   hname_tmp=$hname
-   hname="`echo $hname | cut -d. -f2-99`"
-   test "$hname_tmp" = "$hname" && break
+  file=$srcdir/config/site-specific/host-$hname
+  AC_MSG_CHECKING(for config $file)
+  if test -f "$file"; then
+    . $file
+    AC_MSG_RESULT(found)
+    break
+  fi
+  AC_MSG_RESULT(no)
+  hname_tmp=$hname
+  hname="`echo $hname | cut -d. -f2-99`"
+  test "$hname_tmp" = "$hname" && break
 done
 
 dnl ----------------------------------------------------------------------
@@ -167,18 +167,18 @@ dnl Check if they would like the Fortran interface compiled
 dnl
 AC_MSG_CHECKING(if fortran interface enabled)
 AC_ARG_ENABLE(fortran,
-   [  --enable-fortran        Compile the Fortran interface [default=no]],
-   HDF_FORTRAN=$enableval)
+  [  --enable-fortran        Compile the Fortran interface [default=no]],
+  HDF_FORTRAN=$enableval)
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
-   echo "yes"
-   if test -z "$config_dirs"; then
-      config_dirs="fortran"
-   else
-      config_dirs="${config_dirs} fortran"
-   fi
+  echo "yes"
+  if test -z "$config_dirs"; then
+    config_dirs="fortran"
+  else
+    config_dirs="${config_dirs} fortran"
+  fi
 else
-   echo "no"
+  echo "no"
 fi
 
 dnl ----------------------------------------------------------------------
@@ -186,18 +186,18 @@ dnl Check if they would like the C++ interface compiled
 dnl
 AC_MSG_CHECKING(if c++ interface enabled)
 AC_ARG_ENABLE(cxx,
-   [  --enable-cxx            Compile the C++ interface [default=no]],
-   HDF_CXX=$enableval)
+  [  --enable-cxx            Compile the C++ interface [default=no]],
+  HDF_CXX=$enableval)
 
 if test "X$HDF_CXX" = "Xyes"; then
-   echo "yes"
-   if test -z "$config_dirs"; then
-      config_dirs="c++"
-   else
-      config_dirs="${config_dirs} c++"
-   fi
+  echo "yes"
+  if test -z "$config_dirs"; then
+    config_dirs="c++"
+  else
+    config_dirs="${config_dirs} c++"
+  fi
 else
-   echo "no"
+  echo "no"
 fi
 
 dnl Run configure in the subdirectories if specified
@@ -208,24 +208,33 @@ dnl If we should build only static executables
 dnl
 AC_MSG_CHECKING(if should build only statically linked executables)
 AC_ARG_ENABLE(static_exec,
-   [  --enable-static-exec    Build only statically linked executables [default=no]],
-   STATIC_EXEC=$enableval)
+  [  --enable-static-exec    Build only statically linked executables [default=no]],
+  STATIC_EXEC=$enableval)
 
 if test "X$STATIC_EXEC" = "Xyes"; then
-   echo "yes"
-   LT_STATIC_EXEC="-all-static"
+  echo "yes"
+  LT_STATIC_EXEC="-all-static"
 else
-   echo "no"
-   LT_STATIC_EXEC=""
+  echo "no"
+  LT_STATIC_EXEC=""
 fi
 AC_SUBST(LT_STATIC_EXEC)
+
+dnl ----------------------------------------------------------------------
+dnl Check if they have Perl installed on their system. We only need Perl
+dnl if they're using a GNU compiler.
+dnl
+AC_SUBST(PERL) PERL=""
+if test "X$GCC" = "Xyes"; then
+  AC_CHECK_PROGS(PERL, perl,, $PATH)
+fi
 
 dnl ----------------------------------------------------------------------
 dnl Check which archiving tool to use. This needs to be done before
 dnl the AM_PROG_LIBTOOL macro.
 dnl
 if test -z "$AR"; then
-   AC_CHECK_PROGS(AR,ar xar,:,$PATH)
+  AC_CHECK_PROGS(AR,ar xar,:,$PATH)
 fi
 AC_SUBST(AR)
 
@@ -241,60 +250,60 @@ AM_PROG_LIBTOOL
 dnl Fix up the INSTALL macro if it's a relative path. We want the
 dnl full-path to the binary instead.
 case "$INSTALL" in
-   *install-sh*)
-      INSTALL='\${top_srcdir}/bin/install-sh -c'
-      ;;
+  *install-sh*)
+    INSTALL='\${top_srcdir}/bin/install-sh -c'
+    ;;
 esac
 
 AC_MSG_CHECKING(make)
 AC_SUBST_FILE(DEPEND)
 if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
 	sed -n 1p|cut -c1-8`" = "GNU Make"; then
-   AC_MSG_RESULT(GNU make)
-   GMAKE=yes
-   if test "X$GCC" = "Xyes"; then
-      DEPEND=config/depend1
-   else
-      DEPEND=config/depend2
-   fi
+  AC_MSG_RESULT(GNU make)
+  GMAKE=yes
+  if test "X$GCC" = "Xyes"; then
+    DEPEND=config/depend1
+  else
+    DEPEND=config/depend2
+  fi
 else
-   AC_MSG_RESULT(generic)
+  AC_MSG_RESULT(generic)
 fi
 
 dnl How do we include another file into a Makefile?
 if test -z "$DEPEND"; then
-   AC_MSG_CHECKING(how to include a makefile)
+  AC_MSG_CHECKING(how to include a makefile)
 
-   dnl The include file contains the target for `foo'
-   cat >makeinc <<EOF
+  dnl The include file contains the target for `foo'
+  cat >makeinc <<EOF
 foo:
 	@:
 EOF
 
-   while true; do #for break
-      dnl pmake. We have to be careful because some pmake think that the
-      dnl contents of the MAKE environment variable is a target.
-      echo '.include <makeinc>' >maketest
-      if (MAKE= ${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-         AC_MSG_RESULT([.include <FILE>])
-         DEPEND=config/depend3
-         break
-      fi
-
-      dnl Most make's use `include FILE'
-      echo 'include makeinc' >maketest
-      if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-         AC_MSG_RESULT(include FILE)
-         DEPEND=config/depend4
-         break;
-      fi
-
-      dnl default
-      AC_MSG_RESULT(you have a deficient make command)
-      DEPEND=config/dependN
+  while true; do #for break
+    dnl pmake. We have to be careful because some pmake think that the
+    dnl contents of the MAKE environment variable is a target.
+    echo '.include <makeinc>' >maketest
+    if (MAKE= ${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+      AC_MSG_RESULT([.include <FILE>])
+      DEPEND=config/depend3
       break
-   done
-   rm makeinc maketest
+    fi
+
+    dnl Most make's use `include FILE'
+    echo 'include makeinc' >maketest
+    if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+      AC_MSG_RESULT(include FILE)
+      DEPEND=config/depend4
+      break;
+    fi
+
+    dnl default
+    AC_MSG_RESULT(you have a deficient make command)
+    DEPEND=config/dependN
+    break
+  done
+  rm makeinc maketest
 fi
 
 dnl ----------------------------------------------------------------------
