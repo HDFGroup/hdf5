@@ -119,6 +119,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+	- Fixed dtypes "sw long double -> double" failure in QSC class
+	  machines.  AKC - 2004/4/16
         - Fixed problem with fletcher32 filter when converting data of different
 	    endianess. PVN 2004/03/10
         - Fixed problem with H5Tget_native_type() not handling opaque fields
