@@ -1193,6 +1193,7 @@
 ./tools/lib/h5tools_ref.c
 ./tools/lib/h5tools_ref.h
 ./tools/lib/h5tools_type.c
+./tools/lib/ph5diff.h
 ./tools/lib/talign.c
 
 ./tools/misc/Dependencies
