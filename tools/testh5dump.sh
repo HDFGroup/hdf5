@@ -123,7 +123,8 @@ DUMP tloop-1.ddl tloop.h5
 # test for string 
 DUMP tstr-1.ddl tstr.h5
 
-if test "0" = "$nerrors"; then
+if test $nerrors -eq 0 ; then
 	echo "All h5dump tests passed."
 fi
 
+exit $nerrors

@@ -340,7 +340,8 @@ CONVERT -m tcompound.h5 tall.h5 tloop.h5
 CONVERT -m tdset2.h5 tcompound2.h5 tmany.h5
 CONVERT -m tstr.h5 tstr2.h5
 
-if test "0" = "$nerrors"; then
+if test $nerrors -eq 0 ; then
 	echo "All h5toh4 tests passed."
 fi
 
+exit $nerrors
