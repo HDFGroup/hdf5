@@ -41,7 +41,6 @@ prog_name="`basename $0`"
 allargs=""
 compile_args=""
 libraries=""
-archives=""
 link_args=""
 link_objs=""
 clibpath=""
@@ -205,7 +204,7 @@ for arg in $@ ; do
           fi
         elif test "x$ext" = "x.a"; then
           # This is an archive that we're linking in
-          archives=" $archives $arg "
+          libraries=" $libraries $arg "
         else
           compile_args="$compile_args $arg"
           link_args="$link_args $arg"
@@ -233,41 +232,37 @@ fi
 
 if test "x$do_link" = "xyes"; then
   shared_link=""
-  libraries=" $libraries $LIBS "
+  libraries=" $libraries  -lhdf5 "
   link_args="$link_args -L${libdir}"
 
-  if test "x$USE_SHARED_LIB" = "xyes"; then
-    libraries=" -lhdf5 $libraries "
+  case "$kind" in
+    gcc|linux*)           flag="-Wl,-rpath -Wl," ;;
+    hpux*)                flag="-Wl,+b -Wl," ;;
+    freebsd*|solaris*)    flag="-R" ;;
+    rs6000*|aix*)         flag="-L" ;;
+    irix*|sgi)            flag="-rpath " ;;
+    *)                    flag="" ;;
+  esac
 
-    case "$kind" in
-      gcc|linux*)           flag="-Wl,-rpath -Wl," ;;
-      hpux*)                flag="-Wl,+b -Wl," ;;
-      freebsd*|solaris*)    flag="-R" ;;
-      rs6000*|aix*)         flag="-L" ;;
-      irix*|sgi)            flag="-rpath " ;;
-      *)                    flag="" ;;
-    esac
+  if test -n "$flag"; then
+    shared_link="${flag}${libdir}"
+  fi
 
-    if test -n "$flag"; then
-      shared_link="${flag}${libdir}"
-    fi
-  else
-    if echo "$libraries" | grep " -lhdf5 " > /dev/null; then
-      new_libraries=""
-      for lib in $libraries; do
-        case "$lib" in
-          -lhdf5)
-            new_libraries="$new_libraries ${libdir}/libhdf5.a"
-            ;;
-          *)
-            new_libraries="$new_libraries $lib"
-            ;;
-        esac
-      done
-      libraries="$new_libraries"
-    else
-      link_args="$link_args ${libdir}/libhdf5.a"
-    fi
+  if test "x$USE_SHARED_LIB" != "xyes"; then
+    # The "-lhdf5" flag is in here already...This is a static compile,
+    # though, so change it to the static version (.a) of the library.
+    new_libraries=""
+    for lib in $libraries; do
+      case "$lib" in
+        -lhdf5)
+          new_libraries="$new_libraries ${libdir}/libhdf5.a"
+          ;;
+        *)
+          new_libraries="$new_libraries $lib"
+          ;;
+      esac
+    done
+    libraries="$new_libraries"
   fi
 
   for lib in $libraries; do
@@ -279,7 +274,11 @@ if test "x$do_link" = "xyes"; then
     fi
   done
 
-  $SHOW $CLINKER $CFLAGS $LDFLAGS $clibpath $link_objs $archives $link_args $shared_link
+  # The LIBS are just a bunch of -l* libraries necessary for the HDF5
+  # module. It's okay if they're included twice in the compile line.
+  link_args="$link_args $LIBS"
+
+  $SHOW $CLINKER $CFLAGS $LDFLAGS $clibpath $link_objs $link_args $shared_link
   status=$?
 fi
 
