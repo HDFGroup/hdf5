@@ -185,7 +185,7 @@ void H5File::p_close() const
 // exception can be thrown for file or group.  The func_name is a member
 // function of CommonFG and "H5File::" will be inserted to indicate the
 // function called is an implementation of H5File
-void H5File::throwException(const string& func_name, const string& msg) const
+void H5File::throwException(const string func_name, const string msg) const
 {
    string full_name = func_name;
    full_name.insert(0, "H5File::"); 

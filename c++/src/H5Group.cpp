@@ -138,7 +138,7 @@ void Group::p_close() const
 }
 
 // Throw file exception
-void Group::throwException(const string& func_name, const string& msg) const
+void Group::throwException(const string func_name, const string msg) const
 {
    string full_name = func_name;
    full_name.insert(0, "Group::");
