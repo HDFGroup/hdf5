@@ -1520,10 +1520,6 @@ H5A_copy(const H5A_t *old_attr)
         HDmemcpy(new_attr->data,old_attr->data,old_attr->data_size);
     } /* end if */
 
-#ifndef LATER
-    /* Copy the share info? */
-#endif
-
     /* Set the return value */
     ret_value=new_attr;
     

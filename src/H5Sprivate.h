@@ -155,7 +155,7 @@ typedef struct H5S_conv_t {
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5S_PACKAGE
 #define H5S_GET_EXTENT_TYPE(S)          ((S)->extent.type)
-#define H5S_GET_EXTENT_NDIMS(S)         ((S)->extent.u.simple.rank)
+#define H5S_GET_EXTENT_NDIMS(S)         ((S)->extent.rank)
 #define H5S_GET_EXTENT_NPOINTS(S)       ((S)->extent.nelem)
 #define H5S_GET_SELECT_NPOINTS(S)       ((S)->select.num_elem)
 #define H5S_GET_SELECT_TYPE(S)          ((S)->select.type->type)

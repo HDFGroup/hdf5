@@ -248,7 +248,7 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size,
     /* make a local copy of the dimension info so we can operate with them */
 
     /* Check if this is a "flattened" regular hyperslab selection */
-    if(sel_iter.u.hyp.iter_rank!=0 && sel_iter.u.hyp.iter_rank<space->extent.u.simple.rank) {
+    if(sel_iter.u.hyp.iter_rank!=0 && sel_iter.u.hyp.iter_rank<space->extent.rank) {
         /* Flattened selection */
         rank=sel_iter.u.hyp.iter_rank;
         assert (rank >= 0 && rank<=H5S_MAX_RANK);	/* within array bounds */
@@ -282,7 +282,7 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size,
     } /* end if */
     else {
         /* Non-flattened selection */
-        rank = space->extent.u.simple.rank;
+        rank = space->extent.rank;
         assert (rank >= 0 && rank<=H5S_MAX_RANK);	/* within array bounds */
         if (0==rank)
             goto empty;
@@ -295,7 +295,7 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size,
             d[i].strid = diminfo[i].stride;
             d[i].block = diminfo[i].block;
             d[i].count = diminfo[i].count;
-            d[i].xtent = space->extent.u.simple.size[i];
+            d[i].xtent = space->extent.size[i];
 #ifdef H5Smpi_DEBUG
             HDfprintf(stderr, "%s: start=%Hd  stride=%Hu  count=%Hu  block=%Hu  xtent=%Hu",
                 FUNC, d[i].start, d[i].strid, d[i].count, d[i].block, d[i].xtent );

@@ -42,23 +42,14 @@
 /* 
  * Dataspace extent information
  */
-/* Simple extent container */
-typedef struct H5S_simple_t {
-    unsigned rank;         /* Number of dimensions */
-    hsize_t *size;      /* Current size of the dimensions */
-    hsize_t *max;       /* Maximum size of the dimensions */
-#ifdef LATER
-    hsize_t *perm;      /* Dimension permutation array */
-#endif /* LATER */
-} H5S_simple_t;
-
 /* Extent container */
 typedef struct {
     H5S_class_t	type;   /* Type of extent */
     hsize_t nelem;      /* Number of elements in extent */
-    union {
-        H5S_simple_t	simple;	/* Simple dimensionality information  */
-    } u;
+
+    unsigned rank;      /* Number of dimensions */
+    hsize_t *size;      /* Current size of the dimensions */
+    hsize_t *max;       /* Maximum size of the dimensions */
 } H5S_extent_t;
 
 /* 
@@ -227,7 +218,6 @@ H5_DLLVAR const H5S_select_class_t H5S_sel_none[1];
 H5_DLLVAR const H5S_select_class_t H5S_sel_point[1];
 
 /* Extent functions */
-H5_DLL herr_t H5S_close_simple(H5S_simple_t *simple);
 H5_DLL herr_t H5S_extent_release(H5S_extent_t *extent);
 H5_DLL herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src);
 

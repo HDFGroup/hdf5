@@ -82,11 +82,11 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
 
     /* Check args */
     assert(space);
-    assert(space->extent.u.simple.rank);
+    assert(space->extent.rank);
     assert(offset);
 
     /* Copy the offset over */
-    HDmemcpy(space->select.offset,offset,sizeof(hssize_t)*space->extent.u.simple.rank);
+    HDmemcpy(space->select.offset,offset,sizeof(hssize_t)*space->extent.rank);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -749,11 +749,11 @@ H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space, size_t elmt_s
     /* Initialize common information */
 
     /* Save the dataspace's rank */
-    sel_iter->rank=space->extent.u.simple.rank;
+    sel_iter->rank=space->extent.rank;
 
     if(sel_iter->rank>0) {
         /* Point to the dataspace dimensions */
-        sel_iter->dims=space->extent.u.simple.size;
+        sel_iter->dims=space->extent.size;
     } /* end if */
     else
         sel_iter->dims = NULL;
@@ -1128,12 +1128,12 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements selected");
 
     /* Get the rank of the dataspace */
-    ndims=space->extent.u.simple.rank;
+    ndims=space->extent.rank;
 
     if (ndims > 0){
 	/* Copy the size of the space */
-	assert(space->extent.u.simple.size);
-	HDmemcpy(space_size, space->extent.u.simple.size, ndims*sizeof(hsize_t));
+	assert(space->extent.size);
+	HDmemcpy(space_size, space->extent.size, ndims*sizeof(hsize_t));
     }
     space_size[ndims]=elmt_size;
 
@@ -1308,7 +1308,7 @@ HDfprintf(stderr,"%s: Entering\n",FUNC);
     assert(space2);
 
     /* Check for different dimensionality */
-    if (space1->extent.u.simple.rank!=space2->extent.u.simple.rank)
+    if (space1->extent.rank!=space2->extent.rank)
         HGOTO_DONE(FALSE);
 
 #ifdef QAK
@@ -1339,7 +1339,7 @@ HDfprintf(stderr,"%s: Check 2.0\n",FUNC);
             HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality");
 
         /* Check that the sizes are the same */
-        for (u=0; u<space1->extent.u.simple.rank; u++)
+        for (u=0; u<space1->extent.rank; u++)
             if(dims1[u]!=dims2[u])
                 HGOTO_DONE(FALSE);
     } /* end if */
@@ -1356,7 +1356,7 @@ HDfprintf(stderr,"%s: Check 3.0\n",FUNC);
 HDfprintf(stderr,"%s: Check 4.0\n",FUNC);
 #endif /* QAK */
         /* Check that the shapes are the same */
-        for (u=0; u<space1->extent.u.simple.rank; u++) {
+        for (u=0; u<space1->extent.rank; u++) {
             if(space1->select.sel_info.hslab->opt_diminfo[u].stride!=space2->select.sel_info.hslab->opt_diminfo[u].stride)
                 HGOTO_DONE(FALSE);
             if(space1->select.sel_info.hslab->opt_diminfo[u].count!=space2->select.sel_info.hslab->opt_diminfo[u].count)
@@ -1417,11 +1417,11 @@ else {
 #ifdef QAK
 {
     HDfprintf(stderr,"%s: iter1 start={",FUNC);
-    for(u=0; u<space1->extent.u.simple.rank; u++)
-        HDfprintf(stderr,"%Hd%s",start1[u],(u<(space1->extent.u.simple.rank-1) ? ", " : "}\n"));
+    for(u=0; u<space1->extent.rank; u++)
+        HDfprintf(stderr,"%Hd%s",start1[u],(u<(space1->extent.rank-1) ? ", " : "}\n"));
     HDfprintf(stderr,"%s: iter1 end={",FUNC);
-    for(u=0; u<space1->extent.u.simple.rank; u++)
-        HDfprintf(stderr,"%Hd%s",end1[u],(u<(space1->extent.u.simple.rank-1) ? ", " : "}\n"));
+    for(u=0; u<space1->extent.rank; u++)
+        HDfprintf(stderr,"%Hd%s",end1[u],(u<(space1->extent.rank-1) ? ", " : "}\n"));
 }
 #endif /* QAK */
             if(H5S_SELECT_ITER_BLOCK(&iter2,start2,end2)<0)
@@ -1429,18 +1429,18 @@ else {
 #ifdef QAK
 {
     HDfprintf(stderr,"%s: iter2 start={",FUNC);
-    for(u=0; u<space1->extent.u.simple.rank; u++)
-        HDfprintf(stderr,"%Hd%s",start2[u],(u<(space1->extent.u.simple.rank-1) ? ", " : "}\n"));
+    for(u=0; u<space1->extent.rank; u++)
+        HDfprintf(stderr,"%Hd%s",start2[u],(u<(space1->extent.rank-1) ? ", " : "}\n"));
     HDfprintf(stderr,"%s: iter2 end={",FUNC);
-    for(u=0; u<space1->extent.u.simple.rank; u++)
-        HDfprintf(stderr,"%Hd%s",end2[u],(u<(space1->extent.u.simple.rank-1) ? ", " : "}\n"));
+    for(u=0; u<space1->extent.rank; u++)
+        HDfprintf(stderr,"%Hd%s",end2[u],(u<(space1->extent.rank-1) ? ", " : "}\n"));
 }
 #endif /* QAK */
 
             /* The first block only compares the sizes and sets the relative offsets for later blocks */
             if(first_block) {
                 /* If the block sizes from each selection doesn't match, get out */
-                for (u=0; u<space1->extent.u.simple.rank; u++) {
+                for (u=0; u<space1->extent.rank; u++) {
                     if((end1[u]-start1[u])!=(end2[u]-start2[u]))
                         HGOTO_DONE(FALSE);
 
@@ -1454,7 +1454,7 @@ else {
             } /* end if */
             else {
                 /* Check over the blocks for each selection */
-                for (u=0; u<space1->extent.u.simple.rank; u++) {
+                for (u=0; u<space1->extent.rank; u++) {
                     /* Check if the blocks are in the same relative location */
                     if((start1[u]-off1[u])!=(start2[u]-off2[u]))
                         HGOTO_DONE(FALSE);
