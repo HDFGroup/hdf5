@@ -60,8 +60,7 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><center>
+<hr><!-- #EndLibraryItem --><center>
 <h1>HDF5 Tools</h1>
 </center>
 
@@ -171,8 +170,9 @@ installed with HDF5.
 </table>
 -->
 
+<!-- NEW PAGE -->
+<!-- NEW PAGE -->
 <p>
-
 
 <hr>
 <dl>
@@ -263,6 +263,7 @@ installed with HDF5.
         in opening the file.
         </p>
 
+<!-- NEW PAGE -->
 <dt><strong>XML Output:</strong>
     <dd>With the <code>--xml</code> option, <code>h5dump</code> generates
         XML output.  This output contains a complete description of the file, 
@@ -342,7 +343,8 @@ installed with HDF5.
             <dd>Offset of start of subsetting selection.  
                 <br>
                 Default: the beginning of the dataset.</dd>
-        <dt><code>-S <em>L</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+<!-- NEW PAGE -->
+		<dt><code>-S <em>L</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--stride=<em>L</em></code></dt>
             <dd>Hyperslab stride.
                 <br>
@@ -421,7 +423,8 @@ installed with HDF5.
           <blockquote>
               <code>h5dump --xml bobo.h5 > bobo.h5.xml</code>
           </blockquote>
-       <li>Dumping a subset of the dataset <code>/GroupFoo/databar/</code> 
+<!-- NEW PAGE -->
+	   <li>Dumping a subset of the dataset <code>/GroupFoo/databar/</code> 
            in the file <code>quux.h5</code>
           <blockquote>
               <code>h5dump -d /GroupFoo/databar --start="1,1" --stride="2,3" 
@@ -507,7 +510,7 @@ installed with HDF5.
 
 </dl>
 
-
+<!-- NEW PAGE -->
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-Ls">h5ls</a>
@@ -584,7 +587,7 @@ installed with HDF5.
 -->
 </dl>
 
-
+<!-- NEW PAGE -->
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-Diff">h5diff</a>  &nbsp;&nbsp; <em>(Beta version)</em>
@@ -680,7 +683,7 @@ installed with HDF5.
 -->
 </dl>
 
-
+<!-- NEW PAGE -->
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-Repart">h5repart</a>
@@ -730,7 +733,7 @@ installed with HDF5.
 -->
 </dl>
 
-
+<!-- NEW PAGE -->
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-Import">h5import</a>
@@ -1007,7 +1010,8 @@ installed with HDF5.
                  Example: <code> &nbsp; 4 3 4 38 &nbsp; </code> for a 38x4x3x4 dataset.
             </td></tr> 
 
-          <tr valign=top align=left><td>
+<!-- NEW PAGE -->
+		  <tr valign=top align=left><td>
           <hr><code>PATH</code>
             </td><td><hr>Path of the output dataset.
             </td></tr>
@@ -1113,7 +1117,8 @@ installed with HDF5.
                   (Default: <code> 32</code>)
           </td></tr>
 
-          <tr valign=top align=left><td>
+<!-- NEW PAGE -->
+		  <tr valign=top align=left><td>
           <hr><code>OUTPUT-CLASS&nbsp;&nbsp;</code>
             </td><td><hr>A string denoting the type of output data.  
             </td></tr>
@@ -1201,7 +1206,8 @@ installed with HDF5.
             </td><td>Little-endian.
             </td></tr> 
 
-          <tr valign=top align=left><td colspan="2">
+<!-- NEW PAGE -->
+		  <tr valign=top align=left><td colspan="2">
                 <hr>The following options are disabled by default, making
                 the default storage properties no chunking, no compression,
                 no external storage, and no extensible dimensions.
@@ -1283,7 +1289,8 @@ installed with HDF5.
           <tr valign=top align=left><td><hr></td><td><hr></td></tr>
         </table>
 
-        <p>
+<!-- NEW PAGE -->
+		<p>
         <b>The <code>help</code> option:</b><br>
         The help option, expressed as one of 
         <table width=100% border=0>
@@ -1448,9 +1455,7 @@ installed with HDF5.
 -->
 </dl>
 
-
-
-
+<!-- NEW PAGE -->
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-GIF2H5">gif2h5</a>
@@ -1478,7 +1483,7 @@ installed with HDF5.
 -->
 </dl>
 
-
+<!-- NEW PAGE -->
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-H52GIF">h52gif</a>
@@ -1526,7 +1531,7 @@ installed with HDF5.
 -->
 </dl>
 
-
+<!-- NEW PAGE -->
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-H5toh4">h5toh4</a>
@@ -1615,7 +1620,7 @@ installed with HDF5.
         Floating point datatypes are converted to IEEE format.
         
 <dt><strong>Note:</strong>
-    <dl>The <code>h5toh4</code> and <code>h4toh5</code> utilities 
+    <dd>The <code>h5toh4</code> and <code>h4toh5</code> utilities 
         are no longer part of the HDF5 product;  
 	they are distributed separately through the page
 	<a href="http://hdf.ncsa.uiuc.edu/h4toh5/">
@@ -1641,7 +1646,7 @@ installed with HDF5.
 -->
 </dl>
 
-
+<!-- NEW PAGE -->
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-H4toh5">h4toh5</a>
@@ -1737,7 +1742,7 @@ installed with HDF5.
         </table>
         </center>
 <dt><strong>Note:</strong>
-    <dl>The <code>h4toh5</code> and <code>h5toh4</code> utilities 
+    <dd>The <code>h4toh5</code> and <code>h5toh4</code> utilities 
         are no longer part of the HDF5 product;  
 	they are distributed separately through the page
 	<a href="http://hdf.ncsa.uiuc.edu/h4toh5/">
@@ -1764,7 +1769,7 @@ installed with HDF5.
 -->
 </dl>
 
-
+<!-- NEW PAGE -->
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-Perf">h5perf</a>
@@ -1856,7 +1861,9 @@ installed with HDF5.
 		(Default: All APIs)<br><br>
 		Example, <code>--api=mpiio,phdf5</code> specifies that the
 		MPI I/O and parallel HDf5 APIs are to be monitored.<br><br>
-        <dt><code>-B</code> <em>size</em>, <code>--block-size=</code><em>size</em>
+        
+<!-- NEW PAGE -->
+		<dt><code>-B</code> <em>size</em>, <code>--block-size=</code><em>size</em>
             <dd>Specifies the block size within the transfer buffer.
 		(Default: 128K)<br><br>
 		Block size versus transfer buffer size:
@@ -1922,6 +1929,7 @@ installed with HDF5.
         <dt><code>-I</code>, <code>--interleaved</code>
             <dd>Sets interleaved block I/O.<br>
 	        (Default: Contiguous block I/O)<br><br>
+<!-- NEW PAGE -->
 		Interleaved vs. Contiguous blocks
 		in a parallel environment:<br>
 		When contiguous blocks are written to a dataset, 
@@ -1986,7 +1994,7 @@ installed with HDF5.
 -->
 </dl>
 
-
+<!-- NEW PAGE -->
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-Redeploy">h5redeploy</a>
@@ -2037,7 +2045,7 @@ installed with HDF5.
 -->
 </dl>
 
-
+<!-- NEW PAGE -->
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-H5CC">h5cc</a>
@@ -2193,7 +2201,7 @@ installed with HDF5.
  -->
 </dl>
 
-
+<!-- NEW PAGE -->
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-H5C++">h5c++</a>
@@ -2346,14 +2354,15 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
-</address><!-- #EndLibraryItem --> 
-
-Last modified: 30 October 2003
+</address><!-- #EndLibraryItem --><dt><dt><SCRIPT LANGUAGE="JAVASCRIPT">
+<!--
+document.writeln("Last modified: 24 February 2004");
+-->
+</SCRIPT>
 
 </body>
 </html>

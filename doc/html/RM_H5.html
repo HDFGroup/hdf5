@@ -22,10 +22,7 @@ HDF5/H5 API Specification
  -->
 
 <link href="ed_styles/RMelect.css" rel="stylesheet" type="text/css">
-<!-- #EndLibraryItem --></head>
-
-<body bgcolor="#FFFFFF">
-
+<!-- #EndLibraryItem --></head> <body bgcolor="#FFFFFF"> 
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
 <center>
@@ -60,8 +57,7 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><center>
+<hr><!-- #EndLibraryItem --><center>
 <h1>H5: General Library Functions</h1>
 </center>
 
@@ -240,14 +236,17 @@ facilitate moving easily between them.</i>
         the 1 is the release number, <code>relnum</code>.
 -->
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>unsigned </em><code>majnum</code>
-            <dd>IN: The major version of the library.
-        <dt><em>unsigned </em><code>minnum</code>
-            <dd>IN: The minor version of the library.
-        <dt><em>unsigned </em><code>relnum</code>
-            <dd>IN: The release number of the library.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>unsigned </em><code>majnum</code></td>
+            <td valign="top">IN: The major version of the library.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned&nbsp;</em><code>minnum&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: The minor version of the library.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned </em><code>relnum</code></td>
+            <td valign="top">IN: The release number of the library.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Upon failure, this function causes the application to abort.
@@ -429,14 +428,17 @@ END SUBROUTINE h5garbage_collect_f
         numbers of the version of the HDF library which is linked to 
         the application.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>unsigned *</em><code>majnum</code>
-            <dd>OUT: The major version of the library.
-        <dt><em>unsigned *</em><code>minnum</code>
-            <dd>OUT: The minor version of the library.
-        <dt><em>unsigned *</em><code>relnum</code>
-            <dd>OUT: The release number of the library.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>unsigned *</em><code>majnum</code></td>
+            <td valign="top">OUT: The major version of the library.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned&nbsp;*</em><code>minnum&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: The minor version of the library.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned *</em><code>relnum</code></td>
+            <td valign="top">OUT: The release number of the library.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -559,20 +561,26 @@ END SUBROUTINE h5open_f
         Using a value of <code>-1</code> for a limit means that 
 	no limit is set for the specified type of free list.  
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>int</em> <code>reg_global_lim</code>
-	    <dd>IN: The limit on all regular free list memory used
-        <dt><em>int</em> <code>reg_list_lim</code>
-	    <dd>IN: The limit on memory used in each regular free list
-        <dt><em>int</em> <code>arr_global_lim</code>
-	    <dd>IN: The limit on all array free list memory used
-        <dt><em>int</em> <code>arr_list_lim</code>
-	    <dd>IN: The limit on memory used in each array free list
-        <dt><em>int</em> <code>blk_global_lim</code>
-	    <dd>IN: The limit on all block free list memory used
-        <dt><em>int</em> <code>blk_list_lim</code>
-	    <dd>IN: The limit on memory used in each block free list
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>int</em>&nbsp;<code>reg_global_lim&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+	        <td valign="top">IN: The limit on all regular free list memory used</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>reg_list_lim</code></td>
+	        <td valign="top">IN: The limit on memory used in each regular free list</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>arr_global_lim</code></td>
+	        <td valign="top">IN: The limit on all array free list memory used</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>arr_list_lim</code></td>
+	        <td valign="top">IN: The limit on memory used in each array free list</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>blk_global_lim</code></td>
+	        <td valign="top">IN: The limit on all block free list memory used</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>blk_list_lim</code></td>
+	        <td valign="top">IN: The limit on memory used in each block free list</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -626,14 +634,13 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 20 October 2003");
+document.writeln("Last modified: 24 February 2004");
 -->
 </SCRIPT>
 

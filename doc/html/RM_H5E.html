@@ -61,8 +61,7 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><center>
+<hr><!-- #EndLibraryItem --><center>
 <h1>H5E: Error Interface</h1>
 </center>
 
@@ -203,9 +202,9 @@ errors within the H5E package.
         <code>H5Eclear</code> can fail if there are problems initializing 
         the library.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt>None
-    </dl>
+    <ul><table>
+        <tr><td valign="top">None</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -245,13 +244,15 @@ END SUBROUTINE h5eclear_f
         and its data, <code>client_data</code>.  Either (or both) 
         arguments may be null in which case the value is not returned.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>H5E_auto_t *</em> <code>func</code>
-            <dd>OUT: Current setting for the function to be called upon an 
-                error condition.
-        <dt><em>void **</em><code>client_data</code>
-            <dd>OUT: Current setting for the data passed to the error function.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5E_auto_t *</em> <code>func</code></td>
+            <td valign="top">OUT: Current setting for the function to be called upon an 
+                error condition.</td></tr>
+        <tr>
+		    <td valign="top"><em>void&nbsp;**</em><code>client_data&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Current setting for the data passed to the error function.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -286,10 +287,11 @@ SUBROUTINE
     <dd>Given a major error number, <code>H5Eget_major</code> returns a 
         constant character string that describes the error.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>H5E_major_t</em> <code>n</code>
-            <dd>IN: Major error number.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5E_major_t</em>&nbsp;<code>n&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Major error number.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd> Returns a character string describing the error if successful.
          Otherwise returns "Invalid major error number."
@@ -326,10 +328,11 @@ END SUBROUTINE h5eget_major_f
     <dd>Given a minor error number, <code>H5Eget_minor</code> returns a 
         constant character string that describes the error.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>H5E_minor_t</em> <code>n</code>
-            <dd>IN: Minor error number.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5E_minor_t</em>&nbsp;<code>n&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Minor error number.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd> Returns a character string describing the error if successful.
          Otherwise returns "Invalid minor error number."
@@ -372,10 +375,11 @@ END SUBROUTINE h5eget_minor_f
         <code>H5Ewalk</code> with a function that prints error messages.  
         Users are encouraged to write their own more specific error handlers.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>FILE *</em> <code>stream</code>
-            <dd>IN: File pointer, or stderr if NULL.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>FILE&nbsp;*</em>&nbsp;<code>stream&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File pointer, or stderr if NULL.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -427,20 +431,26 @@ END SUBROUTINE h5eprint_f
         The function name, file name, and error description strings 
         must be statically allocated.   
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>const char *</em><code>file</code>,
-            <dd>IN: Name of the file in which the error was detected.
-        <dt><em>const char *</em><code>func</code>,
-            <dd>IN: Name of the function in which the error was detected.
-        <dt><em>unsigned</em> <code>line</code>,
-            <dd>IN: Line within the file at which the error was detected.
-        <dt><em>H5E_major_t</em> <code>maj_num</code>,
-            <dd>IN: Major error number.
-        <dt><em>H5E_minor_t</em> <code>min_num</code>,
-            <dd>IN: Minor error number.
-        <dt><em>const char *</em><code>str</code>
-            <dd>IN: Error description string.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>const char *</em><code>file</code>,</td>
+            <td valign="top">IN: Name of the file in which the error was detected.</td></tr>
+        <tr>
+		    <td valign="top"><em>const char *</em><code>func</code>,</td>
+            <td valign="top">IN: Name of the function in which the error was detected.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>line</code>,</td>
+            <td valign="top">IN: Line within the file at which the error was detected.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5E_major_t</em>&nbsp;<code>maj_num,&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Major error number.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5E_minor_t</em> <code>min_num</code>,</td>
+            <td valign="top">IN: Minor error number.</td></tr>
+        <tr>
+		    <td valign="top"><em>const char *</em><code>str</code></td>
+            <td valign="top">IN: Error description string.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -487,12 +497,14 @@ SUBROUTINE
         Automatic stack traversal is always in the 
         <code>H5E_WALK_DOWNWARD</code> direction. 
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>H5E_auto_t</em> <code>func</code>
-            <dd>IN: Function to be called upon an error condition.
-        <dt><em>void *</em><code>client_data</code>
-            <dd>IN: Data passed to the error function.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5E_auto_t</em> <code>func</code></td>
+            <td valign="top">IN: Function to be called upon an error condition.</td></tr>
+        <tr>
+		    <td valign="top"><em>void&nbsp;*</em><code>client_data&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Data passed to the error function.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -576,14 +588,17 @@ END SUBROUTINE h5eset_auto_f
         <code>H5Ewalk</code> can fail if there are problems initializing 
         the library.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>H5E_direction_t</em> <code>direction</code>
-            <dd>IN: Direction in which the error stack is to be walked.
-        <dt><em>H5E_walk_t</em> <code>func</code>
-            <dd>IN: Function to be called for each error encountered.
-        <dt><em>void *</em> <code>client_data</code>
-            <dd>IN: Data to be passed with <code>func</code>.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5E_direction_t</em>&nbsp;<code>direction&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Direction in which the error stack is to be walked.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5E_walk_t</em> <code>func</code></td>
+            <td valign="top">IN: Function to be called for each error encountered.</td></tr>
+        <tr>
+		    <td valign="top"><em>void *</em> <code>client_data</code></td>
+            <td valign="top">IN: Data to be passed with <code>func</code>.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -639,15 +654,18 @@ SUBROUTINE
         <code>client_data</code> argument of <code>H5Ewalk</code>.  
         It is expected to be a file pointer (or stderr if NULL). 
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>int</em> <code>n</code>
-            <dd>IN/OUT: Number of times this function has been called 
-                for this traversal of the stack.
-        <dt><em>H5E_error_t *</em><code>err_desc</code>
-            <dd>OUT: Error description.
-        <dt><em>void</em> <code>*client_data</code>
-            <dd>IN: A file pointer, or stderr if NULL.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>int</em> <code>n</code></td>
+            <td valign="top">IN/OUT: Number of times this function has been called 
+                for this traversal of the stack.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5E_error_t&nbsp;*</em><code>err_desc&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Error description.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> <code>*client_data</code></td>
+            <td valign="top">IN: A file pointer, or stderr if NULL.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -701,14 +719,13 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 21 October 2003");
+document.writeln("Last modified: 24 February 2004");
 -->
 </SCRIPT>
  

@@ -61,8 +61,7 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><center>
+<hr><!-- #EndLibraryItem --><center>
 <h1>H5I: Identifier Interface</h1>
 </center>
 
@@ -151,6 +150,7 @@ as the corresponding C function.
 </table>
 
 <!-- NEW PAGE -->
+<!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Idec_ref" -->
 <hr>
 <dl>
@@ -197,10 +197,11 @@ as the corresponding C function.
         decremented and the HDF5 object will be closed when the reference count
         for that that object drops to zero.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>obj_id</code>
-            <dd>IN: Object identifier whose reference count will be modified.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Object identifier whose reference count will be modified.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative reference count of the object ID after
         decrementing it if successful; otherwise a negative value is returned.
@@ -224,7 +225,6 @@ END SUBROUTINE h5idec_ref_f
         -->
 </dl>
 
-<!-- NEW PAGE -->
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Iget_name" -->
 <hr>
@@ -262,16 +262,18 @@ END SUBROUTINE h5idec_ref_f
 	varying according to the path through the HDF5 group 
 	hierarchy used to reach that object.
 <dt><strong>Parameters:</strong> 
-    <dl>
-    <dt><em>hid_t</em>  <code>obj_id</code> 
-        <dd>IN: Identifier of the object.  
-            This identifier can refer to a group, dataset, or 
-	    named datatype. 
-    <dt><em>char *</em><code>name</code> 
-        <dd>OUT: A name associated with the identifier.
-    <dt><em>size_t size</em> 
-        <dd>IN: The size of the <code>name</code> buffer.
-    </dl>
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Identifier of the object.  
+            This identifier can refer to a group, dataset, or named datatype.</td></tr>
+      <tr>
+	    <td valign="top"><em>char *</em><code>name</code></td> 
+        <td valign="top">OUT: A name associated with the identifier.</td></tr>
+      <tr>
+	    <td valign="top"><em>size_t size</em></td> 
+        <td valign="top">IN: The size of the <code>name</code> buffer.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong> 
     <dd>Returns the length of the name if successful,
         returning <code>0</code> (zero) if no name is associated with the identifier.
@@ -321,10 +323,11 @@ END SUBROUTINE h5iget_name_f
         A non-negative return value from this function indicates that the ID
         is still valid.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>obj_id</code>
-            <dd>IN: Object identifier whose reference count will be retrieved.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Object identifier whose reference count will be retrieved.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative current reference count of the object ID
         if successful; otherwise a negative value is returned.
@@ -388,10 +391,11 @@ END SUBROUTINE h5iget_ref_f
         <code>H5Gclose</code>, etc.) to call after a call to 
         <code>H5Rdereference</code>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>obj_id</code>
-            <dd>IN: Object identifier whose type is to be determined.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Object identifier whose type is to be determined.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the object type if successful;
         otherwise <code>H5I_BADID</code>.
@@ -469,10 +473,11 @@ END SUBROUTINE h5iget_type_f
         decremented and the HDF5 object will be closed when the reference count
         for that that object drops to zero.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>obj_id</code>
-            <dd>IN: Object identifier whose reference count will be modified.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Object identifier whose reference count will be modified.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative reference count of the object ID after
         incrementing it if successful; otherwise a negative value is returned.
@@ -529,14 +534,13 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 11 December 2003");
+document.writeln("Last modified: 24 February 2004");
 -->
 </SCRIPT>
 
