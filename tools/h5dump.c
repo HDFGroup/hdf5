@@ -505,6 +505,15 @@ print_datatype(hid_t type)
         printf("%s", dump_header_format->enumblockend);
         break;
 
+    case H5T_VLEN: {
+	hid_t super = H5Tget_super(type);
+
+	printf("H5T_VLEN OF ");
+	print_datatype(super);
+	H5Tclose(super);
+	break;
+    }
+
     default:
         printf("unknown data type");
         d_status = 1;
@@ -1134,6 +1143,7 @@ dump_dataset(hid_t did, const char *name)
         case H5T_COMPOUND:
         case H5T_REFERENCE:
         case H5T_ENUM:
+        case H5T_VLEN:
              dump_data(did,DATASET_DATA);
              break;
 
