@@ -164,6 +164,10 @@ Documentation
 New Features
 ============
 
+    * Added 'closing' parameter to VFL 'flush' callback function and H5FDflush.
+      This allows the library to indicate that the file will be closed
+      immediately following the call to 'flush' and can be used to avoid actions
+      that are duplicated in the VFL 'close' callback function.  QAK - 2002/05/20
     * Added feature to parallel chunk allocation routine to not write fill
       values to chunks allocated if the user has set the "fill time" to never.
       This can improve parallel I/O performance for chunked
