@@ -72,7 +72,7 @@ H5Z_filter_deflate (unsigned UNUSED flags, size_t cd_nelmts,
 	z_stream	z_strm;
 	size_t		nalloc = *buf_size;
 
-	if (NULL==(outbuf = H5F_istore_chunk_alloc(nalloc))) {
+	if (NULL==(outbuf = H5MM_malloc(nalloc))) {
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0,
 			"memory allocation failed for deflate uncompression");
 	}
@@ -93,7 +93,7 @@ H5Z_filter_deflate (unsigned UNUSED flags, size_t cd_nelmts,
 	    }
 	    if (Z_OK==status && 0==z_strm.avail_out) {
 		nalloc *= 2;
-		if (NULL==(outbuf = H5F_istore_chunk_realloc(outbuf, nalloc))) {
+		if (NULL==(outbuf = H5MM_realloc(outbuf, nalloc))) {
 		    inflateEnd(&z_strm);
 		    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0,
 				"memory allocation failed for deflate "
@@ -104,7 +104,7 @@ H5Z_filter_deflate (unsigned UNUSED flags, size_t cd_nelmts,
 	    }
 	}
 	
-	H5F_istore_chunk_free(*buf);
+	H5MM_xfree(*buf);
 	*buf = outbuf;
 	outbuf = NULL;
 	*buf_size = nalloc;
@@ -122,7 +122,7 @@ H5Z_filter_deflate (unsigned UNUSED flags, size_t cd_nelmts,
 	uLongf		z_dst_nbytes = (uLongf)nbytes;
 	uLong		z_src_nbytes = (uLong)nbytes;
 
-	if (NULL==(z_dst=outbuf=H5F_istore_chunk_alloc(nbytes))) {
+	if (NULL==(z_dst=outbuf=H5MM_malloc(nbytes))) {
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0,
 			"unable to allocate deflate destination buffer");
 	}
@@ -135,7 +135,7 @@ H5Z_filter_deflate (unsigned UNUSED flags, size_t cd_nelmts,
 	} else if (Z_OK!=status) {
 	    HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, 0, "deflate error");
 	} else {
-	    H5F_istore_chunk_free(*buf);
+	    H5MM_xfree(*buf);
 	    *buf = outbuf;
 	    outbuf = NULL;
 	    *buf_size = nbytes;
@@ -149,6 +149,6 @@ H5Z_filter_deflate (unsigned UNUSED flags, size_t cd_nelmts,
 
 done:
     if(outbuf)
-        H5F_istore_chunk_free(outbuf);
+        H5MM_xfree(outbuf);
     FUNC_LEAVE (ret_value);
 }

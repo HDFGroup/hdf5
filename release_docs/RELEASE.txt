@@ -35,6 +35,10 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Fixed bug in chunking routines where they were using internal allocation
+      free routines, instead of malloc/free, preventing user filters from
+      working correctly.  Chunks are now allocated/freed with malloc/free and
+      so should the chunks in user filters.  QAK 2002/06/18
     * Fixed bug where regular hyperslab selection could get incorrectly
       transferred when the number of elements in a row did not fit evenly
       into the buffer provided.  QAK 2002/06/12
