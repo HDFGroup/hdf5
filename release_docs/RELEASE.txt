@@ -112,10 +112,11 @@ Platforms Tested
                                   mpxlf 07.01.0000.0002
     AIX 4.3 (IBM SP RS6000)       C for AIX Compiler, Version 5.0.2.0
                                   xlf 7.1.0.2
-                                  poe 2.4.0.14 (includes mpi)
-    Cray T3E sn6711 2.0.5.49a     Cray Standard C Version 6.5.0.1
-    Cray SV1 10.0.0.2             Cray Standard C Version 6.5.0.1  
-                                  Cray Fortran Version 3.5.0.1
+                                  poe 3.1.0.12 (includes mpi)
+    Cray T3E sn6711 2.0.5.55      Cray Standard C Version 6.5.0.2
+                                  Cray Fortran Version 3.5.0.3
+    Cray SV1 10.0.0.8             Cray Standard C Version 6.5.0.2 
+                                  Cray Fortran Version 3.5.0.3
     FreeBSD 4.5                   gcc 2.95.3
                                   g++ 2.95.3
     HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
@@ -135,13 +136,10 @@ Platforms Tested
                                   pgf90 3.2-4
     OSF1 V5.1                     Compaq C V6.3-028         
                                   Compaq Fortran V5.4-1283
-    SunOS 5.6                     WorkShop Compilers 5.0 98/12/15 C 5.0 
-     (Solaris 2.6)                WorkShop Compilers 5.0 98/10/25 FORTRAN 90 
-                                          2.0 Patch 107356-04
     SunOS 5.7                     WorkShop Compilers 5.0 98/12/15 C 5.0
      (Solaris 2.7)                Workshop Compilers 5.0 98/12/15 C++ 5.0 
-                                  Workshop Compilers 5.0 98/10/25 FORTRAN 90
-                                          2.0 Patch 107356-04 
+                                  Workshop Compilers 5.0 98/10/25 
+                                  FORTRAN 90 2.0 Patch 107356-04 
     SunOS 5.8/32                  Sun WorkShop 6 update 1 C 5.2 2000/09/11
      (Solaris 2.8)                Sun WorkShop 6 update 1 Fortran 95 6.1 
                                           Patch 109503-07 2001/08/11
@@ -154,6 +152,10 @@ Platforms Tested
                                         109508-04 2001/07/11
     TFLOPS r1.0.4 v4.0.7 i386     pgcc Rel 3.1-4i with mpich-1.2.1 with
                                           local modifications
+    IA-64 Linux 2.4.16 ia64       gcc version 2.96 20000731
+                                  Intel(R) C++ Itanium(TM) Compiler 
+                                  for the Itanium(TM)-based applications,
+                                  Version 6.0 Beta, Build 20010905       
     Windows 2000 (NT5.0)          MSVC++ 6.0
     Windows NT4.0                 MSVC++ 6.0
                                   DEC Visual Fortran 6.0
@@ -179,6 +181,7 @@ Supported Configuration Features Summary
     Solaris2.7     y  y (1)     y    n         y    y          y     y
     Solaris2.8 64  y  n         n    n         y    y          y     y
     Solaris2.8 32  y  n         y    n         y    y          y     y
+    IA-64          y  n         n    n         n    n          y     y 
     IRIX6.5        y  y (1)     n    n         n    y          y     y
     IRIX64_6.5 64  y  y (2)     y    y         n    y          y     y
     IRIX64_6.5 32  y  y (2)     n    n         n    y          y     y
@@ -202,27 +205,28 @@ Supported Configuration Features Summary
 
     Platform       1.2            static-   Thread-  SRB  GASS	STREAM-
                    compatibility  exec      safe                VFD
-    Solaris2.6     y              x         n        n    n     y
-    Solaris2.7     y              x         y        n    n     y
-    Solaris2.8 64  y              y         n        n    n     y
-    Solaris2.8 32  y              x         n        n    n     y
-    IRIX6.5        y              x         y        n    n     y
-    IRIX64_6.5 64  y              x         n        n    n     y
-    IRIX64_6.5 32  y              x         n        n    n     y
-    HPUX10.20      y              y         n        n    n     y
-    HPUX11.00      y              x         n        n    n     y
-    HPUX11 SysV    y              x         n        n    n     y
-    DECOSF         y              y         n        n    n     y
-    T3E            y              y         n        n    n     y
-    SV1            y              y         n        n    n     y
-    TFLOPS         y              y         n        n    n     n
-    AIX-4.3 SP2    y              y (3)     n        n    n     y
-    AIX-4.3 SP3    y              y         n        n    n     y
-    Win2000        y              y         n        n    n     n
+    Solaris2.6     n              x         n        n    n     y
+    Solaris2.7     n              x         y        n    n     y
+    Solaris2.8 64  n              y         n        n    n     y
+    Solaris2.8 32  n              x         n        n    n     y
+    IA-64          n              n         n        n    n     y   
+    IRIX6.5        n              x         y        n    n     y
+    IRIX64_6.5 64  n              x         n        n    n     y
+    IRIX64_6.5 32  n              x         n        n    n     y
+    HPUX10.20      n              y         n        n    n     y
+    HPUX11.00      n              x         n        n    n     y
+    HPUX11 SysV    n              x         n        n    n     y
+    DECOSF         n              y         n        n    n     y
+    T3E            n              y         n        n    n     y
+    SV1            n              y         n        n    n     y
+    TFLOPS         n              y         n        n    n     n
+    AIX-4.3 SP2    n              y (3)     n        n    n     y
+    AIX-4.3 SP3    n              y         n        n    n     y
+    Win2000        n              y         n        n    n     n
     Win98          n              y         n        n    n     n
-    WinNT          y              y         n        n    n     n
+    WinNT          n              y         n        n    n     n
     WinNT CW       n              n         n        n    n     n
-    FreeBSD        y              y         y        n    n     y
+    FreeBSD        n              y         y        n    n     y
     Linux 2.2      y              y         y        n    n     y
     Linux 2.4      y              y         y        n    n     y
 
@@ -246,6 +250,11 @@ Known Problems
 
     * On the SV1, the h5ls test fails due to a difference between the 
       SV1 printf precision and the printf precision on other platforms.
+
+    * On IA64 systems one has to use -DIA64 compilation flag to compile
+      h4toh5 and h5toh4 utilites. After configuration step manually modify
+      Makefile in the tools/h4toh4 and tools/h5toh4 directories to add 
+      -DIA64 to the compilation flags.
 
     * The h5dump tests may fail to match the expected output in some
       platforms (e.g. SP2 parallel, Windows) where the error messages
