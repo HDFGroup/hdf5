@@ -49,10 +49,10 @@ H5Tinit.c: H5detect
 	$(RUNTEST) ./H5detect >H5Tinit.c
 
 H5detect: H5detect.o
-	$(CC) $(CFLAGS) -o $@ H5detect.o
+	$(CC) $(CFLAGS) -o $@ H5detect.o $(LIBS)	# no $(LIB) which is being made
 
 # How to build the programs...
 debug: debug.o $(LIB)
-	$(CC) $(CFLAGS) -o $@ debug.o $(LIB)
+	$(CC) $(CFLAGS) -o $@ debug.o $(LIB) $(LIBS)
 
 @CONCLUDE@
