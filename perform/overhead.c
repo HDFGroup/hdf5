@@ -165,11 +165,7 @@ static herr_t
 display_error_cb (hid_t estack, void UNUSED *client_data)
 {
     puts ("*FAILED*");
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	    H5Eprint(stdout);
-#else
-	    H5Eprint(estack, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+    H5Eprint_stack(estack, stdout);
 
     return 0;
 }
@@ -375,11 +371,8 @@ main(int argc, char *argv[])
     int		i, j, nerrors=0;
 
     /* Default split ratios */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    H5Eset_auto(display_error_cb, NULL);
-#else
-    H5Eset_auto(H5E_DEFAULT, display_error_cb, NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+    H5Eset_auto_stack(H5E_DEFAULT, display_error_cb, NULL);
+
     if ((xfer=H5Pcreate(H5P_DATASET_XFER))<0) goto error;
     if (H5Pget_btree_ratios(xfer, splits+0, splits+1, splits+2)<0) {
 	goto error;

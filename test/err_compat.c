@@ -226,7 +226,6 @@ main(void)
     const char          *FUNC_main="main";
 
     fprintf(stderr, "   This program tests the Error API compatible with HDF5 v1.6.  There're supposed to be some error messages\n");
-    /*h5_reset();*/
     fapl = h5_fileaccess();
     
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -262,4 +261,4 @@ main(void)
     printf("***** ERROR TEST FAILED! *****\n");
     return 1;
 }
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+#endif /*H5_WANT_H5_V1_6_COMPAT*/

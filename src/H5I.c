@@ -751,7 +751,7 @@ herr_t H5I_destroy_type(H5I_type_t type)
 		HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type");
 
 	H5I_clear_type(type, TRUE);
-	H5E_clear(NULL); /*don't care about errors*/
+	H5E_clear_stack(NULL); /*don't care about errors*/
 	H5MM_xfree(type_ptr->id_list);
 
 	H5MM_free(type_ptr);

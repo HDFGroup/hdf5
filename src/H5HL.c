@@ -438,7 +438,7 @@ H5HL_minimize_heap_space(H5F_t *f, hid_t dxpl_id, H5HL_t *heap)
         /* Release old space on disk */
         H5_CHECK_OVERFLOW(heap->disk_alloc, size_t, hsize_t);
         H5MF_xfree(f, H5FD_MEM_LHEAP, dxpl_id, old_addr, (hsize_t)heap->disk_alloc);
-        H5E_clear(NULL);    /* don't really care if the free failed */
+        H5E_clear_stack(NULL);    /* don't really care if the free failed */
 
         /* Allocate new space on disk */
         H5_CHECK_OVERFLOW(heap->mem_alloc, size_t, hsize_t);

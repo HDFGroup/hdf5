@@ -194,11 +194,7 @@ H5_term_library(void)
 	goto done;
 
     /* Check if we should display error output */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    (void)H5Eget_auto(&func,NULL);
-#else
-    (void)H5Eget_auto(H5E_DEFAULT,&func,NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+    (void)H5Eget_auto_stack(H5E_DEFAULT,&func,NULL);
 
     /*
      * Terminate each interface. The termination functions return a positive

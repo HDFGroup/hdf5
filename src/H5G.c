@@ -2393,7 +2393,7 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
             if (H5G_namei(new_loc, norm_new_name, &rest, &grp_ent, NULL, 
                             H5G_TARGET_NORMAL, NULL, H5G_NAMEI_TRAVERSE, NULL, dxpl_id)>=0)
                 HGOTO_ERROR (H5E_SYM, H5E_EXISTS, FAIL, "already exists");
-            H5E_clear (NULL); /*it's okay that we didn't find it*/
+            H5E_clear_stack (NULL); /*it's okay that we didn't find it*/
             rest = H5G_component (rest, &nchars);
 
             /*
@@ -2588,14 +2588,14 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	    statbuf->objno = obj_ent.header;
 	    statbuf->nlink = H5O_link (&obj_ent, 0, dxpl_id);
 	    if (NULL==H5O_read(&obj_ent, H5O_MTIME_ID, 0, &(statbuf->mtime), dxpl_id)) {
-                H5E_clear(NULL);
+                H5E_clear_stack(NULL);
                 if (NULL==H5O_read(&obj_ent, H5O_MTIME_NEW_ID, 0, &(statbuf->mtime), dxpl_id)) {
-                    H5E_clear(NULL);
+                    H5E_clear_stack(NULL);
                     statbuf->mtime = 0;
                 }
 	    }
 	    statbuf->type = H5G_get_type(&obj_ent, dxpl_id);
-	    H5E_clear(NULL); /*clear errors resulting from checking type*/
+	    H5E_clear_stack(NULL); /*clear errors resulting from checking type*/
 
             /* Get object header information */
             if(H5O_get_info(&obj_ent, &(statbuf->ohdr), dxpl_id)<0)
@@ -2868,7 +2868,7 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf, hid_t dxpl_
 
     /* Remove the previous comment message if any */
     if (H5O_remove(&obj_ent, H5O_NAME_ID, 0, dxpl_id)<0)
-        H5E_clear(NULL);
+        H5E_clear_stack(NULL);
 
     /* Add the new message */
     if (buf && *buf) {
@@ -3159,7 +3159,7 @@ H5G_insertion_file(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
             H5G_free_ent_name(&grp_ent);
             HGOTO_ERROR(H5E_SYM, H5E_EXISTS, NULL, "name already exists");
         } /* end if */
-        H5E_clear(NULL);
+        H5E_clear_stack(NULL);
 
         /* Make sure only the last component wasn't resolved */
         rest = H5G_component(rest, &size);

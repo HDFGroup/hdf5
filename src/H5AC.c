@@ -276,7 +276,7 @@ H5AC_term_interface(void)
             if (H5I_dec_ref(H5AC_dxpl_id) < 0 ||
                     H5I_dec_ref(H5AC_noblock_dxpl_id) < 0 ||
                     H5I_dec_ref(H5AC_ind_dxpl_id) < 0)
-                H5E_clear(NULL); /*ignore error*/
+                H5E_clear_stack(NULL); /*ignore error*/
             else {
                 /* Reset static IDs */
                 H5AC_dxpl_id=(-1);

@@ -1244,8 +1244,8 @@ extend_writeInd(void)
 
     /* Try write to dataset2 beyond its current dim sizes.  Should fail. */
     /* Temporary turn off auto error reporting */
-    H5Eget_auto(&old_func, &old_client_data);
-    H5Eset_auto(NULL, NULL);
+    H5Eget_auto_stack(H5E_DEFAULT, &old_func, &old_client_data);
+    H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
 
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset2);
@@ -1259,7 +1259,7 @@ extend_writeInd(void)
     VRFY((ret < 0), "H5Dwrite failed as expected");
 
     /* restore auto error reporting */
-    H5Eset_auto(old_func, old_client_data);
+    H5Eset_auto_stack(H5E_DEFAULT, old_func, old_client_data);
     H5Sclose(file_dataspace);
 
     /* Extend dataset2 and try again.  Should succeed. */
@@ -1534,8 +1534,8 @@ extend_readInd(void)
 
     /* Try extend dataset1 which is open RDONLY.  Should fail. */
     /* first turn off auto error reporting */
-    H5Eget_auto(&old_func, &old_client_data);
-    H5Eset_auto(NULL, NULL);
+    H5Eget_auto_stack(H5E_DEFAULT, &old_func, &old_client_data);
+    H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
 
     file_dataspace = H5Dget_space (dataset1);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
@@ -1546,7 +1546,7 @@ extend_readInd(void)
     VRFY((ret < 0), "H5Dextend failed as expected");
 
     /* restore auto error reporting */
-    H5Eset_auto(old_func, old_client_data);
+    H5Eset_auto_stack(H5E_DEFAULT, old_func, old_client_data);
     H5Sclose(file_dataspace);
 
 
@@ -1831,8 +1831,8 @@ extend_writeAll(void)
 
     /* Try write to dataset2 beyond its current dim sizes.  Should fail. */
     /* Temporary turn off auto error reporting */
-    H5Eget_auto(&old_func, &old_client_data);
-    H5Eset_auto(NULL, NULL);
+    H5Eget_auto_stack(H5E_DEFAULT, &old_func, &old_client_data);
+    H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
 
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset2);
@@ -1846,7 +1846,7 @@ extend_writeAll(void)
     VRFY((ret < 0), "H5Dwrite failed as expected");
 
     /* restore auto error reporting */
-    H5Eset_auto(old_func, old_client_data);
+    H5Eset_auto_stack(H5E_DEFAULT, old_func, old_client_data);
     H5Sclose(file_dataspace);
 
     /* Extend dataset2 and try again.  Should succeed. */
@@ -1956,8 +1956,8 @@ extend_readAll(void)
 
     /* Try extend dataset1 which is open RDONLY.  Should fail. */
     /* first turn off auto error reporting */
-    H5Eget_auto(&old_func, &old_client_data);
-    H5Eset_auto(NULL, NULL);
+    H5Eget_auto_stack(H5E_DEFAULT, &old_func, &old_client_data);
+    H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
 
     file_dataspace = H5Dget_space (dataset1);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
@@ -1968,7 +1968,7 @@ extend_readAll(void)
     VRFY((ret < 0), "H5Dextend failed as expected");
 
     /* restore auto error reporting */
-    H5Eset_auto(old_func, old_client_data);
+    H5Eset_auto_stack(H5E_DEFAULT, old_func, old_client_data);
     H5Sclose(file_dataspace);
 
 

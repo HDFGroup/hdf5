@@ -3378,13 +3378,8 @@ main(int argc, const char *argv[])
     dump_function_table = &ddl_function_table;
 
     /* Disable error reporting */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    H5Eget_auto(&func, &edata);
-    H5Eset_auto(NULL, NULL);
-#else
-    H5Eget_auto(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto(H5E_DEFAULT, NULL, NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+    H5Eget_auto_stack(H5E_DEFAULT, &func, &edata);
+    H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
 
     /* Initialize h5tools lib */
     h5tools_init();
@@ -3609,11 +3604,7 @@ done:
 
     /* To Do:  clean up XML table */
 
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    H5Eset_auto(func, edata);
-#else
-    H5Eset_auto(H5E_DEFAULT, func, edata);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+    H5Eset_auto_stack(H5E_DEFAULT, func, edata);
     
     leave(d_status);
 }

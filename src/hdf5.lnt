@@ -3,7 +3,7 @@
 
 // Turn off warnings about not using the return value from these functions:
 -esym(534, HDfprintf, HDsnprintf, HDvsnprintf)
--esym(534, H5E_clear, H5E_push)
+-esym(534, H5E_clear_stack, H5E_push_stack)
 -esym(534, H5FL_arr_free, H5FL_blk_free, H5FL_reg_free)
 -esym(534, H5I_clear_group, H5I_destroy_group)
 -esym(534, H5MM_xfree)

@@ -1598,7 +1598,7 @@ H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mes
 	ret_value = (H5O_fast_g[cache_type]) (cache, type, mesg);
 	if (ret_value)
 	    HGOTO_DONE(ret_value);
-	H5E_clear(NULL); /*don't care, try reading from header */
+	H5E_clear_stack(NULL); /*don't care, try reading from header */
     }
 
     /* copy the message to the user-supplied buffer */
@@ -2140,7 +2140,7 @@ H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags, const H5O_class_t *orig_type,
              * If the message isn't shared then turn off the shared bit
              * and treat it as an unshared message.
              */
-            H5E_clear (NULL);
+            H5E_clear_stack (NULL);
             *flags &= ~H5O_FLAG_SHARED;
         } else {
             /* Change type & message to use shared information */
@@ -2993,7 +2993,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 	    if ((idx = H5O_alloc_extend_chunk(f, oh, chunkno, size)) != UFAIL) {
 		break;
 	    }
-	    H5E_clear(NULL);
+	    H5E_clear_stack(NULL);
 	}
 
 	/*

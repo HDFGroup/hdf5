@@ -63,7 +63,7 @@ typedef struct H5E_print_t {
  * and a FUNC_LEAVE() within a function body.  The arguments are the major
  * error number, the minor error number, and a description of the error.
  */
-#define HERROR(maj_id, min_id, str) H5E_push(NULL, __FILE__, FUNC, __LINE__, H5E_ERR_CLS_g, maj_id, min_id, str)
+#define HERROR(maj_id, min_id, str) H5E_push_stack(NULL, __FILE__, FUNC, __LINE__, H5E_ERR_CLS_g, maj_id, min_id, str)
 
 /*
  * HCOMMON_ERROR macro, used by HDONE_ERROR and HGOTO_ERROR
@@ -109,9 +109,9 @@ typedef struct H5E_print_t {
 
 /* Library-private functions defined in H5E package */
 H5_DLL herr_t  H5E_init(void);
-H5_DLL herr_t  H5E_push(H5E_t *estack, const char *file, const char *func, unsigned line, 
+H5_DLL herr_t  H5E_push_stack(H5E_t *estack, const char *file, const char *func, unsigned line, 
                             hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc);
-H5_DLL herr_t  H5E_clear(H5E_t *estack);
+H5_DLL herr_t  H5E_clear_stack(H5E_t *estack);
 H5_DLL herr_t  H5E_dump_api_stack(int is_api);
 
 #ifdef H5_HAVE_PARALLEL

@@ -2195,11 +2195,7 @@ main (int argc, const char *argv[])
     }
 
     /* Turn off HDF5's automatic error printing unless you're debugging h5ls */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    if (!show_errors_g) H5Eset_auto(NULL, NULL);
-#else
-    if (!show_errors_g) H5Eset_auto(H5E_DEFAULT, NULL, NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+    if (!show_errors_g) H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
 
 
     /* Each remaining argument is an hdf5 file followed by an optional slash

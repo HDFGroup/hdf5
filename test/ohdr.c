@@ -74,11 +74,7 @@ main(void)
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
     if (NULL==(f=H5I_object(file))) {
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
 
@@ -89,11 +85,7 @@ main(void)
     HDmemset(&oh_ent,0,sizeof(H5G_entry_t));
     if (H5O_create(f, H5P_DATASET_XFER_DEFAULT, 64, &oh_ent/*out*/)<0) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     PASSED();
@@ -103,29 +95,17 @@ main(void)
     time_new = 11111111;
     if (H5O_modify(&oh_ent, H5O_MTIME_NEW_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (NULL==H5O_read(&oh_ent, H5O_MTIME_NEW_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (ro!=time_new) {
@@ -143,29 +123,17 @@ main(void)
     time_new = 33333333;
     if (H5O_modify(&oh_ent, H5O_MTIME_NEW_ID, 0, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (NULL==H5O_read(&oh_ent, H5O_MTIME_NEW_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (ro!=time_new) {
@@ -184,29 +152,17 @@ main(void)
     time_new = 55555555;
     if (H5O_modify(&oh_ent, H5O_MTIME_NEW_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (NULL==H5O_read(&oh_ent, H5O_MTIME_NEW_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (ro!=time_new) {
@@ -224,29 +180,17 @@ main(void)
     time_new = 77777777;
     if (H5O_modify(&oh_ent, H5O_MTIME_NEW_ID, 1, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (NULL==H5O_read(&oh_ent, H5O_MTIME_NEW_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (ro!=time_new) {
@@ -270,21 +214,13 @@ main(void)
         time_new = (i+1)*1000+1;
         if (H5O_modify(&oh_ent, H5O_MTIME_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	    H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-            H5Eprint(stdout);
-#else
-            H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+            H5Eprint_stack(H5E_DEFAULT, stdout);
 	    goto error;
 	}
     }
     if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     PASSED();
@@ -298,11 +234,7 @@ main(void)
         time_new = (i + 1) * 1000 + 10;
         if (H5O_modify(&oh_ent, H5O_MTIME_NEW_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	    H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-            H5Eprint(stdout);
-#else
-            H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+            H5Eprint_stack(H5E_DEFAULT, stdout);
 	    goto error;
 	}
         if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
@@ -310,7 +242,7 @@ main(void)
 #ifdef H5_WANT_H5_V1_6_COMPAT
             H5Eprint(stdout);
 #else
-            H5Eprint(H5E_DEFAULT, stdout);
+            H5Eprint_stack(H5E_DEFAULT, stdout);
 #endif /* H5_WANT_H5_V1_6_COMPAT */
 	    goto error;
 	}
@@ -323,40 +255,24 @@ main(void)
     TESTING("message deletion");
     if (H5O_remove(&oh_ent, H5O_MTIME_NEW_ID, H5O_ALL, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5O_remove(&oh_ent, H5O_MTIME_ID, H5O_ALL, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5O_read(&oh_ent, H5O_MTIME_NEW_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	puts("    H5O_read() should have failed but didn't");
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eclear();
-#else
-	H5Eclear(H5E_DEFAULT);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eclear_stack(H5E_DEFAULT);
 	goto error;
     }
     if (H5O_read(&oh_ent, H5O_MTIME_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	puts("    H5O_read() should have failed but didn't");
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eclear();
-#else
-	H5Eclear(H5E_DEFAULT);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eclear_stack(H5E_DEFAULT);
 	goto error;
     }
     PASSED();
@@ -366,11 +282,7 @@ main(void)
     TESTING("object header closing");
     if (H5O_close(&oh_ent)<0) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5Fclose(file)<0) goto error;

@@ -74,20 +74,12 @@ main(void)
 	goto error;
     if (NULL==(f=H5I_object(file))) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5HL_create(f, H5P_DATASET_XFER_DEFAULT, 0, &heap_addr/*out*/)<0) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     for (i = 0; i < NOBJS; i++) {
@@ -98,11 +90,7 @@ main(void)
         if ((size_t)(-1)==(obj[i]=H5HL_insert(f, H5P_DATASET_XFER_DEFAULT, heap_addr, strlen(buf)+1,
 					      buf))) {
 	    H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	    H5Eprint_stack(H5E_DEFAULT, stdout);
 	    goto error;
 	}
     }
@@ -118,11 +106,7 @@ main(void)
     if ((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) goto error;
     if (NULL==(f=H5I_object(file))) {
 	H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	H5Eprint_stack(H5E_DEFAULT, stdout);
 	goto error;
     }
     for (i=0; i<NOBJS; i++) {
@@ -134,21 +118,13 @@ main(void)
 
         if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr))) {
 	    H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	    H5Eprint(stdout);
-#else
-	    H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	    H5Eprint_stack(H5E_DEFAULT, stdout);
 	    goto error;
 	}
         
         if (NULL == (s = H5HL_offset_into(f, heap, obj[i]))) {
 	    H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	H5Eprint(stdout);
-#else
-	H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	    H5Eprint_stack(H5E_DEFAULT, stdout);
 	    goto error;
 	}
 
@@ -162,11 +138,7 @@ main(void)
 
         if (H5HL_unprotect(f, H5P_DATASET_XFER_DEFAULT, heap, heap_addr) < 0) {
 	    H5_FAILED();
-#ifdef H5_WANT_H5_V1_6_COMPAT
-	    H5Eprint(stdout);
-#else
-	    H5Eprint(H5E_DEFAULT, stdout);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+	    H5Eprint_stack(H5E_DEFAULT, stdout);
 	    goto error;
 	}
     }

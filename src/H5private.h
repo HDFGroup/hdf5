@@ -1179,7 +1179,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
     FUNC_ENTER_API_THREADSAFE;                                                \
     FUNC_ENTER_API_COMMON(func_name,err);		                      \
     /* Clear thread error stack entering public functions */		      \
-    H5E_clear(NULL);				      \
+    H5E_clear_stack(NULL);				                      \
     {
 
 /*

@@ -119,35 +119,35 @@ test_error(hid_t file)
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_NAME, H5T_STD_I32BE, space,
 			     H5P_DEFAULT))<0) {
-        H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_CREATE, 
+        H5Epush_stack(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_CREATE, 
                 "H5Dcreate failed");
         goto error;
     }
 
     /* Test enabling and disabling default printing */
-    if (H5Eget_auto(H5E_DEFAULT, &old_func, &old_data)<0)
+    if (H5Eget_auto_stack(H5E_DEFAULT, &old_func, &old_data)<0)
 	TEST_ERROR;
     if (old_data != NULL) 
 	TEST_ERROR;
-    if (old_func != (H5E_auto_t)H5Eprint)
+    if (old_func != (H5E_auto_t)H5Eprint_stack)
 	TEST_ERROR;
 
-    if(H5Eset_auto(H5E_DEFAULT, NULL, NULL)<0)
+    if(H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL)<0)
         TEST_ERROR;
 
     /* Make H5Dwrite fail, verify default print is disabled */
     if (H5Dwrite(FAKE_ID, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2)>=0) {
-        H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_WRITE, 
+        H5Epush_stack(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_WRITE, 
                 "H5Dwrite shouldn't succeed");
         goto error;
     }
 
-    if(H5Eset_auto(H5E_DEFAULT, old_func, old_data)<0)
+    if(H5Eset_auto_stack(H5E_DEFAULT, old_func, old_data)<0)
         TEST_ERROR;
 
     /* Test saving and restoring the current error stack */
     if (H5Dwrite(FAKE_ID, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2)<0) {
-        H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_WRITE, 
+        H5Epush_stack(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_WRITE, 
                 "H5Dwrite failed as supposed to");
         estack_id = H5Eget_current_stack();
         H5Dclose(dataset);
@@ -269,7 +269,7 @@ error_stack(void)
 
     /* Make it push error, force this function to fail */
     if((err_num = H5Eget_num(ERR_STACK))==0) {
-        H5Epush(ERR_STACK, __FILE__, FUNC_error_stack, __LINE__, ERR_CLS, ERR_MAJ_API, ERR_MIN_GETNUM, 
+        H5Epush_stack(ERR_STACK, __FILE__, FUNC_error_stack, __LINE__, ERR_CLS, ERR_MAJ_API, ERR_MIN_GETNUM, 
                 "Get number test failed, returned %d", err_num);
         goto error;
     } 
@@ -307,12 +307,12 @@ dump_error(hid_t estack)
 {
     /* Print errors in library default way */
     fprintf(stderr, "********* Print error stack in HDF5 default way *********\n");
-    if(H5Eprint(estack, stderr)<0)
+    if(H5Eprint_stack(estack, stderr)<0)
         TEST_ERROR;
     
     /* Customized way to print errors */
     fprintf(stderr, "\n********* Print error stack in customized way *********\n");
-    if(H5Ewalk(estack, H5E_WALK_UPWARD, custom_print_cb, stderr)<0)
+    if(H5Ewalk_stack(estack, H5E_WALK_UPWARD, custom_print_cb, stderr)<0)
         TEST_ERROR;
     
     return 0;
@@ -432,7 +432,6 @@ main(void)
     const char          *FUNC_main="main";
 
     fprintf(stderr, "   This program tests the Error API.  There're supposed to be some error messages\n");
-    /*h5_reset();*/
 
     /* Initialize errors */
     if(init_error()<0)
@@ -447,7 +446,7 @@ main(void)
     /* Test error stack */ 
     if(error_stack()<0) {
         /* Push an error onto error stack */
-        H5Epush(ERR_STACK, __FILE__, FUNC_main, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_ERRSTACK, 
+        H5Epush_stack(ERR_STACK, __FILE__, FUNC_main, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_ERRSTACK, 
                 "Error stack test failed");
         
         /* Delete an error from the top of error stack */
@@ -457,7 +456,7 @@ main(void)
         dump_error(ERR_STACK);
 
         /* Empty error stack */
-        H5Eclear(ERR_STACK);
+        H5Eclear_stack(ERR_STACK);
 
         /* Close error stack */
         H5Eclose_stack(ERR_STACK);
@@ -465,10 +464,10 @@ main(void)
 
     /* Test error API */
     if(test_error(file)<0) {
-        H5Epush(H5E_DEFAULT, __FILE__, FUNC_main, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, 
+        H5Epush_stack(H5E_DEFAULT, __FILE__, FUNC_main, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, 
                 "Error test failed, %s", "it's wrong");
         estack_id = H5Eget_current_stack();
-        H5Eprint(estack_id, stderr);
+        H5Eprint_stack(estack_id, stderr);
         H5Eclose_stack(estack_id);
     }
     
@@ -486,4 +485,4 @@ main(void)
     printf("***** ERROR TEST FAILED! *****\n");
     return 1;
 }
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+#endif  /*H5_WANT_H5_V1_6_COMPAT*/

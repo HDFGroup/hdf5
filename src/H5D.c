@@ -2487,7 +2487,7 @@ H5D_open(H5G_entry_t *ent, hid_t dxpl_id)
         H5D_t	*dataset;	/*the dataset which was found	*/
 
         /* Clear any errors from H5FO_opened() */
-        H5E_clear(NULL);
+        H5E_clear_stack(NULL);
 
         /* Open the dataset object */
         if ((dataset=H5D_open_oid(ent, dxpl_id)) ==NULL)
@@ -2593,7 +2593,7 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
 
     /* Get the optional filters message */
     if(NULL == H5O_read(&(dataset->ent), H5O_PLINE_ID, 0, &pline, dxpl_id)) {
-        H5E_clear(NULL);
+        H5E_clear_stack(NULL);
         HDmemset(&pline, 0, sizeof(pline));
     }
     if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
@@ -2668,7 +2668,7 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
 
     /* Get the new fill value message */
     if(NULL == H5O_read(&(dataset->ent), H5O_FILL_NEW_ID, 0, &fill, dxpl_id)) {
-        H5E_clear(NULL);
+        H5E_clear_stack(NULL);
         HDmemset(&fill, 0, sizeof(fill));
 
         /* Set the space allocation time appropriately, based on the type of dataset storage */
@@ -2699,7 +2699,7 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
 	/* For compatibility with v1.4.  Retrieve the old fill value message.
  	 * If size is 0, make it -1 for undefined. */
         if(NULL == H5O_read(&(dataset->ent), H5O_FILL_ID, 0, fill_prop, dxpl_id)) {
-            H5E_clear(NULL);
+            H5E_clear_stack(NULL);
             HDmemset(fill_prop, 0, sizeof(H5O_fill_t));
         }
         if(fill_prop->size == 0) {

@@ -50,6 +50,12 @@ New Features
 
     Library:
     --------
+        - Put back 6 old error API functions to be backward compatible with
+            version 1.6.  They are H5Epush, H5Eprint, H5Ewalk, H5Eclear,
+            H5Eset_auto, H5Eget_auto.  Their new equivalent functions are
+            called H5Epush_stack, H5Eprint_stack, H5Ewalk_stack,
+            H5Eclear_stack, H5Eset_auto_stack, H5Eget_auto_stack.  SLU -
+            2004/9/2
         - 4 new API functions, H5Tencode, H5Tdecode, H5Sencode, H5Sdecode were
             added to the library.  Given object ID, these functions encode and 
             decode HDF5 objects(data type and space) information into and from 
