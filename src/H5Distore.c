@@ -1444,8 +1444,10 @@ H5D_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
         } else {
             H5D_fill_value_t	fill_status;
 
+#ifdef OLD_WAY
             /* Clear the error stack from not finding the chunk on disk */
             H5E_clear();
+#endif /* OLD_WAY */
 
             /* Chunk size on disk isn't [likely] the same size as the final chunk
              * size in memory, so allocate memory big enough. */
@@ -2035,9 +2037,17 @@ H5D_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 
     /* Go get the chunk information */
     if (H5B_find (f, dxpl_id, H5B_ISTORE, layout->u.chunk.addr, udata)<0) {
+        /* Note: don't push error on stack, leave that to next higher level,
+         *      since many times the B-tree is searched in order to determine
+         *      if a chunk exists in the B-tree or not. -QAK
+         */
+#ifdef OLD_WAY
         H5E_clear();
 
 	HGOTO_ERROR(H5E_BTREE,H5E_NOTFOUND,HADDR_UNDEF,"Can't locate chunk info");
+#else /* OLD_WAY */
+	HGOTO_DONE(HADDR_UNDEF)
+#endif /* OLD_WAY */
     } /* end if */
 
     /* Success!  Set the return value */

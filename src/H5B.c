@@ -470,7 +470,7 @@ H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt)
 		if (bt->key[i].nkey) {
 		    if ((bt->type->encode) (f, bt, bt->key[i].rkey,
 					    bt->key[i].nkey) < 0)
-			HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key");
+			HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key")
 		}
 		bt->key[i].dirty = FALSE;
 	    }
@@ -490,7 +490,8 @@ H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt)
          * for the final unchanged children.
 	 */
 	if (H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, bt->page)<0)
-	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to save B-tree node to disk");
+	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to save B-tree node to disk")
+
 	bt->cache_info.dirty = FALSE;
 	bt->ndirty = 0;
     }
@@ -646,7 +647,15 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
 	}
     }
     if (cmp)
+        /* Note: don't push error on stack, leave that to next higher level,
+         *      since many times the B-tree is searched in order to determine
+         *      if an object exists in the B-tree or not. -QAK
+         */
+#ifdef OLD_WAY
 	HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree key not found")
+#else /* OLD_WAY */
+	HGOTO_DONE(FAIL)
+#endif /* OLD_WAY */
     
     /*
      * Follow the link to the subtree or to the data node.
@@ -654,10 +663,26 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
     assert(idx < bt->nchildren);
     if (bt->level > 0) {
 	if (H5B_find(f, dxpl_id, type, bt->child[idx], udata) < 0)
+        /* Note: don't push error on stack, leave that to next higher level,
+         *      since many times the B-tree is searched in order to determine
+         *      if an object exists in the B-tree or not. -QAK
+         */
+#ifdef OLD_WAY
 	    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "key not found in subtree")
+#else /* OLD_WAY */
+            HGOTO_DONE(FAIL)
+#endif /* OLD_WAY */
     } else {
 	if ((type->found) (f, dxpl_id, bt->child[idx], bt->key[idx].nkey, udata, bt->key[idx+1].nkey) < 0)
+        /* Note: don't push error on stack, leave that to next higher level,
+         *      since many times the B-tree is searched in order to determine
+         *      if an object exists in the B-tree or not. -QAK
+         */
+#ifdef OLD_WAY
 	    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "key not found in leaf node")
+#else /* OLD_WAY */
+            HGOTO_DONE(FAIL)
+#endif /* OLD_WAY */
     }
 
 done:
@@ -825,9 +850,11 @@ H5B_split(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_t *old_bt, haddr
     if (H5F_addr_defined(old_bt->right)) {
 	if (NULL == (tmp_bt = H5AC_find(f, dxpl_id, H5AC_BT, old_bt->right, type, udata)))
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load right sibling")
+
 	tmp_bt->cache_info.dirty = TRUE;
 	tmp_bt->left = *new_addr_p;
     }
+
     old_bt->right = *new_addr_p;
 
 done:
