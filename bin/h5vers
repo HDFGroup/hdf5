@@ -56,8 +56,8 @@ use strict;
 # ./H5public.h or ./src/H5public.h.
 #
 # If the version number is changed (either `-s' or `-i' was used on
-# the command line) then the first line of the README file one
-# directory above the H5public.h file is also modified so it looks
+# the command line) then the first line of the README and RELEASE.txt files
+# one directory above the H5public.h file is also modified so it looks
 # something like: This is hdf5-1.2.3-pre1 currently under development.
 ##############################################################################
 
@@ -136,8 +136,8 @@ while ($_ = shift) {
 }
 die "mutually exclusive options given\n" if $set && $inc;
 
-# Determine file to use as H5public.h and README. The README file is
-# always in the directory above H5public.h
+# Determine file to use as H5public.h, README and RELEASE.txt.
+# The README and RELEASE.txt files are always in the directory above H5public.h
 unless ($file) {
   for (@files) {
     ($file=$_,last) if -f $_;
@@ -145,9 +145,14 @@ unless ($file) {
 }
 die "unable to find source files\n" unless defined $file;
 die "unable to read file: $file\n" unless -r $file;
+# README
 my $README = $file;
 $README =~ s/[^\/]*$/..\/README/;
 die "unable to read file: $README\n" unless -r $file;
+# RELEASE.txt
+my $RELEASE = $file;
+$RELEASE =~ s/[^\/]*$/..\/RELEASE.txt/;
+die "unable to read file: $RELEASE\n" unless -r $file;
 
 # Get the current version number.
 open FILE, $file or die "unable to open $file: $!\n";
@@ -193,6 +198,7 @@ if ($set) {
 } else {
   # Nothing to do but print result
   $README = "";
+  $RELEASE = "";
   @newver = @curver;
 }
 
@@ -225,6 +231,20 @@ if ($README) {
 			 $newver[3] eq "" ? "" : "-".$newver[3],
 			 "currently under development\n");
   open FILE, ">$README" or die "$README: $!\n";
+  print FILE @contents;
+  close FILE;
+}
+
+# Update the RELEASE.txt file
+if ($RELEASE) {
+  open FILE, $RELEASE or die "$RELEASE: $!\n";
+  my @contents = <FILE>;
+  close FILE;
+  $contents[0] = sprintf("HDF5 version %d.%d.%d%s %s",
+			 @newver[0,1,2],
+			 $newver[3] eq "" ? "" : "-".$newver[3],
+			 "currently under development\n");
+  open FILE, ">$RELEASE" or die "$RELEASE: $!\n";
   print FILE @contents;
   close FILE;
 }
