@@ -41,7 +41,7 @@ typedef struct {
 
 /* Structure for storing information any datatype */
 typedef struct {
-    h5_atomic_type_t  dt;     /* Atomic type of this object */
+    h5_atomic_type_t  dt;     /* Base type of this object */
     char *name;               /* Name of datatype */
     h5_compound_info_t *ci;   /* Information for compound datatypes */
   } h5_datatype_t;
