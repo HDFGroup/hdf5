@@ -94,6 +94,9 @@ H5_init_library(void)
         HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
                       "unable to initialize type interface");
     }
+#ifdef PHDF5
+    MPI_Init( NULL, NULL );
+#endif
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -166,6 +169,9 @@ H5_term_library(void)
         HDfree(temp);
         temp = lib_exit_head;
     }                           /* end while */
+#ifdef PHDF5
+    MPI_Finalize();
+#endif
 }                               /* end H5_term_library() */
 
 /*--------------------------------------------------------------------------

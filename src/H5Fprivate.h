@@ -22,6 +22,12 @@
 
 /* This is a near top-level header! Try not to include much! */
 #include <H5private.h>
+#ifdef PHDF5
+#ifndef MPI_SUCCESS
+#include <mpi.h>
+#include <mpio.h>
+#endif
+#endif
 
 /*
  * Feature: Define this constant to be non-zero if you want to enable code
@@ -298,6 +304,13 @@ typedef struct H5F_low_t {
 	    size_t	alloc;	/* Current size of MEM buffer		*/
 	} core;
 
+#ifdef PHDF5
+	/* MPI-IO */
+	struct {
+	    MPI_File	f;	/* MPI-IO file handle			*/
+	} mpio;
+#endif
+
     } u;
 } H5F_low_t;
 
@@ -310,6 +323,11 @@ extern const H5F_low_class_t H5F_LOW_STDIO[];	/* Posix stdio		*/
 extern const H5F_low_class_t H5F_LOW_CORE[];	/* In-core temp file	*/
 extern const H5F_low_class_t H5F_LOW_FAM[];	/* File family		*/
 extern const H5F_low_class_t H5F_LOW_SPLIT[];	/* Split meta/raw data	*/
+#ifdef PHDF5
+  extern const H5F_low_class_t H5F_LOW_MPIO[];	/* MPI-IO		*/
+# undef  H5F_LOW_DFLT
+# define H5F_LOW_DFLT	H5F_LOW_MPIO	        /* The default type     */
+#endif
 
 /*
  * Define the structure to store the file information for HDF5 files. One of
