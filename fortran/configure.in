@@ -10,8 +10,18 @@ dnl ----------------------------------------------------------------------
 dnl Initialize configure.
 dnl
 AC_REVISION($Id$)
-AC_INIT(src/HDF5.f90)
-AC_CONFIG_AUX_DIR(../bin)
+
+dnl AC_INIT takes the name of the package, the version number, and an
+dnl email address to report bugs. AC_CONFIG_SRCDIR takes a unique file
+dnl as its argument.
+dnl
+dnl NOTE: Don't forget to change the version number here when we do a
+dnl release!!!
+dnl
+AC_INIT([HDF5 Fortran], [1.4.4], [hdfhelp@ncsa.uiuc.edu])
+AC_CONFIG_SRCDIR([src/HDF5.f90])
+AC_CONFIG_AUX_DIR([../bin])
+
 AC_CANONICAL_HOST
 AC_SUBST(CPPFLAGS)
 AC_SUBST(FFLAGS)
@@ -260,6 +270,22 @@ dnl ----------------------------------------------------------------------
 dnl Checks for libraries.
 dnl
 
+dnl ----------------------------------------------------------------------
+dnl Fake --with-xxx option to allow us to create a help message for the
+dnl following --with-xxx options which can take either a =DIR or =INC,LIB
+dnl specifier.
+dnl
+AC_ARG_WITH(fnord,
+  [
+ For the following --with-xxx options, you can specify where the header
+ files and libraries are in two different ways:
+
+    --with-xxx=INC,LIB - Specify individually the include directory and
+                         library directory separated by a comma
+    --with-xxx=DIR     - Specify only the directory which contains the
+                         include/ and lib/ subdirectories
+  ],,)
+
 dnl Is the GNU zlib present?  It has a header file `zlib.h' and a library
 dnl `-lz' and their locations might be specified with the `--enable-zlib'
 dnl command-line switch.  The value is an include path and/or a library path.
@@ -271,7 +297,7 @@ dnl Some systems where you need to specify exactly where the zlib is need
 dnl this.
 ac_cv_lib_z_compress=""
 AC_ARG_WITH(zlib,
-  [  --with-zlib[=DIR]       Use the GNU zlib compression],,
+  [  --with-zlib[=DIR]         Use the GNU zlib compression],,
   withval=yes)
 
 case "$withval" in
@@ -657,19 +683,20 @@ fi
 dnl Then the config.status file (but not makefiles)
 saved_no_create=$no_create
 no_create=yes
-AC_OUTPUT(config/depend1    
-          config/depend2
-          config/depend3
-          config/depend4
-          config/dependN
-          config/commence
-          config/conclude
-          Makefile
-          src/H5fortran_types.f90
-          src/Makefile
-          test/Makefile
-          $PARALLEL_MAKE
-          examples/Makefile)
+AC_CONFIG_FILES([config/depend1    
+                 config/depend2
+                 config/depend3
+                 config/depend4
+                 config/dependN
+                 config/commence
+                 config/conclude
+                 Makefile
+                 src/H5fortran_types.f90
+                 src/Makefile
+                 test/Makefile
+                 $PARALLEL_MAKE
+                 examples/Makefile])
+AC_OUTPUT
 no_create=$saved_no_create
 
 dnl Then the stamp2 file for H5config.h
