@@ -1098,13 +1098,13 @@ nh5pget_fapl_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist
  *                instead of double
  *---------------------------------------------------------------------------*/
 int_f
-nh5pset_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, int_f* rdcc_nelmts,  size_t_f* rdcc_nbytes , real_f* rdcc_w0 )
+nh5pset_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, size_t_f* rdcc_nelmts,  size_t_f* rdcc_nbytes , real_f* rdcc_w0 )
 {
      int ret_value = -1;
      hid_t c_prp_id;
      herr_t ret;
      int c_mdc_nelmts;
-     int c_rdcc_nelmts;
+     size_t c_rdcc_nelmts;
      size_t c_rdcc_nbytes;
      double c_rdcc_w0;
      c_rdcc_nbytes =(size_t) *rdcc_nbytes;
@@ -1115,7 +1115,7 @@ nh5pset_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, int_f* rdcc_nelmts,  size_t_
       */
      c_prp_id = (hid_t)*prp_id;
      c_mdc_nelmts = (int)*mdc_nelmts;
-     c_rdcc_nelmts = (int)*rdcc_nelmts;
+     c_rdcc_nelmts = (size_t)*rdcc_nelmts;
      ret = H5Pset_cache(c_prp_id, c_mdc_nelmts, c_rdcc_nelmts, c_rdcc_nbytes, c_rdcc_w0  );
      if (ret < 0) return ret_value;
      ret_value = 0;
@@ -1155,7 +1155,7 @@ nh5pget_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, size_t_f* rdcc_nelmts, size_
      ret = H5Pget_cache(c_prp_id, &c_mdc_nelmts, &c_rdcc_nelmts, &c_rdcc_nbytes, &c_rdcc_w0);
      if (ret < 0) return ret_value;
      *mdc_nelmts = (int_f)c_mdc_nelmts;
-     *rdcc_nelmts = (int_f)c_rdcc_nelmts;
+     *rdcc_nelmts = (size_t_f)c_rdcc_nelmts;
      *rdcc_nbytes = (size_t_f)c_rdcc_nbytes;
      *rdcc_w0 = (real_f)c_rdcc_w0;
     
@@ -1560,7 +1560,7 @@ nh5pset_external_c (hid_t_f *prp_id, _fcd name, int_f* namelen, int_f* offset, h
      hid_t c_prp_id;
      herr_t ret;
      hsize_t c_bytes;
-     const char* c_name;
+     char* c_name;
      int c_namelen;
      off_t c_offset;
      c_bytes = (hsize_t) *bytes;
@@ -1581,7 +1581,7 @@ nh5pset_external_c (hid_t_f *prp_id, _fcd name, int_f* namelen, int_f* offset, h
      ret_value = 0;
 
 DONE:
-     HDfree(c_name);
+     free(c_name);
      return ret_value;
 }
 

@@ -794,16 +794,16 @@ FORTRAN Property List API -- h5p
 
           SUBROUTINE h5pset_cache_f(prp_id, mdc_nelmts,rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
             IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
-            INTEGER, INTENT(IN) :: mdc_nelmts    ! Number of elements (objects)
-                                                 ! in the meta data cache
-            INTEGER, INTENT(IN) :: rdcc_nelmts   ! Number of elements (objects)
-                                                 ! in the meta data cache
-            INTEGER(SIZE_T), INTENT(IN) :: rdcc_nbytes ! Total size of the raw data
-                                                       ! chunk cache, in bytes
-            REAL, INTENT(IN) :: rdcc_w0             !Preemption policy
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-                                                    ! 0 on success and -1 on failure
+            INTEGER(HID_T), INTENT(IN) :: prp_id         ! Property list identifier
+            INTEGER, INTENT(IN) :: mdc_nelmts            ! Number of elements (objects)
+                                                         ! in the meta data cache
+            INTEGER(SIZE_T), INTENT(IN) :: rdcc_nelmts   ! Number of elements (objects)
+                                                         ! in the meta data cache
+            INTEGER(SIZE_T), INTENT(IN) :: rdcc_nbytes   ! Total size of the raw data
+                                                         ! chunk cache, in bytes
+            REAL, INTENT(IN) :: rdcc_w0                  ! Preemption policy
+            INTEGER, INTENT(OUT) :: hdferr               ! Error code
+                                                         ! 0 on success and -1 on failure
           END SUBROUTINE h5pset_cache_f
 </pre>
 
@@ -823,16 +823,16 @@ FORTRAN Property List API -- h5p
 
           SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
             IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
-            INTEGER, INTENT(OUT) :: mdc_nelmts   ! Number of elements (objects)
-                                                 ! in the meta data cache
-            INTEGER, INTENT(OUT) :: rdcc_nelmts  ! Number of elements (objects)
-                                                 ! in the meta data cache
-            INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nbytes ! Total size of the raw data
-                                                        ! chunk cache, in bytes
-            REAL, INTENT(OUT) :: rdcc_w0    ! Preemption policy
-            INTEGER, INTENT(OUT) :: hdferr  ! Error code
-                                            ! 0 on success and -1 on failure
+            INTEGER(HID_T), INTENT(IN) :: prp_id         ! Property list identifier
+            INTEGER, INTENT(OUT) :: mdc_nelmts           ! Number of elements (objects)
+                                                         ! in the meta data cache
+            INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nelmts  ! Number of elements (objects)
+                                                         ! in the meta data cache
+            INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nbytes  ! Total size of the raw data
+                                                         ! chunk cache, in bytes
+            REAL, INTENT(OUT) :: rdcc_w0                 ! Preemption policy
+            INTEGER, INTENT(OUT) :: hdferr               ! Error code
+                                                         ! 0 on success and -1 on failure
           END SUBROUTINE h5pget_cache_f
 </pre>
 
