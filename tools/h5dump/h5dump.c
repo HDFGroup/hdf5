@@ -4050,10 +4050,16 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 		indentation(indent);
 		printf("<Data>\n");
 		indentation(indent);
-		printf("<DataFromFile>\n");
-		xml_print_refs(attr_id, ATTRIBUTE_DATA);
-		indentation(indent);
-		printf("</DataFromFile>\n");
+                if (!H5Tequal(type, H5T_STD_REF_OBJ)) {
+                   printf("<!-- Note: Region references not supported -->\n");
+                   indentation(indent);
+                   printf("<NoData />\n");
+                } else {
+		    printf("<DataFromFile>\n");
+		    xml_print_refs(attr_id, ATTRIBUTE_DATA);
+		    indentation(indent);
+		    printf("</DataFromFile>\n");
+                }
 		indentation(indent);
 		printf("</Data>\n");
 		break;
@@ -4164,6 +4170,8 @@ xml_dump_named_datatype(hid_t type, const char *name)
 	nmembers = H5Tget_nmembers(type);
 
 	indentation(indent);
+	printf("<DataType>\n");
+	indentation(indent);
 	printf("<CompoundType>\n");
 
 	indent += COL;
@@ -4213,11 +4221,17 @@ xml_dump_named_datatype(hid_t type, const char *name)
 	indent -= COL;
 	indentation(indent);
 	printf("</CompoundType>\n");
+	indentation(indent);
+	printf("</DataType>\n");
     } else {
 	/* Other data types: call print_datatype */
+        indentation(indent);
+        printf("<DataType>\n");
 	indent += COL;
 	xml_print_datatype(type);
 	indent -= COL;
+        indentation(indent);
+        printf("</DataType>\n");
     }
 
     indent -= COL;
@@ -4741,10 +4755,16 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED *sset)
 	    indentation(indent);
 	    printf("<Data>\n");
 	    indentation(indent);
-	    printf("<DataFromFile>\n");
-	    xml_print_refs(did, DATASET_DATA);
-	    indentation(indent);
-	    printf("</DataFromFile>\n");
+            if (!H5Tequal(type, H5T_STD_REF_OBJ)) {
+                printf("<!-- Note: Region references not supported -->\n");
+                indentation(indent);
+                printf("<NoData />\n");
+            } else {
+	        printf("<DataFromFile>\n");
+	        xml_print_refs(did, DATASET_DATA);
+	        indentation(indent);
+	        printf("</DataFromFile>\n");
+            }
 	    indentation(indent);
 	    printf("</Data>\n");
 	    break;
