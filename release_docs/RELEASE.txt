@@ -125,6 +125,9 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+	- Fixed parallel bug in which some processes attempted collective
+	  I/O while others did independent I/O.  Bug appeared when some
+	  processes used point selections, and others didn't.  JRM - 2004/9/15
         - Corrected error where dataset region references were written in an
           incorrect way on Cray machines.  PVN & QAK - 2004/09/13
         - The H5Tget_native_type now determines the native type for integers
@@ -183,9 +186,6 @@ Bug Fixes since HDF5-1.6.2 release
           file for the raw data for the dataset.  QAK - 2004/06/01
 	- Fixed dtypes "sw long double -> double" failure in QSC class
 	  machines.  AKC - 2004/4/16
-	- Fixed parallel bug in which some processes attempted collective
-	  I/O while others did independent I/O.  Bug appeared when some
-	  processes used point selections, and others didn't.  JRM - 2004/9/15
 
     Configuration
     -------------
