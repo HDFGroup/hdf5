@@ -9441,19 +9441,19 @@ fi
 PARALLEL=${PARALLEL:-no}
 
 
-if test -n "$cc_vendor" && test -n "$cc_version"; then
-   CC_VERSION="$CC ($cc_vendor-$cc_version)"
+if `echo $CC | grep / 2>&1 /dev/null`; then
+   CC_VERSION="$CC"	
 else
-         if `echo $CC | grep / 2>&1 /dev/null`; then
-      CC_VERSION="$CC"	
-   else
-      for x in `echo $PATH | sed -e 's/:/ /g'`; do
-         if test -x $x/$CC; then
-            CC_VERSION="$x/$CC"
-            break
-         fi
-      done
-   fi
+   CC_VERSION="$CC";
+   for x in `echo $PATH | sed -e 's/:/ /g'`; do
+      if test -x $x/$CC; then
+	 CC_VERSION="$x/$CC"
+	 break
+      fi
+   done
+fi
+if test -n "$cc_vendor" && test -n "$cc_version"; then
+   CC_VERSION="$CC_VERSION ($cc_vendor-$cc_version)"
 fi
 
 if test -x /bin/pwd; then
