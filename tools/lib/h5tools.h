@@ -482,6 +482,7 @@ extern FILE   *rawdatastream;       /*output stream for raw data            */
 #define SHUFFLE         "PREPROCESSING SHUFFLE"
 #define FLETCHER32      "CHECKSUM FLETCHER32"
 #define SZIP            "COMPRESSION SZIP"
+#define NBIT            "COMPRESSION NBIT"
 #define STORAGE_LAYOUT  "STORAGE_LAYOUT"
 #define CONTIGUOUS      "CONTIGUOUS"
 #define COMPACT         "COMPACT"
