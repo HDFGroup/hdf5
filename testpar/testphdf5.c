@@ -409,11 +409,20 @@ finish:
 	}
 	printf("===================================\n");
     }
-    MPI_Finalize();
-    if (dowrite)
+
+    /* make sure all processes are finished before starting cleanup and exit */
+    MPI_Barrier(MPI_COMM_WORLD);
+    if (dowrite){
 	h5_cleanup(FILENAME, fapl);
-    else
+    } else {
+	/* h5_cleanup would have closed fapl.  Now must do it explicitedly */
 	H5Pclose(fapl);
+    }
+
+    /* close HDF5 library */
+    H5close();
+    /* MPI_Finalize must be called AFTER H5close which may use MPI calls */
+    MPI_Finalize();
     return(nerrors);
 }
 
