@@ -1,4 +1,4 @@
-HDF5 version 1.7.17 released on Sun Jan 25 20:03:38 CST 2004
+HDF5 version 1.7.18 released on Sun Feb 22 04:15:09 CST 2004
 ================================================================================
 
 
@@ -42,9 +42,13 @@ New Features
 
     Library:
     --------
+        - Data type conversion(software) from float to integer was added.
+          Conversion from integer to float will be added later.  SLU -2004/2/4
+        - Added new H5Premove_filter routine to remove I/O pipeline filters
+            from dataset creation property lists.  PVN - 2004/01/26
         - Added new 'compare' callback parameter to H5Pregister & H5Pinsert
             routines.  QAK - 2004/01/07
-        - Data type conversion between integers and floats was added.
+        - Data type conversion(hardware) between integers and floats was added.
             SLU 2003/11/21
         - New function H5Iget_file_id() was added.  It returns file ID given
             an object(dataset, group, or attribute) ID.  SLU 2003/10/29
@@ -75,6 +79,10 @@ New Features
 
     Tools:
     ------
+        - Added the MPI-I/O and MPI-POSIX drivers to the list of VFL drivers
+            available for h5dump and h5ls
+        - Added option --vfd= to h5ls to allow a VFL driver to be selected
+            by a user.
 	- Added option -showconfig to compiler tools (h5cc,h5fc,h5c++).
 	  AKC - 2004/01/08
         - Install the "h5cc" and "h5fc" tools as "h5pcc" and "h5pfc"
@@ -101,6 +109,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed problem with H5Tget_native_type() not handling opaque fields
+            correctly.  QAK - 2004/01/31
         - Fixed several errors in B-tree deletion code which could cause a
             B-tree (used with groups and chunked datasets) to become corrupt
             with the right sequence of deleted objects.  QAK - 2004/01/19
@@ -213,6 +223,9 @@ Bug Fixes since HDF5-1.6.0 release
 
     Configuration
     -------------
+        - Parallel I/O with the MPI-I/O driver will no longer work if the
+            filesystem is not POSIX compliant.  The "HDF5_MPI_1_METAWRITE"
+            environment variable has been removed.  QAK - 2004/01/30
         - Fixed the error that cause "make install" to fail because of the
             macro definition syntax of "prefix?=..."  AKC - 2003/07/22
 
