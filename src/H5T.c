@@ -1733,21 +1733,21 @@ H5T_init_interface(void)
      * ending with the most specific.
      */
     if (NULL == (fixedpt = H5I_object(H5T_NATIVE_INT_g)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (floatpt = H5I_object(H5T_NATIVE_FLOAT_g)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (string = H5I_object(H5T_C_S1_g)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (bitfield = H5I_object(H5T_STD_B8LE_g)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (compound = H5T_create(H5T_COMPOUND, 1)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (enum_type = H5T_create(H5T_ENUM, 1)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (vlen = H5T_vlen_create(native_int)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (array = H5T_array_create(native_int,1,dim,NULL)))
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL==(std_u32le=H5I_object(H5T_STD_U32LE_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
     if (NULL==(std_i32le=H5I_object(H5T_STD_I32LE_g)))
