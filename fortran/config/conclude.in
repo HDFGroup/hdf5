@@ -67,7 +67,7 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	   fi;								      \
 	done
 	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then      \
-	   if test -e "*.$(F9XMODEXT)"; then                                  \
+	   if test -e "hdf5.$(F9XMODEXT)" || test -e "HDF5.$(F9XMODEXT)"; then \
 	      ((cp *.$(F9XMODEXT) $(libdir)/. && chmod 644 $(libdir)/*.$(F9XMODEXT)) || exit 1); \
 	   fi;                                                                \
 	fi
