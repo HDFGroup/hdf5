@@ -145,6 +145,7 @@ static herr_t H5B_split(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_t 
 			haddr_t old_addr, unsigned idx,
                         void *udata, haddr_t *new_addr/*out*/);
 static H5B_t * H5B_copy(const H5F_t *f, const H5B_t *old_bt);
+static herr_t H5B_serialize(H5F_t *f, H5B_t *bt, uint8_t *buf);
 #ifdef H5B_DEBUG
 static herr_t H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type,
 			 void *udata);
@@ -240,6 +241,8 @@ H5B_create(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,
     if (NULL==(bt = H5FL_CALLOC(H5B_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree root node")
     bt->type = type;
+    bt->sizeof_node = size;
+    bt->total_native_keysize = total_native_keysize;
     bt->sizeof_rkey = sizeof_rkey;
     bt->cache_info.dirty = TRUE;
     bt->ndirty = 0;
@@ -342,7 +345,8 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
     if (NULL==(bt = H5FL_CALLOC(H5B_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     bt->sizeof_rkey = (type->get_sizeof_rkey) (f, udata);
-    size = H5B_nodesize(f, type, &total_nkey_size, bt->sizeof_rkey);
+    bt->sizeof_node = size = H5B_nodesize(f, type, &total_nkey_size, bt->sizeof_rkey);
+    bt->total_native_keysize = total_nkey_size;
     bt->type = type;
     bt->cache_info.dirty = FALSE;
     bt->ndirty = 0;
@@ -403,6 +407,79 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5B_serialize
+ *
+ * Purpose:     Serialize the data structure for writing to disk or
+ *              storing on the SAP (for FPHDF5).
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Bill Wendling
+ *              wendling@ncsa.uiuc.edu
+ *              Sept. 15, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B_serialize(H5F_t *f, H5B_t *bt, uint8_t *buf)
+{
+    unsigned    u;
+    uint8_t    *p = NULL;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5B_serialize, FAIL)
+
+    /* check arguments */
+    assert(f);
+    assert(bt);
+    assert(bt->page);
+    assert(bt->type);
+
+    p = buf;
+
+    /* magic number */
+    HDmemcpy(p, H5B_MAGIC, H5B_SIZEOF_MAGIC);
+    p += 4;
+
+    /* node type and level */
+    *p++ = bt->type->id;
+    H5_CHECK_OVERFLOW(bt->level, unsigned, uint8_t);
+    *p++ = (uint8_t)bt->level;
+
+    /* entries used */
+    UINT16ENCODE(p, bt->nchildren);
+
+    /* sibling pointers */
+    H5F_addr_encode(f, &p, bt->left);
+    H5F_addr_encode(f, &p, bt->right);
+
+    /* child keys and pointers */
+    for (u = 0; u <= bt->nchildren; ++u) {
+        /* encode the key */
+        assert(bt->key[u].rkey == p);
+        p += bt->sizeof_rkey;
+
+        /* encode the key */
+        if (bt->key[u].dirty && bt->key[u].nkey)
+            if (bt->type->encode(f, bt, bt->key[u].rkey, bt->key[u].nkey) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key")
+
+        /* encode the child address */
+        if (u < bt->ndirty)
+            H5F_addr_encode(f, &p, bt->child[u]);
+        else
+            p += H5F_SIZEOF_ADDR(f);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5B_flush
  *
  * Purpose:	Flushes a dirty B-tree node to disk.
@@ -423,15 +500,17 @@ done:
  *	Quincey Koziol, 2002-7-180
  *	Added dxpl parameter to allow more control over I/O from metadata
  *      cache.
+ *
+ *      Bill Wendling, 2003-09-15
+ *      Separated out the bit of code that serializes the B-Tree
+ *      structure.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt)
 {
-    unsigned	i;
-    size_t	size = 0;
-    uint8_t	*p = bt->page;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5B_flush, FAIL)
 
@@ -442,54 +521,22 @@ H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt)
     assert(bt->type);
     assert(bt->type->encode);
 
-    size = H5B_nodesize(f, bt->type, NULL, bt->sizeof_rkey);
-
     if (bt->cache_info.dirty) {
+        unsigned    u;
 
-	/* magic number */
-	HDmemcpy(p, H5B_MAGIC, H5B_SIZEOF_MAGIC);
-	p += 4;
+        if (H5B_serialize(f, bt, bt->page) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_WRITEERROR, FAIL, "unable to serialize B-tree")
 
-	/* node type and level */
-	*p++ = bt->type->id;
-	*p++ = bt->level;
-
-	/* entries used */
-	UINT16ENCODE(p, bt->nchildren);
-
-	/* sibling pointers */
-	H5F_addr_encode(f, &p, bt->left);
-	H5F_addr_encode(f, &p, bt->right);
-
-	/* child keys and pointers */
-	for (i=0; i<=bt->nchildren; i++) {
-
-	    /* encode the key */
-	    assert(bt->key[i].rkey == p);
-	    if (bt->key[i].dirty) {
-		if (bt->key[i].nkey) {
-		    if ((bt->type->encode) (f, bt, bt->key[i].rkey,
-					    bt->key[i].nkey) < 0)
-			HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key")
-		}
-		bt->key[i].dirty = FALSE;
-	    }
-	    p += bt->sizeof_rkey;
-
-	    /* encode the child address */
-	    if (i < bt->ndirty) {
-		H5F_addr_encode(f, &p, bt->child[i]);
-	    } else {
-		p += H5F_SIZEOF_ADDR(f);
-	    }
-	}
+        /* child keys and pointers */
+        for (u = 0; u <= bt->nchildren; ++u)
+            bt->key[u].dirty = FALSE;
 
 	/*
          * Write the disk page.	We always write the header, but we don't
          * bother writing data for the child entries that don't exist or
          * for the final unchanged children.
 	 */
-	if (H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, bt->page)<0)
+	if (H5F_block_write(f, H5FD_MEM_BTREE, addr, bt->sizeof_node, dxpl_id, bt->page) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to save B-tree node to disk")
 
 	bt->cache_info.dirty = FALSE;
@@ -612,7 +659,10 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
     H5B_t	*bt = NULL;
     unsigned    idx=0, lt = 0, rt;        /* Final, left & right key indices */
     int	        cmp = 1;                /* Key comparison value */
-    int		ret_value = SUCCEED;
+    unsigned    level;                  /* Level of B-tree node */
+    haddr_t     child;                  /* Address of child to recurse to */
+    void       *nkey1, *nkey2;          /* Native keys of child */
+    int		ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5B_find, FAIL)
 
@@ -661,8 +711,20 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
      * Follow the link to the subtree or to the data node.
      */
     assert(idx < bt->nchildren);
-    if (bt->level > 0) {
-	if (H5B_find(f, dxpl_id, type, bt->child[idx], udata) < 0)
+
+    /* Retrieve the rest of the B-tree information, so we can unlock it before recursing */
+    level = bt->level;
+    child = bt->child[idx];
+    nkey1=bt->key[idx].nkey;
+    nkey2=bt->key[idx+1].nkey;
+
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node")
+
+    bt = NULL;  /* Make certain future references will be caught */
+
+    if (level > 0) {
+	if (H5B_find(f, dxpl_id, type, child, udata) < 0)
         /* Note: don't push error on stack, leave that to next higher level,
          *      since many times the B-tree is searched in order to determine
          *      if an object exists in the B-tree or not. -QAK
@@ -673,13 +735,13 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
             HGOTO_DONE(FAIL)
 #endif /* OLD_WAY */
     } else {
-	if ((type->found) (f, dxpl_id, bt->child[idx], bt->key[idx].nkey, udata, bt->key[idx+1].nkey) < 0)
+	if ((type->found) (f, dxpl_id, child, nkey1, udata, nkey2) < 0)
         /* Note: don't push error on stack, leave that to next higher level,
          *      since many times the B-tree is searched in order to determine
          *      if an object exists in the B-tree or not. -QAK
          */
 #ifdef OLD_WAY
-	    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "key not found in leaf node")
+            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "key not found in leaf node")
 #else /* OLD_WAY */
             HGOTO_DONE(FAIL)
 #endif /* OLD_WAY */
@@ -848,11 +910,15 @@ H5B_split(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_t *old_bt, haddr
     new_bt->right = old_bt->right;
 
     if (H5F_addr_defined(old_bt->right)) {
-	if (NULL == (tmp_bt = H5AC_find(f, dxpl_id, H5AC_BT, old_bt->right, type, udata)))
+	if (NULL == (tmp_bt = H5AC_protect(f, dxpl_id, H5AC_BT, old_bt->right, type, udata)))
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load right sibling")
 
 	tmp_bt->cache_info.dirty = TRUE;
 	tmp_bt->left = *new_addr_p;
+
+        if (H5AC_unprotect(f, dxpl_id, H5AC_BT, old_bt->right, tmp_bt, FALSE) != SUCCEED)
+            HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node")
+        tmp_bt=NULL;    /* Make certain future references will be caught */
     }
 
     old_bt->right = *new_addr_p;
@@ -976,8 +1042,9 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
 
     hbool_t	lt_key_changed = FALSE, rt_key_changed = FALSE;
     haddr_t	child, old_root;
-    int	level;
+    unsigned	level;
     H5B_t	*bt;
+    H5B_t	*new_bt;        /* Copy of B-tree info */
     hsize_t	size;
     H5B_ins_t	my_ins = H5B_INS_ERROR;
     herr_t	ret_value = SUCCEED;
@@ -999,23 +1066,47 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
     assert(H5B_INS_RIGHT == my_ins);
 
     /* the current root */
-    if (NULL == (bt = H5AC_find(f, dxpl_id, H5AC_BT, addr, type, udata)))
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, udata)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to locate root of B-tree")
+
     level = bt->level;
+
     if (!lt_key_changed) {
-	if (!bt->key[0].nkey && H5B_decode_key(f, bt, 0) < 0)
-	    HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, FAIL, "unable to decode key")
+	if (!bt->key[0].nkey && H5B_decode_key(f, bt, 0) < 0) {
+            /* We want the actual error to show up but also want to
+             * execute the "H5AC_unprotect" call. So we use the
+             * "HCOMMON_ERROR" macro. */
+            HCOMMON_ERROR(H5E_BTREE, H5E_CANTDECODE, "unable to decode key");
+
+            if (H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) != SUCCEED)
+                HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release new child")
+
+            HGOTO_DONE(FAIL)
+        }
+
 	HDmemcpy(lt_key, bt->key[0].nkey, type->sizeof_nkey);
     }
+
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) != SUCCEED)
+        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release new child")
+
+    bt = NULL;
     
     /* the new node */
-    if (NULL == (bt = H5AC_find(f, dxpl_id, H5AC_BT, child, type, udata)))
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BT, child, type, udata)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load new node")
 
     if (!rt_key_changed) {
 	if (!bt->key[bt->nchildren].nkey &&
-                H5B_decode_key(f, bt, bt->nchildren) < 0)
-	    HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, FAIL, "unable to decode key")
+                H5B_decode_key(f, bt, bt->nchildren) < 0) {
+            HCOMMON_ERROR(H5E_BTREE, H5E_CANTDECODE, "unable to decode key");
+
+            if (H5AC_unprotect(f, dxpl_id, H5AC_BT, child, bt, FALSE) != SUCCEED)
+                HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release new child")
+
+            HGOTO_DONE(FAIL)
+        }
+
 	HDmemcpy(rt_key, bt->key[bt->nchildren].nkey, type->sizeof_nkey);
     }
     
@@ -1024,23 +1115,34 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
      * root at the old root's previous address.	 This prevents the B-tree
      * from "moving".
      */
-    size = H5B_nodesize(f, type, NULL, bt->sizeof_rkey);
+    size = bt->sizeof_node;
+
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT, child, bt, FALSE) != SUCCEED)
+        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release new child")
+
+    bt = NULL;
+
     if (HADDR_UNDEF==(old_root=H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate file space to move root")
 
     /* update the new child's left pointer */
-    if (NULL == (bt = H5AC_find(f, dxpl_id, H5AC_BT, child, type, udata)))
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BT, child, type, udata)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load new child")
 
     bt->cache_info.dirty = TRUE;
     bt->left = old_root;
+
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT, child, bt, FALSE) != SUCCEED)
+        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release new child")
+
+    bt=NULL;    /* Make certain future references will be caught */
 
     /*
      * Move the node to the new location by checking it out & checking it in
      * at the new location -QAK
      */
     /* Bring the old root into the cache if it's not already */
-    if (NULL == (bt = H5AC_find(f, dxpl_id, H5AC_BT, addr, type, udata)))
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, udata)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load new child")
 
     /* Make certain the old root info is marked as dirty before moving it, */
@@ -1048,40 +1150,51 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
     bt->cache_info.dirty = TRUE;
 
     /* Make a copy of the old root information */
-    if (NULL == (bt = H5B_copy(f, bt)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to copy old root")
+    if (NULL == (new_bt = H5B_copy(f, bt))) {
+        HCOMMON_ERROR(H5E_BTREE, H5E_CANTLOAD, "unable to copy old root");
 
-    /* Move the location on the disk */
+        if (H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) != SUCCEED)
+            HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release new child")
+
+        HGOTO_DONE(FAIL)
+    }
+
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) != SUCCEED)
+        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release new child")
+
+    bt=NULL;    /* Make certain future references will be caught */
+
+    /* Move the location of the old root on the disk */
     if (H5AC_rename(f, dxpl_id, H5AC_BT, addr, old_root) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to move B-tree root node")
 
-    /* Insert the copy of the old root into the file again */
-    if (H5AC_set(f, dxpl_id, H5AC_BT, addr, bt) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to flush old B-tree root node");
-
     /* clear the old root info at the old address (we already copied it) */
-    bt->cache_info.dirty = TRUE;
-    bt->left = HADDR_UNDEF;
-    bt->right = HADDR_UNDEF;
+    new_bt->cache_info.dirty = TRUE;
+    new_bt->left = HADDR_UNDEF;
+    new_bt->right = HADDR_UNDEF;
 
     /* Set the new information for the copy */
-    bt->ndirty = 2;
-    bt->level = level + 1;
-    bt->nchildren = 2;
+    new_bt->ndirty = 2;
+    new_bt->level = level + 1;
+    new_bt->nchildren = 2;
 
-    bt->child[0] = old_root;
-    bt->key[0].dirty = TRUE;
-    bt->key[0].nkey = bt->native;
-    HDmemcpy(bt->key[0].nkey, lt_key, type->sizeof_nkey);
+    new_bt->child[0] = old_root;
+    new_bt->key[0].dirty = TRUE;
+    new_bt->key[0].nkey = new_bt->native;
+    HDmemcpy(new_bt->key[0].nkey, lt_key, type->sizeof_nkey);
 
-    bt->child[1] = child;
-    bt->key[1].dirty = TRUE;
-    bt->key[1].nkey = bt->native + type->sizeof_nkey;
-    HDmemcpy(bt->key[1].nkey, md_key, type->sizeof_nkey);
+    new_bt->child[1] = child;
+    new_bt->key[1].dirty = TRUE;
+    new_bt->key[1].nkey = new_bt->native + type->sizeof_nkey;
+    HDmemcpy(new_bt->key[1].nkey, md_key, type->sizeof_nkey);
 
-    bt->key[2].dirty = TRUE;
-    bt->key[2].nkey = bt->native + 2 * type->sizeof_nkey;
-    HDmemcpy(bt->key[2].nkey, rt_key, type->sizeof_nkey);
+    new_bt->key[2].dirty = TRUE;
+    new_bt->key[2].nkey = new_bt->native + 2 * type->sizeof_nkey;
+    HDmemcpy(new_bt->key[2].nkey, rt_key, type->sizeof_nkey);
+
+    /* Insert the modified copy of the old root into the file again */
+    if (H5AC_set(f, dxpl_id, H5AC_BT, addr, new_bt) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to flush old B-tree root node")
 
 #ifdef H5B_DEBUG
     H5B_assert(f, dxpl_id, addr, type, udata);
@@ -1243,7 +1356,7 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 		  uint8_t *rt_key, hbool_t *rt_key_changed,
 		  haddr_t *new_node_p/*out*/)
 {
-    H5B_t	*bt = NULL, *twin = NULL, *tmp_bt = NULL;
+    H5B_t	*bt = NULL, *twin = NULL;
     unsigned	lt = 0, idx = 0, rt;    /* Left, final & right index values */
     int         cmp = -1;               /* Key comparison value */
     haddr_t	child_addr = HADDR_UNDEF;
@@ -1461,6 +1574,8 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	ret_value = H5B_INS_NOOP;
 
     } else if (H5B_INS_LEFT == my_ins || H5B_INS_RIGHT == my_ins) {
+        H5B_t	*tmp_bt;
+
 	/*
 	 * If this node is full then split it before inserting the new child.
 	 */
@@ -1555,6 +1670,8 @@ H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op
     uint8_t		*key = NULL;
     unsigned		nchildren;      /* Number of children of B-tree node */
     unsigned		u;              /* Local index variable */
+    unsigned            level;
+    haddr_t             left_child;
     herr_t		ret_value;
     
     FUNC_ENTER_NOAPI(H5B_iterate, FAIL)
@@ -1568,11 +1685,20 @@ H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op
     assert(H5F_addr_defined(addr));
     assert(udata);
 
-    if (NULL == (bt=H5AC_find(f, dxpl_id, H5AC_BT, addr, type, udata)))
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, udata)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree node")
-    if (bt->level > 0) {
+
+    level = bt->level;
+    left_child = bt->child[0];
+
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node")
+
+    bt = NULL;  /* Make certain future references will be caught */
+
+    if (level > 0) {
 	/* Keep following the left-most child until we reach a leaf node. */
-	if ((ret_value=H5B_iterate(f, dxpl_id, type, op, bt->child[0], udata))<0)
+	if ((ret_value=H5B_iterate(f, dxpl_id, type, op, left_child, udata))<0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "unable to list B-tree node")
     } else {
 	/*
@@ -1589,18 +1715,32 @@ H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op
 	     * leave the B-tree node protected during an application
 	     * callback.
 	     */
-	    if (NULL==(bt=H5AC_find (f, dxpl_id, H5AC_BT, cur_addr, type, udata)))
-		HGOTO_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL, "B-tree node")
+	    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BT, cur_addr, type, udata)))
+		HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "B-tree node")
+
 	    for (u=0; u<bt->nchildren; u++)
 		child[u] = bt->child[u];
+
 	    for (u=0; u<bt->nchildren+1; u++) {
-		if (!bt->key[u].nkey)
-                    H5B_decode_key(f, bt, u);
-		HDmemcpy(key+u*type->sizeof_nkey, bt->key[u].nkey,
-		         type->sizeof_nkey);
+		if (!bt->key[u].nkey) {
+                    if (H5B_decode_key(f, bt, u) < 0) {
+                        HCOMMON_ERROR(H5E_BTREE, H5E_CANTDECODE, "unable to decode key");
+
+                        if (H5AC_unprotect(f, dxpl_id, H5AC_BT, cur_addr, bt, FALSE) < 0)
+                            HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node")
+
+                        HGOTO_DONE(FAIL)
+                    }
+                } /* end if */
+		HDmemcpy(key+u*type->sizeof_nkey, bt->key[u].nkey, type->sizeof_nkey);
 	    }
+
 	    next_addr = bt->right;
 	    nchildren = bt->nchildren;
+
+            if (H5AC_unprotect(f, dxpl_id, H5AC_BT, cur_addr, bt, FALSE) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node")
+
 	    bt = NULL;
 
 	    /*
@@ -1663,8 +1803,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
     unsigned    idx=0, lt=0, rt;        /* Final, left & right indices */
     int         cmp=1;                  /* Key comparison value */
     unsigned	u;                      /* Local index variable */
-    size_t	sizeof_rkey, sizeof_rec;
-    hsize_t	sizeof_node;
+    size_t	sizeof_rec;
     
     FUNC_ENTER_NOAPI(H5B_remove_helper, H5B_INS_ERROR)
 
@@ -1765,7 +1904,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
              */
             if (ret_value!=H5B_INS_REMOVE && level>0) {
                 if (H5F_addr_defined(bt->right)) {
-                    if (NULL==(sibling=H5AC_find(f, dxpl_id, H5AC_BT, bt->right, type, udata)))
+                    if (NULL == (sibling = H5AC_protect(f, dxpl_id, H5AC_BT, bt->right, type, udata)))
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR, "unable to unlink node from tree")
 
                     /* Make certain the native key for the right sibling is set up */
@@ -1774,6 +1913,11 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
                     HDmemcpy(sibling->key[0].nkey, bt->key[idx+1].nkey, type->sizeof_nkey);
                     sibling->key[0].dirty = TRUE;
                     sibling->cache_info.dirty = TRUE;
+
+                    if (H5AC_unprotect(f, dxpl_id, H5AC_BT, bt->right, sibling, FALSE) != SUCCEED)
+                        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to release node from tree")
+
+                    sibling=NULL;   /* Make certain future references will be caught */
                 }
             }
 	}
@@ -1795,13 +1939,19 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	bt->ndirty = 0;
 	if (level>0) {
 	    if (H5F_addr_defined(bt->left)) {
-		if (NULL==(sibling=H5AC_find(f, dxpl_id, H5AC_BT, bt->left, type, udata)))
-		    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR, "unable to unlink node from tree")
+		if (NULL == (sibling = H5AC_protect(f, dxpl_id, H5AC_BT, bt->left, type, udata)))
+		    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR, "unable to load node from tree")
+
 		sibling->right = bt->right;
 		sibling->cache_info.dirty = TRUE;
+
+                if (H5AC_unprotect(f, dxpl_id, H5AC_BT, bt->left, sibling, FALSE) != SUCCEED)
+                    HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to release node from tree")
+
+                sibling=NULL;   /* Make certain future references will be caught */
 	    }
 	    if (H5F_addr_defined(bt->right)) {
-		if (NULL==(sibling=H5AC_find(f, dxpl_id, H5AC_BT, bt->right, type, udata)))
+		if (NULL == (sibling = H5AC_protect(f, dxpl_id, H5AC_BT, bt->right, type, udata)))
 		    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR, "unable to unlink node from tree")
 
                 /* Copy left-most key from deleted node to left-most key in it's right neighbor */
@@ -1813,12 +1963,15 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 
 		sibling->left = bt->left;
 		sibling->cache_info.dirty = TRUE;
+
+                if (H5AC_unprotect(f, dxpl_id, H5AC_BT, bt->right, sibling, FALSE) != SUCCEED)
+                    HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to release node from tree")
+
+                sibling=NULL;   /* Make certain future references will be caught */
 	    }
 	    bt->left = HADDR_UNDEF;
 	    bt->right = HADDR_UNDEF;
-	    sizeof_rkey = (type->get_sizeof_rkey)(f, udata);
-	    sizeof_node = H5B_nodesize(f, type, NULL, sizeof_rkey);
-	    if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, sizeof_node)<0
+	    if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)bt->sizeof_node)<0
                     || H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, TRUE)<0) {
 		bt = NULL;
 		HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to free B-tree node")
@@ -1880,8 +2033,8 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
          */
         if (level>0) {
             if (H5F_addr_defined(bt->right)) {
-		if (NULL==(sibling=H5AC_find(f, dxpl_id, H5AC_BT, bt->right, type, udata)))
-		    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR, "unable to unlink node from tree")
+                if (NULL == (sibling = H5AC_protect(f, dxpl_id, H5AC_BT, bt->right, type, udata)))
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR, "unable to unlink node from tree")
 
                 /* Make certain the native key for the right sibling is set up */
                 if (!sibling->key[0].nkey && H5B_decode_key(f, sibling, 0) < 0)
@@ -1889,6 +2042,11 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
                 HDmemcpy(sibling->key[0].nkey, bt->key[bt->nchildren].nkey, type->sizeof_nkey);
                 sibling->key[0].dirty = TRUE;
                 sibling->cache_info.dirty = TRUE;
+
+                if (H5AC_unprotect(f, dxpl_id, H5AC_BT, bt->right, sibling, FALSE) != SUCCEED)
+                    HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to release node from tree")
+
+                sibling=NULL;   /* Make certain future references will be caught */
             }
         }
 
@@ -1985,7 +2143,7 @@ H5B_remove(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
      * If the B-tree is now empty then make sure we mark the root node as
      * being at level zero
      */
-    if (NULL==(bt=H5AC_find(f, dxpl_id, H5AC_BT, addr, type, udata)))
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, udata)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree root node")
 
     if (0==bt->nchildren && 0!=bt->level) {
@@ -1993,6 +2151,11 @@ H5B_remove(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
 	bt->cache_info.dirty = TRUE;
     }
     
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) != SUCCEED)
+        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release node")
+
+    bt=NULL;    /* Make certain future references will be caught */
+
 #ifdef H5B_DEBUG
     H5B_assert(f, dxpl_id, addr, type, udata);
 #endif
@@ -2020,8 +2183,6 @@ herr_t
 H5B_delete(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *udata)
 {
     H5B_t	*bt;                    /* B-tree node being operated on */
-    size_t	sizeof_rkey;            /* Size of raw key */
-    hsize_t	sizeof_node;            /* Size of B-tree node */
     unsigned    u;                      /* Local index variable */
     herr_t      ret_value=SUCCEED;      /* Return value */
     
@@ -2064,16 +2225,13 @@ H5B_delete(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
     } /* end else */
 
     /* Delete this node from disk */
-    sizeof_rkey = (type->get_sizeof_rkey)(f, udata);
-    sizeof_node = H5B_nodesize(f, type, NULL, sizeof_rkey);
-    if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, sizeof_node)<0)
+    if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)bt->sizeof_node)<0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree node")
     
-    /* Release node in metadata cache */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, TRUE)<0)
-        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node in cache")
-
 done:
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, TRUE)<0)
+        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node in cache")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_delete() */
 
@@ -2106,9 +2264,8 @@ H5B_nodesize(const H5F_t *f, const H5B_class_t *type,
 	     size_t *total_nkey_size/*out*/, size_t sizeof_rkey)
 {
     size_t	size;
-    size_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B_nodesize, 0)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_nodesize)
 
     /*
      * Check arguments.
@@ -2131,11 +2288,7 @@ H5B_nodesize(const H5F_t *f, const H5B_class_t *type,
 	    2 * H5F_KVALUE(f, type) * H5F_SIZEOF_ADDR(f) +	/*child pointers */
 	    (2 * H5F_KVALUE(f, type) + 1) * sizeof_rkey);	/*keys		*/
 
-    /* Set return value */
-    ret_value=size;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(size)
 }
 
 
@@ -2160,8 +2313,6 @@ static H5B_t *
 H5B_copy(const H5F_t *f, const H5B_t *old_bt)
 {
     H5B_t		*new_node = NULL;
-    size_t		total_native_keysize;
-    size_t		size;
     size_t              nkeys;
     size_t		u;
     H5B_t		*ret_value;
@@ -2174,11 +2325,6 @@ H5B_copy(const H5F_t *f, const H5B_t *old_bt)
     assert(f);
     assert(old_bt);
 
-    /*
-     * Get correct sizes 
-     */
-    size = H5B_nodesize(f, old_bt->type, &total_native_keysize, old_bt->sizeof_rkey);
-
     /* Allocate memory for the new H5B_t object */
     if (NULL==(new_node = H5FL_MALLOC(H5B_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree root node")
@@ -2189,15 +2335,15 @@ H5B_copy(const H5F_t *f, const H5B_t *old_bt)
     /* Compute the number of keys in this node */
     nkeys=2*H5F_KVALUE(f,old_bt->type);
 
-    if (NULL==(new_node->page=H5FL_BLK_MALLOC(page,size)) ||
-            NULL==(new_node->native=H5FL_BLK_MALLOC(native_block,total_native_keysize)) ||
+    if (NULL==(new_node->page=H5FL_BLK_MALLOC(page,old_bt->sizeof_node)) ||
+            NULL==(new_node->native=H5FL_BLK_MALLOC(native_block,old_bt->total_native_keysize)) ||
             NULL==(new_node->child=H5FL_SEQ_MALLOC(haddr_t,nkeys)) ||
             NULL==(new_node->key=H5FL_SEQ_MALLOC(H5B_key_t,(nkeys+1))))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree root node")
 
     /* Copy the other structures */
-    HDmemcpy(new_node->page,old_bt->page,(size_t)size);
-    HDmemcpy(new_node->native,old_bt->native,(size_t)total_native_keysize);
+    HDmemcpy(new_node->page,old_bt->page,old_bt->sizeof_node);
+    HDmemcpy(new_node->native,old_bt->native,old_bt->total_native_keysize);
     HDmemcpy(new_node->child,old_bt->child,(size_t)(sizeof(haddr_t)*nkeys));
     HDmemcpy(new_node->key,old_bt->key,(size_t)(sizeof(H5B_key_t)*(nkeys+1)));
 
@@ -2265,7 +2411,7 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     /*
      * Load the tree node.
      */
-    if (NULL == (bt = H5AC_find(f, dxpl_id, H5AC_BT, addr, type, udata)))
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, udata)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree node")
 
     /*
@@ -2275,21 +2421,21 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 	      "Tree type ID:",
 	      ((bt->type->id)==H5B_SNODE_ID ? "H5B_SNODE_ID" :
             ((bt->type->id)==H5B_ISTORE_ID ? "H5B_ISTORE_ID" : "Unknown!")));
-    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
-	      (unsigned long) H5B_nodesize(f, bt->type, NULL, bt->sizeof_rkey));
-    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	      bt->sizeof_node);
+    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of raw (disk) key:",
-	      (unsigned long) (bt->sizeof_rkey));
+	      bt->sizeof_rkey);
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Dirty flag:",
 	      bt->cache_info.dirty ? "True" : "False");
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Number of initial dirty children:",
 	      bt->ndirty);
-    HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Level:",
-	      (int) (bt->level));
+	      bt->level);
 
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "Address of left sibling:",
@@ -2336,6 +2482,9 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     }
 
 done:
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node")
+
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -2370,7 +2519,7 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
     /* A queue of child data */
     struct child_t {
 	haddr_t			addr;
-	int			level;
+	unsigned		level;
 	struct child_t	       *next;
     } *head = NULL, *tail = NULL, *prev = NULL, *cur = NULL, *tmp = NULL;
 
@@ -2382,13 +2531,17 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 	}
     }
     /* Initialize the queue */
-    bt = H5AC_find(f, dxpl_id, H5AC_BT, addr, type, udata);
+    bt = H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, udata);
     assert(bt);
     cur = H5MM_calloc(sizeof(struct child_t));
     assert (cur);
     cur->addr = addr;
     cur->level = bt->level;
     head = tail = cur;
+
+    status = H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE);
+    assert(status >= 0);
+    bt=NULL;    /* Make certain future references will be caught */
 
     /*
      * Do a breadth-first search of the tree.  New nodes are added to the end
