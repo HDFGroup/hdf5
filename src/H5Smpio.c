@@ -51,8 +51,8 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
 		     hbool_t *is_derived_type );
 static herr_t
 H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
-                     const struct H5O_pline_t *pline,
-                     const struct H5O_efl_t *efl, size_t elmt_size,
+                     const struct H5O_pline_t __unused__ *pline,
+                     const struct H5O_efl_t __unused__ *efl, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
                      const H5D_transfer_t xfer_mode, void *buf /*out*/,
 		     const hbool_t do_write );
@@ -438,8 +438,8 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
  */
 herr_t
 H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
-                     const struct H5O_pline_t *pline,
-                     const struct H5O_efl_t *efl, size_t elmt_size,
+                     const struct H5O_pline_t __unused__ *pline,
+                     const struct H5O_efl_t __unused__ *efl, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
                      const H5D_transfer_t xfer_mode, void *buf /*out*/,
 		     const hbool_t do_write )
