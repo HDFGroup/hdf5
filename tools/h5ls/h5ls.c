@@ -1400,7 +1400,13 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
          if (hexdump_g) {
              p_type = H5Tcopy(type);
          } else {
-             p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
+            H5T_class_t type_class;
+
+            type_class = H5Tget_class(type);
+            if(type_class==H5T_BITFIELD)
+                p_type=H5Tcopy(type);
+            else
+                p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
          }
          
          if (p_type>=0) {

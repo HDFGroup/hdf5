@@ -67,6 +67,7 @@ int do_copy_refobjs(hid_t fidin,
  hsize_t   dims[H5S_MAX_RANK];/* dimensions of dataset */
  int       next;              /* external files */
  int       i, j;
+ H5T_class_t type_class;      /* datatype class */
 
 /*-------------------------------------------------------------------------
  * browse
@@ -122,8 +123,17 @@ int do_copy_refobjs(hid_t fidin,
    nelmts=1;
    for (j=0; j<rank; j++) 
     nelmts*=dims[j];
-   if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
-    goto error;
+   
+   if((type_class = H5Tget_class(ftype_id))<0)
+       goto error;
+   if(type_class==H5T_BITFIELD) {
+       if((mtype_id=H5Tcopy(ftype_id))<0)
+           goto error;
+   } else {
+       if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
+            goto error;
+   }
+
    if ((msize=H5Tget_size(mtype_id))==0)
     goto error;
 
@@ -476,6 +486,7 @@ static int copy_refs_attr(hid_t loc_in,
  char       name[255];
  int        n, j;
  unsigned   u;
+ H5T_class_t type_class;      /* datatype class */
 
  if ((n = H5Aget_num_attrs(loc_in))<0) 
   goto error;
@@ -515,8 +526,17 @@ static int copy_refs_attr(hid_t loc_in,
   nelmts=1;
   for (j=0; j<rank; j++) 
    nelmts*=dims[j];
-  if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
-   goto error;
+
+  if((type_class = H5Tget_class(ftype_id))<0)
+       goto error;
+  if(type_class==H5T_BITFIELD) {
+       if((mtype_id=H5Tcopy(ftype_id))<0)
+           goto error;
+  } else {
+       if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
+            goto error;
+  }
+
   if ((msize=H5Tget_size(mtype_id))==0)
    goto error;
 

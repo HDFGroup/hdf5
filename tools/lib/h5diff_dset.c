@@ -155,6 +155,7 @@ hsize_t diff_datasetid( hid_t dset1_id,
  hsize_t      storage_size1;
  hsize_t      storage_size2;
  hsize_t      nfound=0;               /* number of differences found */
+ H5T_class_t  type_class;             /* data type class */
  int          cmp=1;                  /* do diff or not */
  int          i;
 
@@ -266,9 +267,25 @@ hsize_t diff_datasetid( hid_t dset1_id,
  * memory type and sizes
  *-------------------------------------------------------------------------
  */
+ if((type_class = H5Tget_class(f_type1))<0)
+       goto error;
+ if(type_class==H5T_BITFIELD) {
+       if((m_type1=H5Tcopy(f_type1))<0)
+           goto error;
+ } else {
+       if ((m_type1=H5Tget_native_type(f_type1,H5T_DIR_DEFAULT))<0)
+            goto error;
+ }
 
- m_type1 = H5Tget_native_type( f_type1 , H5T_DIR_DEFAULT);
- m_type2 = H5Tget_native_type( f_type2 , H5T_DIR_DEFAULT);
+ if((type_class = H5Tget_class(f_type2))<0)
+       goto error;
+ if(type_class==H5T_BITFIELD) {
+       if((m_type2=H5Tcopy(f_type2))<0)
+           goto error;
+ } else {
+       if ((m_type2=H5Tget_native_type(f_type2,H5T_DIR_DEFAULT))<0)
+            goto error;
+ }
 
  m_size1 = H5Tget_size( m_type1 );
  m_size2 = H5Tget_size( m_type2 );
@@ -304,13 +321,33 @@ hsize_t diff_datasetid( hid_t dset1_id,
   if ( m_size1 < m_size2 )
   {
    H5Tclose(m_type1);
-   m_type1 = H5Tget_native_type( f_type2 , H5T_DIR_DEFAULT);
+
+   if((type_class = H5Tget_class(f_type2))<0)
+           goto error;
+   if(type_class==H5T_BITFIELD) {
+           if((m_type1=H5Tcopy(f_type2))<0)
+               goto error;
+   } else {
+           if ((m_type1=H5Tget_native_type(f_type2,H5T_DIR_DEFAULT))<0)
+                goto error;
+   }
+
    m_size1 = H5Tget_size( m_type1 );
   }
   else
   {
    H5Tclose(m_type2);
-   m_type2 = H5Tget_native_type( f_type1 , H5T_DIR_DEFAULT);
+
+   if((type_class = H5Tget_class(f_type1))<0)
+       goto error;
+   if(type_class==H5T_BITFIELD) {
+       if((m_type2=H5Tcopy(f_type1))<0)
+           goto error;
+   } else {
+       if ((m_type2=H5Tget_native_type(f_type1,H5T_DIR_DEFAULT))<0)
+            goto error;
+   }
+
    m_size2 = H5Tget_size( m_type2 );
   }
 #if defined (H5DIFF_DEBUG)
