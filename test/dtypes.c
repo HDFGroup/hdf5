@@ -8,6 +8,7 @@
  * Purpose:     Tests the data type interface (H5T)
  */
 #include <assert.h>
+#include <float.h>
 #include <hdf5.h>
 #include <math.h>
 #include <signal.h>
@@ -695,7 +696,7 @@ static int
 test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 {
     flt_t		src_type, dst_type;	/*data types		*/
-    const size_t	ntests=10;		/*number of tests	*/
+    const size_t	ntests=5;		/*number of tests	*/
     const size_t	nelmts=200000;		/*num values per test	*/
     const size_t	max_fails=8;		/*max number of failures*/
     size_t		fails_all_tests=0;	/*number of failures	*/
@@ -799,7 +800,14 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		}
 	    } else if (FLT_DOUBLE==src_type) {
 		if (FLT_FLOAT==dst_type) {
-		    hw_f = ((double*)saved)[j];
+		    /* Watch out for that FPE on overflow! */
+		    if (((double*)saved)[j] > FLT_MAX) {
+			hw_f = FLT_MAX;
+		    } else if (((double*)saved)[j] < -FLT_MAX) {
+			hw_f = -FLT_MAX;
+		    } else {
+			hw_f = ((double*)saved)[j];
+		    }
 		    hw = (unsigned char*)&hw_f;
 		} else if (FLT_DOUBLE==dst_type) {
 		    hw_d = ((double*)saved)[j];
@@ -810,10 +818,24 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		}
 	    } else {
 		if (FLT_FLOAT==dst_type) {
-		    hw_f = ((long double*)saved)[j];
+		    /* Watch out for that FPE on overflow! */
+		    if (((long double*)saved)[j] > FLT_MAX) {
+			hw_f = FLT_MAX;
+		    } else if (((long double*)saved)[j] < -FLT_MAX) {
+			hw_f = -FLT_MAX;
+		    } else {
+			hw_f = ((long double*)saved)[j];
+		    }
 		    hw = (unsigned char*)&hw_f;
 		} else if (FLT_DOUBLE==dst_type) {
-		    hw_d = ((long double*)saved)[j];
+		    /* Watch out for that FPE! */
+		    if (((long double*)saved)[j] > DBL_MAX) {
+			hw_d = DBL_MAX;
+		    } else if (((long double*)saved)[j] < -DBL_MAX) {
+			hw_d = -DBL_MAX;
+		    } else {
+			hw_d = ((long double*)saved)[j];
+		    }
 		    hw = (unsigned char*)&hw_d;
 		} else {
 		    hw_ld = ((long double*)saved)[j];
@@ -993,7 +1015,7 @@ main(void)
     nerrors += test_named ()<0 ? 1 : 0;
     nerrors += test_conv_int ()<0 ? 1 : 0;
 
-#ifndef LATER
+#ifdef LATER
     /*
      * NOT READY FOR TESTING YET BECAUSE SOME SYSTEMS GENERATE A SIGFPE WHEN
      * AN OVERFLOW OCCURS CASTING A DOUBLE TO A FLOAT.

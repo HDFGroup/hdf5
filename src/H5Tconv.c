@@ -13,6 +13,7 @@
 #include <H5Eprivate.h>
 #include <H5MMprivate.h>
 #include <H5Tpkg.h>
+#include <float.h>		/*for FLT_MAX and FLT_MIN		     */
 #include <math.h>		/*for ceil()				     */
 
 /* Conversion data for H5T_conv_struct() */
@@ -1349,8 +1350,19 @@ H5T_conv_double_float (hid_t __unused__ src_id, hid_t __unused__ dst_id,
 	s = (double*)buf;
 	d = (float*)buf;
 
-	for (elmtno=0; elmtno<nelmts; elmtno++) {
-	    *d++ = *s++;
+	/*
+	 * We have to watch out because some machines generate a SIGFPE if
+	 * the source has a larger magnitude than can be represented in the
+	 * destination.
+	 */
+	for (elmtno=0; elmtno<nelmts; elmtno++, d++, s++) {
+	    if (*s > FLT_MAX) {
+		*d = FLT_MAX;
+	    } else if (*s < -FLT_MAX) {
+		*d = -FLT_MAX;
+	    } else {
+		*d = *s;
+	    }
 	}
 	break;
 	    

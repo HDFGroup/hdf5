@@ -238,7 +238,10 @@
 ./testpar/Makefile.ascired
 ./testpar/Makefile.irix64
 ./testpar/README
+./testpar/t_dset.c
+./testpar/t_file.c
 ./testpar/testphdf5.c
+./testpar/testphdf5.h
 ./tgif/APIGrammar.obj
 ./tgif/FileGrammar.obj
 ./tgif/IOPipe.obj
