@@ -1122,6 +1122,11 @@
 ./tools/h5diff/h5difftst.c
 ./tools/h5diff/testh5diff.sh
 
+./tools/h5repack/Makefile.in
+./tools/h5repack/h5repack.sh
+./tools/h5repack/h5repack.c
+./tools/h5repack/h5repacktst.c
+
 ./tools/h5ls/Dependencies
 ./tools/h5ls/Makefile.in
 ./tools/h5ls/h5ls.c
