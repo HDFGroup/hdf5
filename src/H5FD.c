@@ -1418,22 +1418,47 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
     if((file->feature_flags&H5FD_FEAT_AGGREGATE_METADATA) && type!=H5FD_MEM_DRAW) {
         /* Check if the space requested is larger than the space left in the block */
         if(size>file->cur_meta_block_size) {
+            haddr_t new_meta;       /* Address for new metadata */
+
             /* Check if the block asked for is too large for a metadata block */
             if(size>=file->def_meta_block_size) {
-                /* Allocate just enough room for this new block the regular way */
-                ret_value=H5FD_real_alloc(file,type,size);
+                /* Allocate more room for this new block the regular way */
+                new_meta=H5FD_real_alloc(file,type,size);
+
+                /* Check if the new metadata is at the end of the current metadata block */
+                if(file->eoma+file->cur_meta_block_size==new_meta) {
+                    /* Treat the allocation request as if the current metadata block
+                     * grew by the amount allocated and just update the eoma
+                     * address.  Don't bother updating the cur_meta_block_size
+                     * since it will just grow and shrink by the same amount.
+                     */
+                    ret_value=file->eoma;
+                    file->eoma+=size;
+                } /* end if */
+                else {
+                    /* Use the new metadata block for the space allocated */
+                    ret_value=new_meta;
+                } /* end else */
             } /* end if */
             else {
-                /*
-                 * Instead of just dropping the remainder of the block on the
-                 * floor and leaving the space in the file unused, we should
-                 * return this small piece of unused space to the free list
-                 * management. - QAK
-                 */
-
                 /* Allocate another metadata block */
-                file->eoma=H5FD_real_alloc(file,H5FD_MEM_DEFAULT,file->def_meta_block_size);
-                file->cur_meta_block_size=file->def_meta_block_size;
+                new_meta=H5FD_real_alloc(file,H5FD_MEM_DEFAULT,file->def_meta_block_size);
+
+                /* Check if the new metadata is at the end of the current metadata block */
+                if(file->eoma+file->cur_meta_block_size==new_meta) {
+                    file->cur_meta_block_size+=file->def_meta_block_size;
+                } /* end if */
+                else {
+                    /*
+                     * Instead of just dropping the remainder of the block on the
+                     * floor and leaving the space in the file unused, we should
+                     * return this small piece of unused space to the free list
+                     * management. - QAK
+                     */
+                    file->eoma=new_meta;
+                    file->cur_meta_block_size=file->def_meta_block_size;
+                } /* end else */
+
 
                 /* Allocate space out of the metadata block */
                 ret_value=file->eoma;
