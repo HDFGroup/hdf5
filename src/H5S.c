@@ -1029,14 +1029,14 @@ H5Sis_simple (hid_t sid)
     dimension in the array (the slowest) may be unlimited in size.
 --------------------------------------------------------------------------*/
 herr_t
-H5Sset_extent_simple (hid_t sid, int rank, const hsize_t *dims,
-		      const hsize_t *max)
+H5Sset_extent_simple (hid_t sid, int rank, const hsize_t dims[/*rank*/],
+		      const hsize_t max[/*rank*/])
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
     intn		    u;	/* local counting variable */
 
     FUNC_ENTER(H5Sset_extent_simple, FAIL);
-    H5TRACE4("e","iIs*h*h",sid,rank,dims,max);
+    H5TRACE4("e","iIs*[a1]h*[a1]h",sid,rank,dims,max);
 
     /* Check args */
     if ((space = H5I_object(sid)) == NULL) {
@@ -1382,14 +1382,15 @@ H5S_extend (H5S_t *space, const hsize_t *size)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Screate_simple (int rank, const hsize_t *dims, const hsize_t *maxdims)
+H5Screate_simple (int rank, const hsize_t dims[/*rank*/],
+		  const hsize_t maxdims[/*rank*/])
 {
     hid_t	ret_value = FAIL;
     H5S_t	*space = NULL;
     int		i;
 
-    FUNC_ENTER(H5Screate, FAIL);
-    H5TRACE3("i","Is*h*h",rank,dims,maxdims);
+    FUNC_ENTER(H5Screate_simple, FAIL);
+    H5TRACE3("i","Is*[a0]h*[a0]h",rank,dims,maxdims);
 
     /* Check arguments */
     if (rank<0) {

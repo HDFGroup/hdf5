@@ -615,7 +615,7 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    
+
     FUNC_LEAVE(ret_value);
 }
 

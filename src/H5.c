@@ -93,17 +93,6 @@ H5_init_library(void)
 {
     FUNC_ENTER_INIT(H5_init_library, NULL, FAIL);
 
-#ifdef H5_DEBUG_API
-    {
-	/* Turn on tracing? */
-	const char *s = getenv ("HDF5_TRACE");
-	if (s && isdigit(*s)) {
-	    int fd = HDstrtol (s, NULL, 0);
-	    H5_trace_g = HDfdopen (fd, "w");
-	}
-    }
-#endif
-
     /* Install atexit() library cleanup routine */
     if (install_atexit_g == TRUE)
         if (HDatexit(&H5_term_library) != 0)
@@ -118,6 +107,18 @@ H5_init_library(void)
         HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
                       "unable to initialize type interface");
     }
+
+#ifdef H5_DEBUG_API
+    {
+	/* Turn on tracing? */
+	const char *s = getenv ("HDF5_TRACE");
+	if (s && isdigit(*s)) {
+	    int fd = HDstrtol (s, NULL, 0);
+	    H5_trace_g = HDfdopen (fd, "w");
+	}
+    }
+#endif
+
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -962,9 +963,11 @@ void
 H5_trace (hbool_t returning, const char *func, const char *type, ...)
 {
     va_list		ap;
-    char		buf[64];
+    char		buf[64], *rest;
     const char		*argname;
-    intn		argno=0, ptr, n;
+    intn		argno=0, ptr, n, asize_idx;
+    hssize_t		asize[16];
+    hssize_t		i;
     void		*vp = NULL;
     FILE		*out = H5_trace_g;
 
@@ -977,10 +980,28 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	fprintf (out, "%s(", func);
     }
 
-    while (*type) {
+    /* Clear array sizes */
+    for (i=0; i<NELMTS(asize); i++) asize[i] = -1;
+
+    /* Parse the argument types */
+    for (argno=0; *type; argno++, type+=isupper(*type)?2:1) {
 	/* Count levels of indirection */
 	for (ptr=0; '*'==*type; type++) ptr++;
-
+	if ('['==*type) {
+	    if ('a'==type[1]) {
+		asize_idx = strtol(type+2, &rest, 10);
+		assert(']'==*rest);
+		type = rest+1;
+	    } else {
+		rest = strchr(type, ']');
+		assert(rest);
+		type = rest+1;
+		asize_idx = -1;
+	    }
+	} else {
+	    asize_idx = -1;
+	}
+	
 	/*
 	 * The argument name.  Leave off the `_id' part.  If the argument
 	 * name is the null pointer then don't print the argument or the
@@ -994,7 +1015,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		buf[MIN((int)sizeof(buf)-1, n)] = '\0';
 		argname = buf;
 	    }
-	    fprintf (out, "%s%s=", argno++?", ":"", argname);
+	    fprintf (out, "%s%s=", argno?", ":"", argname);
 	} else {
 	    argname = "";
 	}
@@ -1004,7 +1025,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	switch (type[0]) {
 	case 'b':
 	    if (ptr) {
-		fprintf (out, "0x%lx", (unsigned long)vp);
+		if (vp) {
+		    fprintf (out, "0x%lx", (unsigned long)vp);
+		} else {
+		    fprintf(out, "NULL");
+		}
 	    } else {
 		hbool_t bool = va_arg (ap, hbool_t);
 		if (TRUE==bool) fprintf (out, "TRUE");
@@ -1015,7 +1040,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	case 'd':
 	    if (ptr) {
-		fprintf (out, "0x%lx", (unsigned long)vp);
+		if (vp) {
+		    fprintf (out, "0x%lx", (unsigned long)vp);
+		} else {
+		    fprintf(out, "NULL");
+		}
 	    } else {
 		double dbl = va_arg (ap, double);
 		fprintf (out, "%g", dbl);
@@ -1026,7 +1055,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	    switch (type[1]) {
 	    case 'l':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5D_layout_t layout = va_arg (ap, H5D_layout_t);
 		    switch (layout) {
@@ -1051,7 +1084,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		
 	    case 't':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5D_transfer_t transfer = va_arg (ap, H5D_transfer_t);
 		    switch (transfer) {
@@ -1079,7 +1116,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	case 'e':
 	    if (ptr) {
-		fprintf (out, "0x%lx", (unsigned long)vp);
+		if (vp) {
+		    fprintf (out, "0x%lx", (unsigned long)vp);
+		} else {
+		    fprintf(out, "NULL");
+		}
 	    } else {
 		herr_t status = va_arg (ap, herr_t);
 		if (SUCCEED==status) fprintf (out, "SUCCEED");
@@ -1092,7 +1133,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	    switch (type[1]) {
 	    case 'd':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5E_direction_t direction = va_arg (ap, H5E_direction_t);
 		    switch (direction) {
@@ -1111,7 +1156,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		
 	    case 'e':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5E_error_t *error = va_arg (ap, H5E_error_t*);
 		    fprintf (out, "0x%lx", (unsigned long)error);
@@ -1128,7 +1177,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	    switch (type[1]) {
 	    case 'd':
 		if (ptr) {
-		    fprintf(out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf(out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5F_driver_t driver = va_arg(ap, H5F_driver_t);
 		    switch (driver) {
@@ -1170,7 +1223,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	    switch (type[1]) {
 	    case 'l':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5G_link_t link_type = va_arg (ap, H5G_link_t);
 		    switch (link_type) {
@@ -1192,7 +1249,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	    case 's':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5G_stat_t *statbuf = va_arg (ap, H5G_stat_t*);
 		    fprintf (out, "0x%lx", (unsigned long)statbuf);
@@ -1207,10 +1268,31 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	case 'h':
 	    if (ptr) {
-		fprintf (out, "0x%lx", (unsigned long)vp);
+		if (vp) {
+		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (asize_idx>=0 && asize[asize_idx]>=0) {
+			hsize_t *p = (hsize_t*)vp;
+			fprintf(out, " {");
+			for (i=0; i<asize[asize_idx]; i++) {
+			    if (H5S_UNLIMITED==p[i]) {
+				HDfprintf(out, "%sH5S_UNLIMITED", i?", ":"");
+			    } else {
+				HDfprintf(out, "%s%Hu", i?", ":"", p[i]);
+			    }
+			}
+			fprintf(out, "}");
+		    }
+		} else {
+		    fprintf(out, "NULL");
+		}
 	    } else {
 		hsize_t hsize = va_arg (ap, hsize_t);
-		HDfprintf (out, "%Hu", hsize);
+		if (H5S_UNLIMITED==hsize) {
+		    HDfprintf(out, "H5S_UNLIMITED");
+		} else {
+		    HDfprintf (out, "%Hu", hsize);
+		    asize[argno] = (hssize_t)hsize;
+		}
 	    }
 	    break;
 
@@ -1218,10 +1300,23 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	    switch (type[1]) {
 	    case 's':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+			if (asize_idx>=0 && asize[asize_idx]>=0) {
+			    hssize_t *p = (hssize_t*)vp;
+			    fprintf(out, " {");
+			    for (i=0; i<asize[asize_idx]; i++) {
+				HDfprintf(out, "%s%Hd", i?", ":"", p[i]);
+			    }
+			    fprintf(out, "}");
+			}
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    hssize_t hssize = va_arg (ap, hssize_t);
 		    HDfprintf (out, "%Hd", hssize);
+		    asize[argno] = (hssize_t)hssize;
 		}
 		break;
 		
@@ -1233,7 +1328,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	case 'i':
 	    if (ptr) {
-		fprintf (out, "0x%lx", (unsigned long)vp);
+		if (vp) {
+		    fprintf (out, "0x%lx", (unsigned long)vp);
+		} else {
+		    fprintf(out, "NULL");
+		}
 	    } else {
 		hid_t obj = va_arg (ap, hid_t);
 		if (-2 == obj) {
@@ -1241,12 +1340,12 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		} else if (FAIL==obj) {
 		    fprintf (out, "FAIL");
 		} else {
-		    fprintf (out, "%ld", (long)obj);
 		    switch (H5I_group (obj)) {
 		    case BADGROUP:
-			fprintf (out, " (error)");
+			fprintf (out, "%ld (error)", (long)obj);
 			break;
 		    case H5_FILE:
+			fprintf(out, "%ld", (long)obj);
 			if (strcmp (argname, "file")) {
 			    fprintf (out, " (file)");
 			}
@@ -1259,36 +1358,71 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		    case H5_TEMPLATE_5:
 		    case H5_TEMPLATE_6:
 		    case H5_TEMPLATE_7:
+			fprintf(out, "%ld", (long)obj);
 			if (strcmp (argname, "plist")) {
 			    fprintf (out, " (plist)");
 			}
 			break;
 		    case H5_GROUP:
+			fprintf(out, "%ld", (long)obj);
 			if (strcmp (argname, "group")) {
 			    fprintf (out, " (group)");
 			}
 			break;
 		    case H5_DATATYPE:
-			if (strcmp (argname, "type")) {
-			    fprintf (out, " (type)");
+			if (obj==H5T_NATIVE_CHAR_g) {
+			    fprintf(out, "H5T_NATIVE_CHAR");
+			} else if (obj==H5T_NATIVE_UCHAR_g) {
+			    fprintf(out, "H5T_NATIVE_UCHAR");
+			} else if (obj==H5T_NATIVE_SHORT_g) {
+			    fprintf(out, "H5T_NATIVE_SHORT");
+			} else if (obj==H5T_NATIVE_USHORT_g) {
+			    fprintf(out, "H5T_NATIVE_USHORT");
+			} else if (obj==H5T_NATIVE_INT_g) {
+			    fprintf(out, "H5T_NATIVE_INT");
+			} else if (obj==H5T_NATIVE_UINT_g) {
+			    fprintf(out, "H5T_NATIVE_UINT");
+			} else if (obj==H5T_NATIVE_LONG_g) {
+			    fprintf(out, "H5T_NATIVE_LONG");
+			} else if (obj==H5T_NATIVE_ULONG_g) {
+			    fprintf(out, "H5T_NATIVE_ULONG");
+			} else if (obj==H5T_NATIVE_LLONG_g) {
+			    fprintf(out, "H5T_NATIVE_LLONG");
+			} else if (obj==H5T_NATIVE_ULLONG_g) {
+			    fprintf(out, "H5T_NATIVE_ULLONG");
+			} else if (obj==H5T_NATIVE_FLOAT_g) {
+			    fprintf(out, "H5T_NATIVE_FLOAT");
+			} else if (obj==H5T_NATIVE_DOUBLE_g) {
+			    fprintf(out, "H5T_NATIVE_DOUBLE");
+			} else if (obj==H5T_NATIVE_LDOUBLE_g) {
+			    fprintf(out, "H5T_NATIVE_LDOUBLE");
+			} else {
+			    fprintf(out, "%ld", (long)obj);
+			    if (strcmp (argname, "type")) {
+				fprintf (out, " (type)");
+			    }
 			}
 			break;
 		    case H5_DATASPACE:
+			fprintf(out, "%ld", (long)obj);
 			if (strcmp (argname, "space")) {
 			    fprintf (out, " (space)");
 			}
 			break;
 		    case H5_DATASET:
+			fprintf(out, "%ld", (long)obj);
 			if (strcmp (argname, "dset")) {
 			    fprintf (out, " (dset)");
 			}
 			break;
 		    case H5_ATTR:
+			fprintf(out, "%ld", (long)obj);
 			if (strcmp (argname, "attr")) {
 			    fprintf (out, " (attr)");
 			}
 			break;
 		    default:
+			fprintf(out, "%ld", (long)obj);
 			fprintf (out, " (unknown class)");
 			break;
 		    }
@@ -1300,19 +1434,45 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	    switch (type[1]) {
 	    case 's':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+			if (asize_idx>=0 && asize[asize_idx]>=0) {
+			    int *p = (int*)vp;
+			    fprintf(out, " {");
+			    for (i=0; i<asize[asize_idx]; i++) {
+				fprintf(out, "%s%d", i?", ":"", p[i]);
+			    }
+			    fprintf(out, "}");
+			}
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    int is = va_arg (ap, int);
 		    fprintf (out, "%d", is);
+		    asize[argno] = is;
 		}
 		break;
 		
 	    case 'u':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+			if (asize_idx>=0 && asize[asize_idx]>=0) {
+			    int *p = (int*)vp;
+			    fprintf(out, " {");
+			    for (i=0; i<asize[asize_idx]; i++) {
+				HDfprintf(out, "%s%Hu", i?", ":"", p[i]);
+			    }
+			    fprintf(out, "}");
+			}
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    unsigned iu = va_arg (ap, unsigned);
 		    fprintf (out, "%u", iu);
+		    asize[argno] = iu;
 		}
 		break;
 
@@ -1326,7 +1486,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	    switch (type[1]) {
 	    case 'c':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 #ifdef HAVE_PARALLEL
 		    MPI_Comm comm = va_arg (ap, MPI_Comm);
@@ -1336,7 +1500,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		break;
 	    case 'i':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 #ifdef HAVE_PARALLEL
 		    MPI_Info info = va_arg (ap, MPI_Info);
@@ -1351,7 +1519,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	case 'o':
 	    if (ptr) {
-		fprintf (out, "0x%lx", (unsigned long)vp);
+		if (vp) {
+		    fprintf (out, "0x%lx", (unsigned long)vp);
+		} else {
+		    fprintf(out, "NULL");
+		}
 	    } else {
 		off_t offset = va_arg (ap, off_t);
 		fprintf (out, "%ld", (long)offset);
@@ -1360,7 +1532,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	case 'p':
 	    if (ptr) {
-		fprintf (out, "0x%lx", (unsigned long)vp);
+		if (vp) {
+		    fprintf (out, "0x%lx", (unsigned long)vp);
+		} else {
+		    fprintf(out, "NULL");
+		}
 	    } else {
 		H5P_class_t plist_class = va_arg (ap, H5P_class_t);
 		switch (plist_class) {
@@ -1390,7 +1566,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	    switch (type[1]) {
 	    case 'c':
 		if (ptr) {
-		    fprintf(out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf(out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5S_class_t cls = va_arg(ap, H5S_class_t);
 		    switch (cls) {
@@ -1415,7 +1595,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			
 	    case 's':
 		if (ptr) {
-		    fprintf(out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf(out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5S_seloper_t so = va_arg(ap, H5S_seloper_t);
 		    switch (so) {
@@ -1440,7 +1624,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	case 's':
 	    if (ptr) {
-		fprintf (out, "0x%lx", (unsigned long)vp);
+		if (vp) {
+		    fprintf (out, "0x%lx", (unsigned long)vp);
+		} else {
+		    fprintf(out, "NULL");
+		}
 	    } else {
 		const char *str = va_arg (ap, const char*);
 		fprintf (out, "\"%s\"", str);
@@ -1451,7 +1639,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	    switch (type[1]) {
 	    case 'c':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5T_cset_t cset = va_arg (ap, H5T_cset_t);
 		    switch (cset) {
@@ -1470,7 +1662,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	    case 'n':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5T_norm_t norm = va_arg (ap, H5T_norm_t);
 		    switch (norm) {
@@ -1495,7 +1691,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	    case 'o':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5T_order_t order = va_arg (ap, H5T_order_t);
 		    switch (order) {
@@ -1523,7 +1723,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	    case 'p':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5T_pad_t pad = va_arg (ap, H5T_pad_t);
 		    switch (pad) {
@@ -1548,7 +1752,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	    case 's':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5T_sign_t sign = va_arg (ap, H5T_sign_t);
 		    switch (sign) {
@@ -1570,7 +1778,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	    case 't':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5T_class_t type_class = va_arg (ap, H5T_class_t);
 		    switch (type_class) {
@@ -1607,7 +1819,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	    case 'z':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5T_str_t str = va_arg (ap, H5T_str_t);
 		    switch (str) {
@@ -1635,7 +1851,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	case 'x':
 	    if (ptr) {
-		fprintf (out, "0x%lx", (unsigned long)vp);
+		if (vp) {
+		    fprintf (out, "0x%lx", (unsigned long)vp);
+		} else {
+		    fprintf(out, "NULL");
+		}
 	    } else {
 		vp = va_arg (ap, void*);
 		fprintf (out, "0x%lx", (unsigned long)vp);
@@ -1644,10 +1864,23 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	case 'z':
 	    if (ptr) {
-		fprintf (out, "0x%lx", (unsigned long)vp);
+		if (vp) {
+		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (asize_idx>=0 && asize[asize_idx]>=0) {
+			size_t *p = (size_t*)vp;
+			fprintf(out, " {");
+			for (i=0; i<asize[asize_idx]; i++) {
+			    HDfprintf(out, "%s%Zu", i?", ":"", p[i]);
+			}
+			fprintf(out, "}");
+		    }
+		} else {
+		    fprintf(out, "NULL");
+		}
 	    } else {
 		size_t size = va_arg (ap, size_t);
 		HDfprintf (out, "%Zu", size);
+		asize[argno] = (hssize_t)size;
 	    }
 	    break;
 
@@ -1655,7 +1888,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	    switch (type[1]) {
 	    case 'm':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    H5Z_method_t zmeth = va_arg (ap, H5Z_method_t);
 		    if (zmeth<0) {
@@ -1676,10 +1913,23 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	    case 's':
 		if (ptr) {
-		    fprintf (out, "0x%lx", (unsigned long)vp);
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+			if (vp && asize_idx>=0 && asize[asize_idx]>=0) {
+			    ssize_t *p = (ssize_t*)vp;
+			    fprintf(out, " {");
+			    for (i=0; i<asize[asize_idx]; i++) {
+				HDfprintf(out, "%s%Zd", i?", ":"", p[i]);
+			    }
+			    fprintf(out, "}");
+			}
+		    } else {
+			fprintf(out, "NULL");
+		    }
 		} else {
 		    ssize_t ssize = va_arg (ap, ssize_t);
 		    HDfprintf (out, "%Zd", ssize);
+		    asize[argno] = (hssize_t)ssize;
 		}
 		break;
 
@@ -1697,8 +1947,6 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	    }
 	    goto error;
 	}
-
-	type += isupper(*type)?2:1;
     }
 
  error:

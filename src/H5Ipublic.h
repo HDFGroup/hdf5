@@ -20,10 +20,13 @@
 /* Public headers needed by this file */
 #include <H5public.h>
 
-/* Group values allowed */
+/*
+ * Group values allowed.  Start with `1' instead of `0' because it makes the
+ * tracing output look better when hid_t values are large numbers.
+ */
 typedef enum {
     BADGROUP             = (-1),/*invalid Group                              */
-    H5_FILE              = 0,   /*group ID for File objects                  */
+    H5_FILE              = 1,   /*group ID for File objects                  */
     H5_TEMPLATE_0,              /*group ID for Template objects              */
     H5_TEMPLATE_1,              /*group ID for Template objects              */
     H5_TEMPLATE_2,              /*group ID for Template objects              */

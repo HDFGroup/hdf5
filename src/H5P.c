@@ -1038,13 +1038,13 @@ H5Pget_layout (hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_chunk (hid_t tid, int ndims, const hsize_t dim[])
+H5Pset_chunk (hid_t tid, int ndims, const hsize_t dim[/*ndims*/])
 {
     int			    i;
     H5D_create_t	   *tmpl = NULL;
 
     FUNC_ENTER(H5Pset_chunk, FAIL);
-    H5TRACE3("e","iIs*h",tid,ndims,dim);
+    H5TRACE3("e","iIs*[a1]h",tid,ndims,dim);
 
     /* Check arguments */
     if (H5P_DATASET_CREATE != H5P_get_class(tid) ||

@@ -994,7 +994,8 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
     /* First use the hint */
     if (idx_hint && *idx_hint>=0 && *idx_hint<rdcc->nused) {
 	ent = rdcc->slot + *idx_hint;
-	if (layout->ndims==ent->layout->ndims) {
+	if (layout->ndims==ent->layout->ndims &&
+	    H5F_addr_eq(&(layout->addr), &(ent->layout->addr))) {
 	    for (i=0, found=*idx_hint; found>=0 && i<ent->layout->ndims; i++) {
 		if (offset[i]!=ent->offset[i]) found = -1;
 	    }
@@ -1004,7 +1005,8 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
     /* Then look at all the entries */
     for (i=0; found<0 && i<rdcc->nused; i++) {
 	ent = rdcc->slot + i;
-	if (layout->ndims==ent->layout->ndims) {
+	if (layout->ndims==ent->layout->ndims &&
+	    H5F_addr_eq(&(layout->addr), &(ent->layout->addr))) {
 	    for (j=0, found=i; found>=0 && j<ent->layout->ndims; j++) {
 		if (offset[j]!=ent->offset[j]) found = -1;
 	    }

@@ -5,6 +5,7 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Monday, March 23, 1998
  */
+#include <ctype.h>
 #include <hdf5.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,6 +53,59 @@ usage: %s [OPTIONS] FILE [GROUP]\n\
    GROUP\n\
       If a group name is not specified then the contents of the root group\n\
       \"/\" are displayed.\n", progname);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	dump_dataset_values
+ *
+ * Purpose:	Prints all values of a dataset.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, July 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+dump_dataset_values(hid_t dset)
+{
+    hid_t		file_space, mem_space, type;
+    hsize_t		start, file_nelmts, mem_nelmts;
+    hssize_t		zero = 0;
+    unsigned char	buf[1024];
+    hsize_t		i;
+
+    file_space = H5Dget_space(dset);
+    type = H5Dget_type(dset);
+
+    if (H5Tequal(type, H5T_NATIVE_CHAR)) {
+	printf("%*svalue = \"", 26, "");
+	file_nelmts = H5Sextent_npoints(file_space);
+	mem_nelmts = sizeof(buf);
+	mem_space = H5Screate_simple(1, &mem_nelmts, NULL);
+	for (start=0; start<file_nelmts; start+=mem_nelmts) {
+	    mem_nelmts = MIN(mem_nelmts, file_nelmts-start);
+	    H5Sselect_hyperslab(file_space, H5S_SELECT_SET, &start, NULL,
+				&mem_nelmts, NULL);
+	    H5Sselect_hyperslab(mem_space, H5S_SELECT_SET, &zero, NULL,
+				&mem_nelmts, NULL);
+	    H5Dread(dset, H5T_NATIVE_CHAR, mem_space, file_space, H5P_DEFAULT,
+		    buf);
+	    for (i=0; i<mem_nelmts; i++) {
+		if (isprint(buf[i])) putchar(buf[i]);
+		else printf("\\%03o", buf[i]);
+	    }
+	}
+	H5Sclose(mem_space);
+	printf("\"\n");
+    }
+
+    H5Sclose(file_space);
+    H5Tclose(type);
 }
 
 
@@ -153,6 +207,7 @@ list (hid_t group, const char *name, void __unused__ *op_data)
 	printf ("}\n");
 	H5Dclose (space);
 	H5Aiterate (obj, NULL, list_attr, NULL);
+	dump_dataset_values(obj);
 	H5Dclose (obj);
     } else if ((obj=H5Gopen (group, name))>=0) {
 	printf ("Group\n");
