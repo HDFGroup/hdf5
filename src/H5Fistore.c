@@ -1276,10 +1276,11 @@ H5F_istore_prune (H5F_t *f, size_t size)
 	    }
 
 	    if (cur) {
-		if (H5F_istore_preempt(f, cur)<0) nerrors++;
 		for (j=0; j<nmeth; j++) {
 		    if (p[j]==cur) p[j] = NULL;
+		    if (n[j]==cur) n[j] = cur->next;
 		}
+		if (H5F_istore_preempt(f, cur)<0) nerrors++;
 	    }
 	}
 	
