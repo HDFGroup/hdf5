@@ -1,0 +1,138 @@
+#							-*- shell-script -*-
+#
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
+
+
+#----------------------------------------------------------------------------
+# Compiler flags. The CPPFLAGS values should not include package debug
+# flags like `-DH5G_DEBUG' since these are added with the
+# `--enable-debug' switch of configure.
+#----------------------------------------------------------------------------
+
+
+# Choosing a C Compiler
+# ---------------------
+#
+# The user should be able to specify the compiler by setting the CC
+# environment variable to the name of the compiler and any switches it 
+# requires for proper operation.  If CC is unset then this script may
+# set it.  If CC is unset by time this script completes then configure 
+# will try `gcc' and `cc' in that order (perhaps some others too).
+#
+# Note: Code later in this file may depend on the value of $CC_BASENAME
+#       in order to distinguish between different compilers when
+#       deciding which compiler command-line switches to use.  This
+#       variable is set based on the incoming value of $CC and is only
+#       used within this file.
+
+if test "X-" =  "X-$CC"; then
+    CC=cc
+    CC_BASENAME=cc
+fi
+# no need to use RANLIB
+RANLIB=:
+
+
+# C Compiler and Preprocessor Flags
+# ---------------------------------
+#
+# Flags that end with `_CFLAGS' are always passed to the compiler.
+# Flags that end with `_CPPFLAGS' are passed to the compiler when
+# compiling but not when linking.
+#
+# DEBUG_CFLAGS		Flags to pass to the compiler to create a
+# DEBUG_CPPFLAGS	library suitable for use with debugging
+#			tools. Usually this list will exclude
+#			optimization switches (like `-O') and include
+#			switches that turn on symbolic debugging
+#			support (like `-g').
+#
+# PROD_CFLAGS		Flags to pass to the compiler to create a
+# PROD_CPPFLAGS		production version of the library.  These
+#			usualy exclude symbolic debugging switches
+#			(like `-g') and include optimization switches
+#			(like `-O').
+#
+# PROFILE_CFLAGS	Flags to pass to the compiler to create a
+# PROFILE_CPPFLAGS	library suitable for performance testing (like 
+# 			`-pg').  This may or may not include debugging 
+# 			or production flags.
+#			
+# CFLAGS		Flags can be added to this variable which
+#			might already be partially initialized.  These 
+#			flags will always be passed to the compiler
+#			and should include switches to turn on full
+#			warnings.  HDF5 attempts to be ANSI and Posix
+#			compliant and employ good programming
+#			practices resulting in few if any
+#			warnings.
+#
+#			Warning flags do not have to be added to CFLAGS
+#			variable if the compiler is the GNU gcc
+#			compiler or a descendent of gcc such as EGCS or PGCC.
+#
+#			The CFLAGS should contains *something* or else 
+#			configure will probably add `-g'.  For most
+#			systems this isn't a problem but some systems
+#			will disable optimizations in favor of the
+#			`-g'.
+#			
+#
+# These flags should be set according to the compiler being used.
+# There are two ways to check the compiler.  You can try using `-v' or 
+# `--version' to see if the compiler will print a version string.  You 
+# can use the value of $CC_BASENAME which is the base name of the
+# first word in $CC (note that the value of CC may have changed
+# above).
+
+case $CC_BASENAME in
+    gcc)
+	CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
+	DEBUG_CFLAGS="-g -fverbose-asm"
+	DEBUG_CPPFLAGS=
+	PROD_CFLAGS="-O3 -fomit-frame-pointer"
+	PROD_CPPFLAGS=
+	PROFILE_CFLAGS="-pg"
+	PROFILE_CPPFLAGS=
+	;;
+
+    cc)
+	CFLAGS="$CFLAGS"
+	DEBUG_CFLAGS="-g -h zero"
+	DEBUG_CPPFLAGS=
+	PROD_CFLAGS="-O2 -h scalar0"
+	PROD_CPPFLAGS=
+	PROFILE_CFLAGS="-pg"
+	PROFILE_CPPFLAGS=
+	;;
+
+    *)
+	CFLAGS="$CFLAGS -ansi"
+	DEBUG_CFLAGS="-g"
+	DEBUG_CPPFLAGS=
+	PROD_CFLAGS="-O"
+	PROD_CPPFLAGS=
+	PROFILE_CFLAGS="-pg"
+	PROFILE_CPPFLAGS=
+	;;
+esac
+
+
+
+# Overriding Configure Tests
+# --------------------------
+#
+# Values for overriding configuration tests when cross compiling.
+# This includes compiling on some machines where the serial front end
+# compiles for a parallel back end.
+
+# Set this to `yes' or `no' depending on whether the target is big
+# endian or little endian.
+#ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
+
+# Set this to the width required by printf() to print type `long
+# long'.  For instance, if the format would be `%lld' then set it to
+# `ll' or if the format would be `%qd' set it to `q'.
+#hdf5_cv_printf_ll=${hdf5_cv_printf_ll='ll'}
