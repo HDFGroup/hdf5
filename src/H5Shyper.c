@@ -77,34 +77,79 @@ H5FL_ARR_DEFINE_STATIC(H5S_hyper_dim_t,H5S_MAX_RANK);
 /* #define H5S_HYPER_DEBUG */
 #ifdef H5S_HYPER_DEBUG
 static herr_t
-H5S_hyper_print_spans_helper(struct H5S_hyper_span_t *span,unsigned depth)
+H5S_hyper_print_spans_helper(FILE *f, struct H5S_hyper_span_t *span,unsigned depth)
 {
-    struct H5S_hyper_span_t *tmp_span;
-
     FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_print_spans_helper);
 
-    tmp_span=span;
-    while(tmp_span) {
-        HDfprintf(stderr,"%s: depth=%u, span=%p, (%d, %d), nelem=%u, pstride=%u\n",FUNC,depth,tmp_span,(int)tmp_span->low,(int)tmp_span->high,(unsigned)tmp_span->nelem,(unsigned)tmp_span->pstride);
-        if(tmp_span->down && tmp_span->down->head) {
-            HDfprintf(stderr,"%s: spans=%p, count=%u, scratch=%p, head=%p\n",FUNC,tmp_span->down,tmp_span->down->count,tmp_span->down->scratch,tmp_span->down->head);
-            H5S_hyper_print_spans_helper(tmp_span->down->head,depth+1);
+    while(span) {
+        HDfprintf(f,"%s: depth=%u, span=%p, (%d, %d), nelem=%u, pstride=%u\n",FUNC,depth,span,(int)span->low,(int)span->high,(unsigned)span->nelem,(unsigned)span->pstride);
+        if(span->down && span->down->head) {
+            HDfprintf(f,"%s: spans=%p, count=%u, scratch=%p, head=%p\n",FUNC,span->down,span->down->count,span->down->scratch,span->down->head);
+            H5S_hyper_print_spans_helper(f,span->down->head,depth+1);
         } /* end if */
-        tmp_span=tmp_span->next;
+        span=span->next;
     } /* end while */
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
-static herr_t
-H5S_hyper_print_spans(const struct H5S_hyper_span_info_t *span_lst)
+herr_t
+H5S_hyper_print_spans(FILE *f, const struct H5S_hyper_span_info_t *span_lst)
 {
     FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_print_spans);
 
     if(span_lst!=NULL) {
-        HDfprintf(stderr,"%s: spans=%p, count=%u, scratch=%p, head=%p\n",FUNC,span_lst,span_lst->count,span_lst->scratch,span_lst->head);
-        H5S_hyper_print_spans_helper(span_lst->head,0);
+        HDfprintf(f,"%s: spans=%p, count=%u, scratch=%p, head=%p\n",FUNC,span_lst,span_lst->count,span_lst->scratch,span_lst->head);
+        H5S_hyper_print_spans_helper(f,span_lst->head,0);
     } /* end if */
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+}
+
+herr_t
+H5S_space_print_spans(FILE *f, const H5S_t *space)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_space_print_spans);
+
+    H5S_hyper_print_spans(f,space->select.sel_info.hslab.span_lst);
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+}
+
+static herr_t
+H5S_hyper_print_diminfo_helper(FILE *f, const char *field, unsigned ndims, const H5S_hyper_dim_t *dinfo)
+{
+    unsigned u;                 /* Local index variable */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_print_diminfo_helper);
+
+    if(dinfo!=NULL) {
+        HDfprintf(f,"%s: %s: start=[",FUNC,field);
+        for(u=0; u<ndims; u++)
+            HDfprintf(f,"%Hd%s",dinfo[u].start, (u<(ndims-1) ? ", " : "]\n"));
+        HDfprintf(f,"%s: %s: stride=[",FUNC,field);
+        for(u=0; u<ndims; u++)
+            HDfprintf(f,"%Hu%s",dinfo[u].stride, (u<(ndims-1) ? ", " : "]\n"));
+        HDfprintf(f,"%s: %s: count=[",FUNC,field);
+        for(u=0; u<ndims; u++)
+            HDfprintf(f,"%Hu%s",dinfo[u].count, (u<(ndims-1) ? ", " : "]\n"));
+        HDfprintf(f,"%s: %s: block=[",FUNC,field);
+        for(u=0; u<ndims; u++)
+            HDfprintf(f,"%Hu%s",dinfo[u].block, (u<(ndims-1) ? ", " : "]\n"));
+    } /* end if */
+    else
+        HDfprintf(f,"%s: %s==NULL\n",FUNC,field);
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+}
+
+herr_t
+H5S_hyper_print_diminfo(FILE *f, const H5S_t *space)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_print_diminfo);
+
+    H5S_hyper_print_diminfo_helper(f,"diminfo",space->extent.u.simple.rank,space->select.sel_info.hslab.diminfo);
+    H5S_hyper_print_diminfo_helper(f,"app_diminfo",space->extent.u.simple.rank,space->select.sel_info.hslab.app_diminfo);
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
@@ -220,7 +265,7 @@ H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size)
                         /* First dimension after flattened dimensions */
                         iter->u.hyp.diminfo[curr_dim].start = tdiminfo[i].start*acc;
                         /* Special case for single block regular selections */
-                        if(tdiminfo[curr_dim].count==1)
+                        if(tdiminfo[i].count==1)
                             iter->u.hyp.diminfo[curr_dim].stride = 1;
                         else
                             iter->u.hyp.diminfo[curr_dim].stride = tdiminfo[i].stride*acc;
