@@ -28,7 +28,7 @@
 #include "testhdf5.h"
 
 /* Definitions for misc. test #1 */
-#define MISC1_FILE	"tmisc.h5"
+#define MISC1_FILE	"tmisc1.h5"
 #define MISC1_VAL       (13417386)      /* 0xccbbaa */
 #define MISC1_VAL2      (15654348)      /* 0xeeddcc */
 #define MISC1_DSET_NAME "/scalar_set"
@@ -183,6 +183,13 @@ typedef struct
 
 unsigned m13_data[MISC13_DIM1][MISC13_DIM2];           /* Data to write to dataset */
 unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset */
+
+/* Definitions for misc. test #14 */
+#define MISC14_FILE             "tmisc14.h5"
+#define MISC14_DSET1_NAME       "Dataset1"
+#define MISC14_DSET2_NAME       "Dataset2"
+#define MISC14_DSET3_NAME       "Dataset3"
+#define MISC14_METADATA_SIZE    4096
 
 /****************************************************************
 **
@@ -2333,7 +2340,231 @@ test_misc13(void)
 
     /* Verify file contents are still correct */
     verify_file(MISC13_FILE_2,(hsize_t)MISC13_USERBLOCK_SIZE,1);
-}
+} /* end test_misc13() */
+
+/****************************************************************
+**
+**  test_misc14(): Test that file contents can be "slid down" by
+**      inserting a user block in front of an existing file.
+**
+****************************************************************/
+static void
+test_misc14(void)
+{
+    hid_t file_id;              /* File ID */
+    hid_t fapl;                 /* File access property list ID */
+    hid_t DataSpace;            /* Dataspace ID */
+    hid_t Dataset1;             /* Dataset ID #1 */
+    hid_t Dataset2;             /* Dataset ID #2 */
+    hid_t Dataset3;             /* Dataset ID #3 */
+    double data1 = 5.0;         /* Data to write for dataset #1 */
+    double data2 = 10.0;        /* Data to write for dataset #2 */
+    double data3 = 15.0;        /* Data to write for dataset #3 */
+    double rdata;               /* Data read in */
+    herr_t ret;                 /* Generic return value */
+
+    /* Test creating two datasets and deleting the second */
+
+    /* Increase the metadata block size */
+    /* (This makes certain that all the data blocks are allocated together) */
+    fapl=H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    ret=H5Pset_meta_block_size(fapl,(hsize_t)MISC14_METADATA_SIZE);
+    CHECK(ret, FAIL, "H5Pset_meta_block_size");
+
+    /* Create dataspace to use */
+    DataSpace = H5Screate(H5S_SCALAR);
+    CHECK(DataSpace, FAIL, "H5Screate");
+
+    /* Open the file */
+    file_id = H5Fcreate(MISC14_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(file_id, FAIL, "H5Fcreate");
+
+    /* Create first dataset & write data */
+    Dataset1 = H5Dcreate(file_id, MISC14_DSET1_NAME, H5T_NATIVE_DOUBLE, DataSpace, H5P_DEFAULT);
+    CHECK(Dataset1, FAIL, "H5Dcreate");
+
+    ret = H5Dwrite(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data1);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Create second dataset (to be unlinked).  */
+    Dataset2 = H5Dcreate(file_id, MISC14_DSET2_NAME, H5T_NATIVE_DOUBLE, DataSpace, H5P_DEFAULT);
+    CHECK(Dataset2, FAIL, "H5Dcreate");
+
+    ret = H5Dwrite(Dataset2, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data2);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Check data from first dataset */
+    ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+    CHECK(ret, FAIL, "H5Dread");
+    if(rdata!=data1) {
+        num_errs++;
+        printf("Error on line %d: data1!=rdata\n",__LINE__);
+    } /* end if */
+
+    /* Unlink second dataset */
+    ret = H5Gunlink(file_id, MISC14_DSET2_NAME);
+    CHECK(ret, FAIL, "H5Gunlink");
+
+    /* Close second dataset */
+    ret = H5Dclose(Dataset2);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Verify the data from dataset #1 */
+    ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+    CHECK(ret, FAIL, "H5Dread");
+    if(rdata!=data1) {
+        num_errs++;
+        printf("Error on line %d: data1!=rdata\n",__LINE__);
+    } /* end if */
+
+    /* Close first dataset */
+    ret = H5Dclose(Dataset1);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close the file */
+    ret = H5Fclose (file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Test creating two datasets and deleting the first */
+
+    /* Open the file */
+    file_id = H5Fcreate(MISC14_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(file_id, FAIL, "H5Fcreate");
+
+    /* Create first dataset & write data */
+    Dataset1 = H5Dcreate(file_id, MISC14_DSET1_NAME, H5T_NATIVE_DOUBLE, DataSpace, H5P_DEFAULT);
+    CHECK(Dataset1, FAIL, "H5Dcreate");
+
+    ret = H5Dwrite(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data1);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Create second dataset  */
+    Dataset2 = H5Dcreate(file_id, MISC14_DSET2_NAME, H5T_NATIVE_DOUBLE, DataSpace, H5P_DEFAULT);
+    CHECK(Dataset2, FAIL, "H5Dcreate");
+
+    ret = H5Dwrite(Dataset2, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data2);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Check data from second dataset */
+    ret = H5Dread(Dataset2, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+    CHECK(ret, FAIL, "H5Dread");
+    if(rdata!=data2) {
+        num_errs++;
+        printf("Error on line %d: data2!=rdata\n",__LINE__);
+    } /* end if */
+
+    /* Unlink first dataset */
+    ret = H5Gunlink(file_id, MISC14_DSET1_NAME);
+    CHECK(ret, FAIL, "H5Gunlink");
+
+    /* Close first dataset */
+    ret = H5Dclose(Dataset1);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Verify the data from dataset #2 */
+    ret = H5Dread(Dataset2, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+    CHECK(ret, FAIL, "H5Dread");
+    if(rdata!=data2) {
+        num_errs++;
+        printf("Error on line %d: data2!=rdata\n",__LINE__);
+    } /* end if */
+
+    /* Close second dataset */
+    ret = H5Dclose(Dataset2);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close the file */
+    ret = H5Fclose (file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Test creating three datasets and deleting the second */
+
+    /* Open the file */
+    file_id = H5Fcreate(MISC14_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(file_id, FAIL, "H5Fcreate");
+
+    /* Create first dataset & write data */
+    Dataset1 = H5Dcreate(file_id, MISC14_DSET1_NAME, H5T_NATIVE_DOUBLE, DataSpace, H5P_DEFAULT);
+    CHECK(Dataset1, FAIL, "H5Dcreate");
+
+    ret = H5Dwrite(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data1);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Create second dataset */
+    Dataset2 = H5Dcreate(file_id, MISC14_DSET2_NAME, H5T_NATIVE_DOUBLE, DataSpace, H5P_DEFAULT);
+    CHECK(Dataset2, FAIL, "H5Dcreate");
+
+    ret = H5Dwrite(Dataset2, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data2);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Create third dataset */
+    Dataset3 = H5Dcreate(file_id, MISC14_DSET3_NAME, H5T_NATIVE_DOUBLE, DataSpace, H5P_DEFAULT);
+    CHECK(Dataset2, FAIL, "H5Dcreate");
+
+    ret = H5Dwrite(Dataset3, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data3);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Check data from first dataset */
+    ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+    CHECK(ret, FAIL, "H5Dread");
+    if(rdata!=data1) {
+        num_errs++;
+        printf("Error on line %d: data1!=rdata\n",__LINE__);
+    } /* end if */
+
+    /* Check data from third dataset */
+    ret = H5Dread(Dataset3, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+    CHECK(ret, FAIL, "H5Dread");
+    if(rdata!=data3) {
+        num_errs++;
+        printf("Error on line %d: data3!=rdata\n",__LINE__);
+    } /* end if */
+
+    /* Unlink second dataset */
+    ret = H5Gunlink(file_id, MISC14_DSET2_NAME);
+    CHECK(ret, FAIL, "H5Gunlink");
+
+    /* Close second dataset */
+    ret = H5Dclose(Dataset2);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Verify the data from dataset #1 */
+    ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+    CHECK(ret, FAIL, "H5Dread");
+    if(rdata!=data1) {
+        num_errs++;
+        printf("Error on line %d: data1!=rdata\n",__LINE__);
+    } /* end if */
+
+    /* Verify the data from dataset #3 */
+    ret = H5Dread(Dataset3, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+    CHECK(ret, FAIL, "H5Dread");
+    if(rdata!=data3) {
+        num_errs++;
+        printf("Error on line %d: data3!=rdata\n",__LINE__);
+    } /* end if */
+
+    /* Close first dataset */
+    ret = H5Dclose(Dataset1);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close third dataset */
+    ret = H5Dclose(Dataset3);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close the file */
+    ret = H5Fclose (file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close shared objects (dataspace & fapl) */
+    ret = H5Sclose (DataSpace);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Pclose (fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+} /* end test_misc14() */
 
 /****************************************************************
 **
@@ -2359,6 +2590,7 @@ test_misc(void)
     test_misc11();      /* Test for all properties of a file creation property list being stored */
     test_misc12();      /* Test VL-strings in chunked datasets operating correctly */
     test_misc13();      /* Test that a user block can be insert in front of file contents */
+    test_misc14();      /* Test that deleted dataset's data is removed from sieve buffer correctly */
 
 } /* test_misc() */
 
@@ -2396,4 +2628,5 @@ cleanup_misc(void)
     HDremove(MISC12_FILE);
     HDremove(MISC13_FILE_1);
     HDremove(MISC13_FILE_2);
+    HDremove(MISC14_FILE);
 }

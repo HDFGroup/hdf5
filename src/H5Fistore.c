@@ -2662,7 +2662,7 @@ H5F_istore_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key /*in,out 
     FUNC_ENTER_NOAPI(H5F_istore_remove,H5B_INS_ERROR);
 
     /* Check for overlap with the sieve buffer and reset it */
-    if (H5F_sieve_overlap_clear(f, addr, (hsize_t)lt_key->nbytes)<0)
+    if (H5F_sieve_overlap_clear(f, dxpl_id, addr, (hsize_t)lt_key->nbytes)<0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, H5B_INS_ERROR, "unable to clear sieve buffer");
 
     /* Remove raw data chunk from file */
