@@ -31,7 +31,7 @@
 #define FALSE		0
 #endif
 #ifndef TRUE
-#define TRUE		1
+#define TRUE		(!FALSE)
 #endif
 
 /* Loop through all mapped files */
