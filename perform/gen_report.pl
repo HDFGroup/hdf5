@@ -162,15 +162,40 @@ sub create_excel_output_string {
 	$output_content;
 }
 
+sub is_defined {
+	my ($t) = @_;
+	my $def = 1;
+
+	foreach my $procs (sort { $b <=> $a } keys(%results)) {
+		foreach my $xfer (sort { $a <=> $b } keys(%{$results{$procs}})) {
+			if (!defined($results{$procs}{$xfer}[0]{$t})) {
+				$def = 0;
+			}
+		}
+
+		foreach my $xfer (sort { $a <=> $b } keys(%{$results{$procs}})) {
+			if (!defined($results{$procs}{$xfer}[0]{$t})) {
+				$def = 0;
+			}
+		}
+
+		foreach my $xfer (sort { $a <=> $b } keys(%{$results{$procs}})) {
+			if (!defined($results{$procs}{$xfer}[0]{$t})) {
+				$def = 0;
+			}
+		}
+	}
+
+	$def;
+}
+
 sub write_excel_file {
 	print EXCEL_OUTPUT "\nWrite-Only\n";
 	print EXCEL_OUTPUT create_excel_output_string("write-only");
 	print EXCEL_OUTPUT "\nWrite-Close\n";
 	print EXCEL_OUTPUT create_excel_output_string("write-close");
 
-	if (defined($results{$procs}{$xfer}[0]{"read-only"}) ||
-			defined($results{$procs}{$xfer}[1]{"read-only"}) ||
-			defined($results{$procs}{$xfer}[2]{"read-only"})) {
+	if (is_defined("read-only")) {
 		print EXCEL_OUTPUT "\nRead-Only\n";
 		print EXCEL_OUTPUT create_excel_output_string("read-only");
 		print EXCEL_OUTPUT "\nRead-Close\n";
@@ -246,9 +271,7 @@ sub write_ascii_file {
 	print ASCII_OUTPUT "\n-----------\n";
 	print ASCII_OUTPUT create_ascii_output_string("write-close");
 
-	if (defined($results{$procs}{$xfer}[0]{"read-only"}) ||
-			defined($results{$procs}{$xfer}[1]{"read-only"}) ||
-			defined($results{$procs}{$xfer}[2]{"read-only"})) {
+	if (is_defined("read-only")) {
 		print ASCII_OUTPUT "\n\nRead-Only";
 		print ASCII_OUTPUT "\n---------\n";
 		print ASCII_OUTPUT create_ascii_output_string("read-only");
