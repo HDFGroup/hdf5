@@ -57,6 +57,16 @@
     H5F_SIZEOF_SIZE(f) +        /* Total number of bytes tracked */           \
     H5F_SIZEOF_ADDR(f))         /* Address of v2 B-tree which holds block inf */
 
+/* Bit flags for block tracker size status */
+#define H5BT_STATUS_MAX_VALID   0x01    /* Maximum block size valid over all blocks tracked */
+    /* If this flag is not set, then only part of the blocks have been */
+    /* searched to determine the current maximum block size.  This can happen */
+    /* during block shrinks or removals */
+#define H5BT_STATUS_MIN_VALID   0x02    /* Minimum block size valid over all blocks tracked */
+    /* If this flag is not set, then only part of the blocks have been */
+    /* searched to determine the current minimum block size.  This can happen */
+    /* during block expansions or removals */
+
 
 /****************************/
 /* Package Private Typedefs */
@@ -104,6 +114,12 @@ H5FL_EXTERN(H5BT_t);
 H5_DLL herr_t H5BT_cache_dest(H5F_t *f, H5BT_t *b);
 H5_DLL herr_t H5BT_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     int indent, int fwidth);
+#ifdef H5BT_TESTING
+H5_DLL herr_t H5BT_get_max_info(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    hsize_t *size, uint32_t *count, hbool_t *valid);
+H5_DLL herr_t H5BT_get_min_info(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    hsize_t *size, uint32_t *count, hbool_t *valid);
+#endif /* H5B2_TESTING */
 
 #endif /* _H5BTpkg_H */
 

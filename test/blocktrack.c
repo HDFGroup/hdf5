@@ -19,8 +19,10 @@
 
 /*
  * This file needs to access private datatypes from the H5BT package.
+ * This file also needs to access the block tracker testing code.
  */
 #define H5BT_PACKAGE
+#define H5BT_TESTING
 #include "H5BTpkg.h"
 
 /* Other private headers that this test requires */
@@ -58,6 +60,12 @@ test_create(hid_t fapl)
     H5F_t	*f=NULL;
     haddr_t     bt_addr;                /* Address of block tracker created */
     hsize_t     tot_size;               /* Total size of blocks tracked */
+    hsize_t     max_size;               /* Max. size of blocks tracked */
+    uint32_t    max_count;              /* Ref. count of max. size of blocks tracked */
+    hbool_t     max_valid;              /* Is max. size valid over all blocks? */
+    hsize_t     min_size;               /* Min. size of blocks tracked */
+    uint32_t    min_count;              /* Ref. count of min. size of blocks tracked */
+    hbool_t     min_valid;              /* Is min. size valid over all blocks? */
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
@@ -88,6 +96,25 @@ test_create(hid_t fapl)
     /* Make certain that the size is correct */
     if(tot_size != 0) TEST_ERROR;
 
+    if (H5BT_get_max_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &max_size, &max_count, &max_valid)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(max_size != 0) TEST_ERROR;
+    if(max_count != 0) TEST_ERROR;
+    if(max_valid != 0) TEST_ERROR;
+
+    if (H5BT_get_min_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &min_size, &min_count, &min_valid)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(min_size != HSIZET_MAX) TEST_ERROR;
+    if(min_count != 0) TEST_ERROR;
+    if(min_valid != 0) TEST_ERROR;
 
     PASSED();
 
@@ -127,6 +154,12 @@ test_insert_one(hid_t fapl)
     H5F_t	*f=NULL;
     haddr_t     bt_addr;                /* Address of block tracker created */
     hsize_t     tot_size;               /* Total size of blocks tracked */
+    hsize_t     max_size;               /* Max. size of blocks tracked */
+    uint32_t    max_count;              /* Ref. count of max. size of blocks tracked */
+    hbool_t     max_valid;              /* Is max. size valid over all blocks? */
+    hsize_t     min_size;               /* Min. size of blocks tracked */
+    uint32_t    min_count;              /* Ref. count of min. size of blocks tracked */
+    hbool_t     min_valid;              /* Is min. size valid over all blocks? */
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
@@ -162,6 +195,262 @@ test_insert_one(hid_t fapl)
     } /* end if */
     /* Make certain that the size is correct */
     if(tot_size != 20) TEST_ERROR;
+
+    if (H5BT_get_max_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &max_size, &max_count, &max_valid)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(max_size != 20) TEST_ERROR;
+    if(max_count != 1) TEST_ERROR;
+    if(max_valid != 1) TEST_ERROR;
+
+    if (H5BT_get_min_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &min_size, &min_count, &min_valid)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(min_size != 20) TEST_ERROR;
+    if(min_count != 1) TEST_ERROR;
+    if(min_valid != 1) TEST_ERROR;
+
+    PASSED();
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_insert_one() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_insert_few
+ *
+ * Purpose:	Basic tests for the block tracker code
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, March 10, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_insert_few(hid_t fapl)
+{
+    hid_t	file=-1;
+    char	filename[1024];
+    H5F_t	*f=NULL;
+    haddr_t     bt_addr;                /* Address of block tracker created */
+    hsize_t     tot_size;               /* Total size of blocks tracked */
+    hsize_t     max_size;               /* Max. size of blocks tracked */
+    uint32_t    max_count;              /* Ref. count of max. size of blocks tracked */
+    hbool_t     max_valid;              /* Is max. size valid over all blocks? */
+    hsize_t     min_size;               /* Min. size of blocks tracked */
+    uint32_t    min_count;              /* Ref. count of min. size of blocks tracked */
+    hbool_t     min_valid;              /* Is min. size valid over all blocks? */
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+	
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	TEST_ERROR;
+    } /* end if */
+
+    /*
+     * Test inserting one block
+     */
+    TESTING("insert several blocks");
+    if (H5BT_create(f, H5P_DATASET_XFER_DEFAULT, &bt_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    if (H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)10, (hsize_t)20)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    if (H5BT_get_total_size(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &tot_size)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the size is correct */
+    if(tot_size != 20) TEST_ERROR;
+
+    if (H5BT_get_max_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &max_size, &max_count, &max_valid)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(max_size != 20) TEST_ERROR;
+    if(max_count != 1) TEST_ERROR;
+    if(max_valid != 1) TEST_ERROR;
+
+    if (H5BT_get_min_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &min_size, &min_count, &min_valid)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(min_size != 20) TEST_ERROR;
+    if(min_count != 1) TEST_ERROR;
+    if(min_valid != 1) TEST_ERROR;
+
+    if (H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)50, (hsize_t)30)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    if (H5BT_get_total_size(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &tot_size)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the size is correct */
+    if(tot_size != 50) TEST_ERROR;
+
+    if (H5BT_get_max_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &max_size, &max_count, &max_valid)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(max_size != 30) TEST_ERROR;
+    if(max_count != 1) TEST_ERROR;
+    if(max_valid != 1) TEST_ERROR;
+
+    if (H5BT_get_min_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &min_size, &min_count, &min_valid)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(min_size != 20) TEST_ERROR;
+    if(min_count != 1) TEST_ERROR;
+    if(min_valid != 1) TEST_ERROR;
+
+    if (H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)90, (hsize_t)30)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    if (H5BT_get_total_size(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &tot_size)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the size is correct */
+    if(tot_size != 80) TEST_ERROR;
+
+    if (H5BT_get_max_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &max_size, &max_count, &max_valid)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(max_size != 30) TEST_ERROR;
+    if(max_count != 2) TEST_ERROR;
+    if(max_valid != 1) TEST_ERROR;
+
+    if (H5BT_get_min_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &min_size, &min_count, &min_valid)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(min_size != 20) TEST_ERROR;
+    if(min_count != 1) TEST_ERROR;
+    if(min_valid != 1) TEST_ERROR;
+
+    if (H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)120, (hsize_t)20)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    if (H5BT_get_total_size(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &tot_size)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the size is correct */
+    if(tot_size != 100) TEST_ERROR;
+
+    if (H5BT_get_max_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &max_size, &max_count, &max_valid)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(max_size != 30) TEST_ERROR;
+    if(max_count != 2) TEST_ERROR;
+    if(max_valid != 1) TEST_ERROR;
+
+    if (H5BT_get_min_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &min_size, &min_count, &min_valid)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(min_size != 20) TEST_ERROR;
+    if(min_count != 2) TEST_ERROR;
+    if(min_valid != 1) TEST_ERROR;
+
+    if (H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)150, (hsize_t)10)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    if (H5BT_get_total_size(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &tot_size)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the size is correct */
+    if(tot_size != 110) TEST_ERROR;
+
+    if (H5BT_get_max_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &max_size, &max_count, &max_valid)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(max_size != 30) TEST_ERROR;
+    if(max_count != 2) TEST_ERROR;
+    if(max_valid != 1) TEST_ERROR;
+
+    if (H5BT_get_min_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &min_size, &min_count, &min_valid)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+    /* Make certain that the max. info is correct */
+    if(min_size != 10) TEST_ERROR;
+    if(min_count != 1) TEST_ERROR;
+    if(min_valid != 1) TEST_ERROR;
 
     PASSED();
 
@@ -202,6 +491,12 @@ test_insert_many(hid_t fapl)
     haddr_t     bt_addr;                /* Address of block tracker created */
     unsigned    u;                      /* Local index variable */
     hsize_t     tot_size;               /* Total size of blocks tracked */
+    hsize_t     max_size;               /* Max. size of blocks tracked */
+    uint32_t    max_count;              /* Ref. count of max. size of blocks tracked */
+    hbool_t     max_valid;              /* Is max. size valid over all blocks? */
+    hsize_t     min_size;               /* Min. size of blocks tracked */
+    uint32_t    min_count;              /* Ref. count of min. size of blocks tracked */
+    hbool_t     min_valid;              /* Is min. size valid over all blocks? */
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
@@ -238,6 +533,26 @@ test_insert_many(hid_t fapl)
         } /* end if */
         /* Make certain that the size is correct */
         if(tot_size != ((u+1)*20)) TEST_ERROR;
+
+        if (H5BT_get_max_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &max_size, &max_count, &max_valid)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        } /* end if */
+        /* Make certain that the max. info is correct */
+        if(max_size != 20) TEST_ERROR;
+        if(max_count != (u+1)) TEST_ERROR;
+        if(max_valid != 1) TEST_ERROR;
+
+        if (H5BT_get_min_info(f, H5P_DATASET_XFER_DEFAULT, bt_addr, &min_size, &min_count, &min_valid)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        } /* end if */
+        /* Make certain that the max. info is correct */
+        if(min_size != 20) TEST_ERROR;
+        if(min_count != (u+1)) TEST_ERROR;
+        if(min_valid != 1) TEST_ERROR;
 
     } /* end for */
 
@@ -286,6 +601,7 @@ main(void)
 
     /* Test block tracker insertion */
     nerrors += test_insert_one(fapl);
+    nerrors += test_insert_few(fapl);
     nerrors += test_insert_many(fapl);
 
     if (nerrors) goto error;

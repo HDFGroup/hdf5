@@ -39,16 +39,6 @@
 #define H5BT_BT2_SPLIT_PERC     100
 #define H5BT_BT2_MERGE_PERC     40
 
-/* Bit flags for block tracker size status */
-#define H5BT_STATUS_MAX_VALID   0x01    /* Maximum block size valid over all blocks tracked */
-    /* If this flag is not set, then only part of the blocks have been */
-    /* searched to determine the current maximum block size.  This can happen */
-    /* during block shrinks or removals */
-#define H5BT_STATUS_MIN_VALID   0x02    /* Minimum block size valid over all blocks tracked */
-    /* If this flag is not set, then only part of the blocks have been */
-    /* searched to determine the current minimum block size.  This can happen */
-    /* during block expansions or removals */
-
 /* Local typedefs */
 
 /* Local prototypes */
