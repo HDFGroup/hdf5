@@ -38,6 +38,7 @@ static herr_t H5R_create(void *ref, H5G_entry_t *loc, const char *name,
         H5R_type_t ref_type, H5S_t *space);
 static hid_t H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref);
 static H5S_t * H5R_get_region(H5D_t *dset, H5R_type_t ref_type, void *_ref);
+static intn H5R_get_object_type(H5D_t *dset, void *_ref);
 
 
 /*--------------------------------------------------------------------------
@@ -610,3 +611,97 @@ done:
     FUNC_LEAVE(ret_value);
 }   /* end H5Rget_region() */
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5R_get_object_type
+ PURPOSE
+    Retrieves the type of object that an object reference points to
+ USAGE
+    intn H5Rget_object_type(dset, ref)
+        H5D_t *dset;        IN: dataset pointer that the reference is located within
+        void *ref;          IN: Reference to query.
+        
+ RETURNS
+    Success:	An object type defined in H5Gpublic.h
+    Failure:	H5G_UNKNOWN
+ DESCRIPTION
+    Given a reference to some object, this function returns the type of object
+    pointed to.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static intn
+H5R_get_object_type(H5D_t *dset, void *_ref)
+{
+    H5G_entry_t ent;            /* Symbol table entry */
+    hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Only object references currently supported */
+    uint8_t *p;                 /* Pointer to OID to store */
+    intn ret_value = H5G_UNKNOWN;
+
+    FUNC_ENTER(H5R_get_object_type, FAIL);
+
+    assert(ref);
+    assert(dset);
+
+    /* Initialize the symbol table entry */
+    HDmemset(&ent,0,sizeof(H5G_entry_t));
+    ent.type=H5G_NOTHING_CACHED;
+    ent.file=H5D_get_file(dset);
+
+    /* Get the object oid */
+    p=(uint8_t *)ref->oid;
+    H5F_addr_decode(ent.file,(const uint8_t **)&p,&(ent.header));
+
+    /* Get the OID type */
+    ret_value=H5G_get_type(&ent);
+
+#ifdef LATER
+done:
+#endif /* LATER */
+    FUNC_LEAVE(ret_value);
+}   /* end H5R_get_object_type() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Rget_object_type
+ PURPOSE
+    Retrieves the type of object that an object reference points to
+ USAGE
+    intn H5Rget_object_type(ref)
+        hid_t dataset;      IN: dataset the reference is located within
+        void *ref;          IN: Reference to query.
+        
+ RETURNS
+    Success:	An object type defined in H5Gpublic.h
+    Failure:	H5G_UNKNOWN
+ DESCRIPTION
+    Given a reference to some object, this function returns the type of object
+    pointed to.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+intn
+H5Rget_object_type(hid_t dataset, void *_ref)
+{
+    H5D_t *dset = NULL;     /* dataset object */
+    hid_t ret_value = FAIL;
+
+    FUNC_ENTER(H5Rget_object_type, FAIL);
+
+    /* Check args */
+    if (H5I_DATASET != H5I_get_type(dataset) || NULL == (dset = H5I_object(dataset)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    if(_ref==NULL)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer");
+
+    /* Get the object information */
+    ret_value=H5R_get_object_type(dset,_ref);
+
+done:
+    FUNC_LEAVE(ret_value);
+}   /* end H5Rget_object_type() */

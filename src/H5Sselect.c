@@ -1287,13 +1287,17 @@ H5Sget_select_elem_npoints(hid_t spaceid)
  RETURNS
     Non-negative on success, negative on failure
  DESCRIPTION
-    Puts a list of the hyperslab blocks into the user's buffer.  The block
-    coordinates have the same dimensionality (rank) as the dataspace they
-    are located within.  The list of blocks is formatted as follows:
-    <"start" coordinate> immediately followed by <"opposite" corner coordinate>,
-    followed by the next "start" coordinate, etc. until all the block
-    information in the selection have been put into the user's buffer.  No
-    guarantee of any order of the blocks is implied.
+        Puts a list of the hyperslab blocks into the user's buffer.  The blocks
+    start with the 'startblock'th block in the list of blocks and put
+    'numblocks' number of blocks into the user's buffer (or until the end of
+    the list of blocks, whichever happen first)
+        The block coordinates have the same dimensionality (rank) as the
+    dataspace they are located within.  The list of blocks is formatted as
+    follows: <"start" coordinate> immediately followed by <"opposite" corner
+    coordinate>, followed by the next "start" and "opposite" coordinate, etc.
+    until all the block information requested has been put into the user's
+    buffer.
+        No guarantee of any order of the blocks is implied.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -1350,13 +1354,17 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numbloc
  RETURNS
     Non-negative on success, negative on failure
  DESCRIPTION
-    Puts a list of the hyperslab blocks into the user's buffer.  The block
-    coordinates have the same dimensionality (rank) as the dataspace they
-    are located within.  The list of blocks is formatted as follows:
-    <"start" coordinate> immediately followed by <"opposite" corner coordinate>,
-    followed by the next "start" coordinate, etc. until all the block
-    information in the selection have been put into the user's buffer.  No
-    guarantee of any order of the blocks is implied.
+        Puts a list of the hyperslab blocks into the user's buffer.  The blocks
+    start with the 'startblock'th block in the list of blocks and put
+    'numblocks' number of blocks into the user's buffer (or until the end of
+    the list of blocks, whichever happen first)
+        The block coordinates have the same dimensionality (rank) as the
+    dataspace they are located within.  The list of blocks is formatted as
+    follows: <"start" coordinate> immediately followed by <"opposite" corner
+    coordinate>, followed by the next "start" and "opposite" coordinate, etc.
+    until all the block information requested has been put into the user's
+    buffer.
+        No guarantee of any order of the blocks is implied.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -1400,12 +1408,16 @@ H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numbloc
  RETURNS
     Non-negative on success, negative on failure
  DESCRIPTION
-    Puts a list of the element points into the user's buffer.  The point
-    coordinates have the same dimensionality (rank) as the dataspace they
-    are located within.  The list of points is formatted as follows:
-    <coordinate> followed by the next coordinate, etc. until all the point
-    information in the selection have been put into the user's buffer.  No
-    guarantee of any order of the elements is implied.
+        Puts a list of the element points into the user's buffer.  The points
+    start with the 'startpoint'th block in the list of points and put
+    'numpoints' number of points into the user's buffer (or until the end of
+    the list of points, whichever happen first)
+        The point coordinates have the same dimensionality (rank) as the
+    dataspace they are located within.  The list of points is formatted as
+    follows: <coordinate> followed by the next coordinate, etc. until all the
+    point information in the selection have been put into the user's buffer.
+        The points are returned in the order they will be interated through
+    when a selection is read/written from/to disk.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -1461,12 +1473,16 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoint
  RETURNS
     Non-negative on success, negative on failure
  DESCRIPTION
-    Puts a list of the element points into the user's buffer.  The point
-    coordinates have the same dimensionality (rank) as the dataspace they
-    are located within.  The list of points is formatted as follows:
-    <coordinate> followed by the next coordinate, etc. until all the point
-    information in the selection have been put into the user's buffer.  No
-    guarantee of any order of the elements is implied.
+        Puts a list of the element points into the user's buffer.  The points
+    start with the 'startpoint'th block in the list of points and put
+    'numpoints' number of points into the user's buffer (or until the end of
+    the list of points, whichever happen first)
+        The point coordinates have the same dimensionality (rank) as the
+    dataspace they are located within.  The list of points is formatted as
+    follows: <coordinate> followed by the next coordinate, etc. until all the
+    point information in the selection have been put into the user's buffer.
+        The points are returned in the order they will be interated through
+    when a selection is read/written from/to disk.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
