@@ -209,15 +209,23 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
             }
             break;
 
-        /* These three types don't need to compute compound field information since they 
-         * can't be used as field. */
+        /* These types need to be supported properly still... */
         case H5T_TIME:
         case H5T_BITFIELD:
-        case H5T_OPAQUE:
             if((ret_value=H5T_copy(dtype, H5T_COPY_TRANSIENT))==NULL)
-                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
+                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type")
 
             break;
+
+        case H5T_OPAQUE:
+            if((ret_value=H5T_copy(dtype, H5T_COPY_TRANSIENT))==NULL)
+                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type")
+
+            /* Update size, offset and compound alignment for parent. */
+            if(H5T_cmp_offset(comp_size, offset, sizeof(char), size, H5T_NATIVE_SCHAR_COMP_ALIGN_g, struct_align)<0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset")
+            break;
+
         case H5T_REFERENCE:
             {
                 size_t align;
