@@ -239,7 +239,7 @@ printf("%s: leading_partials=%u\n",FUNC,leading_partials);
              *      at coord[n]==0 for dimensions 1->(ndims-1)  (i.e. starting at coordinate
              *      zero for all dimensions except the slowest changing one
              */
-            for(i=ndims-1; i>0 && seq_len>down_size[i]; i--) {
+            for(i=ndims-1; i>0 && seq_len>=down_size[i]; i--) {
                 hsize_t partial_size;       /* Size of the partial hyperslab in bytes */
 
                 /* Check if we have a partial hyperslab in this lower dimension */
@@ -291,7 +291,7 @@ printf("%s: after reading initial partial hyperslabs, seq_len=%lu\n",FUNC,(unsig
 #endif /* QAK */
 
             /* Check if there is more than just a partial hyperslab to read */
-            if(seq_len>down_size[0]) {
+            if(seq_len>=down_size[0]) {
                 hsize_t tmp_seq_len;    /* Temp. size of the sequence in elements */
                 hsize_t full_size;      /* Size of the full hyperslab in bytes */
 
@@ -373,7 +373,7 @@ printf("%s: after reading 'middle' full hyperslabs, seq_len=%lu\n",FUNC,(unsigne
                  */
                 for(i=1; i<(ndims-1); i++) {
                     /* Check if there are enough elements to read in a row in this dimension */
-                    if(seq_len>down_size[i]) {
+                    if(seq_len>=down_size[i]) {
 #ifdef QAK
 printf("%s: seq_len=%ld, down_size[%d]=%ld\n",FUNC,(long)seq_len,i+1,(long)down_size[i+1]);
 #endif /* QAK */
@@ -673,7 +673,7 @@ printf("%s: leading_partials=%u\n",FUNC,leading_partials);
              *      at coord[n]==0 for dimensions 1->(ndims-1)  (i.e. starting at coordinate
              *      zero for all dimensions except the slowest changing one
              */
-            for(i=ndims-1; i>0 && seq_len>down_size[i]; i--) {
+            for(i=ndims-1; i>0 && seq_len>=down_size[i]; i--) {
                 hsize_t partial_size;       /* Size of the partial hyperslab in bytes */
 
                 /* Check if we have a partial hyperslab in this lower dimension */
@@ -725,7 +725,7 @@ printf("%s: seq_len=%lu\n",FUNC,(unsigned long)seq_len);
 #endif /* QAK */
 
             /* Check if there is more than just a partial hyperslab to read */
-            if(seq_len>down_size[0]) {
+            if(seq_len>=down_size[0]) {
                 hsize_t tmp_seq_len;    /* Temp. size of the sequence in elements */
                 hsize_t full_size;      /* Size of the full hyperslab in bytes */
 
@@ -807,7 +807,7 @@ printf("%s: seq_len=%lu\n",FUNC,(unsigned long)seq_len);
                  */
                 for(i=1; i<(ndims-1); i++) {
                     /* Check if there are enough elements to read in a row in this dimension */
-                    if(seq_len>down_size[i]) {
+                    if(seq_len>=down_size[i]) {
 #ifdef QAK
 printf("%s: seq_len=%ld, down_size[%d]=%ld\n",FUNC,(long)seq_len,i+1,(long)down_size[i+1]);
 #endif /* QAK */
