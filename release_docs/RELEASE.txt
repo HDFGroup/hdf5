@@ -210,6 +210,10 @@ Platforms Tested
           SMP ia64                Intel(R) C++ Version 8.0
                                   Intel(R) Fortran Itanium(R) Version 8.0
                                   SGI MPI
+    OSF1 V5.1 (QSC)               Compaq C V6.5-011 
+                                  HP Fortran V5.5A-3548
+				  Compaq C++ V6.5-036  
+				  MPIX200_64_r13.4
     OSF1 V5.1                     Compaq C V6.5-303 
                                   HP Fortran V5.5A-3548
 				  Compaq C++ V6.5-040  
