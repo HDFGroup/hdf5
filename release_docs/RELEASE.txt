@@ -337,7 +337,7 @@ Linux 2.4 SGI Altix ia64    y   n        y      n        y    y             y
 Xeon Linux 2.4.20-31.9      y   n	 y	n	 y    y		    y
     smp_perfctr_lustre 
     C Intel (3)
-IA-64 Linux 2.4.21.         y   n        y      n        y    y             y
+IA-64 Linux 2.4.21.         y   y        y      y        y    y             y
     SuSE_128.bef1 C
     Intel (3)
 
