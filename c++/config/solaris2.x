@@ -15,9 +15,23 @@ fi
 # Try gcc compiler flags
 #. $srcdir/config/gnu-flags
 
+cxx_version="`$CXX -V 2>&1 |grep 'WorkShop' |\
+                sed 's/.*WorkShop.*C\+\+ \([0-9\.]*\).*/\1/'`"
+
+cxx_vers_major=`echo $cxx_version | cut -f1 -d.`
+cxx_vers_minor=`echo $cxx_version | cut -f2 -d.`
+cxx_vers_patch=`echo $cxx_version | cut -f3 -d.`
+
+# Specify the "-features=tmplife" if the compiler can handle this...
+if test -n "$cxx_version"; then
+  if test $cxx_vers_major -ge 5 -a $cxx_vers_minor -ge 3 -o $cxx_vers_major -gt 5; then
+    CXXFLAGS="-features=tmplife"
+  fi
+fi
+
 # Try solaris native compiler flags
 if test -z "$cxx_flags_set"; then
-    CXXFLAGS="-instances=global"
+    CXXFLAGS="$CXXFLAGS -instances=global"
     CPPFLAGS="-LANG:std"
     LIBS="$LIBS -lsocket"
     DEBUG_CXXFLAGS=-g
