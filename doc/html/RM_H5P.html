@@ -3757,7 +3757,6 @@ facilitate moving easily between them.</i>
         <a href="http://www.npaci.edu/Research/DI/srb/">http//www.npaci.edu/Research/DI/srb/</a>.
   <dt><strong>Parameters:</strong>
     <dl>
-    <dl>
         <dt><em>hid_t</em> <code>fapl_id</code>
             <dd>IN: File access property list identifier.
         <dt><em>SRB_Info *</em><code>info</code>
@@ -3794,12 +3793,22 @@ facilitate moving easily between them.</i>
     <dd><code>H5Pset_fapl_core</code> modifies the file access property list 
         to use the <code>H5FD_CORE</code> driver.  
         <p>
-        <code>increment</code> specifies the increment by which allocated memory
-        is to be increased each time more memory is required.
+        The <code>H5FD_CORE</code> driver enables an application to work
+        with a file in memory, speeding reads and writes as no disk access 
+        is made.  File contents are stored only in memory until the file
+        is closed.  The <code>backing_store</code> parameter determines 
+        whether file contents are ever written to disk.
+        <p>
+        <code>increment</code> specifies the increment by which allocated 
+        memory is to be increased each time more memory is required.
         <p>
         If <code>backing_store</code> is set to <code>1</code> 
         (<code>TRUE</code>), the file contents are flushed to a file 
-        with the same name as this core file.
+        with the same name as this core file when the file is closed 
+        or access to the file is terminated in memory.
+  <dt><strong>Note:</strong>
+    <dd>There is currently no means for reading a file from disk then
+        using the <code>H5FD_CORE</code> driver to manipulate the file.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>fapl_id</code>
@@ -3807,7 +3816,8 @@ facilitate moving easily between them.</i>
         <dt><em>size_t</em> <code>increment</code>
             <dd>IN: Size, in bytes, of memory increments.
         <dt><em>hbool_t</em> <code>backing_store</code>
-            <dd>IN: Boolean flag indicating whether to create file.
+            <dd>IN: Boolean flag indicating whether to write the file
+                contents to disk when the file is closed.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
@@ -3838,7 +3848,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Description:</strong>
     <dd><code>H5Pget_fapl_core</code> queries the <code>H5FD_CORE</code> 
     driver properties as set by <code>H5Pset_fapl_core</code>.
-        
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>fapl_id</code>
@@ -3846,7 +3855,8 @@ facilitate moving easily between them.</i>
         <dt><em>size_t</em> *<code>increment</code>
             <dd>OUT: Size, in bytes, of memory increments.
         <dt><em>hbool_t</em> *<code>backing_store</code>
-            <dd>OUT: Boolean flag indicating whether to create file.
+            <dd>OUT: Boolean flag indicating whether to write the file
+                contents to disk when the file is closed.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
