@@ -1717,7 +1717,7 @@ H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_info)
         /* Add new driver */
         H5I_inc_ref(driver_id);
         dxpl->driver_id = driver_id;
-        dxpl->driver_info = H5FD_fapl_copy(driver_id, driver_info);
+        dxpl->driver_info = H5FD_dxpl_copy(driver_id, driver_info);
         
     } else {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
