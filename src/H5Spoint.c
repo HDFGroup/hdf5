@@ -639,4 +639,83 @@ H5S_hyper_npoints (const H5S_t *space)
 
     FUNC_LEAVE (space->select.num_elem);
 }   /* H5S_hyper_npoints() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_point_copy
+ PURPOSE
+    Copy a selection from one dataspace to another
+ USAGE
+    herr_t H5S_point_copy(dst, src)
+        H5S_t *dst;  OUT: Pointer to the destination dataspace
+        H5S_t *src;  IN: Pointer to the source dataspace
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Copies all the point selection information from the source
+    dataspace to the destination dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_point_copy (H5S_t *dst, const H5S_t *src)
+{
+    H5S_pnt_node_t *curr, *new, *new_head;    /* Point information nodes */
+    herr_t ret_value=SUCCEED;  /* return value */
+
+    FUNC_ENTER (H5S_point_copy, FAIL);
+
+    assert(src);
+    assert(dst);
+
+#ifdef QAK
+ printf("%s: check 1.0\n",FUNC);
+#endif /* QAK */
+    /* Allocate room for the head of the point list */
+    if((dst->select.sel_info.pnt_lst=H5MM_malloc(sizeof(H5S_pnt_list_t)))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+            "can't allocate point node");
+
+    curr=src->select.sel_info.pnt_lst->head;
+    new_head=NULL;
+    while(curr!=NULL) {
+        /* Create each point */
+        if((new=H5MM_malloc(sizeof(H5S_pnt_node_t)))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                "can't allocate point node");
+        if((new->pnt = H5MM_malloc(src->extent.u.simple.rank*sizeof(hssize_t)))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                "can't allocate coordinate information");
+        HDmemcpy(new->pnt,curr->pnt,(src->extent.u.simple.rank*sizeof(hssize_t)));
+        new->next=NULL;
+
+#ifdef QAK
+ printf("%s: check 5.0\n",FUNC);
+    {
+        intn i;
+        for(i=0; i<src->extent.u.simple.rank; i++)
+            printf("%s: check 5.1, new->pnt[%d]=%d\n",FUNC,i,(int)new->pnt[i]);
+    }
+#endif /* QAK */
+
+        /* Keep the order the same when copying */
+        if(new_head==NULL)
+            new_head=dst->select.sel_info.pnt_lst->head=new;
+        else {
+            new_head->next=new;
+            new_head=new;
+        } /* end else */
+
+        curr=curr->next;
+    } /* end while */
+#ifdef QAK
+ printf("%s: check 10.0 src->select.sel_info.pnt_lst=%p, dst->select.sel_info.pnt_lst=%p\n",FUNC,src->select.sel_info.pnt_lst,dst->select.sel_info.pnt_lst);
+ printf("%s: check 10.0 src->select.sel_info.pnt_lst->head=%p, dst->select.sel_info.pnt_lst->head=%p\n",FUNC,src->select.sel_info.pnt_lst->head,dst->select.sel_info.pnt_lst->head);
+#endif /* QAK */
+
+done:
+    FUNC_LEAVE (ret_value);
+} /* end H5S_point_copy() */
 

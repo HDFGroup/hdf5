@@ -286,6 +286,7 @@ herr_t H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
 herr_t H5S_point_add (H5S_t *space, size_t num_elemn, const hssize_t **coord);
 herr_t H5S_point_release (H5S_t *space);
 hsize_t H5S_point_npoints (const H5S_t *space);
+herr_t H5S_point_copy (H5S_t *dst, const H5S_t *src);
 
 /* "All" select functions */
 herr_t H5S_all_init (const struct H5O_layout_t *layout,
@@ -337,5 +338,7 @@ herr_t H5S_hyper_release (H5S_t *space);
 herr_t H5S_hyper_sel_iter_release (H5S_sel_iter_t *sel_iter);
 hsize_t H5S_hyper_npoints (const H5S_t *space);
 int H5S_hyper_compare_regions (const void *r1, const void *r2);
+int H5S_hyper_compare_bounds (const void *r1, const void *r2);
+herr_t H5S_hyper_copy (H5S_t *dst, const H5S_t *src);
 
 #endif

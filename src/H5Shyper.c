@@ -1760,3 +1760,159 @@ H5S_hyper_sel_iter_release (H5S_sel_iter_t *sel_iter)
 
     FUNC_LEAVE (SUCCEED);
 }   /* H5S_hyper_sel_iter_release() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_hyper_compare_bounds
+ *
+ * Purpose:	Compares two bounds for equality
+ *
+ * Return:	an integer less than, equal to, or greater than zero if the first
+ *          region is considered to be respectively less than, equal to, or
+ *          greater than the second
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, July 17, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5S_hyper_compare_bounds (const void *r1, const void *r2)
+{
+    if(((const H5S_hyper_bound_t *)r1)->bound<((const H5S_hyper_bound_t *)r2)->bound)
+        return(-1);
+    else
+        if(((const H5S_hyper_bound_t *)r1)->bound>((const H5S_hyper_bound_t *)r2)->bound)
+            return(1);
+        else
+            return(0);
+}   /* end H5S_hyper_compare_bounds */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_copy
+ PURPOSE
+    Copy a selection from one dataspace to another
+ USAGE
+    herr_t H5S_hyper_copy(dst, src)
+        H5S_t *dst;  OUT: Pointer to the destination dataspace
+        H5S_t *src;  IN: Pointer to the source dataspace
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Copies all the hyperslab selection information from the source
+    dataspace to the destination dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
+{
+    H5S_hyper_list_t *new_hyper;    /* New hyperslab selection */
+    H5S_hyper_node_t *curr, *new, *new_head;    /* Hyperslab information nodes */
+    intn i;                     /* Counters */
+    size_t u;                   /* Counters */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER (H5S_hyper_copy, FAIL);
+
+    assert(src);
+    assert(dst);
+
+#ifdef QAK
+    printf("%s: check 3.0\n", FUNC);
+#endif /* QAK */
+    /* Create the new hyperslab information node */
+    if((new_hyper = H5MM_malloc(sizeof(H5S_hyper_list_t)))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+            "can't allocate point node");
+
+    /* Copy the basic hyperslab selection information */
+    *new_hyper=*(src->select.sel_info.hyper_lst);
+
+    /* Attach the hyperslab information to the destination dataspace */
+    dst->select.sel_info.hyper_lst=new_hyper;
+    
+#ifdef QAK
+    printf("%s: check 4.0\n", FUNC);
+#endif /* QAK */
+    /* Allocate space for the low & high bound arrays */
+    if((new_hyper->lo_bounds = H5MM_malloc(sizeof(H5S_hyper_bound_t *)*src->extent.u.simple.rank))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+            "can't allocate point node");
+    if((new_hyper->hi_bounds = H5MM_malloc(sizeof(H5S_hyper_bound_t *)*src->extent.u.simple.rank))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+            "can't allocate point node");
+    for(i=0; i<src->extent.u.simple.rank; i++) {
+        if((new_hyper->lo_bounds[i] = H5MM_malloc(sizeof(H5S_hyper_bound_t)*src->select.sel_info.hyper_lst->count))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                "can't allocate point node");
+        if((new_hyper->hi_bounds[i] = H5MM_malloc(sizeof(H5S_hyper_bound_t)*src->select.sel_info.hyper_lst->count))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                "can't allocate point node");
+    } /* end for */
+
+#ifdef QAK
+    printf("%s: check 5.0\n", FUNC);
+#endif /* QAK */
+    /* Copy the hyperslab selection nodes, adding them to the lo & hi bound arrays also */
+    curr=src->select.sel_info.hyper_lst->head;
+    new_head=NULL;
+    u=0;
+    while(curr!=NULL) {
+#ifdef QAK
+    printf("%s: check 5.1\n", FUNC);
+#endif /* QAK */
+        /* Create each point */
+        if((new = H5MM_malloc(sizeof(H5S_hyper_node_t)))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                "can't allocate point node");
+        if((new->start = H5MM_malloc(src->extent.u.simple.rank*sizeof(hssize_t)))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                "can't allocate coordinate information");
+        if((new->end = H5MM_malloc(src->extent.u.simple.rank*sizeof(hssize_t)))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                "can't allocate coordinate information");
+        HDmemcpy(new->start,curr->start,(src->extent.u.simple.rank*sizeof(hssize_t)));
+        HDmemcpy(new->end,curr->end,(src->extent.u.simple.rank*sizeof(hssize_t)));
+        new->next=NULL;
+
+        /* Insert into low & high bound arrays */
+        for(i=0; i<src->extent.u.simple.rank; i++) {
+            new_hyper->lo_bounds[i][u].bound=new->start[i];
+            new_hyper->lo_bounds[i][u].node=new;
+            new_hyper->hi_bounds[i][u].bound=new->end[i];
+            new_hyper->hi_bounds[i][u].node=new;
+        } /* end for */
+        u++;    /* Increment the location of the next node in the boundary arrays */
+
+        /* Keep the order the same when copying */
+        if(new_head==NULL)
+            new_head=new_hyper->head=new;
+        else {
+            new_head->next=new;
+            new_head=new;
+        } /* end else */
+
+        curr=curr->next;
+    } /* end while */
+#ifdef QAK
+    printf("%s: check 6.0\n", FUNC);
+#endif /* QAK */
+
+    /* Sort the boundary arrays */
+    for(i=0; i<src->extent.u.simple.rank; i++) {
+        qsort(new_hyper->lo_bounds[i],new_hyper->count,sizeof(H5S_hyper_bound_t),H5S_hyper_compare_bounds);
+        qsort(new_hyper->hi_bounds[i],new_hyper->count,sizeof(H5S_hyper_bound_t),H5S_hyper_compare_bounds);
+    } /* end for */
+#ifdef QAK
+    printf("%s: check 7.0\n", FUNC);
+#endif /* QAK */
+
+done:
+    FUNC_LEAVE (ret_value);
+} /* end H5S_hyper_copy() */
+

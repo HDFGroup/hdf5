@@ -93,14 +93,55 @@ H5S_select_term(void)
 herr_t
 H5S_select_copy (H5S_t *dst, const H5S_t *src)
 {
+    herr_t ret_value=SUCCEED;     /* return value */
+
     FUNC_ENTER (H5S_select_copy, FAIL);
 
     /* Check args */
     assert(dst);
     assert(src);
 
+    /* Copy regular fields */
+    dst->select=src->select;
+
+/* Need to copy offset and order information still */
 
     /* Perform correct type of copy based on the type of selection */
+    switch (src->extent.type) {
+        case H5S_SCALAR:
+            /*nothing needed */
+            break;
+
+        case H5S_SIMPLE:
+            /* Deep copy extra stuff */
+            switch(src->select.type) {
+                case H5S_SEL_NONE:
+                case H5S_SEL_ALL:
+                    /*nothing needed */
+                    break;
+
+                case H5S_SEL_POINTS:
+                    ret_value=H5S_point_copy(dst,src);
+                    break;
+
+                case H5S_SEL_HYPERSLABS:
+                    ret_value=H5S_hyper_copy(dst,src);
+                    break;
+
+                default:
+                    assert("unknown selection type" && 0);
+                    break;
+            } /* end switch */
+            break;
+
+        case H5S_COMPLEX:
+            /*void */
+            break;
+
+        default:
+            assert("unknown data space type" && 0);
+            break;
+    }
 
     FUNC_LEAVE (SUCCEED);
 }   /* H5S_select_copy() */
