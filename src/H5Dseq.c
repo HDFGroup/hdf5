@@ -230,15 +230,8 @@ H5F_seq_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_i
                         buf))<0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "external data read failed");
             } else {
-                hsize_t	max_data;    			/*bytes in dataset	*/
-                unsigned	u;				/*counters		*/
-
-                /* Compute the size of the dataset in bytes */
-                for(u=1, max_data=layout->dim[0]; u<layout->ndims; u++)
-                    max_data *= layout->dim[u];
-
                 /* Pass along the vector of sequences to read */
-                if((ret_value=H5F_contig_readvv(f, max_data, layout->addr,
+                if((ret_value=H5F_contig_readvv(f, layout->chunk_size, layout->addr,
                         dset_max_nseq, dset_curr_seq, dset_len_arr, dset_offset_arr,
                         mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr,
                         dxpl_id, buf))<0)
@@ -346,15 +339,8 @@ H5F_seq_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
                         buf))<0)
                     HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "external data write failed");
             } else {
-                hsize_t	max_data;    	/* Bytes in dataset */
-                unsigned u;		/* Local index variable */
-
-                /* Compute the size of the dataset in bytes */
-                for(u=1, max_data=layout->dim[0]; u<layout->ndims; u++)
-                    max_data *= layout->dim[u];
-
                 /* Pass along the vector of sequences to write */
-                if ((ret_value=H5F_contig_writevv(f, max_data, layout->addr,
+                if ((ret_value=H5F_contig_writevv(f, layout->chunk_size, layout->addr,
                         dset_max_nseq, dset_curr_seq, dset_len_arr, dset_offset_arr,
                         mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr,
                         dxpl_id, buf))<0)
