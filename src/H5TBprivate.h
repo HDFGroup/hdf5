@@ -100,6 +100,7 @@ typedef struct H5TB_tree
 #define H5TB_FAST_HADDR_COMPARE    1
 #define H5TB_FAST_INTN_COMPARE     2
 #define H5TB_FAST_STR_COMPARE      3
+#define H5TB_FAST_HSIZE_COMPARE    4
 
 /* Define an access macro for getting a node's data */
 #define H5TB_NODE_DATA(n)       ((n)->data)

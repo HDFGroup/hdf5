@@ -192,6 +192,32 @@ H5TB_int_cmp(const void *k1, const void *k2, int UNUSED cmparg)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5TB_hsize_cmp
+ *
+ * Purpose:	Key comparison routine for TBBT routines
+ *
+ * Return:	same as comparing two hsize_t's
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 20, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5TB_hsize_cmp(const void *k1, const void *k2, int UNUSED cmparg)
+{
+    FUNC_ENTER_NOINIT(H5TB_hsize_cmp);
+
+    assert(k1);
+    assert(k2);
+
+    FUNC_LEAVE_NOAPI(*(const hsize_t *)k1 - *(const hsize_t *)k2);
+} /* end H5TB_hsize_cmp() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5TB_fast_dmake
  *
  * Purpose:	Wrapper around H5TB_dmake for callers which want to use
@@ -230,6 +256,11 @@ H5TB_fast_dmake(unsigned fast_compare)
 
         case H5TB_FAST_STR_COMPARE:
             compar=H5TB_strcmp;
+            cmparg=-1;
+            break;
+
+        case H5TB_FAST_HSIZE_COMPARE:
+            compar=H5TB_hsize_cmp;
             cmparg=-1;
             break;
 
@@ -1445,6 +1476,23 @@ H5TB_ffind(H5TB_NODE * root, const void * key, unsigned fast_compare, H5TB_NODE 
         case H5TB_FAST_STR_COMPARE:
             if (ptr) {
                 while (0 != (cmp = HDstrcmp(key,ptr->key))) {
+                      parent = ptr;
+                      side = (cmp < 0) ? LEFT : RIGHT;
+                      if (!HasChild(ptr, side))
+                          break;
+                      ptr = ptr->link[side];
+                  } /* end while */
+              } /* end if */
+            if (NULL != pp)
+                *pp = parent;
+
+            /* Set return value */
+            ret_value= (0 == cmp) ? ptr : NULL;
+            break;
+
+        case H5TB_FAST_HSIZE_COMPARE:
+            if (ptr) {
+                while (0 != (cmp = (int)(*(const hsize_t *)key - *(hsize_t *)ptr->key))) {
                       parent = ptr;
                       side = (cmp < 0) ? LEFT : RIGHT;
                       if (!HasChild(ptr, side))
