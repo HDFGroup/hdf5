@@ -116,6 +116,52 @@ dnl Check for programs.
 dnl
 AC_PROG_CC
 CC_BASENAME="`echo $CC |cut -f1 -d' ' |xargs basename 2>/dev/null`"
+
+config_dirs=""
+
+dnl ----------------------------------------------------------------------
+dnl Check if they would like the Fortran interface compiled
+dnl
+AC_MSG_CHECKING(if fortran interface enabled)
+AC_ARG_ENABLE(fortran,
+   [  --enable-fortran        Compile the Fortran interface.],
+   HDF_FORTRAN=$enableval)
+
+if test "X$HDF_FORTRAN" = Xyes; then
+   echo "yes"
+
+   if test -z $config_dirs; then
+       config_dirs=fortran
+   else
+       config_dirs=${config_dirs} fortran
+   fi
+else
+   echo "no"
+fi
+
+dnl ----------------------------------------------------------------------
+dnl Check if they would like the Fortran interface compiled
+dnl
+AC_MSG_CHECKING(if c++ interface enabled)
+AC_ARG_ENABLE(c++,
+   [  --enable-c++            Compile the C++ interface.],
+   HDF_CXX=$enableval)
+
+if test "X$HDF_CXX" = Xyes; then
+   echo "yes"
+
+   if test -z $config_dirs; then
+       config_dirs=c++
+   else
+       config_dirs=${config_dirs} c++
+   fi
+else
+   echo "no"
+fi
+
+dnl Run configure in the subdirectories if specified
+AC_CONFIG_SUBDIRS(${config_dirs})
+
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AM_PROG_LIBTOOL
@@ -1327,23 +1373,18 @@ dnl We don't want inline defined for C++ compilers
 cat >> src/H5config.h <<EOF
 
 /* inline is a keyword in C++. If this is a C++ compiler, undefine it */
-#ifdef __cplusplus
-#    ifdef inline
-#	 undef inline
-#    endif
+#if defined(__cplusplus) && defined(inline)
+#undef inline
 #endif
 EOF
 
 dnl Put the C++ ifdef wrappers in the H5pubconf file as well, but only
 dnl if it's not there already.
-if (! grep __cplusplus src/H5pubconf.h >/dev/null); then
+{ grep __cplusplus src H5pubconf.h 1>2 2>/dev/null;} || \
   cat >> src/H5pubconf.h <<EOF
 
 /* inline is a keyword in C++. If this is a C++ compiler, undefine it */
-#ifdef __cplusplus
-#    ifdef inline
-#	 undef inline
-#    endif
+#if defined(__cplusplus) && defined(inline)
+#undef inline
 #endif
 EOF
-fi
