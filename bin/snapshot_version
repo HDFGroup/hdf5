@@ -1,0 +1,6 @@
+# default version for snapshot test
+# H5VERSION matches with a cvs version symbolic name.  Will test use the
+# latest revision of that branch.  If set to "hdf5", it uses the main
+# version.
+# H5VER tells runtest which version to run
+H5VERSION=hdf5

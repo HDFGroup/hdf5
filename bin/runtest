@@ -25,11 +25,10 @@ PROGNAME="bin/runtest $DEBUGMODE"
 
 # Setup
 HOSTNAME=`hostname | cut -f1 -d.`	# no domain part
-H5DIR=$HOME/HDF5/v_1_5/hdf5
 TODAY=`date +%y%m%d`
 WEEKDAY=`date +%a`
 H5VER=			# default to current CVS version
-H5VERSTR=		# default to current CVS version
+H5VERSION=		# default to current CVS version
 
 # Default to do checkout (only once) and test, no release.
 # If srcdir is not used, don't launched multiple tests
@@ -470,11 +469,8 @@ while [ $# -gt 0 ]; do
 	    PRINT "******** DEBUGMODE is $DEBUGMODE ************"
 	    ;;
 	-r*)
-	    # the version string has a leading _ but not for H5DIR name
+	    # version string
 	    H5VER="$1"
-	    H5VERSTR=_`echo $H5VER | sed -e s/-r// -e s/\\\./_/g`
-	    H5DIR=$HOME/HDF5/v$H5VERSTR/hdf5
-	    PROGNAME="$PROGNAME $H5VER"
 	    ;;
 	-all)
 	    # Test all hosts.
@@ -497,11 +493,25 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+# setup H5VER if not set yet
+if [ -z "$H5VER" -a -f bin/snapshot_version ]
+then
+    . bin/snapshot_version
+fi
+
+if [ -n "$H5VER" ]
+then
+    H5VERSION=hdf5_`echo $H5VER | sed -e s/-r// -e s/\\\./_/g`
+    PROGNAME="$PROGNAME $H5VER"
+else
+    H5VERSION=hdf5
+fi
+
 #################################
 # Setup snapshot test directories
 #################################
 # Show the real physical path rather than the symbolic path
-SNAPYARD=`cd $HOME/snapshots-hdf5${H5VERSTR} && /bin/pwd`
+SNAPYARD=`cd $HOME/snapshots-${H5VERSION} && /bin/pwd`
 # Log file basename
 LOGBASENAME=${SNAPYARD}/log/${HOSTNAME}
 PASSEDLOG=${SNAPYARD}/log/PASSED_LOG_${TODAY}
