@@ -72,6 +72,10 @@ while [ $# -gt 0 ] ; do
 	    cmdrel="release"
 	    cmd=""
 	    ;;
+	clean | distclean)
+	    cmdclean="$1"
+	    cmd=""
+	    ;;
 	help)
 	    cmd="help"
 	    break
@@ -127,6 +131,8 @@ Usage: $0 [all] [checkout] [test] [srcdir] [release] [help]
     checkout: Run cvs checkout
     test:     Run test
     release:  Run release
+    clean:    Run make clean
+    distclean:Run make distclean
     srcdir:   Use srcdir option (does not imply other commands)
               "snapshot srcdir" is equivalent to "snapshot srcdir all"
               "snapshot srcdir checkout" is equivalent to "snapshot checkout"
@@ -261,5 +267,34 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
     rm -rf ${PREVIOUS}
     mv ${CURRENT} ${PREVIOUS}
 fi #Release snapshot
+
+
+#=============================
+# Clean the test area.  Default is no clean.
+#=============================
+if [ -n "$cmdclean" ]; then
+    # setup if srcdir is used.
+    if [ -z "$srcdir" ]; then
+	TESTDIR=${CURRENT}
+    else
+	case "$SRCDIRNAME" in
+	"")
+	    SRCDIRNAME=`hostname`
+	    ;;
+	-*)
+	    SRCDIRNAME="`hostname`$SRCDIRNAME"
+	    ;;
+	esac
+	TESTDIR=${BASEDIR}/TestDir/${SRCDIRNAME}
+    fi
+    # Make sure current version exists and is clean
+    if [ -d ${TESTDIR} ]; then
+	(cd ${TESTDIR} && ${MAKE} $cmdclean )
+    else
+	errcode=$?
+        snapshot=no
+        exit $errcode
+    fi
+fi # Clean the Test directory
 
 exit $errcode
