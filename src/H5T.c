@@ -359,7 +359,7 @@ static herr_t H5T_register(H5T_pers_t pers, const char *name, H5T_t *src,
 }
 
 /* Define the code templates for opaque for the "GUTS" in the H5T_INIT_TYPE macro */
-#define H5T_INIT_TYPE_OPAQUE_CORE {					      \
+#define H5T_INIT_TYPE_OPAQ_CORE {					      \
     H5T_INIT_TYPE_ALLOC_COMMON(H5T_OPAQUE)				      \
     dt->u.opaque.tag = H5MM_strdup("");					      \
 }
@@ -757,7 +757,7 @@ H5T_init_interface(void)
          copied_dtype=0;
 
         /* Opaque data */
-        H5T_INIT_TYPE(OPAQUE,H5T_NATIVE_OPAQUE_g,ALLOC,-,SET,1)
+        H5T_INIT_TYPE(OPAQ,H5T_NATIVE_OPAQUE_g,ALLOC,-,SET,1)
 
         /*------------------------------------------------------------
          * The `C' architecture
