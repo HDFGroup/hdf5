@@ -5854,6 +5854,7 @@ H5S_hyper_select_iterate_mem_gen(H5S_hyper_iter_info_t *iter_info)
     hsize_t slab[H5O_LAYOUT_NDIMS]; /* Cumulative size of each dimension in bytes */
     hsize_t acc;        /* Accumulator for computing cumulative sizes */
     hssize_t off_arr[H5O_LAYOUT_NDIMS];  /* Current hyperslab span position */
+    hssize_t coord_arr[H5O_LAYOUT_NDIMS];  /* Current coordinate position */
     int fast_dim;      /* Rank of the fastest changing dimension for the dataspace */
     int curr_dim;      /* Current dimension being operated on */
     int ndims;         /* Number of dimensions of dataset */
@@ -5891,9 +5892,10 @@ H5S_hyper_select_iterate_mem_gen(H5S_hyper_iter_info_t *iter_info)
     for(i=0, loc_off=0; i<ndims; i++) {
         /* Set the location */
         off_arr[i]=iter->hyp.span[i]->low;
+        coord_arr[i]=off_arr[i]+space->select.offset[i];
 
         /* Compute the sequential element offset */
-        loc_off+=(off_arr[i]+space->select.offset[i])*slab[i];
+        loc_off+=coord_arr[i]*slab[i];
     } /* end for */
 
     /* Perform the I/O on the elements, based on the position of the iterator */
@@ -5905,10 +5907,11 @@ H5S_hyper_select_iterate_mem_gen(H5S_hyper_iter_info_t *iter_info)
         /* Iterate through all the span elements */
         for(u=0, loc=(uint8_t *)iter_info->src+loc_off; u<span_io && user_ret==0; u++) {
             /* Call the user's callback routine */
-            user_ret=(*(iter_info->op))(loc,iter_info->dt,(hsize_t)ndims,off_arr,iter_info->op_data);
+            user_ret=(*(iter_info->op))(loc,iter_info->dt,(hsize_t)ndims,coord_arr,iter_info->op_data);
 
             /* Increment the element location */
             off_arr[fast_dim]++;
+            coord_arr[fast_dim]++;
 
             /* Increment the buffer offset */
             loc+=slab[fast_dim];
@@ -5930,6 +5933,7 @@ H5S_hyper_select_iterate_mem_gen(H5S_hyper_iter_info_t *iter_info)
 
             /* Move the element location */
             off_arr[fast_dim]=curr_span->low;
+            coord_arr[fast_dim]=off_arr[fast_dim]+space->select.offset[fast_dim];
         } /* end if */
         /* We walked off the spans for the fastest dimension, work our way back up */
         else {
@@ -5943,6 +5947,7 @@ H5S_hyper_select_iterate_mem_gen(H5S_hyper_iter_info_t *iter_info)
             while(curr_dim>=0) {
                 /* Increment position in span */
                 off_arr[curr_dim]++;
+                coord_arr[curr_dim]++;
 
                 /* Check if we are still within the span */
                 if(off_arr[curr_dim]<=curr_span->high) {
@@ -5957,6 +5962,7 @@ H5S_hyper_select_iterate_mem_gen(H5S_hyper_iter_info_t *iter_info)
                     if(curr_span!=NULL) {
                         /* Reset the offset for the dim */
                         off_arr[curr_dim]=curr_span->low;
+                        coord_arr[curr_dim]=off_arr[curr_dim]+space->select.offset[curr_dim];
 
                         break;
                     } /* end if */
@@ -5994,6 +6000,7 @@ H5S_hyper_select_iterate_mem_gen(H5S_hyper_iter_info_t *iter_info)
 
                     /* Reset the offset for the dim */
                     off_arr[curr_dim+1]=curr_span->low;
+                    coord_arr[curr_dim+1]=off_arr[curr_dim+1]+space->select.offset[curr_dim+1];
 
                     /* Increment current dimension */
                     curr_dim++;
@@ -6008,7 +6015,7 @@ H5S_hyper_select_iterate_mem_gen(H5S_hyper_iter_info_t *iter_info)
 
             /* Reset the buffer offset */
             for(i=0, loc_off=0; i<ndims; i++)
-                loc_off+=(off_arr[i]+space->select.offset[i])*slab[i];
+                loc_off+=coord_arr[i]*slab[i];
         } /* end else */
     } /* end while */
 
