@@ -29,6 +29,8 @@ CONTENTS
 
 - New features
 - New h4toh5 utility
+- F90 Support
+- C++ Support
 - Bug fixes since HDF5-1.2.0 
 - Platforms Tested
 - Known Problems
@@ -122,6 +124,68 @@ Release Notes for h4toh5 beta
     The beta h4toh5 utility has been tested on Solaris 2.6, Solaris 2.5,
     Irix 6.5, HPUX 11.0, DEC Unix, FreeBSD, and Windows 2000.
 
+F90 support
+============
+ 
+    This is the first release of the HDF5 Library wil fully integrated F90 API support.
+    The Fortran Library is created when the --enable-fortran flag is specified during
+    configuration.
+
+    Not all F90 subroutines are implemented. Please refer to the HDF5 Reference Manual 
+    for more details.
+   
+    F90 APIs are available for the Solaris 2.6 and 2.7, Linux, DEC UNIX, T3E, J90 
+    and O2K (64 bit option only) platforms. Parallel version of the HDF5 F90 Library
+    is supported on the O2K and T3E platforms.
+
+    Changes since last prototype release (July 2000).
+
+       * h5open_f and h5close_f must be called instead of h5init_types and h5close_types.
+       * The following subroutines cannot be used anymore: 
+             h5pset_xfer_f
+             h5pget_xfer_f
+             h5pset_mpi_f
+             h5pget_mpi_f
+             h5pset_stdio_f
+             h5pget_stdio_f
+             h5pset_sec2_f
+             h5pget_sec2_f
+             h5pset_core_f
+             h5pget_core_f
+             h5pset_family_f
+             h5pget_family_f
+             
+       * The following functions have been added:
+             h5pset_fapl_mpio_f
+             h5pget_fapl_mpio_f
+             h5pset_dxpl_mpio_f
+             h5pget_dxpl_mpio_f
+        
+       * In the previous HDF5 F90 releases, implementation of object references 
+         and dataset region references was not portable. This release introduces
+         portable implementation, but it also introduces changes to read/write APIs
+         that handles references.
+         If object or dataset region references are written or read to/from
+         an HDF5 file, h5dwrite_f and h5dread_f must use extra parameter n - buffer size, i.e
+
+         h5dwrite(read)_f(dset_id, mem_type_id, buf, n, hdferr, &
+                                                    ^^^ 
+                          mem_space_id, file_space_id, xfer_prp)
+
+         For other datatypes APIs were not changed. 
+              
+             
+C++ support
+============
+
+        This is the first release of the HDF5 Library with fully integrated 
+        C++ APIs support. The HDF5 C++ Library is built when the --enable-cxx
+        flag is specified during configuration.
+
+        Check the HDF5 Reference Manual for available C++ documentation.
+
+        C++ APIs are available for Solaris 2.6 and 2.7, Linux, and FreeBSD. 
+ 
 
 Bug fixes since HDF5-1.2.0
 
