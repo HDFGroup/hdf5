@@ -446,22 +446,23 @@ int main(int argc, char **argv)
 	    "dataset fill value", filenames[8]);
 
     
-    if(mpi_size > 24) {
-     if(MAINPROCESS) {
-      printf("The collective chunk IO test hasn't been tested for the number of process greater than 24\n");
-      printf("Please try with the number of process no greater than 24\n");
-      printf("All collective chunk tests will be skipped \n");
-     }
-      goto finish;
+    if(mpi_size > 64) {
+      if(MAINPROCESS) {
+        printf("The collective chunk IO test hasn't been tested for the number of process greater than 64\n");
+        printf("Please try with the number of process no greater than 64\n");
+        printf("All collective chunk tests will be skipped \n");
+      }
     }
-    AddTest("coll_chunked1", coll_chunk1,NULL,
+    else { 
+      AddTest("coll_chunked1", coll_chunk1,NULL,
 	    "simple collective chunk io",filenames[9]);
-    AddTest("coll_chunked2", coll_chunk2,NULL,
+      AddTest("coll_chunked2", coll_chunk2,NULL,
 	    "noncontiguous collective chunk io",filenames[10]);
-    AddTest("coll_chunked3", coll_chunk3,NULL,
+      AddTest("coll_chunked3", coll_chunk3,NULL,
 	    "multi-chunk collective chunk io",filenames[11]);
-    AddTest("coll_chunked4", coll_chunk4,NULL,
+      AddTest("coll_chunked4", coll_chunk4,NULL,
 	    "collective to independent chunk io",filenames[12]);
+    }
 
     /* Display testing information */
     TestInfo(argv[0]);
