@@ -44,9 +44,10 @@ int doread=1;				/* read test */
 int dowrite=1;				/* write test */
 int docompact=1;                        /* compact dataset test */
 int doindependent=1;			/* independent test */
+unsigned dobig=1;                       /* "big" dataset tests */
 
 /* FILENAME and filenames must have the same number of names */
-const char *FILENAME[8]={
+const char *FILENAME[9]={
 	    "ParaEg1",
 	    "ParaEg2",
 	    "ParaEg3",
@@ -54,8 +55,9 @@ const char *FILENAME[8]={
             "ParaMgroup",
             "ParaCompact",
             "ParaIndividual",
+            "ParaBig",
 	    NULL};
-char	filenames[8][PATH_MAX];
+char	filenames[9][PATH_MAX];
 hid_t	fapl;				/* file access property list */
 
 #ifdef USE_PAUSE
@@ -176,6 +178,8 @@ parse_options(int argc, char **argv)
                 case 'o':   docompact = 0;
                             break;
                 case 'i':   doindependent = 0;
+                            break;
+                case 'b':   dobig = 0;
                             break;
 		case 'v':   verbose = 1;
 			    break;
@@ -326,6 +330,27 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type,
     return (ret_pl);
 }
 
+/*
+ * Check the size of a file using MPI routines
+ */
+MPI_Offset
+h5_mpi_get_file_size(const char *filename, MPI_Comm comm, MPI_Info info)
+{
+    MPI_File	fh;             /* MPI file handle */
+    MPI_Offset	size=0;         /* File size to return */
+
+    if (MPI_SUCCESS != MPI_File_open(comm, (char*)filename, MPI_MODE_RDONLY, info, &fh))
+        goto done;
+
+    if (MPI_SUCCESS != (MPI_File_get_size(fh, &size)))
+        goto done;
+
+    if (MPI_SUCCESS != MPI_File_close(&fh))
+        size=0;
+
+done:
+    return(size);
+}
 
 int main(int argc, char **argv)
 {
@@ -445,7 +470,15 @@ int main(int argc, char **argv)
         MPI_BANNER("Independent test skipped");
     }
         
-    if (!(dowrite || doread || ndatasets || ngroups || docompact)){
+    if (dobig && sizeof(MPI_Offset)>4){
+        MPI_BANNER("big dataset test...");
+        big_dataset(filenames[7]); 
+    }
+    else {
+        MPI_BANNER("big dataset test skipped");
+    }
+    
+    if (!(dowrite || doread || ndatasets || ngroups || docompact || doindependent || dobig)){
 	usage();
 	nerrors++;
     }

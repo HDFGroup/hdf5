@@ -1683,7 +1683,7 @@ int main(void)
 
 if test ${hdf5_cv_malloc_works} = "yes"; then
   AC_DEFINE([MALLOC_WORKS], [1],
-            [Define if your system has a working \`malloc' function.])
+            [Define if your system's \`malloc' function returns a valid pointer for 0-byte allocations.])
   AC_MSG_RESULT([yes])
 else
   AC_MSG_RESULT([no])
@@ -2296,8 +2296,26 @@ dnl
   else
     AC_MSG_RESULT(no)
   fi
-fi
 
+  dnl ----------------------------------------------------------------------
+  dnl Set the flag to indicate that the MPI_File_set_size() function
+  dnl works with files over 2GB, unless it's already set in the cache.
+  dnl (This flag should be set for all machines, except for ASCI Red, where
+  dnl the cache value is set in it's config file)
+  dnl
+  AC_MSG_CHECKING([if MPI_File_set_size works for files over 2GB])
+  AC_CACHE_VAL([hdf5_cv_mpi_file_set_size_big], [hdf5_cv_mpi_file_set_size_big=yes])
+  
+  if test ${hdf5_cv_mpi_file_set_size_big} = "yes"; then
+    AC_DEFINE([MPI_FILE_SET_SIZE_BIG], [1],
+              [Define if your system's \`MPI_File_set_size' function works for files over 2GB.])
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
+  fi
+  
+fi
+  
 dnl ----------------------------------------------------------------------
 dnl Turn on internal I/O filters by setting macros in header files
 dnl Internal I/O filters are contained entirely within the library and do
