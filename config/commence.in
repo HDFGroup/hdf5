@@ -47,6 +47,10 @@ LT_INSTALL_PROG=$(LT) --mode=install $(INSTALL_PROGRAM)
 LT_INSTALL_LIB=$(LT) --mode=install $(INSTALL_DATA)
 LT_UNINSTALL=$(LT) --mode=uninstall $(RM)
 
+## Optional variables. We must declare them here because Irix pmake
+## complains if it sees a reference to a variable which has never been
+## defined. The main makefile is free to redefine these to something else.
+DOCDIR=$(docdir)
 
 # The default is to build the library and/or programs.  We must build
 # them sequentially.
