@@ -2,7 +2,7 @@ HDF5 Install Instructions for Windows NT/95/98.
 -------------------------------------------------------------------------
 
 The instructions which follow assume that you will be using the the source
-code release 'zip' file (hdf5-1_2_0.zip).
+code release 'zip' file (hdf5-1_4_0.zip).
 
 The following sections discuss in detail installation procedures. 
 
@@ -12,7 +12,7 @@ The following sections discuss in detail installation procedures.
   Section 4: ZLIB library - removing or changing the path
 
 Section 1:
-Building from Source Code Release (hdf5-1_2_0.zip)
+Building from Source Code Release (hdf5-1_4_0.zip)
 ==================================================
 
 STEP I:  Preconditions
@@ -87,12 +87,26 @@ STEP II: Building the Libraries and tests.
        Select "Build" and "Build all.exe" to build the corresponding
        version of the HDF5 library.
 
-       NOTE: "all" is a dummy target. You will get a link error when
+       NOTE 1: "all" is a dummy target. You will get a link error when
        "all.exe." is built:
 
              LINK: error LNK2001: unresolved external symbol
 			_mainCRTStartup.....
              all.exe - 2 error(s), ....
+
+       NOTE 2: In the HDF5_1.4 beta release, you may find strange errors
+       when compiling tvlstr.c at testhdf5 and testhdf5dll projects. 
+       Simply selecting tvlstr.c itself and compiling it separately, 
+       you may find tvlstr.c be compiled successfully this time.
+       Now coming back to Build menu and choose Build all.exe(or choose F7 key);
+       The rest of testhdf5 program will be linked successfully.    
+
+       NOTE 3: In order to test h4toh5 and h5toh4 converter, you need to have
+       hdf413(or higher version) library. Please adjust processor settings to include
+       hdf4 header files and adjust the hdf4 library path in your own machine. One way
+       to include library is to select the current project(h4toh5 etc.) and insert
+       hdf4 libraries into the current project. Make sure that you find all hdf4 library
+       files following the hdf4 library templates of the current project.
 
        Warning messages can be ignored. The "all.exe" is never created,
        so it is OK.
@@ -183,11 +197,26 @@ depending on which version you would like to test.
 To test the h5dump utility, cd into hdf5\tools. Then type: "dumptest
 [debug or release] [dll]" depending on which version you would like to
 test. We are using "fc" command to compare whether dumper generates 
-correct results.We recommend you to redirection (using ">") to redirect
+correct results.We recommend you to redirect(using ">") 
 the output into a file to check the test output manually.
 
-To test the h4toh5 utility,  cd into hdf5\tools. Then type: "h4toh5testrun                         [debug or release] [dll]" depending on which version you would like to                             test. We are using "fc" command to compare whether converter converts                              correctly. We recommend you to redirection (using ">") to redirect                                 the output into a file to check the test output manually.                                                                                                                                             To test the h5toh4 utility, you need to have "hdp" utilityin your system.                          cd into hdf5\tools. Four parameters should be input in this format:                                h5toh4testrun [para 1] [para 2] [para 3] [para 4]                                                                                                                                                                                                                                                            para1. [Debug] or [Release] version you are testing.                                               para2. The top directory path(including the drive name) where hdf5 tools                                        is located,for example: D:/h5_1.4                                                     para3. The full path where hdp is located, for example D:/H414/bin                                 para4. If no dll version,leave this parameter empty or type DLL.                                                                                                                                                                                                                                         We are using "fc" command to compare whether converter converts                                    correctly. We recommend you to redirection (using ">") to redirect                                 the output into a file to check the test output manually.     
+To test the h4toh5 utility,  cd into hdf5\tools. 
+Then type: "h4toh5testrun [debug or release] [dll]" depending on which 
+version you would like to test. We are using "fc" command to compare 
+whether converter converts correctly. We recommend you to redirect (using ">")
+the output into a file to check the test output manually.
+                                                                                                   To test the h5toh4 utility, you need to have "hdp" utilityin your system.
+cd into hdf5\tools. Four parameters should be input in this format:
+1) For windows NT 4.0 and 5.0 
+type h5toh4testrun [para 1] [para 2] [para 3] [para 4] 
+2) For Windows 98
+type h5toh4testwin98 [para 1] [para 2] [para 3] [para 4]
 
+  para1: [Debug] or [Release] version you are testing.
+  para2: The top directory path(including the drive name) where hdf5 tools 
+         is located,for example: D:/h5_1.4 
+  para3: The full path where hdp is located, for example D:/H414/bin 
+  para4: If no dll version,leave this parameter empty or type DLL
 
 NOTE: The appropriate dll should be placed in the Windows\system
       directory before using the dlls.
@@ -340,7 +369,7 @@ using the Visual C++ Development Environment.
 Project name and location issues: 
        
     The files in all.zip must end up in the hdf5\ directory installed by
-    hdf5-1_2_0.zip
+    hdf5-1_4_0.zip
 
     If you must install all.dsw and all.dsp in another directory,
     relative to hdf5\ , you will be asked to locate the sub-project
