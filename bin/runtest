@@ -290,6 +290,13 @@ RUNSNAPTEST()
 		SNAPCMD_OPT="$SNAPCMD_OPT $1 $2"
 		shift; shift
 		;;
+	    setenv)
+		# set environment variable
+		shift
+		eval $1="$2"
+		export $1
+		shift; shift
+		;;
 	    *) # unknown test
 		echo "$0: unknown type of test ($1)"
 		retcode=1
