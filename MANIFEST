@@ -156,6 +156,23 @@
 ./doc/html/extern1.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/extern2.gif
 ./doc/html/extern2.obj			_DO_NOT_DISTRIBUTE_
+
+./doc/html/fortran/h5a_FORTRAN.html
+./doc/html/fortran/h5d_FORTRAN.html
+./doc/html/fortran/h5e_FORTRAN.html
+./doc/html/fortran/h5f_FORTRAN.html
+./doc/html/fortran/h5g_FORTRAN.html
+./doc/html/fortran/h5i_FORTRAN.html
+./doc/html/fortran/h5p_FORTRAN.html
+./doc/html/fortran/h5r_FORTRAN.html
+./doc/html/fortran/h5s_FORTRAN.html
+./doc/html/fortran/h5t_FORTRAN.html
+
+./doc/html/Graphics/C++.gif
+./doc/html/Graphics/FORTRAN.gif
+./doc/html/Graphics/Java.gif
+./doc/html/Graphics/OtherAPIs.gif
+
 ./doc/html/group_p1.gif
 ./doc/html/group_p1.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/group_p2.gif
