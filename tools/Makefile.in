@@ -21,7 +21,7 @@ CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src  \
 
 ## Test programs and scripts.
 ##
-TEST_PROGS=talign
+TEST_PROGS=
 TEST_SCRIPTS=
 
 ## These are our main targets: library and tools.
@@ -33,7 +33,7 @@ PROGS=$(PUB_PROGS) $(TEST_PROGS)
 
 ## Source and object files for the tests
 ##
-TEST_SRC=talign.c
+TEST_SRC=
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
 lib ::
@@ -45,7 +45,7 @@ progs: $(LIBTOOLS) $(LIBHDF5)
 	done
 
 check tests test _test: $(PROGS)
-	@@SETX@; for d in $(SUBDIRS); do                                      \
+	@@SETX@; for d in lib $(SUBDIRS); do                                  \
 	   (cd $$d && $(MAKE) $@) || exit 1;                                  \
 	done
 
@@ -82,10 +82,4 @@ maintainer-clean:
 	@@SETX@; for d in $(SUBDIRS); do                                      \
 	   (cd $$d && $(MAKE) $@);                                            \
 	done
-
-talign: talign.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ talign.lo $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
-
-.c.lo:
-	@$(LT_COMPILE) $(CFLAGS) $(CPPFLAGS) -c $<
 
