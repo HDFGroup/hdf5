@@ -282,12 +282,16 @@ test_simple_io(hid_t file)
 static herr_t
 test_tconv(hid_t file)
 {
-    uint8                   out[4 * 1000000];
-    uint8                   in[4 * 1000000];
-    intn                    i;
-    size_t                  dims[1];
-    hid_t                   space, dataset, type;
-    herr_t                  status;
+    uint8	*out=NULL, *in=NULL;
+    intn	i;
+    size_t	dims[1];
+    hid_t	space, dataset, type;
+    herr_t	status;
+
+    out = malloc (4*1000000);
+    assert (out);
+    in = malloc (4*1000000);
+    assert (in);
 
     printf("%-70s", "Testing data type conversion");
 
