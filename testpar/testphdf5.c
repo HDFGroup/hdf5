@@ -14,7 +14,7 @@ int chunkdim1;
 int nerrors = 0;			/* errors count */
 int verbose = 0;			/* verbose, default as no. */
 
-#ifdef POOMA_ARCH
+#ifdef __PUMAGON__
 /* For the PFS of TFLOPS */
 char *fileprefix = "pfs:/pfs_grande/multi/tmp_1/";
 #else
