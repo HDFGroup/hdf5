@@ -44,26 +44,47 @@
  	File Interface (H5F)			H5File
  	Group Interface (H5G)			Group
  	Identifier Interface (H5I)		IdComponent
- 	Property List Interface (H5P)		PropList
- 	Reference Interface (H5R)		Reference
+ 	Property List Interface (H5P)		PropList and subclasses
  	Dataspace Interface (H5S)		DataSpace
- 	Datatype Interface (H5T)		DataType
+ 	Datatype Interface (H5T)		DataType and subclasses
   \endverbatim
  * \section install_sec Installation
  *
- * Please refer to the file release_docs/INSTALL
+ * Please refer to the file release_docs/INSTALL_Windows_withcpp.txt
  * under the top directory for information about installing, building,
  * and testing the C++ API.
  *
  *  
  */
 
-///\par Dataset example:
-///   This example shows how to create datasets.
+///	This example shows how to create datasets.
+///\par
 ///\example     create.cpp
 
-///\par Another example:
-///   This example shows how to write datasets.
+///\par
+///	This example shows how to write datasets.
 ///\example     writedata.cpp
+
+///\par
+///	This example shows how to read datasets.
+///\example     readdata.cpp
+
+///\par
+///	This example shows how to create a compound datatype,
+///	write an array which has the compound datatype to the file,
+///	and read back fields' subsets.
+///\example     compound.cpp
+
+///\par
+///	This example shows how to work with extendible datasets.
+///\example     extend_ds.cpp
+
+///\par
+///	This example shows how to read data from a chunked dataset.
+///\example     chunks.cpp
+
+///\par
+///	This example shows how to work with groups.
+///\example     h5group.cpp
 
 #endif
