@@ -59,6 +59,9 @@ Library
      correct sequence of array elements if hyperslabs were staggered in a
      certain pattern
    * Fixed several other problems in hyperslab iteration code.
+   * Fixed another H5Giterate bug which was causes groups with large numbers
+     of objects in them to misbehave when the callback function returned
+     non-zero values.
 
 Configuration
 -------------
