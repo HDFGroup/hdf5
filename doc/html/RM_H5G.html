@@ -25,6 +25,7 @@ HDF5/H5G API Specification
 <!-- #EndLibraryItem --></head>
 
 <body bgcolor="#FFFFFF">
+<!-- HEADER RIGHT " " -->
 
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
@@ -60,8 +61,7 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><center>
+<hr><!-- #EndLibraryItem --><center>
 <h1>H5G: Group Interface</h1>
 </center>
 
@@ -101,59 +101,61 @@ of objects in an HDF5 file.
 </ul>
 </td></tr>
 </table>
-<br>
 
 <i>Alphabetical Listing</i>
 
 <table border="0">
   <tr>
     <td valign="top">
+	<ul>
       <li><a href="#Group-Close">H5Gclose</a>
       <li><a href="#Group-Create">H5Gcreate</a>
       <li><a href="#Group-GetComment">H5Gget_comment</a>
       <li><a href="#Group-GetLinkval">H5Gget_linkval</a>
       <li><a href="#Group-GetNumObjs">H5Gget_num_objs</a>
       <li><a href="#Group-GetObjinfo">H5Gget_objinfo</a>
-      
-      
+    </ul>     
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#Group-GetObjNameByIdx">H5Gget_objname_by_idx</a>
       <li><a href="#Group-GetObjTypeByIdx">H5Gget_objtype_by_idx</a>
       <li><a href="#Group-Iterate">H5Giterate</a>
       <li><a href="#Group-Link">H5Glink</a>
       <li><a href="#Group-Link2">H5Glink2</a>
       <li><a href="#Group-Move">H5Gmove</a>
+	</ul>
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#Group-Move2">H5Gmove2</a>
       <li><a href="#Group-Open">H5Gopen</a>
       <li><a href="#Group-SetComment">H5Gset_comment</a>
       <li><a href="#Group-Unlink">H5Gunlink</a>
+	</ul>
     </td>
   </tr>
 </table>
 
-<p>
+<br>
 <strong>The FORTRAN90 Interfaces:</strong>
 
-<br>
 <font size=-1>
 <i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below go to the C function 
+as the corresponding C function.  The links below (electronic versions only) go to the C function 
 descriptions, which serve as general descriptions for both.  A button, 
 under <strong>Non-C API(s)</strong> at the end of the C function description,
 opens an external browser window displaying the FORTRAN90-specific 
 information.  You will probably want to adjust the size and location of 
 this external window so that both browser windows are visible and to 
 facilitate moving easily between them.</i>
-</font>
+</font><br>
 
 <table border=0>
 <tr><td valign=top>
@@ -208,7 +210,44 @@ create or access function.
 
 <p>
 
+<!-- NEW PAGE -->
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gclose" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-Close">H5Gclose</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Gclose</code>(<em>hid_t </em><code>group_id</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Closes the specified group.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Gclose</code> releases resources used by a group which was
+        opened by <code>H5Gcreate</code> or <code>H5Gopen</code>. 
+        After closing a group, the <code>group_id</code> cannot be used again.  
+        <p>
+        Failure to release a group with this call will result in resource leaks.
+  <dt><strong>Parameters:</strong>
+    <dl>
+      <dt><em>hid_t</em> <code>group_id</code>
+        <dd>IN: Group identifier to release.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+<!--
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gclose_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5gclose_f&quot;,&quot;FortWin&nquot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
+-->
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gclose_f"
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
 
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gcreate" -->
 <hr>
 <dl>
   <dt><strong>Name:</strong> <a name="Group-Create">H5Gcreate</a>
@@ -268,42 +307,49 @@ create or access function.
         -->
 </dl>
 
-
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gget_comment" -->
 <hr>
 <dl>
-  <dt><strong>Name:</strong> <a name="Group-Open">H5Gopen</a>
+  <dt><strong>Name:</strong> <a name="Group-GetComment">H5Gget_comment</a>
   <dt><strong>Signature:</strong>
-    <dd><em>hid_t </em><code>H5Gopen</code>(<em>hid_t</em> <code>loc_id</code>,
-        <em>const char *</em><code>name</code>
+    <dd><em>herr_t</em> <code>H5Gget_comment</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>size_t</em> <code>bufsize</code>,
+        <em>char *</em><code>comment</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Opens an existing group for modification and returns a group 
-        identifier for that group.
+    <dd>Retrieves comment for specified object.
   <dt><strong>Description:</strong>
-    <dd><code>H5Gopen</code> opens an existing group with the specified 
-        name at the specified location, <code>loc_id</code>.
+    <dd><code>H5Gget_comment</code> retrieves the comment for the the
+        object <code>name</code>.  The comment is returned in the buffer 
+        <code>comment</code>.
         <p>
-        The location is identified by a file or group identifier
+        At most <code>bufsize</code> characters, including a null 
+        terminator, are copied.  The result is not null terminated 
+        if the comment is longer than the supplied buffer.  
         <p>
-        <code>H5Gopen</code> returns a group identifier for the group
-        that was opened.  This group identifier should be released by 
-        calling <code>H5Gclose</code> when it is no longer needed.  
+        If an object does not have a comment, the empty string 
+        is returned.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: File or group identifier within which group is to be open.
-      <dt><em>const char *</em> <code>name</code>
-        <dd>IN: Name of group to open.
+        <dd>IN: Identifier of the file or group.
+      <dt><em>const char *</em><code>name</code>
+        <dd>IN: Name of the object whose comment is to be set or reset.
+      <dt><em>size_t</em> <code>bufsize</code>
+        <dd>IN: Anticipated size of the buffer required to hold 
+            <code>comment</code>.
+      <dt><em>char *</em><code>comment</code>
+        <dd>OUT: The comment.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns a valid group identifier if successful; 
-        otherwise returns a negative value.
+    <dd>Returns the number of characters in the comment, 
+        counting the null terminator, if successful; the value 
+        returned may be larger than <code>bufsize</code>.
+        Otherwise returns a negative value.
   <dt><strong>Non-C API(s):</strong>
-<!--
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gopen_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5gopen_f&quot;,&quot;FortWin&nquot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
--->
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gopen_f"
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gget_comment_f"
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -311,220 +357,328 @@ create or access function.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gget_linkval" -->
 <hr>
 <dl>
-  <dt><strong>Name:</strong> <a name="Group-Close">H5Gclose</a>
+  <dt><strong>Name:</strong> <a name="Group-GetLinkval">H5Gget_linkval</a>
   <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Gclose</code>(<em>hid_t </em><code>group_id</code>)
-  <dt><strong>Purpose:</strong>
-    <dd>Closes the specified group.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Gclose</code> releases resources used by a group which was
-        opened by <code>H5Gcreate</code> or <code>H5Gopen</code>. 
-        After closing a group, the <code>group_id</code> cannot be used again.  
-        <p>
-        Failure to release a group with this call will result in resource leaks.
-  <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>group_id</code>
-        <dd>IN: Group identifier to release.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-<!--
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gclose_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5gclose_f&quot;,&quot;FortWin&nquot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
--->
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gclose_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Group-Link">H5Glink</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Glink</code>(<em>hid_t</em> <code>loc_id</code>,
-        <em>H5G_link_t</em> <code>link_type</code>,
-        <em>const char *</em><code>current_name</code>,
-        <em>const char *</em><code>new_name</code>
+    <dd><em>herr_t</em> <code>H5Gget_linkval</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>size_t</em> <code>size</code>,
+        <em>char *</em><code>value</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Creates a link of the specified type from <code>new_name</code> 
-        to <code>current_name</code>.
+    <dd>Returns the name of the object that the symbolic link points to.
   <dt><strong>Description:</strong>
-    <dd><code>H5Glink</code> creates a new name for an object that has some current 
-	  name, possibly one of many names it currently has.  
+    <dd><code>H5Gget_linkval</code> returns <code>size</code> 
+        characters of the name of the object that the symbolic link <code>name</code> points to.
         <p>
-        If <code>link_type</code> is <code>H5G_LINK_HARD</code>, then 
-        <code>current_name</code> must specify the name of an 
-        existing object and both
-        names are interpreted relative to <code>loc_id</code>, which is 
-        either a file identifier or a group identifier.
+        The parameter <code>loc_id</code> is a file or group identifier.
         <p>
-        If <code>link_type</code> is <code>H5G_LINK_SOFT</code>, then 
-        <code>current_name</code> can be anything and is interpreted at 
-        lookup time relative to the group which contains the final 
-        component of <code>new_name</code>.  For instance, if
-        <code>current_name</code> is <code>./foo</code>,  
-        <code>new_name</code> is <code>./x/y/bar</code>, and a request
-        is made for <code>./x/y/bar</code>, then the actual object looked 
-        up is <code>./x/y/./foo</code>.                            
+        The parameter <code>name</code> must be a symbolic link pointing to
+        the desired object and must be defined relative to <code>loc_id</code>.
+        <p>
+        If <code>size</code> is smaller than the size of the returned object name, then 
+        the name stored in the buffer <code>value</code> will not be null terminated. 
+        <p> 
+        This function fails if <code>name</code> is not a symbolic link.  
+        The presence of a symbolic link can be tested by passing zero for  
+        <code>size</code> and NULL for <code>value</code>.  
+        <p>
+        This function should be used only after <code>H5Gget_objinfo</code> has been called
+        to verify that <code>name</code> is a symbolic link.
+  <dt><strong>Parameters:</strong>
+    <dl>
+      <dt><em>hid_t</em> <code>loc_id</code>
+        <dd>IN: Identifier of the file or group.
+      <dt><em>const char *</em><code>name</code>
+        <dd>IN: Symbolic link to the object whose name is to be returned.
+      <dt><em>size_t</em> <code>size</code>
+        <dd>IN: Maximum number of characters of <code>value</code> 
+            to be returned.
+      <dt><em>char *</em><code>value</code>
+        <dd>OUT: A buffer to hold the name of the object being sought.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value, with the link value in <code>value</code>, 
+        if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gget_linkval_f"
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gget_num_objs" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Group-GetNumObjs">H5Gget_num_objs</a>
+<dt><strong>Signature:</strong>
+  <dd><em>herr_t</em> <code>H5Gget_num_objs</code>(<em>hid_t</em> <code>loc_id</code>,
+      <em>hsize_t* </em> <code>num_obj</code>)
+<dt><strong>Purpose:</strong>
+  <dd>Returns number of objects in the group specified by its identifier
+<dt><strong>Description:</strong>
+  <dd><code>H5Gget_num_objs</code> returns number of objects in a group.
+      Group is specified by its identifier <code>loc_id</code>. 
+      If a file identifier is passed in, then  number of objects in the 
+      root group is returned.
+<dt><strong>Parameters:</strong>
+  <dl>
+    <dt><em>hid_t</em> <code>loc_id</code>
+      <dd>IN: Identifier of the group or the file
+    <dt><em>hsize_t*</em> <code>num_obj</code>
+      <dd>OUT: Number of objects in the group.
+  </dl>
+<dt><strong>Returns:</strong>
+  <dd>Returns positive value if successful;
+      otherwise returns a negative value.
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gget_objinfo" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-GetObjinfo">H5Gget_objinfo</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Gget_objinfo</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>hbool_t</em> <code>follow_link</code>,
+        <em>H5G_stat_t *</em><code>statbuf</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns information about an object.  
+  <dt><strong>Description:</strong>
+    <dd><code>H5Gget_objinfo</code> returns information about the 
+        specified object through the <code>statbuf</code> argument. 
+        <code>loc_id</code> (a file or group identifier) and 
+        <code>name</code> together determine the object.  
+        If the object is a symbolic link and <code>follow_link</code> is
+        zero (<code>0</code>), then the information returned is that for the link itself;
+        otherwise the link is followed and information is returned about
+        the object to which the link points.  
+        If <code>follow_link</code> is non-zero but the final symbolic link 
+        is dangling (does not point to anything), then an error is returned.  
+        The <code>statbuf</code> fields are undefined for an error.  
+        The existence of an object can be tested by calling this function 
+        with a null <code>statbuf</code>.
+        <p>
+        <code>H5Gget_objinfo</code> fills in the following data structure:
+        <pre>
+                  typedef struct H5G_stat_t {
+                      unsigned long fileno;
+                      haddr_t objno;
+                      unsigned nlink;
+                      int type;
+                      time_t mtime; 
+                      size_t linklen;
+                  } H5G_stat_t
+        </pre>
+        The <code>fileno</code> and <code>objno</code> fields contain 
+        values which uniquely itentify an object among those 
+        HDF5 files which are open: if both values are the same 
+        between two objects, then the two objects are the same 
+        (provided both files are still open).  
+        <ul>
+        <li>Note that if a file is closed and re-opened, the
+        value in <code>fileno</code> will change.
+        <li>If a VFL driver either does not or cannot detect that 
+        two <code>H5Fopen</code> calls referencing the same file 
+        actually open the same file, each will get a different 
+        <code>fileno</code>.
+        </ul>
+        <p>
+        The <code>nlink</code> field is the number of hard links to  
+        the object or zero when information is being returned about a 
+        symbolic link (symbolic links do not have hard links but 
+        all other objects always have at least one).  
+        The <code>type</code> field contains the type of the object, 
+        one of 
+		<code>H5G_GROUP</code>, 
+		<code>H5G_DATASET</code>,
+        	<code>H5G_LINK</code>, or
+        	<code>H5G_TYPE</code>.  
+        The <code>mtime</code> field contains the modification time.
+        If information is being returned about a symbolic link then 
+        <code>linklen</code> will be the length of the link value 
+        (the name of the pointed-to object with the null terminator);
+        otherwise <code>linklen</code> will be zero.  
+        Other fields may be added to this structure in the future.
+  <dt><strong>Note:</strong>
+    <dd>Some systems will be able to record the time accurately but
+        unable to retrieve the correct time; such systems (e.g., Irix64) 
+        will report an <code>mtime</code> value of 0 (zero).
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
         <dd>IN: File or group identifier.
-      <dt><em>H5G_link_t</em> <code>link_type</code>
-        <dd>IN: Link type.
-            Possible values are <code>H5G_LINK_HARD</code> and 
-            <code>H5G_LINK_SOFT</code>.
-      <dt><em>const char *</em> <code>current_name</code>
-        <dd>IN: Name of the existing object if link is a hard link.
-            Can be anything for the soft link.
-      <dt><em>const char *</em> <code>new_name</code>
-        <dd>IN: New name for the object.
+      <dt><em>const char</em> <code>*name</code>
+        <dd>IN: Name of the object for which status is being sought.
+      <dt><em>hbool_t</em> <code>follow_link</code>
+        <dd>IN: Link flag.
+      <dt><em>H5G_stat_t</em> <code>*statbuf</code>
+        <dd>OUT: Buffer in which to return information about the object.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
+    <dd> Returns a non-negative value if successful, with the fields of 
+         <code>statbuf</code> (if non-null) initialized.
+         Otherwise returns a negative value.
 <!--
-    <dd><a href="fortran/h5g_FORTRAN.html#h5glink_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5glink_f&quot;,&quot;FortWin&nquot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
--->
-    <dd><a href="fortran/h5g_FORTRAN.html#h5glink_f"
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gget_objinfo_f"
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gget_objname_by_idx" -->
 <hr>
 <dl>
-  <dt><strong>Name:</strong> <a name="Group-Link2">H5Glink2</a> 
-  <dt><strong>Signature:</strong>
-    
-  <dd><em>herr_t</em> <code>H5Glink2</code>(
-    <em>hid_t</em> <code>curr_loc_id</code>, <em>const char *</em><code>current_name</code>,
-    <em>H5G_link_t</em> <code>link_type</code>, 
-	<em>hid_t</em> <code>new_loc_id</code>, <em>const char *</em><code>new_name</code> ) 
-  <dt><strong>Purpose:</strong>
-    <dd>Creates a link of the specified type from <code>new_name</code> 
-        to <code>current_name</code>.
-  <dt><strong>Description:</strong>
-    
-  <dd><code>H5Glink2</code> creates a new name for an object that has some current 
-    name, possibly one of many names it currently has. 
-    <p> 
-	  If <code>link_type</code> is <code>H5G_LINK_HARD</code>, then <code>current_name</code> 
-      must specify the name of an existing object. 
-	  In this case, <code>current_name</code> and <code>new_name</code> are interpreted 
-	  relative to <code>curr_loc_id</code> and <code>new_loc_id</code>, respectively, 
-      which are either file or group identifiers.
-    <p>
-        If <code>link_type</code> is <code>H5G_LINK_SOFT</code>, then 
-        <code>current_name</code> can be anything and is interpreted at 
-        lookup time relative to the group which contains the final 
-        component of <code>new_name</code>.  For instance, if
-        <code>current_name</code> is <code>./foo</code>,  
-        <code>new_name</code> is <code>./x/y/bar</code>, and a request
-        is made for <code>./x/y/bar</code>, then the actual object looked 
-        up is <code>./x/y/./foo</code>.                            
-  <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>curr_loc_id</code> 
-        <dd>IN: The file or group identifier for the original object. 
-      <dt><em>const char *</em> <code>current_name</code>
-        <dd>IN: Name of the existing object if link is a hard link.
-            Can be anything for the soft link.
-      <dt><em>H5G_link_t</em> <code>link_type</code>
-        <dd>IN: Link type.
-            Possible values are <code>H5G_LINK_HARD</code> and 
-            <code>H5G_LINK_SOFT</code>.
-      <dt><em>hid_t</em> <code>new_loc_id</code> 
-        <dd>IN: The file or group identifier for the new link. 
-      <dt><em>const char *</em> <code>new_name</code>
-        <dd>IN: New name for the object.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-<!--
-    <dd><a href="fortran/h5g_FORTRAN.html#h5glink_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5glink_f&quot;,&quot;FortWin&nquot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
--->
-    <dd><a href="fortran/h5g_FORTRAN.html#h5glink2_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
+<dt><strong>Name:</strong> <a name="Group-GetObjNameByIdx">H5Gget_objname_by_idx</a>
+<dt><strong>Signature:</strong>
+  <dd><em>ssize_t</em> <code>H5Gget_objname_by_idx</code>(<em>hid_t</em> <code>loc_id</code>, 
+                      <em>hsize_t</em> <code>idx</code>, 
+                      <em>char *</em><code>name</code>, 
+                      <em>size_t*</em> <code>size</code> )
+<dt><strong>Purpose:</strong>
+  <dd>Returns a name of an object specified by an index.
+<dt><strong>Description:</strong>
+  <dd><code>H5Gget_objname_by_idx</code> returns a name of the object 
+      specified by the index <code>idx</code> in the group <code>loc_id</code>.
+      <p>
+      The group is specified by a group identifier <code>loc_id</code>. 
+      If preferred, a file identifier may be passed in <code>loc_id</code>; 
+      that file's root group will be assumed. 
+      <p>
+      <code>idx</code> is the transient index used to iterate through 
+      the objects in the group.
+      The value of <code>idx</code> is any nonnegative number less than 
+      the total number of objects in the group, which is returned by the
+      function <code>H5Gget_num_objs</code>. 
+      Note that this is a transient index; an object may have a 
+      different index each time a group is opened.
+      <p>
+      The object name is returned in the user-specified buffer <code>name</code>.
+      <p>
+      If the size of the provided buffer <code>name</code> is 
+      less or equal the actual object name length, 
+      the object name is truncated to <code>max_size - 1</code> characters.
+      <p>
+      Note that if the size of the object's name is unkown, a 
+      preliminary call to <code>H5Gget_objname_by_idx</code> with <code>name</code>
+      set to NULL will return the length of the object's name.
+      A second call to <code>H5Gget_objname_by_idx</code> 
+      can then be used to retrieve the actual name.
+<dt><strong>Parameters:</strong>
+  <dl>
+    <dt><em>hid_t</em> <code>loc_id</code>
+        <dd>IN: Group or file identifier.
+    <dt><em>hsize_t</em> <code>idx</code>
+        <dd>IN: Transient index identifying object.
+    <dt><em>char *</em><code>name</code>
+        <dd>IN/OUT: Pointer to user-provided buffer the object name.
+    <dt><em>size_t</em> <code>size</code>
+        <dd>IN: Name length.
+  </dl>
+<dt><strong>Returns:</strong>
+  <dd>Returns the size of the object name if successful; 
+      otherwise returns a negative value.
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gget_objtype_by_idx" -->
 <hr>
 <dl>
-  <dt><strong>Name:</strong> <a name="Group-Unlink">H5Gunlink</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Gunlink</code>(<em>hid_t</em> <code>loc_id</code>,
-        <em>const char *</em><code>name</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Removes the link to an object from a group. 
-  <dt><strong>Description:</strong>
-    <dd><code>H5Gunlink</code> removes the object specified by 
-        <code>name</code> from the group graph and decrements the 
-        link count for the object to which <code>name</code> points.
-        This action eliminates any association between <code>name</code>
-        and the object to which <code>name</code> pointed.
-        <p>
-        Object headers keep track of how many hard links refer to an object;
-        when the link count reaches zero, the object can be removed  
-        from the file.  Objects which are open are not removed until all  
-        identifiers to the object are closed.
-        <p>
-        If the link count reaches zero, all file space associated with 
-        the object will be released, i.e., identified in memory as freespace.
-        If the any object identifier is open for the object, the space
-        will not be released until after the object identifier is closed.
-        <p>
-        Note that space identified as freespace is available for re-use 
-        only as long as the file remains open; once a file has been 
-        closed, the HDF5 library loses track of freespace.  See
-        &ldquo;<a href="Performance.html#Freespace">Freespace Management</a>&rdquo;
-        in the <cite>HDF5 User's Guide</cite> for further details.
-  <dt><strong>Warning:</strong>
-    <dd>Exercise care in unlinking groups as it is possible to render data in 
-        a file inaccessible with <code>H5Gunlink</code>.  
-        See <a href="Groups.html#H5GUnlinkToCorrupt">The Group Interface</a> 
-        in the <cite>HDF5 User's Guide</cite>.
-  <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Identifier of the file or group containing the object.
-      <dt><em>const char *</em> <code>name</code>
-        <dd>IN: Name of the object to unlink.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gunlink_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
+<dt><strong>Name:</strong> <a name="Group-GetObjTypeByIdx">H5Gget_objtype_by_idx</a>
+<dt><strong>Signature:</strong>
+  <dd><em>int</em> <code>H5Gget_objtype_by_idx</code>(<em>hid_t</em> <code>loc_id</code>, 
+                      <em>hsize_t</em> <code>idx</code> )
+<dt><strong>Purpose:</strong>
+  <dd>Returns the type of an object specified by an index.
+<dt><strong>Description:</strong>
+  <dd><code>H5Gget_objtype_by_idx</code> returns the type of the object 
+      specified by the index <code>idx</code> in the group <code>loc_id</code>.
+      <p>
+      The group is specified by a group identifier <code>loc_id</code>. 
+      If preferred, a file identifier may be passed in <code>loc_id</code>; 
+      that file's root group will be assumed. 
+      <p>
+      <code>idx</code> is the transient index used to iterate through 
+      the objects in the group.
+      This parameter is described in more detail in the discussion of 
+      <a href="#Group-GetObjNameByIdx"><code>H5Gget_objname_by_idx</code></a>.
+      <p>
+      The object type is returned as the function return value:
+        <table>	
+        <tr valign=top align=left><td>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            </td><td>
+            <code>H5G_LINK</code> 
+            <!--</td><td>
+            <code>0x0001</code>-->
+            </td><td>
+            <code>0</code>
+            </td><td>
+            Object is a symbolic link. 
+        </td></tr>
+        <tr valign=top align=left><td>&nbsp;
+            
+            </td><td>
+            <code>H5G_GROUP</code> 
+            <!--</td><td>
+            <code>0x0001</code>-->
+            </td><td>
+            <code>1</code>
+            </td><td>
+            Object is a group. 
+        </td></tr>
+        <tr valign=top align=left><td>&nbsp;
+            
+            </td><td>
+            <code>H5G_DATASET</code>  &nbsp;&nbsp;
+            <!--</td><td>
+            <code>0x0001</code>-->
+            </td><td>
+            <code>2</code> &nbsp;&nbsp;
+            </td><td>
+            Object is a dataset. 
+        </td></tr>
+        <tr valign=top align=left><td>&nbsp;
+            
+            </td><td>
+            <code>H5G_TYPE</code> 
+            <!--</td><td>
+            <code>0x0001</code>-->
+            </td><td>
+            <code>3</code>
+            </td><td>
+            Object is a named datatype. 
+        </td></tr>
+	</table>
+
+<dt><strong>Parameters:</strong>
+  <dl>
+    <dt><em>hid_t</em> <code>loc_id</code>
+        <dd>IN: Group or file identifier.
+    <dt><em>hsize_t</em> <code>idx</code>
+        <dd>IN: Transient index identifying object.
+  </dl>
+<dt><strong>Returns:</strong>
+  <dd>Returns the type of the object if successful.
+      Otherwise returns a negative value.
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Giterate" -->
 <hr>
 <dl>
   <dt><strong>Name:</strong> <a name="Group-Iterate">H5Giterate</a>
@@ -629,7 +783,133 @@ create or access function.
         -->
 </dl>
 
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Glink" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-Link">H5Glink</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Glink</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>H5G_link_t</em> <code>link_type</code>,
+        <em>const char *</em><code>current_name</code>,
+        <em>const char *</em><code>new_name</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Creates a link of the specified type from <code>new_name</code> 
+        to <code>current_name</code>.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Glink</code> creates a new name for an object that has some current 
+	  name, possibly one of many names it currently has.  
+        <p>
+        If <code>link_type</code> is <code>H5G_LINK_HARD</code>, then 
+        <code>current_name</code> must specify the name of an 
+        existing object and both
+        names are interpreted relative to <code>loc_id</code>, which is 
+        either a file identifier or a group identifier.
+        <p>
+        If <code>link_type</code> is <code>H5G_LINK_SOFT</code>, then 
+        <code>current_name</code> can be anything and is interpreted at 
+        lookup time relative to the group which contains the final 
+        component of <code>new_name</code>.  For instance, if
+        <code>current_name</code> is <code>./foo</code>,  
+        <code>new_name</code> is <code>./x/y/bar</code>, and a request
+        is made for <code>./x/y/bar</code>, then the actual object looked 
+        up is <code>./x/y/./foo</code>.                            
+  <dt><strong>Parameters:</strong>
+    <dl>
+      <dt><em>hid_t</em> <code>loc_id</code>
+        <dd>IN: File or group identifier.
+      <dt><em>H5G_link_t</em> <code>link_type</code>
+        <dd>IN: Link type.
+            Possible values are <code>H5G_LINK_HARD</code> and 
+            <code>H5G_LINK_SOFT</code>.
+      <dt><em>const char *</em> <code>current_name</code>
+        <dd>IN: Name of the existing object if link is a hard link.
+            Can be anything for the soft link.
+      <dt><em>const char *</em> <code>new_name</code>
+        <dd>IN: New name for the object.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+<!--
+    <dd><a href="fortran/h5g_FORTRAN.html#h5glink_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5glink_f&quot;,&quot;FortWin&nquot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
+-->
+    <dd><a href="fortran/h5g_FORTRAN.html#h5glink_f"
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
 
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Glink2" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-Link2">H5Glink2</a> 
+  <dt><strong>Signature:</strong>
+    
+  <dd><em>herr_t</em> <code>H5Glink2</code>(
+    <em>hid_t</em> <code>curr_loc_id</code>, <em>const char *</em><code>current_name</code>,
+    <em>H5G_link_t</em> <code>link_type</code>, 
+	<em>hid_t</em> <code>new_loc_id</code>, <em>const char *</em><code>new_name</code> ) 
+  <dt><strong>Purpose:</strong>
+    <dd>Creates a link of the specified type from <code>new_name</code> 
+        to <code>current_name</code>.
+  <dt><strong>Description:</strong>
+    
+  <dd><code>H5Glink2</code> creates a new name for an object that has some current 
+    name, possibly one of many names it currently has. 
+    <p> 
+	  If <code>link_type</code> is <code>H5G_LINK_HARD</code>, then <code>current_name</code> 
+      must specify the name of an existing object. 
+	  In this case, <code>current_name</code> and <code>new_name</code> are interpreted 
+	  relative to <code>curr_loc_id</code> and <code>new_loc_id</code>, respectively, 
+      which are either file or group identifiers.
+    <p>
+        If <code>link_type</code> is <code>H5G_LINK_SOFT</code>, then 
+        <code>current_name</code> can be anything and is interpreted at 
+        lookup time relative to the group which contains the final 
+        component of <code>new_name</code>.  For instance, if
+        <code>current_name</code> is <code>./foo</code>,  
+        <code>new_name</code> is <code>./x/y/bar</code>, and a request
+        is made for <code>./x/y/bar</code>, then the actual object looked 
+        up is <code>./x/y/./foo</code>.                            
+  <dt><strong>Parameters:</strong>
+    <dl>
+      <dt><em>hid_t</em> <code>curr_loc_id</code> 
+        <dd>IN: The file or group identifier for the original object. 
+      <dt><em>const char *</em> <code>current_name</code>
+        <dd>IN: Name of the existing object if link is a hard link.
+            Can be anything for the soft link.
+      <dt><em>H5G_link_t</em> <code>link_type</code>
+        <dd>IN: Link type.
+            Possible values are <code>H5G_LINK_HARD</code> and 
+            <code>H5G_LINK_SOFT</code>.
+      <dt><em>hid_t</em> <code>new_loc_id</code> 
+        <dd>IN: The file or group identifier for the new link. 
+      <dt><em>const char *</em> <code>new_name</code>
+        <dd>IN: New name for the object.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+<!--
+    <dd><a href="fortran/h5g_FORTRAN.html#h5glink_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5glink_f&quot;,&quot;FortWin&nquot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
+-->
+    <dd><a href="fortran/h5g_FORTRAN.html#h5glink2_f"
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gmove" -->
 <hr>
 <dl>
   <dt><strong>Name:</strong> <a name="Group-Move">H5Gmove</a>
@@ -673,7 +953,8 @@ create or access function.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gmove2" -->
 <hr>
 <dl>
   <dt><strong>Name:</strong> <a name="Group-Move2">H5Gmove2</a> 
@@ -718,331 +999,42 @@ create or access function.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gopen" -->
 <hr>
 <dl>
-  <dt><strong>Name:</strong> <a name="Group-GetObjinfo">H5Gget_objinfo</a>
+  <dt><strong>Name:</strong> <a name="Group-Open">H5Gopen</a>
   <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Gget_objinfo</code>(<em>hid_t</em> <code>loc_id</code>,
-        <em>const char *</em><code>name</code>,
-        <em>hbool_t</em> <code>follow_link</code>,
-        <em>H5G_stat_t *</em><code>statbuf</code>
+    <dd><em>hid_t </em><code>H5Gopen</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Returns information about an object.  
+    <dd>Opens an existing group for modification and returns a group 
+        identifier for that group.
   <dt><strong>Description:</strong>
-    <dd><code>H5Gget_objinfo</code> returns information about the 
-        specified object through the <code>statbuf</code> argument. 
-        <code>loc_id</code> (a file or group identifier) and 
-        <code>name</code> together determine the object.  
-        If the object is a symbolic link and <code>follow_link</code> is
-        zero (<code>0</code>), then the information returned is that for the link itself;
-        otherwise the link is followed and information is returned about
-        the object to which the link points.  
-        If <code>follow_link</code> is non-zero but the final symbolic link 
-        is dangling (does not point to anything), then an error is returned.  
-        The <code>statbuf</code> fields are undefined for an error.  
-        The existence of an object can be tested by calling this function 
-        with a null <code>statbuf</code>.
+    <dd><code>H5Gopen</code> opens an existing group with the specified 
+        name at the specified location, <code>loc_id</code>.
         <p>
-        <code>H5Gget_objinfo</code> fills in the following data structure:
-        <pre>
-                  typedef struct H5G_stat_t {
-                      unsigned long fileno;
-                      haddr_t objno;
-                      unsigned nlink;
-                      int type;
-                      time_t mtime; 
-                      size_t linklen;
-                  } H5G_stat_t
-        </pre>
-        The <code>fileno</code> and <code>objno</code> fields contain 
-        values which uniquely itentify an object among those 
-        HDF5 files which are open: if both values are the same 
-        between two objects, then the two objects are the same 
-        (provided both files are still open).  
-        <ul>
-        <li>Note that if a file is closed and re-opened, the
-        value in <code>fileno</code> will change.
-        <li>If a VFL driver either does not or cannot detect that 
-        two <code>H5Fopen</code> calls referencing the same file 
-        actually open the same file, each will get a different 
-        <code>fileno</code>.
-        </ul>
+        The location is identified by a file or group identifier
         <p>
-        The <code>nlink</code> field is the number of hard links to  
-        the object or zero when information is being returned about a 
-        symbolic link (symbolic links do not have hard links but 
-        all other objects always have at least one).  
-        The <code>type</code> field contains the type of the object, 
-        one of 
-		<code>H5G_GROUP</code>, 
-		<code>H5G_DATASET</code>,
-        	<code>H5G_LINK</code>, or
-        	<code>H5G_TYPE</code>.  
-        The <code>mtime</code> field contains the modification time.
-        If information is being returned about a symbolic link then 
-        <code>linklen</code> will be the length of the link value 
-        (the name of the pointed-to object with the null terminator);
-        otherwise <code>linklen</code> will be zero.  
-        Other fields may be added to this structure in the future.
-  <dt><strong>Note:</strong>
-    <dd>Some systems will be able to record the time accurately but
-        unable to retrieve the correct time; such systems (e.g., Irix64) 
-        will report an <code>mtime</code> value of 0 (zero).
+        <code>H5Gopen</code> returns a group identifier for the group
+        that was opened.  This group identifier should be released by 
+        calling <code>H5Gclose</code> when it is no longer needed.  
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: File or group identifier.
-      <dt><em>const char</em> <code>*name</code>
-        <dd>IN: Name of the object for which status is being sought.
-      <dt><em>hbool_t</em> <code>follow_link</code>
-        <dd>IN: Link flag.
-      <dt><em>H5G_stat_t</em> <code>*statbuf</code>
-        <dd>OUT: Buffer in which to return information about the object.
+        <dd>IN: File or group identifier within which group is to be open.
+      <dt><em>const char *</em> <code>name</code>
+        <dd>IN: Name of group to open.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd> Returns a non-negative value if successful, with the fields of 
-         <code>statbuf</code> (if non-null) initialized.
-         Otherwise returns a negative value.
+    <dd>Returns a valid group identifier if successful; 
+        otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
 <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gget_objinfo_f"
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gopen_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5gopen_f&quot;,&quot;FortWin&nquot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
 -->
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-
-
-
-
-
-
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Group-GetNumObjs">H5Gget_num_objs</a>
-<dt><strong>Signature:</strong>
-  <dd><em>herr_t</em> <code>H5Gget_num_objs</code>(<em>hid_t</em> <code>loc_id</code>,
-      <em>hsize_t* </em> <code>num_obj</code>)
-<dt><strong>Purpose:</strong>
-  <dd>Returns number of objects in the group specified by its identifier
-<dt><strong>Description:</strong>
-  <dd><code>H5Gget_num_objs</code> returns number of objects in a group.
-      Group is specified by its identifier <code>loc_id</code>. 
-      If a file identifier is passed in, then the number of objects in the 
-      root group is returned.
-<dt><strong>Parameters:</strong>
-  <dl>
-    <dt><em>hid_t</em> <code>loc_id</code>
-      <dd>IN: Identifier of the group or the file
-    <dt><em>hsize_t*</em> <code>num_obj</code>
-      <dd>OUT: Number of objects in the group.
-  </dl>
-<dt><strong>Returns:</strong>
-  <dd>Returns positive value if successful;
-      otherwise returns a negative value.
-</dl>
-
-
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Group-GetObjNameByIdx">H5Gget_objname_by_idx</a>
-<dt><strong>Signature:</strong>
-  <dd><em>ssize_t</em> <code>H5Gget_objname_by_idx</code>(<em>hid_t</em> <code>loc_id</code>, 
-                      <em>hsize_t</em> <code>idx</code>, 
-                      <em>char *</em><code>name</code>, 
-                      <em>size_t*</em> <code>size</code> )
-<dt><strong>Purpose:</strong>
-  <dd>Returns a name of an object specified by an index.
-<dt><strong>Description:</strong>
-  <dd><code>H5Gget_objname_by_idx</code> returns a name of the object 
-      specified by the index <code>idx</code> in the group <code>loc_id</code>.
-      <p>
-      The group is specified by a group identifier <code>loc_id</code>. 
-      If preferred, a file identifier may be passed in <code>loc_id</code>; 
-      that file's root group will be assumed. 
-      <p>
-      <code>idx</code> is the transient index used to iterate through 
-      the objects in the group.
-      The value of <code>idx</code> is any nonnegative number less than 
-      the total number of objects in the group, which is returned by the
-      function <code>H5Gget_num_objs</code>. 
-      Note that this is a transient index; an object may have a 
-      different index each time a group is opened.
-      <p>
-      The object name is returned in the user-specified buffer <code>name</code>.
-      <p>
-      If the size of the provided buffer <code>name</code> is 
-      less or equal the actual object name length, 
-      the object name is truncated to <code>max_size - 1</code> characters.
-      <p>
-      Note that if the size of the object's name is unkown, a 
-      preliminary call to <code>H5Gget_objname_by_idx</code> with <code>name</code>
-      set to NULL will return the length of the object's name.
-      A second call to <code>H5Gget_objname_by_idx</code> 
-      can then be used to retrieve the actual name.
-<dt><strong>Parameters:</strong>
-  <dl>
-    <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Group or file identifier.
-    <dt><em>hsize_t</em> <code>idx</code>
-        <dd>IN: Transient index identifying object.
-    <dt><em>char *</em><code>name</code>
-        <dd>IN/OUT: Pointer to user-provided buffer the object name.
-    <dt><em>size_t</em> <code>size</code>
-        <dd>IN: Name length.
-  </dl>
-<dt><strong>Returns:</strong>
-  <dd>Returns the size of the object name if successful, 
-      otherwise returns a negative value.
-</dl>
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Group-GetObjTypeByIdx">H5Gget_objtype_by_idx</a>
-<dt><strong>Signature:</strong>
-  <dd><em>int</em> <code>H5Gget_objtype_by_idx</code>(<em>hid_t</em> <code>loc_id</code>, 
-                      <em>hsize_t</em> <code>idx</code> )
-<dt><strong>Purpose:</strong>
-  <dd>Returns the type of an object specified by an index.
-<dt><strong>Description:</strong>
-  <dd><code>H5Gget_objtype_by_idx</code> returns the type of the object 
-      specified by the index <code>idx</code> in the group <code>loc_id</code>.
-      <p>
-      The group is specified by a group identifier <code>loc_id</code>. 
-      If preferred, a file identifier may be passed in <code>loc_id</code>; 
-      that file's root group will be assumed. 
-      <p>
-      <code>idx</code> is the transient index used to iterate through 
-      the objects in the group.
-      This parameter is described in more detail in the discussion of 
-      <a href="#Group-GetObjNameByIdx"><code>H5Gget_objname_by_idx</code></a>.
-      <p>
-      The object type is returned as the function return value:
-        <table>	
-        <tr valign=top align=left><td>
-            &nbsp;&nbsp;&nbsp;&nbsp;
-            </td><td>
-            <code>H5G_LINK</code> 
-            <!--</td><td>
-            <code>0x0001</code>-->
-            </td><td>
-            <code>0</code>
-            </td><td>
-            Object is a symbolic link. 
-        </td></tr>
-        <tr valign=top align=left><td>&nbsp;
-            
-            </td><td>
-            <code>H5G_GROUP</code> 
-            <!--</td><td>
-            <code>0x0001</code>-->
-            </td><td>
-            <code>1</code>
-            </td><td>
-            Object is a group. 
-        </td></tr>
-        <tr valign=top align=left><td>&nbsp;
-            
-            </td><td>
-            <code>H5G_DATASET</code>  &nbsp;&nbsp;
-            <!--</td><td>
-            <code>0x0001</code>-->
-            </td><td>
-            <code>2</code> &nbsp;&nbsp;
-            </td><td>
-            Object is a dataset. 
-        </td></tr>
-        <tr valign=top align=left><td>&nbsp;
-            
-            </td><td>
-            <code>H5G_TYPE</code> 
-            <!--</td><td>
-            <code>0x0001</code>-->
-            </td><td>
-            <code>3</code>
-            </td><td>
-            Object is a named datatype. 
-        </td></tr>
-	</table>
-
-<dt><strong>Parameters:</strong>
-  <dl>
-    <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Group or file identifier.
-    <dt><em>hsize_t</em> <code>idx</code>
-        <dd>IN: Transient index identifying object.
-  </dl>
-<dt><strong>Returns:</strong>
-  <dd>Returns the type of the object if successful.
-      Otherwise returns a negative value.
-</dl>
-
-
-
-
-
-
-
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Group-GetLinkval">H5Gget_linkval</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Gget_linkval</code>(<em>hid_t</em> <code>loc_id</code>,
-        <em>const char *</em><code>name</code>,
-        <em>size_t</em> <code>size</code>,
-        <em>char *</em><code>value</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Returns the name of the object that the symbolic link points to.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Gget_linkval</code> returns <code>size</code> 
-        characters of the name of the object that the symbolic link <code>name</code> points to.
-        <p>
-        The parameter <code>loc_id</code> is a file or group identifier.
-        <p>
-        The parameter <code>name</code> must be a symbolic link pointing to
-        the desired object and must be defined relative to <code>loc_id</code>.
-        <p>
-        If <code>size</code> is smaller than the size of the returned object name, then 
-        the name stored in the buffer <code>value</code> will not be null terminated. 
-        <p> 
-        This function fails if <code>name</code> is not a symbolic link.  
-        The presence of a symbolic link can be tested by passing zero for  
-        <code>size</code> and NULL for <code>value</code>.  
-        <p>
-        This function should be used only after <code>H5Gget_objinfo</code> has been called
-        to verify that <code>name</code> is a symbolic link.
-  <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Identifier of the file or group.
-      <dt><em>const char *</em><code>name</code>
-        <dd>IN: Symbolic link to the object whose name is to be returned.
-      <dt><em>size_t</em> <code>size</code>
-        <dd>IN: Maximum number of characters of <code>value</code> 
-            to be returned.
-      <dt><em>char *</em><code>value</code>
-        <dd>OUT: A buffer to hold the name of the object being sought.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value, with the link value in <code>value</code>, 
-        if successful.
-        Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gget_linkval_f"
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gopen_f"
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -1050,11 +1042,8 @@ create or access function.
         -->
 </dl>
 
-
-
-
-
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gset_comment" -->
 <hr>
 <dl>
   <dt><strong>Name:</strong> <a name="Group-SetComment">H5Gset_comment</a>
@@ -1100,55 +1089,62 @@ create or access function.
         -->
 </dl>
 
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gunlink" -->
 <hr>
 <dl>
-  <dt><strong>Name:</strong> <a name="Group-GetComment">H5Gget_comment</a>
+  <dt><strong>Name:</strong> <a name="Group-Unlink">H5Gunlink</a>
   <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Gget_comment</code>(<em>hid_t</em> <code>loc_id</code>,
-        <em>const char *</em><code>name</code>,
-        <em>size_t</em> <code>bufsize</code>,
-        <em>char *</em><code>comment</code>
+    <dd><em>herr_t </em><code>H5Gunlink</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Retrieves comment for specified object.
+    <dd>Removes the link to an object from a group. 
   <dt><strong>Description:</strong>
-    <dd><code>H5Gget_comment</code> retrieves the comment for the the
-        object <code>name</code>.  The comment is returned in the buffer 
-        <code>comment</code>.
+    <dd><code>H5Gunlink</code> removes the object specified by 
+        <code>name</code> from the group graph and decrements the 
+        link count for the object to which <code>name</code> points.
+        This action eliminates any association between <code>name</code>
+        and the object to which <code>name</code> pointed.
         <p>
-        At most <code>bufsize</code> characters, including a null 
-        terminator, are copied.  The result is not null terminated 
-        if the comment is longer than the supplied buffer.  
+        Object headers keep track of how many hard links refer to an object;
+        when the link count reaches zero, the object can be removed  
+        from the file.  Objects which are open are not removed until all  
+        identifiers to the object are closed.
         <p>
-        If an object does not have a comment, the empty string 
-        is returned.
+        If the link count reaches zero, all file space associated with 
+        the object will be released, i.e., identified in memory as freespace.
+        If the any object identifier is open for the object, the space
+        will not be released until after the object identifier is closed.
+        <p>
+        Note that space identified as freespace is available for re-use 
+        only as long as the file remains open; once a file has been 
+        closed, the HDF5 library loses track of freespace.  See
+        &ldquo;<a href="Performance.html#Freespace">Freespace Management</a>&rdquo;
+        in the <cite>HDF5 User's Guide</cite> for further details.
+  <dt><strong>Warning:</strong>
+    <dd>Exercise care in unlinking groups as it is possible to render data in 
+        a file inaccessible with <code>H5Gunlink</code>.  
+        See <a href="Groups.html#H5GUnlinkToCorrupt">The Group Interface</a> 
+        in the <cite>HDF5 User's Guide</cite>.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Identifier of the file or group.
-      <dt><em>const char *</em><code>name</code>
-        <dd>IN: Name of the object whose comment is to be set or reset.
-      <dt><em>size_t</em> <code>bufsize</code>
-        <dd>IN: Anticipated size of the buffer required to hold 
-            <code>comment</code>.
-      <dt><em>char *</em><code>comment</code>
-        <dd>OUT: The comment.
+        <dd>IN: Identifier of the file or group containing the object.
+      <dt><em>const char *</em> <code>name</code>
+        <dd>IN: Name of the object to unlink.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns the number of characters in the comment, 
-        counting the null terminator, if successful; the value 
-        returned may be larger than <code>bufsize</code>.
-        Otherwise returns a negative value.
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5g_FORTRAN.html#h5gget_comment_f"
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gunlink_f"
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
 </dl>
-
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
 <center>
@@ -1183,14 +1179,15 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.0, July 2003
-</address><!-- #EndLibraryItem -->
- 
-Last modified: 26 August 2003
+</address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
+<!--
+document.writeln("Last modified: 9 October 2003");
+-->
+</SCRIPT>
  
 </body>
 </html>
