@@ -25,15 +25,6 @@
 #define FALSE   (!TRUE)
 #endif  /* !FALSE */
 
-/* temporary fix for restoring the H5EXXX API. */
-/* An ISO compliant compiler should handle the repeated name correctly. */
-/* If it barks at it, try change the second name to something like */
-/*     H5E/@@/xxx   where '@' is actually '*'.    */
-#ifndef H5_WANT_H5_V1_6_COMPAT
-#define H5Eget_auto(func, data) H5Eget_auto(H5E_DEFAULT, func, data)
-#define H5Eset_auto(func, data) H5Eset_auto(H5E_DEFAULT, func, data)
-#endif
-
 /* Define some handy debugging shorthands, routines, ... */
 /* debugging tools */
 
