@@ -210,7 +210,7 @@ typedef enum H5E_minor_t {
     /* Property list errors */
     H5E_CANTGET,                /*Can't get value                            */
     H5E_CANTSET,                /*Can't set value                            */
-    H5E_DUPCLASS,               /*Duplicate class name in parent class */
+    H5E_DUPCLASS,               /*Duplicate class name in parent class       */
 
     /* Parallel errors */
     H5E_MPI,			/*some MPI function failed		     */
