@@ -10,16 +10,19 @@
 
 #if defined(_HDF5DLL_)
 #pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
-#define HDF5API __declspec(dllexport)
-#define HDF5GLOBAL __declspec(dllexport)
+#define __DLL__ __declspec(dllexport)
+#define __DLLVAR__ __declspec(dllexport)
+#elif defined(_HDF5USEDLL_)
+#define __DLL__ __declspec(dllimport)
+#define __DLLVAR__ __declspec(dllimport)
 #else
-#define HDF5API
-#define HDF5GLOBAL extern
+#define __DLL__
+#define __DLLVAR__ extern
 #endif /* _HDF5DLL_ */
 
 #else /*WIN32*/
-#define HDF5API
-#define HDF5GLOBAL extern
+#define __DLL__
+#define __DLLVAR__ extern
 #endif
 
 #endif /* H5API_ADPT_H */

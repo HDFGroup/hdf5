@@ -402,11 +402,11 @@ typedef struct {
     double	etime;		/*elapsed wall-clock time	*/
 } H5_timer_t;
 
-HDF5API void H5_timer_reset (H5_timer_t *timer);
-HDF5API void H5_timer_begin (H5_timer_t *timer);
-HDF5API void H5_timer_end (H5_timer_t *sum/*in,out*/,
+__DLL__ void H5_timer_reset (H5_timer_t *timer);
+__DLL__ void H5_timer_begin (H5_timer_t *timer);
+__DLL__ void H5_timer_end (H5_timer_t *sum/*in,out*/,
 			   H5_timer_t *timer/*in,out*/);
-HDF5API void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
+__DLL__ void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 
 /*
  * Redefine all the POSIX functions.  We should never see a POSIX
@@ -479,7 +479,7 @@ HDF5API void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 #define HDfopen(S,M)		fopen(S,M)
 #define HDfork()		fork()
 #define HDfpathconf(F,N)	fpathconf(F,N)
-HDF5API int HDfprintf (FILE *stream, const char *fmt, ...);
+__DLL__ int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDfputc(C,F)		fputc(C,F)
 #define HDfputs(S,F)		fputs(S,F)
 #define HDfread(M,Z,N,F)	fread(M,Z,N,F)
@@ -624,7 +624,7 @@ HDF5API int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDstrtod(S,R)		strtod(S,R)
 #define HDstrtok(X,Y)		strtok(X,Y)
 #define HDstrtol(S,R,N)		strtol(S,R,N)
-HDF5API int64_t HDstrtoll (const char *s, const char **rest, int base);
+__DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDstrtoul(S,R,N)	strtoul(S,R,N)
 #define HDstrxfrm(X,Y,Z)	strxfrm(X,Y,Z)
 #define HDsysconf(N)		sysconf(N)
@@ -671,7 +671,7 @@ char *strdup(const char *s);
 #define HDstrdup(S)		strdup(S)
 
 #ifndef HAVE_SNPRINTF
-HDF5API int HDsnprintf(char *buf, size_t size, const char *fmt, ...);
+__DLL__ int HDsnprintf(char *buf, size_t size, const char *fmt, ...);
 #endif
 
 /*
@@ -775,7 +775,7 @@ extern H5_debug_t		H5_debug_g;
 #define H5TRACE_RETURN(V)		   /*void*/
 #endif
 
-void H5_trace (hbool_t returning, const char *func, const char *type, ...);
+__DLL__ void H5_trace (hbool_t returning, const char *func, const char *type, ...);
 
 
 /*-------------------------------------------------------------------------
@@ -902,23 +902,23 @@ extern hbool_t H5_libinit_g;   /*good thing C's lazy about extern! */
 #endif
 
 /* Private functions, not part of the publicly documented API */
-herr_t H5_init_library(void);
-void H5_term_library(void);
+__DLL__ herr_t H5_init_library(void);
+__DLL__ void H5_term_library(void);
 
 /* Functions to terminate interfaces */
-void H5A_term_interface(intn status);
-void H5D_term_interface(intn status);
-void H5F_term_interface(intn status);
-void H5G_term_interface(intn status);
-void H5I_term_interface(intn status);
-void H5P_term_interface(intn status);
-void H5RA_term_interface(intn status);
-void H5R_term_interface(intn status);
-void H5S_term_interface(intn status);
-void H5TB_term_interface(intn status);
-void H5T_native_close(intn status);
-void H5T_term_interface(intn status);
-void H5Z_term_interface(intn status);
+__DLL__ void H5A_term_interface(intn status);
+__DLL__ void H5D_term_interface(intn status);
+__DLL__ void H5F_term_interface(intn status);
+__DLL__ void H5G_term_interface(intn status);
+__DLL__ void H5I_term_interface(intn status);
+__DLL__ void H5P_term_interface(intn status);
+__DLL__ void H5RA_term_interface(intn status);
+__DLL__ void H5R_term_interface(intn status);
+__DLL__ void H5S_term_interface(intn status);
+__DLL__ void H5TB_term_interface(intn status);
+__DLL__ void H5T_native_close(intn status);
+__DLL__ void H5T_term_interface(intn status);
+__DLL__ void H5Z_term_interface(intn status);
 
 
 #endif
