@@ -26,7 +26,7 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_dtype_encode (H5F_t *f, uint8_t *p, const void *mesg);
-static void *H5O_dtype_decode (H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
+static void *H5O_dtype_decode (H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static void *H5O_dtype_copy (const void *_mesg, void *_dest);
 static size_t H5O_dtype_size (H5F_t *f, const void *_mesg);
 static herr_t H5O_dtype_reset (void *_mesg);
@@ -35,7 +35,7 @@ static herr_t H5O_dtype_get_share (H5F_t *f, const void *_mesg,
 				   H5O_shared_t *sh);
 static herr_t H5O_dtype_set_share (H5F_t *f, void *_mesg,
 				   const H5O_shared_t *sh);
-static herr_t H5O_dtype_debug (H5F_t *f, const void *_mesg,
+static herr_t H5O_dtype_debug (H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			       FILE * stream, int indent, int fwidth);
 
 /* This message derives from H5O */
@@ -783,7 +783,7 @@ done:
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_dtype_decode(H5F_t *f, const uint8_t *p,
+H5O_dtype_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p,
 		 H5O_shared_t UNUSED *sh)
 {
     H5T_t		   *dt = NULL;
@@ -1155,7 +1155,7 @@ done:
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_dtype_debug(H5F_t *f, const void *mesg, FILE *stream,
+H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
 		int indent, int fwidth)
 {
     const H5T_t		*dt = (const H5T_t*)mesg;
@@ -1233,12 +1233,12 @@ H5O_dtype_debug(H5F_t *f, const void *mesg, FILE *stream,
 	    fprintf(stream, "%*s%-*s %lu\n", indent+3, "", MAX(0, fwidth-3),
 		    "Byte offset:",
 		    (unsigned long) (dt->u.compnd.memb[i].offset));
-	    H5O_dtype_debug(f, dt->u.compnd.memb[i].type, stream,
+	    H5O_dtype_debug(f, dxpl_id, dt->u.compnd.memb[i].type, stream,
 			    indent+3, MAX(0, fwidth - 3));
 	}
     } else if (H5T_ENUM==dt->type) {
 	fprintf(stream, "%*s%s\n", indent, "", "Base type:");
-	H5O_dtype_debug(f, dt->parent, stream, indent+3, MAX(0, fwidth-3));
+	H5O_dtype_debug(f, dxpl_id, dt->parent, stream, indent+3, MAX(0, fwidth-3));
 	fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
 		"Number of members:",
 		dt->u.enumer.nmembs);
@@ -1280,7 +1280,7 @@ H5O_dtype_debug(H5F_t *f, const void *mesg, FILE *stream,
     }
     fprintf (stream, "}\n");
 	fprintf(stream, "%*s%s\n", indent, "", "Base type:");
-	H5O_dtype_debug(f, dt->parent, stream, indent+3, MAX(0, fwidth-3));
+	H5O_dtype_debug(f, dxpl_id, dt->parent, stream, indent+3, MAX(0, fwidth-3));
     } else {
 	switch (dt->u.atomic.order) {
             case H5T_ORDER_LE:

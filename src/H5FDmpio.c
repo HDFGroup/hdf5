@@ -28,6 +28,7 @@
  */
 #include "H5private.h"		/*library functions			*/
 #include "H5ACprivate.h"        /* Metadata cache */
+#include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/*error handling			*/
 #include "H5Fprivate.h"		/*files					*/
 #include "H5FDprivate.h"	/*file driver				  */
@@ -83,7 +84,7 @@ static herr_t H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hadd
             size_t size, void *buf);
 static herr_t H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
             size_t size, const void *buf);
-static herr_t H5FD_mpio_flush(H5FD_t *_file, unsigned closing);
+static herr_t H5FD_mpio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 
 /* MPIO-specific file access properties */
 typedef struct H5FD_mpio_fapl_t {
@@ -103,7 +104,7 @@ static const H5FD_class_t H5FD_mpio_g = {
     H5FD_mpio_fapl_get,				/*fapl_get		*/
     NULL,					/*fapl_copy		*/
     NULL, 					/*fapl_free		*/
-    sizeof(H5FD_mpio_dxpl_t),			/*dxpl_size		*/
+    0,		                		/*dxpl_size		*/
     NULL,					/*dxpl_copy		*/
     NULL,					/*dxpl_free		*/
     H5FD_mpio_open,				/*open			*/
@@ -377,7 +378,6 @@ done:
 herr_t
 H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
 {
-    H5FD_mpio_dxpl_t	dx;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
@@ -393,10 +393,12 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
     if (H5FD_MPIO_INDEPENDENT!=xfer_mode && H5FD_MPIO_COLLECTIVE!=xfer_mode)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "incorrect xfer_mode");
 
-    /* Initialize driver-specific properties */
-    dx.xfer_mode = xfer_mode;
+    /* Set the transfer mode */
+    if (H5P_set(plist,H5D_XFER_IO_XFER_MODE_NAME,&xfer_mode)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
-    ret_value= H5P_set_driver(plist, H5FD_MPIO, &dx);
+    /* Initialize driver-specific properties */
+    ret_value= H5P_set_driver(plist, H5FD_MPIO, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -426,7 +428,6 @@ done:
 herr_t
 H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/)
 {
-    H5FD_mpio_dxpl_t	*dx;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -437,11 +438,11 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
     if (H5FD_MPIO!=H5P_get_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
-    if (NULL==(dx=H5P_get_driver_info(plist)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
 
+    /* Get the transfer mode */
     if (xfer_mode)
-        *xfer_mode = dx->xfer_mode;
+        if (H5P_get(plist,H5D_XFER_IO_XFER_MODE_NAME,xfer_mode)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value");
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1299,15 +1300,14 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 	       void *buf/*out*/)
 {
     H5FD_mpio_t			*file = (H5FD_mpio_t*)_file;
-    const H5FD_mpio_dxpl_t	*dx=NULL;
-    H5FD_mpio_dxpl_t		_dx;
     MPI_Offset			mpi_off, mpi_disp;
     MPI_Status  		mpi_stat;
     int				mpi_code;	/* mpi return code */
     MPI_Datatype		buf_type, file_type;
     int         		size_i, bytes_read, n;
     unsigned			use_view_this_time=0;
-    H5P_genplist_t *plist;      /* Property list pointer */
+    H5P_genplist_t              *plist;      /* Property list pointer */
+    H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;   /* I/O tranfer mode */
     herr_t              	ret_value=SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_mpio_read, FAIL);
@@ -1342,13 +1342,10 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     /* Obtain the data transfer properties */
     if(NULL == (plist = H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-    if (H5FD_MPIO!=H5P_get_driver(plist)) {
-        _dx.xfer_mode = H5FD_MPIO_INDEPENDENT; /*the default*/
-        dx = &_dx;
-    } else {
-        dx = H5P_get_driver_info(plist);
-        assert(dx);
-    }
+    if (H5FD_MPIO==H5P_get_driver(plist)) {
+        /* Get the transfer mode */
+        xfer_mode=H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
+    } /* end if */
     
     /*
      * Set up for a fancy xfer using complex types, or single byte block. We
@@ -1393,8 +1390,8 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     } /* end if */
     
     /* Read the data. */
-    assert(H5FD_MPIO_INDEPENDENT==dx->xfer_mode || H5FD_MPIO_COLLECTIVE==dx->xfer_mode);
-    if (H5FD_MPIO_INDEPENDENT==dx->xfer_mode) {
+    assert(H5FD_MPIO_INDEPENDENT==xfer_mode || H5FD_MPIO_COLLECTIVE==xfer_mode);
+    if (H5FD_MPIO_INDEPENDENT==xfer_mode) {
         if (MPI_SUCCESS!= (mpi_code=MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code);
     } else {
@@ -1609,8 +1606,6 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 		size_t size, const void *buf)
 {
     H5FD_mpio_t			*file = (H5FD_mpio_t*)_file;
-    const H5FD_mpio_dxpl_t	*dx=NULL;
-    H5FD_mpio_dxpl_t		_dx;
     MPI_Offset 		 	mpi_off, mpi_disp;
     MPI_Status			mpi_stat;
     MPI_Datatype		buf_type, file_type;
@@ -1618,7 +1613,8 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     int         		size_i, bytes_written;
     unsigned			use_view_this_time=0;
     unsigned		        block_before_meta_write=0;      /* Whether to block before a metadata write */
-    H5P_genplist_t *plist;      /* Property list pointer */
+    H5P_genplist_t              *plist;                 /* Property list pointer */
+    H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;   /* I/O tranfer mode */
     herr_t              	ret_value=SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_mpio_write, FAIL);
@@ -1653,13 +1649,10 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     /* Obtain the data transfer properties */
     if(NULL == (plist = H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-    if (H5FD_MPIO!=H5P_get_driver(plist)) {
-        _dx.xfer_mode = H5FD_MPIO_INDEPENDENT; /*the default*/
-        dx = &_dx;
-    } else {
-        dx = H5P_get_driver_info(plist);
-        assert(dx);
-    }
+    if (H5FD_MPIO==H5P_get_driver(plist)) {
+        /* Get the transfer mode */
+        xfer_mode=H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
+    } /* end if */
     
     /*
      * Set up for a fancy xfer using complex types, or single byte block. We
@@ -1735,8 +1728,8 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     } /* end if */
 
     /* Write the data. */
-    assert(H5FD_MPIO_INDEPENDENT==dx->xfer_mode || H5FD_MPIO_COLLECTIVE==dx->xfer_mode);
-    if (H5FD_MPIO_INDEPENDENT==dx->xfer_mode) {
+    assert(H5FD_MPIO_INDEPENDENT==xfer_mode || H5FD_MPIO_COLLECTIVE==xfer_mode);
+    if (H5FD_MPIO_INDEPENDENT==xfer_mode) {
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if (MPI_SUCCESS != (mpi_code=MPI_File_write_at(file->f, mpi_off, (void*)buf, size_i, buf_type, &mpi_stat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code);
@@ -1860,7 +1853,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mpio_flush(H5FD_t *_file, unsigned closing)
+H5FD_mpio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
 {
     H5FD_mpio_t		*file = (H5FD_mpio_t*)_file;
     int			mpi_code;	/* mpi return code */

@@ -140,6 +140,10 @@
 #define H5D_XFER_HYPER_VECTOR_SIZE_NAME       "vec_size"
 #define H5D_XFER_HYPER_VECTOR_SIZE_SIZE       sizeof(size_t)
 #define H5D_XFER_HYPER_VECTOR_SIZE_DEF        1024
+/* Definitions for I/O transfer mode property */
+#define H5D_XFER_IO_XFER_MODE_NAME       "io_xfer_mode"
+#define H5D_XFER_IO_XFER_MODE_SIZE       sizeof(H5FD_mpio_xfer_t)
+#define H5D_XFER_IO_XFER_MODE_DEF        H5FD_MPIO_INDEPENDENT
 /* Definitions for EDC property */
 #define H5D_XFER_EDC_NAME       "error-detecting"
 #define H5D_XFER_EDC_SIZE       sizeof(H5Z_EDC_t)
@@ -167,10 +171,8 @@ typedef struct H5D_t {
   
 /* Functions defined in H5D.c */
 H5_DLL herr_t H5D_init(void);
-H5_DLL hid_t H5D_open(H5G_entry_t *ent);
-H5_DLL herr_t H5D_close(H5D_t *dataset);
-H5_DLL htri_t H5D_isa(H5G_entry_t *ent);
-H5_DLL herr_t H5D_extend(H5D_t *dataset, const hsize_t *size);
+H5_DLL hid_t H5D_open(H5G_entry_t *ent, hid_t dxpl_id);
+H5_DLL htri_t H5D_isa(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL H5G_entry_t *H5D_entof(H5D_t *dataset);
 H5_DLL H5T_t *H5D_typeof(H5D_t *dset);
 H5_DLL herr_t H5D_crt_copy(hid_t new_plist_t, hid_t old_plist_t, 
@@ -180,7 +182,7 @@ H5_DLL herr_t H5D_xfer_create(hid_t dxpl_id, void *create_data);
 H5_DLL herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id, 
                              void *copy_data);
 H5_DLL herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
-H5_DLL herr_t H5D_flush(H5F_t *f);
+H5_DLL herr_t H5D_flush(H5F_t *f, hid_t dxpl_id);
 
 
 #endif

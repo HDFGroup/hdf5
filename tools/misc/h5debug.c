@@ -104,25 +104,25 @@ main(int argc, char *argv[])
         /*
          * Debug the boot block.
          */
-        status = H5F_debug(f, addr, stdout, 0, VCOL);
+        status = H5F_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
     } else if (!HDmemcmp(sig, H5HL_MAGIC, H5HL_SIZEOF_MAGIC)) {
         /*
          * Debug a local heap.
          */
-        status = H5HL_debug(f, addr, stdout, 0, VCOL);
+        status = H5HL_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 	
     } else if (!HDmemcmp (sig, H5HG_MAGIC, H5HG_SIZEOF_MAGIC)) {
 	/*
 	 * Debug a global heap collection.
 	 */
-	status = H5HG_debug (f, addr, stdout, 0, VCOL);
+	status = H5HG_debug (f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
     } else if (!HDmemcmp(sig, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC)) {
         /*
          * Debug a symbol table node.
          */
-        status = H5G_node_debug(f, addr, stdout, 0, VCOL, extra);
+        status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
 
     } else if (!HDmemcmp(sig, H5B_MAGIC, H5B_SIZEOF_MAGIC)) {
         /*
@@ -134,17 +134,16 @@ main(int argc, char *argv[])
 	
         switch (subtype) {
         case H5B_SNODE_ID:
-            status = H5G_node_debug(f, addr, stdout, 0, VCOL, extra);
+            status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
             break;
 
 	case H5B_ISTORE_ID:
 	    ndims = (int)extra;
-	    status = H5F_istore_debug (f, addr, stdout, 0, VCOL, ndims);
+	    status = H5F_istore_debug (f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims);
 	    break;
 
         default:
-            fprintf(stderr, "Unknown B-tree subtype %u\n",
-		    (unsigned)(subtype));
+            fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
             HDexit(4);
         }
 
@@ -153,7 +152,7 @@ main(int argc, char *argv[])
          * This could be an object header.  Since they don't have a signature
          * it's a somewhat "ify" detection.
          */
-        status = H5O_debug(f, addr, stdout, 0, VCOL);
+        status = H5O_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
     } else {
         /*

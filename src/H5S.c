@@ -1075,7 +1075,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_modify(H5G_entry_t *ent, const H5S_t *ds, hbool_t update_time)
+H5S_modify(H5G_entry_t *ent, const H5S_t *ds, hbool_t update_time, hid_t dxpl_id)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -1087,7 +1087,7 @@ H5S_modify(H5G_entry_t *ent, const H5S_t *ds, hbool_t update_time)
     switch (ds->extent.type) {
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            if (H5O_modify(ent, H5O_SDSPACE, 0, 0, update_time, &(ds->extent.u.simple))<0)
+            if (H5O_modify(ent, H5O_SDSPACE, 0, 0, update_time, &(ds->extent.u.simple), dxpl_id)<0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple data space message");
             break;
 
@@ -1120,7 +1120,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_append(H5F_t *f, H5O_t *oh, const H5S_t *ds)
+H5S_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5S_t *ds)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -1133,7 +1133,7 @@ H5S_append(H5F_t *f, H5O_t *oh, const H5S_t *ds)
     switch (ds->extent.type) {
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            if (H5O_append(f, oh, H5O_SDSPACE, 0, &(ds->extent.u.simple))<0)
+            if (H5O_append(f, dxpl_id, oh, H5O_SDSPACE, 0, &(ds->extent.u.simple))<0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple data space message");
             break;
 
@@ -1169,7 +1169,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5S_t *
-H5S_read(H5G_entry_t *ent)
+H5S_read(H5G_entry_t *ent, hid_t dxpl_id)
 {
     H5S_t		   *ds = NULL;          /* Dataspace to return */
     H5S_t		   *ret_value;   /* Return value */
@@ -1182,7 +1182,7 @@ H5S_read(H5G_entry_t *ent)
     if (NULL==(ds = H5FL_CALLOC(H5S_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    if (H5O_read(ent, H5O_SDSPACE, 0, &(ds->extent.u.simple)) == NULL)
+    if (H5O_read(ent, H5O_SDSPACE, 0, &(ds->extent.u.simple), dxpl_id) == NULL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to load dataspace info from dataset header");
 
     if(ds->extent.u.simple.rank != 0) {
@@ -2022,7 +2022,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth)
+H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent, int fwidth)
 {
     const H5S_t	*mesg = (const H5S_t*)_mesg;
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -2038,7 +2038,7 @@ H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth)
         case H5S_SIMPLE:
             fprintf(stream, "%*s%-*s H5S_SIMPLE\n", indent, "", fwidth,
                     "Space class:");
-            (H5O_SDSPACE->debug)(f, &(mesg->extent.u.simple), stream,
+            (H5O_SDSPACE->debug)(f, dxpl_id, &(mesg->extent.u.simple), stream,
                                  indent+3, MAX(0, fwidth-3));
             break;
             

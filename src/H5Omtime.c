@@ -20,17 +20,17 @@
 
 #define PABLO_MASK	H5O_mtime_mask
 
-static void *H5O_mtime_new_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
+static void *H5O_mtime_new_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_mtime_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_mtime_new_size(H5F_t *f, const void *_mesg);
 
-static void *H5O_mtime_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
+static void *H5O_mtime_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_mtime_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_mtime_copy(const void *_mesg, void *_dest);
 static size_t H5O_mtime_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_mtime_reset(void *_mesg);
 static herr_t H5O_mtime_free(void *_mesg);
-static herr_t H5O_mtime_debug(H5F_t *f, const void *_mesg, FILE *stream,
+static herr_t H5O_mtime_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
 
 /* This message derives from H5O */
@@ -99,7 +99,7 @@ H5FL_DEFINE(time_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_mtime_new_decode(H5F_t UNUSED *f, const uint8_t *p,
+H5O_mtime_new_decode(H5F_t UNUSED *f, hid_t dxpl_id, const uint8_t *p,
 		 H5O_shared_t UNUSED *sh)
 {
     time_t	*mesg, the_time;
@@ -156,7 +156,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
+H5O_mtime_decode(H5F_t UNUSED *f, hid_t dxpl_id, const uint8_t *p,
 		 H5O_shared_t UNUSED *sh)
 {
     time_t	*mesg, the_time;
@@ -537,7 +537,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_mtime_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
+H5O_mtime_debug(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 		int indent, int fwidth)
 {
     const time_t	*mesg = (const time_t *)_mesg;

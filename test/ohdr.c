@@ -69,7 +69,7 @@ main(void)
      */
     TESTING("object header creation");
     HDmemset(&oh_ent,0,sizeof(H5G_entry_t));
-    if (H5O_create(f, 64, &oh_ent/*out*/)<0) {
+    if (H5O_create(f, H5P_DATASET_XFER_DEFAULT, 64, &oh_ent/*out*/)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -80,17 +80,17 @@ main(void)
     TESTING("message creation");
     stab.btree_addr = 11111111;
     stab.heap_addr = 22222222;
-    if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, 1, &stab)<0) {
+    if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5AC_flush(f, NULL, HADDR_UNDEF, TRUE)<0) {
+    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_STAB, 0, &ro)) {
+    if (NULL==H5O_read(&oh_ent, H5O_STAB, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -112,17 +112,17 @@ main(void)
     TESTING("message modification");
     stab.btree_addr = 33333333;
     stab.heap_addr = 44444444;
-    if (H5O_modify(&oh_ent, H5O_STAB, 0, 0, 1, &stab)<0) {
+    if (H5O_modify(&oh_ent, H5O_STAB, 0, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5AC_flush(f, NULL, HADDR_UNDEF, TRUE)<0) {
+    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_STAB, 0, &ro)) {
+    if (NULL==H5O_read(&oh_ent, H5O_STAB, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -145,17 +145,17 @@ main(void)
     TESTING("duplicate message creation");
     stab.btree_addr = 55555555;
     stab.heap_addr = 66666666;
-    if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, 1, &stab)<0) {
+    if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5AC_flush(f, NULL, HADDR_UNDEF, TRUE)<0) {
+    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_STAB, 1, &ro)) {
+    if (NULL==H5O_read(&oh_ent, H5O_STAB, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -177,17 +177,17 @@ main(void)
     TESTING("duplicate message modification");
     stab.btree_addr = 77777777;
     stab.heap_addr = 88888888;
-    if (H5O_modify(&oh_ent, H5O_STAB, 1, 0, 1, &stab)<0) {
+    if (H5O_modify(&oh_ent, H5O_STAB, 1, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5AC_flush(f, NULL, HADDR_UNDEF, TRUE)<0) {
+    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_STAB, 1, &ro)) {
+    if (NULL==H5O_read(&oh_ent, H5O_STAB, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -211,13 +211,13 @@ main(void)
     for (i=0; i<40; i++) {
         stab.btree_addr = (i+1)*1000+1;
         stab.heap_addr = (i+1)*1000+2;
-        if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, 1, &stab)<0) {
+        if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	    H5_FAILED();
 	    H5Eprint(stdout);
 	    goto error;
 	}
     }
-    if (H5AC_flush(f, NULL, HADDR_UNDEF, TRUE)<0) {
+    if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -232,12 +232,12 @@ main(void)
     for (i=0; i<10; i++) {
         stab.btree_addr = (i + 1) * 1000 + 10;
         stab.heap_addr = (i + 1) * 1000 + 20;
-        if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, 1, &stab)<0) {
+        if (H5O_modify(&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	    H5_FAILED();
 	    H5Eprint(stdout);
 	    goto error;
 	}
-        if (H5AC_flush(f, NULL, HADDR_UNDEF, TRUE)<0) {
+        if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	    H5_FAILED();
 	    H5Eprint(stdout);
 	    goto error;
@@ -249,12 +249,12 @@ main(void)
      * Delete all symbol table messages.
      */
     TESTING("message deletion");
-    if (H5O_remove(&oh_ent, H5O_STAB, H5O_ALL)<0) {
+    if (H5O_remove(&oh_ent, H5O_STAB, H5O_ALL, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
     }
-    if (H5O_read(&oh_ent, H5O_STAB, 0, &ro)) {
+    if (H5O_read(&oh_ent, H5O_STAB, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	puts("    H5O_read() should have failed but didn't");
 	H5Eclear();

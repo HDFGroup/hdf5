@@ -179,7 +179,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_vlen_seq_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
+H5T_vlen_seq_mem_read(H5F_t UNUSED *f, hid_t dxpl_id, void *vl_addr, void *buf, size_t len)
 {
     hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -212,7 +212,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf, void UNUSED *bg_addr, hsize_t seq_len, hsize_t base_size)
+H5T_vlen_seq_mem_write(H5F_t UNUSED *f, hid_t dxpl_id, void *vl_addr, void *buf, void UNUSED *bg_addr, hsize_t seq_len, hsize_t base_size)
 {
     H5MM_allocate_t alloc_func;     /* Vlen allocation function */
     void *alloc_info;               /* Vlen allocation information */
@@ -233,7 +233,7 @@ H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf
         /* Use the user's memory allocation routine is one is defined */
 
         /* Get the allocation function & info */
-        if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
+        if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
         if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_NAME,&alloc_func)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
@@ -316,7 +316,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_vlen_str_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
+H5T_vlen_str_mem_read(H5F_t UNUSED *f, hid_t dxpl_id, void *vl_addr, void *buf, size_t len)
 {
     char *s=*(char **)vl_addr;   /* Pointer to the user's hvl_t information */
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -352,7 +352,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf, void UNUSED *bg_addr, hsize_t seq_len, hsize_t base_size)
+H5T_vlen_str_mem_write(H5F_t UNUSED *f, hid_t dxpl_id, void *vl_addr, void *buf, void UNUSED *bg_addr, hsize_t seq_len, hsize_t base_size)
 {
     H5MM_allocate_t alloc_func;     /* Vlen allocation function */
     void *alloc_info;               /* Vlen allocation information */
@@ -370,7 +370,7 @@ H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf
     /* Use the user's memory allocation routine if one is defined */
 
     /* Get the allocation function & info */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
+    if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_NAME,&alloc_func)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
@@ -442,7 +442,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *buf, size_t UNUSED len)
+H5T_vlen_disk_read(H5F_t *f, hid_t dxpl_id, void *vl_addr, void *buf, size_t UNUSED len)
 {
     uint8_t *vl=(uint8_t *)vl_addr;   /* Pointer to the user's hvl_t information */
     H5HG_t hobjid;
@@ -466,7 +466,7 @@ H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *buf, size_t UNUSED len)
         INT32DECODE(vl,hobjid.idx);
 
         /* Read the VL information from disk */
-        if(H5HG_read(f,&hobjid,buf)==NULL)
+        if(H5HG_read(f,dxpl_id, &hobjid,buf)==NULL)
             HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "Unable to read VL information");
     } /* end if */
 
@@ -494,7 +494,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void *buf, void *bg_addr, hsize_t seq_len, hsize_t base_size)
+H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, void *vl_addr, void *buf, void *bg_addr, hsize_t seq_len, hsize_t base_size)
 {
     uint8_t *vl=(uint8_t *)vl_addr; /*Pointer to the user's hvl_t information*/
     uint8_t *bg=(uint8_t *)bg_addr; /*Pointer to the old data hvl_t          */
@@ -523,7 +523,7 @@ H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void *buf, v
             H5F_addr_decode(f, (const uint8_t **)&bg, &(bg_hobjid.addr));
             INT32DECODE(bg, bg_hobjid.idx);
             /* Free heap object */
-            if(H5HG_remove(f, &bg_hobjid)<0)
+            if(H5HG_remove(f, dxpl_id, &bg_hobjid)<0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to remove heap object");
          } /* end if */
     } /* end if */
@@ -536,7 +536,7 @@ H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void *buf, v
     if(seq_len!=0) {
         /* Write the VL information to disk (allocates space also) */
         H5_ASSIGN_OVERFLOW(len,(seq_len*base_size),hsize_t,size_t);
-        if(H5HG_insert(f,len,buf,&hobjid)<0)
+        if(H5HG_insert(f,dxpl_id, len,buf,&hobjid)<0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to write VL information");
     } /* end if */
     else

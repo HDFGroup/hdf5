@@ -37,13 +37,13 @@
 #define PABLO_MASK  H5O_fphdf5_mask
 
 /* local prototypes */
-static void     *H5O_fphdf5_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
+static void     *H5O_fphdf5_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t    H5O_fphdf5_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t    H5O_fphdf5_size(H5F_t *f, const void *_mesg);
 static herr_t    H5O_fphdf5_reset(void *_mesg);
 static void     *H5O_fphdf5_copy(const void *mesg, void *dest);
 static herr_t    H5O_fphdf5_free(void *_mesg);
-static herr_t    H5O_fphdf5_debug(H5F_t *f, const void *_mesg,
+static herr_t    H5O_fphdf5_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
                                   FILE *stream, int indent, int fwidth);
 
 /* This message derives from H5O */
@@ -94,7 +94,7 @@ H5FL_ARR_EXTERN(hsize_t);
  * Modifications:
  */
 static void *
-H5O_fphdf5_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
+H5O_fphdf5_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5O_fphdf5_t *fmeta = NULL; /* New FPHDF5 metadata structure */
     void *ret_value;
@@ -511,7 +511,7 @@ done:
  * Modifications:
  */
 static herr_t
-H5O_fphdf5_debug(H5F_t UNUSED *f, const void *mesg,
+H5O_fphdf5_debug(H5F_t UNUSED *f, hid_t dxpl_id, const void *mesg,
                  FILE * stream, int indent, int fwidth)
 {
     const H5O_fphdf5_t *fmeta = (const H5O_fphdf5_t *) mesg;

@@ -143,7 +143,7 @@ static herr_t H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, hadd
 			     size_t size, void *buf);
 static herr_t H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      size_t size, const void *buf);
-static herr_t H5FD_sec2_flush(H5FD_t *_file,unsigned closing);
+static herr_t H5FD_sec2_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 
 static const H5FD_class_t H5FD_sec2_g = {
     "sec2",					/*name			*/
@@ -780,7 +780,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_sec2_flush(H5FD_t *_file, unsigned UNUSED closing)
+H5FD_sec2_flush(H5FD_t *_file, hid_t dxpl_id, unsigned UNUSED closing)
 {
     H5FD_sec2_t	*file = (H5FD_sec2_t*)_file;
 #ifdef WIN32

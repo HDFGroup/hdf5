@@ -78,7 +78,6 @@ typedef struct H5FD_core_fapl_t {
 static void *H5FD_core_fapl_get(H5FD_t *_file);
 static H5FD_t *H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
-static herr_t H5FD_core_flush(H5FD_t *_file, unsigned closing);
 static herr_t H5FD_core_close(H5FD_t *_file);
 static int H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static haddr_t H5FD_core_get_eoa(H5FD_t *_file);
@@ -89,6 +88,7 @@ static herr_t H5FD_core_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, hadd
 			     size_t size, void *buf);
 static herr_t H5FD_core_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      size_t size, const void *buf);
+static herr_t H5FD_core_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 
 static const H5FD_class_t H5FD_core_g = {
     "core",					/*name			*/
@@ -370,59 +370,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_core_flush
- *
- * Purpose:	Flushes the file to backing store if there is any and if the
- *		dirty flag is set.
- *
- * Return:	Success:	0
- *
- *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *              Friday, October 15, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD_core_flush(H5FD_t *_file, unsigned UNUSED closing)
-{
-    H5FD_core_t	*file = (H5FD_core_t*)_file;
-    herr_t      ret_value=SUCCEED;       /* Return value */
-    
-    FUNC_ENTER_NOAPI(H5FD_core_flush, FAIL);
-
-    /* Write to backing store */
-    if (file->dirty && file->fd>=0) {
-        haddr_t size = file->eof;
-        unsigned char *ptr = file->mem;
-
-        if (0!=HDlseek(file->fd, (off_t)0, SEEK_SET))
-            HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store");
-
-        while (size) {
-            ssize_t n;
-
-            H5_CHECK_OVERFLOW(size,hsize_t,size_t);
-            n = HDwrite(file->fd, ptr, (size_t)size);
-            if (n<0 && EINTR==errno)
-                continue;
-            if (n<0)
-                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "error writing backing store");
-            ptr += (size_t)n;
-            size -= (size_t)n;
-        }
-        file->dirty = FALSE;
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5FD_core_close
  *
  * Purpose:	Closes the file.
@@ -447,10 +394,6 @@ H5FD_core_close(H5FD_t *_file)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_core_close, FAIL);
-
-    /* Flush */
-    if (H5FD_core_flush(_file,TRUE)<0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file");
 
     /* Release resources */
     if (file->fd>=0)
@@ -790,3 +733,57 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_core_flush
+ *
+ * Purpose:	Flushes the file to backing store if there is any and if the
+ *		dirty flag is set.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, October 15, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_core_flush(H5FD_t *_file, hid_t dxpl_id, unsigned UNUSED closing)
+{
+    H5FD_core_t	*file = (H5FD_core_t*)_file;
+    herr_t      ret_value=SUCCEED;       /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5FD_core_flush, FAIL);
+
+    /* Write to backing store */
+    if (file->dirty && file->fd>=0) {
+        haddr_t size = file->eof;
+        unsigned char *ptr = file->mem;
+
+        if (0!=HDlseek(file->fd, (off_t)0, SEEK_SET))
+            HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store");
+
+        while (size) {
+            ssize_t n;
+
+            H5_CHECK_OVERFLOW(size,hsize_t,size_t);
+            n = HDwrite(file->fd, ptr, (size_t)size);
+            if (n<0 && EINTR==errno)
+                continue;
+            if (n<0)
+                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "error writing backing store");
+            ptr += (size_t)n;
+            size -= (size_t)n;
+        }
+        file->dirty = FALSE;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+

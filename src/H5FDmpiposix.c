@@ -179,7 +179,7 @@ static herr_t H5FD_mpiposix_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, 
         size_t size, void *buf);
 static herr_t H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
         size_t size, const void *buf);
-static herr_t H5FD_mpiposix_flush(H5FD_t *_file, unsigned closing);
+static herr_t H5FD_mpiposix_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 
 /* MPIPOSIX-specific file access properties */
 typedef struct H5FD_mpiposix_fapl_t {
@@ -1266,7 +1266,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mpiposix_flush(H5FD_t *_file, unsigned UNUSED closing)
+H5FD_mpiposix_flush(H5FD_t *_file, hid_t dxpl_id, unsigned UNUSED closing)
 {
     H5FD_mpiposix_t	*file = (H5FD_mpiposix_t*)_file;
 #ifdef WIN32

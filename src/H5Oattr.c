@@ -28,11 +28,11 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_attr_encode (H5F_t *f, uint8_t *p, const void *mesg);
-static void *H5O_attr_decode (H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
+static void *H5O_attr_decode (H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static void *H5O_attr_copy (const void *_mesg, void *_dest);
 static size_t H5O_attr_size (H5F_t *f, const void *_mesg);
 static herr_t H5O_attr_reset (void *_mesg);
-static herr_t H5O_attr_debug (H5F_t *f, const void *_mesg,
+static herr_t H5O_attr_debug (H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			      FILE * stream, int indent, int fwidth);
 
 /* This message derives from H5O */
@@ -89,7 +89,7 @@ H5FL_EXTERN(H5S_simple_t);
  *	Added a version number at the beginning.
 --------------------------------------------------------------------------*/
 static void *
-H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
+H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5A_t		*attr = NULL;
     H5S_simple_t	*simple;	/*simple dimensionality information  */
@@ -129,14 +129,14 @@ H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     p += H5O_ALIGN(name_len);    /* advance the memory pointer */
 
     /* decode the attribute datatype */
-    if((attr->dt=(H5O_DTYPE->decode)(f,p,NULL))==NULL)
+    if((attr->dt=(H5O_DTYPE->decode)(f,dxpl_id,p,NULL))==NULL)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype");
     p += H5O_ALIGN(attr->dt_size);
 
     /* decode the attribute dataspace */
     if (NULL==(attr->ds = H5FL_CALLOC(H5S_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    if((simple=(H5O_SDSPACE->decode)(f,p,NULL))!=NULL) {
+    if((simple=(H5O_SDSPACE->decode)(f,dxpl_id,p,NULL))!=NULL) {
         hsize_t nelem;  /* Number of elements in extent */
         unsigned u;     /* Local index variable */
 
@@ -412,7 +412,7 @@ done:
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_attr_debug(H5F_t *f, const void *_mesg, FILE * stream, int indent,
+H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int indent,
 	       int fwidth)
 {
     const H5A_t *mesg = (const H5A_t *)_mesg;
@@ -436,20 +436,20 @@ H5O_attr_debug(H5F_t *f, const void *_mesg, FILE * stream, int indent,
 	    "Opened:",
 	    (unsigned int)mesg->ent_opened);
     fprintf(stream, "%*sSymbol table entry...\n", indent, "");
-    H5G_ent_debug(f, &(mesg->ent), stream, indent+3, MAX(0, fwidth-3),
+    H5G_ent_debug(f, dxpl_id, &(mesg->ent), stream, indent+3, MAX(0, fwidth-3),
 		  HADDR_UNDEF);
     
     fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Data type size:",
 	    (unsigned long)(mesg->dt_size));
     fprintf(stream, "%*sData type...\n", indent, "");
-    (H5O_DTYPE->debug)(f, mesg->dt, stream, indent+3, MAX(0, fwidth-3));
+    (H5O_DTYPE->debug)(f, dxpl_id, mesg->dt, stream, indent+3, MAX(0, fwidth-3));
 
     fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Data space size:",
 	    (unsigned long)(mesg->ds_size));
     fprintf(stream, "%*sData space...\n", indent, "");
-    H5S_debug(f, mesg->ds, stream, indent+3, MAX(0, fwidth-3));
+    H5S_debug(f, dxpl_id, mesg->ds, stream, indent+3, MAX(0, fwidth-3));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

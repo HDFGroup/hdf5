@@ -63,12 +63,19 @@ typedef struct H5F_olist_t {
 } H5F_olist_t;    
 
 /* PRIVATE PROTOTYPES */
-static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id);
-static herr_t H5F_dest(H5F_t *f);
-static herr_t H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
-			hbool_t alloc_only, hbool_t closing);
-static haddr_t H5F_locate_signature(H5FD_t *file);
+static H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, 
+			hid_t fapl_id, hid_t dxpl_id);
+static herr_t H5F_close(H5F_t *f);
+static herr_t H5F_close_all(void);
+#ifdef NOT_YET
+static herr_t H5F_flush_all(hbool_t invalidate);
 static int H5F_flush_all_cb(H5F_t *f, hid_t fid, const void *_invalidate);
+#endif /* NOT_YET */
+static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id);
+static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
+static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, hbool_t invalidate,
+			hbool_t alloc_only, hbool_t closing);
+static haddr_t H5F_locate_signature(H5FD_t *file, hid_t dxpl_id);
 static herr_t H5F_get_objects(H5F_t *f, unsigned types, hid_t *obj_id_list, 
 				unsigned *obj_id_count);
 static herr_t H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
@@ -634,6 +641,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+#ifdef NOT_YET
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_flush_all_cb
@@ -691,6 +699,7 @@ H5F_flush_all(hbool_t invalidate)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------
@@ -711,7 +720,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5F_close_all(void)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -725,6 +734,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+#ifdef NOT_YET
 
 /*--------------------------------------------------------------------------
  NAME
@@ -759,6 +769,7 @@ H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l)
 #endif
 
 }
+#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------
@@ -1293,7 +1304,7 @@ H5F_equal(void *_haystack, hid_t UNUSED id, const void *_needle)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5F_locate_signature(H5FD_t *file)
+H5F_locate_signature(H5FD_t *file, hid_t dxpl_id)
 {
     haddr_t	    addr, eoa;
     uint8_t	    buf[H5F_SIGNATURE_LEN];
@@ -1318,7 +1329,7 @@ H5F_locate_signature(H5FD_t *file)
 	addr = (8==n) ? 0 : (haddr_t)1 << n;
 	if (H5FD_set_eoa(file, addr+H5F_SIGNATURE_LEN)<0)
 	    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to set EOA value for file signature");
-	if (H5FD_read(file, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, addr, H5F_SIGNATURE_LEN, buf)<0)
+	if (H5FD_read(file, H5FD_MEM_SUPER, dxpl_id, addr, H5F_SIGNATURE_LEN, buf)<0)
 	    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to read file signature");
 	if (!HDmemcmp(buf, H5F_SIGNATURE, H5F_SIGNATURE_LEN))
             break;
@@ -1379,7 +1390,7 @@ H5Fis_hdf5(const char *name)
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file");
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
-    ret_value = (HADDR_UNDEF!=H5F_locate_signature(file));
+    ret_value = (HADDR_UNDEF!=H5F_locate_signature(file, H5AC_dxpl_id));
 
 done:
     /* Close the file */
@@ -1547,7 +1558,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_dest(H5F_t *f)
+H5F_dest(H5F_t *f, hid_t dxpl_id)
 {
     herr_t	   ret_value = SUCCEED;
     
@@ -1567,11 +1578,11 @@ H5F_dest(H5F_t *f)
                 H5FL_FREE(H5G_t,f->shared->root_grp);
                 f->shared->root_grp=NULL;
             }
-	    if (H5AC_dest(f)) {
+	    if (H5AC_dest(f, dxpl_id)) {
 		HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
 		ret_value = FAIL; /*but keep going*/
 	    }
-	    if (H5F_istore_dest (f)<0) {
+	    if (H5F_istore_dest (f, dxpl_id)<0) {
 		HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
 		ret_value = FAIL; /*but keep going*/
 	    }
@@ -1702,8 +1713,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5F_t *
-H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
+static H5F_t *
+H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id)
 {
     H5F_t		*file=NULL;	/*the success return value	*/
     H5F_t		*ret_value;     /*actual return value		*/
@@ -1868,19 +1879,19 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         shared->boot_addr = userblock_size;
 	shared->base_addr = shared->boot_addr;
 	shared->consist_flags = 0x03;
-	if (H5F_flush(file, H5F_SCOPE_LOCAL, FALSE, TRUE,FALSE)<0)
+	if (H5F_flush(file, dxpl_id, H5F_SCOPE_LOCAL, FALSE, TRUE,FALSE)<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock");
 
 	/* Create and open the root group */
-	if (H5G_mkroot(file, NULL)<0)
+	if (H5G_mkroot(file, dxpl_id, NULL)<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group");
 	
     } else if (1==shared->nrefs) {
 	/* Read the superblock if it hasn't been read before. */
-	if (HADDR_UNDEF==(shared->boot_addr=H5F_locate_signature(lf)))
+	if (HADDR_UNDEF==(shared->boot_addr=H5F_locate_signature(lf,dxpl_id)))
 	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL, "unable to find file signature");
 	if (H5FD_set_eoa(lf, shared->boot_addr+fixed_size)<0 ||
-                H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, shared->boot_addr, fixed_size, buf)<0)
+                H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, shared->boot_addr, fixed_size, buf)<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock");
 
 	/* Signature, already checked */
@@ -1968,7 +1979,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 			H5G_SIZEOF_ENTRY(file);		/*root group ptr*/
 	assert(variable_size<=sizeof(buf));
 	if (H5FD_set_eoa(lf, shared->boot_addr+fixed_size+variable_size)<0 ||
-                H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, shared->boot_addr+fixed_size, variable_size, &buf[fixed_size])<0)
+                H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, shared->boot_addr+fixed_size, variable_size, &buf[fixed_size])<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read superblock");
 	H5F_addr_decode(file, &p, &(shared->base_addr)/*out*/);
 	H5F_addr_decode(file, &p, &(shared->freespace_addr)/*out*/);
@@ -1989,7 +2000,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 	if (H5F_addr_defined(shared->driver_addr)) {
 	    haddr_t drv_addr = shared->base_addr + shared->driver_addr;
 	    if (H5FD_set_eoa(lf, drv_addr+16)<0 ||
-                    H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, drv_addr, 16, buf)<0)
+                    H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, drv_addr, 16, buf)<0)
 		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read driver information block");
 	    p = buf;
 
@@ -2009,7 +2020,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
 	    /* Read driver information and decode */
 	    if (H5FD_set_eoa(lf, drv_addr+16+driver_size)<0 ||
-                    H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, drv_addr+16, driver_size, &buf[16])<0)
+                    H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, drv_addr+16, driver_size, &buf[16])<0)
 		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read file driver information");
 	    if (H5FD_sb_decode(lf, driver_name, &buf[16])<0)
 		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to decode driver information");
@@ -2025,7 +2036,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 	} /* end if */
 	
 	/* Make sure we can open the root group */
-	if (H5G_mkroot(file, &root_ent)<0)
+	if (H5G_mkroot(file, dxpl_id, &root_ent)<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group");
 
 	/*
@@ -2080,7 +2091,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
 done:
     if (!ret_value && file)
-        H5F_dest(file); /* Don't indicate error here, to leave the error stack with the correct error */
+        H5F_dest(file, dxpl_id); /* Don't indicate error here, to leave the error stack with the correct error */
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -2184,7 +2195,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
     /*
      * Create a new file or truncate an existing file.
      */
-    if (NULL==(new_file=H5F_open(filename, flags, fcpl_id, fapl_id)))
+    if (NULL==(new_file=H5F_open(filename, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
     
     /* Get an atom for the file */
@@ -2260,7 +2271,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list");
 
     /* Open the file */
-    if (NULL==(new_file=H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id)))
+    if (NULL==(new_file=H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file");
 
     /* Get an atom for the file */
@@ -2350,7 +2361,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not associated with a file");
 
     /* Flush the file */
-    if (H5F_flush(f, scope, FALSE, FALSE, FALSE)<0)
+    if (H5F_flush(f, H5AC_dxpl_id, scope, FALSE, FALSE, FALSE)<0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "flush failed");
 
 done:
@@ -2409,7 +2420,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
+H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, hbool_t invalidate,
 	  hbool_t alloc_only, hbool_t closing)
 {
     uint8_t		sbuf[1024];     /* Superblock encoding buffer */
@@ -2447,7 +2458,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     }
     if (H5F_SCOPE_DOWN==scope) {
 	for (i=0; i<f->mtab.nmounts; i++) {
-	    if (H5F_flush(f->mtab.child[i].file, scope, invalidate, FALSE, closing)<0)
+	    if (H5F_flush(f->mtab.child[i].file, dxpl_id, scope, invalidate, FALSE, closing)<0)
 		nerrors++;
 	}
     }
@@ -2455,7 +2466,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     /* Avoid flushing buffers & caches when alloc_only set */
     if(!alloc_only) {
         /* flush any cached compact storage raw data */
-        if (H5D_flush(f)<0)
+        if (H5D_flush(f, dxpl_id)<0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache");
 
         /* If we are invalidating everything (which only happens just before
@@ -2466,7 +2477,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
             if(f->shared->lf->feature_flags&H5FD_FEAT_AGGREGATE_METADATA) {
                 /* Return the unused portion of the metadata block to a free list */
                 if(f->shared->lf->eoma!=0)
-                    if(H5FD_free(f->shared->lf,H5FD_MEM_DEFAULT,f->shared->lf->eoma,f->shared->lf->cur_meta_block_size)<0)
+                    if(H5FD_free(f->shared->lf,H5FD_MEM_DEFAULT,dxpl_id,f->shared->lf->eoma,f->shared->lf->cur_meta_block_size)<0)
                         HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free metadata block");
 
                 /* Reset metadata block information, just in case */
@@ -2476,7 +2487,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
             if(f->shared->lf->feature_flags&H5FD_FEAT_AGGREGATE_SMALLDATA) {
                 /* Return the unused portion of the "small data" block to a free list */
                 if(f->shared->lf->eosda!=0)
-                    if(H5FD_free(f->shared->lf,H5FD_MEM_DRAW,f->shared->lf->eosda,f->shared->lf->cur_sdata_block_size)<0)
+                    if(H5FD_free(f->shared->lf,H5FD_MEM_DRAW,dxpl_id,f->shared->lf->eosda,f->shared->lf->cur_sdata_block_size)<0)
                         HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free 'small data' block");
 
                 /* Reset "small data" block information, just in case */
@@ -2488,7 +2499,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
         /* flush the data sieve buffer, if we have a dirty one */
         if(f->shared->sieve_buf && f->shared->sieve_dirty) {
             /* Write dirty data sieve buffer to file */
-            if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc, f->shared->sieve_size, H5P_DATASET_XFER_DEFAULT, f->shared->sieve_buf)<0)
+            if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0)
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
 
             /* Reset sieve buffer dirty flag */
@@ -2496,11 +2507,11 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
         } /* end if */
 
         /* flush the entire raw data cache */
-        if (H5F_istore_flush (f, invalidate)<0)
+        if (H5F_istore_flush (f, dxpl_id, invalidate)<0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush raw data cache");
         
         /* flush (and invalidate) the entire meta data cache */
-        if (H5AC_flush(f, NULL, HADDR_UNDEF, invalidate)<0)
+        if (H5AC_flush(f, dxpl_id, NULL, HADDR_UNDEF, invalidate)<0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache");
     } /* end if */
 
@@ -2583,7 +2594,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 	 * format address zero.
 	 */
         H5_CHECK_OVERFLOW(f->shared->base_addr,haddr_t,hsize_t);
-	addr = H5FD_alloc(f->shared->lf, H5FD_MEM_SUPER,
+	addr = H5FD_alloc(f->shared->lf, H5FD_MEM_SUPER, dxpl_id,
               ((hsize_t)f->shared->base_addr + superblock_size + driver_size));
 	if (HADDR_UNDEF==addr)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to allocate file space for userblock and/or superblock");
@@ -2606,7 +2617,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
         /* Compare with current checksums */
         if(chksum!=f->shared->boot_chksum) {
             /* Write superblock */
-            if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, f->shared->boot_addr, superblock_size, sbuf)<0)
+            if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, dxpl_id, f->shared->boot_addr, superblock_size, sbuf)<0)
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write superblock");
 
             /* Update checksum information if different */
@@ -2623,7 +2634,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
             /* Compare with current checksums */
             if(chksum!=f->shared->boot_chksum) {
                 /* Write driver information block */
-                if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, f->shared->base_addr+superblock_size, driver_size, dbuf)<0)
+                if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, dxpl_id, f->shared->base_addr+superblock_size, driver_size, dbuf)<0)
                     HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write driver information block");
 
                 /* Update checksum information if different */
@@ -2633,7 +2644,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     } /* end else */
 
     /* Flush file buffers to disk */
-    if (!alloc_only && H5FD_flush(f->shared->lf,closing)<0)
+    if (!alloc_only && H5FD_flush(f->shared->lf,dxpl_id,closing)<0)
 	HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
 
     /* Check flush errors for children - errors are already on the stack */
@@ -2676,7 +2687,7 @@ done:
  *		Modified to use the virtual file layer.
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5F_close(H5F_t *f)
 {
     H5F_close_degree_t	fc_degree;      /* What action to take when closing the last file ID for a file */
@@ -2695,7 +2706,7 @@ H5F_close(H5F_t *f)
      */
     if (f->nrefs>1) {
 	/* Decrement reference counts */
-        if (H5F_dest(f)<0)
+        if (H5F_dest(f, H5AC_dxpl_id)<0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file");
 	HGOTO_DONE(SUCCEED);
     } /* end if */
@@ -2830,7 +2841,7 @@ H5F_close(H5F_t *f)
 	H5F_istore_stats(f, FALSE);
 
 	/* Flush and destroy all caches */
-	if (H5F_flush(f, H5F_SCOPE_LOCAL, TRUE, FALSE, TRUE)<0)
+	if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL, TRUE, FALSE, TRUE)<0)
 	    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
     } /* end if */
 
@@ -2839,7 +2850,7 @@ H5F_close(H5F_t *f)
      * shared H5F_file_t struct. If the reference count for the H5F_file_t
      * struct reaches zero then destroy it also.
      */
-    if (H5F_dest(f)<0)
+    if (H5F_dest(f,H5AC_dxpl_id)<0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file");
 
 done:
@@ -2916,7 +2927,7 @@ done:
  */
 static herr_t
 H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
-	  hid_t UNUSED plist_id)
+	  hid_t UNUSED plist_id, hid_t dxpl_id)
 {
     H5G_t	*mount_point = NULL;	/*mount point group		*/
     H5G_entry_t	*mp_ent = NULL;		/*mount point symbol table entry*/
@@ -2940,7 +2951,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
      */
     if (child->mtab.parent)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "file is already mounted");
-    if (NULL==(mount_point=H5G_open(loc, name)))
+    if (NULL==(mount_point=H5G_open(loc, name, dxpl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found");
 
     parent = H5G_fileof(mount_point);
@@ -3037,7 +3048,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_unmount(H5G_entry_t *loc, const char *name)
+H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
 {
     H5G_t	*mounted = NULL;	/*mount point group		*/
     H5G_entry_t	*mnt_ent = NULL;	/*mounted symbol table entry	*/
@@ -3058,7 +3069,7 @@ H5F_unmount(H5G_entry_t *loc, const char *name)
      * If we get the root group and the file has a parent in the mount tree,
      * then we must have found the mount point.
      */
-    if (NULL==(mounted=H5G_open(loc, name)))
+    if (NULL==(mounted=H5G_open(loc, name, dxpl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found");
     child = H5G_fileof(mounted);
     mnt_ent = H5G_entof(mounted);
@@ -3311,7 +3322,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list");
 
     /* Do the mount */
-    if (H5F_mount(loc, name, child, plist_id)<0)
+    if (H5F_mount(loc, name, child, plist_id, H5AC_dxpl_id)<0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file");
 
 done:
@@ -3356,7 +3367,7 @@ H5Funmount(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
 
     /* Unmount */
-    if (H5F_unmount(loc, name)<0)
+    if (H5F_unmount(loc, name, H5AC_dxpl_id)<0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file");
 
 done:
@@ -3940,7 +3951,7 @@ H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_debug(H5F_t *f, haddr_t UNUSED addr, FILE * stream, int indent,
+H5F_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE * stream, int indent,
 	  int fwidth)
 {
     hsize_t userblock_size;
@@ -4021,7 +4032,7 @@ H5F_debug(H5F_t *f, haddr_t UNUSED addr, FILE * stream, int indent,
 	      "Root group symbol table entry:",
 	      f->shared->root_grp ? "" : "(none)");
     if (f->shared->root_grp) {
-	H5G_ent_debug(f, H5G_entof(f->shared->root_grp), stream,
+	H5G_ent_debug(f, dxpl_id, H5G_entof(f->shared->root_grp), stream,
 		      indent+3, MAX(0, fwidth-3), HADDR_UNDEF);
     }
 

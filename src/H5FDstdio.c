@@ -142,7 +142,7 @@ static herr_t H5FD_stdio_read(H5FD_t *lf, H5FD_mem_t type, hid_t fapl_id, haddr_
                 size_t size, void *buf);
 static herr_t H5FD_stdio_write(H5FD_t *lf, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
                 size_t size, const void *buf);
-static herr_t H5FD_stdio_flush(H5FD_t *_file, unsigned closing);
+static herr_t H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 
 static const H5FD_class_t H5FD_stdio_g = {
     "stdio",				        /*name			*/
@@ -378,8 +378,6 @@ H5FD_stdio_close(H5FD_t *_file)
     /* Clear the error stack */
     H5Eclear();
 
-    if (H5FD_stdio_flush(_file,1)<0) 
-        H5Epush_ret(func, H5E_IO, H5E_WRITEERROR, "flush failed", -1);
     if (fclose(file->fp) < 0)
         H5Epush_ret(func, H5E_IO, H5E_CLOSEERROR, "fclose failed", -1);
 
@@ -833,7 +831,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_stdio_flush(H5FD_t *_file, unsigned closing)
+H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
 {
     H5FD_stdio_t	*file = (H5FD_stdio_t*)_file;
     static const char *func="H5FD_stdio_flush";  /* Function Name for error reporting */

@@ -18,22 +18,22 @@
 
 #define PABLO_MASK	H5O_fill_mask
 
-static void  *H5O_fill_new_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
+static void  *H5O_fill_new_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_fill_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void  *H5O_fill_new_copy(const void *_mesg, void *_dest);
 static size_t H5O_fill_new_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_fill_new_reset(void *_mesg);
 static herr_t H5O_fill_new_free(void *_mesg);
-static herr_t H5O_fill_new_debug(H5F_t *f, const void *_mesg, FILE *stream,
+static herr_t H5O_fill_new_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
 
-static void  *H5O_fill_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh);
+static void  *H5O_fill_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_fill_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void  *H5O_fill_copy(const void *_mesg, void *_dest);
 static size_t H5O_fill_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_fill_reset(void *_mesg);
 static herr_t H5O_fill_free(void *_mesg);
-static herr_t H5O_fill_debug(H5F_t *f, const void *_mesg, FILE *stream,
+static herr_t H5O_fill_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
 
 /* This message derives from H5O, for old fill value before version 1.5 */
@@ -100,7 +100,7 @@ H5FL_DEFINE(H5O_fill_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_new_decode(H5F_t UNUSED *f, const uint8_t *p,
+H5O_fill_new_decode(H5F_t UNUSED *f, hid_t dxpl_id, const uint8_t *p,
 		H5O_shared_t UNUSED *sh)
 {
     H5O_fill_new_t	*mesg=NULL;
@@ -170,7 +170,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_decode(H5F_t UNUSED *f, const uint8_t *p,
+H5O_fill_decode(H5F_t UNUSED *f, hid_t dxpl_id, const uint8_t *p,
                 H5O_shared_t UNUSED *sh)
 {
     H5O_fill_t  *mesg=NULL;
@@ -664,7 +664,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_new_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
+H5O_fill_new_debug(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 	       int indent, int fwidth)
 {
     const H5O_fill_new_t	*mesg = (const H5O_fill_new_t *)_mesg;
@@ -708,7 +708,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
+H5O_fill_debug(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 	       int indent, int fwidth)
 {
     const H5O_fill_t	*mesg = (const H5O_fill_t *)_mesg;
@@ -755,7 +755,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_fill_convert(void *_fill, H5T_t *dset_type)
+H5O_fill_convert(void *_fill, H5T_t *dset_type, hid_t dxpl_id)
 {
     H5O_fill_new_t	*fill = _fill;
     H5T_path_t		*tpath=NULL;		/*type conversion info	*/
@@ -779,7 +779,7 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type)
     /*
      * Can we convert between source and destination data types?
      */
-    if (NULL==(tpath=H5T_path_find(fill->type, dset_type, NULL, NULL))) {
+    if (NULL==(tpath=H5T_path_find(fill->type, dset_type, NULL, NULL, dxpl_id))) {
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		    "unable to convert between src and dst data types");
     }
@@ -804,7 +804,7 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
 
     /* Do the conversion */
-    if (H5T_convert(tpath, src_id, dst_id, (hsize_t)1, 0, 0, buf, bkg, H5P_DATASET_XFER_DEFAULT)<0)
+    if (H5T_convert(tpath, src_id, dst_id, (hsize_t)1, 0, 0, buf, bkg, dxpl_id)<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
     /* Update the fill message */

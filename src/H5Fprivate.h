@@ -434,17 +434,17 @@ H5_DLL herr_t H5F_contig_fill(H5F_t *f, hid_t dxpl_id,
         const struct H5O_fill_t *fill, size_t elmt_size);
 
 /* Functions that operate on indexed storage */
-H5_DLL herr_t H5F_istore_create(H5F_t *f,
+H5_DLL herr_t H5F_istore_create(H5F_t *f, hid_t dxpl_id,
 				 struct H5O_layout_t *layout/*in,out*/);
 H5_DLL herr_t H5F_istore_allocate (H5F_t *f, hid_t dxpl_id,
     const struct H5O_layout_t *layout, const hsize_t *space_dim,
     struct H5P_genplist_t *dc_plist, hbool_t full_overwrite);
-H5_DLL hsize_t H5F_istore_allocated(H5F_t *f, unsigned ndims, haddr_t addr);
-H5_DLL herr_t H5F_istore_dump_btree(H5F_t *f, FILE *stream, unsigned ndims,
+H5_DLL hsize_t H5F_istore_allocated(H5F_t *f, hid_t dxpl_id, unsigned ndims, haddr_t addr);
+H5_DLL herr_t H5F_istore_dump_btree(H5F_t *f, hid_t dxpl_id, FILE *stream, unsigned ndims,
         haddr_t addr);
-H5_DLL herr_t H5F_istore_prune_by_extent( H5F_t *f,
+H5_DLL herr_t H5F_istore_prune_by_extent( H5F_t *f, hid_t dxpl_id,
         const struct H5O_layout_t *layout, const struct H5S_t *space);
-H5_DLL herr_t H5F_istore_initialize_by_extent( H5F_t *f, 
+H5_DLL herr_t H5F_istore_initialize_by_extent( H5F_t *f, hid_t dxpl_id,
         const struct H5O_layout_t *layout, struct H5P_genplist_t *dc_plist,
         const struct H5S_t *space );
 

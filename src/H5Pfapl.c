@@ -178,7 +178,7 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
 {
     hid_t driver_id;            /* VFL driver ID */
     void *driver_info;          /* VFL driver info */
-    void *tmp_driver_info;      /* Temporary VFL driver info */
+    void *copied_driver_info;      /* Temporary VFL driver info */
     herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5P_set_driver, FAIL);
@@ -230,13 +230,13 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
         H5I_inc_ref(new_driver_id);
 
         /* Make a copy of the driver information */
-        if((tmp_driver_info = H5FD_dxpl_copy(new_driver_id, new_driver_info))==NULL)
+        if(H5FD_dxpl_copy(new_driver_id, new_driver_info, &copied_driver_info)<0)
             HGOTO_ERROR (H5E_DATASET, H5E_CANTCOPY, FAIL, "Can't copy VFL driver");
 
         /* Set the driver info for the property list */
         if(H5P_set(plist, H5D_XFER_VFL_ID_NAME, &new_driver_id)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set VFL driver ID");
-        if(H5P_set(plist, H5D_XFER_VFL_INFO_NAME, &tmp_driver_info) < 0)
+        if(H5P_set(plist, H5D_XFER_VFL_INFO_NAME, &copied_driver_info) < 0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set VFL driver info");
         
     } else {

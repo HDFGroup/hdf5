@@ -589,9 +589,9 @@ dataset_writeAll(char *filename)
 
     /* set up the collective transfer properties list */
     xfer_plist = H5Pcreate (H5P_DATASET_XFER);
-    VRFY((xfer_plist >= 0), "");
+    VRFY((xfer_plist >= 0), "H5Pcreate xfer succeeded");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
-    VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+    VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
 
     /* write data collectively */
     MESG("writeAll by Row");
@@ -1096,6 +1096,23 @@ extend_writeInd(char *filename)
     /* setup file access template */
     acc_tpl = create_faccess_plist(comm, info, facc_type);
     VRFY((acc_tpl >= 0), "");
+
+/* Reduce the number of metadata cache slots, so that there are cache
+ * collisions during the raw data I/O on the chunked dataset.  This stresses
+ * the metadata cache and tests for cache bugs. -QAK
+ */
+{
+    int mdc_nelmts;
+    size_t rdcc_nelmts;
+    size_t rdcc_nbytes;
+    double rdcc_w0;
+
+    ret=H5Pget_cache(acc_tpl,&mdc_nelmts,&rdcc_nelmts,&rdcc_nbytes,&rdcc_w0);
+    VRFY((ret >= 0), "H5Pget_cache succeeded");
+    mdc_nelmts=4;
+    ret=H5Pset_cache(acc_tpl,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0);
+    VRFY((ret >= 0), "H5Pset_cache succeeded");
+}
 
     /* create the file collectively */
     fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);

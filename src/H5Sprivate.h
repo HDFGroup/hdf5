@@ -151,15 +151,15 @@ H5_DLL int H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[]/*out*/,
 H5_DLL herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
 		       const hsize_t *max);
 H5_DLL herr_t H5S_modify(struct H5G_entry_t *ent, const H5S_t *space,
-        hbool_t update_time);
-H5_DLL herr_t H5S_append(H5F_t *f, H5O_t *oh, const H5S_t *ds);
-H5_DLL H5S_t *H5S_read(struct H5G_entry_t *ent);
+        hbool_t update_time, hid_t dxpl_id);
+H5_DLL herr_t H5S_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5S_t *ds);
+H5_DLL H5S_t *H5S_read(struct H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL int H5S_cmp(const H5S_t *ds1, const H5S_t *ds2);
 H5_DLL htri_t H5S_is_simple(const H5S_t *sdim);
 H5_DLL herr_t H5S_extent_release(H5S_t *space);
 H5_DLL int H5S_extend(H5S_t *space, const hsize_t *size);
 H5_DLL int H5S_set_extent(H5S_t *space, const hsize_t *size);
-H5_DLL herr_t H5S_debug(H5F_t *f, const void *_mesg, FILE *stream,
+H5_DLL herr_t H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			 int indent, int fwidth);
 
 /* Operations on selections */

@@ -35,6 +35,9 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Corrected metadata caching bug in parallel I/O which could cause hangs
+      when chunked datasets were accessed with independent transfer mode.
+      QAK - 2003/02/10
     * Corrected memory/resource leaks in per-thread key information when
       thread-safe operation was enabled.  QAK - 2003/02/07
     * H5Fopen without the H5F_ACC_CREAT flag should not succeed in creating

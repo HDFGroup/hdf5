@@ -146,6 +146,8 @@ H5_init_library(void)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize datatype interface");
     if (H5D_init()<0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize dataset interface");
+    if (H5AC_init()<0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize metadata caching interface");
 
     /* Debugging? */
     H5_debug_mask("-all");

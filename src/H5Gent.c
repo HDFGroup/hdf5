@@ -430,7 +430,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_debug(H5F_t UNUSED *f, const H5G_entry_t *ent, FILE * stream,
+H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * stream,
 	      int indent, int fwidth, haddr_t heap)
 {
     const char		*lval = NULL;
@@ -471,7 +471,7 @@ H5G_ent_debug(H5F_t UNUSED *f, const H5G_entry_t *ent, FILE * stream,
 		   "Link value offset:",
 		   (unsigned long)(ent->cache.slink.lval_offset));
 	if (H5F_addr_defined(heap)) {
-	    lval = H5HL_peek (ent->file, heap, ent->cache.slink.lval_offset);
+	    lval = H5HL_peek (ent->file, dxpl_id, heap, ent->cache.slink.lval_offset);
 	    HDfprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
 		       "Link value:",
 		       lval);

@@ -94,17 +94,17 @@ typedef struct {
 /* Private functions */
 H5_DLL herr_t H5TN_init_interface(void);
 H5_DLL herr_t H5T_init(void);
-H5_DLL htri_t H5T_isa(H5G_entry_t *ent);
-H5_DLL H5T_t *H5T_open(H5G_entry_t *loc, const char *name);
-H5_DLL H5T_t *H5T_open_oid(H5G_entry_t *ent);
+H5_DLL htri_t H5T_isa(H5G_entry_t *ent, hid_t dxpl_id);
+H5_DLL H5T_t *H5T_open(H5G_entry_t *loc, const char *name, hid_t dxpl_id);
+H5_DLL H5T_t *H5T_open_oid(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL H5T_t *H5T_create(H5T_class_t type, size_t size);
 H5_DLL H5T_t *H5T_copy(const H5T_t *old_dt, H5T_copy_t method);
-H5_DLL herr_t H5T_commit(H5G_entry_t *loc, const char *name, H5T_t *type);
+H5_DLL herr_t H5T_commit(H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id);
 H5_DLL herr_t H5T_lock(H5T_t *dt, hbool_t immutable);
 H5_DLL herr_t H5T_free(H5T_t *dt);
 H5_DLL herr_t H5T_close(H5T_t *dt);
 H5_DLL herr_t H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src,
-                H5T_t *dst, H5T_conv_t func);
+                H5T_t *dst, H5T_conv_t func, hid_t dxpl_id);
 H5_DLL herr_t H5T_path_force_reinit(H5T_t *dt);
 H5_DLL H5T_class_t H5T_get_class(const H5T_t *dt);
 H5_DLL htri_t H5T_detect_class (const H5T_t *dt, H5T_class_t cls);
@@ -139,7 +139,7 @@ H5_DLL H5G_entry_t *H5T_entof(H5T_t *dt);
 H5_DLL htri_t H5T_is_immutable(H5T_t *dt);
 H5_DLL htri_t H5T_is_named(H5T_t *dt);
 H5_DLL H5T_path_t *H5T_path_find(const H5T_t *src, const H5T_t *dst,
-				  const char *name, H5T_conv_t func);
+				  const char *name, H5T_conv_t func, hid_t dxpl_id);
 H5_DLL herr_t H5T_sort_value(H5T_t *dt, int *map);
 H5_DLL herr_t H5T_sort_name(H5T_t *dt, int *map);
 H5_DLL herr_t H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id,
