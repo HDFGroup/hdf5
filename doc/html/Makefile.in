@@ -1,8 +1,7 @@
 # HDF5 Library Makefile(.in)
 #
-# Copyright (C) 1997,2001
-#                    National Center for Supercomputing Applications.
-#                    All rights reserved.
+# Copyright (C) 1997-2001 National Center for Supercomputing Applications
+#                         All rights reserved.
 #
 # 
 top_srcdir=@top_srcdir@
