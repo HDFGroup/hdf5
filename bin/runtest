@@ -394,7 +394,8 @@ RUNSNAPTEST()
         # Dump the first 10 lines and the last 30 lines of the LOGFILE.
         ( nhead=10; ntail=30;
 	    echo =========================
-	    echo "${HOSTNAME}: Dumping first $nhead and last $ntail lines of $LOGFILE"
+	    echo "Dumping logfile of ${HOSTNAME}: $TEST_TYPE"
+	    echo "first $nhead and last $ntail lines of $LOGFILE"
 	    echo =========================
 	    head -$nhead $LOGFILE
 	    echo "[last $ntail lines]..."
