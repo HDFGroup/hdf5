@@ -33,29 +33,24 @@ const char *FILENAME[] = {
  *              Tuesday, November 24, 1998
  *
  * Modifications:
- *
+ *              Robb Matzke, 2002-03-28
+ *              File is opened by parent instead of here.
  *-------------------------------------------------------------------------
  */
 static int
-test_misc(hid_t fapl)
+test_misc(hid_t file)
 {
-    hid_t	file=-1;
     hid_t	g1=-1, g2=-1, g3=-1;
-    char	comment[64], filename[1024];
+    char	comment[64];
     
     /* Test current working groups */
     TESTING("miscellaneous group tests");
 
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
-	goto error;
-
+    /* Create initial groups for testing, then close */
     if ((g1=H5Gcreate(file, "test_1a", 0))<0) goto error;
     if ((g2=H5Gcreate(g1, "sub_1", 0))<0) goto error;
     if ((g3=H5Gcreate(file, "test_1b", 0))<0) goto error;
     if (H5Gset_comment(g3, ".", "hello world")<0) goto error;
-
-    /* Close all groups */
     if (H5Gclose(g1)<0) goto error;
     if (H5Gclose(g2)<0) goto error;
     if (H5Gclose(g3)<0) goto error;
@@ -71,12 +66,10 @@ test_misc(hid_t fapl)
 	printf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
 	goto error;
     }
-
-    /* Close everything */
     if (H5Gclose(g1)<0) goto error;
     if (H5Gclose(g2)<0) goto error;
     if (H5Gclose(g3)<0) goto error;
-    if (H5Fclose(file)<0) goto error;
+
     PASSED();
     return 0;
 
@@ -85,7 +78,59 @@ test_misc(hid_t fapl)
 	H5Gclose(g1);
 	H5Gclose(g2);
 	H5Gclose(g3);
-	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Purpose:     Creates a group with a very long name
+ *
+ * Return:      Success:	0
+ *
+ * 		Failure:	number of errors
+ *
+ * Programmer:  Robb Matzke <matzke@llnl.gov> 2002-03-28
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static int
+test_long(hid_t file)
+{
+    hid_t       g1=-1, g2=-1;
+    char        *name1=NULL, *name2=NULL;
+    size_t      namesize=40960, i;
+    
+    TESTING("long names");
+
+    /* Group names */
+    name1 = malloc(namesize);
+    for (i=0; i<namesize; i++)
+        name1[i] = 'A' + i%26;
+    name1[namesize-1] = '\0';
+    name2 = malloc(2*namesize + 2);
+    sprintf(name2, "%s/%s", name1, name1);
+
+    /* Create groups */
+    if ((g1=H5Gcreate(file, name1, 0))<0) goto error;
+    if ((g2=H5Gcreate(g1, name1, 0))<0) goto error;
+    H5Gclose(g1);
+    H5Gclose(g2);
+
+    /* Open groups */
+    if ((g1=H5Gopen(file, name1))<0) goto error;
+    if ((g2=H5Gopen(file, name2))<0) goto error;
+    H5Gclose(g1);
+    H5Gclose(g2);
+    
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+        H5Gclose(g1);
+        H5Gclose(g2);
     } H5E_END_TRY;
     return 1;
 }
@@ -105,27 +150,19 @@ test_misc(hid_t fapl)
  *              Aug 29 1997
  *
  * Modifications:
- *
+ *              Robb Matzke, 2002-03-28
+ *              File is opened by parent instead of here.
  *-------------------------------------------------------------------------
  */
 static int
-test_large(hid_t fapl)
+test_large(hid_t file)
 {
-    hid_t               file=-1, cwg=-1, fcpl=-1, dir=-1;
+    hid_t               cwg=-1, dir=-1;
     int                 i;
     char                name[1024];
     int                 nsyms = 5000;
 
     TESTING("large directories");
-
-    /*
-     * Use larger symbol table data structures to be more efficient, use
-     * defaults to bang harder on the library for testing.
-     */
-    fcpl = H5Pcreate(H5P_FILE_CREATE);
-    H5Pset_sym_k(fcpl, 16, 16);
-    h5_fixname(FILENAME[1], fapl, name, sizeof name);
-    if ((file=H5Fcreate(name, H5F_ACC_TRUNC, fcpl, fapl))<0) goto error;
 
     /*
      * Create a directory that has so many entries that the root
@@ -142,18 +179,13 @@ test_large(hid_t fapl)
     }
     if (H5Gclose(cwg)<0) goto error;
 
-    /* Close everything */
-    if (H5Pclose(fcpl)<0) goto error;
-    if (H5Fclose(file)<0) goto error;
     PASSED();
     return 0;
 
  error:
     H5E_BEGIN_TRY {
-	H5Pclose(fcpl);
 	H5Gclose(dir);
 	H5Gclose(cwg);
-	H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 }
@@ -178,19 +210,36 @@ test_large(hid_t fapl)
 int
 main(void)
 {
-    hid_t	fapl;
+    hid_t	fapl, fcpl, file;
     int		nerrors=0;
+    char        filename[1024];
 
     /* Reset library */
     h5_reset();
     fapl = h5_fileaccess();
 
+    /*
+     * Use larger symbol table data structures to be more efficient, use
+     * defaults to bang harder on the library for testing.
+     */
+    fcpl = H5Pcreate(H5P_FILE_CREATE);
+#if 0
+    H5Pset_sym_k(fcpl, 16, 16);
+#endif
+    
+    /* Open the file */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl))<0)
+	goto error;
+
     /* Perform tests */
-    nerrors += test_misc(fapl);
-    nerrors += test_large(fapl);
+    nerrors += test_misc(file);
+    nerrors += test_long(file);
+    nerrors += test_large(file);
     if (nerrors) goto error;
 
     /* Cleanup */
+    H5Fclose(file);
     puts("All symbol table tests passed.");
     h5_cleanup(FILENAME, fapl);
     return 0;
