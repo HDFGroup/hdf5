@@ -133,7 +133,7 @@ nh5gget_obj_info_idx_c
       */
       c_loc_id = *loc_id;
       c_idx = *idx;
-      c_ret_value = H5Gget_obj_info_idx(c_loc_id, c_name, c_idx, &c_obj_name, &type);
+      c_ret_value = H5Gget_obj_info_idx(c_loc_id, c_name, c_idx, &c_obj_name, (size_t)*obj_namelen, &type);
 
      if (c_ret_value < 0) {
                             HDfree(c_obj_name);
