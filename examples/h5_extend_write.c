@@ -49,7 +49,7 @@ dataspace = H5Pcreate_simple(RANK, dims, maxdims);
 /*
  * Create a new file. If file exists its contents will be overwritten.
  */
-file = H5Fcreate(FILE, H5ACC_OVERWRITE, H5C_DEFAULT, H5C_DEFAULT);
+file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
 
 /* 
  * Modify dataset creation properties, i.e. enable chunking.

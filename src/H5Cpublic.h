@@ -61,6 +61,11 @@ herr_t H5Cset_layout (hid_t tid, H5D_layout_t layout);
 H5D_layout_t H5Cget_layout (hid_t tid);
 herr_t H5Cset_chunk (hid_t tid, int ndims, const size_t dim[]);
 int H5Cget_chunk (hid_t tid, int max_ndims, size_t dim[]/*out*/);
+herr_t H5Cset_stdio (hid_t tid);
+herr_t H5Cset_sec2 (hid_t tid);
+herr_t H5Cset_core (hid_t tid, size_t increment);
+herr_t H5Cset_split (hid_t tid, hid_t meta_tid, hid_t raw_tid);
+herr_t H5Cset_family (hid_t tid, hid_t memb_tid);
 #ifdef HAVE_PARALLEL
 herr_t H5Cset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode);
 /* herr_t H5Cget_mpi (hid_t tid, int *ik); */  /* not defined yet */

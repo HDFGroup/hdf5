@@ -79,7 +79,7 @@ sub manifest () {
     # Read files from CVS/Entries
     open FIND, "find . -name Entries -print | sort |" or
 	die "unable to find CVS entries";
-    while ($fname=<FIND>) {
+    while (defined($fname=<FIND>)) {
 	chomp $fname;
 	my ($dir) = $fname =~ m%(.*)/CVS/Entries%;
 	open ENTRIES, $fname or die "unable to open $fname";
@@ -208,12 +208,15 @@ EOF
    (setver ($ver=$_) or die "cannot set version") if /\S/;
 
    if (-d "CVS") {
-      print <<EOF;
-      # If we're running under CVS then check in changes and tag all files
-      # with the release number.  Quincey, do you want to add this to the
-      # bottom of the perl script?  Otherwise just give me the commands
-      # and I'll add them.
-EOF
+      my $tag = $ver;
+      $tag =~ s/\./-/g;
+      print "Tag CVS sources with \"$tag\"? [y] ";
+      chomp ($_ = <STDIN>);
+      if (!$_ || $_ eq 'y') {
+	 print "Tagging CVS sources...\n";
+	 my $status = system "cvs tag -R $tag";
+	 die "cvs tag failed" if $status >> 8;
+      }
    }
 
    return 1;

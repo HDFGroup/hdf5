@@ -19,8 +19,8 @@
 #include <H5config.h>           /*from configure                             */
 #include <sys/types.h>
 #ifdef HAVE_PARALLEL
-#include <mpi.h>
-#include <mpio.h>
+#  include <mpi.h>
+#  include <mpio.h>
 #endif
 
 /*

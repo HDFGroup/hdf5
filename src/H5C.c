@@ -58,6 +58,16 @@ H5C_init_interface(void)
 
     FUNC_ENTER(H5C_init_interface, FAIL);
 
+    /*
+     * Make sure the file creation and file access default templates are
+     * initialized since this might be done at run-time instead of compile
+     * time.
+     */
+    if (H5F_init_interface ()<0) {
+	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
+		       "unable to initialize H5F and H5C interfaces");
+    }
+
     assert(H5C_NCLASSES <= H5_TEMPLATE_MAX - H5_TEMPLATE_0);
 
     /*
@@ -66,14 +76,15 @@ H5C_init_interface(void)
      * atom groups aren't.
      */
     for (i = 0; i < H5C_NCLASSES; i++) {
-        status = H5A_init_group((group_t)(H5_TEMPLATE_0 +i), H5A_TEMPID_HASHSIZE, 0, NULL);
-        if (status < 0)
-            ret_value = FAIL;
+        status = H5A_init_group((group_t)(H5_TEMPLATE_0 +i),
+				H5A_TEMPID_HASHSIZE, 0, NULL);
+        if (status < 0) ret_value = FAIL;
     }
     if (ret_value < 0) {
         HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
                       "unable to initialize atom group");
     }
+    
     /*
      * Register cleanup function.
      */
@@ -81,6 +92,7 @@ H5C_init_interface(void)
         HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL,
                       "unable to install atexit function");
     }
+    
     FUNC_LEAVE(ret_value);
 }
 
@@ -194,7 +206,7 @@ H5Ccreate(H5C_class_t type)
 hid_t
 H5C_create(H5C_class_t type, void *tmpl)
 {
-    hid_t                   ret_value = FAIL;
+    hid_t	ret_value = FAIL;
 
     FUNC_ENTER(H5C_create, FAIL);
 
@@ -203,10 +215,11 @@ H5C_create(H5C_class_t type, void *tmpl)
     assert(tmpl);
 
     /* Atomize the new template */
-    if ((ret_value = H5A_register((group_t)(H5_TEMPLATE_0 + type), tmpl)) < 0) {
+    if ((ret_value=H5A_register((group_t)(H5_TEMPLATE_0+type), tmpl)) < 0) {
         HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
                       "can't register template");
     }
+    
     FUNC_LEAVE(ret_value);
 }
 
@@ -226,21 +239,79 @@ H5C_create(H5C_class_t type, void *tmpl)
 herr_t
 H5Cclose(hid_t tid)
 {
-    void                   *tmpl = NULL;
+    H5C_class_t		type;
+    void                *tmpl = NULL;
 
     FUNC_ENTER(H5Cclose, FAIL);
 
-    /* Chuck the object! :-) */
-    if (NULL == (tmpl = H5A_remove(tid))) {
-        HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to remove atom");
+    /* Check arguments */
+    if ((type=H5Cget_class (tid))<0 ||
+	NULL==(tmpl=H5A_object (tid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     }
-#ifdef LATER
-    /* this is for file access template too.  Need to free the COMM and INFO objects too. */
-#endif 
-    H5MM_xfree(tmpl);
+	
+    /*
+     * Chuck the object! This will fail when the reference count reaches zero
+     * since there is no free func registered for the property list groups.
+     */
+    if (H5A_dec_ref (tid)<0) {
+	H5ECLEAR;
+	H5C_close (type, tmpl);
+    }
 
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5C_close
+ *
+ * Purpose:	Closes a template and frees the memory associated with the
+ *		template.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, February 18, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_close (H5C_class_t type, void *tmpl)
+{
+    FUNC_ENTER (H5C_close, FAIL);
+
+    /* Check args */
+    assert (tmpl);
+
+    /* Some templates may need to do special things */
+    switch (type) {
+    case H5C_FILE_ACCESS:
+#ifdef LATER
+	/* Need to free the COMM and INFO objects too. */
+#endif
+	break;
+	
+    case H5C_FILE_CREATE:
+    case H5C_DATASET_CREATE:
+    case H5C_DATASET_XFER:
+	/*nothing to do*/
+	break;
+
+    default:
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "unknown property list class");
+    }
+
+    /* Free the template struct and return */
+    H5MM_xfree(tmpl);
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5Cget_class
@@ -857,6 +928,235 @@ H5Cget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ )
 
     FUNC_LEAVE(tmpl->chunk_ndims);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cset_stdio
+ *
+ * Purpose:	Set the low level file driver to use the functions declared
+ *		in the stdio.h file: fopen(), fseek() or fseek64(), fread(),
+ *		fwrite(), and fclose().
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, February 19, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Cset_stdio (hid_t tid)
+{
+    H5F_access_t	*tmpl = NULL;
+    
+    FUNC_ENTER (H5Cset_stdio, FAIL);
+
+    /* Check arguments */
+    if (H5C_FILE_ACCESS != H5Cget_class(tid) ||
+        NULL == (tmpl = H5A_object(tid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access template");
+    }
+
+    /* Set driver */
+    tmpl->driver = H5F_LOW_STDIO;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cset_sec2
+ *
+ * Purpose:	Set the low-level file driver to use the functions declared
+ *		in the unistd.h file: open(), lseek() or lseek64(), read(),
+ *		write(), and close().
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, February 19, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Cset_sec2 (hid_t tid)
+{
+    H5F_access_t	*tmpl = NULL;
+    
+    FUNC_ENTER (H5Cset_sec2, FAIL);
+
+    /* Check arguments */
+    if (H5C_FILE_ACCESS != H5Cget_class(tid) ||
+        NULL == (tmpl = H5A_object(tid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access template");
+    }
+
+    /* Set driver */
+    tmpl->driver = H5F_LOW_SEC2;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cset_core
+ *
+ * Purpose:	Set the low-level file driver to use malloc() and free().
+ *		This driver is restricted to temporary files which are not
+ *		larger than the amount of virtual memory available. The
+ *		INCREMENT argument determines the file block size and memory
+ *		will be allocated in multiples of INCREMENT bytes. A liberal
+ *		INCREMENT results in fewer calls to realloc() and probably
+ *		less memory fragmentation.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, February 19, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Cset_core (hid_t tid, size_t increment)
+{
+    H5F_access_t	*tmpl = NULL;
+    
+    FUNC_ENTER (H5Cset_core, FAIL);
+
+    /* Check arguments */
+    if (H5C_FILE_ACCESS != H5Cget_class(tid) ||
+        NULL == (tmpl = H5A_object(tid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access template");
+    }
+    if (increment<1) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "increment must be positive");
+    }
+
+    /* Set driver */
+    tmpl->driver = H5F_LOW_CORE;
+    tmpl->u.core.increment = increment;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cset_split
+ *
+ * Purpose:	Set the low-level driver to split meta data from raw data,
+ *		storing meta data in one file and raw data in another file.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, February 19, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Cset_split (hid_t tid, hid_t meta_tid, hid_t raw_tid)
+{
+    H5F_access_t	*tmpl = NULL;
+    H5F_access_t	*meta_tmpl = NULL;
+    H5F_access_t	*raw_tmpl = NULL;
+    
+    FUNC_ENTER (H5Cset_split, FAIL);
+
+    /* Check arguments */
+    if (H5C_FILE_ACCESS != H5Cget_class(tid) ||
+        NULL == (tmpl = H5A_object(tid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access template");
+    }
+    if (H5C_DEFAULT!=meta_tid &&
+	(H5C_FILE_ACCESS != H5Cget_class(meta_tid) ||
+	 NULL == (tmpl = H5A_object(meta_tid)))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access template");
+    }
+    if (H5C_DEFAULT!=raw_tid &&
+	(H5C_FILE_ACCESS != H5Cget_class(raw_tid) ||
+	 NULL == (tmpl = H5A_object(raw_tid)))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access template");
+    }
+
+    /* Set driver */
+    tmpl->driver = H5F_LOW_SPLIT;
+    tmpl->u.split.meta_access = H5C_copy (H5C_FILE_ACCESS, meta_tmpl);
+    tmpl->u.split.raw_access = H5C_copy (H5C_FILE_ACCESS, raw_tmpl);
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cset_family
+ *
+ * Purpose:	Sets the low-level driver to stripe the hdf5 address space
+ *		across a family of files.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, February 19, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Cset_family (hid_t tid, hid_t memb_tid)
+{
+    
+    H5F_access_t	*tmpl = NULL;
+    H5F_access_t	*memb_tmpl = NULL;
+    
+    FUNC_ENTER (H5Cset_family, FAIL);
+
+    /* Check arguments */
+    if (H5C_FILE_ACCESS != H5Cget_class(tid) ||
+        NULL == (tmpl = H5A_object(tid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access template");
+    }
+    if (H5C_DEFAULT!=memb_tid &&
+	(H5C_FILE_ACCESS != H5Cget_class(memb_tid) ||
+	 NULL == (tmpl = H5A_object(memb_tid)))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access template");
+    }
+
+    /* Set driver */
+    tmpl->driver = H5F_LOW_FAMILY;
+    tmpl->u.fam.memb_access = H5C_copy (H5C_FILE_ACCESS, memb_tmpl);
+
+    FUNC_LEAVE (SUCCEED);
+}
+    
+    
 
 #ifdef HAVE_PARALLEL
 /*-------------------------------------------------------------------------
@@ -903,12 +1203,18 @@ H5Cget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ )
  *
  * Modifications:
  *
+ * 	Robb Matzke, 18 Feb 1998
+ *	Check all arguments before the template is updated so we don't leave
+ *	the template in a bad state if something goes wrong.  Also, the
+ *	template data type changed to allow more generality so all the
+ *	mpi-related stuff is in the `u.mpi' member.  The `access_mode' will
+ *	contain only mpi-related flags defined in H5Fpublic.h.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Cset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode)
 {
-    int                     i;
     H5F_access_t           *tmpl = NULL;
     MPI_Comm		    lcomm;
     int			    mrc;		/* MPI return code */
@@ -919,31 +1225,47 @@ H5Cset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode)
     if (H5C_FILE_ACCESS != H5Cget_class(tid) ||
         NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                      "not a file access template");
+		      "not a file access template");
     }
+    
     switch (access_mode){
     case H5ACC_INDEPENDENT:
-	    /* fall through to next case */
     case H5ACC_COLLECTIVE:
-	    tmpl->access_mode = access_mode;
-	    break;
+	/* okay */
+	break;
 
     default:
-            HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-	                          "unknown access_mode");
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "invalid mpio access mode");
     }
 
-    /* store a duplicate copy of comm so that user may freely modify comm after this */
-    /* call.  */
 #ifdef LATER
-    /* need to verify comm and info contain sensible information */
-    /* need to duplicate info too but don't know a quick way to do it now. */
+    /*
+     * Need to verify comm and info contain sensible information.
+     */
 #endif
-    if ((mrc = MPI_Comm_dup(comm, &lcomm)) != MPI_SUCCESS)
+
+
+    /*
+     * Everything looks good.  Now go ahead and modify the access template.
+     */
+    tmpl->driver = H5F_LOW_MPIO;
+    tmpl->u.mpio.access_mode = access_mode;
+
+    /*
+     * Store a duplicate copy of comm so that user may freely modify comm
+     * after this call.
+     */
+    if ((mrc = MPI_Comm_dup(comm, &lcomm)) != MPI_SUCCESS) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                       "failure to duplicate communicator");
-    tmpl->comm = comm;
-    tmpl->info = info;
+    }
+    tmpl->u.mpio.comm = comm;
+    
+#ifdef LATER
+    /* Need to duplicate info too but don't know a quick way to do it now */
+#endif
+    tmpl->u.mpio.info = info;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1038,8 +1360,8 @@ H5C_copy (H5C_class_t type, const void *src)
         break;
 
     case H5C_FILE_ACCESS:
-        HRETURN_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, NULL,
-                      "file access properties are not implemented yet");
+	size = sizeof(H5F_access_t);
+	break;
 
     case H5C_DATASET_CREATE:
         size = sizeof(H5D_create_t);

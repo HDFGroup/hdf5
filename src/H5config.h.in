@@ -49,6 +49,12 @@
 /* The number of bytes in a short.  */
 #undef SIZEOF_SHORT
 
+/* Define if you have the fseek64 function.  */
+#undef HAVE_FSEEK64
+
+/* Define if you have the lseek64 function.  */
+#undef HAVE_LSEEK64
+
 /* Define if you have the mpi library (-lmpi).  */
 #undef HAVE_LIBMPI
 

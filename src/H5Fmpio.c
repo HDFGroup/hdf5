@@ -15,15 +15,16 @@
  *		  and to infer the access flags.  If the file is opened,
  *		  we close it without reading or writing it.
  *		- It is not possible within MPI-IO to determine whether or not
- *		  the names "file1" and "file2" refer to the same physical fileC
+ *		  the names "file1" and "file2" refer to the same physical file
  *		  (at least not without writing one and reading the other).
  *		  So we do what H5F_core_open() does: return a bogus device
  *		  number and a unique inode number.
  *		  This has the side effect that calling H5Fopen() twice
  *		  with the same name really does open the file twice
  *		  and the two handles don't communicate with each other,
- *		  resulting in trashing the file.  It also runs the (very small)
- *		  risk of having two unrelated names be seen as the same file.
+ *		  resulting in trashing the file.  It also runs the (very
+ *		  small) risk of having two unrelated names be seen as the
+ *		  same file.
  *
  *	H5F_mpio_open
  *		- should take MPI communicator and MPI info as parameters
@@ -57,32 +58,35 @@ static hbool_t          interface_initialize_g = FALSE;	/* rky??? */
 #define H5F_MPIO_DEV    0xfffe  /*pseudo dev for MPI-IO until we fix things */
 				/* Make sure this differs from H5F_CORE_DEV */
 
-static hbool_t          H5F_mpio_access(const char *name, int mode,
-                                       H5F_search_t *key /*out */ );
-static H5F_low_t       *H5F_mpio_open(const char *name, uintn flags,
-                                       H5F_search_t *key);
-static herr_t           H5F_mpio_close(H5F_low_t *lf);
-static herr_t           H5F_mpio_read(H5F_low_t *lf, const haddr_t *addr,
-				       size_t size, uint8 *buf);
-static herr_t           H5F_mpio_write(H5F_low_t *lf, const haddr_t *addr,
-				       size_t size, const uint8 *buf);
-static herr_t           H5F_mpio_flush(H5F_low_t *lf);
-static herr_t		H5F_MPIOff_to_haddr( MPI_Offset mpi_off, haddr_t *addr);
-static herr_t		H5F_haddr_to_MPIOff( haddr_t addr, MPI_Offset *mpi_off);
+static hbool_t H5F_mpio_access(const char *name,
+			       const H5F_access_t *access_parms, int mode,
+			       H5F_search_t *key/*out*/);
+static H5F_low_t *H5F_mpio_open(const char *name,
+				const H5F_access_t *access_parms, uintn flags,
+				H5F_search_t *key/*out*/);
+static herr_t H5F_mpio_close(H5F_low_t *lf, const H5F_access_t *access_parms);
+static herr_t H5F_mpio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+			    const haddr_t *addr, size_t size,
+			    uint8 *buf/*out*/);
+static herr_t H5F_mpio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+			     const haddr_t *addr, size_t size,
+			     const uint8 *buf);
+static herr_t H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
+static herr_t H5F_MPIOff_to_haddr(MPI_Offset mpi_off, haddr_t *addr);
+static herr_t H5F_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off);
 
-const H5F_low_class_t   H5F_LOW_MPIO[1] =
-{
-    {
-        H5F_mpio_access,       /* access method                        */
-        H5F_mpio_open,         /* open method                          */
-        H5F_mpio_close,        /* close method                         */
-        H5F_mpio_read,         /* read method                          */
-        H5F_mpio_write,        /* write method                         */
-        H5F_mpio_flush,        /* flush method                         */
-        NULL                   /* extend method                        */
-    }};
+const H5F_low_class_t   H5F_LOW_MPIO_g[1] = {{
+    H5F_mpio_access,       /* access method                        */
+    H5F_mpio_open,         /* open method                          */
+    H5F_mpio_close,        /* close method                         */
+    H5F_mpio_read,         /* read method                          */
+    H5F_mpio_write,        /* write method                         */
+    H5F_mpio_flush,        /* flush method                         */
+    NULL                   /* extend method                        */
+}};
 
 ino_t mpio_inode_num = 0;      /* fake "inode" number */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_mpio_access
@@ -121,10 +125,14 @@ ino_t mpio_inode_num = 0;      /* fake "inode" number */
  *
  * Modifications:
  *
+ * 	Robb Matzke, 18 Feb 1998
+ *	Added the ACCESS_PARMS argument.
+ *
  *-------------------------------------------------------------------------
  */
 static hbool_t
-H5F_mpio_access(const char *name, int mode, H5F_search_t *key /*out */ )
+H5F_mpio_access(const char *name, const H5F_access_t *access_parms, int mode,
+		H5F_search_t *key/*out*/)
 {
     hbool_t		   ret_val = FALSE;
     MPI_File		   fh;
@@ -209,10 +217,15 @@ H5F_mpio_access(const char *name, int mode, H5F_search_t *key /*out */ )
  *
  * Modifications:
  *
+ * 	Robb Matzke, 18 Feb 1998
+ *	Added the ACCESS_PARMS argument.  Moved some error checking here from
+ *	elsewhere.
+ *
  *-------------------------------------------------------------------------
  */
-static H5F_low_t       *
-H5F_mpio_open(const char *name, uintn flags, H5F_search_t *key /*out */ )
+static H5F_low_t *
+H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
+	      H5F_search_t *key/*out*/)
 {
     H5F_low_t              *lf = NULL;
     MPI_File                fh;
@@ -226,9 +239,22 @@ H5F_mpio_open(const char *name, uintn flags, H5F_search_t *key /*out */ )
     fprintf(stdout, "Entering H5F_mpio_open name=%s flags=%x\n", name, flags );
 #endif
 
+    switch (access_parms->u.mpio.access_mode){
+    case H5ACC_INDEPENDENT:
+	/*void*/
+	break;
+	
+    case H5ACC_COLLECTIVE:
+	HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, NULL,
+		      "collective I/O is not supported yet");
+
+    default:
+	HRETURN_ERROR(H5E_IO, H5E_BADVALUE, NULL, "invalid file access mode");
+    }
+
     /* convert HDF5 flags to MPI-IO flags */
     /* some combinations are illegal; let MPI-IO figure it out */
-    mpi_amode  = (flags&H5F_ACC_WRITE) ? MPI_MODE_RDWR : MPI_MODE_RDONLY;
+    mpi_amode  = (flags&H5F_ACC_RDWR) ? MPI_MODE_RDWR : MPI_MODE_RDONLY;
     if (flags&H5F_ACC_CREAT)	mpi_amode |= MPI_MODE_CREATE;
     if (flags&H5F_ACC_EXCL)	mpi_amode |= MPI_MODE_EXCL;
 
@@ -303,10 +329,13 @@ H5F_mpio_open(const char *name, uintn flags, H5F_search_t *key /*out */ )
  *
  * Modifications:
  *
+ * 	Robb Matzke, 18 Feb 1998
+ *	Added the ACCESS_PARMS argument.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_mpio_close(H5F_low_t *lf)
+H5F_mpio_close(H5F_low_t *lf, const H5F_access_t *access_parms)
 {
     int                     mpierr;
     char                    mpierrmsg[MPI_MAX_ERROR_STRING];
@@ -351,10 +380,14 @@ H5F_mpio_close(H5F_low_t *lf)
  *
  * Modifications:
  *
+ * 	Robb Matzke, 18 Feb 1998
+ *	Added the ACCESS_PARMS argument.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_mpio_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
+H5F_mpio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+	      const haddr_t *addr, size_t size, uint8 *buf/*out*/)
 {
     MPI_Offset              mpi_off;
     int                     size_i, bytes_read, n;
@@ -449,11 +482,15 @@ H5F_mpio_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
  *
  * Modifications:
  *
+ * 	Robb Matzke, 18 Feb 1998
+ *	Added the ACCESS_PARMS argument.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_mpio_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
-                const uint8 *buf)
+H5F_mpio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+	       const haddr_t *addr, size_t size,
+	       const uint8 *buf)
 {
     MPI_Offset              mpi_off;
     MPI_Status              mpi_stat;
@@ -511,10 +548,13 @@ H5F_mpio_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
  *
  * Modifications:
  *
+ * 	Robb Matzke, 18 Feb 1998
+ *	Added the ACCESS_PARMS argument.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_mpio_flush(H5F_low_t *lf)
+H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
 {
     int                     mpierr;
     char                    mpierrmsg[MPI_MAX_ERROR_STRING];

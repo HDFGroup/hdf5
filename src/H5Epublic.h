@@ -76,6 +76,7 @@ typedef enum H5E_minor_t {
     H5E_READERROR,              /*read failed                                */
     H5E_WRITEERROR,             /*write failed                               */
     H5E_CLOSEERROR,             /*close failed                               */
+    H5E_OVERFLOW,		/*address overflowed			     */
 
     /* Function entry/exit interface errors */
     H5E_CANTINIT,               /*Can't initialize interface                 */

@@ -37,18 +37,26 @@
 # only apply to that compiler.
 CC=gcc      
 
-warn="-Wall -Wshadow -Wpointer-arith -Wcast-qual -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs"
 
-profile="-pg"
 
-debug="-g -DH5AC_DEBUG -DH5B_DEBUG -DH5F_DEBUG -DH5G_DEBUG -UH5O_DEBUG -DH5T_DEBUG -DH5F_OPT_SEEK=0 -fverbose-asm"
+# First set up the CFLAGS arguments.
+if test "X" = "X$CFLAGS"; then
+    warn="-Wall -Wshadow -Wpointer-arith -Wcast-qual -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs"
+    profile="-pg"
+    debug="-g -fverbose-asm"
+    production="-O3 -finline-functions -funroll-loops -malign-double -fomit-frame-pointer"
+    parallel=""
+    default_mode='-ansi $debug $warn $parallel'
+    CFLAGS="`eval echo ${HDF5_MODE:-$default_mode}`"
+fi
 
-production="-O3 -DNDEBUG -finline-functions -funroll-loops -malign-double -fomit-frame-pointer"
-
-default_mode='-ansi $debug $warn -pipe -DH5F_LOW_DFLT=H5F_LOW_SEC2'
-
-# Don't set CFLAGS if the user already did.
-if test -z "$CFLAGS"; then
-   CFLAGS="`eval echo ${HDF5_MODE:-$default_mode}`"
-   export CFLAGS
+# Then set up the CPPFLAGS arguments.
+if test "X" = "X$CPPFLAGS"; then
+    warn=
+    profile=
+    debug="-DH5AC_DEBUG -DH5B_DEBUG -DH5F_DEBUG -DH5G_DEBUG -UH5O_DEBUG -DH5T_DEBUG -DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+    production="-DNDEBUG"
+    parallel=""
+    default_mode='$debug $warn $parallel'
+    CPPFLAGS="`eval echo ${HDF5_MODE:-$default_mode}`"
 fi

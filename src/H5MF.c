@@ -68,7 +68,8 @@ H5MF_alloc(H5F_t *f, intn op, size_t size, haddr_t *addr /*out */ )
      * from there.  But for now we just allocate more memory from the end of
      * the file.
      */
-    if (H5F_low_extend(f->shared->lf, op, size, addr /*out */ ) < 0) {
+    if (H5F_low_extend(f->shared->lf, &(f->shared->access_parms), op,
+		       size, addr/*out*/) < 0) {
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                       "low level mem management failed");
     }

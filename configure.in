@@ -13,8 +13,7 @@ AC_INIT(src/H5.c)
 AC_CONFIG_HEADER(src/H5config.h)
 AC_CONFIG_AUX_DIR(bin)
 AC_CANONICAL_HOST
-
-
+AC_SUBST(CPPFLAGS)
 
 dnl ----------------------------------------------------------------------
 dnl Check that the cache file was build on the same host as what we're
@@ -65,7 +64,6 @@ if test $site_config != "none"; then
 fi
 
 
-
 dnl ----------------------------------------------------------------------
 dnl Check for programs.
 dnl
@@ -104,6 +102,12 @@ dnl
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
 
+
+
+dnl ----------------------------------------------------------------------
+dnl Check for functions.
+dnl
+AC_CHECK_FUNCS(lseek64 fseek64)
 
 
 dnl ----------------------------------------------------------------------
@@ -166,7 +170,7 @@ case "X-$PARALLEL" in
       AC_DEFINE(PHDF5)	dnl THIS WILL GO AWAY SHORTLY!!!
       AC_DEFINE(HAVE_PARALLEL)
       PARALLEL_SRC='$(PARALLEL_SRC)'
-      CFLAGS="$CFLAGS $MPI_INC"
+      CPPFLAGS="$CPPFLAGS $MPI_INC"
       CFLAGS="$CFLAGS $MPI_LIB"
       AC_CHECK_LIB(mpi,main)  dnl Replace `main' with some function
       AC_CHECK_LIB(mpio,main) dnl Replace `main' with some function

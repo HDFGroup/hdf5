@@ -53,13 +53,11 @@
 #define H5F_SIZEOF_SIZE(F)	((F)->shared->create_parms.sizeof_size)
 
 /*
- * File open flags.
+ * Private file open flags.
  */
-#define H5F_ACC_WRITE	0x0001	/* Open file for read/write access	  */
-#define H5F_ACC_CREAT	0x0002	/* Create non-existing files		  */
-#define H5F_ACC_EXCL	0x0004	/* Fail if file exists			  */
-#define H5F_ACC_TRUNC	0x0008	/* Truncate existing file	  */
-#define H5F_ACC_DEBUG	0x00010 /* Print debug info			  */
+#define H5F_ACC_PUBLIC_FLAGS 	0x00ff
+
+#define H5F_ACC_CREAT	0x0100	/* Create non-existing files		  */
 
 /*
  * Encode and decode macros for file meta-data.
@@ -204,8 +202,10 @@
 
 #define NBYTEENCODE(d, s, n) {	 HDmemcpy(d,s,n); p+=n }
 
-/* Note! the NBYTEDECODE macro is backwards from the memcpy() routine, */
-/*	in the spirit of the other DECODE macros */
+/*
+ * Note:  the NBYTEDECODE macro is backwards from the memcpy() routine, in
+ *	  the spirit of the other DECODE macros.
+ */
 #define NBYTEDECODE(s, d, n) {	 HDmemcpy(d,s,n); p+=n }
 
 /*
@@ -228,11 +228,35 @@ typedef struct H5F_create_t {
  * File-access template.
  */
 typedef struct H5F_access_t {
-    uintn	access_mode;	/* file access mode                     */
+    H5F_driver_t driver;	/* Low level file driver		*/
+    union {
+
+	/* Properties for in-core files */
+	struct {
+	    size_t increment;		/*amount by which to increment size*/
+	} core;
+
+	/* Properties for file families */
+	struct {
+	    struct H5F_access_t *memb_access; /*plist for the members*/
+	} fam;
+
+	/* Properties for the split driver */
+	struct {
+	    struct H5F_access_t *meta_access; /*plist for meta file	*/
+	    struct H5F_access_t *raw_access;  /*plist for raw data file	*/
+	} split;
+	
 #ifdef HAVE_PARALLEL
-    MPI_Comm    comm;           /* communicator for file access         */
-    MPI_Info    info;           /* optional info for MPI-IO             */
-#endif /*HAVE_PARALLEL*/
+	/* Properties for parallel I/O */
+	struct {
+	    uintn access_mode;	/* independent or collective variety?   */
+	    MPI_Comm    comm;   /* communicator for file access         */
+	    MPI_Info    info;   /* optional info for MPI-IO             */
+	} mpio;
+#endif
+	
+    } u;
 } H5F_access_t;
 
 /*
@@ -255,18 +279,27 @@ typedef enum {
  * Define the low-level file interface.
  */
 typedef struct H5F_low_class_t {
-    hbool_t	(*access)(const char *, int, H5F_search_t *);
-    struct H5F_low_t *(*open)(const char *, uintn, H5F_search_t *);
-    herr_t	(*close)(struct H5F_low_t *);
-    herr_t	(*read)(struct H5F_low_t *, const haddr_t *, size_t, uint8 *);
-    herr_t	(*write)(struct H5F_low_t *, const haddr_t *, size_t,
-			 const uint8 *);
-    herr_t	(*flush)(struct H5F_low_t *);
-    herr_t	(*extend)(struct H5F_low_t *, intn, size_t, haddr_t *);
+    hbool_t	(*access)(const char *name, const H5F_access_t *access_parms,
+			  int mode, H5F_search_t *key/*out*/);
+    struct H5F_low_t *(*open)(const char *name,
+			      const H5F_access_t *access_parms, uintn flags,
+			      H5F_search_t *key/*out*/);
+    herr_t	(*close)(struct H5F_low_t *lf,
+			 const H5F_access_t *access_parms);
+    herr_t	(*read)(struct H5F_low_t *lf, const H5F_access_t *access_parms,
+			const haddr_t *addr, size_t size, uint8 *buf);
+    herr_t	(*write)(struct H5F_low_t *lf,
+			 const H5F_access_t *access_parms,
+			 const haddr_t *addr, size_t size, const uint8 *buf);
+    herr_t	(*flush)(struct H5F_low_t *lf,
+			 const H5F_access_t *access_parms);
+    herr_t	(*extend)(struct H5F_low_t *lf,
+			  const H5F_access_t *access_parms,
+			  intn op, size_t size, haddr_t *addr);
 } H5F_low_class_t;
 
 typedef struct H5F_low_t {
-    const H5F_low_class_t *type;	/* What type of file is this?		*/
+    const H5F_low_class_t *type;/* What type of file is this?		*/
     haddr_t		eof;	/* Address of logical end-of-file	*/
     union {
 
@@ -292,14 +325,22 @@ typedef struct H5F_low_t {
 	struct {
 	    int		fd;	/* The unix file descriptor		*/
 	    H5F_fileop_t op;	/* Previous file operation		*/
+#ifdef HAVE_LSEEK64
+	    off64_t	cur;	/* Current file position		*/
+#else
 	    off_t	cur;	/* Current file position		*/
+#endif
 	} sec2;
 
 	/* Posix stdio */
 	struct {
 	    FILE	*f;	/* Posix stdio file			*/
 	    H5F_fileop_t op;	/* Previous file operation		*/
+#ifdef HAVE_FSEEK64
+	    long long	cur;	/* Current file position		*/
+#else
 	    off_t	cur;	/* Current file position		*/
+#endif
 	} stdio;
 
 	/* In-core temp file */
@@ -323,13 +364,13 @@ typedef struct H5F_low_t {
 #ifndef H5F_LOW_DFLT
 #  define H5F_LOW_DFLT	H5F_LOW_STDIO	/* The default type	  */
 #endif
-extern const H5F_low_class_t H5F_LOW_SEC2[];	/* Posix section 2	*/
-extern const H5F_low_class_t H5F_LOW_STDIO[];	/* Posix stdio		*/
-extern const H5F_low_class_t H5F_LOW_CORE[];	/* In-core temp file	*/
-extern const H5F_low_class_t H5F_LOW_FAM[];	/* File family		*/
-extern const H5F_low_class_t H5F_LOW_SPLIT[];	/* Split meta/raw data	*/
+extern const H5F_low_class_t H5F_LOW_SEC2_g[];	/* Posix section 2	*/
+extern const H5F_low_class_t H5F_LOW_STDIO_g[];	/* Posix stdio		*/
+extern const H5F_low_class_t H5F_LOW_CORE_g[];	/* In-core temp file	*/
+extern const H5F_low_class_t H5F_LOW_FAMILY_g[];/* File family		*/
+extern const H5F_low_class_t H5F_LOW_SPLIT_g[];	/* Split meta/raw data	*/
 #ifdef HAVE_PARALLEL
-  extern const H5F_low_class_t H5F_LOW_MPIO[];	/* MPI-IO		*/
+extern const H5F_low_class_t H5F_LOW_MPIO_g[];	/* MPI-IO		*/
 #endif
 
 /*
@@ -349,9 +390,7 @@ typedef struct H5F_file_t {
     haddr_t	hdf5_eof;	/* Relative addr of end of all hdf5 data*/
     struct H5AC_t *cache;	/* The object cache			*/
     H5F_create_t create_parms;	/* File-creation template		*/
-#ifdef HAVE_PARALLEL
     H5F_access_t access_parms;  /* File-access template	*/
-#endif
     struct H5G_entry_t *root_ent; /* Root symbol table entry		*/
 } H5F_file_t;
 
@@ -411,18 +450,20 @@ struct H5O_layout_t;		/*forward decl for prototype arguments */
 
 /* library variables */
 extern const H5F_create_t H5F_create_dflt;
-extern const H5F_access_t H5F_access_dflt;
+extern H5F_access_t H5F_access_dflt;
 
 /* Private functions, not part of the publicly documented API */
+herr_t H5F_init_interface(void);
 void H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l);
-H5F_t *H5F_open(const H5F_low_class_t *type, const char *name, uintn flags,
-		const H5F_create_t *create_parms, const H5F_access_t *access_parms);
+H5F_t *H5F_open(const char *name, uintn flags,
+		const H5F_create_t *create_parms,
+		const H5F_access_t *access_parms);
 herr_t H5F_close(H5F_t *f);
 herr_t H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 		 intn fwidth);
 
 /* Functions that operate on array storage */
-herr_t H5F_arr_create(H5F_t *f, struct H5O_layout_t *layout /*in,out */ );
+herr_t H5F_arr_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);
 herr_t H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 		     const size_t _hslab_size[], const size_t mem_size[],
 		     const size_t mem_offset[], const size_t file_offset[],
@@ -433,7 +474,7 @@ herr_t H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 		      const void *_buf);
 
 /* Functions that operate on indexed storage */
-herr_t H5F_istore_create(H5F_t *f, struct H5O_layout_t *layout /*in,out */ );
+herr_t H5F_istore_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);
 herr_t H5F_istore_read(H5F_t *f, const struct H5O_layout_t *layout,
 		       const size_t offset[], const size_t size[],
 		       void *buf /*out */ );
@@ -447,19 +488,23 @@ herr_t H5F_block_write(H5F_t *f, const haddr_t *addr, size_t size,
 		       const void *buf);
 
 /* Functions that operate directly on low-level files */
-herr_t H5F_low_extend(H5F_low_t *lf, intn op, size_t size, haddr_t *addr);
+const H5F_low_class_t *H5F_low_class (H5F_driver_t driver);
+herr_t H5F_low_extend(H5F_low_t *lf, const H5F_access_t *access_parms,
+		      intn op, size_t size, haddr_t *addr);
 herr_t H5F_low_seteof(H5F_low_t *lf, const haddr_t *addr);
 hbool_t H5F_low_access(const H5F_low_class_t *type, const char *name,
-		       int mode, H5F_search_t *key);
+		       const H5F_access_t *access_parms, int mode,
+		       H5F_search_t *key);
 H5F_low_t *H5F_low_open(const H5F_low_class_t *type, const char *name,
-			uintn flags, H5F_search_t *key);
-H5F_low_t *H5F_low_close(H5F_low_t *lf);
+			const H5F_access_t *access_parms, uintn flags,
+			H5F_search_t *key);
+H5F_low_t *H5F_low_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 size_t H5F_low_size(H5F_low_t *lf, haddr_t *addr);
-herr_t H5F_low_read(H5F_low_t *lf, const haddr_t *addr, size_t size,
-		    uint8 *buf);
-herr_t H5F_low_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
-		     const uint8 *buf);
-herr_t H5F_low_flush(H5F_low_t *lf);
+herr_t H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+		    const haddr_t *addr, size_t size, uint8 *buf);
+herr_t H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+		     const haddr_t *addr, size_t size, const uint8 *buf);
+herr_t H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 
 /* Functions that operate on addresses */
 #define H5F_addr_eq(A1,A2) (H5F_addr_cmp(A1,A2)==0)

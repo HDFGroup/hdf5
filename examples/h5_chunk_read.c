@@ -40,7 +40,7 @@ main ()
 /*
  * Open the file and the dataset.
  */
-file = H5Fopen(FILE, H5ACC_DEFAULT, H5C_DEFAULT);
+file = H5Fopen(FILE, H5F_ACC_RDONLY, H5C_DEFAULT);
 dataset = H5Dopen(file, DATASETNAME);
  
 /*

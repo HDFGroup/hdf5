@@ -23,6 +23,67 @@
 #define PABLO_MASK      H5F_low
 static hbool_t          interface_initialize_g = FALSE;
 #define INTERFACE_INIT NULL
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_low_class
+ *
+ * Purpose:	Given a driver identifier return the class pointer for that
+ *		low-level driver.
+ *
+ * Return:	Success:	A low-level driver class pointer.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, February 18, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+const H5F_low_class_t *
+H5F_low_class (H5F_driver_t driver)
+{
+    const H5F_low_class_t	*type = NULL;
+    
+    FUNC_ENTER (H5F_low_class, NULL);
+
+    switch (driver) {
+    case H5F_LOW_STDIO:
+	type = H5F_LOW_STDIO_g;
+	break;
+
+    case H5F_LOW_SEC2:
+	type = H5F_LOW_SEC2_g;
+	break;
+
+    case H5F_LOW_CORE:
+	type = H5F_LOW_CORE_g;
+	break;
+
+#ifdef HAVE_PARALLEL
+    case H5F_LOW_MPIO:
+	type = H5F_LOW_MPIO_g;
+	break;
+#endif
+
+    case H5F_LOW_SPLIT:
+	type = H5F_LOW_SPLIT_g;
+	break;
+
+    case H5F_LOW_FAMILY:
+	type = H5F_LOW_FAMILY_g;
+	break;
+
+    default:
+	HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, NULL,
+		       "unknown low-level driver");
+    }
+
+    FUNC_LEAVE (type);
+}
+	
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_low_open
@@ -67,9 +128,10 @@ static hbool_t          interface_initialize_g = FALSE;
  *
  *-------------------------------------------------------------------------
  */
-H5F_low_t              *
-H5F_low_open(const H5F_low_class_t *type, const char *name, uintn flags,
-             H5F_search_t *key /*out */ )
+H5F_low_t *
+H5F_low_open(const H5F_low_class_t *type, const char *name,
+	     const H5F_access_t *access_parms, uintn flags,
+	     H5F_search_t *key/*out*/)
 {
     H5F_low_t              *lf = NULL;
 
@@ -78,7 +140,7 @@ H5F_low_open(const H5F_low_class_t *type, const char *name, uintn flags,
     assert(type && type->open);
     assert(name && *name);
 
-    if (NULL == (lf = (type->open) (name, flags, key))) {
+    if (NULL == (lf = (type->open) (name, access_parms, flags, key))) {
         HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed");
     }
     lf->type = type;
@@ -114,13 +176,13 @@ H5F_low_open(const H5F_low_class_t *type, const char *name, uintn flags,
  *
  *-------------------------------------------------------------------------
  */
-H5F_low_t              *
-H5F_low_close(H5F_low_t *lf)
+H5F_low_t *
+H5F_low_close(H5F_low_t *lf, const H5F_access_t *access_parms)
 {
     FUNC_ENTER(H5F_low_close, NULL);
 
     if (lf) {
-        if ((lf->type->close) (lf) < 0) {
+        if ((lf->type->close) (lf, access_parms) < 0) {
             H5MM_xfree(lf);
             HRETURN_ERROR(H5E_IO, H5E_CLOSEERROR, NULL, "close failed");
         }
@@ -156,8 +218,8 @@ H5F_low_close(H5F_low_t *lf)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_low_read(H5F_low_t *lf, const haddr_t *addr, size_t size,
-             uint8 *buf /*out */ )
+H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+	     const haddr_t *addr, size_t size, uint8 *buf/*out*/)
 {
     herr_t                  ret_value = FAIL;
 
@@ -168,7 +230,8 @@ H5F_low_read(H5F_low_t *lf, const haddr_t *addr, size_t size,
     assert(buf);
 
     if (lf->type->read) {
-        if ((ret_value = (lf->type->read) (lf, addr, size, buf)) < 0) {
+        if ((ret_value = (lf->type->read) (lf, access_parms, addr, size,
+					   buf)) < 0) {
             HRETURN_ERROR(H5E_IO, H5E_READERROR, ret_value, "read failed");
         }
     } else {
@@ -204,8 +267,8 @@ H5F_low_read(H5F_low_t *lf, const haddr_t *addr, size_t size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_low_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
-              const uint8 *buf)
+H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+	      const haddr_t *addr, size_t size, const uint8 *buf)
 {
     herr_t                  ret_value = FAIL;
     haddr_t                 tmp_addr;
@@ -225,7 +288,8 @@ H5F_low_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
     }
     /* Write the data */
     if (lf->type->write) {
-        if ((ret_value = (lf->type->write) (lf, addr, size, buf)) < 0) {
+        if ((ret_value = (lf->type->write) (lf, access_parms, addr, size,
+					    buf)) < 0) {
             HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, ret_value, "write failed");
         }
     } else {
@@ -260,7 +324,7 @@ H5F_low_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_low_flush(H5F_low_t *lf)
+H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
 {
     haddr_t                 last_byte;
     uint8                   buf[1];
@@ -274,13 +338,13 @@ H5F_low_flush(H5F_low_t *lf)
     if (addr_defined(&(lf->eof)) && H5F_addr_gt(&(lf->eof), &last_byte)) {
         last_byte = lf->eof;
         last_byte.offset -= 1;
-        if (H5F_low_read(lf, &last_byte, 1, buf) >= 0) {
-            H5F_low_write(lf, &last_byte, 1, buf);
+        if (H5F_low_read(lf, access_parms, &last_byte, 1, buf) >= 0) {
+            H5F_low_write(lf, access_parms, &last_byte, 1, buf);
         }
     }
     /* Invoke the subclass the flush method */
     if (lf->type->flush) {
-        if ((lf->type->flush) (lf) < 0) {
+        if ((lf->type->flush) (lf, access_parms) < 0) {
             HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                           "low level flush failed");
         }
@@ -372,8 +436,9 @@ H5F_low_size(H5F_low_t *lf, haddr_t *eof /*out */ )
  *-------------------------------------------------------------------------
  */
 hbool_t
-H5F_low_access(const H5F_low_class_t *type, const char *name, int mode,
-               H5F_search_t *key /*out */ )
+H5F_low_access(const H5F_low_class_t *type, const char *name,
+	       const H5F_access_t *access_parms, int mode,
+               H5F_search_t *key/*out*/)
 {
     hbool_t                 ret_value;
     struct stat             sb;
@@ -382,7 +447,7 @@ H5F_low_access(const H5F_low_class_t *type, const char *name, int mode,
     assert(type);
 
     if (type->access) {
-        ret_value = (type->access) (name, mode, key /*out */ );
+        ret_value = (type->access) (name, access_parms, mode, key /*out*/);
 
     } else {
         ret_value = (0 == access(name, mode) ? TRUE : FALSE);
@@ -418,7 +483,8 @@ H5F_low_access(const H5F_low_class_t *type, const char *name, int mode,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_low_extend(H5F_low_t *lf, intn op, size_t size, haddr_t *addr /*out */ )
+H5F_low_extend(H5F_low_t *lf, const H5F_access_t *access_parms, intn op,
+	       size_t size, haddr_t *addr/*out*/)
 {
     FUNC_ENTER(H5F_low_alloc, FAIL);
 
@@ -427,7 +493,7 @@ H5F_low_extend(H5F_low_t *lf, intn op, size_t size, haddr_t *addr /*out */ )
     assert(addr);
 
     if (lf->type->extend) {
-        if ((lf->type->extend) (lf, op, size, addr /*out */ ) < 0) {
+        if ((lf->type->extend) (lf, access_parms, op, size, addr/*out*/) < 0) {
             HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                           "unable to extend file");
         }

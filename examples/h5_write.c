@@ -35,11 +35,11 @@ for (j = 0; j < NX; j++) {
                                            4 5 6 7 8 9   */
 
 /*
- * Create a new file using H5ACC_OVERWRITE access,
+ * Create a new file using H5F_ACC_TRUNC access,
  * default file creation properties, and default file
  * access properties.
  */
-file = H5Fcreate(FILE, H5ACC_OVERWRITE, H5C_DEFAULT, H5C_DEFAULT);
+file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
 
 /*
  * Describe the size of the array and create the data space for fixed

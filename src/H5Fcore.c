@@ -19,32 +19,35 @@
 #include <H5Fprivate.h>
 #include <H5MMprivate.h>
 
-#define H5F_CORE_INC    10240   /*amount by which to grow file            */
 #define H5F_CORE_DEV    0xffff  /*pseudo dev for core until we fix things */
 
 #define PABLO_MASK      H5F_core
 static hbool_t          interface_initialize_g = FALSE;
 #define INTERFACE_INIT NULL
 
-static hbool_t          H5F_core_access(const char *name, int mode, H5F_search_t *key);
-static H5F_low_t       *H5F_core_open(const char *name, uintn flags, H5F_search_t *);
-static herr_t           H5F_core_close(H5F_low_t *lf);
-static herr_t           H5F_core_read(H5F_low_t *lf, const haddr_t *addr, size_t size,
-                                      uint8 *buf);
-static herr_t           H5F_core_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
-                                       const uint8 *buf);
+static hbool_t H5F_core_access(const char *name,
+			       const H5F_access_t *access_parms, int mode,
+			       H5F_search_t *key/*out*/);
+static H5F_low_t *H5F_core_open(const char *name,
+				const H5F_access_t *access_parms, uintn flags,
+				H5F_search_t *key/*out*/);
+static herr_t H5F_core_close(H5F_low_t *lf, const H5F_access_t *access_parms);
+static herr_t H5F_core_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+			    const haddr_t *addr, size_t size, uint8 *buf);
+static herr_t H5F_core_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+			     const haddr_t *addr, size_t size,
+			     const uint8 *buf);
 
-const H5F_low_class_t   H5F_LOW_CORE[1] =
-{
-    {
-        H5F_core_access,        /* access method                        */
-        H5F_core_open,          /* open method                          */
-        H5F_core_close,         /* close method                         */
-        H5F_core_read,          /* read method                          */
-        H5F_core_write,         /* write method                         */
-        NULL,                   /* flush method                         */
-        NULL,                   /* extend method                        */
-    }};
+const H5F_low_class_t   H5F_LOW_CORE_g[1] = {{
+    H5F_core_access,        /* access method                        */
+    H5F_core_open,          /* open method                          */
+    H5F_core_close,         /* close method                         */
+    H5F_core_read,          /* read method                          */
+    H5F_core_write,         /* write method                         */
+    NULL,                   /* flush method                         */
+    NULL,                   /* extend method                        */
+}};
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_core_access
@@ -66,11 +69,13 @@ const H5F_low_class_t   H5F_LOW_CORE[1] =
  *-------------------------------------------------------------------------
  */
 static hbool_t
-H5F_core_access(const char *name, int mode, H5F_search_t *key /*out */ )
+H5F_core_access(const char *name, const H5F_access_t *access_parms,
+		int mode, H5F_search_t *key/*out*/)
 {
     FUNC_ENTER(H5F_core_access, FAIL);
     FUNC_LEAVE(FALSE);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_core_open
@@ -93,21 +98,23 @@ H5F_core_access(const char *name, int mode, H5F_search_t *key /*out */ )
  *
  *-------------------------------------------------------------------------
  */
-static H5F_low_t       *
-H5F_core_open(const char *name, uintn flags, H5F_search_t *key)
+static H5F_low_t *
+H5F_core_open(const char *name, const H5F_access_t *access_parms,
+	      uintn flags, H5F_search_t *key/*out*/)
 {
     H5F_low_t              *lf = NULL;
     static ino_t            ino = 0;
 
     FUNC_ENTER(H5F_core_open, NULL);
 
-    if (0 == (flags & H5F_ACC_WRITE) || 0 == (flags & H5F_ACC_CREAT)) {
+    if (0 == (flags & H5F_ACC_RDWR) || 0 == (flags & H5F_ACC_CREAT)) {
         HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL,
                       "must creat file with write access");
     }
+    
     lf = H5MM_xcalloc(1, sizeof(H5F_low_t));
-    lf->u.core.mem = H5MM_xmalloc(H5F_CORE_INC);
-    lf->u.core.alloc = H5F_CORE_INC;
+    lf->u.core.mem = NULL;
+    lf->u.core.alloc = 0;
     lf->u.core.size = 0;
     H5F_addr_reset(&(lf->eof));
 
@@ -115,8 +122,10 @@ H5F_core_open(const char *name, uintn flags, H5F_search_t *key)
         key->dev = H5F_CORE_DEV;
         key->ino = ino++;
     }
+    
     FUNC_LEAVE(lf);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_core_close
@@ -137,7 +146,7 @@ H5F_core_open(const char *name, uintn flags, H5F_search_t *key)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_core_close(H5F_low_t *lf)
+H5F_core_close(H5F_low_t *lf, const H5F_access_t *access_parms)
 {
     FUNC_ENTER(H5F_core_close, FAIL);
 
@@ -147,6 +156,7 @@ H5F_core_close(H5F_low_t *lf)
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_core_read
@@ -169,7 +179,8 @@ H5F_core_close(H5F_low_t *lf)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_core_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
+H5F_core_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+	      const haddr_t *addr, size_t size, uint8 *buf)
 {
     size_t                  n;
     size_t                  eof;
@@ -192,6 +203,7 @@ H5F_core_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_core_write
@@ -214,27 +226,39 @@ H5F_core_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_core_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
-               const uint8 *buf)
+H5F_core_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+	       const haddr_t *addr, size_t size, const uint8 *buf)
 {
-    size_t                  inc_amount;
+    size_t		need_more;
+    size_t		increment = 1;
+    
 
     FUNC_ENTER(H5F_core_write, FAIL);
 
     assert(lf);
     assert(addr && H5F_addr_defined(addr));
     assert(buf);
+    assert (!access_parms || H5F_LOW_CORE==access_parms->driver);
 
-    /* Allocate more space */
+    /*
+     * Allocate more space.  We always allocate a multiple of the increment
+     * size, which is either defined in the file access property list or
+     * which defaults to one.
+     */
     if (addr->offset + size > lf->u.core.alloc) {
-        inc_amount = MAX(addr->offset + size - lf->u.core.alloc, H5F_CORE_INC);
-        lf->u.core.alloc = lf->u.core.alloc + inc_amount;
+	if (access_parms) increment = access_parms->u.core.increment;
+	need_more = addr->offset+size - lf->u.core.alloc;
+	need_more = increment*((need_more+increment-1)/increment);
+
+        lf->u.core.alloc = lf->u.core.alloc + need_more;
         lf->u.core.mem = H5MM_xrealloc(lf->u.core.mem, lf->u.core.alloc);
     }
+    
     /* Move the physical EOF marker */
     if (addr->offset + size > lf->u.core.size) {
         lf->u.core.size = addr->offset + size;
     }
+    
     /* Copy data */
     HDmemcpy(lf->u.core.mem + addr->offset, buf, size);
 

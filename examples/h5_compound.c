@@ -62,7 +62,7 @@ space = H5Pcreate_simple(RANK, dim, NULL);
 /*
  * Create the file.
  */
-file = H5Fcreate(FILE, H5ACC_OVERWRITE, H5C_DEFAULT, H5C_DEFAULT);
+file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
 
 /*
  * Create the memory data type. 
@@ -93,7 +93,7 @@ H5Fclose(file);
 /*
  * Open the file and the dataset.
  */
-file = H5Fopen(FILE, H5ACC_DEFAULT, H5C_DEFAULT);
+file = H5Fopen(FILE, H5F_ACC_RDONLY, H5C_DEFAULT);
  
 dataset = H5Dopen(file, DATASETNAME);
 

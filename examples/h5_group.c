@@ -23,7 +23,7 @@ main()
 /*
  * Create a file.
  */
-file = H5Fcreate(FILE, H5ACC_OVERWRITE, H5C_DEFAULT, H5C_DEFAULT);
+file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
 
 /*
  * Create two groups in a file.
