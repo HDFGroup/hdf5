@@ -231,11 +231,13 @@ H5V_vector_cmp_u (int n, const hsize_t *v1, const hsize_t *v2)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_vector_cmp_u);
 
     if (v1 == v2) HGOTO_DONE(0);
+    if (v1 == NULL) HGOTO_DONE(-1)
+    if (v2 == NULL) HGOTO_DONE(1)
     while (n--) {
-        if ((v1 ? *v1 : 0) < (v2 ? *v2 : 0)) HGOTO_DONE(-1);
-        if ((v1 ? *v1 : 0) > (v2 ? *v2 : 0)) HGOTO_DONE(1);
-        if (v1) v1++;
-        if (v2) v2++;
+        if (*v1 < *v2) HGOTO_DONE(-1)
+        if (*v1 > *v2) HGOTO_DONE(1)
+        v1++;
+        v2++;
     }
 
 done:
@@ -271,11 +273,13 @@ H5V_vector_cmp_s (unsigned n, const hssize_t *v1, const hssize_t *v2)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_vector_cmp_s);
 
     if (v1 == v2) HGOTO_DONE(0);
+    if (v1 == NULL) HGOTO_DONE(-1)
+    if (v2 == NULL) HGOTO_DONE(1)
     while (n--) {
-        if ((v1 ? *v1 : 0) < (v2 ? *v2 : 0)) HGOTO_DONE(-1);
-        if ((v1 ? *v1 : 0) > (v2 ? *v2 : 0)) HGOTO_DONE(1);
-        if (v1) v1++;
-        if (v2) v2++;
+        if (*v1 < *v2) HGOTO_DONE(-1)
+        if (*v1 > *v2) HGOTO_DONE(1)
+        v1++;
+        v2++;
     }
 
 done:
