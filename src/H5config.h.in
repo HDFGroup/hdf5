@@ -4,6 +4,10 @@
    values. */
 #undef CONVERT_DENORMAL_FLOAT
 
+/* Define if your system can convert long double to unsigned int values
+   correctly. */
+#undef CV_LDOUBLE_TO_UINT_WORKS
+
 /* Define if `dev_t' is a scalar */
 #undef DEV_T_IS_SCALAR
 

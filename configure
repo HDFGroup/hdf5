@@ -33914,6 +33914,72 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
+echo "$as_me:$LINENO: checking if converting long double to unsigned int values works" >&5
+echo $ECHO_N "checking if converting long double to unsigned int values works... $ECHO_C" >&6
+
+if test "${hdf5_cv_ldouble_to_uint_works+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+    int main(void)
+    {
+        long double ld = 2733248032.9183987530L;
+        unsigned int i;
+        int           ret = 0;
+
+        i = (unsigned int)ld;
+        if(i!=2733248032 && i!=2733248031 && i!=2733248033)
+            ret = 1;
+
+done:
+        exit(ret);
+    }
+
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  hdf5_cv_ldouble_to_uint_works=yes
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+( exit $ac_status )
+hdf5_cv_ldouble_to_uint_works=no
+fi
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+fi
+
+
+if test ${hdf5_cv_ldouble_to_uint_works} = "yes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define CV_LDOUBLE_TO_UINT_WORKS 1
+_ACEOF
+
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
 
 echo "$as_me:$LINENO: checking if compiling unsigned long long to floating-point typecasts work" >&5
 echo $ECHO_N "checking if compiling unsigned long long to floating-point typecasts work... $ECHO_C" >&6
