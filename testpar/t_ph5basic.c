@@ -219,7 +219,9 @@ test_fapl_mpiposix_dup(void)
     int mpi_size_tmp, mpi_rank_tmp;
     int mrc;			/* MPI return value */
     hid_t acc_pl;		/* File access properties */
+#ifndef H5_WANT_H5_V1_4_COMPAT
     hbool_t use_gpfs = FALSE;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
     herr_t ret;			/* hdf5 return value */
 
     if (verbose)
@@ -244,7 +246,11 @@ test_fapl_mpiposix_dup(void)
     acc_pl = H5Pcreate (H5P_FILE_ACCESS);
     VRFY((acc_pl >= 0), "H5P_FILE_ACCESS");
 
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    ret = H5Pset_fapl_mpiposix(acc_pl, comm);
+#else /* H5_WANT_H5_V1_4_COMPAT */
     ret = H5Pset_fapl_mpiposix(acc_pl, comm, use_gpfs);
+#endif /* H5_WANT_H5_V1_4_COMPAT */
     VRFY((ret >= 0), "");
 
     /* Case 1:
@@ -255,7 +261,11 @@ test_fapl_mpiposix_dup(void)
     mrc = MPI_Comm_free(&comm);
     VRFY((mrc==MPI_SUCCESS), "MPI_Comm_free");
 
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    ret = H5Pget_fapl_mpiposix(acc_pl, &comm_tmp);
+#else /* H5_WANT_H5_V1_4_COMPAT */
     ret = H5Pget_fapl_mpiposix(acc_pl, &comm_tmp, &use_gpfs);
+#endif /* H5_WANT_H5_V1_4_COMPAT */
     VRFY((ret >= 0), "H5Pget_fapl_mpiposix");
     MPI_Comm_size(comm_tmp,&mpi_size_tmp);
     MPI_Comm_rank(comm_tmp,&mpi_rank_tmp);
@@ -275,12 +285,20 @@ test_fapl_mpiposix_dup(void)
     VRFY((mrc==MPI_SUCCESS), "MPI_Comm_free");
 
     /* check NULL argument options. */
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    ret = H5Pget_fapl_mpiposix(acc_pl, NULL);
+#else /* H5_WANT_H5_V1_4_COMPAT */
     ret = H5Pget_fapl_mpiposix(acc_pl, NULL, NULL);
+#endif /* H5_WANT_H5_V1_4_COMPAT */
     VRFY((ret >= 0), "H5Pget_fapl_mpiposix neither");
 
     /* now get it again and check validity too. */
     /* Don't free the returned object which is used in the next case. */
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    ret = H5Pget_fapl_mpiposix(acc_pl, &comm_tmp);
+#else /* H5_WANT_H5_V1_4_COMPAT */
     ret = H5Pget_fapl_mpiposix(acc_pl, &comm_tmp, &use_gpfs);
+#endif /* H5_WANT_H5_V1_4_COMPAT */
     VRFY((ret >= 0), "H5Pget_fapl_mpiposix");
     MPI_Comm_size(comm_tmp,&mpi_size_tmp);
     MPI_Comm_rank(comm_tmp,&mpi_rank_tmp);

@@ -1524,7 +1524,11 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
         /* Use the appropriate VFL driver */
         if(param->h5_use_mpi_posix) {
             /* Set the file driver to the MPI-posix driver */
+#ifdef H5_WANT_H5_V1_4_COMPAT
+            hrc = H5Pset_fapl_mpiposix(acc_tpl, pio_comm_g);
+#else /* H5_WANT_H5_V1_4_COMPAT */
             hrc = H5Pset_fapl_mpiposix(acc_tpl, pio_comm_g, use_gpfs);
+#endif /* H5_WANT_H5_V1_4_COMPAT */
             if (hrc < 0) {
                 fprintf(stderr, "HDF5 Property List Set failed\n");
                 GOTOERROR(FAIL);

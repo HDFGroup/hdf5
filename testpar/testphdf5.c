@@ -317,7 +317,11 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type,
 
     if (l_facc_type == FACC_MPIPOSIX) {
 	/* set Parallel access with communicator */
+#ifdef H5_WANT_H5_V1_4_COMPAT
+	ret = H5Pset_fapl_mpiposix(ret_pl, comm);
+#else /* H5_WANT_H5_V1_4_COMPAT */
 	ret = H5Pset_fapl_mpiposix(ret_pl, comm, use_gpfs);
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 	VRFY((ret >= 0), "H5Pset_fapl_mpiposix succeeded");
 	return(ret_pl);
     }
