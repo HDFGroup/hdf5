@@ -164,7 +164,7 @@ test_atomic_dtype(hid_t file)
     if(H5Tclose(dtype)<0) TEST_ERROR;
     
     
-    /* Create the dataset of H5T_IEEE_F64BE */
+    /* Create the dataset of H5T_IEEE_F32BE */
     if ((dataset = H5Dcreate(file, DSET_ATOMIC_NAME_4, H5T_IEEE_F32BE, space,
 			     H5P_DEFAULT))<0) TEST_ERROR;
 

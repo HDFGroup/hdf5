@@ -3736,6 +3736,8 @@ haddr_t
 H5D_get_offset(H5D_t *dset)
 {
     haddr_t	ret_value;
+    haddr_t     base_addr;
+    H5F_t       *f;
     
     FUNC_ENTER_NOAPI(H5D_get_offset, HADDR_UNDEF);
 
@@ -3750,7 +3752,15 @@ H5D_get_offset(H5D_t *dset)
         case H5D_CONTIGUOUS:
             /* If dataspace hasn't been allocated or dataset is stored in 
              * an external file, the value will be HADDR_UNDEF. */
-            ret_value = dset->layout.addr;
+            f =  H5D_get_file(dset);
+            base_addr = H5F_get_base_addr(f);
+            
+            /* If there's user block in file, returns the absolute dataset offset
+             * from the beginning of file. */
+            if(base_addr!=HADDR_UNDEF)
+                ret_value = dset->layout.addr + base_addr;
+            else
+                ret_value = dset->layout.addr;
             break;
 
         default:

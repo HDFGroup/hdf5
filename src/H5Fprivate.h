@@ -354,6 +354,7 @@ H5_DLL herr_t H5F_get_obj_count(H5F_t *f, unsigned types,
                                  unsigned *obj_id_count);
 H5_DLL herr_t H5F_get_obj_ids(H5F_t *f, unsigned types, hid_t *obj_id_list);
 H5_DLL herr_t H5F_get_vfd_handle(H5F_t *file, hid_t fapl, void** file_handle);
+H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);
 
 /* Functions that operate on array storage */
 H5_DLL herr_t H5F_arr_read (H5F_t *f, hid_t dxpl_id,

@@ -14,6 +14,7 @@
 const char *FILENAME[] = {
     "dataset",
     "compact_dataset",
+    "dset_offset",
     NULL
 };
 
@@ -32,6 +33,7 @@ const char *FILENAME[] = {
 #define DSET_MISSING_NAME	"missing"
 #define DSET_ONEBYTE_SHUF_NAME   "onebyte_shuffle"
 
+#define USER_BLOCK              512 
 #define H5Z_BOGUS		305
 
 /* Shared global arrays */
@@ -213,13 +215,16 @@ test_create(hid_t file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_simple_io(hid_t file)
+test_simple_io(hid_t file, char *fname)
 {
     hid_t		dataset, space, xfer;
     int			i, j, n;
     hsize_t		dims[2];
     void		*tconv_buf = NULL;
-
+    FILE                *f;
+    haddr_t              offset;
+    int                 rdata[100][200];
+    
     TESTING("simple I/O");
 
     /* Initialize the dataset */
@@ -251,9 +256,29 @@ test_simple_io(hid_t file)
     if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, points)<0)
 	goto error;
 
-    /* Test dataset address.  Should be valid. */
-    if(H5Dget_offset(dataset)==HADDR_UNDEF) goto error;
+    /* Test dataset address in file. Open the same file as a C file, seek
+     * the data position as H5Dget_offset points to, read the dataset, and
+     * compare it with the data written in.*/
+    if((offset=H5Dget_offset(dataset))==HADDR_UNDEF) goto error;
+
+    f = fopen(fname, "r");
+    fseek(f, (long int)offset, SEEK_SET);
+    fread(rdata, sizeof(int), 100*200, f);
     
+    /* Check that the values read are the same as the values written */
+    for (i = 0; i < 100; i++) {
+	for (j = 0; j < 200; j++) {
+	    if (points[i][j] != rdata[i][j]) {
+		H5_FAILED();
+		printf("    Read different values than written.\n");
+		printf("    At index %d,%d\n", i, j);
+		goto error;
+	    }
+	}
+    }   
+
+    fclose(f);
+
     /* Read the dataset back */
     if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, check)<0)
 	goto error;
@@ -273,6 +298,97 @@ test_simple_io(hid_t file)
     i=H5Pclose (xfer);
     H5Dclose(dataset);
     free (tconv_buf);
+    PASSED();
+    return 0;
+
+  error:
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_userblock_offset
+ *
+ * Purpose:	Tests H5Dget_offset when user block exists. 
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *		Wednesday, November 27, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_userblock_offset(hid_t fapl)
+{
+    char                filename[32];
+    hid_t		file, fcpl, dataset, space;
+    int			i, j, n;
+    hsize_t		dims[2];
+    FILE                *f;
+    haddr_t             offset;
+    int                 rdata[100][200];
+    
+    TESTING("dataset offset with user block");
+    
+    h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
+    
+    if((fcpl=H5Pcreate(H5P_FILE_CREATE))<0) goto error;
+    if(H5Pset_userblock(fcpl, USER_BLOCK)<0) goto error;
+    
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl))<0) {
+	goto error;
+    }
+    
+    /* Initialize the dataset */
+    /*for (i = n = 0; i < 100; i++) {
+	for (j = 0; j < 200; j++) {
+	    points[i][j] = n++;
+	}
+    }*/
+
+    /* Create the data space */
+    dims[0] = 100;
+    dims[1] = 200;
+    if ((space = H5Screate_simple(2, dims, NULL))<0) goto error;
+
+    /* Create the dataset */
+    if ((dataset = H5Dcreate(file, DSET_SIMPLE_IO_NAME, H5T_NATIVE_INT, space,
+			     H5P_DEFAULT))<0) goto error;
+
+    /* Write the data to the dataset */
+    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points)<0)
+	goto error;
+
+    /* Test dataset address in file. Open the same file as a C file, seek
+     * the data position as H5Dget_offset points to, read the dataset, and
+     * compare it with the data written in.*/
+    if((offset=H5Dget_offset(dataset))==HADDR_UNDEF) goto error;
+
+    f = fopen(filename, "r");
+    fseek(f, (long int)offset, SEEK_SET);
+    fread(rdata, sizeof(int), 100*200, f);
+    
+    /* Check that the values read are the same as the values written */
+    for (i = 0; i < 100; i++) {
+	for (j = 0; j < 200; j++) {
+	    if (points[i][j] != rdata[i][j]) {
+		H5_FAILED();
+		printf("    Read different values than written.\n");
+		printf("    At index %d,%d\n", i, j);
+		goto error;
+	    }
+	}
+    }   
+
+    fclose(f);
+
+    H5Dclose(dataset);
+    H5Fclose(file);
     PASSED();
     return 0;
 
@@ -1421,7 +1537,7 @@ main(void)
     if (H5Gclose (grp)<0) goto error;
 
     nerrors += test_create(file)<0 	?1:0;
-    nerrors += test_simple_io(file)<0	?1:0;
+    nerrors += test_simple_io(file, filename)<0	?1:0;
     nerrors += test_compact_io(fapl)<0  ?1:0;
     nerrors += test_tconv(file)<0	?1:0;
     nerrors += test_compression(file)<0	?1:0;
@@ -1429,7 +1545,8 @@ main(void)
     nerrors += test_onebyte_shuffle(file)<0 ?1:0;
     nerrors += test_multiopen (file)<0	?1:0;
     nerrors += test_types(file)<0       ?1:0;
-
+    nerrors += test_userblock_offset(fapl)<0     ?1:0;
+   
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
     printf("All dataset tests passed.\n");

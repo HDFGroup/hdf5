@@ -3509,6 +3509,24 @@ done:
     FUNC_LEAVE(ret_value);
 } /* end H5F_get_fileno() */
 
+
+haddr_t 
+H5F_get_base_addr(const H5F_t *f)
+{
+    haddr_t	ret_value;
+
+    FUNC_ENTER_NOAPI(H5F_get_base_addr, FAIL);
+
+    assert(f);
+    assert(f->shared);
+
+    /* Retrieve the file's base address */
+    ret_value = f->shared->base_addr;
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_block_read
