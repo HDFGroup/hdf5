@@ -5551,7 +5551,7 @@ H5_VERSION=`cut -d' ' -f3 $srcdir/README |head -1`
  CONFIG_DATE=`date`
 
 # User doing the configuration
- CONFIG_USER="$USER@`hostname`"
+ CONFIG_USER="`whoami`@`hostname`"
 if test "X-$ORGANIZATION" != "X-"; then
     CONFIG_USER="$CONFIG_USER at $ORGANIZATION"
 fi
