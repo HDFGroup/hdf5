@@ -59,6 +59,8 @@
 #define H5_DLL
 #define H5_DLLVAR extern
 #define H5_DLLCPP
+#define H5TEST_DLL
+#define H5TEST_DLLVAR extern
 #endif
 
 #endif /* H5API_ADPT_H */
