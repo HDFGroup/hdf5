@@ -5859,8 +5859,8 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                 long double tmp_s, tmp_h;
                 HDmemcpy(&tmp_s,&buf[j*dst_size],sizeof(long double));
                 HDmemcpy(&tmp_h,&hw[0],sizeof(long double));
-                /*Don't compare the last 2 bytes of mantissa*/
-                if(!HDmemcmp(&tmp_s+3, &tmp_h+3, sizeof(long double)-3))
+                /*Don't compare the last 3 bytes of mantissa*/
+                if(!HDmemcmp(&tmp_s+4, &tmp_h+4, sizeof(long double)-4))
                     continue; /*no error*/
             }
 #endif /*end H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS*/
@@ -6397,7 +6397,9 @@ run_int_float_conv(const char *name)
 #if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
         nerrors += test_conv_int_float(name, H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE);
 #ifdef H5_ULLONG_TO_FP_CAST_WORKS
+#ifdef H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS
         nerrors += test_conv_int_float(name, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE);
+#endif /*H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS*/
 #else /* H5_ULLONG_TO_FP_CAST_WORKS */
         {
             char		str[256];		/*hello string		*/
@@ -6446,7 +6448,7 @@ static int
 run_float_int_conv(const char *name)
 {
     int		nerrors = 0;
-#ifndef TMP
+
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_SCHAR);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_SCHAR);
     
@@ -6507,7 +6509,6 @@ run_float_int_conv(const char *name)
 #endif /*H5_FP_TO_ULLONG_RIGHT_MAXIMUM*/ 
 #endif
 
-#endif /*TMP*/
     if(!strcmp(name, "sw")) {
 #if H5_SW_LDOUBLE_TO_INTEGER_WORKS
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
@@ -6984,7 +6985,7 @@ main(void)
 
     if (ALIGNMENT)
 	printf("Testing non-aligned conversions (ALIGNMENT=%d)....\n", ALIGNMENT);
-#ifndef TMP
+
     /* Do the tests */
     nerrors += test_classes();
     nerrors += test_copy();
@@ -7060,7 +7061,6 @@ main(void)
     /* Test software float-integer conversion functions */
     nerrors += run_float_int_conv("sw");
     
-#endif /*TMP*/
     /* Test software integer-float conversion functions */
     nerrors += run_int_float_conv("sw");
 

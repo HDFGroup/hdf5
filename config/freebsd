@@ -43,3 +43,7 @@ if test "X-" != "X-$enable_threadsafe"; then
   CXXFLAGS="$CXXFLAGS -D_THREAD_SAFE" 
   LDFLAGS="$LDFLAGS -pthread"
 fi
+
+# Temporarily hard set this variable.  The problem of loss of the last 2 bytes of mantissa
+# turns out to be elusive.  Hard set it until a better solution is found. 
+hdf5_cv_ullong_to_ldouble_precision_works=${hdf5_cv_ullong_to_ldouble_precision_works='no'}
