@@ -4041,7 +4041,7 @@ H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr)
 
     /* Release space for B-tree node on disk */
     if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5B2_HEADER_SIZE(f))<0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree header info")
     
 done:
     /* Release the B-tree header info */
@@ -4049,7 +4049,7 @@ done:
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to delete B-tree header info")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_neighbor() */
+} /* H5B2_delete() */
 
 
 /*-------------------------------------------------------------------------
