@@ -6914,8 +6914,12 @@ static herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name)
     
     /* Remove property from property list */
     /* Check if the property being removed is at the head of the list for a hash location */
-    if(prop==pclass->props[loc])
+    if(prop==pclass->props[loc]) {
         pclass->props[loc]=prop->next;
+
+        /* Free the property, ignoring return value, nothing we can do */
+        H5P_free_prop(prop);
+    } /* end if */
     else {
         /* Set up initial pointers */
         prev=tprop=pclass->props[loc];
