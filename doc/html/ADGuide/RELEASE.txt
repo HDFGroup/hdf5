@@ -1,4 +1,4 @@
-HDF5 version 1.5.14 released on Sat Oct 27 04:43:13 CDT 2001
+HDF5 version 1.5.15 released on Sat Nov 10 04:23:57 CST 2001
 ================================================================================
 
 
@@ -179,6 +179,8 @@ New Features
       are made.
     * Improved performance of single, contiguous hyperslabs when reading or
       writing.
+    * Improved performance of non-contiguous hyperslabs (built up with
+      several hyperslab selection calls).
 
 Platforms Tested
 ================
