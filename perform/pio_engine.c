@@ -414,7 +414,7 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
              * handled below. */
             h5_stat_t buf;
 
-            if (stat(fullname, &buf) < 0)
+            if (HDstat(fullname, &buf) < 0)
                 /* The directory doesn't exist just yet */
                 if (mkdir(fullname, (mode_t)0755) < 0 && errno != EEXIST) {
                     /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
