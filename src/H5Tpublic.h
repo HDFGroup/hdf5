@@ -34,8 +34,8 @@ typedef enum H5T_class_t {
     H5T_OPAQUE           = 5,   /*opaque types                               */
     H5T_COMPOUND         = 6,   /*compound types                             */
     H5T_REFERENCE        = 7,   /*reference types                            */
-    H5T_ENUM		     = 8,	/*enumeration types                          */
-    H5T_VLEN		     = 9,	/*Variable-Length types                      */
+    H5T_ENUM		 = 8,	/*enumeration types                          */
+    H5T_VLEN		 = 9,	/*Variable-Length types                      */
     H5T_ARRAY	         = 10,	/*Array types                                */
 
     H5T_NCLASSES                /*this must be last                          */
