@@ -70,6 +70,8 @@ Bug Fixes since HDF5-1.6.2 release
 
     Configuration
     -------------
+        - Fixed the long compile time of H5detect.c when v7.x Intel Compiler
+	  is used with optimization NOT off.  AKC - 2004/05/20
 
     Performance
     -------------
