@@ -764,6 +764,15 @@ H5RA_write(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	    HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 			"unable to extend raw dataset");
 	}
+    /* Throw away previous raw file dataspace */
+    H5S_close(rf_space);
+
+    /* Retrieve newly extended raw file dataspace */
+    if (NULL==(rf_space=H5D_get_space(ra->raw)) ||
+	H5S_get_simple_extent_dims(rf_space, raw_cur_size, NULL)<0) {
+	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
+		    "unable to determine current raw data extents");
+    }
     }
     hs_offset[0] = start_row;
     hs_offset[1] = 0;
@@ -798,6 +807,15 @@ H5RA_write(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	    HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 			"unable to extend meta dataset");
 	}
+    /* Throw away previous meta file dataspace */
+    H5S_close(mf_space);
+
+    /* Retrieve newly extended meta file dataspace */
+    if (NULL==(mf_space=H5D_get_space(ra->meta)) ||
+	H5S_get_simple_extent_dims(mf_space, &meta_cur_size, NULL)<0) {
+	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
+		    "unable to determine current raw data extents");
+    }
     }
     if (H5S_set_extent_simple(mm_space, 1, &nrows, NULL)<0 ||
 	H5S_select_hyperslab(mf_space, H5S_SELECT_SET, &start_row, NULL,
@@ -891,6 +909,15 @@ H5RA_fix_overflow(H5RA_t *ra, H5T_t *type, H5RA_meta_t *meta, hsize_t nelmts,
 	    HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 			"unable to extend overflow dataset");
 	}
+    /* Throw away previous overflow file dataspace */
+    H5S_close(of_space);
+
+    /* Retrieve newly extended overflow file dataspace */
+    if (NULL==(of_space=H5D_get_space(ra->over)) ||
+	H5S_get_simple_extent_dims(of_space, &cur_size, NULL)<0) {
+	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
+		    "unable to determine current overflow data extents");
+    }
 #endif
 	
     } else {
@@ -908,6 +935,15 @@ H5RA_fix_overflow(H5RA_t *ra, H5T_t *type, H5RA_meta_t *meta, hsize_t nelmts,
 	    HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 			"unable to extend overflow dataset");
 	}
+    /* Throw away previous overflow file dataspace */
+    H5S_close(of_space);
+
+    /* Retrieve newly extended overflow file dataspace */
+    if (NULL==(of_space=H5D_get_space(ra->over)) ||
+	H5S_get_simple_extent_dims(of_space, &cur_size, NULL)<0) {
+	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
+		    "unable to determine current overflow data extents");
+    }
     }
 
     /* Write the data */
