@@ -264,13 +264,21 @@ You can possibily test four versions of hdf5 library and tools. They are:
 	debug version
 	debug dll version
 
-NOTE: hdf5ddll.dll and hdf5dll.dll should be placed into some place that
+NOTE: 
+
+1) hdf5ddll.dll and hdf5dll.dll should be placed into some place that
 the application can find, one suggestion is to use
 the C:\WINNT\system or C:\WINDOWS\system directory before using the dlls.
 
+2) If you want to test HDF5 DLL using HDF5 test projects inside HDF5 workspace,
+libtestD.dll should also be placed into some place that the application 
+can find, one suggestion is to use the C:\WINNT\system or C:\WINDOWS\system
+directory before testing HDF5 DLL using HDF5 test projects inside HDF5
+workspace.
+
 We strongly suggest you to redirect your testing results into
 an output file and you can easily check the testing results. 
-You may use either NotePad or NoteTab Light or whatever other
+You may use either NotePad or WordPad or whatever other
 windows tools to check the results. For the purpose of printing, 
 please choose font less than 14 for better alignment of the text.
 
