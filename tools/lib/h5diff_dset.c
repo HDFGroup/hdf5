@@ -65,7 +65,7 @@ int diff_dataset( hid_t file1_id,
  int          can1, can2;             /* supported diff */
  hsize_t      storage_size1;
  hsize_t      storage_size2;
- int          i;
+ int          i, gout=0;
 
 
  /* disable error reporting */
@@ -80,15 +80,17 @@ int diff_dataset( hid_t file1_id,
  if ( (dset1_id = H5Dopen(file1_id,obj1_name)) < 0 )
  {
   printf("Cannot open dataset <%s>\n", obj1_name );
-  goto out;
+  gout=1;
  }
  if ( (dset2_id = H5Dopen(file2_id,obj2_name)) < 0 )
  {
   printf("Cannot open dataset <%s>\n", obj2_name );
-  goto out;
+  gout=1;
  }
  /* enable error reporting */
  } H5E_END_TRY;
+ if (gout)
+  goto out;
 
   /* Get the dataspace handle */
  if ( (space1_id = H5Dget_space(dset1_id)) < 0 )
@@ -373,13 +375,13 @@ int diff_dataset( hid_t file1_id,
  {
   if ( m_size1 < m_size2 )
   {
-   assert( (H5Tclose(m_type1)) >=0);
+   H5Tclose(m_type1);
    m_type1 = H5Tget_native_type( f_type2 , H5T_DIR_DEFAULT);
    m_size1 = H5Tget_size( m_type1 );
   }
   else
   {
-   assert( (H5Tclose(m_type2)) >=0);
+   H5Tclose(m_type2);
    m_type2 = H5Tget_native_type( f_type1 , H5T_DIR_DEFAULT);
    m_size2 = H5Tget_size( m_type2 );
   }
@@ -434,15 +436,19 @@ out:
  if ( buf1) HDfree(buf1);
  if ( buf2) HDfree(buf2);
  
- /* Close */
- if ( dset1_id!=-1 )  assert( (H5Dclose(dset1_id)) >=0);
- if ( dset2_id!=-1 )  assert( (H5Dclose(dset2_id)) >=0);
- if ( space1_id!=-1 ) assert( (H5Sclose(space1_id)) >=0);
- if ( space2_id!=-1 ) assert( (H5Sclose(space2_id)) >=0);
- if ( f_type1!=-1 )   assert( (H5Tclose(f_type1)) >=0);
- if ( f_type2!=-1 )   assert( (H5Tclose(f_type2)) >=0);
- if ( m_type1!=-1 )   assert( (H5Tclose(m_type1)) >=0);
- if ( m_type2!=-1 )   assert( (H5Tclose(m_type2)) >=0);
+ /* close */
+ /* disable error reporting */
+ H5E_BEGIN_TRY {
+  H5Dclose(dset1_id);
+  H5Dclose(dset2_id);
+  H5Sclose(space1_id);
+  H5Sclose(space2_id);
+  H5Tclose(f_type1);
+  H5Tclose(f_type2);
+  H5Tclose(m_type1);
+  H5Tclose(m_type2);
+   /* enable error reporting */
+ } H5E_END_TRY;
  
  return nfound;
 

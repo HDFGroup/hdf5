@@ -74,7 +74,7 @@ int write_dataset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
   
  /* Write the buf */
  if ( buf )
- assert(H5Dwrite(dataset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)>=0);
+  H5Dwrite(dataset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);
 
  /* Close */
  status = H5Dclose(dataset_id);

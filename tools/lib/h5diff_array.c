@@ -175,21 +175,20 @@ int diff_array_mem( void       *_mem1,
 {
  char          fmt_llong[255],  fmt_ullong[255];
  char          fmt_llongp[255], fmt_ullongp[255];
- size_t        type_size; 
- static int    ph=1;      /* print header  */
- int           nfound=0;  /* differences found */
+ hsize_t       dims[H5S_MAX_RANK];
  unsigned char *mem1 = (unsigned char*)_mem1;
  unsigned char *mem2 = (unsigned char*)_mem2;
  unsigned      u;
  hid_t         memb_type;
+ size_t        type_size; 
  size_t        offset;
  int           nmembs;
  int           j;
- hsize_t       dims[H5S_MAX_RANK];
  hsize_t       nelmts;
  hsize_t       ndims;
  size_t        size;
-
+ static int    ph=1;      /* print header  */
+ int           nfound=0;  /* differences found */
 
  /* Build default formats for long long types */
  sprintf(fmt_llong,  "%%%sd              %%%sd               %%%sd\n", 
@@ -271,13 +270,35 @@ int diff_array_mem( void       *_mem1,
   break;
 
 /*-------------------------------------------------------------------------
- * H5T_BITFIELD, H5T_OPAQUE, H5T_ENUM
+ * H5T_BITFIELD
  *-------------------------------------------------------------------------
  */
  case H5T_BITFIELD:
- case H5T_OPAQUE:
- case H5T_ENUM:
+  {
+   /* byte-by-byte comparison */
+   for (u=0; u<type_size; u++)
+    nfound+=diff_native_uchar(
+    mem1 + u,
+    mem2 + u, /* offset */
+    type_size,
+    u, 
+    rank, 
+    acc,
+    pos,
+    options, 
+    obj1, 
+    obj2,
+    ph);
 
+  }
+  break;
+/*-------------------------------------------------------------------------
+ * H5T_OPAQUE
+ *-------------------------------------------------------------------------
+ */
+ case H5T_OPAQUE:
+
+ /* byte-by-byte comparison */
   for (u=0; u<type_size; u++)
    nfound+=diff_native_uchar(
    mem1 + u,
@@ -292,6 +313,48 @@ int diff_array_mem( void       *_mem1,
    obj2,
    ph);
 
+  break;
+
+
+/*-------------------------------------------------------------------------
+ * H5T_ENUM
+ *-------------------------------------------------------------------------
+ */
+ case H5T_ENUM:
+
+/* For enumeration types we compare the names instead of the
+   integer values.  For each pair of elements being
+   compared, we convert both bit patterns to their corresponding 
+   enumeration constant and do a string comparison */
+
+  {
+   char enum_name1[1024];
+   char enum_name2[1024];
+   
+   if ((H5Tenum_nameof(m_type, mem1, enum_name1, sizeof enum_name1) >= 0) &&
+    (H5Tenum_nameof(m_type, mem2, enum_name2, sizeof enum_name2) >= 0))
+   {
+    if (HDstrcmp(enum_name1,enum_name2)!=0)
+     nfound=1;
+   }
+   else
+   {
+    for (u=0; u<type_size; u++)
+     nfound+=diff_native_uchar(
+     mem1 + u,
+     mem2 + u, /* offset */
+     type_size,
+     u, 
+     rank, 
+     acc,
+     pos,
+     options, 
+     obj1, 
+     obj2,
+     ph);
+    
+   }
+  }
   
   break;
 /*-------------------------------------------------------------------------
@@ -1278,8 +1341,7 @@ int diff_array_mem( void       *_mem1,
 /*-------------------------------------------------------------------------
  * Function: diff_native_uchar
  *
- * Purpose: compare H5T_NATIVE_UCHAR (used in H5T_NATIVE_UCHAR 
- *  and H5T_STRING class)
+ * Purpose: do a byte-by-byte comparison
  *
  * Return: number of differences found
  *
