@@ -28,8 +28,7 @@
 
 /* Disable certain warnings in PC-Lint: */
 /*lint --emacro( {534, 830}, H5P_DEFAULT, H5P_FILE_ACCESS, H5P_DATASET_XFER) */
-/*lint --emacro( {534, 830}, H5F_ACC_DEBUG) */
-/*lint --emacro( {534, 830}, H5F_ACC_RDWR) */
+/*lint --emacro( {534, 830}, H5F_ACC_DEBUG, H5F_ACC_RDWR) */
 /*lint --emacro( {534, 830}, H5FD_MULTI) */
 /*lint -esym( 534, H5Eclear, H5Epush) */
 

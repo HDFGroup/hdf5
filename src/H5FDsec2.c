@@ -114,7 +114,7 @@ typedef struct H5FD_sec2_t {
 # /*MSVC*/
 #   define file_offset_t __int64
 #   define file_seek _lseeki64
-#   define file_truncate	_ftruncatei64
+#   define file_truncate	_chsize
 #else
 #   define file_offset_t	off_t
 #   define file_seek		lseek
@@ -141,7 +141,6 @@ typedef struct H5FD_sec2_t {
 				 ((A) & ~(haddr_t)MAXADDR))
 #define SIZE_OVERFLOW(Z)	((Z) & ~(hsize_t)MAXADDR)
 #define REGION_OVERFLOW(A,Z)	(ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) ||      \
-				 sizeof(file_offset_t)<sizeof(size_t) ||      \
                                  HADDR_UNDEF==(A)+(Z) ||		      \
 				 (file_offset_t)((A)+(Z))<(file_offset_t)(A))
 
@@ -305,6 +304,9 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     H5FD_t	*ret_value;
 
     FUNC_ENTER_NOAPI(H5FD_sec2_open, NULL)
+
+    /* Sanity check on file offsets */
+    assert(sizeof(file_offset_t)>=sizeof(size_t));
 
     /* Check arguments */
     if (!name || !*name)

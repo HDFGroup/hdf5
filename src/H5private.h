@@ -587,7 +587,11 @@ H5_DLL void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 #define HDfgetc(F)		fgetc(F)
 #define HDfgetpos(F,P)		fgetpos(F,P)
 #define HDfgets(S,N,F)		fgets(S,N,F)
+#ifdef WIN32
+#define HDfileno(F)		_fileno(F)
+#else /* WIN32 */
 #define HDfileno(F)		fileno(F)
+#endif /* WIN32 */
 #define HDfloor(X)		floor(X)
 #define HDfmod(X,Y)		fmod(X,Y)
 #define HDfopen(S,M)		fopen(S,M)
