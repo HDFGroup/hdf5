@@ -56,11 +56,6 @@ if test "X-icc" = "X-$cc_vendor"; then
     CFLAGS="$CFLAGS $arch -Wall -Wcheck"
 
     # Production
-
-    # Omit frame pointer for optimized code?
-    #NOFP=${NOFP:=-Mnoframe}
-
-    #PROD_CFLAGS="-O3 $NOFP"
     PROD_CFLAGS="-O3"
     PROD_CPPFLAGS=
 
