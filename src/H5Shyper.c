@@ -1684,23 +1684,19 @@ H5S_hyper_is_valid (const H5S_t *space)
         for(u=0; u<space->extent.u.simple.rank; u++) {
             /* if block or count is zero, then can skip the test since */
             /* no data point is chosen */
-            if (diminfo[u].count*diminfo[u].block != 0) {
+            if (diminfo[u].count && diminfo[u].block) {
                 /* Bounds check the start point in this dimension */
                 if((diminfo[u].start+space->select.offset[u])<0 ||
-                    (diminfo[u].start+space->select.offset[u])>=(hssize_t)space->extent.u.simple.size[u]) {
-                    ret_value=FALSE;
-                    break;
-                } /* end if */
+                        (diminfo[u].start+space->select.offset[u])>=(hssize_t)space->extent.u.simple.size[u])
+                    HGOTO_DONE(FALSE)
 
                 /* Compute the largest location in this dimension */
                 end=diminfo[u].start+diminfo[u].stride*(diminfo[u].count-1)+(diminfo[u].block-1)+space->select.offset[u];
 
                 /* Bounds check the end point in this dimension */
-                if(end<0 || end>=(hssize_t)space->extent.u.simple.size[u]) {
-                    ret_value=FALSE;
-                    break;
-                } /* end if */
-            }
+                if(end<0 || end>=(hssize_t)space->extent.u.simple.size[u])
+                    HGOTO_DONE(FALSE)
+            } /* end if */
         } /* end for */
     } /* end if */
     else {
