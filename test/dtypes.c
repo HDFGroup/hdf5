@@ -6038,9 +6038,23 @@ test_conv_flt_1 (const char *name, hbool_t run_special, hid_t src, hid_t dst)
 		uflow++;
 	    }
 
+            /* For Intel machines, the size of "long double" is 12 bytes, precision
+             * is 80 bits; for Intel IA64 and AMD processors, the size of "long double" 
+             * is 16 bytes, precision is 80 bits.  During hardware conversion, the 
+             * last few unused bytes may have garbage in them.  Clean them out with 
+             * 0s before compare the values.
+             */ 
+            if(endian==H5T_ORDER_LE && dst_type==FLT_LDOUBLE) {
+                int q;
+                for(q=dst_nbits/8; q<dst_size; q++) {
+                    buf[j*dst_size+q] = 0x00;
+                    hw[q] = 0x00;
+                }
+            }
+
 	    /* Are the two results the same? */
-	    for (k=0; k<dst_size; k++)
-		if (buf[j*dst_size+k]!=hw[k])
+            for (k=(dst_size-(dst_nbits/8)); k<dst_size; k++)
+                if (buf[j*dst_size+k]!=hw[k])
                     break;
 	    if (k==dst_size)
                 continue; /*no error*/
@@ -6905,7 +6919,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
              */ 
             if(endian==H5T_ORDER_LE && dst_type==FLT_LDOUBLE) {
                 int q;
-                for(q=10; q<dst_size; q++) {
+                for(q=dst_nbits/8; q<dst_size; q++) {
                     buf[j*dst_size+q] = 0x00;
                 }
             }
