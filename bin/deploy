@@ -46,14 +46,14 @@ if [ $# != 1 ]; then
 fi
 
 installdir=$1
-if [ ! -e $installdir ]; then
-    mkdir $installdir
-fi
-if [ ! -d $installdir ]; then
+# create installdir if it does not exist yet.
+if [ -d $installdir ] || mkdir $installdir ; then
+    ${MAKE:-gmake} install prefix=$installdir  && \
+	( cd $installdir/bin; ./h5redeploy -force)
+    exit $?
+else
     echo $installdir is not a valid directory
     USAGE
     exit 1
 fi
 
-${MAKE:-gmake} install prefix=$installdir  && ( cd $installdir/bin; ./h5redeploy -force)
-exit $?
