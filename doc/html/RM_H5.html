@@ -18,7 +18,10 @@ H5&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<!--
 <a href="Glossary.html">Glossary</a>
+-->
 </center>
 <hr>
 
@@ -37,8 +40,8 @@ and it users.
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    <li><a href="#Library-Version">H5version</a>
-    <li><a href="#Library-VersCheck">H5vers_check</a>
+    <li><a href="#Library-Version">H5get_libversion</a>
+    <li><a href="#Library-VersCheck">H5check_version</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
@@ -127,18 +130,18 @@ and it users.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Library-Version">H5version</a>
+<dt><strong>Name:</strong> <a name="Library-Version">H5get_libversion</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5version</code>(<em>unsigned *</em><code>majnum</code>,
+    <dd><em>herr_t</em> <code>H5get_libversion</code>(<em>unsigned *</em><code>majnum</code>,
             <em>unsigned *</em><code>minnum</code>,
-            <em>unsigned *</em><code>relnum</code>,
-            <em>unsigned *</em><code>patnum</code>
+            <em>unsigned *</em><code>relnum</code>
         )
 <dt><strong>Purpose:</strong>
-    <dd>
+    <dd>Returns the HDF library release number.
 <dt><strong>Description:</strong>
-    <dd><code>H5version</code> retrieves the major, minor, release, and
-        patch versions of the library which is linked to the application.  
+    <dd><code>H5get_libversion</code> retrieves the major, minor, and release
+        numbers of the version of the HDF library which is linked to 
+        the application.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>unsigned *</em><code>majnum</code>
@@ -147,8 +150,6 @@ and it users.
             <dd>The minor version of the library.
         <dt><em>unsigned *</em><code>relnum</code>
             <dd>The release number of the library.
-        <dt><em>unsigned *</em><code>patnum</code>
-            <dd>The patch number of the library.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns SUCCEED (0) if successful;
@@ -158,23 +159,22 @@ and it users.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Library-VersCheck">H5vers_check</a>
+<dt><strong>Name:</strong> <a name="Library-VersCheck">H5check_version</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5vers_check</code>(<em>unsigned *</em><code>majnum</code>,
-            <em>unsigned *</em><code>minnum</code>,
-            <em>unsigned *</em><code>relnum</code>,
-            <em>unsigned *</em><code>patnum</code>
+    <dd><em>herr_t</em> <code>H5check_version</code>(<em>unsigned</em> <code>majnum</code>,
+            <em>unsigned</em> <code>minnum</code>,
+            <em>unsigned</em> <code>relnum</code>
         )
 <dt><strong>Purpose:</strong>
     <dd>
 <dt><strong>Description:</strong>
-    <dd><code>H5vers_check</code> verifies that the arguments match the 
+    <dd><code>H5check_version</code> verifies that the arguments match the 
         version numbers compiled into the library.  This function is intended 
         to be called from user to verify that the versions of header files 
         compiled into the application match the version of the HDF5 library.  
         <p>
         Due to the risks of data corruption or segmentation faults, 
-        <code>H5vers_check</code> causes the application to abort if the
+        <code>H5check_version</code> causes the application to abort if the
         version numbers do not match.
 <dt><strong>Parameters:</strong>
     <dl>
@@ -206,7 +206,10 @@ H5&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<!--
 <a href="Glossary.html">Glossary</a>
+-->
 </center>
 <hr>
 
@@ -214,7 +217,7 @@ H5&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  14 July 1998
+Last modified:  2 September 1998
 
 </body>
 </html>

@@ -18,7 +18,10 @@ H5A&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<!--
 <a href="Glossary.html">Glossary</a>
+-->
 </center>
 <hr>
 
@@ -49,7 +52,7 @@ and information about attributes.
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
     <li><a href="#Annot-GetType">H5Aget_type</a>
-    <li><a href="#Annot-NumAttrs">H5Anum_attrs</a>
+    <li><a href="#Annot-NumAttrs">H5Aget_num_attrs</a>
     <li><a href="#Annot-Iterate">H5Aiterate</a>
     <li><a href="#Annot-Delete">H5Adelete</a>
 </ul>
@@ -107,7 +110,7 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>IN: Object (dataset or group) to be attached to.
+            <dd>IN: Object (dataset, group, or named datatype) to be attached to.
         <dt><em>const char *</em><code>name</code>
             <dd>IN: Name of attribute to create.
         <dt><em>hid_t</em> <code>type_id</code>
@@ -203,6 +206,14 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         <code>attr_id</code>.  The attribute's memory datatype 
         is specified with <code>mem_type_id</code>.  The entire 
         attribute is written from <code>buf</code> to the file. 
+        <p>
+        Datatype conversion takes place at the time of a read or write
+        and is automatic.  See the
+        <a href="Datatypes.html#Datatypes-DataConversion">Data Conversion</a> 
+        section of <cite>The Data Type Interface (H5T)</cite> in the 
+        <cite>HDF5 User's Guide</cite> for a discussion of 
+        data conversion, including the range of conversions currently 
+        supported by the HDF5 libraries.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>attr_id</code>
@@ -233,6 +244,14 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         <code>attr_id</code>.  The attribute's memory datatype 
         is specified with <code>mem_type_id</code>.  The entire 
         attribute is read into <code>buf</code> from the file. 
+        <p>
+        Datatype conversion takes place at the time of a read or write
+        and is automatic.  See the
+        <a href="Datatypes.html#Datatypes-DataConversion">Data Conversion</a> 
+        section of <cite>The Data Type Interface (H5T)</cite> in the 
+        <cite>HDF5 User's Guide</cite> for a discussion of 
+        data conversion, including the range of conversions currently 
+        supported by the HDF5 libraries.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>attr_id</code>
@@ -336,13 +355,13 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Annot-NumAttrs">H5Anum_attrs</a>
+<dt><strong>Name:</strong> <a name="Annot-NumAttrs">H5Aget_num_attrs</a>
 <dt><strong>Signature:</strong>
-    <dd><em>int</em> <code>H5Anum_attrs</code>(<em>hid_t</em> <code>loc_id</code>)
+    <dd><em>int</em> <code>H5Aget_num_attrs</code>(<em>hid_t</em> <code>loc_id</code>)
 <dt><strong>Purpose:</strong>
     <dd>Determines the number of attributes attached to an object.
 <dt><strong>Description:</strong>
-    <dd><code>H5Anum_attrs</code> returns the number of attributes 
+    <dd><code>H5Aget_num_attrs</code> returns the number of attributes 
         attached to the object specified by its identifier, 
         <code>loc_id</code>.  
         The object can be a group, dataset, or named datatype.
@@ -487,7 +506,10 @@ H5A&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<!--
 <a href="Glossary.html">Glossary</a>
+-->
 </center>
 <hr>
 
@@ -495,7 +517,7 @@ H5A&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  14 July 1998
+Last modified:  1 September 1998
 
 </body>
 </html>
