@@ -12,6 +12,15 @@ CP=cp
 # configure's automatic SHELL detection may not work on the build machine.
 SHELL=/bin/sh
 
+# Some machines need a command to run executables; this is that command
+# so that our tests will run.
+# We use RUNTESTS instead of RUNSERIAL directly because it may be that
+# some tests need to be run with a different command.  Older versions
+# of the makefiles used the command
+# $(LIBTOOL) --mode=execute
+# in some directories, for instance.
+RUNTESTS=$(RUNSERIAL)
+
 # Libraries to link to while building
 LIBHDF5=$(top_builddir)/src/libhdf5.la
 LIBH5TEST=$(top_builddir)/test/libh5test.la
@@ -37,9 +46,10 @@ H5FC_PP=$(bindir)/h5pfc
 F9XMODEXT=@F9XMODEXT@
 F9XMODFLAG=@F9XMODFLAG@
 
-# Set the paths for autotools to be correct on heping.
+# Set the paths for AFS installs of autotools for Linux machines
 # Ideally, these tools should never be needed during the build.
-ACLOCAL=/usr/bin/aclocal
-AUTOCONF=/usr/local/autoconf-2.59/bin/autoconf
-AUTOMAKE=/usr/bin/automake
-AUTOHEADER=/usr/local/autoconf-2.59/bin/autoheader
+ACLOCAL=/afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/aclocal -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
+AUTOHEADER=/afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
+AUTOMAKE=/afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake
+AUTOCONF=/afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
+

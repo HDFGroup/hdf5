@@ -92,18 +92,18 @@ ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
-# Set the paths for autotools to be correct on heping.
+# Set the paths for AFS installs of autotools for Linux machines
 # Ideally, these tools should never be needed during the build.
-ACLOCAL = /usr/bin/aclocal
+ACLOCAL = /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/aclocal -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
 AM_MAKEFLAGS = @AM_MAKEFLAGS@
 AR = @AR@
-AUTOCONF = /usr/local/autoconf-2.59/bin/autoconf
-AUTOHEADER = /usr/local/autoconf-2.59/bin/autoheader
-AUTOMAKE = /usr/bin/automake
+AUTOCONF = /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
+AUTOHEADER = /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
+AUTOMAKE = /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake
 AWK = @AWK@
 BUILD_CXX_CONDITIONAL_FALSE = @BUILD_CXX_CONDITIONAL_FALSE@
 BUILD_CXX_CONDITIONAL_TRUE = @BUILD_CXX_CONDITIONAL_TRUE@
@@ -273,6 +273,15 @@ target_alias = @target_alias@
 # Shell commands used in Makefiles
 RM = rm -f
 CP = cp
+
+# Some machines need a command to run executables; this is that command
+# so that our tests will run.
+# We use RUNTESTS instead of RUNSERIAL directly because it may be that
+# some tests need to be run with a different command.  Older versions
+# of the makefiles used the command
+# $(LIBTOOL) --mode=execute
+# in some directories, for instance.
+RUNTESTS = $(RUNSERIAL)
 
 # Libraries to link to while building
 LIBHDF5 = $(top_builddir)/src/libhdf5.la
@@ -641,7 +650,7 @@ test _test: $(PROGS) $(TESTS)
 	      fi;                                                             \
 	      echo "============================";                            \
 	      srcdir="$(srcdir)"                                              \
-	         $(RUNTEST) ./$$test $(TEST_FLAGS) ||                         \
+	         $(RUNTESTS) ./$$test $(TEST_FLAGS) ||                         \
 	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
 	         break;                                                       \
 	      echo "";                                                        \

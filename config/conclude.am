@@ -64,7 +64,7 @@ test _test: $(PROGS) $(TESTS)
 	      fi;                                                             \
 	      echo "============================";                            \
 	      srcdir="$(srcdir)"                                              \
-	         $(RUNTEST) ./$$test $(TEST_FLAGS) ||                         \
+	         $(RUNTESTS) ./$$test $(TEST_FLAGS) ||                         \
 	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
 	         break;                                                       \
 	      echo "";                                                        \
