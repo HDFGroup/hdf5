@@ -3106,6 +3106,197 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function: auxread_fdata
+ *
+ * Purpose: reads a dataset "NAME" from FID
+ *
+ * Return: Success: 0
+ *  Failure: -1
+ *
+ * Programmer: Pedro Vicente
+ *              Monday, March 8, 2004
+ *
+ * Modifications:
+ *             
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+auxread_fdata(hid_t fid, const char *name)
+{
+ hid_t     dset_id;           /* dataset ID */ 
+ hid_t     dcpl_id;           /* dataset creation property list ID */ 
+ hid_t     space_id;          /* space ID */ 
+ hid_t     ftype_id;          /* file data type ID */ 
+ hid_t     mtype_id;          /* memory data type ID */
+ size_t    msize;             /* memory size of memory type */
+ void      *buf=NULL;         /* data buffer */
+ hsize_t   nelmts;            /* number of elements in dataset */
+ int       rank;              /* rank of dataset */
+ hsize_t   dims[H5S_MAX_RANK];/* dimensions of dataset */
+ int       i;
+ 
+ if ((dset_id=H5Dopen(fid,name))<0) 
+  goto error;
+ if ((space_id=H5Dget_space(dset_id))<0) 
+  goto error;
+ if ((ftype_id=H5Dget_type (dset_id))<0) 
+  goto error;
+ if ((dcpl_id=H5Dget_create_plist(dset_id))<0) 
+  goto error;
+ if ( (rank=H5Sget_simple_extent_ndims(space_id))<0)
+  goto error;
+ HDmemset(dims, 0, sizeof dims);
+ if ( H5Sget_simple_extent_dims(space_id,dims,NULL)<0)
+  goto error;
+ nelmts=1;
+ for (i=0; i<rank; i++) 
+  nelmts*=dims[i];
+ if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
+  goto error;
+ if ((msize=H5Tget_size(mtype_id))==0)
+  goto error;
+ 
+ if (nelmts)
+ {
+  buf=(void *) HDmalloc((unsigned)(nelmts*msize));
+  if ( buf==NULL){
+   printf( "cannot read into memory\n" );
+   goto error;
+  }
+  if (H5Dread(dset_id,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+   goto error;
+ }
+ 
+ if (H5Pclose(dcpl_id)<0) 
+  goto error;
+ if (H5Sclose(space_id)<0) 
+  goto error;
+ if (H5Dclose(dset_id)<0) 
+  goto error;
+ if (buf)
+  free(buf);
+
+ return 0;
+
+error:
+ H5E_BEGIN_TRY {
+  H5Pclose(dcpl_id);
+  H5Sclose(space_id);
+  H5Dclose(dset_id);
+  H5Tclose(ftype_id);
+  H5Tclose(mtype_id);
+  if (buf)
+   free(buf);
+ } H5E_END_TRY;
+ return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: test_filters_endianess
+ *
+ * Purpose: Reads/writes data with filters (big-endian/little-endian data)
+ *
+ * Return: Success: 0
+ *  Failure: -1
+ *
+ * Programmer: Pedro Vicente
+ *              Monday, March 8, 2004
+ *
+ * Modifications:
+ *             
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_filters_endianess(void)
+{
+    hid_t     fid;                   /* file ID */
+    hid_t     dsid;                  /* dataset ID */
+    hid_t     sid;                   /* dataspace ID */ 
+    hid_t     dcpl;                  /* dataset creation property list ID */
+    hsize_t   dims[1]={2};           /* dataspace dimensions */
+    hsize_t   chunk_dims[1]={2};     /* chunk dimensions */
+    int       buf[2];
+    int       rank=1;
+    int       i;
+    
+    for (i=0; i<2; i++){
+     buf[i]=1;
+    }
+    
+    TESTING("filters with big-endian/little-endian data");
+
+   /*-------------------------------------------------------------------------
+    * step1: create a file 
+    *-------------------------------------------------------------------------
+    */  
+    /* create a file using default properties */
+    fid=H5Fcreate("test_filters.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);
+
+    /* create a data space */
+    if ((sid = H5Screate_simple(rank,dims,NULL))<0) goto error;
+
+    /* create dcpl  */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if(H5Pset_chunk(dcpl,rank,chunk_dims)<0) goto error;
+
+#if defined H5_HAVE_FILTER_FLETCHER32 
+    if (H5Pset_fletcher32 (dcpl)<0) goto error;
+#endif
+
+    /* create a dataset */
+    if ((dsid = H5Dcreate(fid,"dset",H5T_NATIVE_INT,sid,dcpl)) <0) goto error;
+
+    if(H5Dwrite(dsid,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+     goto error;
+
+    /* close */
+    if (H5Pclose (dcpl)<0) goto error;
+    if (H5Dclose (dsid)<0) goto error;
+    if (H5Sclose (sid)<0) goto error;
+    if (H5Fclose (fid)<0) goto error;
+   /*-------------------------------------------------------------------------
+    * step 2: open a file written on a little-endian machine in step 1 
+    *-------------------------------------------------------------------------
+    */  
+    /* open */
+    if ((fid=H5Fopen("test_filters_le.hdf5",H5F_ACC_RDONLY,H5P_DEFAULT))<0) 
+     goto error;
+
+    /* read */
+    if (auxread_fdata(fid,"dset")<0) goto error;
+
+    /* close */
+    if (H5Fclose(fid)<0) goto error;
+   /*-------------------------------------------------------------------------
+    * step 3: open a file written on a big-endian machine in step 1 
+    *-------------------------------------------------------------------------
+    */  
+    /* open */
+    if ((fid=H5Fopen("test_filters_be.hdf5",H5F_ACC_RDONLY,H5P_DEFAULT))<0) 
+     goto error;
+
+    /* read */
+    if (auxread_fdata(fid,"dset")<0) goto error;
+
+    /* close */
+    if (H5Fclose(fid)<0) goto error;
+ 
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_filters_endianess() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Tests the dataset interface (H5D)
@@ -3172,6 +3363,7 @@ main(void)
 #endif /* H5_WANT_H5_V1_4_COMPAT */
     nerrors += test_can_apply_szip(file)<0	?1:0; 
     nerrors += test_compare_dcpl(file)<0	?1:0; 
+    nerrors += test_filters_endianess()<0	?1:0;
 
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
