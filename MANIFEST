@@ -1064,6 +1064,7 @@
 ./testpar/t_mdset.c
 ./testpar/t_mpi.c
 ./testpar/t_ph5basic.c
+./testpar/t_coll_chunk.c
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
 ./testpar/testph5.sh.in
