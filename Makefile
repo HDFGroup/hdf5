@@ -35,11 +35,72 @@ INSTALL_PROGRAM=${INSTALL}
 INSTALL_DATA=${INSTALL} -m 644
 
 # Installation points
+ROOT=/usr/home/koziol/hdf_dev/hdf5
 prefix=/usr/local
 exec_prefix=${prefix}
 bindir=${exec_prefix}/bin
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
+
+# The default is to build the library and programs.
+all: lib progs
+
+# The following rules insure that the Makefile is up-to-date by rerunning
+# various autoconf components (although not all versions of make assume
+# that the makefile is implicitly a target).  We use time stamp files to
+# keep track of the most recent update of H5config.h.in and H5config.h
+# because autoheader and config.status don't update the modification time
+# if the contents don't change.
+#
+# Graphically, the dependencies are:
+#
+#			    configure.in
+#                              |  |
+#         +--------------------+  +-------------------+
+#         |                                           |
+#      stamp1                                     configure
+#         |                                           |
+#         |                                     config.status
+#         |                                       |   |
+#         | +-------------------------------------+   |
+#         | |                                         |
+#       stamp2            Makefile.in                 |
+#          |                    |                     |
+#          |                    +-----------+  +------+
+#          +-----------------------------+  |  |
+#                                        |  |  |
+#                                        Makefile
+#
+# A side effect of updating stamp1 is to generate H5config.h.in and a
+# side effect of updating stamp2 is to generate H5config.h.  When using
+# a version of make that doesn't treat the makefile as the initial target
+# the user may want to occassionally type `make Makefile' in any source
+# directory.
+#
+STAMP1=$(ROOT)/config/stamp1
+STAMP2=$(ROOT)/config/stamp2
+
+MAKEFILE_PARTS=$(ROOT)/config/commence.in Makefile.in			      \
+	       $(ROOT)/config/conclude.in $(ROOT)/config/depend.in
+
+$(STAMP1): $(ROOT)/configure.in
+	-(cd $(ROOT);							      \
+	  touch $(STAMP1);						      \
+	  autoheader)
+
+$(STAMP2): $(STAMP1) $(ROOT)/config.status
+	-(cd $(ROOT);							      \
+	  touch $(STAMP2);						      \
+	  CONFIG_FILES= CONFIG_HEADERS=src/H5config.h ./config.status)
+
+$(ROOT)/configure: $(ROOT)/configure.in
+	-(cd $(ROOT); autoconf)
+
+$(ROOT)/config.status: $(ROOT)/configure
+	-(cd $(ROOT); ./config.status --recheck)
+
+Makefile: $(MAKEFILE_PARTS) $(ROOT)/config.status $(STAMP2)
+	-(cd $(ROOT); CONFIG_HEADERS= ./config.status)
 
 #------------------------------------------------------------------------------
 # The following section of this makefile comes from the middle of `Makefile.in'
@@ -54,6 +115,8 @@ SUBDIRS=src test
 #
 # all:		Build libraries, header files, and programs in the various
 #		subdirectories but do not install them.
+#
+# test:		Test the uninstalled library to make sure it works.
 #
 # install:	Installs libraries, header files, programs, and documentation
 #		in the various directories under the prefix directory (lib,
@@ -91,7 +154,8 @@ SUBDIRS=src test
 #		make used in combination with gcc will maintain dependency
 #		information automatically.
 #
-all install uninstall TAGS dep depend:
+.PHONY: test
+all lib progs test install uninstall TAGS dep depend:
 	@set -x; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
@@ -120,4 +184,6 @@ maintainer-clean:
 
 
 # This file does not end with the `CONCLUDE' statement since it has
-# redefined all the standard targets anyway.
+# redefined all the standard targets anyway.  However, we do need the
+# `DEPEND' so we can automatically rerun configure if we have GNU make.
+
