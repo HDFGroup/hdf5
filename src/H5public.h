@@ -43,9 +43,15 @@ typedef unsigned int	uint32;
 #elif SIZEOF_LONG==4
 typedef long		int32;
 typedef unsigned long	uint32;
+#else
+typedef int		int32;		/*not really*/
+typedef unsigned	uint32;		/*not really*/
 #endif
 
-#if SIZEOF_LONG==8
+#if SIZEOF_INT==8
+typedef int		int64;
+typedef unsigned	uint64;
+#elif SIZEOF_LONG==8
 typedef long		int64;
 typedef unsigned long	uint64;
 #elif SIZEOF_LONG_LONG==8

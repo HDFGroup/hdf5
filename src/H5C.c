@@ -399,12 +399,20 @@ done:
 
 	Robb Matzke, 26 Aug 1997
 	Changed `hash_size' to `val' in two places.
+
+        Robb Matzke, 15 Sep 1997
+        The H5_OFFSET_SIZE and H5_LENGTH_SIZE parameters should be passed
+        a uint8 pointer for the BUF value.
+
+	Robb Matzke, 15 Sep 1997
+	Fixed the power-of-two test to work with any size integer.
 --------------------------------------------------------------------------*/
 herr_t H5Csetparm(hatom_t tid, file_create_param_t parm, const VOIDP buf)
 {
     file_create_temp_t *template;    /* template to query */
     herr_t ret_value = SUCCEED;
     uintn val;
+    intn i;
 
     FUNC_ENTER(H5Csetparm, H5C_init_interface, FAIL);
 
@@ -423,27 +431,25 @@ herr_t H5Csetparm(hatom_t tid, file_create_param_t parm, const VOIDP buf)
       {
         case H5_USERBLOCK_SIZE:
             val = *(const uintn *)buf;
-            /* If anyone knows a faster test for a power of two, please change this silly code -QAK */
-            if (val!=0 && !(val==512 || val==1024 || val==2048 || val==4096
-                || val==8192 || val==16374 || val==32768 || val==65536
-                || val==131072 || val==262144 || val==524288 || val==1048576
-                || val==2097152 || val==4194304 || val==8388608
-                || val==16777216 || val==33554432 || val==67108864
-                || val==134217728 || val==268435456)) {
-               HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
-            }
+	    for (i=8; i<8*sizeof(int); i++) {
+	       uintn p2 = 8==i ? 0 :1<<i;
+	       if (val==p2) break;
+	    }
+	    if (i>=8*sizeof(int)) {
+	       HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
+	    }
             template->userblock_size=val;
             break;
 
         case H5_OFFSET_SIZE:
-            val = *(const uintn *)buf;
+            val = *(const uint8 *)buf;
             if(!(val==2 || val==4 || val==8 || val==16 || val==32 || val==64 || val==128 || val==256))
                HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
             template->offset_size=val;
             break;
 
         case H5_LENGTH_SIZE:
-            val = *(const uintn *)buf;
+            val = *(const uint8 *)buf;
             if(!(val==2 || val==4 || val==8 || val==16 || val==32 || val==64 || val==128 || val==256))
                HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL);
             template->length_size=val;

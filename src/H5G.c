@@ -263,6 +263,11 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
 	       H5O_reset (H5O_NAME, &mesg);
 	       *base = *dir;
 	       aside = TRUE;
+	    } else {
+	       /* component not found */
+	       H5O_reset (H5O_NAME, &mesg);
+	       if (dir_ent) *dir_ent = *dir;
+	       HRETURN_ERROR (H5E_DIRECTORY, H5E_NOTFOUND, -2);
 	    }
 	    H5O_reset (H5O_NAME, &mesg);
 	 } else {
