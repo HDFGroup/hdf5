@@ -2490,15 +2490,9 @@ H5C_flush_cache(H5F_t *  f,
 
         if(cache_ptr->slist_ptr) {
 
-            /* XXX: Replace this with call to H5SL_free() when its implemented... */
-            H5SL_close(cache_ptr->slist_ptr);
+            /* Release all nodes from skip list, but keep list active */
+            H5SL_release(cache_ptr->slist_ptr);
 
-            /* XXX: ...and remove this call */
-            if ( (cache_ptr->slist_ptr = H5SL_create(H5SL_TYPE_HADDR,0.5,16)) 
-                 == NULL ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create skip list.")
-            }
         }
         cache_ptr->slist_len = 0;
         cache_ptr->slist_size = 0;

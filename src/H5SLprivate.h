@@ -60,6 +60,7 @@ H5_DLL void *H5SL_search(H5SL_t *slist, void *key);
 H5_DLL H5SL_node_t *H5SL_first(H5SL_t *slist);
 H5_DLL H5SL_node_t *H5SL_next(H5SL_node_t *slist_node);
 H5_DLL void *H5SL_item(H5SL_node_t *slist_node);
+H5_DLL herr_t H5SL_release(H5SL_t *slist);
 H5_DLL herr_t H5SL_close(H5SL_t *slist);
 
 #endif /* _H5HPprivate_H */
