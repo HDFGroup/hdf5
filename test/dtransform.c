@@ -160,7 +160,11 @@ int main(void)
    if((err = H5Dclose(dset_id_long))<0) TEST_ERROR;
    if((err = H5Dclose(dset_id_ulong))<0) TEST_ERROR;
    if((err = H5Dclose(dset_id_llong))<0) TEST_ERROR;
+
+#ifdef H5_ULLONG_TO_FP_CAST_WORKS
    if((err = H5Dclose(dset_id_ullong))<0) TEST_ERROR;
+#endif
+
    if((err = H5Dclose(dset_id_float))<0) TEST_ERROR;
    if((err = H5Dclose(dset_id_double))<0) TEST_ERROR;
    if((err = H5Dclose(dset_id_ldouble))<0) TEST_ERROR;
@@ -232,10 +236,10 @@ int init_test(void)
  
     if((dset_id_llong = H5Dcreate(file_id, "/transformtest_llong", H5T_NATIVE_LLONG, dataspace, H5P_DEFAULT))<0) TEST_ERROR;
     if((err = H5Dwrite(dset_id_llong, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillFfloat))<0) TEST_ERROR;
-
+#ifdef H5_ULLONG_TO_FP_CAST_WORKS
     if((dset_id_ullong = H5Dcreate(file_id, "/transformtest_ullong", H5T_NATIVE_ULLONG, dataspace, H5P_DEFAULT))<0) TEST_ERROR;
     if((err = H5Dwrite(dset_id_ullong, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_utrans, transformData))<0) TEST_ERROR;
-
+#endif
     if((dset_id_short = H5Dcreate(file_id, "/transformtest_short", H5T_NATIVE_SHORT, dataspace, H5P_DEFAULT))<0) TEST_ERROR;
     if((err = H5Dwrite(dset_id_short, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillFfloat))<0) TEST_ERROR;
 
