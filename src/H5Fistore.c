@@ -193,105 +193,11 @@ H5B_class_t H5B_ISTORE[1] = {{
 #define H5F_HASH(F,ADDR) H5F_addr_hash((ADDR/H5F_HASH_DIVISOR),(F)->shared->rdcc.nslots)
 
 
-/* Declare a free list to manage the chunk information */
-H5FL_BLK_DEFINE_STATIC(istore_chunk);
-
 /* Declare a free list to manage H5F_rdcc_ent_t objects */
 H5FL_DEFINE_STATIC(H5F_rdcc_ent_t);
 
 /* Declare a PQ free list to manage the H5F_rdcc_ent_ptr_t array information */
 H5FL_ARR_DEFINE_STATIC(H5F_rdcc_ent_ptr_t,-1);
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_istore_chunk_alloc
- *
- * Purpose:	Allocates memory for a chunk of a dataset.  This routine is used
- *      instead of malloc because the chunks can be kept on a free list so
- *      they don't thrash malloc/free as much.
- *
- * Return:	Success:	valid pointer to the chunk
- *
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, March  21, 2000
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void *
-H5F_istore_chunk_alloc(size_t chunk_size)
-{
-    void *ret_value;                    /* Pointer to the chunk to return to the user */
-
-    FUNC_ENTER(H5F_istore_chunk_alloc, NULL);
-
-    ret_value=H5FL_BLK_ALLOC(istore_chunk,(hsize_t)chunk_size,0);
-
-    FUNC_LEAVE(ret_value);
-} /* end H5F_istore_chunk_alloc() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_istore_chunk_free
- *
- * Purpose:	Releases memory for a chunk of a dataset.  This routine is used
- *      instead of free because the chunks can be kept on a free list so
- *      they don't thrash malloc/free as much.
- *
- * Return:	Success:	NULL
- *
- *		Failure:	never fails
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, March  21, 2000
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void *
-H5F_istore_chunk_free(void *chunk)
-{
-    FUNC_ENTER(H5F_istore_chunk_free, NULL);
-
-    H5FL_BLK_FREE(istore_chunk,chunk);
-
-    FUNC_LEAVE(NULL);
-} /* end H5F_istore_chunk_free() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_istore_chunk_realloc
- *
- * Purpose:	Resizes a chunk in chunking memory allocation system.  This
- *      does things the straightforward, simple way, not actually using
- *      realloc.
- *
- * Return:	Success:	NULL
- *
- *		Failure:	never fails
- *
- * Programmer:	Quincey Koziol
- *		Tuesday, March  21, 2000
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void *
-H5F_istore_chunk_realloc(void *chunk, size_t new_size)
-{
-    void *ret_value=NULL;               /* Return value */
-
-    FUNC_ENTER(H5F_istore_chunk_realloc, NULL);
-
-    ret_value=H5FL_BLK_REALLOC(istore_chunk,chunk,(hsize_t)new_size);
-
-    FUNC_LEAVE(ret_value);
-} /* end H5F_istore_chunk_realloc() */
 
 
 /*-------------------------------------------------------------------------
@@ -978,7 +884,7 @@ H5F_istore_flush_entry(H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
                  * for later.
                  */
                 alloc = ent->chunk_size;
-                if (NULL==(buf = H5F_istore_chunk_alloc(alloc))) {
+                if (NULL==(buf = H5MM_malloc(alloc))) {
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                         "memory allocation failed for pipeline");
                 }
@@ -1028,7 +934,7 @@ H5F_istore_flush_entry(H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
         ent->pline = H5O_free(H5O_PLINE, ent->pline);
         if (buf==ent->chunk) buf = NULL;
         if(ent->chunk!=NULL)
-            ent->chunk = H5F_istore_chunk_free(ent->chunk);
+            ent->chunk = H5MM_xfree(ent->chunk);
     }
     
     ret_value = SUCCEED;
@@ -1036,7 +942,7 @@ H5F_istore_flush_entry(H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
 done:
     /* Free the temp buffer only if it's different than the entry chunk */
     if (buf!=ent->chunk)
-        H5F_istore_chunk_free(buf);
+        H5MM_xfree(buf);
     
     /*
      * If we reached the point of no return then we have no choice but to
@@ -1048,7 +954,7 @@ done:
         ent->layout = H5O_free(H5O_LAYOUT, ent->layout);
         ent->pline = H5O_free(H5O_PLINE, ent->pline);
         if(ent->chunk)
-            ent->chunk = H5F_istore_chunk_free(ent->chunk);
+            ent->chunk = H5MM_xfree(ent->chunk);
     }
     FUNC_LEAVE(ret_value);
 }
@@ -1406,7 +1312,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         }
         H5_ASSIGN_OVERFLOW(chunk_size,tempchunk_size,hsize_t,size_t);
         chunk_alloc = chunk_size;
-        if (NULL==(chunk=H5F_istore_chunk_alloc (chunk_alloc))) {
+        if (NULL==(chunk=H5MM_malloc (chunk_alloc))) {
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
                  "memory allocation failed for raw data chunk");
         }
@@ -1426,7 +1332,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         udata.addr = HADDR_UNDEF;
         status = H5B_find (f, H5B_ISTORE, layout->addr, &udata);
         H5E_clear ();
-        if (NULL==(chunk = H5F_istore_chunk_alloc (chunk_alloc))) {
+        if (NULL==(chunk = H5MM_malloc (chunk_alloc))) {
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
                  "memory allocation failed for raw data chunk");
         }
@@ -1586,7 +1492,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     
  done:
     if (!ret_value)
-        H5F_istore_chunk_free (chunk);
+        H5MM_xfree (chunk);
     FUNC_LEAVE (ret_value);
 }
 
@@ -1671,7 +1577,7 @@ H5F_istore_unlock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             H5F_istore_flush_entry (f, &x, TRUE);
         } else {
             if(chunk)
-                H5F_istore_chunk_free (chunk);
+                H5MM_xfree (chunk);
         }
     } else {
         /*
@@ -2411,7 +2317,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     }
 
     /* Allocate chunk buffer for processes to use when writing fill values */
-    if (NULL==(chunk = H5F_istore_chunk_alloc(chunk_size)))
+    if (NULL==(chunk = H5MM_malloc(chunk_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for chunk");
 
     /* Fill the chunk with the proper values */
@@ -2486,7 +2392,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 done:
     /* Free the chunk for fill values */
     if(chunk!=NULL)
-        H5F_istore_chunk_free(chunk);
+        H5MM_xfree(chunk);
 
     FUNC_LEAVE(ret_value);
 }
