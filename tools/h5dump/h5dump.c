@@ -5386,7 +5386,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
         indentation(indent + COL);
         printf("<%sNoFill/>\n",xmlnsprefix);
     } else {
-        xml_dump_fill_value(did,type);
+        xml_dump_fill_value(dcpl,type);
     }
 
     indent -= COL;
