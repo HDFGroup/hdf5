@@ -181,6 +181,10 @@ h5tools_fopen(const char *fname, const char *driver, char *drivername,
 #ifdef H5_HAVE_STREAM
         ,{ "stream", FAIL }
 #endif	/* H5_HAVE_STREAM */
+#ifdef H5_HAVE_PARALLEL
+        ,{ "mpio", FAIL }
+        ,{ "mpiposix", FAIL }
+#endif /* H5_HAVE_PARALLEL */
     };
     /* This enum should match the entries in the above drivers_list since they
      * are indexes into the drivers_list array. */
@@ -192,15 +196,17 @@ h5tools_fopen(const char *fname, const char *driver, char *drivername,
 #ifdef H5_HAVE_STREAM
        ,STREAM_IDX
 #endif	/* H5_HAVE_STREAM */
+#ifdef H5_HAVE_PARALLEL
+       ,MPIO_IDX
+       ,MPIPOSIX_IDX
+#endif /* H5_HAVE_PARALLEL */
     };
 #define NUM_DRIVERS     (sizeof(drivers_list) / sizeof(struct d_list))
 
     static int          initialized = 0;
     register unsigned   drivernum;
     hid_t               fid = FAIL;
-#ifndef VERSION12
     hid_t               fapl = H5P_DEFAULT;
-#endif  /* !VERSION12 */
 
     if (!initialized) {
         /* Build a list of file access property lists which we should try
@@ -211,7 +217,6 @@ h5tools_fopen(const char *fname, const char *driver, char *drivername,
         /* SEC2 Driver */
         drivers_list[SEC2_IDX].fapl = H5P_DEFAULT;
         
-#ifndef VERSION12
         /* FAMILY Driver */
         drivers_list[FAMILY_IDX].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
         H5Pset_fapl_family(fapl, (hsize_t)0, H5P_DEFAULT);
@@ -229,7 +234,16 @@ h5tools_fopen(const char *fname, const char *driver, char *drivername,
         drivers_list[STREAM_IDX].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
         H5Pset_fapl_stream(fapl, NULL);
 #endif	/* H5_HAVE_STREAM */
-#endif	/* !VERSION12 */
+
+#ifdef H5_HAVE_PARALLEL
+        /* MPI-IO Driver */
+        drivers_list[MPIO_IDX].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+        H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
+
+        /* MPI-POSIX Driver */
+        drivers_list[MPIPOSIX_IDX].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+        H5Pset_fapl_mpiposix(fapl, MPI_COMM_WORLD, TRUE);
+#endif /* H5_HAVE_PARALLEL */
     }
 
     if (driver && *driver) {
@@ -287,6 +301,24 @@ h5tools_fopen(const char *fname, const char *driver, char *drivername,
 
             drivernum = STREAM_IDX;
 #endif	/* H5_HAVE_STREAM */
+#ifdef H5_HAVE_PARALLEL
+        } else if (!strcmp(driver, drivers_list[MPIO_IDX].name)) {
+            H5E_BEGIN_TRY {
+                fid = H5Fopen(fname, H5F_ACC_RDONLY,
+                              drivers_list[MPIO_IDX].fapl);
+            } H5E_END_TRY;
+            if (fid == FAIL)
+                goto done;
+            drivernum = MPIO_IDX;
+        } else if (!strcmp(driver, drivers_list[MPIPOSIX_IDX].name)) {
+            H5E_BEGIN_TRY {
+                fid = H5Fopen(fname, H5F_ACC_RDONLY,
+                              drivers_list[MPIO_IDX].fapl);
+            } H5E_END_TRY;
+            if (fid == FAIL)
+                goto done;
+            drivernum = MPIPOSIX_IDX;
+#endif /* H5_HAVE_PARALLEL */
         } else {
             goto done;
         }

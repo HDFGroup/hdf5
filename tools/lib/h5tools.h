@@ -23,10 +23,6 @@
 
 #include "hdf5.h"
 
-#if H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 2
-#define VERSION12
-#endif	/* H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 2 */
-
 #define ESCAPE_HTML             1
 #define OPT(X,S)                ((X) ? (X) : (S))
 #define OPTIONAL_LINE_BREAK     "\001"  /* Special strings embedded in the output */

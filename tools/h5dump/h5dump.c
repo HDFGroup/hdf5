@@ -524,6 +524,32 @@ static const dump_functions xml_function_table = {
  */
 static const dump_functions *dump_function_table;
 
+
+/*-------------------------------------------------------------------------
+ * Function:    leave
+ *
+ * Purpose:     Shutdown MPI & HDF5 and call exit()
+ *
+ * Return:      Does not return
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, 31. January 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+leave(int ret)
+{
+    H5close();
+#ifdef H5_HAVE_PARALLEL
+    MPI_Finalize();
+#endif
+    exit(ret);
+}
+
+
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
@@ -2483,7 +2509,7 @@ parse_start:
             break;
         case 'V':
             print_version(progname);
-            exit(EXIT_SUCCESS);
+            leave(EXIT_SUCCESS);
             break;
         case 'w':
             nCols = atoi(opt_arg);
@@ -2558,7 +2584,7 @@ parse_start:
             if (set_output_file(opt_arg) < 0){
                 /* failed to set output file */
                 usage(progname);
-                exit(EXIT_FAILURE);
+                leave(EXIT_FAILURE);
             }
 
             usingdasho = TRUE;
@@ -2590,7 +2616,7 @@ parse_start:
             /* To Do: check format of this value?  */
 	    if (!useschema) {
                 usage(progname);
-                exit(EXIT_FAILURE);
+                leave(EXIT_FAILURE);
 	    }
 	    if (strcmp(opt_arg,":") == 0) {
                 xmlnsprefix = "";
@@ -2611,7 +2637,7 @@ parse_start:
                 error_msg(progname,
                           "option `-%c' can only be used after --dataset option\n",
                           opt);
-                exit(EXIT_FAILURE);
+                leave(EXIT_FAILURE);
             }
 
             if (last_dset->subset_info) {
@@ -2657,11 +2683,11 @@ end_collect:
 
         case 'h':
             usage(progname);
-            exit(EXIT_SUCCESS);
+            leave(EXIT_SUCCESS);
         case '?':
         default:
             usage(progname);
-            exit(EXIT_FAILURE);
+            leave(EXIT_FAILURE);
         }
     }
 
@@ -2670,7 +2696,7 @@ parse_end:
     if (argc <= opt_ind) {
         error_msg(progname, "missing file name\n");
         usage(progname);
-        exit(EXIT_FAILURE);
+        leave(EXIT_FAILURE);
     }
     return hand;
 }
@@ -2758,6 +2784,10 @@ main(int argc, const char *argv[])
     struct handler_t   *hand;
     int                 i;
 
+#ifdef H5_HAVE_PARALLEL
+    MPI_Init(&argc, &argv);
+#endif
+
     dump_header_format = &standardformat;
     dump_function_table = &ddl_function_table;
 
@@ -2779,23 +2809,23 @@ main(int argc, const char *argv[])
 	if (!display_all) {
             error_msg(progname, "option \"%s\" not available for XML\n",
 		      "to display selected objects");
-	    exit(EXIT_FAILURE);
+	    leave(EXIT_FAILURE);
 	} else if (display_bb) {
             error_msg(progname, "option \"%s\" not available for XML\n",
 		      "--boot-block");
-	    exit(EXIT_FAILURE);
+	    leave(EXIT_FAILURE);
 	} else if (display_oid == 1) {
             error_msg(progname, "option \"%s\" not available for XML\n",
 		      "--object-ids");
-	    exit(EXIT_FAILURE);
+	    leave(EXIT_FAILURE);
         } else if (display_char == TRUE) {
             error_msg(progname, "option \"%s\" not available for XML\n",
 		      "--string");
-	    exit(EXIT_FAILURE);
+	    leave(EXIT_FAILURE);
 	} else if (usingdasho) {
             error_msg(progname, "option \"%s\" not available for XML\n",
 		      "--output");
-	    exit(EXIT_FAILURE);
+	    leave(EXIT_FAILURE);
 	}
     } else {
         if (xml_dtd_uri) {
@@ -2807,7 +2837,7 @@ main(int argc, const char *argv[])
     if (argc <= opt_ind) {
         error_msg(progname, "missing file name\n");
         usage(progname);
-        exit(EXIT_FAILURE);
+        leave(EXIT_FAILURE);
     }
     fname = argv[opt_ind];
 
@@ -2815,7 +2845,7 @@ main(int argc, const char *argv[])
 
     if (fid < 0) {
         error_msg(progname, "unable to open file \"%s\"\n", fname);
-        exit(EXIT_FAILURE);
+        leave(EXIT_FAILURE);
     }
 
     /* allocate and initialize internal data structure */
@@ -2862,7 +2892,7 @@ main(int argc, const char *argv[])
 	} else {
 		if (useschema && strcmp(xmlnsprefix,"")) {
         error_msg(progname, "Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
-			exit(EXIT_FAILURE);
+			leave(EXIT_FAILURE);
 		}
 	}
     }
@@ -2986,6 +3016,12 @@ done:
 #else
     H5Eset_auto(H5E_DEFAULT, func, edata);
 #endif /* H5_WANT_H5_V1_6_COMPAT */
+    
+    H5close();
+#ifdef H5_HAVE_PARALLEL
+    MPI_Finalize();
+#endif
+
     return d_status;
 }
 
