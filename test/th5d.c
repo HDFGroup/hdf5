@@ -224,7 +224,7 @@ static void test_h5d_basic_read(void)
     CHECK(n,UFAIL,"H5Pnelem");
     VERIFY(n,SPACE1_DIM1*SPACE1_DIM2*SPACE1_DIM3,"H5Pnelem");
     
-    buf_size=H5Tsize(tid1,len,arch,BTRUE)*n;
+    buf_size=H5Tsize(tid1,BTRUE)*n;
     buf=HDmalloc(buf_size);
     ret=H5Dread(did1,H5P_SCALAR,buf);
     CHECK(ret,FAIL,"H5Dread");

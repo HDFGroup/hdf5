@@ -69,7 +69,7 @@ static void test_h5t_basic(void)
     ret=H5Tset_type(tid1,TYPE1_BASE,TYPE1_LEN,TYPE1_ARCH);
     CHECK(ret,FAIL,"H5Tset_type");
     
-    ret=H5Tsize(tid1,-1,-1,BTRUE);
+    ret=H5Tsize(tid1,BTRUE);
     VERIFY(ret,TYPE1_LEN,"H5Tsize");
     
     ret=H5Tis_atomic(tid1);
@@ -87,7 +87,7 @@ static void test_h5t_basic(void)
     ret=H5Tset_type(tid2,TYPE2_BASE,TYPE2_LEN,TYPE2_ARCH);
     CHECK(ret,FAIL,"H5Tset_type");
     
-    ret=H5Tsize(tid2,-1,-1,BTRUE);
+    ret=H5Tsize(tid2,BTRUE);
     VERIFY(ret,TYPE2_LEN,"H5Tsize");
     
     ret=H5Tis_atomic(tid2);
