@@ -392,23 +392,6 @@
 #   error "nothing appropriate for uint64_t"
 #endif
 
-#if SIZEOF_FLOAT>=4
-typedef float float32;
-#elif SIZEOF_DOUBLE>=4
-typedef double float32;
-#else
-#   error "nothing appropriate for float32"
-#endif
-
-/* Bias float64 toward using double - QAK */
-#if SIZEOF_DOUBLE>=8
-typedef double float64;
-#elif SIZEOF_FLOAT>=8
-typedef float float64;
-#else
-#  error "nothing appropriate for float64"
-#endif
-
 /*
  * Define a type for generic integers.	Use this instead of `int' to
  * show that some thought went into the algorithm.
