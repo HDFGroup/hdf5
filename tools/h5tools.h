@@ -434,3 +434,7 @@ extern int nCols;
 /* Definitions of useful routines */
 void print_version(const char *program_name);
 
+/*used to open files so we can use different drivers*/
+hid_t H5ToolsFopen(char* fname, char* drivername);
+
+#define NDRIVERS	10

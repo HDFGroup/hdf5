@@ -1307,8 +1307,8 @@ int
 main(int argc, char *argv[])
 {
     hid_t fid, gid, dsetid, typeid;
-    hid_t plist=H5P_DEFAULT;
-    const char *fname = NULL;
+    
+    char *fname = NULL;
     int i, index, curr_arg, display_bb=0, display_all=1, newwidth= 0;
     int nopts=0, *opts;
     char *buf, name[128], name1[128];
@@ -1430,7 +1430,9 @@ main(int argc, char *argv[])
     if (argv[argc-1][0] == '\\') fname = &argv[argc-1][1];
     else fname = argv[argc-1];
 
-    if ((fid = H5Fopen (fname, H5F_ACC_RDONLY, plist)) < 0) {
+    fid = H5ToolsFopen(fname, NULL);
+
+    if (fid < 0){
          fprintf (stderr, "h5dump error: unable to open file %s \n", fname);
          free(opts);
          exit(1);
