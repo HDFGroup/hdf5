@@ -217,6 +217,11 @@ Documentation
 New Features
 ============
 
+    * Compact dataset is added to the library.  The data will be stored in 
+      the header message of dataset layout.  Space allocation time has to be
+      EARLY.  No hyperslab is supported for parallel collective write.  There
+      is no API changes except activating H5Pset_layout and H5Pget_layout for
+      compact dataset.  -SLU, 2002/8/20
     * Added MPI-posix VFL driver.  This VFL driver uses MPI functions to
       coordinate actions, but performs I/O directly with POSIX sec(2)
       (i.e. open/close/read/write/etc.) calls.  This driver should _NOT_
