@@ -6053,10 +6053,10 @@ fi
 
 # Byte sex from the AC_C_BIGENDIAN macro.
 
-if test "X-$WORDS_BIGENDIAN" = "X-"; then
-    BYTESEX="little-endian"
-else
+if test $ac_cv_c_bigendian = yes; then
     BYTESEX="big-endian"
+else
+    BYTESEX="little-endian"
 fi
 
 # Are we compiling static libraries, shared libraries, or both?
@@ -6095,7 +6095,7 @@ else
     DEPEND1=$srcdir/src/.distdep
     DEPEND2=$srcdir/test/.distdep
     DEPEND3=$srcdir/testpar/.distdep
-    DEPEND4=$srcdirtools/.distdep
+    DEPEND4=$srcdir/tools/.distdep
 fi
 
 if test "X$GMAKE" = "Xyes"; then
