@@ -14,8 +14,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5TSprivate_H
-#define _H5TSprivate_H
+#ifndef H5TSprivate_H_
+#define H5TSprivate_H_
 
 /* Public headers needed by this file */
 #ifdef LATER
@@ -25,10 +25,10 @@
 /* Library level data structures */
 
 typedef struct H5TS_mutex_struct {
-  pthread_t owner_thread;         /* current lock owner */
-  pthread_mutex_t atomic_lock;    /* lock for atomicity of new mechanism */
-  pthread_cond_t cond_var;        /* condition variable */
-  unsigned int lock_count;
+    pthread_t owner_thread;		/* current lock owner */
+    pthread_mutex_t atomic_lock;	/* lock for atomicity of new mechanism */
+    pthread_cond_t cond_var;		/* condition variable */
+    unsigned int lock_count;
 } H5TS_mutex_t;
 
 /* Extern global variables */
@@ -38,17 +38,16 @@ extern pthread_key_t H5TS_errstk_key_g;
 #if defined c_plusplus || defined __cplusplus
 extern      "C"
 {
-#endif                          /* c_plusplus || __cplusplus */
+#endif	/* c_plusplus || __cplusplus */
 
 __DLL__ void H5TS_first_thread_init(void);
-__DLL__ void H5TS_mutex_lock(H5TS_mutex_t *mutex);
-__DLL__ void H5TS_mutex_unlock(H5TS_mutex_t *mutex);
-__DLL__ void H5TS_cancel_count_inc(void);
-__DLL__ void H5TS_cancel_count_dec(void);
+__DLL__ herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex);
+__DLL__ herr_t H5TS_mutex_unlock(H5TS_mutex_t *mutex);
+__DLL__ herr_t H5TS_cancel_count_inc(void);
+__DLL__ herr_t H5TS_cancel_count_dec(void);
 
 #if defined c_plusplus || defined __cplusplus
 }
-#endif                          /* c_plusplus || __cplusplus */
+#endif	/* c_plusplus || __cplusplus */
 
-#endif  /* _H5TSprivate_H */
-
+#endif	/* H5TSprivate_H_ */
