@@ -259,6 +259,7 @@ struct options {
     int h5_use_chunks;     	/* Make HDF5 dataset chunked            */
     int h5_no_fill;        	/* Disable HDF5 writing fill values     */
     int h5_write_only;        	/* Perform the write tests only         */
+    int verify;        		/* Verify data correctness              */
 };
 
 typedef struct _minmax {
@@ -397,6 +398,7 @@ run_test_loop(struct options *opts)
     parms.h5_use_chunks = opts->h5_use_chunks;
     parms.h5_no_fill = opts->h5_no_fill;
     parms.h5_write_only = opts->h5_write_only;
+    parms.verify = opts->verify;
 
     /* start with max_num_procs and decrement it by half for each loop. */
     /* if performance needs restart, fewer processes may be needed. */
@@ -1043,6 +1045,7 @@ parse_command_line(int argc, char *argv[])
     cl_opts->h5_use_chunks = FALSE; /* Don't chunk the HDF5 dataset by default */
     cl_opts->h5_no_fill = FALSE;    /* Write fill values by default */
     cl_opts->h5_write_only = FALSE; /* Do both read and write by default */
+    cl_opts->verify = FALSE;        /* No Verify data correctness by default */
 
     while ((opt = get_option(argc, (const char **)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
@@ -1138,6 +1141,10 @@ parse_command_line(int argc, char *argv[])
                             /* Turn on time printing */
                             cl_opts->print_times = TRUE;
                             break;
+			case 'v':
+                            /* Turn on verify data correctness*/
+			    cl_opts->verify = TRUE;
+			    break;
                         default:
                             fprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
                             exit(EXIT_FAILURE);
@@ -1325,6 +1332,7 @@ usage(const char *prog)
         printf("          4 - Everything and the kitchen sink\n");
         printf("          r - Raw data I/O throughput information\n");
         printf("          t - Times as well as throughputs\n");
+        printf("          v - Verify data correctness\n");
         printf("\n");
         printf("      Example: --debug=2,r,t\n");
         printf("\n");
