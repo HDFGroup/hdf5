@@ -903,14 +903,17 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
             ctx.p_min_idx[i] = 0;
 
     H5Sget_simple_extent_dims(f_space, total_size, NULL);
-    ctx.size_last_dim = (total_size[ctx.ndims - 1]);
 
     /* calculate the number of elements we're going to print */
     p_nelmts = 1;
 
-    if (ctx.ndims > 0)
-        for (i = 0, p_nelmts = 1; i < ctx.ndims; i++)
+    if (ctx.ndims > 0) {
+        for (i = 0; i < ctx.ndims; i++)
             p_nelmts *= total_size[i];
+        ctx.size_last_dim = (total_size[ctx.ndims - 1]);
+    } /* end if */
+    else
+        ctx.size_last_dim = 0;
  
     if (p_nelmts == 0) {
         /* nothing to print */
@@ -1062,8 +1065,12 @@ h5tools_dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
     
     if (nelmts == 0)
         return SUCCEED; /*nothing to print*/
-    assert(ctx.p_max_idx[ctx.ndims - 1]==(hsize_t)((int)ctx.p_max_idx[ctx.ndims - 1]));
-    ctx.size_last_dim = (int)(ctx.p_max_idx[ctx.ndims - 1]);
+    if(ctx.ndims>0) {
+        assert(ctx.p_max_idx[ctx.ndims - 1]==(hsize_t)((int)ctx.p_max_idx[ctx.ndims - 1]));
+        ctx.size_last_dim = (int)(ctx.p_max_idx[ctx.ndims - 1]);
+    } /* end if */
+    else
+        ctx.size_last_dim = 0;
 
     /* Print it */
     h5tools_dump_simple_data(stream, info, obj_id, &ctx,
