@@ -319,7 +319,7 @@ done:
         hid_t dsid;             IN: Dataspace ID of selection to modify
         H5S_seloper_t op;       IN: Operation to perform on current selection
         size_t num_elem;        IN: Number of elements in COORD array.
-        const hssize_t *coord[];    IN: The location of each element selected
+        const hssize_t **coord; IN: The location of each element selected
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -340,7 +340,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t H5Sselect_elements (hid_t spaceid, H5S_seloper_t op, size_t num_elem,
-    const hssize_t *coord[])
+    const hssize_t **coord)
 {
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
     herr_t ret_value=FAIL;  /* return value */

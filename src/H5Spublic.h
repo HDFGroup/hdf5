@@ -58,7 +58,7 @@ herr_t H5Sselect_hyperslab (hid_t spaceid, H5S_seloper_t op,
     const hssize_t *start, const hsize_t *_stride, const hsize_t *count,
     const hsize_t *_block);
 herr_t H5Sselect_elements (hid_t spaceid, H5S_seloper_t op, size_t num_elemn,
-    const hssize_t *coord[]);
+    const hssize_t **coord);
 
 #ifdef __cplusplus
 }
