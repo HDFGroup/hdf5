@@ -55,7 +55,6 @@
 ./config/rs6000-ibm-aix4.1.4.0
 ./config/solaris2.5
 
-./doc/html/ddl.html
 ./doc/html/Attributes.html
 ./doc/html/Big.html
 ./doc/html/Caching.html
@@ -75,6 +74,8 @@
 ./doc/html/Datasets.html
 ./doc/html/Dataspaces.html
 ./doc/html/Datatypes.html
+./doc/html/ddl.html
+./doc/html/DDL.html              	_DO_NOT_DISTRIBUTE_
 ./doc/html/Debugging.html
 ./doc/html/Environment.html
 ./doc/html/Errors.html
@@ -99,6 +100,7 @@
 ./doc/html/ObjectHeader.txt		_DO_NOT_DISTRIBUTE_
 ./doc/html/Properties.html
 ./doc/html/Ragged.html
+./doc/html/References.html
 ./doc/html/RM_H5.html
 ./doc/html/RM_H5A.html
 ./doc/html/RM_H5D.html
@@ -106,7 +108,9 @@
 ./doc/html/RM_H5F.html
 ./doc/html/RM_H5Front.html
 ./doc/html/RM_H5G.html
+./doc/html/RM_H5I.html
 ./doc/html/RM_H5P.html
+./doc/html/RM_H5R.html
 ./doc/html/RM_H5RA.html
 ./doc/html/RM_H5S.html
 ./doc/html/RM_H5T.html
@@ -151,22 +155,22 @@
 ./doc/html/symtab			_DO_NOT_DISTRIBUTE_
 ./doc/html/version.gif
 ./doc/html/version.obj			_DO_NOT_DISTRIBUTE_
-./doc/src/Copyright.html
-./doc/src/Glossary.html
-./doc/src/H5.intro.doc
-./doc/src/RM_H5.html
-./doc/src/RM_H5A.html
-./doc/src/RM_H5D.html
-./doc/src/RM_H5E.html
-./doc/src/RM_H5F.html
-./doc/src/RM_H5Front.html
-./doc/src/RM_H5G.html
-./doc/src/RM_H5P.html
-./doc/src/RM_H5R.html
-./doc/src/RM_H5S.html
-./doc/src/RM_H5T.html
-./doc/src/RM_H5Z.html
-./doc/src/Tools.html
+./doc/src/Copyright.html		_DO_NOT_DISTRIBUTE_
+./doc/src/Glossary.html			_DO_NOT_DISTRIBUTE_
+./doc/src/H5.intro.doc			_DO_NOT_DISTRIBUTE_
+./doc/src/RM_H5.html			_DO_NOT_DISTRIBUTE_
+./doc/src/RM_H5A.html			_DO_NOT_DISTRIBUTE_
+./doc/src/RM_H5D.html			_DO_NOT_DISTRIBUTE_
+./doc/src/RM_H5E.html			_DO_NOT_DISTRIBUTE_
+./doc/src/RM_H5F.html			_DO_NOT_DISTRIBUTE_
+./doc/src/RM_H5Front.html		_DO_NOT_DISTRIBUTE_
+./doc/src/RM_H5G.html			_DO_NOT_DISTRIBUTE_
+./doc/src/RM_H5P.html			_DO_NOT_DISTRIBUTE_
+./doc/src/RM_H5R.html			_DO_NOT_DISTRIBUTE_
+./doc/src/RM_H5S.html			_DO_NOT_DISTRIBUTE_
+./doc/src/RM_H5T.html			_DO_NOT_DISTRIBUTE_
+./doc/src/RM_H5Z.html			_DO_NOT_DISTRIBUTE_
+./doc/src/Tools.html			_DO_NOT_DISTRIBUTE_
 ./doc/tgif/APIGrammar.obj		_DO_NOT_DISTRIBUTE_
 ./doc/tgif/FileGrammar.obj		_DO_NOT_DISTRIBUTE_
 ./doc/tgif/IOPipe.obj			_DO_NOT_DISTRIBUTE_
