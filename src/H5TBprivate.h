@@ -105,6 +105,12 @@ typedef struct H5TB_tree
 /* Define an access macro for getting a node's data */
 #define H5TB_NODE_DATA(n)       ((n)->data)
 
+/* Define some "function-like" macros */
+#define H5TB_first(root) H5TB_end(root,LEFT)
+#define H5TB_last(root) H5TB_end(root,RIGHT)
+#define H5TB_next(node) H5TB_nbr(node,RIGHT)
+#define H5TB_prev(node) H5TB_nbr(node,LEFT)
+
 #if defined c_plusplus || defined __cplusplus
 extern      "C"
 {
@@ -122,13 +128,11 @@ H5_DLL H5TB_NODE  *H5TB_index (H5TB_NODE * root, unsigned indx);
 H5_DLL H5TB_NODE  *H5TB_dins (H5TB_TREE * tree, void * item, void * key);
 H5_DLL H5TB_NODE  *H5TB_ins (H5TB_NODE ** root, void * item, void * key, H5TB_cmp_t cmp, int arg);
 H5_DLL void *H5TB_rem(H5TB_NODE ** root, H5TB_NODE * node, void * *kp);
-H5_DLL H5TB_NODE  *H5TB_first (H5TB_NODE * root);
-H5_DLL H5TB_NODE  *H5TB_last (H5TB_NODE * root);
-H5_DLL H5TB_NODE  *H5TB_next (H5TB_NODE * node);
-H5_DLL H5TB_NODE  *H5TB_prev (H5TB_NODE * node);
 H5_DLL H5TB_TREE  *H5TB_dfree (H5TB_TREE * tree, void(*fd) (void *), void(*fk) (void *));
 H5_DLL void       *H5TB_free (H5TB_NODE ** root, void(*fd) (void *), void(*fk) (void *));
 H5_DLL long        H5TB_count (H5TB_TREE * tree);
+H5_DLL H5TB_NODE * H5TB_end(H5TB_NODE * root, int side);
+H5_DLL H5TB_NODE *H5TB_nbr(H5TB_NODE * ptr, int side);
 
 #ifdef H5TB_DEBUG
 H5_DLL herr_t      H5TB_dump(H5TB_TREE *ptree, void (*key_dump)(void *,void *), int method);
