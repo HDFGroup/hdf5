@@ -3778,8 +3778,6 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func/*out*/,
  *              Friday, August 25, 2000
  *
  * Modifications:
- *      Quincey Koziol, June 5, 2002
- *      Also sets the "small data" aggregation size
  *
  *-------------------------------------------------------------------------
  */
@@ -3925,6 +3923,89 @@ H5Pget_sieve_buf_size(hid_t fapl_id, hsize_t *size/*out*/)
 
     FUNC_LEAVE (SUCCEED);
 } /* end H5Pget_sieve_buf_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_small_data_block_size
+ *
+ * Purpose:	Sets the minimum size of "small" raw data block allocations
+ *      when the H5FD_FEAT_AGGREGATE_SMALLDATA is set by a VFL driver.
+ *      Each "small" raw data block is allocated to be this size and then
+ *      specific pieces of raw data are sub-allocated from this block.
+ *      
+ *		The default value is set to 2048 (bytes), indicating that
+ *      "small" raw data will be attempted to be bunched together in (at least)
+ *      2K blocks in the file.  Setting the value to 0 with this API function
+ *      will turn off the "small" raw data aggregation, even if the VFL driver
+ *      attempts to use that strategy.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, June 10, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size)
+{
+    H5F_access_t	*fapl = NULL;
+    
+    FUNC_ENTER (H5Pset_small_data_block_size, FAIL);
+    H5TRACE2("e","ih",fapl_id,size);
+
+    /* Check args */
+    if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) ||
+            NULL == (fapl = H5I_object (fapl_id))) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+
+    /* Set values */
+    fapl->sdata_block_size = size;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_small_data_block_size
+ *
+ * Purpose:	Returns the current settings for the "small" raw data block
+ *      allocation property from a file access property list.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, June 10, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_small_data_block_size(hid_t fapl_id, hsize_t *size/*out*/)
+{
+    H5F_access_t	*fapl = NULL;
+
+    FUNC_ENTER (H5Pget_small_data_block_size, FAIL);
+    H5TRACE2("e","ix",fapl_id,size);
+
+    /* Check args */
+    if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) ||
+            NULL == (fapl = H5I_object (fapl_id))) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+
+    /* Get values */
+    if (size)
+        *size = fapl->sdata_block_size;
+
+    FUNC_LEAVE (SUCCEED);
+}
 
 
 /*--------------------------------------------------------------------------
