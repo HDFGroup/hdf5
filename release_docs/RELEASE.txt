@@ -238,14 +238,11 @@ Platforms Tested
                                   Intel(R) Fortran Compiler Version 8.0
 				  mpich-gm-1.2.5..intel
 
-    Windows 2000 (NT5.0)          MSVC++ 6.0
-                                  MSVC++ .NET
-                                  DEC Visual Fortran 6.0
-                                  Intel C and F90 compilers version 7.1
-				  Code Warrior 8.0
     Windows XP                    MSVC++.NET
                                   MSVC++ 6.0
-                                  DEC Visual Fortran 6.0
+                                  Compaq Visual Fortran 6.6C
+                                  Intel 8.1 C++
+
 
     MAC OS X                      Darwin 7.5
                                   gcc and g++ Apple Computer, Inc. GCC 
@@ -316,9 +313,6 @@ AIX-5.1 & 5.2 64-bit                 n              y        n        y
 WinXP Visual Studio 6.0              y              y        n        n
 WinXP .Net                           y              y        n        n
 WinXP Code Warrior                   n              y        n        n
-Win2000 Visual Studio 6.0            y              y        n        n
-Win2000 Visual Studio Intel (6)      y              y        n        n
-Win2000 .Net                         y              y        n        n
 Mac OS X 10.3                        y              y        n        y
 FreeBSD 4.9                          y              y        y        y
 RedHat 7    W       (3)              y              y        y        y
@@ -468,6 +462,14 @@ Known Problems
   flag "--instantiate=local" prior to the configure and build steps, as:
         setenv CXX "pgCC --instantiate=local"  for pgCC 5.02 and higher
         setenv CXX "pgCC -tlocal" for others
+
+* Fortran release DLL randomly failed with compaq visual fortran 6.6c on
+  windows. 
+* Fortran DLL built with Intel 8.1 in .NET environment crushed the compiler,
+  To build Fortran Static library with Intel 8.1 in .NET environment 
+  needs manually setting the project file,
+  please contact to hdfhelp@ncsa.uiuc.edu if you need to build
+  fortran static library with Intel 8.1 with .NET environment.
 
 * On at least one system, (SDSC DataStar), the scheduler (in this case
   LoadLeveler) sends job status updates to standard error when you run
