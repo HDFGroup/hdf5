@@ -48,6 +48,7 @@ $Source = "";
                "char*"                     => "s",
 	       "H5S_class_t"               => "Sc",
 	       "H5S_seloper_t"             => "Ss",
+	       "H5S_sel_type"              => "St",
                "H5T_cset_t",               => "Tc",
                "H5T_norm_t"                => "Tn",
                "H5T_order_t"               => "To",
