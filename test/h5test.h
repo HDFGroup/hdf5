@@ -103,7 +103,6 @@ extern "C" {
 
 /* Generally useful testing routines */
 H5TEST_DLL int h5_cleanup(const char *base_name[], hid_t fapl);
-H5TEST_DLL herr_t h5_errors(void *client_data);
 H5TEST_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname,
 		 size_t size);
 H5TEST_DLL hid_t h5_fileaccess(void);
@@ -116,7 +115,8 @@ H5TEST_DLL int print_func(const char *format, ...);
 /* Routines for operating on the list of tests (for the "all in one" tests) */
 H5TEST_DLL void TestUsage(void);
 H5TEST_DLL void AddTest(const char *TheName, void (*TheCall) (void),
-		     void (*Cleanup) (void), const char *TheDescr);
+	     void (*Cleanup) (void), const char *TheDescr, 
+	     const void *Parameters);
 H5TEST_DLL void TestInfo(const char *ProgName);
 H5TEST_DLL void TestParseCmdLine(int argc, char *argv[], int *Summary, int *CleanUp);
 H5TEST_DLL void PerformTests(void);

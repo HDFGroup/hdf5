@@ -36,6 +36,7 @@ typedef struct TestStruct {
 	char   Name[MAXTESTNAME];
 	void (*Call)(void);
 	void (*Cleanup)(void);
+	void *Parameters;
 } TestStruct;
 
 
@@ -51,9 +52,15 @@ static int    Index = 0;
 /*
  * Setup a test function and add it to the list of tests.
  *      It must have no parameters and returns void.
+ * TheName--short test name
+ * TheCall--the test routine
+ * Cleanup--the cleanup routine for the test
+ * TheDescr--Long description of the test
+ * Parameters--pointer to extra parameters. Use NULL if none used.
+ *    Since only the pointer is copied, the contents should not change.
  */
 void 
-AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), const char *TheDescr)
+AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), const char *TheDescr, const void *Parameters)
 {
     /* Sanity checking */
     if (Index >= MAXNUMOFTESTS) {
@@ -79,6 +86,7 @@ AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), con
     Test[Index].Cleanup = Cleanup;
     Test[Index].NumErrors = -1;
     Test[Index].SkipFlag = 0;
+    Test[Index].Parameters = Parameters;
 
     /* Increment test count */
     Index++;
