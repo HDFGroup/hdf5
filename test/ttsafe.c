@@ -204,15 +204,12 @@ int main(int argc, char *argv[])
 	/* Tests are generally arranged from least to most complexity... */
 	InitTest("dcreate", tts_dcreate, cleanup_dcreate,
 		 "multi-dataset creation");
+	InitTest("error", tts_error, cleanup_error,
+		 "per-thread error stacks");
 	InitTest("cancel", tts_cancel, cleanup_cancel,
 		 "thread cancellation safety test");
 	InitTest("acreate", tts_acreate, cleanup_acreate,
 		 "multi-attribute creation");
-
-        /* Commented out since there are errors for this test */
-	/*InitTest("error", tts_error, cleanup_error,
-		 "per-thread error stacks");
-         */
 
 	Verbosity = 4;	/* Default Verbosity is Low */
 	H5get_libversion(&major, &minor, &release);
