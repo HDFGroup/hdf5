@@ -315,16 +315,16 @@ facilitate moving easily between them.</i>
 <!--  </td></tr></table>                                                    -->
     <p>     
     <i>Array Datatypes</i>
-    <li><a href="#Datatype-ArrayCreate">H5Tarray_create_f</a>   
-    <li><a href="#Datatype-GetArrayNdims">H5Tget_array_ndims_f</a>  
-    <li><a href="#Datatype-GetArrayDims">H5Tget_array_dims_f</a>  
+    <li><a href="#Datatype-ArrayCreate">h5tarray_create_f</a>   
+    <li><a href="#Datatype-GetArrayNdims">h5tget_array_ndims_f</a>  
+    <li><a href="#Datatype-GetArrayDims">h5tget_array_dims_f</a>  
 <!--<p>                                                                     -->
 <!--<i>Variable-length Datatypes</i>                                        -->
 <!--<li><a href="#Datatype-VLCreate">h5tvlen_create_f</a>               -->
     </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top width=32%>
     <i>Compound Datatype Properties</i>
     <li><a href="#Datatype-GetNmembers">h5tget_nmembers_f</a>
-<!--<li><a href="#Datatype-GetMemberClass">H5Tget_member_class_f</a>        -->
+<!--<li><a href="#Datatype-GetMemberClass">h5tget_member_class_f</a>        -->
     <li><a href="#Datatype-GetMemberName">h5tget_member_name_f</a>
 <!--<li><a href="#Datatype-GetMemberIndex">h5tget_member_index_f</a>      -->
     <li><a href="#Datatype-GetMemberOffset">h5tget_member_offset_f</a>
@@ -2883,9 +2883,9 @@ zero.
          the number of significant bits is decreased.
          The size set for a string should include space for the null-terminator
          character, otherwise it will not be stored on (or retrieved from) disk.
-         Adjusting the size of an string automatically sets the precision
-         to 8*size.  A compound datatype may increase in size, but may not
-         shrink.  All datatypes must have a positive size.
+         Adjusting the size of a string automatically sets the precision
+         to 8*<code>size</code>.  A compound datatype may increase in size, 
+         but may not shrink.  All datatypes must have a positive size.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
@@ -3115,7 +3115,7 @@ And in this document, the
 Describes HDF5 Release 1.6.0, July 2003
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 3 October 2003");
+document.writeln("Last modified: 8 October 2003");
 -->
 </SCRIPT>
  
