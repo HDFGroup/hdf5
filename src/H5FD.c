@@ -292,11 +292,11 @@ H5FD_get_class(hid_t id)
     } else if (H5I_VFL==H5I_get_type(id)) {
 	ret_value = H5I_object(id);
     } else if (H5I_GENPROP_LST == H5I_get_type(id) &&
-            TRUE==H5Pisa_class(id,H5P_DATASET_XFER_NEW)) {
+            TRUE==H5Pisa_class(id,H5P_DATASET_XFER)) {
         ret_value = H5FD_get_class(H5P_peek_hid_t(id,H5D_XFER_VFL_ID_NAME));
     } else {
 	switch (H5P_get_class(id)) {
-            case H5P_FILE_ACCESS:
+            case H5P_FILE_ACCESS_OLD:
                 if (NULL==(fapl=H5I_object(id))) {
                     HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
                                   "not a file access property list");
@@ -1968,7 +1968,7 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id= H5P_DATASET_XFER_DEFAULT;
     if (H5I_GENPROP_LST != H5I_get_type(dxpl_id) ||
-            TRUE!=H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(dxpl_id,H5P_DATASET_XFER))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     if (!buf)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null result buffer");
@@ -2008,7 +2008,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
     FUNC_ENTER(H5FD_read, FAIL);
     assert(file && file->cls);
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
+    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER));
     assert(buf);
 
 #ifndef H5_HAVE_PARALLEL
@@ -2121,7 +2121,7 @@ H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id= H5P_DATASET_XFER_DEFAULT;
     if (H5I_GENPROP_LST != H5I_get_type(dxpl_id) ||
-            TRUE!=H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(dxpl_id,H5P_DATASET_XFER))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     if (!buf)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null buffer");
@@ -2164,7 +2164,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
     FUNC_ENTER(H5FD_write, FAIL);
     assert(file && file->cls);
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
+    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER));
     assert(buf);
     
 #ifndef H5_HAVE_PARALLEL

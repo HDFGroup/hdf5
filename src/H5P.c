@@ -34,6 +34,15 @@ static int		interface_initialize_g = 0;
 #define INTERFACE_INIT H5P_init_interface
 static herr_t		H5P_init_interface(void);
 
+/* hid_t aliases for old H5P_class_t enum values */
+/* These go away as each old-style property list is converted to a generic */
+/* property list -QAK */
+hid_t H5P_NO_CLASS=(hid_t)H5P_NO_CLASS_OLD;
+hid_t H5P_FILE_CREATE=(hid_t)H5P_FILE_CREATE_OLD;
+hid_t H5P_FILE_ACCESS=(hid_t)H5P_FILE_ACCESS_OLD;
+hid_t H5P_DATASET_CREATE=(hid_t)H5P_DATASET_CREATE_OLD;
+hid_t H5P_MOUNT=(hid_t)H5P_MOUNT_OLD;
+
 /*
  * Predefined property list classes. These are initialized at runtime by 
  * H5P_init_interface() in this source file.
@@ -167,14 +176,14 @@ H5P_init_interface(void)
 
     FUNC_ENTER(H5P_init_interface, FAIL);
 
-    assert(H5P_NCLASSES <= H5I_TEMPLATE_MAX - H5I_TEMPLATE_0);
+    assert(H5P_NCLASSES_OLD <= H5I_TEMPLATE_MAX - H5I_TEMPLATE_0);
 
     /*
      * Initialize the mappings between property list classes and atom
      * groups. We keep the two separate because property list classes are
      * publicly visible but atom groups aren't.
      */
-    for (i = 0; i < H5P_NCLASSES; i++) {
+    for (i = 0; i < H5P_NCLASSES_OLD; i++) {
         status = H5I_init_group((H5I_type_t)(H5I_TEMPLATE_0 +i),
                     H5I_TEMPID_HASHSIZE, 0, (H5I_free_t)H5P_close);
         if (status < 0)
@@ -269,20 +278,20 @@ H5P_term_interface(void)
         /* Destroy HDF5 library property classes & lists */
 
         /* Check if there are any open property list classes or lists */
-        for (i=0; i<H5P_NCLASSES; i++)
+        for (i=0; i<H5P_NCLASSES_OLD; i++)
             n += H5I_nmembers((H5I_type_t)(H5I_TEMPLATE_0+i));
         n += H5I_nmembers(H5I_GENPROP_CLS);
         n += H5I_nmembers(H5I_GENPROP_LST);
 
         /* If there are any open classes or groups, attempt to get rid of them. */
         if (n) {
-            for (i=0; i<H5P_NCLASSES; i++)
+            for (i=0; i<H5P_NCLASSES_OLD; i++)
                 H5I_clear_group((H5I_type_t)(H5I_TEMPLATE_0+i), FALSE);
             H5I_clear_group(H5I_GENPROP_CLS, FALSE);
             H5I_clear_group(H5I_GENPROP_LST, FALSE);
         } else {
             /* Close the ID groups which hold the property list classes & lists */
-            for (i=0; i<H5P_NCLASSES; i++) {
+            for (i=0; i<H5P_NCLASSES_OLD; i++) {
                 H5I_destroy_group((H5I_type_t)(H5I_TEMPLATE_0 + i));
                 n++; /*H5I*/
             }
@@ -317,45 +326,61 @@ H5P_term_interface(void)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Pcreate(H5P_class_t type)
+H5Pcreate(hid_t type)
 {
     hid_t	ret_value = FAIL;
     const void	*src = NULL;
     H5P_t	*new_plist = NULL;
+    H5P_class_t_old old_type;
 
     FUNC_ENTER(H5Pcreate, FAIL);
     H5TRACE1("i","p",type);
 
-    /* Allocate a new property list and initialize it with default values */
-    switch (type) {
-        case H5P_FILE_CREATE:
-            src = &H5F_create_dflt;
-            break;
-        case H5P_FILE_ACCESS:
-            src = &H5F_access_dflt;
-            break;
-        case H5P_DATASET_CREATE:
-            src = &H5D_create_dflt;
-            break;
-        case H5P_MOUNT:
-            src = &H5F_mount_dflt;
-            break;
-        default:
-            HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                  "unknown property list class");
-    }
+    /* Kludge to detect generic property creations and divert them to the */
+    /* generic property list creation routine - QAK */
+    if (H5I_GENPROP_CLS == H5I_get_type(type)) {
+        if((ret_value=H5Pcreate_list(type))<0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list");
+    } /* end if */
+    else {
+        /* Set the type of the property list to create for older property lists */
+        old_type=(H5P_class_t_old)type;
+assert( old_type==H5P_FILE_CREATE_OLD ||
+        old_type==H5P_FILE_ACCESS_OLD ||
+        old_type==H5P_DATASET_CREATE_OLD ||
+        old_type==H5P_MOUNT_OLD);
 
-    /* Copy the property list */
-    if (NULL==(new_plist=H5P_copy(type, src))) {
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL,
-		      "unable to copy default property list");
-    }
-    
-    /* Atomize the new property list */
-    if ((ret_value = H5P_create(type, new_plist)) < 0) {
-        HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
-		      "unable to register property list");
-    }
+        /* Allocate a new property list and initialize it with default values */
+        switch (old_type) {
+            case H5P_FILE_CREATE_OLD:
+                src = &H5F_create_dflt;
+                break;
+            case H5P_FILE_ACCESS_OLD:
+                src = &H5F_access_dflt;
+                break;
+            case H5P_DATASET_CREATE_OLD:
+                src = &H5D_create_dflt;
+                break;
+            case H5P_MOUNT_OLD:
+                src = &H5F_mount_dflt;
+                break;
+            default:
+                HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                      "unknown property list class");
+        } /* end switch */
+
+        /* Copy the property list */
+        if (NULL==(new_plist=H5P_copy(old_type, src))) {
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL,
+                          "unable to copy default property list");
+        } /* end if */
+        
+        /* Atomize the new property list */
+        if ((ret_value = H5P_create(old_type, new_plist)) < 0) {
+            HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
+                          "unable to register property list");
+        } /* end if */
+    } /* end else */
     
     FUNC_LEAVE(ret_value);
 }
@@ -381,14 +406,14 @@ H5Pcreate(H5P_class_t type)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5P_create(H5P_class_t type, H5P_t *plist)
+H5P_create(H5P_class_t_old type, H5P_t *plist)
 {
     hid_t	ret_value = FAIL;
 
     FUNC_ENTER(H5P_create, FAIL);
 
     /* check args */
-    assert(type >= 0 && type < H5P_NCLASSES);
+    assert(type >= 0 && type < H5P_NCLASSES_OLD);
     assert(plist);
 
     /* Atomize the new property list */
@@ -427,13 +452,22 @@ H5Pclose(hid_t plist_id)
     /* Check arguments */
     if (plist_id==H5P_DEFAULT)
         HRETURN(SUCCEED);
-    if (H5P_get_class (plist_id)<0) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-    }
-	
-    /* When the reference count reaches zero the resources are freed */
-    if (H5I_dec_ref(plist_id) < 0)
-        HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing property list");
+    
+    /* Kludge to detect generic property creations and divert them to the */
+    /* generic property list creation routine - QAK */
+    if (H5I_GENPROP_LST == H5I_get_type(plist_id)) {
+        if(H5Pclose_list(plist_id)<0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to close property list");
+    } /* end if */
+    else {
+        if (H5P_get_class (plist_id)<0) {
+            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        }
+            
+        /* When the reference count reaches zero the resources are freed */
+        if (H5I_dec_ref(plist_id) < 0)
+            HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing property list");
+    } /* end else */
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -470,7 +504,7 @@ H5P_close(void *_plist)
 
     /* Some property lists may need to do special things */
     switch (plist->cls) {
-        case H5P_FILE_ACCESS:
+        case H5P_FILE_ACCESS_OLD:
             if (fa_list->driver_id>=0) {
                 H5FD_fapl_free(fa_list->driver_id, fa_list->driver_info);
                 H5I_dec_ref(fa_list->driver_id);
@@ -479,16 +513,16 @@ H5P_close(void *_plist)
             }
             break;
         
-        case H5P_FILE_CREATE:
+        case H5P_FILE_CREATE_OLD:
             break;
         
-        case H5P_DATASET_CREATE:
+        case H5P_DATASET_CREATE_OLD:
             H5O_reset(H5O_FILL, &(dc_list->fill));
             H5O_reset(H5O_EFL, &(dc_list->efl));
             H5O_reset(H5O_PLINE, &(dc_list->pline));
             break;
 
-        case H5P_MOUNT:
+        case H5P_MOUNT_OLD:
             break;
 
         default:
@@ -519,10 +553,10 @@ H5P_close(void *_plist)
  *
  *-------------------------------------------------------------------------
  */
-H5P_class_t
+hid_t
 H5Pget_class(hid_t plist_id)
 {
-    H5P_class_t		    ret_value = H5P_NO_CLASS;
+    hid_t ret_value = H5P_NO_CLASS;
 
     FUNC_ENTER(H5Pget_class, H5P_NO_CLASS);
     H5TRACE1("p","i",plist_id);
@@ -548,13 +582,13 @@ H5Pget_class(hid_t plist_id)
  *
  *-------------------------------------------------------------------------
  */
-H5P_class_t
+H5P_class_t_old
 H5P_get_class(hid_t plist_id)
 {
     H5I_type_t		    group;
-    H5P_class_t		    ret_value = H5P_NO_CLASS;
+    H5P_class_t_old		    ret_value = H5P_NO_CLASS;
 
-    FUNC_ENTER(H5P_get_class, H5P_NO_CLASS);
+    FUNC_ENTER(H5P_get_class, H5P_NO_CLASS_OLD);
 
     if ((group = H5I_get_type(plist_id)) < 0 ||
             group >= H5I_TEMPLATE_MAX ||
@@ -563,7 +597,7 @@ H5P_get_class(hid_t plist_id)
 		      "not a property list");
     }
 
-    ret_value = (H5P_class_t)(group - H5I_TEMPLATE_0);
+    ret_value = (H5P_class_t_old)(group - H5I_TEMPLATE_0);
     FUNC_LEAVE(ret_value);
 }
     
@@ -833,7 +867,7 @@ H5Pcopy(hid_t plist_id)
 {
     const void		   *plist = NULL;
     void		   *new_plist = NULL;
-    H5P_class_t		    type;
+    H5P_class_t_old	    type;
     hid_t		    ret_value = FAIL;
     H5I_type_t		    group;
 
@@ -900,7 +934,7 @@ H5Pcopy(hid_t plist_id)
  *-------------------------------------------------------------------------
  */
 void *
-H5P_copy (H5P_class_t type, const void *src)
+H5P_copy (H5P_class_t_old type, const void *src)
 {
     size_t		size;
     H5P_t		*dst = NULL;
@@ -912,19 +946,19 @@ H5P_copy (H5P_class_t type, const void *src)
     
     /* How big is the property list */
     switch (type) {
-        case H5P_FILE_CREATE:
+        case H5P_FILE_CREATE_OLD:
             size = sizeof(H5F_create_t);
             break;
 
-        case H5P_FILE_ACCESS:
+        case H5P_FILE_ACCESS_OLD:
             size = sizeof(H5F_access_t);
             break;
 
-        case H5P_DATASET_CREATE:
+        case H5P_DATASET_CREATE_OLD:
             size = sizeof(H5D_create_t);
             break;
 
-        case H5P_MOUNT:
+        case H5P_MOUNT_OLD:
             size = sizeof(H5F_mprop_t);
             break;
 
@@ -947,10 +981,10 @@ H5P_copy (H5P_class_t type, const void *src)
 
     /* Deep-copy pointers */
     switch (type) {
-        case H5P_FILE_CREATE:
+        case H5P_FILE_CREATE_OLD:
             break;
         
-        case H5P_FILE_ACCESS:
+        case H5P_FILE_ACCESS_OLD:
             fa_dst = (H5F_access_t*)dst;
 
             if (fa_dst->driver_id>=0) {
@@ -960,7 +994,7 @@ H5P_copy (H5P_class_t type, const void *src)
             }
             break;
         
-        case H5P_DATASET_CREATE:
+        case H5P_DATASET_CREATE_OLD:
             dc_src = (const H5D_create_t*)src;
             dc_dst = (H5D_create_t*)dst;
 
@@ -984,7 +1018,7 @@ H5P_copy (H5P_class_t type, const void *src)
             }
             break;
         
-        case H5P_MOUNT:
+        case H5P_MOUNT_OLD:
             /* Nothing to do */
             break;
 
@@ -2290,7 +2324,7 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
 
     /* Check arguments */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
         HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, 0, "not a dataset transfer property list");
 
     /* Return values */
@@ -2348,7 +2382,7 @@ H5Pset_hyper_cache(hid_t plist_id, unsigned cache, unsigned limit)
 
     /* Check arguments */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Update property list */
@@ -2386,7 +2420,7 @@ H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/,
 
     /* Check arguments */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
 
     /* Return values */
@@ -2431,7 +2465,7 @@ H5Pset_preserve(hid_t plist_id, hbool_t status)
 
     /* Check arguments */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
 
     /* Update property list */
@@ -2469,7 +2503,7 @@ H5Pget_preserve(hid_t plist_id)
 
     /* Check arguments */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset transfer property list");
 
@@ -2790,7 +2824,7 @@ H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/, double *middle/*out*/,
 
     /* Check arguments */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
 
     /* Get the split ratios */
@@ -2842,7 +2876,7 @@ H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
 
     /* Check arguments */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (left<0.0 || left>1.0 || middle<0.0 || middle>1.0 ||
             right<0.0 || right>1.0)
@@ -3147,7 +3181,7 @@ H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func,
 
     /* Check arguments */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
 
     /* Update property list */
@@ -3189,7 +3223,7 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func/*out*/,
 
     /* Check arguments */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
 
     if(alloc_func!=NULL) {
@@ -3412,7 +3446,7 @@ H5Pset_hyper_vector_size(hid_t plist_id, size_t vector_size)
 
     /* Check arguments */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
 
     if (vector_size<1)
@@ -3448,7 +3482,7 @@ H5Pget_hyper_vector_size(hid_t plist_id, size_t *vector_size/*out*/)
 
     /* Check arguments */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
 
     /* Return values */

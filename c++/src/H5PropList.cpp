@@ -11,22 +11,11 @@
 namespace H5 {
 #endif
 
-const PropList PropList::DEFAULT( H5P_DEFAULT );
+const PropList PropList::DEFAULT( H5P_NO_CLASS );
 
 // Default constructor - set id to 0 by default here but may be set
 // to a valid one, if any, by a subclass constructor.
 PropList::PropList() : IdComponent( 0 ) {}
-
-// Creates a new property of specified type
-PropList::PropList( H5P_class_t type ) : IdComponent( 0 )
-{
-   // call C routine to create the new property
-   id = H5Pcreate(type );
-   if( id <= 0 )
-   {
-      throw PropListIException("PropList constructor", "H5Pcreate failed");
-   }
-}
 
 // Copy constructor: makes a copy of the original object
 PropList::PropList( const PropList& original ) : IdComponent( original ) {}
@@ -39,18 +28,25 @@ Description:
 	the identifier still has reference counter; the p_close function
 	will take care of not to call H5Pclose on the default id.
 */
-PropList::PropList( const hid_t plist_id ) : IdComponent()
+PropList::PropList( const hid_t plist_id ) : IdComponent(0)
 {
-    if (H5I_GENPROP_CLS == H5Iget_type(plist_id)) {
+    if (H5I_GENPROP_CLS == H5Iget_type(plist_id)
+            || plist_id==H5P_FILE_CREATE
+            || plist_id==H5P_FILE_ACCESS
+            || plist_id==H5P_DATASET_CREATE
+            || plist_id==H5P_MOUNT) {
         // call C routine to create the new property
-        id = H5Pcreate_list(plist_id);
+        id = H5Pcreate(plist_id);
         if( id <= 0 )
         {
-            throw PropListIException("PropList constructor", "H5Pcreate_list failed");
+            throw PropListIException("PropList constructor", "H5Pcreate failed");
         }
     }
     else {
-        id=plist_id;
+        if(plist_id==H5P_NO_CLASS)
+            id=H5P_DEFAULT;
+        else
+            id=plist_id;
     }
 }
 
@@ -88,15 +84,11 @@ PropList& PropList::operator=( const PropList& rhs )
 // Closes the property list if it is not a default one
 void PropList::p_close() const
 {
-   if( id != H5P_DEFAULT ) // not a constant, should call H5Pclose
+   if( id != H5P_NO_CLASS ) // not a constant, should call H5Pclose
    {
       herr_t ret_value;
 
-      if (H5I_GENPROP_LST == H5Iget_type(id)) {
-        ret_value = H5Pclose_list( id );
-      } else {
-        ret_value = H5Pclose( id );
-      }
+      ret_value = H5Pclose( id );
     
       if( ret_value < 0 )
       {
@@ -106,9 +98,9 @@ void PropList::p_close() const
 }
 
 // Returns the class of this property list, i.e. H5P_FILE_CREATE...
-H5P_class_t PropList::getClass() const
+hid_t PropList::getClass() const
 {
-   H5P_class_t plist_class = H5Pget_class( id );
+   hid_t plist_class = H5Pget_class( id );
    if( plist_class == H5P_NO_CLASS )
    {
       throw PropListIException("PropList::getClass", 

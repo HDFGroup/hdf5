@@ -174,7 +174,7 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     assert(real_buf);
     /* Make certain we have the correct type of property list */
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
+    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER));
 
 #ifdef H5_HAVE_PARALLEL
     {
@@ -548,7 +548,7 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     assert(real_buf);
     /* Make certain we have the correct type of property list */
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
+    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER));
 
 #ifdef H5_HAVE_PARALLEL
     {

@@ -11,7 +11,7 @@
 namespace H5 {
 #endif
 
-const FileCreatPropList FileCreatPropList::DEFAULT( H5P_DEFAULT );
+const FileCreatPropList FileCreatPropList::DEFAULT( H5P_NO_CLASS );
 
 // Creates a file create property list
 FileCreatPropList::FileCreatPropList() : PropList( H5P_FILE_CREATE ) {}

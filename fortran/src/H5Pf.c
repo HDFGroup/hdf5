@@ -15,12 +15,12 @@
 int_f 
 nh5pcreate_c ( int_f *classtype, hid_t_f *prp_id )
 {
-  H5P_class_t c_classtype;
+  hid_t c_classtype;
   int CASE;
   int ret_value = 0;
   hid_t c_prp_id;
   /*CASE = (int)*classtype; */
-  c_classtype = (H5P_class_t)*classtype;
+  c_classtype = (hid_t)*classtype;
 /*
 
   switch (CASE) {
@@ -50,10 +50,7 @@ nh5pcreate_c ( int_f *classtype, hid_t_f *prp_id )
        return ret_value;
  }
 */
-   if (H5I_GENPROP_CLS == H5Iget_type((hid_t)*classtype))
-       c_prp_id = H5Pcreate_list((hid_t)*classtype); 
-   else
-       c_prp_id = H5Pcreate(c_classtype); 
+   c_prp_id = H5Pcreate(c_classtype); 
 
   if ( c_prp_id  < 0  ) ret_value = -1;
   *prp_id = (hid_t_f)c_prp_id;
@@ -76,11 +73,7 @@ nh5pclose_c ( hid_t_f *prp_id )
   int ret_value = 0;
   hid_t c_prp_id=(*prp_id);
 
-   if (H5I_GENPROP_LST == H5Iget_type(c_prp_id)) {
-      if ( H5Pclose_list(c_prp_id) < 0  ) ret_value = -1;
-   } else {
-      if ( H5Pclose(c_prp_id) < 0  ) ret_value = -1;
-   }
+  if ( H5Pclose(c_prp_id) < 0  ) ret_value = -1;
   return ret_value;
 }
 
@@ -133,24 +126,17 @@ nh5pget_class_c ( hid_t_f *prp_id , int_f *classtype)
 {
   int ret_value = 0;
   hid_t c_prp_id;
-  H5P_class_t c_classtype; 
+  hid_t c_classtype; 
 
   c_prp_id = *prp_id;
   c_classtype = H5Pget_class(c_prp_id);
   if (c_classtype == H5P_NO_CLASS ) {
- /*     *classtype = H5P_NO_CLASS_F; */
       *classtype = H5P_NO_CLASS; 
        ret_value = -1;
        return ret_value;
   }
   *classtype = (int_f)c_classtype;
-/*
-  if (c_classtype == H5P_FILE_CREATE)    *classtype = H5P_FILE_CREATE_F;
-  if (c_classtype == H5P_FILE_ACCESS)    *classtype = H5P_FILE_ACCESS_F; 
-  if (c_classtype == H5P_DATASET_CREATE) *classtype = H5P_DATASET_CREATE_F; 
-  if (c_classtype == H5P_DATASET_XFER)   *classtype = H5P_DATASET_XFER_F; 
-  if (c_classtype == H5P_MOUNT_F)        *classtype = H5P_MOUNT_F; 
-*/
+
   return ret_value;
 }
 

@@ -154,6 +154,11 @@ New Features
       syntax of H5Pset_fapl_multi() in addition to what it used to accept.
     * Added a new test to verify the information provided by the configure
       command.
+    * As part of the transition to using generic properties everywhere, the
+      parameter of H5Pcreate changed from H5P_class_t to hid_t, as well
+      the return type of H5Pget_class changed from H5P_class_t to hid_t.
+      Further changes are still necessary and will be documented here as they
+      are made.
 
 Platforms Tested
 ================

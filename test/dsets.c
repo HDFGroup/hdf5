@@ -198,7 +198,7 @@ test_simple_io(hid_t file)
 
     /* Create a small conversion buffer to test strip mining */
     tconv_buf = malloc (1000);
-    xfer = H5Pcreate_list (H5P_DATASET_XFER_NEW);
+    xfer = H5Pcreate (H5P_DATASET_XFER);
     assert (xfer>=0);
     if (H5Pset_buffer (xfer, 1000, tconv_buf, NULL)<0) goto error;
 
@@ -226,7 +226,7 @@ test_simple_io(hid_t file)
 	}
     }
 
-    i=H5Pclose_list (xfer);
+    i=H5Pclose (xfer);
     H5Dclose(dataset);
     free (tconv_buf);
     PASSED();
@@ -383,7 +383,7 @@ test_compression(hid_t file)
      * Create a small conversion buffer to test strip mining. We
      * might as well test all we can!
      */
-    if ((xfer = H5Pcreate_list (H5P_DATASET_XFER_NEW))<0) goto error;
+    if ((xfer = H5Pcreate (H5P_DATASET_XFER))<0) goto error;
     tconv_buf = malloc (1000);
     if (H5Pset_buffer (xfer, 1000, tconv_buf, NULL)<0) goto error;
 
@@ -637,7 +637,7 @@ test_compression(hid_t file)
      * Cleanup
      *---------------------------------------------------------------------- 
      */
-    if (H5Pclose_list (xfer)<0) goto error;
+    if (H5Pclose (xfer)<0) goto error;
     if (H5Pclose (dc)<0) goto error;
     if (H5Dclose(dataset)<0) goto error;
     free (tconv_buf);

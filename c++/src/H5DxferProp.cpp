@@ -11,10 +11,10 @@
 namespace H5 {
 #endif
 
-const DSetMemXferPropList DSetMemXferPropList::DEFAULT( H5P_DEFAULT );
+const DSetMemXferPropList DSetMemXferPropList::DEFAULT( H5P_NO_CLASS );
 
 // Creates a dataset memory and transfer property list
-DSetMemXferPropList::DSetMemXferPropList() : PropList( H5P_DATASET_XFER_NEW ) {}
+DSetMemXferPropList::DSetMemXferPropList() : PropList( H5P_DATASET_XFER) {}
 
 // Copy constructor: makes a copy of the original DSetMemXferPropList object;
 DSetMemXferPropList::DSetMemXferPropList( const DSetMemXferPropList& orig ) : PropList( orig ) {}

@@ -1970,26 +1970,26 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		    case H5I_TEMPLATE_5:
 		    case H5I_TEMPLATE_6:
 		    case H5I_TEMPLATE_7:
+                        /* These will eventually go away when the old-style */
+                        /* property lists are converted to generic property */
+                        /* lists -QAK */
 			switch (H5P_get_class(id_type)) {
-			case H5P_FILE_CREATE:
-			    fprintf(out, "H5P_FILE_CREATE");
-			    break;
-			case H5P_FILE_ACCESS:
-			    fprintf(out, "H5P_FILE_ACCESS");
-			    break;
-			case H5P_DATASET_CREATE:
-			    fprintf(out, "H5P_DATASET_CREATE");
-			    break;
-			case H5P_DATASET_XFER:
-			    fprintf(out, "H5P_DATASET_XFER");
-			    break;
-			case H5P_MOUNT:
-			    fprintf(out, "H5P_MOUNT");
-			    break;
-			default:
-			    fprintf (out, "H5I_TEMPLATE_%d",
-				     (int)(id_type-H5I_TEMPLATE_0));
-			    break;
+                            case H5P_FILE_CREATE_OLD:
+                                fprintf(out, "H5P_FILE_CREATE");
+                                break;
+                            case H5P_FILE_ACCESS_OLD:
+                                fprintf(out, "H5P_FILE_ACCESS");
+                                break;
+                            case H5P_DATASET_CREATE_OLD:
+                                fprintf(out, "H5P_DATASET_CREATE");
+                                break;
+                            case H5P_MOUNT_OLD:
+                                fprintf(out, "H5P_MOUNT");
+                                break;
+                            default:
+                                fprintf (out, "H5I_TEMPLATE_%d",
+                                         (int)(id_type-H5I_TEMPLATE_0));
+                                break;
 			}
 			break;
 		    case H5I_GROUP:
@@ -2012,6 +2012,15 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			break;
 		    case H5I_REFERENCE:
 			fprintf (out, "H5I_REFERENCE");
+			break;
+		    case H5I_VFL:
+			fprintf (out, "H5I_VFL");
+			break;
+		    case H5I_GENPROP_CLS:
+			fprintf (out, "H5I_GENPROP_CLS");
+			break;
+		    case H5I_GENPROP_LST:
+			fprintf (out, "H5I_GENPROP_LST");
 			break;
 		    case H5I_NGROUPS:
 			fprintf (out, "H5I_NGROUPS");
@@ -2126,80 +2135,83 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		    fprintf(out, "NULL");
 		}
 	    } else {
-		H5P_class_t plist_class = va_arg (ap, H5P_class_t);
+                /* Before deleting the last of these old-style lists, convert */
+                /* this chunk of code to print the class of the property list */
+                /* using the generic property list classes - QAK */
+		H5P_class_t_old plist_class = va_arg (ap, H5P_class_t_old);
 		switch (plist_class) {
-		case H5P_NO_CLASS:
-		    fprintf (out, "H5P_NO_CLASS");
-		    break;
-		case H5P_FILE_CREATE:
-		    fprintf (out, "H5P_FILE_CREATE");
-		    break;
-		case H5P_FILE_ACCESS:
-		    fprintf (out, "H5P_FILE_ACCESS");
-		    break;
-		case H5P_DATASET_CREATE:
-		    fprintf (out, "H5P_DATASET_CREATE");
-		    break;
-		case H5P_DATASET_XFER:
-		    fprintf (out, "H5P_DATASET_XFER");
-		    break;
-		default:
-		    fprintf (out, "%ld", (long)plist_class);
-		    break;
+                    case H5P_NO_CLASS_OLD:
+                        fprintf (out, "H5P_NO_CLASS");
+                        break;
+                    case H5P_FILE_CREATE_OLD:
+                        fprintf (out, "H5P_FILE_CREATE");
+                        break;
+                    case H5P_FILE_ACCESS_OLD:
+                        fprintf (out, "H5P_FILE_ACCESS");
+                        break;
+                    case H5P_DATASET_CREATE_OLD:
+                        fprintf (out, "H5P_DATASET_CREATE");
+                        break;
+                    case H5P_MOUNT_OLD:
+                        fprintf (out, "H5P_MOUNT");
+                        break;
+                    default:
+                        fprintf (out, "%ld", (long)plist_class);
+                        break;
 		}
 	    }
 	    break;
 
 	case 'r':
 	    if (ptr) {
-            if (vp) {
-                fprintf (out, "0x%lx", (unsigned long)vp);
-            } else {
-                fprintf(out, "NULL");
-            }
+                if (vp) {
+                    fprintf (out, "0x%lx", (unsigned long)vp);
+                } else {
+                    fprintf(out, "NULL");
+                }
 	    } else {
-            hobj_ref_t ref = va_arg (ap, hobj_ref_t);
-            fprintf (out, "Reference Object=%p", &ref);
+                hobj_ref_t ref = va_arg (ap, hobj_ref_t);
+                fprintf (out, "Reference Object=%p", &ref);
 	    }
 	    break;
 
 	case 'R':
 	    switch (type[1]) {
-	    case 't':
-		if (ptr) {
-		    if (vp) {
-			fprintf(out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5R_type_t reftype = va_arg(ap, H5R_type_t);
-		    switch (reftype) {
-		    case H5R_BADTYPE:
-			fprintf(out, "H5R_BADTYPE");
-			break;
-		    case H5R_OBJECT:
-			fprintf(out, "H5R_OBJECT");
-			break;
-		    case H5R_DATASET_REGION:
-			fprintf(out, "H5R_DATASET_REGION");
-			break;
-		    case H5R_INTERNAL:
-			fprintf(out, "H5R_INTERNAL");
-			break;
-		    case H5R_MAXTYPE:
-			fprintf(out, "H5R_MAXTYPE");
-			break;
-		    default:
-			fprintf(out, "BADTYPE(%ld)", (long)reftype);
-			break;
-		    }
-		}
-		break;
-			
-	    default:
-		fprintf(out, "BADTYPE(S%c)", type[1]);
-		goto error;
+                case 't':
+                    if (ptr) {
+                        if (vp) {
+                            fprintf(out, "0x%lx", (unsigned long)vp);
+                        } else {
+                            fprintf(out, "NULL");
+                        }
+                    } else {
+                        H5R_type_t reftype = va_arg(ap, H5R_type_t);
+                        switch (reftype) {
+                            case H5R_BADTYPE:
+                                fprintf(out, "H5R_BADTYPE");
+                                break;
+                            case H5R_OBJECT:
+                                fprintf(out, "H5R_OBJECT");
+                                break;
+                            case H5R_DATASET_REGION:
+                                fprintf(out, "H5R_DATASET_REGION");
+                                break;
+                            case H5R_INTERNAL:
+                                fprintf(out, "H5R_INTERNAL");
+                                break;
+                            case H5R_MAXTYPE:
+                                fprintf(out, "H5R_MAXTYPE");
+                                break;
+                            default:
+                                fprintf(out, "BADTYPE(%ld)", (long)reftype);
+                                break;
+                        }
+                    }
+                    break;
+                            
+                default:
+                    fprintf(out, "BADTYPE(S%c)", type[1]);
+                    goto error;
 	    }
 	    break;
 
@@ -2215,21 +2227,21 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		} else {
 		    H5S_class_t cls = va_arg(ap, H5S_class_t);
 		    switch (cls) {
-		    case H5S_NO_CLASS:
-			fprintf(out, "H5S_NO_CLASS");
-			break;
-		    case H5S_SCALAR:
-			fprintf(out, "H5S_SCALAR");
-			break;
-		    case H5S_SIMPLE:
-			fprintf(out, "H5S_SIMPLE");
-			break;
-		    case H5S_COMPLEX:
-			fprintf(out, "H5S_COMPLEX");
-			break;
-		    default:
-			fprintf(out, "%ld", (long)cls);
-			break;
+                        case H5S_NO_CLASS:
+                            fprintf(out, "H5S_NO_CLASS");
+                            break;
+                        case H5S_SCALAR:
+                            fprintf(out, "H5S_SCALAR");
+                            break;
+                        case H5S_SIMPLE:
+                            fprintf(out, "H5S_SIMPLE");
+                            break;
+                        case H5S_COMPLEX:
+                            fprintf(out, "H5S_COMPLEX");
+                            break;
+                        default:
+                            fprintf(out, "%ld", (long)cls);
+                            break;
 		    }
 		}
 		break;
@@ -2244,18 +2256,18 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		} else {
 		    H5S_seloper_t so = va_arg(ap, H5S_seloper_t);
 		    switch (so) {
-		    case H5S_SELECT_NOOP:
-			fprintf(out, "H5S_NOOP");
-			break;
-		    case H5S_SELECT_SET:
-			fprintf(out, "H5S_SELECT_SET");
-			break;
-		    case H5S_SELECT_OR:
-			fprintf(out, "H5S_SELECT_OR");
-			break;
-		    default:
-			fprintf(out, "%ld", (long)so);
-			break;
+                        case H5S_SELECT_NOOP:
+                            fprintf(out, "H5S_NOOP");
+                            break;
+                        case H5S_SELECT_SET:
+                            fprintf(out, "H5S_SELECT_SET");
+                            break;
+                        case H5S_SELECT_OR:
+                            fprintf(out, "H5S_SELECT_OR");
+                            break;
+                        default:
+                            fprintf(out, "%ld", (long)so);
+                            break;
 		    }
 		}
 		break;
@@ -2291,15 +2303,15 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		} else {
 		    H5T_cset_t cset = va_arg (ap, H5T_cset_t);
 		    switch (cset) {
-		    case H5T_CSET_ERROR:
-			fprintf (out, "H5T_CSET_ERROR");
-			break;
-		    case H5T_CSET_ASCII:
-			fprintf (out, "H5T_CSET_ASCII");
-			break;
-		    default:
-			fprintf (out, "%ld", (long)cset);
-			break;
+                        case H5T_CSET_ERROR:
+                            fprintf (out, "H5T_CSET_ERROR");
+                            break;
+                        case H5T_CSET_ASCII:
+                            fprintf (out, "H5T_CSET_ASCII");
+                            break;
+                        default:
+                            fprintf (out, "%ld", (long)cset);
+                            break;
 		    }
 		}
 		break;
@@ -2314,18 +2326,18 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		} else {
 		    H5T_pers_t pers = va_arg(ap, H5T_pers_t);
 		    switch (pers) {
-		    case H5T_PERS_DONTCARE:
-			fprintf(out, "H5T_PERS_DONTCARE");
-			break;
-		    case H5T_PERS_SOFT:
-			fprintf(out, "H5T_PERS_SOFT");
-			break;
-		    case H5T_PERS_HARD:
-			fprintf(out, "H5T_PERS_HARD");
-			break;
-		    default:
-			fprintf(out, "%ld", (long)pers);
-			break;
+                        case H5T_PERS_DONTCARE:
+                            fprintf(out, "H5T_PERS_DONTCARE");
+                            break;
+                        case H5T_PERS_SOFT:
+                            fprintf(out, "H5T_PERS_SOFT");
+                            break;
+                        case H5T_PERS_HARD:
+                            fprintf(out, "H5T_PERS_HARD");
+                            break;
+                        default:
+                            fprintf(out, "%ld", (long)pers);
+                            break;
 		    }
 		}
 		break;
@@ -2340,21 +2352,21 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		} else {
 		    H5T_norm_t norm = va_arg (ap, H5T_norm_t);
 		    switch (norm) {
-		    case H5T_NORM_ERROR:
-			fprintf (out, "H5T_NORM_ERROR");
-			break;
-		    case H5T_NORM_IMPLIED:
-			fprintf (out, "H5T_NORM_IMPLIED");
-			break;
-		    case H5T_NORM_MSBSET:
-			fprintf (out, "H5T_NORM_MSBSET");
-			break;
-		    case H5T_NORM_NONE:
-			fprintf (out, "H5T_NORM_NONE");
-			break;
-		    default:
-			fprintf (out, "%ld", (long)norm);
-			break;
+                        case H5T_NORM_ERROR:
+                            fprintf (out, "H5T_NORM_ERROR");
+                            break;
+                        case H5T_NORM_IMPLIED:
+                            fprintf (out, "H5T_NORM_IMPLIED");
+                            break;
+                        case H5T_NORM_MSBSET:
+                            fprintf (out, "H5T_NORM_MSBSET");
+                            break;
+                        case H5T_NORM_NONE:
+                            fprintf (out, "H5T_NORM_NONE");
+                            break;
+                        default:
+                            fprintf (out, "%ld", (long)norm);
+                            break;
 		    }
 		}
 		break;
@@ -2369,24 +2381,24 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		} else {
 		    H5T_order_t order = va_arg (ap, H5T_order_t);
 		    switch (order) {
-		    case H5T_ORDER_ERROR:
-			fprintf (out, "H5T_ORDER_ERROR");
-			break;
-		    case H5T_ORDER_LE:
-			fprintf (out, "H5T_ORDER_LE");
-			break;
-		    case H5T_ORDER_BE:
-			fprintf (out, "H5T_ORDER_BE");
-			break;
-		    case H5T_ORDER_VAX:
-			fprintf (out, "H5T_ORDER_VAX");
-			break;
-		    case H5T_ORDER_NONE:
-			fprintf (out, "H5T_ORDER_NONE");
-			break;
-		    default:
-			fprintf (out, "%ld", (long)order);
-			break;
+                        case H5T_ORDER_ERROR:
+                            fprintf (out, "H5T_ORDER_ERROR");
+                            break;
+                        case H5T_ORDER_LE:
+                            fprintf (out, "H5T_ORDER_LE");
+                            break;
+                        case H5T_ORDER_BE:
+                            fprintf (out, "H5T_ORDER_BE");
+                            break;
+                        case H5T_ORDER_VAX:
+                            fprintf (out, "H5T_ORDER_VAX");
+                            break;
+                        case H5T_ORDER_NONE:
+                            fprintf (out, "H5T_ORDER_NONE");
+                            break;
+                        default:
+                            fprintf (out, "%ld", (long)order);
+                            break;
 		    }
 		}
 		break;
@@ -2401,21 +2413,21 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		} else {
 		    H5T_pad_t pad = va_arg (ap, H5T_pad_t);
 		    switch (pad) {
-		    case H5T_PAD_ERROR:
-			fprintf (out, "H5T_PAD_ERROR");
-			break;
-		    case H5T_PAD_ZERO:
-			fprintf (out, "H5T_PAD_ZERO");
-			break;
-		    case H5T_PAD_ONE:
-			fprintf (out, "H5T_PAD_ONE");
-			break;
-		    case H5T_PAD_BACKGROUND:
-			fprintf (out, "H5T_PAD_BACKGROUND");
-			break;
-		    default:
-			fprintf (out, "%ld", (long)pad);
-			break;
+                        case H5T_PAD_ERROR:
+                            fprintf (out, "H5T_PAD_ERROR");
+                            break;
+                        case H5T_PAD_ZERO:
+                            fprintf (out, "H5T_PAD_ZERO");
+                            break;
+                        case H5T_PAD_ONE:
+                            fprintf (out, "H5T_PAD_ONE");
+                            break;
+                        case H5T_PAD_BACKGROUND:
+                            fprintf (out, "H5T_PAD_BACKGROUND");
+                            break;
+                        default:
+                            fprintf (out, "%ld", (long)pad);
+                            break;
 		    }
 		}
 		break;
@@ -2430,18 +2442,18 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		} else {
 		    H5T_sign_t sign = va_arg (ap, H5T_sign_t);
 		    switch (sign) {
-		    case H5T_SGN_ERROR:
-			fprintf (out, "H5T_SGN_ERROR");
-			break;
-		    case H5T_SGN_NONE:
-			fprintf (out, "H5T_SGN_NONE");
-			break;
-		    case H5T_SGN_2:
-			fprintf (out, "H5T_SGN_2");
-			break;
-		    default:
-			fprintf (out, "%ld", (long)sign);
-			break;
+                        case H5T_SGN_ERROR:
+                            fprintf (out, "H5T_SGN_ERROR");
+                            break;
+                        case H5T_SGN_NONE:
+                            fprintf (out, "H5T_SGN_NONE");
+                            break;
+                        case H5T_SGN_2:
+                            fprintf (out, "H5T_SGN_2");
+                            break;
+                        default:
+                            fprintf (out, "%ld", (long)sign);
+                            break;
 		    }
 		}
 		break;
@@ -2456,36 +2468,36 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		} else {
 		    H5T_class_t type_class = va_arg(ap, H5T_class_t);
 		    switch (type_class) {
-		    case H5T_NO_CLASS:
-			fprintf(out, "H5T_NO_CLASS");
-			break;
-		    case H5T_INTEGER:
-			fprintf(out, "H5T_INTEGER");
-			break;
-		    case H5T_FLOAT:
-			fprintf(out, "H5T_FLOAT");
-			break;
-		    case H5T_TIME:
-			fprintf(out, "H5T_TIME");
-			break;
-		    case H5T_STRING:
-			fprintf(out, "H5T_STRING");
-			break;
-		    case H5T_BITFIELD:
-			fprintf(out, "H5T_BITFIELD");
-			break;
-		    case H5T_OPAQUE:
-			fprintf(out, "H5T_OPAQUE");
-			break;
-		    case H5T_COMPOUND:
-			fprintf(out, "H5T_COMPOUND");
-			break;
-		    case H5T_ENUM:
-			fprintf(out, "H5T_ENUM");
-			break;
-		    default:
-			fprintf(out, "%ld", (long)type_class);
-			break;
+                        case H5T_NO_CLASS:
+                            fprintf(out, "H5T_NO_CLASS");
+                            break;
+                        case H5T_INTEGER:
+                            fprintf(out, "H5T_INTEGER");
+                            break;
+                        case H5T_FLOAT:
+                            fprintf(out, "H5T_FLOAT");
+                            break;
+                        case H5T_TIME:
+                            fprintf(out, "H5T_TIME");
+                            break;
+                        case H5T_STRING:
+                            fprintf(out, "H5T_STRING");
+                            break;
+                        case H5T_BITFIELD:
+                            fprintf(out, "H5T_BITFIELD");
+                            break;
+                        case H5T_OPAQUE:
+                            fprintf(out, "H5T_OPAQUE");
+                            break;
+                        case H5T_COMPOUND:
+                            fprintf(out, "H5T_COMPOUND");
+                            break;
+                        case H5T_ENUM:
+                            fprintf(out, "H5T_ENUM");
+                            break;
+                        default:
+                            fprintf(out, "%ld", (long)type_class);
+                            break;
 		    }
 		}
 		break;
@@ -2500,21 +2512,21 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		} else {
 		    H5T_str_t str = va_arg(ap, H5T_str_t);
 		    switch (str) {
-		    case H5T_STR_ERROR:
-			fprintf(out, "H5T_STR_ERROR");
-			break;
-		    case H5T_STR_NULLTERM:
-			fprintf(out, "H5T_STR_NULLTERM");
-			break;
-		    case H5T_STR_NULLPAD:
-			fprintf(out, "H5T_STR_NULLPAD");
-			break;
-		    case H5T_STR_SPACEPAD:
-			fprintf(out, "H5T_STR_SPACEPAD");
-			break;
-		    default:
-			fprintf(out, "%ld", (long)str);
-			break;
+                        case H5T_STR_ERROR:
+                            fprintf(out, "H5T_STR_ERROR");
+                            break;
+                        case H5T_STR_NULLTERM:
+                            fprintf(out, "H5T_STR_NULLTERM");
+                            break;
+                        case H5T_STR_NULLPAD:
+                            fprintf(out, "H5T_STR_NULLPAD");
+                            break;
+                        case H5T_STR_SPACEPAD:
+                            fprintf(out, "H5T_STR_SPACEPAD");
+                            break;
+                        default:
+                            fprintf(out, "%ld", (long)str);
+                            break;
 		    }
 		}
 		break;
@@ -2572,6 +2584,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		}
 	    } else {
 		size_t size = va_arg (ap, size_t);
+
 		HDfprintf (out, "%Zu", size);
 		asize[argno] = (hssize_t)size;
 	    }
@@ -2579,48 +2592,50 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	case 'Z':
 	    switch (type[1]) {
-	    case 'f':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5Z_filter_t id = va_arg (ap, H5Z_filter_t);
-		    if (H5Z_FILTER_DEFLATE==id) {
-			fprintf (out, "H5Z_FILTER_DEFLATE");
-		    } else {
-			fprintf (out, "%ld", (long)id);
-		    }
-		}
-		break;
+                case 'f':
+                    if (ptr) {
+                        if (vp) {
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                        } else {
+                            fprintf(out, "NULL");
+                        }
+                    } else {
+                        H5Z_filter_t id = va_arg (ap, H5Z_filter_t);
 
-	    case 's':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-			if (vp && asize_idx>=0 && asize[asize_idx]>=0) {
-			    ssize_t *p = (ssize_t*)vp;
-			    fprintf(out, " {");
-			    for (i=0; i<asize[asize_idx]; i++) {
-				HDfprintf(out, "%s%Zd", i?", ":"", p[i]);
-			    }
-			    fprintf(out, "}");
-			}
-		    } else {
-			fprintf(out, "NULL");
-		    }
-		} else {
-		    ssize_t ssize = va_arg (ap, ssize_t);
-		    HDfprintf (out, "%Zd", ssize);
-		    asize[argno] = (hssize_t)ssize;
-		}
-		break;
+                        if (H5Z_FILTER_DEFLATE==id) {
+                            fprintf (out, "H5Z_FILTER_DEFLATE");
+                        } else {
+                            fprintf (out, "%ld", (long)id);
+                        }
+                    }
+                    break;
 
-	    default:
-		fprintf (out, "BADTYPE(Z%c)", type[1]);
-		goto error;
+                case 's':
+                    if (ptr) {
+                        if (vp) {
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                            if (vp && asize_idx>=0 && asize[asize_idx]>=0) {
+                                ssize_t *p = (ssize_t*)vp;
+                                fprintf(out, " {");
+                                for (i=0; i<asize[asize_idx]; i++) {
+                                    HDfprintf(out, "%s%Zd", i?", ":"", p[i]);
+                                }
+                                fprintf(out, "}");
+                            }
+                        } else {
+                            fprintf(out, "NULL");
+                        }
+                    } else {
+                        ssize_t ssize = va_arg (ap, ssize_t);
+
+                        HDfprintf (out, "%Zd", ssize);
+                        asize[argno] = (hssize_t)ssize;
+                    }
+                    break;
+
+                default:
+                    fprintf (out, "BADTYPE(Z%c)", type[1]);
+                    goto error;
 	    }
 	    break;
 
@@ -2634,7 +2649,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	}
     }
 
- error:
+error:
     va_end (ap);
     if (returning) {
 	fprintf (out, ";\n");

@@ -875,7 +875,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         plist_id= H5P_DATASET_XFER_DEFAULT;
 
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     if (!buf)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
@@ -973,7 +973,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         plist_id= H5P_DATASET_XFER_DEFAULT;
 
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     if (!buf)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
@@ -1783,7 +1783,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(mem_type);
     assert(buf);
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
+    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER));
 
     /* Initialize these before any errors can occur */
     HDmemset(&mem_iter,0,sizeof(H5S_sel_iter_t));
@@ -2230,7 +2230,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(mem_type);
     assert(buf);
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
+    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER));
 
 #ifdef H5_HAVE_PARALLEL
     /* If MPIO is used, no VL datatype support yet. */
@@ -3133,7 +3133,7 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
         plist_id= H5P_DATASET_XFER_DEFAULT;
 
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER_NEW))
+            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
 
     /* Call H5Diterate with args, etc. */
@@ -3299,7 +3299,7 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "no temporary buffers available");
 
     /* Change to the custom memory allocation routines for reading VL data */
-    if((vlen_bufsize.xfer_pid=H5Pcreate_list(H5P_DATASET_XFER_NEW))<0)
+    if((vlen_bufsize.xfer_pid=H5Pcreate_list(H5P_DATASET_XFER))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "no dataset xfer plists available");
 
     if(H5Pset_vlen_mem_manager(vlen_bufsize.xfer_pid,H5D_vlen_get_buf_size_alloc,&vlen_bufsize,NULL,NULL)<0)

@@ -91,7 +91,7 @@ int main(void)
 	H5Tinsert(cmp3, "Not Ok", 0, array_dt);
     H5Tclose(array_dt);
 
-	plist = H5Pcreate_list(H5P_DATASET_XFER_NEW);
+	plist = H5Pcreate(H5P_DATASET_XFER);
 	H5Pset_preserve(plist, 1);
 
 	/*
@@ -166,7 +166,7 @@ int main(void)
 	H5Tclose(cmp1);
 	H5Tclose(cmp2);
 	H5Tclose(cmp3);
-	H5Pclose_list(plist);
+	H5Pclose(plist);
 	H5Fclose(fil);
 	unlink(fname);
 	fflush(stdout);
