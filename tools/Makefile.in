@@ -9,7 +9,7 @@ srcdir=@srcdir@
 
 ## All subdirectories except for the ``lib'' subdirectory.
 ##
-SUBDIRS=h5dump h5ls misc @H5TOH4@ @H4TOH5@ @PDB2HDF@
+SUBDIRS=h5dump h5ls misc @H5TOH4@ @H4TOH5@
 
 @COMMENCE@
 
@@ -22,7 +22,7 @@ CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src  \
 ## Test programs and scripts.
 ##
 TEST_PROGS=talign
-TEST_SCRIPTS=$(srcdir)/testh5dump.sh $(srcdir)/testh5ls.sh @TESTH5TOH4@ @TESTH4TOH5@
+TEST_SCRIPTS=
 
 ## These are our main targets: library and tools.
 ##
