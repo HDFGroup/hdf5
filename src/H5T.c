@@ -131,6 +131,26 @@ hid_t H5T_NATIVE_UINT_FAST64_g		= FAIL;
 
 /*
  * Alignment constraints for native types. These are initialized at run time
+ * in H5Tinit.c.  These alignments are mainly for offsets in HDF5 compound 
+ * datatype or C structures, which are different from the alignments for memory
+ * address below this group of variables.
+ */
+size_t H5T_NATIVE_SCHAR_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_UCHAR_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_SHORT_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_USHORT_COMP_ALIGN_g   	= 0;
+size_t H5T_NATIVE_INT_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_UINT_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_LONG_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_ULONG_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_LLONG_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_ULLONG_COMP_ALIGN_g	        = 0;
+size_t H5T_NATIVE_FLOAT_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_DOUBLE_COMP_ALIGN_g	        = 0;
+size_t H5T_NATIVE_LDOUBLE_COMP_ALIGN_g	        = 0;
+
+/*
+ * Alignment constraints for native types. These are initialized at run time
  * in H5Tinit.c
  */
 size_t H5T_NATIVE_SCHAR_ALIGN_g		= 0;
@@ -2549,6 +2569,631 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Tis_variable_str
+ *
+ * Purpose:	Check whether a datatype is a variable-length string
+ *
+ * Return:	TRUE (1) or FALSE (0) on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		November 4, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Tis_variable_str(hid_t dtype_id)
+{
+    H5T_t	*dt = NULL;
+    htri_t      ret_value;      /* Return value */
+
+    FUNC_ENTER_API(H5Tis_variable_str, FAIL);
+    H5TRACE1("b","i",dtype_id);
+    
+    /* Check args */
+    if (NULL == (dt = H5I_object_verify(dtype_id,H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+
+    /* Set return value */
+    ret_value=H5T_is_variable_str(dt);
+
+done:
+    FUNC_LEAVE(ret_value);   
+}
+ 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_is_variable_str
+ *
+ * Purpose:	Private function of H5Tis_variable_str.
+ *              Check whether a datatype is a variable-length string
+ *		
+ *
+ * Return:	TRUE (1) or FALSE (0) on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		November 4, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5T_is_variable_str(H5T_t *dt)
+{
+    htri_t      ret_value=FALSE;        /* Return value */
+
+    FUNC_ENTER_NOAPI(H5T_is_variable_str, FAIL);
+    
+    assert(dt);
+
+    if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
+        ret_value = TRUE;
+    else 
+        ret_value = FALSE;
+
+done:
+    FUNC_LEAVE(ret_value);   
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Tget_native_type
+ *
+ * Purpose:     High-level API to return the native type of a datatype. 
+ *              The native type is chosen by matching the size and class of 
+ *              querried datatype from the following native premitive 
+ *              datatypes:
+ *                      H5T_NATIVE_CHAR         H5T_NATIVE_UCHAR
+ *                      H5T_NATIVE_SHORT        H5T_NATIVE_USHORT
+ *                      H5T_NATIVE_INT          H5T_NATIVE_UINT
+ *                      H5T_NATIVE_LONG         H5T_NATIVE_ULONG
+ *                      H5T_NATIVE_LLONG        H5T_NATIVE_ULLONG
+ *
+ *                      H5T_NATIVE_FLOAT
+ *                      H5T_NATIVE_DOUBLE
+ *                      H5T_NATIVE_LDOUBLE
+ *
+ *              Compound, array, enum, and VL types all choose among these 
+ *              types for theire members.  Time, Bifield, Opaque, Reference
+ *              types are only copy out.
+ *      
+ * Return:      Success:        Returns the native data type if successful.
+ *
+ *              Failure:        negative
+ *
+ * Programmer:  Raymond Lu
+ *              Oct 3, 2002 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction)
+{
+    H5T_t       *dt=NULL, *new_dt=NULL;
+    H5T_class_t class;
+    size_t      comp_size=0;
+    hid_t       ret_value;
+
+    FUNC_ENTER_API(H5Tget_native_type, FAIL);
+    H5TRACE1("z","i",type_id);
+
+    /* check argument */
+    if(NULL==(dt=H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+
+    if(direction!=H5T_DIR_DEFAULT && direction!=H5T_DIR_ASCEND 
+        && direction!=H5T_DIR_DESCEND)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not valid direction value");
+
+    if((new_dt = H5T_get_native_type(dt, direction, NULL, NULL, &comp_size))==NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot retrieve native type");
+
+    if((ret_value=H5I_register(H5I_DATATYPE, new_dt)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type");
+             
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_get_native_type
+ * 
+ * Purpose:     Returns the native type of a datatype.
+ * 
+ * Return:      Success:        Returns the native data type if successful.
+ * 
+ *              Failure:        negative
+ *              
+ * Programmer:  Raymond Lu
+ *              Oct 3, 2002
+ *              
+ * Modifications:
+ * 
+ *-------------------------------------------------------------------------
+ */
+H5T_t* H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_align, size_t *offset, size_t *comp_size)
+{   
+    H5T_t       *ret_value, *dt;
+    H5T_class_t class;
+    H5T_sign_t  sign;
+    size_t      size;
+    int         nmemb;
+    int         i;
+    H5T_t       *memb_type, *base_type, *super_type, *new_type;
+    hid_t       memb_id, base_id;
+    H5T_t       **memb_list;                   /* List of compound member IDs */
+    size_t      *memb_offset=NULL;              /* List of member offsets in compound type, including member size and alignment */
+    size_t      children_size=0;                /* Total size of compound members */ 
+    size_t      children_st_align=0;            /* The max alignment among compound members.  This'll be the compound alignment */
+    char        **comp_mname;                   /* List of member names in compound type */
+    char        *memb_name;                     
+    void        *memb_value;
+    int         array_rank;
+    hsize_t     *dims = NULL;
+    H5T_class_t child_class;
+
+    FUNC_ENTER_NOAPI(H5T_get_native_type, NULL);
+        
+    assert(dtype); 
+
+    if((class = H5T_get_class(dtype))<0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class");
+        
+    if((size =  H5T_get_size(dtype))==0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid size");
+        
+    switch(class) {
+        case H5T_INTEGER:
+            if((sign =  H5T_get_sign(dtype))==H5T_SGN_ERROR)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid signess");
+        
+            if((ret_value = H5T_get_native_integer(size, sign, direction, struct_align, offset, comp_size))==NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve integer type");
+                
+            break;
+        case H5T_FLOAT:
+            if((ret_value = H5T_get_native_float(size, direction, struct_align, offset, comp_size))==NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
+
+            break;
+        case H5T_STRING:
+            if(H5T_is_variable_str(dtype)) {
+                if(NULL==(dt=H5I_object_verify(H5T_C_S1, H5I_DATATYPE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+                if((ret_value=H5T_copy(dt, H5T_COPY_TRANSIENT))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
+                if(H5T_set_size(ret_value, H5T_VARIABLE)<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot set size");
+            } else {   
+                if(NULL==(dt=H5I_object_verify(H5T_NATIVE_UCHAR, H5I_DATATYPE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+                if((ret_value=H5T_copy(dt, H5T_COPY_TRANSIENT))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
+                if(H5T_set_size(ret_value, size)<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot set size");
+            }
+            
+            break;
+        case H5T_TIME:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_REFERENCE:
+            if((ret_value=H5T_copy(dtype, H5T_COPY_TRANSIENT))==NULL)
+                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
+
+            break;
+        case H5T_COMPOUND:
+            if((nmemb = H5T_get_nmembers(dtype))<=0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "compound data type doesn't have any member");
+            
+            memb_list   = (H5T_t**)HDmalloc(nmemb*sizeof(H5T_t*));
+            memb_offset = (size_t*)HDcalloc(nmemb, sizeof(size_t));
+            comp_mname = (char**)HDmalloc(nmemb*sizeof(char*));
+
+            /* Construct child compound type and retrieve a list of their IDs, offsets, total size, and alignment for compound type. */  
+            for(i=0; i<nmemb; i++) {
+                if((memb_type = H5T_get_member_type(dtype, i))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "member type retrieval failed");
+                    
+                if((comp_mname[i] = H5T_get_member_name(dtype, i))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "member type retrieval failed");
+                    
+                if((memb_list[i] = H5T_get_native_type(memb_type, direction, &children_st_align, &(memb_offset[i]), &children_size))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "member identifier retrieval failed");
+
+                if(H5T_close(memb_type)<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+            }
+           
+            /* The alignment for whole compound type */
+            if(children_st_align && children_size % children_st_align) {
+                memb_offset[nmemb-1] += children_size % children_st_align;
+                children_size += children_size % children_st_align;
+            }
+
+            /* Construct new compound type based on native type */   
+            if((new_type=H5T_create(H5T_COMPOUND, children_size))==NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot create a compound type");
+
+            /* Insert members for the new compound type */       
+            for(i=0; i<nmemb; i++) {
+                if(H5T_insert(new_type, comp_mname[i], memb_offset[i], memb_list[i])<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot insert member to compound datatype");
+            }
+            
+            /* Update size, offset and compound alignment for parent. */
+            if(offset)
+                *offset = *comp_size;
+            if(struct_align && *struct_align < children_st_align)
+                *struct_align = children_st_align;
+            *comp_size += children_size;
+            
+            /* Close member data type */ 
+            for(i=0; i<nmemb; i++) {
+                if(H5T_close(memb_list[i])<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+
+                /* Free member name list */
+                if(comp_mname[i])
+                    HDfree(comp_mname[i]);
+            }
+           
+            if(memb_list)
+                HDfree(memb_list);
+            if(memb_offset)
+                HDfree(memb_offset);
+            if(comp_mname)
+                HDfree(comp_mname);
+            
+            ret_value = new_type;
+
+            break;
+        case H5T_ENUM:
+            /* Retrieve base type for enumarate type */
+            if((super_type=H5T_get_super(dtype))==NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get base type for enumarate type");
+            if((base_type = H5T_get_native_type(super_type, direction, struct_align, offset, comp_size))==NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "base native type retrieval failed");
+
+            /* Allocate room for the enum values */
+            memb_value = H5MM_malloc(H5T_get_size(super_type));
+            assert(memb_value);
+
+            /* Close super type */
+            if(H5T_close(super_type)<0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+             
+            /* Construct new enum type based on native type */   
+            if((new_type=H5T_enum_create(base_type))==NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create enum type");
+                
+            /* Retrieve member info and insert members into new enum type */
+            if((nmemb = H5T_get_nmembers(dtype))<=0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "enumarate data type doesn't have any member");
+            for(i=0; i<nmemb; i++) {
+                if((memb_name=H5T_get_member_name(dtype, i))==NULL)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member name");
+                if(H5T_get_member_value(dtype, i, memb_value)<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value");
+                if(H5T_enum_insert(new_type, memb_name, memb_value)<0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot insert member");
+                if(memb_name)
+                    HDfree(memb_name);
+            }
+            if(memb_value) 
+                H5MM_xfree(memb_value);
+
+            /* Close base type */
+            if(H5T_close(base_type)<0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+           
+            ret_value = new_type;
+
+            break;
+        case H5T_ARRAY:
+            /* Retrieve dimension information for array data type */
+            if((array_rank=H5T_get_array_ndims(dtype))<=0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get dimension rank");
+            if((dims = (hsize_t*)H5MM_malloc(array_rank*sizeof(hsize_t)))==NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory"); 
+            if(H5T_get_array_dims(dtype, dims, NULL)<0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get dimension size");
+
+            /* Retrieve base type for array type */
+            if((super_type=H5T_get_super(dtype))==NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get parent type for enumarate type");
+            if((base_type = H5T_get_native_type(super_type, direction, struct_align, offset, comp_size))==NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "parent native type retrieval failed");
+
+            /* Close super type */
+            if(H5T_close(super_type)<0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+
+            /* Create a new array type based on native type */
+            if((new_type=H5T_array_create(base_type, array_rank, dims, NULL))==NULL) 
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create array type");
+
+            /* Close base type */
+            if(H5T_close(base_type)<0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+            if(dims)
+                HDfree(dims);
+            
+            ret_value = new_type;
+
+            break;
+        case H5T_VLEN:
+            /* Retrieve base type for array type */
+            if((super_type=H5T_get_super(dtype))==NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get parent type for enumarate type");
+            if((base_type = H5T_get_native_type(super_type, direction, struct_align, offset, comp_size))==NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "parent native type retrieval failed");
+
+            /* Close super type */
+            if(H5T_close(super_type)<0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+
+            /* Create a new array type based on native type */
+            if((new_type=H5T_vlen_create(base_type))==NULL) 
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create VL type");
+           
+            /* Close base type */
+            if(H5T_close(base_type)<0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot close datatype");
+            
+            ret_value = new_type;
+
+            break;   
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "data type doesn't match any native type");
+    }   
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_get_native_integer
+ * 
+ * Purpose:     Returns the native integer type of a datatype.
+ * 
+ * Return:      Success:        Returns the native data type if successful.
+ * 
+ *              Failure:        negative
+ *              
+ * Programmer:  Raymond Lu
+ *              Oct 3, 2002
+ *              
+ * Modifications:
+ * 
+ *-------------------------------------------------------------------------
+ */
+H5T_t* H5T_get_native_integer(size_t size, H5T_sign_t sign, H5T_direction_t direction, size_t *struct_align, size_t *offset, size_t *comp_size)
+{  
+    H5T_t       *dt=NULL, *ret_value=NULL;
+    hid_t       tid;
+    size_t      align=1;
+
+    FUNC_ENTER_NOAPI(H5T_get_native_integer, NULL);
+    
+    if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {         
+        if(size==sizeof(char)) {
+            if(sign==H5T_SGN_2)
+                tid = H5T_NATIVE_SCHAR;
+            else
+                tid = H5T_NATIVE_UCHAR;
+            
+            align = H5T_NATIVE_SCHAR_COMP_ALIGN_g; 
+        }
+        else if(size==sizeof(short)) {
+            if(sign==H5T_SGN_2)
+                tid = H5T_NATIVE_SHORT;
+            else
+                tid = H5T_NATIVE_USHORT;
+
+            align = H5T_NATIVE_SHORT_COMP_ALIGN_g; 
+        }
+        else if(size==sizeof(int)) {
+            if(sign==H5T_SGN_2)
+                tid = H5T_NATIVE_INT;
+            else  
+                tid = H5T_NATIVE_UINT;
+
+            align = H5T_NATIVE_INT_COMP_ALIGN_g; 
+        }
+        else if(size==sizeof(long)) {
+            if(sign==H5T_SGN_2)
+                tid = H5T_NATIVE_LONG;
+            else  
+                tid = H5T_NATIVE_ULONG;
+
+            align = H5T_NATIVE_LONG_COMP_ALIGN_g;            
+        }
+        else if(size==sizeof(long long)) {
+            if(sign==H5T_SGN_2)
+                tid = H5T_NATIVE_LLONG;
+            else  
+                tid = H5T_NATIVE_ULLONG;
+
+            align = H5T_NATIVE_LLONG_COMP_ALIGN_g;            
+        }
+        else { /* If no native type matches the querried datatype, simply choose the type of biggest size. */
+            if(sign==H5T_SGN_2)
+                tid = H5T_NATIVE_LLONG;
+            else  
+                tid = H5T_NATIVE_ULLONG;
+
+            align = H5T_NATIVE_LLONG_COMP_ALIGN_g;            
+        }
+    } else if(direction == H5T_DIR_DESCEND) {         
+        if(size==sizeof(long long)) {
+            if(sign==H5T_SGN_2)
+                tid = H5T_NATIVE_LLONG;
+            else  
+                tid = H5T_NATIVE_ULLONG;
+
+            align = H5T_NATIVE_LLONG_COMP_ALIGN_g;            
+        }
+        else if(size==sizeof(long)) {
+            if(sign==H5T_SGN_2)
+                tid = H5T_NATIVE_LONG;
+            else  
+                tid = H5T_NATIVE_ULONG;
+
+            align = H5T_NATIVE_LONG_COMP_ALIGN_g;            
+        }
+        else if(size==sizeof(int)) {
+            if(sign==H5T_SGN_2)
+                tid = H5T_NATIVE_INT;
+            else  
+                tid = H5T_NATIVE_UINT;
+
+            align = H5T_NATIVE_INT_COMP_ALIGN_g;            
+        }
+        else if(size==sizeof(short)) {
+            if(sign==H5T_SGN_2)
+                tid = H5T_NATIVE_SHORT;
+            else  
+                tid = H5T_NATIVE_SHORT;
+
+            align = H5T_NATIVE_SHORT_COMP_ALIGN_g;                       
+        }
+        if(size==sizeof(char)) {
+            if(sign==H5T_SGN_2)
+                tid = H5T_NATIVE_SCHAR;
+            else  
+                tid = H5T_NATIVE_UCHAR;
+
+            align = H5T_NATIVE_SCHAR_COMP_ALIGN_g;                       
+        }
+        else { /* If no native type matches the querried datatype, simple choose the type of smallest size. */
+            if(sign==H5T_SGN_2)
+                tid = H5T_NATIVE_SCHAR;
+            else  
+                tid = H5T_NATIVE_UCHAR;
+
+            align = H5T_NATIVE_SCHAR_COMP_ALIGN_g;                       
+        }
+    }
+        
+    /* Create new native type */
+    if(NULL==(dt=H5I_object_verify(tid, H5I_DATATYPE)))
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+    if((ret_value=H5T_copy(dt, H5T_COPY_TRANSIENT))==NULL)
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
+            
+    /* compute size and offset of compound type member. */
+    if(comp_size && offset) {
+         /* Add alignment value */
+         if(align && *comp_size%align) {
+              *offset = *comp_size +  (align - *comp_size%align);
+              size = size + (align - *comp_size%align);
+         } else
+              *offset = *comp_size;
+                  
+              *comp_size += size; 
+         } 
+    /* Alignment for whole compound type */
+    if(struct_align && *struct_align<align)
+         *struct_align = align;
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_get_native_float
+ * 
+ * Purpose:     Returns the native floatt type of a datatype.
+ * 
+ * Return:      Success:        Returns the native data type if successful.
+ * 
+ *              Failure:        negative
+ *              
+ * Programmer:  Raymond Lu
+ *              Oct 3, 2002
+ *              
+ * Modifications:
+ * 
+ *-------------------------------------------------------------------------
+ */
+H5T_t* H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_align, size_t *offset, size_t *comp_size)
+{  
+    H5T_t       *ret_value=NULL, *dt=NULL;
+    hid_t       tid;
+    size_t      align=1;
+
+    FUNC_ENTER_NOAPI(H5T_get_native_integer, NULL);
+
+    if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {        
+        if(size==sizeof(float)) {
+            tid = H5T_NATIVE_FLOAT;
+            align = H5T_NATIVE_FLOAT_COMP_ALIGN_g;
+        }
+        else if(size==sizeof(double)) {
+            tid = H5T_NATIVE_DOUBLE;
+            align = H5T_NATIVE_DOUBLE_COMP_ALIGN_g;
+        }
+        else if(size==sizeof(long double)) {
+            tid = H5T_NATIVE_LDOUBLE;
+            align = H5T_NATIVE_LDOUBLE_COMP_ALIGN_g;
+        }
+        else { /* If not match, return the biggest datatype */
+            tid = H5T_NATIVE_LDOUBLE;
+            align = H5T_NATIVE_LDOUBLE_COMP_ALIGN_g;
+        }
+    } else {
+        if(size==sizeof(long double)) {
+            tid = H5T_NATIVE_LDOUBLE;
+            align = H5T_NATIVE_LDOUBLE_COMP_ALIGN_g;
+        }
+        else if(size==sizeof(double)) {
+             tid = H5T_NATIVE_DOUBLE;
+             align = H5T_NATIVE_DOUBLE_COMP_ALIGN_g;     
+        }
+        else if(size==sizeof(float)) {
+             tid = H5T_NATIVE_FLOAT;
+             align = H5T_NATIVE_FLOAT_COMP_ALIGN_g;                    
+        }
+        else {
+             tid = H5T_NATIVE_FLOAT;
+             align = H5T_NATIVE_FLOAT_COMP_ALIGN_g;                               
+        }
+    }
+   
+    /* Create new native type */
+    if(NULL==(dt=H5I_object_verify(tid, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+    if((ret_value=H5T_copy(dt, H5T_COPY_TRANSIENT))==NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
+      
+    /* compute size and offset of compound type member. */
+    if(comp_size && offset) {
+        /* Add alignment value */
+        if(align && *comp_size % align) {
+            *offset = *comp_size + (align - *comp_size % align);
+            size = size + (align - *comp_size % align);
+        } else
+            *offset = *comp_size;
+                
+            *comp_size += size;
+    } 
+    /* Alignment for whole compound type */
+    if(struct_align && *struct_align < align)
+        *struct_align = align;
+                
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Tget_size
  *
  * Purpose:	Determines the total size of a data type in bytes.
@@ -3097,9 +3742,42 @@ H5Tget_sign(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_SGN_ERROR, "not an integer data type");
+        
+    ret_value = H5T_get_sign(dt);
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_get_sign
+ *
+ * Purpose:	Private function for H5Tget_sign.  Retrieves the sign type 
+ *              for an integer type.
+ *
+ * Return:	Success:	The sign type.
+ *
+ *		Failure:	H5T_SGN_ERROR (Negative)
+ *
+ * Programmer:	Raymond Lu
+ *		October 8, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_sign_t
+H5T_get_sign(H5T_t *dt)
+{
+    H5T_sign_t		ret_value;
+
+    FUNC_ENTER_NOAPI(H5T_get_sign, H5T_SGN_ERROR);
+
+    /* Check args */
+    if (!dt)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_SGN_ERROR, "not a valid data type");
     if (dt->parent)
-        dt = dt->parent; /*defer to parent*/
-    if (H5T_INTEGER!=dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_SGN_ERROR, "operation not defined for data type class");
     
     /* Sign */
@@ -3108,6 +3786,7 @@ H5Tget_sign(hid_t type_id)
 done:
     FUNC_LEAVE(ret_value);
 }
+
 
 
 /*-------------------------------------------------------------------------
@@ -3802,6 +4481,45 @@ H5Tget_nmembers(hid_t type_id)
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
+    if((ret_value = H5T_get_nmembers(dt))<0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot return member number");
+    
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_get_nmembers
+ *
+ * Purpose:	Private function for H5Tget_nmembers.  Determines how many 
+ *              members DTYPE has.  The type must be either a compound data i
+ *              type or an enumeration data type.
+ *
+ * Return:	Success:	Number of members defined in the data type.
+ *
+ *		Failure:	Negative
+ *
+ * Errors:
+ *
+ * Programmer:  Raymond Lu	
+ *	        October 8, 2002	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5T_get_nmembers(const H5T_t *dt)
+{
+    int	ret_value;
+
+    FUNC_ENTER_NOAPI(H5T_get_nmembers, FAIL);
+
+    /* check argument */
+    if (NULL == dt)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid data type");
+
     if (H5T_COMPOUND==dt->type)
 	ret_value = dt->u.compnd.nmembs;
     else if (H5T_ENUM==dt->type)
@@ -3846,6 +4564,40 @@ H5Tget_member_name(hid_t type_id, int membno)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+
+    if((ret_value = H5T_get_member_name(dt, membno))==NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get member name");
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_get_member_name
+ *
+ * Purpose:	Private function for H5Tget_member_name.  Returns the name 
+ *              of a member of a compound or enumeration data type. Members
+ *              are stored in no particular order with numbers 0 through 
+ *              N-1 where N is the value returned by H5Tget_nmembers().
+ *
+ * Return:	Success:	Ptr to a string allocated with malloc().  The
+ *				caller is responsible for freeing the string.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Raymond Lu
+ *              October 9, 2002	
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+char *
+H5T_get_member_name(H5T_t *dt, int membno)
+{
+    char	*ret_value;
+
+    FUNC_ENTER_NOAPI(H5T_get_member_name, NULL);
 
     switch (dt->type) {
         case H5T_COMPOUND:
@@ -3925,7 +4677,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
 done:
     FUNC_LEAVE(ret_value);
 }
-
+       
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_member_offset
@@ -3959,6 +4711,48 @@ H5Tget_member_offset(hid_t type_id, int membno)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a compound data type");
+    if (membno < 0 || membno >= dt->u.compnd.nmembs)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid member number");
+
+    /* Value */
+    ret_value = H5T_get_member_offset(dt, membno);
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_get_member_offset
+ *
+ * Purpose:	Private function for H5Tget_member_offset.  Returns the byte 
+ *              offset of the beginning of a member with respect to the i
+ *              beginning of the compound data type datum.
+ *
+ * Return:	Success:	Byte offset.
+ *
+ *		Failure:	Zero. Zero is a valid offset, but this
+ *				function will fail only if a call to
+ *				H5Tget_member_dims() fails with the same
+ *				arguments.
+ *
+ * Programmer:	Raymond Lu
+ *		October 8, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5T_get_member_offset(H5T_t *dt, int membno)
+{
+    size_t	ret_value;
+
+    FUNC_ENTER_NOAPI(H5T_get_member_offset, 0);
+
+    /* Check args */
+    if (!dt)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a valid data type");
     if (membno < 0 || membno >= dt->u.compnd.nmembs)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid member number");
 
@@ -4008,6 +4802,7 @@ done:
     FUNC_LEAVE(ret_value);
 } /* end H5Tget_member_class() */
 
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_member_type
@@ -4047,10 +4842,8 @@ H5Tget_member_type(hid_t type_id, int membno)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
     if (membno < 0 || membno >= dt->u.compnd.nmembs)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number");
-    
-    /* Copy data type into an atom */
-    if (NULL == (memb_dt = H5T_copy(dt->u.compnd.memb[membno].type, H5T_COPY_REOPEN)))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy member data type");
+    if ((memb_dt=H5T_get_member_type(dt, membno))==NULL)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to retrieve member type");
     if ((ret_value = H5I_register(H5I_DATATYPE, memb_dt)) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable register data type atom");
     
@@ -4062,6 +4855,48 @@ done:
 
     FUNC_LEAVE(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_get_member_type
+ *
+ * Purpose:	Private function for H5Tget_member_type.  Returns the data 
+ *              type of the specified member.
+ *
+ * Return:	Success:	A copy of the member data type;
+ *				modifying the returned data type does not
+ *				modify the member type.
+ *
+ *		Failure:        NULL	
+ *
+ * Programmer:	Raymond Lu
+ *	        October 8, 2002	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t *
+H5T_get_member_type(H5T_t *dt, int membno)
+{
+    H5T_t	*ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(H5T_get_member_type, NULL);
+
+    /* Check args */
+    if (!dt)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "data type doesn't exist");
+    if (membno < 0 || membno >= dt->u.compnd.nmembs)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid member number");
+    
+    /* Copy data type into an atom */
+    if (NULL == (ret_value = H5T_copy(dt->u.compnd.memb[membno].type, H5T_COPY_REOPEN)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy member data type");
+    
+done:
+    FUNC_LEAVE(ret_value);
+}
+
 
 
 /*-------------------------------------------------------------------------
@@ -4190,13 +5025,8 @@ H5Tenum_create(hid_t parent_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an integer data type");
 
     /* Build new type */
-    if (NULL==(dt = H5FL_ALLOC(H5T_t,1)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    dt->type = H5T_ENUM;
-    dt->parent = H5T_copy(parent, H5T_COPY_ALL);
-    dt->size = dt->parent->size;
-    dt->ent.header = HADDR_UNDEF;
-
+    if((dt=H5T_enum_create(parent))==NULL)
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot create enum type");
     /* Atomize the type */
     if ((ret_value=H5I_register(H5I_DATATYPE, dt))<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type atom");
@@ -4204,6 +5034,45 @@ H5Tenum_create(hid_t parent_id)
 done:
     FUNC_LEAVE(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_enum_create
+ *
+ * Purpose:	Private function for H5Tenum_create.  Create a new 
+ *              enumeration data type based on the specified
+ *		TYPE, which must be an integer type.
+ *
+ * Return:	Success:	new enumeration data type
+ *
+ *		Failure:        NULL	
+ *
+ * Programmer:	Raymond Lu
+ *              October 9, 2002 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t *
+H5T_enum_create(H5T_t *parent)
+{
+    H5T_t	*ret_value = NULL;		/*new enumeration data type	*/
+    
+    FUNC_ENTER_NOAPI(H5T_enum_create, NULL);
+
+    /* Build new type */
+    if (NULL==(ret_value = H5FL_ALLOC(H5T_t,1)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    ret_value->type = H5T_ENUM;
+    ret_value->parent = H5T_copy(parent, H5T_COPY_ALL);
+    ret_value->size = ret_value->parent->size;
+    ret_value->ent.header = HADDR_UNDEF;
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
 
 
 /*-------------------------------------------------------------------------
@@ -4283,10 +5152,8 @@ H5Tget_super(hid_t type)
 
     if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (!dt->parent)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a derived data type");
-    if (NULL==(super=H5T_copy(dt->parent, H5T_COPY_ALL)))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy parent data type");
+    if((super=H5T_get_super(dt))==NULL)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "not a data type");
     if ((ret_value=H5I_register(H5I_DATATYPE, super))<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register parent data type");
 
@@ -4296,6 +5163,41 @@ done:
             H5T_close(super);
     } /* end if */
 
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_get_super
+ *
+ * Purpose:	Private function for H5Tget_super.  Returns the type from 
+ *              which TYPE is derived. In the case of an enumeration type 
+ *              the return value is an integer type.
+ *
+ * Return:	Success:	Data type for base data type.
+ *
+ *		Failure:        NULL	
+ *
+ * Programmer:	Raymond Lu
+ *              October 9, 2002 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t *
+H5T_get_super(H5T_t *dt)
+{
+    H5T_t	*ret_value=NULL;
+    
+    FUNC_ENTER_NOAPI(H5T_get_super, NULL);
+
+    if (!dt->parent)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a derived data type");
+    if (NULL==(ret_value=H5T_copy(dt->parent, H5T_COPY_ALL)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy parent data type");
+
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -4335,11 +5237,44 @@ H5Tget_member_value(hid_t type, int membno, void *value/*out*/)
     if (!value)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null value buffer");
 
+    if (H5T_get_member_value(dt, membno, value)<0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get member value");
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_get_member_value
+ *
+ * Purpose:	Private function for H5T_get_member_value.  Return the 
+ *              value for an enumeration data type member.
+ *
+ * Return:	Success:	non-negative with the member value copied
+ *				into the memory pointed to by VALUE.
+ *
+ *		Failure:	negative, VALUE memory is undefined.
+ *
+ * Programmer:	Raymond Lu
+ *              October 9, 2002 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_get_member_value(H5T_t *dt, int membno, void *value/*out*/)
+{
+    herr_t      ret_value=SUCCEED;       /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5T_get_member_value, FAIL);
+
     HDmemcpy(value, dt->u.enumer.value + membno*dt->size, dt->size);
 
 done:
     FUNC_LEAVE(ret_value);
 }
+
 
 
 /*-------------------------------------------------------------------------
@@ -7782,11 +8717,42 @@ H5Tget_array_ndims(hid_t type_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype");
 
     /* Retrieve the number of dimensions */
-    ret_value=dt->u.array.ndims;
+    ret_value = H5T_get_array_ndims(dt);
 
 done:
     FUNC_LEAVE(ret_value);
 }   /* end H5Tget_array_ndims */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_get_array_ndims
+ *
+ * Purpose:	Private function for H5T_get_array_ndims.  Query the number 
+ *              of dimensions for an array datatype.
+ *
+ * Return:	Success:	Number of dimensions of the array datatype
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *              October 10, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5T_get_array_ndims(H5T_t *dt)
+{
+    int	ret_value;	    /* return value			*/
+    
+    FUNC_ENTER_NOAPI(H5T_get_array_ndims, FAIL);
+
+    /* Retrieve the number of dimensions */
+    ret_value=dt->u.array.ndims;
+
+done:
+    FUNC_LEAVE(ret_value);
+}   /* end H5T_get_array_ndims */
 
 
 /*-------------------------------------------------------------------------
@@ -7821,6 +8787,38 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype");
 
     /* Retrieve the sizes of the dimensions */
+    if(H5T_get_array_dims(dt, dims, perm)<0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to get dimension sizes");
+done:
+    FUNC_LEAVE(ret_value);
+}   /* end H5Tget_array_dims */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_get_array_dims
+ *
+ * Purpose:	Private function for H5T_get_array_dims.  Query the sizes 
+ *              of dimensions for an array datatype.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:  Raymond Lu
+ *              October 10, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_get_array_dims(H5T_t *dt, hsize_t dims[], int perm[])
+{
+    herr_t	ret_value = SUCCEED;	/* return value			*/
+    int    i;                  /* Local index variable */
+    
+    FUNC_ENTER_NOAPI(H5T_get_array_dims, FAIL);
+
+    /* Retrieve the sizes of the dimensions */
     if(dims) 
         for(i=0; i<dt->u.array.ndims; i++)
             dims[i]=dt->u.array.dim[i];
@@ -7832,7 +8830,8 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
 
 done:
     FUNC_LEAVE(ret_value);
-}   /* end H5Tget_array_dims */
+}   /* end H5T_get_array_dims */
+
 
 
 /*-------------------------------------------------------------------------

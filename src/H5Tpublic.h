@@ -157,6 +157,13 @@ typedef enum H5T_pers_t {
     H5T_PERS_SOFT	= 1 	/*soft conversion function		     */
 } H5T_pers_t;
 
+/* The order to retrieve atomic native datatype */
+typedef enum H5T_direction_t {
+    H5T_DIR_DEFAULT     = 0,    /*default direction is inscendent            */
+    H5T_DIR_ASCEND      = 1,    /*in inscendent order                        */
+    H5T_DIR_DESCEND     = 2     /*in descendent order                        */
+} H5T_direction_t;
+
 /* Variable Length Datatype struct in memory */
 /* (This is only used for VL sequences, not VL strings, which are stored in char *'s) */
 typedef struct {
@@ -513,6 +520,8 @@ H5_DLL hid_t H5Tget_member_type(hid_t type_id, int membno);
 H5_DLL herr_t H5Tget_member_value(hid_t type_id, int membno,
 				   void *value/*out*/);
 H5_DLL H5T_cset_t H5Tget_cset(hid_t type_id);
+H5_DLL htri_t H5Tis_variable_str(hid_t type_id);
+H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction); 
 
 /* Setting property values */
 H5_DLL herr_t H5Tset_size(hid_t type_id, size_t size);

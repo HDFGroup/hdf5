@@ -175,6 +175,22 @@ H5_DLLVAR H5T_overflow_t H5T_overflow_g;
  * Alignment information for native types. A value of N indicates that the
  * data must be aligned on an address ADDR such that 0 == ADDR mod N. When
  * N=1 no alignment is required; N=0 implies that alignment constraints were
+ * not calculated.  These alignment info is only for H5Tget_native_type.
+ * These values are used for structure alignment.
+ */
+H5_DLLVAR size_t	H5T_NATIVE_SCHAR_COMP_ALIGN_g;
+H5_DLLVAR size_t	H5T_NATIVE_SHORT_COMP_ALIGN_g;
+H5_DLLVAR size_t	H5T_NATIVE_INT_COMP_ALIGN_g;
+H5_DLLVAR size_t	H5T_NATIVE_LONG_COMP_ALIGN_g;
+H5_DLLVAR size_t	H5T_NATIVE_LLONG_COMP_ALIGN_g;
+H5_DLLVAR size_t	H5T_NATIVE_FLOAT_COMP_ALIGN_g;
+H5_DLLVAR size_t	H5T_NATIVE_DOUBLE_COMP_ALIGN_g;
+H5_DLLVAR size_t	H5T_NATIVE_LDOUBLE_COMP_ALIGN_g;
+
+/*
+ * Alignment information for native types. A value of N indicates that the
+ * data must be aligned on an address ADDR such that 0 == ADDR mod N. When
+ * N=1 no alignment is required; N=0 implies that alignment constraints were
  * not calculated.
  */
 H5_DLLVAR size_t	H5T_NATIVE_SCHAR_ALIGN_g;

@@ -48,6 +48,7 @@ typedef struct detected_t {
     int			epos, esize;	/*information about exponent	*/
     unsigned long	bias;		/*exponent bias for floating pt.*/
     size_t		align;		/*required byte alignment	*/
+    size_t		comp_align;	/*alignment for structure       */
 } detected_t;
 
 static void print_results(int nd, detected_t *d);
@@ -246,6 +247,16 @@ precision (detected_t *d)
    INFO.bias = find_bias (INFO.epos, INFO.esize, INFO.perm, &_v1);	      \
    ALIGNMENT(TYPE, INFO.align);						      \
    precision (&(INFO));							      \
+}
+
+/* Detect alignment for C structure */
+#define COMP_ALIGNMENT(TYPE,COMP_ALIGN) {			              \
+    struct {                                                                  \
+        char    c;                                                            \
+        TYPE    x;                                                            \
+    } s;                                                                      \
+                                                                              \
+    COMP_ALIGN = (size_t)((char*)(&(s.x)) - (char*)(&s));                     \
 }
 
 #if defined(H5_HAVE_LONGJMP) && defined(H5_HAVE_SIGNAL)
@@ -492,6 +503,15 @@ H5TN_init_interface(void)\n\
 	       d[i].varname);
 	printf("    H5T_NATIVE_%s_ALIGN_g = %lu;\n",
 	       d[i].varname, (unsigned long)(d[i].align));
+
+        /* Variables for alignment of compound datatype */
+        if(!strcmp(d[i].varname, "SCHAR")  || !strcmp(d[i].varname, "SHORT") || 
+            !strcmp(d[i].varname, "INT")   || !strcmp(d[i].varname, "LONG")  || 
+            !strcmp(d[i].varname, "LLONG") || !strcmp(d[i].varname, "FLOAT") || 
+            !strcmp(d[i].varname, "DOUBLE") || !strcmp(d[i].varname, "LDOUBLE")) { 
+            printf("    H5T_NATIVE_%s_COMP_ALIGN_g = %lu;\n",
+                    d[i].varname, (unsigned long)(d[i].comp_align));
+        }
     }
 
     printf("\
@@ -1012,13 +1032,24 @@ main(void)
     print_header();
 
     /* C89 integer types */
-    DETECT_I(signed char,	  SCHAR,        d[nd]); nd++;
+    DETECT_I(signed char,	  SCHAR,        d[nd]); 
+    COMP_ALIGNMENT(signed char,   d[nd].comp_align);    nd++;
+    
     DETECT_I(unsigned char,	  UCHAR,        d[nd]); nd++;
-    DETECT_I(short,		  SHORT,        d[nd]); nd++;
+    
+    DETECT_I(short,		  SHORT,        d[nd]); 
+    COMP_ALIGNMENT(short,         d[nd].comp_align);    nd++;
+    
     DETECT_I(unsigned short,	  USHORT,       d[nd]); nd++;
-    DETECT_I(int,		  INT,	        d[nd]); nd++;
+    
+    DETECT_I(int,		  INT,	        d[nd]);
+    COMP_ALIGNMENT(int,           d[nd].comp_align);    nd++;
+    
     DETECT_I(unsigned int,	  UINT,	        d[nd]); nd++;
-    DETECT_I(long,		  LONG,	        d[nd]); nd++;
+    
+    DETECT_I(long,		  LONG,	        d[nd]);
+    COMP_ALIGNMENT(long,          d[nd].comp_align);    nd++;
+    
     DETECT_I(unsigned long,	  ULONG,        d[nd]); nd++;
 
     /*
@@ -1098,7 +1129,9 @@ main(void)
 #endif
     
 #if H5_SIZEOF_LONG_LONG>0
-    DETECT_I(long_long,		  LLONG,        d[nd]); nd++;
+    DETECT_I(long_long,		  LLONG,        d[nd]);
+    COMP_ALIGNMENT(long long,     d[nd].comp_align);    nd++;
+    
     DETECT_I(unsigned long_long,  ULLONG,       d[nd]); nd++;
 #else
     /*
@@ -1106,12 +1139,17 @@ main(void)
      * so we'll just make H5T_NATIVE_LLONG the same as H5T_NATIVE_LONG since
      * `long long' is probably equivalent to `long' here anyway.
      */
-    DETECT_I(long,		  LLONG,        d[nd]); nd++;
+    DETECT_I(long,		  LLONG,        d[nd]);
+    COMP_ALIGNMENT(long,          d[nd].comp_align);    nd++;
+    
     DETECT_I(unsigned long,	  ULLONG,       d[nd]); nd++;
 #endif
 
-    DETECT_F(float,		  FLOAT,        d[nd]); nd++;
-    DETECT_F(double,		  DOUBLE,       d[nd]); nd++;
+    DETECT_F(float,		  FLOAT,        d[nd]);
+    COMP_ALIGNMENT(float,         d[nd].comp_align);    nd++;
+    
+    DETECT_F(double,		  DOUBLE,       d[nd]);
+    COMP_ALIGNMENT(double,        d[nd].comp_align);    nd++;
 
 #if H5_SIZEOF_DOUBLE == H5_SIZEOF_LONG_DOUBLE
     /*
@@ -1120,11 +1158,14 @@ main(void)
      * some systems and `long double' is probably the same as `double' here
      * anyway.
      */
-    DETECT_F(double,		  LDOUBLE,      d[nd]); nd++;
+    DETECT_F(double,		  LDOUBLE,      d[nd]);
+    COMP_ALIGNMENT(double,        d[nd].comp_align);    nd++;
 #else
-    DETECT_F(long double,	  LDOUBLE,      d[nd]); nd++;
+    DETECT_F(long double,	  LDOUBLE,      d[nd]);
+    COMP_ALIGNMENT(long double, d[nd].comp_align);    nd++;
 #endif
 
     print_results (nd, d);
+    
     return 0;
 }

@@ -261,6 +261,12 @@ static void test_vlstring_type(void)
     ret = H5Tset_size(tid_vlstr, H5T_VARIABLE);
     CHECK(ret, FAIL, "H5Tset_size");
 
+    /* Check if datatype is VL string */
+    ret = H5Tget_class(tid_vlstr);
+    VERIFY(ret, H5T_STRING, "H5Tget_class");
+    ret = H5Tis_variable_str(tid_vlstr);
+    VERIFY(ret, TRUE, "H5Tis_variable_str");
+    
     /* Check default character set and padding */
     cset = H5Tget_cset(tid_vlstr);
     VERIFY(cset, H5T_CSET_ASCII, "H5Tget_cset");

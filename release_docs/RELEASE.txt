@@ -230,6 +230,9 @@ Documentation
 New Features
 ============
 
+    * Functions H5Tget_native_type and H5Tis_variable_str are added.  The first
+      one reconstructs a datatype based on native memory datatype.  The second
+      one checks if a datatype is variable string.  SLU - 2002/11/6
     * Added environment variable "HDF5_DISABLE_VERSION_CHECK", which disables
       the version checking between the header files and the library linked into
       an application if set to '1'.  This should be used with caution, mis-
