@@ -1,53 +1,49 @@
--bad /* Blank line after declarations */
--bap /* Blank line after procedure */
--bbb /* No blank line before boxed comments */
--sob /* Swallow optional blank lines */
--nfca /* Don't format comments on their own line */
--d0  /* Align comments on their own line with the surrounding code */
--c33 /* Start comments after code in column 33 */
--cd33 /* Start comments after declarations in column 33 */
--cp0 /* Start comments after pre-processor directives immediately after the directive */
--ncdb /* Don't put comment delimiters on their own lines */
--sc  /* Put stars at the beginning of multi-line comments */
--br  /* Put braces on the same line as the statement */
--ce  /* "Cuddle" else statements onto the same line as the closing if statement's brace */
--cdw  /* "Cuddle" while statements onto the same line as the closing do statement's brace */
--cli4 /* Indent case statements 4 spaces to right of switch statement */
+-bad  /* Blank line after declarations */
+-bap  /* Blank line after procedure */
+-bbb  /* No blank line before boxed comments */
+-bbo  /* Try to break long lines at boolean operators && and || */
+-nbc  /* Don't force newlines after commas in declarations */
+-br   /* Put braces on the same line as the statement (not -bl) */
+-brs  /* Put braces on the same line as the struct declaration (not -bls) */
+-nbs  /* Don't put a space between a sizeof operator and it's object */
+-c33  /* Start comments after code in column 33 */
 -cbi0 /* Indent braces below a case statement 0 spaces to right of case statement */
--ss  /* Put a space before the semicolon if its the only statement in a for or while loop */
+-cd33 /* Start comments after declarations in column 33 */
+-ncdb /* Don't put comment delimiters on their own lines */
+-cdw  /* "Cuddle" while statements onto the same line as the closing do statement's brace */
+-nce  /* Don't "Cuddle" else statements onto the same line as the closing if statement's brace */
+-ci8  /* Align continued code 8 spaces from initial indention */
+-cli4 /* Indent case statements 4 spaces to right of switch statement */
+-cp0  /* Start comments after pre-processor directives immediately after the directive */
+-ncs  /* Don't put a space between a cast operator and it's object */
+-d0   /* Align comments on their own line with the surrounding code */
+-nbfda /* Don't force newlines after commas in function argument declarations */
+-di24 /* Align identifiers in declarations in column 24 */
+-nfc1 /* Don't format comments in the first column */
+-nfca /* Don't format comments on their own line */
+-hnl  /* Honor existing new-lines in long boolean statements */
+-i4   /* Indent space spaces */
+-ip8  /* Don't add any extra indention for nested parentheses */
+-l78  /* Try to break long lines in column 78 */
+-lc78 /* Try to break long comment lines in column 78 */
+-nlp  /* Don't align lines continued onto further lines with the opening parentheses */
+-lps  /* Leave spaces in preprocessor directives alone */
 -npcs /* Don't put a space between the procedure name and it's parameters */
--ncs /* Don't put a space between a cast operator and it's object */
--nbs /* Don't put a space between a sizeof operator and it's object */
+-npcs /* Don't put a space between the procedure name and it's parameters */
+-pi4  /* Extra indentation per open parentheses */
+-pmt  /* Preserve modification times on modified files */
+-nprs /* Don't add spaces around parentheses */
+-psl  /* Force the return type of a procedure to be on it's own line */
 -nsaf /* Don't put a space between a for statement and it's initial parentheses */
 -nsai /* Don't put a space between an if statement and it's initial parentheses */
 -nsaw /* Don't put a space between a while statement and it's initial parentheses */
--nprs /* Don't add spaces around parentheses */
--di24 /* Align identifiers in declarations in column 24 */
--nbc  /* Don't force newlines after commas in declarations */
--nbfda /* Don't force newlines after commas in function argument declarations */
--psl  /* Force the return type of a procedure to be on it's own line */
--brs  /* Put braces for struct definitions on the same line as the struct keyword */
--i4   /* Indent space spaces */
--nlp  /* Don't align lines continued onto further lines with the opening parentheses */
--ci8  /* Align continued code 8 spaces from initial indention */
--ip4  /* Don't add any extra indention for nested parentheses */
--lps  /* Leave spaces in preprocessor directives alone */
--l78  /* Try to break long lines in column 78 */
--bbo  /* Try to break long lines at boolean operators && and || */
--hnl  /* Honor existing new-lines in long boolen statements */
--pmt  /* Preserve modification times on modified files */
+-sbi0 /* Indent braces after a struct, union or enum 0 spaces */
+-sc   /* Put stars at the beginning of multi-line comments */
+-nsob /* Don't swallow optional blank lines */
+-ss   /* Put a space before the semicolon if its the only statement in a for or while loop */
+-ts8  /* Hard tab characters are 8 spaces */
 /* The rest are typedefs used by the library, feel free to add missing ones, */
 /*  but try to keep them alphabetized */
--T uint8
--T int8
--T uint16
--T int16
--T uint32
--T int32
--T intn
--T uintn
--T float32
--T float64
 -T H5AC_class_t
 -T H5AC_prot_t
 -T H5AC_slot_t
