@@ -238,6 +238,7 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
 
     /* Check for actual fill value to replicate */
     if(fill==NULL)
+        /* If there's no fill value, just use zeros */
         HDmemset(tconv_buf,0,dst_type_size);
     else {
         /* Copy the user's data into the buffer for conversion */
@@ -665,7 +666,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
 #ifdef H5_HAVE_PARALLEL
-    /* Collective access is not permissible without the MPIO or MPIPOSIX driver */
+    /* Collective access is not permissible without a MPI based VFD */
     if (dxpl_cache.xfer_mode==H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPI(dataset->ent.file))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based drivers only")
 
@@ -855,19 +856,18 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(mem_type);
     assert(buf);
 
-    /* If MPIO, MPIPOSIX, or FPHDF5 is used, no VL datatype support yet. */
+    /* If MPI based VFD is used, no VL datatype support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
-    if ( (IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file) || IS_H5FD_FPHDF5(dataset->ent.file)) &&
-            H5T_detect_class(mem_type, H5T_VLEN)>0)
-        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing VL datatypes yet");
-    /* If MPIO, MPIPOSIX, or FPHDF5 is used, no dataset region reference datatype support yet. */
+    if (IS_H5FD_MPI(dataset->ent.file) && H5T_detect_class(mem_type, H5T_VLEN)>0)
+        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing VL datatypes yet")
+    /* If MPI based VFD is used, no VL datatype support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
     /* We should really use H5T_detect_class() here, but it will be difficult
      * to detect the type of the reference if it is nested... -QAK
      */
-    if ((IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file) || IS_H5FD_FPHDF5(dataset->ent.file)) &&
+    if (IS_H5FD_MPI(dataset->ent.file) &&
             H5T_get_class(mem_type)==H5T_REFERENCE &&
             H5T_get_ref_type(mem_type)==H5R_DATASET_REGION)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing region reference datatypes yet");
@@ -1170,7 +1170,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
         assert(dataset->layout.addr!=HADDR_UNDEF || dataset->efl.nused>0 || 
              dataset->layout.type==H5D_COMPACT);
         n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), src_type_size, file_space, 
+                &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), file_space, 
                 &file_iter, smine_nelmts, dxpl_cache, dxpl_id, tconv_buf/*out*/);
 
 #ifdef H5S_DEBUG
@@ -1185,7 +1185,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            n = H5S_select_mgath(buf, dst_type_size, mem_space, &bkg_iter,
+            n = H5S_select_mgath(buf, mem_space, &bkg_iter,
 				 smine_nelmts, dxpl_cache, bkg_buf/*out*/);
 #ifdef H5S_DEBUG
             H5_timer_end(&(sconv->stats[1].bkg_timer), &timer);
@@ -1208,7 +1208,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-        status = H5S_select_mscat(tconv_buf, dst_type_size, mem_space,
+        status = H5S_select_mscat(tconv_buf, mem_space,
                           &mem_iter, smine_nelmts, dxpl_cache, buf/*out*/);
 #ifdef H5S_DEBUG
 	H5_timer_end(&(sconv->stats[1].scat_timer), &timer);
@@ -1393,7 +1393,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-        n = H5S_select_mgath(buf, src_type_size, mem_space, &mem_iter,
+        n = H5S_select_mgath(buf, mem_space, &mem_iter,
 			     smine_nelmts, dxpl_cache, tconv_buf/*out*/);
 #ifdef H5S_DEBUG
 	H5_timer_end(&(sconv->stats[0].gath_timer), &timer);
@@ -1408,7 +1408,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
             H5_timer_begin(&timer);
 #endif
             n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                 &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), dst_type_size, file_space, 
+                 &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), file_space, 
                  &bkg_iter, smine_nelmts, dxpl_cache, dxpl_id, bkg_buf/*out*/); 
 
 #ifdef H5S_DEBUG
@@ -1433,7 +1433,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
         H5_timer_begin(&timer);
 #endif
         status = H5S_select_fscat(dataset->ent.file, &(dataset->layout), 
-              &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), dst_type_size, file_space, &file_iter,
+              &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), file_space, &file_iter,
               smine_nelmts, dxpl_cache, dxpl_id, tconv_buf);
 
 #ifdef H5S_DEBUG
@@ -1682,7 +1682,7 @@ UNUSED
             assert(dataset->layout.addr!=HADDR_UNDEF || dataset->efl.nused>0 || 
                  dataset->layout.type==H5D_COMPACT);
             n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                    &dataset->dcpl_cache, &store, src_type_size, chunk_info->fspace, 
+                    &dataset->dcpl_cache, &store, chunk_info->fspace, 
                     &file_iter, smine_nelmts, dxpl_cache, dxpl_id, tconv_buf/*out*/);
 
 #ifdef H5S_DEBUG
@@ -1697,7 +1697,7 @@ UNUSED
 #ifdef H5S_DEBUG
                 H5_timer_begin(&timer);
 #endif
-                n = H5S_select_mgath(buf, dst_type_size, chunk_info->mspace, &bkg_iter,
+                n = H5S_select_mgath(buf, chunk_info->mspace, &bkg_iter,
                                  smine_nelmts, dxpl_cache, bkg_buf/*out*/);
 #ifdef H5S_DEBUG
                 H5_timer_end(&(sconv->stats[1].bkg_timer), &timer);
@@ -1721,7 +1721,7 @@ UNUSED
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            status = H5S_select_mscat(tconv_buf, dst_type_size, chunk_info->mspace,
+            status = H5S_select_mscat(tconv_buf, chunk_info->mspace,
                         &mem_iter, smine_nelmts, dxpl_cache, buf/*out*/);
 #ifdef H5S_DEBUG
             H5_timer_end(&(sconv->stats[1].scat_timer), &timer);
@@ -2033,7 +2033,7 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            n = H5S_select_mgath(buf, src_type_size, chunk_info->mspace, &mem_iter,
+            n = H5S_select_mgath(buf, chunk_info->mspace, &mem_iter,
                                  smine_nelmts, dxpl_cache, tconv_buf/*out*/);
     
 #ifdef H5S_DEBUG
@@ -2049,7 +2049,7 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
                 H5_timer_begin(&timer);
 #endif
                 n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                        &dataset->dcpl_cache, &store, dst_type_size, chunk_info->fspace, 
+                        &dataset->dcpl_cache, &store, chunk_info->fspace, 
                         &bkg_iter, smine_nelmts, dxpl_cache, dxpl_id, bkg_buf/*out*/); 
 
 #ifdef H5S_DEBUG
@@ -2075,7 +2075,7 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             H5_timer_begin(&timer);
 #endif
             status = H5S_select_fscat(dataset->ent.file, &(dataset->layout), 
-                        &dataset->dcpl_cache, &store, dst_type_size, chunk_info->fspace, 
+                        &dataset->dcpl_cache, &store, chunk_info->fspace, 
                         &file_iter, smine_nelmts, dxpl_cache, dxpl_id, tconv_buf);
 
 #ifdef H5S_DEBUG
@@ -2711,7 +2711,7 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
             new_chunk_info->mspace=NULL;
             new_chunk_info->mspace_shared=0;
 
-            /* Compute the chunk's coordinates */
+            /* Copy the chunk's coordinates */
             HDmemcpy(new_chunk_info->coords,coords,fm->f_ndims*sizeof(new_chunk_info->coords[0]));
             new_chunk_info->coords[fm->f_ndims]=0;
 
@@ -2844,11 +2844,11 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
         } /* end else */
     } /* end if */
     else {
-        /* Get bounding box for selection */
+        /* Get bounding box for file selection */
         if(H5S_get_select_bounds(fm->file_space, file_sel_start, file_sel_end)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
 
-        /* Get bounding box for selection */
+        /* Get bounding box for memory selection */
         if(H5S_get_select_bounds(fm->mem_space, mem_sel_start, mem_sel_end)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
 
