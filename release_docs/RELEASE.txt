@@ -204,6 +204,7 @@ Platforms Tested
                                   for the Itanium(TM)-based applications,
                                   Version 6.0 Beta, Build 20010905       
     Windows 2000 (NT5.0)          MSVC++ 6.0
+                                  DEC Visual Fortran 6.0
     Windows NT4.0                 MSVC++ 6.0
                                   DEC Visual Fortran 6.0
     Windows NT4.0                 Code Warrior 6.0
