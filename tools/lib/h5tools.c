@@ -688,7 +688,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
 {
     herr_t              ret;                    /*the value to return   */
     hid_t		f_space;		/*file data space	*/
-    hsize_t		i;                      /*counters		*/
+    int			i;                      /*counters		*/
     hssize_t		zero = 0;               /*vector of zeros	*/
     unsigned int	flags;			/*buffer extent flags	*/
     hsize_t		total_size[H5S_MAX_RANK];/*total size of dataset*/
@@ -727,7 +727,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
 
     /* assume entire data space to be printed */
     if (ctx.ndims > 0)
-        for (i = 0; i < (hsize_t)ctx.ndims; i++)
+        for (i = 0; i < ctx.ndims; i++)
             ctx.p_min_idx[i] = 0;
 
     H5Sget_simple_extent_dims(f_space, total_size, NULL);
@@ -802,7 +802,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
         if (count == 1)
             flags |= END_OF_DATA;
 
-        for (i = 0; i < (hsize_t)ctx.ndims; i++) {
+        for (i = 0; i < ctx.ndims; i++) {
             ctx.p_max_idx[i] = ctx.p_min_idx[i] + MIN(total_size[i], sm_size[i]);
         }
 
@@ -850,7 +850,8 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
                          hid_t p_type, int indentlevel)
 {
     hid_t		f_space;		/*file data space	*/
-    hsize_t		elmtno, i;		/*counters		*/
+    hsize_t		elmtno;			/*counter		*/
+    int			i;			/*counter		*/
     int			carry;			/*counter carry value	*/
     hssize_t		zero[8];		/*vector of zeros	*/
     unsigned int	flags;			/*buffer extent flags	*/
@@ -898,7 +899,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 
     /* Assume entire data space to be printed */
     if (ctx.ndims > 0)
-        for (i = 0; i < (hsize_t)ctx.ndims; i++)
+        for (i = 0; i < ctx.ndims; i++)
             ctx.p_min_idx[i] = 0;
 
     H5Sget_simple_extent_dims(f_space, total_size, NULL);
@@ -908,7 +909,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     p_nelmts = 1;
 
     if (ctx.ndims > 0)
-        for (i = 0, p_nelmts = 1; i < (hsize_t)ctx.ndims; i++)
+        for (i = 0, p_nelmts = 1; i < ctx.ndims; i++)
             p_nelmts *= total_size[i];
  
     if (p_nelmts == 0) {
@@ -948,7 +949,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_nelmts) {
         /* Calculate the hyperslab size */
         if (ctx.ndims > 0) {
-            for (i = 0, hs_nelmts = 1; i < (hsize_t)ctx.ndims; i++) {
+            for (i = 0, hs_nelmts = 1; i < ctx.ndims; i++) {
                 hs_size[i] = MIN(total_size[i] - hs_offset[i], sm_size[i]);
                 ctx.p_max_idx[i] = ctx.p_min_idx[i] + hs_size[i];
                 hs_nelmts *= hs_size[i];
@@ -1032,7 +1033,7 @@ static int
 h5tools_dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
                         hid_t type, hid_t space, void *mem, int indentlevel)
 {
-    hsize_t		i;			/*counters		*/
+    int			i;			/*counters		*/
     hsize_t		nelmts;			/*total selected elmts	*/
     h5tools_context_t	ctx;			/*printing context	*/
 
@@ -1051,12 +1052,12 @@ h5tools_dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
     ctx.need_prefix = 1;
     
     /* Assume entire data space to be printed */
-    for (i = 0; i < (hsize_t)ctx.ndims; i++)
+    for (i = 0; i < ctx.ndims; i++)
         ctx.p_min_idx[i] = 0;
 
     H5Sget_simple_extent_dims(space, ctx.p_max_idx, NULL);
 
-    for (i = 0, nelmts = 1; ctx.ndims != 0 && i < (hsize_t)ctx.ndims; i++)
+    for (i = 0, nelmts = 1; ctx.ndims != 0 && i < ctx.ndims; i++)
         nelmts *= ctx.p_max_idx[i] - ctx.p_min_idx[i];
     
     if (nelmts == 0)
