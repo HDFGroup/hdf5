@@ -251,16 +251,13 @@ H5dont_atexit(void)
 
     FUNC_ENTER_API_NOINIT(H5dont_atexit);
 
-    H5_trace(FALSE, "H5dont_atexit", "");
-
     if (dont_atexit_g)
         HGOTO_DONE(FAIL);
 
     dont_atexit_g = TRUE;
 
 done:
-    FUNC_LEAVE(ret_value);
-}
+    FUNC_LEAVE(ret_value);}
 
 
 /*-------------------------------------------------------------------------
@@ -364,7 +361,10 @@ H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_lim,
  *              Wednesday, August 19, 1998
  *
  * Modifications:
- *
+ *              Robb Matzke, 2002-08-08
+ *              Accepts the `ttop' word. If enabled then show only the
+ *              top level API calls, otherwise show all API calls.  Also
+ *              turns on tracing as if the `trace' word was present.
  *-------------------------------------------------------------------------
  */
 static void
@@ -397,6 +397,12 @@ H5_debug_mask(const char *s)
 	    /* Trace, all, or one? */
 	    if (!HDstrcmp(pkg_name, "trace")) {
 		H5_debug_g.trace = clear?NULL:stream;
+            } else if (!HDstrcmp(pkg_name, "ttop")) {
+                H5_debug_g.trace = stream;
+                H5_debug_g.ttop = !clear;
+            } else if (!HDstrcmp(pkg_name, "ttimes")) {
+                H5_debug_g.trace = stream;
+                H5_debug_g.ttimes = !clear;
 	    } else if (!HDstrcmp(pkg_name, "all")) {
 		for (i=0; i<H5_NPKGS; i++) {
 		    H5_debug_g.pkg[i].stream = clear?NULL:stream;
@@ -1279,8 +1285,9 @@ H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
  *
  * Purpose:	This function is called whenever an API function is called
  *		and tracing is turned on.  If RETURNING is non-zero then
- *		the caller is about to return.  Otherwise we print the
- *		function name and the arguments.
+ *		the caller is about to return and RETURNING points to the
+ *              time for the corresponding function call event.  Otherwise
+ *              we print the function name and the arguments.
  *
  *		The TYPE argument is a string which gives the type of each of
  *		the following argument pairs.  Each type is zero or more
@@ -1316,10 +1323,14 @@ H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
  * 		Robb Matzke, 1999-10-25
  *		The `Ej' and `En' types are H5E_major_t and H5E_minor_t error
  *		types. We only print the integer value here.
+ *
+ *              Robb Matzke, 2002-08-08
+ *              Better output for nested calls.  Show only top-level calls
+ *              if so desired. Show event times if so desired.
  *-------------------------------------------------------------------------
  */
-void
-H5_trace (hbool_t returning, const char *func, const char *type, ...)
+double
+H5_trace (double *returning, const char *func, const char *type, ...)
 {
     va_list		ap;
     char		buf[64], *rest;
@@ -1329,18 +1340,73 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
     hssize_t		i;
     void		*vp = NULL;
     FILE		*out = H5_debug_g.trace;
+    H5_timer_t          event_time;
+    static H5_timer_t   first_time;
+    static int          current_depth=0;
+    static int          last_call_depth=0;
 
     /* FUNC_ENTER() should not be called */
 
-    if (!out) return;	/*tracing is off*/
+    if (!out) return 0.0;	/*tracing is off*/
     va_start (ap, type);
 
-    if (returning) {
-	fprintf (out, " = ");
-    } else {
-	fprintf (out, "%s(", func);
+    if (H5_debug_g.ttop) {
+        if (returning) {
+            if (current_depth>1) {
+                --current_depth;
+                return 0.0;
+            }
+        } else {
+            if (current_depth>0) {
+                /*do not update last_call_depth*/
+                current_depth++;
+                return 0.0;
+            }
+        }
     }
 
+    /* Get tim for event */
+    if (!first_time.etime)
+        H5_timer_begin(&first_time);
+    if (H5_debug_g.ttimes) {
+        H5_timer_begin(&event_time);
+    } else {
+        memset(&event_time, 0, sizeof event_time);
+    }
+    
+    /* Print the first part of the line.  This is the indication of the
+     * nesting depth followed by the function name and either start of
+     * argument list or start of return value.  If this call is for a
+     * function return and no other calls have been made to H5_trace()
+     * since the one for the function call, then we're continuing
+     * the same line. */
+    if (returning) {
+        assert(current_depth>0);
+        --current_depth;
+        if (current_depth<last_call_depth) {
+            /* We are at the beginning of a line */
+            if (H5_debug_g.ttimes) {
+                char tmp[128];
+                sprintf(tmp, "%.6f", event_time.etime-first_time.etime);
+                fprintf(out, " %*s ", strlen(tmp), "");
+            }
+            for (i=0; i<current_depth; i++)
+                fputc('+', out);
+            fprintf(out, "%*s%s = ", 2*current_depth, "", func);
+        } else {
+            /* Continue current line with return value */
+            fprintf(out, " = ");
+        }
+    } else {
+        if (current_depth>last_call_depth)
+            fputs(" = <delayed>\n", out);
+        if (H5_debug_g.ttimes)
+            fprintf(out, "@%.6f ", event_time.etime-first_time.etime);
+        for (i=0; i<current_depth; i++)
+            fputc('+', out);
+        fprintf(out, "%*s%s(", 2*current_depth, "", func);
+    }
+    
     /* Clear array sizes */
     for (i=0; i<(hssize_t)NELMTS(asize); i++) asize[i] = -1;
 
@@ -2589,12 +2655,21 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	}
     }
 
-error:
+
+    /* Display event time for return */
+    if (returning && H5_debug_g.ttimes)
+        fprintf(out, " @%.6f [dt=%.6f]",
+                event_time.etime - first_time.etime,
+                event_time.etime - *returning);
+
+  error:
     va_end (ap);
     if (returning) {
 	fprintf (out, ";\n");
     } else {
+	last_call_depth = current_depth++;
 	fprintf (out, ")");
     }
     HDfflush (out);
+    return event_time.etime;
 }
