@@ -24,10 +24,6 @@ WHEREAMI='pwd'
 # the name of this program
 PROGNAME=bin/runtest
 
-# Email any errors to whom
-TOWHOM=${DEBUGMODE:+acheng}
-TOWHOM=${TOWHOM:-hdf5lib@ncsa.uiuc.edu}
-
 # Setup
 HOSTNAME=`hostname | cut -f1 -d.`	# no domain part
 H5DIR=$HOME/HDF5/v_1_3/hdf5
@@ -81,9 +77,6 @@ SUNHOST="arabica baldric"	# solaris 2.6 and 2.7
 # AFS does not work well in hawkwind.  Use NFS/local space for its
 # test directory.  ssh does not work for it either.
 FREEBSDHOST="hawkwind"
-
-# run both serial and parallel for PARALLELHOST
-PARALLELHOST="modi4"
 
 # set up default all hosts to test
 ALLHOSTS="$O2KHOST $SUNHOST $SGIHOST $HPHOST $LINUXHOST $DECHOST $FREEBSDHOST"
@@ -237,7 +230,7 @@ RUNSNAPTEST()
     [ $retcode -ne 0 ] && errcode=$retcode && return $retcode
 
     # Track down the HDF4 software
-    ans=`bin/locate_hdf4`
+    ans=`$SNAPYARD/current/bin/locate_hdf4`
     H4_SW=`echo $ans | cut -f1 -d' '`
     H4_BIN=`echo $ans | cut -f2 -s -d' '`
     if [ -n "$H4_SW" ]; then
@@ -276,14 +269,6 @@ RUNSNAPTEST()
     PATH=$PATH_SAVED
 }
 
-
-# Record a type of test requested. Separate new request from
-# existing requests by a semicolon (;).
-# $1 is the type of test requested
-ADD_TEST_TYPE()
-{
-echo TEST_TYPES=$TEST_TYPES
-}
 
 # configuration parsing.
 # Taking configuration from input.
@@ -341,6 +326,27 @@ FLUSH_FILES()
 }
 
 
+# Show usage page
+USAGE()
+{
+cat <<EOF
+Usage: runtest [-h] [-r<version>] [-all] [<host> ...]
+    -h
+	print this help page
+    -r<version>
+	do runtest for <version>
+    -all
+	launch tests for all pre-defined testing hosts
+    <host>
+	launch tests for <host>
+    
+-all and <host> are contradictory and whichever is specified last, is
+the one to take effect.  If neither are given, do the test for the
+local host.
+EOF
+}
+
+
 #################################
 # Main
 #################################
@@ -356,6 +362,10 @@ errcode=0			# error code of the whole test
 #################################
 while [ $# -gt 0 ]; do
     case "$1" in
+	-h) # help--show usage
+	    USAGE
+	    exit 0
+	    ;;
 	-r*)
 	    # the version string has a leading _ but not for H5DIR name
 	    H5VER="$1"
@@ -365,6 +375,11 @@ while [ $# -gt 0 ]; do
 	    ;;
 	-all)
 	    TESTHOST=$ALLHOSTS
+	    ;;
+	-*) # Unknow option
+	    echo "Unknown option ($1)"
+	    USAGE
+	    exit 1
 	    ;;
 	*)
 	    TESTHOST=$*
