@@ -119,5 +119,8 @@ in the file file_io.win32.c and including it on the projects
 #else
 #undef H5_HAVE_FUNCTION
 #undef H5_ULLONG_TO_FP_CAST_WORKS 
-
 #endif 
+
+#define H5_FC_FUNC_(name, NAME) NAME
+#define FC_FUNC_(name, NAME) NAME
+
