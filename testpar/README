@@ -1,0 +1,23 @@
+		hdf5/testpar/README
+		-------------------
+		(last update: Feb 16 1998)
+
+This directory holds tests for the parallel HDF5 library.  It is in
+its "infancy" and is not integrated with the rest of the HDF5 software
+yet.  It will be smothed out in the next release.
+
+Steps to compile and test:
+
+1) Makefile.irix64 is one that works for IRIX64 -64 platform.
+   You may use it as a template to create Makefile for other platforms.
+
+2) "make all" creates two tests.  testphdf5 uses parallel I/O access
+   while shdf5 does the same tests but uses the default sequential I/O
+   access.
+
+3) "make test" runs both tests.
+
+
+----
+Questions?  Send mail to
+hdfparallel@ncsa.uiuc.edu
