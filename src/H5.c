@@ -318,11 +318,10 @@ H5dont_atexit(void)
     H5TRACE0("e","");
 
     if (dont_atexit_g)
-        HGOTO_DONE(FAIL);
+        ret_value=FAIL;
+    else
+        dont_atexit_g = TRUE;
 
-    dont_atexit_g = TRUE;
-
-done:
     FUNC_LEAVE_API(ret_value);
 }
 

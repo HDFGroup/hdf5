@@ -59,7 +59,7 @@ void *
 H5MM_malloc(size_t size)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT(H5MM_malloc);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_malloc);
 
     assert(size);
 
@@ -92,7 +92,7 @@ void *
 H5MM_calloc(size_t size)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT(H5MM_calloc);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MM_calloc);
 
     assert(size);
 

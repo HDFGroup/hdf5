@@ -194,12 +194,10 @@ H5AC_init_interface(void)
     unsigned block_before_meta_write; /* "block before meta write" property value */
     unsigned library_internal=1;    /* "library internal" property value */
     H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
-#endif /* H5_HAVE_PARALLEL */
     herr_t ret_value=SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5AC_init_interface);
 
-#ifdef H5_HAVE_PARALLEL
     /* Sanity check */
     assert(H5P_CLS_DATASET_XFER_g!=(-1));
 
@@ -272,17 +270,21 @@ H5AC_init_interface(void)
     xfer_mode=H5FD_MPIO_INDEPENDENT;
     if (H5P_set(xfer_plist,H5D_XFER_IO_XFER_MODE_NAME,&xfer_mode)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 #else /* H5_HAVE_PARALLEL */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5AC_init_interface);
+
     /* Sanity check */
     assert(H5P_LST_DATASET_XFER_g!=(-1));
 
     H5AC_dxpl_id=H5P_DATASET_XFER_DEFAULT;
     H5AC_noblock_dxpl_id=H5P_DATASET_XFER_DEFAULT;
     H5AC_ind_dxpl_id=H5P_DATASET_XFER_DEFAULT;
-#endif /* H5_HAVE_PARALLEL */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
+#endif /* H5_HAVE_PARALLEL */
 } /* end H5AC_init_interface() */
 
 

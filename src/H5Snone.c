@@ -383,7 +383,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_none_copy(H5S_t *dst, const H5S_t *src, hbool_t UNUSED share_selection)
+H5S_none_copy(H5S_t *dst, const H5S_t UNUSED *src, hbool_t UNUSED share_selection)
 {
     herr_t ret_value=SUCCEED;  /* return value */
 

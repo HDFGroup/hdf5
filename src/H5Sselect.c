@@ -37,9 +37,11 @@
 static int             interface_initialize_g = 0;
 
 /* Local functions */
+#ifdef LATER
 static herr_t H5S_select_iter_block (const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end);
 static htri_t H5S_select_iter_has_next_block (const H5S_sel_iter_t *iter);
 static herr_t H5S_select_iter_next_block(H5S_sel_iter_t *iter);
+#endif /* LATER */
 
 /* Declare external the free list for hssize_t arrays */
 H5FL_ARR_EXTERN(hssize_t);
@@ -843,6 +845,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_iter_coords() */
 
+#ifdef LATER
 
 /*--------------------------------------------------------------------------
  NAME
@@ -884,6 +887,7 @@ H5S_select_iter_block (const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *en
 
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_iter_block() */
+#endif /* LATER */
 
 
 /*--------------------------------------------------------------------------
@@ -923,6 +927,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_iter_nelmts() */
 
+#ifdef LATER
 
 /*--------------------------------------------------------------------------
  NAME
@@ -960,6 +965,7 @@ H5S_select_iter_has_next_block (const H5S_sel_iter_t *iter)
 
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_iter_has_next_block() */
+#endif /* LATER */
 
 
 /*--------------------------------------------------------------------------
@@ -1005,6 +1011,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_iter_next() */
 
+#ifdef LATER
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1044,6 +1051,7 @@ H5S_select_iter_next_block(H5S_sel_iter_t *iter)
 
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_iter_next_block() */
+#endif /* LATER */
 
 
 /*--------------------------------------------------------------------------

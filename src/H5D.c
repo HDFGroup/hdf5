@@ -607,7 +607,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t size)
+H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t UNUSED size)
 {
     const H5O_fill_t     *fill1=(const H5O_fill_t *)value1,     /* Create local aliases for values */
         *fill2=(const H5O_fill_t *)value2;
@@ -663,7 +663,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5D_crt_ext_file_list_cmp(const void *value1, const void *value2, size_t size)
+H5D_crt_ext_file_list_cmp(const void *value1, const void *value2, size_t UNUSED size)
 {
     const H5O_efl_t     *efl1=(const H5O_efl_t *)value1,     /* Create local aliases for values */
         *efl2=(const H5O_efl_t *)value2;
@@ -745,7 +745,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5D_crt_data_pipeline_cmp(const void *value1, const void *value2, size_t size)
+H5D_crt_data_pipeline_cmp(const void *value1, const void *value2, size_t UNUSED size)
 {
     const H5O_pline_t     *pline1=(const H5O_pline_t *)value1,     /* Create local aliases for values */
         *pline2=(const H5O_pline_t *)value2;

@@ -1663,10 +1663,9 @@ test_compound_10(void)
     cmpd_struct wdata[ARRAY_DIM];
     cmpd_struct rdata[ARRAY_DIM];
     hid_t       file;
-    hid_t       arr_tid, cmpd_tid, cstr_id, vlstr_id, dup_tid;
+    hid_t       arr_tid, cmpd_tid, cstr_id, vlstr_id;
     hid_t       space_id;
     hid_t       dset_id;
-    hid_t       xfer_pid;
     hsize_t     arr_dim[1] = {ARRAY_DIM};  /* Array dimensions */
     hsize_t     dim1[1];
     void        *t1, *t2;

@@ -668,15 +668,17 @@ error:
  */
 double retrieve_time(void) 
 {
+#ifdef H5_HAVE_PARALLEL
     if(facc_type == FACC_DEFAULT) {
+#endif /*H5_HAVE_PARALLEL*/
         struct timeval t;
         gettimeofday(&t, NULL);
         return ((double)t.tv_sec + (double)t.tv_usec / 1000000);
-    } else { 
 #ifdef H5_HAVE_PARALLEL
+    } else { 
         return MPI_Wtime();   
-#endif /*H5_HAVE_PARALLEL*/
     }
+#endif /*H5_HAVE_PARALLEL*/
 }
 
 

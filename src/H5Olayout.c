@@ -128,7 +128,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_t
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "dimensionality is too large");
 
         /* Layout class */
-        mesg->type = *p++;
+        mesg->type = (H5D_layout_t)*p++;
         assert(H5D_CONTIGUOUS == mesg->type || H5D_CHUNKED == mesg->type || H5D_COMPACT == mesg->type);
 
         /* Reserved bytes */
@@ -176,7 +176,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_t
     } /* end if */
     else {
         /* Layout class */
-        mesg->type = *p++;
+        mesg->type = (H5D_layout_t)*p++;
 
         /* Interpret the rest of the message according to the layout class */
         switch(mesg->type) {
@@ -340,7 +340,6 @@ H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 
             default:
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "Invalid layout class");
-                break;
         } /* end switch */
     } /* end else */
     
@@ -502,7 +501,6 @@ H5O_layout_meta_size(H5F_t *f, const void *_mesg)
 
             default:
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, 0, "Invalid layout class");
-                break;
         } /* end switch */
     } /* end else */
 
