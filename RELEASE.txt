@@ -87,6 +87,11 @@ New Features
       INSTALL_Windows.txt for details.
     * File sizes greater than 2GB are now supported on Linux systems with
       version 2.4.x or higher kernels.
+    * Added a global string variable H5_lib_vers_info_g which holds the
+      HDF5 library version information.  This can be used to identify
+      an hdf5 library or hdf5 application binary.
+      Also added a verification of the consistency between H5_lib_vers_info_g
+      and other version information in the source code.
 
 
 Platforms Tested
