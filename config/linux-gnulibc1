@@ -38,19 +38,27 @@ if test "X-" = "X-$F9X"; then
             ;;
     esac
 else
-    # Figure out which compiler we are using: pgf90 or Absoft f95
-    RM='rm -f'
-    tmpfile=/tmp/cmpver.$$
-    $F9X -V >$tmpfile
-    if test -s "$tmpfile"; then 
-        if( grep -s 'Absoft' $tmpfile > /dev/null) then
-            F9X_BASENAME=f95
-        fi 
-        if( grep -s 'pgf90' $tmpfile > /dev/null) then
-            F9X_BASENAME=pgf90
-        fi 
-    fi
-    $RM $tmpfile
+    case $F9X in
+        # The PGI and Intel compilers are automatically detected below
+        ifc*|ifort*|pgf90*)
+            ;;
+
+        *)
+            # Figure out which compiler we are using: pgf90 or Absoft f95
+            RM='rm -f'
+            tmpfile=/tmp/cmpver.$$
+            $F9X -V >$tmpfile
+            if test -s "$tmpfile"; then 
+                if( grep -s 'Absoft' $tmpfile > /dev/null) then
+                    F9X_BASENAME=f95
+                fi 
+                if( grep -s 'pgf90' $tmpfile > /dev/null) then
+                    F9X_BASENAME=pgf90
+                fi 
+            fi
+            $RM $tmpfile
+            ;;
+    esac
 fi
 
 #
