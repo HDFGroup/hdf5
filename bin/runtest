@@ -673,7 +673,7 @@ PRINT_BLANK
 
 # Do a checkout if one has not been done today
 # Also check MANIFEST file
-if [ -z "$NOCVS" -a ! -f $CVSLOG ]; then
+if [ -z "$NOCVS" ]; then
     PRINT "Running CVS checkout with output saved in"
     PRINT "   $CVSLOG"
     # Set CVS lock first
@@ -729,8 +729,8 @@ if [ -z "$NODIFF" ]; then
 fi
 
 # we can use the version of script in SNAPYARD/current now.
-# Don't do the diff any more.
-PROGNAME="$SNAPYARD/current/$PROGNAME -nodiff"
+# Don't do the diff or cvs update any more.
+PROGNAME="$SNAPYARD/current/$PROGNAME -nodiff -nocvs"
 
 # Decide to do test for the local host or for remote hosts
 if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
