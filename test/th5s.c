@@ -209,7 +209,7 @@ test_h5s_null(void)
     hid_t attr_sid;    /* Dataspace IDs */
     hid_t did;          /* Dataset ID */
     hid_t attr;          /*Attribute ID */
-    H5S_class_t class;  /* dataspace type */
+    H5S_class_t stype;  /* dataspace type */
     herr_t ret;         /* Generic return value */
     
     /* Output message about test being performed */
@@ -266,8 +266,8 @@ test_h5s_null(void)
     CHECK(dset_sid2, FAIL, "H5Scopy");
 
     /* Verify the class type of dataspace */
-    class = H5Sget_simple_extent_type(dset_sid2);
-    VERIFY(class, H5S_NULL, "H5Sget_simple_extent_type");
+    stype = H5Sget_simple_extent_type(dset_sid2);
+    VERIFY(stype, H5S_NULL, "H5Sget_simple_extent_type");
 
     /* Verify there is zero element in the dataspace */
     ret = H5Sget_simple_extent_npoints(dset_sid2);
@@ -289,8 +289,8 @@ test_h5s_null(void)
     CHECK(attr_sid, FAIL, "H5Aget_space");
     
     /* Verify the class type of dataspace */
-    class = H5Sget_simple_extent_type(attr_sid);
-    VERIFY(class, H5S_NULL, "H5Sget_simple_extent_type");
+    stype = H5Sget_simple_extent_type(attr_sid);
+    VERIFY(stype, H5S_NULL, "H5Sget_simple_extent_type");
 
     /* Verify there is zero element in the dataspace */
     ret = H5Sget_simple_extent_npoints(attr_sid);
