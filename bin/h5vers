@@ -56,7 +56,7 @@ use strict;
 # ./H5public.h or ./src/H5public.h.
 #
 # If the version number is changed (either `-s' or `-i' was used on
-# the command line) then the first line of the README and RELEASE.txt files
+# the command line) then the first line of the README.txt and RELEASE.txt files
 # one directory above the H5public.h file is also modified so it looks
 # something like: This is hdf5-1.2.3-pre1 currently under development.
 ##############################################################################
@@ -136,8 +136,9 @@ while ($_ = shift) {
 }
 die "mutually exclusive options given\n" if $set && $inc;
 
-# Determine file to use as H5public.h, README and RELEASE.txt.
-# The README and RELEASE.txt files are always in the directory above H5public.h
+# Determine file to use as H5public.h, README.txt and release_docs/RELEASE.txt.
+# The README.txt and release_docs/RELEASE.txt files are always in the
+# directory above H5public.h
 unless ($file) {
   for (@files) {
     ($file=$_,last) if -f $_;
@@ -145,13 +146,13 @@ unless ($file) {
 }
 die "unable to find source files\n" unless defined $file;
 die "unable to read file: $file\n" unless -r $file;
-# README
+# README.txt
 my $README = $file;
-$README =~ s/[^\/]*$/..\/README/;
+$README =~ s/[^\/]*$/..\/README.txt/;
 die "unable to read file: $README\n" unless -r $file;
-# RELEASE.txt
+# release_docs/RELEASE.txt
 my $RELEASE = $file;
-$RELEASE =~ s/[^\/]*$/..\/RELEASE.txt/;
+$RELEASE =~ s/[^\/]*$/..\/release_docs\/RELEASE.txt/;
 die "unable to read file: $RELEASE\n" unless -r $file;
 
 # Get the current version number.
@@ -221,12 +222,12 @@ if ($newver[0]!=$curver[0] ||
   close FILE;
 }
 
-# Update the README file
+# Update the README.txt file
 if ($README) {
   open FILE, $README or die "$README: $!\n";
   my @contents = <FILE>;
   close FILE;
-  $contents[0] = sprintf("This is hdf5-%d.%d.%d%s %s",
+  $contents[0] = sprintf("HDF5 version %d.%d.%d%s %s",
 			 @newver[0,1,2],
 			 $newver[3] eq "" ? "" : "-".$newver[3],
 			 "currently under development\n");
@@ -235,12 +236,12 @@ if ($README) {
   close FILE;
 }
 
-# Update the RELEASE.txt file
+# Update the release_docs/RELEASE.txt file
 if ($RELEASE) {
   open FILE, $RELEASE or die "$RELEASE: $!\n";
   my @contents = <FILE>;
   close FILE;
-  $contents[0] = sprintf("HDF5 library version %d.%d.%d%s %s",
+  $contents[0] = sprintf("HDF5 version %d.%d.%d%s %s",
 			 @newver[0,1,2],
 			 $newver[3] eq "" ? "" : "-".$newver[3],
 			 "currently under development\n");
