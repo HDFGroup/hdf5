@@ -262,6 +262,9 @@ test_insert_split_root(hid_t fapl)
 	goto error;
     }
 
+    /* Make certain that the index is correct */
+    if(idx != (INSERT_SPLIT_ROOT_NREC+2)) TEST_ERROR;
+
     PASSED();
 
     if (H5Fclose(file)<0) TEST_ERROR;
@@ -551,6 +554,7 @@ test_insert_level1_3leaf_redistrib(hid_t fapl)
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
     unsigned    u;                      /* Local index variable */
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -597,6 +601,18 @@ test_insert_level1_3leaf_redistrib(hid_t fapl)
             goto error;
         }
     }
+
+    /* Iterate over B-tree to check records have been inserted correctly */
+    idx = 0;
+    if(H5B2_iterate(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, iter_cb, &idx)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /* Make certain that the index is correct */
+    if(idx != (INSERT_SPLIT_ROOT_NREC*2)) TEST_ERROR;
+
     PASSED();
 
     if (H5Fclose(file)<0) TEST_ERROR;
@@ -725,6 +741,7 @@ test_insert_make_level2(hid_t fapl)
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
     haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
     unsigned    u;                      /* Local index variable */
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -761,6 +778,18 @@ test_insert_make_level2(hid_t fapl)
             goto error;
         }
     }
+
+    /* Iterate over B-tree to check records have been inserted correctly */
+    idx = 0;
+    if(H5B2_iterate(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, iter_cb, &idx)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /* Make certain that the index is correct */
+    if(idx != (INSERT_SPLIT_ROOT_NREC*11)) TEST_ERROR;
+
     PASSED();
 
     if (H5Fclose(file)<0) TEST_ERROR;
