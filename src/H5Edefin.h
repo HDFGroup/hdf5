@@ -166,6 +166,7 @@ hid_t H5E_CANTREDISTRIBUTE_g = FAIL;      /* Unable to redistribute records */
 hid_t H5E_CANTSWAP_g       = FAIL;      /* Unable to swap records */
 hid_t H5E_CANTINSERT_g     = FAIL;      /* Unable to insert object */
 hid_t H5E_CANTLIST_g       = FAIL;      /* Unable to list node */
+hid_t H5E_CANTMODIFY_g     = FAIL;      /* Unable to modify record */
 
 /* Argument errors */
 hid_t H5E_UNINITIALIZED_g  = FAIL;      /* Information is uinitialized */

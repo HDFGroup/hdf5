@@ -104,7 +104,7 @@ find_cb(const void *_record, void *_op_data)
 /*-------------------------------------------------------------------------
  * Function:	neighbor_cb
  *
- * Purpose:	v2 B-tree find callback
+ * Purpose:	v2 B-tree neighbor callback
  *
  * Return:	Success:	0
  *
@@ -127,6 +127,35 @@ neighbor_cb(const void *_record, void *_op_data)
 
     return(0);
 } /* end neighbor_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	modify_cb
+ *
+ * Purpose:	v2 B-tree modify callback
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, March 10, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+modify_cb(void *_record, void *_op_data, hbool_t *changed)
+{
+    hsize_t *record = (hsize_t *)_record;
+    hsize_t *modify = (hsize_t *)_op_data;
+
+    *record = *modify;
+    *changed = TRUE;
+
+    return(0);
+} /* end modify_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -5461,7 +5490,151 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return 1;
-} /* test_find_neighbor() */
+} /* test_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_modify
+ *
+ * Purpose:	Basic tests for the B-tree v2 code.  This test exercises
+ *              code to modify an existing record in the B-tree
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, March 10, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_modify(hid_t fapl)
+{
+    hid_t	file=-1;
+    char	filename[1024];
+    H5F_t	*f=NULL;
+    hsize_t     record;                 /* Record to insert into tree */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     modify;                 /* Modified value */
+    hsize_t     found;                  /* Found value */
+    unsigned    u;                      /* Local index variable */
+    herr_t      ret;                    /* Generic error return value */
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+	
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /*
+     * Create v2 B-tree 
+     */
+    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /* Insert records */
+    for(u=0; u<100; u++) {
+        record=u*5;
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        } /* end if */
+    } /* end for */
+
+    /*
+     * Test modifying records
+     */
+    TESTING("B-tree modify: attempt to modify non-existant record");
+
+    /* Attempt to modify a non-existant record */
+    record = 3;
+    modify = 4;
+    H5E_BEGIN_TRY {
+	ret = H5B2_modify(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, modify_cb, &modify);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL) TEST_ERROR;
+
+    PASSED();
+
+    TESTING("B-tree modify: modify record in leaf node");
+
+    /* Attempt to modify a record in a leaf node */
+    record = 130;
+    modify = 131;
+    if (H5B2_modify(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, modify_cb, &modify) < 0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    /* Attempt to find modified record */
+    record = 131;
+    found = 131;
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, find_cb, &found)<0) TEST_ERROR;
+    if(found != 131) TEST_ERROR;
+
+    /* Attempt to find original record */
+    record = 130;
+    found = 130;
+    H5E_BEGIN_TRY {
+	ret = H5B2_modify(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, modify_cb, &modify);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL) TEST_ERROR;
+
+    PASSED();
+
+    TESTING("B-tree modify: modify record in internal node");
+
+    /* Attempt to modify a record in an internal node */
+    record = 235;
+    modify = 237;
+    if (H5B2_modify(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, modify_cb, &modify) < 0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+
+    /* Attempt to find modified record */
+    record = 237;
+    found = 237;
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, find_cb, &found)<0) TEST_ERROR;
+    if(found != 237) TEST_ERROR;
+
+    /* Attempt to find original record */
+    record = 235;
+    found = 235;
+    H5E_BEGIN_TRY {
+	ret = H5B2_modify(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, modify_cb, &modify);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL) TEST_ERROR;
+
+    PASSED();
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_modify() */
 
 
 /*-------------------------------------------------------------------------
@@ -5536,6 +5709,9 @@ main(void)
 
     /* Test deleting B-trees */
     nerrors += test_delete(fapl);
+
+    /* Test modifying B-tree records */
+    nerrors += test_modify(fapl);
 
     if (nerrors) goto error;
     puts("All v2 B-tree tests passed.");

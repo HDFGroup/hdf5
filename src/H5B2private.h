@@ -59,8 +59,11 @@ typedef enum H5B2_subid_t {
 /* Define the operator callback function pointer for H5B2_iterate() */
 typedef int (*H5B2_operator_t)(const void *record, void *op_data);
 
-/* Define the 'found' callback function pointer for H5B2_find() */
+/* Define the 'found' callback function pointer for H5B2_find() & H5B2_neighbor() */
 typedef herr_t (*H5B2_found_t)(const void *record, void *op_data);
+
+/* Define the 'modify' callback function pointer for H5B2_modify() */
+typedef herr_t (*H5B2_modify_t)(void *record, void *op_data, hbool_t *changed);
 
 /* Comparisons for H5B2_neighbor() call */
 typedef enum H5B2_compare_t {
@@ -111,6 +114,8 @@ H5_DLL herr_t H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
 H5_DLL herr_t H5B2_neighbor(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, H5B2_compare_t comp, void *udata, H5B2_found_t op,
     void *op_data);
+H5_DLL herr_t H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
+    haddr_t addr, void *udata, H5B2_modify_t op, void *op_data);
 H5_DLL herr_t H5B2_remove(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, void *udata);
 H5_DLL herr_t H5B2_get_nrec(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,

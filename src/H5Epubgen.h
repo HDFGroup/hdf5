@@ -274,6 +274,7 @@ H5_DLLVAR hid_t H5E_CANTCOMPARE_g;   /* Can't compare objects */
 #define H5E_CANTSWAP         (H5OPEN H5E_CANTSWAP_g)
 #define H5E_CANTINSERT       (H5OPEN H5E_CANTINSERT_g)
 #define H5E_CANTLIST         (H5OPEN H5E_CANTLIST_g)
+#define H5E_CANTMODIFY       (H5OPEN H5E_CANTMODIFY_g)
 H5_DLLVAR hid_t H5E_NOTFOUND_g;      /* Object not found */
 H5_DLLVAR hid_t H5E_EXISTS_g;        /* Object already exists */
 H5_DLLVAR hid_t H5E_CANTENCODE_g;    /* Unable to encode value */
@@ -283,6 +284,7 @@ H5_DLLVAR hid_t H5E_CANTREDISTRIBUTE_g; /* Unable to redistribute records */
 H5_DLLVAR hid_t H5E_CANTSWAP_g;      /* Unable to swap records */
 H5_DLLVAR hid_t H5E_CANTINSERT_g;    /* Unable to insert object */
 H5_DLLVAR hid_t H5E_CANTLIST_g;      /* Unable to list node */
+H5_DLLVAR hid_t H5E_CANTMODIFY_g;    /* Unable to modify record */
 
 /* Argument errors */
 #define H5E_UNINITIALIZED    (H5OPEN H5E_UNINITIALIZED_g)
