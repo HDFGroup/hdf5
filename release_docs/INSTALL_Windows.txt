@@ -28,7 +28,8 @@ Preconditions
 
    4. HDF5 uses zlib for compression and zlib is NOT distributed 
       with hdf5 lib in 1.4.4 release. You have to install your own
-      zlib library or you may go to HDF web site(????URL) to download
+      zlib library or you may go to HDF web site(ftp://ftp.ncsa.uiuc.edu/HDF/gzip/) 
+      to download
       the correponding zlib library by yourself. If you want to build
       HDF5 library without using zlib, please read section V.
 
