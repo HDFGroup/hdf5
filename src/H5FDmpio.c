@@ -154,6 +154,7 @@ static int H5FD_mpio_Debug[256] =
           0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 #endif
 
+#ifdef OLD_METADATA_WRITE
 /* Global var to allow elimination of redundant metadata writes
  * to be controlled by the value of an environment variable. */
 /* Use the elimination by default unless this is the Intel Red machine */
@@ -162,6 +163,7 @@ hbool_t	H5_mpi_1_metawrite_g = TRUE;
 #else
 hbool_t	H5_mpi_1_metawrite_g = FALSE;
 #endif
+#endif /* OLD_METADATA_WRITE */
 
 /* Interface initialization */
 #define INTERFACE_INIT	H5FD_mpio_init
@@ -1854,6 +1856,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
             if (MPI_SUCCESS!= (mpi_code=MPI_Barrier(file->comm)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
 
+#ifdef OLD_METADATA_WRITE
         /* Only p<round> will do the actual write if all procs in comm write same metadata */
         if (H5_mpi_1_metawrite_g) {
             if (file->mpi_rank != H5_PAR_META_WRITE) {
@@ -1867,6 +1870,22 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
                 HGOTO_DONE(SUCCEED) /* skip the actual write */
             }
         }
+#else /* OLD_METADATA_WRITE */
+        /* Remember that views are used */
+        use_view_this_time=TRUE;
+
+        /*
+         * Set the file view when we are using MPI derived types
+         */
+        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
+        if (MPI_SUCCESS != (mpi_code=MPI_File_set_view(file->f, mpi_off, MPI_BYTE, MPI_BYTE, (char*)"native", file->info)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+
+        /* When using types, use the address as the displacement for
+         * MPI_File_set_view and reset the address for the read to zero
+         */
+        mpi_off=0;
+#endif /* OLD_METADATA_WRITE */
     } /* end if */
 
     /* Write the data. */
@@ -1943,6 +1962,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     file->eof = HADDR_UNDEF;
     
 done:
+#ifdef OLD_METADATA_WRITE
     /* Guard against getting into metadate broadcast in failure cases */
     if(ret_value!=FAIL) {
         /* if only p<round> writes, need to broadcast the ret_value to other processes */
@@ -1951,6 +1971,7 @@ done:
                 HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
         } /* end if */
     } /* end if */
+#endif /* OLD_METADATA_WRITE */
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])

@@ -237,6 +237,7 @@ H5F_init_interface(void)
     
     FUNC_ENTER_NOINIT(H5F_init_interface)
 
+#ifdef OLD_METADATA_WRITE
 #ifdef H5_HAVE_PARALLEL
     {
         /* Allow MPI buf-and-file-type optimizations? */
@@ -246,6 +247,7 @@ H5F_init_interface(void)
         }
     }
 #endif /* H5_HAVE_PARALLEL */
+#endif /* OLD_METADATA_WRITE */
 
     /*
      * Initialize the atom group for the file IDs. There are two groups:

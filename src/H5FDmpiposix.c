@@ -229,6 +229,7 @@ static const H5FD_class_t H5FD_mpiposix_g = {
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
 };
 
+#ifdef OLD_METADATA_WRITE
 /* Global var to allow elimination of redundant metadata writes
  * to be controlled by the value of an environment variable. */
 /* Use the elimination by default unless this is the Intel Red machine */
@@ -237,6 +238,7 @@ hbool_t	H5_mpiposix_1_metawrite_g = TRUE;
 #else
 hbool_t	H5_mpiposix_1_metawrite_g = FALSE;
 #endif
+#endif /* OLD_METADATA_WRITE */
 
 /* Interface initialization */
 #define INTERFACE_INIT	H5FD_mpiposix_init
@@ -1309,7 +1311,9 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
                 HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
 
         /* Only p<round> will do the actual write if all procs in comm write same metadata */
+#ifdef OLD_METADATA_WRITE
         if (H5_mpiposix_1_metawrite_g)
+#endif /* OLD_METADATA_WRITE */
             if (file->mpi_rank != H5_PAR_META_WRITE)
                 HGOTO_DONE(SUCCEED) /* skip the actual write */
     } /* end if */
@@ -1384,10 +1388,17 @@ done:
     /* Guard against getting into metadata broadcast in failure cases */
     else {
         /* if only p<round> writes, need to broadcast the ret_value to other processes */
+#ifdef OLD_METADATA_WRITE
         if ((type!=H5FD_MEM_DRAW) && H5_mpiposix_1_metawrite_g) {
             if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, H5_PAR_META_WRITE, file->comm)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
         } /* end if */
+#else /* OLD_METADATA_WRITE */
+        if (type!=H5FD_MEM_DRAW) {
+            if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, H5_PAR_META_WRITE, file->comm)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+        } /* end if */
+#endif /* OLD_METADATA_WRITE */
     } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
