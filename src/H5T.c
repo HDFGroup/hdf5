@@ -2610,7 +2610,7 @@ H5Tdetect_class(hid_t type, H5T_class_t cls)
  *-------------------------------------------------------------------------
  */
 htri_t
-H5T_detect_class (H5T_t *dt, H5T_class_t cls)
+H5T_detect_class (const H5T_t *dt, H5T_class_t cls)
 {
     int		i;
 
