@@ -1877,7 +1877,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
      * Update left and right key dirty bits if the subtree indicates that they
      * have changed.  If the subtree's left key changed and the subtree is the
      * left-most child of the current node then we must update the key in our
-     * parent and indicate that it changed.  Similarly, if the rigt subtree
+     * parent and indicate that it changed.  Similarly, if the right subtree
      * key changed and it's the right most key of this node we must update
      * our right key and indicate that it changed.
      */
@@ -1899,6 +1899,29 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	    *rt_key_changed = FALSE;
 	} else {
 	    HDmemcpy(rt_key, bt->key[idx+1].nkey, type->sizeof_nkey);
+
+            /* Since our right key was changed, we must check for a right
+             * sibling and change it's left-most key as well.
+             * (Handle the ret_value==H5B_INS_REMOVE case below)
+             */
+            if (ret_value!=H5B_INS_REMOVE && level>0) {
+                if (H5F_addr_defined(bt->right)) {
+                    if (NULL == (sibling = H5AC_protect(f, dxpl_id, H5AC_BT, bt->right, type, udata, H5AC_WRITE)))
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR, "unable to unlink node from tree")
+
+                    /* Make certain the native key for the right sibling is set up */
+                    if (!sibling->key[0].nkey && H5B_decode_key(f, sibling, 0) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, H5B_INS_ERROR, "unable to decode key")
+                    HDmemcpy(sibling->key[0].nkey, bt->key[idx+1].nkey, type->sizeof_nkey);
+                    sibling->key[0].dirty = TRUE;
+                    sibling->cache_info.dirty = TRUE;
+
+                    if (H5AC_unprotect(f, dxpl_id, H5AC_BT, bt->right, sibling, FALSE) != SUCCEED)
+                        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to release node from tree")
+
+                    sibling=NULL;   /* Make certain future references will be caught */
+                }
+            }
 	}
     }
 
@@ -1932,6 +1955,13 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	    if (H5F_addr_defined(bt->right)) {
 		if (NULL == (sibling = H5AC_protect(f, dxpl_id, H5AC_BT, bt->right, type, udata, H5AC_WRITE)))
 		    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR, "unable to unlink node from tree")
+
+                /* Copy left-most key from deleted node to left-most key in it's right neighbor */
+                /* (Make certain the native key for the right sibling is set up) */
+                if (!sibling->key[0].nkey && H5B_decode_key(f, sibling, 0) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, H5B_INS_ERROR, "unable to decode key")
+                HDmemcpy(sibling->key[0].nkey, bt->key[0].nkey, type->sizeof_nkey);
+                sibling->key[0].dirty = TRUE;
 
 		sibling->left = bt->left;
 		sibling->cache_info.dirty = TRUE;
@@ -2000,6 +2030,30 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	assert(bt->key[bt->nchildren].nkey);
 	HDmemcpy(rt_key, bt->key[bt->nchildren].nkey, type->sizeof_nkey);
 	*rt_key_changed = TRUE;
+
+        /* Since our right key was changed, we must check for a right
+         * sibling and change it's left-most key as well.
+         * (Handle the ret_value==H5B_INS_REMOVE case below)
+         */
+        if (level>0) {
+            if (H5F_addr_defined(bt->right)) {
+                if (NULL == (sibling = H5AC_protect(f, dxpl_id, H5AC_BT, bt->right, type, udata, H5AC_WRITE)))
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR, "unable to unlink node from tree")
+
+                /* Make certain the native key for the right sibling is set up */
+                if (!sibling->key[0].nkey && H5B_decode_key(f, sibling, 0) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, H5B_INS_ERROR, "unable to decode key")
+                HDmemcpy(sibling->key[0].nkey, bt->key[bt->nchildren].nkey, type->sizeof_nkey);
+                sibling->key[0].dirty = TRUE;
+                sibling->cache_info.dirty = TRUE;
+
+                if (H5AC_unprotect(f, dxpl_id, H5AC_BT, bt->right, sibling, FALSE) != SUCCEED)
+                    HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to release node from tree")
+
+                sibling=NULL;   /* Make certain future references will be caught */
+            }
+        }
+
 	ret_value = H5B_INS_NOOP;
 
     } else if (H5B_INS_REMOVE==ret_value) {
