@@ -27,7 +27,6 @@
  */
 #include "H5private.h"		/* Generic Functions			  */
 #include "H5FSprivate.h"	/* Private function stack routines	  */
-#include "H5MMprivate.h"	/* Memory management functions		  */
 
 #ifdef H5_HAVE_FUNCSTACK
 
@@ -86,7 +85,7 @@ H5FS_get_stack(void)
     fstack = pthread_getspecific(H5TS_funcstk_key_g);
     if (!fstack) {
         /* no associated value with current thread - create one */
-        fstack = (H5FS_t *)H5MM_malloc(sizeof(H5FS_t));
+        fstack = (H5FS_t *)HDmalloc(sizeof(H5FS_t));  /* Don't use H5MM_malloc() here, it causes infinite recursion */
         pthread_setspecific(H5TS_funcstk_key_g, (void *)fstack);
     }
 
