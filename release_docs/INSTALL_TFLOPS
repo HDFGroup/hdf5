@@ -25,10 +25,13 @@ We recommand the use of the Gnu gmake which has some features
 Parallel HDF5:
 ---------------
 
-The setup process for building the parallel version of the HDF5 library for the
-ASCI Red machine is very similar to the sequential version.  Since TFLOPS
-does not support MPIO, we have prepared a shell-script file that configures
-with the appropriate MPI library.
+The setup process for building the parallel HDF5 library for the
+ASCI Red machine is done by a coordination of events from sasn100 and
+janus.  Though janus can do compiling, it is better to build it
+from sasn100 which has more complete building tools and runs faster.
+It is also anti-social to tie up janus with compiling.  The HDF5 building
+requires the use of janus because one of steps is to execute a program
+to find out the run-time characteristics of the TFLOPS machine.
 
 Assuming you have already unpacked the HDF5 tar-file into the 
 directory <hdf5>, follow the steps below:
@@ -49,9 +52,6 @@ FROM SASN100,
 	If a cross compiler is detected then cross compile mode will be used.
     =========
    You may add the option "--build=i386-intel-osf1" to get rid of the WARNING.
-
-   (The previous bugs in src/Makefile and test/Makefile have been resolved.
-    You don't need to edit them any more.)
 
 3) gmake H5detect
 

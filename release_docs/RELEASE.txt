@@ -205,7 +205,7 @@ Platforms Tested
     SunOS 5.8(32 and 64 bit)      Sun WorkShop 6 update 2 C 5.3
      (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
                                   Sun WorkShop 6 update 2 C++ 5.3
-    TFLOPS r1.0.4 v4.4.0 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
+    TFLOPS r1.0.4 v4.4.2 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
                                           local modifications
     IA-32 Linux 2.4.9             gcc 2.96
                                   Intel(R) C++ Version 7.0
@@ -299,7 +299,7 @@ Linux 2.4 PGI   (3)   y       n       y    n    y        n           n
 Linux 2.4 IA32 Intel  y       n       y    n    y        y           y
 Linux 2.4 IA64 Intel  y       n       y    n    y        y           y
 
-    Notes: (1) Using mpich 1.2.4.
+    Notes: (1) Using system MPI and MPIO libraries.
            (2) Using mpt and mpich 1.2.4.
            (3) Linux 2.4 with GNU, Intel, and PGI compilers, respectively.
            (4) Shared libraries are provided only for the C library, except 
