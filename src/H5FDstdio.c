@@ -15,6 +15,7 @@
 #include <sys/stat.h>
 
 #include "hdf5.h"
+#include "H5private.h"          /* library function  */
 
 #ifdef H5_HAVE_STDIO_H
 #include <stdio.h>
@@ -227,7 +228,8 @@ H5Pset_fapl_stdio(hid_t fapl_id)
     /* Clear the error stack */
     H5Eclear();
 
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id)) {
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS)) {    
         H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE,
 		    "not a file access property list", -1);
     }

@@ -269,6 +269,10 @@ H5FD_log_init(void)
  *
  * Modifications:
  *              We copy the LOGFILE value into our own access properties.
+ *
+ * 		Raymond Lu, 2001-10-25
+ *		Changed the file access list to the new generic property list.
+ *	
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -280,8 +284,10 @@ H5Pset_fapl_log(hid_t fapl_id, char *logfile, int verbosity)
     FUNC_ENTER(H5Pset_fapl_log, FAIL);
     H5TRACE3("e","isIs",fapl_id,logfile,verbosity);
     
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
+                      "not a file access property list");
 
     fa.logfile = logfile;
     fa.verbosity=verbosity;

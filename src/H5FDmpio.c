@@ -304,7 +304,7 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
     FUNC_ENTER(H5Pget_fapl_mpio, FAIL);
     H5TRACE3("e","ixx",fapl_id,comm,info);
 
-    if(H5I_GENPROP_LST != H5I_GET_TYPE(fapl_id) ||
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
         TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
     if (H5FD_MPIO!=H5P_get_driver(fapl_id))

@@ -218,6 +218,9 @@ H5FD_gass_init(void)
  *
  * Modifications:
  *
+ *		Raymond Lu, 2001-10-25
+ *		Changed the file access list to the new generic property list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -229,8 +232,10 @@ H5Pset_fapl_gass(hid_t fapl_id, GASS_Info info)
     FUNC_ENTER(H5Pset_fapl_gass, FAIL);
     
     /* Check arguments */
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");   
+
 #ifdef LATER
 #warning "We need to verify that INFO contain sensible information."
 #endif
@@ -264,6 +269,9 @@ H5Pset_fapl_gass(hid_t fapl_id, GASS_Info info)
  *
  * Modifications:
  *
+ *              Raymond Lu, 2001-10-25
+ *              Changed the file access list to the new generic property list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -274,8 +282,10 @@ H5Pget_fapl_gass(hid_t fapl_id, GASS_Info *info/*out*/)
     FUNC_ENTER(H5Pget_fapl_gass, FAIL);
     H5TRACE2("e","ix",fapl_id,info);
 
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
+                      "not a file access property list");
     if (H5FD_GASS!=H5P_get_driver(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if (NULL==(fa=H5Pget_driver_info(fapl_id)))

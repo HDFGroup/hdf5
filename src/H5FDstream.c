@@ -22,6 +22,7 @@
  */
 
 #include "H5public.h"                 /* H5_HAVE_STREAM                      */
+#include "H5private.h"                /* library function  */
 
 /* Only build this driver if it was configured with --with-Stream-VFD */
 #ifdef H5_HAVE_STREAM

@@ -183,7 +183,12 @@ H5FD_srb_init(void)
  *
  * Programmer:  Raymond Lu
  *              April 12, 2000
+ *
  * Modifications:
+ *
+ *		Raymond Lu, 2001-10-25
+ *		Use the new generic property list for argument checking.
+ *	
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -195,8 +200,10 @@ H5Pset_fapl_srb(hid_t fapl_id, SRB_Info info)
 
     FUNC_ENTER(H5Pset_fapl_srb, FAIL);
 
-    if(H5P_FILE_ACCESS != H5Pget_class(fapl_id))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "Not a fapl");
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
+                      "not a file access property list");
 
     /*connect to SRB server */
     fa.srb_conn = clConnect(info.srbHost, info.srbPort, info.srbAuth);
@@ -222,9 +229,16 @@ H5Pset_fapl_srb(hid_t fapl_id, SRB_Info info)
  * 
  * Return:      Success:        File INFO is returned.
  *              Failure:        Negative
+ *
  * Programmer:  Raymond Lu
  *              April 12, 2000
+ *
  * Modifications:
+ *
+ *		Raymond Lu, 2001-10-25
+ *		Use the new generic property list for checking property list
+ *		ID.
+ *	
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -235,8 +249,10 @@ H5Pget_fapl_srb(hid_t fapl_id, SRB_Info *info/*out*/)
     FUNC_ENTER(H5Pget_fapl_srb, FAIL);
     H5TRACE2("e","ix",fapl_id,info);
 
-    if(H5P_FILE_ACCESS != H5Pget_class(fapl_id))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
+                      "not a file access property list");
     if(H5FD_SRB != H5P_get_driver(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if(NULL==(fa=H5Pget_driver_info(fapl_id)))

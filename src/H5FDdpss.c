@@ -10,8 +10,9 @@
  */
 
 #include "hdf5.h"
+#include "H5private.h"		/* library function  */
 #include "H5Eprivate.h"         /* error handling    */
-#include "H5FDprivate.h"	/*file driver				  */
+#include "H5FDprivate.h"	/*file driver	     */
 #include "H5FDdpss.h"
 #include "H5MMprivate.h"        /* memory management */
 
@@ -239,8 +240,10 @@ H5Pset_fapl_dpss(hid_t fapl_id)
     H5TRACE1("e","i",fapl_id);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS != H5Pget_class (fapl_id))
-        HRETURN_ERROR (H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
+                      "not a file access property list");
 
     ret_value = H5Pset_driver (fapl_id, H5FD_DPSS, NULL);
 

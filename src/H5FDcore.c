@@ -168,6 +168,10 @@ H5FD_core_init(void)
  *		Added the BACKING_STORE argument. If set then the entire file
  *		contents are flushed to a file with the same name as this
  *		core file.
+ *
+ *		Raymond Lu, 2001-10-25
+ *		Changed the file access list to the new generic list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -179,8 +183,12 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
     FUNC_ENTER(H5FD_set_fapl_core, FAIL);
     H5TRACE3("e","izb",fapl_id,increment,backing_store);
 
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
+    /* Check argument */
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
+                      "not a file access property list");
+
     fa.increment = increment;
     fa.backing_store = backing_store;
 
@@ -205,6 +213,11 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
  * Modifications:
  *		Robb Matzke, 1999-10-19
  *		Added the BACKING_STORE argument.
+ *		
+ *		Raymond Lu
+ *		2001-10-25
+ *		Changed file access list to the new generic property list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -216,8 +229,10 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/,
     FUNC_ENTER(H5Pget_fapl_core, FAIL);
     H5TRACE3("e","ixx",fapl_id,increment,backing_store);
 
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
+                      "not a file access property list");
     if (H5FD_CORE!=H5P_get_driver(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if (NULL==(fa=H5Pget_driver_info(fapl_id)))
