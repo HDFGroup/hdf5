@@ -181,11 +181,16 @@ bool H5File::isHdf5(const string& name )
 //		If this object has represented another HDF5 file, the previous
 //		HDF5 file need to be closed first.
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by Quincey Koziol, June 1, 2004
+// Note:	This wrapper doesn't seem right regarding the 'id' and should
+//		be investigated.  BMR - 2/20/2005
 //--------------------------------------------------------------------------
 void H5File::reOpen()
 {
-   // reset the identifier of this H5File - send 'this' in so that
-   // H5Fclose can be called appropriately
+   // If this object has a valid id, appropriately decrement reference
+   // counter and close the id.
     try {
         decRefCount();
     }
@@ -551,6 +556,9 @@ void H5File::throwException(const string func_name, const string msg) const
 // Function:	H5File destructor
 ///\brief	Properly terminates access to this file. 
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by Quincey Koziol, June 1, 2004
 //--------------------------------------------------------------------------
 H5File::~H5File() 
 {  

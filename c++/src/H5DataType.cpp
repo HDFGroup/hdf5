@@ -94,6 +94,9 @@ DataType::DataType(const DataType& original) : H5Object(original)
 ///\param	like_type - IN: Datatype to be copied
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by Quincey Koziol, June 1, 2004
 //--------------------------------------------------------------------------
 void DataType::copy( const DataType& like_type )
 {
@@ -598,6 +601,9 @@ DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
 // Function:	DataType destructor
 ///\brief	Properly terminates access to this datatype.
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by Quincey Koziol, June 1, 2004
 //--------------------------------------------------------------------------
 DataType::~DataType()
 {  

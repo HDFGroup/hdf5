@@ -260,6 +260,9 @@ string Attribute::getName() const
 // Function:	Attribute destructor
 ///\brief	Properly terminates access to this attribute.
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by Quincey Koziol, June 1, 2004
 //--------------------------------------------------------------------------
 Attribute::~Attribute()
 {

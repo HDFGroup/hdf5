@@ -86,11 +86,14 @@ PropList::PropList( const hid_t plist_id ) : IdComponent(0)
 ///\param	like_plist - IN: Reference to the existing property list
 ///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by Quincey Koziol, June 1, 2004
 //--------------------------------------------------------------------------
 void PropList::copy( const PropList& like_plist )
 {
-   // reset the identifier of this PropList - send 'this' in so that
-   // H5Pclose can be called appropriately
+    // If this object has a valid id, appropriately decrement reference
+    // counter and close the id.
     try {
         decRefCount();
     }
@@ -324,7 +327,7 @@ size_t PropList::getPropSize(const char *name) const
 {
    size_t prop_size;
    herr_t ret_value = H5Pget_size(id, name, &prop_size);
-   if (prop_size < 0)
+   if (ret_value < 0)
    {
       throw PropListIException("PropList::getPropSize", "H5Pget_size failed");
    }
@@ -376,7 +379,7 @@ size_t PropList::getNumProps() const
 {
    size_t nprops;
    herr_t ret_value = H5Pget_nprops (id, &nprops);
-   if( nprops < 0 )
+   if (ret_value < 0)
    {
       throw PropListIException("PropList::getNumProps", "H5Pget_nprops failed");
    }

@@ -93,6 +93,9 @@ DataSpace::DataSpace( const DataSpace& original ) : IdComponent( original ) {}
 ///\param	like_space  - IN: Dataspace to be copied
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by Quincey Koziol, June 1, 2004
 //--------------------------------------------------------------------------
 void DataSpace::copy( const DataSpace& like_space )
 {
@@ -538,6 +541,9 @@ void DataSpace::selectHyperslab( H5S_seloper_t op, const hsize_t *count, const h
 // Function:	DataSpace destructor
 ///\brief	Properly terminates access to this dataspace.
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by Quincey Koziol, June 1, 2004
 //--------------------------------------------------------------------------
 DataSpace::~DataSpace()
 {  

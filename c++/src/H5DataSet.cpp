@@ -482,6 +482,9 @@ DataSpace DataSet::getRegion(void *ref, H5R_type_t ref_type) const
 // Function:	DataSet destructor
 ///\brief	Properly terminates access to this dataset.
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by Quincey Koziol, June 1, 2004
 //--------------------------------------------------------------------------
 DataSet::~DataSet()
 {

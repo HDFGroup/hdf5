@@ -166,6 +166,9 @@ void Group::throwException(const string func_name, const string msg) const
 // Function:	Group destructor
 ///\brief	Properly terminates access to this group.
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//              Replaced resetIdComponent with decRefCount to use new ID
+//              reference counting mechanisms by Quincey Koziol, June 1, 2004
 //--------------------------------------------------------------------------
 Group::~Group()
 {  
