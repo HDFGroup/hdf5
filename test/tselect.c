@@ -253,6 +253,12 @@ test_select_hyper(hid_t xfer_plist)
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
 
+    /* Exercise check for NULL buffer and valid selection */
+    H5E_BEGIN_TRY {
+        ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,NULL);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Dwrite");
+
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
@@ -272,6 +278,12 @@ test_select_hyper(hid_t xfer_plist)
     /* Read selection from disk */
     ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,rbuf);
     CHECK(ret, FAIL, "H5Dread");
+
+    /* Exercise check for NULL buffer and valid selection */
+    H5E_BEGIN_TRY {
+        ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,NULL);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Dread");
 
     /* Check that the values match with a dataset iterator */
     tbuf=wbuf+(15*SPACE2_DIM2);
@@ -5407,6 +5419,14 @@ test_select_none(void)
     /* Write "nothing" to disk (with a datatype conversion :-) */
     ret=H5Dwrite(dataset,H5T_NATIVE_INT,sid2,sid1,H5P_DEFAULT,wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Write "nothing" to disk (with NULL buffer argument) */
+    ret=H5Dwrite(dataset,H5T_NATIVE_INT,sid2,sid1,H5P_DEFAULT,NULL);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Read "nothing" from disk (with NULL buffer argument) */
+    ret=H5Dread(dataset,H5T_NATIVE_INT,sid2,sid1,H5P_DEFAULT,NULL);
+    CHECK(ret, FAIL, "H5Dread");
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);

@@ -480,7 +480,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     else
         if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-    if (!buf)
+    if (!buf && H5S_GET_SELECT_NPOINTS(file_space)!=0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
     /* read raw data */
@@ -568,7 +568,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     else
         if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-    if (!buf)
+    if (!buf && H5S_GET_SELECT_NPOINTS(file_space)!=0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
     /* write raw data */
@@ -649,7 +649,6 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
     /* check args */
     assert(dataset && dataset->ent.file);
-    assert(buf);
 
     /* Get memory datatype */
     if (NULL == (mem_type = H5I_object_verify(mem_type_id, H5I_DATATYPE)))
@@ -846,7 +845,6 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
     /* check args */
     assert(dataset && dataset->ent.file);
-    assert(buf);
 
     /* Get the memory datatype */
     if (NULL == (mem_type = H5I_object_verify(mem_type_id, H5I_DATATYPE)))
