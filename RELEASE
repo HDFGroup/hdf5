@@ -1,531 +1,115 @@
-Changes since HDF5-1.2.0
+
+ 
+                       HDF5 Release 1.3.x
+    			Under Development
+
+
+INTRODUCTION
+
+This document describes the differences between HDF5-1.2.0 and 
+HDF5-1.3.x, and contains information on the platforms where HDF5-1.3.x
+was tested (????? careful, under construction)
+and known problems in HDF5-1.3.x. For more details check the
+HISTORY file in the HDF5 source.
+
+The HDF5 documentation can be found on the NCSA ftp server 
+(ftp.ncsa.uiuc.edu) in the directory:
+
+     /HDF/HDF5/docs/
+
+For more information look at the HDF5 home page at:
+   
+    http://hdf.ncsa.uiuc.edu/HDF5/
+
+If you have any questions or comments, please send them to:
+
+    hdfhelp@ncsa.uiuc.edu
+
+
+CONTENTS
+
+- New features
+- Bug fixes since HDF5-1.2.0 
+- Platforms Tested
+- Known Problems
+
+New features
+============
+VFL(?) 
+
+Bug fixes since HDF5-1.2.0
 ==========================
-* h5dump correctly displays compound datatypes.
-* Corrected an error in h5toh4 which did not convert the 32bits
-  int from HDF5 to HDF4 corectly for the T3E platform.
-* Corrected a floating point number conversion error for the
-  Cray J90 platform.  The error did not convert the value 0.0
-  correctly.
-* The multi and split file drivers did not work on big-endian
-  machines.  Fixed.
-* Added GLOBUS-GASS file driver, upgraded to Globus 1.1.
-* Incorporated DPSS file driver contributed by the Cactus group.
-  DPSS is renamed to storage grid.
-* h5dump correctly displays the committed copy of predefined types.
 
-Release information for hdf5-1.2.0beta
-------------------------------------
-
-		     CHANGES SINCE VERSION 1.0.1
-
-Documentation
--------------
-
-* More examples
-
-* Updated user guide, reference manual, and format specification.
-
-* Self-contained documentation for installations isolated from the
-  Internet.
+Library
+-------
+   * Corrected a floating point number conversion error for the
+     Cray J90 platform.  The error did not convert the value 0.0
+     correctly.
+   * Error was fixed which was not allowing dataset region references to have
+     their regions retrieved correctly.
 
 Configuration
 -------------
 
-* Better detection and support for MPI-IO.
-
-* Recognition of compilers with known code generation problems.
-
-* Support for various compilers on a single architecture (e.g., the
-  native compiler and the GNU compilers).
-
-* Ability to build from read-only media and with different compilers
-  and/or options concurrently.
-
-* Added a libhdf5.settings file which summarizes the configuration
-  information and is installed along with the library.
-
-* Builds a shared library on most systems that support it.
-
-* Support for Cray T3E and Windows/NT.
-
-Debugging
----------
-
-* Improved control and redirection of debugging and tracing messages.
-
-Datatypes
----------
-
-* Optimizations to compound datatype conversions and I/O operations.
-
-* Added nearly 100 optimized conversion functions for native datatypes 
-  including support for non-aligned data.
-
-* Added support for bitfield, opaque, and enumeration types.
-
-* Added distinctions between signed and unsigned char types to the
-  list of predefined native hdf5 datatypes.
-
-* Added HDF5 type definitions for C9x types like int32_t.
-
-* Application-defined type conversion functions can handle non-packed
-  data.
-
-* Changed the H5Tunregister() function to use wildcards when matching
-  conversion functions.  H5Tregister_hard() and H5Tregister_soft()
-  were combined into H5Tregister().
-
-* Support for variable-length datatypes (arrays of varying length per
-  dataset element). Variable length strings currently supported only
-  as variable length arrays of 1-byte integers.
-
-Data Spaces
------------
-
-* New query functions for selections.
-
-* I/O operations bypass the stripmining loop and go directly to
-  storage for certain contiguous selections in the absense of type
-  conversions.  In other cases the stripmining buffers are used more
-  effectively.
-
-* Reduced the number of I/O requests under certain circumstances,
-  improving performance on systems with high I/O latency.
-
-Persistent Pointers
--------------------
-
-* Object (serial and parallel) and dataset region (serial only)
-  references are implemented.
-
-Parallel Support
-----------------
-
-* Improved parallel I/O performance.
-
-* Supported new platforms: Cray T3E, Linux, DEC Cluster.
-
-* Use vendor supported version of MPIO on SGI O2K and Cray platforms.
-
-* Improved the algorithm that translates an HDF5 hyperslab selection
-  into an MPI type for better collective I/O performance.
+   * The hdf5.h include file was fixed to allow the HDF5 Library to be compiled
+     with other libraries/applications that use GNU autoconf. 
+   * Configuration for parallel HDF5 was improved. Configure now attempts to
+     link with libmpi.a and/or libmpio.a as the MPI libraries by default.
+     It also uses "mpirun" to launch MPI tests by default.  It tests to
+     link MPIO routines during the configuration stage, rather than failing
+     later as before.  One can just do "./configure --enable-parallel"
+     if the MPI library is in the system library.
 
 Tools
------
-
-* Enhancements to the h5ls tool including the ability to list objects
-  from more than one file, to display raw hexadecimal data, to
-  show file addresses for raw data, to format output more reasonably,
-  to show object attributes, and to perform a recursive listing, 
-
-* Enhancements to h5dump: support new data types added since previous
-  versions.
-
-* h5toh4: An hdf5 to hdf4 converter.
-
-
-		    CHANGES SINCE THE Version 1.0.0 RELEASE
-
-* [Improvement]: configure sets up the Makefile in the parallel tests
-  suit (testpar/) correctly.
-
-* [Bug-Fix]: Configure failed for all IRIX versions other than 6.3.
-  It now configures correctly for all IRIX 6.x version.
-
-		    CHANGES SINCE THE BETA RELEASE
-
-* Added fill values for datasets.  For contiguous datasets fill value
-  performance may be quite poor since the fill value is written to the 
-  entire dataset when the dataset is created.  This will be remedied
-  in a future version.  Chunked datasets using fill values do not
-  incur any additional overhead. See H5Pset_fill_value().
-
-* Multiple hdf5 files can be "mounted" on one another to create a
-  larger virtual file. See H5Fmount().
-
-* Object names can be removed or changed but objects are never
-  actually removed from the file yet. See H5Gunlink() and H5Gmove().
-
-* Added a tuning mechanism for B-trees to insure that sequential
-  writes to chunked datasets use less overhead.  See H5Pset_btree_ratios().
-
-* Various optimizations and bug fixes.
-
-
-		    CHANGES SINCE THE SECOND ALPHA
-
-* Strided hyperslab selections in dataspaces now working.
-
-* The compression API has been replaced with a more general filter
-  API.  See doc/html/Filters.html for details.
-
-* Alpha-quality 2d ragged arrays are implemented as a layer built on
-  top of other hdf5 objects.  The API and storage format will almost
-  certainly change.
-
-* More debugging support including API tracing.  See Debugging.html.
-
-* C and Fortran style 8-bit fixed-length character string types are
-  supported with space or null padding or null termination and
-  translations between them.
-
-* Added function H5Fflush() to write all cached data immediately to
-  the file.
-
-* Datasets maintain a modification time which can be retrieved with
-  H5Gstat().
-
-* The h5ls tool can display much more information, including all the
-  values of a dataset.
-
-		    CHANGES SINCE THE FIRST ALPHA
-
-* Two of the packages have been renamed.  The data space API has been
-  renamed from `H5P' to `H5S' and the property list (template) API has 
-  been renamed from `H5C' to `H5P'.
-
-* The new attribute API `H5A' has been added.  An attribute is a small 
-  dataset which can be attached to some other object (for instance, a
-  4x4 transformation matrix attached to a 3-dimensional dataset, or an 
-  English abstract attached to a group).
-
-* The error handling API `H5E' has been completed.  By default, when an
-  API function returns failure an error stack is displayed on the
-  standard error stream.  The H5Eset_auto() controls the automatic
-  printing and H5E_BEGIN_TRY/H5E_END_TRY macros can temporarily
-  disable the automatic error printing.
-
-* Support for large files and datasets (>2GB) has been added.  There
-  is an html document that describes how it works.  Some of the types
-  for function arguments have changed to support this: all arguments
-  pertaining to sizes of memory objects are `size_t' and all arguments 
-  pertaining to file sizes are `hsize_t'.
-
-* More data type conversions have been added although none of them are
-  fine tuned for performance.  There are new converters from integer
-  to integer and float to float, but not between integers and floating
-  points.  A bug has been fixed in the converter between compound
-  types.
-
-* The numbered types have been removed from the API: int8, uint8,
-  int16, uint16, int32, uint32, int64, uint64, float32, and float64.
-  Use standard C types instead.  Similarly, the numbered types were
-  removed from the H5T_NATIVE_* architecture; use unnumbered types
-  which correspond to the standard C types like H5T_NATIVE_INT.
-
-* More debugging support was added.  If tracing is enabled at
-  configuration time (the default) and the HDF5_TRACE environment
-  variable is set to a file descriptor then all API calls will emit
-  the function name, argument names and values, and return value on
-  that file number.  There is an html document that describes this.
-  If appropriate debugging options are enabled at configuration time,
-  some packages will display performance information on stderr.
-
-* Data types can be stored in the file as independent objects and
-  multiple datasets can share a data type.
-
-* The raw data I/O stream has been implemented and the application can 
-  control meta and raw data caches, so I/O performance should be
-  improved from the first alpha release.
-
-* Group and attribute query functions have been implemented so it is
-  now possible to find out the contents of a file with no prior
-  knowledge.
-
-* External raw data storage allows datasets to be written by other
-  applications or I/O libraries and described and accessed through
-  HDF5.
-
-* Hard and soft (symbolic) links are implemented which allow groups to 
-  share objects. Dangling and recursive symbolic links are supported.
-
-* User-defined data compression is implemented although we may
-  generalize the interface to allow arbitrary user-defined filters
-  which can be used for compression, checksums, encryption,
-  performance monitoring, etc.  The publicly-available `deflate'
-  method is predefined if the GNU libz.a can be found at configuration 
-  time.
-
-* The configuration scripts have been modified to make it easier to
-  build debugging vs. production versions of the library.
-
-* The library automatically checks that the application was compiled
-  with the correct version of header files.
-
-
-		    Parallel HDF5 Changes
-
-* Parallel support for fixed dimension datasets with contiguous or
-  chunked storages.  Also, support unlimited dimension datasets which
-  must use chunk storage.  No parallel support for compressed datasets.
-
-* Collective data transfer for H5Dread/H5Dwrite.  Collective access
-  support for datasets with contiguous storage only, thus only fixed
-  dimension datasets for now.
-
-* H5Pset_mpi and H5Pget_mpi no longer have the access_mode
-  argument.  It is taken over by the data-transfer property list
-  of H5Dread/H5Dwrite.
-
-* New functions H5Pset_xfer and H5Pget_xfer to handle the
-  specification of independent or collective data transfer_mode
-  in the dataset transfer properties list.  The properties
-  list can be used to specify data transfer mode in the H5Dwrite
-  and H5Dread function calls.
-
-* Added parallel support for datasets with chunked storage layout.
-  When a dataset is extend in a PHDF5 file, all processes that open
-  the file must collectively call H5Dextend with identical new dimension
-  sizes.
-
-
-			LIST OF API FUNCTIONS
-
-The following functions are implemented. Errors are returned if an
-attempt is made to use some feature which is not implemented and
-printing the error stack will show `not implemented yet'.
-
-Library
-   H5check		- check that lib version matches header version
-   H5open		- initialize library (happens automatically)
-   H5close		- shut down the library (happens automatically)
-   H5dont_atexit	- don't call H5close on exit
-   H5get_libversion	- retrieve library version info
-   H5check_version	- check for specific library version
-
-Property Lists
-   H5Pclose		- release template resources
-   H5Pcopy		- copy a template
-   H5Pcreate		- create a new template
-   H5Pget_chunk		- get chunked storage properties
-   H5Pset_chunk		- set chunked storage properties
-   H5Pget_class		- get template class
-   H5Pget_istore_k	- get chunked storage properties
-   H5Pset_istore_k	- set chunked storage properties
-   H5Pget_layout	- get raw data layout class
-   H5Pset_layout	- set raw data layout class
-   H5Pget_sizes		- get address and size sizes
-   H5Pset_sizes		- set address and size sizes
-   H5Pget_sym_k		- get symbol table storage properties
-   H5Pset_sym_k		- set symbol table storage properties
-   H5Pget_userblock	- get user-block size
-   H5Pset_userblock	- set user-block size
-   H5Pget_version	- get file version numbers
-   H5Pget_alignment	- get data alignment properties
-   H5Pset_alignment	- set data alignment properties
-   H5Pget_external_count- get count of external data files
-   H5Pget_external	- get information about an external data file
-   H5Pset_external	- add a new external data file to the list
-   H5Pget_driver	- get low-level file driver class
-   H5Pget_stdio		- get properties for stdio low-level driver
-   H5Pset_stdio		- set properties for stdio low-level driver
-   H5Pget_sec2		- get properties for sec2 low-level driver
-   H5Pset_sec2		- set properties for sec2 low-level driver
-   H5Pget_core		- get properties for core low-level driver
-   H5Pset_core		- set properties for core low-level driver
-   H5Pget_split		- get properties for split low-level driver
-   H5Pset_split		- set properties for split low-level driver
-   H5P_get_family	- get properties for family low-level driver
-   H5P_set_family	- set properties for family low-level driver
-   H5Pget_cache		- get meta- and raw-data caching properties
-   H5Pset_cache		- set meta- and raw-data caching properties
-   H5Pget_buffer	- get raw-data I/O pipe buffer properties
-   H5Pset_buffer	- set raw-data I/O pipe buffer properties
-   H5Pget_preserve	- get type conversion preservation properties
-   H5Pset_preserve	- set type conversion preservation properties
-   H5Pget_nfilters	- get number of raw data filters
-   H5Pget_filter	- get raw data filter properties
-   H5Pset_filter	- set raw data filter properties
-   H5Pset_deflate	- set deflate compression filter properties
-   H5Pget_mpi		- get MPI-IO properties
-   H5Pset_mpi		- set MPI-IO properties
-   H5Pget_xfer		- get data transfer properties
-   H5Pset_xfer		- set data transfer properties
-
-Datasets
-   H5Dclose		- release dataset resources
-   H5Dcreate		- create a new dataset
-   H5Dget_space		- get data space
-   H5Dget_type		- get data type
-   H5Dget_create_plist	- get dataset creation properties
-   H5Dopen		- open an existing dataset
-   H5Dread		- read raw data
-   H5Dwrite		- write raw data
-   H5Dextend		- extend a dataset
-
-Attributes
-   H5Acreate		- create a new attribute
-   H5Aopen_name		- open an attribute by name
-   H5Aopen_idx		- open an attribute by number
-   H5Awrite		- write values into an attribute
-   H5Aread		- read values from an attribute
-   H5Aget_space		- get attribute data space
-   H5Aget_type		- get attribute data type
-   H5Aget_name		- get attribute name
-   H5Anum_attrs		- return the number of attributes for an object
-   H5Aiterate		- iterate over an object's attributes
-   H5Adelete		- delete an attribute
-   H5Aclose		- close an attribute
-
-Errors
-   H5Eclear		- clear the error stack
-   H5Eprint		- print an error stack
-   H5Eget_auto		- get automatic error reporting settings
-   H5Eset_auto		- set automatic error reporting
-   H5Ewalk		- iterate over the error stack
-   H5Ewalk_cb		- the default error stack iterator function
-   H5Eget_major		- get the message for the major error number
-   H5Eget_minor		- get the message for the minor error number
-
-Files
-   H5Fclose		- close a file and release resources
-   H5Fcreate		- create a new file
-   H5Fget_create_plist	- get file creation property list
-   H5Fget_access_plist	- get file access property list
-   H5Fis_hdf5		- determine if a file is an hdf5 file
-   H5Fopen		- open an existing file
-
-Groups
-   H5Gclose		- close a group and release resources
-   H5Gcreate    	- create a new group
-   H5Gopen		- open an existing group
-   H5Gpop		- pop a group from the cwg stack
-   H5Gpush		- push a group onto the cwg stack
-   H5Gset		- set the current working group (cwg)
-   H5Giterate   	- iterate over the contents of a group
-   H5Gmove		- change the name of some object
-   H5Glink		- create a hard or soft link to an object
-   H5Gunlink    	- break the link between a name and an object
-   H5Gget_objinfo	- get information about a group entry
-   H5Gget_linkval	- get the value of a soft link
-   H5Gget_comment	- get the comment string for an object
-   H5Gset_comment	- set the comment string for an object
-
-Dataspaces
-   H5Screate	        - create a new data space
-   H5Scopy		- copy a data space
-   H5Sclose		- release data space
-   H5Screate_simple	- create a new simple data space
-   H5Sset_space		- set simple data space extents
-   H5Sis_simple		- determine if data space is simple
-   H5Sset_extent_simple	- set simple data space dimensionality and size
-   H5Sget_simple_extent_npoints	- get number of points in simple extent
-   H5Sget_simple_extent_ndims - get simple data space dimensionality
-   H5Sget_simple_extent_dims - get simple data space size
-   H5Sget_simple_extent_type - get type of simple extent
-   H5Sset_extent_none	- reset extent to be empty
-   H5Sextent_copy	- copy the extent from one data space to another
-   H5Sget_select_npoints - get number of points selected for I/O
-   H5Sselect_hyperslab	- set hyperslab dataspace selection
-   H5Sselect_elements   - set element sequence dataspace selection
-   H5Sselect_all	- select entire extent for I/O
-   H5Sselect_none	- deselect all elements of extent
-   H5Soffset_simple	- set selection offset
-   H5Sselect_valid	- determine if selection is valid for extent
-
-Datatypes
-   H5Tclose		- release data type resources
-   H5Topen		- open a named data type
-   H5Tcommit		- name a data type
-   H5Tcommitted		- determine if a type is named
-   H5Tcopy		- copy a data type
-   H5Tcreate		- create a new data type
-   H5Tequal		- compare two data types
-   H5Tlock		- lock type to prevent changes
-   H5Tfind		- find a data type conversion function
-   H5Tconvert		- convert data from one type to another
-   H5Tregister_hard	- register specific type conversion function
-   H5Tregister_soft	- register general type conversion function
-   H5Tunregister	- remove a type conversion function
-   H5Tget_overflow	- get function that handles overflow conv. cases
-   H5Tset_overflow	- set function to handle overflow conversion cases
-   H5Tget_class		- get data type class
-   H5Tget_cset		- get character set
-   H5Tget_ebias		- get exponent bias
-   H5Tget_fields	- get floating point fields
-   H5Tget_inpad		- get inter-field padding
-   H5Tget_member_dims	- get struct member dimensions
-   H5Tget_member_name	- get struct member name
-   H5Tget_member_offset	- get struct member byte offset
-   H5Tget_member_type	- get struct member type
-   H5Tget_nmembers	- get number of struct members
-   H5Tget_norm		- get floating point normalization
-   H5Tget_offset	- get bit offset within type
-   H5Tget_order		- get byte order
-   H5Tget_pad		- get padding type
-   H5Tget_precision	- get precision in bits
-   H5Tget_sign		- get integer sign type
-   H5Tget_size		- get size in bytes
-   H5Tget_strpad	- get string padding
-   H5Tinsert		- insert scalar struct member
-   H5Tinsert_array	- insert array struct member
-   H5Tpack		- pack struct members
-   H5Tset_cset		- set character set
-   H5Tset_ebias		- set exponent bias
-   H5Tset_fields	- set floating point fields
-   H5Tset_inpad		- set inter-field padding
-   H5Tset_norm		- set floating point normalization
-   H5Tset_offset	- set bit offset within type
-   H5Tset_order		- set byte order
-   H5Tset_pad		- set padding type
-   H5Tset_precision	- set precision in bits
-   H5Tset_sign		- set integer sign type
-   H5Tset_size		- set size in bytes
-   H5Tset_strpad	- set string padding
-
-Filters
-   H5Tregister		- register a new filter method
-
-Ragged Arrays (alpha)
-   H5Rcreate		- create a new ragged array
-   H5Ropen		- open an existing array
-   H5Rclose		- close a ragged array
-   H5Rwrite		- write to an array
-   H5Rread		- read from an array
-
-
-			PLATFORMS SUPPORTED
-			-------------------
-
-Operating systems listed below with compiler information and MPI library, if
-applicable, are systems that HDF5 1.2.0beta was tested.
-
-                           Compiler & libraries
-  Platform                      Information              Comment
-  --------                      ----------               -------- 
-                                
-  AIX 4.3.2 (IBM SP)
-
-  FreeBSD 3.2                   gcc 2.8.1
-
-  HP-UX 10.20                   cc A.10.32.03
-
-  IRIX 6.5                      cc 7.2.1
-
-  IRIX64 6.5 (64 & n32)         cc 7.30 
-  			        mpt.1.3 (SGI MPI 3.2.0.0)
-
-  Linux (SuSE and RedHat)       egcs-1.1.2               configured with
-  						         --disable-hsizet
-
-  OSF1 V4.0                     DEC-V5.2-033
-
-  SunOS 5.6                     cc 4.2                   no optimization
-  			        gcc 2.8.1
-
-  SunOS 5.5.1                   gcc 2.7.2                configured with
-  						         --disable-hsizet
-  TFLOPS O/S 1.0.4              cicc (pgcc Rel 1.7-6i)
-  			        mpich-1.1.2 with local changes
-
-  Unicos 2.0.4.61 (T3E)         cc 6.2.1.0 
+------
+    * h5dump correctly displays compound datatypes.
+    * Corrected an error in h5toh4 which did not convert the 32bits
+      int from HDF5 to HDF4 corectly for the T3E platform.
+    * h5dump correctly displays the committed copy of predefined types
+      correctly.
+    * Added an option, -V, to show the version information of h5dump.
+    * Fixed a core dumping bug of h5toh4 when executed on platforms like 
+      TFLOPS.
+    * The test script for h5toh4 used to not able to detect the hdp
+      dumper command was not valid.  It now detects and reports the
+      failure of hdp execution.
+
+Documentation
+-------------
+
+    * User's Guide and Reference Manual were updated. 
+      See doc/html/PSandPDF/index.html for more details. 
+
+   
+Platforms Tested:
+================
+ Note: Due to the nature of bug fixes, only static versions of the library and tools were tested.
+
+
+  AIX 4.3.2 (IBM SP)            3.6.6
+  Cray T3E 2.0.4.81             cc 6.3.0.1
                                 mpt.1.3
+  FreeBSD 3.3-STABLE            gcc 2.95.2
+  HP-UX B.10.20                 HP C  HP92453-01 A.10.32
+  IRIX 6.5                      MIPSpro cc 7.30
+  IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
+                                mpt.1.3 (SGI MPI 3.2.0.0)
 
-  Windows/NT 4.0/SP3            MSVC++ 5.0 and 6.0
+  Linux 2.2.10 SuSE             egcs-2.91.66               configured with
+  (i686-pc-linux-gnu)                                      --disable-hsizet
+                                mpich-1.2.0 egcs-2.91.66 19990314/Linux 
 
-  Cygwin                        gcc egcs-2.91.57
+  OSF1 V4.0                     DEC-V5.2-040
+  SunOS 5.6                     cc WorkShop Compilers 4.2  no optimization
+  SunOS 5.7                     cc WorkShop Compilers 5.0
+  TFLOPS 2.8                    cicc (pgcc Rel 3.0-5i)
+                                mpich-1.1.2 with local changes
+  Windows NT4.0 sp5             MSVC++ 6.0
 
+Known Problems:
+==============
 
-
+o SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
+  fail if library is compiled using optimization of any level.
 
 
