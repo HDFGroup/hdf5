@@ -20,6 +20,8 @@
  * Standard header files needed all the time 
  */
 
+#include "H5private.h"
+
 #if (defined (UNICOS) || (defined (_UNICOS)))
 
 #include <fortran.h>
@@ -32,8 +34,6 @@ typedef long               size_t_f;
 typedef long               int_f;
 typedef long               hid_t_f;
 typedef double             real_f;
-#define DF_CAPFNAMES 
-/*#define _fcdtocp(desc) (desc)*/
 
 #endif /* UNICOS */
 
@@ -60,10 +60,6 @@ typedef int               size_t_f;
 typedef int               int_f;
 typedef int               hid_t_f;
 typedef float             real_f;
-#define FNAME(x) x 
-#if defined H5_ABSOFT
-#define DF_CAPFNAMES
-#endif /*H5_ABSOFT*/
 #define _fcdtocp(desc) (desc)
 
 #endif /*APPLE*/
@@ -85,11 +81,6 @@ typedef long long         haddr_t_f;
 typedef long long         hsize_t_f;
 typedef long long         hssize_t_f;
 typedef int               size_t_f;
-#if defined H5_ABSOFT
-#define DF_CAPFNAMES
-#else
-#define FNAME_POST_UNDERSCORE
-#endif /*H5_ABSOFT*/
 
 /* AMD64 specific definitions */
 #elif defined __x86_64__
@@ -98,7 +89,6 @@ typedef long long         haddr_t_f;
 typedef long long         hsize_t_f;
 typedef long long         hssize_t_f;
 typedef int               size_t_f;
-#define FNAME_POST_UNDERSCORE
 
 /* IA64 specific definitions */
 #elif defined __ia64
@@ -107,7 +97,6 @@ typedef long              haddr_t_f;
 typedef long              hsize_t_f;
 typedef long              hssize_t_f;
 typedef long              size_t_f;
-#define FNAME_POST_UNDERSCORE
 
 #endif /* IA64 */
 #endif /* LINUX*/
@@ -122,7 +111,6 @@ typedef long          size_t_f;
 typedef int           int_f;
 typedef int           hid_t_f;
 typedef float         real_f;
-#define FNAME_POST_UNDERSCORE
 #define _fcdtocp(desc) (desc)
 #endif /* IRIX */
 
@@ -136,7 +124,6 @@ typedef int               size_t_f;
 typedef int               int_f;
 typedef int               hid_t_f;
 typedef float             real_f;
-#define FNAME_POST_UNDERSCORE
 #define _fcdtocp(desc) (desc)
 
 #endif     /*SUN*/
@@ -151,7 +138,6 @@ typedef long             size_t_f;
 typedef int              int_f;
 typedef int              hid_t_f;
 typedef float            real_f;
-#define FNAME_POST_UNDERSCORE
 #define _fcdtocp(desc) (desc)
 
 #endif /* DEC_ALPHA */
@@ -166,7 +152,6 @@ typedef long long        size_t_f;
 typedef int              int_f;
 typedef int              hid_t_f;
 typedef float            real_f;
-#define FNAME_POST2_UNDERSCORE
 #define _fcdtocp(desc) (desc)
 
 #endif /* DEC_ALPHA_LINUX */
@@ -197,7 +182,6 @@ typedef int               int_f;
 typedef int               hid_t_f;
 typedef float             real_f;
 
-#define DF_CAPFNAMES
 #define _fcdtocp(desc) (desc)
 
 #endif /*WINDOWS */
@@ -232,32 +216,7 @@ typedef long              hssize_t_f;
 typedef long              size_t_f;
 #endif /* IA64 */
 
-#define FNAME_POST_UNDERSCORE
 
 #endif /* FreeBSD */
-
-/*----------------------------------------------------------------
-** MACRO FNAME for any fortran callable routine name.
-**
-**  This macro prepends, appends, or does not modify a name
-**  passed as a macro parameter to it based on the FNAME_PRE_UNDERSCORE,
-**  FNAME_POST_UNDERSCORE macros set for a specific system.
-**
-**---------------------------------------------------------------*/
-#if defined(FNAME_PRE_UNDERSCORE) && defined(FNAME_POST_UNDERSCORE)
-#   define FNAME(x)     _##x##_
-#endif
-#if defined(FNAME_PRE_UNDERSCORE) && !defined(FNAME_POST_UNDERSCORE)
-#   define FNAME(x)     _##x
-#endif
-#if !defined(FNAME_PRE_UNDERSCORE) && defined(FNAME_POST_UNDERSCORE)
-#   define FNAME(x)     x##_
-#endif
-#if !defined(FNAME_PRE_UNDERSCORE) && !defined(FNAME_POST_UNDERSCORE)
-#   define FNAME(x)     x
-#endif
-#if !defined(FNAME_PRE_UNDERSCORE) && defined(FNAME_POST2_UNDERSCORE)
-#   define FNAME(x)     x##__
-#endif
 
 #endif /* _H5f90i_H */

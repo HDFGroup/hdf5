@@ -24,6 +24,8 @@ include $(top_srcdir)/config/commence.am
 INCLUDES = -I$(top_srcdir)/src
 AM_FCFLAGS=-I$(top_srcdir)/src
 
+AM_FCLIBS=$(LIBHDF5)
+
 # Fortran libraries are linked statically to solve a build problem.
 AM_LDFLAGS=-static
 

@@ -312,18 +312,23 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_LANG_PUSH(Fortran)
 
   dnl --------------------------------------------------------------------
+  dnl Define wrappers for the C compiler to use Fortran function names
+  dnl
+  AC_FC_WRAPPERS
+
+  dnl --------------------------------------------------------------------
   dnl See if the compiler will support the "-I." option
   dnl
-  FCFLAGS_saved=$FCFLAGS
-  FCFLAGS="${FCFLAGS} -I."
+dnl  FCFLAGS_saved=$FCFLAGS
+dnl  FCFLAGS="${FCFLAGS} -I."
 
-  AC_MSG_CHECKING(if compiler supports -I. option)
-  AC_TRY_FCOMPILE([
-      program conftest
-      end
-  ], AC_MSG_RESULT(yes),
-     AC_MSG_RESULT(no)
-     FCFLAGS="$FCFLAGS_saved")
+dnl  AC_MSG_CHECKING(if compiler supports -I. option)
+dnl  AC_TRY_FCOMPILE([
+dnl      program conftest
+dnl      end
+dnl  ], AC_MSG_RESULT(yes),
+dnl     AC_MSG_RESULT(no)
+dnl     FCFLAGS="$FCFLAGS_saved")
 
   dnl Change back to the C language
   AC_LANG_POP(Fortran)

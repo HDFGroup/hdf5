@@ -16,6 +16,7 @@
 #ifndef _H5LTf90proto_H
 #define _H5LTf90proto_H
 
+#include "H5config.h"
 #include "H5f90i.h"
 
 H5_DLL char*  HD5f2cstring (_fcd fdesc, int len);
@@ -25,134 +26,58 @@ H5_DLL void HD5packFstring (char *src, char *dest, size_t len);
 /*
  *  Functions from H5LTfc.c
  */
-#ifndef H5Ff90_FNAMES
-#    define H5Ff90_FNAMES
-#ifdef DF_CAPFNAMES
-#   define nh5ltmake_dataset_c         FNAME(H5LTMAKE_DATASET_C)
-#   define nh5ltread_dataset_c         FNAME(H5LTREAD_DATASET_C)
-#   define nh5ltmake_dataset_string_c  FNAME(H5LTMAKE_DATASET_STRING_C)
-#   define nh5ltread_dataset_string_c  FNAME(H5LTREAD_DATASET_STRING_C)
+#   define nh5ltmake_dataset_c         FC_FUNC_(h5ltmake_dataset_c, H5LTMAKE_DATASET_C)
+#   define nh5ltread_dataset_c         FC_FUNC_(h5ltread_dataset_c, H5LTREAD_DATASET_C)
+#   define nh5ltmake_dataset_string_c  FC_FUNC_(h5ltmake_dataset_string_c, H5LTMAKE_DATASET_STRING_C)
+#   define nh5ltread_dataset_string_c  FC_FUNC_(h5ltread_dataset_string_c, H5LTREAD_DATASET_STRING_C)
 
+#   define nh5ltset_attribute_int_c    FC_FUNC_(h5ltset_attribute_int_c, H5LTSET_ATTRIBUTE_INT_C)
+#   define nh5ltset_attribute_float_c  FC_FUNC_(h5ltset_attribute_float_c, H5LTSET_ATTRIBUTE_FLOAT_C)
+#   define nh5ltset_attribute_double_c FC_FUNC_(h5ltset_attribute_double_c, H5LTSET_ATTRIBUTE_DOUBLE_C)
+#   define nh5ltset_attribute_string_c FC_FUNC_(h5ltset_attribute_string_c, H5LTSET_ATTRIBUTE_STRING_C)
 
-#   define nh5ltset_attribute_int_c    FNAME(H5LTSET_ATTRIBUTE_INT_C)
-#   define nh5ltset_attribute_float_c  FNAME(H5LTSET_ATTRIBUTE_FLOAT_C)
-#   define nh5ltset_attribute_double_c FNAME(H5LTSET_ATTRIBUTE_DOUBLE_C)
-#   define nh5ltset_attribute_string_c FNAME(H5LTSET_ATTRIBUTE_STRING_C)
+#   define nh5ltget_attribute_int_c    FC_FUNC_(h5ltget_attribute_int_c, H5LTGET_ATTRIBUTE_INT_C)
+#   define nh5ltget_attribute_float_c  FC_FUNC_(h5ltget_attribute_float_c, H5LTGET_ATTRIBUTE_FLOAT_C)
+#   define nh5ltget_attribute_double_c FC_FUNC_(h5ltget_attribute_double_c, H5LTGET_ATTRIBUTE_DOUBLE_C)
+#   define nh5ltget_attribute_string_c FC_FUNC_(h5ltget_attribute_string_c, H5LTGET_ATTRIBUTE_STRING_C)
 
-#   define nh5ltget_attribute_int_c    FNAME(H5LTGET_ATTRIBUTE_INT_C)
-#   define nh5ltget_attribute_float_c  FNAME(H5LTGET_ATTRIBUTE_FLOAT_C)
-#   define nh5ltget_attribute_double_c FNAME(H5LTGET_ATTRIBUTE_DOUBLE_C)
-#   define nh5ltget_attribute_string_c FNAME(H5LTGET_ATTRIBUTE_STRING_C)
+#   define nh5ltget_dataset_ndims_c    FC_FUNC_(h5ltget_dataset_ndims_c, H5LTGET_DATASET_NDIMS_C)
+#   define nh5ltfind_dataset_c         FC_FUNC_(h5ltfind_dataset_c, H5LTFIND_DATASET_C)
+#   define nh5ltget_dataset_info_c     FC_FUNC_(h5ltget_dataset_info_c, H5LTGET_DATASET_INFO_C)
 
-#   define nh5ltget_dataset_ndims_c    FNAME(H5LTGET_DATASET_NDIMS_C)
-#   define nh5ltfind_dataset_c         FNAME(H5LTFIND_DATASET_C)
-#   define nh5ltget_dataset_info_c     FNAME(H5LTGET_DATASET_INFO_C)
-
-#   define nh5ltget_attribute_ndims_c  FNAME(H5LTGET_ATTRIBUTE_NDIMS_C)
-#   define nh5ltget_attribute_info_c   FNAME(H5LTGET_ATTRIBUTE_INFO_C)
+#   define nh5ltget_attribute_ndims_c  FC_FUNC_(h5ltget_attribute_ndims_c, H5LTGET_ATTRIBUTE_NDIMS_C)
+#   define nh5ltget_attribute_info_c   FC_FUNC_(h5ltget_attribute_info_c, H5LTGET_ATTRIBUTE_INFO_C)
 
 /*-------------------------------------------------------------------------
  * Image
  *-------------------------------------------------------------------------
  */
-#   define nh5immake_image_8bit_c      FNAME(H5IMMAKE_IMAGE_8BIT_C)
-#   define nh5immake_image_24bit_c     FNAME(H5IMMAKE_IMAGE_24BIT_C)
-#   define nh5imread_image_c           FNAME(H5IMREAD_IMAGE_C)
-#   define nh5imget_image_info_c       FNAME(H5IMGET_IMAGE_INFO_C)
-#   define nh5imis_image_c             FNAME(H5IMIS_IMAGE_C)
-#   define nh5immake_palette_c         FNAME(H5IMMAKE_PALETTE_C)
-#   define nh5imlink_palette_c         FNAME(H5IMLINK_PALETTE_C)
-#   define nh5imunlink_palette_c       FNAME(H5IMUNLINK_PALETTE_C)
-#   define nh5imget_npalettes_c        FNAME(H5IMGET_NPALETTES_C)
-#   define nh5imget_palette_info_c     FNAME(H5IMGET_PALETTE_INFO_C)
-#   define nh5imget_palette_c          FNAME(H5IMGET_PALETTE_C)
-#   define nh5imis_palette_c           FNAME(H5IMIS_PALETTE_C)
-
-	/*-------------------------------------------------------------------------
- * Table
- *-------------------------------------------------------------------------
- */
-#   define nh5tbmake_table_c           FNAME(H5TBMAKE_TABLE_C)
-#   define nh5tbwrite_field_name_c     FNAME(H5TBWRITE_FIELD_NAME_C)
-#   define nh5tbread_field_name_c      FNAME(H5TBREAD_FIELD_NAME_C)
-#   define nh5tbwrite_field_index_c    FNAME(H5TBWRITE_FIELD_INDEX_C)
-#   define nh5tbread_field_index_c     FNAME(H5TBREAD_FIELD_INDEX_C)
-#   define nh5tbinsert_field_c         FNAME(H5TBINSERT_FIELD_C)
-#   define nh5tbdelete_field_c         FNAME(H5TBDELETE_FIELD_C)
-#   define nh5tbget_table_info_c       FNAME(H5TBGET_TABLE_INFO_C)
-#   define nh5tbget_field_info_c       FNAME(H5TBGET_FIELD_INFO_C)
-
-
-
-
-
-#else  /* !DF_CAPFNAMES */
-
-#   define nh5ltmake_dataset_c         FNAME(h5ltmake_dataset_c)
-#   define nh5ltread_dataset_c         FNAME(h5ltread_dataset_c)
-#   define nh5ltmake_dataset_string_c  FNAME(h5ltmake_dataset_string_c)
-#   define nh5ltread_dataset_string_c  FNAME(h5ltread_dataset_string_c)
-
-#   define nh5ltset_attribute_int_c    FNAME(h5ltset_attribute_int_c)
-#   define nh5ltset_attribute_float_c  FNAME(h5ltset_attribute_float_c)
-#   define nh5ltset_attribute_double_c FNAME(h5ltset_attribute_double_c)
-#   define nh5ltset_attribute_string_c FNAME(h5ltset_attribute_string_c)
-
-#   define nh5ltget_attribute_int_c    FNAME(h5ltget_attribute_int_c)
-#   define nh5ltget_attribute_float_c  FNAME(h5ltget_attribute_float_c)
-#   define nh5ltget_attribute_double_c FNAME(h5ltget_attribute_double_c)
-#   define nh5ltget_attribute_string_c FNAME(h5ltget_attribute_string_c)
-
-#   define nh5ltget_dataset_ndims_c    FNAME(h5ltget_dataset_ndims_c)
-#   define nh5ltfind_dataset_c         FNAME(h5ltfind_dataset_c)
-#   define nh5ltget_dataset_info_c     FNAME(h5ltget_dataset_info_c)
-
-#   define nh5ltget_attribute_ndims_c  FNAME(h5ltget_attribute_ndims_c)
-#   define nh5ltget_attribute_info_c   FNAME(h5ltget_attribute_info_c)
-
-/*-------------------------------------------------------------------------
- * Image
- *-------------------------------------------------------------------------
- */
-#   define nh5immake_image_8bit_c      FNAME(h5immake_image_8bit_c)
-#   define nh5immake_image_24bit_c     FNAME(h5immake_image_24bit_c)
-#   define nh5imread_image_c           FNAME(h5imread_image_c)
-#   define nh5imget_image_info_c       FNAME(h5imget_image_info_c)
-#   define nh5imis_image_c             FNAME(h5imis_image_c)
-#   define nh5immake_palette_c         FNAME(h5immake_palette_c)
-#   define nh5imlink_palette_c         FNAME(h5imlink_palette_c)
-#   define nh5imunlink_palette_c       FNAME(h5imunlink_palette_c)
-#   define nh5imget_npalettes_c        FNAME(h5imget_npalettes_c)
-#   define nh5imget_palette_info_c     FNAME(h5imget_palette_info_c)
-#   define nh5imget_palette_c          FNAME(h5imget_palette_c)
-#   define nh5imis_palette_c           FNAME(h5imis_palette_c)
+#   define nh5immake_image_8bit_c      FC_FUNC_(h5immake_image_8bit_c, H5IMMAKE_IMAGE_8BIT_C)
+#   define nh5immake_image_24bit_c     FC_FUNC_(h5immake_image_24bit_c, H5IMMAKE_IMAGE_24BIT_C)
+#   define nh5imread_image_c           FC_FUNC_(h5imread_image_c, H5IMREAD_IMAGE_C)
+#   define nh5imget_image_info_c       FC_FUNC_(h5imget_image_info_c, H5IMGET_IMAGE_INFO_C)
+#   define nh5imis_image_c             FC_FUNC_(h5imis_image_c, H5IMIS_IMAGE_C)
+#   define nh5immake_palette_c         FC_FUNC_(h5immake_palette_c, H5IMMAKE_PALETTE_C)
+#   define nh5imlink_palette_c         FC_FUNC_(h5imlink_palette_c, H5IMLINK_PALETTE_C)
+#   define nh5imunlink_palette_c       FC_FUNC_(h5imunlink_palette_c, H5IMUNLINK_PALETTE_C)
+#   define nh5imget_npalettes_c        FC_FUNC_(h5imget_npalettes_c, H5IMGET_NPALETTES_C)
+#   define nh5imget_palette_info_c     FC_FUNC_(h5imget_palette_info_c, H5IMGET_PALETTE_INFO_C)
+#   define nh5imget_palette_c          FC_FUNC_(h5imget_palette_c, H5IMGET_PALETTE_C)
+#   define nh5imis_palette_c           FC_FUNC_(h5imis_palette_c, H5IMIS_PALETTE_C)
 
 /*-------------------------------------------------------------------------
  * Table
  *-------------------------------------------------------------------------
  */
-#   define nh5tbmake_table_c           FNAME(h5tbmake_table_c)
-#   define nh5tbwrite_field_name_c     FNAME(h5tbwrite_field_name_c)
-#   define nh5tbread_field_name_c      FNAME(h5tbread_field_name_c)
-#   define nh5tbwrite_field_index_c    FNAME(h5tbwrite_field_index_c)
-#   define nh5tbread_field_index_c     FNAME(h5tbread_field_index_c)
-#   define nh5tbinsert_field_c         FNAME(h5tbinsert_field_c)
-#   define nh5tbdelete_field_c         FNAME(h5tbdelete_field_c)
-#   define nh5tbget_table_info_c       FNAME(h5tbget_table_info_c)
-#   define nh5tbget_field_info_c       FNAME(h5tbget_field_info_c)
-
-
-
-
-
-
-
-
-
-
-
-#endif /* DF_CAPFNAMES */
-#endif /* H5Ff90_FNAMES */
+#   define nh5tbmake_table_c           FC_FUNC_(h5tbmake_table_c, H5TBMAKE_TABLE_C)
+#   define nh5tbwrite_field_name_c     FC_FUNC_(h5tbwrite_field_name_c, H5TBWRITE_FIELD_NAME_C)
+#   define nh5tbread_field_name_c      FC_FUNC_(h5tbread_field_name_c, H5TBREAD_FIELD_NAME_C)
+#   define nh5tbwrite_field_index_c    FC_FUNC_(h5tbwrite_field_index_c, H5TBWRITE_FIELD_INDEX_C)
+#   define nh5tbread_field_index_c     FC_FUNC_(h5tbread_field_index_c, H5TBREAD_FIELD_INDEX_C)
+#   define nh5tbinsert_field_c         FC_FUNC_(h5tbinsert_field_c, H5TBINSERT_FIELD_C)
+#   define nh5tbdelete_field_c         FC_FUNC_(h5tbdelete_field_c, H5TBDELETE_FIELD_C)
+#   define nh5tbget_table_info_c       FC_FUNC_(h5tbget_table_info_c, H5TBGET_TABLE_INFO_C)
+#   define nh5tbget_field_info_c       FC_FUNC_(h5tbget_field_info_c, H5TBGET_FIELD_INFO_C)
 
 H5_DLL 
 int_f
