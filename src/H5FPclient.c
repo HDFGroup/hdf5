@@ -69,11 +69,12 @@ static herr_t H5FP_dump_to_file(H5FD_t *file, H5FP_read *sap_read);
  */
 herr_t
 H5FP_request_open(const char *mdata, int md_size, H5FP_obj_t obj_type,
-                  haddr_t maxaddr, unsigned *file_id, unsigned *req_id)
+                  MPI_Offset maxaddr, unsigned *file_id, unsigned *req_id)
 {
     H5FP_request req;
     MPI_Status mpi_status;
-    int ret_value = SUCCEED, mrc;
+    int mrc, my_rank;
+    int ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FP_request_open, FAIL);
 
@@ -84,7 +85,10 @@ H5FP_request_open(const char *mdata, int md_size, H5FP_obj_t obj_type,
 
     HDmemset(&mpi_status, 0, sizeof(MPI_Status));
 
-    if (H5FP_my_rank == H5FP_capt_rank) {
+    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, &my_rank)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
+
+    if ((unsigned)my_rank == H5FP_capt_rank) {
         /*
          * The captain process sends the information about the file to
          * the SAP.
@@ -92,7 +96,7 @@ H5FP_request_open(const char *mdata, int md_size, H5FP_obj_t obj_type,
         HDmemset(&req, 0, sizeof(req));
         req.req_type = H5FP_REQ_OPEN;
         req.req_id = H5FP_gen_request_id();
-        req.proc_rank = H5FP_my_rank;
+        req.proc_rank = my_rank;
         req.md_size = md_size;
         req.obj_type = obj_type;
         req.addr = maxaddr;
@@ -132,7 +136,8 @@ H5FP_request_lock(unsigned file_id, unsigned char *obj_oid,
                   H5FP_status_t *status)
 {
     H5FP_request req;
-    int ret_value = SUCCEED, mrc;
+    int mrc, my_rank;
+    int ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FP_request_lock, FAIL);
 
@@ -143,13 +148,16 @@ H5FP_request_lock(unsigned file_id, unsigned char *obj_oid,
 
     HDmemset(&req, 0, sizeof(req));
 
+    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, &my_rank)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
+
     *status = H5FP_STATUS_OK;
     req.req_type = last ? H5FP_REQ_LOCK_END : H5FP_REQ_LOCK;
     req.req_id = H5FP_gen_request_id();
     req.file_id = file_id;
     req.rw_lock = rw_lock;
     req.md_size = 0;
-    req.proc_rank = H5FP_my_rank;
+    req.proc_rank = my_rank;
     H5FP_COPY_OID(req.oid, obj_oid);
 
     if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
@@ -200,8 +208,8 @@ H5FP_request_release_lock(unsigned file_id, unsigned char *obj_oid,
                           int last, unsigned *req_id, H5FP_status_t *status)
 {
     H5FP_request req;
+    int mrc, my_rank;
     herr_t ret_value = SUCCEED;
-    int mrc;
 
     FUNC_ENTER_NOAPI(H5FP_request_release_lock, FAIL);
 
@@ -212,13 +220,16 @@ H5FP_request_release_lock(unsigned file_id, unsigned char *obj_oid,
 
     HDmemset(&req, 0, sizeof(req));
 
+    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, &my_rank)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
+
     *status = H5FP_STATUS_OK;
     H5FP_COPY_OID(req.oid, obj_oid);
     req.req_type = last ? H5FP_REQ_RELEASE_END : H5FP_REQ_RELEASE;
     req.req_id = H5FP_gen_request_id();
     req.file_id = file_id;
     req.md_size = 0;
-    req.proc_rank = H5FP_my_rank;
+    req.proc_rank = my_rank;
 
     if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS) {
@@ -269,30 +280,34 @@ done:
  */
 herr_t
 H5FP_request_read_metadata(H5FD_t *file, unsigned file_id, H5FD_mem_t mem_type,
-                           haddr_t addr, size_t size, uint8_t **buf,
-                           unsigned *req_id, H5FP_status_t *status)
+                           MPI_Offset addr, size_t size, uint8_t **buf,
+                           int *bytes_read, unsigned *req_id, H5FP_status_t *status)
 {
     H5FP_request req;
     H5FP_read sap_read;     /* metadata info read from the SAP's cache */
-    herr_t ret_value = SUCCEED;
     MPI_Status mpi_status;
-    int mrc;
+    int mrc, my_rank;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FP_request_read_metadata, FAIL);
 
     /* check args */
     assert(file);
     assert(buf);
+    assert(bytes_read);
     assert(req_id);
     assert(status);
 
     HDmemset(&req, 0, sizeof(req));
 
+    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, &my_rank)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
+
     *status = H5FP_STATUS_OK;
     req.req_type = H5FP_REQ_READ;
     req.req_id = H5FP_gen_request_id();
     req.file_id = file_id;
-    req.proc_rank = H5FP_my_rank;
+    req.proc_rank = my_rank;
     req.addr = addr;
 
     if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
@@ -310,6 +325,7 @@ H5FP_request_read_metadata(H5FD_t *file, unsigned file_id, H5FD_mem_t mem_type,
     switch (sap_read.status) {
     case H5FP_STATUS_OK:
         /* use the info in the H5FP_read_t structure to update the metadata */
+        *status = H5FP_STATUS_OK;
         HDmemset(&mpi_status, 0, sizeof(mpi_status));
 
         if ((mrc = MPI_Recv(*buf, (int)size, MPI_BYTE, (int)H5FP_sap_rank,
@@ -317,6 +333,7 @@ H5FP_request_read_metadata(H5FD_t *file, unsigned file_id, H5FD_mem_t mem_type,
                             &mpi_status)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 
+        *bytes_read = size;
         break;
     case H5FP_STATUS_DUMPING:
         /*
@@ -327,21 +344,18 @@ H5FP_request_read_metadata(H5FD_t *file, unsigned file_id, H5FD_mem_t mem_type,
         if (H5FP_dump_to_file(file, &sap_read) == FAIL)
             HGOTO_ERROR(H5E_FPHDF5, H5E_WRITEERROR, FAIL,
                         "can't write metadata update to file");
-
         /* FALLTHROUGH */
     case H5FP_STATUS_MDATA_NOT_CACHED:
         /*
          * The metadata wasn't in the SAP's cache. Should read from disk
          * now.
          */
-        H5FD_read(file, mem_type, H5P_DATASET_XFER_DEFAULT, addr, size, buf);
+        *status = H5FP_STATUS_MDATA_NOT_CACHED;
         break;
     default:
         *status = sap_read.status;
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCHANGE, FAIL, "can't write metadata to server");
     }
-
-    *status = H5FP_STATUS_OK;
 
 done:
     *req_id = req.req_id;
@@ -364,17 +378,16 @@ done:
  * Modifications:
  */
 herr_t
-H5FP_request_write_metadata(H5FD_t *file, unsigned file_id, uint8_t *obj_oid,
-                            H5AC_subid_t type_id, haddr_t addr, int mdata_size,
-                            const char *mdata, unsigned *req_id,
-                            H5FP_status_t *status)
+H5FP_request_write_metadata(H5FD_t *file, unsigned file_id, H5FD_mem_t mem_type,
+                            uint8_t *obj_oid, MPI_Offset addr, int mdata_size,
+                            const char *mdata, unsigned *req_id, H5FP_status_t *status)
 {
     H5FP_reply sap_reply;
     H5FP_read sap_read;     /* metadata info read from the SAP's cache */
     MPI_Status mpi_status;
     H5FP_request req;
+    int mrc, my_rank;
     herr_t ret_value = SUCCEED;
-    int mrc;
 
     FUNC_ENTER_NOAPI(H5FP_request_change, FAIL);
 
@@ -387,12 +400,15 @@ H5FP_request_write_metadata(H5FD_t *file, unsigned file_id, uint8_t *obj_oid,
 
     HDmemset(&req, 0, sizeof(req));
 
+    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, &my_rank)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
+
     H5FP_COPY_OID(req.oid, obj_oid);
     req.req_type = H5FP_REQ_WRITE;
     req.req_id = H5FP_gen_request_id();
-    req.proc_rank = H5FP_my_rank;
+    req.proc_rank = my_rank;
     req.file_id = file_id;
-    req.type_id = type_id;
+    req.mem_type = mem_type;
     req.addr = addr;
     req.md_size = mdata_size;
 
@@ -473,7 +489,8 @@ H5FP_request_close(H5FD_t *file, unsigned file_id, unsigned *req_id,
     H5FP_read sap_read;     /* metadata info read from the SAP's cache */
     H5FP_request req;
     MPI_Status mpi_status;
-    int ret_value = SUCCEED, mrc;
+    int mrc, my_rank;
+    int ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FP_request_close, FAIL);
 
@@ -484,10 +501,13 @@ H5FP_request_close(H5FD_t *file, unsigned file_id, unsigned *req_id,
 
     HDmemset(&req, 0, sizeof(req));
 
+    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, &my_rank)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
+
     req.req_type = H5FP_REQ_CLOSE;
     req.req_id = H5FP_gen_request_id();
     req.file_id = file_id;
-    req.proc_rank = H5FP_my_rank;
+    req.proc_rank = my_rank;
 
     if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
@@ -577,6 +597,7 @@ H5FP_dump_to_file(H5FD_t *file, H5FP_read *sap_read)
 
     /* check args */
     assert(file);
+    assert(sap_read);
 
     /*
      * At this point, we've received a message saying that the SAP is

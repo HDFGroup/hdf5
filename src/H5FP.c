@@ -39,8 +39,6 @@ MPI_Comm H5FP_SAP_BARRIER_COMM; /* Comm if you want to do a barrier     */
 
 unsigned H5FP_sap_rank;         /* The rank of the SAP: Supplied by user*/
 unsigned H5FP_capt_rank;        /* The rank which tells SAP of opens    */
-unsigned H5FP_my_rank;          /* Rank of this process in the COMM     */
-int H5FP_comm_size;             /* Size of the COMM                     */
 
 /* local functions */
 static herr_t H5FP_commit_sap_datatypes(void);
@@ -65,6 +63,7 @@ herr_t
 H5FPinit(MPI_Comm comm, int sap_rank)
 {
     MPI_Group sap_group = MPI_GROUP_NULL, sap_barrier_group = MPI_GROUP_NULL;
+    int mrc, comm_size, my_rank;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5FPinit, FAIL);
@@ -99,7 +98,7 @@ H5FPinit(MPI_Comm comm, int sap_rank)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_create failed");
 
     /* Get the size of all the processes (including the SAP) */
-    if (MPI_Comm_size(H5FP_SAP_COMM, &H5FP_comm_size) != MPI_SUCCESS)
+    if (MPI_Comm_size(H5FP_SAP_COMM, &comm_size) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_size failed");
 
     /*
@@ -107,18 +106,18 @@ H5FPinit(MPI_Comm comm, int sap_rank)
      * will tell the SAP that files have been opened or closed. We mod
      * it so that we don't go over the size of the communicator.
      */
-    H5FP_capt_rank = (H5FP_sap_rank + 1) % H5FP_comm_size;
+    H5FP_capt_rank = (H5FP_sap_rank + 1) % comm_size;
 
     /* Get this processes rank */
-    if (MPI_Comm_rank(H5FP_SAP_COMM, (int *)&H5FP_my_rank) != MPI_SUCCESS)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_rank failed");
+    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, (int *)&my_rank)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
 
     /* Create the MPI types used for communicating with the SAP */
     if (H5FP_commit_sap_datatypes() != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "H5FP_commit_sap_datatypes failed");
 
     /* Go loop, if we are the SAP */
-    if (H5FP_my_rank == H5FP_sap_rank)
+    if ((unsigned)my_rank == H5FP_sap_rank)
         H5FP_sap_receive_loop();
 
     /* Fall through and return to user, if not SAP */
@@ -170,13 +169,18 @@ done:
 herr_t
 H5FPfinalize(void)
 {
+    int mrc, my_rank;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5FPfinalize, FAIL);
     H5TRACE0("e","");
 
+    /* Get this processes rank */
+    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, (int *)&my_rank)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
+
     /* Stop the SAP */
-    if (H5FP_my_rank != H5FP_sap_rank)
+    if ((unsigned)my_rank != H5FP_sap_rank)
         if (H5FP_request_sap_stop() < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Error stopping the SAP");
 
@@ -305,7 +309,7 @@ H5FP_commit_sap_datatypes(void)
     FUNC_ENTER_NOAPI(H5FP_commit_sap_datatypes, FAIL);
 
     /* Commit the H5FP_request_t datatype */
-    block_length[0] = 9;
+    block_length[0] = 8;
     block_length[1] = 1;
     block_length[2] = sizeof(req.oid);
     old_types[0] = MPI_INT;
@@ -338,7 +342,7 @@ H5FP_commit_sap_datatypes(void)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_commit failed");
 
     /* Commit the H5FP_read_t datatype */
-    block_length[0] = 6;
+    block_length[0] = 5;
     block_length[1] = 1;
     old_types[0] = MPI_INT;
     old_types[1] = HADDR_AS_MPI_TYPE;
@@ -371,14 +375,19 @@ static herr_t
 H5FP_request_sap_stop(void)
 {
     H5FP_request req;
+    int mrc, my_rank;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FP_request_sap_stop, FAIL);
 
+    /* Get this processes rank */
+    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, (int *)&my_rank)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
+
     HDmemset(&req, 0, sizeof(req));
     req.req_type = H5FP_REQ_STOP;
     req.req_id = 0;
-    req.proc_rank = H5FP_my_rank;
+    req.proc_rank = my_rank;
 
     if (MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
                  H5FP_TAG_REQUEST, H5FP_SAP_COMM) != MPI_SUCCESS)

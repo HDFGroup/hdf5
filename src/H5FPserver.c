@@ -53,8 +53,7 @@ typedef struct {
 } H5FP_object_lock;
 
 typedef struct {
-    H5FD_mem_t      mem_type;   /* type of memory updated, if req'd         */
-    H5AC_subid_t    type_id;    /* id of the type of this metadata          */
+    H5FD_mem_t      mem_type;   /* type of memory updated                   */
     H5FP_obj_t      obj_type;   /* type of object modified                  */
     haddr_t         addr;       /* address of the metadata                  */
     unsigned        md_size;    /* size of the metadata                     */
@@ -100,7 +99,8 @@ static herr_t H5FP_remove_object_lock_from_list(H5FP_file_info *info,
                                                 H5FP_object_lock *ol);
 
     /* local file information handling functions */
-static herr_t H5FP_add_new_file_info_to_list(unsigned file_id, char *filename, haddr_t maxaddr);
+static herr_t H5FP_add_new_file_info_to_list(unsigned file_id, char *filename,
+                                             MPI_Offset maxaddr);
 static int H5FP_file_info_cmp(H5FP_file_info *k1, H5FP_file_info *k2, int cmparg);
 static H5FP_file_info *H5FP_new_file_info_node(unsigned file_id, char *filename);
 static H5FP_file_info *H5FP_find_file_info(unsigned file_id);
@@ -110,8 +110,7 @@ static herr_t H5FP_free_file_info_node(H5FP_file_info *info);
     /* local file modification structure handling functions */
 static H5FP_mdata_mod *H5FP_new_file_mod_node(unsigned rank,
                                               H5FD_mem_t mem_type,
-                                              H5AC_subid_t type_id,
-                                              haddr_t addr,
+                                              MPI_Offset addr,
                                               unsigned md_size,
                                               char *metadata);
 static herr_t H5FP_free_mod_node(H5FP_mdata_mod *info);
@@ -149,9 +148,14 @@ herr_t
 H5FP_sap_receive_loop(void)
 {
     herr_t ret_value = SUCCEED;
+    int comm_size;
     int stop = 0;
 
     FUNC_ENTER_NOAPI(H5FP_sap_receive_loop, FAIL);
+
+    /* Get the size of the SAP communicator */
+    if (MPI_Comm_size(H5FP_SAP_COMM, &comm_size) != MPI_SUCCESS)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_size failed");
 
     /* Create the file structure tree. */
     if ((file_info_tree = H5TB_dmake((H5TB_cmp_t)H5FP_file_info_cmp,
@@ -189,7 +193,7 @@ H5FP_sap_receive_loop(void)
             hrc = H5FP_sap_handle_close_request(req);
             break;
         case H5FP_REQ_STOP:
-            if (++stop == H5FP_comm_size - 1)
+            if (++stop == comm_size - 1)
                 goto done;
             break;
         default:
@@ -421,8 +425,7 @@ H5FP_free_mod_node(H5FP_mdata_mod *info)
  */
 static H5FP_mdata_mod *
 H5FP_new_file_mod_node(unsigned UNUSED rank, H5FD_mem_t mem_type,
-                       H5AC_subid_t type_id, haddr_t addr, unsigned md_size,
-                       char *metadata)
+                       MPI_Offset addr, unsigned md_size, char *metadata)
 {
     H5FP_mdata_mod *ret_value = NULL;
 
@@ -433,7 +436,6 @@ H5FP_new_file_mod_node(unsigned UNUSED rank, H5FD_mem_t mem_type,
 
     ret_value->mem_type = mem_type;
     ret_value->addr = addr;
-    ret_value->type_id = type_id;
     ret_value->md_size = md_size;
     ret_value->metadata = metadata;
 
@@ -454,8 +456,8 @@ done:
  */
 static herr_t
 H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type, 
-                          H5AC_subid_t type_id, haddr_t addr, unsigned rank,
-                          unsigned md_size, char *metadata)
+                          MPI_Offset addr, unsigned rank, unsigned md_size,
+                          char *metadata)
 {
     H5FP_mdata_mod *fm, mod;
     H5TB_NODE *node;
@@ -478,7 +480,7 @@ H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type,
         fm->metadata = metadata;
         fm->md_size = md_size;
         ret_value = SUCCEED;
-    } else if ((fm = H5FP_new_file_mod_node(rank, mem_type, type_id, addr,
+    } else if ((fm = H5FP_new_file_mod_node(rank, mem_type, addr,
                                             md_size, metadata)) != NULL) {
         if (!H5TB_dins(info->mod_tree, (void *)fm, NULL))
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
@@ -607,7 +609,7 @@ H5FP_find_file_info(unsigned file_id)
  * Modifications:
  */
 static herr_t
-H5FP_add_new_file_info_to_list(unsigned file_id, char *filename, haddr_t maxaddr)
+H5FP_add_new_file_info_to_list(unsigned file_id, char *filename, MPI_Offset maxaddr)
 {
     H5FP_file_info *info;
     herr_t ret_value = FAIL;
@@ -737,7 +739,6 @@ H5FP_dump(H5FP_file_info *info, unsigned to, unsigned req_id, unsigned file_id)
         H5FP_mdata_mod *m = (H5FP_mdata_mod *)node->data;
 
         r.mem_type = m->mem_type;
-        r.type_id = m->type_id;
         r.addr = m->addr;
         r.md_size = m->md_size;
 
@@ -754,7 +755,6 @@ H5FP_dump(H5FP_file_info *info, unsigned to, unsigned req_id, unsigned file_id)
 
     /* Tell the receiving process that we're finished... */
     r.mem_type = 0;
-    r.type_id = 0;
     r.addr = 0;
     r.md_size = 0;
     r.status = H5FP_STATUS_DUMPING_FINISHED;
@@ -1171,7 +1171,6 @@ H5FP_sap_handle_read_request(H5FP_request req)
     r.req_id = req.req_id;
     r.file_id = req.file_id;
     r.md_size = 0;
-    r.type_id = 0;
     r.addr = 0;
     r.status = H5FP_STATUS_MDATA_NOT_CACHED;
 
@@ -1197,7 +1196,6 @@ H5FP_sap_handle_read_request(H5FP_request req)
             H5FP_mdata_mod *fm = (H5FP_mdata_mod *)node->data;
 
             r.md_size = fm->md_size;
-            r.type_id = fm->type_id;
             r.addr = fm->addr;
             r.status = H5FP_STATUS_OK;
             metadata = fm->metadata;    /* Sent out in a separate message */
@@ -1276,9 +1274,8 @@ H5FP_sap_handle_write_request(H5FP_request req, char *mdata, unsigned md_size)
             HGOTO_DONE(FAIL);
         }
 
-        if (H5FP_add_file_mod_to_list(info, req.mem_type, req.type_id,
-                                      req.addr, req.proc_rank, md_size,
-                                      mdata) != SUCCEED) {
+        if (H5FP_add_file_mod_to_list(info, req.mem_type, req.addr,
+                                      req.proc_rank, md_size, mdata) != SUCCEED) {
             exit_state = H5FP_STATUS_OOM;
             HGOTO_DONE(FAIL);
         }
@@ -1311,6 +1308,8 @@ H5FP_sap_handle_close_request(H5FP_request req)
     FUNC_ENTER_NOINIT(H5FP_sap_handle_close_request);
 
     if ((info = H5FP_find_file_info(req.file_id)) != NULL) {
+        int comm_size;
+
         if (info->num_mods) {
             /*
              * If there are any modifications not written out yet, dump
@@ -1330,7 +1329,11 @@ H5FP_sap_handle_close_request(H5FP_request req)
             }
         }
 
-        if (++info->closing == H5FP_comm_size - 1)
+        /* Get the size of the SAP communicator */
+        if (MPI_Comm_size(H5FP_SAP_COMM, &comm_size) != MPI_SUCCESS)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_size failed");
+
+        if (++info->closing == comm_size - 1)
             /* all processes have closed the file - remove it from list */
             if (H5FP_remove_file_id_from_list(req.file_id) != SUCCEED) {
                 exit_state = H5FP_STATUS_BAD_FILE_ID;
