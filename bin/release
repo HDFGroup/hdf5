@@ -31,7 +31,7 @@
 
 # Defaults
 DEST=releases
-VERS=`bin/h5vers`
+VERS=`perl bin/h5vers`
 test "$VERS" || exit 1
 verbose=yes
 
