@@ -74,6 +74,7 @@ int main(int argc, const char *argv[])
      * If argv[0] is greater than 6 characters AND the last 7 equal "ph5diff" we run parallel
      * In all other cases, we run serial */
 
+/*printf("argv[0]=%s\n", argv[0]);*/
     if( (strlen(argv[0]) > strlen("h5diff")) && (strcmp(argv[0] + (strlen(argv[0]) - strlen("ph5diff")), "ph5diff") == 0) )
 	g_Parallel = 1;
 
@@ -291,7 +292,7 @@ int main(int argc, const char *argv[])
 	MPI_Recv(filenames, 1024*2, MPI_CHAR, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
 	if(Status.MPI_TAG == MPI_TAG_PARALLEL)
 	{
-	    printf("We're in parallel mode...opening the files\n");
+/*	    printf("We're in parallel mode...opening the files\n");*/
 
 	    /* disable error reporting */
 	    H5E_BEGIN_TRY
@@ -345,7 +346,7 @@ int main(int argc, const char *argv[])
 		else if(Status.MPI_TAG == MPI_TAG_END)
 		{
 		    MPI_Recv(NULL, 0, MPI_BYTE, 0, MPI_TAG_END, MPI_COMM_WORLD, &Status);
-		    printf("exiting..., task: %d\n", nID);
+/*		    printf("exiting..., task: %d\n", nID);*/
 		    break;
 		}
 		else
