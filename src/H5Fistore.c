@@ -106,8 +106,8 @@ static int		interface_initialize_g = 0;
 typedef struct H5F_rdcc_ent_t {
     hbool_t	locked;		/*entry is locked in cache		*/
     hbool_t	dirty;		/*needs to be written to disk?		*/
-    H5O_layout_t *layout;	/*the layout message			*/
-    H5O_pline_t	*pline;		/*filter pipeline message		*/
+    H5O_layout_t layout;	/*the layout message			*/
+    H5O_pline_t	pline;		/*filter pipeline message		*/
     hssize_t	offset[H5O_LAYOUT_NDIMS]; /*chunk name			*/
     size_t	rd_count;	/*bytes remaining to be read		*/
     size_t	wr_count;	/*bytes remaining to be written		*/
@@ -936,17 +936,16 @@ H5F_istore_flush_entry(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache,
     if (ent->dirty) {
         H5F_istore_ud1_t 	udata;		/*pass through B-tree		*/
 
-        udata.mesg = *(ent->layout);
+        udata.mesg = ent->layout;
         udata.key.filter_mask = 0;
         udata.addr = HADDR_UNDEF;
         udata.key.nbytes = ent->chunk_size;
-        for (u=0; u<ent->layout->ndims; u++) {
+        for (u=0; u<ent->layout.ndims; u++)
             udata.key.offset[u] = ent->offset[u];
-        }
         alloc = ent->alloc_size;
 
         /* Should the chunk be filtered before writing it to disk? */
-        if (ent->pline && ent->pline->nfilters) {
+        if (ent->pline.nfilters) {
             if (!reset) {
                 /*
                  * Copy the chunk to a new buffer before running it through
@@ -968,7 +967,7 @@ H5F_istore_flush_entry(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache,
                 point_of_no_return = TRUE;
                 ent->chunk = NULL;
             }
-            if (H5Z_pipeline(ent->pline, 0, &(udata.key.filter_mask), dxpl_cache->err_detect, 
+            if (H5Z_pipeline(&ent->pline, 0, &(udata.key.filter_mask), dxpl_cache->err_detect, 
                              dxpl_cache->filter_cb, &(udata.key.nbytes), &alloc, &buf)<0) {
                 HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL,
                     "output pipeline failed");
@@ -979,7 +978,7 @@ H5F_istore_flush_entry(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache,
          * Create the chunk it if it doesn't exist, or reallocate the chunk if
          * its size changed.  Then write the data into the file.
          */
-        if (H5B_insert(f, dxpl_id, H5B_ISTORE, ent->layout->addr, &udata)<0)
+        if (H5B_insert(f, dxpl_id, H5B_ISTORE, ent->layout.addr, &udata)<0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to allocate chunk");
         if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, dxpl_id, buf)<0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file");
@@ -992,11 +991,11 @@ H5F_istore_flush_entry(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache,
     /* Reset, but do not free or removed from list */
     if (reset) {
         point_of_no_return = FALSE;
-        ent->layout = H5O_free(H5O_LAYOUT_ID, ent->layout);
+        H5O_reset(H5O_LAYOUT_ID, &ent->layout);
         if (buf==ent->chunk) buf = NULL;
         if(ent->chunk!=NULL)
-            ent->chunk = H5F_istore_chunk_xfree(ent->chunk,ent->pline);
-        ent->pline = H5O_free(H5O_PLINE_ID, ent->pline);
+            ent->chunk = H5F_istore_chunk_xfree(ent->chunk,&ent->pline);
+        H5O_reset(H5O_PLINE_ID, &ent->pline);
     }
     
 done:
@@ -1011,10 +1010,10 @@ done:
      * list.
      */
     if (ret_value<0 && point_of_no_return) {
-        ent->layout = H5O_free(H5O_LAYOUT_ID, ent->layout);
+        H5O_reset(H5O_LAYOUT_ID, &ent->layout);
         if(ent->chunk)
-            ent->chunk = H5F_istore_chunk_xfree(ent->chunk,ent->pline);
-        ent->pline = H5O_free(H5O_PLINE_ID, ent->pline);
+            ent->chunk = H5F_istore_chunk_xfree(ent->chunk,&ent->pline);
+        H5O_reset(H5O_PLINE_ID, &ent->pline);
     }
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -1058,10 +1057,10 @@ H5F_istore_preempt(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, 
     }
     else {
         /* Don't flush, just free chunk */
-	ent->layout = H5O_free(H5O_LAYOUT_ID, ent->layout);
+	H5O_reset(H5O_LAYOUT_ID, &ent->layout);
 	if(ent->chunk != NULL)
-	    ent->chunk = H5F_istore_chunk_xfree(ent->chunk,ent->pline);
-	ent->pline = H5O_free(H5O_PLINE_ID, ent->pline);
+	    ent->chunk = H5F_istore_chunk_xfree(ent->chunk,&ent->pline);
+	H5O_reset(H5O_PLINE_ID, &ent->pline);
     }
 
     /* Unlink from list */
@@ -1383,9 +1382,9 @@ H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, con
         idx=H5F_HASH(f,temp_idx);
         ent = rdcc->slot[idx];
         
-        if (ent && layout->ndims==ent->layout->ndims &&
-                H5F_addr_eq(layout->addr, ent->layout->addr)) {
-            for (u=0, found=TRUE; u<ent->layout->ndims; u++) {
+        if (ent && layout->ndims==ent->layout.ndims &&
+                H5F_addr_eq(layout->addr, ent->layout.addr)) {
+            for (u=0, found=TRUE; u<ent->layout.ndims; u++) {
                 if (offset[u]!=ent->offset[u]) {
                     found = FALSE;
                     break;
@@ -1445,10 +1444,12 @@ H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, con
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk");
             if (H5F_block_read(f, H5FD_MEM_DRAW, chunk_addr, udata->key.nbytes, dxpl_id, chunk)<0)
                 HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk");
-            if (H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata->key.filter_mask), dxpl_cache->err_detect, 
-                     dxpl_cache->filter_cb, &(udata->key.nbytes), &chunk_alloc, &chunk)<0) {
-                HGOTO_ERROR(H5E_PLINE, H5E_READERROR, NULL, "data pipeline read failed");
-            }
+
+            if (pline->nfilters)
+                if (H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata->key.filter_mask), dxpl_cache->err_detect, 
+                         dxpl_cache->filter_cb, &(udata->key.nbytes), &chunk_alloc, &chunk)<0) {
+                    HGOTO_ERROR(H5E_PLINE, H5E_READERROR, NULL, "data pipeline read failed");
+                }
             rdcc->nmisses++;
         } else {
             H5D_fill_value_t	fill_status;
@@ -1509,8 +1510,8 @@ H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, con
         ent->dirty = FALSE;
         ent->chunk_size = chunk_size;
         ent->alloc_size = chunk_size;
-        ent->layout = H5O_copy(H5O_LAYOUT_ID, layout, NULL);
-        ent->pline = H5O_copy(H5O_PLINE_ID, pline, NULL);
+        H5O_copy(H5O_LAYOUT_ID, layout, &ent->layout);
+        H5O_copy(H5O_PLINE_ID, pline, &ent->pline);
         for (u=0; u<layout->ndims; u++)
             ent->offset[u] = offset[u];
         ent->rd_count = chunk_size;
@@ -1646,8 +1647,8 @@ H5F_istore_unlock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
 
             HDmemset (&x, 0, sizeof x);
             x.dirty = TRUE;
-            x.layout = H5O_copy (H5O_LAYOUT_ID, layout, NULL);
-            x.pline = H5O_copy (H5O_PLINE_ID, pline, NULL);
+            H5O_copy (H5O_LAYOUT_ID, layout, &x.layout);
+            H5O_copy (H5O_PLINE_ID, pline, &x.pline);
             for (u=0; u<layout->ndims; u++)
                 x.offset[u] = offset[u];
             assert(layout->chunk_size>0);
@@ -2328,8 +2329,8 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             /* Look for chunk in cache */
             for(ent = rdcc->head; ent && !chunk_exists; ent = ent->next) {
                 /* Make certain we are dealing with the correct B-tree, etc */
-                if (layout->ndims==ent->layout->ndims &&
-                        H5F_addr_eq(layout->addr, ent->layout->addr)) {
+                if (layout->ndims==ent->layout.ndims &&
+                        H5F_addr_eq(layout->addr, ent->layout.addr)) {
 
                     /* Assume a match */
                     chunk_exists = 1;
@@ -2546,10 +2547,10 @@ H5F_istore_prune_by_extent(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
 	next = ent->next;
 
         /* Make certain we are dealing with the correct B-tree, etc */
-        if (layout->ndims==ent->layout->ndims &&
-                H5F_addr_eq(layout->addr, ent->layout->addr)) {
+        if (layout->ndims==ent->layout.ndims &&
+                H5F_addr_eq(layout->addr, ent->layout.addr)) {
             found = 0;
-            for(u = 0; u < ent->layout->ndims - 1; u++) {
+            for(u = 0; u < ent->layout.ndims - 1; u++) {
                 if((hsize_t)ent->offset[u] > curr_dims[u]) {
                     found = 1;
                     break;
@@ -2560,7 +2561,7 @@ H5F_istore_prune_by_extent(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
 	if(found) {
 #if defined (H5F_ISTORE_DEBUG)
 	    HDfputs("cache:remove:[", stdout);
-	    for(u = 0; u < ent->layout->ndims - 1; u++) {
+	    for(u = 0; u < ent->layout.ndims - 1; u++) {
 		HDfprintf(stdout, "%s%Hd", u ? ", " : "", ent->offset[u]);
 	    }
 	    HDfputs("]\n", stdout);
@@ -2914,7 +2915,7 @@ H5F_istore_delete(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout)
             next=ent->next;
 
             /* Is the chunk to be deleted this cache entry? */
-            if(layout->addr==ent->layout->addr)
+            if(layout->addr==ent->layout.addr)
                 /* Remove entry without flushing */
             if (H5F_istore_preempt(f, &dxpl_cache, dxpl_id, ent, FALSE )<0)
                     HGOTO_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks");
