@@ -23,6 +23,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/time.h>
+#include <sys/uio.h>
+#include <unistd.h>
 
 /* our header files */
 #include "hdf5.h"

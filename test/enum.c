@@ -357,11 +357,10 @@ test_tr2(hid_t file)
  *-------------------------------------------------------------------------
  */
 static int
-test_value_dsnt_exist()
+test_value_dsnt_exist(void)
 {
 
     hid_t       datatype_id;  /* identifiers */
-    herr_t      status;
     int val;
     char nam[100];
     size_t size = 100;
