@@ -4079,7 +4079,7 @@ H5P_create_prop(const char *name, size_t size, void *def_value, void *value,
     prop->create=prp_create;
     prop->set=prp_set;
     prop->get=prp_get;
-    prop->delete=prp_delete;
+    prop->del=prp_delete;
     prop->close=prp_close;
 
     /* Reset the link to the next property */
@@ -6930,9 +6930,9 @@ static herr_t H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist");
 
     /* Pass value to 'close' callback, if it exists */
-    if(prop->delete!=NULL) {
+    if(prop->del!=NULL) {
         /* Call user's callback */
-        if((*(prop->delete))(plist_id,name,prop->value)<0)
+        if((*(prop->del))(plist_id,name,prop->value)<0)
             HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't close property value");
     } /* end if */
 
