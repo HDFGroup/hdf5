@@ -9270,8 +9270,8 @@ cat >conftest.$ac_ext <<EOF
 EOF
 
 if test -n "mpi"; then
-  saved_LDFLAGS="$LDFLAGS"
-  LDFLAGS="$LDFLAGS -lmpi"
+  saved_LIBS="$LIBS"
+  LIBS="$LIBS -lmpi"
 fi
 
 if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
@@ -9286,7 +9286,7 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   :
 
 else
-  LDFLAGS="$saved_LDFLAGS"
+  LIBS="$saved_LIBS"
   PARALLEL=no
 fi
 cd ..
@@ -9352,8 +9352,8 @@ cat >conftest.$ac_ext <<EOF
 EOF
 
 if test -n "mpio"; then
-  saved_LDFLAGS="$LDFLAGS"
-  LDFLAGS="$LDFLAGS -lmpio"
+  saved_LIBS="$LIBS"
+  LIBS="$LIBS -lmpio"
 fi
 
 if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
@@ -9368,7 +9368,7 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   :
 
 else
-  LDFLAGS="$saved_LDFLAGS"
+  LIBS="$saved_LIBS"
   PARALLEL=no
 fi
 cd ..

@@ -358,15 +358,15 @@ cat >conftest.$ac_ext <<EOF
 EOF
 
 if test -n "$1"; then
-  saved_LDFLAGS="$LDFLAGS"
-  LDFLAGS="$LDFLAGS -l$1"
+  saved_LIBS="$LIBS"
+  LIBS="$LIBS -l$1"
 fi
 
 if AC_TRY_EVAL(ac_compile) && AC_TRY_EVAL(ac_link); then
   :
   [$3]
 else
-  LDFLAGS="$saved_LDFLAGS"
+  LIBS="$saved_LIBS"
   [$4]
 fi
 cd ..
