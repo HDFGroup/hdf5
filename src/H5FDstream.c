@@ -898,7 +898,7 @@ static herr_t H5FD_stream_close (H5FD_t *_stream)
   FUNC_ENTER (H5FD_stream_close, FAIL);
 
   /* Flush */
-  if (H5FD_stream_flush (_stream) != SUCCEED)
+  if (H5FD_stream_flush (_stream, TRUE) != SUCCEED)
   {
     HRETURN_ERROR (H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file");
   }
