@@ -1,4 +1,4 @@
-HDF5 version 1.6.2-post5 released on Sun Jun  6 20:56:44 CDT 2004
+HDF5 version 1.6.2-post6 released on Mon Jun 14 14:48:20 CDT 2004
 ================================================================================
 
 
@@ -64,8 +64,19 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+        - After compound datatype with variable-length string in the fields
+          is committed to file, the size is messed up when it's read back.
+          Fixed.  SLU - 2004/06/11
+        - Fixed potential file corruption bug when a block of metadata could
+          overlap the end of the internal metadata accumulator buffer and
+          the buffer would be extended correctly, but would incorrectly 
+          change it's starting address.  QAK - 2004/06/09
         - Opaque datatype with no tag failed for some operations.  Fixed.
           SLU - 2004/6/3
+        - Fixed potential file corruption bug where dimensions that were
+          too large (a value greater than could be represented in 32-bits)
+          could cause the incorrect amount of space to be allocated in a
+          file for the raw data for the dataset.  QAK - 2004/06/01
 	- Fixed dtypes "sw long double -> double" failure in QSC class
 	  machines.  AKC - 2004/4/16
 
