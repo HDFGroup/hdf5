@@ -24,11 +24,13 @@
 #include <fcntl.h>
 #include <sys/time.h>
 
-#include "zlib.h"
-
 /* our header files */
 #include "hdf5.h"
 #include "h5tools_utils.h"
+
+#ifdef H5_HAVE_ZLIB_H
+
+#include <zlib.h>
 
 #if defined(MSDOS) || defined(OS2) || defined(WIN32)
 #  include <fcntl.h>
@@ -540,3 +542,22 @@ main(int argc, char **argv)
     cleanup();
     return EXIT_SUCCESS;
 }
+
+#else /* H5_HAVE_ZLIB_H */
+
+/*
+ * Function:    main
+ * Purpose:     Dummy main() function for if HDF5 was configured without
+ *              zlib stuff.
+ * Return:      EXIT_SUCCESS
+ * Programmer:  Bill Wendling, 10. June 2002
+ * Modifications:
+ */
+int
+main(void)
+{
+    printf("No compression IO performance because zlib was not configured\n");
+    return EXIT_SUCCESS;
+}
+
+#endif  /* H5_HAVE_ZLIB_H */
