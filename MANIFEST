@@ -80,14 +80,14 @@
 ./src/H5O.c
 ./src/H5Ocont.c
 ./src/H5Ocstore.c
+./src/H5Odtype.c
 ./src/H5Oefl.c
 ./src/H5Oistore.c
 ./src/H5Oname.c
 ./src/H5Onull.c
 ./src/H5Oprivate.h
 ./src/H5Opublic.h
-./src/H5Osdim.c
-./src/H5Osdtyp.c
+./src/H5Osdspace.c
 ./src/H5Ostab.c
 ./src/H5P.c
 ./src/H5Pprivate.h
