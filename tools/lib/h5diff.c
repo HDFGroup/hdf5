@@ -19,7 +19,7 @@
 /*-------------------------------------------------------------------------
  * Function: h5diff
  *
- * Purpose: public function, can be called in an applicattion program.
+ * Purpose: public function, can be called in an application program.
  *   return differences between 2 HDF5 files
  *
  * Return: Number of differences found; -1 for error.

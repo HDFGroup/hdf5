@@ -62,8 +62,13 @@ TOOLTEST() {
       $RUNSERIAL $DUMPER_BIN $@
    ) >$actual 2>$actual_err
    cat $actual_err >> $actual
-    
-   if $CMP $expect $actual; then
+
+
+   if [ ! -f $expect ]; then
+    # Create the expect file if it doesn't yet exist.
+    echo " CREATED"
+    cp $actual $expect
+   elif $CMP $expect $actual; then
       echo " PASSED"
    else
       echo "*FAILED*"
@@ -190,6 +195,8 @@ TOOLTEST tchar1.ddl -r tchar.h5
 # test failure handling
 # Missing file name
 TOOLTEST tnofilename.ddl
+
+
 
 if test $nerrors -eq 0 ; then
    echo "All $DUMPER tests passed."

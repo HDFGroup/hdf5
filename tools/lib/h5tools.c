@@ -43,9 +43,6 @@
 
 #define ALIGN(A,Z)		((((A) + (Z) - 1) / (Z)) * (Z))
 
-#define START_OF_DATA		0x0001
-#define END_OF_DATA		0x0002
-
 /* global variables */
 int         indent;
 int         compound_data;
@@ -378,9 +375,9 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
 
     /* Terminate previous line, if any */
     if (ctx->cur_column) {
-	fputs(OPT(info->line_suf, ""), stream);
-        putc('\n', stream);
-	fputs(OPT(info->line_sep, ""), stream);
+	    fputs(OPT(info->line_suf, ""), stream);
+     putc('\n', stream);
+	    fputs(OPT(info->line_sep, ""), stream);
     }
 
     /* Calculate new prefix */
@@ -452,7 +449,7 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
  *      handled correctly.
  *-------------------------------------------------------------------------
  */
-static void
+void
 h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,
                          hsize_t nelmts, hid_t type, void *_mem)
@@ -485,7 +482,8 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
     for (i = 0; i < nelmts; i++, ctx->cur_elmt++, elmt_counter++) {
         /* Render the element */
         h5tools_str_reset(&buffer);
-            h5tools_str_sprint(&buffer, info, container, type, mem + i * size, ctx);
+
+        h5tools_str_sprint(&buffer, info, container, type, mem + i * size, ctx);
 
         if (i + 1 < nelmts || (flags & END_OF_DATA) == 0)
             h5tools_str_append(&buffer, "%s", OPT(info->elmt_suf1, ","));

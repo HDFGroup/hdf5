@@ -4838,7 +4838,6 @@ set_local_myfilter(hid_t dcpl_id, hid_t UNUSED type_id, hid_t UNUSED space_id)
  *-------------------------------------------------------------------------
  */
 
-#if 1
 
 int main(void)
 {
@@ -4903,82 +4902,3 @@ int main(void)
 
     return 0;
 }
-#else
-
-#include <stdio.h>
-#include <hdf5.h>
-
-#define COMMIT_CMPD_DATATYPE 1
-
-typedef struct cmpdStruct
-   {
-   int a;
-   int b;
-   hvl_t string;
-   } cmpdStruct;
-
-int main( void )
-{
-   hid_t h5File, cmpdType, dataSetID, dataSpaceID;
-   hsize_t dataSpaceSize;
-   cmpdStruct myStruct;
-   herr_t status;
-
-   myStruct.a = 2;
-   myStruct.b = 6;
-   myStruct.string.p = (char *)malloc( sizeof(char) * 4 );
-   myStruct.string.len = 4;
-   strcpy( myStruct.string.p, "adsf" );
-   
-
-   /* create hdf file */
-   h5File = H5Fcreate( "vlen.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-   printf ("%i\n", h5File);
-
-   /* create compound datatype */
-   cmpdType = H5Tcreate( H5T_COMPOUND, sizeof(cmpdStruct) );
-   printf ("%i\n", cmpdType);
-   status = H5Tinsert( cmpdType, "a", HOFFSET(cmpdStruct, a), H5T_NATIVE_INT );
-   printf ("%i\n", status);
-   status = H5Tinsert( cmpdType, "b", HOFFSET(cmpdStruct, b), H5T_NATIVE_INT );
-   printf ("%i\n", status);
-/*
-   status =H5Tinsert( cmpdType, "string", HOFFSET(cmpdStruct, string),
-              H5Tvlen_create( H5T_NATIVE_CHAR ) );
-*/
-
-   status =H5Tinsert( cmpdType, "string", HOFFSET(cmpdStruct, string),
-              H5Tvlen_create( H5T_C_S1 ) );
-
-   printf ("%i\n", status);
-
-#if (COMMIT_CMPD_DATATYPE == 1)
-   /* commit datatype */
-   status =H5Tcommit( h5File, "cmpdType", cmpdType );
-   printf ("%i\n", status);
-#endif
-
-   /* create dataspace ID */
-   dataSpaceID = H5Screate_simple( 1, (dataSpaceSize=1, &dataSpaceSize), NULL );
-   /* create dataset ID */
-   printf ("%i\n", dataSpaceID);
-   dataSetID = H5Dcreate( h5File, "cmpdStruct", cmpdType, dataSpaceID, H5P_DEFAULT );
-   printf ("%i\n", dataSetID);
-
-   /* write dataset */
-   status = H5Dwrite( dataSetID, cmpdType, H5S_ALL, H5S_ALL, H5P_DEFAULT, &myStruct );
-   printf ("%i\n", status);
-    
-   status = H5Tclose (cmpdType);
-   printf ("%i\n", status);
-   status = H5Dclose (dataSetID);
-   printf ("%i\n", status);
-   status = H5Sclose (dataSpaceID);
-   printf ("%i\n", status);
-   status = H5Fclose (h5File);
-   printf ("%i\n", status);
-
-   return( 0 );
-}
-
-#endif
