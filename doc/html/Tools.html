@@ -94,10 +94,6 @@ of an HDF5 file and dump those contents, in human readable form, to an
 ASCII file.&nbsp; Optionally, the contents of the file may be dumped as
 XML.</dd>
 
-<br>&nbsp;
-<p>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
 <p><tt>h5dump</tt> displays HDF5 file content on standard output. It may
 display the content of the whole HDF5 file or selected objects, which can
 be groups, datasets, links, attributes, or data types.
@@ -130,14 +126,13 @@ to do this now, one must issue the command:
 <dt>
 <b>XML Output</b></dt>
 
-<br>The <tt>--xml </tt>option selects output in XML. The XML output contains
+<dd>The <tt>--xml </tt>option selects output in XML. The XML output contains
 a complete description of the file, marked up in XML. The XML conforms
-to the HDF5 Document Type Definition (DTD), which is available at:
-<dl><a href="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd</a></dl>
+to the HDF5 Document Type Definition (DTD), which is available at
+<code><a href="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd</a></code>.
 
-<p><br>The XML output is suitable for use with other tools, including the
-<a href="http://hdf.ncsa.uiuc.edu/java-hdf5-html">HDF5
-Java Tools</a>.
+<p>The XML output is suitable for use with other tools, including the
+<a href="http://hdf.ncsa.uiuc.edu/java-hdf5-html">HDF5 Java Tools</a>.
 <br>&nbsp;
 <dt>
 <b>Options and Parameters:</b></dt>
@@ -235,6 +230,7 @@ In XML output, refer to the DTD at URI instead of the default DTD.</dd>
 The file to be examined.</dd>
 </dl>
 
+<dd>The option parameters listed above are defined as follows:
 <ul>
 <li>
 <i>P</i> - is the full path from the root group to the object.</li>
@@ -586,10 +582,6 @@ family of files into a single file, or copies one family of files to another
 while changing the size of the family members. <tt>h5repart</tt> can also
 be used to copy a single file to a single file with holes.</dd>
 
-<br>&nbsp;
-<p>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
 <p>Sizes associated with the <tt>-b</tt> and <tt>-m</tt> options may be
 suffixed with <tt>g</tt> for gigabytes, <tt>m</tt> for megabytes, or
 <tt>k</tt>
@@ -672,10 +664,6 @@ and converts all supported objects and pathways to produce an HDF4 file,
 <i>h4file</i>.
 If <i>h4file</i> already exists, it will be replaced.</dd>
 
-<br>&nbsp;
-<p>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
 <p>If only one file name is given, the name must end in <tt>.h5</tt> and
 is assumed to represent the HDF5 input file. <tt>h5toh4</tt> replaces the
 <tt>.h5</tt>
@@ -795,10 +783,6 @@ Converts an HDF4 file to an HDF5 file.</dd>
 (<tt>input.hdf</tt> for example), and writes an HDF5 file, <i>h5file</i>
 (<tt>output.h5</tt> for example), containing the same data.</dd>
 
-<br>&nbsp;
-<p>&nbsp;
-<br>&nbsp;
-<br>&nbsp;
 <p>If no output file <i>h5file</i> is specified, <tt>h4toh5</tt> uses the
 input filename to designate the output file, replacing the extension
 <tt>.hdf</tt>
