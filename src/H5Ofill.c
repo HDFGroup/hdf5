@@ -693,8 +693,63 @@ H5O_fill_new_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FIL
     assert(indent>=0);
     assert(fwidth>=0);
 
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Version:", (unsigned)H5O_FILL_VERSION);
+    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Space Allocation Time:");
+    switch(mesg->alloc_time) {
+        case H5D_ALLOC_TIME_EARLY:
+            fprintf(stream,"Early\n");
+            break;
+
+        case H5D_ALLOC_TIME_LATE:
+            fprintf(stream,"Late\n");
+            break;
+
+        case H5D_ALLOC_TIME_INCR:
+            fprintf(stream,"Incremental\n");
+            break;
+
+        default:
+            fprintf(stream,"Unknown!\n");
+            break;
+
+    } /* end switch */
+    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Fill Time:");
+    switch(mesg->fill_time) {
+        case H5D_FILL_TIME_ALLOC:
+            fprintf(stream,"On Allocation\n");
+            break;
+
+        case H5D_FILL_TIME_NEVER:
+            fprintf(stream,"Never\n");
+            break;
+
+        default:
+            fprintf(stream,"Unknown!\n");
+            break;
+
+    } /* end switch */
+    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Fill Value Defined:");
+    switch(mesg->fill_time) {
+        case H5D_FILL_VALUE_UNDEFINED:
+            fprintf(stream,"Undefined\n");
+            break;
+
+        case H5D_FILL_VALUE_DEFAULT:
+            fprintf(stream,"Default\n");
+            break;
+
+        case H5D_FILL_VALUE_USER_DEFINED:
+            fprintf(stream,"User Defined\n");
+            break;
+
+        default:
+            fprintf(stream,"Unknown!\n");
+            break;
+
+    } /* end switch */
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	      "Bytes:", mesg->size);
+	      "Size:", mesg->size);
     fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Data type:");
     if (mesg->type) {
 	H5T_debug(mesg->type, stream);

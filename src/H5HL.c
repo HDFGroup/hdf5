@@ -1170,7 +1170,7 @@ herr_t
 H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int fwidth)
 {
     H5HL_t		*h = NULL;
-    int			i, j, overlap;
+    int			i, j, overlap, free_block;
     uint8_t		c;
     H5HL_free_t		*freelist = NULL;
     uint8_t		*marker = NULL;
@@ -1198,12 +1198,12 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "Address of heap data:",
 	      h->addr);
-    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	    "Data bytes allocated on disk:",
-	    (unsigned long) (h->disk_alloc));
-    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+            h->disk_alloc);
+    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	    "Data bytes allocated in core:",
-	    (unsigned long) (h->mem_alloc));
+            h->mem_alloc);
 
     /*
      * Traverse the free list and check that all free blocks fall within
@@ -1212,11 +1212,14 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
      */
     if (NULL==(marker = H5MM_calloc(h->mem_alloc)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    for (freelist = h->freelist; freelist; freelist = freelist->next) {
-	fprintf(stream, "%*s%-*s %8lu, %8lu\n", indent, "", fwidth,
-		"Free Block (offset,size):",
-		(unsigned long) (freelist->offset),
-		(unsigned long) (freelist->size));
+    fprintf(stream, "%*sFree Blocks (offset, size):\n", indent, "");
+    for (free_block=0, freelist = h->freelist; freelist; freelist = freelist->next, free_block++) {
+        char temp_str[32];
+
+        sprintf(temp_str,"Block #%d:",free_block);
+	HDfprintf(stream, "%*s%-*s %8Zu, %8Zu\n", indent+3, "", MAX(0,fwidth-9),
+		temp_str,
+		freelist->offset, freelist->size);
 	if (freelist->offset + freelist->size > h->mem_alloc) {
 	    fprintf(stream, "***THAT FREE BLOCK IS OUT OF BOUNDS!\n");
 	} else {
@@ -1235,10 +1238,9 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
     }
 
     if (h->mem_alloc) {
-	fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	fprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth,
 		"Percent of heap used:",
-		(unsigned long) (100 * (h->mem_alloc - amount_free) /
-				 h->mem_alloc));
+		(100.0 * (double)(h->mem_alloc - amount_free) / (double)h->mem_alloc));
     }
     /*
      * Print the data in a VMS-style octal dump.

@@ -3355,14 +3355,14 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 	}
 
 	/* message name and size */
-	HDfprintf(stream, "%*s%-*s 0x%04x %s(%d)\n",
+	HDfprintf(stream, "%*s%-*s 0x%04x `%s' (%d)\n",
 		  indent + 3, "", MAX(0, fwidth - 3),
 		  "Message ID (sequence number):",
 		  (unsigned) (oh->mesg[i].type->id),
 		  oh->mesg[i].type->name,
 		  sequence[oh->mesg[i].type->id]++);
 	HDfprintf (stream, "%*s%-*s %s\n", indent+3, "", MAX (0, fwidth-3),
-		   "Shared message:",
+		   "Shared:",
 		   (oh->mesg[i].flags & H5O_FLAG_SHARED) ? "Yes" : "No");
 	HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Constant:",
