@@ -170,60 +170,82 @@ void TestInfo(const char *ProgName)
 
 
 /*
- * Parse command line information
+ * Parse command line information.
+ *      argc, argv: the usual command line argument count and strings
+ *      Summary:    Return if summary is desired. Default no.
+ *      CleanUp:    Return if Cleanup is desired. Default yes.
+ *      extra_parse: Extra Parse function provided by individual application.
+ *      	    NULL means no extra parsing needed.
+ *
+ * Modification:
+ * 	2004/08/12 Albert Cheng.  Add extra_parse feature.
  */
-void TestParseCmdLine(int argc, char *argv[], int *Summary, int *CleanUp)
+void TestParseCmdLine(int argc, char *argv[], int *Summary, int *CleanUp, int (*extra_parse)(int ac, char *av[]))
 {
-    int                     CLLoop;     /* Command Line Loop */
-    int                     Loop;
-
-    for (CLLoop = 1; CLLoop < argc; CLLoop++) {
-        if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-verbose") == 0) ||
-                                    (HDstrcmp(argv[CLLoop], "-v") == 0))) {
-	    ParseTestVerbosity(argv[CLLoop + 1]);
-        }                       /* end if */
-        if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-summary") == 0) ||
-                                (HDstrcmp(argv[CLLoop], "-s") == 0)))
+    while (argv++, --argc > 0){
+	if ((HDstrcmp(*argv, "-verbose") == 0) ||
+				(HDstrcmp(*argv, "-v") == 0)) {
+	    if (argc > 0){
+		--argc; ++argv;
+		ParseTestVerbosity(*argv);
+	    }else{
+		TestUsage();
+		exit(1);
+	    }
+	}
+	else if (((HDstrcmp(*argv, "-exclude") == 0) ||
+				    (HDstrcmp(*argv, "-x") == 0))) {
+	    if (argc > 0){
+		--argc; ++argv;
+		SetTest(*argv, SKIPTEST);
+	    }else{
+		TestUsage();
+		exit(1);
+	    }
+	}
+	else if (((HDstrcmp(*argv, "-begin") == 0) ||
+				    (HDstrcmp(*argv, "-b") == 0))) {
+	    if (argc > 0){
+		--argc; ++argv;
+		SetTest(*argv, BEGINTEST);
+	    }else{
+		TestUsage();
+		exit(1);
+	    }
+	}
+	else if (((HDstrcmp(*argv, "-only") == 0) ||
+				    (HDstrcmp(*argv, "-o") == 0))) {
+	    if (argc > 0){
+		int Loop;
+		--argc; ++argv;
+		/* Skip all tests, then activate only one. */
+		for (Loop = 0; Loop < Index; Loop++)
+		    Test[Loop].SkipFlag = 1;
+		SetTest(*argv, ONLYTEST);
+	    }else{
+		TestUsage();
+		exit(1);
+	    }
+	}
+	else if ((HDstrcmp(*argv, "-summary") == 0) || (HDstrcmp(*argv, "-s") == 0))
             *Summary = 1;
-
-        if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-help") == 0) ||
-                                (HDstrcmp(argv[CLLoop], "-h") == 0))) {
+	else if ((HDstrcmp(*argv, "-help") == 0) || (HDstrcmp(*argv, "-h") == 0)) {
             TestUsage();
             exit(0);
         }
-        if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-cleanoff") == 0) ||
-                                (HDstrcmp(argv[CLLoop], "-c") == 0)))
+	else if ((HDstrcmp(*argv, "-cleanoff") == 0) || (HDstrcmp(*argv, "-c") == 0))
             *CleanUp = 0;
+	else {
+	    /* non-standard option.  Break out. */
+	    break;
+	}
 
-        if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-exclude") == 0) ||
-                                    (HDstrcmp(argv[CLLoop], "-x") == 0))) {
-            Loop = CLLoop + 1;
-            while ((Loop < argc) && (argv[Loop][0] != '-')) {
-		SetTest(argv[Loop], SKIPTEST);
-                Loop++;
-            }                   /* end while */
-        }                       /* end if */
-        if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-begin") == 0) ||
-                                    (HDstrcmp(argv[CLLoop], "-b") == 0))) {
-            Loop = CLLoop + 1;
-            while ((Loop < argc) && (argv[Loop][0] != '-')) {
-		SetTest(argv[Loop], BEGINTEST);
-                Loop++;
-            }                   /* end while */
-        }                       /* end if */
-        if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-only") == 0) ||
-                                    (HDstrcmp(argv[CLLoop], "-o") == 0))) {
-            for (Loop = 0; Loop < Index; Loop++)
-                Test[Loop].SkipFlag = 1;
+    }
 
-            Loop = CLLoop + 1;
-            while ((Loop < argc) && (argv[Loop][0] != '-')) {
-		SetTest(argv[Loop], ONLYTEST);
-                Loop++;
-            }                   /* end while */
-        }                       /* end if */
-    }                           /* end for */
-
+    /* Call extra parsing function if provided. */
+    if (NULL != extra_parse){
+	extra_parse(argc+1, argv-1);
+    }
 }
 
 
@@ -236,7 +258,7 @@ void PerformTests(void)
 
     for (Loop = 0; Loop < Index; Loop++)
         if (Test[Loop].SkipFlag) {
-            MESSAGE(2, ("Skipping -- %s \n", Test[Loop].Description));
+            MESSAGE(2, ("Skipping -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
         } else {
             MESSAGE(2, ("Testing  -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
             MESSAGE(5, ("===============================================\n"));
@@ -384,7 +406,6 @@ TestErrPrintf(const char *format, ...)
 void SetTest(const char *testname, int action)
 {
     int Loop;
-
     switch (action){
 	case SKIPTEST:
 	    for (Loop = 0; Loop < Index; Loop++)
@@ -397,8 +418,11 @@ void SetTest(const char *testname, int action)
 	    for (Loop = 0; Loop < Index; Loop++) {
 		if (HDstrcmp(testname, Test[Loop].Name) != 0)
 		    Test[Loop].SkipFlag = 1;
-		else
+		else{
+		    /* Found it. Set it to run.  Done. */
+		    Test[Loop].SkipFlag = 0;
 		    break;
+		}
 	    }
 	    break;
 	case ONLYTEST:
@@ -406,6 +430,7 @@ void SetTest(const char *testname, int action)
 		if (HDstrcmp(testname, Test[Loop].Name) != 0)
 		    Test[Loop].SkipFlag = 1;
 		else {
+		    /* Found it. Set it to run. Break to skip the rest. */
 		    Test[Loop].SkipFlag = 0;
 		    break;
 		}
