@@ -23,6 +23,7 @@
 
 ./bin/checkapi				_DO_NOT_DISTRIBUTE_
 ./bin/checkposix			_DO_NOT_DISTRIBUTE_
+./bin/chkmanifest
 ./bin/config.guess
 ./bin/config.sub
 ./bin/config_para_ibm_sp.sh 
@@ -261,6 +262,8 @@
 ./src/H5FDpublic.h
 ./src/H5FDsec2.c
 ./src/H5FDsec2.h
+./src/H5FDstdio.c
+./src/H5FDstdio.h
 ./src/H5G.c
 ./src/H5Gent.c
 ./src/H5Gnode.c
