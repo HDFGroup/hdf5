@@ -118,6 +118,7 @@ main (void)
    aid3  = H5Screate(H5S_SCALAR);
    atype = H5Tcopy(H5T_C_S1);
            H5Tset_size(atype, 4);
+           H5Tset_strpad(atype,H5T_STR_NULLTERM);
    attr3 = H5Acreate(dataset, ANAMES, atype, aid3, H5P_DEFAULT);
 
    /*
@@ -176,7 +177,7 @@ main (void)
    atype = H5Tcopy(H5T_C_S1);
            H5Tset_size(atype, 5);
    ret   = H5Aread(attr, atype, string_out);
-   printf("The value of the attribute with the index 2 is %s \n", string_out);
+   printf("The value of the attribute with index 2 is %s \n", string_out);
    ret   = H5Aclose(attr);
    ret   = H5Tclose(atype);
 
