@@ -2409,7 +2409,7 @@ int copy_atomic_char(char* output, char* input, int numchar, int freespace){
 					(input[x+1] == 't')){ /*escape characters*/
 					strncat(output,input,2);
 					x += 2;
-					freespace - 2;
+					freespace = freespace - 2;
 				}
 				else { /* octal number */
 					if (freespace < 4){
@@ -2418,7 +2418,7 @@ int copy_atomic_char(char* output, char* input, int numchar, int freespace){
 					else {
 						strncat(output,input,4);
 						x += 4;
-						freespace - 4;
+						freespace = freespace - 4;
 					}
 				}
 			}
@@ -2466,6 +2466,10 @@ int h5dump_attr(hid_t oid, hid_t p_type){
 		for (i = 0; i < ndims; i++){
 			nelmts *= size[i];	
 		}
+		dim_n_size = size[ndims - 1];
+	}
+	else {
+	   dim_n_size = 1;
 	}
 	need = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
 	sm_buf = malloc(need);
