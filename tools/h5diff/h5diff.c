@@ -13,19 +13,16 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
 #include <assert.h>
-
-
 #include "hdf5.h"
 #include "h5trav.h"
 
 #define FFORMAT "%-15g %-15g %-15g\n"
 #define IFORMAT "%-15d %-15d %-15d\n"
+#define LIFORMAT "%-15ld %-15ld %-15d\n"
 #define SPACES  "          "
 
 
@@ -41,26 +38,40 @@ typedef struct options_t
  int    n_number_count; /* value */
 } options_t;
 
-int do_test_files();
-int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name, 
-                  char *obj2_name, options_t options );
+/*-------------------------------------------------------------------------
+ * prototypes
+ *-------------------------------------------------------------------------
+ */
+
+int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name, 
+                  const char *obj2_name, options_t options );
 int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank,
-                 hsize_t *dims, options_t options, char *obj1, char *obj2 );
-void print_pos( int *ph, int curr_pos, int *acc, 
-                int *pos, int rank, char *obj1, char *obj2 );
+                 hsize_t *dims, options_t options, const char *obj1, const char *obj2 );
 void print_class( H5T_class_t tclass, char *sclass );
-hid_t fixtype( hid_t f_type );
 void list( const char *filename, int nobjects, info_t *info );
-void diff( hid_t file1_id, char *obj1_name, hid_t file2_id, char *obj2_name, 
+void diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj2_name, 
            options_t options, int type );
-void compare( hid_t file1_id, char *obj1_name, int nobjects1, info_t *info1,
-              hid_t file2_id, char *obj2_name, int nobjects2, info_t *info2,
+void compare( hid_t file1_id, const char *obj1_name, int nobjects1, info_t *info1,
+              hid_t file2_id, const char *obj2_name, int nobjects2, info_t *info2,
               options_t options );
-void match( hid_t file1_id, char *file1_name, int nobjects1, info_t *info1,
-            hid_t file2_id, char *file2_name, int nobjects2, info_t *info2,
+void match( hid_t file1_id, const char *file1_name, int nobjects1, info_t *info1,
+            hid_t file2_id, const char *file2_name, int nobjects2, info_t *info2,
             options_t options );
-int check_n_input( char * );
-int check_f_input( char * );
+void print_pos( int *ph, unsigned int curr_pos, int *acc, 
+                int *pos, int rank, const char *obj1, const char *obj2 );
+
+/*-------------------------------------------------------------------------
+ * utility functions
+ *-------------------------------------------------------------------------
+ */
+
+hid_t fixtype( hid_t f_type );
+int check_n_input( const char* );
+int check_f_input( const char* );
+int get_index( const char *obj, int nobjects, info_t *info );
+int compare_object( char *obj1, char *obj2 );
+void usage(void);
+
 
 
 /*-------------------------------------------------------------------------
@@ -72,34 +83,28 @@ int check_f_input( char * );
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: October 8, 2002
- *
- * Comments:
- *
- * Modifications:
+ * Date: April 9, 2003
  *
  *-------------------------------------------------------------------------
  */
-
-void usage( const char *progname )
+void usage(void)
 {
-#define USAGE   "\n\
-  [OBJ1_NAME]       Name of an HDF5 object\n\
-  [OBJ2_NAME]       Name of an HDF5 object\n\
-  [-h ]             Print a basic help message (this message)\n\
-  [-l ]             List contents of file\n\
-  [-r ]             Print only what objects differ\n\
-  [-n count]        Print difference up to count number for each variable\n\
-  [-d delta]        Print difference when it is greater than limit delta\n\
-  [-p relative]     Print differences which are within a relative error value\n\
-  FILE1_NAME        File name of the first HDF5 file\n\
-  FILE2_NAME        File name of the second HDF5 file\n"
+	printf("Usage: h5diff [obj1_name] [obj2_name] [OPTIONS] file1_name [file2_name]\n");
+	printf("Items in [ ] are optional\n");
+	printf("\n");
+	printf("[obj1_name]       Name of an HDF5 object\n");
+	printf("[obj2_name]       Name of an HDF5 object\n");
+	printf("file1_name        File name of the first HDF5 file\n");
+	printf("file2_name        File name of the second HDF5 file\n");
+	printf("[OPTIONS] are:\n");
+	printf("[-h ]             Print out this information\n");
+	printf("[-l ]             List contents of file\n");
+	printf("[-r ]             Print only what objects differ\n");
+	printf("[-n count]        Print difference up to count number for each variable\n");
+	printf("[-d delta]        Print difference when it is greater than limit delta\n");
+	printf("[-p relative]     Print differences which are within a relative error value\n");
+	printf("\n");
 
- fprintf(stderr,
-  "h5diff [OBJ1_NAME] [OBJ2_NAME] [-h] [-l] [-r] [-d] [-n count] [-d delta] [-p relative] FILE1_NAME FILE2_NAME\n%s",
-  USAGE);
- fprintf(stderr,"\n");
- fprintf(stderr,"Items in [ ] are optional \n");
 }
 
 
@@ -123,8 +128,6 @@ void usage( const char *progname )
 
 int main(int argc, const char *argv[])
 {
- 
- const char *progname = argv[0];
  int        argno;
  const char *s = NULL;
  hid_t      file1_id, file2_id; 
@@ -132,16 +135,18 @@ int main(int argc, const char *argv[])
  int        nobjects1, nobjects2;
  info_t     *info1=NULL;
  info_t     *info2=NULL;
- int        obj1_found = 0;
- int        obj2_found = 0;
+ /*int        obj1_found = 0;
+ int        obj2_found = 0;*/
  options_t  options = {0,0,0,0,0,0,0,0};
  void       *edata;
  hid_t      (*func)(void*);
 
- char       *file1_name;
- char       *file2_name;
- char       *obj1_name  = NULL;
- char       *obj2_name  = NULL;
+ const char *file1_name;
+ const char *file2_name;
+ const char *obj1_name  = NULL;
+ const char *obj2_name  = NULL;
+
+	/*do_test_files();*/
  
 /*-------------------------------------------------------------------------
  * parse command line options
@@ -149,7 +154,7 @@ int main(int argc, const char *argv[])
  */
  
  if (argc < 3) {
-  usage( progname );
+  usage();
   exit(EXIT_FAILURE);
  }
  
@@ -166,11 +171,11 @@ int main(int argc, const char *argv[])
     switch (*s) {
     default:
     printf("-%s is an invalid option\n", s );
-    usage(progname);
+    usage();
     exit(EXIT_SUCCESS);
     break;
     case 'h': 
-     usage(progname);
+     usage();
      exit(EXIT_SUCCESS);
     case 'l': 
      options.l_ = 1;
@@ -184,10 +189,10 @@ int main(int argc, const char *argv[])
      {
       options.d_      = 1;
 
-      if ( check_f_input(argv[argno+1])==-1 )
+      if ( check_f_input(argv[argno+1])==-1)
       {
        printf("<-d %s> is not a valid option\n", argv[argno+1] );
-       usage(progname);
+       usage();
        exit(EXIT_SUCCESS);
       }
 
@@ -196,7 +201,7 @@ int main(int argc, const char *argv[])
      else
      {
       printf("<-d %s> is not a valid option\n", argv[argno+1] );
-      usage(progname);
+      usage();
       exit(EXIT_SUCCESS);
      }
      break;
@@ -205,10 +210,10 @@ int main(int argc, const char *argv[])
      {
       options.p_         = 1;
 
-      if ( check_f_input(argv[argno+1])==-1 )
+      if ( check_f_input(argv[argno+1])==-1)
       {
        printf("<-p %s> is not a valid option\n", argv[argno+1] );
-       usage(progname);
+       usage();
        exit(EXIT_SUCCESS);
       }
 
@@ -220,10 +225,10 @@ int main(int argc, const char *argv[])
      {
       options.n_             = 1;
 
-      if ( check_n_input(argv[argno+1])==-1 )
+      if ( check_n_input(argv[argno+1])==-1)
       {
        printf("<-n %s> is not a valid option\n", argv[argno+1] );
-       usage(progname);
+       usage();
        exit(EXIT_SUCCESS);
       }
       options.n_number_count = atoi(argv[argno+1]);
@@ -373,7 +378,7 @@ int main(int argc, const char *argv[])
  *-------------------------------------------------------------------------
  */
 
-int check_n_input( char *str )
+int check_n_input( const char *str )
 {
  unsigned i;
  char c;
@@ -405,7 +410,7 @@ int check_n_input( char *str )
  *-------------------------------------------------------------------------
  */
 
-int check_f_input( char *str )
+int check_f_input( const char *str )
 {
  unsigned i;
  char c;
@@ -483,8 +488,7 @@ void list( const char *filename, int nobjects, info_t *info )
  *-------------------------------------------------------------------------
  */
 
-
-int get_index( char *obj, int nobjects, info_t *info )
+int get_index( const char *obj, int nobjects, info_t *info )
 {
  char *pdest;
  int  result;
@@ -497,7 +501,7 @@ int get_index( char *obj, int nobjects, info_t *info )
    return i;
 
   pdest  = strstr( info[i].name, obj );
-  result = pdest - info[i].name;
+  result = (int)(pdest - info[i].name);
 
   /* found at position 1, meaning without '/' */
   if( pdest != NULL && result==1 )
@@ -525,8 +529,8 @@ int get_index( char *obj, int nobjects, info_t *info )
  */
 
 
-void compare( hid_t file1_id, char *obj1_name, int nobjects1, info_t *info1,
-              hid_t file2_id, char *obj2_name, int nobjects2, info_t *info2,
+void compare( hid_t file1_id, const char *obj1_name, int nobjects1, info_t *info1,
+              hid_t file2_id, const char *obj2_name, int nobjects2, info_t *info2,
               options_t options )
 {
 
@@ -576,7 +580,7 @@ void compare( hid_t file1_id, char *obj1_name, int nobjects1, info_t *info1,
  */
 
 
-void diff( hid_t file1_id, char *obj1_name, hid_t file2_id, char *obj2_name, 
+void diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj2_name, 
            options_t options, int type )
 {
 
@@ -589,7 +593,7 @@ void diff( hid_t file1_id, char *obj1_name, hid_t file2_id, char *obj2_name,
  */ 
   
  case H5G_GROUP:
-  
+  printf( "<%s> and <%s> are of type H5G_GROUP\n", obj1_name, obj2_name );
   break;
   
  /*-------------------------------------------------------------------------
@@ -598,7 +602,6 @@ void diff( hid_t file1_id, char *obj1_name, hid_t file2_id, char *obj2_name,
   */
   
  case H5G_DATASET:
-  
   diff_dataset(file1_id,file2_id,obj1_name,obj2_name,options);
   break;
   
@@ -608,16 +611,12 @@ void diff( hid_t file1_id, char *obj1_name, hid_t file2_id, char *obj2_name,
   */
   
  case H5G_TYPE:
-   
+  printf( "<%s> and <%s> are of type H5G_TYPE\n", obj1_name, obj2_name ); 
   break;
   
  } /* switch */
- 
- 
+  
 }
-
-
-
 
 /*-------------------------------------------------------------------------
  * Function: compare_object
@@ -664,8 +663,8 @@ int compare_object( char *obj1, char *obj2 )
  *-------------------------------------------------------------------------
  */
 
-void match( hid_t file1_id, char *file1_name, int nobjects1, info_t *info1,
-            hid_t file2_id, char *file2_name, int nobjects2, info_t *info2,
+void match( hid_t file1_id, const char *file1_name, int nobjects1, info_t *info1,
+            hid_t file2_id, const char *file2_name, int nobjects2, info_t *info2,
             options_t options )
 {
  int  cmp;
@@ -752,8 +751,8 @@ void match( hid_t file1_id, char *file1_name, int nobjects1, info_t *info1,
  *-------------------------------------------------------------------------
  */
 
-int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name, 
-                  char *obj2_name, options_t options )
+int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name, 
+                  const char *obj2_name, options_t options )
 {
 
  hid_t   dset1_id, dset2_id; 
@@ -770,7 +769,7 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name,
  char    sclass1[20];
  char    sclass2[20];
  int     nfound;
- size_t  type1_size, type2_size;
+ /*size_t  type1_size, type2_size;*/
  hid_t   type_mem =-1; /* read to memory type */
  void    *edata;
  hid_t   (*func)(void*);
@@ -811,8 +810,8 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name,
   goto out;
 
  /* Get the size */
- type1_size = H5Tget_size( type1_id );
- type2_size = H5Tget_size( type2_id );
+ /*type1_size = H5Tget_size( type1_id );
+ type2_size = H5Tget_size( type2_id );*/
 
   /* Get the dataspace handle */
  if ( (space1_id = H5Dget_space(dset1_id)) < 0 )
@@ -893,6 +892,8 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name,
  case H5T_ARRAY:
   printf( "H5T_ARRAY comparison is not supported\n"); 
   goto out;
+ default:
+		break;
  }
 
 /*-------------------------------------------------------------------------
@@ -907,12 +908,12 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name,
   printf( "<%s>: ", obj1_name );
   printf("[ " );  
   for (j = 0; j < rank1; j++) 
-   printf("%d ", dims1[j]  );
+   printf("%d ", (int)dims1[j]  );
   printf("]\n" );
   printf( "<%s>: ", obj2_name );
   printf("[ " );  
   for (j = 0; j < rank1; j++) 
-   printf("%d ", dims2[j]  );
+   printf("%d ", (int)dims2[j]  );
   printf("]\n" );
   goto out;
  }
@@ -930,12 +931,12 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name,
    printf( "<%s>: ", obj1_name );
    printf("[ " );  
    for (j = 0; j < rank1; j++) 
-    printf("%d ", dims1[j]  );
+    printf("%d ", (int)dims1[j]  );
    printf("]\n" );
    printf( "<%s>: ", obj2_name );
    printf("[ " );  
    for (j = 0; j < rank1; j++) 
-    printf("%d ", dims2[j]  );
+    printf("%d ", (int)dims2[j]  );
    printf("]\n" );
    goto out;
   }
@@ -1033,7 +1034,7 @@ out:
  */
  
 int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank,
-                 hsize_t *dims, options_t options, char *obj1, char *obj2 )
+                 hsize_t *dims, options_t options, const char *obj1, const char *obj2 )
 {
  char   *i1ptr1, *i1ptr2;
  short  *i2ptr1, *i2ptr2;
@@ -1042,20 +1043,21 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
  float  *fptr1, *fptr2;
  double *dptr1, *dptr2;
  int    nfound=0; /* number of differences found */
- int    ph=1;     /* print header /*
+ int    ph=1;     /* print header  */
+	int    i8diff; 
 
  /* accumulator and matrix position */
- int    acc[32];
- int    pos[32];
- int    i;
+ int          acc[32];
+ int          pos[32];
+ unsigned int i; int j;
 
  H5T_class_t type_class;
  size_t      type_size;
 
  acc[rank-1]=1;
- for(i=(rank-2); i>=0; i--)
+ for(j=(rank-2); j>=0; j--)
  {
-  acc[i]=acc[i+1]*(int)dims[i+1];
+  acc[j]=acc[j+1]*(int)dims[j+1];
  }
 
  /* Get the class. */
@@ -1067,6 +1069,10 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
  
  switch(type_class)
  {
+	 default:
+		 return -1;
+			/*break;*/
+
   case H5T_INTEGER:
 
 
@@ -1122,7 +1128,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      else if ( options.d_ && options.p_ )
      {
       if ( abs(1 - *i1ptr1 / *i1ptr2)  > options.p_relative &&
-           fabs(*i1ptr1 - *i1ptr2) > options.d_delta )
+           abs(*i1ptr1 - *i1ptr2) > options.d_delta )
       {
        if ( options.n_ && nfound>=options.n_number_count)
         return nfound;
@@ -1329,6 +1335,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
    case 8:
     i8ptr1 = (long *) buf1;
     i8ptr2 = (long *) buf2;
+				i8diff = (int)(*i8ptr1 - *i8ptr2);
  
     for ( i = 0; i < tot_cnt; i++)
     {
@@ -1337,13 +1344,13 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      {
       if ( options.n_ && nfound>=options.n_number_count)
        return nfound;
-      if ( abs(*i8ptr1 - *i8ptr2) > options.d_delta )
+      if ( abs(i8diff) > options.d_delta )
       {
        if ( options.r_==0 ) 
        {
         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
         printf(SPACES);
-        printf(IFORMAT, *i8ptr1, *i8ptr2, abs(*i8ptr1 - *i8ptr2));
+        printf(LIFORMAT, *i8ptr1, *i8ptr2, i8diff);
        }
        nfound++;
       }
@@ -1352,7 +1359,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      /* percentage but not delta */
      else if ( !options.d_ && options.p_ )
      {
-      if ( abs(1 - *i8ptr1 / *i8ptr2) > options.p_relative  )
+      if ( abs((int)(1 - *i8ptr1 / *i8ptr2)) > options.p_relative  )
       {
        if ( options.n_ && nfound>=options.n_number_count)
         return nfound;
@@ -1360,7 +1367,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
        {
         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
         printf(SPACES);
-        printf(IFORMAT, *i8ptr1, *i8ptr2, abs(*i8ptr1 - *i8ptr2));
+        printf(LIFORMAT, *i8ptr1, *i8ptr2, i8diff);
        }
        nfound++;
       }
@@ -1369,8 +1376,8 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      /* percentage and delta */
      else if ( options.d_ && options.p_ )
      {
-      if ( abs(1 - *i8ptr1 / *i8ptr2) > options.p_relative &&
-           abs(*i8ptr1 - *i8ptr2) > options.d_delta )
+      if ( abs((int)(1 - *i8ptr1 / *i8ptr2)) > options.p_relative &&
+           abs(i8diff) > options.d_delta )
       {
        if ( options.n_ && nfound>=options.n_number_count)
         return nfound;
@@ -1378,7 +1385,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
        {
         print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
         printf(SPACES);
-        printf(IFORMAT, *i8ptr1, *i8ptr2, abs(*i8ptr1 - *i8ptr2));
+        printf(LIFORMAT, *i8ptr1, *i8ptr2, i8diff);
        }
        nfound++;
       }
@@ -1394,7 +1401,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
       {
        print_pos( &ph, i, acc, pos, rank, obj1, obj2 );
        printf(SPACES);
-       printf(IFORMAT, *i8ptr1, *i8ptr2, abs(*i8ptr1 - *i8ptr2));
+       printf(LIFORMAT, *i8ptr1, *i8ptr2, i8diff);
       }
       nfound++;
       
@@ -1617,8 +1624,8 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
  *-------------------------------------------------------------------------
  */
 
-void print_pos( int *ph, int curr_pos, int *acc, 
-                int *pos, int rank, char *obj1, char *obj2 )
+void print_pos( int *ph, unsigned int curr_pos, int *acc, 
+                int *pos, int rank, const char *obj1, const char *obj2 )
 {
  int i;
 
@@ -1670,6 +1677,9 @@ void print_class( H5T_class_t tclass, char *sclass )
 {
  switch (tclass) 
  {
+ default:
+  printf("Invalid class");
+  break;
  case H5T_TIME:
   strcpy(sclass,"H5T_TIME");
   break;
@@ -1734,6 +1744,9 @@ hid_t fixtype(hid_t f_type)
  
  switch (H5Tget_class(f_type)) 
  {
+	default:
+		return -1;
+		/*break;*/
  case H5T_INTEGER:
 /*
  * Use the smallest native integer type of the same sign as the file
@@ -1783,5 +1796,6 @@ hid_t fixtype(hid_t f_type)
   
  return m_type;
 }
+
 
 

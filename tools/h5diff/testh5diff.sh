@@ -79,9 +79,9 @@ TOOLTEST() {
    fi
 
    # Clean up output file
-   if test -z "$HDF5_NOCLEANUP"; then
-      rm -f $actual $actual_err
-   fi
+    if test -z "$HDF5_NOCLEANUP"; then
+    rm -f $actual $actual_err
+    fi
 }
 
 ##############################################################################
@@ -90,20 +90,81 @@ TOOLTEST() {
 ##############################################################################
 ##############################################################################
 
-# test1: Check if the command line number of arguments is less than 3
-TOOLTEST h5diff_1.txt h5diff_test1.h5 
+##############################################################################
+# tests 0., check for bad input values
+##############################################################################
 
-# test2: Check for invalid options
-TOOLTEST h5diff_2.txt -x h5diff_test1.h5 h5diff_test2.h5
+# test 0.1: Check if the command line number of arguments is less than 3
+TOOLTEST h5diff_01.txt h5diff_test1.h5 
 
-# test3: Check for -h option
-TOOLTEST h5diff_3.txt -h h5diff_test1.h5 h5diff_test2.h5
+# test 0.2: Check for invalid options
+TOOLTEST h5diff_02.txt -x h5diff_test1.h5 h5diff_test2.h5
 
-# test4: Check for invalid -d options
-TOOLTEST h5diff_4.txt -d  h5diff_test1.h5 h5diff_test2.h5
+# test 0.3: Check for -h option
+TOOLTEST h5diff_03.txt -h h5diff_test1.h5 h5diff_test2.h5
 
-# test5: Check for invalid -d options
-TOOLTEST h5diff_5.txt -d -4  h5diff_test1.h5 h5diff_test2.h5
+# test 0.4: Check for invalid -d options
+TOOLTEST h5diff_04.txt -d  h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.5: Check for invalid -d options
+TOOLTEST h5diff_05.txt -d -4  h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.6: Check for invalid -p options
+TOOLTEST h5diff_06.txt -p  h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.7: Check for invalid -p options
+TOOLTEST h5diff_07.txt -p -4  h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.8: Check for invalid -n options
+TOOLTEST h5diff_08.txt -n  h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.9: Check for invalid -n options
+TOOLTEST h5diff_09.txt -n 0  h5diff_test1.h5 h5diff_test2.h5
+
+# test 0.10: Check if the file names supplied are valid files
+TOOLTEST h5diff_010.txt h5diff_test1.h6 h5diff_test2.h6
+
+##############################################################################
+# tests 1., Check for not comparable issues
+##############################################################################
+
+# test 1.1.1: Objects are not the same type (e.g try to compare a group with a dataset)
+TOOLTEST h5diff_111.txt dset1.1 g1.1 h5diff_test1.h5 h5diff_test2.h5
+
+# test 1.1.2: Objects are not the same type (e.g try to compare a group with a dataset)
+TOOLTEST h5diff_112.txt g1.1 g1.1 h5diff_test1.h5 h5diff_test2.h5
+
+# test 1.2.1: Objects are of classes H5G_TYPE and H5G_GROUP and their name is supplied
+TOOLTEST h5diff_121.txt compound h5diff_test1.h5 h5diff_test2.h5
+
+# test 1.2.2: Objects are of classes H5G_TYPE and H5G_GROUP and their name is supplied
+TOOLTEST h5diff_122.txt enum h5diff_test1.h5 h5diff_test2.h5
+
+# test 1.3: Check for non supported classes. Supported classes are H5T_INTEGER and H5T_FLOAT
+TOOLTEST h5diff_13.txt dset1.3 h5diff_test1.h5 h5diff_test2.h5
+
+# test 1.4: Objects are not the same dataset class type
+TOOLTEST h5diff_14.txt dset1.1 dset1.4 h5diff_test1.h5 h5diff_test2.h5
+
+# test 1.5: Check for the same rank, for datasets
+TOOLTEST h5diff_15.txt dset1.1 dset1.5 h5diff_test1.h5 h5diff_test2.h5
+
+# test 1.6: Check for the same current dimensions
+TOOLTEST h5diff_16.txt dset1.1 dset1.6 h5diff_test1.h5 h5diff_test2.h5
+
+##############################################################################
+# tests 2., Different datatype sizes and different mix of options 
+##############################################################################
+
+# test 2.1.0: H5T_INTEGER size 1 
+TOOLTEST h5diff_210.txt dset2.1 dset2.2 h5diff_test1.h5 h5diff_test2.h5
+
+# test 2.1.1: H5T_INTEGER size 1 
+TOOLTEST h5diff_211.txt dset2.1 dset2.2 -n 2 h5diff_test1.h5 h5diff_test2.h5
+
+# test 2.1.2: H5T_INTEGER size 1 
+TOOLTEST h5diff_212.txt dset2.1 dset2.2 -d 3 h5diff_test1.h5 h5diff_test2.h5
+
 
 if test $nerrors -eq 0 ; then
    echo "All $H5DIFF tests passed."
