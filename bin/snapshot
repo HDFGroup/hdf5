@@ -1,4 +1,7 @@
 #!/bin/sh
+echo "====================================="
+echo "$0 $*"
+echo "====================================="
 set -x
 date
 uname -a
@@ -40,7 +43,6 @@ fi
 cmd="all"
 test_opt=""
 errcode=0
-echo '$#=' $# '$*="' $* '"'
 while [ $# -gt 0 ] ; do
     case "$1" in
 	all)	
@@ -164,7 +166,7 @@ CONFIGURE="./configure $HDF4LIB $OP_CONFIGURE"
 # Execute the requests
 snapshot=yes
 
-H5VERSION=hdf5
+H5VERSION=hdf5_1_4
 BASEDIR=${HOME}/snapshots-${H5VERSION}
 CURRENT=${BASEDIR}/current
 PREVIOUS=${BASEDIR}/previous
@@ -187,7 +189,7 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     test -d ${BASEDIR} || mkdir -p ${BASEDIR} || exit 1
 
     # Check out the current version from CVS
-    cvs -Q co -d ${CURRENT} hdf5 || exit 1
+    cvs -Q co -d ${CURRENT} -r ${H5VERSION} hdf5 || exit 1
 fi # Do CVS checkout
 
 
