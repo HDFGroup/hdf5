@@ -60,6 +60,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed problems with accessing variable-length data datatypes on
+            Crays.  QAK - 2003/10/10
         - Fixed potential file corruption bug when too many object header
             messages (probably attributes, from a user perspective) were
             inserted into an object header and certain other conditions were
