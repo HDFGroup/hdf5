@@ -1700,8 +1700,9 @@ H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_info)
         }
 
         /* Remove old driver */
-        if (dxpl->driver_id>=0)
-            H5FD_dxpl_free(dxpl->driver_id, dxpl->driver_info);
+        assert(dxpl->driver_id>=0);
+        H5FD_dxpl_free(dxpl->driver_id, dxpl->driver_info);
+        H5I_dec_ref(dxpl->driver_id);
 
         /* Add new driver */
         H5I_inc_ref(driver_id);
