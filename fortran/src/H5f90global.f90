@@ -78,13 +78,13 @@
 !                                H5T_NATIVE_CHARACTER, &
 !                                H5T_STD_REF_OBJ, &
 !                                H5T_STD_REF_DSETREG
-      COMMON /PREDEFINED_TYPES/  predef_types(PREDEF_TYPES_LEN)
+      COMMON /PREDEFINED_TYPES/  predef_types
 
 !      COMMON /FLOATING_TYPES/ H5T_IEEE_F32BE,  &
 !                              H5T_IEEE_F32LE,  &
 !                              H5T_IEEE_F64BE,  &
 !                              H5T_IEEE_F64LE
-      COMMON /FLOATING_TYPES/ floatinig_types(FLOATING_TYPES_LEN) 
+      COMMON /FLOATING_TYPES/ floatinig_types 
 !
 !      COMMON /INTEGER_TYPES/ H5T_STD_I8BE,  &
 !                             H5T_STD_I8LE,    &
@@ -102,7 +102,7 @@
 !                             H5T_STD_U32LE,   &
 !                             H5T_STD_U64BE,   &
 !                             H5T_STD_U64LE
-      COMMON /INTEGER_TYPES/ integer_types(INTEGER_TYPES_LEN)
+      COMMON /INTEGER_TYPES/ integer_types
 !
 ! Fortran flags
 !
