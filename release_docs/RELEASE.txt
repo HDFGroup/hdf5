@@ -192,6 +192,14 @@ New Features
       several hyperslab selection calls).
     * Removed H5P(get|set)_hyper_cache API function, since the property is no
       longer used.
+    * Added a new file access property, file close degree, to control file 
+      close behavior.  It has four values, H5F_CLOSE_WEAK, H5F_CLOSE_SEMI,
+      H5F_CLOSE_STRONG, and H5F_CLOSE_DEFAULT.  Two correspont functions 
+      H5Pset_fclose_degree and H5Pget_fclose_degree are also provided.  Two 
+      new functions H5Fget_obj_count and H5Fget_obj_ids are offerted to assist
+      this new feature.  For full details, please refer to the reference 
+      manual under the description of H5Fcreate, H5Fopen, H5Fclose and the 
+      functions mentioned above. 
     * Changed internal error handling macros to reduce code size of library by
       about 10-20%.
 
