@@ -462,13 +462,6 @@ printf("%s: check 1.0\n",FUNC);
 
     /* Get information about memory and file */
     for (u=0; u<mem_space->extent.u.simple.rank; u++) {
-        if (mem_space->extent.u.simple.max &&
-                mem_space->extent.u.simple.size[u]!=mem_space->extent.u.simple.max[u])
-            goto fall_through;
-        if (file_space->extent.u.simple.max &&
-                file_space->extent.u.simple.size[u]!=file_space->extent.u.simple.max[u])
-            goto fall_through;
-
         if(mem_space->select.type==H5S_SEL_HYPERSLABS) {
             /* Check for a "regular" hyperslab selection */
             if(mem_space->select.sel_info.hslab.diminfo != NULL) {
@@ -623,13 +616,6 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
 
     /* Get information about memory and file */
     for (u=0; u<mem_space->extent.u.simple.rank; u++) {
-        if (mem_space->extent.u.simple.max &&
-                mem_space->extent.u.simple.size[u]!=mem_space->extent.u.simple.max[u])
-            goto fall_through;
-        if (file_space->extent.u.simple.max &&
-                file_space->extent.u.simple.size[u]!=file_space->extent.u.simple.max[u])
-            goto fall_through;
-
         if(mem_space->select.type==H5S_SEL_HYPERSLABS) {
             /* Check for a "regular" hyperslab selection */
             if(mem_space->select.sel_info.hslab.diminfo != NULL) {
