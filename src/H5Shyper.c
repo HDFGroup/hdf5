@@ -5221,6 +5221,10 @@ H5S_hyper_select_iterate_mem_opt(H5S_sel_iter_t UNUSED *iter, void *buf, hid_t t
             tmp_count[fast_dim]--;
         } /* end while */
 
+        /* Check for getting out of iterator, we're done in the 1-D case */
+        if(ndims==1)
+            goto done; /* Yes, an evil goto.. :-) -QAK */
+
         /* Work on other dimensions if necessary */
         if(fast_dim>0 && user_ret==0) {
             /* Reset the sequence and block counts */
