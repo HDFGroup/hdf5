@@ -16,6 +16,7 @@ dnl ----------------------------------------------------------------------
 dnl Initialize configure.
 dnl
 AC_REVISION($Id$)
+AC_PREREQ([2.53])
 
 dnl AC_INIT takes the name of the package, the version number, and an
 dnl email address to report bugs. AC_CONFIG_SRCDIR takes a unique file
