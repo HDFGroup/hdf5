@@ -16,6 +16,8 @@
 #define _H5Image_H
 
 
+#include "H5Lite.h"
+
 
 /* HDF5 image information */
 typedef struct H5IM_imageinfo_t 

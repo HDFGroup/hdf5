@@ -25,7 +25,6 @@
 #include "H5Apublic.h"
 
 
-
 herr_t H5Lmake_dataset( hid_t loc_id, 
                         const char *dset_name, 
                         int rank, 

@@ -21,8 +21,6 @@ static herr_t get_name_group( hid_t  loc_id, const char *name, void *op_data);
 
 
 
-
-
 /*-------------------------------------------------------------------------
  * Function: H5Lmake_dataset
  *
