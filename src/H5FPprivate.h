@@ -136,6 +136,11 @@ typedef enum sap_status {
     /* For read requests */
     H5FP_STATUS_MDATA_NOT_CACHED,
 
+    /* For dumping data to client */
+    H5FP_STATUS_DUMPING,
+    H5FP_STATUS_DUMPING_FINISHED,
+    H5FP_STATUS_DUMPING_FAILED,
+
     /* Out of memory error */
     H5FP_STATUS_OOM,
 
@@ -156,8 +161,9 @@ typedef struct {
     unsigned        file_id;    /* SAP's file ID for the specific file      */
     H5FP_obj_t      obj_type;   /* Type of the object                       */
     H5FP_lock_t     rw_lock;    /* Indicates read or write lock             */
+    H5FD_mem_t      mem_type;   /* Type of memory updated, if req'd         */
     H5AC_subid_t    type_id;    /* Type of metadata                         */
-    int             md_size;    /* Size of the metadata sent in next msg    */
+    unsigned        md_size;    /* Size of the metadata sent in next msg    */
     haddr_t         addr;       /* Address of the metadata                  */
     unsigned char   oid[H5R_OBJ_REF_BUF_SIZE]; /* Buffer to store OID of object */
 } H5FP_request;
@@ -185,9 +191,8 @@ typedef struct {
     H5FP_status_t   status;     /* Status of the request                    */
     H5FD_mem_t      mem_type;   /* Type of memory updated, if req'd         */
     H5AC_subid_t    type_id;    /* Type of metadata                         */
-    int             md_size;    /* Size of the metadata sent in next msg    */
+    unsigned        md_size;    /* Size of the metadata sent in next msg    */
     haddr_t         addr;       /* Address of the metadata                  */
-    hsize_t         size;       /* Size of memory updated, if req'd         */
 } H5FP_read;
 
 extern MPI_Datatype H5FP_read_t; /* MPI datatype for the H5FP_read obj      */
@@ -209,7 +214,8 @@ extern "C" {
 #endif  /* __cplusplus */
 
 /* NOTE: Don't use this function explicitly!! */
-extern herr_t H5FP_send_metadata(const char *mdata, int len, int rank);
+extern herr_t H5FP_send_metadata(const char *mdata, int len, int to);
+extern herr_t H5FP_read_metadata(char **mdata, int len, int from);
 
 /* Start the SAP */
 extern herr_t H5FP_sap_receive_loop(void);
@@ -223,15 +229,18 @@ extern herr_t H5FP_request_lock(unsigned sap_file_id, unsigned char *mdata,
 extern herr_t H5FP_request_release_lock(unsigned sap_file_id, unsigned char *mdata,
                                         int last, unsigned *req_id,
                                         H5FP_status_t *status);
-extern herr_t H5FP_request_write_metadata(unsigned sap_file_id, unsigned char *obj_oid,
-                                          H5FP_obj_t obj_type, H5AC_subid_t type_id,
-                                          haddr_t addr, int mdata_len, const char *mdata,
-                                          unsigned *req_id, H5FP_status_t *status);
-extern herr_t H5FP_request_read_metadata(unsigned sap_file_id, H5FP_obj_t obj_type,
-                                         H5AC_subid_t type_id, haddr_t addr,
-                                         size_t size, uint8_t **buf, unsigned *req_id,
+extern herr_t H5FP_request_read_metadata(H5F_t *file, unsigned sap_file_id,
+                                         H5FP_obj_t obj_type, H5AC_subid_t type_id,
+                                         haddr_t addr, size_t size,
+                                         uint8_t **buf, unsigned *req_id,
                                          H5FP_status_t *status);
-extern herr_t H5FP_request_close(unsigned sap_file_id, unsigned *req_id);
+extern herr_t H5FP_request_write_metadata(H5F_t *file, unsigned sap_file_id,
+                                          unsigned char *obj_oid, H5FP_obj_t obj_type,
+                                          H5AC_subid_t type_id, haddr_t addr,
+                                          int mdata_len, const char *mdata,
+                                          unsigned *req_id, H5FP_status_t *status);
+extern herr_t H5FP_request_close(H5F_t *file, unsigned sap_file_id, unsigned *req_id,
+                                 H5FP_status_t *status);
 
 #ifdef __cplusplus
 }

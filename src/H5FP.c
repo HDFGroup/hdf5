@@ -213,19 +213,13 @@ done:
 /*
  * Function:    H5FP_send_metadata
  * Purpose:     Send a string of metadata to a process.
- *
- *              NOTE: You should never call this function directly!!
- *              There's special setup for sending a string to a processor
- *              which needs to occur first. The H5FP_request_* and
- *              H5FP_reply_* functions take care of this for you.
- *
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  * Programmer:  Bill Wendling, 30. July, 2002
  * Modifications:
  */
 herr_t
-H5FP_send_metadata(const char *mdata, int len, int rank)
+H5FP_send_metadata(const char *mdata, int len, int to)
 {
     herr_t ret_value = SUCCEED;
 
@@ -235,9 +229,49 @@ H5FP_send_metadata(const char *mdata, int len, int rank)
     assert(len);
 
     /* casts the CONST away: Okay */
-    if (MPI_Send((void *)mdata, len, MPI_BYTE, rank, H5FP_TAG_METADATA, H5FP_SAP_COMM)
+    if (MPI_Send((void *)mdata, len, MPI_BYTE, to, H5FP_TAG_METADATA, H5FP_SAP_COMM)
             != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Send failed");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+/*
+ * Function:    H5FP_read_metadata
+ * Purpose:     Read a string of metadata from process FROM.
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ * Programmer:  Bill Wendling, 31. January, 2003
+ * Modifications:
+ */
+herr_t
+H5FP_read_metadata(char **mdata, int len, int from)
+{
+    MPI_Status status;
+    herr_t ret_value = SUCCEED;
+    int mrc;
+
+    FUNC_ENTER_NOAPI(H5FP_read_metadata, FAIL);
+
+    /* check args */
+    assert(mdata);
+
+    /*
+     * There is metadata associated with this request. Get it as a
+     * string (requires another read).
+     */
+    if ((*mdata = (char *)HDmalloc((size_t)len + 1)) == NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory");
+
+    HDmemset(*mdata, 0, (size_t)len + 1);
+
+    if ((mrc = MPI_Recv(*mdata, len, MPI_BYTE, from, H5FP_TAG_METADATA,
+                        H5FP_SAP_COMM, &status)) != MPI_SUCCESS) {
+        HDfree(*mdata);
+        *mdata = NULL;
+        HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -271,7 +305,7 @@ H5FP_commit_sap_datatypes(void)
     FUNC_ENTER_NOAPI(H5FP_commit_sap_datatypes, FAIL);
 
     /* Commit the H5FP_request_t datatype */
-    block_length[0] = 8;
+    block_length[0] = 9;
     block_length[1] = 1;
     block_length[2] = sizeof(req.oid);
     old_types[0] = MPI_INT;
@@ -306,18 +340,14 @@ H5FP_commit_sap_datatypes(void)
     /* Commit the H5FP_read_t datatype */
     block_length[0] = 6;
     block_length[1] = 1;
-    block_length[2] = 1;
     old_types[0] = MPI_INT;
     old_types[1] = HADDR_AS_MPI_TYPE;
-    old_types[2] = MPI_LONG_LONG;
     MPI_Address(&sap_read.req_id, &displs[0]);
     MPI_Address(&sap_read.addr, &displs[1]);
-    MPI_Address(&sap_read.size, &displs[2]);
-    displs[2] -= displs[1];
     displs[1] -= displs[0];
     displs[0] -= displs[0];
 
-    if (MPI_Type_struct(3, block_length, displs, old_types,
+    if (MPI_Type_struct(2, block_length, displs, old_types,
                         &H5FP_read_t) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_struct failed");
 
