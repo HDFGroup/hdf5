@@ -920,7 +920,9 @@ test_file(void)
 
     test_file_create();		/* Test file creation(also creation templates)*/
     test_file_open();		/* Test file opening */
+#ifndef H5_NO_SHARED_WRITING 
     test_file_close();          /* Test file close behavior */
+#endif /* H5_NO_SHARED_WRITING */     
 }				/* test_file() */
 
 

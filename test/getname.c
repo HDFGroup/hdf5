@@ -21,7 +21,8 @@
 
 #include "hdf5.h"
 #include "h5test.h"
- 
+
+
 /* Compound datatype */
 typedef struct s1_t {
     unsigned int a;
@@ -55,10 +56,10 @@ static int check_name( char *name, const char* check )
 
 int main( void )
 {
- char	filename0[1024];
- char	filename1[1024];
- char	filename2[1024];
- char	filename3[1024];
+ char filename0[1024];
+ char filename1[1024];
+ char filename2[1024];
+ char filename3[1024];
  hid_t   fapl;
  hid_t   file_id, file1_id, file2_id, file3_id;
  hid_t   group_id, group2_id, group3_id, group4_id, group5_id, group6_id, group7_id;
@@ -825,6 +826,8 @@ int main( void )
 
  /* Verify */
  if (check_name( name, "/g12/d" )!=0) goto out;
+ 
+ if (H5Funmount(file_id, "/g12")<0) goto out;
 
  /* Close */
  H5Dclose( dataset_id );
@@ -833,6 +836,7 @@ int main( void )
 
 
  PASSED();
+
 
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Fmount; long name
@@ -1712,8 +1716,7 @@ int main( void )
  H5Fclose( file2_id );
  
  PASSED();
-
-
+ 
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with H5Glink hard
  *-------------------------------------------------------------------------
@@ -2076,7 +2079,6 @@ int main( void )
  H5Gclose( group3_id );
  
  PASSED();
-
  
 /*-------------------------------------------------------------------------
  * Test H5Iget_name with several nested mounted files
@@ -2742,6 +2744,8 @@ int main( void )
  /* Close group in mounted file */
  H5Gclose( group5_id );
 
+ if (H5Funmount(file_id, "/g36/g1")<0) goto out;
+ 
  /* Close */
  H5Gclose( group_id );
  H5Gclose( group2_id );
@@ -2754,7 +2758,7 @@ int main( void )
 
 
 /*-------------------------------------------------------------------------
- * Test H5Iget_name with mounting already mounted file
+ * Test H5Iget_name with mounting already mounted files
  *-------------------------------------------------------------------------
  */
 
@@ -2856,7 +2860,6 @@ int main( void )
  H5Fclose( file3_id );
  
  PASSED();
-
 
 /*-------------------------------------------------------------------------
  * end tests 
