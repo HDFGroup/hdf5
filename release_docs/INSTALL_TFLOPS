@@ -9,7 +9,7 @@ Software locations
 ------------------
 The zlib compression library is installed in /usr/community/hdf5/ZLIB.
 The mpich library, including mpi-io support, is in
-/usr/community/mpich/mpich-1.2.0.
+/usr/community/mpich/mpich-1.2.1.
 
 ---------------
 Sequential HDF5:
@@ -31,6 +31,11 @@ FROM SASN100,
 1) cd <hdf5>
 
 2) ./configure --host=i386-intel-osf1
+   You may safely ignore the WARNING message,
+    configure: WARNING: If you wanted to set the --build type, don't use --host.
+	If a cross compiler is detected then cross compile mode will be used.
+   You may add the option "--host=i386-intel-osf1" to get rid of the WARNING.
+
    Due to a bug, you need to patch up two Makefile, src/Makefile and
    test/Makefile, before the next step.  You can use the following
    shell commands.
@@ -103,7 +108,12 @@ FROM SASN100,
 
 1) cd <hdf5>
 
-2) CC=/usr/community/mpich/mpich-1.2.0/bin/mpicc ./configure --host=i386-intel-osf1
+2) CC=/usr/community/mpich/mpich-1.2.1/bin/mpicc ./configure --host=i386-intel-osf1
+   You may safely ignore the WARNING message,
+    configure: WARNING: If you wanted to set the --build type, don't use --host.
+	If a cross compiler is detected then cross compile mode will be used.
+   You may add the option "--host=i386-intel-osf1" to get rid of the WARNING.
+
    Due to a bug, you need to patch up two Makefile, src/Makefile and
    test/Makefile, before the next step.  You can use the following
    shell commands.
