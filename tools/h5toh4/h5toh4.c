@@ -11,16 +11,18 @@
 
 *****************************************************************************/
 
-#include "h5toh4.h"
 #include <errno.h>
 #include <string.h>
 #include <fcntl.h>
-#include <h5tools.h>
+
+#include "h5toh4.h"
+#include "h5tools.h"
+#include "h5tools_utils.h"
 
 
 #ifdef WIN32
 typedef unsigned int mode_t;
-#endif
+#endif  /* WIN32 */
 
 #ifndef S_ISDIR
 #define S_ISDIR(mode)  (((mode)&0xF000) == S_IFDIR)
@@ -40,13 +42,6 @@ extern herr_t convert_shared_group(hid_t, int, op_data_t *);
 extern herr_t convert_dataset_string(hid_t, char *, op_data_t *);
 extern int32 h5type_to_h4type(hid_t);
 extern hid_t h4type_to_memtype(int32);
-
-extern void free_table(table_t **temp);
-extern void dump_tables(char* name, table_t* table);
-extern int get_table_idx(table_t*, unsigned long *);
-extern int get_tableflag(table_t*, int);
-extern int set_tableflag(table_t*, int);
-extern char* get_objectname(table_t*, int);
 
 typedef herr_t (*H5G_operator_t)(hid_t, const char*, void*);
 
