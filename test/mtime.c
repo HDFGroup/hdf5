@@ -145,7 +145,7 @@ main(void)
 	puts("   The modification time could not be decoded on this OS.");
 	puts("   Modification times will be mantained in the file bug cannot");
 	puts("   be queried on this system.  See H5O_mtime_decode().");
-	return 1;
+	return 0;
     } else if (fabs(HDdifftime(now, sb1.mtime))>60.0) {
 	puts("*FAILED*");
 	tm = localtime(&(sb1.mtime));
