@@ -40,6 +40,8 @@ To build the HDF5 and tests, it is assumed that you have done the following:
        own version read the section about the zlib library.
 
 
+    5. You do need hdf4 (hdf and mfhdf) static and dll libraries to generate 
+       h4toh5 and h5toh4 converter tool.
 STEP II: Building the Libraries and tests.
 
     1. Rename the directory under C:\myHDFstuff\ from hdf5xxx to hdf5.
