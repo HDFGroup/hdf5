@@ -38,14 +38,14 @@ static herr_t H5BT_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
 
 /* Package variables */
 const H5B2_class_t H5B2_BLKTRK[1]={{   /* B-tree class information */
-    H5B2_BLK_TRK_ID,           /* Type of B-tree */
-    sizeof(hsize_t),           /* Size of native key */
-    H5BT_store,                /* Record storage callback */
-    H5BT_retrieve,             /* Record retrieval callback */
-    H5BT_compare,              /* Record comparison callback */
-    H5BT_encode,               /* Record encoding callback */
-    H5BT_decode,               /* Record decoding callback */
-    H5BT_debug                 /* Record debugging callback */
+    H5B2_BLK_TRK_ID,            /* Type of B-tree */
+    sizeof(H5BT_blk_info_t),    /* Size of native key */
+    H5BT_store,                 /* Record storage callback */
+    H5BT_retrieve,              /* Record retrieval callback */
+    H5BT_compare,               /* Record comparison callback */
+    H5BT_encode,                /* Record encoding callback */
+    H5BT_decode,                /* Record decoding callback */
+    H5BT_debug                  /* Record debugging callback */
 }};
 
 
@@ -70,7 +70,7 @@ H5BT_store(void *nrecord, const void *udata)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5BT_store)
 
-    *(H5BT_blk_info_t *)nrecord=*(const H5BT_blk_info_t *)udata;
+    *(H5BT_blk_info_t *)nrecord = *(const H5BT_blk_info_t *)udata;
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* H5BT_store() */
@@ -97,7 +97,7 @@ H5BT_retrieve(void *udata, const void *nrecord)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5BT_retrieve)
 
-    *(H5BT_blk_info_t *)udata=*(const H5BT_blk_info_t *)nrecord;
+    *(H5BT_blk_info_t *)udata = *(const H5BT_blk_info_t *)nrecord;
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* H5BT_retrieve() */
