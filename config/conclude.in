@@ -90,24 +90,24 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 ## Install the documents.
 install-doc: $(PUB_DOCS)
 	@if test -d $(DOCDIR) ; then                                          \
-           :;                                                                 \
-        else                                                                  \
+       :;                                                                 \
+    else                                                                  \
 	   mkdir $(DOCDIR) && chmod 755 $(DOCDIR);                            \
 	fi
-	@for d in X $(SUBDIRS); do					      \
-	    if test $$d != X; then					      \
+	@for d in X $(SUBDIRS); do                                            \
+	    if test $$d != X; then                                            \
 	       (set -x; cd $$d && $(MAKE) $@) || exit 1;                      \
-	    fi;								      \
+	    fi;                                                               \
 	done
-	@for f in X $(PUB_DOCS); do					      \
-	   if test $$f != X; then					      \
-	      if test -f $$f; then					      \
-		 (set -x; $(INSTALL_DATA) $$f $(DOCDIR)/. || exit 1);         \
-	      else							      \
+	@for f in X $(PUB_DOCS); do                                           \
+	   if test $$f != X; then                                             \
+	      if test -f $$f; then                                            \
+		 (set -x; $(INSTALL_DATA) $$f $(DOCDIR)/. || exit 1);             \
+	      else                                                            \
 	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(DOCDIR)/. ||        \
-		    exit 1);						      \
-	      fi;							      \
-	   fi;								      \
+		    exit 1);                                                      \
+	      fi;                                                             \
+	   fi;                                                                \
 	done
 
 ## Removes those things that `make install' (would have) installed.
