@@ -291,9 +291,8 @@ SNAPTEST_CONFIG()
 		STANDARD_OPT="$y"
 		;;
 	    *)		# unknown configuration option
-		echo "***Unknown configuration option***"
 		echo $x $y
-		echo "***Ignored***"
+		echo "***Unknown configuration option. Ignored.***"
 		;;
 	esac
     done < $SNAPTESTCFG
@@ -368,7 +367,6 @@ StartTime=`SecOfDay`
 
 # Process the configuration
 SNAPTEST_CONFIG
-echo STANDARD_OPT=$STANDARD_OPT
 
 # Do a checkout if one has not been done today
 # Also check MANIFEST file
@@ -393,9 +391,6 @@ fi
 
 # we can use the version of script in SNAPYARD/current now
 PROGNAME="$SNAPYARD/current/$PROGNAME"
-
-echo PROGNAME=$PROGNAME
-echo SNAPSHOT=$SNAPSHOT
 
 # Decide to do test for the local host or for remote hosts
 if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
