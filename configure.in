@@ -559,15 +559,27 @@ case "$CC_BASENAME" in
 	# exists.
 	PARALLEL=yes
 	AC_MSG_CHECKING(for mpirun)
-	CC_path=`type -path $CC`
-	CC_path=`echo $CC_path |sed -e 's/\/mpicc$//'`
-	if test -x $CC_path/mpirun; then
-	    AC_MSG_RESULT($CC_path/mpirun)
+
+	# Find the path where mpicc is located.
+	cmd=`echo $CC |cut -f1 -d' '`
+        if (echo $cmd |grep / >/dev/null); then
+	    path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
+	else
+	    for path in `echo $PATH |tr : ' '`; do
+		if test -x $path/$cmd; then
+		    break;
+		fi
+	    done
+	fi
+
+	# Is there an mpirun at that path?
+	if test -x $path/mpirun; then
+	    AC_MSG_RESULT($path/mpirun)
 	    if test "X-" = "X-$RUNSERIAL"; then
-	        RUNSERIAL="$CC_path/mpirun -np 1"
+	        RUNSERIAL="$path/mpirun -np 1"
             fi
 	    if test "X-" = "X-$RUNPARALLEL"; then
-	        RUNPARALLEL="$CC_path/mpirun -np \$\${NPROCS:=2}"
+	        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
 	    fi
 	else
 	    AC_MSG_RESULT(none)

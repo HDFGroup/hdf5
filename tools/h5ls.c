@@ -1666,7 +1666,7 @@ main (int argc, char *argv[])
     hid_t	file, plist=H5P_DEFAULT, root;
     const char	*fname = NULL;
     const char	*progname;
-    const char	*s;
+    const char	*s = NULL;
     char	*rest, *container=NULL;
     int		argno;
     H5G_stat_t	sb;

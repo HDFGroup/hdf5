@@ -1,1 +1,4 @@
+#							-*- shell-script -*-
+# This is the same as linux-gnulibc1
+
 . config/linux-gnulibc1

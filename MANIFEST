@@ -43,9 +43,11 @@
 ./config/BlankForm
 ./config/commence.in
 ./config/conclude.in
+./config/dec-flags
 ./config/dec-osf4.x
 ./config/depend.in
 ./config/freebsd
+./config/gnu-flags
 ./config/hpux10.20
 ./config/hpux9.03
 ./config/intel-osf1

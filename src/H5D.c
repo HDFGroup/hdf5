@@ -85,9 +85,7 @@ const H5D_xfer_t	H5D_xfer_dflt = {
 				 * Default to no upper limit on hyperslab
 				 * block size to cache
 				 */
-#ifdef HAVE_PARALLEL
     H5D_XFER_DFLT,      	/* Independent data transfer      	*/
-#endif
 };
 
 /* Interface initialization? */

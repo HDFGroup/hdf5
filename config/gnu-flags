@@ -1,0 +1,149 @@
+#							-*- shell-script -*-
+#
+# This file should be sourced into configure if the compiler is the
+# GNU gcc compiler or a derivative.  It is careful not to do anything
+# if the compiler is not GNU; otherwise `cc_flags_set' is set to `yes'
+#
+
+# Get the compiler version in a way that works for gcc, egcs, and
+# pgcc unless a compiler version is already known
+#
+#   cc_vendor:    The compiler name: gcc, egcs, or pgcc
+#   cc_version:   Version number: 2.91.60, 2.7.2.1
+#
+if test X = "X$cc_flags_set"; then
+    cc_version="`$CC $CFLAGS -v 2>&1 |grep 'gcc version' |\
+	        sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
+    cc_vendor=`echo $cc_version |sed 's/\([a-z]*\).*/\1/'`
+    cc_version=`echo $cc_version |sed 's/[-a-z]//g'`
+    if test X = "X$cc_vendor" -a X != "X$cc_version"; then
+	cc_vendor=gcc
+    fi
+    if test "-" != "$cc_vendor-$cc_version"; then
+	echo "compiler '$CC' is GNU $cc_vendor-$cc_version"
+    fi
+fi
+
+# Warn about old GNU compilers that don't work right.
+case "$cc_vendor-$cc_version" in
+    gcc-2.7.*)
+	cat <<EOF
+    **
+    ** This compiler may be unable to properly compile the long long
+    ** data type used extensively by hdf5, although specifying
+    ** --disable-hsizet for configure may work around those bugs.
+    ** There may be other code generation problems also, especially
+    ** when optimizations are enabled.  Please upgrade to at least GNU
+    ** gcc version 2.8.1 before reporting bugs to the HDF5 team.
+    **
+EOF
+	sleep 5
+	;;
+	    
+    pgcc-2.*)
+        v2=`echo $cc_version |cut -f2 -d.`
+	v3=`echo $cc_version |cut -f3 -d.`
+	v=`expr $v2 '*' 1000 + $v3`
+	if test $v -lt 91060; then
+	    cat <<EOF
+    **
+    ** This compiler may have problems allocating registers for long
+    ** long data types when optimizations are enabled. There may be
+    ** other code generation problems as well. Please upgrade to at
+    ** least pgcc-2.91.60 (egcs-1.1.1) before reporting bugs to the
+    ** HDF5 team.
+    **
+EOF
+	    sleep 5
+	fi
+	;;
+esac
+
+# Compiler flags
+case "$cc_vendor-$cc_version" in
+    gcc-2.7*)
+	# General
+	CFLAGS="$CFLAGS -ansi"
+
+	# Production
+	PROC_CFLAGS="-O3 $NOFP -finline-functions -Wno-shadow"
+	PROD_CPPFLAGS=
+
+	# Debug
+	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+
+	# Profile
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+
+    gcc-2.8.*)
+        # General
+        CFLAGS="$CFLAGS -Wsign-compare"
+
+	# Production
+	PROD_CFLAGS="$ARCH -O3 $NOFP -finline-functions -fschedule-insns2 -Wno-shadow"
+	PROD_CPPFLAGS=
+
+	# Debug
+	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+
+	# Profile
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+
+    egcs-2.*|pgcc-2.*)
+	# General
+	CFLAGS="$CFLAGS -Wsign-compare"
+
+	# Production
+	PROD_CFLAGS="$ARCH -O6 $NOFP -Wno-shadow"
+	PROD_CPPFLAGS=
+
+	# Debug
+	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+
+	# Profile
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+
+    gcc-*|egcs-*|pgcc-*)
+        # This must be some other GNU compiler that we don't know about.
+        # Just use fairly generic flags.
+
+	# Production
+	PROD_CFLAGS=-O
+	PROD_CPPFLAGS=
+
+	# Debug
+	DEBUG_CFLAGS=-g
+	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+
+	# Profile
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+esac
+
+# Clear cc info if no flags set
+if test X = "X$cc_flags_set"; then
+    cc_vendor=
+    cc_version=
+fi

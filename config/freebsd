@@ -5,4 +5,17 @@
 #
 # See BlankForm in this directory for details.
 
-. config/linux-gnulibc1
+# The default compiler is `gcc'
+if test "X-" = "X-$CC"; then
+    CC=gcc
+    CC_BASENAME=gcc
+fi
+
+# Architecture-specific flags
+ARCH=
+
+# Omit frame pointer for optimized code?
+NOFP=${NOFP:=-fomit-frame-pointer}
+
+# Figure out compiler flags
+. ./config/gnu-flags

@@ -4530,15 +4530,27 @@ case "$CC_BASENAME" in
 	PARALLEL=yes
 	echo $ac_n "checking for mpirun""... $ac_c" 1>&6
 echo "configure:4533: checking for mpirun" >&5
-	CC_path=`type -path $CC`
-	CC_path=`echo $CC_path |sed -e 's/\/mpicc$//'`
-	if test -x $CC_path/mpirun; then
-	    echo "$ac_t""$CC_path/mpirun" 1>&6
+
+	# Find the path where mpicc is located.
+	cmd=`echo $CC |cut -f1 -d' '`
+        if (echo $cmd |grep / >/dev/null); then
+	    path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
+	else
+	    for path in `echo $PATH |tr : ' '`; do
+		if test -x $path/$cmd; then
+		    break;
+		fi
+	    done
+	fi
+
+	# Is there an mpirun at that path?
+	if test -x $path/mpirun; then
+	    echo "$ac_t""$path/mpirun" 1>&6
 	    if test "X-" = "X-$RUNSERIAL"; then
-	        RUNSERIAL="$CC_path/mpirun -np 1"
+	        RUNSERIAL="$path/mpirun -np 1"
             fi
 	    if test "X-" = "X-$RUNPARALLEL"; then
-	        RUNPARALLEL="$CC_path/mpirun -np \$\${NPROCS:=2}"
+	        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
 	    fi
 	else
 	    echo "$ac_t""none" 1>&6
@@ -4564,7 +4576,7 @@ fi
 
 
 echo $ac_n "checking for parallel support files""... $ac_c" 1>&6
-echo "configure:4568: checking for parallel support files" >&5
+echo "configure:4580: checking for parallel support files" >&5
 case "X-$enable_parallel" in
     X-|X-no|X-none)
 	# Either we are not compiling for parallel or the header and library
@@ -4588,7 +4600,7 @@ case "X-$enable_parallel" in
 	# is missing.
 	PARALLEL=yes
 	echo $ac_n "checking for MPI_Init in -lmpich""... $ac_c" 1>&6
-echo "configure:4592: checking for MPI_Init in -lmpich" >&5
+echo "configure:4604: checking for MPI_Init in -lmpich" >&5
 ac_lib_var=`echo mpich'_'MPI_Init | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4596,7 +4608,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpich  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4600 "configure"
+#line 4612 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -4607,7 +4619,7 @@ int main() {
 MPI_Init()
 ; return 0; }
 EOF
-if { (eval echo configure:4611: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4623: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4656,10 +4668,10 @@ EOF
 
     # Display what we found about running programs
     echo $ac_n "checking how to run on one processor""... $ac_c" 1>&6
-echo "configure:4660: checking how to run on one processor" >&5
+echo "configure:4672: checking how to run on one processor" >&5
     echo "$ac_t""$RUNSERIAL" 1>&6
     echo $ac_n "checking how to run in parallel""... $ac_c" 1>&6
-echo "configure:4663: checking how to run in parallel" >&5
+echo "configure:4675: checking how to run in parallel" >&5
     echo "$ac_t""$RUNPARALLEL" 1>&6
 
     # There *must* be some way to run in parallel even if it's just the

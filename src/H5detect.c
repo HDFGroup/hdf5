@@ -842,8 +842,7 @@ bit.\n";
     /*
      * The file header: warning, copyright notice, build information.
      */
-    printf("/*\n * DO NOT EDIT OR DISTRIBUTE THIS FILE -- "
-           "IT IS MACHINE GENERATED!\n */\n\n");
+    printf("/* Generated automatically by H5detect -- do not edit */\n\n\n");
     puts(FileHeader);           /*the copyright notice--see top of this file */
 
     printf(" *\n * Created:\t\t%s %2d, %4d\n",

@@ -1,0 +1,62 @@
+#							-*- shell-script -*-
+#
+# This file should be sourced into configure if the compiler is a DEC
+# compiler.  It is careful not to do anything if the compiler is not
+# DEC; otherwise `cc_flags_set' is set to `yes'
+#
+
+# Get the compiler version unless it's already known.
+#
+#   cc_vendor:    The compiler vendor: DEC
+#   cc_version:   Version number, like: V5.2-038
+#
+if test X = "X$cc_flags_set"; then
+    cc_vendor=DEC
+    cc_version="`$CC $CFLAGS -V 2>&1 |head -1 |\
+	        sed 's/.*DEC C \(V[0-9][-\.0-9]*\).*/\1/'`"
+    if test X != "$gcc_version"; then
+	echo "compiler '$CC' is $cc_vendor-$cc_version"
+    else
+        cc_vendor=
+    fi
+fi
+
+# Warn about old compilers that don't work right.
+case "$cc_vendor-$cc_version" in
+    DEC-V5.2-038)
+        cat <<EOF
+    **
+    ** This compiler may generate incorrect code when optimizations are
+    ** enabled. Please upgrade to at newer version (we're not sure which
+    ** version actually works) before reporting bugs to the HDF5 team.
+    **
+EOF
+	sleep 5
+	;;
+esac
+
+# Compiler flags
+case "$cc_vendor-$cc_version" in
+    DEC-V5.*)
+	# Production
+	PROD_CFLAGS="-g0 -verbose -warnprotos -std -O4 $ARCH -ansi_args -fp_reorder -readonly_strings -inline speed"
+	PROD_CPPFLAGS="-D_INTRINSICS -D_INLINE_INTRINSICS"
+
+	# Debug
+	DEBUG_CFLAGS="-g -std -verbose -warnprotos"
+	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+
+	# Profile
+	PROFILE_CFLAGS="-pg -std -verbose -warnprotos"
+	PROFILE_CPPFLAGS=
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+esac
+
+# If no flags were set then clear the compiler vendor and version info.
+if test X = "X$cc_flags_set"; then
+    cc_vendor=
+    cc_version=
+fi
