@@ -4129,7 +4129,7 @@ test_select_combine(void)
 
     /* 'AND' "all" selection with another hyperslab */
     start[0]=start[1]=0;
-    stride[0]=stride[1]=1;
+    stride[0]=stride[1]=0;
     count[0]=count[1]=1;
     block[0]=block[1]=5;
     error=H5Sselect_hyperslab(space1,H5S_SELECT_AND,start,stride,count,block);
@@ -4263,7 +4263,7 @@ test_select_combine(void)
 
     /* 'OR' "none" selection with another hyperslab */
     start[0]=start[1]=0;
-    stride[0]=stride[1]=1;
+    stride[0]=stride[1]=0;
     count[0]=count[1]=1;
     block[0]=block[1]=5;
     error=H5Sselect_hyperslab(space1,H5S_SELECT_OR,start,stride,count,block);
@@ -4298,7 +4298,7 @@ test_select_combine(void)
 
     /* 'AND' "none" selection with another hyperslab */
     start[0]=start[1]=0;
-    stride[0]=stride[1]=1;
+    stride[0]=stride[1]=0;
     count[0]=count[1]=1;
     block[0]=block[1]=5;
     error=H5Sselect_hyperslab(space1,H5S_SELECT_AND,start,stride,count,block);
@@ -4318,7 +4318,7 @@ test_select_combine(void)
 
     /* 'XOR' "none" selection with another hyperslab */
     start[0]=start[1]=0;
-    stride[0]=stride[1]=1;
+    stride[0]=stride[1]=0;
     count[0]=count[1]=1;
     block[0]=block[1]=5;
     error=H5Sselect_hyperslab(space1,H5S_SELECT_XOR,start,stride,count,block);
@@ -4353,7 +4353,7 @@ test_select_combine(void)
 
     /* 'NOTB' "none" selection with another hyperslab */
     start[0]=start[1]=0;
-    stride[0]=stride[1]=1;
+    stride[0]=stride[1]=0;
     count[0]=count[1]=1;
     block[0]=block[1]=5;
     error=H5Sselect_hyperslab(space1,H5S_SELECT_NOTB,start,stride,count,block);
@@ -4373,7 +4373,7 @@ test_select_combine(void)
 
     /* 'NOTA' "none" selection with another hyperslab */
     start[0]=start[1]=0;
-    stride[0]=stride[1]=1;
+    stride[0]=stride[1]=0;
     count[0]=count[1]=1;
     block[0]=block[1]=5;
     error=H5Sselect_hyperslab(space1,H5S_SELECT_NOTA,start,stride,count,block);
