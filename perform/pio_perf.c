@@ -1117,7 +1117,7 @@ parse_command_line(int argc, char *argv[])
     cl_opts->h5_alignment = 1;      /* No alignment for HDF5 objects by default */
     cl_opts->h5_threshold = 1;      /* No threshold for aligning HDF5 objects by default */
     cl_opts->h5_use_chunks = FALSE; /* Don't chunk the HDF5 dataset by default */
-    cl_opts->h5_no_fill = FALSE;    /* Write fill values by default */
+    cl_opts->h5_no_fill = TRUE;    /* Write fill values by default */
     cl_opts->h5_write_only = FALSE; /* Do both read and write by default */
     cl_opts->h5_use_mpi_posix = FALSE; /* Don't use MPI-posix VFD for HDF5 I/O by default */
     cl_opts->verify = FALSE;        /* No Verify data correctness by default */
