@@ -97,6 +97,7 @@
 ./doc/html/IH_mapHead.gif
 ./doc/html/IOPipe.html
 ./doc/html/MemoryManagement.html	_DO_NOT_DISTRIBUTE_
+./doc/html/NCSAfooterlogo.gif
 ./doc/html/ObjectHeader.txt		_DO_NOT_DISTRIBUTE_
 ./doc/html/Properties.html
 ./doc/html/Ragged.html
@@ -133,6 +134,7 @@
 ./doc/html/group_p3.gif
 ./doc/html/group_p3.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/h5s.examples
+./doc/html/hdf2.jpg
 ./doc/html/ph5design.html
 ./doc/html/ph5example.c
 ./doc/html/ph5implement.txt
@@ -404,6 +406,11 @@
 ./tools/testfiles/thlink.dmp
 ./tools/testfiles/thlink.h5
 ./tools/testfiles/tloop-1.ddl
+./tools/testfiles/tloop.dmp
+./tools/testfiles/tloop.h5
+./tools/testfiles/tloop2.h5
+./tools/testfiles/tmany.h5
+./tools/testfiles/tmany.dmp
 ./tools/testfiles/tslink-1.ddl
 ./tools/testfiles/tslink-2.ddl
 ./tools/testfiles/tslink.dmp
