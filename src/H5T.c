@@ -5806,6 +5806,10 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 	}
     }
 
+    /* Does the new member overlap the end of the compound type? */
+    if(offset+total_size>parent->size)
+        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member extends past end of compound type");
+
     /* Increase member array if necessary */
     if (parent->u.compnd.nmembs >= parent->u.compnd.nalloc) {
         size_t na = parent->u.compnd.nalloc + H5T_COMPND_INC;
