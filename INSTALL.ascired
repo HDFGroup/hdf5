@@ -111,17 +111,10 @@ FROM SASN100,
 
 12) cd testpar
 
-13) /* edit testphdf5.c, change the following lines */
-    char    *filenames[]={ "pfs:/pfs/multi/tmp_1/your_own/ParaEg1.h5f",
-                           "pfs:/pfs/multi/tmp_1/your_own/ParaEg2.h5f",
-                           "pfs:/pfs/multi/tmp_1/your_own/ParaEg3.h5f" };
-
-    /* change "your_own" to your own directory name */
-    char    *filenames[]={ "pfs:/pfs/multi/tmp_1/my_dir/ParaEg1.h5f",
-                           "pfs:/pfs/multi/tmp_1/my_dir/ParaEg2.h5f",
-                           "pfs:/pfs/multi/tmp_1/my_dir/ParaEg3.h5f" };
+13) go through the README file.
 
 14) make -f Makefile.ascired
+
 
 When everything is finished compiling and linking,
 FROM JANUS, 
