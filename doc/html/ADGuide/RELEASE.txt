@@ -1,4 +1,4 @@
-HDF5 version 1.6.3-post0 released on Sun Oct 24 21:50:43 CDT 2004
+HDF5 version 1.6.3-post1 released on Sun Nov 14 21:33:40 CST 2004
 ================================================================================
 
 
@@ -51,7 +51,7 @@ New Features
 
     Tools:
     ------
-	      
+	- New tool, h5jam.  See reference manual.  2004/10/08	      
 
     F90 API:
     --------
