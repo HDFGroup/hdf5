@@ -18,6 +18,7 @@
 #include "H5Gprivate.h"
 #include "H5MMprivate.h"
 #include "H5Oprivate.h"
+#include "H5Pprivate.h"
 #include "H5Vprivate.h"
 
 const char *FILENAME[] = {
@@ -207,6 +208,7 @@ test_extend(H5F_t *f, const char *prefix,
     hsize_t		whole_size[3];
     hsize_t		nelmts;
     H5O_layout_t	layout;
+    H5P_genplist_t     *dc_plist=NULL;
 
     if (!nz) {
 	if (!ny) {
@@ -229,6 +231,12 @@ test_extend(H5F_t *f, const char *prefix,
     buf = H5MM_malloc(nx * ny * nz);
     check = H5MM_malloc(nx * ny * nz);
     whole = H5MM_calloc(nx*ny*nz);
+
+    /* Get the default dataset creation property list */
+    if(NULL == (dc_plist = H5I_object(H5P_DATASET_CREATE_DEFAULT))) {
+        printf("not a dset creation property list\n");
+	goto error;
+    }
 
     /* Build the new empty object */
     sprintf(name, "%s_%s", prefix, dims);
@@ -299,7 +307,7 @@ test_extend(H5F_t *f, const char *prefix,
 	memset(buf, (signed)(128+ctr), (size_t)nelmts);
 
 	/* Write to disk */
-	if (H5F_arr_write(f, H5P_DATASET_XFER_DEFAULT, &layout, NULL, NULL, NULL, size,
+	if (H5F_arr_write(f, H5P_DATASET_XFER_DEFAULT, &layout, dc_plist, size,
 			  size, zero, offset, buf)<0) {
 	    H5_FAILED();
 	    printf("    Write failed: ctr=%lu\n", (unsigned long)ctr);
@@ -308,7 +316,7 @@ test_extend(H5F_t *f, const char *prefix,
 
 	/* Read from disk */
 	memset(check, 0xff, (size_t)nelmts);
-	if (H5F_arr_read(f, H5P_DATASET_XFER_DEFAULT, &layout, NULL, NULL, NULL, size,
+	if (H5F_arr_read(f, H5P_DATASET_XFER_DEFAULT, &layout, dc_plist, size,
 			 size, zero, offset, check)<0) {
 	    H5_FAILED();
 	    printf("    Read failed: ctr=%lu\n", (unsigned long)ctr);
@@ -339,7 +347,7 @@ test_extend(H5F_t *f, const char *prefix,
 
     /* Now read the entire array back out and check it */
     memset(buf, 0xff, nx * ny * nz);
-    if (H5F_arr_read(f, H5P_DATASET_XFER_DEFAULT, &layout, NULL, NULL, NULL, whole_size,
+    if (H5F_arr_read(f, H5P_DATASET_XFER_DEFAULT, &layout, dc_plist, whole_size,
 		     whole_size, zero, zero, buf)<0) {
 	H5_FAILED();
 	puts("    Read failed for whole array.");
@@ -410,6 +418,7 @@ test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
     H5G_entry_t		handle;
     H5O_layout_t	layout;
     uint8_t		*buf = NULL;
+    H5P_genplist_t     *dc_plist=NULL;
 
     if (!nz) {
 	if (!ny) {
@@ -430,6 +439,13 @@ test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
     sprintf(s, "Testing istore sparse: %s", dims);
     printf("%-70s", s);
     buf = H5MM_malloc(nx * ny * nz);
+
+    /* Get the default dataset creation property list */
+    if(NULL == (dc_plist = H5I_object(H5P_DATASET_CREATE_DEFAULT))) {
+        printf("not a dset creation property list\n");
+	goto error;
+    }
+
 
     /* Build the new empty object */
     sprintf(name, "%s_%s", prefix, dims);
@@ -452,7 +468,7 @@ test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
 	memset(buf, (signed)(128+ctr), nx * ny * nz);
 
 	/* write to disk */
-	if (H5F_arr_write(f, H5P_DATASET_XFER_DEFAULT, &layout, NULL, NULL, NULL, size,
+	if (H5F_arr_write(f, H5P_DATASET_XFER_DEFAULT, &layout, dc_plist, size,
 			  size, zero, offset, buf)<0) {
 	    H5_FAILED();
 	    printf("    Write failed: ctr=%lu\n", (unsigned long)ctr);
