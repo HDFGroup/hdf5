@@ -249,6 +249,13 @@ dnl Is the GNU zlib present?  It has a header file `zlib.h' and a library
 dnl `-lz' and their locations might be specified with the `--enable-zlib'
 dnl command-line switch.  The value is an include path and/or a library path.
 dnl If the library path is specified then it must be preceded by a comma.
+
+dnl If the presence of zlib is already cached by the top-level configure,
+dnl then "uncache" it so that we will go through this logic in any case.
+dnl Some systems where you need to specify exactly where the zlib is need
+dnl this.
+ac_cv_lib_z_compress=""
+
 AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],
             ,withval=yes)
 case "$withval" in
