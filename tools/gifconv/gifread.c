@@ -116,7 +116,7 @@ BYTE         **MemGif2;     /* GIF image file input FILE stream           */
 {
     register WORD i;        /* Loop counter                               */
     WORD tableSize;         /* Number of entries in the Local Color Table */
-	BYTE Interlace;         /* PackedField & 0x20 gives information on interlacing */
+	/*BYTE Interlace; */        /* PackedField & 0x20 gives information on interlacing */
 	BYTE *TempPtr;
 	int	 ch , ch1;
 

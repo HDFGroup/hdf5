@@ -23,10 +23,11 @@ int write_text_attribute(hid_t dataset_id , char *attr_name , char *attr_value) 
 		
 	/* figure out size of the data */
 	attr_dims_size = strlen(attr_value) + 1;
+        
 
 	/* set the type to string */
 	attr_type_id = H5Tcopy(H5T_C_S1);
-	H5Tset_size(attr_type_id , attr_dims_size);
+	H5Tset_size(attr_type_id , (size_t)attr_dims_size);
 
 	/* create the dataspace for the attribute */
 	attr_dataspace_id = H5Screate_simple(1 , &attr_dims_size , NULL);
@@ -66,10 +67,10 @@ char     *GIFFileName;
 		ApplicationCount ,		/* number of application extensions */
 		PlainTextCount;			/* number of plain text extensions */
 
-	char ImageName[256],		/* Image name for the GR Image */
-		CommentName[256],
+	char ImageName[256];	/* Image name for the GR Image */
+	/*	CommentName[256],
 		ApplicationName[256],
-		PlainTextName[256];
+		PlainTextName[256]; */
 	
 	char GroupName[VSNAMELENMAX];	/* so that we can name the subgroups appropriately */
 	

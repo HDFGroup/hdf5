@@ -38,7 +38,6 @@ int ReadHDF(BYTE** data ,
 
 	hid_t pal_set;	/* dataset for palette */
 	hid_t pal_space;/* dataspace for palette */
-	hsize_t pal_size;	/* size of the palette */
 	
 	hsize_t datasize;	/* size of the image */
 
@@ -84,7 +83,7 @@ int ReadHDF(BYTE** data ,
 	datasize = image_size[0] * image_size[1];
 
 	/* allocate memory to store the image */
-	if ((*data = (BYTE*) malloc(datasize)) == NULL) {
+	if ((*data = (BYTE*) malloc((size_t)datasize)) == NULL) {
 		fprintf(stderr , "Out of memory, exiting");
 		return -1;
 	}
@@ -99,7 +98,6 @@ int ReadHDF(BYTE** data ,
 	if (pal_exist) {
 		hsize_t pal_size[2];
 		hsize_t pal_datasize;
-		CHAR *pal_path;
 
 		BYTE *temp_buf;
 		hsize_t temp_size;
@@ -131,7 +129,7 @@ int ReadHDF(BYTE** data ,
 		/* copy stuff into a temp buffer and then copy 256*3 elements to palette */
 		temp_size = H5Dget_storage_size(pal_set);
 		
-		temp_buf = (BYTE*) malloc (temp_size * sizeof(BYTE));
+		temp_buf = (BYTE*) malloc ((size_t)temp_size * sizeof(BYTE));
 
 		/* make sure that the palette is actually 256 X 3 so that we don't create overflows */
 		if (pal_datasize > 256 * 3)
@@ -150,7 +148,7 @@ int ReadHDF(BYTE** data ,
 		}
 
 		/* copy stuff into the actual palette */
-		memcpy(palette , temp_buf , pal_datasize);
+		memcpy(palette , temp_buf , (size_t)pal_datasize);
 
 		/* get rid of the temp memory */
 		cleanup(temp_buf);

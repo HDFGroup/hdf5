@@ -10,6 +10,7 @@
 
 #include "gif.h"
 #include <stdio.h>
+#include <assert.h>
 
 #define MAX_FILE_LEN 256
 #define MAX_NUMBER_IMAGES 50
@@ -188,12 +189,17 @@ int main(int argc , char **argv) {
 			return -1;
 		}
 				
-		w = dim_sizes[1];
+                assert(dim_sizes[0]==(hsize_t)((int)dim_sizes[0]));   
+                 assert(dim_sizes[1]==(hsize_t)((int)dim_sizes[1]));
+                RWidth = (int)dim_sizes[1];
+                RHeight = (int)dim_sizes[0];
+
+#ifdef UNUSED
+                w = dim_sizes[1];
 		h = dim_sizes[0];
 
-		RWidth  = dim_sizes[1];
-		RHeight = dim_sizes[0];
 		LeftOfs = TopOfs = 0;
+#endif /*UNUSED */
 
 		
 		/* If the first image does not have a palette, I make my own global color table
@@ -331,7 +337,7 @@ int main(int argc , char **argv) {
 
 		fputc (InitCodeSize , fpGif);
 		
-		i = hdfWriteGIF(fpGif , Image , 0 , dim_sizes[0] , dim_sizes[1] , r1, g1 , b1 , pc2nc , 256 , 8 , BitsPerPixel);
+		hdfWriteGIF(fpGif , Image , 0 , dim_sizes[0] , dim_sizes[1] , r1, g1 , b1 , pc2nc , 256 , 8 , BitsPerPixel);
 		fputc(0x00 , fpGif);		
 		free (Image);
 	} 
