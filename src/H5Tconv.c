@@ -2351,11 +2351,12 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 		/* If we are writing and there is a nested VL type, read 
 		 * the sequence into the background buffer */
 		if(dst->u.vlen.f!=NULL && H5T_detect_class(dst->parent,H5T_VLEN) 		    && bg!=NULL) {
-		    UINT32DECODE(bg, bg_seq_len);
+                    uint8_t *tmp=bg;
+		    UINT32DECODE(tmp, bg_seq_len);
 		    if(bg_seq_len>0) {
-			H5F_addr_decode(dst->u.vlen.f, (const uint8_t **)&bg,
+			H5F_addr_decode(dst->u.vlen.f, (const uint8_t **)&tmp,
 					&(bg_hobjid.addr));
-		    	INT32DECODE(bg, bg_hobjid.idx);
+		    	INT32DECODE(tmp, bg_hobjid.idx);
 		    	if(H5HG_read(dst->u.vlen.f,&bg_hobjid,tmp_buf)==NULL)
 			    HRETURN_ERROR (H5E_DATATYPE, H5E_READERROR, FAIL, 
 			    "can't read VL sequence into background buffer");
