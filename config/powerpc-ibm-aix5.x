@@ -8,11 +8,11 @@
 # Use -D_LARGE_FILES by default to support large file size.
 if test "X-" =  "X-$CC"; then
   if test "X-$enable_parallel" = "X-yes"; then
-    CC='mpcc_r -D_LARGE_FILES'
+    CC='mpcc_r -qlanglvl=ansi -D_LARGE_FILES'
     CC_BASENAME=mpcc_r
     RUNPARALLEL=${RUNPARALLEL="MP_PROCS=3 MP_TASKS_PER_NODE=3 poe"}
   else
-    CC='xlc -D_LARGE_FILES'
+    CC='xlc -qlanglvl=ansi -D_LARGE_FILES'
     CC_BASENAME=xlc
   fi
 fi
