@@ -4649,6 +4649,24 @@ static void gent_filters(void)
  ret=make_dset(fid,"nbit",sid,tid,dcpl,buf1);
  assert(ret>=0);
 #endif
+
+/*-------------------------------------------------------------------------
+ * scaleoffset
+ *-------------------------------------------------------------------------
+ */
+#if defined (H5_HAVE_FILTER_SCALEOFFSET)
+ /* remove the filters from the dcpl */
+ ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
+ assert(ret>=0);
+
+ /* set the scaleoffset filter */
+ ret=H5Pset_scaleoffset(dcpl,H5Tget_size(H5T_NATIVE_INT));
+ assert(ret>=0);
+
+ ret=make_dset(fid,"scaleoffset",sid,H5T_NATIVE_INT,dcpl,buf1);
+ assert(ret>=0);
+#endif
+
 /*-------------------------------------------------------------------------
  * all filters
  *-------------------------------------------------------------------------
@@ -4681,6 +4699,12 @@ static void gent_filters(void)
 #if defined (H5_HAVE_FILTER_FLETCHER32)
  /* set the checksum filter */
  ret=H5Pset_fletcher32(dcpl);
+ assert(ret>=0);
+#endif
+
+#if defined (H5_HAVE_FILTER_NBIT)
+ /* set the nbit filter */
+ ret=H5Pset_nbit(dcpl);
  assert(ret>=0);
 #endif
 

@@ -2352,6 +2352,10 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
     indentation(indent + COL);
     printf("%s\n", NBIT);
     break;
+   case H5Z_FILTER_SCALEOFFSET:
+    indentation(indent + COL);
+    printf("%s %s %s %d %s\n", SCALEOFFSET, BEGIN, SCALEOFFSET_MINBIT, cd_values[0], END);
+    break;
    default:
     indentation(indent + COL);
     if (H5Zfilter_avail(filtn))

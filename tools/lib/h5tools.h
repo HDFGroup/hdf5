@@ -483,6 +483,8 @@ extern FILE   *rawdatastream;       /*output stream for raw data            */
 #define FLETCHER32      "CHECKSUM FLETCHER32"
 #define SZIP            "COMPRESSION SZIP"
 #define NBIT            "COMPRESSION NBIT"
+#define SCALEOFFSET            "COMPRESSION SCALEOFFSET"
+#define SCALEOFFSET_MINBIT            "MIN BITS"
 #define STORAGE_LAYOUT  "STORAGE_LAYOUT"
 #define CONTIGUOUS      "CONTIGUOUS"
 #define COMPACT         "COMPACT"
