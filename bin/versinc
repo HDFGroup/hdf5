@@ -2,7 +2,7 @@
 require 5.003;
 use Cwd;
 
-($cwd)=(cwd()=~m#(.*?hdf5)/.*#)
+($cwd)=(cwd()=~m#(.*?hdf5)/.*#);
 print STDERR "$cwd\n";
 $foo2;
 $hdr = "$cwd/src/H5public.h";
