@@ -74,6 +74,16 @@ h4toh5 Utility
     HDF5 Objects":
        http://hdf.ncsa.uiuc.edu/HDF5/papers/H4-H5MappingGuidelines.pdf
 
+    Known Bugs:
+
+      The h4toh5 utility produces images that do not correctly conform
+      to the HDF5 Image and Palette Specification. 
+        http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html
+      Several required HDF5 attributes are omitted, and the dataspace 
+      is reversed (i.e., the ht. and width of the image dataset is 
+      incorrectly described.)  For more information, please see:
+        http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
+ 
     Known Limitations of the h4toh5 beta release
     ---------------------------------------------
 
@@ -441,3 +451,11 @@ Known Problems
   in the top level directory with the Cray-specific files from the 
   ftp://hdf.ncsa.uiuc.edu/pub/ougoing/hdf5/hdf5-1.4.0-beta/F90_source_for_Crays
   directory.
+
+* The h4toh5 utility produces images that do not correctly conform
+  to the HDF5 Image and Palette Specification. 
+      http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html
+  Several required HDF5 attributes are omitted, and the dataspace 
+  is reversed (i.e., the ht. and width of the image dataset is 
+  incorrectly described.)  For more information, please see:
+     http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
