@@ -5580,9 +5580,9 @@ H5S_hyper_select_contiguous(const H5S_t *space)
          *
          * OR
          *
-         * The selection must have only one block (i.e. count==1) and the block
-         * size must be 1 in all but the fastest changing dimension. (dubbed
-         * "small contiguous" block)
+         * The selection must have only one block (i.e. count==1) in all
+         * dimensions and the block size must be 1 in all but the fastest
+         * changing dimension. (dubbed "small contiguous" block)
          */
 
         /* Initialize flags */
@@ -5604,8 +5604,12 @@ H5S_hyper_select_contiguous(const H5S_t *space)
         /* If we didn't find a large contiguous block, check for a small one */
         if(large_contiguous==FALSE) {
             small_contiguous=TRUE;
-            for(u=0; u<(space->extent.u.simple.rank-1); u++) {
-                if(space->select.sel_info.hslab.diminfo[u].count>1 || space->select.sel_info.hslab.diminfo[u].block!=1) {
+            for(u=0; u<space->extent.u.simple.rank; u++) {
+                if(space->select.sel_info.hslab.diminfo[u].count>1) {
+                    small_contiguous=FALSE;
+                    break;
+                } /* end if */
+                if(u<(space->extent.u.simple.rank-1) && space->select.sel_info.hslab.diminfo[u].block!=1) {
                     small_contiguous=FALSE;
                     break;
                 } /* end if */
