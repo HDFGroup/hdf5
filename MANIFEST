@@ -403,10 +403,14 @@
 ./tools/testfiles/tcomp-3.ddl
 ./tools/testfiles/tcompound.h5
 ./tools/testfiles/tcompound2.h5
+./tools/testfiles/tdatareg.h5
+./tools/testfiles/tdatareg.ddl 
 ./tools/testfiles/tdset-1.ddl
 ./tools/testfiles/tdset-2.ddl
 ./tools/testfiles/tdset.h5
 ./tools/testfiles/tdset2.h5
+./tools/testfiles/tenum.h5
+./tools/testfiles/tenum.ddl
 ./tools/testfiles/tgroup-1.ddl
 ./tools/testfiles/tgroup-2.ddl
 ./tools/testfiles/tgroup.h5
@@ -420,6 +424,8 @@
 ./tools/testfiles/tloop.h5
 ./tools/testfiles/tloop2.h5
 ./tools/testfiles/tmany.h5
+./tools/testfiles/tobjref.h5
+./tools/testfiles/tobjref.ddl
 ./tools/testfiles/tslink-1.ddl
 ./tools/testfiles/tslink-2.ddl
 ./tools/testfiles/tslink.h5
