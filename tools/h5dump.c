@@ -280,7 +280,7 @@ H5G_stat_t statbuf;
             indentation (indent+COL);
             if (i >= 0) {
                 if (!type_table.objs[i].recorded) /* unamed data type */
-                    printf("\"#%lu:%lu\"\n", type_table.objs[i].objno[0],
+                    printf("\"/#%lu:%lu\"\n", type_table.objs[i].objno[0],
                                              type_table.objs[i].objno[1]);
                 else
                     printf("\"%s\"\n", type_table.objs[i].objname);
