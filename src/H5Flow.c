@@ -577,7 +577,7 @@ H5F_low_alloc (H5F_low_t *lf, intn op, hsize_t alignment, hsize_t threshold,
     intn	ret_value = FAIL;
     hsize_t	wasted;
     
-    FUNC_ENTER (H5MF_acceptable, FAIL);
+    FUNC_ENTER (H5F_low_alloc, FAIL);
     assert (lf);
     assert (alignment>0);
     assert (size>0);
