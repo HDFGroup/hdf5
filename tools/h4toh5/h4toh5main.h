@@ -32,6 +32,7 @@ Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
 #define H4TOH5MAIN_H
 #include "hdf.h"
 #include "mfhdf.h"
+#include "hfile.h"
 #include "hdf5.h"
 #include "h4toh5util.h"
 #include <fcntl.h>
@@ -85,14 +86,15 @@ int gen_h5comptype(int32,int32,size_t *,size_t*,hid_t*,hid_t*,hid_t,hid_t);
 int Sds_h4_to_h5(int32,int32,hid_t,hid_t);
 int sds_transattrs(int32, hid_t,int,int);
 int sdsdim_to_h5dataset(int32,int32,hid_t,hid_t,int32);
-
+int convert_sdsfillvalue(int32,int32,hid_t,hid_t);
+uint16 get_SDref(int32,uint16,int32);
 
 /*subroutines for h4toh5image.c*/
 int Image_h4_to_h5(int32,int32,hid_t,hid_t); 
 int gr_tranattrs(int32, hid_t,int,int);
 int gr_palette(int32,int32,hid_t,hid_t);
 int create_pal_objref(hid_t ,hid_t ,char *);
-
+uint16 get_RIref(int32,uint16,int32,uint16*);
 /*subroutines for h4toh5anno.c*/
 char* trans_tag_name(int32,ann_type);
 int Annofil_h4_to_h5(int32,hid_t);
