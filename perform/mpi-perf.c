@@ -56,7 +56,7 @@ int     opt_iter      = 1;
 int     opt_stripe    = -1;
 int     opt_correct   = 0;
 int     amode         = O_RDWR | O_CREAT;
-char    opt_file[256] = "/foo/test.out\0";
+char    opt_file[256] = "/tmp/test.out\0";
 char    opt_pvfstab[256] = "notset\0";
 int     opt_pvfstab_set = 0;
 
