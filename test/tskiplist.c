@@ -631,7 +631,62 @@ test_skiplist_iterate(void)
     ret=H5SL_close(slist);
     CHECK(ret, FAIL, "H5SL_close");
 
-} /* end test_skiplist_firstnext() */
+} /* end test_skiplist_iterate() */
+
+/****************************************************************
+**
+**  test_skiplist_hsize(): Test H5SL (skip list) code.
+**      Tests using hsize_t for keys in skip lists.
+** 
+****************************************************************/
+static void 
+test_skiplist_hsize(void)
+{
+    H5SL_t *slist;      /* Skip list created */
+    H5SL_node_t *node;  /* Skip list node */
+    size_t num;         /* Number of elements in skip list */
+    size_t u;           /* Local index variable */
+    hsize_t data[10]={ 10, 20, 15, 5, 50, 30, 31, 32, 80, 90};
+    hsize_t sorted_data[10]={ 5, 10, 15, 20, 30, 31, 32, 50, 80, 90};
+    hsize_t *found_item;    /* Item found in skip list */
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(7, ("Testing Skip List With hsize_t Keys\n"));
+
+    /* Create a skip list */
+    slist=H5SL_create(H5SL_TYPE_HSIZE, 0.5, 16);
+    CHECK(slist, NULL, "H5SL_create");
+
+    /* Check that the skip list has no elements */
+    num=H5SL_count(slist);
+    VERIFY(num, 0, "H5SL_count");
+
+    /* Insert objects into the skip list */
+    for(u=0; u<10; u++) {
+        ret=H5SL_insert(slist,&data[u],&data[u]);
+        CHECK(ret, FAIL, "H5SL_insert");
+    } /* end for */
+
+    /* Check that the skip list has correct # of elements */
+    num=H5SL_count(slist);
+    VERIFY(num, 10, "H5SL_count");
+
+    /* Iterate over all the nodes in the skip list */
+    node=H5SL_first(slist);
+    u=0;
+    while(node!=NULL) {
+        found_item=H5SL_item(node);
+        VERIFY(*found_item,sorted_data[u],"H5SL_next");
+        u++;
+        node=H5SL_next(node);
+    } /* end while */
+
+    /* Close the skip list */
+    ret=H5SL_close(slist);
+    CHECK(ret, FAIL, "H5SL_close");
+
+} /* end test_skiplist_hsize() */
 
 /****************************************************************
 **
@@ -656,6 +711,7 @@ test_skiplist(void)
     test_skiplist_firstnext();  /* Test iteration over skip list nodes with first/next */
     test_skiplist_string();     /* Test skip list string keys */
     test_skiplist_iterate();    /* Test iteration over skip list nodes with callback */
+    test_skiplist_hsize();      /* Test skip list hsize_t keys */
 
 }   /* end test_skiplist() */
 

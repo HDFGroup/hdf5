@@ -42,7 +42,8 @@ typedef struct H5SL_node_t H5SL_node_t;
 typedef enum {
     H5SL_TYPE_INT,      /* Skip list keys are 'int's */
     H5SL_TYPE_HADDR,    /* Skip list keys are 'haddr_t's */
-    H5SL_TYPE_STR       /* Skip list keys are 'char *'s (ie. strings) */
+    H5SL_TYPE_STR,      /* Skip list keys are 'char *'s (ie. strings) */
+    H5SL_TYPE_HSIZE     /* Skip list keys are 'hsize_t's */
 } H5SL_type_t;
 
 /**********/
@@ -59,7 +60,7 @@ typedef herr_t (*H5SL_operator_t)(void *item, void *key,
 /********************/
 H5_DLL H5SL_t *H5SL_create(H5SL_type_t type, double p, size_t max_level);
 H5_DLL size_t H5SL_count(H5SL_t *slist);
-H5_DLL herr_t H5SL_insert(H5SL_t *slist, void *item, void *key);
+H5_DLL herr_t H5SL_insert(H5SL_t *slist, void *item, const void *key);
 H5_DLL void *H5SL_remove(H5SL_t *slist, const void *key);
 H5_DLL void *H5SL_search(H5SL_t *slist, const void *key);
 H5_DLL H5SL_node_t *H5SL_first(H5SL_t *slist);

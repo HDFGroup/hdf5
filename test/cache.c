@@ -28,7 +28,6 @@ const char *FILENAME[] = {
 
 #define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
 
-#include "H5TBprivate.h"
 #include "H5Cpkg.h"
 
 /* with apologies for the abuse of terminology... */
