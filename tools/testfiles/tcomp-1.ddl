@@ -259,7 +259,7 @@ GROUP "/" {
    GROUP "group2" {
       DATASET "dset5" {
          DATATYPE {
-            "#5992:0"
+            "/#5992:0"
          }
          DATASPACE { SIMPLE ( 5 ) / ( 5 ) }
          DATA {
