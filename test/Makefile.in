@@ -12,7 +12,7 @@ CPPFLAGS=-I. -I../src @CPPFLAGS@
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
 TESTS=testhdf5 gheap hyperslab istore bittests dtypes dsets cmpd_dset extend \
-      external shtype links big
+      external shtype links big mtime
 TIMINGS=iopipe chunk
 
 # Temporary files
@@ -24,7 +24,7 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 	    gheap1.h5 gheap2.h5 gheap3.h5 gheap4.h5 shtype0.h5 shtype1.h5    \
 	    shtype2a.h5 shtype2b.h5 shtype3.h5 links.h5 chunk.h5 big.data    \
 	    big[0-9][0-9][0-9][0-9][0-9].h5 dtypes1.h5 dtypes2.h5 tattr.h5   \
-	    tselect.h5
+	    tselect.h5 mtime.h5
 
 # Source and object files for programs...  The TEST_SRC list contains all the
 # source files and is used for things like dependencies, archiving, etc.  The
@@ -32,7 +32,8 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 # overlap with other tests.
 TEST_SRC=testhdf5.c tattr.c tfile.c theap.c tmeta.c tohdr.c tselect.c tstab.c \
     th5s.c dtypes.c hyperslab.c istore.c dsets.c cmpd_dset.c extend.c \
-    external.c iopipe.c gheap.c shtype.c big.c links.c chunk.c bittests.c
+    external.c iopipe.c gheap.c shtype.c big.c links.c chunk.c bittests.c \
+    mtime.c
 TEST_OBJ=$(PROG_SRC:.c=.o)
 
 # Private header files (not to be installed)...
@@ -97,5 +98,8 @@ links: links.o ../src/libhdf5.a
 
 chunk: chunk.o ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ chunk.o ../src/libhdf5.a $(LIBS)
+
+mtime: mtime.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ mtime.o ../src/libhdf5.a $(LIBS)
 
 @CONCLUDE@

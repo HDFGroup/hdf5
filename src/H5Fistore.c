@@ -1688,21 +1688,32 @@ H5F_istore_stats (H5F_t *f, hbool_t headers)
 		"-----", "----", "------", "--------", "-----", "-------");
     }
 
-    if (rdcc->nhits>0 || rdcc->nmisses>0) {
-	miss_rate = 100.0 * rdcc->nmisses /
-			(rdcc->nhits + rdcc->nmisses);
-    } else {
-	miss_rate = 0.0;
+#ifndef H5AC_DEBUG
+    /*
+     * If we're not debugging the H5AC layer then print these statistics only
+     * if we printed the headers that go with them.
+     */
+    if (headers) {
+#endif
+	if (rdcc->nhits>0 || rdcc->nmisses>0) {
+	    miss_rate = 100.0 * rdcc->nmisses /
+			    (rdcc->nhits + rdcc->nmisses);
+	} else {
+	    miss_rate = 0.0;
+	}
+	if (miss_rate > 100) {
+	    sprintf(ascii, "%7d%%", (int) (miss_rate + 0.5));
+	} else {
+	    sprintf(ascii, "%7.2f%%", miss_rate);
+	}
+
+	fprintf(stderr, "   %-18s %8u %8u %7s %8d+%-9ld\n",
+		"raw data chunks", rdcc->nhits, rdcc->nmisses, ascii,
+		rdcc->ninits, (long)(rdcc->nflushes)-(long)(rdcc->ninits));
+#ifndef H5AC_DEBUG
     }
-    if (miss_rate > 100) {
-	sprintf(ascii, "%7d%%", (int) (miss_rate + 0.5));
-    } else {
-	sprintf(ascii, "%7.2f%%", miss_rate);
-    }
-    
-    fprintf(stderr, "   %-18s %8u %8u %7s %8d+%-9ld\n",
-	    "raw data chunks", rdcc->nhits, rdcc->nmisses, ascii,
-	    rdcc->ninits, (long)(rdcc->nflushes)-(long)(rdcc->ninits));
+#endif
+
     FUNC_LEAVE (SUCCEED);
 }
 
@@ -1823,7 +1834,9 @@ H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
     uint8		*chunk=NULL;
     intn		idx_hint=0;
     size_t		chunk_size;
+#ifdef AKC
     H5F_istore_ud1_t	udata;
+#endif
     
     FUNC_ENTER(H5F_istore_allocate, FAIL);
 #ifdef AKC

@@ -845,15 +845,18 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_debug(H5F_t *f)
+H5AC_debug(H5F_t __unused__ *f)
 {
+#ifdef H5AC_DEBUG
     H5AC_subid_t            i;
     char                    s[32], ascii[32];
     H5AC_t                 *cache = f->shared->cache;
     double                  miss_rate;
+#endif
 
     FUNC_ENTER(H5AC_debug, FAIL);
 
+#ifdef H5AC_DEBUG
     fprintf(stderr, "H5AC: meta data cache statistics for file %s\n", f->name);
     fprintf(stderr, "   %-18s %8s %8s %8s %8s+%-8s\n",
             "Layer", "Hits", "Misses", "MissRate", "Inits", "Flushes");
@@ -904,6 +907,7 @@ H5AC_debug(H5F_t *f)
 		((long)(cache->diagnostics[i].nflushes) -
 		 (long)(cache->diagnostics[i].ninits)));
     }
+#endif
 
     FUNC_LEAVE(SUCCEED);
 }
