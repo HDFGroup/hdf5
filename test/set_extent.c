@@ -40,7 +40,7 @@ int main( void )
  int     buf1[ 70 ][ 70 ];
  int     buf2[ 90 ][ 90 ];
  int     i, j, n = 0;
- int     fillvalue = 0;   /* Fill value for the dataset */
+ int     fillvalue = 1;   /* Fill value for the dataset */
  
  
  for( i = 0; i < 90; i++ )

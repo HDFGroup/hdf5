@@ -2940,7 +2940,11 @@ H5F_istore_initialize_by_extent(H5F_t *f, const H5O_layout_t *layout,
 		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to select hyperslab");
 
 	    /* Fill the selection in the memory buffer */
-	    if(H5S_select_fill(fill.buf, fill.size, space_chunk, chunk) < 0)
+            /* Use the size of the elements in the chunk directly instead of */
+            /* relying on the fill.size, which might be set to 0 if there is */
+            /* no fill-value defined for the dataset -QAK */
+            H5_CHECK_OVERFLOW(size[rank],hsize_t,size_t);
+	    if(H5S_select_fill(fill.buf, (size_t)size[rank], space_chunk, chunk) < 0)
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed");
 
 	    if(H5F_istore_unlock(f, dxpl_id, layout, &pline, TRUE,
