@@ -1572,10 +1572,10 @@ void test_datareg(void){
     free(drbuf);
 
 }
-void test_nestcomp(){
+void test_nestcomp(void){
 
 	hid_t file,space,type,type2,dataset;
-	int i, maxdim = 5, status;
+	int i, maxdim = 5;
 	hsize_t dim = 5;
 	int y = 1;
 
@@ -1616,13 +1616,13 @@ void test_nestcomp(){
      */
     type = H5Tcreate (H5T_COMPOUND, sizeof(complex_t));
 
-    status = H5Tinsert(type, "re", HOFFSET(complex_t, re), H5T_NATIVE_DOUBLE);
-    status = H5Tinsert(type, "im", HOFFSET(complex_t, im), H5T_NATIVE_DOUBLE);
+    H5Tinsert(type, "re", HOFFSET(complex_t, re), H5T_NATIVE_DOUBLE);
+    H5Tinsert(type, "im", HOFFSET(complex_t, im), H5T_NATIVE_DOUBLE);
 
     type2 = H5Tcreate (H5T_COMPOUND, sizeof(surf_t));
 
-    status = H5Tinsert(type2, "x", HOFFSET(surf_t, x), type);
-    status = H5Tinsert(type2, "y", HOFFSET(surf_t, y), type);
+    H5Tinsert(type2, "x", HOFFSET(surf_t, x), type);
+    H5Tinsert(type2, "y", HOFFSET(surf_t, y), type);
 
     /* 
      * Create the dataset.
