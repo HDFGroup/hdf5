@@ -89,7 +89,11 @@ SIZE_T='SELECTED_INT_KIND(R_INTEGER)'
 OBJECT_NAMELEN_DEFAULT_F=-1
 
 if test "X-" = "X-$F9X"; then
+  if test "X-$enable_parallel" = "X-yes"; then
+    F9X=mpxlf_r
+  else
     F9X=xlf
+  fi
 fi
 
 if test "X-" = "X-$f9x_flags_set"; then
