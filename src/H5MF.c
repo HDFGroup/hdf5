@@ -300,8 +300,8 @@ void H5MF_free_reserved(H5F_t *f, hsize_t size)
  */
 int H5MF_alloc_overflow(H5F_t *f, hsize_t size)
 {
-    unsigned long long space_needed;    /* Accumulator variable */
-    hsize_t c;
+    hsize_t space_needed;    /* Accumulator variable */
+    size_t c;
 
     /* Start with the current end of the file's address. */
     space_needed = f->shared->lf->cls->get_eoa(f->shared->lf);

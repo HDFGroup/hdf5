@@ -395,5 +395,7 @@ main(void)
    rsrv_ohdr();
    rsrv_heap();
    rsrv_vlen();
+
+   return 0;
 }
 
