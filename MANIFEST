@@ -22,6 +22,7 @@
 ./configure
 ./configure.in
 ./all.zip
+./all_withhdf4.zip
 
 ./bin/checkapi				_DO_NOT_DISTRIBUTE_
 ./bin/checkposix			_DO_NOT_DISTRIBUTE_
