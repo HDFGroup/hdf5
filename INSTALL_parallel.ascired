@@ -55,4 +55,4 @@ MPI_LIB="$mpi1_lib $mpio_lib"
 CPPFLAGS=$MPI_INC \
 LDFLAGS=$MPI_LIB \
 LIBS="-lmpich" \
-./configure --enable-parallel tflop 
+./configure --enable-parallel tflop $@
