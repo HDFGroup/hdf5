@@ -260,7 +260,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id/*unused*/,
     if (H5F_ACC_EXCL & flags) o_flags |= O_EXCL;
     /* Open the file */
 
-    if ((fd=open(name, o_flags, 0666))<0) return NULL;
+    if ((fd=HDopen(name, o_flags, 0666))<0) return NULL;
     if (fstat(fd, &sb)<0) {
 	close(fd);
 	return NULL;
