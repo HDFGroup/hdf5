@@ -2590,7 +2590,7 @@ H5F_close(H5F_t *f)
                 do {
                     /* Allocate space for the IDs of objects still currently open */
                     if((oid_list = H5MM_malloc(oid_count*sizeof(hid_t)))==NULL)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                     /* Get the list of IDs of open objects */
                     if(H5F_get_obj_ids(f, H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE, oid_list) < 0)

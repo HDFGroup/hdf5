@@ -2481,7 +2481,7 @@ herr_t
 H5FDflush(H5FD_t *file, unsigned closing)
 {
     FUNC_ENTER(H5FDflush, FAIL);
-    H5TRACE1("e","x",file);
+    H5TRACE2("e","xIu",file,closing);
 
     /* Check args */
     if (!file || !file->cls) {

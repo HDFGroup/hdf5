@@ -6423,7 +6423,7 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                         *((float*)d) = -FLT_MAX;
                     }
                 } else {
-                    *((float*)d) = *((double*)s);
+                    *((float*)d) = (float) *((double*)s);
                 }
 
                 /* Unalign destination */
