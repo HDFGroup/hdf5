@@ -35,10 +35,10 @@ static herr_t H5O_sdspace_free (void *_mesg);
 static herr_t H5O_sdspace_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 				FILE * stream, int indent, int fwidth);
 
-/* This message derives from H5O, for old dataspace before version 1.7  */
+/* This message derives from H5O */
 const H5O_class_t H5O_SDSPACE[1] = {{
     H5O_SDSPACE_ID,	    	/* message id number		    	*/
-    "extent_dspace",	    	/* message name for debugging	   	*/
+    "simple_dspace",	    	/* message name for debugging	   	*/
     sizeof(H5S_extent_t),   	/* native message size		    	*/
     H5O_sdspace_decode,	    	/* decode message			*/
     H5O_sdspace_encode,	    	/* encode message			*/
@@ -73,7 +73,7 @@ H5FL_ARR_EXTERN(hsize_t);
  NAME
     H5O_sdspace_decode
  PURPOSE
-    Decode an extent dimensionality message and return a pointer to a memory
+    Decode a simple dimensionality message and return a pointer to a memory
 	struct with the decoded information
  USAGE
     void *H5O_sdspace_decode(f, raw_size, p)
@@ -83,14 +83,22 @@ H5FL_ARR_EXTERN(hsize_t);
  RETURNS
     Pointer to the new message in native order on success, NULL on failure
  DESCRIPTION
-	This function decodes the "raw" disk form of an extent dimensionality
+	This function decodes the "raw" disk form of a simple dimensionality
     message into a struct in memory native format.  The struct is allocated
     within this function using malloc() and is returned to the caller.
 
  MODIFICATIONS
-    Raymond Lu
-    April 8, 2004
-    Added the type of dataspace into this header message using a reserved byte.
+	Robb Matzke, 1998-04-09
+	The current and maximum dimensions are now H5F_SIZEOF_SIZET bytes
+	instead of just four bytes.
+ 
+  	Robb Matzke, 1998-07-20
+        Added a version number and reformatted the message for aligment.
+
+        Raymond Lu
+        April 8, 2004
+        Added the type of dataspace into this header message using a reserved
+        byte.
 
 --------------------------------------------------------------------------*/
 static void *
@@ -110,23 +118,34 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_
 
     /* decode */
     if ((sdim = H5FL_CALLOC(H5S_extent_t)) != NULL) {
+        /* Check version */
         version = *p++;
         if (version!=H5O_SDSPACE_VERSION && version!=H5O_SDSPACE_VERSION_2)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "wrong version number in data space message");
-        if(version==H5O_SDSPACE_VERSION_2)
-            sdim->type = *p++;
-        else
-            sdim->type = H5S_NO_CLASS;
+
+        /* Get rank */
         sdim->u.simple.rank = *p++;
         if (sdim->u.simple.rank>H5S_MAX_RANK)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "simple data space dimensionality is too large");
+
+        /* Get dataspace flags for later */
         flags = *p++;
+
+        /* Get the type of the extent */
+        if(version>=H5O_SDSPACE_VERSION_2)
+            sdim->type = *p++;
+        else {
+            /* Set the dataspace type to be simple or scalar as appropriate */
+            if(sdim->u.simple.rank>0)
+                sdim->type = H5S_SIMPLE;
+            else
+                sdim->type = H5S_SCALAR;
+
+            /* Increment past reserved byte */
+            p++;
+        } /* end else */
         
-        if(version==H5O_SDSPACE_VERSION) {
-            p += 5; /*reserved*/
-        } else if(version==H5O_SDSPACE_VERSION_2) {
-            p += 4; /*reserved*/
-        }
+        p += 4; /*reserved*/
         
         if (sdim->u.simple.rank > 0) {
             if (NULL==(sdim->u.simple.size=H5FL_ARR_MALLOC(hsize_t,sdim->u.simple.rank)))
@@ -148,6 +167,14 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_
             }
 #endif /* LATER */
         }
+
+        /* Compute the number of elements in the extent */
+        if(sdim->type == H5S_NULL)
+            sdim->nelem = 0;
+        else {
+            for(i=0, sdim->nelem=1; i<sdim->u.simple.rank; i++)
+                sdim->nelem*=sdim->u.simple.size[i];
+        }
     }
 
     /* Set return value */
@@ -155,7 +182,7 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_
     
 done:
     if (!ret_value && sdim) {
-        H5S_release_extent(sdim);
+        H5S_extent_release(sdim);
         H5FL_FREE(H5S_extent_t,sdim);
     } /* end if */
 
@@ -167,7 +194,7 @@ done:
  NAME
     H5O_sdspace_encode
  PURPOSE
-    Encode an extent dimensionality message 
+    Encode a simple dimensionality message 
  USAGE
     herr_t H5O_sdspace_encode(f, raw_size, p, mesg)
 	H5F_t *f;	        IN: pointer to the HDF5 file struct
@@ -181,9 +208,17 @@ done:
     dimensionality message in the "raw" disk form.
 
  MODIFICATIONS
-    Raymond Lu
-    April 8, 2004
-    Added the type of dataspace into this header message using a reserved byte.
+	Robb Matzke, 1998-04-09
+	The current and maximum dimensions are now H5F_SIZEOF_SIZET bytes
+	instead of just four bytes.
+ 
+  	Robb Matzke, 1998-07-20
+        Added a version number and reformatted the message for aligment.
+
+        Raymond Lu
+        April 8, 2004
+        Added the type of dataspace into this header message using a reserved
+        byte.
 
 --------------------------------------------------------------------------*/
 static herr_t
@@ -210,10 +245,16 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
 #endif
 
     /* encode */
-    *p++ = H5O_SDSPACE_VERSION_2;
-    *p++ = sdim->type;
+    if(sdim->type!=H5S_NULL)
+        *p++ = H5O_SDSPACE_VERSION;
+    else
+        *p++ = H5O_SDSPACE_VERSION_2;
     *p++ = sdim->u.simple.rank;
     *p++ = flags;
+    if(sdim->type!=H5S_NULL)
+        *p++ = 0; /*reserved*/
+    else
+        *p++ = sdim->type;
     *p++ = 0; /*reserved*/
     *p++ = 0; /*reserved*/
     *p++ = 0; /*reserved*/
@@ -251,7 +292,7 @@ done:
  RETURNS
     Pointer to DEST on success, NULL on failure
  DESCRIPTION
-	This function copies a native (memory) extent dimensionality message,
+	This function copies a native (memory) simple dimensionality message,
     allocating the destination structure if necessary.
  MODIFICATIONS
     Raymond Lu
@@ -314,11 +355,14 @@ done:
  RETURNS
     Size of message on success, zero on failure
  DESCRIPTION
-	This function returns the size of the raw extent dimensionality message on
+	This function returns the size of the raw simple dimensionality message on
     success.  (Not counting the message type or size fields, only the data
     portion of the message).  It doesn't take into account alignment.
 
  MODIFICATIONS
+	Robb Matzke, 1998-04-09
+	The current and maximum dimensions are now H5F_SIZEOF_SIZET bytes
+	instead of just four bytes.
 --------------------------------------------------------------------------*/
 static size_t
 H5O_sdspace_size(H5F_t *f, const void *mesg)
@@ -332,18 +376,16 @@ H5O_sdspace_size(H5F_t *f, const void *mesg)
 
     FUNC_ENTER_NOAPI(H5O_sdspace_size, 0);
 
-    if(space->type != H5S_NULL) {
-        /* add in the dimension sizes */
-        ret_value += space->u.simple.rank * H5F_SIZEOF_SIZE (f);
+    /* add in the dimension sizes */
+    ret_value += space->u.simple.rank * H5F_SIZEOF_SIZE (f);
 
-        /* add in the space for the maximum dimensions, if they are present */
-        ret_value += space->u.simple.max ? space->u.simple.rank * H5F_SIZEOF_SIZE (f) : 0;
+    /* add in the space for the maximum dimensions, if they are present */
+    ret_value += space->u.simple.max ? space->u.simple.rank * H5F_SIZEOF_SIZE (f) : 0;
 
 #ifdef LATER
-        /* add in the space for the dimension permutations, if they are present */
-        ret_value += space->u.simple.perm ? space->u.simple.rank * 4 : 0;
+    /* add in the space for the dimension permutations, if they are present */
+    ret_value += space->u.simple.perm ? space->u.simple.rank * 4 : 0;
 #endif
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -373,7 +415,7 @@ H5O_sdspace_reset(void *_mesg)
     
     FUNC_ENTER_NOAPI(H5O_sdspace_reset, FAIL);
 
-    H5S_release_extent(mesg);
+    H5S_extent_release(mesg);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -414,7 +456,7 @@ done:
  NAME
     H5O_sdspace_debug
  PURPOSE
-    Prints debugging information for an extent dimensionality message
+    Prints debugging information for a simple dimensionality message
  USAGE
     void *H5O_sdspace_debug(f, mesg, stream, indent, fwidth)
 	H5F_t *f;	        IN: pointer to the HDF5 file struct

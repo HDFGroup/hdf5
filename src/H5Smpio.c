@@ -104,17 +104,22 @@ H5S_mpio_all_type( const H5S_t *space, size_t elmt_size,
 		     hbool_t *is_derived_type )
 {
     hsize_t	total_bytes;
+    hssize_t	snelmts;                /*total number of elmts	(signed) */
+    hsize_t	nelmts;                 /*total number of elmts	*/
     unsigned		u;
+    herr_t		ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_mpio_all_type);
+    FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_all_type);
 
     /* Check args */
     assert (space);
 
     /* Just treat the entire extent as a block of bytes */
-    total_bytes = (hsize_t)elmt_size;
-    for (u=0; u<space->extent.u.simple.rank; ++u)
-        total_bytes *= space->extent.u.simple.size[u];
+    if((snelmts = H5S_get_simple_extent_npoints(space))<0)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
+    H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
+
+    total_bytes = (hsize_t)elmt_size*nelmts;
 
     /* fill in the return values */
     *new_type = MPI_BYTE;
@@ -122,7 +127,8 @@ H5S_mpio_all_type( const H5S_t *space, size_t elmt_size,
     *extra_offset = 0;
     *is_derived_type = 0;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5S_mpio_all_type() */
 
 

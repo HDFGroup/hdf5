@@ -52,7 +52,7 @@
 
 /* Header message IDs */
 #define H5O_NULL_ID	0x0000          /* Null Message.  */
-#define H5O_SDSPACE_ID	0x0001          /* Extent Dataspace Message.*/
+#define H5O_SDSPACE_ID	0x0001          /* Simple Dataspace Message.  */
 /* Complex dataspace is/was planned for message 0x0002 */
 #define H5O_DTYPE_ID	0x0003          /* Datatype Message.  */
 #define H5O_FILL_ID     0x0004          /* Fill Value Message. (Old)  */

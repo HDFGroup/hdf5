@@ -181,47 +181,18 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
     if (NULL==(attr->ds = H5FL_CALLOC(H5S_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     
-    if((extent=(H5O_SDSPACE->decode)(f,dxpl_id,p,NULL))!=NULL) {
-        unsigned i;     /* Local index variable */
+    if((extent=(H5O_SDSPACE->decode)(f,dxpl_id,p,NULL))==NULL)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace");
 
-        if(extent->type != H5S_NO_CLASS) {  /* File is new, created by version 1.7 or after */
-            /* Compute the number of elements in the extent */
-            if(extent->type == H5S_NULL)
-                extent->nelem = 0;
-            else {
-                for(i=0, extent->nelem=1; i<extent->u.simple.rank; i++)
-                    extent->nelem*=extent->u.simple.size[i];
-            }
-        } else { /* File was created by version 1.6 or before, when there was no H5S_NULL */
-            /* Set the dataspace type to be simple or scalar as appropriate */
-            if(extent->u.simple.rank>0)
-                extent->type = H5S_SIMPLE;
-            else
-                extent->type = H5S_SCALAR;
+    /* Copy the extent information */
+    HDmemcpy(&(attr->ds->extent),extent, sizeof(H5S_extent_t));
 
-            /* Compute the number of elements in the extent */
-            for(i=0, extent->nelem=1; i<extent->u.simple.rank; i++)
-                extent->nelem*=extent->u.simple.size[i];
-        }
-
-        /* Copy the extent information */
-        HDmemcpy(&(attr->ds->extent),extent, sizeof(H5S_extent_t));
-
-        /* Release temporary extent information */
-        H5FL_FREE(H5S_extent_t,extent);
-    } else {
-        attr->ds->extent.type = H5S_NULL;
-        attr->ds->extent.nelem = 0;
-    }
+    /* Release temporary extent information */
+    H5FL_FREE(H5S_extent_t,extent);
    
-    if(attr->ds->extent.type == H5S_NULL) {
-         if(H5S_select_none(attr->ds)<0)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set none selection");
-    } else {
-        /* Default to entire dataspace being selected */
-        if(H5S_select_all(attr->ds,0)<0)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
-    }
+    /* Default to entire dataspace being selected */
+    if(H5S_select_all(attr->ds,0)<0)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
 
     if(version < H5O_ATTR_VERSION_NEW)
         p += H5O_ALIGN(attr->ds_size);

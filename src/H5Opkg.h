@@ -109,7 +109,7 @@ typedef struct H5O_t {
 H5_DLLVAR const H5O_class_t H5O_NULL[1];
 
 /*
- * Extent Data Space Message.
+ * Simple Data Space Message.
  */
 H5_DLLVAR const H5O_class_t H5O_SDSPACE[1];
 

@@ -254,9 +254,6 @@ H5Sget_select_npoints(hid_t spaceid)
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
 
-    if (space->extent.type == H5S_NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace");
-
     ret_value = H5S_get_select_npoints(space);
 
 done:
@@ -330,9 +327,6 @@ H5Sselect_valid(hid_t spaceid)
     /* Check args */
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataspace");
-
-    if (space->extent.type == H5S_NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace");
 
     ret_value = H5S_select_valid(space);
 
@@ -914,7 +908,7 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
     iter_init=1;	/* Selection iteration info has been initialized */
 
     /* Get the number of elements in selection */
-    if((nelmts = (*space->select.get_npoints)(space))<0)
+    if((nelmts = H5S_get_select_npoints(space))<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements selected");
 
     /* Get the rank of the dataspace */
@@ -1333,7 +1327,7 @@ H5S_select_fill(void *_fill, size_t fill_size, const H5S_t *space, void *_buf)
     iter_init=1;	/* Selection iteration info has been initialized */
 
     /* Get the number of elements in selection */
-    if((nelmts = (*space->select.get_npoints)(space))<0)
+    if((nelmts = H5S_get_select_npoints(space))<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements selected");
 
     /* Compute the number of bytes to process */
@@ -1850,11 +1844,11 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, const H5D_dcpl_cache_t *dc
     /* Get number of bytes in selection */
 #ifndef NDEBUG
     {
-        hsize_t tmp_maxbytes=(*file_space->select.get_npoints)(file_space)*elmt_size;
+        hsize_t tmp_maxbytes=H5S_get_select_npoints(file_space)*elmt_size;
         H5_ASSIGN_OVERFLOW(maxbytes,tmp_maxbytes,hsize_t,size_t);
     }
 #else /* NDEBUG */
-    maxbytes=(size_t)((*file_space->select.get_npoints)(file_space)*elmt_size);
+    maxbytes=(size_t)(H5S_get_select_npoints(file_space)*elmt_size);
 #endif /* NDEBUG */
 
     /* Initialize sequence counts */
@@ -2018,11 +2012,11 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_ca
     /* Get number of bytes in selection */
 #ifndef NDEBUG
     {
-        hsize_t tmp_maxbytes=(*file_space->select.get_npoints)(file_space)*elmt_size;
+        hsize_t tmp_maxbytes=H5S_get_select_npoints(file_space)*elmt_size;
         H5_ASSIGN_OVERFLOW(maxbytes,tmp_maxbytes,hsize_t,size_t);
     }
 #else /* NDEBUG */
-    maxbytes=(size_t)((*file_space->select.get_npoints)(file_space)*elmt_size);
+    maxbytes=(size_t)(H5S_get_select_npoints(file_space)*elmt_size);
 #endif /* NDEBUG */
 
     /* Initialize sequence counts */

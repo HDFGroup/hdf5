@@ -28,7 +28,7 @@ static H5S_t * H5S_create(H5S_class_t type);
 static herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank,
     const hsize_t *dims, const hsize_t *max);
 static htri_t H5S_is_simple(const H5S_t *sdim);
-static herr_t H5S_extent_release(H5S_t *ds);
+static herr_t H5S_release_simple(H5S_simple_t *simple);
 
 /* Interface initialization */
 #define PABLO_MASK	H5S_mask
@@ -52,9 +52,6 @@ static size_t			H5S_nconv_g = 0;	/*entries used*/
 /* Global vars whose value can be set from environment variable also */
 hbool_t H5S_mpi_opt_types_g = TRUE;
 #endif /* H5_HAVE_PARALLEL */
-
-/* Declare a free list to manage the H5S_simple_t struct */
-H5FL_DEFINE(H5S_simple_t);
 
 /* Declare a free list to manage the H5S_extent_t struct */
 H5FL_DEFINE(H5S_extent_t);
@@ -310,23 +307,18 @@ H5S_create(H5S_class_t type)
         switch(type) {
             case H5S_SCALAR:
                 ret_value->extent.nelem = 1;
-                if(H5S_select_all(ret_value,0)<0)
-                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
                 break;
             case H5S_SIMPLE:
-                ret_value->extent.nelem = 0;
-                if(H5S_select_all(ret_value,0)<0)
-                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
-                break;
             case H5S_NULL:
                 ret_value->extent.nelem = 0;
-                if(H5S_select_none(ret_value)<0)
-                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set selection to none");
                 break;
             default:
                 assert("unknown dataspace (extent) type" && 0);
                 break;
         } /* end switch */
+
+        if(H5S_select_all(ret_value,0)<0)
+            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
     } /* end if */
 
 done:
@@ -396,17 +388,17 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5S_extent_release(H5S_t *ds)
+herr_t
+H5S_extent_release(H5S_extent_t *extent)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_extent_release, FAIL);
 
-    assert(ds);
+    assert(extent);
 
     /* release extent */
-    switch (ds->extent.type) {
+    switch (extent->type) {
         case H5S_NO_CLASS:
             /*nothing needed */
             break;
@@ -417,7 +409,7 @@ H5S_extent_release(H5S_t *ds)
             break;
 
         case H5S_SIMPLE:
-            ret_value=H5S_release_simple(&(ds->extent.u.simple));
+            ret_value=H5S_release_simple(&(extent->u.simple));
             break;
 
         case H5S_COMPLEX:
@@ -461,7 +453,7 @@ H5S_close(H5S_t *ds)
     H5S_select_release(ds);
 
     /* Release extent */
-    H5S_extent_release(ds);
+    H5S_extent_release(&ds->extent);
 
     /* Release the main structure */
     H5FL_FREE(H5S_t,ds);
@@ -523,12 +515,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_release_simple(H5S_simple_t *simple)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5S_release_simple, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_release_simple);
 
     assert(simple);
 
@@ -541,46 +531,7 @@ H5S_release_simple(H5S_simple_t *simple)
         H5FL_ARR_FREE(hsize_t,simple->perm);
 #endif /* LATER */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5S_release_extent
- *
- * Purpose:	Releases all memory associated with an extent data space.
- *              (but doesn't free the extent space itself)
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *		Wednesday, March 31, 2004
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5S_release_extent(H5S_extent_t *extent)
-{
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5S_release_extent, FAIL);
-
-    assert(extent);
-
-    if(extent->u.simple.size)
-        H5FL_ARR_FREE(hsize_t,extent->u.simple.size);
-    if(extent->u.simple.max)
-        H5FL_ARR_FREE(hsize_t,extent->u.simple.max);
-#ifdef LATER
-    if(extent->u.simple.perm)
-        H5FL_ARR_FREE(hsize_t,extent->u.simple.perm);
-#endif /* LATER */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -1237,73 +1188,17 @@ H5S_read(H5G_entry_t *ent, hid_t dxpl_id)
     if (H5O_read(ent, H5O_SDSPACE_ID, 0, &(ds->extent), dxpl_id) == NULL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to load dataspace info from dataset header");
 
-    if (ds->extent.type == H5S_NO_CLASS) { /* For backward compatibility, if file is created by version 1.6 or before. */
-        if(ds->extent.u.simple.rank != 0) {
-            hsize_t nelem;  /* Number of elements in extent */
-            unsigned u;     /* Local index variable */
+    /* Default to entire dataspace being selected */
+    if(H5S_select_all(ds,0)<0)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
 
-            ds->extent.type = H5S_SIMPLE;
+    /* Allocate space for the offset and set it to zeros */
+    if(ds->extent.u.simple.rank>0) {
+        if (NULL==(ds->select.offset = H5FL_ARR_CALLOC(hssize_t,ds->extent.u.simple.rank)))
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    } else
+        ds->select.offset = NULL;
 
-            /* Compute the number of elements in the extent */
-            for(u=0, nelem=1; u<ds->extent.u.simple.rank; u++)
-                nelem*=ds->extent.u.simple.size[u];
-            ds->extent.nelem = nelem;
-        } else {  
-            ds->extent.type = H5S_SCALAR;
-            ds->extent.nelem = 1;
-        } /* end if */
-
-        /* Default to entire dataspace being selected */
-        if(H5S_select_all(ds,0)<0)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
-
-        /* Allocate space for the offset and set it to zeros */
-        if(ds->extent.u.simple.rank>0) {
-            if (NULL==(ds->select.offset = H5FL_ARR_CALLOC(hssize_t,ds->extent.u.simple.rank)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        } else
-            ds->select.offset = NULL;
-    } else {  /* If file is new, created by version 1.7 or after */
-        switch(ds->extent.type) {
-            case H5S_NULL:
-                ds->extent.nelem = 0;
-                if(H5S_select_none(ds)<0)
-                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set none selection");
-                ds->select.offset = NULL;
-                break;
-
-            case H5S_SCALAR:
-                ds->extent.nelem = 1;
-                /* Default to entire dataspace being selected */
-                if(H5S_select_all(ds,0)<0)
-                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
-                ds->select.offset = NULL;
-                break;
-                
-            case H5S_SIMPLE: {
-                hsize_t nelem;  /* Number of elements in extent */
-                unsigned u;     /* Local index variable */
-
-                /* Compute the number of elements in the extent */
-                for(u=0, nelem=1; u<ds->extent.u.simple.rank; u++)
-                    nelem*=ds->extent.u.simple.size[u];
-                ds->extent.nelem = nelem;
-                
-                /* Default to entire dataspace being selected */
-                if(H5S_select_all(ds,0)<0)
-                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
-                
-                /* Allocate space for the offset and set it to zeros */
-                if (NULL==(ds->select.offset = H5FL_ARR_CALLOC(hssize_t,ds->extent.u.simple.rank)))
-                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-
-                break; }
-                
-            default:
-                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unknown data space type");
-        }
-    }
-    
     /* Set the value for successful return */
     ret_value=ds;
 
@@ -1409,7 +1304,7 @@ H5Sis_simple(hid_t space_id)
     unlimited in size.
 
  MODIFICATION
-    A null dataspace cannot be converted from simple space in this function.
+    A null dataspace cannot be created from simple space with this function.
 
 --------------------------------------------------------------------------*/
 herr_t
@@ -1426,8 +1321,6 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
     /* Check args */
     if ((space = H5I_object_verify(space_id,H5I_DATASPACE)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
-    if(space->extent.type == H5S_NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dataspace");
     if (rank > 0 && dims == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
     if (rank<0 || rank>H5S_MAX_RANK)
@@ -1495,26 +1388,9 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
     else
         space->select.offset = NULL;
 
-    /* shift out of the previous state to a "simple" dataspace.  Not valid for H5S_NULL */
-    switch (space->extent.type) {
-        case H5S_SCALAR:
-            /* do nothing */
-            break;
-
-        case H5S_SIMPLE:
-            H5S_release_simple(&(space->extent.u.simple));
-            break;
-
-        case H5S_COMPLEX:
-        /*
-         * eventually this will destroy whatever "complex" dataspace info
-         * is retained, right now it's an error
-         */
-        /* Fall through to report error */
-
-        default:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "unknown data space class");
-    }
+    /* shift out of the previous state to a "simple" dataspace.  */
+    if(H5S_extent_release(&space->extent)<0)
+        HGOTO_ERROR (H5E_RESOURCE, H5E_CANTFREE, FAIL, "failed to release previous dataspace extent");
 
     if (rank == 0) {		/* scalar variable */
         space->extent.type = H5S_SCALAR;
@@ -1601,15 +1477,17 @@ UNUSED
 
     /* Check args */
     assert (mem_space && (H5S_SIMPLE==mem_space->extent.type ||
+                          H5S_NULL==mem_space->extent.type ||
 			  H5S_SCALAR==mem_space->extent.type));
     assert (file_space && (H5S_SIMPLE==file_space->extent.type ||
+                           H5S_NULL==file_space->extent.type ||
 			   H5S_SCALAR==file_space->extent.type));
 
     /*
      * We can't do conversion if the source and destination select a
      * different number of data points.
      */
-    if ((*mem_space->select.get_npoints)(mem_space) != (*file_space->select.get_npoints) (file_space))
+    if (H5S_get_select_npoints(mem_space) != H5S_get_select_npoints(file_space))
         HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, NULL, "memory and file data spaces are different sizes");
 
     /*
@@ -1991,7 +1869,7 @@ H5Sset_extent_none(hid_t space_id)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
 
     /* Clear the previous extent from the dataspace */
-    if(H5S_extent_release(space)<0)
+    if(H5S_extent_release(&space->extent)<0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTDELETE, FAIL, "can't release previous dataspace");
 
     space->extent.type=H5S_NO_CLASS;
@@ -2029,8 +1907,8 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
     /* Check args */
     if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
-    if (space->extent.u.simple.rank==0 || space->extent.type==H5S_SCALAR
-            || space->extent.type==H5S_NULL)
+    if (space->extent.u.simple.rank==0 || (space->extent.type==H5S_SCALAR
+            || space->extent.type==H5S_NULL))
         HGOTO_ERROR(H5E_ATOM, H5E_UNSUPPORTED, FAIL, "can't set offset on scalar or null dataspace");
     if (offset == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no offset specified");

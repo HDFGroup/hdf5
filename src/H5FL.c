@@ -1465,7 +1465,7 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
     unsigned u;     /* Counter for array of free lists */
     size_t total_mem;   /* Total memory used on list */
     
-    FUNC_ENTER_NOAPI_NOINIT(H5FL_arr_gc_list)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FL_arr_gc_list)
 
     /* Walk through the array of free lists */
     for(u=0; u<(unsigned)head->maxelem; u++) {
@@ -1500,7 +1500,6 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
     /* Double check that all the memory on this list is recycled */
     assert(head->list_mem==0);
 
-done:
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* end H5FL_arr_gc_list() */
 

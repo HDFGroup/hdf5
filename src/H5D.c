@@ -1313,11 +1313,6 @@ H5D_get_space_status(const H5D_t *dset, H5D_space_status_t *allocation, hid_t dx
     space=dset->space;
     assert(space);
 
-    if(H5S_NULL == H5S_get_simple_extent_type(space)) {
-        *allocation = H5D_SPACE_STATUS_NOT_ALLOCATED;
-	HGOTO_DONE(SUCCEED)
-    }
-        
     /* Get the total number of elements in dataset's dataspace */
     if((total_elem=H5S_get_simple_extent_npoints(space))<0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get # of dataspace elements")
@@ -1966,10 +1961,8 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy dataspace")
 
     /* Set the dataset's dataspace to 'all' selection */
-    if(H5S_NULL != H5S_get_simple_extent_type(new_dset->space)) {
-        if(H5S_select_all(new_dset->space,1)<0)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
-    }
+    if(H5S_select_all(new_dset->space,1)<0)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
     /* Check if the dataset has a non-default DCPL & get important values, if so */
     if(new_dset->dcpl_id!=H5P_DATASET_CREATE_DEFAULT) {
@@ -3284,8 +3277,6 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype")
     if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
-    if(H5S_NULL == H5S_get_simple_extent_type(space))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "null dataspace isn't supported")
             
     ret_value=H5S_select_iterate(buf,type_id,space,op,operator_data);
 

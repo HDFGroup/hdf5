@@ -665,8 +665,8 @@ herr_t H5S_select_none (H5S_t *space)
     /* Check args */
     assert(space);
 
-    /* Remove current selection first.  NULL data space either has no selection or selection is none. */
-    if((space->extent.type != H5S_NULL) && (*space->select.release)(space)<0)
+    /* Remove current selection first */
+    if((*space->select.release)(space)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release hyperslab");
 
     /* Set selection type */
