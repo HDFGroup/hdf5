@@ -383,7 +383,7 @@ hbool_t H5Tcommitted (hid_t type_id);
 herr_t H5Tinsert (hid_t parent_id, const char *name, size_t offset,
                   hid_t member_id);
 herr_t H5Tinsert_array (hid_t parent_id, const char *name, size_t offset,
-			int ndims, const size_t *dim, const int *perm,
+			int ndims, const size_t dim[], const int *perm,
 			hid_t member_id);
 herr_t H5Tpack (hid_t type_id);
 

@@ -10,7 +10,7 @@
     <h2>Introduction</h2>
 
     <p>The HDF5 library contains a number of debugging features to
-      make programmers lives easier including the ability to print
+      make programmers' lives easier including the ability to print
       detailed error messages, check invariant conditions, display
       timings and other statistics, and trace API function calls and
       return values.
@@ -27,7 +27,7 @@
 
 	<br><br>
       <dt><b>Invariant Conditions</b>
-      <dd>Unless <code>NDEBUG</code> is defined during compiling the
+      <dd>Unless <code>NDEBUG</code> is defined during compiling, the
 	library will include code to verify that invariant conditions
 	have the expected values.  When a problem is detected the
 	library will display the file and line number within the
@@ -63,14 +63,17 @@
     <p>
       <center>
 	<table border align=center width="100%">
-	  <caption align=top><h4>Example: An Error Message</h4></caption>
 	  <tr>
 	    <td>
 	      <p><code><pre>
+
 HDF5-DIAG: Error detected in thread 0.  Back trace follows.
-  #000: H5T.c line 462 in H5Tclose(): predefined data type
-    major(01): Function argument
-    minor(05): Bad value
+  #000: H5F.c line 1245 in H5Fopen(): unable to open file
+    major(04): File interface
+    minor(10): Unable to open file
+  #001: H5F.c line 846 in H5F_open(): file does not exist
+    major(04): File interface
+    minor(10): Unable to open file
 	      </code></pre>
 	    </td>
 	  </tr>
@@ -78,7 +81,7 @@ HDF5-DIAG: Error detected in thread 0.  Back trace follows.
       </center>
 
     <p>The error handling package (H5E) is described
-      <a href="Errors.html">here</a>.
+      <a href="Errors.html">elsewhere</a>.
 
     <h2>Invariant Conditions</h2>
 
@@ -92,10 +95,10 @@ HDF5-DIAG: Error detected in thread 0.  Back trace follows.
     <p>
       <center>
 	<table border align=center width="100%">
-	  <caption align=top><h4>Example: A Failed Assertion</h4></caption>
 	  <tr>
 	    <td>
 	      <p><code><pre>
+
 Assertion failed: H5.c:123: i&lt;NELMTS(H5_debug_g)
 IOT Trap, core dumped.
 	      </code></pre>
@@ -263,10 +266,10 @@ IOT Trap, core dumped.
     <p>
       <center>
 	<table border align=center width="100%">
-	  <caption align=top><b>Sample Output</b></caption>
 	  <tr>
 	    <td>
 	      <code><pre>
+
 H5Tcopy(type=184549388) = 184549419 (type);
 H5Tcopy(type=184549392) = 184549424 (type);
 H5Tlock(type=184549424) = SUCCEED;
@@ -297,7 +300,6 @@ HDF5-DIAG: Error detected in thread 0.  Back trace follows.
     <p>
       <center>
 	<table border align=center width="100%">
-	  <caption align=top><b>Execution Examples</b></caption>
 	  <tr>
 	    <td>To display the trace on the standard error stream:
 	      <code><pre>
@@ -378,6 +380,7 @@ $ env HDF5_DEBUG="55 trace" a.out 55>trace-output
 	  <tr>
 	    <td>
 	      <code><pre>
+
 $ ../bin/trace *.c
 H5E.c: in function `H5Ewalk_cb':
 H5E.c:336: warning: trace info was not inserted
@@ -402,7 +405,7 @@ H5E.c:336: warning: trace info was not inserted
     <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- Created: Wed Jun 17 12:29:12 EDT 1998 -->
 <!-- hhmts start -->
-Last modified: Wed Aug 19 15:21:35 PDT 1998
+Last modified: Thu Aug 20 10:43:42 PDT 1998
 <!-- hhmts end -->
   </body>
 </html>

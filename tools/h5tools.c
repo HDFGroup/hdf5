@@ -22,7 +22,11 @@
  * size of that temporary buffer in bytes.  For efficiency's sake, choose the
  * largest value suitable for your machine (for testing use a small value).
  */
+#if 0
 #define H5DUMP_BUFSIZE	(1024*1024)
+#else
+#define H5DUMP_BUFSIZE	(1024)
+#endif
 
 #define OPT(X,S)	((X)?(X):(S))
 #define MIN(X,Y)	((X)<(Y)?(X):(Y))
@@ -258,6 +262,7 @@ h5dump_simple(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_type)
     for (i=0, p_nelmts=1; i<(hsize_t)ndims; i++) {
 	p_nelmts *= p_max_idx[i]-p_min_idx[i];
     }
+    if (0==p_nelmts) return 0; /*nothing to print*/
 
     /*
      * Determine the strip mine size and allocate a buffer.  The strip mine is

@@ -391,8 +391,9 @@ H5_debug_mask(const char *s)
 
 	} else if (isdigit(*s)) {
 	    int fd = (int)HDstrtol (s, &rest, 0);
-	    stream = HDfdopen (fd, "w");
-	    setvbuf (stream, NULL, _IOLBF, 0);
+	    if ((stream=HDfdopen(fd, "w"))) {
+	        setvbuf (stream, NULL, _IOLBF, 0);
+            }
 	    s = rest;
 	} else {
 	    s++;
@@ -2124,7 +2125,11 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		}
 	    } else {
 		vp = va_arg (ap, void*);
-		fprintf (out, "0x%lx", (unsigned long)vp);
+		if (vp) {
+		    fprintf (out, "0x%lx", (unsigned long)vp);
+		} else {
+		    fprintf(out, "NULL");
+		}
 	    }
 	    break;
 

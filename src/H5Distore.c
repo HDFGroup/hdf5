@@ -471,6 +471,12 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
  *		that describes the chunk) and RT_KEY is the right key (the
  *		one that describes the next or last chunk).
  *
+ * Note:	It's possible that the chunk isn't really found.  For
+ *		instance, in a sparse dataset the requested chunk might fall
+ *		between two stored chunks in which case this function is
+ *		called with the maximum stored chunk indices less than the
+ *		requested chunk indices.
+ *
  * Return:	Success:	SUCCEED with information about the chunk
  *				returned through the UDATA argument.
  *
@@ -499,6 +505,13 @@ H5F_istore_found(H5F_t __unused__ *f, const haddr_t *addr,
     assert(addr && H5F_addr_defined(addr));
     assert(udata);
     assert(lt_key);
+
+    /* Is this *really* the requested chunk? */
+    for (i=0; i<udata->mesg.ndims; i++) {
+	if (udata->key.offset[i]>=lt_key->offset[i]+udata->mesg.dim[i]) {
+	    HRETURN(FAIL);
+	}
+    }
 
     /* Initialize return values */
     udata->addr = *addr;

@@ -307,7 +307,7 @@ H5O_mtime_debug(H5F_t __unused__ *f, const void *_mesg, FILE *stream,
     tm = localtime(mesg);
 
     
-    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %z", tm);
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	    "Time:", buf);
 
