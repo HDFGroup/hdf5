@@ -1,4 +1,4 @@
-#include <testphdf5.h>
+#include "testphdf5.h"
 
 #define DIM  2
 #define SIZE 32

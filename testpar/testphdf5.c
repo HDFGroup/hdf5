@@ -4,7 +4,7 @@
  * Main driver of the Parallel HDF5 tests
  */
 
-#include <testphdf5.h>
+#include "testphdf5.h"
 
 #ifndef FILENAME_MAX
 #define FILENAME_MAX 512

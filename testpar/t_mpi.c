@@ -12,7 +12,7 @@
  * Last process opens the same file and verifies the data.
  */
 
-#include <testphdf5.h>
+#include "testphdf5.h"
 
 /* FILENAME and filenames must have the same number of names */
 const char *FILENAME[2]={

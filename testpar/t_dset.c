@@ -13,7 +13,7 @@
  * only.  Collective mode for extendible datasets are not supported yet.
  */
 
-#include <testphdf5.h>
+#include "testphdf5.h"
 
 /*
  * The following are various utility routines used by the tests.
