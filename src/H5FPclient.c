@@ -15,9 +15,13 @@
 #define H5S_PACKAGE             /*suppress error about including H5Spkg */
 
 #include "H5private.h"          /* Generic Functions                    */
+#include "H5Dprivate.h"         /* Dataset Functions                    */
 #include "H5Eprivate.h"         /* Error Handling                       */
+#include "H5Iprivate.h"         /* ID Functions                         */
+#include "H5MMprivate.h"        /* Memory allocation                    */
 #include "H5Oprivate.h"         /* Object Headers                       */
-#include "H5Spkg.h"		/* Dataspace functions			*/
+#include "H5Spkg.h"             /* Dataspace functions                  */
+#include "H5Sprivate.h"         /* Dataspaces                           */
 #include "H5TBprivate.h"        /* Threaded, Balanced, Binary Trees     */
 
 #ifdef H5_HAVE_FPHDF5
@@ -33,25 +37,27 @@ static int interface_initialize_g = 0;
 
 /* local functions */
 static unsigned int H5FP_gen_request_id(void);
-static herr_t H5FP_update_metadata_cache(hid_t file_id, struct SAP_sync *sap_sync,
-                                         H5O_fphdf5_t *fmeta);
+static herr_t H5FP_update_metadata_cache(hid_t file_id, struct SAP_sync *sap_sync, uint8_t *msg);
 
 /** Public Library (non-API) Functions **/
 
 /*
  * Function:    H5FP_request_open
- * Purpose:     Request an open of an object from the SAP. You pass in
- *              the metadata string (MDATA) (this is normally the
- *              filename or pathname to the object), it's length in
+ * Purpose:     Request an open of a file from the SAP. You pass in the
+ *              metadata string (MDATA) (the filename), it's length in
  *              (MD_LEN), and the type of the object you're trying to
  *              open (OBJ_TYPE). The request ID is returned in a pointer
  *              supplied by the user.
+ *
+ *              N.B. This could be expanded to handle the opening of more
+ *              than just a file, if that becomes necessary. Right now,
+ *              we are only keeping track of file opens.
+ *
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  * Programmer:  Bill Wendling, 28. August, 2002
  * Modifications:
  */
-/* FIXME: This seems to be only related to opening a file, not an object, contrary to the comments above... -QAK */
 herr_t
 H5FP_request_open(const char *mdata, int md_len, enum sap_obj_type obj_type,
                   unsigned *file_id, unsigned *req_id)
@@ -154,6 +160,15 @@ H5FP_request_lock(unsigned int sap_file_id, unsigned char *obj_oid,
 
         if (sap_reply.status != H5FP_STATUS_LOCK_ACQUIRED)
             /* FIXME: Shouldn't this issue an error also? - QAK */
+            /*
+             * XXX:
+             *      I'm not sure. It's not an "error", per se. The server
+             *      just couldn't get the lock. This requires some kind
+             *      of handling by the client code, obviously, but I
+             *      didn't think it needed to be reported in the HDF5
+             *      error stack...The same with the lock release below.
+             *      -BW
+             */
             HGOTO_DONE(FAIL);
     }
 
@@ -339,9 +354,9 @@ H5FP_request_sync(unsigned int sap_file_id, hid_t hdf_file_id,
          * metadata */
         if (sap_sync.md_len) {
             H5O_fphdf5_t *fmeta;
-            char *buf;
+            uint8_t *buf;
 
-            if ((buf = (char *)HDcalloc((size_t)sap_sync.md_len + 1, 1)) == NULL)
+            if ((buf = (uint8_t *)HDcalloc((size_t)sap_sync.md_len + 1, 1)) == NULL)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory");
 
             HDmemset(&mpi_status, 0, sizeof(mpi_status));
@@ -356,15 +371,12 @@ H5FP_request_sync(unsigned int sap_file_id, hid_t hdf_file_id,
              * FIXME: perform whatever metadata updates we can with the
              * metadata returned from the SAP
              */
-            fmeta = H5O_FPHDF5[0].decode(NULL, buf, NULL);
-            HDfree(buf);
-
-            if (H5FP_update_metadata_cache(hdf_file_id, &sap_sync, fmeta) != SUCCEED) {
+            if (H5FP_update_metadata_cache(hdf_file_id, &sap_sync, buf) != SUCCEED) {
                 H5O_FPHDF5[0].free(fmeta);
                 HGOTO_DONE(FAIL);
             }
 
-            H5O_FPHDF5[0].free(fmeta);
+            HDfree(buf);
         }
     }
 
@@ -373,60 +385,102 @@ done:
     FUNC_LEAVE(ret_value);
 }
 
-#if 0
-struct SAP_sync {
-    unsigned int req_id;        /* Request ID copied from the SAP_request   */
-    unsigned int sync_id;       /* Sync ID to order the sync messages       */
-    unsigned int sap_file_id;   /* SAP's file ID for the specific file      */
-    unsigned int last_msg;      /* Indicates this is the last sync msg sent */
-    int md_len;                 /* Length of the metadata sent in next msg  */
-    enum sap_obj_type obj_type; /* Type of object                           */
-    enum sap_action action;     /* Action done on the object                */
-    enum sap_status status;     /* Status of the request                    */
-};
-
-typedef struct H5O_fphdf5_t {
-    uint8_t oid[H5R_OBJ_REF_BUF_SIZE];  /* OID of object                    */
-    struct H5S_simple_t *sdim;          /* Simple dimensionality structure  */
-    H5T_t *dtype;                       /* Datatype structure               */
-    time_t *mtime;                      /* Modification time                */
-    H5O_name_t *group;                  /* Group name                       */
-    H5O_name_t *dset;                   /* Dataset name                     */
-    struct H5P_genplist_t *plist;       /* Pathname of the object           */
-} H5O_fphdf5_t;
-#endif
-
 static herr_t
-H5FP_update_metadata_cache(hid_t file_id, struct SAP_sync *sap_sync, H5O_fphdf5_t *fmeta)
+H5FP_update_metadata_cache(hid_t file_id, struct SAP_sync *sap_sync, uint8_t *msg)
 {
     herr_t ret_value = SUCCEED;
-    hid_t gid, dset_id;
+    hid_t gid = FAIL, dset_id = FAIL;
+    H5G_entry_t *ent = NULL, *loc = NULL;
+    H5O_fphdf5_t *fmeta = NULL;
+    H5S_t *space = NULL;
+    H5F_t *file = NULL;
 
     FUNC_ENTER_NOINIT(H5FP_update_metadata_cache);
 
     /* check args */
     assert(sap_sync);
-    assert(fmeta);
+    assert(msg);
+
+    if ((file = H5I_object(file_id)) == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
+
+    if ((fmeta = H5O_FPHDF5[0].decode(file, msg, NULL)) == NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory");
+
+    /* FIXME: These shouldn't be calling API functions. -QAK */
+    /*
+     * XXX:
+     *      Okay. Need to come up with good ways of getting the
+     *      information I need then that doesn't duplicate the API
+     *      functions. Will work on this later. -BW
+     */
 
     switch (sap_sync->action) {
     case H5FP_ACT_CREATE:
+        if (sap_sync->obj_type == H5FP_OBJ_DATASET) {
+            if ((gid = H5Gopen(file_id, fmeta->group->s)) == FAIL)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
+
+            if ((loc = H5G_loc(gid)) == NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+
+            if ((ent = H5MM_malloc(sizeof(H5G_entry_t))) == NULL)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory");
+
+            if ((space = H5S_create(H5S_SIMPLE)) == NULL)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL,
+                            "can't create simple dataspace");
+
+            if (H5S_set_extent_simple(space, fmeta->sdim->rank,
+                                      fmeta->sdim->size, fmeta->sdim->max) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions");
+
+            if (H5D_update_entry_cache(file, ent, loc,
+                                       fmeta->dset->s, space,
+                                       fmeta->plist, fmeta->layout, fmeta->dtype,
+                                       FALSE, fmeta->header) == FAIL)
+                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINIT, FAIL, "can't update metadata cache");
+
+            if (H5D_update_external_storage_cache(file, ent, fmeta->efl,
+                                                  fmeta->layout) == FAIL)
+                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINIT, FAIL,
+                            "can't update external file layout metadata cache");
+        }
+
+        break;
+
     case H5FP_ACT_EXTEND:
         if (sap_sync->obj_type == H5FP_OBJ_DATASET) {
-            /* FIXME: These shouldn't be calling API functions. -QAK */
-            gid = H5Gopen(file_id, fmeta->group->s);
-            dset_id = H5Dopen(gid, fmeta->dset->s);
+            if ((gid = H5Gopen(file_id, fmeta->group->s)) == FAIL)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
+
+            if ((dset_id = H5Dopen(gid, fmeta->dset->s)) == FAIL)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open dataset");
 
             if (H5Dextend(dset_id, fmeta->sdim->size) != SUCCEED)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "metadata update failed");
         }
 
         break;
+
     case H5FP_ACT_DELETE:
     default:
         break;
     }
 
 done:
+    if (fmeta)
+        H5O_FPHDF5[0].free(fmeta);
+
+    if (gid != FAIL)
+        H5Gclose(gid);
+
+    if (space)
+	H5S_close(space);
+
+    if (ret_value == FAIL)
+        H5MM_xfree(ent);
+
     FUNC_LEAVE(ret_value);
 }
 

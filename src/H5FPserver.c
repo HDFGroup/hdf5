@@ -801,6 +801,14 @@ H5FP_sap_handle_open_request(struct SAP_request req, char *mdata, int md_len)
 
         /* broadcast the file id to all processes */
         /* FIXME: Isn't there some way to broadcast this result to the barrier group? -QAK */
+        /*
+         * XXX:
+         *      MPI_Bcast doesn't work in this way and I don't know how
+         *      to get it to work for us. From what I gather, all of the
+         *      processes need to execute the same bit of code (the
+         *      MPI_Bcast function) to get the value to be passed to
+         *      everyone. -BW
+         */
         for (i = 0; i < H5FP_comm_size; ++i)
             if ((unsigned)i != H5FP_sap_rank)
                 if ((mrc = MPI_Send(&new_file_id, 1, MPI_UNSIGNED, i,
