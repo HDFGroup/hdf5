@@ -154,6 +154,9 @@ Known Problems
       IRIX 6.5 even if they are configured with --enable-static-exec.
 
     * The shared library failed compilation on IRIX 6.5.
+    
+    * After "make install" or "make install-doc" one may need to reload the source
+      from the tar file before doing another build.
 
     * See "Known problems" section for the HDF5 1.4.0 release in the
       HISTORY.txt file.
