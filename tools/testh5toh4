@@ -118,6 +118,8 @@ CONVERT()
 	    :
 	else
 	    # Use hdp to dump the files and verify the output.
+	    # Filter out the output of "reference = ..." because
+	    # reference numbers are immaterial in general.
 	    outfile=`basename $f .hdf`
 	    expect_out=$outfile.expect
 	    actual_out=$outfile.actual
@@ -125,11 +127,14 @@ CONVERT()
 	    (cd $SRCDIR/Expected
 	    $H4DUMP dumpvg $outfile.hdf
 	    $H4DUMP dumpvd $outfile.hdf
-	    $H4DUMP dumpsds $outfile.hdf ) > $expect_out
+	    $H4DUMP dumpsds $outfile.hdf ) |
+	    sed -e 's/reference = [0-9]*;//' > $expect_out
 	    (cd $OUTDIR
 	    $H4DUMP dumpvg $outfile.hdf
 	    $H4DUMP dumpvd $outfile.hdf
-	    $H4DUMP dumpsds $outfile.hdf ) > $actual_out
+	    $H4DUMP dumpsds $outfile.hdf ) |
+	    sed -e 's/reference = [0-9]*;//' > $actual_out
+
 	    if $cmp $expect_out $actual_out; then
 		:
 	    else
