@@ -234,7 +234,6 @@ void HDFinitTrace_RT( char *fileName, unsigned procTraceMask )
 #ifdef  HAVE_PARALLEL
 	int myNode;
 #endif
-	char *nameBuff;
 	int error;
 	TR_LOCK	criticalSection;
 	TRgetClock( &epoch );
@@ -250,12 +249,11 @@ void HDFinitTrace_RT( char *fileName, unsigned procTraceMask )
 #ifdef  HAVE_PARALLEL
         MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
         setTraceProcessorNumber( myNode );
-	sprintf(FileName,"%s.nd%d\0",fileName,myNode);
+	sprintf(FileName,"%s.nd%d",fileName,myNode);
 	/*==============================================================*
 	// In the parallel case, initialize MPI-IO tracing.  This will	*
 	// set the trace file name.					*
 	//==============================================================*/
-        /*initMPIOTrace( FileName, 1); */
 #else
 	/*==============================================================*
 	// In the non-parallel case, set the trace file name and 	*
@@ -286,8 +284,15 @@ void HDFendTrace_RT( void )
 	//  Assing pablo ids to named identifiers and tag records	*
 	//==============================================================*/
 	HDFassignPabloIDs( &numSetIDs, &Names );
-	mapFile = (char *)malloc( strlen(FileName) + 15 );
-	sprintf( mapFile,"%s.map.nd%d\0", FileName, TRgetNode() );
+	/*==============================================================*
+	//  Create a file name for the File map file.			*
+	//==============================================================*/
+	mapFile = (char *)malloc( strlen(FileName) + 4 );
+	strcpy(mapFile,FileName);
+	strcat(mapFile,".map");
+	/*==============================================================*
+	//  print the file mappings.					*
+	//==============================================================*/
         printFileMappingsRT( mapFile, Names, numSetIDs ); 
 	/*==============================================================*
 	// Print SDDF summary records					*
@@ -301,7 +306,7 @@ void HDFendTrace_RT( void )
 	/*==============================================================*
 	// Clean up storage						*
 	//==============================================================*/
-	/* free( (void *)mapFile );
+	free( (void *)mapFile );
 	for ( j = 0; j < numSetIDs; ++j ) {
 	    if ( Names[j] != NULL ) {
                free((void *)Names[j]);
@@ -314,7 +319,7 @@ void HDFendTrace_RT( void )
         } else {
            free((void *)P);
 	}
-	free((void *)HDFQueues) ; */
+	free((void *)HDFQueues) ; 
 }
 /*======================================================================*
 // initHFDProcTrace_RT							*
@@ -997,7 +1002,9 @@ void HDFupdateProcs( HDFnode_t *P )
 //======================================================================*/
 void HDFSummarySDDF( HDFnode_t *P, int procIndex )
 {
-	int i, arrayLen;
+	int i, j, arrayLen;
+	int allIOCount;
+	double allIOTime;
 	char buff[1024];
 	char *Packet;
 	HDFnode_t *Q;
@@ -1041,6 +1048,20 @@ void HDFSummarySDDF( HDFnode_t *P, int procIndex )
 	   Packet = buff;
 	   memcpy( Packet, &Header, sizeof(Header) );
 	   Packet += sizeof(Header);
+	   /*===========================================================*
+	   // Total the I/O time and counts                        	*
+	   //===========================================================*/
+           allIOTime = 0;
+           for ( j = FirstIO; j <= LastIO; ++j ) {
+              allIOTime += P->record.times[j];
+           }
+           P->record.times[AllIO] = allIOTime;
+ 
+           allIOCount = 0;
+           for ( j = FirstIO; j <= LastIO; ++j ) {
+              allIOCount += P->record.counts[j];
+           }
+           P->record.counts[AllIO] = allIOCount;
 	   /*===========================================================*
 	   // copy length of times array and times array to Packet.	*
 	   //===========================================================*/
@@ -1095,19 +1116,7 @@ void HDFnodeInit ( HDFnode_t *S )
 //======================================================================*/
 void HDFrecordSum ( HDFrec_t *S, HDFrec_t *T )
 {
-        int i, j, allIOCount;
-        double allIOTime;
-        allIOTime = 0;
-        for ( j = FirstIO; j <= LastIO; ++j ) {
-           allIOTime += T->times[j];
-        }
-        T->times[AllIO] = allIOTime;
- 
-        allIOCount = 0;
-        for ( j = FirstIO; j <= LastIO; ++j ) {
-           allIOCount += T->counts[j];
-        }
-        T->counts[AllIO] = allIOCount;
+        int i, j;
  
         T->excDur = T->incDur - ( T->times[HDF_] + T->times[MPI]
                                                  + T->times[AllIO] );
