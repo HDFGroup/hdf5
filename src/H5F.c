@@ -963,7 +963,7 @@ H5Fget_obj_count(hid_t file_id, unsigned types)
     int   ret_value;            /* Return value */
 
     FUNC_ENTER_API(H5Fget_obj_count, FAIL);
-    H5TRACE2("e","iIu",file_id,types);
+    H5TRACE2("Is","iIu",file_id,types);
 
     if( file_id != H5F_OBJ_ALL && (NULL==(f=H5I_object_verify(file_id,H5I_FILE))) )
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id");
