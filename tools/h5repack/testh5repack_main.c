@@ -807,8 +807,10 @@ test_filterqueue(void)
   TEST_ERROR;
  if (h5repack_addlayout("dset1:CHUNK 20x10",&pack_options)<0)
   TEST_ERROR;
+#if defined (H5_HAVE_FILTER_FLETCHER32)
  if (h5repack_addfilter("dset1:FLET",&pack_options)<0)
   TEST_ERROR;
+#endif
  if (h5repack_addfilter("dset1:SHUF",&pack_options)<0)
   TEST_ERROR;
  if (h5repack_addfilter("dset1:SZIP 8",&pack_options)<0)

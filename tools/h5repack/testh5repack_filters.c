@@ -91,7 +91,6 @@ int make_filters(hid_t loc_id)
  * make several dataset with filters
  *-------------------------------------------------------------------------
  */
-  
  /* create a space */
  if((sid = H5Screate_simple(RANK, dims, NULL))<0)
   return -1;
@@ -101,8 +100,6 @@ int make_filters(hid_t loc_id)
  /* set up chunk */
  if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
   goto out;
-
-
 
 /*-------------------------------------------------------------------------
  * SZIP
@@ -145,7 +142,7 @@ int make_filters(hid_t loc_id)
  * checksum
  *-------------------------------------------------------------------------
  */
-#if 1
+#if defined (H5_HAVE_FILTER_FLETCHER32)
  /* remove the filters from the dcpl */
  if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
   goto out;
