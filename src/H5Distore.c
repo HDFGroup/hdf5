@@ -1506,7 +1506,8 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         
         assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
         assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
-        assert((plist=H5I_object(dxpl_id))!=NULL);
+        plist=H5I_object(dxpl_id);
+        assert(plist!=NULL);
         H5P_get(plist,H5D_XFER_BTREE_SPLIT_RATIO_NAME,&(ent->split_ratios));
         
         /* Add it to the cache */
@@ -1653,7 +1654,8 @@ H5F_istore_unlock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 
             assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
             assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
-            assert((plist=H5I_object(dxpl_id))!=NULL);
+            plist=H5I_object(dxpl_id);
+            assert(plist!=NULL);
             H5P_get(plist,H5D_XFER_BTREE_SPLIT_RATIO_NAME,&(x.split_ratios));
             
             H5F_istore_flush_entry (f, &x, TRUE);
