@@ -1332,13 +1332,17 @@ H5O_count_real (H5G_entry_t *ent, const H5O_class_t *type, hid_t dxpl_id)
     assert (type);
 
     /* Load the object header */
-    if (NULL==(oh=H5AC_find(ent->file, dxpl_id, H5AC_OHDR, ent->header, NULL, NULL)))
+    if (NULL == (oh = H5AC_protect(ent->file, dxpl_id, H5AC_OHDR, ent->header, NULL, NULL)))
 	HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header");
 
     for (u=acc=0; u<oh->nmesgs; u++) {
 	if (oh->mesg[u].type==type)
             acc++;
     }
+
+    if (H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) != SUCCEED)
+	HGOTO_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
+
     oh=NULL;
 
     /* Set return value */
@@ -1432,7 +1436,7 @@ H5O_exists_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t d
     assert(sequence>=0);
 
     /* Load the object header */
-    if (NULL==(oh=H5AC_find(ent->file, dxpl_id, H5AC_OHDR, ent->header, NULL, NULL)))
+    if (NULL == (oh = H5AC_protect(ent->file, dxpl_id, H5AC_OHDR, ent->header, NULL, NULL)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header");
 
     /* Scan through the messages looking for the right one */
@@ -1442,6 +1446,10 @@ H5O_exists_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t d
 	if (--sequence<0)
             break;
     }
+
+    if (H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) != SUCCEED)
+	HGOTO_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
+
     oh=NULL;
 
     /* Set return value */
@@ -2023,6 +2031,8 @@ H5O_unprotect(H5G_entry_t *ent, H5O_t *oh, hid_t dxpl_id)
 
     if (H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
+
+    oh = NULL;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

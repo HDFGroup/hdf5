@@ -765,15 +765,16 @@ H5HG_peek (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
     assert (hobj);
 
     /* Load the heap and return a pointer to the object */
-    if (NULL==(heap=H5AC_find(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL)))
+    if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL)))
 	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap");
+
     assert (hobj->idx>0 && hobj->idx<heap->nalloc);
     ret_value = heap->obj[hobj->idx].begin + H5HG_SIZEOF_OBJHDR (f);
     assert (ret_value);
 
     /*
-     * Advance the heap in the CWFS list.  We might have done this already
-     * with the H5AC_find(), but it won't hurt to do it twice.
+     * Advance the heap in the CWFS list. We might have done this already
+     * with the H5AC_protect(), but it won't hurt to do it twice.
      */
     if (heap->obj[0].begin) {
 	for (i=0; i<f->shared->ncwfs; i++) {
@@ -786,6 +787,10 @@ H5HG_peek (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
 	    }
 	}
     }
+
+    if (H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, FALSE) != SUCCEED)
+        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
+
     heap=NULL;
     
 done:
@@ -829,8 +834,9 @@ H5HG_read (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/)
     assert (hobj);
 
     /* Load the heap */
-    if (NULL==(heap=H5AC_find(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL)))
+    if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL)))
 	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap");
+
     assert (hobj->idx>0 && hobj->idx<heap->nalloc);
     assert (heap->obj[hobj->idx].begin);
     size = heap->obj[hobj->idx].size;
@@ -840,8 +846,8 @@ H5HG_read (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/)
     HDmemcpy (object, p, size);
 
     /*
-     * Advance the heap in the CWFS list.  We might have done this already
-     * with the H5AC_find(), but it won't hurt to do it twice.
+     * Advance the heap in the CWFS list. We might have done this already
+     * with the H5AC_protect(), but it won't hurt to do it twice.
      */
     if (heap->obj[0].begin) {
 	for (i=0; i<f->shared->ncwfs; i++) {
@@ -854,12 +860,21 @@ H5HG_read (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/)
 	    }
 	}
     }
+
+    if (H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, FALSE) != SUCCEED) {
+        heap = NULL;
+        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
+    }
+
     heap = NULL;
 
     /* Set return value */
     ret_value=object;
 
 done:
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, FALSE) != SUCCEED)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 

@@ -629,14 +629,19 @@ H5HL_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, voi
     assert(f);
     assert (H5F_addr_defined(addr));
 
-    if (NULL == (heap = H5AC_find(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL)))
+    if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap");
+
     assert(offset < heap->mem_alloc);
     assert(offset + size <= heap->mem_alloc);
 
     if (!buf && NULL==(buf = H5MM_malloc(size)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     HDmemcpy(buf, heap->chunk + H5HL_SIZEOF_HDR(f) + offset, size);
+
+    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE) != SUCCEED)
+        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
+
     heap=NULL;
 
     /* Set return value */
@@ -691,12 +696,17 @@ H5HL_peek(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset)
     assert(f);
     assert(H5F_addr_defined(addr));
 
-    if (NULL == (heap = H5AC_find(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap");
+    if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap");
+
     assert(offset < heap->mem_alloc);
 
     /* Set return value */
     ret_value = heap->chunk + H5HL_SIZEOF_HDR(f) + offset;
+
+    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE) != SUCCEED)
+        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
+
     heap=NULL;
 
 done:

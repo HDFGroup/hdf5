@@ -453,6 +453,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:    H5AC_find
@@ -677,6 +678,7 @@ H5AC_find(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+#endif  /* 0 */
 
 
 /*-------------------------------------------------------------------------

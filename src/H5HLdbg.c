@@ -71,8 +71,9 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
     assert(indent >= 0);
     assert(fwidth >= 0);
 
-    if (NULL == (h = H5AC_find(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
+    if (NULL == (h = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
+
     fprintf(stream, "%*sLocal Heap...\n", indent, "");
     fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
 	    "Dirty:",
@@ -93,11 +94,12 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
     /*
      * Traverse the free list and check that all free blocks fall within
      * the heap and that no two free blocks point to the same region of
-     * the heap.
-     */
+     * the heap.  */
     if (NULL==(marker = H5MM_calloc(h->mem_alloc)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
     fprintf(stream, "%*sFree Blocks (offset, size):\n", indent, "");
+
     for (free_block=0, freelist = h->freelist; freelist; freelist = freelist->next, free_block++) {
         char temp_str[32];
 
@@ -165,6 +167,11 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
 
 	HDfputc('\n', stream);
     }
+
+    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, h, FALSE) != SUCCEED)
+	HGOTO_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
+
+    h = NULL;
 
     H5MM_xfree(marker);
 
