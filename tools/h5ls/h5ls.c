@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 1998 NCSA
- *                    All rights reserved.
+ * Copyright (C) 1998, 2001
+ *     National Center for Supercomputing Applications
+ *     All rights reserved
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Monday, March 23, 1998
  */
-
 
 /*
  * We include the private header file so we can get to the uniform
@@ -14,6 +14,7 @@
  */
 #include "H5private.h"
 #include "h5tools.h"
+#include "h5tools_utils.h"
 
 /*
  * If defined then include the file name as part of the object name when
@@ -847,10 +848,10 @@ display_enum_type(hid_t type, int ind)
 		printf("%02x", value[i*dst_size+j]);
 	    }
 	} else if (H5T_SGN_NONE==H5Tget_sign(native)) {
-	    printf("%"PRINTF_LL_WIDTH"u",
+	    HDfprintf(stdout,"%"PRINTF_LL_WIDTH"u",
 		   *((unsigned long_long*)((void*)(value+i*dst_size))));
 	} else {
-	    printf("%"PRINTF_LL_WIDTH"d",
+	    HDfprintf(stdout,"%"PRINTF_LL_WIDTH"d",
 		   *((long_long*)((void*)(value+i*dst_size))));
 	}
     }
@@ -2103,7 +2104,7 @@ main (int argc, char *argv[])
 	file = -1;
 
 	while (fname && *fname) {
-            file = h5tools_fopen(fname, drivername, sizeof drivername);
+            file = h5tools_fopen(fname, NULL, drivername, sizeof drivername);
 
 	    if (file>=0) {
 		if (verbose_g) {
