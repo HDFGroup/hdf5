@@ -118,7 +118,7 @@ TOOLTEST tcomp-1.ddl tcompound.h5
 # test for named data types
 TOOLTEST tcomp-2.ddl -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5
 # test for unamed type 
-TOOLTEST tcomp-3.ddl -t /#5992:0 -g /group2 tcompound.h5
+TOOLTEST tcomp-3.ddl -t /#6632 -g /group2 tcompound.h5
 
 #test for the nested compound type
 TOOLTEST tnestcomp-1.ddl tnestedcomp.h5
