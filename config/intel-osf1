@@ -19,7 +19,7 @@ AR=${AR:-xar}
 RANLIB=:
 
 # Additional libraries
-LDFLAGS="-L./ -L../ -lnoop_stubs"
+LDFLAGS="$LDFLAGS -L./ -L../ -lnoop_stubs"
 
 # How to run serial and parallel test programs
 RUNSERIAL="yod -sz 1"
@@ -47,3 +47,13 @@ PROFILE_CPPFLAGS=
 # long'.  For instance, if the format would be `%lld' then set it to
 # `ll' or if the format would be `%qd' set it to `q'.
 hdf5_cv_printf_ll=${hdf5_cv_printf_ll='ll'}
+
+# Hard set sizeof_intn_t to 0 because they are not supported.
+ac_cv_sizeof_int16_t=${ac_cv_sizeof_int16_t='0'}
+ac_cv_sizeof_int32_t=${ac_cv_sizeof_int32_t='0'}
+ac_cv_sizeof_int64_t=${ac_cv_sizeof_int64_t='0'}
+ac_cv_sizeof_int8_t=${ac_cv_sizeof_int8_t='0'}
+ac_cv_sizeof_uint16_t=${ac_cv_sizeof_uint16_t='0'}
+ac_cv_sizeof_uint32_t=${ac_cv_sizeof_uint32_t='0'}
+ac_cv_sizeof_uint64_t=${ac_cv_sizeof_uint64_t='0'}
+ac_cv_sizeof_uint8_t=${ac_cv_sizeof_uint8_t='0'}
