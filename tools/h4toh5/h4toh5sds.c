@@ -33,6 +33,7 @@ static int convert_zerosdsunlimit(int32 file_id,
 			 int32 sds_id,
 			 hid_t h5_group,
 			 hid_t h5_dimgroup,
+			 int32 chunk_size,
 			 int h4_attr);
 
 /*-------------------------------------------------------------------------
@@ -116,13 +117,35 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   hsize_t* h5slab_count;
   int h4slab_count,h4slab_index;
   int32 slabsize;
+  int32 chunksize;
   int32 count_slabdata;
   hid_t  slabmemspace;
 
+  FILE *fp;
+  int  memopt;
+  int  sdsopt_flag = 1;
+
+  memopt = 0;
+  if((fp= fopen("parafile","r"))==NULL){/*ignore the parameter file */
+    printf("coming here\n");
+    sdsopt_flag = 0;
+    memopt = 0;
+    chunksize = HDF4_CHUNKSIZE;
+  }
+
+  if(sdsopt_flag !=0) {
+    fscanf(fp,"%d",&memopt);
+    while(fgetc(fp)!='\n');
+    fscanf(fp,"%d",&slabsize);
+    while(fgetc(fp)!='\n');
+    fscanf(fp,"%d",&chunksize);
+    fclose(fp);
+  }
   /* if(memsize <=0) slabsize = -1;*/
-  if(MEMOPT != 0) 
+  if(memopt == 1) 
     slabsize = SLABSIZE*1000000;
   else slabsize = 0;
+
   special_code = -1;
   /* zeroing out the memory for sdsname and sdslabel.*/
 
@@ -145,7 +168,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   }
   if(sds_empty !=0) {
     if(sds_dimsizes[0]==0) {
-      if(convert_zerosdsunlimit(file_id,sds_id,h5_group,h5_dimgroup,h4_attr)==FAIL){
+      if(convert_zerosdsunlimit(file_id,sds_id,h5_group,h5_dimgroup,chunksize,h4_attr)==FAIL){
 	printf("cannot convert unlimited dimension SDS with 0.\n");
 	return FAIL;
       }
@@ -467,7 +490,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     return FAIL;							      
   }									      
 
-  if(count_sdsdata*h4memsize <= slabsize || MEMOPT==0) {
+  if(count_sdsdata*h4memsize <= slabsize || MEMOPT!= 1) {
 
     sds_data = malloc(h4memsize*count_sdsdata);
 
@@ -523,6 +546,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   }
 
   else { 
+    /* obtain the number of hyperslab per dimension. */
   NUM_HSLAB_PERD= get_numslab_perD(h4memsize*count_sdsdata,slabsize,sds_rank);
   
   h4slab_start  = calloc(sds_rank,sizeof(int32));
@@ -533,18 +557,29 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   h5slab_offset = calloc(sds_rank,sizeof(hsize_t));
   h5slab_count  = calloc(sds_rank,sizeof(hsize_t));
 
+  /* Initialize the hyperslab parameter. */
   for ( i =0;i<sds_rank;i++) {
     h4slab_start[i] =0;
     h4slab_stop[i] = 0;
     h4slab_stride[i] =1;
     h4slab_dims[i] = h5ceil(sds_dimsizes[i],NUM_HSLAB_PERD);
-    printf("h4slab_dims[%d]%d\n",i,h4slab_dims[i]);
   }
+
   h4slab_count = -1;
+
+  /* total number of hyperslab is equal to pow(NUM_HSLAB_PERD,sds_rank)-1, 
+     At first, all other dimensions are fixed, only the first dimension
+     (the most frequently changing dimension) changes its starting point
+     and ending point.
+     After the first dimension moves to the end of its dimension, 
+     the second dimension starts to change. So we use "mod fuction" to check the which 
+     dimension we are heading to. */  
+
   while(h4slab_count != pow(NUM_HSLAB_PERD,sds_rank)-1){
     h4slab_count++;
     h4slab_index = -1;
     for (i=0;i<sds_rank;i++){
+      /* check the current location of the slab. */
       if((h4slab_count%pow(NUM_HSLAB_PERD,(i+1)))==0){
         h4slab_index = i;
       }
@@ -560,8 +595,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
       h4slab_stop[i] = h4slab_start[i]+h4slab_dims[i];
       if(h4slab_stop[i]>sds_dimsizes[i])
         h4slab_stop[i] = sds_dimsizes[i];
-      printf("h4slab_start[%d] %d\n",i,h4slab_start[i]);
-      printf("h4slab_stop[%d] %d\n",i,h4slab_stop[i]);
     }
     count_slabdata = 1;
     for(i=0;i<sds_rank;i++){
@@ -569,7 +602,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
       h4slab_edges[i] = h4slab_stop[i]-h4slab_start[i];
     }
     count_slabdata = count_slabdata*h4memsize;
-    printf("count_slabdata %d\n",count_slabdata);
   sds_data = malloc(count_slabdata);
   if(sds_data == NULL) {
     printf("error in allocating memory. \n");
@@ -588,7 +620,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     free(sds_data);
     return FAIL;
   }
-  printf("after SDread data\n");
   write_plist = H5Pcreate(H5P_DATASET_XFER);
   /*  bufsize = h4memsize;
   for(i=0;i<sds_rank;i++)
@@ -616,10 +647,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   H5Sselect_hyperslab(h5d_sid,H5S_SELECT_SET,h5slab_offset,NULL,h5slab_count,NULL);
   if (H5Dwrite(h5dset,h5_memtype,slabmemspace,h5d_sid,write_plist,	    
   (void *)sds_data)<0) {	
-  
- /* printf("before writing \n");
-  if (H5Dwrite(h5dset,h5_memtype,h5d_sid,h5d_sid,H5P_DEFAULT,	    
-  (void *)sds_data)<0) {		      */
     printf("failed to write data into hdf5 dataset");	
     printf(" converted from SDS.\n");
     H5Sclose(h5d_sid);
@@ -633,7 +660,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     free(chunk_dims);
     return FAIL;							      
   }			
-  printf("after writing hdf5 \n");
   free(sds_data);				      
 							
   h4slab_start[0] = h4slab_start[0]+h4slab_dims[0];
@@ -1886,10 +1912,11 @@ uint16 get_SDref(int32 file_id,uint16 tag,int32 sds_ref){
 }
 
 static int convert_zerosdsunlimit(int32 file_id,
-			 int32 sds_id,
-			 hid_t h5_group,
-			 hid_t h5_dimgroup,
-			 int h4_attr) {
+				  int32 sds_id,
+				  hid_t h5_group,
+				  hid_t h5_dimgroup,
+				  int32 chunk_size,
+				  int h4_attr) {
 
 
   int32   sds_dtype;
@@ -1949,7 +1976,7 @@ static int convert_zerosdsunlimit(int32 file_id,
 
   if(SDisrecord(sds_id)){
     max_h5dims[0] = H5S_UNLIMITED;
-    h5dims[0] = H5S_UNLIMITED;
+    /*  h5dims[0] = 0;*/
   }
 
   /* convert hdf4 data type to hdf5 data type. */
@@ -2075,7 +2102,7 @@ static int convert_zerosdsunlimit(int32 file_id,
       for(i=0;i<sds_rank;i++){
 	chunk_dims[i] = (hsize_t)(sds_dimsizes[i]);
         if(sds_dimsizes[0] == 0)
-	  chunk_dims[0] = (hsize_t)DEF_CHUNKSIZE;
+	  chunk_dims[0] = (hsize_t)chunk_size;
       }
       if(H5Pset_chunk(create_plist, sds_rank, chunk_dims)<0) {
 	printf("failed to set up chunking information for ");
@@ -2126,7 +2153,7 @@ static int convert_zerosdsunlimit(int32 file_id,
   }
    
   if(access_id == FAIL) {
-    chunk_dims[0] = (hsize_t)DEF_CHUNKSIZE;
+    chunk_dims[0] = (hsize_t)chunk_size;
     for(i=1;i<sds_rank;i++)
       chunk_dims[i] = h5dims[i];
     if(H5Pset_chunk(create_plist, sds_rank, chunk_dims)<0) {
