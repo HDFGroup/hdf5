@@ -318,7 +318,6 @@ int SetTestVerbosity(int newval)
  */
 void ParseTestVerbosity(char *argv)
 {
-    printf("argv = %s\n", argv);
     if (*argv == 'l')
 	SetTestVerbosity(VERBO_LO);
     else if (*argv == 'm')
@@ -327,7 +326,6 @@ void ParseTestVerbosity(char *argv)
 	SetTestVerbosity(VERBO_HI);
     else
 	SetTestVerbosity(atoi(argv));
-    printf("Verbosity = %d\n", GetTestVerbosity());
 }
 
 
