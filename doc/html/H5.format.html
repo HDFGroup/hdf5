@@ -598,7 +598,13 @@ Elena>               "Free-space object"
             ASCII.  
             For example, the various versions of the <em>family driver</em> 
             will be identified by <code>NCSAfami</code>, <code>NCSAfam0</code>,
-            <code>NCSAfam1</code>, etc. Identification for user-defined drivers 
+            <code>NCSAfam1</code>, etc. 
+            (<code>NCSAfami</code> is simply <code>NCSAfamily</code> truncated 
+            to eight characters.  Subsequent identifiers will be created by
+            substituting sequential numerical values for the final character, 
+            starting with zero.)
+            <p>
+            Identification for user-defined drivers 
             is arbitrary but should be unique.</td>
         </tr>
 
