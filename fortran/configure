@@ -8350,7 +8350,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 int
 main ()
 {
-MPI_Comm_c2f(); return 0;
+MPI_Comm_c2f()
   ;
   return 0;
 }
@@ -8400,7 +8400,7 @@ echo $ECHO_N "checking for MPI_Info_c2f and MPI_Info_f2c functions... $ECHO_C" >
 int
 main ()
 {
-MPI_Info_c2f(); return 0;
+MPI_Info_c2f()
   ;
   return 0;
 }
