@@ -378,6 +378,7 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, const H5B2_shared_t *share
         H5B2_leaf_t *old_leaf=NULL, *new_leaf=NULL;       /* Pointers to old & new leaf nodes */
         H5B2_node_ptr_t new_int_ptr;    /* Node pointer to manage new internal node */
         H5B2_node_ptr_t new_leaf_ptr;   /* Node pointer to manage new leaf node */
+        H5B2_node_ptr_t old_leaf_ptr;   /* Node pointer to manage old leaf node */
         unsigned mid_record;            /* Index of "middle" record in current node */
 
         /* Create new leaf node */
@@ -388,8 +389,11 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, const H5B2_shared_t *share
         /* Determine "middle" record to promote to new root */
         mid_record = shared->split_leaf_nrec/2;
 
+        /* Set "old" leaf pointer to root node */
+        old_leaf_ptr = bt2->root;
+
         /* Protect both leafs */
-        if (NULL == (old_leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, bt2->root.addr, shared->type, &(bt2->root), H5AC_WRITE)))
+        if (NULL == (old_leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, old_leaf_ptr.addr, shared->type, &old_leaf_ptr, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree leaf node")
         if (NULL == (new_leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, new_leaf_ptr.addr, shared->type, &new_leaf_ptr, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree leaf node")
@@ -410,22 +414,22 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, const H5B2_shared_t *share
         HDmemcpy(new_int->int_native,H5B2_LEAF_NKEY(old_leaf,shared,mid_record),shared->type->nkey_size);
 
         /* Update record counts in leaf nodes */
-        bt2->root.all_nrec=bt2->root.node_nrec=old_leaf->nrec=mid_record;
-        new_leaf_ptr.all_nrec=new_leaf_ptr.node_nrec=new_leaf->nrec=shared->split_leaf_nrec-(mid_record+1);
+        old_leaf_ptr.all_nrec = old_leaf_ptr.node_nrec = old_leaf->nrec = mid_record;
+        new_leaf_ptr.all_nrec = new_leaf_ptr.node_nrec = new_leaf->nrec = shared->split_leaf_nrec-(mid_record+1);
 
         /* Mark leaf nodes as dirty */
         old_leaf->cache_info.is_dirty = TRUE;
         new_leaf->cache_info.is_dirty = TRUE;
 
         /* Release leaf nodes */
-        if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, bt2->root.addr, old_leaf, H5AC__NO_FLAGS_SET) < 0)
+        if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, old_leaf_ptr.addr, old_leaf, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree leaf node")
         if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, new_leaf_ptr.addr, new_leaf, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree leaf node")
 
         /* Set internal node pointers to leaf nodes */
-        new_int->node_ptrs[0]=bt2->root;
-        new_int->node_ptrs[1]=new_leaf_ptr;
+        new_int->node_ptrs[0] = old_leaf_ptr;
+        new_int->node_ptrs[1] = new_leaf_ptr;
 
         /* Update record count in new internal node */
         new_int->nrec = 1;
@@ -441,7 +445,8 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, const H5B2_shared_t *share
         bt2->depth++;
 
         /* Update pointer to B-tree's root node to pointer to new internal node */
-        bt2->root = new_int_ptr;
+        bt2->root.addr = new_int_ptr.addr;
+        bt2->root.node_nrec = 1;
 
         /* Mark B-tree header as dirty */
         bt2->cache_info.is_dirty = TRUE;
