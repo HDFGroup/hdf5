@@ -304,7 +304,6 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
 	       haddr_t maxaddr)
 {
     int		fd;
-    struct stat	sb;
     H5FD_gass_t	*file=NULL;
     const H5FD_gass_fapl_t	*fa=NULL;
     H5FD_gass_fapl_t		_fa;
