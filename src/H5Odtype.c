@@ -304,15 +304,20 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 
     case H5T_VLEN:  /* Variable length datatypes...  */
         /* Decode base type of VL information */
-        if (NULL==(dt->parent = H5FL_ALLOC(H5T_t,1)))
-            HRETURN_ERROR (H5E_DATATYPE, H5E_NOSPACE, NULL, "memory allocation failed");
+        if (NULL==(dt->parent = H5FL_ALLOC(H5T_t,1))) {
+            HRETURN_ERROR (H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed");
+	}
+
         H5F_addr_undef(&(dt->parent->ent.header));
-	    if (H5O_dtype_decode_helper(f, pp, dt->parent)<0)
+
+	if (H5O_dtype_decode_helper(f, pp, dt->parent)<0) {
             HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode VL parent type");
+	}
 
         dt->force_conv=TRUE;
+
         /* Mark this type as on disk */
-	    if (H5T_vlen_mark(dt, f, H5T_VLEN_DISK)<0) {
+	if (H5T_vlen_mark(dt, f, H5T_VLEN_DISK)<0) {
             HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
         }
         break;
