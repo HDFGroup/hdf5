@@ -1098,7 +1098,7 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 	    info.line_pre = "            %s \"";
 	    info.line_suf = "\"";
 	}
-	if ((p_type=h5dump_fixtype(type,FALSE))>=0) {
+	if ((p_type=h5dump_fixtype(type))>=0) {
 	    need = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
 	    buf = malloc(need);
 	    assert(buf);
