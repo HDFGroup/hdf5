@@ -68,10 +68,6 @@ typedef struct H5D_xfer_t {
     void		*free_info;	/*VL datatype free information	     */
     hid_t		driver_id;	/*File driver ID		     */
     void		*driver_info;	/*File driver specific information   */
-#ifdef COALESCE_READS
-    unsigned               gather_reads;   /*coalesce single reads into a read  */
-                                        /*transaction                        */
-#endif
 #ifdef H5_HAVE_PARALLEL
     unsigned            use_view;       /* Whether to use a view for this I/O */
     MPI_Datatype        btype;          /* MPI type for buffer (memory) */

@@ -162,9 +162,6 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
 #endif
-#ifdef COALESCE_READS
-    H5D_xfer_t *xfer_parms;                     /*transfer property list*/
-#endif
    
     FUNC_ENTER(H5F_arr_read, FAIL);
 
@@ -297,27 +294,12 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
             }
 #endif
 
-#ifdef COALESCE_READS
-                /* Get the dataset transfer property list */
-                if (H5P_DEFAULT == dxpl_id) {
-                    xfer_parms = &H5D_xfer_dflt;
-                } else if (H5P_DATASET_XFER != H5P_get_class (dxpl_id) ||
-                       NULL == (xfer_parms = H5I_object (dxpl_id))) {
-                    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
-                }
-
-            for (z=0, xfer_parms->gather_reads = nelmts - 1;
-                     z<nelmts;
-                     z++, xfer_parms->gather_reads--) {
-#else
 #ifdef QAK
         printf("%s: nelmts=%d, addr=%lu, elmt_size=%lu\n",FUNC,(int)nelmts,(unsigned long)addr,(unsigned long)elmt_size);
         printf("%s: sieve_buf=%p, sieve_loc=%lu, sieve_size=%lu, sieve_buf_size=%lu, sieve_dirty=%u\n",FUNC,f->shared->sieve_buf,(unsigned long)f->shared->sieve_loc,(unsigned long)f->shared->sieve_size,(unsigned long)f->shared->sieve_buf_size,(unsigned)f->shared->sieve_dirty);
         printf("%s: feature_flags=%lx\n",FUNC,(unsigned long)f->shared->lf->feature_flags);
 #endif /* QAK */
             for (z=0; z<nelmts; z++) {
-#endif
-
                 /* Read directly from file if the dataset is in an external file */
                 /* Note: We can't use data sieve buffers for datasets in external files
                  *  because the 'addr' of all external files is set to 0 (above) and

@@ -94,10 +94,6 @@ H5D_xfer_t	H5D_xfer_dflt = {
     NULL,                   	/*No information needed for free() calls    */
     H5FD_VFD_DEFAULT,			/*See H5Pget_driver()			    */
     NULL,			/*No file driver-specific information yet   */
-#ifdef COALESCE_READS
-    0,                          /*coalesce single reads into a read         */
-                                /*transaction                               */
-#endif
 #ifdef H5_HAVE_PARALLEL
     0,                          /* Whether to use a view for this I/O */
     MPI_DATATYPE_NULL,          /* MPI type for buffer (memory) */
