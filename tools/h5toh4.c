@@ -1175,7 +1175,7 @@ H5T_str_t strpad;
     		case H5T_STRING:
 
 			fxdlenstr = type;
-			h4_type = DFNT_INT8;
+			h4_type = DFNT_CHAR;
 
 			if ((space = H5Aget_space(attr_id)) <= 0) {
 				fprintf(stderr, "Error: H5Dget_space() didn't return appropriate value.\n");
@@ -1214,7 +1214,7 @@ H5T_str_t strpad;
 				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_attr", __FILE__, __LINE__);
 				return strpad;
 			}
-			if ((status = H5Tset_strpad(mem_type, strpad)) != SUCCEED ) {
+			if ((status = H5Tset_strpad(mem_type, H5T_STR_SPACEPAD)) != SUCCEED ) {
 				fprintf(stderr, "Error: Problem with H5Tset_strpad()\n");
 				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_attr", __FILE__, __LINE__);
 				return status;
@@ -1954,7 +1954,7 @@ H5T_str_t strpad;
        	return status;
     }
 
-    h4_type = DFNT_INT8;
+    h4_type = DFNT_CHAR;
     if ((mem_type = H5Tcopy(H5T_C_S1)) == FAIL ) {
 	fprintf(stderr, "Error: Problems translating h4 type to mem type\n");
 	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset_string", __FILE__, __LINE__);

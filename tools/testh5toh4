@@ -295,5 +295,7 @@ if test $nerrors -eq 0 ; then
 	echo "All h5toh4 tests passed."
 fi
 
-$RM -r $OUTDIR
+if test -z "$HDF5_NOCLEANUP"; then
+    $RM -r $OUTDIR
+fi
 exit $nerrors
