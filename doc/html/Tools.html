@@ -2066,7 +2066,8 @@ installed with HDF5.
     <dd>Helper scripts to compile HDF5 C applications.
 <dt><strong>Description:</strong>
     <dd><code>h5cc</code> and <code>h5pcc</code> can be used in much 
-        the same way as MPIch is used to compile an HDF5 program. 
+        the same way as <code>mpicc</code> by MPICH is used to compile 
+        an HDF5 program. 
         These tools take care of specifying on the command line
         the locations of the HDF5 header files and libraries.
         <code>h5cc</code> is for use in serial computing environments;
@@ -2076,10 +2077,10 @@ installed with HDF5.
         compiler scripts in that if you have used a set of scripts to compile 
         the HDF5 library, then <code>h5cc</code> and <code>h5pcc</code> 
         also use those scripts.  
-        For example, when compiling an MPIch program, you use the 
+        For example, when compiling an MPICH program, you use the 
         <code>mpicc</code> script. 
-        If you have built HDF5 using MPIch, then <code>h5cc</code>
-        uses the MPIch program for compilation.
+        If you have built HDF5 using MPICH, then <code>h5cc</code>
+        uses the MPICH program for compilation.
         <p>
         Some programs use HDF5 in only a few modules. 
         It is not necessary to use <code>h5cc</code> or <code>h5pcc</code> 
@@ -2088,6 +2089,7 @@ installed with HDF5.
         convenience scripts, you can still compile HDF5 modules in the 
         normal manner, though you will have to specify the HDF5 libraries 
         and include paths yourself.
+        Use the <code>-show</code> option to see the details.
         <p>
         An example of how to use <code>h5cc</code> to compile the program
         <code>hdf_prog</code>, which consists of the modules
@@ -2156,7 +2158,8 @@ installed with HDF5.
     <dd>Helper scripts to compile HDF5 Fortran90 applications.
 <dt><strong>Description:</strong>
     <dd><code>h5fc</code> and <code>h5pfc</code> can be used in much the 
-        same way MPIch is used to compile an HDF5 program. 
+        same way <code>mpif90</code> by MPICH is used to compile 
+        an HDF5 program. 
         These tools take care of specifying on the command line
         the locations of the HDF5 header files and libraries.
         <code>h5fc</code> is for use in serial computing environments;
@@ -2166,9 +2169,9 @@ installed with HDF5.
         compiler scripts in that if you have used a set of scripts to compile 
         the HDF5 Fortran library, then <code>h5fc</code> and <code>h5pfc</code> 
         also use those scripts. For example, when
-        compiling an MPIch program, you use the <code>mpif90</code>
-        script. If you have built HDF5 using MPIch, then <code>h5fc</code>
-        uses the MPIch program for compilation.
+        compiling an MPICH program, you use the <code>mpif90</code>
+        script. If you have built HDF5 using MPICH, then <code>h5fc</code>
+        uses the MPICH program for compilation.
         <p>
         Some programs use HDF5 in only a few modules. It is not necessary
         to use <code>h5fc</code> and <code>h5pfc</code> to compile those 
@@ -2177,6 +2180,7 @@ installed with HDF5.
         convenience scripts, you can still compile HDF5 Fortran modules in 
         the normal manner, though you will have to specify the 
         HDF5 libraries and include paths yourself.
+        Use the <code>-show</code> option to see the details.
         <p>
         An example of how to use <code>h5fc</code> to compile the program
         <code>hdf_prog</code>, which consists of the modules
@@ -2237,14 +2241,15 @@ installed with HDF5.
     <dd>Helper script to compile HDF5 C++ applications.
 <dt><strong>Description:</strong>
     <dd><p>
-        <code>h5c++</code> can be used in much the same way MPIch is used
-        to compile an HDF5 program. It takes care of specifying where the
+        <code>h5c++</code> can be used in much the same way 
+        <code>mpiCC</code> by MPICH is used to compile an HDF5 program. 
+        It takes care of specifying where the
         HDF5 header files and libraries are on the command line.
         <p>
         <code>h5c++</code> subsumes all other compiler scripts in that
         if you've used one set of compiler scripts to compile the 
 	HDF5 C++ library, then <code>h5c++</code> uses those same scripts. 
-	For example, when compiling an MPIch program, 
+	For example, when compiling an MPICH program, 
         you use the <code>mpiCC</code> script. 
         <p>
         Some programs use HDF5 in only a few modules. It isn't necessary
@@ -2253,6 +2258,7 @@ installed with HDF5.
         script, you are still able to compile HDF5 C++ modules in the 
         normal way. In that case, you will have to specify the HDF5 libraries
         and include paths yourself.
+        Use the <code>-show</code> option to see the details.
         <p>
         An example of how to use <code>h5c++</code> to compile the program
         <code>hdf_prog</code>, which consists of modules
@@ -2386,7 +2392,7 @@ And in this document, the
 Describes HDF5 Release 1.6.2, February 2004
 </address><!-- #EndLibraryItem -->
 
-Last modified: 8 January 2004
+Last modified: 23 January 2004
 
 </body>
 </html>
