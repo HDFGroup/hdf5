@@ -66,6 +66,7 @@
 ./config/unicosmk
 
 ./doc/Makefile.in
+./doc/html/ADGuide.html
 ./doc/html/Attributes.html
 ./doc/html/Caching.html
 ./doc/html/Chunking.html
@@ -108,12 +109,12 @@
 ./doc/html/IH_map4.gif
 ./doc/html/IH_mapFoot.gif
 ./doc/html/IH_mapHead.gif
+./doc/html/ImageSpec.html
 ./doc/html/Makefile.in
 ./doc/html/MountingFiles.html
 ./doc/html/NCSAfooterlogo.gif
 ./doc/html/PaletteExample1.gif
 ./doc/html/Palettes.fm.anc.gif
-./doc/html/Palettes.html
 ./doc/html/Performance.html
 ./doc/html/Properties.html
 ./doc/html/PSandPDF/index.html
