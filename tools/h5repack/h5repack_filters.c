@@ -207,50 +207,51 @@ int apply_filters(const char* name,    /* object name from traverse list */
 		
  if (rank==0)
   goto out;
-
-/*-------------------------------------------------------------------------
- * initialize the assigment object
- *-------------------------------------------------------------------------
+	
+		/*-------------------------------------------------------------------------
+		* initialize the assigment object
+		*-------------------------------------------------------------------------
  */
 	init_packobject(&obj);
-
-
-/*-------------------------------------------------------------------------
+	
+	
+	/*-------------------------------------------------------------------------
  * find options
  *-------------------------------------------------------------------------
  */
  if (aux_assign_obj(name,options,&obj)==0)
   return 0;
-
-
+	
+	
  /* check for datasets too small */
-  if ((size=H5Tget_size(type_id))==0)
-   return 0;
-  nelmts=1;
-  for (i=0; i<rank; i++) 
-   nelmts*=dims[i];
-  if (nelmts*size < options->threshold )
-  {
-   if (options->verbose)
-    printf("Warning: Filter not applied to <%s>. Dataset smaller than <%d> bytes\n",
-    name,(int)options->threshold);
-   return 0;
-  }
-
+	if ((size=H5Tget_size(type_id))==0)
+		return 0;
+	nelmts=1;
+	for (i=0; i<rank; i++) 
+		nelmts*=dims[i];
+	if (nelmts*size < options->threshold )
+	{
+		if (options->verbose)
+			printf("Warning: Filter not applied to <%s>. Dataset smaller than <%d> bytes\n",
+			name,(int)options->threshold);
+		return 0;
+	}
+	
  /* get information about input filters */
  if ((nfilters = H5Pget_nfilters(dcpl_id))<0) 
   return -1;
-/*-------------------------------------------------------------------------
- * check if we have filters in the pipeline
- * we want to replace them with the input filters
- *-------------------------------------------------------------------------
+		/*-------------------------------------------------------------------------
+		* check if we have filters in the pipeline
+		* we want to replace them with the input filters
+		* only remove if we are inserting new ones
+		*-------------------------------------------------------------------------
  */
- if (nfilters) {
+ if (nfilters && obj.nfilters ) {
   if (H5Premove_filter(dcpl_id,H5Z_FILTER_ALL)<0) 
    return -1;
  }
-
-/*-------------------------------------------------------------------------
+	
+	/*-------------------------------------------------------------------------
  * the type of filter and additional parameter 
  * type can be one of the filters
  * H5Z_FILTER_NONE       0,  uncompress if compressed
@@ -260,11 +261,11 @@ int apply_filters(const char* name,    /* object name from traverse list */
  * H5Z_FILTER_SZIP       4 , szip compression 
  *-------------------------------------------------------------------------
  */
-
+	
 	if (obj.nfilters)
 	{
 		
-/*-------------------------------------------------------------------------
+	/*-------------------------------------------------------------------------
  * filters require CHUNK layout; if we do not have one define a default
  *-------------------------------------------------------------------------
 		*/
@@ -274,86 +275,86 @@ int apply_filters(const char* name,    /* object name from traverse list */
 			for (i=0; i<rank; i++) 
 				obj.chunk.chunk_lengths[i] = dims[i];
 		}
-
- for ( i=0; i<obj.nfilters; i++)
- {
-  switch (obj.filter[i].filtn)
-  {
-  default:
-   break;
-
-/*-------------------------------------------------------------------------
- * H5Z_FILTER_DEFLATE	   1 , deflation like gzip	   
- *-------------------------------------------------------------------------
- */
-  case H5Z_FILTER_DEFLATE:
-   aggression=obj.filter[i].cd_values[0];
-   /* set up for deflated data */
-   if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
-    return -1;
-   if(H5Pset_deflate(dcpl_id,aggression)<0)
-    return -1;
-   break;
-
-/*-------------------------------------------------------------------------
- * H5Z_FILTER_SZIP       4 , szip compression 
- *-------------------------------------------------------------------------
- */
-  case H5Z_FILTER_SZIP:
-   {
-    unsigned  options_mask;
-    unsigned  pixels_per_block;
-
-    pixels_per_block=obj.filter[i].cd_values[0];
-    if (obj.filter[i].szip_coding==0)
-     options_mask=H5_SZIP_NN_OPTION_MASK;
-    else 
-     options_mask=H5_SZIP_EC_OPTION_MASK;
-
-    /* set up for szip data */
-    if(H5Pset_chunk(dcpl_id,obj.chunk.rank,obj.chunk.chunk_lengths)<0)
-     return -1;
-    if (H5Pset_szip(dcpl_id,options_mask,pixels_per_block)<0) 
-     return -1;
-
-   }
-   break;
-
-/*-------------------------------------------------------------------------
- * H5Z_FILTER_SHUFFLE    2 , shuffle the data
- *-------------------------------------------------------------------------
- */
-  case H5Z_FILTER_SHUFFLE:
-   if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
-    return -1;
-   if (H5Pset_shuffle(dcpl_id)<0) 
-    return -1;
-   break;
-
-/*-------------------------------------------------------------------------
- * H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
- *-------------------------------------------------------------------------
- */
-  case H5Z_FILTER_FLETCHER32:
-   if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
-    return -1;
-   if (H5Pset_fletcher32(dcpl_id)<0) 
-    return -1;
-   break;
-  } /* switch */
- }/*i*/
-
+		
+		for ( i=0; i<obj.nfilters; i++)
+		{
+			switch (obj.filter[i].filtn)
+			{
+			default:
+				break;
+				
+				/*-------------------------------------------------------------------------
+				* H5Z_FILTER_DEFLATE	   1 , deflation like gzip	   
+				*-------------------------------------------------------------------------
+				*/
+			case H5Z_FILTER_DEFLATE:
+				aggression=obj.filter[i].cd_values[0];
+				/* set up for deflated data */
+				if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
+					return -1;
+				if(H5Pset_deflate(dcpl_id,aggression)<0)
+					return -1;
+				break;
+				
+				/*-------------------------------------------------------------------------
+				* H5Z_FILTER_SZIP       4 , szip compression 
+				*-------------------------------------------------------------------------
+				*/
+			case H5Z_FILTER_SZIP:
+				{
+					unsigned  options_mask;
+					unsigned  pixels_per_block;
+					
+					pixels_per_block=obj.filter[i].cd_values[0];
+					if (obj.filter[i].szip_coding==0)
+						options_mask=H5_SZIP_NN_OPTION_MASK;
+					else 
+						options_mask=H5_SZIP_EC_OPTION_MASK;
+					
+					/* set up for szip data */
+					if(H5Pset_chunk(dcpl_id,obj.chunk.rank,obj.chunk.chunk_lengths)<0)
+						return -1;
+					if (H5Pset_szip(dcpl_id,options_mask,pixels_per_block)<0) 
+						return -1;
+					
+				}
+				break;
+				
+				/*-------------------------------------------------------------------------
+				* H5Z_FILTER_SHUFFLE    2 , shuffle the data
+				*-------------------------------------------------------------------------
+				*/
+			case H5Z_FILTER_SHUFFLE:
+				if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
+					return -1;
+				if (H5Pset_shuffle(dcpl_id)<0) 
+					return -1;
+				break;
+				
+				/*-------------------------------------------------------------------------
+				* H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
+				*-------------------------------------------------------------------------
+				*/
+			case H5Z_FILTER_FLETCHER32:
+				if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
+					return -1;
+				if (H5Pset_fletcher32(dcpl_id)<0) 
+					return -1;
+				break;
+			} /* switch */
+		}/*i*/
+		
 	}
 	/*obj.nfilters*/
-	else
+	
+	/*-------------------------------------------------------------------------
+ * layout   
+ *-------------------------------------------------------------------------
+ */
+	
+	if (obj.layout>=0)
 	{
-		/* just apply layout */
-
-		/* no layout info was found, define the default */
-		if (obj.layout==-1)
-			obj.layout = H5D_CONTIGUOUS;
-
-		
+		/* a layout was defined */
 		if (H5Pset_layout(dcpl_id, obj.layout)<0) 
 			return -1;
 		
@@ -365,12 +366,11 @@ int apply_filters(const char* name,    /* object name from traverse list */
 			if (H5Pset_alloc_time(dcpl_id, H5D_ALLOC_TIME_EARLY)<0) 
 				return -1;
 		}
-
-
+		
 	}
-
+	
  return 0;
-
+	
 out:
  if (options->verbose)
   printf("Warning: Filter could not be applied to <%s>\n",name);
