@@ -2764,7 +2764,8 @@ H5D_create_chunk_file_map_hyper(fm_map *fm)
             new_chunk_info->mspace_shared=0;
 
             /* Copy the chunk's coordinates */
-            HDmemcpy(new_chunk_info->coords,coords,fm->f_ndims*sizeof(new_chunk_info->coords[0]));
+            for(u=0; u<fm->f_ndims; u++)
+                new_chunk_info->coords[u]=coords[u];
             new_chunk_info->coords[fm->f_ndims]=0;
 
             /* Insert the new chunk into the TBBT tree */
