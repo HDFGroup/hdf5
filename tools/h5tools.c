@@ -509,7 +509,7 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	} else if (H5T_STRING==H5Tget_class(type)) {
 		size = H5Tget_size(type);
 		quote = '\0';
-		if (str->s == '"') {
+		if (*(str->s) == '"') {
 			quote = 'a';
 		}
 		for (i=0; i<size && ((char*)vp)[i] != '\0'; i++) {
@@ -1433,7 +1433,7 @@ static void display_numeric_data
  hsize_t p_nelmts, hsize_t dim_n_size, hsize_t elmtno) {
 
 hsize_t i;
-//char p_buf[256];		
+/*char p_buf[256];		*/
 char out_buf[NCOLS];
 struct h5dump_str_t tempstr;
 
