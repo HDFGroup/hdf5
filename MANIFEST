@@ -478,7 +478,6 @@
 ./test/unlink.c
 
 ./testpar/Makefile.in
-./testpar/README
 ./testpar/t_dset.c
 ./testpar/t_file.c
 ./testpar/t_mpi.c
