@@ -6,24 +6,14 @@
 #------------------------------------------------------------------------------
 
 ./COPYING
-./INSTALL
-./INSTALL_TFLOPS
-./INSTALL_VFL
-./INSTALL_parallel
-./INSTALL_Windows.txt
-./HISTORY.txt
 ./MANIFEST
 ./Makefile.dist
 ./Makefile.in
-./README
-./RELEASE.txt
+./README.txt
 ./acconfig.h
 ./aclocal.m4
 ./configure
 ./configure.in
-./all.zip
-./all_withf90.zip
-./all_withhdf4.zip
 
 ./bin/checkapi				_DO_NOT_DISTRIBUTE_
 ./bin/checkposix			_DO_NOT_DISTRIBUTE_
@@ -752,6 +742,15 @@
 ./pablo/ProcTrace.h
 ./pablo/READ_ME
 
+
+./release_docs/INSTALL
+./release_docs/INSTALL_TFLOPS
+./release_docs/INSTALL_VFL
+./release_docs/INSTALL_parallel
+./release_docs/INSTALL_Windows.txt
+./release_docs/HISTORY.txt
+./release_docs/RELEASE.txt
+
 ./src/.indent.pro			_DO_NOT_DISTRIBUTE_
 ./src/Dependencies
 ./src/H5.c
@@ -1225,3 +1224,7 @@
 ./tools/testfiles/tvldtypes1.h5.xml
 ./tools/testfiles/tvldtypes2.h5.xml
 ./tools/testfiles/tvldtypes3.h5.xml
+
+./windows/all.zip
+./windows/all_withf90.zip
+./windows/all_withhdf4.zip
