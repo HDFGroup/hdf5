@@ -105,7 +105,7 @@ static int test_simple(void)
   goto out;
 	
 /*-------------------------------------------------------------------------
- * create 6 datasets: two "data" datasets and 4 dimension scales
+ * create datasets: 1 "data" dataset and 4 dimension scales
  *-------------------------------------------------------------------------
  */  
 
@@ -113,24 +113,20 @@ static int test_simple(void)
  if (H5LTmake_dataset_int(fid,"dset_a",rank,dims,buf)<0)
   goto out;
 
- /* make a dataset */
- if (H5LTmake_dataset_int(fid,"dset_b",rank,dims,buf)<0)
-  goto out;
-
  /* make a DS dataset for the first dimension */
- if (H5LTmake_dataset_int(fid,"ds1",rankds,s1_dim,s1_wbuf)<0)
+ if (H5LTmake_dataset_int(fid,"ds_a_1",rankds,s1_dim,s1_wbuf)<0)
   goto out;
 
  /* make a DS dataset for the second dimension */
- if (H5LTmake_dataset_int(fid,"ds2",rankds,s2_dim,s2_wbuf)<0)
+ if (H5LTmake_dataset_int(fid,"ds_a_2",rankds,s2_dim,s2_wbuf)<0)
   goto out;
 
  /* make a DS dataset with an alternate scale for the 2nd dimension  */
- if (H5LTmake_dataset_int(fid,"ds21",rankds,s2_dim,s2_wbuf)<0)
+ if (H5LTmake_dataset_int(fid,"ds_a_21",rankds,s2_dim,s2_wbuf)<0)
   goto out;
 
  /* make a DS dataset with an alternate scale for the 2nd dimension  */
- if (H5LTmake_dataset_int(fid,"ds22",rankds,s2_dim,s2_wbuf)<0)
+ if (H5LTmake_dataset_int(fid,"ds_a_22",rankds,s2_dim,s2_wbuf)<0)
   goto out;
 
 	
@@ -151,10 +147,10 @@ static int test_simple(void)
  */  
 
  /* get the DS dataset id */
- if ((dsid = H5Dopen(fid,"ds1"))<0)
+ if ((dsid = H5Dopen(fid,"ds_a_1"))<0)
   goto out;
 
- /* attach the "ds1" dimension scale to "dset_a" as the 1st dimension  */
+ /* attach the "ds_a_1" dimension scale to "dset_a" as the 1st dimension  */
  if (H5DSattach_scale(did,dsid,0)<0)
   goto out;
 
@@ -163,12 +159,12 @@ static int test_simple(void)
   goto out;
 
 /*-------------------------------------------------------------------------
- * attach the "ds2" dimension scale to "dset_a"
+ * attach the "ds_a_2" dimension scale to "dset_a"
  *-------------------------------------------------------------------------
  */  
 
  /* get the DS dataset id */
- if ((dsid = H5Dopen(fid,"ds2"))<0)
+ if ((dsid = H5Dopen(fid,"ds_a_2"))<0)
   goto out;
 
  /* attach the "ds2" dimension scale to "dset_a" as the 2nd dimension  */
@@ -180,15 +176,15 @@ static int test_simple(void)
   goto out;
  
 /*-------------------------------------------------------------------------
- *  attach the "ds21" dimension scale to "dset_a"
+ *  attach the "ds_a_21" dimension scale to "dset_a"
  *-------------------------------------------------------------------------
  */ 
 
  /* get the DS dataset id */
- if ((dsid = H5Dopen(fid,"ds21"))<0)
+ if ((dsid = H5Dopen(fid,"ds_a_21"))<0)
   goto out;
 
- /* attach the "ds21" dimension scale to "dset_a" as the 2nd dimension  */
+ /* attach the "ds_a_21" dimension scale to "dset_a" as the 2nd dimension  */
  if (H5DSattach_scale(did,dsid,1)<0)
   goto out;
 
@@ -197,12 +193,12 @@ static int test_simple(void)
   goto out;
 
 /*-------------------------------------------------------------------------
- *  attach the "ds22" dimension scale to "dset_a"
+ *  attach the "ds_a_22" dimension scale to "dset_a"
  *-------------------------------------------------------------------------
  */ 
 
  /* get the DS dataset id */
- if ((dsid = H5Dopen(fid,"ds22"))<0)
+ if ((dsid = H5Dopen(fid,"ds_a_22"))<0)
   goto out;
 
   /* attach the "ds22" dimension scale to "dset_a" as the 2nd dimension  */
@@ -216,59 +212,35 @@ static int test_simple(void)
  /* close dataset ID of "dset_a" */
  if (H5Dclose(did)<0)
   goto out;
- 
-/*-------------------------------------------------------------------------
- *  attach the "ds1" dimension scale to "dset_b"
- *-------------------------------------------------------------------------
- */ 
 
- /* get the dataset id for "dset_b" */
- if ((did = H5Dopen(fid,"dset_b"))<0)
-  goto out;
-
- /* get the DS dataset id */
- if ((dsid = H5Dopen(fid,"ds1"))<0)
-  goto out;
-
- /* attach the "ds1" dimension scale to "dset_b" as the 1st dimension  */
- if (H5DSattach_scale(did,dsid,0)<0)
-  goto out;
-
- /* close DS id */
- if (H5Dclose(dsid)<0)
-  goto out;
-
- /* close dataset ID of "dset_b" */
- if (H5Dclose(did)<0)
-  goto out;
  
 /*-------------------------------------------------------------------------
  *  verify if the dimension scales are valid 
  *-------------------------------------------------------------------------
  */  
 
- if ((did = H5Dopen(fid,"ds1"))<0)
+ if ((did = H5Dopen(fid,"ds_a_1"))<0)
   goto out;
  if ((H5DSis_scale(did))<=0)
   goto out;
  if (H5Dclose(did))
   goto out;
 
- if ((did = H5Dopen(fid,"ds2"))<0)
+ if ((did = H5Dopen(fid,"ds_a_2"))<0)
   goto out;
  if ((H5DSis_scale(did))<=0)
   goto out;
  if (H5Dclose(did))
   goto out;
 
- if ((did = H5Dopen(fid,"ds21"))<0)
+ if ((did = H5Dopen(fid,"ds_a_21"))<0)
   goto out;
  if ((H5DSis_scale(did))<=0)
   goto out;
  if (H5Dclose(did))
   goto out;
 
- if ((did = H5Dopen(fid,"ds22"))<0)
+ if ((did = H5Dopen(fid,"ds_a_22"))<0)
   goto out;
  if ((H5DSis_scale(did))<=0)
   goto out;
@@ -277,7 +249,6 @@ static int test_simple(void)
 
 
  PASSED();
-
 
 
 /*-------------------------------------------------------------------------
@@ -297,15 +268,13 @@ static int test_simple(void)
   goto out;
 
  /* verify that "dset_a" has 1 dimension scale at DIM 0   */
- dim=0;
- if (H5DSget_nscales(did,dim,&nscales)<0)
+ if (H5DSget_nscales(did,0,&nscales)<0)
   goto out;
  if (nscales!=1)
   goto out;
 
  /* verify that "dset_a" has 3 dimension scales at DIM 1   */
- dim=1;
- if (H5DSget_nscales(did,dim,&nscales)<0)
+ if (H5DSget_nscales(did,1,&nscales)<0)
   goto out;
  if (nscales!=3)
   goto out;
@@ -316,6 +285,35 @@ static int test_simple(void)
 
  
 /*-------------------------------------------------------------------------
+ * create datasets: 1 "data" dataset and 1 dimension scale
+ *-------------------------------------------------------------------------
+ */  
+
+ /* make a dataset */
+ if (H5LTmake_dataset_int(fid,"dset_b",rank,dims,buf)<0)
+  goto out;
+
+ /* make a DS dataset for the first dimension */
+ if (H5LTmake_dataset_int(fid,"ds_b_1",rankds,s1_dim,s1_wbuf)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ *  attach the scale to "dset_b"
+ *-------------------------------------------------------------------------
+ */ 
+
+ if ((did = H5Dopen(fid,"dset_b"))<0)
+  goto out;
+ if ((dsid = H5Dopen(fid,"ds_b_1"))<0)
+  goto out;
+ if (H5DSattach_scale(did,dsid,0)<0)
+  goto out;
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
  * verify if "dset_b" has dimension scales
  *-------------------------------------------------------------------------
  */  
@@ -325,15 +323,13 @@ static int test_simple(void)
   goto out;
 
  /* verify that "dset_b" has 1 dimension scale at DIM 0   */
- dim=0;
- if (H5DSget_nscales(did,dim,&nscales)<0)
+ if (H5DSget_nscales(did,0,&nscales)<0)
   goto out;
  if (nscales!=1)
   goto out;
 
  /* verify that "dset_b" has 0 dimension scales at DIM 1   */
- dim=1;
- if (H5DSget_nscales(did,dim,&nscales)<0)
+ if (H5DSget_nscales(did,1,&nscales)<0)
   goto out;
  if (nscales!=0)
   goto out;
@@ -355,7 +351,7 @@ static int test_simple(void)
 
 
 /*-------------------------------------------------------------------------
- * create 3 datasets: one "data" dataset and 2 dimension scales
+ * create datasets: one "data" dataset and 4 dimension scales
  *-------------------------------------------------------------------------
  */  
 
@@ -364,32 +360,58 @@ static int test_simple(void)
   goto out;
 
  /* make a DS dataset for the first dimension */
- if (H5LTmake_dataset_int(fid,"ds3",rankds,s1_dim,s1_wbuf)<0)
+ if (H5LTmake_dataset_int(fid,"ds_c_1",rankds,s1_dim,s1_wbuf)<0)
   goto out;
 
  /* make a DS dataset for the second dimension */
- if (H5LTmake_dataset_int(fid,"ds4",rankds,s2_dim,s2_wbuf)<0)
+ if (H5LTmake_dataset_int(fid,"ds_c_2",rankds,s2_dim,s2_wbuf)<0)
   goto out;
 
+ /* make a DS dataset with an alternate scale for the 2nd dimension  */
+ if (H5LTmake_dataset_int(fid,"ds_c_21",rankds,s2_dim,s2_wbuf)<0)
+  goto out;
+
+ /* make a DS dataset with an alternate scale for the 2nd dimension  */
+ if (H5LTmake_dataset_int(fid,"ds_c_22",rankds,s2_dim,s2_wbuf)<0)
+  goto out;
+
+
 /*-------------------------------------------------------------------------
- *  attach "ds3" and "ds4" to "dset_c"
+ *  attach the scales to "dset_c"
  *-------------------------------------------------------------------------
  */ 
 
  if ((did = H5Dopen(fid,"dset_c"))<0)
   goto out;
- if ((dsid = H5Dopen(fid,"ds3"))<0)
+
+ if ((dsid = H5Dopen(fid,"ds_c_1"))<0)
   goto out;
  if (H5DSattach_scale(did,dsid,0)<0)
   goto out;
  if (H5Dclose(dsid)<0)
   goto out;
- if ((dsid = H5Dopen(fid,"ds4"))<0)
+
+ if ((dsid = H5Dopen(fid,"ds_c_2"))<0)
   goto out;
  if (H5DSattach_scale(did,dsid,1)<0)
   goto out;
  if (H5Dclose(dsid)<0)
   goto out;
+
+ if ((dsid = H5Dopen(fid,"ds_c_21"))<0)
+  goto out;
+ if (H5DSattach_scale(did,dsid,1)<0)
+  goto out;
+ if (H5Dclose(dsid)<0)
+  goto out;
+
+ if ((dsid = H5Dopen(fid,"ds_c_22"))<0)
+  goto out;
+ if (H5DSattach_scale(did,dsid,1)<0)
+  goto out;
+ if (H5Dclose(dsid)<0)
+  goto out;
+
  if (H5Dclose(did)<0)
   goto out;
 
@@ -401,22 +423,20 @@ static int test_simple(void)
  if ((did = H5Dopen(fid,"dset_c"))<0)
   goto out;
  /* verify that "dset_c" has 1 dimension scale at DIM 0   */
- dim=0;
- if (H5DSget_nscales(did,dim,&nscales)<0)
+ if (H5DSget_nscales(did,0,&nscales)<0)
   goto out;
  if (nscales!=1)
   goto out;
- /* verify that "dset_c" has 1 dimension scale at DIM 1   */
- dim=1;
- if (H5DSget_nscales(did,dim,&nscales)<0)
+ /* verify that "dset_c" has 3 dimension scales at DIM 1   */
+ if (H5DSget_nscales(did,1,&nscales)<0)
   goto out;
- if (nscales!=1)
+ if (nscales!=3)
   goto out;
  if (H5Dclose(did)<0)
   goto out;
   
 /*-------------------------------------------------------------------------
- * detach the "ds3" dimension scale to "dset_c"
+ * detach the "ds_c_21" dimension scale to "dset_c"
  *-------------------------------------------------------------------------
  */ 
 
@@ -425,11 +445,11 @@ static int test_simple(void)
   goto out;
 
  /* get the DS dataset id */
- if ((dsid = H5Dopen(fid,"ds3"))<0)
+ if ((dsid = H5Dopen(fid,"ds_c_21"))<0)
   goto out;
 
- /* detach the "ds3" dimension scale to "dset_c" at index 0  */
- if (H5DSdetach_scale(did,dsid,0)<0) 
+ /* detach the "ds_c_21" dimension scale to "dset_c" in DIM 1  */
+ if (H5DSdetach_scale(did,dsid,1)<0) 
   goto out;
 
  /* close DS id */
@@ -441,20 +461,100 @@ static int test_simple(void)
   goto out;
 
 /*-------------------------------------------------------------------------
- * verify that "dset_c" has NOT dimension scales
+ * "dset_c" must have now 2 dimension scales at DIM 1
  *-------------------------------------------------------------------------
  */  
 
  if ((did = H5Dopen(fid,"dset_c"))<0)
   goto out;
-  /* verify that "dset_c" has 0 dimension scale at DIM 0   */
- dim=0;
- if (H5DSget_nscales(did,dim,&nscales)<0)
+  /* verify that "dset_c" has 2 dimension scales at DIM 1  */
+ if (H5DSget_nscales(did,1,&nscales)<0)
+  goto out;
+ if (nscales!=2)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * detach the "ds_c_22" dimension scale to "dset_c"
+ *-------------------------------------------------------------------------
+ */ 
+
+ /* get the dataset id for "dset_c" */
+ if ((did = H5Dopen(fid,"dset_c"))<0)
+  goto out;
+
+ /* get the DS dataset id */
+ if ((dsid = H5Dopen(fid,"ds_c_22"))<0)
+  goto out;
+
+ /* detach the "ds_c_22" dimension scale to "dset_c" in DIM 1  */
+ if (H5DSdetach_scale(did,dsid,1)<0) 
+  goto out;
+
+ /* close DS id */
+ if (H5Dclose(dsid)<0)
+  goto out;
+
+ /* close dataset ID of "dset_c" */
+ if (H5Dclose(did)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * "dset_c" must have now 1 dimension scale at DIM 1
+ *-------------------------------------------------------------------------
+ */  
+
+ if ((did = H5Dopen(fid,"dset_c"))<0)
+  goto out;
+  /* verify that "dset_c" has 1 dimension scale at DIM 1  */
+ if (H5DSget_nscales(did,1,&nscales)<0)
+  goto out;
+ if (nscales!=1)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * detach the "ds_c_2" dimension scale to "dset_c"
+ *-------------------------------------------------------------------------
+ */ 
+
+ /* get the dataset id for "dset_c" */
+ if ((did = H5Dopen(fid,"dset_c"))<0)
+  goto out;
+
+ /* get the DS dataset id */
+ if ((dsid = H5Dopen(fid,"ds_c_2"))<0)
+  goto out;
+
+ /* detach the "ds_c_2" dimension scale to "dset_c" in DIM 1  */
+ if (H5DSdetach_scale(did,dsid,1)<0) 
+  goto out;
+
+ /* close DS id */
+ if (H5Dclose(dsid)<0)
+  goto out;
+
+ /* close dataset ID of "dset_c" */
+ if (H5Dclose(did)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * "dset_c" must have now 0 dimension scales at DIM 1
+ *-------------------------------------------------------------------------
+ */  
+
+ if ((did = H5Dopen(fid,"dset_c"))<0)
+  goto out;
+  /* verify that "dset_c" has 1 dimension scale at DIM 1  */
+ if (H5DSget_nscales(did,1,&nscales)<0)
   goto out;
  if (nscales!=0)
   goto out;
  if (H5Dclose(did)<0)
   goto out;
+
 
  PASSED();
 
@@ -499,19 +599,19 @@ static int test_simple(void)
  TESTING2("set scale/get scale name");
 
 /*-------------------------------------------------------------------------
- * make a dataset named "ds5" and convert it to a DS dataset
+ * make a dataset named "ds_1" and convert it to a DS dataset
  *-------------------------------------------------------------------------
  */ 
- if (H5LTmake_dataset_int(fid,"ds5",rankds,s1_dim,s1_wbuf)<0)
+ if (H5LTmake_dataset_int(fid,"ds_1",rankds,s1_dim,s1_wbuf)<0)
   goto out;
 
- if ((did = H5Dopen(fid,"ds5"))<0)
+ if ((did = H5Dopen(fid,"ds_1"))<0)
   goto out;
 
  if (H5DSset_scale(did,"scale 1")<0)
   goto out;
 
- /* verify that "ds5" is a dimension scale dataset  */
+ /* verify that "ds5_1" is a dimension scale dataset  */
  if ((H5DSis_scale(did))==0)
   goto out;
 
@@ -629,7 +729,7 @@ static int test_simple(void)
    if (match_size==0)
     goto out;
 
-   /* both "ds1" and "ds2" are the on the first index */
+   /* both "ds_a_1" and "ds_a_2" are the on the first index */
    if (idx!=0)
     goto out;
   }
@@ -656,11 +756,11 @@ static int test_simple(void)
  */  
  if (H5LTmake_dataset_int(fid,"dset_d",rank,dims,buf)<0)
   goto out;
- if (H5LTmake_dataset_int(fid,"ds6_1_1",rankds,s1_dim,NULL)<0)
+ if (H5LTmake_dataset_int(fid,"ds_d_1",rankds,s1_dim,NULL)<0)
   goto out;
- if (H5LTmake_dataset_int(fid,"ds6_1_2",rankds,s1_dim,s1_wbuf)<0)
+ if (H5LTmake_dataset_int(fid,"ds_d_11",rankds,s1_dim,s1_wbuf)<0)
   goto out;
- if (H5LTmake_dataset_int(fid,"ds7_2_1",rankds,s2_dim,NULL)<0)
+ if (H5LTmake_dataset_int(fid,"ds_d_2",rankds,s2_dim,NULL)<0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -670,19 +770,19 @@ static int test_simple(void)
  if ((did = H5Dopen(fid,"dset_d"))<0)
   goto out;
 
- if ((dsid = H5Dopen(fid,"ds6_1_1"))<0)
+ if ((dsid = H5Dopen(fid,"ds_d_1"))<0)
   goto out;
  if (H5DSattach_scale(did,dsid,0)<0)
   goto out;
  if (H5Dclose(dsid)<0)
   goto out;
- if ((dsid = H5Dopen(fid,"ds6_1_2"))<0)
+ if ((dsid = H5Dopen(fid,"ds_d_11"))<0)
   goto out;
  if (H5DSattach_scale(did,dsid,0)<0)
   goto out;
  if (H5Dclose(dsid)<0)
   goto out;
- if ((dsid = H5Dopen(fid,"ds7_2_1"))<0)
+ if ((dsid = H5Dopen(fid,"ds_d_2"))<0)
   goto out;
  if (H5DSattach_scale(did,dsid,1)<0)
   goto out;
