@@ -1,4 +1,4 @@
-HDF5 version 1.7.20 released on Wed Mar 17 08:15:57 CST 2004
+HDF5 version 1.7.21 released on Wed Apr 14 04:46:46 CDT 2004
 ================================================================================
 
 
@@ -42,10 +42,13 @@ New Features
 
     Library:
     --------
+        - A new type of dataspace, null dataspace(dataspace without any 
+            element) was added.  SLU - 2004/3/24
         - Data type conversion(software) from integer to float was added.
-          SLU - 2004/3/13 
+            SLU - 2004/3/13 
         - Data type conversion(software) from float to integer was added.
-          Conversion from integer to float will be added later.  SLU -2004/2/4
+            Conversion from integer to float will be added later.  
+            SLU -2004/2/4
         - Added new H5Premove_filter routine to remove I/O pipeline filters
             from dataset creation property lists.  PVN - 2004/01/26
         - Added new 'compare' callback parameter to H5Pregister & H5Pinsert
@@ -81,6 +84,8 @@ New Features
 
     Tools:
     ------
+        - h5repack.sh did not report errors encountered during tests.  It does
+          now.  AKC - 2004/04/02
         - Added the MPI-I/O and MPI-POSIX drivers to the list of VFL drivers
             available for h5dump and h5ls
         - Added option --vfd= to h5ls to allow a VFL driver to be selected
