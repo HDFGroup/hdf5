@@ -451,7 +451,7 @@ test_compression(H5File& file)
 	DataSet* dataset = new DataSet (file.createDataSet 
 	    (DSET_COMPRESS_NAME, PredType::NATIVE_INT, space1, dscreatplist));
   
-#ifdef H5_HAVE_COMPRESS2
+#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
     PASSED();
 #else
     SKIPPED();
@@ -477,7 +477,7 @@ test_compression(H5File& file)
 		}
 	    }
 	}
-#ifdef H5_HAVE_COMPRESS2
+#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
     PASSED();
 #else
     SKIPPED();
@@ -501,8 +501,8 @@ test_compression(H5File& file)
 
 	//if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, points)<0) goto error;
 	dataset->write ((void*) points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
-#ifdef H5_HAVE_COMPRESS2
 
+#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
     PASSED();
 #else
     SKIPPED();
@@ -526,7 +526,7 @@ test_compression(H5File& file)
 		if (status == -1) goto error;
 	    }
 
-#ifdef H5_HAVE_COMPRESS2
+#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
     PASSED();
 #else
     SKIPPED();
@@ -562,7 +562,7 @@ test_compression(H5File& file)
 		if (status == -1) goto error;
 	    }
 
-#ifdef H5_HAVE_COMPRESS2
+#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
     PASSED();
 #else
     SKIPPED();
@@ -591,7 +591,7 @@ test_compression(H5File& file)
 		if (status == -1) goto error;
 	    }
 
-#ifdef H5_HAVE_COMPRESS2
+#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
     PASSED();
 #else
     SKIPPED();
@@ -634,7 +634,7 @@ test_compression(H5File& file)
 	    }
 	}
 	}
-#ifdef H5_HAVE_COMPRESS2
+#if defined(H5_HAVE_COMPRESS2) && defined(H5_HAVE_ZLIB_H) && defined(H5_HAVE_LIBZ)
     PASSED();
 #else
     SKIPPED();
@@ -648,7 +648,7 @@ test_compression(H5File& file)
 	*/
 	TESTING("compression (app-defined method)");
 
-	// BMR: not sure how to handle this yet???
+	// BMR: not sure how to handle this yet
 	if (H5Zregister (H5Z_BOGUS, DSET_BOGUS_NAME, bogus)<0) goto error;
 	if (H5Pset_filter (dscreatplist.getId(), H5Z_BOGUS, 0, 0, NULL)<0) goto error;
 	dscreatplist.setFilter (H5Z_BOGUS, 0, 0, NULL);

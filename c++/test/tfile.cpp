@@ -10,12 +10,13 @@
  * Test the low-level file I/O features.
  */
 
-#include "H5private.h"
-#include "H5Bprivate.h"
-#include "H5Pprivate.h"
+//#include "H5private.h"
+//#include "H5Bprivate.h"
+//#include "H5Pprivate.h"
 
-#include "testhdf5.h"
+#include <iostream>
 #include "H5Cpp.h"
+#include "testhdf5.h"
 
 #ifndef H5_NO_NAMESPACE
 using namespace H5;
@@ -60,10 +61,6 @@ using namespace H5;
 static void 
 test_file_create(void)
 {
-    hid_t       tmpl1, tmpl2;	/*file creation templates	*/
-    int	        iparm, iparm2;
-    herr_t      ret;		/*generic return value		*/
-
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Low-Level File Creation I/O\n"));
 
@@ -72,7 +69,7 @@ test_file_create(void)
 
     /* Create with H5F_ACC_EXCL */
     /* First ensure the file does not exist */
-    //remove(FILE1);
+    remove(FILE1);
 
     try {
 	H5File* fid1 = new H5File (FILE1, H5F_ACC_EXCL);
@@ -137,10 +134,10 @@ test_file_create(void)
 	delete fid1;
     }
     catch( PropListIException error ) {
-	CHECK(-1, FAIL, error.getCDetailMesg());
+	CHECK(-1, FAIL, error.getCFuncName());
     }
     catch( FileIException error ) {
-	CHECK(-1, FAIL, error.getCDetailMesg());
+	CHECK(-1, FAIL, error.getCFuncName());
     }
 
     try
@@ -161,6 +158,7 @@ test_file_create(void)
 
     	/* Release file-creation template */
 	delete tmpl1;
+// here is still good
 
 	/* Get the file-creation template */
 	tmpl1 = new FileCreatPropList (fid2.getCreatePlist());
@@ -214,10 +212,7 @@ test_file_create(void)
 	delete tmpl1;
     }
     catch( PropListIException error ) {
-	CHECK(-1, FAIL, error.getCDetailMesg());
-    }
-    catch( FileIException error ) {
-	CHECK(-1, FAIL, error.getCDetailMesg());
+	CHECK(-1, FAIL, error.getCFuncName());
     }
 } /* test_file_create() */
 
@@ -266,11 +261,8 @@ test_file_open(void)
 	VERIFY(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk");
     }   // end of try block
 
-    catch( FileIException error ) {
-        CHECK(FAIL, FAIL, error.getCDetailMesg());
-    }
-    catch( PropListIException error ) {
-        CHECK(FAIL, FAIL, error.getCDetailMesg());
+    catch( Exception error ) {
+        CHECK(FAIL, FAIL, error.getCFuncName());
     }
 } /* test_file_open() */
 
