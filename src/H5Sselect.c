@@ -1753,7 +1753,7 @@ H5S_select_fill(void *_fill, size_t fill_size, const H5S_t *space, void *_buf)
     /* Check args */
     assert(fill_size>0);
     assert(space);
-    assert(buf);
+    assert(_buf);
 
     /* Check if we need a temporary fill value buffer */
     if(fill==NULL) {
