@@ -55,13 +55,18 @@ printf("dataset rank %d, dimensions %d x %d \n", rank, dims[0], dims[1]);
  */
 cparms = H5Dget_create_parms(dataset); /* Get properties handle first. */
 
+/* 
+ * Check if dataset is chunked.
+ */
+ if (H5D_CHUNKED == H5Cget_layout(cparms))  {
+
 /*
  * Get chunking information: rank and dimensions
  */
 rank_chunk = H5Cget_chunk(cparms, 2, chunk_dims);
 printf("chunk rank %d, dimensions %d x %d \n", rank_chunk,
         chunk_dims[0], chunk_dims[1]);
- 
+} 
  
 /*
  * Define the memory space to read dataset.
@@ -131,6 +136,7 @@ for (j = 0; j < chunk_dims[0]; j++) {
 /*
  * Close/release resources.
  */
+H5Cclose(cparms);
 H5Dclose(dataset);
 H5Pclose(filespace);
 H5Pclose(memspace);
