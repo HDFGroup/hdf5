@@ -379,6 +379,10 @@ H5_DLL herr_t H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			    hsize_t nelmts, size_t buf_stride,
                             size_t bkg_stride, void *_buf, void *bkg,
                             hid_t dset_xfer_plist);
+H5_DLL herr_t H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    hsize_t nelmts, size_t buf_stride,
+                            size_t bkg_stride, void *_buf, void *bkg,
+                            hid_t dset_xfer_plist);
 H5_DLL herr_t H5T_conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			    hsize_t nelmts, size_t buf_stride,
                             size_t bkg_stride, void *_buf, void *bkg,
@@ -1062,6 +1066,7 @@ H5_DLL herr_t H5T_conv_i32le_f64le(hid_t src_id, hid_t dst_id,
 /* Bit twiddling functions */
 H5_DLL void H5T_bit_copy(uint8_t *dst, size_t dst_offset, const uint8_t *src,
 			  size_t src_offset, size_t size);
+H5_DLL void H5T_bit_shift(uint8_t *buf, hssize_t shift_dist, size_t buf_size);
 H5_DLL void H5T_bit_set(uint8_t *buf, size_t offset, size_t size,
 			 hbool_t value);
 H5_DLL hsize_t H5T_bit_get_d(uint8_t *buf, size_t offset, size_t size);
@@ -1070,6 +1075,8 @@ H5_DLL void H5T_bit_set_d(uint8_t *buf, size_t offset, size_t size,
 H5_DLL ssize_t H5T_bit_find(uint8_t *buf, size_t offset, size_t size,
 			     H5T_sdir_t direction, hbool_t value);
 H5_DLL htri_t H5T_bit_inc(uint8_t *buf, size_t start, size_t size);
+H5_DLL void H5T_bit_dec(uint8_t *buf, size_t start, size_t size);
+H5_DLL void H5T_bit_neg(uint8_t *buf, size_t start, size_t size);
 
 /* VL functions */
 H5_DLL H5T_t * H5T_vlen_create(const H5T_t *base);

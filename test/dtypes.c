@@ -3798,7 +3798,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 {
     const size_t	ntests=NTESTS;		/*number of tests	*/
     const size_t	nelmts=NTESTELEM;	/*num values per test	*/
-    const size_t	max_fails=20;		/*max number of failures*/
+    const size_t	max_fails=40;		/*max number of failures*/
     size_t		fails_all_tests=0;	/*number of failures	*/
     size_t		fails_this_test;	/*fails for this test	*/
     char		str[256];		/*hello string		*/
@@ -4328,7 +4328,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
             /* Make certain that there isn't some weird number of destination bits */
             assert(dst_nbits%8==0);
 
-            /* Are the two results the same */
+            /* Are the two results the same? */
             for (k=(dst_size-(dst_nbits/8)); k<dst_size; k++)
                 if (buf[j*dst_size+k]!=hw[k])
                     break;
@@ -5456,7 +5456,7 @@ static int
 run_float_int_conv(const char *name)
 {
     int		nerrors = 0;
-    
+#ifndef TMP    
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_CHAR);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_CHAR);
     
@@ -5468,11 +5468,13 @@ run_float_int_conv(const char *name)
     
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_USHORT);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_USHORT);
- 
+
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_INT);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_INT);
     
+#endif /*TMP*/ 
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_UINT);
+#ifndef TMP    
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_UINT);
     
 #if H5_SIZEOF_LONG!=H5_SIZEOF_INT
@@ -5490,6 +5492,7 @@ run_float_int_conv(const char *name)
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_ULLONG);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_ULLONG);
 #endif
+#endif /*TMP*/ 
     
     return nerrors;
 }
@@ -5592,6 +5595,9 @@ main(void)
     nerrors += test_conv_flt_1("sw", H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
     nerrors += test_conv_flt_1("sw", H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
 #endif
+    
+    /* Test software float-integer conversion functions */
+    nerrors += run_float_int_conv("sw");
 
     reset_hdf5();
     

@@ -78,7 +78,7 @@ H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
      *      ... v v v v v V V V V V
      *      ...+---------------+---------------+
      *      ...|7 6 5 4 3 2 1 0|7 6 5 4 3 2 1 0|
-     *      ...+---------------+---------------+
+           ...+---------------+---------------+
      *           dst[d_idx+1]      dst[d_idx]
      */
     while (src_offset && size>0) {
@@ -157,6 +157,59 @@ H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
 	}
 	size -= nbits;
     }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_bit_shift
+ *
+ * Purpose:	Simulation of hardware shifting.  Shifts a bit vector
+ *              in a way similar to shifting a variable value, like
+ *              value <<= 3, or value >>= 16.
+ *
+ * Return:	void
+ *
+ * Programmer:	Raymond Lu
+ *              Wednesday, Febuary 4, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5T_bit_shift (uint8_t *buf, hssize_t shift_dist, size_t buf_size)
+{
+    uint8_t *tmp_buf;
+    size_t  buf_size_bit = 8*buf_size;
+    size_t  i;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5T_bit_shift);
+
+    if(!shift_dist)
+        goto done;    
+    if(abs(shift_dist) >= buf_size_bit) {
+        H5T_bit_set (buf, 0, buf_size_bit, FALSE);
+        goto done;
+    }
+    
+    tmp_buf = (uint8_t*)HDcalloc(buf_size, 1);
+
+    /* Shift vector by making copies */    
+    if(shift_dist > 0)  /* left shift */ 
+        H5T_bit_copy (tmp_buf, shift_dist, buf, 0, buf_size_bit-shift_dist);
+    else { /* right shift */
+        shift_dist = -shift_dist;
+        H5T_bit_copy(tmp_buf, 0, buf, shift_dist, buf_size_bit-shift_dist);
+    }
+
+    /* Copy back the vector */
+    for(i=0; i<buf_size; i++)
+        buf[i] = tmp_buf[i];
+
+    HDfree(tmp_buf);
+
+done:
+    FUNC_LEAVE_NOAPI_VOID
 }
 
 
@@ -439,7 +492,7 @@ H5T_bit_inc(uint8_t *buf, size_t start, size_t size)
     unsigned	acc, mask;
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_bit_find);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_bit_inc);
 
     assert(buf);
     start %= 8;
@@ -479,4 +532,66 @@ H5T_bit_inc(uint8_t *buf, size_t start, size_t size)
     }
 
     FUNC_LEAVE_NOAPI(carry ? TRUE : FALSE);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_bit_dec
+ *
+ * Purpose:	decrement part of a bit field by 1.
+ *              At this moment, START is always 0 and the algorithm only 
+ *              works from the end to the front for the buffer.
+ *
+ * Return:	void
+ *
+ *
+ * Programmer:	Raymond Lu
+ *              Wednesday, Jan 28, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5T_bit_dec(uint8_t *buf, size_t start, size_t size)
+{
+    size_t	idx;
+
+    assert(buf);
+
+    for(idx=0; idx < size/8; idx++) {
+        if(buf[idx] != 0x00) {
+            buf[idx] -= 1; 
+            break;
+        } else if(buf[idx]==0x00) {
+            buf[idx] -= 1; 
+        }
+    }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_bit_neg
+ *
+ * Purpose:	Bit-negate buffer.
+ *              At this moment, START is always 0. 
+ *
+ * Return:	void
+ *
+ * Programmer:	Raymond Lu
+ *              Wednesday, Jan 28, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5T_bit_neg(uint8_t *buf, size_t start, size_t size)
+{
+    size_t i;
+
+    assert(buf);
+
+    for(i=0; i<size/8; i++)
+        buf[i] = ~(buf[i]);
 }
