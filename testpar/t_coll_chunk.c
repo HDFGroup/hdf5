@@ -78,8 +78,11 @@ coll_chunk3(void)
 {
 
   char *filename;
+  int mpi_size;
+  MPI_Comm comm = MPI_COMM_WORLD;
+  MPI_Comm_size(comm,&mpi_size);           
   filename = (char *) GetTestParameters();
-  coll_chunktest(filename,4,BYROW_CONT);
+  coll_chunktest(filename,mpi_size,BYROW_CONT);
 
 }
 
@@ -88,8 +91,12 @@ coll_chunk4(void)
 {
 
   char *filename;
+  int mpi_size;
+
+  MPI_Comm comm = MPI_COMM_WORLD;
+  MPI_Comm_size(comm,&mpi_size);           
   filename = (char *) GetTestParameters();
-  coll_chunktest(filename,4,BYROW_DISCONT);
+  coll_chunktest(filename,mpi_size*2,BYROW_DISCONT);
 
 }
 
@@ -207,7 +214,7 @@ coll_chunktest(char* filename,int chunk_factor,int select_factor) {
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,&prop_value);
     VRFY((status >= 0),"testing property list get succeeded");
-    if(chunk_factor == 4 && select_factor == BYROW_DISCONT) { /* suppose to use independent */
+    if(chunk_factor == mpi_size*2 && select_factor == BYROW_DISCONT) { /* suppose to use independent */
         VRFY((prop_value == 0), "H5Dwrite shouldn't use MPI Collective IO call");
     }
     else {
@@ -290,7 +297,7 @@ coll_chunktest(char* filename,int chunk_factor,int select_factor) {
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_NAME,&prop_value);
     VRFY((status >= 0),"testing property list get succeeded");
-    if(chunk_factor == 4 && select_factor == BYROW_DISCONT) { /* suppose to use independent */
+    if(chunk_factor == mpi_size*2 && select_factor == BYROW_DISCONT) { /* suppose to use independent */
         VRFY((prop_value == 0), "H5Dread shouldn't use MPI Collective IO call");
     }
     else {
@@ -343,12 +350,18 @@ ccslab_set(int mpi_rank, int mpi_size, hssize_t start[], hsize_t count[],
 	break;
     case BYROW_DISCONT:
 	/* Each process takes several disjoint blocks. */
-	block[0] = 2;
-	block[1] = 2;
+	block[0] = 1;
+	block[1] = 1;
+        /*
 	stride[0] = 3;
 	stride[1] = 6;
 	count[0] = 2;
 	count[1] = 3;
+        */
+        stride[0] = 3;
+        stride[1] = 3;
+        count[0]  = (SPACE_DIM1/mpi_size)/(stride[0]*block[0]);
+        count[1] =(SPACE_DIM2)/(stride[1]*block[1]);
 	start[0] = SPACE_DIM1/mpi_size*mpi_rank;
 	start[1] = 0;
 if (VERBOSE_MED) printf("slab_set BYROW_DISCONT\n");

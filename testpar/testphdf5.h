@@ -122,8 +122,8 @@
 #define FACC_MPIPOSIX   0x8     /* MPIPOSIX */
 
 /*Constants for collective chunk definitions */
-#define SPACE_DIM1 24
-#define SPACE_DIM2 24
+#define SPACE_DIM1 288
+#define SPACE_DIM2 288
 #define BYROW_CONT 1
 #define BYROW_DISCONT 2
 #define DSET_COLLECTIVE_CHUNK_NAME "coll_chunk_name"
