@@ -334,6 +334,89 @@ test_tr2(hid_t file)
     
 
 /*-------------------------------------------------------------------------
+ * Function:	test_value_dsnt_exist
+ *
+ * Purpose:	Create an enumeration datatype with "gaps in values"
+ *              and then request a name of non-existing value within
+ *              an existing range by calling H5Tenum_nameof function.
+ *              Function should fail instead of succeeding and returning 
+ *              a name of one of the existing values. 
+ *              Request a value by supplying non-existing name by calling
+ *              H5Tenum_nameof function. Function should fail.
+ *
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Elena Pourmal
+ *              Wednesday, June 7, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_value_dsnt_exist()
+{
+
+    hid_t       datatype_id;  /* identifiers */
+    herr_t      status;
+    int val;
+    char nam[100];
+    size_t size = 100;
+    TESTING("for non-existing name and value");
+    /* Turn off error reporting since we expect failure in this test */
+ 
+    if (H5Eset_auto(NULL, NULL) < 0) goto error; 
+    if ((datatype_id = H5Tenum_create(H5T_NATIVE_INT))< 0) goto error;
+
+    /* These calls should fail, since no memebrs exist yet */ 
+    if (H5Tenum_valueof(datatype_id, "SAX", &val) >= 0) goto error; 
+    val = 3;
+    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0) goto error; 
+
+    val = 2;
+    if (H5Tenum_insert(datatype_id, "TWO", (int *)&val) < 0) goto error;
+    val = 6;
+    if (H5Tenum_insert(datatype_id, "SIX", (int *)&val) < 0) goto error;
+    val = 10;
+    if (H5Tenum_insert(datatype_id, "TEN", (int *)&val) < 0) goto error;
+ 
+    /* This call should fail since we did not create a member with value = 3*/
+    val = 3;
+    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0) goto error; 
+
+    /* This call should fail since we did not create a member with value = 11*/
+    val = 11;
+    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0) goto error; 
+
+    /* This call should fail since we did not create a member with value = 0*/
+    val = 0;
+    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0) goto error; 
+
+    /* This call should fail since we do not have SAX name in the type */
+    if (H5Tenum_valueof(datatype_id, "SAX", &val) >= 0) goto error; 
+
+    /* This call should fail since we do not have TEEN name in the type */
+    if (H5Tenum_valueof(datatype_id, "TEEN", &val) >= 0) goto error; 
+
+    /* This call should fail since we do not have A name in the type */
+    if (H5Tenum_valueof(datatype_id, "A", &val) >= 0) goto error; 
+
+    if (H5Tclose(datatype_id) < 0) goto error;
+    PASSED();
+    return 0;
+ 
+ error:
+    H5E_BEGIN_TRY {
+	H5Tclose(datatype_id);
+    } H5E_END_TRY;
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	
@@ -368,6 +451,7 @@ main(void)
     nerrors += test_noconv(file);
     nerrors += test_tr1(file);
     nerrors += test_tr2(file);
+    nerrors += test_value_dsnt_exist();
     
   	H5Fclose(file);
   
