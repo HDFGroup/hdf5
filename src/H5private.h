@@ -48,8 +48,9 @@
  */
 #ifdef HAVE_PABLO
 #   define IOTRACE
-#   include "IOTrace.h"
-#   include "ProcIDS.h"
+#   define HDFIOTRACE
+#   include "HDFIOTrace.h"
+#   include "ProcIDs.h"
 #endif
 
 /* Does the compiler support the __attribute__(()) syntax? */
