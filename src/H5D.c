@@ -1420,8 +1420,7 @@ printf("%s: check 4.0, nelmts=%d, need_bkg=%d\n",FUNC,(int)nelmts,(int)need_bkg)
     /* Start strip mining... */
     for (smine_start=0; smine_start<nelmts; smine_start+=smine_nelmts) {
         /* Go figure out how many elements to read from the file */
-        smine_nelmts = (sconv_func.favail)(file_space,&file_iter,
-            MIN(request_nelmts,(nelmts-smine_start)));
+        smine_nelmts = (sconv_func.favail)(file_space,&file_iter, MIN(request_nelmts,(nelmts-smine_start)));
 #ifdef QAK
 printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n",FUNC,(int)nelmts,(int)smine_start,(int)smine_nelmts);
 #endif /* QAK */
@@ -1745,8 +1744,7 @@ printf("%s: check 4.0, nelmts=%d, need_bkg=%d\n",FUNC,(int)nelmts,(int)need_bkg)
     /* Start strip mining... */
     for (smine_start=0; smine_start<nelmts; smine_start+=smine_nelmts) {
         /* Go figure out how many elements to read from the file */
-        smine_nelmts = (sconv_func.favail)(file_space,&file_iter,
-            MIN(request_nelmts,(nelmts-smine_start)));
+        smine_nelmts = (sconv_func.favail)(file_space,&file_iter, MIN(request_nelmts,(nelmts-smine_start)));
 #ifdef QAK
 printf("%s: check 5.0, nelmts=%d, smine_start=%d, smine_nelmts=%d\n",FUNC,(int)nelmts,(int)smine_start,(int)smine_nelmts);
 #endif /* QAK */

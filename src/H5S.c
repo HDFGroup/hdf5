@@ -1048,15 +1048,6 @@ H5Sset_extent_simple (hid_t sid, int rank, const hsize_t *dims,
     if (rank<0) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank");
     }
-    if (dims) {
-        for (u=0; u<rank; u++) {
-            if (((max!=NULL && max[u]!=H5S_UNLIMITED) || max==NULL) &&
-		dims[u]==0) {
-                HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-			       "invalid dimension size");
-            }
-        }
-    }
     if (max!=NULL) {
         if(dims==NULL) {
             HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,

@@ -281,6 +281,7 @@ size_t H5S_point_mgath (const void *_buf, size_t elmt_size,
 herr_t H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
 		const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
 		size_t nelmts, void *_buf/*out*/);
+herr_t H5S_point_add (H5S_t *space, size_t num_elemn, const hssize_t *coord[]);
 herr_t H5S_point_release (H5S_t *space);
 hsize_t H5S_point_npoints (const H5S_t *space);
 

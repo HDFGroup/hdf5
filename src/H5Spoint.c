@@ -9,6 +9,7 @@
  */
 #include <H5private.h>
 #include <H5Eprivate.h>
+#include <H5MMprivate.h>
 #include <H5Sprivate.h>
 #include <H5Vprivate.h>
 
@@ -50,6 +51,72 @@ H5S_point_init (const struct H5O_layout_t __unused__ *layout,
     
     FUNC_LEAVE (SUCCEED);
 }
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_point_add
+ PURPOSE
+    Add a series of elements to a point selection
+ USAGE
+    herr_t H5S_point_add(space, num_elem, coord)
+        H5S_t *space;           IN: Dataspace of selection to modify
+        size_t num_elem;        IN: Number of elements in COORD array.
+        const hssize_t *coord[];    IN: The location of each element selected
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    This function adds elements to the current point selection for a dataspace
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t H5S_point_add (H5S_t *space, size_t num_elem, const hssize_t *coord[])
+{
+    H5S_pnt_node_t *top, *curr, *new; /* Point selection nodes */
+    uintn i;                 /* Counter */
+    herr_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_point_add, FAIL);
+
+    assert(space);
+    assert(num_elem>0);
+    assert(coord);
+
+    top=curr=NULL;
+    for(i=0; i<num_elem; i++) {
+        /* Allocate space for the new node */
+        if((new = H5MM_malloc(sizeof(H5S_pnt_node_t)))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                "can't allocate point node");
+        if((new->pnt = H5MM_malloc(space->extent.u.simple.rank*sizeof(hssize_t)))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                "can't allocate coordinate information");
+
+        /* Copy over the coordinates */
+        HDmemcpy(new->pnt,coord[i],(space->extent.u.simple.rank*sizeof(hssize_t)));
+
+        /* Link into list */
+        new->next=NULL;
+        if(top==NULL)
+            top=new;
+        else
+            curr->next=new;
+        curr=new;
+    } /* end for */
+
+    /* Append current list, if there is one */
+    if(space->select.sel_info.pnt_lst->head!=NULL)
+        curr->next=space->select.sel_info.pnt_lst->head;
+
+    /* Put new list in point selection */
+    space->select.sel_info.pnt_lst->head=top;
+
+    ret_value=SUCCEED;
+    
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5S_point_add() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_point_favail
