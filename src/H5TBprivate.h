@@ -127,7 +127,7 @@ H5_DLL H5TB_NODE  *H5TB_less (H5TB_NODE * root, void * key, H5TB_cmp_t cmp,
                  int arg, H5TB_NODE ** pp);
 H5_DLL H5TB_NODE  *H5TB_index (H5TB_NODE * root, unsigned indx);
 H5_DLL H5TB_NODE  *H5TB_dins (H5TB_TREE * tree, void * item, void * key);
-H5_DLL H5TB_NODE  *H5TB_ins (H5TB_NODE ** root, void * item, void * key, H5TB_cmp_t cmp, int arg);
+H5_DLL H5TB_NODE  *H5TB_ins (H5TB_NODE ** root, void * item, void * key, unsigned fast_compare, H5TB_cmp_t cmp, int arg);
 H5_DLL void *H5TB_rem(H5TB_NODE ** root, H5TB_NODE * node, void * *kp);
 H5_DLL H5TB_TREE  *H5TB_dfree (H5TB_TREE * tree, void(*fd) (void *), void(*fk) (void *));
 H5_DLL void       *H5TB_free (H5TB_NODE ** root, void(*fd) (void *), void(*fk) (void *));
