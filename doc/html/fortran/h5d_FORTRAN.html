@@ -186,13 +186,18 @@ FORTRAN Dataset API -- h5d
     (for all datatypes except object and dataset region references)
 <pre>
 
-          SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, hdferr, &
+          SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, dims, hdferr, &
                                mem_space_id, file_space_id, xfer_prp)
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            TYPE, INTENT(IN) :: buf(*,...*)     ! Data buffer of rank k
+            TYPE, INTENT(INOUT) :: buf          ! Data buffer; may be scalar or an array
+            INTEGER, INTENT(IN)  :: dims(7)     ! Array to hold corresponding
+                                                ! dimension sizes of data buffer buf;
+                                                ! dim(k) has value of the k-th dimension
+                                                ! of buffer buf;
+                                                ! values are ignored if buf is a scalar
             INTEGER, INTENT(OUT) :: hdferr      ! Error code 
                                                 ! 0 on success and -1 on failure
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
@@ -222,7 +227,7 @@ FORTRAN Dataset API -- h5d
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            TYPE, INTENT(IN) :: buf(*)          ! Data buffer of rank 1
+            TYPE, INTENT(INOUT) :: buf(*)       ! Data buffer of rank 1
             TYPE, INTENT(IN) :: n               ! Buffer size, 1 dimension only
             INTEGER, INTENT(OUT) :: hdferr      ! Error code 
                                                 ! 0 on success and -1 on failure
@@ -253,13 +258,18 @@ FORTRAN Dataset API -- h5d
     (for all datatypes except object and dataset region references)
 <pre>
 
-          SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, hdferr, &
+          SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, dims, hdferr, &
                                 mem_space_id, file_space_id, xfer_prp)
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            TYPE, INTENT(IN) :: buf(*,...*)     ! Data buffer of rank k
+            TYPE, INTENT(IN) :: buf             ! Data buffer; may be scalar or an array
+            INTEGER, INTENT(IN)  :: dims(7)     ! Array to hold corresponding
+                                                ! dimension sizes of data buffer buf;
+                                                ! dim(k) has value of the k-th dimension
+                                                ! of buffer buf;
+                                                ! values are ignored if buf is a scalar
             INTEGER, INTENT(OUT) :: hdferr      ! Error code 
                                                 ! 0 on success and -1 on failure
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
