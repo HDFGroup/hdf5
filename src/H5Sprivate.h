@@ -192,8 +192,7 @@ __DLLVAR__ const H5S_mconv_t	H5S_ALL_MCONV[];
 __DLLVAR__ const H5S_fconv_t	H5S_HYPER_FCONV[];
 __DLLVAR__ const H5S_mconv_t	H5S_HYPER_MCONV[];
 
-/* Forward declarations for prototypes arguments */
-struct H5G_entry_t;
+/* We get the declaration of H5G_entry_t from the H5Oprivate.h file */
 
 __DLL__ H5S_t *H5S_create(H5S_class_t type);
 __DLL__ H5S_t *H5S_copy(const H5S_t *src);
