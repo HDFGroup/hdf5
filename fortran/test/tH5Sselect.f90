@@ -104,6 +104,7 @@
     !flag to check operation success 
     !
     INTEGER :: error, error_n 
+    INTEGER, DIMENSION(7) :: data_dims
 
 
     !
@@ -154,7 +155,9 @@
     !
     ! Write the dataset
     !
-    CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, error)
+    data_dims(1) = 5
+    data_dims(2) = 6 
+    CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, data_dims, error)
     CALL check("h5dwrite_f", error, total_error)
 
     !
@@ -232,7 +235,10 @@
     !Read data from hyperslab in the file into the hyperslab in 
     !memory and display.
     !
-    CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, error, &
+    data_dims(1) = 7
+    data_dims(2) = 7 
+    data_dims(3) = 3 
+    CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, data_dims, error, &
          memspace, dataspace)
     CALL check("h5dread_f", error, total_error)
 
@@ -373,6 +379,7 @@
     !
     INTEGER :: error 
     LOGICAL :: status
+    INTEGER, DIMENSION(7) :: data_dims
 
 
     !
@@ -433,10 +440,12 @@
     !
     ! Write the datasets
     !
-    CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, buf1, error)
+    data_dims(1) = 3
+    data_dims(2) = 4
+    CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, buf1, data_dims, error)
     CALL check("h5dwrite_f", error, total_error)
 
-    CALL h5dwrite_f(dset2_id, H5T_NATIVE_INTEGER, buf2, error)
+    CALL h5dwrite_f(dset2_id, H5T_NATIVE_INTEGER, buf2, data_dims, error)
     CALL check("h5dwrite_f", error, total_error)
 
     !
@@ -521,7 +530,8 @@
     !
     !Write value into the selected points in dataset1
     !
-    CALL H5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, val, error, &
+    data_dims(1) = 2
+    CALL H5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, val, data_dims, error, &
          mem_space_id=memspace, file_space_id=dataspace1)
     CALL check("h5dwrite_f", error, total_error)
 
@@ -534,7 +544,7 @@
     !
     !Write value into the selected points in dataset2
     !
-    CALL H5dwrite_f(dset2_id, H5T_NATIVE_INTEGER, val, error, &
+    CALL H5dwrite_f(dset2_id, H5T_NATIVE_INTEGER, val, data_dims, error, &
          mem_space_id=memspace, file_space_id=dataspace2)
     CALL check("h5dwrite_f", error, total_error)
 
@@ -596,7 +606,9 @@
     !
     !Read dataset1.
     !
-    CALL h5dread_f(dset1_id, H5T_NATIVE_INTEGER, bufnew, error)
+    data_dims(1) = 3
+    data_dims(2) = 4
+    CALL h5dread_f(dset1_id, H5T_NATIVE_INTEGER, bufnew, data_dims, error)
     CALL check("h5dread_f", error, total_error)
 
     !
@@ -610,7 +622,7 @@
     !
     !Read dataset2.
     !
-    CALL h5dread_f(dset2_id, H5T_NATIVE_INTEGER, bufnew, error)
+    CALL h5dread_f(dset2_id, H5T_NATIVE_INTEGER, bufnew, data_dims, error)
     CALL check("h5dread_f", error, total_error)
 
     !
@@ -772,6 +784,7 @@
      !flag to check operation success 
      !
      INTEGER :: error, error_n 
+     INTEGER, DIMENSION(7) :: data_dims
 
      !
      !initialize the coord array to give the selected points' position 
@@ -824,7 +837,9 @@
      !
      ! Write the dataset
      !
-     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, error)
+     data_dims(1) = 5
+     data_dims(2) = 6
+     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, data_dims, error)
      CALL check("h5dwrite_f", error, total_error)
 
      !

@@ -38,8 +38,9 @@
           INTEGER :: rankr = 1 
           TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref
           TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref_out
-          INTEGER :: ref_dim
+          INTEGER, DIMENSION(7) :: ref_dim
           INTEGER, DIMENSION(5) :: data = (/1, 2, 3, 4, 5/)
+          INTEGER, DIMENSION(7) :: data_dims
 
           !
           !  Initialize FORTRAN predefined datatypes
@@ -124,7 +125,7 @@
               CALL check("h5rcreate_f",error,total_error)
           CALL h5rcreate_f(file_id, "MyType", ref(4), error)
               CALL check("h5rcreate_f",error,total_error)
-          ref_dim = size(ref)
+          ref_dim(1) = size(ref)
           CALL h5dwrite_f(dsetr_id, H5T_STD_REF_OBJ, ref, ref_dim, error)
               CALL check("h5dwrite_f",error,total_error)
 
@@ -138,7 +139,7 @@
           !
           CALL h5dopen_f(file_id, dsetnamer,dsetr_id,error)
               CALL check("h5dopen_f",error,total_error)
-          ref_dim = size(ref_out)
+          ref_dim(1) = size(ref_out)
           CALL h5dread_f(dsetr_id, H5T_STD_REF_OBJ, ref_out, ref_dim, error)
               CALL check("h5dread_f",error,total_error)
    
@@ -151,7 +152,8 @@
               CALL h5rdereference_f(dsetr_id, ref(3), dset1_id, error)
                   CALL check("h5rdereference_f",error,total_error)
           
-              CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, data, error)
+              data_dims(1) = 5
+              CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, data, data_dims, error)
                   CALL check("h5dwrite_f",error,total_error)
           end if
 
@@ -206,7 +208,8 @@
           INTEGER     ::   error
           TYPE(hdset_reg_ref_t_f) , DIMENSION(2) :: ref     ! Buffers to store references
           TYPE(hdset_reg_ref_t_f) , DIMENSION(2) :: ref_out !
-          INTEGER :: ref_dim
+          INTEGER, DIMENSION(7) :: ref_dim
+          INTEGER, DIMENSION(7) :: data_dims
           INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/2,9/)  ! Datasets dimensions
           INTEGER(HSIZE_T), DIMENSION(1) :: dimsr = (/2/)   ! 
           INTEGER(HSSIZE_T), DIMENSION(2) :: start
@@ -253,7 +256,9 @@
           CALL h5dcreate_f(file_id, dsetnamev, H5T_NATIVE_INTEGER, space_id, &
                dsetv_id, error)
               CALL check("h5dcreate_f", error, total_error)
-          CALL h5dwrite_f(dsetv_id, H5T_NATIVE_INTEGER, data, error)
+          data_dims(1) = 2
+          data_dims(2) = 9 
+          CALL h5dwrite_f(dsetv_id, H5T_NATIVE_INTEGER, data, data_dims, error)
               CALL check("h5dwrite_f", error, total_error)
 
           CALL h5dclose_f(dsetv_id, error)
@@ -289,7 +294,7 @@
           !
           ! Write dataset with the references. 
           !
-          ref_dim = size(ref)
+          ref_dim(1) = size(ref)
           CALL h5dwrite_f(dsetr_id, H5T_STD_REF_DSETREG, ref, ref_dim, error) 
               CALL check("h5dwrite_f", error, total_error)
           !
@@ -313,7 +318,7 @@
           !
           ! Read references to the dataset regions.
           !
-          ref_dim = size(ref_out)
+          ref_dim(1) = size(ref_out)
           CALL h5dread_f(dsetr_id, H5T_STD_REF_DSETREG, ref_out, ref_dim, error) 
               CALL check("h5dread_f", error, total_error)
           ! 
@@ -326,7 +331,9 @@
           !
           ! Read selected data from the dataset.
           !
-          CALL h5dread_f(dsetv_id, H5T_NATIVE_INTEGER, data_out, error, &
+          data_dims(1) = 2
+          data_dims(2) = 9
+          CALL h5dread_f(dsetv_id, H5T_NATIVE_INTEGER, data_out, data_dims, error, &
                mem_space_id = space_id, file_space_id = space_id)
               CALL check("h5dread_f", error, total_error)
           CALL h5sclose_f(space_id, error)
@@ -345,7 +352,7 @@
           !
           ! Read selected data from the dataset.
           !
-          CALL h5dread_f(dsetv_id, H5T_NATIVE_INTEGER, data_out, error, &
+          CALL h5dread_f(dsetv_id, H5T_NATIVE_INTEGER, data_out, data_dims, error, &
                mem_space_id = space_id, file_space_id = space_id)
               CALL check("h5dread_f", error, total_error)
           !

@@ -67,6 +67,9 @@
      !data buffers 
      !         
      INTEGER, DIMENSION(NX,NY) :: data_out
+     INTEGER, DIMENSION(7) :: data_dims
+     data_dims(1) = NX
+     data_dims(2) = NY
 
      !
      !Initialize FORTRAN predifined datatypes
@@ -95,7 +98,7 @@
      !
      !Read the dataset.
      !
-     CALL h5dread_f(dset_id, dtype_id, data_out, error)
+     CALL h5dread_f(dset_id, dtype_id, data_out, data_dims, error)
           CALL check("h5dread_f",error,total_error)
 
      !

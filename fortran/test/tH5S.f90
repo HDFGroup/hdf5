@@ -47,6 +47,7 @@
 
           LOGICAL     ::   flag  !flag to test datyspace is simple or not
           INTEGER     :: i, j    !general purpose integers
+          INTEGER, DIMENSION(7) :: data_dims
 
           !
           ! Initialize the dset_data array.
@@ -168,16 +169,22 @@
           !
           ! Write the datasets.
           !
-          CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, data1_in, error)
+          data_dims(1) = 4
+          data_dims(2) = 6
+          CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, data1_in, data_dims, error)
               CALL check("h5dwrite_f", error, total_error)
 
-          CALL h5dwrite_f(dset2_id, H5T_NATIVE_INTEGER, data2_in, error)
+          data_dims(1) = 6 
+          data_dims(2) = 6
+          CALL h5dwrite_f(dset2_id, H5T_NATIVE_INTEGER, data2_in, data_dims, error)
               CALL check("h5dwrite_f", error, total_error)
 
           !
           ! Read the first dataset.
           !
-          CALL h5dread_f(dset1_id, H5T_NATIVE_INTEGER, data1_out, error)
+          data_dims(1) = 4
+          data_dims(2) = 6
+          CALL h5dread_f(dset1_id, H5T_NATIVE_INTEGER, data1_out, data_dims, error)
               CALL check("h5dread_f", error, total_error)
 
           !
@@ -196,7 +203,9 @@
           !
           ! Read the second dataset.
           !
-          CALL h5dread_f(dset2_id, H5T_NATIVE_INTEGER, data2_out, error)
+          data_dims(1) = 6 
+          data_dims(2) = 6
+          CALL h5dread_f(dset2_id, H5T_NATIVE_INTEGER, data2_out, data_dims, error)
               CALL check("h5dread_f", error, total_error)
 
           !

@@ -35,6 +35,7 @@
           INTEGER     ::   error ! Error flag
 
           INTEGER     :: i, j    !general purpose integers
+          INTEGER, DIMENSION(7) :: data_dims
 
           !
           ! Initialize the dset_data array.
@@ -75,7 +76,9 @@
           !
           ! Write the dataset.
           !
-          CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, dset_data, error)
+          data_dims(1) = 4
+          data_dims(2) = 6 
+          CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, dset_data, data_dims, error)
               CALL check("h5dwrite_f", error, total_error)
 
 
@@ -124,7 +127,7 @@
           !
           ! Read the dataset.
           !
-          CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, error)
+          CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, data_dims, error)
               CALL check("h5dread_f", error, total_error)
 
           !
@@ -242,6 +245,7 @@
           !  
           INTEGER(HSIZE_T), DIMENSION(2) :: dimsr, maxdimsr
           INTEGER :: rankr
+          INTEGER, DIMENSION(7) :: data_dims
 
           !
           !data initialization 
@@ -309,7 +313,9 @@
           !
           !Write the data of size 10X3 to the extended dataset.
           !
-          CALL H5Dwrite_f(dset_id, H5T_NATIVE_INTEGER, data_in, error)
+          data_dims(1) = 10
+          data_dims(2) = 3
+          CALL H5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data_in, data_dims, error)
                CALL check("h5dwrite_f",error,total_error)
 
           !
@@ -391,7 +397,7 @@
           !
           !Read data 
           !
-          CALL H5Dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, error, &
+          CALL H5dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, data_dims, error, &
                     memspace, dataspace)
               CALL check("h5dread_f",error,total_error)
 

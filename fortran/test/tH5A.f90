@@ -70,6 +70,7 @@
      DOUBLE PRECISION,  DIMENSION(1) ::  attr_double_data = 3.459
      REAL,         DIMENSION(1) ::  attr_real_data = 4.0
      INTEGER,      DIMENSION(1) ::  attr_integer_data = 5
+     INTEGER, DIMENSION(7) :: data_dims
 
      
      CHARACTER :: aread_character_data ! variable to put read back Character attr data
@@ -131,7 +132,9 @@
      !
      ! Write data_in to the dataset
      !
-     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data_in, error)
+     data_dims(1) = NX
+     data_dims(2) = NY
+     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data_in, data_dims, error)
      CALL check("h5dwrite_f",error,total_error)
 
      !
@@ -214,28 +217,32 @@
      !
      ! Write the String attribute data.
      !
-     CALL h5awrite_f(attr_id, atype_id, attr_data, error)
+     data_dims(1) = 2
+     CALL h5awrite_f(attr_id, atype_id, attr_data, data_dims, error)
      CALL check("h5awrite_f",error,total_error)
       !
      ! Write the Character attribute data.
      !
-     CALL h5awrite_f(attr2_id, atype2_id, attr_character_data, error)
+     CALL h5awrite_f(attr2_id, atype2_id, attr_character_data, data_dims, error)
      CALL check("h5awrite_f",error,total_error)
      !
      ! Write the DOUBLE attribute data.
      !
-     CALL h5awrite_f(attr3_id, atype3_id, attr_double_data, error)
+     data_dims(1) = 1 
+     CALL h5awrite_f(attr3_id, atype3_id, attr_double_data, data_dims, error)
      CALL check("h5awrite_f",error,total_error)
      !
      ! Write the Real attribute data.
      !
-     CALL h5awrite_f(attr4_id, atype4_id, attr_real_data, error)
+     data_dims(1) = 1 
+     CALL h5awrite_f(attr4_id, atype4_id, attr_real_data, data_dims, error)
      CALL check("h5awrite_f",error,total_error)
 
      !
      ! Write the Integer attribute data.
      !
-     CALL h5awrite_f(attr5_id, atype5_id, attr_integer_data, error)
+     data_dims(1) = 1 
+     CALL h5awrite_f(attr5_id, atype5_id, attr_integer_data, data_dims, error)
      CALL check("h5awrite_f",error,total_error)
     
      !
@@ -388,7 +395,8 @@
      !
      !read the string attribute data back to memory
      !
-     CALL h5aread_f(attr_id, atype_id, aread_data, error)
+     data_dims(1) = 2
+     CALL h5aread_f(attr_id, atype_id, aread_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
 
      if ( (aread_data(1) .ne. attr_data(1)) .or. (aread_data(2) .ne. attr_data(2)) ) then
@@ -399,7 +407,7 @@
      !
      !read the CHARACTER attribute data back to memory
      !
-     CALL h5aread_f(attr2_id, H5T_NATIVE_CHARACTER, aread_character_data, error)
+     CALL h5aread_f(attr2_id, H5T_NATIVE_CHARACTER, aread_character_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
      if (aread_character_data .ne. 'A' ) then
          write(*,*) "Read back character attrbute is wrong ",aread_character_data
@@ -408,7 +416,8 @@
      !
      !read the double attribute data back to memory
      !
-     CALL h5aread_f(attr3_id, H5T_NATIVE_DOUBLE, aread_double_data, error)
+     data_dims(1) = 1 
+     CALL h5aread_f(attr3_id, H5T_NATIVE_DOUBLE, aread_double_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
      if (aread_double_data(1) .ne. 3.459 ) then
          write(*,*) "Read back double attrbute is wrong", aread_double_data(1)
@@ -417,7 +426,8 @@
      !
      !read the real attribute data back to memory
      !
-     CALL h5aread_f(attr4_id, H5T_NATIVE_REAL, aread_real_data, error)
+     data_dims(1) = 1 
+     CALL h5aread_f(attr4_id, H5T_NATIVE_REAL, aread_real_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
      if (aread_real_data(1) .ne. 4.0 ) then
          write(*,*) "Read back real attrbute is wrong ", aread_real_data
@@ -426,7 +436,8 @@
      !
      !read the Integer attribute data back to memory
      !
-     CALL h5aread_f(attr5_id, H5T_NATIVE_INTEGER, aread_integer_data, error)
+     data_dims(1) = 1 
+     CALL h5aread_f(attr5_id, H5T_NATIVE_INTEGER, aread_integer_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
      if (aread_integer_data(1) .ne. 5 ) then
          write(*,*) "Read back integer attrbute is wrong ", aread_integer_data
