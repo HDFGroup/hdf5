@@ -613,7 +613,7 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
     /* Read data from the file */
     if (H5F_arr_read(f, xfer_parms, layout, pline, NULL, efl, size,
 		     size, mem_offset, file_offset, buf/*out*/)<0) {
-	HRETURN_ERROR(H5E_IO, H5E_INTERNAL, FAIL,
+	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
 		      "unable to read data from the file");
     }
     *must_convert = FALSE;
@@ -715,7 +715,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
     /* Write data to the file */
     if (H5F_arr_write(f, xfer_parms, layout, pline, NULL, efl, size,
 		      size, mem_offset, file_offset, buf)<0) {
-	HRETURN_ERROR(H5E_IO, H5E_INTERNAL, FAIL,
+	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
 		      "unable to write data to the file");
     }
     *must_convert = FALSE;

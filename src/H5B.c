@@ -1565,7 +1565,7 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 					 child+i, key+(i+1)*type->sizeof_nkey,
 					 udata);
 		if (ret_value<0) {
-		    HGOTO_ERROR(H5E_BTREE, H5E_INTERNAL, FAIL,
+		    HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL,
 				"iterator function failed");
 		}
 	    }
