@@ -318,6 +318,45 @@ int main(void) {
 ])
 
 dnl ----------------------------------------------------------------------
+dnl Is the GNU zlib present?  It has a header file `zlib.h' and a library
+dnl `-lz' and their locations might be specified with the `--with-zlib'
+dnl command-line switch.  The value is an include path and/or a library path.
+dnl If the library path is specified then it must be preceded by a comma.
+dnl
+
+AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],
+            ,withval=yes)
+case $withval in
+    yes)
+	AC_CHECK_HEADERS(zlib.h)
+	AC_CHECK_LIB(z, compress)
+	;;
+    no)
+	AC_MSG_CHECKING(for GNU zlib)
+	AC_MSG_RESULT(suppressed)
+	;;
+    *)
+	zlib_inc="`echo $withval |cut -f1 -d,`"
+	if test -n "$zlib_inc"; then
+	    saved_CPPFLAGS="$CPPFLAGS"
+	    CPPFLAGS="$CPPFLAGS -I$zlib_inc"
+	    AC_CHECK_HEADERS(zlib.h,,CPPFLAGS="$saved_CPPFLAGS")
+        else
+	    AC_CHECK_HEADERS(zlib.h)
+	fi
+
+	zlib_lib="`echo $withval |cut -f2 -d, -s`"
+	if test -n "$zlib_lib"; then
+	    saved_LDFLAGS="$LDFLAGS"
+	    LDFLAGS="$LDFLAGS -L$zlib_lib"
+	    AC_CHECK_LIB(z, compress,,LDFLAGS="$saved_LDFLAGS")
+	else
+	    AC_CHECK_LIB(z, compress)
+	fi
+	;;
+esac
+
+dnl ----------------------------------------------------------------------
 dnl Checks for header files.
 dnl
 
