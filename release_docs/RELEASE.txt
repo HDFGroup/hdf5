@@ -41,6 +41,10 @@ New Features
 
     Library:
     --------
+	- Added option that if $HDF5_DISABLE_VERSION_CHECK is set to 2,
+	  will suppress all library version mismatch warning messages.
+	  AKC - 2004/4/14
+
 
     Parallel Library:
     -----------------
