@@ -1457,7 +1457,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
                     } /* end if */
                     else {
                         /* Return the unused portion of the metadata block to a free list */
-                        if(file->eoma!=0)
+                        if(file->eoma!=0 && file->cur_meta_block_size!=0)
                             if(H5FD_free(file,H5FD_MEM_DEFAULT,file->eoma,file->cur_meta_block_size)<0)
                                 HRETURN_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "can't free metadata block");
 
@@ -1526,7 +1526,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
                     } /* end if */
                     else {
                         /* Return the unused portion of the "small data" block to a free list */
-                        if(file->eosda!=0)
+                        if(file->eosda!=0 && file->cur_sdata_block_size!=0)
                             if(H5FD_free(file,H5FD_MEM_DRAW,file->eosda,file->cur_sdata_block_size)<0)
                                 HRETURN_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "can't free 'small data' block");
 
