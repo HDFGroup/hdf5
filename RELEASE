@@ -361,8 +361,8 @@ This release has been tested on UNIX platforms only; specifically:
 Linux, FreedBSD, IRIX, Solaris & Dec UNIX.
 
 
-Release information for parallel HDF5
--------------------------------------
+		RELEASE INFORMATION FOR PARALLEL HDF5
+		-------------------------------------
 
 * Current release supports independent access to fixed dimension datasets
   only.
@@ -385,3 +385,15 @@ Release information for parallel HDF5
      support for file access via a communicator besides MPI_COMM_WORLD.
      support for collective access to datasets.
      support for independent create/open of datasets.
+
+
+
+			PLATFORMS SUPPORTED
+			-------------------
+
+  Platform(OS)                    C-Compiler       Fortran-Compiler   
+  ------------                    ----------       ---------------- 
+  Sun4(Solaris 2.5)               CC SC4.0         f77 SC4.0            
+  SGI (IRIX v6.5)                 CC 7.21          f77 7.21
+  SGI-Origin(IRIX64 v6.4-n32)     CC 7.2.1.2m      f77 7.2.1.2m     
+  SGI-Origin(IRIX64 v6.4-64)      CC 7.2.1.2m      f77 7.2.1.2m    
