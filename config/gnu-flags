@@ -126,11 +126,11 @@ case "$cc_vendor-$cc_version" in
 	CFLAGS="$CFLAGS $ARCH -ansi"
 
 	# Production
-	PROC_CFLAGS="-O3 $NOFP -finline-functions -Wno-shadow"
+	PROC_CFLAGS="-O3 $NOFP -finline-functions"
 	PROD_CPPFLAGS=
 
 	# Debug
-	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CFLAGS="-g -fverbose-asm"
 	DEBUG_CPPFLAGS=
 
 	# Profile
@@ -146,11 +146,11 @@ case "$cc_vendor-$cc_version" in
         CFLAGS="$CFLAGS $ARCH -Wsign-compare"
 
 	# Production
-	PROD_CFLAGS="-O3 $NOFP -finline-functions -fschedule-insns2 -Wno-shadow"
+	PROD_CFLAGS="-O3 $NOFP -finline-functions -fschedule-insns2"
 	PROD_CPPFLAGS=
 
 	# Debug
-	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CFLAGS="-g -fverbose-asm"
 	DEBUG_CPPFLAGS=
 
 	# Profile
@@ -166,11 +166,11 @@ case "$cc_vendor-$cc_version" in
 	CFLAGS="$CFLAGS $ARCH -Wsign-compare"
 
 	# Production
-	PROD_CFLAGS="-O6 $NOFP -Wno-shadow"
+	PROD_CFLAGS="-O2 $NOFP"
 	PROD_CPPFLAGS=
 
 	# Debug
-	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CFLAGS="-g -fverbose-asm"
 	DEBUG_CPPFLAGS=
 
 	# Profile
@@ -186,11 +186,11 @@ case "$cc_vendor-$cc_version" in
 	CFLAGS="$CFLAGS $ARCH -Wsign-compare"
 
 	# Production
-	PROD_CFLAGS="-O6 $NOFP -Wno-shadow"
+	PROD_CFLAGS="-O6 $NOFP"
 	PROD_CPPFLAGS=
 
 	# Debug
-	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CFLAGS="-g -fverbose-asm"
 	DEBUG_CPPFLAGS=
 
 	# Profile
