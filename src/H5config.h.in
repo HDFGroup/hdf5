@@ -1,421 +1,466 @@
-/* src/H5config.h.in.  Generated automatically from configure.in by autoheader.  */
-
-/* Define to empty if the keyword does not work.  */
-#undef const
-
-/* Define if your struct tm has tm_zone.  */
-#undef HAVE_TM_ZONE
-
-/* Define if you don't have tm_zone but do have the external array
-   tzname.  */
-#undef HAVE_TZNAME
-
-/* Define as __inline if that's what the C compiler calls it.  */
-#undef inline
-
-/* Define to `long' if <sys/types.h> doesn't define.  */
-#undef off_t
-
-/* Define to `unsigned' if <sys/types.h> doesn't define.  */
-#undef size_t
-
-/* Define if you have the ANSI C header files.  */
-#undef STDC_HEADERS
-
-/* Define if you can safely include both <sys/time.h> and <time.h>.  */
-#undef TIME_WITH_SYS_TIME
-
-/* Define if your <sys/time.h> declares struct tm.  */
-#undef TM_IN_SYS_TIME
-
-/* Define if your processor stores words with the most significant
-   byte first (like Motorola and SPARC, unlike Intel and VAX).  */
-#undef WORDS_BIGENDIAN
-
-/* Define if the __attribute__(()) extension is present */
-#undef HAVE_ATTRIBUTE
-
-/* Define if the compiler understands the __FUNCTION__ keyword. */
-#undef HAVE_FUNCTION
-
-/* Define if we have parallel support */
-#undef HAVE_PARALLEL
-
-/* Define if we have thread safe support */
-#undef HAVE_THREADSAFE
-
-/* Define if it's safe to use `long long' for hsize_t and hssize_t */
-#undef HAVE_LARGE_HSIZET
-
-/* Define if the HDF5 v1.4 compatibility functions are to be compiled in */
-#undef WANT_H5_V1_4_COMPAT
-
-/* Width for printf() for type `long long' or `__int64', us. `ll' */
-#undef PRINTF_LL_WIDTH
-
-/* Define if `tm_gmtoff' is a member of `struct tm' */
-#undef HAVE_TM_GMTOFF
-
-/* Define if `__tm_gmtoff' is a member of `struct tm' */
-#undef HAVE___TM_GMTOFF
-
-/* Define if `timezone' is a global variable */
-#undef HAVE_TIMEZONE
-
-/* Define if `struct timezone' is defined */
-#undef HAVE_STRUCT_TIMEZONE
-
-/* Define if `struct stat' has the `st_blocks' field */
-#undef HAVE_STAT_ST_BLOCKS
-
-/* Define if `struct text_info' is defined */
-#undef HAVE_STRUCT_TEXT_INFO
-
-/* Define if `struct videoconfig' is defined */
-#undef HAVE_STRUCT_VIDEOCONFIG
-
-/* Define if the ioctl TIOCGETD is defined */
-#undef HAVE_TIOCGETD
-
-/* Define if the ioctl TIOCGWINSZ is defined */
-#undef HAVE_TIOCGWINSZ
-
-/* Define if the Globus GASS is defined */
-#undef HAVE_GASS
-
-/* Define if the SRB is defined */
-#undef HAVE_SRB
-
-/* Define if the stream virtual file driver should be compiled */
-#undef HAVE_STREAM
-
-/* Define if `socklen_t' is defined */
-#undef HAVE_SOCKLEN_T
+/* src/H5config.h.in.  Generated from configure.in by autoheader.  */
 
 /* Define if `dev_t' is a scalar */
 #undef DEV_T_IS_SCALAR
 
-/* The number of bytes in a __int64.  */
-#undef SIZEOF___INT64
+/* Define if the __attribute__(()) extension is present */
+#undef HAVE_ATTRIBUTE
 
-/* The number of bytes in a char.  */
-#undef SIZEOF_CHAR
-
-/* The number of bytes in a double.  */
-#undef SIZEOF_DOUBLE
-
-/* The number of bytes in a float.  */
-#undef SIZEOF_FLOAT
-
-/* The number of bytes in a int.  */
-#undef SIZEOF_INT
-
-/* The number of bytes in a int16_t.  */
-#undef SIZEOF_INT16_T
-
-/* The number of bytes in a int32_t.  */
-#undef SIZEOF_INT32_T
-
-/* The number of bytes in a int64_t.  */
-#undef SIZEOF_INT64_T
-
-/* The number of bytes in a int8_t.  */
-#undef SIZEOF_INT8_T
-
-/* The number of bytes in a int_fast16_t.  */
-#undef SIZEOF_INT_FAST16_T
-
-/* The number of bytes in a int_fast32_t.  */
-#undef SIZEOF_INT_FAST32_T
-
-/* The number of bytes in a int_fast64_t.  */
-#undef SIZEOF_INT_FAST64_T
-
-/* The number of bytes in a int_fast8_t.  */
-#undef SIZEOF_INT_FAST8_T
-
-/* The number of bytes in a int_least16_t.  */
-#undef SIZEOF_INT_LEAST16_T
-
-/* The number of bytes in a int_least32_t.  */
-#undef SIZEOF_INT_LEAST32_T
-
-/* The number of bytes in a int_least64_t.  */
-#undef SIZEOF_INT_LEAST64_T
-
-/* The number of bytes in a int_least8_t.  */
-#undef SIZEOF_INT_LEAST8_T
-
-/* The number of bytes in a long.  */
-#undef SIZEOF_LONG
-
-/* The number of bytes in a long double.  */
-#undef SIZEOF_LONG_DOUBLE
-
-/* The number of bytes in a long long.  */
-#undef SIZEOF_LONG_LONG
-
-/* The number of bytes in a off_t.  */
-#undef SIZEOF_OFF_T
-
-/* The number of bytes in a short.  */
-#undef SIZEOF_SHORT
-
-/* The number of bytes in a size_t.  */
-#undef SIZEOF_SIZE_T
-
-/* The number of bytes in a ssize_t.  */
-#undef SIZEOF_SSIZE_T
-
-/* The number of bytes in a uint16_t.  */
-#undef SIZEOF_UINT16_T
-
-/* The number of bytes in a uint32_t.  */
-#undef SIZEOF_UINT32_T
-
-/* The number of bytes in a uint64_t.  */
-#undef SIZEOF_UINT64_T
-
-/* The number of bytes in a uint8_t.  */
-#undef SIZEOF_UINT8_T
-
-/* The number of bytes in a uint_fast16_t.  */
-#undef SIZEOF_UINT_FAST16_T
-
-/* The number of bytes in a uint_fast32_t.  */
-#undef SIZEOF_UINT_FAST32_T
-
-/* The number of bytes in a uint_fast64_t.  */
-#undef SIZEOF_UINT_FAST64_T
-
-/* The number of bytes in a uint_fast8_t.  */
-#undef SIZEOF_UINT_FAST8_T
-
-/* The number of bytes in a uint_least16_t.  */
-#undef SIZEOF_UINT_LEAST16_T
-
-/* The number of bytes in a uint_least32_t.  */
-#undef SIZEOF_UINT_LEAST32_T
-
-/* The number of bytes in a uint_least64_t.  */
-#undef SIZEOF_UINT_LEAST64_T
-
-/* The number of bytes in a uint_least8_t.  */
-#undef SIZEOF_UINT_LEAST8_T
-
-/* Define if you have the BSDgettimeofday function.  */
+/* Define to 1 if you have the `BSDgettimeofday' function. */
 #undef HAVE_BSDGETTIMEOFDAY
 
-/* Define if you have the GetConsoleScreenBufferInfo function.  */
-#undef HAVE_GETCONSOLESCREENBUFFERINFO
-
-/* Define if you have the _getvideoconfig function.  */
-#undef HAVE__GETVIDEOCONFIG
-
-/* Define if you have the _scrsize function.  */
-#undef HAVE__SCRSIZE
-
-/* Define if you have the compress2 function.  */
+/* Define to 1 if you have the `compress2' function. */
 #undef HAVE_COMPRESS2
 
-/* Define if you have the difftime function.  */
+/* Define to 1 if you have the `difftime' function. */
 #undef HAVE_DIFFTIME
 
-/* Define if you have the fork function.  */
-#undef HAVE_FORK
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
 
-/* Define if you have the fseek64 function.  */
-#undef HAVE_FSEEK64
-
-/* Define if you have the getdents64 function.  */
-#undef HAVE_GETDENTS64
-
-/* Define if you have the gethostname function.  */
-#undef HAVE_GETHOSTNAME
-
-/* Define if you have the getpwuid function.  */
-#undef HAVE_GETPWUID
-
-/* Define if you have the getrusage function.  */
-#undef HAVE_GETRUSAGE
-
-/* Define if you have the gettextinfo function.  */
-#undef HAVE_GETTEXTINFO
-
-/* Define if you have the gettimeofday function.  */
-#undef HAVE_GETTIMEOFDAY
-
-/* Define if you have the ioctl function.  */
-#undef HAVE_IOCTL
-
-/* Define if you have the longjmp function.  */
-#undef HAVE_LONGJMP
-
-/* Define if you have the lseek64 function.  */
-#undef HAVE_LSEEK64
-
-/* Define if you have the setsysinfo function.  */
-#undef HAVE_SETSYSINFO
-
-/* Define if you have the sigaction function.  */
-#undef HAVE_SIGACTION
-
-/* Define if you have the signal function.  */
-#undef HAVE_SIGNAL
-
-/* Define if you have the snprintf function.  */
-#undef HAVE_SNPRINTF
-
-/* Define if you have the strdup function.  */
-#undef HAVE_STRDUP
-
-/* Define if you have the system function.  */
-#undef HAVE_SYSTEM
-
-/* Define if you have the vsnprintf function.  */
-#undef HAVE_VSNPRINTF
-
-/* Define if you have the waitpid function.  */
-#undef HAVE_WAITPID
-
-/* Define if you have the <features.h> header file.  */
+/* Define to 1 if you have the <features.h> header file. */
 #undef HAVE_FEATURES_H
 
-/* Define if you have the <globus_common.h> header file.  */
+/* Define to 1 if you have the `fork' function. */
+#undef HAVE_FORK
+
+/* Define to 1 if you have the `fseek64' function. */
+#undef HAVE_FSEEK64
+
+/* Define if the compiler understand the __FUNCTION__ keyword */
+#undef HAVE_FUNCTION
+
+/* Define if the Globus GASS is defined */
+#undef HAVE_GASS
+
+/* Define to 1 if you have the `GetConsoleScreenBufferInfo' function. */
+#undef HAVE_GETCONSOLESCREENBUFFERINFO
+
+/* Define to 1 if you have the `getdents64' function. */
+#undef HAVE_GETDENTS64
+
+/* Define to 1 if you have the `gethostname' function. */
+#undef HAVE_GETHOSTNAME
+
+/* Define to 1 if you have the `getpwuid' function. */
+#undef HAVE_GETPWUID
+
+/* Define to 1 if you have the `getrusage' function. */
+#undef HAVE_GETRUSAGE
+
+/* Define to 1 if you have the `gettextinfo' function. */
+#undef HAVE_GETTEXTINFO
+
+/* Define to 1 if you have the `gettimeofday' function. */
+#undef HAVE_GETTIMEOFDAY
+
+/* Define to 1 if you have the <globus_common.h> header file. */
 #undef HAVE_GLOBUS_COMMON_H
 
-/* Define if you have the <io.h> header file.  */
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `ioctl' function. */
+#undef HAVE_IOCTL
+
+/* Define to 1 if you have the <io.h> header file. */
 #undef HAVE_IO_H
 
-/* Define if you have the <netinet/tcp.h> header file.  */
-#undef HAVE_NETINET_TCP_H
+/* Define if it's safe to use `long long' for hsize_t and hssize_t */
+#undef HAVE_LARGE_HSIZET
 
-/* Define if you have the <pdb.h> header file.  */
-#undef HAVE_PDB_H
-
-/* Define if you have the <pthread.h> header file.  */
-#undef HAVE_PTHREAD_H
-
-/* Define if you have the <setjmp.h> header file.  */
-#undef HAVE_SETJMP_H
-
-/* Define if you have the <srbClient.h> header file.  */
-#undef HAVE_SRBCLIENT_H
-
-/* Define if you have the <stddef.h> header file.  */
-#undef HAVE_STDDEF_H
-
-/* Define if you have the <stdint.h> header file.  */
-#undef HAVE_STDINT_H
-
-/* Define if you have the <sys/filio.h> header file.  */
-#undef HAVE_SYS_FILIO_H
-
-/* Define if you have the <sys/ioctl.h> header file.  */
-#undef HAVE_SYS_IOCTL_H
-
-/* Define if you have the <sys/proc.h> header file.  */
-#undef HAVE_SYS_PROC_H
-
-/* Define if you have the <sys/resource.h> header file.  */
-#undef HAVE_SYS_RESOURCE_H
-
-/* Define if you have the <sys/socket.h> header file.  */
-#undef HAVE_SYS_SOCKET_H
-
-/* Define if you have the <sys/stat.h> header file.  */
-#undef HAVE_SYS_STAT_H
-
-/* Define if you have the <sys/sysinfo.h> header file.  */
-#undef HAVE_SYS_SYSINFO_H
-
-/* Define if you have the <sys/time.h> header file.  */
-#undef HAVE_SYS_TIME_H
-
-/* Define if you have the <sys/timeb.h> header file.  */
-#undef HAVE_SYS_TIMEB_H
-
-/* Define if you have the <sys/types.h> header file.  */
-#undef HAVE_SYS_TYPES_H
-
-/* Define if you have the <unistd.h> header file.  */
-#undef HAVE_UNISTD_H
-
-/* Define if you have the <winsock.h> header file.  */
-#undef HAVE_WINSOCK_H
-
-/* Define if you have the <zlib.h> header file.  */
-#undef HAVE_ZLIB_H
-
-/* Define if you have the SrbClient library (-lSrbClient).  */
-#undef HAVE_LIBSRBCLIENT
-
-/* Define if you have the crypto library (-lcrypto).  */
+/* Define to 1 if you have the `crypto' library (-lcrypto). */
 #undef HAVE_LIBCRYPTO
 
-/* Define if you have the elf library (-lelf).  */
+/* Define to 1 if you have the `elf' library (-lelf). */
 #undef HAVE_LIBELF
 
-/* Define if you have the globus_common library (-lglobus_common).  */
+/* Define to 1 if you have the `globus_common' library (-lglobus_common). */
 #undef HAVE_LIBGLOBUS_COMMON
 
-/* Define if you have the globus_gaa library (-lglobus_gaa).  */
+/* Define to 1 if you have the `globus_gaa' library (-lglobus_gaa). */
 #undef HAVE_LIBGLOBUS_GAA
 
-/* Define if you have the globus_gass_cache library (-lglobus_gass_cache).  */
+/* Define to 1 if you have the `globus_gass_cache' library
+   (-lglobus_gass_cache). */
 #undef HAVE_LIBGLOBUS_GASS_CACHE
 
-/* Define if you have the globus_gass_file library (-lglobus_gass_file).  */
+/* Define to 1 if you have the `globus_gass_file' library
+   (-lglobus_gass_file). */
 #undef HAVE_LIBGLOBUS_GASS_FILE
 
-/* Define if you have the globus_gass_transfer library (-lglobus_gass_transfer).  */
+/* Define to 1 if you have the `globus_gass_transfer' library
+   (-lglobus_gass_transfer). */
 #undef HAVE_LIBGLOBUS_GASS_TRANSFER
 
-/* Define if you have the globus_gass_transfer_assist library (-lglobus_gass_transfer_assist).  */
+/* Define to 1 if you have the `globus_gass_transfer_assist' library
+   (-lglobus_gass_transfer_assist). */
 #undef HAVE_LIBGLOBUS_GASS_TRANSFER_ASSIST
 
-/* Define if you have the globus_gss library (-lglobus_gss).  */
+/* Define to 1 if you have the `globus_gss' library (-lglobus_gss). */
 #undef HAVE_LIBGLOBUS_GSS
 
-/* Define if you have the globus_gss_assist library (-lglobus_gss_assist).  */
+/* Define to 1 if you have the `globus_gss_assist' library
+   (-lglobus_gss_assist). */
 #undef HAVE_LIBGLOBUS_GSS_ASSIST
 
-/* Define if you have the globus_io library (-lglobus_io).  */
+/* Define to 1 if you have the `globus_io' library (-lglobus_io). */
 #undef HAVE_LIBGLOBUS_IO
 
-/* Define if you have the m library (-lm).  */
+/* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
-/* Define if you have the mpi library (-lmpi).  */
+/* Define to 1 if you have the `mpi' library (-lmpi). */
 #undef HAVE_LIBMPI
 
-/* Define if you have the mpich library (-lmpich).  */
+/* Define to 1 if you have the `mpich' library (-lmpich). */
 #undef HAVE_LIBMPICH
 
-/* Define if you have the mpio library (-lmpio).  */
+/* Define to 1 if you have the `mpio' library (-lmpio). */
 #undef HAVE_LIBMPIO
 
-/* Define if you have the nsl library (-lnsl).  */
+/* Define to 1 if you have the `nsl' library (-lnsl). */
 #undef HAVE_LIBNSL
 
-/* Define if you have the pdb library (-lpdb).  */
+/* Define to 1 if you have the `pdb' library (-lpdb). */
 #undef HAVE_LIBPDB
 
-/* Define if you have the pthread library (-lpthread).  */
+/* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
 
-/* Define if you have the silo library (-lsilo).  */
+/* Define to 1 if you have the `silo' library (-lsilo). */
 #undef HAVE_LIBSILO
 
-/* Define if you have the socket library (-lsocket).  */
+/* Define to 1 if you have the `socket' library (-lsocket). */
 #undef HAVE_LIBSOCKET
 
-/* Define if you have the ssl library (-lssl).  */
+/* Define to 1 if you have the `SrbClient' library (-lSrbClient). */
+#undef HAVE_LIBSRBCLIENT
+
+/* Define to 1 if you have the `ssl' library (-lssl). */
 #undef HAVE_LIBSSL
 
-/* Define if you have the z library (-lz).  */
+/* Define to 1 if you have the `z' library (-lz). */
 #undef HAVE_LIBZ
+
+/* Define to 1 if you have the `longjmp' function. */
+#undef HAVE_LONGJMP
+
+/* Define to 1 if you have the `lseek64' function. */
+#undef HAVE_LSEEK64
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the <netinet/tcp.h> header file. */
+#undef HAVE_NETINET_TCP_H
+
+/* Define if we have parallel support */
+#undef HAVE_PARALLEL
+
+/* Define to 1 if you have the <pdb.h> header file. */
+#undef HAVE_PDB_H
+
+/* Define to 1 if you have the <pthread.h> header file. */
+#undef HAVE_PTHREAD_H
+
+/* Define to 1 if you have the <setjmp.h> header file. */
+#undef HAVE_SETJMP_H
+
+/* Define to 1 if you have the `setsysinfo' function. */
+#undef HAVE_SETSYSINFO
+
+/* Define to 1 if you have the `sigaction' function. */
+#undef HAVE_SIGACTION
+
+/* Define to 1 if you have the `signal' function. */
+#undef HAVE_SIGNAL
+
+/* Define to 1 if you have the `snprintf' function. */
+#undef HAVE_SNPRINTF
+
+/* Define if `socklen_t' is defined */
+#undef HAVE_SOCKLEN_T
+
+/* Define if the SRB is defined */
+#undef HAVE_SRB
+
+/* Define to 1 if you have the <srbClient.h> header file. */
+#undef HAVE_SRBCLIENT_H
+
+/* Define if `struct stat' has the `st_blocks' field */
+#undef HAVE_STAT_ST_BLOCKS
+
+/* Define to 1 if you have the <stddef.h> header file. */
+#undef HAVE_STDDEF_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the `strdup' function. */
+#undef HAVE_STRDUP
+
+/* Define if the stream virtual file driver should be compiled */
+#undef HAVE_STREAM
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define if `struct text_info' is defined */
+#undef HAVE_STRUCT_TEXT_INFO
+
+/* Define if `struct timezone' is defined */
+#undef HAVE_STRUCT_TIMEZONE
+
+/* Define to 1 if `tm_zone' is member of `struct tm'. */
+#undef HAVE_STRUCT_TM_TM_ZONE
+
+/* Define if `struct videoconfig' is defined */
+#undef HAVE_STRUCT_VIDEOCONFIG
+
+/* Define to 1 if you have the `system' function. */
+#undef HAVE_SYSTEM
+
+/* Define to 1 if you have the <sys/filio.h> header file. */
+#undef HAVE_SYS_FILIO_H
+
+/* Define to 1 if you have the <sys/ioctl.h> header file. */
+#undef HAVE_SYS_IOCTL_H
+
+/* Define to 1 if you have the <sys/proc.h> header file. */
+#undef HAVE_SYS_PROC_H
+
+/* Define to 1 if you have the <sys/resource.h> header file. */
+#undef HAVE_SYS_RESOURCE_H
+
+/* Define to 1 if you have the <sys/socket.h> header file. */
+#undef HAVE_SYS_SOCKET_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/sysinfo.h> header file. */
+#undef HAVE_SYS_SYSINFO_H
+
+/* Define to 1 if you have the <sys/timeb.h> header file. */
+#undef HAVE_SYS_TIMEB_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define if we have thread safe support */
+#undef HAVE_THREADSAFE
+
+/* Define if `timezone' is a global variable */
+#undef HAVE_TIMEZONE
+
+/* Define if the ioctl TIOCGETD is defined */
+#undef HAVE_TIOCGETD
+
+/* Define if the ioctl TIOGWINSZ is defined */
+#undef HAVE_TIOCGWINSZ
+
+/* Define if `tm_gmtoff' is a member of `struct tm' */
+#undef HAVE_TM_GMTOFF
+
+/* Define to 1 if your `struct tm' has `tm_zone'. Deprecated, use
+   `HAVE_STRUCT_TM_TM_ZONE' instead. */
+#undef HAVE_TM_ZONE
+
+/* Define to 1 if you don't have `tm_zone' but do have the external array
+   `tzname'. */
+#undef HAVE_TZNAME
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the `vsnprintf' function. */
+#undef HAVE_VSNPRINTF
+
+/* Define to 1 if you have the `waitpid' function. */
+#undef HAVE_WAITPID
+
+/* Define to 1 if you have the <winsock.h> header file. */
+#undef HAVE_WINSOCK_H
+
+/* Define to 1 if you have the <zlib.h> header file. */
+#undef HAVE_ZLIB_H
+
+/* Define to 1 if you have the `_getvideoconfig' function. */
+#undef HAVE__GETVIDEOCONFIG
+
+/* Define to 1 if you have the `_scrsize' function. */
+#undef HAVE__SCRSIZE
+
+/* Define if `__tm_gmtoff' is a member of `struct tm' */
+#undef HAVE___TM_GMTOFF
 
 /* Define if your system has a working `malloc' function. */
 #undef MALLOC_WORKS
 
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Width for printf() for type `long long' or `__int64', us. `ll' */
+#undef PRINTF_LL_WIDTH
+
+/* The size of a `char', as computed by sizeof. */
+#undef SIZEOF_CHAR
+
+/* The size of a `double', as computed by sizeof. */
+#undef SIZEOF_DOUBLE
+
+/* The size of a `float', as computed by sizeof. */
+#undef SIZEOF_FLOAT
+
+/* The size of a `int', as computed by sizeof. */
+#undef SIZEOF_INT
+
+/* The size of a `int16_t', as computed by sizeof. */
+#undef SIZEOF_INT16_T
+
+/* The size of a `int32_t', as computed by sizeof. */
+#undef SIZEOF_INT32_T
+
+/* The size of a `int64_t', as computed by sizeof. */
+#undef SIZEOF_INT64_T
+
+/* The size of a `int8_t', as computed by sizeof. */
+#undef SIZEOF_INT8_T
+
+/* The size of a `int_fast16_t', as computed by sizeof. */
+#undef SIZEOF_INT_FAST16_T
+
+/* The size of a `int_fast32_t', as computed by sizeof. */
+#undef SIZEOF_INT_FAST32_T
+
+/* The size of a `int_fast64_t', as computed by sizeof. */
+#undef SIZEOF_INT_FAST64_T
+
+/* The size of a `int_fast8_t', as computed by sizeof. */
+#undef SIZEOF_INT_FAST8_T
+
+/* The size of a `int_least16_t', as computed by sizeof. */
+#undef SIZEOF_INT_LEAST16_T
+
+/* The size of a `int_least32_t', as computed by sizeof. */
+#undef SIZEOF_INT_LEAST32_T
+
+/* The size of a `int_least64_t', as computed by sizeof. */
+#undef SIZEOF_INT_LEAST64_T
+
+/* The size of a `int_least8_t', as computed by sizeof. */
+#undef SIZEOF_INT_LEAST8_T
+
+/* The size of a `long', as computed by sizeof. */
+#undef SIZEOF_LONG
+
+/* The size of a `long double', as computed by sizeof. */
+#undef SIZEOF_LONG_DOUBLE
+
+/* The size of a `long long', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG
+
+/* The size of a `off_t', as computed by sizeof. */
+#undef SIZEOF_OFF_T
+
+/* The size of a `short', as computed by sizeof. */
+#undef SIZEOF_SHORT
+
+/* The size of a `size_t', as computed by sizeof. */
+#undef SIZEOF_SIZE_T
+
+/* The size of a `ssize_t', as computed by sizeof. */
+#undef SIZEOF_SSIZE_T
+
+/* The size of a `uint16_t', as computed by sizeof. */
+#undef SIZEOF_UINT16_T
+
+/* The size of a `uint32_t', as computed by sizeof. */
+#undef SIZEOF_UINT32_T
+
+/* The size of a `uint64_t', as computed by sizeof. */
+#undef SIZEOF_UINT64_T
+
+/* The size of a `uint8_t', as computed by sizeof. */
+#undef SIZEOF_UINT8_T
+
+/* The size of a `uint_fast16_t', as computed by sizeof. */
+#undef SIZEOF_UINT_FAST16_T
+
+/* The size of a `uint_fast32_t', as computed by sizeof. */
+#undef SIZEOF_UINT_FAST32_T
+
+/* The size of a `uint_fast64_t', as computed by sizeof. */
+#undef SIZEOF_UINT_FAST64_T
+
+/* The size of a `uint_fast8_t', as computed by sizeof. */
+#undef SIZEOF_UINT_FAST8_T
+
+/* The size of a `uint_least16_t', as computed by sizeof. */
+#undef SIZEOF_UINT_LEAST16_T
+
+/* The size of a `uint_least32_t', as computed by sizeof. */
+#undef SIZEOF_UINT_LEAST32_T
+
+/* The size of a `uint_least64_t', as computed by sizeof. */
+#undef SIZEOF_UINT_LEAST64_T
+
+/* The size of a `uint_least8_t', as computed by sizeof. */
+#undef SIZEOF_UINT_LEAST8_T
+
+/* The size of a `__int64', as computed by sizeof. */
+#undef SIZEOF___INT64
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
+#undef TIME_WITH_SYS_TIME
+
+/* Define to 1 if your <sys/time.h> declares `struct tm'. */
+#undef TM_IN_SYS_TIME
+
+/* Define if the HDF5 v1.4 compatibility functions are to be compiled in */
+#undef WANT_H5_V1_4_COMPAT
+
+/* Define to 1 if your processor stores words with the most significant byte
+   first (like Motorola and SPARC, unlike Intel and VAX). */
+#undef WORDS_BIGENDIAN
+
+/* Define to empty if `const' does not conform to ANSI C. */
+#undef const
+
+/* Define as `__inline' if that's what the C compiler calls it, or to nothing
+   if it is not supported. */
+#undef inline
+
+/* Define to `long' if <sys/types.h> does not define. */
+#undef off_t
+
+/* Define to `unsigned long' if <sys/types.h> does not define. */
+#undef size_t
+
+/* Define to `long' if <sys/types.h> does not define. */
+#undef ssize_t

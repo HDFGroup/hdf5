@@ -31,7 +31,6 @@
 ./bin/install-sh
 ./bin/iostats
 ./bin/locate_hdf4
-./bin/ltconfig
 ./bin/ltmain.sh
 ./bin/mkdirs
 ./bin/release

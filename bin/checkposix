@@ -55,10 +55,17 @@ while (<>) {
       next if $name =~ /^FUNC_(ENTER|LEAVE)(_INIT)?$/;
       next if $name =~ /^U?INT(8|16|32|64)(ENCODE|DECODE)$/;
       next if $name =~ /^(MIN3?|MAX3?|NELMTS|BOUND|CONSTR)$/;
+      next if $name =~ /^IS_H5FD_MPIO$/;
       next if $name =~ /^addr_defined$/;
 
       # These functions/macros are exempt.
       next if $name =~ /^(assert|main|[fs]?printf|va_(start|arg|end))$/;
+
+      # These are MPI function calls. Ignore them.
+      next if $name =~ /^MPI_/;
+
+      # These are POSIX threads function calls. Ignore them.
+      next if $name =~ /^pthread_/;
 
       print "$ARGV:$.: $name\n";
    }
