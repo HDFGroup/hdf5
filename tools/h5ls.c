@@ -1914,10 +1914,9 @@ main (int argc, char *argv[])
     H5G_stat_t	sb;
     iter_t	iter;
     static char	root_name[] = "/";
-	char drivername[50];
+    char        drivername[50];
 
 
-	memset(drivername, '\0',50);
     /* Build display table */
     DISPATCH(H5G_DATASET, "Dataset", H5Dopen, H5Dclose,
 	     dataset_list1, dataset_list2);
@@ -2093,9 +2092,7 @@ main (int argc, char *argv[])
 	file = -1;
 
 	while (fname && *fname) {
-
-		file = H5ToolsFopen(fname, drivername);
-
+            file = h5dump_fopen(fname, drivername, sizeof drivername);
 	    if (file>=0) {
 		if (verbose_g) {
 		    printf("Opened \"%s\" with %s driver.\n",

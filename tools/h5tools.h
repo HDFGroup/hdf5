@@ -338,6 +338,7 @@ hid_t h5dump_fixtype(hid_t f_type);
 int h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t p_typ,int indentlevel);
 int h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
 	       void *mem, int indentlevel);
+hid_t h5dump_fopen(const char *fname, char *drivername, size_t drivername_len);
 
 
 /*if we get a new program that needs to use the library add its name here*/
@@ -433,9 +434,4 @@ extern int nCols;
 
 /* Definitions of useful routines */
 void print_version(const char *program_name);
-
-/*used to open files so we can use different drivers*/
-hid_t H5ToolsFopen(char* fname, char* drivername);
-
-#define NDRIVERS	10
 

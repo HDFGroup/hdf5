@@ -1431,7 +1431,7 @@ main(int argc, char *argv[])
     if (argv[argc-1][0] == '\\') fname = &argv[argc-1][1];
     else fname = argv[argc-1];
 
-	fid = H5ToolsFopen(fname, NULL);
+	fid = h5dump_fopen(fname, NULL, 0);
     if (fid < 0) {
          fprintf (stderr, "h5dump error: unable to open file %s \n", fname);
          free(opts);

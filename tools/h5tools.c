@@ -87,8 +87,9 @@ typedef struct h5dump_context_t {
                                          *needed so we can break after each
                                          *row */
     int			indent_level;   /*the number of times we need some
-                                          extra indentation */
-	int			default_indent_level; /*this is used when the indent level gets changed*/
+                                         *extra indentation */
+    int			default_indent_level; /*this is used when the indent
+                                               *level gets changed */
 } h5dump_context_t;
 
 typedef herr_t (*H5G_operator_t)(hid_t, const char*, void*);
@@ -105,8 +106,7 @@ extern int get_table_idx(table_t *table, unsigned long *);
 extern int get_tableflag(table_t*, int);
 extern int set_tableflag(table_t*, int);
 extern char* get_objectname(table_t*, int);
-extern hid_t H5ToolsFopen(char* fname, char* drivername);
-
+
 /*-------------------------------------------------------------------------
  * Function:	h5dump_str_close
  *
@@ -131,7 +131,6 @@ h5dump_str_close(h5dump_str_t *str)
     }
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_str_len
  *
@@ -155,7 +154,6 @@ h5dump_str_len(h5dump_str_t *str)
     return str->len;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_str_append
  *
@@ -208,7 +206,6 @@ h5dump_str_append(h5dump_str_t *str/*in,out*/, const char *fmt, ...)
     return str->s;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_str_reset
  *
@@ -241,7 +238,6 @@ h5dump_str_reset(h5dump_str_t *str/*in,out*/)
     return str->s;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_str_trunc
  *
@@ -268,7 +264,6 @@ h5dump_str_trunc(h5dump_str_t *str/*in,out*/, size_t size)
     return str->s;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_str_fmt
  *
@@ -318,7 +313,6 @@ h5dump_str_fmt(h5dump_str_t *str/*in,out*/, size_t start, const char *fmt)
     return str->s;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_prefix
  *
@@ -379,7 +373,6 @@ h5dump_prefix(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
     return h5dump_str_fmt(str, 0, OPT(info->idx_fmt, "%s: "));
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_escape
  *
@@ -456,7 +449,6 @@ h5dump_escape(char *s/*in,out*/, size_t size, int escape_spaces)
     return s;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_is_zero
  *
@@ -481,7 +473,6 @@ h5dump_is_zero(const void *_mem, size_t size)
     return TRUE;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_region
  *
@@ -565,7 +556,6 @@ h5dump_region(hid_t region, h5dump_str_t *str/*in,out*/, const h5dump_t *info)
     return 0;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_sprint
  *
@@ -1024,7 +1014,6 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
     return h5dump_str_fmt(str, start, OPT(info->elmt_fmt, "%s"));
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_ncols
  *
@@ -1052,7 +1041,6 @@ h5dump_ncols(const char *s)
     return i;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_simple_prefix
  *
@@ -1134,7 +1122,6 @@ h5dump_simple_prefix(FILE *stream, const h5dump_t *info,
     h5dump_str_close(&prefix);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_simple_data
  *
@@ -1305,8 +1292,6 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
     h5dump_str_close(&buffer);
 }
 
-	
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_simple_dset
  *
@@ -1461,7 +1446,6 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     return 0;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_simple_mem
  *
@@ -1485,7 +1469,7 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t type,
 {
     hsize_t		i;			/*counters		*/
     hsize_t		nelmts;			/*total selected elmts	*/
-    h5dump_context_t	ctx;			/*printing context	*/		
+    h5dump_context_t	ctx;			/*printing context	*/
 
     /*
      * Check that everything looks okay.  The dimensionality must not be too
@@ -1525,7 +1509,6 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t type,
     return 0;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_fixtype
  *
@@ -1698,7 +1681,6 @@ h5dump_fixtype(hid_t f_type)
     return m_type;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_dset
  *
@@ -1728,7 +1710,8 @@ h5dump_fixtype(hid_t f_type)
  *-------------------------------------------------------------------------
  */
 int
-h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type, int indentlevel)
+h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type,
+            int indentlevel)
 {
     hid_t	f_space;
     hid_t	p_type = _p_type;
@@ -1764,7 +1747,6 @@ h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type, int i
     return status;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	h5dump_mem
  *
@@ -1839,13 +1821,13 @@ h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
  *-----------------------------------------------------------------------*/
 void indentation(int x) {
 
-	if(x < nCols) {
-		while (x>0) { printf(" "); x--; }
-	}
-	else {
-		printf("The indentation exceeds the number of cols. Exiting....\n");
-		exit(1);
-	}
+    if(x < nCols) {
+        while (x>0) { printf(" "); x--; }
+    }
+    else {
+        printf("The indentation exceeds the number of cols. Exiting....\n");
+        exit(1);
+    }
 }
 
 /* Print the program name and the version information which is */
@@ -1882,10 +1864,11 @@ THE FUNCTIONS BELOW ARE FROM THE H5FINSHD.C FILE
  * Modifications:
  *
  *-----------------------------------------------------------------------*/
-void init_table (table_t** temp){
-
-	int i;
-	table_t *table = malloc(sizeof(table_t));
+void
+init_table (table_t** temp)
+{
+    int i;
+    table_t *table = malloc(sizeof(table_t));
 
     table->size = 20;
     table->nobjs = 0;
@@ -1894,15 +1877,13 @@ void init_table (table_t** temp){
   
 
     for (i = 0; i < table->size; i++) {
-         table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
-         table->objs[i].displayed = 0;
-         table->objs[i].recorded = 0;
-		 table->objs[i].objflag = 0;
+        table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
+        table->objs[i].displayed = 0;
+        table->objs[i].recorded = 0;
+        table->objs[i].objflag = 0;
     }
-	*temp = table;
-
+    *temp = table;
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    init_prefix
@@ -1914,11 +1895,13 @@ void init_table (table_t** temp){
  * Modifications:
  *
  *-----------------------------------------------------------------------*/
-void init_prefix(char **prefix, int prefix_len){
-	char *temp;
+void
+init_prefix(char **prefix, int prefix_len)
+{
+    char *temp;
     temp = (char *) malloc(prefix_len * sizeof (char));
     *temp = '\0';
-	*prefix = temp;
+    *prefix = temp;
 }
 
 
@@ -1937,13 +1920,13 @@ void init_prefix(char **prefix, int prefix_len){
  *
  *-----------------------------------------------------------------------*/
 void
-free_table (table_t **table){
-
-	table_t *temp = *table;
-        if (temp->objs != NULL) {
-		HDfree(temp->objs);
-        }
-	*table = temp;
+free_table (table_t **table)
+{
+    table_t *temp = *table;
+    if (temp->objs != NULL) {
+        HDfree(temp->objs);
+    }
+    *table = temp;
 }
 
 
@@ -1962,19 +1945,19 @@ free_table (table_t **table){
  *
  *-----------------------------------------------------------------------*/
 int 
-search_obj (table_t *table, unsigned long *objno) {
-int i=0, found=0;
+search_obj (table_t *table, unsigned long *objno)
+{
+    int i=0, found=0;
 
     while (i < table->nobjs && !found) 
-           if (table->objs[i].objno[0] == *(objno) &&
-               table->objs[i].objno[1] == *(objno+1) )  found = 1;
-           else     i++; 
+        if (table->objs[i].objno[0] == *(objno) &&
+            table->objs[i].objno[1] == *(objno+1) )  found = 1;
+        else     i++; 
   
     if (!found) return -1;
     else return i;
 
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    add_obj
@@ -1990,17 +1973,18 @@ int i=0, found=0;
  *
  *-----------------------------------------------------------------------*/
 void
-add_obj (table_t *table, unsigned long *objno, char *objname) {
-int i;
+add_obj (table_t *table, unsigned long *objno, char *objname)
+{
+    int i;
 
     if (table->nobjs == table->size) {
         table->size *= 2;
         table->objs = realloc (table->objs, table->size*sizeof(obj_t));
         for (i = table->nobjs; i < table->size; i++) {
-             table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
-             table->objs[i].displayed = 0;
-             table->objs[i].recorded = 0;
-			 table->objs[i].objflag = 0;
+            table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
+            table->objs[i].displayed = 0;
+            table->objs[i].recorded = 0;
+            table->objs[i].objflag = 0;
         }
     }
 
@@ -2008,8 +1992,8 @@ int i;
     table->objs[i].objno[0] = *objno;
     table->objs[i].objno[1] = *(objno+1);
     strcpy (table->objs[i].objname, objname);
-
 }
+
 /*-------------------------------------------------------------------------
  * Function:   Find_objs 
  *
@@ -2024,21 +2008,23 @@ int i;
  * Modifications:
  *
  *-----------------------------------------------------------------------*/
-herr_t find_objs(hid_t group, const char *name, void *op_data)
+herr_t
+find_objs(hid_t group, const char *name, void *op_data)
 {
-	hid_t obj, type;
-	H5G_stat_t statbuf;
-	char *tmp;
-	int i;
-	find_objs_t *info = (find_objs_t*)op_data;
+    hid_t obj, type;
+    H5G_stat_t statbuf;
+    char *tmp;
+    int i;
+    find_objs_t *info = (find_objs_t*)op_data;
 
-	if (info->threshold > 1) { /*will get an infinite loop if greater than 1*/
-		return(FAIL);
-	}
+    if (info->threshold > 1) {
+        /*will get an infinite loop if greater than 1*/
+        return(FAIL);
+    }
 
     H5Gget_objinfo(group, name, TRUE, &statbuf);
 
-    tmp = (char *) malloc ((strlen(info->prefix)+strlen(name)+2) * sizeof(char));
+    tmp = (char *) malloc((strlen(info->prefix)+strlen(name)+2)*sizeof(char));
 
     strcpy(tmp, info->prefix); 
 
@@ -2047,9 +2033,10 @@ herr_t find_objs(hid_t group, const char *name, void *op_data)
     case H5G_GROUP:
         if ((obj=H5Gopen (group, name))>=0) {
 
-            if (info->prefix_len < (int)(strlen(info->prefix) + strlen(name) + 2)) {
+            if (info->prefix_len<(int)(strlen(info->prefix)+strlen(name)+2)) {
                 info->prefix_len *= 2;
-                info->prefix = realloc (info->prefix, info->prefix_len * sizeof(char));
+                info->prefix = realloc(info->prefix,
+                                       info->prefix_len * sizeof(char));
             } 
             strcat(strcat(info->prefix,"/"), name);
 
@@ -2078,35 +2065,38 @@ herr_t find_objs(hid_t group, const char *name, void *op_data)
             add_obj (info->dset_table, statbuf.objno, tmp);
 
         if ((obj=H5Dopen (group, name))>=0) {              
-             type = H5Dget_type (obj);
-             if (H5Tcommitted(type) > 0 ) {
-                 H5Gget_objinfo(type, ".", TRUE, &statbuf);
-                 if (search_obj (info->type_table, statbuf.objno) < 0) {
-                     add_obj (info->type_table, statbuf.objno, tmp) ;
-					 info->type_table->objs[info->type_table->nobjs - 1].objflag = 0;
-				 }
-             }
-             H5Tclose(type);
-             H5Dclose (obj);
+            type = H5Dget_type (obj);
+            if (H5Tcommitted(type) > 0 ) {
+                H5Gget_objinfo(type, ".", TRUE, &statbuf);
+                if (search_obj (info->type_table, statbuf.objno) < 0) {
+                    add_obj (info->type_table, statbuf.objno, tmp) ;
+                    info->type_table->objs[info->type_table->nobjs - 1].objflag = 0;
+                }
+            }
+            H5Tclose(type);
+            H5Dclose (obj);
         } else
-             info->status = 1;
+            info->status = 1;
             
         break;
 
     case H5G_TYPE:
-         strcat(tmp,"/");
-         strcat(tmp,name); /* absolute name of the type */
-         i = search_obj (info->type_table, statbuf.objno);
-         if (i < 0) {
-             add_obj (info->type_table, statbuf.objno, tmp) ;
-             info->type_table->objs[info->type_table->nobjs-1].recorded = 1; /* named data type */
-			 info->type_table->objs[info->type_table->nobjs-1].objflag = 1; /* named data type */
-         } else {
-             strcpy (info->type_table->objs[i].objname, tmp);
-             info->type_table->objs[i].recorded = 1; 
-			 info->type_table->objs[info->type_table->nobjs-1].objflag = 1; /* named data type */  
-		 }
-         break;
+        strcat(tmp,"/");
+        strcat(tmp,name); /* absolute name of the type */
+        i = search_obj (info->type_table, statbuf.objno);
+        if (i < 0) {
+            add_obj (info->type_table, statbuf.objno, tmp) ;
+            /* named data type */
+            info->type_table->objs[info->type_table->nobjs-1].recorded = 1;
+            /* named data type */
+            info->type_table->objs[info->type_table->nobjs-1].objflag = 1;
+        } else {
+            strcpy (info->type_table->objs[i].objname, tmp);
+            info->type_table->objs[i].recorded = 1; 
+            /* named data type */  
+            info->type_table->objs[info->type_table->nobjs-1].objflag = 1;
+        }
+        break;
 
     default:
         break;
@@ -2116,7 +2106,6 @@ herr_t find_objs(hid_t group, const char *name, void *op_data)
 
     return SUCCEED;
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    dump_tables
@@ -2131,19 +2120,17 @@ herr_t find_objs(hid_t group, const char *name, void *op_data)
  *
  *-----------------------------------------------------------------------*/
 void 
-dump_table(char* tablename, table_t *table) {
-int i;
+dump_table(char* tablename, table_t *table)
+{
+    int i;
 
     printf("%s: # of entries = %d\n", tablename,table->nobjs);
     for ( i = 0; i < table->nobjs; i++)
         printf ("%lu %lu %s %d\n", table->objs[i].objno[0],
-                                   table->objs[i].objno[1],
-                                   table->objs[i].objname,
-                                   table->objs[i].objflag);
-
+                table->objs[i].objno[1],
+                table->objs[i].objname,
+                table->objs[i].objflag);
 }
-
-
 
 /*-------------------------------------------------------------------------
  * Function:   get_table_idx
@@ -2160,12 +2147,12 @@ int i;
 int
 get_table_idx(table_t *table, unsigned long *objno)
 {
-int idx = -1;
+    int idx = -1;
 
-   idx = search_obj(table, objno);
+    idx = search_obj(table, objno);
     return idx;
-
 }
+
 /*-------------------------------------------------------------------------
  * Function:   Get table flag setting
  *
@@ -2183,11 +2170,9 @@ int idx = -1;
 int
 get_tableflag(table_t *table, int idx)
 {
- 
-  return(table->objs[idx].objflag);
-  
-
+    return(table->objs[idx].objflag);
 }
+
 /*-------------------------------------------------------------------------
  * Function:   Set table flag setting
  *
@@ -2205,12 +2190,10 @@ get_tableflag(table_t *table, int idx)
 int
 set_tableflag(table_t *table, int idx)
 {
-
     table->objs[idx].objflag = TRUE;
     return(SUCCEED);
-    
-
 }
+
 /*-------------------------------------------------------------------------
  * Function:   Get name of i'th object in table
  *
@@ -2226,67 +2209,97 @@ set_tableflag(table_t *table, int idx)
 char *
 get_objectname(table_t* table, int idx)
 {
-
-  return(strdup(table->objs[idx].objname));
+    return(strdup(table->objs[idx].objname));
 }
 
 /*-------------------------------------------------------------------------
- * Function:   opens a file using the list of drivers
+ * Function:    opens a file using the list of drivers
  *
- * Purpose:    
+ * Purpose:     Attempts to open a file with various VFL drivers.
  *
- * Return:      Success:       a file id for the opened file
+ * Return:      Success:        a file id for the opened file. If
+ *                              DRIVERNAME is non-null then the first
+ *                              DRIVERNAME_SIZE-1 characters of the driver
+ *                              name are copied into the DRIVERNAME array
+ *                              and null terminated.
  *
- *              Failure:       -1;
+ *              Failure:        -1. If DRIVERNAME is non-null then the
+ *                              first byte is set to the null terminator.
  *
+ * Modifications:
+ *              Robb Matzke, 2000-06-23
+ *              We only have to initialize driver[] on the first call,
+ *              thereby preventing memory leaks from repeated calls to
+ *              H5Pcreate().
+ *
+ *              Robb Matzke, 2000-06-23
+ *              Added DRIVERNAME_SIZE arg to prevent overflows when
+ *              writing to DRIVERNAME.
+ *
+ *              Robb Matzke, 2000-06-23
+ *              Added test to prevent coredump when the file could not be
+ *              opened by any driver.
+ *
+ *              Robb Matzke, 2000-06-23
+ *              Changed name from H5ToolsFopen() so it jives better with
+ *              the names we already have at the top of this source file.
  *-----------------------------------------------------------------------*/
+hid_t
+h5dump_fopen(const char *fname, char *drivername, size_t drivername_size)
+{
+    static struct {
+        const char	*name;
+        hid_t		fapl;
+    } driver[16];
+    static int          ndrivers = 0;
+    
+    hid_t               fid, fapl = H5P_DEFAULT;
+    int                 drivernum;
 
-hid_t H5ToolsFopen(char* fname, char* drivername){
-
-	typedef struct driver_t {
-		const char	*name;
-		hid_t		fapl;
-	} driver_t;
-
-	hid_t fid, fapl = H5P_DEFAULT;
-	int ndrivers = 0, drivernum;
-	driver_t driver[NDRIVERS];
-
-	/*taken from h5ls*/
-    /*
-     * Build a list of file access property lists which we should try when
-     * opening the file.  Eventually we'd like some way for the user to
-     * augment/replace this list interactively.
-     */
-	driver[ndrivers].name = "sec2";
-    driver[ndrivers].fapl = H5P_DEFAULT;
-    ndrivers++;
+    if (!ndrivers) {
+        /* Build a list of file access property lists which we should try
+         * when opening the file.  Eventually we'd like some way for the
+         * user to augment/replace this list interactively. */
+        driver[ndrivers].name = "sec2";
+        driver[ndrivers].fapl = H5P_DEFAULT;
+        ndrivers++;
+        
 #if defined VERSION13   
-    driver[ndrivers].name = "family";
-    driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_family(fapl, 0, H5P_DEFAULT);
-    ndrivers++;
+        driver[ndrivers].name = "family";
+        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+        H5Pset_fapl_family(fapl, 0, H5P_DEFAULT);
+        ndrivers++;
 
-    driver[ndrivers].name = "split";
-    driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
-    ndrivers++;
+        driver[ndrivers].name = "split";
+        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+        H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
+        ndrivers++;
 
-    driver[ndrivers].name = "multi";
-    driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE);
-    ndrivers++;
+        driver[ndrivers].name = "multi";
+        driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+        H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE);
+        ndrivers++;
 #endif
-	for (drivernum = 0; drivernum<ndrivers;drivernum++){
-		H5E_BEGIN_TRY {
-		    fid = H5Fopen(fname, H5F_ACC_RDONLY, driver[drivernum].fapl);
-		} H5E_END_TRY;
-		if (fid >= 0) break;
-	}
-	if (drivername){
-		memcpy(drivername,driver[drivernum].name,strlen(driver[drivernum].name));
-	}
-	return (fid);
+    }
+
+    /* Try to open the file using each of the drivers */
+    for (drivernum=0; drivernum<ndrivers; drivernum++) {
+        H5E_BEGIN_TRY {
+            fid = H5Fopen(fname, H5F_ACC_RDONLY, driver[drivernum].fapl);
+        } H5E_END_TRY;
+        if (fid >= 0) break;
+    }
+
+    /* Save the driver name */
+    if (drivername && drivername_size){
+        if (fid>=0) {
+            strncpy(drivername, driver[drivernum].name, drivername_size);
+            drivername[drivername_size-1] = '\0';
+        } else {
+            drivername[0] = '\0'; /*no file opened*/
+        }
+    }
+    return (fid);
 }
 
 
