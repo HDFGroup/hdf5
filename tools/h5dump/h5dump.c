@@ -390,9 +390,9 @@ struct handler_t {
  */
 #if 0
     /* binary: not implemented yet */
-static const char *s_opts = "hbBHvVa:d:g:l:t:w:xD:o:s:T:c:k:";
+static const char *s_opts = "hbBHvVa:d:g:l:t:w:xD:o:s:S:c:k:";
 #else
-static const char *s_opts = "hBHvVa:d:g:l:t:w:xD:o:s:T:c:k:";
+static const char *s_opts = "hBHvVa:d:g:l:t:w:xD:o:s:S:c:k:";
 #endif  /* 0 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
@@ -1713,7 +1713,7 @@ dump_dims(hsize_t *s, int dims)
     register int i;
 
     for (i = 0; i < dims; i++) {
-        printf("%u", s[i]);
+        printf("%u", (unsigned int)s[i]);
 
         if (i + 1 != dims)
             printf(", ");
@@ -2038,8 +2038,8 @@ parse_subset_params(char *dset)
         /* sanity check to make sure the [ isn't part of the dataset name */
         if (brace > slash) {
             *brace++ = '\0';
-            s = calloc(1, sizeof(struct subset_t));
 
+            s = calloc(1, sizeof(struct subset_t));
             s->start = parse_hsize_list(brace);
 
             while (*brace && *brace != ';')
@@ -2101,6 +2101,45 @@ handle_datasets(hid_t fid, char *dset, void *data)
                 dump_header_format->datasetblockend);
         d_status = EXIT_FAILURE;
         return;
+    }
+
+    if (sset) {
+        /* check that all of the subsetting parameters are okay */
+        if (!sset->count) {
+            error_msg(progname, "`count' argument missing for subsetting\n");
+            exit(EXIT_FAILURE);
+        }
+
+        if (!sset->start || !sset->stride || !sset->block) {
+            /* they didn't specify a ``stride'' or ``block''. default to 1 in all
+             * dimensions */
+            hid_t sid = H5Dget_space(dsetid);
+            unsigned int ndims = H5Sget_simple_extent_ndims(sid);
+
+            H5Sclose(sid);
+
+            if (!sset->start)
+                /* default to (0, 0, ...) for the start coord */
+                sset->start = calloc(ndims, sizeof(hsize_t));
+
+            if (!sset->stride) {
+                unsigned int i;
+
+                sset->stride = calloc(ndims, sizeof(hsize_t));
+
+                for (i = 0; i < ndims; i++)
+                    sset->stride[i] = 1;
+            }
+
+            if (!sset->block) {
+                unsigned int i;
+
+                sset->block = calloc(ndims, sizeof(hsize_t));
+
+                for (i = 0; i < ndims; i++)
+                    sset->block[i] = 1;
+            }
+        }
     }
 
     H5Gget_objinfo(dsetid, ".", TRUE, &statbuf);
@@ -2445,7 +2484,7 @@ parse_start:
 
         /** begin subsetting parameters **/
         case 's':
-        case 'T':
+        case 'S':
         case 'c':
         case 'k': {
             struct subset_t *s;
@@ -2471,7 +2510,7 @@ parse_start:
              * slightly convoluted, but...we are only interested in options
              * for subsetting: "--start", "--stride", "--count", and "--block"
              * which can come in any order. If we run out of parameters (EOF)
-             * or run into one which isn't a subsetting parameter (NOT s, T,
+             * or run into one which isn't a subsetting parameter (NOT s, S,
              * c, or K), then we exit the do-while look, set the subset_info
              * to the structure we've been filling. If we've reached the end
              * of the options, we exit the parsing (goto parse_end) otherwise,
@@ -4465,15 +4504,17 @@ xml_print_strs(hid_t did, int source)
 	ssiz *= H5Tget_size(type);
 
 	buf = calloc((size_t)ssiz, sizeof(char));
+
 	if (buf == NULL) {
 	    return FAIL;
 	}
+
 	e = H5Dread(did, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+
 	if (e < 0) {
 	    free(buf);
 	    return FAIL;
 	}
-
     } else if (source == ATTRIBUTE_DATA) {
 	space = H5Aget_space(did);
 	ssiz = H5Sget_simple_extent_npoints(space);
