@@ -7,16 +7,15 @@
 @COMMENCE@
 
 # Add the include directory to the C preprocessor flags the the hdf5 library
-# to the library list.  Also add the -DUSE_PAUSE to get the test files to
-# pause until a `go' file exists in order to attach a debugger.
-CPPFLAGS=-I. -I../src -DUSE_PAUSE @CPPFLAGS@
+# to the library list.
+CPPFLAGS=-I. -I../src @CPPFLAGS@
 LIBS=../src/libhdf5.a @LIBS@
 
 # These tests are parallel
 RUNTEST=$(RUNPARALLEL)
 
 # These are our main targets
-TESTS=testphdf5
+TEST_PROGS=testphdf5
 
 # Temporary files
 MOSTLYCLEAN=ParaEg[123].h5f
@@ -28,9 +27,9 @@ TEST_OBJ=$(TEST_SRC:.c=.o)
 PRIVATE_HDR=testphdf5.h
 
 # How to build the tests... They all depend on the hdf5 library
-$(TESTS): ../src/libhdf5.a
+$(TEST_PROGS): ../src/libhdf5.a
 
-testphdf5: testphdf5.o t_dset.o t_file.o
-	$(CC) $(CFLAGS) -o $@ testphdf5.o t_dset.o t_file.o $(LDFLAGS) $(LIBS)
+testphdf5: $(TEST_OBJ)
+	$(CC) $(CFLAGS) -o $@ $(TEST_OBJ) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@
