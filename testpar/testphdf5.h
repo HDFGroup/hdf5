@@ -127,6 +127,7 @@
 #define BYROW_CONT 1
 #define BYROW_DISCONT 2
 #define DSET_COLLECTIVE_CHUNK_NAME "coll_chunk_name"
+
 /* type definitions */
 typedef struct H5Ptest_param_t  /* holds extra test parameters */
 {

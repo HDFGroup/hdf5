@@ -31,7 +31,6 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Sprivate.h"		/* Dataspaces 				*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
-#include "H5Zprivate.h"
 
 /*#define H5D_DEBUG*/
 

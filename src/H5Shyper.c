@@ -729,7 +729,7 @@ H5S_hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
                 /* Increment absolute position */
                 if(curr_dim==fast_dim) {
                     size_t actual_elem;     /* Actual # of elements advanced on each iteration through loop */
-                    hsize_t span_elem;       /* Number of elements left in a span */
+                    hsize_t span_elem;      /* Number of elements left in a span */
 
                     /* Compute the number of elements left in block */
                     span_elem=(curr_span->high-abs_arr[curr_dim])+1;

@@ -757,7 +757,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     } /* end switch */
 
     /* Get dataspace functions */
-    if (NULL==(sconv=H5S_find(dataset->ent.file,mem_space, file_space, sconv_flags, &use_par_opt_io,&dataset->layout)))
+    if (NULL==(sconv=H5S_find(dataset->ent.file, mem_space, file_space, sconv_flags, &use_par_opt_io, &dataset->layout)))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from file to memory data space")
 
 #ifdef H5_HAVE_PARALLEL
@@ -1004,7 +1004,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     } /* end switch */
 
     /* Get dataspace functions */
-    if (NULL==(sconv=H5S_find(dataset->ent.file,mem_space, file_space, sconv_flags, &use_par_opt_io,&dataset->layout)))
+    if (NULL==(sconv=H5S_find(dataset->ent.file, mem_space, file_space, sconv_flags, &use_par_opt_io, &dataset->layout)))
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from memory to file data space")
         
 #ifdef H5_HAVE_PARALLEL
@@ -1031,7 +1031,6 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
      }
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
-     /* end Test for collective chunk IO */
     /* Don't reset the transfer mode if we can't or won't use it */
     if(!use_par_opt_io || !H5T_path_noop(tpath))
         H5D_io_assist_mpio(dxpl_id, dxpl_cache, &xfer_mode_changed);

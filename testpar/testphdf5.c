@@ -469,7 +469,6 @@ int main(int argc, char **argv)
     AddTest("fillvalue", dataset_fillvalue, NULL, 
 	    "dataset fill value", filenames[8]);
 
-
     AddTest("coll. chunked 1", coll_chunk1,NULL,
 	    "simple collective chunk io",filenames[10]);
     AddTest("coll. chunked 2", coll_chunk2,NULL,
@@ -478,6 +477,7 @@ int main(int argc, char **argv)
 	    "multi-chunk collective chunk io",filenames[12]);
     AddTest("coll. chunked 4", coll_chunk4,NULL,
 	    "collective to independent chunk io",filenames[13]);
+
     /* Display testing information */
     TestInfo(argv[0]);
 

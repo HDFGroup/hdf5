@@ -743,5 +743,4 @@ H5S_mpio_opt_possible( const H5F_t *file, const H5S_t *mem_space, const H5S_t *f
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5S_mpio_opt_possible() */
-
 #endif  /* H5_HAVE_PARALLEL */

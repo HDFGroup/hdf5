@@ -23,14 +23,14 @@
 #define PABLO_MASK	H5S_mask
 
 #define _H5S_IN_H5S_C
-#include "H5private.h"		/* Generic Functions			  */
-#include "H5Eprivate.h"		/* Error handling		  */
-#include "H5Fpkg.h"		/* Dataspace functions			  */
-#include "H5FLprivate.h"	/* Free Lists	  */
-#include "H5Iprivate.h"		/* ID Functions		  */
-#include "H5MMprivate.h"	/* Memory Management functions		  */
-#include "H5Oprivate.h"		/* object headers		  */
-#include "H5Spkg.h"		/* Dataspace functions			  */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"             /* File access				*/
+#include "H5FLprivate.h"	/* Free lists                           */
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5Spkg.h"		/* Dataspaces 				*/
 
 /* Local macro definitions */
 #define H5S_ENCODE_VERSION      0
@@ -1375,7 +1375,7 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
             HDmemcpy(space->extent.max, max, sizeof(hsize_t) * rank);
         } /* end if */
         else {
-           space->extent.max = NULL;
+            space->extent.max = NULL;
         }
     }
 
@@ -1807,7 +1807,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
 {
     size_t      extent_size;
@@ -1928,7 +1928,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5S_t*
+static H5S_t*
 H5S_decode(const unsigned char *buf)
 {
     H5S_t       *ds;
@@ -2198,7 +2198,7 @@ done:
  *          by H5Sset_extent_simple() ).  Helps avoid write errors.
  *
  * Return: TRUE if dataspace has extent set
- *          FALSE if dataspace's extent is uninitialized
+ *         FALSE if dataspace's extent is uninitialized
  *
  * Programmer: James Laird
  *
