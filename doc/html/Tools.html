@@ -83,6 +83,7 @@ These tools enable the user to examine HDF5 files interactively.
         [-d </code><em>names</em><code>]
         [-g </code><em>names</em><code>]
         [-l </code><em>names</em><code>]
+				[-o </code><em>fname</em><code>]
         [-t </code><em>names</em><code>] 
         [-w </code><em>number</em><code>]</code>
         
@@ -155,6 +156,8 @@ These tools enable the user to examine HDF5 files interactively.
             <dd>Displays the specified named data type(s).
         <dt><code>-w</code> <em>number</em>
             <dd>Displays the information with the specified number of columns.
+				<dt><code>-o</code> <em>filename</em>
+						<dd>Output the raw data of datasets to a separate file <code>filename</code>.
         <dt><em>file</em>
             <dd>The file to be examined.
     </dl>
@@ -219,6 +222,10 @@ These tools enable the user to examine HDF5 files interactively.
            <dt>- object references 
            <dt>- data regions
            <li>enum type
+					 <li>variable length datatypes
+					 <dt>- atomic types only
+					 <dt>- scalar or single dimensional array of variable length
+					       types supported
         </ul>
         <li>Data space 
         <ul>
