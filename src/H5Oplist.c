@@ -145,8 +145,7 @@ H5O_plist_decode(H5F_t UNUSED *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     version = *p++;
 
     if (version != H5O_PLIST_VERSION)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
-                    "bad version number for property list message");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for property list message");
 
     /* Reserved (for what?) */
     ++p;
@@ -161,8 +160,13 @@ H5O_plist_decode(H5F_t UNUSED *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
      * Retrieve the name of the property class with its parent(s). It's a
      * regular NULL terminated string.
      */
-    pclass = H5P_open_class_path((const char *)p);
-    p += HDstrlen((const char *)p) + 1; /* + 1 for the NULL */
+    if ((pclass = H5P_open_class_path((const char *)p)) == NULL)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTOPENOBJ, NULL, "can't open the class path");
+
+    if (*p)
+        p += HDstrlen((const char *)p) + 1; /* + 1 for the NULL */
+    else
+        ++p;
 
     UINT_DECODE(p, nprops);
     UINT_DECODE(p, hashsize);
@@ -170,7 +174,7 @@ H5O_plist_decode(H5F_t UNUSED *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     /* Allocate new property list */
     if ((new_plist = H5MM_calloc(sizeof(H5P_genplist_t) +
                                  ((hashsize - 1) * sizeof(H5P_genprop_t *)))) == NULL)
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Initialize new property list */
     new_plist->pclass = pclass;
@@ -291,7 +295,6 @@ H5O_plist_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
     herr_t ret_value = SUCCEED;
     unsigned int i;
     char *class_path;
-    uint8_t *old = p;
 
     FUNC_ENTER_NOAPI(H5O_plist_encode, FAIL);
 
@@ -369,8 +372,6 @@ H5O_plist_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
             tprop = tprop->next;
         }
     }
-
-    fprintf(stderr, "number of bytes == %u\n", (unsigned)(p - old));
 
 done:
     FUNC_LEAVE(ret_value);
@@ -533,12 +534,12 @@ H5O_plist_debug(H5F_t UNUSED *f, const void *mesg, FILE *stream,
     for (i = 0; i < plist->pclass->hashsize; ++i) {
         H5P_genprop_t *tprop = plist->props[i];
 
-        HDfprintf(stream, "%*sProperty {\n", indent, "");
-        indent += 2;
-
         /* Walk through the list of properties at each hash location */
         while (tprop) {
             register unsigned int j;
+
+            HDfprintf(stream, "%*sProperty {\n", indent, "");
+            indent += 2;
 
             /*
              * Copy the meat of the generic property:
@@ -549,12 +550,7 @@ H5O_plist_debug(H5F_t UNUSED *f, const void *mesg, FILE *stream,
              *      4. The property value
              */
             HDfprintf(stream, "%*sName: ", indent, "");
-
-            if (tprop->name)
-                HDfprintf(stream, "%s\n", tprop->name);
-            else
-                HDfprintf(stream, "(null)\n");
-
+            HDfprintf(stream, "%s\n", tprop->name ? tprop->name : "(null)");
             HDfprintf(stream, "%*sXOR Value: %d\n", indent, "", tprop->xor_val);
             HDfprintf(stream, "%*sValue Size: %d\n", indent, "", tprop->size);
             HDfprintf(stream, "%*sValue: ", indent, "");
@@ -562,14 +558,12 @@ H5O_plist_debug(H5F_t UNUSED *f, const void *mesg, FILE *stream,
             for (j = 0; j < tprop->size; ++j)
                 HDfprintf(stream, "%02x ", ((char *)tprop->value)[j]);
 
-            HDfprintf(stream, "\n");
+            indent -= 2;
+            HDfprintf(stream, "\n%*s}\n", indent, "");
 
             /* Go to next registered property in class */
             tprop = tprop->next;
         }
-
-        indent -= 2;
-        HDfprintf(stream, "%*s}\n", indent, "");
     }
 
     indent -= 2;
