@@ -56,7 +56,7 @@ typedef int hbool_t;
  * most systems, these are the same as size_t and ssize_t, but on systems
  * with small address spaces these are defined to be larger.
  */
-#ifdef HAVE_LARGE_HSIZET
+#if defined(HAVE_LARGE_HSIZET) && SIZEOF_SIZE_T<SIZEOF_LONG_LONG
 typedef unsigned long long hsize_t;
 typedef signed long long hssize_t;
 #else
