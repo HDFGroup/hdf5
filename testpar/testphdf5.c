@@ -359,43 +359,43 @@ int main(int argc, char **argv)
     TestInit(argv[0], usage, parse_options);
 
     /* Tests are generally arranged from least to most complexity... */
-    AddTest("mpio_dup", test_fapl_mpio_dup, NULL, 
-	    "fapl_mpio_dup", NULL);
-    AddTest("mpiposix_dup", test_fapl_mpiposix_dup, NULL, 
-	    "fapl_mpiposix_dup", NULL);
+    AddTest("mpiodup", test_fapl_mpio_dup, NULL, 
+	    "fapl_mpio duplicate", NULL);
+    AddTest("posixdup", test_fapl_mpiposix_dup, NULL, 
+	    "fapl_mpiposix duplicate", NULL);
 
     ndsets_params.name = filenames[3];
     ndsets_params.count = ndatasets;
-    AddTest("ndatasets", multiple_dset_write, NULL, 
+    AddTest("ndsetw", multiple_dset_write, NULL, 
 	    "multiple datasets write", &ndsets_params);
 
     ngroups_params.name = filenames[4];
     ngroups_params.count = ngroups;
-    AddTest("ngroups", multiple_group_write, NULL, 
+    AddTest("ngrpw", multiple_group_write, NULL, 
 	    "multiple groups write", &ngroups_params);
-    AddTest("ngroups_read", multiple_group_read, NULL, 
+    AddTest("ngrpr", multiple_group_read, NULL, 
 	    "multiple groups read", &ngroups_params);
 
     AddTest("split", test_split_comm_access, NULL, 
 	    "dataset using split communicators", filenames[0]);
-    AddTest("indwrite", dataset_writeInd, NULL, 
+    AddTest("idsetw", dataset_writeInd, NULL, 
 	    "dataset independent write", filenames[0]);
-    AddTest("collwrite", dataset_writeAll, NULL, 
+    AddTest("cdsetw", dataset_writeAll, NULL, 
 	    "dataset collective write", filenames[1]);
-    AddTest("indwriteext", extend_writeInd, NULL, 
+    AddTest("eidsetw", extend_writeInd, NULL, 
 	    "extendible dataset independent write", filenames[2]);
-    AddTest("indwriteext2", extend_writeInd2, NULL, 
+    AddTest("eidsetw2", extend_writeInd2, NULL, 
 	    "extendible dataset independent write #2", filenames[2]);
-    AddTest("collwriteext", extend_writeAll, NULL, 
+    AddTest("ecdsetw", extend_writeAll, NULL, 
 	    "extendible dataset collective write", filenames[2]);
 
-    AddTest("indread", dataset_readInd, NULL, 
+    AddTest("idsetr", dataset_readInd, NULL, 
 	    "dataset independent read", filenames[0]);
-    AddTest("collread", dataset_readAll, NULL, 
+    AddTest("cdsetr", dataset_readAll, NULL, 
 	    "dataset collective read", filenames[1]);
-    AddTest("indreadext", extend_readInd, NULL, 
+    AddTest("eidsetr", extend_readInd, NULL, 
 	    "extendible dataset independent read", filenames[2]);
-    AddTest("collreadext", extend_readAll, NULL, 
+    AddTest("ecdsetr", extend_readAll, NULL, 
 	    "extendible dataset collective read", filenames[2]);
 
     AddTest("compact", compact_dataset, NULL, 
@@ -403,15 +403,15 @@ int main(int argc, char **argv)
 
     collngroups_params.name = filenames[6];
     collngroups_params.count = ngroups;
-    AddTest("coll_ngroups", collective_group_write, NULL, 
+    AddTest("cngrpw", collective_group_write, NULL, 
 	    "collective group and dataset write", &collngroups_params);
-    AddTest("indngroupsread", independent_group_read, NULL, 
+    AddTest("ingrpr", independent_group_read, NULL, 
 	    "independent group and dataset read", &collngroups_params);
 
     /* By default, do not run big dataset. */
-    AddTest("-bigdataset", big_dataset, NULL, 
+    AddTest("-bigdset", big_dataset, NULL, 
 	    "big dataset test", filenames[7]);
-    AddTest("fillvalue", dataset_fillvalue, NULL, 
+    AddTest("fill", dataset_fillvalue, NULL, 
 	    "dataset fill value", filenames[8]);
 
     if(mpi_size > 64) {
@@ -424,13 +424,13 @@ int main(int argc, char **argv)
      }
     }
     else {
-      AddTest("coll_chunked1", coll_chunk1,NULL,
+      AddTest("cchunk1", coll_chunk1,NULL,
 	      "simple collective chunk io",filenames[9]);
-      AddTest("coll_chunked2", coll_chunk2,NULL,
+      AddTest("cchunk2", coll_chunk2,NULL,
 	      "noncontiguous collective chunk io",filenames[10]);
-      AddTest("coll_chunked3", coll_chunk3,NULL,
+      AddTest("cchunk3", coll_chunk3,NULL,
 	      "multi-chunk collective chunk io",filenames[11]);
-      AddTest("coll_chunked4", coll_chunk4,NULL,
+      AddTest("cchunk4", coll_chunk4,NULL,
 	      "collective to independent chunk io",filenames[12]);
     }
     AddTest("null", null_dataset, NULL, 
