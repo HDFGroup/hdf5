@@ -1,15 +1,31 @@
-s/_//g
 s/,//g
-/^[0-9]/,/ID/{
+/^[0-9]/,/[A-z]/{
 /^[0-9]/h
 /^[0-9]/d
-s/$/ = /
+s/$/ = ID_Begin + /
 G
 s/\n//
-s/ID/      parameter ( &/
+s/[A-z]/      parameter ( &/
 s/$/ )/
 h
 s/parameter (/integer/
 s/=.*//
 G
+}
+/ALLHDF/,$!d
+s/_//g
+/integer.*ALLHDF/{
+i\
+      integer RuntimeTrace\
+      integer SummaryTrace\
+      integer MPIRuntimeTrace\
+      integer MPISummaryTrace\
+      integer NoTrace\
+      integer IDBegin \
+      parameter (NoTrace = 0)\
+      parameter (RuntimeTrace = 1)\
+      parameter (SummaryTrace = 2)\
+      parameter (MPIRuntimeTrace = 3)\
+      parameter (MPISummaryTrace = 4)\
+      parameter ( IDBegin = 4 )
 }

@@ -180,7 +180,6 @@ char *hdfRecordPointer;
 // RETURNS								*
 //     None.								*
 //======================================================================*/
-#ifndef PCF_BUILD 
 /*======================================================================*
 // fortran to C interface.                                              *
 // This is called from hdfinittracef_                                   *
@@ -199,7 +198,7 @@ hinittracex_( char *file,
    {
       traceFileName[i] = file[i];
    }
-   traceFileName[*len+1] = 0;
+   traceFileName[*len] = 0;
    /*===================================================================*
    // Allocate space for trace indicators.				*
    //===================================================================*/
@@ -214,7 +213,7 @@ hinittracex_( char *file,
    /*===================================================================*
    // Initialize to 0.							*
    //===================================================================*/
-   for ( i = 0; i <= NUM_HDF_IDS; ++i ) 
+   for ( i = 0; i < NUM_HDF_IDS; ++i ) 
    {
       procTrace[i] = 0;      
    }
@@ -240,6 +239,10 @@ hinittracex_( char *file,
          procTrace[i] = 1;      
       }
    }
+#ifdef PCF_BUILD
+   hdfCaptureInit( traceFileName, OUTPUT_SWITCH );
+#else
+   suppressMPIOtrace = TRUE;
    if ( OUTPUT_SWITCH == RUNTIME_TRACE 
                         || OUTPUT_SWITCH == MPI_RUNTIME_TRACE ) 
    {
@@ -265,8 +268,8 @@ hinittracex_( char *file,
       fprintf(stderr," Exiting Program.     <<\n");
       exit (-1);
    }
-}
 #endif /* PCF_BUILD */
+}
 void
 HDFinitTrace( const char *traceFileName, int id_flag, ... )
 {
@@ -445,14 +448,14 @@ hdfCaptureEnd( void )
    for ( i = 0; i < NUM_HDF_IDS; ++i )
    {
       procTrace[i] = 0;
-   }
+   } 
    hdfBaseEnd();
 #ifdef HAVE_MPIO
    mpiIObaseEnd();
 #endif
    unixIObaseEnd();
    genericBaseEnd();
-   basePerformanceEnd();
+   basePerformanceEnd(); 
 }
 #endif /* PCF_BUILD */
 /*****************************************************************************/
