@@ -166,7 +166,8 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata, haddr_t *retval)
     H5B_t                  *bt = NULL;
     size_t                  size, sizeof_rkey;
     size_t                  total_native_keysize;
-    intn                    offset, i;
+    size_t                  offset;
+    intn                    i;
 
     FUNC_ENTER(H5B_create, FAIL);
 
