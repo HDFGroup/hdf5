@@ -1,3 +1,11 @@
+#------------------------------------------------------------------------------
+# This is the list of files that are part of HDF5.  All files have a
+# `./' prefix and appear in lexicographic order.  Lines that end with
+# _DO_NOT_DISTRIBUTE_ (preceded by tabs) will not be included in a
+# release.  Blank lines and comments are ignored.  Comments must start
+# in column one.
+#------------------------------------------------------------------------------
+
 ./COPYING
 ./INSTALL
 ./INSTALL.ascired
@@ -11,20 +19,24 @@
 ./README
 ./RELEASE
 ./acconfig.h
-./bin/checkapi
-./bin/checkposix
+./configure
+./configure.in
+
+./bin/checkapi				_DO_NOT_DISTRIBUTE_
+./bin/checkposix			_DO_NOT_DISTRIBUTE_
 ./bin/config.guess
 ./bin/config.sub
-./bin/debug-ohdr
+./bin/debug-ohdr			_DO_NOT_DISTRIBUTE_
 ./bin/distdep
-./bin/errors
+./bin/errors				_DO_NOT_DISTRIBUTE_
 ./bin/h5vers
 ./bin/install-sh
 ./bin/iostats
 ./bin/release
 ./bin/snapshot
 ./bin/trace
-./bin/versinc
+./bin/versinc				_DO_NOT_DISTRIBUTE_
+
 ./config/BlankForm
 ./config/alpha-dec
 ./config/alpha-dec-osf4.0
@@ -41,20 +53,19 @@
 ./config/powerpc-ibm-aix4.2.1.0
 ./config/rs6000-ibm-aix4.1.4.0
 ./config/solaris2.5
-./configure
-./configure.in
+
 ./doc/html/ddl.html
 ./doc/html/Attributes.html
 ./doc/html/Big.html
 ./doc/html/Caching.html
-./doc/html/CodeReview.html
+./doc/html/CodeReview.html		_DO_NOT_DISTRIBUTE_
 ./doc/html/Coding.html
 ./doc/html/Datasets.html
 ./doc/html/Dataspaces.html
 ./doc/html/Datatypes.html
 ./doc/html/Debugging.html
 ./doc/html/Errors.html
-./doc/html/ExternalFiles.html
+./doc/html/ExternalFiles.html		_DO_NOT_DISTRIBUTE_
 ./doc/html/Files.html
 ./doc/html/Filters.html
 ./doc/html/Glossary.html
@@ -66,8 +77,8 @@
 ./doc/html/H5.sample_code.html
 ./doc/html/H5.user.html
 ./doc/html/IOPipe.html
-./doc/html/MemoryManagement.html
-./doc/html/ObjectHeader.txt
+./doc/html/MemoryManagement.html	_DO_NOT_DISTRIBUTE_
+./doc/html/ObjectHeader.txt		_DO_NOT_DISTRIBUTE_
 ./doc/html/Properties.html
 ./doc/html/RM_H5.html
 ./doc/html/RM_H5A.html
@@ -82,51 +93,52 @@
 ./doc/html/RM_H5Z.html
 ./doc/html/Version.html
 ./doc/html/chunk1.gif
-./doc/html/chunk1.obj
+./doc/html/chunk1.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/compat.html
 ./doc/html/dataset_p1.gif
 ./doc/html/dataset_p1.obj
 ./doc/html/extern1.gif
-./doc/html/extern1.obj
+./doc/html/extern1.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/extern2.gif
-./doc/html/extern2.obj
+./doc/html/extern2.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/group_p1.gif
-./doc/html/group_p1.obj
+./doc/html/group_p1.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/group_p2.gif
-./doc/html/group_p2.obj
+./doc/html/group_p2.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/group_p3.gif
-./doc/html/group_p3.obj
+./doc/html/group_p3.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/h5s.examples
 ./doc/html/ph5design.html
 ./doc/html/ph5example.c
 ./doc/html/ph5implement.txt
 ./doc/html/pipe1.gif
-./doc/html/pipe1.obj
+./doc/html/pipe1.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/pipe2.gif
-./doc/html/pipe2.obj
+./doc/html/pipe2.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/pipe3.gif
-./doc/html/pipe3.obj
+./doc/html/pipe3.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/pipe4.gif
-./doc/html/pipe4.obj
+./doc/html/pipe4.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/pipe5.gif
-./doc/html/pipe5.obj
-./doc/html/heap.txt
+./doc/html/pipe5.obj			_DO_NOT_DISTRIBUTE_
+./doc/html/heap.txt			_DO_NOT_DISTRIBUTE_
 ./doc/html/index.html
-./doc/html/move.html
-./doc/html/review1.html
-./doc/html/review1a.html
-./doc/html/storage.html
-./doc/html/study.html
-./doc/html/study_1000x1000.gif
-./doc/html/study_250x250.gif
-./doc/html/study_499x499.gif
-./doc/html/study_5000x1000.gif
-./doc/html/study_500x500.gif
-./doc/html/study_p1.gif
-./doc/html/study_p1.obj
-./doc/html/symtab
+./doc/html/move.html			_DO_NOT_DISTRIBUTE_
+./doc/html/review1.html			_DO_NOT_DISTRIBUTE_
+./doc/html/review1a.html		_DO_NOT_DISTRIBUTE_
+./doc/html/storage.html			_DO_NOT_DISTRIBUTE_
+./doc/html/study.html			_DO_NOT_DISTRIBUTE_
+./doc/html/study_1000x1000.gif		_DO_NOT_DISTRIBUTE_
+./doc/html/study_250x250.gif		_DO_NOT_DISTRIBUTE_
+./doc/html/study_499x499.gif		_DO_NOT_DISTRIBUTE_
+./doc/html/study_5000x1000.gif		_DO_NOT_DISTRIBUTE_
+./doc/html/study_500x500.gif		_DO_NOT_DISTRIBUTE_
+./doc/html/study_p1.gif			_DO_NOT_DISTRIBUTE_
+./doc/html/study_p1.obj			_DO_NOT_DISTRIBUTE_
+./doc/html/symtab			_DO_NOT_DISTRIBUTE_
 ./doc/html/version.gif
-./doc/html/version.obj
+./doc/html/version.obj			_DO_NOT_DISTRIBUTE_
+
 ./doc/src/Glossary.html
 ./doc/src/H5.intro.doc
 ./doc/src/RM_H5.html
@@ -140,11 +152,13 @@
 ./doc/src/RM_H5S.html
 ./doc/src/RM_H5T.html
 ./doc/src/RM_H5Z.html
-./doc/tgif/APIGrammar.obj
-./doc/tgif/FileGrammar.obj
-./doc/tgif/IOPipe.obj
-./doc/tgif/RobbPipe.obj
-./doc/tgif/UserView.obj
+
+./doc/tgif/APIGrammar.obj		_DO_NOT_DISTRIBUTE_
+./doc/tgif/FileGrammar.obj		_DO_NOT_DISTRIBUTE_
+./doc/tgif/IOPipe.obj			_DO_NOT_DISTRIBUTE_
+./doc/tgif/RobbPipe.obj			_DO_NOT_DISTRIBUTE_
+./doc/tgif/UserView.obj			_DO_NOT_DISTRIBUTE_
+
 ./examples/Attributes.txt
 ./examples/Makefile.in
 ./examples/h5_chunk_read.c
@@ -155,8 +169,9 @@
 ./examples/h5_write.c
 ./examples/h5_select.c
 ./examples/h5_attribute.c
+
 ./src/.distdep
-./src/.indent.pro
+./src/.indent.pro			_DO_NOT_DISTRIBUTE_
 ./src/H5.c
 ./src/H5A.c
 ./src/H5Aprivate.h
@@ -256,6 +271,7 @@
 ./src/H5public.h
 ./src/Makefile.in
 ./src/hdf5.h
+
 ./test/.distdep
 ./test/Makefile.in
 ./test/big.c
@@ -284,6 +300,7 @@
 ./test/tohdr.c
 ./test/tselect.c
 ./test/tstab.c
+
 ./testpar/Makefile.ascired
 ./testpar/Makefile.ibmsp
 ./testpar/Makefile.irix64
@@ -292,6 +309,7 @@
 ./testpar/t_file.c
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
+
 ./tools/Makefile.in
 ./tools/h5debug.c
 ./tools/h5dump.c

@@ -51,12 +51,16 @@ if [ ! -d $DEST ]; then
     exit 1
 fi
 
+# Copy the manifest file to get a list of file names.
+MANIFEST=/tmp/H5_MANIFEST.$$
+grep '^\.' MANIFEST | unexpand | cut -f1 >$MANIFEST
+
 # Check that all the files in MANIFEST exist and that (if this is a
 # CVS checkout) that all the CVS-managed files appear in the
 # MANIFEST.
 test "$verbose" && echo "   Checking manifest..." 1>&2
-test -f MANIFEST || exit 1
-for file in `cat MANIFEST`; do
+test -f $MANIFEST || exit 1
+for file in `cat $MANIFEST`; do
     if [ ! -f $file ]; then
        echo "- $file"
        fail=yes
@@ -65,7 +69,7 @@ done
 for cvs in `find . -type d -name CVS -print`; do
     path=`echo $cvs |sed s+/CVS++`
     for file in `cut -d/ -f2 $cvs/Entries`; do
-	if (grep $path/$file MANIFEST >/dev/null); then
+	if (grep $path/$file $MANIFEST >/dev/null); then
 	    :
 	else
 	    echo "+ $path/$file"
@@ -74,7 +78,7 @@ for cvs in `find . -type d -name CVS -print`; do
     done
 done
 for file in ./Changes `svf ls`; do
-    if (grep $file MANIFEST >/dev/null); then
+    if (grep $file $MANIFEST >/dev/null); then
 	:
     elif [ $file = ./Changes ]; then
         :
@@ -92,7 +96,10 @@ not appear in the MANIFEST.  Please remedy the situation and try again.
 EOF
     exit 1
 fi
-   
+
+# Create a manifest that contains only files for distribution.
+grep '^\.' MANIFEST | grep -v _DO_NOT_DISTRIBUTE_ >$MANIFEST
+
 # Prepare the source tree for a release.
 test -h ../hdf5-$VERS && rm ../hdf5-$VERS
 ln -s `pwd` ../hdf5-$VERS || exit 1
@@ -105,7 +112,7 @@ test "$verbose" && echo "   Running tar..." 1>&2
 ( \
     cd ..; \
     tar cf x.tar hdf5-$VERS/Makefile \
-	`sed s+^.+hdf5-$VERS+ hdf5-$VERS/MANIFEST` || exit 1 \
+	`sed s+^.+hdf5-$VERS+ $MANIFEST` || exit 1 \
 )
 
 # Compress
@@ -127,6 +134,7 @@ done
 
 # Remove temporary things
 test -f ../Makefile.x && mv ../Makefile.x Makefile
+rm -f $MANIFEST
 rm -f ../hdf5-$VERS
 rm -f ../x.tar
 exit 0
