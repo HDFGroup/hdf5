@@ -81,6 +81,8 @@ Bug Fixes since HDF5-1.4.2 Release
       selection by one element as valid.
     * Fixed the internal macros used to encode & decode file metadata, to avoid
       an unaligned access warning on IA64 machines.
+    * Corrected behavior of H5Tinsert to not allow compound datatype fields to
+      be inserted past the end of the datatype.
 
 
 Documentation
