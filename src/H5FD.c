@@ -774,8 +774,8 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5FD_class_t	*driver;
     H5FD_t		*file=NULL;
     hid_t               driver_id = -1;
-    size_t              meta_block_size=0;    
-    size_t              sdata_block_size=0;    
+    hsize_t             meta_block_size=0;    
+    hsize_t             sdata_block_size=0;    
     H5P_genplist_t *plist;      /* Property list pointer */
     
     FUNC_ENTER_NOAPI(H5FD_open, NULL);
