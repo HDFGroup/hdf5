@@ -62,11 +62,13 @@ Library
     * Fixed error in hyperslab iteration which was not walking through the
       correct sequence of array elements if hyperslabs were staggered in a
       certain pattern
+    * Fixed several other problems in hyperslab iteration code.
 
 Tests
 ------
     * Added additional tests for group and attribute iteration.
     * Added additional test for staggered hyperslab iteration.
+    * Added additional test for random 5-D hyperslab selection.
 
 Tools
 ------
