@@ -136,7 +136,7 @@ case "$cc_vendor-$cc_version" in
                 PROD_CFLAGS="-O3 $NOFP"
                 ;;
             *)
-                PROD_CFLAGS="-O2 $NOFP -finline-functions"
+                PROD_CFLAGS="-O $NOFP -finline-functions"
                 ;;
         esac
 	PROD_CPPFLAGS=
