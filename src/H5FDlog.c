@@ -262,7 +262,7 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, int verbosity)
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
 
-    fa.logfile = H5MM_strdup(logfile);
+    fa.logfile = H5MM_xstrdup(logfile);
     fa.verbosity=verbosity;
     ret_value= H5Pset_driver(fapl_id, H5FD_QAK, &fa);
 
