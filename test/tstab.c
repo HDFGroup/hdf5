@@ -58,10 +58,6 @@ test_stab (void)
    f = H5Aatom_object (fid);
    CHECK (f, NULL, "H5Aatom_object");
 
-   /* create a new root symbol table */
-   status = H5G_mkroot (f, 100);
-   CHECK_I (status, "H5G_mkroot");
-
    /*
     * Create a directory that has so many entries that the root
     * of the B-tree ends up splitting.
