@@ -161,7 +161,7 @@ typedef enum {
 /* A VL datatype */
 typedef struct H5T_vlen_t {
     H5T_vlen_type_t     type;   /* Type of VL data in buffer */
-    H5T_loc_t           loc;    /* Location of VL data in buffer */
+    H5T_loc_t		loc;    /* Location of VL data in buffer */
     H5T_cset_t          cset;   /* For VL string. character set */
     H5T_str_t           pad;    /* For VL string.  space or null padding of 
                                  * extra bytes */                          
@@ -197,7 +197,7 @@ typedef enum H5T_state_t {
 
     /* This struct is shared between all occurances of an open named type */
 typedef struct H5T_shared_t {
-    hsize_t         fo_count; /* number of references to this file object */
+    hsize_t		fo_count; /* number of references to this file object */
     H5T_state_t		state;	/*current state of the type		     */
     H5F_t		*sh_file;/*file pointer if this is a shared type     */
     H5T_class_t		type;	/*which class of type is this?		     */
@@ -1091,7 +1091,7 @@ H5_DLL H5T_t * H5T_array_create(H5T_t *base, int ndims,
 /* Compound functions */
 H5_DLL H5T_t *H5T_get_member_type(const H5T_t *dt, unsigned membno);
 H5_DLL size_t H5T_get_member_offset(const H5T_t *dt, unsigned membno);
-H5_DLL size_t H5T_get_member_size(H5T_t *dt, int membno);
+H5_DLL size_t H5T_get_member_size(H5T_t *dt, unsigned membno);
 H5_DLL htri_t H5T_is_packed(const H5T_t *dt);
 
 #endif

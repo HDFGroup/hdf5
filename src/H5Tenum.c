@@ -28,7 +28,7 @@
 
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */
-#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5FLprivate.h"	/*Free Lists				  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
 #include "H5MMprivate.h"	/*memory management			  */
 #include "H5Tpkg.h"		/*data-type functions			  */
@@ -592,4 +592,3 @@ H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
-

@@ -382,10 +382,6 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             /* Decode base type of VL information */
             if (NULL==(dt->shared->parent = H5FL_CALLOC(H5T_t)))
                 HGOTO_ERROR (H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            if(NULL== (dt->shared->parent->shared = H5FL_CALLOC (H5T_shared_t))) {
-                H5FL_FREE(H5T_t, dt->shared->parent);
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            }
             if (NULL==(dt->shared->parent->shared = H5FL_CALLOC(H5T_shared_t)))
             {
                 H5FL_FREE(H5T_t, dt->shared->parent);
@@ -863,8 +859,6 @@ H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     if (NULL==(dt->shared=H5FL_CALLOC(H5T_shared_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     dt->ent.header = HADDR_UNDEF;
-    dt->shared->fo_count=1;
-
 
     if (H5O_dtype_decode_helper(f, &p, dt) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode type");

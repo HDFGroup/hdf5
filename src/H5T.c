@@ -34,7 +34,7 @@
 #include "H5Eprivate.h"		/*error handling			*/
 #include "H5Fpkg.h"             /* File                 		*/
 #include "H5FLprivate.h"	/* Free Lists				*/
-#include "H5FOprivate.h"    /* File objects                 */
+#include "H5FOprivate.h"	/* File objects				*/
 #include "H5Gprivate.h"		/*groups				  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
 #include "H5MMprivate.h"	/*memory management			  */
@@ -443,7 +443,6 @@ static H5T_t *H5T_decode(const unsigned char *buf);
         H5FL_FREE(H5T_t, dt);                                 \
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed") \
     }                                                         \
-    dt->shared->fo_count=1;                                   \
 }
 
 
@@ -2855,7 +2854,6 @@ H5T_create(H5T_class_t type, size_t size)
     }
 
     dt->ent.header = HADDR_UNDEF;
-    dt->shared->fo_count = 1;
     dt->shared->size = size;
 
     /* Set return value */
@@ -2974,9 +2972,8 @@ H5T_open (H5G_entry_t *ent, hid_t dxpl_id)
 done:
     if(ret_value==NULL) {
         if(dt) {
-            if(shared_fo==NULL) {   /* Need to free shared fo */
+            if(shared_fo==NULL)   /* Need to free shared fo */
                 H5FL_FREE(H5T_shared_t, dt->shared);
-            }
             H5FL_FREE(H5T_t, dt);
         }
         if(shared_fo)
@@ -3095,7 +3092,6 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     /* Copy actual information */
     new_dt->ent = old_dt->ent;
     *(new_dt->shared) = *(old_dt->shared);
-    new_dt->shared->fo_count = 1;
 
     /* Copy parent information */
     if (new_dt->shared->parent)

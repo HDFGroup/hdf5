@@ -316,14 +316,14 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5T_get_member_size(H5T_t *dt, int membno)
+H5T_get_member_size(H5T_t *dt, unsigned membno)
 {
     size_t	ret_value = 0;
 
     FUNC_ENTER_NOAPI(H5T_get_member_size, 0);
 
     assert(dt);
-    assert(membno >=0 && membno < dt->shared->u.compnd.nmembs);
+    assert(membno < dt->shared->u.compnd.nmembs);
     
     /* Value */
     ret_value = dt->shared->u.compnd.memb[membno].type->shared->size;

@@ -27,10 +27,10 @@
 #define PABLO_MASK	H5T_commit_mask
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FOprivate.h"    /* File objects               */
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5Eprivate.h"		/* Error handling			*/
+#include "H5FOprivate.h"	/* File objects				*/
+#include "H5Iprivate.h"		/* IDs					*/
+#include "H5Oprivate.h"		/* Object headers			*/
 #include "H5Tpkg.h"		/* Datatypes				*/
 
 /* Static local functions */
