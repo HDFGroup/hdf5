@@ -189,6 +189,7 @@
                                                  ! Possible values are:
                                                  !  H5S_SCALAR_F (0)
                                                  !  H5S_SIMPLE_F(1)
+                                                 !  H5S_NULL_F(2)
             INTEGER(HID_T), INTENT(OUT) :: space_id ! Dataspace identifier 
             INTEGER, INTENT(OUT) :: hdferr          ! Error code
 
@@ -1089,6 +1090,7 @@
 !				  H5S_NO_CLASS_F (-1)
 !				  H5S_SCALAR_F (0)
 !				  H5S_SIMPLE_F (1)
+!				  H5S_NULL_F   (2)
 !		hdferr:		- error code		
 !				 	Success:  0
 !				 	Failure: -1   
@@ -1120,6 +1122,7 @@
                                                    !  H5S_NO_CLASS_F (-1)
                                                    !  H5S_SCALAR_F (0)
                                                    !  H5S_SIMPLE_F (1)
+                                                   !  H5S_NULL_F   (2)
             INTEGER, INTENT(OUT) :: hdferr         ! Error code
 
 !            INTEGER, EXTERNAL :: h5sget_simple_extent_type_c

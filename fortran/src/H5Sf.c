@@ -499,7 +499,7 @@ nh5sget_simple_extent_ndims_c ( hid_t_f *space_id , int_f *ndims )
  *              of a dataspace 
  * Inputs:      space_id - identifier of the dataspace 
  * Outputs:     classtype - class type; possible values are:
- *              H5S_SCALAR_F (0), H5S_SIMPLE_F (1) 
+ *              H5S_SCALAR_F (0), H5S_SIMPLE_F (1), H5S_NULL_F (2) 
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Wednesday, August 11, 1999
@@ -520,6 +520,7 @@ nh5sget_simple_extent_type_c ( hid_t_f *space_id , int_f *classtype)
 /*
   if (c_classtype == H5S_SCALAR) *classtype = H5S_SCALAR_F;
   if (c_classtype == H5S_SIMPLE) *classtype = H5S_SIMPLE_F;
+  if (c_classtype == H5S_NULL)   *classtype = H5S_NULL_F;
 */
   return ret_value;
 }

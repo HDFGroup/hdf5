@@ -297,26 +297,27 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
 
       h5s_flags[0] = H5S_SCALAR; 
       h5s_flags[1] = H5S_SIMPLE; 
-      h5s_flags[2] = H5S_SELECT_SET;
-      h5s_flags[3] = H5S_SELECT_OR;
-      h5s_flags[4] = (int_f)H5S_UNLIMITED;
-      h5s_flags[5] = H5S_ALL;
+      h5s_flags[2] = H5S_NULL; 
+      h5s_flags[3] = H5S_SELECT_SET;
+      h5s_flags[4] = H5S_SELECT_OR;
+      h5s_flags[5] = (int_f)H5S_UNLIMITED;
+      h5s_flags[6] = H5S_ALL;
 
-      h5s_flags[6] = H5S_SELECT_NOOP;
-      h5s_flags[7] = H5S_SELECT_AND;
-      h5s_flags[8] = H5S_SELECT_XOR;
-      h5s_flags[9] = H5S_SELECT_NOTB;
-      h5s_flags[10] = H5S_SELECT_NOTA;
-      h5s_flags[11] = H5S_SELECT_APPEND;
-      h5s_flags[12] = H5S_SELECT_PREPEND;
-      h5s_flags[13] = H5S_SELECT_INVALID;
+      h5s_flags[7] = H5S_SELECT_NOOP;
+      h5s_flags[8] = H5S_SELECT_AND;
+      h5s_flags[9] = H5S_SELECT_XOR;
+      h5s_flags[10] = H5S_SELECT_NOTB;
+      h5s_flags[11] = H5S_SELECT_NOTA;
+      h5s_flags[12] = H5S_SELECT_APPEND;
+      h5s_flags[13] = H5S_SELECT_PREPEND;
+      h5s_flags[14] = H5S_SELECT_INVALID;
 
 
-      h5s_flags[14] = H5S_SEL_ERROR;
-      h5s_flags[15] = H5S_SEL_NONE;
-      h5s_flags[16] = H5S_SEL_POINTS;
-      h5s_flags[17] = H5S_SEL_HYPERSLABS;
-      h5s_flags[18] = H5S_SEL_ALL;
+      h5s_flags[15] = H5S_SEL_ERROR;
+      h5s_flags[16] = H5S_SEL_NONE;
+      h5s_flags[17] = H5S_SEL_POINTS;
+      h5s_flags[18] = H5S_SEL_HYPERSLABS;
+      h5s_flags[19] = H5S_SEL_ALL;
 
 /*
  *  H5T flags
