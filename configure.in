@@ -1427,24 +1427,36 @@ fi
 
 dnl ----------------------------------------------------------------------
 dnl Enable tracing of the API
+dnl This must come after the enable-debug since it depends on debug.
 dnl
-AC_MSG_CHECKING([for API tracing])
+AC_MSG_CHECKING(for API tracing);
 AC_ARG_ENABLE([trace],
-              [AC_HELP_STRING([--disable-trace],
-                              [Disable API tracing capability])],
-              [TRACE=$enableval])
+              [AC_HELP_STRING([--enable-trace],
+                              [Enable API tracing capability.
+			       Default=no if debug is disabled.])],
+              TRACE=$enableval)
 
-AC_SUBST([TRACE_API])
-
-if test -z "$TRACE" -o "X$TRACE" = "Xyes"; then
-  AC_MSG_RESULT([yes])
-  TRACE_API=yes
-  CPPFLAGS="$CPPFLAGS -DH5_DEBUG_API"
-else
-  AC_MSG_RESULT([no])
-  TRACE_API=no
-  CPPFLAGS="$CPPFLAGS -UH5_DEBUG_API"
+AC_SUBST(TRACE_API)
+dnl Default to no if debug is disabled
+if test "X-$TRACE" = X- ; then
+  if test -z "$DEBUG_PKG" ; then
+    TRACE=no
+  else
+    TRACE=yes
+  fi
 fi
+case "X-$TRACE" in
+  X-yes)
+    AC_MSG_RESULT(yes)
+    TRACE_API=yes
+    CPPFLAGS="$CPPFLAGS -DH5_DEBUG_API"
+    ;;
+  X-no|*)
+    AC_MSG_RESULT(no)
+    TRACE_API=no
+    CPPFLAGS="$CPPFLAGS -UH5_DEBUG_API"
+    ;;
+esac
 
 dnl Checkpoint the cache
 AC_CACHE_SAVE
@@ -2023,6 +2035,15 @@ case "X-$enable_production" in
   *)            PRINT "$enable_production" ;;
 esac
 
+PRINT_N "                         CFLAGS"
+PRINT "$CFLAGS"
+
+PRINT_N "                       CPPFLAGS"
+PRINT "$CPPFLAGS"
+
+PRINT_N "                        LDFLAGS"
+PRINT "$LDFLAGS"
+
 PRINT_N "                     Debug Mode"
 
 if test "X$DEBUG_PKG" = "X$all_packages"; then
@@ -2043,11 +2064,7 @@ PRINT_N "  Statically Linked Executables"
 IF_YES_NO "$STATIC_EXEC"
 
 PRINT_N "                        Tracing"
-if test -z "$TRACE" -o "X$TRACE" = "Xyes"; then
-  PRINT "Yes"
-else
-  PRINT "No"
-fi
+IF_YES_NO "$TRACE_API"
 
 PRINT "Languages:"
 

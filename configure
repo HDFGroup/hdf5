@@ -1015,7 +1015,8 @@ Optional Features:
                           specify a comma-separated list of package names
                           without the leading H5 or the word no. The default
                           is most packages.
-  --disable-trace         Disable API tracing capability
+  --enable-trace          Enable API tracing capability. Default=no if debug
+                          is disabled.
   --enable-parallel=TYPE  Search for MPI-IO and MPI support files
 
 Optional Packages:
@@ -4101,7 +4102,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4104 "configure"' > conftest.$ac_ext
+  echo '#line 4105 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4642,7 +4643,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:4645: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:4646: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -6453,7 +6454,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6456 "configure"
+#line 6457 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -6551,7 +6552,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6554 "configure"
+#line 6555 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -29519,7 +29520,7 @@ if test -n "$DEBUG_PKG"; then
 fi
 
 echo "$as_me:$LINENO: checking for API tracing" >&5
-echo $ECHO_N "checking for API tracing... $ECHO_C" >&6
+echo $ECHO_N "checking for API tracing... $ECHO_C" >&6;
 # Check whether --enable-trace or --disable-trace was given.
 if test "${enable_trace+set}" = set; then
   enableval="$enable_trace"
@@ -29527,18 +29528,27 @@ if test "${enable_trace+set}" = set; then
 fi;
 
 
-
-if test -z "$TRACE" -o "X$TRACE" = "Xyes"; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-  TRACE_API=yes
-  CPPFLAGS="$CPPFLAGS -DH5_DEBUG_API"
-else
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-  TRACE_API=no
-  CPPFLAGS="$CPPFLAGS -UH5_DEBUG_API"
+if test "X-$TRACE" = X- ; then
+  if test -z "$DEBUG_PKG" ; then
+    TRACE=no
+  else
+    TRACE=yes
+  fi
 fi
+case "X-$TRACE" in
+  X-yes)
+    echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+    TRACE_API=yes
+    CPPFLAGS="$CPPFLAGS -DH5_DEBUG_API"
+    ;;
+  X-no|*)
+    echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+    TRACE_API=no
+    CPPFLAGS="$CPPFLAGS -UH5_DEBUG_API"
+    ;;
+esac
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -31669,6 +31679,15 @@ case "X-$enable_production" in
   *)            PRINT "$enable_production" ;;
 esac
 
+PRINT_N "                         CFLAGS"
+PRINT "$CFLAGS"
+
+PRINT_N "                       CPPFLAGS"
+PRINT "$CPPFLAGS"
+
+PRINT_N "                        LDFLAGS"
+PRINT "$LDFLAGS"
+
 PRINT_N "                     Debug Mode"
 
 if test "X$DEBUG_PKG" = "X$all_packages"; then
@@ -31689,11 +31708,7 @@ PRINT_N "  Statically Linked Executables"
 IF_YES_NO "$STATIC_EXEC"
 
 PRINT_N "                        Tracing"
-if test -z "$TRACE" -o "X$TRACE" = "Xyes"; then
-  PRINT "Yes"
-else
-  PRINT "No"
-fi
+IF_YES_NO "$TRACE_API"
 
 PRINT "Languages:"
 
