@@ -69,7 +69,8 @@
 
 /*
  * Limit global heap collections to the some reasonable size.  This is
- * fairly arbitrary...
+ * fairly arbitrary, but needs to be small enough that no more than H5HG_MAXIDX
+ * objects will be allocated from a single heap.
  */
 #define H5HG_MAXSIZE	65536
 
@@ -83,6 +84,11 @@
  * The maximum number of links allowed to a global heap object.
  */
 #define H5HG_MAXLINK	65535
+
+/*
+ * The maximum number of indices allowed in a global heap object.
+ */
+#define H5HG_MAXIDX	65535
 
 /*
  * The size of the collection header, always a multiple of the alignment so
@@ -202,7 +208,8 @@ H5HG_create (H5F_t *f, hid_t dxpl_id, size_t size)
     if (NULL==(heap->chunk = H5FL_BLK_MALLOC (heap_chunk,size)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     heap->nalloc = H5HG_NOBJS (f, size);
-    if (NULL==(heap->obj = H5FL_SEQ_CALLOC (H5HG_obj_t,heap->nalloc)))
+    heap->next_idx = 1; /* skip index 0, which is used for the free object */
+    if (NULL==(heap->obj = H5FL_SEQ_MALLOC (H5HG_obj_t,heap->nalloc)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Initialize the header */
@@ -220,18 +227,25 @@ H5HG_create (H5F_t *f, hid_t dxpl_id, size_t size)
      * align the pointer, but this might not be the case.
      */
     n = H5HG_ALIGN(p-heap->chunk) - (p-heap->chunk);
+#ifdef OLD_WAY
+/* Don't bother zeroing out the rest of the info in the heap -QAK */
     HDmemset(p, 0, n);
+#endif /* OLD_WAY */
     p += n;
 
     /* The freespace object */
     heap->obj[0].size = size - H5HG_SIZEOF_HDR(f);
     assert(H5HG_ISALIGNED(heap->obj[0].size));
+    heap->obj[0].nrefs = 0;
     heap->obj[0].begin = p;
     UINT16ENCODE(p, 0);	/*object ID*/
     UINT16ENCODE(p, 0);	/*reference count*/
     UINT32ENCODE(p, 0); /*reserved*/
     H5F_ENCODE_LENGTH (f, p, heap->obj[0].size);
+#ifdef OLD_WAY
+/* Don't bother zeroing out the rest of the info in the heap -QAK */
     HDmemset (p, 0, (size_t)((heap->chunk+heap->size) - p));
+#endif /* OLD_WAY */
 
     /* Add the heap to the cache */
     if (H5AC_set (f, dxpl_id, H5AC_GHEAP, addr, heap)<0)
@@ -287,10 +301,11 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 	   void UNUSED * udata2)
 {
     H5HG_heap_t	*heap = NULL;
-    H5HG_heap_t	*ret_value = NULL;
     uint8_t	*p = NULL;
     int	i;
     size_t	nalloc, need;
+    size_t      max_idx=0;              /* The maximum index seen */
+    H5HG_heap_t	*ret_value = NULL;      /* Return value */
     
     FUNC_ENTER_NOAPI(H5HG_load, NULL);
 
@@ -340,8 +355,11 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     /* Decode each object */
     p = heap->chunk + H5HG_SIZEOF_HDR (f);
     nalloc = H5HG_NOBJS (f, heap->size);
-    if (NULL==(heap->obj = H5FL_SEQ_CALLOC (H5HG_obj_t,nalloc)))
+    if (NULL==(heap->obj = H5FL_SEQ_MALLOC (H5HG_obj_t,nalloc)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    heap->obj[0].size=heap->obj[0].nrefs=0;
+    heap->obj[0].begin=NULL;
+
     heap->nalloc = nalloc;
     while (p<heap->chunk+heap->size) {
 	if (p+H5HG_SIZEOF_OBJHDR(f)>heap->chunk+heap->size) {
@@ -371,16 +389,10 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
                 if (NULL==(new_obj = H5FL_SEQ_REALLOC (H5HG_obj_t, heap->obj, new_alloc)))
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-                /* Reset new objects to zero */
-                HDmemset(&new_obj[heap->nalloc],0,sizeof(H5HG_obj_t)*(new_alloc-heap->nalloc));
-
                 /* Update heap information */
                 heap->nalloc=new_alloc;
                 heap->obj=new_obj;
             } /* end if */
-
-            /* Check that we haven't double-allocated an index */
-	    assert (NULL==heap->obj[idx].begin);
 
 	    UINT16DECODE (p, heap->obj[idx].nrefs);
 	    p += 4; /*reserved*/
@@ -394,6 +406,11 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 	     */
 	    if (idx>0) {
 		need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(heap->obj[idx].size);
+
+                /* Check for "gap" in index numbers (caused by deletions) and fill in heap object values */
+                if(idx>(max_idx+1))
+                    HDmemset(&heap->obj[max_idx+1],0,sizeof(H5HG_obj_t)*(idx-(max_idx+1)));
+                max_idx=idx;
 	    } else {
 		need = heap->obj[idx].size;
 	    }
@@ -402,6 +419,12 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     }
     assert(p==heap->chunk+heap->size);
     assert(H5HG_ISALIGNED(heap->obj[0].size));
+
+    /* Set the next index value to use */
+    if(max_idx>0)
+        heap->next_idx=max_idx+1;
+    else
+        heap->next_idx=1;
 
     /*
      * Add the new heap to the CWFS list, removing some other entry if
@@ -606,9 +629,14 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size)
      * Find an ID for the new object. ID zero is reserved for the free space
      * object.
      */
-    for (idx=1; idx<heap->nalloc; idx++)
-	if (NULL==heap->obj[idx].begin)
-            break;
+    if(heap->next_idx<H5HG_MAXIDX) {
+        idx=heap->next_idx++;
+    } /* end if */
+    else {
+        for (idx=1; idx<heap->nalloc; idx++)
+            if (NULL==heap->obj[idx].begin)
+                break;
+    } /* end else */
 
     /* Check if we need more room to store heap objects */
     if(idx>=heap->nalloc) {
@@ -617,17 +645,16 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size)
 
         /* Determine the new number of objects to index */
         new_alloc=MAX(heap->nalloc*2,(idx+1));
+        assert(new_alloc<=(H5HG_MAXIDX+1));
 
         /* Reallocate array of objects */
         if (NULL==(new_obj = H5FL_SEQ_REALLOC (H5HG_obj_t, heap->obj, new_alloc)))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
 
-        /* Reset new objects to zero */
-        HDmemset(&new_obj[heap->nalloc],0,sizeof(H5HG_obj_t)*(new_alloc-heap->nalloc));
-
         /* Update heap information */
         heap->nalloc=new_alloc;
         heap->obj=new_obj;
+        assert(heap->nalloc>heap->next_idx);
     } /* end if */
 
     /* Initialize the new object */
@@ -871,8 +898,11 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
     /* Copy data into the heap */
     if(size>0) {
         HDmemcpy(heap->obj[idx].begin+H5HG_SIZEOF_OBJHDR(f), obj, size);
+#ifdef OLD_WAY
+/* Don't bother zeroing out the rest of the info in the heap -QAK */
         HDmemset(heap->obj[idx].begin+H5HG_SIZEOF_OBJHDR(f)+size, 0,
                  need-(H5HG_SIZEOF_OBJHDR(f)+size));
+#endif /* OLD_WAY */
     } /* end if */
     heap->cache_info.dirty = TRUE;
 

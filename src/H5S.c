@@ -1328,6 +1328,7 @@ static herr_t
 H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
 		       const hsize_t *max)
 {
+    unsigned u;                 /* Local index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_set_extent_simple, FAIL);
@@ -1346,7 +1347,6 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
         space->extent.rank = 0;	/* set to scalar rank */
     } else {
         hsize_t nelem;  /* Number of elements in extent */
-        unsigned u;     /* Local index variable */
 
         space->extent.type = H5S_SIMPLE;
 
@@ -1371,7 +1371,8 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
     /* Selection related cleanup */
 
     /* Set offset to zeros */
-    HDmemset(space->select.offset,0,sizeof(hssize_t)*rank);
+    for(u=0; u<space->extent.rank; u++)
+        space->select.offset[u]=0;
 
     /* If the selection is 'all', update the number of elements selected */
     if(H5S_GET_SELECT_TYPE(space)==H5S_SEL_ALL)
