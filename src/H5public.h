@@ -113,6 +113,9 @@ typedef ssize_t			hssize_t;
 #elif SIZEOF_LONG_LONG>=8
     typedef unsigned long long	haddr_t;
 #   define HADDR_UNDEF		((haddr_t)(long long)(-1))
+#   elif SIZEOF___INT64>=8
+    typedef unsigned __int64	haddr_t;
+#   define HADDR_UNDEF		((haddr_t)(__int64)(-1))
 #else
 #   error "nothing appropriate for haddr_t"
 #endif
