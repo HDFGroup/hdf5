@@ -23,17 +23,18 @@
 /* temporary code end */
 
 /* Constants definitions */
+char    *filenames[]={
 #ifdef HAVE_PARALLEL
-#define FILE1	"ufs:ParaEg1.h5"
-#define FILE2	"ufs:ParaEg2.h5"
+"ParaEg1.h5f", "ParaEg2.h5f"
 #else
-#define FILE1	"Eg1.h5"
-#define FILE2	"Eg2.h5"
+"Eg1.h5f", "Eg2.h5f"
 #endif
+};
+
 
 /* 24 is a multiple of 2, 3, 4, 6, 8, 12.  Neat for parallel tests. */
-#define SPACE1_DIM1	24
-#define SPACE1_DIM2	20
+#define SPACE1_DIM1	8
+#define SPACE1_DIM2	12
 #define SPACE1_RANK	2
 #define DATASETNAME1	"Data1"
 #define DATASETNAME2	"Data2"
@@ -61,6 +62,10 @@ phdf5write()
     herr_t ret;         	/* Generic return value */
     int   i, j;
     int numprocs, myid;
+    char *fname;
+    int	color = 0;			/* used for MPI_Comm_split */
+    int mrc;			/* mpi return code */
+    
 #ifdef HAVE_PARALLEL
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
@@ -73,6 +78,13 @@ phdf5write()
     myid = 0;
 #endif
 
+#ifdef NO
+    /* split into two new communicators, one contains the originally */
+    /* odd rank processes, the other the even ones. */
+    color = myid%2;
+    mrc = MPI_Comm_split (MPI_COMM_WORLD, color, myid, &comm);
+    assert(mrc==MPI_SUCCESS);
+#endif
 
     /* setup file access template */
     acc_tpl1 = H5Pcreate (H5P_FILE_ACCESS);
@@ -86,7 +98,7 @@ phdf5write()
 #endif
 
     /* create the file collectively */
-    fid1=H5Fcreate(FILE1,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl1);
+    fid1=H5Fcreate(filenames[color],H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl1);
     assert(fid1 != FAIL);
     MESG("H5Fcreate succeed");
 
@@ -163,11 +175,13 @@ start[0], start[1], count[0], count[1], count[0]*count[1]);
     /* close dataset collectively */					    
     ret=H5Dclose(dataset1);
     assert(ret != FAIL);
+    MESG("H5Dclose1 succeed");
     ret=H5Dclose(dataset2);
     assert(ret != FAIL);
+    MESG("H5Dclose2 succeed");
 
     /* release all IDs created */
-    H5Dclose(sid1);
+    H5Sclose(sid1);
 
     /* close the file collectively */					    
     H5Fclose(fid1);							    
@@ -217,7 +231,7 @@ phdf5read()
 
 
     /* open the file collectively */
-    fid1=H5Fopen(FILE1,H5F_ACC_RDWR,acc_tpl1);
+    fid1=H5Fopen(filenames[0],H5F_ACC_RDWR,acc_tpl1);
     assert(fid1 != FAIL);
 
     /* Release file-access template */
@@ -296,6 +310,75 @@ start[0], start[1], count[0], count[1], count[0]*count[1]);
     H5Fclose(fid1);
 }
 
+#ifdef HAVE_PARALLEL
+/*
+ * test file access by communicator besides COMM_WORLD.
+ * Split COMM_WORLD into two, one (even_comm) contains the original
+ * processes of even ranks.  The other (odd_comm) contains the original
+ * processes of odd ranks.  Processes in even_comm creates a file, then
+ * cloose it, using even_comm.  Processes in old_comm just do a barrier
+ * using odd_comm.  Then they all do a barrier using COMM_WORLD.
+ * If the file creation and cloose does not do correct collective action
+ * according to the communicator argument, the processes will freeze up
+ * sooner or later due to barrier mixed up.
+ */
+void
+test_split_comm_access()
+{
+    int numprocs, myrank;
+    MPI_Comm comm;
+    MPI_Info info = MPI_INFO_NULL;
+    int color, mrc;
+    int newrank, newprocs;
+    hid_t fid;			/* file IDs */
+    hid_t acc_tpl;		/* File access properties */
+    herr_t ret;			/* generic return value */
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&numprocs);
+    MPI_Comm_rank(MPI_COMM_WORLD,&myrank);
+    color = myrank%2;
+    mrc = MPI_Comm_split (MPI_COMM_WORLD, color, myrank, &comm);
+    assert(mrc==MPI_SUCCESS);
+    MPI_Comm_size(comm,&newprocs);
+    MPI_Comm_rank(comm,&newrank);
+    printf("oldrank/oldprocs=%d/%d, newrank/newprocs=%d/%d\n",
+	myrank, numprocs, newrank, newprocs);
+
+    if (color){
+	/* odd-rank processes */
+	mrc = MPI_Barrier(comm);
+	assert(mrc==MPI_SUCCESS);
+    }else{
+	/* even-rank processes */
+	/* setup file access template */
+	acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
+	assert(acc_tpl != FAIL);
+	
+	/* set Independent Parallel access with communicator */
+	ret = H5Pset_mpi(acc_tpl, comm, info, H5ACC_INDEPENDENT);     
+	assert(ret != FAIL);
+
+	printf("filenames[%d]=%s\n", color, filenames[color]);
+	/* create the file collectively */
+	fid=H5Fcreate(filenames[color],H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
+	assert(fid != FAIL);
+	MESG("H5Fcreate succeed");
+
+	/* Release file-access template */
+	ret=H5Pclose(acc_tpl);
+	assert(ret != FAIL);
+
+	ret=H5Fclose(fid);
+	assert(ret != FAIL);
+    }
+    if (myrank == 0){
+	mrc = MPI_File_delete(filenames[color], info);
+	assert(mrc==MPI_SUCCESS);
+    }
+}
+#endif
+
 void
 usage()
 {
@@ -305,6 +388,8 @@ usage()
     printf("\tdefault do write then read\n");
     printf("\n");
 }
+
+
     
 main(int argc, char **argv)
 {
@@ -335,7 +420,11 @@ pause_proc(MPI_COMM_WORLD, myid, processor_name, namelen, argc, argv);
 	}
     }
 
+
     if (dowrite){
+#ifdef HAVE_PARALLEL
+	test_split_comm_access();
+#endif
 	MPI_BANNER("testing PHDF5 writing dataset ...");
 	phdf5write();
     }
