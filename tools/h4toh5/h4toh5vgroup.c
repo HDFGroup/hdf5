@@ -421,7 +421,7 @@ int convert_vdata(int32 file_id,int32 obj_ref,char * h5pgroup_name,
     return FAIL;
   }
 
-  if(istat); /*ignore, dependent vdata(attributes, etc.)can be retrieved later.*/
+  /* if(istat);*/ /*ignore, dependent vdata(attributes, etc.)can be retrieved later.*/
 
   else { /* independent vdata, read in */
 
