@@ -395,8 +395,15 @@ STEP  8: Read middle third hyperslab into memory array.\n");
     assert (status>=0);
 
     /* Create memory data space */
-    s8_m_sid = H5Pcreate_simple (2, (size_t *)h_size);
+    {   /* H5Pcreate_simple expects dimsize be size_t type. */
+	/* Use a temporary array.  A kludge--need to fix hyperslab */
+	/* argument types later. */
+    size_t tdim[2];
+    tdim[0] = h_size[0];
+    tdim[1] = h_size[1];
+    s8_m_sid = H5Pcreate_simple (2, tdim);
     assert (s8_m_sid>=0);
+    }
 
     /* Read the dataset */
     s8 = calloc (h_size[0]*h_size[1], sizeof(s1_t));
