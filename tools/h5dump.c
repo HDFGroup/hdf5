@@ -210,14 +210,13 @@ usage(void)
 {
 fprintf(stderr, 
 "\nUsage of HDF5 Dumper:\n\n  \
-h5dump [-h] [-bb] [-header] [-a <names>] [-d <names>] [-g <names>]\n  \
+h5dump [-h] [-bb] [-header] [-v] [-V] [-a <names>] [-d <names>] [-g <names>]\n  \
        [-l <names>] [-t <names>] [-w <number>] <file>\n\n\
   -h            Print information on this command and exit.\n\
   -bb           Display the conent of the boot block. The default is not to display.\n\
   -header       Display header only; no data is displayed.\n\
   -v            Display the object ids\n\
   -V            Display version information and exit.\n\
-  -xml			Display the output in XML format.\n\
   -a <names>    Display the specified attribute(s).\n\
   -d <names>    Display the specified dataset(s).\n\
   -g <names>    Display the specified group(s) and all the members.\n\
