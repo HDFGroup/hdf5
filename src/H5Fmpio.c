@@ -520,8 +520,8 @@ H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
 
 #ifdef H5Fmpio_DEBUG
     if (H5F_mpio_Debug[(int)'r'])
-        fprintf(stdout, "in H5F_mpio_read  mpi_off=%lld  size_i=%d\n",
-                mpi_off, size_i );
+        HDfprintf(stdout, "in H5F_mpio_read  mpi_off=%Hd  size_i=%d\n",
+                (hssize_t)mpi_off, size_i );
 #endif
 
     /* Set up for a fancy xfer using complex types, or single byte block.
@@ -772,8 +772,8 @@ H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
 
 #ifdef H5Fmpio_DEBUG
     if (H5F_mpio_Debug[(int)'w'])
-        fprintf(stdout, "in H5F_mpio_write  mpi_off=%lld  size_i=%d\n",
-                mpi_off, size_i );
+        HDfprintf(stdout, "in H5F_mpio_write  mpi_off=%Hd  size_i=%d\n",
+                (hssize_t)mpi_off, size_i );
 #endif
 
     /* Only p0 will do the actual write if all procs in comm write same data */

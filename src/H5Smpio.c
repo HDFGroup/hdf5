@@ -103,8 +103,7 @@ H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
     *is_derived_type = 0;
 
 #ifdef H5Smpi_DEBUG
-    fprintf(stdout, "Leave %s total_bytes=%lld\n",
-	    FUNC, (long_long)total_bytes );
+    fprintf(stdout, "Leave %s total_bytes=%Hu\n", FUNC, total_bytes );
 #endif
     FUNC_LEAVE (SUCCEED);
 } /* H5S_mpio_all_type() */
@@ -167,10 +166,9 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
 	d[i].count = diminfo[i].count;
 	d[i].xtent = space->extent.u.simple.size[i];
 #ifdef H5Smpi_DEBUG
-	fprintf(stdout, "hyper_type: start=%lld  stride=%lld  count=%lld  "
-		"block=%lld  xtent=%lld", (long_long)d[i].start,
-		(long_long)d[i].strid, (long_long)d[i].count,
-		(long_long)d[i].block, (long_long)d[i].xtent );
+	fprintf(stdout, "hyper_type: start=%Hd  stride=%Hu  count=%Hu  "
+		"block=%Hu  xtent=%Hu",
+		d[i].start, d[i].strid, d[i].count, d[i].block, d[i].xtent );
 	if (i==0) fprintf(stdout, "  rank=%d\n", rank );
 	else	  fprintf(stdout, "\n" );
 #endif
@@ -253,9 +251,9 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
     /* construct the type by walking the hyperslab dims from the inside out */
     for ( i=new_rank-1; i>=0; --i) {
 #ifdef H5Smpi_DEBUG
-	fprintf(stdout, "hyper_type: i=%d Making vector type\n count=%lld "
-		"block=%lld stride=%lld\n", i, (long_long)d[i].count,
-		(long_long)d[i].block, (long_long)d[i].strid );
+	fprintf(stdout, "hyper_type: i=%d Making vector type\n"
+		"count=%Hu block=%Hu stride=%Hu\n",
+		i, d[i].count, d[i].block, d[i].strid );
 #endif
 	err = MPI_Type_vector(	(int)(d[i].count),	/* count */
 				(int)(d[i].block),	/* blocklength */
@@ -315,8 +313,8 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
 	     * The struct's first "field" is the displacement,
 	     * and its second "field" is the just-created vector type */
 #ifdef H5Smpi_DEBUG
-	    fprintf(stdout, "hyper_type: i=%d Making struct type\n "
-		    "b[1]=%d d[1]=%lld\n", i, b[1], (long_long)s[1] );
+	    fprintf(stdout, "hyper_type: i=%d Making struct type\n"
+		    "b[1]=%d d[1]=%Hu\n", i, b[1], (hsize_t)s[1] );
 #endif
 	    err = MPI_Type_struct( 2, b, s, t, &inner_type/*becomes outer*/ );
 	    MPI_Type_free( &outer_type );	/* no longer needed */
@@ -513,7 +511,7 @@ H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
     H5F_addr_add( &disp, &(layout->addr) );
     f->shared->access_parms->u.mpio.disp = disp;
 #ifdef H5Smpi_DEBUG
-    fprintf(stdout, "spaces_xfer: disp=%lld\n", (long_long)disp.offset );
+    fprintf(stdout, "spaces_xfer: disp=%Hu\n", disp.offset );
 #endif
 
     /* Effective address determined by base addr and the MPI file type */
