@@ -1,7 +1,8 @@
 # HDF5 Library Doc Makefile(.in)
 #
-# Copyright (C) 1997 National Center for Supercomputing Applications.
-#                    All rights reserved.
+# Copyright (C) 1997, 2002
+#     National Center for Supercomputing Applications.
+#     All rights reserved.
 #
 # 
 # This is the top level makefile of the Doc directory.  It mostly just
@@ -22,35 +23,33 @@ lib progs check test _test install uninstall:
 
 tests TAGS dep depend:
 	@@SETX@; for d in $(SUBDIRS); do				      \
-	   (cd $$d && $(MAKE) $@) || exit 1;				      \
+		(cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
 install-doc:
 	@if test -d $(DOCDIR) ; then                                          \
-	   :;                                                                 \
+		:;                                                                 \
 	else                                                                  \
-	   mkdir $(DOCDIR) && chmod 755 $(DOCDIR);                            \
+		mkdir $(DOCDIR) && chmod 755 $(DOCDIR);                            \
 	fi
 	@@SETX@; for d in $(SUBDIRS); do                                      \
-	   (cd $$d && $(MAKE) $@) || exit 1;                                  \
+		(cd $$d && $(MAKE) $@) || exit 1;                                  \
 	done
 
 uninstall-doc:
-	@@SETX@; for d in $(SUBDIRS); do                                      \
-	   (cd $$d && $(MAKE) $@) || exit 1;                                  \
-	done
+	-$(RM) -r $(DOCDIR)/hdf5
 
 .PHONY: all lib progs test _test install uninstall dep depend clean           \
 	mostlyclean distclean maintainer-clean
 
 clean mostlyclean:
 	@@SETX@; for d in $(SUBDIRS); do				      \
-	   (cd $$d && $(MAKE) $@);					      \
+		(cd $$d && $(MAKE) $@);					      \
 	done
 
 distclean:
 	@@SETX@; for d in $(SUBDIRS); do				      \
-	   (cd $$d && $(MAKE) $@);					      \
+		(cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) Makefile
 
@@ -58,6 +57,6 @@ maintainer-clean: distclean
 	@echo "This target is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 	@@SETX@; for d in $(SUBDIRS); do				      \
-	   (cd $$d && $(MAKE) $@);					      \
+		(cd $$d && $(MAKE) $@);					      \
 	done
 
