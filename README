@@ -27,10 +27,9 @@ library.
    hdf5cvs      - For checkin notices of code development on the library,
 		  not a discussion list.
 
-To subscribe to a list, send mail to "<list>-request@ncsa.uiuc.edu",
-(e.g., hdf5-request@ncsa.uiuc.edu) with "subscribe <your e-mail
-address> in the _body_ of the message.  Messages to be sent to
-the list should be sent to "<list>@ncsa.uiuc.edu".
+To subscribe to a list, send mail to "majordomo@ncsa.uiuc.edu",
+with "subscribe <your e-mail address> in the _body_ of the message.  Messages
+to be sent to the list should be sent to "<list>@ncsa.uiuc.edu".
 
 Nearly daily code snapshots are now being provided at the following URL:
     ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/snapshots
