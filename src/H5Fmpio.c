@@ -521,7 +521,7 @@ H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
      * (or even MPI_TYPE_NULL, which could mean "use MPI_BYTE" by convention).
      */
     use_types_this_time = access_parms->u.mpio.use_types;
-    if (access_parms->u.mpio.use_types) {
+    if (use_types_this_time) {
 	/* prepare for a full-blown xfer using btype, ftype, and disp */
 	buf_type = access_parms->u.mpio.btype;
 	file_type = access_parms->u.mpio.ftype;
