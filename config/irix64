@@ -35,7 +35,7 @@
 
 # Unconditionally set the compiler to gcc since the following flags
 # only apply to that compiler.
-CC="cc -64"
+CC="cc -ansi -64"
 
 warn="-fullwarn"
 
