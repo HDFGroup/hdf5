@@ -32,6 +32,9 @@ static herr_t H5T_init_interface(void);
 /*
  * Predefined data types. These are initialized at runtime in H5Tinit.c and
  * by H5T_init_interface() in this source file.
+ *
+ * If more of these are added, the new ones must be added to the list of
+ * types to reset in H5T_term_interface().
  */
 hid_t H5T_IEEE_F32BE_g			= FAIL;
 hid_t H5T_IEEE_F32LE_g			= FAIL;
@@ -1660,7 +1663,7 @@ H5T_init_interface(void)
      */
 
     /* One-byte character string */
-    if(H5T_F_S1_g<0) {
+    if(H5T_FORTRAN_S1_g<0) {
         if (NULL==(dt = H5FL_ALLOC(H5T_t,1)))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
@@ -1729,13 +1732,13 @@ H5T_init_interface(void)
      * Register conversion functions beginning with the most general and
      * ending with the most specific.
      */
-    if (NULL == (fixedpt = H5I_object(H5T_NATIVE_INT)))
+    if (NULL == (fixedpt = H5I_object(H5T_NATIVE_INT_g)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
-    if (NULL == (floatpt = H5I_object(H5T_NATIVE_FLOAT)))
+    if (NULL == (floatpt = H5I_object(H5T_NATIVE_FLOAT_g)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
-    if (NULL == (string = H5I_object(H5T_C_S1)))
+    if (NULL == (string = H5I_object(H5T_C_S1_g)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
-    if (NULL == (bitfield = H5I_object(H5T_STD_B8LE)))
+    if (NULL == (bitfield = H5I_object(H5T_STD_B8LE_g)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
     if (NULL == (compound = H5T_create(H5T_COMPOUND, 1)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
@@ -1790,7 +1793,7 @@ H5T_init_interface(void)
     status |= H5T_register(H5T_PERS_HARD, "ullong_ulong", native_ullong, native_ulong, H5T_conv_ullong_ulong);
     status |= H5T_register(H5T_PERS_HARD, "llong_short", native_llong, native_short, H5T_conv_llong_short);
     status |= H5T_register(H5T_PERS_HARD, "llong_ushort", native_llong, native_ushort, H5T_conv_llong_ushort);
-    status |= H5T_register(H5T_PERS_HARD, "ullong_short", native_llong, native_short, H5T_conv_ullong_short);
+    status |= H5T_register(H5T_PERS_HARD, "ullong_short", native_ullong, native_short, H5T_conv_ullong_short);
     status |= H5T_register(H5T_PERS_HARD, "ullong_ushort", native_ullong, native_ushort, H5T_conv_ullong_ushort);
     status |= H5T_register(H5T_PERS_HARD, "llong_int", native_llong, native_int, H5T_conv_llong_int);
     status |= H5T_register(H5T_PERS_HARD, "llong_uint", native_llong, native_uint, H5T_conv_llong_uint);
@@ -1984,7 +1987,7 @@ H5T_term_interface(void)
 	    }
 	    H5T_close (path->src);
 	    H5T_close (path->dst);
-        H5FL_FREE(H5T_path_t,path);
+            H5FL_FREE(H5T_path_t,path);
 	    H5T_g.path[i] = NULL;
 	}
 
@@ -1997,6 +2000,100 @@ H5T_term_interface(void)
 	/* Unlock all datatypes, then free them */
 	H5I_search (H5I_DATATYPE, H5T_unlock_cb, NULL);
 	H5I_destroy_group(H5I_DATATYPE);
+
+        /* Reset all the datatype IDs */
+        H5T_IEEE_F32BE_g			= FAIL;
+        H5T_IEEE_F32LE_g			= FAIL;
+        H5T_IEEE_F64BE_g			= FAIL;
+        H5T_IEEE_F64LE_g			= FAIL;
+
+        H5T_STD_I8BE_g			= FAIL;
+        H5T_STD_I8LE_g			= FAIL;
+        H5T_STD_I16BE_g			= FAIL;
+        H5T_STD_I16LE_g			= FAIL;
+        H5T_STD_I32BE_g			= FAIL;
+        H5T_STD_I32LE_g			= FAIL;
+        H5T_STD_I64BE_g			= FAIL;
+        H5T_STD_I64LE_g			= FAIL;
+        H5T_STD_U8BE_g			= FAIL;
+        H5T_STD_U8LE_g			= FAIL;
+        H5T_STD_U16BE_g			= FAIL;
+        H5T_STD_U16LE_g			= FAIL;
+        H5T_STD_U32BE_g			= FAIL;
+        H5T_STD_U32LE_g			= FAIL;
+        H5T_STD_U64BE_g			= FAIL;
+        H5T_STD_U64LE_g			= FAIL;
+        H5T_STD_B8BE_g			= FAIL;
+        H5T_STD_B8LE_g			= FAIL;
+        H5T_STD_B16BE_g			= FAIL;
+        H5T_STD_B16LE_g			= FAIL;
+        H5T_STD_B32BE_g			= FAIL;
+        H5T_STD_B32LE_g			= FAIL;
+        H5T_STD_B64BE_g			= FAIL;
+        H5T_STD_B64LE_g 			= FAIL;
+        H5T_STD_REF_OBJ_g 		= FAIL;
+        H5T_STD_REF_DSETREG_g 		= FAIL;
+
+        H5T_UNIX_D32BE_g			= FAIL;
+        H5T_UNIX_D32LE_g			= FAIL;
+        H5T_UNIX_D64BE_g			= FAIL;
+        H5T_UNIX_D64LE_g 			= FAIL;
+
+        H5T_C_S1_g			= FAIL;
+
+        H5T_FORTRAN_S1_g			= FAIL;
+
+        H5T_NATIVE_SCHAR_g		= FAIL;
+        H5T_NATIVE_UCHAR_g		= FAIL;
+        H5T_NATIVE_SHORT_g		= FAIL;
+        H5T_NATIVE_USHORT_g		= FAIL;
+        H5T_NATIVE_INT_g			= FAIL;
+        H5T_NATIVE_UINT_g			= FAIL;
+        H5T_NATIVE_LONG_g			= FAIL;
+        H5T_NATIVE_ULONG_g		= FAIL;
+        H5T_NATIVE_LLONG_g		= FAIL;
+        H5T_NATIVE_ULLONG_g		= FAIL;
+        H5T_NATIVE_FLOAT_g		= FAIL;
+        H5T_NATIVE_DOUBLE_g		= FAIL;
+        H5T_NATIVE_LDOUBLE_g		= FAIL;
+        H5T_NATIVE_B8_g			= FAIL;
+        H5T_NATIVE_B16_g			= FAIL;
+        H5T_NATIVE_B32_g			= FAIL;
+        H5T_NATIVE_B64_g			= FAIL;
+        H5T_NATIVE_OPAQUE_g		= FAIL;
+        H5T_NATIVE_HADDR_g		= FAIL;
+        H5T_NATIVE_HSIZE_g		= FAIL;
+        H5T_NATIVE_HSSIZE_g		= FAIL;
+        H5T_NATIVE_HERR_g			= FAIL;
+        H5T_NATIVE_HBOOL_g		= FAIL;
+
+        H5T_NATIVE_INT8_g			= FAIL;
+        H5T_NATIVE_UINT8_g		= FAIL;
+        H5T_NATIVE_INT_LEAST8_g		= FAIL;
+        H5T_NATIVE_UINT_LEAST8_g		= FAIL;
+        H5T_NATIVE_INT_FAST8_g		= FAIL;
+        H5T_NATIVE_UINT_FAST8_g		= FAIL;
+
+        H5T_NATIVE_INT16_g		= FAIL;
+        H5T_NATIVE_UINT16_g		= FAIL;
+        H5T_NATIVE_INT_LEAST16_g		= FAIL;
+        H5T_NATIVE_UINT_LEAST16_g		= FAIL;
+        H5T_NATIVE_INT_FAST16_g		= FAIL;
+        H5T_NATIVE_UINT_FAST16_g		= FAIL;
+
+        H5T_NATIVE_INT32_g		= FAIL;
+        H5T_NATIVE_UINT32_g		= FAIL;
+        H5T_NATIVE_INT_LEAST32_g		= FAIL;
+        H5T_NATIVE_UINT_LEAST32_g		= FAIL;
+        H5T_NATIVE_INT_FAST32_g		= FAIL;
+        H5T_NATIVE_UINT_FAST32_g		= FAIL;
+
+        H5T_NATIVE_INT64_g		= FAIL;
+        H5T_NATIVE_UINT64_g		= FAIL;
+        H5T_NATIVE_INT_LEAST64_g		= FAIL;
+        H5T_NATIVE_UINT_LEAST64_g		= FAIL;
+        H5T_NATIVE_INT_FAST64_g		= FAIL;
+        H5T_NATIVE_UINT_FAST64_g		= FAIL;
 
 	/* Mark interface as closed */
 	interface_initialize_g = 0;
@@ -2576,7 +2673,7 @@ H5Tget_size(hid_t type_id)
     H5TRACE1("z","i",type_id);
 
     /* Check args */
-    if (H5I_DATATYPE != H5I_get_type(type_id) || NULL == (dt = H5I_object(type_id))) {
+    if (H5I_DATATYPE != H5I_get_type(type_id) || NULL == (dt = H5I_object(type_id)))
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
     
     /* size */
@@ -4514,8 +4611,7 @@ H5T_vlen_create(H5T_t *base)
     H5T_t	*dt = NULL;		/*new VL data type	*/
     H5T_t	*ret_value = NULL;	/*return value			*/
     
-    FUNC_ENTER(H5Tvlen_create, NULL);
-    H5TRACE1("i","i",base_id);
+    FUNC_ENTER(H5T_vlen_create, NULL);
 
     /* Check args */
     assert(base);
@@ -7663,7 +7759,7 @@ H5Tarray_create(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
  *
  *-------------------------------------------------------------------------
  */
-static H5T_t *
+H5T_t *
 H5T_array_create(H5T_t *base, int ndims, const hsize_t dim[/* ndims */],
     const int perm[/* ndims */])
 {

@@ -762,5 +762,4 @@ __DLL__ herr_t H5T_vlen_disk_write(hid_t dxpl_id, H5F_t *f, void *vl_addr, void 
 /* Array functions */
 __DLL__ H5T_t * H5T_array_create(H5T_t *base, int ndims,
         const hsize_t dim[/* ndims */], const int perm[/* ndims */]);
-
 #endif
