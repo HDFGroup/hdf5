@@ -510,6 +510,8 @@ H5F_dest(H5F_t *f)
  *              The CREATE_PARMS argument is optional.  A null pointer will
  *              cause the default file creation parameters to be used.
  *
+ *              The ACCESS_PARMS argument is not used yet.
+ *
  *              The TYPE argument determins the low-level type of file that
  *              is opened.  The special value H5F_LOW_DFLT uses the default
  *              method which is defined at compile time.
@@ -564,6 +566,10 @@ H5F_dest(H5F_t *f)
  *      If the name contains the pattern /[^%]%\d*[duxX]/ then the file is
  *      assumed to be a family of files.  The TYPE argument is ignored and
  *      H5F_LOW_FAM is used instead.
+ *
+ *      Albert Cheng, 5 Feb 1998
+ *      Added the access_parms argument to pass down access template
+ *      information.
  *
  *-------------------------------------------------------------------------
  */

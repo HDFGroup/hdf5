@@ -22,12 +22,6 @@
 
 /* This is a near top-level header! Try not to include much! */
 #include <H5private.h>
-#ifdef HAVE_PARALLEL
-#ifndef MPI_SUCCESS
-#include <mpi.h>
-#include <mpio.h>
-#endif
-#endif
 
 /*
  * Feature: Define this constant to be non-zero if you want to enable code
@@ -327,11 +321,7 @@ typedef struct H5F_low_t {
 
 /* What types of low-level files are there? */
 #ifndef H5F_LOW_DFLT
-# ifdef HAVE_PARALLEL
-#  define H5F_LOW_DFLT	H5F_LOW_MPIO	/* when parallel, MPI-IO is default */
-# else
 #  define H5F_LOW_DFLT	H5F_LOW_STDIO	/* The default type	  */
-# endif
 #endif
 extern const H5F_low_class_t H5F_LOW_SEC2[];	/* Posix section 2	*/
 extern const H5F_low_class_t H5F_LOW_STDIO[];	/* Posix stdio		*/
