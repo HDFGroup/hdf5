@@ -96,6 +96,8 @@
 ./doc/html/H5.intro.html
 ./doc/html/H5.sample_code.html
 ./doc/html/H5.user.html
+./doc/html/H5.user.PrintGen.html
+./doc/html/H5.user.PrintTpg.html
 ./doc/html/IH_map1.gif
 ./doc/html/IH_map2.gif
 ./doc/html/IH_map3.gif
