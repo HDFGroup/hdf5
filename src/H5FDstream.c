@@ -46,7 +46,7 @@
 #endif
 #endif
 
-#ifndef HAVE_STRUCT_SOCKLEN_T
+#ifndef H5_HAVE_SOCKLEN_T
 typedef int socklen_t;
 #endif
 
