@@ -1551,6 +1551,10 @@ H5D_close(H5D_t *dataset)
  *	Added the code that when it detects it is not safe to process a
  *	COLLECTIVE read request without hanging, it changes it to
  *	INDEPENDENT calls.
+ *
+ *	Albert Cheng, 2000-11-27
+ *	Changed to use the optimized MPIO transfer for Collective calls only.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1673,7 +1677,12 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * turn out to be inappropriate for MPI-IO).  */
     if (H5_mpi_opt_types_g &&
         IS_H5FD_MPIO(dataset->ent.file)) {
-	sconv->read = H5S_mpio_spaces_read;
+	/* Only collective write should call this since it eventually
+	 * calls MPI_File_set_view which is a collective call.
+	 * See H5S_mpio_spaces_xfer() for details.
+	 */
+	if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE)
+	    sconv->read = H5S_mpio_spaces_read;
     }
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -1978,6 +1987,9 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
  *	COLLECTIVE write request without hanging, it changes it to
  *	INDEPENDENT calls.
  *      
+ *	Albert Cheng, 2000-11-27
+ *	Changed to use the optimized MPIO transfer for Collective calls only.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2137,7 +2149,12 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * turn out to be inappropriate for MPI-IO).  */
     if (H5_mpi_opt_types_g &&
         IS_H5FD_MPIO(dataset->ent.file)) {
-	sconv->write = H5S_mpio_spaces_write;
+	/* Only collective write should call this since it eventually
+	 * calls MPI_File_set_view which is a collective call.
+	 * See H5S_mpio_spaces_xfer() for details.
+	 */
+	if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE)
+	    sconv->write = H5S_mpio_spaces_write;
     }
 #endif /*H5_HAVE_PARALLEL*/
     

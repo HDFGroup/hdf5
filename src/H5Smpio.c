@@ -541,6 +541,7 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
  *	rky 980918
  *	Added must_convert parameter to let caller know we can't optimize
  *	the xfer.
+ *
  *	Albert Cheng, 001123
  *	Include the MPI_type freeing as part of cleanup code.
  *
@@ -587,7 +588,34 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
 	*must_convert = 1;      /* can't do optimized xfer; do the old way */
 	HGOTO_DONE(SUCCEED);
     }
-    
+
+    /*
+     * For collective data transfer only since this would eventually
+     * call H5FD_mpio_setup to do setup to eveually call MPI_File_set_view
+     * in H5FD_mpio_read or H5FD_mpio_write.  MPI_File_set_view is a
+     * collective call.  Letting independent data transfer use this
+     * route would result in hanging.
+     */
+#if 0
+    /* For now, the checking is being done in
+     * H5D_write and H5D_read before it is called because
+     * the following block of code, though with the right idea, is not
+     * correct yet.
+     */
+    {   /* Get the transfer mode */
+        H5D_xfer_t *dxpl;
+        H5FD_mpio_dxpl_t *dx;
+
+        if (H5P_DEFAULT!=dxpl_id && (dxpl=H5I_object(dxpl_id)) &&
+                H5FD_MPIO==dxpl->driver_id && (dx=dxpl->driver_info) &&
+                H5FD_MPIO_COLLECTIVE==dx->xfer_mode) {
+	    /* let it fall through */
+	}else{
+	    *must_convert = 1;	/* can't do optimized xfer; do the old way */
+	    HGOTO_DONE(SUCCEED);
+	}
+    }
+#endif
 
     /* create the MPI buffer type */
     err = H5S_mpio_space_type( mem_space, elmt_size,
