@@ -129,6 +129,7 @@ static herr_t do_fopen(parameters *param, char *fname, file_descr *fd /*out*/,
 static herr_t do_fclose(iotype iot, file_descr *fd);
 static void do_cleanupfile(iotype iot, char *fname);
 
+#ifdef H5_HAVE_GPFS
 /* GPFS-specific functions */
 static void access_range(int handle, off_t start, off_t length, int is_write);
 static void free_range(int handle, off_t start, off_t length);
@@ -137,6 +138,7 @@ static void cancel_hints(int handle);
 static void start_data_shipping(int handle, int num_insts);
 static void stop_data_shipping(int handle);
 static void invalidate_file_cache(const char *filename);
+#endif
 
 /*
  * Function:    do_pio
@@ -1295,7 +1297,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 		    HDprint_rank(output);
 		    HDfprintf(output, "...");
 		    HDfprintf(output, "total read data errors=%Hd\n",
-			    nerror);
+			    (long_long)nerror);
 		}
             }	/* if (parms->verify) */
 
@@ -1864,6 +1866,8 @@ invalidate_file_cache(const char *filename)
 
 #else
 
+/* turn the stubs off since some compilers are warning they are not used */
+#if 0
 /* H5_HAVE_GPFS isn't defined...stub functions */
 
 static void
@@ -1907,6 +1911,8 @@ invalidate_file_cache(const char UNUSED *filename)
 {
     return;
 }
+
+#endif  /* 0 */
 
 #endif  /* H5_HAVE_GPFS */
 
