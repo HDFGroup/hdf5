@@ -45,6 +45,9 @@ static int interface_initialize_g = 0;
 /* Declare a free list to manage pieces of vlen data */
 H5FL_BLK_DEFINE_STATIC(vlen_seq);
 
+/* Declare a free list to manage pieces of array data */
+H5FL_BLK_DEFINE_STATIC(array_seq);
+
 /*
  * These macros are for the bodies of functions that convert buffers of one
  * integer type to another using hardware.  They all start with `H5T_CONV_'
@@ -1177,10 +1180,7 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
  * Purpose:	Check whether the source or destination datatypes require a
  *		background buffer for the conversion.
  *
- *		Currently, only compound datatypes require a background buffer,
- *		but since they can be embedded in variable-length or array datatypes,
- *      those types must ask for a background buffer if they have compound
- *      components.
+ *		Currently, only compound datatypes require a background buffer.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1200,14 +1200,8 @@ H5T_conv_need_bkg (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     assert(dst);
     assert(cdata);
 
-    /* Compound datatypes only need a "temp" buffer */
+    /* Compound datatypes need a buffer */
     if (H5T_detect_class(src,H5T_COMPOUND)==TRUE || H5T_detect_class(dst,H5T_COMPOUND)==TRUE)
-        cdata->need_bkg = H5T_BKG_TEMP;
-
-    /* Compound datatypes need a "yes" buffer though */
-    if (H5T_detect_class(src,H5T_VLEN)==TRUE || H5T_detect_class(dst,H5T_VLEN)==TRUE)
-        cdata->need_bkg = H5T_BKG_YES;
-    if (H5T_detect_class(src,H5T_ARRAY)==TRUE || H5T_detect_class(dst,H5T_ARRAY)==TRUE)
         cdata->need_bkg = H5T_BKG_YES;
 
     FUNC_LEAVE (SUCCEED);
@@ -2202,7 +2196,7 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 herr_t
 H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 	      size_t buf_stride, size_t bkg_stride, void *_buf,
-              void *_bkg, hid_t dset_xfer_plist)
+              void UNUSED *_bkg, hid_t dset_xfer_plist)
 {
     const H5D_xfer_t	   *xfer_parms = NULL;
     H5T_path_t	*tpath;			/* Type conversion path		     */
@@ -2211,15 +2205,17 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     H5T_t	*dst = NULL;		/*destination data type		     */
     hsize_t	olap;			/*num overlapping elements	     */
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs     */
-    uint8_t 	**dptr;		     /*pointer to correct destination pointer*/
+    uint8_t 	**dptr;		        /*pointer to correct destination pointer*/
     size_t	src_delta, dst_delta;	/*source & destination stride	     */
-    hssize_t 	seq_len;     /*the number of elements in the current sequence*/
+    hssize_t 	seq_len;                /*the number of elements in the current sequence*/
     size_t	src_base_size, dst_base_size;/*source & destination base size*/
-    size_t	src_size, dst_size;/*source & destination total size in bytes*/
+    size_t	src_size, dst_size;     /*source & destination total size in bytes*/
     void	*conv_buf=NULL;     	/*temporary conversion buffer 	     */
-    hsize_t	conv_buf_size;  	/*size of conversion buffer in bytes */
+    hsize_t	conv_buf_size=0;  	/*size of conversion buffer in bytes */
+    void	*bkg_buf=NULL;     	/*temporary background buffer 	     */
+    hsize_t	bkg_buf_size=0;	        /*size of background buffer in bytes */
     uint8_t	dbuf[64],*dbuf_ptr=dbuf;/*temp destination buffer	     */
-    int	direction;		/*direction of traversal	     */
+    int	        direction;		/*direction of traversal	     */
     hsize_t	elmtno;			/*element number counter	     */
 
     FUNC_ENTER (H5T_conv_vlen, FAIL);
@@ -2242,8 +2238,8 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
             assert (H5T_VLEN==src->type);
             assert (H5T_VLEN==dst->type);
 
-            /* Check if we need a background buffer */
-            H5T_conv_need_bkg (src, dst, cdata);
+            /* Variable-length types don't need a background buffer */
+            cdata->need_bkg = H5T_BKG_NO;
 
             break;
 
@@ -2334,6 +2330,14 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 }
             }
 
+            /* Check if we need a background buffer for this conversion */
+            if(tpath->cdata.need_bkg) {
+                /* Set up initial background buffer */
+                bkg_buf_size=MAX(src_base_size,dst_base_size);
+                if ((bkg_buf=H5FL_BLK_ALLOC(vlen_seq,bkg_buf_size,0))==NULL)
+                    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
+            } /* end if */
+
             for (elmtno=0; elmtno<nelmts; elmtno++) {
                 s = sp;
                 d = *dptr;
@@ -2358,10 +2362,19 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                     HRETURN_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL,
                                   "can't read VL data");
 
+                /* Check if background buffer is large enough, resize if necessary */      
+                /* (Chain off the conversion buffer size) */
+                if(tpath->cdata.need_bkg && bkg_buf_size<conv_buf_size) {
+                    /* Set up initial background buffer */
+                    bkg_buf_size=conv_buf_size;
+                    if((bkg_buf=H5FL_BLK_REALLOC(vlen_seq,bkg_buf,bkg_buf_size))==NULL)
+                        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
+                } /* end if */
+
                 /* Convert VL sequence */
                 H5_CHECK_OVERFLOW(seq_len,hssize_t,hsize_t);
                 if (H5T_convert(tpath, tsrc_id, tdst_id, (hsize_t)seq_len, 0, bkg_stride,
-                                conv_buf, _bkg, dset_xfer_plist)<0)
+                                conv_buf, bkg_buf, dset_xfer_plist)<0)
                     HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                                   "datatype conversion failed");
 
@@ -2389,8 +2402,12 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 } /* end if */
             }
 
-            /* Release the conversion buffer */
+            /* Release the conversion buffer (always allocated) */
             H5FL_BLK_FREE(vlen_seq,conv_buf);
+
+            /* Release the background buffer, if we have one */
+            if(bkg_buf!=NULL)
+                H5FL_BLK_FREE(vlen_seq,bkg_buf);
 
             /* Release the temporary datatype IDs used */
             if (tsrc_id >= 0)
@@ -2426,17 +2443,19 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 herr_t
 H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 	      size_t buf_stride, size_t bkg_stride, void *_buf,
-              void *_bkg, hid_t dset_xfer_plist)
+              void UNUSED *_bkg, hid_t dset_xfer_plist)
 {
-    H5T_path_t	*tpath;		/* Type conversion path		     */
-    hid_t   tsrc_id = -1, tdst_id = -1;/*temporary type atoms	     */
-    H5T_t	*src = NULL;	/*source data type		     */
-    H5T_t	*dst = NULL;	/*destination data type		     */
-    uint8_t	*sp, *dp;	    /*source and dest traversal ptrs     */
+    H5T_path_t	*tpath;		        /* Type conversion path		     */
+    hid_t   tsrc_id = -1, tdst_id = -1; /*temporary type atoms	     */
+    H5T_t	*src = NULL;	        /*source data type		     */
+    H5T_t	*dst = NULL;	        /*destination data type		     */
+    uint8_t	*sp, *dp;	        /*source and dest traversal ptrs     */
     size_t	src_delta, dst_delta;	/*source & destination stride	     */
-    int	direction;		/*direction of traversal	     */
+    int	        direction;		/*direction of traversal	     */
     hsize_t	elmtno;			/*element number counter	     */
-    int    i;              /* local index variable */
+    int         i;                      /* local index variable */
+    void	*bkg_buf=NULL;     	/*temporary background buffer 	     */
+    hsize_t	bkg_buf_size=0;	        /*size of background buffer in bytes */
 
     FUNC_ENTER (H5T_conv_array, FAIL);
 
@@ -2470,8 +2489,8 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                     HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "array datatypes do not have the same dimension permutations");
 #endif /* LATER */
 
-            /* Check if we need a background buffer */
-            H5T_conv_need_bkg (src, dst, cdata);
+            /* Array datatypes don't need a background buffer */
+            cdata->need_bkg = H5T_BKG_NO;
 
             break;
 
@@ -2530,6 +2549,14 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 }
             }
 
+            /* Check if we need a background buffer for this conversion */
+            if(tpath->cdata.need_bkg) {
+                /* Allocate background buffer */
+                bkg_buf_size=src->u.array.nelem*MAX(src->size,dst->size);
+                if ((bkg_buf=H5FL_BLK_ALLOC(array_seq,bkg_buf_size,0))==NULL)
+                    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
+            } /* end if */
+
             /* Perform the actual conversion */
             for (elmtno=0; elmtno<nelmts; elmtno++) {
                 /* Copy the source array into the correct location for the destination */
@@ -2537,7 +2564,7 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 
                 /* Convert array */
                 if (H5T_convert(tpath, tsrc_id, tdst_id, (hsize_t)src->u.array.nelem, 0, bkg_stride,
-                                dp, _bkg, dset_xfer_plist)<0)
+                                dp, bkg_buf, dset_xfer_plist)<0)
                     HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                                   "datatype conversion failed");
 
@@ -2545,6 +2572,10 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 sp += src_delta;
                 dp += dst_delta;
             }
+
+            /* Release the background buffer, if we have one */
+            if(bkg_buf!=NULL)
+                H5FL_BLK_FREE(array_seq,bkg_buf);
 
             /* Release the temporary datatype IDs used */
             if (tsrc_id >= 0)

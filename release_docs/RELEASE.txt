@@ -70,6 +70,9 @@ New Features
 
 Bug Fixes since HDF5-1.4.3 Release
 ==================================
+    * Fixed bug where the data for several level deep nested compound &
+        variable-length datatypes used for datasets were getting corrupted when
+        written to the file.  QAK - 2002/04/17
     * Fixed bug where selection offset was being ignored for certain hyperslab
         selections when optimized I/O was being performed.  QAK - 2002/04/02
     * Fixed limitation in h5dumper with object names which reached over 1024
