@@ -26,11 +26,20 @@ FROM SASN100,
 
 1) cd <hdf5>
 
-2) CC=/usr/community/mpich/mpich-1.2.3/bin/mpicc ./configure --host=i386-intel-osf1
+2) CC=/usr/community/mpich/mpich-1.2.3/bin/mpicc \
+      ./configure --host=i386-intel-osf1 --with-zlib=/usr/community/hdf5/ZLIB
+
+   Skip the "--with-zlib=..." option if you do not wish to include the zlib
+   compression feature.  Without the zlib compression feature, the library
+   will not be able to access zlib compressed datasets.
+
    You may safely ignore the WARNING message,
+    =========
     configure: WARNING: If you wanted to set the --build type, don't use --host.
 	If a cross compiler is detected then cross compile mode will be used.
-   You may add the option "--host=i386-intel-osf1" to get rid of the WARNING.
+    =========
+   You may add the option "--build=i386-intel-osf1" to get rid of the WARNING.
+
    (The previous bugs in src/Makefile and test/Makefile have been resolved.
     You don't need to edit them any more.)
 
@@ -92,11 +101,19 @@ FROM SASN100,
 
 1) cd <hdf5>
 
-2) ./configure --host=i386-intel-osf1
+2) ./configure --host=i386-intel-osf1 --with-zlib=/usr/community/hdf5/ZLIB
+
+   Skip the "--with-zlib=..." option if you do not wish to include the zlib
+   compression feature.  Without the zlib compression feature, the library
+   will not be able to access zlib compressed datasets.
+
    You may safely ignore the WARNING message,
+    =========
     configure: WARNING: If you wanted to set the --build type, don't use --host.
 	If a cross compiler is detected then cross compile mode will be used.
-   You may add the option "--host=i386-intel-osf1" to get rid of the WARNING.
+    =========
+   You may add the option "--build=i386-intel-osf1" to get rid of the WARNING.
+
    (The previous bugs in src/Makefile and test/Makefile have been resolved.
     You don't need to edit them any more.)
 
