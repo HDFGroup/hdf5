@@ -60,7 +60,8 @@ typedef int herr_t;
  * 	    printf("error determining whether data type is committed\n");
  *	}
  */
-typedef int hbool_t;
+typedef unsigned int hbool_t;           /* For truly boolean values */
+typedef int htri_t;                     /* For values that might be TRUE/FALSE/FAIL */
 
 /*
  * The sizes of file-objects in hdf5 have their own types defined here.  On

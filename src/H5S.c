@@ -1182,7 +1182,7 @@ H5S_cmp(const H5S_t *ds1, const H5S_t *ds2)
  PURPOSE
     Check if a dataspace is simple (internal)
  USAGE
-    hbool_t H5S_is_simple(sdim)
+    htri_t H5S_is_simple(sdim)
 	H5S_t *sdim;		IN: Pointer to dataspace object to query
  RETURNS
     TRUE/FALSE/FAIL
@@ -1190,10 +1190,10 @@ H5S_cmp(const H5S_t *ds1, const H5S_t *ds2)
 	This function determines the if a dataspace is "simple". ie. if it
     has orthogonal, evenly spaced dimensions.
 --------------------------------------------------------------------------*/
-hbool_t
+htri_t
 H5S_is_simple(const H5S_t *sdim)
 {
-    hbool_t		    ret_value = FAIL;
+    htri_t		    ret_value = FAIL;
 
     FUNC_ENTER(H5S_is_simple, FAIL);
 
@@ -1211,7 +1211,7 @@ H5S_is_simple(const H5S_t *sdim)
  PURPOSE
     Check if a dataspace is simple
  USAGE
-    hbool_t H5Sis_simple(space_id)
+    htri_t H5Sis_simple(space_id)
 	hid_t space_id;	      IN: ID of dataspace object to query
  RETURNS
     TRUE/FALSE/FAIL
@@ -1219,11 +1219,11 @@ H5S_is_simple(const H5S_t *sdim)
 	This function determines the if a dataspace is "simple". ie. if it
     has orthogonal, evenly spaced dimensions.
 --------------------------------------------------------------------------*/
-hbool_t
+htri_t
 H5Sis_simple(hid_t space_id)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
-    hbool_t		    ret_value = FAIL;
+    htri_t		    ret_value = FAIL;
 
     FUNC_ENTER(H5Sis_simple, FAIL);
     H5TRACE1("b","i",space_id);

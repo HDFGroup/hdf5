@@ -25,7 +25,7 @@
 static hbool_t		interface_initialize_g = FALSE;
 #define INTERFACE_INIT NULL
 
-static hbool_t H5F_core_access(const char *name,
+static htri_t H5F_core_access(const char *name,
 			       const H5F_access_t *access_parms, int mode,
 			       H5F_search_t *key/*out*/);
 static H5F_low_t *H5F_core_open(const char *name,
@@ -69,7 +69,7 @@ const H5F_low_class_t	H5F_LOW_CORE_g[1] = {{
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static htri_t
 H5F_core_access(const char __unused__*name,
 		const H5F_access_t __unused__ *access_parms,
 		int __unused__ mode, H5F_search_t __unused__ *key/*out*/)

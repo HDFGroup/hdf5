@@ -444,7 +444,7 @@ H5F_locate_signature(H5F_low_t *f_handle, const H5F_access_t *access_parms,
     Check the file signature to detect an HDF5 file.
 
  USAGE
-    hbool_t H5Fis_hdf5(filename)
+    htri_t H5Fis_hdf5(filename)
 	const char *filename;	IN: Name of the file to check
  ERRORS
     ARGS      BADRANGE	    No filename specified. 
@@ -460,7 +460,7 @@ H5F_locate_signature(H5F_low_t *f_handle, const H5F_access_t *access_parms,
  DESCRIPTION
     This function determines if a file is an HDF5 format file.
 --------------------------------------------------------------------------*/
-hbool_t
+htri_t
 H5Fis_hdf5(const char *filename)
 {
     H5F_low_t	*f_handle = NULL;	/* file handle */

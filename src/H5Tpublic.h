@@ -377,10 +377,10 @@ hid_t H5Topen (hid_t loc_id, const char *name);
 hid_t H5Tcreate (H5T_class_t type, size_t size);
 hid_t H5Tcopy (hid_t type_id);
 herr_t H5Tclose (hid_t type_id);
-hbool_t H5Tequal (hid_t type1_id, hid_t type2_id);
+htri_t H5Tequal (hid_t type1_id, hid_t type2_id);
 herr_t H5Tlock (hid_t type_id);
 herr_t H5Tcommit (hid_t loc_id, const char *name, hid_t type_id);
-hbool_t H5Tcommitted (hid_t type_id);
+htri_t H5Tcommitted (hid_t type_id);
 
 /* Operations defined on compound data types */
 herr_t H5Tinsert (hid_t parent_id, const char *name, size_t offset,

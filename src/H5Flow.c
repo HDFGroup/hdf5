@@ -477,12 +477,12 @@ H5F_low_size(H5F_low_t *lf, haddr_t *eof/*out*/)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+htri_t
 H5F_low_access(const H5F_low_class_t *type, const char *name,
 	       const H5F_access_t *access_parms, int mode,
 	       H5F_search_t *key/*out*/)
 {
-    hbool_t		    ret_value;
+    htri_t		    ret_value;
     struct stat		    sb;
 
     FUNC_ENTER(H5F_low_size, FAIL);
@@ -708,7 +708,7 @@ H5F_addr_undef(haddr_t *addr/*out*/)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+htri_t
 H5F_addr_defined(const haddr_t *addr)
 {
     FUNC_ENTER(H5F_addr_defined, FAIL);
@@ -752,7 +752,7 @@ H5F_addr_reset(haddr_t *addr/*out*/)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+htri_t
 H5F_addr_zerop(const haddr_t *addr)
 {
     FUNC_ENTER(H5F_addr_zerop, FAIL);

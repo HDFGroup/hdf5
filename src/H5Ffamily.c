@@ -35,7 +35,7 @@ static hbool_t		interface_initialize_g = FALSE;
 #define H5F_FAM_MEMBNO(LF,ADDR)	((intn)((ADDR)->offset /		     \
 					(LF)->u.fam.memb_size.offset))
 
-static hbool_t H5F_fam_access(const char *name,
+static htri_t H5F_fam_access(const char *name,
 			      const H5F_access_t *access_parms, int mode,
 			      H5F_search_t *key/*out*/);
 static H5F_low_t *H5F_fam_open(const char *name,
@@ -564,14 +564,14 @@ H5F_fam_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static htri_t
 H5F_fam_access(const char *name, const H5F_access_t *access_parms,
 	       int mode, H5F_search_t *key/*out*/)
 {
     intn			membno;
     char			member_name[4096];
-    hbool_t			status;
-    hbool_t			ret_value = FALSE;
+    htri_t			status;
+    htri_t			ret_value = FALSE;
     const H5F_low_class_t	*memb_type = NULL;
 
     FUNC_ENTER(H5F_fam_access, FAIL);

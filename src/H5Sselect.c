@@ -845,7 +845,7 @@ H5S_sel_iter_release (const H5S_t *space, H5S_sel_iter_t *sel_iter)
     Check whether the selection fits within the extent, with the current
     offset defined.
  USAGE
-    hbool_t H5Sselect_void(dsid)
+    htri_t H5Sselect_void(dsid)
         hid_t dsid;             IN: Dataspace ID to query
  RETURNS
     TRUE if the selection fits within the extent, FALSE if it does not and
@@ -858,11 +858,11 @@ H5S_sel_iter_release (const H5S_t *space, H5S_sel_iter_t *sel_iter)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hbool_t
+htri_t
 H5Sselect_valid(hid_t spaceid)
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
-    hbool_t ret_value=FAIL;     /* return value */
+    htri_t ret_value=FAIL;     /* return value */
 
     FUNC_ENTER (H5Sselect_valid, 0);
     H5TRACE1("b","i",spaceid);
@@ -885,7 +885,7 @@ H5Sselect_valid(hid_t spaceid)
     Check whether the selection fits within the extent, with the current
     offset defined.
  USAGE
-    hbool_t H5Sselect_void(space)
+    htri_t H5Sselect_void(space)
         H5S_t *space;             IN: Dataspace pointer to query
  RETURNS
     TRUE if the selection fits within the extent, FALSE if it does not and
@@ -898,10 +898,10 @@ H5Sselect_valid(hid_t spaceid)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hbool_t
+htri_t
 H5S_select_valid (const H5S_t *space)
 {
-    hbool_t ret_value=FAIL;  /* return value */
+    htri_t ret_value=FAIL;  /* return value */
 
     FUNC_ENTER (H5S_select_valid, FAIL);
 

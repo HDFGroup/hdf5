@@ -63,7 +63,7 @@ hsize_t H5Sget_simple_extent_npoints (hid_t space_id);
 int H5Sget_simple_extent_ndims (hid_t space_id);
 int H5Sget_simple_extent_dims (hid_t space_id, hsize_t dims[],
 			       hsize_t maxdims[]);
-hbool_t H5Sis_simple (hid_t space_id);
+htri_t H5Sis_simple (hid_t space_id);
 herr_t H5Sset_space (hid_t space_id, int rank, const hsize_t *dims);
 hssize_t H5Sget_select_npoints (hid_t spaceid);
 herr_t H5Sselect_hyperslab (hid_t space_id, H5S_seloper_t op,
@@ -77,7 +77,7 @@ herr_t H5Sextent_copy (hid_t dst_id,hid_t src_id);
 herr_t H5Sselect_all (hid_t spaceid);
 herr_t H5Sselect_none (hid_t spaceid);
 herr_t H5Soffset_simple (hid_t space_id, const hssize_t *offset);
-hbool_t H5Sselect_valid (hid_t spaceid);
+htri_t H5Sselect_valid (hid_t spaceid);
 
 #ifdef __cplusplus
 }

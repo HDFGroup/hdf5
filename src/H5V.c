@@ -200,7 +200,7 @@ H5V_hyper_stride(intn n, const hsize_t *size,
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+htri_t
 H5V_hyper_eq(intn n,
 	     const hssize_t *offset1, const hsize_t *size1,
 	     const hssize_t *offset2, const hsize_t *size2)
@@ -241,7 +241,7 @@ H5V_hyper_eq(intn n,
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+htri_t
 H5V_hyper_disjointp(intn n,
 		    const hssize_t *offset1, const hsize_t *size1,
 		    const hssize_t *offset2, const hsize_t *size2)

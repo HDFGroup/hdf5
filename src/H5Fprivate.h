@@ -312,7 +312,7 @@ typedef struct H5MF_free_t {
  * Define the low-level file interface.
  */
 typedef struct H5F_low_class_t {
-    hbool_t	(*access)(const char *name, const H5F_access_t *access_parms,
+    htri_t	(*access)(const char *name, const H5F_access_t *access_parms,
 			  int mode, H5F_search_t *key/*out*/);
     struct H5F_low_t *(*open)(const char *name,
 			      const H5F_access_t *access_parms, uintn flags,
@@ -611,7 +611,7 @@ herr_t H5F_low_seteof(H5F_low_t *lf, const haddr_t *addr);
 intn H5F_low_alloc (H5F_low_t *lf, intn op, hsize_t alignment,
 		    hsize_t threshold, hsize_t size, H5MF_free_t *blk,
 		    haddr_t *addr/*out*/);
-hbool_t H5F_low_access(const H5F_low_class_t *type, const char *name,
+htri_t H5F_low_access(const H5F_low_class_t *type, const char *name,
 		       const H5F_access_t *access_parms, int mode,
 		       H5F_search_t *key);
 H5F_low_t *H5F_low_open(const H5F_low_class_t *type, const char *name,
@@ -636,10 +636,10 @@ herr_t H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 #define H5F_addr_ge(A1,A2) (H5F_addr_cmp(A1,A2)>=0)
 
 intn H5F_addr_cmp(const haddr_t *, const haddr_t *);
-hbool_t H5F_addr_defined(const haddr_t *);
+htri_t H5F_addr_defined(const haddr_t *);
 void H5F_addr_undef(haddr_t *);
 void H5F_addr_reset(haddr_t *);
-hbool_t H5F_addr_zerop(const haddr_t *);
+htri_t H5F_addr_zerop(const haddr_t *);
 void H5F_addr_encode(H5F_t *, uint8 **, const haddr_t *);
 void H5F_addr_decode(H5F_t *, const uint8 **, haddr_t *);
 void H5F_addr_print(FILE *, const haddr_t *);
@@ -651,7 +651,7 @@ uintn H5F_addr_hash(const haddr_t *, uintn mod);
 
 /* Functions for MPI-IO */
 #ifdef HAVE_PARALLEL
-hbool_t H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval );
+htri_t H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval );
 #endif /* HAVE_PARALLEL */
 
 #endif

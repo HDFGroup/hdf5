@@ -83,7 +83,7 @@ extern "C" {
 #endif
 
 /* Functions in H5F.c */
-hbool_t H5Fis_hdf5 (const char *filename);
+htri_t H5Fis_hdf5 (const char *filename);
 hid_t H5Fcreate (const char *filename, unsigned flags, hid_t create_plist,
                  hid_t access_plist);
 hid_t H5Fopen (const char *filename, unsigned flags, hid_t access_plist);

@@ -99,7 +99,7 @@ static int H5F_mpio_Debug[256] =
           0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 #endif
 
-static hbool_t H5F_mpio_access(const char *name,
+static htri_t H5F_mpio_access(const char *name,
 			       const H5F_access_t *access_parms, int mode,
 			       H5F_search_t *key/*out*/);
 static H5F_low_t *H5F_mpio_open(const char *name,
@@ -109,7 +109,7 @@ static herr_t H5F_mpio_close(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
 			    const H5D_transfer_t xfer_mode,
 			    const haddr_t *addr, size_t size, uint8 *buf/*out*/);
-hbool_t H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval );
+htri_t H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval );
 static herr_t H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
 			     const H5D_transfer_t xfer_mode,
 			     const haddr_t *addr, size_t size, const uint8 *buf);
@@ -195,11 +195,11 @@ ino_t mpio_inode_num = 0;      /* fake "inode" number */
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static htri_t
 H5F_mpio_access(const char *name, const H5F_access_t *access_parms, int mode,
 		H5F_search_t *key/*out*/)
 {
-    hbool_t		   ret_val = FALSE;
+    htri_t		   ret_val = FALSE;
     MPI_File		   fh;
     int			   mpierr;
     int			   mpi_mode;
@@ -649,7 +649,7 @@ H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+htri_t
 H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval )
 {
     hbool_t		oldval;

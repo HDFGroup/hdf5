@@ -1010,7 +1010,7 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+htri_t
 H5Tcommitted(hid_t type_id)
 {
     H5T_t	*type = NULL;
@@ -1161,12 +1161,12 @@ H5Tclose(hid_t type_id)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+htri_t
 H5Tequal(hid_t type1_id, hid_t type2_id)
 {
     const H5T_t		*dt1 = NULL;
     const H5T_t		*dt2 = NULL;
-    hbool_t		ret_value = FAIL;
+    htri_t		ret_value = FAIL;
 
     FUNC_ENTER(H5Tequal, FAIL);
     H5TRACE2("b","ii",type1_id,type2_id);
@@ -3820,7 +3820,7 @@ H5T_close(H5T_t *dt)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+htri_t
 H5T_is_atomic(const H5T_t *dt)
 {
     FUNC_ENTER(H5T_is_atomic, FAIL);

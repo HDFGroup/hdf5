@@ -52,7 +52,7 @@ herr_t H5T_lock (H5T_t *dt, hbool_t immutable);
 herr_t H5T_close (H5T_t *dt);
 size_t H5T_get_size (const H5T_t *dt);
 intn H5T_cmp (const H5T_t *dt1, const H5T_t *dt2);
-hbool_t H5T_is_atomic (const H5T_t *dt);
+htri_t H5T_is_atomic (const H5T_t *dt);
 herr_t H5T_insert (H5T_t *parent, const char *name, size_t offset,
                    intn ndims, const size_t *dim, const intn *perm,
 		   const H5T_t *member);

@@ -1116,7 +1116,7 @@ test_select_hyper_offset(void)
                *tbuf2;      /* temporary buffer pointer */
     intn        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
-    hbool_t	    valid;		/* Generic boolean return value		*/
+    htri_t	    valid;		/* Generic boolean return value		*/
     H5S_class_t ext_type;   /* Extent type */
 
     /* Output message about test being performed */
@@ -1276,7 +1276,7 @@ test_select_point_offset(void)
                *tbuf2;      /* temporary buffer pointer */
     intn        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
-    hbool_t	    valid;		/* Generic boolean return value		*/
+    htri_t	    valid;		/* Generic boolean return value		*/
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Element Selection Functions\n"));

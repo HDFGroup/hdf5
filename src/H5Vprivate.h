@@ -42,10 +42,10 @@
 hsize_t H5V_hyper_stride(intn n, const hsize_t *size,
 			 const hsize_t *total_size, const hssize_t *offset,
 			 hssize_t *stride);
-hbool_t H5V_hyper_disjointp(intn n, const hssize_t *offset1,
+htri_t H5V_hyper_disjointp(intn n, const hssize_t *offset1,
 			    const hsize_t *size1, const hssize_t *offset2,
 			    const hsize_t *size2);
-hbool_t H5V_hyper_eq(intn n, const hssize_t *offset1, const hsize_t *size1,
+htri_t H5V_hyper_eq(intn n, const hssize_t *offset1, const hsize_t *size1,
 		     const hssize_t *offset2, const hsize_t *size2);
 herr_t H5V_hyper_fill(intn n, const hsize_t *_size, const hsize_t *total_size,
 		      const hssize_t *offset, void *_dst, uintn fill_value);
@@ -116,7 +116,7 @@ H5V_vector_reduce_product(intn n, const hsize_t *v)
  *
  *-------------------------------------------------------------------------
  */
-static inline hbool_t __unused__
+static inline htri_t __unused__
 H5V_vector_zerop_u(intn n, const hsize_t *v)
 {
     if (!v) return TRUE;
@@ -143,7 +143,7 @@ H5V_vector_zerop_u(intn n, const hsize_t *v)
  *
  *-------------------------------------------------------------------------
  */
-static inline hbool_t __unused__
+static inline htri_t __unused__
 H5V_vector_zerop_s(intn n, const hssize_t *v)
 {
     if (!v) return TRUE;

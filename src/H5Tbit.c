@@ -328,7 +328,7 @@ H5T_bit_find (uint8 *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	/* Beginning */
 	if (offset) {
 	    for (i=offset; i<8 && size>0; i++, size--) {
-		if (value==((buf[idx]>>i) & 0x01)) {
+		if (value==(hbool_t)((buf[idx]>>i) & 0x01)) {
 		    return 8*idx+i - base;
 		}
 	    }
@@ -339,7 +339,7 @@ H5T_bit_find (uint8 *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	while (size>=8) {
 	    if ((value?0x00:0xff)!=buf[idx]) {
 		for (i=0; i<8; i++) {
-		    if (value==((buf[idx]>>i) & 0x01)) {
+		    if (value==(hbool_t)((buf[idx]>>i) & 0x01)) {
 			return 8*idx+i - base;
 		    }
 		}
@@ -349,7 +349,7 @@ H5T_bit_find (uint8 *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	}
 	/* End */
 	for (i=0; i<(ssize_t)size; i++) {
-	    if (value==((buf[idx]>>i) & 0x01)) {
+	    if (value==(hbool_t)((buf[idx]>>i) & 0x01)) {
 		return 8*idx+i - base;
 	    }
 	}
@@ -363,7 +363,7 @@ H5T_bit_find (uint8 *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	/* Beginning */
 	if (size>8-offset && (offset+size)%8) {
 	    for (i=(offset+size)%8-1; i>=0; --i, --size) {
-		if (value==((buf[idx]>>i) & 0x01)) {
+		if (value==(hbool_t)((buf[idx]>>i) & 0x01)) {
 		    return 8*idx+i - base;
 		}
 	    }
@@ -373,7 +373,7 @@ H5T_bit_find (uint8 *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	while (size>=8) {
 	    if ((value?0x00:0xff)!=buf[idx]) {
 		for (i=7; i>=0; --i) {
-		    if (value==((buf[idx]>>i) & 0x01)) {
+		    if (value==(hbool_t)((buf[idx]>>i) & 0x01)) {
 			return 8*idx+i - base;
 		    }
 		}
@@ -384,7 +384,7 @@ H5T_bit_find (uint8 *buf, size_t offset, size_t size, H5T_sdir_t direction,
 	/* End */
 	if (size>0) {
 	    for (i=offset+size-1; i>=(ssize_t)offset; --i) {
-		if (value==((buf[idx]>>i) & 0x01)) {
+		if (value==(hbool_t)((buf[idx]>>i) & 0x01)) {
 		    return 8*idx+i - base;
 		}
 	    }
@@ -414,7 +414,7 @@ H5T_bit_find (uint8 *buf, size_t offset, size_t size, H5T_sdir_t direction,
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
+htri_t
 H5T_bit_inc(uint8 *buf, size_t start, size_t size)
 {
     size_t	idx = start / 8;

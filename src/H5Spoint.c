@@ -788,7 +788,7 @@ done:
     Check whether the selection fits within the extent, with the current
     offset defined.
  USAGE
-    hbool_t H5S_point_select_valid(space);
+    htri_t H5S_point_select_valid(space);
         H5S_t *space;             IN: Dataspace pointer to query
  RETURNS
     TRUE if the selection fits within the extent, FALSE if it does not and
@@ -801,12 +801,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hbool_t
+htri_t
 H5S_point_select_valid (const H5S_t *space)
 {
     H5S_pnt_node_t *curr;       /* Point information nodes */
     intn i;                     /* Counter */
-    hbool_t ret_value=TRUE;     /* return value */
+    htri_t ret_value=TRUE;     /* return value */
 
     FUNC_ENTER (H5S_point_select_valid, FAIL);
 

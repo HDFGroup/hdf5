@@ -300,7 +300,7 @@ intn H5S_get_simple_extent_dims (const H5S_t *ds, hsize_t dims[]/*out*/,
 herr_t H5S_modify (H5G_entry_t *ent, const H5S_t *space);
 H5S_t *H5S_read (H5G_entry_t *ent);
 intn H5S_cmp (const H5S_t *ds1, const H5S_t *ds2);
-hbool_t H5S_is_simple (const H5S_t *sdim);
+htri_t H5S_is_simple (const H5S_t *sdim);
 uintn H5S_nelem (const H5S_t *space);
 H5S_conv_t *H5S_find (const H5S_t *mem_space, const H5S_t *file_space);
 herr_t H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
@@ -320,7 +320,7 @@ hssize_t H5S_get_select_npoints (const H5S_t *space);
 intn H5S_extend (H5S_t *space, const hsize_t *size);
 herr_t H5S_set_extent_simple (H5S_t *space, int rank, const hsize_t *dims,
 			      const hsize_t *max);
-hbool_t H5S_select_valid (const H5S_t *space);
+htri_t H5S_select_valid (const H5S_t *space);
 herr_t H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, intn indent,
 		 intn fwidth);
 herr_t H5S_register(H5S_sel_type cls, const H5S_fconv_t *fconv,
@@ -331,7 +331,7 @@ herr_t H5S_point_add (H5S_t *space, size_t num_elemn, const hssize_t **coord);
 herr_t H5S_point_release (H5S_t *space);
 hsize_t H5S_point_npoints (const H5S_t *space);
 herr_t H5S_point_copy (H5S_t *dst, const H5S_t *src);
-hbool_t H5S_point_select_valid (const H5S_t *space);
+htri_t H5S_point_select_valid (const H5S_t *space);
 
 /* "All" select functions */
 herr_t H5S_all_release (H5S_t *space);
@@ -345,7 +345,7 @@ hsize_t H5S_hyper_npoints (const H5S_t *space);
 int H5S_hyper_compare_regions (const void *r1, const void *r2);
 int H5S_hyper_compare_bounds (const void *r1, const void *r2);
 herr_t H5S_hyper_copy (H5S_t *dst, const H5S_t *src);
-hbool_t H5S_hyper_select_valid (const H5S_t *space);
+htri_t H5S_hyper_select_valid (const H5S_t *space);
 herr_t H5S_hyper_node_add (H5S_hyper_node_t **head, intn endflag, intn rank, const hssize_t *start, const hsize_t *size);
 herr_t H5S_hyper_clip (H5S_t *space, H5S_hyper_node_t *nodes, H5S_hyper_node_t **uniq, H5S_hyper_node_t **overlap);
 

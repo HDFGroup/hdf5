@@ -155,6 +155,6 @@ hsize_t H5T_bit_get_d (uint8 *buf, size_t offset, size_t size);
 void H5T_bit_set_d (uint8 *buf, size_t offset, size_t size, hsize_t val);
 ssize_t H5T_bit_find (uint8 *buf, size_t offset, size_t size,
 		      H5T_sdir_t direction, hbool_t value);
-hbool_t H5T_bit_inc(uint8 *buf, size_t start, size_t size);
+htri_t H5T_bit_inc(uint8 *buf, size_t start, size_t size);
 
 #endif
