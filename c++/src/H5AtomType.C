@@ -89,12 +89,15 @@ void AtomType::setPrecision( size_t precision ) const
 }
 
 // Retrieves the bit offset of the first significant bit. 
-size_t AtomType::getOffset() const
+// 12/05/00: due to C API change
+//	- return type changed from size_t to int
+//	- offset = -1 when failure occurs vs. 0
+int AtomType::getOffset() const
 {
-   size_t offset = H5Tget_offset( id );  // C routine
+   int offset = H5Tget_offset( id );  // C routine
 
-   // returns a positive offset value if successful
-   if( offset == 0 )
+   // returns a non-negative offset value if successful
+   if( offset == -1 )
    {
       throw DataTypeIException();
    }

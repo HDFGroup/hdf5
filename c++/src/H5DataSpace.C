@@ -114,12 +114,14 @@ int DataSpace::getSimpleExtentNdims () const
 }
 
 // Determines the number of elements in a dataspace
-hsize_t DataSpace::getSimpleExtentNpoints () const
+// 12/05/00: due to C API change
+//	return type hssize_t vs. hsize_t
+//	num_elements = -1 when failure occurs vs. 0
+hssize_t DataSpace::getSimpleExtentNpoints () const
 {
-   hsize_t num_elements = H5Sget_simple_extent_npoints( id );
+   hssize_t num_elements = H5Sget_simple_extent_npoints( id );
 
-   // num_elements = 0 when failure occurs
-   if( num_elements > 0 )
+   if( num_elements > -1 )
       return( num_elements );
    else
    {

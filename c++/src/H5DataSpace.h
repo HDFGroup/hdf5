@@ -47,7 +47,8 @@ class DataSpace : public IdComponent {
 	int getSimpleExtentNdims () const;
 
 	// Gets the number of elements in this dataspace.
-	hsize_t getSimpleExtentNpoints () const;
+	// 12/05/00 - changed return type to hssize_t from hsize_t - C API 
+	hssize_t getSimpleExtentNpoints () const;
 
 	// Gets the current class of this dataspace.
 	H5S_class_t getSimpleExtentType () const;

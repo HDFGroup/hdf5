@@ -25,7 +25,8 @@ class AtomType : public DataType {
 	void setPrecision( size_t precision ) const;
 
 	// Retrieves the bit offset of the first significant bit. 
-	size_t getOffset() const;
+	// 12/05/00 - changed return type to int from size_t - C API
+	int getOffset() const;
 
 	// Sets the bit offset of the first significant bit. 
 	void setOffset( size_t offset ) const;
