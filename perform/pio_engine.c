@@ -129,9 +129,9 @@ typedef union _file_descr {
 static char  *pio_create_filename(iotype iot, const char *base_name,
                                   char *fullname, size_t size);
 static herr_t do_write(file_descr *fd, iotype iot, long ndsets,
-                       long nelmts, long buf_size, void *buffer);
+                       long nelmts, size_t buf_size, void *buffer);
 static herr_t do_read(file_descr *fd, iotype iot, long ndsets,
-		      long nelmts, long buf_size, void *buffer /*out*/);
+		      long nelmts, size_t buf_size, void *buffer /*out*/);
 static herr_t do_fopen(iotype iot, char *fname, file_descr *fd /*out*/,
                        int flags);
 static herr_t do_fclose(iotype iot, file_descr *fd);
@@ -157,9 +157,10 @@ do_pio(parameters param)
     char        fname[FILENAME_MAX];
     int         maxprocs;
     int		nfiles, nf;
-    long        ndsets, nelmts;
+    long        ndsets;
+    long        nelmts;
     char        *buffer = NULL;         /*data buffer pointer           */
-    long        buf_size;               /*data buffer size in bytes     */
+    size_t      buf_size;               /*data buffer size in bytes     */
 
     /* HDF5 variables */
     herr_t          hrc;                /*HDF5 return code              */
@@ -244,7 +245,7 @@ buf_size=MIN(1024*1024, buf_size);
 #endif
 
     /* allocate data buffer */
-    buffer = malloc((size_t)buf_size);
+    buffer = malloc(buf_size);
 
     if (buffer == NULL){
         fprintf(stderr, "malloc for data buffer size (%ld) failed\n",
@@ -468,7 +469,7 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
  */
 static herr_t
 do_write(file_descr *fd, iotype iot, long ndsets,
-         long nelmts, long buf_size, void *buffer)
+         long nelmts, size_t buf_size, void *buffer)
 {
     int         ret_code = SUCCESS;
     int         rc;             /*routine return code                   */
@@ -480,7 +481,7 @@ do_write(file_descr *fd, iotype iot, long ndsets,
     char        dname[64];
     off_t       dset_offset;    /*dataset offset in a file              */
     off_t       file_offset;    /*file offset of the next transfer      */
-    long        dset_size;      /*one dataset size in bytes             */
+    off_t       dset_size;      /*one dataset size in bytes             */
     long        nelmts_in_buf;
     long        elmts_begin;    /*first elmt this process transfer      */
     long        elmts_count;    /*number of elmts this process transfer */
@@ -587,7 +588,9 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
             /* Calculate offset of write within a dataset/file */
             switch (iot) {
             case RAWIO:
-                file_offset = dset_offset + (elmts_begin + nelmts_written)*ELMT_SIZE;
+		/* need to (off_t) the elmnts_begin expression because they */
+		/* may be of smaller sized integer types */
+                file_offset = dset_offset + (off_t)(elmts_begin + nelmts_written)*ELMT_SIZE;
 
 #if AKCDEBUG
 fprintf(stderr, "proc %d: writes %ld bytes at file-offset %ld\n",
@@ -692,7 +695,7 @@ done:
  */
 static herr_t
 do_read(file_descr *fd, iotype iot, long ndsets,
-        long nelmts, long buf_size, void *buffer /*out*/)
+        long nelmts, size_t buf_size, void *buffer /*out*/)
 {
     int         ret_code = SUCCESS;
     int         rc;             /*routine return code                   */
@@ -704,7 +707,7 @@ do_read(file_descr *fd, iotype iot, long ndsets,
     char        dname[64];
     off_t       dset_offset;    /*dataset offset in a file              */
     off_t       file_offset;	/*file offset of the next transfer      */
-    long        dset_size;      /*one dataset size in bytes             */
+    off_t       dset_size;      /*one dataset size in bytes             */
     long        nelmts_in_buf;
     long        elmts_begin;    /*first elmt this process transfer      */
     long        elmts_count;    /*number of elmts this process transfer */
@@ -797,7 +800,9 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
             /* Calculate offset of read within a dataset/file */
             switch (iot){
             case RAWIO:
-                file_offset = dset_offset + (elmts_begin + nelmts_read)*ELMT_SIZE;
+		/* need to (off_t) the elmnts_begin expression because they */
+		/* may be of smaller sized integer types */
+                file_offset = dset_offset + (off_t)(elmts_begin + nelmts_read)*ELMT_SIZE;
 
 #if AKCDEBUG
 fprintf(stderr, "proc %d: read %ld bytes at file-offset %ld\n",

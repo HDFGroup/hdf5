@@ -203,14 +203,14 @@ static struct long_options l_opts[] = {
 struct options {
     long io_types;              /* bitmask of which I/O types to test   */
     const char *output_file;    /* file to print report to              */
-    long file_size;             /* size of file                         */
+    off_t file_size;            /* size of file                         */
     long num_dsets;             /* number of datasets                   */
     long num_files;             /* number of files                      */
     long num_iters;             /* number of iterations                 */
     long max_num_procs;         /* maximum number of processes to use   */
     long min_num_procs;         /* minimum number of processes to use   */
-    long max_xfer_size;         /* maximum transfer buffer size         */
-    long min_xfer_size;         /* minimum transfer buffer size         */
+    size_t max_xfer_size;       /* maximum transfer buffer size         */
+    size_t min_xfer_size;       /* minimum transfer buffer size         */
 };
 
 typedef struct _minmax {
@@ -221,13 +221,13 @@ typedef struct _minmax {
 } minmax;
 
 /* local functions */
-static long parse_size_directive(const char *size);
+static off_t parse_size_directive(const char *size);
 static struct options *parse_command_line(int argc, char *argv[]);
 static void run_test_loop(struct options *options);
 static int run_test(iotype iot, parameters parms);
 static void output_all_info(minmax *mm, int count, int indent_level);
 static void get_minmax(minmax *mm, double val);
-static minmax accumulate_minmax_stuff(minmax *mm, long raw_size, int count);
+static minmax accumulate_minmax_stuff(minmax *mm, off_t raw_size, int count);
 static int create_comm_world(int num_procs, int *doing_pio);
 static int destroy_comm_world(void);
 static void output_report(const char *fmt, ...);
@@ -296,7 +296,7 @@ main(int argc, char **argv)
             goto finish;
         }
     }
-
+printf("file_size=%lld\n", opts->file_size);
     run_test_loop(opts);
 
 finish:
@@ -355,7 +355,7 @@ run_test_loop(struct options *opts)
     /* if performance needs restart, fewer processes may be needed. */
     for (num_procs = opts->max_num_procs;
             num_procs >= opts->min_num_procs; num_procs >>= 1) {
-        register long buf_size;
+        register size_t buf_size;
 
         parms.num_procs = num_procs;
 
@@ -411,7 +411,7 @@ run_test(iotype iot, parameters parms)
     results         res;
     register int    i, ret_value = SUCCESS;
     int             comm_size;
-    long            raw_size;
+    off_t           raw_size;
     minmax          total_mm;
     minmax         *write_mpi_mm_table;
     minmax         *write_mm_table;
@@ -484,7 +484,7 @@ run_test(iotype iot, parameters parms)
         read_gross_mm_table[i].num = 0;
     }
 
-    /* call Albert's testing here */
+    /* Do IO iteration times, collecting statics each time */
     for (i = 0; i < parms.num_iters; ++i) {
         double t;
 
@@ -529,6 +529,9 @@ run_test(iotype iot, parameters parms)
         pio_time_destroy(res.timers);
     }
 
+    /* 
+     * Show various statics
+     */
     /* show mpi write statics */
     if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
@@ -691,7 +694,7 @@ get_minmax(minmax *mm, double val)
  * Modifications:
  */
 static minmax
-accumulate_minmax_stuff(minmax *mm, long raw_size, int count)
+accumulate_minmax_stuff(minmax *mm, off_t raw_size, int count)
 {
     register int i;
     minmax total_mm;
@@ -944,15 +947,16 @@ parse_command_line(int argc, char *argv[])
  *                  M, m - Megabyte
  *                  G, g - Gigabyte
  *
- * Return:      The size as a LONG. If an unknown size indicator is used, then
- *              the program will exit with EXIT_FAILURE as the return value.
+ * Return:      The size as a off_t because this is related to file size.
+ *              If an unknown size indicator is used, then the program will
+ *              exit with EXIT_FAILURE as the return value.
  * Programmer:  Bill Wendling, 18. December 2001
  * Modifications:
  */
-static long
+static off_t
 parse_size_directive(const char *size)
 {
-    long s;
+    off_t s;
     char *endptr;
 
     s = strtol(size, &endptr, 10);
