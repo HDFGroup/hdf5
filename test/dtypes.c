@@ -2063,38 +2063,47 @@ test_compound_12(void)
     TESTING("adjust size of compound data types");
 
     /* Create the empty compound type */
-    if ((complex_id = H5Tcreate(H5T_COMPOUND, 0))<0) goto error;
+    if ((complex_id = H5Tcreate(H5T_COMPOUND, 1))<0) goto error;
+    
+    /* Verify the size */
+    if((new_size=H5Tget_size(complex_id))==0) goto error; 
+    if(new_size!=1) goto error;
 
     /* Add a couple fields and adjust the size */
     offset = size;
-    if((size+=H5Tget_size(H5T_NATIVE_DOUBLE))<0) goto error; 
+    size+=H5Tget_size(H5T_NATIVE_DOUBLE);
     if (H5Tset_size(complex_id, size)<0) goto error;
     if (H5Tinsert(complex_id, "real", offset,
 		  H5T_NATIVE_DOUBLE)<0) goto error;
 
     offset = size;
-    if((size+=H5Tget_size(H5T_NATIVE_DOUBLE))<0) goto error; 
+    size+=H5Tget_size(H5T_NATIVE_DOUBLE);
     if (H5Tset_size(complex_id, size)<0) goto error;
     if (H5Tinsert(complex_id, "imaginary", offset,
 		  H5T_NATIVE_DOUBLE)<0) goto error;
 
     /* Increase and decrease the size. */
-    if((size+=H5Tget_size(H5T_NATIVE_DOUBLE))<0) goto error; 
+    size+=H5Tget_size(H5T_NATIVE_DOUBLE);
     if (H5Tset_size(complex_id, size)<0) goto error;
    
-    if((size-=H5Tget_size(H5T_NATIVE_DOUBLE))<0) goto error; 
+    size-=H5Tget_size(H5T_NATIVE_DOUBLE);
     if (H5Tset_size(complex_id, size)<0) goto error;
 
     /* Verify the size */
-    if((new_size=H5Tget_size(complex_id))<0) goto error; 
+    if((new_size=H5Tget_size(complex_id))==0) goto error; 
     if(new_size!=size) goto error;
 
     /* Tries to cut last member.  Supposed to fail. */
     size--;
     H5E_BEGIN_TRY {
-        H5Tset_size(complex_id, size);
+        ret = H5Tset_size(complex_id, size);
     } H5E_END_TRY;  
-    
+    if(ret>=0) {
+        H5_FAILED();
+        puts("  Tries to cut off the last member. Should have failed.");
+        goto error;
+    }
+   
     if (H5Tclose (complex_id)<0) goto error;
     PASSED();
     return 0;
