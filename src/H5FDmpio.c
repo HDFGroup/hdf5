@@ -71,12 +71,13 @@ static void *H5FD_mpio_fapl_get(H5FD_t *_file);
 static H5FD_t *H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
 static herr_t H5FD_mpio_close(H5FD_t *_file);
+static herr_t H5FD_mpio_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_mpio_get_eoa(H5FD_t *_file);
 static herr_t H5FD_mpio_set_eoa(H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_mpio_get_eof(H5FD_t *_file);
 static herr_t H5FD_mpio_read(H5FD_t *_file, hid_t fapl_id, haddr_t addr,
 			     hsize_t size, void *buf);
-static herr_t H5FD_mpio_write(H5FD_t *_file, hid_t fapl_id, haddr_t addr,
+static herr_t H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      hsize_t size, const void *buf);
 static herr_t H5FD_mpio_flush(H5FD_t *_file);
 
@@ -103,6 +104,7 @@ static const H5FD_class_t H5FD_mpio_g = {
     H5FD_mpio_open,				/*open			*/
     H5FD_mpio_close,				/*close			*/
     NULL,					/*cmp			*/
+    H5FD_mpio_query,		/*query			*/
     NULL,					/*alloc			*/
     NULL,					/*free			*/
     H5FD_mpio_get_eoa,				/*get_eoa		*/
@@ -857,6 +859,40 @@ H5FD_mpio_close(H5FD_t *_file)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_mpio_query
+ *
+ * Purpose:	Set the flags that this VFL driver is capable of supporting.
+ *      (listed in H5FDpublic.h)
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, August 25, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_mpio_query(const H5FD_t *_f, unsigned long *flags /* out */)
+{
+    const H5FD_mpio_t	*f = (const H5FD_mpio_t*)_f;
+    herr_t ret_value=SUCCEED;
+
+    FUNC_ENTER(H5FD_mpio_query, FAIL);
+
+    /* Set the VFL feature flags that this driver supports */
+    if(flags) {
+        *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
+    } /* end if */
+
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_mpio_get_eoa
  *
  * Purpose:	Gets the end-of-address marker for the file. The EOA marker
@@ -1231,7 +1267,7 @@ H5FD_mpio_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mpio_write(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
+H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, haddr_t addr,
 		hsize_t size, const void *buf)
 {
     H5FD_mpio_t			*file = (H5FD_mpio_t*)_file;

@@ -71,12 +71,13 @@ static H5FD_t *H5FD_family_open(const char *name, unsigned flags,
 				hid_t fapl_id, haddr_t maxaddr);
 static herr_t H5FD_family_close(H5FD_t *_file);
 static int H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
+static herr_t H5FD_family_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_family_get_eoa(H5FD_t *_file);
 static herr_t H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa);
 static haddr_t H5FD_family_get_eof(H5FD_t *_file);
 static herr_t H5FD_family_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr,
 			       hsize_t size, void *_buf/*out*/);
-static herr_t H5FD_family_write(H5FD_t *_file, hid_t dxpl_id, haddr_t addr,
+static herr_t H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 				hsize_t size, const void *_buf);
 static herr_t H5FD_family_flush(H5FD_t *_file);
 
@@ -97,6 +98,7 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD_family_open,				/*open			*/
     H5FD_family_close,				/*close			*/
     H5FD_family_cmp,				/*cmp			*/
+    H5FD_family_query,		        /*query			*/
     NULL,					/*alloc			*/
     NULL,					/*free			*/
     H5FD_family_get_eoa,			/*get_eoa		*/
@@ -608,6 +610,41 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_family_query
+ *
+ * Purpose:	Set the flags that this VFL driver is capable of supporting.
+ *      (listed in H5FDpublic.h)
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, August 25, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_family_query(const H5FD_t *_f, unsigned long *flags /* out */)
+{
+    const H5FD_family_t	*f = (const H5FD_family_t*)_f;
+    herr_t ret_value=SUCCEED;
+
+    FUNC_ENTER(H5FD_family_query, FAIL);
+
+    /* Set the VFL feature flags that this driver supports */
+    if(flags) {
+        *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
+        *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
+    } /* end if */
+
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_family_get_eoa
  *
  * Purpose:	Returns the end-of-address marker for the file. The EOA
@@ -837,7 +874,7 @@ H5FD_family_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_write(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
+H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size,
 		  const void *_buf)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
@@ -868,7 +905,7 @@ H5FD_family_write(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
         req = MIN(size, file->memb_size-sub);
         assert(i<file->nmembs);
 
-        if (H5FDwrite(file->memb[i], memb_dxpl_id, sub, req, buf)<0)
+        if (H5FDwrite(file->memb[i], type, memb_dxpl_id, sub, req, buf)<0)
             HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
 			  "member file write failed");
 

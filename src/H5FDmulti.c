@@ -123,7 +123,7 @@ static herr_t H5FD_multi_free(H5FD_t *_file, H5FD_mem_t type, haddr_t addr,
 			      hsize_t size);
 static herr_t H5FD_multi_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr,
 			      hsize_t size, void *_buf/*out*/);
-static herr_t H5FD_multi_write(H5FD_t *_file, hid_t dxpl_id, haddr_t addr,
+static herr_t H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 			       hsize_t size, const void *_buf);
 static herr_t H5FD_multi_flush(H5FD_t *_file);
 
@@ -144,6 +144,7 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_open,				/*open			*/
     H5FD_multi_close,				/*close			*/
     H5FD_multi_cmp,				/*cmp			*/
+    NULL,				    /*query			*/
     H5FD_multi_alloc,				/*alloc			*/
     H5FD_multi_free,				/*free			*/
     H5FD_multi_get_eoa,				/*get_eoa		*/
@@ -1587,7 +1588,7 @@ H5FD_multi_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_multi_write(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
+H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size,
 		  const void *_buf)
 {
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
@@ -1618,7 +1619,7 @@ H5FD_multi_write(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
     assert(hi>0);
 
     /* Write to that member */
-    return H5FDwrite(file->memb[hi], dx?dx->memb_dxpl[hi]:H5P_DEFAULT,
+    return H5FDwrite(file->memb[hi], type, dx?dx->memb_dxpl[hi]:H5P_DEFAULT,
 		     addr-start_addr, size, _buf);
 }
 
