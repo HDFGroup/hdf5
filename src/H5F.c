@@ -21,26 +21,26 @@
 /* Predefined file drivers */
 #include "H5FDcore.h"		/*temporary in-memory files		  */
 #include "H5FDfamily.h"		/*family of files			  */
+#include "H5FDgass.h"           /*GASS I/O                                */
+#include "H5FDlog.h"            /* sec2 driver with logging, for debugging */
 #include "H5FDmpio.h"		/*MPI-2 I/O				  */
 #include "H5FDmpiposix.h"	/*MPI-2 & posix I/O			  */
-#include "H5FDgass.h"           /*GASS I/O                                */
-#include "H5FDstream.h"         /*in-memory files streamed via sockets    */
-#include "H5FDsrb.h"            /*SRB I/O                                 */
 #include "H5FDmulti.h"		/*multiple files partitioned by mem usage */
 #include "H5FDsec2.h"		/*Posix unbuffered I/O			  */
+#include "H5FDsrb.h"            /*SRB I/O                                 */
 #include "H5FDstdio.h"		/* Standard C buffered I/O		  */
-#include "H5FDlog.h"        /* sec2 driver with logging, for debugging */
+#include "H5FDstream.h"         /*in-memory files streamed via sockets    */
 
 /* Packages needed by this file... */
 #include "H5private.h"		/*library functions			  */
 #include "H5Aprivate.h"		/*attributes				  */
-#include "H5Dprivate.h"		/*datasets				  */
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5Iprivate.h"		/*object IDs				  */
 #include "H5ACprivate.h"	/*cache					  */
+#include "H5Dprivate.h"		/*datasets				  */
 #include "H5Eprivate.h"		/*error handling			  */
 #include "H5Fpkg.h"             /*file access                             */
 #include "H5FDprivate.h"	/*file driver				  */
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5Iprivate.h"		/*object IDs				  */
 #include "H5Gprivate.h"		/*symbol tables				  */
 #include "H5MMprivate.h"	/*core memory management		  */
 #include "H5Pprivate.h"		/*property lists			  */
