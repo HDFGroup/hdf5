@@ -30,6 +30,69 @@
 /* Local datatypes */
 
 /* Static function prototypes */
+static herr_t H5P_set_layout(H5P_genplist_t *plist, H5D_layout_t layout);
+
+
+/*-------------------------------------------------------------------------
+ * Function:  H5P_set_layout
+ *
+ * Purpose:   Sets the layout of raw data in the file.
+ *
+ * Return:    Non-negative on success/Negative on failure
+ *
+ * Programmer:        Quincey Koziol
+ *            Tuesday, November 23, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P_set_layout(H5P_genplist_t *plist, H5D_layout_t layout)
+{
+    unsigned alloc_time_state;  /* State of allocation time property */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5P_set_layout);
+
+    /* Get the allocation time state */
+    if(H5P_get(plist, H5D_CRT_ALLOC_TIME_STATE_NAME, &alloc_time_state) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set space allocation time");
+
+    /* If we still have the "default" allocation time, change it according to the new layout */
+    if(alloc_time_state) {
+        H5D_alloc_time_t alloc_time;    /* Space allocation time */
+
+        /* Set the default based on layout */
+        switch(layout) {
+            case H5D_COMPACT:
+                alloc_time=H5D_ALLOC_TIME_EARLY;
+                break;
+
+            case H5D_CONTIGUOUS:
+                alloc_time=H5D_ALLOC_TIME_LATE;
+                break;
+
+            case H5D_CHUNKED:
+                alloc_time=H5D_ALLOC_TIME_INCR;
+                break;
+
+            default:
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unknown layou t type")
+        } /* end switch */
+
+        /* Set new allocation time */
+        if(H5P_set(plist, H5D_CRT_ALLOC_TIME_NAME, &alloc_time) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set space allocat ion time");
+    } /* end if */
+
+    /* Set layout value */
+    if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set layout");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5P_set_layout() */
 
 
 /*-------------------------------------------------------------------------
@@ -69,7 +132,7 @@ H5Pset_layout(hid_t plist_id, H5D_layout_t layout)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set value */
-    if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+    if(H5P_set_layout (plist, layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set layout");
 
 done:
@@ -149,7 +212,6 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
 {
     int			    i;
     size_t real_dims[H5O_LAYOUT_NDIMS]; /* Full-sized array to hold chunk dims */
-    H5D_layout_t           layout;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
 
@@ -178,13 +240,12 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
         real_dims[i]=(size_t)dim[i]; /* Store user's chunk dimensions */
     } /* end for */
 
-    layout = H5D_CHUNKED;
-    if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set layout");
+    if(H5P_set_layout (plist, H5D_CHUNKED) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout");
     if(H5P_set(plist, H5D_CRT_CHUNK_DIM_NAME, &ndims) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set chunk dimensionanlity");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set chunk dimensionanlity");
     if(H5P_set(plist, H5D_CRT_CHUNK_SIZE_NAME, real_dims) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set chunk size");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set chunk size");
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1066,6 +1127,7 @@ done:
  *              Tuesday, April 1, 2003
  *
  * Modifications:
+ *
  *          Nat Furrer and James Laird
  *          June 30, 2004
  *          Now ensures that SZIP encoding is enabled
@@ -1504,6 +1566,7 @@ herr_t
 H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time)
 {
     H5P_genplist_t *plist; 	/* Property list pointer */
+    unsigned alloc_time_state;  /* State of allocation time property */
     herr_t ret_value = SUCCEED; /* return value 	 */
 
     FUNC_ENTER_API(H5Pset_alloc_time, FAIL);
@@ -1513,9 +1576,44 @@ H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time)
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
+    /* Check for resetting to default for layout type */
+    if(alloc_time==H5D_ALLOC_TIME_DEFAULT) {
+        H5D_layout_t layout;            /* Type of storage layout */
+        
+        /* Retrieve the storage layout */
+        if(H5P_get(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get layout");
+
+        /* Set the default based on layout */
+        switch(layout) {
+            case H5D_COMPACT:
+                alloc_time=H5D_ALLOC_TIME_EARLY;
+                break;
+
+            case H5D_CONTIGUOUS:
+                alloc_time=H5D_ALLOC_TIME_LATE;
+                break;
+
+            case H5D_CHUNKED:
+                alloc_time=H5D_ALLOC_TIME_INCR;
+                break;
+
+            default:
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unknown layout type")
+        } /* end switch */
+
+        /* Reset the "state" of the allocation time property back to the "default" */
+        alloc_time_state=1;
+    } /* end if */
+    else
+        /* Set the "state" of the allocation time property to indicate the user modified it */
+        alloc_time_state=0;
+
     /* Set values */
     if(H5P_set(plist, H5D_CRT_ALLOC_TIME_NAME, &alloc_time) < 0)
 	HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set space allocation time");
+    if(H5P_set(plist, H5D_CRT_ALLOC_TIME_STATE_NAME, &alloc_time_state) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set space allocation time");
 
 done:
     FUNC_LEAVE_API(ret_value);  

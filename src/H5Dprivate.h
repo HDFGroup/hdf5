@@ -58,7 +58,10 @@
 /* Definitions for space allocation time */
 #define H5D_CRT_ALLOC_TIME_NAME   "alloc_time"
 #define H5D_CRT_ALLOC_TIME_SIZE   sizeof(H5D_alloc_time_t)
-#define H5D_CRT_ALLOC_TIME_DEF    H5D_ALLOC_TIME_DEFAULT
+#define H5D_CRT_ALLOC_TIME_DEF    H5D_ALLOC_TIME_LATE
+#define H5D_CRT_ALLOC_TIME_STATE_NAME   "alloc_time_state"
+#define H5D_CRT_ALLOC_TIME_STATE_SIZE   sizeof(unsigned)
+#define H5D_CRT_ALLOC_TIME_STATE_DEF    1
 /* Definitions for time of fill value writing */
 #define H5D_CRT_FILL_TIME_NAME     "fill_time"
 #define H5D_CRT_FILL_TIME_SIZE     sizeof(H5D_fill_time_t)
@@ -75,14 +78,6 @@
 #define H5D_CRT_DATA_PIPELINE_CMP  H5D_crt_data_pipeline_cmp
 
 /* ======== Data transfer properties ======== */
-/* Definitions for data transform property */
-#define H5D_XFER_XFORM_NAME         "data_transform"
-#define H5D_XFER_XFORM_SIZE         sizeof(void *)
-#define H5D_XFER_XFORM_DEF          NULL
-#define H5D_XFER_XFORM_DEL          H5D_xfer_xform_del
-#define H5D_XFER_XFORM_COPY         H5D_xfer_xform_copy
-#define H5D_XFER_XFORM_CLOSE        H5D_xfer_xform_close
-                                   
 /* Definitions for maximum temp buffer size property */
 #define H5D_XFER_MAX_TEMP_BUF_NAME       "max_temp_buf"
 #define H5D_XFER_MAX_TEMP_BUF_SIZE       sizeof(size_t)
@@ -153,6 +148,13 @@
 #define H5D_XFER_CONV_CB_NAME       "type_conv_cb"
 #define H5D_XFER_CONV_CB_SIZE       sizeof(H5T_conv_cb_t)
 #define H5D_XFER_CONV_CB_DEF        {NULL,NULL}
+/* Definitions for data transform property */
+#define H5D_XFER_XFORM_NAME         "data_transform"
+#define H5D_XFER_XFORM_SIZE         sizeof(void *)
+#define H5D_XFER_XFORM_DEF          NULL
+#define H5D_XFER_XFORM_DEL          H5D_xfer_xform_del
+#define H5D_XFER_XFORM_COPY         H5D_xfer_xform_copy
+#define H5D_XFER_XFORM_CLOSE        H5D_xfer_xform_close
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
 /* Definitions for collective chunk I/O property */
 #define H5D_XFER_COLL_CHUNK_NAME       "coll_chunk"
