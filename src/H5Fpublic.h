@@ -113,7 +113,7 @@ H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void** file_handle);
 H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
 H5_DLL herr_t H5Funmount(hid_t loc, const char *name);
 H5_DLL hssize_t H5Fget_freespace(hid_t file_id);
-H5_DLL haddr_t H5Fget_filesize(hid_t file_id);
+H5_DLL herr_t H5Fget_filesize(hid_t file_id, hsize_t *size);
 H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
 
 #ifdef __cplusplus

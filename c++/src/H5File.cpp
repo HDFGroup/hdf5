@@ -175,14 +175,16 @@ FileAccPropList H5File::getAccessPlist() const
 // is called after an existing file is opened in order
 // to learn the true size of the underlying file.
 //  (Raymond Lu)
-haddr_t H5File::getFileSize(void) const
+herr_t H5File::getFileSize(hsize_t *size) const
 {
-   haddr_t file_size = H5Fget_filesize(id);
-   if( file_size < 0 )
+   herr_t ret;
+   
+   ret = H5Fget_filesize(id, size);
+   if( ret < 0 )
    {
       throw FileIException("H5File::getFileSize", "H5Fget_filesize failed");
    }
-   return file_size;
+   return ret;
 }
 
 // Calls the C API H5Fclose to close this file.  Used by IdComponent::reset

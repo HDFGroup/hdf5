@@ -51,7 +51,7 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	void reopen();
 
         // Retrieves the file size of an opened file.
-        haddr_t getFileSize() const;
+        herr_t getFileSize(hsize_t *size) const;
 
 	// Gets the creation property list of this file
 	FileCreatPropList getCreatePlist() const;
