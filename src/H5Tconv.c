@@ -3584,11 +3584,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if(cb_struct.func) { /*If user's exception handler is present, use it*/
                         /*reverse order first*/
                         H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
-                        if(sign)
-                            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_NINF,
-                                src_id, dst_id, src_rev, d, cb_struct.user_data);
-                        else
-                            except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_PINF,
+                        except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_NAN,
                                 src_id, dst_id, src_rev, d, cb_struct.user_data);
                     }
 
@@ -9917,7 +9913,8 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      */
                     if(sign) { /*source is negative*/
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
+                            /*reverse order first*/
+                            H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW, 
                                     src_id, dst_id, src_rev, d, cb_struct.user_data);
                             if(except_ret == H5T_CONV_ABORT)
@@ -9932,7 +9929,8 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         if (first>=dst.prec) {
                             /*overflow*/
                             if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
+                                /*reverse order first*/
+                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, 
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -9947,7 +9945,8 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         } else if (first <dst.prec) {
                             if(truncated && cb_struct.func) { /*If user's exception handler is present, use it*/
-                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
+                                /*reverse order first*/
+                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_TRUNCATE, 
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -9967,7 +9966,8 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if(sign) { /*source is negative*/
                         if(first < dst.prec-1) {
                             if(truncated && cb_struct.func) { /*If user's exception handler is present, use it*/
-                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
+                                /*reverse order first*/
+                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order);
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_TRUNCATE, 
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
