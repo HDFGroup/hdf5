@@ -1,11 +1,12 @@
 /*
- * Copyright (C) 1998, 2001
- *     National Center for Supercomputing Applications
- *     All rights reserved
+ * Copyright (C) 1998-2002 NCSA
+ * For conditions of distribution and use, see the accompanying
+ * COPYING file.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Monday, March 23, 1998
  */
+
 
 /*
  * We include the private header file so we can get to the uniform
@@ -1056,6 +1057,64 @@ display_vlen_type(hid_t type, int ind)
     return TRUE;
 }
 
+/*---------------------------------------------------------------------------
+ * Purpose:     Print information about an array type
+ *
+ * Return:      Success:        TRUE
+ *
+ *              Failure:        FALSE
+ *
+ * Programmer:  Robb Matzke
+ *              Thursday, January 31, 2002
+ *
+ * Modifications:
+ *---------------------------------------------------------------------------
+ */
+static hbool_t
+display_array_type(hid_t type, int ind)
+{
+    hid_t       super;
+    int         ndims, i, *perm=NULL, identity;
+    hsize_t     *dims=NULL;
+
+    if (H5T_ARRAY!=H5Tget_class(type)) return FALSE;
+    ndims = H5Tget_array_ndims(type);
+    if (ndims) {
+        dims = malloc(ndims*sizeof(dims[0]));
+        perm = malloc(ndims*sizeof(perm[0]));
+        H5Tget_array_dims(type, dims, perm);
+
+        /* Print dimensions */
+        for (i=0; i<ndims; i++)
+            HDfprintf(stdout, "%s%Hu" , i?",":"[", dims[i]);
+        putchar(']');
+
+        /* Print permutation vector if not identity */
+        for (i=0, identity=TRUE; identity && i<ndims; i++) {
+            if (i!=perm[i]) identity = FALSE;
+        }
+        if (!identity) {
+            fputs(" perm=[", stdout);
+            for (i=0; i<ndims; i++)
+                HDfprintf(stdout, "%s%d", i?",":"", perm[i]);
+            putchar(']');
+        }
+
+        free(dims);
+        free(perm);
+    } else {
+        fputs(" [SCALAR]", stdout);
+    }
+    
+
+    /* Print parent type */
+    putchar(' ');
+    super = H5Tget_super(type);
+    display_type(super, ind+4);
+    H5Tclose(super);
+    return TRUE;
+}
+            
 
 /*-------------------------------------------------------------------------
  * Function:	display_type
@@ -1110,6 +1169,7 @@ display_type(hid_t type, int ind)
 	display_string_type(type, ind) ||
 	display_reference_type(type, ind) ||
         display_vlen_type(type, ind) ||
+        display_array_type(type, ind) ||
 	display_opaque_type(type, ind)) {
 	return;
     }
@@ -1246,12 +1306,13 @@ dump_dataset_values(hid_t dset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
+list_attr (hid_t obj, const char *attr_name, void * UNUSED op_data)
 {
     hid_t	attr, space, type, p_type;
     hsize_t	size[64], nelmts=1;
     int		ndims, i, n;
     size_t	need;
+    hsize_t     temp_need;
     void	*buf;
     h5dump_t	info;
 
@@ -1314,7 +1375,9 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 	    p_type = h5tools_fixtype(type);
 	}
 	if (p_type>=0) {
-	    need = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
+            temp_need= nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
+            assert(temp_need==(hsize_t)((size_t)temp_need));
+            need = (size_t)temp_need;
 	    buf = malloc(need);
 	    assert(buf);
 	    if (H5Aread(attr, p_type, buf)>=0) {
@@ -1404,7 +1467,7 @@ dataset_list1(hid_t dset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-dataset_list2(hid_t dset, const char UNUSED *name)
+dataset_list2(hid_t dset, const char * UNUSED name)
 {
     hid_t		dcpl;		/*dataset creation property list*/
     hid_t		type;		/*data type of dataset		*/
@@ -1591,7 +1654,7 @@ group_list2(hid_t grp, const char *name)
  *-------------------------------------------------------------------------
  */
 static herr_t
-datatype_list2(hid_t type, const char UNUSED *name)
+datatype_list2(hid_t type, const char * UNUSED name)
 {
     if (verbose_g>0) {
 	printf("    %-10s ", "Type:");
