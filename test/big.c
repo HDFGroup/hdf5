@@ -220,7 +220,6 @@ writer (hid_t fapl, int wrt_n)
 		      H5P_DEFAULT, buf)<0) goto error;
     }
 	
-    fclose(out);
     if (H5Dclose (d1)<0) goto error;
     if (H5Dclose (d2)<0) goto error;
     if (H5Sclose (mem_space)<0) goto error;
@@ -228,6 +227,7 @@ writer (hid_t fapl, int wrt_n)
     if (H5Sclose (space2)<0) goto error;
     if (H5Fclose (file)<0) goto error;
     free (buf);
+    fclose(out);
     PASSED();
     return 0;
 
@@ -373,7 +373,7 @@ main (void)
 	if (H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT)<0) goto error;
     } else if (H5Pget_fapl_family(fapl, &family_size, NULL)<0) {
 	goto error;
-    } else if (family_size!=FAMILY_SIZE) {
+    } else if (family_size!=(hsize_t)FAMILY_SIZE) {
 	printf("Changing family member size from %lu to %lu\n",
 	       (unsigned long)family_size, (unsigned long)FAMILY_SIZE);
 	if (H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT)<0) goto error;
