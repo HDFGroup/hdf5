@@ -78,7 +78,7 @@ typedef float             real_f;
 #endif /*IBM6000*/
 
 /* LINUX definitions */
-#if defined(i386) && defined(linux)
+#if defined(i386) && (defined(linux) || defined(__FreeBSD__))
 #define DF_MT             DFMT_LINIX
 typedef char              *_fcd;
 typedef long long         hsize_t_f;

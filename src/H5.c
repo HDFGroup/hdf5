@@ -2123,7 +2123,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
                 }
 	    } else {
                 hobj_ref_t ref = va_arg (ap, hobj_ref_t);
-                fprintf (out, "Reference Object=%p", &ref);
+                fprintf (out, "Reference Object=%p", (void *)&ref);
 	    }
 	    break;
 

@@ -632,7 +632,7 @@ for (u=0; u<=mem_space->extent.u.simple.rank; u++)
     *must_convert = FALSE;
 
 done:
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -892,7 +892,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
 
 
 done:
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(ret_value);
 }
 
 

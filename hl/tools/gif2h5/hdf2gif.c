@@ -22,9 +22,6 @@
 #define MAX_FILE_LEN            256
 #define MAX_NUMBER_IMAGES       50
 
-extern int hdfWriteGIF(FILE *fp, BYTE *pic, int ptype, int w, int h,
-                       BYTE *rmap, BYTE *gmap, BYTE *bmap, BYTE *pc2ncmap,
-                       int numcols, int colorstyle, int BitsPerPixel);
 int EndianOrder;
 
 #ifdef NOT_USED
@@ -67,7 +64,6 @@ int main(int argc , char **argv)
 
     /* reference variables */
     int has_local_palette;  /* treated as a flag */
-    int loop_times;         /* number of times to loop, treat it as yes/no */
 
     BYTE* b;
 
@@ -304,10 +300,8 @@ int main(int argc , char **argv)
             /* Write out the GIF header and logical screen descriptor */
             if (n_images > 1) {
                 fwrite("GIF89a", 1, 6, fpGif);  /* the GIF magic number */
-                loop_times = 0;
             } else {
                 fwrite("GIF87a", 1, 6, fpGif);  /* the GIF magic number */
-                loop_times = 1;
             }
 
             putword(RWidth, fpGif);             /* screen descriptor */

@@ -4717,9 +4717,6 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, unsigned hashsize,
     )
 {
     H5P_genclass_t *pclass;         /* Property list class created */
-    H5P_genprop_t *tmp;             /* Temporary pointer to parent class properties */
-    H5P_genprop_t *pcopy;           /* Copy of property to insert into class */
-    unsigned u;                     /* Local index variable */
     H5P_genclass_t *ret_value=NULL;     /* return value */
 
     FUNC_ENTER (H5P_create_class, NULL);

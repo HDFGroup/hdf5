@@ -472,7 +472,7 @@ h5_fileaccess(void)
         if ((val = HDstrtok(NULL, " \t\n\r")))
             log_flags = HDstrtol(val, NULL, 0);
 
-        if (H5Pset_fapl_log(fapl, NULL, log_flags, 0) < 0)
+        if (H5Pset_fapl_log(fapl, NULL, (unsigned)log_flags, 0) < 0)
 	    return -1;
 #endif /* H5_WANT_H5_V1_4_COMPAT */
     } else {

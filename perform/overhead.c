@@ -232,7 +232,7 @@ test(fill_t fill_style, const double splits[],
 	    break;
 	case FILL_OUTWARD:
 	    j = (cur_size[0]-i)+1;
-	    hs_start[0] = j%2 ? j/2 : cur_size[0]-j/2;
+	    hs_start[0] = j%2 ? j/2 : (hssize_t)cur_size[0]-j/2;
 	    break;
 	case FILL_RANDOM:
 	    for (j=rand()%cur_size[0]; had[j]; j=(j+1)%cur_size[0]) /*void*/;

@@ -371,7 +371,7 @@ main (void)
 	 cache_size+=RM_CACHE_DELT) {
 	for (io_percent=RM_START; io_percent<=RM_END; io_percent+=RM_DELTA) {
 	    io_size = MAX (1, (size_t)(CH_SIZE*io_percent));
-	    printf ("Rowmaj-rd %8d %8.2f", cache_size, io_percent);
+	    printf ("Rowmaj-rd %8d %8.2f", (int)cache_size, io_percent);
 	    fflush (stdout);
 	    effic = test_rowmaj (READ, cache_size, io_size);
 	    printf (" %8.2f\n", effic);
@@ -417,7 +417,7 @@ main (void)
 	 cache_size+=RM_CACHE_DELT) {
 	for (io_percent=RM_START; io_percent<=RM_END; io_percent+=RM_DELTA) {
 	    io_size = MAX (1, (size_t)(CH_SIZE*io_percent));
-	    printf ("Rowmaj-wr %8d %8.2f", cache_size, io_percent);
+	    printf ("Rowmaj-wr %8d %8.2f", (int)cache_size, io_percent);
 	    fflush (stdout);
 	    effic = test_rowmaj (WRITE, cache_size, io_size);
 	    printf (" %8.2f\n", effic);
@@ -462,7 +462,7 @@ main (void)
 	     io_percent<=DIAG_END;
 	     io_percent+=DIAG_DELTA) {
 	    io_size = MAX (1, (size_t)(CH_SIZE*io_percent));
-	    printf ("Diag-rd   %8d %8.2f", cache_size, io_percent);
+	    printf ("Diag-rd   %8d %8.2f", (int)cache_size, io_percent);
 	    fflush (stdout);
 	    effic = test_diag (READ, cache_size, io_size, MAX (1, io_size/2));
 	    printf (" %8.2f\n", effic);
@@ -507,7 +507,7 @@ main (void)
 	     io_percent<=DIAG_END;
 	     io_percent+=DIAG_DELTA) {
 	    io_size = MAX (1, (size_t)(CH_SIZE*io_percent));
-	    printf ("Diag-wr   %8d %8.2f", cache_size, io_percent);
+	    printf ("Diag-wr   %8d %8.2f", (int)cache_size, io_percent);
 	    fflush (stdout);
 	    effic = test_diag (WRITE, cache_size, io_size, MAX (1, io_size/2));
 	    printf (" %8.2f\n", effic);

@@ -29,10 +29,12 @@ int main( void )
   hsize_t dims_out[2];
   hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
   int     data1[3][3] = { {1, 2, 3}, {4, 5, 6}, {7, 8, 9} }; 
+#if 0
   int     buf1[3][3];
+#endif
   int     buf2[2][2];
   herr_t  status; 
-  int     i, j;
+  hsize_t i, j;
 
   TESTING("extend dataset");
   

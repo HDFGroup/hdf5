@@ -35,10 +35,6 @@ static int dummy;	/* just to create a non-empty object file */
 #define DATASETNAME_LENGTH	10
 #define NUM_THREAD		16
 
-/* Global variables */
-extern int num_errs;
-extern int Verbosity;
-
 void *tts_dcreate_creator(void *);
 
 typedef struct thread_info {

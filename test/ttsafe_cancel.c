@@ -38,10 +38,6 @@ static int dummy;	/* just to create a non-empty object file */
 #define FILENAME	"ttsafe_cancel.h5"
 #define DATASETNAME	"commonname"
 
-/* Global variables */
-extern int num_errs;
-extern int Verbosity;
-
 void *tts_cancel_thread(void *);
 void tts_cancel_barrier(void);
 herr_t tts_cancel_callback(void *, hid_t, hsize_t, hssize_t *, void *);

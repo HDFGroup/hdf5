@@ -101,6 +101,14 @@ int hdfWriteGIF(FILE *fp, byte *pic, int ptype, int w, int h, byte *rmap,
     int i;
     byte *pic8 = pic;
 
+    /* Shut compiler up... */
+    ptype=ptype;
+    rmap=rmap;
+    gmap=gmap;
+    bmap=bmap;
+    numcols=numcols;
+    colorstyle=colorstyle;
+
 #ifdef UNUSED
     Interlace = 0;
     Background = 0;

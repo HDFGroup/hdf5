@@ -70,7 +70,7 @@ herr_t aiter_cb(hid_t loc_id, const char *name, void *op_data);
 ****************************************************************/
 int iter_strcmp(const void *s1, const void *s2)
 {
-    return(strcmp(*(const char **)s1,*(const char **)s2));
+    return(strcmp(*(const char * const *)s1,*(const char * const *)s2));
 }
 
 /****************************************************************

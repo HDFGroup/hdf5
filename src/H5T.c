@@ -2637,7 +2637,6 @@ H5T_detect_class (H5T_t *dt, H5T_class_t cls)
         case H5T_VLEN:
         case H5T_ENUM:
             HRETURN(H5T_detect_class(dt->parent,cls));
-            break;
 
         default:
             break;
@@ -2891,7 +2890,7 @@ H5Tget_precision(hid_t type_id)
     }
     if (dt->parent) dt = dt->parent;	/*defer to parent*/
     if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR,
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0,
 		      "operation not defined for specified data type");
     }
     

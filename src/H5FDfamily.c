@@ -876,7 +876,7 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
      * list does not belong to this driver then assume defaults
      */
     if(NULL == (plist = H5I_object(dxpl_id)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5P_get_driver(plist)) {
         H5FD_family_dxpl_t *dx = H5P_get_driver_info(plist);
 
@@ -954,7 +954,7 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
      * list does not belong to this driver then assume defaults.
      */
     if(NULL == (plist = H5I_object(dxpl_id)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5P_get_driver(plist)) {
         H5FD_family_dxpl_t *dx = H5P_get_driver_info(plist);
 
