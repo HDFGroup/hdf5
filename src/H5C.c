@@ -386,7 +386,7 @@ done:
     herr_t H5Csetparm(tid, parm, buf)
         hatom_t tid;        IN: Template object to store parameter in
         file_create_param_t parm;   IN: Parameter to store
-        VOIDP buf;          OUT: Pointer to parameter buffer
+        const VOIDP buf;    IN: Pointer to parameter buffer
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
