@@ -2027,10 +2027,10 @@ H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info, unsigned *access_mode)
  *		hid_t tid 
  *		    ID of a dataset transfer property list
  *		H5D_transfer_t data_xfer_mode
- *		    data transfer modes: 
- *			H5ACC_INDEPENDENT 
+ *		    Data transfer modes: 
+ *			H5D_XFER_INDEPENDENT 
  *			    Use independent I/O access. 
- *			H5ACC_COLLECTIVE 
+ *			H5D_XFER_COLLECTIVE 
  *			    Use MPI collective I/O access. 
  *	     
  * Return:	Success:	SUCCEED
