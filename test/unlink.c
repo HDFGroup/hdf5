@@ -165,6 +165,7 @@ test_many(hid_t file)
     /* Create a test group */
     if ((work=H5Gcreate(file, "/test_many", 0))<0) goto error;
     if ((grp = H5Gcreate(work, "/test_many_foo", 0))<0) goto error;
+    if (H5Gclose(grp)<0) goto error;
 
     /* Create a bunch of names and unlink them in order */
     printf("%-70s", "Testing forward unlink");

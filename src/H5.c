@@ -1404,6 +1404,30 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		}
 		break;
 
+	    case 's':
+		if (ptr) {
+		    if (vp) {
+			fprintf(out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5F_scope_t scope = va_arg(ap, H5F_scope_t);
+		    switch (scope) {
+		    case H5F_SCOPE_LOCAL:
+			fprintf(out, "H5F_SCOPE_LOCAL");
+			break;
+		    case H5F_SCOPE_GLOBAL:
+			fprintf(out, "H5F_SCOPE_GLOBAL");
+			break;
+		    case H5F_SCOPE_DOWN:
+			fprintf(out, "H5F_SCOPE_DOWN "
+				"/*FOR INTERNAL USE ONLY!*/");
+			break;
+		    }
+		}
+		break;
+
 	    default:
 		fprintf(out, "BADTYPE(F%c)", type[1]);
 		goto error;

@@ -110,7 +110,7 @@ static void H5F_term_interface(void);
 static H5F_t *H5F_new(H5F_file_t *shared, const H5F_create_t *fcpl,
 		      const H5F_access_t *fapl);
 static herr_t H5F_dest(H5F_t *f);
-static herr_t H5F_flush(H5F_t *f, hbool_t invalidate);
+static herr_t H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate);
 static herr_t H5F_locate_signature(H5F_low_t *f_handle,
 				   const H5F_access_t *access_parms,
 				   haddr_t *addr/*out*/);
@@ -583,6 +583,7 @@ H5F_new(H5F_file_t *shared, const H5F_create_t *fcpl, const H5F_access_t *fapl)
 	H5F_istore_init (f);
     }
     f->shared->nrefs++;
+    f->nrefs = 1;
     ret_value = f;
 
  done:
@@ -613,6 +614,10 @@ H5F_new(H5F_file_t *shared, const H5F_create_t *fcpl, const H5F_access_t *fapl)
  *
  * Modifications:
  *
+ * 	Robb Matzke, 1998-10-14
+ *	Nothing happens unless the reference count for the H5F_t goes to
+ *	zero.  The reference counts are decremented here.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -622,8 +627,8 @@ H5F_dest(H5F_t *f)
     
     FUNC_ENTER(H5F_dest, FAIL);
 
-    if (f) {
-	if (0 == --(f->shared->nrefs)) {
+    if (f && 0 == --f->nrefs) {
+	if (0 == --f->shared->nrefs) {
 	    /*
 	     * Do not close the root group since we didn't count it, but free
 	     * the memory associated with it.
@@ -644,6 +649,8 @@ H5F_dest(H5F_t *f)
 	    f->shared = H5MM_xfree(f->shared);
 	}
 	f->name = H5MM_xfree(f->name);
+	f->mtab.child = H5MM_xfree(f->mtab.child);
+	f->mtab.nalloc = 0;
 	H5MM_xfree(f);
     }
     FUNC_LEAVE(ret_value);
@@ -935,7 +942,7 @@ H5F_open(const char *name, uintn flags,
 	f->shared->base_addr = f->shared->boot_addr;
 
 	f->shared->consist_flags = 0x03;
-	if (H5F_flush(f, FALSE) < 0) {
+	if (H5F_flush(f, H5F_SCOPE_LOCAL, FALSE) < 0) {
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL,
 			"unable to write file boot block");
 	}
@@ -1133,8 +1140,9 @@ H5F_open(const char *name, uintn flags,
  * Modifications:
  * 
  * 	Robb Matzke, 18 Jul 1997
- *	File struct creation and destruction is through H5F_new() H5F_dest().
- *	Writing the root symbol table entry is done with H5G_encode().
+ *	File struct creation and destruction is through H5F_new() and
+ *	H5F_dest(). Writing the root symbol table entry is done with
+ *	H5G_encode().
  *	
  *  	Robb Matzke, 29 Aug 1997
  *	Moved creation of the boot block to H5F_flush().
@@ -1251,8 +1259,9 @@ H5Fcreate(const char *filename, unsigned flags, hid_t create_id,
  * Modifications:
  * 
  *  	Robb Matzke, 18 Jul 1997
- *	File struct creation and destruction is through H5F_new() H5F_dest().
- *	Reading the root symbol table entry is done with H5G_decode().
+ *	File struct creation and destruction is through H5F_new() and
+ *	H5F_dest(). Reading the root symbol table entry is done with
+ *	H5G_decode().
  *	
  *  	Robb Matzke, 23 Sep 1997
  *	Most of the work is now done by H5F_open() since H5Fcreate() and
@@ -1331,10 +1340,13 @@ H5Fopen(const char *filename, unsigned flags, hid_t access_id)
  *
  * Modifications:
  *
+ * 		Robb Matzke, 1998-10-16
+ *		Added the `scope' argument.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fflush(hid_t object_id)
+H5Fflush(hid_t object_id, H5F_scope_t scope)
 {
     H5F_t	*f = NULL;
     H5G_t	*grp = NULL;
@@ -1344,7 +1356,7 @@ H5Fflush(hid_t object_id)
     H5G_entry_t	*ent = NULL;
     
     FUNC_ENTER(H5Fflush, FAIL);
-    H5TRACE1("e","i",object_id);
+    H5TRACE2("e","iFs",object_id,scope);
 
     switch (H5I_get_type(object_id)) {
     case H5I_FILE:
@@ -1404,7 +1416,7 @@ H5Fflush(hid_t object_id)
     }
 
     /* Flush the file */
-    if (H5F_flush(f, FALSE)<0) {
+    if (H5F_flush(f, scope, FALSE)<0) {
 	HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
 		      "flush failed");
     }
@@ -1435,16 +1447,25 @@ H5Fflush(hid_t object_id)
  * Modifications:
  *              rky 980828 Only p0 writes metadata to disk.
  *
+ * 		Robb Matzke, 1998-10-16
+ *		Added the `scope' argument to indicate what should be
+ *		flushed. If the value is H5F_SCOPE_GLOBAL then the entire
+ *		virtual file is flushed; a value of H5F_SCOPE_LOCAL means
+ *		that only the specified file is flushed.  A value of
+ *		H5F_SCOPE_DOWN means flush the specified file and all
+ *		children.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_flush(H5F_t *f, hbool_t invalidate)
+H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate)
 {
     uint8		buf[2048], *p = buf;
     haddr_t		reserved_addr;
+    uintn		nerrors=0, i;
     
     FUNC_ENTER(H5F_flush, FAIL);
-
+	
     /*
      * Nothing to do if the file is read only.	This determination is made at
      * the shared open(2) flags level, implying that opening a file twice,
@@ -1453,6 +1474,19 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
      */
     if (0 == (H5F_ACC_RDWR & f->shared->flags)) {
 	HRETURN(SUCCEED);
+    }
+
+    /* Flush other stuff depending on scope */
+    if (H5F_SCOPE_GLOBAL==scope) {
+	while (f->mtab.parent) f = f->mtab.parent;
+	scope = H5F_SCOPE_DOWN;
+    }
+    if (H5F_SCOPE_DOWN==scope) {
+	for (i=0; i<f->mtab.nmounts; i++) {
+	    if (H5F_flush(f->mtab.child[i].file, scope, invalidate)<0) {
+		nerrors++;
+	    }
+	}
     }
 
     /* flush the entire raw data cache */
@@ -1512,6 +1546,9 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     if (H5F_low_flush(f->shared->lf, f->shared->access_parms) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
     }
+
+    /* Check flush errors for children - errors are already on the stack */
+    if (nerrors) HRETURN(FAIL);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -1519,7 +1556,9 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
 /*-------------------------------------------------------------------------
  * Function:	H5F_close
  *
- * Purpose:	Closes an open HDF5 file.
+ * Purpose:	Closes an open HDF5 file.  From the API this function gets
+ *		called when a file hid_t reference count gets to zero as a
+ *		result of calling H5Fclose().
  *
  * Return:	Success:	SUCCEED
  *
@@ -1529,6 +1568,11 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
  *		Tuesday, September 23, 1997
  *
  * Modifications:
+ *
+ * 	Robb Matzke, 1998-10-14
+ *	Nothing happens unless the H5F_t reference count is one (the
+ *	file is flushed anyway).  The reference count is decremented by
+ *	H5F_dest().
  *
  *-------------------------------------------------------------------------
  */
@@ -1540,13 +1584,25 @@ H5F_close(H5F_t *f)
     FUNC_ENTER(H5F_close, FAIL);
 
     /*
-     * Find the root of the virtual file. Then unmount and close each child
-     * before closing the current file.
+     * If the reference count is positive then just decrement the count and
+     * flush the file.
      */
-    while (f->mtab.parent) f = f->mtab.parent;
+    if (f->nrefs>1) {
+	if (H5F_flush(f, H5F_SCOPE_LOCAL, FALSE)<0) {
+	    HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
+			  "unable to flush cache");
+	}
+	H5F_dest(f); /*decrement reference counts*/
+	HRETURN(SUCCEED);
+    }
+    
+    /*
+     * Unmount and close each child before closing the current file.
+     */
+    assert(NULL==f->mtab.parent);
     for (i=0; i<f->mtab.nmounts; i++) {
-	H5G_close(f->mtab.child[i].group);
 	f->mtab.child[i].file->mtab.parent = NULL;
+	H5G_close(f->mtab.child[i].group);
 	H5F_close(f->mtab.child[i].file);
     }
     f->mtab.nmounts = 0;
@@ -1558,7 +1614,7 @@ H5F_close(H5F_t *f)
      * problem.
      */
     if (f->nopen_objs>0) {
-	if (H5F_flush(f, FALSE)<0) {
+	if (H5F_flush(f, H5F_SCOPE_LOCAL, FALSE)<0) {
 	    HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
 			  "unable to flush cache");
 	}
@@ -1586,9 +1642,9 @@ H5F_close(H5F_t *f)
      * If this is the last reference to the shared part of the file then
      * close it also.
      */
-    if (1==f->shared->nrefs) {
+    if (1==f->nrefs && 1==f->shared->nrefs) {
 	/* Flush and destroy all caches */
-	if (H5F_flush (f, TRUE)<0) {
+	if (H5F_flush (f, H5F_SCOPE_LOCAL, TRUE)<0) {
 	    HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL,
 			   "unable to flush cache");
 	}
@@ -1605,7 +1661,7 @@ H5F_close(H5F_t *f)
 	 * this file are closed the flush isn't really necessary, but lets
 	 * just be safe.
 	 */
-	if (H5F_flush(f, TRUE)<0) {
+	if (H5F_flush(f, H5F_SCOPE_LOCAL, TRUE)<0) {
 	    HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
 			  "unable to flush cache");
 	}
@@ -1697,6 +1753,9 @@ H5Fclose(hid_t file_id)
  *
  * Modifications:
  *
+ * 	Robb Matzke, 1998-10-14
+ *	The reference count for the mounted H5F_t is incremented.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1781,6 +1840,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     parent->mtab.child[md].group = mount_point;
     parent->mtab.child[md].file = child;
     child->mtab.parent = parent;
+    child->nrefs++;
     ret_value = SUCCEED;
 
  done:
@@ -1810,6 +1870,9 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
  *              Tuesday, October  6, 1998
  *
  * Modifications:
+ *
+ * 	Robb Matzke, 1998-10-14
+ *	The ref count for the child is decremented by calling H5F_close().
  *
  *-------------------------------------------------------------------------
  */
@@ -1854,6 +1917,7 @@ H5F_unmount(H5G_entry_t *loc, const char *name)
 		parent->mtab.nmounts -= 1;
 		H5G_close(parent->mtab.child[i].group);
 		child->mtab.parent = NULL;
+		H5F_close(child);
 		HDmemmove(parent->mtab.child+i,
 			  parent->mtab.child+i+1,
 			  ((parent->mtab.nmounts-i)*
@@ -1890,6 +1954,7 @@ H5F_unmount(H5G_entry_t *loc, const char *name)
 	parent->mtab.nmounts -= 1;
 	H5G_close(parent->mtab.child[md].group);
 	parent->mtab.child[md].file->mtab.parent = NULL;
+	H5F_close(parent->mtab.child[md].file);
 	HDmemmove(parent->mtab.child+md,
 		  parent->mtab.child+md+1,
 		  (parent->mtab.nmounts-md)*sizeof(parent->mtab.child[0]));

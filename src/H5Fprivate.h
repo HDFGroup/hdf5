@@ -476,6 +476,7 @@ typedef struct H5F_file_t {
  * pointers to shared H5F_file_t structs.
  */
 typedef struct H5F_t {
+    uintn		nrefs;		/* Reference count		*/
     uintn		intent;		/* The flags passed to H5F_open()*/
     char		*name;		/* Name used to open file	*/
     H5F_file_t		*shared;	/* The shared file info		*/
@@ -490,9 +491,11 @@ typedef struct H5F_t {
     : H5F_SIZEOF_ADDR(f)==2 ? UINT16ENCODE(p,o) \
     : H5FPencode_unusual_offset(f,&(p),(uint8 *)&(o)))
 #else /* NOT_YET */
-#define H5F_ENCODE_OFFSET(f,p,o) switch(H5F_SIZEOF_ADDR(f)) { case 4: UINT32ENCODE(p,o); break;\
-    case 8: UINT64ENCODE(p,o); break;\
-    case 2: UINT16ENCODE(p,o); break;}
+#define H5F_ENCODE_OFFSET(f,p,o) switch(H5F_SIZEOF_ADDR(f)) {		      \
+    case 4: UINT32ENCODE(p,o); break;					      \
+    case 8: UINT64ENCODE(p,o); break;					      \
+    case 2: UINT16ENCODE(p,o); break;					      \
+}
 #endif /* NOT_YET */
 
 #define H5F_DECODE_OFFSET(f,p,o)					      \

@@ -1189,7 +1189,6 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 		 */
 		H5E_clear ();
 		flags &= ~H5O_FLAG_SHARED;
-		H5MM_xfree (sh_mesg);
 	    } else if (sh_mesg->in_gh) {
 		/*
 		 * The shared message is stored in the global heap.
@@ -1245,6 +1244,7 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
     /* Copy the native value into the object header */
     if (flags & H5O_FLAG_SHARED) {
 	oh->mesg[idx].native = sh_mesg;
+	sh_mesg = NULL;
     } else {
 	if (oh->mesg[idx].native) {
 	    H5O_reset (oh->mesg[idx].type, oh->mesg[idx].native);
@@ -1265,6 +1265,7 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
     ret_value = sequence;
 
   done:
+    H5MM_xfree(sh_mesg);
     if (oh && H5AC_unprotect(ent->file, H5AC_OHDR, &(ent->header), oh) < 0) {
 	HRETURN_ERROR(H5E_OHDR, H5E_PROTECT, FAIL,
 		      "unable to release object header");

@@ -986,11 +986,6 @@ test_close(void)
     
     printf("%-70s", "Testing file handle close");
     fflush(stdout);
-#if 1
-    puts("   SKIP");
-    puts("   Skipped for now (until H5F_t refcounts are implemented)...");
-    return 0;
-#endif
     
     /* Build the virtual file */
     if ((file1=H5Fopen(FILE_NAME_1, H5F_ACC_RDWR, H5P_DEFAULT))<0 ||
@@ -998,16 +993,34 @@ test_close(void)
 	goto error;
     if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT)<0) goto error;
 
-    /* Close by file1 */
+    /*
+     * Close file1 unmounting it from the virtual file.  Objects in file2 are
+     * still accessible through the file2 handle, but nothing in file1 is
+     * accessible.
+     */
     if (H5Fclose(file1)<0) goto error;
     H5E_BEGIN_TRY {
-	status = H5Fclose(file2);
+	status = H5Gget_objinfo(file2, "/mnt1", TRUE, NULL);
     } H5E_END_TRY;
     if (status>=0) {
 	puts("*FAILED*");
-	puts("   File close should have closed all virtual file members!");
+	puts("   File1 contents are still accessible!");
 	goto error;
     }
+    if (H5Fclose(file2)<0) goto error;
+
+    /* Build the virtual file again */
+    if ((file1=H5Fopen(FILE_NAME_1, H5F_ACC_RDWR, H5P_DEFAULT))<0 ||
+	(file2=H5Fopen(FILE_NAME_2, H5F_ACC_RDWR, H5P_DEFAULT))<0)
+	goto error;
+    if (H5Fmount(file1, "/mnt1", file2, H5P_DEFAULT)<0) goto error;
+
+    /*
+     * Close file2.  It is not actually closed because it's a child of file1.
+     */    
+    if (H5Fclose(file2)<0) goto error;
+    if (H5Gget_objinfo(file1, "/mnt1/file2", TRUE, NULL)<0) goto error;
+    if (H5Fclose(file1)<0) goto error;
     
     /* Shut down */
     puts(" PASSED");

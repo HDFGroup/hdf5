@@ -742,7 +742,6 @@ main (void)
 	    }
 	}
     }
-    free(s11);
     puts(" PASSED");
 
     
