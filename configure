@@ -10318,22 +10318,6 @@ cat >> src/H5config.h <<EOF
 #endif
 EOF
 
-IF_YES_NO() {
-  if test "$1" = "yes"; then
-    echo "Yes"
-  else
-    echo "No"
-  fi
-}
-
-IF_ENABLED_DISABLED() {
-  if test "$1" = "yes"; then
-    echo "Enabled"
-  else
-    echo "Disabled"
-  fi
-}
-
 if test -z "$ECHO_N" -o -z "$ECHO_C"; then
   if (echo "testing\c"; echo 1,2,3) | grep c >/dev/null; then
     if (echo -n testing; echo 1,2,3) | sed s/-n/xn/ | grep xn >/dev/null; then
@@ -10350,86 +10334,112 @@ if test -z "$ECHO_N" -o -z "$ECHO_C"; then
   fi
 fi
 
-echo ""
-echo "Compiling Options:"
+PRINT_N() {
+  echo $ECHO_N "$1:  $ECHO_C"
+  echo $ECHO_N "$1:  $ECHO_C" 1>>src/libhdf5.settings
+}
 
-echo $ECHO_N "               Compilation Mode:  $ECHO_C"
+PRINT() {
+  echo "$1"
+  echo "$1" 1>>src/libhdf5.settings
+}
+
+IF_YES_NO() {
+  if test "$1" = "yes"; then
+    PRINT "Yes"
+  else
+    PRINT "No"
+  fi
+}
+
+IF_ENABLED_DISABLED() {
+  if test "$1" = "yes"; then
+    PRINT "Enabled"
+  else
+    PRINT "Disabled"
+  fi
+}
+
+PRINT ""
+PRINT "Compiling Options:"
+
+PRINT_N "               Compilation Mode"
 case "X-$enable_production" in
-  X-yes)           echo "Production" ;;
-  X-|X-no)         echo "Development" ;;
-  X-pg|X-profile)  echo "Profile" ;;
-  *)               echo "$enable_production" ;;
+  X-yes)           PRINT "Production" ;;
+  X-|X-no)         PRINT "Development" ;;
+  X-pg|X-profile)  PRINT "Profile" ;;
+  *)               PRINT "$enable_production" ;;
 esac
 
-echo $ECHO_N "                     Debug Mode:  $ECHO_C"
+PRINT_N "                     Debug Mode"
 case "X-$DEBUG_PKG" in
-  X-|X-yes)     echo "Default" ;;
-  X-all)        echo "All" ;;
-  X-no|X-none)  echo "None" ;;
-  *)            echo "$DEBUG_PKG" ;;
+  X-|X-yes)     PRINT "Default" ;;
+  X-all)        PRINT "All" ;;
+  X-no|X-none)  PRINT "None" ;;
+  *)            PRINT "$DEBUG_PKG" ;;
 esac
 
-echo $ECHO_N "               Shared Libraries:  $ECHO_C"
+PRINT_N "               Shared Libraries"
 IF_YES_NO "$enable_shared"
 
-echo $ECHO_N "               Static Libraries:  $ECHO_C"
+PRINT_N "               Static Libraries"
 IF_YES_NO "$enable_static"
 
-echo $ECHO_N "  Statically Linked Executables:  $ECHO_C"
+PRINT_N "  Statically Linked Executables"
 IF_YES_NO "$STATIC_EXEC"
 
-echo $ECHO_N "                        Tracing:  $ECHO_C"
+PRINT_N "                        Tracing"
 if test -z "$TRACE" -o "X$TRACE" = "Xyes"; then
-  echo "Yes"
+  PRINT "Yes"
 else
-  echo "No"
+  PRINT "No"
 fi
 
-echo ""
-echo "Features:"
+PRINT ""
+PRINT "Features:"
 
-echo $ECHO_N "                            C++:  $ECHO_C"
+PRINT_N "                            C++"
 IF_YES_NO "$HDF_CXX"
 
-echo $ECHO_N "                        Fortran:  $ECHO_C"
+PRINT_N "                        Fortran"
 IF_YES_NO "$HDF_FORTRAN"
 
-echo $ECHO_N "                           GASS:  $ECHO_C"
+PRINT_N "                           GASS"
 IF_YES_NO "$GASS"
 
-echo $ECHO_N "                    GridStorage:  $ECHO_C"
+PRINT_N "                    GridStorage"
 IF_YES_NO "$GRIDSTORAGE"
 
-echo $ECHO_N "                           HDF4:  $ECHO_C"
+PRINT_N "                           HDF4"
 IF_YES_NO "$HAVE_HDF4"
 
-echo $ECHO_N "        HDF5 v1.4 Compatibility:  $ECHO_C"
+PRINT_N "        HDF5 v1.4 Compatibility"
 IF_YES_NO "$HDF5_V1_4_COMPAT"
 
-echo $ECHO_N "                        hsize_t:  $ECHO_C"
+PRINT_N "                        hsize_t"
 case "$HSIZET" in
-  no|small)  echo "Small" ;;
-  *)         echo "Large" ;;
+  no|small)  PRINT "Small" ;;
+  *)         PRINT "Large" ;;
 esac
 
-echo $ECHO_N " Linux Large File Support (LFS):  $ECHO_C"
+PRINT_N " Linux Large File Support (LFS)"
 IF_ENABLED_DISABLED "$LINUX_LFS"
 
-echo $ECHO_N "                  Parallel HDF5:  $ECHO_C"
+PRINT_N "                  Parallel HDF5"
 if test "$PARALLEL" != "no"; then
-  echo "Yes"
+  PRINT "Yes"
 else
-  echo "No"
+  PRINT "No"
 fi
 
-echo $ECHO_N "                            SRB:  $ECHO_C"
+PRINT_N "                            SRB"
 IF_YES_NO "$SRB"
 
-echo $ECHO_N "                     Stream VFD:  $ECHO_C"
+PRINT_N "                     Stream VFD"
 IF_ENABLED_DISABLED "$STREAM_VFD"
 
-echo $ECHO_N "                   Threadsafety:  $ECHO_C"
+PRINT_N "                   Threadsafety"
 IF_ENABLED_DISABLED "$THREADSAFE"
 
-echo $ECHO_N "               Zlib-compression:  $ECHO_C"
+PRINT_N "               Zlib-compression"
 IF_YES_NO "$HAVE_ZLIB"
