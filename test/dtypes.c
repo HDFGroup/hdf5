@@ -27,11 +27,7 @@
 #define NTESTS	1
 
 /* Number of elements in each test */
-#ifndef TMP
 #define NTESTELEM	100000
-#else
-#define NTESTELEM       10
-#endif /*TMP*/
 
 /* Define if you want to see a count of overflows */
 #undef SHOW_OVERFLOWS
