@@ -6,86 +6,86 @@
   </head>
   <body bgcolor="#FFFFFF">
 
-<p align=right>
-<font size=-1><a href="index.html" target=_top>(Return to full HDF5 document set.)</a></font>
-</p>
+<hr>
+<center>
+<table border=0 width=98%>
+<tr><td valign=top align=left>
+<a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
+<a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
+</td>
+<td>&nbsp;</td>
+<td valign=top align=right>
+<a href="H5.user.html">HDF5 User Guide</a>&nbsp;<br>
+<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;<br>
+</td></tr>
+</table>
+</center>
 <hr>
 
     <center><h1>HDF5 File Format Specification</h1></center>
 
+    <center>
+    <table border=0 width=90%>
+    <tr>
+    <td valign=top>
     <ol type=I>
-      <li><a href="#Intro">
-	  Introduction</a>
-      <li><a href="#BootBlock">
-	  Disk Format Level 0 - File Signature and Super Block</a>
-      <li><a href="#Group">
-	  Disk Format Level 1 - File Infrastructure</a>
+      <li><a href="#Intro">Introduction</a>
+      <li><a href="#BootBlock">Disk Format Level 0 - File Signature and Super Block</a>
+      <li><a href="#Group">Disk Format Level 1 - File Infrastructure</a>
+        <font size=-2>
 	<ol type=A>
-	  <li><a href="#Btrees">
-	      Disk Format Level 1A - B-link Trees and B-tree Nodes</a>
-	  <li><a href="#SymbolTable">
-	      Disk Format Level 1B - Group</a>
-	  <li><a href="#SymbolTableEntry">
-	      Disk Format Level 1C - Group Entry</a>
-	  <li><a href="#LocalHeap">
-	      Disk Format Level 1D - Local Heaps</a>
-	  <li><a href="#GlobalHeap">
-	      Disk Format Level 1E - Global Heap</a>
-	  <li><a href="#FreeSpaceIndex">
-	      Disk Format Level 1F - Free-space Index</a>
+	  <li><a href="#Btrees">Disk Format Level 1A - B-link Trees and B-tree Nodes</a>
+	  <li><a href="#SymbolTable">Disk Format Level 1B - Group</a>
+	  <li><a href="#SymbolTableEntry">Disk Format Level 1C - Group Entry</a>
+	  <li><a href="#LocalHeap">Disk Format Level 1D - Local Heaps</a>
+	  <li><a href="#GlobalHeap">Disk Format Level 1E - Global Heap</a>
+	  <li><a href="#FreeSpaceIndex">Disk Format Level 1F - Free-space Index</a>
 	</ol>
-      <li><a href="#DataObject">
-	  Disk Format Level 2 - Data Objects</a>
+        </font>
+      <li><a href="#DataObject">Disk Format Level 2 - Data Objects</a>
+        <font size=-2>
 	<ol type=A>
-	  <li><a href="#ObjectHeader">
-	      Disk Format Level 2a - Data Object Headers</a>
+	  <li><a href="#ObjectHeader">Disk Format Level 2a - Data Object Headers</a>
 	    <ol type=1>
-	      <li><a href="#NILMessage">                        <!-- 0x0000 -->
-		  Name: NIL</a>
-	      <li><a href="#SimpleDataSpace">                   <!-- 0x0001 -->
-		  Name: Simple Dataspace</a>
+	      <li><a href="#NILMessage">Name: NIL</a>                                                       <!-- 0x0000 -->
+	      <li><a href="#SimpleDataSpace">Name: Simple Dataspace</a>                                     <!-- 0x0001 -->
 <!--
-	      <li><a href="#DataSpaceMessage">            -->   <!-- 0x0002 --><!--
-		  Name: Complex Dataspace</a>
--->
-	      <li><a href="#DataTypeMessage">                   <!-- 0x0003 -->
-		  Name: Datatype</a>
-	      <li><a href="#FillValueMessage">                  <!-- 0x0004 -->
-		  Name: Data Storage - Fill Value</a>
-	      <li><a href="#ReservedMessage_0005">              <!-- 0x0005 -->
-		  Name: Reserved - not assigned yet</a>
-	      <li><a href="#CompactDataStorageMessage">         <!-- 0x0006 -->
-		  Name: Data Storage - Compact</a>
-	      <li><a href="#ExternalFileListMessage">           <!-- 0x0007 -->
-		  Name: Data Storage - External Data Files</a>
-	      <li><a href="#LayoutMessage">                     <!-- 0x0008 -->
-		  Name: Data Storage - Layout</a>
-	      <li><a href="#ReservedMessage_0009">              <!-- 0x0009 -->
-		  Name: Reserved - not assigned yet</a>
-	      <li><a href="#ReservedMessage_000A">              <!-- 0x000a -->
-		  Name: Reserved - not assigned yet</a>
-	      <li><a href="#FilterMessage">                	<!-- 0x000b -->
-		  Name: Data Storage - Filter Pipeline</a>
-	      <li><a href="#AttributeMessage">                  <!-- 0x000c -->
-		  Name: Attribute</a>
-	      <li><a href="#NameMessage">                       <!-- 0x000d -->
-		  Name: Object Name</a>
-	      <li><a href="#ModifiedMessage">                   <!-- 0x000e -->
-		  Name: Object Modification Date and Time</a>
-	      <li><a href="#SharedMessage">                     <!-- 0x000f -->
-		  Name: Shared Object Message</a>
-	      <li><a href="#ContinuationMessage">               <!-- 0x0010 -->
-		  Name: Object Header Continuation</a>
-	      <li><a href="#SymbolTableMessage">                <!-- 0x0011 -->
-		  Name: Group Message</a>
+	      <li><a href="#DataSpaceMessage">Name: Complex Dataspace</a>  -->                              <!-- 0x0002 -->
+	      <li><a href="#DataTypeMessage">Name: Datatype</a>                                             <!-- 0x0003 -->
+	      <li><a href="#FillValueMessage">Name: Data Storage - Fill Value</a>                           <!-- 0x0004 -->
+	      <li><a href="#ReservedMessage_0005">Name: Reserved - not assigned yet</a>                     <!-- 0x0005 -->
 	    </ol>
-	  <li><a href="#SharedObjectHeader">
-	      Disk Format: Level 2b - Shared Data Object Headers</a>
-	  <li><a href="#DataStorage">
-	      Disk Format: Level 2c - Data Object Data Storage</a>
-	</ol>
+        </ol>
+        </font>
     </ol>
+    </td><td>&nbsp;&nbsp;</td><td valign=top>
+    <ol type=I>
 
+      <li><a href="#DataObject">Disk Format Level 2 - Data Objects</a> 
+        <font size=-2><i>(Continued)</i>
+	<ol type=A>
+	  <li><a href="#ObjectHeader">Disk Format Level 2a - Data Object Headers</a><i>(Continued)</i>
+	    <ol type=1>
+	      <li><a href="#CompactDataStorageMessage">Name: Data Storage - Compact</a>                     <!-- 0x0006 -->
+	      <li><a href="#ExternalFileListMessage">Name: Data Storage - External Data Files</a>           <!-- 0x0007 -->
+	      <li><a href="#LayoutMessage">Name: Data Storage - Layout</a>                                  <!-- 0x0008 -->
+	      <li><a href="#ReservedMessage_0009">Name: Reserved - not assigned yet</a>                     <!-- 0x0009 -->
+	      <li><a href="#ReservedMessage_000A">Name: Reserved - not assigned yet</a>                     <!-- 0x000a -->
+	      <li><a href="#FilterMessage">Name: Data Storage - Filter Pipeline</a>                	     <!-- 0x000b -->
+	      <li><a href="#AttributeMessage">Name: Attribute</a>                                           <!-- 0x000c -->
+	      <li><a href="#NameMessage">Name: Object Name</a>                                              <!-- 0x000d -->
+	      <li><a href="#ModifiedMessage">Name: Object Modification Date and Time</a>                    <!-- 0x000e -->
+	      <li><a href="#SharedMessage">Name: Shared Object Message</a>                                  <!-- 0x000f -->
+	      <li><a href="#ContinuationMessage">Name: Object Header Continuation</a>                       <!-- 0x0010 -->
+	      <li><a href="#SymbolTableMessage">Name: Group Message</a>                                     <!-- 0x0011 -->
+	    </ol>
+	  <li><a href="#SharedObjectHeader">Disk Format: Level 2b - Shared Data Object Headers</a>
+	  <li><a href="#DataStorage">Disk Format: Level 2c - Data Object Data Storage</a>
+	</ol>
+        </font>
+    </ol>
+</td></tr>
+</table>
 
 <br><br>
 
@@ -635,7 +635,7 @@ Elena>               "Free-space object"
 		      <dt>0
 		      <dd>This tree points to group nodes.
 		      <dt>1
-		      <dd>This tree points to a (partial) linear address space.
+		      <dd>This tree points to a new data chunk.
 		    </dl>
 		  </td>
 		</tr>
@@ -693,21 +693,109 @@ Elena>               "Free-space object"
 		  <td>The format and size of the key values is determined by
 		    the type of data to which this tree points.  The keys are
 		    ordered and are boundaries for the contents of the child
-		    pointer.  That is, the key values represented by child
+		    pointer; that is, the key values represented by child
 		    <em>N</em> fall between Key <em>N</em> and Key
 		    <em>N</em>+1. Whether the interval is open or closed on
 		    each end is determined by the type of data to which the
-		    tree points.</td>
+		    tree points.
+		    <p>
+		    The format of the key depends on the node type.
+		    For nodes of node type 1, the key is formatted as follows:
+		    <center>
+		    <table>
+		    <tr valign=top align=left>
+		      <td width=40%>Bytes 1-4</td>
+		      <td>Size of chunk in bytes.</td>
+		    <tr valign=top align=left></tr>
+		      <td>Bytes 4-8</td>
+		      <td>Filter mask, a 32-bit bitfield indicating which 
+		        filters have been applied to that chunk.</td>
+		    </tr><tr valign=top align=left>
+		      <td><i>N</i> fields of 8 bytes each</td>
+		      <td>A 64-bit index indicating the offset of the 
+		        chunk within the dataset where <i>N</i> is the number 
+		        of dimensions of the dataset.  For example, if 
+		        a chunk in a 3-dimensional dataset begins at the
+		        position <code>[5,5,5]</code>, there will be three
+		        such 8-bit indices, each with the value of 
+		        <code>5</code>.</td>
+		    </tr>
+		    </table>
+		    </center>
+		    <p>
+		    For nodes of node type 0, the key is formatted as follows:
+		    <center>
+		    <table>
+		    <tr valign=top align=left>
+		      <td width=40%>A single field of <i>Size of Lengths</i> 
+		        bytes</td>
+		      <td>Indicates the byte offset into the local heap 
+		        for the first object name in the subtree which 
+		        that key describes.</td>
+		    </tr>
+		    </table>
+		    </center>
+		    </td>
 		</tr>
 
 		<tr valign=top>
 		  <td>Child Pointers</td>
 		  <td>The tree node contains file addresses of subtrees or
-		    data depending on the node level (0 implies data
-		    addresses).</td>
+		    data depending on the node level.  Nodes at Level 0 point 
+		    to data addresses, either data chunk or group nodes.
+		    Nodes at non-zero levels point to other nodes of the 
+		    same B-tree.</td>
 		</tr>
 	      </table>
 	    </center>
+
+<p>
+	     Each B-tree node looks like this:
+
+	     <center>
+	     <table>
+	       <tr valign=top align=center>
+	         <td>key[0]</td><td>&nbsp;&nbsp;</td>
+	         <td>child[0]</td><td>&nbsp;&nbsp;</td>
+	         <td>key[1]</td><td>&nbsp;&nbsp;</td>
+	         <td>child[1]</td><td>&nbsp;&nbsp;</td>
+	         <td>key[2]</td><td>&nbsp;&nbsp;</td>
+	         <td>...</td><td>&nbsp;&nbsp;</td>
+	         <td>...</td><td>&nbsp;&nbsp;</td>
+	         <td>key[<i>N</i>-1]</td><td>&nbsp;&nbsp;</td>
+	         <td>child[<i>N</i>-1]</td><td>&nbsp;&nbsp;</td>
+	         <td>key[<i>N</i>]</td>
+	       </tr>
+	     </table>
+	     </center>
+
+	     where child[<i>i</i>] is a pointer to a sub-tree (at a level 
+	     above Level 0) or to data (at Level 0).  
+	     Each key[<i>i</i>] describes an <i>item</i> stored by the B-tree 
+	     (a chunk or an object of a group node).  The range of values 
+	     represented by child[<i>i</i>] are indicated by key[<i>i</i>] 
+	     and key[<i>i</i>+1].
+
+
+	    <p>The following question must next be answered: 
+	     "Is the value described by key[<i>i</i>] contained in 
+             child[<i>i</i>-1] or in child[<i>i</i>]?"  
+	     The answer depends on the type of tree. 
+	     In trees for groups (node type 0) the object described by 
+	     key[<i>i</i>] is the greatest object contained in 
+	     child[<i>i</i>-1] while in chunk trees (node type 1) the 
+	     chunk described by key[<i>i</i>] is the least chunk in 
+	     child[<i>i</i>].
+
+	    <p>That means that key[0] for group trees is sometimes unused; 
+	     it points to offset zero in the heap, which is always the 
+	     empty string and compares as "less-than" any valid object name.
+
+	    <p>And key[<i>N</i>] for chunk trees is sometimes unused; 
+	     it contains a chunk offset which compares as "greater-than" 
+	     any other chunk offset and has a chunk byte size of zero 
+	     to indicate that it is not actually allocated.
+
 
 	    <h3><a name="SymbolTable">Disk Format: Level 1B - Group and Symbol Nodes</a></h3>
 
@@ -856,7 +944,7 @@ Elena>               "Free-space object"
 		<tr valign=top>
 		  <td>Name Offset</td>
 		  <td>This is the byte offset into the group local
-		    heap for the name of the symbol. The name is null
+		    heap for the name of the object. The name is null
 		    terminated.</td>
 		</tr>
 
@@ -1655,7 +1743,7 @@ Elena>               "Free-space object"
       must use the <em>Complex Dataspace</em> message for expressing 
       the space the dataset inhabits.  
       <i>(Note: The <em>Complex Dataspace</em> functionality is 
-      not yet implemented, as of HDF5 Release 1.2.  It is not described 
+      not yet implemented (as of HDF5 Release 1.2).  It is not described 
       in this document.)</i>
 
     <p>
@@ -2541,6 +2629,81 @@ Elena>               "Free-space object"
 	  <td colspan=4><br><br>Member Type Message<br><br><br></td>
 	</tr>
 
+      </table>
+    </center>
+
+   <p>
+    <center>
+      <table border cellpadding=4 width="80%">
+	<caption align=top>
+	  <b>Bit Field for Enumeration types (Class 8)</b>
+	</caption>
+
+	<tr align=center>
+	  <th width="10%">Bits</th>
+	  <th width="90%">Meaning</th>
+	</tr>
+
+	<tr valign=top>
+	  <td>0-15</td>
+	  <td><b>Number of Members.</b> The number of name/value
+	    pairs defined for the enumeration type.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>16-23</td>
+	  <td>Reserved (zero).</td>
+	</tr>
+      </table>
+    </center>
+
+    <p>
+    <center>
+      <table border cellpadding=4 width="80%">
+	<caption align=top>
+	  <b>Properties for Enumeration types (Class 8)</b>
+	</caption>
+
+	<tr align=center>
+	  <th width="25%">Byte</th>
+	  <th width="25%">Byte</th>
+	  <th width="25%">Byte</th>
+	  <th width="25%">Byte</th>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4><br>Parent Type<br><br></td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4><br>Names<br><br></td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4><br>Values<br><br></td>
+        </tr>
+
+      </table>
+    </center>
+
+    <center>
+      <table border=0 cellpadding=4 width="80%">
+	<tr align=left valign=top>
+          <td valign=top width=20%>Parent Type:</td>
+	  <td valign=top>Each enumeration type is based on some parent type, 
+	    usually an integer. The information for that parent type is 
+	    described recursively by this field.</td>
+	</tr><tr align=left valign=top>
+          <td valign=top>Names:</td>
+	  <td valign=top>The name for each name/value pair. Each name is 
+	    stored as a null terminated ASCII string in a multiple of 
+	    eight bytes. The names are in no particular order.</td>
+	</tr><tr align=left valign=top>  
+          <td valign=top>Values:</td>
+	  <td valign=top>The list of values in the same order as the names. 
+	    The values are packed (no inter-value padding) and the 
+	    size of each value is determined by the parent type.</td>
+        </tr>
       </table>
     </center>
 
@@ -3688,18 +3851,28 @@ for the last field).
 in the structure, with each item formatted according to its datatype.
 
 <hr>
-<p align=right>
-<font size=-1><a href="index.html" target=_top>(Return to full HDF5 document set.)</a></font>
-</p>
-
+<center>
+<table border=0 width=98%>
+<tr><td valign=top align=left>
+<a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
+<a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
+</td>
+<td>&nbsp;</td>
+<td valign=top align=right>
+<a href="H5.user.html">HDF5 User Guide</a>&nbsp;<br>
+<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;<br>
+</td></tr>
+</table>
+</center>
 <hr>
+
 <!--
 <address><a href="mailto:koziol@ncsa.uiuc.edu">Quincey Koziol</a></address>
 <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 -->
 <address><a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a></address>
 <!-- hhmts start -->
-Last modified: 11 October 1999
+Last modified: 18 October 1999
 <!-- hhmts end -->
 </body>
 </html>
