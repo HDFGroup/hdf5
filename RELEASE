@@ -36,6 +36,8 @@ CONTENTS
 New features
 ============
 VFL(?) 
+   * New features added to snapshots.  Use 'snapshot help' to see a
+     complete list of features.
 
 Bug fixes since HDF5-1.2.0
 ==========================
@@ -47,6 +49,8 @@ Library
      correctly.
    * Error was fixed which was not allowing dataset region references to have
      their regions retrieved correctly.
+   * Corrected a bug that caused non-parallel file drivers to fail in
+     the parallel version.
    * Added internal free-lists to reduce memory required by the library and
      H5garbage_collect API function
    * Fixed error in H5Giterate which was not updating the "index" parameter
