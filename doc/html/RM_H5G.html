@@ -365,14 +365,11 @@ create or access function.
         If the any object identifier is open for the object, the space
         will not be released until after the object identifier is closed.
         <p>
-        <!-- editingcomment: freespace and file packing -->
         Note that space identified as freespace is available for re-use 
         only as long as the file remains open; once a file has been 
-        closed, the HDF5 library loses track of freespace. 
-        Identifying freespace does not imply that the file
-        will be packed or that, if the file is closed and later reopened,
-        that the space will be available for re-use.  
-        Such functionality has not yet been implemented in the HDF5 library.
+        closed, the HDF5 library loses track of freespace.  See
+        &ldquo;<a href="Performance.html#Freespace">Freespace Management</a>&rdquo;
+        in the <cite>HDF5 User's Guide</cite> for further details.
   <dt><strong>Warning:</strong>
     <dd>Exercise care in unlinking groups as it is possible to render data in 
         a file inaccessible with <code>H5Gunlink</code>.  
@@ -624,9 +621,11 @@ create or access function.
     <dd> Returns a non-negative value if successful, with the fields of 
          <code>statbuf</code> (if non-null) initialized.
          Otherwise returns a negative value.
+<!--
   <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5g_FORTRAN.html#h5gget_objinfo_f"
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -828,10 +827,9 @@ H5G&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  1 November 2000
+Last modified:  2 August 2001
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
-
 
 </body>
 </html>
