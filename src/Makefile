@@ -34,7 +34,7 @@ $(TARGET): $(OBJ)
 	$(AR) $(ARFLAGS) $(TARGET) $(OBJ)
 	$(RANLIB) $(TARGET)
 
-all test: $(TARGET)
+all test: $(TARGET) debug_hdf5
 
 debug: $(OBJ) 
 	$(AR) $(ARFLAGS) $(TARGET) $(OBJ)
@@ -45,6 +45,12 @@ clean:
 	-rm -f *.bak
 
 ###########################################################################
+
+debug_hdf5: $(TARGET) debug.o
+	$(CC) -o debug debug.o -L. -lhdf5
+
+debug.o: debug.c $(INCL)
+	$(CC) $(CFLAGS) debug.c
 
 H5.o:	H5.c  $(INCL) H5private.h H5proto.h
 	$(CC) $(CFLAGS) H5.c

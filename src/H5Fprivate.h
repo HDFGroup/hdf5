@@ -92,6 +92,8 @@ void H5F_encode_offset_unusual(const hdf5_file_t *f, uint8 **p, uint8 *o);
 intn H5F_compare_filename(const VOIDP obj, const VOIDP key);
 herr_t H5F_block_read (hdf5_file_t *f, haddr_t addr, size_t size, void *buf);
 herr_t H5F_block_write (hdf5_file_t *f, haddr_t addr, size_t size, void *buf);
+herr_t H5F_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
+		  intn fwidth);
 
 #endif /* HDF5FILE_H */
 

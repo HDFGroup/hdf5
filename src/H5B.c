@@ -181,7 +181,7 @@ H5B_new (hdf5_file_t *f, const H5B_class_t *type, size_t sizeof_rkey)
     * `page' buffer.  Each native key pointer should be null until the key is
     * translated to native format.
     */
-   for (i=0,offset=H5B_HDR_SIZE(f);
+   for (i=0,offset=H5B_SIZEOF_HDR(f);
 	i<2*type->k;
 	i++,offset+=bt->sizeof_rkey+H5F_SIZEOF_OFFSET(f)) {
 
@@ -249,7 +249,7 @@ H5B_load (hdf5_file_t *f, haddr_t addr, const void *_data)
    p = bt->page;
 
    /* magic number */
-   if (memcmp (p, H5B_MAGIC, 4)) goto error;
+   if (memcmp (p, H5B_MAGIC, H5B_SIZEOF_MAGIC)) goto error;
    p += 4;
 
    /* node type and level */
@@ -326,7 +326,7 @@ H5B_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5B_t *bt)
    if (bt->dirty) {
       
       /* magic number */
-      memcpy (p, H5B_MAGIC, 4);
+      memcpy (p, H5B_MAGIC, H5B_SIZEOF_MAGIC);
       p += 4;
 
       /* node type and level */
@@ -513,14 +513,14 @@ H5B_split (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, intn anchor)
    /*
     * Copy data into the new node from the old node.
     */
-   memcpy (bt->page + H5B_HDR_SIZE(f),
-	   old->page + H5B_HDR_SIZE(f) + delta*recsize,
+   memcpy (bt->page + H5B_SIZEOF_HDR(f),
+	   old->page + H5B_SIZEOF_HDR(f) + delta*recsize,
 	   type->k * recsize);
    memcpy (bt->native,
 	   old->native + delta * type->sizeof_nkey,
 	   (type->k+1) * type->sizeof_nkey);
 
-   for (i=0,offset=H5B_HDR_SIZE(f); i<=2*type->k; i++,offset+=recsize) {
+   for (i=0,offset=H5B_SIZEOF_HDR(f); i<=2*type->k; i++,offset+=recsize) {
 
       /* key */
       if (i<=type->k) {
@@ -555,8 +555,8 @@ H5B_split (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, intn anchor)
    old->nchildren = type->k;
    
    if (H5B_ANCHOR_RT==anchor) {
-      memcpy (old->page + H5B_HDR_SIZE(f),
-	      old->page + H5B_HDR_SIZE(f) + delta*recsize,
+      memcpy (old->page + H5B_SIZEOF_HDR(f),
+	      old->page + H5B_SIZEOF_HDR(f) + delta*recsize,
 	      type->k * recsize);
       memmove (old->native,
 	       old->native + delta * type->sizeof_nkey,
@@ -803,8 +803,8 @@ H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
       /*
        * The MD_KEY is the left key of the new node.
        */
-      memmove (bt->page + H5B_HDR_SIZE(f) + (idx+1)*recsize,
-	       bt->page + H5B_HDR_SIZE(f) + idx*recsize,
+      memmove (bt->page + H5B_SIZEOF_HDR(f) + (idx+1)*recsize,
+	       bt->page + H5B_SIZEOF_HDR(f) + idx*recsize,
 	       (bt->nchildren-idx)*recsize + bt->sizeof_rkey);
 
       memmove (bt->native + (idx+1) * type->sizeof_nkey,
@@ -822,9 +822,9 @@ H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
       /*
        * The MD_KEY is the right key of the new node.
        */
-      memmove (bt->page + (H5B_HDR_SIZE(f) +
+      memmove (bt->page + (H5B_SIZEOF_HDR(f) +
 			   (idx+1)*recsize + bt->sizeof_rkey),
-	       bt->page + (H5B_HDR_SIZE(f) +
+	       bt->page + (H5B_SIZEOF_HDR(f) +
 			   idx*recsize + bt->sizeof_rkey),
 	       (bt->nchildren-idx) * recsize);
 
@@ -1170,8 +1170,60 @@ H5B_nodesize (hdf5_file_t *f, const H5B_class_t *type,
       *total_nkey_size = (2 * type->k + 1) * type->sizeof_nkey;
    }
 
-   return (H5B_HDR_SIZE(f) +				/*node header	*/
+   return (H5B_SIZEOF_HDR(f) +				/*node header	*/
 	   2 * type->k * H5F_SIZEOF_OFFSET(f) +		/*child pointers*/
 	   (2*type->k+1) * sizeof_rkey);		/*keys		*/
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B_debug
+ *
+ * Purpose:	Prints debugging info about a B-tree.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug  4 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
+	   intn fwidth, const H5B_class_t *type)
+{
+   H5B_t		*bt = H5AC_find (f, H5AC_BT, addr, type);
+
+   if (!bt) return -1;
+
+   fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
+	    "Tree type ID:",
+	    (int)(bt->type->id));
+   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    "Size of raw (disk) key:",
+	    (unsigned long)(bt->sizeof_rkey));
+   fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
+	    "Dirty flag:",
+	    (int)(bt->dirty));
+   fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
+	    "Number of initial dirty children:",
+	    (int)(bt->ndirty));
+   fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
+	    "Level:",
+	    (int)(bt->level));
+   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    "Address of left sibling:",
+	    (unsigned long)(bt->left));
+   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    "Address of right sibling:",
+	    (unsigned long)(bt->right));
+   fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
+	    "Number of children:",
+	    (int)(bt->nchildren));
+   return 0;
+}

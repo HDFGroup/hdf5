@@ -96,6 +96,12 @@ H5AC_dest (hdf5_file_t *f)
  *
  * Modifications:
  *
+ * 	Robb Matzke, 4 Aug 1997
+ *	Fails immediately if the cached object is at the correct address
+ *	but is of the wrong type.  This happens if the caller doesn't know
+ *	what type of object is at the address and calls this function with
+ *	various type identifiers until one succeeds (cf., the debugger).
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -116,6 +122,15 @@ H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
     */
    if (f->cache[idx].type==type && f->cache[idx].addr==addr) {
       return f->cache[idx].thing;
+   }
+
+   /*
+    * Fail if the item in the cache is at the correct address but is
+    * of the wrong type.
+    */
+   if (f->cache[idx].type && f->cache[idx].addr==addr &&
+       f->cache[idx].type!=type) {
+      return NULL;
    }
 
    /*

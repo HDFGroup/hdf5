@@ -25,9 +25,16 @@
 #include "H5Fprivate.h"
 
 #define H5G_NODE_MAGIC	"SNOD"	/*symbol table node magic number	*/
+#define H5G_NODE_SIZEOF_MAGIC 4 /*sizeof symbol node magic number	*/
 #define H5G_NODE_VERS	1	/*symbol table node version number	*/
 #define H5G_NODE_K	64	/*min degree.  max degree is twice this	*/
-#define H5G_HDR_SIZE(F)	8
+#define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
+#define H5G_SIZEOF_ENTRY(F)						      \
+   (H5F_SIZEOF_OFFSET(F) +	/*offset of name into heap     		*/    \
+    H5F_SIZEOF_OFFSET(F) +	/*address of object header		*/    \
+    4 +				/*entry type				*/    \
+    24)				/*scratch pad space			*/
+    
 
 /*
  * Various types of object header information can be cached in a symbol
@@ -126,6 +133,8 @@ extern const H5B_class_t H5B_SNODE[1];
 /*
  * Library prototypes...
  */
+herr_t H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
+		       intn fwidth);
 haddr_t H5G_new (hdf5_file_t *f, size_t init);
 haddr_t H5G_find (hdf5_file_t *f, haddr_t addr, const char *name,
 		  H5G_entry_t *entry);

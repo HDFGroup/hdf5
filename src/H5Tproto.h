@@ -48,6 +48,9 @@ hbool_t H5Tis_atomic(hatom_t tid);
 herr_t H5Tset_type(hatom_t tid,hatom_t base,uint8 len,uint8 arch);
 uintn H5Tsize(hatom_t tid, uint8 len, uint8 arch, hbool_t mem_flag);
 herr_t H5T_release(hatom_t oid);
+herr_t H5Tadd_field (hatom_t tid, const char *name, hatom_t base, uint8 len,
+		     uint8 arch, hatom_t space);
+herr_t H5Tget_fields(hatom_t tid, hatom_t *field_list);
 
 #if defined c_plusplus || defined __cplusplus
 }

@@ -584,6 +584,7 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
     haddr_t curr_off=0;          /* The current offset to check in the file */
     size_t file_len=0;          /* The length of the file we are checking */
     hatom_t ret_value = FAIL;
+    size_t	variable_size;	/*size of the variable part of the bb */
 
     FUNC_ENTER(H5F_mask, ID_H5Fopen, H5F_init_interface, FAIL);
 
@@ -670,9 +671,9 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
     
     /* Read in the fixed-size part of the boot-block */
     if(H5F_READ(new_file->file_handle,temp_buf,16)==FAIL)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL);
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL);
 
-    /* Decode the boot block */
+    /* Decode fixed-size part of the boot block */
     p=temp_buf;
     new_file->file_create_parms.bootblock_ver=*p++;    /* Decode Boot-block version # */
     new_file->file_create_parms.smallobject_ver=*p++;  /* Decode Small-Object Heap version # */
@@ -684,6 +685,17 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
     p++;                         /* Decode the reserved byte :-) */
     UINT32DECODE(p,new_file->file_create_parms.btree_page_size);    /* Decode the B-Tree page size */
     UINT32DECODE(p,new_file->consist_flags);       /* Decode File-Consistancy flags */
+
+    /* Read the variable-size part of the boot-block */
+    variable_size = H5F_SIZEOF_OFFSET(new_file) +	/*offset of global small-object heap*/
+		    H5F_SIZEOF_OFFSET(new_file) +	/*offset of global free list*/
+		    H5F_SIZEOF_SIZE(new_file) +		/*logical size of HDF5 file*/
+		    H5G_SIZEOF_ENTRY(new_file);		/*root symbol table entry*/
+    if (H5F_READ(new_file->file_handle, temp_buf, variable_size)<0)
+       HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL);
+
+    /* Decode the variable-size part of the boot block */
+    p = temp_buf;
     H5F_decode_offset(new_file,p,new_file->smallobj_off);  /* Decode offset of global small-object heap */
     H5F_decode_offset(new_file,p,new_file->freespace_off);  /* Decode offset of global free-space heap */
     H5F_decode_length(new_file,p,new_file->logical_len); /* Decode logical length of file */
@@ -845,4 +857,86 @@ H5F_block_write (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
         HRETURN_ERROR(H5F_mask, ID_H5F_block_write, H5E_IO, H5E_WRITEERROR, FAIL);
     PABLO_TRACE_OFF(H5F_mask, ID_H5F_block_write);
     return SUCCEED;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_debug
+ *
+ * Purpose:	Prints a file header to the specified stream.  Each line
+ *		is indented and the field name occupies the specified width
+ *		number of characters.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug  1 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
+	   intn fwidth)
+{
+   fprintf (stream, "%*sFile Boot Block...\n", indent, "");
+   
+   fprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
+	    "Directory:",
+	    f->dir);
+   fprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
+	    "File name:",
+	    f->filename);
+   fprintf (stream, "%*s%-*s 0x%08x\n", indent, "", fwidth,
+	    "Permissions",
+	    (unsigned)(f->acc_perm));
+   fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+	    "Reference count:",
+	    (unsigned)(f->ref_count));
+   fprintf (stream, "%*s%-*s 0x%08lx\n", indent, "", fwidth,
+	    "Consistency flags:",
+	    (unsigned long)(f->consist_flags));
+   fprintf (stream, "%*s%-*s %ld\n", indent, "", fwidth,
+	    "Small object heap address:",
+	    (long)(f->smallobj_off));
+   fprintf (stream, "%*s%-*s %ld\n", indent, "", fwidth,
+	    "Free list address:",
+	    (long)(f->freespace_off));
+   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    "Logical file length:",
+	    (unsigned long)(f->logical_len));
+   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    "Size of user block:",
+	    (unsigned long)(f->file_create_parms.userblock_size));
+   fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+	    "Size of file size_t type:",
+	    (unsigned)(f->file_create_parms.offset_size));
+   fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+	    "Size of file off_t type:",
+	    (unsigned)(f->file_create_parms.length_size));
+   fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+	    "Bytes per B-tree page:",
+	    (unsigned)(f->file_create_parms.btree_page_size));
+   fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+	    "Boot block version number:",
+	    (unsigned)(f->file_create_parms.bootblock_ver));
+   fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+	    "Small object heap version number:",
+	    (unsigned)(f->file_create_parms.smallobject_ver));
+   fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+	    "Free list version number:",
+	    (unsigned)(f->file_create_parms.freespace_ver));
+   fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+	    "Object directory version number:",
+	    (unsigned)(f->file_create_parms.objectdir_ver));
+   fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+	    "Shared header version number:",
+	    (unsigned)(f->file_create_parms.sharedheader_ver));
+	    
+
+   return 0;
 }

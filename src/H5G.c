@@ -347,7 +347,7 @@ H5G_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
       abort();
    }
 
-   *pp = p_ret + 2*H5F_SIZEOF_OFFSET(f) + 4 + 24;
+   *pp = p_ret + H5G_SIZEOF_ENTRY(f);
    return 0;
 }
 
@@ -433,7 +433,7 @@ H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
       abort();
    }
 
-   *pp = p_ret + 2*H5F_SIZEOF_OFFSET(f) + 4 + 24;
+   *pp = p_ret + H5G_SIZEOF_ENTRY(f);
    return 0;
 }
 

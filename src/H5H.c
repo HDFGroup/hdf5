@@ -22,10 +22,17 @@
 #include "H5MFprivate.h"		/*file memory management	*/
 #include "H5MMprivate.h"		/*core memory management	*/
 
-#define H5H_MAGIC	"HEAP"		/*heap magic number		*/
 #define H5H_FREE_NULL	1		/*end of free list on disk	*/
-#define H5H_HDR_SIZE(F)	(4+H5F_SIZEOF_SIZE(F)+2*H5F_SIZEOF_OFFSET(F))
-#define H5H_SIZEOF_FREE(F) (H5F_SIZEOF_SIZE(F)+H5F_SIZEOF_OFFSET(F))
+
+#define H5H_SIZEOF_HDR(F)						      \
+   (H5H_SIZEOF_MAGIC +			/*heap signature		*/    \
+    H5F_SIZEOF_SIZE (F) +		/*data size			*/    \
+    H5F_SIZEOF_OFFSET (F) +		/*free list head		*/    \
+    H5F_SIZEOF_OFFSET (F))		/*data address			*/
+   
+#define H5H_SIZEOF_FREE(F)						      \
+   (H5F_SIZEOF_OFFSET (F) +		/*ptr to next free block	*/    \
+   H5F_SIZEOF_SIZE (F))			/*size of this free block	*/
 
 typedef struct H5H_free_t {
    off_t	offset;			/*offset of free block		*/
@@ -92,15 +99,15 @@ H5H_new (hdf5_file_t *f, size_t size_hint)
    }
 
    /* allocate file version */
-   total_size = H5H_HDR_SIZE(f) + size_hint;
+   total_size = H5H_SIZEOF_HDR(f) + size_hint;
    if ((addr = H5MF_alloc (f, total_size))<0) return -1;
 
    /* allocate memory version */
    heap = H5MM_xcalloc (1, sizeof(H5H_t));
-   heap->addr = addr + H5H_HDR_SIZE(f);
+   heap->addr = addr + H5H_SIZEOF_HDR(f);
    heap->disk_alloc = size_hint;
    heap->mem_alloc = size_hint;
-   heap->chunk = H5MM_xmalloc (H5H_HDR_SIZE(f) + size_hint);
+   heap->chunk = H5MM_xmalloc (H5H_SIZEOF_HDR(f) + size_hint);
 
    /* free list */
    if (size_hint) {
@@ -146,15 +153,15 @@ H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata)
    haddr_t	free_block;
 
    assert (addr>0);
-   assert (H5H_HDR_SIZE(f) <= sizeof hdr);
+   assert (H5H_SIZEOF_HDR(f) <= sizeof hdr);
    assert (!udata);
 
-   if (H5F_block_read (f, addr, H5H_HDR_SIZE(f), hdr)<0) goto error;
+   if (H5F_block_read (f, addr, H5H_SIZEOF_HDR(f), hdr)<0) goto error;
    p = hdr;
 
    /* magic number */
-   if (HDmemcmp (hdr, H5H_MAGIC, 4)) goto error;
-   p += 4;
+   if (HDmemcmp (hdr, H5H_MAGIC, H5H_SIZEOF_MAGIC)) goto error;
+   p += H5H_SIZEOF_MAGIC;
 
    /* heap data size */
    H5F_decode_length (f, p, heap->disk_alloc);
@@ -166,10 +173,10 @@ H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata)
 
    /* data */
    H5F_decode_offset (f, p, heap->addr);
-   heap->chunk = H5MM_xmalloc (H5H_HDR_SIZE(f) + heap->mem_alloc);
+   heap->chunk = H5MM_xmalloc (H5H_SIZEOF_HDR(f) + heap->mem_alloc);
    if (heap->disk_alloc &&
        H5F_block_read (f, heap->addr, heap->disk_alloc,
-		       heap->chunk + H5H_HDR_SIZE(f))<0) {
+		       heap->chunk + H5H_SIZEOF_HDR(f))<0) {
       goto error;
    }
 
@@ -184,7 +191,7 @@ H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata)
       tail = fl;
       if (!heap->freelist) heap->freelist = fl;
 		   
-      p = heap->chunk + H5H_HDR_SIZE(f) + free_block;
+      p = heap->chunk + H5H_SIZEOF_HDR(f) + free_block;
       H5F_decode_offset (f, p, free_block);
       H5F_decode_length (f, p, fl->size);
 
@@ -241,7 +248,7 @@ H5H_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
       /*
        * Write the header.
        */
-      HDmemcpy (p, H5H_MAGIC, 4); p += 4;
+      HDmemcpy (p, H5H_MAGIC, H5H_SIZEOF_MAGIC); p += H5H_SIZEOF_MAGIC;
       H5F_encode_length (f, p, heap->mem_alloc);
       H5F_encode_offset (f, p, fl?fl->offset:-1);
       H5F_encode_offset (f, p, heap->addr);
@@ -250,7 +257,7 @@ H5H_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
        * Write the free list.
        */
       while (fl) {
-	 p = heap->chunk + H5H_HDR_SIZE(f) + fl->offset;
+	 p = heap->chunk + H5H_SIZEOF_HDR(f) + fl->offset;
 	 if (fl->next) {
 	    H5F_encode_offset (f, p, fl->next->offset);
 	 } else {
@@ -263,17 +270,17 @@ H5H_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5H_t *heap)
       /*
        * Copy buffer to disk.
        */
-      if (heap->addr == addr + H5H_HDR_SIZE(f)) {
-	 if (H5F_block_write (f, addr, H5H_HDR_SIZE(f)+heap->disk_alloc,
+      if (heap->addr == addr + H5H_SIZEOF_HDR(f)) {
+	 if (H5F_block_write (f, addr, H5H_SIZEOF_HDR(f)+heap->disk_alloc,
 			      heap->chunk)<0) {
 	    return -1;
 	 }
       } else {
-	 if (H5F_block_write (f, addr, H5H_HDR_SIZE(f), heap->chunk)<0) {
+	 if (H5F_block_write (f, addr, H5H_SIZEOF_HDR(f), heap->chunk)<0) {
 	    return -1;
 	 }
 	 if (H5F_block_write (f, heap->addr, heap->disk_alloc,
-			      heap->chunk + H5H_HDR_SIZE(f))<0) {
+			      heap->chunk + H5H_SIZEOF_HDR(f))<0) {
 	    return -1;
 	 }
       }
@@ -333,7 +340,7 @@ H5H_read (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size, void *buf)
    assert (offset+size<=heap->mem_alloc);
 
    if (!buf) buf = H5MM_xmalloc (size);
-   HDmemcpy (buf, heap->chunk+H5H_HDR_SIZE(f)+offset, size);
+   HDmemcpy (buf, heap->chunk+H5H_SIZEOF_HDR(f)+offset, size);
    return buf;
 }
 
@@ -374,7 +381,7 @@ H5H_peek (hdf5_file_t *f, haddr_t addr, off_t offset)
    H5H_t	*heap = H5AC_find (f, H5AC_HEAP, addr, NULL);
 
    assert (offset>=0 && offset<heap->mem_alloc);
-   return heap->chunk+H5H_HDR_SIZE(f)+offset;
+   return heap->chunk+H5H_SIZEOF_HDR(f)+offset;
 }
 
 
@@ -502,13 +509,13 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t size, const void *buf)
 	       (unsigned long)(heap->mem_alloc + need_more));
       heap->mem_alloc += need_more;
       heap->chunk = H5MM_xrealloc (heap->chunk,
-				   H5H_HDR_SIZE(f)+heap->mem_alloc);
+				   H5H_SIZEOF_HDR(f)+heap->mem_alloc);
    }
 
    /*
     * Copy the data into the heap
     */
-   HDmemcpy (heap->chunk + H5H_HDR_SIZE(f) + offset, buf, size);
+   HDmemcpy (heap->chunk + H5H_SIZEOF_HDR(f) + offset, buf, size);
    return offset;
 }
    
@@ -547,7 +554,7 @@ H5H_write (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size,
    assert (buf);
 
    heap->dirty += 1;
-   HDmemcpy (heap->chunk+H5H_HDR_SIZE(f)+offset, buf, size);
+   HDmemcpy (heap->chunk+H5H_SIZEOF_HDR(f)+offset, buf, size);
    return 0;
 }
 
@@ -649,5 +656,120 @@ H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size)
    if (heap->freelist) heap->freelist->prev = fl;
    heap->freelist = fl;
 
+   return 0;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5H_debug
+ *
+ * Purpose:	Prints debugging information about a heap.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug  1 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5H_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
+	   intn fwidth)
+{
+   H5H_t	*h = H5AC_find (f, H5AC_HEAP, addr, NULL);
+   int		i, j, overlap;
+   uint8	c;
+   H5H_free_t	*freelist=NULL;
+   uint8	*marker = NULL;
+   size_t	amount_free = 0;
+
+   if (!h) return -1;
+
+   fprintf (stream, "%*sHeap...\n", indent, "");
+   fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
+	    "Dirty:",
+	    (int)(h->dirty));
+   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    "Data bytes allocated on disk:",
+	    (unsigned long)(h->disk_alloc));
+   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    "Data bytes allocated in core:",
+	    (unsigned long)(h->mem_alloc));
+
+
+   /*
+    * Traverse the free list and check that all free blocks fall within
+    * the heap and that no two free blocks point to the same region of
+    * the heap.
+    */
+   marker = H5MM_xcalloc (h->mem_alloc, 1);
+   for (freelist=h->freelist; freelist; freelist=freelist->next) {
+      fprintf (stream, "%*s%-*s %8lu, %8lu\n", indent, "", fwidth,
+	       "Free Block (offset,size):",
+	       (unsigned long)(freelist->offset),
+	       (unsigned long)(freelist->size));
+      if (freelist->offset + freelist->size > h->mem_alloc) {
+	 fprintf (stream, "***THAT FREE BLOCK IS OUT OF BOUNDS!\n");
+      } else {
+	 for (i=overlap=0; i<freelist->size; i++) {
+	    if (marker[freelist->offset+i]) overlap++;
+	    marker[freelist->offset+i] = 1;
+	 }
+	 if (overlap) {
+	    fprintf (stream,"***THAT FREE BLOCK OVERLAPPED A PREVIOUS ONE!\n");
+	 } else {
+	    amount_free += freelist->size;
+	 }
+      }
+   }
+
+   if (h->mem_alloc) {
+      fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
+	       "Percent of heap used:",
+	       100 * (h->mem_alloc - amount_free) / h->mem_alloc);
+   }
+
+   /*
+    * Print the data in a VMS-style octal dump.
+    */
+   fprintf (stream, "%*sData follows (`__' indicates free region)...\n",
+	    indent, "");
+   for (i=0; i<h->disk_alloc; i+=16) {
+      fprintf (stream, "%*s %8d: ", indent, "", i);
+      for (j=0; j<16; j++) {
+	 if (i+j<h->disk_alloc) {
+	    if (marker[i+j]) {
+	       fprintf (stream, "__ ");
+	    } else {
+	       c = h->chunk[H5H_SIZEOF_HDR(f)+i+j];
+	       fprintf (stream, "%02x ", c);
+	    }
+	 } else {
+	    fprintf (stream, "   ");
+	 }
+	 if (7==j) fputc (' ', stream);
+      }
+
+      for (j=0; j<16; j++) {
+	 if (i+j<h->disk_alloc) {
+	    if (marker[i+j]) {
+	       fputc (' ', stream);
+	    } else {
+	       c = h->chunk[H5H_SIZEOF_HDR(f)+i+j];
+	       if (c>' ' && c<'~') fputc (c, stream);
+	       else fputc ('.', stream);
+	    }
+	 }
+      }
+
+      fputc ('\n', stream);
+   }
+      
+   H5MM_xfree (marker);
    return 0;
 }

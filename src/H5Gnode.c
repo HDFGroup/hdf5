@@ -60,7 +60,7 @@ static const H5AC_class_t H5AC_SNODE[1] = {{
 
 /* H5G inherits B-tree like properties from H5B */
 const H5B_class_t H5B_SNODE[1] = {{
-   0,						/*id			*/
+   H5B_SUBTYPE_SNODE,				/*id			*/
    64,						/*k			*/
    sizeof (H5G_node_key_t),			/*sizeof_nkey		*/
    H5G_node_sizeof_rkey,			/*get_sizeof_rkey	*/
@@ -167,7 +167,8 @@ H5G_node_encode_key (hdf5_file_t *f, uint8 *raw, void *_key)
 static size_t
 H5G_node_size (hdf5_file_t *f)
 {
-   return H5G_HDR_SIZE(f) + (2*H5G_NODE_K) * (2*H5F_SIZEOF_OFFSET(f));
+   return H5G_NODE_SIZEOF_HDR(f) +
+      (2*H5G_NODE_K) * H5G_SIZEOF_ENTRY(f);
 }
 
 
@@ -244,7 +245,7 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
       buf = p = H5MM_xmalloc (size);
 
       /* magic number */
-      HDmemcpy (p, H5G_NODE_MAGIC, 4);
+      HDmemcpy (p, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC);
       p += 4;
 
       /* version number */
@@ -303,7 +304,7 @@ H5G_node_load (hdf5_file_t *f, haddr_t addr, const void *_udata)
    H5F_block_read (f, addr, size, buf);
 
    /* magic */
-   if (HDmemcmp (p, H5G_NODE_MAGIC, 4)) goto error;
+   if (HDmemcmp (p, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC)) goto error;
    p += 4;
 
    /* version */
@@ -693,3 +694,100 @@ H5G_node_list (hdf5_file_t *f, haddr_t addr, void *_udata)
    return 0;
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_debug
+ *
+ * Purpose:	Prints debugging information about a symbol table node
+ *		or a B-tree node for a symbol table B-tree.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *		robb@maya.nuance.com
+ *		Aug  4 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
+		intn fwidth)
+{
+   int		i, j;
+   char		buf[64];
+   H5G_node_t	*sn = H5AC_find (f, H5AC_SNODE, addr, NULL);
+
+   /*
+    * If we couldn't load the symbol table node, then try loading the
+    * B-tree node.
+    */
+   if (!sn) {
+      return H5B_debug (f, addr, stream, indent, fwidth, H5B_SNODE);
+   }
+
+
+   if (!sn) return -1;
+   fprintf (stream, "%*sSymbol Table Node...\n", indent, "");
+   fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
+	    "Dirty:",
+	    sn->dirty);
+   fprintf (stream, "%*s%-*s %d of %d\n", indent, "", fwidth,
+	    "Number of Symbols:",
+	    sn->nsyms, 2*H5G_NODE_K);
+
+   indent += 3;
+   fwidth = MAX (0, fwidth-3);
+   for (i=0; i<sn->nsyms; i++) {
+      fprintf (stream, "%*sSymbol %d:\n", indent-3, "", i);
+      fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	       "Name offset into private heap:",
+	       (unsigned long)(sn->entry[i].name_off));
+      fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	       "Object header address:",
+	       (unsigned long)(sn->entry[i].header));
+      
+      fprintf (stream, "%*s%-*s ", indent, "", fwidth,
+	       "Symbol type:");
+      switch (sn->entry[i].type) {
+      case H5G_NOTHING_CACHED:
+	 fprintf (stream, "Nothing Cached\n");
+	 break;
+	 
+      case H5G_CACHED_SDATA:
+	 fprintf (stream, "S-data\n");
+	 fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+		  "Number type:",
+		  (unsigned)(sn->entry[i].cache.sdata.nt));
+	 fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+		  "Dimensionality:",
+		  (unsigned)(sn->entry[i].cache.sdata.ndim));
+	 for (j=0; j<sn->entry[i].cache.sdata.ndim && j<4; j++) {
+	    sprintf (buf, "Dimension %d", j);
+	    fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+		     buf,
+		     (unsigned)(sn->entry[i].cache.sdata.dim[j]));
+	 }
+	 break;
+	 
+      case H5G_CACHED_SYMTAB:
+	 fprintf (stream, "Symbol Table\n");
+	 fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+		  "B-tree address:",
+		  (unsigned long)(sn->entry[i].cache.symtab.btree));
+	 fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+		  "Heap address:",
+		  (unsigned long)(sn->entry[i].cache.symtab.heap));
+	 break;
+
+      default:
+	 fprintf (stream, "*** Unknown symbol type %d\n", sn->entry[i].type);
+	 break;
+      }
+   }
+   return 0;
+}
+   

@@ -21,11 +21,20 @@
 
 #include "H5Fprivate.h"
 
-#define H5B_MAGIC	"TREE"	/* tree node magic number		*/
-#define H5B_HDR_SIZE(F)	(8+2*H5F_SIZEOF_OFFSET(F))
+#define H5B_MAGIC	"TREE"	/*tree node magic number		*/
+#define H5B_SIZEOF_MAGIC 4	/*size of magic number			*/
+
+#define H5B_SIZEOF_HDR(F)						      \
+   (H5B_SIZEOF_MAGIC +		/*magic number				*/    \
+    4 +				/*type, level, num entries		*/    \
+    2*H5F_SIZEOF_OFFSET(F))	/*left and right sibling addresses	*/
 
 #define H5B_ANCHOR_LT	0	/* left node is anchored, right is new	*/
 #define H5B_ANCHOR_RT	1	/* right node is anchored, left is new	*/
+
+typedef enum H5B_subid_t {
+   H5B_SUBTYPE_SNODE	=0	/*B-tree is for symbol table nodes	*/
+} H5B_subid_t;
    
 
 /*
@@ -33,7 +42,7 @@
  * variable of this type that contains class variables and methods.
  */
 typedef struct H5B_class_t {
-   intn		id;		/*id as found in file			*/
+   H5B_subid_t	id;		/*id as found in file			*/
    intn		k;		/* max children is 2k			*/
    size_t	sizeof_nkey;	/*size of native (memory) key		*/
    size_t	(*get_sizeof_rkey)(hdf5_file_t*);
@@ -75,7 +84,8 @@ typedef struct H5B_t {
 /*
  * Library prototypes.
  */
-herr_t H5B_debug (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type);
+herr_t H5B_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
+		  intn fwidth, const H5B_class_t *type);
 haddr_t H5B_new (hdf5_file_t *f, const H5B_class_t *type, size_t sizeof_rkey);
 herr_t H5B_find (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
 		 void *udata);
