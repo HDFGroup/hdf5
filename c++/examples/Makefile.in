@@ -36,8 +36,7 @@ TEST_SRC=create.cpp readdata.cpp writedata.cpp compound.cpp extend_ds.cpp \
 	 chunks.cpp h5group.cpp
 TEST_OBJ=$(TEST_SRC:.cpp=.lo)
 
-H5_FILES=Attributes.h5 SDScompound.h5 Select.h5 SDSextendible.h5 Group.h5 SDS.h5
-EXAMPLE_PROGS=$(TEST_SRC) $(H5_FILES)
+EXAMPLE_PROGS=$(TEST_SRC)
 
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.
