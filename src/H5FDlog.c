@@ -354,8 +354,8 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned flags, size_t buf_s
     
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-
-    fa.logfile=logfile;
+       
+    fa.logfile=(char*)logfile;
     fa.flags=flags;
     fa.buf_size=buf_size;
     ret_value= H5P_set_driver(plist, H5FD_LOG, &fa);

@@ -153,7 +153,7 @@ H5RS_wrap(const char *s)
         HGOTO_ERROR(H5E_RS,H5E_NOSPACE,NULL,"memory allocation failed");
 
     /* Set the internal fields */
-    ret_value->s=s;
+    ret_value->s=(char*)s;
     ret_value->wrapped=1;
     ret_value->n=1;
 
