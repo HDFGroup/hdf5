@@ -42,7 +42,7 @@ static intn interface_initialize_g = 0;
  *      in memory.  The data is read from file F and the array's size and
  *      storage information is in LAYOUT.  External files are described
  *      according to the external file list, EFL.  The sequence offset is 
- *      FILE_OFFSET in the file and MEM_OFFSET in memory (offsets are
+ *      FILE_OFFSET in the file (offsets are
  *      in terms of bytes) and the size of the hyperslab is SEQ_LEN. The
  *		total size of the file array is implied in the LAYOUT argument.
  *
@@ -59,8 +59,7 @@ herr_t
 H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 	     const struct H5O_pline_t *pline, const H5O_fill_t *fill,
 	     const struct H5O_efl_t *efl, const H5S_t *file_space, size_t elmt_size,
-         hsize_t seq_len, hssize_t mem_offset, hssize_t file_offset,
-         void *_buf/*out*/)
+         hsize_t seq_len, hssize_t file_offset, void *_buf/*out*/)
 {
     uint8_t	*buf = (uint8_t*)_buf;		    /*cast for arithmetic	*/
     hsize_t	dset_dims[H5O_LAYOUT_NDIMS];	/* dataspace dimensions */
@@ -120,7 +119,6 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                 addr = layout->addr;
             }
             addr += file_offset;
-            buf += mem_offset;
 
             /*
              * Now begin to walk through the array, copying data from disk to
@@ -194,7 +192,7 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
     if(count<10) {
         printf("%s: elmt_size=%d, addr=%d, seq_len=%d\n",FUNC,(int)elmt_size,(int)addr,(int)seq_len);
-        printf("%s: file_offset=%d, mem_offset=%d\n",FUNC,(int)file_offset,(int)mem_offset);
+        printf("%s: file_offset=%d\n",FUNC,(int)file_offset);
         count++;
     }
 }
@@ -271,7 +269,7 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
  *      in memory.  The data is written to file F and the array's size and
  *      storage information is in LAYOUT.  External files are described
  *      according to the external file list, EFL.  The sequence offset is 
- *      FILE_OFFSET in the file and MEM_OFFSET in memory (offsets are
+ *      FILE_OFFSET in the file (offsets are
  *      in terms of bytes) and the size of the hyperslab is SEQ_LEN. The
  *		total size of the file array is implied in the LAYOUT argument.
  *
@@ -288,8 +286,7 @@ herr_t
 H5F_seq_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 	     const struct H5O_pline_t *pline, const H5O_fill_t *fill,
 	     const struct H5O_efl_t *efl, const H5S_t *file_space, size_t elmt_size,
-         hsize_t seq_len, hssize_t mem_offset, hssize_t file_offset,
-         const void *_buf)
+         hsize_t seq_len, hssize_t file_offset, const void *_buf)
 {
     const uint8_t	*buf = (const uint8_t*)_buf;    /*cast for arithmetic */
     hsize_t	dset_dims[H5O_LAYOUT_NDIMS];	/* dataspace dimensions */
@@ -349,7 +346,6 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                 addr = layout->addr;
             }
             addr += file_offset;
-            buf += mem_offset;
 
             /*
              * Now begin to walk through the array, copying data from disk to
@@ -417,7 +413,7 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
     if(count<10) {
         printf("%s: elmt_size=%d, addr=%d, seq_len=%lu\n",FUNC,(int)elmt_size,(int)addr,(unsigned long)seq_len);
-        printf("%s: file_offset=%d, mem_offset=%d\n",FUNC,(int)file_offset,(int)mem_offset);
+        printf("%s: file_offset=%d\n",FUNC,(int)file_offset);
         count++;
     }
 }

@@ -943,6 +943,13 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
     hsize_t	tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary block count */
     hsize_t	tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary block offset */
     uint8_t	*buf=(uint8_t *)_buf;   /* Alias for pointer arithmetic */
+    const H5S_hyper_dim_t *tdiminfo;    /* Local pointer to diminfo information */
+    hssize_t fast_dim_start,            /* Local copies of fastest changing dimension info */
+        fast_dim_offset;
+    hsize_t fast_dim_stride,            /* Local copies of fastest changing dimension info */
+        fast_dim_block,
+        fast_dim_count,
+        fast_dim_buf_off;
     intn fast_dim;  /* Rank of the fastest changing dimension for the dataspace */
     intn temp_dim;  /* Temporary rank holder */
     hsize_t	acc;	/* Accumulator */
@@ -1009,7 +1016,7 @@ printf("%s: Check 1.0\n",FUNC);
 
         /* Read in the rest of the sequence */
         if (H5F_seq_read(f, dxpl_id, layout, pline, fill, efl, file_space,
-            elmt_size, actual_bytes, 0, buf_off, buf/*out*/)<0) {
+            elmt_size, actual_bytes, buf_off, buf/*out*/)<0) {
             HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
         }
 
@@ -1018,9 +1025,6 @@ printf("%s: Check 1.0\n",FUNC);
 
         /* Increment the count read */
         num_read+=actual_read;
-
-        /* Decrement the number of elements left in selection */
-        file_iter->hyp.elmt_left-=actual_read;
 
         /* Advance the point iterator */
         /* If we had enough buffer space to read in the rest of the sequence
@@ -1084,6 +1088,17 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
         last_buf_off=-1;
         buf_size=0;
 
+        /* Set the local copy of the diminfo pointer */
+        tdiminfo=file_space->select.sel_info.hslab.diminfo;
+
+        /* Set local copies of information for the fastest changing dimension */
+        fast_dim_start=tdiminfo[fast_dim].start;
+        fast_dim_stride=tdiminfo[fast_dim].stride;
+        fast_dim_block=tdiminfo[fast_dim].block;
+        fast_dim_count=tdiminfo[fast_dim].count;
+        fast_dim_buf_off=slab[fast_dim]*fast_dim_stride;
+        fast_dim_offset=fast_dim_start+file_space->select.offset[fast_dim];
+
         /* Read in data until an entire sequence can't be read in any longer */
         while(num_read<nelmts) {
             /* Check if we are running out of room in the buffer */
@@ -1116,7 +1131,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                 else {
                     /* Read in the sequence */
                     if (H5F_seq_read(f, dxpl_id, layout, pline, fill, efl, file_space,
-                        elmt_size, buf_size, 0, last_buf_off, buf/*out*/)<0) {
+                        elmt_size, buf_size, last_buf_off, buf/*out*/)<0) {
                         HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
                     } /* end if */
 
@@ -1133,67 +1148,63 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
             /* Increment the count read */
             num_read+=actual_read;
 
-            /* Decrement the number of elements left in selection */
-            file_iter->hyp.elmt_left-=actual_read;
+            /* Increment the offset and count for the fastest changing dimension */
 
-            /* Increment the offset and count */
-            temp_dim=fast_dim;
+            /* Move to the next block in the current dimension */
+            /* Check for partial block read! */
+            if(actual_read<fast_dim_block) {
+                offset[fast_dim]+=actual_read;
+                buf_off+=actual_bytes;
+                continue;   /* don't bother checking slower dimensions */
+            } /* end if */
+            else {
+                offset[fast_dim]+=fast_dim_stride;    /* reset the offset in the fastest dimension */
+                buf_off+=fast_dim_buf_off;
+                tmp_count[fast_dim]++;
+            } /* end else */
+
+            /* If this block is still in the range of blocks to output for the dimension, break out of loop */
+            if(tmp_count[fast_dim]<fast_dim_count)
+                continue;   /* don't bother checking slower dimensions */
+            else {
+                tmp_count[fast_dim]=0; /* reset back to the beginning of the line */
+                offset[fast_dim]=fast_dim_offset;
+
+                /* Re-compute the initial buffer offset */
+                for(i=0,buf_off=0; i<ndims; i++)
+                    buf_off+=offset[i]*slab[i];
+            } /* end else */
+
+            /* Increment the offset and count for the other dimensions */
+            temp_dim=fast_dim-1;
             while(temp_dim>=0) {
-                if(temp_dim==fast_dim) {
+                /* Move to the next row in the curent dimension */
+                offset[temp_dim]++;
+                buf_off+=slab[temp_dim];
+                tmp_block[temp_dim]++;
+
+                /* If this block is still in the range of blocks to output for the dimension, break out of loop */
+                if(tmp_block[temp_dim]<tdiminfo[temp_dim].block)
+                    break;
+                else {
                     /* Move to the next block in the current dimension */
-                    /* Check for partial block read! */
-                    if(actual_read<file_space->select.sel_info.hslab.diminfo[fast_dim].block) {
-                        offset[temp_dim]+=actual_read;
-                        buf_off+=actual_bytes;
-                        break;
-                    } /* end if */
-                    else {
-                        offset[temp_dim]+=file_space->select.sel_info.hslab.diminfo[temp_dim].stride;    /* reset the offset in the fastest dimension */
-                        buf_off+=slab[temp_dim]*file_space->select.sel_info.hslab.diminfo[temp_dim].stride;
-                        tmp_count[temp_dim]++;
-                    } /* end else */
+                    offset[temp_dim]+=(tdiminfo[temp_dim].stride-tdiminfo[temp_dim].block);
+                    buf_off+=(tdiminfo[temp_dim].stride-tdiminfo[temp_dim].block)*slab[temp_dim];
+                    tmp_block[temp_dim]=0;
+                    tmp_count[temp_dim]++;
 
                     /* If this block is still in the range of blocks to output for the dimension, break out of loop */
-                    if(tmp_count[temp_dim]<file_space->select.sel_info.hslab.diminfo[temp_dim].count)
+                    if(tmp_count[temp_dim]<tdiminfo[temp_dim].count)
                         break;
                     else {
                         tmp_count[temp_dim]=0; /* reset back to the beginning of the line */
-                        offset[temp_dim]=file_space->select.sel_info.hslab.diminfo[temp_dim].start+file_space->select.offset[temp_dim];
+                        tmp_block[temp_dim]=0;
+                        offset[temp_dim]=tdiminfo[temp_dim].start+file_space->select.offset[temp_dim];
 
                         /* Re-compute the initial buffer offset */
                         for(i=0,buf_off=0; i<ndims; i++)
                             buf_off+=offset[i]*slab[i];
-                    } /* end else */
-                } /* end if */
-                else {
-                    /* Move to the next row in the curent dimension */
-                    offset[temp_dim]++;
-                    buf_off+=slab[temp_dim];
-                    tmp_block[temp_dim]++;
-
-                    /* If this block is still in the range of blocks to output for the dimension, break out of loop */
-                    if(tmp_block[temp_dim]<file_space->select.sel_info.hslab.diminfo[temp_dim].block)
-                        break;
-                    else {
-                        /* Move to the next block in the current dimension */
-                        offset[temp_dim]+=(file_space->select.sel_info.hslab.diminfo[temp_dim].stride-file_space->select.sel_info.hslab.diminfo[temp_dim].block);
-                        buf_off+=(file_space->select.sel_info.hslab.diminfo[temp_dim].stride-file_space->select.sel_info.hslab.diminfo[temp_dim].block)*slab[temp_dim];
-                        tmp_block[temp_dim]=0;
-                        tmp_count[temp_dim]++;
-
-                        /* If this block is still in the range of blocks to output for the dimension, break out of loop */
-                        if(tmp_count[temp_dim]<file_space->select.sel_info.hslab.diminfo[temp_dim].count)
-                            break;
-                        else {
-                            tmp_count[temp_dim]=0; /* reset back to the beginning of the line */
-                            tmp_block[temp_dim]=0;
-                            offset[temp_dim]=file_space->select.sel_info.hslab.diminfo[temp_dim].start+file_space->select.offset[temp_dim];
-
-                            /* Re-compute the initial buffer offset */
-                            for(i=0,buf_off=0; i<ndims; i++)
-                                buf_off+=offset[i]*slab[i];
-                        }
-                    } /* end else */
+                    }
                 } /* end else */
 
                 /* Decrement dimension count */
@@ -1205,7 +1216,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
         if(last_buf_off>=0) {
             /* Read in the sequence */
             if (H5F_seq_read(f, dxpl_id, layout, pline, fill, efl, file_space,
-                elmt_size, buf_size, 0, last_buf_off, buf/*out*/)<0) {
+                elmt_size, buf_size, last_buf_off, buf/*out*/)<0) {
                 HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
             } /* end if */
         } /* end if */
@@ -1213,6 +1224,9 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
         /* Update the iterator with the location we stopped */
         HDmemcpy(file_iter->hyp.pos, offset, ndims*sizeof(hssize_t));
     } /* end if */
+
+    /* Decrement the number of elements left in selection */
+    file_iter->hyp.elmt_left-=num_read;
 
     FUNC_LEAVE (num_read);
 } /* H5S_hyper_fread_opt() */
@@ -1501,6 +1515,13 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
     hsize_t	tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary block count */
     hsize_t	tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary block offset */
     const uint8_t	*buf=(const uint8_t *)_buf;   /* Alias for pointer arithmetic */
+    const H5S_hyper_dim_t *tdiminfo;      /* Temporary pointer to diminfo information */
+    hssize_t fast_dim_start,            /* Local copies of fastest changing dimension info */
+        fast_dim_offset;
+    hsize_t fast_dim_stride,            /* Local copies of fastest changing dimension info */
+        fast_dim_block,
+        fast_dim_count,
+        fast_dim_buf_off;
     intn fast_dim;  /* Rank of the fastest changing dimension for the dataspace */
     intn temp_dim;  /* Temporary rank holder */
     hsize_t	acc;	/* Accumulator */
@@ -1567,7 +1588,7 @@ printf("%s: Check 1.0\n",FUNC);
 
         /* Read in the rest of the sequence */
         if (H5F_seq_write(f, dxpl_id, layout, pline, fill, efl, file_space,
-            elmt_size, actual_bytes, 0, buf_off, buf)<0) {
+            elmt_size, actual_bytes, buf_off, buf)<0) {
             HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
         }
 
@@ -1576,9 +1597,6 @@ printf("%s: Check 1.0\n",FUNC);
 
         /* Increment the count write */
         num_write+=actual_write;
-
-        /* Decrement the number of elements left in selection */
-        file_iter->hyp.elmt_left-=actual_write;
 
         /* Advance the point iterator */
         /* If we had enough buffer space to write out the rest of the sequence
@@ -1642,6 +1660,17 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
         last_buf_off=-1;
         buf_size=0;
 
+        /* Set the local copy of the diminfo pointer */
+        tdiminfo=file_space->select.sel_info.hslab.diminfo;
+
+        /* Set local copies of information for the fastest changing dimension */
+        fast_dim_start=tdiminfo[fast_dim].start;
+        fast_dim_stride=tdiminfo[fast_dim].stride;
+        fast_dim_block=tdiminfo[fast_dim].block;
+        fast_dim_count=tdiminfo[fast_dim].count;
+        fast_dim_buf_off=slab[fast_dim]*fast_dim_stride;
+        fast_dim_offset=fast_dim_start+file_space->select.offset[fast_dim];
+
         /* Read in data until an entire sequence can't be written out any longer */
         while(num_write<nelmts) {
             /* Check if we are running out of room in the buffer */
@@ -1674,7 +1703,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                 else {
                     /* Write out the sequence */
                     if (H5F_seq_write(f, dxpl_id, layout, pline, fill, efl, file_space,
-                        elmt_size, buf_size, 0, last_buf_off, buf)<0) {
+                        elmt_size, buf_size, last_buf_off, buf)<0) {
                         HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
                     } /* end if */
 
@@ -1691,67 +1720,63 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
             /* Increment the count write */
             num_write+=actual_write;
 
-            /* Decrement the number of elements left in selection */
-            file_iter->hyp.elmt_left-=actual_write;
+            /* Increment the offset and count for the fastest changing dimension */
 
-            /* Increment the offset and count */
-            temp_dim=fast_dim;
+            /* Move to the next block in the current dimension */
+            /* Check for partial block write! */
+            if(actual_write<fast_dim_block) {
+                offset[fast_dim]+=actual_write;
+                buf_off+=actual_bytes;
+                continue;   /* don't bother checking slower dimensions */
+            } /* end if */
+            else {
+                offset[fast_dim]+=fast_dim_stride;    /* reset the offset in the fastest dimension */
+                buf_off+=fast_dim_buf_off;
+                tmp_count[fast_dim]++;
+            } /* end else */
+
+            /* If this block is still in the range of blocks to output for the dimension, break out of loop */
+            if(tmp_count[fast_dim]<fast_dim_count)
+                continue;   /* don't bother checking slower dimensions */
+            else {
+                tmp_count[fast_dim]=0; /* reset back to the beginning of the line */
+                offset[fast_dim]=fast_dim_offset;
+
+                /* Re-compute the initial buffer offset */
+                for(i=0,buf_off=0; i<ndims; i++)
+                    buf_off+=offset[i]*slab[i];
+            } /* end else */
+
+            /* Increment the offset and count for the other dimensions */
+            temp_dim=fast_dim-1;
             while(temp_dim>=0) {
-                if(temp_dim==fast_dim) {
+                /* Move to the next row in the curent dimension */
+                offset[temp_dim]++;
+                buf_off+=slab[temp_dim];
+                tmp_block[temp_dim]++;
+
+                /* If this block is still in the range of blocks to output for the dimension, break out of loop */
+                if(tmp_block[temp_dim]<tdiminfo[temp_dim].block)
+                    break;
+                else {
                     /* Move to the next block in the current dimension */
-                    /* Check for partial block write! */
-                    if(actual_write<file_space->select.sel_info.hslab.diminfo[fast_dim].block) {
-                        offset[temp_dim]+=actual_write;
-                        buf_off+=actual_bytes;
-                        break;
-                    } /* end if */
-                    else {
-                        offset[temp_dim]+=file_space->select.sel_info.hslab.diminfo[temp_dim].stride;    /* reset the offset in the fastest dimension */
-                        buf_off+=slab[temp_dim]*file_space->select.sel_info.hslab.diminfo[temp_dim].stride;
-                        tmp_count[temp_dim]++;
-                    } /* end else */
+                    offset[temp_dim]+=(tdiminfo[temp_dim].stride-tdiminfo[temp_dim].block);
+                    buf_off+=(tdiminfo[temp_dim].stride-tdiminfo[temp_dim].block)*slab[temp_dim];
+                    tmp_block[temp_dim]=0;
+                    tmp_count[temp_dim]++;
 
                     /* If this block is still in the range of blocks to output for the dimension, break out of loop */
-                    if(tmp_count[temp_dim]<file_space->select.sel_info.hslab.diminfo[temp_dim].count)
+                    if(tmp_count[temp_dim]<tdiminfo[temp_dim].count)
                         break;
                     else {
                         tmp_count[temp_dim]=0; /* reset back to the beginning of the line */
-                        offset[temp_dim]=file_space->select.sel_info.hslab.diminfo[temp_dim].start+file_space->select.offset[temp_dim];
+                        tmp_block[temp_dim]=0;
+                        offset[temp_dim]=tdiminfo[temp_dim].start+file_space->select.offset[temp_dim];
 
                         /* Re-compute the initial buffer offset */
                         for(i=0,buf_off=0; i<ndims; i++)
                             buf_off+=offset[i]*slab[i];
-                    } /* end else */
-                } /* end if */
-                else {
-                    /* Move to the next row in the curent dimension */
-                    offset[temp_dim]++;
-                    buf_off+=slab[temp_dim];
-                    tmp_block[temp_dim]++;
-
-                    /* If this block is still in the range of blocks to output for the dimension, break out of loop */
-                    if(tmp_block[temp_dim]<file_space->select.sel_info.hslab.diminfo[temp_dim].block)
-                        break;
-                    else {
-                        /* Move to the next block in the current dimension */
-                        offset[temp_dim]+=(file_space->select.sel_info.hslab.diminfo[temp_dim].stride-file_space->select.sel_info.hslab.diminfo[temp_dim].block);
-                        buf_off+=(file_space->select.sel_info.hslab.diminfo[temp_dim].stride-file_space->select.sel_info.hslab.diminfo[temp_dim].block)*slab[temp_dim];
-                        tmp_block[temp_dim]=0;
-                        tmp_count[temp_dim]++;
-
-                        /* If this block is still in the range of blocks to output for the dimension, break out of loop */
-                        if(tmp_count[temp_dim]<file_space->select.sel_info.hslab.diminfo[temp_dim].count)
-                            break;
-                        else {
-                            tmp_count[temp_dim]=0; /* reset back to the beginning of the line */
-                            tmp_block[temp_dim]=0;
-                            offset[temp_dim]=file_space->select.sel_info.hslab.diminfo[temp_dim].start+file_space->select.offset[temp_dim];
-
-                            /* Re-compute the initial buffer offset */
-                            for(i=0,buf_off=0; i<ndims; i++)
-                                buf_off+=offset[i]*slab[i];
-                        }
-                    } /* end else */
+                    }
                 } /* end else */
 
                 /* Decrement dimension count */
@@ -1763,7 +1788,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
         if(last_buf_off>=0) {
             /* Write out the sequence */
             if (H5F_seq_write(f, dxpl_id, layout, pline, fill, efl, file_space,
-                elmt_size, buf_size, 0, last_buf_off, buf)<0) {
+                elmt_size, buf_size, last_buf_off, buf)<0) {
                 HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
             } /* end if */
         } /* end if */
@@ -1771,6 +1796,9 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
         /* Update the iterator with the location we stopped */
         HDmemcpy(file_iter->hyp.pos, offset, ndims*sizeof(hssize_t));
     } /* end if */
+
+    /* Decrement the number of elements left in selection */
+    file_iter->hyp.elmt_left-=num_write;
 
     FUNC_LEAVE (num_write);
 } /* H5S_hyper_fwrite_opt() */
@@ -2032,6 +2060,13 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
     hsize_t	tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary block offset */
     const uint8_t	*src=(const uint8_t *)_buf;   /* Alias for pointer arithmetic */
     uint8_t	*dst=(uint8_t *)_tconv_buf;   /* Alias for pointer arithmetic */
+    const H5S_hyper_dim_t *tdiminfo;      /* Temporary pointer to diminfo information */
+    hssize_t fast_dim_start,            /* Local copies of fastest changing dimension info */
+        fast_dim_offset;
+    hsize_t fast_dim_stride,            /* Local copies of fastest changing dimension info */
+        fast_dim_block,
+        fast_dim_count,
+        fast_dim_buf_off;
     intn fast_dim;  /* Rank of the fastest changing dimension for the dataspace */
     intn temp_dim;  /* Temporary rank holder */
     hsize_t	acc;	/* Accumulator */
@@ -2105,13 +2140,10 @@ printf("%s: Check 1.0\n",FUNC);
         HDmemcpy(dst,src+buf_off,actual_bytes);
 
         /* Increment the offset of the buffer */
-        dst+=elmt_size*actual_read;
+        dst+=actual_bytes;
 
         /* Increment the count read */
         num_read+=actual_read;
-
-        /* Decrement the number of elements left in selection */
-        mem_iter->hyp.elmt_left-=actual_read;
 
         /* Advance the point iterator */
         /* If we had enough buffer space to read in the rest of the sequence
@@ -2175,6 +2207,17 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
         (int)i,(int)mem_space->select.sel_info.hslab.diminfo[i].count);
 #endif /* QAK */
 
+        /* Set the local copy of the diminfo pointer */
+        tdiminfo=mem_space->select.sel_info.hslab.diminfo;
+
+        /* Set local copies of information for the fastest changing dimension */
+        fast_dim_start=tdiminfo[fast_dim].start;
+        fast_dim_stride=tdiminfo[fast_dim].stride;
+        fast_dim_block=tdiminfo[fast_dim].block;
+        fast_dim_count=tdiminfo[fast_dim].count;
+        fast_dim_buf_off=slab[fast_dim]*fast_dim_stride;
+        fast_dim_offset=fast_dim_start+mem_space->select.offset[fast_dim];
+
         /* Read in data until an entire sequence can't be written out any longer */
         while(num_read<nelmts) {
             /* Check if we are running out of room in the buffer */
@@ -2193,72 +2236,68 @@ for(i=0; i<mem_space->extent.u.simple.rank; i++)
             HDmemcpy(dst,src+buf_off,actual_bytes);
 
             /* Increment the offset of the buffer */
-            dst+=elmt_size*actual_read;
+            dst+=actual_bytes;
 
             /* Increment the count read */
             num_read+=actual_read;
 
-            /* Decrement the number of elements left in selection */
-            mem_iter->hyp.elmt_left-=actual_read;
+            /* Increment the offset and count for the fastest changing dimension */
 
-            /* Increment the offset and count */
-            temp_dim=fast_dim;
+            /* Move to the next block in the current dimension */
+            /* Check for partial block read! */
+            if(actual_read<fast_dim_block) {
+                offset[fast_dim]+=actual_read;
+                buf_off+=actual_bytes;
+                continue;   /* don't bother checking slower dimensions */
+            } /* end if */
+            else {
+                offset[fast_dim]+=fast_dim_stride;    /* reset the offset in the fastest dimension */
+                buf_off+=fast_dim_buf_off;
+                tmp_count[fast_dim]++;
+            } /* end else */
+
+            /* If this block is still in the range of blocks to output for the dimension, break out of loop */
+            if(tmp_count[fast_dim]<fast_dim_count)
+                continue;   /* don't bother checking slower dimensions */
+            else {
+                tmp_count[fast_dim]=0; /* reset back to the beginning of the line */
+                offset[fast_dim]=fast_dim_offset;
+
+                /* Re-compute the initial buffer offset */
+                for(i=0,buf_off=0; i<ndims; i++)
+                    buf_off+=offset[i]*slab[i];
+            } /* end else */
+
+            /* Increment the offset and count for the other dimensions */
+            temp_dim=fast_dim-1;
             while(temp_dim>=0) {
-                if(temp_dim==fast_dim) {
+                /* Move to the next row in the curent dimension */
+                offset[temp_dim]++;
+                buf_off+=slab[temp_dim];
+                tmp_block[temp_dim]++;
+
+                /* If this block is still in the range of blocks to output for the dimension, break out of loop */
+                if(tmp_block[temp_dim]<tdiminfo[temp_dim].block)
+                    break;
+                else {
                     /* Move to the next block in the current dimension */
-                    /* Check for partial block read! */
-                    if(actual_read<mem_space->select.sel_info.hslab.diminfo[fast_dim].block) {
-                        offset[temp_dim]+=actual_read;
-                        buf_off+=actual_bytes;
-                        break;
-                    } /* end if */
-                    else {
-                        offset[temp_dim]+=mem_space->select.sel_info.hslab.diminfo[temp_dim].stride;    /* reset the offset in the fastest dimension */
-                        buf_off+=slab[temp_dim]*mem_space->select.sel_info.hslab.diminfo[temp_dim].stride;
-                        tmp_count[temp_dim]++;
-                    } /* end else */
+                    offset[temp_dim]+=(tdiminfo[temp_dim].stride-tdiminfo[temp_dim].block);
+                    buf_off+=(tdiminfo[temp_dim].stride-tdiminfo[temp_dim].block)*slab[temp_dim];
+                    tmp_block[temp_dim]=0;
+                    tmp_count[temp_dim]++;
 
                     /* If this block is still in the range of blocks to output for the dimension, break out of loop */
-                    if(tmp_count[temp_dim]<mem_space->select.sel_info.hslab.diminfo[temp_dim].count)
+                    if(tmp_count[temp_dim]<tdiminfo[temp_dim].count)
                         break;
                     else {
                         tmp_count[temp_dim]=0; /* reset back to the beginning of the line */
-                        offset[temp_dim]=mem_space->select.sel_info.hslab.diminfo[temp_dim].start+mem_space->select.offset[temp_dim];
+                        tmp_block[temp_dim]=0;
+                        offset[temp_dim]=tdiminfo[temp_dim].start+mem_space->select.offset[temp_dim];
 
                         /* Re-compute the initial buffer offset */
                         for(i=0,buf_off=0; i<ndims; i++)
                             buf_off+=offset[i]*slab[i];
-                    } /* end else */
-                } /* end if */
-                else {
-                    /* Move to the next row in the curent dimension */
-                    offset[temp_dim]++;
-                    buf_off+=slab[temp_dim];
-                    tmp_block[temp_dim]++;
-
-                    /* If this block is still in the range of blocks to output for the dimension, break out of loop */
-                    if(tmp_block[temp_dim]<mem_space->select.sel_info.hslab.diminfo[temp_dim].block)
-                        break;
-                    else {
-                        /* Move to the next block in the current dimension */
-                        offset[temp_dim]+=(mem_space->select.sel_info.hslab.diminfo[temp_dim].stride-mem_space->select.sel_info.hslab.diminfo[temp_dim].block);
-                        buf_off+=(mem_space->select.sel_info.hslab.diminfo[temp_dim].stride-mem_space->select.sel_info.hslab.diminfo[temp_dim].block)*slab[temp_dim];
-                        tmp_block[temp_dim]=0;
-                        tmp_count[temp_dim]++;
-
-                        /* If this block is still in the range of blocks to output for the dimension, break out of loop */
-                        if(tmp_count[temp_dim]<mem_space->select.sel_info.hslab.diminfo[temp_dim].count)
-                            break;
-                        else {
-                            tmp_count[temp_dim]=0; /* reset back to the beginning of the line */
-                            tmp_block[temp_dim]=0;
-                            offset[temp_dim]=mem_space->select.sel_info.hslab.diminfo[temp_dim].start+mem_space->select.offset[temp_dim];
-
-                            /* Re-compute the initial buffer offset */
-                            for(i=0,buf_off=0; i<ndims; i++)
-                                buf_off+=offset[i]*slab[i];
-                        }
-                    } /* end else */
+                    }
                 } /* end else */
 
                 /* Decrement dimension count */
@@ -2269,6 +2308,9 @@ for(i=0; i<mem_space->extent.u.simple.rank; i++)
         /* Update the iterator with the location we stopped */
         HDmemcpy(mem_iter->hyp.pos, offset, ndims*sizeof(hssize_t));
     } /* end if */
+
+    /* Decrement the number of elements left in selection */
+    mem_iter->hyp.elmt_left-=num_read;
 
     FUNC_LEAVE (num_read);
 } /* end H5S_hyper_mread_opt() */
@@ -2525,6 +2567,13 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
     hsize_t	tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary block offset */
     const uint8_t	*src=(const uint8_t *)_tconv_buf;   /* Alias for pointer arithmetic */
     uint8_t	*dst=(uint8_t *)_buf;   /* Alias for pointer arithmetic */
+    const H5S_hyper_dim_t *tdiminfo;      /* Temporary pointer to diminfo information */
+    hssize_t fast_dim_start,            /* Local copies of fastest changing dimension info */
+        fast_dim_offset;
+    hsize_t fast_dim_stride,            /* Local copies of fastest changing dimension info */
+        fast_dim_block,
+        fast_dim_count,
+        fast_dim_buf_off;
     intn fast_dim;  /* Rank of the fastest changing dimension for the dataspace */
     intn temp_dim;  /* Temporary rank holder */
     hsize_t	acc;	/* Accumulator */
@@ -2599,13 +2648,10 @@ printf("%s: Check 1.0\n",FUNC);
         HDmemcpy(dst+buf_off,src,actual_bytes);
 
         /* Increment the offset of the buffer */
-        src+=elmt_size*actual_write;
+        src+=actual_bytes;
 
         /* Increment the count write */
         num_write+=actual_write;
-
-        /* Decrement the number of elements left in selection */
-        mem_iter->hyp.elmt_left-=actual_write;
 
         /* Advance the point iterator */
         /* If we had enough buffer space to write out the rest of the sequence
@@ -2669,6 +2715,17 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
         (int)i,(int)mem_space->select.sel_info.hslab.diminfo[i].count);
 #endif /* QAK */
 
+        /* Set the local copy of the diminfo pointer */
+        tdiminfo=mem_space->select.sel_info.hslab.diminfo;
+
+        /* Set local copies of information for the fastest changing dimension */
+        fast_dim_start=tdiminfo[fast_dim].start;
+        fast_dim_stride=tdiminfo[fast_dim].stride;
+        fast_dim_block=tdiminfo[fast_dim].block;
+        fast_dim_count=tdiminfo[fast_dim].count;
+        fast_dim_buf_off=slab[fast_dim]*fast_dim_stride;
+        fast_dim_offset=fast_dim_start+mem_space->select.offset[fast_dim];
+
         /* Read in data until an entire sequence can't be written out any longer */
         while(num_write<nelmts) {
             /* Check if we are running out of room in the buffer */
@@ -2691,72 +2748,68 @@ printf("%s: buf_off=%u, actual_bytes=%u\n",FUNC,(unsigned)buf_off,(int)actual_by
 #endif /* QAK */
 
             /* Increment the offset of the buffer */
-            src+=elmt_size*actual_write;
+            src+=actual_bytes;
 
             /* Increment the count write */
             num_write+=actual_write;
 
-            /* Decrement the number of elements left in selection */
-            mem_iter->hyp.elmt_left-=actual_write;
+            /* Increment the offset and count for the fastest changing dimension */
 
-            /* Increment the offset and count */
-            temp_dim=fast_dim;
+            /* Move to the next block in the current dimension */
+            /* Check for partial block write! */
+            if(actual_write<fast_dim_block) {
+                offset[fast_dim]+=actual_write;
+                buf_off+=actual_bytes;
+                continue;   /* don't bother checking slower dimensions */
+            } /* end if */
+            else {
+                offset[fast_dim]+=fast_dim_stride;    /* reset the offset in the fastest dimension */
+                buf_off+=fast_dim_buf_off;
+                tmp_count[fast_dim]++;
+            } /* end else */
+
+            /* If this block is still in the range of blocks to output for the dimension, break out of loop */
+            if(tmp_count[fast_dim]<fast_dim_count)
+                continue;   /* don't bother checking slower dimensions */
+            else {
+                tmp_count[fast_dim]=0; /* reset back to the beginning of the line */
+                offset[fast_dim]=fast_dim_offset;
+
+                /* Re-compute the initial buffer offset */
+                for(i=0,buf_off=0; i<ndims; i++)
+                    buf_off+=offset[i]*slab[i];
+            } /* end else */
+
+            /* Increment the offset and count for the other dimensions */
+            temp_dim=fast_dim-1;
             while(temp_dim>=0) {
-                if(temp_dim==fast_dim) {
+                /* Move to the next row in the curent dimension */
+                offset[temp_dim]++;
+                buf_off+=slab[temp_dim];
+                tmp_block[temp_dim]++;
+
+                /* If this block is still in the range of blocks to output for the dimension, break out of loop */
+                if(tmp_block[temp_dim]<tdiminfo[temp_dim].block)
+                    break;
+                else {
                     /* Move to the next block in the current dimension */
-                    /* Check for partial block write! */
-                    if(actual_write<mem_space->select.sel_info.hslab.diminfo[fast_dim].block) {
-                        offset[temp_dim]+=actual_write;
-                        buf_off+=actual_bytes;
-                        break;
-                    } /* end if */
-                    else {
-                        offset[temp_dim]+=mem_space->select.sel_info.hslab.diminfo[temp_dim].stride;    /* reset the offset in the fastest dimension */
-                        buf_off+=slab[temp_dim]*mem_space->select.sel_info.hslab.diminfo[temp_dim].stride;
-                        tmp_count[temp_dim]++;
-                    } /* end else */
+                    offset[temp_dim]+=(tdiminfo[temp_dim].stride-tdiminfo[temp_dim].block);
+                    buf_off+=(tdiminfo[temp_dim].stride-tdiminfo[temp_dim].block)*slab[temp_dim];
+                    tmp_block[temp_dim]=0;
+                    tmp_count[temp_dim]++;
 
                     /* If this block is still in the range of blocks to output for the dimension, break out of loop */
-                    if(tmp_count[temp_dim]<mem_space->select.sel_info.hslab.diminfo[temp_dim].count)
+                    if(tmp_count[temp_dim]<tdiminfo[temp_dim].count)
                         break;
                     else {
                         tmp_count[temp_dim]=0; /* reset back to the beginning of the line */
-                        offset[temp_dim]=mem_space->select.sel_info.hslab.diminfo[temp_dim].start+mem_space->select.offset[temp_dim];
+                        tmp_block[temp_dim]=0;
+                        offset[temp_dim]=tdiminfo[temp_dim].start+mem_space->select.offset[temp_dim];
 
                         /* Re-compute the initial buffer offset */
                         for(i=0,buf_off=0; i<ndims; i++)
                             buf_off+=offset[i]*slab[i];
-                    } /* end else */
-                } /* end if */
-                else {
-                    /* Move to the next row in the curent dimension */
-                    offset[temp_dim]++;
-                    buf_off+=slab[temp_dim];
-                    tmp_block[temp_dim]++;
-
-                    /* If this block is still in the range of blocks to output for the dimension, break out of loop */
-                    if(tmp_block[temp_dim]<mem_space->select.sel_info.hslab.diminfo[temp_dim].block)
-                        break;
-                    else {
-                        /* Move to the next block in the current dimension */
-                        offset[temp_dim]+=(mem_space->select.sel_info.hslab.diminfo[temp_dim].stride-mem_space->select.sel_info.hslab.diminfo[temp_dim].block);
-                        buf_off+=(mem_space->select.sel_info.hslab.diminfo[temp_dim].stride-mem_space->select.sel_info.hslab.diminfo[temp_dim].block)*slab[temp_dim];
-                        tmp_block[temp_dim]=0;
-                        tmp_count[temp_dim]++;
-
-                        /* If this block is still in the range of blocks to output for the dimension, break out of loop */
-                        if(tmp_count[temp_dim]<mem_space->select.sel_info.hslab.diminfo[temp_dim].count)
-                            break;
-                        else {
-                            tmp_count[temp_dim]=0; /* reset back to the beginning of the line */
-                            tmp_block[temp_dim]=0;
-                            offset[temp_dim]=mem_space->select.sel_info.hslab.diminfo[temp_dim].start+mem_space->select.offset[temp_dim];
-
-                            /* Re-compute the initial buffer offset */
-                            for(i=0,buf_off=0; i<ndims; i++)
-                                buf_off+=offset[i]*slab[i];
-                        }
-                    } /* end else */
+                    }
                 } /* end else */
 
                 /* Decrement dimension count */
@@ -2767,6 +2820,9 @@ printf("%s: buf_off=%u, actual_bytes=%u\n",FUNC,(unsigned)buf_off,(int)actual_by
         /* Update the iterator with the location we stopped */
         HDmemcpy(mem_iter->hyp.pos, offset, ndims*sizeof(hssize_t));
     } /* end if */
+
+    /* Decrement the number of elements left in selection */
+    mem_iter->hyp.elmt_left-=num_write;
 
     FUNC_LEAVE (num_write);
 } /* end H5S_hyper_mwrite_opt() */

@@ -342,12 +342,12 @@ __DLL__ herr_t H5F_seq_read(H5F_t *f, hid_t dxpl_id,
         const struct H5O_layout_t *layout, const struct H5O_pline_t *pline,
         const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
         const struct H5S_t *file_space, size_t elmt_size, hsize_t seq_len,
-        hssize_t mem_offset, hssize_t file_offset, void *_buf/*out*/);
+        hssize_t file_offset, void *_buf/*out*/);
 __DLL__ herr_t H5F_seq_write (H5F_t *f, hid_t dxpl_id,
         const struct H5O_layout_t *layout, const struct H5O_pline_t *pline,
         const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
         const struct H5S_t *file_space, size_t elmt_size, hsize_t seq_len,
-        hssize_t mem_offset, hssize_t file_offset, const void *_buf);
+        hssize_t file_offset, const void *_buf);
 
 
 /* Functions that operate on indexed storage */

@@ -60,23 +60,32 @@ H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxp
     if(f->shared->lf->feature_flags&H5FD_FEAT_DATA_SIEVE) {
         /* Try reading from the data sieve buffer */
         if(f->shared->sieve_buf) {
+            haddr_t sieve_start, sieve_end;     /* Start & end locations of sieve buffer */
+            haddr_t contig_end;         /* End locations of block to write */
+            hsize_t sieve_size;                 /* size of sieve buffer */
+
+            /* Stash local copies of these value */
+            sieve_start=f->shared->sieve_loc;
+            sieve_size=f->shared->sieve_size;
+            sieve_end=sieve_start+sieve_size;
+            contig_end=addr+size-1;
+            
             /* If entire read is within the sieve buffer, read it from the buffer */
-            if((addr>=f->shared->sieve_loc && addr<(f->shared->sieve_loc+f->shared->sieve_size))
-                    && ((addr+size-1)>=f->shared->sieve_loc && (addr+size-1)<(f->shared->sieve_loc+f->shared->sieve_size))) {
+            if(addr>=sieve_start && contig_end<sieve_end) {
                 /* Grab the data out of the buffer */
-                HDmemcpy(buf,f->shared->sieve_buf+(addr-f->shared->sieve_loc),size);
+                HDmemcpy(buf,f->shared->sieve_buf+(addr-sieve_start),size);
             } /* end if */
             /* Entire request is not within this data sieve buffer */
             else {
                 /* Check if we can actually hold the I/O request in the sieve buffer */
                 if(size>f->shared->sieve_buf_size) {
                     /* Check for any overlap with the current sieve buffer */
-                    if((f->shared->sieve_loc>=addr && f->shared->sieve_loc<(addr+size))
-                            || ((f->shared->sieve_loc+f->shared->sieve_size-1)>=addr && (f->shared->sieve_loc+f->shared->sieve_size-1)<(addr+size))) {
+                    if((sieve_start>=addr && sieve_start<(contig_end+1))
+                            || ((sieve_end-1)>=addr && (sieve_end-1)<(contig_end+1))) {
                         /* Flush the sieve buffer, if it's dirty */
                         if(f->shared->sieve_dirty) {
                             /* Write to file */
-                            if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
+                            if (H5F_block_write(f, H5FD_MEM_DRAW, sieve_start, sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
                                 HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                                   "block write failed");
                             }
@@ -97,7 +106,7 @@ H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxp
                     /* Flush the sieve buffer if it's dirty */
                     if(f->shared->sieve_dirty) {
                         /* Write to file */
-                        if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
+                        if (H5F_block_write(f, H5FD_MEM_DRAW, sieve_start, sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
                             HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                               "block write failed");
                         }
@@ -213,11 +222,20 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
     if(f->shared->lf->feature_flags&H5FD_FEAT_DATA_SIEVE) {
         /* Try writing to the data sieve buffer */
         if(f->shared->sieve_buf) {
+            haddr_t sieve_start, sieve_end;     /* Start & end locations of sieve buffer */
+            haddr_t contig_end;         /* End locations of block to write */
+            hsize_t sieve_size;                 /* size of sieve buffer */
+
+            /* Stash local copies of these value */
+            sieve_start=f->shared->sieve_loc;
+            sieve_size=f->shared->sieve_size;
+            sieve_end=sieve_start+sieve_size;
+            contig_end=addr+size-1;
+            
             /* If entire write is within the sieve buffer, write it to the buffer */
-            if((addr>=f->shared->sieve_loc && addr<(f->shared->sieve_loc+f->shared->sieve_size))
-                    && ((addr+size-1)>=f->shared->sieve_loc && (addr+size-1)<(f->shared->sieve_loc+f->shared->sieve_size))) {
+            if(addr>=sieve_start && contig_end<sieve_end) {
                 /* Grab the data out of the buffer */
-                HDmemcpy(f->shared->sieve_buf+(addr-f->shared->sieve_loc),buf,size);
+                HDmemcpy(f->shared->sieve_buf+(addr-sieve_start),buf,size);
 
                 /* Set sieve buffer dirty flag */
                 f->shared->sieve_dirty=1;
@@ -228,12 +246,12 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
                 /* Check if we can actually hold the I/O request in the sieve buffer */
                 if(size>f->shared->sieve_buf_size) {
                     /* Check for any overlap with the current sieve buffer */
-                    if((f->shared->sieve_loc>=addr && f->shared->sieve_loc<(addr+size))
-                            || ((f->shared->sieve_loc+f->shared->sieve_size-1)>=addr && (f->shared->sieve_loc+f->shared->sieve_size-1)<(addr+size))) {
+                    if((sieve_start>=addr && sieve_start<(contig_end+1))
+                            || ((sieve_end-1)>=addr && (sieve_end-1)<(contig_end+1))) {
                         /* Flush the sieve buffer, if it's dirty */
                         if(f->shared->sieve_dirty) {
                             /* Write to file */
-                            if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
+                            if (H5F_block_write(f, H5FD_MEM_DRAW, sieve_start, sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
                                 HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                                   "block write failed");
                             }
@@ -258,7 +276,7 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
                     /* Flush the sieve buffer if it's dirty */
                     if(f->shared->sieve_dirty) {
                         /* Write to file */
-                        if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
+                        if (H5F_block_write(f, H5FD_MEM_DRAW, sieve_start, sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
                             HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                               "block write failed");
                         }
