@@ -9702,6 +9702,47 @@ rm -f conftest*
    if test "X$RUNPARALLEL" = "Xnone"; then
       RUNPARALLEL=
    fi
+
+         echo $ac_n "checking whether a MPI_Get_count works correctly""... $ac_c" 1>&6
+echo "configure:9708: checking whether a MPI_Get_count works correctly" >&5
+   if test "$cross_compiling" = yes; then
+    { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
+else
+  cat > conftest.$ac_ext <<EOF
+#line 9713 "configure"
+#include "confdefs.h"
+
+#include <mpi.h>
+
+int main(int argc, char **argv)
+{
+    MPI_Status mpi_stat;
+    int bytes_read = 0, ret;
+
+    MPI_Init(&argc, &argv);
+    ret = MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_read);
+    MPI_Finalize();
+
+    /* this returns TRUE if bytes_read is 0...the shell thinks that the
+     * program fails, but we want it didn't of course so switch the
+     * "true"/"false" parts of the TRY_RUN macro */
+    return bytes_read == 0;
+}
+   
+EOF
+if { (eval echo configure:9734: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+then
+  echo "$ac_t""no" 1>&6
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -fr conftest*
+  echo "$ac_t""yes" 1>&6
+   CPPFLAGS="$CPPFLAGS -DMPI_GET_COUNT_WORKS"
+fi
+rm -fr conftest*
+fi
+
 fi
 
 

@@ -1109,7 +1109,7 @@ int main(void)
 	sprintf(s,"%${hdf5_cv_printf_ll}d",x);
 	exit(strcmp(s,"1099511627776"));
 }
-   ], break)
+   ], break,,)
 done)
 
 AC_MSG_RESULT(%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u)
@@ -1409,6 +1409,31 @@ if test -n "$PARALLEL"; then
    if test "X$RUNPARALLEL" = "Xnone"; then
       RUNPARALLEL=
    fi
+
+   dnl Check whether MPI_Get_count actually works correctly on this
+   dnl platform.
+   AC_MSG_CHECKING(whether a MPI_Get_count works correctly)
+   AC_TRY_RUN([
+#include <mpi.h>
+
+int main(int argc, char **argv)
+{
+    MPI_Status mpi_stat;
+    int bytes_read = 0, ret;
+
+    MPI_Init(&argc, &argv);
+    ret = MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_read);
+    MPI_Finalize();
+
+    /* this returns TRUE if bytes_read is 0...the shell thinks that the
+     * program fails, but we want it didn't of course so switch the
+     * "true"/"false" parts of the TRY_RUN macro */
+    return bytes_read == 0;
+}
+   ],
+   AC_MSG_RESULT(no),
+   AC_MSG_RESULT(yes)
+   CPPFLAGS="$CPPFLAGS -DMPI_GET_COUNT_WORKS")
 fi
 
 dnl ----------------------------------------------------------------------
