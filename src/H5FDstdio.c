@@ -100,11 +100,23 @@ typedef struct H5FD_stdio_t {
  *			which can be addressed entirely by the second
  *			argument of the file seek function.
  */
+/* adding for windows NT filesystem support. */
+#ifdef WIN32
+#define MAXADDR (((haddr_t)1<<(8*sizeof(LONGLONG)-1))-1)
+#else 
 #define MAXADDR (((haddr_t)1<<(8*sizeof(long)-1))-1)
+#endif
+
 #define ADDR_OVERFLOW(A)	(HADDR_UNDEF==(A) || ((A) & ~(haddr_t)MAXADDR))
 #define SIZE_OVERFLOW(Z)	((Z) & ~(hsize_t)MAXADDR)
+
+#ifdef WIN32
+#define REGION_OVERFLOW(A,Z)    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || \
+     sizeof(LONGLONG)<sizeof(size_t) || HADDR_UNDEF==(A)+(Z) || (LONGLONG)((A)+(Z))<(LONGLONG)(A))
+#else
 #define REGION_OVERFLOW(A,Z)	(ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || \
     sizeof(long)<sizeof(size_t) || HADDR_UNDEF==(A)+(Z) || (long)((A)+(Z))<(long)(A))
+#endif
 
 /* Prototypes */
 static H5FD_t *H5FD_stdio_open(const char *name, unsigned flags,
@@ -312,7 +324,7 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
 
     /* The unique key */
 #ifdef WIN32
-//#error "Needs correct fileindexhi & fileindexlo, code below is from sec2 driver"
+/*#error "Needs correct fileindexhi & fileindexlo, code below is from sec2 driver"*/
     filehandle = _get_osfhandle(f);
     results = GetFileInformationByHandle(filehandle, &fileinfo);
     file->fileindexhi = fileinfo.nFileIndexHigh;
@@ -601,11 +613,21 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsi
      */
     if (!(file->op == H5FD_STDIO_OP_READ || file->op==H5FD_STDIO_OP_SEEK) ||
             file->pos != addr) {
+#ifdef WIN32
+        fpos_t tempos =(fpos_t)(addr+SEEK_SET);
+	if (fsetpos(file->fp,&tempos)!=0) {
+	    file->op = H5FD_STDIO_OP_UNKNOWN;
+            file->pos = HADDR_UNDEF;
+            H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fsetpos failed", -1);
+	}
+#else
+
         if (fseek(file->fp, (long)addr, SEEK_SET) < 0) {
             file->op = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
             H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
         }
+#endif
         file->pos = addr;
     }
 
@@ -691,11 +713,13 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
      */
     if (!(file->op == H5FD_STDIO_OP_WRITE || file->op==H5FD_STDIO_OP_SEEK) ||
                 file->pos != addr) {
+#ifdef WIN32                                                                                   fpos_t tempos =(fpos_t)(addr+SEEK_SET);                                                if (fsetpos(file->fp,&tempos)!=0) {                                                        file->op = H5FD_STDIO_OP_UNKNOWN;                                                      file->pos = HADDR_UNDEF;                                                               H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fsetpos failed", -1);                    }                                                                              #else          
         if (fseek(file->fp, (long)addr, SEEK_SET) < 0) {
             file->op = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
             H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
         }
+#endif
         file->pos = addr;
     }
     
