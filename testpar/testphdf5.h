@@ -110,6 +110,7 @@ void extend_writeInd(char *filename);
 void dataset_readInd(char *filename);
 void dataset_readAll(char *filename);
 void extend_readInd(char *filename);
+void compact_dataset(char *filename);
 int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], DATATYPE *dataset, DATATYPE *original);
 
 #endif /* PHDF5TEST_H */

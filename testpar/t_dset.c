@@ -136,7 +136,7 @@ dataset_print(hssize_t start[], hsize_t block[], DATATYPE * dataset)
     /* print the column heading */
     printf("%-8s", "Cols:");
     for (j=0; j < block[1]; j++){
-	printf("%3ld ", (long)start[1]+j);
+	printf("%3ld ", (long)(start[1]+j));
     }
     printf("\n");
 

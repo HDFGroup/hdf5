@@ -122,7 +122,7 @@ usage(void)
 /*
  * parse the command line options
  */
-int
+static int
 parse_options(int argc, char **argv)
 {
     int mpi_size, mpi_rank;				/* mpi variables */

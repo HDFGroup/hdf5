@@ -85,7 +85,7 @@ void multiple_dset_write(char *filename, int ndatasets)
  */
 void compact_dataset(char *filename)
 {
-    int i, j, n, mpi_size, mpi_rank, err_num=0;
+    int i, j, mpi_size, mpi_rank, err_num=0;
     hid_t iof, plist, dcpl, dxpl, dataset, memspace, filespace;
     hssize_t chunk_origin [DIM];
     hsize_t chunk_dims [DIM], file_dims [DIM];
