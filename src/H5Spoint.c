@@ -202,12 +202,15 @@ herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hss
     }
     else {  /* op==H5S_SELECT_APPEND */
         new=space->select.sel_info.pnt_lst->head;
-        if(new!=NULL)
+        if(new!=NULL) {
             while(new->next!=NULL)
                 new=new->next;
 
-        /* Append new list to point selection */
-        new->next=top;
+            /* Append new list to point selection */
+            new->next=top;
+        } /* end if */
+        else 
+            space->select.sel_info.pnt_lst->head=top;
     }
 
     /* Add the number of elements in the new selection */

@@ -4884,6 +4884,14 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         block = _block;
     }
 
+    /* Fixup operation if selection is 'none' and operation is an OR */
+    /* (Allows for 'or'ing a sequence of hyperslab into a 'none' selection to */
+    /* have same affect as setting the first hyperslab in the sequence to have */
+    /* the 'set' operation and the rest of the hyperslab sequence to be 'or'ed */
+    /* after that */
+    if(space->select.type==H5S_SEL_NONE && op==H5S_SELECT_OR)
+        op=H5S_SELECT_SET;
+
 #ifdef QAK
     printf("%s: check 1.0, op=%s\n",FUNC,(op==H5S_SELECT_SET? "H5S_SELECT_SET" : (op==H5S_SELECT_OR ? "H5S_SELECT_OR" : "Unknown")));
 #endif /* QAK */
