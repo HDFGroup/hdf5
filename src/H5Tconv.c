@@ -1149,6 +1149,10 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	    xbkg += bkg_stride;
 	}
 
+    /* If the bkg_stride was set to -(dst->size), make it positive now */
+    if(buf_stride==0 && dst->size>src->size)
+        bkg_stride=dst->size;
+
 	/*
 	 * Copy the background buffer back into the in-place conversion
 	 * buffer.
