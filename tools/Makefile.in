@@ -10,16 +10,16 @@
 CPPFLAGS=-I../src -I. @CPPFLAGS@
 
 # These are our main targets:
-PROGS=h5debug h5import h5ls h5repart
+PROGS=h5debug h5import h5ls h5repart h5dump
 LIB=libh5tools.a
 LIBS=../src/libhdf5.a libh5tools.a @LIBS@
 
 # Source and object files for the library.
-LIB_SRC=h5dump.c
+LIB_SRC=h5tools.c
 LIB_OBJ=$(LIB_SRC:.c=.o)
 
 # Source and object files for programs...
-PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c
+PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c h5dumputil.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 PRIVATE_HDR=h5tools.h
 
@@ -35,5 +35,8 @@ h5ls: h5ls.o $(LIB) ../src/libhdf5.a
 
 h5repart: h5repart.o $(LIB) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ h5repart.o $(LIBS)
+
+h5dump: h5dump.o h5dumputil.o $(LIB) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ h5dump.o h5dumputil.o $(LIBS)
 
 @CONCLUDE@
