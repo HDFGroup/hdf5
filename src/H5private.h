@@ -270,7 +270,7 @@
 
 #if SIZEOF_INT32_T>=4
 #elif SIZEOF_SHORT>=4
-    typedef short int32_t
+    typedef short int32_t;
 #   undef SIZEOF_INT32_T
 #   define SIZEOF_INT32_T SIZEOF_SHORT
 #elif SIZEOF_INT>=4
