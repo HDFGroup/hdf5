@@ -1,4 +1,4 @@
-HDF5 version 1.7.33 released on Sun Aug  8 04:46:20 CDT 2004
+HDF5 version 1.7.34 released on Sun Aug 15 04:04:09 CDT 2004
 ================================================================================
 
 
@@ -171,6 +171,10 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed error which could cause a core dump when a type conversion
+            routine was registered after a compound datatype had been
+            converted and then an equivalment compound datatype was converted
+            again.  QAK - 2004/08/07
         - Fixed memory overwrite when encoding "multi" file driver information
             for file's superblock.  QAK - 2004/08/05
         - Fixed obscure bug where a filter which failed during chunk allocation
