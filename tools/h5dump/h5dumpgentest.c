@@ -70,6 +70,10 @@
 #define FILE42  "tnamed_dtype_attr.h5"
 #define FILE43  "tvldtypes5.h5"
 #define FILE44  "tfilters.h5"
+#define FILE46  "tfcontents1.h5"
+#define FILE47  "tfcontents2.h5"
+#define FILE48  "tfdriver1.h5"
+#define FILE49  "tfdriver2.h5"
 
 
 /*-------------------------------------------------------------------------
@@ -4435,7 +4439,6 @@ make_external(hid_t fid)
  H5Pclose(dcpl);
  assert(ret>=0);
 }
-
 /*-------------------------------------------------------------------------
  * Function: gent_filters
  *
@@ -4844,11 +4847,20 @@ static void gent_filters(void)
  write_dset(fid,1,dims4,"char",H5T_NATIVE_CHAR,buf4);
 
 /*-------------------------------------------------------------------------
- * a group and a link
+ * links
+ *-------------------------------------------------------------------------
+ */
+ ret=H5Glink (fid, H5G_LINK_SOFT, "all", "slink to all");
+ assert(ret>=0);
+
+ ret=H5Glink (fid, H5G_LINK_HARD, "all", "hlink to all");
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * a group 
  *-------------------------------------------------------------------------
  */
  gid  = H5Gcreate(fid,"g1",0);
- H5Glink (gid, H5G_LINK_SOFT, "somevalue", "slink");
  write_dset(gid,1,dims4,"mydset",H5T_NATIVE_CHAR,buf4);
  ret  = H5Gclose(gid);
  assert(ret>=0);
@@ -4865,7 +4877,6 @@ static void gent_filters(void)
  * close
  *-------------------------------------------------------------------------
  */
-
  ret=H5Sclose(sid1);
  assert(ret>=0);
 
@@ -4921,8 +4932,128 @@ set_local_myfilter(hid_t dcpl_id, hid_t UNUSED type_id, hid_t UNUSED space_id)
   return(FAIL);
  
  return(SUCCEED);
-} 
+}
 
+
+/*-------------------------------------------------------------------------
+ * Function: gent_fcontents
+ *
+ * Purpose: generate several files to list its contents
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_fcontents(void)
+{
+ hid_t    fid;   /* file id */
+ hid_t    gid1;  /* group ID */
+ hid_t    gid2;  /* group ID */
+ hid_t    gid3;  /* group ID */
+ hid_t    tid;   /* datatype ID */
+ hsize_t  dims[1]={4};
+ int      buf[4]={1,2,3,4};
+ int      ret;
+ 
+ /* create a file */
+ fid  = H5Fcreate(FILE46, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ assert(fid>=0);
+
+ write_dset(fid,1,dims,"dset",H5T_NATIVE_INT,buf);
+
+/*-------------------------------------------------------------------------
+ * links
+ *-------------------------------------------------------------------------
+ */
+
+ /* soft link to "dset" */
+ ret=H5Glink (fid, H5G_LINK_SOFT, "dset", "slink to dset");
+ assert(ret>=0);
+
+ /* hard link to "dset" */
+ ret=H5Glink (fid, H5G_LINK_HARD, "dset", "hlink to dset");
+ assert(ret>=0);
+
+ /* soft link to itself */
+ ret=H5Glink (fid, H5G_LINK_SOFT, "link", "link");
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * groups
+ *-------------------------------------------------------------------------
+ */
+ gid1  = H5Gcreate(fid,"g1",0);
+ gid2  = H5Gcreate(gid1,"g2",0);
+ gid3  = H5Gcreate(gid2,"g3",0);
+ write_dset(gid3,1,dims,"dset",H5T_NATIVE_INT,buf);
+ ret  = H5Gclose(gid1);
+ assert(ret>=0);
+ ret  = H5Gclose(gid2);
+ assert(ret>=0);
+ ret  = H5Gclose(gid3);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * datatype 
+ *-------------------------------------------------------------------------
+ */
+ tid=H5Tcopy(H5T_STD_B8LE);
+ ret=H5Tcommit(fid, "mytype", tid);
+ assert(ret>=0);
+ ret=H5Tclose(tid);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * close
+ *-------------------------------------------------------------------------
+ */
+
+ ret=H5Fclose(fid);
+ assert(ret>=0);
+
+ /* create a file for the bootblock test */
+ fid  = H5Fcreate(FILE47, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ assert(fid>=0);
+
+ ret=H5Fclose(fid);
+ assert(ret>=0);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: gent_fdrivers
+ *
+ * Purpose: file drivers test
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_fdrivers(void)
+{
+ hid_t    fid;   /* file id */
+ hid_t    fapl;  /* file access property list */
+ int      ret;
+
+ fapl = H5Pcreate(H5P_FILE_ACCESS);
+ assert(fapl>=0);
+
+ ret=H5Pset_fapl_stdio(fapl);
+ assert(ret>=0);
+
+ /* create a file */
+ fid  = H5Fcreate(FILE48, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+ assert(fid>=0);
+
+ ret=H5Fclose(fid);
+ assert(ret>=0);
+
+
+/*-------------------------------------------------------------------------
+ * close
+ *-------------------------------------------------------------------------
+ */
+ ret=H5Pclose(fapl);
+ assert(ret>=0);
+
+
+}
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -4991,6 +5122,8 @@ int main(void)
     gent_named_dtype_attr();
 
     gent_filters();
+    gent_fcontents();
+    gent_fdrivers();
 
     return 0;
 }
