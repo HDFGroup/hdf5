@@ -588,7 +588,9 @@ __DLL__ int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDgetppid()		getppid()
 #define HDgetpwnam(S)		getpwnam(S)
 #define HDgetpwuid(U)		getpwuid(U)
+#define HDgetrusage(X,S)	getrusage(X,S)
 #define HDgets(S)		gets(S)
+#define HDgettimeofday(S,P)	gettimeofday(S,P)
 #define HDgetuid()		getuid()
 #define HDgmtime(T)		gmtime(T)
 #define HDisalnum(C)		isalnum((int)(C)) /*cast for solaris warning*/

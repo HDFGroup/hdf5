@@ -1585,8 +1585,8 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 	    }
 	    for (i=0; i<bt->nchildren+1; i++) {
 		if (!bt->key[i].nkey) H5B_decode_key(f, bt, i);
-		memcpy(key+i*type->sizeof_nkey, bt->key[i].nkey,
-		       type->sizeof_nkey);
+		HDmemcpy(key+i*type->sizeof_nkey, bt->key[i].nkey,
+		         type->sizeof_nkey);
 	    }
 	    next_addr = bt->right;
 	    nchildren = bt->nchildren;

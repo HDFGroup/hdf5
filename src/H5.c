@@ -15,10 +15,10 @@
 /* private headers */
 #include "H5private.h"          /*library                 		*/
 #include "H5Bprivate.h"         /*B-link trees                    	*/
-#include "H5Dprivate.h"         /*datasets          		    */
+#include "H5Dprivate.h"         /*datasets                              */
 #include "H5Eprivate.h"         /*error handling          		*/
 #include "H5FDprivate.h"	/*file driver				*/
-#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5FLprivate.h"	/*free lists                            */
 #include "H5Iprivate.h"		/*atoms					*/
 #include "H5MMprivate.h"        /*memory management               	*/
 #include "H5Pprivate.h"		/*property lists			*/
@@ -110,7 +110,7 @@ H5_init_library(void)
      * adding it again later if the library is cosed and reopened.
      */
     if (!dont_atexit_g) {
-	atexit(H5_term_library);
+	HDatexit(H5_term_library);
 	dont_atexit_g = TRUE;
     }
 
@@ -194,7 +194,7 @@ H5_term_library(void)
 #define DOWN(F)								      \
     (((n=H5##F##_term_interface()) && at+5<sizeof loop)?		      \
      (sprintf(loop+at, "%s%s", at?",":"", #F),				      \
-      at += strlen(loop+at),						      \
+      at += HDstrlen(loop+at),						      \
       n):0)
     
     do {
@@ -658,7 +658,7 @@ HDsnprintf(char *buf, size_t UNUSED size, const char *fmt, ...)
     va_list	ap;
 
     va_start(ap, fmt);
-    n = vsprintf(buf, fmt, ap);
+    n = HDvsprintf(buf, fmt, ap);
     va_end(ap);
     return n;
 }
@@ -693,7 +693,7 @@ HDsnprintf(char *buf, size_t UNUSED size, const char *fmt, ...)
 int
 HDvsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 {
-    return vsprintf(buf, fmt, ap);
+    return HDvsprintf(buf, fmt, ap);
 }
 #endif /* H5_HAVE_VSNPRINTF */
 
@@ -1157,7 +1157,7 @@ H5_timer_begin (H5_timer_t *timer)
     assert (timer);
 
 #ifdef H5_HAVE_GETRUSAGE
-    getrusage (RUSAGE_SELF, &rusage);
+    HDgetrusage (RUSAGE_SELF, &rusage);
     timer->utime = (double)rusage.ru_utime.tv_sec +
                    (double)rusage.ru_utime.tv_usec/1e6;
     timer->stime = (double)rusage.ru_stime.tv_sec +
@@ -1167,7 +1167,7 @@ H5_timer_begin (H5_timer_t *timer)
     timer->stime = 0.0;
 #endif
 #ifdef H5_HAVE_GETTIMEOFDAY
-    gettimeofday (&etime, NULL);
+    HDgettimeofday (&etime, NULL);
     timer->etime = (double)etime.tv_sec + (double)etime.tv_usec/1e6;
 #else
     timer->etime = 0.0;
