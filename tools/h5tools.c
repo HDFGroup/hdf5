@@ -52,11 +52,10 @@
 #define H5DUMP_BUFSIZE          (1024)
 #endif
 
-#define OPT(X,S)                ((X) ? (X) : (S))
-#define ALIGN(A,Z)              ((((A) + (Z) - 1) / (Z)) * (Z))
-
-#define START_OF_DATA           0x0001
-#define END_OF_DATA             0x0002
+#define OPT(X,S)		((X) ? (X) : (S))
+#define ALIGN(A,Z)		((((A) + (Z) - 1) / (Z)) * (Z))
+#define START_OF_DATA		0x0001
+#define END_OF_DATA		0x0002
 
 /* Special strings embedded in the output */
 #define OPTIONAL_LINE_BREAK     "\001"
@@ -105,13 +104,8 @@ typedef struct h5dump_context_t {
 
 typedef herr_t (*H5G_operator_t)(hid_t, const char*, void*);
 
-extern int print_data(hid_t oid, hid_t _p_type, int obj_data);
-extern void init_prefix(char **temp, int length);
-extern void init_table(table_t **table);
 extern void free_table(table_t **table);
 extern void dump_table(char *name, table_t* table);
-extern herr_t find_objs(hid_t group, const char *name, void *op_data);
-extern int search_obj (table_t *temp, unsigned long *);
 extern int get_table_idx(table_t *table, unsigned long *);
 extern int get_tableflag(table_t*, int);
 extern int set_tableflag(table_t*, int);
@@ -720,6 +714,7 @@ static int
 h5dump_region(hid_t region, h5dump_str_t *str/*in,out*/, const h5dump_t *info)
 {
     hssize_t	nblocks, npoints;
+    hsize_t alloc_size;
     hsize_t	*ptdata;
     int		ndims = H5Sget_simple_extent_ndims(region);
 
@@ -729,62 +724,68 @@ h5dump_region(hid_t region, h5dump_str_t *str/*in,out*/, const h5dump_t *info)
      * the other.
      */
     H5E_BEGIN_TRY {
-	nblocks = H5Sget_select_hyper_nblocks(region);
-	npoints = H5Sget_select_elem_npoints(region);
+        nblocks = H5Sget_select_hyper_nblocks(region);
+        npoints = H5Sget_select_elem_npoints(region);
     } H5E_END_TRY;
 
     h5dump_str_append(str, "{");
 
     /* Print block information */
     if (nblocks > 0) {
-	int i;
+        int i;
 
-	ptdata = malloc(nblocks * ndims * 2 * sizeof(ptdata[0]));
-	H5Sget_select_hyper_blocklist(region, 0, nblocks, ptdata);
+        alloc_size=nblocks * ndims * 2 * sizeof(ptdata[0]);
+        assert(alloc_size==(hsize_t)((size_t)alloc_size)); /*check for overflow*/
+        ptdata = malloc((size_t)alloc_size);
+        H5_CHECK_OVERFLOW(nblocks,hssize_t,hsize_t);
+        H5Sget_select_hyper_blocklist(region, (hsize_t)0, (hsize_t)nblocks, ptdata);
 
-	for (i = 0; i < nblocks; i++) {
-	    int j;
+        for (i = 0; i < nblocks; i++) {
+            int j;
 
-	    h5dump_str_append(str, info->dset_blockformat_pre,
-			      i ? "," OPTIONAL_LINE_BREAK " " : "",
-			      (unsigned long)i);
-		
-	    /* Start coordinates and opposite corner */
-	    for (j = 0; j < ndims; j++)
-		h5dump_str_append(str, "%s%lu", j ? "," : "(",
-				  (unsigned long)ptdata[i * 2 * ndims + j]);
+            h5dump_str_append(str, info->dset_blockformat_pre,
+                      i ? "," OPTIONAL_LINE_BREAK " " : "",
+                      (unsigned long)i);
+            
+            /* Start coordinates and opposite corner */
+            for (j = 0; j < ndims; j++)
+                h5dump_str_append(str, "%s%lu", j ? "," : "(",
+                      (unsigned long)ptdata[i * 2 * ndims + j]);
 
-	    for (j = 0; j < ndims; j++)
-		h5dump_str_append(str, "%s%lu", j ? "," : ")-(",
-				  (unsigned long)ptdata[i * 2 * ndims + j + ndims]);
+            for (j = 0; j < ndims; j++)
+                h5dump_str_append(str, "%s%lu", j ? "," : ")-(",
+                      (unsigned long)ptdata[i * 2 * ndims + j + ndims]);
 
-	    h5dump_str_append(str, ")");
-	}
-	free(ptdata);
+            h5dump_str_append(str, ")");
+        }
+        free(ptdata);
     }
 
     /* Print point information */
     if (npoints > 0) {
-	int i;
+        int i;
 
-	ptdata = malloc(npoints * ndims * sizeof(ptdata[0]));
-	H5Sget_select_elem_pointlist(region, 0, npoints, ptdata);
+        alloc_size=npoints * ndims * sizeof(ptdata[0]);
+        assert(alloc_size==(hsize_t)((size_t)alloc_size)); /*check for overflow*/
+        ptdata = malloc((size_t)alloc_size);
+        H5_CHECK_OVERFLOW(npoints,hssize_t,hsize_t);
+        H5Sget_select_elem_pointlist(region, (hsize_t)0, (hsize_t)npoints, ptdata);
 
-	for (i = 0; i < npoints; i++) {
-	    int j;
+        for (i = 0; i < npoints; i++) {
+            int j;
 
-	    h5dump_str_append(str, info->dset_ptformat_pre ,
-			      i ? "," OPTIONAL_LINE_BREAK " " : "",
-			      (unsigned long)i);
-		
-	    for (j = 0; j < ndims; j++)
-		h5dump_str_append(str, "%s%lu", j ? "," : "(",
-				  (unsigned long)(ptdata[i * ndims + j]));
+            h5dump_str_append(str, info->dset_ptformat_pre ,
+                      i ? "," OPTIONAL_LINE_BREAK " " : "",
+                      (unsigned long)i);
+            
+            for (j = 0; j < ndims; j++)
+                h5dump_str_append(str, "%s%lu", j ? "," : "(",
+                      (unsigned long)(ptdata[i * ndims + j]));
 
-	    h5dump_str_append(str, ")");
-	}
+            h5dump_str_append(str, ")");
+        }
 
-	free(ptdata);
+        free(ptdata);
     }
     
     h5dump_str_append(str, "}");
@@ -1459,7 +1460,7 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
     if (info->line_ncols > 0)
 	ncols = info->line_ncols;
 
-    h5dump_simple_prefix(stream, info, ctx, 0, 0);
+    h5dump_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
     
     for (i = 0; i < nelmts; i++, ctx->cur_elmt++, elmt_counter++) {
         /* Render the element */
@@ -1688,7 +1689,8 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     else
         sm_nbytes = p_type_nbytes;
 
-    sm_buf = malloc(sm_nbytes);
+    assert(sm_nbytes==(hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
+    sm_buf = malloc((size_t)sm_nbytes);
     sm_nelmts = sm_nbytes / p_type_nbytes;
     sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
 
@@ -1920,8 +1922,9 @@ h5dump_fixtype(hid_t f_type)
 	 * and add the members.
 	 */
 	nmembs = H5Tget_nmembers(f_type);
-	memb = calloc(nmembs, sizeof(hid_t));
-	name = calloc(nmembs, sizeof(char *));
+    assert(nmembs>0);
+	memb = calloc((size_t)nmembs, sizeof(hid_t));
+	name = calloc((size_t)nmembs, sizeof(char *));
 	
 	for (i = 0, size = 0; i < nmembs; i++) {
 
@@ -2268,7 +2271,10 @@ init_table(table_t** temp)
 void
 init_prefix(char **prefix, int prefix_len)
 {
-    char *temp = malloc(prefix_len);
+    char *temp;
+
+    assert(prefix_len>0);
+    temp = malloc((size_t)prefix_len);
 
     *temp = '\0';
     *prefix = temp;
@@ -2621,7 +2627,10 @@ h5dump_fopen(const char *fname, char *drivername, size_t drivername_size)
         hid_t		fapl;
     } driver[16];
     static int          ndrivers = 0;
-    hid_t               fid=(-1), fapl = H5P_DEFAULT;
+    hid_t               fid=(-1);
+#ifdef VERSION13
+    hid_t               fapl = H5P_DEFAULT;
+#endif
     int                 drivernum;
 
     if (!ndrivers) {

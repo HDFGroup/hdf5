@@ -833,15 +833,16 @@ display_enum_type(hid_t type, int ind)
     }
 
     /* Get the names and raw values of all members */
-    name = calloc(nmembs, sizeof(char*));
-    value = calloc(nmembs, MAX(H5Tget_size(type), dst_size));
+    assert(nmembs>0);
+    name = calloc((size_t)nmembs, sizeof(char*));
+    value = calloc((size_t)nmembs, MAX(H5Tget_size(type), dst_size));
     for (i=0; i<nmembs; i++) {
 	name[i] = H5Tget_member_name(type, i);
 	H5Tget_member_value(type, i, value+i*H5Tget_size(type));
     }
 
     /* Convert values to native data type */
-    if (native>0) H5Tconvert(super, native, nmembs, value, NULL, H5P_DEFAULT);
+    if (native>0) H5Tconvert(super, native, (hsize_t)nmembs, value, NULL, H5P_DEFAULT);
 
     /* Sort members by increasing value */
     /*not implemented yet*/

@@ -1103,7 +1103,7 @@ H5I_find_id(hid_t id)
  *
  *-------------------------------------------------------------------------
  */
-#ifdef H5I_DEBUG
+#ifdef H5I_DEBUG_OUTPUT
 static herr_t
 H5I_debug(H5I_type_t grp)
 {
@@ -1150,5 +1150,5 @@ H5I_debug(H5I_type_t grp)
 
     FUNC_LEAVE(SUCCEED);
 }
-#endif /* H5I_DEBUG */
+#endif /* H5I_DEBUG_OUTPUT */
 

@@ -71,7 +71,7 @@ main(int argc, char *argv[])
      */
     if (strchr (argv[1], '%')) {
 	plist = H5Pcreate (H5P_FILE_ACCESS);
-	H5Pset_fapl_family (plist, 0, H5P_DEFAULT);
+	H5Pset_fapl_family (plist, (hsize_t)0, H5P_DEFAULT);
     }
     if ((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, plist)) < 0) {
         fprintf(stderr, "cannot open file\n");

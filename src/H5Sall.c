@@ -24,28 +24,28 @@ static intn             interface_initialize_g = 0;
 
 static herr_t H5S_all_init (const struct H5O_layout_t *layout,
 			    const H5S_t *space, H5S_sel_iter_t *iter, size_t *min_elem_out);
-static size_t H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
-			      size_t max);
-static size_t H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
+static hsize_t H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
+			      hsize_t max);
+static hsize_t H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 			     const struct H5O_pline_t *pline,
 			     const struct H5O_fill_t *fill,
 			     const struct H5O_efl_t *efl, size_t elmt_size,
 			     const H5S_t *file_space,
-			     H5S_sel_iter_t *file_iter, size_t nelmts,
+			     H5S_sel_iter_t *file_iter, hsize_t nelmts,
 			     hid_t dxpl_id, void *buf/*out*/);
 static herr_t H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 			     const struct H5O_pline_t *pline,
 			     const struct H5O_fill_t *fill,
 			     const struct H5O_efl_t *efl, size_t elmt_size,
 			     const H5S_t *file_space,
-			     H5S_sel_iter_t *file_iter, size_t nelmts,
+			     H5S_sel_iter_t *file_iter, hsize_t nelmts,
 			     hid_t dxpl_id, const void *buf);
-static size_t H5S_all_mgath (const void *_buf, size_t elmt_size,
+static hsize_t H5S_all_mgath (const void *_buf, size_t elmt_size,
 			     const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-			     size_t nelmts, void *_tconv_buf/*out*/);
+			     hsize_t nelmts, void *_tconv_buf/*out*/);
 static herr_t H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
 			     const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-			     size_t nelmts, void *_buf/*out*/);
+			     hsize_t nelmts, void *_buf/*out*/);
 static herr_t H5S_select_all(H5S_t *space);
 
 const H5S_fconv_t	H5S_ALL_FCONV[1] = {{
@@ -123,7 +123,7 @@ H5S_all_init (const struct H5O_layout_t UNUSED *layout,
  * Purpose:	Figure out the optimal number of elements to transfer to/from
  *		the file.
  *
- * Return:	non-negative number of elements on success, negative on
+ * Return:	non-negative number of elements on success, zero on
  *		failure.
  *
  * Programmer:	Quincey Koziol
@@ -133,8 +133,8 @@ H5S_all_init (const struct H5O_layout_t UNUSED *layout,
  *
  *-------------------------------------------------------------------------
  */
-static size_t
-H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *sel_iter, size_t max)
+static hsize_t
+H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *sel_iter, hsize_t max)
 {
     hsize_t	nelmts;
     int		m_ndims;	/* file dimensionality	*/
@@ -142,7 +142,7 @@ H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *sel_iter, size_t max)
     hsize_t	acc;
     int		i;
 
-    FUNC_ENTER (H5S_all_favail, FAIL);
+    FUNC_ENTER (H5S_all_favail, 0);
 
     /* Check args */
     assert (space && H5S_SEL_ALL==space->select.type);
@@ -158,7 +158,7 @@ H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *sel_iter, size_t max)
         acc *= size[i];
     nelmts = (max/acc) * acc;
     if (nelmts<=0) {
-        HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL,
+        HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, 0,
 		       "strip mine buffer is too small");
     }
 
@@ -191,12 +191,12 @@ H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *sel_iter, size_t max)
  *		what the virtual file layer needs.
  *-------------------------------------------------------------------------
  */
-static size_t
+static hsize_t
 H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 	       const struct H5O_pline_t *pline,
 	       const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
 	       size_t elmt_size, const H5S_t *file_space,
-	       H5S_sel_iter_t *file_iter, size_t nelmts, hid_t dxpl_id,
+	       H5S_sel_iter_t *file_iter, hsize_t nelmts, hid_t dxpl_id,
 	       void *_buf/*out*/)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
@@ -252,11 +252,11 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
      */
     if (H5F_arr_read(f, dxpl_id, layout, pline, fill, efl, hsize, hsize,
 		     zero, file_offset, buf/*out*/)<0) {
-	HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
+        HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
     }
 
     /* Advance iterator */
-    file_iter->all.elmt_left--;
+    file_iter->all.elmt_left-=nelmts;
     file_iter->all.offset+=nelmts;
     
     FUNC_LEAVE (nelmts);
@@ -287,7 +287,7 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 	       const struct H5O_pline_t *pline, const struct H5O_fill_t *fill,
 	       const struct H5O_efl_t *efl, size_t elmt_size,
 	       const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-	       size_t nelmts, hid_t dxpl_id, const void *_buf)
+	       hsize_t nelmts, hid_t dxpl_id, const void *_buf)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
@@ -342,7 +342,7 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     }
 
     /* Advance iterator */
-    file_iter->all.elmt_left--;
+    file_iter->all.elmt_left-=nelmts;
     file_iter->all.offset+=nelmts;
     
     FUNC_LEAVE (SUCCEED);
@@ -368,10 +368,10 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
  *
  *-------------------------------------------------------------------------
  */
-static size_t
+static hsize_t
 H5S_all_mgath (const void *_buf, size_t elmt_size,
 	       const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-	       size_t nelmts, void *_tconv_buf/*out*/)
+	       hsize_t nelmts, void *_tconv_buf/*out*/)
 {
     hssize_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
     hsize_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/
@@ -426,14 +426,15 @@ H5S_all_mgath (const void *_buf, size_t elmt_size,
     /*
      * Scatter from conversion buffer to application memory.
      */
-    if (H5V_hyper_copy (space_ndims+1, hsize, hsize, zero, tconv_buf,
+    H5_CHECK_OVERFLOW(space_ndims+1,intn,uintn);
+    if (H5V_hyper_copy ((uintn)(space_ndims+1), hsize, hsize, zero, tconv_buf,
 			mem_size, mem_offset, buf)<0) {
         HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to scatter data to memory");
     }
 
     /* Advance iterator */
-    mem_iter->all.elmt_left--;
+    mem_iter->all.elmt_left-=nelmts;
     mem_iter->all.offset+=nelmts;
     
     FUNC_LEAVE (nelmts);
@@ -459,7 +460,7 @@ H5S_all_mgath (const void *_buf, size_t elmt_size,
 static herr_t
 H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
 	       const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-	       size_t nelmts, void *_buf/*out*/)
+	       hsize_t nelmts, void *_buf/*out*/)
 {
     hssize_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
     hsize_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/
@@ -516,14 +517,15 @@ H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
     /*
      * Scatter from conversion buffer to application memory.
      */
-    if (H5V_hyper_copy (space_ndims+1, hsize, mem_size, mem_offset, buf,
+    H5_CHECK_OVERFLOW(space_ndims+1,intn,uintn);
+    if (H5V_hyper_copy ((uintn)(space_ndims+1), hsize, mem_size, mem_offset, buf,
 			hsize, zero, tconv_buf)<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to scatter data to memory");
     }
 
     /* Advance iterator */
-    mem_iter->all.elmt_left--;
+    mem_iter->all.elmt_left-=nelmts;
     mem_iter->all.offset+=nelmts;
     
     FUNC_LEAVE (SUCCEED);
@@ -567,7 +569,7 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
     hsize_t	size[H5O_LAYOUT_NDIMS];
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];
     hssize_t	mem_offset[H5O_LAYOUT_NDIMS];
-    int		i;
+    uintn	u;
 
     FUNC_ENTER(H5S_all_read, FAIL);
     *must_convert = TRUE;
@@ -588,8 +590,8 @@ printf("%s: check 1.0\n",FUNC);
         /* Check for a "regular" hyperslab selection */
         if(mem_space->select.sel_info.hslab.diminfo != NULL) {
             /* Check each dimension */
-            for(count=1,i=0; i<mem_space->extent.u.simple.rank; i++)
-                count*=mem_space->select.sel_info.hslab.diminfo[i].count;
+            for(count=1,u=0; u<mem_space->extent.u.simple.rank; u++)
+                count*=mem_space->select.sel_info.hslab.diminfo[u].count;
             /* If the regular hyperslab definition creates more than one hyperslab, fall through */
             if(count>1)
                 goto fall_through;
@@ -609,8 +611,8 @@ printf("%s: check 1.0\n",FUNC);
         /* Check for a "regular" hyperslab selection */
         if(file_space->select.sel_info.hslab.diminfo != NULL) {
             /* Check each dimension */
-            for(count=1,i=0; i<file_space->extent.u.simple.rank; i++)
-                count*=file_space->select.sel_info.hslab.diminfo[i].count;
+            for(count=1,u=0; u<file_space->extent.u.simple.rank; u++)
+                count*=file_space->select.sel_info.hslab.diminfo[u].count;
             /* If the regular hyperslab definition creates more than one hyperslab, fall through */
             if(count>1)
                 goto fall_through;
@@ -626,56 +628,56 @@ printf("%s: check 1.0\n",FUNC);
             goto fall_through;
 
     /* Get information about memory and file */
-    for (i=0; i<mem_space->extent.u.simple.rank; i++) {
+    for (u=0; u<mem_space->extent.u.simple.rank; u++) {
         if (mem_space->extent.u.simple.max &&
-                mem_space->extent.u.simple.size[i]!=mem_space->extent.u.simple.max[i])
+                mem_space->extent.u.simple.size[u]!=mem_space->extent.u.simple.max[u])
             goto fall_through;
         if (file_space->extent.u.simple.max &&
-                file_space->extent.u.simple.size[i]!=file_space->extent.u.simple.max[i])
+                file_space->extent.u.simple.size[u]!=file_space->extent.u.simple.max[u])
             goto fall_through;
 
         if(mem_space->select.type==H5S_SEL_HYPERSLABS) {
             /* Check for a "regular" hyperslab selection */
             if(mem_space->select.sel_info.hslab.diminfo != NULL) {
-                mem_size=mem_space->select.sel_info.hslab.diminfo[i].block;
-                mem_off=mem_space->select.sel_info.hslab.diminfo[i].start;
+                mem_size=mem_space->select.sel_info.hslab.diminfo[u].block;
+                mem_off=mem_space->select.sel_info.hslab.diminfo[u].start;
             } /* end if */
             else {
-                mem_size=(mem_node->end[i]-mem_node->start[i])+1;
-                mem_off=mem_node->start[i];
+                mem_size=(mem_node->end[u]-mem_node->start[u])+1;
+                mem_off=mem_node->start[u];
             } /* end else */
         } /* end if */
         else {
-            mem_size=mem_space->extent.u.simple.size[i];
+            mem_size=mem_space->extent.u.simple.size[u];
             mem_off=0;
         } /* end else */
 
         if(file_space->select.type==H5S_SEL_HYPERSLABS) {
             /* Check for a "regular" hyperslab selection */
             if(file_space->select.sel_info.hslab.diminfo != NULL) {
-                file_size=file_space->select.sel_info.hslab.diminfo[i].block;
-                file_off=file_space->select.sel_info.hslab.diminfo[i].start;
+                file_size=file_space->select.sel_info.hslab.diminfo[u].block;
+                file_off=file_space->select.sel_info.hslab.diminfo[u].start;
             } /* end if */
             else {
-                file_size=(file_node->end[i]-file_node->start[i])+1;
-                file_off=file_node->start[i];
+                file_size=(file_node->end[u]-file_node->start[u])+1;
+                file_off=file_node->start[u];
             } /* end else */
         } /* end if */
         else {
-            file_size=file_space->extent.u.simple.size[i];
+            file_size=file_space->extent.u.simple.size[u];
             file_off=0;
         } /* end else */
 
         if (mem_size!=file_size)
             goto fall_through;
 
-        size[i] = file_size;
-        file_offset[i] = file_off;
-        mem_offset[i] = mem_off;
+        size[u] = file_size;
+        file_offset[u] = file_off;
+        mem_offset[u] = mem_off;
     }
-    size[i] = elmt_size;
-    file_offset[i] = 0;
-    mem_offset[i] = 0;
+    size[u] = elmt_size;
+    file_offset[u] = 0;
+    mem_offset[u] = 0;
 
 #ifdef QAK
 printf("%s: check 2.0\n",FUNC);
@@ -731,7 +733,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
     hsize_t	size[H5O_LAYOUT_NDIMS];
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];
     hssize_t	mem_offset[H5O_LAYOUT_NDIMS];
-    int		i;
+    uintn		u;
     
     FUNC_ENTER(H5S_all_write, FAIL);
     *must_convert = TRUE;
@@ -749,8 +751,8 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
         /* Check for a "regular" hyperslab selection */
         if(mem_space->select.sel_info.hslab.diminfo != NULL) {
             /* Check each dimension */
-            for(count=1,i=0; i<mem_space->extent.u.simple.rank; i++)
-                count*=mem_space->select.sel_info.hslab.diminfo[i].count;
+            for(count=1,u=0; u<mem_space->extent.u.simple.rank; u++)
+                count*=mem_space->select.sel_info.hslab.diminfo[u].count;
             /* If the regular hyperslab definition creates more than one hyperslab, fall through */
             if(count>1)
                 goto fall_through;
@@ -770,8 +772,8 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
         /* Check for a "regular" hyperslab selection */
         if(file_space->select.sel_info.hslab.diminfo != NULL) {
             /* Check each dimension */
-            for(count=1,i=0; i<file_space->extent.u.simple.rank; i++)
-                count*=file_space->select.sel_info.hslab.diminfo[i].count;
+            for(count=1,u=0; u<file_space->extent.u.simple.rank; u++)
+                count*=file_space->select.sel_info.hslab.diminfo[u].count;
             /* If the regular hyperslab definition creates more than one hyperslab, fall through */
             if(count>1)
                 goto fall_through;
@@ -787,56 +789,56 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
             goto fall_through;
 
     /* Get information about memory and file */
-    for (i=0; i<mem_space->extent.u.simple.rank; i++) {
+    for (u=0; u<mem_space->extent.u.simple.rank; u++) {
         if (mem_space->extent.u.simple.max &&
-                mem_space->extent.u.simple.size[i]!=mem_space->extent.u.simple.max[i])
+                mem_space->extent.u.simple.size[u]!=mem_space->extent.u.simple.max[u])
             goto fall_through;
         if (file_space->extent.u.simple.max &&
-                file_space->extent.u.simple.size[i]!=file_space->extent.u.simple.max[i])
+                file_space->extent.u.simple.size[u]!=file_space->extent.u.simple.max[u])
             goto fall_through;
 
         if(mem_space->select.type==H5S_SEL_HYPERSLABS) {
             /* Check for a "regular" hyperslab selection */
             if(mem_space->select.sel_info.hslab.diminfo != NULL) {
-                mem_size=mem_space->select.sel_info.hslab.diminfo[i].block;
-                mem_off=mem_space->select.sel_info.hslab.diminfo[i].start;
+                mem_size=mem_space->select.sel_info.hslab.diminfo[u].block;
+                mem_off=mem_space->select.sel_info.hslab.diminfo[u].start;
             } /* end if */
             else {
-                mem_size=(mem_node->end[i]-mem_node->start[i])+1;
-                mem_off=mem_node->start[i];
+                mem_size=(mem_node->end[u]-mem_node->start[u])+1;
+                mem_off=mem_node->start[u];
             } /* end else */
         } /* end if */
         else {
-            mem_size=mem_space->extent.u.simple.size[i];
+            mem_size=mem_space->extent.u.simple.size[u];
             mem_off=0;
         } /* end else */
 
         if(file_space->select.type==H5S_SEL_HYPERSLABS) {
             /* Check for a "regular" hyperslab selection */
             if(file_space->select.sel_info.hslab.diminfo != NULL) {
-                file_size=file_space->select.sel_info.hslab.diminfo[i].block;
-                file_off=file_space->select.sel_info.hslab.diminfo[i].start;
+                file_size=file_space->select.sel_info.hslab.diminfo[u].block;
+                file_off=file_space->select.sel_info.hslab.diminfo[u].start;
             } /* end if */
             else {
-                file_size=(file_node->end[i]-file_node->start[i])+1;
-                file_off=file_node->start[i];
+                file_size=(file_node->end[u]-file_node->start[u])+1;
+                file_off=file_node->start[u];
             } /* end else */
         } /* end if */
         else {
-            file_size=file_space->extent.u.simple.size[i];
+            file_size=file_space->extent.u.simple.size[u];
             file_off=0;
         } /* end else */
 
         if (mem_size!=file_size)
             goto fall_through;
 
-        size[i] = file_size;
-        file_offset[i] = file_off;
-        mem_offset[i] = mem_off;
+        size[u] = file_size;
+        file_offset[u] = file_off;
+        mem_offset[u] = mem_off;
     }
-    size[i] = elmt_size;
-    file_offset[i] = 0;
-    mem_offset[i] = 0;
+    size[u] = elmt_size;
+    file_offset[u] = 0;
+    mem_offset[u] = 0;
 
     /* Write data to the file */
     if (H5F_arr_write(f, dxpl_id, layout, pline, NULL, efl, size,
@@ -879,6 +881,7 @@ H5S_all_release (H5S_t UNUSED *space)
 
     FUNC_LEAVE (SUCCEED);
 }   /* H5S_all_release() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -901,7 +904,7 @@ H5S_all_release (H5S_t UNUSED *space)
 hsize_t
 H5S_all_npoints (const H5S_t *space)
 {
-    intn i;     /* Counters */
+    uintn u;     /* Counters */
     hsize_t ret_value;
 
     FUNC_ENTER (H5S_all_npoints, 0);
@@ -909,11 +912,12 @@ H5S_all_npoints (const H5S_t *space)
     /* Check args */
     assert (space);
 
-    for(i=0, ret_value=1; i<space->extent.u.simple.rank; i++)
-        ret_value*=space->extent.u.simple.size[i];
+    for(u=0, ret_value=1; u<space->extent.u.simple.rank; u++)
+        ret_value*=space->extent.u.simple.size[u];
     
     FUNC_LEAVE (ret_value);
 }   /* H5S_all_npoints() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -954,6 +958,7 @@ H5S_all_select_serialize (const H5S_t *space, uint8_t *buf)
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_all_select_serialize() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -991,6 +996,7 @@ H5S_all_select_deserialize (H5S_t *space, const uint8_t UNUSED *buf)
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5S_all_select_deserialize() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1163,7 +1169,7 @@ H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op
     hsize_t offset;             /* offset of region in buffer */
     hsize_t nelemts;            /* Number of elements to iterate through */
     void *tmp_buf;              /* temporary location of the element in the buffer */
-    intn rank;              /* Dataspace rank */
+    uintn rank;             /* Dataspace rank */
     intn indx;              /* Index to increment */
     herr_t ret_value=0;     /* return value */
 
@@ -1193,7 +1199,7 @@ H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op
         offset=H5V_array_offset(rank+1,mem_size,(const hssize_t *)mem_offset);
         tmp_buf=((char *)buf+offset);
 
-        ret_value=(*op)(tmp_buf,type_id,rank,(hssize_t *)mem_offset,operator_data);
+        ret_value=(*op)(tmp_buf,type_id,(hsize_t)rank,(hssize_t *)mem_offset,operator_data);
 
         /* Decrement the number of elements to iterate through */
         nelemts--;

@@ -112,7 +112,7 @@ herr_t
 H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr_p/*out*/)
 {
     H5HL_t	*heap = NULL;
-    size_t	total_size;		/*total heap size on disk	*/
+    hsize_t	total_size;		/*total heap size on disk	*/
     herr_t	ret_value = FAIL;
 
     FUNC_ENTER(H5HL_create, FAIL);
@@ -141,7 +141,7 @@ H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr_p/*out*/)
     heap->addr = *addr_p + (hsize_t)H5HL_SIZEOF_HDR(f);
     heap->disk_alloc = size_hint;
     heap->mem_alloc = size_hint;
-    if (NULL==(heap->chunk = H5FL_BLK_ALLOC(heap_chunk,H5HL_SIZEOF_HDR(f) + size_hint,1))) {
+    if (NULL==(heap->chunk = H5FL_BLK_ALLOC(heap_chunk,(hsize_t)(H5HL_SIZEOF_HDR(f) + size_hint),1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed");
     }
@@ -253,7 +253,7 @@ H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 
     /* data */
     H5F_addr_decode(f, &p, &(heap->addr));
-    heap->chunk = H5FL_BLK_ALLOC(heap_chunk,H5HL_SIZEOF_HDR(f) + heap->mem_alloc,1);
+    heap->chunk = H5FL_BLK_ALLOC(heap_chunk,(hsize_t)(H5HL_SIZEOF_HDR(f) + heap->mem_alloc),1);
     if (NULL==heap->chunk) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
@@ -350,12 +350,12 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 	if (heap->mem_alloc > heap->disk_alloc) {
 	    haddr_t old_addr = heap->addr, new_addr;
 	    if (HADDR_UNDEF==(new_addr=H5MF_alloc(f, H5FD_MEM_LHEAP,
-						  heap->mem_alloc))) {
+						  (hsize_t)heap->mem_alloc))) {
 		HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			      "unable to allocate file space for heap");
 	    }
 	    heap->addr = new_addr;
-	    H5MF_xfree(f, H5FD_MEM_LHEAP, old_addr, heap->disk_alloc);
+	    H5MF_xfree(f, H5FD_MEM_LHEAP, old_addr, (hsize_t)heap->disk_alloc);
 	    H5E_clear(); /*don't really care if the free failed */
 	    heap->disk_alloc = heap->mem_alloc;
 	}
@@ -722,7 +722,7 @@ H5HL_insert(H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
 	old_size = heap->mem_alloc;
 	heap->mem_alloc += need_more;
 	heap->chunk = H5FL_BLK_REALLOC(heap_chunk,heap->chunk,
-				   H5HL_SIZEOF_HDR(f) + heap->mem_alloc);
+				   (hsize_t)(H5HL_SIZEOF_HDR(f) + heap->mem_alloc));
 	if (NULL==heap->chunk) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1),
 			   "memory allocation failed");

@@ -77,7 +77,7 @@ is_sparse(void)
     struct stat	sb;
     
     if ((fd=open("x.h5", O_RDWR|O_TRUNC|O_CREAT, 0666))<0) return 0;
-    if (lseek(fd, 1024*1024, SEEK_SET)!=1024*1024) return 0;
+    if (lseek(fd, (off_t)(1024*1024), SEEK_SET)!=1024*1024) return 0;
     if (5!=write(fd, "hello", 5)) return 0;
     if (close(fd)<0) return 0;
     if (stat("x.h5", &sb)<0) return 0;
@@ -377,13 +377,13 @@ main (void)
 #endif /* H5_WANT_H5_V1_2_COMPAT */
 	printf("Changing file drivers to the family driver, %lu bytes each\n",
 	       (unsigned long)FAMILY_SIZE);
-	if (H5Pset_fapl_family(fapl, FAMILY_SIZE, H5P_DEFAULT)<0) goto error;
+	if (H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT)<0) goto error;
     } else if (H5Pget_fapl_family(fapl, &family_size, NULL)<0) {
 	goto error;
     } else if (family_size!=FAMILY_SIZE) {
 	printf("Changing family member size from %lu to %lu\n",
 	       (unsigned long)family_size, (unsigned long)FAMILY_SIZE);
-	if (H5Pset_fapl_family(fapl, FAMILY_SIZE, H5P_DEFAULT)<0) goto error;
+	if (H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT)<0) goto error;
     }
 
     /*

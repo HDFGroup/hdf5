@@ -1519,7 +1519,8 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
             HRETURN_ERROR(H5E_FILE, H5E_NOSPACE, HADDR_UNDEF,
                   "file allocation failed");
         }
-        if (old_size>sizeof(_buf) && NULL==(buf=H5MM_malloc(old_size))) {
+        assert(old_size==(hsize_t)((size_t)old_size)); /*check for overflow*/
+        if (old_size>sizeof(_buf) && NULL==(buf=H5MM_malloc((size_t)old_size))) {
             H5FDfree(file, type, new_addr, new_size);
             HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF,
                   "memory allocation failed");
@@ -1914,7 +1915,8 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
             amount_read=MIN((file->accum_size-read_off),size);
 
             /* Copy the data out of the buffer */
-            HDmemcpy(read_buf,file->meta_accum+read_off,amount_read);
+            assert(amount_read==(hsize_t)((size_t)amount_read)); /*check for overflow*/
+            HDmemcpy(read_buf,file->meta_accum+read_off,(size_t)amount_read);
 
             /* Adjust the buffer, address & size */
             read_buf+=amount_read;
@@ -2021,7 +2023,7 @@ herr_t
 H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size,
 	   const void *buf)
 {
-    size_t new_size;    /* New size of the accumulator buffer */
+    hsize_t new_size;    /* New size of the accumulator buffer */
     size_t old_offset;  /* Offset of old data within the accumulator buffer */
 
     FUNC_ENTER(H5FD_write, FAIL);
@@ -2059,10 +2061,12 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
                     } /* end if */
 
                     /* Move the existing metadata to the proper location */
-                    HDmemmove(file->meta_accum+size,file->meta_accum,file->accum_size);
+                    assert(file->accum_size==(hsize_t)((size_t)file->accum_size)); /*check for overflow*/
+                    HDmemmove(file->meta_accum+size,file->meta_accum,(size_t)file->accum_size);
 
                     /* Copy the new metadata at the front */
-                    HDmemcpy(file->meta_accum,buf,size);
+                    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+                    HDmemcpy(file->meta_accum,buf,(size_t)size);
 
                     /* Set the new size & location of the metadata accumulator */
                     file->accum_loc=addr;
@@ -2084,7 +2088,8 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
                     } /* end if */
 
                     /* Copy the new metadata to the end */
-                    HDmemcpy(file->meta_accum+file->accum_size,buf,size);
+                    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+                    HDmemcpy(file->meta_accum+file->accum_size,buf,(size_t)size);
 
                     /* Set the new size of the metadata accumulator */
                     file->accum_size=file->accum_size+size;
@@ -2095,7 +2100,8 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
                 /* Check if the new metadata is entirely within the current accumulator */
                 else if(addr>=file->accum_loc && (addr+size)<=(file->accum_loc+file->accum_size)) {
                     /* Copy the new metadata to the proper location within the accumulator */
-                    HDmemcpy(file->meta_accum+(addr-file->accum_loc),buf,size);
+                    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+                    HDmemcpy(file->meta_accum+(addr-file->accum_loc),buf,(size_t)size);
 
                     /* Mark it as written to */
                     file->accum_dirty=TRUE;
@@ -2119,10 +2125,12 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
                     old_offset=(addr+size)-file->accum_loc;
 
                     /* Move the existing metadata to the proper location */
-                    HDmemmove(file->meta_accum+size,file->meta_accum+old_offset,file->accum_size-old_offset);
+                    assert((file->accum_size-old_offset)==(hsize_t)((size_t)(file->accum_size-old_offset))); /*check for overflow*/
+                    HDmemmove(file->meta_accum+size,file->meta_accum+old_offset,(size_t)(file->accum_size-old_offset));
 
                     /* Copy the new metadata at the front */
-                    HDmemcpy(file->meta_accum,buf,size);
+                    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+                    HDmemcpy(file->meta_accum,buf,(size_t)size);
 
                     /* Set the new size & location of the metadata accumulator */
                     file->accum_loc=addr;
@@ -2147,7 +2155,8 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
                     } /* end if */
 
                     /* Copy the new metadata to the end */
-                    HDmemcpy(file->meta_accum+(addr-file->accum_loc),buf,size);
+                    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+                    HDmemcpy(file->meta_accum+(addr-file->accum_loc),buf,(size_t)size);
 
                     /* Set the new size & location of the metadata accumulator */
                     file->accum_loc=addr;
@@ -2181,7 +2190,8 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
                 file->accum_loc=addr;
                 file->accum_size=size;
                 file->accum_dirty=TRUE;
-                HDmemcpy(file->meta_accum,buf,size);
+                assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+                HDmemcpy(file->meta_accum,buf,(size_t)size);
             } /* end else */
         } /* end if */
         /* No metadata in the accumulator, grab this piece and keep it */
@@ -2200,7 +2210,8 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
             file->accum_loc=addr;
             file->accum_size=size;
             file->accum_dirty=TRUE;
-            HDmemcpy(file->meta_accum,buf,size);
+            assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+            HDmemcpy(file->meta_accum,buf,(size_t)size);
         } /* end else */
     } /* end if */
     else {

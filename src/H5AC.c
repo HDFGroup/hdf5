@@ -100,13 +100,13 @@ H5AC_create(H5F_t *f, intn size_hint)
 		       "memory allocation failed");
     }
     cache->nslots = size_hint;
-    cache->slot = H5FL_ARR_ALLOC(H5AC_info_ptr_t,cache->nslots,1);
+    cache->slot = H5FL_ARR_ALLOC(H5AC_info_ptr_t,(hsize_t)cache->nslots,1);
     if (NULL==cache->slot) {
         f->shared->cache = H5FL_FREE (H5AC_t,f->shared->cache);
         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     }
 #ifdef H5AC_DEBUG
-    if ((cache->prot = H5FL_ARR_ALLOC(H5AC_prot_t,cache->nslots,1))==NULL) {
+    if ((cache->prot = H5FL_ARR_ALLOC(H5AC_prot_t,(hsize_t)cache->nslots,1))==NULL) {
         cache->slot = H5FL_ARR_FREE (H5AC_info_ptr_t,cache->slot);
         f->shared->cache = H5FL_FREE (H5AC_t,f->shared->cache);
         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -414,10 +414,10 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
          * Sort the cache entries by address since flushing them in
          * ascending order by address may be much more efficient.
          */
-        if (NULL==(map=H5FL_ARR_ALLOC(intn,cache->nslots,0))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+        if (NULL==(map=H5FL_ARR_ALLOC(intn,(hsize_t)cache->nslots,0))) {
+            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
-	}
+        }
         for (i = nslots = 0; i < cache->nslots; i++) {
             if (cache->slot[i]!=NULL)
                 map[nslots++] = i;

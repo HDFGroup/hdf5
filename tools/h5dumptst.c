@@ -1090,7 +1090,7 @@ static hid_t mkstr(int size, H5T_str_t pad) {
 hid_t type;
 
   if ((type=H5Tcopy(H5T_C_S1))<0) return -1;
-  if (H5Tset_size(type, size)<0) return -1;
+  if (H5Tset_size(type, (size_t)size)<0) return -1;
   if (H5Tset_strpad(type, pad)<0) return -1;
 
   return type;
@@ -1452,7 +1452,7 @@ static void test_objref(void)
     sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
 
     /* Create a group */
-    group=H5Gcreate(fid1,"Group1",-1);
+    group=H5Gcreate(fid1,"Group1",(size_t)-1);
 
     /* Set group's comment */
     H5Gset_comment(group,".",write_comment);

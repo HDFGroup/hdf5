@@ -272,7 +272,38 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     
     if (!base_name || !fullname || size<1) return NULL;
 
-#ifndef H5_WANT_H5_V1_2_COMPAT
+#ifdef H5_WANT_H5_V1_2_COMPAT
+    /* figure out the suffix */
+    if (H5P_DEFAULT!=fapl){
+	if ((driver=H5Pget_driver(fapl))<0)
+            return NULL;
+	if (H5F_LOW_FAMILY==driver) {
+	    suffix = "%05d.h5";
+	} else if (H5F_LOW_CORE==driver) {
+	    suffix = NULL;
+	} 
+    }
+    
+    /* Use different ones depending on parallel or serial driver used. */
+    if (H5P_DEFAULT!=fapl && H5F_LOW_MPIO==driver){
+	/* For parallel:
+	 * First use command line option, then the environment variable,
+	 * then try the constant
+	 */
+	prefix = (paraprefix ? paraprefix : getenv("HDF5_PARAPREFIX"));
+#ifdef HDF5_PARAPREFIX
+	if (!prefix) prefix = HDF5_PARAPREFIX;
+#endif
+    }else{
+	/* For serial:
+	 * First use the environment variable, then try the constant
+	 */
+	prefix = getenv("HDF5_PREFIX");
+#ifdef HDF5_PREFIX
+	if (!prefix) prefix = HDF5_PREFIX;
+#endif
+    }
+#else /* H5_WANT_H5_V1_2_COMPAT */
     /* figure out the suffix */
     if (H5P_DEFAULT!=fapl){
 	if ((driver=H5Pget_driver(fapl))<0) return NULL;
@@ -307,7 +338,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
     /* Prepend the prefix value to the base name */
     if (prefix && *prefix) {
-	if (HDsnprintf(fullname, (long)size, "%s/%s", prefix, base_name)==(int)size) {
+	if (HDsnprintf(fullname, size, "%s/%s", prefix, base_name)==(int)size) {
 	    return NULL; /*buffer is too small*/
 	}
     } else if (strlen(base_name)>=size) {

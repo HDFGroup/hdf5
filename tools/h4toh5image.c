@@ -522,7 +522,7 @@ int gr_palette(int32 file_id,int32 ri_id,hid_t h5dset,hid_t h5_palgroup) {
   int        check_pal;
   int        check_palname;
   int        pal_stat;
-  char*      h5pal_name;
+  char*      h5pal_name=NULL;
 
 
   /* get palette id */

@@ -52,7 +52,7 @@ struct H5HG_heap_t {
     size_t		size;		/*total size of collection	*/
     uint8_t		*chunk;		/*the collection, incl. header	*/
     intn		nalloc;		/*numb object slots allocated	*/
-    H5HG_obj_t		*obj;		/*array of object descriptions	*/
+    H5HG_obj_t	*obj;		/*array of object descriptions	*/
 };
 
 /* PRIVATE PROTOTYPES */
@@ -118,7 +118,8 @@ H5HG_create (H5F_t *f, size_t size)
 
     /* Check args */
     assert (f);
-    if (size<H5HG_MINSIZE) size = H5HG_MINSIZE;
+    if (size<H5HG_MINSIZE)
+        size = H5HG_MINSIZE;
     size = H5HG_ALIGN(size);
 #ifdef QAK
 printf("%s: size=%d\n",FUNC,(int)size);
@@ -136,12 +137,12 @@ printf("%s: size=%d\n",FUNC,(int)size);
     heap->addr = addr;
     heap->size = size;
     heap->dirty = TRUE;
-    if (NULL==(heap->chunk = H5FL_BLK_ALLOC (heap_chunk,size,0))) {
+    if (NULL==(heap->chunk = H5FL_BLK_ALLOC (heap_chunk,(hsize_t)size,0))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
     heap->nalloc = H5HG_NOBJS (f, size);
-    if (NULL==(heap->obj = H5FL_ARR_ALLOC (H5HG_obj_t,heap->nalloc,1))) {
+    if (NULL==(heap->obj = H5FL_ARR_ALLOC (H5HG_obj_t,(hsize_t)heap->nalloc,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -252,7 +253,7 @@ H5HG_load (H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 		     "memory allocation failed");
     }
     heap->addr = addr;
-    if (NULL==(heap->chunk = H5FL_BLK_ALLOC (heap_chunk,H5HG_MINSIZE,0))) {
+    if (NULL==(heap->chunk = H5FL_BLK_ALLOC (heap_chunk,(hsize_t)H5HG_MINSIZE,0))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -288,7 +289,7 @@ H5HG_load (H5F_t *f, haddr_t addr, const void UNUSED *udata1,
      */
     if (heap->size > H5HG_MINSIZE) {
 	haddr_t next_addr = addr + (hsize_t)H5HG_MINSIZE;
-	if (NULL==(heap->chunk = H5FL_BLK_REALLOC (heap_chunk, heap->chunk, heap->size))) {
+	if (NULL==(heap->chunk = H5FL_BLK_REALLOC (heap_chunk, heap->chunk, (hsize_t)heap->size))) {
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			 "memory allocation failed");
 	}
@@ -302,7 +303,7 @@ H5HG_load (H5F_t *f, haddr_t addr, const void UNUSED *udata1,
     /* Decode each object */
     p = heap->chunk + H5HG_SIZEOF_HDR (f);
     nalloc = H5HG_NOBJS (f, heap->size);
-    if (NULL==(heap->obj = H5FL_ARR_ALLOC (H5HG_obj_t,nalloc,1))) {
+    if (NULL==(heap->obj = H5FL_ARR_ALLOC (H5HG_obj_t,(hsize_t)nalloc,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -851,75 +852,74 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
     assert (f);
     assert (hobj);
     if (0==(f->intent & H5F_ACC_RDWR)) {
-	HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL,
+        HRETURN_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL,
 		       "no write intent on file");
     }
 
     /* Load the heap */
     if (NULL==(heap=H5AC_find (f, H5AC_GHEAP, hobj->addr, NULL, NULL))) {
-	HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
+        HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
     }
     assert (hobj->idx>0 && hobj->idx<heap->nalloc);
     assert (heap->obj[hobj->idx].begin);
     obj_start = heap->obj[hobj->idx].begin;
-    need = H5HG_ALIGN(heap->obj[hobj->idx].size); /*
-						   * should this include the
+    need = H5HG_ALIGN(heap->obj[hobj->idx].size); /* should this include the
 						   * object header size? -rpm
 						   */
     
     /* Move the new free space to the end of the heap */
     for (i=0; i<heap->nalloc; i++) {
-	if (heap->obj[i].begin > heap->obj[hobj->idx].begin) {
-	    heap->obj[i].begin -= need;
-	}
+        if (heap->obj[i].begin > heap->obj[hobj->idx].begin) {
+            heap->obj[i].begin -= need;
+        }
     }
     if (NULL==heap->obj[0].begin) {
-	heap->obj[0].begin = heap->chunk + (heap->size-need);
-	heap->obj[0].size = need;
-	heap->obj[0].nrefs = 0;
+        heap->obj[0].begin = heap->chunk + (heap->size-need);
+        heap->obj[0].size = need;
+        heap->obj[0].nrefs = 0;
     } else {
-	heap->obj[0].size += need;
+        heap->obj[0].size += need;
     }
     HDmemmove (obj_start, obj_start+need,
 	       heap->size-((obj_start+need)-heap->chunk));
     if (heap->obj[0].size>=H5HG_SIZEOF_OBJHDR (f)) {
-	p = heap->obj[0].begin;
-	UINT16ENCODE(p, 0); /*id*/
-	UINT16ENCODE(p, 0); /*nrefs*/
-	UINT32ENCODE(p, 0); /*reserved*/
-	H5F_ENCODE_LENGTH (f, p, need);
+        p = heap->obj[0].begin;
+        UINT16ENCODE(p, 0); /*id*/
+        UINT16ENCODE(p, 0); /*nrefs*/
+        UINT32ENCODE(p, 0); /*reserved*/
+        H5F_ENCODE_LENGTH (f, p, need);
     }
     HDmemset (heap->obj+hobj->idx, 0, sizeof(H5HG_obj_t));
     heap->dirty = 1;
 
     if (heap->obj[0].size+H5HG_SIZEOF_HDR(f)==heap->size) {
-	/*
-	 * The collection is empty. Remove it from the CWFS list and return it
-	 * to the file free list.
-	 */
-	heap->dirty = FALSE;
-	H5MF_xfree(f, H5FD_MEM_GHEAP, heap->addr, heap->size);
-	H5AC_flush (f, H5AC_GHEAP, heap->addr, TRUE);
-	heap = NULL;
+        /*
+         * The collection is empty. Remove it from the CWFS list and return it
+         * to the file free list.
+         */
+        heap->dirty = FALSE;
+        H5MF_xfree(f, H5FD_MEM_GHEAP, heap->addr, (hsize_t)heap->size);
+        H5AC_flush (f, H5AC_GHEAP, heap->addr, TRUE);
+        heap = NULL;
     } else {
-	/*
-	 * If the heap is in the CWFS list then advance it one position.  The
-	 * H5AC_find() might have done that too, but that's okay.  If the
-	 * heap isn't on the CWFS list then add it to the end.
-	 */
-	for (i=0; i<f->shared->ncwfs; i++) {
-	    if (f->shared->cwfs[i]==heap) {
-		if (i) {
-		    f->shared->cwfs[i] = f->shared->cwfs[i-1];
-		    f->shared->cwfs[i-1] = heap;
-		}
-		break;
-	    }
-	}
-	if (i>=f->shared->ncwfs) {
-	    f->shared->ncwfs = MIN (f->shared->ncwfs+1, H5HG_NCWFS);
-	    f->shared->cwfs[f->shared->ncwfs-1] = heap;
-	}
+        /*
+         * If the heap is in the CWFS list then advance it one position.  The
+         * H5AC_find() might have done that too, but that's okay.  If the
+         * heap isn't on the CWFS list then add it to the end.
+         */
+        for (i=0; i<f->shared->ncwfs; i++) {
+            if (f->shared->cwfs[i]==heap) {
+                if (i) {
+                    f->shared->cwfs[i] = f->shared->cwfs[i-1];
+                    f->shared->cwfs[i-1] = heap;
+                }
+            break;
+            }
+        }
+        if (i>=f->shared->ncwfs) {
+            f->shared->ncwfs = MIN (f->shared->ncwfs+1, H5HG_NCWFS);
+            f->shared->cwfs[f->shared->ncwfs-1] = heap;
+        }
     }
     
     FUNC_LEAVE (SUCCEED);

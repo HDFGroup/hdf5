@@ -1380,7 +1380,7 @@ H5T_term_interface(void)
 		H5T_print_stats(path, &nprint/*in,out*/);
 		path->cdata.command = H5T_CONV_FREE;
 		if ((path->func)(FAIL, FAIL, &(path->cdata),
-				 0, 0, 0, NULL, NULL,H5P_DEFAULT)<0) {
+				 (hsize_t)0, 0, 0, NULL, NULL,H5P_DEFAULT)<0) {
 #ifdef H5T_DEBUG
 		    if (H5DEBUG(T)) {
 			fprintf (H5DEBUG(T), "H5T: conversion function "
@@ -4337,7 +4337,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
             }
             HDmemset(&cdata, 0, sizeof cdata);
             cdata.command = H5T_CONV_INIT;
-            if ((func)(tmp_sid, tmp_did, &cdata, 0, 0, 0, NULL, NULL,
+            if ((func)(tmp_sid, tmp_did, &cdata, (hsize_t)0, 0, 0, NULL, NULL,
                        H5P_DEFAULT)<0) {
                 H5I_dec_ref(tmp_sid);
                 H5I_dec_ref(tmp_did);
@@ -4370,7 +4370,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
             H5T_print_stats(old_path, &nprint);
             old_path->cdata.command = H5T_CONV_FREE;
             if ((old_path->func)(tmp_sid, tmp_did, &(old_path->cdata),
-                                 0, 0, 0, NULL, NULL, H5P_DEFAULT)<0) {
+                                 (hsize_t)0, 0, 0, NULL, NULL, H5P_DEFAULT)<0) {
 #ifdef H5T_DEBUG
 		if (H5DEBUG(T)) {
 		    fprintf (H5DEBUG(T), "H5T: conversion function 0x%08lx "
@@ -4473,7 +4473,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
         /* Shut down path */
         H5T_print_stats(path, &nprint);
         path->cdata.command = H5T_CONV_FREE;
-        if ((path->func)(FAIL, FAIL, &(path->cdata), 0, 0, 0, NULL, NULL,
+        if ((path->func)(FAIL, FAIL, &(path->cdata), (hsize_t)0, 0, 0, NULL, NULL,
                          H5P_DEFAULT)<0) {
 #ifdef H5T_DEBUG
 	    if (H5DEBUG(T)) {
@@ -4619,7 +4619,7 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
+H5Tconvert(hid_t src_id, hid_t dst_id, hsize_t nelmts, void *buf,
 	    void *background, hid_t plist_id)
 {
     H5T_path_t		*tpath=NULL;		/*type conversion info	*/
@@ -6751,7 +6751,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	HDstrcpy(H5T_g.path[0]->name, "no-op");
 	H5T_g.path[0]->func = H5T_conv_noop;
 	H5T_g.path[0]->cdata.command = H5T_CONV_INIT;
-	if (H5T_conv_noop(FAIL, FAIL, &(H5T_g.path[0]->cdata), 0, 0, 0,
+	if (H5T_conv_noop(FAIL, FAIL, &(H5T_g.path[0]->cdata), (hsize_t)0, 0, 0,
 			  NULL, NULL, H5P_DEFAULT)<0) {
 #ifdef H5T_DEBUG
 	    if (H5DEBUG(T)) {
@@ -6843,7 +6843,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 			"query");
 	}
 	path->cdata.command = H5T_CONV_INIT;
-	if ((func)(src_id, dst_id, &(path->cdata), 0, 0, 0, NULL, NULL,
+	if ((func)(src_id, dst_id, &(path->cdata), (hsize_t)0, 0, 0, NULL, NULL,
                    H5P_DEFAULT)<0) {
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
 			"unable to initialize conversion function");
@@ -6876,7 +6876,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	}
 	path->cdata.command = H5T_CONV_INIT;
 	if ((H5T_g.soft[i].func) (src_id, dst_id, &(path->cdata),
-                                  0, 0, 0, NULL, NULL, H5P_DEFAULT)<0) {
+                                  (hsize_t)0, 0, 0, NULL, NULL, H5P_DEFAULT)<0) {
 	    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
 	    H5E_clear(); /*ignore the error*/
 	} else {
@@ -6898,7 +6898,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	assert(table==H5T_g.path[md]);
 	H5T_print_stats(table, &nprint/*in,out*/);
 	table->cdata.command = H5T_CONV_FREE;
-	if ((table->func)(FAIL, FAIL, &(table->cdata), 0, 0, 0, NULL, NULL,
+	if ((table->func)(FAIL, FAIL, &(table->cdata), (hsize_t)0, 0, 0, NULL, NULL,
                           H5P_DEFAULT)<0) {
 #ifdef H5T_DEBUG
 	    if (H5DEBUG(T)) {
@@ -6991,7 +6991,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, size_t nelmts,
+H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, hsize_t nelmts,
 	    size_t buf_stride, size_t bkg_stride, void *buf, void *bkg,
             hid_t dset_xfer_plist)
 {

@@ -172,9 +172,9 @@ __DLL__ herr_t H5Pget_xfer(hid_t plist_id, H5D_transfer_t *data_xfer_mode);
 __DLL__ hid_t H5Pget_driver(hid_t plist_id);
 #endif /* WANT_H5_V1_2_COMPAT */
 __DLL__ void *H5Pget_driver_info(hid_t plist_id);
-__DLL__ herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv,
+__DLL__ herr_t H5Pset_buffer(hid_t plist_id, hsize_t size, void *tconv,
 			     void *bkg);
-__DLL__ size_t H5Pget_buffer(hid_t plist_id, void **tconv/*out*/,
+__DLL__ hsize_t H5Pget_buffer(hid_t plist_id, void **tconv/*out*/,
 			     void **bkg/*out*/);
 __DLL__ herr_t H5Pset_preserve(hid_t plist_id, hbool_t status);
 __DLL__ int H5Pget_preserve(hid_t plist_id);

@@ -26,8 +26,10 @@
 #include <H5private.h>
 #include <H5Eprivate.h>
 
+#ifndef HDF5_TEST_MASTER
 extern int              num_errs;
 extern int              Verbosity;
+#endif /* HDF5_TEST_MASTER */
 
 /* Use %ld to print the value because long should cover most cases. */
 /* Used to make certain a return value _is_not_ a value */

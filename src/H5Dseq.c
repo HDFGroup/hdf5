@@ -59,7 +59,7 @@ herr_t
 H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 	     const struct H5O_pline_t *pline, const H5O_fill_t *fill,
 	     const struct H5O_efl_t *efl, const H5S_t *file_space, size_t elmt_size,
-         hsize_t seq_len, hssize_t file_offset, void *buf/*out*/)
+         hsize_t seq_len, hsize_t file_offset, void *buf/*out*/)
 {
     hsize_t	dset_dims[H5O_LAYOUT_NDIMS];	/* dataspace dimensions */
     hssize_t coords[H5O_LAYOUT_NDIMS];	    /* offset of hyperslab in dataspace */
@@ -285,7 +285,7 @@ herr_t
 H5F_seq_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 	     const struct H5O_pline_t *pline, const H5O_fill_t *fill,
 	     const struct H5O_efl_t *efl, const H5S_t *file_space, size_t elmt_size,
-         hsize_t seq_len, hssize_t file_offset, const void *buf)
+         hsize_t seq_len, hsize_t file_offset, const void *buf)
 {
     hsize_t	dset_dims[H5O_LAYOUT_NDIMS];	/* dataspace dimensions */
     hssize_t coords[H5O_LAYOUT_NDIMS];	    /* offset of hyperslab in dataspace */

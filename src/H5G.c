@@ -2055,7 +2055,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 
     /* Find the object's symbol table entry */
     if (H5G_namei (loc, name, NULL, &grp_ent/*out*/, &obj_ent/*out*/,
-		   follow_link?H5G_TARGET_NORMAL:H5G_TARGET_SLINK, NULL)<0) {
+		   (uintn)(follow_link?H5G_TARGET_NORMAL:H5G_TARGET_SLINK), NULL)<0) {
 	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to stat object");
     }
 

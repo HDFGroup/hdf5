@@ -96,7 +96,7 @@ test_reference_obj(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a group */
-    group=H5Gcreate(fid1,"Group1",-1);
+    group=H5Gcreate(fid1,"Group1",(size_t)-1);
     CHECK(group, FAIL, "H5Gcreate");
 
     /* Set group's comment */
@@ -455,7 +455,7 @@ test_reference_region(void)
     ret = H5Sget_select_hyper_nblocks(sid2);
     VERIFY(ret, 1, "H5Sget_select_hyper_nblocks");
     coords=HDmalloc(ret*SPACE2_RANK*sizeof(hsize_t)*2); /* allocate space for the hyperslab blocks */
-    ret = H5Sget_select_hyper_blocklist(sid2,0,ret,coords);
+    ret = H5Sget_select_hyper_blocklist(sid2,(hsize_t)0,(hsize_t)ret,coords);
     CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
     VERIFY(coords[0], 2, "Hyperslab Coordinates");
     VERIFY(coords[1], 2, "Hyperslab Coordinates");
@@ -483,7 +483,7 @@ test_reference_region(void)
     ret = H5Sget_select_elem_npoints(sid2);
     VERIFY(ret, 10, "H5Sget_select_elem_npoints");
     coords=HDmalloc(ret*SPACE2_RANK*sizeof(hsize_t)); /* allocate space for the element points */
-    ret = H5Sget_select_elem_pointlist(sid2,0,ret,coords);
+    ret = H5Sget_select_elem_pointlist(sid2,(hsize_t)0,(hsize_t)ret,coords);
     CHECK(ret, FAIL, "H5Sget_select_elem_pointlist");
     VERIFY((hssize_t)coords[0], coord1[0][0], "Element Coordinates");
     VERIFY((hssize_t)coords[1], coord1[0][1], "Element Coordinates");

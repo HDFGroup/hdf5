@@ -156,7 +156,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
     uintn	acc;	    		/*accumulator		    	*/
     size_t	i, j, k, dx, dy, dz;	/*counters		   	*/
     size_t	u, v, w;
-    int		ndims;			/*hyperslab dimensionality	*/
+    uintn		ndims;			/*hyperslab dimensionality	*/
     char	dim[64], s[256];    	/*temp string		    	*/
     uintn	fill_value;	    	/*fill value		    	*/
 
@@ -330,7 +330,7 @@ test_copy(int mode,
     uintn	acc;			/*accumulator			*/
     hsize_t	i, j, k, dx, dy, dz;	/*counters		     	*/
     hsize_t	u, v, w;
-    int		ndims;			/*hyperslab dimensionality	*/
+    uintn		ndims;			/*hyperslab dimensionality	*/
     char	dim[64], s[256];	/*temp string			*/
     const char	*sub;
 

@@ -342,20 +342,22 @@ __DLL__ herr_t H5F_seq_read(H5F_t *f, hid_t dxpl_id,
         const struct H5O_layout_t *layout, const struct H5O_pline_t *pline,
         const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
         const struct H5S_t *file_space, size_t elmt_size, hsize_t seq_len,
-        hssize_t file_offset, void *_buf/*out*/);
+        hsize_t file_offset, void *_buf/*out*/);
 __DLL__ herr_t H5F_seq_write (H5F_t *f, hid_t dxpl_id,
         const struct H5O_layout_t *layout, const struct H5O_pline_t *pline,
         const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
         const struct H5S_t *file_space, size_t elmt_size, hsize_t seq_len,
-        hssize_t file_offset, const void *_buf);
+        hsize_t file_offset, const void *_buf);
 
 
 /* Functions that operate on indexed storage */
-__DLL__ hsize_t H5F_istore_allocated(H5F_t *f, int ndims, haddr_t addr);
-__DLL__ herr_t H5F_istore_dump_btree(H5F_t *f, FILE *stream, int ndims,
+__DLL__ hsize_t H5F_istore_allocated(H5F_t *f, uintn ndims, haddr_t addr);
+__DLL__ herr_t H5F_istore_dump_btree(H5F_t *f, FILE *stream, uintn ndims,
 				     haddr_t addr);
 
 /* Functions for allocation/releasing chunks */
+__DLL__ void * H5F_istore_chunk_alloc(size_t chunk_size);
+__DLL__ void * H5F_istore_chunk_realloc(void *chunk, size_t new_size);
 __DLL__ void * H5F_istore_chunk_free(void *chunk);
 
 /* Address-related functions */

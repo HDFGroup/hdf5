@@ -933,7 +933,7 @@ hid_t mkstr(int size, H5T_str_t pad) {
   hid_t type;
 
   if((type=H5Tcopy(H5T_C_S1))<0) return -1;
-  if((H5Tset_size(type,size))<0) return -1;
+  if((H5Tset_size(type,(size_t)size))<0) return -1;
   if((H5Tset_strpad(type,pad))<0) return -1;
 
   return type;
@@ -955,7 +955,7 @@ hid_t mkstr(int size, H5T_str_t pad) {
  */    
 int h4_transnumattr(hid_t h5g,const char *refname,uint16 group_ref) {
 
-  hid_t    h5memtype;
+  hid_t    h5memtype=(-1);
   hid_t    h5a_id;
   hid_t    h5a_sid;
   herr_t   ret;

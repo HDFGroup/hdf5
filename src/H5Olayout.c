@@ -73,7 +73,8 @@ static void *
 H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5O_layout_t           *mesg = NULL;
-    intn                    i, version;
+    intn                    version;
+    uintn                   u;
 
     FUNC_ENTER(H5O_layout_decode, NULL);
 
@@ -84,14 +85,14 @@ H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 
     /* decode */
     if (NULL==(mesg = H5FL_ALLOC(H5O_layout_t,1))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
 
     /* Version */
     version = *p++;
     if (version!=H5O_LAYOUT_VERSION) {
-	HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
+        HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
 		      "bad version number for layout message");
     }
 
@@ -114,8 +115,8 @@ H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     H5F_addr_decode(f, &p, &(mesg->addr));
 
     /* Read the size */
-    for (i = 0; i < mesg->ndims; i++) {
-        UINT32DECODE(p, mesg->dim[i]);
+    for (u = 0; u < mesg->ndims; u++) {
+        UINT32DECODE(p, mesg->dim[u]);
     }
 
     FUNC_LEAVE(mesg);
@@ -141,7 +142,7 @@ static herr_t
 H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
-    int                     i;
+    uintn                     u;
 
     FUNC_ENTER(H5O_layout_encode, FAIL);
 
@@ -161,14 +162,15 @@ H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     *p++ = mesg->type;
 
     /* reserved bytes should be zero */
-    for (i=0; i<5; i++) *p++ = 0;
+    for (u=0; u<5; u++)
+        *p++ = 0;
 
     /* data or B-tree address */
     H5F_addr_encode(f, &p, mesg->addr);
 
     /* dimension size */
-    for (i = 0; i < mesg->ndims; i++) {
-        UINT32ENCODE(p, mesg->dim[i]);
+    for (u = 0; u < mesg->ndims; u++) {
+        UINT32ENCODE(p, mesg->dim[u]);
     }
 
     FUNC_LEAVE(SUCCEED);
@@ -299,7 +301,7 @@ H5O_layout_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
 		 intn indent, intn fwidth)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
-    intn                    i;
+    uintn                    u;
 
     FUNC_ENTER(H5O_layout_debug, FAIL);
 
@@ -320,9 +322,9 @@ H5O_layout_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
 
     /* Size */
     HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Size:");
-    for (i = 0; i < mesg->ndims; i++) {
-        HDfprintf(stream, "%s%lu", i ? ", " : "",
-		  (unsigned long) (mesg->dim[i]));
+    for (u = 0; u < mesg->ndims; u++) {
+        HDfprintf(stream, "%s%lu", u ? ", " : "",
+		  (unsigned long) (mesg->dim[u]));
     }
     HDfprintf(stream, "}\n");
 

@@ -204,7 +204,8 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
             buf_size+=sizeof(haddr_t);
 
             /* Allocate the space to store the serialized information */
-            if (NULL==(buf = H5MM_malloc(buf_size))) {
+            assert(buf_size==(hssize_t)((size_t)buf_size)); /*check for overflow*/
+            if (NULL==(buf = H5MM_malloc((size_t)buf_size))) {
                 HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                        "memory allocation failed");
             }
@@ -220,7 +221,8 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
                   "Unable to serialize selection");
 
             /* Save the serialized buffer for later */
-            if(H5HG_insert(loc->file,buf_size,buf,&hobjid)<0)
+            assert(buf_size==(hssize_t)((size_t)buf_size)); /*check for overflow*/
+            if(H5HG_insert(loc->file,(size_t)buf_size,buf,&hobjid)<0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_WRITEERROR, FAIL,
                   "Unable to serialize selection");
 

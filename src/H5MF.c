@@ -69,12 +69,12 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t type, hsize_t size)
     
     /* Fail if we don't have write access */
     if (0==(f->intent & H5F_ACC_RDWR)) {
-	HRETURN_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "file is read-only");
+	HRETURN_ERROR(H5E_RESOURCE, H5E_CANTINIT, HADDR_UNDEF, "file is read-only");
     }
 
     /* Allocate space from the virtual file layer */
     if (HADDR_UNDEF==(ret_value=H5FD_alloc(f->shared->lf, type, size))) {
-	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF,
 		      "file allocation failed");
     }
 
@@ -186,7 +186,7 @@ H5MF_realloc(H5F_t *f, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
     ret_value = H5FD_realloc(f->shared->lf, type, old_addr, old_size,
 			     new_size);
     if (HADDR_UNDEF==ret_value) {
-	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF,
 		      "unable to allocate new file memory");
     }
 

@@ -69,7 +69,7 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
 /* Need to copy order information still */
 
     /* Copy offset information */
-    if (NULL==(dst->select.offset = H5FL_ARR_ALLOC(hssize_t, src->extent.u.simple.rank,1))) {
+    if (NULL==(dst->select.offset = H5FL_ARR_ALLOC(hssize_t,(hsize_t)src->extent.u.simple.rank,1))) {
         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
@@ -563,8 +563,7 @@ H5S_select_deserialize (H5S_t *space, const uint8_t *buf)
             ret_value=H5S_none_select_deserialize(space,buf);
             break;
 
-        case H5S_SEL_ERROR:
-        case H5S_SEL_N:
+        default:
             break;
     }
 
@@ -592,7 +591,7 @@ static hssize_t
 H5S_get_select_hyper_nblocks(H5S_t *space)
 {
     hssize_t ret_value=FAIL;        /* return value */
-    intn i;                     /* Counter */
+    uintn u;                    /* Counter */
 
     FUNC_ENTER (H5S_get_select_hyper_nblocks, FAIL);
 
@@ -604,13 +603,13 @@ H5S_get_select_hyper_nblocks(H5S_t *space)
 #ifdef QAK
 {
 H5S_hyper_dim_t *diminfo=space->select.sel_info.hslab.diminfo;
-for(i=0; i<space->extent.u.simple.rank; i++)
-    printf("%s: (%d) start=%d, stride=%d, count=%d, block=%d\n",FUNC,i,(int)diminfo[i].start,(int)diminfo[i].stride,(int)diminfo[i].count,(int)diminfo[i].block);
+for(u=0; u<space->extent.u.simple.rank; u++)
+    printf("%s: (%u) start=%d, stride=%d, count=%d, block=%d\n",FUNC,u,(int)diminfo[u].start,(int)diminfo[u].stride,(int)diminfo[u].count,(int)diminfo[u].block);
 }
 #endif /*QAK */
         /* Check each dimension */
-        for(ret_value=1,i=0; i<space->extent.u.simple.rank; i++)
-            ret_value*=space->select.sel_info.hslab.app_diminfo[i].count;
+        for(ret_value=1,u=0; u<space->extent.u.simple.rank; u++)
+            ret_value*=space->select.sel_info.hslab.app_diminfo[u].count;
     } /* end if */
     else 
         ret_value = (hssize_t)space->select.sel_info.hslab.hyper_lst->count;

@@ -2805,7 +2805,7 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
+H5Pset_buffer(hid_t plist_id, hsize_t size, void *tconv, void *bkg)
 {
     H5D_xfer_t		*plist = NULL;
     
@@ -2848,7 +2848,7 @@ H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
  *
  *-------------------------------------------------------------------------
  */
-size_t
+hsize_t
 H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
 {
     H5D_xfer_t		*plist = NULL;
@@ -3093,7 +3093,7 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "invalid filter identifier");
     }
-    if (flags & ~H5Z_FLAG_DEFMASK) {
+    if (flags & ~((unsigned)H5Z_FLAG_DEFMASK)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "invalid flags");
     }
@@ -3564,7 +3564,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     HDmemcpy(buf, plist->fill.buf, H5T_get_size(plist->fill.type));
         
     /* Do the conversion */
-    if (H5T_convert(tpath, src_id, type_id, 1, 0, 0, buf, bkg, H5P_DEFAULT)<0) {
+    if (H5T_convert(tpath, src_id, type_id, (hsize_t)1, 0, 0, buf, bkg, H5P_DEFAULT)<0) {
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
             "data type conversion failed");
     }
@@ -4699,7 +4699,7 @@ done:
 hid_t H5Pcreate_list(hid_t cls_id)
 {
     H5P_genclass_t	*pclass;   /* Property list class to modify */
-    H5P_genplist_t	*plist;    /* Property list created */
+    H5P_genplist_t	*plist=NULL;    /* Property list created */
     hid_t plist_id=FAIL;       /* Property list ID */
     hid_t ret_value=FAIL;      /* return value */
 
@@ -4871,7 +4871,7 @@ static herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size
      */
     if(pclass->plists>0 || pclass->classes>0) {
         if((new_class=H5P_create_class(pclass->parent,pclass->name,pclass->hashsize,
-                pclass->internal,pclass->create_func,pclass->create_data,
+                (uintn)pclass->internal,pclass->create_func,pclass->create_data,
                 pclass->close_func,pclass->close_data))==NULL)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy class");
 
@@ -7255,7 +7255,7 @@ done:
  PURPOSE
     Internal routine to close a property list class.
  USAGE
-    herr_t H5P_create_class(class)
+    herr_t H5P_close_class(class)
         H5P_genclass_t *class;  IN: Property list class to close
  RETURNS
     Returns non-negative on success, negative on failure.

@@ -303,7 +303,7 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
 
     /* Open backing store */
     if (fa && fa->backing_store && name &&
-            (fd=open(name, O_CREAT|O_TRUNC|O_RDWR, 0666))<0) {
+            (fd=HDopen(name, O_CREAT|O_TRUNC|O_RDWR, 0666))<0) {
         HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
 		      "unable to open backing store");
     }
@@ -358,12 +358,15 @@ H5FD_core_flush(H5FD_t *_file)
         haddr_t size = file->eof;
         unsigned char *ptr = file->mem;
 
-        if (0!=lseek(file->fd, 0, SEEK_SET))
+        if (0!=HDlseek(file->fd, (off_t)0, SEEK_SET))
             HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL,
 			  "error seeking in backing store");
 
         while (size) {
-            ssize_t n = write(file->fd, ptr, size);
+            ssize_t n;
+
+            assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+            n = HDwrite(file->fd, ptr, (size_t)size);
             if (n<0 && EINTR==errno) continue;
             if (n<0)
                 HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
@@ -408,10 +411,10 @@ H5FD_core_close(H5FD_t *_file)
         HRETURN_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file");
 
     /* Release resources */
-    if (file->fd>=0) close(file->fd);
+    if (file->fd>=0) HDclose(file->fd);
     if (file->name) H5MM_xfree(file->name);
     if (file->mem) H5MM_xfree(file->mem);
-    memset(file, 0, sizeof(H5FD_core_t));
+    HDmemset(file, 0, sizeof(H5FD_core_t));
     H5MM_xfree(file);
     FUNC_LEAVE(0);
 }
@@ -595,15 +598,18 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
     if (addr < file->eof) {
 		hsize_t nbytes = MIN(size, file->eof-addr);
 
-        memcpy(buf, file->mem + addr, nbytes);
+        assert(nbytes==(hsize_t)((size_t)nbytes)); /*check for overflow*/
+        HDmemcpy(buf, file->mem + addr, (size_t)nbytes);
         size -= nbytes;
         addr += nbytes;
         buf = (char *)buf + nbytes;
     }
 
     /* Read zeros for the part which is after the EOF markers */
-    if (size > 0)
-        memset(buf, 0, size);
+    if (size > 0) {
+        assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+        HDmemset(buf, 0, (size_t)size);
+    }
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -665,7 +671,8 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
     }
 
     /* Write from BUF to memory */
-    memcpy(file->mem+addr, buf, size);
+    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+    HDmemcpy(file->mem+addr, buf, (size_t)size);
     file->dirty = TRUE;
 
     FUNC_LEAVE(SUCCEED);

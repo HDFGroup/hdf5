@@ -92,10 +92,10 @@ print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
  *-------------------------------------------------------------------------
  */
 static int
-new_object(H5F_t *f, const char *name, intn ndims, H5G_entry_t *ent/*out*/)
+new_object(H5F_t *f, const char *name, uintn ndims, H5G_entry_t *ent/*out*/)
 {
     H5O_layout_t	    layout;
-    intn		    i;
+    uintn		    u;
 
     /* Create the object header */
     if (H5O_create(f, 64, ent)) {
@@ -107,11 +107,11 @@ new_object(H5F_t *f, const char *name, intn ndims, H5G_entry_t *ent/*out*/)
     /* create chunked storage */
     layout.type = H5D_CHUNKED;
     layout.ndims = ndims;
-    for (i = 0; i < ndims; i++) {
-	if (i < (int)NELMTS(align_g)) {
-	    layout.dim[i] = align_g[i];
+    for (u = 0; u < ndims; u++) {
+	if (u < (int)NELMTS(align_g)) {
+	    layout.dim[u] = align_g[u];
 	} else {
-	    layout.dim[i] = 2;
+	    layout.dim[u] = 2;
 	}
     }
     H5F_arr_create(f, &layout/*in,out*/);
@@ -158,14 +158,14 @@ static herr_t
 test_create(H5F_t *f, const char *prefix)
 {
     H5G_entry_t		    handle;
-    intn		    i;
+    uintn		    u;
     char		    name[256];
 
     TESTING("istore create");
 
-    for (i = 1; i <= H5O_LAYOUT_NDIMS; i++) {
-	HDsnprintf(name, sizeof name, "%s_%02d", prefix, i);
-	if (new_object(f, name, i, &handle) < 0)
+    for (u = 1; u <= H5O_LAYOUT_NDIMS; u++) {
+	HDsnprintf(name, sizeof name, "%s_%02u", prefix, u);
+	if (new_object(f, name, u, &handle) < 0)
 	    return FAIL;
     }
 
@@ -198,7 +198,7 @@ test_extend(H5F_t *f, const char *prefix,
 {
     H5G_entry_t		handle;
     hsize_t		i, j, k, ctr;
-    int			ndims;
+    uintn			ndims;
     uint8_t		*buf = NULL, *check = NULL, *whole = NULL;
     char		dims[64], s[256], name[256];
     hssize_t		offset[3];
@@ -233,7 +233,7 @@ test_extend(H5F_t *f, const char *prefix,
     /* Build the new empty object */
     sprintf(name, "%s_%s", prefix, dims);
     if (new_object(f, name, ndims, &handle) < 0) {
-	printf("    Cannot create %d-d object `%s'\n", ndims, name);
+	printf("    Cannot create %u-d object `%s'\n", ndims, name);
 	goto error;
     }
     if (NULL == H5O_read(&handle, H5O_LAYOUT, 0, &layout)) {
@@ -402,7 +402,7 @@ static herr_t
 test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
 	    size_t nx, size_t ny, size_t nz)
 {
-    intn		ndims;
+    uintn		ndims;
     hsize_t		ctr;
     char		dims[64], s[256], name[256];
     hssize_t		offset[3];
@@ -434,7 +434,7 @@ test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
     /* Build the new empty object */
     sprintf(name, "%s_%s", prefix, dims);
     if (new_object(f, name, ndims, &handle) < 0) {
-	printf("    Cannot create %d-d object `%s'\n", ndims, name);
+	printf("    Cannot create %u-d object `%s'\n", ndims, name);
 	goto error;
     }
     if (NULL == H5O_read(&handle, H5O_LAYOUT, 0, &layout)) {

@@ -1527,7 +1527,7 @@ typedef struct
 {
   int      nsubfields;
   char     *name[NMAX];
-  off_t    offset[NMAX];
+  size_t   offset[NMAX];
   hid_t    datatype[NMAX];
 
 } CmpDTSinfo;

@@ -204,9 +204,5 @@ __DLL__ herr_t H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t 
 __DLL__ herr_t H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
                   hsize_t size, hid_t dxpl_id, const void *buf);
 
-/* Functions for allocation/releasing chunks */
-__DLL__ void * H5F_istore_chunk_alloc(size_t chunk_size);
-__DLL__ void * H5F_istore_chunk_realloc(void *chunk, size_t new_size);
-
 #endif
 

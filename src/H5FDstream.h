@@ -62,7 +62,7 @@ typedef struct H5FD_stream_fapl_t
   size_t       increment;            /* how much to grow memory in reallocs  */
   H5FD_STREAM_SOCKET_TYPE socket;    /* external socket descriptor           */
   hbool_t      do_socket_io;         /* do I/O on socket                     */
-  unsigned int backlog;              /* backlog argument for listen call     */
+  int          backlog;              /* backlog argument for listen call     */
   H5FD_stream_broadcast_t broadcast_fn; /* READ broadcast callback           */
   void        *broadcast_arg;        /* READ broadcast callback user argument*/
 } H5FD_stream_fapl_t;

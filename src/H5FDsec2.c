@@ -264,7 +264,7 @@ static H5FD_t *
 H5FD_sec2_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
 	       haddr_t maxaddr)
 {
-    unsigned	o_flags;
+    int	o_flags;
     int		fd;
     struct stat	sb;
     H5FD_sec2_t	*file=NULL;
@@ -579,9 +579,10 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
      * and the end of the file.
      */
     while (size>0) {
-        do
-            nbytes = read(file->fd, buf, size);
-        while (-1==nbytes && EINTR==errno);
+        do {
+            assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+            nbytes = HDread(file->fd, buf, (size_t)size);
+        } while (-1==nbytes && EINTR==errno);
         if (-1==nbytes) {
             /* error */
             file->pos = HADDR_UNDEF;
@@ -590,7 +591,8 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
         }
         if (0==nbytes) {
             /* end of file but not end of format address space */
-            memset(buf, 0, size);
+            assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+            HDmemset(buf, 0, (size_t)size);
             size = 0;
         }
         assert(nbytes>=0);
@@ -659,9 +661,10 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
      * results
      */
     while (size>0) {
-        do
-            nbytes = write(file->fd, buf, size);
-        while (-1==nbytes && EINTR==errno);
+        do {
+            assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+            nbytes = HDwrite(file->fd, buf, (size_t)size);
+        } while (-1==nbytes && EINTR==errno);
         if (-1==nbytes) {
             /* error */
             file->pos = HADDR_UNDEF;

@@ -99,7 +99,7 @@ H5Z_filter_deflate (unsigned UNUSED flags, size_t cd_nelmts,
 				"memory allocation failed for deflate "
 				"uncompression");
 		}
-		z_strm.next_out = (char*)outbuf + z_strm.total_out;
+		z_strm.next_out = (unsigned char*)outbuf + z_strm.total_out;
 		z_strm.avail_out = nalloc - z_strm.total_out;
 	    }
 	}

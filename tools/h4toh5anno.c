@@ -104,7 +104,7 @@ int Annofil_h4_to_h5(int32 file_id,hid_t h5group){
       return FAIL;
     }
 
-    ann_buf    = malloc(ann_length + 1);
+    ann_buf    = malloc((size_t)ann_length + 1);
     if(ann_buf == NULL) {
       printf("error in allocating memory. \n");
       return FAIL;
@@ -199,7 +199,7 @@ int Annofil_h4_to_h5(int32 file_id,hid_t h5group){
       return FAIL;
     }
 
-    ann_buf    = malloc(ann_length+1);
+    ann_buf    = malloc((size_t)ann_length+1);
     if(ann_buf == NULL) {
       printf("error in allocating memory. \n");
       ANend(an_id);
@@ -317,8 +317,8 @@ int Annoobj_h4_to_h5(int32 file_id,int32 obj_ref, int32 obj_tag,
   int      num_lab_anno;
   int      num_des_anno;
   int32    istat;
-  int32*   des_anno_list;
-  int32*   lab_anno_list;
+  int32*   des_anno_list=NULL;
+  int32*   lab_anno_list=NULL;
 
   char*    ann_buf;
   char*    ann_obj_name;
@@ -380,7 +380,7 @@ int Annoobj_h4_to_h5(int32 file_id,int32 obj_ref, int32 obj_tag,
 	return FAIL;
       }
 
-      ann_buf    = malloc(ann_length+1);
+      ann_buf    = malloc((size_t)ann_length+1);
       if(ann_buf == NULL) {
 	printf("error in allocating annotation memory.\n");
 	ANendaccess(ann_id);
@@ -487,7 +487,7 @@ int Annoobj_h4_to_h5(int32 file_id,int32 obj_ref, int32 obj_tag,
 	return FAIL;
       }
 
-      ann_buf = malloc(ann_length+1);
+      ann_buf = malloc((size_t)ann_length+1);
 
       if(ann_buf == NULL) {
 	printf("error in allocating annotation memory.\n");

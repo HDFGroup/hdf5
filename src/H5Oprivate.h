@@ -78,7 +78,7 @@ typedef struct H5O_class_t {
     herr_t	(*reset)(void *);		 /*free nested data structs  */
     herr_t	(*free)(void *);		 /*free main data struct  */
     herr_t	(*get_share)(H5F_t*, const void*, struct H5O_shared_t*);
-    herr_t      (*set_share)(H5F_t*, void*, const struct H5O_shared_t*);
+    herr_t  (*set_share)(H5F_t*, void*, const struct H5O_shared_t*);
     herr_t	(*debug)(H5F_t*, const void*, FILE*, intn, intn);
 } H5O_class_t;
 
@@ -106,11 +106,11 @@ typedef struct H5O_t {
     intn	version;		/*version number		     */
     intn	nlink;			/*link count			     */
     intn	nmesgs;			/*number of messages		     */
-    intn	alloc_nmesgs;		/*number of message slots	     */
-    H5O_mesg_t	*mesg;			/*array of messages		     */
+    intn	alloc_nmesgs;	/*number of message slots	     */
+    H5O_mesg_t	*mesg;		/*array of messages		     */
     intn	nchunks;		/*number of chunks		     */
-    intn	alloc_nchunks;		/*chunks allocated		     */
-    H5O_chunk_t *chunk;			/*array of chunks		     */
+    intn	alloc_nchunks;	/*chunks allocated		     */
+    H5O_chunk_t *chunk;		/*array of chunks		     */
 } H5O_t;
 
 /*
@@ -157,7 +157,7 @@ typedef struct H5O_fill_t {
 __DLLVAR__ const H5O_class_t H5O_EFL[1];/*external file list class	     */
 
 typedef struct H5O_efl_entry_t {
-    size_t	name_offset;		/*offset of name within heap	     */
+    size_t	name_offset;	/*offset of name within heap	     */
     char	*name;			/*malloc'd name			     */
     off_t	offset;			/*offset of data within file	     */
     hsize_t	size;			/*size allocated within file	     */
@@ -167,7 +167,7 @@ typedef struct H5O_efl_t {
     haddr_t	heap_addr;		/*address of name heap		     */
     intn	nalloc;			/*number of slots allocated	     */
     intn	nused;			/*number of slots used		     */
-    H5O_efl_entry_t *slot;		/*array of external file entries     */
+    H5O_efl_entry_t *slot;	/*array of external file entries     */
 } H5O_efl_t;
 
 /*
@@ -180,7 +180,7 @@ __DLLVAR__ const H5O_class_t H5O_LAYOUT[1];
 typedef struct H5O_layout_t {
     int		type;			/*type of layout, H5D_layout_t	     */
     haddr_t	addr;			/*file address of data or B-tree     */
-    intn	ndims;			/*num dimensions in stored data	     */
+    uintn	ndims;			/*num dimensions in stored data	     */
     hsize_t	dim[H5O_LAYOUT_NDIMS];	/*size of data or chunk		     */
 } H5O_layout_t;
 
@@ -194,11 +194,11 @@ typedef struct H5O_pline_t {
     size_t	nfilters;		/*num filters defined		     */
     size_t	nalloc;			/*num elements in `filter' array     */
     struct {
-	H5Z_filter_t	id;		/*filter identification number	     */
-	uintn		flags;		/*defn and invocation flags	     */
-	char		*name;		/*optional filter name		     */
-	size_t		cd_nelmts;	/*number of elements in cd_values[]  */
-	uintn		*cd_values;	/*client data values		     */
+        H5Z_filter_t	id;		/*filter identification number	     */
+        uintn		flags;		/*defn and invocation flags	     */
+        char		*name;		/*optional filter name		     */
+        size_t		cd_nelmts;	/*number of elements in cd_values[]  */
+        uintn		*cd_values;	/*client data values		     */
     } *filter;				/*array of filters		     */
 } H5O_pline_t;
 

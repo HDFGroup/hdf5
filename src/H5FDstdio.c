@@ -608,7 +608,8 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsi
     if (0 == size)
         return(0);
 	if ((haddr_t)addr >= file->eof) {
-        memset(buf, 0, size);
+        assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+        memset(buf, 0, (size_t)size);
         return(0);
     }
 
@@ -649,13 +650,15 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsi
      * will advance the file position by N.  If N is negative or an error
      * occurs then the file position is undefined.
      */
-    n = fread(buf, 1, size, file->fp);
+    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+    n = fread(buf, 1, (size_t)size, file->fp);
     if (n <= 0 && ferror(file->fp)) {
         file->op = H5FD_STDIO_OP_UNKNOWN;
         file->pos = HADDR_UNDEF;
         H5Epush_ret(func, H5E_IO, H5E_READERROR, "fread failed", -1);
     } else if (n < size) {
-        memset((unsigned char *)buf + n, 0, size - n);
+        assert((size-n)==(hsize_t)((size_t)(size-n))); /*check for overflow*/
+        memset((unsigned char *)buf + n, 0, (size_t)(size - n));
     }
     
     /*
@@ -740,7 +743,8 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
      * advanced by the number of bytes read.  Otherwise nobody knows where it
      * is.
      */
-    if (size != fwrite(buf, 1, size, file->fp)) {
+    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+    if (size != fwrite(buf, 1, (size_t)size, file->fp)) {
         file->op = H5FD_STDIO_OP_UNKNOWN;
         file->pos = HADDR_UNDEF;
         H5Epush_ret(func, H5E_IO, H5E_WRITEERROR, "fwrite failed", -1);

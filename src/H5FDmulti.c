@@ -469,8 +469,10 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map/*out*/,
 
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
         H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1);
-    if (H5FD_MULTI!=H5P_get_driver(fapl_id))
+#ifndef WANT_H5_V1_2_COMPAT
+    if (H5FD_MULTI!=H5Pget_driver(fapl_id))
         H5Epush_ret(func, H5E_PLIST, H5E_BADVALUE, "incorrect VFL driver", -1);
+#endif /* WANT_H5_V1_2_COMPAT */
     if (NULL==(fa=H5Pget_driver_info(fapl_id)))
         H5Epush_ret(func, H5E_PLIST, H5E_BADVALUE, "bad VFL driver info", -1);
 
@@ -586,8 +588,10 @@ H5Pget_dxpl_multi(hid_t dxpl_id, hid_t *memb_dxpl/*out*/)
 
     if (H5P_FILE_ACCESS!=H5Pget_class(dxpl_id))
         H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1);
-    if (H5FD_MULTI!=H5P_get_driver(dxpl_id))
+#ifndef WANT_H5_V1_2_COMPAT
+    if (H5FD_MULTI!=H5Pget_driver(dxpl_id))
         H5Epush_ret(func, H5E_PLIST, H5E_BADVALUE, "incorrect VFL driver", -1);
+#endif /* WANT_H5_V1_2_COMPAT */
     if (NULL==(dx=H5Pget_driver_info(dxpl_id)))
         H5Epush_ret(func, H5E_PLIST, H5E_BADVALUE, "bad VFL driver info", -1);
 
@@ -642,8 +646,8 @@ H5FD_multi_sb_size(H5FD_t *_file)
 
     /* Name templates */
     UNIQUE_MEMBERS(file->fa.memb_map, mt) {
-	size_t n = strlen(file->fa.memb_name[mt])+1;
-	nbytes += (n+7) & ~0x0007;
+        size_t n = strlen(file->fa.memb_name[mt])+1;
+        nbytes += (n+7) & ~((size_t)0x0007);
     } END_MEMBERS;
 
     return nbytes;
@@ -682,7 +686,7 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
     haddr_t		memb_eoa;
     unsigned char	*p;
-    int			nseen;
+    hsize_t		nseen;
     size_t		i;
     H5FD_mem_t		m;
     static const char *func="H5FD_multi_sb_encode";  /* Function Name for error reporting */
@@ -695,7 +699,7 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
 
     assert(7==H5FD_MEM_NTYPES);
     for (m=H5FD_MEM_SUPER; m<H5FD_MEM_NTYPES; m++) {
-	buf[m-1] = file->fa.memb_map[m];
+        buf[m-1] = file->fa.memb_map[m];
     }
     buf[7] = 0;
     buf[8] = 0;
@@ -710,12 +714,12 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
     p = buf+8;
     assert(sizeof(haddr_t)<=8);
     UNIQUE_MEMBERS(file->fa.memb_map, mt) {
-	memb_eoa = H5FDget_eoa(file->memb[mt]);
-	memcpy(p, &(file->fa.memb_addr[mt]), sizeof(haddr_t));
-	p += sizeof(haddr_t);
-	memcpy(p, &memb_eoa, sizeof(haddr_t));
-	p += sizeof(haddr_t);
-	nseen++;
+        memb_eoa = H5FDget_eoa(file->memb[mt]);
+        memcpy(p, &(file->fa.memb_addr[mt]), sizeof(haddr_t));
+        p += sizeof(haddr_t);
+        memcpy(p, &memb_eoa, sizeof(haddr_t));
+        p += sizeof(haddr_t);
+        nseen++;
     } END_MEMBERS;
     if (H5Tconvert(H5T_NATIVE_HADDR, H5T_STD_U64LE, nseen*2, buf+8, NULL,
 		   H5P_DEFAULT)<0) {
@@ -725,10 +729,10 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
     /* Encode all name templates */
     p = buf + 8 + nseen*2*8;
     UNIQUE_MEMBERS(file->fa.memb_map, mt) {
-	size_t n = strlen(file->fa.memb_name[mt]) + 1;
-	strcpy((char *)p, file->fa.memb_name[mt]);
-	p += n;
-	for (i=n; i%8; i++) *p++ = '\0';
+        size_t n = strlen(file->fa.memb_name[mt]) + 1;
+        strcpy((char *)p, file->fa.memb_name[mt]);
+        p += n;
+        for (i=n; i%8; i++) *p++ = '\0';
     } END_MEMBERS;
 
     return 0;
@@ -763,7 +767,8 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
     char		x[2*H5FD_MEM_NTYPES*8];
     H5FD_mem_t		map[H5FD_MEM_NTYPES];
-    int			nseen=0, i;
+    int			i;
+    hsize_t		nseen=0;
     hbool_t		map_changed=FALSE;
     hbool_t		in_use[H5FD_MEM_NTYPES];
     const char		*memb_name[H5FD_MEM_NTYPES];
@@ -781,9 +786,9 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 
     /* Set default values */
     ALL_MEMBERS(mt) {
-	memb_addr[mt] = HADDR_UNDEF;
-	memb_eoa[mt] = HADDR_UNDEF;
-	memb_name[mt] = NULL;
+        memb_addr[mt] = HADDR_UNDEF;
+        memb_eoa[mt] = HADDR_UNDEF;
+        memb_name[mt] = NULL;
     } END_MEMBERS;
 	    
     /*
@@ -792,31 +797,32 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     memset(map, 0, sizeof map);
     for (i=0; i<6; i++) {
         map[i+1] = (H5FD_mem_t)buf[i];
-        if (file->fa.memb_map[i+1]!=map[i+1]) map_changed=TRUE;
+        if (file->fa.memb_map[i+1]!=map[i+1])
+            map_changed=TRUE;
     }
     UNIQUE_MEMBERS(map, mt) {
-	nseen++;
+        nseen++;
     } END_MEMBERS;
     buf += 8;
 
     /* Decode Address and EOA values */
     assert(sizeof(haddr_t)<=8);
-    memcpy(x, buf, nseen*2*8);
+    assert((nseen*2*8)==(hsize_t)((size_t)(nseen*2*8))); /*check for overflow*/
+    memcpy(x, buf, (size_t)(nseen*2*8));
     buf += nseen*2*8;
-    if (H5Tconvert(H5T_STD_U64LE, H5T_NATIVE_HADDR, nseen*2, x, NULL,
-		   H5P_DEFAULT)<0)
+    if (H5Tconvert(H5T_STD_U64LE, H5T_NATIVE_HADDR, nseen*2, x, NULL, H5P_DEFAULT)<0)
         H5Epush_ret(func, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1);
     ap = (haddr_t*)x;
     UNIQUE_MEMBERS(map, mt) {
-	memb_addr[_unmapped] = *ap++;
-	memb_eoa[_unmapped] = *ap++;
+        memb_addr[_unmapped] = *ap++;
+        memb_eoa[_unmapped] = *ap++;
     } END_MEMBERS;
 
     /* Decode name templates */
     UNIQUE_MEMBERS(map, mt) {
-	size_t n = strlen((const char *)buf)+1;
-	memb_name[_unmapped] = (const char *)buf;
-	buf += (n+7) & ~0x0007;
+        size_t n = strlen((const char *)buf)+1;
+        memb_name[_unmapped] = (const char *)buf;
+        buf += (n+7) & ~((unsigned)0x0007);
     } END_MEMBERS;
 
     /*
@@ -827,50 +833,50 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
      */
     if (map_changed) {
 #ifdef H5FD_MULTI_DEBUG
-	if (file->flags & H5F_ACC_DEBUG) {
-	    fprintf(stderr, "H5FD_MULTI: member map override\n");
-	    fprintf(stderr, "    old value: ");
-	    ALL_MEMBERS(mt) {
-		fprintf(stderr, "%s%d", mt?", ":"",
-			(int)(file->fa.memb_map[mt]));
-	    } END_MEMBERS;
-	    fprintf(stderr, "\n    new value: ");
-	    ALL_MEMBERS(mt) {
-		fprintf(stderr, "%s%d", mt?", ":"", (int)(map[mt]));
-	    } END_MEMBERS;
-	}
+        if (file->flags & H5F_ACC_DEBUG) {
+            fprintf(stderr, "H5FD_MULTI: member map override\n");
+            fprintf(stderr, "    old value: ");
+            ALL_MEMBERS(mt) {
+                fprintf(stderr, "%s%d", mt?", ":"", (int)(file->fa.memb_map[mt]));
+            } END_MEMBERS;
+            fprintf(stderr, "\n    new value: ");
+            ALL_MEMBERS(mt) {
+                fprintf(stderr, "%s%d", mt?", ":"", (int)(map[mt]));
+            } END_MEMBERS;
+        }
 #endif
-	/* Commit map */
-	ALL_MEMBERS(mt) {
-	    file->fa.memb_map[mt] = map[mt];
-	} END_MEMBERS;
-	
-	/* Close files which are unused now */
-	memset(in_use, 0, sizeof in_use);
-	UNIQUE_MEMBERS(map, mt) {
-	    in_use[mt] = TRUE;
-	} END_MEMBERS;
-	ALL_MEMBERS(mt) {
-	    if (!in_use[mt] && file->memb[mt]) {
+        /* Commit map */
+        ALL_MEMBERS(mt) {
+            file->fa.memb_map[mt] = map[mt];
+        } END_MEMBERS;
+        
+        /* Close files which are unused now */
+        memset(in_use, 0, sizeof in_use);
+        UNIQUE_MEMBERS(map, mt) {
+            in_use[mt] = TRUE;
+        } END_MEMBERS;
+        ALL_MEMBERS(mt) {
+            if (!in_use[mt] && file->memb[mt]) {
 #ifdef H5FD_MULTI_DEBUG
-		if (file->flags & H5F_ACC_DEBUG) {
-		    fprintf(stderr, "H5FD_MULTI: close member %d\n", (int)mt);
-		}
+                if (file->flags & H5F_ACC_DEBUG) {
+                    fprintf(stderr, "H5FD_MULTI: close member %d\n", (int)mt);
+                }
 #endif
-		H5FDclose(file->memb[mt]);
-		file->memb[mt] = NULL;
-	    }
-	    file->fa.memb_map[mt] = map[mt];
-	} END_MEMBERS;
+                H5FDclose(file->memb[mt]);
+                file->memb[mt] = NULL;
+            }
+            file->fa.memb_map[mt] = map[mt];
+        } END_MEMBERS;
     }
 
     /* Commit member starting addresses and name templates */
     ALL_MEMBERS(mt) {
-	file->fa.memb_addr[mt] = memb_addr[mt];
-	if (memb_name[mt]) {
-	    if (file->fa.memb_name[mt]) free(file->fa.memb_name[mt]);
-	    file->fa.memb_name[mt] = my_strdup(memb_name[mt]);
-	}
+        file->fa.memb_addr[mt] = memb_addr[mt];
+        if (memb_name[mt]) {
+            if (file->fa.memb_name[mt])
+                free(file->fa.memb_name[mt]);
+            file->fa.memb_name[mt] = my_strdup(memb_name[mt]);
+        }
     } END_MEMBERS;
     if (compute_next(file)<0)
         H5Epush_ret(func, H5E_INTERNAL, H5E_BADVALUE, "compute_next() failed", -1);
@@ -881,9 +887,9 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 
     /* Set the EOA marker for all open files */
     UNIQUE_MEMBERS(file->fa.memb_map, mt) {
-	if (file->memb[mt]) {
-	    H5FDset_eoa(file->memb[mt], memb_eoa[mt]);
-	}
+        if (file->memb[mt]) {
+            H5FDset_eoa(file->memb[mt], memb_eoa[mt]);
+        }
     } END_MEMBERS;
 
     return 0;
@@ -1134,7 +1140,7 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
      */
     if (NULL==(file=calloc(1, sizeof(H5FD_multi_t))))
         H5Epush_ret(func, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed", NULL);
-    if (H5P_DEFAULT==fapl_id || H5FD_MULTI!=H5P_get_driver(fapl_id)) {
+    if (H5P_DEFAULT==fapl_id || H5FD_MULTI!=H5Pget_driver(fapl_id)) {
         close_fapl = fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         H5Pset_fapl_multi(fapl_id, NULL, NULL, NULL, NULL, TRUE);
     }
@@ -1579,7 +1585,7 @@ H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsi
     H5Eclear();
 
     /* Get the data transfer properties */
-    if (H5P_DEFAULT!=dxpl_id && H5FD_MULTI==H5P_get_driver(dxpl_id)) {
+    if (H5P_DEFAULT!=dxpl_id && H5FD_MULTI==H5Pget_driver(dxpl_id)) {
 	dx = H5Pget_driver_info(dxpl_id);
     }
     
@@ -1634,7 +1640,7 @@ H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hs
     H5Eclear();
 
     /* Get the data transfer properties */
-    if (H5P_DEFAULT!=dxpl_id && H5FD_MULTI==H5P_get_driver(dxpl_id)) {
+    if (H5P_DEFAULT!=dxpl_id && H5FD_MULTI==H5Pget_driver(dxpl_id)) {
 	dx = H5Pget_driver_info(dxpl_id);
     }
     

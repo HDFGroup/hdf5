@@ -85,16 +85,16 @@ typedef struct H5S_fconv_t {
 		   H5S_sel_iter_t *iter, size_t *min_elem_out);
 
     /* Determine optimal number of elements to transfer */
-    size_t (*avail)(const H5S_t *file_space, const H5S_sel_iter_t *file_iter,
-		    size_t max);
+    hsize_t (*avail)(const H5S_t *file_space, const H5S_sel_iter_t *file_iter,
+		    hsize_t max);
 
     /* Gather elements from disk to type conversion buffer */
-    size_t (*gath)(H5F_t *f, const struct H5O_layout_t *layout,
+    hsize_t (*gath)(H5F_t *f, const struct H5O_layout_t *layout,
 		   const struct H5O_pline_t *pline,
 		   const struct H5O_fill_t *fill,
 		   const struct H5O_efl_t *efl, size_t elmt_size,
 		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		   size_t nelmts, hid_t dxpl_id, void *tconv_buf/*out*/);
+		   hsize_t nelmts, hid_t dxpl_id, void *tconv_buf/*out*/);
 
     /* Scatter elements from type conversion buffer to disk */
     herr_t (*scat)(H5F_t *f, const struct H5O_layout_t *layout,
@@ -102,7 +102,7 @@ typedef struct H5S_fconv_t {
 		   const struct H5O_fill_t *fill,
 		   const struct H5O_efl_t *efl, size_t elmt_size,
 		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
-		   size_t nelmts, hid_t dxpl_id, const void *tconv_buf);
+		   hsize_t nelmts, hid_t dxpl_id, const void *tconv_buf);
 } H5S_fconv_t;
 
 typedef struct H5S_mconv_t {
@@ -115,14 +115,14 @@ typedef struct H5S_mconv_t {
 		   H5S_sel_iter_t *iter, size_t *min_elem_out);
 
     /* Gather elements from app buffer to type conversion buffer */
-    size_t (*gath)(const void *buf, size_t elmt_size,
+    hsize_t (*gath)(const void *buf, size_t elmt_size,
 		   const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-		   size_t nelmts, void *tconv_buf/*out*/);
+		   hsize_t nelmts, void *tconv_buf/*out*/);
 
     /* Scatter elements from type conversion buffer to application buffer */
     herr_t (*scat)(const void *tconv_buf, size_t elmt_size,
 		   const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
-		   size_t nelmts, void *buf/*out*/);
+		   hsize_t nelmts, void *buf/*out*/);
 } H5S_mconv_t;
 
 typedef struct H5S_conv_t {

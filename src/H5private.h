@@ -427,6 +427,19 @@ typedef unsigned uintn;
 #endif
 
 /*
+ * A macro for detecting over/under-flow when casting between types
+ */
+#ifndef NDEBUG
+#define H5_CHECK_OVERFLOW(var,vartype,casttype) \
+{                                               \
+    casttype _tmp_overflow=(casttype)(var);     \
+    assert((var)==(vartype)_tmp_overflow);      \
+}
+#else /* NDEBUG */
+#define H5_CHECK_OVERFLOW(var,vartype,casttype)
+#endif /* NDEBUG */
+
+/*
  * Data types and functions for timing certain parts of the library.
  */
 typedef struct {
@@ -708,7 +721,7 @@ __DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
  * And now for a couple non-Posix functions...  Watch out for systems that
  * define these in terms of macros.
  */
-#ifndef strdup
+#if !defined strdup && !defined HAVE_STRDUP
 char *strdup(const char *s);
 #endif
 #define HDstrdup(S)		strdup(S)

@@ -560,7 +560,7 @@ int get_numof_hdf4obj(char*filename,int32 file_id) {
 
 int set_helpgroups(hid_t h5root,hid_t* h5dimgptr,hid_t* h5palgptr){
 
-  hid_t  h5_dimg;/* hdf5 dimensional scale group identifier. */
+  hid_t  h5_dimg=(-1);/* hdf5 dimensional scale group identifier. */
   hid_t  h5_palg;/* hdf5 palette group identifier. */
   
   /*1. dimensional scale group.*/
@@ -581,7 +581,7 @@ int set_helpgroups(hid_t h5root,hid_t* h5dimgptr,hid_t* h5palgptr){
     h5_palg = H5Gcreate(h5root,HDF4_PALG,0);
     if(h5_palg <0) {
       printf("error in creating hdf5 palette group. \n");
-      H5Gclose(h5_dimg);
+      if(h5_dimg>0) H5Gclose(h5_dimg);
       return FAIL;
     }
 

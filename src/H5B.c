@@ -124,7 +124,7 @@ static H5B_t *H5B_load(H5F_t *f, haddr_t addr, const void *_type, void *udata);
 static herr_t H5B_decode_key(H5F_t *f, H5B_t *bt, intn idx);
 static herr_t H5B_decode_keys(H5F_t *f, H5B_t *bt, intn idx);
 static hsize_t H5B_nodesize(H5F_t *f, const H5B_class_t *type,
-			   size_t *total_nkey_size, size_t sizeof_rkey);
+			   hsize_t *total_nkey_size, size_t sizeof_rkey);
 static herr_t H5B_split(H5F_t *f, const H5B_class_t *type, H5B_t *old_bt,
 			haddr_t old_addr, intn idx,
 			const double split_ratios[], void *udata,
@@ -192,7 +192,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
     H5B_t		*bt = NULL;
     size_t		sizeof_rkey;
     hsize_t		size;
-    size_t		total_native_keysize;
+    hsize_t		total_native_keysize;
     size_t		offset;
     intn		i;
     herr_t		ret_value = FAIL;
@@ -229,8 +229,8 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
     bt->nchildren = 0;
     if (NULL==(bt->page=H5FL_BLK_ALLOC(page,size,1)) ||
         NULL==(bt->native=H5FL_BLK_ALLOC(native_block,total_native_keysize,0)) ||
-	NULL==(bt->child=H5FL_ARR_ALLOC(haddr_t,2*H5B_K(f,type),0)) ||
-	NULL==(bt->key=H5FL_ARR_ALLOC(H5B_key_t,(2*H5B_K(f,type)+1),0))) {
+	NULL==(bt->child=H5FL_ARR_ALLOC(haddr_t,(hsize_t)(2*H5B_K(f,type)),0)) ||
+	NULL==(bt->key=H5FL_ARR_ALLOC(H5B_key_t,(hsize_t)(2*H5B_K(f,type)+1),0))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed for B-tree root node");
     }
@@ -307,7 +307,7 @@ static H5B_t *
 H5B_load(H5F_t *f, haddr_t addr, const void *_type, void *udata)
 {
     const H5B_class_t	*type = (const H5B_class_t *) _type;
-    size_t		total_nkey_size;
+    hsize_t		total_nkey_size;
     hsize_t		size;
     H5B_t		*bt = NULL;
     intn		i;
@@ -333,8 +333,8 @@ H5B_load(H5F_t *f, haddr_t addr, const void *_type, void *udata)
     bt->ndirty = 0;
     if (NULL==(bt->page=H5FL_BLK_ALLOC(page,size,0)) ||
 	NULL==(bt->native=H5FL_BLK_ALLOC(native_block,total_nkey_size,0)) ||
-	NULL==(bt->key=H5FL_ARR_ALLOC(H5B_key_t,(2*H5B_K(f,type)+1),0)) ||
-	NULL==(bt->child=H5FL_ARR_ALLOC(haddr_t,2*H5B_K(f,type),0))) {
+	NULL==(bt->key=H5FL_ARR_ALLOC(H5B_key_t,(hsize_t)(2*H5B_K(f,type)+1),0)) ||
+	NULL==(bt->child=H5FL_ARR_ALLOC(haddr_t,(hsize_t)(2*H5B_K(f,type)),0))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -1563,7 +1563,7 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 	 * We've reached the left-most leaf.  Now follow the right-sibling
 	 * pointer from leaf to leaf until we've processed all leaves.
 	 */
-	if (NULL==(child=H5FL_ARR_ALLOC(haddr_t,2*H5B_K(f,type),0)) ||
+	if (NULL==(child=H5FL_ARR_ALLOC(haddr_t,(hsize_t)(2*H5B_K(f,type)),0)) ||
 	    NULL==(key=H5MM_malloc((2*H5B_K(f, type)+1)*type->sizeof_nkey))) {
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			 "memory allocation failed");
@@ -2000,7 +2000,7 @@ H5B_remove(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
  */
 static hsize_t
 H5B_nodesize(H5F_t *f, const H5B_class_t *type,
-	     size_t *total_nkey_size/*out*/, size_t sizeof_rkey)
+	     hsize_t *total_nkey_size/*out*/, size_t sizeof_rkey)
 {
     hsize_t	size;
 
@@ -2052,9 +2052,9 @@ static H5B_t *
 H5B_copy(H5F_t *f, const H5B_t *old_bt)
 {
     H5B_t		*ret_value = NULL;
-    size_t		total_native_keysize;
+    hsize_t		total_native_keysize;
     hsize_t		size;
-    uintn       nkeys;
+    hsize_t     nkeys;
     uintn		u;
 
     FUNC_ENTER(H5B_copy, NULL);
@@ -2093,9 +2093,12 @@ H5B_copy(H5F_t *f, const H5B_t *old_bt)
     /* Copy the other structures */
     assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
     HDmemcpy(ret_value->page,old_bt->page,(size_t)size);
-    HDmemcpy(ret_value->native,old_bt->native,total_native_keysize);
-    HDmemcpy(ret_value->child,old_bt->child,sizeof(haddr_t)*nkeys);
-    HDmemcpy(ret_value->key,old_bt->key,sizeof(H5B_key_t)*(nkeys+1));
+    assert(total_native_keysize==(hsize_t)((size_t)total_native_keysize)); /*check for overflow*/
+    HDmemcpy(ret_value->native,old_bt->native,(size_t)total_native_keysize);
+    assert((sizeof(haddr_t)*nkeys)==(hsize_t)((size_t)(sizeof(haddr_t)*nkeys))); /*check for overflow*/
+    HDmemcpy(ret_value->child,old_bt->child,(size_t)(sizeof(haddr_t)*nkeys));
+    assert((sizeof(H5B_key_t)*(nkeys+1))==(hsize_t)((size_t)(sizeof(H5B_key_t)*(nkeys+1)))); /*check for overflow*/
+    HDmemcpy(ret_value->key,old_bt->key,(size_t)(sizeof(H5B_key_t)*(nkeys+1)));
 
     /*
      * Translate the keys from pointers into the old 'page' buffer into

@@ -18,7 +18,7 @@
 #include <h5tools.h>
 
 
-#if WIN32
+#ifdef WIN32
 typedef unsigned int mode_t;
 #endif
 
@@ -41,11 +41,8 @@ extern herr_t convert_dataset_string(hid_t, char *, op_data_t *);
 extern int32 h5type_to_h4type(hid_t);
 extern hid_t h4type_to_memtype(int32);
 
-extern void init_table(table_t **temp);
 extern void free_table(table_t **temp);
-extern void init_prefix(char **prefix, int length);
 extern void dump_tables(char* name, table_t* table);
-extern herr_t find_objs(hid_t , const char *, void *);
 extern int get_table_idx(table_t*, unsigned long *);
 extern int get_tableflag(table_t*, int);
 extern int set_tableflag(table_t*, int);
@@ -129,7 +126,7 @@ main(int argc, char *argv[])
 			break;
 		}
 #ifndef WIN32
-		if (test_file(h5_filename,O_EXCL,292) != 0 ) { /* 292 Decimal - 0444 Octal, a+r */
+		if (test_file(h5_filename,O_EXCL,(mode_t)(S_IRUSR|S_IRGRP|S_IROTH)) != 0 ) { /* 292 Decimal - 0444 Octal, a+r */
 			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "main", __FILE__, __LINE__);
 			status = -1;
 			break;
@@ -150,7 +147,7 @@ main(int argc, char *argv[])
 			break;
 		}
 #ifndef WIN32
-		if (test_file(h4_filename,O_CREAT|O_EXCL,436) != 0) { /* 436 Decimal - 0664 Octal, ug+rw,o+r */
+		if (test_file(h4_filename,O_CREAT|O_EXCL,(mode_t)(S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH)) != 0) { /* 436 Decimal - 0664 Octal, ug+rw,o+r */
 			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "main", __FILE__, __LINE__);
 			status = -1;
 			break;

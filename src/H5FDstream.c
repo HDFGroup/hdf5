@@ -374,7 +374,7 @@ static void *H5FD_stream_fapl_get (H5FD_t *_stream)
 
 static H5FD_STREAM_SOCKET_TYPE
 H5FDstream_open_socket (const char *filename, int o_flags,
-                        unsigned int backlog,
+                        int backlog,
                         const char **errormsg,
                         H5E_major_t *major, H5E_minor_t *minor)
 {
@@ -419,7 +419,7 @@ H5FDstream_open_socket (const char *filename, int o_flags,
     return (sock);
   }
 
-  hostname = (char *) H5MM_malloc (separator - filename + 1);
+  hostname = (char *) H5MM_malloc ((size_t)(separator - filename + 1));
 
   /* Return if out of memory */
   if (hostname == NULL)
@@ -429,11 +429,11 @@ H5FDstream_open_socket (const char *filename, int o_flags,
     return (sock);
   }
 
-  strncpy (hostname, filename, separator - filename);
+  HDstrncpy (hostname, filename, (size_t)(separator - filename));
   hostname[separator - filename] = 0;
   port = atoi (separator + 1);
 
-  memset (&server, 0, sizeof (server));
+  HDmemset (&server, 0, sizeof (server));
   server.sin_family = AF_INET;
   server.sin_port = htons (port);
 
@@ -450,7 +450,7 @@ H5FDstream_open_socket (const char *filename, int o_flags,
   {
     if (O_RDONLY == o_flags)
     {
-      memcpy (&server.sin_addr, he->h_addr, he->h_length);
+      HDmemcpy (&server.sin_addr, he->h_addr, (size_t)he->h_length);
 #ifdef DEBUG
       fprintf (stderr, "Stream VFD: connecting to host '%s' port %d\n",
                hostname, port);
@@ -545,7 +545,7 @@ static void H5FDstream_read_from_socket (H5FD_stream_t *stream,
     }
 
     /* now receive the next chunk of data */
-    size = recv (stream->socket, ptr, (int) max_size, 0);
+    size = recv (stream->socket, ptr, max_size, 0);
 
     if (size < 0 && (EINTR == errno || EAGAIN == errno || EWOULDBLOCK))
     {
@@ -657,7 +657,7 @@ static H5FD_t *H5FD_stream_open (const char *filename,
   }
 
   /* zero out file structure and set file access property list */
-  memset (&_stream, 0, sizeof (_stream));
+  HDmemset (&_stream, 0, sizeof (_stream));
   _stream.fapl = *fapl;
 
   errormsg = NULL;
@@ -781,8 +781,8 @@ static H5FD_t *H5FD_stream_open (const char *filename,
 static herr_t H5FD_stream_flush (H5FD_t *_stream)
 {
   H5FD_stream_t *stream = (H5FD_stream_t *) _stream;
-  int size;
-  int bytes_send;
+  size_t size;
+  ssize_t bytes_send;
   int on = 1;
   unsigned char *ptr;
   struct sockaddr from;
@@ -808,7 +808,7 @@ static herr_t H5FD_stream_flush (H5FD_t *_stream)
         continue;           /* continue the loop for other clients' requests */
       }
 
-      size = (int) stream->eof;
+      size = stream->eof;
       ptr = stream->mem;
 
       while (size)
@@ -878,7 +878,7 @@ static herr_t H5FD_stream_close (H5FD_t *_stream)
   {
     H5MM_xfree (stream->mem);
   }
-  memset (stream, 0, sizeof (H5FD_stream_t));
+  HDmemset (stream, 0, sizeof (H5FD_stream_t));
   H5MM_xfree (stream);
 
   FUNC_LEAVE (0);
@@ -1006,7 +1006,6 @@ static haddr_t H5FD_stream_get_eof (H5FD_t *_stream)
 {
   H5FD_stream_t        *stream = (H5FD_stream_t *) _stream;
 
-
   FUNC_ENTER (H5FD_stream_get_eof, HADDR_UNDEF);
 
   FUNC_LEAVE (MAX (stream->eof, stream->eoa));
@@ -1042,7 +1041,6 @@ static herr_t H5FD_stream_read (H5FD_t *_stream,
   H5FD_stream_t *stream = (H5FD_stream_t *) _stream;
   ssize_t        nbytes;
 
-
   FUNC_ENTER (H5FD_stream_read, FAIL);
 
   assert (stream && stream->pub.cls);
@@ -1066,7 +1064,7 @@ static herr_t H5FD_stream_read (H5FD_t *_stream,
   if (addr < stream->eof)
   {
     nbytes = (ssize_t) MIN (size, stream->eof - addr);
-    memcpy (buf, stream->mem + addr, (size_t) nbytes);
+    HDmemcpy (buf, stream->mem + addr, (size_t) nbytes);
     size -= nbytes;
     addr += nbytes;
     buf = (char *) buf + nbytes;
@@ -1075,7 +1073,7 @@ static herr_t H5FD_stream_read (H5FD_t *_stream,
   /* Read zeros for the part which is after the EOF markers */
   if (size > 0)
   {
-    memset (buf, 0, (size_t) size);
+    HDmemset (buf, 0, (size_t) size);
   }
 
   FUNC_LEAVE (SUCCEED);
@@ -1159,7 +1157,7 @@ static herr_t H5FD_stream_write (H5FD_t *_stream,
   }
 
   /* Write from BUF to memory */
-  memcpy (stream->mem + addr, buf, (size_t) size);
+  HDmemcpy (stream->mem + addr, buf, (size_t) size);
   stream->dirty = TRUE;
 
   FUNC_LEAVE (SUCCEED);

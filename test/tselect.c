@@ -326,7 +326,7 @@ test_select_point(void)
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Verify correct elements selected */
-    H5Sget_select_elem_pointlist(sid1,0,POINT1_NPOINTS,(hsize_t *)temp_coord1);
+    H5Sget_select_elem_pointlist(sid1,(hsize_t)0,(hsize_t)POINT1_NPOINTS,(hsize_t *)temp_coord1);
     for(i=0; i<POINT1_NPOINTS; i++) {
         VERIFY(temp_coord1[i][0],coord1[i][0],"H5Sget_select_elem_pointlist");
         VERIFY(temp_coord1[i][1],coord1[i][1],"H5Sget_select_elem_pointlist");
@@ -351,7 +351,7 @@ test_select_point(void)
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Verify correct elements selected */
-    H5Sget_select_elem_pointlist(sid1,POINT1_NPOINTS,POINT1_NPOINTS,(hsize_t *)temp_coord1);
+    H5Sget_select_elem_pointlist(sid1,(hsize_t)POINT1_NPOINTS,(hsize_t)POINT1_NPOINTS,(hsize_t *)temp_coord1);
     for(i=0; i<POINT1_NPOINTS; i++) {
         VERIFY(temp_coord1[i][0],coord1[i][0],"H5Sget_select_elem_pointlist");
         VERIFY(temp_coord1[i][1],coord1[i][1],"H5Sget_select_elem_pointlist");
@@ -376,7 +376,7 @@ test_select_point(void)
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Verify correct elements selected */
-    H5Sget_select_elem_pointlist(sid2,0,POINT1_NPOINTS,(hsize_t *)temp_coord2);
+    H5Sget_select_elem_pointlist(sid2,(hsize_t)0,(hsize_t)POINT1_NPOINTS,(hsize_t *)temp_coord2);
     for(i=0; i<POINT1_NPOINTS; i++) {
         VERIFY(temp_coord2[i][0],coord2[i][0],"H5Sget_select_elem_pointlist");
         VERIFY(temp_coord2[i][1],coord2[i][1],"H5Sget_select_elem_pointlist");
@@ -405,7 +405,7 @@ test_select_point(void)
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Verify correct elements selected */
-    H5Sget_select_elem_pointlist(sid2,0,POINT1_NPOINTS,(hsize_t *)temp_coord2);
+    H5Sget_select_elem_pointlist(sid2,(hsize_t)0,(hsize_t)POINT1_NPOINTS,(hsize_t *)temp_coord2);
     for(i=0; i<POINT1_NPOINTS; i++) {
         VERIFY(temp_coord2[i][0],coord2[i][0],"H5Sget_select_elem_pointlist");
         VERIFY(temp_coord2[i][1],coord2[i][1],"H5Sget_select_elem_pointlist");
@@ -447,7 +447,7 @@ test_select_point(void)
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Verify correct elements selected */
-    H5Sget_select_elem_pointlist(sid2,0,POINT1_NPOINTS,(hsize_t *)temp_coord3);
+    H5Sget_select_elem_pointlist(sid2,(hsize_t)0,(hsize_t)POINT1_NPOINTS,(hsize_t *)temp_coord3);
     for(i=0; i<POINT1_NPOINTS; i++) {
         VERIFY(temp_coord3[i][0],coord3[i][0],"H5Sget_select_elem_pointlist");
         VERIFY(temp_coord3[i][1],coord3[i][1],"H5Sget_select_elem_pointlist");
@@ -471,7 +471,7 @@ test_select_point(void)
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Verify correct elements selected */
-    H5Sget_select_elem_pointlist(sid2,POINT1_NPOINTS,POINT1_NPOINTS,(hsize_t *)temp_coord3);
+    H5Sget_select_elem_pointlist(sid2,(hsize_t)POINT1_NPOINTS,(hsize_t)POINT1_NPOINTS,(hsize_t *)temp_coord3);
     for(i=0; i<POINT1_NPOINTS; i++) {
         VERIFY(temp_coord3[i][0],coord3[i][0],"H5Sget_select_elem_pointlist");
         VERIFY(temp_coord3[i][1],coord3[i][1],"H5Sget_select_elem_pointlist");

@@ -69,7 +69,7 @@ static char RcsId[] = "@(#)$Revision$";
 #include <H5TBprivate.h>    /*Threaded, balanced, binary trees	  */
 
 # define   KEYcmp(k1,k2,a) ((NULL!=compar) ? (*compar)( k1, k2, a) \
-                 : HDmemcmp( k1, k2, 0<(a) ? (a) : (intn)HDstrlen(k1) )  )
+                 : HDmemcmp( k1, k2, 0<(a) ? (a) : HDstrlen(k1) )  )
 
 /* Return maximum of two scalar values (use arguments w/o side effects): */
 #define   Max(a,b)  ( (a) > (b) ? (a) : (b) )

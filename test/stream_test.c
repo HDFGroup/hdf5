@@ -291,7 +291,7 @@ static int receiver (void)
   /*
    * Read dataset from file into memory.
    */
-  data = (int *) malloc (nelems * sizeof (int));
+  data = (int *) malloc ((size_t)(nelems * sizeof (int)));
   status = H5Dread (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                     data);
   H5Dclose (dataset);

@@ -219,12 +219,13 @@ herr_t H5T_vlen_seq_mem_write(const H5D_xfer_t *xfer_parms, H5F_t UNUSED *f, voi
 
     if(seq_len!=0) {
         /* Use the user's memory allocation routine is one is defined */
+        assert((seq_len*base_size)==(hsize_t)((size_t)(seq_len*base_size))); /*check for overflow*/
         if(xfer_parms->vlen_alloc!=NULL) {
-            if(NULL==(vl->p=(xfer_parms->vlen_alloc)(seq_len*base_size,xfer_parms->alloc_info)))
+            if(NULL==(vl->p=(xfer_parms->vlen_alloc)((size_t)(seq_len*base_size),xfer_parms->alloc_info)))
                 HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
           } /* end if */
         else {  /* Default to system malloc */
-            if(NULL==(vl->p=H5MM_malloc(seq_len*base_size)))
+            if(NULL==(vl->p=H5MM_malloc((size_t)(seq_len*base_size))))
                 HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
           } /* end else */
 
@@ -327,12 +328,13 @@ herr_t H5T_vlen_str_mem_write(const H5D_xfer_t *xfer_parms, H5F_t UNUSED *f, voi
     assert(buf);
 
     /* Use the user's memory allocation routine is one is defined */
+    assert(((seq_len+1)*base_size)==(hsize_t)((size_t)((seq_len+1)*base_size))); /*check for overflow*/
     if(xfer_parms->vlen_alloc!=NULL) {
-        if(NULL==(*s=(xfer_parms->vlen_alloc)((seq_len+1)*base_size,xfer_parms->alloc_info)))
+        if(NULL==(*s=(xfer_parms->vlen_alloc)((size_t)((seq_len+1)*base_size),xfer_parms->alloc_info)))
             HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
       } /* end if */
     else {  /* Default to system malloc */
-        if(NULL==(*s=H5MM_malloc((seq_len+1)*base_size)))
+        if(NULL==(*s=H5MM_malloc((size_t)((seq_len+1)*base_size))))
             HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
       } /* end else */
 

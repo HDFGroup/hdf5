@@ -151,7 +151,8 @@ H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxp
             } /* end if */
             else {
                 /* Allocate room for the data sieve buffer */
-                if (NULL==(f->shared->sieve_buf=H5MM_malloc(f->shared->sieve_buf_size))) {
+                assert(f->shared->sieve_buf_size==(hsize_t)((size_t)f->shared->sieve_buf_size)); /*check for overflow*/
+                if (NULL==(f->shared->sieve_buf=H5MM_malloc((size_t)f->shared->sieve_buf_size))) {
                     HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                           "memory allocation failed");
                 }
@@ -325,7 +326,8 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
             } /* end if */
             else {
                 /* Allocate room for the data sieve buffer */
-                if (NULL==(f->shared->sieve_buf=H5MM_malloc(f->shared->sieve_buf_size))) {
+                assert(f->shared->sieve_buf_size==(hsize_t)((size_t)f->shared->sieve_buf_size)); /*check for overflow*/
+                if (NULL==(f->shared->sieve_buf=H5MM_malloc((size_t)f->shared->sieve_buf_size))) {
                     HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                           "memory allocation failed");
                 }

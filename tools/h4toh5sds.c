@@ -973,7 +973,7 @@ int sdsdim_to_h5dataset(int32 sds_id,int32 sds_rank,hid_t sh5dset,
      attr_refDims[0] = count_h5objref;
      attr_refSpace   = H5Screate_simple(1,attr_refDims,NULL);
      attr_refType    = H5Tcopy(H5T_STD_REF_OBJ);
-     alldim_refdat   = calloc(count_h5objref,sizeof(hobj_ref_t));
+     alldim_refdat   = calloc((size_t)count_h5objref,sizeof(hobj_ref_t));
 
      if(alldim_refdat == NULL) {
        printf("error in allocating memory. \n");

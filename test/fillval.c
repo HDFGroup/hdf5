@@ -380,7 +380,8 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
 	nelmts *= hs_size[i];
     }
     if ((mspace=H5Screate_simple(5, hs_size, hs_size))<0) goto error;
-    buf = malloc(nelmts*sizeof(int));
+    assert((nelmts*sizeof(int))==(hssize_t)((size_t)(nelmts*sizeof(int)))); /*check for overflow*/
+    buf = malloc((size_t)(nelmts*sizeof(int)));
     for (i=0; i<nelmts; i++) buf[i] = 9999;
     if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, hs_stride,
 			    hs_size, NULL)<0) goto error;
@@ -519,7 +520,7 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 	nelmts = max_size[0]*max_size[1]*max_size[2]*max_size[3]*max_size[4];
 	if ((fd=open(FILE_NAME_RAW, O_RDWR|O_CREAT|O_TRUNC, 0666))<0 ||
 	    close(fd)<0) goto error;
-	if (H5Pset_external(dcpl, FILE_NAME_RAW, 0, nelmts*sizeof(int))<0)
+	if (H5Pset_external(dcpl, FILE_NAME_RAW, (off_t)0, (hsize_t)nelmts*sizeof(int))<0)
 	    goto error;
     }
 #endif
@@ -577,7 +578,8 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 	nelmts *= hs_size[i];
     }
     if ((mspace=H5Screate_simple(5, hs_size, hs_size))<0) goto error;
-    buf = malloc(nelmts*sizeof(int));
+    assert((nelmts*sizeof(int))==(hssize_t)((size_t)(nelmts*sizeof(int)))); /*check for overflow*/
+    buf = malloc((size_t)(nelmts*sizeof(int)));
     for (i=0; i<nelmts; i++) buf[i] = 9999;
     if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, hs_stride,
 			    hs_size, NULL)<0) goto error;

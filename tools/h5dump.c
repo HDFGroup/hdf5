@@ -761,7 +761,7 @@ dump_selected_attr(hid_t loc_id, char *name)
     H5G_stat_t statbuf;
 
     j = (int)strlen(name) - 1;
-    obj_name = malloc(j + 2);
+    obj_name = malloc((size_t)j + 2);
 
     /* find the last / */
     while (name[j] != '/' && j >=0)
@@ -771,7 +771,7 @@ dump_selected_attr(hid_t loc_id, char *name)
     if (j == -1) {
         strcpy(obj_name, "/");
     } else {
-        strncpy(obj_name, name, j+1);
+        strncpy(obj_name, name, (size_t)j+1);
         obj_name[j+1] = '\0';
     }
 
@@ -1245,7 +1245,7 @@ dump_data(hid_t obj_id, int obj_data)
     void *buf;
     hid_t space, type, p_type;
     int ndims, i;
-    hsize_t size[64], nelmts = 1;
+    hsize_t size[64], nelmts = 1, alloc_size;
     int depth;
     int stdindent = COL; /* should be 3*/
 
@@ -1276,7 +1276,9 @@ dump_data(hid_t obj_id, int obj_data)
         for (i = 0; i < ndims; i++)
             nelmts *= size[i];
 
-        buf = malloc(nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type)));
+        alloc_size= nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
+        assert(alloc_size==(hsize_t)((size_t)alloc_size)); /*check for overflow*/
+        buf = malloc((size_t)alloc_size);
         assert(buf);
 
         if (H5Aread(obj_id, p_type, buf) >= 0)
@@ -1754,7 +1756,7 @@ main(int argc, const char *argv[])
     /* init the find_objs_t */
     info.threshold = 0;
     info.prefix_len = prefix_len;
-    info.prefix = malloc(info.prefix_len);
+    info.prefix = malloc((size_t)info.prefix_len);
     info.prefix[0] = '\0';
     info.group_table = group_table;
     info.type_table = type_table;
@@ -1876,8 +1878,9 @@ print_enum(hid_t type)
     }
 
     /* Get the names and raw values of all members */
-    name = calloc(nmembs, sizeof(char *));
-    value = calloc(nmembs, MAX(H5Tget_size(type), dst_size));
+    assert(nmembs>0);
+    name = calloc((size_t)nmembs, sizeof(char *));
+    value = calloc((size_t)nmembs, MAX(H5Tget_size(type), dst_size));
 
     for (i = 0; i < nmembs; i++) {
         name[i] = H5Tget_member_name(type, i);
@@ -1886,7 +1889,7 @@ print_enum(hid_t type)
 
     /* Convert values to native data type */
     if (native > 0)
-        H5Tconvert(super, native, nmembs, value, NULL, H5P_DEFAULT);
+        H5Tconvert(super, native, (hsize_t)nmembs, value, NULL, H5P_DEFAULT);
 
     /* Sort members by increasing value */
     /*not implemented yet*/

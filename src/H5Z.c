@@ -260,7 +260,7 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, uintn flags,
     FUNC_ENTER(H5Z_append, FAIL);
     assert(pline);
     assert(filter>=0 && filter<=H5Z_FILTER_MAX);
-    assert(0==(flags & ~H5Z_FLAG_DEFMASK));
+    assert(0==(flags & ~((uintn)H5Z_FLAG_DEFMASK)));
     assert(0==cd_nelmts || cd_values);
 
     /*
@@ -386,7 +386,7 @@ H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, uintn flags,
     FUNC_ENTER(H5Z_pipeline, FAIL);
     
     assert(f);
-    assert(0==(flags & ~H5Z_FLAG_INVMASK));
+    assert(0==(flags & ~((uintn)H5Z_FLAG_INVMASK)));
     assert(filter_mask);
     assert(nbytes && *nbytes>0);
     assert(buf_size && *buf_size>0);

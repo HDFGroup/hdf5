@@ -730,7 +730,8 @@ H5RA_write(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 		    "unable to set meta data selection");
     }
-    if (NULL==(meta=H5MM_malloc(nrows*sizeof(H5RA_meta_t)))) {
+    assert((nrows*sizeof(H5RA_meta_t))==(hsize_t)((size_t)(nrows*sizeof(H5RA_meta_t)))); /*check for overflow*/
+    if (NULL==(meta=H5MM_malloc((size_t)(nrows*sizeof(H5RA_meta_t))))) {
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		    "memory allocation failed for meta data");
     }
@@ -739,8 +740,9 @@ H5RA_write(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	HGOTO_ERROR(H5E_RAGGED, H5E_READERROR, FAIL,
 		    "unable to read meta data");
     }
+    assert(((nrows-meta_read_size)*sizeof(H5RA_meta_t))==(hsize_t)((size_t)((nrows-meta_read_size)*sizeof(H5RA_meta_t)))); /*check for overflow*/
     HDmemset(meta+meta_read_size, 0,
-	     (nrows-meta_read_size)*sizeof(H5RA_meta_t));
+	     (size_t)((nrows-meta_read_size)*sizeof(H5RA_meta_t)));
 
     /* Write the part of the data that will fit in the raw dataset */
     if (NULL==(rf_space=H5D_get_space(ra->raw)) ||
@@ -748,15 +750,17 @@ H5RA_write(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 		    "unable to determine current raw data extents");
     }
-    if (NULL==(raw_buf=H5MM_malloc(nrows*raw_cur_size[1]*type_size))) {
+    assert((nrows*raw_cur_size[1]*type_size)==(hsize_t)((size_t)(nrows*raw_cur_size[1]*type_size))); /*check for overflow*/
+    if (NULL==(raw_buf=H5MM_malloc((size_t)(nrows*raw_cur_size[1]*type_size)))) {
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		    "unable to allocate buffer for raw data");
     }
     for (i=0; i<nrows; i++) {
 	size_t nbytes = MIN(size[i], raw_cur_size[1])*type_size;
 	HDmemcpy(raw_buf+i*raw_cur_size[1]*type_size, buf[i], nbytes);
+    assert((raw_cur_size[1]*type_size-nbytes)==(hsize_t)((size_t)(raw_cur_size[1]*type_size-nbytes))); /*check for overflow*/
 	HDmemset(raw_buf+i*raw_cur_size[1]*type_size+nbytes, 0,
-		 raw_cur_size[1]*type_size-nbytes);
+		 (size_t)(raw_cur_size[1]*type_size-nbytes));
     }
     if ((hsize_t)start_row+nrows>raw_cur_size[0]) {
 	raw_cur_size[0] = (hsize_t)start_row + nrows;
@@ -1105,7 +1109,8 @@ H5RA_read(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
      * this because if we return failure we want `buf' to have the original
      * values.
      */
-    if (NULL==(buf_out=H5MM_calloc(nrows*sizeof(void*)))) {
+    assert((nrows*sizeof(void*))==(hsize_t)((size_t)(nrows*sizeof(void*)))); /*check for overflow*/
+    if (NULL==(buf_out=H5MM_calloc((size_t)(nrows*sizeof(void*))))) {
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		    "memory allocation failed for BUF output values");
     }
@@ -1132,7 +1137,8 @@ H5RA_read(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
 		    "unable to set raw dataset selection");
     }
-    if (NULL==(raw_buf=H5MM_malloc(nrows*raw_read_size[1]*type_size))) {
+    assert((nrows*raw_read_size[1]*type_size)==(hsize_t)((size_t)(nrows*raw_read_size[1]*type_size))); /*check for overflow*/
+    if (NULL==(raw_buf=H5MM_malloc((size_t)(nrows*raw_read_size[1]*type_size)))) {
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		    "memory allocation failed for raw dataset");
     }
@@ -1141,11 +1147,13 @@ H5RA_read(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	HGOTO_ERROR(H5E_RAGGED, H5E_READERROR, FAIL,
 		    "unable to read raw dataset");
     }
+    assert(((nrows-raw_read_size[0])*raw_read_size[1]*type_size)==(hsize_t)((size_t)((nrows-raw_read_size[0])*raw_read_size[1]*type_size))); /*check for overflow*/
     HDmemset(raw_buf+raw_read_size[0]*raw_read_size[1]*type_size, 0,
-	     (nrows-raw_read_size[0])*raw_read_size[1]*type_size);
+	     (size_t)((nrows-raw_read_size[0])*raw_read_size[1]*type_size));
 	
     /* Get the meta data */
-    if (NULL==(meta=H5MM_malloc(nrows*sizeof(H5RA_meta_t)))) {
+    assert((nrows*sizeof(H5RA_meta_t))==(hsize_t)((size_t)(nrows*sizeof(H5RA_meta_t)))); /*check for overflow*/
+    if (NULL==(meta=H5MM_malloc((size_t)(nrows*sizeof(H5RA_meta_t))))) {
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		    "memory allocation failed for meta data");
     }
@@ -1171,8 +1179,9 @@ H5RA_read(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	HGOTO_ERROR(H5E_RAGGED, H5E_READERROR, FAIL,
 		    "unable to read meta data");
     }
+    assert(((nrows-meta_read_size)*sizeof(H5RA_meta_t))==(hsize_t)((size_t)((nrows-meta_read_size)*sizeof(H5RA_meta_t)))); /*check for overflow*/
     HDmemset(meta+meta_read_size, 0,
-	     (nrows-meta_read_size)*sizeof(H5RA_meta_t));
+	     (size_t)((nrows-meta_read_size)*sizeof(H5RA_meta_t)));
 
     /* Copy data into output buffers */
     for (i=0; i<nrows; i++) {
@@ -1182,8 +1191,9 @@ H5RA_read(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 	 * size and request the entire row.
 	 */
 	if (NULL==(buf_out[i]=buf[i])) {
+        assert((meta[i].nelmts*type_size)==(hsize_t)((size_t)(meta[i].nelmts*type_size))); /*check for overflow*/
 	    if (meta[i].nelmts>0 &&
-		NULL==(buf_out[i]=H5MM_malloc(meta[i].nelmts*type_size))) {
+		NULL==(buf_out[i]=H5MM_malloc((size_t)(meta[i].nelmts*type_size)))) {
 		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			    "memory allocation failed for result");
 	    }

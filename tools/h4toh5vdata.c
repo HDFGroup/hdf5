@@ -28,6 +28,7 @@ Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
 *****************************************************************************/
 
 #include "h4toh5main.h"
+#include <assert.h>
 
 /*-------------------------------------------------------------------------
  * Function:	Vdata_h4_to_h5
@@ -152,10 +153,11 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id) {
     return FAIL;
   }
 
-  h5memtype = calloc(nfields,sizeof(hid_t));
-  h5type    = calloc(nfields,sizeof(hid_t));
-  h4memsize = calloc(nfields,sizeof(size_t));
-  h4size    = calloc(nfields,sizeof(size_t));
+  assert(nfields>0);
+  h5memtype = calloc((size_t)nfields,sizeof(hid_t));
+  h5type    = calloc((size_t)nfields,sizeof(hid_t));
+  h4memsize = calloc((size_t)nfields,sizeof(size_t));
+  h4size    = calloc((size_t)nfields,sizeof(size_t));
 
   for (i=0;i<nfields;i++) {
      
@@ -199,7 +201,7 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id) {
      
   }
  
-  vd_data = malloc(vdatamem_size*n_records);   
+  vd_data = malloc((size_t)(vdatamem_size*n_records));   
 
   istat   = VSsetfields(vdata_id,field_name_list); 
   
