@@ -19,9 +19,6 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5G_stab_mask
 
 #include "H5private.h"
 #include "H5Eprivate.h"

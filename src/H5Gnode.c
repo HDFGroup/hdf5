@@ -30,9 +30,6 @@
 #define H5G_PACKAGE /*suppress error message about including H5Gpkg.h */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5G_node_mask
 
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/

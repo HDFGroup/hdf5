@@ -17,9 +17,6 @@
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5A_init_interface
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5A_mask
 
 /* Private header files */
 #include "H5private.h"		/* Generic Functions			*/

@@ -57,6 +57,7 @@ New Features
 
     Library:
     --------
+        - Pablo was removed from the source code EIP - 2005/01/21
         - Modified registration of SZIP to dynamically detect the presence
             or absence of the encoder.  Changed configure and Makefiles,
             and tests to dynamically detect encoder. BEM - 2004/11/02

@@ -26,7 +26,7 @@ srcdir=@srcdir@
 # TESTPARALLEL must be after test since it uses libtest.a.  Putting it
 # before tools allows parallel tests to run sooner.
 # HL must be last because it might depend on the FORTRAN library
-SUBDIRS=src test @TESTPARALLEL@ tools  @PABLO@ @HDF5_INTERFACES@ @HL@
+SUBDIRS=src test @TESTPARALLEL@ tools   @HDF5_INTERFACES@ @HL@
 
 ##############################################################################
 ##		    T A R G E T S

@@ -28,9 +28,6 @@
 #define H5F_PACKAGE	/*suppress error about including H5Fpkg	  */
 #define H5O_PACKAGE	/*suppress error about including H5Opkg	  */
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5O_shared_mask
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/

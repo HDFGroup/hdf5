@@ -23,7 +23,6 @@
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Tpkg.h"		/* Datatypes				*/
 
-#define PABLO_MASK	H5O_dtype_mask
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_dtype_encode (H5F_t *f, uint8_t *p, const void *mesg);

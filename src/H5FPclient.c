@@ -15,9 +15,6 @@
 #define H5S_PACKAGE             /*suppress error about including H5Spkg */
 #define H5G_PACKAGE             /*suppress error about including H5Gpkg */
 
-/* Pablo mask */
-/* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK      H5FP_client_mask
 
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5ACprivate.h"        /* Metadata Cache                       */

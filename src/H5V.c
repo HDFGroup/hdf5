@@ -17,9 +17,6 @@
  *	       Friday, October 10, 1997
  */
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5V_mask
 
 #include "H5private.h"
 #include "H5Eprivate.h"

@@ -21,9 +21,6 @@
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 #define H5D_TESTING		/*suppress warning about H5D testing funcs*/
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK      H5Dtest_mask
 
 #include "H5private.h"		/* Generic Functions			  */
 #include "H5Dpkg.h"		/* Datasets 				*/

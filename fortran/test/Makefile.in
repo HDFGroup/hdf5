@@ -23,7 +23,7 @@ HDF_FORTRAN="yes"
 hdf5_srcdir=$(top_srcdir)/src 
 hdf5_builddir=$(top_builddir)/src
 CPPFLAGS=-I. -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
-FSEARCH_DIRS =@F9XMODFLAG@../src @FSEARCH_DIRS@
+FSEARCH_DIRS=@F9XMODFLAG@../src @FSEARCH_DIRS@
 
 ## Add include directory to the C preprocessor flags and the h5test and hdf5
 ## libraries to the library list.

@@ -20,9 +20,6 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5T_bit_mask
 
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */

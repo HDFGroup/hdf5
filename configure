@@ -1062,7 +1062,6 @@ Optional Packages:
                           [default=yes]
   --with-szlib=DIR        Use szlib library for external szlib I/O filter
                           [default=no]
-  --with-pablo=DIR        Use the Pablo library [default=no]
   --with-ssl=LIB          Use the SSL library [default=no]
   --with-gass=DIR         Use the GASS library [default=no]
   --with-srb=DIR          Use the SRB library [default=no]
@@ -2723,7 +2722,7 @@ done
 
 if test -n "$F9XMODFLAG"; then
   echo $F9XMODFLAG 1>&6
-  FFLAGS="$F9XMODFLAG. $F9XMODFLAG../src $F9XMODFLAG../../../fortran/src  $FFLAGS"
+  FFLAGS="$F9XMODFLAG. $FFLAGS"
 else
   echo unknown 1>&6
 fi
@@ -5240,7 +5239,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5243 "configure"' > conftest.$ac_ext
+  echo '#line 5242 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -5781,7 +5780,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:5784: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:5783: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -7588,7 +7587,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 7591 "configure"
+#line 7590 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7686,7 +7685,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 7689 "configure"
+#line 7688 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -25300,93 +25299,6 @@ echo "${ECHO_T}no" >&6
     fi
 fi
 
- PABLO=""
- HAVE_PABLO="no"
-
-# Check whether --with-pablo or --without-pablo was given.
-if test "${with_pablo+set}" = set; then
-  withval="$with_pablo"
-
-else
-  withval=no
-fi;
-
-echo "$as_me:$LINENO: checking for Pablo" >&5
-echo $ECHO_N "checking for Pablo... $ECHO_C" >&6
-
-case "$withval" in
-  yes)
-    echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-    HAVE_PABLO="yes"
-    PABLO="pablo"
-    ;;
-  no)
-    echo "$as_me:$LINENO: result: suppressed" >&5
-echo "${ECHO_T}suppressed" >&6
-    ;;
-  *)
-    case "$withval" in
-      *,*)
-        pablo_inc="`echo $withval | cut -f1 -d,`"
-        pablo_lib="`echo $withval | cut -f2 -d, -s`"
-        ;;
-      *)
-        if test -n "$withval"; then
-          pablo_inc="$withval/include"
-          pablo_lib="$withval/lib"
-        fi
-        ;;
-    esac
-
-            if test "X$pablo_inc" = "X/usr/include"; then
-      pablo_inc=""
-    fi
-    if test "X$pablo_lib" = "X/usr/lib"; then
-      pablo_lib=""
-    fi
-
-    saved_CPPFLAGS="$CPPFLAGS"
-    saved_LDFLAGS="$LDFLAGS"
-    if test -n "$pablo_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$pablo_inc"
-    fi
-
-    if test -n "$pablo_lib"; then
-      LDFLAGS="$LDFLAGS -L$pablo_lib"
-    fi
-
-    failed="no"
-    if test -f "$pablo_inc/PabloTrace.h"; then
-      :
-    else
-      failed="yes"
-    fi
-
-    if test -f "$pablo_lib/libPabloTraceExt.a"; then
-      :
-    else
-      failed="yes"
-    fi
-
-    if test "$failed" = "yes"; then
-            CPPFLAGS="$saved_CPPFLAGS"
-      LDFLAGS="$saved_LDFLAGS"
-    else
-      HAVE_PABLO="yes"
-      PABLO="pablo"
-    fi
-
-    if test "$HAVE_PABLO" = "yes"; then
-      echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-    else
-      echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-    fi
-    ;;
-esac
-
  SSL=yes
 
 # Check whether --with-ssl or --without-ssl was given.
@@ -34249,17 +34161,7 @@ if test -n "$TESTPARALLEL"; then
   fi
 fi
 
-PABLO_MAKE=""
 
- PARALLEL_PABLO=""
-
-if test "X$HAVE_PABLO" = "Xyes"; then
-  PABLO_MAKE="pablo/Makefile"
-
-  if test -n "$TESTPARALLEL"; then
-    PARALLEL_PABLO="yes"
-  fi
-fi
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   FORTRAN_FILES="fortran/Makefile
@@ -34299,7 +34201,7 @@ if test "X$HDF5_HL" = "Xyes" &&  test "X$HDF_FORTRAN" = "Xyes"; then
 HL_FOR="fortran"
 fi
 
-ac_config_files="$ac_config_files src/libhdf5.settings config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/Makefile $PABLO_MAKE test/Makefile $PARALLEL_MAKE perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5import/Makefile tools/h5diff/Makefile tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/gifconv/Makefile examples/Makefile doc/Makefile doc/html/Makefile doc/html/ed_libs/Makefile doc/html/ed_styles/Makefile doc/html/ADGuide/Makefile doc/html/Graphics/Makefile doc/html/Intro/Makefile doc/html/PSandPDF/Makefile doc/html/TechNotes/Makefile doc/html/Tutor/Makefile doc/html/Tutor/Graphics/Makefile doc/html/Tutor/examples/Makefile doc/html/cpplus/Makefile doc/html/fortran/Makefile $FORTRAN_FILES $CXX_FILES $HL_FILES"
+ac_config_files="$ac_config_files src/libhdf5.settings config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/Makefile test/Makefile $PARALLEL_MAKE perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5import/Makefile tools/h5diff/Makefile tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/gifconv/Makefile examples/Makefile doc/Makefile doc/html/Makefile doc/html/ed_libs/Makefile doc/html/ed_styles/Makefile doc/html/ADGuide/Makefile doc/html/Graphics/Makefile doc/html/Intro/Makefile doc/html/PSandPDF/Makefile doc/html/TechNotes/Makefile doc/html/Tutor/Makefile doc/html/Tutor/Graphics/Makefile doc/html/Tutor/examples/Makefile doc/html/cpplus/Makefile doc/html/fortran/Makefile $FORTRAN_FILES $CXX_FILES $HL_FILES"
 
 
 cat >confcache <<\_ACEOF
@@ -34793,7 +34695,6 @@ do
   "config/conclude" ) CONFIG_FILES="$CONFIG_FILES config/conclude" ;;
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
-  "$PABLO_MAKE" ) CONFIG_FILES="$CONFIG_FILES $PABLO_MAKE" ;;
   "test/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
   "$PARALLEL_MAKE" ) CONFIG_FILES="$CONFIG_FILES $PARALLEL_MAKE" ;;
   "perform/Makefile" ) CONFIG_FILES="$CONFIG_FILES perform/Makefile" ;;
@@ -34968,8 +34869,6 @@ s,@LIBTOOL@,$LIBTOOL,;t t
 s,@DEPEND@,,;t t
 s,@USE_FILTER_DEFLATE@,$USE_FILTER_DEFLATE,;t t
 s,@USE_FILTER_SZIP@,$USE_FILTER_SZIP,;t t
-s,@PABLO@,$PABLO,;t t
-s,@HAVE_PABLO@,$HAVE_PABLO,;t t
 s,@SSL@,$SSL,;t t
 s,@GASS@,$GASS,;t t
 s,@TESTGASS@,$TESTGASS,;t t
@@ -35007,7 +34906,6 @@ s,@COMMENCE@,,;t t
 s,@CONCLUDE@,,;t t
 s,@SEARCH@,$SEARCH,;t t
 s,@SETX@,$SETX,;t t
-s,@PARALLEL_PABLO@,$PARALLEL_PABLO,;t t
 CEOF
 
 _ACEOF
@@ -35712,8 +35610,6 @@ IF_ENABLED_DISABLED "$LINUX_LFS"
 PRINT_N "                            MPE"
 IF_YES_NO "$MPE"
 
-PRINT_N "                          Pablo"
-IF_YES_NO "$HAVE_PABLO"
 
 PRINT_N "                  Parallel HDF5"
 if test "$PARALLEL" != "no"; then

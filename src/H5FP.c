@@ -12,9 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Pablo mask */
-/* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK          H5FP_mask
 
 /* Private header files */
 #include "H5private.h"          /* Generic Functions                    */

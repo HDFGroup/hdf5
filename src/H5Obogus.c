@@ -37,7 +37,6 @@
 #include "H5Opkg.h"             /* Object header functions                 */
 
 #ifdef H5O_ENABLE_BOGUS
-#define PABLO_MASK      H5O_bogus_mask
 
 /* PRIVATE PROTOTYPES */
 static void *H5O_bogus_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);

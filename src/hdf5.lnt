@@ -36,8 +36,6 @@
 -esym(534, H5RC_decr)
 -esym(534, H5V_array_fill)
 
-// Turn off warnings about not using PABLO_MASK macro
--esym(750, PABLO_MASK)
 
 // Turn off warnings about "Expression-like macro not parenthesized" for
 // enumerated type increment & decrement macros:
@@ -91,7 +89,7 @@
         H5Zszip.c
 
     The following files have had their FUNC_ENTER, FUNC_LEAVE & HGOTO*
-    macros cleaned up and the PABLO_MASK adjusted, but have not been linted
+    macros cleaned up, but have not been linted
     due to their dependencies on features that we don't support on Windows:
         H5FDfphdf5.c
         H5FDgass.c

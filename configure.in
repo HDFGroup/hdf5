@@ -1155,90 +1155,6 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Pablo Configuration
-dnl
-AC_SUBST(PABLO) PABLO=""
-AC_SUBST(HAVE_PABLO) HAVE_PABLO="no"
-AC_ARG_WITH([pablo],
-            [AC_HELP_STRING([--with-pablo=DIR],
-                            [Use the Pablo library [default=no]])],,
-            withval=no)
-
-AC_MSG_CHECKING([for Pablo])
-
-case "$withval" in
-  yes)
-    AC_MSG_RESULT(yes)
-    HAVE_PABLO="yes"
-    PABLO="pablo"
-    ;;
-  no)
-    AC_MSG_RESULT(suppressed)
-    ;;
-  *)
-    case "$withval" in
-      *,*)
-        pablo_inc="`echo $withval | cut -f1 -d,`"
-        pablo_lib="`echo $withval | cut -f2 -d, -s`"
-        ;;
-      *)
-        if test -n "$withval"; then
-          pablo_inc="$withval/include"
-          pablo_lib="$withval/lib"
-        fi
-        ;;
-    esac
-
-    dnl Trying to include -I/usr/include and -L/usr/lib is redundant and
-    dnl can mess some compilers up.
-    if test "X$pablo_inc" = "X/usr/include"; then
-      pablo_inc=""
-    fi
-    if test "X$pablo_lib" = "X/usr/lib"; then
-      pablo_lib=""
-    fi
-
-    saved_CPPFLAGS="$CPPFLAGS"
-    saved_LDFLAGS="$LDFLAGS"
-    if test -n "$pablo_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$pablo_inc"
-    fi
-
-    if test -n "$pablo_lib"; then
-      LDFLAGS="$LDFLAGS -L$pablo_lib"
-    fi
-
-    failed="no"
-    if test -f "$pablo_inc/PabloTrace.h"; then
-      :
-    else
-      failed="yes"
-    fi
-
-    if test -f "$pablo_lib/libPabloTraceExt.a"; then
-      :
-    else
-      failed="yes"
-    fi
-
-    if test "$failed" = "yes"; then
-      dnl Reset flags if failed
-      CPPFLAGS="$saved_CPPFLAGS"
-      LDFLAGS="$saved_LDFLAGS"
-    else
-      HAVE_PABLO="yes"
-      PABLO="pablo"
-    fi
-
-    if test "$HAVE_PABLO" = "yes"; then
-      AC_MSG_RESULT(yes)
-    else
-      AC_MSG_RESULT(no)
-    fi
-    ;;
-esac
-
-dnl ----------------------------------------------------------------------
 dnl Is SSL library present? It is needed by GLOBUS-GASS and Grid Storage
 dnl driver. SSL must be tested before them.
 dnl
@@ -3044,17 +2960,7 @@ if test -n "$TESTPARALLEL"; then
   fi
 fi
 
-PABLO_MAKE=""
 
-AC_SUBST([PARALLEL_PABLO]) PARALLEL_PABLO=""
-
-if test "X$HAVE_PABLO" = "Xyes"; then
-  PABLO_MAKE="pablo/Makefile"
-
-  if test -n "$TESTPARALLEL"; then
-    PARALLEL_PABLO="yes"
-  fi
-fi
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   FORTRAN_FILES="fortran/Makefile
@@ -3104,7 +3010,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  config/conclude
                  Makefile
                  src/Makefile
-                 $PABLO_MAKE
                  test/Makefile
                  $PARALLEL_MAKE
                  perform/Makefile
@@ -3339,8 +3244,6 @@ IF_ENABLED_DISABLED "$LINUX_LFS"
 PRINT_N "                            MPE"
 IF_YES_NO "$MPE"
 
-PRINT_N "                          Pablo"
-IF_YES_NO "$HAVE_PABLO"
 
 PRINT_N "                  Parallel HDF5"
 if test "$PARALLEL" != "no"; then

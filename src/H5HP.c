@@ -20,9 +20,6 @@
  *
  */
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5HP_mask
 
 /* Private headers needed */
 #include "H5private.h"		/* Generic Functions			*/

@@ -100,9 +100,6 @@
 #define H5B_PACKAGE		/*suppress error about including H5Bpkg	  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5B_mask
 
 /* private headers */
 #include "H5private.h"		/* Generic Functions			*/
