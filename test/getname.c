@@ -2920,6 +2920,67 @@ PASSED();
  PASSED();
 
 /*-------------------------------------------------------------------------
+ * Test H5Iget_name with opening object in unmounted file
+ *-------------------------------------------------------------------------
+ */
+
+ TESTING("H5Iget_name with opening object in unmounted file");
+
+ /* Create file and group "/g39/g1/g2" in it */
+ file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+ if ((group_id = H5Gcreate( file1_id, "/g41", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file1_id, "/g41/g1", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file1_id, "/g41/g1/g2", 0 ))<0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Create second file and group "/g42/g1/g2" in it */
+ file2_id = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+ if ((group_id = H5Gcreate( file2_id, "/g42", 0 ))<0) goto out;
+ if ((group2_id = H5Gcreate( file2_id, "/g42/g3", 0 ))<0) goto out;
+ if ((group3_id = H5Gcreate( file2_id, "/g42/g3/g4", 0 ))<0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Gclose( group3_id );
+
+ /* Mount second file under "/g41/g1" in the first file */
+ if (H5Fmount(file1_id, "/g41/g1", file2_id, H5P_DEFAULT)<0) goto out;
+
+ if ((group_id = H5Gopen( file1_id, "/g41/g1/g42/g3" ))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "/g41/g1/g42/g3" )!=0) goto out;
+
+ /* Unmount file */
+ if (H5Funmount(file1_id, "/g41/g1")<0) goto out;
+
+ if ((group2_id = H5Gopen( group_id, "g4" ))<0) goto out;
+
+ /* Get name */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+
+ /* Verify */
+ if (check_name( name, "" )!=0) goto out;
+
+ /* Close */
+ H5Gclose( group_id );
+ H5Gclose( group2_id );
+ H5Fclose( file1_id );
+ H5Fclose( file2_id );
+ 
+ PASSED();
+
+/*-------------------------------------------------------------------------
  * end tests 
  *-------------------------------------------------------------------------
  */
