@@ -694,6 +694,13 @@ H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval )
  *		which is rather klugey.
  *		Would it be better to pass a parameter to low-level writes
  *		like H5F_block_write and H5F_low_write, instead?  Or...???
+ *		Also, when I created this mechanism I wanted to minimize
+ *		the difference in behavior between the old way of doing things
+ *		(i.e., all procs write) and the new way, so the writes are
+ *		eliminated at the very lowest level, here in H5F_mpio_write.
+ *		It may be better to rethink that, and short-circuit the writes
+ *		at a higher level (e.g., at the points in the code where
+ *		H5F_mpio_tas_allsame is called).
  *
  * Errors:
  *              IO        WRITEERROR    MPI_File_write_at failed. 
