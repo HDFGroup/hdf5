@@ -116,6 +116,10 @@ const char *FILENAME[] = {
 /* Names for zero-dim test */
 #define ZERODIM_DATASET "zerodim"
 
+/* Parameters for zero-dim test */
+#define MISSING_CHUNK_DATASET   "missing_chunk"
+#define MISSING_CHUNK_DIM       100
+
 /* Shared global arrays */
 #define DSET_DIM1       100
 #define DSET_DIM2       200
@@ -3649,6 +3653,107 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function: test_missing_chunk
+ *
+ * Purpose: Tests that reads from chunked dataset with undefined fill value and
+ *              not all chunks written don't overwrite data in user's buffer
+ *              for missing chunks.
+ *
+ * Return: Success: 0
+ *  Failure: -1
+ *
+ * Programmer: Quincey Koziol
+ *              Tuesday, August 25, 2004
+ *
+ * Modifications:
+ *             
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_missing_chunk(hid_t file)
+{
+    hid_t       s=-1, d=-1, dcpl=-1;
+    hssize_t	hs_start[1];
+    hsize_t	hs_stride[1],
+                hs_count[1],
+                hs_block[1];
+    int         wdata[MISSING_CHUNK_DIM],
+                rdata[MISSING_CHUNK_DIM];
+    hsize_t     dsize=100, dmax=H5S_UNLIMITED, csize=5;
+    size_t      u;
+    
+    TESTING("Read dataset with unwritten chunk & undefined fill value");
+
+    /* Initialize data */
+    for(u=0; u<MISSING_CHUNK_DIM; u++) {
+        wdata[u]=u;
+        rdata[u]=911;
+    } /* end for */
+
+    /* Create dataspace */
+    if((s = H5Screate_simple(1, &dsize, &dmax))<0) TEST_ERROR;
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) TEST_ERROR;
+
+    /* Set to chunked */
+    if(H5Pset_chunk(dcpl, 1, &csize)<0) TEST_ERROR;
+
+    /* Undefine fill value */
+    if(H5Pset_fill_value(dcpl, H5T_NATIVE_INT, NULL)<0) TEST_ERROR;
+
+    /* Create dataset */
+    if((d = H5Dcreate(file, MISSING_CHUNK_DATASET, H5T_NATIVE_INT, s, dcpl))<0) TEST_ERROR;
+
+    /* Select elements in every other chunk */
+    hs_start[0]=0;
+    hs_stride[0]=10;
+    hs_count[0]=10;
+    hs_block[0]=5;
+    if (H5Sselect_hyperslab(s, H5S_SELECT_SET, hs_start, hs_stride, hs_count,
+			    hs_block)<0) TEST_ERROR;
+
+    /* Write selected data */
+    if(H5Dwrite(d, H5T_NATIVE_INT, s, s, H5P_DEFAULT, wdata)<0) TEST_ERROR;
+
+    /* Read all data */
+    if(H5Dread(d, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata)<0) TEST_ERROR;
+
+    /* Validata values read */
+    for(u=0; u<MISSING_CHUNK_DIM; u++) {
+        if((u%10)>=5) {
+            if(rdata[u]!=911) {
+                printf("    Line %d: Incorrect value, rdata[%u]=%d\n",__LINE__,(unsigned)u,rdata[u]);
+                TEST_ERROR;
+            } /* end if */
+        } /* end if */
+        else {
+            if(rdata[u]!=wdata[u]) {
+                printf("    Line %d: Incorrect value, wdata[%u]=%d, rdata[%u]=%d\n",__LINE__,(unsigned)u,wdata[u],(unsigned)u,rdata[u]);
+                TEST_ERROR;
+            } /* end if */
+        } /* end else */
+    } /* end for */
+
+    /* Close everything */
+    if(H5Pclose(dcpl)<0) TEST_ERROR;
+    if(H5Sclose(s)<0) TEST_ERROR;
+    if(H5Dclose(d)<0) TEST_ERROR;
+ 
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Dclose(d);
+        H5Sclose(s);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_zero_dims() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Tests the dataset interface (H5D)
@@ -3718,6 +3823,7 @@ main(void)
     nerrors += test_compare_dcpl(file)<0	?1:0; 
     nerrors += test_filters_endianess()<0	?1:0;
     nerrors += test_zero_dims(file)<0	?1:0;
+    nerrors += test_missing_chunk(file)<0	?1:0;
 
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;

@@ -298,17 +298,17 @@ test_extend(hid_t f, const char *prefix,
 #if 0
 	if (0 == ctr)
 	    fprintf(stderr,"\n");
-	fprintf(stderr,"    Insert: ctr=%d, corner=(%d", ctr, offset[0]);
+	fprintf(stderr,"    Insert: ctr=%lu, corner=(%ld", (unsigned long)ctr, (long)offset[0]);
 	if (ndims > 1)
-	    fprintf(stderr,",%d", offset[1]);
+	    fprintf(stderr,",%ld", (long)offset[1]);
 	if (ndims > 2)
-	    fprintf(stderr,",%d", offset[2]);
-	fprintf(stderr,"), size=(%d", size[0]);
+	    fprintf(stderr,",%ld", (long)offset[2]);
+	fprintf(stderr,"), size=(%lu", (unsigned long)size[0]);
 	if (ndims > 1)
-	    fprintf(stderr,",%d", size[1]);
+	    fprintf(stderr,",%lu", (unsigned long)size[1]);
 	if (ndims > 2)
-	    fprintf(stderr,",%d", size[2]);
-	fprintf(stderr,"), %d element%s", nelmts, 1 == nelmts ? "" : "s");
+	    fprintf(stderr,",%lu", (unsigned long)size[2]);
+	fprintf(stderr,"), %lu element%s", (unsigned long)nelmts, 1 == nelmts ? "" : "s");
 	if (0 == nelmts)
 	    fprintf(stderr," *SKIPPED*");
 	fprintf(stderr,"\n");
