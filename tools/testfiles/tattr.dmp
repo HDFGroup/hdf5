@@ -29,7 +29,7 @@ File name: testfiles/tattr.hdf
 
 Vdata: 0
    tag = 1962; reference = 3;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [VALUES];
    record size (in bytes) = 24;
    name = attr1; class = Attr0.0;
@@ -41,7 +41,7 @@ Loc.     Data
 
 Vdata: 1
    tag = 1962; reference = 4;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [VALUES];
    record size (in bytes) = 40;
    name = attr2; class = Attr0.0;
@@ -53,7 +53,7 @@ Loc.     Data
 
 Vdata: 2
    tag = 1962; reference = 5;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [VALUES];
    record size (in bytes) = 80;
    name = attr3; class = Attr0.0;
@@ -65,7 +65,7 @@ Loc.     Data
 
 Vdata: 3
    tag = 1962; reference = 6;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [VALUES];
    record size (in bytes) = 4;
    name = attr4; class = Attr0.0;

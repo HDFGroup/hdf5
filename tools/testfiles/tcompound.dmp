@@ -80,7 +80,7 @@ File name: testfiles/tcompound.hdf
 
 Vdata: 0
    tag = 1962; reference = 3;
-   number of records = 5; interlace = 0;
+   number of records = 5; interlace = FULL_INTERLACE (0);
    fields = [a_name, b_name, c_name];
    record size (in bytes) = 16;
    name = dset1; class = HDF5;
@@ -97,7 +97,7 @@ Loc.     Data
 
 Vdata: 1
    tag = 1962; reference = 5;
-   number of records = 5; interlace = 0;
+   number of records = 5; interlace = FULL_INTERLACE (0);
    fields = [int_name, float_name];
    record size (in bytes) = 8;
    name = dset2; class = HDF5;
@@ -112,7 +112,7 @@ Loc.     Data
 
 Vdata: 2
    tag = 1962; reference = 7;
-   number of records = 5; interlace = 0;
+   number of records = 5; interlace = FULL_INTERLACE (0);
    fields = [int, float];
    record size (in bytes) = 8;
    name = dset4; class = HDF5;
@@ -127,7 +127,7 @@ Loc.     Data
 
 Vdata: 3
    tag = 1962; reference = 11;
-   number of records = 5; interlace = 0;
+   number of records = 5; interlace = FULL_INTERLACE (0);
    fields = [int, float];
    record size (in bytes) = 8;
    name = dset5; class = HDF5;

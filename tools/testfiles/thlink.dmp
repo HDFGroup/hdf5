@@ -132,7 +132,7 @@ File name: testfiles/thlink.hdf
 
 Vdata: 0
    tag = 1962; reference = 7;
-   number of records = 1; interlace = 0;
+   number of records = 1; interlace = FULL_INTERLACE (0);
    fields = [Values];
    record size (in bytes) = 4;
    name = fakeDim0; class = DimVal0.1;
