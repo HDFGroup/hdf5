@@ -1,10 +1,19 @@
 /*keep this here -RPM*/
 static const char *FileHeader = "\n\
-/*-------------------------------------------------------------------------\n\
- * Copyright (C) 1997-2002 National Center for Supercomputing Applications \n\
- *			All rights reserved.				   \n\
- *									   \n\
- *-------------------------------------------------------------------------";
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n\
+ * Copyright by the Board of Trustees of the University of Illinois.         *\n\
+ * All rights reserved.                                                      *\n\
+ *                                                                           *\n\
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *\n\
+ * terms governing use, modification, and redistribution, is contained in    *\n\
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *\n\
+ * of the source code distribution tree; Copyright.html can be found at the  *\n\
+ * root level of an installed copy of the electronic HDF5 document set and   *\n\
+ * is linked from the top-level documents page.  It can also be found at     *\n\
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *\n\
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *\n\
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *";
+
 /*
  *
  * Created:	H5detect.c
