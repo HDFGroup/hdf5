@@ -20,7 +20,7 @@
 # Created Date: 2004/12/23
 
 # variable initialization
-waitperiod=`expr 3600 \* 5`		# default to 5 hours
+waitminutes=300			# default to 5 hours == 300 minutes
 debugtimelimit=
 debugflag=		# no debug
 
@@ -39,7 +39,7 @@ PRINTMSG() {
 USAGE()
 {
     echo "Usage: %0 [-h] [-debug] [<time-limit>]"
-    echo "    Run timekeeper with <time-limit>, default is $waitperiod."
+    echo "    Run timekeeper with <time-limit> minutes, default is $waitminutes."
     echo "    -h      print this help page"
     echo "    -debug  run debug mode"
 }
@@ -55,28 +55,35 @@ ParseOption()
     if [ $# -gt 0 -a "$1" = -debug ]; then
 	shift
 	debugflag=yes
-	waitperiod=20		# use shorter time for debug
+	waitminutes=1		# use shorter time for debug
     fi
     if [ $# -gt 0 ]; then
-	waitperiod=$1
+	waitminutes=$1
 	shift
     fi
 }
 
 
 # Main body
+echo "Timekeeper started at `date`"
 ParseOption $*
+waitperiod=`expr $waitminutes \* 60`		# convert to seconds
 
 if [ -z "$debugflag" ]; then
     # normal time keeping mode
     # sleep first
+    echo Timekeeper sleeping for $waitperiod seconds
     sleep $waitperiod
     # Look for any processes still around
+    echo "Timekeeper woke up at `date`, looking for processes to terminate..."
     for x in PID.* ; do
 	if [ -f $x ]; then
 	    pid=`cat $x`
-	    echo "terminating process $x ($pid)"
-	    kill -HUP $pid
+	    # check if process is still around
+	    if ps $pid > /dev/null; then
+		echo "terminating process $x ($pid)"
+		kill -HUP $pid
+	    fi
 	fi
     done
 else
@@ -84,12 +91,12 @@ else
     # waitperiod.  Must launch timekeeper from a subshell, else the debug
     # will wait for it too.
     myhostname=`hostname`
-    ( $0 $waitperiod &)
-    debugtimelimit=`expr $waitperiod - 5`
+    ( $0 $waitminutes &)
+    debugtimelimit=`expr $waitperiod - 10`
     echo rsh $myhostname sleep $debugtimelimit
     rsh $myhostname sleep $debugtimelimit &
     echo $! > PID.before
-    debugtimelimit=`expr $waitperiod + 5`
+    debugtimelimit=`expr $waitperiod + 10`
     echo rsh $myhostname sleep $debugtimelimit
     rsh $myhostname sleep $debugtimelimit &
     echo $! > PID.after
@@ -98,4 +105,4 @@ else
     rm PID.before PID.after
 fi
 
-echo Timekeeper Done.
+echo "Timekeeper ended at `date`"
