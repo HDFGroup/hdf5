@@ -44,11 +44,9 @@
 /* Predefined file drivers */
 #include "H5FDcore.h"		/* Files stored entirely in memory	*/
 #include "H5FDfamily.h"		/* File families 			*/
-#include "H5FDfphdf5.h" 	/* Flexible Parallel HDF5               */
 #include "H5FDgass.h"		/* Remote files using GASS I/O		*/
 #include "H5FDlog.h"        	/* sec2 driver with I/O logging (for debugging) */
-#include "H5FDmpio.h"		/* Parallel files using MPI-2 I/O	*/
-#include "H5FDmpiposix.h"	/* Parallel files using combination MPI-2 & posix I/O */
+#include "H5FDmpi.h"            /* MPI-based file drivers		*/
 #include "H5FDmulti.h"		/* Usage-partitioned file family	*/
 #include "H5FDsec2.h"		/* POSIX unbuffered file I/O		*/
 #include "H5FDsrb.h"        	/* Remote access using SRB              */

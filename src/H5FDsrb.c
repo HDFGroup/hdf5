@@ -186,7 +186,7 @@ H5FD_srb_init(void)
     FUNC_ENTER_NOAPI(H5FD_srb_init, FAIL)
 
     if(H5I_VFL != H5Iget_type(H5FD_SRB_g))
-        H5FD_SRB_g = H5FDregister(&H5FD_srb_g);  
+        H5FD_SRB_g = H5FD_register(&H5FD_srb_g,sizeof(H5FD_class_t));
 
     /* Set return value */
     ret_value=H5FD_SRB_g;

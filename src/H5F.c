@@ -35,18 +35,16 @@
 #include "H5Tprivate.h"		/* Datatypes				*/
 
 /* Predefined file drivers */
-#include "H5FDcore.h"		/*temporary in-memory files		  */
-#include "H5FDfamily.h"		/*family of files			  */
-#include "H5FDfphdf5.h"		/*FPHDF5                                  */
-#include "H5FDgass.h"           /*GASS I/O                                */
+#include "H5FDcore.h"		/*temporary in-memory files		*/
+#include "H5FDfamily.h"		/*family of files			*/
+#include "H5FDgass.h"           /*GASS I/O                              */
 #include "H5FDlog.h"            /* sec2 driver with logging, for debugging */
-#include "H5FDmpio.h"		/*MPI-2 I/O				  */
-#include "H5FDmpiposix.h"	/*MPI-2 & posix I/O			  */
+#include "H5FDmpi.h"            /* MPI-based file drivers		*/
 #include "H5FDmulti.h"		/*multiple files partitioned by mem usage */
-#include "H5FDsec2.h"		/*Posix unbuffered I/O			  */
-#include "H5FDsrb.h"            /*SRB I/O                                 */
-#include "H5FDstdio.h"		/* Standard C buffered I/O		  */
-#include "H5FDstream.h"         /*in-memory files streamed via sockets    */
+#include "H5FDsec2.h"		/*Posix unbuffered I/O			*/
+#include "H5FDsrb.h"            /*SRB I/O                               */
+#include "H5FDstdio.h"		/* Standard C buffered I/O		*/
+#include "H5FDstream.h"         /*in-memory files streamed via sockets  */
 
 /* Interface initialization */
 static int interface_initialize_g = 0;
@@ -228,18 +226,6 @@ H5F_init_interface(void)
     hbool_t 	    local		= H5F_MNT_SYM_LOCAL_DEF;
     
     FUNC_ENTER_NOAPI_NOINIT(H5F_init_interface)
-
-#ifdef OLD_METADATA_WRITE
-#ifdef H5_HAVE_PARALLEL
-    {
-        /* Allow MPI buf-and-file-type optimizations? */
-        const char *s = HDgetenv ("HDF5_MPI_1_METAWRITE");
-        if (s && HDisdigit(*s)) {
-            H5_mpiposix_1_metawrite_g = H5_mpi_1_metawrite_g = (int)HDstrtol (s, NULL, 0);
-        }
-    }
-#endif /* H5_HAVE_PARALLEL */
-#endif /* OLD_METADATA_WRITE */
 
     /*
      * Initialize the atom group for the file IDs. There are two groups:

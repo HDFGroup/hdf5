@@ -529,7 +529,7 @@ done:
  */
 static herr_t
 H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type, 
-                          haddr_t addr, unsigned rank, unsigned md_size,
+                          haddr_t addr, unsigned md_size,
                           char *metadata)
 {
     H5FP_mdata_mod *fm, mod;
@@ -711,7 +711,7 @@ H5FP_add_new_file_info_to_list(unsigned file_id, haddr_t maxaddr,
          */
         HDmemset(&info->file, 0, sizeof(info->file));
         info->file.pub.driver_id = H5FD_FPHDF5;
-        info->file.pub.cls = &H5FD_fphdf5_g;
+        info->file.pub.cls = (const H5FD_class_t *)&H5FD_fphdf5_g;
         info->file.pub.maxaddr = maxaddr;
         info->file.pub.accum_loc = HADDR_UNDEF;
         info->file.pub.feature_flags = feature_flags;
@@ -1384,7 +1384,7 @@ H5FP_sap_handle_write_request(H5FP_request_t *req, char *mdata, unsigned md_size
         }
 
         if (H5FP_add_file_mod_to_list(info, req->mem_type, (haddr_t)req->addr,
-                                      req->proc_rank, md_size, mdata) != SUCCEED) {
+                                      md_size, mdata) != SUCCEED) {
             exit_state = H5FP_STATUS_OOM;
             HGOTO_DONE(FAIL);
         }
@@ -1632,7 +1632,9 @@ H5FP_sap_handle_get_eoa_request(H5FP_request_t *req)
         ret_value = FAIL;
     }
 
+#ifdef LATER
 done:
+#endif /* LATER */
     if ((mrc = MPI_Send(&sap_eoa, 1, H5FP_eoa, (int)req->proc_rank,
                         H5FP_TAG_EOA, H5FP_SAP_COMM)) != MPI_SUCCESS)
         HMPI_DONE_ERROR(FAIL, "MPI_Send failed", mrc);
@@ -1653,7 +1655,6 @@ H5FP_sap_handle_set_eoa_request(H5FP_request_t *req)
 {
     H5FP_status_t   exit_state = H5FP_STATUS_OK;
     H5FP_file_info *info;
-    int             mrc;
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FP_sap_handle_set_eoa_request);
@@ -1667,7 +1668,9 @@ H5FP_sap_handle_set_eoa_request(H5FP_request_t *req)
         ret_value = FAIL;
     }
 
+#ifdef LATER
 done:
+#endif /* LATER */
     H5FP_send_reply(req->proc_rank, req->req_id, req->file_id, exit_state);
     FUNC_LEAVE_NOAPI(ret_value);
 }

@@ -230,7 +230,7 @@ hid_t H5FD_stream_init (void)
   FUNC_ENTER_NOAPI(H5FD_stream_init, FAIL)
 
   if (H5I_VFL != H5Iget_type (H5FD_STREAM_g)) {
-    H5FD_STREAM_g = H5FDregister (&H5FD_stream_g);
+    H5FD_STREAM_g = H5FD_register (&H5FD_stream_g,sizeof(H5FD_class_t));
 
     /* set the process signal mask to ignore SIGPIPE signals */
     /* NOTE: Windows doesn't know SIGPIPE signals that's why the #ifdef */

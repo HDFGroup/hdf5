@@ -606,7 +606,7 @@ H5FP_request_close(H5FD_t *file, unsigned file_id, unsigned *req_id,
     req.req_type = H5FP_REQ_CLOSE;
     req.req_id = H5FP_gen_request_id();
     req.file_id = file_id;
-    req.proc_rank = H5FD_fphdf5_mpi_rank(file);
+    req.proc_rank = H5FD_mpi_get_rank(file);
 
     if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
@@ -661,7 +661,7 @@ H5FP_request_allocate(H5FD_t *file, H5FD_mem_t mem_type, hsize_t size,
     req.req_type = H5FP_REQ_ALLOC;
     req.req_id = H5FP_gen_request_id();
     req.file_id = H5FD_fphdf5_file_id(file);
-    req.proc_rank = H5FD_fphdf5_mpi_rank(file);
+    req.proc_rank = H5FD_mpi_get_rank(file);
     req.mem_type = mem_type;
     req.meta_block_size = size; /* use this field as the size to allocate */
 
@@ -721,7 +721,7 @@ H5FP_request_free(H5FD_t *file, H5FD_mem_t mem_type, haddr_t addr, hsize_t size,
     req.req_type = H5FP_REQ_FREE;
     req.req_id = H5FP_gen_request_id();
     req.file_id = H5FD_fphdf5_file_id(file);
-    req.proc_rank = H5FD_fphdf5_mpi_rank(file);
+    req.proc_rank = H5FD_mpi_get_rank(file);
     req.mem_type = mem_type;
     req.addr = addr;
     req.meta_block_size = size;
@@ -778,7 +778,7 @@ H5FP_request_get_eoa(H5FD_t *file, haddr_t *eoa, unsigned *req_id, H5FP_status_t
     req.req_type = H5FP_REQ_GET_EOA;
     req.req_id = H5FP_gen_request_id();
     req.file_id = H5FD_fphdf5_file_id(file);
-    req.proc_rank = H5FD_fphdf5_mpi_rank(file);
+    req.proc_rank = H5FD_mpi_get_rank(file);
 
     if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
@@ -831,7 +831,7 @@ H5FP_request_set_eoa(H5FD_t *file, haddr_t eoa, unsigned *req_id, H5FP_status_t 
     req.req_type = H5FP_REQ_SET_EOA;
     req.req_id = H5FP_gen_request_id();
     req.file_id = H5FD_fphdf5_file_id(file);
-    req.proc_rank = H5FD_fphdf5_mpi_rank(file);
+    req.proc_rank = H5FD_mpi_get_rank(file);
     req.addr = eoa;
 
     if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
@@ -884,7 +884,7 @@ H5FP_request_update_eoma_eosda(H5FD_t *file, unsigned *req_id, H5FP_status_t *st
     req.req_type = H5FP_REQ_UPDATE_EOMA_EOSDA;
     req.req_id = H5FP_gen_request_id();
     req.file_id = H5FD_fphdf5_file_id(file);
-    req.proc_rank = H5FD_fphdf5_mpi_rank(file);
+    req.proc_rank = H5FD_mpi_get_rank(file);
 
     if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)

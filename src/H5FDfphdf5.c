@@ -22,8 +22,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"         /* Files access                         */
 #include "H5FDprivate.h"	/* File drivers				*/
-#include "H5FDfphdf5.h"		/* Flexible PHDF5 file driver		*/
-#include "H5FDmpio.h"		/* MPI I/O file driver			*/
+#include "H5FDmpi.h"            /* MPI-based file drivers		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
@@ -41,10 +40,8 @@
 static hid_t H5FD_FPHDF5_g = 0;
 
 /*
- * Prototypes
+ * Private Prototypes
  */
-static haddr_t  H5FD_fphdf5_MPIOff_to_haddr(MPI_Offset mpi_off);
-static herr_t   H5FD_fphdf5_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off);
 
 /*
  * Callbacks
@@ -64,6 +61,9 @@ static herr_t   H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_
 static herr_t   H5FD_fphdf5_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id,
                                   haddr_t addr, size_t size, const void *buf);
 static herr_t   H5FD_fphdf5_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static int      H5FD_fphdf5_mpi_rank(const H5FD_t *_file);
+static int      H5FD_fphdf5_mpi_size(const H5FD_t *_file);
+static MPI_Comm H5FD_fphdf5_barrier_communicator(const H5FD_t *_file);
 
 /*
  * FPHDF5-specific file access properties
@@ -79,7 +79,8 @@ typedef struct H5FD_fphdf5_fapl_t {
 /*
  * The FPHDF5 file driver information
  */
-const H5FD_class_t H5FD_fphdf5_g = {
+const H5FD_class_mpi_t H5FD_fphdf5_g = {
+    {   /* Start of superclass information */
     "fphdf5",                                   /*name                  */
     HADDR_MAX,                                  /*maxaddr               */
     H5F_CLOSE_SEMI,                             /*fc_degree             */
@@ -109,29 +110,15 @@ const H5FD_class_t H5FD_fphdf5_g = {
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
     H5FD_FLMAP_SINGLE                           /*fl_map                */
+    },  /* End of superclass information */
+    H5FD_fphdf5_mpi_rank,                       /*get_rank              */
+    H5FD_fphdf5_mpi_size,                       /*get_size              */
+    H5FD_fphdf5_barrier_communicator            /*get_comm              */
 };
 
 /* Interface initialization */
 #define INTERFACE_INIT      H5FD_fphdf5_init
 static int interface_initialize_g = 0;
-
-/*
- * The view is set to this value
- */
-static char H5FD_mpio_native[] = "native";
-
-/* ======== Temporary, Local data transfer properties ======== */
-/*
- * Definitions for memory MPI type property
- */
-#define H5FD_FPHDF5_XFER_MEM_MPI_TYPE_NAME      "H5FD_fphdf5_mem_mpi_type"
-#define H5FD_FPHDF5_XFER_MEM_MPI_TYPE_SIZE      sizeof(MPI_Datatype)
-
-/*
- * Definitions for file MPI type property
- */
-#define H5FD_FPHDF5_XFER_FILE_MPI_TYPE_NAME     "H5FD_fphdf5_file_mpi_type"
-#define H5FD_FPHDF5_XFER_FILE_MPI_TYPE_SIZE     sizeof(MPI_Datatype)
 
 
 /*-------------------------------------------------------------------------
@@ -153,7 +140,7 @@ H5FD_fphdf5_init(void)
     FUNC_ENTER_NOAPI(H5FD_fphdf5_init, FAIL)
 
     if (H5Iget_type(H5FD_FPHDF5_g) != H5I_VFL)
-        H5FD_FPHDF5_g = H5FDregister(&H5FD_fphdf5_g);
+        H5FD_FPHDF5_g = H5FD_register((const H5FD_class_t *)&H5FD_fphdf5_g,sizeof(H5FD_class_mpi_t));
 
     /* Set return value */
     ret_value = H5FD_FPHDF5_g;
@@ -288,127 +275,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_fphdf5_communicator
- * Purpose:     Returns the MPI communicator for the file.
- * Return:      Success:    The communicator
- *              Failure:    NULL
- * Programmer:  Bill Wendling
- *              30. January 2003
- * Modifications:
- *-------------------------------------------------------------------------
- */
-MPI_Comm
-H5FD_fphdf5_communicator(H5FD_t *_file)
-{
-    H5FD_fphdf5_t  *file = (H5FD_fphdf5_t*)_file;
-    MPI_Comm        ret_value;
-
-    FUNC_ENTER_NOAPI(H5FD_fphdf5_communicator, MPI_COMM_NULL)
-
-    /* check args */
-    assert(file);
-    assert(file->pub.driver_id == H5FD_FPHDF5);
-
-    /* Set return value */
-    ret_value = file->comm;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_fphdf5_barrier_communicator
- * Purpose:     Returns the MPI communicator for the file that can be
- *              used in an MPI_Barrier() statement for the client
- *              processes.
- * Return:      Success:    The barrier communicator
- *              Failure:    NULL
- * Programmer:  Bill Wendling
- *              10. February 2003
- * Modifications:
- *-------------------------------------------------------------------------
- */
-MPI_Comm
-H5FD_fphdf5_barrier_communicator(H5FD_t *_file)
-{
-    H5FD_fphdf5_t  *file = (H5FD_fphdf5_t*)_file;
-    MPI_Comm        ret_value;
-
-    FUNC_ENTER_NOAPI(H5FD_fphdf5_communicator, MPI_COMM_NULL)
-
-    /* check args */
-    assert(file);
-    assert(file->pub.driver_id == H5FD_FPHDF5);
-
-    /* Set return value */
-    ret_value = file->barrier_comm;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_fphdf5_mpi_rank
- * Purpose:     Returns the MPI rank for a process
- * Return:      Success:    MPI rank
- *              Failure:    Doesn't fail
- * Programmer:  Bill Wendling
- *              30. January 2003
- * Modifications:
- *-------------------------------------------------------------------------
- */
-int
-H5FD_fphdf5_mpi_rank(H5FD_t *_file)
-{
-    H5FD_fphdf5_t  *file = (H5FD_fphdf5_t*)_file;
-    int             ret_value;
-
-    FUNC_ENTER_NOAPI(H5FD_fphdf5_mpi_rank, FAIL)
-
-    /* check args */
-    assert(file);
-    assert(file->pub.driver_id == H5FD_FPHDF5);
-
-    /* Set return value */
-    ret_value = file->mpi_rank;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_fphdf5_mpi_size
- * Purpose:     Returns the number of MPI processes
- * Return:      Success:    Number of MPI processes
- *              Failure:    Doesn't fail
- * Programmer:  Bill Wendling
- *              30. January 2003
- * Modifications:
- *-------------------------------------------------------------------------
- */
-int
-H5FD_fphdf5_mpi_size(H5FD_t *_file)
-{
-    H5FD_fphdf5_t  *file = (H5FD_fphdf5_t*)_file;
-    int             ret_value; 
-
-    FUNC_ENTER_NOAPI(H5FD_fphdf5_mpi_size, FAIL)
-
-    /* check args */
-    assert(file);
-    assert(file->pub.driver_id == H5FD_FPHDF5);
-
-    /* Set return value */
-    ret_value = file->mpi_size;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5FD_fphdf5_file_id
  * Purpose:     Returns the file ID for the file.
  * Return:      Success:    File ID
@@ -521,82 +387,6 @@ H5FD_is_fphdf5_driver(H5FD_t *_file)
 
     /* Set return value */
     ret_value = file->pub.driver_id == H5FD_FPHDF5;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_fphdf5_setup
- * Purpose:     Set the buffer type BTYPE, file type FTYPE for a data
- *              transfer. Also request an MPI type transfer.
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
- * Programmer:  Bill Wendling
- *              30. January 2003
- * Modifications:
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_fphdf5_setup(hid_t dxpl_id, MPI_Datatype btype,
-                  MPI_Datatype ftype)
-{
-    H5P_genplist_t *plist;
-    herr_t          ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5FD_fphdf5_setup, FAIL)
-
-    /* Check arguments */
-    if ((plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)) == NULL)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataset transfer list")
-
-    /* Set buffer MPI type */
-    if (H5P_insert(plist, H5FD_FPHDF5_XFER_MEM_MPI_TYPE_NAME,
-                   H5FD_FPHDF5_XFER_MEM_MPI_TYPE_SIZE, &btype,
-                   NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert MPI-I/O property")
-
-    /* Set file MPI type */
-    if (H5P_insert(plist, H5FD_FPHDF5_XFER_FILE_MPI_TYPE_NAME,
-                   H5FD_FPHDF5_XFER_FILE_MPI_TYPE_SIZE, &ftype,
-                   NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert MPI-I/O property")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_fphdf5_teardown
- * Purpose:     Remove the temporary MPI-I/O properties from dxpl.
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
- * Programmer:  Bill Wendling
- *              30. January 2003
- * Modifications:
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_fphdf5_teardown(hid_t dxpl_id)
-{
-    H5P_genplist_t *plist;
-    herr_t          ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5FD_fphdf5_teardown, FAIL)
-
-    /* Check arguments */
-    if ((plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)) == NULL)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataset transfer list")
-
-    /* Remove buffer MPI type */
-    if (H5P_remove(dxpl_id, plist, H5FD_FPHDF5_XFER_MEM_MPI_TYPE_NAME) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "can't remove MPI-I/O property")
-
-    /* Remove file MPI type */
-    if (H5P_remove(dxpl_id, plist, H5FD_FPHDF5_XFER_FILE_MPI_TYPE_NAME) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "can't remove MPI-I/O property")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -876,7 +666,7 @@ H5FD_fphdf5_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     file->info = fa->info;
     file->mpi_rank = mpi_rank;
     file->mpi_size = mpi_size;
-    file->eof = H5FD_fphdf5_MPIOff_to_haddr(size);
+    file->eof = H5FD_mpi_MPIOff_to_haddr(size);
 
     /* Set return value */
     ret_value = (H5FD_t *)file;
@@ -1182,7 +972,7 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
     HDmemset(&status, 0, sizeof(MPI_Status));
 
     /* Some numeric conversions */
-    if (H5FD_fphdf5_haddr_to_MPIOff(addr, &mpi_off) < 0)
+    if (H5FD_mpi_haddr_to_MPIOff(addr, &mpi_off) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr_t to MPI offset")
 
     size_i = (int)size;
@@ -1218,15 +1008,15 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
             use_view_this_time = TRUE;
 
             /* Prepare for a full-blown xfer using btype, ftype, and disp */
-            if (H5P_get(plist, H5FD_FPHDF5_XFER_MEM_MPI_TYPE_NAME, &buf_type) < 0)
+            if (H5P_get(plist, H5FD_MPI_XFER_MEM_MPI_TYPE_NAME, &buf_type) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property")
 
-            if (H5P_get(plist, H5FD_FPHDF5_XFER_FILE_MPI_TYPE_NAME, &file_type) < 0)
+            if (H5P_get(plist, H5FD_MPI_XFER_FILE_MPI_TYPE_NAME, &file_type) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property")
 
             /* Set the file view when we are using MPI derived types */
             if ((mrc = MPI_File_set_view(file->f, mpi_off, MPI_BYTE,
-                                         file_type, H5FD_mpio_native,
+                                         file_type, H5FD_mpi_native_g,
                                          file->info)) != MPI_SUCCESS)
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mrc)
 
@@ -1245,7 +1035,7 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
              * Reset the file view when we used MPI derived types
              */
             if ((mrc = MPI_File_set_view(file->f, (MPI_Offset)0, MPI_BYTE, MPI_BYTE,
-                                         H5FD_mpio_native,  file->info)) != MPI_SUCCESS)
+                                         H5FD_mpi_native_g,  file->info)) != MPI_SUCCESS)
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mrc)
         } else {
             /*
@@ -1456,7 +1246,7 @@ H5FD_fphdf5_write_real(H5FD_t *_file, H5FD_mem_t mem_type, H5P_genplist_t *plist
     HDmemset(&status, 0, sizeof(MPI_Status));
 
     /* some numeric conversions */
-    if (H5FD_fphdf5_haddr_to_MPIOff(addr, &mpi_off) < 0)
+    if (H5FD_mpi_haddr_to_MPIOff(addr, &mpi_off) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
 
     /* Only check for fancy transfers with raw data I/O */
@@ -1479,15 +1269,15 @@ H5FD_fphdf5_write_real(H5FD_t *_file, H5FD_mem_t mem_type, H5P_genplist_t *plist
             use_view_this_time = TRUE;
 
             /* Prepare for a full-blown xfer using btype, ftype, and disp */
-            if (H5P_get(plist, H5FD_FPHDF5_XFER_MEM_MPI_TYPE_NAME, &buf_type) < 0)
+            if (H5P_get(plist, H5FD_MPI_XFER_MEM_MPI_TYPE_NAME, &buf_type) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property")
 
-            if (H5P_get(plist, H5FD_FPHDF5_XFER_FILE_MPI_TYPE_NAME, &file_type) < 0)
+            if (H5P_get(plist, H5FD_MPI_XFER_FILE_MPI_TYPE_NAME, &file_type) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property")
 
             /* Set the file view when we are using MPI derived types */
             if ((mrc = MPI_File_set_view(file->f, mpi_off, MPI_BYTE,
-                                         file_type, H5FD_mpio_native,
+                                         file_type, H5FD_mpi_native_g,
                                          file->info)) != MPI_SUCCESS)
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mrc)
 
@@ -1508,7 +1298,7 @@ H5FD_fphdf5_write_real(H5FD_t *_file, H5FD_mem_t mem_type, H5P_genplist_t *plist
 
         /* Reset the file view when we used MPI derived types */
         if ((mrc = MPI_File_set_view(file->f, (MPI_Offset)0, MPI_BYTE, MPI_BYTE,
-                                     H5FD_mpio_native, file->info)) != MPI_SUCCESS)
+                                     H5FD_mpi_native_g, file->info)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mrc)
     } /* end if */
     else {
@@ -1580,7 +1370,7 @@ H5FD_fphdf5_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
      * back.
      */
     if (file->eoa > file->last_eoa) {
-        if (H5FD_fphdf5_haddr_to_MPIOff(file->eoa, &mpi_off) < 0)
+        if (H5FD_mpi_haddr_to_MPIOff(file->eoa, &mpi_off) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset")
 
         /* Extend the file's size */
@@ -1619,48 +1409,92 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_fphdf5_MPIOff_to_haddr
- * Purpose:     Convert an MPI_Offset value to haddr_t.
- * Return:      Success:    The haddr_t equivalent of the MPI_OFF argument.
- *              Failure:    HADDR_UNDEF
- * Programmer:  Bill Wendling
- *              30. January 2003
- * Modifications:
- *------------------------------------------------------------------------- 
- */
-static haddr_t
-H5FD_fphdf5_MPIOff_to_haddr(MPI_Offset mpi_off)
-{
-    haddr_t ret_value;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_fphdf5_MPIOff_to_haddr)
-    ret_value = (mpi_off != (MPI_Offset)(haddr_t)mpi_off ? HADDR_UNDEF : (haddr_t)mpi_off);
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_fphdf5_haddr_to_MPIOff
- * Purpose:     Convert an haddr_t value to MPI_Offset.
- * Return:      Success:    Non-negative, the MPI_OFF argument contains
- *                          the converted value.
- *              Failure:    FAIL, MPI_OFF is undefined.
+ * Function:    H5FD_fphdf5_mpi_rank
+ * Purpose:     Returns the MPI rank for a process
+ * Return:      Success:    MPI rank
+ *              Failure:    Doesn't fail
  * Programmer:  Bill Wendling
  *              30. January 2003
  * Modifications:
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5FD_fphdf5_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off)
+static int
+H5FD_fphdf5_mpi_rank(const H5FD_t *_file)
 {
-    herr_t ret_value = FAIL;
+    const H5FD_fphdf5_t  *file = (const H5FD_fphdf5_t*)_file;
+    int             ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_fphdf5_haddr_to_MPIOff)
+    FUNC_ENTER_NOAPI(H5FD_fphdf5_mpi_rank, FAIL)
 
-    if (mpi_off)
-        *mpi_off = (MPI_Offset)addr;
+    /* check args */
+    assert(file);
+    assert(file->pub.driver_id == H5FD_FPHDF5);
 
-    ret_value = (addr != (haddr_t)(MPI_Offset)addr ? FAIL : SUCCEED);
+    /* Set return value */
+    ret_value = file->mpi_rank;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_fphdf5_mpi_size
+ * Purpose:     Returns the number of MPI processes
+ * Return:      Success:    Number of MPI processes
+ *              Failure:    Doesn't fail
+ * Programmer:  Bill Wendling
+ *              30. January 2003
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD_fphdf5_mpi_size(const H5FD_t *_file)
+{
+    const H5FD_fphdf5_t  *file = (const H5FD_fphdf5_t*)_file;
+    int             ret_value; 
+
+    FUNC_ENTER_NOAPI(H5FD_fphdf5_mpi_size, FAIL)
+
+    /* check args */
+    assert(file);
+    assert(file->pub.driver_id == H5FD_FPHDF5);
+
+    /* Set return value */
+    ret_value = file->mpi_size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_fphdf5_barrier_communicator
+ * Purpose:     Returns the MPI communicator for the file that can be
+ *              used in an MPI_Barrier() statement for the client
+ *              processes.
+ * Return:      Success:    The barrier communicator
+ *              Failure:    NULL
+ * Programmer:  Bill Wendling
+ *              10. February 2003
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static MPI_Comm
+H5FD_fphdf5_barrier_communicator(const H5FD_t *_file)
+{
+    const H5FD_fphdf5_t  *file = (const H5FD_fphdf5_t*)_file;
+    MPI_Comm        ret_value;
+
+    FUNC_ENTER_NOAPI(H5FD_fphdf5_barrier_communicator, MPI_COMM_NULL)
+
+    /* check args */
+    assert(file);
+    assert(file->pub.driver_id == H5FD_FPHDF5);
+
+    /* Set return value */
+    ret_value = file->barrier_comm;
+
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 

@@ -152,44 +152,18 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
 
 #ifdef H5_HAVE_PARALLEL
     /* Retrieve MPI parameters */
-    if(IS_H5FD_MPIO(f)) {
+    if(IS_H5FD_MPI(f)) {
         /* Get the MPI communicator */
-        if (MPI_COMM_NULL == (mpi_comm=H5FD_mpio_communicator(f->shared->lf)))
+        if (MPI_COMM_NULL == (mpi_comm=H5FD_mpi_get_comm(f->shared->lf)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
 
         /* Get the MPI rank & size */
-        if ((mpi_rank=H5FD_mpio_mpi_rank(f->shared->lf))<0)
+        if ((mpi_rank=H5FD_mpi_get_rank(f->shared->lf))<0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
 
         /* Set the MPI-capable file driver flag */
         using_mpi=1;
     } /* end if */
-    else if(IS_H5FD_MPIPOSIX(f)) {
-        /* Get the MPI communicator */
-        if (MPI_COMM_NULL == (mpi_comm=H5FD_mpiposix_communicator(f->shared->lf)))
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
-
-        /* Get the MPI rank & size */
-        if ((mpi_rank=H5FD_mpiposix_mpi_rank(f->shared->lf))<0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
-
-        /* Set the MPI-capable file driver flag */
-        using_mpi=1;
-    } /* end if */
-#ifdef H5_HAVE_FPHDF5
-    else if (IS_H5FD_FPHDF5(f)) {
-        /* Get the FPHDF5 barrier communicator */
-        if (MPI_COMM_NULL == (mpi_comm = H5FD_fphdf5_barrier_communicator(f->shared->lf)))
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
-
-        /* Get the MPI rank & size */
-        if ((mpi_rank = H5FD_fphdf5_mpi_rank(f->shared->lf)) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
-
-        /* Set the MPI-capable file driver flag */
-        using_mpi = 1;
-    } /* end if */
-#endif  /* H5_HAVE_FPHDF5 */
 #endif  /* H5_HAVE_PARALLEL */
 
     /* Get the number of elements in the dataset's dataspace */

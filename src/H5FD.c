@@ -213,6 +213,9 @@ H5FD_free_cls(H5FD_class_t *cls)
  *              Monday, July 26, 1999
  *
  * Modifications:
+ *              Copied guts of function info H5FD_register
+ *              Quincey Koziol
+ *              Friday, January 30, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -220,7 +223,6 @@ hid_t
 H5FDregister(const H5FD_class_t *cls)
 {
     hid_t		ret_value;
-    H5FD_class_t	*saved=NULL;
     H5FD_mem_t		type;
 
     FUNC_ENTER_API(H5FDregister, FAIL)
@@ -229,27 +231,77 @@ H5FDregister(const H5FD_class_t *cls)
     /* Check arguments */
     if (!cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "null class pointer is disallowed")
-
     if (!cls->open || !cls->close)
 	HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "`open' and/or `close' methods are not defined")
-
     if (!cls->get_eoa || !cls->set_eoa)
 	HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "`get_eoa' and/or `set_eoa' methods are not defined")
-
     if (!cls->get_eof)
 	HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "`get_eof' method is not defined")
     if (!cls->read || !cls->write)
 	HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "`read' and/or `write' method is not defined")
-    for (type=H5FD_MEM_DEFAULT; type<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,type)) {
-	if (cls->fl_map[type]<H5FD_MEM_NOLIST ||
-                cls->fl_map[type]>=H5FD_MEM_NTYPES)
+    for (type=H5FD_MEM_DEFAULT; type<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,type))
+	if (cls->fl_map[type]<H5FD_MEM_NOLIST || cls->fl_map[type]>=H5FD_MEM_NTYPES)
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid free-list mapping")
-    }
+
+    /* Create the new class ID */
+    if ((ret_value=H5FD_register(cls, sizeof(H5FD_class_t)))<0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register file driver ID")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDregister() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_register
+ *
+ * Purpose:	Registers a new file driver as a member of the virtual file
+ *		driver class.  Certain fields of the class struct are
+ *		required and that is checked here so it doesn't have to be
+ *		checked every time the field is accessed.
+ *
+ * Return:	Success:	A file driver ID which is good until the
+ *				library is closed or the driver is
+ *				unregistered.
+ *
+ *		Failure:	A negative value.
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 26, 1999
+ *
+ * Modifications:
+ *              Broke into public and internal routines & added 'size'
+ *              parameter to internal routine, which allows us to create
+ *              sub-classes of H5FD_class_t for internal support (see the
+ *              MPI drivers, etc.)
+ *              Quincey Koziol
+ *              January 30, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5FD_register(const void *_cls, size_t size)
+{
+    hid_t		ret_value;
+    const H5FD_class_t	*cls=(const H5FD_class_t *)_cls;
+    H5FD_class_t	*saved=NULL;
+    H5FD_mem_t		type;
+
+    FUNC_ENTER_NOAPI(H5FD_register, FAIL)
+
+    /* Check arguments */
+    assert(cls);
+    assert(cls->open && cls->close);
+    assert(cls->get_eoa && cls->set_eoa);
+    assert(cls->get_eof);
+    assert(cls->read && cls->write);
+    for (type=H5FD_MEM_DEFAULT; type<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,type))
+        assert(cls->fl_map[type]>=H5FD_MEM_NOLIST && cls->fl_map[type]<H5FD_MEM_NTYPES);
 
     /* Copy the class structure so the caller can reuse or free it */
-    if (NULL==(saved=H5MM_malloc(sizeof(H5FD_class_t))))
+    if (NULL==(saved=H5MM_malloc(size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for file driver class struct")
-    *saved = *cls;
+    HDmemcpy(saved,cls,size);
 
     /* Create the new class ID */
     if ((ret_value=H5I_register(H5I_VFL, saved))<0)
@@ -260,8 +312,8 @@ done:
         if(saved)
             H5MM_xfree(saved);
 
-    FUNC_LEAVE_API(ret_value)
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_register() */
 
 
 /*-------------------------------------------------------------------------

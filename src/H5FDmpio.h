@@ -21,20 +21,11 @@
 #ifndef H5FDmpio_H
 #define H5FDmpio_H
 
-#include "H5FDpublic.h"
-#include "H5Ipublic.h"
-
 #ifdef H5_HAVE_PARALLEL
 #   define H5FD_MPIO	(H5FD_mpio_init())
 #else
 #   define H5FD_MPIO	(-1)
 #endif /* H5_HAVE_PARALLEL */
-
-/* Type of I/O for data transfer properties */
-typedef enum H5FD_mpio_xfer_t {
-    H5FD_MPIO_INDEPENDENT = 0, 		/*zero is the default*/
-    H5FD_MPIO_COLLECTIVE
-} H5FD_mpio_xfer_t;
 
 /* Macros */
 
@@ -59,14 +50,6 @@ H5_DLL herr_t H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/,
 			MPI_Info *info/*out*/);
 H5_DLL herr_t H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode);
 H5_DLL herr_t H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/);
-H5_DLL MPI_Comm H5FD_mpio_communicator(H5FD_t *_file);
-H5_DLL herr_t H5FD_mpio_setup(hid_t dxpl_id, MPI_Datatype btype,
-    MPI_Datatype ftype);
-H5_DLL herr_t H5FD_mpio_teardown(hid_t dxpl_id);
-H5_DLL herr_t H5FD_mpio_wait_for_left_neighbor(H5FD_t *file);
-H5_DLL herr_t H5FD_mpio_signal_right_neighbor(H5FD_t *file);
-H5_DLL int H5FD_mpio_mpi_rank(H5FD_t *_file);
-H5_DLL int H5FD_mpio_mpi_size(H5FD_t *_file);
 #ifdef __cplusplus
 }
 #endif

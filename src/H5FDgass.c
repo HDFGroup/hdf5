@@ -204,7 +204,7 @@ H5FD_gass_init(void)
     FUNC_ENTER_NOAPI(H5FD_gass_init, FAIL)
 
     if (!H5FD_GASS_g)
-        H5FD_GASS_g = H5FDregister(&H5FD_gass_g);
+        H5FD_GASS_g = H5FD_register(&H5FD_gass_g,sizeof(H5FD_class_t));
 
     globus_module_activate (GLOBUS_COMMON_MODULE);
     globus_module_activate (GLOBUS_GASS_FILE_MODULE);

@@ -41,7 +41,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
-#include "H5FDmpiposix.h"       /* MPI/posix I/O file driver            */
+#include "H5FDmpi.h"            /* MPI-based file drivers		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"         /* Property lists                       */
@@ -189,6 +189,9 @@ static herr_t H5FD_mpiposix_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, 
 static herr_t H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
         size_t size, const void *buf);
 static herr_t H5FD_mpiposix_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static int H5FD_mpiposix_mpi_rank(const H5FD_t *_file);
+static int H5FD_mpiposix_mpi_size(const H5FD_t *_file);
+static MPI_Comm H5FD_mpiposix_communicator(const H5FD_t *_file);
 
 /* MPIPOSIX-specific file access properties */
 typedef struct H5FD_mpiposix_fapl_t {
@@ -197,7 +200,8 @@ typedef struct H5FD_mpiposix_fapl_t {
 } H5FD_mpiposix_fapl_t;
 
 /* The MPIPOSIX file driver information */
-static const H5FD_class_t H5FD_mpiposix_g = {
+static const H5FD_class_mpi_t H5FD_mpiposix_g = {
+    {   /* Start of superclass information */
     "mpiposix",					/*name			*/
     MAXADDR,					/*maxaddr		*/
     H5F_CLOSE_SEMI,				/* fc_degree		*/
@@ -227,18 +231,11 @@ static const H5FD_class_t H5FD_mpiposix_g = {
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
+    },  /* End of superclass information */
+    H5FD_mpiposix_mpi_rank,                     /*get_rank              */
+    H5FD_mpiposix_mpi_size,                     /*get_size              */
+    H5FD_mpiposix_communicator                  /*get_comm              */
 };
-
-#ifdef OLD_METADATA_WRITE
-/* Global var to allow elimination of redundant metadata writes
- * to be controlled by the value of an environment variable. */
-/* Use the elimination by default unless this is the Intel Red machine */
-#ifndef __PUMAGON__
-hbool_t	H5_mpiposix_1_metawrite_g = TRUE;
-#else
-hbool_t	H5_mpiposix_1_metawrite_g = FALSE;
-#endif
-#endif /* OLD_METADATA_WRITE */
 
 /* Interface initialization */
 #define INTERFACE_INIT	H5FD_mpiposix_init
@@ -270,7 +267,7 @@ H5FD_mpiposix_init(void)
     FUNC_ENTER_NOAPI(H5FD_mpiposix_init, FAIL)
 
     if (H5I_VFL!=H5Iget_type(H5FD_MPIPOSIX_g))
-        H5FD_MPIPOSIX_g = H5FDregister(&H5FD_mpiposix_g);
+        H5FD_MPIPOSIX_g = H5FD_register((const H5FD_class_t *)&H5FD_mpiposix_g,sizeof(H5FD_class_mpi_t));
 
     /* Set return value */
     ret_value=H5FD_MPIPOSIX_g;
@@ -402,109 +399,6 @@ H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/, hbool_t *use_gpfs/*ou
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_fapl_mpiposix() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_communicator
- *
- * Purpose:	Returns the MPI communicator for the file.
- *
- * Return:	Success:	The communicator
- *
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Thursday, July 11, 2002
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-MPI_Comm
-H5FD_mpiposix_communicator(H5FD_t *_file)
-{
-    H5FD_mpiposix_t *file = (H5FD_mpiposix_t*)_file;
-    MPI_Comm ret_value;         /* Return value */
-
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_communicator, MPI_COMM_NULL)
-
-    assert(file);
-    assert(H5FD_MPIPOSIX==file->pub.driver_id);
-
-    /* Set return value */
-    ret_value=file->comm;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_mpi_posix_communicator() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_mpi_rank
- *
- * Purpose:	Returns the MPI rank for a process
- *
- * Return:	Success: non-negative
- *		Failure: negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, July 11, 2002
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-int
-H5FD_mpiposix_mpi_rank(H5FD_t *_file)
-{
-    H5FD_mpiposix_t *file = (H5FD_mpiposix_t*)_file;
-    int ret_value;      /* Return value */
-
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_mpi_rank, FAIL)
-
-    assert(file);
-    assert(H5FD_MPIPOSIX==file->pub.driver_id);
-
-    /* Set return value */
-    ret_value=file->mpi_rank;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_mpiposix_mpi_rank() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_mpiposix_mpi_size
- *
- * Purpose:	Returns the number of MPI processes
- *
- * Return:	Success: non-negative
- *		Failure: negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, July 11, 2002
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-int
-H5FD_mpiposix_mpi_size(H5FD_t *_file)
-{
-    H5FD_mpiposix_t *file = (H5FD_mpiposix_t*)_file;
-    int ret_value;      /* Return value */
-
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_mpi_rank, FAIL)
-
-    assert(file);
-    assert(H5FD_MPIPOSIX==file->pub.driver_id);
-
-    /* Set return value */
-    ret_value=file->mpi_size;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_mpiposix_mpi_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -1310,12 +1204,9 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
             if (MPI_SUCCESS!= (mpi_code=MPI_Barrier(file->comm)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
 
-        /* Only p<round> will do the actual write if all procs in comm write same metadata */
-#ifdef OLD_METADATA_WRITE
-        if (H5_mpiposix_1_metawrite_g)
-#endif /* OLD_METADATA_WRITE */
-            if (file->mpi_rank != H5_PAR_META_WRITE)
-                HGOTO_DONE(SUCCEED) /* skip the actual write */
+        /* Only one process will do the actual write if all procs in comm write same metadata */
+        if (file->mpi_rank != H5_PAR_META_WRITE)
+            HGOTO_DONE(SUCCEED) /* skip the actual write */
     } /* end if */
 
 #ifdef REPORT_IO
@@ -1387,18 +1278,11 @@ done:
     } /* end if */
     /* Guard against getting into metadata broadcast in failure cases */
     else {
-        /* if only p<round> writes, need to broadcast the ret_value to other processes */
-#ifdef OLD_METADATA_WRITE
-        if ((type!=H5FD_MEM_DRAW) && H5_mpiposix_1_metawrite_g) {
-            if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, H5_PAR_META_WRITE, file->comm)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
-        } /* end if */
-#else /* OLD_METADATA_WRITE */
+        /* when only one process writes, need to broadcast the ret_value to other processes */
         if (type!=H5FD_MEM_DRAW) {
             if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, H5_PAR_META_WRITE, file->comm)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
         } /* end if */
-#endif /* OLD_METADATA_WRITE */
     } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1477,6 +1361,109 @@ H5FD_mpiposix_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpiposix_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_mpiposix_mpi_rank
+ *
+ * Purpose:	Returns the MPI rank for a process
+ *
+ * Return:	Success: non-negative
+ *		Failure: negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, July 11, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD_mpiposix_mpi_rank(const H5FD_t *_file)
+{
+    const H5FD_mpiposix_t *file = (const H5FD_mpiposix_t*)_file;
+    int ret_value;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_mpiposix_mpi_rank, FAIL)
+
+    assert(file);
+    assert(H5FD_MPIPOSIX==file->pub.driver_id);
+
+    /* Set return value */
+    ret_value=file->mpi_rank;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_mpiposix_mpi_rank() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_mpiposix_mpi_size
+ *
+ * Purpose:	Returns the number of MPI processes
+ *
+ * Return:	Success: non-negative
+ *		Failure: negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, July 11, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD_mpiposix_mpi_size(const H5FD_t *_file)
+{
+    const H5FD_mpiposix_t *file = (const H5FD_mpiposix_t*)_file;
+    int ret_value;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_mpiposix_mpi_size, FAIL)
+
+    assert(file);
+    assert(H5FD_MPIPOSIX==file->pub.driver_id);
+
+    /* Set return value */
+    ret_value=file->mpi_size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_mpiposix_mpi_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_mpiposix_communicator
+ *
+ * Purpose:	Returns the MPI communicator for the file.
+ *
+ * Return:	Success:	The communicator
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, July 11, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static MPI_Comm
+H5FD_mpiposix_communicator(const H5FD_t *_file)
+{
+    const H5FD_mpiposix_t *file = (const H5FD_mpiposix_t*)_file;
+    MPI_Comm ret_value;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_mpiposix_communicator, MPI_COMM_NULL)
+
+    assert(file);
+    assert(H5FD_MPIPOSIX==file->pub.driver_id);
+
+    /* Set return value */
+    ret_value=file->comm;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_mpi_posix_communicator() */
 
 #endif /*H5_HAVE_PARALLEL*/
 

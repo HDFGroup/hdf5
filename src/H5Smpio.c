@@ -681,7 +681,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
      * Pass buf type, file type to the file driver. Request an MPI type
      * transfer (instead of an elementary byteblock transfer).
      */
-    if(H5FD_mpio_setup(dxpl_id, mpi_buf_type, mpi_file_type)<0)
+    if(H5FD_mpi_setup_collective(dxpl_id, mpi_buf_type, mpi_file_type)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O properties");
     plist_is_setup=1;
 
@@ -700,7 +700,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
 done:
     /* Reset the dxpl settings */
     if(plist_is_setup) {
-        if(H5FD_mpio_teardown(dxpl_id)<0)
+        if(H5FD_mpi_teardown_collective(dxpl_id)<0)
     	    HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to reset dxpl values");
     } /* end if */
 

@@ -168,7 +168,7 @@ H5FD_core_init(void)
     FUNC_ENTER_NOAPI(H5FD_core_init, FAIL)
 
     if (H5I_VFL!=H5Iget_type(H5FD_CORE_g))
-        H5FD_CORE_g = H5FDregister(&H5FD_core_g);
+        H5FD_CORE_g = H5FD_register(&H5FD_core_g,sizeof(H5FD_class_t));
 
     /* Set return value */
     ret_value=H5FD_CORE_g;
