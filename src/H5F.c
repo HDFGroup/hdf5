@@ -31,8 +31,6 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5FDsec2.h>		/*Posix unbuffered I/O			  */
 #include <H5FDstdio.h>		/* Standard C buffered I/O		  */
 
-#include <H5FDqak.h>		/* Custom unbuffered I/O			  */
-
 /* Packages needed by this file... */
 #include <H5private.h>		/*library functions			  */
 #include <H5Aprivate.h>		/*attributes				  */
