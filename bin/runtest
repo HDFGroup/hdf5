@@ -553,8 +553,13 @@ fi
 #################################
 # Setup snapshot test directories
 #################################
+BASEDIR=${HOME}/snapshots-${H5VERSION}
+if [ ! -d ${BASEDIR} ]; then
+    echo "BASEDIR ($BASEDIR) does not exist"
+    exit 1
+fi
 # Show the real physical path rather than the symbolic path
-SNAPYARD=`cd $HOME/snapshots-${H5VERSION} && /bin/pwd`
+SNAPYARD=`cd $BASEDIR && /bin/pwd`
 # Log file basename
 LOGBASENAME=${SNAPYARD}/log/${HOSTNAME}
 PASSEDLOG=${SNAPYARD}/log/PASSED_LOG_${TODAY}

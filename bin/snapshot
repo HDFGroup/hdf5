@@ -217,6 +217,11 @@ else
 fi
 
 BASEDIR=${HOME}/snapshots-${H5VERSION}
+if [ ! -d ${BASEDIR} ]; then
+    echo "BASEDIR ($BASEDIR) does not exist"
+    exit 1
+fi
+
 CURRENT=${BASEDIR}/current
 PREVIOUS=${BASEDIR}/previous
 HOSTNAME=`hostname | cut -f1 -d.`	# no domain part
@@ -238,11 +243,6 @@ done
 #=============================
 if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     TIMESTAMP "checkout"
-    # Create a working directory.  Hopefully one is left over from last
-    # time that still has the contents of the previous release.  But if
-    # not, just create one and assume that a snapshot is necessary.
-    test -d ${BASEDIR} || mkdir -p ${BASEDIR} || exit 1
-
     # If there is a Makefile in ${CURRENT}, the last test done in it
     # has not been distclean'ed.  They would interfere with other
     # --srcdir build since make considers the files in ${CURRENT} 
