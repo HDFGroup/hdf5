@@ -200,6 +200,7 @@
 ./pablo/HDFmpioProtos.h
 ./pablo/HDFrecord_RT.h
 ./pablo/Makefile.in
+./pablo/PabloHDF.c
 ./pablo/PabloHDF_RT.c
 ./pablo/PabloHDF_SDDF.c
 ./pablo/ProcIDs.h
