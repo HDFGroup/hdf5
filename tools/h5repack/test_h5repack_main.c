@@ -53,9 +53,9 @@ test()
 
  if (h5repack_init (&options, 0)<0)
   TEST_ERROR;
- if (h5repack_addcomp("dset2:GZIP 9",&options)<0)
+ if (h5repack_addcomp("dset1:GZIP 9",&options)<0)
   TEST_ERROR;
- if (h5repack_addchunk("dset2:5x4",&options)<0)
+ if (h5repack_addchunk("dset1:5x4",&options)<0)
   TEST_ERROR;
  if (h5repack(FILENAME,FILENAME_OUT,&options)<0)
   TEST_ERROR;

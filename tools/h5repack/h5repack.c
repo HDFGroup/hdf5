@@ -59,6 +59,9 @@ int h5repack(char* infile,
   
   if (options->verbose)
    printf("Making file <%s>...\n",outfile);
+
+  if (copy_file(infile,outfile,options)<0)
+   return -1;
   
  }
 

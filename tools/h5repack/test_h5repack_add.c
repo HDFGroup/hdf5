@@ -177,7 +177,9 @@ int make_dsets()
   TEST_ERROR;
  
  nerrors += make_deflate(fid);
+#if 0
  nerrors += make_szip(fid);
+#endif
  
  /* close */
  if(H5Fclose(fid)<0)

@@ -18,21 +18,34 @@
 #define H5REPACK_LIST_H__
 
 #include "h5repack.h"
+#include "h5trav.h"
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/*-------------------------------------------------------------------------
+ * private functions
+ *-------------------------------------------------------------------------
+ */
+
+
+int get_objlist(char* infname, 
+                packoptions_t *options);
+
+int copy_file(char* fnamein, 
+              char* fnameout,
+              packoptions_t *options);
+
+void print_objlist(char *filename, 
+                   int nobjects, 
+                   info_t *info );
+
+int do_copy_file(hid_t fidin, 
+                 hid_t fidout, 
+                 int nobjects, 
+                 info_t *info,
+                 packoptions_t *options);
 
 
 
-int get_objlist(char* infname, packoptions_t *options);
-
-
-
-#ifdef __cplusplus
-}
-#endif
 
 
 #endif  /* H5REPACK_LIST_H__ */

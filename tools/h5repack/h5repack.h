@@ -105,11 +105,17 @@ int h5repack_addchunk(char* str, packoptions_t *options);
 int h5repack_init    (packoptions_t *options, int verbose);
 int h5repack_end     (packoptions_t *options);
 
-
-
 #ifdef __cplusplus
 }
 #endif
+
+/*-------------------------------------------------------------------------
+ * private functions
+ *-------------------------------------------------------------------------
+ */
+
+
+void read_info(char *filename,packoptions_t *options);
 
 
 

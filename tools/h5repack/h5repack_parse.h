@@ -20,26 +20,15 @@
 #include "h5repack.h"
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/*-------------------------------------------------------------------------
+ * private functions
+ *-------------------------------------------------------------------------
+ */
 
-int parse_number(char *str);
-
-
-/* compression */
-
+int         parse_number(char *str);
 obj_list_t* parse_comp(char *str, int *n_objs, comp_info_t *comp);
 char*       get_scomp(int code);
-
-/* chunking */
-
 obj_list_t* parse_chunk(char *str, int *n_objs, hsize_t *chunk_lengths, int *chunk_rank);
-
-
-#ifdef __cplusplus
-}
-#endif
 
 
 #endif  /* H5REPACK_PARSE_H__ */

@@ -37,7 +37,7 @@ int options_table_init( options_table_t **tbl )
   return -1;
  }
  
- table->size   = 3;
+ table->size   = 30;
  table->nelems = 0;
  table->objs   = (pack_info_t*) malloc(table->size * sizeof(pack_info_t));
  if (table->objs==NULL) {
