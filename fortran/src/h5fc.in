@@ -50,8 +50,9 @@ dash_c="no"
 get_output_file="no"
 
 SHOW="eval"
-FCBASE="@FC@"
-FLINKERBASE="@FC@"
+FCBASE="@F9X@"
+FLINKERBASE="@F9X@"
+FFLAGS="@FFLAGS@"
 LDFLAGS="@LDFLAGS@"
 LIBS="@LIBS@"
 
@@ -196,7 +197,7 @@ if test "x$do_link" = "xyes"; then
   link_args="$link_args ${libdir}/libhdf5_fortran.a ${libdir}/libhdf5.a"
 
   link_args="$link_args $LIBS"
-  $SHOW $FLINKER $LDFLAGS $link_objs $link_args
+  $SHOW $FLINKER $FFLAGS $LDFLAGS $link_objs $link_args
   status=$?
 fi
 
