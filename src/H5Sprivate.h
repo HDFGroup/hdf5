@@ -134,7 +134,7 @@ typedef struct {
     hsize_t num_elem;   /* Number of elements in selection */
     union {
         H5S_pnt_list_t *pnt_lst; /* List of selected points (order is important) */
-        H5S_hyper_sel_t hyper;   /* Info about hyperslab selections */
+        H5S_hyper_sel_t hslab;   /* Info about hyperslab selections */
     } sel_info;
 } H5S_select_t;
 
