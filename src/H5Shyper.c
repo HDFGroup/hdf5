@@ -197,7 +197,7 @@ printf("%s: check 2.0, bound_count=%d\n",FUNC,bound_count);
                 /* Check if we've allocated the array yet */
                 if(num_reg==0) {
                     /* Allocate array */
-                    ret_value=H5MM_malloc(sizeof(H5S_hyper_node_t));
+                    ret_value=H5MM_malloc(sizeof(H5S_hyper_region_t));
 
                     /* Initialize with first region */
                     ret_value[0].start=lo_bounds[next_dim][i].bound;
@@ -211,7 +211,7 @@ printf("%s: check 2.0, bound_count=%d\n",FUNC,bound_count);
                         ret_value[curr_reg].end=MAX(hi_bounds[next_dim][i].bound,ret_value[curr_reg].end);
                     else {  /* no overlap with previous region, add new region */
                         /* Enlarge array */
-                        ret_value=H5MM_realloc(ret_value,sizeof(H5S_hyper_node_t)*(num_reg+1));
+                        ret_value=H5MM_realloc(ret_value,sizeof(H5S_hyper_region_t)*(num_reg+1));
 
                         /* Initialize with new region */
                         ret_value[num_reg].start=lo_bounds[next_dim][i].bound;
