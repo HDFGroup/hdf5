@@ -99,6 +99,8 @@ test -h ../hdf5-$VERS && rm ../hdf5-$VERS
 ln -s `pwd` ../hdf5-$VERS || exit 1
 mv Makefile ../Makefile.x 2>/dev/null #might fail
 cp -p Makefile.dist Makefile
+# synchronize the HISTORY and RELEASE files in the doc area
+cp HISTORY.txt RELEASE.txt doc/html/ADGuide/.
 echo "This is hdf5-$VERS released on `date`" >README.x
 tail +2l README >>README.x
 mv README.x README
