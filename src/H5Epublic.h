@@ -38,7 +38,10 @@ typedef enum
       H5E_SYM,		       /* Symbol Table */
       H5E_HEAP,		       /* Heap */
       H5E_OHDR,		       /* Object Header */
-      H5E_DIRECTORY	       /* Directory */
+      H5E_DIRECTORY,       /* Directory */
+      H5E_DATATYPE,	       /* Datatype */
+      H5E_DATASPACE,       /* Dataspace */
+      H5E_DATASET          /* Dataset */
   }
 hdf_maj_err_code_t;
 
