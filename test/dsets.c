@@ -1649,8 +1649,19 @@ test_filter_noencoder(const char *dset_name)
         int test_ints[10] = { 12 };
         int read_buf[10];
         int i;
+        char * srcdir = HDgetenv("srcdir"); /* The source directory */
+        char testfile[512]="";	/* Buffer to hold name of test file */
 
-        file_id = H5Fopen(NOENCODER_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+        /* Create the name of the file to open (in case we are using the --srcdir
+         * option.  */
+        if (srcdir && ((HDstrlen(srcdir) + HDstrlen(NOENCODER_FILENAME) + 1) < sizeof(testfile)) )
+        {
+            HDstrcpy(testfile, srcdir);
+            HDstrcat(testfile, "/");
+        }
+        HDstrcat(testfile, NOENCODER_FILENAME);
+
+        file_id = H5Fopen(testfile, H5F_ACC_RDWR, H5P_DEFAULT);
         if (file_id < 0) goto error;
 
         dset_id = H5Dopen(file_id, dset_name);
