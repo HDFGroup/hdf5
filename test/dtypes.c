@@ -1047,7 +1047,81 @@ test_conv_str_2(void)
     return ret_value;
 }
 
-    
+
+/*-------------------------------------------------------------------------
+ * Function:	test_conv_enum_1
+ *
+ * Purpose:	Test conversion speed for enum data types
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, January  5, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_conv_enum_1(void)
+{
+    const int	nelmts=200000, ntests=NTESTS;
+    int		i, val, *buf=NULL;
+    hid_t	t1, t2;
+    char	s[80];
+    herr_t	ret_value=FAIL;
+
+    /* Build the data types */
+    t1 = H5Tcreate(H5T_ENUM, sizeof(int));
+    t2 = H5Tenum_create(H5T_NATIVE_INT);
+    s[1] = '\0';
+    for (i=0; i<26; i++) {
+	s[0] = 'A'+i;
+	H5Tenum_insert(t1, s, &i);
+	H5Tenum_insert(t2, s, (val=i*1000+i, &val));
+    }
+
+    /* Initialize the buffer */
+    buf = malloc(nelmts*MAX(H5Tget_size(t1), H5Tget_size(t2)));
+    for (i=0; i<nelmts; i++) buf[i] = rand() % 26;
+
+    /* Conversions */
+    for (i=0; i<ntests; i++) {
+	if (ntests>1) {
+	    sprintf(s, "Testing random enum conversion O(N) (test %d/%d)",
+		    i+1, ntests);
+	} else {
+	    sprintf(s, "Testing random enum conversion O(N)");
+	}
+	printf("%-70s", s);
+	fflush(stdout);
+	if (H5Tconvert(t1, t2, nelmts, buf, NULL)<0) goto error;
+	PASSED();
+    }
+
+    for (i=0; i<ntests; i++) {
+	if (ntests>1) {
+	    sprintf(s, "Testing random enum conversion O(N log N) "
+		    "(test %d/%d)", i+1, ntests);
+	} else {
+	    sprintf(s, "Testing random enum conversion O(N log N)");
+	}
+	printf("%-70s", s);
+	fflush(stdout);
+	if (H5Tconvert(t2, t1, nelmts, buf, NULL)<0) goto error;
+	PASSED();
+    }
+    ret_value = 0;
+
+ error:
+    H5Tclose(t1);
+    H5Tclose(t2);
+    if (buf) free(buf);
+    reset_hdf5();
+    return ret_value;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -2845,6 +2919,7 @@ main(void)
     nerrors += test_conv_str_1()<0 ? 1 : 0;
     nerrors += test_conv_str_2()<0 ? 1 : 0;
     nerrors += test_conv_int ()<0 ? 1 : 0;
+    nerrors += test_conv_enum_1()<0 ? 1 : 0;
 
     /* Does floating point overflow generate a SIGFPE? */
     generates_sigfpe();

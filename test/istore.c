@@ -611,6 +611,7 @@ main(int argc, char *argv[])
     }
 
     /* Close the test file and exit */
+    H5Pclose(fcpl);
     H5Fclose(file);
     
     if (nerrors) {

@@ -534,7 +534,7 @@ test_extend(hid_t fapl, const char *basename, H5D_layout_t layout)
     if (H5D_CONTIGUOUS==layout) {
 	SKIPPED();
 	puts("    Not implemented yet -- needs H5S_SELECT_DIFF operator");
-	return 0;
+	goto skip;
     }
 #endif
     
@@ -665,6 +665,16 @@ test_extend(hid_t fapl, const char *basename, H5D_layout_t layout)
 	H5Fclose(file);
     } H5E_END_TRY;
     return 1;
+
+ skip:
+    H5E_BEGIN_TRY {
+	H5Dclose(dset);
+	H5Sclose(fspace);
+	H5Sclose(mspace);
+	H5Pclose(dcpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 0;
 }
     
     
