@@ -80,8 +80,8 @@
             INTEGER, INTENT(OUT) :: hdferr         ! Error code 
             INTEGER(HID_T), INTENT(IN) :: fapl ! file access property list
 
-            INTEGER :: base_namelen ! Length of the base name character string
-            INTEGER :: full_namelen ! Length of the full name character string
+            INTEGER(SIZE_T) :: base_namelen ! Length of the base name character string
+            INTEGER(SIZE_T) :: full_namelen ! Length of the full name character string
 !            INTEGER(HID_T) :: fapl_default
 
             INTERFACE
@@ -94,10 +94,10 @@
               !DEC$ATTRIBUTES reference :: base_name 
               !DEC$ATTRIBUTES reference :: full_name 
               CHARACTER(LEN=*), INTENT(IN) :: base_name
-              INTEGER :: base_namelen
+              INTEGER(SIZE_T) :: base_namelen
               INTEGER(HID_T), INTENT(IN) :: fapl
               CHARACTER(LEN=*), INTENT(IN) :: full_name
-              INTEGER :: full_namelen
+              INTEGER(SIZE_T) :: full_namelen
               END FUNCTION h5_fixname_c
             END INTERFACE
 
@@ -139,7 +139,7 @@
             INTEGER, INTENT(OUT) :: hdferr         ! Error code 
             INTEGER(HID_T), INTENT(IN) :: fapl ! file access property list
 
-            INTEGER :: base_namelen ! Length of the base name character string
+            INTEGER(SIZE_T) :: base_namelen ! Length of the base name character string
 
             INTERFACE
               INTEGER FUNCTION h5_cleanup_c(base_name, base_namelen, fapl)
@@ -149,7 +149,7 @@
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: base_name 
               CHARACTER(LEN=*), INTENT(IN) :: base_name
-              INTEGER :: base_namelen
+              INTEGER(SIZE_T) :: base_namelen
               INTEGER(HID_T), INTENT(IN) :: fapl
               END FUNCTION h5_cleanup_c
             END INTERFACE
@@ -158,3 +158,43 @@
             hdferr = h5_cleanup_c(base_name, base_namelen, fapl)
 
           END SUBROUTINE h5_cleanup_f
+
+!----------------------------------------------------------------------
+! Name:		h5_exit_f 
+!
+! Purpose:	Exit application
+!               It is a fortran counterpart for the standard C 'exit()' routine
+!
+! Inputs:  
+!		status	- Status to return from application
+!
+! Outputs:  
+!		none
+!
+! Programmer:	Quincey Koziol
+!		December 14, 2004
+!
+!
+!----------------------------------------------------------------------
+          SUBROUTINE h5_exit_f(status)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5_exit_f
+!DEC$endif
+            IMPLICIT NONE
+            INTEGER, INTENT(IN) :: status         ! Return code
+
+            INTERFACE
+              SUBROUTINE h5_exit_c(status)
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5_EXIT_C':: h5_exit_c
+              !DEC$ ENDIF
+              INTEGER, INTENT(IN) :: status
+              END SUBROUTINE h5_exit_c
+            END INTERFACE
+
+            CALL h5_exit_c(status)
+
+          END SUBROUTINE h5_exit_f
+

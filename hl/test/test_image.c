@@ -31,15 +31,12 @@ unsigned char image_out2[ WIDTH*HEIGHT*3 ];
 int main( void )
 {
  hid_t         file_id;
- herr_t        status;
  hsize_t       width, height, planes;
  hsize_t       pal_dims[] = {9,3};
  hsize_t       pal_dims_out[2];
  hsize_t       i;
  char          interlace[20];
  hssize_t      npals;
- herr_t        is_image;
- herr_t        is_palette;
 
  unsigned char pal_data_out[9*3];
  /* create a 9 entry grey palette */
@@ -165,10 +162,10 @@ int main( void )
  *-------------------------------------------------------------------------
  */
 
- if ( (is_image = H5IMis_image( file_id, "Image1" )) < 0 )
+ if ( H5IMis_image( file_id, "Image1" ) < 0 )
   goto out;
 
- if ( (is_image = H5IMis_image( file_id, "Image2" )) < 0 )
+ if ( H5IMis_image( file_id, "Image2" ) < 0 )
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -176,7 +173,7 @@ int main( void )
  *-------------------------------------------------------------------------
  */
 
- if ( (is_palette = H5IMis_palette( file_id, "Pallete" )) < 0 )
+ if ( H5IMis_palette( file_id, "Pallete" ) < 0 )
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -185,7 +182,7 @@ int main( void )
  */
 
      /* Close the file. */
- status = H5Fclose( file_id );
+ if(H5Fclose( file_id ) < 0) goto out;
 
  PASSED();
  return 0;

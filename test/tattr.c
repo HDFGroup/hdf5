@@ -615,7 +615,7 @@ test_attr_compound_read(void)
     fields=H5Tget_nmembers(type);
     VERIFY(fields, 3, "H5Tget_nmembers");
     for(i=0; i<fields; i++) {
-        fieldname=H5Tget_member_name(type,i);
+        fieldname=H5Tget_member_name(type,(unsigned)i);
         if(!(HDstrcmp(fieldname,ATTR4_FIELDNAME1) || 
                 HDstrcmp(fieldname,ATTR4_FIELDNAME2) ||
                 HDstrcmp(fieldname,ATTR4_FIELDNAME3)))

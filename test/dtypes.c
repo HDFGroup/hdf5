@@ -120,11 +120,10 @@ static int num_opaque_conversions_g = 0;
 #define aligned_free(M)		HDfree((char*)(M)-ALIGNMENT)
 
 void some_dummy_func(float x);
+static int my_isnan(flt_t type, void *val);
 static int opaque_check(int tag_it);
-void *test_vltypes_alloc_custom(size_t size, void *info);
-void test_vltypes_free_custom(void *mem, void *info);
-static herr_t
-convert_opaque(hid_t UNUSED st, hid_t UNUSED dt, H5T_cdata_t *cdata,
+static herr_t convert_opaque(hid_t UNUSED st, hid_t UNUSED dt,
+               H5T_cdata_t *cdata,
 	       size_t UNUSED nelmts, size_t UNUSED buf_stride,
                size_t UNUSED bkg_stride, void UNUSED *_buf,
 	       void UNUSED *bkg, hid_t UNUSED dset_xfer_plid);
@@ -1456,9 +1455,9 @@ static int
 test_compound_9(void)
 {
     typedef struct cmpd_struct {
-       int          i1;
-       char*        str;
-       int          i2;
+       int    i1;
+       char*  str;
+       int    i2;
     } cmpd_struct;
 
     cmpd_struct wdata = {11, "variable-length string", 22};
@@ -1561,7 +1560,7 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if(rdata.i1!=wdata.i1 || rdata.i2!=wdata.i2 || strcmp(rdata.str, wdata.str)) {
+    if(rdata.i1!=wdata.i1 || rdata.i2!=wdata.i2 || HDstrcmp(rdata.str, wdata.str)) {
         H5_FAILED(); AT();
         printf("incorrect read data\n");
         goto error;
@@ -2056,12 +2055,12 @@ test_compound_12(void)
 {
     hid_t                   complex_id;
     size_t                  size = 0;
-    size_t                  offset, new_size;
+    size_t                  offset, new_size, tmp_size;
     herr_t ret;
 
     TESTING("adjust size of compound data types");
 
-    /* Create the empty compound type */
+    /* Create a compound type of minimal size */
     if ((complex_id = H5Tcreate(H5T_COMPOUND, 1))<0) goto error;
     
     /* Verify the size */
@@ -2070,22 +2069,26 @@ test_compound_12(void)
 
     /* Add a couple fields and adjust the size */
     offset = size;
-    size+=H5Tget_size(H5T_NATIVE_DOUBLE);
+    if((tmp_size=H5Tget_size(H5T_NATIVE_DOUBLE))==0) goto error; 
+    size+=tmp_size;
     if (H5Tset_size(complex_id, size)<0) goto error;
     if (H5Tinsert(complex_id, "real", offset,
 		  H5T_NATIVE_DOUBLE)<0) goto error;
 
     offset = size;
-    size+=H5Tget_size(H5T_NATIVE_DOUBLE);
+    if((tmp_size=H5Tget_size(H5T_NATIVE_DOUBLE))==0) goto error; 
+    size+=tmp_size;
     if (H5Tset_size(complex_id, size)<0) goto error;
     if (H5Tinsert(complex_id, "imaginary", offset,
 		  H5T_NATIVE_DOUBLE)<0) goto error;
 
     /* Increase and decrease the size. */
-    size+=H5Tget_size(H5T_NATIVE_DOUBLE);
+    if((tmp_size=H5Tget_size(H5T_NATIVE_DOUBLE))==0) goto error; 
+    size+=tmp_size;
     if (H5Tset_size(complex_id, size)<0) goto error;
    
-    size-=H5Tget_size(H5T_NATIVE_DOUBLE);
+    if((tmp_size=H5Tget_size(H5T_NATIVE_DOUBLE))==0) goto error; 
+    size-=tmp_size;
     if (H5Tset_size(complex_id, size)<0) goto error;
 
     /* Verify the size */
@@ -2102,7 +2105,7 @@ test_compound_12(void)
         puts("  Tries to cut off the last member. Should have failed.");
         goto error;
     }
-   
+
     if (H5Tclose (complex_id)<0) goto error;
     PASSED();
     return 0;
@@ -3542,6 +3545,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     unsigned char	dst_bits[32];		/*dest value in LE order*/
     size_t		src_nbits;		/*source length in bits	*/
     size_t		dst_nbits;		/*dst length in bits	*/
+    H5T_sign_t          src_sign;               /*source sign type      */
+    H5T_sign_t          dst_sign;               /*dst sign type         */
     void		*aligned=NULL;		/*aligned temp buffer	*/
     signed char		hw_char;
     unsigned char	hw_uchar;
@@ -3643,6 +3648,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     dst_size = H5Tget_size(dst);
     src_nbits = H5Tget_precision(src); /* not 8*src_size, esp on J90 - QAK */
     dst_nbits = H5Tget_precision(dst); /* not 8*dst_size, esp on J90 - QAK */
+    src_sign = H5Tget_sign(src);
+    dst_sign = H5Tget_sign(dst);
     buf = aligned_malloc(nelmts*MAX(src_size, dst_size));
     saved = aligned_malloc(nelmts*MAX(src_size, dst_size));
     aligned = HDmalloc(sizeof(long_long));
@@ -4142,7 +4149,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             /* Make certain that there isn't some weird number of destination bits */
             assert(dst_nbits%8==0);
 
-	    /* Are the two results the same? */
+            /* Are the two results the same? */
             for (k=(dst_size-(dst_nbits/8)); k<dst_size; k++)
                 if (buf[j*dst_size+k]!=hw[k])
                     break;
@@ -4166,7 +4173,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	     * hardware conversion result during overflows is usually garbage
 	     * so we must handle those cases differetly when checking results.
 	     */
-	    if (H5T_SGN_2==H5Tget_sign(src) && H5T_SGN_2==H5Tget_sign(dst)) {
+	    if (H5T_SGN_2==src_sign && H5T_SGN_2==dst_sign) {
                 if (src_nbits>dst_nbits) {
                     if(0==H5T_bit_get_d(src_bits, src_nbits-1, 1) &&
                             H5T_bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits),
@@ -4211,7 +4218,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                             continue; /*no error*/
                     }
                 }
-	    } else if (H5T_SGN_2==H5Tget_sign(src) && H5T_SGN_NONE==H5Tget_sign(dst)) {
+	    } else if (H5T_SGN_2==src_sign && H5T_SGN_NONE==dst_sign) {
                 if (H5T_bit_get_d(src_bits, src_nbits-1, 1)) {
                     /*
                      * The source is negative so the result should be zero.
@@ -4231,7 +4238,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                     if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 0)<0)
                         continue; /*no error*/
                 }
-	    } else if (H5T_SGN_NONE==H5Tget_sign(src) && H5T_SGN_2==H5Tget_sign(dst)) {
+	    } else if (H5T_SGN_NONE==src_sign && H5T_SGN_2==dst_sign) {
                 if (src_nbits>=dst_nbits &&
                         H5T_bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits)+1,
                             H5T_BIT_LSB, 1)>=0) {
@@ -4690,21 +4697,21 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	goto error;
     }
     
-    /* Allocate buffers */
-    endian = H5Tget_order(H5T_NATIVE_FLOAT);
+    /* Get "interesting" values */
     src_size = H5Tget_size(src);
     dst_size = H5Tget_size(dst);
-    buf   = aligned_malloc(nelmts*MAX(src_size, dst_size));
-    saved = aligned_malloc(nelmts*MAX(src_size, dst_size));
-    aligned = malloc(16); /*should be big enough for any type*/
-#ifdef SHOW_OVERFLOWS
-    noverflows_g = 0;
-#endif
-
-    /* Get "interesting" values */
     dst_ebias=H5Tget_ebias(dst);
     H5Tget_fields(src,NULL,&src_epos,&src_esize,NULL,NULL);
     H5Tget_fields(dst,NULL,&dst_epos,&dst_esize,NULL,&dst_msize);
+
+    /* Allocate buffers */
+    endian = H5Tget_order(H5T_NATIVE_FLOAT);
+    buf   = aligned_malloc(nelmts*MAX(src_size, dst_size));
+    saved = aligned_malloc(nelmts*MAX(src_size, dst_size));
+    aligned = HDmalloc(32); /*should be big enough for any type*/
+#ifdef SHOW_OVERFLOWS
+    noverflows_g = 0;
+#endif
 
     for (i=0; i<ntests; i++) {
 
@@ -4905,7 +4912,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		/* Special check for denormalized values */
 		if(check_expo[0]<(-(int)dst_ebias) || check_expo[1]<(-(int)dst_ebias)) {
 		    int expo_diff=check_expo[0]-check_expo[1];
-		    int valid_bits=((int)(dst_ebias+dst_msize)+MIN(check_expo[0],check_expo[1]))-1;
+		    int valid_bits=(int)((dst_ebias+dst_msize)+MIN(check_expo[0],check_expo[1]))-1;
 		    double epsilon=1.0;
 
 		    /* Re-scale the mantissas based on any exponent difference */

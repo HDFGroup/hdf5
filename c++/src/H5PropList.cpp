@@ -36,32 +36,32 @@ namespace H5 {
 const PropList PropList::DEFAULT( H5P_DEFAULT );
 
 //--------------------------------------------------------------------------
-// Function     Default constructor
-///\brief       Default constructor: creates a stub property list object.
+// Function	Default constructor
+///\brief	Default constructor: creates a stub property list object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PropList::PropList() : IdComponent(0) {}
+PropList::PropList() : IdComponent( 0 ) {}
 
 //--------------------------------------------------------------------------
-// Function:    PropList copy constructor
-///\brief       Copy constructor
-///\param       original - IN: The original property list to copy
+// Function:	PropList copy constructor
+///\brief	Copy constructor
+///\param	original - IN: The original property list to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PropList::PropList( const PropList& original ) : IdComponent( original ) {}
 
 //--------------------------------------------------------------------------
-// Function:    PropList overloaded constructor
-///\brief       Creates a property list using the id of an existing property.
-///\param       plist_id - IN: Id of the existing property list
-///\exception   H5::PropListIException
+// Function:	PropList overloaded constructor
+///\brief	Creates a property list using the id of an existing property.
+///\param	plist_id - IN: Id of the existing property list
+///\exception	H5::PropListIException
 // Description
-//              This function calls H5Pcreate to create a new property list
-//              if the given id, plist_id, is that of a property class.  If
-//              the given id is equal to H5P_NO_CLASS, then set this
-//              property's id to H5P_DEFAULT, otherwise, to the given id.
-//              Note: someone else added this code without comments and this
-//              description was what I came up with from reading the code.
+//		This function calls H5Pcreate to create a new property list 
+//		if the given id, plist_id, is that of a property class.  If 
+//		the given id is equal to H5P_NO_CLASS, then set this 
+//		property's id to H5P_DEFAULT, otherwise, to the given id.  
+//		Note: someone else added this code without comments and this 
+//		description was what I came up with from reading the code.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PropList::PropList( const hid_t plist_id ) : IdComponent(0)
@@ -83,10 +83,10 @@ PropList::PropList( const hid_t plist_id ) : IdComponent(0)
 }
 
 //--------------------------------------------------------------------------
-// Function:    PropList::copy
-///\brief       Makes a copy of an existing property list
-///\param       like_plist - IN: Reference to the existing property list
-///\exception   H5::PropListIException
+// Function:	PropList::copy
+///\brief	Makes a copy of an existing property list.
+///\param	like_plist - IN: Reference to the existing property list
+///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void PropList::copy( const PropList& like_plist )
@@ -106,9 +106,7 @@ void PropList::copy( const PropList& like_plist )
    ref_count = new RefCounter;
 
    if( id <= 0 )
-   {
       throw PropListIException("PropList::copy", "H5Pcopy failed");
-   }
 }
 
 //--------------------------------------------------------------------------
@@ -118,8 +116,8 @@ void PropList::copy( const PropList& like_plist )
 ///\return	Reference to PropList instance
 ///\exception   H5::PropListIException
 // Description
-//              Makes a copy of the property list on the right hand side
-//              and stores the new id in the left hand side object.
+//		Makes a copy of the property list on the right hand side 
+//		and stores the new id in the left hand side object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PropList& PropList::operator=( const PropList& rhs )
@@ -129,12 +127,12 @@ PropList& PropList::operator=( const PropList& rhs )
 }
 
 //--------------------------------------------------------------------------
-// Function:    PropList::copyProp
-///\brief       Copies a property from one list or class to another.
-///\param       dest - IN: Destination property list or class
-///\param       src  - IN: Source property list or class
-///\param       name - IN: Name of the property to copy - \c char pointer
-///\exception   H5::PropListIException
+// Function:	PropList::copyProp
+///\brief	Copies a property from one list or class to another
+///\param	dest - IN: Destination property list or class
+///\param	src  - IN: Source property list or class
+///\param	name - IN: Name of the property to copy - \c char pointer
+///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void PropList::copyProp( PropList& dest, PropList& src, const char *name ) const
@@ -146,7 +144,9 @@ void PropList::copyProp( PropList& dest, PropList& src, const char *name ) const
    {
       throw PropListIException("PropList::copyProp", "H5Pcopy_prop failed");
    }
+
 }
+
 //--------------------------------------------------------------------------
 // Function:    PropList::copyProp
 ///\brief       This is an overloaded member function, provided for convenience.
@@ -187,11 +187,11 @@ void PropList::p_close() const
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
-// Function:    PropList::getClass
-///\brief       Returns the class of this property list, i.e. \c H5P_FILE_CREATE...
-///\return      The property list class if it is not equal to \c H5P_NO_CLASS
-///\exception   H5::PropListIException
-// Programmer:  Binh-Minh Ribler - April, 2004
+// Function:	PropList::getClass
+///\brief	Returns the class of this property list, i.e. \c H5P_FILE_CREATE...
+///\return	The property list class if it is not equal to \c H5P_NO_CLASS
+///\exception	H5::PropListIException
+// Programmer	Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 hid_t PropList::getClass() const
 {
@@ -249,7 +249,7 @@ bool PropList::propExist(const string& name ) const
 ///\brief	Close a property list class.
 ///\exception	H5::PropListIException
 ///\par Description
-///		Releases memory and de-attaches a class from the property 
+///		Releases memory and detaches a class from the property 
 ///		list class hierarchy.
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
@@ -269,8 +269,9 @@ void PropList::closeClass() const
 ///\param	value - OUT: Pointer to the buffer for the property value
 ///\exception	H5::PropListIException
 ///\par Description
-///   Retrieves a copy of the value for a property in a property list.  The
-///   property name must exist or this routine will throw an exception.
+///		Retrieves a copy of the value for a property in a property 
+///		list.  The property name must exist or this routine will 
+///		throw an exception.
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 void PropList::getProperty(const char* name, void* value) const
@@ -373,7 +374,7 @@ size_t PropList::getPropSize(const string& name) const
 
 //--------------------------------------------------------------------------
 // Function:	PropList::getClassName
-///\brief	Return the name of a generic property list class
+///\brief	Return the name of a generic property list class.
 ///\return	A string containing the class name, if success, otherwise,
 ///		a NULL string.
 // Programmer:  Binh-Minh Ribler - April, 2004

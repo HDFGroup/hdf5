@@ -23,8 +23,8 @@
      INTEGER, INTENT(OUT) :: total_error 
      LOGICAL :: status, status1
      INTEGER(HID_T)    :: crtpr_id, xfer_id
-     INTEGER           :: error
      INTEGER           :: nfilters
+     INTEGER           :: error
      INTEGER(HSIZE_T)  :: ch_dims(2)
      INTEGER           :: RANK = 2
      INTEGER           :: dlevel = 6
@@ -180,21 +180,20 @@
           INTEGER     ::   num_errors = 0 ! Number of data errors
 
           INTEGER     :: i, j    !general purpose integers
-          INTEGER(HSIZE_T), DIMENSION(2) :: data_dims_b
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
           INTEGER(HID_T) ::  crp_list
           INTEGER :: options_mask, pix_per_block 
           LOGICAL :: flag
           CHARACTER(LEN=4) filter_name 
-          
+
           INTEGER :: filter_flag = -1
           INTEGER(SIZE_T) :: cd_nelemnts = 4
           INTEGER(SIZE_T) :: filter_name_len = 4
           INTEGER, DIMENSION(4) :: cd_values
-          INTEGER :: config_flag = 0 
+          INTEGER     :: config_flag = 0   ! for h5zget_filter_info_f
 
           !
-          ! Make sure that Szip has an encoder available
+          ! Verify that SZIP exists and has an encoder
           !
           CALL h5zget_filter_info_f(H5Z_FILTER_SZIP_F, config_flag, error)
               CALL check("h5zget_filter_info", error, total_error)
@@ -285,9 +284,9 @@
           !
           ! Write the dataset.
           !
-          data_dims_b(1) = N
-          data_dims_b(2) =  M
-          CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, dset_data, data_dims_b, error)
+          data_dims(1) = N
+          data_dims(2) =  M
+          CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, dset_data, data_dims, error)
               CALL check("h5dwrite_f", error, total_error)
 
 
@@ -338,7 +337,7 @@
           !
           ! Read the dataset.
           !
-          CALL h5dread_f (dset_id, H5T_NATIVE_INTEGER, data_out, data_dims_b, error)
+          CALL h5dread_f (dset_id, H5T_NATIVE_INTEGER, data_out, data_dims, error)
               CALL check("h5dread_f", error, total_error)
 
           !

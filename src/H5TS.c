@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /* private headers */
 #include "H5private.h"		/*library                 		*/
 #include "H5Eprivate.h"		/*error handling          		*/
@@ -148,7 +146,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
     ret_value = pthread_mutex_lock(&mutex->atomic_lock);
 
     if (ret_value)
-	    return ret_value;
+        return ret_value;
 
     if (mutex->owner_thread && pthread_equal(pthread_self(), *mutex->owner_thread)) {
         /* already owned by self - increment count */
@@ -284,7 +282,7 @@ H5TS_cancel_count_inc(void)
 	 * First time thread calls library - create new counter and associate
          * with key
          */
-	cancel_counter = H5MM_malloc(sizeof(H5TS_cancel_t));
+	cancel_counter = H5MM_calloc(sizeof(H5TS_cancel_t));
 
 	if (!cancel_counter) {
 	    H5E_push(H5E_RESOURCE, H5E_NOSPACE, "H5TS_cancel_count_inc",
@@ -292,7 +290,6 @@ H5TS_cancel_count_inc(void)
 	    return FAIL;
 	}
 
-        cancel_counter->cancel_count = 0;
         ret_value = pthread_setspecific(H5TS_cancel_key_g,
 					(void *)cancel_counter);
     }

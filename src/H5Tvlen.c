@@ -19,42 +19,41 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	     */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5T_init_vlen_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5Tvlen_mask
+#define PABLO_MASK	H5T_vlen_mask
 
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"         /* Errors */
-#include "H5FLprivate.h"	/* Free Lists	  */
-#include "H5HGprivate.h"        /* Global Heaps */
-#include "H5Iprivate.h"         /* IDs */
-#include "H5MMprivate.h"        /* Memory Allocation */
-#include "H5Pprivate.h"         /* Property Lists */
-#include "H5Tpkg.h"             /* Datatypes */
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT H5T_init_vlen_interface
-static herr_t H5T_init_vlen_interface(void);
+#include "H5Dprivate.h"		/* Dataset functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5HGprivate.h"	/* Global Heaps				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Tpkg.h"		/* Datatypes				*/
 
 /* Local functions */
-static htri_t H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc);
+static htri_t H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc);
 static herr_t H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, void *free_info);
-static ssize_t H5T_vlen_seq_mem_getlen(void *_vl);
+static ssize_t H5T_vlen_seq_mem_getlen(const void *_vl);
 static void * H5T_vlen_seq_mem_getptr(void *_vl);
-static htri_t H5T_vlen_seq_mem_isnull(H5F_t *f, void *_vl);
+static htri_t H5T_vlen_seq_mem_isnull(const H5F_t *f, void *_vl);
 static herr_t H5T_vlen_seq_mem_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *_buf, size_t len);
 static herr_t H5T_vlen_seq_mem_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *_buf, void *_bg, size_t seq_len, size_t base_size);
 static herr_t H5T_vlen_seq_mem_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg);
-static ssize_t H5T_vlen_str_mem_getlen(void *_vl);
+static ssize_t H5T_vlen_str_mem_getlen(const void *_vl);
 static void * H5T_vlen_str_mem_getptr(void *_vl);
-static htri_t H5T_vlen_str_mem_isnull(H5F_t *f, void *_vl);
+static htri_t H5T_vlen_str_mem_isnull(const H5F_t *f, void *_vl);
 static herr_t H5T_vlen_str_mem_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *_buf, size_t len);
 static herr_t H5T_vlen_str_mem_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *_buf, void *_bg, size_t seq_len, size_t base_size);
 static herr_t H5T_vlen_str_mem_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg);
-static ssize_t H5T_vlen_disk_getlen(void *_vl);
+static ssize_t H5T_vlen_disk_getlen(const void *_vl);
 static void * H5T_vlen_disk_getptr(void *_vl);
-static htri_t H5T_vlen_disk_isnull(H5F_t *f, void *_vl);
+static htri_t H5T_vlen_disk_isnull(const H5F_t *f, void *_vl);
 static herr_t H5T_vlen_disk_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *_buf, size_t len);
 static herr_t H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *_buf, void *_bg, size_t seq_len, size_t base_size);
 static herr_t H5T_vlen_disk_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg);
@@ -69,7 +68,7 @@ static H5T_vlen_alloc_info_t H5T_vlen_def_vl_alloc_info ={
     H5D_XFER_VLEN_FREE_INFO_DEF
 };
 
-/* Declare extern the free list for H5T_t's */
+/* Declare extern the free lists for H5T_t's and H5T_shared_t's */
 H5FL_EXTERN(H5T_t);
 H5FL_EXTERN(H5T_shared_t);
 
@@ -219,7 +218,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
+H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
 {
     htri_t ret_value = 0;       /* Indicate that success, but no location change */
 
@@ -299,7 +298,7 @@ H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
 
             default:
                 HGOTO_ERROR (H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype location")
-        } /* end switch */
+        } /* end switch */ /*lint !e788 All appropriate cases are covered */
     } /* end if */
 
 done:
@@ -322,9 +321,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5T_vlen_seq_mem_getlen(void *_vl)
+H5T_vlen_seq_mem_getlen(const void *_vl)
 {
-    hvl_t *vl=(hvl_t *)_vl;   /* Pointer to the user's hvl_t information */
+    const hvl_t *vl=(const hvl_t *)_vl;   /* Pointer to the user's hvl_t information */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_seq_mem_getlen)
 
@@ -379,7 +378,7 @@ H5T_vlen_seq_mem_getptr(void *_vl)
  */
 /* ARGSUSED */
 static htri_t
-H5T_vlen_seq_mem_isnull(H5F_t UNUSED *f, void *_vl)
+H5T_vlen_seq_mem_isnull(const H5F_t UNUSED *f, void *_vl)
 {
     hvl_t *vl=(hvl_t *)_vl;   /* Pointer to the user's hvl_t information */
 
@@ -534,9 +533,9 @@ H5T_vlen_seq_mem_setnull(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void 
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5T_vlen_str_mem_getlen(void *_vl)
+H5T_vlen_str_mem_getlen(const void *_vl)
 {
-    char *s=*(char **)_vl;   /* Pointer to the user's string information */
+    const char *s=*(const char * const *)_vl;   /* Pointer to the user's string information */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_str_mem_getlen)
 
@@ -591,13 +590,13 @@ H5T_vlen_str_mem_getptr(void *_vl)
  */
 /* ARGSUSED */
 static htri_t
-H5T_vlen_str_mem_isnull(H5F_t UNUSED *f, void *_vl)
+H5T_vlen_str_mem_isnull(const H5F_t UNUSED *f, void *_vl)
 {
     char *s=*(char **)_vl;   /* Pointer to the user's string information */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_str_mem_isnull)
 
-    FUNC_LEAVE_NOAPI(s==NULL ? TRUE : FALSE);
+    FUNC_LEAVE_NOAPI(s==NULL ? TRUE : FALSE)
 }   /* end H5T_vlen_str_mem_isnull() */
 
 
@@ -728,9 +727,9 @@ H5T_vlen_str_mem_setnull(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void 
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5T_vlen_disk_getlen(void *_vl)
+H5T_vlen_disk_getlen(const void *_vl)
 {
-    uint8_t *vl=(uint8_t *)_vl; /* Pointer to the disk VL information */
+    const uint8_t *vl=(const uint8_t *)_vl; /* Pointer to the disk VL information */
     size_t	seq_len;        /* Sequence length */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_disk_getlen)
@@ -758,6 +757,7 @@ H5T_vlen_disk_getlen(void *_vl)
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static void *
 H5T_vlen_disk_getptr(void UNUSED *vl)
 {
@@ -785,7 +785,7 @@ H5T_vlen_disk_getptr(void UNUSED *vl)
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5T_vlen_disk_isnull(H5F_t *f, void *_vl)
+H5T_vlen_disk_isnull(const H5F_t *f, void *_vl)
 {
     uint8_t *vl=(uint8_t *)_vl; /* Pointer to the disk VL information */
     haddr_t addr;               /* Sequence's heap address */
@@ -825,7 +825,6 @@ H5T_vlen_disk_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *buf, size_t UNUSED 
 {
     uint8_t *vl=(uint8_t *)_vl;   /* Pointer to the user's hvl_t information */
     H5HG_t hobjid;
-    uint32_t seq_len;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5T_vlen_disk_read)
@@ -835,8 +834,8 @@ H5T_vlen_disk_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *buf, size_t UNUSED 
     assert(buf);
     assert(f);
 
-    /* Get the length of the sequence */
-    UINT32DECODE(vl, seq_len); /* Not used */
+    /* Skip the length of the sequence */
+    vl += 4;
     
     /* Get the heap information */
     H5F_addr_decode(f,(const uint8_t **)&vl,&(hobjid.addr));
@@ -872,6 +871,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t
 H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t UNUSED *vl_alloc_info, void *_vl, void *buf, void *_bg, size_t seq_len, size_t base_size)
 {
@@ -890,11 +890,10 @@ H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t UNUSED 
     
     /* Free heap object for old data.  */
     if(bg!=NULL) {
-        size_t bg_seq_len;      /* "Background" VL info sequence's length */
         H5HG_t bg_hobjid;       /* "Background" VL info sequence's ID info */
 
-        /* Get the length of the sequence and heap object ID from background data. */
-        UINT32DECODE(bg, bg_seq_len);
+        /* Skip the length of the sequence and heap object ID from background data. */
+        bg += 4;
 
         /* Get heap information */
         H5F_addr_decode(f, (const uint8_t **)&bg, &(bg_hobjid.addr));
@@ -955,11 +954,10 @@ H5T_vlen_disk_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg)
     
     /* Free heap object for old data.  */
     if(bg!=NULL) {
-        hsize_t bg_seq_len=0;   /* "Background" VL info sequence's length */
         H5HG_t bg_hobjid;       /* "Background" VL info sequence's ID info */
 
-        /* Get the length of the sequence and heap object ID from background data. */
-        UINT32DECODE(bg, bg_seq_len);
+        /* Skip the length of the sequence and heap object ID from background data. */
+        bg += 4;
 
         /* Get heap information */
         H5F_addr_decode(f, (const uint8_t **)&bg, &(bg_hobjid.addr));
@@ -1035,7 +1033,7 @@ H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, voi
 
         case H5T_COMPOUND:
             /* Check each field and recurse on VL, compound, enum or array ones */
-            for (i=0; i<(unsigned)dt->shared->u.compnd.nmembs; i++) {
+            for (i=0; i<dt->shared->u.compnd.nmembs; i++) {
                 /* Recurse if it's VL, compound, enum or array */
                 if(H5T_IS_COMPLEX(dt->shared->u.compnd.memb[i].type->shared->type)) {
                     void *off;     /* offset of field */
@@ -1087,7 +1085,7 @@ H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, voi
 
         default:
             break;
-    } /* end switch */
+    } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1103,8 +1101,8 @@ done:
     herr_t H5T_vlen_reclaim(elem,type_id,ndim,point,op_data)
         void *elem;  IN/OUT: Pointer to the dataset element
         hid_t type_id;   IN: Datatype of dataset element
-        hsize_t ndim;    IN: Number of dimensions in dataspace
-        hssize_t *point; IN: Coordinate location of element in dataspace
+        unsigned ndim;    IN: Number of dimensions in dataspace
+        hsize_t *point; IN: Coordinate location of element in dataspace
         void *op_data    IN: Operator data
         
  RETURNS
@@ -1120,7 +1118,7 @@ done:
 --------------------------------------------------------------------------*/
 /* ARGSUSED */
 herr_t 
-H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void *op_data)
+H5T_vlen_reclaim(void *elem, hid_t type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void *op_data)
 {
     H5T_vlen_alloc_info_t *vl_alloc_info = (H5T_vlen_alloc_info_t *)op_data; /* VL allocation info from iterator */
     H5T_t	*dt;
@@ -1231,8 +1229,8 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
 {
     htri_t vlen_changed;    /* Whether H5T_vlen_mark changed the type (even if the size didn't change) */
     htri_t ret_value = 0;   /* Indicate that success, but no location change */
-    int i;                 /* Local index variable */
-    int accum_change=0;    /* Amount of change in the offset of the fields */
+    unsigned i;             /* Local index variable */
+    int accum_change=0;     /* Amount of change in the offset of the fields */
     size_t old_size;        /* Previous size of a field */
 
     FUNC_ENTER_NOAPI(H5T_vlen_mark, FAIL);

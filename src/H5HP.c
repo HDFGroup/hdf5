@@ -30,10 +30,6 @@
 #include "H5HPprivate.h"	/* Heap routines			*/
 #include "H5FLprivate.h"	/* Memory management functions		*/
 
-/* Interface initialization? */
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
-
 /* Local Macros */
 #define H5HP_START_SIZE 16      /* Initial number of entries for heaps */
 
@@ -62,7 +58,7 @@ static herr_t H5HP_sink_min(H5HP_t *heap, size_t loc);
 /* Declare a free list to manage the H5HP_t struct */
 H5FL_DEFINE_STATIC(H5HP_t);
 
-/* Declare a free list to manage arrays of H5HP_ent_t */
+/* Declare a free list to manage sequences of H5HP_ent_t */
 H5FL_SEQ_DEFINE_STATIC(H5HP_ent_t);
 
 
@@ -419,7 +415,7 @@ H5HP_count(const H5HP_t *heap)
 {
     ssize_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HP_count,FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5HP_count);
 
     /* Check args */
     assert(heap);
@@ -436,9 +432,7 @@ H5HP_count(const H5HP_t *heap)
     H5_CHECK_OVERFLOW(heap->nobjs,size_t,ssize_t);
     ret_value=(ssize_t)heap->nobjs;
 
-done:
     /* No post-condition check necessary, since heap is constant */
-
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HP_count() */
 
@@ -547,9 +541,7 @@ done:
 herr_t
 H5HP_top(const H5HP_t *heap, int *val)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5HP_top,FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5HP_top);
 
     /* Check args */
     assert(heap);
@@ -566,11 +558,8 @@ H5HP_top(const H5HP_t *heap, int *val)
     /* Get value of the top object in the heap */
     *val=heap->heap[1].val;
 
-done:
-
     /* No post-condition check necessary, since heap is constant */
-
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5HP_top() */
 
 
@@ -909,9 +898,7 @@ done:
 herr_t
 H5HP_close(H5HP_t *heap)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5HP_close,FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5HP_close);
 
     /* Check args */
     assert(heap);
@@ -930,7 +917,6 @@ H5HP_close(H5HP_t *heap)
     /* Free actual heap object */
     H5FL_FREE(H5HP_t,heap);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5HP_close() */
 

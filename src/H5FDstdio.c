@@ -275,7 +275,7 @@ H5Pset_fapl_stdio(hid_t fapl_id)
     H5Eclear();
 
     if(0 == H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
-        H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1);
+        H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1)
     
     return H5Pset_driver(fapl_id, H5FD_STDIO, NULL);
 }
@@ -336,21 +336,21 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
 
     /* Check arguments */
     if (!name || !*name)
-        H5Epush_ret(func, H5E_ARGS, H5E_BADVALUE, "invalid file name", NULL);
+        H5Epush_ret(func, H5E_ARGS, H5E_BADVALUE, "invalid file name", NULL)
     if (0==maxaddr || HADDR_UNDEF==maxaddr)
-        H5Epush_ret(func, H5E_ARGS, H5E_BADRANGE, "bogus maxaddr", NULL);
+        H5Epush_ret(func, H5E_ARGS, H5E_BADRANGE, "bogus maxaddr", NULL)
     if (ADDR_OVERFLOW(maxaddr))
-        H5Epush_ret(func, H5E_ARGS, H5E_OVERFLOW, "maxaddr too large", NULL);
+        H5Epush_ret(func, H5E_ARGS, H5E_OVERFLOW, "maxaddr too large", NULL)
 
     if (access(name, F_OK) < 0) {
         if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_RDWR)) {
             f = fopen(name, "wb+");
             write_access=1;     /* Note the write access */
-        } else {
-            H5Epush_ret(func, H5E_IO, H5E_CANTOPENFILE, "file doesn't exist and CREAT wasn't specified", NULL);
         }
+        else
+            H5Epush_ret(func, H5E_IO, H5E_CANTOPENFILE, "file doesn't exist and CREAT wasn't specified", NULL)
     } else if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_EXCL)) {
-        H5Epush_ret(func, H5E_IO, H5E_FILEEXISTS, "file exists but CREAT and EXCL were specified", NULL);
+        H5Epush_ret(func, H5E_IO, H5E_FILEEXISTS, "file exists but CREAT and EXCL were specified", NULL)
     } else if (flags & H5F_ACC_RDWR) {
         if (flags & H5F_ACC_TRUNC)
             f = fopen(name, "wb+");
@@ -361,11 +361,11 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
         f = fopen(name, "rb");
     }
     if (!f)
-        H5Epush_ret(func, H5E_IO, H5E_CANTOPENFILE, "fopen failed", NULL);
+        H5Epush_ret(func, H5E_IO, H5E_CANTOPENFILE, "fopen failed", NULL)
 
     /* Build the return value */
     if (NULL==(file = calloc(1,sizeof(H5FD_stdio_t))))
-        H5Epush_ret(func, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed", NULL);
+        H5Epush_ret(func, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed", NULL)
     file->fp = f;
     file->op = H5FD_STDIO_OP_SEEK;
     file->pos = HADDR_UNDEF;
@@ -423,7 +423,7 @@ H5FD_stdio_close(H5FD_t *_file)
     H5Eclear();
 
     if (fclose(file->fp) < 0)
-        H5Epush_ret(func, H5E_IO, H5E_CLOSEERROR, "fclose failed", -1);
+        H5Epush_ret(func, H5E_IO, H5E_CLOSEERROR, "fclose failed", -1)
 
     free(file);
 
@@ -647,7 +647,7 @@ H5FD_stdio_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
 
     *file_handle = &(file->fp);
     if(*file_handle==NULL)
-        H5Epush_ret(func, H5E_IO, H5E_WRITEERROR, "get handle failed", -1);
+        H5Epush_ret(func, H5E_IO, H5E_WRITEERROR, "get handle failed", -1)
     return(0); 
 }
 
@@ -693,11 +693,11 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
 
     /* Check for overflow */
     if (HADDR_UNDEF==addr) 
-        H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
+        H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
     if (REGION_OVERFLOW(addr, size))
-        H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
+        H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
     if (addr+size>file->eoa)
-        H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
+        H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
 
     /* Check easy cases */
     if (0 == size)
@@ -715,7 +715,7 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
         if (fseek(file->fp, (long)addr, SEEK_SET) < 0) {
             file->op = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
-            H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
+            H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fseek failed", -1)
         }
         file->pos = addr;
     }
@@ -738,7 +738,7 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
     if (n == 0 && ferror(file->fp)) {
         file->op = H5FD_STDIO_OP_UNKNOWN;
         file->pos = HADDR_UNDEF;
-        H5Epush_ret(func, H5E_IO, H5E_READERROR, "fread failed", -1);
+        H5Epush_ret(func, H5E_IO, H5E_READERROR, "fread failed", -1)
     } else if (n < size) {
         memset((unsigned char *)buf + n, 0, (size - n));
     }
@@ -791,11 +791,11 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 
     /* Check for overflow conditions */
     if (HADDR_UNDEF==addr)
-        H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
+        H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
     if (REGION_OVERFLOW(addr, size))
-        H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
+        H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
     if (addr+size>file->eoa)
-        H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1);
+        H5Epush_ret (func, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
     
     /*
      * Seek to the correct file position.
@@ -805,7 +805,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         if (fseek(file->fp, (long)addr, SEEK_SET) < 0) {
             file->op = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
-            H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
+            H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fseek failed", -1)
         }
         file->pos = addr;
     }
@@ -818,7 +818,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     if (size != fwrite(buf, 1, size, file->fp)) {
         file->op = H5FD_STDIO_OP_UNKNOWN;
         file->pos = HADDR_UNDEF;
-        H5Epush_ret(func, H5E_IO, H5E_WRITEERROR, "fwrite failed", -1);
+        H5Epush_ret(func, H5E_IO, H5E_WRITEERROR, "fwrite failed", -1)
     }
     
     /*
@@ -883,13 +883,14 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
             li.QuadPart = (LONGLONG)file->eoa;
             (void)SetFilePointer((HANDLE)filehandle,li.LowPart,&li.HighPart,FILE_BEGIN);
             if(SetEndOfFile((HANDLE)filehandle)==0)
-                H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "unable to extend file properly", -1);
+                H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "unable to extend file properly", -1)
 #else /* WIN32 */
             int fd=fileno(file->fp);     /* File descriptor for HDF5 file */
 
             if (-1==file_truncate(fd, (file_offset_t)file->eoa))
-                H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "unable to extend file properly", -1);
+                H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "unable to extend file properly", -1)
 #endif /* WIN32 */
+
             /* Update the eof value */
             file->eof = file->eoa;
 
@@ -903,13 +904,13 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
          */
         if(!closing) {
             if (fflush(file->fp) < 0)
-                H5Epush_ret(func, H5E_IO, H5E_WRITEERROR, "fflush failed", -1);
+                H5Epush_ret(func, H5E_IO, H5E_WRITEERROR, "fflush failed", -1)
         } /* end if */
     } /* end if */
     else {
         /* Double-check for problems */
         if (file->eoa>file->eof)
-            H5Epush_ret(func, H5E_IO, H5E_TRUNCATED, "eoa>eof!", -1);
+            H5Epush_ret(func, H5E_IO, H5E_TRUNCATED, "eoa>eof!", -1)
       } /* end else */
 
     return(0);

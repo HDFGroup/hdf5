@@ -33,10 +33,6 @@
 #include "H5Eprivate.h"
 #include "H5MMprivate.h"
 
-/* Interface initialization? */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
-
 #ifndef NDEBUG
 
 /*-------------------------------------------------------------------------

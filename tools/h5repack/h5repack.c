@@ -264,6 +264,9 @@ static int check_options(pack_opt_t *options)
    case H5D_CHUNKED:
     strcpy(slayout,"chunked");
     break;
+   default:
+    strcpy(slayout,"unknown");
+    break;
    }
    printf(" Apply %s layout to all\n", slayout);
    if (H5D_CHUNKED==options->layout_g) {

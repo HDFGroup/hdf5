@@ -107,8 +107,8 @@ of a dataset.
     <li><a href="#Datatype-SetSize">H5Tset_size</a>
     <li><a href="#Datatype-GetOrder">H5Tget_order</a>
     <li><a href="#Datatype-SetOrder">H5Tset_order</a>
-    <li><a href="#Datatype-GetPrecision">H5Tget_precision</a>&nbsp;&nbsp;
-    <li><a href="#Datatype-SetPrecision">H5Tset_precision</a>&nbsp;&nbsp;
+    <li><a href="#Datatype-GetPrecision">H5Tget_precision</a>
+    <li><a href="#Datatype-SetPrecision">H5Tset_precision</a>
     <li><a href="#Datatype-GetOffset">H5Tget_offset</a>
     <li><a href="#Datatype-SetOffset">H5Tset_offset</a>
     <li><a href="#Datatype-GetPad">H5Tget_pad</a>
@@ -413,20 +413,24 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
          permutation, i.e. C versus FORTRAN array order.  
          &nbsp;
          <b><i>(The parameter </i><code>perm</code><i> is currently unused and is not yet implemented.)</i></b>
-         <p>
+         
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>base</code>
-            <dd>IN: Datatype identifier for the array base datatype.
-        <dt><em>int</em> <code>rank</code>
-            <dd>IN: Rank of the array.
-        <dt><em>const hsize_t</em> <code>dims[/*rank*/]</code>
-            <dd>IN: Size of each array dimension.
-        <dt><em>const int</em> <code>perm[/*rank*/]</code>
-            <dd>IN: Dimension permutation.  
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>base</code></td>
+            <td valign="top">IN: Datatype identifier for the array base datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>rank</code></td>
+            <td valign="top">IN: Rank of the array.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;hsize_t</em>&nbsp;<code>dims[/*rank*/]&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Size of each array dimension.</td></tr>
+        <tr>
+		    <td valign="top"><em>const int</em> <code>perm[/*rank*/]</code></td>
+            <td valign="top">IN: Dimension permutation.  
                 &nbsp;
-                <b><i>(Currently not implemented.)</i></b>
-    </dl>
+                <b><i>(Currently not implemented.)</i></b></td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -467,10 +471,11 @@ END SUBROUTINE h5tarray_create_f
         through the datatype identifier is illegal.  Failure to release 
         a datatype with this call will result in resource leaks.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to release.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">Identifier of datatype to release.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -512,14 +517,17 @@ END SUBROUTINE h5tclose_f
         which, when combined with <code>name</code>, refers to a new 
         named datatype.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>IN: A file or group identifier.
-        <dt><em>const char *</em> <code>name</code>
-            <dd>IN: A datatype name.
-        <dt><em>hid_t</em> <code>type</code>
-            <dd>IN: A datatype identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+          <td valign="top">IN: A file or group identifier.</td></tr>
+        <tr>
+		  <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: A datatype name.</td></tr>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>type</code></td>
+          <td valign="top">IN: A datatype identifier.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -562,10 +570,11 @@ END SUBROUTINE h5tcommit_f
         return committed datatypes with <code>H5Dget_type()</code> are 
         able to share the datatype with other datasets in the same file.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type</code>
-            <dd>IN: Datatype identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Datatype identifier.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>When successful, returns a positive value, for <code>TRUE</code>, 
         if the datatype has been committed, or <code>0</code> (zero), 
@@ -624,20 +633,26 @@ END SUBROUTINE h5tcommitted_f
         As of Release 1.2, this parameter is only used to pass along the 
         variable-length datatype custom allocation information.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>src_id</code>
-            <dd>Identifier for the source datatype.
-        <dt><em>hid_t</em> <code>dst_id</code>
-            <dd>Identifier for the destination datatype.
-        <dt><em>size_t</em> <code>nelmts</code>
-            <dd>Size of array <code>buf</code>.
-        <dt><em>void *</em><code>buf</code>
-            <dd>Array containing pre- and post-conversion values.
-        <dt><em>void *</em><code>background</code>
-            <dd>Optional background buffer.
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>Dataset transfer property list identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>src_id</code></td>
+            <td valign="top">Identifier for the source datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dst_id</code></td>
+            <td valign="top">Identifier for the destination datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>nelmts</code></td>
+            <td valign="top">Size of array <code>buf</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>void *</em><code>buf</code></td>
+            <td valign="top">Array containing pre- and post-conversion values.</td></tr>
+        <tr>
+		    <td valign="top"><em>void&nbsp;*</em><code>background&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Optional background buffer.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">Dataset transfer property list identifier.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -734,12 +749,13 @@ SUBROUTINE
         </dl> </ul>
 -->
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to copy.  Can be a datatype
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to copy.  Can be a datatype
                 identifier, a predefined datatype (defined in 
-                <code>H5Tpublic.h</code>), or a dataset identifier.
-    </dl>
+                <code>H5Tpublic.h</code>), or a dataset identifier.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a datatype identifier if successful;
         otherwise returns a negative value
@@ -790,12 +806,14 @@ END SUBROUTINE h5tcopy_f
         The datatype identifier returned from this function should be 
         released with <code>H5Tclose</code> or resource leaks will result.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>H5T_class_t</em> <code>class</code>
-            <dd>Class of datatype to create.
-        <dt><em>size_t</em> <code>size</code>
-            <dd>The number of bytes in the datatype to create.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5T_class_t</em>&nbsp;<code>class&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Class of datatype to create.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>size</code></td>
+            <td valign="top">The number of bytes in the datatype to create.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns datatype identifier if successful;
         otherwise returns a negative value.
@@ -846,12 +864,14 @@ END SUBROUTINE h5tcreate_f
         Valid class identifiers are as defined in 
 	<a href="#Datatype-GetClass"><code>H5Tget_class</code></a>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dtype_id</code>
-            <dd>Datatype identifier.
-        <dt><em>H5T_class_t</em><code>dtype_class</code>
-            <dd>Datatype class.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dtype_id</code></td>
+            <td valign="top">Datatype identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_class_t</em>&nbsp;<code>dtype_class&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Datatype class.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns <code>TRUE</code> or <code>FALSE</code> if successful;
         otherwise returns a negative value.
@@ -887,10 +907,11 @@ SUBROUTINE
         based on the specified base datatype, <code>parent_id</code>, 
         which must be an integer type.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>parent_id</code>
-            <dd>IN: Datatype identifier for the base datatype.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>parent_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Datatype identifier for the base datatype.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the datatype identifier for the new enumeration datatype if successful;
         otherwise returns a negative value.
@@ -941,14 +962,17 @@ END SUBROUTINE h5tenum_create_f
         <code>value</code> points to data which is of the 
         datatype defined when the enumeration datatype was created.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type</code>
-            <dd>IN: Datatype identifier for the enumeration datatype.
-        <dt><em>const char</em> *<code>name</code>
-            <dd>IN: Name of the new member.
-        <dt><em>void</em> *<code>value</code>
-            <dd>IN: Pointer to the value of the new member.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type</code></td>
+            <td valign="top">IN: Datatype identifier for the enumeration datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char</em>&nbsp;*<code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Name of the new member.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> *<code>value</code></td>
+            <td valign="top">IN: Pointer to the value of the new member.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -997,16 +1021,20 @@ END SUBROUTINE h5tenum_insert_f
         many characters as possible are copied 
         (not null terminated) and the function fails.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type</code>
-            <dd>IN: Enumeration datatype identifier.
-        <dt><em>void</em> *<code>value</code>,
-            <dd>IN: Value of the enumeration datatype.
-        <dt><em>char</em> *<code>name</code>,
-            <dd>OUT: Buffer for output of the symbol name.
-        <dt><em>size_t</em> <code>size</code>
-            <dd>IN: Anticipated size of the symbol name, in bytes (characters).
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type</code></td>
+            <td valign="top">IN: Enumeration datatype identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em>&nbsp;*<code>value,&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Value of the enumeration datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>char</em> *<code>name</code>,</td>
+            <td valign="top">OUT: Buffer for output of the symbol name.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>size</code></td>
+            <td valign="top">IN: Anticipated size of the symbol name, in bytes (characters).</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value 
@@ -1055,14 +1083,17 @@ END SUBROUTINE h5tenum_nameof_f
         as large as the value of <code>H5Tget_size(type)</code>
         in order to hold the result.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type</code>
-            <dd>IN: Enumeration datatype identifier.
-        <dt><em>const char</em> *<code>name</code>,
-            <dd>IN: Symbol name of the enumeration datatype.
-        <dt><em>void</em> *<code>value</code>,
-            <dd>OUT: Buffer for output of the value of the enumeration datatype.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type</code></td>
+            <td valign="top">IN: Enumeration datatype identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char</em>&nbsp;*<code>name,&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Symbol name of the enumeration datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> *<code>value</code>,</td>
+            <td valign="top">OUT: Buffer for output of the value of the enumeration datatype.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1101,12 +1132,14 @@ END SUBROUTINE h5tenum_valueof_f
     <dd><code>H5Tequal</code> determines whether two datatype identifiers 
         refer to the same datatype.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id1</code>
-            <dd>Identifier of datatype to compare.
-        <dt><em>hid_t</em> <code>type_id2</code>
-            <dd>Identifier of datatype to compare.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id1&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to compare.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id2</code></td>
+            <td valign="top">Identifier of datatype to compare.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>When successful, returns a positive value, for <code>TRUE</code>, 
         if the datatype identifiers refer to the same datatype, 
@@ -1154,14 +1187,17 @@ END SUBROUTINE h5tequal_f
         by the soft type conversion function of this path when the 
         conversion function was installed on the path.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>src_id</code>
-            <dd>IN: Identifier for the source datatype.
-        <dt><em>hid_t</em> <code>dst_id</code>
-            <dd>IN: Identifier for the destination datatype.
-        <dt><em>H5T_cdata_t **</em><code>pcdata</code>
-            <dd>OUT: Pointer to type conversion data.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>src_id</code></td>
+            <td valign="top">IN: Identifier for the source datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dst_id</code></td>
+            <td valign="top">IN: Identifier for the destination datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_cdata_t&nbsp;**</em><code>pcdata&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to type conversion data.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a pointer to a suitable conversion function if successful.
         Otherwise returns NULL.
@@ -1202,14 +1238,17 @@ SUBROUTINE
         The dimension permutations, i.e., C versus FORTRAN array order,
         are returned in the array <code>perm</code>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>adtype_id</code>
-            <dd>IN: Datatype identifier of array object.
-        <dt><em>hsize_t *</em><code>dims[]</code>
-            <dd>OUT: Sizes of array dimensions.
-        <dt><em>int *</em><code>perm[]</code>
-            <dd>OUT: Dimension permutations.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>adtype_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Datatype identifier of array object.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t *</em><code>dims[]</code></td>
+            <td valign="top">OUT: Sizes of array dimensions.</td></tr>
+        <tr>
+		    <td valign="top"><em>int *</em><code>perm[]</code></td>
+            <td valign="top">OUT: Dimension permutations.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the non-negative number of dimensions of the array type if successful;
         otherwise returns a negative value.
@@ -1248,10 +1287,11 @@ END SUBROUTINE h5tget_array_dims_f
     <dd><code>H5Tget_array_ndims</code> returns the rank, 
         the number of dimensions, of an array datatype object.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>adtype_id</code>
-            <dd>IN: Datatype identifier of array object.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>adtype_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Datatype identifier of array object.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the rank of the array if successful;
         otherwise returns a negative value.
@@ -1301,10 +1341,11 @@ END SUBROUTINE h5tget_array_ndims_f
             <li><code>H5T_ARRAY</code>
         </ul>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns datatype class identifier if successful;
         otherwise <code>H5T_NO_CLASS</code> (-1).
@@ -1351,15 +1392,16 @@ END SUBROUTINE h5tget_class_f
 <dt><strong>Description:</strong>
     <dd><code>H5Tget_cset</code> retrieves the character set type 
         of a string datatype.  Valid character set types are:
-        <ul> <dl>
+        <dl><ul>
             <dt>H5T_CSET_ASCII (<code>0</code>)
                <dd>Character set is US ASCII
-        </dl> </ul>
+        </ul></dl>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a valid character set type if successful;
         otherwise <code>H5T_CSET_ERROR</code> (-1).
@@ -1398,10 +1440,11 @@ END SUBROUTINE h5tget_cset_f
 <dt><strong>Description:</strong>
     <dd><code>H5Tget_ebias</code> retrieves the exponent bias of a floating-point type.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the bias if successful;
         otherwise 0.
@@ -1447,20 +1490,26 @@ END SUBROUTINE h5tget_ebias_f
         numbered with the least significant bit number zero.
         Any (or even all) of the arguments can be null pointers.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>IN: Identifier of datatype to query.
-        <dt><em>size_t *</em><code>spos</code>
-            <dd>OUT: Pointer to location to return floating-point sign bit.
-        <dt><em>size_t *</em><code>epos</code>
-            <dd>OUT: Pointer to location to return exponent bit-position.
-        <dt><em>size_t *</em><code>esize</code>
-            <dd>OUT: Pointer to location to return size of exponent in bits.
-        <dt><em>size_t *</em><code>mpos</code>
-            <dd>OUT: Pointer to location to return mantissa bit-position.
-        <dt><em>size_t *</em><code>msize</code>
-            <dd>OUT: Pointer to location to return size of mantissa in bits.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of datatype to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t *</em><code>spos</code></td>
+            <td valign="top">OUT: Pointer to location to return floating-point sign bit.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t *</em><code>epos</code></td>
+            <td valign="top">OUT: Pointer to location to return exponent bit-position.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t *</em><code>esize</code></td>
+            <td valign="top">OUT: Pointer to location to return size of exponent in bits.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t *</em><code>mpos</code></td>
+            <td valign="top">OUT: Pointer to location to return mantissa bit-position.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t *</em><code>msize</code></td>
+            <td valign="top">OUT: Pointer to location to return size of mantissa in bits.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1509,10 +1558,11 @@ END SUBROUTINE h5tget_fields_f
                <dd>Leave background alone.
         </dl> </ul>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a valid padding type if successful;
         otherwise <code>H5T_PAD_ERROR</code> (-1).
@@ -1548,7 +1598,7 @@ END SUBROUTINE h5tget_inpad_f
 <dt><strong>Signature:</strong>
     <dd><em>H5T_class_t</em> <code>H5Tget_member_class</code>(
                        <em>hid_t</em> <code>cdtype_id</code>,
-                       <em>int </em><code>member_no</code>
+                       <em>unsigned </em><code>member_no</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Returns datatype class of compound datatype member.
@@ -1557,12 +1607,14 @@ END SUBROUTINE h5tget_inpad_f
         <code>H5Tget_member_class</code> returns the datatype class of 
         the compound datatype member specified by <code>member_no</code>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>cdtype_id</code>
-            <dd>IN: Datatype identifier of compound object.
-        <dt><em>int</em> <code>member_no</code>
-            <dd>IN: Compound object member number.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>cdtype_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Datatype identifier of compound object.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>member_no</code></td>
+            <td valign="top">IN: Compound object member number.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the datatype class, a non-negative value, if successful;
         otherwise returns a negative value.
@@ -1603,12 +1655,14 @@ END SUBROUTINE h5tget_inpad_f
         with index values of 0 through <em>N</em>-1, where <em>N</em> is 
         the value returned by <code>H5Tget_nmembers</code>.  
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-        <dt><em>const char *</em> <code>field_name</code>
-            <dd>Name of the field or member whose index is to be retrieved.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>field_name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Name of the field or member whose index is to be retrieved.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a valid field or member index if successful;
         otherwise returns a negative value.
@@ -1635,7 +1689,7 @@ END SUBROUTINE h5tget_inpad_f
 <dt><strong>Name:</strong> <a name="Datatype-GetMemberName">H5Tget_member_name</a>
 <dt><strong>Signature:</strong>
     <dd><em>char *</em> <code>H5Tget_member_name</code>(<em>hid_t </em><code>type_id</code>,
-        <em>int</em> <code>field_idx</code>
+        <em>unsigned</em> <code>field_idx</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Retrieves the name of a compound or enumeration datatype member.
@@ -1654,13 +1708,15 @@ END SUBROUTINE h5tget_inpad_f
         allocated with <code>malloc()</code> and the caller is responsible 
         for freeing the memory used.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-        <dt><em>int</em> <code>field_idx</code>
-            <dd>Zero-based index of the field or element whose name
-                is to be retrieved.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>field_idx</code></td>
+            <td valign="top">Zero-based index of the field or element whose name
+                is to be retrieved.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a valid pointer to a string allocated with 
         <code>malloc()</code> if successful; 
@@ -1695,7 +1751,7 @@ END SUBROUTINE h5tget_member_name_f
 <dt><strong>Name:</strong> <a name="Datatype-GetMemberOffset">H5Tget_member_offset</a>
 <dt><strong>Signature:</strong>
     <dd><em>size_t</em> <code>H5Tget_member_offset</code>(<em>hid_t </em><code>type_id</code>,
-        <em>int</em> <code>memb_no</code>
+        <em>unsigned</em> <code>memb_no</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Retrieves the offset of a field of a compound datatype.
@@ -1705,12 +1761,14 @@ END SUBROUTINE h5tget_member_name_f
         compound datatype with respect to the beginning 
         of the compound data type datum. 
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-        <dt><em>int</em> <code>memb_no</code>
-            <dd>Number of the field whose offset is requested.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>memb_no</code></td>
+            <td valign="top">Number of the field whose offset is requested.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the byte offset of the field if successful;
         otherwise returns <code>0</code> (zero).
@@ -1746,7 +1804,7 @@ END SUBROUTINE h5tget_member_offset_f
 <dt><strong>Name:</strong> <a name="Datatype-GetMemberType">H5Tget_member_type</a>
 <dt><strong>Signature:</strong>
     <dd><em>hid_t</em> <code>H5Tget_member_type</code>(<em>hid_t </em><code>type_id</code>,
-        <em>int</em> <code>field_idx</code>
+        <em>unsigned</em> <code>field_idx</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Returns the datatype of the specified member.
@@ -1754,12 +1812,14 @@ END SUBROUTINE h5tget_member_offset_f
     <dd><code>H5Tget_member_type</code> returns the datatype of the specified member.  The caller
         should invoke H5Tclose() to release resources associated with the type.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-        <dt><em>int</em> <code>field_idx</code>
-            <dd>Field index (0-based) of the field type to retrieve.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>field_idx</code></td>
+            <td valign="top">Field index (0-based) of the field type to retrieve.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the identifier of a copy of the datatype of the field
         if successful;
@@ -1793,7 +1853,7 @@ END SUBROUTINE h5tget_member_type_f
 <dt><strong>Name:</strong> <a name="Datatype-GetMemberValue">H5Tget_member_value</a>
 <dt><strong>Signature:</strong>
     <dd><em>hid_t</em> <code>H5Tget_member_value</code>(<em>hid_t</em> <code>type</code>
-        <em>int</em> <code>memb_no</code>,
+        <em>unsigned</em> <code>memb_no</code>,
         <em>void</em> *<code>value</code>
     )
 <dt><strong>Purpose:</strong>
@@ -1805,15 +1865,18 @@ END SUBROUTINE h5tget_member_type_f
         The member value is returned in a user-supplied buffer 
         pointed to by <code>value</code>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type</code>
-            <dd>IN: Datatype identifier for the enumeration datatype.
-        <dt><em>int</em> <code>memb_no</code>,
-            <dd>IN: Number of the enumeration datatype member.
-        <dt><em>void</em> *<code>value</code>
-            <dd>OUT: Pointer to a buffer for output of the 
-                value of the enumeration datatype member.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type</code></td>
+            <td valign="top">IN: Datatype identifier for the enumeration datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>memb_no</code>,</td>
+            <td valign="top">IN: Number of the enumeration datatype member.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em>&nbsp;*<code>value&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to a buffer for output of the 
+                value of the enumeration datatype member.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1907,12 +1970,14 @@ END SUBROUTINE h5tget_member_value_f
         should eventually be closed by calling <code>H5Tclose</code> 
         to release resources.    
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Datatype identifier for the dataset datatype.
-        <dt><em>H5T_direction_t</em> <code>direction</code>
-            <dd>Direction of search.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Datatype identifier for the dataset datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_direction_t</em>&nbsp;<code>direction&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Direction of search.</td></tr>
+    </table></ul>
 <!-- NEW PAGE -->
 <dt><strong>Returns:</strong>
     <dd>Returns the native datatype identifier for the  
@@ -1949,10 +2014,11 @@ SUBROUTINE
         the number of fields in a compound datatype or 
         the number of members of an enumeration datatype.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the number of elements if successful;
         otherwise returns a negative value.
@@ -1998,10 +2064,11 @@ END SUBROUTINE h5tget_nmembers_f
                 <dd>Mantissa is not normalized
         </dl> </ul>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a valid normalization type if successful;
         otherwise <code>H5T_NORM_ERROR</code> (-1).
@@ -2093,10 +2160,11 @@ END SUBROUTINE h5tget_norm_f
         </tr>
       </table>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns an offset value if successful;
         otherwise returns a negative value.
@@ -2144,10 +2212,11 @@ END SUBROUTINE h5tget_offset_f
                 <dd>VAX mixed byte ordering (not currently supported).
         </dl></ul>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a byte order constant if successful;
         otherwise <code>H5T_ORDER_ERROR</code> (-1).
@@ -2240,16 +2309,19 @@ SUBROUTINE
                <dd>Leave background alone.
         </dl> </ul>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>IN: Identifier of datatype to query.
-        <dt><em>H5T_pad_t *</em> <code>lsb</code>
-            <dd>OUT: Pointer to location to return least-significant 
-                bit padding type.
-        <dt><em>H5T_pad_t *</em> <code>msb</code>
-            <dd>OUT: Pointer to location to return most-significant 
-                bit padding type.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">IN: Identifier of datatype to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_pad_t&nbsp;*</em>&nbsp;<code>lsb&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to location to return least-significant 
+                bit padding type.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_pad_t *</em> <code>msb</code></td>
+            <td valign="top">OUT: Pointer to location to return most-significant 
+                bit padding type.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -2297,10 +2369,11 @@ END SUBROUTINE h5tget_pad_f
         precision is the number of significant bits which, unless padding is
         present, is 8 times larger than the value returned by H5Tget_size().
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the number of significant bits if successful;
         otherwise 0.
@@ -2343,10 +2416,11 @@ END SUBROUTINE h5tget_precision_f
                <dd>Two's complement signed integer type.
         </dl> </ul>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a valid sign type if successful;
         otherwise <code>H5T_SGN_ERROR</code> (-1).
@@ -2390,10 +2464,11 @@ END SUBROUTINE h5tget_sign_f
 <dt><strong>Description:</strong>
     <dd><code>H5Tget_size</code> returns the size of a datatype in bytes.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the size of the datatype in bytes if successful;
         otherwise 0.
@@ -2432,10 +2507,11 @@ END SUBROUTINE h5tget_size_f
         for a string datatype, as defined in 
         <a href="#Datatype-SetStrpad"><code>H5Tset_strpad</code></a>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a valid string storage mechanism if successful;
         otherwise <code>H5T_STR_ERROR</code> (-1).
@@ -2480,10 +2556,11 @@ END SUBROUTINE h5tget_strpad_f
         <P>
         In the case of an enumeration type, the return value is an integer type.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type</code>
-            <dd>Datatype identifier for the derived datatype.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Datatype identifier for the derived datatype.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the datatype identifier for the base datatype if successful;
         otherwise returns a negative value.
@@ -2523,10 +2600,11 @@ END SUBROUTINE h5tget_super_f
         The tag is returned via a pointer to an 
         allocated string, which the caller must free.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Datatype identifier for the opaque datatype.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Datatype identifier for the opaque datatype.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a pointer to an allocated string if successful;
         otherwise returns <code>NULL</code>.
@@ -2575,16 +2653,20 @@ END SUBROUTINE h5tget_tag_f
         Note: Members of a compound datatype do not have to be atomic datatypes; 
         a compound datatype can have a member which is a compound datatype.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of compound datatype to modify.
-        <dt><em>const char *</em> <code>name</code>
-            <dd>Name of the field to insert.
-        <dt><em>size_t</em> <code>offset</code>
-            <dd>Offset in memory structure of the field to insert.
-        <dt><em>hid_t</em> <code>field_id</code>
-            <dd>Datatype identifier of the field to insert.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of compound datatype to modify.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Name of the field to insert.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>offset</code></td>
+            <td valign="top">Offset in memory structure of the field to insert.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>field_id</code></td>
+            <td valign="top">Datatype identifier of the field to insert.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -2628,10 +2710,11 @@ END SUBROUTINE h5tinsert_f
         This function can be used to distinguish between 
         fixed and variable-length string datatypes.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dtype_id</code>
-            <dd>Datatype identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>dtype_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Datatype identifier.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns <code>TRUE</code> or <code>FALSE</code> if successful;
         otherwise returns a negative value.
@@ -2675,10 +2758,11 @@ END SUBROUTINE h5tis_variable_str_f
         inadvertently change or delete a predefined type.  
         Once a datatype is locked it can never be unlocked.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to lock.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to lock.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -2716,12 +2800,15 @@ SUBROUTINE
         group identifier.  The identifier should eventually be closed 
         by calling <code>H5Tclose</code> to release resources.    
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>IN: A file or group identifier.
-        <dt><em>const char *</em> <code>name</code>
-            <dd>IN: A datatype name, defined within the file or group identified by <code>loc_id</code>.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top">IN: A file or group identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: A datatype name, defined within the file 
+			  or group identified by <code>loc_id</code>.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a named datatype identifier if successful;
         otherwise returns a negative value.
@@ -2761,10 +2848,11 @@ END SUBROUTINE h5topen_f
     <dd><code>H5Tpack</code> recursively removes padding from within a compound
         datatype to make it more efficient (space-wise) to store that data.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to modify.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to modify.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -2858,20 +2946,24 @@ END SUBROUTINE h5tpack_f
         section of&nbsp; &ldquo;The Datatype Interface (H5T)&rdquo; 
         in the <cite>HDF5 User's Guide</cite>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>H5T_pers_t</em> <code>pers</code>
-            <dd><code>H5T_PERS_HARD</code> for hard conversion functions;
-                <code>H5T_PERS_SOFT</code> for soft conversion functions.
-<!-- NEW PAGE -->
-        <dt><em>const char *</em> <code>name</code>
-            <dd>Name displayed in diagnostic output.
-        <dt><em>hid_t</em> <code>src_id</code>
-            <dd>Identifier of source datatype.
-        <dt><em>hid_t</em> <code>dst_id</code>
-            <dd>Identifier of destination datatype.
-        <dt><em>H5T_conv_t</em> <code>func</code>
-            <dd>Function to convert between source and destination datatypes.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5T_pers_t</em> <code>pers</code></td>
+            <td valign="top"><code>H5T_PERS_HARD</code> for hard conversion functions;
+                <code>H5T_PERS_SOFT</code> for soft conversion functions.</td></tr>
+        <tr>
+		    <td valign="top"><em>const char *</em> <code>name</code></td>
+            <td valign="top">Name displayed in diagnostic output.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>src_id</code></td>
+            <td valign="top">Identifier of source datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dst_id</code></td>
+            <td valign="top">Identifier of destination datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_conv_t</em>&nbsp;<code>func&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Function to convert between source and destination datatypes.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -2913,12 +3005,14 @@ SUBROUTINE
                <dd>Character set is US ASCII.
         </dl> </ul>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to modify.
-        <dt><em>H5T_cset_t</em> <code>cset</code>
-            <dd>Character set type.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to modify.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_cset_t</em>&nbsp;<code>cset&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Character set type.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -2958,12 +3052,14 @@ END SUBROUTINE h5tset_cset_f
 <dt><strong>Description:</strong>
     <dd><code>H5Tset_ebias</code> sets the exponent bias of a floating-point type.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to set.
-        <dt><em>size_t</em> <code>ebias</code>
-            <dd>Exponent bias value.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to set.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>ebias</code></td>
+            <td valign="top">Exponent bias value.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3012,21 +3108,27 @@ END SUBROUTINE h5tset_ebias_f
         <P>Fields are not allowed to extend beyond the number of bits of
         precision, nor are they allowed to overlap with one another.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to set.
-        <dt><em>size_t</em> <code>spos</code>
-            <dd>Sign position, i.e., the bit offset of the floating-point 
-                sign bit.
-        <dt><em>size_t</em> <code>epos</code>
-            <dd>Exponent bit position.
-        <dt><em>size_t</em> <code>esize</code>
-            <dd>Size of exponent in bits.
-        <dt><em>size_t</em> <code>mpos</code>
-            <dd>Mantissa bit position.
-        <dt><em>size_t</em> <code>msize</code>
-            <dd>Size of mantissa in bits.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to set.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>spos</code></td>
+            <td valign="top">Sign position, i.e., the bit offset of the floating-point 
+                sign bit.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>epos</code></td>
+            <td valign="top">Exponent bit position.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>esize</code></td>
+            <td valign="top">Size of exponent in bits.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>mpos</code></td>
+            <td valign="top">Mantissa bit position.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>msize</code></td>
+            <td valign="top">Size of mantissa in bits.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3078,12 +3180,14 @@ END SUBROUTINE h5tset_fields_f
                <dd>Leave background alone.
         </dl> </ul>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to modify.
-        <dt><em>H5T_pad_t</em> <code>pad</code>
-            <dd>Padding type.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to modify.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_pad_t</em>&nbsp;<code>pad&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Padding type.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3135,12 +3239,14 @@ END SUBROUTINE h5tset_inpad_f
                 <dd>Mantissa is not normalized
         </dl> </ul>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to set.
-        <dt><em>H5T_norm_t</em> <code>norm</code>
-            <dd>Mantissa normalization type.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to set.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_norm_t</em>&nbsp;<code>norm&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Mantissa normalization type.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3240,12 +3346,14 @@ the value from hanging over the edge of the datatype.
 <P>The offset of an H5T_STRING cannot be set to anything but
 zero.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to set.
-        <dt><em>size_t</em> <code>offset</code>
-            <dd>Offset of first significant bit.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to set.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>offset</code></td>
+            <td valign="top">Offset of first significant bit.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3292,12 +3400,14 @@ END SUBROUTINE h5tset_offset_f
                 <dd>VAX mixed byte ordering (not currently supported).
         </dl> </ul>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to set.
-        <dt><em>H5T_order_t</em> <code>order</code>
-            <dd>Byte ordering constant.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to set.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_order_t</em>&nbsp;<code>order&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Byte ordering constant.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3350,10 +3460,11 @@ END SUBROUTINE h5tset_order_f
         <p>
         The NULL pointer may be passed to remove the overflow handler.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>H5T_overflow_t</em> <code>func</code>
-            <dd>Overflow function.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5T_overflow_t</em>&nbsp;<code>func&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Overflow function.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3387,23 +3498,26 @@ SUBROUTINE
     <dd>Sets the least and most-significant bits padding types.
 <dt><strong>Description:</strong>
     <dd><code>H5Tset_pad</code> sets the least and most-significant bits padding types.
-        <ul> <dl>
+        <dl> <ul>
             <dt>H5T_PAD_ZERO (<code>0</code>)
                <dd>Set background to zeros.
             <dt>H5T_PAD_ONE (<code>1</code>)
                <dd>Set background to ones.
             <dt>H5T_PAD_BACKGROUND (<code>2</code>)
                <dd>Leave background alone.
-        </dl> </ul>
+        </ul> </dl>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to set.
-        <dt><em>H5T_pad_t</em> <code>lsb</code>
-            <dd>Padding type for least-significant bits.
-        <dt><em>H5T_pad_t</em> <code>msb</code>
-            <dd>Padding type for most-significant bits.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to set.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_pad_t</em>&nbsp;<code>lsb&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Padding type for least-significant bits.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_pad_t</em> <code>msb</code></td>
+            <td valign="top">Padding type for most-significant bits.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3460,12 +3574,14 @@ END SUBROUTINE h5tset_pad_f
             locations and sizes of the sign, mantissa, and exponent fields
             first.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to set.
-        <dt><em>size_t</em> <code>precision</code>
-            <dd>Number of bits of precision for datatype.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to set.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em>&nbsp;<code>precision&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Number of bits of precision for datatype.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3508,12 +3624,14 @@ END SUBROUTINE h5tset_precision_f
             <dd>Two's complement signed integer type.
          </dl>
 <dt><strong>Parameters:</strong>
-        <dl>
-		<dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to set.
-        <dt><em>H5T_sign_t</em> <code>sign</code>
-            <dd>Sign type.
-    </dl>
+    <ul><table>
+		<tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to set.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_sign_t</em>&nbsp;<code>sign&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Sign type.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3569,12 +3687,14 @@ END SUBROUTINE h5tset_sign_f
          to 8*<code>size</code>.  A compound datatype may increase in size, 
          but may not shrink.  All datatypes must have a positive size.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to change size.
-        <dt><em>size_t</em> <code>size</code>
-            <dd>Size in bytes to modify datatype.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to change size.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>size</code></td>
+            <td valign="top">Size in bytes to modify datatype.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3641,12 +3761,14 @@ END SUBROUTINE h5tset_size_f
 
 
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of datatype to modify.
-        <dt><em>H5T_str_t</em> <code>strpad</code>
-            <dd>String padding type.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to modify.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_str_t</em>&nbsp;<code>strpad&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">String padding type.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3660,7 +3782,7 @@ SUBROUTINE h5tset_strpad_f(type_id, strpad, hdferr)
   INTEGER, INTENT(IN) :: strpad  ! String padding method for a string datatype 
                                  ! Possible values of padding type are:
                                  !    Pad with zeros (as C does): 
-                                 !r      H5T_STR_NULLPAD_(0)
+                                 !       H5T_STR_NULLPAD_F(0)
                                  !    Pad with spaces (as FORTRAN does): 
                                  !       H5T_STR_SPACEPAD_F(1)
   INTEGER, INTENT(OUT) :: hdferr ! Error code
@@ -3690,13 +3812,15 @@ END SUBROUTINE h5tset_strpad_f
     <dd><code>H5Tset_tag</code> tags an opaque datatype <code>type_id</code>
         with a descriptive ASCII identifier,<code> tag</code>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>IN: Datatype identifier for the opaque datatype to be tagged.
-        <dt><em>const char</em> *<code>tag</code>
-            <dd>IN: Descriptive ASCII string with which the 
-                opaque datatype is to be tagged.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">IN: Datatype identifier for the opaque datatype to be tagged.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char</em>&nbsp;*<code>tag&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Descriptive ASCII string with which the 
+                opaque datatype is to be tagged.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3736,10 +3860,11 @@ END SUBROUTINE h5tset_tag_f
         The conversion function pointer type declaration is described in 
         <a href="#Datatype-Register">H5Tregister</a>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>H5T_conv_t</em> <code>func</code>
-            <dd>Function to remove from conversion paths.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5T_conv_t</em>&nbsp;<code>func&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Function to remove from conversion paths.</td>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3783,10 +3908,11 @@ SUBROUTINE
         The datatype identifier returned from this function should be 
         released with <code>H5Tclose</code> or resource leaks will result.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>base_type_id</code>
-            <dd>Base type of datatype to create.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>base_type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Base type of datatype to create.</td></tr>
+    </table></ul>
 <dt><strong>See Also:</strong>
     <dd><a href="RM_H5D.html#Dataset-GetVLBuf">H5Dget_vlen_buf_size</a>
     <dd><a href="RM_H5D.html#Dataset-VLReclaim">H5Dvlen_reclaim</a>

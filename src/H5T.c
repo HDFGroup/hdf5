@@ -21,6 +21,9 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5T_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5T_mask
@@ -40,10 +43,6 @@
 #ifdef H5_HAVE_SYS_FPU_H
 #include <sys/fpu.h>
 #endif /* H5_HAVE_SYS_FPU_H */
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT H5T_init_interface
 
 /*
  * Predefined data types. These are initialized at runtime in H5Tinit.c and
@@ -245,7 +244,10 @@ static struct {
 /* The overflow handler */
 H5T_overflow_t H5T_overflow_g = NULL;
 
-/* Declare the free lists for H5T_t's and H5T_shared_t's */
+/* The native endianess of the platform */
+H5T_order_t H5T_native_order_g = H5T_ORDER_ERROR;
+
+/* Declare the free list for H5T_t's and H5T_shared_t's */
 H5FL_DEFINE(H5T_t);
 H5FL_DEFINE(H5T_shared_t);
 
@@ -518,7 +520,7 @@ H5T_init_inf(void)
     dst = &dst_p->shared->u.atomic;
 
     /* Check that we can re-order the bytes correctly */
-    if (H5T_ORDER_LE!=dst->order && H5T_ORDER_BE!=dst->order)
+    if (H5T_ORDER_LE!=H5T_native_order_g && H5T_ORDER_BE!=H5T_native_order_g)
         HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
 
     /* +Inf */
@@ -528,7 +530,7 @@ H5T_init_inf(void)
     H5T_bit_set (d, dst->u.f.mpos, dst->u.f.msize, FALSE);
 
     /* Swap the bytes if the machine architecture is big-endian */
-    if (H5T_ORDER_BE==dst->order) {
+    if (H5T_ORDER_BE==H5T_native_order_g) {
         half_size = dst_p->shared->size/2;
         for (u=0; u<half_size; u++) {
             uint8_t tmp = d[dst_p->shared->size-(u+1)];
@@ -544,7 +546,7 @@ H5T_init_inf(void)
     H5T_bit_set (d, dst->u.f.mpos, dst->u.f.msize, FALSE);
 
     /* Swap the bytes if the machine architecture is big-endian */
-    if (H5T_ORDER_BE==dst->order) {
+    if (H5T_ORDER_BE==H5T_native_order_g) {
         half_size = dst_p->shared->size/2;
         for (u=0; u<half_size; u++) {
             uint8_t tmp = d[dst_p->shared->size-(u+1)];
@@ -559,7 +561,7 @@ H5T_init_inf(void)
     dst = &dst_p->shared->u.atomic;
 
     /* Check that we can re-order the bytes correctly */
-    if (H5T_ORDER_LE!=dst->order && H5T_ORDER_BE!=dst->order)
+    if (H5T_ORDER_LE!=H5T_native_order_g && H5T_ORDER_BE!=H5T_native_order_g)
         HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
 
     /* +Inf */
@@ -569,7 +571,7 @@ H5T_init_inf(void)
     H5T_bit_set (d, dst->u.f.mpos, dst->u.f.msize, FALSE);
 
     /* Swap the bytes if the machine architecture is big-endian */
-    if (H5T_ORDER_BE==dst->order) {
+    if (H5T_ORDER_BE==H5T_native_order_g) {
         half_size = dst_p->shared->size/2;
         for (u=0; u<half_size; u++) {
             uint8_t tmp = d[dst_p->shared->size-(u+1)];
@@ -585,7 +587,7 @@ H5T_init_inf(void)
     H5T_bit_set (d, dst->u.f.mpos, dst->u.f.msize, FALSE);
 
     /* Swap the bytes if the machine architecture is big-endian */
-    if (H5T_ORDER_BE==dst->order) {
+    if (H5T_ORDER_BE==H5T_native_order_g) {
         half_size = dst_p->shared->size/2;
         for (u=0; u<half_size; u++) {
             uint8_t tmp = d[dst_p->shared->size-(u+1)];
@@ -1183,7 +1185,7 @@ H5T_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_term_interface);
 
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
 	/* Unregister all conversion functions */
 	for (i=0; i<H5T_g.npaths; i++) {
 	    path = H5T_g.path[i];
@@ -1318,7 +1320,7 @@ H5T_term_interface(void)
         H5T_NATIVE_UINT_FAST64_g		= FAIL;
 
 	/* Mark interface as closed */
-	interface_initialize_g = 0;
+	H5_interface_initialize_g = 0;
 	n = 1; /*H5I*/
     }
     FUNC_LEAVE_NOAPI(n);
@@ -1760,7 +1762,7 @@ done:
 htri_t
 H5T_detect_class (const H5T_t *dt, H5T_class_t cls)
 {
-    int		i;
+    unsigned	i;
     htri_t      ret_value=FALSE;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_detect_class, FAIL);
@@ -2564,7 +2566,6 @@ done:
     FUNC_LEAVE_API(ret_value);
 }
 
-
 /*-------------------------------------------------------------------------
  * API functions are above; library-private functions are below...
  *------------------------------------------------------------------------- 
@@ -2781,7 +2782,6 @@ done:
         if(shared_fo)
             shared_fo->fo_count--;
     }
-
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -2877,7 +2877,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 {
     H5T_t	*new_dt=NULL, *tmp=NULL;
     H5T_shared_t    *reopened_fo;
-    int	i;
+    unsigned	i;
     char	*s;
     H5T_t	*ret_value;
 
@@ -2972,7 +2972,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                  new_dt->shared->u.compnd.nmembs * sizeof(H5T_cmemb_t));
 
             for (i=0; i<new_dt->shared->u.compnd.nmembs; i++) {
-                int	j;
+                unsigned	j;
                 int    old_match;
 
                 s = new_dt->shared->u.compnd.memb[i].name;
@@ -3060,7 +3060,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 
     /* Deep copy of the symbol table entry, if there was one */
     if (H5F_addr_defined(old_dt->ent.header))
-        if (H5G_ent_copy(&(new_dt->ent), &(old_dt->ent), H5G_COPY_DEEP)<0)
+        if (H5G_ent_copy(&(new_dt->ent), &(old_dt->ent),H5G_COPY_DEEP)<0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry");
 
     /* Set return value */
@@ -3143,7 +3143,7 @@ done:
 herr_t
 H5T_free(H5T_t *dt)
 {
-    int	i;
+    unsigned	i;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_free, FAIL);
@@ -3503,9 +3503,11 @@ H5T_get_size(const H5T_t *dt)
 int
 H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 {
-    int	*idx1 = NULL, *idx2 = NULL;
+    unsigned	*idx1 = NULL, *idx2 = NULL;
     int	ret_value = 0;
-    int	i, j, tmp;
+    int	i, j;
+    unsigned u;
+    int	tmp;
     hbool_t	swapped;
     size_t	base_size;
 
@@ -3542,11 +3544,11 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
                 HGOTO_DONE(1);
 
             /* Build an index for each type so the names are sorted */
-            if (NULL==(idx1 = H5MM_malloc(dt1->shared->u.compnd.nmembs * sizeof(int))) ||
-                    NULL==(idx2 = H5MM_malloc(dt1->shared->u.compnd.nmembs * sizeof(int))))
+            if (NULL==(idx1 = H5MM_malloc(dt1->shared->u.compnd.nmembs * sizeof(unsigned))) ||
+                    NULL==(idx2 = H5MM_malloc(dt1->shared->u.compnd.nmembs * sizeof(unsigned))))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
-            for (i=0; i<dt1->shared->u.compnd.nmembs; i++)
-                idx1[i] = idx2[i] = i;
+            for (u=0; u<dt1->shared->u.compnd.nmembs; u++)
+                idx1[u] = idx2[u] = u;
             for (i=dt1->shared->u.compnd.nmembs-1, swapped=TRUE; swapped && i>=0; --i) {
                 for (j=0, swapped=FALSE; j<i; j++) {
                     if (HDstrcmp(dt1->shared->u.compnd.memb[idx1[j]].name,
@@ -3572,35 +3574,31 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 
 #ifdef H5T_DEBUG
             /* I don't quite trust the code above yet :-)  --RPM */
-            for (i=0; i<dt1->shared->u.compnd.nmembs-1; i++) {
-                assert(HDstrcmp(dt1->shared->u.compnd.memb[idx1[i]].name,
-                        dt1->shared->u.compnd.memb[idx1[i + 1]].name));
-                assert(HDstrcmp(dt2->shared->u.compnd.memb[idx2[i]].name,
-                        dt2->shared->u.compnd.memb[idx2[i + 1]].name));
+            for (u=0; u<dt1->shared->u.compnd.nmembs-1; u++) {
+                assert(HDstrcmp(dt1->shared->u.compnd.memb[idx1[u]].name,
+                        dt1->shared->u.compnd.memb[idx1[u + 1]].name));
+                assert(HDstrcmp(dt2->shared->u.compnd.memb[idx2[u]].name,
+                        dt2->shared->u.compnd.memb[idx2[u + 1]].name));
             }
 #endif
 
             /* Compare the members */
-            for (i=0; i<dt1->shared->u.compnd.nmembs; i++) {
-                tmp = HDstrcmp(dt1->shared->u.compnd.memb[idx1[i]].name,
-                       dt2->shared->u.compnd.memb[idx2[i]].name);
+            for (u=0; u<dt1->shared->u.compnd.nmembs; u++) {
+                tmp = HDstrcmp(dt1->shared->u.compnd.memb[idx1[u]].name,
+                       dt2->shared->u.compnd.memb[idx2[u]].name);
                 if (tmp < 0)
                     HGOTO_DONE(-1);
                 if (tmp > 0)
                     HGOTO_DONE(1);
 
-                if (dt1->shared->u.compnd.memb[idx1[i]].offset <
-                dt2->shared->u.compnd.memb[idx2[i]].offset) HGOTO_DONE(-1);
-                if (dt1->shared->u.compnd.memb[idx1[i]].offset >
-                dt2->shared->u.compnd.memb[idx2[i]].offset) HGOTO_DONE(1);
+                if (dt1->shared->u.compnd.memb[idx1[u]].offset < dt2->shared->u.compnd.memb[idx2[u]].offset) HGOTO_DONE(-1);
+                if (dt1->shared->u.compnd.memb[idx1[u]].offset > dt2->shared->u.compnd.memb[idx2[u]].offset) HGOTO_DONE(1);
 
-                if (dt1->shared->u.compnd.memb[idx1[i]].size <
-                dt2->shared->u.compnd.memb[idx2[i]].size) HGOTO_DONE(-1);
-                if (dt1->shared->u.compnd.memb[idx1[i]].size >
-                dt2->shared->u.compnd.memb[idx2[i]].size) HGOTO_DONE(1);
+                if (dt1->shared->u.compnd.memb[idx1[u]].size < dt2->shared->u.compnd.memb[idx2[u]].size) HGOTO_DONE(-1);
+                if (dt1->shared->u.compnd.memb[idx1[u]].size > dt2->shared->u.compnd.memb[idx2[u]].size) HGOTO_DONE(1);
 
-                tmp = H5T_cmp(dt1->shared->u.compnd.memb[idx1[i]].type,
-                      dt2->shared->u.compnd.memb[idx2[i]].type);
+                tmp = H5T_cmp(dt1->shared->u.compnd.memb[idx1[u]].type,
+                      dt2->shared->u.compnd.memb[idx2[u]].type);
                 if (tmp < 0) HGOTO_DONE(-1);
                 if (tmp > 0) HGOTO_DONE(1);
             }
@@ -3616,11 +3614,11 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
                 HGOTO_DONE(1);
 
             /* Build an index for each type so the names are sorted */
-            if (NULL==(idx1 = H5MM_malloc(dt1->shared->u.enumer.nmembs * sizeof(int))) ||
-                    NULL==(idx2 = H5MM_malloc(dt1->shared->u.enumer.nmembs * sizeof(int))))
+            if (NULL==(idx1 = H5MM_malloc(dt1->shared->u.enumer.nmembs * sizeof(unsigned))) ||
+                    NULL==(idx2 = H5MM_malloc(dt1->shared->u.enumer.nmembs * sizeof(unsigned))))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
-            for (i=0; i<dt1->shared->u.enumer.nmembs; i++)
-                idx1[i] = idx2[i] = i;
+            for (u=0; u<dt1->shared->u.enumer.nmembs; u++)
+                idx1[u] = idx2[u] = u;
             for (i=dt1->shared->u.enumer.nmembs-1, swapped=TRUE; swapped && i>=0; --i) {
                 for (j=0, swapped=FALSE; j<i; j++) {
                     if (HDstrcmp(dt1->shared->u.enumer.name[idx1[j]],
@@ -3646,24 +3644,24 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 
 #ifdef H5T_DEBUG
             /* I don't quite trust the code above yet :-)  --RPM */
-            for (i=0; i<dt1->shared->u.enumer.nmembs-1; i++) {
-                assert(HDstrcmp(dt1->shared->u.enumer.name[idx1[i]],
-                        dt1->shared->u.enumer.name[idx1[i+1]]));
-                assert(HDstrcmp(dt2->shared->u.enumer.name[idx2[i]],
-                        dt2->shared->u.enumer.name[idx2[i+1]]));
+            for (u=0; u<dt1->shared->u.enumer.nmembs-1; u++) {
+                assert(HDstrcmp(dt1->shared->u.enumer.name[idx1[u]],
+                        dt1->shared->u.enumer.name[idx1[u+1]]));
+                assert(HDstrcmp(dt2->shared->u.enumer.name[idx2[u]],
+                        dt2->shared->u.enumer.name[idx2[u+1]]));
             }
 #endif
 
             /* Compare the members */
             base_size = dt1->shared->parent->shared->size;
-            for (i=0; i<dt1->shared->u.enumer.nmembs; i++) {
-                tmp = HDstrcmp(dt1->shared->u.enumer.name[idx1[i]],
-                       dt2->shared->u.enumer.name[idx2[i]]);
+            for (u=0; u<dt1->shared->u.enumer.nmembs; u++) {
+                tmp = HDstrcmp(dt1->shared->u.enumer.name[idx1[u]],
+                       dt2->shared->u.enumer.name[idx2[u]]);
                 if (tmp<0) HGOTO_DONE(-1);
                 if (tmp>0) HGOTO_DONE(1);
 
-                tmp = HDmemcmp(dt1->shared->u.enumer.value+idx1[i]*base_size,
-                       dt2->shared->u.enumer.value+idx2[i]*base_size,
+                tmp = HDmemcmp(dt1->shared->u.enumer.value+idx1[u]*base_size,
+                       dt2->shared->u.enumer.value+idx2[u]*base_size,
                        base_size);
                 if (tmp<0) HGOTO_DONE(-1);
                 if (tmp>0) HGOTO_DONE(1);
@@ -4573,7 +4571,7 @@ herr_t
 H5T_debug(const H5T_t *dt, FILE *stream)
 {
     const char	*s1="", *s2="";
-    int		i;
+    unsigned	i;
     size_t	k, base_size;
     uint64_t	tmp;
     herr_t ret_value=SUCCEED;   /* Return value */

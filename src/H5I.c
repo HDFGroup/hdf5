@@ -34,6 +34,13 @@
 
 #define H5I_PACKAGE		/*suppress error about including H5Ipkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5I_init_interface
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5I_mask
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
@@ -50,13 +57,6 @@
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Tprivate.h"		/* Datatypes				*/
 #endif /* H5I_DEBUG_OUTPUT */
-
-/* Pablo information */
-#define PABLO_MASK	H5I_mask
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT H5I_init_interface
 
 /* Local Macros */
 
@@ -115,7 +115,6 @@ static H5I_id_group_t *H5I_id_group_list_g[H5I_NGROUPS];
 H5FL_DEFINE_STATIC(H5I_id_info_t);
 
 /*--------------------- Local function prototypes ---------------------------*/
-static herr_t H5I_init_interface(void);
 static H5I_id_info_t *H5I_find_id(hid_t id);
 static hid_t H5I_get_file_id(hid_t obj_id);
 static int H5I_get_ref(hid_t id);
@@ -181,7 +180,7 @@ H5I_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5I_term_interface);
 
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
         /* How many groups are still being used? */
         for (grp=(H5I_type_t)0; grp<H5I_NGROUPS; H5_INC_ENUM(H5I_type_t,grp)) {
             if ((grp_ptr=H5I_id_group_list_g[grp]) && grp_ptr->id_list)
@@ -198,7 +197,7 @@ H5I_term_interface(void)
         }
 
         /* Mark interface closed */
-        interface_initialize_g = 0;
+        H5_interface_initialize_g = 0;
     }
     FUNC_LEAVE_NOAPI(n);
 }
@@ -1294,7 +1293,9 @@ done:
  *
  * Purpose: Gets a name of an object from its ID. 
  *
- * Return: Success: 0, Failure: -1
+ * Return: Success: The length of name.
+ * 
+ *         Failure: -1
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -1434,7 +1435,6 @@ done:
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
 #endif /* H5I_DEBUG_OUTPUT */
-
 
 
 /*-------------------------------------------------------------------------

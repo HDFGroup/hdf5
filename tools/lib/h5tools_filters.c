@@ -82,7 +82,6 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
   
   switch (filtn)
   {
-
 /*-------------------------------------------------------------------------
  * user defined filter	   
  *-------------------------------------------------------------------------
@@ -91,7 +90,7 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
     if (name)
      print_warning(name,"user defined");
     return 0;
-   break;
+
 /*-------------------------------------------------------------------------
  * H5Z_FILTER_DEFLATE	   1 , deflation like gzip	   
  *-------------------------------------------------------------------------
@@ -147,5 +146,95 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function: h5tools_canwritef
+ *
+ * Purpose: check if the filter is available and can write data.
+ * At this time, all filters that are available can write data,
+ * except SZIP, which may be configured decoder-only.
+ *
+ * Return: 1, can write, 0, cannot, -1 error
+ *
+ * Programmer: 
+ *
+ * Date: October 5, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+int h5tools_can_encode( H5Z_filter_t filtn) 
+{
 
- 
+ int          have_deflate=0; /* assume initially we do not have filters */
+ int          have_szip=0;
+ int          have_shuffle=0; 
+ int          have_fletcher=0;
+ unsigned int filter_config_flags;
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+ have_deflate=1;
+#endif
+#ifdef H5_HAVE_FILTER_SZIP
+ have_szip=1;
+#endif
+#ifdef H5_HAVE_FILTER_SHUFFLE
+ have_shuffle=1;
+#endif
+#ifdef H5_HAVE_FILTER_FLETCHER32
+ have_fletcher=1;
+#endif
+
+  switch (filtn)
+  {
+    /* user defined filter	   */
+  default:
+    return 0;
+
+  case H5Z_FILTER_DEFLATE:
+   if (!have_deflate)
+   {
+    return 0;
+   }
+   break;
+  case H5Z_FILTER_SZIP:
+   if (!have_szip)
+   {
+    return 0;
+   }
+   if(H5Zget_filter_info(filtn, &filter_config_flags)<0)
+       return -1;
+   if ((filter_config_flags & 
+          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) == 0) {
+    /* filter present but neither encode nor decode is supported (???) */
+    return -1;
+   } else if ((filter_config_flags & 
+          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) == 
+    H5Z_FILTER_CONFIG_DECODE_ENABLED) {
+     /* decoder only: read but not write */
+    return 0;
+   } else if ((filter_config_flags & 
+          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) == 
+    H5Z_FILTER_CONFIG_ENCODE_ENABLED) {
+     /* encoder only: write but not read (???) */
+     return -1;
+   } else if ((filter_config_flags & 
+          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) == 
+          (H5Z_FILTER_CONFIG_ENCODE_ENABLED|H5Z_FILTER_CONFIG_DECODE_ENABLED)) { 
+    return 1;
+   }
+   break;
+  case H5Z_FILTER_SHUFFLE:
+   if (!have_shuffle)
+   {
+    return 0;
+   }
+   break;
+  case H5Z_FILTER_FLETCHER32:
+   if (!have_fletcher)
+   {
+    return 0;
+   }
+   break;
+  }/*switch*/
+
+ return 1;
+}

@@ -23,16 +23,12 @@
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK      H5Stest_mask
+#define PABLO_MASK      H5S_test_mask
 
 #include "H5private.h"		/* Generic Functions			  */
 #include "H5Eprivate.h"		/* Error handling		  */
 #include "H5Iprivate.h"		/* ID Functions		  */
 #include "H5Spkg.h"		/* Dataspace functions			  */
-
-/* Interface initialization */
-#define INTERFACE_INIT  NULL
-static int             interface_initialize_g = 0;
 
 
 /*--------------------------------------------------------------------------

@@ -33,6 +33,9 @@
  *		
  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5FD_family_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5FD_family_mask
@@ -131,10 +134,6 @@ static const H5FD_class_t H5FD_family_g = {
     NULL,                                       /*unlock                */
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
 };
-
-/* Interface initialization */
-#define INTERFACE_INIT	H5FD_family_init_interface
-static int interface_initialize_g = 0;
 
 
 /*--------------------------------------------------------------------------
@@ -568,6 +567,13 @@ done:
  *              Wednesday, August  4, 1999
  *
  * Modifications:
+ *              Raymond Lu
+ *              Thursday, November 18, 2004
+ *              When file is re-opened, member size passed in from access property
+ *              is checked to see if it's reasonable.  If there is only 1 member 
+ *              file, member size can't be smaller than current member size. 
+ *              If there are at least 2 member files, member size can only be equal 
+ *              the 1st member size.
  *
  *-------------------------------------------------------------------------
  */
@@ -578,10 +584,10 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_family_t	*file=NULL;
     H5FD_t     		*ret_value=NULL;
     char		memb_name[4096], temp[4096];
-    hsize_t		eof;
+    hsize_t		eof1=HADDR_UNDEF, eof2=HADDR_UNDEF;
     unsigned		t_flags = flags & ~H5F_ACC_CREAT;
     H5P_genplist_t      *plist;      /* Property list pointer */
-    
+
     FUNC_ENTER_NOAPI(H5FD_family_open, NULL)
 
     /* Check arguments */
@@ -631,7 +637,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
 
         /* Enlarge member array */
         if (file->nmembs>=file->amembs) {
-            int n = MAX(64, 2*file->amembs);
+            unsigned n = MAX(64, 2*file->amembs);
             H5FD_t **x = H5MM_realloc(file->memb, n*sizeof(H5FD_t*));
 
             if (!x)
@@ -657,14 +663,28 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
         }
         file->nmembs++;
     }
-    
-    /*
-     * The size of the first member determines the size of all the members,
-     * but if the size of the first member is zero then use the member size
-     * from the file access property list.
+
+    /* 
+     * Get file size of the first 2 member files if exist.  Check if user sets 
+     * reasonable member size.   
      */
-    if ((eof=H5FDget_eof(file->memb[0])))
-        file->memb_size = eof;
+    if(HADDR_UNDEF==(eof1 = H5FD_get_eof(file->memb[0])))
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "file get eof1 request failed")
+    if(file->memb[1] && (HADDR_UNDEF==(eof2 = H5FD_get_eof(file->memb[1]))))
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "file get eof2 request failed")
+            
+    if(eof1 && (eof2==HADDR_UNDEF || !eof2)) {  
+        /* If there is only 1 member file, new member size can't be smaller than 
+         * current member size. 
+         */
+        if(file->memb_size<eof1)
+            file->memb_size = eof1;
+    } else if(eof1 && eof2) { 
+        /* If there are at least 2 member files, new member size can only be equal 
+         * to the 1st member size
+         */
+        file->memb_size = eof1;
+    }
 
     ret_value=(H5FD_t *)file;
 
@@ -676,7 +696,7 @@ done:
 
         for (u=0; u<file->nmembs; u++)
             if (file->memb[u])
-                if (H5FDclose(file->memb[u])<0)
+                if (H5FD_close(file->memb[u])<0)
                     nerrors++;
         if (nerrors)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "unable to close member files")
@@ -813,7 +833,9 @@ H5FD_family_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
     if(flags) {
         *flags=0;
         *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
-        *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
+        /**flags|=H5FD_FEAT_ACCUMULATE_METADATA;*/ /* OK to accumulate metadata for faster writes. 
+                                                    * - Turn it off temporarily because there's a bug
+                                                    * when trying to flush metadata during closing. */
         *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
         *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
     }
@@ -888,7 +910,7 @@ H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa)
 
         /* Enlarge member array */
         if (u>=file->amembs) {
-            int n = MAX(64, 2*file->amembs);
+            unsigned n = MAX(64, 2*file->amembs);
             H5FD_t **x = H5MM_realloc(file->memb, n*sizeof(H5FD_t*));
             if (!x)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block")
@@ -966,7 +988,7 @@ H5FD_family_get_eof(H5FD_t *_file)
      */
     assert(file->nmembs>0);
     for (i=(int)file->nmembs-1; i>=0; --i) {
-        if ((eof=H5FD_get_eof(file->memb[i])))
+        if ((eof=H5FD_get_eof(file->memb[i]))!=0)
             break;
         if (0==i)
             break;

@@ -33,7 +33,7 @@
 static herr_t H5O_attr_encode (H5F_t *f, uint8_t *p, const void *mesg);
 static void *H5O_attr_decode (H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static void *H5O_attr_copy (const void *_mesg, void *_dest, unsigned update_flags);
-static size_t H5O_attr_size (H5F_t *f, const void *_mesg);
+static size_t H5O_attr_size (const H5F_t *f, const void *_mesg);
 static herr_t H5O_attr_reset (void *_mesg);
 static herr_t H5O_attr_free (void *mesg);
 static herr_t H5O_attr_delete (H5F_t *f, hid_t dxpl_id, const void *_mesg);
@@ -67,9 +67,6 @@ const H5O_class_t H5O_ATTR[1] = {{
 
 /* Flags for attribute flag encoding */
 #define H5O_ATTR_FLAG_TYPE_SHARED       0x01
-
-/* Interface initialization */
-#define INTERFACE_INIT  NULL
 
 /* Declare extern the free list for H5A_t's */
 H5FL_EXTERN(H5A_t);
@@ -415,7 +412,7 @@ done:
  *	Added padding between message parts for alignment.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_attr_size(H5F_t UNUSED *f, const void *_mesg)
+H5O_attr_size(const H5F_t UNUSED *f, const void *_mesg)
 {
     const H5A_t         *attr = (const H5A_t *)_mesg;
     size_t		name_len;

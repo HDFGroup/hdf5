@@ -13,7 +13,7 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 !
     MODULE H5GLOBAL
-         USE H5FORTRAN_TYPES
+      USE H5FORTRAN_TYPES
 !
 ! Definitions for reference datatypes.
 ! If you change the value of these parameters, do not forget to change corresponding
@@ -372,7 +372,7 @@
       EQUIVALENCE(H5E_flags(24), H5E_TBBT_F)
 
 !
-! H5E flags declaration
+! H5I flags declaration
 !
       INTEGER, PARAMETER :: H5I_FLAGS_LEN = 7
       INTEGER H5I_flags(H5I_FLAGS_LEN)
@@ -572,7 +572,7 @@
 !
 ! H5Z flags declaration
 !
-      INTEGER, PARAMETER :: H5Z_FLAGS_LEN = 14 
+      INTEGER, PARAMETER :: H5Z_FLAGS_LEN = 14
       INTEGER H5Z_flags(H5Z_FLAGS_LEN)
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$ ATTRIBUTES DLLEXPORT :: /H5Z_FLAGS/

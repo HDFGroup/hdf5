@@ -72,7 +72,7 @@ static H5HL_t *H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udat
 static herr_t H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, H5HL_t *heap);
 static herr_t H5HL_dest(H5F_t *f, H5HL_t *heap);
 static herr_t H5HL_clear(H5F_t *f, H5HL_t *heap, hbool_t destroy);
-static herr_t H5HL_compute_size(H5F_t *f, H5HL_t *heap, size_t *size_ptr);
+static herr_t H5HL_compute_size(const H5F_t *f, const H5HL_t *heap, size_t *size_ptr);
 
 /*
  * H5HL inherits cache-like properties from H5AC
@@ -85,10 +85,6 @@ const H5AC_class_t H5AC_LHEAP[1] = {{
     (H5AC_clear_func_t)H5HL_clear,
     (H5AC_size_func_t)H5HL_compute_size,
 }};
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
 
 /* Declare a free list to manage the H5HL_free_t struct */
 H5FL_DEFINE_STATIC(H5HL_free_t);
@@ -572,7 +568,7 @@ H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 
 	/* Write the header */
         if (H5HL_serialize(f, heap, heap->chunk) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_WRITEERROR, FAIL, "unable to serialize local heap")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSERIALIZE, FAIL, "unable to serialize local heap")
 
 	/* Copy buffer to disk */
 	hdr_end_addr = addr + (hsize_t)sizeof_hdr;
@@ -699,7 +695,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_compute_size(H5F_t *f, H5HL_t *heap, size_t *size_ptr)
+H5HL_compute_size(const H5F_t *f, const H5HL_t *heap, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_compute_size);
 

@@ -19,7 +19,6 @@
  * Purpose:     Tests the "H5Fget_name" functionality
  */
 
-#include "h5test.h"
 #include "testhdf5.h"
 
 #define FILENAME "get_file_name"
@@ -50,7 +49,6 @@ typedef struct s1_t {
 		   "in %s\n", where, val, x, (int)__LINE__, __FILE__);        \
 	H5Eprint (stdout);					              \
     }									      \
-    strcmp(x, "");                                                            \
 } while(0)
 
 int main( void )

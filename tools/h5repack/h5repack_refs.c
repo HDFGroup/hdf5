@@ -52,15 +52,15 @@ int do_copy_refobjs(hid_t fidin,
                     trav_table_t *travt,
                     pack_opt_t *options) /* repack options */
 {
- hid_t     grp_in;            /* read group ID */ 
- hid_t     grp_out;           /* write group ID */ 
- hid_t     dset_in;           /* read dataset ID */ 
- hid_t     dset_out;          /* write dataset ID */ 
- hid_t     type_in;           /* named type ID */ 
- hid_t     dcpl_id;           /* dataset creation property list ID */ 
- hid_t     space_id;          /* space ID */ 
- hid_t     ftype_id;          /* file data type ID */ 
- hid_t     mtype_id;          /* memory data type ID */
+ hid_t     grp_in=(-1);            /* read group ID */ 
+ hid_t     grp_out=(-1);           /* write group ID */ 
+ hid_t     dset_in=(-1);           /* read dataset ID */ 
+ hid_t     dset_out=(-1);          /* write dataset ID */ 
+ hid_t     type_in=(-1);           /* named type ID */ 
+ hid_t     dcpl_id=(-1);           /* dataset creation property list ID */ 
+ hid_t     space_id=(-1);          /* space ID */ 
+ hid_t     ftype_id=(-1);          /* file data type ID */ 
+ hid_t     mtype_id=(-1);          /* memory data type ID */
  size_t    msize;             /* memory size of memory type */
  hsize_t   nelmts;            /* number of elements in dataset */
  int       rank;              /* rank of dataset */

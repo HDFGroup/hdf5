@@ -34,7 +34,7 @@
 static void  *H5O_fill_new_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_fill_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void  *H5O_fill_new_copy(const void *_mesg, void *_dest, unsigned update_flags);
-static size_t H5O_fill_new_size(H5F_t *f, const void *_mesg);
+static size_t H5O_fill_new_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_fill_new_reset(void *_mesg);
 static herr_t H5O_fill_new_free(void *_mesg);
 static herr_t H5O_fill_new_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
@@ -43,7 +43,7 @@ static herr_t H5O_fill_new_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FIL
 static void  *H5O_fill_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_fill_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void  *H5O_fill_copy(const void *_mesg, void *_dest, unsigned update_flags);
-static size_t H5O_fill_size(H5F_t *f, const void *_mesg);
+static size_t H5O_fill_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_fill_reset(void *_mesg);
 static herr_t H5O_fill_free(void *_mesg);
 static herr_t H5O_fill_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
@@ -90,10 +90,6 @@ const H5O_class_t H5O_FILL_NEW[1] = {{
 /* Revised version of the "new" fill value information */
 #define H5O_FILL_VERSION_2 	2	
  
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
-
 /* Declare a free list to manage the H5O_fill_new_t struct */
 H5FL_DEFINE(H5O_fill_new_t);
 
@@ -469,7 +465,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_fill_new_size(H5F_t UNUSED *f, const void *_mesg)
+H5O_fill_new_size(const H5F_t UNUSED *f, const void *_mesg)
 {
     const H5O_fill_new_t	*mesg = (const H5O_fill_new_t *)_mesg;
     size_t			ret_value;
@@ -509,7 +505,7 @@ H5O_fill_new_size(H5F_t UNUSED *f, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_fill_size(H5F_t UNUSED *f, const void *_mesg)
+H5O_fill_size(const H5F_t UNUSED *f, const void *_mesg)
 {
     const H5O_fill_t    *mesg = (const H5O_fill_t *)_mesg;
     
@@ -580,7 +576,6 @@ static herr_t
 H5O_fill_reset(void *_mesg)
 {
     H5O_fill_t  *mesg = (H5O_fill_t *)_mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_reset);
 
@@ -594,7 +589,7 @@ H5O_fill_reset(void *_mesg)
         mesg->type = NULL;
     }
     
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 

@@ -53,7 +53,7 @@ const char *FILENAME[] = {
 #endif /* H5_HAVE_LARGE_HSIZET */
 
 hsize_t chunk_dims[H5O_LAYOUT_NDIMS];
-hssize_t zero[H5O_LAYOUT_NDIMS];
+hsize_t zero[H5O_LAYOUT_NDIMS];
 
 
 /*-------------------------------------------------------------------------
@@ -228,8 +228,8 @@ test_extend(hid_t f, const char *prefix,
     int			ndims;
     uint8_t		*buf = NULL, *check = NULL, *whole = NULL;
     char		dims[64], s[256], name[256];
-    hssize_t		offset[3];
-    hssize_t		max_corner[3];
+    hsize_t		offset[3];
+    hsize_t		max_corner[3];
     hsize_t		size[3];
     hsize_t		whole_size[3];
     hsize_t		nelmts;
@@ -274,7 +274,7 @@ test_extend(hid_t f, const char *prefix,
     if((fspace=H5Dget_space(dataset))<0) TEST_ERROR;
 
     for (ctr = 0;
-	 H5V_vector_lt_s((unsigned)ndims, max_corner, (hssize_t*)whole_size);
+	 H5V_vector_lt_u((unsigned)ndims, max_corner, whole_size);
 	 ctr++) {
 
 	/* Size and location */
@@ -359,9 +359,8 @@ test_extend(hid_t f, const char *prefix,
 		       size, H5V_ZERO, buf);		/*src*/
 
 	/* Update max corner */
-	for (i=0; i<(size_t)ndims; i++) {
-	    max_corner[i] = MAX(max_corner[i], offset[i]+(hssize_t)size[i]);
-	}
+	for (i=0; i<(size_t)ndims; i++)
+	    max_corner[i] = MAX(max_corner[i], offset[i]+size[i]);
     }
 
     /* Now read the entire array back out and check it */
@@ -442,7 +441,7 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks,
     int			ndims;
     hsize_t		ctr;
     char		dims[64], s[256], name[256];
-    hssize_t		offset[3];
+    hsize_t		offset[3];
     hsize_t		size[3], total = 0;
     uint8_t		*buf = NULL;
     hsize_t		whole_size[3];  /* Size of dataset's dataspace */
@@ -492,9 +491,9 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks,
     if((mspace=H5Screate_simple(ndims,size,NULL))<0) TEST_ERROR;
 
     for (ctr=0; ctr<nblocks; ctr++) {
-	offset[0] = (hssize_t)(HDrandom() % (TEST_SPARSE_SIZE-nx));
-	offset[1] = (hssize_t)(HDrandom() % (TEST_SPARSE_SIZE-ny));
-	offset[2] = (hssize_t)(HDrandom() % (TEST_SPARSE_SIZE-nz));
+	offset[0] = (hsize_t)(HDrandom() % (TEST_SPARSE_SIZE-nx));
+	offset[1] = (hsize_t)(HDrandom() % (TEST_SPARSE_SIZE-ny));
+	offset[2] = (hsize_t)(HDrandom() % (TEST_SPARSE_SIZE-nz));
 
         /* Select region in file dataspace */
         if(H5Sselect_hyperslab(fspace,H5S_SELECT_SET,offset,NULL,size,NULL)<0) TEST_ERROR;

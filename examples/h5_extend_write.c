@@ -1,4 +1,3 @@
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -46,7 +45,7 @@ main (void)
     hsize_t      maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t      chunk_dims[2] ={2, 5};
     hsize_t      size[2];
-    hssize_t     offset[2];
+    hsize_t      offset[2];
 
     herr_t      status;                             
 
@@ -58,7 +57,7 @@ main (void)
 
     int         data3[2][2] = { {3, 3},
 				{3, 3} };
-    int         fill_val = 0;
+    int fillvalue = 0;
 
     /*
      * Create the data space with unlimited dimensions. 
@@ -75,7 +74,7 @@ main (void)
      */
     cparms = H5Pcreate(H5P_DATASET_CREATE);
     status = H5Pset_chunk( cparms, RANK, chunk_dims);
-             H5Pset_fill_value(cparms, H5T_NATIVE_INT, &fill_val);
+    status = H5Pset_fill_value (cparms, H5T_NATIVE_INT, &fillvalue );
 
     /*
      * Create a new dataset within the file using cparms

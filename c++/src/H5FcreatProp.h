@@ -26,15 +26,14 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 	// Default file creation property list.
 	static const FileCreatPropList DEFAULT;
 	
-	// Creates a file creation property list.
-	FileCreatPropList();
+	// Retrieves version information for various parts of a file.
+	void getVersion( unsigned& super, unsigned& freelist, unsigned& stab, unsigned& shhdr ) const;
 
-	// Returns the 1/2 rank of an indexed storage B-tree.
-	int getIstorek() const;
+	// Sets the userblock size field of a file creation property list.
+	void setUserblock( hsize_t size ) const;
 
-	// Sets the size of parameter used to control the B-trees for
-	// indexing chunked datasets.
-	void setIstorek( int ik ) const;
+	// Gets the size of a user block in this file creation property list.
+	hsize_t getUserblock() const;
 
 	// Retrieves the size-of address and size quantities stored in a 
 	// file according to this file creation property list.
@@ -53,29 +52,30 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 #else /* H5_WANT_H5_V1_4_COMPAT */
 	// Retrieves the size of the symbol table B-tree 1/2 rank and the
 	// symbol table leaf node 1/2 size.
-	void getSymk( int& int_nodes_k, unsigned& leaf_nodes_k ) const;
+	void getSymk( unsigned& int_nodes_k, unsigned& leaf_nodes_k ) const;
 
 	// Sets the size of parameters used to control the symbol table nodes.
-	void setSymk( int int_nodes_k, unsigned leaf_nodes_k ) const;
+	void setSymk( unsigned int_nodes_k, unsigned leaf_nodes_k ) const;
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
-	// Gets the size of a user block in this file creation property list.
-	hsize_t getUserblock() const;
+	// Returns the 1/2 rank of an indexed storage B-tree.
+	unsigned getIstorek() const;
 
-	// Sets the userblock size field of a file creation property list.
-	void setUserblock( hsize_t size ) const;
+	// Sets the size of parameter used to control the B-trees for
+	// indexing chunked datasets.
+	void setIstorek( unsigned ik ) const;
 
-	// Retrieves version information for various parts of a file.
-	void getVersion( int& boot, int& freelist, int& stab, int& shhdr ) const;
+	// Creates a file create property list.
+	FileCreatPropList();
 
-	// Copy constructor: creates a copy of a FileCreatPropList object
+	// Copy constructor: creates a copy of a FileCreatPropList object.
 	FileCreatPropList(const FileCreatPropList& orig);
 
 	// Creates a copy of an existing file create property list
-	// using the property list id
+	// using the property list id.
 	FileCreatPropList (const hid_t plist_id);
 
-	// Noop destructor.
+	// Noop destructor
 	virtual ~FileCreatPropList();
 };
 #ifndef H5_NO_NAMESPACE

@@ -1172,7 +1172,7 @@ test_misc8(void)
 #endif /* H5_WANT_H5_V1_4_COMPAT */
     size_t rdcc_nbytes;         /* Raw data number of bytes */
     double rdcc_w0;             /* Raw data write percentage */
-    hssize_t start[MISC8_RANK]; /* Hyperslab start */
+    hsize_t start[MISC8_RANK];  /* Hyperslab start */
     hsize_t count[MISC8_RANK];  /* Hyperslab block count */
     herr_t ret;
 
@@ -1439,9 +1439,8 @@ test_misc8(void)
     tdata2=rdata;
     for(u=0; u<MISC8_DIM0; u++)
         for(v=0; v<MISC8_DIM1; v++,tdata++,tdata2++)
-            if(*tdata!=*tdata2) {
+            if(*tdata!=*tdata2)
                 TestErrPrintf("Error on line %d: u=%u, v=%d, *tdata=%d, *tdata2=%d\n",__LINE__,(unsigned)u,(unsigned)v,(int)*tdata,(int)*tdata2);
-            } 
 #endif /* VERIFY_DATA */
 
     /* Check the storage size after data is written */
@@ -1750,17 +1749,17 @@ test_misc11(void)
     hsize_t     userblock;      /* Userblock size retrieved from FCPL */
     size_t      off_size;       /* Size of offsets in the file */
     size_t      len_size;       /* Size of lengths in the file */
-    int         sym_ik;         /* Symbol table B-tree initial 'K' value */
-    int         istore_ik;      /* Indexed storage B-tree initial 'K' value */
+    unsigned    sym_ik;         /* Symbol table B-tree initial 'K' value */
+    unsigned    istore_ik;      /* Indexed storage B-tree initial 'K' value */
 #ifdef H5_WANT_H5_V1_4_COMPAT
     int         sym_lk;         /* Symbol table B-tree leaf 'K' value */
 #else /* H5_WANT_H5_V1_4_COMPAT */
     unsigned    sym_lk;         /* Symbol table B-tree leaf 'K' value */
 #endif /* H5_WANT_H5_V1_4_COMPAT */
-    int super;                  /* Superblock version # */
-    int freelist;               /* Free list version # */
-    int stab;                   /* Symbol table entry version # */
-    int shhdr;                  /* Shared object header version # */
+    unsigned super;             /* Superblock version # */
+    unsigned freelist;          /* Free list version # */
+    unsigned stab;              /* Symbol table entry version # */
+    unsigned shhdr;             /* Shared object header version # */
     herr_t      ret;            /* Generic return value */
 
     /* Output message about test being performed */
@@ -1920,7 +1919,7 @@ test_misc12(void)
     hsize_t		maxdims1[1] = {H5S_UNLIMITED};
     hsize_t		chkdims1[1] = {MISC12_CHUNK_SIZE};
     hsize_t     	newsize[1] = {MISC12_SPACE1_DIM1+MISC12_APPEND_SIZE};
-    hssize_t    	offset[1] = {MISC12_SPACE1_DIM1};
+    hsize_t    		offset[1] = {MISC12_SPACE1_DIM1};
     hsize_t     	count[1] = {MISC12_APPEND_SIZE};
     int                 i;          /* counting variable */
     herr_t		ret;		/* Generic return value  */
@@ -3386,13 +3385,14 @@ test_misc20(void)
     CHECK(ret, FAIL, "H5Fclose");
 
 } /* end test_misc20() */
-    
-/*
-    test_misc21 and test_misc22 should be executed only when SZIP is present
-    and encoder is available
-                             EIP 2004/8/04
-*/
-#if defined H5_HAVE_FILTER_SZIP & defined H5_SZIP_CAN_ENCODE
+
+/* 
+   test_misc21 and test_misc22 should be executed when SZIP is present 
+   and encoder is available.
+                            EIP 2004/8/04
+*/    
+#if defined H5_HAVE_FILTER_SZIP 
+
 /****************************************************************
 **
 **  test_misc21(): Test that late allocation time is treated the same
@@ -3410,6 +3410,7 @@ test_misc21(void)
         chunk_size[2]={MISC21_CHUNK_DIM0,MISC21_CHUNK_DIM1};
     herr_t ret;         /* Generic return value */
 
+    if (h5_szip_can_encode() != 1) return;
     /* Output message about test being performed */
     MESSAGE(5, ("Testing late allocation time w/chunks & filters\n"));
 
@@ -3488,6 +3489,7 @@ test_misc22(void)
     unsigned int cd_values[32];
     int correct;
 
+    if (h5_szip_can_encode() != 1) return;
     idts[0]=H5Tcopy(H5T_NATIVE_UINT8);
     idts[1]=H5Tcopy(H5T_NATIVE_UINT16);
     idts[2]=H5Tcopy(H5T_NATIVE_UINT32);
@@ -3538,7 +3540,7 @@ test_misc22(void)
 
                 /* compute the correct PPB that should be set by SZIP */
                 if (offsets[k] == 0) {
-            	correct=prec[j];	
+            	    correct=prec[j];	
                 } else {
                     correct=H5Tget_size(idts[i])*8;
                 }
@@ -3601,7 +3603,7 @@ test_misc22(void)
 
     HDfree(buf);
 } /* end test_misc22() */
-#endif /* H5_SZIP_CAN_ENCODE & H5_HAVE_FILTER_SZIP */
+#endif /* H5_HAVE_FILTER_SZIP */
 
 /****************************************************************
 **
@@ -3634,10 +3636,11 @@ test_misc(void)
     test_misc18();      /* Test new object header information in H5G_stat_t struct */
     test_misc19();      /* Test incrementing & decrementing ref count on IDs */
     test_misc20();      /* Test problems with truncated dimensions in version 2 of storage layout message */
-#if defined H5_HAVE_FILTER_SZIP & defined H5_SZIP_CAN_ENCODE
+#if defined H5_HAVE_FILTER_SZIP 
     test_misc21();      /* Test that "late" allocation time is treated the same as "incremental", for chunked datasets w/a filters */
     test_misc22();     /* check szip bits per pixel */
-#endif /* H5_SZIP_CAN_ENCODE & H5_HAVE_FILTER_SZIP */
+#endif /* H5_HAVE_FILTER_SZIP */
+
 } /* test_misc() */
 
 
@@ -3681,8 +3684,9 @@ cleanup_misc(void)
     HDremove(MISC18_FILE);
     HDremove(MISC19_FILE);
     HDremove(MISC20_FILE);
-#if defined H5_HAVE_FILTER_SZIP & defined H5_SZIP_CAN_ENCODE
+#if defined H5_HAVE_FILTER_SZIP 
     HDremove(MISC21_FILE);
     HDremove(MISC22_FILE);
-#endif /* H5_SZIP_CAN_ENCODE & H5_HAVE_FILTER_SZIP */
+#endif /* H5_HAVE_FILTER_SZIP */
 }
+

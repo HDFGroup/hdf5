@@ -170,10 +170,8 @@ parse_options(int argc, char **argv)
     } /*while*/
 
     /* Check valid values */
+#ifndef H5_HAVE_PARALLEL
     if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX)
-#ifdef H5_HAVE_PARALLEL
-        ;
-#else
     {
         nerrors++;
         return(1);

@@ -187,7 +187,7 @@ writer (hid_t fapl, int wrt_n)
 {
     hsize_t	size1[4] = {8, 1024, 1024, 1024};
     hsize_t	size2[1] = {GB8LL};
-    hssize_t	hs_start[1];
+    hsize_t	hs_start[1];
     hsize_t	hs_size[1];
     hid_t	file=-1, space1=-1, space2=-1, mem_space=-1, d1=-1, d2=-1;
     int		*buf = malloc (sizeof(int) * WRT_SIZE);
@@ -299,7 +299,7 @@ reader (hid_t fapl)
     FILE	*script = NULL;
     hid_t	file=-1, mspace=-1, fspace=-1, d2=-1;
     char	ln[128], *s;
-    hssize_t	hs_offset[1];
+    hsize_t	hs_offset[1];
     hsize_t	hs_size[1] = {WRT_SIZE};
     int		*buf = malloc (sizeof(int) * WRT_SIZE);
     int		i, j, zero, wrong, nerrors=0;

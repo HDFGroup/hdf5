@@ -145,7 +145,7 @@ main (int argc, char *argv[])
     hid_t		file, dataset, space, PRESERVE, fapl;
     hid_t       array_dt;
     static hsize_t	dim[] = {NX, NY};
-    hssize_t 		f_offset[2];	/*offset of hyperslab in file	*/
+    hsize_t 		f_offset[2];	/*offset of hyperslab in file	*/
     hsize_t 		h_size[2];	/*size of hyperslab		*/
     hsize_t		memb_size[1] = {4};
     char		filename[256];
@@ -544,10 +544,10 @@ main (int argc, char *argv[])
 	for (j=0; j<NY; j++) {
 	    s1_t *ps1 = s1 + i*NY + j;
 	    s2_t *ps2 = s2 + i*NY + j;
-	    if ((hssize_t)i>=f_offset[0] &&
-		(hsize_t)i<f_offset[0]+h_size[0] &&
-		(hssize_t)j>=f_offset[1] &&
-		(hsize_t)j<f_offset[1]+h_size[1]) {
+	    if (i>=f_offset[0] &&
+		i<f_offset[0]+h_size[0] &&
+		j>=f_offset[1] &&
+		j<f_offset[1]+h_size[1]) {
 		if (ps2->a != ps1->a ||
 		    ps2->b != ps1->b ||
 		    ps2->c[0] != ps1->c[0] ||
@@ -602,10 +602,10 @@ main (int argc, char *argv[])
 	for (j=0; j<NY; j++) {
 	    s1_t *ps1 = s1 + i*NY + j;
 	    s5_t *ps5 = s5 + i*NY + j;
-	    if ((hssize_t)i>=f_offset[0] &&
-		(hsize_t)i<f_offset[0]+h_size[0] &&
-		(hssize_t)j>=f_offset[1] &&
-		(hsize_t)j<f_offset[1]+h_size[1]) {
+	    if (i>=f_offset[0] &&
+		i<f_offset[0]+h_size[0] &&
+		j>=f_offset[1] &&
+		j<f_offset[1]+h_size[1]) {
 		if (ps5->pre != (unsigned)(-1) ||
 		    ps5->a != ps1->a ||
 		    ps5->b != ps1->b ||
@@ -692,10 +692,10 @@ main (int argc, char *argv[])
 		goto error;
 	    }
 	    
-	    if ((hssize_t)i>=f_offset[0] &&
-		(hsize_t)i<f_offset[0]+h_size[0] &&
-		(hssize_t)j>=f_offset[1] &&
-		(hsize_t)j<f_offset[1]+h_size[1]) {
+	    if (i>=f_offset[0] &&
+		i<f_offset[0]+h_size[0] &&
+		j>=f_offset[1] &&
+		j<f_offset[1]+h_size[1]) {
 		if (ps1->b != (unsigned)(-1) ||
 		    ps1->d != (unsigned)(-1)) {
 		    H5_FAILED();

@@ -6,8 +6,6 @@
  * Author:  Thomas Radke <tradke@aei-potsdam.mpg.de>
  *          Tuesday, September 12, 2000
  *
- * Version: $Id$
- *
  * Modifications:
  *          Thomas Radke, Thursday, October 26, 2000
  *          Made it compiling under Windows.

@@ -41,7 +41,7 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	void extentCopy( DataSpace& dest_space ) const;
 
 	// Gets the bounding box containing the current selection.
-	void getSelectBounds( hssize_t* start, hssize_t* end ) const;
+	void getSelectBounds( hsize_t* start, hsize_t* end ) const;
 
 	// Gets the number of element points in the current selection.
 	hssize_t getSelectElemNpoints() const;
@@ -82,10 +82,10 @@ class H5_DLLCPP DataSpace : public IdComponent {
 
 	// Selects array elements to be included in the selection for 
 	// this dataspace.
-	void selectElements( H5S_seloper_t op, const size_t num_elements, const hssize_t *coord[ ] ) const;
+	void selectElements( H5S_seloper_t op, const size_t num_elements, const hsize_t *coord[ ] ) const;
 
 	// Selects a hyperslab region to add to the current selected region.
-	void selectHyperslab( H5S_seloper_t op, const hsize_t *count, const hssize_t *start, const hsize_t *stride = NULL, const hsize_t *block = NULL ) const;
+	void selectHyperslab( H5S_seloper_t op, const hsize_t *count, const hsize_t *start, const hsize_t *stride = NULL, const hsize_t *block = NULL ) const;
 
 	// Resets the selection region to include no elements.
 	void selectNone() const;

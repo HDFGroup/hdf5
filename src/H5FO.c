@@ -32,10 +32,6 @@
 #include "H5FOprivate.h"        /* File objects                         */
 #include "H5Oprivate.h"		/* Object headers		  	*/
 
-/* Interface initialization */
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT	NULL
-
 /* Private typedefs */
 
 /* Information about object objects in a file */
@@ -113,7 +109,7 @@ H5FO_opened(const H5F_t *f, haddr_t addr)
     H5FO_open_obj_t *open_obj;  /* Information about open object */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FO_opened,NULL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5FO_opened)
 
     /* Sanity check */
     assert(f);
@@ -129,7 +125,6 @@ H5FO_opened(const H5F_t *f, haddr_t addr)
     else
         ret_value=NULL;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FO_opened() */
 
@@ -264,7 +259,7 @@ H5FO_mark(const H5F_t *f, haddr_t addr, hbool_t deleted)
     H5FO_open_obj_t *open_obj;  /* Information about open object */
     herr_t ret_value=SUCCEED;            /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FO_mark,FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5FO_mark)
 
     /* Sanity check */
     assert(f);
@@ -278,7 +273,6 @@ H5FO_mark(const H5F_t *f, haddr_t addr, hbool_t deleted)
     else
         ret_value=FAIL;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FO_mark() */
 
@@ -309,7 +303,7 @@ H5FO_marked(const H5F_t *f, haddr_t addr)
     H5FO_open_obj_t *open_obj;  /* Information about open object */
     htri_t ret_value=FAIL;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FO_marked,FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5FO_marked)
 
     /* Sanity check */
     assert(f);
@@ -321,7 +315,6 @@ H5FO_marked(const H5F_t *f, haddr_t addr)
     if((open_obj=H5SL_search(f->shared->open_objs,&addr))!=NULL)
         ret_value=open_obj->deleted;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FO_marked() */
 

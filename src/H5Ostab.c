@@ -41,7 +41,7 @@
 static void *H5O_stab_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_stab_copy(const void *_mesg, void *_dest, unsigned update_flags);
-static size_t H5O_stab_size(H5F_t *f, const void *_mesg);
+static size_t H5O_stab_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_stab_free (void *_mesg);
 static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 static herr_t H5O_stab_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
@@ -64,9 +64,6 @@ const H5O_class_t H5O_STAB[1] = {{
     NULL, 			/*set share method		*/
     H5O_stab_debug,         	/*debug the message             */
 }};
-
-/* Interface initialization */
-#define INTERFACE_INIT  NULL
 
 /* Declare a free list to manage the H5O_stab_t struct */
 H5FL_DEFINE_STATIC(H5O_stab_t);
@@ -267,7 +264,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_stab_size(H5F_t *f, const void UNUSED *_mesg)
+H5O_stab_size(const H5F_t *f, const void UNUSED *_mesg)
 {
     size_t ret_value;   /* Return value */
 

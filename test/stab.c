@@ -86,10 +86,10 @@ test_misc(hid_t file)
         g1=H5Gcreate(file, "/", 0);
     } H5E_END_TRY
     if(g1 >= 0) goto error;
-       
+
     H5E_BEGIN_TRY {
         g1=H5Gcreate(file, "./././", 0);
-    } H5E_END_TRY    
+    } H5E_END_TRY
     if(g1 >= 0) goto error;
 
     PASSED();

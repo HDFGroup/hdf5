@@ -12,9 +12,9 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include "h5tools.h"
 #include "h5diff.h"
 #include "H5private.h" 
-#include "h5tools.h"
 
 
 /*-------------------------------------------------------------------------

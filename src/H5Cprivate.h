@@ -124,8 +124,8 @@ typedef herr_t (*H5C_dest_func_t)(H5F_t *f,
 typedef herr_t (*H5C_clear_func_t)(H5F_t *f, 
                                    void *thing, 
                                    hbool_t dest);
-typedef herr_t (*H5C_size_func_t)(H5F_t *f, 
-                                  void *thing, 
+typedef herr_t (*H5C_size_func_t)(const H5F_t *f, 
+                                  const void *thing, 
                                   size_t *size_ptr);
 
 typedef struct H5C_class_t {
@@ -140,7 +140,7 @@ typedef struct H5C_class_t {
 
 /* Type defintions of call back functions used by the cache as a whole */
 
-typedef herr_t (*H5C_write_permitted_func_t)(H5F_t *f,
+typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
                                              hid_t dxpl_id,
                                              hbool_t * write_permitted_ptr);
 
@@ -377,8 +377,7 @@ H5_DLL herr_t H5C_insert_entry(H5F_t *             f,
                                haddr_t             addr,
                                void *              thing);
 
-H5_DLL herr_t H5C_rename_entry(H5F_t *            f,
-                               H5C_t *             cache_ptr,
+H5_DLL herr_t H5C_rename_entry(H5C_t *             cache_ptr,
                                const H5C_class_t * type,
                                haddr_t             old_addr,
                                haddr_t             new_addr);

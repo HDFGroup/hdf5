@@ -63,9 +63,6 @@ const H5O_class_t H5O_CONT[1] = {{
     H5O_cont_debug,         	/*debugging                     */
 }};
 
-/* Interface initialization */
-#define INTERFACE_INIT  NULL
-
 /* Declare the free list for H5O_cont_t's */
 H5FL_DEFINE(H5O_cont_t);
 

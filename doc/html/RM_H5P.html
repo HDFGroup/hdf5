@@ -825,10 +825,11 @@ as the corresponding C function.
         set in the dataset creation property list <code>dcpl_id</code> are 
 	currently available.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dcpl_id</code>
-            <dd>IN: Dataset creation property list identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>dcpl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns <code>TRUE</code> if all filters are available
         and <code>FALSE</code> if one or more is not currently available.<br>
@@ -865,10 +866,11 @@ SUBROUTINE
             finished accessing them. 
             This frees resources used by the property list.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of the property list to terminate access to.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the property list to terminate access to.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -915,7 +917,7 @@ END SUBROUTINE h5pclose_f
   <dt><strong>Parameters:</strong>
     <ul><table>
     <tr>
-        <td><em>hid_t</em> <code>class</code></td>
+        <td><em>hid_t</em>&nbsp;<code>class&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>IN: Property list class to close</td></tr>
     </table></ul>
 
@@ -970,7 +972,7 @@ END SUBROUTINE h5pclose_class_f
   <dt><strong>Parameters:</strong>
     <ul><table>
     <tr>
-        <td><em>hid_t</em> <code>plist</code><td>
+        <td><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code><td>
         <td>IN: Property list to close</td></tr>
     </table></ul>
     
@@ -1013,10 +1015,11 @@ END SUBROUTINE h5pclose_list_f
             The new property list has the same properties and values 
             as the original property list.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of property list to duplicate.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of property list to duplicate.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a property list identifier if successful;
         otherwise returns a negative value.
@@ -1092,7 +1095,7 @@ END SUBROUTINE h5pcopy_f
         <td><em>hid_t</em> <code>src_id</code></td>
         <td>IN: Identifier of the source property list or class</td></tr>
     <tr>
-        <td><em>const char *</em><code>name</code></td>
+        <td><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>IN: Name of the property to copy</td></tr>
     </table></ul>
 
@@ -1168,10 +1171,11 @@ END SUBROUTINE h5pcopy_prop_f
       <code>H5Pclose</code>;  
       otherwise, errors are likely to occur.
   <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>cls_id</code>
-        <dd>IN: The class of the property list to create.
-    </dl>
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em>&nbsp;<code>cls_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: The class of the property list to create.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a property list identifier (<code>plist</code>) if successful; 
         otherwise Fail (-1).
@@ -1314,7 +1318,7 @@ END SUBROUTINE h5pcreate_f
         <td><em>const char *</em><code>name</code></td>
         <td>IN: Name of property list class to register</td></tr>
     <tr>
-        <td><em>H5P_cls_create_func_t</em> <code>create</code></td>
+        <td><em>H5P_cls_create_func_t</em>&nbsp;<code>create&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>IN: Callback routine called when a property list is created</td></tr>
     <tr>
         <td><em>H5P_cls_copy_func_t</em> <code>copy</code></td>
@@ -1329,6 +1333,7 @@ END SUBROUTINE h5pcreate_f
     <dd>Success: a valid property list class identifier
     <dd>Failure: a negative value
 
+<!-- NEW PAGE -->
   <dt><strong>Fortran90 Interface:</strong> h5pcreate_class_f
     <dd>
 	<pre>
@@ -1383,7 +1388,7 @@ END SUBROUTINE h5pcreate_class_f
   <dt><strong>Parameter:</strong>
     <ul><table>
     <tr>
-        <td><em>hid_t</em> <code>class</code>;</td>
+        <td><em>hid_t</em>&nbsp;<code>class;&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>IN: Class of property list to create.</td></tr>
     </table></ul>
 
@@ -1399,6 +1404,105 @@ SUBROUTINE
 	</pre>		
 -->
 
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Premove_filter" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-RemoveFilter">H5Premove_filter</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Premove_filter</code>(<em>hid_t</em> <code>plist</code>,
+        <em>H5Z_filter_t</em> <code>filter</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Delete one or more filters in the filter pipeline.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Premove_filter</code> removes the specified 
+        <code>filter</code> from the filter pipeline in the
+        dataset creation property list <code>plist</code>.
+	<p>
+	The <code>filter</code> parameter specifies the filter to be removed.  
+	Valid values for use in <code>filter</code> are as follows:
+
+        <center>
+        <table width=75%>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_ALL</code> 
+            </td><td>
+            Removes all filters from the permanent filter pipeline.
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_DEFLATE</code> 
+            </td><td>
+            Data compression filter, employing the gzip algorithm 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_SHUFFLE</code> 
+            </td><td>
+            Data shuffling filter 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_FLETCHER32&nbsp;&nbsp;</code> 
+            </td><td>
+            Error detection filter, employing the Fletcher32 checksum algorithm 
+        </td></tr>	
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_SZIP</code> 
+            </td><td>
+            Data compression filter, employing the SZIP algorithm 
+        </td></tr>
+	</table>
+	</center>
+        <p>
+        Additionally, user-defined filters can be removed with this routine
+        by passing the filter identifier with which they were registered 
+        with the HDF5 Library.
+        <p>
+        Attempting to remove a filter that is not in the permanent filter
+        pipeline is an error.
+  <dt><strong>Note:</strong>
+    <dd>This function currently supports only the permanent filter
+        pipeline; <code>plist</code> must be a dataset creation 
+        property list.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>IN: Dataset creation property list identifier.
+        <dt><em>H5Z_filter_t</em> <code>filter</code>
+            <dd>IN: Filter to be deleted.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+
+    <dt><strong>Fortran90 Interface:</strong> h5premove_filter_f
+    <dd>
+	<pre>
+SUBROUTINE h5premove_filter_f(prp_id, filter, hdferr) 
+
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset creation property 
+                                       ! list identifier
+  INTEGER, INTENT(IN) :: filter        ! Filter to be removed
+                                       ! Valid values are:
+                                       !     H5Z_FILTER_ALL_F
+                                       !     H5Z_FILTER_DEFLATE_F
+                                       !     H5Z_FILTER_SHUFFLE_F
+                                       !     H5Z_FILTER_FLETCHER32_F
+                                       !     H5Z_FILTER_SZIP_F
+                                       !
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success, -1 on failure
+END SUBROUTINE h5premove_filter_f
+	</pre>		
+		
 		<!--<dt><strong>Non-C API(s):</strong>
     	<dd>
         
@@ -1434,7 +1538,7 @@ SUBROUTINE
   <dt><strong>Parameters:</strong>
     <ul><table>
     <tr>
-        <td><em>hid_t</em> <code>id1</code></td>
+        <td><em>hid_t</em>&nbsp;<code>id1&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>IN: First property object to be compared</td></tr>
     <tr>
         <td><em>hid_t</em> <code>id2</code></td>
@@ -1494,7 +1598,7 @@ END SUBROUTINE h5pequal_f
         <td><em>hid_t</em> <code>id</code></td>
         <td>IN: Identifier for the property to query</td></tr>
     <tr>
-        <td><em>const char *</em><code>name</code></td>
+        <td><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>IN: Name of property to check for</td></tr>
     </table></ul>
 
@@ -1564,12 +1668,14 @@ END SUBROUTINE h5pexist_f
 	See <a href="RM_H5D.html#Dataset-Create">H5Dcreate</a> for 
 	further cross-references.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Dataset creation property list identifier.
-        <dt><em>H5D_fill_value_t *</em><code>status</code>
-            <dd>OUT: Status of fill value in property list.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5D_fill_value_t&nbsp;*</em><code>status&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Status of fill value in property list.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1631,7 +1737,7 @@ SUBROUTINE
         <td><em>hid_t</em> <code>plid</ecodem></td>
         <td>IN: Identifier of the property list to query</td></tr>
     <tr>
-        <td><em>const char *</em><code>name</code></td>
+        <td><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>IN: Name of property to query</td></tr>
     <tr>
         <td><em>void *</em><code>value</code></td>
@@ -1688,14 +1794,17 @@ END SUBROUTINE h5pget_f
         The <code>threshold</code> and/or <code>alignment</code> pointers 
         may be null pointers (NULL). 
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of a file access property list.
-        <dt><em>hsize_t</em> <code>*threshold</code>
-            <dd>OUT: Pointer to location of return threshold value.
-        <dt><em>hsize_t</em> <code>*alignment</code>
-            <dd>OUT: Pointer to location of return alignment value.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of a file access property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em>&nbsp;<code>*threshold&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to location of return threshold value.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em> <code>*alignment</code></td>
+            <td valign="top">OUT: Pointer to location of return alignment value.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1766,12 +1875,14 @@ END SUBROUTINE h5pget_alignment_f
 	set with the functions 
 	<code>H5Pget_fill_value</code> and <code>H5Pget_fill_time</code>.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Dataset creation property list identifier.
-        <dt><em>H5D_alloc_time_t *</em><code>alloc_time</code>
-            <dd>IN: When to allocate dataset storage space.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5D_alloc_time_t&nbsp;*</em><code>alloc_time&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: When to allocate dataset storage space.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1823,16 +1934,20 @@ END SUBROUTINE h5pget_alloc_time_f
         arguments <code>left</code>, <code>middle</code>, and <code>right</code>,
         as set by the <a href="#Property-SetBTreeRatios">H5Pset_btree_ratios</a> function.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: The dataset transfer property list identifier.
-        <dt><em>double</em> <code>left</code>
-            <dd>OUT: The B-tree split ratio for left-most nodes.
-        <dt><em>double</em> <code>right</code>
-            <dd>OUT: The B-tree split ratio for right-most nodes and lone nodes.
-        <dt><em>double</em> <code>middle</code>
-            <dd>OUT: The B-tree split ratio for all other nodes.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: The dataset transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>double</em> <code>left</code></td>
+            <td valign="top">OUT: The B-tree split ratio for left-most nodes.</td></tr>
+        <tr>
+		    <td valign="top"><em>double</em> <code>right</code></td>
+            <td valign="top">OUT: The B-tree split ratio for right-most nodes and lone nodes.</td></tr>
+        <tr>
+		    <td valign="top"><em>double</em>&nbsp;<code>middle&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: The B-tree split ratio for all other nodes.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1876,16 +1991,19 @@ END SUBROUTINE h5pget_btree_ratios_f
     <dd><code>H5Pget_buffer</code> reads values previously set 
         with H5Pset_buffer.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier for the dataset transfer property list.
-        <dt><em>void</em> <code>**tconv</code>
-            <dd>OUT: Address of the pointer to application-allocated 
-                type conversion buffer.
-        <dt><em>void</em> <code>**bkg</code>
-            <dd>OUT: Address of the pointer to application-allocated 
-                background buffer.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier for the dataset transfer property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em>&nbsp;<code>**tconv&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Address of the pointer to application-allocated 
+                type conversion buffer.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> <code>**bkg</code></td>
+            <td valign="top">OUT: Address of the pointer to application-allocated 
+                background buffer.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns buffer size, in bytes, if successful;
         otherwise 0 on failure.
@@ -1933,25 +2051,30 @@ END SUBROUTINE h5pget_buffer_f
         Any (or all) arguments may be null pointers, in which case the 
         corresponding datum is not returned.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Identifier of the file access property list.
-        <dt><em>int</em> <code>*mdc_nelmts</code>
-            <dd>IN/OUT: Number of elements (objects) in the meta data cache.
-        <dt><em>int</em> <code>*rdcc_nelmts</code>
-            <dd>IN/OUT: Number of elements (objects) in the raw data chunk cache.
-        <dt><em>size_t</em> <code>*rdcc_nbytes</code>
-            <dd>IN/OUT: Total size of the raw data chunk cache, in bytes.
-        <dt><em>double</em> <code>*rdcc_w0</code>
-            <dd>IN/OUT: Preemption policy.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Identifier of the file access property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>*mdc_nelmts</code></td>
+            <td valign="top">IN/OUT: Number of elements (objects) in the meta data cache.</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>*rdcc_nelmts</code></td>
+            <td valign="top">IN/OUT: Number of elements (objects) in the raw data chunk cache.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em>&nbsp;<code>*rdcc_nbytes&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN/OUT: Total size of the raw data chunk cache, in bytes.</td></tr>
+        <tr>
+		    <td valign="top"><em>double</em> <code>*rdcc_w0</code></td>
+            <td valign="top">IN/OUT: Preemption policy.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
   <dt><strong>Fortran90 Interface:</strong> h5pget_cache_f
     <dd>
 	<pre>
-SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, &amp; 
+SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes,
                           rdcc_w0, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id         ! Property list identifier
@@ -1995,14 +2118,17 @@ END SUBROUTINE h5pget_cache_f
             At most, <code>max_ndims</code> elements of <code>dims</code> 
             will be initialized.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of property list to query.
-        <dt><em>int</em> <code>max_ndims</code>
-            <dd>IN: Size of the <code>dims</code> array.
-        <dt><em>hsize_t *</em> <code>dims</code>
-            <dd>OUT: Array to store the chunk dimensions.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of property list to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em>&nbsp;<code>max_ndims&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Size of the <code>dims</code> array.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t *</em> <code>dims</code></td>
+            <td valign="top">OUT: Array to store the chunk dimensions.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns chunk dimensionality successful;
         otherwise returns a negative value.
@@ -2047,10 +2173,11 @@ END SUBROUTINE h5pget_chunk_f
         Valid property list classes are defined in the description of
         <code>H5Pcreate</code>.
   <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>plist</code>
-        <dd>IN: Identifier of property list to query.
-    </dl>
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Identifier of property list to query.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a property list class if successful.
         Otherwise returns H5P_NO_CLASS (-1).
@@ -2104,7 +2231,7 @@ END SUBROUTINE h5pget_class_f
   <dt><strong>Parameters:</strong>
     <ul><table>
     <tr>
-        <td><em>hid_t</em> <code>pcid</code></td>
+        <td><em>hid_t</em>&nbsp;<code>pcid&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>IN: Identifier of the property class  to query</td></tr>
     </table></ul>
 
@@ -2160,7 +2287,7 @@ END SUBROUTINE h5pget_class_name_f
   <dt><strong>Parameters:</strong>
     <ul><table>
     <tr>
-        <td><em>hid_t</em> <code>pcid</code></td>
+        <td><em>hid_t</em>&nbsp;<code>pcid&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>IN: Identifier of the property class to query</td></tr>
     </table></ul>
 
@@ -2224,10 +2351,11 @@ END SUBROUTINE h5pget_class_parent_f
         The returned driver identifier is only valid as long as the 
         file driver remains registered.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: File access or data transfer property list identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access or data transfer property list identifier.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a valid low-level driver identifier if successful.
         Otherwise returns a negative value.
@@ -2319,12 +2447,14 @@ END SUBROUTINE h5pget_driver_f
         <p>
         <code>H5Pget_dxpl_mpio</code> is not a collective function.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dxpl_id</code>
-            <dd>IN: Data transfer property list identifier.
-        <dt><em>H5FD_mpio_xfer_t *</em><code>xfer_mode</code>
-            <dd>OUT: Data transfer mode.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dxpl_id</code></td>
+            <td valign="top">IN: Data transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5FD_mpio_xfer_t&nbsp;*</em><code>xfer_mode&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Data transfer mode.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -2369,12 +2499,14 @@ END SUBROUTINE h5pget_dxpl_mpio_f
     <dd><code>H5Pget_dxpl_multi</code> returns the data transfer property list
         information for the multi-file driver.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dxpl_id</code>,
-            <dd>IN: Data transfer property list identifier.
-        <dt><em>const hid_t *</em><code>memb_dxpl</code>
-            <dd>OUT: Array of data access property lists.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dxpl_id</code>,</td>
+            <td valign="top">IN: Data transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;hid_t&nbsp;*</em><code>memb_dxpl&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Array of data access property lists.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -2408,10 +2540,11 @@ SUBROUTINE
         list <code>plist</code> to determine whether error detection 
         is enabled for data read operations. 
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Dataset transfer property list identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Dataset transfer property list identifier.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns <code>H5Z_ENABLE_EDC</code> or <code>H5Z_DISABLE_EDC</code> 
         if successful;
@@ -2446,7 +2579,7 @@ END SUBROUTINE h5pget_edc_check_f
   <dt><strong>Name:</strong> <a name="Property-GetExternal">H5Pget_external</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Pget_external</code>(<em>hid_t</em> <code>plist</code>,
-        <em>int</em> <code>idx</code>,
+        <em>unsigned</em> <code>idx</code>,
         <em>size_t</em> <code>name_size</code>,
         <em>char</em> <code>*name</code>,
         <em>off_t</em> <code>*offset</code>,
@@ -2469,21 +2602,27 @@ END SUBROUTINE h5pget_edc_check_f
         If <code>offset</code> or <code>size</code> are null pointers 
         then the corresponding information is not returned.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of a dataset creation property list.
-        <dt><em>int</em> <code>idx</code>
-            <dd>IN: External file index.
-        <dt><em>size_t</em> <code>name_size</code>
-            <dd>IN: Maximum length of <code>name</code> array.
-        <dt><em>char</em> <code>*name</code>
-            <dd>OUT: Name of the external file.
-        <dt><em>off_t</em> <code>*offset</code>
-            <dd>OUT: Pointer to a location to return an offset value.
-        <dt><em>hsize_t</em> <code>*size</code>
-            <dd>OUT: Pointer to a location to return the size of the 
-                external file data.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of a dataset creation property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>idx</code></td>
+            <td valign="top">IN: External file index.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em>&nbsp;<code>name_size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Maximum length of <code>name</code> array.</td></tr>
+        <tr>
+		    <td valign="top"><em>char</em> <code>*name</code></td>
+            <td valign="top">OUT: Name of the external file.</td></tr>
+        <tr>
+		    <td valign="top"><em>off_t</em> <code>*offset</code></td>
+            <td valign="top">OUT: Pointer to a location to return an offset value.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em> <code>*size</code></td>
+            <td valign="top">OUT: Pointer to a location to return the size of the 
+                external file data.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -2529,10 +2668,11 @@ END SUBROUTINE h5pget_external_f
     <dd><code>H5Pget_external_count</code> returns the number of external files 
         for the specified dataset.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of a dataset creation property list.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of a dataset creation property list.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns the number of external files if successful;
         otherwise returns a negative value.
@@ -2587,12 +2727,14 @@ END SUBROUTINE h5pget_external_count_f
 	Use of this function is only appropriate for an HDF5 file written as a 
 	family of files with the <code>FAMILY</code> file driver.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>hsize_t *</em><code>offset</code>
-            <dd>IN: Offset in bytes within the HDF5 file.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t&nbsp;*</em><code>offset&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Offset in bytes within the HDF5 file.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -2629,15 +2771,18 @@ SUBROUTINE
     <dd><code>H5Pget_fapl_core</code> queries the <code>H5FD_CORE</code> 
     driver properties as set by <code>H5Pset_fapl_core</code>.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>size_t</em> *<code>increment</code>
-            <dd>OUT: Size, in bytes, of memory increments.
-        <dt><em>hbool_t</em> *<code>backing_store</code>
-            <dd>OUT: Boolean flag indicating whether to write the file
-                contents to disk when the file is closed.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> *<code>increment</code></td>
+            <td valign="top">OUT: Size, in bytes, of memory increments.</td></tr>
+        <tr>
+		    <td valign="top"><em>hbool_t</em>&nbsp;*<code>backing_store&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Boolean flag indicating whether to write the file
+                contents to disk when the file is closed.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -2683,15 +2828,18 @@ END SUBROUTINE h5pget_fapl_core_f
         for use with the family driver.
         This information is returned through the output parameters.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em> hsize_t *</em><code>memb_size</code>
-            <dd>OUT: Size in bytes of each file member.
-        <dt><em>hid_t *</em><code>memb_fapl_id</code>
-            <dd>OUT: Identifier of file access property list for each 
-                    family member.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em> hsize_t *</em><code>memb_size</code></td>
+            <td valign="top">OUT: Size in bytes of each file member.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t&nbsp;*</em><code>memb_fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Identifier of file access property list for each 
+                    family member.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -2746,12 +2894,14 @@ END SUBROUTINE h5pget_fapl_family_f
         For further information, see 
         <a href="http://www.globus.org/">http//www.globus.org/</a>.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>,
-            <dd>IN: File access property list identifier.
-        <dt><em>GASS_Info *</em><code>info</code>
-            <dd>OUT: Pointer to the GASS information structure.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code>,</td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>GASS_Info&nbsp;*</em><code>info&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to the GASS information structure.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -2794,14 +2944,17 @@ SUBROUTINE
         so they are valid only until the file access property list 
         is either modified or closed.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>MPI_Comm *</em><code>comm</code>
-            <dd>OUT: MPI-2 communicator.
-        <dt><em>MPI_Info *</em><code>info</code>
-            <dd>OUT: MPI-2 info object.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>MPI_Comm&nbsp;*</em><code>comm&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: MPI-2 communicator.</td></tr>
+        <tr>
+		    <td valign="top"><em>MPI_Info *</em><code>info</code></td>
+            <td valign="top">OUT: MPI-2 info object.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -2848,12 +3001,14 @@ END SUBROUTINE h5pget_fapl_mpio_f
         <code>comm</code> is not copied, so it is valid only 
         until the file access property list is either modified or closed.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>MPI_Comm *</em><code>comm</code>
-            <dd>OUT: MPI-2 communicator.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>MPI_Comm&nbsp;*</em><code>comm&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: MPI-2 communicator.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -2897,28 +3052,34 @@ END SUBROUTINE h5pget_fapl_mpiposix_f
     <dd><code>H5Pget_fapl_multi</code> returns information about the 
         multi-file access property list.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>const H5FD_mem_t *</em><code>memb_map</code>
-            <dd>OUT: Maps memory usage types to other memory usage types.
-        <dt><em>const hid_t *</em><code>memb_fapl</code>
-            <dd>OUT: Property list for each memory usage type.
-        <dt><em>const char **</em><code>memb_name</code>
-            <dd>OUT: Name generator for names of member files.
-        <dt><em>const haddr_t *</em><code>memb_addr</code>
-            <dd>OUT: 
-        <dt><em>hbool_t *</em><code>relax</code>
-            <dd>OUT: Allows read-only access to incomplete file sets 
-                when <code>TRUE</code>.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;H5FD_mem_t&nbsp;*</em><code>memb_map&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Maps memory usage types to other memory usage types.</td></tr>
+        <tr>
+		    <td valign="top"><em>const hid_t *</em><code>memb_fapl</code></td>
+            <td valign="top">OUT: Property list for each memory usage type.</td></tr>
+        <tr>
+		    <td valign="top"><em>const char **</em><code>memb_name</code></td>
+            <td valign="top">OUT: Name generator for names of member files.</td></tr>
+        <tr>
+		    <td valign="top"><em>const haddr_t *</em><code>memb_addr</code></td>
+            <td valign="top">OUT:</td></tr>
+        <tr>
+		    <td valign="top"><em>hbool_t *</em><code>relax</code></td>
+            <td valign="top">OUT: Allows read-only access to incomplete file sets 
+                when <code>TRUE</code>.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
   <dt><strong>Fortran90 Interface:</strong> h5pget_fapl_multi_f
     <dd>
 	<pre>
-SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, &amp; 
+SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name,
                                memb_addr, relax, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T),INTENT(IN)   :: prp_id    ! Property list identifier
@@ -2970,12 +3131,14 @@ END SUBROUTINE h5pget_fapl_multi_f
         Storage Resource Broker (SRB).  For further information, see 
         <a href="http://www.npaci.edu/Research/DI/srb/">http//www.npaci.edu/Research/DI/srb/</a>.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>SRB_Info *</em><code>info</code>
-            <dd>OUT: Pointer to the SRB information structure.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>SRB_Info&nbsp;*</em><code>info&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to the SRB information structure.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -3013,12 +3176,14 @@ SUBROUTINE
         <code>H5Pset_fapl_stream</code> and <code>H5Pget_fapl_stream</code> 
         are not intended for use in a parallel environment.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>H5FD_stream_fapl_t *</em><code>fapl</code>
-            <dd>OUT: The streaming I/O file access property list.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5FD_stream_fapl_t&nbsp;*</em><code>fapl&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: The streaming I/O file access property list.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -3056,13 +3221,15 @@ SUBROUTINE
       is called to close that file.  <code>fc_degree</code> can have any one of 
       four valid values as described above in <a href="#Property-SetFcloseDegree"><code>H5Pset_fclose_degree</code></a>. 
   <dt><strong>Parameters:</strong> 
-    <dl>
-      <dt><em>hid_t</em> <code>fapl_id</code> 
-      <dd>IN: File access property list identifier. 
-      <dt><em>H5F_close_degree_t *</em><code>fc_degree</code> 
-      <dd>OUT: Pointer to a location to which to return the file close degree 
-        property, the value of <code>fc_degree</code>.
-    </dl>
+    <ul><table>
+      <tr>
+	      <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+          <td valign="top">IN: File access property list identifier.</td></tr>
+      <tr>
+	      <td valign="top"><em>H5F_close_degree_t&nbsp;*</em><code>fc_degree&nbsp;&nbsp;&nbsp;&nbsp;</code></td> 
+          <td valign="top">OUT: Pointer to a location to which to return the file close degree 
+            property, the value of <code>fc_degree</code>.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong> 
   <dd>Returns a non-negative value if successful. Otherwise returns a negative 
     value. 
@@ -3131,12 +3298,14 @@ END SUBROUTINE h5pget_fclose_degree_f
 	dataset storage allocation time properties, retrieved with the functions 
 	<code>H5Pget_fill_value</code> and <code>H5Pget_alloc_time</code>.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Dataset creation property list identifier.
-        <dt><em>H5D_fill_time_t *</em><code>fill_time</code>
-            <dd>OUT: Setting for the timing of writing fill values to the dataset.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5D_fill_time_t&nbsp;*</em><code>fill_time&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Setting for the timing of writing fill values to the dataset.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3206,15 +3375,17 @@ END SUBROUTINE h5pget_fill_time_f
 	and <code>H5Pget_fill_time</code>, respectively.
 
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Dataset creation property list identifier.
-        <dt><em>hid_t</em> <code>type_id</code>,
-            <dd>IN: Datatype identifier for the value passed 
-	        via <code>value</code>.
-        <dt><em>void *</em><code>value</code>
-            <dd>OUT: Pointer to buffer to contain the returned fill value.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code>,</td>
+            <td valign="top">IN: Datatype identifier for the value passed 
+	        via <code>value</code>.</td></tr>
+        <tr><td valign="top"><em>void *</em><code>value</code></td>
+            <td valign="top">OUT: Pointer to buffer to contain the returned fill value.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3253,7 +3424,7 @@ END SUBROUTINE h5pget_fill_value_f
         <em>size_t *</em><code>cd_nelmts</code>,
         <em>unsigned int *</em><code>cd_values</code>,
         <em>size_t</em> <code>namelen</code>,
-        <em>char</em> <code>name[]</code>		
+        <em>char</em> <code>name[]</code>
     )
   <dt><strong>Purpose:</strong>
     <dd>Returns information about a filter in a pipeline.
@@ -3292,24 +3463,32 @@ END SUBROUTINE h5pget_fill_value_f
         pipeline; <code>plist</code> must be a dataset creation property 
         list.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Property list identifier.
-        <dt><em>int</em> <code>filter_number</code>
-            <dd>IN: Sequence number within the filter pipeline of 
-                the filter for which information is sought.
-        <dt><em>unsigned int *</em><code>flags</code>
-            <dd>OUT: Bit vector specifying certain general properties
-                of the filter.
-        <dt><em>size_t *</em><code>cd_nelmts</code>
-            <dd>IN/OUT: Number of elements in <code>cd_values</code>.
-        <dt><em>unsigned int *</em><code>cd_values</code>
-            <dd>OUT: Auxiliary data for the filter.
-        <dt><em>size_t</em> <code>namelen</code>
-            <dd>IN: Anticipated number of characters in <code>name</code>.
-        <dt><em>char</em> <code>name[]</code>
-            <dd>OUT: Name of the filter.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>filter_number</code></td>
+            <td valign="top">IN: Sequence number within the filter pipeline of 
+                the filter for which information is sought.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned int *</em><code>flags</code></td>
+            <td valign="top">OUT: Bit vector specifying certain general properties
+                of the filter.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t *</em><code>cd_nelmts</code></td>
+            <td valign="top">IN/OUT: Number of elements in <code>cd_values</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned&nbsp;int&nbsp;*</em><code>cd_values&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Auxiliary data for the filter.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>namelen</code></td>
+            <td valign="top">IN: Anticipated number of characters in <code>name</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>char</em> <code>name[]</code></td>
+            <td valign="top">OUT: Name of the filter.</td></tr>
+    </table></ul>
+<!-- NEW PAGE -->
   <dt><strong>Returns:</strong>
     <dd>Returns the filter identifier if successful:
          <center>
@@ -3418,24 +3597,31 @@ END SUBROUTINE h5pget_filter_f
         set for the property list, an error will be returned
 	and <code>H5Pget_filter_by_id</code> will fail.
  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Property list identifier.
-        <dt><em>H5Z_filter_t</em> <code>filter</code>
-            <dd>IN: Filter identifier.
-        <dt><em>unsigned int</em> <code>flags</code>
-            <dd>OUT:  Bit vector specifying certain general properties
-                of the filter.
-        <dt><em>size_t</em> <code>cd_nelmts</code>
-            <dd>IN/OUT: Number of elements in <code>cd_values</code>.
-        <dt><em>const unsigned int</em> <code>cd_values[]</code>
-            <dd>OUT: Auxiliary data for the filter.
-        <dt><em>size_t</em> <code>namelen</code>
-            <dd>IN/OUT: Length of filter name and 
-	        number of elements in <code>name[]</code>.
-        <dt><em>char *</em><code>name[]</code>
-            <dd>OUT: Name of filter.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5Z_filter_t</em> <code>filter</code></td>
+            <td valign="top">IN: Filter identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned int</em> <code>flags</code></td>
+            <td valign="top">OUT:  Bit vector specifying certain general properties
+                of the filter.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>cd_nelmts</code></td>
+            <td valign="top">IN/OUT: Number of elements in <code>cd_values</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;unsigned&nbsp;int</em>&nbsp;<code>cd_values[]&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Auxiliary data for the filter.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>namelen</code></td>
+            <td valign="top">IN/OUT: Length of filter name and 
+	        number of elements in <code>name[]</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>char *</em><code>name[]</code></td>
+            <td valign="top">OUT: Name of filter.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3443,7 +3629,7 @@ END SUBROUTINE h5pget_filter_f
   <dt><strong>Fortran90 Interface:</strong> h5pget_filter_by_id_f
     <dd>
 	<pre>
-SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts, &amp; 
+SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts,
                                  cd_values, namelen, name, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier
@@ -3488,15 +3674,17 @@ END SUBROUTINE h5pget_filter_by_id_f
         The garbage collection references property is set 
         by <a href="#Property-SetGCReferences">H5Pset_gc_references</a>.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>unsigned</em> <code>gc_ref</code>
-            <dd>OUT: Flag returning the state of reference garbage collection.
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em>&nbsp;<code>gc_ref&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Flag returning the state of reference garbage collection.
                 A returned value of <code>1</code> indicates that 
                 garbage collection is on while 
-                <code>0</code> indicates that garbage collection is off.
-    </dl>
+                <code>0</code> indicates that garbage collection is off.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3608,12 +3796,14 @@ END SUBROUTINE h5pget_hyper_cache_f
 	was previously set with a call to 
 	<a href="#Property-SetHyperVectorSize">H5Pset_hyper_vector_size</a>.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dxpl_id</code>
-            <dd>IN: Dataset transfer property list identifier.
-        <dt><em>size_t *</em><code>vector_size</code>
-            <dd>OUT: Number of I/O vectors to accumulate in memory for I/O operations. 
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dxpl_id</code></td>
+            <td valign="top">IN: Dataset transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t&nbsp;*</em><code>vector_size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Number of I/O vectors to accumulate in memory for I/O operations.</td></tr> 
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3645,7 +3835,7 @@ END SUBROUTINE h5pget_hyper_vector_size_f
   <dt><strong>Name:</strong> <a name="Property-GetIstoreK">H5Pget_istore_k</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Pget_istore_k</code>(<em>hid_t</em> <code>plist</code>,
-            <em>int *</em> <code>ik</code>
+            <em>unsigned *</em> <code>ik</code>
         )
   <dt><strong>Purpose:</strong>
     <dd>Queries the 1/2 rank of an indexed storage B-tree.  
@@ -3657,12 +3847,14 @@ END SUBROUTINE h5pget_hyper_vector_size_f
             <p>
             See <a href="#Property-SetIstoreK">H5Pset_istore_k</a> for details.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of property list to query.
-        <dt><em>int *</em> <code>ik</code>
-            <dd>OUT: Pointer to location to return the chunked storage B-tree 1/2 rank.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of property list to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned *</em> <code>ik</code></td>
+            <td valign="top">OUT: Pointer to location to return the chunked storage B-tree 1/2 rank.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3706,10 +3898,11 @@ END SUBROUTINE h5pget_istore_k_f
         documentation for details.
 	
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier for property list to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier for property list to query.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns the layout type (a non-negative value)  
         of a dataset creation property list if successful.  
@@ -3773,12 +3966,14 @@ END SUBROUTINE h5pget_layout_f
         and is retrieved from the file access property list
         <code>fapl_id</code>. 
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>hsize_t *</em><code>size</code>
-            <dd>OUT: Minimum size, in bytes, of metadata block allocations.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t *</em><code>size</code></td>
+            <td valign="top">OUT: Minimum size, in bytes, of metadata block allocations.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -3836,12 +4031,14 @@ END SUBROUTINE h5pget_meta_block_size_f
 	Use of this function is only appropriate for an HDF5 file written 
 	as a set of files with the <code>MULTI</code> file driver.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list or data transfer property list identifier.
-        <dt><em>H5FD_mem_t *</em><code>type</code>
-            <dd>OUT: Type of data.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list or data transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5FD_mem_t&nbsp;*</em><code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Type of data.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -3889,10 +4086,11 @@ SUBROUTINE
         pipeline; <code>plist_id</code> must be a dataset creation 
         property list.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Property list identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Property list identifier.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns the number of filters in the pipeline if successful;
         otherwise returns a negative value.
@@ -3947,7 +4145,7 @@ END SUBROUTINE h5pget_nfilters_f
         <td><em>hid_t</em> <code>id</code></td>
         <td>IN: Identifier of property object to query</td></tr>
     <tr>
-        <td><em>size_t *</em><code>nprops</code></td>
+        <td><em>size_t&nbsp;*</em><code>nprops&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>OUT: Number of properties in object</td></tr>
     </table></ul>
 
@@ -3988,10 +4186,11 @@ END SUBROUTINE h5pget_nprops_f
     <dd><code>H5Pget_preserve</code> checks the status of the 
         dataset transfer property list.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier for the dataset transfer property list.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier for the dataset transfer property list.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns TRUE or FALSE if successful;
         otherwise returns a negative value.
@@ -4027,8 +4226,6 @@ END SUBROUTINE h5pget_preserve_f
                      <em>hid_t</em> <code>fapl_id</code>,
                      <em>hsize_t *</em><code>size</code>
     )
-<br>
-<br>
   <dt><strong>Purpose:</strong>
     <dd> Returns maximum data sieve buffer size.
   <dt><strong>Description:</strong>
@@ -4040,12 +4237,14 @@ END SUBROUTINE h5pget_preserve_f
         and is retrieved from the file access property list
         <code>fapl_id</code>. 
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>hsize_t *</em><code>size</code>
-            <dd>IN: Maximum size, in bytes, of data sieve buffer.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t *</em><code>size</code></td>
+            <td valign="top">IN: Maximum size, in bytes, of data sieve buffer.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -4101,7 +4300,7 @@ END SUBROUTINE h5pget_sieve_buf_size_f
         <td><em>hid_t</em> <code>id</code></td>
         <td>IN: Identifier of property object to query</td></tr>
     <tr>
-        <td><em>const char *</em><code>name</code></td>
+        <td><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>IN: Name of property to query</td></tr>
     <tr>
         <td><em>size_t *</em><code>size</code></td>
@@ -4150,14 +4349,17 @@ END SUBROUTINE h5pget_size_f
             and lengths used in an HDF5 file.  
             This function is only valid for file creation property lists.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of property list to query.
-        <dt><em>size_t *</em> <code>size</code>
-            <dd>OUT: Pointer to location to return offset size in bytes.
-        <dt><em>size_t *</em> <code>size</code>
-            <dd>OUT: Pointer to location to return length size in bytes.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of property list to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t&nbsp;*</em>&nbsp;<code>size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to location to return offset size in bytes.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t *</em> <code>size</code></td>
+            <td valign="top">OUT: Pointer to location to return length size in bytes.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -4202,12 +4404,14 @@ END SUBROUTINE h5pget_sizes_f
         If the returned value is zero (<code>0</code>), the small data 
         block mechanism has been disabled for the file.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier .
-        <dt><em>hsize_t *</em><code>size</code>
-            <dd>OUT: Maximum size, in bytes, of the small data block.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t *</em><code>size</code></td>
+            <td valign="top">OUT: Maximum size, in bytes, of the small data block.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise a negative value.
@@ -4239,8 +4443,8 @@ END SUBROUTINE h5pget_small_data_block_size_f
   <dt><strong>Name:</strong> <a name="Property-GetSymK">H5Pget_sym_k</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Pget_sym_k</code>(<em>hid_t</em> <code>plist</code>,
-            <em>int *</em> <code>ik</code>,
-            <em>int *</em> <code>lk</code>
+            <em>unsigned *</em> <code>ik</code>,
+            <em>unsigned *</em> <code>lk</code>
         )
   <dt><strong>Purpose:</strong>
     <dd>Retrieves the size of the symbol table B-tree 1/2 rank 
@@ -4254,14 +4458,17 @@ END SUBROUTINE h5pget_small_data_block_size_f
             <a href="#Property-SetSymK">H5Pset_sym_k</a> for more 
             information.  
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Property list to query.
-        <dt><em>int *</em> <code>ik</code>
-            <dd>OUT: Pointer to location to return the symbol table's B-tree 1/2 rank.
-        <dt><em>int *</em> <code>size</code>
-            <dd>OUT: Pointer to location to return the symbol table's leaf node 1/2 size.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Property list to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned *</em> <code>ik</code></td>
+            <td valign="top">OUT: Pointer to location to return the symbol table's B-tree 1/2 rank.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned *</em> <code>size</code></td>
+            <td valign="top">OUT: Pointer to location to return the symbol table's leaf node 1/2 size.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -4301,12 +4508,14 @@ END SUBROUTINE h5pget_sym_k_f
         <dd><code>H5Pget_userblock</code> retrieves the size of a user block 
             in a file creation property list.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier for property list to query.
-        <dt><em>hsize_t *</em> <code>size</code>
-            <dd>OUT: Pointer to location to return user-block size.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier for property list to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t&nbsp;*</em>&nbsp;<code>size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to location to return user-block size.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -4338,10 +4547,10 @@ END SUBROUTINE h5pget_userblock_f
   <dt><strong>Name:</strong> <a name="Property-GetVersion">H5Pget_version</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Pget_version</code>(<em>hid_t</em> <code>plist</code>,
-            <em>int *</em> <code>super</code>,
-            <em>int *</em> <code>freelist</code>,
-            <em>int *</em> <code>stab</code>,
-            <em>int *</em> <code>shhdr</code>
+            <em>unsigned *</em> <code>super</code>,
+            <em>unsigned *</em> <code>freelist</code>,
+            <em>unsigned *</em> <code>stab</code>,
+            <em>unsigned *</em> <code>shhdr</code>
         )
   <dt><strong>Purpose:</strong>
     <dd>Retrieves the version information of various objects for 
@@ -4351,18 +4560,23 @@ END SUBROUTINE h5pget_userblock_f
             for a file creation property list.  Any pointer parameters which are
             passed as NULL are not queried.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of the file creation property list.
-        <dt><em>int *</em> <code>super</code>
-            <dd>OUT: Pointer to location to return super block version number.
-        <dt><em>int *</em> <code>freelist</code>
-            <dd>OUT: Pointer to location to return global freelist version number.
-        <dt><em>int *</em> <code>stab</code>
-            <dd>OUT: Pointer to location to return symbol table version number.
-        <dt><em>int *</em> <code>shhdr</code>
-            <dd>OUT: Pointer to location to return shared object header version number.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of the file creation property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned *</em> <code>super</code></td>
+            <td valign="top">OUT: Pointer to location to return super block version number.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned&nbsp;*</em>&nbsp;<code>freelist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to location to return global freelist version number.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned *</em> <code>stab</code></td>
+            <td valign="top">OUT: Pointer to location to return symbol table version number.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned *</em> <code>shhdr</code></td>
+            <td valign="top">OUT: Pointer to location to return shared object header version number.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -4415,26 +4629,31 @@ END SUBROUTINE h5pget_version_f
         <code>H5Pset_vlen_mem_manager</code>, returning the parameters
         set by that function.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier for the dataset transfer property list.
-        <dt><em>H5MM_allocate_t</em> <code>alloc</code>
-            <dd>OUT: User's allocate routine, or &nbsp; <code> NULL</code> 
-                for system &nbsp; <code> malloc</code>. 
-        <dt><em>void</em> *<code>alloc_info</code>
-            <dd>OUT: Extra parameter for user's allocation routine.  
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier for the dataset transfer property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5MM_allocate_t</em>&nbsp;<code>alloc&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: User's allocate routine, or &nbsp; <code> NULL</code> 
+                for system &nbsp; <code> malloc</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> *<code>alloc_info</code></td>
+            <td valign="top">OUT: Extra parameter for user's allocation routine.  
                 <br>
                 Contents are ignored if preceding parameter is &nbsp; 
-                <code> NULL</code>.
-        <dt><em>H5MM_free_t</em> <code>free</code>
-            <dd>OUT: User's free routine, or &nbsp; <code> NULL</code> for 
-                system <code>free</code>. 
-        <dt><em>void</em> *<code>free_info</code>
-            <dd>OUT: Extra parameter for user's free routine.  
+                <code> NULL</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5MM_free_t</em> <code>free</code></td>
+            <td valign="top">OUT: User's free routine, or &nbsp; <code> NULL</code> for 
+                system <code>free</code>.</td></tr> 
+        <tr>
+		    <td valign="top"><em>void</em> *<code>free_info</code></td>
+            <td valign="top">OUT: Extra parameter for user's free routine.  
                 <br>
                 Contents are ignored if preceding parameter is &nbsp; 
-                <code> NULL</code>.
-    </dl>
+                <code> NULL</code>.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -4576,6 +4795,7 @@ SUBROUTINE
     routine returns an error value.
     </p>
 
+    <P>
     The <code>delete</code> routine is called when a property is being 
     deleted from a property list.  
     The <code>H5P_prp_delete_func_t</code> callback function is defined 
@@ -4609,6 +4829,7 @@ SUBROUTINE
     error value but the property is still deleted. 
     </P>
     
+    <P>
     The <code>copy</code> routine is called when a new property list 
     with this property is being created through a copy operation.  
     The <code>H5P_prp_copy_func_t</code> callback function is defined 
@@ -4673,6 +4894,7 @@ SUBROUTINE
     list objects; the initial value is assumed to have any necessary setup 
     already performed on it.
 
+<!-- NEW PAGE -->
   <dt><strong>Parameters:</strong>
     <ul><table>
     <tr>
@@ -4697,7 +4919,7 @@ SUBROUTINE
         <td>IN: Callback routine called when a property value is retrieved 
                 from the property</td></tr>
     <tr>
-        <td><em>H5P_prp_delete_func_t</em> <code>delete</code></td>
+        <td><em>H5P_prp_delete_func_t</em>&nbsp;<code>delete&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>IN: Callback routine called when a property is deleted from
                 a property list</td></tr>
     <tr>
@@ -4766,7 +4988,7 @@ END SUBROUTINE h5pinsert_f
         <td><em>hid_t</em> <code>plist</code></td>
         <td>IN: Identifier of the property list</td></tr>
     <tr>
-        <td><code>hid_t</code> <em>pclass</em></td>
+        <td><code>hid_t</code>&nbsp;<em>pclass&nbsp;&nbsp;&nbsp;&nbsp;</em></td>
         <td>IN: Identifier of the property class</td></tr>
     </table></ul>
 
@@ -4888,7 +5110,7 @@ END SUBROUTINE h5pisa_class_f
         <td><em>int *</em> <code>idx</code></td>
         <td>IN/OUT: Index of the property to begin with</td></tr>
     <tr>
-        <td><em>H5P_iterate_t</em> <code>iter_func</code></td>
+        <td><em>H5P_iterate_t</em>&nbsp;<code>iter_func&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>IN: Function pointer to function to be called with each 
                 property iterated over</td></tr>
     <tr>
@@ -4948,19 +5170,24 @@ SUBROUTINE
         pipeline; <code>plist_id</code> must be a dataset creation 
         property list.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Property list identifier.
-        <dt><em>H5Z_filter_t</em> <code>filter</code>
-            <dd>IN: Filter to be modified.
-        <dt><em>unsigned int</em> <code>flags</code>
-            <dd>IN:  Bit vector specifying certain general properties
-                of the filter.
-        <dt><em>size_t</em> <code>cd_nelmts</code>
-            <dd>IN: Number of elements in <code>cd_values</code>.
-        <dt><em>const unsigned int</em> <code>cd_values[]</code>
-            <dd>IN: Auxiliary data for the filter.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5Z_filter_t</em> <code>filter</code></td>
+            <td valign="top">IN: Filter to be modified.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned int</em> <code>flags</code></td>
+            <td valign="top">IN:  Bit vector specifying certain general properties
+                of the filter.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>cd_nelmts</code></td>
+            <td valign="top">IN: Number of elements in <code>cd_values</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;unsigned&nbsp;int</em>&nbsp;<code>cd_values[]&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Auxiliary data for the filter.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -5035,6 +5262,7 @@ END SUBROUTINE h5pmodify_filter_f
     <code>get</code> callbacks are never called.
     </P>
 	
+    <P>
     The <code>create</code> routine is called when a new property list 
     with this property is being created.  
     The <code>H5P_prp_create_func_t</code> callback function is defined 
@@ -5064,6 +5292,7 @@ END SUBROUTINE h5pmodify_filter_f
     create routine returns an error value.
     </P>
 	
+    <P>
     The <code>set</code> routine is called before a new value is copied 
     into the property.  
     The <code>H5P_prp_set_func_t</code> callback function is defined 
@@ -5143,6 +5372,7 @@ END SUBROUTINE h5pmodify_filter_f
     routine returns an error value.
     </P>
 
+    <P>
     The <code>delete</code> routine is called when a property is being 
     deleted from a property list.  
     The <code>H5P_prp_delete_func_t</code> callback function is defined 
@@ -5176,6 +5406,7 @@ END SUBROUTINE h5pmodify_filter_f
     an error value but the property is still deleted.
     </P>
 
+    <P>
     The <code>copy</code> routine is called when a new property list with 
     this property is being created through a copy operation.  
     The <code>H5P_prp_copy_func_t</code> callback function is defined
@@ -5236,38 +5467,49 @@ END SUBROUTINE h5pmodify_filter_f
     If the <code>close</code> routine returns a negative value, 
     the property list close routine returns an error value but
     the property list is still closed.
+    </P>
 	
 <dt><strong>Parameters:</strong>
-    <ul><dl>
-      <dt><code>hid_t</code> <em>class</em>
-        <dd>IN: Property list class to register permanent property 
-		    within
-      <dt><code>const char *</code> <em>name</em>
-        <dd>IN: Name of property to register
-      <dt><code>size_t</code> <em>size</em>
-        <dd>IN: Size of property in bytes
-      <dt><code>void *</code> <em>default</em>
-        <dd>IN: Default value for property in newly created property 
-		    lists
-      <dt><code>H5P_prp_create_func_t</code> <em>create</em>
-        <dd>IN: Callback routine called when a property list is being 
-            created and the property value will be initialized
-      <dt><code>H5P_prp_set_func_t</code> <em>set</em>
-        <dd>IN: Callback routine called before a new value is copied 
-            into the property's value
-      <dt><code>H5P_prp_get_func_t</code> <em>get</em>
-        <dd>IN: Callback routine called when a property value is 
-            retrieved from the property
-      <dt><code>H5P_prp_delete_func_t</code> <em>delete</em>
-        <dd>IN: Callback routine called when a property is deleted from
-            a property list
-      <dt><code>H5P_prp_copy_func_t</code> <em>copy</em>
-        <dd>IN: Callback routine called when a property is copied from
-            a property list
-      <dt><code>H5P_prp_close_func_t</code> <em>close</em>
-        <dd>IN: Callback routine called when a property list is being 
-            closed and the property value will be disposed of
-    </dl></ul>
+    <ul><table>
+      <tr>
+	    <td valign="top"><code>hid_t</code> <em>class</em></td>
+        <td valign="top">IN: Property list class to register permanent property 
+		    within</td></tr>
+      <tr>
+	    <td valign="top"><code>const char *</code> <em>name</em></td>
+        <td valign="top">IN: Name of property to register</td></tr>
+      <tr>
+	    <td valign="top"><code>size_t</code> <em>size</em></td>
+        <td valign="top">IN: Size of property in bytes</td></tr>
+      <tr>
+	    <td valign="top"><code>void *</code> <em>default</em></td>
+        <td valign="top">IN: Default value for property in newly created property 
+		    lists</td></tr>
+      <tr>
+	    <td valign="top"><code>H5P_prp_create_func_t</code>&nbsp;<em>create&nbsp;&nbsp;&nbsp;&nbsp;</em></td>
+        <td valign="top">IN: Callback routine called when a property list is being 
+            created and the property value will be initialized</td></tr>
+      <tr>
+	    <td valign="top"><code>H5P_prp_set_func_t</code> <em>set</em></td>
+        <td valign="top">IN: Callback routine called before a new value is copied 
+            into the property's value</td></tr>
+      <tr>
+	    <td valign="top"><code>H5P_prp_get_func_t</code> <em>get</em></td>
+        <td valign="top">IN: Callback routine called when a property value is 
+            retrieved from the property</td></tr>
+      <tr>
+	    <td valign="top"><code>H5P_prp_delete_func_t</code> <em>delete</em></td>
+        <td valign="top">IN: Callback routine called when a property is deleted from
+            a property list</td></tr>
+      <tr>
+	    <td valign="top"><code>H5P_prp_copy_func_t</code> <em>copy</em></td>
+        <td valign="top">IN: Callback routine called when a property is copied from
+            a property list</td></tr>
+      <tr>
+	    <td valign="top"><code>H5P_prp_close_func_t</code> <em>close</em></td>
+        <td valign="top">IN: Callback routine called when a property list is being 
+            closed and the property value will be disposed of</td></tr>
+    </table></ul>
 
 <dt><strong>Returns:</strong>
     <dd>Success: a non-negative value
@@ -5337,7 +5579,7 @@ END SUBROUTINE h5pregister_f
         <td><em>hid_t</em> <code>plid</code></td>
         <td>IN: Identifier of the property list to modify</td></tr>
     <tr>
-        <td><em>const char *</em><code>name</code></td>
+        <td><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>IN: Name of property to remove</td></tr>
     </table></ul>
 
@@ -5361,108 +5603,6 @@ END SUBROUTINE h5premove_f
     	<dd>
         
         <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<!-- NEW PAGE -->
-<!-- HEADER RIGHT "H5Premove_filter" -->
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-RemoveFilter">H5Premove_filter</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Premove_filter</code>(<em>hid_t</em> <code>plist</code>,
-        <em>H5Z_filter_t</em> <code>filter</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Delete one or more filters in the filter pipeline.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Premove_filter</code> removes the specified 
-        <code>filter</code> from the filter pipeline in the
-        dataset creation property list <code>plist</code>.
-        <p>
-        The <code>filter</code> parameter specifies the filter to be removed.  
-        Valid values for use in <code>filter</code> are as follows:
-
-        <center>
-        <table width=75%>
-        <tr valign=top align=left><td>
-            <code>H5Z_FILTER_ALL</code> 
-            </td><td>
-            Removes all filters from the permanent filter pipeline.
-        </td></tr>
-        <tr valign=top align=left><td>
-            <code>H5Z_FILTER_DEFLATE</code> 
-            </td><td>
-            Data compression filter, employing the gzip algorithm 
-        </td></tr>
-        <tr valign=top align=left><td>
-            <code>H5Z_FILTER_SHUFFLE</code> 
-            </td><td>
-            Data shuffling filter 
-        </td></tr>
-        <tr valign=top align=left><td>
-            <code>H5Z_FILTER_FLETCHER32&nbsp;&nbsp;</code> 
-            </td><td>
-            Error detection filter, employing the Fletcher32 checksum algorithm 
-        </td></tr>
-        <tr valign=top align=left><td>
-            <code>H5Z_FILTER_SZIP</code>
-            </td><td>
-            Data compression filter, employing the SZIP algorithm
-        </td></tr>
-        </table>
-        </center>
-        <p>
-        Additionally, user-defined filters can be removed with this routine
-        by passing the filter identifier with which they were registered
-        with the HDF5 Library.
-        <p>
-        Attempting to remove a filter that is not in the permanent filter
-        pipeline is an error.
-  <dt><strong>Note:</strong>
-    <dd>This function currently supports only the permanent filter
-        pipeline; <code>plist</code> must be a dataset creation
-        property list.
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Dataset creation property list identifier.
-        <dt><em>H5Z_filter_t</em> <code>filter</code>
-            <dd>IN: Filter to be deleted.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-
-    <dt><strong>Fortran90 Interface:</strong> h5premove_filter_f
-    <dd>
-        <pre>
-SUBROUTINE h5premove_filter_f(prp_id, filter, hdferr)
-
-  IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset creation property 
-                                       ! list identifier
-  INTEGER, INTENT(IN) :: filter        ! Filter to be removed
-                                       ! Valid values are:
-                                       !     H5Z_FILTER_ALL_F
-                                       !     H5Z_FILTER_DEFLATE_F
-                                       !     H5Z_FILTER_SHUFFLE_F
-                                       !     H5Z_FILTER_FLETCHER32_F
-                                       !     H5Z_FILTER_SZIP_F
-                                       !</pre>
-<!-- NEW PAGE -->
-<pre>
-  INTEGER, INTENT(OUT) :: hdferr       ! Error code
-                                       ! 0 on success, -1 on failure
-END SUBROUTINE h5premove_filter_f
-        </pre>
-
-                <!--<dt><strong>Non-C API(s):</strong>
-        <dd>
-
-        <img src="Graphics/Java.gif">
         <img src="Graphics/C++.gif">
         -->
 </dl>
@@ -5512,7 +5652,7 @@ END SUBROUTINE h5premove_filter_f
         <td><em>hid_t</em> <code>plid</code>;
         <td>IN: Property list identifier to modify</td></tr>
     <tr>
-        <td><em>const char *</em><code>name</code>;
+        <td><em>const&nbsp;char&nbsp;*</em><code>name;&nbsp;&nbsp;&nbsp;&nbsp;</code>
         <td>IN: Name of property to modify</td></tr>
     <tr>
         <td><em>void *</em><code>value</code>;
@@ -5579,19 +5719,20 @@ END SUBROUTINE h5pset_f
         For MPI-IO and other parallel systems, choose an alignment
         which is a multiple of the disk block size.   
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier for a file access property list.
-        <dt><em>hsize_t</em> <code>threshold</code>
-            <dd>IN: Threshold value.  
-                Must be non-negative.
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier for a file access property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em>&nbsp;<code>threshold&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Threshold value.  
                 Note that setting the threshold value to 0 (zero) has 
                 the effect of a special case, forcing everything 
-                to be aligned.
-        <dt><em>hsize_t</em> <code>alignment</code>
-            <dd>IN: Alignment value.  
-                Must be a positive value.
-    </dl>
+                to be aligned.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em> <code>alignment</code></td>
+            <td valign="top">IN: Alignment value.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -5676,12 +5817,14 @@ END SUBROUTINE h5pset_alignment_f
 	See <a href="RM_H5D.html#Dataset-Create">H5Dcreate</a> for 
 	further cross-references.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Dataset creation property list identifier.
-        <dt><em>H5D_alloc_time_t</em> <code>alloc_time</code>
-            <dd>IN: When to allocate dataset storage space.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5D_alloc_time_t</em>&nbsp;<code>alloc_time&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: When to allocate dataset storage space.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -5743,16 +5886,20 @@ END SUBROUTINE h5pset_alloc_time_f
         <p>
         All ratios are real numbers between 0 and 1, inclusive. 
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: The dataset transfer property list identifier.
-        <dt><em>double</em> <code>left</code>
-            <dd>IN: The B-tree split ratio for left-most nodes.
-        <dt><em>double</em> <code>right</code>
-            <dd>IN: The B-tree split ratio for right-most nodes and lone nodes.
-        <dt><em>double</em> <code>middle</code>
-            <dd>IN: The B-tree split ratio for all other nodes.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: The dataset transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>double</em> <code>left</code></td>
+            <td valign="top">IN: The B-tree split ratio for left-most nodes.</td></tr>
+        <tr>
+		    <td valign="top"><em>double</em> <code>right</code></td>
+            <td valign="top">IN: The B-tree split ratio for right-most nodes and lone nodes.</td></tr>
+        <tr>
+		    <td valign="top"><em>double</em>&nbsp;<code>middle&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: The B-tree split ratio for all other nodes.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -5818,16 +5965,20 @@ END SUBROUTINE h5pset_btree_ratios_f
          <p>
          The default value for the maximum buffer is 1 Mb.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier for the dataset transfer property list.
-        <dt><em>hsize_t</em> <code>size</code>
-            <dd>IN: Size, in bytes, of the type conversion and background buffers.
-        <dt><em>void</em> <code>tconv</code>
-            <dd>IN: Pointer to application-allocated type conversion buffer.
-        <dt><em>void</em> <code>bkg</code>
-            <dd>IN: Pointer to application-allocated background buffer.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier for the dataset transfer property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em>&nbsp;<code>size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Size, in bytes, of the type conversion and background buffers.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> <code>tconv</code></td>
+            <td valign="top">IN: Pointer to application-allocated type conversion buffer.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> <code>bkg</code></td>
+            <td valign="top">IN: Pointer to application-allocated background buffer.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -5889,18 +6040,23 @@ END SUBROUTINE h5pset_buffer_f
         preemption is strictly LRU) while a value of one means fully
         read chunks are always preempted before other chunks. 
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Identifier of the file access property list.
-        <dt><em>int</em> <code>mdc_nelmts</code>
-            <dd>IN: Number of elements (objects) in the meta data cache.
-        <dt><em>int</em> <code>rdcc_nelmts</code>
-            <dd>IN: Number of elements (objects) in the raw data chunk cache.
-        <dt><em>size_t</em> <code>rdcc_nbytes</code>
-            <dd>IN: Total size of the raw data chunk cache, in bytes.
-        <dt><em>double</em> <code>rdcc_w0</code>
-            <dd>IN: Preemption policy.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Identifier of the file access property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>mdc_nelmts</code></td>
+            <td valign="top">IN: Number of elements (objects) in the meta data cache.</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>rdcc_nelmts</code></td>
+            <td valign="top">IN: Number of elements (objects) in the raw data chunk cache.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em>&nbsp;<code>rdcc_nbytes&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Total size of the raw data chunk cache, in bytes.</td></tr>
+        <tr>
+		    <td valign="top"><em>double</em> <code>rdcc_w0</code></td>
+            <td valign="top">IN: Preemption policy.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -5955,19 +6111,22 @@ END SUBROUTINE h5pset_cache_f
         The unit of measure for <code>dim</code> values is 
         <em>dataset elements</em>.
         <p>
-        As a side-effect of this function, the layout of the dataset 
-        is changed to <code>H5D_CHUNKED</code>, if it is not already so set.
+        As a side-effect of this function, the layout of the dataset is 
+        changed to <code>H5D_CHUNKED</code>, if it is not already so set.
         (See <a href="#Property-SetLayout"><code>H5Pset_layout</code></a>.)
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier for property list to query.
-        <dt><em>int</em> <code>ndims</code>
-            <dd>IN: The number of dimensions of each chunk.
-        <dt><em>const hsize_t *</em> <code>dim</code>
-            <dd>IN: An array defining the size, in dataset elements, 
-                of each chunk.
-    </dl>
+    <ul><table>
+        <tr>
+          <td valign="top"><em>hid_t</em> <code>plist</code></td>
+          <td valign="top">IN: Identifier for property list to query.</td></tr>
+        <tr>
+          <td valign="top"><em>int</em> <code>ndims</code></td>
+          <td valign="top">IN: The number of dimensions of each chunk.</td></tr>
+        <tr>
+          <td valign="top"><em>const&nbsp;hsize_t&nbsp;*</em>&nbsp;<code>dim&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: An array defining the size, in dataset elements, 
+              of each chunk.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -6013,12 +6172,14 @@ END SUBROUTINE h5pset_chunk_f
         Lower compression levels are faster but result in less compression.  
         This is the same algorithm as used by the GNU gzip program.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier for the dataset creation property list.
-        <dt><em>int</em> <code>level</code>
-            <dd>IN: Compression level.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier for the dataset creation property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>level</code></td>
+            <td valign="top">IN: Compression level.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -6117,12 +6278,14 @@ END SUBROUTINE h5pset_deflate_f
         </dl>
         </dir></p>
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dxpl_id</code>
-            <dd>IN: Data transfer property list identifier.
-        <dt><em>H5FD_mpio_xfer_t</em> <code>xfer_mode</code>
-            <dd>IN: Transfer mode.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dxpl_id</code></td>
+            <td valign="top">IN: Data transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5FD_mpio_xfer_t</em>&nbsp;<code>xfer_mode&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Transfer mode.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -6169,12 +6332,14 @@ END SUBROUTINE h5pset_dxpl_mpio_f
         <code>H5Pset_dxpl_multi</code> can only be used after 
         the member map has been set with <code>H5Pset_fapl_multi</code>.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dxpl_id</code>,
-            <dd>IN: Data transfer property list identifier.
-        <dt><em>const hid_t *</em><code>memb_dxpl</code>
-            <dd>IN: Array of data access property lists.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dxpl_id</code>,</td>
+            <td valign="top">IN: Data transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;hid_t&nbsp;*</em><code>memb_dxpl&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Array of data access property lists.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -6229,13 +6394,15 @@ SUBROUTINE
     <dd>The initial error detection implementation, Fletcher32 checksum, 
         supports error detection for chunked datasets only.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Dataset transfer property list identifier.
-        <dt><em>H5Z_EDC_t</em> <code>check</code>
-            <dd>IN: Specifies whether error checking is enabled or disabled 
-	        for dataset read operations.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Dataset transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5Z_EDC_t</em>&nbsp;<code>check&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Specifies whether error checking is enabled or disabled 
+	        for dataset read operations.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -6296,8 +6463,8 @@ END SUBROUTINE h5pset_edc_check_f
         The <code>size</code> argument specifies the number of bytes reserved 
         for data in the external file.
         If  <code>size</code> is set to <code>H5F_UNLIMITED</code>, the 
-        external file can be of unlimited size and no more files can be added to
-        the external files list.
+        external file can be of unlimited size and no more files can be added 
+        to the external files list.
         <p>
         All of the external files for a given dataset must be 
         specified with <code>H5Pset_external</code> 
@@ -6307,17 +6474,21 @@ END SUBROUTINE h5pset_edc_check_f
         <code>H5Dwrite</code> is called to write data to it, 
         the library will create the file.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of a dataset creation property list.
-        <dt><em>const char</em> <code>*name</code>
-            <dd>IN: Name of an external file.
-        <dt><em>off_t</em> <code>offset</code>
-            <dd>IN: Offset, in bytes, from the beginning of the file
-                to the location in the file where the data starts.
-        <dt><em>hsize_t</em> <code>size</code>
-            <dd>IN: Number of bytes reserved in the file for the data.
-    </dl>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of a dataset creation property list.</td></tr>
+        <tr>
+            <td valign="top"><em>const&nbsp;char</em>&nbsp;<code>*name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Name of an external file.</td></tr>
+        <tr>
+            <td valign="top"><em>off_t</em> <code>offset</code></td>
+            <td valign="top">IN: Offset, in bytes, from the beginning of the file
+                to the location in the file where the data starts.</td></tr>
+        <tr>
+            <td valign="top"><em>hsize_t</em> <code>size</code></td>
+            <td valign="top">IN: Number of bytes reserved in the file for the data.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -6378,12 +6549,14 @@ END SUBROUTINE h5pset_external_f
 	Use of this function is only appropriate for an HDF5 file written as a 
 	family of files with the <code>FAMILY</code> file driver.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>hsize_t</em> <code>offset</code>
-            <dd>IN: Offset in bytes within the HDF5 file.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em>&nbsp;<code>offset&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Offset in bytes within the HDF5 file.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -6443,15 +6616,18 @@ END SUBROUTINE h5pset_family_offset_f
     <dd>There is currently no means for reading a file from disk then
         using the <code>H5FD_CORE</code> driver to manipulate the file.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>size_t</em> <code>increment</code>
-            <dd>IN: Size, in bytes, of memory increments.
-        <dt><em>hbool_t</em> <code>backing_store</code>
-            <dd>IN: Boolean flag indicating whether to write the file
-                contents to disk when the file is closed.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>increment</code></td>
+            <td valign="top">IN: Size, in bytes, of memory increments.</td></tr>
+        <tr>
+		    <td valign="top"><em>hbool_t</em>&nbsp;<code>backing_store&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Boolean flag indicating whether to write the file
+                contents to disk when the file is closed.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -6502,15 +6678,18 @@ END SUBROUTINE h5pset_fapl_core_f
         <code>memb_fapl_id</code> is the identifier of the 
         file access property list to be used for each family member. 
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em> hsize_t</em> <code>memb_size</code>
-            <dd>IN: Size in bytes of each file member.
-        <dt><em>hid_t</em> <code>memb_fapl_id</code>
-            <dd>IN: Identifier of file access property list for each 
-                    family member.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em> hsize_t</em> <code>memb_size</code></td>
+            <td valign="top">IN: Size in bytes of each file member.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>memb_fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of file access property list for each 
+                    family member.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -6570,12 +6749,14 @@ END SUBROUTINE h5pset_fapl_family_f
         For further information, see 
         <a href="http://www.globus.org/">http//www.globus.org/</a>.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>,
-            <dd>IN: File access property list identifier.
-        <dt><em>GASS_Info</em> <code>info</code>
-            <dd>IN: Pointer to the GASS information structure.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code>,</td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>GASS_Info</em>&nbsp;<code>info&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Pointer to the GASS information structure.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -6740,6 +6921,7 @@ SUBROUTINE
             <code>(H5FD_LOG_NUM_READ | H5FD_LOG_NUM_WRITE | H5FD_LOG_NUM_SEEK)</code>
         </td></tr>
 	
+<!-- NEW PAGE -->
 	<tr valign=top align=left><td>
             <hr>
             <code>H5FD_LOG_TIME_OPEN</code> 
@@ -6839,16 +7021,20 @@ SUBROUTINE
 	which must be at least the size in bytes of the file to be logged.
  
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>char *</em><code>logfile</code>
-            <dd>IN: Name of the log file.
-        <dt><em>unsigned int</em> <code>flags</code>
-            <dd>IN: Flags specifying the types of logging activity.
-        <dt><em>size_t</em> <code>buf_size</code>
-            <dd>IN: The size of the logging buffer.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>char *</em><code>logfile</code></td>
+            <td valign="top">IN: Name of the log file.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned&nbsp;int</em>&nbsp;<code>flags&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Flags specifying the types of logging activity.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>buf_size</code></td>
+            <td valign="top">IN: The size of the logging buffer.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns non-negative if successful.
         Otherwise returns negative.
@@ -6907,14 +7093,17 @@ SUBROUTINE
         Users should not modify the info while it is defined 
         in a property list.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>MPI_Comm</em> <code>comm</code>
-            <dd>IN: MPI-2 communicator.
-        <dt><em>MPI_Info</em> <code>info</code>
-            <dd>IN: MPI-2 info object.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>MPI_Comm</em>&nbsp;<code>comm&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: MPI-2 communicator.</td></tr>
+        <tr>
+		    <td valign="top"><em>MPI_Info</em> <code>info</code></td>
+            <td valign="top">IN: MPI-2 info object.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -6973,12 +7162,14 @@ END SUBROUTINE h5pset_fapl_mpio_f
         Users should not modify the communicator while it is defined 
         in a property list.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>MPI_Comm</em> <code>comm</code>
-            <dd>IN: MPI-2 communicator.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>MPI_Comm</em>&nbsp;<code>comm&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: MPI-2 communicator.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -7087,30 +7278,36 @@ END SUBROUTINE h5pset_fapl_mpiposix_f
                   <code>l</code> &nbsp;&nbsp; for <code>H5FD_MEM_LHEAP</code>
                   <br>
                   <code>o</code> &nbsp;&nbsp; for <code>H5FD_MEM_OHDR</code>
-              </dir>
+              </dir></dd></dt>
 <!-- NEW PAGE -->
           <dt><code>memb_addr</code>
             <dd>The default value is <code>HADDR_UNDEF</code> for each element.
         </dl>
         </dir>
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>const H5FD_mem_t *</em><code>memb_map</code>
-            <dd>IN: Maps memory usage types to other memory usage types.
-        <dt><em>const hid_t *</em><code>memb_fapl</code>
-            <dd>IN: Property list for each memory usage type.
-        <dt><em>const char * const *</em><code>memb_name</code>
-            <dd>IN: Name generator for names of member files.
-        <dt><em>const haddr_t *</em><code>memb_addr</code>
-            <dd>IN: The offsets within the virtual address space, 
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;H5FD_mem_t&nbsp;*</em><code>memb_map&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Maps memory usage types to other memory usage types.</td></tr>
+        <tr>
+		    <td valign="top"><em>const hid_t *</em><code>memb_fapl</code></td>
+            <td valign="top">IN: Property list for each memory usage type.</td></tr>
+        <tr>
+		    <td valign="top"><em>const char * const *</em><code>memb_name</code></td>
+            <td valign="top">IN: Name generator for names of member files.</td></tr>
+        <tr>
+		    <td valign="top"><em>const haddr_t *</em><code>memb_addr</code></td>
+            <td valign="top">IN: The offsets within the virtual address space, 
                 from <code>0</code> (zero) to <code>HADDR_MAX</code>, 
-                at which each type of data storage begins.
-        <dt><em>hbool_t</em> <code>relax</code>
-            <dd>IN: Allows read-only access to incomplete file sets 
-                when <code>TRUE</code>.
-    </dl>
+                at which each type of data storage begins.</td></tr>
+        <tr>
+		    <td valign="top"><em>hbool_t</em> <code>relax</code></td>
+            <td valign="top">IN: Allows read-only access to incomplete file sets 
+                when <code>TRUE</code>.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -7147,7 +7344,7 @@ END SUBROUTINE h5pset_fapl_mpiposix_f
   <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_multi_f
     <dd>
 	<pre>
-SUBROUTINE h5pset_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, &amp; 
+SUBROUTINE h5pset_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name,
                                memb_addr, relax, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T),INTENT(IN)  :: prp_id     ! Property list identifier
@@ -7188,10 +7385,11 @@ END SUBROUTINE h5pset_fapl_multi_f
     <dd><code>H5Pset_fapl_sec2</code> modifies the file access property list 
         to use the <code>H5FD_SEC2</code> driver.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -7265,19 +7463,23 @@ END SUBROUTINE h5pset_fapl_sec2_f
         HDF5 provides no mechanism to determine whether it was called
         as the special case invoked by <code>H5Pset_fapl_split</code>.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt>
-        <dt><em>hid_t</em> <code>fapl_id</code>,
-            <dd>IN: File access property list identifier.
-        <dt><em>const char *</em><code>meta_ext</code>,
-            <dd>IN: Metadata filename extension.
-        <dt><em>hid_t</em> <code>meta_plist_id</code>,
-            <dd>IN: File access property list identifier for the metadata file.
-        <dt><em>const char *</em><code>raw_ext</code>,
-            <dd>IN: Raw data filename extension.
-        <dt><em>hid_t</em> <code>raw_plist_id</code>
-            <dd>IN: File access property list identifier for the raw data file.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code>,</td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>meta_ext,&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Metadata filename extension.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>meta_plist_id</code>,</td>
+            <td valign="top">IN: File access property list identifier for the metadata file.</td></tr>
+        <tr>
+		    <td valign="top"><em>const char *</em><code>raw_ext</code>,</td>
+            <td valign="top">IN: Raw data filename extension.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>raw_plist_id</code></td>
+            <td valign="top">IN: File access property list identifier for the raw data file.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -7356,12 +7558,14 @@ END SUBROUTINE h5pset_fapl_split_f
         Storage Resource Broker (SRB).  For further information, see 
         <a href="http://www.npaci.edu/Research/DI/srb/">http//www.npaci.edu/Research/DI/srb/</a>.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>SRB_Info</em> <code>info</code>
-            <dd>IN: Pointer to the SRB information structure.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>SRB_Info</em> <code>info</code></td>
+            <td valign="top">IN: Pointer to the SRB information structure.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -7396,10 +7600,11 @@ SUBROUTINE
     <dd><code>H5Pset_fapl_stdio</code> modifies the file access property list 
         to use the standard I/O driver, <code>H5FD_STDIO</code>.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -7484,12 +7689,14 @@ END SUBROUTINE h5pset_fapl_stdio_f
         <code>H5Pset_fapl_stream</code> and <code>H5Pget_fapl_stream</code> 
         are not intended for use in a parallel environment.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>H5FD_stream_fapl_t *</em><code>fapl</code>
-            <dd>IN: The streaming I/O file access property list.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5FD_stream_fapl_t&nbsp;*</em><code>fapl&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: The streaming I/O file access property list.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -7562,13 +7769,15 @@ SUBROUTINE
       </table>
     </div>
   <dt><strong>Parameters:</strong> 
-    <dl>
-      <dt><em>hid_t</em> <code>fapl_id</code> 
-      <dd>IN: File access property list identifier. 
-      <dt><em>H5F_close_degree_t</em> <code>fc_degree</code> 
-      <dd>IN: Pointer to a location containing the file close degree property, 
-        the value of <code>fc_degree</code>.
-    </dl>
+    <ul><table>
+      <tr>
+	      <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+          <td valign="top">IN: File access property list identifier.</td></tr>
+      <tr>
+	      <td valign="top"><em>H5F_close_degree_t</em>&nbsp;<code>fc_degree&nbsp;&nbsp;&nbsp;&nbsp;</code></td> 
+          <td valign="top">IN: Pointer to a location containing the file close degree property, 
+        the value of <code>fc_degree</code>.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong> 
   <dd>Returns a non-negative value if successful. Otherwise returns a negative 
     value. 
@@ -7639,12 +7848,14 @@ END SUBROUTINE h5pset_fclose_degree_f
 	See <a href="RM_H5D.html#Dataset-Create">H5Dcreate</a> for 
 	further cross-references.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Dataset creation property list identifier.
-        <dt><em>H5D_fill_time_t</em> <code>fill_time</code>
-            <dd>IN: When to write fill values to a dataset.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5D_fill_time_t</em>&nbsp;<code>fill_time&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: When to write fill values to a dataset.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -7730,14 +7941,17 @@ END SUBROUTINE h5pset_fill_time_f
 	See <a href="RM_H5D.html#Dataset-Create">H5Dcreate</a> for 
 	further cross-references.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Dataset creation property list identifier.
-        <dt><em>hid_t</em> <code>type_id</code>,
-            <dd>IN: Datatype of <code>value</code>.
-        <dt><em>const void *</em><code>value</code>
-            <dd>IN: Pointer to buffer containing value to use as fill value.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code>,</td>
+            <td valign="top">IN: Datatype of <code>value</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;void&nbsp;*</em><code>value&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Pointer to buffer containing value to use as fill value.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -7857,20 +8071,25 @@ END SUBROUTINE h5pset_fill_value_f
 	If multiple filters are set for a property list, they will be 
 	applied to each chunk in the order in which they were set.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Property list identifier.
-        <dt><em>H5Z_filter_t</em> <code>filter</code>
-            <dd>IN: Filter identifier 
-                for the filter to be added to the pipeline.
-        <dt><em>unsigned int</em> <code>flags</code>
-            <dd>IN:  Bit vector specifying certain general properties
-                of the filter.
-        <dt><em>size_t</em> <code>cd_nelmts</code>
-            <dd>IN: Number of elements in <code>cd_values</code>.
-        <dt><em>const unsigned int</em> <code>cd_values[]</code>
-            <dd>IN: Auxiliary data for the filter.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5Z_filter_t</em> <code>filter</code></td>
+            <td valign="top">IN: Filter identifier for the filter  
+                             to be added to the pipeline.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned int</em> <code>flags</code></td>
+            <td valign="top">IN:  Bit vector specifying certain general properties
+                of the filter.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>cd_nelmts</code></td>
+            <td valign="top">IN: Number of elements in <code>cd_values</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;unsigned&nbsp;int</em>&nbsp;<code>cd_values[]&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Auxiliary data for the filter.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -7940,14 +8159,17 @@ END SUBROUTINE h5pset_filter_f
 	Valid callback function return values are 
 	<code>H5Z_CB_FAIL</code> and <code>H5Z_CB_CONT</code>.  
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Dataset transfer property list identifier.
-        <dt><em>H5Z_filter_func_t</em> <code>func</code>
-            <dd>IN: User-defined filter callback function.
-        <dt><em>void *</em><code>op_data</code>
-            <dd>IN: User-defined input data for the callback function.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Dataset transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5Z_filter_func_t</em>&nbsp;<code>func&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: User-defined filter callback function.</td></tr>
+        <tr>
+		    <td valign="top"><em>void *</em><code>op_data</code></td>
+            <td valign="top">IN: User-defined input data for the callback function.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -7983,10 +8205,11 @@ SUBROUTINE
     <dd>The initial error detection implementation supports 
         error detection for chunked datasets only.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Dataset creation property list identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -8037,13 +8260,15 @@ END SUBROUTINE h5pset_fletcher32_f
         <p>
         The default value for garbage collecting references is off.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>unsigned</em> <code>gc_ref</code>
-            <dd>IN: Flag setting reference garbage collection to 
-                on (<code>1</code>) or off (<code>0</code>).
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em>&nbsp;<code>gc_ref&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Flag setting reference garbage collection to 
+                on (<code>1</code>) or off (<code>0</code>).</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -8180,14 +8405,15 @@ END SUBROUTINE h5pset_hyper_cache_f
 	but the library will use more memory during hyperslab I/O.  
 	The default value of <code>vector_size</code> is <code>1024</code>.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dxpl_id</code>
-            <dd>IN: Dataset transfer property list identifier.
-        <dt><em>size_t</em> <code>vector_size</code>
-            <dd>IN: Number of I/O vectors to accumulate in memory for I/O operations. 
-                Must be greater than <code>1</code> (one).
-		Default value: <code>1024</code>.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dxpl_id</code></td>
+            <td valign="top">IN: Dataset transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em>&nbsp;<code>vector_size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Number of I/O vectors to accumulate in memory for I/O operations. 
+                Must be greater than <code>1</code> (one). Default value: <code>1024</code>.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -8219,7 +8445,7 @@ END SUBROUTINE h5pset_hyper_vector_size_f
   <dt><strong>Name:</strong> <a name="Property-SetIstoreK">H5Pset_istore_k</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Pset_istore_k</code>(<em>hid_t</em> <code>plist</code>,
-            <em>int</em> <code>ik</code>
+            <em>unsigned</em> <code>ik</code>
         )
   <dt><strong>Purpose:</strong>
     <dd>Sets the size of the parameter used to control the
@@ -8234,12 +8460,14 @@ END SUBROUTINE h5pset_hyper_vector_size_f
             or have an average rank of 1.5 times the value of 
             <code>ik</code>.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of property list to query.
-        <dt><em>int</em> <code>ik</code>
-            <dd>IN: 1/2 rank of chunked storage B-tree.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of property list to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>ik</code></td>
+            <td valign="top">IN: 1/2 rank of chunked storage B-tree.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -8299,12 +8527,14 @@ END SUBROUTINE h5pset_istore_k_f
 	<a href="RM_H5D.html#Dataset-Write">H5Dwrite</a>
         documentation for details.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of property list to query.
-        <dt><em>H5D_layout_t</em> <code>layout</code>
-            <dd>IN: Type of storage layout for raw data.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of property list to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5D_layout_t</em>&nbsp;<code>layout&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Type of storage layout for raw data.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -8366,12 +8596,14 @@ END SUBROUTINE h5pset_layout_f
         potentially significantly improving library and application 
         performance.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>hsize_t</em> <code>size</code>
-            <dd>IN: Minimum size, in bytes, of metadata block allocations.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em> <code>size</code></td>
+            <td valign="top">IN: Minimum size, in bytes, of metadata block allocations.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -8463,12 +8695,14 @@ END SUBROUTINE h5pset_meta_block_size_f
 	Use of this function is only appropriate for an HDF5 file written 
 	as a set of files with the <code>MULTI</code> file driver.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list or data transfer property list identifier.
-        <dt><em>H5FD_mem_t</em> <code>type</code>
-            <dd>OUT: Type of data.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list or data transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5FD_mem_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Type of data.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -8509,13 +8743,15 @@ SUBROUTINE
         property to TRUE.  Otherwise the I/O pipeline treats the
         destination datapoints as completely uninitialized.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier for the dataset transfer property list.
-        <dt><em>hbool_t</em> <code>status</code>
-            <dd>IN: Status of for the dataset transfer property list 
-                (TRUE/FALSE).
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier for the dataset transfer property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>hbool_t</em>&nbsp;<code>status&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Status of for the dataset transfer property list 
+                (TRUE/FALSE).</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -8578,10 +8814,11 @@ END SUBROUTINE h5pset_preserve_f
         achieved by the use of a compression filter without 
         the shuffle filter.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Dataset creation property list identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -8631,12 +8868,14 @@ END SUBROUTINE h5pset_shuffle_f
         Setting the value to 0 with this API function will turn off the 
         data sieving, even if the VFL driver attempts to use that strategy. 
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
-        <dt><em>hsize_t</em> <code>size</code>
-            <dd>IN: Maximum size, in bytes, of data sieve buffer.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em> <code>size</code></td>
+            <td valign="top">IN: Maximum size, in bytes, of data sieve buffer.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
@@ -8675,22 +8914,26 @@ END SUBROUTINE h5pset_sieve_buf_size_f
     <dd>Sets the byte size of the offsets and lengths used to address objects 
         in an HDF5 file.  
   <dt><strong>Description:</strong>
-        <dd><code>H5Pset_sizes</code> sets the byte size of the offsets and lengths used to
-            address objects in an HDF5 file.  This function is only valid for
-            file creation property lists.  Passing in a value of 0 for one of the
-            sizeof parameters retains the current value.  The default value
-            for both values is the same as <code>sizeof(hsize_t)</code> 
-            in the library (normally 8 bytes).  
+        <dd><code>H5Pset_sizes</code> sets the byte size of the offsets 
+            and lengths used to address objects in an HDF5 file.  
+            This function is only valid for file creation property lists.  
+            Passing in a value of 0 for one of the <code>sizeof_...</code> 
+            parameters retains the current value.  
+            The default value for both values is the same as 
+            <code>sizeof(hsize_t)</code> in the library (normally 8 bytes).  
             Valid values currently are 2, 4, 8 and 16.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of property list to modify.
-        <dt><em>size_t</em> <code>sizeof_addr</code>
-            <dd>IN: Size of an object offset in bytes.
-        <dt><em>size_t</em> <code>sizeof_size</code>
-            <dd>IN: Size of an object length in bytes.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of property list to modify.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em>&nbsp;<code>sizeof_addr&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Size of an object offset in bytes.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>sizeof_size</code></td>
+            <td valign="top">IN: Size of an object length in bytes.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -8756,14 +8999,16 @@ END SUBROUTINE h5pset_sizes_f
         Setting <code>size</code> to zero (<code>0</code>) disables the
         small data block mechanism.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier .
-        <dt><em>hsize_t</em> <code>size</code>
-            <dd>IN: Maximum size, in bytes, of the small data block.
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em> <code>size</code></td>
+            <td valign="top">IN: Maximum size, in bytes, of the small data block.
                 <br>
-                The default size is <code>2048</code>.
-    </dl>
+                The default size is <code>2048</code>.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise a negative value.
@@ -8795,8 +9040,8 @@ END SUBROUTINE h5pset_small_data_block_size_f
   <dt><strong>Name:</strong> <a name="Property-SetSymK">H5Pset_sym_k</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Pset_sym_k</code>(<em>hid_t</em> <code>plist</code>,
-            <em>int</em> <code>ik</code>,
-            <em>int</em> <code>lk</code>
+            <em>unsigned</em> <code>ik</code>,
+            <em>unsigned</em> <code>lk</code>
         )
   <dt><strong>Purpose:</strong>
     <dd>Sets the size of parameters used to control the symbol table nodes.
@@ -8819,14 +9064,17 @@ END SUBROUTINE h5pset_small_data_block_size_f
             contain 1.5 times the number of symbols specified by 
             <code>lk</code>.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier for property list to query.
-        <dt><em>int</em> <code>ik</code>
-            <dd>IN: Symbol table tree rank.
-        <dt><em>int</em> <code>lk</code>
-            <dd>IN: Symbol table node size.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier for property list to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>ik</code></td>
+            <td valign="top">IN: Symbol table tree rank.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>lk</code></td>
+            <td valign="top">IN: Symbol table node size.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -8988,21 +9236,23 @@ END SUBROUTINE h5pset_sym_k_f
 		<code>H5Zget_filter_info</code></a> can be employed 
 		to avoid such a failure.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Dataset creation property list identifier.
-        <dt><em>unsigned int</em> <code>options_mask</code>
-            <dd>IN: A bit-mask conveying the desired SZIP options.
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Dataset creation property list 
+                identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned int</em> <code>options_mask</code></td>
+            <td valign="top">IN: A bit-mask conveying the desired SZIP options.
                 Valid values are <code>H5_SZIP_EC_OPTION_MASK</code>
-                and <code>H5_SZIP_NN_OPTION_MASK</code>.
-        <dt><em>unsigned int</em> <code>pixels_per_block</code>
-            <dd>IN: The number of pixels, or data elements, 
-                in each data block.
-    </dl>
+                and <code>H5_SZIP_NN_OPTION_MASK</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned&nbsp;int</em>&nbsp;<code>pixels_per_block&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: The number of pixels or data elements in each data block.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-
   <dt><strong>Notes:</strong>
     <dd>The following notes are of interest primarily to those who have 
         used SZIP compression outside of the HDF5 context.
@@ -9178,12 +9428,14 @@ END SUBROUTINE h5pset_szip_f
             The default user block size is 0; it may be set to any 
             power of 2 equal to 512 or greater (512, 1024, 2048, etc.).
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of property list to modify.
-        <dt><em>hsize_t</em> <code>size</code>
-            <dd>IN: Size of the user-block in bytes.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of property list to modify.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em>&nbsp;<code>size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Size of the user-block in bytes.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -9262,26 +9514,31 @@ END SUBROUTINE h5pset_userblock_f
         and the  <code>alloc_info</code> and <code>free_info</code> 
         parameters are ignored.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier for the dataset transfer property list.
-        <dt><em>H5MM_allocate_t</em> <code>alloc</code>
-            <dd>IN: User's allocate routine, or &nbsp; <code> NULL</code> 
-                for system &nbsp; <code> malloc</code>. 
-        <dt><em>void</em> *<code>alloc_info</code>
-            <dd>IN: Extra parameter for user's allocation routine.  
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier for the dataset transfer property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5MM_allocate_t</em>&nbsp;<code>alloc&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: User's allocate routine, or &nbsp; <code> NULL</code> 
+                for system &nbsp; <code> malloc</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> *<code>alloc_info</code></td>
+            <td valign="top">IN: Extra parameter for user's allocation routine.  
                 <br>
                 Contents are ignored if preceding parameter is &nbsp; 
-                <code> NULL</code>.
-        <dt><em>H5MM_free_t</em> <code>free</code>
-            <dd>IN: User's free routine, or &nbsp; <code> NULL</code> 
-                for system <code>free</code>. 
-        <dt><em>void</em> *<code>free_info</code>
-            <dd>IN: Extra parameter for user's free routine.  
+                <code> NULL</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5MM_free_t</em> <code>free</code></td>
+            <td valign="top">IN: User's free routine, or &nbsp; <code> NULL</code> 
+                for system <code>free</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> *<code>free_info</code></td>
+            <td valign="top">IN: Extra parameter for user's free routine.  
                 <br>
                 Contents are ignored if preceding parameter is &nbsp; 
-                <code> NULL</code>.
-    </dl>
+                <code> NULL</code>.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -9328,7 +9585,7 @@ SUBROUTINE
   <dt><strong>Parameters:</strong>
     <ul><table>
     <tr>
-        <td><em>H5P_class_t</em> <code>class</code></td>
+        <td><em>H5P_class_t</em>&nbsp;<code>class&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>IN: Property list class from which to remove 
 	        permanent property</td></tr>
     <tr>

@@ -535,10 +535,7 @@ herr_t H5IMlink_palette( hid_t loc_id,
  hobj_ref_t  *refbuf;     /* buffer to read references */
  hssize_t    n_refs;
  hsize_t     dim_ref;
- int         ok_pal, has_pal;
-
- /* Try to find the palette dataset */
- has_pal = H5LTfind_dataset( loc_id, pal_name );
+ int         ok_pal;
 
  /* The image dataset may or not have the attribute "PALETTE" 
   * First we try to open to see if it is already there; if not, it is created.
@@ -888,7 +885,6 @@ herr_t H5IMget_palette_info( hid_t loc_id,
  hsize_t    dim_ref;
  hobj_ref_t *refbuf;     /* buffer to read references */
  hid_t      pal_id;
- int        rank;
  hid_t      pal_space_id;
  hsize_t    pal_maxdims[2];
 
@@ -938,7 +934,7 @@ herr_t H5IMget_palette_info( hid_t loc_id,
   if ( (pal_space_id = H5Dget_space( pal_id )) < 0 )
    goto out;
 
-  if ( (rank = H5Sget_simple_extent_ndims( pal_space_id )) < 0 )
+  if ( H5Sget_simple_extent_ndims( pal_space_id ) < 0 )
    goto out;
   
   if ( H5Sget_simple_extent_dims( pal_space_id, pal_dims, pal_maxdims ) < 0 )
@@ -1114,7 +1110,6 @@ herr_t H5IMis_image( hid_t loc_id,
  int        has_class;
  hid_t      attr_type;
  hid_t      attr_id;
- hid_t      attr_class;
  char       attr_data[20];
  herr_t     ret;
 
@@ -1143,7 +1138,7 @@ herr_t H5IMis_image( hid_t loc_id,
   if ( (attr_type = H5Aget_type( attr_id )) < 0 )
    goto out;
 
-  if ( (attr_class = H5Tget_class( attr_type )) < 0 )
+  if ( H5Tget_class( attr_type ) < 0 )
    goto out;
 
   if ( H5Aread( attr_id, attr_type, attr_data ) < 0 )
@@ -1203,7 +1198,6 @@ herr_t H5IMis_palette( hid_t loc_id,
  int        has_class;
  hid_t      attr_type;
  hid_t      attr_id;
- hid_t      attr_class;
  char       attr_data[20];
  herr_t     ret;
 
@@ -1232,7 +1226,7 @@ herr_t H5IMis_palette( hid_t loc_id,
   if ( (attr_type = H5Aget_type( attr_id )) < 0 )
    goto out;
 
-  if ( (attr_class = H5Tget_class( attr_type )) < 0 )
+  if ( H5Tget_class( attr_type ) < 0 )
    goto out;
 
   if ( H5Aread( attr_id, attr_type, attr_data ) < 0 )

@@ -55,7 +55,7 @@
 /* Library Private Typedefs */
 /****************************/
 
-/* Typedef for local heap in memory (defined in H5HL.c) */
+/* Typedef for local heap in memory (defined in H5HLpkg.h) */
 typedef struct H5HL_t H5HL_t;
 
 /*

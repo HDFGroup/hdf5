@@ -309,12 +309,12 @@ main(void)
     }
     PASSED();
 
-    h5_cleanup(FILENAME, fapl);
-
     puts("All object header tests passed.");
+    h5_cleanup(FILENAME, fapl);
     return 0;
 
  error:
+     puts("*** TESTS FAILED ***");
     H5E_BEGIN_TRY {
 	H5Fclose(file);
     } H5E_END_TRY;

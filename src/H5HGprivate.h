@@ -34,10 +34,10 @@
 /* Information to locate object in global heap */
 typedef struct H5HG_t {
     haddr_t		addr;		/*address of collection		*/
-    unsigned		idx;		/*object ID within collection	*/
+    size_t		idx;		/*object ID within collection	*/
 } H5HG_t;
 
-/* Typedef for heap in memory (defined in H5HG.c) */
+/* Typedef for heap in memory (defined in H5HGpkg.h) */
 typedef struct H5HG_heap_t H5HG_heap_t;
 
 H5_DLL herr_t H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj,

@@ -19,6 +19,9 @@
 
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5P_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5P_mask
@@ -32,11 +35,6 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
-
-/* Interface initialization */
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT H5P_init_interface
-static herr_t		H5P_init_interface(void);
 
 /* Local variables */
 
@@ -313,7 +311,7 @@ H5P_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_term_interface);
 
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
         /* Destroy HDF5 library property classes & lists */
 
         /* Check if there are any open property list classes or lists */
@@ -358,7 +356,7 @@ H5P_term_interface(void)
             H5I_destroy_group(H5I_GENPROP_CLS);
             n++; /*H5I*/
 
-            interface_initialize_g = 0;
+            H5_interface_initialize_g = 0;
         }
     }
     FUNC_LEAVE_NOAPI(n);
@@ -2201,6 +2199,7 @@ done:
             size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list being modified.
+        const char *name;   IN: The name of the property being modified.
         size_t size;        IN: The size of the property value
         void *new_value;    IN/OUT: The value being set for the property.
     The 'set' routine may modify the value to be set and those changes will be
@@ -2413,6 +2412,7 @@ done:
             size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list being modified.
+        const char *name;   IN: The name of the property being modified.
         size_t size;        IN: The size of the property value
         void *new_value;    IN/OUT: The value being set for the property.
     The 'set' routine may modify the value to be set and those changes will be

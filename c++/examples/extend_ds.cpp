@@ -81,7 +81,6 @@ int main (void)
        * Create a new dataset within the file using cparms
        * creation properties.
        */
-
       DataSet dataset = file.createDataSet( DATASET_NAME, PredType::NATIVE_INT, mspace1, cparms);
 
       /*
@@ -96,7 +95,7 @@ int main (void)
        * Select a hyperslab.
        */
       DataSpace fspace1 = dataset.getSpace ();
-      hssize_t     offset[2];
+      hsize_t     offset[2];
       offset[0] = 0;
       offset[1] = 0;
       hsize_t      dims1[2] = { 3, 3};            /* data1 dimensions */ 

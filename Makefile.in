@@ -1,5 +1,3 @@
-## Top-level HDF5 Makefile(.in)
-##
 ##
 ## Copyright by the Board of Trustees of the University of Illinois.
 ## All rights reserved.
@@ -16,6 +14,8 @@
 ## This makefile mostly just reinvokes make in the various subdirectories
 ## but does so in the correct order.  You can alternatively invoke make from
 ## each subdirectory manually.
+##
+## Top-level HDF5 Makefile(.in)
 ##
 top_srcdir=@top_srcdir@
 top_builddir=.
@@ -72,7 +72,7 @@ lib progs check test _test uninstall:
 	done
 
 tests TAGS dep depend:
-	@@SETX@; for d in $(SUBDIRS) perform; do		      \
+	@@SETX@; for d in $(SUBDIRS) perform; do		              \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
@@ -142,13 +142,13 @@ H5Tinit.c:
 	mostlyclean distclean maintainer-clean
 
 clean mostlyclean:
-	@@SETX@; for d in $(SUBDIRS) doc perform examples; do	      \
+	@@SETX@; for d in $(SUBDIRS) doc perform examples; do		      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) conftest conftest.c
 
 distclean:
-	@@SETX@; for d in $(SUBDIRS) doc perform examples; do	      \
+	@@SETX@; for d in $(SUBDIRS) doc perform examples; do		      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) config/commence config/conclude
@@ -160,7 +160,7 @@ distclean:
 maintainer-clean:
 	@echo "This target is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
-	@@SETX@; for d in $(SUBDIRS) doc perform examples; do	      \
+	@@SETX@; for d in $(SUBDIRS) doc perform examples; do		      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) config.cache config.log config.status src/H5config.h

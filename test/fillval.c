@@ -605,9 +605,10 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
     hsize_t	cur_size[5] = {2, 8, 8, 4, 2};
     hsize_t	one[5] = {1, 1, 1, 1, 1};
     hsize_t	hs_size[5], hs_stride[5];
-    hssize_t	hs_offset[5], nelmts;
+    hsize_t	hs_offset[5], nelmts;
     int		fillval=(-1), val_rd, should_be;
     int		i, j, *buf=NULL, odd;
+    unsigned    u;
     comp_datatype       rd_c, fill_c, should_be_c;
     comp_datatype	*buf_c=NULL;
     H5D_space_status_t  allocation;
@@ -646,11 +647,11 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
 	    if (fill_time!=H5D_FILL_TIME_NEVER && val_rd!=fillval) {
 	        H5_FAILED();
 	        puts("    Value read was not a fill value.");
-	        printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
+	        HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %u, "
 		       "Fill value: %u\n",
-		       (long)hs_offset[0], (long)hs_offset[1],
-		       (long)hs_offset[2], (long)hs_offset[3],
-		       (long)hs_offset[4], val_rd, fillval);
+		       hs_offset[0], hs_offset[1],
+		       hs_offset[2], hs_offset[3],
+		       hs_offset[4], val_rd, fillval);
 	        goto error;
 	    }
 	/* case for compound datatype */
@@ -662,11 +663,11 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
 		rd_c.z!=fill_c.z)) {
                 H5_FAILED();
                 puts("    Value read was not a fill value.");
-                printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %f, %d, %f, %c"
+                HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %f, %d, %f, %c"
                        "Fill value: %f, %d, %f, %c\n",
-                       (long)hs_offset[0], (long)hs_offset[1],
-                       (long)hs_offset[2], (long)hs_offset[3],
-                       (long)hs_offset[4], rd_c.a, rd_c.x, rd_c.y, rd_c.z, 
+                       hs_offset[0], hs_offset[1],
+                       hs_offset[2], hs_offset[3],
+                       hs_offset[4], rd_c.a, rd_c.x, rd_c.y, rd_c.z, 
 			fill_c.a, fill_c.x, fill_c.y, fill_c.z);
                 goto error;
             }
@@ -688,22 +689,22 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
     /* case for atomic datatype */
     if(datatype==H5T_INTEGER) {
         /*check for overflow*/
-        assert((nelmts*sizeof(int))==(hssize_t)((size_t)(nelmts*sizeof(int))));
+        assert((nelmts*sizeof(int))==(hsize_t)((size_t)(nelmts*sizeof(int))));
         buf = malloc((size_t)(nelmts*sizeof(int)));
-        for (i=0; i<nelmts; i++) buf[i] = 9999;
+        for (u=0; u<nelmts; u++) buf[u] = 9999;
         if (H5Dwrite(dset1, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT,
 	    buf)<0) goto error;
     } 
     /* case for compound datatype */ 
     else if(datatype==H5T_COMPOUND) {
         assert((nelmts*sizeof(comp_datatype))==
-	    (hssize_t)((size_t)(nelmts*sizeof(comp_datatype))));
+	    (hsize_t)((size_t)(nelmts*sizeof(comp_datatype))));
 	buf_c = (comp_datatype*)calloc((size_t)nelmts,sizeof(comp_datatype));
-        for (i=0; i<nelmts; i++) {
-	    buf_c[i].a = (float)1111.11;
- 	    buf_c[i].x = 2222;
-	    buf_c[i].y = 3333.3333;
-	    buf_c[i].z = 'd';
+        for (u=0; u<nelmts; u++) {
+	    buf_c[u].a = (float)1111.11;
+ 	    buf_c[u].x = 2222;
+	    buf_c[u].y = 3333.3333;
+	    buf_c[u].z = 'd';
 	}
         if (H5Dwrite(dset2, ctype_id, mspace, fspace, H5P_DEFAULT,
             buf_c)<0) goto error;
@@ -1030,7 +1031,7 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
     hsize_t	ch_size[5] = {1, 16, 8, 4, 2};
     hsize_t	one[5] = {1, 1, 1, 1, 1};
     hsize_t	hs_size[5], hs_stride[5];
-    hssize_t	hs_offset[5], nelmts;
+    hsize_t	hs_offset[5], nelmts;
 #ifdef NO_FILLING
     int		fillval = 0;
 #else
@@ -1038,6 +1039,7 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 #endif
     int		val_rd, should_be;
     int		i, j, *buf=NULL, odd, fd;
+    unsigned    u;
     char	filename[1024];
 
     if (H5D_CHUNKED==layout) {
@@ -1127,11 +1129,11 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 	if (val_rd!=fillval) {
 	    H5_FAILED();
 	    puts("    Value read was not a fill value.");
-	    printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
+	    HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %u, "
 		   "Fill value: %u\n",
-		   (long)hs_offset[0], (long)hs_offset[1],
-		   (long)hs_offset[2], (long)hs_offset[3],
-		   (long)hs_offset[4], val_rd, fillval);
+		   hs_offset[0], hs_offset[1],
+		   hs_offset[2], hs_offset[3],
+		   hs_offset[4], val_rd, fillval);
 	    goto error;
 	}
     }
@@ -1145,9 +1147,9 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 	nelmts *= hs_size[i];
     }
     if ((mspace=H5Screate_simple(5, hs_size, hs_size))<0) goto error;
-    assert((nelmts*sizeof(int))==(hssize_t)((size_t)(nelmts*sizeof(int)))); /*check for overflow*/
+    assert((nelmts*sizeof(int))==(hsize_t)((size_t)(nelmts*sizeof(int)))); /*check for overflow*/
     buf = malloc((size_t)(nelmts*sizeof(int)));
-    for (i=0; i<nelmts; i++) buf[i] = 9999;
+    for (u=0; u<nelmts; u++) buf[u] = 9999;
     if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, hs_stride,
 			    hs_size, NULL)<0) goto error;
     if (H5Dwrite(dset, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT,
@@ -1172,11 +1174,11 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 	if (val_rd!=should_be) {
 	    H5_FAILED();
 	    puts("    Value read was not correct.");
-	    printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
+	    HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %u, "
 		   "should be: %u\n",
-		   (long)hs_offset[0], (long)hs_offset[1],
-		   (long)hs_offset[2], (long)hs_offset[3],
-		   (long)hs_offset[4], val_rd, should_be);
+		   hs_offset[0], hs_offset[1],
+		   hs_offset[2], hs_offset[3],
+		   hs_offset[4], val_rd, should_be);
 	    goto error;
 	}
     }
@@ -1208,11 +1210,11 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 	if (val_rd!=should_be) {
 	    H5_FAILED();
 	    puts("    Value read was not correct.");
-	    printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
+	    HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %u, "
 		   "should be: %u\n",
-		   (long)hs_offset[0], (long)hs_offset[1],
-		   (long)hs_offset[2], (long)hs_offset[3],
-		   (long)hs_offset[4], val_rd, should_be);
+		   hs_offset[0], hs_offset[1],
+		   hs_offset[2], hs_offset[3],
+		   hs_offset[4], val_rd, should_be);
 	    goto error;
 	}
     }
@@ -1270,7 +1272,7 @@ test_compatible(void)
   hid_t      dcpl1=-1, dcpl2=-1, fspace=-1, mspace=-1;
   int        rd_fill=0, fill_val=4444, val_rd=0;
   hsize_t    dims[2], one[2]={1,1};
-  hssize_t   hs_offset[2]={3,4};
+  hsize_t   hs_offset[2]={3,4};
   H5D_fill_value_t status;
   char       *srcdir = getenv("srcdir"); /*where the src code is located*/ 
   char       testfile[512]="";  /* test file name */

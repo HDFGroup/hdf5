@@ -13,6 +13,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "H5f90.h"
+
 /*----------------------------------------------------------------------------
  * Name:        h5screate_simple_c
  * Purpose:     Call H5Screate_simple to create a dataspace 
@@ -219,7 +220,8 @@ nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock,
   hid_t c_space_id;
   hsize_t c_num_blocks;
 
-  int i, rank;
+  hsize_t i;
+  int rank;
   hsize_t c_startblock, *c_buf;
 
   c_space_id = *space_id;
@@ -229,7 +231,7 @@ nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock,
   if (rank < 0 ) return ret_value;
   c_startblock = (hsize_t)*startblock;
 
-  c_buf = (hsize_t*)malloc(sizeof(hsize_t)*c_num_blocks*2*rank);
+  c_buf = (hsize_t*)malloc(sizeof(hsize_t)*(size_t)(c_num_blocks*2*rank));
   if (!c_buf) return ret_value;
 
   ret_value = H5Sget_select_hyper_blocklist(c_space_id, c_startblock, 
@@ -259,28 +261,28 @@ nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock,
  *---------------------------------------------------------------------------*/
 
 int_f 
-nh5sget_select_bounds_c( hid_t_f *space_id , hssize_t_f * start, hssize_t_f * end)
+nh5sget_select_bounds_c( hid_t_f *space_id , hsize_t_f * start, hsize_t_f * end)
 {
   int ret_value = -1;
   hid_t c_space_id;
-  hssize_t* c_start, *c_end;
+  hsize_t* c_start, *c_end;
   int i, rank;
 
   c_space_id = *space_id;
   rank = H5Sget_simple_extent_ndims(c_space_id);
   if (rank < 0 ) return ret_value;
 
-  c_start =(hssize_t*) malloc(sizeof(hssize_t)*rank);
+  c_start =(hsize_t*) malloc(sizeof(hsize_t)*rank);
   if (!c_start) return ret_value;
 
-  c_end = (hssize_t*)malloc(sizeof(hssize_t)*rank);
+  c_end = (hsize_t*)malloc(sizeof(hsize_t)*rank);
   if(!c_end) return ret_value;
 
   ret_value = H5Sget_select_bounds(c_space_id, c_start, c_end);
   for(i = 0; i < rank; i++)
   {
-    start[i] = (hssize_t_f)(c_start[i]+1);
-    end[i] = (hssize_t_f)(c_end[i]+1);
+    start[i] = (hsize_t_f)(c_start[i]+1);
+    end[i] = (hsize_t_f)(c_end[i]+1);
   }
   if (ret_value  >= 0  ) ret_value = 0;
 
@@ -327,7 +329,7 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
   if (rank < 0 ) return ret_value;
 
   c_startpoint = (hsize_t)*startpoint; 
-  c_buf = (hsize_t*)malloc(sizeof(hsize_t)*c_num_points*rank);
+  c_buf = (hsize_t*)malloc(sizeof(hsize_t)*(size_t)(c_num_points*rank));
   if (!c_buf) return ret_value;
   ret_value = H5Sget_select_elem_pointlist(c_space_id, c_startpoint, 
                                             c_num_points, c_buf);
@@ -753,11 +755,11 @@ nh5sset_extent_none_c ( hid_t_f *space_id )
  *---------------------------------------------------------------------------*/
 
 int_f 
-nh5sselect_hyperslab_c ( hid_t_f *space_id , int_f *op, hssize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block)
+nh5sselect_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block)
 {
   int ret_value = -1;
   hid_t c_space_id;
-  hssize_t *c_start = NULL;
+  hsize_t *c_start = NULL;
   hsize_t *c_count = NULL;
   hsize_t *c_stride = NULL;
   hsize_t *c_block = NULL; 
@@ -769,7 +771,7 @@ nh5sselect_hyperslab_c ( hid_t_f *space_id , int_f *op, hssize_t_f *start, hsize
 
   rank = H5Sget_simple_extent_ndims(*space_id);
   if (rank < 0 ) return ret_value;
-  c_start = (hssize_t *)HDmalloc(sizeof(hssize_t)*rank);
+  c_start = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
   if (c_start == NULL) goto DONE;
 
   c_count = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
@@ -788,7 +790,7 @@ nh5sselect_hyperslab_c ( hid_t_f *space_id , int_f *op, hssize_t_f *start, hsize
 
   for (i=0; i < rank; i++) {
       int t= (rank - i) - 1;
-      c_start[i] = (hssize_t)start[t];
+      c_start[i] = (hsize_t)start[t];
       c_count[i] = (hsize_t)count[t];
       c_stride[i] = (hsize_t)stride[t];
       c_block[i] = (hsize_t)block[t];
@@ -853,7 +855,7 @@ nh5sget_select_type_c ( hid_t_f *space_id , int_f *type)
  *---------------------------------------------------------------------------*/
 
 int_f 
-nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hssize_t_f *coord)
+nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsize_t_f *coord)
 {
   int ret_value = -1;
   hid_t c_space_id;
@@ -861,7 +863,7 @@ nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hss
   herr_t  status;
   int rank;
   int i, j;
-  hssize_t *c_coord;
+  hsize_t *c_coord;
   size_t c_nelements;
 /*
   if (*op != H5S_SELECT_SET_F) return ret_value;
@@ -872,16 +874,16 @@ nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hss
   c_space_id = *space_id;
   rank = H5Sget_simple_extent_ndims(c_space_id);
 
-  c_coord = malloc(sizeof(hssize_t)*rank*(*nelements));
+  c_coord = malloc(sizeof(hsize_t)*rank*(*nelements));
   if(!c_coord) return ret_value;
   for (i=0; i< *nelements; i++) {
       for (j = 0; j < rank; j++) {
-          c_coord[j+i*rank] = (hssize_t)coord[j + i*rank];
+          c_coord[j+i*rank] = (hsize_t)coord[j + i*rank];
       }
   }
 
   c_nelements = *nelements;
-  status = H5Sselect_elements(c_space_id, c_op, c_nelements, (const hssize_t **)c_coord);
+  status = H5Sselect_elements(c_space_id, c_op, c_nelements, (const hsize_t **)c_coord);
   if ( status >= 0  ) ret_value = 0;
   HDfree(c_coord); 
   return ret_value;

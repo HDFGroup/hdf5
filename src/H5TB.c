@@ -119,9 +119,6 @@ H5FL_DEFINE_STATIC(H5TB_NODE);
 /* Declare a free list to manage the H5TB_TREE struct */
 H5FL_DEFINE_STATIC(H5TB_TREE);
 
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT	NULL
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5TB_strcmp
@@ -424,7 +421,7 @@ H5TB_dfind(H5TB_TREE * tree, const void * key, H5TB_NODE ** pp)
 {
     H5TB_NODE *ret_value;
 
-    FUNC_ENTER_NOAPI(H5TB_dfind, NULL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5TB_dfind);
 
     assert(tree);
 
@@ -439,7 +436,6 @@ H5TB_dfind(H5TB_TREE * tree, const void * key, H5TB_NODE ** pp)
         ret_value=NULL;
     } /* end else */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_dfind() */
 
@@ -477,9 +473,9 @@ H5TB_find(H5TB_NODE * ptr, const void * key,
 {
     H5TB_NODE  *parent = NULL;
     int        cmp = 1;
-    H5TB_NODE  *ret_value;
 
-    FUNC_ENTER_NOAPI(H5TB_find, NULL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5TB_find);
+
 
     if(ptr) {
         while (0 != (cmp = KEYcmp(key, ptr->key, arg))) {
@@ -504,11 +500,7 @@ H5TB_find(H5TB_NODE * ptr, const void * key,
     if (NULL != pp)
         *pp = parent;
 
-    /* Set return value */
-    ret_value=ptr;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ptr);
 }   /* end H5TB_find() */
 
 
@@ -543,14 +535,13 @@ H5TB_dless(H5TB_TREE * tree, void * key, H5TB_NODE ** pp)
 {
     H5TB_NODE *ret_value;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5TB_dless,NULL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5TB_dless);
 
     assert(tree);
 
     /* Set return value */
     ret_value= H5TB_less(tree->root, key, tree->compar, tree->cmparg, pp);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_dless() */
 
@@ -593,7 +584,7 @@ H5TB_less(H5TB_NODE * root, void * key, H5TB_cmp_t compar, int arg, H5TB_NODE **
     int        side;
     H5TB_NODE  *ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5TB_less,NULL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5TB_less);
 
     /* Try to find an exact match */
     if (ptr) {
@@ -630,7 +621,6 @@ H5TB_less(H5TB_NODE * root, void * key, H5TB_cmp_t compar, int arg, H5TB_NODE **
     /* Set return value */
     ret_value= (0 == cmp) ? ptr : NULL;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_less */
 
@@ -662,7 +652,7 @@ H5TB_index(H5TB_NODE * root, unsigned indx)
     H5TB_NODE  *ptr = root;
     H5TB_NODE  *ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5TB_index,NULL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5TB_index);
 
     if (NULL != ptr) {
       /* Termination condition is if the index equals the number of children on
@@ -688,7 +678,6 @@ H5TB_index(H5TB_NODE * root, unsigned indx)
     /* Set return value */
     ret_value=ptr;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_index() */
 
@@ -719,7 +708,7 @@ H5TB_dins(H5TB_TREE * tree, void * item, void * key)
 {
     H5TB_NODE  *ret_value;       /* the node to return */
 
-    FUNC_ENTER_NOAPI(H5TB_dins,NULL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5TB_dins);
 
     assert(tree);
 
@@ -730,7 +719,6 @@ H5TB_dins(H5TB_TREE * tree, void * item, void * key)
     if (ret_value != NULL)
         tree->count++;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_dins() */
 
@@ -1030,7 +1018,7 @@ H5TB_dfree(H5TB_TREE * tree, void(*fd) (void * /* item */), void(*fk) (void * /*
 {
     H5TB_TREE *ret_value=NULL;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5TB_dfree,NULL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5TB_dfree);
 
     if (tree != NULL) {
         /* Free the actual tree */
@@ -1040,7 +1028,6 @@ H5TB_dfree(H5TB_TREE * tree, void(*fd) (void * /* item */), void(*fk) (void * /*
         H5FL_FREE(H5TB_TREE,tree);
     } /* end if */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_dfree() */
 
@@ -1076,7 +1063,7 @@ H5TB_free(H5TB_NODE ** root, void(*fd) (void * /* item */), void(*fk) (void * /*
     H5TB_NODE  *par, *node = *root;
     void *ret_value=NULL;                    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5TB_free,NULL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5TB_free);
 
     /* While nodes left to be free()d */
     while (NULL != *root) {
@@ -1112,7 +1099,6 @@ H5TB_free(H5TB_NODE ** root, void(*fd) (void * /* item */), void(*fk) (void * /*
             } while (NULL != par);  /* While moving back up tree */
       } /* end while */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_free() */
 
@@ -1139,12 +1125,11 @@ H5TB_count(H5TB_TREE * tree)
 {
     long ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5TB_count,FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5TB_count);
 
     /* Set return value */
     ret_value= (tree==NULL) ? FAIL : (long)tree->count;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_count() */
 
@@ -1174,7 +1159,7 @@ done:
 herr_t
 H5TB_dump(H5TB_TREE *tree, void (*key_dump)(void *,void *), int method)
 {
-    FUNC_ENTER_NOAPI(H5TB_dump,FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5TB_dump);
 
     printf("H5TB-tree dump  %p:\n",tree);
     printf("capacity = %ld\n\n",(long)tree->count);
@@ -1205,7 +1190,7 @@ H5TB_printNode(H5TB_NODE * node, void(*key_dump)(void *,void *))
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5TB_printNode);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_printNode);
 
     if (node == NULL) {
         printf("ERROR:  null node pointer\n");
@@ -1249,7 +1234,7 @@ H5TB_dumpNode(H5TB_NODE *node, void (*key_dump)(void *,void *),
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5TB_dumpNode);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_dumpNode);
 
     if (node == NULL)
         HGOTO_DONE(FAIL);

@@ -70,8 +70,8 @@ extern "C" {
 #endif
 
 /* Define the operator function pointer for H5Diterate() */
-typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, hsize_t ndim,
-				 hssize_t *point, void *operator_data);
+typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim,
+				 const hsize_t *point, void *operator_data);
 
 H5_DLL hid_t H5Dcreate (hid_t file_id, const char *name, hid_t type_id,
 			 hid_t space_id, hid_t plist_id);
@@ -95,8 +95,8 @@ H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, voi
 H5_DLL herr_t H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *size);
 H5_DLL herr_t H5Dfill(const void *fill, hid_t fill_type, void *buf,
         hid_t buf_type, hid_t space);
-H5_DLL herr_t H5Ddebug(hid_t dset_id, unsigned int flags);
 H5_DLL herr_t H5Dset_extent (hid_t dset_id, const hsize_t *size);
+H5_DLL herr_t H5Ddebug(hid_t dset_id);
 
 
 #ifdef __cplusplus

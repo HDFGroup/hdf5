@@ -23,18 +23,18 @@
 */
 
 /* some commonly used routines for collective chunk IO tests*/
-static void ccslab_set(int mpi_rank,int mpi_size,hssize_t start[],hsize_t count[],
+static void ccslab_set(int mpi_rank,int mpi_size,hsize_t start[],hsize_t count[],
 		hsize_t stride[],hsize_t block[],int mode);
 
-static void ccdataset_fill(hssize_t start[],hsize_t count[],             
+static void ccdataset_fill(hsize_t start[],hsize_t count[],             
                  hsize_t stride[],hsize_t block[],DATATYPE*dataset);    
 
-static void ccdataset_print(hssize_t start[],hsize_t block[],DATATYPE*dataset);
+static void ccdataset_print(hsize_t start[],hsize_t block[],DATATYPE*dataset);
 
-static int ccdataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[],     
+static int ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[],     
                  hsize_t block[], DATATYPE *dataset, DATATYPE *original); 
 
-static void coll_chunktest(char* filename,int chunk_factor,int select_factor);
+static void coll_chunktest(const char* filename,int chunk_factor,int select_factor);
 
 /*-------------------------------------------------------------------------
  * Function:	coll_chunk1
@@ -56,8 +56,8 @@ void
 coll_chunk1(void)
 {
 
-  char *filename;
-  filename = (char *) GetTestParameters();
+  const char *filename;
+  filename = GetTestParameters();
   coll_chunktest(filename,1,BYROW_CONT);
 
 }
@@ -66,8 +66,8 @@ void
 coll_chunk2(void)
 {
 
-  char *filename;
-  filename = (char *) GetTestParameters();
+  const char *filename;
+  filename = GetTestParameters();
   coll_chunktest(filename,1,BYROW_DISCONT);
 
 }
@@ -77,11 +77,11 @@ void
 coll_chunk3(void)
 {
 
-  char *filename;
+  const char *filename;
   int mpi_size;
   MPI_Comm comm = MPI_COMM_WORLD;
   MPI_Comm_size(comm,&mpi_size);
-  filename = (char *) GetTestParameters();
+  filename = GetTestParameters();
   coll_chunktest(filename,mpi_size,BYROW_CONT);
 
 }
@@ -90,17 +90,17 @@ void
 coll_chunk4(void)
 {
 
-  char *filename;
+  const char *filename;
   int mpi_size;
   MPI_Comm comm = MPI_COMM_WORLD;
   MPI_Comm_size(comm,&mpi_size);           
-  filename = (char *) GetTestParameters();
+  filename = GetTestParameters();
   coll_chunktest(filename,mpi_size*2,BYROW_DISCONT);
 
 }
 
 static void
-coll_chunktest(char* filename,int chunk_factor,int select_factor) {
+coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
 
   hid_t	   file,dataset, file_dataspace;
   hid_t    acc_plist,xfer_plist,crp_plist;
@@ -108,7 +108,7 @@ coll_chunktest(char* filename,int chunk_factor,int select_factor) {
   int*     data_array1  = NULL;    
   int*     data_origin1 = NULL;
   herr_t   status;
-  hssize_t start[RANK];
+  hsize_t start[RANK];
   hsize_t  count[RANK],stride[RANK],block[RANK];
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
   unsigned prop_value;
@@ -320,7 +320,7 @@ coll_chunktest(char* filename,int chunk_factor,int select_factor) {
 
 
 static void
-ccslab_set(int mpi_rank, int mpi_size, hssize_t start[], hsize_t count[],
+ccslab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[],
 	 hsize_t stride[], hsize_t block[], int mode)
 {
     switch (mode){
@@ -364,8 +364,8 @@ if (VERBOSE_MED) printf("slab_set wholeset\n");
 	break;
     }
 if (VERBOSE_MED){
-    printf("start[]=(%ld,%ld), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total datapoints=%lu\n",
-	(long)start[0], (long)start[1], (unsigned long)count[0], (unsigned long)count[1],
+    printf("start[]=(%lu,%lu), count[]=(%lu,%lu), stride[]=(%lu,%lu), block[]=(%lu,%lu), total datapoints=%lu\n",
+	(unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0], (unsigned long)count[1],
 	(unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1],
 	(unsigned long)(block[0]*block[1]*count[0]*count[1]));
     }
@@ -377,7 +377,7 @@ if (VERBOSE_MED){
  * Assume dimension rank is 2 and data is stored contiguous.
  */
 static void
-ccdataset_fill(hssize_t start[], hsize_t stride[], hsize_t count[], hsize_t block[], DATATYPE * dataset)
+ccdataset_fill(hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t block[], DATATYPE * dataset)
 {
     DATATYPE *dataptr = dataset;
     DATATYPE *tmptr;
@@ -408,7 +408,7 @@ ccdataset_fill(hssize_t start[], hsize_t stride[], hsize_t count[], hsize_t bloc
  * Print the first block of the content of the dataset.
  */
 static void
-ccdataset_print(hssize_t start[], hsize_t block[], DATATYPE * dataset)
+ccdataset_print(hsize_t start[], hsize_t block[], DATATYPE * dataset)
 {
     DATATYPE *dataptr = dataset;
     hsize_t i, j;
@@ -417,13 +417,13 @@ ccdataset_print(hssize_t start[], hsize_t block[], DATATYPE * dataset)
     printf("Print only the first block of the dataset\n");
     printf("%-8s", "Cols:");
     for (j=0; j < block[1]; j++){
-	printf("%3ld ", (long)(start[1]+j));
+	printf("%3lu ", (unsigned long)(start[1]+j));
     }
     printf("\n");
 
     /* print the slab data */
     for (i=0; i < block[0]; i++){
-	printf("Row %2ld: ", (long)(i+start[0]));
+	printf("Row %2lu: ", (unsigned long)(i+start[0]));
 	for (j=0; j < block[1]; j++){
 	    printf("%03d ", *dataptr++);
 	}
@@ -436,7 +436,7 @@ ccdataset_print(hssize_t start[], hsize_t block[], DATATYPE * dataset)
  * Print the content of the dataset.
  */
 static int
-ccdataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], DATATYPE *dataset, DATATYPE *original)
+ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], DATATYPE *dataset, DATATYPE *original)
 {
     hsize_t i, j,k1,k2;
     int vrfyerrs;
@@ -445,8 +445,8 @@ ccdataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t bloc
     /* print it if VERBOSE_MED */
     if (VERBOSE_MED) {
 	printf("dataset_vrfy dumping:::\n");
-	printf("start(%ld, %ld), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
-	    (long)start[0], (long)start[1], (unsigned long)count[0], (unsigned long)count[1],
+	printf("start(%lu, %lu), count(%lu, %lu), stride(%lu, %lu), block(%lu, %lu)\n",
+	    (unsigned long)start[0], (unsigned long)start[1], (unsigned long)count[0], (unsigned long)count[1],
 	    (unsigned long)stride[0], (unsigned long)stride[1], (unsigned long)block[0], (unsigned long)block[1]);
 	printf("original values:\n");
 	ccdataset_print(start, block, original);
@@ -468,8 +468,8 @@ ccdataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t bloc
     
 	    if (*dataptr != *oriptr){
 		if (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED){
-		    printf("Dataset Verify failed at [%ld][%ld]: expect %d, got %d\n",
-			(long)i, (long)j,
+		    printf("Dataset Verify failed at [%lu][%lu]: expect %d, got %d\n",
+			(unsigned long)i, (unsigned long)j,
 	     	    	*(original), *(dataset));
 		}
 	    }

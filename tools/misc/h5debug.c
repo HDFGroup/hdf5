@@ -69,7 +69,8 @@ main(int argc, char *argv[])
     H5F_t       *f;
     haddr_t     addr=0, extra=0;
     uint8_t     sig[16];
-    int        i, ndims;
+    int         i;
+    unsigned    ndims;
     herr_t      status = SUCCEED;
 
     if (argc == 1) {
@@ -129,7 +130,7 @@ main(int argc, char *argv[])
         /*
          * Debug the boot block.
          */
-        status = H5F_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+        status = H5F_debug(f, H5P_DATASET_XFER_DEFAULT, stdout, 0, VCOL);
 
     } else if (!HDmemcmp(sig, H5HL_MAGIC, H5HL_SIZEOF_MAGIC)) {
         /*
@@ -163,7 +164,7 @@ main(int argc, char *argv[])
             break;
 
 	case H5B_ISTORE_ID:
-	    ndims = (int)extra;
+	    ndims = (unsigned)extra;
 	    status = H5D_istore_debug (f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims);
 	    break;
 

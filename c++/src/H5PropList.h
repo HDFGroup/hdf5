@@ -25,6 +25,10 @@ class H5_DLLCPP PropList : public IdComponent {
 	// Default property list
         static const PropList DEFAULT;
 
+	// Creates a property list of a given type or creates a copy of an 
+	// existing property list giving the property list id.
+	PropList(const hid_t plist_id);
+
 	// Make a copy of the given property list using assignment statement
 	PropList& operator=( const PropList& rhs );
 
@@ -84,10 +88,6 @@ class H5_DLLCPP PropList : public IdComponent {
 
 	// Default constructor: creates a stub PropList object.
 	PropList();
-
-	// Creates a property list of a given type or creates a copy of an 
-	// existing property list giving the property list id.
-	PropList(const hid_t plist_id);
 
 	// Copy constructor: creates a copy of a PropList object.
 	PropList(const PropList& original);

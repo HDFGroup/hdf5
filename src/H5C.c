@@ -99,10 +99,6 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5SLprivate.h"	/* Skip lists				*/
 
-/* Interface initialization? */
-#define INTERFACE_INIT NULL
-static int interface_initialize_g = 0;
-
 
 /****************************************************************************
  *
@@ -2800,8 +2796,7 @@ done:
  */
 
 herr_t
-H5C_rename_entry(H5F_t *	     f, 
-                 H5C_t *	     cache_ptr,
+H5C_rename_entry(H5C_t *	     cache_ptr,
                  const H5C_class_t * type, 
                  haddr_t 	     old_addr,
 	         haddr_t 	     new_addr)
@@ -2814,7 +2809,6 @@ H5C_rename_entry(H5F_t *	     f,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || f );
     HDassert( type );
     HDassert( H5F_addr_defined(old_addr) );
     HDassert( H5F_addr_defined(new_addr) );

@@ -36,7 +36,7 @@
  *
  *	19 May 2000, Bill Wendling
  *	Changed so that it creates its own HDF5 file and removes it at cleanup
- *	time. Added num_errs flag.
+ *	time.
  *
  ********************************************************************/
 #include "ttsafe.h"

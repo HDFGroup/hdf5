@@ -51,7 +51,7 @@
 
      INTEGER     ::   type !object identifier
      INTEGER     ::   error ! Error flag
-     INTEGER(HSIZE_T), DIMENSION(7) :: data_dims
+     INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
      CHARACTER(LEN=80) name_buf
      CHARACTER(LEN=280) name_buf1
      INTEGER(SIZE_T)   buf_size
@@ -88,6 +88,9 @@
      CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dspace_id, &
                dset_id, error)
      CALL check("h5dcreate_f",error,total_error)
+     !
+     ! Get dataset name from dataset identifier
+     ! 
      buf_size = 80
      CALL h5iget_name_f(dset_id, name_buf, buf_size, name_size, error)
      CALL check("h5iget_name_f",error,total_error)
@@ -113,7 +116,6 @@
               write(*,*) "h5fget_name returned wrong file name"
               total_error = total_error + 1
           endif
-
 
      !
      ! Write data_in to the dataset

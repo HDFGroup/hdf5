@@ -60,7 +60,7 @@ char **sort_uniq_words;
 
 static int tst_strcmp(const void *_s1, const void *_s2)
 {
-    return(HDstrcmp(*(const char **)_s1,*(const char **)_s2));
+    return(HDstrcmp(*(const char * const *)_s1,*(const char * const *)_s2));
 }
 
 /****************************************************************
@@ -73,7 +73,7 @@ static void
 test_tst_init(void)
 {
     time_t curr_time;   /* Current time, for seeding random number generator */
-    char *tmp_word=NULL;/* Temporary pointer to word in word set */
+    char *tmp_word;/* Temporary pointer to word in word set */
     size_t u,v,w;       /* Local index variables */
 
     /* Compute the number of words in the test set */
@@ -208,16 +208,14 @@ test_tst_insert(void)
         found=H5ST_find(tree,uniq_words[u]);
         CHECK(found, NULL, "H5ST_find");
 
-        if(HDstrcmp((const char *)found->eqkid,uniq_words[u])) {
+        if(HDstrcmp((const char *)found->eqkid,uniq_words[u]))
             TestErrPrintf("%d: TST node values don't match!, found->eqkid=%s, uniq_words[%u]=%s\n",__LINE__,(char *)found->eqkid,(unsigned)u,uniq_words[u]);
-        } /* end if */
 
         obj=H5ST_locate(tree,uniq_words[u]);
         CHECK(obj, NULL, "H5ST_locate");
 
-        if(HDstrcmp((const char *)obj,uniq_words[u])) {
+        if(HDstrcmp((const char *)obj,uniq_words[u]))
             TestErrPrintf("%d: TST objects don't match!, obj=%s, uniq_words[%u]=%s\n",__LINE__,(char *)obj,(unsigned)u,uniq_words[u]);
-        } /* end if */
     } /* end for */
 
     /* Verify that words not in the TST aren't found */
@@ -266,9 +264,8 @@ test_tst_iterate(void)
     u=0;
     do {
         /* Check that the strings in the TST are in the correct order */
-        if(HDstrcmp((const char *)found->eqkid,sort_uniq_words[u])) {
+        if(HDstrcmp((const char *)found->eqkid,sort_uniq_words[u]))
             TestErrPrintf("%d: TST node values don't match!, found->eqkid=%s, sort_uniq_words[%u]=%s\n",__LINE__,(char *)found->eqkid,(unsigned)u,sort_uniq_words[u]);
-        } /* end if */
 
         /* Advance to next string in TST */
         found=H5ST_findnext(found);
@@ -315,9 +312,8 @@ test_tst_remove(void)
         CHECK(obj, NULL, "H5ST_remove");
 
         /* Check that the correct string was removed from TST */
-        if(HDstrcmp((const char *)obj,rand_uniq_words[u])) {
+        if(HDstrcmp((const char *)obj,rand_uniq_words[u]))
             TestErrPrintf("%d: TST node values don't match!, obj=%s, rand_uniq_words[%u]=%s\n",__LINE__,(char *)obj,(unsigned)u,rand_uniq_words[u]);
-        } /* end if */
 
         /* Check that the string can't be found in the TST any longer */
         check=H5ST_search(tree,rand_uniq_words[u]);
@@ -337,9 +333,8 @@ test_tst_remove(void)
         CHECK(found, NULL, "H5ST_find");
 
         /* Check that the correct object will be removed from TST */
-        if(HDstrcmp((const char *)found->eqkid,rand_uniq_words[u])) {
+        if(HDstrcmp((const char *)found->eqkid,rand_uniq_words[u]))
             TestErrPrintf("%d: TST node values don't match!, found->eqkid=%s, rand_uniq_words[%u]=%s\n",__LINE__,(char *)found->eqkid,(unsigned)u,rand_uniq_words[u]);
-        } /* end if */
 
         /* Remove the node */
         ret=H5ST_delete(tree,found);

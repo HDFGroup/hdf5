@@ -885,8 +885,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
                 h5tools_str_append(str, info->obj_format,
                           sb.fileno[1], sb.fileno[0], sb.objno[1], sb.objno[0]);
 
-            /* Print name */
-            path = lookup_ref_path(vp);
+             /* Print name */
+            path = lookup_ref_path(*(hobj_ref_t *)vp);
             if (path) {
              h5tools_str_append(str, " ");
              h5tools_str_append(str, path);

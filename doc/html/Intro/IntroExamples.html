@@ -246,9 +246,9 @@ main (void)
     int         data_out[NX][NY][NZ ]; /* output buffer */
    
     hsize_t      count[2];              /* size of the hyperslab in the file */
-    hssize_t     offset[2];             /* hyperslab offset in the file */
+    hsize_t      offset[2];             /* hyperslab offset in the file */
     hsize_t      count_out[3];          /* size of the hyperslab in memory */
-    hssize_t     offset_out[3];         /* hyperslab offset in memory */
+    hsize_t      offset_out[3];         /* hyperslab offset in memory */
     int          i, j, k, status_n, rank;
 
     for (j = 0; j < NX; j++) {
@@ -404,12 +404,12 @@ int main (void)
    hsize_t fdim[] = {FSPACE_DIM1, FSPACE_DIM2}; 
                                     /* Dimension sizes of the dataset (on disk) */
 
-   hssize_t start[2]; /* Start of hyperslab */
+   hsize_t start[2];  /* Start of hyperslab */
    hsize_t stride[2]; /* Stride of hyperslab */
    hsize_t count[2];  /* Block count */
    hsize_t block[2];  /* Block sizes */
 
-   hssize_t coord[NPOINTS][FSPACE_RANK]; /* Array to store selected points 
+   hsize_t coord[NPOINTS][FSPACE_RANK]; /* Array to store selected points 
                                             from the file dataspace */ 
    herr_t  ret;
    uint    i,j;
@@ -504,7 +504,7 @@ int main (void)
     coord[3][0] = 5; coord[3][1] = 6;
 
     ret = H5Sselect_elements(fid, H5S_SELECT_SET, NPOINTS, 
-                             (const hssize_t **)coord);
+                             (const hsize_t **)coord);
 
     /*
      * Write new selection of points to the dataset.
@@ -779,7 +779,7 @@ main (void)
     hsize_t      maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t      chunk_dims[2] ={2, 5};
     hsize_t      size[2];
-    hssize_t     offset[2];
+    hsize_t      offset[2];
 
     herr_t      status;                             
 
@@ -956,7 +956,7 @@ main (void)
     hsize_t     chunk_dims[2];
     hsize_t     col_dims[1];
     hsize_t     count[2];
-    hssize_t    offset[2];
+    hsize_t     offset[2];
 
     herr_t      status, status_n;                             
 
@@ -1117,7 +1117,7 @@ main (void)
     H5Fclose(file);
 
     return 0;
-)
+}
 
 </pre>
 
@@ -1851,18 +1851,18 @@ and then written to the dataset in the file.
 int
 main(void)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dset1,	/* Dataset ID			*/
+    hid_t	fid1;		/* HDF5 File IDs		*/
+    hid_t	dset1,		/* Dataset ID			*/
                 dset2;      /* Dereferenced dataset ID */
-    hid_t		sid1,       /* Dataspace ID	#1		*/
+    hid_t	sid1,       /* Dataspace ID	#1		*/
                 sid2;       /* Dataspace ID	#2		*/
-    hsize_t		dims1[] = {SPACE1_DIM1},
+    hsize_t	dims1[] = {SPACE1_DIM1},
             	dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hssize_t	start[SPACE2_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE2_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE2_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE2_RANK];     /* Block size of hyperslab */
-    hssize_t	coord1[POINT1_NPOINTS][SPACE2_RANK]; 
+    hsize_t	start[SPACE2_RANK];     /* Starting location of hyperslab */
+    hsize_t	stride[SPACE2_RANK];    /* Stride of hyperslab */
+    hsize_t	count[SPACE2_RANK];     /* Element count of hyperslab */
+    hsize_t	block[SPACE2_RANK];     /* Block size of hyperslab */
+    hsize_t	coord1[POINT1_NPOINTS][SPACE2_RANK]; 
                                     /* Coordinates for point selection */
     hdset_reg_ref_t      *wbuf;      /* buffer to write to disk */
     int     *dwbuf;      /* Buffer for writing numeric data to disk */
@@ -1921,7 +1921,7 @@ main(void)
     coord1[7][0]=9; coord1[7][1]=0;
     coord1[8][0]=7; coord1[8][1]=1;
     coord1[9][0]=3; coord1[9][1]=3;
-    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord1);
+    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord1);
 
     /* Store second dataset region */
     ret = H5Rcreate(&wbuf[1],fid1,"/Dataset2",H5R_DATASET_REGION,sid2);
@@ -1988,8 +1988,8 @@ main(void)
     hid_t		sid1,       /* Dataspace ID	#1		*/
                 sid2;       /* Dataspace ID	#2		*/
     hsize_t *   coords;             /* Coordinate buffer */
-    hssize_t		low[SPACE2_RANK];   /* Selection bounds */
-    hssize_t		high[SPACE2_RANK];     /* Selection bounds */
+    hsize_t		low[SPACE2_RANK];   /* Selection bounds */
+    hsize_t		high[SPACE2_RANK];     /* Selection bounds */
     hdset_reg_ref_t      *rbuf;      /* buffer to to read disk */
     int    *drbuf;      /* Buffer for reading numeric data from disk */
     int        i, j;          /* counting variables */

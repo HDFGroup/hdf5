@@ -39,8 +39,7 @@
  *
  * 	19 May 2000, Bill Wendling
  * 	Modified so that it creates a unique HDF5 file and removes it on
- * 	cleanup. Also added the num_errs flag and increment it when necessary
- * 	to report the errors.
+ * 	cleanup.
  *
  ********************************************************************/
 #include "ttsafe.h"
@@ -84,130 +83,122 @@ pthread_mutex_t error_mutex;
 
 void tts_error(void)
 {
-	pthread_t threads[NUM_THREAD];
-	pthread_attr_t attribute;
-	H5E_auto_t old_error_cb;
-	void *old_error_client_data;
-	hid_t dataset;
-	int value, i;
+    pthread_t threads[NUM_THREAD];
+    pthread_attr_t attribute;
+    hid_t dataset;
+    int value, i;
 
-	/* set up mutex for global count of errors */
-	pthread_mutex_init(&error_mutex, NULL);
+    /* set up mutex for global count of errors */
+    pthread_mutex_init(&error_mutex, NULL);
 
-	/* preserve previous error stack handler */
-	H5Eget_auto(&old_error_cb, &old_error_client_data);
-
-	/* set our own auto error stack handler */
-	H5Eset_auto(error_callback, NULL);
-
-	/* make thread scheduling global */
-	pthread_attr_init(&attribute);
+    /* make thread scheduling global */
+    pthread_attr_init(&attribute);
 #ifdef H5_HAVE_SYSTEM_SCOPE_THREADS
-	pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
+    pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
 #endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
 
-	/*
-	 * Create a hdf5 file using H5F_ACC_TRUNC access, default file
-	 * creation plist and default file access plist
-	 */
-	error_file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    /*
+     * Create a hdf5 file using H5F_ACC_TRUNC access, default file
+     * creation plist and default file access plist
+     */
+    error_file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-	for (i = 0; i < NUM_THREAD; i++)
-		pthread_create(&threads[i], &attribute, tts_error_thread, NULL);
+    for (i = 0; i < NUM_THREAD; i++)
+        pthread_create(&threads[i], &attribute, tts_error_thread, NULL);
 
-	for (i = 0; i < NUM_THREAD; i++)
-		pthread_join(threads[i],NULL);
+    for (i = 0; i < NUM_THREAD; i++)
+        pthread_join(threads[i],NULL);
 
-	if (error_flag) {
-		TestErrPrintf("Threads reporting different error values!\n");
-	}
+    if (error_flag)
+        TestErrPrintf("Threads reporting different error values!\n");
 
-	if (error_count != NUM_THREAD - 1) {
-		TestErrPrintf("Error: %d threads failed instead of %d\n",
-			error_count, NUM_THREAD-1);
-	}
+    if (error_count != NUM_THREAD - 1)
+        TestErrPrintf("Error: %d threads failed instead of %d\n", error_count, NUM_THREAD-1);
 
-	dataset = H5Dopen(error_file, DATASETNAME);
-	H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
+    dataset = H5Dopen(error_file, DATASETNAME);
+    H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
 
-	if (value != WRITE_NUMBER) {
-		TestErrPrintf("Error: Successful thread wrote value %d instead of %d\n",
-			value, WRITE_NUMBER);
-	}
+    if (value != WRITE_NUMBER)
+        TestErrPrintf("Error: Successful thread wrote value %d instead of %d\n", value, WRITE_NUMBER);
 
-	H5Dclose(dataset);
-	H5Fclose(error_file);
+    H5Dclose(dataset);
+    H5Fclose(error_file);
 
-	/* turn our error stack handler off */
-	H5Eset_auto(old_error_cb, old_error_client_data);
-
-        /* Destroy the thread attribute */
-        pthread_attr_destroy(&attribute);
+    /* Destroy the thread attribute */
+    pthread_attr_destroy(&attribute);
 }
 
 static
-void *tts_error_thread(void *arg)
+void *tts_error_thread(void UNUSED *arg)
 {
-	hid_t dataspace, datatype, dataset;
-	hsize_t dimsf[1]; /* dataset dimensions */
-	int value;
+    hid_t dataspace, datatype, dataset;
+    hsize_t dimsf[1]; /* dataset dimensions */
+    H5E_auto_t old_error_cb;
+    void *old_error_client_data;
+    int value;
 
-	/* define dataspace for dataset */
-	dimsf[0] = 1;
-	dataspace = H5Screate_simple(1,dimsf,NULL);
+    /* preserve previous error stack handler */
+    H5Eget_auto(&old_error_cb, &old_error_client_data);
 
-	/* define datatype for the data using native little endian integers */
-	datatype = H5Tcopy(H5T_NATIVE_INT);
-	H5Tset_order(datatype, H5T_ORDER_LE);
+    /* set each thread's error stack handler */
+    H5Eset_auto(error_callback, NULL);
 
-	/* create a new dataset within the file */
-	dataset = H5Dcreate(error_file, DATASETNAME, datatype, dataspace,
-			    H5P_DEFAULT);
-	if (dataset >= 0) {   /* not an error */
-		value = WRITE_NUMBER;
-		H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-			 H5P_DEFAULT, &value);
-		H5Dclose(dataset);
-	}
+    /* define dataspace for dataset */
+    dimsf[0] = 1;
+    dataspace = H5Screate_simple(1,dimsf,NULL);
 
-	H5Tclose(datatype);
-	H5Sclose(dataspace);
-        arg = arg; /* gets rid of annoying warning message */
-	return NULL;
+    /* define datatype for the data using native little endian integers */
+    datatype = H5Tcopy(H5T_NATIVE_INT);
+    H5Tset_order(datatype, H5T_ORDER_LE);
+
+    /* create a new dataset within the file */
+    dataset = H5Dcreate(error_file, DATASETNAME, datatype, dataspace, H5P_DEFAULT);
+    if (dataset >= 0) {   /* not an error */
+        value = WRITE_NUMBER;
+        H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
+        H5Dclose(dataset);
+    }
+
+    H5Tclose(datatype);
+    H5Sclose(dataspace);
+
+    /* turn our error stack handler off */
+    H5Eset_auto(old_error_cb, old_error_client_data);
+
+    return NULL;
 }
 
 static
 herr_t error_callback(void *client_data)
 {
-	pthread_mutex_lock(&error_mutex);
-	error_count++;
-	pthread_mutex_unlock(&error_mutex);
-        client_data = client_data; /* gets rid of annoying warning message */
-	return H5Ewalk(H5E_WALK_DOWNWARD, walk_error_callback, NULL);
+    pthread_mutex_lock(&error_mutex);
+    error_count++;
+    pthread_mutex_unlock(&error_mutex);
+
+    return H5Ewalk(H5E_WALK_DOWNWARD, walk_error_callback, client_data);
 }
 
 static
-herr_t walk_error_callback(int n, H5E_error_t *err_desc, void *client_data)
+herr_t walk_error_callback(int n, H5E_error_t *err_desc, void UNUSED *client_data)
 {
-	int maj_num, min_num;
+    int maj_num, min_num;
 
-	if (err_desc) {
-		maj_num = err_desc->maj_num;
-		min_num = err_desc->min_num;
+    if (err_desc) {
+        maj_num = err_desc->maj_num;
+        min_num = err_desc->min_num;
+        
+        if (n < EXPECTED_ERROR_DEPTH && maj_num == expected[n].maj_num &&
+                min_num == expected[n].min_num)
+            return SUCCEED;
+    }
 
-		if (n < EXPECTED_ERROR_DEPTH && maj_num == expected[n].maj_num &&
-			min_num == expected[n].min_num)
-				return SUCCEED;
-	}
-
-	error_flag = -1;
-        client_data = client_data; /* gets rid of annoying warning message */
-	return SUCCEED;
+    error_flag = -1;
+    return SUCCEED;
 }
 
 void cleanup_error(void)
 {
-	HDunlink(FILENAME);
+    HDunlink(FILENAME);
 }
 
 #endif /*H5_HAVE_THREADSAFE*/

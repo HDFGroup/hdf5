@@ -22,16 +22,12 @@
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5Tbit_mask
+#define PABLO_MASK	H5T_bit_mask
 
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
 #include "H5Tpkg.h"		/*data-type functions			  */
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
 
 
 /*-------------------------------------------------------------------------
@@ -163,7 +159,8 @@ H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
 /*-------------------------------------------------------------------------
  * Function:	H5T_bit_get_d
  *
- * Purpose:	Return a small bit sequence as a number.
+ * Purpose:	Return a small bit sequence as a number.  Bit vector starts
+ *              at OFFSET and is SIZE bits long.
  *
  * Return:	Success:	The bit sequence interpretted as an unsigned
  *				integer.
@@ -184,12 +181,12 @@ H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size)
     size_t	i, hs;
     hsize_t	ret_value;      /* Return value */
     
-    FUNC_ENTER_NOAPI(H5T_bit_get_d, 0);
+    FUNC_ENTER_NOAPI_NOFUNC(H5T_bit_get_d);
 
     assert (8*sizeof(val)>=size);
 
     H5T_bit_copy ((uint8_t*)&val, 0, buf, offset, size);
-    switch (((H5T_t*)(H5I_object(H5T_NATIVE_INT_g)))->shared->u.atomic.order) {
+    switch (H5T_native_order_g) {
         case H5T_ORDER_LE:
             break;
 
@@ -208,7 +205,6 @@ H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size)
     /* Set return value */
     ret_value=val;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -234,7 +230,7 @@ H5T_bit_set_d (uint8_t *buf, size_t offset, size_t size, hsize_t val)
     
     assert (8*sizeof(val)>=size);
 
-    switch (((H5T_t*)(H5I_object(H5T_NATIVE_INT_g)))->shared->u.atomic.order) {
+    switch (H5T_native_order_g) {
         case H5T_ORDER_LE:
             break;
 
@@ -313,7 +309,9 @@ H5T_bit_set (uint8_t *buf, size_t offset, size_t size, hbool_t value)
  * Purpose:	Finds the first bit with the specified VALUE within a region
  *		of a bit vector.  The region begins at OFFSET and continues
  *		for SIZE bits, but the region can be searched from the least
- *		significat end toward the most significant end with 
+ *		significat end toward the most significant end(H5T_BIT_LSB
+ *		as DIRECTION), or from the most significant end to the least 
+ *		significant end(H5T_BIT_MSB as DIRECTION).
  *
  * Return:	Success:	The position of the bit found, relative to
  *				the offset.
@@ -417,10 +415,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_bit_inc
  *
- * Purpose:	Increment part of a bit field by adding 1.
+ * Purpose:	Increment part of a bit field by adding 1.  The bit field 
+ *              starts with bit position START and is SIZE bits long.
  *
- * Return:	Success:        The carry-out value, one if overflow zero
- *				otherwise.
+ * Return:	Success:        The carry-out value.  One if overflows, 
+ *                              zero otherwise.
  *
  *		Failure:	Negative
  *

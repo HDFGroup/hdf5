@@ -26,6 +26,27 @@
 #define H5E_NSLOTS	32	/*number of slots in an error stack	     */
 
 /*
+ * The list of error messages in the system is kept as an array of
+ * error_code/message pairs, one for major error numbers and another for
+ * minor error numbers.
+ */
+typedef struct H5E_major_mesg_t {
+    H5E_major_t error_code;
+    const char	*str;
+} H5E_major_mesg_t;
+
+typedef struct H5E_minor_mesg_t {
+    H5E_minor_t error_code;
+    const char	*str;
+} H5E_minor_mesg_t;
+
+/* An error stack */
+typedef struct H5E_t {
+    int	nused;			/*num slots currently used in stack  */
+    H5E_error_t slot[H5E_NSLOTS];	/*array of error records	     */
+} H5E_t;
+
+/*
  * HERROR macro, used to facilitate error reporting between a FUNC_ENTER()
  * and a FUNC_LEAVE() within a function body.  The arguments are the major
  * error number, the minor error number, and a description of the error.
@@ -47,6 +68,8 @@
  * "done:" label.  The arguments are
  * the major error number, the minor error number, a return value, and a
  * description of the error.
+ * (This macro can also be used to push an error and set the return value
+ *      without jumping to any labels)
  */
 #define HDONE_ERROR(maj, min, ret_val, str) {				      \
    HCOMMON_ERROR (maj, min, str);					      \
@@ -62,7 +85,7 @@
  */
 #define HGOTO_ERROR(maj, min, ret_val, str) {				      \
    HCOMMON_ERROR (maj, min, str);					      \
-   HGOTO_DONE (ret_val);					              \
+   HGOTO_DONE (ret_val)						              \
 }
 
 /*
@@ -73,37 +96,15 @@
  */
 #define HGOTO_DONE(ret_val) {ret_value = ret_val; goto done;}
 
-/*
- * The list of error messages in the system is kept as an array of
- * error_code/message pairs, one for major error numbers and another for
- * minor error numbers.
- */
-typedef struct H5E_major_mesg_t {
-    H5E_major_t error_code;
-    const char	*str;
-} H5E_major_mesg_t;
-
-typedef struct H5E_minor_mesg_t {
-    H5E_minor_t error_code;
-    const char	*str;
-} H5E_minor_mesg_t;
-
-/* An error stack */
-typedef struct H5E_t {
-    int	nused;			/*num slots currently used in stack  */
-    H5E_error_t slot[H5E_NSLOTS];	/*array of error records	     */
-} H5E_t;
-
 H5_DLLVAR const hbool_t H5E_clearable_g;/*safe to call H5E_clear() on enter?*/
 H5_DLLVAR herr_t (*H5E_auto_g)(void *client_data);
 H5_DLLVAR void *H5E_auto_data_g;
 
+/* Library-private functions defined in H5E package */
 H5_DLL herr_t H5E_push (H5E_major_t maj_num, H5E_minor_t min_num,
 			 const char *func_name, const char *file_name,
 			 unsigned line, const char *desc);
 H5_DLL herr_t H5E_clear (void);
-H5_DLL herr_t H5E_walk (H5E_direction_t dir, H5E_walk_t func,
-			 void *client_data);
 
 #ifdef H5_HAVE_PARALLEL
 /*

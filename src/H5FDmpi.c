@@ -38,10 +38,6 @@ char H5FD_mpi_native_g[] = "native";
 
 #ifdef H5_HAVE_PARALLEL
 
-/* Interface initialization */
-#define INTERFACE_INIT	NULL
-static int interface_initialize_g = 0;
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_mpi_get_rank

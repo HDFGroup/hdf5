@@ -520,7 +520,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     hsize_t	h5block[1];		/*dataspace selection           */
     hsize_t	h5stride[1];
     hsize_t	h5count[1];
-    hssize_t	h5start[1];
+    hsize_t	h5start[1];
     hssize_t	h5offset[1];            /* Selection offset within dataspace */
     hid_t       h5dcpl = -1;            /* Dataset creation property list */
     hid_t       h5dxpl = -1;            /* Dataset transfer property list */
@@ -1001,7 +1001,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     hsize_t	h5block[1];		/*dataspace selection           */
     hsize_t	h5stride[1];
     hsize_t	h5count[1];
-    hssize_t	h5start[1];
+    hsize_t	h5start[1];
     hssize_t	h5offset[1];            /* Selection offset within dataspace */
     hid_t       h5dxpl = -1;            /* Dataset transfer property list */
 

@@ -30,10 +30,6 @@
 #include "H5Eprivate.h"		/* Error handling		  */
 #include "H5Iprivate.h"		/* ID Functions		  */
 
-/* Interface initialization */
-#define INTERFACE_INIT  NULL
-static int             interface_initialize_g = 0;
-
 
 /*--------------------------------------------------------------------------
  NAME

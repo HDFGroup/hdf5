@@ -726,7 +726,7 @@ nh5tget_norm_c ( hid_t_f *type_id , int_f *norm)
   c_norm = H5Tget_norm(c_type_id);
   if ( c_norm == 0  ) return ret_value;
 
-  *norm = (size_t_f)c_norm;
+  *norm = (int_f)c_norm;
   ret_value = 0; 
   return ret_value;
 }
@@ -981,19 +981,19 @@ nh5tget_nmembers_c ( hid_t_f *type_id , int_f * num_members)
  *---------------------------------------------------------------------------*/
 
 int_f 
-nh5tget_member_name_c ( hid_t_f *type_id ,int_f* index, _fcd member_name, int_f *namelen)
+nh5tget_member_name_c ( hid_t_f *type_id ,int_f* idx, _fcd member_name, int_f *namelen)
 {
   int ret_value = -1;
   hid_t c_type_id;
-  int c_index;
+  unsigned c_index;
   char *c_name;
 
   c_type_id = *type_id;
-  c_index = *index;
+  c_index = *idx;
   c_name = H5Tget_member_name(c_type_id, c_index);
   if (c_name == NULL ) return ret_value;
 
-  HD5packFstring(c_name, _fcdtocp(member_name), strlen(c_name));  
+  HD5packFstring(c_name, _fcdtocp(member_name), (int)strlen(c_name));  
   *namelen = (int_f)strlen(c_name);
   HDfree(c_name);
   ret_value = 0; 
@@ -1013,7 +1013,7 @@ nh5tget_member_name_c ( hid_t_f *type_id ,int_f* index, _fcd member_name, int_f 
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5tget_member_index_c (hid_t_f *type_id, _fcd name, int_f *namelen, int_f *index)
+nh5tget_member_index_c (hid_t_f *type_id, _fcd name, int_f *namelen, int_f *idx)
 {
      int ret_value = -1;
      char *c_name;
@@ -1035,7 +1035,7 @@ nh5tget_member_index_c (hid_t_f *type_id, _fcd name, int_f *namelen, int_f *inde
      c_index = H5Tget_member_index(c_type_id, c_name);
 
      if (c_index < 0) goto DONE;
-     *index = (int_f)c_index;
+     *idx = (int_f)c_index;
 DONE:
      HDfree(c_name);
      ret_value = 0;
@@ -1064,7 +1064,7 @@ nh5tget_member_offset_c ( hid_t_f *type_id ,int_f* member_no, size_t_f * offset)
   int ret_value = -1;
   size_t c_offset;
   hid_t c_type_id;
-  int c_member_no;
+  unsigned c_member_no;
 
   c_type_id = *type_id;
   c_member_no = *member_no;
@@ -1193,7 +1193,7 @@ nh5tget_member_type_c ( hid_t_f *type_id ,int_f* field_idx, hid_t_f * datatype)
 {
   int ret_value = -1;
   hid_t c_type_id;
-  int c_field_idx;
+  unsigned c_field_idx;
 
   c_type_id = *type_id;
   c_field_idx = *field_idx;
@@ -1443,7 +1443,7 @@ nh5tenum_nameof_c(hid_t_f *type_id, int_f* value, _fcd name, size_t_f* namelen)
   c_name = (char *)malloc(sizeof(char)*c_namelen);
   c_type_id = *type_id;
   error = H5Tenum_nameof(c_type_id, &c_value, c_name, c_namelen);
-  HD5packFstring(c_name, _fcdtocp(name), strlen(c_name));  
+  HD5packFstring(c_name, _fcdtocp(name), (int)strlen(c_name));  
   HDfree(c_name);
 
   if(error < 0) return ret_value;
@@ -1506,7 +1506,7 @@ nh5tget_member_value_c(hid_t_f *type_id, int_f* member_no, int_f* value)
 {
   int ret_value = -1;
   hid_t c_type_id;
-  int c_member_no;
+  unsigned c_member_no;
   int c_value;
   herr_t error;
 
@@ -1577,8 +1577,8 @@ nh5tget_tag_c(hid_t_f* type_id, _fcd tag, int_f* taglen)
   c_tag = H5Tget_tag(c_type_id);
   if (c_tag == NULL ) return ret_value;
 
-  HD5packFstring(c_tag, _fcdtocp(tag), strlen(c_tag));  
-  *taglen = strlen(c_tag);
+  HD5packFstring(c_tag, _fcdtocp(tag), (int)strlen(c_tag));  
+  *taglen = (int_f)HDstrlen(c_tag);
   HDfree(c_tag);
   ret_value = 0; 
   return ret_value;

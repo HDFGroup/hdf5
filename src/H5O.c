@@ -28,6 +28,9 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5O_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5O_mask
@@ -88,7 +91,7 @@ static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata
 static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh);
 static herr_t H5O_dest(H5F_t *f, H5O_t *oh);
 static herr_t H5O_clear(H5F_t *f, H5O_t *oh, hbool_t destroy);
-static herr_t H5O_compute_size(H5F_t *f, H5O_t *oh, size_t *size_ptr);
+static herr_t H5O_compute_size(const H5F_t *f, const H5O_t *oh, size_t *size_ptr);
 
 /* H5O inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_OHDR[1] = {{
@@ -99,11 +102,6 @@ static const H5AC_class_t H5AC_OHDR[1] = {{
     (H5AC_clear_func_t)H5O_clear,
     (H5AC_size_func_t)H5O_compute_size,
 }};
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT	H5O_init_interface
-static herr_t H5O_init_interface(void);
 
 /* ID to type mapping */
 static const H5O_class_t *const message_type_g[] = {
@@ -835,7 +833,8 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
 
         oh->chunk[i].image = H5FL_BLK_FREE(chunk_image,oh->chunk[i].image);
     }
-    oh->chunk = H5FL_SEQ_FREE(H5O_chunk_t,oh->chunk);
+    if(oh->chunk)
+        oh->chunk = H5FL_SEQ_FREE(H5O_chunk_t,oh->chunk);
 
     /* destroy messages */
     for (i = 0; i < oh->nmesgs; i++) {
@@ -847,7 +846,8 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
         else
             H5O_free_real(oh->mesg[i].type, oh->mesg[i].native);
     }
-    oh->mesg = H5FL_SEQ_FREE(H5O_mesg_t,oh->mesg);
+    if(oh->mesg)
+        oh->mesg = H5FL_SEQ_FREE(H5O_mesg_t,oh->mesg);
 
     /* destroy object header */
     H5FL_FREE(H5O_t,oh);
@@ -925,7 +925,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_compute_size(H5F_t *f, H5O_t *oh, size_t *size_ptr)
+H5O_compute_size(const H5F_t *f, const H5O_t *oh, size_t *size_ptr)
 {
     unsigned	u;
     size_t	size;
@@ -940,9 +940,7 @@ H5O_compute_size(H5F_t *f, H5O_t *oh, size_t *size_ptr)
     size = H5O_SIZEOF_HDR(f);
 
     for (u = 0; u < oh->nchunks; u++) 
-    {
         size += oh->chunk[u].size;
-    }
 
     HDassert(size >= H5O_SIZEOF_HDR(f));
 
@@ -3132,7 +3130,7 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5O_raw_size(unsigned type_id, H5F_t *f, const void *mesg)
+H5O_raw_size(unsigned type_id, const H5F_t *f, const void *mesg)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     size_t      ret_value;       /* Return value */

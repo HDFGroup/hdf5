@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /***********************************************************
 *
 * Test program:	 tfile
@@ -53,6 +51,12 @@
 #define F3_SYM_INTERN_K	   F2_SYM_INTERN_K
 #define FILE3	"tfile3.h5"
 
+#define GRP_NAME         "/group"
+#define DSET_NAME         "dataset"
+#define ATTR_NAME          "attr"
+#define TYPE_NAME          "type"
+#define FILE4	           "tfile4.h5"
+
 #define OBJ_ID_COUNT_0     0
 #define OBJ_ID_COUNT_1     1 
 #define OBJ_ID_COUNT_2     2
@@ -65,6 +69,8 @@ static void
 create_objects(hid_t, hid_t, hid_t *, hid_t *, hid_t *, hid_t *);
 static void
 test_obj_count_and_id(hid_t, hid_t, hid_t, hid_t, hid_t, hid_t);
+static void 
+check_file_id(hid_t, hid_t);
 
 /****************************************************************
 **
@@ -79,7 +85,7 @@ test_file_create(void)
     hsize_t		ublock;		/*sizeof userblock		*/
     size_t		parm;		/*file-creation parameters	*/
     size_t		parm2;		/*file-creation parameters	*/
-    int			iparm;
+    unsigned		iparm;
 #ifdef H5_WANT_H5_V1_4_COMPAT
     int		iparm2;
 #else /* H5_WANT_H5_V1_4_COMPAT */
@@ -318,7 +324,7 @@ test_file_open(void)
     hsize_t		ublock;		/*sizeof user block		*/
     size_t		parm;		/*file-creation parameters	*/
     size_t		parm2;		/*file-creation parameters	*/
-    int			iparm;
+    unsigned		iparm;
 #ifdef H5_WANT_H5_V1_4_COMPAT
     int		iparm2;
 #else /* H5_WANT_H5_V1_4_COMPAT */
@@ -817,6 +823,158 @@ create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
 
 /****************************************************************
 **
+**  test_get_file_id(): Test H5Iget_file_id() 
+**
+*****************************************************************/
+static void 
+test_get_file_id(void)
+{
+    hid_t               fid, fid2, fid3;
+    hid_t		datatype_id, dataset_id, dataspace_id, group_id, attr_id;
+    hid_t               plist;
+    hsize_t             dims[F2_RANK];
+    herr_t              ret;
+
+    /* Create a file */
+    fid = H5Fcreate(FILE4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Test H5Iget_file_id() */
+    check_file_id(fid, fid);
+
+    /* Create a group in the file.  Make a duplicated file ID from the group.
+     * And close this duplicated ID
+     */
+    group_id = H5Gcreate(fid, GRP_NAME, 0);
+    CHECK(group_id, FAIL, "H5Gcreate");
+   
+    /* Test H5Iget_file_id() */
+    check_file_id(fid, group_id);
+
+    /* Close the file and get file ID from the group ID */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Test H5Iget_file_id() */
+    check_file_id(-1, group_id);
+
+    ret = H5Gclose(group_id);
+    CHECK(ret, FAIL, "H5Gclose");
+   
+    /* Open the file again.  Test H5Iget_file_id() */
+    fid = H5Fopen(FILE4, H5F_ACC_RDWR, H5P_DEFAULT);       
+    CHECK(fid, FAIL, "H5Fcreate");
+   
+    group_id = H5Gopen(fid, GRP_NAME);
+    CHECK(group_id, FAIL, "H5Gcreate");
+   
+    /* Test H5Iget_file_id() */
+    check_file_id(fid, group_id);
+
+    /* Open the file for second time.  Test H5Iget_file_id() */
+    fid3 = H5Freopen(fid);
+    CHECK(fid3, FAIL, "H5Freopen");
+    
+    /* Test H5Iget_file_id() */
+    check_file_id(fid3, fid3);
+    
+    ret = H5Fclose(fid3);
+    CHECK(ret, FAIL, "H5Fclose");
+     
+    /* Create a dataset in the group.  Make a duplicated file ID from the 
+     * dataset.  And close this duplicated ID. 
+     */
+    dims[0] = F2_DIM0;
+    dims[1] = F2_DIM1;
+    dataspace_id = H5Screate_simple(F2_RANK, dims, NULL);
+    CHECK(dataspace_id, FAIL, "H5Screate_simple");
+
+    dataset_id = H5Dcreate(group_id, DSET_NAME, H5T_NATIVE_INT, dataspace_id,
+                        H5P_DEFAULT);
+    CHECK(dataset_id, FAIL, "H5Dcreate");
+    
+    /* Test H5Iget_file_id() */
+    check_file_id(fid, dataset_id);
+    
+    /* Create an attribute for the dataset.  Make a duplicated file ID from
+     * this attribute.  And close it.
+     */
+    attr_id=H5Acreate(dataset_id,ATTR_NAME,H5T_NATIVE_INT,dataspace_id,H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Acreate");
+
+    /* Test H5Iget_file_id() */
+    check_file_id(fid, attr_id);
+
+    /* Create a named datatype.  Make a duplicated file ID from
+     * this attribute.  And close it.
+     */
+    datatype_id=H5Tcopy(H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Acreate");
+    
+    ret = H5Tcommit(fid, TYPE_NAME, datatype_id);
+    CHECK(ret, FAIL, "H5Tcommit");
+    
+    /* Test H5Iget_file_id() */
+    check_file_id(fid, datatype_id);
+
+    /* Create a property list and try to get file ID from it.
+     * Supposed to fail.
+     */
+    plist = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(plist, FAIL, "H5Pcreate");
+    
+    H5E_BEGIN_TRY {
+        fid2 = H5Iget_file_id(plist);
+    } H5E_END_TRY;
+    VERIFY(fid2, FAIL, "H5Iget_file_id");
+    
+    /* Close objects */ 
+    ret = H5Tclose(datatype_id);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    ret = H5Aclose(attr_id);
+    CHECK(ret, FAIL, "H5Aclose");
+    
+    ret = H5Sclose(dataspace_id);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Dclose(dataset_id);
+    CHECK(ret, FAIL, "H5Dclose");
+   
+    ret = H5Gclose(group_id);
+    CHECK(ret, FAIL, "H5Gclose");
+   
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+}
+
+/****************************************************************
+**
+**  check_file_id(): Internal function of test_get_file_id() 
+**
+*****************************************************************/
+static void 
+check_file_id(hid_t fid, hid_t object_id)
+{
+    hid_t               new_fid;
+    herr_t              ret;
+
+    /* Return a duplicated file ID even not expecting user to do it.
+     * And close this duplicated ID
+     */
+    new_fid = H5Iget_file_id(object_id);
+
+    if(fid >=0)
+        VERIFY(new_fid, fid, "H5Iget_file_id");
+    else
+        CHECK(new_fid, FAIL, "H5Iget_file_id");
+
+    ret = H5Fclose(new_fid);
+    CHECK(ret, FAIL, "H5Fclose");
+}
+
+/****************************************************************
+**
 **  test_obj_count_and_id(): test object count and ID list functions. 
 **
 ****************************************************************/
@@ -1078,6 +1236,7 @@ test_file(void)
 #ifndef H5_NO_SHARED_WRITING 
     test_file_close();          /* Test file close behavior */
 #endif /* H5_NO_SHARED_WRITING */     
+    test_get_file_id();         /* Test H5Iget_file_id */
     test_file_perm();           /* Test file access permissions */
     test_file_freespace();      /* Test file free space information */
 }				/* test_file() */
@@ -1103,4 +1262,5 @@ cleanup_file(void)
     remove(FILE1);
     remove(FILE2);
     remove(FILE3);
+    remove(FILE4);
 }

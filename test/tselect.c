@@ -127,15 +127,21 @@
 #define SPACE10_DIM1    180
 #define SPACE10_CHUNK_SIZE 12
 
+/* Information for bounds checking test */
+#define SPACE11_RANK	2
+#define SPACE11_DIM1    100
+#define SPACE11_DIM2    100
+#define SPACE11_NPOINTS 4
+
 /* Location comparison function */
 int compare_size_t(const void *s1, const void *s2);
 
-herr_t test_select_hyper_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
-herr_t test_select_point_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
-herr_t test_select_all_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
-herr_t test_select_none_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
-herr_t test_select_hyper_iter2(void *_elem, hid_t type_id, hsize_t ndim, hssize_t *point, void *_operator_data);
-herr_t test_select_hyper_iter3(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
+herr_t test_select_hyper_iter1(void *elem,hid_t type_id, unsigned ndim, const hsize_t *point, void *operator_data);
+herr_t test_select_point_iter1(void *elem,hid_t type_id, unsigned ndim, const hsize_t *point, void *operator_data);
+herr_t test_select_all_iter1(void *elem,hid_t type_id, unsigned ndim, const hsize_t *point, void *operator_data);
+herr_t test_select_none_iter1(void *elem,hid_t type_id, unsigned ndim, const hsize_t *point, void *operator_data);
+herr_t test_select_hyper_iter2(void *_elem, hid_t type_id, unsigned ndim, const hsize_t *point, void *_operator_data);
+herr_t test_select_hyper_iter3(void *elem,hid_t type_id, unsigned ndim, const hsize_t *point, void *operator_data);
 
 /****************************************************************
 **
@@ -143,7 +149,7 @@ herr_t test_select_hyper_iter3(void *elem,hid_t type_id, hsize_t ndim, hssize_t 
 ** 
 ****************************************************************/
 herr_t 
-test_select_hyper_iter1(void *_elem,hid_t UNUSED type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void *_operator_data)
+test_select_hyper_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void *_operator_data)
 {
     uint8_t *tbuf=(uint8_t *)_elem,     /* temporary buffer pointer */
             **tbuf2=(uint8_t **)_operator_data; /* temporary buffer handle */
@@ -165,16 +171,16 @@ test_select_hyper_iter1(void *_elem,hid_t UNUSED type_id, hsize_t UNUSED ndim, h
 static void 
 test_select_hyper(hid_t xfer_plist)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1,sid2;	/* Dataspace ID			*/
-    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
-    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hssize_t	start[SPACE1_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
+    hid_t	fid1;		/* HDF5 File IDs		*/
+    hid_t	dataset;	/* Dataset ID			*/
+    hid_t	sid1,sid2;	/* Dataspace ID			*/
+    hsize_t	dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t	dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t	dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hsize_t	start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t	stride[SPACE1_RANK];    /* Stride of hyperslab */
+    hsize_t	count[SPACE1_RANK];     /* Element count of hyperslab */
+    hsize_t	block[SPACE1_RANK];     /* Block size of hyperslab */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
@@ -312,7 +318,7 @@ test_select_hyper(hid_t xfer_plist)
 }   /* test_select_hyper() */
 
 struct pnt_iter {
-    hssize_t	coord[POINT1_NPOINTS*2][SPACE2_RANK]; /* Coordinates for point selection */
+    hsize_t	coord[POINT1_NPOINTS*2][SPACE2_RANK]; /* Coordinates for point selection */
     uint8_t *buf;           /* Buffer the points are in */
     int offset;            /* Which point we are looking at */
 };
@@ -324,7 +330,7 @@ struct pnt_iter {
 ** 
 ****************************************************************/
 herr_t 
-test_select_point_iter1(void *_elem,hid_t UNUSED type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void *_operator_data)
+test_select_point_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void *_operator_data)
 {
     uint8_t *elem=(uint8_t *)_elem;  /* Pointer to the element to examine */
     uint8_t *tmp;                       /* temporary ptr to element in operator data */
@@ -337,7 +343,7 @@ test_select_point_iter1(void *_elem,hid_t UNUSED type_id, hsize_t UNUSED ndim, h
         pnt_info->offset++;
         return(0);
     }
-}   /* end test_select_hyper_iter1() */
+}   /* end test_select_point_iter1() */
 
 /****************************************************************
 **
@@ -355,12 +361,12 @@ test_select_point(hid_t xfer_plist)
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hssize_t	coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
-    hssize_t	temp_coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
-    hssize_t	coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
-    hssize_t	temp_coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
-    hssize_t	coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
-    hssize_t	temp_coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
+    hsize_t	coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
+    hsize_t	temp_coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
+    hsize_t	coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
+    hsize_t	temp_coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
+    hsize_t	coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
+    hsize_t	temp_coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
@@ -403,7 +409,7 @@ test_select_point(hid_t xfer_plist)
     coord1[7][0]=1; coord1[7][1]= 0; coord1[7][2]= 4;
     coord1[8][0]=2; coord1[8][1]= 1; coord1[8][2]= 6;
     coord1[9][0]=0; coord1[9][1]= 3; coord1[9][2]= 8;
-    ret = H5Sselect_elements(sid1,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord1);
+    ret = H5Sselect_elements(sid1,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord1);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Verify correct elements selected */
@@ -428,7 +434,7 @@ test_select_point(hid_t xfer_plist)
     coord1[7][0]=1; coord1[7][1]=14; coord1[7][2]= 6;
     coord1[8][0]=2; coord1[8][1]= 2; coord1[8][2]= 5;
     coord1[9][0]=0; coord1[9][1]= 6; coord1[9][2]=13;
-    ret = H5Sselect_elements(sid1,H5S_SELECT_APPEND,POINT1_NPOINTS,(const hssize_t **)coord1);
+    ret = H5Sselect_elements(sid1,H5S_SELECT_APPEND,POINT1_NPOINTS,(const hsize_t **)coord1);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Verify correct elements selected */
@@ -453,7 +459,7 @@ test_select_point(hid_t xfer_plist)
     coord2[7][0]=29; coord2[7][1]= 4;
     coord2[8][0]= 8; coord2[8][1]= 8;
     coord2[9][0]=19; coord2[9][1]=17;
-    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord2);
+    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord2);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Verify correct elements selected */
@@ -482,7 +488,7 @@ test_select_point(hid_t xfer_plist)
     coord2[7][0]=12; coord2[7][1]= 2;
     coord2[8][0]=21; coord2[8][1]=12;
     coord2[9][0]= 9; coord2[9][1]=18;
-    ret = H5Sselect_elements(sid2,H5S_SELECT_PREPEND,POINT1_NPOINTS,(const hssize_t **)coord2);
+    ret = H5Sselect_elements(sid2,H5S_SELECT_PREPEND,POINT1_NPOINTS,(const hsize_t **)coord2);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Verify correct elements selected */
@@ -524,7 +530,7 @@ test_select_point(hid_t xfer_plist)
     coord3[7][0]= 1; coord3[7][1]=22;
     coord3[8][0]=12; coord3[8][1]=21;
     coord3[9][0]=11; coord3[9][1]= 6;
-    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord3);
+    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord3);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Verify correct elements selected */
@@ -548,7 +554,7 @@ test_select_point(hid_t xfer_plist)
     coord3[7][0]= 9; coord3[7][1]=16;
     coord3[8][0]=12; coord3[8][1]=22;
     coord3[9][0]=13; coord3[9][1]= 9;
-    ret = H5Sselect_elements(sid2,H5S_SELECT_APPEND,POINT1_NPOINTS,(const hssize_t **)coord3);
+    ret = H5Sselect_elements(sid2,H5S_SELECT_APPEND,POINT1_NPOINTS,(const hsize_t **)coord3);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Verify correct elements selected */
@@ -598,7 +604,7 @@ test_select_point(hid_t xfer_plist)
 ** 
 ****************************************************************/
 herr_t 
-test_select_all_iter1(void *_elem,hid_t UNUSED type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void *_operator_data)
+test_select_all_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void *_operator_data)
 {
     uint8_t *tbuf=(uint8_t *)_elem,     /* temporary buffer pointer */
             **tbuf2=(uint8_t **)_operator_data; /* temporary buffer handle */
@@ -618,7 +624,7 @@ test_select_all_iter1(void *_elem,hid_t UNUSED type_id, hsize_t UNUSED ndim, hss
 ** 
 ****************************************************************/
 herr_t 
-test_select_none_iter1(void UNUSED *_elem,hid_t UNUSED type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void UNUSED *_operator_data)
+test_select_none_iter1(void UNUSED *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void UNUSED *_operator_data)
 {
     return(-1);
 }   /* end test_select_none_iter1() */
@@ -716,7 +722,7 @@ test_select_all_hyper(hid_t xfer_plist)
     hsize_t		dims1[] = {SPACE3_DIM1, SPACE3_DIM2};
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hssize_t	start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
     hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
@@ -854,8 +860,8 @@ test_select_combo(void)
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hssize_t	coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
-    hssize_t    start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t		coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
+    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
     hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
@@ -901,7 +907,7 @@ test_select_combo(void)
     coord1[7][0]=1; coord1[7][1]= 0; coord1[7][2]= 4;
     coord1[8][0]=2; coord1[8][1]= 1; coord1[8][2]= 6;
     coord1[9][0]=0; coord1[9][1]= 3; coord1[9][2]= 8;
-    ret = H5Sselect_elements(sid1,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord1);
+    ret = H5Sselect_elements(sid1,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord1);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Select 1x10 hyperslab for writing memory dataset */
@@ -995,7 +1001,7 @@ test_select_hyper_stride(hid_t xfer_plist)
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hssize_t	start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
     hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
@@ -1145,7 +1151,7 @@ test_select_hyper_contig(hid_t dset_type, hid_t xfer_plist)
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		sid1,sid2;	/* Dataspace ID			*/
     hsize_t		dims2[] = {SPACE2_DIM2, SPACE2_DIM1};
-    hssize_t	start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
     hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
@@ -1274,7 +1280,7 @@ test_select_hyper_contig2(hid_t dset_type, hid_t xfer_plist)
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		sid1,sid2;	/* Dataspace ID			*/
     hsize_t		dims2[] = {SPACE8_DIM4, SPACE8_DIM3, SPACE8_DIM2, SPACE8_DIM1};
-    hssize_t	        start[SPACE8_RANK];     /* Starting location of hyperslab */
+    hsize_t	        start[SPACE8_RANK];     /* Starting location of hyperslab */
     hsize_t		count[SPACE8_RANK];     /* Element count of hyperslab */
     uint16_t   *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
@@ -1398,12 +1404,12 @@ test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		sid1,sid2;	/* Dataspace ID			*/
     hsize_t		dims2[] = {SPACE8_DIM4, SPACE8_DIM3, SPACE8_DIM2, SPACE8_DIM1};
-    hssize_t	        start[SPACE8_RANK];     /* Starting location of hyperslab */
+    hsize_t	        start[SPACE8_RANK];     /* Starting location of hyperslab */
     hsize_t		count[SPACE8_RANK];     /* Element count of hyperslab */
     uint16_t   *wbuf,           /* Buffer to write to disk */
                *rbuf,           /* Buffer read from disk */
                *tbuf, *tbuf2;   /* Temporary buffer pointers */
-    int        i,j,k,l;     /* Counters */
+    unsigned   i,j,k,l;     /* Counters */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -1480,19 +1486,19 @@ test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
         for(j=0; j<SPACE8_DIM3; j++)
             for(k=0; k<SPACE8_DIM2; k++)
                 for(l=0; l<SPACE8_DIM1; l++,tbuf++,tbuf2++)
-                    if( (i>=start[0] && i<(int)(start[0]+count[0])) &&
-                            (j>=start[1] && j<(int)(start[1]+count[1])) &&
-                            (k>=start[2] && k<(int)(start[2]+count[2])) &&
-                            (l>=start[3] && l<(int)(start[3]+count[3])) ) {
+                    if( (i>=start[0] && i<(start[0]+count[0])) &&
+                            (j>=start[1] && j<(start[1]+count[1])) &&
+                            (k>=start[2] && k<(start[2]+count[2])) &&
+                            (l>=start[3] && l<(start[3]+count[3])) ) {
                         if(*tbuf!=*tbuf2) {
                             printf("Error: hyperslab values don't match!\n");
-                            TestErrPrintf("Line: %d, i=%d, j=%d, k=%d, l=%d, *tbuf=%u,*tbuf2=%u\n",__LINE__,i,j,k,l,(unsigned)*tbuf,(unsigned)*tbuf2);
+                            TestErrPrintf("Line: %d, i=%u, j=%u, k=%u, l=%u, *tbuf=%u,*tbuf2=%u\n",__LINE__,i,j,k,l,(unsigned)*tbuf,(unsigned)*tbuf2);
                         } /* end if */
                     } /* end if */
                     else {
                         if(*tbuf2!=0) {
                             printf("Error: invalid data in read buffer!\n");
-                            TestErrPrintf("Line: %d, i=%d, j=%d, k=%d, l=%d, *tbuf=%u,*tbuf2=%u\n",__LINE__,i,j,k,l,(unsigned)*tbuf,(unsigned)*tbuf2);
+                            TestErrPrintf("Line: %d, i=%u, j=%u, k=%u, l=%u, *tbuf=%u,*tbuf2=%u\n",__LINE__,i,j,k,l,(unsigned)*tbuf,(unsigned)*tbuf2);
                         } /* end if */
                     } /* end else */
 
@@ -1532,7 +1538,7 @@ test_select_hyper_copy(void)
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hssize_t	start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
     hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
@@ -1690,9 +1696,9 @@ test_select_point_copy(void)
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hssize_t	coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
-    hssize_t	coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
-    hssize_t	coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
+    hsize_t	coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
+    hsize_t	coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
+    hsize_t	coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
     uint16_t   *wbuf,       /* buffer to write to disk */
                *rbuf,       /* 1st buffer read from disk */
                *rbuf2,      /* 2nd buffer read from disk */
@@ -1736,7 +1742,7 @@ test_select_point_copy(void)
     coord1[7][0]=1; coord1[7][1]= 0; coord1[7][2]= 4;
     coord1[8][0]=2; coord1[8][1]= 1; coord1[8][2]= 6;
     coord1[9][0]=0; coord1[9][1]= 3; coord1[9][2]= 8;
-    ret = H5Sselect_elements(sid1,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord1);
+    ret = H5Sselect_elements(sid1,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord1);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Select sequence of ten points for write dataset */
@@ -1750,7 +1756,7 @@ test_select_point_copy(void)
     coord2[7][0]=29; coord2[7][1]= 4;
     coord2[8][0]= 8; coord2[8][1]= 8;
     coord2[9][0]=19; coord2[9][1]=17;
-    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord2);
+    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord2);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Make a copy of the dataspace to write */
@@ -1794,7 +1800,7 @@ test_select_point_copy(void)
     coord3[7][0]= 1; coord3[7][1]=22;
     coord3[8][0]=12; coord3[8][1]=21;
     coord3[9][0]=11; coord3[9][1]= 6;
-    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord3);
+    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord3);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Make a copy of the dataspace to read */
@@ -1859,7 +1865,7 @@ test_select_hyper_offset(void)
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hssize_t	start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
     hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
@@ -2017,7 +2023,7 @@ test_select_hyper_offset2(void)
     hid_t	sid1,sid2;	/* Dataspace ID			*/
     hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
     hsize_t	dims2[] = {SPACE7_DIM1, SPACE7_DIM2};
-    hssize_t	start[SPACE7_RANK];     /* Starting location of hyperslab */
+    hsize_t	start[SPACE7_RANK];     /* Starting location of hyperslab */
     hsize_t	count[SPACE7_RANK];     /* Element count of hyperslab */
     hssize_t	offset[SPACE7_RANK];    /* Offset of selection */
     uint8_t    *wbuf,       /* buffer to write to disk */
@@ -2136,9 +2142,9 @@ test_select_point_offset(void)
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hssize_t	coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
-    hssize_t	coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
-    hssize_t	coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
+    hsize_t	coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
+    hsize_t	coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
+    hsize_t	coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
     hssize_t	offset[SPACE1_RANK];    /* Offset of selection */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
@@ -2183,7 +2189,7 @@ test_select_point_offset(void)
     coord1[7][0]=1; coord1[7][1]= 0; coord1[7][2]= 4;
     coord1[8][0]=2; coord1[8][1]= 1; coord1[8][2]= 6;
     coord1[9][0]=0; coord1[9][1]= 3; coord1[9][2]= 8;
-    ret = H5Sselect_elements(sid1,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord1);
+    ret = H5Sselect_elements(sid1,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord1);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Check a valid offset */
@@ -2218,7 +2224,7 @@ test_select_point_offset(void)
     coord2[7][0]=23; coord2[7][1]= 4;
     coord2[8][0]= 8; coord2[8][1]= 8;
     coord2[9][0]=19; coord2[9][1]=17;
-    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord2);
+    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord2);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Choose a valid offset for the memory dataspace */
@@ -2254,7 +2260,7 @@ test_select_point_offset(void)
     coord3[7][0]= 1; coord3[7][1]=22;
     coord3[8][0]=12; coord3[8][1]=21;
     coord3[9][0]=11; coord3[9][1]= 6;
-    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord3);
+    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord3);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Read selection from disk */
@@ -2306,7 +2312,7 @@ test_select_hyper_union(void)
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
-    hssize_t	start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
     hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
@@ -2820,7 +2826,7 @@ test_select_hyper_and_2d(void)
     hid_t		sid1,sid2;	/* Dataspace ID			*/
     hsize_t		dims1[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims2[] = {SPACE2A_DIM1};
-    hssize_t	        start[SPACE2_RANK];     /* Starting location of hyperslab */
+    hsize_t	        start[SPACE2_RANK];     /* Starting location of hyperslab */
     hsize_t		stride[SPACE2_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE2_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE2_RANK];     /* Block size of hyperslab */
@@ -2946,7 +2952,7 @@ test_select_hyper_xor_2d(void)
     hid_t		sid1,sid2;	/* Dataspace ID			*/
     hsize_t		dims1[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims2[] = {SPACE2A_DIM1};
-    hssize_t	        start[SPACE2_RANK];     /* Starting location of hyperslab */
+    hsize_t	        start[SPACE2_RANK];     /* Starting location of hyperslab */
     hsize_t		stride[SPACE2_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE2_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE2_RANK];     /* Block size of hyperslab */
@@ -3074,7 +3080,7 @@ test_select_hyper_notb_2d(void)
     hid_t		sid1,sid2;	/* Dataspace ID			*/
     hsize_t		dims1[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims2[] = {SPACE2A_DIM1};
-    hssize_t	        start[SPACE2_RANK];     /* Starting location of hyperslab */
+    hsize_t	        start[SPACE2_RANK];     /* Starting location of hyperslab */
     hsize_t		stride[SPACE2_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE2_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE2_RANK];     /* Block size of hyperslab */
@@ -3201,7 +3207,7 @@ test_select_hyper_nota_2d(void)
     hid_t		sid1,sid2;	/* Dataspace ID			*/
     hsize_t		dims1[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims2[] = {SPACE2A_DIM1};
-    hssize_t	        start[SPACE2_RANK];     /* Starting location of hyperslab */
+    hsize_t	        start[SPACE2_RANK];     /* Starting location of hyperslab */
     hsize_t		stride[SPACE2_RANK];    /* Stride of hyperslab */
     hsize_t		count[SPACE2_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE2_RANK];     /* Block size of hyperslab */
@@ -3320,7 +3326,7 @@ test_select_hyper_nota_2d(void)
 ** 
 ****************************************************************/
 herr_t 
-test_select_hyper_iter2(void *_elem, hid_t UNUSED type_id, hsize_t ndim, hssize_t *point, void *_operator_data)
+test_select_hyper_iter2(void *_elem, hid_t UNUSED type_id, unsigned ndim, const hsize_t *point, void *_operator_data)
 {
     int *tbuf=(int *)_elem,     /* temporary buffer pointer */
         **tbuf2=(int **)_operator_data; /* temporary buffer handle */
@@ -3329,9 +3335,9 @@ test_select_hyper_iter2(void *_elem, hid_t UNUSED type_id, hsize_t ndim, hssize_
     if(*tbuf!=**tbuf2) {
         TestErrPrintf("Error in hyperslab iteration!\n");
         printf("location: { ");
-        for(u=0; u<(unsigned)ndim; u++) {
+        for(u=0; u<ndim; u++) {
             printf("%2d",(int)point[u]);
-            if(u<(unsigned)(ndim-1))
+            if(u<(ndim-1))
                 printf(", ");
         } /* end for */
         printf("}\n");
@@ -3342,7 +3348,7 @@ test_select_hyper_iter2(void *_elem, hid_t UNUSED type_id, hsize_t ndim, hssize_
         (*tbuf2)++;
         return(0);
     }
-}   /* end test_select_hyper_iter1() */
+}   /* end test_select_hyper_iter2() */
 
 /****************************************************************
 **
@@ -3358,7 +3364,7 @@ test_select_hyper_union_random_5d(hid_t read_plist)
     hid_t		sid1,sid2;	/* Dataspace ID			*/
     hsize_t		dims1[] = {SPACE5_DIM1, SPACE5_DIM2, SPACE5_DIM3, SPACE5_DIM4, SPACE5_DIM5};
     hsize_t		dims2[] = {SPACE6_DIM1};
-    hssize_t	start[SPACE5_RANK];     /* Starting location of hyperslab */
+    hsize_t		start[SPACE5_RANK];     /* Starting location of hyperslab */
     hsize_t		count[SPACE5_RANK];     /* Element count of hyperslab */
     int    *wbuf,          /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
@@ -3555,9 +3561,9 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
     short         *tmpdata_out; /* output buffer */
    
     hsize_t     count[3];              /* size of the hyperslab in the file */
-    hssize_t    offset[3];             /* hyperslab offset in the file */
+    hsize_t     offset[3];             /* hyperslab offset in the file */
     hsize_t     count_out[3];          /* size of the hyperslab in memory */
-    hssize_t    offset_out[3];         /* hyperslab offset in memory */
+    hsize_t     offset_out[3];         /* hyperslab offset in memory */
     int         i, j, k, status_n, rank;
 
     /* Output message about test being performed */
@@ -3788,9 +3794,9 @@ test_select_point_chunk(void)
     unsigned    *tmpdata_out;			/* output buffer */
 #endif /* LATER */
    
-    hssize_t    start[SPACE7_RANK];             /* hyperslab offset */
+    hsize_t     start[SPACE7_RANK];             /* hyperslab offset */
     hsize_t     count[SPACE7_RANK];             /* size of the hyperslab */
-    hssize_t    points[SPACE7_NPOINTS][SPACE7_RANK];   /* points for selection */
+    hsize_t     points[SPACE7_NPOINTS][SPACE7_RANK];   /* points for selection */
     unsigned    i, j;                           /* Local index variables */
 
     /* Output message about test being performed */
@@ -3853,7 +3859,7 @@ test_select_point_chunk(void)
     points[6][1]=1;
     points[7][0]=6;    /* In same chunk as point #3, but "earlier" in chunk */
     points[7][1]=6;
-    ret = H5Sselect_elements(pnt1_space,H5S_SELECT_SET,SPACE7_NPOINTS,(const hssize_t **)points);
+    ret = H5Sselect_elements(pnt1_space,H5S_SELECT_SET,SPACE7_NPOINTS,(const hsize_t **)points);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Create 1st hyperslab selection */
@@ -3889,7 +3895,7 @@ test_select_point_chunk(void)
     points[6][1]=2;
     points[7][0]=7;    /* In same chunk as point #3, but "earlier" in chunk */
     points[7][1]=7;
-    ret = H5Sselect_elements(pnt2_space,H5S_SELECT_SET,SPACE7_NPOINTS,(const hssize_t **)points);
+    ret = H5Sselect_elements(pnt2_space,H5S_SELECT_SET,SPACE7_NPOINTS,(const hsize_t **)points);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Create 2nd hyperslab selection */
@@ -3967,7 +3973,7 @@ test_select_scalar_chunk(void)
     hid_t m_sid;                /* Memory dataspace */
     hsize_t dims[] = {2};       /* Dataset dimensions */
     hsize_t maxdims[] = {H5S_UNLIMITED};        /* Dataset maximum dimensions */
-    hssize_t offset[] = {0};    /* Hyperslab start */
+    hsize_t offset[] = {0};     /* Hyperslab start */
     hsize_t count[] = {1};      /* Hyperslab count */
     unsigned data = 2;          /* Data to write */
     herr_t ret;
@@ -4029,9 +4035,9 @@ test_select_valid(void)
     herr_t error;
     htri_t valid;
     hid_t main_space, sub_space;
-    hssize_t safe_start[2]={1,1};
+    hsize_t safe_start[2]={1,1};
     hsize_t safe_count[2]={1,1};
-    hssize_t start[2];
+    hsize_t start[2];
     hsize_t dims[2],maxdims[2],size[2],count[2];
 
     /* Output message about test being performed */
@@ -4126,7 +4132,7 @@ test_select_combine(void)
     hid_t all_id;       /* Dataspace for "all" selection */
     hid_t none_id;      /* Dataspace for "none" selection */
     hid_t space1;       /* Temporary dataspace #1 */
-    hssize_t start[SPACE7_RANK];        /* Hyperslab start */
+    hsize_t start[SPACE7_RANK];        /* Hyperslab start */
     hsize_t stride[SPACE7_RANK];        /* Hyperslab stride */
     hsize_t count[SPACE7_RANK];         /* Hyperslab count */
     hsize_t block[SPACE7_RANK];         /* Hyperslab block */
@@ -4477,7 +4483,7 @@ test_select_combine(void)
 typedef struct {
     unsigned short fill_value;  /* The fill value to check */
     size_t curr_coord;          /* Current coordinate to examine */
-    hssize_t *coords;           /* Pointer to selection's coordinates */
+    hsize_t *coords;            /* Pointer to selection's coordinates */
 } fill_iter_info;
 
 /****************************************************************
@@ -4486,11 +4492,11 @@ typedef struct {
 ** 
 ****************************************************************/
 herr_t 
-test_select_hyper_iter3(void *_elem,hid_t UNUSED type_id, hsize_t ndim, hssize_t *point, void *_operator_data)
+test_select_hyper_iter3(void *_elem, hid_t UNUSED type_id, unsigned ndim, const hsize_t *point, void *_operator_data)
 {
     unsigned short *tbuf=(unsigned short *)_elem;     /* temporary buffer pointer */
     fill_iter_info *iter_info=(fill_iter_info *)_operator_data; /* Get the pointer to the iterator information */
-    hssize_t *coord_ptr;        /* Pointer to the coordinate information for a point*/
+    hsize_t *coord_ptr;        /* Pointer to the coordinate information for a point*/
 
     /* Check value in current buffer location */
     if(*tbuf!=iter_info->fill_value)
@@ -4526,7 +4532,7 @@ test_select_fill_all(void)
     hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
     int         fill_value;     /* Fill value */
     fill_iter_info iter_info;   /* Iterator information structure */
-    hssize_t    points[SPACE7_DIM1*SPACE7_DIM2][SPACE7_RANK];   /* Coordinates of selection */
+    hsize_t     points[SPACE7_DIM1*SPACE7_DIM2][SPACE7_RANK];   /* Coordinates of selection */
     unsigned short *wbuf,       /* buffer to write to disk */
                *tbuf;           /* temporary buffer pointer */
     int         i,j;            /* Counters */
@@ -4572,7 +4578,7 @@ test_select_fill_all(void)
     /* Initialize the iterator structure */
     iter_info.fill_value=SPACE7_FILL;
     iter_info.curr_coord=0;
-    iter_info.coords=(hssize_t *)points;
+    iter_info.coords=(hsize_t *)points;
 
     /* Iterate through selection, verifying correct data */
     ret = H5Diterate(wbuf,H5T_NATIVE_USHORT,sid1,test_select_hyper_iter3,&iter_info);
@@ -4598,7 +4604,7 @@ test_select_fill_point(hssize_t *offset)
     hid_t	sid1;           /* Dataspace ID */
     hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
     hssize_t    real_offset[SPACE7_RANK];       /* Actual offset to use */
-    hssize_t    points[5][SPACE7_RANK] = {{2,4}, {3,8}, {8,4}, {7,5}, {7,7}};
+    hsize_t     points[5][SPACE7_RANK] = {{2,4}, {3,8}, {8,4}, {7,5}, {7,7}};
     size_t      num_points=5;   /* Number of points selected */
     int         fill_value;     /* Fill value */
     fill_iter_info iter_info;   /* Iterator information structure */
@@ -4623,7 +4629,7 @@ test_select_fill_point(hssize_t *offset)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Select "point" selection */
-    ret = H5Sselect_elements(sid1, H5S_SELECT_SET,num_points,(const hssize_t **)points);
+    ret = H5Sselect_elements(sid1, H5S_SELECT_SET,num_points,(const hsize_t **)points);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     if(offset!=NULL) {
@@ -4647,7 +4653,7 @@ test_select_fill_point(hssize_t *offset)
     for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
         for(j=0; j<SPACE7_DIM2; j++, tbuf++) {
             for(k=0; k<(int)num_points; k++) {
-                if(i==(points[k][0]+real_offset[0]) && j==(points[k][1]+real_offset[1])) {
+                if(i==(int)(points[k][0]+real_offset[0]) && j==(int)(points[k][1]+real_offset[1])) {
                     if(*tbuf!=(unsigned short)fill_value)
                         TestErrPrintf("Error! j=%d, i=%d, *tbuf=%u, fill_value=%u\n",j,i,(unsigned)*tbuf,(unsigned)fill_value);
                     break;
@@ -4660,7 +4666,7 @@ test_select_fill_point(hssize_t *offset)
     /* Initialize the iterator structure */
     iter_info.fill_value=SPACE7_FILL;
     iter_info.curr_coord=0;
-    iter_info.coords=(hssize_t *)points;
+    iter_info.coords=(hsize_t *)points;
 
     /* Add in the offset */
     for(i=0; i<(int)num_points; i++) {
@@ -4692,10 +4698,10 @@ test_select_fill_hyper_simple(hssize_t *offset)
     hid_t	sid1;           /* Dataspace ID */
     hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
     hssize_t    real_offset[SPACE7_RANK];       /* Actual offset to use */
-    hssize_t    start[SPACE7_RANK];     /* Hyperslab start */
+    hsize_t     start[SPACE7_RANK];     /* Hyperslab start */
     hsize_t     count[SPACE7_RANK];     /* Hyperslab block size */
     size_t      num_points;     /* Number of points in selection */
-    hssize_t    points[16][SPACE7_RANK];        /* Coordinates selected */
+    hsize_t     points[16][SPACE7_RANK];        /* Coordinates selected */
     int         fill_value;     /* Fill value */
     fill_iter_info iter_info;   /* Iterator information structure */
     unsigned short *wbuf,       /* buffer to write to disk */
@@ -4758,7 +4764,7 @@ test_select_fill_hyper_simple(hssize_t *offset)
     /* Initialize the iterator structure */
     iter_info.fill_value=SPACE7_FILL;
     iter_info.curr_coord=0;
-    iter_info.coords=(hssize_t *)points;
+    iter_info.coords=(hsize_t *)points;
 
     /* Set the coordinates of the selection (with the offset) */
     for(i=0, num_points=0; i<(int)count[0]; i++)
@@ -4791,11 +4797,11 @@ test_select_fill_hyper_regular(hssize_t *offset)
     hid_t	sid1;           /* Dataspace ID */
     hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
     hssize_t    real_offset[SPACE7_RANK];       /* Actual offset to use */
-    hssize_t    start[SPACE7_RANK];     /* Hyperslab start */
+    hsize_t     start[SPACE7_RANK];     /* Hyperslab start */
     hsize_t     stride[SPACE7_RANK];    /* Hyperslab stride size */
     hsize_t     count[SPACE7_RANK];     /* Hyperslab block count */
     hsize_t     block[SPACE7_RANK];     /* Hyperslab block size */
-    hssize_t    points[16][SPACE7_RANK] = {
+    hsize_t     points[16][SPACE7_RANK] = {
         {2,2}, {2,3}, {2,6}, {2,7},
         {3,2}, {3,3}, {3,6}, {3,7},
         {6,2}, {6,3}, {6,6}, {6,7},
@@ -4853,7 +4859,7 @@ test_select_fill_hyper_regular(hssize_t *offset)
     for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
         for(j=0; j<SPACE7_DIM2; j++, tbuf++) {
             for(k=0; k<(int)num_points; k++) {
-                if(i==(points[k][0]+real_offset[0]) && j==(points[k][1]+real_offset[1])) {
+                if(i==(int)(points[k][0]+real_offset[0]) && j==(int)(points[k][1]+real_offset[1])) {
                     if(*tbuf!=(unsigned short)fill_value)
                         TestErrPrintf("Error! j=%d, i=%d, *tbuf=%u, fill_value=%u\n",j,i,(unsigned)*tbuf,(unsigned)fill_value);
                     break;
@@ -4866,7 +4872,7 @@ test_select_fill_hyper_regular(hssize_t *offset)
     /* Initialize the iterator structure */
     iter_info.fill_value=SPACE7_FILL;
     iter_info.curr_coord=0;
-    iter_info.coords=(hssize_t *)points;
+    iter_info.coords=(hsize_t *)points;
 
     /* Add in the offset */
     for(i=0; i<(int)num_points; i++) {
@@ -4898,9 +4904,9 @@ test_select_fill_hyper_irregular(hssize_t *offset)
     hid_t	sid1;           /* Dataspace ID */
     hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
     hssize_t    real_offset[SPACE7_RANK];       /* Actual offset to use */
-    hssize_t    start[SPACE7_RANK];     /* Hyperslab start */
+    hsize_t     start[SPACE7_RANK];     /* Hyperslab start */
     hsize_t     count[SPACE7_RANK];     /* Hyperslab block count */
-    hssize_t    points[32][SPACE7_RANK] = { /* Yes, some of the are duplicated.. */
+    hsize_t     points[32][SPACE7_RANK] = { /* Yes, some of the are duplicated.. */
         {2,2}, {2,3}, {2,4}, {2,5},
         {3,2}, {3,3}, {3,4}, {3,5},
         {4,2}, {4,3}, {4,4}, {4,5},
@@ -4910,7 +4916,7 @@ test_select_fill_hyper_irregular(hssize_t *offset)
         {6,4}, {6,5}, {6,6}, {6,7},
         {7,4}, {7,5}, {7,6}, {7,7},
         };
-    hssize_t    iter_points[28][SPACE7_RANK] = { /* Coordinates, as iterated through */
+    hsize_t     iter_points[28][SPACE7_RANK] = { /* Coordinates, as iterated through */
         {2,2}, {2,3}, {2,4}, {2,5},
         {3,2}, {3,3}, {3,4}, {3,5},
         {4,2}, {4,3}, {4,4}, {4,5}, {4,6}, {4,7},
@@ -4975,7 +4981,7 @@ test_select_fill_hyper_irregular(hssize_t *offset)
     for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
         for(j=0; j<SPACE7_DIM2; j++, tbuf++) {
             for(k=0; k<(int)num_points; k++) {
-                if(i==(points[k][0]+real_offset[0]) && j==(points[k][1]+real_offset[1])) {
+                if(i==(int)(points[k][0]+real_offset[0]) && j==(int)(points[k][1]+real_offset[1])) {
                     if(*tbuf!=(unsigned short)fill_value)
                         TestErrPrintf("Error! j=%d, i=%d, *tbuf=%u, fill_value=%u\n",j,i,(unsigned)*tbuf,(unsigned)fill_value);
                     break;
@@ -4988,7 +4994,7 @@ test_select_fill_hyper_irregular(hssize_t *offset)
     /* Initialize the iterator structure */
     iter_info.fill_value=SPACE7_FILL;
     iter_info.curr_coord=0;
-    iter_info.coords=(hssize_t *)iter_points;
+    iter_info.coords=(hsize_t *)iter_points;
 
     /* Add in the offset */
     for(i=0; i<(int)num_iter_points; i++) {
@@ -5117,8 +5123,8 @@ test_scalar_select(void)
     hid_t	dataset;	/* Dataset ID			*/
     hid_t	sid1,sid2;	/* Dataspace ID			*/
     hsize_t	dims2[] = {SPACE7_DIM1, SPACE7_DIM2};
-    hssize_t	coord1[SPACE7_RANK]; /* Coordinates for point selection */
-    hssize_t    start[SPACE7_RANK]; /* Hyperslab start */
+    hsize_t	coord1[SPACE7_RANK]; /* Coordinates for point selection */
+    hsize_t     start[SPACE7_RANK]; /* Hyperslab start */
     hsize_t     count[SPACE7_RANK]; /* Hyperslab block count */
     uint8_t    *wbuf_uint8,     /* buffer to write to disk */
                 rval_uint8,     /* value read back in */
@@ -5161,7 +5167,7 @@ test_scalar_select(void)
 
     /* Select one element in memory with a point selection */
     coord1[0]=0; coord1[1]= 2;
-    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,1,(const hssize_t **)&coord1);
+    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,1,(const hsize_t **)&coord1);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Write single point to disk */
@@ -5265,8 +5271,8 @@ static void
 test_scalar_select2(void)
 {
     hid_t	sid;		/* Dataspace ID			*/
-    hssize_t	coord1[1]; /* Coordinates for point selection */
-    hssize_t    start[1]; /* Hyperslab start */
+    hsize_t	coord1[1]; /* Coordinates for point selection */
+    hsize_t     start[1]; /* Hyperslab start */
     hsize_t     count[1]; /* Hyperslab block count */
     herr_t	ret;		/* Generic return value	*/
 
@@ -5280,7 +5286,7 @@ test_scalar_select2(void)
     /* Select one element in memory with a point selection */
     coord1[0]=0;
     H5E_BEGIN_TRY {
-    	ret = H5Sselect_elements(sid,H5S_SELECT_SET,1,(const hssize_t **)&coord1);
+    	ret = H5Sselect_elements(sid,H5S_SELECT_SET,1,(const hsize_t **)&coord1);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sselect_elements");
 
@@ -5331,9 +5337,9 @@ test_shape_same(void)
     hid_t	none_hyper_sid;	/* Dataspace ID	with "no hyperslabs" selection */
     hid_t	tmp_sid;	/* Temporary dataspace ID */
     hsize_t	dims[] = {SPACE9_DIM1, SPACE9_DIM2};
-    hssize_t	coord1[1][SPACE2_RANK]; /* Coordinates for single point selection */
-    hssize_t	coord2[SPACE9_DIM2][SPACE9_RANK]; /* Coordinates for multiple point selection */
-    hssize_t    start[SPACE9_RANK]; /* Hyperslab start */
+    hsize_t	coord1[1][SPACE2_RANK]; /* Coordinates for single point selection */
+    hsize_t	coord2[SPACE9_DIM2][SPACE9_RANK]; /* Coordinates for multiple point selection */
+    hsize_t     start[SPACE9_RANK]; /* Hyperslab start */
     hsize_t     stride[SPACE9_RANK]; /* Hyperslab stride */
     hsize_t     count[SPACE9_RANK]; /* Hyperslab block count */
     hsize_t     block[SPACE9_RANK]; /* Hyperslab block size */
@@ -5367,7 +5373,7 @@ test_shape_same(void)
 
     /* Select sequence of ten points for multiple point selection */
     coord1[0][0]=2; coord1[0][1]=2;
-    ret = H5Sselect_elements(single_pt_sid,H5S_SELECT_SET,1,(const hssize_t **)coord1);
+    ret = H5Sselect_elements(single_pt_sid,H5S_SELECT_SET,1,(const hsize_t **)coord1);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Create dataspace for multiple point selection */
@@ -5385,7 +5391,7 @@ test_shape_same(void)
     coord2[7][0]=1; coord2[7][1]=0;
     coord2[8][0]=5; coord2[8][1]=1;
     coord2[9][0]=9; coord2[9][1]=3;
-    ret = H5Sselect_elements(mult_pt_sid,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord2);
+    ret = H5Sselect_elements(mult_pt_sid,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord2);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Create dataspace for single hyperslab selection */
@@ -5742,7 +5748,7 @@ test_shape_same(void)
                 for(v=1; v<(SPACE9_DIM2-1); v++) {
                     coord2[v-1][0]=u; coord2[v-1][1]=v;
                 } /* end for */
-                ret = H5Sselect_elements(tmp_sid,H5S_SELECT_APPEND,(SPACE9_DIM2-2),(const hssize_t **)coord2);
+                ret = H5Sselect_elements(tmp_sid,H5S_SELECT_APPEND,(SPACE9_DIM2-2),(const hsize_t **)coord2);
                 CHECK(ret, FAIL, "H5Sselect_elements");
             } /* end for */
 
@@ -5848,7 +5854,7 @@ test_shape_same(void)
                 for(v=0; v<SPACE9_DIM2; v++) {
                     coord2[v][0]=u; coord2[v][1]=v;
                 } /* end for */
-                ret = H5Sselect_elements(tmp_sid,H5S_SELECT_APPEND,SPACE9_DIM2,(const hssize_t **)coord2);
+                ret = H5Sselect_elements(tmp_sid,H5S_SELECT_APPEND,SPACE9_DIM2,(const hsize_t **)coord2);
                 CHECK(ret, FAIL, "H5Sselect_elements");
             } /* end for */
 
@@ -5998,7 +6004,7 @@ test_shape_same(void)
                 for(v=0; v<2; v++) {
                     coord2[v][0]=u; coord2[v][1]=(v*2)+2;
                 } /* end for */
-                ret = H5Sselect_elements(tmp_sid,H5S_SELECT_APPEND,2,(const hssize_t **)coord2);
+                ret = H5Sselect_elements(tmp_sid,H5S_SELECT_APPEND,2,(const hsize_t **)coord2);
                 CHECK(ret, FAIL, "H5Sselect_elements");
             } /* end for */
 
@@ -6180,7 +6186,7 @@ test_select_hyper_chunk_offset(void)
     int *rbuf;                          /* Buffer for reading data */
     hid_t dcpl;                         /* Dataset creation property list ID */
     hsize_t chunks[1]={SPACE10_CHUNK_SIZE };    /* Chunk size */
-    hssize_t start[1] = { 0 };          /* The start of the hyperslab */
+    hsize_t start[1] = { 0 };           /* The start of the hyperslab */
     hsize_t count[1] = { SPACE10_CHUNK_SIZE };  /* The size of the hyperslab */
     int i,j;                            /* Local index */
     herr_t ret;                         /* Generic return value */
@@ -6376,6 +6382,210 @@ test_select_hyper_chunk_offset(void)
 
 /****************************************************************
 **
+**  test_select_bounds(): Tests selection bounds on dataspaces,
+**      both with and without offsets.
+** 
+****************************************************************/
+static void 
+test_select_bounds(void)
+{
+    hid_t sid;          /* Dataspace ID */
+    const hsize_t dims[SPACE11_RANK] = { SPACE11_DIM1, SPACE11_DIM2 };      /* Dataspace dimensions */
+    hsize_t coord[SPACE11_NPOINTS][SPACE11_RANK]; /* Coordinates for point selection */
+    hsize_t start[SPACE11_RANK];       /* The start of the hyperslab */
+    hsize_t stride[SPACE11_RANK];       /* The stride between block starts for the hyperslab */
+    hsize_t count[SPACE11_RANK];        /* The number of blocks for the hyperslab */
+    hsize_t block[SPACE11_RANK];        /* The size of each block for the hyperslab */
+    hssize_t offset[SPACE11_RANK];      /* Offset amount for selection */
+    hsize_t low_bounds[SPACE11_RANK];  /* The low bounds for the selection */
+    hsize_t high_bounds[SPACE11_RANK]; /* The high bounds for the selection */
+    herr_t ret;                         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(6, ("Testing selection bounds\n"));
+
+    /* Create dataspace */
+    sid = H5Screate_simple (SPACE11_RANK, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Get bounds for 'all' selection */
+    ret = H5Sget_select_bounds(sid,low_bounds,high_bounds);
+    CHECK(ret, FAIL, "H5Sget_select_bounds");
+    VERIFY(low_bounds[0],0,"H5Sget_select_bounds");
+    VERIFY(low_bounds[1],0,"H5Sget_select_bounds");
+    VERIFY(high_bounds[0],SPACE11_DIM1-1,"H5Sget_select_bounds");
+    VERIFY(high_bounds[1],SPACE11_DIM2-1,"H5Sget_select_bounds");
+
+    /* Set offset for selection */
+    offset[0]=1; offset[1]=1;
+    ret=H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Get bounds for 'all' selection with offset (which should be ignored) */
+    ret = H5Sget_select_bounds(sid,low_bounds,high_bounds);
+    CHECK(ret, FAIL, "H5Sget_select_bounds");
+    VERIFY(low_bounds[0],0,"H5Sget_select_bounds");
+    VERIFY(low_bounds[1],0,"H5Sget_select_bounds");
+    VERIFY(high_bounds[0],SPACE11_DIM1-1,"H5Sget_select_bounds");
+    VERIFY(high_bounds[1],SPACE11_DIM2-1,"H5Sget_select_bounds");
+
+    /* Reset offset for selection */
+    offset[0]=0; offset[1]=0;
+    ret=H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Set 'none' selection */
+    ret=H5Sselect_none(sid);
+    CHECK(ret, FAIL, "H5Sselect_none");
+
+    /* Get bounds for 'none' selection */
+    H5E_BEGIN_TRY {
+        ret = H5Sget_select_bounds(sid,low_bounds,high_bounds);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sget_select_bounds");
+
+    /* Set point selection */
+    coord[0][0]=  3; coord[0][1]=  3;
+    coord[1][0]=  3; coord[1][1]= 96;
+    coord[2][0]= 96; coord[2][1]=  3;
+    coord[3][0]= 96; coord[3][1]= 96;
+    ret = H5Sselect_elements(sid,H5S_SELECT_SET,SPACE11_NPOINTS,(const hsize_t **)coord);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    /* Get bounds for point selection */
+    ret = H5Sget_select_bounds(sid,low_bounds,high_bounds);
+    CHECK(ret, FAIL, "H5Sget_select_bounds");
+    VERIFY(low_bounds[0],3,"H5Sget_select_bounds");
+    VERIFY(low_bounds[1],3,"H5Sget_select_bounds");
+    VERIFY(high_bounds[0],SPACE11_DIM1-4,"H5Sget_select_bounds");
+    VERIFY(high_bounds[1],SPACE11_DIM2-4,"H5Sget_select_bounds");
+
+    /* Set bad offset for selection */
+    offset[0]=5; offset[1]=-5;
+    ret=H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Get bounds for hyperslab selection with negative offset */
+    H5E_BEGIN_TRY {
+        ret = H5Sget_select_bounds(sid,low_bounds,high_bounds);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sget_select_bounds");
+
+    /* Set valid offset for selection */
+    offset[0]=2; offset[1]=-2;
+    ret=H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Get bounds for point selection with offset */
+    ret = H5Sget_select_bounds(sid,low_bounds,high_bounds);
+    CHECK(ret, FAIL, "H5Sget_select_bounds");
+    VERIFY(low_bounds[0],5,"H5Sget_select_bounds");
+    VERIFY(low_bounds[1],1,"H5Sget_select_bounds");
+    VERIFY(high_bounds[0],SPACE11_DIM1-2,"H5Sget_select_bounds");
+    VERIFY(high_bounds[1],SPACE11_DIM2-6,"H5Sget_select_bounds");
+
+    /* Reset offset for selection */
+    offset[0]=0; offset[1]=0;
+    ret=H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Set "regular" hyperslab selection */
+    start[0]=  2; start[1]=  2;
+    stride[0]=  10; stride[1]= 10;
+    count[0]= 4; count[1]=  4;
+    block[0]= 5; block[1]= 5;
+    ret = H5Sselect_hyperslab(sid,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Get bounds for hyperslab selection */
+    ret = H5Sget_select_bounds(sid,low_bounds,high_bounds);
+    CHECK(ret, FAIL, "H5Sget_select_bounds");
+    VERIFY(low_bounds[0],2,"H5Sget_select_bounds");
+    VERIFY(low_bounds[1],2,"H5Sget_select_bounds");
+    VERIFY(high_bounds[0],36,"H5Sget_select_bounds");
+    VERIFY(high_bounds[1],36,"H5Sget_select_bounds");
+
+    /* Set bad offset for selection */
+    offset[0]=5; offset[1]=-5;
+    ret=H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Get bounds for hyperslab selection with negative offset */
+    H5E_BEGIN_TRY {
+        ret = H5Sget_select_bounds(sid,low_bounds,high_bounds);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sget_select_bounds");
+
+    /* Set valid offset for selection */
+    offset[0]=5; offset[1]=-2;
+    ret=H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Get bounds for hyperslab selection with offset */
+    ret = H5Sget_select_bounds(sid,low_bounds,high_bounds);
+    CHECK(ret, FAIL, "H5Sget_select_bounds");
+    VERIFY(low_bounds[0],7,"H5Sget_select_bounds");
+    VERIFY(low_bounds[1],0,"H5Sget_select_bounds");
+    VERIFY(high_bounds[0],41,"H5Sget_select_bounds");
+    VERIFY(high_bounds[1],34,"H5Sget_select_bounds");
+
+    /* Reset offset for selection */
+    offset[0]=0; offset[1]=0;
+    ret=H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Make "irregular" hyperslab selection */
+    start[0]= 20; start[1]= 20;
+    stride[0]=  20; stride[1]= 20;
+    count[0]= 2; count[1]=  2;
+    block[0]= 10; block[1]= 10;
+    ret = H5Sselect_hyperslab(sid,H5S_SELECT_OR,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Get bounds for hyperslab selection */
+    ret = H5Sget_select_bounds(sid,low_bounds,high_bounds);
+    CHECK(ret, FAIL, "H5Sget_select_bounds");
+    VERIFY(low_bounds[0],2,"H5Sget_select_bounds");
+    VERIFY(low_bounds[1],2,"H5Sget_select_bounds");
+    VERIFY(high_bounds[0],49,"H5Sget_select_bounds");
+    VERIFY(high_bounds[1],49,"H5Sget_select_bounds");
+
+    /* Set bad offset for selection */
+    offset[0]=5; offset[1]=-5;
+    ret=H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Get bounds for hyperslab selection with negative offset */
+    H5E_BEGIN_TRY {
+        ret = H5Sget_select_bounds(sid,low_bounds,high_bounds);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sget_select_bounds");
+
+    /* Set valid offset for selection */
+    offset[0]=5; offset[1]=-2;
+    ret=H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Get bounds for hyperslab selection with offset */
+    ret = H5Sget_select_bounds(sid,low_bounds,high_bounds);
+    CHECK(ret, FAIL, "H5Sget_select_bounds");
+    VERIFY(low_bounds[0],7,"H5Sget_select_bounds");
+    VERIFY(low_bounds[1],0,"H5Sget_select_bounds");
+    VERIFY(high_bounds[0],54,"H5Sget_select_bounds");
+    VERIFY(high_bounds[1],47,"H5Sget_select_bounds");
+
+    /* Reset offset for selection */
+    offset[0]=0; offset[1]=0;
+    ret=H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Close the dataspace */
+    ret=H5Sclose (sid);
+    CHECK(ret, FAIL, "H5Sclose");
+}   /* test_select_bounds() */
+
+/****************************************************************
+**
 **  test_select(): Main H5S selection testing routine.
 ** 
 ****************************************************************/
@@ -6518,6 +6728,9 @@ test_select(void)
 
     /* Test using selection offset on hyperslab in chunked dataset */
     test_select_hyper_chunk_offset();
+
+    /* Test selection bounds with & without offsets */
+    test_select_bounds();
 
 }   /* test_select() */
 

@@ -262,12 +262,13 @@ hsize_t dims[2];
 int data[2][2], dset1[10][10], dset2[20];
 char buf[512];
 int i, j;
+unsigned u;
 float dset2_1[10], dset2_2[3][5];
 int fd;
 char *bp;
 
   create_plist = H5Pcreate(H5P_FILE_CREATE);
-  H5Pset_userblock(create_plist,512);
+  H5Pset_userblock(create_plist,(hsize_t)512);
   fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, create_plist, H5P_DEFAULT);
 
   /* create groups */
@@ -390,8 +391,8 @@ char *bp;
 	/* fill buf with pattern */
 	memset(buf,'\0',512);
 	bp = buf;
-	for (i = 0; i < strlen(pattern); i++) {
-		*bp++ = pattern[i%10];	
+	for (u = 0; u < strlen(pattern); u++) {
+		*bp++ = pattern[u%10];	
 	}
 
 	HDwrite(fd,buf,512);
@@ -411,7 +412,7 @@ int fd;
 char *bp;
 
   create_plist = H5Pcreate(H5P_FILE_CREATE);
-  H5Pset_userblock(create_plist,1024);
+  H5Pset_userblock(create_plist,(hsize_t)1024);
   fid = H5Fcreate(FILE9, H5F_ACC_TRUNC, create_plist, H5P_DEFAULT);
 
   /* create groups */
@@ -543,14 +544,14 @@ char *bp;
 	close(fd);
 }
 
-void
-create_textfile(char *name, off_t size) {
+static void
+create_textfile(const char *name, size_t size) {
 char *buf;
 int fd;
-int i;
+size_t i;
 char *bp;
 
-	fd = creat(name,0777);
+	fd = creat(name,(mode_t)0777);
 	if (fd < 0) {
 		/* panic */
 	}

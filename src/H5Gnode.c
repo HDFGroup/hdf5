@@ -65,7 +65,7 @@ typedef struct H5G_node_key_t {
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf);
-static size_t H5G_node_size(H5F_t *f);
+static size_t H5G_node_size(const H5F_t *f);
 static herr_t H5G_node_shared_free(void *shared);
 
 /* Metadata cache callbacks */
@@ -75,11 +75,11 @@ static herr_t H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t a
 			     H5G_node_t *sym);
 static herr_t H5G_node_dest(H5F_t *f, H5G_node_t *sym);
 static herr_t H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy);
-static herr_t H5G_compute_size(H5F_t *f, H5G_node_t *sym, size_t *size_ptr);
+static herr_t H5G_compute_size(const H5F_t *f, const H5G_node_t *sym, size_t *size_ptr);
 
 /* B-tree callbacks */
 static size_t H5G_node_sizeof_rkey(const H5F_t *f, const void *_udata);
-static H5RC_t *H5G_node_get_shared(H5F_t *f, const void *_udata);
+static H5RC_t *H5G_node_get_shared(const H5F_t *f, const void *_udata);
 static herr_t H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t op, void *_lt_key,
 			      void *_udata, void *_rt_key,
 			      haddr_t *addr_p/*out*/);
@@ -88,7 +88,7 @@ static int H5G_node_cmp2(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata,
 static int H5G_node_cmp3(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata,
 			  void *_rt_key);
 static herr_t H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_lt_key,
-			     void *_udata, const void *_rt_key);
+			     void *_udata);
 static H5B_ins_t H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
 				 hbool_t *lt_key_changed, void *_md_key,
 				 void *_udata, void *_rt_key,
@@ -97,9 +97,9 @@ static H5B_ins_t H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_l
 static H5B_ins_t H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *lt_key,
 				 hbool_t *lt_key_changed, void *udata,
 				 void *rt_key, hbool_t *rt_key_changed);
-static herr_t H5G_node_decode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
+static herr_t H5G_node_decode_key(const H5F_t *f, const H5B_t *bt, const uint8_t *raw,
 				  void *_key);
-static herr_t H5G_node_encode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
+static herr_t H5G_node_encode_key(const H5F_t *f, const H5B_t *bt, uint8_t *raw,
 				  void *_key);
 static herr_t H5G_node_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
                                     int indent, int fwidth, const void *key,
@@ -133,10 +133,6 @@ H5B_class_t H5B_SNODE[1] = {{
     H5G_node_encode_key,	/*encode		*/
     H5G_node_debug_key,		/*debug			*/
 }};
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT	NULL
 
 /* Declare a free list to manage the H5B_shared_t struct */
 H5FL_EXTERN(H5B_shared_t);
@@ -203,7 +199,7 @@ H5G_node_sizeof_rkey(const H5F_t *f, const void UNUSED * udata)
  *-------------------------------------------------------------------------
  */
 static H5RC_t *
-H5G_node_get_shared(H5F_t *f, const void UNUSED *_udata)
+H5G_node_get_shared(const H5F_t *f, const void UNUSED *_udata)
 {
     H5RC_t *rc;
 
@@ -236,7 +232,7 @@ H5G_node_get_shared(H5F_t *f, const void UNUSED *_udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_decode_key(H5F_t *f, H5B_t UNUSED *bt, uint8_t *raw, void *_key)
+H5G_node_decode_key(const H5F_t *f, const H5B_t UNUSED *bt, const uint8_t *raw, void *_key)
 {
     H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
 
@@ -268,7 +264,7 @@ H5G_node_decode_key(H5F_t *f, H5B_t UNUSED *bt, uint8_t *raw, void *_key)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_encode_key(H5F_t *f, H5B_t UNUSED *bt, uint8_t *raw, void *_key)
+H5G_node_encode_key(const H5F_t *f, const H5B_t UNUSED *bt, uint8_t *raw, void *_key)
 {
     H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
 
@@ -348,7 +344,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5G_node_size(H5F_t *f)
+H5G_node_size(const H5F_t *f)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_size);
 
@@ -513,7 +509,7 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
         if (H5G_node_serialize(f, sym, size, buf) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "node serialization failed");
+            HGOTO_ERROR(H5E_SYM, H5E_CANTSERIALIZE, FAIL, "node serialization failed");
 
         if (H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, buf) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "unable to write symbol table node to the file");
@@ -690,7 +686,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_compute_size(H5F_t *f, H5G_node_t UNUSED *sym, size_t *size_ptr)
+H5G_compute_size(const H5F_t *f, const H5G_node_t UNUSED *sym, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_compute_size);
 
@@ -936,7 +932,7 @@ done:
  */
 static herr_t
 H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key,
-	       void *_udata, const void UNUSED *_rt_key)
+	       void *_udata)
 {
     H5G_bt_ud1_t	*bt_udata = (H5G_bt_ud1_t *) _udata;
     H5G_node_t		*sn = NULL;
@@ -1047,7 +1043,7 @@ done:
 static H5B_ins_t
 H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
 		hbool_t UNUSED *lt_key_changed, void *_md_key,
-		void *_udata, void *_rt_key, hbool_t UNUSED *rt_key_changed,
+		void *_udata, void *_rt_key, hbool_t *rt_key_changed,
 		haddr_t *new_node_p)
 {
     H5G_node_key_t	*md_key = (H5G_node_key_t *) _md_key;
@@ -1462,8 +1458,8 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5G_node_iterate (H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
-		  void UNUSED *_rt_key, void *_udata)
+H5G_node_iterate (H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
+		  const void UNUSED *_rt_key, void *_udata)
 {
     H5G_bt_ud2_t	*bt_udata = (H5G_bt_ud2_t *)_udata;
     H5G_node_t		*sn = NULL;
@@ -1490,7 +1486,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
     if (NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
     nsyms = sn->nsyms;
-    if (NULL==(name_off = H5FL_SEQ_MALLOC(size_t, nsyms)))
+    if (NULL==(name_off = H5FL_SEQ_MALLOC(size_t, (size_t)nsyms)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed");
     for (i=0; i<nsyms; i++)
         name_off[i] = sn->entry[i].name_off;
@@ -1570,8 +1566,8 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5G_node_sumup(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
-		  void UNUSED *_rt_key, void *_udata)
+H5G_node_sumup(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
+		  const void UNUSED *_rt_key, void *_udata)
 {
     hsize_t	        *num_objs = (hsize_t *)_udata;
     H5G_node_t		*sn = NULL;
@@ -1617,8 +1613,8 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5G_node_name(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
-		  void UNUSED *_rt_key, void *_udata)
+H5G_node_name(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
+		  const void UNUSED *_rt_key, void *_udata)
 {
     H5G_bt_ud3_t	*bt_udata = (H5G_bt_ud3_t *)_udata;
     const H5HL_t        *heap = NULL;
@@ -1686,8 +1682,8 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5G_node_type(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
-		  void UNUSED *_rt_key, void *_udata)
+H5G_node_type(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
+		  const void UNUSED *_rt_key, void *_udata)
 {
     H5G_bt_ud3_t	*bt_udata = (H5G_bt_ud3_t*)_udata;
     hsize_t             loc_idx;

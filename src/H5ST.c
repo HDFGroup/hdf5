@@ -25,10 +25,6 @@ Bentley and Robert Sedgewick in the April, 1998, Dr. Dobb's Journal.
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5STprivate.h"        /* Ternary search trees                 */
 
-/* Interface initialization */
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT	NULL
-
 /* Declare a free list to manage the H5ST_node_t struct */
 H5FL_DEFINE_STATIC(H5ST_node_t);
 
@@ -253,7 +249,7 @@ H5ST_search(H5ST_tree_t *tree, const char *s)
     H5ST_ptr_t p;               /* Temporary pointer to TST node */
     htri_t ret_value=FALSE;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5ST_search,FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5ST_search);
 
     p = tree->root;
     while (p) {
@@ -550,7 +546,7 @@ H5ST_findnext(H5ST_ptr_t p)
     H5ST_ptr_t q;               /* Temporary pointer to TST node */
     H5ST_ptr_t ret_value=NULL;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5ST_findnext,NULL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5ST_findnext);
 
     /* Find the next node at the current level, or go back up the tree */
     do {
@@ -743,7 +739,7 @@ done:
 herr_t
 H5ST_dump_internal(H5ST_ptr_t p)
 {
-    FUNC_ENTER_NOAPI_NOINIT(H5ST_dump_internal);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5ST_dump_internal);
 
     if (p) {
         printf("p=%p\n",p);
@@ -762,7 +758,6 @@ H5ST_dump_internal(H5ST_ptr_t p)
         H5ST_dump_internal(p->hikid);
     } /* end if */
 
-done:
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5ST_dump_internal() */
 
@@ -788,14 +783,11 @@ done:
 herr_t
 H5ST_dump(H5ST_tree_t *tree)
 {
-    herr_t ret_value=SUCCEED;  /* Return value */
-
-    FUNC_ENTER_NOAPI(H5ST_dump,NULL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5ST_dump,NULL);
 
     /* Dump the tree */
     H5ST_dump_internal(tree->root);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5ST_dump() */
 #endif /* H5ST_DEBUG */

@@ -78,11 +78,11 @@ typedef herr_t (*H5D_io_write_func_t)(struct H5D_io_info_t *io_info,
     const void *buf);
 
 /* Function pointers for I/O on particular types of dataset layouts */
-typedef ssize_t (*H5D_io_readvv_func_t)(struct H5D_io_info_t *io_info,
+typedef ssize_t (*H5D_io_readvv_func_t)(const struct H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     void *buf);
-typedef ssize_t (*H5D_io_writevv_func_t)(struct H5D_io_info_t *io_info,
+typedef ssize_t (*H5D_io_writevv_func_t)(const struct H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     const void *buf);
@@ -217,21 +217,21 @@ H5_DLL herr_t H5D_select_write(H5D_io_info_t *io_info,
 H5_DLL herr_t H5D_contig_create(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout);
 H5_DLL herr_t H5D_contig_fill(H5D_t *dset, hid_t dxpl_id);
 H5_DLL haddr_t H5D_contig_get_addr(const H5D_t *dset);
-H5_DLL ssize_t H5D_contig_readvv(H5D_io_info_t *io_info,
+H5_DLL ssize_t H5D_contig_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     void *buf);
-H5_DLL ssize_t H5D_contig_writevv(H5D_io_info_t *io_info,
+H5_DLL ssize_t H5D_contig_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     const void *buf);
 
 /* Functions that operate on compact dataset storage */
-H5_DLL ssize_t H5D_compact_readvv(H5D_io_info_t *io_info,
+H5_DLL ssize_t H5D_compact_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[], 
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[], 
     void *buf);
-H5_DLL ssize_t H5D_compact_writevv(H5D_io_info_t *io_info,
+H5_DLL ssize_t H5D_compact_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[], 
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[], 
     const void *buf);
@@ -239,14 +239,14 @@ H5_DLL ssize_t H5D_compact_writevv(H5D_io_info_t *io_info,
 /* Functions that operate on indexed storage */
 /* forward reference for collective-chunk IO use */
 struct H5D_istore_ud1_t; /*define in H5Distore.c*/
-H5_DLL herr_t H5D_istore_init (const H5F_t *f, H5D_t *dset);
+H5_DLL herr_t H5D_istore_init (const H5F_t *f, const H5D_t *dset);
 H5_DLL herr_t H5D_istore_flush (H5D_t *dset, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D_istore_create(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout);
 H5_DLL herr_t H5D_istore_dest (H5D_t *dset, hid_t dxpl_id);
 H5_DLL herr_t H5D_istore_allocate (H5D_t *dset, hid_t dxpl_id,
         hbool_t full_overwrite);
 H5_DLL hsize_t H5D_istore_allocated(H5D_t *dset, hid_t dxpl_id);
-H5_DLL herr_t H5D_istore_prune_by_extent(H5D_io_info_t *io_info);
+H5_DLL herr_t H5D_istore_prune_by_extent(const H5D_io_info_t *io_info);
 H5_DLL herr_t H5D_istore_initialize_by_extent(H5D_io_info_t *io_info);
 H5_DLL herr_t H5D_istore_update_cache(H5D_t *dset, hid_t dxpl_id);
 H5_DLL herr_t H5D_istore_dump_btree(H5F_t *f, hid_t dxpl_id, FILE *stream, unsigned ndims,
@@ -254,23 +254,23 @@ H5_DLL herr_t H5D_istore_dump_btree(H5F_t *f, hid_t dxpl_id, FILE *stream, unsig
 #ifdef H5D_ISTORE_DEBUG
 H5_DLL herr_t H5D_istore_stats (H5D_t *dset, hbool_t headers);
 #endif /* H5D_ISTORE_DEBUG */
-H5_DLL ssize_t H5D_istore_readvv(H5D_io_info_t *io_info,
+H5_DLL ssize_t H5D_istore_readvv(const H5D_io_info_t *io_info,
     size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     void *buf);
-H5_DLL ssize_t H5D_istore_writevv(H5D_io_info_t *io_info,
+H5_DLL ssize_t H5D_istore_writevv(const H5D_io_info_t *io_info,
     size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     const void *buf);
-H5_DLL haddr_t H5D_istore_get_addr(H5D_io_info_t *io_info,
+H5_DLL haddr_t H5D_istore_get_addr(const H5D_io_info_t *io_info,
     struct H5D_istore_ud1_t *_udata);
 
 /* Functions that operate on external file list (efl) storage */
-H5_DLL ssize_t H5D_efl_readvv(H5D_io_info_t *io_info,
+H5_DLL ssize_t H5D_efl_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     void *buf);
-H5_DLL ssize_t H5D_efl_writevv(H5D_io_info_t *io_info,
+H5_DLL ssize_t H5D_efl_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     const void *buf);
@@ -284,6 +284,18 @@ H5_DLL herr_t H5D_mpio_spaces_read(H5D_io_info_t *io_info,
 
 /* MPI-IO function to write directly from app buffer to file rky980813 */
 H5_DLL herr_t H5D_mpio_spaces_write(H5D_io_info_t *io_info,
+    size_t nelmts, size_t elmt_size,
+    const struct H5S_t *file_space, const struct H5S_t *mem_space,
+    const void *buf);
+
+/* MPI-IO function to read directly from app buffer to file rky980813 */
+H5_DLL herr_t H5D_mpio_spaces_span_read(H5D_io_info_t *io_info,
+    size_t nelmts, size_t elmt_size,
+    const struct H5S_t *file_space, const struct H5S_t *mem_space,
+    void *buf/*out*/);
+
+/* MPI-IO function to write directly from app buffer to file rky980813 */
+H5_DLL herr_t H5D_mpio_spaces_span_write(H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
     const struct H5S_t *file_space, const struct H5S_t *mem_space,
     const void *buf);

@@ -44,6 +44,9 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5AC_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5AC_mask
@@ -57,10 +60,6 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Pprivate.h"         /* Property lists                       */
 
-/* Interface initialization */
-static int             interface_initialize_g = 0;
-#define INTERFACE_INIT H5AC_init_interface
-static herr_t H5AC_init_interface(void);
 
 /*
  * Private file-scope variables.
@@ -86,7 +85,7 @@ hid_t H5AC_ind_dxpl_id=(-1);
  * Private file-scope function declarations:
  */
 
-static herr_t H5AC_check_if_write_permitted(H5F_t *f, 
+static herr_t H5AC_check_if_write_permitted(const H5F_t *f, 
                                             hid_t dxpl_id,
                                             hbool_t * write_permitted_ptr);
 
@@ -262,7 +261,7 @@ H5AC_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5AC_term_interface)
 
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
 #ifdef H5_HAVE_PARALLEL
         if(H5AC_dxpl_id>0 || H5AC_noblock_dxpl_id>0 || H5AC_ind_dxpl_id>0) {
             /* Indicate more work to do */
@@ -280,7 +279,7 @@ H5AC_term_interface(void)
                 H5AC_ind_dxpl_id=(-1);
 
                 /* Reset interface initialization flag */
-                interface_initialize_g = 0;
+                H5_interface_initialize_g = 0;
             } /* end else */
         } /* end if */
         else
@@ -292,7 +291,7 @@ H5AC_term_interface(void)
 
 #endif /* H5_HAVE_PARALLEL */
             /* Reset interface initialization flag */
-            interface_initialize_g = 0;
+            H5_interface_initialize_g = 0;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
@@ -337,7 +336,7 @@ H5AC_term_interface(void)
  *-------------------------------------------------------------------------
  */
 
-const char * H5AC_entry_type_names[H5AC_NTYPES] =
+static const char * H5AC_entry_type_names[H5AC_NTYPES] =
 {
     "B-tree nodes",
     "symbol table nodes",
@@ -346,10 +345,9 @@ const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "object headers"
 };
 
-int
+herr_t
 H5AC_create(const H5F_t *f, int UNUSED size_hint)
 {
-    H5AC_t *cache = NULL;
     int ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_create, FAIL)
@@ -361,34 +359,19 @@ H5AC_create(const H5F_t *f, int UNUSED size_hint)
      * in proper size hints.
      *                                             -- JRM
      */
-    cache = H5C_create(H5C__DEFAULT_MAX_CACHE_SIZE,
+    f->shared->cache = H5C_create(H5C__DEFAULT_MAX_CACHE_SIZE,
                            H5C__DEFAULT_MIN_CLEAN_SIZE,
                            (H5AC_NTYPES - 1),
                            (const char **)H5AC_entry_type_names,
                            H5AC_check_if_write_permitted);
 
-    if ( NULL == cache ) {
+    if ( NULL == f->shared->cache ) {
 
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-    } else {
-
-        f->shared->cache = cache;
 
     }
 
 done:
-
-    if ( ret_value < 0 ) {
-
-        if ( cache != NULL ) {
-
-            H5C_dest_empty(cache);
-            f->shared->cache = NULL;
-
-        } /* end if */
-
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -613,7 +596,7 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
 
     if ( result < 0 ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, "H5C_insert_entry() failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5C_insert_entry() failed")
     }
 
 done:
@@ -654,8 +637,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_rename(H5F_t *f, hid_t UNUSED dxpl_id, const H5AC_class_t *type, haddr_t old_addr,
-	    haddr_t new_addr)
+H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t new_addr)
 {
     herr_t		result;
     herr_t ret_value=SUCCEED;      /* Return value */
@@ -669,15 +651,14 @@ H5AC_rename(H5F_t *f, hid_t UNUSED dxpl_id, const H5AC_class_t *type, haddr_t ol
     HDassert(H5F_addr_defined(new_addr));
     HDassert(H5F_addr_ne(old_addr, new_addr));
 
-    result = H5C_rename_entry(f,
-                              f->shared->cache,
+    result = H5C_rename_entry(f->shared->cache,
                               type,
                               old_addr,
                               new_addr);
 
     if ( result < 0 ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, \
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRENAME, FAIL, \
                     "H5C_rename_entry() failed.")
     }
 
@@ -783,7 +764,7 @@ H5AC_protect(H5F_t *f,
 
     if ( thing == NULL ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_PROTECT, NULL, "H5C_protect() failed.")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, "H5C_protect() failed.")
     }
 
     /* Set return value */
@@ -886,7 +867,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
 
     if ( result < 0 ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_NOTCACHED, FAIL, \
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
                     "H5C_unprotect() failed.")
     }
 
@@ -919,7 +900,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_stats(H5F_t UNUSED *f)
+H5AC_stats(const H5F_t *f)
 {
     herr_t		ret_value = SUCCEED;   /* Return value */
 
@@ -928,7 +909,7 @@ H5AC_stats(H5F_t UNUSED *f)
     HDassert(f);
     HDassert(f->shared->cache);
 
-    H5C_stats(f->shared->cache, f->name, FALSE); /* at present, this can't fail */
+    (void)H5C_stats(f->shared->cache, f->name, FALSE); /* at present, this can't fail */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -964,12 +945,12 @@ done:
 
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_check_if_write_permitted(H5F_t *f,
+H5AC_check_if_write_permitted(const H5F_t *f,
                               hid_t dxpl_id,
                               hbool_t * write_permitted_ptr)
 #else /* H5_HAVE_PARALLEL */
 static herr_t
-H5AC_check_if_write_permitted(H5F_t UNUSED * f,
+H5AC_check_if_write_permitted(const H5F_t UNUSED * f,
                               hid_t UNUSED dxpl_id,
                               hbool_t * write_permitted_ptr)
 #endif /* H5_HAVE_PARALLEL */

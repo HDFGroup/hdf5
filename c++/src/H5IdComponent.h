@@ -25,13 +25,13 @@ namespace H5 {
 
 class H5_DLLCPP IdComponent {
    public:
-	// Increment reference counter
+	// Increment reference counter.
 	void incRefCount();
 
-	// Decrement reference counter
+	// Decrement reference counter.
 	void decRefCount();
 
-	// Get the reference counter to this identifier
+	// Get the reference counter to this identifier.
 	int getCounter();
 
 	// Decrements the reference counter then determines if there are no more
@@ -46,13 +46,13 @@ class H5_DLLCPP IdComponent {
 	// Sets the identifier of this object to a new value.
 	void setId( hid_t new_id );
 
-	// Creates an object to hold an HDF5 identifier
+	// Creates an object to hold an HDF5 identifier.
 	IdComponent( const hid_t h5_id );
 
 	// Copy constructor: makes copy of the original IdComponent object.
 	IdComponent( const IdComponent& original );
 
-	// Gets the value of IdComponent's data member
+	// Gets the value of IdComponent's data member.
 	virtual hid_t getId () const;
 
 	// Pure virtual function so appropriate close function can

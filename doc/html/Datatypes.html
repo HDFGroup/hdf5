@@ -610,7 +610,7 @@
 	<code>H5Tget_nmembers()</code> returns -1 on failure.
 
 	<br><br>
-      <dt><code>char *H5Tget_member_name (hid_t <em>type</em>, int
+      <dt><code>char *H5Tget_member_name (hid_t <em>type</em>, unsigned
 	  <em>membno</em>)</code>
       <dd>Each member has a name which is unique among its siblings in
 	a compound datatype.  This function returns a pointer to a
@@ -620,7 +620,7 @@
 	function.
 
 	<br><br>
-      <dt><code>size_t H5Tget_member_offset (hid_t <em>type</em>, int
+      <dt><code>size_t H5Tget_member_offset (hid_t <em>type</em>, unsigned
 	  <em>membno</em>)</code>
       <dd>The byte offset of member number <em>membno</em> with
 	respect to the beginning of the containing compound datum is
@@ -631,7 +631,7 @@
 	<em>membno</em> arguments.
 
 	<br><br>
-      <dt><code>hid_t H5Tget_member_type (hid_t <em>type</em>, int
+      <dt><code>hid_t H5Tget_member_type (hid_t <em>type</em>, unsigned
 	  <em>membno</em>)</code>
       <dd>Each member has its own datatype, a copy of which is
 	returned by this function.  The returned datatype identifier
@@ -1297,7 +1297,7 @@ H5Tlock(hdf_fr_colors);</pre>
 	datatypes.
 
 	<br><br>
-      <dt><code>char *H5Tget_member_name(hid_t <em>etype</em>, int
+      <dt><code>char *H5Tget_member_name(hid_t <em>etype</em>, unsigned
 	  <em>membno</em>)</code>
       <dd>Given an enumeration datatype <em>etype</em> this function
 	returns the symbol name for the member indexed by
@@ -1310,7 +1310,7 @@ H5Tlock(hdf_fr_colors);</pre>
 	<code>free()</code>.
 
 	<br><br>
-      <dt><code>herr_t H5Tget_member_value(hid_t <em>etype</em>, int
+      <dt><code>herr_t H5Tget_member_value(hid_t <em>etype</em>, unsigned
 	  <em>membno</em>, void *<em>value</em>/*out*/)</code>
       <dd>Given an enumeration datatype <em>etype</em> this function
 	returns the value associated with the member indexed by
@@ -1325,12 +1325,13 @@ H5Tlock(hdf_fr_colors);</pre>
 	when the type is not known by the C compiler.
 
 	<pre>
-int i, n = H5Tget_nmembers(hdf_en_colors);
-for (i=0; i&lt;n; i++) {
-    char *symbol = H5Tget_member_name(hdf_en_colors, i);
+int n = H5Tget_nmembers(hdf_en_colors);
+unsigned u;
+for (u=0; u&lt;(unsigned)n; u++) {
+    char *symbol = H5Tget_member_name(hdf_en_colors, u);
     short val;
-    H5Tget_member_value(hdf_en_colors, i, &amp;val);
-    printf("#%d %20s = %d\n", i, symbol, val);
+    H5Tget_member_value(hdf_en_colors, u, &amp;val);
+    printf("#%u %20s = %d\n", u, symbol, val);
     free(symbol);
 }</pre>
 
@@ -1502,13 +1503,13 @@ int n = H5Tget_nmembers(foreign);
 hid_t itype = H5Tget_super(foreign);
 void *val = malloc(n * MAX(H5Tget_size(itype), sizeof(int)));
 char *name = malloc(n * sizeof(char*));
-int i;
+unsigned u;
 
 /* Get foreign type information */
-for (i=0; i&lt;n; i++) {
-    name[i] = H5Tget_member_name(foreign, i);
-    H5Tget_member_value(foreign, i,
-                        (char*)val+i*H5Tget_size(foreign));
+for (u=0; u&lt;(unsigned)n; u++) {
+    name[u] = H5Tget_member_name(foreign, u);
+    H5Tget_member_value(foreign, u,
+                        (char*)val+u*H5Tget_size(foreign));
 }
 
 /* Convert integer values to new type */

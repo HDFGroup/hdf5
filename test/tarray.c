@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /***********************************************************
 *
 * Test program:	 tarray
@@ -596,9 +594,8 @@ test_array_compound_atomic(void)
     /* Check the 1st field's name */
     mname=H5Tget_member_name(tid2,0);
     CHECK(mname, NULL, "H5Tget_member_name");
-    if(HDstrcmp(mname,"i")!=0) {
+    if(HDstrcmp(mname,"i")!=0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
-    } /* end if */
     free(mname);
 
     /* Check the 1st field's offset */
@@ -608,18 +605,16 @@ test_array_compound_atomic(void)
     /* Check the 1st field's datatype */
     mtid=H5Tget_member_type(tid2,0);
     CHECK(mtid, FAIL, "H5Tget_member_type");
-    if((ret=H5Tequal(mtid,H5T_NATIVE_INT))<=0) {
+    if((ret=H5Tequal(mtid,H5T_NATIVE_INT))<=0)
         TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-    } /* end if */
     ret=H5Tclose(mtid);
     CHECK(mtid, FAIL, "H5Tclose");
 
     /* Check the 2nd field's name */
     mname=H5Tget_member_name(tid2,1);
     CHECK(mname, NULL, "H5Tget_member_name");
-    if(HDstrcmp(mname,"f")!=0) {
+    if(HDstrcmp(mname,"f")!=0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
-    } /* end if */
     free(mname);
 
     /* Check the 2nd field's offset */
@@ -629,9 +624,8 @@ test_array_compound_atomic(void)
     /* Check the 2nd field's datatype */
     mtid=H5Tget_member_type(tid2,1);
     CHECK(mtid, FAIL, "H5Tget_member_type");
-    if((ret=H5Tequal(mtid,H5T_NATIVE_FLOAT))<=0) {
+    if((ret=H5Tequal(mtid,H5T_NATIVE_FLOAT))<=0)
         TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-    } /* end if */
     ret=H5Tclose(mtid);
     CHECK(mtid, FAIL, "H5Tclose");
 
@@ -814,9 +808,8 @@ test_array_compound_array(void)
     /* Check the 1st field's name */
     mname=H5Tget_member_name(tid2,0);
     CHECK(mname, NULL, "H5Tget_member_name");
-    if(HDstrcmp(mname,"i")!=0) {
+    if(HDstrcmp(mname,"i")!=0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
-    } /* end if */
     free(mname);
 
     /* Check the 1st field's offset */
@@ -826,18 +819,16 @@ test_array_compound_array(void)
     /* Check the 1st field's datatype */
     mtid=H5Tget_member_type(tid2,0);
     CHECK(mtid, FAIL, "H5Tget_member_type");
-    if((ret=H5Tequal(mtid,H5T_NATIVE_INT))<=0) {
+    if((ret=H5Tequal(mtid,H5T_NATIVE_INT))<=0)
         TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-    } /* end if */
     ret=H5Tclose(mtid);
     CHECK(mtid, FAIL, "H5Tclose");
 
     /* Check the 2nd field's name */
     mname=H5Tget_member_name(tid2,1);
     CHECK(mname, NULL, "H5Tget_member_name");
-    if(HDstrcmp(mname,"f")!=0) {
+    if(HDstrcmp(mname,"f")!=0)
         TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
-    } /* end if */
     free(mname);
 
     /* Check the 2nd field's offset */
@@ -871,9 +862,8 @@ test_array_compound_array(void)
     tid3=H5Tget_super(mtid);
     CHECK(tid3, FAIL, "H5Tget_super");
 
-    if((ret=H5Tequal(tid3,H5T_NATIVE_FLOAT))<=0) {
+    if((ret=H5Tequal(tid3,H5T_NATIVE_FLOAT))<=0)
         TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-    } /* end if */
 
     /* Close the array's base type datatype */
     ret=H5Tclose(tid3);
@@ -1106,9 +1096,8 @@ test_array_vlen_atomic(void)
     tid3=H5Tget_super(tid2);
     CHECK(tid3, FAIL, "H5Tget_super");
 
-    if((ret=H5Tequal(tid3,H5T_NATIVE_UINT))<=0) {
+    if((ret=H5Tequal(tid3,H5T_NATIVE_UINT))<=0)
         TestErrPrintf("VL base datatype is incorrect!, ret=%d\n",(int)ret);
-    } /* end if */
 
     /* Close the array's base type datatype */
     ret=H5Tclose(tid3);
@@ -1351,9 +1340,8 @@ test_array_vlen_array(void)
     CHECK(tid4, FAIL, "H5Tget_super");
 
 
-    if((ret=H5Tequal(tid4,H5T_NATIVE_UINT))<=0) {
+    if((ret=H5Tequal(tid4,H5T_NATIVE_UINT))<=0)
         TestErrPrintf("VL base datatype is incorrect!, ret=%d\n",(int)ret);
-    } /* end if */
 
     /* Close the array's base type datatype */
     ret=H5Tclose(tid4);
@@ -1586,7 +1574,7 @@ test_array_bkg(void)
     /* Verify correct data */    
     /* ------------------- */
     for (i = 0; i < LENGTH; i++) {        
-	    for (j = 0; j < ALEN; j++) {
+        for (j = 0; j < ALEN; j++) {
             if(cf[i].a[j]!=cfr[i].a[j]) {
                 TestErrPrintf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
                 continue;
@@ -1606,7 +1594,7 @@ test_array_bkg(void)
     /* Release memory resources */
     /* ------------------------ */
     for (i = 0; i < dtsinfo.nsubfields; i++)
-	    free(dtsinfo.name[i]);
+        free(dtsinfo.name[i]);
 
 
     /* Release IDs */
@@ -1679,7 +1667,7 @@ test_array_bkg(void)
     /* Verify correct data */    
     /* ------------------- */
     for (i = 0; i < LENGTH; i++) {        
-	    for (j = 0; j < ALEN; j++) {
+        for (j = 0; j < ALEN; j++) {
             if(cf[i].a[j]!=cfr[i].a[j]) {
                 TestErrPrintf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
                 continue;
@@ -1728,7 +1716,7 @@ test_array_bkg(void)
     /* Verify correct data */    
     /* ------------------- */
     for (i = 0; i < LENGTH; i++) {        
-	    for (j = 0; j < ALEN; j++) {
+        for (j = 0; j < ALEN; j++) {
             if(cf[i].a[j]!=cfr[i].a[j]) {
                 TestErrPrintf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
                 continue;
@@ -1837,9 +1825,8 @@ test_compat(void)
         /* Check the 1st field's name */
         mname=H5Tget_member_name(tid1,0);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"i")!=0) {
+        if(HDstrcmp(mname,"i")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
-        } /* end if */
         free(mname);
 
         /* Check the 1st field's offset */
@@ -1849,18 +1836,16 @@ test_compat(void)
         /* Check the 1st field's datatype */
         mtid=H5Tget_member_type(tid1,0);
         CHECK(mtid, FAIL, "H5Tget_member_type");
-        if((ret=H5Tequal(mtid,H5T_STD_I16LE))<=0) {
+        if((ret=H5Tequal(mtid,H5T_STD_I16LE))<=0)
             TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-        } /* end if */
         ret=H5Tclose(mtid);
         CHECK(mtid, FAIL, "H5Tclose");
 
         /* Check the 2nd field's name */
         mname=H5Tget_member_name(tid1,1);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"f")!=0) {
+        if(HDstrcmp(mname,"f")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
-        } /* end if */
         free(mname);
 
         /* Check the 2nd field's offset */
@@ -1870,18 +1855,16 @@ test_compat(void)
         /* Check the 2nd field's datatype */
         mtid=H5Tget_member_type(tid1,1);
         CHECK(mtid, FAIL, "H5Tget_member_type");
-        if((ret=H5Tequal(mtid,H5T_IEEE_F32LE))<=0) {
+        if((ret=H5Tequal(mtid,H5T_IEEE_F32LE))<=0)
             TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-        } /* end if */
         ret=H5Tclose(mtid);
         CHECK(mtid, FAIL, "H5Tclose");
 
         /* Check the 3rd field's name */
         mname=H5Tget_member_name(tid1,2);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"l")!=0) {
+        if(HDstrcmp(mname,"l")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
-        } /* end if */
         free(mname);
 
         /* Check the 3rd field's offset */
@@ -1891,9 +1874,8 @@ test_compat(void)
         /* Check the 3rd field's datatype */
         mtid=H5Tget_member_type(tid1,2);
         CHECK(mtid, FAIL, "H5Tget_member_type");
-        if((ret=H5Tequal(mtid,H5T_STD_I32LE))<=0) {
+        if((ret=H5Tequal(mtid,H5T_STD_I32LE))<=0)
             TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-        } /* end if */
         ret=H5Tclose(mtid);
         CHECK(mtid, FAIL, "H5Tclose");
 
@@ -1925,9 +1907,8 @@ test_compat(void)
         /* Check the 1st field's name */
         mname=H5Tget_member_name(tid1,0);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"i")!=0) {
+        if(HDstrcmp(mname,"i")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
-        } /* end if */
         free(mname);
 
         /* Check the 1st field's offset */
@@ -1937,18 +1918,16 @@ test_compat(void)
         /* Check the 1st field's datatype */
         mtid=H5Tget_member_type(tid1,0);
         CHECK(mtid, FAIL, "H5Tget_member_type");
-        if((ret=H5Tequal(mtid,H5T_STD_I16LE))<=0) {
+        if((ret=H5Tequal(mtid,H5T_STD_I16LE))<=0)
             TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-        } /* end if */
         ret=H5Tclose(mtid);
         CHECK(mtid, FAIL, "H5Tclose");
 
         /* Check the 2nd field's name */
         mname=H5Tget_member_name(tid1,1);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"f")!=0) {
+        if(HDstrcmp(mname,"f")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
-        } /* end if */
         free(mname);
 
         /* Check the 2nd field's offset */
@@ -1980,11 +1959,10 @@ test_compat(void)
 
         /* Check the array's base datatype */
         tid2=H5Tget_super(mtid);
-        CHECK(tid2, FAIL, "H5Tget_member_type");
+        CHECK(tid2, FAIL, "H5Tget_super");
 
-        if((ret=H5Tequal(tid2,H5T_IEEE_F32LE))<=0) {
+        if((ret=H5Tequal(tid2,H5T_IEEE_F32LE))<=0)
             TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-        } /* end if */
         ret=H5Tclose(tid2);
         CHECK(ret, FAIL, "H5Tclose");
         ret=H5Tclose(mtid);
@@ -1993,9 +1971,8 @@ test_compat(void)
         /* Check the 3rd field's name */
         mname=H5Tget_member_name(tid1,2);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"l")!=0) {
+        if(HDstrcmp(mname,"l")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
-        } /* end if */
         free(mname);
 
         /* Check the 3rd field's offset */
@@ -2027,11 +2004,10 @@ test_compat(void)
 
         /* Check the array's base datatype */
         tid2=H5Tget_super(mtid);
-        CHECK(tid2, FAIL, "H5Tget_member_type");
+        CHECK(tid2, FAIL, "H5Tget_super");
 
-        if((ret=H5Tequal(tid2,H5T_STD_I32LE))<=0) {
+        if((ret=H5Tequal(tid2,H5T_STD_I32LE))<=0)
             TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-        } /* end if */
         ret=H5Tclose(tid2);
         CHECK(ret, FAIL, "H5Tclose");
         ret=H5Tclose(mtid);
@@ -2040,9 +2016,8 @@ test_compat(void)
         /* Check the 4th field's name */
         mname=H5Tget_member_name(tid1,3);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"d")!=0) {
+        if(HDstrcmp(mname,"d")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
-        } /* end if */
         free(mname);
 
         /* Check the 4th field's offset */
@@ -2052,9 +2027,8 @@ test_compat(void)
         /* Check the 4th field's datatype */
         mtid=H5Tget_member_type(tid1,3);
         CHECK(mtid, FAIL, "H5Tget_member_type");
-        if((ret=H5Tequal(mtid,H5T_IEEE_F64LE))<=0) {
+        if((ret=H5Tequal(mtid,H5T_IEEE_F64LE))<=0)
             TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-        } /* end if */
         ret=H5Tclose(mtid);
         CHECK(mtid, FAIL, "H5Tclose");
 

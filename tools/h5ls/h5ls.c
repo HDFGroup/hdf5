@@ -80,7 +80,7 @@ static char *fix_name(const char *path, const char *base);
 
 hid_t thefile;
 char  *prefix;
-char  *progname;
+const char *progname="h5ls";
 int   d_status;
 
 
@@ -99,7 +99,7 @@ int   d_status;
  *-------------------------------------------------------------------------
  */
 static void
-usage (const char *progname)
+usage (void)
 {
     fprintf(stderr, "\
 usage: %s [OPTIONS] [OBJECTS...]\n\
@@ -117,6 +117,7 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
       -wN, --width=N   Set the number of columns of output\n\
       -v, --verbose    Generate more verbose output\n\
       -V, --version    Print version number and exit\n\
+      --vfd=DRIVER     Use the specified virtual file driver\n\
       -x, --hexdump    Show raw data in hexadecimal format\n\
 \n\
    OBJECTS\n\
@@ -1328,26 +1329,38 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
     hsize_t     temp_need;
     void *buf;
     h5dump_t info;
+    H5S_class_t space_type;
 
     printf("    Attribute: ");
     n = display_string(stdout, attr_name, TRUE);
     printf("%*s", MAX(0, 9-n), "");
+
     if ((attr = H5Aopen_name(obj, attr_name))) {
         space = H5Aget_space(attr);
         type = H5Aget_type(attr);
 
         /* Data space */
         ndims = H5Sget_simple_extent_dims(space, size, NULL);
- if (0==ndims) {
-     puts(" scalar");
- } else {
-     printf(" {");
-     for (i=0; i<ndims; i++) {
-  HDfprintf(stdout, "%s%Hu", i?", ":"", size[i]);
-  nelmts *= size[i];
-     }
-     puts("}");
- }
+        space_type = H5Sget_simple_extent_type(space);
+        switch (space_type) {
+            case H5S_SCALAR:
+                /* scalar dataspace */
+                puts(" scalar");
+                break;
+            case H5S_SIMPLE:
+                /* simple dataspace */
+                printf(" {");
+                for (i=0; i<ndims; i++) {
+                    HDfprintf(stdout, "%s%Hu", i?", ":"", size[i]);
+                    nelmts *= size[i];
+                }
+                puts("}");
+                break;
+            default:
+                /* Unknown dataspace type */
+                puts(" unknown");
+                break;
+        }
 
         /* Data type */
         printf("        Type:      ");
@@ -1441,11 +1454,13 @@ dataset_list1(hid_t dset)
     hsize_t     max_size[64];   /* maximum dataset dimensions */
     hid_t       space;          /* data space                 */
     int         ndims;          /* dimensionality             */
+    H5S_class_t space_type;     /* type of dataspace          */
     int   i;
 
     /* Information that goes on the same row as the name.  The name has
      * already been printed. */
     space = H5Dget_space(dset);
+    space_type = H5Sget_simple_extent_type(space);
     ndims = H5Sget_simple_extent_dims(space, cur_size, max_size);
     printf (" {");
     for (i=0; i<ndims; i++) {
@@ -1456,7 +1471,7 @@ dataset_list1(hid_t dset)
      HDfprintf(stdout, "/%Hu", max_size[i]);
  }
     }
-    if (0==ndims) printf("SCALAR");
+    if (space_type==H5S_SCALAR) printf("SCALAR");
     putchar('}');
     H5Sclose (space);
 
@@ -1541,7 +1556,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
  /* Print information about external strorage */
  if ((nf = H5Pget_external_count(dcpl))>0) {
      for (i=0, max_len=0; i<nf; i++) {
-  H5Pget_external(dcpl, i, sizeof(f_name), f_name, NULL, NULL);
+  H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, NULL, NULL);
   n = display_string(NULL, f_name, TRUE);
   max_len = MAX(max_len, n);
      }
@@ -1554,7 +1569,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
      for (i=0; i<max_len; i++) putchar('-');
      putchar('\n');
      for (i=0, total=0; i<nf; i++) {
-  if (H5Pget_external(dcpl, i, sizeof(f_name), f_name, &f_offset,
+  if (H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, &f_offset,
         &f_size)<0) {
       HDfprintf(stdout,
          "        #%03d %10Hu %10s %10s ***ERROR*** %s\n",
@@ -1582,7 +1597,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
  if ((nf = H5Pget_nfilters(dcpl))>0) {
      for (i=0; i<nf; i++) {
   cd_nelmts = NELMTS(cd_values);
-  filt_id = H5Pget_filter(dcpl, i, &filt_flags, &cd_nelmts,
+  filt_id = H5Pget_filter(dcpl, (unsigned)i, &filt_flags, &cd_nelmts,
      cd_values, sizeof(f_name), f_name);
   f_name[sizeof(f_name)-1] = '\0';
   sprintf(s, "Filter-%d:", i);
@@ -1603,7 +1618,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
  printf("\n");
 
  /* Print address information */
- if (address_g) H5Ddebug(dset, 0);
+ if (address_g) H5Ddebug(dset);
 
  /* Close stuff */
  H5Tclose(type);
@@ -2005,7 +2020,6 @@ main (int argc, const char *argv[])
 {
     hid_t file=-1, root=-1;
     char *fname=NULL, *oname=NULL, *x;
-    const char *progname="h5ls";
     const char *s = NULL;
     char *rest, *container=NULL;
     int  argno;
@@ -2013,6 +2027,7 @@ main (int argc, const char *argv[])
     iter_t iter;
     static char root_name[] = "/";
     char        drivername[50];
+    const char                *preferred_driver=NULL;
 
     /* Initialize h5tools lib */
     h5tools_init();
@@ -2043,7 +2058,7 @@ main (int argc, const char *argv[])
             argno++;
             break;
         } else if (!strcmp(argv[argno], "--help")) {
-            usage(progname);
+            usage();
             leave(0);
         } else if (!strcmp(argv[argno], "--address")) {
             address_g = TRUE;
@@ -2064,22 +2079,24 @@ main (int argc, const char *argv[])
             simple_output_g = TRUE;
         } else if (!strcmp(argv[argno], "--string")) {
             string_g = TRUE;
+        } else if (!strncmp(argv[argno], "--vfd=", 6)) {
+            preferred_driver = argv[argno]+6;
         } else if (!strncmp(argv[argno], "--width=", 8)) {
             width_g = (int)strtol(argv[argno]+8, &rest, 0);
             if (width_g<=0 || *rest) {
-                usage(progname);
+                usage();
                 leave(1);
             }
         } else if (!strcmp(argv[argno], "--width")) {
             if (argno+1>=argc) {
-                usage(progname);
+                usage();
                 leave(1);
             } else {
                 s = argv[++argno];
             }
             width_g = (int)strtol(s, &rest, 0);
             if (width_g<=0 || *rest) {
-                usage(progname);
+                usage();
                 leave(1);
             }
         } else if (!strcmp(argv[argno], "--verbose")) {
@@ -2093,14 +2110,14 @@ main (int argc, const char *argv[])
             if (argv[argno][2]) {
                 s = argv[argno]+2;
             } else if (argno+1>=argc) {
-                usage(progname);
+                usage();
                 leave(1);
             } else {
                 s = argv[++argno];
             }
             width_g = (int)strtol(s, &rest, 0);
             if (width_g<=0 || *rest) {
-                usage(progname);
+                usage();
                 leave(1);
             }
         } else if ('-'!=argv[argno][1]) {
@@ -2109,7 +2126,7 @@ main (int argc, const char *argv[])
                 switch (*s) {
                     case '?':
                     case 'h': /* --help */
-                        usage(progname);
+                        usage();
                         leave(0);
                     case 'a': /* --address */
                         address_g = TRUE;
@@ -2149,12 +2166,12 @@ main (int argc, const char *argv[])
                         hexdump_g = TRUE;
                         break;
                     default:
-                        usage(progname);
+                        usage();
                         leave(1);
                 }
             }
         } else {
-            usage(progname);
+            usage();
             leave(1);
         }
     }
@@ -2162,7 +2179,7 @@ main (int argc, const char *argv[])
     /* If no arguments remain then print a usage message (instead of doing
      * absolutely nothing ;-) */
     if (argno>=argc) {
-        usage(progname);
+        usage();
         leave(1);
     }
 
@@ -2189,7 +2206,7 @@ main (int argc, const char *argv[])
         file = -1;
 
         while (fname && *fname) {
-            file = h5tools_fopen(fname, NULL, drivername, sizeof drivername, argc, argv);
+            file = h5tools_fopen(fname, preferred_driver, drivername, sizeof drivername, argc, argv);
 
             if (file>=0) {
                 if (verbose_g) {

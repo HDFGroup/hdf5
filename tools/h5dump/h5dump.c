@@ -22,7 +22,6 @@
 #include "h5trav.h"
 
 
-
 /* module-scoped variables */
 const char  *progname = "h5dump";
 
@@ -56,7 +55,6 @@ static int          display_fi        = FALSE; /*file index */
 static int          display_ai        = TRUE;  /*array index */   
 static int          display_escape    = FALSE; /*escape non printable characters */ 
 
-
 /**
  **  Added for XML  **
  **/
@@ -78,6 +76,9 @@ static hid_t     h5_fileaccess(void);
 static void      dump_oid(hid_t oid);
 static void      print_enum(hid_t type);
 static herr_t    dump_all(hid_t group, const char *name, void *op_data);
+#ifdef LATER
+static void      check_compression(hid_t);
+#endif /* LATER */
 static int       xml_name_to_XID(const char *, char *, int , int );
 
 static h5dump_t         dataformat = {
@@ -466,7 +467,6 @@ static void             dump_dcpl(hid_t dcpl, hid_t type_id, hid_t obj_id);
 static void             dump_comment(hid_t obj_id);
 static void             dump_fcpl(hid_t fid);
 static void             dump_fcontents(hid_t fid);
-
 
 /* XML format:   same interface, alternative output */
 
@@ -1007,20 +1007,22 @@ dump_dataspace(hid_t space)
     hsize_t   size[H5DUMP_MAX_RANK];
     hsize_t   maxsize[H5DUMP_MAX_RANK];
     int       ndims = H5Sget_simple_extent_dims(space, size, maxsize);
+    H5S_class_t space_type = H5Sget_simple_extent_type(space);
     int       i;
 
     indentation(indent + COL);
     printf("%s ", dump_header_format->dataspacebegin);
 
-    if (H5Sis_simple(space)) {
-	if (ndims == 0) {
+    switch (space_type) {
+        case H5S_SCALAR:
 	    /* scalar dataspace */
 	    HDfprintf(stdout, "%s %s",
-		      dump_header_format->dataspacedescriptionbegin, SCALAR);
-	} else {
+		      dump_header_format->dataspacedescriptionbegin, S_SCALAR);
+            break;
+        case H5S_SIMPLE:
 	    /* simple dataspace */
 	    HDfprintf(stdout, "%s %s { %s %Hu",
-		      dump_header_format->dataspacedescriptionbegin, SIMPLE,
+		      dump_header_format->dataspacedescriptionbegin, S_SIMPLE,
 		      dump_header_format->dataspacedimbegin, size[0]);
 
 	    for (i = 1; i < ndims; i++)
@@ -1043,9 +1045,14 @@ dump_dataspace(hid_t space)
 		    HDfprintf(stdout, ", %Hu", maxsize[i]);
 
 	    printf(" %s }", dump_header_format->dataspacedimend);
-	}
-    } else {
-	printf("%s not yet implemented %s\n", BEGIN, END);
+
+	    break;
+        case H5S_COMPLEX:
+	    printf("%s not yet implemented %s\n", BEGIN, END);
+            break;
+        case H5S_NO_CLASS:
+        default:
+	    printf("%s unknown dataspace %s\n", BEGIN, END);
     }
 
     end_obj(dump_header_format->dataspaceend,
@@ -1544,7 +1551,6 @@ dump_named_datatype(hid_t type, const char *name)
 	    dump_header_format->datatypeblockend);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    dump_group
  *
@@ -1851,6 +1857,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
     int         status = -1;
     void       *buf;
     hid_t       space, type, p_type;
+    H5S_class_t space_type;
     int         ndims, i;
     hsize_t     size[64], nelmts = 1, alloc_size;
     int         depth;
@@ -1929,61 +1936,65 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
 	status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, sset, depth);
         H5Tclose(f_type);
     } else {
-        char        string_prefix[64];
-        h5dump_t    string_dataformat;
-
         /* need to call h5tools_dump_mem for the attribute data */    
-        type = H5Aget_type(obj_id);
-        p_type = h5tools_get_native_type(type);
-
         space = H5Aget_space(obj_id);
-        ndims = H5Sget_simple_extent_dims(space, size, NULL);
+        space_type = H5Sget_simple_extent_type(space);
+        if(space_type == H5S_NO_CLASS || space_type == H5S_COMPLEX) {
+            status = SUCCEED;
+        } else {
+	    char        string_prefix[64];
+	    h5dump_t    string_dataformat;
 
-        for (i = 0; i < ndims; i++)
-            nelmts *= size[i];
+            type = H5Aget_type(obj_id);
+            p_type = h5tools_get_native_type(type);
 
-        alloc_size = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
-        assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
-        
-        buf = malloc((size_t)alloc_size);
-        assert(buf);
+            ndims = H5Sget_simple_extent_dims(space, size, NULL);
 
-        if (H5Aread(obj_id, p_type, buf) >= 0){
-	    if (display_char && H5Tget_size(type) == 1 && H5Tget_class(type) == H5T_INTEGER) {
-		/*
-		 * Print 1-byte integer data as an ASCII character string
-		 * instead of integers if the `-r' or `--string' command-line
-		 * option was given.
-		 *
-		 * We don't want to modify the global dataformat, so make a
-		 * copy of it instead.
-		 */
-		string_dataformat = *outputformat;
-		string_dataformat.idx_fmt = " ";
-		string_dataformat.line_multi_new = 1;
-		string_dataformat.line_1st = "        %s\"";
-		string_dataformat.line_pre = "        %s";
-		string_dataformat.line_cont = "        %s";
-		string_dataformat.str_repeat = 8;
-		string_dataformat.ascii = TRUE;
-		string_dataformat.elmt_suf1 = "";
-		string_dataformat.elmt_suf2 = "";
-		string_dataformat.line_indent = "";
-		strcpy(string_prefix, string_dataformat.line_pre);
-		strcat(string_prefix, "\"");
-		string_dataformat.line_pre = string_prefix;
-		string_dataformat.line_suf = "\"";
-		outputformat = &string_dataformat;
-	    }
+            for (i = 0; i < ndims; i++)
+                nelmts *= size[i];
 
-            status = h5tools_dump_mem(stdout, outputformat, obj_id, p_type,
-                                    space, buf, depth);
-	}
-        
-        free(buf);
-        H5Tclose(p_type); 
+            alloc_size = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
+            assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+            
+            buf = malloc((size_t)alloc_size);
+            assert(buf);
+
+            if (H5Aread(obj_id, p_type, buf) >= 0)
+		if (display_char && H5Tget_size(type) == 1 && H5Tget_class(type) == H5T_INTEGER) {
+		    /*
+		     * Print 1-byte integer data as an ASCII character string
+		     * instead of integers if the `-r' or `--string' command-line
+		     * option was given.
+		     *
+		     * We don't want to modify the global dataformat, so make a
+		     * copy of it instead.
+		     */
+		    string_dataformat = *outputformat;
+		    string_dataformat.idx_fmt = " ";
+		    string_dataformat.line_multi_new = 1;
+		    string_dataformat.line_1st = "        %s\"";
+		    string_dataformat.line_pre = "        %s";
+		    string_dataformat.line_cont = "        %s";
+		    string_dataformat.str_repeat = 8;
+		    string_dataformat.ascii = TRUE;
+		    string_dataformat.elmt_suf1 = "";
+		    string_dataformat.elmt_suf2 = "";
+		    string_dataformat.line_indent = "";
+		    strcpy(string_prefix, string_dataformat.line_pre);
+		    strcat(string_prefix, "\"");
+		    string_dataformat.line_pre = string_prefix;
+		    string_dataformat.line_suf = "\"";
+		    outputformat = &string_dataformat;
+		}
+
+                status = h5tools_dump_mem(stdout, outputformat, obj_id, p_type,
+                                        space, buf, depth);
+            
+            free(buf);
+            H5Tclose(p_type); 
+            H5Tclose(type);
+        }
         H5Sclose(space);
-        H5Tclose(type);
     }
 
     if (status == FAIL) {
@@ -2071,7 +2082,7 @@ static void dump_fill_value(hid_t dcpl,hid_t type_id, hid_t obj_id)
     h5tools_context_t	ctx;			/*print context		*/
     size_t            size;
     void              *buf=NULL;
-    int               nelmts=1;
+    hsize_t           nelmts=1;
     h5dump_t          *outputformat = &dataformat;
     hid_t             n_type;
 
@@ -2189,8 +2200,8 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
    printf("%s %s\n", EXTERNAL, BEGIN);
    /*start indent */
    indent += COL;
-   for ( i=0; i<next; i++) {
-    H5Pget_external(dcpl_id,i,sizeof(name),name,&offset,&size);
+   for ( j=0; j<(unsigned)next; j++) {
+    H5Pget_external(dcpl_id,j,sizeof(name),name,&offset,&size);
     indentation(indent + COL);
     HDfprintf(stdout,"FILENAME %s SIZE %Hu OFFSET %ld\n",name,size,offset);
    }
@@ -2345,15 +2356,18 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
  H5Pget_fill_time(dcpl_id, &ft);
  switch ( ft ) 
  {
-	case H5D_FILL_TIME_ALLOC: 
-  printf("%s", "H5D_FILL_TIME_ALLOC\n");
-		break;
-	case H5D_FILL_TIME_NEVER: 
-  printf("%s", "H5D_FILL_TIME_NEVER\n");
-		break;
-	case H5D_FILL_TIME_IFSET: 
-  printf("%s", "H5D_FILL_TIME_IFSET\n");
-		break;
+    case H5D_FILL_TIME_ALLOC: 
+        printf("%s", "H5D_FILL_TIME_ALLOC\n");
+        break;
+    case H5D_FILL_TIME_NEVER: 
+        printf("%s", "H5D_FILL_TIME_NEVER\n");
+        break;
+    case H5D_FILL_TIME_IFSET: 
+        printf("%s", "H5D_FILL_TIME_IFSET\n");
+        break;
+    default:
+        assert(0);
+        break;
  }
  indentation(indent + COL);
  printf("%s ", "VALUE ");
@@ -2385,15 +2399,18 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
  H5Pget_alloc_time(dcpl_id, &at);
  switch (at) 
  {
-	case H5D_ALLOC_TIME_EARLY: 
-  printf("%s", "H5D_ALLOC_TIME_EARLY\n");
-		break;
-	case H5D_ALLOC_TIME_INCR:
-  printf("%s", "H5D_ALLOC_TIME_INCR\n");
-		break;
-	case H5D_ALLOC_TIME_LATE: 
-  printf("%s", "H5D_ALLOC_TIME_LATE\n");
-		break;
+    case H5D_ALLOC_TIME_EARLY: 
+        printf("%s", "H5D_ALLOC_TIME_EARLY\n");
+        break;
+    case H5D_ALLOC_TIME_INCR:
+        printf("%s", "H5D_ALLOC_TIME_INCR\n");
+        break;
+    case H5D_ALLOC_TIME_LATE: 
+        printf("%s", "H5D_ALLOC_TIME_LATE\n");
+        break;
+    default:
+        assert(0);
+        break;
  }
  /* end indent */ 
  indent -= COL;
@@ -2417,24 +2434,25 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
 static void
 dump_fcpl(hid_t fid)
 {
-#ifdef H5_WANT_H5_V1_4_COMPAT
- int      sym_lk;         
-#else 
- unsigned sym_lk;    /* symbol table B-tree leaf 'K' value */
-#endif 
- int      istore_ik; /* indexed storage B-tree initial 'K' value */
  hid_t    fcpl;      /* file creation property list ID */
  hid_t		  fapl;      /* file access property list ID */
  hsize_t  userblock; /* userblock size retrieved from FCPL */
  size_t   off_size;  /* size of offsets in the file */
  size_t   len_size;  /* size of lengths in the file */
- int      sym_ik;    /* symbol table B-tree initial 'K' value */
- int      super;     /* superblock version # */
- int      freelist;  /* free list version # */
- int      stab;      /* symbol table entry version # */
- int      shhdr;     /* shared object header version # */
+ unsigned super;     /* superblock version # */
+ unsigned freelist;  /* free list version # */
+ unsigned stab;      /* symbol table entry version # */
+ unsigned shhdr;     /* shared object header version # */
  hid_t    fdriver;    /* file driver */
  char     dname[15]; /* buffer to store driver name */
+#ifdef H5_WANT_H5_V1_4_COMPAT
+ int      sym_lk;         
+ int      sym_ik;    /* symbol table B-tree internal 'K' value */
+#else 
+ unsigned sym_lk;    /* symbol table B-tree leaf 'K' value */
+ unsigned sym_ik;    /* symbol table B-tree internal 'K' value */
+#endif 
+ unsigned istore_ik; /* indexed storage B-tree internal 'K' value */
 
  fcpl=H5Fget_create_plist(fid);
  H5Pget_version(fcpl, &super, &freelist, &stab, &shhdr);
@@ -2453,19 +2471,19 @@ dump_fcpl(hid_t fid)
  */
  printf("%s %s\n",SUPER_BLOCK, BEGIN);
  indentation(indent + COL);
- printf("%s %d\n","SUPERBLOCK_VERSION", super);
+ printf("%s %u\n","SUPERBLOCK_VERSION", super);
  indentation(indent + COL);
- printf("%s %d\n","FREELIST_VERSION", freelist);
+ printf("%s %u\n","FREELIST_VERSION", freelist);
  indentation(indent + COL);
- printf("%s %d\n","SYMBOLTABLE_VERSION", stab);
+ printf("%s %u\n","SYMBOLTABLE_VERSION", stab);
  indentation(indent + COL);
- printf("%s %d\n","OBJECTHEADER_VERSION", shhdr);
+ printf("%s %u\n","OBJECTHEADER_VERSION", shhdr);
  indentation(indent + COL);
  HDfprintf(stdout,"%s %Hd\n","OFFSET_SIZE", (long_long)off_size);
  indentation(indent + COL);
  HDfprintf(stdout,"%s %Hd\n","LENGTH_SIZE", (long_long)len_size);
  indentation(indent + COL);
- printf("%s %d\n","BTREE_RANK", sym_ik); 
+ printf("%s %u\n","BTREE_RANK", sym_ik); 
  indentation(indent + COL);
  printf("%s %d\n","BTREE_LEAF", sym_lk);
 
@@ -2511,7 +2529,7 @@ dump_fcpl(hid_t fid)
  indentation(indent + COL);
  printf("%s %s\n","FILE_DRIVER", dname);
  indentation(indent + COL);
- printf("%s %d\n","ISTORE_K", istore_ik);
+ printf("%s %u\n","ISTORE_K", istore_ik);
  printf("%s\n",END);
 
 /*-------------------------------------------------------------------------
@@ -2715,7 +2733,7 @@ parse_subset_params(char *dset)
             *brace++ = '\0';
 
             s = calloc(1, sizeof(struct subset_t));
-            s->start = (hssize_t *)parse_hsize_list(brace);
+            s->start = parse_hsize_list(brace);
 
             while (*brace && *brace != ';')
                 brace++;
@@ -3248,7 +3266,7 @@ parse_start:
              */
             do {
                 switch ((char)opt) {
-                case 's': free(s->start); s->start = (hssize_t *)parse_hsize_list(opt_arg); break;
+                case 's': free(s->start); s->start = parse_hsize_list(opt_arg); break;
                 case 'S': free(s->stride); s->stride = parse_hsize_list(opt_arg); break;
                 case 'c': free(s->count); s->count = parse_hsize_list(opt_arg); break;
                 case 'k': free(s->block); s->block = parse_hsize_list(opt_arg); break;
@@ -3717,11 +3735,8 @@ int
 xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
 {
     ref_path_table_entry_t *r;
-    char *os;
 
     if (outlen < 22) return 1;
-
-    os = outstr;
 
     r = ref_path_table_lookup(str);
     if (r == NULL) {
@@ -3729,9 +3744,8 @@ xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
             r = ref_path_table_lookup("/");
             if (r == NULL) {
                 if (gen) {
-                    sprintf(os," "); /* ?? */
                     r = ref_path_table_gen_fake(str);
-		    sprintf(os,"xid_%lu-%lu",r->statbuf.objno[0],r->statbuf.objno[1]);
+		    sprintf(outstr,"xid_%lu-%lu",r->statbuf.objno[0],r->statbuf.objno[1]);
                     return 0;
                 } else {
                     return 1;
@@ -3739,9 +3753,8 @@ xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
             }
         } else {
             if (gen) {
-                sprintf(os," "); /* ?? */
                 r = ref_path_table_gen_fake(str);
-		sprintf(os,"xid_%lu-%lu",r->statbuf.objno[0],r->statbuf.objno[1]);
+		sprintf(outstr,"xid_%lu-%lu",r->statbuf.objno[0],r->statbuf.objno[1]);
                 return 0;
             } else {
                 return 1;
@@ -3749,7 +3762,7 @@ xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
         }
     }
 
-    sprintf(os,"xid_%lu-%lu",r->statbuf.objno[0],r->statbuf.objno[1]);
+    sprintf(outstr,"xid_%lu-%lu",r->statbuf.objno[0],r->statbuf.objno[1]);
 
     return(0);
 }
@@ -4415,17 +4428,20 @@ xml_dump_dataspace(hid_t space)
     hsize_t                 maxsize[H5DUMP_MAX_RANK];
     int                     ndims =
 	H5Sget_simple_extent_dims(space, size, maxsize);
+    H5S_class_t             space_type = H5Sget_simple_extent_type(space);
     int                     i;
 
     indentation(indent + COL);
     printf("<%sDataspace>\n", xmlnsprefix);
-    if (H5Sis_simple(space)) {
-	indentation(indent + COL + COL);
+    indentation(indent + COL + COL);
 
-	if (ndims == 0) {
+    switch (space_type) {
+        case H5S_SCALAR:
 	    /* scalar dataspace (just a tag, no XML attrs. defined */
 	    printf("<%sScalarDataspace />\n",xmlnsprefix);
-	} else {
+            
+            break;
+        case H5S_SIMPLE:
 	    /* simple dataspace */
 	    /* <hdf5:SimpleDataspace Ndims="nd"> */
 	    printf("<%sSimpleDataspace Ndims=\"%d\">\n",xmlnsprefix, ndims);
@@ -4449,14 +4465,19 @@ xml_dump_dataspace(hid_t space)
 	    }
 	    indentation(indent + COL + COL);
 	    printf("</%sSimpleDataspace>\n", xmlnsprefix );
-	}
-    } else {
-	printf("<!-- not yet implemented -->\n");
+            
+            break;
+        case H5S_COMPLEX:
+	    printf("<!-- not yet implemented -->\n");
+            
+            break;
+        case H5S_NO_CLASS:
+        default:
+	    printf("<!-- unknown dataspace -->\n");
     }
 
     indentation(indent + COL);
     printf("</%sDataspace>\n", xmlnsprefix);
-
 }
 
 /*-------------------------------------------------------------------------
@@ -5069,7 +5090,7 @@ xml_print_refs(hid_t did, int source)
     ssiz = H5Sget_simple_extent_npoints(space);
 
     for (i = 0; i < ssiz; i++) {
-	path = lookup_ref_path(refbuf);
+	path = lookup_ref_path(*refbuf);
 	indentation(indent + COL);
 
 	if (!path) {
@@ -5276,7 +5297,7 @@ check_filters(hid_t dcpl)
     if (nfilt <= 0)
 	return;
     for (i = 0; i < nfilt; i++) {
-	filter = H5Pget_filter(dcpl, i, &flags,
+	filter = H5Pget_filter(dcpl, (unsigned)i, &flags,
 			       (size_t *) &cd_nelmts,
 			       cd_values, 120, namebuf);
 	if (filter == H5Z_FILTER_DEFLATE) {
@@ -5356,7 +5377,7 @@ char * name;
 	H5Pget_fill_value(dcpl, type, buf);
 
 	if (H5Tget_class(type) == H5T_REFERENCE) {
-	    path = lookup_ref_path(buf);
+	    path = lookup_ref_path(*(hobj_ref_t *)buf);
 
 	    indentation(indent);
 	    printf("<%sDataFromFile>\n",xmlnsprefix);
@@ -5413,7 +5434,7 @@ char * name;
 		case H5T_ENUM:
 			indentation(indent);
 			printf("<%sDataFromFile>\n",xmlnsprefix);
-			name = H5Tget_member_name(type, *(int *)buf);
+			name = H5Tget_member_name(type, *(unsigned *)buf);
 			indentation(indent);
 			printf("\"%s\"\n",name);
 			indentation(indent);
@@ -5844,9 +5865,6 @@ xml_print_enum(hid_t type)
     free(value);
     H5Tclose(super);
 }
-
-
-
 
 
 /*-------------------------------------------------------------------------

@@ -32,6 +32,9 @@
  *
  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5FD_mpiposix_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5FD_mpiposix_mask
@@ -236,10 +239,6 @@ static const H5FD_class_mpi_t H5FD_mpiposix_g = {
     H5FD_mpiposix_mpi_size,                     /*get_size              */
     H5FD_mpiposix_communicator                  /*get_comm              */
 };
-
-/* Interface initialization */
-#define INTERFACE_INIT	H5FD_mpiposix_init_interface
-static int interface_initialize_g = 0;
 
 
 /*--------------------------------------------------------------------------

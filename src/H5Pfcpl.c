@@ -12,9 +12,11 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5P_fcpl_mask
 
 /* Private header files */
 #include "H5private.h"		/* Generic Functions			*/
@@ -22,13 +24,6 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files		  	*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
-
-/* Pablo mask */
-#define PABLO_MASK	H5Pfcpl_mask
-
-/* Interface initialization */
-#define INTERFACE_INIT  NULL
-static int             interface_initialize_g = 0;
 
 /* Local datatypes */
 
@@ -65,8 +60,8 @@ static int             interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_version(hid_t plist_id, int *super/*out*/, int *freelist/*out*/,
-	       int *stab/*out*/, int *shhdr/*out*/)
+H5Pget_version(hid_t plist_id, unsigned *super/*out*/, unsigned *freelist/*out*/,
+	       unsigned *stab/*out*/, unsigned *shhdr/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -432,14 +427,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_sym_k(hid_t plist_id, int ik, unsigned lk)
+H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk)
 {
-    int btree_k[H5B_NUM_BTREE_ID];
+    unsigned btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_sym_k, FAIL);
-    H5TRACE3("e","iIsIu",plist_id,ik,lk);
+    H5TRACE3("e","iIuIu",plist_id,ik,lk);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
@@ -483,9 +478,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , unsigned *lk /*out */ )
+H5Pget_sym_k(hid_t plist_id, unsigned *ik /*out */ , unsigned *lk /*out */ )
 {
-    int btree_k[H5B_NUM_BTREE_ID];
+    unsigned btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -532,17 +527,17 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_istore_k(hid_t plist_id, int ik)
+H5Pset_istore_k(hid_t plist_id, unsigned ik)
 {
-    int btree_k[H5B_NUM_BTREE_ID];
+    unsigned btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_istore_k, FAIL);
-    H5TRACE2("e","iIs",plist_id,ik);
+    H5TRACE2("e","iIu",plist_id,ik);
 
     /* Check arguments */
-    if (ik <= 0)
+    if (ik == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "istore IK value must be positive");
 
     /* Get the plist structure */
@@ -583,9 +578,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_istore_k(hid_t plist_id, int *ik /*out */ )
+H5Pget_istore_k(hid_t plist_id, unsigned *ik /*out */ )
 {
-    int btree_k[H5B_NUM_BTREE_ID];
+    unsigned btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
 

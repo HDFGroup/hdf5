@@ -51,12 +51,12 @@ MOSTLYCLEAN=*.h5 *.tmp
 $(TEST_PROGS): $(LIB) $(FLIB) 
 
 fortranlib_test: $(FORTLIBTEST_OBJ)
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ $(FORTLIBTEST_OBJ)  $(LIB) $(TCLIB) $(FLIB) $(LIBS) $(HDF5LIB)
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ $(FORTLIBTEST_OBJ) $(LIB) $(TCLIB) $(FLIB) $(LIBS) $(HDF5LIB)
 
 fflush1: fflush1.lo 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush1.lo   $(LIB) $(TCLIB) $(FLIB) $(LIBS) $(HDF5LIB)
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush1.lo $(LIB) $(TCLIB) $(FLIB) $(LIBS) $(HDF5LIB)
 
 fflush2: fflush2.lo 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush2.lo   $(LIB) $(TCLIB) $(FLIB) $(LIBS) $(HDF5LIB)
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush2.lo $(LIB) $(TCLIB) $(FLIB) $(LIBS) $(HDF5LIB)
 
 @CONCLUDE@

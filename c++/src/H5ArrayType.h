@@ -34,10 +34,10 @@ class H5_DLLCPP ArrayType : public DataType {
 	// Returns the sizes of dimensions of this array datatype.
 	int getArrayDims(hsize_t* dims);
 
-	// Copy constructor - makes copy of the original object
+	// Copy constructor: makes copy of the original object.
 	ArrayType( const ArrayType& original );
 
-	// Default destructor
+	// Noop destructor
 	virtual ~ArrayType();
 
    protected:

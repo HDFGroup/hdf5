@@ -18,11 +18,7 @@
 
 
 /* local functions */
-#ifdef H5_WANT_H5_V1_4_COMPAT
-static void    close_obj(int obj_type, hid_t obj_id);
-#else /* H5_WANT_H5_V1_4_COMPAT */
-static void    close_obj(H5G_obj_t obj_type, hid_t obj_id);
-#endif /* H5_WANT_H5_V1_4_COMPAT */
+static void    close_obj(H5G_obj_t1 obj_type, hid_t obj_id);
 static int     diff_region(hid_t region1_id, hid_t region2_id);
 static hbool_t is_zero(const void *_mem, size_t size);
 
@@ -258,13 +254,8 @@ hsize_t diff_datum(void       *_mem1,
  size_t        size;
  int           iszero1;
  int           iszero2;
-#ifdef H5_WANT_H5_V1_4_COMPAT
- int            obj1_type;
- int            obj2_type;
-#else /* H5_WANT_H5_V1_4_COMPAT */
- H5G_obj_t     obj1_type;
- H5G_obj_t     obj2_type;
-#endif /* H5_WANT_H5_V1_4_COMPAT */
+ H5G_obj_t1     obj1_type;
+ H5G_obj_t1     obj2_type;
  hid_t         obj1_id;
  hid_t         obj2_id;
  H5G_stat_t    sb1;
@@ -1723,13 +1714,8 @@ is_zero(const void *_mem, size_t size)
  *-------------------------------------------------------------------------
  */
 
-#ifdef H5_WANT_H5_V1_4_COMPAT
 static 
-void close_obj(int obj_type, hid_t obj_id)
-#else /* H5_WANT_H5_V1_4_COMPAT */
-static 
-void close_obj(H5G_obj_t obj_type, hid_t obj_id)
-#endif /* H5_WANT_H5_V1_4_COMPAT */
+void close_obj(H5G_obj_t1 obj_type, hid_t obj_id)
 {
  
  switch (obj_type) {
@@ -3041,7 +3027,7 @@ hsize_t diff_long(unsigned char *mem1,
 			memcpy(&temp1_long, mem1, sizeof(long));
 			memcpy(&temp2_long, mem2, sizeof(long));
 			
-			if (labs(temp1_long-temp2_long) > options->delta)
+			if (labs(temp1_long-temp2_long) > (long)options->delta)
 			{
 				if ( print_data(options) ) 
 				{
@@ -3098,7 +3084,7 @@ hsize_t diff_long(unsigned char *mem1,
 			memcpy(&temp2_long, mem2, sizeof(long));
 			
 			if ( temp1_long!=0 && labs(1-temp2_long/temp1_long) > options->percent && 
-				labs(temp1_long-temp2_long) > options->delta )
+				labs(temp1_long-temp2_long) > (long)options->delta )
 			{
 				if ( print_data(options) ) 
 				{
@@ -3184,7 +3170,7 @@ hsize_t diff_ulong(unsigned char *mem1,
 			memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
 			memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
 			
-			if (labs(temp1_ulong-temp2_ulong) > options->delta)
+			if (labs((long)(temp1_ulong-temp2_ulong)) > (long)options->delta)
 			{
 				if ( print_data(options) ) 
 				{

@@ -22,54 +22,54 @@
        INTERFACE h5pset_fill_value_f
          MODULE PROCEDURE h5pset_fill_value_integer
          MODULE PROCEDURE h5pset_fill_value_real
-! Comment if on T3E
+! Comment if on Crays
          MODULE PROCEDURE h5pset_fill_value_double
-! End comment if on T3E
+! End comment if on Crays
          MODULE PROCEDURE h5pset_fill_value_char
        END INTERFACE
      
        INTERFACE h5pget_fill_value_f
          MODULE PROCEDURE h5pget_fill_value_integer
          MODULE PROCEDURE h5pget_fill_value_real
-! Comment if on T3E
+! Comment if on Crays
          MODULE PROCEDURE h5pget_fill_value_double
-! End comment if on T3E
+! End comment if on Crays
          MODULE PROCEDURE h5pget_fill_value_char
        END INTERFACE
 
        INTERFACE h5pset_f
          MODULE PROCEDURE h5pset_integer
          MODULE PROCEDURE h5pset_real
-! Comment if on T3E
+! Comment if on Crays
          MODULE PROCEDURE h5pset_double
-! End comment if on T3E
+! End comment if on Crays
          MODULE PROCEDURE h5pset_char
        END INTERFACE
      
        INTERFACE h5pget_f
          MODULE PROCEDURE h5pget_integer
          MODULE PROCEDURE h5pget_real
-! Comment if on T3E
+! Comment if on Crays
          MODULE PROCEDURE h5pget_double
-! End comment if on T3E
+! End comment if on Crays
          MODULE PROCEDURE h5pget_char
        END INTERFACE
 
        INTERFACE h5pregister_f
          MODULE PROCEDURE h5pregister_integer
          MODULE PROCEDURE h5pregister_real
-! Comment if on T3E
+! Comment if on Crays
          MODULE PROCEDURE h5pregister_double
-! End comment if on T3E
+! End comment if on Crays
          MODULE PROCEDURE h5pregister_char
        END INTERFACE
      
        INTERFACE h5pinsert_f
          MODULE PROCEDURE h5pinsert_integer
          MODULE PROCEDURE h5pinsert_real
-! Comment if on T3E
+! Comment if on Crays
          MODULE PROCEDURE h5pinsert_double
-! End comment if on T3E
+! End comment if on Crays
          MODULE PROCEDURE h5pinsert_char
        END INTERFACE
        
@@ -6450,13 +6450,14 @@
 
             hdferr = h5pmodify_filter_c(prp_id, filter, flags, cd_nelmts, cd_values )
           END SUBROUTINE h5pmodify_filter_f
+
 !----------------------------------------------------------------------
 ! Name:		h5premove_filter_f 
 !
 ! Purpose: 	Removes filter from the dataset creation property list. 
 !
 ! Inputs:  
-!		prp_id		- data creation property list 
+!		prp_id		- data creation or transfer property list 
 !				  identifier
 !		filter		- filter to be removed
 ! Outputs:  
@@ -6474,7 +6475,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5premove_filter_f(prp_id, filter, hdferr) 
+          SUBROUTINE h5premove_filter_f(prp_id, filter, hdferr)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -6487,6 +6488,9 @@
             INTEGER, INTENT(IN) :: filter        ! Filter to be removed
             INTEGER, INTENT(OUT) :: hdferr       ! Error code
 
+!            INTEGER, EXTERNAL :: h5premove_filter_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
             INTERFACE
               INTEGER FUNCTION h5premove_filter_c(prp_id, filter)
               USE H5GLOBAL
@@ -6500,6 +6504,5 @@
 
             hdferr = h5premove_filter_c(prp_id, filter)
           END SUBROUTINE h5premove_filter_f
-
 
      END MODULE H5P

@@ -20,7 +20,7 @@
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK    H5Tconv_mask
+#define PABLO_MASK    H5T_conv_mask
 
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */
@@ -50,10 +50,6 @@ typedef struct H5T_conv_hw_t {
     size_t	s_aligned;		/*number source elements aligned     */
     size_t	d_aligned;		/*number destination elements aligned*/
 } H5T_conv_hw_t;
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
 
 /* Declare a free list to manage pieces of vlen data */
 H5FL_BLK_DEFINE_STATIC(vlen_seq);
@@ -336,7 +332,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 	if (NULL==(st=H5I_object(src_id)) || NULL==(dt=H5I_object(dst_id)))   \
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
 			  "unable to dereference datatype object ID")	      \
-	if (st->shared->size!=sizeof(ST) || dt->shared->size!=sizeof(DT))		      \
+	if (st->shared->size!=sizeof(ST) || dt->shared->size!=sizeof(DT))     \
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
 			  "disagreement about datatype size")		      \
 	CI_ALLOC_PRIV	                                                      \
@@ -353,7 +349,8 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 	if (buf_stride) {						      \
             assert(buf_stride>=sizeof(ST));				      \
             assert(buf_stride>=sizeof(DT));				      \
-	    s_stride = d_stride = buf_stride;				      \
+            H5_CHECK_OVERFLOW(buf_stride,size_t,ssize_t);                     \
+	    s_stride = d_stride = (ssize_t)buf_stride;			      \
 	} else {							      \
             s_stride = sizeof(ST);					      \
             d_stride = sizeof(DT);					      \
@@ -1306,7 +1303,8 @@ static herr_t
 H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
 {
     H5T_conv_struct_t	*priv = (H5T_conv_struct_t*)(cdata->priv);
-    int		i, j, *src2dst = NULL;
+    int		*src2dst = NULL;
+    unsigned		i, j;
     H5T_t		*type = NULL;
     hid_t		tid;
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -1463,6 +1461,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t	offset;			/*byte offset wrt struct	*/
     size_t	src_delta;	    /*source stride	*/
     size_t	elmtno;
+    unsigned	u;		/*counters			*/
     int	i;			/*counters			*/
     H5T_conv_struct_t *priv = (H5T_conv_struct_t *)(cdata->priv);
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -1545,14 +1544,14 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * data point as small as possible with all the free space on the
                  * right side.
                  */
-                for (i=0, offset=0; i<src->shared->u.compnd.nmembs; i++) {
-                    if (src2dst[i]<0) continue; /*subsetting*/
-                    src_memb = src->shared->u.compnd.memb + i;
-                    dst_memb = dst->shared->u.compnd.memb + src2dst[i];
+                for (u=0, offset=0; u<src->shared->u.compnd.nmembs; u++) {
+                    if (src2dst[u]<0) continue; /*subsetting*/
+                    src_memb = src->shared->u.compnd.memb + u;
+                    dst_memb = dst->shared->u.compnd.memb + src2dst[u];
 
                     if (dst_memb->size <= src_memb->size) {
-                        if (H5T_convert(priv->memb_path[i], priv->src_memb_id[i],
-                                priv->dst_memb_id[src2dst[i]],
+                        if (H5T_convert(priv->memb_path[u], priv->src_memb_id[u],
+                                priv->dst_memb_id[src2dst[u]],
                                 1, 0, 0, /*no striding (packed array)*/
                                 xbuf+src_memb->offset, xbkg+dst_memb->offset,
                                 dxpl_id)<0)
@@ -1695,6 +1694,7 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     H5T_cmemb_t	*dst_memb = NULL;	/*destination struct memb desc.	*/
     size_t	offset;			/*byte offset wrt struct	*/
     size_t	elmtno;			/*element counter		*/
+    unsigned	u;			/*counters			*/
     int	i;			    /*counters			*/
     H5T_conv_struct_t *priv = NULL;	/*private data			*/
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -1732,11 +1732,11 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
              * is room for each conversion instead of actually doing anything.
              */
             if (dst->shared->size > src->shared->size) {
-                for (i=0, offset=0; i<src->shared->u.compnd.nmembs; i++) {
-                    if (src2dst[i]<0)
+                for (u=0, offset=0; u<src->shared->u.compnd.nmembs; u++) {
+                    if (src2dst[u]<0)
                         continue;
-                    src_memb = src->shared->u.compnd.memb + i;
-                    dst_memb = dst->shared->u.compnd.memb + src2dst[i];
+                    src_memb = src->shared->u.compnd.memb + u;
+                    dst_memb = dst->shared->u.compnd.memb + src2dst[u];
                     if (dst_memb->size > src_memb->size)
                         offset += src_memb->size;
                 }
@@ -1813,17 +1813,17 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
              * destination in the bkg buffer. Otherwise move the element as far
              * left as possible in the buffer.
              */
-            for (i=0, offset=0; i<src->shared->u.compnd.nmembs; i++) {
-                if (src2dst[i]<0) continue; /*subsetting*/
-                src_memb = src->shared->u.compnd.memb + i;
-                dst_memb = dst->shared->u.compnd.memb + src2dst[i];
+            for (u=0, offset=0; u<src->shared->u.compnd.nmembs; u++) {
+                if (src2dst[u]<0) continue; /*subsetting*/
+                src_memb = src->shared->u.compnd.memb + u;
+                dst_memb = dst->shared->u.compnd.memb + src2dst[u];
 
                 if (dst_memb->size <= src_memb->size) {
                     xbuf = buf + src_memb->offset;
                     xbkg = bkg + dst_memb->offset;
-                    if (H5T_convert(priv->memb_path[i],
-                            priv->src_memb_id[i],
-                            priv->dst_memb_id[src2dst[i]], nelmts,
+                    if (H5T_convert(priv->memb_path[u],
+                            priv->src_memb_id[u],
+                            priv->dst_memb_id[src2dst[u]], nelmts,
                             buf_stride ? buf_stride : src->shared->size,
                             bkg_stride, xbuf, xbkg,
                             dxpl_id)<0)
@@ -1915,8 +1915,8 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     int		n;		/*src value cast as native int	*/
     int		domain[2];	/*min and max source values	*/
     int		*map=NULL;	/*map from src value to dst idx	*/
-    int		length;		/*nelmts in map array		*/
-    int		i, j;		/*counters			*/
+    unsigned	length;		/*nelmts in map array		*/
+    unsigned	i, j;		/*counters			*/
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI_NOINIT(H5T_conv_enum_init);
@@ -2296,14 +2296,19 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (buf_stride) {
                 assert(buf_stride>=src->shared->size);
                 assert(buf_stride>=dst->shared->size);
-                s_stride = d_stride = buf_stride;
+                H5_CHECK_OVERFLOW(buf_stride,size_t,ssize_t);
+                s_stride = d_stride = (ssize_t)buf_stride;
             } else {
-                s_stride = src->shared->size;
-                d_stride = dst->shared->size;
+                H5_CHECK_OVERFLOW(src->shared->size,size_t,ssize_t);
+                H5_CHECK_OVERFLOW(dst->shared->size,size_t,ssize_t);
+                s_stride = (ssize_t)src->shared->size;
+                d_stride = (ssize_t)dst->shared->size;
             }
             if(bkg) {
-                if(bkg_stride)
-                    b_stride=bkg_stride;
+                if(bkg_stride) {
+                    H5_CHECK_OVERFLOW(bkg_stride,size_t,ssize_t);
+                    b_stride=(ssize_t)bkg_stride;
+                } /* end if */
                 else
                     b_stride=d_stride;
             } /* end if */
@@ -2509,8 +2514,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 done:
     /* If the conversion buffer doesn't need to be freed, reset its pointer */
     if(write_to_file && noop_conv)
-        conv_buf = NULL;
-
+        conv_buf=NULL;
     /* Release the conversion buffer (always allocated, except on errors) */
     if(conv_buf!=NULL)
         H5FL_BLK_FREE(vlen_seq,conv_buf);
@@ -2893,7 +2897,6 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
                               dst->shared->u.atomic.prec);
                     }
-                    
                 } else if (first+1 == src->shared->u.atomic.prec) {
                     /*
                      * Both the source and the destination are signed and the
@@ -3317,13 +3320,13 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     H5T_bit_set(d, dst.u.f.mpos, 1, TRUE);
                 } else if (mrsh==dst.u.f.msize) {
                     H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
-                    H5T_bit_set_d(d, dst.u.f.mpos, MIN(2, dst.u.f.msize), implied);
+                    H5T_bit_set_d(d, dst.u.f.mpos, MIN(2, dst.u.f.msize), (hsize_t)implied);
                 } else {
                     if (mrsh>0) {
                         H5T_bit_set(d, dst.u.f.mpos+dst.u.f.msize-mrsh, mrsh,
                                     FALSE);
                         H5T_bit_set_d(d, dst.u.f.mpos+dst.u.f.msize-mrsh, 2,
-                                      implied);
+                                      (hsize_t)implied);
                     }
                     if (mrsh+msize>=dst.u.f.msize) {
                         H5T_bit_copy(d, dst.u.f.mpos,

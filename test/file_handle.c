@@ -23,7 +23,7 @@
 
 #define KB              1024
 #define FAMILY_NUMBER   4
-#define FAMILY_SIZE     128 
+#define FAMILY_SIZE     1024
 #define MULTI_SIZE      128 
 #define CORE_INCREMENT  4096
 
@@ -174,10 +174,9 @@ test_core(void)
         goto error;
 
     /* There is no garantee the size of metadata in file is constant.  
-     * Just try to check if it's reasonable.  Currently, this file size
-     * is 976.
+     * Just try to check if it's reasonable.  Why is this 4KB? 
      */ 
-    if(file_size<KB/2 || file_size>1*KB)
+    if(file_size<2*KB || file_size>6*KB)
         goto error;
 
     if(H5Fclose(file)<0)
@@ -239,12 +238,24 @@ test_family(void)
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
         goto error;
 
+    if(H5Fclose(file)<0)
+        goto error;
+   
+    /* Tries to reopen the file with member file size smaller than 
+     * actual 1st member file size(976 bytes).  The library is 
+     * supposed to adjust the member size to 976 bytes. */
+    if(H5Pset_fapl_family(fapl, (hsize_t)512, H5P_DEFAULT)<0)
+        goto error;
+
+    if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0)
+        goto error;
+
     /* Check file size API */
     if(H5Fget_filesize(file, &file_size) < 0)
         goto error;
 
-    /* The file size is supposed to be 2KB right now. */
-    if(file_size<1*KB || file_size>4*KB)
+    /* The file size is supposed to be 976 bytes right now. */
+    if(file_size<KB/2 || file_size>4*KB)
         goto error;
 
     /* Create and write dataset */
@@ -290,10 +301,15 @@ test_family(void)
     if(H5Fget_filesize(file, &file_size) < 0)
         goto error;
 
-    /* Some data has been written.  The file size should be bigger(4KB) now. */ 
-    if(file_size<2*KB || file_size>6*KB)
-        goto error;
-
+    /* Some data has been written.  The file size should be bigger(18KB+976 bytes if int size is 4 bytes) now. */ 
+    if(sizeof(int)<=4) {
+        if(file_size<18*KB || file_size>20*KB)
+            goto error;
+    } else if(sizeof(int)>=8) {
+        if(file_size<32*KB || file_size>40*KB)
+            goto error;
+    }
+   
     if(H5Sclose(space)<0)
         goto error;
     if(H5Dclose(dset)<0)

@@ -408,7 +408,7 @@ const char * entry_type_names[NUMBER_OF_ENTRY_TYPES] =
 
 /* call back function declarations: */
 
-static herr_t check_write_permitted(H5F_t UNUSED * f,
+static herr_t check_write_permitted(const H5F_t UNUSED * f,
                                     hid_t UNUSED dxpl_id,
                                     hbool_t * write_permitted_ptr);
 
@@ -842,7 +842,7 @@ type_and_index_to_addr(int32_t type,
  */
 
 static herr_t
-check_write_permitted(H5F_t UNUSED * f,
+check_write_permitted(const H5F_t UNUSED * f,
                       hid_t UNUSED dxpl_id,
                       hbool_t * write_permitted_ptr)
 {
@@ -1961,7 +1961,7 @@ rename_entry(H5C_t * cache_ptr,
 
     if ( ! done ) {
 
-        result = H5C_rename_entry(NULL, cache_ptr, &(types[type]),
+        result = H5C_rename_entry(cache_ptr, &(types[type]),
                                   old_addr, new_addr);
     }
 
@@ -3936,7 +3936,7 @@ check_rename_err(void)
 
     if ( pass ) {
 
-        result = H5C_rename_entry(NULL, cache_ptr, &(types[0]),
+        result = H5C_rename_entry(cache_ptr, &(types[0]),
                                   entry_0_0_ptr->addr, entry_0_1_ptr->addr);
 
         if ( result >= 0 ) {
@@ -3948,7 +3948,7 @@ check_rename_err(void)
 
     if ( pass ) {
 
-        result = H5C_rename_entry(NULL, cache_ptr, &(types[0]),
+        result = H5C_rename_entry(cache_ptr, &(types[0]),
                                   entry_0_0_ptr->addr, entry_1_0_ptr->addr);
 
         if ( result >= 0 ) {

@@ -68,7 +68,7 @@ nh5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_siz
       * Allocate buffer to hold name of an attribute
       */
      c_buf_size = (size_t)*buf_size;
-     c_buf = (char *)HDmalloc((int)c_buf_size +1);
+     c_buf = (char *)HDmalloc(c_buf_size +1);
      if (c_buf == NULL) return ret_value; 
  
      /*
@@ -176,6 +176,7 @@ nh5iget_ref_c(hid_t_f *obj_id, int_f *ref_count)
 done:
       return ret_value;
 }
+
 /*----------------------------------------------------------------------------
  * Name:        h5iget_file_id_c
  * Purpose:     Call H5Iget_file_id to obtain file identifier from object identifier

@@ -292,6 +292,7 @@
             END INTERFACE
             hdferr = h5iget_ref_c(obj_id, ref_count)
           END SUBROUTINE h5iget_ref_f
+
 !----------------------------------------------------------------------
 ! Name:		h5iget_file_id_f
 !
@@ -337,7 +338,6 @@
             END INTERFACE
             hdferr = h5iget_file_id_c(obj_id, file_id)
           END SUBROUTINE h5iget_file_id_f
-
 
       END MODULE H5I
 

@@ -42,10 +42,10 @@ ArrayType::ArrayType() : DataType()
 }
 
 //--------------------------------------------------------------------------
-// Function:    ArrayType overloaded constructor
-///\brief       Creates an ArrayType object using an existing id.
-///\param       existing_id - IN: Id of an existing datatype
-///\exception   H5::DataTypeIException
+// Function:	ArrayType overloaded constructor
+///\brief	Creates an ArrayType object using an existing id.
+///\param	existing_id - IN: Id of an existing datatype
+///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
 ArrayType::ArrayType( const hid_t existing_id ) : DataType( existing_id ) 
@@ -81,13 +81,13 @@ ArrayType::ArrayType( const ArrayType& original ) : DataType( original )
 }
 
 //--------------------------------------------------------------------------
-// Function:    ArrayType overloaded constructor
-///\brief       Creates a new array data type based on the specified 
+// Function:	ArrayType overloaded constructor
+///\brief	Creates a new array data type based on the specified 
 ///		\a base_type.
-///\param       base_type - IN: Existing datatype
-///\param       ndims     - IN: Rank of the array, [0..H5S_MAX_RANK]
-///\param       dims      - IN: Size of each array dimension
-///\exception   H5::DataTypeIException
+///\param	base_type - IN: Existing datatype
+///\param	ndims     - IN: Rank of the array, [0..H5S_MAX_RANK]
+///\param	dims      - IN: Size of each array dimension
+///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
 ArrayType::ArrayType(const DataType& base_type, int ndims, const hsize_t* dims) : DataType()
@@ -105,10 +105,10 @@ ArrayType::ArrayType(const DataType& base_type, int ndims, const hsize_t* dims) 
 }
 
 //--------------------------------------------------------------------------
-// Function:    ArrayType::getArrayNDims
-///\brief       Returns the number of dimensions for an array datatype.
+// Function:	ArrayType::getArrayNDims
+///\brief	Returns the number of dimensions for an array datatype.
 ///\return	Number of dimensions
-///\exception   H5::DataTypeIException
+///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
 int ArrayType::getArrayNDims()
@@ -127,11 +127,11 @@ int ArrayType::getArrayNDims()
 }
 
 //--------------------------------------------------------------------------
-// Function:    ArrayType::getArrayDims
-///\brief       Retrieves the size of all dimensions of an array datatype.
+// Function:	ArrayType::getArrayDims
+///\brief	Retrieves the size of all dimensions of an array datatype.
 ///\param	dims - OUT: Sizes of dimensions
 ///\return	Number of dimensions
-///\exception   H5::DataTypeIException
+///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
 int ArrayType::getArrayDims(hsize_t* dims)

@@ -261,7 +261,7 @@ H5_DLL herr_t H5O_remove(H5G_entry_t *ent, unsigned type_id, int sequence,
 H5_DLL herr_t H5O_reset(unsigned type_id, void *native);
 H5_DLL void *H5O_free(unsigned type_id, void *mesg);
 H5_DLL void *H5O_copy(unsigned type_id, const void *mesg, void *dst);
-H5_DLL size_t H5O_raw_size(unsigned type_id, H5F_t *f, const void *mesg);
+H5_DLL size_t H5O_raw_size(unsigned type_id, const H5F_t *f, const void *mesg);
 H5_DLL herr_t H5O_get_share(unsigned type_id, H5F_t *f, const void *mesg, H5O_shared_t *share);
 H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL herr_t H5O_get_info(H5G_entry_t *ent, H5O_stat_t *ostat, hid_t dxpl_id);
@@ -272,7 +272,7 @@ H5_DLL herr_t H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, in
 			 int fwidth);
 
 /* Layout operators */
-H5_DLL size_t H5O_layout_meta_size(H5F_t *f, const void *_mesg);
+H5_DLL size_t H5O_layout_meta_size(const H5F_t *f, const void *_mesg);
 
 /* EFL operators */
 H5_DLL hsize_t H5O_efl_total_size(H5O_efl_t *efl);

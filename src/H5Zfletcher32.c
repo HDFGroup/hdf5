@@ -19,6 +19,10 @@
 
 #define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5Z_fletcher32_mask
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"         /* File access                          */
@@ -26,11 +30,6 @@
 #include "H5Zpkg.h"		/* Data filters				*/
 
 #ifdef H5_HAVE_FILTER_FLETCHER32
-
-/* Interface initialization */
-#define PABLO_MASK	H5Z_fletcher32_mask
-#define INTERFACE_INIT	NULL
-static int interface_initialize_g = 0;
 
 /* Local function prototypes */
 static size_t H5Z_filter_fletcher32 (unsigned flags, size_t cd_nelmts,
@@ -130,6 +129,7 @@ H5Z_filter_fletcher32_compute(void *_src, size_t len)
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static size_t
 H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned UNUSED cd_values[], 
                      size_t nbytes, size_t *buf_size, void **buf)
@@ -139,7 +139,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
     uint32_t fletcher;          /* Checksum value */
     size_t   ret_value;         /* Return value */
     
-    FUNC_ENTER_NOAPI(H5Z_filter_fletcher32, 0);
+    FUNC_ENTER_NOAPI(H5Z_filter_fletcher32, 0)
 
     assert(sizeof(uint32_t)>=4);
    
@@ -157,11 +157,11 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
             UINT32DECODE(tmp_src, stored_fletcher);
 
             /* Compute checksum (can't fail) */
-            fletcher = H5Z_filter_fletcher32_compute((unsigned short*)src,src_nbytes);
+            fletcher = H5Z_filter_fletcher32_compute(src,src_nbytes);
 
             /* Verify computed checksum matches stored checksum */
             if(stored_fletcher != fletcher)
-	        HGOTO_ERROR(H5E_STORAGE, H5E_READERROR, 0, "data error detected by Fletcher32 checksum");
+	        HGOTO_ERROR(H5E_STORAGE, H5E_READERROR, 0, "data error detected by Fletcher32 checksum")
         }
         
         /* Set return values */
@@ -171,10 +171,10 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
         unsigned char *dst;     /* Temporary pointer to destination buffer */
 
         /* Compute checksum (can't fail) */
-        fletcher = H5Z_filter_fletcher32_compute((unsigned short*)src,nbytes);
+        fletcher = H5Z_filter_fletcher32_compute(src,nbytes);
         
 	if (NULL==(dst=outbuf=H5MM_malloc(nbytes+FLETCHER_LEN)))
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "unable to allocate Fletcher32 checksum destination buffer");
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "unable to allocate Fletcher32 checksum destination buffer")
         
         /* Copy raw data */
         HDmemcpy((void*)dst, (void*)(*buf), nbytes);
@@ -196,7 +196,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
 done:
     if(outbuf)
         H5MM_xfree(outbuf);
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5_HAVE_FILTER_FLETCHER32 */
 

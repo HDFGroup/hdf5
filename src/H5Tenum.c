@@ -19,6 +19,9 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5T_init_enum_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5T_enum_mask
@@ -30,19 +33,14 @@
 #include "H5MMprivate.h"	/*memory management			  */
 #include "H5Tpkg.h"		/*data-type functions			  */
 
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT H5T_init_enum_interface
-static herr_t H5T_init_enum_interface(void);
-
 /* Declare extern the free lists for H5T_t's and H5T_shared_t's */
 H5FL_EXTERN(H5T_t);
 H5FL_EXTERN(H5T_shared_t);
 
 /* Static local functions */
-static char *H5T_enum_nameof(H5T_t *dt, const void *value, char *name/*out*/,
+static char *H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/,
 			      size_t size);
-static herr_t H5T_enum_valueof(H5T_t *dt, const char *name,
+static herr_t H5T_enum_valueof(const H5T_t *dt, const char *name,
 				void *value/*out*/);
 
 
@@ -143,7 +141,7 @@ H5T_enum_create(const H5T_t *parent)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     if (NULL==(ret_value->shared=H5FL_CALLOC(H5T_shared_t))) {
         H5FL_FREE(H5T_t, ret_value);
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     }
     ret_value->shared->type = H5T_ENUM;
     ret_value->shared->parent = H5T_copy(parent, H5T_COPY_ALL);
@@ -225,9 +223,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_enum_insert(H5T_t *dt, const char *name, const void *value)
+H5T_enum_insert(const H5T_t *dt, const char *name, const void *value)
 {
-    int		i;
+    unsigned	i;
     char	**names=NULL;
     uint8_t	*values=NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -248,7 +246,7 @@ H5T_enum_insert(H5T_t *dt, const char *name, const void *value)
 
     /* Increase table sizes */
     if (dt->shared->u.enumer.nmembs >= dt->shared->u.enumer.nalloc) {
-	int n = MAX(32, 2*dt->shared->u.enumer.nalloc);
+	unsigned n = MAX(32, 2*dt->shared->u.enumer.nalloc);
 	if (NULL==(names=H5MM_realloc(dt->shared->u.enumer.name, n*sizeof(char*))))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 	dt->shared->u.enumer.name = names;
@@ -288,19 +286,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Tget_member_value(hid_t type, int membno, void *value/*out*/)
+H5Tget_member_value(hid_t type, unsigned membno, void *value/*out*/)
 {
     H5T_t	*dt=NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_API(H5Tget_member_value, FAIL)
-    H5TRACE3("e","iIsx",type,membno,value);
+    H5TRACE3("e","iIux",type,membno,value);
 
     if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
     if (H5T_ENUM!=dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class")
-    if (membno<0 || membno>=dt->shared->u.enumer.nmembs)
+    if (membno>=dt->shared->u.enumer.nmembs)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number")
     if (!value)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null value buffer")
@@ -331,7 +329,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_get_member_value(const H5T_t *dt, int membno, void *value/*out*/)
+H5T_get_member_value(const H5T_t *dt, unsigned membno, void *value/*out*/)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
     
@@ -423,9 +421,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static char *
-H5T_enum_nameof(H5T_t *dt, const void *value, char *name/*out*/, size_t size)
+H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/, size_t size)
 {
-    int	lt, md, rt;		/*indices for binary search	*/
+    unsigned	lt, md=0, rt;		/*indices for binary search	*/
     int	cmp=(-1);		/*comparison result		*/
     char *ret_value;            /* Return value */
     
@@ -446,7 +444,6 @@ H5T_enum_nameof(H5T_t *dt, const void *value, char *name/*out*/, size_t size)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOMPARE, NULL, "value sort failed")
     lt = 0;
     rt = dt->shared->u.enumer.nmembs;
-    md = -1;
 
     while (lt<rt) {
 	md = (lt+rt)/2;
@@ -544,9 +541,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
+H5T_enum_valueof(const H5T_t *dt, const char *name, void *value/*out*/)
 {
-    int	lt, md, rt;		/*indices for binary search	*/
+    unsigned	lt, md=0, rt;		/*indices for binary search	*/
     int	cmp=(-1);		/*comparison result		*/
     herr_t      ret_value=SUCCEED;       /* Return value */
     
@@ -566,7 +563,6 @@ H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOMPARE, FAIL, "value sort failed")
     lt = 0;
     rt = dt->shared->u.enumer.nmembs;
-    md = -1;
 
     while (lt<rt) {
 	md = (lt+rt)/2;

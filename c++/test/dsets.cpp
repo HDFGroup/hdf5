@@ -33,7 +33,6 @@
 #endif
 
 #include "testhdf5.h"
-#include "h5test.h"
 #include "H5Cpp.h"
 
 #ifndef H5_NO_NAMESPACE
@@ -42,15 +41,15 @@ using namespace H5;
 
 #include "h5cpputil.h"
 
-const string    FILE1("dataset.h5");
-#define DSET_DEFAULT_NAME	"default"
-#define DSET_CHUNKED_NAME	"chunked"
-#define DSET_SIMPLE_IO_NAME	"simple_io"
-#define DSET_TCONV_NAME		"tconv"
-#define DSET_COMPRESS_NAME	"compressed"
-#define DSET_BOGUS_NAME		"bogus"
+const string	FILE1("dataset.h5");
+const string	DSET_DEFAULT_NAME("default");
+const string	DSET_CHUNKED_NAME("chunked");
+const string	DSET_SIMPLE_IO_NAME("simple_io");
+const string	DSET_TCONV_NAME	("tconv");
+const string	DSET_COMPRESS_NAME("compressed");
+const string	DSET_BOGUS_NAME	("bogus");
 
-#define H5Z_FILTER_BOGUS		305
+const int H5Z_FILTER_BOGUS = 305;
 
 // Local prototypes
 static size_t bogus(unsigned int flags, size_t cd_nelmts, 
@@ -601,7 +600,7 @@ test_compression(H5File& file)
 	TESTING("compression (partial I/O)");
 
 	const hsize_t	hs_size[2] = {4, 50};
-	const hssize_t	hs_offset[2] = {7, 30};
+	const hsize_t	hs_offset[2] = {7, 30};
 	for (i = 0; i < hs_size[0]; i++) {
 	    for (j = 0; j < hs_size[1]; j++) {
 		points[hs_offset[0]+i][hs_offset[1]+j] = rand ();

@@ -25,15 +25,15 @@
  *		expected to be a rare condition.
  *
  */
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5FS_mask
+
 #include "H5private.h"		/* Generic Functions			  */
 #include "H5FSprivate.h"	/* Private function stack routines	  */
 
 #ifdef H5_HAVE_FUNCSTACK
-
-#define PABLO_MASK	H5FS_mask
-
-/* Interface initialization? */
-#define INTERFACE_INIT NULL
 
 #ifdef H5_HAVE_THREADSAFE
 /*
@@ -80,7 +80,7 @@ H5FS_get_stack(void)
 {
     H5FS_t *fstack;
 
-    FUNC_ENTER_NOAPI_NOFS(H5FS_get_stack);
+    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5FS_get_stack);
 
     fstack = pthread_getspecific(H5TS_funcstk_key_g);
     if (!fstack) {
@@ -116,7 +116,7 @@ H5FS_print(FILE *stream)
     int         i;                      /* Local index ariable */
     
     /* Don't push this function on the function stack... :-) */
-    FUNC_ENTER_NOAPI_NOFS(H5FS_print);
+    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5FS_print);
     
     /* Sanity check */
     assert(fstack);
@@ -164,7 +164,7 @@ H5FS_push(const char *func_name)
     H5FS_t	*fstack = H5FS_get_my_stack ();
     
     /* Don't push this function on the function stack... :-) */
-    FUNC_ENTER_NOAPI_NOFS(H5FS_push);
+    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5FS_push);
 
     /* Sanity check */
     assert (fstack);
@@ -201,7 +201,7 @@ H5FS_pop(void)
     H5FS_t	*fstack = H5FS_get_my_stack ();
     
     /* Don't push this function on the function stack... :-) */
-    FUNC_ENTER_NOAPI_NOFS(H5FS_pop);
+    FUNC_ENTER_NOAPI_NOFUNC_NOFS(H5FS_pop);
 
     /* Sanity check */
     assert (fstack);

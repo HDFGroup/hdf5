@@ -38,7 +38,7 @@
 static void *H5O_name_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_name_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_name_copy(const void *_mesg, void *_dest, unsigned update_flags);
-static size_t H5O_name_size(H5F_t *f, const void *_mesg);
+static size_t H5O_name_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_name_reset(void *_mesg);
 static herr_t H5O_name_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			     int indent, int fwidth);
@@ -60,9 +60,6 @@ const H5O_class_t H5O_NAME[1] = {{
     NULL,			/*set share method		*/
     H5O_name_debug,         	/*debug the message             */
 }};
-
-/* Interface initialization */
-#define INTERFACE_INIT  NULL
 
 
 /*-------------------------------------------------------------------------
@@ -216,7 +213,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_name_size(H5F_t UNUSED *f, const void *_mesg)
+H5O_name_size(const H5F_t UNUSED *f, const void *_mesg)
 {
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
     size_t                  ret_value;

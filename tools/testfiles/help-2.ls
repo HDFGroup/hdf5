@@ -16,6 +16,7 @@ usage: h5ls [OPTIONS] [OBJECTS...]
       -wN, --width=N   Set the number of columns of output
       -v, --verbose    Generate more verbose output
       -V, --version    Print version number and exit
+      --vfd=DRIVER     Use the specified virtual file driver
       -x, --hexdump    Show raw data in hexadecimal format
 
    OBJECTS

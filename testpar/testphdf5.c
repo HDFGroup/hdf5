@@ -438,6 +438,24 @@ int main(int argc, char **argv)
 	      "collective to independent chunk io",PARATESTFILE);
     }
 
+#ifdef KYANG 
+    AddTest("ccontw",coll_irregular_cont_write,NULL,
+            "collective irregular contiguous write",PARATESTFILE);
+    AddTest("ccontr",coll_irregular_cont_read,NULL,
+            "collective irregular contiguous read",PARATESTFILE);
+
+    AddTest("cschunkw",coll_irregular_simple_chunk_write,NULL,
+            "collective irregular simple chunk write",PARATESTFILE);
+    AddTest("cschunkr",coll_irregular_simple_chunk_read,NULL,
+            "collective irregular simple chunk read",PARATESTFILE);
+
+    AddTest("ccchunkw",coll_irregular_complex_chunk_write,NULL,
+            "collective irregular complex chunk write",PARATESTFILE);
+
+    AddTest("ccchunkr",coll_irregular_complex_chunk_read,NULL,
+            "collective irregular complex chunk read",PARATESTFILE);
+#endif
+
     io_mode_confusion_params.name  = PARATESTFILE;
     io_mode_confusion_params.count = 0; /* value not used */
 
@@ -455,14 +473,6 @@ int main(int argc, char **argv)
     /* Parse command line arguments */
     TestParseCmdLine(argc, argv);
 
-    /*
-    if (parse_options(argc, argv) != 0){
-	if (MAINPROCESS)
-	    usage();
-	goto finish;
-    }
-    */
-
     if (facc_type == FACC_MPIPOSIX && MAINPROCESS){
 	printf("===================================\n"
 	       "   Using MPIPOSIX driver\n"
@@ -472,7 +482,6 @@ int main(int argc, char **argv)
     /* Perform requested testing */
     PerformTests();
 
-finish:
     /* make sure all processes are finished before final report, cleanup
      * and exit.
      */

@@ -493,40 +493,25 @@ sigbus_handler(int UNUSED signo)
 static void
 print_results(int nd, detected_t *d, int na, malign_t *misc_align)
 {
-
+    int         byte_order=0;
     int		i, j;
 
     /* Include files */
     printf("\
 #define H5T_PACKAGE /*suppress error about including H5Tpkg.h*/\n\
-#define PABLO_MASK	H5Tinit_mask\n\
+#define PABLO_MASK	H5T_init_mask\n\
 \n\
 #include \"H5private.h\"\n\
 #include \"H5Iprivate.h\"\n\
 #include \"H5Eprivate.h\"\n\
 #include \"H5FLprivate.h\"\n\
-#include \"H5MMprivate.h\"\n\
 #include \"H5Tpkg.h\"\n\
 \n\
-static int interface_initialize_g = 0;\n\
-#define INTERFACE_INIT NULL\n\
-\n\
-/* Declare external the free list for H5T_t's */\n\
+/* Declare external the free lists for H5T_t's and H5T_shared_t's */\n\
 H5FL_EXTERN(H5T_t);\n\
 H5FL_EXTERN(H5T_shared_t);\n\
 \n\
 \n");
-
-    /* The interface termination function */
-    printf("\n\
-int\n\
-H5TN_term_interface(void)\n\
-{\n\
-    interface_initialize_g = 0;\n\
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TN_term_interface);\n\
-    \n\
-    FUNC_LEAVE_NOAPI(0);\n\
-}\n");
 
     /* The interface initialization function */
     printf("\n\
@@ -537,6 +522,18 @@ H5TN_init_interface(void)\n\
     herr_t	ret_value = SUCCEED;\n\
 \n\
     FUNC_ENTER_NOAPI(H5TN_init_interface, FAIL);\n");
+
+    /* The native endianess of this machine */
+    /* (Use the byte-order of a reasonably large type) */
+    for (i = 0; i < nd; i++)
+        if(d[i].size>1) {
+            byte_order=d[i].perm[0];
+            break;
+        } /* end if */
+    printf("\n\
+    /* Set the native order for this machine */\n\
+    H5T_native_order_g = H5T_ORDER_%s;\n",
+	       byte_order ? "BE" : "LE");	/*byte order		*/
 
     for (i = 0; i < nd; i++) {
 
@@ -568,6 +565,7 @@ H5TN_init_interface(void)\n\
 	       d[i].perm[0] ? "BE" : "LE",	/*byte order		*/
 	       d[i].offset,			/*offset		*/
 	       d[i].precision);			/*precision		*/
+    assert(d[i].size<2 || (d[i].perm[0]>0)==(byte_order>0));   /* Double-check that byte-order doesn't change */
 
 	if (0 == d[i].msize) {
 	    /* The part unique to fixed point types */

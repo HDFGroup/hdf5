@@ -254,10 +254,11 @@ of the <cite>HDF5 User's Guide.</cite>.
         Failure to release a dataspace with this call will
         result in resource leaks.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Identifier of dataspace to release.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">Identifier of dataspace to release.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -296,10 +297,11 @@ END SUBROUTINE h5sclose_f
         The dataspace identifier returned from this function should be 
         released with <code>H5Sclose</code> or resource leaks will occur.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Identifier of dataspace to copy.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">Identifier of dataspace to copy.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful; 
         otherwise returns a negative value.
@@ -309,7 +311,7 @@ END SUBROUTINE h5sclose_f
 SUBROUTINE h5scopy_f(space_id, new_space_id, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: space_id      ! Dataspace identifier 
-  INTEGER(HID_T), INTENT(OUT) :: new_space_id ! Identifier of dataspace's copy 
+  INTEGER(HID_T), INTENT(OUT) :: new_space_id ! Identifier of dataspace copy 
   INTEGER, INTENT(OUT) :: hdferr              ! Error code
                                               ! 0 on success and -1 on failure
 END SUBROUTINE h5scopy_f
@@ -339,10 +341,11 @@ END SUBROUTINE h5scopy_f
         <code>H5S_SIMPLE</code>;
         others are planned to be added later.  
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>H5S_class_t</em> <code>type</code>
-            <dd>The type of dataspace to be created.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>H5S_class_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">The type of dataspace to be created.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful; 
         otherwise returns a negative value.
@@ -405,14 +408,17 @@ END SUBROUTINE h5screate_f
         The dataspace identifier returned from this function must be 
         released with <code>H5Sclose</code> or resource leaks will occur.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>int</em> <code>rank</code>
-            <dd>Number of dimensions of dataspace.
-        <dt><em>const hsize_t *</em> <code>dims</code>
-            <dd>An array of the size of each dimension.
-        <dt><em>const hsize_t *</em> <code>maxdims</code>
-            <dd>An array of the maximum size of each dimension.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>int</em> <code>rank</code></td>
+          <td valign="top">Number of dimensions of dataspace.</td></tr>
+        <tr>
+		  <td valign="top"><em>const hsize_t *</em> <code>dims</code></td>
+          <td valign="top">An array of the size of each dimension.</td></tr>
+        <tr>
+		  <td valign="top"><em>const&nbsp;hsize_t&nbsp;*</em>&nbsp;<code>maxdims&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">An array of the maximum size of each dimension.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful; 
         otherwise returns a negative value.
@@ -456,14 +462,16 @@ END SUBROUTINE h5screate_simple_f
     <code>source_space_id</code> to <code>dest_space_id</code>. 
     This action may change the type of the dataspace.  
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dest_space_id</code>
-            <dd>IN: The identifier for the dataspace to which 
-                the extent is copied.
-        <dt><em>hid_t</em> <code>source_space_id</code>
-            <dd>IN: The identifier for the dataspace from which 
-                the extent is copied.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>dest_space_id</code></td>
+          <td valign="top">IN: The identifier for the dataspace to which 
+              the extent is copied.</td></tr>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>source_space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: The identifier for the dataspace from which 
+              the extent is copied.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -496,8 +504,8 @@ END SUBROUTINE h5sextent_copy_f
 <dt><strong>Name:</strong> <a name="Dataspace-SelectBounds">H5Sget_select_bounds</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Sget_select_bounds</code>(<em>hid_t </em><code>space_id</code>,
-        <em>hssize_t *</em><code>start</code>,
-        <em>hssize_t *</em><code>end</code>
+        <em>hsize_t *</em><code>start</code>,
+        <em>hsize_t *</em><code>end</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Gets the bounding box containing the current selection.
@@ -520,15 +528,18 @@ END SUBROUTINE h5sextent_copy_f
         Calling this function on a <code>none</code> selection will 
         return <code>FAIL</code>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>IN: Identifier of dataspace to query.
-        <dt><em>hssize_t *</em><code>start</code>
-            <dd>OUT: Starting coordinates of the bounding box.
-        <dt><em>hssize_t *</em><code>end</code>
-            <dd>OUT: Ending coordinates of the bounding box, 
-                i.e., the coordinates of the diagonally opposite corner.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Identifier of dataspace to query.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t *</em><code>start</code></td>
+          <td valign="top">OUT: Starting coordinates of the bounding box.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t *</em><code>end</code></td>
+          <td valign="top">OUT: Ending coordinates of the bounding box, 
+                i.e., the coordinates of the diagonally opposite corner.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -539,9 +550,9 @@ SUBROUTINE  h5sget_select_bounds_f(space_id, start, end, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: space_id 
                                    ! Dataspace identifier 
-  INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) :: start
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: start
                                    ! Starting coordinates of the bounding box 
-  INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) :: end
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: end
                                    ! Ending coordinates of the bounding box,
                                    ! i.e., the coordinates of the diagonally 
                                    ! opposite corner 
@@ -570,10 +581,11 @@ END SUBROUTINE h5sget_select_bounds_f
     <dd><code>H5Sget_select_elem_npoints</code> returns
     the number of element points in the current dataspace selection.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>IN: Identifier of dataspace to query.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Identifier of dataspace to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the number of element points in the current dataspace selection if successful.
         Otherwise returns a negative value.
@@ -634,23 +646,27 @@ END SUBROUTINE h5sget_select_elem_npoints_f
         The points are returned in the order they will be iterated through
         when the selection is read/written from/to disk.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>IN: Dataspace identifier of selection to query.
-        <dt><em>hsize_t </em><code>startpoint</code>
-            <dd>IN: Element point to start with.
-        <dt><em>hsize_t </em><code>numpoints</code>
-            <dd>IN: Number of element points to get.
-        <dt><em>hsize_t *</em><code>buf</code>
-            <dd>OUT: List of element points selected.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+          <td valign="top">IN: Dataspace identifier of selection to query.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t&nbsp;</em><code>startpoint&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Element point to start with.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t </em><code>numpoints</code></td>
+          <td valign="top">IN: Number of element points to get.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t *</em><code>buf</code></td>
+          <td valign="top">OUT: List of element points selected.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5sget_select_elem_pointlist_f
     <dd>
 	<pre>
-SUBROUTINE h5sget_select_elem_pointlist_f(space_id, startpoint, num_points, &amp; 
+SUBROUTINE h5sget_select_elem_pointlist_f(space_id, startpoint, num_points,
                                           buf, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN)   :: space_id   ! Dataspace identifier
@@ -709,23 +725,27 @@ END SUBROUTINE h5sget_select_elem_pointlist_f
         <p>
         No guarantee is implied as the order in which blocks are listed.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>IN: Dataspace identifier of selection to query.
-        <dt><em>hsize_t </em><code>startblock</code>
-            <dd>IN: Hyperslab block to start with.
-        <dt><em>hsize_t </em><code>numblocks</code>
-            <dd>IN: Number of hyperslab blocks to get.
-        <dt><em>hsize_t *</em><code>buf</code>
-            <dd>OUT: List of hyperslab blocks selected.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+          <td valign="top">IN: Dataspace identifier of selection to query.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t&nbsp;</em><code>startblock&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Hyperslab block to start with.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t </em><code>numblocks</code></td>
+          <td valign="top">IN: Number of hyperslab blocks to get.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t *</em><code>buf</code></td>
+          <td valign="top">OUT: List of hyperslab blocks selected.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5sget_select_hyper_blocklist_f
     <dd>
 	<pre>
-SUBROUTINE h5sget_select_hyper_blocklist_f(space_id, startblock, num_blocks, &amp; 
+SUBROUTINE h5sget_select_hyper_blocklist_f(space_id, startblock, num_blocks,
                                            buf, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN)   :: space_id   ! Dataspace identifier
@@ -761,10 +781,11 @@ END SUBROUTINE h5sget_select_hyper_blocklist_f
     <dd><code>H5Sget_select_hyper_nblocks</code> returns the 
         number of hyperslab blocks in the current dataspace selection.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>IN: Identifier of dataspace to query.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Identifier of dataspace to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the number of hyperslab blocks in 
         the current dataspace selection if successful.
@@ -802,10 +823,11 @@ END SUBROUTINE h5sget_select_hyper_nblocks_f
     <dd><code>H5Sget_select_npoints</code> determines the number of elements 
         in the current selection of a dataspace.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Dataspace identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">Dataspace identifier.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the number of elements in the selection if successful; 
         otherwise returns a negative value.
@@ -844,10 +866,11 @@ END SUBROUTINE h5sget_select_npoints_f
         type of selection currently defined for the dataspace 
 	<code>space_id</code>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Dataspace identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">Dataspace identifier.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the dataspace selection type, a value of       
         the  enumerated datatype <code>H5S_sel_type</code>, 
@@ -924,14 +947,17 @@ END SUBROUTINE h5sget_select_type_f
         <code>H5S_UNLIMITED</code> (</code>-1</code>), 
         the maximum size of that dimension is unlimited.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>IN: Identifier of the dataspace object to query
-        <dt><em>hsize_t *</em><code>dims</code>
-            <dd>OUT: Pointer to array to store the size of each dimension.
-        <dt><em>hsize_t *</em><code>maxdims</code>
-            <dd>OUT: Pointer to array to store the maximum size of each dimension.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+          <td valign="top">IN: Identifier of the dataspace object to query</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t *</em><code>dims</code></td>
+          <td valign="top">OUT: Pointer to array to store the size of each dimension.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t&nbsp;*</em><code>maxdims&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">OUT: Pointer to array to store the maximum size of each dimension.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the number of dimensions in the dataspace if successful;
         otherwise returns a negative value.
@@ -972,10 +998,11 @@ END SUBROUTINE h5sget_simple_extent_dims_f
     <dd><code>H5Sget_simple_extent_ndims</code> determines the dimensionality (or rank) 
         of a dataspace.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Identifier of the dataspace
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">Identifier of the dataspace</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the number of dimensions in the dataspace if successful;
         otherwise returns a negative value.
@@ -1013,10 +1040,11 @@ END SUBROUTINE h5sget_simple_extent_ndims_f
         in a dataspace.  For example, a simple 3-dimensional dataspace 
         with dimensions 2, 3, and 4 would have 24 elements.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>ID of the dataspace object to query
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">ID of the dataspace object to query</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the number of elements in the dataspace if successful; 
         otherwise returns 0.
@@ -1058,10 +1086,11 @@ END SUBROUTINE h5sget_simple_extent_npoints_f
             <code>H5S_SIMPLE</code>, or 
             <code>H5S_NONE</code>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Dataspace identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">Dataspace identifier.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace class name if successful; 
         otherwise H5S_NO_CLASS (-1).
@@ -1072,10 +1101,10 @@ SUBROUTINE h5sget_simple_extent_type_f(space_id, classtype, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
   INTEGER, INTENT(OUT) :: classtype      ! Class type 
-                                         ! Valid values are: 
+                                         ! Possible values are: 
                                          !    H5S_NO_CLASS_F 
                                          !    H5S_SCALAR_F 
-                                         !    H5S_SIMPLE_F   
+                                         !    H5S_SIMPLE_F 
   INTEGER, INTENT(OUT) :: hdferr         ! Error code
                                          ! 0 on success and -1 on failure
 END SUBROUTINE h5sget_simple_extent_type_f
@@ -1103,10 +1132,11 @@ END SUBROUTINE h5sget_simple_extent_type_f
         a simple dataspace.  [Currently, all dataspace objects are simple
         dataspaces, complex dataspace support will be added in the future]
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Identifier of the dataspace to query
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">Identifier of the dataspace to query</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>When successful, returns a positive value, for <code>TRUE</code>,
         or <code>0</code> (zero), for <code>FALSE</code>.
@@ -1117,8 +1147,8 @@ END SUBROUTINE h5sget_simple_extent_type_f
 SUBROUTINE h5sis_simple_f(space_id, flag, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: space_id    ! Dataspace identifier 
-  LOGICAL, INTENT(OUT) :: flag              ! Flag, idicates if dataspace
-                                            ! is simple or not:
+  LOGICAL, INTENT(OUT) :: flag              ! Flag, indicates if dataspace
+                                            ! is simple or not: 
                                             ! TRUE or FALSE  
   INTEGER, INTENT(OUT) :: hdferr            ! Error code
                                             ! 0 on success and -1 on failure 
@@ -1156,12 +1186,14 @@ END SUBROUTINE h5sis_simple_f
     to different locations within a dataspace without requiring it 
     to be redefined.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>IN: The identifier for the dataspace object to reset.
-        <dt><em>const hssize_t *</em><code>offset</code>
-            <dd>IN: The offset at which to position the selection.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+          <td valign="top">IN: The identifier for the dataspace object to reset.</td></tr>
+        <tr>
+		  <td valign="top"><em>const&nbsp;hssize_t&nbsp;*</em><code>offset&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: The offset at which to position the selection.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1205,11 +1237,12 @@ END SUBROUTINE h5soffset_simple_f
     <code>space_id</code>.  <tt>H5S_SELECT_ALL</tt> selects the
     entire dataspace for any dataspace it is applied to.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>IN: The identifier for the dataspace in which the 
-                selection is being made.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: The identifier for the dataspace in which the 
+                selection is being made.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1241,7 +1274,7 @@ END SUBROUTINE h5sselect_all_f
     <dd><em>herr_t</em> <code>H5Sselect_elements</code>(<em>hid_t </em><code>space_id</code>,
         <em>H5S_seloper_t</em> <code>op</code>,
         <em>const size_t</em> <code>num_elements</code>,
-        <em>const hssize_t *</em><code>coord</code>[ ]
+        <em>const hsize_t *</em><code>coord</code>[ ]
     )
 <dt><strong>Purpose:</strong>
     <dd>Selects array elements to be included in the selection for a dataspace.
@@ -1295,38 +1328,42 @@ END SUBROUTINE h5sselect_all_f
         the selection ordering is reset to C array ordering.
 -->
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Identifier of the dataspace.
-        <dt><em>H5S_seloper_t</em> <code>op</code>
-            <dd>Operator specifying how the new selection is to be 
-                combined with the existing selection for the dataspace.
-        <dt><em>const size_t</em> <code>num_elements</code>
-            <dd>Number of elements to be selected.
-        <dt><em>const hssize_t *</em><code>coord</code>[ ]
-            <dd>A 2-dimensional array of 0-based values specifying the 
-                coordinates of the elements being selected.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+          <td valign="top">Identifier of the dataspace.</td></tr>
+        <tr>
+		  <td valign="top"><em>H5S_seloper_t</em> <code>op</code></td>
+          <td valign="top">Operator specifying how the new selection is to be 
+                combined with the existing selection for the dataspace.</td></tr>
+        <tr>
+		  <td valign="top"><em>const&nbsp;size_t</em>&nbsp;<code>num_elements&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">Number of elements to be selected.</td></tr>
+        <tr>
+		  <td valign="top"><em>const hsize_t *</em><code>coord</code>[ ]</td>
+          <td valign="top">A 2-dimensional array of 0-based values specifying the 
+                coordinates of the elements being selected.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful; 
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5sselect_elements_f
     <dd>
 	<pre>
-SUBROUTINE h5sselect_elements_f(space_id, operator, num_elements, &amp; 
+SUBROUTINE h5sselect_elements_f(space_id, operator, num_elements,
                                 coord, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
   INTEGER, INTENT(IN) :: op               ! Flag, valid values are:
                                           !    H5S_SELECT_SET_F 
                                           !    H5S_SELECT_OR_F 
-  INTEGER, INTENT(IN) :: num_elements     ! Number of elements to be selected</pre>
-<!-- NEW PAGE -->
-<pre>
-  INTEGER(HSSIZE_T), DIMENSION(*,*), INTENT(IN) :: coord 
+  INTEGER, INTENT(IN) :: num_elements     ! Number of elements to be selected
+  INTEGER(HSIZE_T), DIMENSION(*,*), INTENT(IN) :: coord 
                                           ! Array with the coordinates
                                           ! of the selected elements:
-                                          ! coord(num_elements, rank)
+                                          ! coord(num_elements, rank)</pre>
+<!-- NEW PAGE -->
+<pre>
   INTEGER, INTENT(OUT) :: hdferr          ! Error code
                                           ! 0 on success and -1 on failure
 END SUBROUTINE h5sselect_elements_f
@@ -1348,7 +1385,7 @@ END SUBROUTINE h5sselect_elements_f
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Sselect_hyperslab</code>(<em>hid_t</em> <code>space_id</code>,
         <em>H5S_seloper_t</em> <code>op</code>,
-        <em>const hssize_t *</em><code>start</code>,
+        <em>const hsize_t *</em><code>start</code>,
         <em>const hsize_t *</em><code>stride</code>,
         <em>const hsize_t *</em><code>count</code>,
         <em>const hsize_t *</em><code>block</code>
@@ -1451,34 +1488,40 @@ END SUBROUTINE h5sselect_elements_f
         Regions selected with this function call default to C order 
         iteration when I/O is performed.
 <dt><strong>Parameters:</strong>
-    <dl> 
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>IN: Identifier of dataspace selection to modify
-        <dt><em>H5S_seloper_t</em> <code>op</code>
-            <dd>IN: Operation to perform on current selection.
-        <dt><em>const hssize_t *</em><code>start</code>
-            <dd>IN: Offset of start of hyperslab
-        <dt><em>const hsize_t *</em><code>count</code>
-            <dd>IN: Number of blocks included in hyperslab.
-        <dt><em>const hsize_t *</em><code>stride</code>
-            <dd>IN: Hyperslab stride.
-        <dt><em>const hsize_t *</em><code>block</code>
-            <dd>IN: Size of block in hyperslab.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+          <td valign="top">IN: Identifier of dataspace selection to modify</td></tr>
+        <tr>
+		  <td valign="top"><em>H5S_seloper_t</em> <code>op</code></td>
+          <td valign="top">IN: Operation to perform on current selection.</td></tr>
+        <tr>
+		  <td valign="top"><em>const hsize_t *</em><code>start</code></td>
+          <td valign="top">IN: Offset of start of hyperslab</td></tr>
+        <tr>
+		  <td valign="top"><em>const hsize_t *</em><code>count</code></td>
+          <td valign="top">IN: Number of blocks included in hyperslab.</td></tr>
+        <tr>
+		  <td valign="top"><em>const&nbsp;hsize_t&nbsp;*</em><code>stride&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Hyperslab stride.</td></tr>
+        <tr>
+		  <td valign="top"><em>const hsize_t *</em><code>block</code></td>
+          <td valign="top">IN: Size of block in hyperslab.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5sselect_hyperslab_f
     <dd>
 	<pre>
-SUBROUTINE h5sselect_hyperslab_f(space_id, operator, start, count, &amp; 
+SUBROUTINE h5sselect_hyperslab_f(space_id, operator, start, count,
                                  hdferr, stride, block) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
   INTEGER, INTENT(IN) :: op               ! Flag, valid values are:
                                           !    H5S_SELECT_SET_F
                                           !    H5S_SELECT_OR_F
-  INTEGER(HSSIZE_T), DIMENSION(*), INTENT(IN) :: start
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: start
                                           ! Starting coordinates of hyperslab 
   INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: count 
                                           ! Number of blocks to select 
@@ -1514,11 +1557,12 @@ END SUBROUTINE h5sselect_hyperslab_f
     <dd><code>H5Sselect_none</code> resets the selection region 
     for the dataspace <code>space_id</code> to include no elements.     
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>IN: The identifier for the dataspace in which the 
-                selection is being reset.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: The identifier for the dataspace in which the 
+                selection is being reset.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1555,10 +1599,11 @@ END SUBROUTINE h5sselect_none_f
     for the dataspace <code>space_id</code> is within the extent
     of the dataspace if the current offset for the dataspace is used.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>The identifier for the dataspace being queried.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">The identifier for the dataspace being queried.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a positive value, for <code>TRUE</code>, 
         if the selection is contained within the extent 
@@ -1600,11 +1645,12 @@ END SUBROUTINE h5sselect_valid_f
     <dd><code>H5Sset_extent_none</code> removes the extent from 
     a dataspace and sets the type to <tt>H5S_NO_CLASS</tt>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>The identifier for the dataspace from which
-                the extent is to be removed.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">The identifier for the dataspace from which
+                the extent is to be removed.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1657,23 +1703,27 @@ END SUBROUTINE h5sset_extent_none_f
         type is set to <code>H5S_SIMPLE</code>, and the extent is set as 
         specified.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Dataspace identifier.
-        <dt><em>int</em> <code>rank</code>
-            <dd>Rank, or dimensionality, of the dataspace.
-        <dt><em>const hsize_t *</em><code>current_size</code>
-            <dd>Array containing current size of dataspace.
-        <dt><em>const hsize_t *</em><code>maximum_size</code>
-            <dd>Array containing maximum size of dataspace.
-    </dl>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+          <td valign="top">Dataspace identifier.</td>
+        <tr>
+		  <td valign="top"><em>int</em> <code>rank</code></td>
+          <td valign="top">Rank, or dimensionality, of the dataspace.</td>
+        <tr>
+		  <td valign="top"><em>const&nbsp;hsize_t&nbsp;*</em><code>current_size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">Array containing current size of dataspace.</td>
+        <tr>
+		  <td valign="top"><em>const hsize_t *</em><code>maximum_size</code></td>
+          <td valign="top">Array containing maximum size of dataspace.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful; 
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5sset_extent_simple_f
     <dd>
 	<pre>
-SUBROUTINE h5sset_extent_simple_f(space_id, rank, current_size, &amp; 
+SUBROUTINE h5sset_extent_simple_f(space_id, rank, current_size,
                                   maximum_size, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: space_id     ! Dataspace identifier 

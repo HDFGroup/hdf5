@@ -21,14 +21,14 @@
 ## tilde to the file name.
 ##
 $(srcdir)/Dependencies: .depend
-	@if test "$(srcdir)" != "."; then                                     \
-      echo '## This file is machine generated on GNU systems.' >$@;       \
-      echo '## Only temporary changes may be made here.' >>$@;            \
-      echo >>$@;                                                          \
-      $(PERL) -p $(top_srcdir)/bin/distdep .depend >>$@;                  \
-    else                                                                  \
-      echo 'Dependencies cannot be built when $$srcdir == $$builddir';    \
-    fi
+	@if test "$(srcdir)" != "."; then					\
+	  echo '## This file is machine generated on GNU systems.' >$@;		\
+	  echo '## Only temporary changes may be made here.' >>$@;		\
+	  echo >>$@;								\
+	  $(PERL) -p $(top_srcdir)/bin/distdep .depend >>$@;			\
+	else									\
+	  echo 'Dependencies cannot be built when $$srcdir == $$builddir';	\
+	fi
 
 .depend: $(LIB_SRC) $(TEST_SRC) $(PROG_SRC)
 	@touch .depend

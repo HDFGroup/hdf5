@@ -10,7 +10,7 @@ srcdir=@srcdir@
 @COMMENCE@
 
 ## Add `-I.' to the C preprocessor flags.
-CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src  -I$(top_srcdir)/tools/lib @CPPFLAGS@
+CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src  -I$(top_srcdir)/hl/src @CPPFLAGS@
 
 ## This is our main target, but also remove the settings file when cleaning.
 LIB=libhdf5_hl.la

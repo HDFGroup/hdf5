@@ -25,6 +25,9 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5FD_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5FD_mask
@@ -50,12 +53,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 
-/* Interface initialization */
-#define INTERFACE_INIT	H5FD_init_interface
-static int interface_initialize_g = 0;
-
 /* static prototypes */
-static herr_t H5FD_init_interface(void);
 static herr_t H5FD_pl_copy(void *(*copy_func)(const void *), size_t pl_size,
     const void *old_pl, void **copied_pl);
 static herr_t H5FD_pl_close(hid_t driver_id, herr_t (*free_func)(void *),
@@ -158,8 +156,8 @@ H5FD_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_term_interface)
 
-    if (interface_initialize_g) {
-	if ((n=H5I_nmembers(H5I_VFL))) {
+    if (H5_interface_initialize_g) {
+	if ((n=H5I_nmembers(H5I_VFL))!=0) {
 	    H5I_clear_group(H5I_VFL, FALSE);
 
             /* Reset the VFL drivers, if they've been closed */
@@ -186,7 +184,7 @@ H5FD_term_interface(void)
             } /* end if */
 	} else {
 	    H5I_destroy_group(H5I_VFL);
-	    interface_initialize_g = 0;
+	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}
     }
@@ -630,7 +628,8 @@ H5FD_pl_close(hid_t driver_id, herr_t (*free_func)(void *), void *pl)
 	H5MM_xfree(pl);
 
     /* Decrement reference count for driver */
-    H5I_dec_ref(driver_id);
+    if(H5I_dec_ref(driver_id)<0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't decrement reference count for driver")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1469,7 +1468,7 @@ H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     /* Check args */
     if (!file || !file->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid file pointer")
-    if (type<0 || type>=H5FD_MEM_NTYPES)
+    if (type<H5FD_MEM_DEFAULT || type>=H5FD_MEM_NTYPES)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid request type")
     if (size==0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "zero-size request")
@@ -1516,7 +1515,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     /* check args */
     assert(file);
     assert(file->cls);
-    assert(type >= 0 && type < H5FD_MEM_NTYPES);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
     assert(size > 0);
 
 
@@ -1579,7 +1578,7 @@ H5FD_alloc_from_free_list(H5FD_t *file, H5FD_mem_t type,
     FUNC_ENTER_NOAPI(H5FD_alloc_from_free_list, HADDR_UNDEF)
 
     assert(file);
-    assert(type >= 0 && type < H5FD_MEM_NTYPES);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
     assert(size > 0);
 
     /*
@@ -1601,7 +1600,7 @@ H5FD_alloc_from_free_list(H5FD_t *file, H5FD_mem_t type,
      *   2. block address is aligned with smallest size > requested size;
      *   3. block address is not aligned with smallest size >= requested size.
      */
-    if (mapped_type >= 0 && (file->maxsize == 0 || size <= file->maxsize)) {
+    if (mapped_type >= H5FD_MEM_DEFAULT && (file->maxsize == 0 || size <= file->maxsize)) {
         H5FD_free_t    *prev = NULL, *best = NULL;
         H5FD_free_t    *cur = file->fl[mapped_type];
         int             found_aligned = 0;
@@ -1757,7 +1756,7 @@ H5FD_alloc_from_free_list(H5FD_t *file, H5FD_mem_t type,
                     if((tmp = H5FL_MALLOC(H5FD_free_t))==NULL)
                         HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "free block allocation failed")
 
-                    if ((tmp->size = (best->size - (head + size)))) {
+                    if ((tmp->size = (best->size - (head + size)))!=0) {
                         tmp->addr = best->addr + (head + size);
                         tmp->next = best->next;
                         best->next = tmp;
@@ -1801,7 +1800,7 @@ H5FD_alloc_metadata(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 
     /* check args */
     assert(file);
-    assert(type >= 0 && type < H5FD_MEM_NTYPES);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
     assert(size > 0);
 
     /*
@@ -1916,7 +1915,7 @@ H5FD_alloc_raw(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 
     /* check args */
     assert(file);
-    assert(type >= 0 && type < H5FD_MEM_NTYPES);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
     assert(size > 0);
 
     /*
@@ -2033,7 +2032,7 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     /* check args */
     assert(file);
     assert(file->cls);
-    assert(type >= 0 && type < H5FD_MEM_NTYPES);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
     assert(size > 0);
     
     /*
@@ -2079,7 +2078,7 @@ H5FD_update_eoa(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     /* check args */
     assert(file);
     assert(file->cls);
-    assert(type >= 0 && type < H5FD_MEM_NTYPES);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
     assert(size > 0);
 
     eoa = file->cls->get_eoa(file);
@@ -2171,7 +2170,7 @@ H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t siz
     /* Check args */
     if (!file || !file->cls)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
-    if (type<0 || type>=H5FD_MEM_NTYPES)
+    if (type<H5FD_MEM_DEFAULT || type>=H5FD_MEM_NTYPES)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request type")
     if (H5P_DEFAULT == dxpl_id)
         dxpl_id= H5P_DATASET_XFER_DEFAULT;
@@ -2219,7 +2218,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
     /* Check args */
     assert(file);
     assert(file->cls);
-    assert(type >= 0 && type < H5FD_MEM_NTYPES);
+    assert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
 
     if (!H5F_addr_defined(addr) || addr>file->maxaddr ||
             H5F_addr_overflow(addr, size) || addr+size>file->maxaddr)
@@ -2241,7 +2240,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
      * without ever telling the driver that it was freed.  Otherwise let the
      * driver deallocate the memory.
      */
-    if (mapped_type>=0) {
+    if (mapped_type>=H5FD_MEM_DEFAULT) {
         H5FD_free_t *last;          /* Last merged node */
         H5FD_free_t *last_prev=NULL;/* Pointer to node before merged node */
         H5FD_free_t *curr;          /* Current free block being inspected */
@@ -3696,7 +3695,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hssize_t
-H5FD_get_freespace(H5FD_t *file)
+H5FD_get_freespace(const H5FD_t *file)
 {
     H5FD_free_t *free_node;     /* Pointer to node on free list */
     H5FD_mem_t type;            /* Type of memory */
@@ -3716,7 +3715,7 @@ H5FD_get_freespace(H5FD_t *file)
         /* Iterate through the free list, accumulating the amount of free space for this type */
         free_node = file->fl[type];
         while(free_node) {
-            ret_value+=free_node->size;
+            ret_value+=(hssize_t)free_node->size;
             free_node=free_node->next;
         } /* end while */
     } /* end for */

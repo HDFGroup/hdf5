@@ -41,7 +41,8 @@ HDF5/H5F API Specification
 </td>
 <td valign=top align=right>
 And in this document, the 
-<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;&nbsp;<br>
+<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;&nbsp;
+<br>
 <a href="RM_H5.html">H5</a>&nbsp;&nbsp;
 <a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
 <a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
@@ -49,7 +50,8 @@ And in this document, the
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
 <a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
-<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;<br>
+<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<br>
 <a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
@@ -57,14 +59,9 @@ And in this document, the
 <a href="Tools.html">Tools</a>&nbsp;&nbsp;
 <a href="PredefDTypes.html">Datatypes</a>&nbsp;&nbsp;
 </td></tr>
-<tr><td colspan="2" align="right">
-<i><small>(<a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/PSandPDF/">PDF</a>
-of complete manual formatted as print volume)&nbsp;&nbsp;&nbsp;</small></i>
-</td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><center>
+<hr><!-- #EndLibraryItem --><center>
 <h1>H5F: File Interface</h1>
 </center>
 
@@ -171,6 +168,7 @@ as the corresponding C function.
     <li><a href="#File-Unmount">h5funmount_f</a>
     <li><a href="#File-GetVfdHandle">h5fget_vfd_handle_f</a>
     <li><a href="#File-GetFilesize">h5fget_filesize_f</a>
+    <li><a href="#File-GetFreespace">h5fget_freespace_f</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
@@ -179,7 +177,6 @@ as the corresponding C function.
     <li><a href="#File-GetName">h5fget_name_f</a>
     <li><a href="#File-GetObjCount">h5fget_obj_count_f</a>
     <li><a href="#File-GetObjIDs">h5fget_obj_ids_f</a>
-    <li><a href="#File-GetObjIDs">h5fget_freespace_f</a>
 </ul>
 </td></tr>
 </table>
@@ -235,10 +232,11 @@ as the corresponding C function.
             in a file before calling <code>H5Fclose</code>.  
             It is generally recommended to do so in all cases.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>file_id</code>
-            <dd>IN: Identifier of a file to terminate access to.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of a file to terminate access to.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -328,11 +326,13 @@ END SUBROUTINE h5fclose_f
             with an already opened file.
 
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>const char *</em><code>name</code>
-            <dd>IN: Name of the file to access.
-        <dt><em>uintn</em> <code>flags</code>
-            <dd>IN: File access flags.  Allowable values are:
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Name of the file to access.</td></tr>
+        <tr>
+		    <td valign="top"><em>uintn</em> <code>flags</code></td>
+            <td valign="top">IN: File access flags.  Allowable values are:
                 <ul><dl>
                     <dt><code>H5F_ACC_TRUNC</code>
                         <dd>Truncate file, if it already exists,  
@@ -345,18 +345,20 @@ END SUBROUTINE h5fclose_f
                 <li>An additional flag, <code>H5F_ACC_DEBUG</code>, prints 
                 debug information.  This flag is used only by HDF5 library 
                 developers; <i>it is neither tested nor supported</i> 
-                for use in applications.
-        <dt><em>hid_t</em> <code>create_id</code>
-            <dd>IN: File creation property list identifier, used when modifying
+                for use in applications.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>create_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File creation property list identifier, used when modifying
                 default file meta-data.
-                Use <code>H5P_DEFAULT</code> for default file creation properties.
-        <dt><em>hid_t</em> <code>access_id</code>
-            <dd>IN: File access property list identifier.
+                Use <code>H5P_DEFAULT</code> for default file creation properties.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>access_id</code></td>
+            <td valign="top">IN: File access property list identifier.
                 If parallel file access is desired, this is a collective
                 call according to the communicator stored in the
                 <code>access_id</code>. 
-                Use <code>H5P_DEFAULT</code> for default file access properties.
-    </dl>
+                Use <code>H5P_DEFAULT</code> for default file access properties.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a file identifier if successful;
         otherwise returns a negative value.
@@ -422,12 +424,12 @@ END SUBROUTINE h5fcreate_f
         action is global or local.  Valid values are
         <center>
         <table border=0>
-        <tr><td align=left valign=bottom><code>H5F_SCOPE_GLOBAL</code></td>
+        <tr><td align=left valign=top><code>H5F_SCOPE_GLOBAL</code></td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td align=left valign=bottom>Flushes the entire virtual file.</td></tr>
-        <tr><td align=left valign=bottom><code>H5F_SCOPE_LOCAL</code></td>
+            <td align=left valign=top>Flushes the entire virtual file.</td></tr>
+        <tr><td align=left valign=top><code>H5F_SCOPE_LOCAL</code></td>
             <td></td>
-            <td align=left valign=bottom>Flushes only the specified file.</td></tr>
+            <td align=left valign=top>Flushes only the specified file.</td></tr>
         </table>
         </center>       
 <dt><strong>Note:</strong>
@@ -437,12 +439,14 @@ END SUBROUTINE h5fcreate_f
         open files.  After that, the OS is responsible for ensuring that
         the data is actually flushed to disk.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t </em><code>object_id</code>
-            <dd>IN: Identifier of object used to identify the file.
-        <dt><em>H5F_scope_t</em> <code>scope</code>
-            <dd>IN: Specifies the scope of the flushing action.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t </em><code>object_id</code></td>
+            <td valign="top">IN: Identifier of object used to identify the file.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5F_scope_t</em>&nbsp;<code>scope&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Specifies the scope of the flushing action.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -489,10 +493,11 @@ END SUBROUTINE h5fflush_f
             <cite>HDF5 User's Guide</cite> for 
             additional information and related functions.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>file_id</code>
-            <dd>IN: Identifier of file to get access property list of
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of file to get access property list of</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a file access property list identifier if successful;
         otherwise returns a negative value.
@@ -516,7 +521,6 @@ END SUBROUTINE h5fget_access_plist_f
         <img src="Graphics/C++.gif">
         -->
 </dl>
-
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Fget_create_plist" -->
@@ -542,10 +546,11 @@ END SUBROUTINE h5fget_access_plist_f
             <cite>HDF5 User's Guide</cite> for 
             additional information and related functions.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>file_id</code>
-            <dd>IN: Identifier of the file to get creation property list of
-    </dl>
+    <ul><table>
+        <dt>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the file to get creation property list of</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a file creation property list identifier if successful;
         otherwise returns a negative value.
@@ -629,7 +634,7 @@ END SUBROUTINE h5fget_filesize_f
 <!-- HEADER RIGHT "H5Fget_freespace" -->
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="File-GetFreespace">H5Fget_freespace</a>
+<dt><strong>Name:</strong> <a name="File-GetFreeSpace">H5Fget_freespace</a>
 <dt><strong>Signature:</strong>
     <dd><em>hssize_t </em><code>H5Fget_freespace</code>(<em>hid_t</em> <code>file_id</code>)
 <dt><strong>Purpose:</strong>
@@ -644,10 +649,11 @@ END SUBROUTINE h5fget_filesize_f
         only report the free space that has been created during that
         interval.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>file_id</code>
-            <dd>IN: Identifier of a currently-open HDF5 file
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of a currently-open HDF5 file</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a the amount of free space in the file if successful;
         otherwise returns a negative value.
@@ -811,13 +817,15 @@ END SUBROUTINE h5fget_name_f
 	For example, the expression <code>(H5F_OBJ_DATASET|H5F_OBJ_GROUP)</code> would call for 
 	datasets and groups.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>file_id</code>
-            <dd>IN: Identifier of a currently-open HDF5 file or 
-	        <code>H5F_OBJ_ALL</code> for all currently-open HDF5 files. 
-        <dt><em>unsigned int</em> <code>types</code>
-            <dd>IN: Type of object for which identifiers are to be returned. 
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>file_id</code></td>
+            <td valign="top">IN: Identifier of a currently-open HDF5 file or 
+	        <code>H5F_OBJ_ALL</code> for all currently-open HDF5 files.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned&nbsp;int</em>&nbsp;<code>types&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Type of object for which identifiers are to be returned.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a the number of open objects if successful;
         otherwise returns a negative value.
@@ -878,17 +886,22 @@ END SUBROUTINE h5fget_obj_count_f
         To retrieve identifiers for all open objects, pass a negative value
         for the <code>max_objs</code>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>file_id</code>
-            <dd>IN: Identifier of a currently-open HDF5 file or 
-	        <code>H5F_OBJ_ALL</code> for all currently-open HDF5 files. 
-        <dt><em>unsigned int</em> <code>types</code>
-            <dd>IN: Type of object for which identifiers are to be returned. 
-        <dt><em>int</em> <code>max_objs</code>
-            <dd>IN: Maximum number of object identifiers to place into <code>obj_id_list</code>.
-        <dt><em>hid_t *</em><code>obj_id_list</code>
-            <dd>OUT: Pointer to the returned list of open object identifiers. 
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>file_id</code></td>
+            <td valign="top">IN: Identifier of a currently-open HDF5 file or 
+	        <code>H5F_OBJ_ALL</code> for all currently-open HDF5 files.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned int</em> <code>types</code></td>
+            <td valign="top">IN: Type of object for which identifiers are to be returned.</td></tr> 
+        <tr>
+		    <td valign="top"><em>int</em> <code>max_objs</code></td>
+            <td valign="top">IN: Maximum number of object identifiers to place into 
+			<code>obj_id_list</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t&nbsp;*</em><code>obj_id_list&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to the returned list of open object identifiers.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns number of objects placed into <code>obj_id_list</code> if successful;
         otherwise returns a negative value.
@@ -948,22 +961,25 @@ END SUBROUTINE h5fget_obj_ids_f
     open; it will be invalid if the file is closed and reopened or 
     opened during a subsequent session.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>file_id</code>
-            <dd>IN: Identifier of the file to be queried.
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list  identifier.
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>file_id</code></td>
+            <td valign="top">IN: Identifier of the file to be queried.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list  identifier.
 	        For most drivers, the value will be <code>H5P_DEFAULT</code>. 
-		For the <code>FAMILY</code> or <code>MULTI</code> drivers,
-		this value should be defined through the property list
-		functions: 
-		<code>H5Pset_family_offset</code> for the <code>FAMILY</code> 
-		driver and <code>H5Pset_multi_type</code> for the 
-		<code>MULTI</code> driver.
-        <dt><em>void *</em><code>file_handle</code>
-            <dd>OUT: Pointer to the file handle being used by 
-	        the low-level virtual file driver.
-    </dl>
+		    For the <code>FAMILY</code> or <code>MULTI</code> drivers,
+		    this value should be defined through the property list
+		    functions: 
+		    <code>H5Pset_family_offset</code> for the <code>FAMILY</code> 
+		    driver and <code>H5Pset_multi_type</code> for the 
+		    <code>MULTI</code> driver.</td></tr>
+        <tr>
+		    <td valign="top"><em>void&nbsp;*</em><code>file_handle&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to the file handle being used by 
+	        the low-level virtual file driver.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -998,10 +1014,11 @@ SUBROUTINE
         <dd><code>H5Fis_hdf5</code> determines whether a file is in 
             the HDF5 format.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>const char *</em><code>name</code>
-            <dd>IN: File name to check format.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File name to check format.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>When successful, returns a positive value, for <code>TRUE</code>,
         or <code>0</code> (zero), for <code>FALSE</code>.
@@ -1050,19 +1067,23 @@ END SUBROUTINE h5fis_hdf5_f
             Note that <code>loc_id</code> is either a file or group identifier
             and <code>name</code> is relative to <code>loc_id</code>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>IN: Identifier for of file or group in 
-                which <code>name</code> is defined.
-        <dt><em>const char *</em><code>name</code>
-            <dd>IN: Name of the group onto which the 
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top">IN: Identifier for of file or group in 
+                which <code>name</code> is defined.</td>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Name of the group onto which the 
                 file specified by <code>child_id</code> 
-                is to be mounted.
-        <dt><em>hid_t</em> <code>child_id</code>
-            <dd>IN: Identifier of the file to be mounted.
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Identifier of the property list to be used.
-    </dl>
+                is to be mounted.</td>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>child_id</code></td>
+            <td valign="top">IN: Identifier of the file to be mounted.</td>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Identifier of the property list to be used.</td>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1150,11 +1171,13 @@ END SUBROUTINE h5fmount_f
             multiple opens of the same file.
 
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>const char *</em><code>name</code>
-            <dd>IN: Name of the file to access.
-        <dt><em>unsigned</em> <code>flags</code>
-            <dd>IN: File access flags.  Allowable values are:
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Name of the file to access.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>flags</code></td>
+            <td valign="top">IN: File access flags.  Allowable values are:
                 <ul><dl>
                     <dt><code>H5F_ACC_RDWR</code>
                         <dd>Allow read and write access to file.
@@ -1167,15 +1190,16 @@ END SUBROUTINE h5fmount_f
                 debug information.  This flag is used only by HDF5 library 
                 developers; it is neither tested nor supported
                 for use in applications.
-                </ul>
+                </ul></td></tr>
 <!-- NEW PAGE -->
-        <dt><em>hid_t</em> <code>access_id</code>
-            <dd>IN: Identifier for the file access properties list.
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>access_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier for the file access properties list.
                 If parallel file access is desired, this is a collective
                 call according to the communicator stored in the
                 <code>access_id</code>. 
-                Use <code>H5P_DEFAULT</code> for default file access properties.
-    </dl>
+                Use <code>H5P_DEFAULT</code> for default file access properties.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a file identifier if successful;
         otherwise returns a negative value.
@@ -1235,11 +1259,12 @@ END SUBROUTINE h5fopen_f
             The new file identifier should be closed by calling
             <code>H5Fclose</code> when it is no longer needed.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>file_id</code>
-            <dd>IN: Identifier of a file for which an additional identifier 
-                is required.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of a file for which an additional identifier 
+                is required.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a new file identifier if successful;
         otherwise returns a negative value.
@@ -1290,13 +1315,15 @@ END SUBROUTINE h5freopen_f
             Note that <code>loc_id</code> is either a file or group identifier
             and <code>name</code> is relative to <code>loc_id</code>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>IN: File or group identifier for the location at which
-                the specified file is to be unmounted.
-        <dt><em>const char *</em><code>name</code>
-            <dd>IN: Name of the mount point.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top">IN: File or group identifier for the location at which
+                the specified file is to be unmounted.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Name of the mount point.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1336,7 +1363,8 @@ END SUBROUTINE h5funmount_f
 </td>
 <td valign=top align=right>
 And in this document, the 
-<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;&nbsp;<br>
+<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;&nbsp;
+<br>
 <a href="RM_H5.html">H5</a>&nbsp;&nbsp;
 <a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
 <a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
@@ -1344,7 +1372,8 @@ And in this document, the
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
 <a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
-<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;<br>
+<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<br>
 <a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
@@ -1352,17 +1381,12 @@ And in this document, the
 <a href="Tools.html">Tools</a>&nbsp;&nbsp;
 <a href="PredefDTypes.html">Datatypes</a>&nbsp;&nbsp;
 </td></tr>
-<tr><td colspan="2" align="right">
-<i><small>(<a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/PSandPDF/">PDF</a>
-of complete manual formatted as print volume)&nbsp;&nbsp;&nbsp;</small></i>
-</td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
-Describes HDF5 Release 1.6.3, September 2004
+Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
 document.writeln("Last modified: 24 August 2004");

@@ -140,6 +140,10 @@ H5TEST_DLL int  TestErrPrintf(const char *format, ...);
 H5TEST_DLL void SetTest(const char *testname, int action);
 
 
+#ifdef H5_HAVE_FILTER_SZIP 
+H5TEST_DLL int h5_szip_can_encode(void);
+#endif /* H5_HAVE_FILTER_SZIP */
+
 #ifdef H5_HAVE_PARALLEL
 H5TEST_DLL int h5_set_info_object(void);
 H5TEST_DLL void h5_dump_info_object(MPI_Info info);

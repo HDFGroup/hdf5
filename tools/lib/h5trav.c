@@ -511,7 +511,6 @@ int traverse( hid_t loc_id,
 
     
   default:
-   printf(" %-10s %s\n", "User defined object", path );
    break;
  
   } 

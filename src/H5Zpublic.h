@@ -81,7 +81,7 @@ typedef enum H5Z_cb_return_t {
 /* Filter callback function definition */
 typedef H5Z_cb_return_t (*H5Z_filter_func_t)(H5Z_filter_t filter, void* buf,
                                 size_t buf_size, void* op_data);
-                                
+
 /* Structure for filter callback property */
 typedef struct H5Z_cb_t {
     H5Z_filter_func_t func;

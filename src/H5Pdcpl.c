@@ -27,10 +27,6 @@
 #include "H5Ppkg.h"		/* Property lists		  	*/
 #include "H5Zprivate.h"		/* Data filters				*/
 
-/* Interface initialization */
-#define INTERFACE_INIT  NULL
-static int             interface_initialize_g = 0;
-
 /* Local datatypes */
 
 /* Static function prototypes */
@@ -495,7 +491,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_external(hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
+H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name/*out*/,
 		 off_t *offset/*out*/, hsize_t *size/*out*/)
 {
     H5O_efl_t           efl;
@@ -503,7 +499,7 @@ H5Pget_external(hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_external, FAIL);
-    H5TRACE6("e","iIszxxx",plist_id,idx,name_size,name,offset,size);
+    H5TRACE6("e","iIuzxxx",plist_id,idx,name_size,name,offset,size);
     
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
@@ -513,7 +509,7 @@ H5Pget_external(hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
     if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list");
     
-    if (idx<0 || (size_t)idx>=efl.nused)
+    if (idx>=efl.nused)
         HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL, "external file index is out of range");
 
     /* Return values */
@@ -551,6 +547,8 @@ done:
  *		failed; the filter will not participate in the pipeline
  *		during an H5Dread() of the chunk.  If this bit is clear and
  *		the filter fails then the entire I/O operation fails.
+ *      If this bit is set but encoding is disabled for a filter,
+ *      attempting to write will generate an error.
  *
  * Note:	This function currently supports only the permanent filter
  *		pipeline.  That is, PLIST_ID must be a dataset creation
@@ -627,6 +625,8 @@ done:
  *		failed; the filter will not participate in the pipeline
  *		during an H5Dread() of the chunk.  If this bit is clear and
  *		the filter fails then the entire I/O operation fails.
+ *      If this bit is set but encoding is disabled for a filter,
+ *      attempting to write will generate an error.
  *
  * Note:	This function currently supports only the permanent filter
  *		pipeline.  That is, PLIST_ID must be a dataset creation
@@ -767,7 +767,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5Z_filter_t
-H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
+H5Pget_filter(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
 	       size_t *cd_nelmts/*in_out*/, unsigned cd_values[]/*out*/,
 	       size_t namelen, char name[]/*out*/)
 {
@@ -778,7 +778,7 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
     H5Z_filter_t ret_value;     /* return value */
     
     FUNC_ENTER_API(H5Pget_filter, H5Z_FILTER_ERROR);
-    H5TRACE7("Zf","iIsx*zxzx",plist_id,idx,flags,cd_nelmts,cd_values,namelen,
+    H5TRACE7("Zf","iIux*zxzx",plist_id,idx,flags,cd_nelmts,cd_values,namelen,
              name);
 
     /* Check args */
@@ -811,7 +811,7 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get pipeline");
 
     /* Check more args */
-    if (idx<0 || (size_t)idx>=pline.nused)
+    if (idx>=pline.nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "filter number is invalid");
 
     /* Set pointer to particular filter to query */
@@ -1434,45 +1434,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_fill_value_defined
- *
- * Purpose:	Check if fill value is defined.  Internal version of function
- * 
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Raymond Lu
- *              Wednesday, January 16, 2002
- *
- * Modifications:
- *              
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5P_fill_value_defined(H5P_genplist_t *plist, H5D_fill_value_t *status)
-{
-    herr_t		ret_value = SUCCEED;
-    H5O_fill_t		fill;
-
-    FUNC_ENTER_NOAPI(H5P_fill_value_defined, FAIL);
-
-    assert(plist);
-    assert(status);
-
-    /* Get the fill value struct */
-    if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value"); 
-
-    /* Get the fill-value status */
-    if(H5P_is_fill_value_defined(&fill, status) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't check fill value status"); 
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5P_fill_value_defined() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5Pfill_value_defined
  *
  * Purpose:	Check if fill value is defined.
@@ -1491,6 +1452,7 @@ herr_t
 H5Pfill_value_defined(hid_t plist_id, H5D_fill_value_t *status)
 {
     H5P_genplist_t 	*plist;
+    H5O_fill_t		fill;
     herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Pfill_value_defined, FAIL);
@@ -1502,9 +1464,13 @@ H5Pfill_value_defined(hid_t plist_id, H5D_fill_value_t *status)
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    /* Call the internal function */
-    if(H5P_fill_value_defined(plist, status) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value info"); 
+    /* Get the fill value struct */
+    if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value"); 
+
+    /* Get the fill-value status */
+    if(H5P_is_fill_value_defined(&fill, status) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't check fill value status"); 
 
 done:
     FUNC_LEAVE_API(ret_value);

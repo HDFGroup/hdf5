@@ -1837,18 +1837,18 @@ setDefaultValues(struct Input *in, int count)
 }
 
 hid_t 
-createOutputDataType(struct Input in)
+createOutputDataType(struct Input *in)
 {
   hid_t new_type = (-1);
   const char *err1 = "Invalid value for output class.\n";
   
-  switch (in.outputClass)
+  switch (in->outputClass)
   {
     case 0: 
-      switch (in.outputArchitecture)
+      switch (in->outputArchitecture)
       {
         case 0: /* NATIVE */
-          switch(in.outputSize)
+          switch(in->outputSize)
           {
             case 8:
               new_type = H5Tcopy (H5T_NATIVE_CHAR);
@@ -1869,10 +1869,10 @@ createOutputDataType(struct Input in)
         break;
           
         case 1: /* STD */
-          switch(in.outputSize)
+          switch(in->outputSize)
           {
             case 8:
-              switch(in.outputByteOrder)
+              switch(in->outputByteOrder)
               {
                 case 0:
                   new_type = H5Tcopy (H5T_STD_I8BE);
@@ -1885,7 +1885,7 @@ createOutputDataType(struct Input in)
             break;
 
             case 16:
-              switch(in.outputByteOrder)
+              switch(in->outputByteOrder)
               {
                 case 0:
                   new_type = H5Tcopy (H5T_STD_I16BE);
@@ -1898,7 +1898,7 @@ createOutputDataType(struct Input in)
             break;
 
             case 32:
-              switch(in.outputByteOrder)
+              switch(in->outputByteOrder)
               {
                 case 0:
                   new_type = H5Tcopy (H5T_STD_I32BE);
@@ -1911,7 +1911,7 @@ createOutputDataType(struct Input in)
             break;
 
             case 64:
-              switch(in.outputByteOrder)
+              switch(in->outputByteOrder)
               {
                 case 0:
                   new_type = H5Tcopy (H5T_STD_I64BE);
@@ -1929,10 +1929,10 @@ createOutputDataType(struct Input in)
         break;
 
     case 1:
-      switch (in.outputArchitecture)
+      switch (in->outputArchitecture)
       {
         case 0:
-          switch(in.outputSize)
+          switch(in->outputSize)
           {
             case 32:
               new_type = H5Tcopy (H5T_NATIVE_FLOAT);                                
@@ -1949,10 +1949,10 @@ createOutputDataType(struct Input in)
         break;
 
         case 2:
-          switch(in.outputSize)
+          switch(in->outputSize)
           {
             case 32:
-              switch(in.outputByteOrder)
+              switch(in->outputByteOrder)
               {
                 case 0:
                   new_type = H5Tcopy (H5T_IEEE_F32BE);
@@ -1965,7 +1965,7 @@ createOutputDataType(struct Input in)
             break;
 
             case 64:
-              switch(in.outputByteOrder)
+              switch(in->outputByteOrder)
               {
                 case 0:
                   new_type = H5Tcopy (H5T_IEEE_F64BE);
@@ -1983,10 +1983,10 @@ createOutputDataType(struct Input in)
       break;
 
     case 2:
-        switch (in.outputArchitecture)
+        switch (in->outputArchitecture)
         {
           case 0:
-            switch(in.outputSize)
+            switch(in->outputSize)
             {
               case 8:
                 new_type = H5Tcopy (H5T_NATIVE_UCHAR);
@@ -2007,10 +2007,10 @@ createOutputDataType(struct Input in)
             break;
           
           case 1:
-            switch(in.outputSize)
+            switch(in->outputSize)
             {
               case 8:
-                switch(in.outputByteOrder)
+                switch(in->outputByteOrder)
                 {
                   case 0:
                     new_type = H5Tcopy (H5T_STD_U8BE);
@@ -2023,7 +2023,7 @@ createOutputDataType(struct Input in)
                 break;
 
               case 16:
-                switch(in.outputByteOrder)
+                switch(in->outputByteOrder)
                 {
                   case 0:
                     new_type = H5Tcopy (H5T_STD_U16BE);
@@ -2036,7 +2036,7 @@ createOutputDataType(struct Input in)
                 break;
 
               case 32:
-                switch(in.outputByteOrder)
+                switch(in->outputByteOrder)
                 {
                   case 0:
                     new_type = H5Tcopy (H5T_STD_U32BE);
@@ -2049,7 +2049,7 @@ createOutputDataType(struct Input in)
                 break;
 
               case 64:
-                switch(in.outputByteOrder)
+                switch(in->outputByteOrder)
                 {
                   case 0:
                     new_type = H5Tcopy (H5T_STD_U64BE);
@@ -2079,16 +2079,16 @@ createOutputDataType(struct Input in)
 }
 
 hid_t 
-createInputDataType(struct Input in)
+createInputDataType(struct Input *in)
 {
   hid_t new_type = (-1);
   const char *err1 = "Invalid value for input class.\n";
 
-  switch (in.inputClass)
+  switch (in->inputClass)
   {
     case 0:
     case 4:
-        switch(in.inputSize)
+        switch(in->inputSize)
         {
           case 8:
               new_type = H5Tcopy (H5T_NATIVE_CHAR);
@@ -2111,7 +2111,7 @@ createInputDataType(struct Input in)
     case 1:
     case 2:
     case 3:
-        switch(in.inputSize)
+        switch(in->inputSize)
         {
           case 32:
               new_type = H5Tcopy (H5T_NATIVE_FLOAT);
@@ -2128,7 +2128,7 @@ createInputDataType(struct Input in)
 
     case 6:
     case 7:
-        switch(in.inputSize)
+        switch(in->inputSize)
         {
           case 8:
               new_type = H5Tcopy (H5T_NATIVE_UCHAR);
@@ -2165,8 +2165,6 @@ process(struct Options *opt)
   hid_t intype, outtype;
   hid_t proplist;  
   hsize_t numOfElements = 1; 
-  H5E_auto_t func;
-  void *client_data;
   int j,k;
 
   const char *err1 = "Error creating HDF output file: %s.\n";
@@ -2175,18 +2173,16 @@ process(struct Options *opt)
   const char *err4 = "Error in creating or opening external file.\n";  
   const char *err5 = "Error in creating the output data set. Dataset with the same name may exist at the specified path\n";
   const char *err6 = "Error in writing the output data set.\n";
-  H5Eget_auto(&func, &client_data);
-    
-    /* disable error reporting */
-    H5Eset_auto(NULL, NULL);
-  if ((file_id = H5Fopen(opt->outfile, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
-  if ((file_id = H5Fcreate(opt->outfile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) == FAIL) 
-  {
-    (void) fprintf(stderr, err1, opt->outfile);
-    return (-1);
-  }
-    /*enable error reporting */
-    H5Eset_auto(func, client_data);
+
+  H5E_BEGIN_TRY {
+    if ((file_id = H5Fopen(opt->outfile, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
+      if ((file_id = H5Fcreate(opt->outfile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) == FAIL) 
+      {
+        (void) fprintf(stderr, err1, opt->outfile);
+        return (-1);
+      }
+    }
+  } H5E_END_TRY;
     
   for (k = 0; k < opt->fcount; k++)
   {
@@ -2209,11 +2205,8 @@ process(struct Options *opt)
     for (j=0; j<in->rank;j++)
       numOfElements *= in->sizeOfDimension[j];
 
-  /* store error reporting parameters */
-    H5Eget_auto(&func, &client_data);
-    
     /* disable error reporting */
-    H5Eset_auto(NULL, NULL);
+    H5E_BEGIN_TRY {
     
     /* create parent groups */
     if (in->path.count > 1)
@@ -2241,11 +2234,11 @@ process(struct Options *opt)
     }
 
     /*enable error reporting */
-    H5Eset_auto(func, client_data);
+    } H5E_END_TRY;
     
     /*create data type */
-    intype = createInputDataType(*in);
-    outtype = createOutputDataType(*in);    
+    intype = createInputDataType(in);
+    outtype = createOutputDataType(in);    
     
     /* create property list */
     proplist = H5Pcreate (H5P_DATASET_CREATE);      
@@ -2285,10 +2278,9 @@ process(struct Options *opt)
     {
       dataspace = H5Screate_simple(in->rank, in->sizeOfDimension, NULL);
     }
-    H5Eget_auto(&func, &client_data);
     
     /* disable error reporting */
-    H5Eset_auto(NULL, NULL); 
+    H5E_BEGIN_TRY {
     /* create data set */
     if ((dataset = H5Dcreate(handle, in->path.group[j], outtype, dataspace, proplist)) < 0) 
     {
@@ -2300,7 +2292,7 @@ process(struct Options *opt)
     }
  
     /*enable error reporting */
-    H5Eset_auto(func, client_data);
+    } H5E_END_TRY;
 
      /* write dataset */
     if (H5Dwrite(dataset, intype, H5S_ALL, H5S_ALL, H5P_DEFAULT, (VOIDP)in->data) < 0) 

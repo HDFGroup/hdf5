@@ -337,7 +337,6 @@ hsize_t diff_long(unsigned char *mem1,
 																			const char    *obj2,
 																			int           *ph);
 
-
 hsize_t diff_ulong(unsigned char *mem1,
 																			unsigned char *mem2,
 																			hsize_t       nelmts,

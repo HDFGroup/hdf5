@@ -305,10 +305,9 @@ herr_t H5TBappend_records( hid_t loc_id,
  hid_t    tid=-1;    
  hid_t    mem_type_id=-1;
  hsize_t  count[1];    
- hssize_t offset[1];
+ hsize_t offset[1];
  hid_t    sid=-1;
  hid_t    mem_space_id=-1;
- int      rank;
  hsize_t  dims[1];
  hsize_t  mem_dims[1];
  hsize_t  nrecords_orig;
@@ -346,7 +345,7 @@ herr_t H5TBappend_records( hid_t loc_id,
   return -1;
 
  /* Get the dimensions */
- if ( (rank = H5Sget_simple_extent_dims( sid, dims, NULL )) != 1 )
+ if ( H5Sget_simple_extent_dims( sid, dims, NULL ) != 1 )
   goto out;
 
  /* Define a hyperslab in the dataset */
@@ -426,7 +425,7 @@ herr_t H5TBwrite_records( hid_t loc_id,
  hid_t    did;
  hid_t    tid;    
  hsize_t  count[1];    
- hssize_t offset[1];
+ hsize_t offset[1];
  hid_t    sid=-1;
  hid_t    mem_space_id=-1;
  hsize_t  mem_size[1];
@@ -540,7 +539,7 @@ herr_t H5TBwrite_fields_name( hid_t loc_id,
  hid_t    member_type_id;
  hid_t    nmtype_id;
  hsize_t  count[1];    
- hssize_t offset[1];
+ hsize_t offset[1];
  hid_t    sid=-1;
  char     *member_name;
  hssize_t  nfields;
@@ -710,10 +709,9 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
  hid_t    member_type_id;
  hid_t    nmtype_id;
  hsize_t  count[1];    
- hssize_t offset[1];
+ hsize_t offset[1];
  hid_t    sid=-1;
  char     *member_name;
- int      nmenbers;
  hsize_t  i, j;
  hid_t    PRESERVE;
  size_t   size_native;
@@ -733,7 +731,7 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
   goto out;
  
  /* Get the number of fields */
- if ( ( nmenbers = H5Tget_nmembers( tid )) < 0 )
+ if ( H5Tget_nmembers( tid ) < 0 )
   goto out;
  
  /* Create a write id */
@@ -954,7 +952,7 @@ herr_t H5TBread_records( hid_t loc_id,
  hid_t    ftype_id;    
  hid_t    mem_type_id=-1;
  hsize_t  count[1];    
- hssize_t offset[1];
+ hsize_t offset[1];
  hid_t    sid=-1;
  hsize_t  dims[1];
  hid_t    mem_space_id=-1;
@@ -1071,7 +1069,7 @@ herr_t H5TBread_fields_name( hid_t loc_id,
  char     *member_name;
  hssize_t nfields;
  hsize_t  count[1];    
- hssize_t offset[1];
+ hsize_t offset[1];
  hid_t    sid=-1;
  hid_t    mem_space_id=-1;
  hsize_t  mem_size[1];
@@ -1224,10 +1222,9 @@ herr_t H5TBread_fields_index( hid_t loc_id,
  hid_t    read_type_id=-1;
  hid_t    member_type_id;
  hid_t    nmtype_id;
- hssize_t member_size;
  char     *member_name;
  hsize_t  count[1];    
- hssize_t offset[1];
+ hsize_t offset[1];
  hid_t    sid=-1;
  hid_t    mem_space_id=-1;
  hsize_t  mem_size[1];
@@ -1259,7 +1256,7 @@ herr_t H5TBread_fields_index( hid_t loc_id,
    goto out;
 
   /* Get the member size */
-  if ( ( member_size = H5Tget_size( member_type_id )) < 0 )
+  if ( H5Tget_size( member_type_id ) == 0 )
    goto out;
   
   /* Convert to native type */
@@ -1387,7 +1384,7 @@ herr_t H5TBdelete_record( hid_t loc_id,
  hid_t    did;
  hid_t    tid;    
  hsize_t  count[1];    
- hssize_t offset[1];
+ hsize_t offset[1];
  hid_t    sid;
  hid_t    mem_space_id;
  hsize_t  mem_size[1];
@@ -1558,7 +1555,7 @@ herr_t H5TBinsert_record( hid_t loc_id,
  hid_t    tid=-1; 
  hid_t    mem_type_id=-1;
  hsize_t  count[1];    
- hssize_t offset[1];
+ hsize_t offset[1];
  hid_t    sid=-1;
  hid_t    mem_space_id=-1;
  hsize_t  dims[1];
@@ -1719,10 +1716,10 @@ herr_t H5TBadd_records_from( hid_t loc_id,
  hid_t    type_id1;  
  hid_t    space_id1=-1;
  hid_t    mem_space_id1=-1;
- hssize_t type_size1;
+ size_t   type_size1;
 
  hsize_t  count[1];    
- hssize_t offset[1];
+ hsize_t offset[1];
  hsize_t  mem_size[1];
  hsize_t  nfields;
  hsize_t  ntotal_records;
@@ -1768,10 +1765,10 @@ herr_t H5TBadd_records_from( hid_t loc_id,
   goto out;
 
  /* Get the size of the datatype */
- if ( ( type_size1 = H5Tget_size( type_id1 )) < 0 )
+ if ( ( type_size1 = H5Tget_size( type_id1 )) == 0 )
   goto out;
 
- tmp_buf = (unsigned char *)calloc((size_t)nrecords, (size_t)type_size1 );
+ tmp_buf = (unsigned char *)calloc((size_t)nrecords, type_size1 );
 
  /* Define a hyperslab in the dataset of the size of the records */
  offset[0] = start1;
@@ -1877,7 +1874,7 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  hid_t    plist_id3;
 
  hsize_t  count[1];    
- hssize_t offset[1];
+ hsize_t offset[1];
  hid_t    mem_space_id;
  hsize_t  mem_size[1];
  hsize_t  nfields;
@@ -1889,7 +1886,7 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  size_t   type_size;
  hid_t    sid;
  hid_t    member_type_id;
- hssize_t member_offset;
+ size_t   member_offset;
  char     attr_name[255];
  hid_t    attr_id;
  char     aux[255];
@@ -2012,8 +2009,7 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
     goto out;
    
    /* Get the member offset */
-   if ( ( member_offset = H5Tget_member_offset( type_id3, (unsigned) i )) < 0 )
-    goto out;
+   member_offset = H5Tget_member_offset( type_id3, (unsigned) i );
    
    strcpy( attr_name, "FIELD_" );
    sprintf( aux, "%d", (int) i );
@@ -2260,15 +2256,14 @@ herr_t H5TBinsert_field( hid_t loc_id,
  size_t   member_size;
  size_t   new_member_size = 0;
  char     *member_name;
- hssize_t total_size;
+ size_t   total_size;
  hsize_t  nfields;
  hsize_t  nrecords;
- int      rank_chunk;
  hsize_t  dims_chunk[1];
  hsize_t  dims[1];
  hsize_t  maxdims[1] = { H5S_UNLIMITED };
  hsize_t  count[1];    
- hssize_t offset[1];
+ hsize_t offset[1];
  hsize_t  mem_size[1];
  hid_t    write_type_id;
  hid_t    PRESERVE;
@@ -2276,7 +2271,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
  int      inserted;
  hsize_t  idx;
  char     table_title[255];
- hssize_t member_offset;
+ size_t   member_offset;
  char     attr_name[255];
  hid_t    attr_id;
  char     aux[255];
@@ -2306,7 +2301,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
   goto out;
 
  /* Get the size of the datatype */
- if ( ( total_size = H5Tget_size( type_id1 )) < 0 )
+ if ( ( total_size = H5Tget_size( type_id1 )) == 0 )
   goto out;
   
  /* Get the dataspace handle */
@@ -2327,7 +2322,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
   goto out;
 
  /* alloc fill value attribute buffer */
- tmp_fill_buf = (unsigned char *)malloc((size_t) total_size );
+ tmp_fill_buf = (unsigned char *)malloc(total_size );
 
  /* Get the fill value attributes */
  if ( (H5TBAget_fill( loc_id, dset_name, dataset_id1, tmp_fill_buf )) < 0 )
@@ -2405,7 +2400,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
  */
 
  /* Retrieve the size of chunk */
- if ( ( rank_chunk = H5Pget_chunk( plist_id1, 1, dims_chunk )) < 0 )
+ if ( H5Pget_chunk( plist_id1, 1, dims_chunk ) < 0 )
   goto out;
 
  /* Create a new simple data space with unlimited size, using the dimension */
@@ -2593,8 +2588,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
     goto out;
 
    /* Get the member offset */
-   if ( ( member_offset = H5Tget_member_offset( type_id1, (unsigned) i )) < 0 )
-    goto out;
+   member_offset = H5Tget_member_offset( type_id1, (unsigned) i );
 
    strcpy( attr_name, "FIELD_" );
    sprintf( aux, "%d", (int)i );
@@ -2714,7 +2708,6 @@ herr_t H5TBdelete_field( hid_t loc_id,
  size_t   type_size2;
  hsize_t  nfields;
  hsize_t  nrecords;
- int      rank_chunk;
  hsize_t  dims_chunk[1];
  hsize_t  dims[1];
  hsize_t  maxdims[1] = { H5S_UNLIMITED };
@@ -2892,7 +2885,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
  */
 
  /* Retrieve the size of chunk */
- if ( ( rank_chunk = H5Pget_chunk( plist_id1, 1, dims_chunk )) < 0 )
+ if ( H5Pget_chunk( plist_id1, 1, dims_chunk ) < 0 )
   goto out;
 
  /* Create a new simple data space with unlimited size, using the dimension */

@@ -39,12 +39,18 @@
  *		errors within the H5E package.
  *
  */
+
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5E_init_interface
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5E_mask
+
 #include "H5private.h"		/* Generic Functions			  */
 #include "H5Iprivate.h"		/* IDs                                    */
 #include "H5Eprivate.h"		/* Private error routines		  */
 #include "H5MMprivate.h"	/* Memory management			  */
-
-#define PABLO_MASK	H5E_mask
 
 static const H5E_major_mesg_t H5E_major_mesg_g[] = {
     {H5E_NONE_MAJOR,	"No error"},
@@ -203,7 +209,6 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
 /* Interface initialization? */
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5E_init_interface
-static herr_t H5E_init_interface (void);
 
 #ifdef H5_HAVE_THREADSAFE
 /*
@@ -215,16 +220,16 @@ static herr_t H5E_init_interface (void);
  * In order for this macro to work, H5E_get_my_stack() must be preceeded
  * by "H5E_t *estack =".
  */
-H5E_t *H5E_get_stack(void);
+static H5E_t *    H5E_get_stack(void);
 #define H5E_get_my_stack()  H5E_get_stack()
-#else
+#else /* H5_HAVE_THREADSAFE */
 /*
- * The error stack.  Eventually we'll have some sort of global table so each
- * thread has it's own stack.  The stacks will be created on demand when the
- * thread first calls H5E_push().  */
+ * The current error stack.
+ */
 H5E_t		H5E_stack_g[1];
-#define H5E_get_my_stack()	(H5E_stack_g+0)
-#endif
+#define H5E_get_my_stack() (H5E_stack_g+0)
+#endif /* H5_HAVE_THREADSAFE */
+
 
 #ifdef H5_HAVE_PARALLEL
 /*
@@ -244,49 +249,8 @@ void *H5E_auto_data_g = NULL;
 
 
 /* Static function declarations */
+static herr_t H5E_walk (H5E_direction_t direction, H5E_walk_t func, void *client_data);
 static herr_t H5E_walk_cb (int n, H5E_error_t *err_desc, void *client_data);
-
-
-#ifdef H5_HAVE_THREADSAFE
-/*-------------------------------------------------------------------------
- * Function:	H5E_get_stack
- *
- * Purpose:	Support function for H5E_get_my_stack() to initialize and
- *              acquire per-thread error stack.
- *
- * Return:	Success:	error stack (H5E_t *)
- *
- *		Failure:	NULL
- *
- * Programmer:	Chee Wai LEE
- *              April 24, 2000
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-H5E_t *
-H5E_get_stack(void)
-{
-    H5E_t *estack;
-    H5E_t *ret_value;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5E_get_stack,NULL);
-
-    estack = pthread_getspecific(H5TS_errstk_key_g);
-    if (!estack) {
-        /* no associated value with current thread - create one */
-        estack = (H5E_t *)H5MM_malloc(sizeof(H5E_t));
-        pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
-    }
-
-    /* Set return value */
-    ret_value=estack;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-#endif  /* H5_HAVE_THREADSAFE */
 
 
 /*-------------------------------------------------------------------------
@@ -310,12 +274,55 @@ done:
 static herr_t
 H5E_init_interface (void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_init_interface)
 
     H5E_auto_data_g = stderr;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
+
+
+#ifdef H5_HAVE_THREADSAFE
+/*-------------------------------------------------------------------------
+ * Function:	H5E_get_stack
+ *
+ * Purpose:	Support function for H5E_get_my_stack() to initialize and
+ *              acquire per-thread error stack.
+ *
+ * Return:	Success:	error stack (H5E_t *)
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Chee Wai LEE
+ *              April 24, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5E_t *
+H5E_get_stack(void)
+{
+    H5E_t *estack;
+    H5E_t *ret_value;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5E_get_stack,NULL)
+
+    estack = pthread_getspecific(H5TS_errstk_key_g);
+
+    if (!estack) {
+        /* no associated value with current thread - create one */
+        estack = (H5E_t *)H5MM_malloc(sizeof(H5E_t));
+        pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
+    }
+
+    /* Set return value */
+    ret_value=estack;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+#endif  /* H5_HAVE_THREADSAFE */
 
 
 /*-------------------------------------------------------------------------
@@ -349,14 +356,14 @@ H5Eset_auto(H5E_auto_t func, void *client_data)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API(H5Eset_auto, FAIL);
+    FUNC_ENTER_API(H5Eset_auto, FAIL)
     H5TRACE2("e","xx",func,client_data);
     
     H5E_auto_g = func;
     H5E_auto_data_g = client_data;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -381,14 +388,14 @@ H5Eget_auto(H5E_auto_t *func, void **client_data)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API(H5Eget_auto, FAIL);
+    FUNC_ENTER_API(H5Eget_auto, FAIL)
     H5TRACE2("e","*xx",func,client_data);
 
     if (func) *func = H5E_auto_g;
     if (client_data) *client_data = H5E_auto_data_g;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -412,12 +419,12 @@ H5Eclear(void)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API(H5Eclear, FAIL);
+    FUNC_ENTER_API(H5Eclear, FAIL)
     H5TRACE0("e","");
     /* FUNC_ENTER() does all the work */
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -449,7 +456,7 @@ H5Eprint(FILE *stream)
     herr_t	ret_value = FAIL;
     
     /* Don't clear the error stack! :-) */
-    FUNC_ENTER_API_NOCLEAR(H5Eprint, FAIL);
+    FUNC_ENTER_API_NOCLEAR(H5Eprint, FAIL)
     /*NO TRACE*/
     
     if (!stream) stream = stderr;
@@ -475,7 +482,7 @@ H5Eprint(FILE *stream)
     ret_value = H5E_walk (H5E_WALK_DOWNWARD, H5E_walk_cb, (void*)stream);
     
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -500,13 +507,13 @@ H5Ewalk(H5E_direction_t direction, H5E_walk_t func, void *client_data)
     herr_t	ret_value;
 
     /* Don't clear the error stack! :-) */
-    FUNC_ENTER_API_NOCLEAR(H5Ewalk, FAIL);
+    FUNC_ENTER_API_NOCLEAR(H5Ewalk, FAIL)
     H5TRACE3("e","Edxx",direction,func,client_data);
 
     ret_value = H5E_walk (direction, func, client_data);
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -551,7 +558,7 @@ H5E_walk_cb(int n, H5E_error_t *err_desc, void *client_data)
     const char		*min_str = NULL;
     const int		indent = 2;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_walk_cb);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_walk_cb)
     /*NO TRACE*/
 
     /* Check arguments */
@@ -571,7 +578,7 @@ H5E_walk_cb(int n, H5E_error_t *err_desc, void *client_data)
     fprintf (stream, "%*sminor(%02d): %s\n",
 	     indent*2, "", err_desc->min_num, min_str);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -605,15 +612,14 @@ H5Eget_major (H5E_major_t n)
      *		traversal and adding/removing entries as the result of an
      *		error would most likely mess things up.
      */
-    FUNC_ENTER_API_NOINIT(H5Eget_major);
+    FUNC_ENTER_API_NOINIT(H5Eget_major)
 
-    for (i=0; i<NELMTS (H5E_major_mesg_g); i++) {
+    for (i=0; i<NELMTS (H5E_major_mesg_g); i++)
 	if (H5E_major_mesg_g[i].error_code==n)
-	    HGOTO_DONE(H5E_major_mesg_g[i].str);
-    }
+	    HGOTO_DONE(H5E_major_mesg_g[i].str)
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -647,15 +653,14 @@ H5Eget_minor (H5E_minor_t n)
      *		traversal and adding/removing entries as the result of an
      *		error would most likely mess things up.
      */
-    FUNC_ENTER_API_NOINIT(H5Eget_minor);
+    FUNC_ENTER_API_NOINIT(H5Eget_minor)
 
-    for (i=0; i<NELMTS (H5E_minor_mesg_g); i++) {
+    for (i=0; i<NELMTS (H5E_minor_mesg_g); i++)
 	if (H5E_minor_mesg_g[i].error_code==n)
-	    HGOTO_DONE(H5E_minor_mesg_g[i].str);
-    }
+	    HGOTO_DONE(H5E_minor_mesg_g[i].str)
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -694,7 +699,7 @@ H5E_push(H5E_major_t maj_num, H5E_minor_t min_num, const char *function_name,
      *		HERROR().  HERROR() is called by HRETURN_ERROR() which could
      *		be called by FUNC_ENTER().
      */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_push);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_push)
 
     /*
      * Don't fail if arguments are bad.  Instead, substitute some default
@@ -718,7 +723,7 @@ H5E_push(H5E_major_t maj_num, H5E_minor_t min_num, const char *function_name,
 	estack->nused++;
     }
     
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -750,13 +755,13 @@ H5Epush(const char *file, const char *func, unsigned line, H5E_major_t maj,
 {
     herr_t	ret_value;
     
-    FUNC_ENTER_API(H5Epush, FAIL);
+    FUNC_ENTER_API(H5Epush, FAIL)
     H5TRACE6("e","ssIuEjEns",file,func,line,maj,min,str);
 
     ret_value = H5E_push(maj, min, func, file, line, str);
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -780,12 +785,12 @@ H5E_clear(void)
     H5E_t	*estack = H5E_get_my_stack ();
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5E_clear, FAIL);
+    FUNC_ENTER_NOAPI(H5E_clear, FAIL)
 
     if (estack) estack->nused = 0;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -815,7 +820,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5E_walk (H5E_direction_t direction, H5E_walk_t func, void *client_data)
 {
     H5E_t	*estack = H5E_get_my_stack ();
@@ -823,7 +828,7 @@ H5E_walk (H5E_direction_t direction, H5E_walk_t func, void *client_data)
     herr_t	status;
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5E_walk, FAIL);
+    FUNC_ENTER_NOAPI(H5E_walk, FAIL)
 
     /* check args, but rather than failing use some default value */
     if (direction!=H5E_WALK_UPWARD && direction!=H5E_WALK_DOWNWARD) {
@@ -843,6 +848,6 @@ H5E_walk (H5E_direction_t direction, H5E_walk_t func, void *client_data)
     }
     
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 

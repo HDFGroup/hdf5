@@ -126,6 +126,8 @@ DONE:
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Tuesday, May 14, 2002
+ * Modifications: This function is added to accomodate oveloaded h5dwrite_f
+ *                with the dims argument being of INTEGER(HSIZE_T) type
  *---------------------------------------------------------------------------*/
 int_f
 nh5dwritec_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
@@ -152,6 +154,8 @@ nh5dwritec_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Tuesday, May 14, 2002
+ * Modifications: This function is added to accomodate oveloaded h5dwrite_f
+ *                with the dims argument being of INTEGER(HSIZE_T) type
  *---------------------------------------------------------------------------*/
 int_f
 nh5dwrite_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
@@ -197,6 +201,8 @@ nh5dwrite_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_
  * Returns:     0 on success,e-1 on failure
  * Programmer:  Elena Pourmal
  *              Tuesday, May 14, 2002
+ * Modifications: This function was added to accomodate h5dwrite_f with the
+ *                dims argumnet being of INTEGER(HSIZE_T) type.
  *---------------------------------------------------------------------------*/
 int_f
 nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, hsize_t_f *dims)
@@ -208,7 +214,7 @@ nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
      hid_t c_mem_space_id;
      hid_t c_file_space_id;
      hid_t c_xfer_prp;
-     hobj_ref_t *buf_c = NULL;
+     hobj_ref_t *buf_c;
      int i, n;
      n = (int)*dims;
 
@@ -256,6 +262,8 @@ nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Tuesday, May 14, 2002
+ * Modifications: This function was added to accomodate h5dwrite_f with the
+ *                dims argument being of INTEGER(HSIZE_T) type
  *---------------------------------------------------------------------------*/
 int_f
 nh5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, hsize_t_f *dims)
@@ -317,6 +325,8 @@ nh5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Wednesday, May 15, 2002
+ * Modifications: This function was added to accomodate h5dread_f subroutine
+ *                with the dims parameter being of INTEGER(HSIZE_T_F) size.
  *---------------------------------------------------------------------------*/
 int_f
 nh5dreadc_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
@@ -343,6 +353,8 @@ nh5dreadc_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Wednesday, May 15, 2002
+ * Modifications: This function was added to accomodate h5dread_f subroutine
+ *                with the dims parameter being of INTEGER(HSIZE_T_F) size.
  *---------------------------------------------------------------------------*/
 int_f
 nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f *dims)
@@ -376,6 +388,7 @@ nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t
 
 /*----------------------------------------------------------------------------
  * Name:        h5dread_ref_obj_c
+ * Purpose:     Call H5Dread to read a dataset  of object references
  * Inputs:      dset_id - dataset identifier 
  *              mem_type_id - memory datatype identifier
  *              mem_space_id - memory dataspace identifier
@@ -386,6 +399,8 @@ nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Wednesday, May 15, 2002
+ * Modifications: This function was added to accomodate h5dread_f subroutine
+ *                with the dims parameter being of INTEGER(HSIZE_T_F) size.
  *---------------------------------------------------------------------------*/
 int_f
 nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f * buf, hsize_t_f *dims)
@@ -408,23 +423,23 @@ nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
      /*
       * Allocate temporary buffer.
       */
-     buf_c = (hobj_ref_t*)HDmalloc(sizeof(hobj_ref_t)*(n));
+     buf_c = (hobj_ref_t*)HDmalloc(sizeof(hobj_ref_t)*(size_t)n);
      if ( buf_c != NULL ) {
-     /*
-      * Call H5Dread function.
-      */
-     c_dset_id = (hid_t)*dset_id;
-     c_mem_type_id = (hid_t)*mem_type_id;
-     c_mem_space_id = (hid_t)*mem_space_id;
-     c_file_space_id = (hid_t)*file_space_id;
-     ret = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf_c);
-     if (ret >=0) {
-        for (i = 0; i < n; i++) {
-           HDmemcpy(buf, &buf_c[i], H5R_OBJ_REF_BUF_SIZE);
-           buf = buf + REF_OBJ_BUF_LEN_F;
-        }  
-     }
-     if ( buf_c != NULL ) HDfree(buf_c);
+         /*
+          * Call H5Dread function.
+          */
+         c_dset_id = (hid_t)*dset_id;
+         c_mem_type_id = (hid_t)*mem_type_id;
+         c_mem_space_id = (hid_t)*mem_space_id;
+         c_file_space_id = (hid_t)*file_space_id;
+         ret = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf_c);
+         if (ret >=0) {
+            for (i = 0; i < n; i++) {
+               HDmemcpy(buf, &buf_c[i], H5R_OBJ_REF_BUF_SIZE);
+               buf = buf + REF_OBJ_BUF_LEN_F;
+            }  
+         }
+         if ( buf_c != NULL ) HDfree(buf_c);
      } 
      if (ret < 0) return ret_value;
      ret_value = 0;
@@ -444,6 +459,8 @@ nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Wednesday, May 15, 2002
+ * Modifications: This function was added to accomodate h5dread_f subroutine
+ *                with the dims parameter being of INTEGER(HSIZE_T_F) size.
  *---------------------------------------------------------------------------*/
 int_f
 nh5dread_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f * buf, hsize_t_f *dims)
@@ -466,23 +483,23 @@ nh5dread_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
      /*
       * Allocate temporary buffer.
       */
-     buf_c = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t)*(n));
+     buf_c = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t)*(size_t)n);
      if ( buf_c != NULL ) {
-     /*
-      * Call H5Dread function.
-      */
-     c_dset_id = (hid_t)*dset_id;
-     c_mem_type_id = (hid_t)*mem_type_id;
-     c_mem_space_id = (hid_t)*mem_space_id;
-     c_file_space_id = (hid_t)*file_space_id;
-     ret = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf_c);
-     if (ret >=0) {
-        for (i = 0; i < n; i++) {
-           HDmemcpy(buf, &buf_c[i], H5R_DSET_REG_REF_BUF_SIZE);
-           buf = buf + REF_REG_BUF_LEN_F;
-        }  
-     }
-     if ( buf_c != NULL ) HDfree(buf_c);
+         /*
+          * Call H5Dread function.
+          */
+         c_dset_id = (hid_t)*dset_id;
+         c_mem_type_id = (hid_t)*mem_type_id;
+         c_mem_space_id = (hid_t)*mem_space_id;
+         c_file_space_id = (hid_t)*file_space_id;
+         ret = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf_c);
+         if (ret >=0) {
+            for (i = 0; i < n; i++) {
+               HDmemcpy(buf, &buf_c[i], H5R_DSET_REG_REF_BUF_SIZE);
+               buf = buf + REF_REG_BUF_LEN_F;
+            }  
+         }
+         if ( buf_c != NULL ) HDfree(buf_c);
      } 
      if (ret < 0) return ret_value;
      ret_value = 0;
@@ -700,7 +717,7 @@ nh5dvlen_get_max_len_c ( hid_t_f *dset_id ,  hid_t_f *type_id, hid_t_f *space_id
   num_elem = H5Sget_select_npoints(c_space_id);  
   if( num_elem < 0) return ret_value;
 
-  c_buf = (hvl_t *)malloc(sizeof(hvl_t)*num_elem); 
+  c_buf = (hvl_t *)malloc(sizeof(hvl_t)*(size_t)num_elem); 
   if (c_buf == NULL) return ret_value;
   status = H5Dread(c_dset_id, c_type_id, H5S_ALL, c_space_id, H5P_DEFAULT, c_buf);
   if(status < 0) goto DONE;
@@ -749,7 +766,7 @@ nh5dwrite_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_
   size_t max_len;
 
   hvl_t *c_buf;
-  int i;
+  hsize_t i;
   hsize_t num_elem;
   
   max_len = (size_t)dims[0];
@@ -761,7 +778,7 @@ nh5dwrite_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_
   c_file_space_id = (hid_t)*file_space_id;
   c_xfer_prp      = (hid_t)*xfer_prp;
 
-  c_buf = (hvl_t *)malloc(num_elem * sizeof(hvl_t)); 
+  c_buf = (hvl_t *)malloc((size_t)num_elem * sizeof(hvl_t)); 
   if (c_buf == NULL) return ret_value;
   tmp = (int *)buf; 
   for (i=0; i < num_elem; i++) {
@@ -826,7 +843,7 @@ nh5dread_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_s
   num_elem = H5Sget_select_npoints(c_mem_space_id);  
   if(num_elem != dims[1]) return ret_value;
 
-  c_buf = (hvl_t *)malloc(num_elem * sizeof(hvl_t)); 
+  c_buf = (hvl_t *)malloc((size_t)num_elem * sizeof(hvl_t)); 
   if (c_buf == NULL) return ret_value;
   /*
    * Call H5Dread function.
@@ -876,7 +893,7 @@ nh5dwrite_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_sp
   size_t max_len;
 
   char **c_buf;
-  int i;
+  hsize_t i;
   hsize_t num_elem;
   
   max_len = (size_t)dims[0];
@@ -891,11 +908,11 @@ nh5dwrite_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_sp
   /*
    * Allocate arra of character pointers
    */
-  c_buf = (char **)malloc(num_elem * sizeof(char *)); 
+  c_buf = (char **)malloc((size_t)num_elem * sizeof(char *)); 
   if (c_buf == NULL) return ret_value;
 
   /* Copy data to long C string */
-  tmp = (char *)HD5f2cstring(buf, max_len*num_elem);
+  tmp = (char *)HD5f2cstring(buf, (int)(max_len*num_elem));
   if (tmp == NULL) { free(c_buf);
                      return ret_value;
                    }
@@ -904,8 +921,8 @@ nh5dwrite_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_sp
    */
    tmp_p = tmp;
    for (i=0; i < num_elem; i++) {
-        c_buf[i] = (char *) malloc(len[i]+1);
-        memcpy(c_buf[i], tmp_p, len[i]);
+        c_buf[i] = (char *) malloc((size_t)len[i]+1);
+        memcpy(c_buf[i], tmp_p, (size_t)len[i]);
         c_buf[i][len[i]] = '\0'; 
         tmp_p = tmp_p + max_len;
    }
@@ -955,7 +972,7 @@ nh5dread_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
   size_t max_len;
 
   char **c_buf;
-  int i;
+  hsize_t i;
   hsize_t num_elem;
   
   max_len = (size_t)dims[0];
@@ -970,7 +987,7 @@ nh5dread_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
   /*
    * Allocate array of character pointers
    */
-  c_buf = (char **)malloc(num_elem * sizeof(char *)); 
+  c_buf = (char **)malloc((size_t)num_elem * sizeof(char *)); 
   if (c_buf == NULL) return ret_value;
 
   /*
@@ -981,7 +998,7 @@ nh5dread_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
                      return ret_value;
                    }
   /* Copy data to long C string */
-  tmp = (char *)malloc(max_len*num_elem +1);
+  tmp = (char *)malloc((size_t)(max_len*num_elem) +1);
   tmp_p = tmp;
   for (i=0; i<max_len*num_elem; i++) tmp[i] = ' ';
   tmp[max_len*num_elem] = '\0';
@@ -990,7 +1007,7 @@ nh5dread_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
         len[i] = (size_t_f)strlen(c_buf[i]);
         tmp_p = tmp_p + max_len;
   }
-  HD5packFstring(tmp, _fcdtocp(buf), max_len*num_elem);  
+  HD5packFstring(tmp, _fcdtocp(buf), (int)(max_len*num_elem));
   ret_value = 0;
   H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
   free(c_buf);
@@ -1027,15 +1044,11 @@ nh5dwrite_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
   hid_t c_file_space_id;
   hid_t c_xfer_prp;
   herr_t status;
-#if defined (_UNICOS)
-  double *tmp;
-#else
-  float *tmp;
-#endif
+  real_f *tmp;
   size_t max_len;
 
   hvl_t *c_buf;
-  int i;
+  hsize_t i;
   hsize_t num_elem;
   
   max_len = (size_t)dims[0];
@@ -1047,13 +1060,9 @@ nh5dwrite_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
   c_file_space_id = (hid_t)*file_space_id;
   c_xfer_prp      = (hid_t)*xfer_prp;
 
-  c_buf = (hvl_t *)malloc(num_elem * sizeof(hvl_t)); 
+  c_buf = (hvl_t *)malloc((size_t)num_elem * sizeof(hvl_t)); 
   if (c_buf == NULL) return ret_value;
-#if defined (_UNICOS)
-  tmp = (double *)buf; 
-#else
-  tmp = (float *)buf;
-#endif
+  tmp = (real_f *)buf; 
   for (i=0; i < num_elem; i++) {
        c_buf[i].len = (size_t)len[i];  
        c_buf[i].p   = tmp;
@@ -1116,7 +1125,7 @@ nh5dread_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spac
   num_elem = H5Sget_select_npoints(c_mem_space_id);  
   if(num_elem != dims[1]) return ret_value;
 
-  c_buf = (hvl_t *)malloc(num_elem * sizeof(hvl_t)); 
+  c_buf = (hvl_t *)malloc((size_t)num_elem * sizeof(hvl_t)); 
   if (c_buf == NULL) return ret_value;
   /*
    * Call H5Dread function.
@@ -1125,11 +1134,7 @@ nh5dread_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spac
  if ( status <0  )  goto DONE;
   for (i=0; i < num_elem; i++) {
        len[i] = (size_t_f)c_buf[i].len;  
-#if defined (_UNICOS)
-       memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(double));
-#else
-       memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(float));
-#endif
+       memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(real_f));
   }
   
   H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);

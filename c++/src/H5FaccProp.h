@@ -129,7 +129,7 @@ class H5_DLLCPP FileAccPropList : public PropList {
 	// using the property list id.
 	FileAccPropList (const hid_t plist_id);
 
-	// Default destructor
+	// Noop destructor
 	virtual ~FileAccPropList();
 };
 #ifndef H5_NO_NAMESPACE

@@ -5,6 +5,7 @@
 # the various compile modes.
 
 # Use AIX supplied C compiler by default, xlc for serial, mpcc_r for parallel.
+# Use -D_LARGE_FILES by default to support large file size.
 if test "X-" =  "X-$CC"; then
   if test "X-$enable_parallel" = "X-yes"; then
     CC=mpcc_r
@@ -17,7 +18,7 @@ fi
 
 # Define RUNPARALLEL if parallel mode is enabled or a parallel compiler used.
 if test "X-$enable_parallel" = "X-yes" -o X-$CC_BASENAME = X-mpcc_r; then
-    RUNPARALLEL=${RUNPARALLEL="MP_PROCS=\$\${NPROCS:=3} MP_TASKS_PER_NODE=\$\${NPROCS:=3} poe"}
+  RUNPARALLEL=${RUNPARALLEL="MP_PROCS=\$\${NPROCS:=3} MP_TASKS_PER_NODE=\$\${NPROCS:=3} poe"}
 fi
 
 
@@ -27,33 +28,33 @@ fi
 # `--enable-debug' switch of configure.
 
 case $CC_BASENAME in
-    xlc|mpcc_r)
-	# Turn off shared lib option.  It causes some test suite to fail.
-	enable_shared="${enable_shared:-no}"
-        # Use -D_LARGE_FILES by default to support large file size.
-        CFLAGS="-qlanglvl=ansi -D_LARGE_FILES $CFLAGS"
-	DEBUG_CFLAGS="-g"
-	DEBUG_CPPFLAGS=
-	# -O causes test/dtypes to fail badly. Turn it off for now.
-	PROD_CFLAGS=""
-	PROD_CPPFLAGS=
-	PROFILE_CFLAGS="-pg"
-	PROFILE_CPPFLAGS=
-	;;
+  xlc|mpcc_r)
+    # Turn off shared lib option.  It causes some test suite to fail.
+    enable_shared="${enable_shared:-no}"
+    # Use -D_LARGE_FILES by default to support large file size.
+    CFLAGS="-qlanglvl=ansi -D_LARGE_FILES -DSTDC $CFLAGS"
+    DEBUG_CFLAGS="-g -qfullpath"
+    DEBUG_CPPFLAGS=
+    # -O causes test/dtypes to fail badly. Turn it off for now.
+    PROD_CFLAGS=""
+    PROD_CPPFLAGS=
+    PROFILE_CFLAGS="-g -qfullpath -pg"
+    PROFILE_CPPFLAGS=
+    ;;
 
-    gcc)
-	. $srcdir/config/gnu-flags
-	;;
+  gcc)
+    . $srcdir/config/gnu-flags
+    ;;
 
-    *)
-	CFLAGS="$CFLAGS -ansi"
-	DEBUG_CFLAGS="-g"
-	DEBUG_CPPFLAGS=
-	PROD_CFLAGS="-O"
-	PROD_CPPFLAGS=
-	PROFILE_CFLAGS="-pg"
-	PROFILE_CPPFLAGS=
-	;;
+  *)
+    CFLAGS="$CFLAGS -ansi"
+    DEBUG_CFLAGS="-g"
+    DEBUG_CPPFLAGS=
+    PROD_CFLAGS="-O"
+    PROD_CPPFLAGS=
+    PROFILE_CFLAGS="-pg"
+    PROFILE_CPPFLAGS=
+    ;;
 esac
 
 #----------------------------------------------------------------------------

@@ -1505,7 +1505,7 @@ PASSED();
  if (H5Iget_name( type_id, name, size )<0) goto out;
  if (check_name( name, "/g18/t2" )!=0) goto out;
 
- /* Get name for the IDs of the secondt file, should be "" */
+ /* Get name for the IDs of the second file, should be "" */
  if (H5Iget_name( group6_id, name, size )<0) goto out;
  if (check_name( name, "" )!=0) goto out;
 

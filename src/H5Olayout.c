@@ -36,7 +36,7 @@
 static void *H5O_layout_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_layout_copy(const void *_mesg, void *_dest, unsigned update_flags);
-static size_t H5O_layout_size(H5F_t *f, const void *_mesg);
+static size_t H5O_layout_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_layout_reset (void *_mesg);
 static herr_t H5O_layout_free (void *_mesg);
 static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
@@ -67,9 +67,6 @@ const H5O_class_t H5O_LAYOUT[1] = {{
 #define H5O_LAYOUT_VERSION_1	1
 #define H5O_LAYOUT_VERSION_2	2
 #define H5O_LAYOUT_VERSION_3	3
-
-/* Interface initialization */
-#define INTERFACE_INIT  NULL
 
 /* Declare a free list to manage the H5O_layout_t struct */
 H5FL_DEFINE(H5O_layout_t);
@@ -427,7 +424,7 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5O_layout_meta_size(H5F_t *f, const void *_mesg)
+H5O_layout_meta_size(const H5F_t *f, const void *_mesg)
 {
     /* Casting away const OK - QAK */
     H5O_layout_t      *mesg = (H5O_layout_t *) _mesg;
@@ -536,7 +533,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_layout_size(H5F_t *f, const void *_mesg)
+H5O_layout_size(const H5F_t *f, const void *_mesg)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     size_t                  ret_value;

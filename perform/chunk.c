@@ -197,7 +197,7 @@ test_rowmaj (int op, size_t cache_size, size_t io_size)
     hid_t	file, dset, mem_space, file_space;
     signed char	*buf = calloc (1, (size_t)(SQUARE(io_size)));
     hsize_t	i, j, hs_size[2];
-    hssize_t	hs_offset[2];
+    hsize_t	hs_offset[2];
 #ifdef H5_WANT_H5_V1_4_COMPAT
     int		mdc_nelmts, rdcc_nelmts;
 #else /* H5_WANT_H5_V1_4_COMPAT */
@@ -277,7 +277,7 @@ test_diag (int op, size_t cache_size, size_t io_size, size_t offset)
     hid_t	file, dset, mem_space, file_space;
     hsize_t	i, hs_size[2];
     hsize_t	nio = 0;
-    hssize_t	hs_offset[2];
+    hsize_t	hs_offset[2];
     signed char	*buf = calloc (1, (size_t)(SQUARE (io_size)));
 #ifdef H5_WANT_H5_V1_4_COMPAT
     int		mdc_nelmts, rdcc_nelmts;

@@ -407,7 +407,7 @@
          !
          CALL h5dopen_f(reopen_id, dsetname, dset_id, error)
               CALL check("h5dopen_f",error,total_error)
-
+         !
          !Get file name from the dataset identifier
          !
          CALL h5fget_name_f(dset_id, file_name, name_size, error)

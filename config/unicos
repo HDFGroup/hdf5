@@ -28,12 +28,11 @@
 #       used within this file.
 
 if test "X-" =  "X-$CC"; then
-    CC=cc
-    CC_BASENAME=cc
+  CC=cc
+  CC_BASENAME=cc
 fi
 # no need to use RANLIB
 RANLIB=:
-
 
 # C Compiler and Preprocessor Flags
 # ---------------------------------
@@ -88,38 +87,36 @@ RANLIB=:
 # above).
 
 case $CC_BASENAME in
-    gcc)
-	CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
-	DEBUG_CFLAGS="-g -fverbose-asm"
-	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
-	PROD_CFLAGS="-O3 -fomit-frame-pointer"
-	PROD_CPPFLAGS=
-	PROFILE_CFLAGS="-pg"
-	PROFILE_CPPFLAGS=
-	;;
+  gcc)
+    CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
+    DEBUG_CFLAGS="-g -fverbose-asm"
+    DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+    PROD_CFLAGS="-O3 -fomit-frame-pointer"
+    PROD_CPPFLAGS=
+    PROFILE_CFLAGS="-pg"
+    PROFILE_CPPFLAGS=
+    ;;
 
-    cc)
-	CFLAGS="$CFLAGS"
-	DEBUG_CFLAGS="-g -h zero -h scalar0"
-	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+  cc)
+    CFLAGS="$CFLAGS"
+    DEBUG_CFLAGS="-g -h zero -h scalar0"
+    DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
     PROD_CFLAGS="-O2 -h scalar0"
-	PROD_CPPFLAGS=
-	PROFILE_CFLAGS="-pg"
-	PROFILE_CPPFLAGS=
-	;;
+    PROD_CPPFLAGS=
+    PROFILE_CFLAGS="-pg"
+    PROFILE_CPPFLAGS=
+    ;;
 
-    *)
-	CFLAGS="$CFLAGS -ansi"
-	DEBUG_CFLAGS="-g"
-	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
-	PROD_CFLAGS="-O"
-	PROD_CPPFLAGS=
-	PROFILE_CFLAGS="-pg"
-	PROFILE_CPPFLAGS=
-	;;
+  *)
+    CFLAGS="$CFLAGS -ansi"
+    DEBUG_CFLAGS="-g"
+    DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+    PROD_CFLAGS="-O"
+    PROD_CPPFLAGS=
+    PROFILE_CFLAGS="-pg"
+    PROFILE_CPPFLAGS=
+    ;;
 esac
-
-
 
 # Overriding Configure Tests
 # --------------------------

@@ -8,9 +8,9 @@
 
 # The default compiler is `gcc'.
 if test "X-" =  "X-$CC"; then
-    CC=gcc
-    CC_BASENAME=gcc
-    LD=ld
+  CC=gcc
+  CC_BASENAME=gcc
+  LD=ld
 fi
 
 # Figure out compiler flags

@@ -7,30 +7,30 @@
 # See BlankForm in this directory for details
 
 # Default compiler is `cc'
-if test "X-" =  "X-$CC"; then
-    CC=cc
-    CC_BASENAME=cc
+if test "X$CC" = "X"; then
+  CC=cc
+  CC_BASENAME=cc
 fi
 
 # Flags
 case "X-$CC" in
-    X-gcc)
-	CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
-	DEBUG_CFLAGS="-g -fverbose-asm"
-	DEBUG_CPPFLAGS=
-	PROD_CFLAGS="-O3"
-	PROD_CPPFLAGS=
-	PROFILE_CFLAGS="-pg"
-	PROFILE_CPPFLAGS=
-	;;
+  X-gcc)
+    CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
+    DEBUG_CFLAGS="-g -fverbose-asm"
+    DEBUG_CPPFLAGS=
+    PROD_CFLAGS="-O3"
+    PROD_CPPFLAGS=
+    PROFILE_CFLAGS="-pg"
+    PROFILE_CPPFLAGS=
+    ;;
 
-    *)
-	CFLAGS="$CFLAGS -Ae"
-	DEBUG_CFLAGS=-g
-	DEBUG_CPPFLAGS=
-	PROD_CFLAGS=
-	PROD_CPPFLAGS=
-	PROFILE_CFLAGS=
-	PROFILE_CPPFLAGS=
-	;;
+  *)
+    CFLAGS="$CFLAGS -Ae"
+    DEBUG_CFLAGS=-g
+    DEBUG_CPPFLAGS=
+    PROD_CFLAGS=
+    PROD_CPPFLAGS=
+    PROFILE_CFLAGS=
+    PROFILE_CPPFLAGS=
+    ;;
 esac

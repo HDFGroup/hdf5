@@ -54,7 +54,7 @@ AbstractDs::AbstractDs( const AbstractDs& original ) : H5Object( original ) {}
 // Function:	AbstractDs::getTypeClass
 ///\brief	Returns the class of the datatype that is used by this 
 ///		object, which can be a dataset or an attribute.
-///\return      Datatype class identifier
+///\return	Datatype class identifier
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -80,7 +80,7 @@ H5T_class_t AbstractDs::getTypeClass() const
 // Function:	AbstractDs::getDataType
 ///\brief	Returns the generic datatype of this abstract dataset, which
 ///		can be a dataset or an attribute.
-///\return      DataType instance
+///\return	DataType instance
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -100,7 +100,7 @@ DataType AbstractDs::getDataType() const
 // Function:	AbstractDs::getEnumType
 ///\brief	Returns the enumeration datatype of this abstract dataset which 
 ///		can be a dataset or an attribute.
-///\return      EnumType instance
+///\return	EnumType instance
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -114,7 +114,7 @@ EnumType AbstractDs::getEnumType() const
 // Function:	AbstractDs::getCompType
 ///\brief	Returns the compound datatype of this abstract dataset which 
 ///		can be a dataset or an attribute.
-///\return      CompType instance
+///\return	CompType instance
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -128,7 +128,7 @@ CompType AbstractDs::getCompType() const
 // Function:	AbstractDs::getIntType
 ///\brief	Returns the integer datatype of this abstract dataset which 
 ///		can be a dataset or an attribute.
-///\return      IntType instance
+///\return	IntType instance
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -142,7 +142,7 @@ IntType AbstractDs::getIntType() const
 // Function:	AbstractDs::getFloatType
 ///\brief	Returns the floating-point datatype of this abstract dataset,
 ///		which can be a dataset or an attribute.
-///\return      FloatType instance
+///\return	FloatType instance
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -156,7 +156,7 @@ FloatType AbstractDs::getFloatType() const
 // Function:	AbstractDs::getStrType
 ///\brief	Returns the string datatype of this abstract dataset which 
 ///		can be a dataset or an attribute.
-///\return      StrType instance
+///\return	StrType instance
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------

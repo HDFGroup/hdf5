@@ -34,7 +34,7 @@ class H5_DLLCPP CompType : public DataType {
 	// Returns the type class of the specified member of this compound
 	// datatype.  It provides to the user a way of knowing what type
 	// to create another datatype of the same class
-	H5T_class_t getMemberClass( int member_num ) const;
+	H5T_class_t getMemberClass( unsigned member_num ) const;
 
 	// Returns the dimensionality of the specified member. 
 	int getMemberDims( int member_num, size_t* dims, int* perm ) const;
@@ -44,10 +44,10 @@ class H5_DLLCPP CompType : public DataType {
 	int getMemberIndex(const string& name) const;
 
 	// Returns the offset of a member of this compound datatype. 
-	size_t getMemberOffset( int memb_no ) const;
+	size_t getMemberOffset( unsigned memb_no ) const;
 
 	// Returns the name of a member of this compound datatype. 
-	string getMemberName( int member_num ) const;
+	string getMemberName( unsigned member_num ) const;
 
 	// Returns the compound datatype of the specified member in 
 	// this compound datatype.
@@ -97,7 +97,7 @@ class H5_DLLCPP CompType : public DataType {
    private:
 	// Contains common code that is used by the member functions
 	// getMemberXxxType
-	hid_t p_get_member_type(int member_num) const; 
+	hid_t p_get_member_type(unsigned member_num) const; 
 };
 #ifndef H5_NO_NAMESPACE
 }

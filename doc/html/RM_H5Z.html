@@ -105,7 +105,7 @@ as the corresponding C function.
     </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top width="30%">
     <ul>
-<!--<li><a href="#Compression-Register">h5zregister_f</a><br>        -->
+<!--<li><a href="#Compression-Register">h5zregister_f</a><br>    -->
     <li><a href="#Compression-GetFilterInfo">h5zget_filter_info_f</a>
     </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top width="30%">
@@ -129,10 +129,10 @@ The flexibility of the filter pipeline implementation enables the
 definition of additional filters by a user application.
 A filter
   <ul>
-    <li>is associated with a dataset when the dataset is created,<br>
-    <li>can be used only with chunked data<br>
-    (i.e., datasets stored in the <code>H5D_CHUNKED</code> 
-    storage layout), and
+    <li>is associated with a dataset when the dataset is created,
+    <li>can be used only with chunked data
+        <br>(i.e., datasets stored in the <code>H5D_CHUNKED</code> 
+        storage layout), and
     <li>is applied independently to each chunk of the dataset.
   </ul>
 <p>
@@ -179,12 +179,13 @@ data compression.
     <dd><code>H5Zfilter_avail</code> determines whether the filter 
         specified in <code>filter</code> is available to the application.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>H5Z_filter_t</em> <code>filter</code>
-            <dd>IN: Filter identifier.
-              See the introduction to this section of the reference manual
-              for a list of valid filter identifiers.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5Z_filter_t</em>&nbsp;<code>filter&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Filter identifier.
+              See the introduction to this section of the reference manual 
+              for a list of valid filter identifiers.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -275,20 +276,20 @@ END SUBROUTINE h5zfilter_avail_f
       the filter is not so configured.
       <p>
       If a filter is not encode-enabled, the corresponding
-      <code>H5Pset_*</code> function will return an error if the 
-      filter is added to a dataset creation property list (which is 
+      <code>H5Pset_*</code> function will return an error if the
+      filter is added to a dataset creation property list (which is
       required if the filter is to be used to encode that dataset).
       For example, if the <code>H5Z_FILTER_CONFIG_ENCODE_ENABLED</code>
-      flag is not returned for the SZIP filter, 
-      <code>H5Z_FILTER_SZIP</code>, a call to <code>H5Pset_szip</code> 
+      flag is not returned for the SZIP filter,
+      <code>H5Z_FILTER_SZIP</code>, a call to <code>H5Pset_szip</code>
       will fail.
       <p>
-      If a filter is not decode-enabled, the application will not be 
-      able to read an existing file encoded with that filter.  
+      If a filter is not decode-enabled, the application will not be
+      able to read an existing file encoded with that filter.
       <p>
-      This function should be called, and the returned 
-      <code>filter_config_flags</code> analyzed, before calling 
-      any other function, such as <code>H5Pset_szip</code>, 
+      This function should be called, and the returned
+      <code>filter_config_flags</code> analyzed, before calling
+      any other function, such as <code>H5Pset_szip</code>,
       that might require a particular filter configuration.
 
 <dt><strong>Parameters:</strong>
@@ -301,24 +302,24 @@ END SUBROUTINE h5zfilter_avail_f
         <dd>OUT: A bit field encoding the returned filter information
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value on success, 
+    <dd>Returns a non-negative value on success,
         a negative value on failure.
 
 <!-- NEW PAGE -->
 <dt><strong>Fortran90 Interface:</strong> 
     <dd>
     <pre>
-SUBROUTINE h5zget_filter_info_f(filter, config_flags, hdferr) 
+SUBROUTINE h5zget_filter_info_f(filter, config_flags, hdferr)
 
   IMPLICIT NONE
-  INTEGER, INTENT(IN)  :: filter        ! Filter, may be one of the 
+  INTEGER, INTENT(IN)  :: filter        ! Filter, may be one of the
                                         ! following:
                                         !     H5Z_FILTER_DEFLATE_F
                                         !     H5Z_FILTER_SHUFFLE_F
                                         !     H5Z_FILTER_FLETCHER32_F
                                         !     H5Z_FILTER_SZIP_F
-  INTEGER, INTENT(OUT) :: config_flags  ! Bit field indicating whether 
-                                        ! a filter's encoder and/or 
+  INTEGER, INTENT(OUT) :: config_flags  ! Bit field indicating whether
+                                        ! a filter's encoder and/or
                                         ! decoder are available
   INTEGER, INTENT(OUT) :: hdferr        ! Error code
 
@@ -326,8 +327,8 @@ END SUBROUTINE h5zfilter_avail_f
     </pre>
         <!--<dt><strong>Non-C API(s):</strong>
         <dd>
-        
-        <img src="Graphics/Java.gif"> 
+
+        <img src="Graphics/Java.gif">
         <img src="Graphics/C++.gif">
         -->
 </dl>
@@ -523,10 +524,11 @@ END SUBROUTINE h5zfilter_avail_f
       the <i>set local</i> and <i>can apply</i> callback functions
       first appeared in HDF5 Release 1.6.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>const H5Z_class_t</em> <code>filter_class</code>
-            <dd>IN: Struct containing filter-definition information.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>const&nbsp;H5Z_class_t</em>&nbsp;<code>filter_class&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Struct containing filter-definition information.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -563,13 +565,14 @@ END SUBROUTINE h5zfilter_avail_f
 	specified in <code>filter</code> will no longer be 
 	available to the application.
   <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>H5Z_filter_t</em> <code>filter</code>
-            <dd>IN: Identifier of the filter to be unregistered.
-                See the introduction to this section of the reference manual
-                for a list of identifiers for standard filters distributed 
-				with the HDF5 Library.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5Z_filter_t</em>&nbsp;<code>filter&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the filter to be unregistered.
+                See the introduction to this section of the reference manual 
+                for a list of identifiers for standard filters
+                distributed with the HDF5 Library.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.

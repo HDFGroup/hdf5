@@ -92,7 +92,7 @@ test_h5s_basic(void)
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		sid1, sid2;	/* Dataspace ID			*/
     hid_t		dset1;		/* Dataset ID			*/
-    hid_t               aid1;           /* Attribute ID                 */
+    hid_t       aid1;       /* Attribute ID         */
     int		        rank;		/* Logical rank of dataspace	*/
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2, SPACE2_DIM3,
@@ -152,9 +152,9 @@ test_h5s_basic(void)
     rank = H5Sget_simple_extent_dims(sid1, tdims, tmax);
     CHECK(rank, FAIL, "H5Sget_simple_extent_dims");
     VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(hsize_t)), 0,
-           "H5Sget_simple_extent_dims");
+	   "H5Sget_simple_extent_dims");
     VERIFY(HDmemcmp(tmax, dims1, SPACE1_RANK * sizeof(hsize_t)), 0,
-           "H5Sget_simple_extent_dims");
+	   "H5Sget_simple_extent_dims");
 
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
@@ -654,9 +654,8 @@ test_h5s_chunk(void)
 
     for(i=0; i<50000; i++) {
         for(j=0; j<3; j++) {
-            if(chunk_data_dbl[i][j]!=chunk_data_flt[i][j]) {
+            if(chunk_data_dbl[i][j]!=chunk_data_flt[i][j])
                 TestErrPrintf("chunk_data_dbl[%d][%d]=%f, chunk_data_flt[%d][%d]=%f\n",i,j,chunk_data_dbl[i][j],i,j,chunk_data_flt[i][j]);
-            } /* end if */
         } /* end for */
     } /* end for */
 } /* test_h5s_chunk() */

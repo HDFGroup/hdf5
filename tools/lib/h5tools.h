@@ -419,7 +419,7 @@ typedef struct h5tools_context_t {
 
 /* a structure to hold the subsetting particulars for a dataset */
 struct subset_t {
-    hssize_t *start;
+    hsize_t *start;
     hsize_t *stride;
     hsize_t *count;
     hsize_t *block;
@@ -463,8 +463,8 @@ extern FILE   *rawdatastream;       /*output stream for raw data            */
 #define NLINK           "NLINK"
 #define OBJID           "OBJECTID"
 #define OBJNO           "OBJNO"
-#define SCALAR          "SCALAR"
-#define SIMPLE          "SIMPLE"
+#define S_SCALAR        "SCALAR"
+#define S_SIMPLE        "SIMPLE"
 #define SOFTLINK        "SOFTLINK"
 #define STORAGELAYOUT   "STORAGELAYOUT"
 #define START           "START"
@@ -508,5 +508,6 @@ extern void     h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid
 
 extern int      h5tools_canreadf(const char* name,
                                  hid_t dcpl_id);
+extern int      h5tools_can_encode(H5Z_filter_t filtn);
 
 #endif	/* H5TOOLS_H__ */

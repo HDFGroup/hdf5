@@ -73,15 +73,15 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
                    pack_info_t *obj /*OUT*/)    /* info about object to filter */
 {
 
- int  index, i;
+ int  idx, i;
 	pack_info_t tmp;
 
 	init_packobject(&tmp);
 
-	index = aux_find_obj(name,options,&tmp);
+	idx = aux_find_obj(name,options,&tmp);
 	
 	/* name was on input */
-	if (index>=0)
+	if (idx>=0)
 	{
 		
 		/* applying to all objects */
@@ -102,13 +102,13 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
 		}
 		else
 		{
-			tmp.layout = options->op_tbl->objs[index].layout;
+			tmp.layout = options->op_tbl->objs[idx].layout;
 			switch (tmp.layout)
 			{
 			case H5D_CHUNKED:
-				tmp.chunk.rank = options->op_tbl->objs[index].chunk.rank;
+				tmp.chunk.rank = options->op_tbl->objs[idx].chunk.rank;
 				for ( i=0; i<tmp.chunk.rank; i++) 
-					tmp.chunk.chunk_lengths[i]=options->op_tbl->objs[index].chunk.chunk_lengths[i];
+					tmp.chunk.chunk_lengths[i]=options->op_tbl->objs[idx].chunk.chunk_lengths[i];
 				break;
 			default:
 				break;
@@ -125,15 +125,15 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
 		} /* if all */
 		else
 		{
-   tmp.nfilters=options->op_tbl->objs[index].nfilters;
+   tmp.nfilters=options->op_tbl->objs[idx].nfilters;
 			for ( i=0; i<tmp.nfilters; i++) 
 			{
-    tmp.filter[i] = options->op_tbl->objs[index].filter[i];
+    tmp.filter[i] = options->op_tbl->objs[idx].filter[i];
 			}
 		}
 		
 		
-	} /* if index */
+	} /* if idx */
 	
 
  /* no input name */

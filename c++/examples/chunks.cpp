@@ -144,7 +144,7 @@ int main (void)
       /*
        * Define the column (hyperslab) to read.
        */
-      hssize_t offset[2] = { 0, 2 };
+      hsize_t offset[2] = { 0, 2 };
       hsize_t  count[2] = { 10, 1 };
       int      column[10];        // buffer for column to be read
 

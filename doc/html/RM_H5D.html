@@ -210,10 +210,11 @@ as the corresponding C function.
         Further use of the dataset identifier is illegal in calls to 
         the dataset API.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>IN: Identifier of the dataset to close access to.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>dataset_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataset to close access to.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -297,15 +298,15 @@ END SUBROUTINE h5dclose_f
 	<table width=80% border="0">
 	<tr valign="top" align="left"><td width=10%>&nbsp;
 	  </td><td width=45%>
-            <a href="#Dataset-Fill">H5Dfill</a><br>
-            <a href="RM_H5P.html#Property-SetFillValue">H5Pset_fill_value</a><br>
-            <a href="RM_H5P.html#Property-GetFillValue">H5Pget_fill_value</a><br>
-            <a href="RM_H5P.html#Property-FillValueDefined">H5Pfill_value_defined</a>
+            <a href="#Dataset-Fill"><code>H5Dfill</code></a><br>
+            <a href="RM_H5P.html#Property-SetFillValue"><code>H5Pset_fill_value</code></a><br>
+            <a href="RM_H5P.html#Property-GetFillValue"><code>H5Pget_fill_value</code></a><br>
+            <a href="RM_H5P.html#Property-FillValueDefined"><code>H5Pfill_value_defined</code></a>
 	  </td><td width=45%>
-            <a href="RM_H5P.html#Property-SetFillTime">H5Pset_fill_time</a><br>
-            <a href="RM_H5P.html#Property-GetFillTime">H5Pget_fill_time</a><br>
-            <a href="RM_H5P.html#Property-SetAllocTime">H5Pset_alloc_time</a><br>
-            <a href="RM_H5P.html#Property-GetAllocTime">H5Pget_alloc_time</a>
+            <a href="RM_H5P.html#Property-SetFillTime"><code>H5Pset_fill_time</code></a><br>
+            <a href="RM_H5P.html#Property-GetFillTime"><code>H5Pget_fill_time</code></a><br>
+            <a href="RM_H5P.html#Property-SetAllocTime"><code>H5Pset_alloc_time</code></a><br>
+            <a href="RM_H5P.html#Property-GetAllocTime"><code>H5Pget_alloc_time</code></a>
 	  </td></tr>
 	</table>
 	This information is also included in the 
@@ -336,21 +337,27 @@ END SUBROUTINE h5dclose_f
         Other known similar problems can occur with . . .
         --> 
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>IN: Identifier of the file or group 
-                within which to create the dataset.
-        <dt><em>const char *</em> <code>name</code>
-            <dd>IN: The name of the dataset to create.
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>IN: Identifier of the datatype to use 
-                when creating the dataset.
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>IN: Identifier of the dataspace to use 
-                when creating the dataset.
-        <dt><em>hid_t</em> <code>create_plist_id</code>
-            <dd>IN: Identifier of the set creation property list.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top">IN: Identifier of the file or group 
+                within which to create the dataset.</td></tr>
+        <tr>
+		    <td valign="top"><em>const char *</em> <code>name</code></td>
+            <td valign="top">IN: The name of the dataset to create.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">IN: Identifier of the datatype to use 
+                when creating the dataset.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+            <td valign="top">IN: Identifier of the dataspace to use 
+                when creating the dataset.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>create_plist_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the set creation property list.</td></tr>
+    </table></ul>
+<!-- NEW PAGE -->
 <dt><strong>Returns:</strong>
     <dd>Returns a dataset identifier if successful;
         otherwise returns a negative value.
@@ -412,12 +419,14 @@ END SUBROUTINE h5dcreate_f
 	<a href="RM_H5P.html#Property-SetAllocTime">H5Pset_alloc_time</a>.)
 
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>IN: Identifier of the dataset.
-        <dt><em>const hsize_t *</em> <code>size</code>
-            <dd>IN: Array containing the new magnitude of each dimension.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dataset_id</code></td>
+            <td valign="top">IN: Identifier of the dataset.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;hsize_t&nbsp;*</em>&nbsp;<code>size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Array containing the new magnitude of each dimension.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -491,20 +500,25 @@ END SUBROUTINE h5dextend_f
 	and
 	<a href="#Dataset-Create">H5Dcreate</a>.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>const void *</em><code>fill</code>
-            <dd>IN: Pointer to the fill value to be used.
-        <dt><em>hid_t </em><code>fill_type_id</code>
-            <dd>IN:  Fill value datatype identifier.
-        <dt><em>void *</em><code>buf</code>
-            <dd>IN/OUT: Pointer to the memory buffer containing the 
-                selection to be filled.
-        <dt><em>hid_t </em><code>buf_type_id</code>
-            <dd>IN: Datatype of dataspace elements to be filled.
-        <dt><em>hid_t </em><code>space_id</code>
-            <dd>IN: Dataspace describing memory buffer and 
-                    containing the selection to be filled.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>const void *</em><code>fill</code></td>
+            <td valign="top">IN: Pointer to the fill value to be used.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t&nbsp;</em><code>fill_type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN:  Fill value datatype identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>void *</em><code>buf</code></td>
+            <td valign="top">IN/OUT: Pointer to the memory buffer containing the 
+                selection to be filled.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t </em><code>buf_type_id</code></td>
+            <td valign="top">IN: Datatype of dataspace elements to be filled.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t </em><code>space_id</code></td>
+            <td valign="top">IN: Dataspace describing memory buffer and 
+                    containing the selection to be filled.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -550,10 +564,11 @@ END SUBROUTINE h5dfill_f
         The creation property list identifier should be released with 
         the <code>H5Pclose</code> function.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>IN: Identifier of the dataset to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>dataset_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataset to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataset creation property list identifier if successful;
         otherwise returns a negative value.
@@ -594,10 +609,11 @@ END SUBROUTINE h5dget_create_plist_f
 	That address is expressed as the offset in bytes from 
 	the beginning of the file.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t </em><code>dset_id</code>
-            <dd>Dataset identifier.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t&nbsp;</em><code>dset_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Dataset identifier.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the offset in bytes; 
         otherwise returns <code>HADDR_UNDEF</code>, a negative value.
@@ -633,10 +649,11 @@ SUBROUTINE
         The dataspace identifier should be released with the 
         <code>H5Sclose</code> function.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>IN: Identifier of the dataset to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>dataset_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataset to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful;
         otherwise returns a negative value.
@@ -679,15 +696,15 @@ END SUBROUTINE h5dget_space_f
         <center>
 	<table border="0">
           <tr valign="top"><td rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
-            H5D_SPACE_STATUS_NOT_ALLOCATED
+            <code>H5D_SPACE_STATUS_NOT_ALLOCATED</code>
 	    </td><td>
             Space has not been allocated for this dataset.
           </td></tr><tr valign="top"><td>
-            H5D_SPACE_STATUS_ALLOCATED
+            <code>H5D_SPACE_STATUS_ALLOCATED</code>
 	    </td><td>
             Space has been allocated for this dataset.
           </td></tr><tr valign="top"><td>
-            H5D_SPACE_STATUS_PART_ALLOCATED&nbsp;&nbsp;
+            <code>H5D_SPACE_STATUS_PART_ALLOCATED</code>&nbsp;&nbsp;
 	    </td><td>
             Space has been partially allocated for this dataset.  
 	    (Used only for datasets with chunked storage.)
@@ -695,12 +712,14 @@ END SUBROUTINE h5dget_space_f
         </table>
 	</center>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dset_id</code>
-            <dd>IN: Identifier of the dataset to query.
-        <dt><em>H5D_space_status_t *</em><code>status</code>
-            <dd>OUT: Space allocation status.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dset_id</code></td>
+            <td valign="top">IN: Identifier of the dataset to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5D_space_status_t&nbsp;*</em><code>status&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Space allocation status.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -745,10 +764,11 @@ END SUBROUTINE h5dget_space_status_f
         the chunk size.        
         The return value may be zero if no data has been stored.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>IN: Identifier of the dataset to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>dataset_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataset to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the amount of storage space allocated for the dataset, 
         not counting meta data; 
@@ -794,10 +814,11 @@ END SUBROUTINE h5dget_storage_size_f
         Otherwise, the returned datatype is read-only.  
         If atomization of the datatype fails, then the datatype is closed.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>IN: Identifier of the dataset to query.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>dataset_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataset to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a datatype identifier if successful;
         otherwise returns a negative value.
@@ -848,23 +869,28 @@ END SUBROUTINE h5dget_type_f
         the iteration may then be re-started by the user where it left off.  
         
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>void *</em><code>buf</code>
-            <dd>IN/OUT: Pointer to the buffer in memory containing the 
-                elements to iterate over.
-        <dt><em>hid_t </em><code>type_id</code>
-            <dd>IN:  Datatype identifier for the elements stored in 
-                <code>buf</code>.
-        <dt><em>hid_t </em><code>space_id</code>
-            <dd>IN: Dataspace identifier for <code>buf</code>.  
-                Also contains the selection to iterate over.
-        <dt><em>H5D_operator_t </em><code>operator</code>
-            <dd>IN: Function pointer to the routine to be called 
-                for each element in <code>buf</code> iterated over.
-        <dt><em>void *</em><code>operator_data</code>
-            <dd>IN/OUT: Pointer to any user-defined data associated 
-                with the operation.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>void *</em><code>buf</code></td>
+            <td valign="top">IN/OUT: Pointer to the buffer in memory containing the 
+                elements to iterate over.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t </em><code>type_id</code></td>
+            <td valign="top">IN:  Datatype identifier for the elements stored in 
+                <code>buf</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t </em><code>space_id</code></td>
+            <td valign="top">IN: Dataspace identifier for <code>buf</code>.  
+                Also contains the selection to iterate over.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5D_operator_t&nbsp;</em><code>operator&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Function pointer to the routine to be called 
+                for each element in <code>buf</code> iterated over.</td></tr>
+        <tr>
+		    <td valign="top"><em>void *</em><code>operator_data</code></td>
+            <td valign="top">IN/OUT: Pointer to any user-defined data associated 
+                with the operation.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns the return value of the last operator if it was non-zero,
         or zero if all elements have been processed.
@@ -901,13 +927,15 @@ SUBROUTINE
         or group specified in <code>loc_id</code>.  <code>name</code> is
         a dataset name and is used to identify the dataset in the file.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>IN: Identifier of the file or group 
-                within which the dataset to be accessed will be found.
-        <dt><em>const char *</em> <code>name</code>
-            <dd>IN: The name of the dataset to access.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top">IN: Identifier of the file or group 
+                within which the dataset to be accessed will be found.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: The name of the dataset to access.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataset identifier if successful;
         otherwise returns a negative value.
@@ -1075,21 +1103,27 @@ END SUBROUTINE h5dopen_f
         data conversion, including the range of conversions currently 
         supported by the HDF5 libraries.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>IN: Identifier of the dataset read from.
-        <dt><em>hid_t</em> <code>mem_type_id</code>
-            <dd>IN: Identifier of the memory datatype.
-        <dt><em>hid_t</em> <code>mem_space_id</code>
-            <dd>IN: Identifier of the memory dataspace.
-        <dt><em>hid_t</em> <code>file_space_id</code>
-            <dd>IN: Identifier of the dataset's dataspace in the file.
-        <dt><em>hid_t</em> <code>xfer_plist_id</code>
-            <dd>IN: Identifier of a transfer property list 
-                for this I/O operation.
-        <dt><em>void *</em> <code>buf</code>
-            <dd>OUT: Buffer to receive data read from file.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dataset_id</code></td>
+            <td valign="top">IN: Identifier of the dataset read from.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>mem_type_id</code></td>
+            <td valign="top">IN: Identifier of the memory datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>mem_space_id</code></td>
+            <td valign="top">IN: Identifier of the memory dataspace.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataset's dataspace in the file.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>xfer_plist_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of a transfer property list 
+                for this I/O operation.</td></tr>
+        <tr>
+		    <td valign="top"><em>void *</em> <code>buf</code></td>
+            <td valign="top">OUT: Buffer to receive data read from file.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1101,32 +1135,31 @@ SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, dims, hdferr, &amp;
                      mem_space_id, file_space_id, xfer_prp)
 
   IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN) :: dset_id      ! Dataset identifier
-  INTEGER(HID_T), INTENT(IN) :: mem_type_id  ! Memory datatype identifier
-  TYPE, INTENT(INOUT) :: buf                 ! Data buffer; may be a scalar 
-                                             ! or an array
+  INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
+  INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+  TYPE, INTENT(INOUT) :: buf                ! Data buffer; may be a scalar 
+                                            ! or an array
   DIMENSION(*), INTEGER(HSIZE_T), INTENT(IN)  :: dims 
-                                             ! Array to hold corresponding 
-                                             ! dimension sizes of data 
-                                             ! buffer buf 
-                                             ! dim(k) has value of the k-th 
-                                             ! dimension of buffer buf
-                                             ! Values are ignored if buf is 
-                                             ! a scalar
-  INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-                                             ! 0 on success and -1 on failure
+                                            ! Array to hold corresponding 
+                                            ! dimension sizes of data 
+                                            ! buffer buf 
+                                            ! dim(k) has value of the k-th 
+                                            ! dimension of buffer buf
+                                            ! Values are ignored if buf is 
+                                            ! a scalar
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code 
+                                            ! 0 on success and -1 on failure
   INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                             ! Memory dataspace identfier 
-                                             ! Default value is H5S_ALL_F 
+                                            ! Memory dataspace identfier 
+                                            ! Default value is H5S_ALL_F 
   INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                             ! File dataspace identfier 
-                                             ! Default value is H5S_ALL_F
+                                            ! File dataspace identfier 
+                                            ! Default value is H5S_ALL_F
   INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                             ! Transfer property list identifier
-                                             ! Default value is H5P_DEFAULT_F             
+                                            ! Transfer property list identifier
+                                            ! Default value is H5P_DEFAULT_F             
 END SUBROUTINE h5dread_f
 	</pre>
-
 
 		<!--<dt><strong>Non-C API(s):</strong>
     	<dd>
@@ -1159,16 +1192,21 @@ END SUBROUTINE h5dread_f
         <code>*size</code> is returned with the number of bytes 
         required to store the VL data in memory.          
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>IN: Identifier of the dataset to query.
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>IN: Datatype identifier.
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>IN: Dataspace identifier.
-        <dt><em>hsize_t</em> *<code>size</code>
-            <dd>OUT: The size in bytes of the memory buffer required to store the VL data.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>dataset_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataset to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">IN: Datatype identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+            <td valign="top">IN: Dataspace identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em> *<code>size</code></td>
+            <td valign="top">OUT: The size in bytes of the memory 
+			                 buffer required to store the VL data.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns non-negative value if successful;
         otherwise returns a negative value.
@@ -1228,16 +1266,20 @@ END SUBROUTINE h5dvlen_get_max_len_f
         this routine frees them <em>from the bottom up</em>, releasing all 
         the memory without creating memory leaks.
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>type_id</code>
-            <dd>IN: Identifier of the datatype.
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>IN: Identifier of the dataspace.
-        <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Identifier of the property list used to create the buffer.
-        <dt><em>void</em> *<code>buf</code>
-            <dd>IN: Pointer to the buffer to be reclaimed.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">IN: Identifier of the datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataspace.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Identifier of the property list used to create the buffer.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> *<code>buf</code></td>
+            <td valign="top">IN: Pointer to the buffer to be reclaimed.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns non-negative value if successful;
         otherwise returns a negative value.
@@ -1418,21 +1460,27 @@ SUBROUTINE
         write identical data to the dataset from all processes.
 	
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>IN: Identifier of the dataset to write to.
-        <dt><em>hid_t</em> <code>mem_type_id</code>
-            <dd>IN: Identifier of the memory datatype.
-        <dt><em>hid_t</em> <code>mem_space_id</code>
-            <dd>IN: Identifier of the memory dataspace.
-        <dt><em>hid_t</em> <code>file_space_id</code>
-            <dd>IN: Identifier of the dataset's dataspace in the file.
-        <dt><em>hid_t</em> <code>xfer_plist_id</code>
-            <dd>IN: Identifier of a transfer property list 
-                for this I/O operation.
-        <dt><em>const void *</em> <code>buf</code>
-            <dd>IN: Buffer with data to be written to the file.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dataset_id</code></td>
+            <td valign="top">IN: Identifier of the dataset to write to.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>mem_type_id</code></td>
+            <td valign="top">IN: Identifier of the memory datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>mem_space_id</code></td>
+            <td valign="top">IN: Identifier of the memory dataspace.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataset's dataspace in the file.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>xfer_plist_id</code></td>
+            <td valign="top">IN: Identifier of a transfer property list 
+                for this I/O operation.</td></tr>
+        <tr>
+		    <td valign="top"><em>const void *</em> <code>buf</code></td>
+            <td valign="top">IN: Buffer with data to be written to the file.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1447,7 +1495,9 @@ SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, dims, hdferr, &amp;
   INTEGER(HID_T), INTENT(IN) :: dset_id      ! Dataset identifier
   INTEGER(HID_T), INTENT(IN) :: mem_type_id  ! Memory datatype identifier
   TYPE, INTENT(IN) :: buf                    ! Data buffer; may be a scalar 
-                                             ! or an array
+                                             ! or an array</pre>
+<!-- NEW PAGE -->
+<pre>
   DIMENSION(*), INTEGER(HSIZE_T), INTENT(IN)  :: dims 
                                              ! Array to hold corresponding 
                                              ! dimension sizes of data 
@@ -1455,10 +1505,8 @@ SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, dims, hdferr, &amp;
                                              ! of the k-th dimension of 
                                              ! buffer buf; values are 
                                              ! ignored if buf is a scalar
-  INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-                                             ! 0 on success and -1 on failure</pre>
-<!-- NEW PAGE -->
-<pre>
+  INTEGER, INTENT(OUT) :: hdferr             ! Error code 
+                                             ! 0 on success and -1 on failure
   INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
                                              ! Memory dataspace identfier 
                                              ! Default value is H5S_ALL_F

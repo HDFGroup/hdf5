@@ -839,8 +839,6 @@
 ./fortran/src/H5Fff.f90
 ./fortran/src/H5Gf.c
 ./fortran/src/H5Gff.f90
-./fortran/src/H5Git.c
-./fortran/src/H5Git.h
 ./fortran/src/H5If.c
 ./fortran/src/H5Iff.f90
 ./fortran/src/H5Pf.c
@@ -1076,6 +1074,9 @@
 ./release_docs/RELEASE.txt
 
 ./src/.indent.pro			_DO_NOT_DISTRIBUTE_
+./src/hdf5.lnt				_DO_NOT_DISTRIBUTE_
+./src/hdf5-lin.lnt			_DO_NOT_DISTRIBUTE_
+./src/hdf5-win.lnt			_DO_NOT_DISTRIBUTE_
 ./src/Dependencies
 ./src/H5.c
 ./src/H5api_adpt.h
@@ -1109,6 +1110,7 @@
 ./src/H5Eprivate.h
 ./src/H5Epublic.h
 ./src/H5F.c
+./src/H5Fdbg.c
 ./src/H5Fpkg.h
 ./src/H5Fprivate.h
 ./src/H5Fpublic.h
@@ -1368,6 +1370,7 @@
 ./testpar/t_mpi.c
 ./testpar/t_ph5basic.c
 ./testpar/t_coll_chunk.c
+./testpar/t_span_tree.c
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
 ./testpar/testph5.sh.in
@@ -1463,6 +1466,7 @@
 ./tools/h5repack/testh5repack_main.c
 ./tools/h5repack/testh5repack_make.c
 ./tools/h5repack/testh5repack_util.c
+./tools/h5repack/testh5repack_detect_szip.c
 
 ./tools/h5ls/Dependencies
 ./tools/h5ls/Makefile.in

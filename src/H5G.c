@@ -88,6 +88,9 @@
 #define H5G_PACKAGE     /*suppress error message about including H5Gpkg.h */
 #define H5F_PACKAGE     /*suppress error about including H5Fpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5G_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5G_mask
@@ -120,11 +123,6 @@
 #define H5G_TARGET_NORMAL	0x0000
 #define H5G_TARGET_SLINK	0x0001
 #define H5G_TARGET_MOUNT	0x0002
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT	H5G_init_interface
-static herr_t H5G_init_interface(void);
 
 /* Local typedefs */
 
@@ -287,7 +285,6 @@ H5Gopen(hid_t loc_id, const char *name)
     H5G_t       *grp = NULL;
     H5G_entry_t	*loc = NULL;
     H5G_entry_t	 ent;
-    hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open group */
 
     FUNC_ENTER_API(H5Gopen, FAIL);
     H5TRACE2("i","is",loc_id,name);
@@ -299,11 +296,11 @@ H5Gopen(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
 
     /* Open the parent group, making sure it's a group */
-    if (H5G_find(loc, name, NULL, &ent/*out*/, dxpl_id) < 0)
+    if (H5G_find(loc, name, NULL, &ent/*out*/, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found");
 
     /* Open the group */
-    if ((grp = H5G_open(&ent, dxpl_id)) ==NULL)
+    if ((grp = H5G_open(&ent, H5AC_dxpl_id))==NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
 
     /* Register an atom for the group */
@@ -620,7 +617,7 @@ H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
     H5G_obj_t		ret_value;
     
     FUNC_ENTER_API(H5Gget_objtype_by_idx, H5G_UNKNOWN);
-    H5TRACE2("Is","ih",loc_id,idx);
+    H5TRACE2("Go","ih",loc_id,idx);
 
     /* Check args */
     if (NULL==(loc=H5G_loc (loc_id)))
@@ -1067,7 +1064,7 @@ H5G_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_term_interface);
     
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_GROUP))) {
 	    H5I_clear_group(H5I_GROUP, FALSE);
 	} else {
@@ -1085,7 +1082,7 @@ H5G_term_interface(void)
             H5G_comp_alloc_g = 0;
 
 	    /* Mark closed */
-	    interface_initialize_g = 0;
+	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}
     }
@@ -2199,6 +2196,7 @@ herr_t
 H5G_free(H5G_t *grp)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
+
     FUNC_ENTER_NOAPI(H5G_free, FAIL);
 
     assert(grp && grp->shared);
@@ -2469,8 +2467,8 @@ H5G_loc (hid_t loc_id)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of attribute");
             break;
                 
-        case H5I_TEMPBUF:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of buffer");
+        case H5I_REFERENCE:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of reference");
 
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object ID");

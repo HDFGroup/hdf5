@@ -314,7 +314,7 @@ H5Pset_chunk (plist, 2, size);
 	external data then zero is returned.
 
 	<br><br>
-      <dt><code>herr_t H5Pget_external (hid_t <em>plist</em>, int
+      <dt><code>herr_t H5Pget_external (hid_t <em>plist</em>, unsigned
 	  <em>idx</em>, size_t <em>name_size</em>, char *<em>name</em>, off_t
 	  *<em>offset</em>, hsize_t *<em>size</em>)</code>
       <dd>This is the counterpart for the <code>H5Pset_external()</code>
@@ -800,7 +800,7 @@ H5Pset_external (plist, "scan3.data", 0, 16);
 	      <p><code><pre>
  1 hid_t file, mem_space, file_space, dataset;
  2 double dd[200][400];
- 3 hssize_t offset[2];
+ 3 hsize_t offset[2];
  4 hsize size[2];
  5 
  6 /*

@@ -24,6 +24,9 @@
  *		application to the same file).
  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5FD_sec2_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5FD_sec2_mask
@@ -186,10 +189,6 @@ static const H5FD_class_t H5FD_sec2_g = {
     NULL,                                       /*unlock                */
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
 };
-
-/* Interface initialization */
-#define INTERFACE_INIT	H5FD_sec2_init_interface
-static int interface_initialize_g = 0;
 
 /* Declare a free list to manage the H5FD_sec2_t struct */
 H5FL_DEFINE_STATIC(H5FD_sec2_t);
@@ -376,7 +375,6 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct")
 
     file->fd = fd;
-
     H5_ASSIGN_OVERFLOW(file->eof,sb.st_size,h5_stat_size_t,haddr_t);
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;

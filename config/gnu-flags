@@ -92,7 +92,6 @@ fi
 # Common GCC flags for various situations
 case "$cc_vendor-$cc_version" in
   gcc*|egcs*|pgcc*)
-
     # Architecture-specific flags
     arch=
     case "$host_os-$host_cpu" in

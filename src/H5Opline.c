@@ -30,15 +30,12 @@
 /* Pablo mask */
 #define PABLO_MASK	H5O_pline_mask
 
-/* Interface initialization */
-#define INTERFACE_INIT	NULL
-
 #define H5O_PLINE_VERSION	1
 
 static herr_t H5O_pline_encode (H5F_t *f, uint8_t *p, const void *mesg);
 static void *H5O_pline_decode (H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static void *H5O_pline_copy (const void *_mesg, void *_dest, unsigned update_flags);
-static size_t H5O_pline_size (H5F_t *f, const void *_mesg);
+static size_t H5O_pline_size (const H5F_t *f, const void *_mesg);
 static herr_t H5O_pline_reset (void *_mesg);
 static herr_t H5O_pline_free (void *_mesg);
 static herr_t H5O_pline_debug (H5F_t *f, hid_t dxpl_id, const void *_mesg,
@@ -324,7 +321,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_pline_size (H5F_t UNUSED *f, const void *mesg)
+H5O_pline_size (const H5F_t UNUSED *f, const void *mesg)
 {
     const H5O_pline_t	*pline = (const H5O_pline_t*)mesg;
     size_t		i, name_len;

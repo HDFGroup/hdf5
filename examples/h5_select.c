@@ -1,4 +1,3 @@
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -67,12 +66,12 @@ main (void)
                                                    read selection from the
                                                    dataset on the disk */
 
-   hssize_t start[2]; /* Start of hyperslab */
+   hsize_t start[2];  /* Start of hyperslab */
    hsize_t stride[2]; /* Stride of hyperslab */
    hsize_t count[2];  /* Block count */
    hsize_t block[2];  /* Block sizes */
 
-   hssize_t coord[NPOINTS][FSPACE_RANK]; /* Array to store selected points 
+   hsize_t coord[NPOINTS][FSPACE_RANK]; /* Array to store selected points 
                                             from the file dataspace */ 
    herr_t ret;
    unsigned i,j;
@@ -171,7 +170,7 @@ main (void)
     coord[3][0] = 5; coord[3][1] = 6;
 
     ret = H5Sselect_elements(fid, H5S_SELECT_SET, NPOINTS, 
-                             (const hssize_t **)coord);
+                             (const hsize_t **)coord);
 
     /*
      * Write new selection of points to the dataset.

@@ -1,4 +1,4 @@
-  /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
@@ -91,7 +91,6 @@ write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *attr_name,
 static int 
 write_dset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
                    hid_t type_id, void *buf );
-
 
 /* a filter operation callback function */
 static size_t
@@ -1357,7 +1356,7 @@ static void gent_str2(void)
 hid_t fid, group, attr, dataset, space, space2, mem_space, hyper_space;
 hid_t fxdlenstr, fxdlenstr2, memtype;
 hsize_t dims[1], size[1], stride[1], count[1], block[1];
-hssize_t start[1];
+hsize_t start[1];
 
 
 int i;
@@ -1656,11 +1655,11 @@ static void gent_datareg(void)
                 sid2;       /* Dataspace ID #2  */
     hsize_t  dims1[] = {SPACE1_DIM1},
              dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hssize_t start[SPACE2_RANK];     /* Starting location of hyperslab */
+    hsize_t  start[SPACE2_RANK];     /* Starting location of hyperslab */
     hsize_t  stride[SPACE2_RANK];    /* Stride of hyperslab */
     hsize_t  count[SPACE2_RANK];     /* Element count of hyperslab */
     hsize_t  block[SPACE2_RANK];     /* Block size of hyperslab */
-    hssize_t coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
+    hsize_t  coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
     hdset_reg_ref_t      *wbuf,      /* buffer to write to disk */
                *rbuf;       /* buffer read from disk */
     uint8_t    *dwbuf,      /* Buffer for writing numeric data to disk */
@@ -1723,7 +1722,7 @@ static void gent_datareg(void)
     coord1[7][0]=9; coord1[7][1]=0;
     coord1[8][0]=7; coord1[8][1]=1;
     coord1[9][0]=3; coord1[9][1]=3;
-    H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord1);
+    H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord1);
 
     H5Sget_select_npoints(sid2);
 
@@ -4079,6 +4078,8 @@ int write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *attr_name,
  *
  * Purpose: utility function to create and write a dataset in LOC_ID
  *
+ * Return: 
+ *
  * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: May 27, 2003
@@ -4099,23 +4100,16 @@ int write_dset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
 
  /* Create a dataset */
  dset_id = H5Dcreate(loc_id,dset_name,type_id,space_id,H5P_DEFAULT);
- assert (dset_id >= 0);
   
  /* Write the buf */
  if ( buf )
- {
   status = H5Dwrite(dset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);
-  assert (status >= 0);
- }
 
  /* Close */
  status = H5Dclose(dset_id);
- assert (status >= 0);
-
  status = H5Sclose(space_id);
- assert (status >= 0);
 
- return 1;
+ return status;
 
 }
 
@@ -4443,6 +4437,7 @@ make_external(hid_t fid)
  H5Pclose(dcpl);
  assert(ret>=0);
 }
+
 /*-------------------------------------------------------------------------
  * Function: gent_filters
  *
@@ -4456,10 +4451,10 @@ static void gent_filters(void)
  hid_t    dcpl; /* dataset creation property list */
  hid_t    sid;  /* dataspace ID */
  hid_t    tid;  /* datatype ID */
-#if defined (H5_HAVE_FILTER_SZIP)
+#ifdef H5_HAVE_FILTER_SZIP
  unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
  unsigned szip_pixels_per_block=4;
-#endif
+#endif /* H5_HAVE_FILTER_SZIP */
  hsize_t  dims1[RANK]      = {DIM1,DIM2};
  hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};
  int      buf1[DIM1][DIM2];
@@ -4529,7 +4524,8 @@ static void gent_filters(void)
  * SZIP
  *-------------------------------------------------------------------------
  */
-#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
+#ifdef H5_HAVE_FILTER_SZIP
+ if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
  /* remove the filters from the dcpl */
  ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
  assert(ret>=0);
@@ -4540,7 +4536,8 @@ static void gent_filters(void)
 
  ret=make_dset(fid,"szip",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
-#endif
+ }
+#endif /* H5_HAVE_FILTER_SZIP */
 
 /*-------------------------------------------------------------------------
  * GZIP
@@ -4609,12 +4606,14 @@ static void gent_filters(void)
  assert(ret>=0);
 #endif
 
-#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
+#ifdef H5_HAVE_FILTER_SZIP
+ if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
  szip_options_mask=H5_SZIP_CHIP_OPTION_MASK | H5_SZIP_EC_OPTION_MASK;
  /* set szip data */
  ret=H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block);
  assert(ret>=0);
-#endif
+ }
+#endif /* H5_HAVE_FILTER_SZIP */
 
 #if defined (H5_HAVE_FILTER_DEFLATE)
  /* set deflate data */
@@ -5054,7 +5053,7 @@ static void gent_string(void)
  hid_t    str_tid;  /* datatype ID */
  hid_t    did;      /* dataset ID */
  char     buf1[]={"quote \"  backspace\b form feed\f new line\n tab\t new line\n carriage return\r"};
- char    *buf2[SPACE1_DIM1]= {
+ const char *buf2[SPACE1_DIM1]= {
         "Four score and seven\n years ago our forefathers brought forth on this continent a new nation,",
         "conceived in liberty\n and dedicated to the proposition that all men are created equal.",
         "Now we are engaged\n in a great civil war,",
@@ -5204,9 +5203,7 @@ static void gent_aindices(void)
  write_dset(gid[5],3,dims3,"3d",H5T_NATIVE_INT,buf3);
  for (i=0; i<6; i++)
   H5Gclose(gid[i]);
- 
-
- 
+  
 /*-------------------------------------------------------------------------
  * close
  *-------------------------------------------------------------------------
@@ -5233,32 +5230,23 @@ int main(void)
     gent_compound_dt();
     gent_all();
     gent_loop();
-
     gent_dataset2();
     gent_compound_dt2();
     gent_loop2();
     gent_many();
-
     gent_str();
     gent_str2();
-
     gent_enum();
-
     gent_objref();
     gent_datareg();
-
     gent_nestcomp();
-
     gent_opaque();
-
     gent_bitfields();
-
     gent_vldatatypes();
     gent_vldatatypes2();
     gent_vldatatypes3();
     gent_vldatatypes4();
     gent_vldatatypes5();
-
     gent_array1();
     gent_array2();
     gent_array3();
@@ -5266,19 +5254,15 @@ int main(void)
     gent_array5();
     gent_array6();
     gent_array7();
-
     gent_empty();
     gent_group_comments();
     gent_split_file();
     gent_family();
     gent_multi();
-
     gent_large_objname();
     gent_vlstr();
     gent_char();
-
     gent_attr_all();
-
     gent_compound_complex();
     gent_named_dtype_attr();
 

@@ -1513,6 +1513,8 @@ host_os=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 
 
 
+ DEFAULT_LIBS=""
+
 
 
 echo "$as_me:$LINENO: checking shell variables initial values" >&5
@@ -4155,7 +4157,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4158 "configure"' > conftest.$ac_ext
+  echo '#line 4160 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4696,7 +4698,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:4699: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:4701: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -6503,7 +6505,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6506 "configure"
+#line 6508 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -6601,7 +6603,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6604 "configure"
+#line 6606 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -23678,7 +23680,6 @@ fi
 
 
  USE_FILTER_SZIP="no"
- USE_FILTER_SZIP_ENCODER="no"
 
 # Check whether --with-szlib or --without-szlib was given.
 if test "${with_szlib+set}" = set; then
@@ -24172,14 +24173,8 @@ fi
 
 
     if test ${hdf5_cv_szlib_can_encode} = "yes"; then
-
-cat >>confdefs.h <<\_ACEOF
-#define SZIP_CAN_ENCODE 1
-_ACEOF
-
         echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-        USE_FILTER_SZIP_ENCODER="yes"
     else
         echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
@@ -24189,6 +24184,11 @@ echo "${ECHO_T}no" >&6
         EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
     fi
     EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip"
+    if test ${hdf5_cv_szlib_can_encode} = "yes"; then
+        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}(encoder)"
+    else
+        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}(no encoder)"
+    fi
 fi
 
  PABLO=""
@@ -25253,7 +25253,6 @@ else
 fi
 
     ;;
-
   no)
     echo "$as_me:$LINENO: checking for GASS" >&5
 echo $ECHO_N "checking for GASS... $ECHO_C" >&6
@@ -25261,7 +25260,6 @@ echo $ECHO_N "checking for GASS... $ECHO_C" >&6
 echo "${ECHO_T}suppressed" >&6
     unset GASS TESTGASS
     ;;
-
   *)
     case "$withval" in
       *,*)
@@ -30263,7 +30261,7 @@ else
   LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo $LDFLAGS | sed -e 's/-L/:/g' -e 's/ //g'`"
 export LD_LIBRARY_PATH
 
-for hdf5_cv_printf_ll in l L ll q unknown; do
+for hdf5_cv_printf_ll in l ll L q unknown; do
    if test "$cross_compiling" = yes; then
   continue
 else
@@ -30651,6 +30649,7 @@ if test "X-$TRACE" = X- ; then
     TRACE=yes
   fi
 fi
+
 case "X-$TRACE" in
   X-yes)
     echo "$as_me:$LINENO: result: yes" >&5
@@ -31078,10 +31077,8 @@ echo "$as_me: error: \'$enable_parallel\' is not a valid parallel search type" >
 esac
 
 if test -n "$PARALLEL"; then
-  TESTPARALLEL=testpar
-fi
+    TESTPARALLEL=testpar
 
-if test -n "$PARALLEL"; then
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_PARALLEL 1
@@ -32098,11 +32095,13 @@ if (grep '^build_libtool_libs=yes' libtool >/dev/null); then
 else
   enable_shared=no
 fi
+
 if (grep '^build_old_libs=yes' libtool >/dev/null); then
   enable_static=yes
 else
   enable_static=no
 fi
+
 if test "X$enable_static" = "Xyes" && test "X$enable_shared" = "Xyes"; then
   STATIC_SHARED="static, shared"
 elif test "X$enable_static" = "Xyes"; then
@@ -32171,8 +32170,6 @@ if test -n "$CPPFLAGS"; then
 fi
 
 
-
-
  HL=""
 echo "$as_me:$LINENO: checking if high level library is enabled" >&5
 echo $ECHO_N "checking if high level library is enabled... $ECHO_C" >&6
@@ -32190,7 +32187,6 @@ if test "X$HDF5_HL" = "Xyes"; then
 else
  echo "no"
 fi
-
 
  COMMENCE=config/commence
  CONCLUDE=config/conclude
@@ -32866,6 +32862,7 @@ s,@host_cpu@,$host_cpu,;t t
 s,@host_vendor@,$host_vendor,;t t
 s,@host_os@,$host_os,;t t
 s,@CPPFLAGS@,$CPPFLAGS,;t t
+s,@DEFAULT_LIBS@,$DEFAULT_LIBS,;t t
 s,@HSIZET@,$HSIZET,;t t
 s,@CC@,$CC,;t t
 s,@CFLAGS@,$CFLAGS,;t t
@@ -32894,7 +32891,6 @@ s,@LIBTOOL@,$LIBTOOL,;t t
 s,@DEPEND@,,;t t
 s,@USE_FILTER_DEFLATE@,$USE_FILTER_DEFLATE,;t t
 s,@USE_FILTER_SZIP@,$USE_FILTER_SZIP,;t t
-s,@USE_FILTER_SZIP_ENCODER@,$USE_FILTER_SZIP_ENCODER,;t t
 s,@PABLO@,$PABLO,;t t
 s,@HAVE_PABLO@,$HAVE_PABLO,;t t
 s,@SSL@,$SSL,;t t
@@ -33771,5 +33767,4 @@ IF_ENABLED_DISABLED "$THREADSAFE"
 
 PRINT_N "             High Level library"
 IF_ENABLED_DISABLED "$HDF5_HL"
-
 

@@ -19,18 +19,18 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5T_init_fields_interface
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5T_fields_mask
+
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
 #include "H5MMprivate.h"	/*memory management			  */
 #include "H5Tpkg.h"		/*data-type functions			  */
-
-#define PABLO_MASK	H5Tfields_mask
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT H5T_init_fields_interface
-static herr_t H5T_init_fields_interface(void);
 
 
 /*--------------------------------------------------------------------------
@@ -49,9 +49,9 @@ DESCRIPTION
 static herr_t
 H5T_init_fields_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_fields_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_fields_interface)
 
-    FUNC_LEAVE_NOAPI(H5T_init());
+    FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_fields_interface() */
 
 
@@ -59,9 +59,9 @@ H5T_init_fields_interface(void)
  * Function:	H5Tget_nmembers
  *
  * Purpose:	Determines how many members TYPE_ID has.  The type must be
- *		either a compound data type or an enumeration data type.
+ *		either a compound datatype or an enumeration datatype.
  *
- * Return:	Success:	Number of members defined in the data type.
+ * Return:	Success:	Number of members defined in the datatype.
  *
  *		Failure:	Negative
  *
@@ -72,7 +72,7 @@ H5T_init_fields_interface(void)
  *
  * Modifications:
  *	Robb Matzke, 22 Dec 1998
- *	Also works with enumeration data types.
+ *	Also works with enumeration datatypes.
  *-------------------------------------------------------------------------
  */
 int
@@ -81,18 +81,18 @@ H5Tget_nmembers(hid_t type_id)
     H5T_t	*dt = NULL;
     int	ret_value;
 
-    FUNC_ENTER_API(H5Tget_nmembers, FAIL);
+    FUNC_ENTER_API(H5Tget_nmembers, FAIL)
     H5TRACE1("Is","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     if((ret_value = H5T_get_nmembers(dt))<0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot return member number");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot return member number")
     
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -101,9 +101,9 @@ done:
  *
  * Purpose:	Private function for H5Tget_nmembers.  Determines how many 
  *              members DTYPE has.  The type must be either a compound data
- *              type or an enumeration data type.
+ *              type or an enumeration datatype.
  *
- * Return:	Success:	Number of members defined in the data type.
+ * Return:	Success:	Number of members defined in the datatype.
  *
  *		Failure:	Negative
  *
@@ -121,19 +121,19 @@ H5T_get_nmembers(const H5T_t *dt)
 {
     int	ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_get_nmembers, FAIL);
+    FUNC_ENTER_NOAPI(H5T_get_nmembers, FAIL)
 
     assert(dt);
 
     if (H5T_COMPOUND==dt->shared->type)
-	ret_value = dt->shared->u.compnd.nmembs;
+	ret_value = (int)dt->shared->u.compnd.nmembs;
     else if (H5T_ENUM==dt->shared->type)
-	ret_value = dt->shared->u.enumer.nmembs;
+	ret_value = (int)dt->shared->u.enumer.nmembs;
     else
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for type class");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for type class")
     
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -141,7 +141,7 @@ done:
  * Function:	H5Tget_member_name
  *
  * Purpose:	Returns the name of a member of a compound or enumeration
- *		data type. Members are stored in no particular order with
+ *		datatype. Members are stored in no particular order with
  *		numbers 0 through N-1 where N is the value returned by
  *		H5Tget_nmembers().
  *
@@ -155,26 +155,26 @@ done:
  *
  * Modifications:
  *	Robb Matzke, 22 Dec 1998
- *	Also works with enumeration data types.
+ *	Also works with enumeration datatypes.
  *-------------------------------------------------------------------------
  */
 char *
-H5Tget_member_name(hid_t type_id, int membno)
+H5Tget_member_name(hid_t type_id, unsigned membno)
 {
     H5T_t	*dt = NULL;
     char	*ret_value;
 
-    FUNC_ENTER_API(H5Tget_member_name, NULL);
+    FUNC_ENTER_API(H5Tget_member_name, NULL)
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
 
     if((ret_value = H5T_get_member_name(dt, membno))==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get member name");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get member name")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -182,7 +182,7 @@ done:
  * Function:	H5T_get_member_name
  *
  * Purpose:	Private function for H5Tget_member_name.  Returns the name 
- *              of a member of a compound or enumeration data type. Members
+ *              of a member of a compound or enumeration datatype. Members
  *              are stored in no particular order with numbers 0 through 
  *              N-1 where N is the value returned by H5Tget_nmembers().
  *
@@ -198,33 +198,33 @@ done:
  *-------------------------------------------------------------------------
  */
 char *
-H5T_get_member_name(H5T_t const *dt, int membno)
+H5T_get_member_name(H5T_t const *dt, unsigned membno)
 {
     char	*ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_get_member_name, NULL);
+    FUNC_ENTER_NOAPI(H5T_get_member_name, NULL)
 
     assert(dt);
 
     switch (dt->shared->type) {
         case H5T_COMPOUND:
-            if (membno<0 || membno>=dt->shared->u.compnd.nmembs)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid member number");
+            if (membno>=dt->shared->u.compnd.nmembs)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid member number")
             ret_value = H5MM_xstrdup(dt->shared->u.compnd.memb[membno].name);
             break;
 
         case H5T_ENUM:
-            if (membno<0 || membno>=dt->shared->u.enumer.nmembs)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid member number");
+            if (membno>=dt->shared->u.enumer.nmembs)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid member number")
             ret_value = H5MM_xstrdup(dt->shared->u.enumer.name[membno]);
             break;
             
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "operation not supported for type class");
-    }
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "operation not supported for type class")
+    } /*lint !e788 All appropriate cases are covered */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -232,7 +232,7 @@ done:
  * Function:    H5Tget_member_index
  *
  * Purpose:     Returns the index of a member in a compound or enumeration
- *              data type by given name.Members are stored in no particular 
+ *              datatype by given name.Members are stored in no particular 
  *              order with numbers 0 through N-1 where N is the value 
  *              returned by H5Tget_nmembers().
  *      
@@ -251,47 +251,45 @@ H5Tget_member_index(hid_t type_id, const char *name)
 {
     H5T_t       *dt = NULL;
     int         ret_value=FAIL;
-    int         nmembs, i;
+    unsigned    i;
 
-    FUNC_ENTER_API(H5Tget_member_index, FAIL);
+    FUNC_ENTER_API(H5Tget_member_index, FAIL)
     H5TRACE2("Is","is",type_id,name);
 
     /* Check arguments */
     assert(name);
     if(NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Locate member by name */
     switch (dt->shared->type) {
         case H5T_COMPOUND:
-            nmembs = dt->shared->u.compnd.nmembs;
-            for(i=0; i<nmembs; i++) {
+            for(i=0; i< dt->shared->u.compnd.nmembs; i++) {
                 if(!HDstrcmp(dt->shared->u.compnd.memb[i].name, name))
-                    HGOTO_DONE(i);
+                    HGOTO_DONE((int)i)
             }
             break;  
         case H5T_ENUM:
-            nmembs = dt->shared->u.enumer.nmembs;
-            for(i=0; i<nmembs; i++) {
+            for(i=0; i< dt->shared->u.enumer.nmembs; i++) {
                 if(!HDstrcmp(dt->shared->u.enumer.name[i], name))
-                    HGOTO_DONE(i);
+                    HGOTO_DONE((int)i)
             }
             break;
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for this type");
-    }
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for this type")
+    } /*lint !e788 All appropriate cases are covered */
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_sort_value
  *
- * Purpose:	Sorts the members of a compound data type by their offsets;
+ * Purpose:	Sorts the members of a compound datatype by their offsets;
  *		sorts the members of an enum type by their values. This even
- *		works for locked data types since it doesn't change the value
+ *		works for locked datatypes since it doesn't change the value
  *		of the type.  MAP is an optional parallel integer array which
  *		is also swapped along with members of DT.
  *
@@ -305,15 +303,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_sort_value(H5T_t *dt, int *map)
+H5T_sort_value(const H5T_t *dt, int *map)
 {
-    int		i, j, nmembs;
+    unsigned	i, j, nmembs;
     size_t	size;
     hbool_t	swapped;
     uint8_t	tbuf[32];
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_sort_value, FAIL);
+    FUNC_ENTER_NOAPI(H5T_sort_value, FAIL)
 
     /* Check args */
     assert(dt);
@@ -393,15 +391,15 @@ H5T_sort_value(H5T_t *dt, int *map)
     }
     
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_sort_name
  *
- * Purpose:	Sorts members of a compound or enumeration data type by their
- *		names. This even works for locked data types since it doesn't
+ * Purpose:	Sorts members of a compound or enumeration datatype by their
+ *		names. This even works for locked datatypes since it doesn't
  *		change the value of the types.
  *
  * Return:	Success:	Non-negative
@@ -416,15 +414,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_sort_name(H5T_t *dt, int *map)
+H5T_sort_name(const H5T_t *dt, int *map)
 {
-    int		i, j, nmembs;
+    unsigned	i, j, nmembs;
     size_t	size;
     hbool_t	swapped;
     uint8_t	tbuf[32];
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_sort_name, FAIL);
+    FUNC_ENTER_NOAPI(H5T_sort_name, FAIL)
 
     /* Check args */
     assert(dt);
@@ -500,6 +498,6 @@ H5T_sort_name(H5T_t *dt, int *map)
     }
     
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 

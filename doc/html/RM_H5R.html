@@ -76,6 +76,28 @@ to specific objects and data regions in an HDF5 file.
 <p>
 <strong>The C Interfaces:</strong>
 
+<table border=0 width=80%>
+<tr><td valign=top width=40%>
+<ul>
+    <li><a href="#Reference-Create">H5Rcreate</a>
+    <li><a href="#Reference-Dereference">H5Rdereference</a>
+</ul>
+</td><td valign=top width=40%>
+<ul>
+    <li><a href="#Reference-GetRegion">H5Rget_region</a>
+    <li><a href="#Reference-GetObjType">H5Rget_obj_type</a>
+</ul>
+</td><td valign=top width=20%>
+<ul>
+    &nbsp;
+</ul>
+</td></tr>
+</table>
+
+<p>
+
+<i>Alphabetical Listing</i>
+
 <table border="0">
   <tr>
     <td valign="top">
@@ -181,20 +203,25 @@ as the corresponding C function.
         to be pointed to for a dataset region reference.
         This parameter is unused with object references.  
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>void *</em><code>ref</code>
-            <dd>OUT: Reference created by the function call.
-        <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>IN: Location identifier used to locate the object being 
-                    pointed to.
-        <dt><em>const char *</em><code>name</code>
-            <dd>IN: Name of object at location <code>loc_id</code>.
-        <dt><em>H5R_type_t</em> <code>ref_type</code>
-            <dd>IN: Type of reference.
-        <dt><em>hid_t</em> <code>space_id</code>
-            <dd>IN: Dataspace identifier with selection. 
-                    Used for dataset region references. 
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>void *</em><code>ref</code></td>
+            <td valign="top">OUT: Reference created by the function call.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top">IN: Location identifier used to locate the object being 
+                    pointed to.</td></tr>
+        <tr>
+		    <td valign="top"><em>const char *</em><code>name</code></td>
+            <td valign="top">IN: Name of object at location <code>loc_id</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5R_type_t</em>&nbsp;<code>ref_type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Type of reference.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+            <td valign="top">IN: Dataspace identifier with selection. 
+                    Used for dataset region references.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -262,14 +289,17 @@ END SUBROUTINE h5rcreate_f
         <li><code>H5R_DATASET_REGION</code>  (<code>1</code>)
         </ul>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dataset</code>
-            <dd>IN: Dataset containing reference object.
-        <dt><em>H5R_type_t</em> <code>ref_type</code>
-            <dd>IN: The reference type of <code>ref</code>.
-        <dt><em>void *</em><code>ref</code>
-            <dd>IN: Reference to open.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dataset</code></td>
+            <td valign="top">IN: Dataset containing reference object.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5R_type_t</em>&nbsp;<code>ref_type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: The reference type of <code>ref</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>void *</em><code>ref</code></td>
+            <td valign="top">IN: Reference to open.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns valid identifier if successful;
         otherwise returns a negative value.
@@ -361,16 +391,19 @@ END SUBROUTINE h5rdereference_f
 	</td></tr>
 	</table>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>id</code>,
-            <dd>IN: The dataset containing the reference object or 
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>id</code>,</td>
+            <td valign="top">IN: The dataset containing the reference object or 
                 the location identifier of the object that the 
-                dataset is located within.
-        <dt><em>H5R_type_t</em> <code>ref_type</code>
-            <dd>IN: Type of reference to query.
-        <dt><em>void *</em><code>ref</code>
-            <dd>IN: Reference to query.
-    </dl>
+                dataset is located within.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5R_type_t</em>&nbsp;<code>ref_type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Type of reference to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>void *</em><code>ref</code></td>
+            <td valign="top">IN: Reference to query.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns an object type as defined in <code>H5Gpublic.h</code> if successful;
         otherwise returns <code>H5G_UNKNOWN</code>.
@@ -472,14 +505,17 @@ END SUBROUTINE h5rget_object_type_f
         <li><code>H5R_DATASET_REGION</code>  (<code>1</code>)
         </ul>
 <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>dataset</code>,
-            <dd>IN: Dataset containing reference object.
-        <dt><em>H5R_type_t</em> <code>ref_type</code>,
-            <dd>IN: The reference type of <code>ref</code>.
-        <dt><em>void *</em><code>ref</code>
-            <dd>IN: Reference to open.
-    </dl>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dataset</code></td>
+            <td valign="top">IN: Dataset containing reference object.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5R_type_t</em>&nbsp;<code>ref_type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: The reference type of <code>ref</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>void *</em><code>ref</code></td>
+            <td valign="top">IN: Reference to open.</td></tr>
+    </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a valid identifier if successful;
         otherwise returns a negative value.

@@ -106,11 +106,11 @@ StrType::StrType( const hid_t existing_id ) : AtomType( existing_id ) {}
 StrType::StrType( const StrType& original ) : AtomType ( original ) {}
 
 //--------------------------------------------------------------------------
-// Function:    EnumType overloaded constructor
-///\brief       Gets the string datatype of the specified dataset
-///\param       dataset - IN: Dataset that this string datatype associates with
-///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
+// Function:	EnumType overloaded constructor
+///\brief	Gets the string datatype of the specified dataset
+///\param	dataset - IN: Dataset that this string datatype associates with
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 StrType::StrType( const DataSet& dataset ) : AtomType ()
 {

@@ -14,18 +14,15 @@
 
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 
+/* Pablo mask */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5P_dxpl_mask
+
 /* Private header files */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
-
-/* Pablo mask */
-#define PABLO_MASK	H5Pdxpl_mask
-
-/* Interface initialization */
-#define INTERFACE_INIT  NULL
-static int             interface_initialize_g = 0;
 
 /* Local datatypes */
 

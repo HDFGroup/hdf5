@@ -14,6 +14,9 @@
 
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5D_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5D_mask
@@ -31,12 +34,7 @@
 
 /*#define H5D_DEBUG*/
 
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT H5D_init_interface
-
 /* Local functions */
-static herr_t H5D_init_interface(void);
 static herr_t H5D_init_storage(H5D_t *dataset, hbool_t full_overwrite, hid_t dxpl_id);
 static H5D_shared_t * H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type);
 static H5D_t * H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, 
@@ -47,7 +45,7 @@ static hsize_t H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id);
 static haddr_t H5D_get_offset(const H5D_t *dset);
 static herr_t H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 static herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
-static herr_t H5D_init_type(H5F_t *file, H5D_t *dset, hid_t type_id, const H5T_t *type);
+static herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type);
 static int H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t size);
 static int H5D_crt_ext_file_list_cmp(const void *value1, const void *value2, size_t size);
 static int H5D_crt_data_pipeline_cmp(const void *value1, const void *value2, size_t size);
@@ -420,8 +418,8 @@ H5D_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_term_interface)
 
-    if (interface_initialize_g) {
-	if ((n=H5I_nmembers(H5I_DATASET))) {
+    if (H5_interface_initialize_g) {
+	if ((n=H5I_nmembers(H5I_DATASET))>0) {
             /* The dataset API uses the "force" flag set to true because it
              * is using the "file objects" (H5FO) API functions to track open
              * objects in the file.  Using the H5FO code means that dataset
@@ -447,7 +445,7 @@ H5D_term_interface(void)
 	    H5I_clear_group(H5I_DATASET, TRUE);
 	} else {
 	    H5I_destroy_group(H5I_DATASET);
-	    interface_initialize_g = 0;
+	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}
     }
@@ -1640,7 +1638,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_init_type(H5F_t *file, H5D_t *dset, hid_t type_id, const H5T_t *type)
+H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
 {
     htri_t relocatable;                 /* Flag whether the type is relocatable */
     htri_t immutable;                   /* Flag whether the type is immutable */
@@ -1981,6 +1979,10 @@ done:
  *      whether we're working with an external file or not. Between the
  *      two, there is a conditional call to allocate space which isn't
  *      part of updating the cache.
+ *
+ *      Nat Furrer and James Laird
+ *      June 7, 2004
+ *      Added checked_filters flag
  *	
  *-------------------------------------------------------------------------
  */
@@ -2253,7 +2255,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
 
         default:
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet")
-    } /* end switch */
+    } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
     /* Update the dataset's entry info. */
     if (H5D_update_entry_info(file, dxpl_id, new_dset, dc_plist) != SUCCEED)
@@ -2386,7 +2388,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5D_t*
-H5D_open(H5G_entry_t *ent, hid_t dxpl_id)
+H5D_open(const H5G_entry_t *ent, hid_t dxpl_id)
 {
     H5D_shared_t    *shared_fo=NULL;
     H5D_t           *dataset=NULL;
@@ -2399,7 +2401,6 @@ H5D_open(H5G_entry_t *ent, hid_t dxpl_id)
 
     /* Check if dataset was already open */
     if((shared_fo=H5FO_opened(ent->file,ent->header))==NULL) {
-
         /* Clear any errors from H5FO_opened() */
         H5E_clear();
 
@@ -2429,16 +2430,15 @@ H5D_open(H5G_entry_t *ent, hid_t dxpl_id)
     ret_value = dataset;
 
 done:
-     if(ret_value==NULL) {
+    if(ret_value==NULL) {
         if(dataset) {
-            if(shared_fo==NULL) {   /* Need to free shared fo */
+            if(shared_fo==NULL)   /* Need to free shared fo */
                 H5FL_FREE(H5D_shared_t, dataset->shared);
-            }
             H5FL_FREE(H5D_t, dataset);
         }
         if(shared_fo)
             shared_fo->fo_count--;
-    }
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -2588,7 +2588,7 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
 
         default:
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet")
-    } /* end switch */
+    } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
     /* Point at dataset's copy, to cache it for later */
     fill_prop=&dataset->shared->fill;
@@ -2620,7 +2620,7 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
                 
             default:
                 HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet")
-        } /* end switch */
+        } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Set the default fill time */
         fill.fill_time=H5D_CRT_FILL_TIME_DEF;
@@ -2795,7 +2795,7 @@ H5D_close(H5D_t *dataset)
 #ifdef NDEBUG
                 HGOTO_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
 #endif /* NDEBUG */
-        } /* end switch */
+        } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /*
         * Release datatype, dataspace and creation property list -- there isn't
@@ -3119,7 +3119,7 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
 #ifdef NDEBUG
                 HGOTO_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
 #endif /* NDEBUG */
-        } /* end switch */
+        } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Check if we need to initialize the space */
         if(init_space) {
@@ -3244,7 +3244,7 @@ H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hid_t dxpl_id)
 #ifdef NDEBUG
             HGOTO_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
 #endif /* NDEBUG */
-    } /* end switch */
+    } /* end switch */ /*lint !e788 All appropriate cases are covered */
     
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3338,7 +3338,7 @@ H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id)
 
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset type")
-    }
+    } /*lint !e788 All appropriate cases are covered */
      
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3434,7 +3434,7 @@ H5D_get_offset(const H5D_t *dset)
 #ifdef NDEBUG
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "unknown dataset layout type")
 #endif /* NDEBUG */
-    }
+    } /*lint !e788 All appropriate cases are covered */
      
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3469,14 +3469,14 @@ done:
  * Operation information:
  *      H5D_operator_t is defined as:
  *          typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id,
- *              hsize_t ndim, hssize_t *point, void *operator_data);
+ *              unsigned ndim, const hsize_t *point, void *operator_data);
  *
  *      H5D_operator_t parameters:
  *          void *elem;         IN/OUT: Pointer to the element in memory containing
  *                                  the current point.
  *          hid_t type_id;      IN: Datatype ID for the elements stored in ELEM.
- *          hsize_t ndim;       IN: Number of dimensions for POINT array
- *          hssize_t *point;    IN: Array containing the location of the element
+ *          unsigned ndim;       IN: Number of dimensions for POINT array
+ *          const hsize_t *point; IN: Array containing the location of the element
  *                                  within the original dataspace.
  *          void *operator_data;    IN/OUT: Pointer to any user-defined data
  *                                  associated with the operation.
@@ -3648,7 +3648,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t *point, void *op_data)
+H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim, const hsize_t *point, void *op_data)
 {
     H5D_vlen_bufsize_t *vlen_bufsize=(H5D_vlen_bufsize_t *)op_data;
     H5T_t	*dt = NULL;
@@ -3668,7 +3668,7 @@ H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, hsize_t UNUSED ndim, hss
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't resize tbuf")
 
     /* Select point to read in */
-    if (H5Sselect_elements(vlen_bufsize->fspace_id,H5S_SELECT_SET,1,(const hssize_t **)point)<0)
+    if (H5Sselect_elements(vlen_bufsize->fspace_id,H5S_SELECT_SET,1,(const hsize_t **)point)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't select point")
 
     /* Read in the point (with the custom VL memory allocator) */
@@ -3970,7 +3970,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
+H5D_flush(const H5F_t *f, hid_t dxpl_id, unsigned flags)
 {
     int         num_dsets;      /* Number of datasets in file   */
     hid_t       *id_list=NULL;  /* list of dataset IDs          */
@@ -4035,7 +4035,7 @@ H5D_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
 #ifdef NDEBUG
                     HGOTO_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
 #endif /* NDEBUG */
-            } /* end switch */
+            } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         }
     } /* end if */
@@ -4065,13 +4065,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Ddebug(hid_t dset_id, unsigned UNUSED flags)
+H5Ddebug(hid_t dset_id)
 {
     H5D_t	*dset=NULL;
     herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(H5Ddebug, FAIL)
-    H5TRACE2("e","iIu",dset_id,flags);
+    H5TRACE1("e","i",dset_id);
 
     /* Check args */
     if (NULL==(dset=H5I_object_verify(dset_id, H5I_DATASET)))

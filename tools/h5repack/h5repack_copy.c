@@ -128,7 +128,7 @@ int copy_objects(const char* fnamein,
                  pack_opt_t *options)
 {
  hid_t         fidin; 
- hid_t         fidout; 
+ hid_t         fidout=(-1); 
  trav_table_t  *travt=NULL;
 
 /*-------------------------------------------------------------------------
@@ -222,17 +222,17 @@ int do_copy_objects(hid_t fidin,
                     trav_table_t *travt,
                     pack_opt_t *options) /* repack options */
 {
- hid_t     grp_in;       /* group ID */ 
- hid_t     grp_out;      /* group ID */ 
- hid_t     dset_in;      /* read dataset ID */ 
- hid_t     dset_out;     /* write dataset ID */ 
- hid_t     type_in;      /* named type ID */ 
- hid_t     type_out;     /* named type ID */ 
- hid_t     dcpl_id;      /* dataset creation property list ID */ 
-	hid_t     dcpl_out;     /* dataset creation property list ID */ 
- hid_t     space_id;     /* space ID */ 
- hid_t     ftype_id;     /* file data type ID */ 
- hid_t     mtype_id;     /* memory data type ID */
+ hid_t     grp_in=(-1);       /* group ID */ 
+ hid_t     grp_out=(-1);      /* group ID */ 
+ hid_t     dset_in=(-1);      /* read dataset ID */ 
+ hid_t     dset_out=(-1);     /* write dataset ID */ 
+ hid_t     type_in=(-1);      /* named type ID */ 
+ hid_t     type_out=(-1);     /* named type ID */ 
+ hid_t     dcpl_id=(-1);      /* dataset creation property list ID */ 
+ hid_t     dcpl_out=(-1);     /* dataset creation property list ID */ 
+ hid_t     space_id=(-1);     /* space ID */ 
+ hid_t     ftype_id=(-1);     /* file data type ID */ 
+ hid_t     mtype_id=(-1);     /* memory data type ID */
  size_t    msize;        /* memory size of memory type */
  void      *buf=NULL;    /* data buffer */
  hsize_t   nelmts;       /* number of elements in dataset */
@@ -241,7 +241,6 @@ int do_copy_objects(hid_t fidin,
  hsize_t   dsize_in;     /* input dataset size before filter */
  int       next;         /* external files */
  int       i, j;
- int       wrote=0;
 
 /*-------------------------------------------------------------------------
  * copy the suppplied object list
@@ -401,7 +400,6 @@ int do_copy_objects(hid_t fidin,
     if (dsize_in && nelmts) {
      if (H5Dwrite(dset_out,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
       goto error;
-     wrote=1;
     }
     /*-------------------------------------------------------------------------
      * copy attrs
@@ -555,7 +553,6 @@ error:
  return -1;
 
 }
-
 
 
 /*-------------------------------------------------------------------------

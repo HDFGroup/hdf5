@@ -14,6 +14,9 @@
 
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5S_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5S_mask
@@ -32,11 +35,6 @@ static H5S_t * H5S_create(H5S_class_t type);
 static herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank,
     const hsize_t *dims, const hsize_t *max);
 static htri_t H5S_is_simple(const H5S_t *sdim);
-
-/* Interface initialization */
-#define INTERFACE_INIT	H5S_init_interface
-static int		interface_initialize_g = 0;
-static herr_t		H5S_init_interface(void);
 
 #ifdef H5S_DEBUG
 /* Names of the selection names, for debugging */
@@ -63,9 +61,6 @@ H5FL_DEFINE(H5S_t);
 
 /* Declare a free list to manage the array's of hsize_t's */
 H5FL_ARR_DEFINE(hsize_t,H5S_MAX_RANK);
-
-/* Declare a free list to manage the array's of hssize_t's */
-H5FL_ARR_DEFINE(hssize_t,H5S_MAX_RANK);
 
 
 /*--------------------------------------------------------------------------
@@ -132,11 +127,11 @@ H5S_term_interface(void)
     int		j, nprints=0;
     H5S_iostats_t	*path=NULL;
     char	buf[256];
-#endif
+#endif /* H5S_DEBUG */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_term_interface);
 
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_DATASPACE))) {
 	    H5I_clear_group(H5I_DATASPACE, FALSE);
 	} else {
@@ -269,7 +264,7 @@ H5S_term_interface(void)
 #endif /* H5S_DEBUG */
 
 	    /* Shut down interface */
-	    interface_initialize_g = 0;
+	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}
     }
@@ -1650,6 +1645,37 @@ H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_create_simple() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_raw_size
+ *
+ * Purpose:	Compute the 'raw' size of the extent, as stored on disk.
+ *
+ * Return:	Success:	non-zero
+ *		Failure:	zero
+ *
+ * Programmer:	Quincey Koziol
+ *              koziol@ncsa.uiuc.edu
+ *              October 14, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5S_raw_size(const H5F_t *f, const H5S_t *space)
+{
+    size_t      ret_value;
+
+    FUNC_ENTER_NOAPI(H5S_raw_size, 0);
+
+    /* Find out the size of buffer needed for extent */
+    ret_value=H5O_raw_size(H5O_SDSPACE_ID, f, &(space->extent));
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5S_raw_size() */
 
 
 /*-------------------------------------------------------------------------

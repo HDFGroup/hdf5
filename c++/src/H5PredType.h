@@ -34,7 +34,7 @@ class H5_DLLCPP PredType : public AtomType {
 	// Returns the HDF5 predefined type id.
 	virtual hid_t getId() const;
 
-	// Default destructor
+	// Noop destructor
 	virtual ~PredType();
 
 	// Declaration of predefined types; their definition is in H5PredType.cpp

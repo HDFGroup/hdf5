@@ -67,8 +67,8 @@ typedef enum H5B_ins_t {
 #define H5B_ITER_STOP   (1)
 
 /* Define the operator callback function pointer for H5B_iterate() */
-typedef int (*H5B_operator_t)(H5F_t *f, hid_t, void *_lt_key, haddr_t addr,
-                                        void *_rt_key, void *_udata);
+typedef int (*H5B_operator_t)(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
+                                        const void *_rt_key, void *_udata);
 
 /* Typedef for B-tree in memory (defined in H5Bpkg.h) */
 typedef struct H5B_t H5B_t;
@@ -98,11 +98,11 @@ typedef struct H5B_class_t {
     H5B_subid_t id;					/*id as found in file*/
     size_t	sizeof_nkey;			/*size of native (memory) key*/
     size_t	(*get_sizeof_rkey)(const H5F_t*, const void*);    /*raw key size   */
-    H5RC_t *    (*get_shared)(H5F_t*, const void*);    /*shared info for node */
+    H5RC_t *    (*get_shared)(const H5F_t*, const void*);    /*shared info for node */
     herr_t	(*new_node)(H5F_t*, hid_t, H5B_ins_t, void*, void*, void*, haddr_t*);
     int         (*cmp2)(H5F_t*, hid_t, void*, void*, void*);	    /*compare 2 keys */
     int         (*cmp3)(H5F_t*, hid_t, void*, void*, void*);	    /*compare 3 keys */
-    herr_t	(*found)(H5F_t*, hid_t, haddr_t, const void*, void*, const void*);
+    herr_t	(*found)(H5F_t*, hid_t, haddr_t, const void*, void*);
     
     /* insert new data */
     H5B_ins_t	(*insert)(H5F_t*, hid_t, haddr_t, void*, hbool_t*, void*, void*,
@@ -117,8 +117,8 @@ typedef struct H5B_class_t {
 			  hbool_t*);
 
     /* encode, decode, debug key values */
-    herr_t	(*decode)(H5F_t*, struct H5B_t*, uint8_t*, void*);
-    herr_t	(*encode)(H5F_t*, struct H5B_t*, uint8_t*, void*);
+    herr_t	(*decode)(const H5F_t*, const struct H5B_t*, const uint8_t*, void*);
+    herr_t	(*encode)(const H5F_t*, const struct H5B_t*, uint8_t*, void*);
     herr_t	(*debug_key)(FILE*, H5F_t*, hid_t, int, int, const void*, const void*);
 
 } H5B_class_t;

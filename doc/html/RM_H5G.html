@@ -224,10 +224,11 @@ create or access function.
         <p>
         Failure to release a group with this call will result in resource leaks.
   <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>group_id</code>
-        <dd>IN: Group identifier to release.
-    </dl>
+    <ul><table>
+      <tr>
+	      <td valign="top"><em>hid_t</em>&nbsp;<code>group_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Group identifier to release.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -282,20 +283,23 @@ END SUBROUTINE h5gclose_f
 	This group identifier should be closed by calling 
         <code>H5Gclose</code> when it is no longer needed. 
   <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: File or group identifier.
-      <dt><em>const char *</em><code>name</code>
-        <dd>IN: Absolute or relative name of the new group.
-      <dt><em>size_t</em> <code>size_hint</code>
-        <dd>IN: Optional parameter indicating the number of bytes 
-            to reserve for the names that will appear in the group. 
-            A conservative estimate could result in multiple 
-            system-level I/O requests to read the group name heap; 
-            a liberal estimate could result in a single large 
-            I/O request even when the group has just a few names.  
-            HDF5 stores each name with a null terminator.
-    </dl>
+    <ul><table>
+      <tr>
+	      <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+          <td valign="top">IN: File or group identifier.</td></tr>
+      <tr>
+	      <td valign="top"><em>const char *</em><code>name</code></td>
+          <td valign="top">IN: Absolute or relative name of the new group.</td></tr>
+      <tr>
+	      <td valign="top"><em>size_t</em>&nbsp;<code>size_hint&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Optional parameter indicating the number of bytes 
+              to reserve for the names that will appear in the group. 
+              A conservative estimate could result in multiple 
+              system-level I/O requests to read the group name heap; 
+              a liberal estimate could result in a single large 
+              I/O request even when the group has just a few names.  
+              HDF5 stores each name with a null terminator.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a valid group identifier for the open group if successful; 
         otherwise returns a negative value.
@@ -352,12 +356,15 @@ END SUBROUTINE h5gcreate_f
         If an object does not have a comment, the empty string 
         is returned.
   <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Identifier of a file, group, dataset, or named datatype.
-      <dt><em>const char *</em><code>name</code>
-        <dd>IN: Name of the object in <code>loc_id</code> whose comment 
-            is to be retreived.
+    <ul><table>
+      <tr>
+        <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: Identifier of the file, group, dataset, or 
+            named datatype.</td></tr>
+      <tr>
+        <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Name of the object in <code>loc_id</code> whose 
+            comment is to be retrieved.
             <br>
             <code>name</code> can be '.' (dot) if <code>loc_id</code> 
             fully specifies the object for which the associated comment 
@@ -365,12 +372,15 @@ END SUBROUTINE h5gcreate_f
             <br>
             <code>name</code> is ignored if <code>loc_id</code> 
             is a dataset or named datatype.
-      <dt><em>size_t</em> <code>bufsize</code>
-        <dd>IN: Anticipated required size of the 
-            <code>comment</code> buffer.
-      <dt><em>char *</em><code>comment</code>
-        <dd>OUT: The comment.
-    </dl>
+            </td></tr>
+      <tr>
+        <td valign="top"><em>size_t</em> <code>bufsize</code></td>
+        <td valign="top">IN: Anticipated required size of the  
+            <code>comment</code> buffer.</td></tr>
+      <tr>
+        <td valign="top"><em>char *</em><code>comment</code></td>
+        <td valign="top">OUT: The comment.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns the number of characters in the comment, 
         counting the null terminator, if successful; the value 
@@ -378,19 +388,19 @@ END SUBROUTINE h5gcreate_f
         Otherwise returns a negative value.
   <dt><strong>Fortran90 Interface:</strong> h5gget_comment_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5gget_comment_f(loc_id, name, size, buffer, hdferr)
   IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN) :: loc_id         ! File, group, dataset, or 
+  INTEGER(HID_T), INTENT(IN) :: loc_id         ! File, group, dataset, or
                                                ! named datatype identifier  
   CHARACTER(LEN=*), INTENT(IN) :: name         ! Name of the object link 
   CHARACTER(LEN=size), INTENT(OUT) :: buffer   ! Buffer to hold the comment
   INTEGER, INTENT(OUT) :: hdferr               ! Error code 
                                                ! 0 on success and -1 on failure
 END SUBROUTINE h5gget_comment_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
+    </pre>
+
+    <!--<dt><strong>Non-C API(s):</strong>
     	<dd>
         
         <img src="Graphics/Java.gif"> 
@@ -430,17 +440,21 @@ END SUBROUTINE h5gget_comment_f
         This function should be used only after <code>H5Gget_objinfo</code> has been called
         to verify that <code>name</code> is a symbolic link.
   <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Identifier of the file or group.
-      <dt><em>const char *</em><code>name</code>
-        <dd>IN: Symbolic link to the object whose name is to be returned.
-      <dt><em>size_t</em> <code>size</code>
-        <dd>IN: Maximum number of characters of <code>value</code> 
-            to be returned.
-      <dt><em>char *</em><code>value</code>
-        <dd>OUT: A buffer to hold the name of the object being sought.
-    </dl>
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: Identifier of the file or group.</td></tr>
+      <tr>
+	    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Symbolic link to the object whose name is to be returned.</td></tr>
+      <tr>
+	    <td valign="top"><em>size_t</em> <code>size</code></td>
+        <td valign="top">IN: Maximum number of characters of <code>value</code> 
+            to be returned.</td></tr>
+      <tr>
+	    <td valign="top"><em>char *</em><code>value</code></td>
+        <td valign="top">OUT: A buffer to hold the name of the object being sought.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value, with the link value in <code>value</code>, 
         if successful.
@@ -484,12 +498,14 @@ END SUBROUTINE h5gget_linkval_f
       If a file identifier is passed in, then the number of objects in the 
       root group is returned.
 <dt><strong>Parameters:</strong>
-  <dl>
-    <dt><em>hid_t</em> <code>loc_id</code>
-      <dd>IN: Identifier of the group or the file
-    <dt><em>hsize_t*</em> <code>num_obj</code>
-      <dd>OUT: Number of objects in the group.
-  </dl>
+  <ul><table>
+    <tr>
+	  <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+      <td valign="top">IN: Identifier of the group or the file</td></tr>
+    <tr>
+	  <td valign="top"><em>hsize_t&nbsp;*</em><code>num_obj&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+      <td valign="top">OUT: Number of objects in the group.</td></tr>
+  </table></ul>
 <dt><strong>Returns:</strong>
   <dd>Returns positive value if successful;
       otherwise returns a negative value.
@@ -616,16 +632,20 @@ SUBROUTINE
         unable to retrieve the correct time; such systems (e.g., Irix64) 
         will report an <code>mtime</code> value of 0 (zero).
   <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: File or group identifier.
-      <dt><em>const char</em> <code>*name</code>
-        <dd>IN: Name of the object for which status is being sought.
-      <dt><em>hbool_t</em> <code>follow_link</code>
-        <dd>IN: Link flag.
-      <dt><em>H5G_stat_t</em> <code>*statbuf</code>
-        <dd>OUT: Buffer in which to return information about the object.
-    </dl>
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: File or group identifier.</td></tr>
+      <tr>
+	    <td valign="top"><em>const char</em> <code>*name</code></td>
+        <td valign="top">IN: Name of the object for which status is being sought.</td></tr>
+	  <tr>
+	    <td valign="top"><em>hbool_t</em> <code>follow_link</code></td>
+        <td valign="top">IN: Link flag.</td></tr>
+      <tr>
+	    <td valign="top"><em>H5G_stat_t</em>&nbsp;<code>*statbuf&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">OUT: Buffer in which to return information about the object.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd> Returns a non-negative value if successful, with the fields of 
          <code>statbuf</code> (if non-null) initialized.
@@ -687,16 +707,20 @@ SUBROUTINE
       A second call to <code>H5Gget_objname_by_idx</code> 
       can then be used to retrieve the actual name.
 <dt><strong>Parameters:</strong>
-  <dl>
-    <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Group or file identifier.
-    <dt><em>hsize_t</em> <code>idx</code>
-        <dd>IN: Transient index identifying object.
-    <dt><em>char *</em><code>name</code>
-        <dd>IN/OUT: Pointer to user-provided buffer the object name.
-    <dt><em>size_t</em> <code>size</code>
-        <dd>IN: Name length.
-  </dl>
+  <ul><table>
+    <tr>
+	    <td valign="top"><em>hid_t</em>&nbsp;<code>loc_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Group or file identifier.</td></tr>
+    <tr>
+	    <td valign="top"><em>hsize_t</em> <code>idx</code></td>
+        <td valign="top">IN: Transient index identifying object.</td></tr>
+    <tr>
+	    <td valign="top"><em>char *</em><code>name</code></td>
+        <td valign="top">IN/OUT: Pointer to user-provided buffer the object name.</td></tr>
+    <tr>
+	    <td valign="top"><em>size_t</em> <code>size</code></td>
+        <td valign="top">IN: Name length.</td></tr>
+  </table></ul>
 <dt><strong>Returns:</strong>
   <dd>Returns the size of the object name if successful, 
       or <code>0</code> if no name is associated with the group identifier.
@@ -790,12 +814,14 @@ SUBROUTINE
 	</table>
 
 <dt><strong>Parameters:</strong>
-  <dl>
-    <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Group or file identifier.
-    <dt><em>hsize_t</em> <code>idx</code>
-        <dd>IN: Transient index identifying object.
-  </dl>
+  <ul><table>
+    <tr>
+	    <td valign="top"><em>hid_t</em>&nbsp;<code>loc_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Group or file identifier.</td></tr>
+    <tr>
+	    <td valign="top"><em>hsize_t</em> <code>idx</code></td>
+        <td valign="top">IN: Transient index identifying object.</td></tr>
+  </table></ul>
 <dt><strong>Returns:</strong>
   <dd>Returns the type of the object if successful.
       Otherwise returns a negative value.
@@ -846,12 +872,15 @@ SUBROUTINE
         non-zero.  
         <p>
         The prototype for <code>H5G_iterate_t</code> is:
-        <ul><dl>
-            <dd><code>typedef</code> <em>herr_t </em>(*<code>H5G_iterate_t</code>)(<em>hid_t</em> <code>group_id</code>,
-                <em>const char *</em><code>member_name</code>, 
-                <em>void *</em><code>operator_data</code>);
-        </dl></ul>
-        <dd>The operation receives the group identifier for the group being 
+        <table>
+		    <tr>
+			  <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			  <td valign="top"><code>typedef</code> <em>herr_t </em>(*<code>H5G_iterate_t</code>)
+			                   (<em>hid_t</em> <code>group_id</code>, <em>const char *</em>
+							   <code>member_name</code>, <em>void *</em><code>operator_data</code>);</td></tr>
+        </table>
+				
+        <p>The operation receives the group identifier for the group being 
         iterated over, <code>group_id</code>, the name of the current 
         object within the group, <code>member_name</code>, and the 
         pointer to the operator data passed in to <code>H5Giterate</code>, 
@@ -874,23 +903,29 @@ SUBROUTINE
         iteration.  If the membership changes during the iteration, 
         the function's behavior is undefined.
   <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: File or group identifier.
-      <dt><em>const char</em> <code>*name</code>
-        <dd>IN: Group over which the iteration is performed.
-      <dt><em>int</em> <code>*idx</code>
-        <dd>IN/OUT: Location at which to begin the iteration.
-      <dt><em>H5G_iterate_t</em> <code>operator</code>
-        <dd>IN: Operation to be performed on an object at each step of 
-            the iteration.
-      <dt><em>void</em> <code>*operator_data</code>
-        <dd>IN/OUT: Data associated with the operation.
-    </dl>
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: File or group identifier.</td></tr>
+      <tr>
+	    <td valign="top"><em>const char</em> <code>*name</code></td>
+        <td valign="top">IN: Group over which the iteration is performed.</td></tr>
+      <tr>
+	    <td valign="top"><em>int</em> <code>*idx</code></td>
+        <td valign="top">IN/OUT: Location at which to begin the iteration.</td></tr>
+      <tr>
+	    <td valign="top"><em>H5G_iterate_t</em>&nbsp;<code>operator&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Operation to be performed on an object at each step of 
+            the iteration.</td></tr>
+      <tr>
+	    <td valign="top"><em>void</em> <code>*operator_data</code></td>
+        <td valign="top">IN/OUT: Data associated with the operation.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns the return value of the last operator if it was non-zero, 
         or zero if all group members were processed.
         Otherwise returns a negative value.
+<!-- NEW PAGE -->
   <dt><strong>Fortran90 Interface:</strong>
     <dd>There is no direct FORTRAN couterpart for the C function 
         <code>H5Giterate</code>.  
@@ -908,8 +943,8 @@ SUBROUTINE
           Returns the number of group members.
         </tr>
 		<tr valign=top align=left>
-          <td>
-            <code>h5gget_obj_info_idx_f</code> 
+            <td>
+            <code>h5gget_obj_info_idx_f</code>
             </td><td>&nbsp;&nbsp;</td><td>
             <strong>Purpose:</strong>
             Returns name and type of the group member identified by its index.
@@ -921,12 +956,11 @@ SUBROUTINE
 		<pre>
 SUBROUTINE h5gn_members_f(loc_id, name, nmembers, hdferr)           
   IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
-  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the group 
-  INTEGER, INTENT(OUT) :: nmembers       ! Number of members in the
-                                         ! group 
-  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
-                                         ! 0 on success and -1 on failure
+  INTEGER(HID_T), INTENT(IN) :: loc_id        ! File or group identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name        ! Name of the group 
+  INTEGER, INTENT(OUT) :: nmembers            ! Number of members in the group
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code 
+                                              ! 0 on success and -1 on failure
 END SUBROUTINE h5gn_members_f
 		</pre>
 		
@@ -934,17 +968,17 @@ END SUBROUTINE h5gn_members_f
 SUBROUTINE h5gget_obj_info_idx_f(loc_id, name, idx, &amp; 
                                  obj_name, obj_type, hdferr)           
   IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
-  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the group 
-  INTEGER, INTENT(IN) :: idx             ! Index of member object 
+  INTEGER(HID_T), INTENT(IN) :: loc_id        ! File or group identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name        ! Name of the group 
+  INTEGER, INTENT(IN) :: idx                  ! Index of member object 
   CHARACTER(LEN=*), INTENT(OUT) :: obj_name   ! Name of the object 
-  INTEGER, INTENT(OUT) :: obj_type       ! Object type : 
-                                         ! H5G_LINK_F 
-                                         ! H5G_GROUP_F 
-                                         ! H5G_DATASET_F 
-                                         ! H5G_TYPE_F 
-  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
-                                         ! 0 on success and -1 on failure
+  INTEGER, INTENT(OUT) :: obj_type            ! Object type : 
+                                              !     H5G_LINK_F 
+                                              !     H5G_GROUP_F 
+                                              !     H5G_DATASET_F 
+                                              !     H5G_TYPE_F 
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code 
+                                              ! 0 on success and -1 on failure
 END SUBROUTINE h5gget_obj_info_idx_f
 		</pre>
 </dl>
@@ -982,19 +1016,23 @@ END SUBROUTINE h5gget_obj_info_idx_f
         is made for <code>./x/y/bar</code>, then the actual object looked 
         up is <code>./x/y/./foo</code>.                            
   <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: File or group identifier.
-      <dt><em>H5G_link_t</em> <code>link_type</code>
-        <dd>IN: Link type.
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: File or group identifier.</td></tr>
+      <tr>
+	    <td valign="top"><em>H5G_link_t</em> <code>link_type</code></td>
+        <td valign="top">IN: Link type.
             Possible values are <code>H5G_LINK_HARD</code> and 
-            <code>H5G_LINK_SOFT</code>.
-      <dt><em>const char *</em> <code>current_name</code>
-        <dd>IN: Name of the existing object if link is a hard link.
-            Can be anything for the soft link.
-      <dt><em>const char *</em> <code>new_name</code>
-        <dd>IN: New name for the object.
-    </dl>
+            <code>H5G_LINK_SOFT</code>.</td></tr>
+      <tr>
+	    <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>current_name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Name of the existing object if link is a hard link.
+            Can be anything for the soft link.</td></tr>
+      <tr>
+	    <td valign="top"><em>const char *</em> <code>new_name</code></td>
+        <td valign="top">IN: New name for the object.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1058,21 +1096,25 @@ END SUBROUTINE h5glink_f
         is made for <code>./x/y/bar</code>, then the actual object looked 
         up is <code>./x/y/./foo</code>.                            
   <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>curr_loc_id</code> 
-        <dd>IN: The file or group identifier for the original object. 
-      <dt><em>const char *</em> <code>current_name</code>
-        <dd>IN: Name of the existing object if link is a hard link.
-            Can be anything for the soft link.
-      <dt><em>H5G_link_t</em> <code>link_type</code>
-        <dd>IN: Link type.
+    <ul><table>
+	  <tr>
+	    <td valign="top"><em>hid_t</em> <code>curr_loc_id</code></td>
+        <td valign="top">IN: The file or group identifier for the original object.</td></tr>
+	  <tr>
+        <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>current_name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Name of the existing object if link is a hard link.
+            Can be anything for the soft link.</td></tr>
+	  <tr>
+        <td valign="top"><em>H5G_link_t</em> <code>link_type</code></td>
+        <td valign="top">IN: Link type.
             Possible values are <code>H5G_LINK_HARD</code> and 
-            <code>H5G_LINK_SOFT</code>.
-      <dt><em>hid_t</em> <code>new_loc_id</code> 
-        <dd>IN: The file or group identifier for the new link. 
-      <dt><em>const char *</em> <code>new_name</code>
-        <dd>IN: New name for the object.
-    </dl>
+            <code>H5G_LINK_SOFT</code>.</td></tr>
+	  <tr>
+        <td valign="top"><em>hid_t</em> <code>new_loc_id</code></td>
+        <td valign="top">IN: The file or group identifier for the new link.</td></tr> 
+        <td valign="top"><em>const char *</em> <code>new_name</code></td>
+        <td valign="top">IN: New name for the object.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1128,14 +1170,17 @@ END SUBROUTINE h5glink2_f
         See <a href="Groups.html#H5GUnlinkToCorrupt">The Group Interface</a> 
         in the <cite>HDF5 User's Guide</cite>.
   <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: File or group identifier.
-      <dt><em>const char</em> <code>*src_name</code>
-        <dd>IN: Object's original name.
-      <dt><em>const char</em> <code>*dst_name</code>
-        <dd>IN: Object's new name.
-    </dl>
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: File or group identifier.</td></tr>
+      <tr>
+	    <td valign="top"><em>const&nbsp;char</em>&nbsp;<code>*src_name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Object's original name.</td></tr>
+      <tr>
+	    <td valign="top"><em>const char</em> <code>*dst_name</code></td>
+        <td valign="top">IN: Object's new name.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1184,16 +1229,20 @@ END SUBROUTINE h5gmove_f
     inaccessible with <code>H5Gmove</code>. See <a href="Groups.html#H5GUnlinkToCorrupt">The 
     Group Interface</a> in the <cite>HDF5 User's Guide</cite>. 
   <dt><strong>Parameters:</strong> 
-    <dl>
-      <dt><em>hid_t</em> <code>src_loc_id</code> 
-      <dd>IN: Original file or group identifier. 
-      <dt><em>const char</em> <code>*src_name</code> 
-      <dd>IN: Object's original name. 
-      <dt><em>hid_t</em> <code>dst_loc_id</code> 
-      <dd>IN: Destination file or group identifier. 
-      <dt><em>const char</em> <code>*dst_name</code> 
-      <dd>IN: Object's new name. 
-    </dl>
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em> <code>src_loc_id</code></td> 
+        <td valign="top">IN: Original file or group identifier.</td></tr>
+      <tr>
+	    <td valign="top"><em>const&nbsp;char</em>&nbsp;<code>*src_name&nbsp;&nbsp;&nbsp;&nbsp;</code></td> 
+        <td valign="top">IN: Object's original name.</td></tr>
+      <tr>
+	    <td valign="top"><em>hid_t</em> <code>dst_loc_id</code></td> 
+        <td valign="top">IN: Destination file or group identifier.</td></tr>
+      <tr>
+	    <td valign="top"><em>const char</em> <code>*dst_name</code></td> 
+        <td valign="top">IN: Object's new name.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong> 
   <dd>Returns a non-negative value if successful; otherwise returns a negative 
     value. 
@@ -1243,12 +1292,14 @@ END SUBROUTINE h5gmove2_f
         that was opened.  This group identifier should be released by 
         calling <code>H5Gclose</code> when it is no longer needed.  
   <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: File or group identifier within which group is to be open.
-      <dt><em>const char *</em> <code>name</code>
-        <dd>IN: Name of group to open.
-    </dl>
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: File or group identifier within which group is to be open.</td></tr>
+      <tr>
+	    <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Name of group to open.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a valid group identifier if successful; 
         otherwise returns a negative value.
@@ -1286,7 +1337,7 @@ END SUBROUTINE h5gopen_f
   <dt><strong>Purpose:</strong>
     <dd>Sets comment for specified object.
   <dt><strong>Description:</strong>
-    <dd><code>H5Gset_comment</code> sets the comment for the
+    <dd><code>H5Gset_comment</code> sets the comment for the 
         object specified by <code>loc_id</code> and <code>name</code> 
         to <code>comment</code>.
         Any previously existing comment is overwritten.
@@ -1301,20 +1352,26 @@ END SUBROUTINE h5gopen_f
         e.g., datasets, groups, named datatypes, and dataspaces, but 
         not symbolic links.
   <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Identifier of the file, group, dataset, or named datatype.
-      <dt><em>const char *</em><code>name</code>
-        <dd>IN: Name of the object whose comment is to be set or reset.
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: Identifier of the file, group, dataset, 
+            or named datatype.</td></tr>
+      <tr>
+	    <td valign="top"><em>const char *</em><code>name</code></td>
+        <td valign="top">IN: Name of the object whose comment is to be 
+            set or reset.
             <br>
             <code>name</code> can be '.' (dot) if <code>loc_id</code> 
             fully specifies the object for which the comment is to be set.
             <br>
             <code>name</code> is ignored if <code>loc_id</code> 
             is a dataset or named datatype.
-      <dt><em>const char *</em><code>comment</code>
-        <dd>IN: The new comment.
-    </dl>
+	    </td></tr>
+      <tr>
+	    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>comment&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: The new comment.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
@@ -1379,12 +1436,14 @@ END SUBROUTINE h5gset_comment_f
         See <a href="Groups.html#H5GUnlinkToCorrupt">The Group Interface</a> 
         in the <cite>HDF5 User's Guide</cite>.
   <dt><strong>Parameters:</strong>
-    <dl>
-      <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Identifier of the file or group containing the object.
-      <dt><em>const char *</em> <code>name</code>
-        <dd>IN: Name of the object to unlink.
-    </dl>
+    <ul><table>      
+	  <tr>
+	    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: Identifier of the file or group containing the object.</td></tr>
+      <tr>
+	    <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Name of the object to unlink.</td></tr>
+    </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.

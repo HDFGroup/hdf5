@@ -35,12 +35,12 @@
 
 static void *H5O_mtime_new_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_mtime_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static size_t H5O_mtime_new_size(H5F_t *f, const void *_mesg);
+static size_t H5O_mtime_new_size(const H5F_t *f, const void *_mesg);
 
 static void *H5O_mtime_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_mtime_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static void *H5O_mtime_copy(const void *_mesg, void *_dest, unsigned update_flags);
-static size_t H5O_mtime_size(H5F_t *f, const void *_mesg);
+static size_t H5O_mtime_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_mtime_reset(void *_mesg);
 static herr_t H5O_mtime_free(void *_mesg);
 static herr_t H5O_mtime_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
@@ -82,9 +82,6 @@ const H5O_class_t H5O_MTIME_NEW[1] = {{
     NULL,			/*set share method		*/
     H5O_mtime_debug,		/*debug the message		*/
 }};
-
-/* Interface initialization */
-#define INTERFACE_INIT	NULL
 
 /* Current version of new mtime information */
 #define H5O_MTIME_VERSION 	1	
@@ -434,7 +431,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_mtime_new_size(H5F_t UNUSED * f, const void UNUSED * mesg)
+H5O_mtime_new_size(const H5F_t UNUSED * f, const void UNUSED * mesg)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_new_size);
 
@@ -467,7 +464,7 @@ H5O_mtime_new_size(H5F_t UNUSED * f, const void UNUSED * mesg)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_mtime_size(H5F_t UNUSED * f, const void UNUSED * mesg)
+H5O_mtime_size(const H5F_t UNUSED * f, const void UNUSED * mesg)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_size);
 

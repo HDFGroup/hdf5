@@ -49,7 +49,7 @@ esac
 case "$cc_vendor-$cc_version" in
     DEC-V5.*)
 	# Production
-	PROD_CFLAGS="-std -verbose -warnprotos -ieee -misalign -O4 -ansi_args -fp_reorder -readonly_strings -inline speed"
+	PROD_CFLAGS="-std -verbose -warnprotos -ieee -misalign -O4  -ansi_args -fp_reorder -readonly_strings -inline speed"
 	PROD_CPPFLAGS="-D_INTRINSICS -D_INLINE_INTRINSICS"
 
 	# Debug

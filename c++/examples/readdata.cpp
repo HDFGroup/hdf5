@@ -128,7 +128,7 @@ int main (void)
        * Define hyperslab in the dataset; implicitly giving strike and 
        * block NULL.
        */
-      hssize_t     offset[2];	// hyperslab offset in the file
+      hsize_t      offset[2];	// hyperslab offset in the file
       hsize_t      count[2];	// size of the hyperslab in the file
       offset[0] = 1;
       offset[1] = 2;
@@ -148,7 +148,7 @@ int main (void)
       /*
        * Define memory hyperslab. 
        */
-      hssize_t     offset_out[3];	// hyperslab offset in memory
+      hsize_t      offset_out[3];	// hyperslab offset in memory
       hsize_t      count_out[3];	// size of the hyperslab in memory
       offset_out[0] = 3;
       offset_out[1] = 0;

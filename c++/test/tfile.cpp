@@ -104,7 +104,7 @@ test_file_create(void)
 	    // name, that skips the comparison b/w the 1st & 2nd args would 
 	    // be more appropriate, but verify_val can be used for now;
 	    // also, more text about what is testing would be better.
-	    verify_val(file2.getId(), FAIL, "H5File constructor", __LINE__, __FILE__);
+	    verify_val(file2.getId(), FAIL, "H5File constructor", __LINE__, __FILE__); 
 	}
 	catch( FileIException E ) {} // do nothing, FAIL expected
 
@@ -156,10 +156,11 @@ test_file_create(void)
 	verify_val(parm1, F1_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 	verify_val(parm2, F1_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 
-    	int  iparm1;		/*file-creation parameters	*/
 #ifdef H5_WANT_H5_V1_4_COMPAT
+    	int  iparm1;		/*file-creation parameters	*/
     	int  iparm2;	/*file-creation parameters	*/
 #else /* H5_WANT_H5_V1_4_COMPAT */
+    	unsigned  iparm1;		/*file-creation parameters	*/
     	unsigned  iparm2;	/*file-creation parameters	*/
 #endif /* H5_WANT_H5_V1_4_COMPAT */
     	tmpl1.getSymk( iparm1, iparm2);
@@ -210,10 +211,11 @@ test_file_create(void)
 	verify_val(parm1, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 	verify_val(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 
-    	int  iparm1;		/*file-creation parameters	*/
 #ifdef H5_WANT_H5_V1_4_COMPAT
+    	int  iparm1;		/*file-creation parameters	*/
     	int  iparm2;	/*file-creation parameters	*/
 #else /* H5_WANT_H5_V1_4_COMPAT */
+    	unsigned  iparm1;		/*file-creation parameters	*/
     	unsigned  iparm2;	/*file-creation parameters	*/
 #endif /* H5_WANT_H5_V1_4_COMPAT */
     	tmpl1->getSymk( iparm1, iparm2);
@@ -291,17 +293,17 @@ test_file_open(void)
 	/* Get the file-creation parameters */
 	hsize_t ublock = tmpl1.getUserblock();
 	verify_val(ublock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
-	verify_val(ublock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
     	size_t  parm1, parm2;		/*file-creation parameters	*/
 	tmpl1.getSizes( parm1, parm2);
 	verify_val(parm1, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 	verify_val(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 
-	int  iparm1;            /*file-creation parameters      */
 #ifdef H5_WANT_H5_V1_4_COMPAT
+	int  iparm1;            /*file-creation parameters      */
 	int  iparm2;       /*file-creation parameters      */
 #else /* H5_WANT_H5_V1_4_COMPAT */
+	unsigned  iparm1;            /*file-creation parameters      */
 	unsigned  iparm2;       /*file-creation parameters      */
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 	tmpl1.getSymk( iparm1, iparm2);

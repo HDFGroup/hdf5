@@ -37,10 +37,11 @@ int	nerrors = 0;
 hid_t	fapl;				/* file access property list */
 
 /* protocols */
+static int errors_sum(int nerrs);
 
 #define MPIO_TEST_WRITE_SIZE 1024*1024     /* 1 MB */
 
-int
+static int
 test_mpio_overlap_writes(char *filename)
 {
     int mpi_size, mpi_rank;
@@ -186,7 +187,7 @@ test_mpio_overlap_writes(char *filename)
  * Then reads the file back in by reverse order, that is process 0 
  * reads the data of process n-1 and vice versa.
  */
-int
+static int
 test_mpio_gb_file(char *filename)
 {
     int mpi_size, mpi_rank;
@@ -407,7 +408,8 @@ finish:
 #define USEFSYNC 2		/* request file_sync */
 
 
-int test_mpio_1wMr(char *filename, int special_request)
+static int
+test_mpio_1wMr(char *filename, int special_request)
 {
     char hostname[128];
     int  mpi_size, mpi_rank;
@@ -593,7 +595,7 @@ if (special_request & USEFSYNC){
 /*
  * parse the command line options
  */
-int
+static int
 parse_options(int argc, char **argv)
 {
     while (--argc){
@@ -655,7 +657,7 @@ parse_options(int argc, char **argv)
 /*
  * Show command usage
  */
-void
+static void
 usage(void)
 {
     printf("Usage: t_mpi [-v<verbosity>] [-f <prefix>]\n");
@@ -667,7 +669,8 @@ usage(void)
 /*
  * return the sum of all errors.
  */
-int errors_sum(nerrs)
+static int
+errors_sum(int nerrs)
 {
     int temp;
     MPI_Allreduce(&nerrs, &temp, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);

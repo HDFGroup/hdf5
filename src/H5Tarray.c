@@ -19,6 +19,9 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5T_init_array_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5T_array_mask
@@ -28,11 +31,6 @@
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Iprivate.h"		/* IDs					*/
 #include "H5Tpkg.h"		/* Datatypes				*/
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT H5T_init_array_interface
-static herr_t H5T_init_array_interface(void);
 
 /* Declare extern the free list for H5T_t's */
 H5FL_EXTERN(H5T_t);

@@ -14,6 +14,13 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5R_init_interface
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5R_mask
+
 #include "H5private.h"		/* Generic Functions */
 #include "H5Iprivate.h"		/* ID Functions */
 #include "H5Dprivate.h"		/* Datasets */
@@ -25,12 +32,6 @@
 #include "H5Rprivate.h"		/* References */
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5Tprivate.h"		/* Datatypes */
-
-/* Interface initialization */
-#define PABLO_MASK	H5R_mask
-#define INTERFACE_INIT	H5R_init_interface
-static int		interface_initialize_g = 0;
-static herr_t		H5R_init_interface(void);
 
 /* Static functions */
 static herr_t H5R_create(void *ref, H5G_entry_t *loc, const char *name,
@@ -93,12 +94,12 @@ H5R_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5R_term_interface);
     
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_REFERENCE))) {
 	    H5I_clear_group(H5I_REFERENCE, FALSE);
 	} else {
 	    H5I_destroy_group(H5I_REFERENCE);
-	    interface_initialize_g = 0;
+	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}
     }
@@ -401,7 +402,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
     if(H5O_link(&ent,0,dxpl_id)<=0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_LINKCOUNT, FAIL, "dereferencing deleted object");
 
-    /* Open the dataset object */
+    /* Open the object */
     oid_type=H5G_get_type(&ent,dxpl_id);
     switch(oid_type) {
         case H5G_GROUP:
@@ -416,7 +417,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
             break;
 
         case H5G_TYPE:
-            if ((type=H5T_open(&ent, dxpl_id)) ==NULL)
+            if ((type=H5T_open(&ent, dxpl_id)) == NULL)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found");
 
             /* Create an atom for the datatype */
@@ -428,7 +429,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
 
         case H5G_DATASET:
             /* Open the dataset */
-            if ((dset=H5D_open(&ent,dxpl_id)) ==NULL)
+            if ((dset=H5D_open(&ent,dxpl_id))==NULL)
                 HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found");
 
             /* Create an atom for the dataset */
@@ -659,7 +660,7 @@ H5R_get_object_type(H5F_t *file, hid_t dxpl_id, void *_ref)
     uint8_t *p;                 /* Pointer to OID to store */
     int ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5R_get_object_type);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5R_get_object_type);
 
     assert(ref);
     assert(file);

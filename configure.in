@@ -47,6 +47,12 @@ AC_OUTPUT_COMMANDS([
 AC_CANONICAL_HOST
 AC_SUBST([CPPFLAGS])
 
+dnl Different compilers may need default libraries. They are specified in
+dnl the config/* files, so we put this statement here so that it'll be
+dnl set by the code which follows...
+dnl
+AC_SUBST(DEFAULT_LIBS) DEFAULT_LIBS=""
+
 dnl ----------------------------------------------------------------------
 dnl Set prefix default (install directory) to a directory in the build area.
 dnl This allows multiple src-dir builds within one host.
@@ -894,7 +900,6 @@ dnl command-line switch. The value is an include path and/or a library path.
 dnl If the library path is specified then it must be preceded by a comma.
 dnl
 AC_SUBST(USE_FILTER_SZIP) USE_FILTER_SZIP="no"
-AC_SUBST(USE_FILTER_SZIP_ENCODER) USE_FILTER_SZIP_ENCODER="no"
 AC_ARG_WITH([szlib],
             [AC_HELP_STRING([--with-szlib=DIR],
                             [Use szlib library for external szlib I/O
@@ -987,10 +992,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
         ], [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)])
 
     if test ${hdf5_cv_szlib_can_encode} = "yes"; then
-        AC_DEFINE([SZIP_CAN_ENCODE], [1],
-                  [Define if szip encoder is present])
         AC_MSG_RESULT([yes])
-        USE_FILTER_SZIP_ENCODER="yes"
     else
         AC_MSG_RESULT([no])
     fi
@@ -1000,6 +1002,11 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
         EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
     fi
     EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip"
+    if test ${hdf5_cv_szlib_can_encode} = "yes"; then
+        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}(encoder)"
+    else
+        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}(no encoder)"
+    fi
 fi
 
 dnl ----------------------------------------------------------------------
@@ -1140,13 +1147,11 @@ case "$withval" in
     AC_CHECK_LIB(globus_gass_transfer,main,,unset GASS TESTGASS)
     AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
     ;;
-
   no)
     AC_MSG_CHECKING([for GASS])
     AC_MSG_RESULT([suppressed])
     unset GASS TESTGASS
     ;;
-
   *)
     case "$withval" in
       *,*)
@@ -1613,7 +1618,7 @@ AC_CACHE_VAL([hdf5_cv_printf_ll],
 LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo $LDFLAGS | sed -e 's/-L/:/g' -e 's/ //g'`"
 export LD_LIBRARY_PATH
 
-for hdf5_cv_printf_ll in l L ll q unknown; do
+for hdf5_cv_printf_ll in l ll L q unknown; do
    AC_TRY_RUN([
 #include <stdio.h>
 #include <stdlib.h>
@@ -1785,6 +1790,7 @@ if test "X-$TRACE" = X- ; then
     TRACE=yes
   fi
 fi
+
 case "X-$TRACE" in
   X-yes)
     AC_MSG_RESULT([yes])
@@ -2012,16 +2018,12 @@ case "X-$enable_parallel" in
 esac
 
 dnl ----------------------------------------------------------------------
-dnl Should the 'testpar' directory participate in the build?
-dnl
-if test -n "$PARALLEL"; then
-  TESTPARALLEL=testpar
-fi
-
-dnl ----------------------------------------------------------------------
 dnl Print some other parallel information and do some sanity checks.
 dnl
 if test -n "$PARALLEL"; then
+  dnl The 'testpar' directory should participate in the build
+  TESTPARALLEL=testpar
+
   dnl We are building a parallel library
   AC_DEFINE([HAVE_PARALLEL], [1], [Define if we have parallel support])
 
@@ -2267,11 +2269,13 @@ if (grep '^build_libtool_libs=yes' libtool >/dev/null); then
 else
   enable_shared=no
 fi
+
 if (grep '^build_old_libs=yes' libtool >/dev/null); then
   enable_static=yes
 else
   enable_static=no
 fi
+
 if test "X$enable_static" = "Xyes" && test "X$enable_shared" = "Xyes"; then
   STATIC_SHARED="static, shared"
 elif test "X$enable_static" = "Xyes"; then
@@ -2357,11 +2361,9 @@ if test -n "$CPPFLAGS"; then
   CPPFLAGS=$TEMP_CPPFLAGS
 fi
 
-
 dnl ----------------------------------------------------------------------
 dnl Check if they would like the High Level library  compiled
 dnl
-
 
 AC_SUBST(HL) HL=""
 AC_MSG_CHECKING([if high level library is enabled])
@@ -2377,7 +2379,6 @@ if test "X$HDF5_HL" = "Xyes"; then
 else
  echo "no"
 fi
-	
 
 dnl ----------------------------------------------------------------------
 dnl Build the Makefiles.  Almost every Makefile.in will begin with the line
@@ -2684,5 +2685,4 @@ IF_ENABLED_DISABLED "$THREADSAFE"
 
 PRINT_N "             High Level library"
 IF_ENABLED_DISABLED "$HDF5_HL"
-
 

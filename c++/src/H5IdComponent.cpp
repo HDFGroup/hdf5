@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
   * Copyright by the Board of Trustees of the University of Illinois.         *
-  * All rights reserved.		                                        *
-  *		                                                             *
+  * All rights reserved.                                                      *
+  *                                                                           *
   * This file is part of HDF5.  The full HDF5 copyright notice, including     *
   * terms governing use, modification, and redistribution, is contained in    *
   * the files COPYING and Copyright.html.  COPYING can be found at the root   *
@@ -53,14 +53,14 @@ IdComponent::IdComponent( const IdComponent& original )
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::incRefCount
-///\brief	Increments id reference counter.
+///\brief	Increment id reference counter.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void IdComponent::incRefCount() { ref_count->increment(); }
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::decRefCount
-///\brief	Decrements id reference counter.
+///\brief	Decrement id reference counter.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void IdComponent::decRefCount() { ref_count->decrement(); }
@@ -68,7 +68,7 @@ void IdComponent::decRefCount() { ref_count->decrement(); }
 //--------------------------------------------------------------------------
 // Function:	IdComponent::getCounter
 ///\brief	Returns the reference counter to this identifier.
-///\return      Reference count
+///\return	Reference count
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int IdComponent::getCounter() { return( ref_count->getCounter()); }
@@ -94,9 +94,9 @@ bool IdComponent::noReference()
 // Function:	IdComponent::operator=
 ///\brief	Assignment operator.
 ///\param	rhs - IN: Reference to the existing object
-///\return      Reference to IdComponent instance
+///\return	Reference to IdComponent instance
 ///\exception	H5::IdComponentException when attempt to close the HDF5
-///             object fails
+///		object fails
 // Description
 //		Reset the identifier of this object so that the HDF5 id can
 //		be properly closed.  Copy the id from rhs to this object,
@@ -147,6 +147,7 @@ void IdComponent::setId( hid_t new_id )
         throw IdComponentException("IdComponent::setId", close_error.getDetailMsg());
     }
 
+   // reset object's id to the given id
    id = new_id;
 
    // starts counting object references
@@ -155,8 +156,8 @@ void IdComponent::setId( hid_t new_id )
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::getId
-///\brief	Returns the id of this object.
-///\return	HDF5 object id
+///\brief	Returns the id of this object 
+///\return	HDF5 id
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 hid_t IdComponent::getId () const
@@ -269,7 +270,7 @@ void* IdComponent::p_reference(const char* name, hid_t space_id, H5R_type_t ref_
    if (ret_value < 0)
    {
       throw IdComponentException("IdComponent::p_reference",
-		  "H5Rcreate failed");
+                "H5Rcreate failed");
    }
    return(ref);
 }
@@ -294,7 +295,7 @@ H5G_obj_t IdComponent::p_get_obj_type(void *ref, H5R_type_t ref_type) const
    if (obj_type == H5G_UNKNOWN)
    {
       throw IdComponentException("IdComponent::p_get_obj_type",
-		  "H5R_get_obj_type failed");
+                "H5R_get_obj_type failed");
    }
    return(obj_type);
 }
@@ -316,7 +317,7 @@ hid_t IdComponent::p_get_region(void *ref, H5R_type_t ref_type) const
    if (space_id < 0)
    {
       throw IdComponentException("IdComponent::p_get_region",
-		  "H5Rget_region failed");
+                "H5Rget_region failed");
    }
    return(space_id);
 }

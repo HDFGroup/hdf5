@@ -183,7 +183,7 @@
      CALL h5tcopy_f(H5T_NATIVE_CHARACTER, atype2_id, error)
      CALL check("h5tcopy_f",error,total_error)
      !
-     ! Create datatype for the DOulble attribute.
+     ! Create datatype for the Double attribute.
      !
      CALL h5tcopy_f(H5T_NATIVE_DOUBLE, atype3_id, error)
      CALL check("h5tcopy_f",error,total_error)

@@ -47,51 +47,44 @@
 
 H5_DLL hsize_t H5V_hyper_stride(unsigned n, const hsize_t *size,
 				 const hsize_t *total_size,
-				 const hssize_t *offset,
-				 hssize_t *stride);
-H5_DLL htri_t H5V_hyper_disjointp(unsigned n, const hssize_t *offset1,
+				 const hsize_t *offset,
+				 hsize_t *stride);
+H5_DLL htri_t H5V_hyper_disjointp(unsigned n, const hsize_t *offset1,
 				   const size_t *size1,
-				   const hssize_t *offset2,
+				   const hsize_t *offset2,
 				   const size_t *size2);
-H5_DLL htri_t H5V_hyper_eq(int n, const hssize_t *offset1,
-			    const hsize_t *size1, const hssize_t *offset2,
+H5_DLL htri_t H5V_hyper_eq(unsigned n, const hsize_t *offset1,
+			    const hsize_t *size1, const hsize_t *offset2,
 			    const hsize_t *size2);
 H5_DLL herr_t H5V_hyper_fill(unsigned n, const hsize_t *_size,
 			      const hsize_t *total_size,
-			      const hssize_t *offset, void *_dst,
+			      const hsize_t *offset, void *_dst,
 			      unsigned fill_value);
 H5_DLL herr_t H5V_hyper_copy(unsigned n, const hsize_t *size,
 			      const hsize_t *dst_total_size,
-			      const hssize_t *dst_offset, void *_dst,
+			      const hsize_t *dst_offset, void *_dst,
 			      const hsize_t *src_total_size,
-			      const hssize_t *src_offset, const void *_src);
+			      const hsize_t *src_offset, const void *_src);
 H5_DLL herr_t H5V_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
-			       const hssize_t *stride, void *_dst,
+			       const hsize_t *stride, void *_dst,
 			       unsigned fill_value);
 H5_DLL herr_t H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *_size,
+			       const hsize_t *dst_stride, void *_dst,
+			       const hsize_t *src_stride, const void *_src);
+H5_DLL herr_t H5V_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *_size,
 			       const hssize_t *dst_stride, void *_dst,
 			       const hssize_t *src_stride, const void *_src);
-H5_DLL herr_t H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size, int dst_n,
-				const hsize_t *dst_size,
-				const hssize_t *dst_stride, void *_dst,
-				int src_n, const hsize_t *src_size,
-				const hssize_t *src_stride, const void *_src);
-H5_DLL herr_t H5V_stride_optimize1(unsigned *np, hsize_t *elmt_size,
-				    hsize_t *size, hssize_t *stride1);
-H5_DLL herr_t H5V_stride_optimize2(unsigned *np, hsize_t *elmt_size,
-				    hsize_t *size, hssize_t *stride1,
-				    hssize_t *stride2);
 H5_DLL herr_t H5V_array_fill(void *_dst, const void *src, size_t size,
 			      size_t count);
 H5_DLL herr_t H5V_array_down(unsigned n, const hsize_t *total_size,
     hsize_t *down);
 H5_DLL hsize_t H5V_array_offset_pre(unsigned n,
-    const hsize_t *acc, const hssize_t *offset);
+    const hsize_t *acc, const hsize_t *offset);
 H5_DLL hsize_t H5V_array_offset(unsigned n, const hsize_t *total_size,
-    const hssize_t *offset);
+    const hsize_t *offset);
 H5_DLL herr_t H5V_array_calc(hsize_t offset, unsigned n,
-    const hsize_t *total_size, hssize_t *coords);
-H5_DLL herr_t H5V_chunk_index(unsigned ndims, const hssize_t *coord,
+    const hsize_t *total_size, hsize_t *coords);
+H5_DLL herr_t H5V_chunk_index(unsigned ndims, const hsize_t *coord,
     const size_t *chunk, const hsize_t *down_nchunks, hsize_t *chunk_idx);
 H5_DLL ssize_t H5V_memcpyvv(void *_dst,
     size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_len_arr[], hsize_t dst_off_arr[],
@@ -124,13 +117,13 @@ H5V_vector_reduce_product(unsigned n, const hsize_t *v)
     hsize_t                  ret_value = 1;
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_vector_reduce_product);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_vector_reduce_product)
 
-    if (n && !v) HGOTO_DONE(0);
+    if (n && !v) HGOTO_DONE(0)
     while (n--) ret_value *= *v++;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -156,16 +149,16 @@ H5V_vector_zerop_u(int n, const hsize_t *v)
     htri_t      ret_value=TRUE;       /* Return value */
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_vector_zerop_u);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_vector_zerop_u)
 
     if (!v)
-        HGOTO_DONE(TRUE);
+        HGOTO_DONE(TRUE)
     while (n--)
 	if (*v++)
-            HGOTO_DONE(FALSE);
+            HGOTO_DONE(FALSE)
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -191,16 +184,16 @@ H5V_vector_zerop_s(int n, const hssize_t *v)
     htri_t      ret_value=TRUE;       /* Return value */
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_vector_zerop_s);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_vector_zerop_s)
 
     if (!v)
-        HGOTO_DONE(TRUE);
+        HGOTO_DONE(TRUE)
     while (n--)
 	if (*v++)
-            HGOTO_DONE(FALSE);
+            HGOTO_DONE(FALSE)
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -223,14 +216,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5_inline int UNUSED
-H5V_vector_cmp_u (int n, const hsize_t *v1, const hsize_t *v2)
+H5V_vector_cmp_u (unsigned n, const hsize_t *v1, const hsize_t *v2)
 {
     int ret_value=0;    /* Return value */
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_vector_cmp_u);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_vector_cmp_u)
 
-    if (v1 == v2) HGOTO_DONE(0);
+    if (v1 == v2) HGOTO_DONE(0)
     if (v1 == NULL) HGOTO_DONE(-1)
     if (v2 == NULL) HGOTO_DONE(1)
     while (n--) {
@@ -241,7 +234,7 @@ H5V_vector_cmp_u (int n, const hsize_t *v1, const hsize_t *v2)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -270,9 +263,9 @@ H5V_vector_cmp_s (unsigned n, const hssize_t *v1, const hssize_t *v2)
     int ret_value=0;    /* Return value */
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_vector_cmp_s);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_vector_cmp_s)
 
-    if (v1 == v2) HGOTO_DONE(0);
+    if (v1 == v2) HGOTO_DONE(0)
     if (v1 == NULL) HGOTO_DONE(-1)
     if (v2 == NULL) HGOTO_DONE(1)
     while (n--) {
@@ -283,7 +276,7 @@ H5V_vector_cmp_s (unsigned n, const hssize_t *v1, const hssize_t *v2)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 

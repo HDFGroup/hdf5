@@ -94,7 +94,7 @@ typedef enum H5T_cset_t {
     H5T_CSET_RESERVED_14 = 14,  /*reserved for later use		     */
     H5T_CSET_RESERVED_15 = 15   /*reserved for later use		     */
 } H5T_cset_t;
-#define H5T_NCSET 1    		/*Number of character sets actually defined  */
+#define H5T_NCSET H5T_CSET_RESERVED_1    		/*Number of character sets actually defined  */
 
 /*
  * Type of padding to use in character strings.  Do not change these values
@@ -119,7 +119,7 @@ typedef enum H5T_str_t {
     H5T_STR_RESERVED_14  = 14,  /*reserved for later use		     */
     H5T_STR_RESERVED_15  = 15   /*reserved for later use		     */
 } H5T_str_t;
-#define H5T_NSTR 3		/*num H5T_str_t types actually defined	     */
+#define H5T_NSTR H5T_STR_RESERVED_3		/*num H5T_str_t types actually defined	     */
 
 /* Type of padding to use in other atomic types */
 typedef enum H5T_pad_t {
@@ -199,13 +199,13 @@ typedef herr_t (*H5T_overflow_t)(hid_t src_id, hid_t dst_id,
 				 void *src_buf, void *dst_buf);
 
 
-/* When this header is included from H5Tprivate.h, don't make calls to H5open() */
+/* When this header is included from a private header, don't make calls to H5open() */
 #undef H5OPEN
-#ifndef _H5Tprivate_H
+#ifndef _H5private_H
 #define H5OPEN          H5open(),
-#else   /* _H5Tprivate_H */
+#else   /* _H5private_H */
 #define H5OPEN
-#endif  /* _H5Tprivate_H */
+#endif  /* _H5private_H */
 
 /*
  * The IEEE floating point types in various byte orders.
@@ -523,12 +523,12 @@ H5_DLL H5T_norm_t H5Tget_norm(hid_t type_id);
 H5_DLL H5T_pad_t H5Tget_inpad(hid_t type_id);
 H5_DLL H5T_str_t H5Tget_strpad(hid_t type_id);
 H5_DLL int H5Tget_nmembers(hid_t type_id);
-H5_DLL char *H5Tget_member_name(hid_t type_id, int membno);
+H5_DLL char *H5Tget_member_name(hid_t type_id, unsigned membno);
 H5_DLL int H5Tget_member_index(hid_t type_id, const char *name);
-H5_DLL size_t H5Tget_member_offset(hid_t type_id, int membno);
-H5_DLL H5T_class_t H5Tget_member_class(hid_t type_id, int membno);
-H5_DLL hid_t H5Tget_member_type(hid_t type_id, int membno);
-H5_DLL herr_t H5Tget_member_value(hid_t type_id, int membno, void *value/*out*/);
+H5_DLL size_t H5Tget_member_offset(hid_t type_id, unsigned membno);
+H5_DLL H5T_class_t H5Tget_member_class(hid_t type_id, unsigned membno);
+H5_DLL hid_t H5Tget_member_type(hid_t type_id, unsigned membno);
+H5_DLL herr_t H5Tget_member_value(hid_t type_id, unsigned membno, void *value/*out*/);
 H5_DLL H5T_cset_t H5Tget_cset(hid_t type_id);
 H5_DLL htri_t H5Tis_variable_str(hid_t type_id);
 H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction); 

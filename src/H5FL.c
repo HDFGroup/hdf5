@@ -26,6 +26,9 @@
  *      move frequently accessed free lists to the head of the queue.
  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5FL_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5FL_mask
@@ -36,9 +39,6 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MMprivate.h"	/* Memory management			*/
-
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT	NULL
 
 /*
  * Private type definitions
@@ -112,6 +112,31 @@ static herr_t H5FL_blk_gc_list(H5FL_blk_head_t *head);
 H5FL_DEFINE(H5FL_blk_node_t);
 
 
+/*--------------------------------------------------------------------------
+NAME
+   H5FL_init_interface -- Initialize interface-specific information
+USAGE
+    herr_t H5FL_init_interface()
+   
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+
+--------------------------------------------------------------------------*/
+static herr_t
+H5FL_init_interface(void)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FL_init_interface)
+
+    /* Nothing currently... */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FL_init_interface() */
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5FL_malloc
  *
@@ -139,7 +164,7 @@ H5FL_malloc(size_t mem_size)
     if(NULL==(ret_value=H5MM_malloc(mem_size))) {
         /* If we can't allocate the memory now, try garbage collecting first */
         if(H5FL_garbage_coll()<0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, NULL, "garbage collection failed during allocation")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during allocation")
 
         /* Now try allocating the memory again */
         if(NULL==(ret_value=H5MM_malloc(mem_size)))
@@ -252,12 +277,12 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
     /* First check this particular list */
     if(head->list_mem>H5FL_reg_lst_mem_lim)
         if(H5FL_reg_gc_list(head)<0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, NULL, "garbage collection failed during free")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free")
 
     /* Then check the global amount memory on regular free lists */
     if(H5FL_reg_gc_head.mem_freed>H5FL_reg_glb_mem_lim)
         if(H5FL_reg_gc()<0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, NULL, "garbage collection failed during free")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -448,7 +473,7 @@ H5FL_reg_gc(void)
     while(gc_node!=NULL) {
         /* Release the free nodes on the list */
         if(H5FL_reg_gc_list(gc_node->list)<0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "garbage collection of list failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "garbage collection of list failed")
 
         /* Go on to the next free list to garbage collect */
         gc_node=gc_node->next;
@@ -495,7 +520,7 @@ H5FL_reg_term(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FL_reg_term)
 
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
         /* Free the nodes on the garbage collection list, keeping nodes with allocations outstanding */
         left=NULL;
         while(H5FL_reg_gc_head.first!=NULL) {
@@ -525,7 +550,7 @@ H5FL_reg_term(void)
         /* Point to the list of nodes left with allocations open, if any */
         H5FL_reg_gc_head.first=left;
         if (!left)
-            interface_initialize_g = 0; /*this layer has reached its initial state*/
+            H5_interface_initialize_g = 0; /*this layer has reached its initial state*/
     }
 
     /* Terminating this layer never affects other layers; rather, other layers affect
@@ -911,12 +936,12 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
     /* First check this particular list */
     if(head->list_mem>H5FL_blk_lst_mem_lim)
         if(H5FL_blk_gc_list(head)<0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, NULL, "garbage collection failed during free")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free")
 
     /* Then check the global amount memory on block free lists */
     if(H5FL_blk_gc_head.mem_freed>H5FL_blk_glb_mem_lim)
         if(H5FL_blk_gc()<0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, NULL, "garbage collection failed during free")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1072,7 +1097,7 @@ H5FL_blk_gc(void)
     while(gc_node!=NULL) {
         /* For each free list being garbage collected, walk through the nodes and free them */
         if(H5FL_blk_gc_list(gc_node->pq)<0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "garbage collection of list failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "garbage collection of list failed")
 
         /* Go on to the next free list to garbage collect */
         gc_node=gc_node->next;
@@ -1263,12 +1288,12 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
     /* First check this particular list */
     if(head->list_mem>H5FL_arr_lst_mem_lim)
         if(H5FL_arr_gc_list(head)<0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, NULL, "garbage collection failed during free")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free")
 
     /* Then check the global amount memory on array free lists */
     if(H5FL_arr_gc_head.mem_freed>H5FL_arr_glb_mem_lim)
         if(H5FL_arr_gc()<0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, NULL, "garbage collection failed during free")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, NULL, "garbage collection failed during free")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1539,7 +1564,7 @@ H5FL_arr_gc(void)
     while(gc_arr_node!=NULL) {
         /* Release the free nodes on the list */
         if(H5FL_arr_gc_list(gc_arr_node->list)<0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "garbage collection of list failed")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "garbage collection of list failed")
 
         /* Go on to the next free list to garbage collect */
         gc_arr_node=gc_arr_node->next;
@@ -1634,16 +1659,11 @@ printf("H5FL_arr_term: head->name=%s, head->allocated=%d\n", H5FL_arr_gc_head.fi
 void *
 H5FL_seq_free(H5FL_seq_head_t *head, void *obj)
 {
-    void *ret_value=NULL;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5FL_seq_free, NULL)
-
-    /* The H5MM_xfree code allows obj to null */
-    if (!obj)
-        HGOTO_DONE (NULL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FL_seq_free)
 
     /* Double check parameters */
     assert(head);
+    assert(obj);
 
     /* Make certain that the free list is initialized */
     assert(head->queue.init);
@@ -1651,8 +1671,7 @@ H5FL_seq_free(H5FL_seq_head_t *head, void *obj)
     /* Use block routine */
     H5FL_blk_free(&(head->queue),obj);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(NULL)
 }   /* end H5FL_seq_free() */
 
 
@@ -1782,15 +1801,15 @@ H5FL_garbage_coll(void)
 
     /* Garbage collect the free lists for array objects */
     if(H5FL_arr_gc()<0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't garbage collect array objects")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect array objects")
 
     /* Garbage collect free lists for blocks */
     if(H5FL_blk_gc()<0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't garbage collect block objects")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect block objects")
 
     /* Garbage collect the free lists for regular objects */
     if(H5FL_reg_gc()<0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't garbage collect regular objects")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "can't garbage collect regular objects")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

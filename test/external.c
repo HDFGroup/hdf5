@@ -595,7 +595,7 @@ test_2 (hid_t fapl)
     int		part[25], whole[100];	/*raw data buffers		*/
     hsize_t	cur_size;		/*current data space size	*/
     hid_t	hs_space;		/*hyperslab data space		*/
-    hssize_t	hs_start = 30;		/*hyperslab starting offset	*/
+    hsize_t	hs_start = 30;		/*hyperslab starting offset	*/
     hsize_t	hs_count = 25;		/*hyperslab size		*/
 	int temparray[10] = {0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f};
 
@@ -721,7 +721,7 @@ test_3 (hid_t fapl)
     int	    part[25],whole[100];	/*raw data buffers		*/
     hsize_t	cur_size=100;		/*current data space size	*/
     hsize_t	max_size=200;		/*maximum data space size	*/
-    hssize_t	hs_start=100;		/*hyperslab starting offset	*/
+    hsize_t	hs_start=100;		/*hyperslab starting offset	*/
     hsize_t	hs_count=100;		/*hyperslab size		*/
     char	filename[1024];		/*file name			*/
 	int temparray[10] = {0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f};

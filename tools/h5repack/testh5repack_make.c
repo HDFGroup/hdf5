@@ -27,7 +27,9 @@ int make_attributes(hid_t loc_id);
 int make_hlinks(hid_t loc_id);
 int make_early(void);
 int make_layout(hid_t loc_id);
+#ifdef H5_HAVE_FILTER_SZIP
 int make_szip(hid_t loc_id);
+#endif /* H5_HAVE_FILTER_SZIP */
 int make_deflate(hid_t loc_id);
 int make_shuffle(hid_t loc_id);
 int make_fletcher32(hid_t loc_id);
@@ -113,12 +115,14 @@ int make_testfiles(void)
  * create a file with the SZIP filter
  *-------------------------------------------------------------------------
  */
+#ifdef H5_HAVE_FILTER_SZIP
  if((loc_id = H5Fcreate(FNAME7,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   return -1;
  if (make_szip(loc_id)<0)
   goto out;
  if(H5Fclose(loc_id)<0)
   return -1;
+#endif /* H5_HAVE_FILTER_SZIP */
 
 /*-------------------------------------------------------------------------
  * create a file with the deflate filter
@@ -362,6 +366,7 @@ int make_hlinks(hid_t loc_id)
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5_HAVE_FILTER_SZIP
 int make_szip(hid_t loc_id)
 {
  hid_t    dcpl; /* dataset creation property list */
@@ -372,6 +377,7 @@ int make_szip(hid_t loc_id)
  hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
  int      buf[DIM1][DIM2];
  int      i, j, n;
+ int szip_can_encode = 0;
 
  for (i=n=0; i<DIM1; i++){
   for (j=0; j<DIM2; j++){
@@ -393,13 +399,18 @@ int make_szip(hid_t loc_id)
  *-------------------------------------------------------------------------
  */
  /* Make sure encoding is enabled */
-#if defined (H5_SZIP_CAN_ENCODE) && defined (H5_HAVE_FILTER_SZIP)
+if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
+   szip_can_encode = 1;
+}
+if (szip_can_encode) {
  /* set szip data */
  if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
   goto out;
  if (make_dset(loc_id,"dset_szip",sid,dcpl,buf)<0)
   goto out;
-#endif
+} else {
+	/* WARNING? SZIP is decoder only, can't generate test files */
+}
 
  if(H5Sclose(sid)<0)
   goto out;
@@ -415,6 +426,7 @@ out:
  } H5E_END_TRY;
  return -1;
 }
+#endif /* H5_HAVE_FILTER_SZIP */
 
 
 
@@ -623,12 +635,17 @@ int make_all(hid_t loc_id)
 {
  hid_t    dcpl; /* dataset creation property list */
  hid_t    sid;  /* dataspace ID */
+#if defined (H5_HAVE_FILTER_SZIP)
  unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
  unsigned szip_pixels_per_block=8;
+#endif /* H5_HAVE_FILTER_SZIP */
  hsize_t  dims[RANK]={DIM1,DIM2};
  hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
  int      buf[DIM1][DIM2];
  int      i, j, n;
+#if defined (H5_HAVE_FILTER_SZIP)
+ int szip_can_encode = 0;
+#endif
 
  for (i=n=0; i<DIM1; i++){
   for (j=0; j<DIM2; j++){
@@ -657,10 +674,17 @@ int make_all(hid_t loc_id)
   goto out;
 #endif
 
-#if defined (H5_SZIP_CAN_ENCODE) && defined (H5_HAVE_FILTER_SZIP)
+#if defined (H5_HAVE_FILTER_SZIP)
+if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
+   szip_can_encode = 1;
+}
+if (szip_can_encode) {
  /* set szip data */
  if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
   goto out;
+} else {
+	/* WARNING? SZIP is decoder only, can't generate test data using szip */
+}
 #endif
 
 #if defined (H5_HAVE_FILTER_DEFLATE)
@@ -692,7 +716,8 @@ int make_all(hid_t loc_id)
  *-------------------------------------------------------------------------
  */
  /* Make sure encoding is enabled */
-#if defined (H5_SZIP_CAN_ENCODE) && defined (H5_HAVE_FILTER_SZIP)
+#if defined (H5_HAVE_FILTER_SZIP)
+if (szip_can_encode) {
  /* remove the filters from the dcpl */
  if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
   goto out;
@@ -701,6 +726,9 @@ int make_all(hid_t loc_id)
   goto out;
  if (make_dset(loc_id,"dset_szip",sid,dcpl,buf)<0)
   goto out;
+} else {
+	/* WARNING? SZIP is decoder only, can't generate test dataset */
+}
 #endif
 
 /*-------------------------------------------------------------------------
