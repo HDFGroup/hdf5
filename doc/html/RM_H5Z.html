@@ -85,18 +85,19 @@ data compression.
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Zregister</code>(<em>H5Z_method_t</em> <code>method</code>,
         <em>const char *</em><code>name</code>,
-        <em>H5Z_func_t</em><code>cfunc</code>,
-        <em>H5Z_func_t</em> <code>ufunc</code>
+        <em>H5Z_func_t</em> <code>function</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd> Registers new compression and uncompression functions for a 
-         method specified by a method number.
+    <dd> Registers new compression / uncompression function.
 <dt><strong>Description:</strong>
-    <dd><code>H5Zregister</code> registers new compression and uncompression 
-         functions for a method specified by a method number, <code>method</code>.  
-         <code>name</code> is used for debugging and may be the null pointer.  
-         Either or both of <code>cfunc</code> (the compression function) and 
-         <code>ufunc</code> (the uncompression method) may be null pointers.
+    <dd><code>H5Zregister</code> registers a new compression / uncompression 
+         function for the compression method specified by 
+         the method number, <code>method</code>.  
+         <p>
+         <code>name</code> is used for debugging and may be the null pointer. 
+         <p>
+         <code>function</code> is a user-defined function providing both
+         compression and uncompression; it may be the null pointer.
          <p>
          The statistics associated with a method number are not reset
          by this function; they accumulate over the life of the library.
@@ -105,11 +106,10 @@ data compression.
         <dt><em>H5Z_method_t</em> <code>method</code>
             <dd>Number specifying compression method.
         <dt><em>const char *</em><code>name</code>
-            <dd>Name associated with the method number.
-        <dt><em>H5Z_func_t</em> <code>cfunc</code>
-            <dd>Compression method.
-        <dt><em>H5Z_func_t</em> <code>ufunc</code>
-            <dd>Uncompression method.
+            <dd>Name associated with the method number.  
+                Used for debugging purposes only.
+        <dt><em>H5Z_func_t</em> <code>function</code>
+            <dd>Compression / uncompression method.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -157,7 +157,7 @@ H5Z&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  8 September 2000
+Last modified:  6 February 2002
 <br>
 Describes HDF5 Release 1.4.3, February 2002
 
