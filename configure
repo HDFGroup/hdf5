@@ -2082,8 +2082,49 @@ else
 fi
 rm -f conftest*
 
+echo $ac_n "checking how to print long long""... $ac_c" 1>&6
+echo "configure:2087: checking how to print long long" >&5;
+if eval "test \"`echo '$''{'hdf5_cv_printf_ll'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  for hdf5_cv_printf_ll in ll q l; do
+                if test "$cross_compiling" = yes; then
+    { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
+else
+  cat > conftest.$ac_ext <<EOF
+#line 2096 "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+                  main() {char *s=malloc(128);
+	             long long x = (long long)1048576 * (long long)1048576;
+	             sprintf(s,"%${hdf5_cv_printf_ll}d",x);
+	             exit (strcmp(s,"1099511627776"));}
+EOF
+if { (eval echo configure:2107: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest && (./conftest; exit) 2>/dev/null
+then
+  break
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+fi
+rm -fr conftest*
+fi
+
+	     done
+fi
+
+echo "$ac_t""$hdf5_cv_printf_ll" 1>&6
+cat >> confdefs.h <<EOF
+#define PRINTF_LL_WIDTH "$hdf5_cv_printf_ll"
+EOF
+
+
+
 echo $ac_n "checking for debug flags""... $ac_c" 1>&6
-echo "configure:2087: checking for debug flags" >&5;
+echo "configure:2128: checking for debug flags" >&5;
 # Check whether --enable-debug or --disable-debug was given.
 if test "${enable_debug+set}" = set; then
   enableval="$enable_debug"
@@ -2121,7 +2162,7 @@ if test "${enable_parallel+set}" = set; then
 fi
 
 echo $ac_n "checking for parallel support""... $ac_c" 1>&6
-echo "configure:2125: checking for parallel support" >&5;
+echo "configure:2166: checking for parallel support" >&5;
 
 
 
@@ -2148,7 +2189,7 @@ EOF
       CFLAGS="$CFLAGS $MPI_LIB"
       RUNTEST="$RUNTEST"
       echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:2152: checking for main in -lmpi" >&5
+echo "configure:2193: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -2156,14 +2197,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpi  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 2160 "configure"
+#line 2201 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:2167: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:2208: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2190,7 +2231,7 @@ else
   echo "$ac_t""no" 1>&6
 fi
         echo $ac_n "checking for main in -lmpio""... $ac_c" 1>&6
-echo "configure:2194: checking for main in -lmpio" >&5
+echo "configure:2235: checking for main in -lmpio" >&5
 ac_lib_var=`echo mpio'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -2198,14 +2239,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpio  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 2202 "configure"
+#line 2243 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:2209: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:2250: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else

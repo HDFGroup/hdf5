@@ -9,3 +9,6 @@
 
 /* Define if it's safe to use `long long' for hsize_t and hssize_t */
 #undef HAVE_LARGE_HSIZET
+
+/* The width parameter for printf formats for type `long long', us. `ll' */
+#undef PRINTF_LL_WIDTH

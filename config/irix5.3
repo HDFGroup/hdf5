@@ -1,13 +1,50 @@
-#!/bin/sh
-# Site configuration -- do not distribute this file.
+#							-*- shell-script -*-
+#
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
 
-CC="cc"
 
-# -woff 799	about long long type non-standard
+#----------------------------------------------------------------------------
+# Compiler flags. The CPPFLAGS values should not include package debug
+# flags like `-DH5G_DEBUG' since these are added with the
+# `--enable-debug' switch of configure.
 
-RANLIB=:		# SGI does not use ranlib
+# Sometimes a particular compiler must be used.  If that's the case
+# then uncomment the following line.  Otherwise the main configure
+# script will try to detect the compiler automatically.
+CC=cc
+RANLIB=:
 
-# Don't set CFLAGS if the user already did.
-if test -z "$CFLAGS"; then
-   CFLAGS="-ansi -fullwarn -woff 799"
-fi
+# What must *always* be present for things to compile correctly?
+CFLAGS="$CFLAGS -ansi -fullwarn -woff 799"
+#CPPFLAGS="$CPPFLAGS -I."
+
+# What compiler flags should be used for code development?
+DEBUG_CFLAGS=-g
+DEBUG_CPPFLAGS=
+
+# What compiler flags should be used for building a production
+# library?
+PROD_CFLAGS=-O
+PROD_CPPFLAGS=
+
+# What compiler flags enable code profiling?
+PROFILE_CFLAGS=-pg
+PROFILE_CPPFLAGS=
+
+
+#----------------------------------------------------------------------------
+# Values for overriding configuration tests when cross compiling.
+# This includes compiling on some machines where the serial front end
+# compiles for a parallel back end.
+
+# Set this to `yes' or `no' depending on whether the target is big
+# endian or little endian.
+#ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
+
+# Set this to the width required by printf() to print type `long
+# long'.  For instance, if the format would be `%lld' then set it to
+# `ll' or if the format would be `%qd' set it to `q'.
+#hdf5_cv_printf_ll=${hdf5_cv_printf_ll='ll'}
+

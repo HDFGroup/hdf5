@@ -462,7 +462,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
     int		plussign;
     int		ldspace;
     int		prefix;
-    int		modifier;
+    char	modifier[8];
     int		conv;
     char	*rest, template[128];
     const char	*s;
@@ -479,7 +479,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	plussign = 0;
 	prefix = 0;
 	ldspace = 0;
-	modifier = 0;
+	modifier[0] = '\0';
 
 	if ('%'==fmt[0] && '%'==fmt[1]) {
 	    putc ('%', stream);
@@ -539,13 +539,14 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		switch (*s) {
 		case 'H':
 		    if (sizeof(hsize_t)==sizeof(long)) {
-			modifier = 'l';
+			strcpy (modifier, "l");
 		    } else if (sizeof(hsize_t)==sizeof(long long)) {
-			modifier = 'q';
+			strcpy (modifier, PRINTF_LL_WIDTH);
 		    }
 		    break;
 		default:
-		    modifier = *s;
+		    modifier[0] = *s;
+		    modifier[1] = '\0';
 		    break;
 		}
 		s++;
@@ -565,7 +566,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		sprintf (template+strlen (template), ".%d", prec);
 	    }
 	    if (modifier) {
-		sprintf (template+strlen (template), "%c", modifier);
+		sprintf (template+strlen (template), "%s", modifier);
 	    }
 	    sprintf (template+strlen (template), "%c", conv);
 	    
@@ -574,16 +575,16 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    switch (conv) {
 	    case 'd':
 	    case 'i':
-		if ('h'==modifier) {
+		if (!strcmp (modifier, "h")) {
 		    short x = va_arg (ap, short);
 		    n = fprintf (stream, template, x);
-		} else if (!modifier) {
+		} else if (!*modifier) {
 		    int x = va_arg (ap, int);
 		    n = fprintf (stream, template, x);
-		} else if ('l'==modifier) {
+		} else if (!strcmp (modifier, "l")) {
 		    long x = va_arg (ap, long);
 		    n = fprintf (stream, template, x);
-		} else if ('q'==modifier) {
+		} else {
 		    long long x = va_arg (ap, long long);
 		    n = fprintf (stream, template, x);
 		}
@@ -593,16 +594,16 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    case 'u':
 	    case 'x':
 	    case 'X':
-		if ('h'==modifier) {
+		if (!strcmp (modifier, "h")) {
 		    unsigned short x = va_arg (ap, unsigned short);
 		    n = fprintf (stream, template, x);
-		} else if (!modifier) {
+		} else if (!*modifier) {
 		    unsigned int x = va_arg (ap, unsigned int);
 		    n = fprintf (stream, template, x);
-		} else if ('l'==modifier) {
+		} else if (!strcmp (modifier, "l")) {
 		    unsigned long x = va_arg (ap, unsigned long);
 		    n = fprintf (stream, template, x);
-		} else if ('q'==modifier) {
+		} else {
 		    unsigned long long x = va_arg (ap, unsigned long long);
 		    n = fprintf (stream, template, x);
 		}
@@ -613,13 +614,13 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    case 'E':
 	    case 'g':
 	    case 'G':
-		if ('h'==modifier) {
+		if (!strcmp (modifier, "h")) {
 		    float x = va_arg (ap, float);
 		    n = fprintf (stream, template, x);
-		} else if (!modifier || 'l'==modifier) {
+		} else if (!*modifier || !strcmp (modifier, "l")) {
 		    double x = va_arg (ap, double);
 		    n = fprintf (stream, template, x);
-		} else if ('q'==modifier) {
+		} else {
 		    long double x = va_arg (ap, long double);
 		    n = fprintf (stream, template, x);
 		}

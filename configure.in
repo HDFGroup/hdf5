@@ -204,6 +204,28 @@ AC_TRY_COMPILE(,[int f(void){return __FUNCTION__;}],
 		     AC_MSG_RESULT(no))
 
 dnl ----------------------------------------------------------------------
+dnl Try to figure out how to print `long long'.  Some machines use `%lld'
+dnl and others use `%qd'.  There may be more!  The final `l' is a
+dnl default in case none of the others work.
+dnl
+AC_MSG_CHECKING(how to print long long);
+AC_CACHE_VAL(hdf5_cv_printf_ll,
+             for hdf5_cv_printf_ll in ll q l; do
+                AC_TRY_RUN([
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+                  main() {char *s=malloc(128);
+	             long long x = (long long)1048576 * (long long)1048576;
+	             sprintf(s,"%${hdf5_cv_printf_ll}d",x);
+	             exit (strcmp(s,"1099511627776"));}],
+		 break)
+	     done)
+AC_MSG_RESULT($hdf5_cv_printf_ll)
+AC_DEFINE_UNQUOTED(PRINTF_LL_WIDTH,"$hdf5_cv_printf_ll")
+
+
+dnl ----------------------------------------------------------------------
 dnl Turn on debugging by setting compiler flags
 dnl
 AC_MSG_CHECKING(for debug flags);

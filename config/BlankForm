@@ -41,3 +41,8 @@ PROFILE_CPPFLAGS=
 # Set this to `yes' or `no' depending on whether the target is big
 # endian or little endian.
 #ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
+
+# Set this to the width required by printf() to print type `long
+# long'.  For instance, if the format would be `%lld' then set it to
+# `ll' or if the format would be `%qd' set it to `q'.
+#hdf5_cv_printf_ll=${hdf5_cv_printf_ll='ll'}
