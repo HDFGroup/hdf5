@@ -30,6 +30,7 @@
 #define TESTFILE   "th5s.h5"
 #define DATAFILE   "th5s1.h5"
 #define NULLFILE   "tnullspace.h5"
+#define BASICFILE  "th5s3.h5"
 
 /* 3-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
@@ -75,7 +76,10 @@ struct space4_struct {
 
 /* NULL dataspace info */
 #define NULLDATASET  "null_dataset"
+#define BASICDATASET "basic_dataset"
+#define BASICDATASET2 "basic_dataset2"
 #define NULLATTR   "null_attribute"
+#define BASICATTR  "basic_attribute"
 
 /****************************************************************
 **
@@ -88,6 +92,7 @@ test_h5s_basic(void)
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		sid1, sid2;	/* Dataspace ID			*/
     hid_t		dset1;		/* Dataset ID			*/
+    hid_t               aid1;           /* Attribute ID                 */
     int		        rank;		/* Logical rank of dataspace	*/
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2, SPACE2_DIM3,
@@ -207,6 +212,90 @@ test_h5s_basic(void)
 
     ret = H5Sclose(sid1);
     CHECK_I(ret, "H5Sclose");
+
+    /*
+     * Try writing simple dataspaces without setting their extents
+     */
+    /* Create the file */
+    fid1 = H5Fcreate(BASICFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    dims1[0]=SPACE1_DIM1;
+
+    sid1 = H5Screate(H5S_SIMPLE);
+    CHECK(sid1, FAIL, "H5Screate");
+    sid2 = H5Screate_simple(1, dims1, dims1);
+    CHECK(sid2, FAIL, "H5Screate");
+
+    /* This dataset's space has no extent; it should not be created */
+    H5E_BEGIN_TRY {
+    dset1 = H5Dcreate(fid1, BASICDATASET, H5T_NATIVE_INT, sid1, H5P_DEFAULT);
+    } H5E_END_TRY
+    VERIFY(dset1, FAIL, "H5Dcreate");
+
+    dset1 = H5Dcreate(fid1, BASICDATASET2, H5T_NATIVE_INT, sid2, H5P_DEFAULT);
+    CHECK(dset1, FAIL, "H5Dcreate");
+
+    /* Try some writes with the bad dataspace (sid1) */
+    H5E_BEGIN_TRY {
+    ret = H5Dwrite(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, &n);
+    } H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Dwrite");
+
+    H5E_BEGIN_TRY {
+    ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, &n);
+    } H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Dwrite");
+
+    H5E_BEGIN_TRY {
+    ret = H5Dwrite(dset1, H5T_NATIVE_INT, sid1, sid1, H5P_DEFAULT, &n);
+    } H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Dwrite");
+
+    /* Try to iterate using the bad dataspace */
+    H5E_BEGIN_TRY {
+    ret = H5Diterate(&n, H5T_NATIVE_INT, sid1, NULL, NULL);
+    } H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Diterate");
+
+    /* Try to fill using the bad dataspace */
+    H5E_BEGIN_TRY {
+    ret = H5Dfill(NULL, H5T_NATIVE_INT, &n, H5T_NATIVE_INT, sid1);
+    } H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Dfill");
+
+    /* Now use the bad dataspace as the space for an attribute */
+    H5E_BEGIN_TRY {
+    aid1 = H5Acreate(dset1, BASICATTR,
+                        H5T_NATIVE_INT, sid1, H5P_DEFAULT);
+    } H5E_END_TRY
+    VERIFY(aid1, FAIL, "H5Acreate");
+
+    /* Make sure that dataspace reads using the bad dataspace fail */
+    H5E_BEGIN_TRY {
+    ret = H5Dread(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, &n);
+    } H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Dread");
+
+    H5E_BEGIN_TRY {
+    ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, &n);
+    } H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Dread");
+
+    H5E_BEGIN_TRY {
+    ret = H5Dread(dset1, H5T_NATIVE_INT, sid1, sid1, H5P_DEFAULT, &n);
+    } H5E_END_TRY
+    VERIFY(ret, FAIL, "H5Dread");
+
+    /* Clean up */
+    ret = H5Dclose(dset1);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
 }				/* test_h5s_basic() */
 
 /****************************************************************

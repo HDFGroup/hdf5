@@ -229,6 +229,10 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
     assert(buf_type);
     assert(space);
 
+    /* Make sure the dataspace has an extent set */
+    if( !(H5S_has_extent(space)) )
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace extent has not been set")
+
     /* Get the memory and file datatype sizes */
     src_type_size = H5T_get_size(fill_type);
     dst_type_size = H5T_get_size(buf_type);
@@ -682,6 +686,12 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     if (nelmts!=(hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
 
+    /* Make sure that both selections have their extents set */
+    if( !(H5S_has_extent(file_space)) )
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set")
+    if( !(H5S_has_extent(mem_space)) )
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
+
     /* Retrieve dataset properties */
     /* <none needed in the general case> */
 
@@ -906,6 +916,12 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /* Make certain that the number of elements in each selection is the same */
     if (nelmts!=(hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
+
+    /* Make sure that both selections have their extents set */
+    if( !(H5S_has_extent(file_space)) )
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set")
+    if( !(H5S_has_extent(mem_space)) )
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
 
     /* Retrieve dataset properties */
     /* <none needed currently> */
@@ -2478,7 +2494,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
         } /* end if */
     } /* end else */
 
-#ifdef QAK
+#ifdef QAK 
 {
     int mpi_rank;
     double time;

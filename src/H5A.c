@@ -226,6 +226,10 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     assert(type);
     assert(space);
 
+    /* Check if the dataspace has an extent set (or is NULL) */
+    if( !(H5S_has_extent(space)) )
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace extent has not been set")
+
     /* Build the attribute information */
     if((attr = H5MM_calloc(sizeof(H5A_t)))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for attribute info")
