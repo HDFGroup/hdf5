@@ -116,6 +116,7 @@ H5O_mtime_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
 		 H5O_shared_t UNUSED *sh)
 {
     time_t	*mesg, the_time;
+    uint32_t    tmp_time;       /* Temporary copy of the time */
     int		version;        /* Version of mtime information */
     void        *ret_value;     /* Return value */
 
@@ -135,7 +136,8 @@ H5O_mtime_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     p+=3;
 
     /* Get the time_t from the file */
-    UINT32DECODE(p, the_time);
+    UINT32DECODE(p, tmp_time);
+    the_time=(time_t)tmp_time;
 
     /* The return value */
     if (NULL==(mesg = H5FL_MALLOC(time_t)))

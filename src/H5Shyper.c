@@ -6783,7 +6783,6 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
     size_t span_size=0; /* Number of bytes in current span to actually process */
     size_t io_left;     /* Number of elements left to process */
     size_t io_bytes_left;   /* Number of bytes left to process */
-    size_t start_io_bytes_left;   /* Initial number of bytes left to process */
     size_t io_used;     /* Number of elements processed */
     size_t curr_seq=0; /* Number of sequence/offsets stored in the arrays */
     size_t elem_size;   /* Size of each element iterating over */
@@ -6818,7 +6817,7 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
     /* Set the amount of elements to perform I/O on, etc. */
     H5_CHECK_OVERFLOW(iter->elmt_left,hsize_t,size_t);
     io_left=MIN(maxelem,(size_t)iter->elmt_left);
-    start_io_bytes_left=io_bytes_left=io_left*elem_size;
+    io_bytes_left=io_left*elem_size;
 
     /* Compute the cumulative size of dataspace dimensions */
     for(i=fast_dim, acc=elem_size; i>=0; i--) {

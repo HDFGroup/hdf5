@@ -71,11 +71,11 @@ case "X-$CC_BASENAME" in
     DEBUG_CPPFLAGS=
 
     # Extra production flags
-    PROD_CFLAGS="-O -s"
+    PROD_CFLAGS="-O -OPT:Olimit=0 -s"
     PROD_CPPFLAGS=
 
     # Extra profiling flags
-    PROFILE_CFLAGS=-pg
+    PROFILE_CFLAGS=
     PROFILE_CPPFLAGS=
     ;;
 esac

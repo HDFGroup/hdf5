@@ -235,7 +235,7 @@ H5I_type_t H5Iregister_type(size_t hash_size, unsigned reserved, H5I_free_t free
 	FUNC_ENTER_API(H5Iregister_type, H5I_BADID);
 
 		/* Call H5I_register_type with a value of 0 to get a new type */
-	ret_value = H5I_register_type(0, hash_size, reserved, free_func);
+	ret_value = H5I_register_type((H5I_type_t)0, hash_size, reserved, free_func);
 
 done:
 	FUNC_LEAVE_API(ret_value);
@@ -312,7 +312,7 @@ H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned rese
 				if(H5I_id_type_list_g[i] == NULL)
 				{
 					/* Found a free type ID */
-					ret_value = i;
+					ret_value = (H5I_type_t)i;
 					done = 1;
 				}
 			}

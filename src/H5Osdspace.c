@@ -129,7 +129,7 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_
 
         /* Get the type of the extent */
         if(version>=H5O_SDSPACE_VERSION_2)
-            sdim->type = *p++;
+            sdim->type = (H5S_class_t)*p++;
         else {
             /* Set the dataspace type to be simple or scalar as appropriate */
             if(sdim->rank>0)

@@ -752,10 +752,8 @@ H5T_vlen_disk_getlen(void *_vl)
  *-------------------------------------------------------------------------
  */
 static void *
-H5T_vlen_disk_getptr(void *_vl)
+H5T_vlen_disk_getptr(void UNUSED *vl)
 {
-    uint8_t *vl=(uint8_t *)_vl; /* Pointer to the disk VL information */
-
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_disk_getptr)
 
     /* check parameters */

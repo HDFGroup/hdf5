@@ -1677,7 +1677,9 @@ H5D_istore_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxp
 {
     H5D_istore_ud1_t udata;		/*B-tree pass-through	*/
     haddr_t	        chunk_addr;     /* Chunk address on disk */
+#ifndef NDEBUG
     size_t		u;              /* Local index variables */
+#endif
     ssize_t             ret_value;      /* Return value */
     
     FUNC_ENTER_NOAPI(H5D_istore_readvv, FAIL);
@@ -1780,7 +1782,9 @@ H5D_istore_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
 {
     H5D_istore_ud1_t udata;		/*B-tree pass-through	*/
     haddr_t	        chunk_addr;     /* Chunk address on disk */
+#ifndef NDEBUG
     size_t		u;              /* Local index variables */
+#endif
     ssize_t             ret_value;      /* Return value */
     
     FUNC_ENTER_NOAPI(H5D_istore_writevv, FAIL);

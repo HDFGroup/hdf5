@@ -2474,7 +2474,7 @@ dump_fcpl(hid_t fid)
  indentation(indent + COL);
  printf("%s %d\n","OBJECTHEADER_VERSION", (int)shhdr);
  indentation(indent + COL);
- printf("%s %d\n","USERBLOCK_VERSION", userblock);
+ HDfprintf(stdout,"%s %Hu\n","USERBLOCK_VERSION", userblock);
  indentation(indent + COL);
  printf("%s %d\n","OFFSET_SIZE", off_size);
  indentation(indent + COL);
