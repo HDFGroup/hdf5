@@ -1612,6 +1612,7 @@ struct h5dump_str_t tempstr;
              }
         }
     }
+	free(out_buf);
 }
 
 
@@ -1827,6 +1828,7 @@ static void display_string
 
          }
     }
+	free(out_buf);
 }
 
 
