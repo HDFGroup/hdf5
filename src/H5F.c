@@ -1893,6 +1893,14 @@ H5F_close(H5F_t *f)
      */
     assert(1==f->nrefs);
     if (1==f->shared->nrefs) {
+#ifdef H5_HAVE_PARALLEL
+        if(IS_H5FD_MPIO(f)) {
+            if (SUCCEED!= H5FD_mpio_closing(f->shared->lf)) {
+                HRETURN_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL,
+                       "unable to set 'closing' flag");
+            }
+        } /* end if */
+#endif /* H5_HAVE_PARALLEL */
 	/* Flush and destroy all caches */
 	if (H5F_flush(f, H5F_SCOPE_LOCAL, TRUE, FALSE)<0) {
 	    HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,

@@ -54,6 +54,7 @@ typedef struct H5FD_mpio_t {
     int         mpi_rank;       /* This process's rank                  */
     int         mpi_size;       /* Total number of processes            */
     int         mpi_round;      /* Current round robin process (for metadata I/O) */
+    unsigned    closing;        /* Indicate that the file is closing immediately after a flush */
     haddr_t	eof;		/*end-of-file marker			*/
     haddr_t	eoa;		/*end-of-address marker			*/
     MPI_Datatype btype;		/*buffer type for xfers			*/
@@ -559,6 +560,37 @@ H5FD_mpio_signal_right_neighbor(H5FD_t *_file)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_mpio_closing
+ *
+ * Purpose:	Indicate that next flush call is immediately prior to a
+ *              close on the file.
+ *
+ * Return:	Success: non-negative
+ *		Failure: negative
+ *
+ * Programmer:	Quincey Koziol, May 13, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_mpio_closing(H5FD_t *_file)
+{
+    H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
+
+    FUNC_ENTER(H5FD_mpio_closing, FAIL);
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
+
+    /* Set the 'closing' flag for this file */
+    file->closing=TRUE;
+    
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_mpio_fapl_get
  *
  * Purpose:	Returns a file access property list which could be used to
@@ -765,6 +797,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     file->mpi_rank = mpi_rank;
     file->mpi_size = mpi_size;
     file->mpi_round = 0;        /* Start metadata writes with process 0 */
+    file->closing = FALSE;      /* Not closing yet */
     file->btype = MPI_DATATYPE_NULL;
     file->ftype = MPI_DATATYPE_NULL;
 
@@ -1519,9 +1552,14 @@ H5FD_mpio_flush(H5FD_t *_file)
         }
     }
 
+    /* Check if the file is closing and avoid calling MPI_File_sync if so */
+    if(!file->closing) {
+        if (MPI_SUCCESS != (mpi_code=MPI_File_sync(file->f)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_sync failed", mpi_code);
+    } /* end if */
 
-    if (MPI_SUCCESS != (mpi_code=MPI_File_sync(file->f)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_File_sync failed", mpi_code);
+    /* Reset 'closing' flag now */
+    file->closing=FALSE;
 
 done:
 #ifdef H5FDmpio_DEBUG
