@@ -6,6 +6,7 @@
 #------------------------------------------------------------------------------
 
 ./COPYING
+./HISTORY
 ./INSTALL
 ./INSTALL_TFLOPS
 ./INSTALL_parallel
@@ -166,6 +167,7 @@
 ./doc/html/Tutor/Graphics/Intro.gif
 ./doc/html/Tutor/Graphics/IntroTopics.gif
 ./doc/html/Tutor/Graphics/Iterate.gif
+./doc/html/Tutor/Graphics/Makefile.in
 ./doc/html/Tutor/Graphics/MountFile.gif
 ./doc/html/Tutor/Graphics/Quiz.gif
 ./doc/html/Tutor/Graphics/QuizAns.gif
@@ -191,7 +193,7 @@
 ./doc/html/Tutor/crtgrp.html
 ./doc/html/Tutor/crtgrpar.html
 ./doc/html/Tutor/crtgrpd.html
-./doc/html/Tutor/examples/Makefile
+./doc/html/Tutor/examples/Makefile.in
 ./doc/html/Tutor/examples/h5_compound.c
 ./doc/html/Tutor/examples/h5_copy.c
 ./doc/html/Tutor/examples/h5_crtatt.c
