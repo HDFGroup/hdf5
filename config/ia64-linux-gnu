@@ -20,7 +20,7 @@ fi
 # So it is removed.
 
 case $CC_BASENAME in
-    ecc)
+    ecc|icc)
 	# Default to C99 standard.
 	CFLAGS="${CFLAGS:--std=c99}"
 	DEBUG_CFLAGS="-w2 -Wall -g -O0"
@@ -100,15 +100,30 @@ if test "X$f9x_flags_set" = "X"; then
   f9x_flags_set=yes
 fi
 
-
 # The Default settings for C++
 if test -z "$CXX"; then
     CXX=ecc
     CXX_BASENAME=ecc
 fi
 
+# A patch to make g++ getting the default settings.
+# CXX_BASENAME should have been set in configure.
+if test $CXX = g++; then
+    CXX_BASENAME=g++
+if
+
 
 case $CXX_BASENAME in
+    ecc|icc)	# Intel compilers
+	# Default to C99 standard.
+	CXXFLAGS="${CXXFLAGS:--std=c99}"
+	DEBUG_CXXFLAGS="-g -w2 -Wall"
+	DEBUG_CPPFLAGS=
+	PROD_CXXFLAGS=""     #Default optimization O2 is used
+	PROD_CPPFLAGS=
+	PROFILE_CXXFLAGS="-pg"
+	PROFILE_CPPFLAGS=
+	;;
     g++)
 	CXXFLAGS="$CXXFLAGS -Wsign-compare" #Only works for some versions
 	DEBUG_CXXFLAGS="-g -fverbose-asm"
@@ -122,9 +137,9 @@ case $CXX_BASENAME in
     *)
 	# Default to C99 standard.
 	CXXFLAGS="${CXXFLAGS:--std=c99}"
-	DEBUG_CXXFLAGS="-g -w2 -Wall"
+	DEBUG_CXXFLAGS="-g"
 	DEBUG_CPPFLAGS=
-	PROD_CXXFLAGS=""     #Default optimization O2 is used
+	PROD_CXXFLAGS="-O"
 	PROD_CPPFLAGS=
 	PROFILE_CXXFLAGS="-pg"
 	PROFILE_CPPFLAGS=
