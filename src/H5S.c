@@ -566,7 +566,7 @@ H5Scopy(hid_t space_id)
         HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     /* Copy */
-    if (NULL==(dst=H5S_copy (src)))
+    if (NULL==(dst=H5S_copy (src, FALSE)))
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy data space");
 
     /* Atomize */
@@ -691,7 +691,11 @@ done:
  * Function:	H5S_copy
  *
  * Purpose:	Copies a data space, by copying the extent and selection through
- *          H5S_extent_copy and H5S_select_copy
+ *          H5S_extent_copy and H5S_select_copy.  If the SHARE_SELECTION flag
+ *          is set, then the selection can be shared between the source and
+ *          destination dataspaces.  (This should only occur in situations
+ *          where the destination dataspace will immediately change to a new
+ *          selection)
  *
  * Return:	Success:	A pointer to a new copy of SRC
  *
@@ -705,7 +709,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5S_t *
-H5S_copy(const H5S_t *src)
+H5S_copy(const H5S_t *src, hbool_t share_selection)
 {
     H5S_t		   *dst = NULL;
     H5S_t		   *ret_value;   /* Return value */
@@ -725,7 +729,7 @@ H5S_copy(const H5S_t *src)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent");
 
     /* Copy the source dataspace's selection */
-    if (H5S_select_copy(dst,src)<0)
+    if (H5S_select_copy(dst,src,share_selection)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy select");
 
     /* Set the return value */

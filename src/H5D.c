@@ -1351,7 +1351,7 @@ H5Dget_space(hid_t dset_id)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Read the data space message and return a data space object */
-    if (NULL==(space=H5S_copy (dset->space)))
+    if (NULL==(space=H5S_copy (dset->space, FALSE)))
 	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get data space")
 
     /* Create an atom */
@@ -2086,7 +2086,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
     /* Copy dataspace for dataset */
-    if((new_dset->space = H5S_copy(space))==NULL)
+    if((new_dset->space = H5S_copy(space, FALSE))==NULL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy dataspace")
 
     /* Set the dataset's dataspace to 'all' selection */

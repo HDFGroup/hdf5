@@ -217,7 +217,7 @@ H5_DLL herr_t H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
 /* Hyperslab selection functions */
 H5_DLL herr_t H5S_hyper_release(H5S_t *space);
 H5_DLL hsize_t H5S_hyper_npoints(const H5S_t *space);
-H5_DLL herr_t H5S_hyper_copy(H5S_t *dst, const H5S_t *src);
+H5_DLL herr_t H5S_hyper_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
 H5_DLL htri_t H5S_hyper_is_valid(const H5S_t *space);
 H5_DLL hssize_t H5S_hyper_serial_size(const H5S_t *space);
 H5_DLL herr_t H5S_hyper_serialize(const H5S_t *space, uint8_t *buf);

@@ -1557,13 +1557,18 @@ done:
  DESCRIPTION
     Copies all the hyperslab selection information from the source
     dataspace to the destination dataspace.
+
+    If the SHARE_SELECTION flag is set, then the selection can be shared
+    between the source and destination dataspaces.  (This should only occur in
+    situations where the destination dataspace will immediately change to a new
+    selection)
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
+H5S_hyper_copy (H5S_t *dst, const H5S_t *src, hbool_t share_selection)
 {
     herr_t ret_value=SUCCEED;   /* return value */
 
@@ -1575,8 +1580,14 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
     /* Check if there is hyperslab span information to copy */
     /* (Regular hyperslab information is copied with the selection structure) */
     if(src->select.sel_info.hslab.span_lst!=NULL) {
-        /* Copy the hyperslab span information */
-        dst->select.sel_info.hslab.span_lst=H5S_hyper_copy_span(src->select.sel_info.hslab.span_lst);
+        if(share_selection) {
+            /* Share the source's span tree by incrementing the reference count on it */
+            dst->select.sel_info.hslab.span_lst=src->select.sel_info.hslab.span_lst;
+            dst->select.sel_info.hslab.span_lst->count++;
+        } /* end if */
+        else
+            /* Copy the hyperslab span information */
+            dst->select.sel_info.hslab.span_lst=H5S_hyper_copy_span(src->select.sel_info.hslab.span_lst);
     } /* end if */
 
 done:

@@ -113,13 +113,18 @@ done:
  DESCRIPTION
     Copies all the selection information (include offset) from the source
     dataspace to the destination dataspace.
+
+    If the SHARE_SELECTION flag is set, then the selection can be shared
+    between the source and destination dataspaces.  (This should only occur in
+    situations where the destination dataspace will immediately change to a new
+    selection)
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_copy (H5S_t *dst, const H5S_t *src)
+H5S_select_copy (H5S_t *dst, const H5S_t *src, hbool_t share_selection)
 {
     herr_t ret_value=SUCCEED;     /* return value */
 
@@ -132,7 +137,7 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
     /* Copy regular fields */
     HDmemcpy(&dst->select,&src->select,sizeof(H5S_select_t));
 
-/* Need to copy order information still */
+/* Need to copy permutation order information still */
 
     /* Copy offset information */
     if(src->extent.u.simple.rank>0) {
@@ -166,7 +171,7 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
                     break;
 
                 case H5S_SEL_HYPERSLABS:
-                    ret_value=H5S_hyper_copy(dst,src);
+                    ret_value=H5S_hyper_copy(dst,src,share_selection);
                     break;
 
                 default:
