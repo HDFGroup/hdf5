@@ -564,7 +564,7 @@ test_copy(int mode,
 	}
     }
     puts(" PASSED");
-#ifdef WIN32 && _HDF5USEDLL_
+#if defined(WIN32) && defined(_HDF5USEDLL_)
     HDfree(src);
     HDfree(dst);
 #else
@@ -618,7 +618,7 @@ test_multifill(size_t nx)
     fflush(stdout);
 
     /* Initialize the source and destination */
-#ifndef WIN32 && _HDF5USEDLL_
+#if !defined(WIN32) && !defined(_HDF5USEDLL_)
     src = H5MM_malloc(nx * sizeof(*src));
     dst = H5MM_malloc(nx * sizeof(*dst));
 #else
@@ -691,7 +691,7 @@ test_multifill(size_t nx)
     }
 	
     puts(" PASSED");
-#ifndef WIN32 && _HDF5USEDLL_
+#if !defined(WIN32) && !defined(_HDF5USEDLL_)
     H5MM_xfree(src);
     H5MM_xfree(dst);
 #else
@@ -780,7 +780,7 @@ test_endian(size_t nx)
     }
 
     puts(" PASSED");
-#ifdef WIN32 && _HDF5USEDLL_
+#if defined(WIN32) && defined(_HDF5USEDLL_)
 	HDfree(src);
 	HDfree(dst);
 #else
@@ -887,7 +887,7 @@ test_transpose(size_t nx, size_t ny)
     }
 
     puts(" PASSED");
-#ifndef WIN32 && _HDF5USEDLL_
+#if !defined(WIN32) && !defined(_HDF5USEDLL_)
     H5MM_xfree(src);
     H5MM_xfree(dst);
 #else
