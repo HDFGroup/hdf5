@@ -1,10 +1,10 @@
-./configure
 ./INSTALL
 ./INSTALL.ibm.sp.parallel
 ./INSTALL_MAINT
+./INSTALL_parallel
+./MANIFEST
 ./Makefile.dist
 ./Makefile.in
-./MANIFEST
 ./README
 ./RELEASE
 ./acconfig.h
@@ -26,9 +26,10 @@
 ./config/powerpc-ibm-aix4.2.1.0
 ./config/rs6000-ibm-aix4.1.4.0
 ./config/solaris2.5
+./configure
 ./configure.in
-./examples/h5_compound.c
 ./examples/h5_chunk_read.c
+./examples/h5_compound.c
 ./examples/h5_extend_write.c
 ./examples/h5_group.c
 ./examples/h5_read.c
@@ -74,9 +75,7 @@
 ./html/study_p1.obj
 ./html/symtab
 ./src/.indent.pro
-./src/debug.c
 ./src/H5.c
-./src/H5detect.c
 ./src/H5A.c
 ./src/H5AC.c
 ./src/H5ACprivate.h
@@ -87,7 +86,6 @@
 ./src/H5Bprivate.h
 ./src/H5Bpublic.h
 ./src/H5C.c
-./src/H5config.h.in
 ./src/H5Cprivate.h
 ./src/H5Cpublic.h
 ./src/H5D.c
@@ -103,11 +101,11 @@
 ./src/H5Fistore.c
 ./src/H5Flow.c
 ./src/H5Fmpio.c
+./src/H5Fprivate.h
+./src/H5Fpublic.h
 ./src/H5Fsec2.c
 ./src/H5Fsplit.c
 ./src/H5Fstdio.c
-./src/H5Fprivate.h
-./src/H5Fpublic.h
 ./src/H5G.c
 ./src/H5Gent.c
 ./src/H5Gnode.c
@@ -142,8 +140,6 @@
 ./src/H5Pprivate.h
 ./src/H5Ppublic.h
 ./src/H5Psimp.c
-./src/H5private.h
-./src/H5public.h
 ./src/H5T.c
 ./src/H5Tconv.c
 ./src/H5Tpkg.h
@@ -151,8 +147,13 @@
 ./src/H5Tpublic.h
 ./src/H5V.c
 ./src/H5Vprivate.h
-./src/hdf5.h
+./src/H5config.h.in
+./src/H5detect.c
+./src/H5private.h
+./src/H5public.h
 ./src/Makefile.in
+./src/debug.c
+./src/hdf5.h
 ./test/Makefile.in
 ./test/cmpd_dset.c
 ./test/dsets.c
@@ -163,7 +164,6 @@
 ./test/istore.c
 ./test/testhdf5.c
 ./test/testhdf5.h
-./test/testphdf5.c
 ./test/tfile.c
 ./test/th5p.c
 ./test/theap.c
@@ -172,6 +172,6 @@
 ./test/tstab.c
 ./tgif/APIGrammar.obj
 ./tgif/FileGrammar.obj
-./tgif/UserView.obj
 ./tgif/IOPipe.obj
 ./tgif/RobbPipe.obj
+./tgif/UserView.obj
