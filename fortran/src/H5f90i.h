@@ -93,6 +93,21 @@ typedef float             real_f;
 #define _fcdtocp(desc) (desc)
 #endif /*IBM6000*/
 
+/* MAC APPLE definitions with IBM XL compiler*/
+#if defined(__APPLE__)
+typedef char              *_fcd;
+typedef long long         hsize_t_f;
+typedef long long         hssize_t_f;
+typedef int               size_t_f;
+typedef int               int_f;
+typedef int               hid_t_f;
+typedef float             real_f;
+#define FNAME(x) x 
+#define _fcdtocp(desc) (desc)
+
+#endif /*APPLE*/
+
+/* IA64 LINUX definitions */
 /* LINUX definitions */
 #if defined(i386) && defined(linux)
 #define DF_MT             DFMT_LINIX

@@ -64,7 +64,8 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
-  
+        - HDF5 Fortran APIs are supported on MAC OSX with IBM XL Fortran compiler
+          version 8.1 Beta  
 
 Bug Fixes since HDF5-1.6.1 release
 ==================================
@@ -204,6 +205,7 @@ Platforms Tested
     MAC OS X                      Darwin 6.8
                                   gcc and g++ Apple Computer, Inc. GCC 
                                   version 1175, based on gcc version 3.1
+                                  IBM XL Fortran version 8.1 Beta
                                   
 
 

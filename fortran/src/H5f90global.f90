@@ -13,7 +13,7 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 !
     MODULE H5GLOBAL
-      USE H5FORTRAN_TYPES
+         USE H5FORTRAN_TYPES
 !
 ! Definitions for reference datatypes.
 ! If you change the value of these parameters, do not forget to change corresponding
