@@ -1,0 +1,92 @@
+#							-*- shell-script -*-
+#
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
+
+# Use Intel C & Fortran compiler by default.
+if test "X-" =  "X-$CC"; then
+    CC=ecc
+    CC_BASENAME=ecc
+fi
+if test "X-" =  "X-$F9X"; then
+    F9X=efc
+fi
+
+#----------------------------------------------------------------------------
+# Compiler flags. The CPPFLAGS values should not include package debug
+# flags like `-DH5G_DEBUG' since these are added with the
+# `--enable-debug' switch of configure.
+
+case $CC_BASENAME in
+    ecc)
+	# CFLAGS must be set else configure set it to -g
+	CFLAGS="${CFLAGS:--DIA64}"
+	DEBUG_CFLAGS="-g"
+	DEBUG_CPPFLAGS=
+	# ecc has -O2 as default
+	PROD_CFLAGS=""
+	PROD_CPPFLAGS=
+	PROFILE_CFLAGS=""	# ecc has no profile option
+	PROFILE_CPPFLAGS=
+	;;
+
+    gcc)
+	. $srcdir/config/gnu-flags
+	;;
+
+    *)
+	CFLAGS="$CFLAGS -ansi"
+	DEBUG_CFLAGS="-g"
+	DEBUG_CPPFLAGS=
+	PROD_CFLAGS="-O"
+	PROD_CPPFLAGS=
+	PROFILE_CFLAGS="-pg"
+	PROFILE_CPPFLAGS=
+	;;
+esac
+
+# The default Fortran 90 compiler
+
+#
+# HDF5 integers
+#
+#       R_LARGE is the number of digits for the bigest integer supported.
+#       R_INTEGER is the number of digits in INTEGER
+#
+# (for the Linux architechture)
+#
+
+R_LARGE=18
+R_INTEGER=9
+
+case $F9X in
+    *efc)
+	# this is for efc v7.  Older efc do not work with these.
+	# -Vaxlib is for non-standard fortran calls like exit().
+	FFLAGS='-fpp -DDEC$=DEC_ -DMS$=MS_ -Vaxlib'
+	HSIZE_T='SELECTED_INT_KIND(R_LARGE)'
+	HSSIZE_T='SELECTED_INT_KIND(R_LARGE)'
+	HID_T='SELECTED_INT_KIND(R_INTEGER)'
+	SIZE_T='SELECTED_INT_KIND(R_LARGE)'
+	OBJECT_NAMELEN_DEFAULT_F=-1
+	f9x_flags_set=yes
+	;;
+    *)
+	HSIZE_T='SELECTED_INT_KIND(R_LARGE)'
+	HSSIZE_T='SELECTED_INT_KIND(R_LARGE)'
+	HID_T='SELECTED_INT_KIND(R_INTEGER)'
+	SIZE_T='SELECTED_INT_KIND(R_LARGE)'
+	OBJECT_NAMELEN_DEFAULT_F=-1
+	f9x_flags_set=yes
+	;;
+esac
+
+# The following is not right and need work.
+if test -z "$f9x_flags_set"; then
+    FFLAGS=
+    DEBUG_FFLAGS=
+    PROD_FFLAGS=
+    PROFILE_FFLAGS=
+    f9x_flags_set=yes
+fi
