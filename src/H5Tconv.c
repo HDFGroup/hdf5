@@ -2155,7 +2155,6 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     void	*tmp_buf=NULL;     	/*temporary background buffer 	     */
     size_t	tmp_buf_size=0;	        /*size of temporary bkg buffer	     */
     void	*dbuf=NULL;             /*temp destination buffer	     */
-    size_t	dbuf_size=0;	        /*size of destination buffer	     */
     int	        direction;		/*direction of traversal	     */
     int         nested=0;               /*flag of nested VL case             */
     hsize_t	elmtno;			/*element number counter	     */
@@ -2235,8 +2234,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
             bkg_delta = direction * (bkg_stride ? bkg_stride : dst->size);
 
             /* Dynamically allocate the destination buffer */
-            dbuf_size=MAX(sizeof(hvl_t),sizeof(char *));
-            if ((dbuf=H5FL_BLK_MALLOC(vlen_seq,dbuf_size))==NULL)
+            if ((dbuf=H5FL_BLK_MALLOC(vlen_seq,dst->size))==NULL)
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
 
             /*
