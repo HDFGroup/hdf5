@@ -1071,19 +1071,23 @@ dump_data (hid_t obj_id, int obj_data) {
 	info.cmpd_suf = "}";
 	info.cmpd_end = "\n";
 
+	info.fmt_raw = "%02x";
 	info.fmt_double = "%g";
 	info.fmt_float = "%g";
 	info.fmt_schar = "%d";
 	info.fmt_int = "%d";
 	info.fmt_uint = "%u";
+	info.fmt_schar = "%d";
 	info.fmt_uchar = "%u";
 	info.fmt_short = "%d";
 	info.fmt_ushort = "%u";
 	info.fmt_long = "%ld";
 	info.fmt_ulong = "%lu";
+	info.fmt_llong = NULL;
+	info.fmt_ullong = NULL;
 
 	info.str_repeat = 0;
-    info.raw = 0;
+	info.raw = 0;
 
 	info.ascii = 0;
 
