@@ -1342,6 +1342,8 @@
 ./tools/testfiles/tindiceslarge.ddl
 ./tools/testfiles/tfill.ddl
 ./tools/testfiles/tfvalues.h5
+./tools/testfiles/tstring2.ddl
+./tools/testfiles/tstr3.h5
 
 
 
