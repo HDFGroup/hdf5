@@ -580,7 +580,7 @@ main(int argc, char *argv[])
     if (NULL == (f = H5F_open(FILETYPE, FILENAME,
                             (H5F_ACC_CREAT | H5F_ACC_WRITE | H5F_ACC_TRUNC |
                              H5F_ACC_DEBUG),
-                              creation_template))) {
+                              creation_template, NULL))) {
         printf("Cannot create file %s; test aborted\n", FILENAME);
         exit(1);
     }
