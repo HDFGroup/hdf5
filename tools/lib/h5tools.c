@@ -175,12 +175,12 @@ h5tools_fopen(const char *fname, const char *driver, char *drivername,
     /* This enum should match the entries in the above drivers_list since they
      * are indexes into the drivers_list array. */
     enum {
-        SEC2_IDX = 0,
-        FAMILY_IDX,
-        SPLIT_IDX,
-        MULTI_IDX,
+        SEC2_IDX = 0
+       ,FAMILY_IDX
+       ,SPLIT_IDX
+       ,MULTI_IDX
 #ifdef H5_HAVE_STREAM
-        STREAM_IDX,
+       ,STREAM_IDX
 #endif	/* H5_HAVE_STREAM */
     };
 #define NUM_DRIVERS     (sizeof(drivers_list) / sizeof(struct d_list))
