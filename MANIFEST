@@ -41,7 +41,6 @@
 ./src/H5Cprivate.h
 ./src/H5Cpublic.h
 ./src/H5D.c
-./src/H5Dconv.c
 ./src/H5Dprivate.h
 ./src/H5Dpublic.h
 ./src/H5E.c
@@ -94,6 +93,7 @@
 ./src/H5private.h
 ./src/H5public.h
 ./src/H5T.c
+./src/H5Tconv.c
 ./src/H5Tpkg.h
 ./src/H5Tprivate.h
 ./src/H5Tpublic.h

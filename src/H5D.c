@@ -856,10 +856,14 @@ herr_t
 H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
 	  const H5D_xfer_t *xfer_parms, void *buf/*out*/)
 {
-   size_t	nbytes;
+   size_t	nelmts, src_size, dst_size;
    size_t	offset[H5O_ISTORE_NDIMS];
    size_t	size[H5O_ISTORE_NDIMS];
    intn		i;
+   herr_t	ret_value = FAIL;
+   uint8	*conv_buf = NULL;	/*data type conv buffer		*/
+   H5T_conv_t	conv_func = NULL;	/*conversion function		*/
+   hid_t	src_id=-1, dst_id=-1;	/*temporary type atoms		*/
    
    FUNC_ENTER (H5D_read, FAIL);
 
@@ -870,52 +874,81 @@ H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
    assert (buf);
 
    if (H5D_CONTIGUOUS!=dataset->create_parms.layout) {
-      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		     "layout is not supported yet");
-   }
-   if (H5T_cmp (type, dataset->type)) {
-      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		     "type conversion not supported yet");
+      HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		   "layout is not supported yet");
    }
    if (space && H5P_cmp (space, dataset->space)) {
-      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		     "space conversion not supported yet");
+      HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		   "space conversion not supported yet");
    }
 
-   /* Compute the size of the request */
-   nbytes = H5T_get_size (dataset->type) * H5P_get_npoints (dataset->space);
+   /*
+    * Convert data types to atoms because the conversion functions are
+    * application-level functions.
+    */
+   if ((src_id=H5Aregister_atom (H5_DATATYPE, H5T_copy (dataset->type)))<0 ||
+       (dst_id=H5Aregister_atom (H5_DATATYPE, H5T_copy (type)))<0) {
+      HGOTO_ERROR (H5E_DATASET, H5E_CANTREGISTER, FAIL,
+		   "unable to register types for conversion");
+   }
 
+   /* Compute the size of the request and allocate scratch buffers */
+   nelmts = H5P_get_npoints (dataset->space);
+   src_size = nelmts * H5T_get_size (dataset->type);
+   dst_size = nelmts * H5T_get_size (type);
+   conv_buf = H5MM_xmalloc (MAX (src_size, dst_size));
+   if (NULL==(conv_func=H5T_find (dataset->type, type))) {
+      HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		   "unable to convert between src and dest data types");
+   }
+
+   /*
+    * Read data into the data type conversion buffer.
+    */
    switch (dataset->create_parms.layout) {
    case H5D_CONTIGUOUS:
-      /*
-       * Read a block of contiguous data.
-       */
+      /* Read a block of contiguous data */
       if (H5F_block_read (dataset->ent.file, &(dataset->storage.cstore.addr),
-			  nbytes, buf)<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL, "read failed");
+			  src_size, conv_buf)<0) {
+	 HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "read failed");
       }
       break;
 
    case H5D_CHUNKED:
-      /*
-       * Read one or more chunks from indexed storage.
-       */
+      /* Read one or more chunks from indexed storage */
       for (i=0; i<dataset->storage.istore.ndims; i++) offset[i] = 0;
       H5P_get_dims (dataset->space, size);
       size[dataset->storage.istore.ndims-1] = H5T_get_size (dataset->type);
       if (H5F_istore_read (dataset->ent.file, &(dataset->storage.istore),
-			   offset, size, buf)<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL, "read failed");
+			   offset, size, conv_buf)<0) {
+	 HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "read failed");
       }
       break;
 
    default:
       assert ("not implemented yet" && 0);
-      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
-		     "not implemented yet");
+      HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "not implemented yet");
    }
 
-   FUNC_LEAVE (SUCCEED);
+   /*
+    * Perform data type conversion.
+    */
+   if ((conv_func)(src_id, dst_id, nelmts, conv_buf, NULL)<0) {
+      HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		   "data type conversion failed");
+   }
+
+   /*
+    * Copy conversion buffer into destination.
+    */
+   HDmemcpy (buf, conv_buf, dst_size);
+   
+   ret_value = SUCCEED;
+ done:
+   if (src_id>=0) H5A_dec_ref (src_id);
+   if (dst_id>=0) H5A_dec_ref (dst_id);
+   conv_buf = H5MM_xfree (conv_buf);
+   FUNC_LEAVE (ret_value);
 }
 
 
@@ -945,10 +978,14 @@ herr_t
 H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
 	   const H5D_xfer_t *xfer_parms, const void *buf)
 {
-   size_t	nbytes;
+   size_t	nelmts, src_size, dst_size;
    size_t	offset[H5O_ISTORE_NDIMS];
    size_t	size[H5O_ISTORE_NDIMS];
    intn		i;
+   herr_t	ret_value = FAIL;
+   uint8	*conv_buf = NULL;	/*data type conversion buffer	*/
+   H5T_conv_t	conv_func = NULL;	/*data type conversion function	*/
+   hid_t	src_id=-1, dst_id=-1;	/*temporary type atoms		*/
    
    FUNC_ENTER (H5D_write, FAIL);
 
@@ -962,49 +999,79 @@ H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
       HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "layout is not supported yet");
    }
-   if (H5T_cmp (type, dataset->type)) {
-      HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		     "type conversion not supported yet");
-   }
    if (space && H5P_cmp (space, dataset->space)) {
       HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "space conversion not supported yet");
    }
 
-   /* Compute the size of the request */
-   nbytes = H5T_get_size (dataset->type) * H5P_get_npoints (dataset->space);
+   /*
+    * Convert data types to atoms because the conversion functions are
+    * application-level functions.
+    */
+   if ((src_id=H5Aregister_atom (H5_DATATYPE, H5T_copy (dataset->type)))<0 ||
+       (dst_id=H5Aregister_atom (H5_DATATYPE, H5T_copy (type)))<0) {
+      HGOTO_ERROR (H5E_DATASET, H5E_CANTREGISTER, FAIL,
+		   "unable to register types for conversion");
+   }
 
 
+   /* Compute the size of the request and allocate scratch buffers */
+   nelmts = H5P_get_npoints (dataset->space);
+   src_size = nelmts * H5T_get_size (type);
+   dst_size = nelmts * H5T_get_size (dataset->type);
+   conv_buf = H5MM_xmalloc (MAX (src_size, dst_size));
+   if (NULL==(conv_func=H5T_find (type, dataset->type))) {
+      HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		   "unable to convert between src and dest data types");
+   }
+
+
+   /*
+    * Read data into the data type conversion buffer.
+    */
+   HDmemcpy (conv_buf, buf, src_size);
+
+   /*
+    * Perform data type conversion.
+    */
+   if ((conv_func)(src_id, dst_id, nelmts, conv_buf, NULL)<0) {
+      HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		   "data type conversion failed");
+   }
+
+   /*
+    * Write data into the file.
+    */
    switch (dataset->create_parms.layout) {
    case H5D_CONTIGUOUS:
-      /*
-       * Write a contiguous chunk of data.
-       */
+      /* Write a contiguous chunk of data */
       if (H5F_block_write (dataset->ent.file, &(dataset->storage.cstore.addr),
-			   nbytes, buf)<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
+			   dst_size, conv_buf)<0) {
+	 HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
       }
       break;
 
    case H5D_CHUNKED:
-      /*
-       * Write one or more chunks to indexed storage.
-       */
+      /* Write one or more chunks to indexed storage */
       for (i=0; i<dataset->storage.istore.ndims; i++) offset[i] = 0;
       H5P_get_dims (dataset->space, size);
       size[dataset->storage.istore.ndims-1] = H5T_get_size (dataset->type);
       if (H5F_istore_write (dataset->ent.file, &(dataset->storage.istore),
-			    offset, size, buf)<0) {
-	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
+			    offset, size, conv_buf)<0) {
+	 HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
       }
       break;
 
    default:
       assert ("not implemented yet" && 0);
-      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
-		     "not implemented yet");
+      HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "not implemented yet");
    }
-   
-   FUNC_LEAVE (SUCCEED);
+
+   ret_value = SUCCEED;
+ done:
+   if (src_id>=0) H5A_dec_ref (src_id);
+   if (dst_id>=0) H5A_dec_ref (dst_id);
+   conv_buf = H5MM_xfree (conv_buf);
+   FUNC_LEAVE (ret_value);
 }
 

@@ -22,8 +22,8 @@ typedef struct H5T_atomic_t {
    H5T_order_t		order;	/*byte order				*/
    size_t		prec;	/*precision in bits			*/
    size_t		offset;	/*bit position of lsb of value		*/
-   intn			lo_pad;	/*type of lsb padding			*/
-   intn			hi_pad;	/*type of msb padding			*/
+   intn			lsb_pad;/*type of lsb padding			*/
+   intn			msb_pad;/*type of msb padding			*/
    union {
       struct {
 	 H5T_sign_t	sign;	/*type of integer sign			*/
@@ -42,7 +42,7 @@ typedef struct H5T_atomic_t {
 
       struct {
 	 H5T_cset_t	cset;	/*character set				*/
-	 H5T_str_t	spad;	/*space or null padding of extra bytes	*/
+	 H5T_str_t	pad;	/*space or null padding of extra bytes	*/
       } s;
    } u;
 } H5T_atomic_t;
@@ -72,5 +72,27 @@ typedef struct H5T_member_t {
    struct H5T_t		type;	/*type of this member			*/
 } H5T_member_t;
 
+/* The data type conversion database */
+typedef struct H5T_path_t {
+   H5T_t		*src;	/*source data type ID			*/
+   H5T_t		*dst;	/*destination data type	ID		*/
+   H5T_conv_t		hard;	/*hard conversion function or null	*/
+   H5T_conv_t		soft;	/*soft conversion function or null	*/
+} H5T_path_t;
+
+/* The master list of soft conversion functions */
+typedef struct H5T_soft_t {
+   H5T_class_t		src;	/*source data type class		*/
+   H5T_class_t		dst;	/*destination data type class		*/
+   H5T_conv_t		func;	/*the conversion function		*/
+} H5T_soft_t;
+
+H5T_path_t *H5T_path_find (const H5T_t *src, const H5T_t *dst, hbool_t create);
+
+/* Conversion functions */
+herr_t H5T_conv_noop (hid_t src_id, hid_t dst_id, size_t nelmts,
+		      void *buf, const void *background);
+herr_t H5T_conv_order (hid_t src_id, hid_t dst_id, size_t nelmts,
+		       void *_buf, const void *background);
 
 #endif

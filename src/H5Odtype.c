@@ -95,8 +95,8 @@ H5O_dtype_decode_helper (const uint8 **pp, H5T_t *dt)
        * Integer types...
        */
       dt->u.atomic.order = (flags & 0x1) ? H5T_ORDER_BE : H5T_ORDER_LE;
-      dt->u.atomic.lo_pad = (flags & 0x2) ? H5T_PAD_ONE : H5T_PAD_ZERO;
-      dt->u.atomic.hi_pad = (flags & 0x4) ? H5T_PAD_ONE : H5T_PAD_ZERO;
+      dt->u.atomic.lsb_pad = (flags & 0x2) ? H5T_PAD_ONE : H5T_PAD_ZERO;
+      dt->u.atomic.msb_pad = (flags & 0x4) ? H5T_PAD_ONE : H5T_PAD_ZERO;
       dt->u.atomic.u.i.sign = (flags & 0x8) ? H5T_SGN_2 : H5T_SGN_NONE;
       UINT16DECODE (*pp, dt->u.atomic.offset);
       UINT16DECODE (*pp, dt->u.atomic.prec);
@@ -107,8 +107,8 @@ H5O_dtype_decode_helper (const uint8 **pp, H5T_t *dt)
        * Floating-point types...
        */
       dt->u.atomic.order = (flags & 0x1) ? H5T_ORDER_BE : H5T_ORDER_LE;
-      dt->u.atomic.lo_pad = (flags & 0x2) ? H5T_PAD_ONE : H5T_PAD_ZERO;
-      dt->u.atomic.hi_pad = (flags & 0x4) ? H5T_PAD_ONE : H5T_PAD_ZERO;
+      dt->u.atomic.lsb_pad = (flags & 0x2) ? H5T_PAD_ONE : H5T_PAD_ZERO;
+      dt->u.atomic.msb_pad = (flags & 0x4) ? H5T_PAD_ONE : H5T_PAD_ZERO;
       dt->u.atomic.u.f.pad = (flags & 0x8) ? H5T_PAD_ONE : H5T_PAD_ZERO;
       switch ((flags>>4) & 0x03) {
       case 0:
@@ -232,7 +232,7 @@ H5O_dtype_encode_helper (uint8 **pp, const H5T_t *dt)
 			"byte order is not supported in file format yet");
       }
 
-      switch (dt->u.atomic.lo_pad) {
+      switch (dt->u.atomic.lsb_pad) {
       case H5T_PAD_ZERO:
 	 break; /*nothing*/
       case H5T_PAD_ONE:
@@ -243,7 +243,7 @@ H5O_dtype_encode_helper (uint8 **pp, const H5T_t *dt)
 			"bit padding is not supported in file format yet");
       }
       
-      switch (dt->u.atomic.hi_pad) {
+      switch (dt->u.atomic.msb_pad) {
       case H5T_PAD_ZERO:
 	 break; /*nothing*/
       case H5T_PAD_ONE:
@@ -284,7 +284,7 @@ H5O_dtype_encode_helper (uint8 **pp, const H5T_t *dt)
 			"byte order is not supported in file format yet");
       }
 
-      switch (dt->u.atomic.lo_pad) {
+      switch (dt->u.atomic.lsb_pad) {
       case H5T_PAD_ZERO:
 	 break; /*nothing*/
       case H5T_PAD_ONE:
@@ -295,7 +295,7 @@ H5O_dtype_encode_helper (uint8 **pp, const H5T_t *dt)
 			"bit padding is not supported in file format yet");
       }
       
-      switch (dt->u.atomic.hi_pad) {
+      switch (dt->u.atomic.msb_pad) {
       case H5T_PAD_ZERO:
 	 break; /*nothing*/
       case H5T_PAD_ONE:
@@ -739,7 +739,7 @@ H5O_dtype_debug (H5F_t *f, const void *mesg, FILE *stream,
 	       (unsigned long)(dt->u.atomic.offset),
 	       1==dt->u.atomic.offset?"":"s");
 
-      switch (dt->u.atomic.lo_pad) {
+      switch (dt->u.atomic.lsb_pad) {
       case H5T_PAD_ZERO:
 	 s = "zero";
 	 break;
@@ -747,18 +747,13 @@ H5O_dtype_debug (H5F_t *f, const void *mesg, FILE *stream,
 	 s = "one";
 	 break;
       default:
-	 if (dt->u.atomic.lo_pad<0) {
-	    sprintf (buf, "H5T_PAD_%d", -(dt->u.atomic.lo_pad));
-	 } else {
-	    sprintf (buf, "bit-%d", dt->u.atomic.lo_pad);
-	 }
-	 s = buf;
+	 s = "pad?";
 	 break;
       }
       fprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
 	       "Low pad type:", s);
 
-      switch (dt->u.atomic.hi_pad) {
+      switch (dt->u.atomic.msb_pad) {
       case H5T_PAD_ZERO:
 	 s = "zero";
 	 break;
@@ -766,12 +761,7 @@ H5O_dtype_debug (H5F_t *f, const void *mesg, FILE *stream,
 	 s = "one";
 	 break;
       default:
-	 if (dt->u.atomic.hi_pad<0) {
-	    sprintf (buf, "H5T_PAD_%d", -(dt->u.atomic.hi_pad));
-	 } else {
-	    sprintf (buf, "bit-%d", dt->u.atomic.hi_pad);
-	 }
-	 s = buf;
+	 s = "pad?";
 	 break;
       }
       fprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,

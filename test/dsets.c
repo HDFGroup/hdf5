@@ -22,6 +22,7 @@
 #define DSET_DEFAULT_NAME	"default"
 #define DSET_CHUNKED_NAME	"chunked"
 #define DSET_SIMPLE_IO_NAME	"simple_io"
+#define DSET_TCONV_NAME		"tconv"
 
 
 /*-------------------------------------------------------------------------
@@ -277,6 +278,89 @@ test_simple_io (hid_t file)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_tconv
+ *
+ * Purpose:	Test some simple data type conversion stuff.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, January 14, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_tconv (hid_t file)
+{
+   uint8	out[4*1000000];
+   uint8	in[4*1000000];
+   intn		i;
+   size_t	dims[1];
+   hid_t	space, dataset, type;
+   herr_t	status;
+   
+   printf ("%-70s", "Testing data type conversion");
+
+   /* Initialize the dataset */
+   for (i=0; i<1000000; i++) ((int32*)out)[i] = 0x11223344;
+
+   /* Create the data space */
+   space = H5Pcreate (H5P_SIMPLE);
+   assert (space>=0);
+   dims[0] = 1000000;
+   status = H5Pset_space (space, 1, dims);
+   assert (status>=0);
+
+   /* Create the data set */
+   dataset = H5Dcreate (file, DSET_TCONV_NAME, H5T_NATIVE_INT32, space,
+			H5C_DEFAULT);
+   assert (dataset>=0);
+
+   /* Write the data to the dataset */
+   status = H5Dwrite (dataset, H5T_NATIVE_INT32, H5P_ALL, H5C_DEFAULT, out);
+   assert (status>=0);
+
+   /* Create a new type with the opposite byte order */
+   type = H5Tcopy (H5T_NATIVE_INT32);
+   switch (H5Tget_order (type)) {
+   case H5T_ORDER_BE:
+      H5Tset_order (type, H5T_ORDER_LE);
+      break;
+   case H5T_ORDER_LE:
+      H5Tset_order (type, H5T_ORDER_BE);
+      break;
+   default:
+      assert ("funny byte order" && 0);
+      break;
+   }
+
+   /* Read data with byte order conversion */
+   status = H5Dread (dataset, type, H5P_ALL, H5C_DEFAULT, in);
+   assert (status>=0);
+
+   /* Check */
+   for (i=0; i<1000000; i++) {
+      assert (in[4*i+0] == out[4*i+3]);
+      assert (in[4*i+1] == out[4*i+2]);
+      assert (in[4*i+2] == out[4*i+1]);
+      assert (in[4*i+3] == out[4*i+0]);
+   }
+
+   H5Dclose (dataset);
+   H5Tclose (type);
+
+   puts (" PASSED");
+   return SUCCEED;
+}
+
+   
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Tests the dataset interface (H5D)
@@ -308,6 +392,9 @@ main (void)
    nerrors += status<0 ? 1 : 0;
 
    status = test_simple_io (file);
+   nerrors += status<0 ? 1 : 0;
+
+   status = test_tconv (file);
    nerrors += status<0 ? 1 : 0;
 
    status = H5Fclose (file);

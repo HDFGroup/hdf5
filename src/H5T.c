@@ -33,6 +33,44 @@ static intn interface_initialize_g = FALSE;
 #define INTERFACE_INIT H5T_init_interface
 static void H5T_term_interface (void);
 
+/* Predefined types */
+hid_t H5T_NATIVE_CHAR_g		= FAIL;
+hid_t H5T_NATIVE_UCHAR_g	= FAIL;
+hid_t H5T_NATIVE_SHORT_g	= FAIL;
+hid_t H5T_NATIVE_USHORT_g	= FAIL;
+hid_t H5T_NATIVE_INT_g		= FAIL;
+hid_t H5T_NATIVE_UINT_g		= FAIL;
+hid_t H5T_NATIVE_LONG_g		= FAIL;
+hid_t H5T_NATIVE_LLONG_g	= FAIL;
+hid_t H5T_NATIVE_ULLONG_g	= FAIL;
+hid_t H5T_NATIVE_HYPER_g	= FAIL;
+hid_t H5T_NATIVE_UHYPER_g	= FAIL;
+hid_t H5T_NATIVE_INT8_g		= FAIL;
+hid_t H5T_NATIVE_UINT8_g	= FAIL;
+hid_t H5T_NATIVE_INT16_g	= FAIL;
+hid_t H5T_NATIVE_UINT16_g	= FAIL;
+hid_t H5T_NATIVE_INT32_g	= FAIL;
+hid_t H5T_NATIVE_UINT32_g	= FAIL;
+hid_t H5T_NATIVE_INT64_g	= FAIL;
+hid_t H5T_NATIVE_UINT64_g	= FAIL;
+hid_t H5T_NATIVE_ULONG_g	= FAIL;
+hid_t H5T_NATIVE_FLOAT_g	= FAIL;
+hid_t H5T_NATIVE_DOUBLE_g	= FAIL;
+hid_t H5T_NATIVE_TIME_g		= FAIL;
+hid_t H5T_NATIVE_STRING_g	= FAIL;
+hid_t H5T_NATIVE_BITFIELD_g	= FAIL;
+hid_t H5T_NATIVE_OPAQUE_g	= FAIL;
+
+/* The path database */
+static intn		H5T_npath_g	= 0;	/*num paths defined	*/
+static intn		H5T_apath_g	= 0;	/*num slots allocated	*/
+static H5T_path_t	*H5T_path_g	= NULL;	/*path array		*/
+
+/* The soft conversion function master list */
+static intn		H5T_nsoft_g	= 0;	/*num soft funcs defined*/
+static intn		H5T_asoft_g	= 0;	/*num slots allocated	*/
+static H5T_soft_t	*H5T_soft_g	= NULL;	/*master soft list	*/
+
 /*--------------------------------------------------------------------------
 NAME
    H5T_init_interface -- Initialize interface-specific information
@@ -48,7 +86,10 @@ DESCRIPTION
 herr_t
 H5T_init_interface (void)
 {
-   herr_t ret_value = SUCCEED;
+   H5T_t	*dt = NULL;
+   herr_t 	ret_value = SUCCEED;
+
+   interface_initialize_g = TRUE;
    FUNC_ENTER (H5T_init_interface, FAIL);
 
    /* Initialize the atom group for the file IDs */
@@ -58,8 +99,153 @@ H5T_init_interface (void)
       ret_value=H5_add_exit (&H5T_term_interface);
    }
 
-   /* Initialize pre-defined data types */
+   /*
+    * Initialize pre-defined data types that depend on the architecture.
+    */
    ret_value = H5T_init ();
+
+   /*
+    * Initialize pre-define data types that can be derived from
+    * architecture-dependent types.
+    */
+
+   /* INT8 */
+   H5T_NATIVE_INT8_g = H5Tcopy (H5T_NATIVE_INT_g);
+   H5Tset_size (H5T_NATIVE_INT8_g, 1);
+   H5Tset_precision (H5T_NATIVE_INT8_g, 8);
+   H5Tlock (H5T_NATIVE_INT8_g);
+   
+   /* UINT8 */
+   H5T_NATIVE_UINT8_g = H5Tcopy (H5T_NATIVE_UINT_g);
+   H5Tset_size (H5T_NATIVE_UINT8_g, 1);
+   H5Tset_precision (H5T_NATIVE_UINT8_g, 8);
+   H5Tlock (H5T_NATIVE_UINT8_g);
+
+   /* INT16 */
+   H5T_NATIVE_INT16_g = H5Tcopy (H5T_NATIVE_INT_g);
+   H5Tset_size (H5T_NATIVE_INT16_g, 2);
+   H5Tset_precision (H5T_NATIVE_INT16_g, 16);
+   H5Tlock (H5T_NATIVE_INT16_g);
+   
+   /* UINT16 */
+   H5T_NATIVE_UINT16_g = H5Tcopy (H5T_NATIVE_UINT_g);
+   H5Tset_size (H5T_NATIVE_UINT16_g, 2);
+   H5Tset_precision (H5T_NATIVE_UINT16_g, 16);
+   H5Tlock (H5T_NATIVE_UINT16_g);
+   
+   /* INT32 */
+   H5T_NATIVE_INT32_g = H5Tcopy (H5T_NATIVE_INT_g);
+   H5Tset_size (H5T_NATIVE_INT32_g, 4);
+   H5Tset_precision (H5T_NATIVE_INT32_g, 32);
+   H5Tlock (H5T_NATIVE_INT32_g);
+   
+   /* UINT32 */
+   H5T_NATIVE_UINT32_g = H5Tcopy (H5T_NATIVE_UINT_g);
+   H5Tset_size (H5T_NATIVE_UINT32_g, 4);
+   H5Tset_precision (H5T_NATIVE_UINT32_g, 32);
+   H5Tlock (H5T_NATIVE_UINT32_g);
+   
+   /* INT64 */
+   H5T_NATIVE_INT64_g = H5Tcopy (H5T_NATIVE_INT_g);
+   H5Tset_size (H5T_NATIVE_INT64_g, 8);
+   H5Tset_precision (H5T_NATIVE_INT64_g, 64);
+   H5Tlock (H5T_NATIVE_INT64_g);
+   
+   /* UINT64 */
+   H5T_NATIVE_UINT64_g = H5Tcopy (H5T_NATIVE_UINT_g);
+   H5Tset_size (H5T_NATIVE_UINT64_g, 8);
+   H5Tset_precision (H5T_NATIVE_UINT64_g, 64);
+   H5Tlock (H5T_NATIVE_UINT64_g);
+   
+
+   /*
+    * Initialize pre-defined data types that don't depend on architecture.
+    */
+
+   /* TIME */
+   dt = H5MM_xcalloc (1, sizeof(H5T_t));
+   dt->locked = TRUE;
+   dt->type = H5T_TIME;
+   dt->size = 1;
+   dt->u.atomic.order = H5Tget_order (H5T_NATIVE_INT_g);
+   dt->u.atomic.offset = 0;
+   dt->u.atomic.prec = 8*dt->size;
+   dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+   dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+   if ((H5T_NATIVE_TIME_g = H5Aregister_atom (H5_DATATYPE, dt))<0) {
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		     "can't initialize H5T layer");
+   }
+
+   /* STRING */
+   dt = H5MM_xcalloc (1, sizeof(H5T_t));
+   dt->locked = TRUE;
+   dt->type = H5T_STRING;
+   dt->size = 1;
+   dt->u.atomic.order = H5T_ORDER_NONE;
+   dt->u.atomic.offset = 0;
+   dt->u.atomic.prec = 8*dt->size;
+   dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+   dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+   dt->u.atomic.u.s.cset = H5T_CSET_ASCII;
+   dt->u.atomic.u.s.pad = H5T_STR_NULL;
+   if ((H5T_NATIVE_STRING_g = H5Aregister_atom (H5_DATATYPE, dt))<0) {
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		     "can't initialize H5T layer");
+   }
+
+   /* BITFIELD */
+   dt = H5MM_xcalloc (1, sizeof(H5T_t));
+   dt->locked = TRUE;
+   dt->type = H5T_BITFIELD;
+   dt->size = 1;
+   dt->u.atomic.order = H5Tget_order (H5T_NATIVE_INT_g);
+   dt->u.atomic.offset = 0;
+   dt->u.atomic.prec = 8*dt->size;
+   dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+   dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+   if ((H5T_NATIVE_BITFIELD_g = H5Aregister_atom (H5_DATATYPE, dt))<0) {
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		     "unable to initialize H5T layer");
+   }
+
+   /* OPAQUE */
+   dt = H5MM_xcalloc (1, sizeof(H5T_t));
+   dt->locked = TRUE;
+   dt->type = H5T_OPAQUE;
+   dt->size = 1;
+   dt->u.atomic.order = H5T_ORDER_NONE;
+   dt->u.atomic.offset = 0;
+   dt->u.atomic.prec = 8*dt->size;
+   dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+   dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+   if ((H5T_NATIVE_OPAQUE_g = H5Aregister_atom (H5_DATATYPE, dt))<0) {
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		     "unable to initialize H5T layer");
+   }
+
+   /*
+    * Define aliases.
+    */
+   H5T_NATIVE_HYPER_g = H5Tcopy (H5T_NATIVE_LLONG_g);
+   H5Tlock (H5T_NATIVE_HYPER_g);
+
+   H5T_NATIVE_UHYPER_g = H5Tcopy (H5T_NATIVE_ULLONG_g);
+   H5Tlock (H5T_NATIVE_UHYPER_g);
+
+   /*
+    * Register conversion functions beginning with the most general and
+    * ending with the most specific.
+    */
+   
+   if (H5Tregister_soft (H5T_INTEGER, H5T_INTEGER, H5T_conv_order)<0) {
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		     "unable to register conversion function");
+   }
+   if (H5Tregister_soft (H5T_FLOAT, H5T_FLOAT, H5T_conv_order)<0) {
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		     "unable to register conversion function");
+   }
    
    FUNC_LEAVE (ret_value);
 }
@@ -272,6 +458,45 @@ H5Tequal (hid_t type1_id, hid_t type2_id)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Tlock
+ *
+ * Purpose:	Locks a type, making it read only and non-destructable.  This
+ *		is normally done by the library for predefined data types so
+ *		the application doesn't inadvertently change or delete a
+ *		predefined type.
+ *
+ * 		Once a data type is locked it can never be unlocked.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tlock (hid_t type_id)
+{
+   H5T_t	*dt = NULL;
+   
+   FUNC_ENTER (H5Tlock, FAIL);
+
+   /* Check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+   }
+
+   dt->locked = TRUE;
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Tget_class
  *
  * Purpose:	Returns the data type class identifier for data type TYPE_ID.
@@ -358,6 +583,9 @@ H5Tget_size (hid_t type_id)
  *		hang over the edge of the new size, then the number of
  *		significant bits is decreased.
  *
+ *		Adjusting the size of an H5T_STRING automatically sets the
+ *		precision to 8*size.
+ *
  * 		All data types have a positive size.
  *
  * Return:	Success:	SUCCEED
@@ -405,11 +633,15 @@ H5Tset_size (hid_t type_id, size_t size)
    switch (dt->type) {
    case H5T_INTEGER:
    case H5T_TIME:
-   case H5T_STRING:
    case H5T_BITFIELD:
       /* nothing to check */
       break;
       
+   case H5T_STRING:
+      prec = 8*size;
+      offset = 0;
+      break;
+
    case H5T_FLOAT:
       /*
        * The sign, mantissa, and exponent fields should be adjusted first
@@ -585,6 +817,9 @@ H5Tget_precision (hid_t type_id)
  *		and then the size is increased to insure that significant
  *		bits do not "hang over" the edge of the data type.
  *
+ *		Changing the precision of an H5T_STRING automatically changes
+ *		the size as well.  The precision must be a multiple of 8.
+ *
  *		When decreasing the precision of a floating point type, set
  *		the locations and sizes of the sign, mantissa, and exponent
  *		fields first.
@@ -634,12 +869,20 @@ H5Tset_precision (hid_t type_id, size_t prec)
    switch (dt->type) {
    case H5T_INTEGER:
    case H5T_TIME:
-   case H5T_STRING:
    case H5T_BITFIELD:
    case H5T_OPAQUE:
       /* nothing to check */
       break;
       
+   case H5T_STRING:
+      if (prec % 8) {
+	 HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+			"precision for this type must be a multiple of 8");
+      }
+      offset = 0;
+      size = prec / 8;
+      break;
+
    case H5T_FLOAT:
       /*
        * The sign, mantissa, and exponent fields should be adjusted first
@@ -746,6 +989,8 @@ H5Tget_offset (hid_t type_id)
  *		incremented also if necessary to prevent significant bits of
  *		the value from hanging over the edge of the data type.
  *
+ *		The offset of an H5T_STRING cannot be set to anything but
+ *		zero. 
  *
  * Return:	Success:	SUCCEED
  *
@@ -761,7 +1006,6 @@ H5Tget_offset (hid_t type_id)
 herr_t
 H5Tset_offset (hid_t type_id, size_t offset)
 {
-
    H5T_t	*dt = NULL;
 
    FUNC_ENTER (H5Tset_offset, FAIL);
@@ -776,9 +1020,9 @@ H5Tset_offset (hid_t type_id, size_t offset)
    if (dt->locked) {
       HRETURN_ERROR (H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
    }
-   if (offset<=0) {
+   if (H5T_STRING==dt->type && offset!=0) {
       HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		     "precision must be positive");
+		     "offset must be zero for this type");
    }
 
    /* Adjust the size */
@@ -792,6 +1036,91 @@ H5Tset_offset (hid_t type_id, size_t offset)
    FUNC_LEAVE (SUCCEED);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tget_pad
+ *
+ * Purpose:	Gets the least significant pad type and the most significant
+ *		pad type and returns their values through the LSB and MSB
+ *		arguments, either of which may be the null pointer.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tget_pad (hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
+{
+   H5T_t	*dt = NULL;
+
+   FUNC_ENTER (H5Tget_pad, FAIL);
+   H5ECLEAR;
+
+   /* Check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id)) ||
+       !H5T_is_atomic (dt)) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
+   }
+
+   /* Get values */
+   if (lsb) *lsb = dt->u.atomic.lsb_pad;
+   if (msb) *msb = dt->u.atomic.msb_pad;
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tset_pad
+ *
+ * Purpose:	Sets the LSB and MSB pad types.
+ *
+ * Return:	Success:	
+ *
+ *		Failure:	
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tset_pad (hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
+{
+   H5T_t	*dt = NULL;
+
+   FUNC_ENTER (H5Tset_pad, FAIL);
+   H5ECLEAR;
+
+   /* Check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id)) ||
+       !H5T_is_atomic (dt)) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
+   }
+   if (dt->locked) {
+      HRETURN_ERROR (H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+   }
+   if (lsb<0 || lsb>=H5T_NPAD || msb<0 || msb>=H5T_NPAD) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pad type");
+   }
+
+   dt->u.atomic.lsb_pad = lsb;
+   dt->u.atomic.msb_pad = msb;
+
+   FUNC_LEAVE (SUCCEED);
+}
+   
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_sign
@@ -866,7 +1195,7 @@ H5Tset_sign (hid_t type_id, H5T_sign_t sign)
    if (dt->locked) {
       HRETURN_ERROR (H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
    }
-   if (sign<0 || sign>=H5T_SGN_N) {
+   if (sign<0 || sign>=H5T_NSGN) {
       HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "illegal sign type");
    }
    
@@ -1173,6 +1502,274 @@ H5Tset_norm (hid_t type_id, H5T_norm_t norm)
    FUNC_LEAVE (SUCCEED);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tget_inpad
+ *
+ * Purpose:	If any internal bits of a floating point type are unused
+ *		(that is, those significant bits which are not part of the
+ *		sign, exponent, or mantissa) then they will be filled
+ *		according to the value of this property.
+ *
+ * Return:	Success:	The internal padding type.
+ *
+ *		Failure:	H5T_PAD_ERROR (-1, same as FAIL)
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_pad_t
+H5Tget_inpad (hid_t type_id)
+{
+   H5T_t	*dt = NULL;
+   H5T_pad_t	pad;
+   
+   FUNC_ENTER (H5Tget_inpad, H5T_PAD_ERROR);
+   H5ECLEAR;
+
+   /* Check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id)) ||
+       H5T_FLOAT!=dt->type) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, H5T_PAD_ERROR,
+		     "not a floating-point data type");
+   }
+
+   /* pad */
+   pad = dt->u.atomic.u.f.pad;
+
+   FUNC_LEAVE (pad);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tset_inpad
+ *
+ * Purpose:	If any internal bits of a floating point type are unused
+ *		(that is, those significant bits which are not part of the
+ *		sign, exponent, or mantissa) then they will be filled
+ *		according to the value of this property.
+ *
+ * Return:	Success:	
+ *
+ *		Failure:	
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tset_inpad (hid_t type_id, H5T_pad_t pad)
+{
+   H5T_t	*dt = NULL;
+
+   FUNC_ENTER (H5Tset_inpad, FAIL);
+   H5ECLEAR;
+
+   /* Check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id)) ||
+       H5T_FLOAT!=dt->type) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		     "not a floating-point data type");
+   }
+   if (dt->locked) {
+      HRETURN_ERROR (H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+   }
+   if (pad<0 || pad>=H5T_NPAD) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		     "illegal internal pad type");
+   }
+   
+   /* pad */
+   dt->u.atomic.u.f.pad = pad;
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tget_cset
+ *
+ * Purpose:	HDF5 is able to distinguish between character sets of
+ *		different nationalities and to convert between them to the
+ *		extent possible.
+ *		
+ * Return:	Success:	The character set of an H5T_STRING type.
+ *
+ *		Failure:	H5T_CSET_ERROR (-1, same as FAIL)
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_cset_t
+H5Tget_cset (hid_t type_id)
+{
+   H5T_t	*dt = NULL;
+   H5T_cset_t	cset;
+   
+   FUNC_ENTER (H5Tget_cset, H5T_CSET_ERROR);
+   H5ECLEAR;
+
+   /* Check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id)) ||
+       H5T_STRING!=dt->type) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, H5T_CSET_ERROR,
+		     "not a string data type");
+   }
+
+   /* result */
+   cset = dt->u.atomic.u.s.cset;
+
+   FUNC_LEAVE (cset);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tset_cset
+ *
+ * Purpose:	HDF5 is able to distinguish between character sets of
+ *		different nationalities and to convert between them to the
+ *		extent possible.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tset_cset (hid_t type_id, H5T_cset_t cset)
+{
+   H5T_t	*dt = NULL;
+
+   FUNC_ENTER (H5Tset_cset, FAIL);
+   H5ECLEAR;
+
+   /* Check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id)) ||
+       H5T_STRING!=dt->type) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a string data type");
+   }
+   if (dt->locked) {
+      HRETURN_ERROR (H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+   }
+   if (cset<0 || cset>=H5T_NCSET) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		     "illegal character set type");
+   }
+   
+   /* set */
+   dt->u.atomic.u.s.cset = cset;
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tget_strpad
+ *
+ * Purpose:	The method used to store character strings differs with the
+ *		programming language: C usually null terminates strings while
+ *		Fortran left-justifies and space-pads strings.  This property
+ *		defines the storage mechanism for the string.
+ *		
+ * Return:	Success:	The character set of an H5T_STRING type.
+ *
+ *		Failure:	H5T_STR_ERROR (-1, same as FAIL)
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_str_t
+H5Tget_strpad (hid_t type_id)
+{
+   H5T_t	*dt = NULL;
+   H5T_str_t	strpad;
+   
+   FUNC_ENTER (H5Tget_strpad, H5T_STR_ERROR);
+   H5ECLEAR;
+
+   /* Check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id)) ||
+       H5T_STRING!=dt->type) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, H5T_STR_ERROR,
+		     "not a string data type");
+   }
+
+   /* result */
+   strpad = dt->u.atomic.u.s.pad;
+
+   FUNC_LEAVE (strpad);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tset_strpad
+ *
+ * Purpose:	The method used to store character strings differs with the
+ *		programming language: C usually null terminates strings while
+ *		Fortran left-justifies and space-pads strings.  This property
+ *		defines the storage mechanism for the string.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tset_strpad (hid_t type_id, H5T_str_t strpad)
+{
+   H5T_t	*dt = NULL;
+
+   FUNC_ENTER (H5Tset_strpad, FAIL);
+   H5ECLEAR;
+
+   /* Check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id)) ||
+       H5T_STRING!=dt->type) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a string data type");
+   }
+   if (dt->locked) {
+      HRETURN_ERROR (H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
+   }
+   if (strpad<0 || strpad>=H5T_NSTR) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "illegal string pad type");
+   }
+   
+   /* set */
+   dt->u.atomic.u.s.pad = strpad;
+   FUNC_LEAVE (SUCCEED);
+}
+   
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_nmembers
@@ -1510,7 +2107,264 @@ H5Tpack (hid_t type_id)
    FUNC_LEAVE (SUCCEED);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tregister_hard
+ *
+ * Purpose:	Register a hard conversion function for a data type
+ *		conversion path.  The path is specified by the source and
+ *		destination data types SRC_ID and DST_ID.  A conversion path
+ *		can only have one hard function, so FUNC replaces any
+ *		previous hard function.
+ *
+ *		If FUNC is the null pointer then any hard function registered
+ *		for this path is removed from this path.  The soft functions
+ *		are then used when determining which conversion function is
+ *		appropriate for this path.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, January  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tregister_hard (hid_t src_id, hid_t dst_id, H5T_conv_t func)
+{
+   H5T_t	*src = NULL;
+   H5T_t	*dst = NULL;
+   H5T_path_t	*path = NULL;
    
+   FUNC_ENTER (H5Tregister_hard, FAIL);
+
+   /* Check args */
+   if (H5_DATATYPE!=H5Aatom_group (src_id) ||
+       NULL==(src=H5Aatom_object (src_id)) ||
+       H5_DATATYPE!=H5Aatom_group (dst_id) ||
+       NULL==(dst=H5Aatom_object (dst_id))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+   }
+
+   /* Locate or create a new conversion path */
+   if (NULL==(path=H5T_path_find (src, dst, TRUE))) {
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		     "unable to locate/allocate conversion path");
+   }
+
+   /* Initialize the hard function */
+   path->hard = func;
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tregister_soft
+ *
+ * Purpose:	Registers a soft conversion function by adding it to the end
+ *		of the master soft list and replacing the soft function in
+ *		all applicable existing conversion paths.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, January 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tregister_soft (H5T_class_t src_cls, H5T_class_t dst_cls, H5T_conv_t func)
+{
+   intn		i;
+   hid_t	src_id, dst_id;
+   
+   FUNC_ENTER (H5Tregister_soft, FAIL);
+
+   /* Check args */
+   if (src_cls<0 || src_cls>=H5T_NCLASSES ||
+       dst_cls<0 || dst_cls>=H5T_NCLASSES) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		     "illegal source or destination data type class");
+   }
+   if (!func) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		     "no soft conversion function specified");
+   }
+   
+   /* Add function to end of master list */
+   if (H5T_nsoft_g>=H5T_asoft_g) {
+      H5T_asoft_g = MAX (32, 2*H5T_asoft_g);
+      H5T_soft_g = H5MM_xrealloc (H5T_soft_g, H5T_asoft_g*sizeof(H5T_soft_t));
+   }
+   H5T_soft_g[H5T_nsoft_g].src = src_cls;
+   H5T_soft_g[H5T_nsoft_g].dst = dst_cls;
+   H5T_soft_g[H5T_nsoft_g].func = func;
+   H5T_nsoft_g++;
+
+   /* Replace soft functions of all appropriate paths */
+   for (i=0; i<H5T_npath_g; i++) {
+      H5T_path_t *path = H5T_path_g + i;
+
+      /*
+       * Type conversion functions are app-level, so we need to convert the
+       * data type temporarily to an object id before we query the functions
+       * capabilities.
+       */
+      if (path->src->type!=src_cls || path->dst->type!=dst_cls) continue;
+      if ((src_id = H5Aregister_atom (H5_DATATYPE, H5T_copy (path->src)))<0 ||
+	  (dst_id = H5Aregister_atom (H5_DATATYPE, H5T_copy (path->dst)))<0) {
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+			"unable to register data types for conv query");
+      }
+      if ((func)(src_id, dst_id, 0, NULL, NULL)>=0) {
+	 path->soft = func;
+      }
+      H5A_dec_ref (src_id);
+      H5A_dec_ref (dst_id);
+      H5ECLEAR;
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tunregister
+ *
+ * Purpose:	Removes FUNC from all conversion paths.  If FUNC is
+ *		registered as the soft conversion function of a path then it
+ *		is replaced with some other soft conversion function from the
+ *		master soft list if one applies.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, January 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tunregister (H5T_conv_t func)
+{
+   intn		i, j;
+   H5T_path_t	*path = NULL;
+   hid_t	src_id, dst_id;
+
+   FUNC_ENTER (H5Tunregister, FAIL);
+
+   /* Check args */
+   if (!func) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no conversion function");
+   }
+
+   /* Remove function from master soft list */
+   for (i=H5T_nsoft_g-1; i>=0; --i) {
+      if (H5T_soft_g[i].func==func) {
+	 HDmemmove (H5T_soft_g+i, H5T_soft_g+i+1,
+		    (H5T_nsoft_g-(i+1))*sizeof(H5T_soft_t));
+	 --H5T_nsoft_g;
+      }
+   }
+   
+   /* Remove function from all conversion paths */
+   for (i=0; i<H5T_npath_g; i++) {
+      path = H5T_path_g + i;
+
+      /* Reset hard function */
+      if (path->hard==func) {
+	 path->hard = NULL;
+      }
+
+      /* Reset soft function */
+      if (path->soft==func) {
+	 path->soft = NULL;
+	 for (j=H5T_nsoft_g-1; j>=0 && !path->soft; --j) {
+	    if (path->src->type!=H5T_soft_g[j].src ||
+		path->dst->type!=H5T_soft_g[j].dst) {
+	       continue;
+	    }
+
+	    /*
+	     * Conversion functions are app-level, so temporarily create
+	     * object id's for the data types.
+	     */
+	    if ((src_id=H5Aregister_atom (H5_DATATYPE,
+					  H5T_copy (path->src)))<0 ||
+		(dst_id=H5Aregister_atom (H5_DATATYPE,
+					  H5T_copy (path->dst)))<0) {
+	       HRETURN_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+			      "unable to register conv types for query");
+	    }
+	    if ((H5T_soft_g[j].func)(src_id, dst_id, 0, NULL, NULL)>=0) {
+	       path->soft = H5T_soft_g[j].func;
+	    }
+	    H5A_dec_ref (src_id);
+	    H5A_dec_ref (dst_id);
+	    H5ECLEAR;
+	 }
+      }
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tfind
+ *
+ * Purpose:	Finds a conversion function that can handle a conversion from
+ *		type SRC_ID to type DST_ID.
+ *
+ * Return:	Success:	A pointer to a suitable conversion function.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, January 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_conv_t
+H5Tfind (hid_t src_id, hid_t dst_id)
+{
+   H5T_conv_t	ret_value = NULL;
+   H5T_t	*src=NULL, *dst=NULL;
+   
+   FUNC_ENTER (H5Tfind, NULL);
+
+   /* Check args */
+   if (H5_DATATYPE!=H5Aatom_group (src_id) ||
+       NULL==(src=H5Aatom_object (src_id)) ||
+       H5_DATATYPE!=H5Aatom_group (dst_id) ||
+       NULL==(dst=H5Aatom_object (dst_id))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+   }
+
+   /* Find it */
+   if (NULL==(ret_value = H5T_find (src, dst))) {
+      HRETURN_ERROR (H5E_DATATYPE, H5E_NOTFOUND, NULL,
+		     "conversion function not found");
+   }
+
+   FUNC_LEAVE (ret_value);
+}
+
+
+
 
 
 /*-------------------------------------------------------------------------
@@ -1553,28 +2407,13 @@ H5T_create (H5T_class_t type, size_t size)
 
    switch (type) {
    case H5T_INTEGER:
-      /* Default type is a native `int' */
-      if (NULL==(dt=H5T_copy (H5Aatom_object (H5T_NATIVE_INT)))) {
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL,
-			"can't derive type from native int");
-      }
-      break;
-
    case H5T_FLOAT:
-      /* Default type is a native `double' */
-      if (NULL==(dt=H5T_copy (H5Aatom_object (H5T_NATIVE_DOUBLE)))) {
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL,
-			"can't derive type from native double");
-      }
-      break;
-
    case H5T_TIME:
    case H5T_STRING:
    case H5T_BITFIELD:
    case H5T_OPAQUE:
-      assert ("not implemented yet" && 0);
       HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, NULL,
-		     "not implemented yet");
+		     "type class is not appropriate - use H5Tcopy()");
 
    case H5T_COMPOUND:
       dt = H5MM_xcalloc (1, sizeof(H5T_t));
@@ -2057,11 +2896,11 @@ H5T_cmp (const H5T_t *dt1, const H5T_t *dt2)
       if (dt1->u.atomic.offset < dt2->u.atomic.offset) HGOTO_DONE (-1);
       if (dt1->u.atomic.offset > dt2->u.atomic.offset) HGOTO_DONE (1);
       
-      if (dt1->u.atomic.lo_pad < dt2->u.atomic.lo_pad) HGOTO_DONE (-1);
-      if (dt1->u.atomic.lo_pad > dt2->u.atomic.lo_pad) HGOTO_DONE (1);
+      if (dt1->u.atomic.lsb_pad < dt2->u.atomic.lsb_pad) HGOTO_DONE (-1);
+      if (dt1->u.atomic.lsb_pad > dt2->u.atomic.lsb_pad) HGOTO_DONE (1);
       
-      if (dt1->u.atomic.hi_pad < dt2->u.atomic.hi_pad) HGOTO_DONE (-1);
-      if (dt1->u.atomic.hi_pad > dt2->u.atomic.hi_pad) HGOTO_DONE (1);
+      if (dt1->u.atomic.msb_pad < dt2->u.atomic.msb_pad) HGOTO_DONE (-1);
+      if (dt1->u.atomic.msb_pad > dt2->u.atomic.msb_pad) HGOTO_DONE (1);
 
       switch (dt1->type) {
       case H5T_INTEGER:
@@ -2110,8 +2949,8 @@ H5T_cmp (const H5T_t *dt1, const H5T_t *dt2)
 	 if (dt1->u.atomic.u.s.cset < dt1->u.atomic.u.s.cset) HGOTO_DONE (-1);
 	 if (dt1->u.atomic.u.s.cset > dt1->u.atomic.u.s.cset) HGOTO_DONE (1);
 	 
-	 if (dt1->u.atomic.u.s.spad < dt1->u.atomic.u.s.spad) HGOTO_DONE (-1);
-	 if (dt1->u.atomic.u.s.spad > dt1->u.atomic.u.s.spad) HGOTO_DONE (1);
+	 if (dt1->u.atomic.u.s.pad < dt1->u.atomic.u.s.pad) HGOTO_DONE (-1);
+	 if (dt1->u.atomic.u.s.pad > dt1->u.atomic.u.s.pad) HGOTO_DONE (1);
 
 	 break;
 	 
@@ -2134,7 +2973,152 @@ H5T_cmp (const H5T_t *dt1, const H5T_t *dt2)
 
    FUNC_LEAVE (ret_value);
 }
-      
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_find
+ *
+ * Purpose:	Finds a conversion function for the specified path.
+ *
+ * Return:	Success:	A pointer to an appropriate conversion
+ *				function.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, January 14, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_conv_t
+H5T_find (const H5T_t *src, const H5T_t *dst)
+{
+   H5T_path_t	*path = NULL;
+   H5T_conv_t	ret_value = NULL;
+   
+   FUNC_ENTER (H5T_find, NULL);
+
+   /* Check args */
+   assert (src);
+   assert (dst);
+
+   /* No-op case */
+   if (0==H5T_cmp (src, dst)) HRETURN (H5T_conv_noop);
+
+   /* Find it */
+   if (NULL==(path=H5T_path_find (src, dst, TRUE))) {
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL,
+		     "unable to create conversion path");
+   }
+   ret_value = path->hard;
+   if (!ret_value) ret_value = path->soft;
+
+   if (!ret_value) {
+      HRETURN_ERROR (H5E_DATATYPE, H5E_NOTFOUND, NULL,
+		     "no conversion function for that path");
+   }
+
+   FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_path_find
+ *
+ * Purpose:	Finds the path which converts type SRC_ID to type DST_ID.  If
+ *		the path isn't found and CREATE is non-zero then a new path
+ *		is created.
+ *
+ * Return:	Success:	Pointer to the path, valid until the path
+ *				database is modified.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, January 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_path_t *
+H5T_path_find (const H5T_t *src, const H5T_t *dst, hbool_t create)
+{
+   intn		lt = 0;			/*left edge (inclusive)		*/
+   intn		rt = H5T_npath_g;	/*right edge (exclusive)	*/
+   intn		md = 0;			/*middle			*/
+   intn		cmp = -1;		/*comparison result		*/
+   H5T_path_t	*path = NULL;		/*path found			*/
+   int		i;
+   hid_t	src_id, dst_id;
+   
+   FUNC_ENTER (H5T_path_find, NULL);
+
+   /* Check args */
+   assert (src);
+   assert (dst);
+
+   /* Binary search */
+   while (lt<rt) {
+      md = (lt+rt)/2;
+
+      cmp = H5T_cmp (src, H5T_path_g[md].src);
+      if (0==cmp) cmp = H5T_cmp (dst, H5T_path_g[md].dst);
+
+      if (cmp<0) {
+	 rt = md;
+      } else if (cmp>0) {
+	 lt = md+1;
+      } else {
+	 HRETURN (H5T_path_g+md);
+      }
+   }
+   
+   /* Insert */
+   if (create) {
+      if (H5T_npath_g>=H5T_apath_g) {
+	 H5T_apath_g = MAX (64, 2*H5T_apath_g);
+	 H5T_path_g = H5MM_xrealloc (H5T_path_g,
+				     H5T_apath_g*sizeof(H5T_path_t));
+      }
+      if (cmp>0) md++;
+
+      /* make room */
+      HDmemmove (H5T_path_g+md+1, H5T_path_g+md,
+		 (H5T_npath_g-md)*sizeof(H5T_path_t));
+      H5T_npath_g++;
+
+      /* insert */
+      path = H5T_path_g + md;
+      HDmemset (path, 0, sizeof(H5T_path_t));
+      path->src = H5T_copy (src);
+      path->dst = H5T_copy (dst);
+
+      /* Locate soft function */
+      for (i=H5T_nsoft_g-1; i>=0 && !path->soft; --i) {
+	 if (src->type!=H5T_soft_g[i].src || dst->type!=H5T_soft_g[i].dst) {
+	    continue;
+	 }
+	 
+	 if ((src_id=H5Aregister_atom (H5_DATATYPE, H5T_copy (path->src)))<0 ||
+	     (dst_id=H5Aregister_atom (H5_DATATYPE, H5T_copy (path->dst)))<0) {
+	    HRETURN_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, NULL,
+			   "unable to register conv types for query");
+	 }
+	 if ((H5T_soft_g[i].func)(src_id, dst_id, 0, NULL, NULL)>=0) {
+	    path->soft = H5T_soft_g[i].func;
+	 }
+	 H5A_dec_ref (src_id);
+	 H5A_dec_ref (dst_id);
+	 H5ECLEAR;
+      }
+   }
+
+   FUNC_LEAVE (path);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_debug

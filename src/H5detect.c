@@ -282,11 +282,6 @@ static hbool_t interface_initialize_g = FALSE;\n\
 \n");
    
 
-   /* Global definitions for each type */
-   for (i=0; i<nd; i++) {
-      printf ("hid_t H5T_NATIVE_%s_g = FAIL;\n", d[i].varname);
-   }
-   
    /* Function declaration */
    printf ("\n\
 herr_t\n\
@@ -316,8 +311,8 @@ H5T_init (void)\n\
    dt->size = %d;\n\
    dt->u.atomic.order = H5T_ORDER_%s;\n\
    dt->u.atomic.prec = %d;\n\
-   dt->u.atomic.lo_pad = H5T_PAD_ZERO;\n\
-   dt->u.atomic.hi_pad = H5T_PAD_ZERO;\n",
+   dt->u.atomic.lsb_pad = H5T_PAD_ZERO;\n\
+   dt->u.atomic.lsb_pad = H5T_PAD_ZERO;\n",
 	      d[i].msize?"FLOAT":"INTEGER", 		/*class		*/
 	      d[i].size+abs (d[i].padding), 		/*size		*/
 	      d[i].perm[0]?"BE":"LE", 			/*byte order	*/
@@ -922,16 +917,18 @@ main (int argc, char *argv[]) {
 
    print_header();
 
-   DETECT_I (signed char,    CHAR,   d[nd]); nd++;
-   DETECT_I (unsigned char,  UCHAR,  d[nd]); nd++;
-   DETECT_I (short,	     SHORT,  d[nd]); nd++;
-   DETECT_I (unsigned short, USHORT, d[nd]); nd++;
-   DETECT_I (int,	     INT,    d[nd]); nd++;
-   DETECT_I (unsigned int,   UINT,   d[nd]); nd++;
-   DETECT_I (long,	     LONG,   d[nd]); nd++;
-   DETECT_I (unsigned long,  ULONG,  d[nd]); nd++;
-   DETECT_F (float,	     FLOAT,  d[nd]); nd++;
-   DETECT_F (double,	     DOUBLE, d[nd]); nd++;
+   DETECT_I (signed char,        CHAR,   d[nd]); nd++;
+   DETECT_I (unsigned char,      UCHAR,  d[nd]); nd++;
+   DETECT_I (short,	         SHORT,  d[nd]); nd++;
+   DETECT_I (unsigned short,     USHORT, d[nd]); nd++;
+   DETECT_I (int,	         INT,    d[nd]); nd++;
+   DETECT_I (unsigned int,       UINT,   d[nd]); nd++;
+   DETECT_I (long,	         LONG,   d[nd]); nd++;
+   DETECT_I (unsigned long,      ULONG,  d[nd]); nd++;
+   DETECT_I (long long,          LLONG,  d[nd]); nd++;
+   DETECT_I (unsigned long long, ULLONG, d[nd]); nd++;
+   DETECT_F (float,	         FLOAT,  d[nd]); nd++;
+   DETECT_F (double,	         DOUBLE, d[nd]); nd++;
 
    print_results (nd, d);
    exit (0);
