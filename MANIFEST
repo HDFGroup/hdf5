@@ -1364,11 +1364,27 @@
 #test files for h5diff
 ./tools/testfiles/h5diff_test1.h5
 ./tools/testfiles/h5diff_test2.h5
-./tools/testfiles/h5diff_1.txt
-./tools/testfiles/h5diff_2.txt
-./tools/testfiles/h5diff_3.txt
-./tools/testfiles/h5diff_4.txt
-./tools/testfiles/h5diff_5.txt
+./tools/testfiles/h5diff_010.txt
+./tools/testfiles/h5diff_01.txt
+./tools/testfiles/h5diff_02.txt
+./tools/testfiles/h5diff_03.txt
+./tools/testfiles/h5diff_04.txt
+./tools/testfiles/h5diff_05.txt
+./tools/testfiles/h5diff_06.txt
+./tools/testfiles/h5diff_07.txt
+./tools/testfiles/h5diff_08.txt
+./tools/testfiles/h5diff_09.txt
+./tools/testfiles/h5diff_111.txt
+./tools/testfiles/h5diff_112.txt
+./tools/testfiles/h5diff_121.txt
+./tools/testfiles/h5diff_122.txt
+./tools/testfiles/h5diff_13.txt
+./tools/testfiles/h5diff_14.txt
+./tools/testfiles/h5diff_15.txt
+./tools/testfiles/h5diff_16.txt
+./tools/testfiles/h5diff_210.txt
+./tools/testfiles/h5diff_211.txt
+./tools/testfiles/h5diff_212.txt
 
 
 ./windows/all.zip
