@@ -549,7 +549,7 @@ H5I_destroy_group(H5I_type_t grp)
      */
     if (1==grp_ptr->count) {
         H5I_clear_group(grp, TRUE);
-        H5E_clear(); /*don't care about errors*/
+        H5E_clear(H5E_get_my_stack()); /*don't care about errors*/
         H5MM_xfree(grp_ptr->id_list);
         HDmemset (grp_ptr, 0, sizeof(*grp_ptr));
     } else {

@@ -222,7 +222,7 @@ hid_t
 H5FD_stdio_init(void)
 {
     /* Clear the error stack */
-    H5Eclear();
+    H5Eclear(H5E_DEFAULT);
 
     if (H5I_VFL!=H5Iget_type(H5FD_STDIO_g))
         H5FD_STDIO_g = H5FDregister(&H5FD_stdio_g);
@@ -255,7 +255,7 @@ H5Pset_fapl_stdio(hid_t fapl_id)
     /*NO TRACE*/
 
     /* Clear the error stack */
-    H5Eclear();
+    H5Eclear(H5E_DEFAULT);
 
     if(0 == H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
         H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1);
@@ -313,7 +313,7 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
     fapl_id=fapl_id;
 
     /* Clear the error stack */
-    H5Eclear();
+    H5Eclear(H5E_DEFAULT);
 
     /* Check arguments */
     if (!name || !*name)
@@ -401,7 +401,7 @@ H5FD_stdio_close(H5FD_t *_file)
     static const char *func="H5FD_stdio_close";  /* Function Name for error reporting */
 
     /* Clear the error stack */
-    H5Eclear();
+    H5Eclear(H5E_DEFAULT);
 
     if (fclose(file->fp) < 0)
         H5Epush_ret(func, H5E_IO, H5E_CLOSEERROR, "fclose failed", -1);
@@ -438,7 +438,7 @@ H5FD_stdio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_stdio_t	*f2 = (const H5FD_stdio_t*)_f2;
 
     /* Clear the error stack */
-    H5Eclear();
+    H5Eclear(H5E_DEFAULT);
 
 #ifdef WIN32
     if (f1->fileindexhi < f2->fileindexhi) return -1;
@@ -528,7 +528,7 @@ H5FD_stdio_get_eoa(H5FD_t *_file)
     H5FD_stdio_t	*file = (H5FD_stdio_t*)_file;
 
     /* Clear the error stack */
-    H5Eclear();
+    H5Eclear(H5E_DEFAULT);
 
     return(file->eoa);
 }
@@ -559,7 +559,7 @@ H5FD_stdio_set_eoa(H5FD_t *_file, haddr_t addr)
     H5FD_stdio_t	*file = (H5FD_stdio_t*)_file;
 
     /* Clear the error stack */
-    H5Eclear();
+    H5Eclear(H5E_DEFAULT);
 
     file->eoa = addr;
 
@@ -594,7 +594,7 @@ H5FD_stdio_get_eof(H5FD_t *_file)
     H5FD_stdio_t	*file = (H5FD_stdio_t*)_file;
 
     /* Clear the error stack */
-    H5Eclear();
+    H5Eclear(H5E_DEFAULT);
 
     return(MAX(file->eof, file->eoa));
 }
@@ -624,7 +624,7 @@ H5FD_stdio_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
     fapl=fapl;
    
     /* Clear the error stack */
-    H5Eclear();
+    H5Eclear(H5E_DEFAULT);
              
     *file_handle = &(file->fp);
     if(*file_handle==NULL)
@@ -670,7 +670,7 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
     dxpl_id=dxpl_id;
 
     /* Clear the error stack */
-    H5Eclear();
+    H5Eclear(H5E_DEFAULT);
 
     /* Check for overflow */
     if (HADDR_UNDEF==addr) 
@@ -782,7 +782,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     type=type;
 
     /* Clear the error stack */
-    H5Eclear();
+    H5Eclear(H5E_DEFAULT);
 
     /* Check for overflow conditions */
     if (HADDR_UNDEF==addr)
@@ -880,7 +880,7 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
     dxpl_id=dxpl_id;
 
     /* Clear the error stack */
-    H5Eclear();
+    H5Eclear(H5E_DEFAULT);
 
     /* Only try to flush the file if we have write access */
     if(file->write_access) {

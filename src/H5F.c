@@ -1859,7 +1859,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     if (NULL==(lf=H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
 	if (tent_flags == flags)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file");
-	H5E_clear();
+        H5E_clear(H5E_get_my_stack());
 	tent_flags = flags;
 	if (NULL==(lf=H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF)))
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file");

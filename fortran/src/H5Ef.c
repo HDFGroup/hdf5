@@ -37,7 +37,7 @@ nh5eclear_c( )
   /*
    * Call H5Eclear function.
    */
-  status = H5Eclear(); 
+  status = H5Eclear(H5E_DEFAULT); 
   if(status < 0) return ret_val;
   ret_val = 0;
   return ret_val;
@@ -71,7 +71,7 @@ nh5eprint_c1(_fcd name, int_f* namelen)
   /*
    * Call H5Eprint function.
    */
-  status = H5Eprint(file);
+  status = H5Eprint(H5E_DEFAULT, file);
   if (status >=0 ) ret_val = 0;
   fclose(file);
 
@@ -101,7 +101,7 @@ nh5eprint_c2()
   /*
    * Call H5Eprint function.
    */
-  status = H5Eprint(NULL);
+  status = H5Eprint(H5E_DEFAULT, NULL);
   if(status >= 0) ret_val = 0;
   return ret_val;
 }  
@@ -121,14 +121,14 @@ int_f
 nh5eget_major_c(int_f* error_no, _fcd name)
 {
   int ret_val = -1;
-  const char* c_name;
-  H5E_major_t c_error_no;
-  c_error_no = (H5E_major_t)*error_no;
+  const char c_name[H5E_LEN];
+  hid_t c_error_no;
+  c_error_no = (hid_t)*error_no;
 
   /*
    * Call H5Eget_major function.
    */
-  c_name = H5Eget_major(c_error_no);
+  H5Eget_msg(c_error_no, NULL, c_name, H5E_LEN);
   HD5packFstring((char*)c_name, _fcdtocp(name), strlen(c_name)); 
   
   if(!strcmp(c_name, "Invalid major error number")) return ret_val;
@@ -151,14 +151,14 @@ int_f
 nh5eget_minor_c(int_f* error_no, _fcd name)
 {
   int ret_val = -1;
-  const char* c_name;
-  H5E_minor_t c_error_no;
-  c_error_no = (H5E_minor_t)*error_no;
+  const char c_name[H5E_LEN];
+  hid_t c_error_no;
+  c_error_no = (hid_t)*error_no;
 
   /*
    * Call H5Eget_minor function.
    */
-  c_name = H5Eget_minor(c_error_no);
+  H5Eget_msg(c_error_no, NULL, c_name, H5E_LEN);
   HD5packFstring((char*)c_name, _fcdtocp(name), strlen(c_name)); 
   
   if(!strcmp(c_name, "Invalid minor error number")) return ret_val;
@@ -183,9 +183,9 @@ nh5eset_auto_c(int_f* printflag)
   herr_t status;
 
   if (*printflag == 1)
-    status = H5Eset_auto((H5E_auto_t)H5Eprint, stderr);
+    status = H5Eset_auto(H5E_DEFAULT, (H5E_auto_t)H5Eprint, stderr);
   if (*printflag == 0)
-    status = H5Eset_auto(NULL,NULL);
+    status = H5Eset_auto(H5E_DEFAULT, NULL,NULL);
   if (status >= 0) ret_val = 0;
   return ret_val;
 }

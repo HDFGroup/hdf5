@@ -2744,7 +2744,7 @@ main(int argc, const char *argv[])
     hid_t               fid, gid;
     const char         *fname = NULL;
     void               *edata;
-    hid_t               (*func)(void*);
+    H5E_auto_t          func;
     find_objs_t         info;
     struct handler_t   *hand;
     int                 i;
@@ -2753,8 +2753,8 @@ main(int argc, const char *argv[])
     dump_function_table = &ddl_function_table;
 
     /* Disable error reporting */
-    H5Eget_auto(&func, &edata);
-    H5Eset_auto(NULL, NULL);
+    H5Eget_auto(H5E_DEFAULT, &func, &edata);
+    H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
     /* Initialize h5tools lib */
     h5tools_init();
@@ -2940,7 +2940,7 @@ done:
     /* To Do:  clean up XML table */
 
     h5tools_close();
-    H5Eset_auto(func, edata);
+    H5Eset_auto(H5E_DEFAULT, func, edata);
     return d_status;
 }
 

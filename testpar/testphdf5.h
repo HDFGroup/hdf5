@@ -51,7 +51,7 @@
 	    MPI_Finalize(); exit(nerrors); \
 	}								      \
     }                                                                         \
-    H5Eclear();                                                               \
+    H5Eclear(H5E_DEFAULT);                                                    \
 } while(0)
 
 /*
@@ -72,7 +72,7 @@
 	    mesg, (int)__LINE__, __FILE__);     			      \
 	fflush(stdout);							      \
     }                                                                         \
-    H5Eclear();                                                               \
+    H5Eclear(H5E_DEFAULT);                                                               \
 } while(0)
 
 #define MPI_BANNER(mesg)\

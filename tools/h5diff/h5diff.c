@@ -185,7 +185,7 @@ int main(int argc, const char *argv[])
  info_t     *info2=NULL;
  options_t  options = {0,0,0,0,0,0,0};
  void       *edata;
- hid_t      (*func)(void*);
+ H5E_auto_t func;
  const char *file1_name = NULL;
  const char *file2_name = NULL;
  const char *obj1_name  = NULL;
@@ -236,8 +236,8 @@ int main(int argc, const char *argv[])
  */
 
  /* disable error reporting */
- H5Eget_auto(&func, &edata);
- H5Eset_auto(NULL, NULL);
+ H5Eget_auto(H5E_DEFAULT, &func, &edata);
+ H5Eset_auto(H5E_DEFAULT, NULL, NULL);
  
  /* Open the files */
  if ((file1_id=H5Fopen(file1_name,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
@@ -251,7 +251,7 @@ int main(int argc, const char *argv[])
   exit(1);
  }
  /* enable error reporting */
- H5Eset_auto(func, edata);
+ H5Eset_auto(H5E_DEFAULT, func, edata);
 
  
 /*-------------------------------------------------------------------------
@@ -849,7 +849,7 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
                   const char *obj2_name, options_t options )
 {
  void         *edata;
- hid_t        (*func)(void*);
+ H5E_auto_t   func;
  hid_t        dset1_id  =-1;
  hid_t        dset2_id  =-1;
  hid_t        space1_id =-1;
@@ -875,8 +875,8 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
 
 
  /* disable error reporting */
- H5Eget_auto(&func, &edata);
- H5Eset_auto(NULL, NULL);
+ H5Eget_auto(H5E_DEFAULT, &func, &edata);
+ H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
 /*-------------------------------------------------------------------------
  * open the handles
@@ -895,7 +895,7 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
   goto out;
  }
  /* enable error reporting */
- H5Eset_auto(func, edata);
+ H5Eset_auto(H5E_DEFAULT, func, edata);
 
   /* Get the dataspace handle */
  if ( (space1_id = H5Dget_space(dset1_id)) < 0 )

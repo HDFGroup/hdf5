@@ -74,7 +74,7 @@ main(void)
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
     if (NULL==(f=H5I_object(file))) {
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
 
@@ -85,7 +85,7 @@ main(void)
     HDmemset(&oh_ent,0,sizeof(H5G_entry_t));
     if (H5O_create(f, H5P_DATASET_XFER_DEFAULT, 64, &oh_ent/*out*/)<0) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     PASSED();
@@ -96,17 +96,17 @@ main(void)
     stab.heap_addr = 22222222;
     if (H5O_modify(&oh_ent, H5O_STAB_ID, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (NULL==H5O_read(&oh_ent, H5O_STAB_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5F_addr_ne(ro.btree_addr, stab.btree_addr) ||
@@ -128,17 +128,17 @@ main(void)
     stab.heap_addr = 44444444;
     if (H5O_modify(&oh_ent, H5O_STAB_ID, 0, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (NULL==H5O_read(&oh_ent, H5O_STAB_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5F_addr_ne(ro.btree_addr, stab.btree_addr) ||
@@ -161,17 +161,17 @@ main(void)
     stab.heap_addr = 66666666;
     if (H5O_modify(&oh_ent, H5O_STAB_ID, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (NULL==H5O_read(&oh_ent, H5O_STAB_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5F_addr_ne(ro.btree_addr, stab.btree_addr) ||
@@ -193,17 +193,17 @@ main(void)
     stab.heap_addr = 88888888;
     if (H5O_modify(&oh_ent, H5O_STAB_ID, 1, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (NULL==H5O_read(&oh_ent, H5O_STAB_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5F_addr_ne(ro.btree_addr, stab.btree_addr) ||
@@ -227,13 +227,13 @@ main(void)
         stab.heap_addr = (i+1)*1000+2;
         if (H5O_modify(&oh_ent, H5O_STAB_ID, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	    H5_FAILED();
-	    H5Eprint(stdout);
+	    H5Eprint(H5E_DEFAULT, stdout);
 	    goto error;
 	}
     }
     if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     PASSED();
@@ -248,12 +248,12 @@ main(void)
         stab.heap_addr = (i + 1) * 1000 + 20;
         if (H5O_modify(&oh_ent, H5O_STAB_ID, H5O_NEW_MESG, 0, 1, &stab, H5P_DATASET_XFER_DEFAULT)<0) {
 	    H5_FAILED();
-	    H5Eprint(stdout);
+	    H5Eprint(H5E_DEFAULT, stdout);
 	    goto error;
 	}
         if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, NULL, HADDR_UNDEF, TRUE)<0) {
 	    H5_FAILED();
-	    H5Eprint(stdout);
+	    H5Eprint(H5E_DEFAULT, stdout);
 	    goto error;
 	}
     }
@@ -265,13 +265,13 @@ main(void)
     TESTING("message deletion");
     if (H5O_remove(&oh_ent, H5O_STAB_ID, H5O_ALL, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5O_read(&oh_ent, H5O_STAB_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	puts("    H5O_read() should have failed but didn't");
-	H5Eclear();
+	H5Eclear(H5E_DEFAULT);
 	goto error;
     }
     PASSED();
@@ -281,7 +281,7 @@ main(void)
     TESTING("object header closing");
     if (H5O_close(&oh_ent)<0) {
 	H5_FAILED();
-	H5Eprint(stdout);
+	H5Eprint(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5Fclose(file)<0) goto error;

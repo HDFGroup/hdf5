@@ -42,9 +42,9 @@ extern int              Verbosity;
 	print_func("*** UNEXPECTED RETURN from %s is %ld at line %4d "	      \
 		   "in %s\n", where, (long)(ret), (int)__LINE__, __FILE__);     \
 	num_errs++;							      \
-	H5Eprint (stdout);						      \
+	H5Eprint (H5E_DEFAULT, stdout);						      \
     }									      \
-    H5Eclear();								      \
+    H5Eclear(H5E_DEFAULT);								      \
 } while(0)
 
 #define CHECK_I(ret,where) {						      \
@@ -55,10 +55,10 @@ extern int              Verbosity;
    if ((ret)<0) {							      \
       print_func ("*** UNEXPECTED RETURN from %s is %ld line %4d in %s\n",    \
                   (where), (long)(ret), (int)__LINE__, __FILE__);	      \
-      H5Eprint (stdout);						      \
+      H5Eprint (H5E_DEFAULT, stdout);						      \
       num_errs++;							      \
    }									      \
-   H5Eclear ();								      \
+   H5Eclear (H5E_DEFAULT);								      \
 }
 
 #define CHECK_PTR(ret,where) {						      \
@@ -69,10 +69,10 @@ extern int              Verbosity;
    if (!(ret)) {							      \
       print_func ("*** UNEXPECTED RETURN from %s is NULL line %4d in %s\n",   \
                   (where), (int)__LINE__, __FILE__);			      \
-      H5Eprint (stdout);						      \
+      H5Eprint (H5E_DEFAULT, stdout);						      \
       num_errs++;							      \
    }									      \
-   H5Eclear ();								      \
+   H5Eclear (H5E_DEFAULT);								      \
 }
 
 /* Used to make certain a return value _is_ a value */
@@ -84,10 +84,10 @@ extern int              Verbosity;
     if ((x) != (val)) {							      \
 	print_func("*** UNEXPECTED VALUE from %s should be %ld, but is %ld at line %4d "	      \
 		   "in %s\n", (where), (long)(val), (long)(x), (int)__LINE__, __FILE__);	      \
-	H5Eprint (stdout);						      \
+	H5Eprint (H5E_DEFAULT, stdout);						      \
 	num_errs++;							      \
     }									      \
-    H5Eclear();								      \
+    H5Eclear(H5E_DEFAULT);								      \
 } while(0)
 
 /* Used to document process through a test and to check for errors */
@@ -100,10 +100,10 @@ extern int              Verbosity;
     if ((ret) == FAIL) {							      \
 	print_func("*** UNEXPECTED RETURN from %s is %ld at line %4d "	      \
 		   "in %s\n", func, (long)(ret), (int)__LINE__, __FILE__);      \
-	H5Eprint (stdout);						      \
+	H5Eprint (H5E_DEFAULT, stdout);						      \
 	num_errs++;							      \
     }									      \
-    H5Eclear();								      \
+    H5Eclear(H5E_DEFAULT);								      \
 } while(0)
 
 /* Used to document process through a test */

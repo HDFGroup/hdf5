@@ -67,7 +67,7 @@ hid_t   ERR_MIN_GETNUM;
 #define SPACE2_DIM1	        10
 #define SPACE2_DIM2	        10
 
-herr_t custom_print_cb(int n, H5E_error_t_new *err_desc, void* client_data);
+herr_t custom_print_cb(int n, H5E_error_t *err_desc, void* client_data);
 
 
 /*-------------------------------------------------------------------------
@@ -112,35 +112,35 @@ test_error(hid_t file)
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_NAME, H5T_STD_I32BE, space,
 			     H5P_DEFAULT))<0) {
-        H5Epush_new(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_MAJ_IO, ERR_MIN_CREATE, 
+        H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_MAJ_IO, ERR_MIN_CREATE, 
                 "H5Dcreate failed");
         goto error;
     }
 
     /* Test enabling and disabling default printing */
-    if (H5Eget_auto_new(H5E_DEFAULT, &old_func, &old_data)<0)
+    if (H5Eget_auto(H5E_DEFAULT, &old_func, &old_data)<0)
 	TEST_ERROR;
     if (old_data != stderr) 
 	TEST_ERROR;
-    if (old_func != H5Eprint_new)
+    if (old_func != H5Eprint)
 	TEST_ERROR;
 
-    if(H5Eset_auto_new(H5E_DEFAULT, NULL, NULL)<0)
+    if(H5Eset_auto(H5E_DEFAULT, NULL, NULL)<0)
         TEST_ERROR;
 
     /* Make H5Dwrite fail, verify default print is disabled */
     /*if (H5Dwrite(FAKE_ID, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2)>=0) {
-        H5Epush_new(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_MAJ_IO, ERR_MIN_WRITE, 
+        H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_MAJ_IO, ERR_MIN_WRITE, 
                 "H5Dwrite shouldn't succeed");
         goto error;
     }*/
 
-    if(H5Eset_auto_new(H5E_DEFAULT, old_func, old_data)<0)
+    if(H5Eset_auto(H5E_DEFAULT, old_func, old_data)<0)
         TEST_ERROR;
 
     /* Test saving and restoring the current error stack */
     if (H5Dwrite(FAKE_ID, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2)<0) {
-        H5Epush_new(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_MAJ_IO, ERR_MIN_WRITE, 
+        H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_MAJ_IO, ERR_MIN_WRITE, 
                 "H5Dwrite failed as supposed to");
         estack_id = H5Eget_current_stack();
         H5Dclose(dataset);
@@ -195,27 +195,27 @@ init_error(void)
     if(strcmp(ERR_CLS_NAME, cls_name)) 
         TEST_ERROR;
    
-    if((ERR_MAJ_TEST = H5Ecreate_msg(ERR_CLS, H5E_MAJOR_new, ERR_MAJ_TEST_MSG))<0)
+    if((ERR_MAJ_TEST = H5Ecreate_msg(ERR_CLS, H5E_MAJOR, ERR_MAJ_TEST_MSG))<0)
         TEST_ERROR;
-    if((ERR_MAJ_IO = H5Ecreate_msg(ERR_CLS, H5E_MAJOR_new, ERR_MAJ_IO_MSG))<0)
+    if((ERR_MAJ_IO = H5Ecreate_msg(ERR_CLS, H5E_MAJOR, ERR_MAJ_IO_MSG))<0)
         TEST_ERROR;
-    if((ERR_MAJ_API = H5Ecreate_msg(ERR_CLS, H5E_MAJOR_new, ERR_MAJ_API_MSG))<0)
+    if((ERR_MAJ_API = H5Ecreate_msg(ERR_CLS, H5E_MAJOR, ERR_MAJ_API_MSG))<0)
         TEST_ERROR;
 
-    if((ERR_MIN_SUBROUTINE = H5Ecreate_msg(ERR_CLS, H5E_MINOR_new, ERR_MIN_SUBROUTINE_MSG))<0)
+    if((ERR_MIN_SUBROUTINE = H5Ecreate_msg(ERR_CLS, H5E_MINOR, ERR_MIN_SUBROUTINE_MSG))<0)
         TEST_ERROR;
-    if((ERR_MIN_ERRSTACK = H5Ecreate_msg(ERR_CLS, H5E_MINOR_new, ERR_MIN_ERRSTACK_MSG))<0)
+    if((ERR_MIN_ERRSTACK = H5Ecreate_msg(ERR_CLS, H5E_MINOR, ERR_MIN_ERRSTACK_MSG))<0)
         TEST_ERROR;
-    if((ERR_MIN_CREATE = H5Ecreate_msg(ERR_CLS, H5E_MINOR_new, ERR_MIN_CREATE_MSG))<0)
+    if((ERR_MIN_CREATE = H5Ecreate_msg(ERR_CLS, H5E_MINOR, ERR_MIN_CREATE_MSG))<0)
         TEST_ERROR;
-    if((ERR_MIN_WRITE = H5Ecreate_msg(ERR_CLS, H5E_MINOR_new, ERR_MIN_WRITE_MSG))<0)
+    if((ERR_MIN_WRITE = H5Ecreate_msg(ERR_CLS, H5E_MINOR, ERR_MIN_WRITE_MSG))<0)
         TEST_ERROR;
-    if((ERR_MIN_GETNUM = H5Ecreate_msg(ERR_CLS, H5E_MINOR_new, ERR_MIN_GETNUM_MSG))<0)
+    if((ERR_MIN_GETNUM = H5Ecreate_msg(ERR_CLS, H5E_MINOR, ERR_MIN_GETNUM_MSG))<0)
         TEST_ERROR;
 
     if(msg_size != H5Eget_msg(ERR_MIN_SUBROUTINE, msg_type, msg, (size_t)msg_size) + 1)
         TEST_ERROR;
-    if(*msg_type != H5E_MINOR_new)
+    if(*msg_type != H5E_MINOR)
         TEST_ERROR;
     if(strcmp(msg, ERR_MIN_SUBROUTINE_MSG))
         TEST_ERROR;
@@ -264,7 +264,7 @@ error_stack(void)
 
     /* Make it push error, force this function to fail */
     if((err_num = H5Eget_num(ERR_STACK))==0) {
-        H5Epush_new(ERR_STACK, __FILE__, FUNC_error_stack, __LINE__, ERR_MAJ_API, ERR_MIN_GETNUM, 
+        H5Epush(ERR_STACK, __FILE__, FUNC_error_stack, __LINE__, ERR_MAJ_API, ERR_MIN_GETNUM, 
                 "Get number test failed, returned %d", err_num);
         goto error;
     } 
@@ -302,12 +302,12 @@ dump_error(hid_t estack)
 {
     /* Print errors in library default way */
     fprintf(stderr, "********* Print error stack in HDF5 default way *********\n");
-    if(H5Eprint_new(estack, stderr)<0)
+    if(H5Eprint(estack, stderr)<0)
         TEST_ERROR;
     
     /* Customized way to print errors */
     fprintf(stderr, "\n********* Print error stack in customized way *********\n");
-    if(H5Ewalk_new(estack, H5E_WALK_UPWARD, custom_print_cb, stderr)<0)
+    if(H5Ewalk(estack, H5E_WALK_UPWARD, custom_print_cb, stderr)<0)
         TEST_ERROR;
     
     return 0;
@@ -334,7 +334,7 @@ dump_error(hid_t estack)
  *-------------------------------------------------------------------------
  */
 herr_t 
-custom_print_cb(int n, H5E_error_t_new *err_desc, void* client_data)
+custom_print_cb(int n, H5E_error_t *err_desc, void* client_data)
 {
     FILE		*stream  = (FILE *)client_data;
     char                maj[MSG_SIZE];
@@ -426,6 +426,7 @@ main(void)
     char		filename[1024];
     const char          *FUNC_main="main";
 
+    fprintf(stderr, "   This program tests the Error API.  There're supposed to be some error messages\n");
     /*h5_reset();*/
 
     /* Initialize errors */
@@ -437,11 +438,11 @@ main(void)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	TEST_ERROR ;
-   
+
     /* Test error stack */ 
     if(error_stack()<0) {
         /* Push an error onto error stack */
-        H5Epush_new(ERR_STACK, __FILE__, FUNC_main, __LINE__, ERR_MAJ_TEST, ERR_MIN_ERRSTACK, 
+        H5Epush(ERR_STACK, __FILE__, FUNC_main, __LINE__, ERR_MAJ_TEST, ERR_MIN_ERRSTACK, 
                 "Error stack test failed");
         
         /* Delete an error from the top of error stack */
@@ -451,7 +452,7 @@ main(void)
         dump_error(ERR_STACK);
 
         /* Empty error stack */
-        H5Eclear_new(ERR_STACK);
+        H5Eclear(ERR_STACK);
 
         /* Close error stack */
         H5Eclose_stack(ERR_STACK);
@@ -459,10 +460,10 @@ main(void)
 
     /* Test error API */
     if(test_error(file)<0) {
-        H5Epush_new(H5E_DEFAULT, __FILE__, FUNC_main, __LINE__, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, 
+        H5Epush(H5E_DEFAULT, __FILE__, FUNC_main, __LINE__, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, 
                 "Error test failed, %s", "it's wrong");
         estack_id = H5Eget_current_stack();
-        H5Eprint_new(estack_id, stderr);
+        H5Eprint(estack_id, stderr);
         H5Eclose_stack(estack_id);
     }
     

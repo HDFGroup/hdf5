@@ -2157,6 +2157,11 @@ H5G_loc (hid_t loc_id)
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of property list");
+            
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of error class, massage or stack");
 
         case H5I_GROUP:
             if (NULL==(group=H5I_object (loc_id)))
@@ -2253,7 +2258,7 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
             if (H5G_namei(new_loc, new_name, &rest, &grp_ent, NULL, 
                             H5G_TARGET_NORMAL, NULL, H5G_NAMEI_TRAVERSE, NULL, dxpl_id)>=0)
                 HGOTO_ERROR (H5E_SYM, H5E_EXISTS, FAIL, "already exists");
-            H5E_clear (); /*it's okay that we didn't find it*/
+            H5E_clear (H5E_get_my_stack()); /*it's okay that we didn't find it*/
             rest = H5G_component (rest, &nchars);
 
             /*
@@ -2439,14 +2444,14 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	    statbuf->nlink = H5O_link (&obj_ent, 0, dxpl_id);
 	    statbuf->type = H5G_LINK;
 	    if (NULL==H5O_read(&obj_ent, H5O_MTIME_ID, 0, &(statbuf->mtime), dxpl_id)) {
-		H5E_clear();
+                H5E_clear(H5E_get_my_stack());
                 if (NULL==H5O_read(&obj_ent, H5O_MTIME_NEW_ID, 0, &(statbuf->mtime), dxpl_id)) {
-                    H5E_clear();
+                    H5E_clear(H5E_get_my_stack());
                     statbuf->mtime = 0;
                 }
 	    }
 	    statbuf->type = H5G_get_type(&obj_ent, dxpl_id);
-	    H5E_clear(); /*clear errors resulting from checking type*/
+	    H5E_clear(H5E_get_my_stack()); /*clear errors resulting from checking type*/
 	}
 
         /* Common code to retrieve the file's fileno */
@@ -2689,7 +2694,7 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf, hid_t dxpl_
 
     /* Remove the previous comment message if any */
     if (H5O_remove(&obj_ent, H5O_NAME_ID, 0, dxpl_id)<0)
-        H5E_clear();
+        H5E_clear(H5E_get_my_stack());
 
     /* Add the new message */
     if (buf && *buf) {
@@ -2971,7 +2976,7 @@ H5G_insertion_file(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
             H5G_free_ent_name(&grp_ent);
             HGOTO_ERROR(H5E_SYM, H5E_EXISTS, NULL, "name already exists");
         } /* end if */
-        H5E_clear();
+        H5E_clear(H5E_get_my_stack());
 
         /* Make sure only the last component wasn't resolved */
         rest = H5G_component(rest, &size);

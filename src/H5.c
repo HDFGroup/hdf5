@@ -196,7 +196,7 @@ H5_term_library(void)
 	goto done;
 
     /* Check if we should display error output */
-    (void)H5Eget_auto(&func,NULL);
+    (void)H5Eget_auto(H5E_DEFAULT,&func,NULL);
 
     /*
      * Terminate each interface. The termination functions return a positive
@@ -239,6 +239,7 @@ H5_term_library(void)
             pending += DOWN(Z);
             pending += DOWN(FD);
             pending += DOWN(P);
+            /*pending += DOWN(E); - Commented out since there is seg fault */
             /* Don't shut down the ID code until other APIs which use them are shut down */
             if(pending==0)
                 pending += DOWN(I);
@@ -1807,8 +1808,15 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 			fprintf(out, "NULL");
 		    }
 		} else {
-		    H5E_major_t emaj = va_arg(ap, H5E_major_t);
-		    fprintf(out, "%d", (int)emaj);
+		    /*H5E_major_t emaj = va_arg(ap, H5E_major_t);*/
+		    hid_t emaj_id = va_arg(ap, hid_t);
+                    H5E_msg_t   *emaj_ptr;
+
+                    /* Get the message and print it */
+                    if(NULL != (emaj_ptr = H5I_object_verify(emaj_id, H5I_ERROR_MSG)))
+		        fprintf (out, emaj_ptr->msg);
+                    else
+		        fprintf(out, "%d", (int)emaj_id);
 		}
 		break;
 
@@ -1820,8 +1828,17 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 			fprintf(out, "NULL");
 		    }
 		} else {
-		    H5E_minor_t emin = va_arg(ap, H5E_minor_t);
-		    fprintf(out, "%d", (int)emin);
+		    /*H5E_minor_t emin = va_arg(ap, H5E_minor_t);*/
+		    hid_t emin_id = va_arg(ap, hid_t);
+                    H5E_msg_t   *emin_ptr;
+
+                    /* Get the message and print it */
+                    if(NULL != (emin_ptr = H5I_object_verify(emin_id, H5I_ERROR_MSG)))
+		        fprintf (out, emin_ptr->msg);
+                    else
+		        fprintf(out, "%d", (int)emin_id);
+
+		    fprintf(out, "%d", (int)emin_id);
 		}
 		break;
 		

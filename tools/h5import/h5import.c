@@ -2187,10 +2187,10 @@ process(struct Options *opt)
   const char *err4 = "Error in creating or opening external file.\n";  
   const char *err5 = "Error in creating the output data set. Dataset with the same name may exist at the specified path\n";
   const char *err6 = "Error in writing the output data set.\n";
-  H5Eget_auto(&func, &client_data);
+  H5Eget_auto(H5E_DEFAULT, &func, &client_data);
     
     /* disable error reporting */
-    H5Eset_auto(NULL, NULL);
+    H5Eset_auto(H5E_DEFAULT, NULL, NULL);
   if ((file_id = H5Fopen(opt->outfile, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
   if ((file_id = H5Fcreate(opt->outfile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) == FAIL) 
   {
@@ -2198,7 +2198,7 @@ process(struct Options *opt)
     return (-1);
   }
     /*enable error reporting */
-    H5Eset_auto(func, client_data);
+    H5Eset_auto(H5E_DEFAULT, func, client_data);
     
   for (k = 0; k < opt->fcount; k++)
   {
@@ -2222,10 +2222,10 @@ process(struct Options *opt)
       numOfElements *= in->sizeOfDimension[j];
 
   /* store error reporting parameters */
-    H5Eget_auto(&func, &client_data);
+    H5Eget_auto(H5E_DEFAULT, &func, &client_data);
     
     /* disable error reporting */
-    H5Eset_auto(NULL, NULL);
+    H5Eset_auto(H5E_DEFAULT, NULL, NULL);
     
     /* create parent groups */
     if (in->path.count > 1)
@@ -2253,7 +2253,7 @@ process(struct Options *opt)
     }
 
     /*enable error reporting */
-    H5Eset_auto(func, client_data);
+    H5Eset_auto(H5E_DEFAULT, func, client_data);
     
     /*create data type */
     intype = createInputDataType(*in);
@@ -2297,10 +2297,10 @@ process(struct Options *opt)
     {
       dataspace = H5Screate_simple(in->rank, in->sizeOfDimension, NULL);
     }
-    H5Eget_auto(&func, &client_data);
+    H5Eget_auto(H5E_DEFAULT, &func, &client_data);
     
     /* disable error reporting */
-    H5Eset_auto(NULL, NULL); 
+    H5Eset_auto(H5E_DEFAULT, NULL, NULL); 
     /* create data set */
     if ((dataset = H5Dcreate(handle, in->path.group[j], outtype, dataspace, proplist)) < 0) 
     {
@@ -2312,7 +2312,7 @@ process(struct Options *opt)
     }
  
     /*enable error reporting */
-    H5Eset_auto(func, client_data);
+    H5Eset_auto(H5E_DEFAULT, func, client_data);
 
      /* write dataset */
     if (H5Dwrite(dataset, intype, H5S_ALL, H5S_ALL, H5P_DEFAULT, (VOIDP)in->data) < 0) 

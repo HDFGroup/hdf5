@@ -153,7 +153,7 @@ main(int argc, char *argv[])
      * half the functions this test calls are private, so automatic error
      * reporting wouldn't do much good since it's triggered at the API layer.
      */
-    H5Eset_auto (NULL, NULL);
+    H5Eset_auto (H5E_DEFAULT, NULL, NULL);
 
     /* Tests are generally arranged from least to most complexity... */
     InitTest("configure", test_configure, cleanup_configure, "Configure definitions");

@@ -86,7 +86,9 @@ H5FS_get_stack(void)
     fstack = pthread_getspecific(H5TS_funcstk_key_g);
     if (!fstack) {
         /* no associated value with current thread - create one */
-        fstack = (H5FS_t *)H5MM_malloc(sizeof(H5FS_t));
+        /* Where is it freed? */
+        fstack = (H5FS_t *)H5MM_calloc(sizeof(H5FS_t));
+        fstack->nused = 0;
         pthread_setspecific(H5TS_funcstk_key_g, (void *)fstack);
     }
 

@@ -32,9 +32,6 @@ typedef struct H5TS_cancel_struct {
 /* Global variable definitions */
 pthread_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
 pthread_key_t H5TS_errstk_key_g;
-#ifndef NEW_ERR
-pthread_key_t H5TS_errstk_key_g_new;
-#endif /* NEW_ERR */
 pthread_key_t H5TS_funcstk_key_g;
 pthread_key_t H5TS_cancel_key_g;
 hbool_t H5TS_allow_concurrent_g = FALSE; /* concurrent APIs override this */
@@ -108,17 +105,12 @@ H5TS_first_thread_init(void)
     pthread_cond_init(&H5_g.init_lock.cond_var, NULL);
     H5_g.init_lock.lock_count = 0;
 
-    /* initialize key for thread-specific error stacks */
-    pthread_key_create(&H5TS_errstk_key_g, H5TS_key_destructor);
-#ifndef NEW_ERR
-    /* initialize key for thread-specific error stacks */
-    pthread_key_create(&H5TS_errstk_key_g_new, H5TS_key_destructor);
-#endif /* NEW_ERR */
     /* initialize key for thread-specific function stacks */
     pthread_key_create(&H5TS_funcstk_key_g, H5TS_key_destructor);
-
     /* initialize key for thread cancellability mechanism */
     pthread_key_create(&H5TS_cancel_key_g, H5TS_key_destructor);
+    /* initialize key for thread-specific error stacks */
+    pthread_key_create(&H5TS_errstk_key_g, H5TS_key_destructor);
 }
 
 /*--------------------------------------------------------------------------
@@ -164,8 +156,8 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
 	mutex->owner_thread = H5MM_malloc(sizeof(pthread_t));
 
 	if (!mutex->owner_thread) {
-	    H5E_push(H5E_RESOURCE, H5E_NOSPACE, "H5TS_mutex_lock",
-		     __FILE__, __LINE__, "memory allocation failed");
+	    H5E_push(H5E_get_my_stack(), "H5TS_mutex_lock", __FILE__, __LINE__, 
+                    H5E_ERR_CLS_g, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed");
 	    return FAIL;
 	}
 
@@ -180,8 +172,8 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
 		mutex->owner_thread = H5MM_malloc(sizeof(pthread_t));
 
 		if (!mutex->owner_thread) {
-		    H5E_push(H5E_RESOURCE, H5E_NOSPACE, "H5TS_mutex_lock",
-			     __FILE__, __LINE__, "memory allocation failed");
+		    H5E_push(H5E_get_my_stack(), "H5TS_mutex_lock",
+			     __FILE__, __LINE__, H5E_ERR_CLS_g, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed");
 		    return FAIL;
 		}
 
@@ -290,11 +282,12 @@ H5TS_cancel_count_inc(void)
 	 * First time thread calls library - create new counter and associate
          * with key
          */
-	cancel_counter = H5MM_malloc(sizeof(H5TS_cancel_t));
+        /* Where is it freed? */
+	cancel_counter = H5MM_calloc(sizeof(H5TS_cancel_t));
 
 	if (!cancel_counter) {
-	    H5E_push(H5E_RESOURCE, H5E_NOSPACE, "H5TS_cancel_count_inc",
-		     __FILE__, __LINE__, "memory allocation failed");
+	    H5E_push(H5E_get_my_stack(), "H5TS_cancel_count_inc",
+		     __FILE__, __LINE__, H5E_ERR_CLS_g, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed");
 	    return FAIL;
 	}
 

@@ -1518,7 +1518,7 @@ H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mes
 	ret_value = (H5O_fast_g[cache_type]) (cache, type, mesg);
 	if (ret_value)
 	    HGOTO_DONE(ret_value);
-	H5E_clear(); /*don't care, try reading from header */
+	H5E_clear(H5E_get_my_stack()); /*don't care, try reading from header */
     }
 
     /* can we get it from the object header? */
@@ -1829,7 +1829,7 @@ H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
 		 * If the message isn't shared then turn off the shared bit
 		 * and treat it as an unshared message.
 		 */
-		H5E_clear ();
+		H5E_clear (H5E_get_my_stack());
 		flags &= ~H5O_FLAG_SHARED;
 	    } else if (sh_mesg.in_gh) {
 		/*
@@ -2101,7 +2101,7 @@ H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t *type,
              * If the message isn't shared then turn off the shared bit
              * and treat it as an unshared message.
              */
-            H5E_clear ();
+            H5E_clear (H5E_get_my_stack());
             flags &= ~H5O_FLAG_SHARED;
         } else if (sh_mesg.in_gh) {
             /*
@@ -2926,7 +2926,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 	    if ((idx = H5O_alloc_extend_chunk(oh, chunkno, size)) != UFAIL) {
 		break;
 	    }
-	    H5E_clear();
+	    H5E_clear(H5E_get_my_stack());
 	}
 
 	/*

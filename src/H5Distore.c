@@ -1432,7 +1432,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         udata.mesg = *layout;
         udata.addr = HADDR_UNDEF;
         status = H5B_find (f, dxpl_id, H5B_ISTORE, layout->addr, &udata);
-        H5E_clear ();
+        H5E_clear(H5E_get_my_stack());
 
         if (status>=0 && H5F_addr_defined(udata.addr)) {
             size_t		chunk_alloc=0;		/*allocated chunk size	*/
@@ -2082,7 +2082,8 @@ H5F_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 
     /* Go get the chunk information */
     if (H5B_find (f, dxpl_id, H5B_ISTORE, layout->addr, &udata)<0) {
-        H5E_clear();
+        H5E_clear(H5E_get_my_stack());
+        
 	HGOTO_ERROR(H5E_BTREE,H5E_NOTFOUND,HADDR_UNDEF,"Can't locate chunk info");
     } /* end if */
 

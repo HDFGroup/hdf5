@@ -238,8 +238,8 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
  int           inserted_objs=0;
  int           j;
  void          *edata;
- hid_t         (*func)(void*);
- 
+ H5E_auto_t     func;
+
  if (( nobjs = get_nobjects( loc_id, group_name )) < 0 )
   return -1;
  
@@ -259,12 +259,12 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
   strcat( path, name ); 
 
   /* disable error reporting */
-  H5Eget_auto(&func, &edata);
-  H5Eset_auto(NULL, NULL);
+  H5Eget_auto(H5E_DEFAULT, &func, &edata);
+  H5Eset_auto(H5E_DEFAULT, NULL, NULL);
 
   /* get info */
   H5Gget_objinfo( loc_id, path, TRUE, &statbuf);
-  H5Eset_auto(func, edata);
+  H5Eset_auto(H5E_DEFAULT, &func, edata);
 
   /* add to array */
   if ( info )
