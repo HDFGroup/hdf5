@@ -1,4 +1,4 @@
-HDF5 version 1.5.39 released on Sat Oct 26 03:48:35 CDT 2002
+HDF5 version 1.5.40 released on Sat Nov  2 03:51:51 CST 2002
 ================================================================================
 
 
@@ -35,6 +35,10 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Fixed error condition where "none" selections were not being handled
+      correctly in parallel.  QAK - 2002/10/29
+    * New functions H5Gget_comment(modification), H5Aget_storage_size, 
+      H5Arename.  SLU - 2002/10/29
     * Fixed an assertion of H5S_select_iterate that did not account for scalar
       type that has no dimension sizes.   AKC - 2002/10/15
     * Partially fixed space allocation inefficiencies in the file by
