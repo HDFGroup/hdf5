@@ -176,7 +176,7 @@ H5S_hyper_print_diminfo(FILE *f, const H5S_t *space)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size)
+H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
 {
     const H5S_hyper_dim_t *tdiminfo;    /* Temporary pointer to diminfo information */
     H5S_hyper_span_info_t *spans;   /* Pointer to hyperslab span info node */
@@ -222,7 +222,7 @@ H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size)
         /* Don't flatten adjacent elements into contiguous block if the
          * element size is 0.  This is for the H5S_select_shape_same() code.
          */
-        if(elmt_size>0) {
+        if(iter->elmt_size>0) {
             /* Check for any "contiguous" blocks that can be flattened */
             for(u=rank-1; u>0; u--) {
                 if(tdiminfo[u].count==1 && tdiminfo[u].block==mem_size[u])
@@ -316,7 +316,7 @@ H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size)
         iter->u.hyp.spans=H5S_hyper_copy_span(space->select.sel_info.hslab.span_lst);
 
         /* Set the nelem & pstride values according to the element size */
-        H5S_hyper_span_precompute(iter->u.hyp.spans,elmt_size);
+        H5S_hyper_span_precompute(iter->u.hyp.spans,iter->elmt_size);
 
         /* Initialize the starting span_info's and spans */
         spans=iter->u.hyp.spans;
@@ -6669,11 +6669,10 @@ done:
  PURPOSE
     Create a list of offsets & lengths for a selection
  USAGE
-    herr_t H5S_select_hyper_get_file_list_gen(space,iter,maxseq,nseq,off,len)
+    herr_t H5S_select_hyper_get_file_list_gen(space,iter,maxseq,maxelem,nseq,nelem,off,len)
         H5S_t *space;           IN: Dataspace containing selection to use.
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
                                     position of interest in selection.
-        size_t elem_size;       IN: Size of an element
         size_t maxseq;          IN: Maximum number of sequences to generate
         size_t maxelem;         IN: Maximum number of elements to include in the
                                     generated sequences
@@ -6696,7 +6695,7 @@ done:
 --------------------------------------------------------------------------*/
 static herr_t
 H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
-    size_t elem_size, size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
+    size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {
     H5S_hyper_span_t *curr_span;    /* Current hyperslab span node */
@@ -6713,6 +6712,7 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
     size_t start_io_bytes_left;   /* Initial number of bytes left to process */
     size_t io_used;     /* Number of elements processed */
     size_t curr_seq=0; /* Number of sequence/offsets stored in the arrays */
+    size_t elem_size;   /* Size of each element iterating over */
     int ndims;         /* Number of dimensions of dataset */
     int fast_dim;      /* Rank of the fastest changing dimension for the dataspace */
     int curr_dim;      /* Current dimension being operated on */
@@ -6723,7 +6723,6 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
     /* Check args */
     assert(space);
     assert(iter);
-    assert(elem_size>0);
     assert(maxseq>0);
     assert(maxelem>0);
     assert(nseq);
@@ -6740,6 +6739,7 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
     abs_arr=iter->u.hyp.off;
     off_arr=space->select.offset;
     ispan=iter->u.hyp.span;
+    elem_size=iter->elmt_size;
 
     /* Set the amount of elements to perform I/O on, etc. */
     H5_CHECK_OVERFLOW(iter->elmt_left,hsize_t,size_t);
@@ -7102,11 +7102,10 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
  PURPOSE
     Create a list of offsets & lengths for a selection
  USAGE
-    herr_t H5S_select_hyper_get_file_list_opt(space,iter,maxseq,nseq,off,len)
+    herr_t H5S_select_hyper_get_file_list_opt(space,iter,maxseq,maxelem,nseq,nelem,off,len)
         H5S_t *space;           IN: Dataspace containing selection to use.
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
                                     position of interest in selection.
-        size_t elem_size;       IN: Size of an element
         size_t maxseq;          IN: Maximum number of sequences to generate
         size_t maxelem;         IN: Maximum number of elements to include in the
                                     generated sequences
@@ -7129,7 +7128,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
 --------------------------------------------------------------------------*/
 static herr_t
 H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
-    size_t elmt_size, size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
+    size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {
     hsize_t *mem_size;                  /* Size of the source buffer */
@@ -7163,13 +7162,13 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
     size_t nelmts;      /* Starting number of elements */
     size_t io_left;     /* The number of elements left in I/O operation */
     size_t start_io_left; /* The initial number of elements left in I/O operation */
+    size_t elem_size;   /* Size of each element iterating over */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_get_seq_list_opt);
 
     /* Check args */
     assert(space);
     assert(iter);
-    assert(elmt_size>0);
     assert(maxseq>0);
     assert(maxelem>0);
     assert(nseq);
@@ -7205,7 +7204,8 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
     } /* end else */
 
     /* initialize row sizes for each dimension */
-    for(i=(ndims-1),acc=elmt_size; i>=0; i--) {
+    elem_size=iter->elmt_size;
+    for(i=(ndims-1),acc=elem_size; i>=0; i--) {
         slab[i]=acc;
         acc*=mem_size[i];
     } /* end for */
@@ -7236,7 +7236,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
 
         /* Add a new sequence */
         off[curr_seq]=loc;
-        H5_ASSIGN_OVERFLOW(len[curr_seq],actual_elem*elmt_size,hsize_t,size_t);
+        H5_ASSIGN_OVERFLOW(len[curr_seq],actual_elem*elem_size,hsize_t,size_t);
 
         /* Increment sequence count */
         curr_seq++;
@@ -7287,7 +7287,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
         H5_ASSIGN_OVERFLOW(actual_elem,tdiminfo[fast_dim].block,hsize_t,size_t);
 
         /* Set the number of actual bytes */
-        actual_bytes=actual_elem*elmt_size;
+        actual_bytes=actual_elem*elem_size;
 
         /* Set local copies of information for the fastest changing dimension */
         fast_dim_start=tdiminfo[fast_dim].start;
@@ -7532,7 +7532,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
             /* Handle any leftover, partial blocks in this row */
             if(io_left>0 && curr_seq<maxseq) {
                 actual_elem=io_left;
-                actual_bytes=actual_elem*elmt_size;
+                actual_bytes=actual_elem*elem_size;
 
                 /* Store the sequence information */
                 off[curr_seq]=loc;
@@ -7579,12 +7579,11 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
  PURPOSE
     Create a list of offsets & lengths for a selection
  USAGE
-    herr_t H5S_hyper_get_seq_list(space,flags,iter,elem_size,maxseq,maxbytes,nseq,nbytes,off,len)
+    herr_t H5S_hyper_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
         H5S_t *space;           IN: Dataspace containing selection to use.
         unsigned flags;         IN: Flags for extra information about operation
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
                                     position of interest in selection.
-        size_t elem_size;       IN: Size of an element
         size_t maxseq;          IN: Maximum number of sequences to generate
         size_t maxelem;         IN: Maximum number of elements to include in the
                                     generated sequences
@@ -7607,7 +7606,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
 --------------------------------------------------------------------------*/
 herr_t
 H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t *iter,
-    size_t elem_size, size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
+    size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {
     herr_t ret_value;      /* return value */
@@ -7617,7 +7616,6 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t
     /* Check args */
     assert(space);
     assert(iter);
-    assert(elem_size>0);
     assert(maxseq>0);
     assert(maxelem>0);
     assert(nseq);
@@ -7628,10 +7626,10 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t
     /* Check for the special case of just one H5Sselect_hyperslab call made */
     if(space->select.sel_info.hslab.diminfo_valid)
         /* Use optimized call to generate sequence list */
-        ret_value=H5S_hyper_get_seq_list_opt(space,iter,elem_size,maxseq,maxelem,nseq,nelem,off,len);
+        ret_value=H5S_hyper_get_seq_list_opt(space,iter,maxseq,maxelem,nseq,nelem,off,len);
     else
         /* Call the general sequence generator routine */
-        ret_value=H5S_hyper_get_seq_list_gen(space,iter,elem_size,maxseq,maxelem,nseq,nelem,off,len);
+        ret_value=H5S_hyper_get_seq_list_gen(space,iter,maxseq,maxelem,nseq,nelem,off,len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

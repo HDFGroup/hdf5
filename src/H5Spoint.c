@@ -68,7 +68,7 @@ H5FL_DEFINE_STATIC(H5S_pnt_list_t);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_point_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t UNUSED elmt_size)
+H5S_point_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -1307,12 +1307,11 @@ done:
  PURPOSE
     Create a list of offsets & lengths for a selection
  USAGE
-    herr_t H5S_point_get_seq_list(space,flags,iter,elem_size,maxseq,maxbytes,nseq,nbytes,off,len)
+    herr_t H5S_point_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
         H5S_t *space;           IN: Dataspace containing selection to use.
         unsigned flags;         IN: Flags for extra information about operation
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
                                     position of interest in selection.
-        size_t elem_size;       IN: Size of an element
         size_t maxseq;          IN: Maximum number of sequences to generate
         size_t maxelem;         IN: Maximum number of elements to include in the
                                     generated sequences
@@ -1335,7 +1334,7 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
-    size_t elem_size, size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
+    size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {
     size_t io_left;             /* The number of bytes left in the selection */
@@ -1354,7 +1353,6 @@ H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
     /* Check args */
     assert(space);
     assert(iter);
-    assert(elem_size>0);
     assert(maxseq>0);
     assert(maxelem>0);
     assert(nseq);
@@ -1376,7 +1374,7 @@ H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
     curr_seq=0;
     while(node!=NULL) {
         /* Compute the offset of each selected point in the buffer */
-        for(i=ndims-1,acc=elem_size,loc=0; i>=0; i--) {
+        for(i=ndims-1,acc=iter->elmt_size,loc=0; i>=0; i--) {
             loc+=(node->pnt[i]+space->select.offset[i])*acc;
             acc*=dims[i];
         } /* end for */
@@ -1391,12 +1389,12 @@ H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
             /* (Unlikely, but possible) */
             if(loc==(off[curr_seq-1]+len[curr_seq-1])) {
                 /* Extend the previous sequence */
-                len[curr_seq-1]+=elem_size;
+                len[curr_seq-1]+=iter->elmt_size;
             } /* end if */
             else {
                 /* Add a new sequence */
                 off[curr_seq]=loc;
-                len[curr_seq]=elem_size;
+                len[curr_seq]=iter->elmt_size;
 
                 /* Increment sequence count */
                 curr_seq++;
@@ -1405,7 +1403,7 @@ H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
         else {
             /* Add a new sequence */
             off[curr_seq]=loc;
-            len[curr_seq]=elem_size;
+            len[curr_seq]=iter->elmt_size;
 
             /* Increment sequence count */
             curr_seq++;

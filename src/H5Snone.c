@@ -61,7 +61,7 @@ static herr_t H5S_none_iter_release(H5S_sel_iter_t *sel_iter);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_none_iter_init (H5S_sel_iter_t *iter, const H5S_t UNUSED *space, size_t UNUSED elmt_size)
+H5S_none_iter_init (H5S_sel_iter_t *iter, const H5S_t UNUSED *space)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -733,12 +733,11 @@ done:
  PURPOSE
     Create a list of offsets & lengths for a selection
  USAGE
-    herr_t H5S_all_get_seq_list(space,flags,iter,elem_size,maxseq,maxbytes,nseq,nbytes,off,len)
+    herr_t H5S_all_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
         H5S_t *space;           IN: Dataspace containing selection to use.
         unsigned flags;         IN: Flags for extra information about operation
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
                                     position of interest in selection.
-        size_t elem_size;       IN: Size of an element
         size_t maxseq;          IN: Maximum number of sequences to generate
         size_t maxelem;         IN: Maximum number of elements to include in the
                                     generated sequences
@@ -761,7 +760,7 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5S_none_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_iter_t UNUSED *iter,
-    size_t UNUSED elem_size, size_t UNUSED maxseq, size_t UNUSED maxelem, size_t *nseq, size_t *nelem,
+    size_t UNUSED maxseq, size_t UNUSED maxelem, size_t *nseq, size_t *nelem,
     hsize_t UNUSED *off, size_t UNUSED *len)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -771,7 +770,6 @@ H5S_none_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_
     /* Check args */
     assert(space);
     assert(iter);
-    assert(elem_size>0);
     assert(maxseq>0);
     assert(maxelem>0);
     assert(nseq);

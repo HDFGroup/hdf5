@@ -1171,7 +1171,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
         assert(dataset->layout.addr!=HADDR_UNDEF || dataset->efl.nused>0 || 
              dataset->layout.type==H5D_COMPACT);
         n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), src_type_size, file_space, 
+                &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), file_space, 
                 &file_iter, smine_nelmts, dxpl_cache, dxpl_id, tconv_buf/*out*/);
 
 #ifdef H5S_DEBUG
@@ -1186,7 +1186,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            n = H5S_select_mgath(buf, dst_type_size, mem_space, &bkg_iter,
+            n = H5S_select_mgath(buf, mem_space, &bkg_iter,
 				 smine_nelmts, dxpl_cache, bkg_buf/*out*/);
 #ifdef H5S_DEBUG
             H5_timer_end(&(sconv->stats[1].bkg_timer), &timer);
@@ -1209,7 +1209,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-        status = H5S_select_mscat(tconv_buf, dst_type_size, mem_space,
+        status = H5S_select_mscat(tconv_buf, mem_space,
                           &mem_iter, smine_nelmts, dxpl_cache, buf/*out*/);
 #ifdef H5S_DEBUG
 	H5_timer_end(&(sconv->stats[1].scat_timer), &timer);
@@ -1395,7 +1395,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-        n = H5S_select_mgath(buf, src_type_size, mem_space, &mem_iter,
+        n = H5S_select_mgath(buf, mem_space, &mem_iter,
 			     smine_nelmts, dxpl_cache, tconv_buf/*out*/);
 #ifdef H5S_DEBUG
 	H5_timer_end(&(sconv->stats[0].gath_timer), &timer);
@@ -1410,7 +1410,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
             H5_timer_begin(&timer);
 #endif
             n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                 &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), dst_type_size, file_space, 
+                 &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), file_space, 
                  &bkg_iter, smine_nelmts, dxpl_cache, dxpl_id, bkg_buf/*out*/); 
 
 #ifdef H5S_DEBUG
@@ -1435,7 +1435,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
         H5_timer_begin(&timer);
 #endif
         status = H5S_select_fscat(dataset->ent.file, &(dataset->layout), 
-              &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), dst_type_size, file_space, &file_iter,
+              &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), file_space, &file_iter,
               smine_nelmts, dxpl_cache, dxpl_id, tconv_buf);
 
 #ifdef H5S_DEBUG
@@ -1685,7 +1685,7 @@ UNUSED
             assert(dataset->layout.addr!=HADDR_UNDEF || dataset->efl.nused>0 || 
                  dataset->layout.type==H5D_COMPACT);
             n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                    &dataset->dcpl_cache, &store, src_type_size, chunk_info->fspace, 
+                    &dataset->dcpl_cache, &store, chunk_info->fspace, 
                     &file_iter, smine_nelmts, dxpl_cache, dxpl_id, tconv_buf/*out*/);
 
 #ifdef H5S_DEBUG
@@ -1700,7 +1700,7 @@ UNUSED
 #ifdef H5S_DEBUG
                 H5_timer_begin(&timer);
 #endif
-                n = H5S_select_mgath(buf, dst_type_size, chunk_info->mspace, &bkg_iter,
+                n = H5S_select_mgath(buf, chunk_info->mspace, &bkg_iter,
                                  smine_nelmts, dxpl_cache, bkg_buf/*out*/);
 #ifdef H5S_DEBUG
                 H5_timer_end(&(sconv->stats[1].bkg_timer), &timer);
@@ -1724,7 +1724,7 @@ UNUSED
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            status = H5S_select_mscat(tconv_buf, dst_type_size, chunk_info->mspace,
+            status = H5S_select_mscat(tconv_buf, chunk_info->mspace,
                         &mem_iter, smine_nelmts, dxpl_cache, buf/*out*/);
 #ifdef H5S_DEBUG
             H5_timer_end(&(sconv->stats[1].scat_timer), &timer);
@@ -2037,7 +2037,7 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            n = H5S_select_mgath(buf, src_type_size, chunk_info->mspace, &mem_iter,
+            n = H5S_select_mgath(buf, chunk_info->mspace, &mem_iter,
                                  smine_nelmts, dxpl_cache, tconv_buf/*out*/);
     
 #ifdef H5S_DEBUG
@@ -2053,7 +2053,7 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
                 H5_timer_begin(&timer);
 #endif
                 n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                        &dataset->dcpl_cache, &store, dst_type_size, chunk_info->fspace, 
+                        &dataset->dcpl_cache, &store, chunk_info->fspace, 
                         &bkg_iter, smine_nelmts, dxpl_cache, dxpl_id, bkg_buf/*out*/); 
 
 #ifdef H5S_DEBUG
@@ -2079,7 +2079,7 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             H5_timer_begin(&timer);
 #endif
             status = H5S_select_fscat(dataset->ent.file, &(dataset->layout), 
-                        &dataset->dcpl_cache, &store, dst_type_size, chunk_info->fspace, 
+                        &dataset->dcpl_cache, &store, chunk_info->fspace, 
                         &file_iter, smine_nelmts, dxpl_cache, dxpl_id, tconv_buf);
 
 #ifdef H5S_DEBUG

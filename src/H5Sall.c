@@ -60,7 +60,7 @@ static herr_t H5S_all_iter_release(H5S_sel_iter_t *sel_iter);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_all_iter_init (H5S_sel_iter_t *iter, const H5S_t *space, size_t UNUSED elmt_size)
+H5S_all_iter_init (H5S_sel_iter_t *iter, const H5S_t *space)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -74,7 +74,8 @@ H5S_all_iter_init (H5S_sel_iter_t *iter, const H5S_t *space, size_t UNUSED elmt_
     iter->elmt_left=H5S_get_simple_extent_npoints(space);
 
     /* Start at the upper left location */
-    iter->u.all.offset=0;
+    iter->u.all.elmt_offset=0;
+    iter->u.all.byte_offset=0;
 
     /* Initialize methods for selection iterator */
     iter->iter_coords=H5S_all_iter_coords;
@@ -117,7 +118,7 @@ H5S_all_iter_coords (const H5S_sel_iter_t *iter, hssize_t *coords)
     assert (coords);
 
     /* Calculate the coordinates for the current iterator offset */
-    if(H5V_array_calc(iter->u.all.offset,iter->rank,iter->dims,coords)<0)
+    if(H5V_array_calc(iter->u.all.elmt_offset,iter->rank,iter->dims,coords)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve coordinates");
 
 done:
@@ -249,7 +250,8 @@ H5S_all_iter_next(H5S_sel_iter_t *iter, size_t nelem)
     assert (nelem>0);
 
     /* Increment the iterator */
-    iter->u.all.offset+=nelem;
+    iter->u.all.elmt_offset+=nelem;
+    iter->u.all.byte_offset+=(nelem*iter->elmt_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5S_all_iter_next() */
@@ -779,12 +781,11 @@ done:
  PURPOSE
     Create a list of offsets & lengths for a selection
  USAGE
-    herr_t H5S_all_get_seq_list(space,flags,iter,elem_size,maxseq,maxbytes,nseq,nbytes,off,len)
+    herr_t H5S_all_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
         H5S_t *space;           IN: Dataspace containing selection to use.
         unsigned flags;         IN: Flags for extra information about operation
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
                                     position of interest in selection.
-        size_t elem_size;       IN: Size of an element
         size_t maxseq;          IN: Maximum number of sequences to generate
         size_t maxelem;         IN: Maximum number of elements to include in the
                                     generated sequences
@@ -807,7 +808,7 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_iter_t *iter,
-    size_t elem_size, size_t UNUSED maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
+    size_t UNUSED maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {
     size_t elem_used;           /* The number of elements used */
@@ -818,7 +819,6 @@ H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_i
     /* Check args */
     assert(space);
     assert(iter);
-    assert(elem_size>0);
     assert(maxseq>0);
     assert(maxelem>0);
     assert(nseq);
@@ -831,8 +831,8 @@ H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_i
     elem_used=MIN(maxelem,(size_t)iter->elmt_left);
 
     /* Compute the offset in the dataset */
-    off[0]=iter->u.all.offset*elem_size;
-    len[0]=elem_used*elem_size;
+    off[0]=iter->u.all.byte_offset;
+    len[0]=elem_used*iter->elmt_size;
 
     /* Should only need one sequence for 'all' selections */
     *nseq=1;
@@ -842,7 +842,8 @@ H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_i
 
     /* Update the iterator */
     iter->elmt_left-=elem_used;
-    iter->u.all.offset+=elem_used;
+    iter->u.all.elmt_offset+=elem_used;
+    iter->u.all.byte_offset+=len[0];
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
