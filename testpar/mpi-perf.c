@@ -140,15 +140,13 @@ int main(int argc, char **argv)
 		goto die_jar_jar_die;
 	}
 
-	/* now repeat the seek and write operations the number of times
+	/* now repeat the write operations the number of times
 	 * specified on the command line */
 	for (j=0; j < opt_iter; j++) {
 
-		/* seek to an appropriate position depending on the iteration and
-		 * rank of the current process */
+		/* calculate the appropriate position depending on the iteration
+		 * and rank of the current process */
 		seek_position = (j*iter_jump)+(mynod*opt_block);
-
-/*		MPI_File_seek(fh, seek_position, MPI_SEEK_SET);*/
 
 		if (opt_correct) /* fill in buffer for iteration */ {
 			for (i=mynod+j, check=buf; i<opt_block; i++,check++) *check=(char)i;
@@ -194,10 +192,9 @@ int main(int argc, char **argv)
 	/* we are going to repeat the read operation the number of iterations
 	 * specified */
 	for (j=0; j < opt_iter; j++) {
-		/* seek to the appropriate spot give the current iteration and
+		/* calculate the appropriate spot give the current iteration and
 		 * rank within the MPI processes */
 		seek_position = (j*iter_jump)+(mynod*opt_block);
-/*		MPI_File_seek(fh, seek_position, MPI_SEEK_SET);*/
 
 		/* discover the start time */
 	   MPI_Barrier(MPI_COMM_WORLD);
