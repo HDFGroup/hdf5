@@ -27,7 +27,6 @@
 /* File drivers */
 #include <H5FDfamily.h>
 
-
 #define INDENT  3
 #define VCOL    50
 
@@ -58,6 +57,12 @@ main(int argc, char *argv[])
     uint8_t     sig[16];
     intn        i, ndims;
     herr_t      status = SUCCEED;
+
+    if (argc == 1) {
+	fprintf(stderr,
+		"Usage: %s filename [signature addr [extra]]\n", argv[0]);
+	HDexit(1);
+    }
 
     /*
      * Open the file and get the file descriptor.
