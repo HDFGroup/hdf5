@@ -2250,6 +2250,11 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
+    /* Initialize these before any errors can occur */
+    HDmemset(&mem_iter,0,sizeof(H5S_sel_iter_t));
+    HDmemset(&bkg_iter,0,sizeof(H5S_sel_iter_t));
+    HDmemset(&file_iter,0,sizeof(H5S_sel_iter_t));
+
     /* Get the dataset's creation property list */
     if (NULL == (dc_plist = H5I_object(dataset->dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
@@ -2257,11 +2262,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* Get the dataset transfer property list */
     if (NULL == (dx_plist = H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-
-    /* Initialize these before any errors can occur */
-    HDmemset(&mem_iter,0,sizeof(H5S_sel_iter_t));
-    HDmemset(&bkg_iter,0,sizeof(H5S_sel_iter_t));
-    HDmemset(&file_iter,0,sizeof(H5S_sel_iter_t));
 
     if (!file_space) {
         if (NULL==(free_this_space=H5S_read (&(dataset->ent))))
@@ -2664,6 +2664,11 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
+    /* Initialize these before any errors can occur */
+    HDmemset(&mem_iter,0,sizeof(H5S_sel_iter_t));
+    HDmemset(&bkg_iter,0,sizeof(H5S_sel_iter_t));
+    HDmemset(&file_iter,0,sizeof(H5S_sel_iter_t));
+
     /* Get the dataset's creation property list */
     if (NULL == (dc_plist = H5I_object(dataset->dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
@@ -2688,11 +2693,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             H5T_get_ref_type(mem_type)==H5R_DATASET_REGION)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing region reference datatypes yet");
 #endif
-
-    /* Initialize these before any errors can occur */
-    HDmemset(&mem_iter,0,sizeof(H5S_sel_iter_t));
-    HDmemset(&bkg_iter,0,sizeof(H5S_sel_iter_t));
-    HDmemset(&file_iter,0,sizeof(H5S_sel_iter_t));
 
     if (0==(H5F_get_intent(dataset->ent.file) & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file");
