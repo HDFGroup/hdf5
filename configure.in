@@ -783,18 +783,15 @@ AC_ARG_WITH(pablo,
   [  --with-pablo[=DIR]      Use the Pablo library [default=no]],,
   withval=no)
 
+AC_MSG_CHECKING(for Pablo)
+
 case "$withval" in
   yes)
-    failed="no"
-    AC_CHECK_LIB(PabloTraceExt, initIOTrace,, failed="yes")
-
-    if test "$failed" != "yes"; then
-      HAVE_PABLO="yes"
-      PABLO="pablo"
-    fi
+    AC_MSG_RESULT(yes)
+    HAVE_PABLO="yes"
+    PABLO="pablo"
     ;;
   no)
-    AC_MSG_CHECKING(for Pablo)
     AC_MSG_RESULT(suppressed)
     ;;
   *)
@@ -822,9 +819,17 @@ case "$withval" in
     fi
 
     failed="no"
-    AC_CHECK_HEADERS(IOTrace.h,
-                     AC_CHECK_LIB(PabloTraceExt, initIOTrace,, failed="yes"),
-                     failed="yes")
+    if test -f "$pablo_inc/PabloTrace.h"; then
+      :
+    else
+      failed="yes"
+    fi
+
+    if test -f "$pablo_lib/libPabloTraceExt.a"; then
+      :
+    else
+      failed="yes"
+    fi
 
     if test "$failed" = "yes"; then
       dnl Reset flags if failed
@@ -833,6 +838,12 @@ case "$withval" in
     else
       HAVE_PABLO="yes"
       PABLO="pablo"
+    fi
+
+    if test "$HAVE_PABLO" = "yes"; then
+      AC_MSG_RESULT(yes)
+    else
+      AC_MSG_RESULT(no)
     fi
     ;;
 esac
