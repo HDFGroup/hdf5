@@ -66,8 +66,10 @@
 /*
  * C9x integer types
  */
+#ifndef __cplusplus
 #ifdef H5_HAVE_STDINT_H
 #   include <stdint.h>
+#endif
 #endif
 
 /*
