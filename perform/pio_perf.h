@@ -41,7 +41,13 @@ typedef struct results_ {
 
 extern MPI_Comm pio_comm_g;         /* Communicator to run the PIO          */
 extern int      pio_mpi_rank_g;     /* MPI rank of pio_comm_g               */
-extern int	    pio_mpi_nprocs_g;   /* number of processes of pio_comm_g    */
+extern int      pio_mpi_nprocs_g;   /* number of processes of pio_comm_g    */
+extern int      pio_debug_level;    /* The debug level:
+                                     *   0 - Off
+                                     *   1 - Minimal
+                                     *   2 - Some more
+                                     *   3 - Maximal
+                                     */
 
 #ifdef __cplusplus
 extern "C" {

@@ -81,7 +81,13 @@
 /* global variables */
 MPI_Comm    pio_comm_g;         /* Communicator to run the PIO          */
 int         pio_mpi_rank_g;     /* MPI rank of pio_comm_g               */
-int	        pio_mpi_nprocs_g;   /* number of processes of pio_comm_g    */
+int         pio_mpi_nprocs_g;   /* Number of processes of pio_comm_g    */
+int         pio_debug_level = 0;/* The debug level:
+                                 *   0 - Off
+                                 *   1 - Minimal
+                                 *   2 - Some more
+                                 *   3 - Maximal
+                                 */
 
 /* local variables */
 static const char  *progname = "pio_perf";
@@ -92,9 +98,9 @@ static const char  *progname = "pio_perf";
  * adding more, make sure that they don't clash with each other.
  */
 #if 1
-static const char *s_opts = "hf:HP:p:X:x:md:F:i:o:r";
+static const char *s_opts = "hD:f:HP:p:X:x:md:F:i:o:r";
 #else
-static const char *s_opts = "hbf:HP:p:X:x:md:F:i:o:r";
+static const char *s_opts = "hbD:f:HP:p:X:x:md:F:i:o:r";
 #endif  /* 1 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
@@ -108,6 +114,11 @@ static struct long_options l_opts[] = {
     { "bin", no_arg, 'b' },
     { "bi", no_arg, 'b' },
 #endif  /* 0 */
+    { "debug", require_arg, 'D' },
+    { "debu", require_arg, 'D' },
+    { "deb", require_arg, 'D' },
+    { "de", require_arg, 'D' },
+    { "d", require_arg, 'D' },
     { "file-size", require_arg, 'f' },
     { "file-siz", require_arg, 'f' },
     { "file-si", require_arg, 'f' },
@@ -211,8 +222,9 @@ static long parse_size_directive(const char *size);
 static struct options *parse_command_line(int argc, char *argv[]);
 static void run_test_loop(FILE *output, struct options *options);
 static int run_test(FILE *output, iotype iot, parameters parms);
+static void output_all_info(FILE *output, minmax *mm, int count, int indent_level);
 static void get_minmax(minmax *mm, double val);
-static minmax accumulate_minmax_stuff(minmax *mm, int count);
+static minmax accumulate_minmax_stuff(minmax *mm, long raw_size, int count);
 static int create_comm_world(int num_procs, int *doing_pio);
 static int destroy_comm_world(void);
 static void output_report(FILE *output, const char *fmt, ...);
@@ -335,36 +347,36 @@ run_test_loop(FILE *output, struct options *opts)
 
 	/* only processes doing PIO will run the tests */
 	if (doing_pio){
-        output_report(output, "Number of processors = %ld\n", parms.num_procs);
+            output_report(output, "Number of processors = %ld\n", parms.num_procs);
 
-        /* multiply the xfer buffer size by 2 for each loop iteration */
-        for (buf_size = opts->min_xfer_size;
-                buf_size <= opts->max_xfer_size; buf_size <<= 1) {
-            parms.buf_size = buf_size;
-            parms.num_elmts = opts->file_size / (parms.num_dsets * sizeof(int));
+            /* multiply the xfer buffer size by 2 for each loop iteration */
+            for (buf_size = opts->min_xfer_size;
+                    buf_size <= opts->max_xfer_size; buf_size <<= 1) {
+                parms.buf_size = buf_size;
+                parms.num_elmts = opts->file_size / (parms.num_dsets * sizeof(int));
 
-            print_indent(output, TAB_SPACE * 1);
-            output_report(output, "Transfer Buffer Size: %ld bytes, File size: %.2f MBs\n",
-                          buf_size,
-                          ((double)parms.num_dsets * parms.num_elmts * sizeof(int)) / ONE_MB);
-            print_indent(output, TAB_SPACE * 1);
-            output_report(output,
-                          "  # of files: %ld, # of dsets: %ld, # of elmts per dset: %ld\n",
-                          parms.num_files, parms.num_dsets, parms.num_elmts);
+                print_indent(output, 1);
+                output_report(output, "Transfer Buffer Size: %ld bytes, File size: %.2f MBs\n",
+                              buf_size,
+                              ((double)parms.num_dsets * parms.num_elmts * sizeof(int)) / ONE_MB);
+                print_indent(output, 1);
+                output_report(output,
+                              "  # of files: %ld, # of dsets: %ld, # of elmts per dset: %ld\n",
+                              parms.num_files, parms.num_dsets, parms.num_elmts);
 
-            if (io_runs & PIO_RAW)
-                run_test(output, RAW, parms);
+                if (io_runs & PIO_RAW)
+                    run_test(output, RAW, parms);
 
-            if (io_runs & PIO_MPI)
-                run_test(output, MPIO, parms);
+                if (io_runs & PIO_MPI)
+                    run_test(output, MPIO, parms);
 
-            if (io_runs & PIO_HDF5)
-                run_test(output, PHDF5, parms);
-        }
+                if (io_runs & PIO_HDF5)
+                    run_test(output, PHDF5, parms);
+            }
 
-        if (destroy_comm_world() != SUCCESS) {
-            /* do something harsh */
-        }
+            if (destroy_comm_world() != SUCCESS) {
+                /* do something harsh */
+            }
 	}
     }
 }
@@ -395,7 +407,7 @@ run_test(FILE *output, iotype iot, parameters parms)
 
     raw_size = parms.num_dsets * parms.num_elmts * sizeof(int);
     parms.io_type = iot;
-    print_indent(output, TAB_SPACE * 2);
+    print_indent(output, 2);
     output_report(output, "Type of IO = ");
 
     switch (iot) {
@@ -441,7 +453,6 @@ run_test(FILE *output, iotype iot, parameters parms)
 
     /* call Albert's testing here */
     for (i = 0; i < parms.num_iters; ++i) {
-        register int j;
         double t;
 
         MPI_Barrier(pio_comm_g);
@@ -473,81 +484,115 @@ run_test(FILE *output, iotype iot, parameters parms)
     }
 
     /* accumulate and output the max, min, and average "write" times */
-    total_mm = accumulate_minmax_stuff(write_mm_table, parms.num_iters);
+    if (pio_debug_level == 3) {
+        /* output all of the times for all iterations */
+        print_indent(output, 3);
+        output_report(output, "Write details:\n");
+        output_all_info(output, write_mm_table, parms.num_iters, 4);
+    }
 
-    print_indent(output, TAB_SPACE * 3);
+    total_mm = accumulate_minmax_stuff(write_mm_table, raw_size, parms.num_iters);
+
+    print_indent(output, 3);
     output_report(output, "Write (%d iteration(s)):\n", parms.num_iters);
 
-    print_indent(output, TAB_SPACE * 4);
-    output_report(output, "Minimum Time: %.2fs (%.2f MB/s)\n",
-                  total_mm.min,
-                  MB_PER_SEC(raw_size, total_mm.min));
-    print_indent(output, TAB_SPACE * 4);
-    output_report(output, "Maximum Time: %.2fs (%.2f MB/s)\n",
-                  total_mm.max, MB_PER_SEC(raw_size, total_mm.max));
-    print_indent(output, TAB_SPACE * 4);
-    output_report(output, "Average Time: %.2fs (%.2f MB/s)\n",
-                  total_mm.sum / total_mm.num,
-                  MB_PER_SEC(raw_size, (total_mm.sum / total_mm.num)));
+    print_indent(output, 4);
+    output_report(output, "Minimum Throughput: %.2f MB/s\n", total_mm.min);
+    print_indent(output, 4);
+    output_report(output, "Maximum Throughput: %.2f MB/s\n", total_mm.max);
+    print_indent(output, 4);
+    output_report(output, "Average Throughput: %.2f MB/s\n",
+                  total_mm.sum / total_mm.num);
 
     /* accumulate and output the max, min, and average "gross write" times */
-    total_mm = accumulate_minmax_stuff(write_gross_mm_table, parms.num_iters);
+    if (pio_debug_level == 3) {
+        /* output all of the times for all iterations */
+        print_indent(output, 3);
+        output_report(output, "Write Open-Close details:\n");
+        output_all_info(output, write_gross_mm_table, parms.num_iters, 4);
+    }
 
-    print_indent(output, TAB_SPACE * 3);
+    total_mm = accumulate_minmax_stuff(write_gross_mm_table, raw_size, parms.num_iters);
+
+    print_indent(output, 3);
     output_report(output, "Write Open-Close (%d iteration(s)):\n", parms.num_iters);
 
-    print_indent(output, TAB_SPACE * 4);
-    output_report(output, "Minimum Time: %.2fs (%.2f MB/s)\n",
-                  total_mm.min,
-                  MB_PER_SEC(raw_size, total_mm.min));
-    print_indent(output, TAB_SPACE * 4);
-    output_report(output, "Maximum Time: %.2fs (%.2f MB/s)\n",
-                  total_mm.max, MB_PER_SEC(raw_size, total_mm.max));
-    print_indent(output, TAB_SPACE * 4);
-    output_report(output, "Average Time: %.2fs (%.2f MB/s)\n",
-                  total_mm.sum / total_mm.num,
-                  MB_PER_SEC(raw_size, (total_mm.sum / total_mm.num)));
+    print_indent(output, 4);
+    output_report(output, "Minimum Throughput: %.2f MB/s\n", total_mm.min);
+    print_indent(output, 4);
+    output_report(output, "Maximum Throughput: %.2f MB/s\n", total_mm.max);
+    print_indent(output, 4);
+    output_report(output, "Average Throughput: %.2f MB/s\n",
+                  total_mm.sum / total_mm.num);
 
     /* accumulate and output the max, min, and average "read" times */
-    total_mm = accumulate_minmax_stuff(read_mm_table, parms.num_iters);
+    if (pio_debug_level == 3) {
+        /* output all of the times for all iterations */
+        print_indent(output, 3);
+        output_report(output, "Read details:\n");
+        output_all_info(output, read_mm_table, parms.num_iters, 4);
+    }
 
-    print_indent(output, TAB_SPACE * 3);
+    total_mm = accumulate_minmax_stuff(read_mm_table, raw_size, parms.num_iters);
+
+    print_indent(output, 3);
     output_report(output, "Read (%d iteration(s)):\n", parms.num_iters);
 
-    print_indent(output, TAB_SPACE * 4);
-    output_report(output, "Minimum Time: %.2fs (%.2f MB/s)\n",
-                  total_mm.min, MB_PER_SEC(raw_size, total_mm.min));
-    print_indent(output, TAB_SPACE * 4);
-    output_report(output, "Maximum Time: %.2fs (%.2f MB/s)\n",
-                  total_mm.max, MB_PER_SEC(raw_size, total_mm.max));
-    print_indent(output, TAB_SPACE * 4);
-    output_report(output, "Average Time: %.2fs (%.2f MB/s)\n",
-                  total_mm.sum / total_mm.num,
-                  MB_PER_SEC(raw_size, (total_mm.sum / total_mm.num)));
+    print_indent(output, 4);
+    output_report(output, "Minimum Throughput: %.2f MB/s\n", total_mm.min);
+    print_indent(output, 4);
+    output_report(output, "Maximum Throughput: %.2f MB/s\n", total_mm.max);
+    print_indent(output, 4);
+    output_report(output, "Average Throughput: %.2f MB/s\n",
+                  total_mm.sum / total_mm.num);
 
     /* accumulate and output the max, min, and average "gross read" times */
-    total_mm = accumulate_minmax_stuff(read_gross_mm_table, parms.num_iters);
+    if (pio_debug_level == 3) {
+        /* output all of the times for all iterations */
+        print_indent(output, 3);
+        output_report(output, "Read Open-Close details:\n");
+        output_all_info(output, read_gross_mm_table, parms.num_iters, 4);
+    }
 
-    print_indent(output, TAB_SPACE * 3);
+    total_mm = accumulate_minmax_stuff(read_gross_mm_table, raw_size, parms.num_iters);
+
+    print_indent(output, 3);
     output_report(output, "Read Open-Close (%d iteration(s)):\n", parms.num_iters);
 
-    print_indent(output, TAB_SPACE * 4);
-    output_report(output, "Minimum Time: %.2fs (%.2f MB/s)\n",
-                  total_mm.min,
-                  MB_PER_SEC(raw_size, total_mm.min));
-    print_indent(output, TAB_SPACE * 4);
-    output_report(output, "Maximum Time: %.2fs (%.2f MB/s)\n",
-                  total_mm.max, MB_PER_SEC(raw_size, total_mm.max));
-
-    print_indent(output, TAB_SPACE * 4);
-    output_report(output, "Average Time: %.2fs (%.2f MB/s)\n",
-                  total_mm.sum / total_mm.num,
-                  MB_PER_SEC(raw_size, (total_mm.sum / total_mm.num)));
+    print_indent(output, 4);
+    output_report(output, "Minimum Throughput: %.2f MB/s\n", total_mm.min);
+    print_indent(output, 4);
+    output_report(output, "Maximum Throughput: %.2f MB/s\n", total_mm.max);
+    print_indent(output, 4);
+    output_report(output, "Average Throughput: %.2f MB/s\n",
+                  total_mm.sum / total_mm.num);
 
     free(write_mm_table);
     free(read_mm_table);
     pio_time_destroy(res.timers);
     return ret_value;
+}
+
+/*
+ * Function:    output_all_info
+ * Purpose:     
+ * Return:      Nothing
+ * Programmer:  Bill Wendling, 29. January 2002
+ * Modifications:
+ */
+static void
+output_all_info(FILE *output, minmax *mm, int count, int indent_level)
+{
+    register int i;
+
+    for (i = 0; i < count; ++i) {
+        print_indent(output, indent_level);
+        output_report(output, "Iteration %d:\n", i);
+        print_indent(output, indent_level + 1);
+        output_report(output, "Minimum Time: %.2fs\n", mm[i].min);
+        print_indent(output, indent_level + 1);
+        output_report(output, "Maximum Time: %.2fs\n", mm[i].max);
+    }
 }
 
 /*
@@ -561,7 +606,6 @@ run_test(FILE *output, iotype iot, parameters parms)
 static void
 get_minmax(minmax *mm, double val)
 {
-    double min, max, sum;
     int myrank;
 
     MPI_Comm_rank(pio_comm_g, &myrank);
@@ -581,20 +625,24 @@ get_minmax(minmax *mm, double val)
  * Modifications:
  */
 static minmax
-accumulate_minmax_stuff(minmax *mm, int count)
+accumulate_minmax_stuff(minmax *mm, long raw_size, int count)
 {
     register int i;
-    minmax total_mm = mm[0];
+    minmax total_mm;
+    
+    total_mm.sum = total_mm.max = total_mm.min = MB_PER_SEC(raw_size, mm[0].max);
+    total_mm.num = count;
 
     for (i = 1; i < count; ++i) {
-        total_mm.sum += mm[i].sum;
-        total_mm.num += mm[i].num;
+        double m = MB_PER_SEC(raw_size, total_mm.max);
 
-        if (mm[i].min < total_mm.min)
-            total_mm.min = mm[i].min;
+        total_mm.sum += m;
 
-        if (mm[i].max > total_mm.max)
-            total_mm.max = mm[i].max;
+        if (m < total_mm.min)
+            total_mm.min = m;
+
+        if (m > total_mm.max)
+            total_mm.max = m;
     }
 
     return total_mm;
@@ -715,6 +763,8 @@ output_report(FILE *output, const char *fmt, ...)
 static void
 print_indent(register FILE *output, register int indent)
 {
+    indent *= TAB_SPACE;
+
     for (; indent > 0; --indent)
         fputc(' ', output);
 }
@@ -755,6 +805,15 @@ parse_command_line(int argc, char *argv[])
 #endif  /* 0 */
         case 'd':
             cl_opts->num_dsets = strtol(opt_arg, NULL, 10);
+            break;
+        case 'D':
+            pio_debug_level = strtol(opt_arg, NULL, 10);
+
+            if (pio_debug_level > 3)
+                pio_debug_level = 3;
+            else if (pio_debug_level < 0)
+                pio_debug_level = 0;
+
             break;
         case 'f':
             cl_opts->file_size = parse_size_directive(opt_arg);
@@ -872,6 +931,7 @@ usage(const char *prog)
         fprintf(stdout, "  OPTIONS\n");
         fprintf(stdout, "     -h, --help                  Print a usage message and exit\n");
         fprintf(stdout, "     -d N, --num-dsets=N         Number of datasets per file [default:1]\n");
+        fprintf(stdout, "     -D N, --debug=N             Indicate the debugging level [default:0]\n");
         fprintf(stdout, "     -f S, --file-size=S         Size of a single file [default: 64M]\n");
         fprintf(stdout, "     -F N, --num-files=N         Number of files [default: 1]\n");
         fprintf(stdout, "     -H, --hdf5                  Run HDF5 performance test\n");
@@ -893,6 +953,13 @@ usage(const char *prog)
         fprintf(stdout, "          G - Gigabyte\n");
         fprintf(stdout, "\n");
         fprintf(stdout, "      Example: 37M = 37 Megabytes\n");
+        fprintf(stdout, "\n");
+        fprintf(stdout, "  Debugging levels are:\n");
+        fprintf(stdout, "\n");
+        fprintf(stdout, "    0 - None\n");
+        fprintf(stdout, "    1 - Minimal\n");
+        fprintf(stdout, "    2 - Not quite everything\n");
+        fprintf(stdout, "    3 - Everything\n");
         fprintf(stdout, "\n");
         fflush(stdout);
     }
