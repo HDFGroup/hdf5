@@ -311,11 +311,16 @@ H5AC_compare(const void *_a, const void *_b)
 
     assert(current_cache_g);
 
-    if(NULL==current_cache_g->slot[a]) {
-        if (NULL == current_cache_g->slot[b]) {
-            return 0;
-        } else {
-            return -1;
+    if(NULL==current_cache_g->slot[a] || NULL == current_cache_g->slot[b]) {
+        if(NULL==current_cache_g->slot[a]) {
+            if (NULL == current_cache_g->slot[b]) {
+                return 0;
+            } else {
+                return -1;
+            }
+        }
+        else {
+            return 1;
         }
     }
     else if (NULL == current_cache_g->slot[a]->type) {
