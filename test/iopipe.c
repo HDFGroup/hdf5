@@ -184,8 +184,15 @@ main (void)
     hssize_t		start[2];
     hsize_t		count[2];
     
+
+	/*  
+	* The extra cast in the following statement is a bug                           
+	* workaround for the Win32 version 0.0 compiler.                               
+	* 1998-11-06 ptl                                                               
+	*/   
     printf ("I/O request size is %1.1fMB\n",
-	    ((double)(size[0])*(double)(size[1]))/(1024.0*1024));
+			((double)((hssize_t)(size[0]*size[1])))/(1024.0*1024));
+	   // ((double)(size[0])*(double)(size[1]))/(1024.0*1024));
 
     
     /* Open the files */

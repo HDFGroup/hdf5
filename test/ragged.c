@@ -247,7 +247,12 @@ ragged_write_all(hid_t ra, hsize_t rows_at_once)
 	if (0==row || alarm_g || 0==timeout_g) {
 	    alarm_g = 0;
 	    H5_timer_end(&timer_total, &timer);
-	    H5_bandwidth(s, (double)interval_nelmts*sizeof(C_MTYPE),
+		/*  
+		* The extra cast in the following statement is a bug                           
+		* workaround for the Win32 version 0.0 compiler.                               
+		* 1998-11-06 ptl                                                               
+		*/   
+	    H5_bandwidth(s, (double)((hssize_t)interval_nelmts)*sizeof(C_MTYPE),
 			 timer.etime);
 	    printf("   %8lu %8lu %7.3f%% %10s%s\n",
 		   (unsigned long)(row+i), (unsigned long)total_nelmts,
@@ -261,7 +266,13 @@ ragged_write_all(hid_t ra, hsize_t rows_at_once)
     /* Conclusions */
     if (timeout_g) { /*a minor race condition, but who really cares?*/
 	H5_timer_end(&timer_total, &timer);
-	H5_bandwidth(s, (double)interval_nelmts*sizeof(C_MTYPE), timer.etime);
+
+	/*  
+	* The extra cast in the following statement is a bug                           
+	* workaround for the Win32 version 0.0 compiler.                               
+	* 1998-11-06 ptl                                                               
+	*/   
+	H5_bandwidth(s, (double)((hssize_t)interval_nelmts)*sizeof(C_MTYPE), timer.etime);
 	printf("   %8lu %8lu %7.3f%% %10s\n",
 	       (unsigned long)row, (unsigned long)total_nelmts,
 	       100.0*total_nelmts/MAX_NELMTS, s);
@@ -369,7 +380,12 @@ ragged_read_all(hid_t ra, hsize_t rows_at_once)
 	if (0==row || alarm_g || 0==timeout_g) {
 	    alarm_g = 0;
 	    H5_timer_end(&timer_total, &timer);
-	    H5_bandwidth(s, (double)interval_nelmts*sizeof(C_MTYPE),
+		/*  
+		* The extra cast in the following statement is a bug                           
+		* workaround for the Win32 version 0.0 compiler.                               
+		* 1998-11-06 ptl                                                               
+		*/   
+	    H5_bandwidth(s, (double)((hssize_t)interval_nelmts)*sizeof(C_MTYPE),
 			 timer.etime);
 	    printf("   %8lu %8lu %7.3f%% %10s%s\n",
 		   (unsigned long)(row+i), (unsigned long)total_nelmts,
@@ -391,7 +407,12 @@ ragged_read_all(hid_t ra, hsize_t rows_at_once)
     /* Conclusions */
     if (timeout_g) { /*a minor race condition, but who really cares?*/
 	H5_timer_end(&timer_total, &timer);
-	H5_bandwidth(s, (double)interval_nelmts*sizeof(C_MTYPE), timer.etime);
+	/*  
+	* The extra cast in the following statement is a bug                           
+	* workaround for the Win32 version 0.0 compiler.                               
+	* 1998-11-06 ptl                                                               
+	*/   
+	H5_bandwidth(s, (double)((hssize_t)interval_nelmts)*sizeof(C_MTYPE), timer.etime);
 	printf("   %8lu %8lu %7.3f%% %10s\n",
 	       (unsigned long)row, (unsigned long)total_nelmts,
 	       100.0*total_nelmts/MAX_NELMTS, s);
@@ -521,7 +542,12 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
 	if (0==row || alarm_g || 0==timeout_g) {
 	    alarm_g = 0;
 	    H5_timer_end(&timer_total, &timer);
-	    H5_bandwidth(s, (double)interval_nelmts*sizeof(C_MTYPE),
+		/*  
+		* The extra cast in the following statement is a bug                           
+		* workaround for the Win32 version 0.0 compiler.                               
+		* 1998-11-06 ptl                                                               
+		*/   
+	    H5_bandwidth(s, (double)((hssize_t)interval_nelmts)*sizeof(C_MTYPE),
 			 timer.etime);
 	    printf("   %8lu %8lu %7.3f%% %10s%s\n",
 		   (unsigned long)(row+i), (unsigned long)read_nelmts,
@@ -543,13 +569,23 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
     /* Conclusions */
     if (timeout_g) { /*a minor race condition, but who really cares?*/
 	H5_timer_end(&timer_total, &timer);
-	H5_bandwidth(s, (double)interval_nelmts*sizeof(C_MTYPE), timer.etime);
+	/*  
+	* The extra cast in the following statement is a bug                           
+	* workaround for the Win32 version 0.0 compiler.                               
+	* 1998-11-06 ptl                                                               
+	*/   
+	H5_bandwidth(s, (double)((hssize_t)interval_nelmts)*sizeof(C_MTYPE), timer.etime);
 	printf("   %8lu %8lu %7.3f%% %10s\n",
 	       (unsigned long)row, (unsigned long)read_nelmts,
 	       100.0*total_nelmts/MAX_NELMTS, s);
     }
     printf("   -------- -------- -------- ----------\n");
-    H5_bandwidth(s, (double)read_nelmts*sizeof(C_MTYPE), timer_total.etime);
+	/*  
+	* The extra cast in the following statement is a bug                           
+	* workaround for the Win32 version 0.0 compiler.                               
+	* 1998-11-06 ptl                                                               
+	*/   
+    H5_bandwidth(s, (double)((hssize_t)read_nelmts)*sizeof(C_MTYPE), timer_total.etime);
     printf("   %27s%10s\n", "", s);
 
     /* Cleanup */

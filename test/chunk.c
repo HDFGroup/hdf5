@@ -285,7 +285,12 @@ test_diag (int op, hsize_t cache_size, hsize_t io_size, hsize_t offset)
     H5Dclose (dset);
     H5Fclose (file);
 
-    return (double)nio/(double)nio_g;
+	/*  
+	* The extra cast in the following statement is a bug                           
+	* workaround for the Win32 version 0.0 compiler.                               
+	* 1998-11-06 ptl                                                               
+	*/               
+    return (double)((hssize_t)(nio/nio_g));
 }
 
 
