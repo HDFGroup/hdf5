@@ -38,7 +38,8 @@ int main(int argc, char *argv[])
   const char *err6 = "Invalid dimensions - %s.\n";
   const char *err7 = "Invalid type of data - %s.\n";
   const char *err8 = "Invalid size of data - %s.\n";
-  
+  const char *err9 = "Cannot specify more than 30 input files in one call to h5import.\n";
+   
   (void) setvbuf(stderr, (char *) NULL, _IOLBF, 0);
   (void) setvbuf(stdout, (char *) NULL, _IOLBF, 0);
 
@@ -77,12 +78,19 @@ int main(int argc, char *argv[])
     switch (state)
     {
     
-      case 1: /* counting input files */                  
-        (void) HDstrcpy(opt.infiles[opt.fcount].datafile, argv[i]);
-	in = &(opt.infiles[opt.fcount].in);
-	opt.infiles[opt.fcount].config = 0;
-	setDefaultValues(in, opt.fcount);
-        opt.fcount++;
+      case 1: /* counting input files */       
+				if (opt.fcount < 29) {           
+	        (void) HDstrcpy(opt.infiles[opt.fcount].datafile, argv[i]);
+					in = &(opt.infiles[opt.fcount].in);
+					opt.infiles[opt.fcount].config = 0;
+					setDefaultValues(in, opt.fcount);				
+	        opt.fcount++;
+				}
+				else {
+					(void) fprintf(stderr, err9, argv[i]);
+					goto err;
+				}
+				
       break;
 
       case 2: /* -c found; look for configfile */
@@ -113,7 +121,7 @@ int main(int argc, char *argv[])
 	if (parseDimensions(in, argv[i]) == -1)
         {
           (void) fprintf(stderr, err6, argv[i]);
-          return (-1);        
+					goto err;
         }
       break;
 
@@ -124,7 +132,7 @@ int main(int argc, char *argv[])
  	if (parsePathInfo(&in->path, argv[i]) == -1)
         {
           (void) fprintf(stderr, err5, argv[i]);
-          return (-1);        
+					goto err;
         }
       break;
 
@@ -135,7 +143,7 @@ int main(int argc, char *argv[])
         if (getInputClass(in, argv[i]) == -1)
         {
           (void) fprintf(stderr, err7, argv[i]);
-          return (-1);      
+					goto err;
         }
 
         if (in->inputClass == 0 || in->inputClass == 4)
@@ -153,7 +161,7 @@ int main(int argc, char *argv[])
         if (getInputSize(in, HDstrtol(argv[i], NULL, BASE_10)) == -1)
         {
           (void) fprintf(stderr, err8, argv[i]);
-          return (-1);      
+					goto err;
         }
         /*set default value for output-size */          
         in->outputSize = in->inputSize;
@@ -180,7 +188,7 @@ int main(int argc, char *argv[])
   return(0);  
   err:
     (void) fprintf(stderr, err4);
-    return(1);
+    return(-1);
 }
 
 static int
