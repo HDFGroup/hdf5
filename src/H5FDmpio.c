@@ -673,6 +673,10 @@ H5FD_mpio_fapl_get(H5FD_t *_file)
  *		
  * 		Robb Matzke, 1999-08-06
  *		Modified to work with the virtual file layer.
+ *
+ *      	rky & ppw, 1999-11-07
+ *		Modified "H5FD_mpio_open" so that file-truncation is
+ *              avoided for brand-new files (with zero filesize).
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
@@ -682,10 +686,11 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_mpio_t			*file=NULL;
     MPI_File			fh;
     int				mpi_amode;
-    int				mpierr;
+    int				mpi_rank;
     MPI_Offset			size;
     const H5FD_mpio_fapl_t	*fa=NULL;
     H5FD_mpio_fapl_t		_fa;
+
 
     FUNC_ENTER(H5FD_mpio_open, NULL);
 
@@ -698,21 +703,19 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /* Obtain a pointer to mpio-specific file access properties */
     if (H5P_DEFAULT==fapl_id || H5FD_MPIO!=H5Pget_driver(fapl_id)) {
-        _fa.comm = MPI_COMM_SELF; /*default*/
-        _fa.info = MPI_INFO_NULL; /*default*/
-        fa = &_fa;
+	_fa.comm = MPI_COMM_SELF; /*default*/
+	_fa.info = MPI_INFO_NULL; /*default*/
+	fa = &_fa;
     } else {
-        fa = H5Pget_driver_info(fapl_id);
-        assert(fa);
+	fa = H5Pget_driver_info(fapl_id);
+	assert(fa);
     }
 
     /* convert HDF5 flags to MPI-IO flags */
     /* some combinations are illegal; let MPI-IO figure it out */
     mpi_amode  = (flags&H5F_ACC_RDWR) ? MPI_MODE_RDWR : MPI_MODE_RDONLY;
-    if (flags&H5F_ACC_CREAT)
-        mpi_amode |= MPI_MODE_CREATE;
-    if (flags&H5F_ACC_EXCL)
-        mpi_amode |= MPI_MODE_EXCL;
+    if (flags&H5F_ACC_CREAT)	mpi_amode |= MPI_MODE_CREATE;
+    if (flags&H5F_ACC_EXCL)	mpi_amode |= MPI_MODE_EXCL;
 
 #ifdef H5FDmpio_DEBUG
     {
@@ -750,35 +753,51 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     if (MPI_SUCCESS != MPI_File_open(fa->comm, (char*)name, mpi_amode, fa->info, &fh))
         HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, NULL, "MPI_File_open failed");
 
-    /* truncate the file, if requested */
-    if (flags & H5F_ACC_TRUNC) {
+
+/*  Following changes in handling file-truncation made be rkyates and ppweidhaas, sep 99  */
+    if (MPI_SUCCESS != MPI_Comm_rank (fa->comm, &mpi_rank))
+          HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, NULL, "MPI_Comm_rank failed");
+
+    /* Only processor p0 will get the filesize and broadcast it. */
+    if (mpi_rank == 0) {
+      /* Get current file size */
+      if (MPI_SUCCESS != MPI_File_get_size(fh, &size)) {
+          H5MM_xfree(file);
+          MPI_File_close(&fh);
+          HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, NULL, "MPI_File_get_size failed");
+      }
+    }
+
+    /* Broadcast file-size */
+    if (MPI_SUCCESS != MPI_Bcast(&size, sizeof(MPI_Offset), MPI_BYTE, 0, fa->comm))
+          HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, NULL, "MPI_Bcast failed");
+
+    /* Only if size > 0, truncate the file - if requested */
+    if (size && (flags & H5F_ACC_TRUNC)) {
         if (MPI_SUCCESS != MPI_File_set_size(fh, (MPI_Offset)0)) {
             MPI_File_close(&fh);
             HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, NULL, "MPI_File_set_size failed");
         }
 
-        /* Don't let any proc return until all have truncated the file. */
+	/* Don't let any proc return until all have truncated the file. */
         if (MPI_SUCCESS!= MPI_Barrier(fa->comm)) {
             MPI_File_close(&fh);
             HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, NULL, "MPI_Barrier failed");
         }
+        size = 0;
     }
 
     /* Build the return value and initialize it */
     if (NULL==(file=H5MM_calloc(sizeof(H5FD_mpio_t))))
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
     file->f = fh;
     file->comm = fa->comm;
     file->info = fa->info;
     file->btype = MPI_DATATYPE_NULL;
     file->ftype = MPI_DATATYPE_NULL;
 
-    /* Get current file size */
-    if (MPI_SUCCESS != MPI_File_get_size(fh, &size)) {
-        H5MM_xfree(file);
-        MPI_File_close(&fh);
-        HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, NULL, "MPI_File_get_size failed");
-    }
+
     file->eof = MPIOff_to_haddr(size);
 
 #ifdef H5FDmpio_DEBUG
