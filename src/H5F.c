@@ -4498,3 +4498,42 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_sieve_overlap_clear() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_freespace
+ *
+ * Purpose:     Retrieves the amount of free space (of a given type) in the
+ *              file.  If TYPE is 'H5FD_MEM_DEFAULT', then the amount of free
+ *              space for all types is returned.
+ *
+ * Return:      Success:        Amount of free space for type
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@ncsa.uiuc.edu
+ *              Oct  6, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hssize_t
+H5Fget_freespace(hid_t file_id)
+{
+    H5F_t      *file=NULL;      /* File object for file ID */
+    hssize_t    ret_value;      /* Return value */
+
+    FUNC_ENTER_API(H5Fget_freespace, FAIL)
+
+    /* Check args */
+    if(NULL==(file=H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+
+    /* Go get the actual amount of free space in the file */
+    if((ret_value = H5FD_get_freespace(file->shared->lf))<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fget_freespace() */
+

@@ -802,4 +802,56 @@
             hdferr = h5fget_obj_ids_c(file_id, obj_type, max_objs, obj_ids)
 
           END SUBROUTINE h5fget_obj_ids_f
+
+!----------------------------------------------------------------------
+! Name:		h5fget_freespace_f
+!
+! Purpose:	Get amount of free space within a file
+!
+! Inputs:  
+!		file_id		- file identifier
+! Outputs:  
+!               free_space      - amount of free space in file
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Quincey Koziol
+!		October 7, 2003
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+          
+          SUBROUTINE h5fget_freespace_f(file_id, free_space, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fget_freespace_f
+!DEC$endif
+!
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: file_id ! File identifier
+            INTEGER(HSSIZE_T), INTENT(OUT) :: free_space 
+                                             !amount of free space in file
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5fget_freespace_c(file_id, free_space)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+       !MS$ATTRIBUTES C,reference,alias:'_H5FGET_FREESPACE_C':: h5fget_freespace_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: file_id
+              INTEGER(HSSIZE_T), INTENT(OUT) :: free_space 
+              END FUNCTION h5fget_freespace_c
+            END INTERFACE
+
+            hdferr = h5fget_freespace_c(file_id, free_space)
+
+          END SUBROUTINE h5fget_freespace_f
       END MODULE H5F

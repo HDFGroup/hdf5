@@ -41,7 +41,9 @@ New Features
 
     Library:
     --------
-        - Added backward compatbility with v1.6 for new Error API. SLU - 
+        - Added new H5Fget_freespace() routine to query the free space in a
+            given file.  QAK 2003/10/06
+        - Added backward compatability with v1.6 for new Error API. SLU - 
             2003/09/24
         - Changed 'objno' field in H5G_stat_t structure from 'unsigned long[2]'
             to 'haddr_t'.  QAK - 2003/08/08

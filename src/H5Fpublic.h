@@ -112,6 +112,7 @@ H5_DLL int H5Fget_obj_ids(hid_t file_id, unsigned types, int max_objs, hid_t *ob
 H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void** file_handle);
 H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
 H5_DLL herr_t H5Funmount(hid_t loc, const char *name);
+H5_DLL hssize_t H5Fget_freespace(hid_t file_id);
 
 #ifdef __cplusplus
 }

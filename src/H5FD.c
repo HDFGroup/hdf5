@@ -3372,3 +3372,50 @@ herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }    
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_get_freespace
+ *
+ * Purpose:     Retrieve the amount of free space in a file.
+ *
+ * Return:      Success:        Amount of free space in file
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, October  6, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hssize_t
+H5FD_get_freespace(H5FD_t *file)
+{
+    H5FD_free_t *free_node;     /* Pointer to node on free list */
+    H5FD_mem_t type;            /* Type of memory */
+    hssize_t ret_value;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_get_freespace, FAIL)
+
+    /* check args */
+    assert(file);
+    assert(file->cls);
+
+    /* Initialize return value */
+    ret_value=0;
+
+    /* Iterate over all the types of memory, to retrieve amount of free space for each */
+    for (type=H5FD_MEM_DEFAULT; type<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,type)) {
+        /* Iterate through the free list, accumulating the amount of free space for this type */
+        free_node = file->fl[type];
+        while(free_node) {
+            ret_value+=free_node->size;
+            free_node=free_node->next;
+        } /* end while */
+    } /* end for */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_get_freespace() */
+
