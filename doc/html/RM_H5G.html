@@ -360,6 +360,11 @@ create or access function.
         the object will be reclaimed.  If the object is open, the 
         reclamation of the file space is delayed until all handles to the
         object are closed.
+  <dt><strong>Warning:</strong>
+    <dd>Exercise care in unlinking groups as it is possible to render data in 
+        a file inaccessible with <code>H5Gunlink</code>.  
+        See <a href="Groups.html#H5GUnlinkToCorrupt">The Group Interface</a> 
+        in the <cite>HDF5 User's Guide</cite>.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
@@ -502,6 +507,11 @@ create or access function.
         as an atomic operation.  Both names are interpreted relative 
         to <code>loc_id</code>, which is either a file or a group 
         identifier.
+  <dt><strong>Warning:</strong>
+    <dd>Exercise care in moving groups as it is possible to render data in 
+        a file inaccessible with <code>H5Gmove</code>.  
+        See <a href="Groups.html#H5GUnlinkToCorrupt">The Group Interface</a> 
+        in the <cite>HDF5 User's Guide</cite>.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
@@ -805,7 +815,7 @@ H5G&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  7 March 2000
+Last modified:  1 November 2000
 <br>
 Describes HDF5 Version 1.3 (Unrelased development version. Dynamic.)
 

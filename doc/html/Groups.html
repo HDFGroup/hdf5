@@ -307,6 +307,33 @@
 	string is returned.
     </dl>
 
+    <a name="H5GUnlinkToCorrupt">
+    <h2>6. Unlinking Datasets with H5Gmove and H5Gunlink</h2>
+    </a>
+
+    <p>Exercise caution in the use of <code>H5Gmove</code> and 
+       <code>H5Gunlink</code>.
+
+    <p>Note that <code>H5Gmove</code> and <code>H5Gunlink</code>
+       each include a step that unlinks pointers to a set or group.
+       If the link that is removed is on the only path leading 
+       to a dataset or group, that dataset or group will become 
+       inaccessible in the file.
+
+    <p>Consider the following example.  Assume that the group
+       <code>group2</code> can only be accessed via the following path,
+       where <code>top_group</code> is a member of the file's root group:
+       <pre>
+              <code>/top_group/group1/group2/</code> </pre>
+       Using <code>H5Gmove</code>, <code>top_group</code> is renamed
+       to be a member of <code>group2</code>.  At this point, since 
+       <code>top_group</code> was the only route from the root group 
+       to <code>group1</code>, there is no longer a path by which 
+       one can access <code>group1</code>, <code>group2</code>, or 
+       any member datasets.
+       <code>top_group</code> and any member datasets have also 
+       become inaccessible.
+
 
 <hr>
 <center>
@@ -359,7 +386,7 @@
 
 <!-- Created: Tue Jan 27 09:11:27 EST 1998 -->
 <!-- hhmts start -->
-Last modified:  14 October 1999
+Last modified:  1 November 2000
 <!-- hhmts end -->
 
   </body>
