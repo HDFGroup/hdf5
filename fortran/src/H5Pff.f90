@@ -1,3 +1,18 @@
+
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+!   Copyright by the Board of Trustees of the University of Illinois.         *
+!   All rights reserved.                                                      *
+!                                                                             *
+!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
+!   terms governing use, modification, and redistribution, is contained in    *
+!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
+!   of the source code distribution tree; Copyright.html can be found at the  *
+!   root level of an installed copy of the electronic HDF5 document set and   *
+!   is linked from the top-level documents page.  It can also be found at     *
+!   http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+!   access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+!
 !
 ! This file contains Fortran90 interfaces for H5P functions.
 !
@@ -3827,7 +3842,7 @@
               INTEGER FUNCTION h5pget_meta_block_size_c(plist_id, size)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-        !MS$ATTRIBUTES C,reference,alias:'_H5PSET_META_BLOCK_SIZE_C'::h5pset_meta_block_size_c
+        !MS$ATTRIBUTES C,reference,alias:'_H5PGET_META_BLOCK_SIZE_C'::h5pget_meta_block_size_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: plist_id
               INTEGER(HSIZE_T), INTENT(OUT) :: size
@@ -4026,7 +4041,7 @@
         !MS$ATTRIBUTES C,reference,alias:'_H5PGET_SMALL_DATA_BLOCK_SIZE_C'::h5pget_small_data_block_size_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: plist_id
-              INTEGER(HSIZE_T), INTENT(IN) :: size
+              INTEGER(HSIZE_T), INTENT(OUT) :: size
               END FUNCTION h5pget_small_data_block_size_c
             END INTERFACE
 
@@ -4570,7 +4585,7 @@
               INTEGER FUNCTION h5pgetc_c(prp_id, name, name_len, value, value_len)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PSETC_C'::h5psetc_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGETC_C'::h5pgetc_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               !DEC$ATTRIBUTES reference :: value
@@ -6007,6 +6022,7 @@
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FAPL_MULTI_C'::h5pset_fapl_multi_c
               !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: memb_name
               INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
               INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_map
               INTEGER(HID_T), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_fapl
@@ -6142,6 +6158,7 @@
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FAPL_MULTI_C'::h5pget_fapl_multi_c
               !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: memb_name
               INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
               INTEGER, DIMENSION(H5FD_MEM_NTYPES_F), INTENT(OUT) :: memb_map
               INTEGER(HID_T), DIMENSION(H5FD_MEM_NTYPES_F), INTENT(OUT) :: memb_fapl
@@ -6266,7 +6283,7 @@
               INTEGER FUNCTION h5pall_filters_avail_c(prp_id, status) 
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5PALL_FILTERS_AVAIL_C'::h5ppall_filters_avail_c
+              !MS$ATTRIBUTES C,reference,alias:'_H5PALL_FILTERS_AVAIL_C'::h5pall_filters_avail_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
               INTEGER, INTENT(OUT) :: status

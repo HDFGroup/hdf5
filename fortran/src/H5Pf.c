@@ -1,3 +1,19 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* This files contains C stubs for H5P Fortran APIs */
+
 #include "H5f90.h"
 
 
@@ -16,7 +32,6 @@ int_f
 nh5pcreate_c ( hid_t_f *class, hid_t_f *prp_id )
 {
   hid_t c_class;
-  int CASE;
   int ret_value = 0;
   hid_t c_prp_id;
   
@@ -184,7 +199,6 @@ nh5pget_preserve_c ( hid_t_f *prp_id , int_f *flag)
 {
   int ret_value = 0;
   hid_t c_prp_id;
-  herr_t status;
   int c_flag; 
 
   c_prp_id = (hid_t)*prp_id;
@@ -301,7 +315,7 @@ nh5pget_chunk_c ( hid_t_f *prp_id, int_f *max_rank, hsize_t_f *dims )
    * Transpose dimension arrays because of C-FORTRAN storage order
    */
   for (i = 0; i < *max_rank ; i++) {
-       dims[*max_rank - i - 1] = c_dims[i];
+       dims[*max_rank - i - 1] = (hsize_t_f)c_dims[i];
   }
   HDfree (c_dims);
   if (rank < 0) return ret_value;
@@ -441,7 +455,6 @@ nh5pget_version_c (hid_t_f *prp_id, int_f * boot,int_f * freelist, int_f * stab,
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     int i;
      herr_t ret;
      int c_boot;
      int c_freelist;
@@ -480,7 +493,6 @@ nh5pget_userblock_c (hid_t_f *prp_id, hsize_t_f * size)
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     int i;
      herr_t ret;
      hsize_t c_size;
 
@@ -545,7 +557,6 @@ nh5pget_sizes_c (hid_t_f *prp_id, size_t_f * sizeof_addr, size_t_f * sizeof_size
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     int i;
      herr_t ret;
      size_t c_sizeof_addr;
      size_t c_sizeof_size;
@@ -647,7 +658,6 @@ nh5pget_sym_k_c (hid_t_f *prp_id, int_f* ik, int_f* lk)
 {
      int ret_value = -1;
      hid_t c_prp_id;
-     int i;
      herr_t ret;
      int c_ik;
 #ifdef H5_WANT_H5_V1_4_COMPAT
@@ -1137,7 +1147,6 @@ nh5pget_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, size_t_f* rdcc_nelmts, size_
      int c_mdc_nelmts;
      size_t c_rdcc_nelmts; 
      size_t c_rdcc_nbytes;
-     hid_t c_memb_plist;
      double c_rdcc_w0; 
      /*
       * Call H5Pget_cache function.
@@ -1620,7 +1629,7 @@ nh5pget_external_count_c (hid_t_f *prp_id, int_f* count)
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pget_external_c(hid_t_f *prp_id,int_f *idx, size_t_f* name_size, _fcd name, int_f* offset, hsize_t_f*bytes)
+nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, int_f* offset, hsize_t_f*bytes)
 {
      int ret_value = -1;
      hid_t c_prp_id;
@@ -1628,7 +1637,6 @@ nh5pget_external_c(hid_t_f *prp_id,int_f *idx, size_t_f* name_size, _fcd name, i
      herr_t status;
      size_t c_namelen;
      char* c_name;
-     int i;
      off_t c_offset;
      hsize_t size;
 
@@ -1675,7 +1683,9 @@ nh5pset_hyper_cache_c(hid_t_f *prp_id, int_f * cache, int_f * limit)
 {
      int ret_value = -1;
      hid_t c_prp_id;
+#ifdef H5_WANT_H5_V1_4_COMPAT
      herr_t ret;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
      unsigned c_cache, c_limit;
 
      c_cache = (unsigned) *cache;
@@ -1710,20 +1720,20 @@ int_f
 nh5pget_hyper_cache_c(hid_t_f *prp_id, int_f * cache, int_f * limit)
 {
      int ret_value = -1;
+#ifdef H5_WANT_H5_V1_4_COMPAT
      hid_t c_prp_id;
      herr_t ret;
      unsigned c_cache, c_limit;
      /*
       * Call H5Pget__hyper_cache function.
       */
-#ifdef H5_WANT_H5_V1_4_COMPAT
      c_prp_id = (hid_t)*prp_id;
      ret = H5Pget_hyper_cache(c_prp_id, &c_cache, &c_limit);
      if (ret < 0) return ret_value;
      *cache = (int_f)c_cache;
      *limit = (int_f)c_limit;   
-#endif /* H5_WANT_H5_V1_4_COMPAT */
      ret_value = 0;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
      return ret_value;
 } 
 
@@ -2509,6 +2519,7 @@ nh5pget_nprops_c(hid_t_f *plist, size_t_f *nprops)
 
      *nprops = (size_t_f)c_nprops;
      ret_value = 0;
+     return ret_value;
 }
 /*----------------------------------------------------------------------------
  * Name:        h5pget_class_parent_c
@@ -2538,6 +2549,7 @@ nh5pget_class_parent_c(hid_t_f *prp_id, hid_t_f *parent_id)
 
      *parent_id =(hid_t_f)c_parent_id;
      ret_value = 0;
+     return ret_value;
 }
 /*----------------------------------------------------------------------------
  * Name:        h5pcopy_prop_c
@@ -2897,11 +2909,10 @@ nh5pget_edc_check_c ( hid_t_f *prp_id, int_f *flag )
   int ret_value = 0;
   hid_t c_prp_id;
   H5Z_EDC_t c_flag;
-  herr_t status;
 
   c_prp_id = (hid_t)*prp_id;
   c_flag = H5Pget_edc_check(c_prp_id);
-  if ( status < 0  ) ret_value = -1;
+  if ( c_flag  < 0  ) ret_value = -1;
   *flag = (int_f)c_flag;
   return ret_value;
 }
@@ -3107,8 +3118,12 @@ HD5packFstring(tmp, _fcdtocp(memb_name), c_lenmax*H5FD_MEM_NTYPES);
   for (i=0; i < H5FD_MEM_NTYPES; i++) {
        memb_map[i] = (int_f)c_memb_map[i];
        memb_fapl[i] = (hid_t_f)c_memb_fapl[i];
+#if defined(WIN32)
+       memb_addr[i] = -1;
+#else
        if(c_memb_addr[i] == HADDR_UNDEF) memb_addr[i] = -1;
-       else memb_addr[i] = (real_f) ((float)c_memb_addr[i]/HADDR_MAX);
+       else memb_addr[i] = (real_f) ((long)c_memb_addr[i]/HADDR_MAX);
+#endif /*WIN32*/
   }     
   *flag = (int_f)relax; 
   *maxlen_out = (int_f)length;

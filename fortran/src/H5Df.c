@@ -1,3 +1,19 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* This files contains C stubs for H5D Fortran APIs */
+
 #include "H5f90.h"
 
 /*----------------------------------------------------------------------------
@@ -1138,7 +1154,7 @@ nh5dwrite_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_
 
   c_buf = (hvl_t *)malloc(num_elem * sizeof(hvl_t)); 
   if (c_buf == NULL) return ret_value;
-  tmp = buf; 
+  tmp = (int *)buf; 
   for (i=0; i < num_elem; i++) {
        c_buf[i].len = (size_t)len[i];  
        c_buf[i].p   = tmp;
@@ -1406,7 +1422,11 @@ nh5dwrite_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
   hid_t c_file_space_id;
   hid_t c_xfer_prp;
   herr_t status;
+#if defined (_UNICOS)
+  double *tmp;
+#else
   float *tmp;
+#endif
   size_t max_len;
 
   hvl_t *c_buf;
@@ -1424,7 +1444,11 @@ nh5dwrite_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
 
   c_buf = (hvl_t *)malloc(num_elem * sizeof(hvl_t)); 
   if (c_buf == NULL) return ret_value;
-  tmp = buf; 
+#if defined (_UNICOS)
+  tmp = (double *)buf; 
+#else
+  tmp = (float *)buf;
+#endif
   for (i=0; i < num_elem; i++) {
        c_buf[i].len = (size_t)len[i];  
        c_buf[i].p   = tmp;
@@ -1496,7 +1520,11 @@ nh5dread_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spac
  if ( status >=0 ) {
   for (i=0; i < num_elem; i++) {
        len[i] = (size_t_f)c_buf[i].len;  
+#if defined (_UNICOS)
+       memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(double));
+#else
        memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(float));
+#endif
   }
  } 
   ret_value = num_elem;

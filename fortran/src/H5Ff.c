@@ -1,3 +1,19 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* This files contains C stubs for H5F Fortran APIs */
+
 #include "H5f90.h"
 
 /*----------------------------------------------------------------------------
@@ -24,41 +40,11 @@ nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, h
      unsigned c_access_flags;
      hid_t c_crt_prp;
      hid_t c_acc_prp;
-     int CASE;
-     hid_t CASE_prp;
 
      /*
       * Define access flags
       */
      c_access_flags = (unsigned) *access_flags;
-/*
-     CASE = (int)*access_flags;
-     switch (CASE) {
-
-	case H5F_ACC_RDWR_F:
-	  c_access_flags = H5F_ACC_RDWR;
-          break;
-
-	case H5F_ACC_RDONLY_F:
-          c_access_flags = H5F_ACC_RDONLY;
-          break;
-
-        case H5F_ACC_TRUNC_F:
-          c_access_flags = H5F_ACC_TRUNC;
-          break;
-
-        case H5F_ACC_EXCL_F:
-          c_access_flags = H5F_ACC_EXCL;
-          break;
-
-        case H5F_ACC_DEBUG_F:
-          c_access_flags = H5F_ACC_DEBUG;
-          break;
-
-        default:
-          return ret_value;
-     }
-*/     
      /*
       * Define creation property
       */
@@ -264,42 +250,12 @@ nh5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hi
      hid_t c_file_id;
      unsigned c_access_flags;
      hid_t c_acc_prp;
-     int CASE;
-     hid_t CASE_prp;
      c_acc_prp = (hid_t)*acc_prp;
 
      /*
       * Define access flags
       */
      c_access_flags = (unsigned) *access_flags;
-/*
-     CASE = (int)*access_flags;
-     switch (CASE) {
-
-	case H5F_ACC_RDWR_F:
-	  c_access_flags = H5F_ACC_RDWR;
-          break;
-
-	case H5F_ACC_RDONLY_F:
-          c_access_flags = H5F_ACC_RDONLY;
-          break;
-
-        case H5F_ACC_TRUNC_F:
-          c_access_flags = H5F_ACC_TRUNC;
-          break;
-
-        case H5F_ACC_EXCL_F:
-          c_access_flags = H5F_ACC_EXCL;
-          break;
-
-        case H5F_ACC_DEBUG_F:
-          c_access_flags = H5F_ACC_DEBUG;
-          break;
-
-        default:
-          return ret_value;
-     }
- */    
      /*
       * Define access property
       */

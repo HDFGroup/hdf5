@@ -84,27 +84,10 @@ int_f
 nh5screate_c ( int_f *classtype, hid_t_f *space_id )
 {
   H5S_class_t c_classtype;
-  int CASE;
   int ret_value = 0;
   hid_t c_space_id;
   c_classtype = (H5S_class_t) *classtype;
-/*
-  switch (CASE) {
-
-     case (H5S_SCALAR_F):
-       c_classtype = H5S_SCALAR;
-       break;
-
-     case(H5S_SIMPLE_F):
-       c_classtype = H5S_SIMPLE;
-       break;
-
-     default:
-       ret_value = -1;
-       return ret_value;
- }
-*/
-   c_space_id = H5Screate(c_classtype); 
+  c_space_id = H5Screate(c_classtype); 
 
   if ( c_space_id  < 0  ) ret_value = -1;
   *space_id = (hid_t_f) c_space_id;
@@ -157,8 +140,6 @@ nh5sget_select_hyper_nblocks_c( hid_t_f *space_id , hssize_t_f * num_blocks)
   int ret_value = 0;
   hid_t c_space_id;
   hssize_t c_num_blocks;
-  hsize_t* buf;
-  int i, j;
 
   c_space_id = *space_id;
   c_num_blocks = H5Sget_select_hyper_nblocks(c_space_id);
@@ -324,7 +305,7 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
   hid_t c_space_id;
   hsize_t c_num_points;
   hsize_t c_startpoint,* c_buf;
-  int i,j, rank;
+  int i, rank;
 
   c_space_id = *space_id;
   c_num_points = (hsize_t)* numpoints;

@@ -1,3 +1,19 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* This files contains C stubs for H5R Fortran APIs */
+
 #include "H5f90.h"
 
 /*----------------------------------------------------------------------------
@@ -21,7 +37,6 @@ nh5rcreate_object_c (int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen)
      char *c_name;
      int c_namelen;
      hobj_ref_t ref_c;
-     int i;
 
      /*
       * Convert FORTRAN name to C name
@@ -70,7 +85,6 @@ nh5rcreate_region_c (int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid
      char *c_name;
      int c_namelen;
      hdset_reg_ref_t ref_c;
-     int i;
 
      /*
       * Convert FORTRAN name to C name
@@ -112,7 +126,6 @@ nh5rdereference_region_c (hid_t_f *dset_id, int_f *ref, hid_t_f *obj_id)
      hid_t c_dset_id;
      hdset_reg_ref_t ref_c;
      hid_t c_obj_id;
-     int i;
 
      HDmemcpy (ref_c.heapid, ref, H5R_DSET_REG_REF_BUF_SIZE);
 
@@ -146,7 +159,6 @@ nh5rdereference_object_c (hid_t_f *dset_id, int_f *ref, hid_t_f *obj_id)
      hid_t c_dset_id;
      hid_t c_obj_id;
      hobj_ref_t ref_c;
-     int i;
 
      HDmemcpy (ref_c.oid, ref, H5R_OBJ_REF_BUF_SIZE);
 
@@ -179,7 +191,6 @@ nh5rget_region_region_c (hid_t_f *dset_id, int_f *ref, hid_t_f *space_id)
      hid_t c_dset_id;
      hid_t c_space_id;
      hdset_reg_ref_t ref_c;
-     int i;
 
      HDmemcpy (ref_c.heapid, ref, H5R_DSET_REG_REF_BUF_SIZE);
 
@@ -213,7 +224,6 @@ nh5rget_object_type_obj_c (hid_t_f *dset_id, int_f *ref, int_f *obj_type)
      hid_t c_dset_id;
      int c_obj_type;
      hobj_ref_t ref_c;
-     int i;
 
      HDmemcpy (ref_c.oid, ref, H5R_OBJ_REF_BUF_SIZE);
 
