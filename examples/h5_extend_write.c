@@ -19,16 +19,16 @@ main ()
    hid_t       datatype, dataspace, dataset;  
    hid_t       filespace;                   
    hid_t       cparms;                     
-   size_t      dims[2]  = { 3, 3};            /* dataset dimensions
+   hsize_t      dims[2]  = { 3, 3};            /* dataset dimensions
                                                  at the creation time  */ 
-   size_t      dims1[2] = { 3, 3};            /* data1 dimensions */ 
-   size_t      dims2[2] = { 7, 1};            /* data2 dimensions */  
-   size_t      dims3[2] = { 2, 2};            /* data3 dimensions */ 
+   hsize_t      dims1[2] = { 3, 3};            /* data1 dimensions */ 
+   hsize_t      dims2[2] = { 7, 1};            /* data2 dimensions */  
+   hsize_t      dims3[2] = { 2, 2};            /* data3 dimensions */ 
 
-   size_t      maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-   size_t      chunk_dims[2] ={2, 5};
-   size_t      size[2];
-   int         offset[2];
+   hsize_t      maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+   hsize_t      chunk_dims[2] ={2, 5};
+   hsize_t      size[2];
+   hssize_t     offset[2];
 
    herr_t      status;                             
 
