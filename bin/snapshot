@@ -14,7 +14,7 @@ date
 PATH="/usr/local/bin:$PATH"
 
 # Where are the snapshots stored?
-ARCHIVES=/hdf3/ftp/pub/outgoing/hdf5/snapshots
+ARCHIVES=/afs/ncsa/ftp/HDF/pub/outgoing/hdf5/snapshots
 if [ "$1" ]; then
     ARCHIVES="$1"
     shift
@@ -68,8 +68,11 @@ if [ "$snapshot" = "yes" ]; then
 fi
 
 # Release snapshot, update version, and commit to cvs and tag
+# Turn on exit on error in the sub-shell so that it does not
+# cvs commit if errors encounter here.
 if [ "$snapshot" = "yes" ]; then
     (
+	set -e
 	cd ${COMPARE}/current
 	cvs -Q tag hdf5-`perl -w bin/h5vers |tr . _`
 	bin/release -d $ARCHIVES $METHODS
