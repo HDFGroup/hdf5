@@ -3396,10 +3396,8 @@ H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
     /* Get the pointer to the parent class */
     if(parent==H5P_DEFAULT)
         par_class=NULL;
-    else {
-        if (NULL == (par_class = H5I_object(parent)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't retrieve parent class");
-    } /* end else */
+    else if (NULL == (par_class = H5I_object(parent)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't retrieve parent class");
 
     /* Create the new property list class */
     if (NULL==(pclass=H5P_create_class(par_class, name, hashsize, 0, cls_create, create_data, cls_close, close_data)))
@@ -3554,7 +3552,7 @@ done:
     hid_t H5Pcreate_list(cls_id)
         hid_t cls_id;       IN: Property list class create list from
  RETURNS
-    Returns a valid property list ID on success, NULL on failure.
+    Returns a valid property list ID on success, FAIL on failure.
  DESCRIPTION
         Creates a property list of a given class.  If a 'create' callback
     exists for the property list class, it is called before the
@@ -3578,11 +3576,11 @@ hid_t H5Pcreate_list(hid_t cls_id)
 
     /* Check arguments. */
     if (H5I_GENPROP_CLS != H5I_get_type(cls_id) || NULL == (pclass = H5I_object(cls_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list class");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
     /* Create the new property list */
     if ((plist=H5P_create_list(pclass))==NULL)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, NULL, "unable to create property list");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list");
 
     /* Get an atom for the property list */
     if ((plist_id = H5I_register(H5I_GENPROP_LST, plist))<0)
@@ -4779,25 +4777,25 @@ done:
 herr_t
 H5P_close_class(H5P_genclass_t *class)
 {
-    herr_t ret_value=FAIL;     /* return value */
+    herr_t ret_value = FAIL;     /* return value */
 
     FUNC_ENTER (H5P_close_class, FAIL);
 
     assert(class);
 
     /* Decrement parent class's dependant property class value! */
-    if(H5P_access_class(class->parent,H5P_MOD_DEC_CLS)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't decrement class ref count");
+    if (H5P_access_class(class->parent, H5P_MOD_DEC_CLS) < 0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't decrement class ref count");
     
     /* Mark class as deleted */
-    class->deleted=1;
+    class->deleted = 1;
 
     /* Check dependancies on this class, deleting it if allowed */
-    if(H5P_access_class(class,H5P_MOD_CHECK)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't check class ref count");
+    if (H5P_access_class(class, H5P_MOD_CHECK) < 0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't check class ref count");
 
     /* Set return value */
-    ret_value=SUCCEED;
+    ret_value = SUCCEED;
 
 done:
     FUNC_LEAVE (ret_value);
@@ -4829,6 +4827,7 @@ H5Pclose_class(hid_t cls_id)
     hid_t	ret_value = SUCCEED;    /* Return value			*/
 
     FUNC_ENTER(H5Pclose_class, FAIL);
+    H5TRACE1("e","i",cls_id);
 
     /* Check arguments */
     if (H5I_GENPROP_CLS != H5I_get_type(cls_id) || NULL == (pclass = H5I_remove(cls_id)))
