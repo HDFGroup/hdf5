@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-int make_dsets();
+int make_dsets(void);
 
 
 #ifdef __cplusplus

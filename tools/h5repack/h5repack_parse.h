@@ -32,7 +32,7 @@ obj_list_t* parse_chunk (const char *str,
                          int *n_objs, 
                          hsize_t *chunk_lengths, 
                          int *chunk_rank);
-char*       get_scomp   (int code);
+const char* get_scomp   (int code);
 int         parse_number(char *str);
 
 

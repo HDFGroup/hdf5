@@ -17,7 +17,7 @@
 #include <stdlib.h>
 
 
-static void usage();
+static void usage(void);
 
 
 /*
@@ -108,8 +108,9 @@ int main(int argc, char **argv)
  */
 
 static 
-void usage()
+void usage(void)
 {
+
 
  exit(1);
 }

@@ -165,7 +165,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-int make_dsets()
+int make_dsets(void)
 {
  hid_t  fid;  /* file ID */
  int		  nerrors=0;

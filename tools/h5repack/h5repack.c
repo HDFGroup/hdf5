@@ -248,7 +248,7 @@ void print_options(pack_opt_t *options)
   if (options->all_chunk==1)  {
    printf("\tChunk all with dimension [");
    for ( j = 0; j < options->chunk_g.rank; j++)  
-    printf("%d ", options->chunk_g.chunk_lengths[j]);
+    printf("%d ",(int)options->chunk_g.chunk_lengths[j]);
    printf("]\n");
   }
  }/* verbose */
@@ -262,7 +262,7 @@ void print_options(pack_opt_t *options)
    if (options->verbose){
     printf("\t<%s> with chunk size ",obj_name); 
     for ( k = 0; k < options->op_tbl->objs[i].chunk.rank; k++) 
-     printf("%d ",options->op_tbl->objs[i].chunk.chunk_lengths[k]);
+     printf("%d ",(int)options->op_tbl->objs[i].chunk.chunk_lengths[k]);
     printf("\n");
    }
    has_ck=1;

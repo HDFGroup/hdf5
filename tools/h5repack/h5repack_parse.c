@@ -208,7 +208,7 @@ obj_list_t* parse_comp(const char *str,
  *-------------------------------------------------------------------------
  */
 
-char* get_scomp(int code)
+const char* get_scomp(int code)
 {
  if (code==H5Z_FILTER_NONE)
   return "NONE";
