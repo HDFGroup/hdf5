@@ -285,7 +285,7 @@ printf("%s: partial_size=%lu, hslab_size[%d]=%ld\n",FUNC,(unsigned long)partial_
                     }
 
                     /* Increment the buffer offset */
-                    buf=(unsigned char *)buf+partial_size;
+                    buf=(unsigned char *)buf+(partial_size*elmt_size);
 
                     /* Decrement the length of the sequence to read */
                     seq_len-=partial_size;
@@ -367,7 +367,7 @@ printf("%s: tmp_seq_len=%lu, hslab_size[%d]=%ld\n",FUNC,(unsigned long)tmp_seq_l
                 }
 
                 /* Increment the buffer offset */
-                buf=(unsigned char *)buf+full_size;
+                buf=(unsigned char *)buf+(full_size*elmt_size);
 
                 /* Decrement the sequence length left */
                 seq_len-=full_size;
@@ -426,7 +426,7 @@ printf("%s: partial_size=%lu, coords[%d]=%ld, hslab_size[%d]=%ld\n",FUNC,(unsign
                         }
 
                         /* Increment the buffer offset */
-                        buf=(unsigned char *)buf+partial_size;
+                        buf=(unsigned char *)buf+(partial_size*elmt_size);
 
                         /* Decrement the length of the sequence to read */
                         seq_len-=partial_size;
@@ -738,7 +738,7 @@ printf("%s: partial_size=%lu, hslab_size[%d]=%ld\n",FUNC,(unsigned long)partial_
                     }
 
                     /* Increment the buffer offset */
-                    buf=(const unsigned char *)buf+partial_size;
+                    buf=(const unsigned char *)buf+(partial_size*elmt_size);
 
                     /* Decrement the length of the sequence to read */
                     seq_len-=partial_size;
@@ -820,7 +820,7 @@ printf("%s: tmp_seq_len=%lu, hslab_size[%d]=%ld\n",FUNC,(unsigned long)tmp_seq_l
                 }
 
                 /* Increment the buffer offset */
-                buf=(const unsigned char *)buf+full_size;
+                buf=(const unsigned char *)buf+(full_size*elmt_size);
 
                 /* Decrement the sequence length left */
                 seq_len-=full_size;
@@ -879,7 +879,7 @@ printf("%s: partial_size=%lu, coords[%d]=%ld, hslab_size[%d]=%ld\n",FUNC,(unsign
                         }
 
                         /* Increment the buffer offset */
-                        buf=(const unsigned char *)buf+partial_size;
+                        buf=(const unsigned char *)buf+(partial_size*elmt_size);
 
                         /* Decrement the length of the sequence to read */
                         seq_len-=partial_size;
