@@ -432,4 +432,4 @@ dnl before we generate them or the Makefiles.
 touch ./config/stamp1 ./config/stamp2
 
 AC_OUTPUT(config/depend config/commence config/conclude \
-          Makefile src/Makefile test/Makefile tools/Makefile examples/Makefile)
+          Makefile src/Makefile pablo/Makefile test/Makefile tools/Makefile examples/Makefile)
