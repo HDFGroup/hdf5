@@ -1152,6 +1152,7 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
     ssize_t       ret_value;
 
     FUNC_ENTER_API (H5Iget_name, FAIL);
+    H5TRACE3("Zs","ixz",id,name,size);
 
     /* get symbol table entry */
     if(NULL!=(ent = H5G_loc(id))) {

@@ -1,9 +1,8 @@
 ## This file is machine generated on GNU systems.
 ## Only temporary changes may be made here.
 
-h5dump.lo: \
-   $(srcdir)/h5dump.c \
-   $(srcdir)/h5dump.h \
+h5diff.lo: \
+   $(srcdir)/h5diff.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_srcdir)/src/H5pubconf.h \
@@ -36,12 +35,9 @@ h5dump.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h \
-   $(top_srcdir)/src/H5private.h \
-   $(top_srcdir)/tools/lib/h5tools.h \
-   $(top_srcdir)/tools/lib/h5tools_utils.h
-h5dumptst.lo: \
-   $(srcdir)/h5dumptst.c \
+   $(top_srcdir)/src/H5FDstream.h
+h5difftst.lo: \
+   $(srcdir)/h5difftst.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_srcdir)/src/H5pubconf.h \
@@ -74,5 +70,4 @@ h5dumptst.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h \
-   $(top_srcdir)/src/H5private.h
+   $(top_srcdir)/src/H5FDstream.h

@@ -1088,6 +1088,7 @@ H5Sselect_elements(hid_t spaceid, H5S_seloper_t op, size_t num_elem,
     herr_t ret_value;  /* return value */
 
     FUNC_ENTER_API(H5Sselect_elements, FAIL);
+    H5TRACE4("e","iSsz**Hs",spaceid,op,num_elem,coord);
 
     /* Check args */
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
