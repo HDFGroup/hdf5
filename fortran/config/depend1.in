@@ -20,41 +20,35 @@
 ## otherwise the file is changed and a backup is saved by appending a
 ## tilde to the file name.
 ##
-.PRECIOUS: Dependencies
 $(srcdir)/Dependencies: .depend
 	@if test "$(srcdir)" != "."; then				      \
-	    echo '## This file is machine generated on GNU systems.'          \
-		>$@;							      \
-	    echo '## Only temporary changes may be made here.' 		      \
-		>>$@;							      \
-	    echo >>$@;					      \
+	    echo '## This file is machine generated on GNU systems.' >$@;     \
+	    echo '## Only temporary changes may be made here.' >>$@;	      \
+	    echo >>$@;					      		      \
 	    perl -p $(top_srcdir)/bin/distdep .depend >>$@;		      \
+	else								      \
+	    echo 'Dependencies cannot be built when $$srcdir == $$builddir';  \
 	fi
 
-.PRECIOUS: .depend
 .depend: $(LIB_SRC) $(TEST_SRC) $(PROG_SRC)
 	@touch .depend
 	@for dep in $? dummy; do					      \
 	   if [ $$dep != "dummy" ]; then				      \
-	      echo Building dependencies for $$dep;			      \
-	      obj=`basename $$dep .c`.lo;				      \
-	      sed '\%^'"$$obj"':%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;	      \
-	      $(TRACE) $$dep;						      \
-	      $(CC) -M -MG $(CPPFLAGS) $$dep 2>/dev/null |		      \
-                  sed 's% $(srcdir)/% $$(srcdir)/%g' |                        \
-                  sed 's% $(top_srcdir)/% $$(top_srcdir)/%g' |                \
-                  sed 's% $(top_builddir)/% $$(top_builddir)/%g' |            \
-	          sed 's/\.o/.lo/' >>$@;	      			      \
+	      case "$$dep" in						      \
+	         *.c)							      \
+	            echo Building dependencies for $$dep;		      \
+	            obj=`basename $$dep .c`.lo;				      \
+	            sed '\%^'"$$obj"':%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;   \
+	            $(top_srcdir)/$(TRACE) $$dep;			      \
+	            $(CC) -M -MG $(CPPFLAGS) $$dep 2>/dev/null |	      \
+                        sed 's% $(srcdir)/% $$(srcdir)/%g' |		      \
+                        sed 's% $(top_srcdir)/% $$(top_srcdir)/%g' |	      \
+                        sed 's% $(top_builddir)/% $$(top_builddir)/%g' |      \
+	                sed 's/\.o/.lo/' >>$@;				      \
+	            ;;							      \
+	      esac;							      \
 	   fi;								      \
 	done;
-	@if test "$(srcdir)" != "."; then				      \
-	    echo '## This file is machine generated on GNU systems.'          \
-		>Dependencies;				      \
-	    echo '## Only temporary changes may be made here.' 		      \
-		>>Dependencies;				      \
-	    echo >>Dependencies;				      \
-	    perl -p $(top_srcdir)/bin/distdep .depend>>Dependencies;\
-	fi
 
 -include .depend
 
