@@ -26,6 +26,8 @@
 #define REFERENCE_LIST        "REFERENCE_LIST"
 #define DIMENSION_LABELS      "DIMENSION_LABELS"
 
+typedef herr_t (*H5DS_iterate_t)(hid_t dset, unsigned dim, hid_t scale, void *visitor_data); 
+
 
 /* attribute type of a DS dataset */
 typedef struct ds_list_t {
@@ -38,7 +40,7 @@ typedef struct ds_list_t {
 extern "C" {
 #endif
 
- herr_t H5DSset_scale(hid_t did, 
+herr_t H5DSset_scale(hid_t did, 
                      char *dimname);
 
 herr_t H5DSattach_scale(hid_t did,
@@ -64,6 +66,17 @@ herr_t H5DSget_scale_name(hid_t did,
 herr_t H5DSis_scale(hid_t did);
 
 herr_t H5DShas_scale(hid_t did);
+
+herr_t H5DSget_nscales(hid_t did,
+                       unsigned int dim,
+                       int *nscales);
+
+
+herr_t H5DSiterate_scales(hid_t did, 
+                          unsigned int dim, 
+                          int *idx, 
+                          H5DS_iterate_t visitor, 
+                          void *visitor_data);
 
 
 #ifdef __cplusplus
