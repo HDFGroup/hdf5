@@ -1,0 +1,86 @@
+## HDF5-Fortran test/Makefile(.in)
+##
+## Copyright (C) 2000 National Center for Supercomputing Applications.
+##                    All rights reserved.
+##
+##
+top_srcdir=@top_srcdir@
+top_builddir=..
+srcdir=@srcdir@
+@COMMENCE@
+
+hdf5_dir=$(top_srcdir)/../src
+
+## Add include directory to the C preprocessor flags and the h5test and hdf5
+## libraries to the library list.
+LT_LINK_LIB=$(LT) --mode=link $(F9X) -static -rpath $(libdir)
+MFLAG=@F9XMODFLAG@
+FFLAGS=$(MFLAG). $(MFLAG)../src
+FLIB=../src/libhdf5_fortran.la
+HDF5LIB=$(hdf5_dir)/libhdf5.la
+
+## These are the programs that `make all' or `make tests' will build and which
+## `make check' will run. List them in the order they should be run.
+TEST_PROGS=dsetexample fileexample rwdsetexample attrexample groupexample	\
+	   grpsexample grpdsetexample hyperslab selectele grpit refobjexample	\
+	   refregexample mountexample compound
+
+## These are the files that `make clean' (and derivatives) will remove from
+## this directory.
+CLEAN=*.h5
+
+## List all source files here. The list of object files will be
+## created by replacing the `.f90' with a `.o'. This list is necessary
+## for building automatic dependencies.
+TEST_SRC=dsetexample.f90 fileexample.f90 rwdsetexample.f90 attrexample.f90	\
+	 groupexample.f90 grpsexample.f90 grpdsetexample.f90 hyperslab.f90	\
+	 selectele.f90 grpit.f90 refobjexample.f90 refregexample.f90		\
+	 mountexample.f90 compound.f90
+TEST_OBJ=$(TEST_SRC:.f90=.lo)
+
+## How to build the programs... they all depend on the Fortran HDF5 library
+$(TEST_PROGS): $(FLIB)
+
+dsetexample: dsetexample.f90 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ dsetexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+
+fileexample: fileexample.f90 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fileexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+
+rwdsetexample: rwdsetexample.f90 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ rwdsetexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+
+attrexample: attrexample.f90 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ attrexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+
+groupexample: groupexample.f90 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ groupexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+
+grpsexample: grpsexample.f90 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ grpsexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+
+grpdsetexample: grpdsetexample.f90 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ grpdsetexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+
+hyperslab: hyperslab.f90 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ hyperslab.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+
+selectele: selectele.f90 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ selectele.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+
+grpit: grpit.f90 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ grpit.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+
+refobjexample: refobjexample.f90 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ refobjexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+
+refregexample: refregexample.f90 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ refregexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+
+mountexample: mountexample.f90 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ mountexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+
+compound: compound.f90 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ compound.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+
+@CONCLUDE@

@@ -1,0 +1,92 @@
+#							-*- shell-script -*-
+#
+# This file should be sourced into configure if the compiler is a DEC
+# compiler.  It is careful not to do anything if the compiler is not
+# DEC; otherwise `cc_flags_set' is set to `yes'
+#
+
+# Get the compiler version unless it's already known.
+#
+#   cc_vendor:    The compiler vendor: DEC
+#   cc_version:   Version number, like: V5.2-038
+#
+if test X = "X$cc_flags_set"; then
+    cc_vendor=DEC
+    cc_version="`$CC $CFLAGS -V 2>&1 |head -1 |\
+	        sed 's/.*DEC C \(V[0-9][-\.0-9]*\).*/\1/'`"
+    if test X != "$gcc_version"; then
+	echo "compiler '$CC' is $cc_vendor-$cc_version"
+    else
+        cc_vendor=
+    fi
+fi
+
+# Warn about old compilers that don't work right.
+case "$cc_vendor-$cc_version" in
+    DEC-V5.2-038)
+        cat <<EOF
+    **
+    ** This compiler may generate incorrect code when optimizations are
+    ** enabled. Please upgrade to a newer version (we're not sure which
+    ** version actually works) before reporting bugs to the HDF5 team.
+    **
+EOF
+	sleep 5
+	;;
+esac
+
+# Compiler flags
+case "$cc_vendor-$cc_version" in
+    DEC-V5.*)
+	# Production
+	PROD_CFLAGS="-g0 -verbose -warnprotos -std -O4 $ARCH -ansi_args -fp_reorder -readonly_strings -inline speed"
+	PROD_CPPFLAGS="-D_INTRINSICS -D_INLINE_INTRINSICS"
+
+	# Debug
+	DEBUG_CFLAGS="-g -std -verbose -warnprotos"
+	DEBUG_CPPFLAGS=
+
+	# Profile
+	PROFILE_CFLAGS="-pg -std -verbose -warnprotos"
+	PROFILE_CPPFLAGS=
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+esac
+
+# If no flags were set then clear the compiler vendor and version info.
+if test X = "X$cc_flags_set"; then
+    cc_vendor=
+    cc_version=
+fi
+
+# The default Fortran 90 compiler
+
+#
+# HDF5 integers
+#
+# 	R_LARGE is the number of digits for the bigest integer supported.
+#	R_INTEGER is the number of digits in INTEGER
+#
+# (for the Digital UNIX architechture)
+#
+R_LARGE=18
+R_INTEGER=9
+HSIZE_T='SELECTED_INT_KIND(R_LARGE)'
+HSSIZE_T='SELECTED_INT_KIND(R_LARGE)'
+HID_T='SELECTED_INT_KIND(R_INTEGER)'
+SIZE_T='SELECTED_INT_KIND(R_LARGE)'
+OBJECT_NAMELEN_DEFAULT_F=-1
+
+if test "X-" = "X-$F9X"; then
+    F9X=f90
+fi
+
+if test "X-" = "X-$f9x_flags_set"; then
+    FFLAGS="-Olimit 2048 -std1"
+    DEBUG_FFLAGS="-Olimit 2048 -std1"
+    PROD_FFLAGS="-Olimit 2048 -std1"
+    PROFILE_FFLAGS="-Olimit 2048 -std1"
+    f9x_flags_set=yes
+fi

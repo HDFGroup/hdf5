@@ -1,0 +1,586 @@
+dnl ----------------------------------------------------------------------
+dnl Process this file with autoconf to produce configure.
+dnl
+dnl Copyright (C) 2000 National Center for Supercomputing Applications.
+dnl                    All rights reserved.
+dnl ----------------------------------------------------------------------
+
+dnl ----------------------------------------------------------------------
+dnl Initialize configure.
+dnl
+AC_REVISION($Id$)
+AC_INIT(src/HDF5.f90)
+dnl AC_CONFIG_HEADER(config.h)
+AC_CONFIG_AUX_DIR(bin)
+AC_CANONICAL_HOST
+AC_SUBST(CPPFLAGS)
+
+dnl ----------------------------------------------------------------------
+dnl HDF5 integer variables for the H5fortran_types.f90 file.
+dnl
+AC_SUBST(R_LARGE)
+AC_SUBST(R_INTEGER)
+AC_SUBST(HSIZE_T)
+AC_SUBST(HSSIZE_T)
+AC_SUBST(HID_T)
+AC_SUBST(SIZE_T)
+AC_SUBST(OBJECT_NAMELEN_DEFAULT_F)
+
+dnl ----------------------------------------------------------------------
+dnl Dump all shell variables values.
+dnl
+AC_MSG_CHECKING(shell variables initial values)
+set >&5
+AC_MSG_RESULT(done)
+
+dnl ----------------------------------------------------------------------
+dnl Where is the root of the source tree.  Give an absolute address so
+dnl we can find it no matter which directory of the distribution is our
+dnl current directory.  The built-in pwd fails on some systems, but the
+dnl /bin/pwd version works OK.
+dnl
+if test -x /bin/pwd; then
+   pwd=/bin/pwd
+else
+   pwd=pwd
+fi
+AC_SUBST(ROOT) ROOT=`$pwd`
+
+dnl ----------------------------------------------------------------------
+dnl Check that the cache file was build on the same host as what we're
+dnl running on now.
+dnl
+AC_CACHE_CHECK(for cached host,hdf5_cv_host,hdf5_cv_host="none");
+if test "X$hdf5_cv_host" = "Xnone"; then
+   hdf5_cv_host=$host
+elif test "$hdf5_cv_host" != "$host"; then
+   echo "The config.cache file was generated on $hdf5_cv_host but"
+   echo "this is $host. Please remove that file and try again."
+   AC_MSG_ERROR(config.cache file is invalid)
+fi
+
+dnl ----------------------------------------------------------------------
+dnl Source any special files that we need.  These files normally aren't
+dnl present but can be used by the maintainers to fine tune things like
+dnl turning on debug or profiling flags for the compiler.  The search order
+dnl is:
+dnl
+dnl	CPU-VENDOR-OS
+dnl	VENDOR-OS
+dnl	CPU-OS
+dnl	CPU-VENDOR
+dnl	OS
+dnl	VENDOR
+dnl	CPU
+dnl
+dnl If the `OS' ends with a version number then remove it. For instance,
+dnl `freebsd3.1' would become `freebsd'
+case "$host_os" in
+   aix4.*)
+      host_os_novers=aix4.x
+      ;;
+   freebsd*)
+      host_os_novers=freebsd
+      ;;
+   irix5.*)
+      host_os_novers=irix5.x
+      ;;
+   irix6.*)
+      host_os_novers=irix6.x
+      ;;
+   osf4.*)
+      host_os_novers=osf4.x
+      ;;
+   solaris2.*)
+      host_os_novers=solaris2.x
+      ;;
+   *)
+      host_os_novers=$host_os
+      ;;
+esac
+
+host_config="none"
+for f in $host_cpu-$host_vendor-$host_os \
+	 $host_cpu-$host_vendor-$host_os_novers \
+	 $host_vendor-$host_os \
+         $host_vendor-$host_os_novers \
+	 $host_cpu-$host_os \
+         $host_cpu-$host_os_novers \
+         $host_cpu-$host_vendor \
+	 $host_os \
+	 $host_os_novers \
+	 $host_vendor \
+	 $host_cpu ; do
+   AC_MSG_CHECKING(for config $f)
+   if test -f $srcdir/config/$f; then
+      host_config=$srcdir/config/$f
+      AC_MSG_RESULT(found)
+      break
+   fi
+   AC_MSG_RESULT(no)
+done
+if test "X$host_config" != "Xnone"; then
+   CC_BASENAME="`echo $CC |cut -f1 -d' ' |xargs basename 2>/dev/null`"
+   . $host_config
+fi
+
+dnl ----------------------------------------------------------------------
+dnl Check for programs.
+dnl
+AC_PROG_CC
+AC_PROG_CPP	dnl this is checked for when AC_HEADER_STDC is done
+CC_BASENAME="`echo $CC |cut -f1 -d' ' |xargs basename 2>/dev/null`"
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+AM_PROG_LIBTOOL
+
+if test -z "$AR"; then
+   AC_CHECK_PROGS(AR,ar xar,:,$PATH)
+fi
+AC_SUBST(AR)
+
+dnl ----------------------------------------------------------------------
+dnl Sometimes makes think the `.PATH:' appearing before the first rule
+dnl with an action should override the `all' default target. So we have
+dnl to decide what the proper syntax is.
+dnl
+AC_MSG_CHECKING(how make searches directories)
+while true; do #for break
+   dnl The most common method is `VPATH=DIR1 DIR2 ...'
+   cat >maketest <<EOF
+VPATH=$srcdir/config $srcdir/src $srcdir/bin
+.c.o:
+	cp $< H5.o
+
+foo: H5.o
+	/bin/rm -f H5.o
+	@echo works
+EOF
+
+   if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+      SEARCH_RULE='VPATH='
+      SEARCH_SEP=' '
+      AC_MSG_RESULT([VPATH=DIR1 DIR2 ...])
+      break
+   fi
+
+   dnl The second most common method is like above except with the
+   dnl directories separated by colons.
+   cat >maketest <<EOF
+VPATH=$srcdir/config:$srcdir/src:$srcdir/bin
+.c.o:
+	cp $< H5.o
+
+foo: H5.o
+	/bin/rm -f H5.o
+	@echo works
+EOF
+
+   if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+      SEARCH_RULE='VPATH='
+      SEARCH_SEP=':'
+      AC_MSG_RESULT([VPATH=DIR1:DIR2:...])
+      break
+   fi
+
+   dnl pmake uses the construct `.PATH: DIR1 DIR2
+   cat >maketest <<EOF
+.PATH: $srcdir/config $srcdir/src $srcdir/bin
+.c.o:
+	cp $< H5.o
+
+foo: H5.o
+	/bin/rm -f H5.o
+	@echo works
+EOF
+   if (MAKE= ${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+      SEARCH_RULE='.PATH: '
+      SEARCH_SEP=' '
+      AC_MSG_RESULT([.PATH: DIR1 DIR2 ...])
+      break
+   fi
+
+   dnl No way for make to search directories
+   SEARCH_RULE='## SEARCH DISABLED: '
+   SEARCH_SEP=' '
+   AC_MSG_RESULT([it doesn't])
+   if test ! -f configure; then
+      AC_MSG_ERROR(${MAKE-make} requires the build and source directories to be the same)
+   fi
+   break
+done
+rm maketest
+
+dnl ----------------------------------------------------------------------
+dnl Check for a Fortran 9X compiler, how to optimize it, and how to
+dnl include modules.
+dnl 
+AC_PROG_F9X
+dnl AC_F9X_OPT_FLAGS
+AC_F9X_MODS
+
+dnl Change back to the C language
+AC_LANG_C
+
+dnl ----------------------------------------------------------------------
+dnl Checks for libraries.
+dnl
+
+dnl Is the GNU zlib present?  It has a header file `zlib.h' and a library
+dnl `-lz' and their locations might be specified with the `--enable-zlib'
+dnl command-line switch.  The value is an include path and/or a library path.
+dnl If the library path is specified then it must be preceded by a comma.
+AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],
+            ,withval=yes)
+case "$withval" in
+   yes)
+      AC_CHECK_HEADERS(zlib.h)
+      AC_CHECK_LIB(z, compress)
+      ;;
+   no)
+      AC_MSG_CHECKING(for GNU zlib)
+      AC_MSG_RESULT(suppressed)
+      ;;
+   *)
+      zlib_inc="`echo $withval |cut -f1 -d,`"
+      if test -n "$zlib_inc"; then
+         saved_CPPFLAGS="$CPPFLAGS"
+         CPPFLAGS="$CPPFLAGS -I$zlib_inc"
+         AC_CHECK_HEADERS(zlib.h,,CPPFLAGS="$saved_CPPFLAGS")
+      else
+         AC_CHECK_HEADERS(zlib.h)
+      fi
+
+      zlib_lib="`echo $withval |cut -f2 -d, -s`"
+      if test -n "$zlib_lib"; then
+         saved_LDFLAGS="$LDFLAGS"
+         LDFLAGS="$LDFLAGS -L$zlib_lib"
+         ZLIB_DIR=$zlib_lib
+         AC_CHECK_LIB(z, compress,,LDFLAGS="$saved_LDFLAGS")
+      else
+         AC_CHECK_LIB(z, compress)
+      fi
+      ;;
+esac
+
+dnl ----------------------------------------------------------------------
+dnl Checks for header files.
+dnl
+
+dnl Checkpoint the cache
+AC_CACHE_SAVE
+
+dnl ----------------------------------------------------------------------
+dnl The following variables are used to distinguish between building a
+dnl serial and parallel library.
+dnl
+dnl    HAVE_PARALLEL	-- defined in H5config.h if we are building
+dnl			   a parallel library even if configure wasn't
+dnl			   able to find some header file or library that
+dnl			   might be required. This is defined if the
+dnl			   compiler looks like a parallel compiler (e.g.,
+dnl			   mpicc or mpcc) or if the user explicitly states
+dnl			   that a parallel library is being built by supplying
+dnl			   the `--enable-parallel' configure switch.
+dnl
+dnl    PARALLEL		-- This variable is set to a non-null value if
+dnl			   configure thinks we're compiling a parallel
+dnl			   version of the library.
+dnl
+dnl    RUNSERIAL	-- This is a command which will be prepended to
+dnl			   the executable name to run the executable using
+dnl			   a single process. For serial versions of the
+dnl			   library this will normally be empty. For parallel
+dnl			   versions it might be something like `mpirun -np 1'.
+dnl			   The value of this variable is substituted in *.in
+dnl			   files.
+dnl
+dnl    RUNPARALLEL	-- This is a command which will be prepended to
+dnl			   the executable name to run the executable on
+dnl			   multiple processors. For the serial library the
+dnl			   value will normally be the empty string. For
+dnl			   parallel library it should be something like
+dnl			   `mpi -np $$NPROCS' where NPROCS will eventually
+dnl			   contain the number of processors on which to run
+dnl			   the executable (the double dollarsigns are to
+dnl			   protect the expansion until make executes the
+dnl			   command).  The value of this variable is
+dnl			   substituted in *.in files.
+dnl
+AC_SUBST(PARALLEL)
+AC_SUBST(RUNSERIAL)
+AC_SUBST(RUNPARALLEL)
+AC_SUBST(TESTPARALLEL)
+
+dnl ----------------------------------------------------------------------
+dnl If the compiler is obviously a parallel compiler then we're building
+dnl a parallel version of hdf5 and should define HAVE_PARALLEL. Furthermore,
+dnl the name of the compiler might tell us how to run the resulting
+dnl executable. For `mpicc' the executable should be run with `mpirun' from
+dnl the same directory as mpicc if it exists.
+dnl
+case "$CC_BASENAME" in
+   mpicc)
+      dnl The mpich compiler. Use mpirun from the same directory if it
+      dnl exists.
+      PARALLEL=mpicc
+      AC_MSG_CHECKING(for mpirun)
+
+      dnl Find the path where mpicc is located.
+      cmd=`echo $CC |cut -f1 -d' '`
+      if (echo $cmd |grep / >/dev/null); then
+         path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
+      else
+         for path in `echo $PATH |tr : ' '`; do
+            if test -x $path/$cmd; then
+               break;
+            fi
+         done
+      fi
+
+      dnl Is there an mpirun at that path?
+      if test -x $path/mpirun; then
+         AC_MSG_RESULT($path/mpirun)
+         RUNSERIAL="${RUNSERIAL:-none}"
+         if test -z "$RUNPARALLEL"; then
+            RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
+         fi
+      else
+	 AC_MSG_RESULT(none)
+      fi
+      ;;
+
+   mpcc|mpcc_r)
+      dnl The IBM compiler
+      PARALLEL="$CC_BASENAME"
+      ;;
+
+   *)
+      dnl Probably not a parallel compiler, but if `--enable-parallel'
+      dnl is defined below then we're still building a parallel hdf5.
+      ;;
+esac
+
+dnl ----------------------------------------------------------------------
+dnl What header files and libraries do we have to look for for parallel
+dnl support?  For the most part, search paths are already specified with
+dnl CPPFLAGS and LDFLAGS or are known to the compiler.  If the user says
+dnl `--disable-parallel' but specifies a known parallel compiler (like mpicc
+dnl or mpcc) then parallel support is enabled but configure doesn't search
+dnl for any parallel header files or libraries.
+dnl
+AC_ARG_ENABLE(parallel,
+  [  --enable-parallel=TYPE  Search for MPI-IO and MPI support files])
+
+AC_MSG_CHECKING(for parallel support files)
+case "X-$enable_parallel" in
+   X-|X-no|X-none)
+      dnl Either we are not compiling for parallel or the header and library
+      dnl files and locations are known to the compiler (this is the case
+      dnl for a correct installation of mpicc for instance).
+      AC_MSG_RESULT(skipped)
+      ;;
+
+   X-yes)
+      dnl We want to compile a parallel library with a compiler that
+      dnl may already know how to link with MPI and MPI-IO.
+      AC_MSG_RESULT(provided by compiler)
+      PARALLEL=yes
+
+      dnl Try link a simple MPI program.  If fail, try again with -lmpi.
+      AC_TRY_LINK(,MPI_Init(),,AC_CHECK_LIB(mpi,MPI_Init,,PARALLEL=no))
+
+      dnl Then try link a simple MPI-IO program.  If fail, try again with
+      dnl -lmpio.
+      if test "X$PARALLEL" = "Xyes"; then
+         AC_TRY_LINK(,MPI_File_open(),,
+                     AC_CHECK_LIB(mpio,MPI_File_open,,PARALLEL=no))
+      fi
+
+      dnl Set RUNPARALLEL to mpirun if not set yet.
+      if test "X$PARALLEL" = "Xyes" && test -z "$RUNPARALLEL"; then
+         RUNPARALLEL="mpirun -np \$\${NPROCS:=2}"
+      fi
+      ;;
+
+   X-mpich)
+      dnl For normal mpich installation the compiler, mpicc, should know
+      dnl where the MPI and MPI-IO header files are located and know which
+      dnl extra libraries need to be linked and will supply appropriate
+      dnl flags to the underlying compiler.
+      AC_MSG_RESULT(mpich)
+      AC_MSG_WARN(*** Why aren't you using an mpicc compiler? ***)
+
+      dnl Apparently mpicc isn't installed correctly so configure must
+      dnl search for the header files and libraries. Actually we only
+      dnl have to search for the libraries in order to get the onto the
+      dnl link line, the user will have already told us about the
+      dnl locations. Fail if something is missing.
+      PARALLEL=mpich
+      AC_CHECK_LIB(mpich,MPI_Init,,AC_MSG_ERROR(no mpich library))
+      ;;
+
+   *)
+      AC_MSG_RESULT(error)
+      AC_MSG_ERROR(\'$enable_parallel\' is not a valid parallel search type)
+      ;;
+esac
+
+dnl ----------------------------------------------------------------------
+dnl Print some other parallel information and do some sanity checks.
+dnl
+if test -n "$PARALLEL"; then
+   dnl We are building a parallel library
+   AC_DEFINE(HAVE_PARALLEL)
+
+   dnl Display what we found about running programs
+   AC_MSG_CHECKING(prefix for running on one processor)
+   AC_MSG_RESULT($RUNSERIAL)
+   AC_MSG_CHECKING(prefix for running in parallel)
+   AC_MSG_RESULT($RUNPARALLEL)
+
+   dnl Check that we can link a simple MPI and MPI-IO application
+   AC_MSG_CHECKING(whether a simple MPI-IO program can be linked)
+   AC_TRY_LINK(,[MPI_Init();MPI_File_open();],
+               AC_MSG_RESULT(yes),
+               AC_MSG_RESULT(no)
+               AC_MSG_ERROR('unable to link a simple MPI-IO application'))
+
+   dnl There *must* be some way to run in parallel even if it's just the
+   dnl word `none'.
+   if test -z "$RUNPARALLEL"; then
+      AC_MSG_ERROR(no way to run a parallel program)
+   fi
+
+   dnl If RUNSERIAL or RUNPARALLEL is the word `none' then replace it with
+   dnl the empty string.
+   if test "X$RUNSERIAL" = "Xnone"; then
+      RUNSERIAL=
+   fi
+   if test "X$RUNPARALLEL" = "Xnone"; then
+      RUNPARALLEL=
+   fi
+fi
+
+AC_MSG_CHECKING(make)
+AC_SUBST_FILE(DEPEND)
+if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
+	sed -n 1p|cut -c1-8`" = "GNU Make"; then
+   AC_MSG_RESULT(GNU make)
+   GMAKE=yes
+   if test "X$GCC" = "Xyes"; then
+      DEPEND=config/depend1
+   else
+      DEPEND=config/depend2
+   fi
+else
+   AC_MSG_RESULT(generic)
+fi
+
+dnl How do we include another file into a Makefile?
+if test -n "$DEPEND"; then
+   AC_MSG_CHECKING(how to include a makefile)
+
+   dnl The include file contains the target for `foo'
+   cat >makeinc <<EOF
+foo:
+	@:
+EOF
+
+   while true; do dnl for break
+      dnl pmake. We have to be careful because some pmake think that the
+      dnl contents of the MAKE environment variable is a target.
+      echo '.include <makeinc>' >maketest
+      if (MAKE= ${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+         AC_MSG_RESULT([.include <FILE>])
+         DEPEND=config/depend3
+         break
+      fi
+ 
+      dnl Most make's use `include FILE'
+      echo 'include makeinc' >maketest
+      if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+         AC_MSG_RESULT(include FILE)
+         DEPEND=config/depend4
+         break;
+      fi
+
+      dnl default
+      AC_MSG_RESULT(you have a deficient make command)
+      DEPEND=config/dependN
+      break
+   done
+   rm makeinc maketest
+fi
+
+dnl Some cleanup stuff
+rm -f conftest core core.* *.core conftest.o conftest.c dummy.o $ac_clean_files
+
+dnl ----------------------------------------------------------------------
+dnl Determine the runtime libraries we may need to include in the
+dnl libtools command so that executables will find the correct dynamic
+dnl libraries.
+dnl 
+DYNAMIC_DIRS=""
+if test -n "$LDFLAGS"; then
+   for d in $LDFLAGS ; do
+      d=`echo $d | sed -e 's/-L//g'`
+      case "$d" in
+         .*)
+	    dnl If the path isn't absolute, make it so by prepending the
+	    dnl ROOT directory to it.
+	    d=${ROOT}/$d
+	    ;;
+      esac
+      DYNAMIC_DIRS="-R${d} $DYNAMIC_DIRS"
+   done
+fi
+AC_SUBST(DYNAMIC_DIRS)
+
+dnl ----------------------------------------------------------------------
+dnl Build the Makefiles.  Almost every Makefile.in will begin with the line
+dnl `@COMMENCE@' and end with the line `@CONCLUDE@'.  These lines insert
+dnl various files from the config directory into the Makefile.
+dnl
+AC_SUBST_FILE(COMMENCE) COMMENCE=config/commence
+AC_SUBST_FILE(CONCLUDE) CONCLUDE=config/conclude
+
+dnl The directory search list
+AC_SUBST(SEARCH) SEARCH='$(srcdir) $(top_builddir)/src $(top_srcdir)/src'
+cmd='echo $SEARCH |sed "s/ /'$SEARCH_SEP'/g"'
+SEARCH="$SEARCH_RULE`eval $cmd`"
+
+dnl We don't need to say when we're entering directories if we're using
+dnl GNU make becuase make does it for us.
+if test "X$GMAKE" = "Xyes"; then
+   AC_SUBST(SETX) SETX=":"
+else
+   AC_SUBST(SETX) SETX="set -x"
+fi
+
+dnl Some cleanup stuff
+rm -rf conftest* confdefs* core core.* *.core dummy.o
+
+dnl Build config.status, touch the stamp files, and build all the Makefiles.
+dnl The order is such that the first `make' does not need to update any
+dnl configuration information. See config/commence.in for the order in which
+dnl things need to be done.
+
+dnl First the stamp1 file for H5config.h.in
+mkdir ./config >/dev/null 2>&1
+touch ./config/stamp1
+
+dnl Then the config.status file (but not makefiles)
+saved_no_create=$no_create
+no_create=yes
+AC_OUTPUT(config/depend1 config/depend2 config/depend3 config/depend4	\
+	  config/dependN config/commence config/conclude Makefile	\
+	  src/H5fortran_types.f90 src/Makefile test/Makefile		\
+	  examples/Makefile)
+no_create=$saved_no_create
+
+dnl Then the stamp2 file for H5config.h
+touch ./config/stamp2
+
+dnl Finally the makefiles
+test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1

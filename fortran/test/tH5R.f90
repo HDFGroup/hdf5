@@ -1,0 +1,367 @@
+!
+! 
+!    Testing Reference Interface functionality.
+!
+!      MODULE H5RTEST
+
+!        USE HDF5 ! This module contains all necessary modules 
+        
+!      CONTAINS
+!      
+!The following subroutine tests h5rcreate_f, h5rdereference_f
+!and H5Rget_object_type functions
+!
+        SUBROUTINE refobjtest(total_error)
+        USE HDF5 ! This module contains all necessary modules 
+          IMPLICIT NONE
+          INTEGER, INTENT(OUT) :: total_error 
+
+          CHARACTER(LEN=12), PARAMETER :: filename = "reference.h5"
+          CHARACTER(LEN=8), PARAMETER :: dsetnamei = "INTEGERS"
+          CHARACTER(LEN=17), PARAMETER :: dsetnamer = "OBJECT_REFERENCES"
+          CHARACTER(LEN=6), PARAMETER :: groupname1 = "GROUP1"
+          CHARACTER(LEN=6), PARAMETER :: groupname2 = "GROUP2"
+
+          INTEGER(HID_T) :: file_id       ! File identifier 
+          INTEGER(HID_T) :: grp1_id       ! Group identifier 
+          INTEGER(HID_T) :: grp2_id       ! Group identifier 
+          INTEGER(HID_T) :: dset1_id      ! Dataset identifier 
+          INTEGER(HID_T) :: dsetr_id      ! Dataset identifier 
+          INTEGER(HID_T) :: type_id       ! Type identifier  
+          INTEGER(HID_T) :: space_id      ! Dataspace identifier 
+          INTEGER(HID_T) :: spacer_id     ! Dataspace identifier 
+          INTEGER     ::   error, obj_type
+          INTEGER(HSIZE_T), DIMENSION(1) :: dims = (/5/)
+          INTEGER(HSIZE_T), DIMENSION(1) :: dimsr= (/4/)
+          INTEGER(HSIZE_T), DIMENSION(1) :: my_maxdims = (/5/)
+          INTEGER :: rank = 1 
+          INTEGER :: rankr = 1 
+          TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref
+          TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref_out
+          INTEGER, DIMENSION(5) :: data = (/1, 2, 3, 4, 5/)
+
+          !
+          !  Initialize FORTRAN predefined datatypes
+          !
+!          CALL h5init_types_f(error)
+!              CALL check("h5init_types_f",error,total_error)
+
+          !
+          !Create a new file with Default file access and
+          !file creation properties . 
+          !
+          CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
+              CALL check("h5fcreate_f",error,total_error)
+
+
+          !
+          ! Create a group inside the file
+          !
+          CALL h5gcreate_f(file_id, groupname1, grp1_id, error)
+              CALL check("h5gcreate_f",error,total_error)
+
+          !
+          ! Create a group inside the group GROUP1
+          !
+          CALL h5gcreate_f(grp1_id, groupname2, grp2_id, error)
+              CALL check("h5gcreate_f",error,total_error)
+
+          ! 
+          ! Create dataspaces for datasets   
+          !
+          CALL h5screate_simple_f(rank, dims, space_id, error, maxdims=my_maxdims)
+              CALL check("h5screate_simple_f",error,total_error)
+          CALL h5screate_simple_f(rankr, dimsr, spacer_id, error)
+              CALL check("h5screate_simple_f",error,total_error)
+
+          !
+          ! Create integer dataset
+          !
+          CALL h5dcreate_f(file_id, dsetnamei, H5T_NATIVE_INTEGER, space_id, &
+                      dset1_id, error)
+              CALL check("h5dcreate_f",error,total_error)
+          !
+          ! Create dataset to store references to the objects
+          !
+          CALL h5dcreate_f(file_id, dsetnamer, H5T_STD_REF_OBJ, spacer_id, &
+                      dsetr_id, error)
+              CALL check("h5dcreate_f",error,total_error)
+          !
+          ! Create a datatype and store in the file
+          !
+          CALL h5tcopy_f(H5T_NATIVE_REAL, type_id, error)
+              CALL check("h5tcopy_f",error,total_error)
+          CALL h5tcommit_f(file_id, "MyType", type_id, error)
+              CALL check("h5tcommit_f",error,total_error)
+
+          !
+          !  Close dataspaces, groups and integer dataset
+          ! 
+          CALL h5sclose_f(space_id, error)
+              CALL check("h5sclose_f",error,total_error)
+          CALL h5sclose_f(spacer_id, error)         
+              CALL check("h5sclose_f",error,total_error)
+          CALL h5dclose_f(dset1_id, error)
+              CALL check("h5dclose_f",error,total_error)
+          CALL h5tclose_f(type_id, error)
+              CALL check("h5tclose_f",error,total_error)
+          CALL h5gclose_f(grp1_id, error)
+              CALL check("h5gclose_f",error,total_error)
+          CALL h5gclose_f(grp2_id, error)
+              CALL check("h5gclose_f",error,total_error)
+
+
+          !
+          ! Craete references to two groups, integer dataset and shared datatype
+          ! and write it to the dataset in the file
+          !
+          CALL h5rcreate_f(file_id, groupname1, ref(1), error)
+              CALL check("h5rcreate_f",error,total_error)
+          CALL h5rcreate_f(file_id, "/GROUP1/GROUP2", ref(2), error)
+              CALL check("h5rcreate_f",error,total_error)
+          CALL h5rcreate_f(file_id, dsetnamei, ref(3), error)
+              CALL check("h5rcreate_f",error,total_error)
+          CALL h5rcreate_f(file_id, "MyType", ref(4), error)
+              CALL check("h5rcreate_f",error,total_error)
+
+          CALL h5dwrite_f(dsetr_id, H5T_STD_REF_OBJ, ref, error)
+              CALL check("h5dwrite_f",error,total_error)
+
+          !
+          !Close the dataset
+          ! 
+          CALL h5dclose_f(dsetr_id, error)
+              CALL check("h5dclose_f",error,total_error)
+
+          ! 
+          ! Reopen the dataset with object references
+          !
+          CALL h5dopen_f(file_id, dsetnamer,dsetr_id,error)
+              CALL check("h5dopen_f",error,total_error)
+          CALL h5dread_f(dsetr_id, H5T_STD_REF_OBJ, ref_out, error)
+              CALL check("h5dread_f",error,total_error)
+   
+          !
+          !get the third reference's type and Dereference it
+          !
+          CALL h5rget_object_type_obj_f(dsetr_id, ref(3), obj_type, error) 
+              CALL check("h5rget_object_type_obj_f",error,total_error)
+          if (obj_type == 2) then 
+              CALL h5rdereference_f(dsetr_id, ref(3), dset1_id, error)
+                  CALL check("h5rdereference_f",error,total_error)
+          
+              CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, data, error)
+                  CALL check("h5dwrite_f",error,total_error)
+          end if
+
+          !
+          !get the fourth reference's type and Dereference it
+          !
+          CALL h5rget_object_type_obj_f(dsetr_id, ref(4), obj_type, error) 
+              CALL check("h5rget_object_type_obj_f",error,total_error)
+          if (obj_type == 3) then 
+              CALL h5rdereference_f(dsetr_id, ref(4), type_id, error)
+                  CALL check("h5rdereference_f",error,total_error)
+          end if
+
+          !
+          ! Close all objects.
+          !          
+          CALL h5dclose_f(dset1_id, error)
+              CALL check("h5dclose_f",error,total_error)
+          CALL h5tclose_f(type_id, error)
+              CALL check("h5tclose_f",error,total_error)
+
+          CALL h5dclose_f(dsetr_id, error)
+              CALL check("h5dclose_f",error,total_error)
+          CALL h5fclose_f(file_id, error)
+              CALL check("h5fclose_f",error,total_error)
+          !
+          ! Close FORTRAN predefined datatypes.
+          !
+!          CALL h5close_types_f(error) 
+!              CALL check("h5close_types_f",error,total_error)
+          RETURN
+
+        END SUBROUTINE refobjtest
+!
+!The following subroutine tests h5rget_region_f, h5rcreate_f
+!and h5rdereference_f functionalities
+! 
+        SUBROUTINE refregtest(total_error)
+        USE HDF5 ! This module contains all necessary modules 
+          IMPLICIT NONE
+          INTEGER, INTENT(OUT) :: total_error 
+
+          CHARACTER(LEN=9), PARAMETER :: filename = "Refreg.h5"
+          CHARACTER(LEN=6), PARAMETER :: dsetnamev = "MATRIX"
+          CHARACTER(LEN=17), PARAMETER :: dsetnamer = "REGION_REFERENCES"
+
+          INTEGER(HID_T) :: file_id       ! File identifier 
+          INTEGER(HID_T) :: space_id      ! Dataspace identifier 
+          INTEGER(HID_T) :: spacer_id     ! Dataspace identifier 
+          INTEGER(HID_T) :: dsetv_id      ! Dataset identifier 
+          INTEGER(HID_T) :: dsetr_id      ! Dataset identifier 
+          INTEGER     ::   error
+          TYPE(hdset_reg_ref_t_f) , DIMENSION(2) :: ref     ! Buffers to store references
+          TYPE(hdset_reg_ref_t_f) , DIMENSION(2) :: ref_out !
+          INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/2,9/)  ! Datasets dimensions
+          INTEGER(HSIZE_T), DIMENSION(1) :: dimsr = (/2/)   ! 
+          INTEGER(HSSIZE_T), DIMENSION(2) :: start
+          INTEGER(HSIZE_T), DIMENSION(2) :: count
+          INTEGER :: rankr = 1 
+          INTEGER :: rank = 2
+          INTEGER , DIMENSION(2,9) ::  data 
+          INTEGER , DIMENSION(2,9) ::  data_out = 0 
+          INTEGER(HSSIZE_T) , DIMENSION(2,3) :: coord
+          INTEGER(SIZE_T) ::num_points = 3  ! Number of selected points
+          INTEGER :: i, j
+          coord = reshape((/1,1,2,7,1,9/), (/2,3/))   ! Coordinates of selected points
+          data = reshape ((/1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6/), (/2,9/))
+
+          !
+          !  Initialize FORTRAN predefined datatypes.
+          !
+!          CALL h5init_types_f(error)
+!              CALL check("h5init_types_f", error, total_error)
+          !
+          !  Create a new file.
+          !
+          CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
+          ! Default file access and file creation
+          ! properties are used. 
+              CALL check("h5fcreate_f", error, total_error)
+          ! 
+          ! Create  dataspaces:
+          ! 
+          ! for dataset with references to dataset regions 
+          !
+          CALL h5screate_simple_f(rankr, dimsr, spacer_id, error)
+              CALL check("h5screate_simple_f", error, total_error)
+          !
+          ! for integer dataset 
+          !
+          CALL h5screate_simple_f(rank, dims, space_id, error)
+              CALL check("h5screate_simple_f", error, total_error)
+          !
+          ! Create  and write datasets:
+          !
+          ! Integer dataset 
+          !
+          CALL h5dcreate_f(file_id, dsetnamev, H5T_NATIVE_INTEGER, space_id, &
+               dsetv_id, error)
+              CALL check("h5dcreate_f", error, total_error)
+          CALL h5dwrite_f(dsetv_id, H5T_NATIVE_INTEGER, data, error)
+              CALL check("h5dwrite_f", error, total_error)
+
+          CALL h5dclose_f(dsetv_id, error)
+              CALL check("h5dclose_f", error, total_error)
+          !
+          ! Dataset with references
+          !
+          CALL h5dcreate_f(file_id, dsetnamer, H5T_STD_REF_DSETREG, spacer_id, &
+               dsetr_id, error)
+              CALL check("h5dcreate_f", error, total_error)
+          !
+          ! Create a reference to the hyperslab selection.
+          !
+          start(1) = 0 
+          start(2) = 3 
+          count(1) = 2
+          count(2) = 3
+          CALL h5sselect_hyperslab_f(space_id, H5S_SELECT_SET_F, &
+               start, count, error) 
+              CALL check("h5sselect_hyperslab_f", error, total_error)
+          CALL h5rcreate_f(file_id, dsetnamev, space_id, ref(1), error) 
+              CALL check("h5rcreate_f", error, total_error)
+          !
+          ! Create a reference to elements selection.
+          !
+          CALL h5sselect_none_f(space_id, error)
+              CALL check("h5sselect_none_f", error, total_error)
+          CALL h5sselect_elements_f(space_id, H5S_SELECT_SET_F, rank, num_points,&
+               coord, error) 
+              CALL check("h5sselect_elements_f", error, total_error)
+          CALL h5rcreate_f(file_id, dsetnamev, space_id, ref(2), error) 
+              CALL check("h5rcreate_f", error, total_error)
+          !
+          ! Write dataset with the references. 
+          !
+          CALL h5dwrite_f(dsetr_id, H5T_STD_REF_DSETREG, ref, error) 
+              CALL check("h5dwrite_f", error, total_error)
+          !
+          ! Close all objects.
+          !
+          CALL h5sclose_f(space_id, error)
+              CALL check("h5sclose_f", error, total_error)
+          CALL h5sclose_f(spacer_id, error)
+              CALL check("h5sclose_f", error, total_error)
+          CALL h5dclose_f(dsetr_id, error)
+              CALL check("h5dclose_f", error, total_error)
+          CALL h5fclose_f(file_id, error)
+              CALL check("h5fclose_f", error, total_error)
+          !
+          ! Reopen the file to test selections.
+          !
+          CALL h5fopen_f (filename, H5F_ACC_RDWR_F, file_id, error)
+              CALL check("h5fopen_f", error, total_error)
+          CALL h5dopen_f(file_id, dsetnamer, dsetr_id, error)
+              CALL check("h5dopen_f", error, total_error)
+          !
+          ! Read references to the dataset regions.
+          !
+          CALL h5dread_f(dsetr_id, H5T_STD_REF_DSETREG, ref_out, error) 
+              CALL check("h5dread_f", error, total_error)
+          ! 
+          ! Dereference the first reference.
+          ! 
+          CALL H5rdereference_f(dsetr_id, ref_out(1), dsetv_id, error)
+              CALL check("h5rdereference_f", error, total_error)
+          CALL H5rget_region_f(dsetr_id, ref_out(1), space_id, error) 
+              CALL check("h5rget_region_f", error, total_error)
+          !
+          ! Read selected data from the dataset.
+          !
+          CALL h5dread_f(dsetv_id, H5T_NATIVE_INTEGER, data_out, error, &
+               mem_space_id = space_id, file_space_id = space_id)
+              CALL check("h5dread_f", error, total_error)
+          CALL h5sclose_f(space_id, error)
+              CALL check("h5sclose_f", error, total_error)
+          CALL h5dclose_f(dsetv_id, error)
+              CALL check("h5dclose_f", error, total_error)
+          data_out = 0
+          !  
+          ! Dereference the second reference.
+          ! 
+          CALL H5rdereference_f(dsetr_id, ref_out(2), dsetv_id, error)
+              CALL check("h5rdereference_f", error, total_error)
+          CALL H5rget_region_f(dsetr_id, ref_out(2), space_id, error) 
+              CALL check("h5rget_region_f", error, total_error)
+          !
+          ! Read selected data from the dataset.
+          !
+          CALL h5dread_f(dsetv_id, H5T_NATIVE_INTEGER, data_out, error, &
+               mem_space_id = space_id, file_space_id = space_id)
+              CALL check("h5dread_f", error, total_error)
+          !
+          ! Close all objects
+          !
+          CALL h5sclose_f(space_id, error)
+              CALL check("h5sclose_f", error, total_error)
+          CALL h5dclose_f(dsetv_id, error)
+              CALL check("h5dclose_f", error, total_error)
+          CALL h5dclose_f(dsetr_id, error)
+              CALL check("h5dclose_f", error, total_error)
+          CALL h5fclose_f(file_id, error)
+              CALL check("h5fclose_f", error, total_error)
+          !
+          ! Close FORTRAN predefined datatypes.
+          !
+!          CALL h5close_types_f(error) 
+!              CALL check("h5close_types_f",error,total_error)
+          RETURN
+
+        END SUBROUTINE refregtest
+
+
+!      END MODULE H5RTEST

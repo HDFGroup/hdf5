@@ -1,0 +1,40 @@
+## HDF5-Fortran test/Makefile(.in)
+##
+## Copyright (C) 2000 National Center for Supercomputing Applications.
+##                    All rights reserved.
+##
+##
+top_srcdir=@top_srcdir@
+top_builddir=..
+srcdir=@srcdir@
+@COMMENCE@
+
+hdf5_dir=$(top_srcdir)/../src
+
+## Add include directory to the C preprocessor flags and the h5test and hdf5
+## libraries to the library list.
+LT_LINK_LIB=$(LT) --mode=link $(F9X) -static -rpath $(libdir)
+MFLAG=@F9XMODFLAG@
+FFLAGS=$(MFLAG). $(MFLAG)../src
+FLIB=../src/libhdf5_fortran.la
+HDF5LIB=$(hdf5_dir)/libhdf5.la
+
+TEST_PROGS_SRC=fortranlib_test.f90 fflush1.f90 fflush2.f90
+TEST_PROGS=$(TEST_PROGS_SRC:.f90=)
+
+TEST_SRC=hdf5test.f90 tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90	\
+	 tH5Sselect.f90 tH5P.f90
+TEST_OBJ=$(TEST_SRC:.f90=.lo)
+
+$(TEST_PROGS): $(FLIB)
+
+fortranlib_test: $(TEST_OBJ)
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fortranlib_test.f90 $(TEST_OBJ) $(FLIB) $(LIBS) $(HDF5LIB)
+
+fflush1: fflush1.f90 hdf5test.f90
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush1.f90 hdf5test.o $(FLIB) $(LIBS) $(HDF5LIB)
+
+fflush2: fflush2.f90 hdf5test.f90
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush2.f90 hdf5test.o $(FLIB) $(LIBS) $(HDF5LIB)
+
+@CONCLUDE@

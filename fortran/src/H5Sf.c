@@ -1,0 +1,874 @@
+#include "H5f90.h"
+
+/*----------------------------------------------------------------------------
+ * Name:        h5screate_simple_c
+ * Purpose:     Call H5Screate_simple to create a dataspace 
+ * Inputs:      rank - number of dimensions of dataspace
+ *              dims - array of the size of each dimension
+                maxdims - an array of the maximum size of each dimension
+ * Outputs:     space_id - identifier of the created dataspace
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, August 4, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5screate_simple_c ( int_f *rank, hsize_t_f *dims, hsize_t_f *maxdims, hid_t_f *space_id )
+{
+  int ret_value = -1;
+  hsize_t *c_dims;
+  hsize_t *c_maxdims;
+  hid_t c_space_id;
+  int i;
+
+  c_dims =  malloc(sizeof(hsize_t) * (*rank ));
+  if (!c_dims) return ret_value;
+  c_maxdims =  malloc(sizeof(hsize_t) * (*rank ));
+  if (!c_maxdims) return ret_value;
+
+  /*
+   * Transpose dimension arrays because of C-FORTRAN storage order
+   */
+  for (i = 0; i < *rank ; i++) {
+       c_dims[i] =  dims[*rank - i - 1];
+       c_maxdims[i] = maxdims[*rank - i - 1]; 
+  }
+
+  c_space_id = H5Screate_simple(*rank, c_dims, c_maxdims);
+  if (c_space_id < 0) return ret_value;
+
+  *space_id = (hid_t_f)c_space_id;
+  ret_value = 0;
+  HDfree (c_dims);
+  HDfree (c_maxdims);
+  return ret_value;
+}  
+
+
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sclose_c
+ * Purpose:     Call H5Sclose to close the dataspace 
+ * Inputs:      space_id - identifier of the dataspace to be closed
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, August 4, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sclose_c ( hid_t_f *space_id )
+{
+  int ret_value = 0;
+  hid_t c_space_id;
+  
+  c_space_id = *space_id;
+  if ( H5Sclose(c_space_id) < 0  ) ret_value = -1;
+  return ret_value;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Name:        h5screate_c
+ * Purpose:     Call H5Screate to create a dataspace 
+ * Inputs:      classtype - type of the dataspace class
+ * Outputs:     space_id - identifier of the created dataspace
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Tuesday, August 10, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5screate_c ( int_f *classtype, hid_t_f *space_id )
+{
+  H5S_class_t c_classtype;
+  int CASE;
+  int ret_value = 0;
+  hid_t c_space_id;
+  CASE = (int)*classtype;
+
+  switch (CASE) {
+
+     case (H5S_SCALAR_F):
+       c_classtype = H5S_SCALAR;
+       break;
+
+     case(H5S_SIMPLE_F):
+       c_classtype = H5S_SIMPLE;
+       break;
+
+     default:
+       ret_value = -1;
+       return ret_value;
+ }
+   c_space_id = H5Screate(c_classtype); 
+
+  if ( c_space_id  < 0  ) ret_value = -1;
+  *space_id = (hid_t_f) c_space_id;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5scopy_c
+ * Purpose:     Call H5Scopy to copy dataspace 
+ * Inputs:      space_id - identifier of the dataspace to be copied 
+ * Outputs:     new_space_id - identifier of the new datspace
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Tuesday, August 10, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5scopy_c( hid_t_f *space_id , hid_t_f *new_space_id)
+{
+  int ret_value = 0;
+  hid_t c_new_space_id;
+  hid_t c_space_id;
+
+  c_space_id = *space_id;
+  c_new_space_id = H5Scopy(c_space_id); 
+  if ( c_new_space_id < 0  ) ret_value = -1;
+
+  *new_space_id = (hid_t_f)c_new_space_id;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sget_select_hyper_nblocks_c
+ * Purpose:     Call H5SH5Sget_select_hyper_nblocks to 
+ *              get the the number of hyperslab blocks in 
+ *              the current dataspace selection if successful 
+ * Inputs:      space_id - identifier of the dataspace
+ * Outputs:     num_blocks -  number of hyperslab blocks in 
+ *              the current dataspace selection
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Xiangyang Su
+ *              Friday, November 12, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sget_select_hyper_nblocks_c( hid_t_f *space_id , hssize_t_f * num_blocks)
+{
+  int ret_value = 0;
+  hid_t c_space_id;
+  hssize_t c_num_blocks;
+  hsize_t* buf;
+  int i, j;
+
+  c_space_id = *space_id;
+  c_num_blocks = H5Sget_select_hyper_nblocks(c_space_id);
+  if ( c_num_blocks < 0  ) ret_value = -1;
+
+  *num_blocks = (hssize_t_f)c_num_blocks;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sget_select_elem_npoints_c
+ * Purpose:     Call H5Sget_select_elem_npoints to 
+ *              get the the number of element points in 
+ *              the current dataspace selection if successful 
+ * Inputs:      space_id - identifier of the dataspace
+ * Outputs:     num_points -  number of element points in 
+ *              the current dataspace selection
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Xiangyang Su
+ *              Monday, November 15, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points)
+{
+  int ret_value = 0;
+  hid_t c_space_id;
+  hssize_t c_num_points;
+
+  c_space_id = *space_id;
+  c_num_points = H5Sget_select_elem_npoints(c_space_id);
+  if ( c_num_points < 0  ) ret_value = -1;
+
+  *num_points = (hssize_t_f)c_num_points;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sget_select_hyper_blocklist_c
+ * Purpose:     Call H5Sget_select_hyper_blocklist to 
+ *              get a list of the hyperslab blocks currently selected  
+ *              Starting with the startblock-th block in the
+ *              list of blocks, num_blocks blocks are put into the user's
+ *              buffer. If the user's buffer fills up before numblocks 
+ *              blocks are inserted, the buffer
+ *              will contain only as many blocks as fit. 
+ * Inputs:      space_id - identifier of the dataspace
+ *              startblock - Hyperslab block to start with
+ *              num_blocks -  number of hyperslab blocks in 
+ *                            the current dataspace selection
+ * Outputs:     buf - List of hyperslab blocks selected 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Xiangyang Su
+ *              Monday, November 15, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock, 
+                                  hsize_t_f * num_blocks, hsize_t_f * buf)
+{
+  int ret_value = -1;
+  hid_t c_space_id;
+  hsize_t c_num_blocks;
+
+  int i, rank;
+  hsize_t* c_startblock,* c_buf;
+
+  c_space_id = *space_id;
+  c_num_blocks = * num_blocks;
+
+  rank = H5Sget_simple_extent_ndims(c_space_id);
+  if (rank < 0 ) return ret_value;
+
+  c_startblock = (hsize_t*)malloc(sizeof(hsize_t)*rank);
+  if (!c_startblock) return ret_value;
+  for (i = 0; i < rank; i++)
+  {
+    c_startblock[i] = (hsize_t)startblock[i];
+  }
+
+  c_buf = (hsize_t*)malloc(sizeof(hsize_t)*c_num_blocks*2*rank);
+  if (!c_buf) return ret_value;
+
+  ret_value = H5Sget_select_hyper_blocklist(c_space_id, *c_startblock, 
+                                            c_num_blocks, c_buf);
+  for(i = 0; i < c_num_blocks*2*rank; i++)
+  {
+      buf[i] = (hsize_t_f)c_buf[i] +1;
+  }
+  HDfree(c_buf);
+  HDfree(c_startblock);
+  if (ret_value  >= 0  ) ret_value = 0;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sget_select_bounds_c
+ * Purpose:     Call H5Sget_select_bounds to retrieve the coordinates 
+ *              of the bounding box containing the current selection 
+ *              and places them into user-supplied buffers
+ * Inputs:      space_id - identifier of the dataspace
+ * Outputs:     start -  Starting coordinates of the bounding box
+ *              end -  Ending coordinates of the bounding box,
+ *                     i.e., the coordinates of the diagonally opposite corne 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Xiangyang Su
+ *              Wednesday, November 17, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sget_select_bounds_c( hid_t_f *space_id , hsize_t_f * start, hsize_t_f * end)
+{
+  int ret_value = -1;
+  hid_t c_space_id;
+  hsize_t* c_start, *c_end;
+  int i, rank;
+
+  c_space_id = *space_id;
+  rank = H5Sget_simple_extent_ndims(c_space_id);
+  if (rank < 0 ) return ret_value;
+
+  c_start =(hsize_t*) malloc(sizeof(hsize_t)*rank);
+  if (!c_start) return ret_value;
+
+  c_end = (hsize_t*)malloc(sizeof(hsize_t)*rank);
+  if(!c_end) return ret_value;
+
+  ret_value = H5Sget_select_bounds(c_space_id, c_start, c_end);
+  for(i = 0; i < rank; i++)
+  {
+    start[i] = (hsize_t_f)(c_start[i]+1);
+    end[i] = (hsize_t_f)(c_end[i]+1);
+  }
+  if (ret_value  >= 0  ) ret_value = 0;
+
+  HDfree(c_start);
+  HDfree(c_end);
+
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sget_select_elem_pointlist_c
+ * Purpose:     Call  H5Sget_select_elem_pointlist
+ *              get a list of  element points in the  
+ *              current dataspace selectin. 
+ *              Starting with the startpoint-th point in the
+ *              list of points, numpoints points are put into the user's
+ *              buffer. If the user's buffer fills up before numpoints 
+ *              points are inserted, the buffer
+ *              will contain only as many points as fit. 
+ * Inputs:      space_id - identifier of the dataspace
+ *              startpoint - Element point to start with
+ *              numpoints -  Number of element points to get 
+ * Outputs:     buf - List of element points selected 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Xiangyang Su
+ *              Wednesday, November 17, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint, 
+                                  hsize_t_f * numpoints, hsize_t_f * buf)
+{
+  int ret_value = -1;
+  hid_t c_space_id;
+  hsize_t c_num_points;
+  hsize_t* c_startpoint,* c_buf;
+  int i,j, rank;
+
+  c_space_id = *space_id;
+  c_num_points = (hsize_t)* numpoints;
+
+  rank = H5Sget_simple_extent_ndims(c_space_id);
+  if (rank < 0 ) return ret_value;
+
+  c_startpoint = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
+  if (!c_startpoint) return ret_value;
+  for (i =0; i < rank; i++)
+    c_startpoint[i] = (hsize_t)startpoint[i];
+
+  c_buf = (hsize_t*)malloc(sizeof(hsize_t)*c_num_points*rank);
+  if (!c_buf) return ret_value;
+  ret_value = H5Sget_select_elem_pointlist(c_space_id, *startpoint, 
+                                            c_num_points, c_buf);
+  for (i = c_num_points*rank-1; i >= 0; i--) {
+      buf[i] = (hsize_t_f)(c_buf[i]+1);
+  }
+
+  if (ret_value  >= 0  ) ret_value = 0;
+ 
+  HDfree(c_startpoint);
+  HDfree(c_buf);
+
+  return ret_value;
+}
+
+
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sselect_all_c
+ * Purpose:     Call H5Sselect_all to select entire dataspace 
+ * Inputs:      space_id - identifier of the dataspace 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Tuesday, August 10, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sselect_all_c ( hid_t_f *space_id )
+{
+  int ret_value = 0;
+  hid_t c_space_id;
+
+  c_space_id = *space_id;
+  if ( H5Sselect_all(c_space_id) < 0  ) ret_value = -1;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sselect_none_c
+ * Purpose:     Call H5Sselect_none to reset the selection region 
+ * Inputs:      space_id - identifier of the dataspace 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Tuesday, August 10, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sselect_none_c ( hid_t_f *space_id )
+{
+  int ret_value = 0;
+  hid_t c_space_id;
+
+  c_space_id = *space_id;
+  if ( H5Sselect_none(c_space_id) < 0  ) ret_value = -1;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sselect_valid_c
+ * Purpose:     Call H5Sselect_valid to verify that selection
+ *              is within dataspace extent.  
+ * Inputs:      space_id - identifier of the dataspace 
+ * Outputs:     flag - 0 if not valid selection, 1 if is valid selection,
+ *              and negative on failure.
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Tuesday, August 10, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sselect_valid_c ( hid_t_f *space_id , int_f *flag )
+{
+  int ret_value = 0;
+  hid_t c_space_id;
+  htri_t status;
+
+  c_space_id = *space_id;
+  status = H5Sselect_valid(c_space_id);
+  *flag = (int_f)status;
+  if ( status < 0  ) ret_value = -1;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sget_simple_extent_npoints_c
+ * Purpose:     Call H5Sget_simple_extent_npoints to determine the number
+ *              of elements in a dataspace 
+ * Inputs:      space_id - identifier of the dataspace 
+ * Outputs:     npoints - number of points in a dataspace 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, August 11, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sget_simple_extent_npoints_c ( hid_t_f *space_id , hsize_t_f *npoints )
+{
+  int ret_value = 0;
+  hid_t c_space_id;
+  hsize_t c_npoints;
+
+  c_space_id = *space_id;
+  c_npoints = H5Sget_simple_extent_npoints(c_space_id);
+  if ( c_npoints == 0  ) ret_value = -1;
+  *npoints = (hsize_t_f)c_npoints;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sget_select_npoints_c
+ * Purpose:     Call H5Sget_select_npoints to determine the number
+ *              of elements in a dataspace selection 
+ * Inputs:      space_id - identifier of the dataspace 
+ * Outputs:     npoints - number of points in a dataspace selection 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, August 11, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sget_select_npoints_c ( hid_t_f *space_id , hssize_t_f *npoints )
+{
+  int ret_value = 0;
+  hssize_t c_npoints;
+  hid_t c_space_id;
+
+  c_space_id = *space_id;
+  c_npoints = H5Sget_select_npoints(c_space_id);
+  if ( c_npoints == 0  ) ret_value = -1;
+  *npoints = (hssize_t_f)c_npoints;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sget_simple_extent_ndims_c
+ * Purpose:     Call H5Sget_simple_extent_ndims to determine the number
+ *              dimensions 
+ * Inputs:      space_id - identifier of the dataspace 
+ * Outputs:     rank - number of dataspace dimensions 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, August 11, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sget_simple_extent_ndims_c ( hid_t_f *space_id , int_f *ndims )
+{
+  int ret_value = 0;
+  hid_t c_space_id;
+  int c_ndims; 
+
+  c_space_id = *space_id;
+  c_ndims = H5Sget_simple_extent_ndims(c_space_id);
+  if ( c_ndims < 0  ) ret_value = -1;
+  *ndims = (int_f)c_ndims;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sget_simple_extent_type_c
+ * Purpose:     Call H5Sget_simple_extent_type to determine the class type
+ *              of a dataspace 
+ * Inputs:      space_id - identifier of the dataspace 
+ * Outputs:     classtype - class type; possible values are:
+ *              H5S_SCALAR_F (0), H5S_SIMPLE_F (1) 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, August 11, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sget_simple_extent_type_c ( hid_t_f *space_id , int_f *classtype)
+{
+  int ret_value = 0;
+  hid_t c_space_id;
+  H5S_class_t c_classtype; 
+
+  c_space_id = *space_id;
+  c_classtype = H5Sget_simple_extent_type(c_space_id);
+  if ( c_classtype < 0  ) ret_value = -1;
+  if (c_classtype == H5S_SCALAR) *classtype = H5S_SCALAR_F;
+  if (c_classtype == H5S_SIMPLE) *classtype = H5S_SIMPLE_F;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5soffset_simple_c
+ * Purpose:     Call H5Soffset_simple to set the offset of a simple 
+ *              dataspace 
+ * Inputs:      space_id - identifier of the dataspace 
+ *              offset - offset array 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, August 11, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5soffset_simple_c ( hid_t_f *space_id , hssize_t_f *offset)
+{
+  int ret_value = -1;
+  hid_t c_space_id;
+  int rank;
+  hssize_t *c_offset;
+  herr_t  status;
+  int i;
+
+  c_space_id = *space_id;
+  rank = H5Sget_simple_extent_ndims(c_space_id);
+  if (rank < 0) return ret_value;
+
+  c_offset = malloc(sizeof(hssize_t)*rank);
+  if (!c_offset) return ret_value;
+
+  /*
+   * Reverse dimensions due to C-FORTRAN storage order.
+   */
+  for (i=0; i < rank; i++) c_offset[i] = offset[rank - i - 1];
+
+  status = H5Soffset_simple(c_space_id, c_offset);
+  if ( status >= 0  ) ret_value = 0;
+  HDfree(c_offset);
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sset_extent_simple_c
+ * Purpose:     Call H5Sset_extent_simple to set or reset size of
+ *              existing  dataspace 
+ * Inputs:      space_id - identifier of the dataspace 
+ *              rank - dataspace rank
+ *              current_size - array with the new dimension sizes 
+ *              maximum_size - aray with maximum sizes of dimensions
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, August 11, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sset_extent_simple_c ( hid_t_f *space_id , int_f *rank, hsize_t_f *current_size, hsize_t_f *maximum_size)
+{
+  int ret_value = -1;
+  hid_t c_space_id;
+  int c_rank;
+  hsize_t *c_current_size;
+  hsize_t *c_maximum_size;
+  herr_t  status;
+  int i;
+
+  c_current_size = malloc(sizeof(hsize_t)*(*rank));
+  if (!c_current_size) return ret_value;
+
+  c_maximum_size = malloc(sizeof(hsize_t)*(*rank));
+  if (!c_maximum_size) return ret_value;
+
+  /*
+   * Reverse dimensions due to C-FORTRAN storage order.
+   */
+  for (i=0; i < *rank; i++) {
+      c_current_size[i] = (hsize_t)current_size[*rank - i - 1];
+      c_maximum_size[i] = (hsize_t)maximum_size[*rank - i - 1];
+  }
+  
+  c_space_id = *space_id;
+  c_rank = *rank;
+  status = H5Sset_extent_simple(c_space_id, c_rank, c_current_size, c_maximum_size);
+  if ( status >= 0  ) ret_value = 0;
+  HDfree(c_current_size);
+  HDfree(c_maximum_size);
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sget_simple_extent_dims_c
+ * Purpose:     Call H5Sget_simple_extent_dims to retrieve sizes of an 
+ *              existing  dataspace 
+ * Inputs:      space_id - identifier of the dataspace 
+ * Outputs:     dims - array with the dimension sizes 
+ *              maxdims - aray with maximum sizes of dimensions
+ * Returns:     number of dataspace dimensions (rank) on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, August 11, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sget_simple_extent_dims_c ( hid_t_f *space_id , hsize_t_f *dims, hsize_t_f *maxdims)
+{
+  int ret_value = -1;
+  hid_t c_space_id;
+  hsize_t *c_dims;
+  hsize_t *c_maxdims;
+  int status;
+  int rank;
+  int i;
+
+  c_space_id = *space_id;
+  rank = H5Sget_simple_extent_ndims(c_space_id);
+  if (rank < 0) return ret_value;
+
+  c_dims = malloc(sizeof(hsize_t)*rank);
+  if (!c_dims) return ret_value;
+
+  c_maxdims = malloc(sizeof(hsize_t)*rank);
+  if (!c_maxdims) return ret_value;
+
+  status = H5Sget_simple_extent_dims(c_space_id, c_dims, c_maxdims);
+  /*
+   * Reverse dimensions due to C-FORTRAN storage order.
+   */
+  for (i=0; i < rank; i++) {
+      dims[rank - i - 1] = (hsize_t_f)c_dims[i];
+      maxdims[rank - i - 1] = (hsize_t_f)c_maxdims[i];
+  }
+
+  if ( status >= 0  ) ret_value = rank;
+  HDfree(c_dims);
+  HDfree(c_maxdims);
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sis_simple_c
+ * Purpose:     Call H5Sis_simple to detrmine if the dataspace 
+ *              is simple.  
+ * Inputs:      space_id - identifier of the dataspace 
+ * Outputs:     flag - 0 if not simple, 1 if is simple,
+ *              and negative on failure.
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, August 11, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sis_simple_c ( hid_t_f *space_id , int_f *flag )
+{
+  int ret_value = 0;
+  hid_t c_space_id;
+  htri_t status;
+
+  c_space_id = *space_id;
+  status = H5Sis_simple(c_space_id);
+  *flag = (int_f)status;
+  if ( status < 0  ) ret_value = -1;
+  return ret_value;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sextent_copy_c
+ * Purpose:     Call H5Sextent_copy to copy an extent of dataspace 
+ * Inputs:      dest_space_id - identifier of the destination dataspace 
+ *              source_space_id - identifier of the source dataspace
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, August 11, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sextent_copy_c ( hid_t_f *dest_space_id , hid_t_f *source_space_id)
+{
+  int ret_value = 0;
+  hid_t c_dest_space_id, c_source_space_id;
+  herr_t status;
+
+  c_dest_space_id = *dest_space_id;
+  c_source_space_id = *source_space_id;
+  status = H5Sextent_copy(c_dest_space_id, c_source_space_id); 
+  if ( status < 0  ) ret_value = -1;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sset_extent_none_c
+ * Purpose:     Call H5Sset_extent_none to remove extent from a dataspace 
+ * Inputs:      space_id - dataspace identifier 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, August 11, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sset_extent_none_c ( hid_t_f *space_id )
+{
+  int ret_value = 0;
+  hid_t c_space_id;
+  herr_t status;
+
+  c_space_id = *space_id;
+  status = H5Sset_extent_none(c_space_id); 
+  if ( status < 0  ) ret_value = -1;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sselect_hyperslab_c
+ * Purpose:     Call H5Sselect_hyperslab to select a hyperslab 
+ * Inputs:      space_id - identifier of the dataspace 
+ *              operator - defines how the new selection is combined
+ *              with the previous one; current values are 
+ *              H5S_SELECT_SET_F (0) and H5S_SELECT_OR_F (1) 
+ *              start - offset of start of hyperslab 
+ *              count - number of blocks included in the hyperslab
+ *              stride - hyperslab stride (interval between blocks)
+ *              block - size of block in the hyperslab
+ *              maximum_size - aray with maximum sizes of dimensions
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, August 11, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sselect_hyperslab_c ( hid_t_f *space_id , int_f *op, hssize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block)
+{
+  int ret_value = -1;
+  hid_t c_space_id;
+  hssize_t *c_start;
+  hsize_t *c_count;
+  hsize_t *c_stride;
+  hsize_t *c_block; 
+
+  H5S_seloper_t c_op;
+  herr_t  status;
+  int rank;
+  int i;
+
+  rank = H5Sget_simple_extent_ndims(*space_id);
+  if (rank < 0 ) return ret_value;
+  c_start = (hssize_t *)HDmalloc(sizeof(hssize_t)*rank);
+  if (!c_start) return ret_value;
+
+  c_count = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
+  if (!c_count) return ret_value;
+
+  c_stride = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
+  if (!c_stride) return ret_value;
+
+  c_block = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank);
+  if (!c_block) return ret_value;
+
+
+  /*
+   * Reverse dimensions due to C-FORTRAN storage order.
+   */
+
+  for (i=0; i < rank; i++) {
+      int t= (rank - i) - 1;
+      c_start[i] = (hssize_t)start[t];
+      c_count[i] = (hsize_t)count[t];
+      c_stride[i] = (hsize_t)stride[t];
+      c_block[i] = (hsize_t)block[t];
+  }
+
+  if (*op == H5S_SELECT_SET_F) c_op = H5S_SELECT_SET;
+  if (*op == H5S_SELECT_OR_F)  c_op = H5S_SELECT_OR;
+
+
+  c_space_id = *space_id;
+  status = H5Sselect_hyperslab(c_space_id, c_op, c_start, c_stride, c_count, c_block);
+  if ( status >= 0  ) ret_value = 0;
+  HDfree(c_start);
+  HDfree(c_count);
+  HDfree(c_stride);
+  HDfree(c_block);
+  return ret_value;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sselect_elements_c
+ * Purpose:     Call H5Sselect_elements to select elements of a dataspace 
+ * Inputs:      space_id - identifier of the dataspace 
+ *              operator - defines how the new selection is combined
+ *              with the previous one; current values are 
+ *              H5S_SELECT_SET_F (0) 
+ *              nelements - number of elements in the selection 
+ *              coord - arrays with the elements coordinates 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, August 11, 1999
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hssize_t_f *coord)
+{
+  int ret_value = -1;
+  hid_t c_space_id;
+  H5S_seloper_t c_op;
+  herr_t  status;
+  int rank;
+  int i, j;
+  hssize_t *c_coord;
+  size_t c_nelements;
+
+  if (*op != H5S_SELECT_SET_F) return ret_value;
+  c_op =  H5S_SELECT_SET;
+
+  c_space_id = *space_id;
+  rank = H5Sget_simple_extent_ndims(c_space_id);
+
+  c_coord = malloc(sizeof(hssize_t)*rank*(*nelements));
+  if(!c_coord) return ret_value;
+  for (i=0; i< *nelements; i++) {
+      for (j = 0; j < rank; j++) {
+          c_coord[j+i*rank] = (hssize_t)coord[j + i*rank];
+      }
+  }
+
+  c_nelements = *nelements;
+  status = H5Sselect_elements(c_space_id, c_op, c_nelements, (const hssize_t **)c_coord);
+  if ( status >= 0  ) ret_value = 0;
+  HDfree(c_coord); 
+  return ret_value;
+}
+

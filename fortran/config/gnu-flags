@@ -1,0 +1,227 @@
+#							-*- shell-script -*-
+#
+# This file should be sourced into configure if the compiler is the
+# GNU gcc compiler or a derivative.  It is careful not to do anything
+# if the compiler is not GNU; otherwise `cc_flags_set' is set to `yes'
+#
+
+# Get the compiler version in a way that works for gcc, egcs, and
+# pgcc unless a compiler version is already known
+#
+#   cc_vendor:    The compiler name: gcc, egcs, or pgcc
+#   cc_version:   Version number: 2.91.60, 2.7.2.1
+#
+if test X = "X$cc_flags_set"; then
+    cc_version="`$CC $CFLAGS -v 2>&1 |grep 'gcc version' |\
+	        sed 's/.*gcc version \([-a-z0-9\.]*\).*/\1/'`"
+    cc_vendor=`echo $cc_version |sed 's/\([a-z]*\).*/\1/'`
+    cc_version=`echo $cc_version |sed 's/[-a-z]//g'`
+    if test X = "X$cc_vendor" -a X != "X$cc_version"; then
+	cc_vendor=gcc
+    fi
+    if test "-" != "$cc_vendor-$cc_version"; then
+	echo "compiler '$CC' is GNU $cc_vendor-$cc_version"
+    fi
+
+    # Some version numbers
+    cc_vers_major=`echo $cc_version | cut -f1 -d.`
+    cc_vers_minor=`echo $cc_version | cut -f2 -d.`
+    cc_vers_patch=`echo $cc_version | cut -f3 -d.`
+    test -n "$cc_vers_major" || cc_vers_major=0
+    test -n "$cc_vers_minor" || cc_vers_minor=0
+    test -n "$cc_vers_patch" || cc_vers_patch=0
+    cc_vers_all=`expr $cc_vers_major '*' 1000000 + $cc_vers_minor '*' 1000 + $cc_vers_patch`
+fi
+
+# GCC compilers before gcc-2.8.1 have problems with `long long'.
+if test gcc = $cc_vendor -a $cc_vers_all -lt 2008001; then
+    cat <<EOF
+    **
+    ** This compiler may be unable to properly compile the long long
+    ** data type used extensively by hdf5, although specifying
+    ** --disable-hsizet for configure may work around those bugs.
+    ** There may be other code generation problems also, especially
+    ** when optimizations are enabled.  Please upgrade to at least GNU
+    ** gcc version 2.8.1 before reporting bugs to the HDF5 team.
+    **
+EOF
+    sleep 5
+
+# Current EGCS compilers have problems with `long long' and register
+# allocation when optimizations are turned on for x86 systems.
+elif test egcs = $cc_vendor -a $cc_vers_all -le 2091066; then
+    cat <<EOF
+    **
+    ** This compiler may have problems allocating registers when
+    ** optimizations are enabled on some platforms. Specifying
+    ** --disable-hsizet usually avoids the bug.
+    **
+EOF
+    sleep 5
+
+# All current versions of PGCC have problems also.
+elif test pgcc = $cc_vendor -a $cc_vers_all -le 2091066; then	    
+    cat <<EOF
+    **
+    ** This compiler may have problems allocating registers for long
+    ** long data types when optimizations are enabled. There may be
+    ** other code generation problems as well. We know of no version
+    ** of pgcc which is capable of compiling HDF5 in production mode.
+    ** Please use gcc-2.8 or egcs-1.1.1 before reporting bugs.
+    **
+EOF
+    sleep 5
+
+fi
+
+# Architecture-specific flags
+case "$host_os-$host_cpu" in
+    # FreeBSD sets the information from "hostname -m" to the general machine
+    # architecture, not the specific CPU for the machine, so even our
+    # Pentium II Xeon server is set to "i386".  Once we know we are on a FreeBSD
+    # machine, use the "sysctl" command to get the CPU hardware model.
+    freebsd*)
+        host_cpu_model=`sysctl -n hw.model`
+        case "$host_cpu_model" in
+            # Hmm.. this might not catch Celerons, but it won't hurt them either...
+            *Pro*|*II*)
+                # This check should be kept in sync with the *-i686 check below
+                case "$cc_vendor-$cc_version" in
+                    gcc-2.95*)
+                        ARCH=${ARCH:="-march=i686 -malign-double"}
+                        ;;
+                    gcc-*|egcs-*|pgcc-*)
+                        ARCH=${ARCH:="-mcpu=pentiumpro -march=pentiumpro -malign-double"}
+                        ;;
+                esac
+            ;;
+        esac
+        ;;
+
+    *-i686)
+        case "$cc_vendor-$cc_version" in
+            gcc-2.95*)
+                ARCH=${ARCH:="-march=i686 -malign-double"}
+                ;;
+            gcc-*|egcs-*|pgcc-*)
+                ARCH=${ARCH:="-mcpu=pentiumpro -march=pentiumpro -malign-double"}
+                ;;
+        esac
+        ;;
+esac
+
+# Host-specific flags
+case "`hostname`" in
+    hawkwind.ncsa.uiuc.edu)
+        ARCH="$ARCH -pipe"
+        ;;
+esac
+
+# Compiler flags
+case "$cc_vendor-$cc_version" in
+    gcc-2.7*)
+	# General
+	CFLAGS="$CFLAGS $ARCH -ansi"
+
+	# Production
+	PROC_CFLAGS="-O3 $NOFP -finline-functions -Wno-shadow"
+	PROD_CPPFLAGS=
+
+	# Debug
+	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CPPFLAGS=
+
+	# Profile
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+
+    gcc-2.8.*)
+        # General
+        CFLAGS="$CFLAGS $ARCH -Wsign-compare"
+
+	# Production
+	PROD_CFLAGS="-O3 $NOFP -finline-functions -fschedule-insns2 -Wno-shadow"
+	PROD_CPPFLAGS=
+
+	# Debug
+	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CPPFLAGS=
+
+	# Profile
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+
+    gcc-2.95*)
+	# General
+	CFLAGS="$CFLAGS $ARCH -Wsign-compare"
+
+	# Production
+	PROD_CFLAGS="-O6 $NOFP -Wno-shadow"
+	PROD_CPPFLAGS=
+
+	# Debug
+	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CPPFLAGS=
+
+	# Profile
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+
+    egcs-2.*|pgcc-2.*)
+	# General
+	CFLAGS="$CFLAGS $ARCH -Wsign-compare"
+
+	# Production
+	PROD_CFLAGS="-O6 $NOFP -Wno-shadow"
+	PROD_CPPFLAGS=
+
+	# Debug
+	DEBUG_CFLAGS="-g -fverbose-asm -Wno-shadow"
+	DEBUG_CPPFLAGS=
+
+	# Profile
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+
+    gcc-*|egcs-*|pgcc-*)
+        # This must be some other GNU compiler that we don't know about.
+        # Just use fairly generic flags.
+
+	# Production
+	PROD_CFLAGS=-O
+	PROD_CPPFLAGS=
+
+	# Debug
+	DEBUG_CFLAGS=-g
+	DEBUG_CPPFLAGS=
+
+	# Profile
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+esac
+
+# Clear cc info if no flags set
+if test X = "X$cc_flags_set"; then
+    cc_vendor=
+    cc_version=
+fi

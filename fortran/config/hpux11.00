@@ -1,0 +1,36 @@
+#							-*- shell-script -*-
+#
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
+#
+# See BlankForm in this directory for details.
+
+# Default compiler is `cc'
+if test "X-" =  "X-$CC"; then
+    CC=cc
+    CC_BASENAME=cc
+fi
+
+# Flags
+case "X-$CC" in
+    X-gcc)
+	CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
+	DEBUG_CFLAGS="-g -fverbose-asm"
+	DEBUG_CPPFLAGS=
+	PROD_CFLAGS="-O3"
+	PROD_CPPFLAGS=
+	PROFILE_CFLAGS="-pg"
+	PROFILE_CPPFLAGS=
+	;;
+
+    *)
+	CFLAGS="$CFLAGS -Ae"
+	DEBUG_CFLAGS=-g
+	DEBUG_CPPFLAGS="-Ae"
+	PROD_CFLAGS=-O
+	PROD_CPPFLAGS="-Ae"
+	PROFILE_CFLAGS=
+	PROFILE_CPPFLAGS="-Ae"
+	;;
+esac
