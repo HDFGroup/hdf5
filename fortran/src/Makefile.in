@@ -5,11 +5,11 @@
 ##		      All rights reserved.
 ##
 top_srcdir=@top_srcdir@
-top_builddir=..
+top_builddir=@top_builddir@
 srcdir=@srcdir@
 @COMMENCE@
 
-hdf5_dir=$(top_srcdir)/../src
+hdf5_dir=$(top_builddir)/../src
 
 TRACE=perl $(top_srcdir)/bin/trace
 
