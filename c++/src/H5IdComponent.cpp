@@ -82,7 +82,7 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
         its identifier, its reference counter will be deleted.  A new 
         reference counter is created for the new HDF5 object id.
 */
-void IdComponent::setId( const hid_t new_id )
+void IdComponent::setId( hid_t new_id )
 {
    // reset the identifier of this object, call appropriate H5Xclose
    resetIdComponent( this );
