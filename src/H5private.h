@@ -727,12 +727,14 @@ __DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
  * And now for a couple non-Posix functions...  Watch out for systems that
  * define these in terms of macros.
  */
-/*
-if !defined strdup && !defined HAVE_STRDUP && !defined _strdup
-char *strdup(const char *s);
+#ifdef LATER
+#if !defined strdup && !defined HAVE_STRDUP && !defined _strdup
+extern char *strdup(const char *s);
 #endif
+#else /* LATER */
+extern char *strdup(const char *s);
+#endif /* LATER */
 #define HDstrdup(S)		strdup(S)
-*/
 
 
 #ifdef WIN32
