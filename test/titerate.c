@@ -178,7 +178,7 @@ static void test_iter_group(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Sort the dataset names */
-    qsort(dnames,NDATASETS,sizeof(char *),iter_strcmp);
+    HDqsort(dnames,NDATASETS,sizeof(char *),iter_strcmp);
 
 
     /* Iterate through the datasets in the root group in various ways */
@@ -265,10 +265,8 @@ static void test_iter_group(void)
     /* Test all objects in group, when callback always returns 0 */
     info.command=RET_ZERO;
     idx=0;
-    if((ret=H5Giterate(file,"/",&idx,giter_cb,&info))>0) {
-        printf("Group iteration function didn't return zero correctly!\n");
-        num_errs++;
-    }
+    if((ret=H5Giterate(file,"/",&idx,giter_cb,&info))>0)
+        TestErrPrintf("Group iteration function didn't return zero correctly!\n");
 
     /* Test all objects in group, when callback always returns 1 */
     /* This also tests the "restarting" ability, because the index changes */
@@ -286,34 +284,24 @@ static void test_iter_group(void)
 
         /* Verify that the correct name is retrieved */
         if(idx<=NDATASETS) {
-            if(strcmp(info.name,dnames[idx-1])!=0) {
-                printf("Group iteration function didn't return one correctly for dataset #%d!\n",idx);
-                num_errs++;
-            } /* end if */
+            if(HDstrcmp(info.name,dnames[idx-1])!=0)
+                TestErrPrintf("Group iteration function didn't return one correctly for dataset #%d!\n",idx);
         } /* end if */
         else if(idx==(NDATASETS+1)) {
-            if(strcmp(info.name,"dtype")!=0) {
-                printf("Group iteration function didn't return one correctly for group!\n");
-                num_errs++;
-            } /* end if */
+            if(HDstrcmp(info.name,"dtype")!=0)
+                TestErrPrintf("Group iteration function didn't return one correctly for group!\n");
         } /* end if */
         else if(idx==(NDATASETS+2)) {
-            if(strcmp(info.name,"grp")!=0) {
-                printf("Group iteration function didn't return one correctly for group!\n");
-                num_errs++;
-            } /* end if */
+            if(HDstrcmp(info.name,"grp")!=0)
+                TestErrPrintf("Group iteration function didn't return one correctly for group!\n");
         } /* end if */
-        else {
-            printf("Group iteration function walked too far!\n");
-            num_errs++;
-        } /* end else */
+        else
+            TestErrPrintf("Group iteration function walked too far!\n");
     }
     VERIFY(ret,-1,"H5Giterate");
 
-    if(i!=(NDATASETS+2)) {
-        printf("Group iteration function didn't perform multiple iterations correctly!\n");
-        num_errs++;
-    } /* end if */
+    if(i!=(NDATASETS+2))
+        TestErrPrintf("Group iteration function didn't perform multiple iterations correctly!\n");
 
     /* Test all objects in group, when callback changes return value */
     /* This also tests the "restarting" ability, because the index changes */
@@ -331,41 +319,31 @@ static void test_iter_group(void)
 
         /* Verify that the correct name is retrieved */
         if(idx<=NDATASETS) {
-            if(strcmp(info.name,dnames[idx-1])!=0) {
-                printf("Group iteration function didn't return one correctly for dataset #%d!\n",idx);
-                num_errs++;
-            } /* end if */
+            if(HDstrcmp(info.name,dnames[idx-1])!=0)
+                TestErrPrintf("Group iteration function didn't return one correctly for dataset #%d!\n",idx);
         } /* end if */
         else if(idx==(NDATASETS+1)) {
-            if(strcmp(info.name,"dtype")!=0) {
-                printf("Group iteration function didn't return one correctly for group!\n");
-                num_errs++;
-            } /* end if */
+            if(HDstrcmp(info.name,"dtype")!=0)
+                TestErrPrintf("Group iteration function didn't return one correctly for group!\n");
         } /* end if */
         else if(idx==(NDATASETS+2)) {
-            if(strcmp(info.name,"grp")!=0) {
-                printf("Group iteration function didn't return one correctly for group!\n");
-                num_errs++;
-            } /* end if */
+            if(HDstrcmp(info.name,"grp")!=0)
+                TestErrPrintf("Group iteration function didn't return one correctly for group!\n");
         } /* end if */
-        else {
-            printf("Group iteration function walked too far!\n");
-            num_errs++;
-        } /* end else */
+        else
+            TestErrPrintf("Group iteration function walked too far!\n");
     }
     VERIFY(ret,-1,"H5Giterate");
 
-    if(i!=42 || idx!=52) {
-        printf("Group iteration function didn't perform multiple iterations correctly!\n");
-        num_errs++;
-    } /* end if */
+    if(i!=42 || idx!=52)
+        TestErrPrintf("Group iteration function didn't perform multiple iterations correctly!\n");
 
     ret=H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Free the dataset names */
     for(i=0; i< NDATASETS; i++)
-        free(dnames[i]);
+        HDfree(dnames[i]);
 
 } /* test_iter_group() */
 
@@ -486,10 +464,8 @@ static void test_iter_attr(void)
     /* Test all attributes on dataset, when callback always returns 0 */
     info.command=RET_ZERO;
     idx=0;
-    if((ret=H5Aiterate(dataset,&idx,aiter_cb,&info))>0) {
-        printf("Attribute iteration function didn't return zero correctly!\n");
-        num_errs++;
-    }
+    if((ret=H5Aiterate(dataset,&idx,aiter_cb,&info))>0)
+        TestErrPrintf("Attribute iteration function didn't return zero correctly!\n");
 
     /* Test all attributes on dataset, when callback always returns 1 */
     /* This also tests the "restarting" ability, because the index changes */
@@ -506,16 +482,12 @@ static void test_iter_attr(void)
         VERIFY(idx,(unsigned)i,"H5Aiterate");
 
         /* Verify that the correct name is retrieved */
-        if(strcmp(info.name,anames[idx-1])!=0) {
-            printf("Attribute iteration function didn't return one correctly!\n");
-            num_errs++;
-        } /* end if */
+        if(HDstrcmp(info.name,anames[idx-1])!=0)
+            TestErrPrintf("Attribute iteration function didn't return one correctly!\n");
     }
     VERIFY(ret,-1,"H5Aiterate");
-    if(i!=50 || idx!=50) {
-        printf("Group iteration function didn't perform multiple iterations correctly!\n");
-        num_errs++;
-    } /* end if */
+    if(i!=50 || idx!=50)
+        TestErrPrintf("Group iteration function didn't perform multiple iterations correctly!\n");
 
 
     /* Test all attributes on dataset, when callback changes return value */
@@ -533,16 +505,12 @@ static void test_iter_attr(void)
         VERIFY(idx,(unsigned)i+10,"H5Aiterate");
 
         /* Verify that the correct name is retrieved */
-        if(strcmp(info.name,anames[idx-1])!=0) {
-            printf("Attribute iteration function didn't return changing correctly!\n");
-            num_errs++;
-        } /* end if */
+        if(HDstrcmp(info.name,anames[idx-1])!=0)
+            TestErrPrintf("Attribute iteration function didn't return changing correctly!\n");
     }
     VERIFY(ret,-1,"H5Aiterate");
-    if(i!=40 || idx!=50) {
-        printf("Group iteration function didn't perform multiple iterations correctly!\n");
-        num_errs++;
-    } /* end if */
+    if(i!=40 || idx!=50)
+        TestErrPrintf("Group iteration function didn't perform multiple iterations correctly!\n");
 
     ret=H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
@@ -552,7 +520,7 @@ static void test_iter_attr(void)
 
     /* Free the attribute names */
     for(i=0; i< NATTR; i++)
-        free(anames[i]);
+        HDfree(anames[i]);
 
 } /* test_iter_attr() */
 
@@ -577,9 +545,8 @@ herr_t giter_cb2(hid_t loc_id, const char *name, void *opdata)
     herr_t		ret;		/* Generic return value		*/
     H5G_stat_t statbuf;
 
-    if(strcmp(name,test_info->name)) {
-        num_errs++;
-        printf("name=%s, test_info=%s\n",name,test_info->name);
+    if(HDstrcmp(name,test_info->name)) {
+        TestErrPrintf("name=%s, test_info=%s\n",name,test_info->name);
         return(-1);
     } /* end if */
 
@@ -590,8 +557,7 @@ herr_t giter_cb2(hid_t loc_id, const char *name, void *opdata)
     CHECK(ret, FAIL, "H5Gget_objinfo");
 
     if(test_info->type!=statbuf.type) {
-        num_errs++;
-        printf("test_info->type=%d, statbuf.type=%d\n",test_info->type,statbuf.type);
+        TestErrPrintf("test_info->type=%d, statbuf.type=%d\n",test_info->type,statbuf.type);
         return(-1);
     } /* end if */
 

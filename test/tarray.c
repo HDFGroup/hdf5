@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /***********************************************************
 *
 * Test program:	 tarray
@@ -145,8 +143,7 @@ test_array_atomic_1d(void)
     /* Check the array dimensions */
     for(i=0; i<ndims; i++)
         if(rdims1[i]!=tdims1[i]) {
-            num_errs++;
-            printf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
+            TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
             continue;
         } /* end if */
 
@@ -158,8 +155,7 @@ test_array_atomic_1d(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         for(j=0; j<ARRAY1_DIM1; j++) {
             if(wdata[i][j]!=rdata[i][j]) {
-                num_errs++;
-                printf("Array data information doesn't match!, wdata[%d][%d]=%d, rdata[%d][%d]=%d\n",(int)i,(int)j,(int)wdata[i][j],(int)i,(int)j,(int)rdata[i][j]);
+                TestErrPrintf("Array data information doesn't match!, wdata[%d][%d]=%d, rdata[%d][%d]=%d\n",(int)i,(int)j,(int)wdata[i][j],(int)i,(int)j,(int)rdata[i][j]);
                 continue;
             } /* end if */
         } /* end for */
@@ -271,8 +267,7 @@ test_array_atomic_3d(void)
     /* Check the array dimensions */
     for(i=0; i<ndims; i++)
         if(rdims2[i]!=tdims2[i]) {
-            num_errs++;
-            printf("Array dimension information doesn't match!, rdims2[%d]=%d, tdims2[%d]=%d\n",(int)i,(int)rdims2[i],(int)i,(int)tdims2[i]);
+            TestErrPrintf("Array dimension information doesn't match!, rdims2[%d]=%d, tdims2[%d]=%d\n",(int)i,(int)rdims2[i],(int)i,(int)tdims2[i]);
             continue;
         } /* end if */
 
@@ -286,8 +281,7 @@ test_array_atomic_3d(void)
             for(k=0; k<ARRAY2_DIM2; k++) {
                 for(l=0; l<ARRAY2_DIM3; l++) {
                     if(wdata[i][j][k][l]!=rdata[i][j][k][l]) {
-                        num_errs++;
-                        printf("Array data information doesn't match!, wdata[%d][%d][%d][%d]=%d, rdata[%d][%d][%d][%d]=%d\n",(int)i,(int)j,(int)k,(int)l,(int)wdata[i][j][k][l],(int)i,(int)j,(int)k,(int)l,(int)rdata[i][j][k][l]);
+                        TestErrPrintf("Array data information doesn't match!, wdata[%d][%d][%d][%d]=%d, rdata[%d][%d][%d][%d]=%d\n",(int)i,(int)j,(int)k,(int)l,(int)wdata[i][j][k][l],(int)i,(int)j,(int)k,(int)l,(int)rdata[i][j][k][l]);
                         continue;
                     } /* end if */
                 } /* end for */
@@ -411,8 +405,7 @@ test_array_array_atomic(void)
     /* Check the array dimensions */
     for(i=0; i<ndims1; i++)
         if(rdims1[i]!=tdims1[i]) {
-            num_errs++;
-            printf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
+            TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
             continue;
         } /* end if */
 
@@ -431,8 +424,7 @@ test_array_array_atomic(void)
     /* Check the array dimensions */
     for(i=0; i<ndims2; i++)
         if(rdims2[i]!=tdims2[i]) {
-            num_errs++;
-            printf("Array dimension information doesn't match!, rdims2[%d]=%d, tdims2[%d]=%d\n",(int)i,(int)rdims2[i],(int)i,(int)tdims2[i]);
+            TestErrPrintf("Array dimension information doesn't match!, rdims2[%d]=%d, tdims2[%d]=%d\n",(int)i,(int)rdims2[i],(int)i,(int)tdims2[i]);
             continue;
         } /* end if */
 
@@ -446,8 +438,7 @@ test_array_array_atomic(void)
             for(k=0; k<ARRAY2_DIM2; k++) {
                 for(l=0; l<ARRAY2_DIM3; l++) {
                     if(wdata[i][j][k][l]!=rdata[i][j][k][l]) {
-                        num_errs++;
-                        printf("Array data information doesn't match!, wdata[%d][%d][%d][%d]=%d, rdata[%d][%d][%d][%d]=%d\n",(int)i,(int)j,(int)k,(int)l,(int)wdata[i][j][k][l],(int)i,(int)j,(int)k,(int)l,(int)rdata[i][j][k][l]);
+                        TestErrPrintf("Array data information doesn't match!, wdata[%d][%d][%d][%d]=%d, rdata[%d][%d][%d][%d]=%d\n",(int)i,(int)j,(int)k,(int)l,(int)wdata[i][j][k][l],(int)i,(int)j,(int)k,(int)l,(int)rdata[i][j][k][l]);
                         continue;
                     } /* end if */
                 } /* end for */
@@ -588,8 +579,7 @@ test_array_compound_atomic(void)
     /* Check the array dimensions */
     for(i=0; i<ndims; i++)
         if(rdims1[i]!=tdims1[i]) {
-            num_errs++;
-            printf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
+            TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
             continue;
         } /* end if */
 
@@ -604,10 +594,8 @@ test_array_compound_atomic(void)
     /* Check the 1st field's name */
     mname=H5Tget_member_name(tid2,0);
     CHECK(mname, NULL, "H5Tget_member_name");
-    if(HDstrcmp(mname,"i")!=0) {
-        num_errs++;
-        printf("Compound field name doesn't match!, mname=%s\n",mname);
-    } /* end if */
+    if(HDstrcmp(mname,"i")!=0)
+        TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
     free(mname);
 
     /* Check the 1st field's offset */
@@ -617,20 +605,16 @@ test_array_compound_atomic(void)
     /* Check the 1st field's datatype */
     mtid=H5Tget_member_type(tid2,0);
     CHECK(mtid, FAIL, "H5Tget_member_type");
-    if((ret=H5Tequal(mtid,H5T_NATIVE_INT))<=0) {
-        num_errs++;
-        printf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-    } /* end if */
+    if((ret=H5Tequal(mtid,H5T_NATIVE_INT))<=0)
+        TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
     ret=H5Tclose(mtid);
     CHECK(mtid, FAIL, "H5Tclose");
 
     /* Check the 2nd field's name */
     mname=H5Tget_member_name(tid2,1);
     CHECK(mname, NULL, "H5Tget_member_name");
-    if(HDstrcmp(mname,"f")!=0) {
-        num_errs++;
-        printf("Compound field name doesn't match!, mname=%s\n",mname);
-    } /* end if */
+    if(HDstrcmp(mname,"f")!=0)
+        TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
     free(mname);
 
     /* Check the 2nd field's offset */
@@ -640,10 +624,8 @@ test_array_compound_atomic(void)
     /* Check the 2nd field's datatype */
     mtid=H5Tget_member_type(tid2,1);
     CHECK(mtid, FAIL, "H5Tget_member_type");
-    if((ret=H5Tequal(mtid,H5T_NATIVE_FLOAT))<=0) {
-        num_errs++;
-        printf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-    } /* end if */
+    if((ret=H5Tequal(mtid,H5T_NATIVE_FLOAT))<=0)
+        TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
     ret=H5Tclose(mtid);
     CHECK(mtid, FAIL, "H5Tclose");
 
@@ -659,13 +641,11 @@ test_array_compound_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         for(j=0; j<ARRAY1_DIM1; j++) {
             if(wdata[i][j].i!=rdata[i][j].i) {
-                num_errs++;
-                printf("Array data information doesn't match!, wdata[%d][%d].i=%d, rdata[%d][%d].i=%d\n",(int)i,(int)j,(int)wdata[i][j].i,(int)i,(int)j,(int)rdata[i][j].i);
+                TestErrPrintf("Array data information doesn't match!, wdata[%d][%d].i=%d, rdata[%d][%d].i=%d\n",(int)i,(int)j,(int)wdata[i][j].i,(int)i,(int)j,(int)rdata[i][j].i);
                 continue;
             } /* end if */
             if(wdata[i][j].f!=rdata[i][j].f) {
-                num_errs++;
-                printf("Array data information doesn't match!, wdata[%d][%d].f=%f, rdata[%d][%d].f=%f\n",(int)i,(int)j,wdata[i][j].f,(int)i,(int)j,rdata[i][j].f);
+                TestErrPrintf("Array data information doesn't match!, wdata[%d][%d].f=%f, rdata[%d][%d].f=%f\n",(int)i,(int)j,wdata[i][j].f,(int)i,(int)j,rdata[i][j].f);
                 continue;
             } /* end if */
         } /* end for */
@@ -813,8 +793,7 @@ test_array_compound_array(void)
     /* Check the array dimensions */
     for(i=0; i<ndims; i++)
         if(rdims1[i]!=tdims1[i]) {
-            num_errs++;
-            printf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
+            TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
             continue;
         } /* end if */
 
@@ -829,10 +808,8 @@ test_array_compound_array(void)
     /* Check the 1st field's name */
     mname=H5Tget_member_name(tid2,0);
     CHECK(mname, NULL, "H5Tget_member_name");
-    if(HDstrcmp(mname,"i")!=0) {
-        num_errs++;
-        printf("Compound field name doesn't match!, mname=%s\n",mname);
-    } /* end if */
+    if(HDstrcmp(mname,"i")!=0)
+        TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
     free(mname);
 
     /* Check the 1st field's offset */
@@ -842,20 +819,16 @@ test_array_compound_array(void)
     /* Check the 1st field's datatype */
     mtid=H5Tget_member_type(tid2,0);
     CHECK(mtid, FAIL, "H5Tget_member_type");
-    if((ret=H5Tequal(mtid,H5T_NATIVE_INT))<=0) {
-        num_errs++;
-        printf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-    } /* end if */
+    if((ret=H5Tequal(mtid,H5T_NATIVE_INT))<=0)
+        TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
     ret=H5Tclose(mtid);
     CHECK(mtid, FAIL, "H5Tclose");
 
     /* Check the 2nd field's name */
     mname=H5Tget_member_name(tid2,1);
     CHECK(mname, NULL, "H5Tget_member_name");
-    if(HDstrcmp(mname,"f")!=0) {
-        num_errs++;
-        printf("Compound field name doesn't match!, mname=%s\n",mname);
-    } /* end if */
+    if(HDstrcmp(mname,"f")!=0)
+        TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
     free(mname);
 
     /* Check the 2nd field's offset */
@@ -881,8 +854,7 @@ test_array_compound_array(void)
     /* Check the array dimensions */
     for(i=0; i<ndims; i++)
         if(rdims1[i]!=tdims1[i]) {
-            num_errs++;
-            printf("Nested array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
+            TestErrPrintf("Nested array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
             continue;
         } /* end if */
 
@@ -890,10 +862,8 @@ test_array_compound_array(void)
     tid3=H5Tget_super(mtid);
     CHECK(tid3, FAIL, "H5Tget_super");
 
-    if((ret=H5Tequal(tid3,H5T_NATIVE_FLOAT))<=0) {
-        num_errs++;
-        printf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-    } /* end if */
+    if((ret=H5Tequal(tid3,H5T_NATIVE_FLOAT))<=0)
+        TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
 
     /* Close the array's base type datatype */
     ret=H5Tclose(tid3);
@@ -915,14 +885,12 @@ test_array_compound_array(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         for(j=0; j<ARRAY1_DIM1; j++) {
             if(wdata[i][j].i!=rdata[i][j].i) {
-                num_errs++;
-                printf("Array data information doesn't match!, wdata[%d][%d].i=%d, rdata[%d][%d].i=%d\n",(int)i,(int)j,(int)wdata[i][j].i,(int)i,(int)j,(int)rdata[i][j].i);
+                TestErrPrintf("Array data information doesn't match!, wdata[%d][%d].i=%d, rdata[%d][%d].i=%d\n",(int)i,(int)j,(int)wdata[i][j].i,(int)i,(int)j,(int)rdata[i][j].i);
                 continue;
             } /* end if */
             for(k=0; k<ARRAY1_DIM1; k++)
                 if(wdata[i][j].f[k]!=rdata[i][j].f[k]) {
-                    num_errs++;
-                    printf("Array data information doesn't match!, wdata[%d][%d].f[%d]=%f, rdata[%d][%d].f[%d]=%f\n",(int)i,(int)j,(int)k,wdata[i][j].f[k],(int)i,(int)j,(int)k,rdata[i][j].f[k]);
+                    TestErrPrintf("Array data information doesn't match!, wdata[%d][%d].f[%d]=%f, rdata[%d][%d].f[%d]=%f\n",(int)i,(int)j,(int)k,wdata[i][j].f[k],(int)i,(int)j,(int)k,rdata[i][j].f[k]);
                     continue;
                 } /* end if */
         } /* end for */
@@ -1112,8 +1080,7 @@ test_array_vlen_atomic(void)
     /* Check the array dimensions */
     for(i=0; i<ndims; i++)
         if(rdims1[i]!=tdims1[i]) {
-            num_errs++;
-            printf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
+            TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
             continue;
         } /* end if */
 
@@ -1129,10 +1096,8 @@ test_array_vlen_atomic(void)
     tid3=H5Tget_super(tid2);
     CHECK(tid3, FAIL, "H5Tget_super");
 
-    if((ret=H5Tequal(tid3,H5T_NATIVE_UINT))<=0) {
-        num_errs++;
-        printf("VL base datatype is incorrect!, ret=%d\n",(int)ret);
-    } /* end if */
+    if((ret=H5Tequal(tid3,H5T_NATIVE_UINT))<=0)
+        TestErrPrintf("VL base datatype is incorrect!, ret=%d\n",(int)ret);
 
     /* Close the array's base type datatype */
     ret=H5Tclose(tid3);
@@ -1172,14 +1137,12 @@ test_array_vlen_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         for(j=0; j<ARRAY1_DIM1; j++) {
             if(wdata[i][j].len!=rdata[i][j].len) {
-                num_errs++;
-                printf("VL data length don't match!, wdata[%d][%d].len=%d, rdata[%d][%d].len=%d\n",(int)i,(int)j,(int)wdata[i][j].len,(int)i,(int)j,(int)rdata[i][j].len);
+                TestErrPrintf("VL data length don't match!, wdata[%d][%d].len=%d, rdata[%d][%d].len=%d\n",(int)i,(int)j,(int)wdata[i][j].len,(int)i,(int)j,(int)rdata[i][j].len);
                 continue;
             } /* end if */
             for(k=0; k<(int)rdata[i][j].len; k++) {
                 if( ((unsigned int *)wdata[i][j].p)[k] != ((unsigned int *)rdata[i][j].p)[k] ) {
-                    num_errs++;
-                    printf("VL data values don't match!, wdata[%d][%d].p[%d]=%d, rdata[%d][%d].p[%d]=%d\n",(int)i,(int)j,(int)k, (int)((unsigned int *)wdata[i][j].p)[k], (int)i,(int)j,(int)k, (int)((unsigned int *)rdata[i][j].p)[k]);
+                    TestErrPrintf("VL data values don't match!, wdata[%d][%d].p[%d]=%d, rdata[%d][%d].p[%d]=%d\n",(int)i,(int)j,(int)k, (int)((unsigned int *)wdata[i][j].p)[k], (int)i,(int)j,(int)k, (int)((unsigned int *)rdata[i][j].p)[k]);
                     continue;
                 } /* end if */
             } /* end for */
@@ -1337,8 +1300,7 @@ test_array_vlen_array(void)
     /* Check the array dimensions */
     for(i=0; i<ndims; i++)
         if(rdims1[i]!=tdims1[i]) {
-            num_errs++;
-            printf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
+            TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
             continue;
         } /* end if */
 
@@ -1369,8 +1331,7 @@ test_array_vlen_array(void)
     /* Check the array dimensions */
     for(i=0; i<ndims; i++)
         if(rdims1[i]!=tdims1[i]) {
-            num_errs++;
-            printf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
+            TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
             continue;
         } /* end if */
 
@@ -1379,10 +1340,8 @@ test_array_vlen_array(void)
     CHECK(tid4, FAIL, "H5Tget_super");
 
 
-    if((ret=H5Tequal(tid4,H5T_NATIVE_UINT))<=0) {
-        num_errs++;
-        printf("VL base datatype is incorrect!, ret=%d\n",(int)ret);
-    } /* end if */
+    if((ret=H5Tequal(tid4,H5T_NATIVE_UINT))<=0)
+        TestErrPrintf("VL base datatype is incorrect!, ret=%d\n",(int)ret);
 
     /* Close the array's base type datatype */
     ret=H5Tclose(tid4);
@@ -1426,15 +1385,13 @@ test_array_vlen_array(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         for(j=0; j<ARRAY1_DIM1; j++) {
             if(wdata[i][j].len!=rdata[i][j].len) {
-                num_errs++;
-                printf("VL data length don't match!, wdata[%d][%d].len=%d, rdata[%d][%d].len=%d\n",(int)i,(int)j,(int)wdata[i][j].len,(int)i,(int)j,(int)rdata[i][j].len);
+                TestErrPrintf("VL data length don't match!, wdata[%d][%d].len=%d, rdata[%d][%d].len=%d\n",(int)i,(int)j,(int)wdata[i][j].len,(int)i,(int)j,(int)rdata[i][j].len);
                 continue;
             } /* end if */
             for(k=0; k<(int)rdata[i][j].len; k++) {
                 for(l=0; l<ARRAY1_DIM1; l++) {
                     if( ((unsigned int *)wdata[i][j].p)[k*ARRAY1_DIM1+l] != ((unsigned int *)rdata[i][j].p)[k*ARRAY1_DIM1+l] ) {
-                        num_errs++;
-                        printf("VL data values don't match!, wdata[%d][%d].p[%d][%d]=%d, rdata[%d][%d].p[%d][%d]=%d\n",(int)i,(int)j,(int)k,(int)l, (int)((unsigned int *)wdata[i][j].p)[k*ARRAY1_DIM1+l], (int)i,(int)j,(int)k,(int)l, (int)((unsigned int *)rdata[i][j].p)[k*ARRAY1_DIM1+l]);
+                        TestErrPrintf("VL data values don't match!, wdata[%d][%d].p[%d][%d]=%d, rdata[%d][%d].p[%d][%d]=%d\n",(int)i,(int)j,(int)k,(int)l, (int)((unsigned int *)wdata[i][j].p)[k*ARRAY1_DIM1+l], (int)i,(int)j,(int)k,(int)l, (int)((unsigned int *)rdata[i][j].p)[k*ARRAY1_DIM1+l]);
                         continue;
                     } /* end if */
                 } /* end for */
@@ -1617,20 +1574,17 @@ test_array_bkg(void)
     /* Verify correct data */    
     /* ------------------- */
     for (i = 0; i < LENGTH; i++) {        
-	    for (j = 0; j < ALEN; j++) {
+        for (j = 0; j < ALEN; j++) {
             if(cf[i].a[j]!=cfr[i].a[j]) {
-                num_errs++;
-                printf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
+                TestErrPrintf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
                 continue;
             }
             if(cf[i].b[j]!=cfr[i].b[j]) {
-                num_errs++;
-                printf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].b[j],(int)i,(int)j,(float)cfr[i].b[j]);
+                TestErrPrintf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].b[j],(int)i,(int)j,(float)cfr[i].b[j]);
                 continue;
             }
             if(cf[i].c[j]!=cfr[i].c[j]) {
-                num_errs++;
-                printf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].c[j],(int)i,(int)j,(float)cfr[i].c[j]);
+                TestErrPrintf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].c[j],(int)i,(int)j,(float)cfr[i].c[j]);
                 continue;
             }
         }
@@ -1640,7 +1594,7 @@ test_array_bkg(void)
     /* Release memory resources */
     /* ------------------------ */
     for (i = 0; i < dtsinfo.nsubfields; i++)
-	    free(dtsinfo.name[i]);
+        free(dtsinfo.name[i]);
 
 
     /* Release IDs */
@@ -1693,8 +1647,7 @@ test_array_bkg(void)
     for (i=0; i< LENGTH; i++) 
         for (j = 0; j < ALEN; j++)
             if(fld[i].b[j]!=fldr[i].b[j]) {
-                num_errs++;
-                printf("Field data doesn't match, fld[%d].b[%d]=%f, fldr[%d].b[%d]=%f\n",(int)i,(int)j,(float)fld[i].b[j],(int)i,(int)j,(float)fldr[i].b[j]);
+                TestErrPrintf("Field data doesn't match, fld[%d].b[%d]=%f, fldr[%d].b[%d]=%f\n",(int)i,(int)j,(float)fld[i].b[j],(int)i,(int)j,(float)fldr[i].b[j]);
                 continue;
             }
     
@@ -1714,20 +1667,17 @@ test_array_bkg(void)
     /* Verify correct data */    
     /* ------------------- */
     for (i = 0; i < LENGTH; i++) {        
-	    for (j = 0; j < ALEN; j++) {
+        for (j = 0; j < ALEN; j++) {
             if(cf[i].a[j]!=cfr[i].a[j]) {
-                num_errs++;
-                printf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
+                TestErrPrintf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
                 continue;
             }
             if(cf[i].b[j]!=cfr[i].b[j]) {
-                num_errs++;
-                printf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].b[j],(int)i,(int)j,(float)cfr[i].b[j]);
+                TestErrPrintf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].b[j],(int)i,(int)j,(float)cfr[i].b[j]);
                 continue;
             }
             if(cf[i].c[j]!=cfr[i].c[j]) {
-                num_errs++;
-                printf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].c[j],(int)i,(int)j,(float)cfr[i].c[j]);
+                TestErrPrintf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].c[j],(int)i,(int)j,(float)cfr[i].c[j]);
                 continue;
             }
         }
@@ -1766,20 +1716,17 @@ test_array_bkg(void)
     /* Verify correct data */    
     /* ------------------- */
     for (i = 0; i < LENGTH; i++) {        
-	    for (j = 0; j < ALEN; j++) {
+        for (j = 0; j < ALEN; j++) {
             if(cf[i].a[j]!=cfr[i].a[j]) {
-                num_errs++;
-                printf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
+                TestErrPrintf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
                 continue;
             }
             if(cf[i].b[j]!=cfr[i].b[j]) {
-                num_errs++;
-                printf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].b[j],(int)i,(int)j,(float)cfr[i].b[j]);
+                TestErrPrintf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].b[j],(int)i,(int)j,(float)cfr[i].b[j]);
                 continue;
             }
             if(cf[i].c[j]!=cfr[i].c[j]) {
-                num_errs++;
-                printf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].c[j],(int)i,(int)j,(float)cfr[i].c[j]);
+                TestErrPrintf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].c[j],(int)i,(int)j,(float)cfr[i].c[j]);
                 continue;
             }
         }
@@ -1878,10 +1825,8 @@ test_compat(void)
         /* Check the 1st field's name */
         mname=H5Tget_member_name(tid1,0);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"i")!=0) {
-            num_errs++;
-            printf("Compound field name doesn't match!, mname=%s\n",mname);
-        } /* end if */
+        if(HDstrcmp(mname,"i")!=0)
+            TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
         free(mname);
 
         /* Check the 1st field's offset */
@@ -1891,20 +1836,16 @@ test_compat(void)
         /* Check the 1st field's datatype */
         mtid=H5Tget_member_type(tid1,0);
         CHECK(mtid, FAIL, "H5Tget_member_type");
-        if((ret=H5Tequal(mtid,H5T_STD_I16LE))<=0) {
-            num_errs++;
-            printf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-        } /* end if */
+        if((ret=H5Tequal(mtid,H5T_STD_I16LE))<=0)
+            TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
         ret=H5Tclose(mtid);
         CHECK(mtid, FAIL, "H5Tclose");
 
         /* Check the 2nd field's name */
         mname=H5Tget_member_name(tid1,1);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"f")!=0) {
-            num_errs++;
-            printf("Compound field name doesn't match!, mname=%s\n",mname);
-        } /* end if */
+        if(HDstrcmp(mname,"f")!=0)
+            TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
         free(mname);
 
         /* Check the 2nd field's offset */
@@ -1914,20 +1855,16 @@ test_compat(void)
         /* Check the 2nd field's datatype */
         mtid=H5Tget_member_type(tid1,1);
         CHECK(mtid, FAIL, "H5Tget_member_type");
-        if((ret=H5Tequal(mtid,H5T_IEEE_F32LE))<=0) {
-            num_errs++;
-            printf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-        } /* end if */
+        if((ret=H5Tequal(mtid,H5T_IEEE_F32LE))<=0)
+            TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
         ret=H5Tclose(mtid);
         CHECK(mtid, FAIL, "H5Tclose");
 
         /* Check the 3rd field's name */
         mname=H5Tget_member_name(tid1,2);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"l")!=0) {
-            num_errs++;
-            printf("Compound field name doesn't match!, mname=%s\n",mname);
-        } /* end if */
+        if(HDstrcmp(mname,"l")!=0)
+            TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
         free(mname);
 
         /* Check the 3rd field's offset */
@@ -1937,10 +1874,8 @@ test_compat(void)
         /* Check the 3rd field's datatype */
         mtid=H5Tget_member_type(tid1,2);
         CHECK(mtid, FAIL, "H5Tget_member_type");
-        if((ret=H5Tequal(mtid,H5T_STD_I32LE))<=0) {
-            num_errs++;
-            printf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-        } /* end if */
+        if((ret=H5Tequal(mtid,H5T_STD_I32LE))<=0)
+            TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
         ret=H5Tclose(mtid);
         CHECK(mtid, FAIL, "H5Tclose");
 
@@ -1972,10 +1907,8 @@ test_compat(void)
         /* Check the 1st field's name */
         mname=H5Tget_member_name(tid1,0);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"i")!=0) {
-            num_errs++;
-            printf("Compound field name doesn't match!, mname=%s\n",mname);
-        } /* end if */
+        if(HDstrcmp(mname,"i")!=0)
+            TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
         free(mname);
 
         /* Check the 1st field's offset */
@@ -1985,20 +1918,16 @@ test_compat(void)
         /* Check the 1st field's datatype */
         mtid=H5Tget_member_type(tid1,0);
         CHECK(mtid, FAIL, "H5Tget_member_type");
-        if((ret=H5Tequal(mtid,H5T_STD_I16LE))<=0) {
-            num_errs++;
-            printf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-        } /* end if */
+        if((ret=H5Tequal(mtid,H5T_STD_I16LE))<=0)
+            TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
         ret=H5Tclose(mtid);
         CHECK(mtid, FAIL, "H5Tclose");
 
         /* Check the 2nd field's name */
         mname=H5Tget_member_name(tid1,1);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"f")!=0) {
-            num_errs++;
-            printf("Compound field name doesn't match!, mname=%s\n",mname);
-        } /* end if */
+        if(HDstrcmp(mname,"f")!=0)
+            TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
         free(mname);
 
         /* Check the 2nd field's offset */
@@ -2024,8 +1953,7 @@ test_compat(void)
         /* Check the array dimensions */
         for(i=0; i<ndims; i++)
             if(rdims1[i]!=tdims1[i]) {
-                num_errs++;
-                printf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
+                TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
                 continue;
             } /* end if */
 
@@ -2033,10 +1961,8 @@ test_compat(void)
         tid2=H5Tget_super(mtid);
         CHECK(tid2, FAIL, "H5Tget_member_type");
 
-        if((ret=H5Tequal(tid2,H5T_IEEE_F32LE))<=0) {
-            num_errs++;
-            printf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-        } /* end if */
+        if((ret=H5Tequal(tid2,H5T_IEEE_F32LE))<=0)
+            TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
         ret=H5Tclose(tid2);
         CHECK(ret, FAIL, "H5Tclose");
         ret=H5Tclose(mtid);
@@ -2045,10 +1971,8 @@ test_compat(void)
         /* Check the 3rd field's name */
         mname=H5Tget_member_name(tid1,2);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"l")!=0) {
-            num_errs++;
-            printf("Compound field name doesn't match!, mname=%s\n",mname);
-        } /* end if */
+        if(HDstrcmp(mname,"l")!=0)
+            TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
         free(mname);
 
         /* Check the 3rd field's offset */
@@ -2074,8 +1998,7 @@ test_compat(void)
         /* Check the array dimensions */
         for(i=0; i<ndims; i++)
             if(rdims1[i]!=tdims1[i]) {
-                num_errs++;
-                printf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
+                TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
                 continue;
             } /* end if */
 
@@ -2083,10 +2006,8 @@ test_compat(void)
         tid2=H5Tget_super(mtid);
         CHECK(tid2, FAIL, "H5Tget_member_type");
 
-        if((ret=H5Tequal(tid2,H5T_STD_I32LE))<=0) {
-            num_errs++;
-            printf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-        } /* end if */
+        if((ret=H5Tequal(tid2,H5T_STD_I32LE))<=0)
+            TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
         ret=H5Tclose(tid2);
         CHECK(ret, FAIL, "H5Tclose");
         ret=H5Tclose(mtid);
@@ -2095,10 +2016,8 @@ test_compat(void)
         /* Check the 4th field's name */
         mname=H5Tget_member_name(tid1,3);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"d")!=0) {
-            num_errs++;
-            printf("Compound field name doesn't match!, mname=%s\n",mname);
-        } /* end if */
+        if(HDstrcmp(mname,"d")!=0)
+            TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
         free(mname);
 
         /* Check the 4th field's offset */
@@ -2108,10 +2027,8 @@ test_compat(void)
         /* Check the 4th field's datatype */
         mtid=H5Tget_member_type(tid1,3);
         CHECK(mtid, FAIL, "H5Tget_member_type");
-        if((ret=H5Tequal(mtid,H5T_IEEE_F64LE))<=0) {
-            num_errs++;
-            printf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-        } /* end if */
+        if((ret=H5Tequal(mtid,H5T_IEEE_F64LE))<=0)
+            TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
         ret=H5Tclose(mtid);
         CHECK(mtid, FAIL, "H5Tclose");
 

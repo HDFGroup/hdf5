@@ -40,8 +40,10 @@ typedef struct TestStruct {
 
 
 /*
- * Global variables used by InitTest().
+ * Variables used by testing framework.
  */
+static int num_errs = 0;        /* Total number of errors during testing */
+static int Verbosity = 4;       /* Default Verbosity is Low */
 static TestStruct Test[MAXNUMOFTESTS];
 static int    Index = 0;
 
@@ -294,5 +296,46 @@ void TestCleanup(void)
     for (Loop = 0; Loop < Index; Loop++)
         if (!Test[Loop].SkipFlag && Test[Loop].Cleanup!=NULL)
             Test[Loop].Cleanup();
+}
+
+
+/*
+ * Retrieve the verbosity level for the testing framework
+ */
+int GetTestVerbosity(void)
+{
+    return(Verbosity);
+}
+
+
+/*
+ * Retrieve the number of testing errors for the testing framework
+ */
+int GetTestNumErrs(void)
+{
+    return(num_errs);
+}
+
+
+/*
+ * This routine is designed to provide equivalent functionality to 'printf'
+ * and also increment the error count for the testing framework.
+ */
+int 
+TestErrPrintf(const char *format, ...)
+{
+    va_list arglist;
+    int ret_value;
+
+    /* Increment the error count */
+    num_errs++;
+
+    /* Print the requested information */
+    va_start(arglist, format);
+    ret_value = vprintf(format, arglist);
+    va_end(arglist);
+
+    /* Return the length of the string produced (like printf() does) */
+    return ret_value;
 }
 

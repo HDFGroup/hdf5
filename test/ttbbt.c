@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /*
    FILE
        tbbt.c
@@ -100,7 +98,7 @@ test_tbbt(void)
                       swap_arr(rem_arr, i, t);
                   }     /* end for */
 
-                if (Verbosity > 9)
+                if (GetTestVerbosity() > 9)
                   {
                       printf("ins_arr: \n");
                       for (i = 0; i < test_size; i++)   /* print the arrays */
@@ -117,12 +115,12 @@ test_tbbt(void)
                       MESSAGE(9, ("inserting %d\n", (int) ins_arr[i]));
                       H5TB_dins(tree, (void *) &ins_arr[i], NULL);
 #ifdef H5TB_DEBUG
-                      if(Verbosity>9)
+                      if(GetTestVerbosity()>9)
                           H5TB_dump(tree, -1);
 #endif /* H5TB_DEBUG */
                   }
 #ifdef H5TB_DEBUG
-                if(Verbosity>9)
+                if(GetTestVerbosity()>9)
                     H5TB_dump(tree, -1);
 #endif /* H5TB_DEBUG */
                 for (i = 0; i < test_size; i++)
@@ -134,7 +132,7 @@ test_tbbt(void)
                       MESSAGE(9, ("removing %d\n", (int) key));
                       H5TB_rem((H5TB_NODE **) tree, (H5TB_NODE *) r, NULL);
 #ifdef H5TB_DEBUG
-                      if(Verbosity>9)
+                      if(GetTestVerbosity()>9)
                           H5TB_dump(tree, -1);
 #endif /* H5TB_DEBUG */
                   } /* end for */

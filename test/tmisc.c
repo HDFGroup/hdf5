@@ -571,14 +571,10 @@ test_misc4(void)
     VERIFY(stat1.fileno,stat2.fileno,"H5Gget_objinfo");
 
     /* Verify that the fileno values are not the same between file1 & file2 */
-    if(stat1.fileno==stat3.fileno) {
-        num_errs++;
-        printf("Error on line %d: stat1.fileno==stat3.fileno\n",__LINE__);
-    } /* end if */
-    if(stat2.fileno==stat3.fileno) {
-        num_errs++;
-        printf("Error on line %d: stat1.fileno==stat3.fileno\n",__LINE__);
-    } /* end if */
+    if(stat1.fileno==stat3.fileno)
+        TestErrPrintf("Error on line %d: stat1.fileno==stat3.fileno\n",__LINE__);
+    if(stat2.fileno==stat3.fileno)
+        TestErrPrintf("Error on line %d: stat1.fileno==stat3.fileno\n",__LINE__);
 
     /* Close the objects */
     ret = H5Gclose(group1);
@@ -1401,10 +1397,8 @@ test_misc8(void)
     tdata2=rdata;
     for(u=0; u<MISC8_DIM0; u++)
         for(v=0; v<MISC8_DIM1; v++,tdata++,tdata2++)
-            if(*tdata!=*tdata2) {
-                num_errs++;
-                printf("Error on line %d: u=%u, v=%d, *tdata=%d, *tdata2=%d\n",__LINE__,(unsigned)u,(unsigned)v,(int)*tdata,(int)*tdata2);
-            } 
+            if(*tdata!=*tdata2)
+                TestErrPrintf("Error on line %d: u=%u, v=%d, *tdata=%d, *tdata2=%d\n",__LINE__,(unsigned)u,(unsigned)v,(int)*tdata,(int)*tdata2);
 #endif /* VERIFY_DATA */
 
     /* Check the storage size after data is written */
@@ -1439,15 +1433,11 @@ test_misc8(void)
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
-        num_errs++;
-        printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    } 
+    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
+        TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
 #else /* Compression is not configured */
-    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
-        num_errs++;
-        printf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    }
+    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
+        TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Close dataset ID */
@@ -1475,15 +1465,11 @@ test_misc8(void)
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
-        num_errs++;
-        printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    } 
+    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
+        TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
 #else /* Compression is not configured */
-    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
-        num_errs++;
-        printf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    }
+    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
+        TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Write entire dataset */
@@ -1500,25 +1486,19 @@ test_misc8(void)
     tdata2=rdata;
     for(u=0; u<MISC8_DIM0; u++)
         for(v=0; v<MISC8_DIM1; v++,tdata++,tdata2++)
-            if(*tdata!=*tdata2) {
-                num_errs++;
-                printf("Error on line %d: u=%u, v=%d, *tdata=%d, *tdata2=%d\n",__LINE__,(unsigned)u,(unsigned)v,(int)*tdata,(int)*tdata2);
-            } 
+            if(*tdata!=*tdata2)
+                TestErrPrintf("Error on line %d: u=%u, v=%d, *tdata=%d, *tdata2=%d\n",__LINE__,(unsigned)u,(unsigned)v,(int)*tdata,(int)*tdata2);
 #endif /* VERIFY_DATA */
 
     /* Check the storage size after data is written */
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
-        num_errs++;
-        printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    } 
+    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
+        TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
 #else
-    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
-        num_errs++;
-        printf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    }
+    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
+        TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
 #endif /*H5_HAVE_FILTER_DEFLATE*/
 
     /* Close dataset ID */
@@ -1545,15 +1525,11 @@ test_misc8(void)
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if(storage_size>=(4*MISC8_CHUNK_DIM0*MISC8_CHUNK_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
-        num_errs++;
-        printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    } 
+    if(storage_size>=(4*MISC8_CHUNK_DIM0*MISC8_CHUNK_DIM1*H5Tget_size(H5T_NATIVE_INT)))
+        TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
 #else /* Compression is not configured */
-    if(storage_size!=(4*MISC8_CHUNK_DIM0*MISC8_CHUNK_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
-        num_errs++;
-        printf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    }
+    if(storage_size!=(4*MISC8_CHUNK_DIM0*MISC8_CHUNK_DIM1*H5Tget_size(H5T_NATIVE_INT)))
+        TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Write entire dataset */
@@ -1570,25 +1546,19 @@ test_misc8(void)
     tdata2=rdata;
     for(u=0; u<MISC8_DIM0; u++)
         for(v=0; v<MISC8_DIM1; v++,tdata++,tdata2++)
-            if(*tdata!=*tdata2) {
-                num_errs++;
-                printf("Error on line %d: u=%u, v=%d, *tdata=%d, *tdata2=%d\n",__LINE__,(unsigned)u,(unsigned)v,(int)*tdata,(int)*tdata2);
-            } 
+            if(*tdata!=*tdata2)
+                TestErrPrintf("Error on line %d: u=%u, v=%d, *tdata=%d, *tdata2=%d\n",__LINE__,(unsigned)u,(unsigned)v,(int)*tdata,(int)*tdata2);
 #endif /* VERIFY_DATA */
 
     /* Check the storage size after data is written */
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
-        num_errs++;
-        printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    } 
+    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
+        TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
 #else
-    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
-        num_errs++;
-        printf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    }
+    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
+        TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
 #endif /*H5_HAVE_FILTER_DEFLATE*/
 
     /* Close dataset ID */
@@ -1978,15 +1948,11 @@ test_misc12(void)
     CHECK(ret, FAIL, "H5Dread");
 
     for(i=0; i<MISC12_SPACE1_DIM1; i++)
-        if(HDstrcmp(wdata[i],rdata[i])) {
-            num_errs++;
-            printf("Error on line %d: wdata[%d]=%s, rdata[%d]=%s\n",__LINE__,i,wdata[i],i,rdata[i]);
-        } /* end if */
+        if(HDstrcmp(wdata[i],rdata[i]))
+            TestErrPrintf("Error on line %d: wdata[%d]=%s, rdata[%d]=%s\n",__LINE__,i,wdata[i],i,rdata[i]);
     for(; i<(MISC12_SPACE1_DIM1+MISC12_APPEND_SIZE); i++)
-        if(HDstrcmp(wdata1[i-MISC12_SPACE1_DIM1],rdata[i])) {
-            num_errs++;
-            printf("Error on line %d: wdata1[%d]=%s, rdata[%d]=%s\n",__LINE__,i-MISC12_SPACE1_DIM1,wdata1[i-MISC12_SPACE1_DIM1],i,rdata[i]);
-        } /* end if */
+        if(HDstrcmp(wdata1[i-MISC12_SPACE1_DIM1],rdata[i]))
+            TestErrPrintf("Error on line %d: wdata1[%d]=%s, rdata[%d]=%s\n",__LINE__,i-MISC12_SPACE1_DIM1,wdata1[i-MISC12_SPACE1_DIM1],i,rdata[i]);
 
     /* Reclaim VL data memory */
     ret = H5Dvlen_reclaim (tid1, sid1, H5P_DEFAULT, rdata);
@@ -2424,10 +2390,8 @@ test_misc14(void)
     /* Check data from first dataset */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data1) {
-        num_errs++;
-        printf("Error on line %d: data1!=rdata\n",__LINE__);
-    } /* end if */
+    if(rdata!=data1)
+        TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
 
     /* Unlink second dataset */
     ret = H5Gunlink(file_id, MISC14_DSET2_NAME);
@@ -2440,10 +2404,8 @@ test_misc14(void)
     /* Verify the data from dataset #1 */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data1) {
-        num_errs++;
-        printf("Error on line %d: data1!=rdata\n",__LINE__);
-    } /* end if */
+    if(rdata!=data1)
+        TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
 
     /* Close first dataset */
     ret = H5Dclose(Dataset1);
@@ -2476,10 +2438,8 @@ test_misc14(void)
     /* Check data from second dataset */
     ret = H5Dread(Dataset2, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data2) {
-        num_errs++;
-        printf("Error on line %d: data2!=rdata\n",__LINE__);
-    } /* end if */
+    if(rdata!=data2)
+        TestErrPrintf("Error on line %d: data2!=rdata\n",__LINE__);
 
     /* Unlink first dataset */
     ret = H5Gunlink(file_id, MISC14_DSET1_NAME);
@@ -2492,10 +2452,8 @@ test_misc14(void)
     /* Verify the data from dataset #2 */
     ret = H5Dread(Dataset2, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data2) {
-        num_errs++;
-        printf("Error on line %d: data2!=rdata\n",__LINE__);
-    } /* end if */
+    if(rdata!=data2)
+        TestErrPrintf("Error on line %d: data2!=rdata\n",__LINE__);
 
     /* Close second dataset */
     ret = H5Dclose(Dataset2);
@@ -2535,18 +2493,14 @@ test_misc14(void)
     /* Check data from first dataset */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data1) {
-        num_errs++;
-        printf("Error on line %d: data1!=rdata\n",__LINE__);
-    } /* end if */
+    if(rdata!=data1)
+        TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
 
     /* Check data from third dataset */
     ret = H5Dread(Dataset3, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data3) {
-        num_errs++;
-        printf("Error on line %d: data3!=rdata\n",__LINE__);
-    } /* end if */
+    if(rdata!=data3)
+        TestErrPrintf("Error on line %d: data3!=rdata\n",__LINE__);
 
     /* Unlink second dataset */
     ret = H5Gunlink(file_id, MISC14_DSET2_NAME);
@@ -2559,18 +2513,14 @@ test_misc14(void)
     /* Verify the data from dataset #1 */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data1) {
-        num_errs++;
-        printf("Error on line %d: data1!=rdata\n",__LINE__);
-    } /* end if */
+    if(rdata!=data1)
+        TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
 
     /* Verify the data from dataset #3 */
     ret = H5Dread(Dataset3, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data3) {
-        num_errs++;
-        printf("Error on line %d: data3!=rdata\n",__LINE__);
-    } /* end if */
+    if(rdata!=data3)
+        TestErrPrintf("Error on line %d: data3!=rdata\n",__LINE__);
 
     /* Close first dataset */
     ret = H5Dclose(Dataset1);
@@ -2696,14 +2646,12 @@ test_misc16(void)
 
     /* Compare data read in */
     for(i=0; i<MISC16_SPACE_DIM; i++) {
-        if(strlen(wdata[i])!=strlen(rdata[i])) {
-            num_errs++;
-            printf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+        if(HDstrlen(wdata[i])!=strlen(rdata[i])) {
+            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
             continue;
         } /* end if */
-        if( strcmp(wdata[i],rdata[i]) != 0 ) {
-            num_errs++;
-            printf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+        if( HDstrcmp(wdata[i],rdata[i]) != 0 ) {
+            TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
             continue;
         } /* end if */
     } /* end for */
@@ -2774,14 +2722,12 @@ test_misc17(void)
 
     /* Compare data in the way of strings. */
     for(i=0; i<MISC17_SPACE_DIM1; i++) {
-        if(strlen(wdata[i])!=strlen(rdata[i])) {
-            num_errs++;
-            printf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+        if(HDstrlen(wdata[i])!=strlen(rdata[i])) {
+            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
             continue;
         } /* end if */
-        if( strcmp(wdata[i],rdata[i]) != 0 ) {
-            num_errs++;
-            printf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+        if( HDstrcmp(wdata[i],rdata[i]) != 0 ) {
+            TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
             continue;
         } /* end if */
     } /* end for */

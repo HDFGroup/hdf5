@@ -186,7 +186,7 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 
 	    } else if (driver == H5FD_MULTI) {
 		H5FD_mem_t mt;
-		assert(strlen(multi_letters)==H5FD_MEM_NTYPES);
+		assert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
 
 		for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
 		    HDsnprintf(temp, sizeof temp, "%s-%c.h5",
@@ -466,9 +466,6 @@ h5_fileaccess(void)
     const char	*name;
     char s[1024];
     hid_t fapl = -1;
-    hsize_t fam_size = 100*1024*1024; /*100 MB*/
-    long log_flags = H5FD_LOG_LOC_IO;
-    H5FD_mem_t	mt;
     
     /* First use the environment variable, then the constant */
     val = HDgetenv("HDF5_DRIVER");
@@ -505,6 +502,7 @@ h5_fileaccess(void)
 	const char *memb_name[H5FD_MEM_NTYPES];
 	char sv[H5FD_MEM_NTYPES][1024];
 	haddr_t memb_addr[H5FD_MEM_NTYPES];
+        H5FD_mem_t	mt;
 
 	HDmemset(memb_map, 0, sizeof memb_map);
 	HDmemset(memb_fapl, 0, sizeof memb_fapl);
@@ -524,12 +522,16 @@ h5_fileaccess(void)
 	    return -1;
 	}
     } else if (!HDstrcmp(name, "family")) {
+        hsize_t fam_size = 100*1024*1024; /*100 MB*/
+
 	/* Family of files, each 1MB and using the default driver */
-	if ((val=HDstrtok(NULL, " \t\n\r"))) {
+	if ((val=HDstrtok(NULL, " \t\n\r")))
 	    fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024);
-	}
-	if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0) return -1;
+	if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0)
+            return -1;
     } else if (!HDstrcmp(name, "log")) {
+        long log_flags = H5FD_LOG_LOC_IO;
+
         /* Log file access */
         if ((val = HDstrtok(NULL, " \t\n\r")))
             log_flags = HDstrtol(val, NULL, 0);

@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /***********************************************************
 *
 * Test program:  tconfig
@@ -29,9 +27,8 @@
 /* verify C type sizes */
 #define vrfy_ctype(ctype, ctype_macro) \
     if (sizeof(ctype) != ctype_macro){ \
-	print_func("Error verifying %s expected: %d, got: %d\n", \
+	TestErrPrintf("Error verifying %s expected: %d, got: %d\n", \
 	    #ctype_macro, ctype_macro, sizeof(ctype)); \
-	    num_errs++; \
     }
 
 /* local routine prototypes */

@@ -85,10 +85,8 @@ test_genprop_basic_class(void)
     /* Check class name */
     name = H5Pget_class_name(cid1);
     CHECK_PTR(name, "H5Pget_class_name");
-    if(HDstrcmp(name,CLASS1_NAME)!=0) {
-        num_errs++;
-        printf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
-    } /* end if */
+    if(HDstrcmp(name,CLASS1_NAME)!=0)
+        TestErrPrintf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
     free(name);
 
     /* Check class parent */
@@ -118,10 +116,8 @@ test_genprop_basic_class(void)
     /* Check class name */
     name = H5Pget_class_name(cid1);
     CHECK_PTR(name, "H5Pget_class_name");
-    if(HDstrcmp(name,CLASS2_NAME)!=0) {
-        num_errs++;
-        printf("Class names don't match!, name=%s, CLASS2_NAME=%s\n",name,CLASS2_NAME);
-    } /* end if */
+    if(HDstrcmp(name,CLASS2_NAME)!=0)
+        TestErrPrintf("Class names don't match!, name=%s, CLASS2_NAME=%s\n",name,CLASS2_NAME);
     free(name);
 
     /* Check class parent */
@@ -758,10 +754,8 @@ test_genprop_basic_list_prop(void)
     /* Check values of temporary properties (set with regular values) */
     ret = H5Pget(lid1,PROP3_NAME,&prop3_value);
     CHECK_I(ret, "H5Pget");
-    if(memcmp(&prop3_value,PROP3_DEF_VALUE,PROP3_SIZE)!=0) {
-        num_errs++;
-        printf("Property #3 doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
+    if(HDmemcmp(&prop3_value,PROP3_DEF_VALUE,PROP3_SIZE)!=0)
+        TestErrPrintf("Property #3 doesn't match!, line=%d\n",__LINE__);
     ret = H5Pget(lid1,PROP4_NAME,&prop4_value);
     CHECK_I(ret, "H5Pget");
     VERIFY(prop4_value, *PROP4_DEF_VALUE, "H5Pget");
@@ -1186,14 +1180,10 @@ test_genprop_list_callback(void)
 
     /* Verify creation callback information for properties tracked */
     VERIFY(prop1_cb_info.crt_count, 1, "H5Pcreate");
-    if(HDstrcmp(prop1_cb_info.crt_name,PROP1_NAME)!=0) {
-        num_errs++;
-        printf("Property #1 name doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
-    if(HDmemcmp(prop1_cb_info.crt_value,PROP1_DEF_VALUE,PROP1_SIZE)!=0) {
-        num_errs++;
-        printf("Property #1 value doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
+    if(HDstrcmp(prop1_cb_info.crt_name,PROP1_NAME)!=0)
+        TestErrPrintf("Property #1 name doesn't match!, line=%d\n",__LINE__);
+    if(HDmemcmp(prop1_cb_info.crt_value,PROP1_DEF_VALUE,PROP1_SIZE)!=0)
+        TestErrPrintf("Property #1 value doesn't match!, line=%d\n",__LINE__);
 
     /* Check values of permanent properties (set with default values) */
     ret = H5Pget(lid1,PROP1_NAME,&prop1_value);
@@ -1206,10 +1196,8 @@ test_genprop_list_callback(void)
     /* Check values of temporary properties (set with regular values) */
     ret = H5Pget(lid1,PROP3_NAME,&prop3_value);
     CHECK_I(ret, "H5Pget");
-    if(memcmp(&prop3_value,PROP3_DEF_VALUE,PROP3_SIZE)!=0) {
-        num_errs++;
-        printf("Property #3 doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
+    if(HDmemcmp(&prop3_value,PROP3_DEF_VALUE,PROP3_SIZE)!=0)
+        TestErrPrintf("Property #3 doesn't match!, line=%d\n",__LINE__);
     ret = H5Pget(lid1,PROP4_NAME,&prop4_value);
     CHECK_I(ret, "H5Pget");
     VERIFY(prop4_value, *PROP4_DEF_VALUE, "H5Pget");
@@ -1217,14 +1205,10 @@ test_genprop_list_callback(void)
     /* Verify get callback information for properties tracked */
     VERIFY(prop1_cb_info.get_count, 1, "H5Pget");
     VERIFY(prop1_cb_info.get_plist_id, lid1, "H5Pget");
-    if(HDstrcmp(prop1_cb_info.get_name,PROP1_NAME)!=0) {
-        num_errs++;
-        printf("Property #1 name doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
-    if(HDmemcmp(prop1_cb_info.get_value,PROP1_DEF_VALUE,PROP1_SIZE)!=0) {
-        num_errs++;
-        printf("Property #1 value doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
+    if(HDstrcmp(prop1_cb_info.get_name,PROP1_NAME)!=0)
+        TestErrPrintf("Property #1 name doesn't match!, line=%d\n",__LINE__);
+    if(HDmemcmp(prop1_cb_info.get_value,PROP1_DEF_VALUE,PROP1_SIZE)!=0)
+        TestErrPrintf("Property #1 value doesn't match!, line=%d\n",__LINE__);
 
     /* Set value of property #1 to different value */
     ret = H5Pset(lid1,PROP1_NAME,&prop1_new_value);
@@ -1233,14 +1217,10 @@ test_genprop_list_callback(void)
     /* Verify set callback information for properties tracked */
     VERIFY(prop1_cb_info.set_count, 1, "H5Pset");
     VERIFY(prop1_cb_info.set_plist_id, lid1, "H5Pset");
-    if(HDstrcmp(prop1_cb_info.set_name,PROP1_NAME)!=0) {
-        num_errs++;
-        printf("Property #1 name doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
-    if(HDmemcmp(prop1_cb_info.set_value,&prop1_new_value,PROP1_SIZE)!=0) {
-        num_errs++;
-        printf("Property #1 value doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
+    if(HDstrcmp(prop1_cb_info.set_name,PROP1_NAME)!=0)
+        TestErrPrintf("Property #1 name doesn't match!, line=%d\n",__LINE__);
+    if(HDmemcmp(prop1_cb_info.set_value,&prop1_new_value,PROP1_SIZE)!=0)
+        TestErrPrintf("Property #1 value doesn't match!, line=%d\n",__LINE__);
 
     /* Check new value of tracked properties */
     ret = H5Pget(lid1,PROP1_NAME,&prop1_value);
@@ -1250,14 +1230,10 @@ test_genprop_list_callback(void)
     /* Verify get callback information again for properties tracked */
     VERIFY(prop1_cb_info.get_count, 2, "H5Pget");
     VERIFY(prop1_cb_info.get_plist_id, lid1, "H5Pget");
-    if(HDstrcmp(prop1_cb_info.get_name,PROP1_NAME)!=0) {
-        num_errs++;
-        printf("Property #1 name doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
-    if(HDmemcmp(prop1_cb_info.get_value,&prop1_new_value,PROP1_SIZE)!=0) {
-        num_errs++;
-        printf("Property #1 value doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
+    if(HDstrcmp(prop1_cb_info.get_name,PROP1_NAME)!=0)
+        TestErrPrintf("Property #1 name doesn't match!, line=%d\n",__LINE__);
+    if(HDmemcmp(prop1_cb_info.get_value,&prop1_new_value,PROP1_SIZE)!=0)
+        TestErrPrintf("Property #1 value doesn't match!, line=%d\n",__LINE__);
 
     /* Delete property #2 */
     ret = H5Premove(lid1,PROP2_NAME);
@@ -1266,14 +1242,10 @@ test_genprop_list_callback(void)
     /* Verify delete callback information for properties tracked */
     VERIFY(prop2_cb_info.del_count, 1, "H5Premove");
     VERIFY(prop2_cb_info.del_plist_id, lid1, "H5Premove");
-    if(HDstrcmp(prop2_cb_info.del_name,PROP2_NAME)!=0) {
-        num_errs++;
-        printf("Property #2 name doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
-    if(HDmemcmp(prop2_cb_info.del_value,PROP2_DEF_VALUE,PROP2_SIZE)!=0) {
-        num_errs++;
-        printf("Property #2 value doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
+    if(HDstrcmp(prop2_cb_info.del_name,PROP2_NAME)!=0)
+        TestErrPrintf("Property #2 name doesn't match!, line=%d\n",__LINE__);
+    if(HDmemcmp(prop2_cb_info.del_value,PROP2_DEF_VALUE,PROP2_SIZE)!=0)
+        TestErrPrintf("Property #2 value doesn't match!, line=%d\n",__LINE__);
 
     /* Copy first list */
     lid2 = H5Pcopy(lid1);
@@ -1281,14 +1253,10 @@ test_genprop_list_callback(void)
 
     /* Verify copy callback information for properties tracked */
     VERIFY(prop1_cb_info.cop_count, 1, "H5Pcopy");
-    if(HDstrcmp(prop1_cb_info.cop_name,PROP1_NAME)!=0) {
-        num_errs++;
-        printf("Property #1 name doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
-    if(HDmemcmp(prop1_cb_info.cop_value,&prop1_new_value,PROP1_SIZE)!=0) {
-        num_errs++;
-        printf("Property #1 value doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
+    if(HDstrcmp(prop1_cb_info.cop_name,PROP1_NAME)!=0)
+        TestErrPrintf("Property #1 name doesn't match!, line=%d\n",__LINE__);
+    if(HDmemcmp(prop1_cb_info.cop_value,&prop1_new_value,PROP1_SIZE)!=0)
+        TestErrPrintf("Property #1 value doesn't match!, line=%d\n",__LINE__);
 
     /* Verify that the class creation callback occurred */
     VERIFY(cop_cb_struct.count, 1, "H5Pcopy");
@@ -1309,14 +1277,10 @@ test_genprop_list_callback(void)
 
     /* Verify close callback information for properties tracked */
     VERIFY(prop1_cb_info.cls_count, 1, "H5Pclose");
-    if(HDstrcmp(prop1_cb_info.cls_name,PROP1_NAME)!=0) {
-        num_errs++;
-        printf("Property #1 name doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
-    if(HDmemcmp(prop1_cb_info.cls_value,&prop1_new_value,PROP1_SIZE)!=0) {
-        num_errs++;
-        printf("Property #1 value doesn't match!, line=%d\n",__LINE__);
-    } /* end if */
+    if(HDstrcmp(prop1_cb_info.cls_name,PROP1_NAME)!=0)
+        TestErrPrintf("Property #1 name doesn't match!, line=%d\n",__LINE__);
+    if(HDmemcmp(prop1_cb_info.cls_value,&prop1_new_value,PROP1_SIZE)!=0)
+        TestErrPrintf("Property #1 value doesn't match!, line=%d\n",__LINE__);
 
     /* Close second list */
     ret = H5Pclose(lid2);
@@ -1604,11 +1568,9 @@ test_genprop_path(void)
     /* Get full path for first class */
     path=H5P_get_class_path_test(cid1);
     CHECK_PTR(path, "H5P_get_class_path_test");
-    if(HDstrcmp(path,CLASS1_PATH)!=0) {
-        num_errs++;
-        printf("Class names don't match!, path=%s, CLASS1_PATH=%s\n",path,CLASS1_PATH);
-    } /* end if */
-    free(path);
+    if(HDstrcmp(path,CLASS1_PATH)!=0)
+        TestErrPrintf("Class names don't match!, path=%s, CLASS1_PATH=%s\n",path,CLASS1_PATH);
+    HDfree(path);
 
     /* Create another new generic class, derived from first class */
     cid2 = H5Pcreate_class(cid1,CLASS2_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
@@ -1625,10 +1587,8 @@ test_genprop_path(void)
     /* Get full path for second class */
     path=H5P_get_class_path_test(cid2);
     CHECK_PTR(path, "H5P_get_class_path_test");
-    if(HDstrcmp(path,CLASS2_PATH)!=0) {
-        num_errs++;
-        printf("Class names don't match!, path=%s, CLASS2_PATH=%s\n",path,CLASS2_PATH);
-    } /* end if */
+    if(HDstrcmp(path,CLASS2_PATH)!=0)
+        TestErrPrintf("Class names don't match!, path=%s, CLASS2_PATH=%s\n",path,CLASS2_PATH);
 
     /* Open a copy of the class with the path name */
     cid3 = H5P_open_class_path_test(path);
@@ -1691,11 +1651,9 @@ test_genprop_refcount(void)
     /* Check class name */
     name = H5Pget_class_name(cid1);
     CHECK_PTR(name, "H5Pget_class_name");
-    if(HDstrcmp(name,CLASS1_NAME)!=0) {
-        num_errs++;
-        printf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
-    } /* end if */
-    free(name);
+    if(HDstrcmp(name,CLASS1_NAME)!=0)
+        TestErrPrintf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
+    HDfree(name);
 
     /* Close class */
     ret = H5Pclose_class(cid1);
@@ -1712,11 +1670,9 @@ test_genprop_refcount(void)
     /* Check class name */
     name = H5Pget_class_name(cid1);
     CHECK_PTR(name, "H5Pget_class_name");
-    if(HDstrcmp(name,CLASS1_NAME)!=0) {
-        num_errs++;
-        printf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
-    } /* end if */
-    free(name);
+    if(HDstrcmp(name,CLASS1_NAME)!=0)
+        TestErrPrintf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
+    HDfree(name);
 
     /* Close list */
     ret = H5Pclose(lid1);
@@ -1725,11 +1681,9 @@ test_genprop_refcount(void)
     /* Check class name */
     name = H5Pget_class_name(cid1);
     CHECK_PTR(name, "H5Pget_class_name");
-    if(HDstrcmp(name,CLASS1_NAME)!=0) {
-        num_errs++;
-        printf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
-    } /* end if */
-    free(name);
+    if(HDstrcmp(name,CLASS1_NAME)!=0)
+        TestErrPrintf("Class names don't match!, name=%s, CLASS1_NAME=%s\n",name,CLASS1_NAME);
+    HDfree(name);
 
     /* Close class */
     ret = H5Pclose_class(cid1);

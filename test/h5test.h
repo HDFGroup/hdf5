@@ -21,14 +21,13 @@
 #ifndef _H5TEST_H
 #define _H5TEST_H
 
-#include <stdarg.h>
-
 #undef NDEBUG
 #include "hdf5.h"
 #include "H5private.h"
 
 #ifdef H5_STDC_HEADERS
 #   include <signal.h>
+#   include <stdarg.h>
 #endif
 
 /*
