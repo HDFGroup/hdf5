@@ -48,23 +48,23 @@ if(ret == val) {print_func("*** UNEXPECTED RETURN from %s is %ld at line %4d in 
    if (Verbosity>9) {							      \
       print_func("   Call to routine: %15s at line %4d in %s returned %ld\n", \
 		 (where), (int)__LINE__, __FILE__, (long)(ret));	      \
-      if ((ret)<0) {							      \
-	 print_func ("*** UNEXPECTED RETURN from %s is %ld line %4d in %s\n", \
-		     (where), (long)(ret), (int)__LINE__, __FILE__);	      \
-	 num_errs++;							      \
-      }									      \
+   }									      \
+   if ((ret)<0) {							      \
+      print_func ("*** UNEXPECTED RETURN from %s is %ld line %4d in %s\n",    \
+		  (where), (long)(ret), (int)__LINE__, __FILE__);	      \
+      num_errs++;							      \
    }									      \
 }
 		     
 #define CHECK_PTR(ret,where) {						      \
    if (Verbosity>9) {							      \
       print_func("   Call to routine: %15s at line %4d in %s returned %p\n",  \
-		 (where), (int)__LINE__, __FILE__, (ret));	 	      \
-      if (!(ret)) {							      \
-	 print_func ("*** UNEXPECTED RETURN from %s is NULL line %4d in %s\n",\
-		     (where), (int)__LINE__, __FILE__);			      \
-	 num_errs++;							      \
-      }									      \
+		 (where), (int)__LINE__, __FILE__, (ret));		      \
+   }									      \
+   if (!(ret)) {							      \
+      print_func ("*** UNEXPECTED RETURN from %s is NULL line %4d in %s\n",   \
+		  (where), (int)__LINE__, __FILE__);			      \
+      num_errs++;							      \
    }									      \
 }
 
@@ -111,6 +111,7 @@ void test_metadata(void);
 void test_file(void);
 void test_heap (void);
 void test_ohdr (void);
+void test_stab (void);
 
 #endif /* HDF5TEST_H */
 

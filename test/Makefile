@@ -14,7 +14,7 @@ DEFS = -I../src
 
 INCL = ../src/hdf5.h testhdf5.h
 
-OBJ =	testhdf5.o tmeta.o tfile.o theap.o tohdr.o
+OBJ =	testhdf5.o tmeta.o tfile.o theap.o tohdr.o tstab.o
 
 LIBS =	../src/libhdf5.a
 
@@ -49,5 +49,8 @@ theap.o:	theap.c $(INCL)
 
 tohdr.o:	tohdr.c $(INCL)
 	$(CC) $(CFLAGS) $(DEFS) tohdr.c
+
+tstab.o:	tstab.c $(INCL)
+	$(CC) $(CFLAGS) $(DEFS) tstab.c
 
 
