@@ -145,7 +145,7 @@ H5FD_term_interface(void)
 {
     int	n = 0;
 
-    FUNC_ENTER_NOINIT(H5_term_interface);
+    FUNC_ENTER_NOINIT(H5FD_term_interface);
 
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_VFL))) {
