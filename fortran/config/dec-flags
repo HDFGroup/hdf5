@@ -84,6 +84,8 @@ if test "X-" = "X-$F9X"; then
 fi
 
 if test "X-" = "X-$f9x_flags_set"; then
+    F9XSUFFIXFLAG=""
+    FSEARCH_DIRS=""
     FFLAGS="-Olimit 2048 -std1"
     DEBUG_FFLAGS="-Olimit 2048 -std1"
     PROD_FFLAGS="-Olimit 2048 -std1"

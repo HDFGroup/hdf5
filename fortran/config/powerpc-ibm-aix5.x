@@ -47,7 +47,9 @@ if test "X-" = "X-$F9X"; then
 fi
 
 if test "X-" = "X-$f9x_flags_set"; then
-    FFLAGS="-static -O -qsuffix=f=f90 -qmoddir=./ -I./ -k"
+    F9XSUFFIXFLAG="-qsuffix=f=f90"
+    FFLAGS="-static -O ${F9XSUFFIXFLAG} -qmoddir=./ -k"
+    FSEARCH_DIRS="-I./ -I../src"
     DEBUG_FFLAGS="-O"
     PROD_FFLAGS="-O"
     PROFILE_FFLAGS="-O"

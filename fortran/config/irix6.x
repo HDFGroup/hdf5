@@ -86,6 +86,8 @@ esac
 # Use SGI supplied C compiler by default.  There is no ranlib
 if test "X-" =  "X-$F9X"; then
     F9X="f90"
+    F9XSUFFIXFLAG=""
+    FSEARCH_DIRS=""
     FFLAGS="-64 -mips4 -O -s"
     DEBUG_FFLAGS="-64 -mips4 -O -s"
     PROD_FFLAGS="-64 -mips4 -O -s"
@@ -115,6 +117,8 @@ if test "X-" = "X-$F9X"; then
 fi
 
 if test "X-" = "X-$f9x_flags_set"; then
+    F9XSUFFIXFLAG=""
+    FSEARCH_DIRS=""
     FFLAGS="-64 -mips4 -O -s"
     DEBUG_FFLAGS="-64 -mips4 -O -s"
     PROD_FFLAGS="-64 -mips4 -O -s"

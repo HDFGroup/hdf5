@@ -54,9 +54,11 @@ if test "X-" = "X-$F9X"; then
 fi
 
 if test "X-" = "X-$f9x_flags_set"; then
-    FFLAGS=
-    DEBUG_FFLAGS=
-    PROD_FFLAGS=
-    PROFILE_FFLAGS=
+    F9XSUFFIXFLAG=""
+    FSEARCH_DIRS=""
+    FFLAGS=""
+    DEBUG_FFLAGS=""
+    PROD_FFLAGS=""
+    PROFILE_FFLAGS=""
     f9x_flags_set=yes
 fi

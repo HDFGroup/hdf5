@@ -48,6 +48,7 @@ AC_OUTPUT_COMMANDS([
 AC_CANONICAL_HOST
 AC_SUBST(CPPFLAGS)
 AC_SUBST(FFLAGS)
+AC_SUBST(FSEARCH_DIRS)
 
 dnl ----------------------------------------------------------------------
 dnl HDF5 integer variables for the H5fortran_types.f90 file.
@@ -141,16 +142,16 @@ esac
 
 host_config="none"
 for f in $host_cpu-$host_vendor-$host_os \
-	 $host_cpu-$host_vendor-$host_os_novers \
-	 $host_vendor-$host_os \
-         $host_vendor-$host_os_novers \
-	 $host_cpu-$host_os \
-         $host_cpu-$host_os_novers \
-         $host_cpu-$host_vendor \
-	 $host_os \
-	 $host_os_novers \
-	 $host_vendor \
-	 $host_cpu ; do
+   $host_cpu-$host_vendor-$host_os_novers \
+   $host_vendor-$host_os \
+   $host_vendor-$host_os_novers \
+   $host_cpu-$host_os \
+   $host_cpu-$host_os_novers \
+   $host_cpu-$host_vendor \
+   $host_os \
+   $host_os_novers \
+   $host_vendor \
+   $host_cpu ; do
    AC_MSG_CHECKING(for config $f)
    if test -f $srcdir/config/$f; then
       host_config=$srcdir/config/$f
@@ -163,6 +164,8 @@ if test "X$host_config" != "Xnone"; then
    CC_BASENAME="`echo $CC |cut -f1 -d' ' |xargs basename 2>/dev/null`"
    . $host_config
 fi
+
+AC_SUBST(F9XSUFFIXFLAG)
 
 dnl ----------------------------------------------------------------------
 dnl Check for programs.
@@ -317,8 +320,8 @@ AC_CHECK_LIB([m], [ceil])
 
 if test "`uname`" = "SunOS" -o "`uname -sr`" = "HP-UX B.11.00"; then
   dnl ...for Solaris
-  AC_CHECK_LIB([nsl], [xdr_int])
   AC_CHECK_LIB([socket], [socket])
+  AC_CHECK_LIB([nsl], [xdr_int])
 fi
 
 dnl ----------------------------------------------------------------------

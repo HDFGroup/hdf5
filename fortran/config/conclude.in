@@ -174,10 +174,10 @@ maintainer-clean: distclean
 	@$(LT_CCOMPILE) $(CFLAGS) $(CPPFLAGS) -c $<
 
 .f90.o:
-	$(F9X) $(FFLAGS) -c $<
+	$(F9X) $(FFLAGS) $(FSEARCH_DIRS) -c $<
 
 .f90.lo:
-	@$(LT_FCOMPILE) $(FFLAGS) -c $<
+	@$(LT_FCOMPILE) $(FFLAGS) $(FSEARCH_DIRS) -c $<
 
 ##-----------------------------------------------------------------------------
 ## The following section of this makefile contains dependencies between the

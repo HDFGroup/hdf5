@@ -158,6 +158,8 @@ if test "X-" = "X-$F9X"; then
 fi
 
 if test "X-" = "X-$f9x_flags_set"; then
+    F9XSUFFIXFLAG=""
+    FSEARCH_DIRS=""
     FFLAGS="-dp"
     DEBUG_FFLAGS="-dp"
     PROD_FFLAGS="-dp"

@@ -54,6 +54,7 @@ FCBASE="@F9X@"
 FLINKERBASE="@F9X@"
 FFLAGS="@FFLAGS@"
 F9XMODFLAG="@F9XMODFLAG@"
+F9XSUFFIXFLAG="@F9XSUFFIXFLAG@"
 LDFLAGS="@LDFLAGS@"
 LIBS="@LIBS@"
 
@@ -186,7 +187,7 @@ if test "x$do_compile" = "xyes"; then
     compile_args="-c $compile_args"
   fi
 
-  $SHOW $FC $FFLAGS $compile_args
+  $SHOW $FC $FFLAGS ${F9XSUFFIXFLAG} $compile_args
   status=$?
 
   if test "$status" != "0"; then
@@ -204,7 +205,7 @@ if test "x$do_link" = "xyes"; then
   link_args="$link_args ${libdir}/libhdf5_fortran.a ${libdir}/libhdf5.a"
 
   link_args="$link_args $LIBS"
-  $SHOW $FLINKER ${fmodules} $link_objs $link_args ${LDFLAGS}
+  $SHOW $FLINKER ${FFLAGS} ${F9XSUFFIXFLAG} ${fmodules} $link_objs $link_args ${LDFLAGS}
   status=$?
 fi
 
