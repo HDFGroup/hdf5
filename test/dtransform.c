@@ -140,6 +140,7 @@ int main(void)
     if((err = test_ulong(dxpl_id_utrans_inv)) < 0) TEST_ERROR;
     if((err = test_llong(dxpl_id_c_to_f)) < 0) TEST_ERROR;
     if((err = test_ullong(dxpl_id_utrans_inv)) < 0) TEST_ERROR;
+
     if((err = test_float(dxpl_id_c_to_f, dxpl_id_polynomial)) < 0) TEST_ERROR;
     if((err = test_double(dxpl_id_c_to_f)) < 0) TEST_ERROR;
     if((err = test_ldouble(dxpl_id_c_to_f)) < 0) TEST_ERROR;
@@ -510,9 +511,12 @@ int test_ullong(const hid_t dxpl_id_utrans_inv)
     herr_t err;  
     
     TESTING("data transform, no data type conversion (ullong->ullong)")
-
+#ifdef H5_ULLONG_TO_FP_CAST_WORKS
     if((err = H5Dread(dset_id_ullong, H5T_NATIVE_ULLONG, H5S_ALL, H5S_ALL, dxpl_id_utrans_inv, transformDataullong))<0) TEST_ERROR;
     UCOMPARE(unsigned long_long, *transformDataullong, *transformData, 4)
+#else
+    SKIPPED();
+#endif
 
     return 0;
 
