@@ -1,5 +1,5 @@
-Release information for hdf5-1.2.0beta
-------------------------------------
+Release information for hdf5-1.2.0
+----------------------------------
 
 		     CHANGES SINCE VERSION 1.0.1
 
@@ -473,7 +473,7 @@ Ragged Arrays (alpha)
 			-------------------
 
 Operating systems listed below with compiler information and MPI library, if
-applicable, are systems that HDF5 1.2.0beta was tested.
+applicable, are systems that HDF5 1.2.0 was tested.
 
                            Compiler & libraries
   Platform                      Information              Comment
@@ -506,4 +506,6 @@ applicable, are systems that HDF5 1.2.0beta was tested.
   Unicos 2.0.4.61 (T3E)         cc 6.2.1.0 
                                 mpt.1.3
 
-  Windows/NT 4.0/SP3            MSVC++ 5.0 and 6.0
+  Windows NT 4.0/SP3            MSVC++ 5.0 and 6.0
+
+  Windows 98                    MSVC++ 5.0

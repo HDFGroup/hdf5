@@ -7,11 +7,9 @@
 
 ./COPYING
 ./INSTALL
-./INSTALL.ascired
-./INSTALL.ibm.sp.parallel
 ./INSTALL_MAINT
+./INSTALL_TFLOPS
 ./INSTALL_parallel
-./INSTALL_parallel.ascired
 ./INSTALL_Windows.txt
 ./MANIFEST
 ./Makefile.dist
@@ -28,6 +26,8 @@
 ./bin/checkposix			_DO_NOT_DISTRIBUTE_
 ./bin/config.guess
 ./bin/config.sub
+./bin/config_para_ibm_sp.sh
+./bin/config_para_tflops.sh
 ./bin/debug-ohdr			_DO_NOT_DISTRIBUTE_
 ./bin/distdep
 ./bin/errors				_DO_NOT_DISTRIBUTE_
