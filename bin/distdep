@@ -6,6 +6,6 @@
 # removing all but the base name of other include files (since the Makefiles
 # contain the logic for searching).
 
-($h,$_)=/\s*\\/?$h.$`:("","$h\n");
+($h,$_)=/\s*\\/?$h.$`:("",$h.$_);
 s|( +/\S*)*( *)|$2?" \\\n   ":""|eg;
 #s|(([-\w\.]+)/)+([-\w\.]+)|\3|g;

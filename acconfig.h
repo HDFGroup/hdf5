@@ -51,3 +51,6 @@
 
 /* Define if the Grid Storage is defined */
 #undef HAVE_GRIDSTORAGE
+
+/* Define if the stream virtual file driver should be compiled */
+#undef HAVE_STREAM

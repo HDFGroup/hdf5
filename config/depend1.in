@@ -20,18 +20,16 @@
 ## otherwise the file is changed and a backup is saved by appending a
 ## tilde to the file name.
 ##
-.PRECIOUS: Dependencies
-Dependencies: .depend
+$(srcdir)/Dependencies: .depend
 	@if test "$(srcdir)" != "."; then				      \
-	    echo '## This file is machine generated on GNU systems.'          \
-		>$@;							      \
-	    echo '## Only temporary changes may be made here.' 		      \
-		>>$@;							      \
-	    echo >>$@;					      \
+	    echo '## This file is machine generated on GNU systems.' >$@;     \
+	    echo '## Only temporary changes may be made here.' >>$@;	      \
+	    echo >>$@;					      		      \
 	    perl -p $(top_srcdir)/bin/distdep .depend >>$@;		      \
+	else								      \
+	    echo 'Dependencies cannot be built when $$srcdir == $$builddir';  \
 	fi
 
-.PRECIOUS: .depend
 .depend: $(LIB_SRC) $(TEST_SRC) $(PROG_SRC)
 	@touch .depend
 	@for dep in $? dummy; do					      \
@@ -47,14 +45,6 @@ Dependencies: .depend
 	          sed 's/\.o/.lo/' >>$@;	      			      \
 	   fi;								      \
 	done;
-	@if test "$(srcdir)" != "."; then				      \
-	    echo '## This file is machine generated on GNU systems.'          \
-		>Dependencies;				      \
-	    echo '## Only temporary changes may be made here.' 		      \
-		>>Dependencies;				      \
-	    echo >>Dependencies;				      \
-	    perl -p $(top_srcdir)/bin/distdep .depend>>Dependencies;\
-	fi
 
 -include .depend
 
