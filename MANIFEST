@@ -173,6 +173,7 @@
 ./doc/html/TechNotes/Version.html
 ./doc/html/TechNotes/VFL.html
 ./doc/html/TechNotes/VFLfunc.html
+./doc/html/TechNotes/openmp-test.txt
 ./doc/html/TechNotes/pipe1.gif
 ./doc/html/TechNotes/pipe1.obj
 ./doc/html/TechNotes/pipe2.gif
@@ -705,6 +706,8 @@
 ./tools/testfiles/tobjref.ddl
 ./tools/testfiles/topaque.h5
 ./tools/testfiles/topaque.ddl
+./tools/testfiles/tsaf.ddl
+./tools/testfiles/tsaf.h5
 ./tools/testfiles/tslink-1.ddl
 ./tools/testfiles/tslink-2.ddl
 ./tools/testfiles/tslink.h5
