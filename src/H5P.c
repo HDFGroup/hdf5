@@ -3466,6 +3466,7 @@ H5Pfill_value_defined(hid_t plist_id, H5D_fill_value_t *status)
     herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER(H5Pfill_value_defined, FAIL);
+    H5TRACE2("e","i*Df",plist_id,status);
 
     assert(status);
 
@@ -3509,6 +3510,7 @@ H5Pset_space_time(hid_t plist_id, H5D_space_time_t alloc_time)
     herr_t ret_value = SUCCEED; /* return value 	 */
 
     FUNC_ENTER(H5Pset_space_time, FAIL);
+    H5TRACE2("e","iDs",plist_id,alloc_time);
 
     /* Check args */
     if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
@@ -3779,6 +3781,7 @@ H5Pset_fclose_degree(hid_t plist_id, H5F_close_degree_t degree)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER(H5Pset_fclose_degree, FAIL);
+    H5TRACE2("e","iFc",plist_id,degree);
 
     /* Check args */
     if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
@@ -5096,6 +5099,8 @@ H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
     hid_t	ret_value = FAIL;           /* Return value		   */
 
     FUNC_ENTER(H5Pcreate_class, FAIL);
+    H5TRACE9("i","isIuxxxxxx",parent,name,hashsize,cls_create,create_data,
+             cls_copy,copy_data,cls_close,close_data);
 
     /* Check arguments. */
     if (H5P_DEFAULT!=parent && (H5I_GENPROP_CLS!=H5I_get_type(parent)))
