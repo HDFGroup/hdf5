@@ -42,7 +42,7 @@ typedef struct {
 
 /* Note! Be careful with the sizes of the references because they should really
  * depend on the run-time values in the file.  Unfortunately, the arrays need
- * to be defined at run-time, so we have to go with the worst case sizes for
+ * to be defined at compile-time, so we have to go with the worst case sizes for
  * them.  -QAK
  */
 #define H5R_OBJ_REF_BUF_SIZE    sizeof(haddr_t)
@@ -70,7 +70,10 @@ __DLL__ herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name,
 			 H5R_type_t ref_type, hid_t space_id);
 __DLL__ hid_t H5Rdereference(hid_t dataset, H5R_type_t ref_type, void *ref);
 __DLL__ hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, void *ref);
+#ifdef H5_WANT_H5_V1_4_COMPAT
 __DLL__ int H5Rget_object_type(hid_t dataset, void *_ref);
+#endif /* H5_WANT_H5_V1_4_COMPAT */
+__DLL__ int H5Rget_obj_type(hid_t dataset, H5R_type_t ref_type, void *_ref);
 
 #ifdef __cplusplus
 }

@@ -753,7 +753,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
         if (h5tools_is_zero(vp, H5Tget_size(type))) {
             h5tools_str_append(str, "NULL");
         } else {
-            otype = H5Rget_object_type(container, vp);
+            otype = H5Rget_obj_type(container, H5R_OBJECT, vp);
             obj = H5Rdereference(container, H5R_OBJECT, vp);
             H5Gget_objinfo(obj, ".", FALSE, &sb);
 

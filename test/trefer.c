@@ -155,26 +155,46 @@ test_reference_obj(void)
     /* Create reference to dataset */
     ret = H5Rcreate(&wbuf[0],fid1,"/Group1/Dataset1",H5R_OBJECT,-1);
     CHECK(ret, FAIL, "H5Rcreate");
+#ifdef H5_WANT_H5_V1_4_COMPAT
     ret = H5Rget_object_type(dataset,&wbuf[0]);
     VERIFY(ret, H5G_DATASET, "H5Rget_object_type");
+#else /* H5_WANT_H5_V1_4_COMPAT */
+    ret = H5Rget_obj_type(dataset,H5R_OBJECT,&wbuf[0]);
+    VERIFY(ret, H5G_DATASET, "H5Rget_obj_type");
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     /* Create reference to dataset */
     ret = H5Rcreate(&wbuf[1],fid1,"/Group1/Dataset2",H5R_OBJECT,-1);
     CHECK(ret, FAIL, "H5Rcreate");
+#ifdef H5_WANT_H5_V1_4_COMPAT
     ret = H5Rget_object_type(dataset,&wbuf[1]);
     VERIFY(ret, H5G_DATASET, "H5Rget_object_type");
+#else /* H5_WANT_H5_V1_4_COMPAT */
+    ret = H5Rget_obj_type(dataset,H5R_OBJECT,&wbuf[1]);
+    VERIFY(ret, H5G_DATASET, "H5Rget_obj_type");
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     /* Create reference to group */
     ret = H5Rcreate(&wbuf[2],fid1,"/Group1",H5R_OBJECT,-1);
     CHECK(ret, FAIL, "H5Rcreate");
+#ifdef H5_WANT_H5_V1_4_COMPAT
     ret = H5Rget_object_type(dataset,&wbuf[2]);
     VERIFY(ret, H5G_GROUP, "H5Rget_object_type");
+#else /* H5_WANT_H5_V1_4_COMPAT */
+    ret = H5Rget_obj_type(dataset,H5R_OBJECT,&wbuf[2]);
+    VERIFY(ret, H5G_GROUP, "H5Rget_obj_type");
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     /* Create reference to named datatype */
     ret = H5Rcreate(&wbuf[3],fid1,"/Group1/Datatype1",H5R_OBJECT,-1);
     CHECK(ret, FAIL, "H5Rcreate");
+#ifdef H5_WANT_H5_V1_4_COMPAT
     ret = H5Rget_object_type(dataset,&wbuf[3]);
     VERIFY(ret, H5G_TYPE, "H5Rget_object_type");
+#else /* H5_WANT_H5_V1_4_COMPAT */
+    ret = H5Rget_obj_type(dataset,H5R_OBJECT,&wbuf[3]);
+    VERIFY(ret, H5G_TYPE, "H5Rget_obj_type");
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
@@ -365,6 +385,8 @@ test_reference_region(void)
     /* Store first dataset region */
     ret = H5Rcreate(&wbuf[0],fid1,"/Dataset2",H5R_DATASET_REGION,sid2);
     CHECK(ret, FAIL, "H5Rcreate");
+    ret = H5Rget_obj_type(dset1,H5R_DATASET_REGION,&wbuf[0]);
+    VERIFY(ret, H5G_DATASET, "H5Rget_obj_type");
 
     /* Select sequence of ten points for second reference */
     coord1[0][0]=6; coord1[0][1]=9;
@@ -423,9 +445,9 @@ test_reference_region(void)
     dset2 = H5Rdereference(dset1,H5R_DATASET_REGION,&rbuf[0]);
     CHECK(dset2, FAIL, "H5Rdereference");
 
-    /* Check what H5Rget_object_type function returns */
-    ret = H5Rget_object_type(dset1, &rbuf[0]);
-    VERIFY(ret, H5G_UNKNOWN, "H5Rget_object_type");
+    /* Check what H5Rget_obj_type function returns */
+    ret = H5Rget_obj_type(dset1, H5R_DATASET_REGION,&rbuf[0]);
+    VERIFY(ret, H5G_DATASET, "H5Rget_obj_type");
 
     /* Check information in referenced dataset */
     sid1 = H5Dget_space(dset2);
@@ -575,8 +597,13 @@ test_reference_obj_deleted(void)
     /* Create reference to dataset */
     ret = H5Rcreate(&oref,fid1,"/Dataset1",H5R_OBJECT,-1);
     CHECK(ret, FAIL, "H5Rcreate");
+#ifdef H5_WANT_H5_V1_4_COMPAT
     ret = H5Rget_object_type(dataset,&oref);
     VERIFY(ret, H5G_DATASET, "H5Rget_object_type");
+#else /* H5_WANT_H5_V1_4_COMPAT */
+    ret = H5Rget_obj_type(dataset,H5R_OBJECT,&oref);
+    VERIFY(ret, H5G_DATASET, "H5Rget_obj_type");
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,&oref);

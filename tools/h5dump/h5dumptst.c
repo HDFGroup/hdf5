@@ -1509,28 +1509,18 @@ static void test_objref(void)
 
     /* Create reference to dataset */
     H5Rcreate(&wbuf[0],fid1,"/Group1/Dataset1",H5R_OBJECT,-1);
-    H5Rget_object_type(dataset,&wbuf[0]);
 
     /* Create reference to dataset */
     H5Rcreate(&wbuf[1],fid1,"/Group1/Dataset2",H5R_OBJECT,-1);
 
-    H5Rget_object_type(dataset,&wbuf[1]);
- 
     /* Create reference to group */
     H5Rcreate(&wbuf[2],fid1,"/Group1",H5R_OBJECT,-1);
-
-    H5Rget_object_type(dataset,&wbuf[2]);
-
 
     /* Create reference to named datatype */
     H5Rcreate(&wbuf[3],fid1,"/Group1/Datatype1",H5R_OBJECT,-1);
 
-    H5Rget_object_type(dataset,&wbuf[3]);
-
-
     /* Write selection to disk */
     H5Dwrite(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
-
 
     /* Close disk dataspace */
     H5Sclose(sid1);

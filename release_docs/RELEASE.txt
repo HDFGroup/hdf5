@@ -204,6 +204,11 @@ New Features
       functions mentioned above. 
     * Changed internal error handling macros to reduce code size of library by
       about 10-20%.
+    * Added H5Rget_obj_type() API function, which performs the same functionality
+      as H5Rget_object_type(), but requires the reference type as a parameter
+      in order to correctly handle dataset region references.  Moved
+      H5Rget_object_type() to be only compiled into the library when v1.4
+      compatibility is enabled.
 
 Platforms Tested
 ================
