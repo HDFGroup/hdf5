@@ -431,6 +431,37 @@ case "$host" in
 esac
 
 dnl ----------------------------------------------------------------------
+dnl Test for 64bit stuff before the data types and their sizes. The
+dnl result could effect the outcome of the sizeof macros below.
+dnl
+case "$host_cpu-$host_vendor-$host_os" in
+   *linux*)
+      AC_CHECK_FUNCS(getdents64,
+        dnl Add the large file support flags to the CPPFLAGS macro if
+        dnl we're on a Linux system which austensibly supports LFS. (We
+        dnl think it does if it has the ``getdents64'' syscall).
+        CPPFLAGS="-D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $CPPFLAGS"
+        if test $cc_vers_all -gt 2095000 -a $cc_vers_all -lt 2096000; then
+           dnl For GCC compilers 2.95.x, the -malign-double flag plays
+           dnl havoc with the LFS stuff. Remove it. It apparently works
+           dnl for 2.96, though, so...
+           CFLAGS_saved=$CFLAGS
+           CFLAGS=""
+           for flag in X $CFLAGS_saved; do
+              if test "$flag" != "X" -a "$flag" != "-malign-double"; then
+                 CFLAGS="$CFLAGS $flag"
+              fi
+           done
+        fi)
+      ;;
+esac
+
+AC_TRY_COMPILE([#include <sys/types.h>],
+	       [off64_t n = 0;],
+	       AC_CHECK_FUNCS(lseek64 fseek64),
+	       AC_MSG_RESULT([skipping test for lseek64() and fseek64()]))
+
+dnl ----------------------------------------------------------------------
 dnl Data types and their sizes.
 dnl
 AC_TYPE_OFF_T
@@ -1033,33 +1064,6 @@ dnl
 AC_CHECK_FUNCS(compress2 difftime fork gethostname getpwuid getrusage)
 AC_CHECK_FUNCS(gettimeofday BSDgettimeofday longjmp setsysinfo sigaction)
 AC_CHECK_FUNCS(signal snprintf vsnprintf strdup system waitpid)
-AC_TRY_COMPILE([#include<sys/types.h>],
-	       [off64_t n = 0;],
-	       AC_CHECK_FUNCS(lseek64 fseek64),
-	       AC_MSG_RESULT([skipping test for lseek64() and fseek64()]))
-
-case "$host_cpu-$host_vendor-$host_os" in
-   *linux*)
-      AC_CHECK_FUNCS(getdents64,
-        dnl Add the large file support flags to the CPPFLAGS macro if
-        dnl we're on a Linux system which austensibly supports LFS. (We
-        dnl think it does if it has the ``getdents64'' syscall).
-        CPPFLAGS="-D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $CPPFLAGS"
-        if test $cc_vers_all -gt 2095000 -a $cc_vers_all -lt 2096000; then
-           dnl For GCC compilers 2.95.x, the -malign-double flag plays
-           dnl havoc with the LFS stuff. Remove it. It apparently works
-           dnl for 2.96, though, so...
-           CFLAGS_saved=$CFLAGS
-           CFLAGS=""
-           for flag in X $CFLAGS_saved; do
-              if test "$flag" != "X" -a "$flag" != "-malign-double"; then
-                 CFLAGS="$CFLAGS $flag"
-              fi
-           done
-        fi)
-      ;;
-esac
-
 
 dnl ----------------------------------------------------------------------
 dnl Check compiler characteristics
