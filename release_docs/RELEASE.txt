@@ -5,8 +5,8 @@ HDF5 version 1.5.63 currently under development
 INTRODUCTION
 
 This document describes the differences between HDF5-1.4.* and
-HDF5-1.5.*, and contains information on the platforms tested and
-known problems in HDF5-1.5.*. For more details check the HISTORY.txt
+HDF5-1.6.0, and contains information on the platforms tested and
+known problems in HDF5-1.6.0. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -49,12 +49,16 @@ Library:
 --------
     Summary: This release has the following new features that are not
              available in 1.4.* releases
+
     1. Generic properties to give application more control on I/O pipeline
     2. Time allocation and fill value properties
     3. New  filters: external compression filter szip
                      internal shuffling and checksum filters
     4. Compact storage layout for datasets
     5. Redesigned I/O pipeline for better performance.
+    Check http://hdf.ncsa.uiuc.edu/HDF5/doc/ADGuide/Changes.html and 
+    http://hdf.ncsa.uiuc.edu/HDF5/doc/TechNotes.html files for more
+    information.
     
     Complete list of changes:
 
@@ -202,10 +206,17 @@ Tools:
       Old h5import tool in the tools/misc directory was renamed to 
       h5createU8 to reflect its purpose. h5createU8 will be deleted in 
       1.6.1 release. 
+    * Two new scripts h5fc and h5c++ were added to compile F90 and C++
+      HDF5 applications.
 
-Support for new platforms and languages
+Support for new platforms, languages and compilers.
 =======================================
     * Added C++ API support on HPUX11.00.  BMR - 2003/03/19
+    * Absoft compiler is supported for Fortran HDF5 Library. 
+      When building with Absoft compiler, add -DH5_ABSOFT to
+      C compilation flags to get correct names of C functions
+      called by Fortran APIs. 
+
 
 Bug Fixes since HDF5-1.4.0 release
 ==================================
@@ -294,15 +305,18 @@ Documentation
 Platforms Tested
 ================
 
-    AIX 5.1  (32 and 64-bit)      C for AIX Compiler, Version 6.0.0.2
+    AIX 5.1  (32 and 64-bit)      C for AIX Compiler, Version 6.0.0.4
                                   xlf 8.1.0.3
-                                  poe 3.2.0.11
+                                  poe 3.2.0.10
     Cray T3E sn6606 2.0.6.08      Cray Standard C Version 6.6.0.2
                                   Cray Fortran Version 3.6.0.0.2
-    Cray SV1 sn9617 10.0.1.0      Cray Standard C Version 6.6.0.2
+                                  mpt 2.2.0.0
+    Cray SV1 sn9617 10.0.1.2      Cray Standard C Version 6.6.0.2
+                                  mpt 2.2.0.0
                                   Cray Fortran Version 3.6.0.0.2
     Cray T90IEEE 10.0.1.01y       Cray Standard C Version 6.4.0.2.3
                                   Cray Fortran Version 3.4.0.3
+                                  mpt 2.1.0.0
     FreeBSD 4.7                   gcc 2.95.4
                                   g++ 2.95.5
     HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20 
@@ -313,11 +327,11 @@ Platforms Tested
     IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1.3m
                                   F90 MIPSpro 7.3.1.3m (64 only)
                                   MPIch 1.2.4
-    Linux 2.4.18                  gcc 3.2.2
-                                  g++ 3.22.
+    Linux 2.4.18                  gcc 2.96, 3.2.2, 3.2.3
+                                  g++ 3.2.2, 3.2.3
                                   Intel(R) C++ Version 7.1
                                   Intel(R) Fortran Compiler Version 7.1
-                                  PGI compilers (pgcc, pgf90, pgCC) version 4.0-2
+                                  PGI compilers (pgcc, pgf90) version 4.0-2
                                   MPIch 1.2.4
     OSF1 V5.1                     Compaq C V6.4-014
                                   Compaq Fortran X5.4A-1684
@@ -500,7 +514,7 @@ Known Problems
   complaining about exit subroutine. Comment out the line 
   IF (total_error .ne. 0) CALL exit (total_error)
 
-  ftp://hdf.ncsa.uiuc.edu/pub/ougoing/hdf5/hdf5-1.6.0/F90_source_for_Crays
+  ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/hdf5-1.6.0/F90_source_for_Crays
 
 * On IA32 and IA64 systems, if you use a compiler other than GCC (such as
   Intel's ecc or icc compilers), you will need to modify the generated
