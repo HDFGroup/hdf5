@@ -44,9 +44,8 @@ static intn		interface_initialize_g = 0;
  */
 herr_t
 H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxpl_id,
-	       void *_buf/*out*/)
+	       void *buf/*out*/)
 {
-    uint8_t	*buf = (uint8_t*)_buf;		/*cast for arithmetic	*/
     haddr_t	eoa;		        /*end of file address		*/
    
     FUNC_ENTER(H5F_contig_read, FAIL);

@@ -59,9 +59,8 @@ herr_t
 H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 	     const struct H5O_pline_t *pline, const H5O_fill_t *fill,
 	     const struct H5O_efl_t *efl, const H5S_t *file_space, size_t elmt_size,
-         hsize_t seq_len, hssize_t file_offset, void *_buf/*out*/)
+         hsize_t seq_len, hssize_t file_offset, void *buf/*out*/)
 {
-    uint8_t	*buf = (uint8_t*)_buf;		    /*cast for arithmetic	*/
     hsize_t	dset_dims[H5O_LAYOUT_NDIMS];	/* dataspace dimensions */
     hssize_t coords[H5O_LAYOUT_NDIMS];	    /* offset of hyperslab in dataspace */
     hsize_t	hslab_size[H5O_LAYOUT_NDIMS];	/* hyperslab size in dataspace*/
@@ -286,9 +285,8 @@ herr_t
 H5F_seq_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 	     const struct H5O_pline_t *pline, const H5O_fill_t *fill,
 	     const struct H5O_efl_t *efl, const H5S_t *file_space, size_t elmt_size,
-         hsize_t seq_len, hssize_t file_offset, const void *_buf)
+         hsize_t seq_len, hssize_t file_offset, const void *buf)
 {
-    const uint8_t	*buf = (const uint8_t*)_buf;    /*cast for arithmetic */
     hsize_t	dset_dims[H5O_LAYOUT_NDIMS];	/* dataspace dimensions */
     hssize_t coords[H5O_LAYOUT_NDIMS];	    /* offset of hyperslab in dataspace */
     hsize_t	hslab_size[H5O_LAYOUT_NDIMS];	/* hyperslab size in dataspace*/
