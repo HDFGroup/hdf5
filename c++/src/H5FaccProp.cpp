@@ -31,21 +31,31 @@ namespace H5 {
 const FileAccPropList FileAccPropList::DEFAULT( H5P_DEFAULT );
 
 //--------------------------------------------------------------------------
-// Function:    Default Constructor
-///\brief       Default constructor: Creates a file access property list
+// Function:    FileAccPropList default constructor
+///\brief       Default constructor: creates a file access property list.
+// Programmer:  Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FileAccPropList::FileAccPropList() : PropList( H5P_FILE_ACCESS ) {}
 
 //--------------------------------------------------------------------------
-// Function:    Copy Constructor
-///\brief       Copy Constructor: Makes a copy of the original
+// Function:    FileAccPropList copy constructor
+///\brief       Copy constructor: makes a copy of the original FileAccPropList.
 ///             FileAccPropList object
+// Programmer:  Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FileAccPropList::FileAccPropList(const FileAccPropList& orig) : PropList(orig) {}
 
 //--------------------------------------------------------------------------
+// Function:    FileAccPropList overloaded constructor
+///\brief       Creates a file access property list using the id of an 
+///		existing one.
+// Programmer:  Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+FileAccPropList::FileAccPropList(const hid_t plist_id) : PropList(plist_id) {}
+
+//--------------------------------------------------------------------------
 // Function:    FileAccPropList::setStdio
-///\brief       Modifies this property list to use the \c H5FD_STDIO driver
+///\brief       Modifies this property list to use the \c H5FD_STDIO driver.
 ///\exception   H5::PropListIException
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
@@ -81,7 +91,7 @@ hid_t FileAccPropList::getDriver() const
 
 //--------------------------------------------------------------------------
 // Function:    FileAccPropList::setDriver
-///\brief	Set file driver for this property list
+///\brief	Set file driver for this property list.
 ///\param       new_driver_id   - IN: File driver
 ///\param       new_driver_info - IN: Struct containing the driver-specific properites
 ///\exception   H5::PropListIException
@@ -160,7 +170,7 @@ void FileAccPropList::setCore (size_t increment, hbool_t backing_store) const
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::getCore
 ///\brief	Queries core file driver properties.
-///\param	increment - OUT: Size of memory increment, in bytes
+///\param	increment     - OUT: Size of memory increment, in bytes
 ///\param	backing_store - OUT: Indicating whether to write the file 
 ///				contents to disk when the file is closed
 ///\exception   H5::PropListIException
@@ -364,10 +374,10 @@ void FileAccPropList::setSieveBufSize(size_t bufsize) const
 // Function:	FileAccPropList::setMetaBlockSize
 ///\brief	Sets the minimum size of metadata block allocations.
 ///\param	block_size - IN: Minimum size, in bytes, of metadata 
-///		block allocations
+///				 block allocations
 ///\exception   H5::PropListIException
 ///\par Description
-///		For more detail, please refer to
+///		For more detail, please see the C layer Reference Manual at:
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetMetaBlockSize
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------

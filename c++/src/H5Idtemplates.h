@@ -22,10 +22,23 @@
 namespace H5 {
 #endif
 
-// Older compilers (baldric) don't support template member functions
-// and IdComponent::reset is one; so at this time, the resetId is not
-// a member function so it can be template to work around that problem.
-
+//--------------------------------------------------------------------------
+// Function:	resetIdComponent
+///\brief	Resets the id of the passed-in object.
+///\param	obj - IN: A "this" pointer of an IdComponent object
+///\exception	H5::Exception's subclasses, thrown by p_close
+///\par Description:
+///		This function is used to reset an IdComponent object 
+///		before using it again for another HDF5 object.  If 
+///		the member \a id is the valid id of an HDF5 object, which
+///		this IdComponent object represents, the associate close
+///		function will be called to properly close the HDF5 object.
+//
+//  Note:	Some older compilers don't support template member functions; 
+//		so at this time, resetIdComponent is not a member function so 
+//		it can be template to work around that problem.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 template <class Type>
 H5_DLLCPP void resetIdComponent( 
 	Type* obj )	// pointer to object to be reset

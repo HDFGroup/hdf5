@@ -32,10 +32,19 @@ const FileCreatPropList FileCreatPropList::DEFAULT( H5P_DEFAULT );
 
 //--------------------------------------------------------------------------
 // Function:    FileCreatPropList default constructor
-///\brief       Default constructor: Creates a file create property list
+///\brief       Default constructor: creates a file creation property list.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FileCreatPropList::FileCreatPropList() : PropList( H5P_FILE_CREATE ) {}
+
+//--------------------------------------------------------------------------
+// Function:    FileCreatPropList overloaded constructor
+///\brief	Creates a file creation property list using the id of an 
+///		existing one.
+///\param       plist_id - IN: FileCreatPropList id to use
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+FileCreatPropList::FileCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
 
 //--------------------------------------------------------------------------
 // Function:    FileCreatPropList copy constructor

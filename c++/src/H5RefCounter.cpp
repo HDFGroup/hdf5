@@ -22,29 +22,29 @@ namespace H5 {
 
 //--------------------------------------------------------------------------
 // Function:	RefCounter default constructor
-///\brief	Default constructor: Creates a reference counter and set it
-///		to 1.
+//=\brief	Default constructor: Creates a reference counter and set it
+//=		to 1.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 RefCounter::RefCounter() : counter(1) {} 
  
 //--------------------------------------------------------------------------
 // Function:	RefCounter::getCounter
-///\brief	Returns the current value of the reference counter.
+//=\brief	Returns the current value of the reference counter.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int RefCounter::getCounter () const { return counter; }
 
 //--------------------------------------------------------------------------
 // Function:	RefCounter::increment
-///\brief	Increments the reference counter.
+//=\brief	Increments the reference counter.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void RefCounter::increment() { counter++; }
 
 //--------------------------------------------------------------------------
 // Function:	RefCounter::decrement
-///\brief	Decrements the reference counter.
+//=\brief	Decrements the reference counter.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void RefCounter::decrement() 
@@ -58,11 +58,11 @@ void RefCounter::decrement()
 
 //--------------------------------------------------------------------------
 // Function:	RefCounter::noReference
-///\brief	Returns true if there are no more reference to the object 
-///		that uses this counter.
-///\return	true if there are no more reference to the object
-///             that uses this counter, and false, otherwise.
-///\note	This function will be obsolete in the next release.
+//=\brief	Returns true if there are no more reference to the object 
+//=		that uses this counter.
+//=\return	true if there are no more reference to the object
+//=             that uses this counter, and false, otherwise.
+//=\note	This function will be obsolete in the next release.
 // Description
 //		Decrements the reference counter then determines if there 
 //		are no more reference to the object that uses this counter.
@@ -77,7 +77,7 @@ bool RefCounter::noReference()
 
 //--------------------------------------------------------------------------
 // Function:	RefCounter destructor
-///\brief	Noop destructor.
+//=\brief	Noop destructor.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 RefCounter::~RefCounter() {}

@@ -29,22 +29,32 @@ namespace H5 {
 #endif
 
 //--------------------------------------------------------------------------
-///\brief	Constant for default property
+///\brief	Constant for dataset creation default property
 //--------------------------------------------------------------------------
 const DSetCreatPropList DSetCreatPropList::DEFAULT( H5P_DEFAULT );
 
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList default constructor
-///\brief       Default Constructor: Creates a dataset creation property list
+///\brief       Default constructor: creates a stub dataset creation property list
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DSetCreatPropList::DSetCreatPropList() : PropList( H5P_DATASET_CREATE) {}
 
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList copy constructor
-///\brief       Copy Constructor: Makes a copy of the original
+///\brief       Copy constructor: makes a copy of the original
 ///             DSetCreatPropList object
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DSetCreatPropList::DSetCreatPropList( const DSetCreatPropList& orig ) : PropList( orig ) {}
+
+//--------------------------------------------------------------------------
+// Function:    DSetCreatPropList overloaded constructor
+///\brief	Creates a DSetCreatPropList object using the id of an 
+///		existing dataset creation property list.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+DSetCreatPropList::DSetCreatPropList(const hid_t plist_id) : PropList( plist_id ) {}
 
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList::setChunk
@@ -59,6 +69,7 @@ DSetCreatPropList::DSetCreatPropList( const DSetCreatPropList& orig ) : PropList
 ///             define the size of the chunks to store the dataset's raw
 ///             data.  As a side-effect, the layout of the dataset will be
 ///             changed to \c H5D_CHUNKED, if it is not so already.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setChunk( int ndims, const hsize_t* dim ) const
 {
@@ -76,6 +87,7 @@ void DSetCreatPropList::setChunk( int ndims, const hsize_t* dim ) const
 ///\param       max_ndims - IN: Size of \a dim array
 ///\param       dim      - OUT: Array to store the chunk dimensions
 ///\exception   H5::PropListIException
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int DSetCreatPropList::getChunk( int max_ndims, hsize_t* dim ) const
 {
@@ -97,6 +109,7 @@ int DSetCreatPropList::getChunk( int max_ndims, hsize_t* dim ) const
 ///\par Description
 ///             For information on setting layout type, please refer to
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetLayout
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setLayout(hid_t plist, H5D_layout_t layout ) const
 {
@@ -122,6 +135,7 @@ void DSetCreatPropList::setLayout(hid_t plist, H5D_layout_t layout ) const
 ///                             in the file.
 ///\exception   H5::PropListIException
 ///\par Description
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5D_layout_t DSetCreatPropList::getLayout() const
 {
@@ -144,6 +158,7 @@ H5D_layout_t DSetCreatPropList::getLayout() const
 ///             list to \c H5D_COMPRESS_DEFLATE and the compression level to
 ///             \a level. Lower compression levels are faster but result in
 ///             less compression.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setDeflate( int level ) const
 {
@@ -171,6 +186,7 @@ void DSetCreatPropList::setDeflate( int level ) const
 ///             For information on setting fill value, please refer to the
 ///             C layer Reference Manual at:
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetFillValue
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setFillValue( const DataType& fvalue_type, const void* value ) const
 {
@@ -193,6 +209,7 @@ void DSetCreatPropList::setFillValue( const DataType& fvalue_type, const void* v
 ///             and the memory is allocated by the caller.  The fill
 ///             value will be converted from its current data type to the
 ///             specified by \a fvalue_type.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::getFillValue( const DataType& fvalue_type, void* value ) const
 {
@@ -212,6 +229,7 @@ void DSetCreatPropList::getFillValue( const DataType& fvalue_type, void* value )
 ///             \li \c H5D_FILL_VALUE_DEFAULT      =1,
 ///             \li \c H5D_FILL_VALUE_USER_DEFINED =2
 ///\exception   H5::PropListIException
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5D_fill_value_t DSetCreatPropList::isFillValueDefined()
 {
@@ -244,6 +262,7 @@ H5D_fill_value_t DSetCreatPropList::isFillValueDefined()
 ///             failed; the filter will not participate in the pipeline
 ///             during a \c DataSet::read() of the chunk.  If this bit is clear
 ///             and the filter fails then the entire I/O operation fails.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setFilter( H5Z_filter_t filter_id, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[] ) const
 {
@@ -263,6 +282,7 @@ void DSetCreatPropList::setFilter( H5Z_filter_t filter_id, unsigned int flags, s
 ///\par Description
 ///             Deletes a filter from the dataset creation property list;
 ///             deletes all filters if \a filter_id is \c H5Z_FILTER_NONE.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::removeFilter(H5Z_filter_t filter_id) const
 {
@@ -279,6 +299,7 @@ void DSetCreatPropList::removeFilter(H5Z_filter_t filter_id) const
 ///\brief       Returns the number of filters in the pipeline
 ///\return      Number of filters
 ///\exception   H5::PropListIException
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int DSetCreatPropList::getNfilters() const
 {
@@ -307,6 +328,7 @@ int DSetCreatPropList::getNfilters() const
 ///\exception   H5::PropListIException
 ///\par Description
 ///             Failure occurs when \a filter_number is out of range.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Z_filter_t DSetCreatPropList::getFilter( int filter_number, unsigned int& flags, size_t& cd_nelmts, unsigned int* cd_values, size_t namelen, char name[] ) const
 {
@@ -334,6 +356,7 @@ H5Z_filter_t DSetCreatPropList::getFilter( int filter_number, unsigned int& flag
 ///\param       namelen   -  IN: Length of \a name
 ///\param       name      - OUT: Name of the filter
 ///\exception   H5::PropListIException
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::getFilterById(H5Z_filter_t filter_id, unsigned int &flags, size_t &cd_nelmts, unsigned int* cd_values, size_t namelen, char name[]) const
 {
@@ -365,6 +388,7 @@ void DSetCreatPropList::getFilterById(H5Z_filter_t filter_id, unsigned int &flag
 ///             failed; the filter will not participate in the pipeline
 ///             during a DataSet::read() of the chunk.  If this bit is clear
 ///             and the filter fails then the entire I/O operation fails.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::modifyFilter( H5Z_filter_t filter_id, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[] ) const
 {
@@ -383,6 +407,7 @@ void DSetCreatPropList::modifyFilter( H5Z_filter_t filter_id, unsigned int flags
 ///\return      true if all filters available, and false if one or more
 ///             filters not currently available
 ///\exception   H5::PropListIException
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 bool DSetCreatPropList::allFiltersAvail()
 {
@@ -405,6 +430,7 @@ bool DSetCreatPropList::allFiltersAvail()
 ///             Please refer to the Reference Manual of \c H5Pset_shuffle for
 ///             details.
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetShuffle
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setShuffle()
 {
@@ -428,6 +454,7 @@ void DSetCreatPropList::setShuffle()
 ///             \li \c H5D_ALLOC_TIME_EARLY
 ///             \li \c H5D_ALLOC_TIME_LATE
 ///             \li \c H5D_ALLOC_TIME_INCR
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5D_alloc_time_t DSetCreatPropList::getAllocTime()
 {
@@ -451,6 +478,7 @@ H5D_alloc_time_t DSetCreatPropList::getAllocTime()
 ///             Valid values for fill value writing time include
 ///             \li \c H5D_FILL_TIME_NEVER
 ///             \li \c H5D_FILL_TIME_ALLOC.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5D_fill_time_t DSetCreatPropList::getFillTime()
 {
@@ -476,6 +504,7 @@ H5D_fill_time_t DSetCreatPropList::getFillTime()
 ///             \li \c H5D_ALLOC_TIME_EARLY
 ///             \li \c H5D_ALLOC_TIME_LATE
 ///             \li \c H5D_ALLOC_TIME_INCR
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setAllocTime(H5D_alloc_time_t alloc_time)
 {
@@ -496,6 +525,7 @@ void DSetCreatPropList::setAllocTime(H5D_alloc_time_t alloc_time)
 ///             Valid values for fill value writing time include
 ///             \li \c H5D_FILL_TIME_NEVER
 ///             \li \c H5D_FILL_TIME_ALLOC.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setFillTime(H5D_fill_time_t fill_time)
 {
@@ -511,6 +541,7 @@ void DSetCreatPropList::setFillTime(H5D_fill_time_t fill_time)
 // Function:    DSetCreatPropList::setFletcher32
 ///\brief       Sets Fletcher32 checksum of EDC for this property list.
 ///\exception   H5::PropListIException
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setFletcher32()
 {
@@ -536,6 +567,7 @@ void DSetCreatPropList::setFletcher32()
 ///             the total size is larger than the size of a dataset then the
 ///             dataset can be extended (provided the data space also allows
 ///             the extending).
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setExternal( const char* name, off_t offset, hsize_t size ) const
 {
@@ -552,6 +584,7 @@ void DSetCreatPropList::setExternal( const char* name, off_t offset, hsize_t siz
 ///\brief       Returns the number of external files for a dataset
 ///\return      Number of external files
 ///\exception   H5::PropListIException
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int DSetCreatPropList::getExternalCount() const
 {
@@ -585,6 +618,7 @@ int DSetCreatPropList::getExternalCount() const
 ///             external file name will not be returned.  If \a offset or
 ///             \a size are null pointers then the corresponding information
 ///             will not be returned.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::getExternal( int idx, size_t name_size, char* name, off_t& offset, hsize_t& size ) const
 {

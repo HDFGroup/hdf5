@@ -29,21 +29,23 @@
 namespace H5 {
 #endif
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
-// Function:	AtomType default constructor
-///\brief	Default constructor: Creates a stub datatype
+// Function:	AtomType default constructor [protected]
+// Purpose	Default constructor: creates a stub atomic datatype.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 AtomType::AtomType() : DataType() {}
 
 //--------------------------------------------------------------------------
-// Function:	AtomType overloaded constructor
-///\brief	Creates an AtomType object using an existing id.
-///\param	existing_id - IN: Id of an existing datatype
-///\exception   H5::DataTypeIException
+// Function:	AtomType overloaded constructor [protected]
+// Purpose	Creates an AtomType object using an existing id.
+// Parameter	existing_id - IN: Id of an existing datatype
+// Exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 AtomType::AtomType( const hid_t existing_id ) : DataType( existing_id ) {}
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	AtomType copy constructor

@@ -44,7 +44,7 @@ namespace H5 {
 
 //--------------------------------------------------------------------------
 // Function:	Group default constructor
-///\brief	Default constructor: Creates a stub group
+///\brief	Default constructor: creates a stub Group.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Group::Group() : H5Object() {}

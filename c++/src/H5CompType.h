@@ -31,11 +31,13 @@ class H5_DLLCPP CompType : public DataType {
 	// Gets the compound datatype of the specified dataset
 	CompType( const DataSet& dataset );  // H5Dget_type
 
-	// Returns the number of members in this compound datatype. 
-	int getNmembers() const;
+	// Returns the type class of the specified member of this compound
+	// datatype.  It provides to the user a way of knowing what type
+	// to create another datatype of the same class
+	H5T_class_t getMemberClass( int member_num ) const;
 
-	// Returns the name of a member of this compound datatype. 
-	string getMemberName( int member_num ) const;
+	// Returns the dimensionality of the specified member. 
+	int getMemberDims( int member_num, size_t* dims, int* perm ) const;
 
 	// Returns the index of a member in this compound data type.
 	int getMemberIndex(const char* name) const;
@@ -44,13 +46,12 @@ class H5_DLLCPP CompType : public DataType {
 	// Returns the offset of a member of this compound datatype. 
 	size_t getMemberOffset( int memb_no ) const;
 
-	// Returns the dimensionality of the specified member. 
-	int getMemberDims( int member_num, size_t* dims, int* perm ) const;
+	// Returns the name of a member of this compound datatype. 
+	string getMemberName( int member_num ) const;
 
-	// Returns the type class of the specified member of this compound
-	// datatype.  It provides to the user a way of knowing what type
-	// to create another datatype of the same class
-	H5T_class_t getMemberClass( int member_num ) const;
+	// Returns the compound datatype of the specified member in 
+	// this compound datatype.
+	CompType getMemberCompType( int member_num ) const;
 
 	// Returns the generic datatype of the specified member in 
 	// this compound datatype.
@@ -59,10 +60,6 @@ class H5_DLLCPP CompType : public DataType {
 	// Returns the enumeration datatype of the specified member in 
 	// this compound datatype.
 	EnumType getMemberEnumType( int member_num ) const;
-
-	// Returns the compound datatype of the specified member in 
-	// this compound datatype.
-	CompType getMemberCompType( int member_num ) const;
 
 	// Returns the integer datatype of the specified member in 
 	// this compound datatype.
@@ -75,6 +72,9 @@ class H5_DLLCPP CompType : public DataType {
 	// Returns the string datatype of the specified member in 
 	// this compound datatype.
 	StrType getMemberStrType( int member_num ) const;
+
+	// Returns the number of members in this compound datatype. 
+	int getNmembers() const;
 
 	// Adds a new member to this compound datatype.
 	void insertMember( const string& name, size_t offset, const DataType& new_member ) const;
@@ -91,6 +91,7 @@ class H5_DLLCPP CompType : public DataType {
 	// Copy constructor - makes a copy of original object
 	CompType( const CompType& original );
 
+	// Noop destructor.
 	virtual ~CompType();
 
    private:

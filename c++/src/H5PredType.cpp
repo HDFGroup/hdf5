@@ -31,13 +31,7 @@
 namespace H5 {
 #endif
 
-//--------------------------------------------------------------------------
-// Function:	PredType default constructor
-///\brief	Default constructor: Creates a stub predefined datatype
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-PredType::PredType() : AtomType() {}
-
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:	PredType overloaded constructor
 ///\brief	Creates a PredType object using the id of an existing 
@@ -54,29 +48,19 @@ PredType::PredType( const hid_t predtype_id ) : AtomType( predtype_id )
 }
 
 //--------------------------------------------------------------------------
+// Function:	PredType default constructor
+///\brief	Default constructor: Creates a stub predefined datatype
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+PredType::PredType() : AtomType() {}
+
+//--------------------------------------------------------------------------
 // Function:	PredType copy constructor
 ///\brief	Copy constructor: makes a copy of the original PredType object.
 ///\param	original - IN: PredType instance to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PredType::PredType( const PredType& original ) : AtomType( original ) {}
-
-//--------------------------------------------------------------------------
-// Function:	PredType::operator=
-///\brief	Assignment operator.
-///\param	rhs - IN: Reference to the predefined datatype
-///\return	Reference to PredType instance
-///\exception	H5::DataTypeIException
-// Description
-//		Makes a copy of the type on the right hand side and stores
-//		the new id in the left hand side object.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-PredType& PredType::operator=( const PredType& rhs )
-{
-   copy(rhs);
-   return(*this);
-}
 
 const PredType PredType::NotAtexit;	// only for atexit/global dest. problem
 
@@ -225,6 +209,24 @@ const PredType PredType::NATIVE_INT_LEAST64( E_NATIVE_INT_LEAST64 );
 const PredType PredType::NATIVE_UINT_LEAST64( E_NATIVE_UINT_LEAST64 );
 const PredType PredType::NATIVE_INT_FAST64( E_NATIVE_INT_FAST64 );
 const PredType PredType::NATIVE_UINT_FAST64( E_NATIVE_UINT_FAST64 );
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
+//--------------------------------------------------------------------------
+// Function:	PredType::operator=
+///\brief	Assignment operator.
+///\param	rhs - IN: Reference to the predefined datatype
+///\return	Reference to PredType instance
+///\exception	H5::DataTypeIException
+// Description
+//		Makes a copy of the type on the right hand side and stores
+//		the new id in the left hand side object.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+PredType& PredType::operator=( const PredType& rhs )
+{
+   copy(rhs);
+   return(*this);
+}
 
 //--------------------------------------------------------------------------
 // Function:	PredType::getId
@@ -503,6 +505,7 @@ hid_t PredType::getId() const
     }   // end switch
 }   // end of getId()
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 // These dummy functions do not inherit from DataType - they'll
 // throw an DataTypeIException if invoked.
 void PredType::commit( H5Object& loc, const char* name )
@@ -520,8 +523,14 @@ bool PredType::committed()
    throw DataTypeIException("PredType::committed", "Error: Attempting to check for commit status on a predefined datatype." );
    return (0);
 }  
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 // Default destructor
+//--------------------------------------------------------------------------
+// Function:	PredType destructor
+///\brief	Noop destructor.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 PredType::~PredType() {}
 
 #ifndef H5_NO_NAMESPACE

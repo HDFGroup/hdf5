@@ -43,10 +43,8 @@ namespace H5 {
 #endif
 
 //--------------------------------------------------------------------------
-// Function	Default constructor
-///\brief	Default constructor - Creates a stub hdf5 file object.
-///\par Description
-///		The id of this hdf5 file is set to 0.
+// Function	H5File default constructor
+///\brief	Default constructor: creates a stub H5File object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5File::H5File() : IdComponent() {}
@@ -54,8 +52,8 @@ H5File::H5File() : IdComponent() {}
 //--------------------------------------------------------------------------
 // Function:	H5File overloaded constructor
 ///\brief	Creates or opens an HDF5 file depending on the parameter flags.
-///\param	name - IN: Name of the file
-///\param	flags - IN: File access flags
+///\param	name         - IN: Name of the file
+///\param	flags        - IN: File access flags
 ///\param	create_plist - IN: File creation property list, used when 
 ///		modifying default file meta-data.  Default to 
 ///		FileCreatPropList::DEFAULT
@@ -87,14 +85,13 @@ H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& c
 // Function:	H5File overloaded constructor
 ///\brief	This is another overloaded constructor.  It differs from the 
 ///		above constructor only in the type of the \a name argument.
-///\param	name - IN: Name of the file
+///\param	name - IN: Name of the file - \c std::string
 ///\param	flags - IN: File access flags
 ///\param	create_plist - IN: File creation property list, used when 
 ///		modifying default file meta-data.  Default to 
 ///		FileCreatPropList::DEFAULT
 ///\param	access_plist - IN: File access property list.  Default to 
 ///		FileCreatPropList::DEFAULT
-///\param	name - IN: Name of the file - \c std::string
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5File::H5File( const string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent()
@@ -135,8 +132,8 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 }
 
 //--------------------------------------------------------------------------
-// Function:	Copy Constructor
-///\brief	Copy Constructor: Makes a copy of the original
+// Function:	H5File copy constructor
+///\brief	Copy constructor: makes a copy of the original
 ///		H5File object.
 ///\param	original - IN: H5File instance to copy
 // Programmer	Binh-Minh Ribler - 2000
@@ -179,7 +176,7 @@ bool H5File::isHdf5(const string& name )
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5File::reopen
+// Function:	H5File::reOpen
 ///\brief	Reopens this file.
 ///\exception	H5::FileIException
 // Description
@@ -187,7 +184,7 @@ bool H5File::isHdf5(const string& name )
 //		HDF5 file need to be closed first.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void H5File::reopen()
+void H5File::reOpen()
 {
    // reset the identifier of this H5File - send 'this' in so that
    // H5Fclose can be called appropriately
@@ -204,6 +201,20 @@ void H5File::reopen()
    {
       throw FileIException("H5File::reopen", "H5Freopen failed");
    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::reopen
+///\brief	Reopens this file.
+///\exception	H5::FileIException
+///\par Description
+///		This function will be replaced by the above function \c reOpen
+///		in future releases.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void H5File::reopen()
+{
+   H5File::reOpen();
 }
 
 //--------------------------------------------------------------------------
@@ -421,8 +432,7 @@ string H5File::getFileName() const
 ///\return	A reference
 ///\exception	H5::ReferenceIException
 ///\par Description
-///		Note that, for H5File, name must be an absolute path to the 
-///		object in the file.
+///		Note that name must be an absolute path to the object in the file.
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* H5File::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const

@@ -25,14 +25,8 @@ class H5_DLLCPP DataType : public H5Object {
 	// Creates a datatype given its class and size
 	DataType( const H5T_class_t type_class, size_t size );
 
-	// Copy constructor: makes a copy of the original object
-	DataType( const DataType& original );
-
 	// Copies an existing datatype to this datatype object
 	void copy( const DataType& like_type );
-
-	// Returns the datatype class identifier. 
-	H5T_class_t getClass() const;
 
 	// Commits a transient datatype to a file; this datatype becomes 
 	// a named datatype which can be accessed from the location.
@@ -43,27 +37,24 @@ class H5_DLLCPP DataType : public H5Object {
 	// a transient datatype. 
 	bool committed() const;
 
+	// Converts data from between specified datatypes. 
+	void convert( const DataType& dest, hsize_t nelmts, void *buf, void *background, PropList& plist ) const;
+
+	// Checks whether this datatype contains (or is) a certain type class.
+	bool detectClass(H5T_class_t cls) const;
+
         // Finds a conversion function that can handle the conversion 
         // this datatype to the given datatype, dest.
 	H5T_conv_t find( const DataType& dest, H5T_cdata_t **pcdata ) const;
 
-	// Converts data from between specified datatypes. 
-	void convert( const DataType& dest, hsize_t nelmts, void *buf, void *background, PropList& plist ) const;
-
-	// Sets the overflow handler to a specified function. 
-	void setOverflow(H5T_overflow_t func) const;
+	// Returns the datatype class identifier. 
+	H5T_class_t getClass() const;
 
 	// Returns a pointer to the current global overflow function. 
 	H5T_overflow_t getOverflow(void) const;
 
-	// Assignment operator
-	DataType& operator=( const DataType& rhs );
-
-	// Determines whether two datatypes are the same.
-	bool operator==(const DataType& compared_type ) const;
-
-	// Locks a datatype. 
-	void lock() const;
+	// Sets the overflow handler to a specified function. 
+	void setOverflow(H5T_overflow_t func) const;
 
 	// Returns the size of a datatype. 
 	size_t getSize() const;
@@ -71,6 +62,25 @@ class H5_DLLCPP DataType : public H5Object {
 	// Returns the base datatype from which a datatype is derived. 
 	// Note: not quite right for specific types yet???
 	DataType getSuper() const;
+
+	// Gets the tag associated with an opaque datatype. 
+	string getTag() const;
+
+	// Tags an opaque datatype. 
+	void setTag( const string& tag ) const;
+	void setTag( const char* tag ) const;
+
+	// Checks whether this datatype is a variable-length string.
+	bool isVariableStr() const;
+
+	// Locks a datatype. 
+	void lock() const;
+
+	// Assignment operator
+	DataType& operator=( const DataType& rhs );
+
+	// Determines whether two datatypes are the same.
+	bool operator==(const DataType& compared_type ) const;
 
 	// Registers a conversion function. 
 	void registerFunc(H5T_pers_t pers, const string& name, const DataType& dest, H5T_conv_t func ) const;
@@ -80,36 +90,18 @@ class H5_DLLCPP DataType : public H5Object {
 	void unregister( H5T_pers_t pers, const string& name, const DataType& dest, H5T_conv_t func ) const;
 	void unregister( H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func ) const;
 
-	// Tags an opaque datatype. 
-	void setTag( const string& tag ) const;
-	void setTag( const char* tag ) const;
-
-	// Gets the tag associated with an opaque datatype. 
-	string getTag() const;
-
-	// Checks whether this datatype contains (or is) a certain type class.
-	bool detectClass(H5T_class_t cls) const;
-
-	// Checks whether this datatype is a variable-length string.
-	bool isVariableStr() const;
-
-	// Creates a reference to a named Hdf5 object in this object.
-	void* Reference(const char* name) const;
-
-	// Creates a reference to a named Hdf5 object or to a dataset region
-	// in this object.
-	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
-
 	// Retrieves the type of object that an object reference points to.
 	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type) const;
 
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 	
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-	// Used by the API to appropriately close a datatype
-        void p_close() const;
-#endif // DOXYGEN_SHOULD_SKIP_THIS
+	// Creates a reference to a named Hdf5 object or to a dataset region
+	// in this object.
+	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+
+	// Creates a reference to a named Hdf5 object in this object.
+	void* Reference(const char* name) const;
 
 	// Creates a copy of an existing DataType using its id 
 	DataType( const hid_t type_id, bool predtype = false );
@@ -117,6 +109,15 @@ class H5_DLLCPP DataType : public H5Object {
 	// Default constructor
 	DataType();
 
+	// Copy constructor: makes a copy of the original object
+	DataType( const DataType& original );
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+	// Used by the API to appropriately close a datatype
+        void p_close() const;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
+	// Destructor: properly terminates access to this datatype.
 	virtual ~DataType();
 
    protected:

@@ -23,58 +23,59 @@ namespace H5 {
 // class for file access properties
 class H5_DLLCPP FileCreatPropList : public PropList {
    public:
+	// Default file creation property list.
 	static const FileCreatPropList DEFAULT;
 	
-	// Creates a file create property list.
+	// Creates a file creation property list.
 	FileCreatPropList();
 
-	// Copy constructor: creates a copy of a FileCreatPropList object
-	FileCreatPropList( const FileCreatPropList& orig );
-
-	// Retrieves version information for various parts of a file.
-	void getVersion( int& boot, int& freelist, int& stab, int& shhdr ) const;
-
-	// Sets the userblock size field of a file creation property list.
-	void setUserblock( hsize_t size ) const;
-
-	// Gets the size of a user block in this file creation property list.
-	hsize_t getUserblock() const;
-
-	// Sets file size-of addresses and sizes.
-	void setSizes( size_t sizeof_addr = 4, size_t sizeof_size = 4 ) const;
-
-	// Retrieves the size-of address and size quantities stored in a 
-	// file according to this file creation property list.
-	void getSizes( size_t& sizeof_addr, size_t& sizeof_size ) const;
-
-#ifdef H5_WANT_H5_V1_4_COMPAT
-	// Sets the size of parameters used to control the symbol table nodes.
-	void setSymk( int int_nodes_k, int leaf_nodes_k ) const;
-
-	// Retrieves the size of the symbol table B-tree 1/2 rank and the
-	// symbol table leaf node 1/2 size.
-	void getSymk( int& int_nodes_k, int& leaf_nodes_k ) const;
-#else /* H5_WANT_H5_V1_4_COMPAT */
-	// Sets the size of parameters used to control the symbol table nodes.
-	void setSymk( int int_nodes_k, unsigned leaf_nodes_k ) const;
-
-	// Retrieves the size of the symbol table B-tree 1/2 rank and the
-	// symbol table leaf node 1/2 size.
-	void getSymk( int& int_nodes_k, unsigned& leaf_nodes_k ) const;
-#endif /* H5_WANT_H5_V1_4_COMPAT */
+	// Returns the 1/2 rank of an indexed storage B-tree.
+	int getIstorek() const;
 
 	// Sets the size of parameter used to control the B-trees for
 	// indexing chunked datasets.
 	void setIstorek( int ik ) const;
 
-	// Returns the 1/2 rank of an indexed storage B-tree.
-	int getIstorek() const;
+	// Retrieves the size-of address and size quantities stored in a 
+	// file according to this file creation property list.
+	void getSizes( size_t& sizeof_addr, size_t& sizeof_size ) const;
+
+	// Sets file size-of addresses and sizes.
+	void setSizes( size_t sizeof_addr = 4, size_t sizeof_size = 4 ) const;
+
+#ifdef H5_WANT_H5_V1_4_COMPAT
+	// Retrieves the size of the symbol table B-tree 1/2 rank and the
+	// symbol table leaf node 1/2 size.
+	void getSymk( int& int_nodes_k, int& leaf_nodes_k ) const;
+
+	// Sets the size of parameters used to control the symbol table nodes.
+	void setSymk( int int_nodes_k, int leaf_nodes_k ) const;
+#else /* H5_WANT_H5_V1_4_COMPAT */
+	// Retrieves the size of the symbol table B-tree 1/2 rank and the
+	// symbol table leaf node 1/2 size.
+	void getSymk( int& int_nodes_k, unsigned& leaf_nodes_k ) const;
+
+	// Sets the size of parameters used to control the symbol table nodes.
+	void setSymk( int int_nodes_k, unsigned leaf_nodes_k ) const;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
+
+	// Gets the size of a user block in this file creation property list.
+	hsize_t getUserblock() const;
+
+	// Sets the userblock size field of a file creation property list.
+	void setUserblock( hsize_t size ) const;
+
+	// Retrieves version information for various parts of a file.
+	void getVersion( int& boot, int& freelist, int& stab, int& shhdr ) const;
+
+	// Copy constructor: creates a copy of a FileCreatPropList object
+	FileCreatPropList(const FileCreatPropList& orig);
 
 	// Creates a copy of an existing file create property list
 	// using the property list id
-	FileCreatPropList (const hid_t plist_id) : PropList( plist_id ) {}
+	FileCreatPropList (const hid_t plist_id);
 
-	// Default destructor
+	// Noop destructor.
 	virtual ~FileCreatPropList();
 };
 #ifndef H5_NO_NAMESPACE

@@ -26,27 +26,37 @@ namespace H5 {
 #endif
 
 //--------------------------------------------------------------------------
-///\brief	Constant for default property
+///\brief	Constant for default dataset memory and transfer property list.
 //--------------------------------------------------------------------------
 const DSetMemXferPropList DSetMemXferPropList::DEFAULT( H5P_DEFAULT );
 
 //--------------------------------------------------------------------------
 // Function     Default constructor
-///\brief	Default constructor - Creates a stub dataset memory and
+///\brief	Default constructor: creates a stub dataset memory and
 ///		transfer property list object.
-// Programmer:  Binh-Minh Ribler
+// Programmer:  Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DSetMemXferPropList::DSetMemXferPropList() : PropList(H5P_DATASET_XFER) {}
 
 //--------------------------------------------------------------------------
-// Function     Copy constructor
-///\brief	Copy constructor - makes a copy of the original
+// Function     DSetMemXferPropList copy constructor
+///\brief	Copy constructor: makes a copy of the original
 ///		DSetMemXferPropList object
 ///\param       original - IN: Original dataset memory and transfer property
 ///				list object to copy
-// Programmer:  Binh-Minh Ribler
+// Programmer:  Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetMemXferPropList::DSetMemXferPropList( const DSetMemXferPropList& original ) : PropList( original ) {}
+DSetMemXferPropList::DSetMemXferPropList(const DSetMemXferPropList& original) : PropList(original) {}
+
+//--------------------------------------------------------------------------
+// Function     DSetMemXferPropList overloaded constructor
+///\brief	Creates a DSetMemXferPropList object using the id of an
+///		existing DSetMemXferPropList.
+///\param       plist_id - IN: Id of an existing dataset memory and transfer 
+///				property list
+// Programmer:  Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+DSetMemXferPropList::DSetMemXferPropList(const hid_t plist_id) : PropList(plist_id) {}
 
 #ifdef H5_WANT_H5_V1_4_COMPAT
 //--------------------------------------------------------------------------

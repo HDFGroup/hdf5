@@ -31,22 +31,22 @@ namespace H5 {
 #endif
 
 //--------------------------------------------------------------------------
-///\brief	Constant for default property
+///\brief	Constant for default property.
 //--------------------------------------------------------------------------
 const PropList PropList::DEFAULT( H5P_DEFAULT );
 
 //--------------------------------------------------------------------------
 // Function     Default constructor
-///\brief       Default constructor - Creates a stub property list object.
-///\par Description
-///             The id of this property list is set to 0.
+///\brief       Default constructor: creates a stub property list object.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PropList::PropList() : IdComponent( 0 ) {}
+PropList::PropList() : IdComponent(0) {}
 
 //--------------------------------------------------------------------------
 // Function:    PropList copy constructor
 ///\brief       Copy constructor
 ///\param       original - IN: The original property list to copy
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PropList::PropList( const PropList& original ) : IdComponent( original ) {}
 
@@ -62,6 +62,7 @@ PropList::PropList( const PropList& original ) : IdComponent( original ) {}
 //              property's id to H5P_DEFAULT, otherwise, to the given id.
 //              Note: someone else added this code without comments and this
 //              description was what I came up with from reading the code.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PropList::PropList( const hid_t plist_id ) : IdComponent(0)
 {
@@ -86,6 +87,7 @@ PropList::PropList( const hid_t plist_id ) : IdComponent(0)
 ///\brief       Makes a copy of an existing property list
 ///\param       like_plist - IN: Reference to the existing property list
 ///\exception   H5::PropListIException
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void PropList::copy( const PropList& like_plist )
 {
@@ -111,12 +113,14 @@ void PropList::copy( const PropList& like_plist )
 
 //--------------------------------------------------------------------------
 // Function:    PropList::operator=
-///\brief       Assignment operator
+///\brief       Assignment operator.
 ///\param       rhs - IN: Reference to the existing property list
-///
+///\return	Reference to PropList instance
+///\exception   H5::PropListIException
 // Description
 //              Makes a copy of the property list on the right hand side
 //              and stores the new id in the left hand side object.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 PropList& PropList::operator=( const PropList& rhs )
 {
@@ -126,10 +130,12 @@ PropList& PropList::operator=( const PropList& rhs )
 
 //--------------------------------------------------------------------------
 // Function:    PropList::copyProp
-///\brief       Copies a property from one list or class to another
+///\brief       Copies a property from one list or class to another.
 ///\param       dest - IN: Destination property list or class
 ///\param       src  - IN: Source property list or class
 ///\param       name - IN: Name of the property to copy - \c char pointer
+///\exception   H5::PropListIException
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void PropList::copyProp( PropList& dest, PropList& src, const char *name ) const
 {
@@ -149,6 +155,8 @@ void PropList::copyProp( PropList& dest, PropList& src, const char *name ) const
 ///\param       dest - IN: Destination property list or class
 ///\param       src  - IN: Source property list or class
 ///\param       name - IN: Name of the property to copy - \c std::string
+///\exception   H5::PropListIException
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void PropList::copyProp( PropList& dest, PropList& src, const string& name ) const
 {
@@ -183,6 +191,7 @@ void PropList::p_close() const
 ///\brief       Returns the class of this property list, i.e. \c H5P_FILE_CREATE...
 ///\return      The property list class if it is not equal to \c H5P_NO_CLASS
 ///\exception   H5::PropListIException
+// Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 hid_t PropList::getClass() const
 {
@@ -478,7 +487,7 @@ void PropList::setProperty(const string& name, string& strg) const
 
 //--------------------------------------------------------------------------
 // Function:	PropList::isAClass
-///\brief	Determines whether a property list is a certain class
+///\brief	Determines whether a property list is a certain class.
 ///\param	prop_class - IN: Property class to query
 ///\return	true if the property list is a member of the property list 
 ///		class, and false, otherwise.
@@ -501,7 +510,7 @@ bool PropList::isAClass(const PropList& prop_class) const
 
 //--------------------------------------------------------------------------
 // Function:	PropList::removeProp
-///\brief	Removes a property from a property list
+///\brief	Removes a property from a property list.
 ///\param	name - IN: Name of property to remove - \c char pointer
 ///\exception	H5::PropListIException
 // Programmer:  Binh-Minh Ribler - April, 2004

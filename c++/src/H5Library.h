@@ -20,7 +20,9 @@
 namespace H5 {
 #endif
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 #define NOTATEXIT       (-10)   // just in case the HDF5 library use more
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 	// negative constants. Note: the solution used for the atexit/global
 	// destructors is not reliable, and desperately needs improvement 
 	// It is not even working, inifiteloop message still printed when

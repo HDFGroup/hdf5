@@ -27,21 +27,15 @@ namespace H5 {
 
 class H5_DLLCPP Exception {
    public:
-	// Default constructor
-	Exception();
-
 	// Creates an exception with a function name where the failure occurs
 	// and an optional detailed message
 	Exception(const string func_name, const string message = DEFAULT_MSG);
 
-	// copy constructor
-	Exception( const Exception& orig);
-
-	// Returns the character string that describes an error specified by
+	// Returns a character string that describes the error specified by
 	// a major error number.
 	string getMajorString( H5E_major_t major_num ) const;
 
-	// Returns the character string that describes an error specified by
+	// Returns a character string that describes the error specified by
 	// a minor error number.
 	string getMinorString( H5E_minor_t minor_num ) const;
 
@@ -72,6 +66,12 @@ class H5_DLLCPP Exception {
 	// Prints the error stack in a default manner.
 	virtual void printError( FILE* stream = NULL ) const;
 
+	// Default constructor
+	Exception();
+
+	// copy constructor
+	Exception( const Exception& orig);
+
 	// virtual Destructor
 	virtual ~Exception();
 
@@ -92,71 +92,71 @@ class H5_DLLCPP Exception {
 
 class H5_DLLCPP FileIException : public Exception {
    public:
-	FileIException();
 	FileIException( const string func_name, const string message = DEFAULT_MSG);
+	FileIException();
 	virtual ~FileIException();
 };
 
 class H5_DLLCPP GroupIException : public Exception {
    public:
-	GroupIException();
 	GroupIException( const string func_name, const string message = DEFAULT_MSG);
+	GroupIException();
 	virtual ~GroupIException();
 };
 
 class H5_DLLCPP DataSpaceIException : public Exception {
    public:
-	DataSpaceIException();
 	DataSpaceIException(const string func_name, const string message = DEFAULT_MSG);
+	DataSpaceIException();
 	virtual ~DataSpaceIException();
 };
 
 class H5_DLLCPP DataTypeIException : public Exception {
    public:
-	DataTypeIException();
 	DataTypeIException(const string func_name, const string message = DEFAULT_MSG);
+	DataTypeIException();
 	virtual ~DataTypeIException();
 };
 
 class H5_DLLCPP PropListIException : public Exception {
    public:
-	PropListIException();
 	PropListIException(const string func_name, const string message = DEFAULT_MSG);
+	PropListIException();
 	virtual ~PropListIException();
 };
 
 class H5_DLLCPP DataSetIException : public Exception {
    public:
-	DataSetIException();
 	DataSetIException(const string func_name, const string message = DEFAULT_MSG);
+	DataSetIException();
 	virtual ~DataSetIException();
 };
 
 class H5_DLLCPP AttributeIException : public Exception {
    public:
-	AttributeIException();
 	AttributeIException(const string func_name, const string message = DEFAULT_MSG);
+	AttributeIException();
 	virtual ~AttributeIException();
 };
 
 class H5_DLLCPP ReferenceException : public Exception {
    public:
-	ReferenceException();
 	ReferenceException(const string func_name, const string message = DEFAULT_MSG);
+	ReferenceException();
 	virtual ~ReferenceException();
 };
 
 class H5_DLLCPP LibraryIException : public Exception {
    public:
-	LibraryIException();
 	LibraryIException(const string func_name, const string message = DEFAULT_MSG);
+	LibraryIException();
 	virtual ~LibraryIException();
 };
 
 class H5_DLLCPP IdComponentException : public Exception {
    public:
-	IdComponentException();
 	IdComponentException(const string func_name, const string message = DEFAULT_MSG);
+	IdComponentException();
 	virtual ~IdComponentException();
 };
 

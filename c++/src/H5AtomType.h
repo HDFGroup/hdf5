@@ -26,20 +26,11 @@ namespace H5 {
 #endif
 class H5_DLLCPP AtomType : public DataType {
    public:
-	// Sets the total size for an atomic datatype. 
-	void setSize( size_t size ) const;
-
 	// Returns the byte order of an atomic datatype. 
 	H5T_order_t getOrder( string& order_string ) const;
 
 	// Sets the byte ordering of an atomic datatype. 
 	void setOrder( H5T_order_t order ) const;
-
-	// Returns the precision of an atomic datatype. 
-	size_t getPrecision() const;
-
-	// Sets the precision of an atomic datatype. 
-	void setPrecision( size_t precision ) const;
 
 	// Retrieves the bit offset of the first significant bit. 
 	// 12/05/00 - changed return type to int from size_t - C API
@@ -54,6 +45,15 @@ class H5_DLLCPP AtomType : public DataType {
 	// Sets the least and most-significant bits padding types
 	void setPad( H5T_pad_t lsb, H5T_pad_t msb ) const;
 
+	// Returns the precision of an atomic datatype. 
+	size_t getPrecision() const;
+
+	// Sets the precision of an atomic datatype. 
+	void setPrecision( size_t precision ) const;
+
+	// Sets the total size for an atomic datatype. 
+	void setSize( size_t size ) const;
+
 	// Copy constructor - makes copy of the original object
 	AtomType( const AtomType& original );
 
@@ -61,11 +61,13 @@ class H5_DLLCPP AtomType : public DataType {
 	virtual ~AtomType();
 
    protected:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Default constructor
 	AtomType();
 
 	// Constructor that takes an existing id
 	AtomType( const hid_t existing_id );
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 };
 #ifndef H5_NO_NAMESPACE
 }

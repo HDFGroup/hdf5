@@ -21,25 +21,11 @@ namespace H5 {
 #endif
 class H5_DLLCPP IntType : public AtomType {
    public:
-
-	// default constructor
-	IntType();
-
-	// Creates a integer datatype using an existing id
-	IntType( const hid_t existing_id );
-
 	// Creates a integer type using a predefined type
-	IntType( const PredType& pred_type );
-
-	// Copy constructor: makes copy of IntType object
-	IntType( const IntType& original );
+	IntType(const PredType& pred_type);
 
 	// Gets the integer datatype of the specified dataset
-	IntType( const DataSet& dataset );
-
-	// Assignment operator that takes a predefined type
-	// may not use - BMR
-	// virtual IntType& operator=( const PredType& rhs );
+	IntType(const DataSet& dataset);
 
 	// Retrieves the sign type for an integer type
 	H5T_sign_t getSign() const;
@@ -47,6 +33,16 @@ class H5_DLLCPP IntType : public AtomType {
 	// Sets the sign proprety for an integer type. 
 	void setSign( H5T_sign_t sign ) const;
 
+	// Default constructor
+	IntType();
+
+	// Creates a integer datatype using an existing id
+	IntType(const hid_t existing_id);
+
+	// Copy constructor: makes copy of IntType object
+	IntType(const IntType& original);
+
+	// Noop destructor.
 	virtual ~IntType();
 };
 #ifndef H5_NO_NAMESPACE

@@ -20,3 +20,18 @@
 // by #include <hdf5.h>, but decide not to. BMR - 3/22/01
 
 #include <hdf5.h>
+
+// Define bool type for platforms that don't support bool yet
+#ifdef BOOL_NOTDEFINED
+#ifdef false
+#undef false
+#endif
+#ifdef true
+#undef true
+#endif
+typedef int bool;
+const bool  false = 0;
+const bool  true  = 1;
+#endif
+
+

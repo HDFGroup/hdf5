@@ -26,17 +26,6 @@ namespace H5 {
 #endif
 
 //--------------------------------------------------------------------------
-// Function:	IdComponent default constructor - private
-///\brief	Default constructor.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-IdComponent::IdComponent() : id( -1 )
-{
-   // starts counting object references
-   ref_count = new RefCounter;
-}
-
-//--------------------------------------------------------------------------
 // Function:	IdComponent overloaded constructor
 ///\brief	Creates an IdComponent object using the id of an existing object.
 ///\param	h5_id - IN: Id of an existing object
@@ -64,14 +53,14 @@ IdComponent::IdComponent( const IdComponent& original )
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::incRefCount
-///\brief	Increment id reference counter.
+///\brief	Increments id reference counter.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void IdComponent::incRefCount() { ref_count->increment(); }
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::decRefCount
-///\brief	Decrement id reference counter.
+///\brief	Decrements id reference counter.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void IdComponent::decRefCount() { ref_count->decrement(); }
@@ -140,11 +129,13 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 ///\brief	Sets the identifier of this object to a new value.
 ///\exception	H5::IdComponentException when the attempt to close the HDF5
 ///             object fails
-// Description:
-//		Reset the current id of this object so that the HDF5
-//		id can be appropriately closed.  If only this object references
-//		its id, its reference counter will be deleted.  A new
-//		reference counter is created for the new HDF5 object id.
+///\par Description:
+///		The calling routine must reset the id of this object by
+///		calling resetIdComponent and passing in the "this" pointer.
+///		resetIdComponent ensures that the HDF5 id will be 
+///		appropriately closed.  If only this object references its 
+///		id, its reference counter will be deleted.  A new reference 
+///		counter is created for the new HDF5 object id.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void IdComponent::setId( hid_t new_id )
@@ -164,8 +155,8 @@ void IdComponent::setId( hid_t new_id )
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::getId
-///\brief	Returns the id of this object
-///\return	HDF5 id
+///\brief	Returns the id of this object.
+///\return	HDF5 object id
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 hid_t IdComponent::getId () const
@@ -173,7 +164,12 @@ hid_t IdComponent::getId () const
    return( id );
 }
 
-// Reset this object by deleting its RefCounter
+//--------------------------------------------------------------------------
+// Function:	IdComponent::reset
+///\brief	Reset this object by deleting/resetting its reference counter.
+///\return	HDF5 object id
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void IdComponent::reset ()
 {
    delete ref_count;
@@ -324,6 +320,18 @@ hid_t IdComponent::p_get_region(void *ref, H5R_type_t ref_type) const
    }
    return(space_id);
 }
+
+//--------------------------------------------------------------------------
+// Function:	IdComponent default constructor - private
+///\brief	Default constructor.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+IdComponent::IdComponent() : id(-1)
+{
+   // starts counting object references
+   ref_count = new RefCounter;
+}
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef H5_NO_NAMESPACE

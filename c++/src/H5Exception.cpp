@@ -37,7 +37,6 @@ Exception::Exception() : detail_message(""), func_name("") {}
 ///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
-///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Exception::Exception(const string func_name, const string message) : detail_message(message), func_name(func_name) {}
@@ -56,9 +55,10 @@ Exception::Exception( const Exception& orig )
 
 //--------------------------------------------------------------------------
 // Function:	Exception::getMajorString
-///\brief	Returns the text string that describes an error
+///\brief	Returns a text string that describes the error
 ///		specified by a major error number.
 ///\param	err_major - IN: Major error number
+///\return	Major error string
 ///\par Description
 ///		In the failure case, the string "Invalid major error number"
 ///		will be returned.
@@ -74,9 +74,10 @@ string Exception::getMajorString(H5E_major_t err_major) const
 
 //--------------------------------------------------------------------------
 // Function:	Exception::getMinorString
-///\brief	Returns the text string that describes an error
+///\brief	Returns a text string that describes the error
 ///		specified by a minor error number.
 ///\param	err_minor - IN: Minor error number
+///\return	Minor error string
 ///\par Description
 ///		In the failure case, the string "Invalid minor error number"
 ///		will be returned.
@@ -97,9 +98,10 @@ string Exception::getMinorString(H5E_minor_t err_minor) const
 ///\param	client_data - IN: Data passed to the error function
 ///\par Description
 ///		When the library is first initialized the auto printing
-///		function is set to the C API \c H5Eprint and \a client_data is
-///		the standard error stream pointer, \c stderr.  Automatic stack
-///		traversal is always in the \c H5E_WALK_DOWNWARD direction.
+///		function, \a func, is set to the C API \c H5Eprint and 
+///		\a client_data is the standard error stream pointer, \c stderr.
+///		Automatic stack traversal is always in the \c H5E_WALK_DOWNWARD
+///		direction.
 ///\par
 ///		Users are encouraged to write their own more specific error
 ///		handlers
@@ -116,7 +118,7 @@ void Exception::setAutoPrint( H5E_auto_t& func, void* client_data )
 
 //--------------------------------------------------------------------------
 // Function:	Exception::dontPrint
-///\brief	Turns off the automatic error printing.
+///\brief	Turns off the automatic error printing from the C library.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void Exception::dontPrint()
@@ -132,16 +134,10 @@ void Exception::dontPrint()
 // Function:	Exception::getAutoPrint
 ///\brief	Retrieves the current settings for the automatic error
 ///		stack traversal function and its data.
-///\param	func        - IN: Function to be called upon an error condition
-///\param	client_data - IN: Data passed to the error function
-///\par Description
-///		When the library is first initialized the auto printing
-///		function is set to the C API \c H5Eprint and \a client_data is
-///		the standard error stream pointer, \c stderr.  Automatic stack
-///		traversal is always in the \c H5E_WALK_DOWNWARD direction.
-///\par
-///		Users are encouraged to write their own more specific error
-///		handlers
+///\param	func        - OUT: Current setting for the function to be 
+///					called upon an error condition
+///\param	client_data - OUT: Current setting for the data passed to 
+///					the error function
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void Exception::getAutoPrint( H5E_auto_t& func, void** client_data )
@@ -158,7 +154,7 @@ void Exception::getAutoPrint( H5E_auto_t& func, void** client_data )
 ///\brief	Clears the error stack for the current thread.
 ///\par Description
 ///		The stack is also cleared whenever a C API function is
-///		called, with certain exceptions (for instance, H5Eprint).
+///		called, with certain exceptions (for instance, \c H5Eprint).
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void Exception::clearErrorStack()

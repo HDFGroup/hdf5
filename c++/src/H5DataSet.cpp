@@ -41,7 +41,7 @@ namespace H5 {
 
 //--------------------------------------------------------------------------
 // Function:	DataSet default constructor
-///\brief	Default constructor: Creates a stub dataset.
+///\brief	Default constructor: creates a stub DataSet.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DataSet::DataSet() : AbstractDs() {}

@@ -25,19 +25,6 @@ namespace H5 {
 
 class H5_DLLCPP IdComponent {
    public:
-	// Parent classes must reset the current IdComponent copy
-	// before setting new id to control reference count
-	void setId( hid_t new_id );
-
-	// Creates an object to hold an HDF5 identifier
-	IdComponent( const hid_t h5_id );
-
-	// Copy constructor: makes copy of the original IdComponent object.
-	IdComponent( const IdComponent& original );
-
-	// Gets the value of IdComponent's data member
-	virtual hid_t getId () const;
-
 	// Increment reference counter
 	void incRefCount();
 
@@ -56,6 +43,18 @@ class H5_DLLCPP IdComponent {
 
 	void reset();
 
+	// Sets the identifier of this object to a new value.
+	void setId( hid_t new_id );
+
+	// Creates an object to hold an HDF5 identifier
+	IdComponent( const hid_t h5_id );
+
+	// Copy constructor: makes copy of the original IdComponent object.
+	IdComponent( const IdComponent& original );
+
+	// Gets the value of IdComponent's data member
+	virtual hid_t getId () const;
+
 	// Pure virtual function so appropriate close function can
 	// be called by subclasses' for the corresponding object
 	// This function will be obsolete because its functionality
@@ -73,7 +72,7 @@ class H5_DLLCPP IdComponent {
 	RefCounter* ref_count; // used to keep track of the
 	                              // number of copies of an object
 
-	// Default constructor
+	// Default constructor.
 	IdComponent();
 
 	// Gets the name of the file, in which an HDF5 object belongs.

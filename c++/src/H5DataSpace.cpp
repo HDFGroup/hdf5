@@ -31,13 +31,13 @@ namespace H5 {
 #endif
 
 //--------------------------------------------------------------------------
-///\brief	Constant for default dataspace
+///\brief	Constant for default dataspace.
 //--------------------------------------------------------------------------
 const DataSpace DataSpace::ALL( H5S_ALL );
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace default constructor
-///\brief	Default constructor: creates a stub dataspace instance.
+///\brief	Default constructor: creates a stub DataSpace.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DataSpace::DataSpace() : IdComponent() {}
@@ -46,7 +46,8 @@ DataSpace::DataSpace() : IdComponent() {}
 // Function:	DataSpace overloaded constructor
 ///\brief	Creates a new dataspace given a dataspace type.
 ///\param	type - IN: Type of the dataspace to be created, which 
-///		currently can be either \c H5S_SCALAR or \c H5S_SIMPLE
+///		currently can be either \c H5S_SCALAR or \c H5S_SIMPLE;
+///		default to \c H5S_SCALAR.
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -79,7 +80,7 @@ DataSpace::DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims) :
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace overloaded constructor
-///\brief	Creates an DataSpace object using the id of an existing 
+///\brief	Creates a DataSpace object using the id of an existing 
 ///		dataspace.
 ///\param	existing_id - IN: Id of an existing dataspace
 ///\exception	H5::DataSpaceIException
@@ -90,7 +91,7 @@ DataSpace::DataSpace(const hid_t existing_id) : IdComponent(existing_id) {}
 //--------------------------------------------------------------------------
 // Function:	DataSpace copy constructor
 ///\brief	Copy constructor: makes a copy of the original DataSpace object.
-///\param	original - IN: DataSpace instance to copy
+///\param	original - IN: DataSpace object to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DataSpace::DataSpace( const DataSpace& original ) : IdComponent( original ) {}
@@ -104,7 +105,7 @@ DataSpace::DataSpace( const DataSpace& original ) : IdComponent( original ) {}
 //--------------------------------------------------------------------------
 void DataSpace::copy( const DataSpace& like_space )
 {
-   // reset the identifier of this instance - send 'this' in so that
+   // reset the identifier of this object - send 'this' in so that
    // H5Sclose can be called appropriately
    try {
       resetIdComponent( this ); }
@@ -205,7 +206,7 @@ int DataSpace::getSimpleExtentDims ( hsize_t *dims, hsize_t *maxdims ) const
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace::getSimpleExtentNdims
-///\brief	Determines the dimensionality of a dataspace.
+///\brief	Returns the dimensionality of a dataspace.
 ///\return	Number of dimensions
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
@@ -223,7 +224,7 @@ int DataSpace::getSimpleExtentNdims () const
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace::getSimpleExtentNpoints
-///\brief	Determines the number of elements in a dataspace.
+///\brief	Returns the number of elements in a dataspace.
 ///\return	Number of elements
 ///\exception	H5::DataSpaceIException
 // Modification
@@ -247,7 +248,7 @@ hssize_t DataSpace::getSimpleExtentNpoints () const
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace::getSimpleExtentType
-///\brief	Determine the current class of a dataspace.
+///\brief	Returns the current class of a dataspace.
 ///\return	Class of the dataspace
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
@@ -398,7 +399,7 @@ hssize_t DataSpace::getSelectElemNpoints () const
 ///\par Description
 ///		For more information, please refer to the C layer Reference
 ///		Manual at:
-/// http:
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5S.html#Dataspace-SelectElemPointList
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSpace::getSelectElemPointlist ( hsize_t startpoint, hsize_t numpoints, hsize_t *buf ) const

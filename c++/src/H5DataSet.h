@@ -24,20 +24,28 @@ namespace H5 {
 
 class H5_DLLCPP DataSet : public AbstractDs {
    public:
-	// Gets the dataspace of this dataset.
-	virtual DataSpace getSpace() const;
+	// Extends the dataset with unlimited dimension.
+	void extend( const hsize_t* size ) const;
+
+	// Fills a selection in memory with a value
+	void fillMemBuf(const void *fill, DataType& fill_type, void *buf, DataType& buf_type, DataSpace& space);
+	// Fills a selection in memory with zero 
+	void fillMemBuf(void *buf, DataType& buf_type, DataSpace& space);
 
 	// Gets the creation property list of this dataset.
 	DSetCreatPropList getCreatePlist() const;
 
-	// Gets the storage size of this dataset.
-	hsize_t getStorageSize() const;
-
 	// Returns the address of this dataset in the file.
 	haddr_t getOffset() const;
 	
+	// Gets the dataspace of this dataset.
+	virtual DataSpace getSpace() const;
+
 	// Determines whether space has been allocated for a dataset.
 	void getSpaceStatus(H5D_space_status_t& status) const;
+
+	// Gets the storage size of this dataset.
+	hsize_t getStorageSize() const;
 
 	// not yet implemented??
 	hsize_t getVlenBufSize( DataType& type, DataSpace& space ) const;
@@ -58,26 +66,18 @@ class H5_DLLCPP DataSet : public AbstractDs {
 	// Iterates the selected elements in the specified dataspace - not implemented in C++ style yet
         int iterateElems( void* buf, const DataType& type, const DataSpace& space, H5D_operator_t op, void* op_data = NULL );
 
-	// Extends the dataset with unlimited dimension.
-	void extend( const hsize_t* size ) const;
-
-	// Fills a selection in memory with a value
-	void fillMemBuf(const void *fill, DataType& fill_type, void *buf, DataType& buf_type, DataSpace& space);
-	// Fills a selection in memory with zero 
-	void fillMemBuf(void *buf, DataType& buf_type, DataSpace& space);
-
-	// Creates a reference to a named Hdf5 object in this object.
-	void* Reference(const char* name) const;
-
-	// Creates a reference to a named Hdf5 object or to a dataset region
-	// in this object.
-	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
-
 	// Retrieves the type of object that an object reference points to.
 	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type) const;
 
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+
+	// Creates a reference to a named Hdf5 object or to a dataset region
+	// in this object.
+	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+
+	// Creates a reference to a named Hdf5 object in this object.
+	void* Reference(const char* name) const;
 
 	// Creates a copy of an existing DataSet using its id.
 	DataSet(const hid_t existing_id);
@@ -93,6 +93,7 @@ class H5_DLLCPP DataSet : public AbstractDs {
 	// Copy constructor.
 	DataSet( const DataSet& original );
 
+	// Destructor: properly terminates access to this dataset.
 	virtual ~DataSet();
 
    private:

@@ -20,22 +20,6 @@
 namespace H5 {
 #endif
 
-// define bool type for platforms that don't support bool yet
-// Note: it is added here because most of the C++ library source
-// files include this header file
-#ifdef BOOL_NOTDEFINED
-#ifdef false
-#undef false
-#endif
-#ifdef true
-#undef true
-#endif
-typedef int bool;
-const bool  false = 0;
-const bool  true  = 1;
-
-#endif
-
 class H5_DLLCPP RefCounter {
    public:
 	// Creates a reference counter to be used by an HDF5 object
