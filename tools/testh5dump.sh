@@ -1,8 +1,13 @@
-#!/bin/sh
+#! /bin/sh
+# 
+#  Copyright (C) 1998 - 2001
+#      National Center for Supercomputing Applications
+#      All rights reserved.
+#
 # Tests for the h5dump tool
 
-h5tool=h5dump			# The tool name
-h5tool_bin=`pwd`/$h5tool	# The path of the tool binary
+DUMPER=h5dump			# The tool name
+DUMPER_BIN=`pwd`/$DUMPER	# The path of the tool binary
 CMP='cmp -s'
 DIFF='diff -c'
 
@@ -10,17 +15,18 @@ nerrors=0
 verbose=yes
 
 # The build (current) directory might be different than the source directory.
-if test "X$srcdir" = X; then
-    srcdir=.
+if test -z "$srcdir"; then
+   srcdir=.
 fi
+
 mkdir testfiles >/dev/null 2>&1
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
-TESTING()
-{
-    SPACES="                                                               "
-    echo "Testing $* $SPACES" |cut -c1-70 |tr -d '\012'
+#
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
@@ -30,39 +36,37 @@ TESTING()
 # the actual output file is calculated by replacing the `.ddl' with
 # `.out'.  The actual output is not removed if $HDF5_NOCLEANUP has a
 # non-zero value.
-TOOLTEST()
-{
-    expect=$srcdir/testfiles/$1
-    actual="testfiles/`basename $1 .ddl`.out"
-    shift
-    full=`pwd`/$h5tool
+#
+TOOLTEST() {
+   expect=$srcdir/testfiles/$1
+   actual="testfiles/`basename $1 .ddl`.out"
+   shift
 
-    # Run test.
-    TESTING $h5tool $@
-    (
-	echo "#############################"
-	echo "Expected output for '$h5tool $@'" 
-	echo "#############################"
-	cd $srcdir/testfiles
-        $RUNSERIAL $h5tool_bin "$@" 2>/dev/null
-    ) >$actual
+   # Run test.
+   TESTING $DUMPER $@
+
+   (
+      echo "#############################"
+      echo "Expected output for '$DUMPER $@'" 
+      echo "#############################"
+      cd $srcdir/testfiles
+      $RUNSERIAL $DUMPER_BIN "$@" 2>&1
+   ) >$actual
     
-    if $CMP $expect $actual; then
-	echo " PASSED"
-    else
-	echo "*FAILED*"
-	echo "    Expected result (*.ddl) differs from actual result (*.out)"
-	nerrors="`expr $nerrors + 1`"
-	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
-    fi
+   if $CMP $expect $actual; then
+      echo " PASSED"
+   else
+      echo "*FAILED*"
+      echo "    Expected result (*.ddl) differs from actual result (*.out)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+   fi
 
-    # Clean up output file
-    if [ X = ${HDF5_NOCLEANUP:-X} ]; then
-	rm -f $actual
-    fi
+   # Clean up output file
+   if test -z "$HDF5_NOCLEANUP"; then
+      rm -f $actual
+   fi
 }
-
-
 
 ##############################################################################
 ##############################################################################
@@ -73,7 +77,7 @@ TOOLTEST()
 # test for displaying groups
 TOOLTEST tgroup-1.ddl tgroup.h5
 # test for displaying the selected groups
-TOOLTEST tgroup-2.ddl -g /g2 -g / -g /y tgroup.h5
+TOOLTEST tgroup-2.ddl --group=/g2 --group / -g /y tgroup.h5
 
 # test for displaying simple space datasets
 TOOLTEST tdset-1.ddl tdset.h5
@@ -83,9 +87,9 @@ TOOLTEST tdset-2.ddl -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5
 # test for displaying attributes
 TOOLTEST tattr-1.ddl tattr.h5
 # test for displaying the selected attributes of string type and scalar space
-TOOLTEST tattr-2.ddl -a attr1 --attribute attr4 --attribute=attr5 tattr.h5
+TOOLTEST tattr-2.ddl -a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5
 # test for header and error messages
-TOOLTEST tattr-3.ddl --header -a attr2 --attribute=attr tattr.h5
+TOOLTEST tattr-3.ddl --header -a /attr2 --attribute=/attr tattr.h5
 
 # test for displaying soft links
 TOOLTEST tslink-1.ddl tslink.h5
@@ -187,7 +191,7 @@ TOOLTEST tsaf.h5.xml --xml tsaf.h5
 TOOLTEST tempty.h5.xml --xml tempty.h5
 
 if test $nerrors -eq 0 ; then
-	echo "All $h5tool tests passed."
+   echo "All $DUMPER tests passed."
 fi
 
 exit $nerrors
