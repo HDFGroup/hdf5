@@ -61,7 +61,7 @@ class H5_DLLCPP AbstractDs : public H5Object {
 
    private:
 	// This member function is implemented by DataSet and Attribute
-	virtual hid_t p_getType() const = 0;
+	virtual hid_t p_get_type() const = 0;
 
 	// This member function is implemented by DataSet and Attribute
         virtual void p_close() const = 0;

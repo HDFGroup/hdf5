@@ -455,13 +455,13 @@ void* H5File::Reference(const char* name) const
 //--------------------------------------------------------------------------
 // Function:	H5File::getObjType
 ///\brief	Retrieves the type of object that an object reference points to.
-///\param		ref      - IN: Reference to query
-///\param		ref_type - IN: Type of reference to query
+///\param	ref      - IN: Reference to query
+///\param	ref_type - IN: Type of reference to query
 ///\return	Object type, which can be one of the following:
-///			\li \c H5G_LINK Object is a symbolic link.  
-///			\li \c H5G_GROUP Object is a group.  
-///			\li \c H5G_DATASET   Object is a dataset.  
-///			\li \c H5G_TYPE Object is a named datatype 
+///		\li \c H5G_LINK    - Object is a symbolic link.  
+///		\li \c H5G_GROUP   - Object is a group.  
+///		\li \c H5G_DATASET - Object is a dataset.  
+///		\li \c H5G_TYPE    - Object is a named datatype 
 ///\exception	H5::ReferenceIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------

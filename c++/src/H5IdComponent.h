@@ -73,7 +73,11 @@ class H5_DLLCPP IdComponent {
 	IdComponent();
 
 	// Gets the name of the file, in which an HDF5 object belongs.
+#ifndef H5_NO_STD
 	std::string p_get_file_name() const;
+#else
+	string p_get_file_name() const;
+#endif  // H5_NO_STD
 
         // Gets the id of the H5 file in which the given object is located.
         hid_t p_get_file_id();

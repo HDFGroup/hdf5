@@ -28,21 +28,6 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	// Copy constructor: makes a copy of the original object
 	Group( const Group& original );
 
-	// Returns the number of objects in the group.
-	hsize_t getNumObjs() const;
-
-	// Retrieves the name of an object in a given group by giving index
-	//ssize_t getObjnameByIdx(hsize_t idx, char *name, size_t size) const;
-	ssize_t getObjnameByIdx(hsize_t idx, string& name, size_t size) const;
-
-        // Returns the type of an object in a given group by giving index;
-        // the overloaded function also provided the object type in text as
-        // "group" for H5G_GROUP
-        // "dataset" for H5G_DATASET
-        // "datatype" for H5G_TYPE
-	int getObjTypeByIdx(hsize_t idx) const;
-	int getObjTypeByIdx(hsize_t idx, string& type_name) const;
-
 	// Creates a reference to a named Hdf5 object in this object.
 	void* Reference(const char* name) const;
 

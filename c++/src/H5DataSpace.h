@@ -26,13 +26,13 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	static const DataSpace ALL;
 
 	// Creates a dataspace object given the space type
-	DataSpace( H5S_class_t type ); // H5Screate
+	DataSpace(H5S_class_t type);
 
 	// Creates a simple dataspace
-	DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims = NULL); // H5Screate_simple
+	DataSpace(int rank, const hsize_t * dims, const hsize_t * maxdims = NULL);
 
 	// Makes copy of an existing dataspace.
-	void copy( const DataSpace& like_space ); // H5Scopy
+	void copy(const DataSpace& like_space);
 
 	// Assignment operator
 	DataSpace& operator=( const DataSpace& rhs );

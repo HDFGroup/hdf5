@@ -165,7 +165,7 @@ DataSpace Attribute::getSpace() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	Attribute::p_getType (private)
+// Function:	Attribute::p_get_type (private)
 // Purpose	Gets the datatype of this attribute.
 // Return	Id of the datatype
 // Exception	H5::AttributeIException
@@ -173,7 +173,7 @@ DataSpace Attribute::getSpace() const
 // 		This private function is used in AbstractDs.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-hid_t Attribute::p_getType() const
+hid_t Attribute::p_get_type() const
 {
    hid_t type_id = H5Aget_type( id );
    if( type_id > 0 )

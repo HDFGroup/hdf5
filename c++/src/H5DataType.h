@@ -36,8 +36,8 @@ class H5_DLLCPP DataType : public H5Object {
 
 	// Commits a transient datatype to a file; this datatype becomes 
 	// a named datatype which can be accessed from the location.
-	void commit( CommonFG& loc, const string& name ) const;
 	void commit( CommonFG& loc, const char* name ) const;
+	void commit( CommonFG& loc, const string& name ) const;
 
 	// Determines whether this datatype is a named datatype or 
 	// a transient datatype. 

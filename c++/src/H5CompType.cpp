@@ -216,7 +216,7 @@ H5T_class_t CompType::getMemberClass( int member_num ) const
 // of the specified member.  It provides the id to construct appropriate
 // sub-types in the functions getMemberXxxType below, where Xxx indicates
 // the sub-types.
-hid_t CompType::p_getMemberType( int member_num ) const
+hid_t CompType::p_get_member_type(int member_num) const
 {
    // get the id of the specified member first
    hid_t member_type_id = H5Tget_member_type( id, member_num );
@@ -224,7 +224,7 @@ hid_t CompType::p_getMemberType( int member_num ) const
       return( member_type_id );
    else
    {
-	// p_getMemberType is private, use caller's function name for api
+	// p_get_member_type is private, use caller's function name for api
       throw DataTypeIException("CompType::getMemberDataType", 
 		"H5Tget_member_type failed");
    }
@@ -241,8 +241,8 @@ hid_t CompType::p_getMemberType( int member_num ) const
 //--------------------------------------------------------------------------
 DataType CompType::getMemberDataType( int member_num ) const
 {
-   DataType datatype( p_getMemberType( member_num )); 
-   return( datatype );
+   DataType datatype(p_get_member_type(member_num)); 
+   return(datatype);
 }
 
 //--------------------------------------------------------------------------
@@ -256,8 +256,8 @@ DataType CompType::getMemberDataType( int member_num ) const
 //--------------------------------------------------------------------------
 EnumType CompType::getMemberEnumType( int member_num ) const
 {
-   EnumType enumtype( p_getMemberType( member_num )); 
-   return( enumtype );
+   EnumType enumtype(p_get_member_type(member_num)); 
+   return(enumtype);
 }
 
 //--------------------------------------------------------------------------
@@ -271,8 +271,8 @@ EnumType CompType::getMemberEnumType( int member_num ) const
 //--------------------------------------------------------------------------
 CompType CompType::getMemberCompType( int member_num ) const
 {
-   CompType comptype( p_getMemberType( member_num )); 
-   return( comptype );
+   CompType comptype(p_get_member_type(member_num)); 
+   return(comptype);
 }
 
 //--------------------------------------------------------------------------
@@ -286,8 +286,8 @@ CompType CompType::getMemberCompType( int member_num ) const
 //--------------------------------------------------------------------------
 IntType CompType::getMemberIntType( int member_num ) const
 {
-   IntType inttype( p_getMemberType( member_num )); 
-   return( inttype );
+   IntType inttype(p_get_member_type(member_num)); 
+   return(inttype);
 }
 
 //--------------------------------------------------------------------------
@@ -301,8 +301,8 @@ IntType CompType::getMemberIntType( int member_num ) const
 //--------------------------------------------------------------------------
 FloatType CompType::getMemberFloatType( int member_num ) const
 {
-   FloatType floatype( p_getMemberType( member_num )); 
-   return( floatype );
+   FloatType floatype(p_get_member_type(member_num)); 
+   return(floatype);
 }
 
 //--------------------------------------------------------------------------
@@ -316,9 +316,9 @@ FloatType CompType::getMemberFloatType( int member_num ) const
 //--------------------------------------------------------------------------
 StrType CompType::getMemberStrType( int member_num ) const
 {
-   StrType strtype( p_getMemberType( member_num )); 
-   return( strtype );
-}
+   StrType strtype(p_get_member_type(member_num)); 
+   return(strtype);
+} 
 
 /* old style of getMemberType - using overloads; new style above 
    returns the appropriate datatypes but has different named functions.
@@ -328,27 +328,27 @@ StrType CompType::getMemberStrType( int member_num ) const
 // Several overloading of getMemberType are for different datatypes
 void CompType::getMemberType( int member_num, EnumType& enumtype ) const
 {
-   p_getMemberType( member_num, enumtype ); 
+   p_get_member_type(member_num, enumtype); 
 }
 
 void CompType::getMemberType( int member_num, CompType& comptype ) const
 {
-   p_getMemberType( member_num, comptype ); 
+   p_get_member_type(member_num, comptype); 
 }
 
 void CompType::getMemberType( int member_num, IntType& inttype ) const
 {
-   p_getMemberType( member_num, inttype ); 
+   p_get_member_type(member_num, inttype); 
 }
 
 void CompType::getMemberType( int member_num, FloatType& floatype ) const
 {
-   p_getMemberType( member_num, floatype ); 
+   p_get_member_type(member_num, floatype); 
 }
 
 void CompType::getMemberType( int member_num, StrType& strtype ) const
 {
-   p_getMemberType( member_num, strtype ); 
+   p_get_member_type(member_num, strtype); 
 }
 // end of overloading of getMemberType
 */

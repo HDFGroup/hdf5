@@ -29,7 +29,7 @@ const string Exception::DEFAULT_MSG("No detailed information provided");
 ///\brief	Default constructor.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Exception::Exception() : detailMessage(""), funcName("") {}
+Exception::Exception() : detail_message(""), func_name("") {}
 
 //--------------------------------------------------------------------------
 // Function:	Exception overloaded constructor
@@ -40,7 +40,7 @@ Exception::Exception() : detailMessage(""), funcName("") {}
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Exception::Exception(const string func_name, const string message) : detailMessage(message), funcName(func_name) {}
+Exception::Exception(const string func_name, const string message) : detail_message(message), func_name(func_name) {}
 
 //--------------------------------------------------------------------------
 // Function:	Exception copy constructor
@@ -50,8 +50,8 @@ Exception::Exception(const string func_name, const string message) : detailMessa
 //--------------------------------------------------------------------------
 Exception::Exception( const Exception& orig )
 {
-   detailMessage = orig.detailMessage;
-   funcName = orig.funcName;
+   detail_message = orig.detail_message;
+   func_name = orig.func_name;
 }
 
 //--------------------------------------------------------------------------
@@ -227,7 +227,7 @@ void Exception::walkErrorStack( H5E_direction_t direction, H5E_walk_t func, void
 //--------------------------------------------------------------------------
 string Exception::getDetailMsg() const
 {
-   return(detailMessage);
+   return(detail_message);
 }
 
 //--------------------------------------------------------------------------
@@ -239,7 +239,7 @@ string Exception::getDetailMsg() const
 //--------------------------------------------------------------------------
 const char* Exception::getCDetailMsg() const
 {
-   return(detailMessage.c_str());
+   return(detail_message.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -250,7 +250,7 @@ const char* Exception::getCDetailMsg() const
 //--------------------------------------------------------------------------
 string Exception::getFuncName() const
 {
-   return(funcName);
+   return(func_name);
 }
 
 //--------------------------------------------------------------------------
@@ -261,7 +261,7 @@ string Exception::getFuncName() const
 //--------------------------------------------------------------------------
 const char* Exception::getCFuncName() const
 {
-   return(funcName.c_str());
+   return(func_name.c_str());
 }
 
 //--------------------------------------------------------------------------

@@ -87,7 +87,7 @@ DataSpace DataSet::getSpace() const
 // This private member function calls the C API to get the identifier 
 // of the datatype that is used by this dataset.  It is used
 // by the various AbstractDs functions to get the specific datatype.
-hid_t DataSet::p_getType() const
+hid_t DataSet::p_get_type() const
 {
    hid_t type_id = H5Dget_type( id );
    if( type_id > 0 )

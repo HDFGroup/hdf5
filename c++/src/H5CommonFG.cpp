@@ -515,7 +515,7 @@ void CommonFG::unmount( const string& name ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	CommonFG::p_openDataType (private)
+// Function:	CommonFG::p_open_data_type (private)
 // Purpose	Opens the named datatype and returns the datatype's identifier.
 // Return	Id of the datatype
 // Exception	H5::FileIException or H5::GroupIException
@@ -525,7 +525,7 @@ void CommonFG::unmount( const string& name ) const
 //		datatypes.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-hid_t CommonFG::p_openDataType( const char* name ) const
+hid_t CommonFG::p_open_data_type( const char* name ) const
 { 
    // Call C function H5Topen to open the named datatype in this group,
    // giving either the file or group id 
@@ -543,7 +543,7 @@ hid_t CommonFG::p_openDataType( const char* name ) const
 
 //
 // The following member functions use the private function
-// p_openDataType to open a named datatype in this location
+// p_open_data_type to open a named datatype in this location
 //
 
 //--------------------------------------------------------------------------
@@ -556,7 +556,7 @@ hid_t CommonFG::p_openDataType( const char* name ) const
 //--------------------------------------------------------------------------
 DataType CommonFG::openDataType( const char* name ) const
 {
-   DataType data_type( p_openDataType( name ));
+   DataType data_type(p_open_data_type(name));
    return( data_type );
 }
 
@@ -582,8 +582,8 @@ DataType CommonFG::openDataType( const string& name ) const
 //--------------------------------------------------------------------------
 EnumType CommonFG::openEnumType( const char* name ) const
 {
-   EnumType enum_type( p_openDataType( name ));
-   return( enum_type );
+   EnumType enum_type(p_open_data_type(name));
+   return(enum_type);
 }  
 
 //--------------------------------------------------------------------------
@@ -608,8 +608,8 @@ EnumType CommonFG::openEnumType( const string& name ) const
 //--------------------------------------------------------------------------
 CompType CommonFG::openCompType( const char* name ) const
 {
-   CompType comp_type( p_openDataType( name ));
-   return( comp_type );
+   CompType comp_type(p_open_data_type(name));
+   return(comp_type);
 }
 
 //--------------------------------------------------------------------------
@@ -634,8 +634,8 @@ CompType CommonFG::openCompType( const string& name ) const
 //--------------------------------------------------------------------------
 IntType CommonFG::openIntType( const char* name ) const
 {  
-   IntType int_type( p_openDataType( name ));
-   return( int_type );
+   IntType int_type(p_open_data_type(name));
+   return(int_type);
 }
 
 //--------------------------------------------------------------------------
@@ -660,8 +660,8 @@ IntType CommonFG::openIntType( const string& name ) const
 //--------------------------------------------------------------------------
 FloatType CommonFG::openFloatType( const char* name ) const
 {  
-   FloatType float_type( p_openDataType( name ));
-   return( float_type );
+   FloatType float_type(p_open_data_type(name));
+   return(float_type);
 }
 
 //--------------------------------------------------------------------------
@@ -686,8 +686,8 @@ FloatType CommonFG::openFloatType( const string& name ) const
 //--------------------------------------------------------------------------
 StrType CommonFG::openStrType( const char* name ) const
 {
-   StrType str_type( p_openDataType( name ));
-   return( str_type );
+   StrType str_type(p_open_data_type(name));
+   return(str_type);
 }
 
 //--------------------------------------------------------------------------
@@ -705,9 +705,9 @@ StrType CommonFG::openStrType( const string& name ) const
 //--------------------------------------------------------------------------
 // Function:	CommonFG::iterateElems
 ///\brief	Iterates a user's function over the entries of a group.
-///\param	name  - IN: Name of group to iterate over
-///\param	idx - IN/OUT: Starting (IN) and ending (OUT) entry indices
-///\param	op - IN: User's function to operate on each entry
+///\param	name    - IN    : Name of group to iterate over
+///\param	idx     - IN/OUT: Starting (IN) and ending (OUT) entry indices
+///\param	op      - IN    : User's function to operate on each entry
 ///\param	op_data - IN/OUT: Data associated with the operation
 ///\return	The return value of the first operator that returns non-zero, 
 ///		or zero if all members were processed with no operator 
@@ -737,6 +737,101 @@ int CommonFG::iterateElems( const string& name, int *idx, H5G_iterate_t op , voi
    return( iterateElems( name.c_str(), idx, op, op_data ));
 }
 
+//--------------------------------------------------------------------------
+// Function:	CommonFG::getNumObjs
+///\brief	Returns the number of objects in this group.
+///\return	Number of objects
+///\exception	H5::FileIException or H5::GroupIException
+// Programmer	Binh-Minh Ribler - January, 2003
+//--------------------------------------------------------------------------
+hsize_t CommonFG::getNumObjs() const
+{
+   hsize_t num_objs;
+   herr_t ret_value = H5Gget_num_objs(getLocId(), &num_objs);
+   if(ret_value < 0)
+   {
+      throwException("getNumObjs", "H5Gget_num_objs failed");
+   }
+   return (num_objs);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::getObjnameByIdx
+///\brief	Retrieves the name of an object in this group by giving the
+///		object's index.
+///\param	idx  -     IN: Transient index of the object
+///\param	name - IN/OUT: Retrieved name of the object
+///\param	size -     IN: Length to retrieve
+///\return	Actual size of the object name or 0, if object has no name
+///\exception	H5::FileIException or H5::GroupIException
+///\par Description
+///		The value of idx can be any nonnegative number less than the 
+///		total number of objects in the group, which is returned by 
+///		the function \c CommonFG::getNumObjs.  Note that this is a 
+///		transient index; thus, an object may have a different index 
+///		each time the group is opened.
+// Programmer	Binh-Minh Ribler - January, 2003
+//--------------------------------------------------------------------------
+ssize_t CommonFG::getObjnameByIdx(hsize_t idx, string& name, size_t size) const
+{
+   char* name_C = new char[size];
+   ssize_t name_len = H5Gget_objname_by_idx(getLocId(), idx, name_C, size);
+   if(name_len < 0)
+   {
+      throwException("getObjnameByIdx", "H5Gget_objname_by_idx failed");
+   }
+   name = string( name_C );
+   delete [] name_C;
+   return (name_len);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::getObjTypeByIdx
+///\brief	Returns the type of an object in this group by giving the
+///		object's index.
+///\param	idx - IN: Transient index of the object
+///\return	Object type
+///\exception	H5::FileIException or H5::GroupIException
+// Programmer	Binh-Minh Ribler - January, 2003
+//--------------------------------------------------------------------------
+H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx) const
+{
+   H5G_obj_t obj_type = H5Gget_objtype_by_idx(getLocId(), idx);
+   if (obj_type == H5G_UNKNOWN)
+   {
+      throwException("getObjTypeByIdx", "H5Gget_objtype_by_idx failed");
+   }
+   return (obj_type);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::getObjTypeByIdx
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function because it also provides
+///		the returned object type in text.
+///\param	idx       - IN: Transient index of the object
+///\param	type_name - IN: Object type in text
+///\return	Object type
+///\exception	H5::FileIException or H5::GroupIException
+// Programmer	Binh-Minh Ribler - January, 2003
+//--------------------------------------------------------------------------
+H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, string& type_name) const
+{
+   H5G_obj_t obj_type = H5Gget_objtype_by_idx(getLocId(), idx);
+   switch (obj_type)
+   {
+	case H5G_LINK: type_name = string("symbolic link"); break;
+	case H5G_GROUP: type_name = string("group"); break;
+	case H5G_DATASET: type_name = string("dataset"); break;
+	case H5G_TYPE: type_name = string("datatype"); break;
+	case H5G_UNKNOWN:
+	default:
+   	{
+	   throwException("getObjTypeByIdx", "H5Gget_objtype_by_idx failed");
+	}
+   }
+   return (obj_type);
+}
 //--------------------------------------------------------------------------
 // Function:	CommonFG default constructor
 ///\brief	Default constructor.

@@ -82,11 +82,11 @@ class H5_DLLCPP Exception {
 #if defined(WIN32)
 #pragma warning(disable: 4251)
 #endif
-	string detailMessage;
-	string funcName;
+	string detail_message;
+	string func_name;
 
    protected:
-        // Default value for detailMessage
+        // Default value for detail_message
         static const string DEFAULT_MSG;
 };
 

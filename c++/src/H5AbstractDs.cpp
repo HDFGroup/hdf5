@@ -61,9 +61,9 @@ AbstractDs::AbstractDs( const AbstractDs& original ) : H5Object( original ) {}
 H5T_class_t AbstractDs::getTypeClass() const
 {
    // Gets the datatype used by this dataset or attribute.
-   // p_getType calls either H5Dget_type or H5Aget_type depending on 
+   // p_get_type calls either H5Dget_type or H5Aget_type depending on 
    // which object invokes getTypeClass
-   DataType datatype( p_getType());
+   DataType datatype(p_get_type());
 
    // Gets the class of the datatype and validate it before returning
    H5T_class_t type_class = H5Tget_class( datatype.getId());
@@ -87,9 +87,9 @@ H5T_class_t AbstractDs::getTypeClass() const
 DataType AbstractDs::getDataType() const
 {
    // Gets the id of the datatype used by this dataset or attribute.
-   // p_getType calls either H5Dget_type or H5Aget_type depending on 
+   // p_get_type calls either H5Dget_type or H5Aget_type depending on 
    // which object invokes getTypeClass
-   hid_t datatype_id = p_getType();  // returned value is already validated
+   hid_t datatype_id = p_get_type();  // returned value is already validated
 
    // Create and return the DataType object
    DataType datatype( datatype_id );
@@ -106,8 +106,8 @@ DataType AbstractDs::getDataType() const
 //--------------------------------------------------------------------------
 EnumType AbstractDs::getEnumType() const
 {
-   EnumType enumtype( p_getType());
-   return( enumtype );
+   EnumType enumtype(p_get_type());
+   return(enumtype);
 }
 
 //--------------------------------------------------------------------------
@@ -120,8 +120,8 @@ EnumType AbstractDs::getEnumType() const
 //--------------------------------------------------------------------------
 CompType AbstractDs::getCompType() const
 {
-   CompType comptype( p_getType());
-   return( comptype );
+   CompType comptype(p_get_type());
+   return(comptype);
 }
 
 //--------------------------------------------------------------------------
@@ -134,8 +134,8 @@ CompType AbstractDs::getCompType() const
 //--------------------------------------------------------------------------
 IntType AbstractDs::getIntType() const
 {
-   IntType inttype( p_getType());
-   return( inttype );
+   IntType inttype(p_get_type());
+   return(inttype);
 }
 
 //--------------------------------------------------------------------------
@@ -148,8 +148,8 @@ IntType AbstractDs::getIntType() const
 //--------------------------------------------------------------------------
 FloatType AbstractDs::getFloatType() const
 {
-   FloatType floatype( p_getType());
-   return( floatype );
+   FloatType floatype(p_get_type());
+   return(floatype);
 }
 
 //--------------------------------------------------------------------------
@@ -162,8 +162,8 @@ FloatType AbstractDs::getFloatType() const
 //--------------------------------------------------------------------------
 StrType AbstractDs::getStrType() const
 {
-   StrType strtype( p_getType());
-   return( strtype );
+   StrType strtype(p_get_type());
+   return(strtype);
 }
 
 //--------------------------------------------------------------------------
