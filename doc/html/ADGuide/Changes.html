@@ -35,7 +35,30 @@ This document is intended to assist application developers who must keep
 an application synchroniaed with the HDF5 library or related software.
 
 
-<h2>Release 1.4 (current release) Versus Release 1.2.2</h2> 
+<h2>Release 1.4.1 (current release) Versus Release 1.4</h2> 
+<dir>
+    Release 1.4.1 is a "Tools Release," so changes to the 
+    underlying HDF5 library have included only bugfixes.
+    <p>
+    The <code>h5dump</code> utility has a new XML output option, 
+    <code>--xml</code>.  The XML output is suitable for use with other 
+    tools, including the HDF5 Java Tools.
+    <p>
+    An image conversion bug in the <code>h4toh5</code> utility has been 
+    fixed.  Earlier releases of the utility produced images that did not
+    correctly conform to the 
+    <a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/ADGuide/ImageSpec.html"><cite>HDF5 Image and Palette Specification</cite></a>.
+    Several required HDF5 attributes were omitted, and the dataspace
+    were reversed (i.e., the height and width of the image dataset were
+    incorrectly described).  For more information, please see
+    http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.html.
+    <p>
+    See <a href="RELEASE.txt" target="ExtWin">RELEASE.txt</a> for
+    a list of bugs fixed in the HDF5 library.
+</dir>
+
+
+<h2>Release 1.4 Versus Release 1.2.2</h2> 
 
 <dir>
 
@@ -350,7 +373,7 @@ V1.4.0
 
 <!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified:  21 February 2001 
+Last modified:  3 April 2001 
 <!-- hhmts end -->
 
 <br>
