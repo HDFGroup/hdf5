@@ -1923,6 +1923,10 @@ main (int argc, char *argv[])
     static char	root_name[] = "/";
     char        drivername[50];
 
+#ifdef HAVE_PARALLEL
+    MPI_Init(&argc, &argv);
+    atexit(MPI_Finalize);
+#endif
 
     /* Build display table */
     DISPATCH(H5G_DATASET, "Dataset", H5Dopen, H5Dclose,
