@@ -368,7 +368,7 @@ H5FD_srb_close(H5FD_t *_file)
  * Function:	H5FD_srb_query
  *
  * Purpose:	Set the flags that this VFL driver is capable of supporting.
- *      (listed in H5FDpublic.h)
+ *              (listed in H5FDpublic.h)
  *
  * Return:	Success:	non-negative
  *
@@ -390,8 +390,9 @@ H5FD_srb_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
+        *flgs = 0;
         *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
-    } /* end if */
+    }
 
     FUNC_LEAVE(ret_value);
 }
