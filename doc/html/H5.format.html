@@ -1780,8 +1780,9 @@ TABLE.list TD { border:none; }
             <P>This is the size in bytes of the entire collection
             including this field.  The default (and minimum)
             collection size is 4096 bytes which is a typical file
-            system block size and which allows for 170 16-byte heap
-            objects plus their overhead.
+            system block size.  This allows for 127 16-byte heap
+            objects plus their overhead (the collection header of 16 bytes
+            and the 16 bytes of information about each heap object).
             </P>
           </td>
         </tr>
