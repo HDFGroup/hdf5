@@ -1743,7 +1743,7 @@ done:
     if (H5Fclose(fid) < 0)
 	d_status = 1;
 
-    if (rawdatastream != stdout)
+    if (rawdatastream && rawdatastream != stdout)
 	if (fclose(rawdatastream))
 	    perror("fclose");
 
