@@ -58,6 +58,7 @@
 ./config/hpux9.03
 ./config/i386-pc-cygwin32
 ./config/ia64-linux-gnu
+./config/intel-flags
 ./config/intel-osf1
 ./config/irix5.x
 ./config/irix6.x
@@ -65,6 +66,7 @@
 ./config/linux-gnuaout
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
+./config/pgi-flags
 ./config/powerpc-apple
 ./config/powerpc-ibm-aix4.x
 ./config/powerpc-ibm-aix5.x
@@ -777,6 +779,8 @@
 ./fortran/config/hpux9.03
 ./fortran/config/i386-pc-cygwin32
 ./fortran/config/ia64-linux-gnu
+./fortran/config/intel-fflags
+./fortran/config/intel-flags
 ./fortran/config/intel-osf1
 ./fortran/config/irix5.x
 ./fortran/config/irix6.x
@@ -784,6 +788,8 @@
 ./fortran/config/linux-gnuaout
 ./fortran/config/linux-gnulibc1
 ./fortran/config/linux-gnulibc2
+./fortran/config/pgi-fflags
+./fortran/config/pgi-flags
 ./fortran/config/powerpc-apple
 ./fortran/config/powerpc-ibm-aix4.x
 ./fortran/config/powerpc-ibm-aix5.x
