@@ -149,7 +149,7 @@ static const dump_header xmlformat = {
 	"<BOOTBLOCK>",         /*bootblockbegin*/
 	"</BOOTBLOCK>",         /*bootblockend*/
 	"<GROUP>",         /*groupbegin*/
-	"</GROUP>",	         /*groupend*
+	"</GROUP>",	         /*groupend*/
 	"<DATASET>",	         /*datasetbegin*/
 	"</DATASET>",		/*datasetend*/	
 	"<ATTRIBUTE>",         /*attributebegin*/
