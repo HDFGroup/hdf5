@@ -1,3 +1,4 @@
+// This may look like C code, but it is really -*- C++ -*-
 // Class CompType inherits from DataType and provides accesses to a compound
 // datatype.
 

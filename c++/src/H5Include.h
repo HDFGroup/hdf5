@@ -1,3 +1,4 @@
+// This may look like C code, but it is really -*- C++ -*-
 // Added this line for CC to compile at this time.  Will remove it when
 // the problem of "Multiple declaration for RcsId" is fixed. BMR - 10/30/00
 #ifdef RCSID

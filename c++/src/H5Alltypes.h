@@ -1,3 +1,4 @@
+// This may look like C code, but it is really -*- C++ -*-
 // This header file simply serves as a container to hold the
 // header files of all datatypes.  It simplifies the header
 // file including in the code.

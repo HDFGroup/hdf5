@@ -1,3 +1,4 @@
+// This may look like C code, but it is really -*- C++ -*-
 #ifndef _Reset_h
 #define _Reset_h
 

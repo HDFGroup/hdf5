@@ -1,3 +1,4 @@
+// This may look like C code, but it is really -*- C++ -*-
 // Class AtomType is a base class, from which IntType, FloatType, StrType,
 // and PredType inherit.  It provides the services that are common to these
 // subclasses.  It also inherits from DataType and passes down the

@@ -1,5 +1,6 @@
-#ifndef _H5Attribute_H
-#define _H5Attribute_H
+// This may look like C code, but it is really -*- C++ -*-
+#ifndef H5Attribute_H_
+#define H5Attribute_H_
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {

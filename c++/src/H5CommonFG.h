@@ -1,3 +1,4 @@
+// This may look like C code, but it is really -*- C++ -*-
 // CommonFG is a protocol class.  Its existence is simply to provide the
 // common services that are provided by H5File and Group.  The file or
 // group in the context of this class is referred to as 'location'.

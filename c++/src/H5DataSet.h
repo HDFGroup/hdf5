@@ -1,4 +1,4 @@
-
+// This may look like C code, but it is really -*- C++ -*-
 // Class DataSet inherits from AbstractDs and provides accesses to a dataset.
 
 #ifndef _H5DataSet_H

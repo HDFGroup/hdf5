@@ -1,3 +1,4 @@
+// This may look like C code, but it is really -*- C++ -*-
 #ifndef _H5CPP_H
 #define _H5CPP_H
 
