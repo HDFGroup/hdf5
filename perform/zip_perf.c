@@ -245,7 +245,7 @@ write_file(Bytef *source, uLongf sourceLen)
         if (rc == -1)
             error(strerror(errno));
 
-        if (rc == d_len)
+        if (rc == (int)d_len)
             break;
 
         d_len -= rc;
@@ -292,6 +292,7 @@ compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
     }
 }
 
+#ifdef LATER
 /*
  * Function:    uncompress_buffer
  * Purpose:     Uncompress the buffer.
@@ -310,6 +311,7 @@ uncompress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
 
     return rc;
 }
+#endif /* LATER */
 
 /*
  * Function:    get_unique_name
@@ -431,10 +433,10 @@ parse_size_directive(const char *size)
 static void
 fill_with_random_data(Bytef *src, uLongf src_len)
 {
-    register int i;
-    struct stat buf;
+    register unsigned u;
+    struct stat stat_buf;
 
-    if (stat("/dev/urandom", &buf) == 0) {
+    if (stat("/dev/urandom", &stat_buf) == 0) {
         uLongf len = src_len;
         Bytef *buf = src;
         int fd = open("/dev/urandom", O_RDONLY);
@@ -450,7 +452,7 @@ fill_with_random_data(Bytef *src, uLongf src_len)
             if (rc == -1)
                 error(strerror(errno));
 
-            if (rc == len)
+            if (rc == (ssize_t)len)
                 break;
 
             buf += rc;
@@ -459,8 +461,8 @@ fill_with_random_data(Bytef *src, uLongf src_len)
     } else {
         printf("Using random() for random data\n");
 
-        for (i = 0; i < src_len; ++i)
-            src[i] = 0xff & random();
+        for (u = 0; u < src_len; ++u)
+            src[u] = 0xff & random();
     }
 
     if (compress_percent) {
@@ -527,7 +529,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
                 if (rc == -1)
                     error(strerror(errno));
 
-                if (rc == s_len)
+                if (rc == (ssize_t)s_len)
                     break;
 
                 s_len -= rc;
