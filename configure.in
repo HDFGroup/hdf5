@@ -235,6 +235,14 @@ AC_PROG_INSTALL
 AC_LIBTOOL_DLOPEN
 AM_PROG_LIBTOOL
 
+dnl Fix up the INSTALL macro if it's a relative path. We want the
+dnl full-path to the binary instead.
+case "$INSTALL" in
+   *install-sh*)
+      INSTALL='\${top_srcdir}'/bin/install-sh
+      ;;
+esac
+
 AC_MSG_CHECKING(make)
 AC_SUBST_FILE(DEPEND)
 if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
@@ -1546,6 +1554,22 @@ dnl things need to be done.
 mkdir ./config >/dev/null 2>&1
 touch ./config/stamp1
 
+PARALLEL_MAKE=
+
+if test -n "$TESTPARALLEL"; then
+   PARALLEL_MAKE="$TESTPARALLEL/Makefile"
+fi
+
+EXTRA_H4_MAKEFILES=
+
+if test -n "$H4TOH5"; then
+   EXTRA_H4_MAKEFILES="$EXTRA_H4_MAKEFILES tools/h4toh5/Makefile"
+fi
+    
+if test -n "$H5TOH4"; then
+   EXTRA_H4_MAKEFILES="$EXTRA_H4_MAKEFILES tools/h5toh4/Makefile"
+fi
+
 # Then the config.status file (but not makefiles)
 saved_no_create=$no_create
 no_create=yes
@@ -1561,14 +1585,13 @@ AC_OUTPUT(src/libhdf5.settings
           src/Makefile
           pablo/Makefile
           test/Makefile
-          testpar/Makefile
+          $PARALLEL_MAKE
           tools/Makefile
-          tools/h4toh5/Makefile
           tools/h5dump/Makefile
           tools/h5ls/Makefile
-          tools/h5toh4/Makefile
           tools/lib/Makefile
           tools/misc/Makefile
+          $EXTRA_H4_MAKEFILES
           examples/Makefile
           doc/Makefile
           doc/html/Makefile
@@ -1580,7 +1603,6 @@ AC_OUTPUT(src/libhdf5.settings
           doc/html/Tutor/Makefile
           doc/html/Tutor/Graphics/Makefile
           doc/html/Tutor/examples/Makefile
-          doc/html/Tutor/examples/java/Makefile
           doc/html/cpplus/Makefile
           doc/html/fortran/Makefile)
 no_create=$saved_no_create
