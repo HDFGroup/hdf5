@@ -74,6 +74,9 @@ install:
 install-doc:
 	(cd doc && $(MAKE) $@) || exit 1;
 
+uninstall-doc:
+	(cd doc && $(MAKE) $@) || exit 1;
+
 ## Number format detection
 H5detect: 
 	(cd src && $(MAKE) $@)
