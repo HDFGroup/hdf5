@@ -40,10 +40,12 @@ static herr_t H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], 
                               size_t nbytes, size_t *buf_size, void **buf);
 
+static void H5Z_calc_parms_nooptype(void);
 static void H5Z_calc_parms_atomic(void);
 static herr_t H5Z_calc_parms_array(hid_t type_id);
 static herr_t H5Z_calc_parms_compound(hid_t type_id);
 
+static herr_t H5Z_set_parms_nooptype(hid_t type_id, unsigned cd_values[]);
 static herr_t H5Z_set_parms_atomic(hid_t type_id, unsigned cd_values[]);
 static herr_t H5Z_set_parms_array(hid_t type_id, unsigned cd_values[]);
 static herr_t H5Z_set_parms_compound(hid_t type_id, unsigned cd_values[]);
@@ -53,6 +55,8 @@ static void H5Z_nbit_decompress_one_byte(unsigned char *data, size_t data_offset
 int end_i, unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p, int datatype_len);
 static void H5Z_nbit_compress_one_byte(unsigned char *data, size_t data_offset, int k, int begin_i, 
 int end_i, unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p, int datatype_len);
+static void H5Z_nbit_decompress_one_nooptype(unsigned char *data, size_t data_offset, 
+                       unsigned char *buffer, size_t *j, int *buf_len, unsigned size);
 static void H5Z_nbit_decompress_one_atomic(unsigned char *data, size_t data_offset, 
                     unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p);
 static void H5Z_nbit_decompress_one_array(unsigned char *data, size_t data_offset, 
@@ -61,6 +65,8 @@ static void H5Z_nbit_decompress_one_compound(unsigned char *data, size_t data_of
               unsigned char *buffer, size_t *j, int *buf_len, const unsigned parms[]); 
 static void H5Z_nbit_decompress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer, 
                                 const unsigned parms[]);
+static void H5Z_nbit_compress_one_nooptype(unsigned char *data, size_t data_offset, 
+                     unsigned char *buffer, size_t *j, int *buf_len, unsigned size);
 static void H5Z_nbit_compress_one_atomic(unsigned char *data, size_t data_offset, 
                   unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p);
 static void H5Z_nbit_compress_one_array(unsigned char *data, size_t data_offset, 
@@ -83,9 +89,10 @@ H5Z_class_t H5Z_NBIT[1] = {{
 }};
 
 /* Local macros */
-#define H5Z_NBIT_ATOMIC          1     /* Atomic datatype class for nbit: integer/floating-point */
-#define H5Z_NBIT_ARRAY           2     /* Array datatype class for nbit */
-#define H5Z_NBIT_COMPOUND        3     /* Compound datatype class for nbit */
+#define H5Z_NBIT_ATOMIC          1     /* Atomic datatype class: integer/floating-point */
+#define H5Z_NBIT_ARRAY           2     /* Array datatype class */
+#define H5Z_NBIT_COMPOUND        3     /* Compound datatype class */
+#define H5Z_NBIT_NOOPTYPE        4     /* Other datatype class: nbit does no compression */
 #define H5Z_NBIT_USER_NPARMS     0     /* Number of parameters that users can set */
 #define H5Z_NBIT_MAX_NPARMS      4096  /* Max number of parameters for filter */
 #define H5Z_NBIT_ORDER_LE        0     /* Little endian for datatype byte order */
@@ -110,8 +117,6 @@ static unsigned parms_index = 0;
  * Purpose:	Check the parameters for nbit compression for validity and
  *              whether they fit a particular dataset.
  *
- * Note:        
- *              
  * Return:	Success: Non-negative
  *		Failure: Negative
  *
@@ -145,14 +150,35 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Z_calc_parms_nooptype
+ *
+ * Purpose:     Calculate the number of parameters of array cd_values[]
+ *              of datatype that is not integer, nor floating-point, nor
+ *              compound, and nor array.
+ *
+ * Programmer:  Xiaowen Wu
+ *              Thursday, March 3, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void H5Z_calc_parms_nooptype()
+{
+    /* Store datatype class code */
+    ++cd_values_actual_nparms;
+ 
+    /* Store datatype size */
+    ++cd_values_actual_nparms;
+} 
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Z_calc_parms_atomic
  *
  * Purpose:     Calculate the number of parameters of array cd_values[]
  *              of atomic datatype whose datatype class is integer 
  *              or floating point 
- *
- * Return:      Success: Non-negative
- *              Failure: Negative
  *
  * Programmer:  Xiaowen Wu
  *              Saturday, January 29, 2005
@@ -233,9 +259,11 @@ static herr_t H5Z_calc_parms_array(hid_t type_id)
             if(H5Z_calc_parms_compound(dtype_base)==FAIL)
                 HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot compute parameters for datatype")
             break;
-        default: 
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "datatype class not supported by nbit")
+        default: /* Other datatype class: nbit does no compression */
+            H5Z_calc_parms_nooptype();
+            break;
     } /* end switch */
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_calc_parms_array() */
@@ -308,13 +336,70 @@ static herr_t H5Z_calc_parms_compound(hid_t type_id)
                 if(H5Z_calc_parms_compound(dtype_member)==FAIL)
                     HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot compute parameters for datatype")
                 break;
-            default: 
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "datatype class not supported by nbit")
+            default: /* Other datatype class: nbit does no compression */
+                H5Z_calc_parms_nooptype();
+                break;
         } /* end switch */
     } /* end for */
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_calc_params_compound */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z_set_parms_nooptype
+ *
+ * Purpose:     Set the array cd_values[] for a given datatype identifier 
+ *              type_id if its datatype class is not integer, nor
+ *              floating-point, nor array, and nor compound  
+ *
+ * Return:      Success: Non-negative
+ *              Failure: Negative
+ *
+ * Programmer:  Xiaowen Wu
+ *              Thursday, March 3, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t H5Z_set_parms_nooptype(hid_t type_id, unsigned cd_values[])
+{
+    size_t dtype_size;          /* No-op datatype's size (in bytes) */
+    herr_t ret_value=SUCCEED;   /* Return value */
+    htri_t is_vlstring;         /* flag indicating if datatype is varible-length string */
+
+    FUNC_ENTER_NOAPI(H5Z_set_parms_nooptype, FAIL)
+
+    /* Set datatype class code */
+    cd_values[cd_values_index++] = H5Z_NBIT_NOOPTYPE;
+ 
+    /* Get datatype's size */
+    if((dtype_size=H5Tget_size(type_id))==0)
+	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
+
+    /* Check if datatype is a variable-length string */
+    if((is_vlstring=H5Tis_variable_str(type_id))<0) 
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, 
+                    "cannot determine if datatype is a variable-length string")
+
+    /* Set "local" parameter for datatype size */
+    if(is_vlstring) {
+#if 0
+        printf("\n*** inside function H5Z_set_parms_nooptype in file H5Znbit.c\n");
+        printf("\n*** indirectly called by function H5Z_set_local_nbit\n");
+        printf("\n*** size of variable-length string datatype: %d\n", dtype_size);
+#endif
+        /* temporal fix, needs to be changed */ 
+        cd_values[cd_values_index++] = 16;
+    }
+    else            
+        cd_values[cd_values_index++] = dtype_size;
+
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_set_parms_nooptype() */
 
 
 /*-------------------------------------------------------------------------
@@ -458,8 +543,10 @@ static herr_t H5Z_set_parms_array(hid_t type_id, unsigned cd_values[])
             if(H5Z_set_parms_compound(dtype_base, cd_values)==FAIL)
                 HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
             break;
-        default: 
-            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "datatype class not supported by nbit")
+        default: /* other datatype that nbit does no compression */
+            if(H5Z_set_parms_nooptype(dtype_base, cd_values)==FAIL)
+                HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
+            break;
     } /* end switch */
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -542,8 +629,10 @@ static herr_t H5Z_set_parms_compound(hid_t type_id, unsigned cd_values[])
                 if(H5Z_set_parms_compound(dtype_member, cd_values)==FAIL)
                     HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
                 break;
-            default: 
-                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "datatype class not supported by nbit")
+            default: /* other datatype that nbit does no compression */ 
+                if(H5Z_set_parms_nooptype(dtype_member, cd_values)==FAIL)
+                    HGOTO_ERROR(H5E_PLINE,H5E_BADTYPE,FAIL,"nbit cannot set parameters for datatype")
+                break;
         } /* end switch */
     } /* end for */
 done:
@@ -687,8 +776,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z_filter_nbit (unsigned flags, size_t cd_nelmts, const unsigned cd_values[], 
-    size_t nbytes, size_t *buf_size, void **buf)
+H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], 
+                size_t nbytes, size_t *buf_size, void **buf)
 {
     size_t ret_value = 0;          /* return value */
     size_t size_out  = 0;          /* size of output buffer */
@@ -809,6 +898,29 @@ int end_i, unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p, int d
    }
 }
 
+static void H5Z_nbit_decompress_one_nooptype(unsigned char *data, size_t data_offset, 
+                       unsigned char *buffer, size_t *j, int *buf_len, unsigned size)
+{
+   unsigned i;        /* index */
+   unsigned dat_len;  /* dat_len is the number of bits to be copied in each data byte */
+   unsigned char val; /* value to be copied in each data byte */
+
+   for(i = 0; i < size; i++) {
+      /* initialize value and bits of unsigned char to be copied */
+      val = buffer[*j];
+      dat_len = sizeof(unsigned char) * 8;
+
+      data[data_offset + i] = ((val & ~(~0 << *buf_len)) << (dat_len - *buf_len));
+      dat_len -= *buf_len;
+      H5Z_nbit_next_byte(j, buf_len);
+      if(dat_len == 0) continue;
+
+      val = buffer[*j];
+      data[data_offset + i] |= ((val >> (*buf_len - dat_len)) & ~(~0 << dat_len));
+      *buf_len -= dat_len; 
+   }
+}
+
 static void H5Z_nbit_decompress_one_atomic(unsigned char *data, size_t data_offset, 
                     unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p) 
 {
@@ -848,10 +960,10 @@ static void H5Z_nbit_decompress_one_atomic(unsigned char *data, size_t data_offs
 static void H5Z_nbit_decompress_one_array(unsigned char *data, size_t data_offset, 
            unsigned char *buffer, size_t *j, int *buf_len, const unsigned parms[]) 
 {
-   unsigned i, size, base_class, base_size, n, begin_index;
+   unsigned i, total_size, base_class, base_size, n, begin_index;
    parms_atomic p;
 
-   size = parms[parms_index++];
+   total_size = parms[parms_index++];
    base_class = parms[parms_index++];
 
    switch(base_class) {
@@ -860,14 +972,14 @@ static void H5Z_nbit_decompress_one_array(unsigned char *data, size_t data_offse
            p.order = parms[parms_index++];
            p.precision = parms[parms_index++];
            p.offset = parms[parms_index++];
-           n = size/p.size;
+           n = total_size/p.size;
            for(i = 0; i < n; i++)
               H5Z_nbit_decompress_one_atomic(data, data_offset + i*p.size,
                                              buffer, j, buf_len, p);
            break;
       case H5Z_NBIT_ARRAY:
            base_size = parms[parms_index]; /* read in advance */
-           n = size/base_size; /* number of base_type elements inside the array datatype */
+           n = total_size/base_size; /* number of base_type elements inside the array datatype */
            begin_index = parms_index;
            for(i = 0; i < n; i++) {
               H5Z_nbit_decompress_one_array(data, data_offset + i*base_size,
@@ -877,13 +989,17 @@ static void H5Z_nbit_decompress_one_array(unsigned char *data, size_t data_offse
            break;
       case H5Z_NBIT_COMPOUND:
            base_size = parms[parms_index]; /* read in advance */
-           n = size/base_size; /* number of base_type elements inside the array datatype */
+           n = total_size/base_size; /* number of base_type elements inside the array datatype */
            begin_index = parms_index;
            for(i = 0; i < n; i++) {
               H5Z_nbit_decompress_one_compound(data, data_offset + i*base_size,
                                                buffer, j, buf_len, parms);
               parms_index = begin_index;
            }
+           break;
+      case H5Z_NBIT_NOOPTYPE:
+           parms_index++; /* skip size of no-op type */
+           H5Z_nbit_decompress_one_nooptype(data, data_offset, buffer, j, buf_len, total_size);   
            break;
    } /* end switch */
 }
@@ -894,7 +1010,7 @@ static void H5Z_nbit_decompress_one_compound(unsigned char *data, size_t data_of
    unsigned i, nmembers, member_offset, member_class, size;
    parms_atomic p;
 
-   size = parms[parms_index++];
+   parms_index++; /* skip total size of compound datatype */
    nmembers = parms[parms_index++];
 
    for(i = 0; i < nmembers; i++) {
@@ -916,6 +1032,11 @@ static void H5Z_nbit_decompress_one_compound(unsigned char *data, size_t data_of
          case H5Z_NBIT_COMPOUND:
               H5Z_nbit_decompress_one_compound(data, data_offset+member_offset, 
                                                buffer, j, buf_len, parms);
+              break;
+         case H5Z_NBIT_NOOPTYPE:
+              size = parms[parms_index++];
+              H5Z_nbit_decompress_one_nooptype(data, data_offset+member_offset,
+                                               buffer, j, buf_len, size);
               break;
       } /* end switch */
    }
@@ -1003,6 +1124,28 @@ int end_i, unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p, int d
    }
 }
 
+static void H5Z_nbit_compress_one_nooptype(unsigned char *data, size_t data_offset, 
+                     unsigned char *buffer, size_t *j, int *buf_len, unsigned size)
+{
+   unsigned i;        /* index */
+   unsigned dat_len;  /* dat_len is the number of bits to be copied in each data byte */
+   unsigned char val; /* value to be copied in each data byte */
+
+   for(i = 0; i < size; i++) {
+      /* initialize value and bits of unsigned char to be copied */
+      val = data[data_offset + i];
+      dat_len = sizeof(unsigned char) * 8;
+      
+      buffer[*j] |= (val >> (dat_len - *buf_len)) & ~(~0 << *buf_len);
+      dat_len -= *buf_len;
+      H5Z_nbit_next_byte(j, buf_len);
+      if(dat_len == 0) continue;
+
+      buffer[*j] = (val & ~(~0 << dat_len)) << (*buf_len - dat_len);
+      *buf_len -= dat_len; 
+   }
+}
+
 static void H5Z_nbit_compress_one_atomic(unsigned char *data, size_t data_offset, 
                   unsigned char *buffer, size_t *j, int *buf_len, parms_atomic p) 
 {
@@ -1042,10 +1185,10 @@ static void H5Z_nbit_compress_one_atomic(unsigned char *data, size_t data_offset
 static void H5Z_nbit_compress_one_array(unsigned char *data, size_t data_offset, unsigned char *buffer, 
                                  size_t *j, int *buf_len, const unsigned parms[]) 
 {
-   unsigned i, size, base_class, base_size, n, begin_index;
+   unsigned i, total_size, base_class, base_size, n, begin_index;
    parms_atomic p;
 
-   size = parms[parms_index++]; 
+   total_size = parms[parms_index++]; 
    base_class = parms[parms_index++];
 
    switch(base_class) {
@@ -1054,14 +1197,14 @@ static void H5Z_nbit_compress_one_array(unsigned char *data, size_t data_offset,
            p.order = parms[parms_index++];
            p.precision = parms[parms_index++];
            p.offset = parms[parms_index++];
-           n = size/p.size;
+           n = total_size/p.size;
            for(i = 0; i < n; i++)
               H5Z_nbit_compress_one_atomic(data, data_offset + i*p.size, 
                                            buffer, j, buf_len, p);
            break;
       case H5Z_NBIT_ARRAY:
            base_size = parms[parms_index]; /* read in advance */
-           n = size/base_size; /* number of base_type elements inside the array datatype */
+           n = total_size/base_size; /* number of base_type elements inside the array datatype */
            begin_index = parms_index;
            for(i = 0; i < n; i++) {
               H5Z_nbit_compress_one_array(data, data_offset + i*base_size, 
@@ -1071,13 +1214,17 @@ static void H5Z_nbit_compress_one_array(unsigned char *data, size_t data_offset,
            break;
       case H5Z_NBIT_COMPOUND:
            base_size = parms[parms_index]; /* read in advance */
-           n = size/base_size; /* number of base_type elements inside the array datatype */
+           n = total_size/base_size; /* number of base_type elements inside the array datatype */
            begin_index = parms_index;
            for(i = 0; i < n; i++) {
               H5Z_nbit_compress_one_compound(data, data_offset + i*base_size, 
                                              buffer, j, buf_len, parms);
               parms_index = begin_index;
            }
+           break;
+      case H5Z_NBIT_NOOPTYPE:
+           parms_index++; /* skip size of no-op type */
+           H5Z_nbit_compress_one_nooptype(data, data_offset, buffer, j, buf_len, total_size);   
            break;
    } /* end switch */
 }
@@ -1088,7 +1235,7 @@ static void H5Z_nbit_compress_one_compound(unsigned char *data, size_t data_offs
    unsigned i, nmembers, member_offset, member_class, size;
    parms_atomic p;
 
-   size = parms[parms_index++];
+   parms_index++; /* skip size of compound datatype */
    nmembers = parms[parms_index++];
 
    for(i = 0; i < nmembers; i++) {
@@ -1111,6 +1258,11 @@ static void H5Z_nbit_compress_one_compound(unsigned char *data, size_t data_offs
          case H5Z_NBIT_COMPOUND:
               H5Z_nbit_compress_one_compound(data, data_offset+member_offset, 
                                              buffer, j, buf_len, parms);
+              break;
+         case H5Z_NBIT_NOOPTYPE:
+              size = parms[parms_index++];
+              H5Z_nbit_compress_one_nooptype(data, data_offset+member_offset,
+                                             buffer, j, buf_len, size);
               break;
       } /* end switch */
    }
