@@ -50,8 +50,6 @@ int apply_filter(hid_t dcpl_id,
  unsigned     aggression;     /* the deflate level */
  unsigned     szip_options_mask=H5_SZIP_NN_OPTION_MASK;
  unsigned     szip_pixels_per_block;
-
-
  
  /* get information about filters */
  if ((nfilters = H5Pget_nfilters(dcpl_id))<0) 
@@ -139,7 +137,26 @@ int apply_filter(hid_t dcpl_id,
   }
   
   break;
+
   
+ case H5Z_FILTER_SHUFFLE:
+  
+  if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
+   return -1;
+  if (H5Pset_shuffle(dcpl_id)<0) 
+   return -1;
+  
+  break;
+  
+ case H5Z_FILTER_FLETCHER32:
+
+  if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
+   return -1;
+  if (H5Pset_fletcher32(dcpl_id)<0) 
+   return -1;
+
+  break;
+
   
  default:
   break;

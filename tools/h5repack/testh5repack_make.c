@@ -274,20 +274,6 @@ int make_special_objects(hid_t loc_id)
  if ((group3_id = H5Gcreate(group2_id,"g3",0))<0)
   return -1;
 
- /*
-  H5Glink2(curr_loc_id, current_name, link_type, new_loc_id, new_name ) 
-  hid_t curr_loc_id 
-    IN: The file or group identifier for the original object. 
-  const char * current_name 
-    IN: Name of the existing object if link is a hard link. 
-  H5G_link_t link_type 
-    IN: Link type. Possible values are H5G_LINK_HARD and H5G_LINK_SOFT. 
-  hid_t new_loc_id 
-    IN: The file or group identifier for the new link. 
-  const char * new_name 
-    IN: New name for the object.
-  */
-
  if (H5Glink2(loc_id, "g1", H5G_LINK_HARD, group2_id, "link1 to g1")<0)
   return -1;
  if (H5Glink2(group1_id, "g2", H5G_LINK_HARD, group3_id, "link1 to g2")<0)

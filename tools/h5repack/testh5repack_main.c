@@ -46,9 +46,11 @@ test_copy(void)
   TEST_ERROR;
  if (h5repack(FNAME1,FNAME1OUT,&pack_options)<0)
   TEST_ERROR;
- if (h5repack_end (&pack_options)<0)
-  TEST_ERROR;
  if (h5diff(FNAME1,FNAME1OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME1OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
  PASSED(); 
 
@@ -57,9 +59,11 @@ test_copy(void)
   TEST_ERROR;
  if (h5repack(FNAME2,FNAME2OUT,&pack_options)<0)
   TEST_ERROR;
- if (h5repack_end (&pack_options)<0)
-  TEST_ERROR;
  if (h5diff(FNAME2,FNAME2OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME2OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
  PASSED();      
 
@@ -68,9 +72,11 @@ test_copy(void)
   TEST_ERROR;
  if (h5repack(FNAME3,FNAME3OUT,&pack_options)<0)
   TEST_ERROR;
- if (h5repack_end (&pack_options)<0)
-  TEST_ERROR;
  if (h5diff(FNAME3,FNAME3OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME3OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
  PASSED();          
  
@@ -113,6 +119,28 @@ test_filter_deflate(void)
 
 #ifdef H5_HAVE_FILTER_DEFLATE
 
+/*-------------------------------------------------------------------------
+ * test no object option (preserve old filters)
+ *-------------------------------------------------------------------------
+ */
+
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+
+/*-------------------------------------------------------------------------
+ * test an individual object option
+ *-------------------------------------------------------------------------
+ */
+
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack_addfilter("dset1:GZIP 9",&pack_options)<0)
@@ -127,6 +155,11 @@ test_filter_deflate(void)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
+
+/*-------------------------------------------------------------------------
+ * test all objects option
+ *-------------------------------------------------------------------------
+ */
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
@@ -190,11 +223,126 @@ test_filter_szip(void)
 
 #ifdef H5_HAVE_FILTER_SZIP
 
+/*-------------------------------------------------------------------------
+ * test an individual object option
+ *-------------------------------------------------------------------------
+ */
+
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack_addfilter("dset2:SZIP 8",&pack_options)<0)
   TEST_ERROR;
  if (h5repack_addchunk("dset2:20x10",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+/*-------------------------------------------------------------------------
+ * test all objects option
+ *-------------------------------------------------------------------------
+ */
+
+
+#if 0
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("SZIP 8",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack_addchunk("20x10",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+#endif
+ 
+ 
+ PASSED();  
+#else
+ SKIPPED();
+#endif
+ return 0; 
+ 
+#ifdef H5_HAVE_FILTER_SZIP
+error:                                                       
+ return 1;
+#endif
+
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: test_filter_shuffle
+ *
+ * Purpose: 
+ *
+ * 1) compress/chunk FILENAME with the shuffle filter
+ * 2) use the h5diff utility to compare the input and output file; 
+ *     it returns RET==0 if the objects have the same data
+ * 3) use API functions to verify the compression/chunking input on the output file
+ *
+ * Return: Success: zero
+ *  Failure: 1
+ *
+ * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
+ *             September, 19, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_filter_shuffle(void)
+{
+ pack_opt_t  pack_options;
+ diff_opt_t  diff_options;
+ memset(&diff_options, 0, sizeof (diff_opt_t));
+ memset(&pack_options, 0, sizeof (pack_opt_t));
+
+ TESTING("    shuffle filter");
+
+#ifdef H5_HAVE_FILTER_SHUFFLE
+
+/*-------------------------------------------------------------------------
+ * test an individual object option
+ *-------------------------------------------------------------------------
+ */
+
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset1:SHUF",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack_addchunk("dset1:20x10",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+/*-------------------------------------------------------------------------
+ * test all objects option
+ *-------------------------------------------------------------------------
+ */
+
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("SHUF",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack_addchunk("20x10",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
@@ -211,13 +359,101 @@ test_filter_szip(void)
 #endif
  return 0; 
  
-#ifdef H5_HAVE_FILTER_SZIP
+#ifdef H5_HAVE_FILTER_SHUFFLE
 error:                                                       
  return 1;
 #endif
 
 
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function: test_filter_checksum 
+ *
+ * Purpose: 
+ *
+ * 1) compress/chunk FILENAME with the checksum filter
+ * 2) use the h5diff utility to compare the input and output file; 
+ *     it returns RET==0 if the objects have the same data
+ * 3) use API functions to verify the compression/chunking input on the output file
+ *
+ * Return: Success: zero
+ *  Failure: 1
+ *
+ * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
+ *             September, 19, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_filter_checksum(void)
+{
+ pack_opt_t  pack_options;
+ diff_opt_t  diff_options;
+ memset(&diff_options, 0, sizeof (diff_opt_t));
+ memset(&pack_options, 0, sizeof (pack_opt_t));
+
+ TESTING("    checksum filter");
+
+#ifdef H5_HAVE_FILTER_FLETCHER32
+
+/*-------------------------------------------------------------------------
+ * test an individual object option
+ *-------------------------------------------------------------------------
+ */
+
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset1:FLET",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack_addchunk("dset1:20x10",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+/*-------------------------------------------------------------------------
+ * test all objects option
+ *-------------------------------------------------------------------------
+ */
+
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("FLET",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack_addchunk("20x10",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+ 
+ PASSED();  
+#else
+ SKIPPED();
+#endif
+ return 0; 
+ 
+#ifdef H5_HAVE_FILTER_FLETCHER32
+error:                                                       
+ return 1;
+#endif
+
+
+}
+
 
 
 /*-------------------------------------------------------------------------
@@ -255,6 +491,12 @@ int main (void)
 
  /* test a copy with the szip filter */
  nerrors += test_filter_szip();
+
+ /* test a copy with the shuffle filter */
+ nerrors += test_filter_shuffle();
+
+ /* test a copy with the checksum filter */
+ nerrors += test_filter_checksum();
 
  /* check for errors */
  if (nerrors)
