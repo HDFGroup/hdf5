@@ -6,7 +6,11 @@
  * Author:  Thomas Radke <tradke@aei-potsdam.mpg.de>
  *          Tuesday, September 12, 2000
  *
+ * Version: $Id$
+ *
  * Modifications:
+ *          Thomas Radke, Thursday, October 26, 2000
+ *          Made it compiling under Windows.
  *
  */
 
@@ -28,22 +32,33 @@
  *       processes and returns their exit code.
  */
 
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <stdio.h>
-#include <stdlib.h>
-
-#include <h5test.h>
+#include <hdf5.h>
 
 #ifndef H5_HAVE_STREAM
 
 int main (void)
 {
-    printf ("Test skipped because Stream Virtual File Driver not available\n");
-    return (0);
+  printf ("Test skipped because Stream Virtual File Driver not available\n");
+  return (0);
+}
+
+#elif ! defined (H5_HAVE_FORK) || ! defined (H5_HAVE_WAITPID)
+
+int main (void)
+{
+  printf ("Test skipped because this architecture doesn't provide "
+          "fork(2) and waitpid(2)\n");
+  return (0);
 }
 
 #else
+
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
 
 #define DELAY         10                /* sleeping time in seconds  */
 #define RANK          2                 /* sample dataset rank       */
