@@ -65,8 +65,15 @@ const H5Z_class_t H5Z_FLETCHER32[1] = {{
  *-------------------------------------------------------------------------
  */
 static uint32_t
-H5Z_filter_fletcher32_compute(unsigned short *src, size_t len)
+H5Z_filter_fletcher32_compute(void *_src, size_t len)
 {
+#if H5_SIZEOF_UINT16_T==2
+    uint16_t *src=(uint16_t *)_src;
+#else /* H5_SIZEOF_UINT16_T */
+    /*To handle unusual platforms like Cray*/
+    unsigned char *src=(unsigned char *)_src;
+    unsigned short tmp_src;
+#endif /* H5_SIZEOF_UINT16_T */
     size_t count = len;         /* Number of bytes left to checksum */
     uint32_t s1 = 0, s2 = 0;    /* Temporary partial checksums */
 
@@ -74,7 +81,15 @@ H5Z_filter_fletcher32_compute(unsigned short *src, size_t len)
 
     /* Compute checksum */
     while(count > 1) {
+#if H5_SIZEOF_UINT16_T==2
+        /*For normal platforms*/
         s1 += *src++;
+#else /* H5_SIZEOF_UINT16_T */
+        /*To handle unusual platforms like Cray*/
+        tmp_src = (((unsigned short)src[0])<<8) | ((unsigned short)src[1]);
+        src +=2;
+        s1 += tmp_src;
+#endif /* H5_SIZEOF_UINT16_T */
         if(s1 & 0xFFFF0000) { /*Wrap around carry if occurred*/
             s1 &= 0xFFFF;
             s1++;
@@ -130,7 +145,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
     
     FUNC_ENTER_NOAPI(H5Z_filter_fletcher32, 0);
 
-    assert(sizeof(uint32_t)==4);
+    assert(sizeof(uint32_t)>=4);
    
     if (flags & H5Z_FLAG_REVERSE) { /* Read */
         /* Do checksum if it's enabled for read; otherwise skip it
