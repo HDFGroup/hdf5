@@ -26,17 +26,17 @@
 
 /* Token types */
 typedef enum {
-    ERROR,
-    H5Z_INTEGER, /* this represents an integer type in the data transform expression */
-    H5Z_FLOAT,  /* this represents a floating point type in the data transform expression */
-    SYMBOL,
-    PLUS,
-    MINUS,
-    MULT,
-    DIVIDE,
-    LPAREN,
-    RPAREN,
-    END
+    H5Z_XFORM_ERROR,
+    H5Z_XFORM_INTEGER, /* this represents an integer type in the data transform expression */
+    H5Z_XFORM_FLOAT,  /* this represents a floating point type in the data transform expression */
+    H5Z_XFORM_SYMBOL,
+    H5Z_XFORM_PLUS,
+    H5Z_XFORM_MINUS,
+    H5Z_XFORM_MULT,
+    H5Z_XFORM_DIVIDE,
+    H5Z_XFORM_LPAREN,
+    H5Z_XFORM_RPAREN,
+    H5Z_XFORM_END
 } H5Z_token_type;
 
 typedef union {
@@ -118,8 +118,8 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
  *              '+' factor  |   // unary plus
  *              '(' expr ')'
  * symbol   :=  [a-zA-Z][a-zA-Z0-9]*
- * number   :=  H5Z_INTEGER | FLOAT
- *      // H5Z_INTEGER is a C long int
+ * number   :=  H5Z_XFORM_INTEGER | FLOAT
+ *      // H5Z_XFORM_INTEGER is a C long int
  *      // FLOAT is a C double
  */
 
@@ -199,13 +199,13 @@ H5Z_get_token(H5Z_token *current)
             current->tok_end = current->tok_begin;
 
             /*
-             * H5Z_INTEGER          :=  digit-sequence
+             * H5Z_XFORM_INTEGER          :=  digit-sequence
              * digit-sequence   :=  digit | digit digit-sequence
              * digit            :=  0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
              */
             if (current->tok_end[0] != '.') {
                 /* is number */
-                current->tok_type = H5Z_INTEGER;
+                current->tok_type = H5Z_XFORM_INTEGER;
 
                 while (isdigit(current->tok_end[0]))
                     ++current->tok_end;
@@ -221,7 +221,7 @@ H5Z_get_token(H5Z_token *current)
             if (current->tok_end[0] == '.' ||
                     current->tok_end[0] == 'e' ||
                     current->tok_end[0] == 'E') {
-                current->tok_type = H5Z_FLOAT;
+                current->tok_type = H5Z_XFORM_FLOAT;
 
                 if (current->tok_end[0] == '.')
                     do {
@@ -237,7 +237,7 @@ H5Z_get_token(H5Z_token *current)
                         ++current->tok_end;
 
                     if (!isdigit(current->tok_end[0])) {
-                        current->tok_type = ERROR;
+                        current->tok_type = H5Z_XFORM_ERROR;
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, current, "Invalidly formatted floating point number")
                     }
 
@@ -247,7 +247,7 @@ H5Z_get_token(H5Z_token *current)
 
                 /* Check that this is a properly formatted numerical value */
                 if (isalpha(current->tok_end[0]) || current->tok_end[0] == '.') {
-                    current->tok_type = ERROR;
+                    current->tok_type = H5Z_XFORM_ERROR;
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, current, "Invalidly formatted floating point number")
                 }
             }
@@ -255,7 +255,7 @@ H5Z_get_token(H5Z_token *current)
             break;
         } else if (isalpha(current->tok_begin[0])) {
             /* is symbol */
-            current->tok_type = SYMBOL;
+            current->tok_type = H5Z_XFORM_SYMBOL;
             current->tok_end = current->tok_begin;
 
             while (isalnum(current->tok_end[0]))
@@ -265,14 +265,14 @@ H5Z_get_token(H5Z_token *current)
         } else {
             /* should be +, -, *, /, (, or ) */
             switch (current->tok_begin[0]) {
-                case '+':   current->tok_type = PLUS;    break;
-                case '-':   current->tok_type = MINUS;   break;
-                case '*':   current->tok_type = MULT;    break;
-                case '/':   current->tok_type = DIVIDE;  break;
-                case '(':   current->tok_type = LPAREN;  break;
-                case ')':   current->tok_type = RPAREN;  break;
+                case '+':   current->tok_type = H5Z_XFORM_PLUS;    break;
+                case '-':   current->tok_type = H5Z_XFORM_MINUS;   break;
+                case '*':   current->tok_type = H5Z_XFORM_MULT;    break;
+                case '/':   current->tok_type = H5Z_XFORM_DIVIDE;  break;
+                case '(':   current->tok_type = H5Z_XFORM_LPAREN;  break;
+                case ')':   current->tok_type = H5Z_XFORM_RPAREN;  break;
                 default:
-                    current->tok_type = ERROR;
+                    current->tok_type = H5Z_XFORM_ERROR;
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, current, "Unknown H5Z_token in data transform expression ")
             }
 
@@ -284,7 +284,7 @@ H5Z_get_token(H5Z_token *current)
     }
 
     if (current->tok_begin[0] == '\0')
-        current->tok_type = END;
+        current->tok_type = H5Z_XFORM_END;
 
     HGOTO_DONE(current);
 
@@ -313,7 +313,7 @@ H5Z_xform_destroy_parse_tree(H5Z_node *tree)
     if (!tree)
         return;
 
-    if (tree->type == SYMBOL)
+    if (tree->type == H5Z_XFORM_SYMBOL)
         H5MM_xfree(tree->value.sym_val);
 
     H5Z_xform_destroy_parse_tree(tree->lchild);
@@ -394,8 +394,8 @@ H5Z_parse_expression(H5Z_token *current)
         current = H5Z_get_token(current);
 
         switch (current->tok_type) {
-        case PLUS:
-            new_node = H5Z_new_node(PLUS);
+        case H5Z_XFORM_PLUS:
+            new_node = H5Z_new_node(H5Z_XFORM_PLUS);
 
             if (!new_node) {
                 H5Z_xform_destroy_parse_tree(expr);
@@ -414,8 +414,8 @@ H5Z_parse_expression(H5Z_token *current)
 
             expr = new_node;
             break;
-        case MINUS:
-            new_node = H5Z_new_node(MINUS);
+        case H5Z_XFORM_MINUS:
+            new_node = H5Z_new_node(H5Z_XFORM_MINUS);
 
             if (!new_node) {
                 H5Z_xform_destroy_parse_tree(expr);
@@ -434,10 +434,10 @@ H5Z_parse_expression(H5Z_token *current)
 
             expr = new_node;
             break;
-        case RPAREN:
+        case H5Z_XFORM_RPAREN:
             H5Z_unget_token(current);
             HGOTO_DONE(expr)
-        case END:
+        case H5Z_XFORM_END:
             HGOTO_DONE(expr)
         default:
             H5Z_xform_destroy_parse_tree(expr);
@@ -482,8 +482,8 @@ H5Z_parse_term(H5Z_token *current)
         current = H5Z_get_token(current);
 
         switch (current->tok_type) {
-        case MULT:
-            new_node = H5Z_new_node(MULT);
+        case H5Z_XFORM_MULT:
+            new_node = H5Z_new_node(H5Z_XFORM_MULT);
 
             if (!new_node) {
                 H5Z_xform_destroy_parse_tree(term);
@@ -502,8 +502,8 @@ H5Z_parse_term(H5Z_token *current)
 
             term = new_node;
             break;
-        case DIVIDE:
-            new_node = H5Z_new_node(DIVIDE);
+        case H5Z_XFORM_DIVIDE:
+            new_node = H5Z_new_node(H5Z_XFORM_DIVIDE);
 
             if (!new_node) {
                 H5Z_xform_destroy_parse_tree(term);
@@ -522,10 +522,10 @@ H5Z_parse_term(H5Z_token *current)
             }
 
             break;
-        case RPAREN:
+        case H5Z_XFORM_RPAREN:
             H5Z_unget_token(current);
             HGOTO_DONE(term)
-        case END:
+        case H5Z_XFORM_END:
             HGOTO_DONE(term)
         default:
             H5Z_unget_token(current);
@@ -570,24 +570,24 @@ H5Z_parse_factor(H5Z_token *current)
     current = H5Z_get_token(current);
 
     switch (current->tok_type) {
-    case H5Z_INTEGER:
-        factor = H5Z_new_node(H5Z_INTEGER);
+    case H5Z_XFORM_INTEGER:
+        factor = H5Z_new_node(H5Z_XFORM_INTEGER);
 
         if (!factor)
             HGOTO_DONE(factor)
 
         sscanf(current->tok_begin, "%ld", &factor->value.int_val);
         break;
-    case H5Z_FLOAT:
-        factor = H5Z_new_node(H5Z_FLOAT);
+    case H5Z_XFORM_FLOAT:
+        factor = H5Z_new_node(H5Z_XFORM_FLOAT);
 
         if (!factor)
             HGOTO_DONE(factor)
 
         sscanf(current->tok_begin, "%lf", &factor->value.float_val);
         break;
-    case SYMBOL:
-        factor = H5Z_new_node(SYMBOL);
+    case H5Z_XFORM_SYMBOL:
+        factor = H5Z_new_node(H5Z_XFORM_SYMBOL);
 
         if (!factor)
             HGOTO_DONE(factor)
@@ -596,7 +596,7 @@ H5Z_parse_factor(H5Z_token *current)
         HDstrncpy(factor->value.sym_val, current->tok_begin,
                 (size_t)(current->tok_end - current->tok_begin));
         break;
-    case LPAREN:
+    case H5Z_XFORM_LPAREN:
         factor = H5Z_parse_expression(current);
 
         if (!factor)
@@ -604,25 +604,25 @@ H5Z_parse_factor(H5Z_token *current)
 
         current = H5Z_get_token(current);
 
-        if (current->tok_type != RPAREN) {
+        if (current->tok_type != H5Z_XFORM_RPAREN) {
             H5Z_xform_destroy_parse_tree(factor);
             factor = NULL;
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Syntax error in data transform expression")
         }
 
         break;
-    case RPAREN:
+    case H5Z_XFORM_RPAREN:
         /* We shouldn't see a ) right now */
         H5Z_xform_destroy_parse_tree(factor);
         factor = NULL;
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Syntax error: unexpected ')' ")
-    case PLUS:
+    case H5Z_XFORM_PLUS:
         /* unary + */
         new_node = H5Z_parse_factor(current);
 
         if (new_node) {
-            if (new_node->type != H5Z_INTEGER && new_node->type != H5Z_FLOAT &&
-                    new_node->type != SYMBOL) {
+            if (new_node->type != H5Z_XFORM_INTEGER && new_node->type != H5Z_XFORM_FLOAT &&
+                    new_node->type != H5Z_XFORM_SYMBOL) {
                 H5Z_xform_destroy_parse_tree(new_node);
                 H5Z_xform_destroy_parse_tree(factor);
                 factor=NULL;
@@ -630,7 +630,7 @@ H5Z_parse_factor(H5Z_token *current)
             }
 
             factor = new_node;
-            new_node = H5Z_new_node(PLUS);
+            new_node = H5Z_new_node(H5Z_XFORM_PLUS);
 
             if (!new_node) {
                 H5Z_xform_destroy_parse_tree(factor);
@@ -647,13 +647,13 @@ H5Z_parse_factor(H5Z_token *current)
         }
 
         break;
-    case MINUS:
+    case H5Z_XFORM_MINUS:
         /* unary - */
         new_node = H5Z_parse_factor(current);
 
         if (new_node) {
-            if (new_node->type != H5Z_INTEGER && new_node->type != H5Z_FLOAT &&
-                    new_node->type != SYMBOL) {
+            if (new_node->type != H5Z_XFORM_INTEGER && new_node->type != H5Z_XFORM_FLOAT &&
+                    new_node->type != H5Z_XFORM_SYMBOL) {
                 H5Z_xform_destroy_parse_tree(new_node);
                 H5Z_xform_destroy_parse_tree(factor);
                 factor = NULL;
@@ -661,7 +661,7 @@ H5Z_parse_factor(H5Z_token *current)
             }
 
             factor = new_node;
-            new_node = H5Z_new_node(MINUS);
+            new_node = H5Z_new_node(H5Z_XFORM_MINUS);
 
             if (!new_node) {
                 H5Z_xform_destroy_parse_tree(factor);
@@ -678,7 +678,7 @@ H5Z_parse_factor(H5Z_token *current)
         }
 
         break;
-    case END:
+    case H5Z_XFORM_END:
         HGOTO_DONE(factor)
     }
 
@@ -755,7 +755,7 @@ herr_t H5Z_xform_eval(const H5Z_data_xform_t *data_xform_prop, void* array, hsiz
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Could not find matching data type for data transform.")
 
     /* If it's a trivial data transform, perform it */
-    if( tree->type == H5Z_INTEGER)
+    if( tree->type == H5Z_XFORM_INTEGER)
     {
 	if(array_type == H5T_NATIVE_INT)
 	{
@@ -775,7 +775,7 @@ herr_t H5Z_xform_eval(const H5Z_data_xform_t *data_xform_prop, void* array, hsiz
 
 
     }
-    else if (tree->type == H5Z_FLOAT)
+    else if (tree->type == H5Z_XFORM_FLOAT)
     {
 	if(array_type == H5T_NATIVE_INT)
 	{
@@ -798,7 +798,7 @@ herr_t H5Z_xform_eval(const H5Z_data_xform_t *data_xform_prop, void* array, hsiz
     else
     {
 	res = H5Z_eval_full(tree, array, array_size, array_type);
-	if(res.type == ERROR)
+	if(res.type == H5Z_XFORM_ERROR)
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform")
     }
 
@@ -828,28 +828,28 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
     H5Z_result res, resl, resr, ret_value, error;
     unsigned int i;
     
-    error.type = ERROR;
+    error.type = H5Z_XFORM_ERROR;
         
     FUNC_ENTER_NOAPI(H5Z_eval_full, ret_value);
     
     /* check args */
     assert(tree);
 
-    if (tree->type == H5Z_INTEGER) 
+    if (tree->type == H5Z_XFORM_INTEGER) 
     {
-        res.type = H5Z_INTEGER;
+        res.type = H5Z_XFORM_INTEGER;
         res.value = tree->value;
         HGOTO_DONE(res)
     } 
-    else if (tree->type == H5Z_FLOAT) 
+    else if (tree->type == H5Z_XFORM_FLOAT) 
     {
-        res.type = H5Z_FLOAT;
+        res.type = H5Z_XFORM_FLOAT;
         res.value = tree->value;
         HGOTO_DONE(res)
     } 
-    else if (tree->type == SYMBOL) 
+    else if (tree->type == H5Z_XFORM_SYMBOL) 
     {
-        res.type = SYMBOL;
+        res.type = H5Z_XFORM_SYMBOL;
         res.value = tree->value;
         res.ar_type = array_type;
         HGOTO_DONE(res)
@@ -860,10 +860,10 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
         resr = H5Z_eval_full(tree->rchild, array, array_size, array_type);
         switch (tree->type) 
         {
-        case PLUS:  
-           if( (resl.type == SYMBOL) && (resr.type==H5Z_INTEGER))
+        case H5Z_XFORM_PLUS:  
+           if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_INTEGER))
             {
-                res.type = SYMBOL; 
+                res.type = H5Z_XFORM_SYMBOL; 
                     if(array_type == H5T_NATIVE_INT)
                     {
 			for(i=0; i<array_size; i++)
@@ -878,9 +878,9 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
 			HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, error, "Cannot perform a data transform on this type")
              HGOTO_DONE(res)
             }
-            else if( (resl.type == SYMBOL) && (resr.type==H5Z_FLOAT)) 
+            else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_FLOAT)) 
             {
-                res.type = SYMBOL;
+                res.type = H5Z_XFORM_SYMBOL;
                     if(array_type == H5T_NATIVE_INT)
                     {
 			for(i=0; i<array_size; i++)
@@ -896,9 +896,9 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
 
                 HGOTO_DONE(res)
             }
-            else if( (resr.type == SYMBOL) && (resl.type==H5Z_INTEGER))
+            else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_INTEGER))
             {
-                 res.type = SYMBOL; 
+                 res.type = H5Z_XFORM_SYMBOL; 
                     if(array_type == H5T_NATIVE_INT)
                     {
 			for(i=0; i<array_size; i++)
@@ -914,10 +914,10 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
                 HGOTO_DONE(res)
           
             }
-	   else if( (resr.type == SYMBOL) && (resl.type==H5Z_FLOAT))
+	   else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_FLOAT))
 	   {
 
-	       res.type = SYMBOL;
+	       res.type = H5Z_XFORM_SYMBOL;
 	       if(array_type == H5T_NATIVE_INT)
 	       {
 		   for(i=0; i<array_size; i++)
@@ -937,11 +937,11 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
 
             HGOTO_DONE(res) 
             break;
-	case MINUS:
+	case H5Z_XFORM_MINUS:
 
-	    if( (resl.type == SYMBOL) && (resr.type==H5Z_INTEGER))
+	    if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_INTEGER))
 	    {
-		res.type = SYMBOL; 
+		res.type = H5Z_XFORM_SYMBOL; 
 		if(array_type == H5T_NATIVE_INT)
 		{
 		    for(i=0; i<array_size; i++)
@@ -956,9 +956,9 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
 
 			HGOTO_DONE(res)
 	    }
-	    else if( (resl.type == SYMBOL) && (resr.type==H5Z_FLOAT)) /*we can't upgrade an array w/o allocating more memory, so we downgrade the float_val to an int.*/
+	    else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_FLOAT)) /*we can't upgrade an array w/o allocating more memory, so we downgrade the float_val to an int.*/
 	    {
-                res.type = SYMBOL;
+                res.type = H5Z_XFORM_SYMBOL;
                     if(array_type == H5T_NATIVE_INT)
                     {
 			for(i=0; i<array_size; i++)
@@ -975,9 +975,9 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
 		    }
 		    HGOTO_DONE(res)
 	    }
-	    else if( (resr.type == SYMBOL) && (resl.type==H5Z_INTEGER))
+	    else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_INTEGER))
 	    {
-		res.type = SYMBOL; 
+		res.type = H5Z_XFORM_SYMBOL; 
 		    if(array_type == H5T_NATIVE_INT)
 		    {
 			for(i=0; i<array_size; i++)
@@ -993,10 +993,10 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
 		HGOTO_DONE(res)
 
 	    }
-	    else if( (resr.type == SYMBOL) && (resl.type==H5Z_FLOAT))
+	    else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_FLOAT))
             {
 
-		res.type = SYMBOL;
+		res.type = H5Z_XFORM_SYMBOL;
 		if(array_type == H5T_NATIVE_INT)
 		{
 		    for(i=0; i<array_size; i++)
@@ -1019,11 +1019,11 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
             break;
 
 
-        case MULT:
+        case H5Z_XFORM_MULT:
 
-	    if( (resl.type == SYMBOL) && (resr.type==H5Z_INTEGER))
+	    if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_INTEGER))
 	    {
-		res.type = SYMBOL; 
+		res.type = H5Z_XFORM_SYMBOL; 
 		if(array_type == H5T_NATIVE_INT)
 		{
 		    for(i=0; i<array_size; i++)
@@ -1038,9 +1038,9 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
 
 			HGOTO_DONE(res)
 	    }
-	    else if( (resl.type == SYMBOL) && (resr.type==H5Z_FLOAT)) 
+	    else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_FLOAT)) 
 	    {
-		res.type = SYMBOL;
+		res.type = H5Z_XFORM_SYMBOL;
 		if(array_type == H5T_NATIVE_INT)
 		{
 		    for(i=0; i<array_size; i++)
@@ -1055,9 +1055,9 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
 
 			HGOTO_DONE(res)
 	    }
-	    else if( (resr.type == SYMBOL) && (resl.type==H5Z_INTEGER))
+	    else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_INTEGER))
 	    {
-		res.type = SYMBOL; 
+		res.type = H5Z_XFORM_SYMBOL; 
 		if(array_type == H5T_NATIVE_INT)
 		{
 		    for(i=0; i<array_size; i++)
@@ -1073,10 +1073,10 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
 			HGOTO_DONE(res)
 
 	    }
-	    else if( (resr.type == SYMBOL) && (resl.type==H5Z_FLOAT)) 
+	    else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_FLOAT)) 
 	    {
 
-		res.type = SYMBOL;
+		res.type = H5Z_XFORM_SYMBOL;
 		if(array_type == H5T_NATIVE_INT)
 		{
 		    for(i=0; i<array_size; i++)
@@ -1098,11 +1098,11 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
 	    break;
 
 
-	case DIVIDE: 
+	case H5Z_XFORM_DIVIDE: 
 
-	    if( (resl.type == SYMBOL) && (resr.type==H5Z_INTEGER))
+	    if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_INTEGER))
 	    {
-		res.type = SYMBOL; 
+		res.type = H5Z_XFORM_SYMBOL; 
 		if(array_type == H5T_NATIVE_INT)
 		{
 		    for(i=0; i<array_size; i++)
@@ -1117,9 +1117,9 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
 
 			HGOTO_DONE(res)
 	    }
-	    else if( (resl.type == SYMBOL) && (resr.type==H5Z_FLOAT)) 
+	    else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_FLOAT)) 
 	    {
-		res.type = SYMBOL;
+		res.type = H5Z_XFORM_SYMBOL;
 		if(array_type == H5T_NATIVE_INT)
 		{
 		    for(i=0; i<array_size; i++)
@@ -1134,9 +1134,9 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
 
                 HGOTO_DONE(res)
             }
-            else if( (resr.type == SYMBOL) && (resl.type==H5Z_INTEGER))
+            else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_INTEGER))
             {
-                res.type = SYMBOL; 
+                res.type = H5Z_XFORM_SYMBOL; 
                 {
                     if(array_type == H5T_NATIVE_INT)
 		    {
@@ -1154,10 +1154,10 @@ H5Z_eval_full(H5Z_node *tree, void* array, hsize_t array_size,  hid_t array_type
                 HGOTO_DONE(res)
 
             }
-            else if( (resr.type == SYMBOL) && (resl.type==H5Z_FLOAT))
+            else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type==H5Z_XFORM_FLOAT))
             {
 
-                res.type = SYMBOL;
+                res.type = H5Z_XFORM_SYMBOL;
 		{
 		    if(array_type == H5T_NATIVE_INT)
 		    {
@@ -1289,79 +1289,79 @@ void* H5Z_xform_copy_tree(H5Z_node* tree)
    
     assert(tree);   
 
-    if(tree->type == H5Z_INTEGER)
+    if(tree->type == H5Z_XFORM_INTEGER)
     {
         if ((ret_value = (H5Z_node*) H5MM_malloc(sizeof(H5Z_node))) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree")
         else
         {
-            ret_value -> type = H5Z_INTEGER;
+            ret_value -> type = H5Z_XFORM_INTEGER;
             ret_value ->value.int_val = tree->value.int_val;
         }
     }
-    else if (tree->type == H5Z_FLOAT)
+    else if (tree->type == H5Z_XFORM_FLOAT)
     {   
         if ((ret_value = (H5Z_node*) H5MM_malloc(sizeof(H5Z_node))) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree")
         else
         {   
-            ret_value -> type = H5Z_FLOAT;
+            ret_value -> type = H5Z_XFORM_FLOAT;
             ret_value ->value.float_val = tree->value.float_val;
         }   
     }
-    else if(tree->type == SYMBOL)
+    else if(tree->type == H5Z_XFORM_SYMBOL)
     {   
         if ((ret_value = (H5Z_node*) H5MM_malloc(sizeof(H5Z_node))) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree")
         else
         {   
-            ret_value -> type = SYMBOL;
+            ret_value -> type = H5Z_XFORM_SYMBOL;
             if ((ret_value->value.sym_val = (char*) H5MM_malloc(strlen(tree->value.sym_val)+1)) == NULL)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree")
             else 
                 strcpy(ret_value ->value.sym_val, tree->value.sym_val);
         }   
     }   
-    else if(tree->type == MULT)
+    else if(tree->type == H5Z_XFORM_MULT)
     {
         if ((ret_value = (H5Z_node*) H5MM_malloc(sizeof(H5Z_node))) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree")
         else
         {
-            ret_value->type = MULT;
+            ret_value->type = H5Z_XFORM_MULT;
             ret_value->lchild = (H5Z_node*) H5Z_xform_copy_tree(tree->lchild);
             ret_value->rchild = (H5Z_node*) H5Z_xform_copy_tree(tree->rchild);
         }
     }
-    else if(tree->type == PLUS)
+    else if(tree->type == H5Z_XFORM_PLUS)
     {
         if ((ret_value = (H5Z_node*) H5MM_malloc(sizeof(H5Z_node))) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree")
         else
         {
-            ret_value->type = PLUS;
+            ret_value->type = H5Z_XFORM_PLUS;
             ret_value->lchild = (H5Z_node*) H5Z_xform_copy_tree(tree->lchild);
             ret_value->rchild = (H5Z_node*) H5Z_xform_copy_tree(tree->rchild);
         }
     }
-    else if(tree->type == MINUS)
+    else if(tree->type == H5Z_XFORM_MINUS)
     {
         if ((ret_value = (H5Z_node*) H5MM_malloc(sizeof(H5Z_node))) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree")
         else
         {
-            ret_value->type = MINUS;
+            ret_value->type = H5Z_XFORM_MINUS;
             ret_value->lchild = (H5Z_node*) H5Z_xform_copy_tree(tree->lchild);
             ret_value->rchild = (H5Z_node*) H5Z_xform_copy_tree(tree->rchild);
         }
     }
-    else if(tree->type == DIVIDE)
+    else if(tree->type == H5Z_XFORM_DIVIDE)
     {
         if ((ret_value = (H5Z_node*) H5MM_malloc(sizeof(H5Z_node))) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Ran out of memory trying to copy parse tree")
         else
         {
-            ret_value->type = DIVIDE;
+            ret_value->type = H5Z_XFORM_DIVIDE;
             ret_value->lchild = (H5Z_node*) H5Z_xform_copy_tree(tree->lchild);
             ret_value->rchild = (H5Z_node*) H5Z_xform_copy_tree(tree->rchild);
         }
@@ -1397,21 +1397,21 @@ void H5Z_xform_reduce_tree(H5Z_node* tree)
         if(!tree)
             HGOTO_DONE(SUCCEED)
 
-    if((tree->type == PLUS) || (tree->type == DIVIDE) ||(tree->type == MULT) ||(tree->type == MINUS))
+    if((tree->type == H5Z_XFORM_PLUS) || (tree->type == H5Z_XFORM_DIVIDE) ||(tree->type == H5Z_XFORM_MULT) ||(tree->type == H5Z_XFORM_MINUS))
     {
-        if(((tree->lchild->type == H5Z_INTEGER) || (tree->lchild->type == H5Z_FLOAT)) && ((tree->rchild->type == H5Z_INTEGER) || (tree->rchild->type == H5Z_FLOAT)))
+        if(((tree->lchild->type == H5Z_XFORM_INTEGER) || (tree->lchild->type == H5Z_XFORM_FLOAT)) && ((tree->rchild->type == H5Z_XFORM_INTEGER) || (tree->rchild->type == H5Z_XFORM_FLOAT)))
             H5Z_do_op(tree);
         else
         {
             H5Z_xform_reduce_tree(tree->lchild);
-            if(((tree->lchild->type == H5Z_INTEGER) || (tree->lchild->type == H5Z_FLOAT)) && ((tree->rchild->type == H5Z_INTEGER) || (tree->rchild->type == H5Z_FLOAT)))
+            if(((tree->lchild->type == H5Z_XFORM_INTEGER) || (tree->lchild->type == H5Z_XFORM_FLOAT)) && ((tree->rchild->type == H5Z_XFORM_INTEGER) || (tree->rchild->type == H5Z_XFORM_FLOAT)))
 	    {
 	       	H5Z_do_op(tree);
 		HGOTO_DONE(SUCCEED)
 	    }
 
             H5Z_xform_reduce_tree(tree->rchild);
-            if(((tree->lchild->type == H5Z_INTEGER) || (tree->lchild->type == H5Z_FLOAT)) && ((tree->rchild->type == H5Z_INTEGER) || (tree->rchild->type == H5Z_FLOAT)))
+            if(((tree->lchild->type == H5Z_XFORM_INTEGER) || (tree->lchild->type == H5Z_XFORM_FLOAT)) && ((tree->rchild->type == H5Z_XFORM_INTEGER) || (tree->rchild->type == H5Z_XFORM_FLOAT)))
 	    {
 	     	H5Z_do_op(tree);
 		HGOTO_DONE(SUCCEED)
@@ -1444,38 +1444,38 @@ static void H5Z_do_op(H5Z_node* tree)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5Z_do_op)
  
 
-    if(tree->type == DIVIDE)
+    if(tree->type == H5Z_XFORM_DIVIDE)
     {
-        if((tree->lchild->type == H5Z_INTEGER) && (tree->rchild->type==H5Z_INTEGER))
+        if((tree->lchild->type == H5Z_XFORM_INTEGER) && (tree->rchild->type==H5Z_XFORM_INTEGER))
         {
-            tree->type = H5Z_INTEGER;
+            tree->type = H5Z_XFORM_INTEGER;
             tree->value.int_val = tree->lchild->value.int_val / tree->rchild->value.int_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if((tree->lchild->type == H5Z_FLOAT) && (tree->rchild->type == H5Z_FLOAT))
+        else if((tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type == H5Z_XFORM_FLOAT))
         {
-            tree->type = H5Z_FLOAT;
+            tree->type = H5Z_XFORM_FLOAT;
             tree->value.float_val = tree->lchild->value.float_val / tree->rchild->value.float_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if( (tree->lchild->type == H5Z_FLOAT) && (tree->rchild->type==H5Z_INTEGER))
+        else if( (tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type==H5Z_XFORM_INTEGER))
         {
-            tree->type = H5Z_FLOAT;
+            tree->type = H5Z_XFORM_FLOAT;
             tree->value.float_val = tree->lchild->value.float_val / tree->rchild->value.int_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if( (tree->lchild->type == H5Z_INTEGER) && (tree->rchild->type == H5Z_FLOAT))
+        else if( (tree->lchild->type == H5Z_XFORM_INTEGER) && (tree->rchild->type == H5Z_XFORM_FLOAT))
         {
-            tree->type = H5Z_FLOAT;
+            tree->type = H5Z_XFORM_FLOAT;
             tree->value.float_val = tree->lchild->value.int_val / tree->rchild->value.float_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
@@ -1484,40 +1484,40 @@ static void H5Z_do_op(H5Z_node* tree)
         }
 
     }
-    else if(tree->type == MULT)
+    else if(tree->type == H5Z_XFORM_MULT)
     {
 
 
-        if((tree->lchild->type == H5Z_INTEGER) && (tree->rchild->type==H5Z_INTEGER))
+        if((tree->lchild->type == H5Z_XFORM_INTEGER) && (tree->rchild->type==H5Z_XFORM_INTEGER))
         {
-            tree->type = H5Z_INTEGER;
+            tree->type = H5Z_XFORM_INTEGER;
             tree->value.int_val = tree->lchild->value.int_val * tree->rchild->value.int_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if((tree->lchild->type == H5Z_FLOAT) && (tree->rchild->type == H5Z_FLOAT))
+        else if((tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type == H5Z_XFORM_FLOAT))
         {
-            tree->type = H5Z_FLOAT;
+            tree->type = H5Z_XFORM_FLOAT;
             tree->value.float_val = tree->lchild->value.float_val * tree->rchild->value.float_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if( (tree->lchild->type == H5Z_FLOAT) && (tree->rchild->type==H5Z_INTEGER))
+        else if( (tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type==H5Z_XFORM_INTEGER))
         {
-            tree->type = H5Z_FLOAT;
+            tree->type = H5Z_XFORM_FLOAT;
             tree->value.float_val = tree->lchild->value.float_val * tree->rchild->value.int_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if( (tree->lchild->type == H5Z_INTEGER) && (tree->rchild->type == H5Z_FLOAT))
+        else if( (tree->lchild->type == H5Z_XFORM_INTEGER) && (tree->rchild->type == H5Z_XFORM_FLOAT))
         {
-            tree->type = H5Z_FLOAT;
+            tree->type = H5Z_XFORM_FLOAT;
             tree->value.float_val = tree->lchild->value.int_val * tree->rchild->value.float_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
@@ -1526,40 +1526,40 @@ static void H5Z_do_op(H5Z_node* tree)
         }
 
     }
-    else if(tree->type == PLUS)
+    else if(tree->type == H5Z_XFORM_PLUS)
     {
 
 
-        if((tree->lchild->type == H5Z_INTEGER) && (tree->rchild->type==H5Z_INTEGER))
+        if((tree->lchild->type == H5Z_XFORM_INTEGER) && (tree->rchild->type==H5Z_XFORM_INTEGER))
         {
-            tree->type = H5Z_INTEGER;
+            tree->type = H5Z_XFORM_INTEGER;
             tree->value.int_val = tree->lchild->value.int_val + tree->rchild->value.int_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if((tree->lchild->type == H5Z_FLOAT) && (tree->rchild->type == H5Z_FLOAT))
+        else if((tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type == H5Z_XFORM_FLOAT))
         {
-            tree->type = H5Z_FLOAT;
+            tree->type = H5Z_XFORM_FLOAT;
             tree->value.float_val = tree->lchild->value.float_val + tree->rchild->value.float_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if( (tree->lchild->type == H5Z_FLOAT) && (tree->rchild->type==H5Z_INTEGER))
+        else if( (tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type==H5Z_XFORM_INTEGER))
         {
-            tree->type = H5Z_FLOAT;
+            tree->type = H5Z_XFORM_FLOAT;
             tree->value.float_val = tree->lchild->value.float_val + tree->rchild->value.int_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if( (tree->lchild->type == H5Z_INTEGER) && (tree->rchild->type == H5Z_FLOAT))
+        else if( (tree->lchild->type == H5Z_XFORM_INTEGER) && (tree->rchild->type == H5Z_XFORM_FLOAT))
         {
-            tree->type = H5Z_FLOAT;
+            tree->type = H5Z_XFORM_FLOAT;
             tree->value.float_val = tree->lchild->value.int_val + tree->rchild->value.float_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
@@ -1568,40 +1568,40 @@ static void H5Z_do_op(H5Z_node* tree)
         }
 
     }
-    else if(tree->type == MINUS)
+    else if(tree->type == H5Z_XFORM_MINUS)
     {
 
 
-        if((tree->lchild->type == H5Z_INTEGER) && (tree->rchild->type==H5Z_INTEGER))
+        if((tree->lchild->type == H5Z_XFORM_INTEGER) && (tree->rchild->type==H5Z_XFORM_INTEGER))
         {
-            tree->type = H5Z_INTEGER;
+            tree->type = H5Z_XFORM_INTEGER;
             tree->value.int_val = tree->lchild->value.int_val - tree->rchild->value.int_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if((tree->lchild->type == H5Z_FLOAT) && (tree->rchild->type == H5Z_FLOAT))
+        else if((tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type == H5Z_XFORM_FLOAT))
         {
-            tree->type = H5Z_FLOAT;
+            tree->type = H5Z_XFORM_FLOAT;
             tree->value.float_val = tree->lchild->value.float_val - tree->rchild->value.float_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if( (tree->lchild->type == H5Z_FLOAT) && (tree->rchild->type==H5Z_INTEGER))
+        else if( (tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type==H5Z_XFORM_INTEGER))
         {
-            tree->type = H5Z_FLOAT;
+            tree->type = H5Z_XFORM_FLOAT;
             tree->value.float_val = tree->lchild->value.float_val - tree->rchild->value.int_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if( (tree->lchild->type == H5Z_INTEGER) && (tree->rchild->type == H5Z_FLOAT))
+        else if( (tree->lchild->type == H5Z_XFORM_INTEGER) && (tree->rchild->type == H5Z_XFORM_FLOAT))
         {
-            tree->type = H5Z_FLOAT;
+            tree->type = H5Z_XFORM_FLOAT;
             tree->value.float_val = tree->lchild->value.int_val - tree->rchild->value.float_val;
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
@@ -1646,15 +1646,15 @@ H5Z_xform_create(const char *expr)
 
     /* Allocate space for the data transform information */
     if((data_xform_prop = H5MM_calloc(sizeof(H5Z_data_xform_t)))==NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for data transform info")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for data transform info")
    
     /* copy the user's string into the property */
     if((data_xform_prop->xform_exp = H5MM_xstrdup(expr))==NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for data transform expression")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for data transform expression")
    
     /* we generate the parse tree right here and store a poitner to its root in the property. */
     if((data_xform_prop->parse_root = H5Z_xform_parse(expr))==NULL)
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for data transform parse tree")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for data transform parse tree")
 
     /* Assign return value */
     ret_value=data_xform_prop;
