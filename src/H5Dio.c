@@ -2199,6 +2199,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
             const H5S_t *mem_space, fm_map *fm)
 {
     H5S_t *tmp_mspace=NULL;     /* Temporary memory dataspace */
+    H5S_t *equiv_mspace=NULL;   /* Equivalent memory dataspace */
     hid_t f_tid=(-1);           /* Temporary copy of file datatype for iteration */
     hbool_t iter_init=0;        /* Selection iteration info has been initialized */
     unsigned f_ndims;           /* The number of dimensions of the file's dataspace */
@@ -2227,9 +2228,26 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     /* Get layout for dataset */
     fm->layout = &(dataset->layout);
     
-    /*make a copy of mem_space*/
-    if((tmp_mspace = H5S_copy(mem_space))==NULL)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space");
+    /* Check if the memory space is scalar & make equivalent memory space */
+    if((sm_ndims = H5S_get_simple_extent_ndims(mem_space))<0)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number")
+    if(sm_ndims==0) {
+        hsize_t dims[H5O_LAYOUT_NDIMS];    /* Temporary dimension information */
+
+        /* Set up "equivalent" n-dimensional dataspace with size '1' in each dimension */
+        for(u=0; u<dataset->layout.ndims-1; u++)
+            dims[u]=1;
+        if((equiv_mspace = H5S_create_simple(dataset->layout.ndims-1,dims,NULL))==NULL)
+            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create equivalent dataspace for scalar space")
+    } /* end else */
+    else {
+        if((equiv_mspace = H5S_copy(mem_space))==NULL)
+            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
+    } /* end else */
+ 
+    /* Make a copy of equivalent memory space */
+    if((tmp_mspace = H5S_copy(equiv_mspace))==NULL)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
  
     /* Get dim number and dimensionality for each dataspace */
     fm->f_ndims=f_ndims=dataset->layout.ndims-1;
@@ -2278,13 +2296,13 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     /* Copy the dataspaces */
     if((fm->file_space = H5S_copy(file_space))==NULL)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy file dataspace")
-    if((fm->mem_space = H5S_copy(mem_space))==NULL)
+    if((fm->mem_space = H5S_copy(equiv_mspace))==NULL)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory dataspace")
 
     /* Get type of selection on disk & in memory */
     if((fsel_type=H5S_get_select_type(file_space))<0)
         HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to convert from file to memory data space")
-    if((fm->msel_type=H5S_get_select_type(mem_space))<0)
+    if((fm->msel_type=H5S_get_select_type(equiv_mspace))<0)
         HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to convert from file to memory data space")
 
     /* Check if file selection is a point selection */
@@ -2325,7 +2343,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
         MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
         time = MPI_Wtime();
         HDfprintf(stderr,"%s: rank=%d - After creating file chunk selections, time=%f\n",FUNC,mpi_rank,time);
-        HDfprintf(stderr,"%s: rank=%d - H5S_select_shape_same=%d\n",FUNC,mpi_rank,H5S_select_shape_same(file_space,mem_space));
+        HDfprintf(stderr,"%s: rank=%d - H5S_select_shape_same=%d\n",FUNC,mpi_rank,H5S_select_shape_same(file_space,equiv_mspace));
     }
 #endif /* QAK */
 
@@ -2348,7 +2366,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     } /* end else */
 
     /* Build the memory selection for each chunk */
-    if(fsel_type!=H5S_SEL_POINTS && H5S_select_shape_same(file_space,mem_space)==TRUE) {
+    if(fsel_type!=H5S_SEL_POINTS && H5S_select_shape_same(file_space,equiv_mspace)==TRUE) {
         if(H5S_hyper_convert(fm->mem_space)<0)
             HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
 
@@ -2370,7 +2388,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
         /* Create selection iterator for memory selection */
         if((elmt_size=H5T_get_size(mem_type))==0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "datatype size invalid");
-        if (H5S_select_iter_init(&(fm->mem_iter), mem_space, elmt_size)<0)
+        if (H5S_select_iter_init(&(fm->mem_iter), equiv_mspace, elmt_size)<0)
             HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
         iter_init=1;	/* Selection iteration info has been initialized */
 
@@ -2421,6 +2439,10 @@ done:
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping");
     } /* end if */
 
+    if(equiv_mspace) {
+        if(H5S_close(equiv_mspace)<0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template");
+    } /* end if */
     if(iter_init) {
         if (H5S_select_iter_release(&(fm->mem_iter))<0)
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
