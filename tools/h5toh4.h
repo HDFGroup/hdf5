@@ -33,7 +33,7 @@ typedef struct op_data_t {
 #ifdef H5TOH4_DEBUG
 #define DEBUG_PRINT(s1,s2,s3,n1) ( fprintf(stderr,s1,s2,s3,n1) )
 #else
-#define DEBUG_PRINT(s1,s2,s3,n1) (  )
+#define DEBUG_PRINT(s1,s2,s3,n1) ( fprintf(stderr," ") )
 #endif
 
 #endif
