@@ -3,8 +3,9 @@ dnl -------------------------------------------------------------------------
 dnl
 dnl Macros for HDF5 Fortran
 dnl
-dnl Copyright (C) 2000 National Center for Supercomputing Applications.
-dnl                    All rights reserved.
+dnl Copyright (C) 2000, 2002
+dnl     National Center for Supercomputing Applications.
+dnl     All rights reserved.
 dnl -------------------------------------------------------------------------
 dnl -------------------------------------------------------------------------
 
@@ -68,6 +69,19 @@ rm -fr conftest*
 ])
 
 dnl -------------------------------------------------------------------------
+dnl AC_LANG_FORTRAN9X()
+dnl
+dnl	Generic macro to setup the Fortran 9X specific env variables.
+dnl
+AC_DEFUN(AC_LANG_FORTRAN9X, [
+define([AC_LANG], [FORTRAN9X])
+ac_ext=f90
+ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&AC_FD_CC'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&AC_FD_CC'
+cross_compiling=$ac_cv_prog_f9x_cross
+])
+
+dnl -------------------------------------------------------------------------
 dnl AC_LANG_F9X_WORKS()
 dnl
 dnl	It would be nice if the compiler actually works.
@@ -87,19 +101,6 @@ if test $ac_cv_prog_f9x_works = no; then
 fi
 AC_MSG_CHECKING([whether the Fortran 9X compiler ($F9X $FFLAGS $LDFLAGS) is a cross-compiler])
 AC_MSG_RESULT($ac_cv_prog_f9x_cross)
-cross_compiling=$ac_cv_prog_f9x_cross
-])
-
-dnl -------------------------------------------------------------------------
-dnl AC_LANG_FORTRAN9X()
-dnl
-dnl	Generic macro to setup the Fortran 9X specific env variables.
-dnl
-AC_DEFUN(AC_LANG_FORTRAN9X, [
-define([AC_LANG], [FORTRAN9X])
-ac_ext=f90
-ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&AC_FD_CC'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&AC_FD_CC'
 cross_compiling=$ac_cv_prog_f9x_cross
 ])
 
@@ -255,7 +256,80 @@ else
 fi
 AC_SUBST(F9XMODFLAG)
 AC_SUBST(F9XMODEXT)
-rm -rf conftest*])
+rm -rf conftest*
+])
+
+dnl -------------------------------------------------------------------------
+dnl AC_TRY_FLINK()
+dnl
+dnl	Check if we can link a simple Fortran 90 program.
+dnl
+dnl AC_TRY_FLINK(INCLUDES, FUNCTION-BODY,
+dnl              [ACTION-IF-SUCCESS], [ACTION-IF-NOT-SUCCESS])
+dnl
+AC_DEFUN([AC_TRY_FLINK],
+[AC_LANG_SAVE
+AC_LANG_FORTRAN9X
+
+test -d conftestdir || mkdir conftestdir
+cd conftestdir
+rm -rf *
+
+cat >conftest.$ac_ext <<EOF
+        program conftest
+          include '$1'
+          $2
+        end
+EOF
+
+if AC_TRY_EVAL(ac_compile) && AC_TRY_EVAL(ac_link); then
+  :
+  [$3]
+else
+  :
+  [$4]
+fi
+cd ..
+rm -rf conftest*
+])
+
+dnl -------------------------------------------------------------------------
+dnl AC_CHECK_FLIB()
+dnl
+dnl	Check if we can link a simple Fortran 90 program with the specified library.
+dnl
+dnl AC_CHECK_FLIB(LIBRARY, FUNCTION-BODY,
+dnl               [ACTION-IF-SUCCESS], [ACTION-IF-NOT-SUCCESS])
+dnl
+AC_DEFUN([AC_CHECK_FLIB],
+[AC_LANG_SAVE
+AC_LANG_FORTRAN9X
+
+test -d conftestdir || mkdir conftestdir
+cd conftestdir
+rm -rf *
+
+cat >conftest.$ac_ext <<EOF
+        program conftest
+          $2
+        end
+EOF
+
+if test -n "$1"; then
+  saved_LDFLAGS="$LDFLAGS"
+  LDFLAGS="$LDFLAGS -l$1"
+fi
+
+if AC_TRY_EVAL(ac_compile) && AC_TRY_EVAL(ac_link); then
+  :
+  [$3]
+else
+  LDFLAGS="saved_LDFLAGS"
+  [$4]
+fi
+cd ..
+rm -rf conftest*
+])
 
 dnl -------------------------------------------------------------------------
 dnl -------------------------------------------------------------------------
