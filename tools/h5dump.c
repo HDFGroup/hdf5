@@ -594,7 +594,7 @@ H5G_stat_t statbuf;
         space = H5Aget_space(attr_id);
         dump_datatype(type);
         dump_dataspace(space);
-		if(display_oid){
+		if (display_oid){
 			dump_oid(attr_id);
 		}
         if (display_data) dump_data(attr_id, ATTRIBUTE_DATA);
@@ -849,7 +849,9 @@ int i;
     indentation (indent);
     begin_obj(GROUPNAME, name);
     indent += COL;
-	dump_oid(gid);
+	if (display_oid) {
+		dump_oid(gid);
+	}
     if (!strcmp(name,"/") && unamedtype) { /* dump unamed type in root group */
         for (i = 0; i < type_table.nobjs; i++)
              if (!type_table.objs[i].recorded) {
@@ -1729,6 +1731,8 @@ static void print_enum(hid_t type){
  *-----------------------------------------------------------------------*/
 static void 
 dump_oid(hid_t oid){	
+	
+
     indent += COL;
     indentation (indent);
 
