@@ -343,6 +343,12 @@ H5O_close(H5G_entry_t *obj_ent)
  *
  * 	Robb Matzke, 1999-07-28
  *	The ADDR argument is passed by value.
+ * 
+ *	Raymond Lu, 2002-2-27
+ *	Add a temporary solution for compatibility with version 1.5.  
+ *	A new fill value message is added to 1.5, whose ID is 5.  Don't 
+ * 	read this message since v1.4 doesn't know it.
+ *
  *-------------------------------------------------------------------------
  */
 static H5O_t *
@@ -450,34 +456,39 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 	    flags = *p++;
 	    p += 3; /*reserved*/
 
-	    if (id >= NELMTS(message_type_g) || NULL == message_type_g[id]) {
-		HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL,
-			    "corrupt object header");
-	    }
-	    if (p + mesg_size > oh->chunk[chunkno].image + chunk_size) {
-		HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
-			    "corrupt object header");
-	    }
-	    if (H5O_NULL_ID == id && oh->nmesgs > 0 &&
-		H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
-		oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
-		/* combine adjacent null messages */
-		mesgno = oh->nmesgs - 1;
-		oh->mesg[mesgno].raw_size += H5O_SIZEOF_MSGHDR(f) + mesg_size;
-	    } else {
-		/* new message */
-		if (oh->nmesgs >= nmesgs) {
-		    HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
-				"corrupt object header");
-		}
-		mesgno = oh->nmesgs++;
-		oh->mesg[mesgno].type = message_type_g[id];
-		oh->mesg[mesgno].dirty = FALSE;
-		oh->mesg[mesgno].flags = flags;
-		oh->mesg[mesgno].native = NULL;
-		oh->mesg[mesgno].raw = p;
-		oh->mesg[mesgno].raw_size = mesg_size;
-		oh->mesg[mesgno].chunkno = chunkno;
+	    if (id != 5) { /* This is a temporary solution for compatibility 
+			    * with version 1.5.  A new fill value message is 
+			    * added to 1.5, whose ID is 5.  Don't read this 
+			    * message since v1.4 doesn't know it. */
+	        if (id>=NELMTS(message_type_g) || NULL==message_type_g[id]) {
+		    HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL,
+			        "corrupt object header");
+	        }
+	        if (p + mesg_size > oh->chunk[chunkno].image + chunk_size) {
+		    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
+			        "corrupt object header");
+	        }
+	        if (H5O_NULL_ID == id && oh->nmesgs > 0 &&
+		    H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
+		    oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
+		    /* combine adjacent null messages */
+		    mesgno = oh->nmesgs - 1;
+		    oh->mesg[mesgno].raw_size+=H5O_SIZEOF_MSGHDR(f)+mesg_size;
+	        } else {
+		    /* new message */
+		    if (oh->nmesgs >= nmesgs) {
+		        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
+			    	    "corrupt object header");
+		    }
+		    mesgno = oh->nmesgs++;
+		    oh->mesg[mesgno].type = message_type_g[id];
+		    oh->mesg[mesgno].dirty = FALSE;
+		    oh->mesg[mesgno].flags = flags;
+		    oh->mesg[mesgno].native = NULL;
+		    oh->mesg[mesgno].raw = p;
+		    oh->mesg[mesgno].raw_size = mesg_size;
+		    oh->mesg[mesgno].chunkno = chunkno;
+	        }
 	    }
 	}
 	assert(p == oh->chunk[chunkno].image + chunk_size);

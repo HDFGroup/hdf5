@@ -1431,12 +1431,16 @@ H5D_open_oid(H5G_entry_t *ent)
     }
 
     /* Get the external file list message, which might not exist */
-    if (NULL==H5O_read (&(dataset->ent), H5O_EFL, 0,
+    /*if (NULL==H5O_read (&(dataset->ent), H5O_EFL, 0,
 			&(dataset->create_parms->efl)) &&
             !H5F_addr_defined (dataset->layout.addr)) {
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		     "storage address is undefined an no external file list");
-    }
+    }*/
+    /* A temporary solution for compatibility with v1.5.  For new fill value
+     * design, data space may not allocated except in case of external storage.
+     */
+    H5O_read (&(dataset->ent), H5O_EFL, 0, &(dataset->create_parms->efl));
 
     /*
      * Make sure all storage is properly initialized for chunked datasets.
@@ -1613,6 +1617,11 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     HDmemset(&mem_iter,0,sizeof(H5S_sel_iter_t));
     HDmemset(&bkg_iter,0,sizeof(H5S_sel_iter_t));
     HDmemset(&file_iter,0,sizeof(H5S_sel_iter_t));
+
+    /* Check if the dataset has space */
+    if(!H5F_addr_defined (dataset->layout.addr)
+			       && (dataset->create_parms->efl.nused==0))
+        HGOTO_ERROR (H5E_DATASET, H5E_READERROR, FAIL, "no data to read");
 
     /* Get the dataset transfer property list */
     if (H5P_DEFAULT == dxpl_id) {
@@ -2087,6 +2096,11 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef QAK
     printf("%s: check 0.3, buf=%p\n", FUNC,buf);
 #endif /* QAK */
+
+    /* Check if the dataset has space */
+    if(!H5F_addr_defined (dataset->layout.addr)
+			       && (dataset->create_parms->efl.nused==0))
+        HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "no space to write");
 
     /* Get the dataset transfer property list */
     if (H5P_DEFAULT == dxpl_id) {

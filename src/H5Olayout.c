@@ -39,7 +39,11 @@ const H5O_class_t H5O_LAYOUT[1] = {{
     H5O_layout_debug,       	/*debug the message             */
 }};
 
+/* A temporary solution for compatibility with v1.5.  Added version 2 for 
+ * layout.  If data space has been allocated by v1.5, version is 2; 
+ * otherwise it's 1. */
 #define H5O_LAYOUT_VERSION	1
+#define H5O_LAYOUT_VERSION_2	2
 
 /* Interface initialization */
 #define PABLO_MASK      H5O_layout_mask
@@ -89,9 +93,12 @@ H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 		       "memory allocation failed");
     }
 
-    /* Version */
+    /* Version.  Here is a temporary solution for compatibility with v1.5.
+     * Added version 2 for layout.  If data space hasn't been allocated by 
+     * v1.5, version is 2; otherwise it's 1. 
+     */
     version = *p++;
-    if (version!=H5O_LAYOUT_VERSION) {
+    if (version!=H5O_LAYOUT_VERSION && version!=H5O_LAYOUT_VERSION_2) {
         HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
 		      "bad version number for layout message");
     }

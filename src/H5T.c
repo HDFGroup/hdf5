@@ -3433,6 +3433,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
     int		nmembs, i;
 
     FUNC_ENTER(H5Tget_member_index, NULL);
+    H5TRACE2("Is","is",type_id,name);
 
     /* Check arguments */
     assert(name);

@@ -42,6 +42,8 @@ New Features
   =========
     o General
     --------- 
+      * Fill-value's forward-compatibility with 1.5 was added.  SLU -
+	2002/04/11
       * Added serial multi-gigabyte file size test.  "test/big -h" shows
         the help page.  AKC - 2002/03/29
       * A new query function H5Tget_member_index has been added for compound
