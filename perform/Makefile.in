@@ -14,7 +14,7 @@ srcdir=@srcdir@
 CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib @CPPFLAGS@
 LIBHDF5=../src/libhdf5.la
 LIBH5TEST=../test/libh5test.la
-LIBH5TOOLS=../tools/lib/libh5tools.la
+LIBTOOLS=../tools/lib/libh5tools.la
 
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.
@@ -42,7 +42,7 @@ $(TEST_PROGS) $(TEST_PROGS_PARA): $(LIBHDF5)
 
 pio_perf: $(PIO_PERF_OBJ)
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(PIO_PERF_OBJ) $(LIBH5TEST) \
-	$(LIBHDF5) $(LDFLAGS) $(LIBH5TOOLS) $(LIBS)
+	$(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 perf: perf.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ perf.lo $(LIBH5TEST) $(LIBHDF5) \
