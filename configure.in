@@ -498,14 +498,16 @@ esac
 dnl ----------------------------------------------------------------------
 dnl Is SSL library present?  It is needed by the DPSS driver.
 dnl
+AC_SUBST(SSL)
+SSL=yes
+
 AC_ARG_WITH(ssl,[  --with-ssl=LIB          Use SSL libs from LIB ],,)
 if test "X-" != "X-$with_ssl_libpath"; then
     LDFLAGS="$LDFLAGS -L$with_ssl_libpath"
 fi
 
-AC_CHECK_LIB(crypto,main,,unset GASS TESTGASS)
-AC_CHECK_LIB(ssl,SSL_get_version,,
-	AC_MSG_WARN([SSL libraries not found (required for GASS). Please use option --with-ssl-libpath !]); unset GASS TESTGASS)
+AC_CHECK_LIB(crypto,main,,unset SSL)
+AC_CHECK_LIB(ssl,SSL_get_version,,unset SSL)
 
 dnl ----------------------------------------------------------------------
 dnl Is Globus-GASS present?  If so then we can compile in the GASS driver.
