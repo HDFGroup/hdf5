@@ -90,7 +90,6 @@ __DLL__ herr_t H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space
 __DLL__ herr_t H5Dfill(const void *fill, hid_t fill_type, void *buf,
         hid_t buf_type, hid_t space);
 __DLL__ herr_t H5Ddebug(hid_t dset_id, unsigned int flags);
-/*pvn*/
 __DLL__ herr_t H5Dset_extent (hid_t dset_id, const hsize_t *size);
 
 

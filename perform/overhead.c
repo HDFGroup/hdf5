@@ -216,8 +216,7 @@ test(fill_t fill_style, const double splits[],
 #if !defined( __MWERKS__)	
 
  /* 
-  workaround for a bug in the Metrowerks open function
-  pvn
+  workaround for a bug in the Metrowerks version 6.0 open function
   */		
     if ((fd=open(FILE_NAME_1, O_RDONLY))<0) goto error;
 #endif  

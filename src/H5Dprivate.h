@@ -180,7 +180,6 @@ __DLL__ herr_t H5D_xfer_create(hid_t dxpl_id, void *create_data);
 __DLL__ herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id, 
                              void *copy_data);
 __DLL__ herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
-/*pvn*/
 __DLL__ herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size);
 
 

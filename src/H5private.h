@@ -756,9 +756,8 @@ __DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDwctomb(S,C)		wctomb(S,C)
 
 #if defined (__MWERKS__)
-/* workaround for a bug in the Metrowerks header file for write
+/* workaround for a bug in the Metrowerks version 6.0 header file for write
  which is not defined as const void*
- pvn
  */
 #define HDwrite(F,M,Z)		write(F,(void*)M,Z)
 #else
