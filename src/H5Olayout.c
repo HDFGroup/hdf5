@@ -124,10 +124,8 @@ H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     if(mesg->type == H5D_COMPACT) {
         UINT32DECODE(p, mesg->size);
         if(mesg->size > 0) {
-            if(NULL==(mesg->buf=H5MM_malloc(mesg->size))) {
-                HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                              "memory allocation failed for fill value");
-            }
+            if(NULL==(mesg->buf=H5MM_malloc(mesg->size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value");
             HDmemcpy(mesg->buf, p, mesg->size);
             p += mesg->size;
         }
