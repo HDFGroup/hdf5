@@ -38,6 +38,7 @@ fi
 #
 # Command options
 cmd="all"
+test_opt=""
 errcode=0
 echo '$#=' $# '$*="' $* '"'
 while [ $# -gt 0 ] ; do
@@ -52,6 +53,10 @@ while [ $# -gt 0 ] ; do
 	test)
 	    cmdtest="test"
 	    cmd=""
+	    ;;
+	srcdir)
+	    #use srcdir option for test
+	    srcdir="yes"
 	    ;;
 	release)
 	    cmdrel="release"
@@ -93,12 +98,15 @@ done
 
 if [ "$cmd" = help ]; then
     set -
-    echo "Usage: $0 [all] [checkout] [test] [release] [help] [hdf4 <hdf4lib_path>] [archive <arch_path> ]"
+    echo "Usage: $0 [all] [checkout] [test] [srcdir] [release] [help] [hdf4 <hdf4lib_path>] [archive <arch_path> ]"
     echo "    all:      Run all commands (checkout, test & release)"
     echo "              [Default is all]"
     echo "    checkout: Run cvs checkout"
     echo "    test:     Run test"
     echo "    release:  Run release"
+    echo "    srcdir:   Use srcdir option (does not imply other commands)"
+    echo '                "snapshot srcdir" is equivalent to "snapshot srcdir all"'
+    echo '                "snapshot srcdir checkout" is equivalent to "snapshot checkout"'
     echo "    help:     Print this message"
     echo "    hdf4 <hdf4lib_path>:"
     echo "              Use <hdf4lib_path> as the HDF4LIB locations"
@@ -118,6 +126,8 @@ CONFIGURE="./configure $HDF4LIB"
 snapshot=yes
 
 COMPARE=${HOME}/hdf5-snapshots
+CURRENT=${COMPARE}/current
+PREVIOUS=${COMPARE}/previous
 
 #=============================
 # Run CVS checkout
@@ -129,7 +139,7 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     test -d ${COMPARE} || mkdir -p ${COMPARE} || exit 1
 
     # Check out the current version from CVS
-    cvs -Q co -d ${COMPARE}/current hdf5 || exit 1
+    cvs -Q co -d ${CURRENT} hdf5 || exit 1
 fi # Do CVS checkout
 
 
@@ -137,9 +147,17 @@ fi # Do CVS checkout
 # Run Test the HDF5 library
 #=============================
 if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
+    # setup if srcdir is used.
+    if [ -z "$srcdir" ]; then
+	TESTDIR=${CURRENT}
+    else
+	#create TESTDIR if not exist yet
+	TESTDIR=${COMPARE}/TestDir/`hostname`
+	test -d ${TESTDIR} || mkdir ${TESTDIR}
+    fi
     # Make sure current version exists and is clean
-    if [ -d ${COMPARE}/current ]; then
-	(cd ${COMPARE}/current && ${MAKE} distclean)
+    if [ -d ${TESTDIR} ]; then
+	(cd ${TESTDIR} && ${MAKE} distclean)
     else
 	errcode=$?
         snapshot=no
@@ -148,13 +166,13 @@ if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
 
     # Compare it with the previous version.  Compare only files listed in
     # the MANIFEST plus the MANIFEST itself.
-    if [ -d ${COMPARE}/previous ]; then
-	if (diff -c ${COMPARE}/previous/MANIFEST ${COMPARE}/current/MANIFEST); then
+    if [ -d ${PREVIOUS} ]; then
+	if (diff -c ${PREVIOUS}/MANIFEST ${CURRENT}/MANIFEST); then
 	    snapshot=no
-	    for src in `grep '^\.' ${COMPARE}/current/MANIFEST|expand|cut -f1 -d' '`; do
+	    for src in `grep '^\.' ${CURRENT}/MANIFEST|expand|cut -f1 -d' '`; do
 		diff -I H5_VERS_RELEASE -I " released on " \
 		    -I " currently under development" \
-		    ${COMPARE}/previous/$src ${COMPARE}/current/$src || \
+		    ${PREVIOUS}/$src ${CURRENT}/$src || \
 		    snapshot=yes
 		    # Don't break because we want to see all the diffs.
 	    done
@@ -163,8 +181,8 @@ if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
 
     # Make sure all the serial tests work.
     if [ "$snapshot" = "yes" ]; then
-	if (cd ${COMPARE}/current; \
-	    ${CONFIGURE}; \
+	if (cd ${TESTDIR}; \
+	    ${srcdir:+${CURRENT}/}${CONFIGURE}; \
 	    ${MAKE} check); then
 	    :
 	else
@@ -181,12 +199,12 @@ fi # Test the HDF5 library
 #=============================
 if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
     if [ "$snapshot" = "yes" ]; then
-	(cd ${COMPARE}/current; ${MAKE} distclean)
+	(cd ${CURRENT}; ${MAKE} distclean)
 	(
 	    # Turn on exit on error in the sub-shell so that it does not
 	    # cvs commit if errors encounter here.
 	    set -e
-	    cd ${COMPARE}/current
+	    cd ${CURRENT}
 	    bin/release -d $ARCHIVES $METHODS
 	    RELEASE_VERSION="`perl bin/h5vers -v`"
 	    perl bin/h5vers -i
@@ -196,8 +214,8 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
     fi
 
     # Replace the previous version with the current version.
-    rm -rf ${COMPARE}/previous
-    mv ${COMPARE}/current ${COMPARE}/previous
+    rm -rf ${PREVIOUS}
+    mv ${CURRENT} ${PREVIOUS}
 fi #Release snapshot
 
 exit $errcode
