@@ -21,6 +21,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -29,15 +30,6 @@
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 
 /*#define H5D_DEBUG*/
-
-/*
- * The MPIO, MPIPOSIX, & FPHDF5 drivers are needed because there are
- * file and places where we check for things that aren't handled by these
- * drivers.
- */
-#include "H5FDfphdf5.h"
-#include "H5FDmpio.h"
-#include "H5FDmpiposix.h"
 
 #ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
@@ -566,9 +558,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	doing_mpio++;
         xfer_mode=(H5FD_mpio_xfer_t)H5P_peek_unsigned(dx_plist, H5D_XFER_IO_XFER_MODE_NAME);
     } /* end if */
-    /* Collective access is not permissible without the MPIO or MPIPOSIX driver */
-    if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE &&
-            !(IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file) || IS_H5FD_FPHDF5(dataset->ent.file)))
+    /* Collective access is not permissible without a MPI based VFD */
+    if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPI(dataset->ent.file))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPIO & MPIPOSIX drivers only");
 
     /* Set the "parallel I/O possible" flag, for H5S_find() */
@@ -765,16 +756,15 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(mem_type);
     assert(buf);
 
-    /* If MPIO, MPIPOSIX, or FPHDF5 is used, no VL datatype support yet. */
+    /* If MPI based VFD is used, no VL datatype support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
-    if ( (IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file) || IS_H5FD_FPHDF5(dataset->ent.file)) &&
-            H5T_get_class(mem_type)==H5T_VLEN)
+    if (IS_H5FD_MPI(dataset->ent.file) && H5T_get_class(mem_type)==H5T_VLEN)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing VL datatypes yet");
-    /* If MPIO, MPIPOSIX, or FPHDF5 is used, no dataset region reference datatype support yet. */
+    /* If MPI based VFD is used, no VL datatype support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
-    if ((IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file) || IS_H5FD_FPHDF5(dataset->ent.file)) &&
+    if (IS_H5FD_MPI(dataset->ent.file) &&
             H5T_get_class(mem_type)==H5T_REFERENCE &&
             H5T_get_ref_type(mem_type)==H5R_DATASET_REGION)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing region reference datatypes yet");
@@ -806,9 +796,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         xfer_mode=(H5FD_mpio_xfer_t)H5P_peek_unsigned(dx_plist, H5D_XFER_IO_XFER_MODE_NAME);
     } /* end if */
     
-    /* Collective access is not permissible without the MPIO or MPIPOSIX driver */
-    if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE &&
-            !(IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file) || IS_H5FD_FPHDF5(dataset->ent.file)))
+    /* Collective access is not permissible without a MPI based VFD */
+    if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE && !IS_H5FD_MPI(dataset->ent.file))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPIO driver only");
 
     /* If dataset is compact, collective access is only allowed when file space

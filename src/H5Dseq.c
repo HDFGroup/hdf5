@@ -29,21 +29,17 @@
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5Fseq_mask
 
-#include "H5private.h"
-#include "H5Dprivate.h"
-#include "H5Eprivate.h"
-#include "H5Fpkg.h"
-#include "H5FDprivate.h"	/*file driver				  */
-#include "H5Iprivate.h"
-#include "H5MFprivate.h"
-#include "H5MMprivate.h"	/*memory management			  */
-#include "H5Oprivate.h"
-#include "H5Pprivate.h"
-#include "H5Vprivate.h"
-
-/* MPIO & MPIPOSIX driver functions are needed for some special checks */
-#include "H5FDmpio.h"
-#include "H5FDmpiposix.h"
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"		/* Files				*/
+#include "H5FDprivate.h"	/* File drivers				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MFprivate.h"	/* File space management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5Pprivate.h"         /* Property lists                       */
+#include "H5Vprivate.h"		/* Vector and array functions		*/
 
 /* Interface initialization */
 #define INTERFACE_INIT	NULL

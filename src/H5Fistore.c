@@ -52,6 +52,7 @@
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* Files				*/
+#include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFprivate.h"	/* File space management		*/
@@ -60,11 +61,6 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Sprivate.h"         /* Dataspaces                           */
 #include "H5Vprivate.h"		/* Vector and array functions		*/
-
-/* MPIO, MPIPOSIX, & FPHDF5 drivers needed for special checks */
-#include "H5FDfphdf5.h"
-#include "H5FDmpio.h"
-#include "H5FDmpiposix.h"
 
 /*
  * Feature: If this constant is defined then every cache preemption and load
@@ -1897,15 +1893,13 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
      * for the chunk has been defined, then don't load the chunk into the
      * cache, just write the data to it directly.
      *
-     * If MPIO, MPIPOSIX, or FPHDF5 is used, must bypass the
+     * If MPI based VFD is used, must bypass the
      * chunk-cache scheme because other MPI processes could be
      * writing to other elements in the same chunk.  Do a direct
      * write-through of only the elements requested.
      */
-    if ((chunk_size>f->shared->rdcc_nbytes && pline.nfilters==0 &&
-            chunk_addr!=HADDR_UNDEF)
-        || ((IS_H5FD_MPIO(f) ||IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) &&
-            (H5F_ACC_RDWR & f->shared->flags))) {
+    if ((chunk_size>f->shared->rdcc_nbytes && pline.nfilters==0 && chunk_addr!=HADDR_UNDEF)
+        || (IS_H5FD_MPI(f) && (H5F_ACC_RDWR & f->shared->flags))) {
 #ifdef H5_HAVE_PARALLEL
         /* Additional sanity check when operating in parallel */
         if (chunk_addr==HADDR_UNDEF || pline.nfilters>0)
@@ -2345,7 +2339,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 #ifdef H5_HAVE_PARALLEL
                 /* Check if this file is accessed with an MPI-capable file driver */
                 if(using_mpi) {
-                    /* Round-robin write the chunks out from only one process */
+                    /* Write the chunks out from only one process */
                     if(H5_PAR_META_WRITE==mpi_rank) {
                         if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, dxpl_id, chunk)<0)
                             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file");
