@@ -2994,9 +2994,23 @@ PRINT "Languages:"
 
 PRINT_N "                            C++"
 IF_YES_NO "$HDF_CXX"
+if test X$HDF_CXX = Xyes; then
+    PRINT_N "                   C++ Compiler"
+    PRINT "$CXX"
+
+    PRINT_N "                       CXXFLAGS"
+    PRINT "$CXXFLAGS"
+fi
 
 PRINT_N "                        Fortran"
 IF_YES_NO "$HDF_FORTRAN"
+if test X$HDF_FORTRAN = Xyes; then
+    PRINT_N "               Fortran Compiler"
+    PRINT "$F9X"
+
+    PRINT_N "                         FFLAGS"
+    PRINT "$FFLAGS"
+fi
 
 PRINT "Features:"
 
