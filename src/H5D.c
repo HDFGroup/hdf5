@@ -2601,7 +2601,7 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
     /* Check args */
     if (H5I_DATATYPE!=H5I_get_type(type_id) ||
         H5I_DATASPACE!=H5I_get_type(space_id) ||
-        (H5I_TEMPLATE_0<=H5I_get_type(plist_id) && H5I_TEMPLATE_MAX>H5I_get_type(plist_id)) ||
+	H5P_DATASET_XFER!=H5P_get_class(plist_id) ||
         buf==NULL) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument");
     }
