@@ -116,6 +116,9 @@ ino_t mpio_inode_num = 0;      /* fake "inode" number */
  *		resulting in trashing the file.  It also runs the (very small)
  *		risk of having two unrelated names be seen as the same file.
  *
+ *		Must call this routine collectively since it collectively
+ *		calls MPI_File_open with the communicator in access_parms.
+ *
  * Return:      Success:        TRUE or FALSE.  If TRUE, then KEY is
  *                              initialized with data that makes this file
  *                              unique (same value as H5F_low_open).
@@ -130,6 +133,12 @@ ino_t mpio_inode_num = 0;      /* fake "inode" number */
  * 	Robb Matzke, 18 Feb 1998
  *	Added the ACCESS_PARMS argument.
  *
+ * 	June 9, 1998	Albert Cheng
+ *	Instead of opening the file with COMM_SELF (which results in
+ *	racing condition in routine that calls it), open it with the
+ *	communicator in access_parms.  (This assumes this access call
+ *	must be called collectively.)
+ *
  *-------------------------------------------------------------------------
  */
 static hbool_t
@@ -143,39 +152,41 @@ H5F_mpio_access(const char *name, const H5F_access_t *access_parms, int mode,
 
     FUNC_ENTER(H5F_mpio_access, FAIL);
 #ifdef H5F_MPIO_DEBUG
-    fprintf(stdout, "Entering H5F_mpio_access name=%s mode=%x\n", name, mode );
+    fprintf(stdout, "Entering H5F_mpio_access name=%s mode=0x%x\n", name, mode );
 #endif
+    assert(access_parms->driver == H5F_LOW_MPIO);
 
     /* The only way to get this info in MPI-IO is to try to open the file */
     /* (though particular implementations of MPI-IO may allow other ways) */
-
     switch (mode) {
 	case F_OK: mpi_mode = MPI_MODE_RDONLY;
-			   /* to see if it exists, first try to open for read */
+		   /* to see if it exists, first try to open for read */
 		   break;
 	case R_OK: mpi_mode = MPI_MODE_RDONLY;
 		   break;
 	case W_OK: mpi_mode = MPI_MODE_WRONLY;
 		   break;
 	default:   HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                          "invalid mode parameter");
+				 "invalid mode parameter");
     }
 
     /* (char*) name is okay since MPI_File_open will not change it. */
-    mpierr = MPI_File_open( MPI_COMM_SELF, (char*) name, mpi_mode, MPI_INFO_NULL, &fh );
+    mpierr = MPI_File_open(access_parms->u.mpio.comm, (char*) name,
+			   mpi_mode, access_parms->u.mpio.info, &fh );
     if (mpierr == MPI_SUCCESS) {
 	mpierr = MPI_File_close( &fh );
-    	if (mpierr != MPI_SUCCESS)
-	    HRETURN_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "MPI_File_close failed");
+	if (mpierr != MPI_SUCCESS)
+	    HRETURN_ERROR(H5E_IO, H5E_MPI, FAIL, "MPI_File_close failed");
 	ret_val = TRUE;
     } else if (mode == F_OK) {
 	/* to see if it exists, this time try to open for write */
-	mpierr = MPI_File_open( MPI_COMM_SELF, (char*)name, MPI_MODE_WRONLY,
-				MPI_INFO_NULL, &fh );
+	mpierr = MPI_File_open(access_parms->u.mpio.comm, (char*)name,
+			       MPI_MODE_WRONLY, access_parms->u.mpio.info,
+			       &fh );
 	if (mpierr == MPI_SUCCESS) {
 	    mpierr = MPI_File_close( &fh );
 	    if (mpierr != MPI_SUCCESS)
-		HRETURN_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "MPI_File_close failed");
+		HRETURN_ERROR(H5E_IO, H5E_MPI, FAIL, "MPI_File_close failed");
 	    ret_val = TRUE;
 	}
     }
@@ -187,9 +198,9 @@ H5F_mpio_access(const char *name, const H5F_access_t *access_parms, int mode,
     }
 
 #ifdef H5F_MPIO_DEBUG
-    if (key)
+    if (key && (ret_val==TRUE))
     	fprintf(stdout,
-	    "Leaving H5F_mpio_access ret_val=%d key->dev=%x key->ino=%d\n",
+	    "Leaving H5F_mpio_access ret_val=%d key->dev=0x%x key->ino=%d\n",
 	    ret_val, key->dev, key->ino );
     else
     	fprintf(stdout,
@@ -238,7 +249,7 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
 
     FUNC_ENTER(H5F_mpio_open, NULL);
 #ifdef H5F_MPIO_DEBUG
-    fprintf(stdout, "Entering H5F_mpio_open name=%s flags=%x\n", name, flags );
+    fprintf(stdout, "Entering H5F_mpio_open name=%s flags=0x%x\n", name, flags );
 #endif
 
     /* convert HDF5 flags to MPI-IO flags */
@@ -291,7 +302,7 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
 #ifdef H5F_MPIO_DEBUG
     if (key)
     	fprintf(stdout,
-	    "Leaving H5F_mpio_open key->dev=%x key->ino=%d\n",
+	    "Leaving H5F_mpio_open key->dev=0x%x key->ino=%d\n",
 	    key->dev, key->ino );
     else
     	fprintf(stdout,
