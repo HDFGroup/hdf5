@@ -31,6 +31,9 @@ class H5_DLLCPP PredType : public AtomType {
 	// id in the left hand side object.  
 	PredType& operator=( const PredType& rhs );
 
+	// Copy constructor - makes copy of the original object
+	PredType( const PredType& original );
+
 	// Returns the HDF5 predefined type id.
 	virtual hid_t getId() const;
 
@@ -243,9 +246,6 @@ class H5_DLLCPP PredType : public AtomType {
 
 	// Creates a pre-defined type using an HDF5 pre-defined constant
 	PredType( const hid_t predtype_id );  // used by the library only
-
-	// Copy constructor - makes copy of the original object
-	PredType( const PredType& original );
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
