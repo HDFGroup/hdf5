@@ -198,6 +198,9 @@ TOOLTEST tlarge_objname.ddl -w157 tlarge_objname.h5
 # test '-A' to suppress data but print attr's
 TOOLTEST tall-2A.ddl -A tall.h5
 
+# test '-r' to print attributes in ASCII instead of decimal
+TOOLTEST tall-2B.ddl -A -r tall.h5
+
 # test Subsetting
 TOOLTEST tall-4s.ddl --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5
 TOOLTEST tall-5s.ddl -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5

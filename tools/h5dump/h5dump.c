@@ -1839,6 +1839,8 @@ dump_subsetting_header(struct subset_t *sset, int dims)
  * Programmer:  Ruey-Hsia Li
  *
  * Modifications: pvn, print the matrix indices
+ *	Albert Cheng, 2004/11/18
+ *	Add --string printing for attributes too.
  *
  *-------------------------------------------------------------------------
  */
@@ -1927,6 +1929,9 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
 	status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, sset, depth);
         H5Tclose(f_type);
     } else {
+        char        string_prefix[64];
+        h5dump_t    string_dataformat;
+
         /* need to call h5tools_dump_mem for the attribute data */    
         type = H5Aget_type(obj_id);
         p_type = h5tools_get_native_type(type);
@@ -1943,9 +1948,37 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
         buf = malloc((size_t)alloc_size);
         assert(buf);
 
-        if (H5Aread(obj_id, p_type, buf) >= 0)
+        if (H5Aread(obj_id, p_type, buf) >= 0){
+	    if (display_char && H5Tget_size(type) == 1 && H5Tget_class(type) == H5T_INTEGER) {
+		/*
+		 * Print 1-byte integer data as an ASCII character string
+		 * instead of integers if the `-r' or `--string' command-line
+		 * option was given.
+		 *
+		 * We don't want to modify the global dataformat, so make a
+		 * copy of it instead.
+		 */
+		string_dataformat = *outputformat;
+		string_dataformat.idx_fmt = " ";
+		string_dataformat.line_multi_new = 1;
+		string_dataformat.line_1st = "        %s\"";
+		string_dataformat.line_pre = "        %s";
+		string_dataformat.line_cont = "        %s";
+		string_dataformat.str_repeat = 8;
+		string_dataformat.ascii = TRUE;
+		string_dataformat.elmt_suf1 = "";
+		string_dataformat.elmt_suf2 = "";
+		string_dataformat.line_indent = "";
+		strcpy(string_prefix, string_dataformat.line_pre);
+		strcat(string_prefix, "\"");
+		string_dataformat.line_pre = string_prefix;
+		string_dataformat.line_suf = "\"";
+		outputformat = &string_dataformat;
+	    }
+
             status = h5tools_dump_mem(stdout, outputformat, obj_id, p_type,
                                     space, buf, depth);
+	}
         
         free(buf);
         H5Tclose(p_type); 
