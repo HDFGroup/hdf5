@@ -137,6 +137,8 @@ H5_init_library(void)
      * & dataset interfaces though, in order to provide them with the proper
      * property classes.
      */
+    if (H5E_init()<0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize error interface")
     if (H5P_init()<0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize property list interface")
     if (H5F_init()<0)

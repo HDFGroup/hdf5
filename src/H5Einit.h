@@ -321,14 +321,9 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Error from filter 'set local' callback
 if((H5E_SETLOCAL_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_NOENCODER_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MINOR, "Error from filter 'no encoder' callback"))==NULL)
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Filter present but encoding disabled"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_NOENCODER_g = H5I_register(H5I_ERROR_MSG, msg))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
-assert(H5E_NODECODER_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MINOR, "Error from filter 'no decoder' callback"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_NODECODER_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Datatype conversion errors */
@@ -417,6 +412,11 @@ assert(H5E_CANTGC_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to garbage collect"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_CANTGC_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTGETSIZE_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to compute size"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTGETSIZE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Generic low-level file I/O errors */
@@ -560,6 +560,31 @@ assert(H5E_NOTCACHED_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Metadata not currently cached"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_NOTCACHED_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_SYSTEM_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Internal error detected"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_SYSTEM_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTINS_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to insert metadata into cache"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTINS_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTRENAME_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to rename metadata"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTRENAME_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTPROTECT_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to protect metadata"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTPROTECT_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTUNPROTECT_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to unprotect metadata"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTUNPROTECT_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Group related errors */

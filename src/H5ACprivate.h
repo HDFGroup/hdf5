@@ -21,7 +21,9 @@
  * Purpose:		Constants and typedefs available to the rest of the
  *			library.
  *
- * Modifications:
+ * Modifications:	JRM - 6/4/04
+ *			Complete re-write for a new caching algorithm
+ *			located in H5C.c
  *
  *-------------------------------------------------------------------------
  */
@@ -29,21 +31,20 @@
 #ifndef _H5ACprivate_H
 #define _H5ACprivate_H
 
-#include "H5ACpublic.h"		/*public prototypes			     */
+#include "H5ACpublic.h"		/*public prototypes			*/
 
 /* Pivate headers needed by this header */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Fprivate.h"		/* File access				*/
+#include "H5Cprivate.h"		/* cache				*/
 
-/*
- * Feature: Define H5AC_DEBUG on the compiler command line if you want to
- *	    debug H5AC_protect() and H5AC_unprotect() by insuring that
- *	    nothing  accesses protected objects.  NDEBUG must not be defined
- *	    in order for this to have any effect.
- */
-#ifdef NDEBUG
-#  undef H5AC_DEBUG
-#endif
+
+#define H5AC_BT_ID	0	/*B-tree nodes				     */
+#define H5AC_SNODE_ID	1	/*symbol table nodes			     */
+#define H5AC_LHEAP_ID	2	/*local heap				     */
+#define H5AC_GHEAP_ID	3	/*global heap				     */
+#define H5AC_OHDR_ID	4	/*object header				     */
+#define H5AC_NTYPES	5	
 
 /*
  * Class methods pertaining to caching.	 Each type of cached object will
@@ -64,28 +65,38 @@
  * DEST:	Just frees memory allocated by the LOAD method.
  *
  * CLEAR:	Just marks object as non-dirty.
+ *
+ * SIZE:	Report the size (on disk) of the specified cache object.
+ *		Note that the space allocated on disk may not be contiguous.
  */
-typedef enum H5AC_subid_t {
-    H5AC_BT_ID		= 0,	/*B-tree nodes				     */
-    H5AC_SNODE_ID	= 1,	/*symbol table nodes			     */
-    H5AC_LHEAP_ID	= 2,	/*local heap				     */
-    H5AC_GHEAP_ID	= 3,	/*global heap				     */
-    H5AC_OHDR_ID	= 4,	/*object header				     */
-    H5AC_NTYPES		= 5	/*THIS MUST BE LAST!			     */
-} H5AC_subid_t;
 
-typedef void *(*H5AC_load_func_t)(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata1, void *udata2);
-typedef herr_t (*H5AC_flush_func_t)(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, void *thing);
-typedef herr_t (*H5AC_dest_func_t)(H5F_t *f, void *thing);
-typedef herr_t (*H5AC_clear_func_t)(H5F_t *f, void *thing, hbool_t dest);
+typedef H5C_load_func_t		H5AC_load_func_t;
+typedef H5C_flush_func_t	H5AC_flush_func_t;
+typedef H5C_dest_func_t		H5AC_dest_func_t;
+typedef H5C_clear_func_t	H5AC_clear_func_t;
+typedef H5C_size_func_t		H5AC_size_func_t;
 
-typedef struct H5AC_class_t {
-    H5AC_subid_t            id;
-    H5AC_load_func_t        load;
-    H5AC_flush_func_t       flush;
-    H5AC_dest_func_t        dest;
-    H5AC_clear_func_t       clear;
-} H5AC_class_t;
+typedef H5C_class_t		H5AC_class_t;
+
+
+/* The H5AC_NSLOTS #define is now obsolete, as the metadata cache no longer
+ * uses slots.  However I am leaving it in for now to avoid modifying the
+ * interface between the metadata cache and the rest of HDF.  It should
+ * be removed when we get to dealing with the size_hint parameter in
+ * H5AC_create().
+ *						JRM - 5/20/04
+ *
+ * Old comment on H5AC_NSLOTS follows:
+ *
+ * A cache has a certain number of entries.  Objects are mapped into a
+ * cache entry by hashing the object's file address.  Each file has its
+ * own cache, an array of slots.
+ */
+#define H5AC_NSLOTS     10330           /* The library "likes" this number... */
+
+
+typedef H5C_cache_entry_t	H5AC_info_t;
+
 
 /*===----------------------------------------------------------------------===
  *                             Protect Types
@@ -95,27 +106,15 @@ typedef struct H5AC_class_t {
  * type of operation you're planning on doing to the metadata. The
  * Flexible Parallel HDF5 locking can then act accordingly.
  */
+
 typedef enum H5AC_protect_t {
     H5AC_WRITE,                 /* Protect object for writing                */
     H5AC_READ                   /* Protect object for reading                */
 } H5AC_protect_t;
 
-/*
- * A cache has a certain number of entries.  Objects are mapped into a
- * cache entry by hashing the object's file address.  Each file has its
- * own cache, an array of slots.
- */
-#define H5AC_NSLOTS	10330		/* The library "likes" this number... */
 
-typedef struct H5AC_info_t {
-    const H5AC_class_t	*type;		/*type of object stored here	     */
-    haddr_t		addr;		/*file address for object	     */
-    hbool_t             dirty;          /* 'Dirty' flag for cached object */
-} H5AC_info_t;
-typedef H5AC_info_t *H5AC_info_ptr_t;   /* Typedef for free lists */
-
-/* Typedef for metadata cache (defined in H5AC.c) */
-typedef struct H5AC_t H5AC_t;
+/* Typedef for metadata cache (defined in H5C.c) */
+typedef H5C_t	H5AC_t;
 
 /* Metadata specific properties for FAPL */
 /* (Only used for parallel I/O) */
@@ -158,9 +157,9 @@ H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, hadd
 H5_DLL herr_t H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);
 H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);
-#ifdef H5AC_DEBUG
+
 H5_DLL herr_t H5AC_stats(H5F_t *f);
-#endif /* H5AC_DEBUG */
+
 
 #endif /* !_H5ACprivate_H */
 

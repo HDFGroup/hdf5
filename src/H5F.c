@@ -1838,6 +1838,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
          * We've just opened a fresh new file (or truncated one). We need
          * to create & write the superblock.
          */
+
 #ifdef H5_HAVE_FPHDF5
         if (!H5FD_is_fphdf5_driver(lf) || H5FD_fphdf5_is_captain(lf)) {
 #endif  /* H5_HAVE_FPHDF5 */
@@ -1979,7 +1980,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
         if(fc_degree!=H5F_CLOSE_DEFAULT && fc_degree != shared->fc_degree)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match")
     }
-        
+
     /* Success */
     ret_value = file;
 
@@ -1987,6 +1988,7 @@ done:
     if (!ret_value && file)
         if(H5F_dest(file, dxpl_id)<0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
+
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -3272,9 +3274,9 @@ H5F_close(H5F_t *f)
     /* Only flush at this point if the file will be closed */
     assert(closing);
     /* Dump debugging info */
-#ifdef H5AC_DEBUG
+#if H5C_COLLECT_CACHE_STATS
     H5AC_stats(f);
-#endif /* H5AC_DEBUG */
+#endif /* H5AC_COLLECT_CACHE_STATS */
 
     /* Only try to flush the file if it was opened with write access */
     if(f->intent&H5F_ACC_RDWR) {

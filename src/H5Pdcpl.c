@@ -883,7 +883,8 @@ H5Pget_filter_by_id(hid_t plist_id, H5Z_filter_t id, unsigned int *flags/*out*/,
              name);
     
     /* Check args */
-    if (cd_nelmts || cd_values) {
+    if (cd_nelmts || cd_values)
+{
         if (cd_nelmts && *cd_nelmts>256)
             /*
              * It's likely that users forget to initialize this on input, so

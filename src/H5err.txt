@@ -107,6 +107,7 @@ MINOR, RESOURCE, H5E_ALREADYEXISTS, Object already exists
 MINOR, RESOURCE, H5E_CANTLOCK, Unable to lock object
 MINOR, RESOURCE, H5E_CANTUNLOCK, Unable to unlock object
 MINOR, RESOURCE, H5E_CANTGC, Unable to garbage collect
+MINOR, RESOURCE, H5E_CANTGETSIZE, Unable to compute size
 
 # File accessability errors
 MINOR, FILEACC, H5E_FILEEXISTS, File already exists
@@ -146,6 +147,11 @@ MINOR, CACHE, H5E_CANTSERIALIZE, Unable to serialize data from cache
 MINOR, CACHE, H5E_CANTLOAD, Unable to load metadata into cache
 MINOR, CACHE, H5E_PROTECT, Protected metadata error
 MINOR, CACHE, H5E_NOTCACHED, Metadata not currently cached
+MINOR, CACHE, H5E_SYSTEM, Internal error detected
+MINOR, CACHE, H5E_CANTINS, Unable to insert metadata into cache
+MINOR, CACHE, H5E_CANTRENAME, Unable to rename metadata
+MINOR, CACHE, H5E_CANTPROTECT, Unable to protect metadata
+MINOR, CACHE, H5E_CANTUNPROTECT, Unable to unprotect metadata
 
 # B-tree related errors
 MINOR, BTREE, H5E_NOTFOUND, Object not found

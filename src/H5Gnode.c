@@ -72,6 +72,7 @@ static herr_t H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t a
 			     H5G_node_t *sym);
 static herr_t H5G_node_dest(H5F_t *f, H5G_node_t *sym);
 static herr_t H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy);
+static herr_t H5G_compute_size(H5F_t *f, H5G_node_t *sym, size_t *size_ptr);
 
 /* B-tree callbacks */
 static size_t H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
@@ -107,6 +108,7 @@ const H5AC_class_t H5AC_SNODE[1] = {{
     (H5AC_flush_func_t)H5G_node_flush,
     (H5AC_dest_func_t)H5G_node_dest,
     (H5AC_clear_func_t)H5G_node_clear,
+    (H5AC_size_func_t)H5G_compute_size,
 }};
 
 /* H5G inherits B-tree like properties from H5B */
@@ -616,6 +618,43 @@ H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5G_node_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_compute_size
+ *
+ * Purpose:	Compute the size in bytes of the specified instance of
+ *		H5G_node_t on disk, and return it in *size_ptr.  On failure
+ *		the value of size_ptr is undefined.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer
+ *		5/13/04
+ *
+ * Modifications:
+ * 
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_compute_size(H5F_t *f, H5G_node_t UNUSED *sym, size_t *size_ptr)
+{
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_compute_size, FAIL);
+
+    /*
+     * Check arguments.
+     */
+    assert(f);
+    assert(size_ptr);
+
+    *size_ptr = H5G_node_size(f);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+
+} /* H5G_compute_size() */
 
 
 /*-------------------------------------------------------------------------

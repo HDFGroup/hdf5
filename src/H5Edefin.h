@@ -90,8 +90,7 @@ hid_t H5E_NOFILTER_g       = FAIL;      /* Requested filter is not available */
 hid_t H5E_CALLBACK_g       = FAIL;      /* Callback failed */
 hid_t H5E_CANAPPLY_g       = FAIL;      /* Error from filter 'can apply' callback */
 hid_t H5E_SETLOCAL_g       = FAIL;      /* Error from filter 'set local' callback */
-hid_t H5E_NOENCODER_g      = FAIL;      /* Filter present but encoder not enabled */
-hid_t H5E_NODECODER_g      = FAIL;      /* Filter present but decoder not enabled */
+hid_t H5E_NOENCODER_g      = FAIL;      /* Filter present but encoding disabled */
 
 /* Datatype conversion errors */
 hid_t H5E_CANTCONVERT_g    = FAIL;      /* Can't convert datatypes */
@@ -116,6 +115,7 @@ hid_t H5E_ALREADYEXISTS_g  = FAIL;      /* Object already exists */
 hid_t H5E_CANTLOCK_g       = FAIL;      /* Unable to lock object */
 hid_t H5E_CANTUNLOCK_g     = FAIL;      /* Unable to unlock object */
 hid_t H5E_CANTGC_g         = FAIL;      /* Unable to garbage collect */
+hid_t H5E_CANTGETSIZE_g    = FAIL;      /* Unable to compute size */
 
 /* Generic low-level file I/O errors */
 hid_t H5E_SEEKERROR_g      = FAIL;      /* Seek failed */
@@ -151,6 +151,11 @@ hid_t H5E_CANTSERIALIZE_g  = FAIL;      /* Unable to serialize data from cache *
 hid_t H5E_CANTLOAD_g       = FAIL;      /* Unable to load metadata into cache */
 hid_t H5E_PROTECT_g        = FAIL;      /* Protected metadata error */
 hid_t H5E_NOTCACHED_g      = FAIL;      /* Metadata not currently cached */
+hid_t H5E_SYSTEM_g         = FAIL;      /* Internal error detected */
+hid_t H5E_CANTINS_g        = FAIL;      /* Unable to insert metadata into cache */
+hid_t H5E_CANTRENAME_g     = FAIL;      /* Unable to rename metadata */
+hid_t H5E_CANTPROTECT_g    = FAIL;      /* Unable to protect metadata */
+hid_t H5E_CANTUNPROTECT_g  = FAIL;      /* Unable to unprotect metadata */
 
 /* Group related errors */
 hid_t H5E_CANTOPENOBJ_g    = FAIL;      /* Can't open object */

@@ -91,9 +91,8 @@ H5E_CANTALLOC_g=
 H5E_NOFILTER_g=    
 H5E_CALLBACK_g=    
 H5E_CANAPPLY_g=    
-H5E_SETLOCAL_g=
+H5E_SETLOCAL_g=    
 H5E_NOENCODER_g=
-H5E_NODECODER_g=
 
 /* Datatype conversion errors */    
 H5E_CANTCONVERT_g=    
@@ -117,7 +116,8 @@ H5E_CANTFREE_g=
 H5E_ALREADYEXISTS_g=    
 H5E_CANTLOCK_g=    
 H5E_CANTUNLOCK_g=    
-H5E_CANTGC_g=
+H5E_CANTGC_g=    
+H5E_CANTGETSIZE_g=
 
 /* Generic low-level file I/O errors */    
 H5E_SEEKERROR_g=    
@@ -152,7 +152,12 @@ H5E_CANTFLUSH_g=
 H5E_CANTSERIALIZE_g=    
 H5E_CANTLOAD_g=    
 H5E_PROTECT_g=    
-H5E_NOTCACHED_g=
+H5E_NOTCACHED_g=    
+H5E_SYSTEM_g=    
+H5E_CANTINS_g=    
+H5E_CANTRENAME_g=    
+H5E_CANTPROTECT_g=    
+H5E_CANTUNPROTECT_g=
 
 /* Group related errors */    
 H5E_CANTOPENOBJ_g=    

@@ -27,15 +27,16 @@ TEST_SCRIPTS=$(srcdir)/testerror.sh
 
 ## These are our main targets. They should be listed in the order to be
 ## executed, generally most specific tests to least specific tests.
-TEST_PROGS=testhdf5 lheap ohdr stab gheap hyperslab istore bittests dtypes      \
-           dsets cmpd_dset extend external links unlink big mtime fillval mount \
-           flush1 flush2 enum gass_write gass_read gass_append set_extent       \
-           srb_write srb_append srb_read ttsafe stream_test getname file_handle \
-           ntypes dangle dtransform filename
+TEST_PROGS=testhdf5 lheap ohdr stab gheap cache hyperslab istore bittests    \
+           dtypes dsets cmpd_dset extend external links unlink big mtime     \
+           fillval mount flush1 flush2 enum gass_write gass_read gass_append \
+           set_extent srb_write srb_append srb_read ttsafe stream_test       \
+           getname file_handle ntypes dangle dtransform filename
            
 ## Test programs for Error API.  Only compile them but let testerror.sh run 
 ## them to compare the output error messages with standard ones.  'make check'
 ## doesn't run them directly.
+
 ERR_PROGS=error_test err_compat
 
 PROGS=$(ERR_PROGS) $(TEST_PROGS)
@@ -77,7 +78,7 @@ CLEAN=$(TIMINGS)
 ## other source lists are for the individual tests, the files of which may
 ## overlap with other tests.
 
-TEST_SRC=big.c bittests.c cmpd_dset.c dsets.c dtypes.c extend.c              \
+TEST_SRC=big.c bittests.c cache.c cmpd_dset.c dsets.c dtypes.c extend.c      \
          external.c fillval.c flush1.c flush2.c gheap.c h5test.c hyperslab.c \
          istore.c lheap.c links.c mount.c mtime.c ohdr.c stab.c tarray.c     \
          tattr.c tconfig.c testhdf5.c testmeta.c tfile.c         \
@@ -126,6 +127,9 @@ testhdf5: $(TESTHDF5_OBJ)
 
 lheap: lheap.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ lheap.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+cache: cache.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ cache.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 ohdr: ohdr.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ ohdr.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)

@@ -72,6 +72,7 @@ static H5HL_t *H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udat
 static herr_t H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, H5HL_t *heap);
 static herr_t H5HL_dest(H5F_t *f, H5HL_t *heap);
 static herr_t H5HL_clear(H5F_t *f, H5HL_t *heap, hbool_t destroy);
+static herr_t H5HL_compute_size(H5F_t *f, H5HL_t *heap, size_t *size_ptr);
 
 /*
  * H5HL inherits cache-like properties from H5AC
@@ -82,6 +83,7 @@ const H5AC_class_t H5AC_LHEAP[1] = {{
     (H5AC_flush_func_t)H5HL_flush,
     (H5AC_dest_func_t)H5HL_dest,
     (H5AC_clear_func_t)H5HL_clear,
+    (H5AC_size_func_t)H5HL_compute_size,
 }};
 
 /* Declare a free list to manage the H5HL_free_t struct */
@@ -666,6 +668,42 @@ H5HL_clear(H5F_t *f, H5HL_t *heap, hbool_t destroy)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HL_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HL_compute_size
+ *
+ * Purpose:	Compute the size in bytes of the specified instance of
+ *              H5HL_t on disk, and return it in *len_ptr.  On failure,
+ *              the value of *len_ptr is undefined.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer
+ *		5/13/04
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HL_compute_size(H5F_t *f, H5HL_t *heap, size_t *size_ptr)
+{
+    herr_t  ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5HL_compute_size, FAIL);
+
+    /* check arguments */
+    HDassert(f);
+    HDassert(heap);
+    HDassert(size_ptr);
+
+    *size_ptr = H5HL_SIZEOF_HDR(f) + heap->disk_alloc;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5HL_compute_size() */
 
 
 /*-------------------------------------------------------------------------

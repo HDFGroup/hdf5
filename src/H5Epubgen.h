@@ -147,14 +147,12 @@ H5_DLLVAR hid_t H5E_CANTALLOC_g;    /* Can't allocate from file */
 #define H5E_CALLBACK        (H5OPEN H5E_CALLBACK_g)
 #define H5E_CANAPPLY        (H5OPEN H5E_CANAPPLY_g)
 #define H5E_SETLOCAL        (H5OPEN H5E_SETLOCAL_g)
-#define H5E_NOENCODER        (H5OPEN H5E_NOENCODER_g)
-#define H5E_NODECODER        (H5OPEN H5E_NODECODER_g)
+#define H5E_NOENCODER       (H5OPEN H5E_NOENCODER_g)
 H5_DLLVAR hid_t H5E_NOFILTER_g;     /* Requested filter is not available */
 H5_DLLVAR hid_t H5E_CALLBACK_g;     /* Callback failed */
 H5_DLLVAR hid_t H5E_CANAPPLY_g;     /* Error from filter 'can apply' callback */
 H5_DLLVAR hid_t H5E_SETLOCAL_g;     /* Error from filter 'set local' callback */
-H5_DLLVAR hid_t H5E_NOENCODER_g;    /* Filter present, but encoding disabled */
-H5_DLLVAR hid_t H5E_NODECODER_g;    /* Filter present, but decoding disabled */
+H5_DLLVAR hid_t H5E_NOENCODER_g;    /* Filter present but encoding disabled */
 
 /* Datatype conversion errors */
 #define H5E_CANTCONVERT     (H5OPEN H5E_CANTCONVERT_g)
@@ -188,6 +186,7 @@ H5_DLLVAR hid_t H5E_CANTDELETE_g;   /* Can't delete message */
 #define H5E_CANTLOCK        (H5OPEN H5E_CANTLOCK_g)
 #define H5E_CANTUNLOCK      (H5OPEN H5E_CANTUNLOCK_g)
 #define H5E_CANTGC          (H5OPEN H5E_CANTGC_g)
+#define H5E_CANTGETSIZE     (H5OPEN H5E_CANTGETSIZE_g)
 H5_DLLVAR hid_t H5E_NOSPACE_g;      /* No space available for allocation */
 H5_DLLVAR hid_t H5E_CANTCOPY_g;     /* Unable to copy object */
 H5_DLLVAR hid_t H5E_CANTFREE_g;     /* Unable to free object */
@@ -195,6 +194,7 @@ H5_DLLVAR hid_t H5E_ALREADYEXISTS_g;/* Object already exists */
 H5_DLLVAR hid_t H5E_CANTLOCK_g;     /* Unable to lock object */
 H5_DLLVAR hid_t H5E_CANTUNLOCK_g;   /* Unable to unlock object */
 H5_DLLVAR hid_t H5E_CANTGC_g;       /* Unable to garbage collect */
+H5_DLLVAR hid_t H5E_CANTGETSIZE_g;  /* Unable to compute size */
 
 /* Generic low-level file I/O errors */
 #define H5E_SEEKERROR       (H5OPEN H5E_SEEKERROR_g)
@@ -252,11 +252,21 @@ H5_DLLVAR hid_t H5E_MOUNT_g;        /* File mount error */
 #define H5E_CANTLOAD        (H5OPEN H5E_CANTLOAD_g)
 #define H5E_PROTECT         (H5OPEN H5E_PROTECT_g)
 #define H5E_NOTCACHED       (H5OPEN H5E_NOTCACHED_g)
+#define H5E_SYSTEM          (H5OPEN H5E_SYSTEM_g)
+#define H5E_CANTINS         (H5OPEN H5E_CANTINS_g)
+#define H5E_CANTRENAME      (H5OPEN H5E_CANTRENAME_g)
+#define H5E_CANTPROTECT     (H5OPEN H5E_CANTPROTECT_g)
+#define H5E_CANTUNPROTECT   (H5OPEN H5E_CANTUNPROTECT_g)
 H5_DLLVAR hid_t H5E_CANTFLUSH_g;    /* Unable to flush data from cache */
 H5_DLLVAR hid_t H5E_CANTSERIALIZE_g;/* Unable to serialize data from cache */
 H5_DLLVAR hid_t H5E_CANTLOAD_g;     /* Unable to load metadata into cache */
 H5_DLLVAR hid_t H5E_PROTECT_g;      /* Protected metadata error */
 H5_DLLVAR hid_t H5E_NOTCACHED_g;    /* Metadata not currently cached */
+H5_DLLVAR hid_t H5E_SYSTEM_g;       /* Internal error detected */
+H5_DLLVAR hid_t H5E_CANTINS_g;      /* Unable to insert metadata into cache */
+H5_DLLVAR hid_t H5E_CANTRENAME_g;   /* Unable to rename metadata */
+H5_DLLVAR hid_t H5E_CANTPROTECT_g;  /* Unable to protect metadata */
+H5_DLLVAR hid_t H5E_CANTUNPROTECT_g;/* Unable to unprotect metadata */
 
 /* Group related errors */
 #define H5E_CANTOPENOBJ     (H5OPEN H5E_CANTOPENOBJ_g)

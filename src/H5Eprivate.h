@@ -108,6 +108,7 @@ typedef struct H5E_print_t {
 #define HGOTO_DONE(ret_val) {ret_value = ret_val; goto done;}
 
 /* Library-private functions defined in H5E package */
+H5_DLL herr_t  H5E_init(void);
 H5_DLL herr_t  H5E_push(H5E_t *estack, const char *file, const char *func, unsigned line, 
                             hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc);
 H5_DLL herr_t  H5E_clear(H5E_t *estack);

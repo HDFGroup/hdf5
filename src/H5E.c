@@ -120,6 +120,35 @@ static herr_t  H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client
 static herr_t  H5E_get_auto(const H5E_t *estack, H5E_auto_t *func, void **client_data);
 static herr_t  H5E_set_auto(H5E_t *estack, H5E_auto_t func, void *client_data);
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_init
+ *
+ * Purpose:	Initialize the interface from some other layer.
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, June 29, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E_init(void)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5E_init, FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
 /*--------------------------------------------------------------------------
  * Function:    H5E_init_interface
  *
