@@ -10,7 +10,7 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
-#include <hdf5.h>
+#include <H5config.h>
 
 #ifdef STDC_HEADERS
 #   include <assert.h>
@@ -18,12 +18,15 @@
 #   include <stdio.h>
 #   include <stdlib.h>
 #   include <string.h>
+#	include <io.h>
 #endif
 
 #ifdef HAVE_UNISTD_H
 #   include <sys/types.h>
 #   include <unistd.h>
 #endif
+
+#include <hdf5.h>
 
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
@@ -580,7 +583,7 @@ test_2 (void)
 	    puts ("   Failed to read dataset");
 	    break;
 	}
-
+ 
 	for (i=0; i<100; i++) {
 	    if (whole[i]!=(signed)i) {
 		puts ("*FAILED*");
