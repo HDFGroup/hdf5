@@ -148,15 +148,11 @@ __DLL__ herr_t H5S_all_select_serialize(const H5S_t *space, uint8_t *buf);
 __DLL__ herr_t H5S_all_select_deserialize(H5S_t *space, const uint8_t *buf);
 __DLL__ herr_t H5S_all_bounds(H5S_t *space, hsize_t *start, hsize_t *end);
 __DLL__ herr_t H5S_all_read(H5F_t *f, const struct H5O_layout_t *layout,
-			    const struct H5O_pline_t *pline,
-                            const struct H5O_fill_t *fill,
-			    const struct H5O_efl_t *efl, size_t elmt_size,
+                            H5P_genplist_t *dc_plist, size_t elmt_size,
 			    const H5S_t *file_space, const H5S_t *mem_space,
 			    hid_t dxpl_id, void *buf/*out*/);
 __DLL__ herr_t H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
-			    const struct H5O_pline_t *pline,
-                            const struct H5O_fill_t *fill,
-			    const struct H5O_efl_t *efl, size_t elmt_size,
+                            H5P_genplist_t *dc_plist, size_t elmt_size,
 			    const H5S_t *file_space, const H5S_t *mem_space,
 			    hid_t dxpl_id, const void *buf);
 __DLL__ herr_t H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space,

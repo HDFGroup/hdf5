@@ -23,6 +23,7 @@
 #include "H5Dpublic.h"
 #include "H5Fprivate.h"
 #include "H5Oprivate.h"
+#include "H5Pprivate.h"
 
 #define H5S_RESERVED_ATOMS  2
 
@@ -93,17 +94,13 @@ typedef struct H5S_fconv_t {
 
     /* Gather elements from disk to type conversion buffer */
     hsize_t (*gath)(H5F_t *f, const struct H5O_layout_t *layout,
-		   const struct H5O_pline_t *pline,
-		   const struct H5O_fill_t *fill,
-		   const struct H5O_efl_t *efl, size_t elmt_size,
+                   H5P_genplist_t *dc_plist, size_t elmt_size,
 		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		   hsize_t nelmts, hid_t dxpl_id, void *tconv_buf/*out*/);
 
     /* Scatter elements from type conversion buffer to disk */
     herr_t (*scat)(H5F_t *f, const struct H5O_layout_t *layout,
-		   const struct H5O_pline_t *pline,
-		   const struct H5O_fill_t *fill,
-		   const struct H5O_efl_t *efl, size_t elmt_size,
+                   H5P_genplist_t *dc_plist, size_t elmt_size,
 		   const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		   hsize_t nelmts, hid_t dxpl_id, const void *tconv_buf);
 } H5S_fconv_t;
@@ -139,18 +136,14 @@ typedef struct H5S_conv_t {
     
     /* Read from file to application w/o intermediate scratch buffer */
     herr_t (*read)(H5F_t *f, const struct H5O_layout_t *layout,
-		   const struct H5O_pline_t *pline,
-                   const struct H5O_fill_t *fill,
-		   const struct H5O_efl_t *efl, size_t elmt_size,
+                   H5P_genplist_t *dc_plist, size_t elmt_size,
 		   const H5S_t *file_space, const H5S_t *mem_space,
 		   hid_t dxpl_id, void *buf/*out*/);
 
 
     /* Write directly from app buffer to file */
     herr_t (*write)(H5F_t *f, const struct H5O_layout_t *layout,
-		   const struct H5O_pline_t *pline,
-                   const struct H5O_fill_t *fill,
-		   const struct H5O_efl_t *efl, size_t elmt_size,
+                   H5P_genplist_t *dc_plist, size_t elmt_size,
 		   const H5S_t *file_space, const H5S_t *mem_space,
 		   hid_t dxpl_id, const void *buf);
     
@@ -210,7 +203,7 @@ __DLL__ herr_t H5S_extent_release(H5S_t *space);
 __DLL__ herr_t H5S_select_release(H5S_t *space);
 __DLL__ hssize_t H5S_get_select_npoints(const H5S_t *space);
 __DLL__ int H5S_extend(H5S_t *space, const hsize_t *size);
-__DLL__ int H5S_set_extent(H5S_t *space, const hsize_t *size);
+__DLL__ herr_t H5S_set_extent(H5S_t *space, const hsize_t *size);
 __DLL__ htri_t H5S_select_valid(const H5S_t *space);
 __DLL__ herr_t H5S_debug(H5F_t *f, const void *_mesg, FILE *stream,
 			 int indent, int fwidth);
@@ -243,9 +236,7 @@ __DLL__ htri_t H5S_all_opt_possible(const H5S_t *mem_space,
 /* MPI-IO function to read directly from app buffer to file rky980813 */
 __DLL__ herr_t H5S_mpio_spaces_read(H5F_t *f,
 				    const struct H5O_layout_t *layout,
-				    const struct H5O_pline_t *pline,
-                                    const struct H5O_fill_t *fill,
-				    const struct H5O_efl_t *efl,
+                                    H5P_genplist_t *dc_plist,
 				    size_t elmt_size, const H5S_t *file_space,
 				    const H5S_t *mem_space, hid_t dxpl_id,
 				    void *buf/*out*/);
@@ -253,9 +244,7 @@ __DLL__ herr_t H5S_mpio_spaces_read(H5F_t *f,
 /* MPI-IO function to write directly from app buffer to file rky980813 */
 __DLL__ herr_t H5S_mpio_spaces_write(H5F_t *f,
 				    const struct H5O_layout_t *layout,
-				    const struct H5O_pline_t *pline,
-                                    const struct H5O_fill_t *fill,
-				    const struct H5O_efl_t *efl,
+                                    H5P_genplist_t *dc_plist,
 				    size_t elmt_size, const H5S_t *file_space,
 				    const H5S_t *mem_space, hid_t dxpl_id,
 				    const void *buf);

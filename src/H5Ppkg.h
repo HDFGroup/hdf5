@@ -39,7 +39,7 @@ typedef enum {
 } H5P_class_mod_t;
 
 /* Define structure to hold property information */
-typedef struct H5P_genprop_tag {
+typedef struct H5P_genprop_t {
     /* Values for this property */
     unsigned xor_val;      /* XOR'ed version of the name, for faster comparisons */
     char *name;         /* Name of property */
@@ -55,12 +55,12 @@ typedef struct H5P_genprop_tag {
     H5P_prp_copy_func_t copy;  /* Function to call when a property is copied */
     H5P_prp_close_func_t close; /* Function to call when a property is closed */
 
-    struct H5P_genprop_tag *next;  /* Pointer to the next property in this list */
+    struct H5P_genprop_t *next;  /* Pointer to the next property in this list */
 } H5P_genprop_t;
 
 /* Define structure to hold class information */
-struct H5P_genclass_tag {
-    struct H5P_genclass_tag *parent;     /* Pointer to parent class */
+struct H5P_genclass_t {
+    struct H5P_genclass_t *parent;     /* Pointer to parent class */
     char *name;         /* Name of property list class */
     size_t  nprops;     /* Number of properties in class */
     unsigned   hashsize;   /* Hash table size */
@@ -82,7 +82,7 @@ struct H5P_genclass_tag {
 };
 
 /* Define structure to hold property list information */
-struct H5P_genplist_tag {
+struct H5P_genplist_t {
     H5P_genclass_t *pclass; /* Pointer to class info */
     hid_t   plist_id;       /* Copy of the property list ID (for use in close callback) */
     size_t  nprops;         /* Number of properties in class */

@@ -22,8 +22,8 @@
 #include "H5private.h"
 
 /* Forward declarations for anonymous H5P objects */
-typedef struct H5P_genplist_tag H5P_genplist_t;
-typedef struct H5P_genclass_tag H5P_genclass_t;
+typedef struct H5P_genplist_t H5P_genplist_t;
+typedef struct H5P_genclass_t H5P_genclass_t;
 
 /* Private functions, not part of the publicly documented API */
 __DLL__ herr_t H5P_init(void);

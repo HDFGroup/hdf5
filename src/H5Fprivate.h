@@ -321,11 +321,12 @@ __DLL__ size_t H5F_sizeof_size(const H5F_t *f);
 #define H5F_MNT_SYM_LOCAL_DEF	 	FALSE	
 
 /* Forward declarations for prototypes arguments */
+struct H5G_entry_t;
 struct H5O_layout_t;
 struct H5O_efl_t;
 struct H5O_pline_t;
 struct H5O_fill_t;
-struct H5G_entry_t;
+struct H5P_genplist_t;
 struct H5S_t;
 
 /* Private functions, not part of the publicly documented API */
@@ -338,23 +339,19 @@ __DLL__ herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
 __DLL__ herr_t H5F_arr_create(H5F_t *f,
 			      struct H5O_layout_t *layout /*in,out*/);
 __DLL__ herr_t H5F_arr_read (H5F_t *f, hid_t dxpl_id,
-			     const struct H5O_layout_t *layout,
-			     const struct H5O_pline_t *pline,
-			     const struct H5O_fill_t *fill,
-			     const struct H5O_efl_t *efl,
-			     const hsize_t _hslab_size[],
-			     const hsize_t mem_size[],
-			     const hssize_t mem_offset[],
-			     const hssize_t file_offset[], void *_buf/*out*/);
+                            const struct H5O_layout_t *layout,
+                            struct H5P_genplist_t *dc_plist,
+                            const hsize_t _hslab_size[],
+                            const hsize_t mem_size[],
+                            const hssize_t mem_offset[],
+                            const hssize_t file_offset[], void *_buf/*out*/);
 __DLL__ herr_t H5F_arr_write (H5F_t *f, hid_t dxpl_id,
-			      const struct H5O_layout_t *layout,
-			      const struct H5O_pline_t *pline,
-			      const struct H5O_fill_t *fill,
-			      const struct H5O_efl_t *efl,
-			      const hsize_t _hslab_size[],
-			      const hsize_t mem_size[],
-			      const hssize_t mem_offset[],
-			      const hssize_t file_offset[], const void *_buf);
+                            const struct H5O_layout_t *layout,
+                            struct H5P_genplist_t *dc_plist,
+                            const hsize_t _hslab_size[],
+                            const hsize_t mem_size[],
+                            const hssize_t mem_offset[],
+                            const hssize_t file_offset[], const void *_buf);
 
 /* Functions that operate on blocks of bytes wrt boot block */
 __DLL__ herr_t H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr,
@@ -364,25 +361,25 @@ __DLL__ herr_t H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
 
 /* Functions that operate on byte sequences */
 __DLL__ herr_t H5F_seq_read(H5F_t *f, hid_t dxpl_id,
-        const struct H5O_layout_t *layout, const struct H5O_pline_t *pline,
-        const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
+        const struct H5O_layout_t *layout,
+        struct H5P_genplist_t *dc_plist,
         const struct H5S_t *file_space, size_t elmt_size, size_t seq_len,
         hsize_t file_offset, void *_buf/*out*/);
 __DLL__ herr_t H5F_seq_write (H5F_t *f, hid_t dxpl_id,
-        const struct H5O_layout_t *layout, const struct H5O_pline_t *pline,
-        const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
+        const struct H5O_layout_t *layout,
+        struct H5P_genplist_t *dc_plist,
         const struct H5S_t *file_space, size_t elmt_size, size_t seq_len,
         hsize_t file_offset, const void *_buf);
 
 /* Functions that operate on vectors of byte sequences */
 __DLL__ herr_t H5F_seq_readv(H5F_t *f, hid_t dxpl_id,
-        const struct H5O_layout_t *layout, const struct H5O_pline_t *pline,
-        const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
+        const struct H5O_layout_t *layout,
+        struct H5P_genplist_t *dc_plist,
         const struct H5S_t *file_space, size_t elmt_size, size_t nseq,
         size_t seq_len[], hsize_t file_offset[], void *_buf/*out*/);
 __DLL__ herr_t H5F_seq_writev(H5F_t *f, hid_t dxpl_id,
-        const struct H5O_layout_t *layout, const struct H5O_pline_t *pline,
-        const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
+        const struct H5O_layout_t *layout,
+        struct H5P_genplist_t *dc_plist,
         const struct H5S_t *file_space, size_t elmt_size, size_t nseq,
         size_t seq_len[], hsize_t file_offset[], const void *_buf);
 
@@ -390,16 +387,12 @@ __DLL__ herr_t H5F_seq_writev(H5F_t *f, hid_t dxpl_id,
 /* Functions that operate on indexed storage */
 __DLL__ hsize_t H5F_istore_allocated(H5F_t *f, unsigned ndims, haddr_t addr);
 __DLL__ herr_t H5F_istore_dump_btree(H5F_t *f, FILE *stream, unsigned ndims,
-				     haddr_t addr);
-
-__DLL__ herr_t H5F_istore_prune_by_extent( H5F_t *f, 
-																																										 struct H5O_layout_t *layout, 
-																																											struct H5S_t *space  );
+        haddr_t addr);
+__DLL__ herr_t H5F_istore_prune_by_extent( H5F_t *f,
+        const struct H5O_layout_t *layout, const struct H5S_t *space);
 __DLL__ herr_t H5F_istore_initialize_by_extent( H5F_t *f, 
-																																															 struct H5O_layout_t *layout, 
-																																															 struct H5O_pline_t *pline, 
-																																																struct H5O_fill_t *fill, 
-																																																struct H5S_t *space );
+        const struct H5O_layout_t *layout, struct H5P_genplist_t *dc_plist,
+        const struct H5S_t *space );
 
 /* Functions for allocation/releasing chunks */
 __DLL__ void * H5F_istore_chunk_alloc(size_t chunk_size);

@@ -1931,6 +1931,51 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
 
 
 /*-------------------------------------------------------------------------
+ * Function: H5S_set_extent
+ *
+ * Purpose: Modify the dimensions of a data space. Based on H5S_extend
+ *
+ * Return: Success: Non-negative
+ *
+ * Failure: Negative
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: March 13, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_set_extent( H5S_t *space, const hsize_t *size )
+{
+    herr_t ret_value=SUCCEED;
+    unsigned u;
+       
+    FUNC_ENTER( H5S_set_extent, FAIL );
+
+    /* Check args */
+    assert( space && H5S_SIMPLE==space->extent.type );
+    assert( size);
+
+    /* Check for changing dimensions of a scalar dataspace */
+    if(space->extent.u.simple.rank==0)
+
+    /* Verify that the dimensions being changed are allowed to change */
+    for ( u = 0; u < space->extent.u.simple.rank; u++ )
+        if ( space->extent.u.simple.max &&
+                 H5S_UNLIMITED != space->extent.u.simple.max[u] &&
+                 space->extent.u.simple.max[u]<size[u] )
+             HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,"dimension cannot be modified");
+
+    /* Update dimensions with new values */
+    for ( u = 0; u < space->extent.u.simple.rank; u++ )
+        space->extent.u.simple.size[u] = size[u];
+
+    FUNC_LEAVE( ret_value );
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5S_debug
  *
  * Purpose:	Prints debugging information about a data space.
@@ -1971,48 +2016,5 @@ H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth)
     }
 
     FUNC_LEAVE(SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: H5S_set_extent
- *
- * Purpose: Modify the dimensions of a data space. Based on H5S_extend
- *
- * Return: Success: Number of dimensions whose size increased.
- *
- * Failure: Negative
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: March 13, 2002
- *
- *-------------------------------------------------------------------------
- */
-int H5S_set_extent( H5S_t *space, const hsize_t *size )
-{
-    int ret_value;
-    unsigned u;
-       
-    FUNC_ENTER( H5S_set_extent, FAIL );
-
-    /* Check args */
-    assert( space && H5S_SIMPLE==space->extent.type );
-    assert( size);
-
-    for ( u = 0; u < space->extent.u.simple.rank; u++ )
-        if ( space->extent.u.simple.max &&
-                 H5S_UNLIMITED != space->extent.u.simple.max[u] &&
-                 space->extent.u.simple.max[u]<size[u] )
-             HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,"dimension cannot be modified");
-
-    /* Update dimensions with new values */
-    for ( u = 0; u < space->extent.u.simple.rank; u++ )
-        space->extent.u.simple.size[u] = size[u];
-
-    /* Set return value */
-    ret_value=space->extent.u.simple.rank;
-
-    FUNC_LEAVE( ret_value );
 }
 

@@ -28,17 +28,13 @@ static herr_t H5S_point_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter
 static hsize_t H5S_point_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
 				hsize_t max);
 static hsize_t H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-			       const struct H5O_pline_t *pline,
-			       const struct H5O_fill_t *fill,
-			       const struct H5O_efl_t *efl, size_t elmt_size,
-			       const H5S_t *file_space,
+                               H5P_genplist_t *dc_plist,
+                               size_t elmt_size, const H5S_t *file_space,
 			       H5S_sel_iter_t *file_iter, hsize_t nelmts,
 			       hid_t dxpl_id, void *buf/*out*/);
 static herr_t H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-			       const struct H5O_pline_t *pline,
-			       const struct H5O_fill_t *fill,
-			       const struct H5O_efl_t *efl, size_t elmt_size,
-			       const H5S_t *file_space,
+                               H5P_genplist_t *dc_plist,
+                               size_t elmt_size, const H5S_t *file_space,
 			       H5S_sel_iter_t *file_iter, hsize_t nelmts,
 			       hid_t dxpl_id, const void *buf);
 static hsize_t H5S_point_mgath (const void *_buf, size_t elmt_size,
@@ -283,8 +279,7 @@ H5S_point_favail (const H5S_t * UNUSED space,
  */
 static hsize_t
 H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-		 const struct H5O_pline_t *pline,
-		 const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
+                 H5P_genplist_t *dc_plist,
 		 size_t elmt_size, const H5S_t *file_space,
 		 H5S_sel_iter_t *file_iter, hsize_t nelmts, hid_t dxpl_id,
 		 void *_buf/*out*/)
@@ -335,18 +330,9 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
                 file_offset[u] += file_space->select.offset[u];
 
             /* Go read the point */
-            if (H5F_arr_read(f, dxpl_id, layout, pline, fill, efl, hsize, hsize, zero, file_offset, buf/*out*/)<0) {
+            if (H5F_arr_read(f, dxpl_id, layout, dc_plist, hsize, hsize, zero, file_offset, buf/*out*/)<0)
                 HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
-            }
 
-#ifdef QAK
-	    printf("%s: check 3.0\n",FUNC);
-		for(u=0; u<ndims; u++) {
-		    printf("%s: %u - pnt=%d\n", FUNC, (unsigned)u, (int)file_iter->pnt.curr->pnt[u]);
-		    printf("%s: %u - file_offset=%d\n", FUNC, (unsigned)u, (int)file_offset[u]);
-		}
-		printf("%s: *buf=%u\n",FUNC,(unsigned)*buf);
-#endif /* QAK */
             /* Increment the offset of the buffer */
             buf+=elmt_size;
 
@@ -386,8 +372,7 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
  */
 static herr_t
 H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-		 const struct H5O_pline_t *pline,
-		 const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
+                 H5P_genplist_t *dc_plist,
 		 size_t elmt_size, const H5S_t *file_space,
 		 H5S_sel_iter_t *file_iter, hsize_t nelmts, hid_t dxpl_id,
 		 const void *_buf)
@@ -411,10 +396,9 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     assert (nelmts>0);
     assert (buf);
 
-#ifdef QAK
-    printf("%s: check 1.0, layout->ndims=%d\n",FUNC,(int)layout->ndims);
-#endif /* QAK */
+    /* Hold the number of dimensions of the dataspace */
     ndims=file_space->extent.u.simple.rank;
+
     /* initialize hyperslab size and offset in memory buffer */
     for(u=0; u<ndims+1; u++) {
         hsize[u]=1;     /* hyperslab size is 1, except for last element */
@@ -428,14 +412,6 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
      */
     num_written=0;
     while(num_written<nelmts && file_iter->pnt.elmt_left>0) {
-#ifdef QAK
-	printf("%s: check 2.0\n",FUNC);
-	{
-	    for(u=0; u<ndims; u++) {
-            printf("%s: %u - pnt=%d\n", FUNC, (unsigned)u, (int)file_iter->pnt.curr->pnt[u]);
-	    }
-	}
-#endif /* QAK */
         /* Copy the location of the point to get */
         HDmemcpy(file_offset,file_iter->pnt.curr->pnt,ndims*sizeof(hssize_t));
         file_offset[ndims] = 0;
@@ -444,18 +420,9 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
         for(u=0; u<file_space->extent.u.simple.rank; u++)
             file_offset[u] += file_space->select.offset[u];
 
-#ifdef QAK
-	printf("%s: check 3.0\n",FUNC);
-    for(u=0; u<ndims; u++) {
-        printf("%s: %u - pnt=%d\n", FUNC,(unsigned)u,(int)file_iter->pnt.curr->pnt[u]);
-        printf("%s: %u - file_offset=%d\n", FUNC,(unsigned)u,(int)file_offset[u]);
-    }
-    printf("%s: *buf=%u\n",FUNC,(unsigned)*buf);
-#endif /* QAK */
         /* Go write the point */
-        if (H5F_arr_write(f, dxpl_id, layout, pline, fill, efl, hsize, hsize, zero, file_offset, buf)<0) {
+        if (H5F_arr_write(f, dxpl_id, layout, dc_plist, hsize, hsize, zero, file_offset, buf)<0)
             HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
-        }
 
         /* Increment the offset of the buffer */
         buf+=elmt_size;
@@ -466,9 +433,6 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
         /* Advance the point iterator */
         file_iter->pnt.elmt_left--;
         file_iter->pnt.curr=file_iter->pnt.curr->next;
-#ifdef QAK
-	printf("%s: check 5.0, file_iter->pnt.curr=%p\n", FUNC,file_iter->pnt.curr);
-#endif
     } /* end while */
 
     FUNC_LEAVE (num_written>0 ? SUCCEED : FAIL);

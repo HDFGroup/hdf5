@@ -27,16 +27,12 @@ static herr_t H5S_all_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter_t
 static hsize_t H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
 			      hsize_t max);
 static hsize_t H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-			     const struct H5O_pline_t *pline,
-			     const struct H5O_fill_t *fill,
-			     const struct H5O_efl_t *efl, size_t elmt_size,
+                             H5P_genplist_t *dc_plist, size_t elmt_size,
 			     const H5S_t *file_space,
 			     H5S_sel_iter_t *file_iter, hsize_t nelmts,
 			     hid_t dxpl_id, void *buf/*out*/);
 static herr_t H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-			     const struct H5O_pline_t *pline,
-			     const struct H5O_fill_t *fill,
-			     const struct H5O_efl_t *efl, size_t elmt_size,
+                             H5P_genplist_t *dc_plist, size_t elmt_size,
 			     const H5S_t *file_space,
 			     H5S_sel_iter_t *file_iter, hsize_t nelmts,
 			     hid_t dxpl_id, const void *buf);
@@ -158,8 +154,7 @@ H5S_all_favail (const H5S_t * UNUSED space, const H5S_sel_iter_t *sel_iter, hsiz
  */
 static hsize_t
 H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-	       const struct H5O_pline_t *pline,
-	       const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
+               H5P_genplist_t *dc_plist,
 	       size_t elmt_size, const H5S_t *file_space,
 	       H5S_sel_iter_t *file_iter, hsize_t nelmts, hid_t dxpl_id,
 	       void *buf/*out*/)
@@ -186,7 +181,7 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
      * Read piece from file.
      */
     H5_CHECK_OVERFLOW(actual_bytes,hsize_t,size_t);
-    if (H5F_seq_read(f, dxpl_id, layout, pline, fill, efl, file_space,
+    if (H5F_seq_read(f, dxpl_id, layout, dc_plist, file_space,
             elmt_size, (size_t)actual_bytes, buf_off, buf/*out*/)<0) {
         HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
     }
@@ -221,8 +216,7 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
  */
 static herr_t
 H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-	       const struct H5O_pline_t *pline, const struct H5O_fill_t *fill,
-	       const struct H5O_efl_t *efl, size_t elmt_size,
+               H5P_genplist_t *dc_plist, size_t elmt_size,
 	       const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 	       hsize_t nelmts, hid_t dxpl_id, const void *buf)
 {
@@ -248,7 +242,7 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
      * Write piece from file.
      */
     H5_CHECK_OVERFLOW(actual_bytes,hsize_t,size_t);
-    if (H5F_seq_write(f, dxpl_id, layout, pline, fill, efl, file_space,
+    if (H5F_seq_write(f, dxpl_id, layout, dc_plist, file_space,
             elmt_size, (size_t)actual_bytes, buf_off, buf/*out*/)<0) {
         HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
     }
@@ -443,10 +437,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
-             const struct H5O_fill_t *fill,
-	     const H5O_efl_t *efl, size_t elmt_size, const H5S_t *file_space,
-	     const H5S_t *mem_space, hid_t dxpl_id, void *_buf/*out*/)
+H5S_all_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
+            size_t elmt_size, const H5S_t *file_space,
+	    const H5S_t *mem_space, hid_t dxpl_id, void *_buf/*out*/)
 {
     H5S_hyper_span_t *file_span=NULL,*mem_span=NULL;     /* Hyperslab span node */
     char       *buf=(char*)_buf;        /* Get pointer to buffer */
@@ -544,13 +537,13 @@ for (u=0; u<=mem_space->extent.u.simple.rank; u++)
     printf("file_offset[%u]=%lu\n",u,(unsigned long)file_offset[u]);
 #endif /* QAK */
     /* Read data from the file */
-    if (H5F_arr_read(f, dxpl_id, layout, pline, fill, efl, size,
+    if (H5F_arr_read(f, dxpl_id, layout, dc_plist, size,
             mem_size, mem_offset, file_offset, buf/*out*/)<0)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read data from the file");
 
 done:
     FUNC_LEAVE(ret_value);
-}
+} /* end H5S_all_read() */
 
 
 /*-------------------------------------------------------------------------
@@ -578,10 +571,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
-	     const H5O_pline_t *pline,
-             const struct H5O_fill_t *fill,
-             const H5O_efl_t *efl,
+H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout, H5P_genplist_t *dc_plist,
 	     size_t elmt_size, const H5S_t *file_space,
 	     const H5S_t *mem_space, hid_t dxpl_id, const void *_buf)
 {
@@ -682,13 +672,13 @@ for (u=0; u<=mem_space->extent.u.simple.rank; u++)
     printf("file_offset[%u]=%lu\n",u,(unsigned long)file_offset[u]);
 #endif /* QAK */
     /* Write data to the file */
-    if (H5F_arr_write(f, dxpl_id, layout, pline, fill, efl, size,
+    if (H5F_arr_write(f, dxpl_id, layout, dc_plist, size,
             mem_size, mem_offset, file_offset, buf)<0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write data to the file");
 
 done:
     FUNC_LEAVE(ret_value);
-}
+} /* end H5S_all_write() */
 
 
 /*--------------------------------------------------------------------------

@@ -58,10 +58,8 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
 		     size_t *count,
 		     hbool_t *is_derived_type );
 static herr_t
-H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
-                     const struct H5O_pline_t UNUSED *pline,
-                     const struct H5O_fill_t UNUSED *fill,
-                     const struct H5O_efl_t UNUSED *efl, size_t elmt_size,
+H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout,
+                     H5P_genplist_t *dc_plist, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
                      hid_t dxpl_id, void *buf/*out*/, const hbool_t do_write);
 
@@ -549,11 +547,9 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
-                     const struct H5O_pline_t UNUSED *pline,
-                     const struct H5O_fill_t UNUSED *fill,
-                     const struct H5O_efl_t UNUSED *efl, size_t elmt_size,
+static herr_t
+H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout,
+                     H5P_genplist_t UNUSED *dc_plist, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
 		     hid_t dxpl_id, void *buf /*out*/,
 		     const hbool_t do_write )
@@ -703,10 +699,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_mpio_spaces_read(H5F_t *f, const struct H5O_layout_t *layout,
-                     const struct H5O_pline_t *pline,
-                     const struct H5O_fill_t *fill,
-                     const struct H5O_efl_t *efl, size_t elmt_size,
+H5S_mpio_spaces_read(H5F_t *f, const H5O_layout_t *layout,
+                     H5P_genplist_t *dc_plist, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
                      hid_t dxpl_id, void *buf/*out*/)
 {
@@ -714,7 +708,7 @@ H5S_mpio_spaces_read(H5F_t *f, const struct H5O_layout_t *layout,
 
     FUNC_ENTER (H5S_mpio_spaces_read, FAIL);
 
-    ret_value = H5S_mpio_spaces_xfer(f, layout, pline, fill, efl, elmt_size,
+    ret_value = H5S_mpio_spaces_xfer(f, layout, dc_plist, elmt_size,
 				     file_space, mem_space, dxpl_id,
 				     buf, 0/*read*/);
 
@@ -743,10 +737,8 @@ H5S_mpio_spaces_read(H5F_t *f, const struct H5O_layout_t *layout,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_mpio_spaces_write(H5F_t *f, const struct H5O_layout_t *layout,
-		     const struct H5O_pline_t *pline,
-                     const struct H5O_fill_t *fill,
-		     const struct H5O_efl_t *efl, size_t elmt_size,
+H5S_mpio_spaces_write(H5F_t *f, const H5O_layout_t *layout,
+                     H5P_genplist_t *dc_plist, size_t elmt_size,
 		     const H5S_t *file_space, const H5S_t *mem_space,
 		     hid_t dxpl_id, const void *buf)
 {
@@ -754,7 +746,7 @@ H5S_mpio_spaces_write(H5F_t *f, const struct H5O_layout_t *layout,
 
     FUNC_ENTER (H5S_mpio_spaces_write, FAIL);
 
-    ret_value = H5S_mpio_spaces_xfer(f, layout, pline, fill, efl, elmt_size,
+    ret_value = H5S_mpio_spaces_xfer(f, layout, dc_plist, elmt_size,
 				     file_space, mem_space, dxpl_id,
 				     (void*)buf, 1/*write*/);
 

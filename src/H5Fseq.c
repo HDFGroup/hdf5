@@ -57,10 +57,10 @@ static int interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
-         const struct H5O_pline_t *pline, const H5O_fill_t *fill,
-         const struct H5O_efl_t *efl, const H5S_t *file_space, size_t elmt_size,
-         size_t seq_len, hsize_t file_offset, void *buf/*out*/)
+H5F_seq_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
+        H5P_genplist_t *dc_plist,
+        const H5S_t *file_space, size_t elmt_size,
+        size_t seq_len, hsize_t file_offset, void *buf/*out*/)
 {
     FUNC_ENTER(H5F_seq_read, FAIL);
 
@@ -69,7 +69,7 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     assert(layout);
     assert(buf);
 
-    if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, file_space, elmt_size, 1, &seq_len, &file_offset, buf)<0)
+    if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, file_space, elmt_size, 1, &seq_len, &file_offset, buf)<0)
         HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "vector read failed");
 
     FUNC_LEAVE(SUCCEED);
@@ -98,10 +98,10 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_seq_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
-         const struct H5O_pline_t *pline, const H5O_fill_t *fill,
-         const struct H5O_efl_t *efl, const H5S_t *file_space, size_t elmt_size,
-         size_t seq_len, hsize_t file_offset, const void *buf)
+H5F_seq_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
+        H5P_genplist_t *dc_plist,
+        const H5S_t *file_space, size_t elmt_size,
+        size_t seq_len, hsize_t file_offset, const void *buf)
 {
     FUNC_ENTER(H5F_seq_write, FAIL);
 
@@ -110,7 +110,7 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     assert(layout);
     assert(buf);
 
-    if (H5F_seq_writev(f, dxpl_id, layout, pline, fill, efl, file_space, elmt_size, 1, &seq_len, &file_offset, buf)<0)
+    if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, file_space, elmt_size, 1, &seq_len, &file_offset, buf)<0)
         HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vector write failed");
 
     FUNC_LEAVE(SUCCEED);
@@ -141,11 +141,11 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
-         const struct H5O_pline_t *pline, const H5O_fill_t *fill,
-         const struct H5O_efl_t *efl, const H5S_t *file_space, size_t elmt_size,
-         size_t nseq, size_t seq_len_arr[], hsize_t file_offset_arr[],
-         void *_buf/*out*/)
+H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
+        H5P_genplist_t *dc_plist,
+        const H5S_t *file_space, size_t elmt_size,
+        size_t nseq, size_t seq_len_arr[], hsize_t file_offset_arr[],
+        void *_buf/*out*/)
 {
     unsigned char *real_buf=(unsigned char *)_buf;   /* Local pointer to buffer to fill */
     unsigned char *buf;                         /* Local pointer to buffer to fill */
@@ -163,10 +163,12 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     unsigned	u;				/*counters		*/
     size_t      v;                              /*counters              */
     int	i,j;				/*counters		*/
+    struct H5O_efl_t efl;               /* External File List info */
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
     H5P_genplist_t *plist=NULL;                 /* Property list */
 #endif
+    herr_t      ret_value = SUCCEED;            /* Return value */
    
     FUNC_ENTER(H5F_seq_readv, FAIL);
 
@@ -186,17 +188,17 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
         /* Get the plist structure */
         if(NULL == (plist = H5I_object(dxpl_id)))
-            HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
 
         /* Get the driver ID */
         if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
-            HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
 
         /* Check if we are using the MPIO driver */
         if(H5FD_MPIO==driver_id) {
             /* Get the driver information */
             if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &dx)<0)
-                HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
 
             /* Check if we are not using independent I/O */
             if(H5FD_MPIO_INDEPENDENT!=dx->xfer_mode)
@@ -206,54 +208,49 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
     /* Collective MPIO access is unsupported for non-contiguous datasets */
     if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode)
-        HRETURN_ERROR (H5E_DATASET, H5E_READERROR, FAIL, "collective access on non-contiguous datasets not supported yet");
+        HGOTO_ERROR (H5E_DATASET, H5E_READERROR, FAIL, "collective access on non-contiguous datasets not supported yet");
 #endif
+
+    /* Get necessary properties from property list */
+    if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get EFL value");
 
     switch (layout->type) {
         case H5D_CONTIGUOUS:
-            /* Filters cannot be used for contiguous data. */
-            if (pline && pline->nfilters>0) {
-                HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
-                      "filters are not allowed for contiguous data");
-            }
-            
-
             /* Read directly from file if the dataset is in an external file */
-            if (efl && efl->nused>0) {
+            if (efl.nused>0) {
                 /* Iterate through the sequence vectors */
                 for(v=0; v<nseq; v++) {
 #ifdef H5_HAVE_PARALLEL
-            if (H5FD_MPIO_COLLECTIVE==xfer_mode) {
-                /*
-                 * Currently supports same number of collective access. Need to
-                 * be changed LATER to combine all reads into one collective MPIO
-                 * call.
-                 */
-                unsigned long max, min, temp;
+                    if (H5FD_MPIO_COLLECTIVE==xfer_mode) {
+                        /*
+                         * Currently supports same number of collective access. Need to
+                         * be changed LATER to combine all reads into one collective MPIO
+                         * call.
+                         */
+                        unsigned long max, min, temp;
 
-                temp = seq_len_arr[v];
-                assert(temp==seq_len_arr[v]);	/* verify no overflow */
-                MPI_Allreduce(&temp, &max, 1, MPI_UNSIGNED_LONG, MPI_MAX,
-                      H5FD_mpio_communicator(f->shared->lf));
-                MPI_Allreduce(&temp, &min, 1, MPI_UNSIGNED_LONG, MPI_MIN,
-                      H5FD_mpio_communicator(f->shared->lf));
+                        temp = seq_len_arr[v];
+                        assert(temp==seq_len_arr[v]);	/* verify no overflow */
+                        MPI_Allreduce(&temp, &max, 1, MPI_UNSIGNED_LONG, MPI_MAX,
+                              H5FD_mpio_communicator(f->shared->lf));
+                        MPI_Allreduce(&temp, &min, 1, MPI_UNSIGNED_LONG, MPI_MIN,
+                              H5FD_mpio_communicator(f->shared->lf));
 #ifdef AKC
-                printf("seq_len=%lu, min=%lu, max=%lu\n", temp, min, max);
+                        printf("seq_len=%lu, min=%lu, max=%lu\n", temp, min, max);
 #endif
-                if (max != min)
-                    HRETURN_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
-                      "collective access with unequal number of blocks not supported yet");
-            }
+                        if (max != min)
+                            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
+                              "collective access with unequal number of blocks not supported yet");
+                    }
 #endif
                     /* Note: We can't use data sieve buffers for datasets in external files
                      *  because the 'addr' of all external files is set to 0 (above) and
                      *  all datasets in external files would alias to the same set of
                      *  file offsets, totally mixing up the data sieve buffer information. -QAK
                      */
-                    if (H5O_efl_read(f, efl, file_offset_arr[v], seq_len_arr[v], real_buf)<0) {
-                        HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
-                              "external data read failed");
-                    }
+                    if (H5O_efl_read(f, &efl, file_offset_arr[v], seq_len_arr[v], real_buf)<0)
+                        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "external data read failed");
 
                     /* Increment offset in buffer */
                     real_buf += seq_len_arr[v];
@@ -264,10 +261,8 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                     max_data *= layout->dim[u];
 
                 /* Pass along the vector of sequences to read */
-                if (H5F_contig_readv(f, max_data, H5FD_MEM_DRAW, layout->addr, nseq, seq_len_arr, file_offset_arr, dxpl_id, real_buf)<0) {
-                    HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
-                              "block read failed");
-                }
+                if (H5F_contig_readv(f, max_data, H5FD_MEM_DRAW, layout->addr, nseq, seq_len_arr, file_offset_arr, dxpl_id, real_buf)<0)
+                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "block read failed");
             } /* end else */
             break;
 
@@ -275,13 +270,12 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
             /*
              * This method is unable to access external raw data files 
              */
-            if (efl && efl->nused>0) {
-                HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
-                      "chunking and external files are mutually exclusive");
-            }
+            if (efl.nused>0)
+                HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "chunking and external files are mutually exclusive");
+
             /* Compute the file offset coordinates and hyperslab size */
             if((ndims=H5S_get_simple_extent_dims(file_space,dset_dims,NULL))<0)
-                HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unable to retrieve dataspace dimensions");
+                HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unable to retrieve dataspace dimensions");
             
             /* Build the array of cumulative hyperslab sizes */
             /* (And set the memory offset to zero) */
@@ -340,11 +334,10 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                             hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                             /* Read in the partial hyperslab */
-                            if (H5F_istore_read(f, dxpl_id, layout, pline, fill,
+                            if (H5F_istore_read(f, dxpl_id, layout, dc_plist,
                                     hslab_size, mem_offset, coords, hslab_size,
-                                    buf)<0) {
-                                HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "chunked read failed");
-                            }
+                                    buf)<0)
+                                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "chunked read failed");
 
                             /* Increment the buffer offset */
                             buf=(unsigned char *)buf+(partial_size*elmt_size);
@@ -401,10 +394,9 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                         hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                         /* Read the full hyperslab in */
-                        if (H5F_istore_read(f, dxpl_id, layout, pline, fill,
-                                hslab_size, mem_offset, coords, hslab_size, buf)<0) {
-                            HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "chunked read failed");
-                        }
+                        if (H5F_istore_read(f, dxpl_id, layout, dc_plist,
+                                hslab_size, mem_offset, coords, hslab_size, buf)<0)
+                            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "chunked read failed");
 
                         /* Increment the buffer offset */
                         buf=(unsigned char *)buf+(full_size*elmt_size);
@@ -448,11 +440,9 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                                 hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                                 /* Read in the partial hyperslab */
-                                if (H5F_istore_read(f, dxpl_id, layout, pline,
-                                        fill, hslab_size, mem_offset, coords,
-                                        hslab_size, buf)<0) {
-                                    HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "chunked read failed");
-                                }
+                                if (H5F_istore_read(f, dxpl_id, layout, dc_plist,
+                                        hslab_size, mem_offset, coords, hslab_size, buf)<0)
+                                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "chunked read failed");
 
                                 /* Increment the buffer offset */
                                 buf=(unsigned char *)buf+(partial_size*elmt_size);
@@ -484,11 +474,9 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                             hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                             /* Read in the partial hyperslab */
-                            if (H5F_istore_read(f, dxpl_id, layout, pline, fill,
-                                    hslab_size, mem_offset, coords, hslab_size,
-                                    buf)<0) {
-                                HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "chunked read failed");
-                            }
+                            if (H5F_istore_read(f, dxpl_id, layout, dc_plist,
+                                    hslab_size, mem_offset, coords, hslab_size, buf)<0)
+                                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "chunked read failed");
 
                             /* Double-check the amount read in */
                             assert(seq_len==partial_size);
@@ -503,10 +491,11 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
         default:
             assert("not implemented yet" && 0);
-            HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
+            HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
     }   /* end switch() */
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }   /* H5F_seq_readv() */
 
 
@@ -534,11 +523,11 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
-         const struct H5O_pline_t *pline, const H5O_fill_t *fill,
-         const struct H5O_efl_t *efl, const H5S_t *file_space, size_t elmt_size,
-         size_t nseq, size_t seq_len_arr[], hsize_t file_offset_arr[],
-         const void *_buf)
+H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
+        H5P_genplist_t *dc_plist,
+        const H5S_t *file_space, size_t elmt_size,
+        size_t nseq, size_t seq_len_arr[], hsize_t file_offset_arr[],
+        const void *_buf)
 {
     const unsigned char *real_buf=(const unsigned char *)_buf;   /* Local pointer to buffer to fill */
     const unsigned char *buf;                         /* Local pointer to buffer to fill */
@@ -556,10 +545,12 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     unsigned	u;				/*counters		*/
     size_t      v;                              /*counters              */
     int	i,j;				/*counters		*/
+    struct H5O_efl_t efl;               /* External File List info */
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
     H5P_genplist_t *plist=NULL;                 /* Property list */
 #endif
+    herr_t      ret_value = SUCCEED;            /* Return value */
    
     FUNC_ENTER(H5F_seq_writev, FAIL);
 
@@ -579,17 +570,17 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
         /* Get the plist structure */
         if(NULL == (plist = H5I_object(dxpl_id)))
-            HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
 
         /* Get the driver ID */
         if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
-            HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
 
         /* Check if we are using the MPIO driver */
         if(H5FD_MPIO==driver_id) {
             /* Get the driver information */
             if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &dx)<0)
-                HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
 
             /* Check if we are not using independent I/O */
             if(H5FD_MPIO_INDEPENDENT!=dx->xfer_mode)
@@ -599,56 +590,50 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
     /* Collective MPIO access is unsupported for non-contiguous datasets */
     if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode) {
-        HRETURN_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
+        HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
            "collective access on non-contiguous datasets not supported yet");
     }
 #endif
 
+    /* Get necessary properties from property list */
+    if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get EFL value");
+
     switch (layout->type) {
         case H5D_CONTIGUOUS:
-            /* Filters cannot be used for contiguous data. */
-            if (pline && pline->nfilters>0) {
-                HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-                      "filters are not allowed for contiguous data");
-            }
-            
-
             /* Write directly to file if the dataset is in an external file */
-            if (efl && efl->nused>0) {
+            if (efl.nused>0) {
                 /* Iterate through the sequence vectors */
                 for(v=0; v<nseq; v++) {
 #ifdef H5_HAVE_PARALLEL
-            if (H5FD_MPIO_COLLECTIVE==xfer_mode) {
-                /*
-                 * Currently supports same number of collective access. Need to
-                 * be changed LATER to combine all reads into one collective MPIO
-                 * call.
-                 */
-                unsigned long max, min, temp;
+                    if (H5FD_MPIO_COLLECTIVE==xfer_mode) {
+                        /*
+                         * Currently supports same number of collective access. Need to
+                         * be changed LATER to combine all reads into one collective MPIO
+                         * call.
+                         */
+                        unsigned long max, min, temp;
 
-                temp = seq_len_arr[v];
-                assert(temp==seq_len_arr[v]);	/* verify no overflow */
-                MPI_Allreduce(&temp, &max, 1, MPI_UNSIGNED_LONG, MPI_MAX,
-                      H5FD_mpio_communicator(f->shared->lf));
-                MPI_Allreduce(&temp, &min, 1, MPI_UNSIGNED_LONG, MPI_MIN,
-                      H5FD_mpio_communicator(f->shared->lf));
+                        temp = seq_len_arr[v];
+                        assert(temp==seq_len_arr[v]);	/* verify no overflow */
+                        MPI_Allreduce(&temp, &max, 1, MPI_UNSIGNED_LONG, MPI_MAX,
+                              H5FD_mpio_communicator(f->shared->lf));
+                        MPI_Allreduce(&temp, &min, 1, MPI_UNSIGNED_LONG, MPI_MIN,
+                              H5FD_mpio_communicator(f->shared->lf));
 #ifdef AKC
-                printf("seq_len=%lu, min=%lu, max=%lu\n", temp, min, max);
+                        printf("seq_len=%lu, min=%lu, max=%lu\n", temp, min, max);
 #endif
-                if (max != min)
-                    HRETURN_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
-                      "collective access with unequal number of blocks not supported yet");
-            }
+                        if (max != min)
+                            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "collective access with unequal number of blocks not supported yet");
+                    }
 #endif
                     /* Note: We can't use data sieve buffers for datasets in external files
                      *  because the 'addr' of all external files is set to 0 (above) and
                      *  all datasets in external files would alias to the same set of
                      *  file offsets, totally mixing up the data sieve buffer information. -QAK
                      */
-                    if (H5O_efl_write(f, efl, file_offset_arr[v], seq_len_arr[v], real_buf)<0) {
-                        HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-                              "external data write failed");
-                    }
+                    if (H5O_efl_write(f, &efl, file_offset_arr[v], seq_len_arr[v], real_buf)<0)
+                        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "external data write failed");
 
                     /* Increment offset in buffer */
                     real_buf += seq_len_arr[v];
@@ -659,10 +644,8 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                     max_data *= layout->dim[u];
 
                 /* Pass along the vector of sequences to write */
-                if (H5F_contig_writev(f, max_data, H5FD_MEM_DRAW, layout->addr, nseq, seq_len_arr, file_offset_arr, dxpl_id, real_buf)<0) {
-                    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-                              "block write failed");
-                }
+                if (H5F_contig_writev(f, max_data, H5FD_MEM_DRAW, layout->addr, nseq, seq_len_arr, file_offset_arr, dxpl_id, real_buf)<0)
+                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
             } /* end else */
             break;
 
@@ -670,13 +653,12 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
             /*
              * This method is unable to access external raw data files 
              */
-            if (efl && efl->nused>0) {
-                HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
-                      "chunking and external files are mutually exclusive");
-            }
+            if (efl.nused>0)
+                HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "chunking and external files are mutually exclusive");
+
             /* Compute the file offset coordinates and hyperslab size */
             if((ndims=H5S_get_simple_extent_dims(file_space,dset_dims,NULL))<0)
-                HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unable to retrieve dataspace dimensions");
+                HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unable to retrieve dataspace dimensions");
 
             /* Build the array of cumulative hyperslab sizes */
             /* (And set the memory offset to zero) */
@@ -735,11 +717,9 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                             hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                             /* Write out the partial hyperslab */
-                            if (H5F_istore_write(f, dxpl_id, layout, pline, fill,
-                                    hslab_size, mem_offset,coords, hslab_size,
-                                    buf)<0) {
-                                HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "chunked write failed");
-                            }
+                            if (H5F_istore_write(f, dxpl_id, layout, dc_plist,
+                                    hslab_size, mem_offset,coords, hslab_size, buf)<0)
+                                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "chunked write failed");
 
                             /* Increment the buffer offset */
                             buf=(const unsigned char *)buf+(partial_size*elmt_size);
@@ -796,10 +776,9 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                         hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                         /* Write the full hyperslab in */
-                        if (H5F_istore_write(f, dxpl_id, layout, pline, fill,
-                                hslab_size, mem_offset, coords, hslab_size, buf)<0) {
-                            HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "chunked write failed");
-                        }
+                        if (H5F_istore_write(f, dxpl_id, layout, dc_plist,
+                                hslab_size, mem_offset, coords, hslab_size, buf)<0)
+                            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "chunked write failed");
 
                         /* Increment the buffer offset */
                         buf=(const unsigned char *)buf+(full_size*elmt_size);
@@ -843,11 +822,9 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                                 hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                                 /* Write out the partial hyperslab */
-                                if (H5F_istore_write(f, dxpl_id, layout, pline,
-                                        fill, hslab_size, mem_offset, coords,
-                                        hslab_size, buf)<0) {
-                                    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "chunked write failed");
-                                }
+                                if (H5F_istore_write(f, dxpl_id, layout, dc_plist,
+                                        hslab_size, mem_offset, coords, hslab_size, buf)<0)
+                                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "chunked write failed");
 
                                 /* Increment the buffer offset */
                                 buf=(const unsigned char *)buf+(partial_size*elmt_size);
@@ -879,11 +856,9 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                             hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                             /* Write out the final partial hyperslab */
-                            if (H5F_istore_write(f, dxpl_id, layout, pline, fill,
-                                    hslab_size, mem_offset, coords, hslab_size,
-                                    buf)<0) {
-                                HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "chunked write failed");
-                            }
+                            if (H5F_istore_write(f, dxpl_id, layout, dc_plist,
+                                    hslab_size, mem_offset, coords, hslab_size, buf)<0)
+                                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "chunked write failed");
 
                             /* Double-check the amount read in */
                             assert(seq_len==partial_size);
@@ -898,9 +873,10 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
         default:
             assert("not implemented yet" && 0);
-            HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
+            HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
     }   /* end switch() */
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }   /* H5F_seq_writev() */
 

@@ -44,15 +44,11 @@ static herr_t H5S_hyper_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter
 static hsize_t H5S_hyper_favail (const H5S_t UNUSED *space,
 		  const H5S_sel_iter_t *sel_iter, hsize_t max);
 static hsize_t H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-		 const struct H5O_pline_t *pline,
-		 const struct H5O_fill_t *fill,
-		 const struct H5O_efl_t *efl, size_t elmt_size,
+                 H5P_genplist_t *dc_plist, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		 hsize_t nelmts, hid_t dxpl_id, void *_buf/*out*/);
 static herr_t H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-		 const struct H5O_pline_t *pline,
-		 const struct H5O_fill_t *fill,
-		 const struct H5O_efl_t *efl, size_t elmt_size,
+                 H5P_genplist_t *dc_plist, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		 hsize_t nelmts, hid_t dxpl_id, const void *_buf);
 static hsize_t H5S_hyper_mgath (const void *_buf, size_t elmt_size,
@@ -396,9 +392,7 @@ H5S_hyper_iter_next (const H5S_t *file_space, H5S_sel_iter_t *file_iter)
  */
 static hsize_t
 H5S_hyper_fread (H5F_t *f, const struct H5O_layout_t *layout,
-		 const struct H5O_pline_t *pline,
-		 const struct H5O_fill_t *fill,
-		 const struct H5O_efl_t *efl, size_t elmt_size,
+                 H5P_genplist_t *dc_plist, size_t elmt_size,
 		 const H5S_t *space, H5S_sel_iter_t *iter,
 		 hsize_t nelem, hid_t dxpl_id, void *_buf/*out*/)
 {
@@ -432,9 +426,6 @@ printf("%s: Called!\n",FUNC);
     /* Check args */
     assert(f);
     assert(layout);
-    assert(pline);
-    assert(fill);
-    assert(efl);
     assert(elmt_size>0);
     assert(space);
     assert(iter);
@@ -492,10 +483,9 @@ printf("%s: Called!\n",FUNC);
         if(span_size>io_bytes_left)
             span_size=io_bytes_left;
 
-        if (H5F_seq_read(f, dxpl_id, layout, pline, fill, efl, space,
-                elmt_size, span_size, loc_off, dst/*out*/)<0) {
+        if (H5F_seq_read(f, dxpl_id, layout, dc_plist, space,
+                elmt_size, span_size, loc_off, dst/*out*/)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
-        }
 
         /* Increment offset in destination */
         dst+=span_size;
@@ -653,10 +643,9 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
                 /* If the sequence & offset arrays are full, read them in */
                 if(nseq>=vector_size) {
                     /* Read in the sequences */
-                    if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, space,
-                        elmt_size, nseq, seq_len_arr, buf_off_arr, dst/*out*/)<0) {
+                    if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, space,
+                            elmt_size, nseq, seq_len_arr, buf_off_arr, dst/*out*/)<0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
-                    } /* end if */
 
                     /* Increment the offset of the destination buffer */
                     dst+=(last_io_bytes_left-io_bytes_left);
@@ -685,10 +674,9 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
                 /* If the sequence & offset arrays are full, read them in */
                 if(nseq>=vector_size) {
                     /* Read in the sequences */
-                    if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, space,
-                        elmt_size, nseq, seq_len_arr, buf_off_arr, dst/*out*/)<0) {
+                    if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, space,
+                            elmt_size, nseq, seq_len_arr, buf_off_arr, dst/*out*/)<0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
-                    } /* end if */
 
                     /* Increment the offset of the destination buffer */
                     dst+=(last_io_bytes_left-io_bytes_left);
@@ -805,10 +793,9 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
     /* Check for any stored sequences which need to be flushed */
     if(nseq>0) {
         /* Read in the sequence */
-        if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, space,
-            elmt_size, nseq, seq_len_arr, buf_off_arr, dst/*out*/)<0) {
+        if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, space,
+                elmt_size, nseq, seq_len_arr, buf_off_arr, dst/*out*/)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
-        } /* end if */
     } /* end if */
 
     /* Increment amount of I/O performed */
@@ -846,9 +833,7 @@ done:
  */
 static hsize_t
 H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
-		 const struct H5O_pline_t *pline,
-		 const struct H5O_fill_t *fill,
-		 const struct H5O_efl_t *efl, size_t elmt_size,
+                 H5P_genplist_t *dc_plist, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		 hsize_t nelmts, hid_t dxpl_id, void *_buf/*out*/)
 {
@@ -977,10 +962,9 @@ printf("%s: buf_off=%ld, actual_read=%d, actual_bytes=%d\n",FUNC,(long)buf_off,(
 #endif /* QAK */
 
         /* Read in the rest of the sequence */
-        if (H5F_seq_read(f, dxpl_id, layout, pline, fill, efl, file_space,
-            elmt_size, actual_bytes, buf_off, buf/*out*/)<0) {
+        if (H5F_seq_read(f, dxpl_id, layout, dc_plist, file_space,
+                elmt_size, actual_bytes, buf_off, buf/*out*/)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
-        }
 
         /* Increment the offset of the buffer */
         buf+=actual_bytes;
@@ -1205,10 +1189,9 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     /* If the sequence & offset arrays are full, read them in */
                     if(nseq>=vector_size) {
                         /* Read in the sequences */
-                        if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, file_space,
-                            elmt_size, nseq, seq_len_arr, buf_off_arr, buf/*out*/)<0) {
+                        if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, file_space,
+                                elmt_size, nseq, seq_len_arr, buf_off_arr, buf/*out*/)<0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
-                        } /* end if */
 
                         /* Increment the offset of the destination buffer */
                         buf+=tot_buf_size;
@@ -1277,10 +1260,9 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     /* If the sequence & offset arrays are full, read them in */
                     if(nseq>=vector_size) {
                         /* Read in the sequences */
-                        if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, file_space,
-                            elmt_size, nseq, seq_len_arr, buf_off_arr, buf/*out*/)<0) {
+                        if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, file_space,
+                                elmt_size, nseq, seq_len_arr, buf_off_arr, buf/*out*/)<0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
-                        } /* end if */
 
                         /* Increment the offset of the destination buffer */
                         buf+=tot_buf_size;
@@ -1321,10 +1303,9 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     /* If the sequence & offset arrays are full, read them in */
                     if(nseq>=vector_size) {
                         /* Read in the sequences */
-                        if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, file_space,
-                            elmt_size, nseq, seq_len_arr, buf_off_arr, buf/*out*/)<0) {
+                        if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, file_space,
+                                elmt_size, nseq, seq_len_arr, buf_off_arr, buf/*out*/)<0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
-                        } /* end if */
 
                         /* Increment the offset of the destination buffer */
                         buf+=tot_buf_size;
@@ -1386,10 +1367,9 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
         /* Check for any stored sequences which need to be flushed */
         if(nseq>0) {
             /* Read in the sequence */
-            if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, file_space,
-                elmt_size, nseq, seq_len_arr, buf_off_arr, buf/*out*/)<0) {
+            if (H5F_seq_readv(f, dxpl_id, layout, dc_plist, file_space,
+                    elmt_size, nseq, seq_len_arr, buf_off_arr, buf/*out*/)<0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
-            } /* end if */
         } /* end if */
 
         /* Subtract out the selection offset */
@@ -1443,9 +1423,7 @@ done:
  */
 static hsize_t
 H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-		 const struct H5O_pline_t *pline,
-		 const struct H5O_fill_t *fill,
-		 const struct H5O_efl_t *efl, size_t elmt_size,
+                 H5P_genplist_t *dc_plist, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		 hsize_t nelmts, hid_t dxpl_id, void *_buf/*out*/)
 {
@@ -1466,11 +1444,11 @@ H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     /* Check for the special case of just one H5Sselect_hyperslab call made */
     if(file_space->select.sel_info.hslab.diminfo!=NULL) {
         /* Use optimized call to read in regular hyperslab */
-        num_read=H5S_hyper_fread_opt(f,layout,pline,fill,efl,elmt_size,file_space,file_iter,nelmts,dxpl_id,_buf);
+        num_read=H5S_hyper_fread_opt(f,layout,dc_plist,elmt_size,file_space,file_iter,nelmts,dxpl_id,_buf);
     } /* end if */
     else {
         /* Perform generic hyperslab operation */
-        num_read=H5S_hyper_fread(f,layout,pline,fill,efl,elmt_size,file_space,file_iter,nelmts,dxpl_id,_buf);
+        num_read=H5S_hyper_fread(f,layout,dc_plist,elmt_size,file_space,file_iter,nelmts,dxpl_id,_buf);
     } /* end else */
 
     FUNC_LEAVE (ret_value==SUCCEED ? num_read : 0);
@@ -1495,9 +1473,7 @@ H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
  */
 static hsize_t
 H5S_hyper_fwrite (H5F_t *f, const struct H5O_layout_t *layout,
-		 const struct H5O_pline_t *pline,
-		 const struct H5O_fill_t *fill,
-		 const struct H5O_efl_t *efl, size_t elmt_size,
+                 H5P_genplist_t *dc_plist, size_t elmt_size,
 		 const H5S_t *space, H5S_sel_iter_t *iter,
 		 hsize_t nelem, hid_t dxpl_id, const void *_buf)
 {
@@ -1531,9 +1507,6 @@ printf("%s: Called!\n",FUNC);
     /* Check args */
     assert(f);
     assert(layout);
-    assert(pline);
-    assert(fill);
-    assert(efl);
     assert(elmt_size>0);
     assert(space);
     assert(iter);
@@ -1591,10 +1564,9 @@ printf("%s: Called!\n",FUNC);
         if(span_size>io_bytes_left)
             span_size=io_bytes_left;
 
-        if (H5F_seq_write(f, dxpl_id, layout, pline, fill, efl, space,
-            elmt_size, span_size, loc_off, src)<0) {
+        if (H5F_seq_write(f, dxpl_id, layout, dc_plist, space,
+                elmt_size, span_size, loc_off, src)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
-        } /* end if */
 
         /* Increment offset in destination */
         src+=span_size;
@@ -1752,10 +1724,9 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
                 /* If the sequence & offset arrays are full, read them in */
                 if(nseq>=vector_size) {
                     /* Write out the sequences */
-                    if (H5F_seq_writev(f, dxpl_id, layout, pline, fill, efl, space,
-                        elmt_size, nseq, seq_len_arr, buf_off_arr, src)<0) {
+                    if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, space,
+                            elmt_size, nseq, seq_len_arr, buf_off_arr, src)<0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
-                    } /* end if */
 
                     /* Increment the offset of the destination buffer */
                     src+=(last_io_bytes_left-io_bytes_left);
@@ -1784,10 +1755,9 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
                 /* If the sequence & offset arrays are full, read them in */
                 if(nseq>=vector_size) {
                     /* Write out the sequences */
-                    if (H5F_seq_writev(f, dxpl_id, layout, pline, fill, efl, space,
-                        elmt_size, nseq, seq_len_arr, buf_off_arr, src)<0) {
+                    if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, space,
+                            elmt_size, nseq, seq_len_arr, buf_off_arr, src)<0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
-                    } /* end if */
 
                     /* Increment the offset of the destination buffer */
                     src+=(last_io_bytes_left-io_bytes_left);
@@ -1904,10 +1874,9 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
     /* Check for any stored sequences which need to be flushed */
     if(nseq>0) {
         /* Write out the sequence */
-        if (H5F_seq_writev(f, dxpl_id, layout, pline, fill, efl, space,
-            elmt_size, nseq, seq_len_arr, buf_off_arr, src)<0) {
+        if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, space,
+                elmt_size, nseq, seq_len_arr, buf_off_arr, src)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
-        } /* end if */
     } /* end if */
 
     /* Increment amount of I/O performed */
@@ -1945,9 +1914,7 @@ done:
  */
 static hsize_t
 H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
-		 const struct H5O_pline_t *pline,
-		 const struct H5O_fill_t *fill,
-		 const struct H5O_efl_t *efl, size_t elmt_size,
+                 H5P_genplist_t *dc_plist, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		 hsize_t nelmts, hid_t dxpl_id, const void *_buf)
 {
@@ -2076,10 +2043,9 @@ printf("%s: buf_off=%ld, actual_write=%d, actual_bytes=%d\n",FUNC,(long)buf_off,
 #endif /* QAK */
 
         /* Write out the rest of the sequence */
-        if (H5F_seq_write(f, dxpl_id, layout, pline, fill, efl, file_space,
-            elmt_size, actual_bytes, buf_off, buf)<0) {
+        if (H5F_seq_write(f, dxpl_id, layout, dc_plist, file_space,
+                elmt_size, actual_bytes, buf_off, buf)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
-        }
 
         /* Increment the offset of the buffer */
         buf+=actual_bytes;
@@ -2304,10 +2270,9 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     /* If the sequence & offset arrays are full, write them out */
                     if(nseq>=vector_size) {
                         /* Write out the sequences */
-                        if (H5F_seq_writev(f, dxpl_id, layout, pline, fill, efl, file_space,
-                            elmt_size, nseq, seq_len_arr, buf_off_arr, buf)<0) {
-                                HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
-                        } /* end if */
+                        if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, file_space,
+                                elmt_size, nseq, seq_len_arr, buf_off_arr, buf)<0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
 
                         /* Increment the offset of the destination buffer */
                         buf+=tot_buf_size;
@@ -2376,10 +2341,9 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     /* If the sequence & offset arrays are full, write them out */
                     if(nseq>=vector_size) {
                         /* Write out the sequences */
-                        if (H5F_seq_writev(f, dxpl_id, layout, pline, fill, efl, file_space,
-                            elmt_size, nseq, seq_len_arr, buf_off_arr, buf)<0) {
+                        if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, file_space,
+                                elmt_size, nseq, seq_len_arr, buf_off_arr, buf)<0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
-                        } /* end if */
 
                         /* Increment the offset of the destination buffer */
                         buf+=tot_buf_size;
@@ -2420,10 +2384,9 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     /* If the sequence & offset arrays are full, write them out */
                     if(nseq>=vector_size) {
                         /* Write out the sequences */
-                        if (H5F_seq_writev(f, dxpl_id, layout, pline, fill, efl, file_space,
-                            elmt_size, nseq, seq_len_arr, buf_off_arr, buf)<0) {
+                        if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, file_space,
+                                elmt_size, nseq, seq_len_arr, buf_off_arr, buf)<0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
-                        } /* end if */
 
                         /* Increment the offset of the destination buffer */
                         buf+=tot_buf_size;
@@ -2485,10 +2448,9 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
         /* Check for any stored sequences which need to be flushed */
         if(nseq>0) {
             /* Write out the sequence */
-            if (H5F_seq_writev(f, dxpl_id, layout, pline, fill, efl, file_space,
-                elmt_size, nseq, seq_len_arr, buf_off_arr, buf)<0) {
+            if (H5F_seq_writev(f, dxpl_id, layout, dc_plist, file_space,
+                    elmt_size, nseq, seq_len_arr, buf_off_arr, buf)<0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
-            } /* end if */
         } /* end if */
 
         /* Subtract out the selection offset */
@@ -2536,9 +2498,7 @@ done:
  */
 static herr_t
 H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-		 const struct H5O_pline_t *pline,
-		 const struct H5O_fill_t *fill,
-		 const struct H5O_efl_t *efl, size_t elmt_size,
+                 H5P_genplist_t *dc_plist, size_t elmt_size,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		 hsize_t nelmts, hid_t dxpl_id, const void *_buf)
 {
@@ -2559,11 +2519,11 @@ H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     /* Check for the special case of just one H5Sselect_hyperslab call made */
     if(file_space->select.sel_info.hslab.diminfo!=NULL) {
         /* Use optimized call to write out regular hyperslab */
-        num_written=H5S_hyper_fwrite_opt(f,layout,pline,fill,efl,elmt_size,file_space,file_iter,nelmts,dxpl_id,_buf);
+        num_written=H5S_hyper_fwrite_opt(f,layout,dc_plist,elmt_size,file_space,file_iter,nelmts,dxpl_id,_buf);
     } /* end if */
     else {
         /* Perform generic hyperslab operation */
-        num_written=H5S_hyper_fwrite(f,layout,pline,fill,efl,elmt_size,file_space,file_iter,nelmts,dxpl_id,_buf);
+        num_written=H5S_hyper_fwrite(f,layout,dc_plist,elmt_size,file_space,file_iter,nelmts,dxpl_id,_buf);
     } /* end else */
 
     FUNC_LEAVE (ret_value==FAIL ? ret_value : (num_written >0) ? SUCCEED : FAIL);

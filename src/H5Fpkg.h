@@ -183,24 +183,21 @@ __DLL__ herr_t H5F_istore_stats (H5F_t *f, hbool_t headers);
 __DLL__ herr_t H5F_istore_create(H5F_t *f,
 				 struct H5O_layout_t *layout/*in,out*/);
 __DLL__ herr_t H5F_istore_read(H5F_t *f, hid_t dxpl_id,
-			       const struct H5O_layout_t *layout,
-			       const struct H5O_pline_t *pline,
-			       const struct H5O_fill_t *fill,
-                               const hsize_t size_m[], const hssize_t offset_m[],
-			       const hssize_t offset_f[], const hsize_t size[],
-			       void *buf/*out*/);
-__DLL__ herr_t H5F_istore_write(H5F_t *f, hid_t dxpl_id,
-				const struct H5O_layout_t *layout,
-				const struct H5O_pline_t *pline,
-				const struct H5O_fill_t *fill,
+                                const struct H5O_layout_t *layout,
+                                struct H5P_genplist_t *dc_plist,
                                 const hsize_t size_m[], const hssize_t offset_m[],
-				const hssize_t offset[], const hsize_t size[],
-				const void *buf);
+                                const hssize_t offset_f[], const hsize_t size[],
+                                void *buf/*out*/);
+__DLL__ herr_t H5F_istore_write(H5F_t *f, hid_t dxpl_id,
+                                const struct H5O_layout_t *layout,
+                                struct H5P_genplist_t *dc_plist,
+                                const hsize_t size_m[], const hssize_t offset_m[],
+                                const hssize_t offset[], const hsize_t size[],
+                                const void *buf);
 __DLL__ herr_t H5F_istore_allocate (H5F_t *f, hid_t dxpl_id,
-				    const struct H5O_layout_t *layout,
-				    const hsize_t *space_dim,
-				    const struct H5O_pline_t *pline,
-				    const struct H5O_fill_t *fill);
+                                const struct H5O_layout_t *layout,
+                                const hsize_t *space_dim,
+                                struct H5P_genplist_t *dc_plist);
 
 /* Functions that operate on contiguous storage wrt boot block */
 __DLL__ herr_t H5F_contig_read(H5F_t *f, hsize_t max_data, H5FD_mem_t type, haddr_t addr,
