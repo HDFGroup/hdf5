@@ -80,6 +80,7 @@ test_select_hyper(void)
                *tbuf2;      /* temporary buffer pointer */
     intn        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
+    H5S_class_t ext_type;   /* Extent type */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Hyperslab Selection Functions\n"));
@@ -104,6 +105,10 @@ test_select_hyper(void)
     /* Create dataspace for writing buffer */
     sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
     CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Verify extent type */
+    ext_type = H5Sextent_class(sid1);
+    VERIFY(ext_type, H5S_SIMPLE, "H5Sextent_class");
 
     /* Select 2x15x13 hyperslab for disk dataset */
     start[0]=1; start[1]=0; start[2]=0;

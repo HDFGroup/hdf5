@@ -161,6 +161,7 @@ test_h5s_scalar_write(void)
     unsigned		rank;		/* Logical rank of dataspace	*/
     hsize_t		tdims[4];	/* Dimension array to test with */
     size_t		n;	 	/* Number of dataspace elements */
+    H5S_class_t ext_type;   /* Extent type */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -184,6 +185,10 @@ test_h5s_scalar_write(void)
 
     ret = H5Sextent_dims(sid1, tdims, NULL);
     VERIFY(ret, 0, "H5Sextent_dims");
+
+    /* Verify extent type */
+    ext_type = H5Sextent_class(sid1);
+    VERIFY(ext_type, H5S_SCALAR, "H5Sextent_class");
 
     /* Create a dataset */
     dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UINT,sid1,H5P_DEFAULT);
