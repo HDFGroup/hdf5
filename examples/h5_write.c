@@ -17,7 +17,7 @@ main ()
    hid_t       datatype, dataspace;   /* handles */
    size_t      dimsf[2];              /* dataset dimensions */
    herr_t      status;                             
-   int         data[NX][NY];          /* data to write */
+   int32       data[NX][NY];          /* data to write */
    int         i, j;
 
 /* 
@@ -51,7 +51,7 @@ dataspace = H5Pcreate_simple(RANK, dimsf, NULL);
 
 /* 
  * Define datatype for the data in the file.
- * We will store liitle endian INT32 numbers.
+ * We will store little endian INT32 numbers.
  */
 datatype = H5Tcopy(H5T_NATIVE_INT32);
 status = H5Tset_order(datatype, H5T_ORDER_LE);
@@ -65,7 +65,7 @@ dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace,
 /*
  * Write the data to the dataset using default transfer properties.
  */
-status = H5Dwrite(dataset, H5T_NATIVE_INT, H5P_ALL, H5P_ALL,
+status = H5Dwrite(dataset, H5T_NATIVE_INT32, H5P_ALL, H5P_ALL,
                   H5C_DEFAULT, data);
 
 /*
