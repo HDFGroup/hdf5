@@ -1,6 +1,6 @@
 #!/bin/sh
 
-h5toh4=h5toh4		# a relative name
+h5toh4=./h5toh4		# a relative name
 cmp='cmp -s'
 diff='diff -c'
 
