@@ -1979,7 +1979,6 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	      size_t buf_stride, size_t UNUSED bkg_stride, void *_buf,
               void UNUSED *_bkg, hid_t dset_xfer_plist)
 {
-    const H5D_xfer_t	   *xfer_parms = NULL;
     H5T_path_t	*tpath;		/* Type conversion path		     */
     hid_t   tsrc_id = -1, tdst_id = -1;/*temporary type atoms	     */
     H5T_t	*src = NULL;	/*source data type		     */
@@ -2044,14 +2043,6 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 H5I_DATATYPE != H5I_get_type(dst_id) ||
                 NULL == (dst = H5I_object(dst_id))) {
                 HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            }
-
-            /* Get the dataset transfer property list */
-            if (H5P_DEFAULT == dset_xfer_plist) {
-                xfer_parms = &H5D_xfer_dflt;
-            } else if (H5P_DATA_XFER != H5P_get_class(dset_xfer_plist) ||
-                       NULL == (xfer_parms = H5I_object(dset_xfer_plist))) {
-                HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
             }
 
             /*
