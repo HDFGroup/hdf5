@@ -98,6 +98,8 @@ typedef struct H5F_file_t {
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
     haddr_t	freespace_addr;	/* Relative address of free-space info	*/
     haddr_t	driver_addr;	/* File driver information block address*/
+    unsigned	boot_chksum;	/* Boot block checksum                  */
+    unsigned	drvr_chksum;	/* Driver info block checksum           */
     struct H5AC_t *cache;	/* The object cache			*/
     hid_t       fcpl_id;	/* File creation property list ID 	*/
     int	mdc_nelmts;		/* Size of meta data cache (elements)	*/

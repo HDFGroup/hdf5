@@ -1620,6 +1620,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     H5FD_t		*lf=NULL;	/*file driver part of `shared'	*/
     uint8_t		buf[256];	/*temporary I/O buffer		*/
     const uint8_t	*p;		/*ptr into temp I/O buffer	*/
+    uint8_t	        *q;		/*ptr into temp I/O buffer	*/
     size_t		fixed_size=24;	/*fixed sizeof superblock	*/
     size_t		variable_size;	/*variable sizeof superblock	*/
     size_t		driver_size;	/*size of driver info block	*/
@@ -1641,6 +1642,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     H5P_genplist_t      *c_plist;
     H5P_genplist_t      *a_plist;            /* Property list */
     H5F_close_degree_t  fc_degree;
+    unsigned		chksum;         /* Checksum temporary variable */
+    unsigned		i;              /* Index variable */
 
     FUNC_ENTER_NOAPI(H5F_open, NULL);
 
@@ -1860,15 +1863,22 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 			H5G_SIZEOF_ENTRY(file);		/*root group ptr*/
 	assert(variable_size<=sizeof(buf));
 	if (H5FD_set_eoa(lf, shared->boot_addr+fixed_size+variable_size)<0 ||
-                H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, shared->boot_addr+fixed_size, variable_size, buf)<0)
+                H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, shared->boot_addr+fixed_size, variable_size, &buf[fixed_size])<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read superblock");
-	p = buf;
 	H5F_addr_decode(file, &p, &(shared->base_addr)/*out*/);
 	H5F_addr_decode(file, &p, &(shared->freespace_addr)/*out*/);
 	H5F_addr_decode(file, &p, &stored_eoa/*out*/);
 	H5F_addr_decode(file, &p, &(shared->driver_addr)/*out*/);
 	if (H5G_ent_decode(file, &p, &root_ent/*out*/)<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root symbol entry");
+
+        /* Compute boot block checksum */
+        assert(sizeof(chksum)==sizeof(shared->boot_chksum));
+        for(q=(uint8_t *)&chksum, chksum=0, i=0; i<(fixed_size+variable_size); i++)
+            q[i%sizeof(shared->boot_chksum)] ^= buf[i];
+
+        /* Set the boot block checksum */
+        shared->boot_chksum=chksum;
 
 	/* Decode the optional driver information block */
 	if (H5F_addr_defined(shared->driver_addr)) {
@@ -1894,10 +1904,19 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
 	    /* Read driver information and decode */
 	    if (H5FD_set_eoa(lf, drv_addr+16+driver_size)<0 ||
-                    H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, drv_addr+16, driver_size, buf)<0)
+                    H5FD_read(lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, drv_addr+16, driver_size, &buf[16])<0)
 		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read file driver information");
-	    if (H5FD_sb_decode(lf, driver_name, buf)<0)
+	    if (H5FD_sb_decode(lf, driver_name, &buf[16])<0)
 		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to decode driver information");
+
+            /* Compute driver info block checksum */
+            assert(sizeof(chksum)==sizeof(shared->drvr_chksum));
+            for(q=(uint8_t *)&chksum, chksum=0, i=0; i<(driver_size+16); i++)
+                q[i%sizeof(shared->drvr_chksum)] ^= buf[i];
+
+            /* Set the driver info block checksum */
+            shared->drvr_chksum=chksum;
+
 	} /* end if */
 	
 	/* Make sure we can open the root group */
@@ -2288,20 +2307,31 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
  *		Quincey Koziol, 2002-05-20
  *              Added 'closing' parameter
  *
+ *		Quincey Koziol, 2002-06-05
+ *              Added boot block & driver info block checksumming, to avoid
+ *              writing them out when they haven't changed.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 	  hbool_t alloc_only, hbool_t closing)
 {
-    uint8_t		sbuf[2048], dbuf[2048], *p=NULL;
-    unsigned		nerrors=0, i;
-    size_t		superblock_size, driver_size;
-    char		driver_name[9];
-    int                 boot_vers, freespace_vers, 
-                        obj_dir_vers, share_head_vers,
-                        btree_k[H5B_NUM_BTREE_ID];
-    unsigned            sym_leaf_k;
+    uint8_t		sbuf[1024];     /* Superblock encoding buffer */
+    uint8_t		dbuf[1024];     /* Driver info block encoding buffer */
+    uint8_t		*p=NULL;        /* Temporary pointer into encoding buffers */
+    unsigned		nerrors=0;      /* Errors from nested flushes */
+    unsigned		i;              /* Index variable */
+    unsigned		chksum;         /* Checksum temporary variable */
+    size_t		superblock_size;/* Size of superblock, in bytes */
+    size_t		driver_size;    /* Size of driver info block, in bytes */
+    char		driver_name[9]; /* Name of driver, for driver info block */
+    int                 boot_vers;      /* Boot block version */
+    int                 freespace_vers; /* Freespace info version */
+    int                 obj_dir_vers;   /* Object header info version */
+    int                 share_head_vers;/* Shared header info version */
+    int                 btree_k[H5B_NUM_BTREE_ID];      /* B-tree size info */
+    unsigned            sym_leaf_k;     /* Number of symbols in B-tree leafs */
     H5P_genplist_t *plist;              /* Property list */
     
     FUNC_ENTER_NOINIT(H5F_flush);
@@ -2328,23 +2358,26 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 	}
     }
 
-    /* flush the data sieve buffer, if we have a dirty one */
-    if(!alloc_only && f->shared->sieve_buf && f->shared->sieve_dirty) {
-        /* Write dirty data sieve buffer to file */
-        if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc, f->shared->sieve_size, H5P_DATASET_XFER_DEFAULT, f->shared->sieve_buf)<0)
-            HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
+    /* Avoid flushing buffers & caches when alloc_only set */
+    if(!alloc_only) {
+        /* flush the data sieve buffer, if we have a dirty one */
+        if(f->shared->sieve_buf && f->shared->sieve_dirty) {
+            /* Write dirty data sieve buffer to file */
+            if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc, f->shared->sieve_size, H5P_DATASET_XFER_DEFAULT, f->shared->sieve_buf)<0)
+                HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
 
-        /* Reset sieve buffer dirty flag */
-        f->shared->sieve_dirty=0;
+            /* Reset sieve buffer dirty flag */
+            f->shared->sieve_dirty=0;
+        } /* end if */
+
+        /* flush the entire raw data cache */
+        if (H5F_istore_flush (f, invalidate)<0)
+            HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush raw data cache");
+        
+        /* flush (and invalidate) the entire meta data cache */
+        if (H5AC_flush(f, NULL, HADDR_UNDEF, invalidate)<0)
+            HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache");
     } /* end if */
-
-    /* flush the entire raw data cache */
-    if (!alloc_only && H5F_istore_flush (f, invalidate)<0)
-	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush raw data cache");
-    
-    /* flush (and invalidate) the entire meta data cache */
-    if (!alloc_only && H5AC_flush(f, NULL, HADDR_UNDEF, invalidate)<0)
-	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache");
 
     /* Get the shared file creation property list */
     if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
@@ -2387,6 +2420,9 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     H5G_ent_encode(f, &p, H5G_entof(f->shared->root_grp));
     superblock_size = p-sbuf;
 
+    /* Double check we didn't overrun the block (unlikely) */
+    assert(superblock_size<=sizeof(sbuf));
+
     /*
      * Encode the driver information block.
      */
@@ -2411,6 +2447,9 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 
 	/* Driver name */
 	HDmemcpy(dbuf+8, driver_name, 8);
+
+        /* Double check we didn't overrun the block (unlikely) */
+        assert(driver_size<=sizeof(dbuf));
     } /* end if */
 
     if (alloc_only) {
@@ -2438,15 +2477,37 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 	    f->shared->driver_addr = superblock_size;
 	
     } else {
-	/* Write superblock */
-	if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, f->shared->boot_addr, superblock_size, sbuf)<0)
-	    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write superblock");
+        /* Compute boot block checksum */
+        assert(sizeof(chksum)==sizeof(f->shared->boot_chksum));
+        for(p=(uint8_t *)&chksum, chksum=0, i=0; i<superblock_size; i++)
+            p[i%sizeof(f->shared->boot_chksum)] ^= sbuf[i];
 
-	/* Write driver information block */
+        /* Compare with current checksums */
+        if(chksum!=f->shared->boot_chksum) {
+            /* Write superblock */
+            if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, f->shared->boot_addr, superblock_size, sbuf)<0)
+                HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write superblock");
+
+            /* Update checksum information if different */
+            f->shared->boot_chksum=chksum;
+        } /* end if */
+
+	/* Check for driver info block */
 	if (HADDR_UNDEF!=f->shared->driver_addr) {
-	    if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT,
-                       f->shared->base_addr+superblock_size, driver_size, dbuf)<0)
-		HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write driver information block");
+            /* Compute driver info block checksum */
+            assert(sizeof(chksum)==sizeof(f->shared->drvr_chksum));
+            for(p=(uint8_t *)&chksum, chksum=0, i=0; i<driver_size; i++)
+                p[i%sizeof(f->shared->drvr_chksum)] ^= dbuf[i];
+
+            /* Compare with current checksums */
+            if(chksum!=f->shared->boot_chksum) {
+                /* Write driver information block */
+                if (H5FD_write(f->shared->lf, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, f->shared->base_addr+superblock_size, driver_size, dbuf)<0)
+                    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write driver information block");
+
+                /* Update checksum information if different */
+                f->shared->drvr_chksum=chksum;
+            } /* end if */
 	} /* end if */
     } /* end else */
 
@@ -2455,11 +2516,8 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
 
     /* Check flush errors for children - errors are already on the stack */
-    if (nerrors)
-        HRETURN(FAIL);
-
-    FUNC_LEAVE(SUCCEED);
-}
+    FUNC_LEAVE(nerrors ? FAIL : SUCCEED);
+} /* end H5F_flush() */
 
 
 /*-------------------------------------------------------------------------
