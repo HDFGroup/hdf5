@@ -14,8 +14,8 @@
 #
 # Tests for the h5diff tool
 
-DUMPER=h5diff               # The tool name
-DUMPER_BIN=`pwd`/$DUMPER    # The path of the tool binary
+H5DIFF=h5diff               # The tool name
+H5DIFF_BIN=`pwd`/$H5DIFF    # The path of the tool binary
 
 CMP='cmp -s'
 DIFF='diff -c'
@@ -28,6 +28,7 @@ if test -z "$srcdir"; then
    srcdir=.
 fi
 
+test -d ../testfiles || mkdir ../testfiles
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -35,7 +36,6 @@ fi
 TESTING() {
    SPACES="                                                               "
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
-   echo '\n'
 }
 
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
@@ -47,18 +47,55 @@ TESTING() {
 # non-zero value.
 #
 TOOLTEST() {
+   expect="$srcdir/../testfiles/$1"
+   actual="../testfiles/`basename $1 .txt`.out"
+   actual_err="../testfiles/`basename $1 .txt`.err"
+   shift
+
    # Run test.
-   TESTING $DUMPER $@
-   $RUNSERIAL $DUMPER_BIN "$@"
+   # Tflops interprets "$@" as "" when no parameter is given (e.g., the
+   # case of missing file name).  Changed it to use $@ till Tflops fixes it.
+   TESTING $H5DIFF $@
+   (
+      echo "#############################"
+      echo "Expected output for '$H5DIFF $@'" 
+      echo "#############################"
+      cd $srcdir/../testfiles
+      if [ "`uname -s`" = "TFLOPS O/S" ]; then
+        $RUNSERIAL $H5DIFF_BIN $@
+      else
+        $RUNSERIAL $H5DIFF_BIN "$@"
+      fi
+   ) >$actual 2>$actual_err
+   cat $actual_err >> $actual
+    
+   if $CMP $expect $actual; then
+      echo " PASSED"
+   else
+      echo "*FAILED*"
+      echo "    Expected result (*.txt) differs from actual result (*.out)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+   fi
+
+   # Clean up output file
+#   if test -z "$HDF5_NOCLEANUP"; then
+#      rm -f $actual $actual_err
+#   fi
 }
 
 ##############################################################################
 ##############################################################################
-###           T H E   T E S T S                                ###
+###			  T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
 
-# test 
-TOOLTEST -v h5diff_test1.h5 h5diff_test2.h5
+# test1: Check if the command line number of arguments is less than 3
+TOOLTEST h5diff_1.txt h5diff_test1.h5 
+
+
+if test $nerrors -eq 0 ; then
+   echo "All $H5DIFF tests passed."
+fi
 
 exit $nerrors

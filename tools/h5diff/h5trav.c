@@ -1,11 +1,23 @@
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "hdf5.h"
 #include "h5trav.h"
-
-
 
 #ifndef FALSE
 #define FALSE 0
@@ -17,8 +29,6 @@
 #ifndef FAIL
 #define FAIL -1
 #endif
-
-
 
 /* functions for traversal */
 int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info, int *idx );
@@ -32,14 +42,12 @@ int  table_search(unsigned long *objno, table_t *table );
 void table_add(unsigned long *objno, char *objname, table_t *table );
 
 
-
-
 /*-------------------------------------------------------------------------
  * Function: H5get_object_info
  *
  * Purpose: 
  *
- * Return: Success: 0, Failure: -11
+ * Return:
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -72,9 +80,6 @@ int H5get_object_info( hid_t file_id, info_t *info )
 
 }
 
-
-
-
 /*-------------------------------------------------------------------------
  * Function: count_objects
  *
@@ -104,9 +109,6 @@ static herr_t count_objects( hid_t loc_id, const char *name, void *op_data)
  /* Define a default zero value for return. This will cause the iterator to continue */
  return 0;
 } 
-
-
-
 
 /*-------------------------------------------------------------------------
  * Function: get_nobjects
@@ -139,7 +141,6 @@ herr_t get_nobjects( hid_t loc_id, const char *group_name )
 
  return nobjs;
 }
-
 
 
 /*-------------------------------------------------------------------------
@@ -209,18 +210,12 @@ herr_t get_name_type( hid_t loc_id, const char *group_name, int idx, char **name
  return 0;
 }
 
-
-
-
-
-
-
 /*-------------------------------------------------------------------------
  * Function: traverse
  *
  * Purpose: 
  *
- * Return: Success: 0, Failure: -11
+ * Return: 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -232,8 +227,6 @@ herr_t get_name_type( hid_t loc_id, const char *group_name, int idx, char **name
  *
  *-------------------------------------------------------------------------
  */
-
-
 
 int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info, int *idx ) 
 {
@@ -266,8 +259,6 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
   if ( strcmp(group_name,"/")!=0 )
    strcat( path, "/" );
   strcat( path, name ); 
-
-  
 
   /* disable error reporting */
   H5Eget_auto(&func, &edata);
@@ -326,10 +317,6 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
     }
 
    }
-
-
-   
-  
    
    break;
 
@@ -339,8 +326,6 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
    */
     
   case H5G_DATASET:
-
-   
 
     /* increment */
    inserted_objs++;
@@ -381,8 +366,6 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
  
   case H5G_TYPE:
 
-   
-
    /* increment */
    inserted_objs++;
 
@@ -403,8 +386,6 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
    */
  
   case H5G_LINK:
-
-   
 
    /* increment */
    inserted_objs++;
@@ -442,7 +423,7 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
  *
  * Purpose: 
  *
- * Return: Success: 0, Failure: -11
+ * Return: 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -472,7 +453,7 @@ int table_search(unsigned long *objno, table_t *table )
  *
  * Purpose: 
  *
- * Return: Success: 0, Failure: -11
+ * Return: 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -484,8 +465,6 @@ int table_search(unsigned long *objno, table_t *table )
  *
  *-------------------------------------------------------------------------
  */
-
-
 
 void table_add(unsigned long *objno, char *objname, table_t *table)
 {
@@ -518,7 +497,7 @@ void table_add(unsigned long *objno, char *objname, table_t *table)
  *
  * Purpose: 
  *
- * Return: Success: 0, Failure: -11
+ * Return: 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -557,7 +536,7 @@ void table_init( table_t **tbl )
  *
  * Purpose: 
  *
- * Return: Success: 0, Failure: -11
+ * Return: 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -574,16 +553,6 @@ void table_free( table_t *table )
 {
 
  int i;
-
- 
-#if 0
- printf("Table: # of entries = %d\n", table->nobjs);
- for ( i = 0; i < table->nobjs; i++)
-  printf("%lu %lu %s %d %d\n", table->objs[i].objno[0],
-  table->objs[i].objno[1],
-  table->objs[i].objname,
-  table->objs[i].displayed, table->objs[i].recorded);
-#endif
 
  for ( i = 0; i < table->nobjs; i++)
   free( table->objs[i].objname );

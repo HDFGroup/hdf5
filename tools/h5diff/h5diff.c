@@ -1,4 +1,18 @@
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,36 +24,9 @@
 #include "hdf5.h"
 #include "h5trav.h"
 
-
-/*
-
-dset1 dset2 h5diff_test1.h5 h5diff_test2.h5
-dset1 dset2 -l h5diff_test1.h5 h5diff_test2.h5
-h5diff_test1.h5 h5diff_test2.h5
-dset1 dset2 -r h5diff_test1.h5 h5diff_test2.h5
-dset1 dset2 -n 2 h5diff_test1.h5 h5diff_test2.h5
-dset3 dset4 -d 0.01 h5diff_test1.h5 h5diff_test2.h5
-dset5 dset6 -p 0.05 h5diff_test1.h5 h5diff_test2.h5
-dset5 dset7 h5diff_test1.h5 h5diff_test2.h5
-dset8 dset9 h5diff_test2.h5 h5diff_test2.h5
-dset11 dset12 h5diff_test1.h5 h5diff_test2.h5
-DATASET=HISTORY/DN wrfout_01_0hdf5.h5 wrfout_phdf5.h5
-cmp-1-x.h5 cmp-1-y.h5
-*/
-
-
 #define FFORMAT "%-15g %-15g %-15g\n"
 #define IFORMAT "%-15d %-15d %-15d\n"
 #define SPACES  "          "
-
-
-
-#ifndef FALSE
-#define FALSE 0
-#endif
-#ifndef TRUE
-#define TRUE 1
-#endif
 
 
 typedef struct options_t
@@ -55,7 +42,6 @@ typedef struct options_t
 } options_t;
 
 int do_test_files();
-
 int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name, 
                   char *obj2_name, options_t options );
 int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank,
@@ -65,18 +51,14 @@ void print_pos( int *ph, int curr_pos, int *acc,
 void print_class( H5T_class_t tclass, char *sclass );
 hid_t fixtype( hid_t f_type );
 void list( const char *filename, int nobjects, info_t *info );
-
 void diff( hid_t file1_id, char *obj1_name, hid_t file2_id, char *obj2_name, 
            options_t options, int type );
-
-
 void compare( hid_t file1_id, char *obj1_name, int nobjects1, info_t *info1,
               hid_t file2_id, char *obj2_name, int nobjects2, info_t *info2,
               options_t options );
 void match( hid_t file1_id, char *file1_name, int nobjects1, info_t *info1,
             hid_t file2_id, char *file2_name, int nobjects2, info_t *info2,
             options_t options );
-
 int check_n_input( char * );
 int check_f_input( char * );
 
@@ -124,9 +106,9 @@ void usage( const char *progname )
 /*-------------------------------------------------------------------------
  * Function: main
  *
- * Purpose: H5diff 
+ * Purpose: H5diff main program
  *
- * Return: Success: 0, Failure: 1
+ * Return: 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -161,19 +143,12 @@ int main(int argc, const char *argv[])
  char       *obj1_name  = NULL;
  char       *obj2_name  = NULL;
  
-
-
-#if 1 
- do_test_files();
-#endif
-
-
 /*-------------------------------------------------------------------------
  * parse command line options
  *-------------------------------------------------------------------------
  */
  
- if (argc < 2) {
+ if (argc < 3) {
   usage( progname );
   exit(EXIT_FAILURE);
  }
@@ -445,9 +420,6 @@ int check_f_input( char *str )
  return 1;
 }
 
-
-
-
 /*-------------------------------------------------------------------------
  * Function: list
  *
@@ -674,7 +646,6 @@ int compare_object( char *obj1, char *obj2 )
 }
 
 
-
 /*-------------------------------------------------------------------------
  * Function: match
  *
@@ -708,7 +679,7 @@ void match( hid_t file1_id, char *file1_name, int nobjects1, info_t *info1,
   cmp = compare_object( info1[curr1].name, info2[curr2].name );
   if ( cmp == 0 )
   {
-   printf( "%s found in file 1 <%s> and %s found in file 2 <%s>\n", 
+   printf( "<%s> found in <%s> and <%s> found in <%s>\n", 
     info1[curr1].name, file1_name, info2[curr2].name, file2_name);
 
    /* do the diff */
@@ -722,14 +693,14 @@ void match( hid_t file1_id, char *file1_name, int nobjects1, info_t *info1,
   }
   else if ( cmp < 0 )
   {
-   printf( "%s is in file 1 <%s>, but not in file 2 <%s>\n", info1[curr1].name, 
+   printf( "<%s> is in <%s>, but not in <%s>\n", info1[curr1].name, 
     file1_name, file2_name);
    curr1++;
   }
   else 
   {
-   printf( "%s is in file 2 <%s>, but not in file 1 <%s>\n", info2[curr2].name, 
-    file1_name, file2_name);
+   printf( "<%s> is in <%s>, but not in <%s>\n", info2[curr2].name, 
+    file2_name, file1_name);
    curr2++;
   }
 
@@ -743,7 +714,7 @@ void match( hid_t file1_id, char *file1_name, int nobjects1, info_t *info1,
  {
   while ( curr1<nobjects1 )
   {
-   printf( "%s is in file 1 <%s>, but not in file 2 <%s>\n", info1[curr1].name, 
+   printf( "<%s> is in <%s>, but not in <%s>\n", info1[curr1].name, 
     file1_name, file2_name);
    curr1++;
   }
@@ -754,7 +725,7 @@ void match( hid_t file1_id, char *file1_name, int nobjects1, info_t *info1,
  {
   while ( curr2<nobjects2 )
   {
-   printf( "%s is in file 2 <%s>, but not in file 1 <%s>\n", info2[curr2].name, 
+   printf( "<%s> is in <%s>, but not in <%s>\n", info2[curr2].name, 
     file1_name, file2_name);
    curr2++;
   }
@@ -762,7 +733,6 @@ void match( hid_t file1_id, char *file1_name, int nobjects1, info_t *info1,
 
 
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: diff_dataset
@@ -781,8 +751,6 @@ void match( hid_t file1_id, char *file1_name, int nobjects1, info_t *info1,
  *
  *-------------------------------------------------------------------------
  */
-
-
 
 int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name, 
                   char *obj2_name, options_t options )
@@ -810,7 +778,6 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name,
  /* disable error reporting */
  H5Eget_auto(&func, &edata);
  H5Eset_auto(NULL, NULL);
-
 
 /*-------------------------------------------------------------------------
  * open the handles
@@ -892,12 +859,10 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name,
   goto out;
  }
 
-
 /*-------------------------------------------------------------------------
  * check for non supported classes
  *-------------------------------------------------------------------------
  */
-
 
  switch (tclass1) 
  {
@@ -930,9 +895,6 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name,
   goto out;
  }
 
- 
-
-
 /*-------------------------------------------------------------------------
  * check for the same rank
  *-------------------------------------------------------------------------
@@ -954,7 +916,6 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name,
   printf("]\n" );
   goto out;
  }
-
 
 /*-------------------------------------------------------------------------
  * check for the same dimensionality
@@ -1004,9 +965,6 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name,
   goto out;
  }
 
-
-
-
 /*-------------------------------------------------------------------------
  * memory type
  *-------------------------------------------------------------------------
@@ -1037,12 +995,10 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, char *obj1_name,
  free((char *) buf1);
  free((char *) buf2);
 
-
 /*-------------------------------------------------------------------------
  * close
  *-------------------------------------------------------------------------
  */
-
 
 out:
  
@@ -1058,14 +1014,12 @@ out:
 
 }
 
-
-
 /*-------------------------------------------------------------------------
  * Function: array_diff
  *
  * Purpose: 
  *
- * Return: Success: 0, Failure: -11
+ * Return: 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -1077,7 +1031,6 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-
  
 int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank,
                  hsize_t *dims, options_t options, char *obj1, char *obj2 )
@@ -1628,8 +1581,6 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      dptr1++;  dptr2++;
     }
    
-
-
     break;
 
     default:
@@ -1637,7 +1588,6 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
     break;
       
    } /*switch*/
-
 
    
    break; /* H5T_FLOAT 8 */
@@ -1666,8 +1616,6 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
  *
  *-------------------------------------------------------------------------
  */
-
-
 
 void print_pos( int *ph, int curr_pos, int *acc, 
                 int *pos, int rank, char *obj1, char *obj2 )
@@ -1698,16 +1646,12 @@ void print_pos( int *ph, int curr_pos, int *acc,
   printf("%d ", pos[i]  );
  }
  printf("]" );
-
-
 }
-
-
 
 /*-------------------------------------------------------------------------
  * Function: print_class
  *
- * Purpose: 
+ * Purpose: print the class name
  *
  * Return: 
  *
@@ -1841,592 +1785,3 @@ hid_t fixtype(hid_t f_type)
 }
 
 
-/*-------------------------------------------------------------------------
- * do some test files 
- *-------------------------------------------------------------------------
- */
-
-int do_test_files()
-{
-
- hid_t   file1_id, file2_id; 
- hid_t   dataset_id;
- hid_t   space_id;  
- hid_t   group_id, group2_id;
- hid_t   type_id;  
- hsize_t dims  [1] = { 7 };
- hsize_t dims2 [2] = { 3,2 };
- hsize_t dims3 [2] = { 3,3 };
- int     data1[7] = {1,1,1,1,1,1,1};
- int     data2[7] = {1,1,1,4,5,6,7};
- float   data3[7] = {1,1,3,4,5,6,7};
- float   data4[7] = {1,1,3.02f,4.002f,5.00002f,6,7};
- float   data5[3][2] = {1,1,3,4,5,6};
- float   data6[3][2] = {1,1.1f,3.02f,4.002f,5.00002f,6};
- float   data7[3][3] = {1,1,3,4,5,6,7,8,9};
- double  data8[3][2] = {1,1,3.40505e-9,4,5,6};
- double  data9[3][2] = {1,1,3.58911e-9,4,5,6};
- char    data10[] = {"A string"};
- long    data11[7] = {1,1,1,1,1,1,1};
- long    data12[7] = {1,1,1,4,5,6,7};
- herr_t  status;
-
-/*-------------------------------------------------------------------------
- * Create two files
- *-------------------------------------------------------------------------
- */
-  
- /* Create a file */
- file1_id = H5Fcreate ("h5diff_test1.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT); 
-
- /* Create a file */
- file2_id = H5Fcreate ("h5diff_test2.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT); 
-
-/*-------------------------------------------------------------------------
- * Make dataset "dset1" on file1
- *-------------------------------------------------------------------------
- */
-
- /* Create a data space  */
- space_id = H5Screate_simple(1,dims,NULL);
-
- /* Create a dataset "dset1" */
- dataset_id = H5Dcreate(file1_id,"dset1",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
-  
- /* Write the data */
- status = H5Dwrite(dataset_id,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,data1);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
-
-/*-------------------------------------------------------------------------
- * Make dataset "dset3" on file1
- *-------------------------------------------------------------------------
- */
-
- /* Create a data space  */
- space_id = H5Screate_simple(1,dims,NULL);
-
- /* Create a dataset "dset3" */
- dataset_id = H5Dcreate(file1_id,"dset3",H5T_NATIVE_FLOAT,space_id,H5P_DEFAULT);
-  
- /* Write the data */
- status = H5Dwrite(dataset_id,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,data3);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
-
-
-/*-------------------------------------------------------------------------
- * Make dataset "g1/dset1" on file1
- *-------------------------------------------------------------------------
- */
-
- /* Create a data space  */
- space_id = H5Screate_simple(1,dims,NULL);
-
- /* Create a group. */
- group_id = H5Gcreate(file1_id, "g1", 0);
-
- /* Create a dataset "g1/dset1" */
- dataset_id = H5Dcreate(group_id,"dset1",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
-  
- /* Write the data */
- status = H5Dwrite(dataset_id,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,data1);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Gclose(group_id);
- status = H5Sclose(space_id);
-
-
-/*-------------------------------------------------------------------------
- * Make dataset "dset1" on file2
- *-------------------------------------------------------------------------
- */
-
- /* Create a data space  */
- space_id = H5Screate_simple(1,dims,NULL);
-
- /* Create a dataset "dset1" */
- dataset_id = H5Dcreate(file2_id,"dset1",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
-
- /* Write the data */
- status = H5Dwrite(dataset_id,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,data2);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
-
-
-/*-------------------------------------------------------------------------
- * Make dataset "dset2" on file2
- *-------------------------------------------------------------------------
- */
-
- /* Create a data space  */
- space_id = H5Screate_simple(1,dims,NULL);
-
- /* Create a dataset "dset1" */
- dataset_id = H5Dcreate(file2_id,"dset2",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
-
- /* Write the data */
- status = H5Dwrite(dataset_id,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,data2);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
-
-
-/*-------------------------------------------------------------------------
- * Make dataset "g1/dset1" on file2
- *-------------------------------------------------------------------------
- */
-
- /* Create a data space  */
- space_id = H5Screate_simple(1,dims,NULL);
-
- /* Create a group. */
- group_id = H5Gcreate(file2_id, "g1", 0);
-
- /* Create a dataset "g1/dset1" */
- dataset_id = H5Dcreate(group_id,"dset1",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
-  
- /* Write the data */
- status = H5Dwrite(dataset_id,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,data2);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Gclose(group_id);
- status = H5Sclose(space_id);
-
-/*-------------------------------------------------------------------------
- * Make group "g2/g1" on file2
- *-------------------------------------------------------------------------
- */
-
- /* Create a group. */
- group_id = H5Gcreate(file2_id, "g2", 0);
- group2_id = H5Gcreate(group_id, "g1", 0);
-
- /* Close */
- status = H5Gclose(group_id);
- status = H5Gclose(group2_id);
-
-#if 1
-
-/*-------------------------------------------------------------------------
- * Make dataset "dset4" on file2
- *-------------------------------------------------------------------------
- */
-
- /* Create a data space  */
- space_id = H5Screate_simple(1,dims,NULL);
-
- /* Create a dataset "dset" */
- dataset_id = H5Dcreate(file2_id,"dset4",H5T_NATIVE_FLOAT,space_id,H5P_DEFAULT);
-  
- /* Write the data */
- status = H5Dwrite(dataset_id,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,data4);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
-
-/*-------------------------------------------------------------------------
- * Make dataset "dset5" on file1
- *-------------------------------------------------------------------------
- */
-
- /* Create a data space  */
- space_id = H5Screate_simple(2,dims2,NULL);
-
- /* Create a dataset "dset" */
- dataset_id = H5Dcreate(file1_id,"dset5",H5T_NATIVE_FLOAT,space_id,H5P_DEFAULT);
-  
- /* Write the data */
- status = H5Dwrite(dataset_id,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,data5);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
-
-/*-------------------------------------------------------------------------
- * Make dataset "dset6" on file2
- *-------------------------------------------------------------------------
- */
-
- /* Create a data space  */
- space_id = H5Screate_simple(2,dims2,NULL);
-
- /* Create a dataset "dset" */
- dataset_id = H5Dcreate(file2_id,"dset6",H5T_NATIVE_FLOAT,space_id,H5P_DEFAULT);
-  
- /* Write the data */
- status = H5Dwrite(dataset_id,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,data6);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
-
-/*-------------------------------------------------------------------------
- * Make dataset "dset7" on file2
- *-------------------------------------------------------------------------
- */
-
- /* Create a data space  */
- space_id = H5Screate_simple(2,dims3,NULL);
-
- /* Create a dataset "dset" */
- dataset_id = H5Dcreate(file2_id,"dset7",H5T_NATIVE_FLOAT,space_id,H5P_DEFAULT);
-  
- /* Write the data */
- status = H5Dwrite(dataset_id,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,data7);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
-
-/*-------------------------------------------------------------------------
- * Make dataset "dset8" on file2
- *-------------------------------------------------------------------------
- */
-
- /* Create a data space  */
- space_id = H5Screate_simple(2,dims2,NULL);
-
- /* Create a dataset "dset" */
- dataset_id = H5Dcreate(file2_id,"dset8",H5T_NATIVE_DOUBLE,space_id,H5P_DEFAULT);
-  
- /* Write the data */
- status = H5Dwrite(dataset_id,H5T_NATIVE_DOUBLE,H5S_ALL,H5S_ALL,H5P_DEFAULT,data8);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
-
-/*-------------------------------------------------------------------------
- * Make dataset "dset9" on file2
- *-------------------------------------------------------------------------
- */
-
- /* Create a data space  */
- space_id = H5Screate_simple(2,dims2,NULL);
-
- /* Create a dataset "dset" */
- dataset_id = H5Dcreate(file2_id,"dset9",H5T_NATIVE_DOUBLE,space_id,H5P_DEFAULT);
-  
- /* Write the data */
- status = H5Dwrite(dataset_id,H5T_NATIVE_DOUBLE,H5S_ALL,H5S_ALL,H5P_DEFAULT,data9);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
-
-/*-------------------------------------------------------------------------
- * Make dataset "dset10" on file2
- *-------------------------------------------------------------------------
- */
-
- /* Create a data space  */
- space_id = H5Screate(H5S_SCALAR);
-
- /* Make a string type */
- type_id = H5Tcopy(H5T_C_S1);
- status = H5Tset_size (type_id, strlen(data10));
-
- /* Create a dataset "dset" */
- dataset_id = H5Dcreate(file2_id,"dset10",type_id,space_id,H5P_DEFAULT);
-  
- /* Write the data */
- status = H5Dwrite(dataset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,data10);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
- status = H5Tclose(type_id);
-
-/*-------------------------------------------------------------------------
- * Make dataset "dset11" on file1
- *-------------------------------------------------------------------------
- */
-
- /* Create a data space  */
- space_id = H5Screate_simple(1,dims,NULL);
-
- /* Create a dataset "dset1" */
- dataset_id = H5Dcreate(file1_id,"dset11",H5T_NATIVE_LONG,space_id,H5P_DEFAULT);
-  
- /* Write the data */
- status = H5Dwrite(dataset_id,H5T_NATIVE_LONG,H5S_ALL,H5S_ALL,H5P_DEFAULT,data11);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
-
-/*-------------------------------------------------------------------------
- * Make dataset "dset12" on file2
- *-------------------------------------------------------------------------
- */
-
- /* Create a data space  */
- space_id = H5Screate_simple(1,dims,NULL);
-
- /* Create a dataset "dset12" */
- dataset_id = H5Dcreate(file2_id,"dset12",H5T_NATIVE_LONG,space_id,H5P_DEFAULT);
-  
- /* Write the data */
- status = H5Dwrite(dataset_id,H5T_NATIVE_LONG,H5S_ALL,H5S_ALL,H5P_DEFAULT,data12);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
-
-#endif
-
- 
-/*-------------------------------------------------------------------------
- * Close files
- *-------------------------------------------------------------------------
- */
- status = H5Fclose(file1_id);
- status = H5Fclose(file2_id);
-
-
- return 0;
-
-
-}
-
-
-
-#if 0
-
-
-/*-------------------------------------------------------------------------
- * Function: compare_uni
- *
- * Purpose: 
- *
- * Return: 
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: March 10, 2003
- *
- * Comments:
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-void compare_uni( hid_t file1_id, char *obj1_name, int nobjects1, info_t *info1,
-                  hid_t file2_id, char *obj2_name, int nobjects2, info_t *info2,
-                  options_t options )
-{
- char       *pdest;
- int        result;
- int        len;
- int        i, j;
-
- int        obj1_found = 0;
- int        obj2_found = 0;
-
-/*-------------------------------------------------------------------------
- * object name was supplied
- *-------------------------------------------------------------------------
- */
- 
- /* object name was supplied, find obj1_name */
- if ( obj1_name )
- {
-  
-  for ( i = 0; i < nobjects1; i++)
-  {
-   
-   pdest = strstr( info1[i].name, obj1_name );
-   result = pdest - info1[i].name;
-   len = strlen(obj1_name);
-   
-   /* found at position result */
-   if( pdest != NULL && 
-    /* check if it is not a substring */
-    info1[i].name[result-1] == '/' &&
-    /* check if it is the last or in the middle */
-    (info1[i].name[result+len]=='/' || 
-    info1[i].name[result+len]=='\0') )
-   {
-    printf( "%s found in file 1 <%s>\n", info1[i].name, file1_name);
-    
-    obj1_found = 1;
-    
-    /* go to second file and find obj2_name */
-    for ( j = 0; j < nobjects2; j++)
-    {
-     
-     pdest = strstr( info2[j].name, obj2_name );
-     result = pdest - info2[j].name;
-     
-     len = strlen(obj2_name);
-     
-     /* found at position result */
-     if( pdest != NULL && 
-      /* check if it is not a substring */
-      info2[j].name[result-1] == '/' &&
-      /* check if it is the last or in the middle */
-      (info2[j].name[result+len]=='/' || info2[j].name[result+len]=='\0') )
-     {
-      
-      obj2_found = 1;
-      /* objects are the same type */
-      if ( info1[i].type == info2[j].type )
-      {
-       
-       switch ( info1[i].type )
-       {
-        
-       /*-------------------------------------------------------------------------
-       * H5G_GROUP
-       *-------------------------------------------------------------------------
-        */ 
-        
-       case H5G_GROUP:
-        
-        printf( "%s found in file 2 <%s>\n", info2[j].name, file2_name ); 
-        
-        break;
-        
-        /*-------------------------------------------------------------------------
-        * H5G_DATASET
-        *-------------------------------------------------------------------------
-        */
-        
-       case H5G_DATASET:
-
-        printf( "%s found in file 2 <%s>\n", info2[j].name, file2_name ); 
-        /* match with the absolute name */
-        diff_dataset(file1_id,file2_id,info1[i].name,info2[j].name,options);
-        printf("\n");
-        break;
-        
-        /*-------------------------------------------------------------------------
-        * H5G_TYPE
-        *-------------------------------------------------------------------------
-        */
-        
-       case H5G_TYPE:
-        
-        printf( "%s found in file 2 <%s>\n", info2[j].name, file2_name ); 
-        
-        break;
-        
-       } /* switch */
-      }
-      
-     }
-     
-    } /* j */
-    
-    if ( obj2_found == 0 )
-     printf( "%s was not found in file 2 <%s>\n", obj2_name, file2_name);
-    
-   }
-   
-  } /* i */
-  
-  if ( obj1_found == 0 )
-   printf( "%s was not found in file 1 <%s>\n", obj1_name, file1_name);
-  
-  
- }
-  
-/*-------------------------------------------------------------------------
- * match all datasets
- *-------------------------------------------------------------------------
- */
- 
- else
-  
- {
-  for ( i = 0; i < nobjects1; i++)
-  {
-   obj1_name = info1[i].name;
-   len = strlen(obj1_name);
-
-   printf( "%s found in file 1 <%s>\n", info1[i].name, file1_name);
-   
-   obj2_found = 0;
-   for ( j = 0; j < nobjects2; j++)
-   {
-    /* find an object in file2 with same name as in file 1 */
-    
-    pdest = strstr( info2[j].name, obj1_name );
-    result = pdest - info2[j].name;
-    
-    obj2_name = info2[j].name;
-        
-    /* found at position result */
-    if( pdest != NULL && 
-     /* check if it is not a substring */
-     info2[j].name[result] == '/' &&
-     /* check if it is the last or in the middle */
-     (info2[j].name[result+len]=='/' || info2[j].name[result+len]=='\0') &&
-     /* objects are the same type */
-     info1[i].type == info2[j].type )
-    {
-     
-     obj2_found = 1;
-     switch ( info1[i].type )
-     {
-      
-     /*-------------------------------------------------------------------------
-     * H5G_GROUP
-     *-------------------------------------------------------------------------
-      */ 
-      
-     case H5G_GROUP:
-      
-      printf( "%s found in file 2 <%s>\n", info2[j].name, file2_name ); 
-      
-      break;
-      
-      /*-------------------------------------------------------------------------
-      * H5G_DATASET
-      *-------------------------------------------------------------------------
-      */
-      
-     case H5G_DATASET:
-      
-      printf( "%s found in file 2 <%s>\n", info2[j].name, file2_name ); 
-      /* match with the absolute name */
-      diff_dataset(file1_id,file2_id,info1[i].name,info2[j].name,options);
-      printf("\n");
-      break;
-      
-      /*-------------------------------------------------------------------------
-      * H5G_TYPE
-      *-------------------------------------------------------------------------
-      */
-      
-     case H5G_TYPE:
-      
-      printf( "%s found in file 2 <%s>\n", info2[j].name, file2_name ); 
-      
-      break;
-     } /* switch */
-    } /* if */
-   } /* j */
-    
-   if ( obj2_found == 0 )
-    printf( "%s is in file 1 <%s>, but not in file 2 <%s>\n", obj1_name, file1_name, file2_name);
-
-  } /* i */
-  
- }
-
-}
-
-#endif
