@@ -32,6 +32,11 @@
             RETURN
          END SUBROUTINE check   
 
+
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: verify
+!DEC$endif
          SUBROUTINE verify(string,value,correct_value,total_error)
             CHARACTER(LEN=*) :: string
             INTEGER :: value, correct_value, total_error
