@@ -71,9 +71,9 @@
 #define ONE_MB              (ONE_KB * ONE_KB)
 #define ONE_GB              (ONE_MB * ONE_KB)
 
-#define PIO_RAW             020
-#define PIO_MPI             040
-#define PIO_HDF5            060
+#define PIO_RAW             0x10
+#define PIO_MPI             0x20
+#define PIO_HDF5            0x40
 
 #define MB_PER_SEC(bytes,t) (((bytes) / ONE_MB) / t)
 
@@ -283,18 +283,22 @@ run_test_loop(FILE *output, struct options *opts)
     long num_procs;
     int io_runs = PIO_HDF5 | PIO_MPI | PIO_RAW; /* default to run all tests */
 
-    if (opts->io_types & ~07) {
+    if (opts->io_types & ~0x7) {
         /* we want to run only a select subset of these tests */
-        opts->io_types = 0;
+        io_runs = 0;
 
-        if (opts->io_types | PIO_HDF5)
+        printf("0x%02x\n", opts->io_types);
+
+        if (opts->io_types & PIO_HDF5)
             io_runs |= PIO_HDF5;
 
-        if (opts->io_types | PIO_MPI)
+        if (opts->io_types & PIO_MPI)
             io_runs |= PIO_MPI;
 
-        if (opts->io_types | PIO_RAW)
+        if (opts->io_types & PIO_RAW)
             io_runs |= PIO_RAW;
+
+        printf("0x%02x\n", io_runs);
     }
 
     parms.num_files = opts->num_files;
@@ -318,13 +322,13 @@ run_test_loop(FILE *output, struct options *opts)
                     "# of files: %u, # of dsets: %lu, Elements per dset: %lu\n",
                     parms.num_files, parms.num_dsets, parms.num_elmts);
 
-            if (io_runs | PIO_RAW)
+            if (io_runs & PIO_RAW)
                 run_test(output, RAW, parms);
 
-            if (io_runs | PIO_MPI)
+            if (io_runs & PIO_MPI)
                 run_test(output, MPIO, parms);
 
-            if (io_runs | PIO_HDF5)
+            if (io_runs & PIO_HDF5)
                 run_test(output, PHDF5, parms);
         }
     }
@@ -400,14 +404,14 @@ print_indent(register FILE *output, register int indent)
 static struct options *
 parse_command_line(int argc, char *argv[])
 {
-    int opt;
+    register int opt;
     struct options *cl_opts;
 
     cl_opts = (struct options *)malloc(sizeof(struct options));
 
     cl_opts->output_file = NULL;
     cl_opts->file_size = 64 * ONE_MB;
-    cl_opts->io_types = 07;     /* bottom bits indicate default type to run */
+    cl_opts->io_types = 0x7;    /* bottom bits indicate default type to run */
     cl_opts->num_dsets = 1;
     cl_opts->num_files = 1;
     cl_opts->num_iters = 1;
@@ -433,14 +437,14 @@ parse_command_line(int argc, char *argv[])
             cl_opts->num_files = strtol(opt_arg, NULL, 10);
             break;
         case 'H':
-            cl_opts->io_types &= ~07;
+            cl_opts->io_types &= ~0x7;
             cl_opts->io_types |= PIO_HDF5;
             break;
         case 'i':
             cl_opts->num_iters = strtol(opt_arg, NULL, 10);
             break;
         case 'm':
-            cl_opts->io_types &= ~07;
+            cl_opts->io_types &= ~0x7;
             cl_opts->io_types |= PIO_MPI;
             break;
         case 'o':
@@ -453,7 +457,7 @@ parse_command_line(int argc, char *argv[])
             cl_opts->max_num_procs = strtol(opt_arg, NULL, 10);
             break;
         case 'r':
-            cl_opts->io_types &= ~07;
+            cl_opts->io_types &= ~0x7;
             cl_opts->io_types |= PIO_RAW;
             break;
         case 'x':
