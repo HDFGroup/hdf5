@@ -58,7 +58,11 @@ LIB_COBJ=$(LIB_XOBJ:.x=.o)
 LIB_OBJ=$(PABLO_OBJ) $(LIB_COBJ)
 
 .c.x:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(top_srcdir)/src/$*.c -o $*.o
+	if test "$*" != "H5Tinit"; then                                  \
+	  $(CC) $(CFLAGS) $(CPPFLAGS) -c $(top_srcdir)/src/$*.c -o $*.o; \
+	else                                                             \
+	  $(CC) $(CFLAGS) $(CPPFLAGS) -c $(top_builddir)/src/$*.c -o $*.o; \
+	fi;
 	cp $*.o $@
 
 # 'vpath' directive is only supported in gmake, take out - QAK
