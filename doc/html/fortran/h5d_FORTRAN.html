@@ -162,10 +162,11 @@ FORTRAN Dataset API -- h5d
 
 <dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5dopen_f</strong>
 <pre>
-          SUBROUTINE h5dopen_f(loc_id, name, hdferr) 
+          SUBROUTINE h5dopen_f(loc_id, name, dset_id, hdferr) 
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
             CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the dataset 
+            INTEGER(HID_T), INTENT(OUT) :: dset_id ! Dataset identifier
             INTEGER, INTENT(OUT) :: hdferr       ! Error code 
                                                  ! 0 on success and -1 on failure
           END SUBROUTINE h5dopen_f  
