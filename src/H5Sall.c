@@ -36,6 +36,24 @@
 static int             interface_initialize_g = 0;
 
 /* Static function prototypes */
+
+/* Selection callbacks */
+static herr_t H5S_all_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
+static herr_t H5S_all_get_seq_list(const H5S_t *space, unsigned flags,
+    H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
+    size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
+static herr_t H5S_all_release(H5S_t *space);
+static htri_t H5S_all_is_valid(const H5S_t *space);
+static hssize_t H5S_all_serial_size(const H5S_t *space);
+static herr_t H5S_all_serialize(const H5S_t *space, uint8_t *buf);
+static herr_t H5S_all_deserialize(H5S_t *space, const uint8_t *buf);
+static herr_t H5S_all_bounds(const H5S_t *space, hssize_t *start, hssize_t *end);
+static htri_t H5S_all_is_contiguous(const H5S_t *space);
+static htri_t H5S_all_is_single(const H5S_t *space);
+static htri_t H5S_all_is_regular(const H5S_t *space);
+static herr_t H5S_all_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
+
+/* Selection iteration callbacks */
 static herr_t H5S_all_iter_coords(const H5S_sel_iter_t *iter, hssize_t *coords);
 static herr_t H5S_all_iter_block(const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end);
 static hsize_t H5S_all_iter_nelmts(const H5S_sel_iter_t *iter);
@@ -43,6 +61,39 @@ static htri_t H5S_all_iter_has_next_block(const H5S_sel_iter_t *iter);
 static herr_t H5S_all_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 static herr_t H5S_all_iter_next_block(H5S_sel_iter_t *sel_iter);
 static herr_t H5S_all_iter_release(H5S_sel_iter_t *sel_iter);
+
+/* Selection properties for "all" selections */
+const H5S_select_class_t H5S_sel_all[1] = {{
+    H5S_SEL_ALL,
+
+    /* Methods on selection */
+    H5S_all_copy,
+    H5S_all_get_seq_list,
+    H5S_all_release,
+    H5S_all_is_valid,
+    H5S_all_serial_size,
+    H5S_all_serialize,
+    H5S_all_deserialize,
+    H5S_all_bounds,
+    H5S_all_is_contiguous,
+    H5S_all_is_single,
+    H5S_all_is_regular,
+    H5S_all_iter_init,
+}};
+
+/* Iteration properties for "all" selections */
+static const H5S_sel_iter_class_t H5S_sel_iter_all[1] = {{
+    H5S_SEL_ALL,
+
+    /* Methods on selection iterator */
+    H5S_all_iter_coords,
+    H5S_all_iter_block,
+    H5S_all_iter_nelmts,
+    H5S_all_iter_has_next_block,
+    H5S_all_iter_next,
+    H5S_all_iter_next_block,
+    H5S_all_iter_release,
+}};
 
 
 /*-------------------------------------------------------------------------
@@ -67,7 +118,7 @@ H5S_all_iter_init (H5S_sel_iter_t *iter, const H5S_t *space)
     FUNC_ENTER_NOAPI(H5S_all_iter_init, FAIL);
 
     /* Check args */
-    assert (space && H5S_SEL_ALL==space->select.type);
+    assert (space && H5S_SEL_ALL==H5S_GET_SELECT_TYPE(space));
     assert (iter);
 
     /* Initialize the number of elements to iterate over */
@@ -77,14 +128,8 @@ H5S_all_iter_init (H5S_sel_iter_t *iter, const H5S_t *space)
     iter->u.all.elmt_offset=0;
     iter->u.all.byte_offset=0;
 
-    /* Initialize methods for selection iterator */
-    iter->iter_coords=H5S_all_iter_coords;
-    iter->iter_block=H5S_all_iter_block;
-    iter->iter_nelmts=H5S_all_iter_nelmts;
-    iter->iter_has_next_block=H5S_all_iter_has_next_block;
-    iter->iter_next=H5S_all_iter_next;
-    iter->iter_next_block=H5S_all_iter_next_block;
-    iter->iter_release=H5S_all_iter_release;
+    /* Initialize type of selection iterator */
+    iter->type=H5S_sel_iter_all;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -370,7 +415,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_all_copy (H5S_t *dst, const H5S_t *src)
+H5S_all_copy(H5S_t *dst, const H5S_t *src, hbool_t UNUSED share_selection)
 {
     herr_t ret_value=SUCCEED;  /* return value */
 
@@ -380,7 +425,7 @@ H5S_all_copy (H5S_t *dst, const H5S_t *src)
     assert(dst);
 
     /* Set number of elements in selection */
-    dst->select.num_elem=(hsize_t)H5S_GET_SIMPLE_EXTENT_NPOINTS(dst);
+    dst->select.num_elem=(hsize_t)H5S_GET_EXTENT_NPOINTS(dst);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -489,7 +534,7 @@ H5S_all_serialize (const H5S_t *space, uint8_t *buf)
     assert(space);
 
     /* Store the preamble information */
-    UINT32ENCODE(buf, (uint32_t)space->select.type);  /* Store the type of selection */
+    UINT32ENCODE(buf, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
     UINT32ENCODE(buf, (uint32_t)1);  /* Store the version number */
     UINT32ENCODE(buf, (uint32_t)0);  /* Store the un-used padding */
     UINT32ENCODE(buf, (uint32_t)0);  /* Store the additional information length */
@@ -524,7 +569,7 @@ done:
 herr_t
 H5S_all_deserialize (H5S_t *space, const uint8_t UNUSED *buf)
 {
-    herr_t ret_value=FAIL;  /* return value */
+    herr_t ret_value;   /* return value */
 
     FUNC_ENTER_NOAPI(H5S_all_deserialize, FAIL);
 
@@ -723,22 +768,10 @@ H5S_select_all (H5S_t *space, unsigned rel_prev)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection");
 
     /* Set number of elements in selection */
-    space->select.num_elem=(hsize_t)H5S_GET_SIMPLE_EXTENT_NPOINTS(space);
+    space->select.num_elem=(hsize_t)H5S_GET_EXTENT_NPOINTS(space);
 
     /* Set selection type */
-    space->select.type=H5S_SEL_ALL;
-
-    /* Set selection methods */
-    space->select.get_seq_list=H5S_all_get_seq_list;
-    space->select.release=H5S_all_release;
-    space->select.is_valid=H5S_all_is_valid;
-    space->select.serial_size=H5S_all_serial_size;
-    space->select.serialize=H5S_all_serialize;
-    space->select.bounds=H5S_all_bounds;
-    space->select.is_contiguous=H5S_all_is_contiguous;
-    space->select.is_single=H5S_all_is_single;
-    space->select.is_regular=H5S_all_is_regular;
-    space->select.iter_init=H5S_all_iter_init;
+    space->select.type=H5S_sel_all;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

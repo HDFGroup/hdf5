@@ -272,7 +272,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     assert(attr->dt_size>0);
     attr->ds_size=H5O_raw_size(H5O_SDSPACE_ID,attr->ent.file,&(space->extent.u.simple));
     assert(attr->ds_size>0);
-    H5_ASSIGN_OVERFLOW(attr->data_size,H5S_GET_SIMPLE_EXTENT_NPOINTS(attr->ds)*H5T_get_size(attr->dt),hssize_t,size_t);
+    H5_ASSIGN_OVERFLOW(attr->data_size,H5S_GET_EXTENT_NPOINTS(attr->ds)*H5T_get_size(attr->dt),hssize_t,size_t);
 
     /* Hold the symbol table entry (and file) open */
     if (H5O_open(&(attr->ent)) < 0)
@@ -630,7 +630,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
     assert(buf);
 
     /* Create buffer for data to store on disk */
-    if((snelmts=H5S_GET_SIMPLE_EXTENT_NPOINTS(attr->ds))<0)
+    if((snelmts=H5S_GET_EXTENT_NPOINTS(attr->ds))<0)
         HGOTO_ERROR (H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
     nelmts=(hsize_t)snelmts;
 
@@ -780,7 +780,7 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
     assert(buf);
 
     /* Create buffer for data to store on disk */
-    if((snelmts=H5S_GET_SIMPLE_EXTENT_NPOINTS(attr->ds))<0)
+    if((snelmts=H5S_GET_EXTENT_NPOINTS(attr->ds))<0)
         HGOTO_ERROR (H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
     nelmts=(hsize_t)snelmts;
 

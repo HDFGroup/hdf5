@@ -84,25 +84,14 @@ typedef struct {
     hsize_t byte_offset;         /* Next byte to output */
 } H5S_all_iter_t;
 
-typedef struct H5S_sel_iter_t H5S_sel_iter_t;
-
-/* Method to retrieve the current coordinates of iterator for current selection */
-typedef herr_t (*H5S_sel_iter_coords_func_t)(const H5S_sel_iter_t *iter, hssize_t *coords);
-/* Method to retrieve the current block of iterator for current selection */
-typedef herr_t (*H5S_sel_iter_block_func_t)(const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end);
-/* Method to determine number of elements left in iterator for current selection */
-typedef hsize_t (*H5S_sel_iter_nelmts_func_t)(const H5S_sel_iter_t *iter);
-/* Method to determine if there are more blocks left in the current selection */
-typedef htri_t (*H5S_sel_iter_has_next_block_func_t)(const H5S_sel_iter_t *iter);
-/* Method to move selection iterator to the next element in the selection */
-typedef herr_t (*H5S_sel_iter_next_func_t)(H5S_sel_iter_t *iter, size_t nelem);
-/* Method to move selection iterator to the next block in the selection */
-typedef herr_t (*H5S_sel_iter_next_block_func_t)(H5S_sel_iter_t *iter);
-/* Method to release iterator for current selection */
-typedef herr_t (*H5S_sel_iter_release_func_t)(H5S_sel_iter_t *iter);
+/* Forward declaration of selection iteration class */
+struct H5S_sel_iter_class_t;
 
 /* Selection iteration container */
-struct H5S_sel_iter_t {
+typedef struct H5S_sel_iter_t {
+    /* Selection class */
+    const struct H5S_sel_iter_class_t *type; /* Selection iteration class info */
+
     /* Information common to all iterators */
     unsigned rank;              /* Rank of dataspace the selection iterator is operating on */
     hsize_t *dims;              /* Dimensions of dataspace the selection is operating on */
@@ -115,16 +104,7 @@ struct H5S_sel_iter_t {
         H5S_hyper_iter_t hyp;   /* New Hyperslab selection iteration information */
         H5S_all_iter_t all;     /* "All" selection iteration information */
     } u;
-
-    /* Methods on selections */
-    H5S_sel_iter_coords_func_t iter_coords;     /* Method to retrieve the current coordinates of iterator for current selection */
-    H5S_sel_iter_block_func_t iter_block;       /* Method to retrieve the current block of iterator for current selection */
-    H5S_sel_iter_nelmts_func_t iter_nelmts;     /* Method to determine number of elements left in iterator for current selection */
-    H5S_sel_iter_has_next_block_func_t iter_has_next_block;         /* Method to query if there is another block left in the selection */
-    H5S_sel_iter_next_func_t iter_next;         /* Method to move selection iterator to the next element in the selection */
-    H5S_sel_iter_next_block_func_t iter_next_block;     /* Method to move selection iterator to the next block in the selection */
-    H5S_sel_iter_release_func_t iter_release;   /* Method to release iterator for current selection */
-};
+} H5S_sel_iter_t;
 
 typedef struct H5S_conv_t {
     H5S_sel_type	ftype;
@@ -174,31 +154,31 @@ typedef struct H5S_conv_t {
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5S_PACKAGE
-#define H5S_GET_SIMPLE_EXTENT_TYPE(S)   ((S)->extent.type)
-#define H5S_GET_SIMPLE_EXTENT_NDIMS(S)  ((S)->extent.u.simple.rank)
-#define H5S_GET_SIMPLE_EXTENT_NPOINTS(S) ((S)->extent.nelem)
+#define H5S_GET_EXTENT_TYPE(S)          ((S)->extent.type)
+#define H5S_GET_EXTENT_NDIMS(S)         ((S)->extent.u.simple.rank)
+#define H5S_GET_EXTENT_NPOINTS(S)       ((S)->extent.nelem)
 #define H5S_GET_SELECT_NPOINTS(S)       ((S)->select.num_elem)
-#define H5S_GET_SELECT_TYPE(S)          ((S)->select.type)
-#define H5S_SELECT_GET_SEQ_LIST(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN)             ((*(S)->select.get_seq_list)(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN))
-#define H5S_SELECT_VALID(S)             ((*(S)->select.is_valid)(S))
-#define H5S_SELECT_RELEASE(S)           ((*(S)->select.release)(S))
-#define H5S_SELECT_SERIAL_SIZE(S)       ((*(S)->select.serial_size)(S))
-#define H5S_SELECT_SERIALIZE(S,BUF)     ((*(S)->select.serialize)(S,BUF))
-#define H5S_SELECT_BOUNDS(S,START,END)  ((*(S)->select.bounds)(S,START,END))
-#define H5S_SELECT_IS_CONTIGUOUS(S)     ((*(S)->select.is_contiguous)(S))
-#define H5S_SELECT_IS_SINGLE(S)         ((*(S)->select.is_single)(S))
-#define H5S_SELECT_IS_REGULAR(S)        ((*(S)->select.is_regular)(S))
-#define H5S_SELECT_ITER_COORDS(ITER,COORDS)     ((*(ITER)->iter_coords)(ITER,COORDS))
-#define H5S_SELECT_ITER_BLOCK(ITER,START,END)   ((*(ITER)->iter_block)(ITER,START,END))
-#define H5S_SELECT_ITER_NELMTS(ITER)    ((*(ITER)->iter_nelmts)(ITER))
-#define H5S_SELECT_ITER_HAS_NEXT_BLOCK(ITER)    ((*(ITER)->iter_has_next_block)(ITER))
-#define H5S_SELECT_ITER_NEXT(ITER,NELEM)((*(ITER)->iter_next)(ITER,NELEM))
-#define H5S_SELECT_ITER_NEXT_BLOCK(ITER)        ((*(ITER)->iter_next_block)(ITER))
-#define H5S_SELECT_ITER_RELEASE(ITER)   ((*(ITER)->iter_release)(ITER))
+#define H5S_GET_SELECT_TYPE(S)          ((S)->select.type->type)
+#define H5S_SELECT_GET_SEQ_LIST(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN)             ((*(S)->select.type->get_seq_list)(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN))
+#define H5S_SELECT_VALID(S)             ((*(S)->select.type->is_valid)(S))
+#define H5S_SELECT_RELEASE(S)           ((*(S)->select.type->release)(S))
+#define H5S_SELECT_SERIAL_SIZE(S)       ((*(S)->select.type->serial_size)(S))
+#define H5S_SELECT_SERIALIZE(S,BUF)     ((*(S)->select.type->serialize)(S,BUF))
+#define H5S_SELECT_BOUNDS(S,START,END)  ((*(S)->select.type->bounds)(S,START,END))
+#define H5S_SELECT_IS_CONTIGUOUS(S)     ((*(S)->select.type->is_contiguous)(S))
+#define H5S_SELECT_IS_SINGLE(S)         ((*(S)->select.type->is_single)(S))
+#define H5S_SELECT_IS_REGULAR(S)        ((*(S)->select.type->is_regular)(S))
+#define H5S_SELECT_ITER_COORDS(ITER,COORDS)     ((*(ITER)->type->iter_coords)(ITER,COORDS))
+#define H5S_SELECT_ITER_BLOCK(ITER,START,END)   ((*(ITER)->type->iter_block)(ITER,START,END))
+#define H5S_SELECT_ITER_NELMTS(ITER)    ((*(ITER)->type->iter_nelmts)(ITER))
+#define H5S_SELECT_ITER_HAS_NEXT_BLOCK(ITER)    ((*(ITER)->type->iter_has_next_block)(ITER))
+#define H5S_SELECT_ITER_NEXT(ITER,NELEM)((*(ITER)->type->iter_next)(ITER,NELEM))
+#define H5S_SELECT_ITER_NEXT_BLOCK(ITER)        ((*(ITER)->type->iter_next_block)(ITER))
+#define H5S_SELECT_ITER_RELEASE(ITER)   ((*(ITER)->type->iter_release)(ITER))
 #else /* H5S_PACKAGE */
-#define H5S_GET_SIMPLE_EXTENT_TYPE(S)   (H5S_get_simple_extent_type(S))
-#define H5S_GET_SIMPLE_EXTENT_NDIMS(S)  (H5S_get_simple_extent_ndims(S))
-#define H5S_GET_SIMPLE_EXTENT_NPOINTS(S) (H5S_get_simple_extent_npoints(S))
+#define H5S_GET_EXTENT_TYPE(S)          (H5S_get_simple_extent_type(S))
+#define H5S_GET_EXTENT_NDIMS(S)         (H5S_get_simple_extent_ndims(S))
+#define H5S_GET_EXTENT_NPOINTS(S)       (H5S_get_simple_extent_npoints(S))
 #define H5S_GET_SELECT_NPOINTS(S)       (H5S_get_select_npoints(S))
 #define H5S_GET_SELECT_TYPE(S)          (H5S_get_select_type(S))
 #define H5S_SELECT_GET_SEQ_LIST(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN)       (H5S_select_get_seq_list(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN))
@@ -218,6 +198,9 @@ typedef struct H5S_conv_t {
 #define H5S_SELECT_ITER_NEXT_BLOCK(ITER)        (H5S_select_iter_next_block(ITER))
 #define H5S_SELECT_ITER_RELEASE(ITER)   (H5S_select_iter_release(ITER))
 #endif /* H5S_PACKAGE */
+/* Handle these two callbacks in a special way, since they have prologs that need to be executed */
+#define H5S_SELECT_COPY(DST,SRC,SHARE)  (H5S_select_copy(DST,SRC,SHARE))
+#define H5S_SELECT_DESERIALIZE(S,BUF)   (H5S_select_deserialize(S,BUF))
 
 
 /* Operations on dataspaces */

@@ -917,7 +917,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         hbool_t full_overwrite; /* Whether we are over-writing all the elements */
 
         /* Get the number of elements in file dataset's dataspace */
-        if((file_nelmts=H5S_GET_SIMPLE_EXTENT_NPOINTS(file_space))<0)
+        if((file_nelmts=H5S_GET_EXTENT_NPOINTS(file_space))<0)
             HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, FAIL, "can't retrieve number of elements in file dataset")
 
         /* Always allow fill values to be written if the dataset has a VL datatype */
@@ -2309,7 +2309,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     fm->layout = &(dataset->layout);
     
     /* Check if the memory space is scalar & make equivalent memory space */
-    if((sm_ndims = H5S_GET_SIMPLE_EXTENT_NDIMS(mem_space))<0)
+    if((sm_ndims = H5S_GET_EXTENT_NDIMS(mem_space))<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number")
     if(sm_ndims==0) {
         hsize_t dims[H5O_LAYOUT_NDIMS];    /* Temporary dimension information */
