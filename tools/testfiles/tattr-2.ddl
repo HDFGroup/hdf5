@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5dump -a attr1 attr4 attr5 tattr.h5'
+Expected output for 'h5dump -a attr1 --attribute attr4 --attribute=attr5 tattr.h5'
 #############################
 HDF5 "tattr.h5" {
 ATTRIBUTE "attr1" {

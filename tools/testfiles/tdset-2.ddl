@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5dump -header -d dset1 /dset2 dset3 tdset.h5'
+Expected output for 'h5dump -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5'
 #############################
 HDF5 "tdset.h5" {
 DATASET "dset1" {
