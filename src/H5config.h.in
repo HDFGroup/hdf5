@@ -302,6 +302,9 @@
 /* Define if you have the <stdint.h> header file.  */
 #undef HAVE_STDINT_H
 
+/* Define if you have the <sys/filio.h> header file.  */
+#undef HAVE_SYS_FILIO_H
+
 /* Define if you have the <sys/ioctl.h> header file.  */
 #undef HAVE_SYS_IOCTL_H
 
