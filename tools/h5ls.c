@@ -923,6 +923,42 @@ display_reference_type(hid_t type, int UNUSED indent)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	display_opaque_type
+ *
+ * Purpose:	Prints information about an opaque data type.
+ *
+ * Return:	Success:	TRUE
+ *
+ *		Failure:	FALSE, nothing printed
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, June  7, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+display_opaque_type(hid_t type, int indent)
+{
+    char	*tag;
+    size_t	size;
+    
+    if (H5T_OPAQUE!=H5Tget_class(type)) return FALSE;
+
+    size = H5Tget_size(type);
+    printf("%lu-byte opaque type", (unsigned long)size);
+    if ((tag=H5Tget_tag(type))) {
+	printf("\n%*s(tag = \"", indent, "");
+	display_string(stdout, tag, FALSE);
+	printf("\")");
+	free(tag);
+    }
+    return TRUE;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	display_type
  *
  * Purpose:	Prints a data type definition.  The definition is printed
@@ -962,7 +998,8 @@ display_type(hid_t type, int indent)
 	display_cmpd_type(type, indent) ||
 	display_enum_type(type, indent) ||
 	display_string_type(type, indent) ||
-	display_reference_type(type, indent)) {
+	display_reference_type(type, indent) ||
+	display_opaque_type(type, indent)) {
 	return;
     }
 

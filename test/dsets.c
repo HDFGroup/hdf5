@@ -702,6 +702,103 @@ test_multiopen (hid_t file)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_types
+ *
+ * Purpose:	Make some datasets with various types so we can test h5ls.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, June  7, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_types(hid_t file)
+{
+    hid_t		grp=-1, type=-1, space=-1, dset=-1;
+    size_t		i;
+    hsize_t		nelmts;
+    unsigned char	buf[32];
+
+    TESTING("various datatypes");
+    if ((grp=H5Gcreate(file, "typetests", 0))<0) goto error;
+
+    /* bitfield_1 */
+    nelmts = sizeof(buf);
+    if ((type=H5Tcopy(H5T_STD_B8LE))<0 ||
+	(space=H5Screate_simple(1, &nelmts, NULL))<0 ||
+	(dset=H5Dcreate(grp, "bitfield_1", type, space, H5P_DEFAULT))<0)
+	goto error;
+    for (i=0; i<sizeof buf; i++) buf[i] = 0xff ^ i;
+    if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)<0)
+	goto error;
+    if (H5Sclose(space)<0) goto error;
+    if (H5Tclose(type)<0) goto error;
+    if (H5Dclose(dset)<0) goto error;
+
+    /* bitfield_2 */
+    nelmts = sizeof(buf)/2;
+    if ((type=H5Tcopy(H5T_STD_B16LE))<0 ||
+	(space=H5Screate_simple(1, &nelmts, NULL))<0 ||
+	(dset=H5Dcreate(grp, "bitfield_2", type, space, H5P_DEFAULT))<0)
+	goto error;
+    for (i=0; i<sizeof buf; i++) buf[i] = 0xff ^ i;
+    if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)<0)
+	goto error;
+    if (H5Sclose(space)<0) goto error;
+    if (H5Tclose(type)<0) goto error;
+    if (H5Dclose(dset)<0) goto error;
+
+    /* opaque_1 */
+    nelmts = sizeof(buf);
+    if ((type=H5Tcreate(H5T_OPAQUE, 1))<0 ||
+	H5Tset_tag(type, "testing 1-byte opaque type")<0 ||
+	(space=H5Screate_simple(1, &nelmts, NULL))<0 ||
+	(dset=H5Dcreate(grp, "opaque_1", type, space, H5P_DEFAULT))<0)
+	goto error;
+    for (i=0; i<sizeof buf; i++) buf[i] = 0xff ^ i;
+    if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)<0)
+	goto error;
+    if (H5Sclose(space)<0) goto error;
+    if (H5Tclose(type)<0) goto error;
+    if (H5Dclose(dset)<0) goto error;
+    
+    /* opaque_2 */
+    nelmts = sizeof(buf)/4;
+    if ((type=H5Tcreate(H5T_OPAQUE, 4))<0 ||
+	H5Tset_tag(type, "testing 4-byte opaque type")<0 ||
+	(space=H5Screate_simple(1, &nelmts, NULL))<0 ||
+	(dset=H5Dcreate(grp, "opaque_2", type, space, H5P_DEFAULT))<0)
+	goto error;
+    for (i=0; i<sizeof buf; i++) buf[i] = 0xff ^ i;
+    if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)<0)
+	goto error;
+    if (H5Sclose(space)<0) goto error;
+    if (H5Tclose(type)<0) goto error;
+    if (H5Dclose(dset)<0) goto error;
+    
+    /* Cleanup */
+    if (H5Gclose(grp)<0) goto error;
+    PASSED();
+    return 0;
+    
+ error:
+    H5E_BEGIN_TRY {
+	H5Gclose(grp);
+	H5Tclose(type);
+	H5Sclose(space);
+	H5Dclose(dset);
+    } H5E_END_TRY;
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Tests the dataset interface (H5D)
@@ -751,6 +848,7 @@ main(void)
     nerrors += test_tconv(file)<0	?1:0;
     nerrors += test_compression(file)<0	?1:0;
     nerrors += test_multiopen (file)<0	?1:0;
+    nerrors += test_types(file)<0       ?1:0;
 
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;

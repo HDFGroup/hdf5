@@ -910,6 +910,7 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	}
 	
     } else {
+	/* All other types get printed as hexadecimal */
 	h5dump_str_append(str, "0x");
 	n = H5Tget_size(type);
 	for (i=0; i<n; i++) {
@@ -1555,12 +1556,22 @@ h5dump_fixtype(hid_t f_type)
 
     case H5T_ENUM:
     case H5T_REFERENCE:
+    case H5T_OPAQUE:
+	/* Same as file type */
 	m_type = H5Tcopy(f_type);
 	break;
 
-	case H5T_TIME:
     case H5T_BITFIELD:
-    case H5T_OPAQUE:
+	/*
+	 * Same as the file except the offset is set to zero and the byte
+	 * order is set to little endian.
+	 */
+	m_type = H5Tcopy(f_type);
+	H5Tset_offset(m_type, 0);
+	H5Tset_order(m_type, H5T_ORDER_LE);
+	break;
+
+    case H5T_TIME:
 	/*
 	 * These type classes are not implemented yet.
 	 */

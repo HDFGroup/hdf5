@@ -628,7 +628,7 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	    /*
              * Copy the significant part of the value. If the source is larger
              * than the destination then invoke the overflow function or copy
-             * as many bits as possible.
+             * as many bits as possible. Zero extra bits in the destination.
              */
 	    if (src->u.atomic.prec>dst->u.atomic.prec) {
 		if (!H5T_overflow_g ||
@@ -640,6 +640,8 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		H5T_bit_copy(d, dst->u.atomic.offset,
 			     s, src->u.atomic.offset,
 			     src->u.atomic.prec);
+		H5T_bit_set(d, dst->u.atomic.offset+src->u.atomic.prec,
+			    dst->u.atomic.prec-src->u.atomic.prec, FALSE);
 	    }
 
 	    /*
