@@ -393,7 +393,7 @@ h5_fileaccess(void)
     char s[1024];
     hid_t fapl = -1;
     hsize_t fam_size = 100*1024*1024; /*100 MB*/
-    long verbosity = 1;
+    long log_flags = H5FD_LOG_LOC_IO;
     H5FD_mem_t	mt;
     
     /* First use the environment variable, then the constant */
@@ -458,9 +458,9 @@ h5_fileaccess(void)
     } else if (!HDstrcmp(name, "log")) {
         /* Log file access */
         if ((val = HDstrtok(NULL, " \t\n\r")))
-            verbosity = HDstrtol(val, NULL, 0);
+            log_flags = HDstrtol(val, NULL, 0);
 
-        if (H5Pset_fapl_log(fapl, NULL, (int)verbosity) < 0)
+        if (H5Pset_fapl_log(fapl, NULL, log_flags, 0) < 0)
 	    return -1;
     } else {
 	/* Unknown driver */
