@@ -62,10 +62,6 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
         // Throw group exception
         virtual void throwException(const string func_name, const string msg) const;
 
-
-	// Used by the API to appropriately close a group
-	void p_close() const;
-
 	virtual ~Group();
 
         // Creates a copy of an existing Group using its id

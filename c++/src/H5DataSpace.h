@@ -103,9 +103,6 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	// or uses a default id to create a default dataspace object
 	DataSpace( const hid_t space_id );
 
-	// Used by the API to close the dataspace 
-	void p_close() const;
-
 	// Default constructor
 	DataSpace();
 

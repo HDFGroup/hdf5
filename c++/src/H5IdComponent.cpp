@@ -15,11 +15,9 @@
 #include <string>
 
 #include "H5Include.h"
-#include "H5RefCounter.h"
 #include "H5Exception.h"
 #include "H5Library.h"
 #include "H5IdComponent.h"
-#include "H5Idtemplates.h"
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -32,8 +30,6 @@ namespace H5 {
 //--------------------------------------------------------------------------
 IdComponent::IdComponent() : id( -1 )
 {
-   // starts counting object references
-   ref_count = new RefCounter;
 }
 
 //--------------------------------------------------------------------------
@@ -46,8 +42,6 @@ IdComponent::IdComponent() : id( -1 )
 
 IdComponent::IdComponent( const hid_t h5_id ) : id( h5_id )
 {
-   // starts counting object references
-   ref_count = new RefCounter;
 }
 
 //--------------------------------------------------------------------------
@@ -59,8 +53,7 @@ IdComponent::IdComponent( const hid_t h5_id ) : id( h5_id )
 IdComponent::IdComponent( const IdComponent& original )
 {
    id = original.id;
-   ref_count = original.ref_count; // points to the same ref counter
-   ref_count->increment(); // increment number of references to this id
+   H5Iinc_ref(id); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------
@@ -68,14 +61,19 @@ IdComponent::IdComponent( const IdComponent& original )
 ///\brief	Increment id reference counter.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void IdComponent::incRefCount() { ref_count->increment(); }
+void IdComponent::incRefCount() { H5Iinc_ref(id); }
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::decRefCount
 ///\brief	Decrement id reference counter.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void IdComponent::decRefCount() { ref_count->decrement(); }
+void IdComponent::decRefCount()
+{
+    if(id>0)
+        if(H5Idec_ref(id)<0)
+            throw IdComponentException("IdComponent::decRefCount", "decrementing object ref count failed");
+}
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::getCounter
@@ -83,22 +81,7 @@ void IdComponent::decRefCount() { ref_count->decrement(); }
 ///\return	Reference count
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-int IdComponent::getCounter() { return( ref_count->getCounter()); }
-
-//--------------------------------------------------------------------------
-// Function:	IdComponent::noReference
-///\brief	Decrements the reference counter then determines if there 
-///		are no more reference to this object.
-///\return	true if there are no more reference to this object, and false,
-///		otherwise
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-bool IdComponent::noReference()
-{
-   if( ref_count->getCounter() > 0 )
-      ref_count->decrement();
-   return( ref_count->getCounter() == 0 ? true:false );
-}
+int IdComponent::getCounter() { return( H5Iget_ref(id)); }
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::operator=
@@ -116,20 +99,14 @@ bool IdComponent::noReference()
 //--------------------------------------------------------------------------
 IdComponent& IdComponent::operator=( const IdComponent& rhs )
 {
-   // reset the identifier of this object - resetIdComponent will call the 
-   // appropriate H5xclose to close the id
-    try {
-        resetIdComponent( this ); }
-    catch (Exception close_error) { // thrown by p_close
-        throw IdComponentException("IdComponent::operator=", close_error.getDetailMsg());
-    }
+   // reset the identifier of this object, call appropriate H5Xclose
+   decRefCount();
 
    // copy the data members from the rhs object
    id = rhs.id;
-   ref_count = rhs.ref_count; // points to the same ref counter
 
    // increment the reference counter
-   ref_count->increment();
+   H5Iinc_ref(id);
 
    return( *this );
 }
@@ -149,16 +126,9 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 void IdComponent::setId( hid_t new_id )
 {
    // reset the identifier of this object, call appropriate H5Xclose
-    try {
-        resetIdComponent( this ); }
-    catch (Exception close_error) { // thrown by p_close
-        throw IdComponentException("IdComponent::setId", close_error.getDetailMsg());
-    }
+   decRefCount();
 
    id = new_id;
-
-   // starts counting object references
-   ref_count = new RefCounter;
 }
 
 //--------------------------------------------------------------------------
@@ -170,17 +140,6 @@ void IdComponent::setId( hid_t new_id )
 hid_t IdComponent::getId () const
 {
    return( id );
-}
-
-//--------------------------------------------------------------------------
-// Function:	IdComponent::reset
-///\brief	Reset the reference counter of this object.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-void IdComponent::reset ()
-{
-   delete ref_count;
-   ref_count = NULL;
 }
 
 //--------------------------------------------------------------------------

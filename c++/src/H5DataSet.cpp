@@ -20,10 +20,8 @@
 #endif
 
 #include "H5Include.h"
-#include "H5RefCounter.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
-#include "H5Idtemplates.h"
 #include "H5PropList.h"
 #include "H5Object.h"
 #include "H5PropList.h"
@@ -506,8 +504,9 @@ DataSet::~DataSet()
 {
    // The dataset id will be closed properly 
     try {
-	resetIdComponent( this ); }
-    catch (Exception close_error) { // thrown by p_close
+        decRefCount();
+    }
+    catch (Exception close_error) {
         cerr << "DataSet::~DataSet - " << close_error.getDetailMsg() << endl;
     }
 }

@@ -20,10 +20,8 @@
 #endif
 
 #include "H5Include.h"
-#include "H5RefCounter.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
-#include "H5Idtemplates.h"
 #include "H5PropList.h"
 #include "H5Object.h"
 #include "H5FaccProp.h"
@@ -191,8 +189,9 @@ void H5File::reopen()
    // reset the identifier of this H5File - send 'this' in so that
    // H5Fclose can be called appropriately
     try {
-        resetIdComponent( this ); }
-    catch (Exception close_error) { // thrown by p_close
+        decRefCount();
+    }
+    catch (Exception close_error) {
         throw FileIException("H5File::reopen", close_error.getDetailMsg());
     }
 
@@ -200,9 +199,7 @@ void H5File::reopen()
    // does id need to be closed later?  which id to be the parameter?
    id = H5Freopen( id );
    if( id <= 0 ) // Raise exception when H5Freopen returns a neg value
-   {
       throw FileIException("H5File::reopen", "H5Freopen failed");
-   }
 }
 
 //--------------------------------------------------------------------------
@@ -532,8 +529,9 @@ H5File::~H5File()
 {  
    // The HDF5 file id will be closed properly
     try {
-        resetIdComponent( this ); }
-    catch (Exception close_error) { // thrown by p_close
+        decRefCount();
+    }
+    catch (Exception close_error) {
         cerr << "H5File::~H5File - " << close_error.getDetailMsg() << endl;
     }
 }  

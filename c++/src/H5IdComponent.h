@@ -29,10 +29,6 @@ class H5_DLLCPP IdComponent {
 	// before setting new id to control reference count
 	void setId( hid_t new_id );
 
-	// Pure virtual function so appropriate close function can
-	// be called by subclasses' for the corresponding object
-	virtual void p_close() const = 0;
-
 	// Creates an object to hold an HDF5 identifier
 	IdComponent( const hid_t h5_id );
 
@@ -51,10 +47,6 @@ class H5_DLLCPP IdComponent {
 	// Get the reference counter to this identifier
 	int getCounter();
 
-	// Decrements the reference counter then determines if there are no more
-	// reference to this object
-	bool noReference();
-
 	// Assignment operator
 	IdComponent& operator=( const IdComponent& rhs );
 
@@ -66,8 +58,6 @@ class H5_DLLCPP IdComponent {
 
    protected:
 	hid_t id;	// HDF5 object id
-	RefCounter* ref_count; // used to keep track of the
-	                              // number of copies of an object
 
 	// Default constructor
 	IdComponent();

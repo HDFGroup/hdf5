@@ -20,10 +20,8 @@
 #endif
 
 #include "H5Include.h"
-#include "H5RefCounter.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
-#include "H5Idtemplates.h"
 #include "H5PropList.h"
 #include "H5Object.h"
 #include "H5DataSpace.h"
@@ -99,22 +97,20 @@ void DataType::copy( const DataType& like_type )
 {
    // reset the identifier of this instance, H5Tclose will be called 
    // if needed 
-    try {
-        resetIdComponent( this ); }
-    catch (Exception close_error) { // thrown by p_close
-        throw DataTypeIException("DataType::copy", close_error.getDetailMsg());
+   if( is_predtype == false ) {
+        try {
+            decRefCount();
+        }
+        catch (Exception close_error) {
+            throw DataTypeIException("DataType::copy", close_error.getDetailMsg());
+        }
     }
 
    // call C routine to copy the datatype
    id = H5Tcopy( like_type.getId() );
 
-   // new reference counter for this id
-   ref_count = new RefCounter;
-
    if( id <= 0 )
-   {
       throw DataTypeIException("DataType::copy", "H5Tcopy failed");
-   }
 }
 
 //--------------------------------------------------------------------------
@@ -597,28 +593,6 @@ DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
 }
 
 //--------------------------------------------------------------------------
-// Function:    DataType::p_close (private)
-///\brief       Closes this datatype.
-///\exception   H5::DataTypeIException
-///\note
-///             This function will be obsolete because its functionality
-///             is recently handled by the C library layer.
-// Programmer   Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-void DataType::p_close() const
-{
-   // If this datatype is not a predefined type, call H5Tclose on it.
-   if( is_predtype == false )
-   {
-      herr_t ret_value = H5Tclose( id );
-      if( ret_value < 0 )
-      {
-         throw DataTypeIException(0, "H5Tclose failed");
-      }
-   }
-}
-
-//--------------------------------------------------------------------------
 // Function:    DataType destructor
 ///\brief       Properly terminates access to this datatype.
 // Programmer	Binh-Minh Ribler - 2000
@@ -626,10 +600,13 @@ void DataType::p_close() const
 DataType::~DataType()
 {  
    // The datatype id will be closed properly
-    try {
-        resetIdComponent( this ); }
-    catch (Exception close_error) { // thrown by p_close
-        cerr << "DataType::~DataType - " << close_error.getDetailMsg() << endl;
+   if( is_predtype == false ) {
+        try {
+            decRefCount();
+        }
+        catch (Exception close_error) {
+            cerr << "DataType::~DataType - " << close_error.getDetailMsg() << endl;
+        }
     }
 }  
 
