@@ -282,7 +282,7 @@ H5_DLL herr_t H5S_none_get_seq_list(const H5S_t *space, unsigned flags,
 H5_DLL herr_t H5S_mpio_spaces_read(H5F_t *f,
 				    const struct H5O_layout_t *layout,
                                     H5P_genplist_t *dc_plist,
-                                    const H5O_efl_t *efl,
+                                    const H5D_storage_t *store,
 				    size_t elmt_size, const H5S_t *file_space,
 				    const H5S_t *mem_space, hid_t dxpl_id,
 				    void *buf/*out*/);
@@ -291,7 +291,7 @@ H5_DLL herr_t H5S_mpio_spaces_read(H5F_t *f,
 H5_DLL herr_t H5S_mpio_spaces_write(H5F_t *f,
 				    struct H5O_layout_t *layout,
                                     H5P_genplist_t *dc_plist,
-                                    const H5O_efl_t *efl,
+                                    const H5D_storage_t *store,
 				    size_t elmt_size, const H5S_t *file_space,
 				    const H5S_t *mem_space, hid_t dxpl_id,
 				    const void *buf);
@@ -300,13 +300,6 @@ H5_DLL herr_t H5S_mpio_spaces_write(H5F_t *f,
  * memory and the file */
 H5_DLL htri_t H5S_mpio_opt_possible(const H5S_t *mem_space,
                                      const H5S_t *file_space, const unsigned flags);
-
-#ifndef _H5S_IN_H5S_C
-/* Global vars whose value comes from environment variable */
-/* (Defined in H5S.c) */
-H5_DLLVAR hbool_t		H5S_mpi_opt_types_g;
-H5_DLLVAR hbool_t		H5S_mpi_prefer_derived_types_g;
-#endif /* _H5S_IN_H5S_C */
 
 #endif /* H5_HAVE_PARALLEL */
 

@@ -5249,11 +5249,11 @@ test_scalar_select2(void)
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sselect_hyperslab");
 
-    /* Select no elements in memory & file with "none" selections */
+    /* Select no elements in memory & file with "none" selection */
     ret = H5Sselect_none(sid);
     CHECK(ret, FAIL, "H5Sselect_none");
     
-    /* Select no elements in memory & file with "none" selections */
+    /* Select all elements in memory & file with "all" selection */
     ret = H5Sselect_all(sid);
     CHECK(ret, FAIL, "H5Sselect_none");
 

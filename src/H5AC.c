@@ -793,7 +793,9 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
         /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
         if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
             H5AC_info_t       **dinfo;
+#ifdef H5AC_DEBUG
             H5AC_subid_t        type_id;
+#endif /* H5AC_DEBUG */
 #ifndef NDEBUG
             H5P_genplist_t *dxpl;           /* Dataset transfer property list */
             H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
@@ -824,7 +826,9 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
                     assert((*info)!=NULL);
                     assert((*info)->dirty==0);
 
+#ifdef H5AC_DEBUG
                     type_id=(*info)->type->id;  /* Remember this for later */
+#endif /* H5AC_DEBUG */
 
                     /* Destroy 'current' information */
                     dest = (*info)->type->dest;
@@ -916,7 +920,9 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
         /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
         if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
             H5AC_info_t       **dinfo;
+#ifdef H5AC_DEBUG
             H5AC_subid_t        type_id;
+#endif /* H5AC_DEBUG */
 #ifndef NDEBUG
             H5P_genplist_t *dxpl;           /* Dataset transfer property list */
             H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
@@ -944,7 +950,9 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
                 assert((*info)!=NULL);
                 assert((*info)->dirty==0);
 
+#ifdef H5AC_DEBUG
                 type_id=(*info)->type->id;  /* Remember this for later */
+#endif /* H5AC_DEBUG */
 
                 /* Destroy 'current' information */
                 dest = (*info)->type->dest;
@@ -1061,7 +1069,9 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
     /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
     if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
         H5AC_info_t       **dinfo;
+#ifdef H5AC_DEBUG
         H5AC_subid_t        type_id;
+#endif /* H5AC_DEBUG */
         H5P_genplist_t *dxpl;           /* Dataset transfer property list */
         H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
 
@@ -1087,7 +1097,9 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
                 assert((*info)!=NULL);
                 assert((*info)->dirty==0);
 
+#ifdef H5AC_DEBUG
                 type_id=(*info)->type->id;  /* Remember this for later */
+#endif /* H5AC_DEBUG */
 
                 /* Destroy 'current' information */
                 dest = (*info)->type->dest;
@@ -1230,7 +1242,9 @@ H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t old_addr,
     /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
     if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
         H5AC_info_t       **new_dinfo;
+#ifdef H5AC_DEBUG
         H5AC_subid_t        type_id;
+#endif /* H5AC_DEBUG */
         H5P_genplist_t *dxpl;           /* Dataset transfer property list */
         H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
 
@@ -1256,7 +1270,9 @@ H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t old_addr,
                 assert((*new_info)!=NULL);
                 assert((*new_info)->dirty==0);
 
+#ifdef H5AC_DEBUG
                 type_id=(*new_info)->type->id;  /* Remember this for later */
+#endif /* H5AC_DEBUG */
 
                 /* Destroy 'current' information */
                 dest = (*new_info)->type->dest;
@@ -1324,7 +1340,9 @@ H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t old_addr,
     /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
     if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
         H5AC_info_t       **old_dinfo;
+#ifdef H5AC_DEBUG
         H5AC_subid_t        type_id;
+#endif /* H5AC_DEBUG */
 
         /* Get pointer to new 'held' information */
         old_dinfo = cache->dslot + old_idx;
@@ -1334,7 +1352,9 @@ H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t old_addr,
             /* Sanity check */
             assert((*old_dinfo)->dirty);
 
+#ifdef H5AC_DEBUG
             type_id=(*old_info)->type->id;  /* Remember this for later */
+#endif /* H5AC_DEBUG */
 
             /* Restore 'held' information back to 'current' information */
             (*old_info)=(*old_dinfo);
@@ -1654,7 +1674,9 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
         /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
         if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
             H5AC_info_t       **dinfo;
+#ifdef H5AC_DEBUG
             H5AC_subid_t        type_id;
+#endif /* H5AC_DEBUG */
             H5P_genplist_t *dxpl;           /* Dataset transfer property list */
             H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
 
@@ -1680,7 +1702,9 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
                     assert((*info)!=NULL);
                     assert((*info)->dirty==0);
 
+#ifdef H5AC_DEBUG
                     type_id=(*info)->type->id;  /* Remember this for later */
+#endif /* H5AC_DEBUG */
 
                     /* Destroy 'current' information */
                     dest = (*info)->type->dest;

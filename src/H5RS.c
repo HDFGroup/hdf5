@@ -392,7 +392,7 @@ H5RS_len(const H5RS_str_t *rs)
     assert(rs);
     assert(rs->s);
 
-    ret_value=HDstrlen(rs->s);
+    ret_value=(ssize_t)HDstrlen(rs->s);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

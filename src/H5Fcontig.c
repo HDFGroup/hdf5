@@ -420,7 +420,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+ssize_t
 H5F_contig_readvv(H5F_t *f, hsize_t _max_data, haddr_t _addr,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],

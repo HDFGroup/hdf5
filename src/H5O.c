@@ -3250,7 +3250,7 @@ H5O_debug_id(hid_t type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *str
 
     /* Call the debug method in the class */
     if ((ret_value = (type->debug)(f, dxpl_id, mesg, stream, indent, fwidth))<0)
-        HGOTO_ERROR (H5E_OHDR, H5E_INTERNAL, FAIL, "unable to debug message");
+        HGOTO_ERROR (H5E_OHDR, H5E_BADTYPE, FAIL, "unable to debug message");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

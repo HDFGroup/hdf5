@@ -546,19 +546,19 @@ H5Gget_objtype_by_idx(hid_t group_id, hsize_t idx)
 {
     H5G_t		*group = NULL;
     hsize_t             num_objs;
-    H5G_obj_t		ret_value = H5G_UNKNOWN;
+    H5G_obj_t		ret_value;
     
-    FUNC_ENTER_API(H5Gget_objtype_by_idx, FAIL);
+    FUNC_ENTER_API(H5Gget_objtype_by_idx, H5G_UNKNOWN);
     H5TRACE2("Is","ih",group_id,idx);
 
     /* Check args */
     if (NULL==(group = H5I_object_verify(group_id,H5I_GROUP)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a group");
         
     if (H5G_get_num_objs(group, &num_objs, H5AC_ind_dxpl_id)<0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to retrieve number of members");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "unable to retrieve number of members");
     if(idx >= num_objs)    
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "index out of bound");
         
     /*call private function*/
     ret_value = H5G_get_objtype_by_idx(group, idx, H5AC_ind_dxpl_id);
@@ -2520,7 +2520,7 @@ H5G_get_objname_by_idx(H5G_t *grp, hsize_t idx, char* name, size_t size, hid_t d
               H5G_node_name, grp->ent.cache.stab.btree_addr, &udata))<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed");
     
-    ret_value = HDstrlen(udata.name);
+    ret_value = (ssize_t)HDstrlen(udata.name);
     if(name && size>0) {
         HDstrncpy(name, udata.name, MIN((size_t)(ret_value+1),size-1));
         if((size_t)ret_value >= size)

@@ -432,7 +432,8 @@ H5HP_count(const H5HP_t *heap)
     assert(heap->heap[0].obj==NULL);
 
     /* Return the number of objects in the heap */
-    ret_value=heap->nobjs;
+    H5_CHECK_OVERFLOW(heap->nobjs,size_t,ssize_t);
+    ret_value=(ssize_t)heap->nobjs;
 
 done:
     /* No post-condition check necessary, since heap is constant */

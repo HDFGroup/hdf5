@@ -484,20 +484,20 @@ H5Pget_edc_check(hid_t plist_id)
     H5P_genplist_t *plist;      /* Property list pointer */
     H5Z_EDC_t      ret_value;   /* return value */
     
-    FUNC_ENTER_API(H5Pget_edc_check, FAIL);
+    FUNC_ENTER_API(H5Pget_edc_check, H5Z_ERROR_EDC);
     H5TRACE1("Ze","i",plist_id);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5Z_ERROR_EDC, "can't find object for ID");
 
     /* Update property list */
     if (H5P_get(plist,H5D_XFER_EDC_NAME,&ret_value)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, H5Z_ERROR_EDC, "unable to set value");
 
     /* check valid value */
     if (ret_value != H5Z_ENABLE_EDC && ret_value != H5Z_DISABLE_EDC)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid value");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_ERROR_EDC, "not a valid value");
 
 done:
     FUNC_LEAVE_API(ret_value);

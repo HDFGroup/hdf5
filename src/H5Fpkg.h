@@ -213,7 +213,7 @@ H5_DLL herr_t H5F_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * str
 				int indent, int fwidth, int ndims);
 
 /* Functions that operate on contiguous storage wrt boot block */
-H5_DLL herr_t H5F_contig_readvv(H5F_t *f, hsize_t _max_data, haddr_t _addr,
+H5_DLL ssize_t H5F_contig_readvv(H5F_t *f, hsize_t _max_data, haddr_t _addr,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     hid_t dxpl_id, void *buf);

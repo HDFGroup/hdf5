@@ -870,9 +870,9 @@ H5Rget_obj_type(hid_t id, H5R_type_t ref_type, void *_ref)
 
     /* Check args */
     if (NULL == (loc = H5G_loc(id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a location");
     if(ref_type<=H5R_BADTYPE || ref_type>=H5R_MAXTYPE)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type");
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, H5G_UNKNOWN, "invalid reference type");
     if(_ref==NULL)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, H5G_UNKNOWN, "invalid reference pointer");
 

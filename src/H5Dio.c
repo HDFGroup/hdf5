@@ -62,11 +62,6 @@ typedef struct fm_map {
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT NULL 
 
-#ifdef H5_HAVE_PARALLEL
-/* Global vars whose value can be set from environment variable also */
-extern hbool_t H5S_mpi_opt_types_g;
-#endif /* H5_HAVE_PARALLEL */
-
 /* Local functions */
 static herr_t H5D_read(H5D_t *dataset, const H5T_t *mem_type,
 			const H5S_t *mem_space, const H5S_t *file_space,
@@ -538,7 +533,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* Collect Parallel I/O information for possible later use */
     if (H5FD_MPIO==H5P_peek_hid_t(dx_plist,H5D_XFER_VFL_ID_NAME)) {
 	doing_mpio++;
-        xfer_mode=H5P_peek_unsigned(dx_plist, H5D_XFER_IO_XFER_MODE_NAME);
+        xfer_mode=(H5FD_mpio_xfer_t)H5P_peek_unsigned(dx_plist, H5D_XFER_IO_XFER_MODE_NAME);
     } /* end if */
     /* Collective access is not permissible without the MPIO or MPIPOSIX driver */
     if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE &&
@@ -777,7 +772,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* Collect Parallel I/O information for possible later use */
     if (H5FD_MPIO==H5P_peek_hid_t(dx_plist,H5D_XFER_VFL_ID_NAME)) {
 	doing_mpio++;
-        xfer_mode=H5P_peek_unsigned(dx_plist, H5D_XFER_IO_XFER_MODE_NAME);
+        xfer_mode=(H5FD_mpio_xfer_t)H5P_peek_unsigned(dx_plist, H5D_XFER_IO_XFER_MODE_NAME);
     } /* end if */
     
     /* Collective access is not permissible without the MPIO or MPIPOSIX driver */
@@ -2100,7 +2095,6 @@ H5D_chunk_mem_file_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_
     hbool_t iter_init=0;        /* Selection iteration info has been initialized */
     unsigned f_ndims;           /* The number of dimensions of the file's dataspace */
     int sm_ndims;               /* The number of dimensions of the memory buffer's dataspace (signed) */
-    unsigned m_ndims;           /* The number of dimensions of the memory buffer's dataspace */
     hsize_t f_dims[H5O_LAYOUT_NDIMS];   /* Dimensionality of file dataspace */
     char bogus;                         /* "bogus" buffer to pass to selection iterator */
     unsigned u;                         /* Local index variable */
@@ -2127,7 +2121,7 @@ H5D_chunk_mem_file_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_
     f_ndims=dataset->layout.ndims-1;
     if((sm_ndims = H5S_get_simple_extent_ndims(tmp_mspace))<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number");
-    fm->m_ndims=m_ndims=sm_ndims;
+    fm->m_ndims=sm_ndims;
 
     if(H5S_get_simple_extent_dims(file_space, f_dims, NULL)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality");

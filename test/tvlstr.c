@@ -440,7 +440,6 @@ static void
 test_compact_vlstring(void)
 {
     const char *wdata[SPACE1_DIM1] = {"one", "two", "three", "four"};
-    const char *wdata2[SPACE1_DIM1] = {NULL, NULL, NULL, NULL};
     char *rdata[SPACE1_DIM1];   /* Information read in */
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/

@@ -220,4 +220,13 @@ H5_DLL hsize_t H5S_select_iter_nelmts(const H5S_sel_iter_t *sel_iter);
 H5_DLL herr_t H5S_select_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 H5_DLL herr_t H5S_select_iter_release(H5S_sel_iter_t *sel_iter);
 
+#ifdef H5_HAVE_PARALLEL
+#ifndef _H5S_IN_H5S_C
+/* Global vars whose value comes from environment variable */
+/* (Defined in H5S.c) */
+H5_DLLVAR hbool_t		H5S_mpi_opt_types_g;
+H5_DLLVAR hbool_t		H5S_mpi_prefer_derived_types_g;
+#endif /* _H5S_IN_H5S_C */
+#endif /* H5_HAVE_PARALLEL */
+
 #endif /* _H5Sprivate_H */

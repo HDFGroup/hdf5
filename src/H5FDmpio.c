@@ -1065,10 +1065,9 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Check for debug commands in the info parameter */
     {
 	char debug_str[128];
-        int infoerr, flag, i;
+        int flag, i;
         if (MPI_INFO_NULL != info_dup) {
-            infoerr = MPI_Info_get(fa->info, H5F_MPIO_DEBUG_KEY, 127,
-				   debug_str, &flag);
+            MPI_Info_get(fa->info, H5F_MPIO_DEBUG_KEY, 127, debug_str, &flag);
             if (flag) {
                 fprintf(stdout, "H5FD_mpio debug flags=%s\n", debug_str );
                 for (i=0;
@@ -1514,7 +1513,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if (H5FD_MPIO==H5P_get_driver(plist)) {
         /* Get the transfer mode */
-        xfer_mode=H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
+        xfer_mode=(H5FD_mpio_xfer_t)H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
     } /* end if */
     
     /*
@@ -1821,7 +1820,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if (H5FD_MPIO==H5P_get_driver(plist)) {
         /* Get the transfer mode */
-        xfer_mode=H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
+        xfer_mode=(H5FD_mpio_xfer_t)H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
     } /* end if */
     
     /*

@@ -193,7 +193,7 @@ H5F_seq_readvv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
 #endif /* H5_HAVE_PARALLEL */
-    herr_t      ret_value = SUCCEED;            /* Return value */
+    ssize_t ret_value;            /* Return value */
    
     FUNC_ENTER_NOAPI(H5F_seq_readvv, FAIL);
 
@@ -229,7 +229,7 @@ H5F_seq_readvv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
         /* Check if we are using the MPIO driver (for the DXPL) */
         if(H5FD_MPIO==driver_id) {
             /* Get the transfer mode */
-            xfer_mode=H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
+            xfer_mode=(H5FD_mpio_xfer_t)H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
         } /* end if */
     } /* end if */
 
@@ -373,7 +373,7 @@ H5F_seq_writevv(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
         /* Check if we are using the MPIO driver (for the DXPL) */
         if(H5FD_MPIO==driver_id) {
             /* Get the transfer mode */
-            xfer_mode=H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
+            xfer_mode=(H5FD_mpio_xfer_t)H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
         } /* end if */
     } /* end if */
 
