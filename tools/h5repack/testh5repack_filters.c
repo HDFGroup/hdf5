@@ -108,19 +108,16 @@ int make_filters(hid_t loc_id)
  * SZIP
  *-------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_FILTER_SZIP
  /* set szip data */
  if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
   goto out;
  if (make_dset(loc_id,"dset_szip",sid,dcpl,buf)<0)
   goto out;
-#endif
 
 /*-------------------------------------------------------------------------
  * GZIP
  *-------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_FILTER_DEFLATE
  /* remove the filters from the dcpl */
  if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
   goto out;
@@ -129,7 +126,6 @@ int make_filters(hid_t loc_id)
   goto out;
  if (make_dset(loc_id,"dset_gzip",sid,dcpl,buf)<0)
   goto out;
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -171,11 +167,9 @@ int make_filters(hid_t loc_id)
  /* set the checksum filter */
  if (H5Pset_fletcher32(dcpl)<0) 
   goto out;
-#ifdef H5_HAVE_FILTER_SZIP
  /* set szip data */
  if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
   goto out;
-#endif
  if (make_dset(loc_id,"dset_all",sid,dcpl,buf)<0)
   goto out;
 
