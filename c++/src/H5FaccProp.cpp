@@ -277,6 +277,7 @@ void FileAccPropList::setSplit( FileAccPropList& meta_plist, FileAccPropList& ra
    setSplit( meta_plist, raw_plist, meta_ext.c_str(), raw_ext.c_str() );
 }
 
+#ifdef H5_HAVE_STREAM // for Stream Virtual File Driver
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::getStream
 ///\brief	Retrieves the streaming I/O driver settings
@@ -316,6 +317,7 @@ void FileAccPropList::setStream(H5FD_stream_fapl_t &fapl) const
       throw PropListIException("FileAccPropList::setStream", "H5Pset_fapl_stream failed");
    }
 }
+#endif // Stream Virtual File Driver
 
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::getSieveBufSize
