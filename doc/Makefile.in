@@ -27,17 +27,19 @@ tests TAGS dep depend:
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
 
-$(docdir):
-	mkdir $@ && chmod 755 $@
-
-install-doc: $(docdir)
-	@@SETX@; for d in $(SUBDIRS); do				      \
-	   (cd $$d && $(MAKE) $@) || exit 1;				      \
+install-doc:
+	@if test -d $(DOCDIR) ; then                                          \
+           :;                                                                 \
+        else                                                                  \
+	   mkdir $(DOCDIR) && chmod 755 $(DOCDIR);                            \
+	fi
+	@@SETX@; for d in $(SUBDIRS); do                                      \
+	   (cd $$d && $(MAKE) $@) || exit 1;                                  \
 	done
 
 uninstall-doc:
-	@@SETX@; for d in $(SUBDIRS); do				      \
-	   (cd $$d && $(MAKE) $@) || exit 1;				      \
+	@@SETX@; for d in $(SUBDIRS); do                                      \
+	   (cd $$d && $(MAKE) $@) || exit 1;                                  \
 	done
 
 .PHONY: all lib progs test _test install uninstall dep depend clean           \
