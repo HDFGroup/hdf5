@@ -72,6 +72,7 @@
 ./config/solaris2.x
 ./config/unicos
 ./config/unicosmk
+./config/unicosmk2.0.X
 
 ./config/site-specific/BlankForm
 
@@ -175,6 +176,7 @@
 ./doc/html/TechNotes/VFL.html
 ./doc/html/TechNotes/VFLfunc.html
 ./doc/html/TechNotes/openmp-hdf5.html
+./doc/html/TechNotes/openmp-hdf5.c
 ./doc/html/TechNotes/pipe1.gif
 ./doc/html/TechNotes/pipe1.obj
 ./doc/html/TechNotes/pipe2.gif
@@ -334,6 +336,7 @@
 ./fortran/config/solaris2.x
 ./fortran/config/unicos
 ./fortran/config/unicosmk
+./fortran/config/unicosmk2.0.X
 
 ./fortran/examples/Dependencies
 ./fortran/examples/Makefile.in
@@ -806,6 +809,7 @@
 ./tools/testfiles/tarray3.h5
 ./tools/testfiles/tarray4.ddl
 ./tools/testfiles/tarray4.h5
+./tools/testfiles/tarray5.ddl
 ./tools/testfiles/tarray5.h5
 ./tools/testfiles/tarray6.ddl
 ./tools/testfiles/tarray6.h5
