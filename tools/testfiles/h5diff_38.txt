@@ -1,8 +1,0 @@
-#############################
-Expected output for 'h5diff file4.h5 file4.h5 integer float'
-#############################
-$h5diff file4.h5 file4.h5 integer float
-Comparison not supported
-</integer> is of class H5T_INTEGER and </float> is of class H5T_FLOAT
-
-

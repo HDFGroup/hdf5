@@ -1,8 +1,0 @@
-#############################
-Expected output for 'h5diff file4.h5 file4.h5 vlen'
-#############################
-$h5diff file4.h5 file4.h5 vlen
-Comparison not supported
-</vlen> is of class H5T_VLEN and </vlen> is of class H5T_VLEN
-
-

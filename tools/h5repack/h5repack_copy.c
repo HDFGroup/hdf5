@@ -19,6 +19,96 @@
 #include "H5private.h"
 #include "h5repack.h"
 
+#if 0
+#define PRINT_DEBUG
+#endif
+
+/*-------------------------------------------------------------------------
+ * Function: print_obj
+ *
+ * Purpose: print name and filters of an object 
+ *
+ *-------------------------------------------------------------------------
+ */
+static void print_obj(hid_t dcpl, char *name)
+{
+ char         str[255]; 
+#if defined (PRINT_DEBUG )
+ char         temp[255];  
+#endif 
+ int          nfilters;       /* number of filters */
+ unsigned     filt_flags;     /* filter flags */
+ H5Z_filter_t filtn;          /* filter identification number */
+ unsigned     cd_values[20];  /* filter client data values */
+ size_t       cd_nelmts;      /* filter client number of values */
+ char         f_name[256];    /* filter name */
+ int          i;
+
+ strcpy(str,"\0");
+
+ /* get information about input filters */
+ if ((nfilters = H5Pget_nfilters(dcpl))<0) 
+  return;
+
+ for ( i=0; i<nfilters; i++)
+ {
+  cd_nelmts = NELMTS(cd_values);
+  filtn = H5Pget_filter(dcpl, 
+   (unsigned)i, 
+   &filt_flags, 
+   &cd_nelmts,
+   cd_values, 
+   sizeof(f_name), 
+   f_name);
+  switch (filtn)
+  {
+  default:
+   break;
+  case H5Z_FILTER_DEFLATE:
+   strcat(str,"GZIP ");
+
+#if defined (PRINT_DEBUG)
+   {
+    unsigned level=cd_values[0]; 
+    sprintf(temp,"(%d)",level);
+    strcat(str,temp);
+   }
+#endif
+
+   break;
+  case H5Z_FILTER_SZIP:
+   strcat(str,"SZIP ");
+
+#if defined (PRINT_DEBUG)
+   {
+    unsigned options_mask=cd_values[0]; /* from dcpl, not filt*/
+    unsigned ppb=cd_values[1]; 
+    sprintf(temp,"(%d,",ppb);
+    strcat(str,temp);
+    if (options_mask & H5_SZIP_EC_OPTION_MASK) 
+     strcpy(temp,"EC) ");
+    else if (options_mask & H5_SZIP_NN_OPTION_MASK) 
+     strcpy(temp,"NN) ");
+   }
+   strcat(str,temp);
+
+#endif
+
+   break;
+  case H5Z_FILTER_SHUFFLE:
+   strcat(str,"SHUF ");
+   break;
+  case H5Z_FILTER_FLETCHER32:
+   strcat(str,"FLET ");
+   break;
+  } /* switch */
+ }/*i*/
+
+ printf(" %-10s %s %s\n", "dataset",str,name );
+
+}
+
+
 /*-------------------------------------------------------------------------
  * Function: copy_objects
  *
@@ -112,46 +202,6 @@ out:
 }
 
 
-/*-------------------------------------------------------------------------
- * Function: print_obj
- *
- * Purpose: print name and filters of an object 
- *
- *-------------------------------------------------------------------------
- */
-
-
-void print_obj(pack_info_t *obj, char *name)
-{
- char str[26]; /*5x5+1*/
- int i;
-
- strcpy(str,"\0");
-
- for ( i=0; i<obj->nfilters; i++)
- {
-  switch (obj->filter[i].filtn)
-  {
-  default:
-   break;
-  case H5Z_FILTER_DEFLATE:
-   strcat(str,"GZIP ");
-   break;
-  case H5Z_FILTER_SZIP:
-   strcat(str,"SZIP ");
-   break;
-  case H5Z_FILTER_SHUFFLE:
-   strcat(str,"SHUF ");
-   break;
-  case H5Z_FILTER_FLETCHER32:
-   strcat(str,"FLET ");
-   break;
-  } /* switch */
- }/*i*/
-
- printf(" %-10s %s %s\n", "dataset",str,name );
-
-}
 
 
 /*-------------------------------------------------------------------------
@@ -262,9 +312,6 @@ int do_copy_objects(hid_t fidin,
    if ((msize=H5Tget_size(mtype_id))==0)
     goto error;
 
-   if (options->verbose)
-    print_filters(dcpl_id);
-
 /*-------------------------------------------------------------------------
  * check for external files
  *-------------------------------------------------------------------------
@@ -370,7 +417,7 @@ int do_copy_objects(hid_t fidin,
      free(buf);
 
     if (options->verbose && wrote)
-     print_obj(&obj,travt->objs[i].name );
+     print_obj(dcpl_id,travt->objs[i].name );
 
 
     

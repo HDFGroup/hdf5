@@ -122,8 +122,6 @@ int apply_filters(const char* name,    /* object name from traverse list */
  unsigned     aggression;     /* the deflate level */
  hsize_t      nelmts;         /* number of elements in dataset */
  size_t       size;           /* size of datatype in bytes */
- unsigned     szip_options_mask=H5_SZIP_NN_OPTION_MASK;
- unsigned     szip_pixels_per_block;
  int          i;
 
  /* check first if the object is to be filtered */
@@ -205,15 +203,23 @@ int apply_filters(const char* name,    /* object name from traverse list */
  *-------------------------------------------------------------------------
  */
   case H5Z_FILTER_SZIP:
-   szip_pixels_per_block=obj->filter[i].cd_values[0];
+   {
+    unsigned  options_mask;
+    unsigned  pixels_per_block;
 
+    pixels_per_block=obj->filter[i].cd_values[0];
+    if (obj->filter[i].szip_coding==0)
+     options_mask=H5_SZIP_NN_OPTION_MASK;
+    else 
+     options_mask=H5_SZIP_EC_OPTION_MASK;
+ 
 #if defined (CHECK_SZIP)
    /* check szip parameters */
    if (check_szip(type_id,
     obj->chunk.rank,
     obj->chunk.chunk_lengths,
-    szip_options_mask,
-    &szip_pixels_per_block,
+    options_mask,
+    &pixels_per_block,
     options)==1)
    {
 #endif
@@ -221,8 +227,9 @@ int apply_filters(const char* name,    /* object name from traverse list */
     /* set up for szip data */
     if(H5Pset_chunk(dcpl_id,obj->chunk.rank,obj->chunk.chunk_lengths)<0)
      return -1;
-    if (H5Pset_szip(dcpl_id, szip_options_mask, szip_pixels_per_block)<0) 
+    if (H5Pset_szip(dcpl_id,options_mask,pixels_per_block)<0) 
      return -1;
+
 
 #if defined (CHECK_SZIP)
    }
@@ -234,6 +241,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
 #endif
 
 
+   }
    break;
 
 /*-------------------------------------------------------------------------
@@ -291,7 +299,7 @@ int print_filters(hid_t dcpl_id)
  unsigned     cd_values[20];  /* filter client data values */
  size_t       cd_nelmts;      /* filter client number of values */
  size_t       cd_num;         /* filter client data counter */
- char         f_name[256];    /* filter/file name */
+ char         f_name[256];    /* filter name */
  char         s[64];          /* temporary string buffer */
  int          i;
 
@@ -324,6 +332,9 @@ int print_filters(hid_t dcpl_id)
  
  return 0;
 }
+
+
+#if defined (CHECK_SZIP)
 
 
 /*-------------------------------------------------------------------------
@@ -547,4 +558,7 @@ int check_szip_params( unsigned bits_per_pixel,
  
  return 1;
 }
+
+#endif /* CHECK_SZIP */
+
 

@@ -102,23 +102,29 @@ TOOLTEST() {
 # 1.0
 TOOLTEST h5diff_10.txt -h
 
-# 1.1
-TOOLTEST h5diff_11.txt  file1.h5 file2.h5  g1/dset1 g1/dset2
+# 1.1 normal mode
+TOOLTEST h5diff_11.txt  file1.h5 file2.h5 
 
-# 1.2
-TOOLTEST h5diff_12.txt file1.h5 file2.h5 -v -n 2 g1/dset1 g1/dset2
+# 1.2 normal mode with objects
+TOOLTEST h5diff_12.txt  file1.h5 file2.h5  g1/dset1 g1/dset2
 
-# 1.3
-TOOLTEST h5diff_13.txt file1.h5 file2.h5 -v -d 5 g1/dset3 g1/dset4
+# 1.3 report mode
+TOOLTEST h5diff_13.txt file1.h5 file2.h5 -r
 
-# 1.4
-TOOLTEST h5diff_14.txt file1.h5 file2.h5 -v -p 0.05 g1/dset3 g1/dset4
+# 1.4 report  mode with objects
+TOOLTEST h5diff_14.txt  file1.h5 file2.h5  -r g1/dset1 g1/dset2
 
-# 1.5
-TOOLTEST h5diff_15.txt file1.h5 file2.h5 -v -r g1/dset1 g1/dset2
+# 1.5 with -d
+TOOLTEST h5diff_15.txt file1.h5 file2.h5 -r -d 5 g1/dset3 g1/dset4
 
-# 1.6
-TOOLTEST h5diff_16.txt file1.h5 file2.h5 
+# 1.6 with -p
+TOOLTEST h5diff_16.txt file1.h5 file2.h5 -r -p 0.05 g1/dset3 g1/dset4
+
+# 1.7 verbose mode
+TOOLTEST h5diff_17.txt file1.h5 file2.h5 -v  
+
+# 1.8 quiet mode 
+TOOLTEST h5diff_18.txt file1.h5 file2.h5 -q
 
 # ##############################################################################
 # # not comparable types
@@ -190,31 +196,31 @@ TOOLTEST h5diff_601.txt file1.h5 file2.h5 -x
 # ##############################################################################
 
 # 6.2: no value
-TOOLTEST h5diff_602.txt file1.h5 file2.h5 -d g1/dset3 g1/dset4
+TOOLTEST h5diff_602.txt file1.h5 file2.h5  -d g1/dset3 g1/dset4
 
 # 6.3: negative value
-TOOLTEST h5diff_603.txt file1.h5 file2.h5 -d -4 g1/dset3 g1/dset4
+TOOLTEST h5diff_603.txt file1.h5 file2.h5  -d -4 g1/dset3 g1/dset4
 
 # 6.4: zero
-TOOLTEST h5diff_604.txt file1.h5 file2.h5 -d 0 g1/dset3 g1/dset4
+TOOLTEST h5diff_604.txt file1.h5 file2.h5  -d 0 g1/dset3 g1/dset4
 
 # 6.5: non number
-TOOLTEST h5diff_605.txt file1.h5 file2.h5 -d u g1/dset3 g1/dset4
+TOOLTEST h5diff_605.txt file1.h5 file2.h5  -d u g1/dset3 g1/dset4
 
 # 6.6: hexadecimal
 TOOLTEST h5diff_606.txt file1.h5 file2.h5 -d 0x1 g1/dset3 g1/dset4
 
 # 6.7: string
-TOOLTEST h5diff_607.txt file1.h5 file2.h5 -d "1" g1/dset3 g1/dset4
+TOOLTEST h5diff_607.txt file1.h5 file2.h5  -d "1" g1/dset3 g1/dset4
 
 # 6.8: repeated option
-TOOLTEST h5diff_608.txt file1.h5 file2.h5 -d 1 -d 2 g1/dset3 g1/dset4
+TOOLTEST h5diff_608.txt file1.h5 file2.h5  -d 1 -d 2 g1/dset3 g1/dset4
 
 # 6.9: number larger than biggest difference
-TOOLTEST h5diff_609.txt file1.h5 file2.h5 -d 200 g1/dset3 g1/dset4
+TOOLTEST h5diff_609.txt file1.h5 file2.h5  -d 200 g1/dset3 g1/dset4
 
 # 6.10: number smaller than smallest difference
-TOOLTEST h5diff_610.txt file1.h5 file2.h5 -d 1 g1/dset3 g1/dset4
+TOOLTEST h5diff_610.txt file1.h5 file2.h5  -d 1 g1/dset3 g1/dset4
 
 
 # ##############################################################################
@@ -223,7 +229,7 @@ TOOLTEST h5diff_610.txt file1.h5 file2.h5 -d 1 g1/dset3 g1/dset4
 
 
 # 6.11: no value
-TOOLTEST h5diff_611.txt file1.h5 file2.h5 -p g1/dset3 g1/dset4
+TOOLTEST h5diff_611.txt file1.h5 file2.h5 -r -p g1/dset3 g1/dset4
 
 # 6.12: negative value
 TOOLTEST h5diff_612.txt file1.h5 file2.h5 -p -4 g1/dset3 g1/dset4
@@ -293,13 +299,13 @@ TOOLTEST h5diff_629.txt file1.h6 file2.h6
 # # attributes
 # ##############################################################################
 
-TOOLTEST h5diff_70.txt file5.h5 file6.h5
+TOOLTEST h5diff_70.txt file5.h5 file6.h5 -v
 
 # ##############################################################################
 # # all dataset datatypes
 # ##############################################################################
 
-TOOLTEST h5diff_80.txt file7.h5 file8.h5
+TOOLTEST h5diff_80.txt file7.h5 file8.h5 -v
 
 
 

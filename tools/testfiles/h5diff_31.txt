@@ -1,8 +1,0 @@
-#############################
-Expected output for 'h5diff file4.h5 file4.h5 bitfield'
-#############################
-$h5diff file4.h5 file4.h5 bitfield
-Comparison not supported
-</bitfield> is of class H5T_BITFIELD and </bitfield> is of class H5T_BITFIELD
-
-

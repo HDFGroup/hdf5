@@ -51,14 +51,18 @@
  */
 
 typedef struct {
- int    r;       /* report only what objects differ */
- int    d;       /* delta */
- double delta;   /* delta value */
- int    p;       /* relative error */
- double percent; /* relative error value */
- int    n;       /* count */
- int    count;   /* count value */
- int    verbose; /* print information */
+ int    m_quiet;   /* quiet mide: no output at all */
+ int    m_report;  /* report mode: print the data */
+ int    m_verbose; /* verbose mode: print the data, list of objcets, warnings */
+ int    d;         /* delta, absolute value to compare */
+ double delta;     /* delta value */
+ int    p;         /* relative error to compare*/
+ double percent;   /* relative error value */
+ int    n;         /* count, compare up to count */
+ int    count;     /* count value */
+ int    err_stat;  /* an error ocurred (1, error, 0, no error) */
+ int    cmn_objs;  /* do we have comparable objects */
+
 } diff_opt_t;
 
 
@@ -72,11 +76,11 @@ typedef struct {
 extern "C" {
 #endif
 
-int  h5diff(const char *fname1, 
-            const char *fname2, 
-            const char *objname1, 
-            const char *objname2, 
-            diff_opt_t *options);
+hsize_t  h5diff(const char *fname1, 
+                const char *fname2, 
+                const char *objname1, 
+                const char *objname2, 
+                diff_opt_t *options);
 
 
 #ifdef __cplusplus
@@ -91,56 +95,56 @@ int  h5diff(const char *fname1,
  */
 
 
-int diff_dataset( hid_t file1_id, 
-                  hid_t file2_id, 
-                  const char *obj1_name, 
-                  const char *obj2_name,
-                  diff_opt_t *options );
+hsize_t diff_dataset( hid_t file1_id, 
+                      hid_t file2_id, 
+                      const char *obj1_name, 
+                      const char *obj2_name,
+                      diff_opt_t *options );
 
-int diff_datasetid( hid_t dset1_id, 
-                    hid_t dset2_id, 
-                    const char *obj1_name, 
-                    const char *obj2_name, 
+hsize_t diff_datasetid( hid_t dset1_id, 
+                        hid_t dset2_id, 
+                        const char *obj1_name, 
+                        const char *obj2_name, 
+                        diff_opt_t *options );
+
+hsize_t diff( hid_t      file1_id, 
+              const char *path1, 
+              hid_t      file2_id, 
+              const char *path2, 
+              diff_opt_t *options, 
+              H5G_obj_t1  type );
+
+hsize_t diff_compare( hid_t file1_id, 
+                      const char *file1_name, 
+                      const char *obj1_name, 
+                      int nobjects1, 
+                      trav_info_t *info1,
+                      hid_t file2_id, 
+                      const char *file2_name, 
+                      const char *obj2_name, 
+                      int nobjects2, 
+                      trav_info_t *info2,
+                      diff_opt_t *options );
+
+hsize_t diff_match( hid_t file1_id, 
+                    int nobjects1, 
+                    trav_info_t *info1,
+                    hid_t file2_id, 
+                    int nobjects2, 
+                    trav_info_t *info2, 
                     diff_opt_t *options );
 
-int diff( hid_t      file1_id, 
-          const char *path1, 
-          hid_t      file2_id, 
-          const char *path2, 
-          diff_opt_t *options, 
-          H5G_obj_t1  type );
-
-int diff_compare( hid_t file1_id, 
-                  const char *file1_name, 
-                  const char *obj1_name, 
-                  int nobjects1, 
-                  trav_info_t *info1,
-                  hid_t file2_id, 
-                  const char *file2_name, 
-                  const char *obj2_name, 
-                  int nobjects2, 
-                  trav_info_t *info2,
-                  diff_opt_t *options );
-
-int diff_match( hid_t file1_id, 
-                int nobjects1, 
-                trav_info_t *info1,
-                hid_t file2_id, 
-                int nobjects2, 
-                trav_info_t *info2, 
-                diff_opt_t *options );
-
-int diff_array( void *_mem1, 
-                void *_mem2, 
-                hsize_t nelmts, 
-                int rank, 
-                hsize_t *dims, 
-                diff_opt_t *options, 
-                const char *name1, 
-                const char *name2,
-                hid_t m_type,
-                hid_t container1_id,
-                hid_t container2_id); /* dataset where the reference came from*/
+hsize_t diff_array( void *_mem1, 
+                    void *_mem2, 
+                    hsize_t nelmts, 
+                    int rank, 
+                    hsize_t *dims, 
+                    diff_opt_t *options, 
+                    const char *name1, 
+                    const char *name2,
+                    hid_t m_type,
+                    hid_t container1_id,
+                    hid_t container2_id); /* dataset where the reference came from*/
 
 
 int diff_can_type( hid_t       f_type1, /* file data type */ 
@@ -169,6 +173,7 @@ int diff_attr(hid_t      loc1_id,
  *-------------------------------------------------------------------------
  */
 
+void        print_found(hsize_t nfound);
 void        print_type(hid_t type);
 const char* diff_basename(const char *name);
 const char* get_type(int type);
@@ -184,15 +189,52 @@ void        print_pos( int        *ph,
                        const char *obj1, 
                        const char *obj2 );
 
+int print_objname(diff_opt_t *options, hsize_t nfound);
+
+
 #if defined (H5DIFF_DEBUG)
 void print_sizes( const char *obj1, const char *obj2,
  hid_t f_type1, hid_t f_type2,
  hid_t m_type1, hid_t m_type2 );
 #endif
 
-#ifdef NOT_YET
-void diff_list( const char *filename, int nobjects, trav_info_t *info );
-#endif /* NOT_YET */
+
+hsize_t diff_native_uchar(unsigned char *mem1,
+                          unsigned char *mem2,
+                          hsize_t       i, 
+                          int           rank, 
+                          hsize_t       *acc,  
+                          hsize_t       *pos,
+                          diff_opt_t    *options, 
+                          const char    *obj1, 
+                          const char    *obj2,
+                          int           *ph);
+
+
+hsize_t diff_char(unsigned char *mem1,
+                  unsigned char *mem2,
+                  hsize_t       i, 
+                  int           rank, 
+                  hsize_t       *acc,  
+                  hsize_t       *pos,
+                  diff_opt_t    *options, 
+                  const char    *obj1, 
+                  const char    *obj2,
+                  int           *ph);
+
+hsize_t diff_datum(void       *_mem1, 
+                   void       *_mem2, 
+                   hid_t      m_type,
+                   hsize_t    i, 
+                   int        rank, 
+                   hsize_t    *acc,  
+                   hsize_t    *pos, 
+                   diff_opt_t *options, 
+                   const char *obj1, 
+                   const char *obj2,
+                   hid_t      container1_id,
+                   hid_t      container2_id, /*where the reference came from*/
+                   int        *ph);           /*print header */ 
 
 
 

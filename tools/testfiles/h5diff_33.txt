@@ -1,8 +1,0 @@
-#############################
-Expected output for 'h5diff file4.h5 file4.h5 compound'
-#############################
-$h5diff file4.h5 file4.h5 compound
-Comparison not supported
-</compound> is of class H5T_COMPOUND and </compound> is of class H5T_COMPOUND
-
-

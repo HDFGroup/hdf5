@@ -586,7 +586,7 @@ int make_fletcher32(hid_t loc_id)
 
 
 /*-------------------------------------------------------------------------
- * checksum
+ * fletcher32
  *-------------------------------------------------------------------------
  */
 #if defined (H5_HAVE_FILTER_FLETCHER32)
@@ -625,7 +625,7 @@ out:
 /*-------------------------------------------------------------------------
  * Function: make_all
  *
- * Purpose: make a dataset with the all filters
+ * Purpose: make a file with all filters
  *
  *-------------------------------------------------------------------------
  */
@@ -681,6 +681,69 @@ int make_all(hid_t loc_id)
 
  if (make_dset(loc_id,"dset_all",sid,dcpl,buf)<0)
   goto out;
+
+/*-------------------------------------------------------------------------
+ * fletcher32
+ *-------------------------------------------------------------------------
+ */
+#if defined (H5_HAVE_FILTER_FLETCHER32)
+ /* remove the filters from the dcpl */
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+  goto out;
+ /* set the checksum filter */
+ if (H5Pset_fletcher32(dcpl)<0) 
+  goto out;
+ if (make_dset(loc_id,"dset_fletcher32",sid,dcpl,buf)<0)
+  goto out;
+#endif
+
+/*-------------------------------------------------------------------------
+ * SZIP
+ *-------------------------------------------------------------------------
+ */
+ /* Make sure encoding is enabled */
+#if defined (H5_SZIP_CAN_ENCODE) && defined (H5_HAVE_FILTER_SZIP)
+ /* remove the filters from the dcpl */
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+  goto out;
+ /* set szip data */
+ if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
+  goto out;
+ if (make_dset(loc_id,"dset_szip",sid,dcpl,buf)<0)
+  goto out;
+#endif
+
+/*-------------------------------------------------------------------------
+ * shuffle
+ *-------------------------------------------------------------------------
+ */
+#if defined (H5_HAVE_FILTER_SHUFFLE)
+ /* remove the filters from the dcpl */
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+  goto out;
+ /* set the shuffle filter */
+ if (H5Pset_shuffle(dcpl)<0) 
+  goto out;
+ if (make_dset(loc_id,"dset_shuffle",sid,dcpl,buf)<0)
+  goto out;
+#endif
+
+/*-------------------------------------------------------------------------
+ * GZIP
+ *-------------------------------------------------------------------------
+ */
+#if defined (H5_HAVE_FILTER_DEFLATE)
+ /* remove the filters from the dcpl */
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+  goto out;
+ /* set deflate data */
+ if(H5Pset_deflate(dcpl, 1)<0)
+  goto out;
+ if (make_dset(loc_id,"dset_deflate",sid,dcpl,buf)<0)
+  goto out;
+#endif
+
+
 
 /*-------------------------------------------------------------------------
  * close space and dcpl

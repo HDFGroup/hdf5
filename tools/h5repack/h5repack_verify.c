@@ -182,11 +182,6 @@ int h5repack_verify(const char *fname,
    goto error;
   if ((dcpl_id=H5Dget_create_plist(dset_id))<0) 
    goto error;
-
-  if (options->verbose) {
-    printf(" %-10s %s\n", "dataset",name );
-    print_filters(dcpl_id);
-  }
   
 /*-------------------------------------------------------------------------
  * filter check
@@ -252,11 +247,7 @@ int h5repack_verify(const char *fname,
      goto error;
     if ((dcpl_id=H5Dget_create_plist(dset_id))<0) 
      goto error;
-    
-    if (options->verbose) {
-     printf(" %-10s %s\n", "dataset",name );
-     print_filters(dcpl_id);
-    }
+
  /*-------------------------------------------------------------------------
   * filter check
   *-------------------------------------------------------------------------

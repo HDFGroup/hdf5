@@ -28,7 +28,6 @@
  * Return: 
  *  0 : no differences found
  *  1 : differences found
- * -1 : error ocurred 
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -63,8 +62,10 @@ int diff_attr(hid_t      loc1_id,
  hsize_t    dims2[H5S_MAX_RANK];/* dimensions of dataset */
 	char       name1[255];
  char       name2[255];
-	int        n1, n2, i, j, nfound;
+	int        n1, n2, i, j;
  int        ret=0;
+ hsize_t    nfound;
+ int        cmp=1;
 
  if ((n1 = H5Aget_num_attrs(loc1_id))<0) 
   goto error;
@@ -99,7 +100,7 @@ int diff_attr(hid_t      loc1_id,
 
   if (HDstrcmp(name1,name2)!=0)
   {
-   if (options->verbose) 
+   if (options->m_verbose) 
    {
     printf("Different name for attributes: <%s> and <%s>\n", name1, name2);
    }
@@ -144,7 +145,13 @@ int diff_attr(hid_t      loc1_id,
   name1, 
   name2, 
   options)!=1)
-  goto error;
+   cmp=0;
+/*-------------------------------------------------------------------------
+ * only attempt to compare if possible 
+ *-------------------------------------------------------------------------
+ */
+ if (cmp) 
+ {
 	
 /*-------------------------------------------------------------------------
  * read to memory
@@ -180,9 +187,6 @@ int diff_attr(hid_t      loc1_id,
  * array compare
  *-------------------------------------------------------------------------
  */
-
- if (options->verbose)
-  printf( "Attribute:   <%s> and <%s>\n",name1,name2);
  sprintf(name1,"%s of <%s>",name1,path1);
  sprintf(name2,"%s of <%s>",name2,path2);
  nfound = diff_array(buf1, 
@@ -196,8 +200,18 @@ int diff_attr(hid_t      loc1_id,
                      mtype1_id,
                      attr1_id,
                      attr2_id);
- if (options->verbose && nfound)
-  printf("%d differences found\n", nfound );
+ 
+ }/*cmp*/
+
+/*-------------------------------------------------------------------------
+ * print how many differences were found
+ *-------------------------------------------------------------------------
+ */
+ if (print_objname(options,nfound))
+ {
+  printf( "Attribute:   <%s> and <%s>\n",name1,name2);
+  print_found(nfound);
+ }
 
 
 /*-------------------------------------------------------------------------
@@ -236,7 +250,9 @@ error:
   if (buf2)
    HDfree(buf2);
  } H5E_END_TRY;
- return -1;
+     
+ options->err_stat=1;
+ return 0;
 }
 
 

@@ -1,8 +1,0 @@
-#############################
-Expected output for 'h5diff file5.h5 file5.h5 dset3 dset4'
-#############################
-$h5diff file5.h5 file5.h5 dset3 dset4
-Comparison not supported
-</dset3> has rank 4, dimensions [ 2 2 2 2 ] , max dimensions [ 2 2 2 2 ] 
-</dset4> has rank 4, dimensions [ 2 2 2 3 ] , max dimensions [ 2 2 2 3 ] 
-

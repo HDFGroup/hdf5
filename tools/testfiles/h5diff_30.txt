@@ -1,8 +1,0 @@
-#############################
-Expected output for 'h5diff file4.h5 file4.h5 string'
-#############################
-$h5diff file4.h5 file4.h5 string
-Comparison not supported
-</string> is of class H5T_STRING and </string> is of class H5T_STRING
-
-

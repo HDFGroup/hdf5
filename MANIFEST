@@ -1482,24 +1482,14 @@
 ./tools/testfiles/h5diff_14.txt
 ./tools/testfiles/h5diff_15.txt
 ./tools/testfiles/h5diff_16.txt
+./tools/testfiles/h5diff_17.txt
+./tools/testfiles/h5diff_18.txt
 ./tools/testfiles/h5diff_20.txt
 ./tools/testfiles/h5diff_21.txt
 ./tools/testfiles/h5diff_22.txt
 ./tools/testfiles/h5diff_23.txt
 ./tools/testfiles/h5diff_24.txt
 ./tools/testfiles/h5diff_25.txt
-./tools/testfiles/h5diff_30.txt
-./tools/testfiles/h5diff_31.txt
-./tools/testfiles/h5diff_32.txt
-./tools/testfiles/h5diff_33.txt
-./tools/testfiles/h5diff_34.txt
-./tools/testfiles/h5diff_35.txt
-./tools/testfiles/h5diff_36.txt
-./tools/testfiles/h5diff_37.txt
-./tools/testfiles/h5diff_38.txt
-./tools/testfiles/h5diff_40.txt
-./tools/testfiles/h5diff_41.txt
-./tools/testfiles/h5diff_42.txt
 ./tools/testfiles/h5diff_50.txt
 ./tools/testfiles/h5diff_51.txt
 ./tools/testfiles/h5diff_52.txt
@@ -1540,13 +1530,9 @@
 ./tools/testfiles/h5diff_629.txt
 ./tools/testfiles/h5diff_70.txt
 ./tools/testfiles/h5diff_80.txt
-./tools/testfiles/test1.h5
-./tools/testfiles/test3.h5
-./tools/testfiles/test4.h5
-./tools/testfiles/test5.h5
-./tools/testfiles/h5repack_info.txt
 
 
+# h5repack sources
 ./tools/h5repack/Dependencies
 ./tools/h5repack/h5repack_opttable.c
 ./tools/h5repack/h5repack_verify.c
@@ -1567,7 +1553,13 @@
 ./tools/h5repack/testh5repack_main.c
 ./tools/h5repack/h5repack.h
 
+# h5repack test files
+./tools/testfiles/test1.h5
+./tools/testfiles/test3.h5
+./tools/testfiles/test4.h5
+./tools/testfiles/test5.h5
+./tools/testfiles/h5repack_info.txt
 
-
+# windows
 ./windows/all.zip
 ./windows/all_withf90.zip

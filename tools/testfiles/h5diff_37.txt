@@ -1,8 +1,0 @@
-#############################
-Expected output for 'h5diff file4.h5 file4.h5 array'
-#############################
-$h5diff file4.h5 file4.h5 array
-Comparison not supported
-</array> is of class H5T_ARRAY and </array> is of class H5T_ARRAY
-
-

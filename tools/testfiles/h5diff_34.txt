@@ -1,8 +1,0 @@
-#############################
-Expected output for 'h5diff file4.h5 file4.h5 ref'
-#############################
-$h5diff file4.h5 file4.h5 ref
-Comparison not supported
-</ref> is of class H5T_REFERENCE and </ref> is of class H5T_REFERENCE
-
-
