@@ -1015,7 +1015,8 @@
 ./tools/testfiles/tvldtypes4.h5
 
 # new hdf4 files for testing h4toh5 converter
-./tools/testfiles/anno_test.hdf                                                                       ./tools/testfiles/gr_typ_test.hdf
+./tools/testfiles/anno_test.hdf                                                                       
+./tools/testfiles/gr_typ_test.hdf
 ./tools/testfiles/grnameclash_test.hdf
 ./tools/testfiles/image_attr_test.hdf
 ./tools/testfiles/ras_24_test.hdf
