@@ -533,21 +533,12 @@ H5P_close(void *_plist)
 H5P_class_t
 H5Pget_class(hid_t plist_id)
 {
-    H5I_type_t		    group;
     H5P_class_t		    ret_value = H5P_NO_CLASS;
 
     FUNC_ENTER(H5Pget_class, H5P_NO_CLASS);
     H5TRACE1("p","i",plist_id);
 
-    if ((group = H5I_get_type(plist_id)) < 0 ||
-            group >= H5I_TEMPLATE_MAX ||
-            group < H5I_TEMPLATE_0) {
-        HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, H5P_NO_CLASS,
-		      "not a property list");
-    }
-
-    ret_value = (H5P_class_t)(group - H5I_TEMPLATE_0);
-
+    ret_value = H5P_get_class(plist_id);
     FUNC_LEAVE(ret_value);
 }
 

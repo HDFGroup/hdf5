@@ -1963,7 +1963,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		    case H5I_TEMPLATE_5:
 		    case H5I_TEMPLATE_6:
 		    case H5I_TEMPLATE_7:
-			switch (H5Pget_class(id_type)) {
+			switch (H5P_get_class(id_type)) {
 			case H5P_FILE_CREATE:
 			    fprintf(out, "H5P_FILE_CREATE");
 			    break;
