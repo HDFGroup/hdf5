@@ -124,13 +124,14 @@ TABLE.list TD { border:none; }
 	      <li><a href="#LayoutMessage">Name: Data Storage - Layout</a>                                  <!-- 0x0008 -->
 	      <li><a href="#ReservedMessage_0009">Name: Reserved - not assigned yet</a>                     <!-- 0x0009 -->
 	      <li><a href="#ReservedMessage_000A">Name: Reserved - not assigned yet</a>                     <!-- 0x000a -->
-	      <li><a href="#FilterMessage">Name: Data Storage - Filter Pipeline</a>                	     <!-- 0x000b -->
+	      <li><a href="#FilterMessage">Name: Data Storage - Filter Pipeline</a>                	    <!-- 0x000b -->
 	      <li><a href="#AttributeMessage">Name: Attribute</a>                                           <!-- 0x000c -->
 	      <li><a href="#NameMessage">Name: Object Name</a>                                              <!-- 0x000d -->
-	      <li><a href="#ModifiedMessage">Name: Object Modification Date and Time</a>                    <!-- 0x000e -->
+	      <li><a href="#OldModifiedMessage">Name: Object Modification Date and Time (Old)</a>           <!-- 0x000e -->
 	      <li><a href="#SharedMessage">Name: Shared Object Message</a>                                  <!-- 0x000f -->
 	      <li><a href="#ContinuationMessage">Name: Object Header Continuation</a>                       <!-- 0x0010 -->
 	      <li><a href="#SymbolTableMessage">Name: Group Message</a>                                     <!-- 0x0011 -->
+	      <li><a href="#ModifiedMessage">Name: Object Modification Date and Time</a>                    <!-- 0x0012 -->
 	    </ol>
 	  <li><a href="#SharedObjectHeader">Disk Format: Level 2b - Shared Data Object Headers</a>
 	  <li><a href="#DataStorage">Disk Format: Level 2c - Data Object Data Storage</a>
@@ -5213,7 +5214,7 @@ TABLE.list TD { border:none; }
     </center>
     
     <hr>
-    <h4><a name="ModifiedMessage">Name: Object Modification Date &amp; Time</a></h4>
+    <h4><a name="OldModifiedMessage">Name: Object Modification Date &amp; Time (Old)</a></h4>
 
     <p><b>Header Message Type:</b> 0x000E<br>
       <b>Length:</b> fixed<br>
@@ -5502,6 +5503,75 @@ where the group name heap is located.
 </dl>
 </dl>
 
+    <hr>
+    <h4><a name="ModifiedMessage">Name: Object Modification Date &amp; Time</a></h4>
+
+    <P class=item><B>Header Message Type:</B> 0x0012
+    </P>
+    <P class=item><B>Length:</B> Fixed
+    </P>
+    <P class=item><B>Status:</B> Optional, may not be repeated.
+    </P>
+
+    <P class=item><B>Description:</B> The object modification date
+      and time is a timestamp which indicates
+      the last modification of an object.  The time is
+      updated when any object header message changes according to the
+      system clock where the change was posted.
+    </P>
+
+    <p>
+    <center>
+      <table border align=center cellpadding=4 width="80%">
+	<caption align=top>
+	  <b>Modification Time Message</b>
+	</caption>
+
+	<tr align=center>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	  <th width="25%">byte</th>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=1>Version</td>
+	  <td colspan=3>Reserved</td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4>Seconds After Epoch</td>
+	</tr>
+      </table>
+    </center>
+
+    <p>
+    <center>
+      <table align=center width="80%">
+	<tr align=left>
+          <th width="30%"><U><font size=+1>Field Name</font></U></th>
+          <th><U><font size=+1>Description</font></U></th>
+	</tr>
+
+	<tr valign=top>
+	  <td>Version</td>
+	  <td>The version number for the message.  This document
+	    describes version one of the new modification time message.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Reserved</td>
+	  <td>This field is reserved and should always be zero.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Seconds After Epoch</td>
+	  <td>The number of seconds since 0 hours, 0
+               minutes, 0 seconds, January 1, 1970, Coordinated Universal Time.
+	</tr>
+      </table>
+    </center>
+    
 <h3><a name="SharedObjectHeader">Disk Format: Level 2b - Shared Data Object Headers</a></h3>
 <P>In order to share header messages between several dataset objects, object
 header messages may be placed into the global heap.  Since these
