@@ -16,7 +16,7 @@ fi
 if test -z "$cxx_flags_set"; then
 # -LANG:std required for std use; -ptused causes templates used to be
 # instantiated
-    CPPFLAGS="-LANG:std -ptused"
+    CPPFLAGS="$CPPFLAGS -LANG:std -ptused"
 
 # libCio is a default library, since libtool before 1.5 doesn't fully 
 # support C++ yet, default libraries must be explicitly specified.

@@ -25,14 +25,14 @@ cxx_vers_patch=`echo $cxx_version | cut -f3 -d.`
 # Specify the "-features=tmplife" if the compiler can handle this...
 if test -n "$cxx_version"; then
   if test $cxx_vers_major -ge 5 -a $cxx_vers_minor -ge 3 -o $cxx_vers_major -gt 5; then
-    CXXFLAGS="-features=tmplife"
+    CXXFLAGS="$CXXFLAGS -features=tmplife"
   fi
 fi
 
 # Try solaris native compiler flags
 if test -z "$cxx_flags_set"; then
     CXXFLAGS="$CXXFLAGS -instances=global"
-    CPPFLAGS="-LANG:std"
+    CPPFLAGS="$CPPFLAGS -LANG:std"
     LIBS="$LIBS -lsocket"
     DEBUG_CXXFLAGS=-g
     DEBUG_CPPFLAGS=
