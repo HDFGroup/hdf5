@@ -37,9 +37,9 @@
 int check_objects(const char* fname, 
                   pack_opt_t *options)
 {
- hid_t        fid; 
- int          nobjects, i;
- trav_info_t  *info=NULL;
+ hid_t         fid; 
+ int           i;
+ trav_table_t  *travt=NULL;
 
 /*-------------------------------------------------------------------------
  * open the file 
@@ -59,28 +59,16 @@ int check_objects(const char* fname,
 
 
 /*-------------------------------------------------------------------------
- * get the number of objects in the file
- *-------------------------------------------------------------------------
- */
-
- if ((nobjects = h5trav_getinfo(fid, NULL ))<0) {
-  printf("h5repack: <%s>: Could not obtain object list\n", fname );
-  return -1;
- }
-
-/*-------------------------------------------------------------------------
  * get the list of objects in the file
  *-------------------------------------------------------------------------
  */
 
- if ((info = (trav_info_t*) malloc( nobjects * sizeof(trav_info_t)))==NULL){
-  printf("h5repack: <%s>: Could not allocate object list\n", fname );
-  return -1;
- }
- if (h5trav_getinfo(fid, info )<0) {
-  printf("h5repack: <%s>: Could not obtain object list\n", fname );
-  return -1;
- }
+ /* init table */
+ trav_table_init(&travt);
+
+ /* get the list of objects in the file */
+ if (h5trav_gettable(fid,travt)<0)
+  goto out;
 
 /*-------------------------------------------------------------------------
  * compare with user supplied list
@@ -92,29 +80,32 @@ int check_objects(const char* fname,
  
  for ( i = 0; i < options->op_tbl->nelems; i++) 
  {
-  char* obj_name=options->op_tbl->objs[i].path;
+  char* name=options->op_tbl->objs[i].path;
   if (options->verbose)
-   printf(PFORMAT1,"","",obj_name);
+   printf(PFORMAT1,"","",name);
   
   /* the input object names are present in the file and are valid */
-  if (h5trav_getindex(obj_name,nobjects,info)<0)
+  if (h5trav_getindext(name,travt)<0)
   {
    printf("\nError: Could not find <%s> in file <%s>. Exiting...\n",
-    obj_name,fname);
-   H5Fclose(fid);
-   h5trav_freeinfo(info,nobjects);
-   exit(1);
+    name,fname);
+   goto out;
   }
   if (options->verbose)
    printf("...Found\n");
  }
 /*-------------------------------------------------------------------------
- * free
+ * close
  *-------------------------------------------------------------------------
  */
  H5Fclose(fid);
- h5trav_freeinfo(info,nobjects);
+ trav_table_free(travt);
  return 0;
+
+out:
+ H5Fclose(fid);
+ trav_table_free(travt);
+ return -1;
 }
 
 

@@ -78,7 +78,7 @@ typedef struct trav_table_t {
 
 
 /*-------------------------------------------------------------------------
- * "h5trav info" public functions
+ * public functions
  *-------------------------------------------------------------------------
  */
 
@@ -86,12 +86,23 @@ typedef struct trav_table_t {
 extern "C" {
 #endif
 
+/*-------------------------------------------------------------------------
+ * "h5trav info" public functions
+ *-------------------------------------------------------------------------
+ */
 int  h5trav_getinfo( hid_t file_id, trav_info_t *info );
 int  h5trav_getindex( const char *obj, int nobjs, trav_info_t *info );
 void h5trav_freeinfo( trav_info_t *info, int nobjs );
 void h5trav_printinfo(int nobjs, trav_info_t *info);
-int  h5trav_gettable(hid_t fid, trav_table_t *travt);
 
+/*-------------------------------------------------------------------------
+ * "h5trav table" public functions
+ *-------------------------------------------------------------------------
+ */
+
+int  h5trav_getindext(const char *obj,trav_table_t *travt);
+int  h5trav_gettable(hid_t fid, trav_table_t *travt);
+void h5trav_printtable(trav_table_t *table);
 
 #ifdef __cplusplus
 }
@@ -119,7 +130,6 @@ void trav_table_addflags(unsigned *flags,
                          H5G_obj_t type, 
                          trav_table_t *table);
 
-void h5trav_printtable(trav_table_t *table);
 
 void trav_table_addlink(trav_table_t *table, 
                         int j /* the object index */,

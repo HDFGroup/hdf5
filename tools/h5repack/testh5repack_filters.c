@@ -336,7 +336,6 @@ int make_special_objects(hid_t loc_id)
  hsize_t dims[1]={2};
  int     buf[2]= {1,2};                 
 
- 
 /*-------------------------------------------------------------------------
  * create a dataset and some hard links to it
  *-------------------------------------------------------------------------
@@ -351,25 +350,41 @@ int make_special_objects(hid_t loc_id)
  if (H5Glink(loc_id, H5G_LINK_HARD, "dset", "link3 to dset")<0)
   return -1;
 
+
 /*-------------------------------------------------------------------------
  * create a group and some hard links to it
  *-------------------------------------------------------------------------
  */ 
-
+ 
  if ((group1_id = H5Gcreate(loc_id,"g1",0))<0)
   return -1;
  if ((group2_id = H5Gcreate(group1_id,"g2",0))<0)
   return -1;
  if ((group3_id = H5Gcreate(group2_id,"g3",0))<0)
   return -1;
- if (H5Glink(loc_id, H5G_LINK_HARD, "g1", "link1 to g1")<0)
-  return -1;
- if (H5Glink(loc_id, H5G_LINK_HARD, "g1", "link2 to g1")<0)
-  return -1;
 
+ /*
+  H5Glink2(curr_loc_id, current_name, link_type, new_loc_id, new_name ) 
+  hid_t curr_loc_id 
+    IN: The file or group identifier for the original object. 
+  const char * current_name 
+    IN: Name of the existing object if link is a hard link. 
+  H5G_link_t link_type 
+    IN: Link type. Possible values are H5G_LINK_HARD and H5G_LINK_SOFT. 
+  hid_t new_loc_id 
+    IN: The file or group identifier for the new link. 
+  const char * new_name 
+    IN: New name for the object.
+  */
 
+ if (H5Glink2(loc_id, "g1", H5G_LINK_HARD, group2_id, "link1 to g1")<0)
+  return -1;
+ if (H5Glink2(group1_id, "g2", H5G_LINK_HARD, group3_id, "link1 to g2")<0)
+  return -1;
+ 
  H5Gclose(group1_id);
  H5Gclose(group2_id);
+ H5Gclose(group3_id);
 
  return 0;                                                 
  

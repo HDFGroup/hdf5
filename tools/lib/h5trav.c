@@ -389,11 +389,12 @@ int traverse( hid_t loc_id,
     if ( table->objs[j].displayed == 0 )
     {
      table->objs[j].displayed = 1;
+     trav_table_addlink(table,j,path);
     }
     else
     {
 #if defined (H5_TRAV_DEBUG)
-     printf("<%s> HARDLINK to <%s>\n", path, table->objs[j].name);
+     printf("<%s> HARDLINK\n", path);
 #endif
      trav_table_addlink(table,j,path);
     }
@@ -429,11 +430,12 @@ int traverse( hid_t loc_id,
     if ( table->objs[j].displayed == 0 )
     {
      table->objs[j].displayed = 1;
+     trav_table_addlink(table,j,path);
     }
     else
     {
 #if defined (H5_TRAV_DEBUG)
-     printf("<%s> HARDLINK to <%s>\n", path, table->objs[j].name);
+     printf("<%s> HARDLINK\n", path);
 #endif
      trav_table_addlink(table,j,path);
     } /* displayed==1 */
@@ -585,10 +587,65 @@ void h5trav_printtable(trav_table_t *table)
   {
    for ( j=0; j<table->objs[i].nlinks; j++)
    {
-    printf(" %-10s %s\n", "    hardlink", table->objs[i].links[j] );
+    printf(" %-10s %s\n", "    hardlink", table->objs[i].links[j].new_name );
    }
   }
 
  }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: h5trav_getindext
+ *
+ * Purpose: get index of NAME in list
+ *
+ * Return: index, -1 if not found
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: December 18, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+
+int h5trav_getindext(const char *name, trav_table_t *table)
+{
+ char *pdest;
+ int  result;
+ int  i, j;
+
+ for ( i = 0; i < table->nobjs; i++) 
+ {
+  if ( strcmp(name,table->objs[i].name)==0 )
+   return i;
+
+  pdest  = strstr( table->objs[i].name, name );
+  result = (int)(pdest - table->objs[i].name);
+
+  /* found at position 1, meaning without '/' */
+  if( pdest != NULL && result==1 )
+   return i;
+
+  /* search also in the list of links */
+  if (table->objs[i].nlinks)
+  {
+   for ( j=0; j<table->objs[i].nlinks; j++)
+   {
+    if ( strcmp(name,table->objs[i].links[j].new_name)==0 )
+     return i;
+    
+    pdest  = strstr( table->objs[i].links[j].new_name, name );
+    result = (int)(pdest - table->objs[i].links[j].new_name);
+    
+    /* found at position 1, meaning without '/' */
+    if( pdest != NULL && result==1 )
+     return i;
+
+   }
+  }
+
+ }
+ return -1;
 }
 

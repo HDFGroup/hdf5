@@ -235,14 +235,21 @@ void trav_table_addlink(trav_table_t *table,
                         char *path )
 {
  int k;
- /* store the link information */
+
+ /* already inserted */
+ if (strcmp(table->objs[j].name,path)==0)
+  return;
+
+ /* allocate space if necessary */
  if (table->objs[j].nlinks == table->objs[j].sizelinks) {
   table->objs[j].sizelinks += 2;
   table->objs[j].links = 
    (trav_link_t*)HDrealloc(table->objs[j].links, 
    table->objs[j].sizelinks * sizeof(trav_link_t));
  }
- k = table->objs[j].nlinks++;
+
+ /* insert it */
+ k=table->objs[j].nlinks++;
  table->objs[j].links[k].new_name = (char*)HDstrdup(path);
 }
 
