@@ -19,174 +19,6 @@ dnl -------------------------------------------------------------------------
 dnl -------------------------------------------------------------------------
 
 dnl -------------------------------------------------------------------------
-dnl AC_PROG_F9X
-dnl
-dnl	Check for a Fortran 9X compiler.
-dnl
-AC_DEFUN(AC_PROG_F9X,
-[AC_CHECK_PROGS(F9X, f90 pgf90 xlf90 f95 g95 xlf95 efc)
-test -z "$FC" && AC_MSG_ERROR([no acceptable f9X compiler found in \$PATH])
-
-AC_PROG_F9X_WORKS
-AC_PROG_F9X_GNU
-
-if test $ac_cv_prog_g9x = yes; then
-  G9X=yes
-  dnl Check whether -g works, even if FCFLAGS is set, in case the package
-  dnl plays around with FCFLAGS (such as to build both debugging and
-  dnl normal versions of a library), tasteless as that idea is.
-  ac_test_FCFLAGS="${FCFLAGS+set}"
-  ac_save_FCFLAGS="$FCFLAGS"
-  FCFLAGS=
-  AC_PROG_F9X_G
-  if test "$ac_test_FCFLAGS" = set; then
-    FCFLAGS="$ac_save_FCFLAGS"
-  elif test $ac_cv_prog_f9x_g = yes; then
-    FCFLAGS="-g -O2"
-  else
-    FCFLAGS="-O2"
-  fi
-else
-  G9X=
-  test "${FCFLAGS+set}" = set || FCFLAGS="-g"
-fi
-])
-
-dnl -------------------------------------------------------------------------
-dnl AC_TRY_F9X_COMPILER()
-dnl
-dnl	It would be nice if the compiler actually works.
-dnl
-AC_DEFUN(AC_TRY_F9X_COMPILER, [
-cat > conftest.$ac_ext << EOF
-[$1]
-EOF
-if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
-  [$2]=yes
-  # If we can't run a trivial program, we are probably using a cross compiler.
-  if (./conftest; exit) 2>/dev/null; then
-    [$3]=no
-  else
-    [$3]=yes
-  fi
-else
-  echo "configure: failed program was:" >&AS_MESSAGE_LOG_FD
-  cat conftest.$ac_ext >&AS_MESSAGE_LOG_FD
-  [$2]=no
-fi
-rm -fr conftest*
-])
-
-dnl -------------------------------------------------------------------------
-dnl AC_LANG_FORTRAN9X()
-dnl
-dnl	Generic macro to setup the Fortran 9X specific env variables.
-dnl
-m4_define([AC_LANG(FORTRAN9X)],
-[ac_ext=f90
-ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&AS_MESSAGE_LOG_FD'
-ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&AS_MESSAGE_LOG_FD'
-cross_compiling=$ac_cv_prog_f9x_cross
-])
-
-AU_DEFUN([AC_LANG_FORTRAN9X], [AC_LANG(FORTRAN9X)])
-
-dnl -------------------------------------------------------------------------
-dnl AC_LANG_F9X_WORKS()
-dnl
-dnl	It would be nice if the compiler actually works.
-dnl
-AC_DEFUN(AC_PROG_F9X_WORKS, [
-AC_MSG_CHECKING([whether the Fortran 9X compiler ($FC $FCFLAGS $LDFLAGS) works])
-AC_LANG_SAVE
-AC_LANG_FORTRAN9X
-AC_TRY_F9X_COMPILER([
-      program conftest
-      end
-], ac_cv_prog_f9x_works, ac_cv_prog_f9x_cross)
-AC_LANG_RESTORE
-AC_MSG_RESULT($ac_cv_prog_f9x_works)
-if test $ac_cv_prog_f9x_works = no; then
-  AC_MSG_ERROR([installation or configuration problem: Fortran 9X compiler cannot create executables.])
-fi
-AC_MSG_CHECKING([whether the Fortran 9X compiler ($FC $FCFLAGS $LDFLAGS) is a cross-compiler])
-AC_MSG_RESULT($ac_cv_prog_f9x_cross)
-cross_compiling=$ac_cv_prog_f9x_cross
-])
-
-dnl -------------------------------------------------------------------------
-dnl AC_PROG_F9X_GNU
-dnl
-dnl	Test whether for Fortran 9X compiler is `g95' (the GNU Fortran 95
-dnl	Compiler). This test depends on whether the Fortran 9X compiler
-dnl	can do CPP pre-processing.
-dnl
-AC_DEFUN(AC_PROG_F9X_GNU,
-[AC_CACHE_CHECK(whether we are using GNU Fortran 95, ac_cv_prog_g9x,
-[cat > conftest.fpp <<EOF
-#ifdef __GNUC__
-  yes
-#endif
-EOF
-if AC_TRY_COMMAND($FC -E conftest.fpp) | egrep yes >/dev/null 2>&1; then
-  ac_cv_prog_g9x=yes
-else
-  ac_cv_prog_g9x=no
-fi])])
-
-dnl -------------------------------------------------------------------------
-dnl AC_PROG_F9X_G
-dnl
-dnl	Test whether the Fortran 9X compiler can accept the `-g' option
-dnl	to enable debugging.
-dnl
-AC_DEFUN(AC_PROG_F9X_G,
-[AC_CACHE_CHECK(whether $FC accepts -g, ac_cv_prog_f9x_g,
-[cat > conftest.f << EOF
-       program conftest
-       end
-EOF
-if test -z "`$FC -g -c conftest.f 2>&1`"; then
-  ac_cv_prog_f9x_g=yes
-else
-  ac_cv_prog_f9x_g=no
-fi
-rm -f conftest*
-])])
-
-dnl -------------------------------------------------------------------------
-dnl AC_F9X_OPT_FLAGS()
-dnl
-dnl	Check for optimizer flags the Fortran compiler can use.
-dnl
-AC_DEFUN(AC_F9X_OPT_FLAGS,
-[AC_MSG_CHECKING([for $FC optimizer flags])
-AC_LANG_SAVE
-AC_LANG_FORTRAN9X
-
-for flags in "-fast" "-O3" "-O" "";do
-  cat > conftest.$ac_ext <<EOF
-      program main
-      end
-EOF
-  ac_compile='${FC-f90} -c $flag $FCFLAGS conftest.$ac_ext 1>&AS_MESSAGE_LOG_FD'
-  if AC_TRY_EVAL(ac_compile); then
-    if grep 'passed to ld' conftest.out > /dev/null 2>&1; then :; else
-      FCFLAGS="$FCFLAGS $flags"
-      break
-    fi
-  fi
-done
-
-if test -n "$flags"; then
-  echo "$flags" 1>&6
-else
-  echo "none" 1>&6
-fi
-rm -f conftest*
-])
-
-dnl -------------------------------------------------------------------------
 dnl AC_F9X_MODS()
 dnl
 dnl	Check how F9X handles modules. This macro also checks which
@@ -194,8 +26,7 @@ dnl	command-line option to use to include the module once it's built.
 dnl
 AC_DEFUN(AC_F9X_MODS,
 [AC_MSG_CHECKING(what $FC does with modules)
-AC_LANG_SAVE
-AC_LANG_FORTRAN9X
+AC_LANG_PUSH(Fortran)
 
 test -d conftestdir || mkdir conftestdir
 cd conftestdir
@@ -268,6 +99,7 @@ fi
 AC_SUBST(F9XMODFLAG)
 AC_SUBST(F9XMODEXT)
 rm -rf conftest*
+AC_LANG_POP(Fortran)
 ])
 
 dnl -------------------------------------------------------------------------
@@ -279,8 +111,7 @@ dnl AC_TRY_FCOMPILE(FUNCTION-BODY,
 dnl                 [ACTION-IF-SUCCESS], [ACTION-IF-NOT-SUCCESS])
 dnl
 AC_DEFUN([AC_TRY_FCOMPILE],
-[AC_LANG_SAVE
-AC_LANG_FORTRAN9X
+[AC_LANG_PUSH(Fortran)
 
 test -d conftestdir || mkdir conftestdir
 cd conftestdir
@@ -299,6 +130,7 @@ else
 fi
 cd ..
 rm -rf conftest*
+AC_LANG_POP(Fortran)
 ])
 
 dnl -------------------------------------------------------------------------
@@ -310,8 +142,7 @@ dnl AC_TRY_FLINK(INCLUDES, FUNCTION-BODY,
 dnl              [ACTION-IF-SUCCESS], [ACTION-IF-NOT-SUCCESS])
 dnl
 AC_DEFUN([AC_TRY_FLINK],
-[AC_LANG_SAVE
-AC_LANG_FORTRAN9X
+[AC_LANG_PUSH(Fortran)
 
 test -d conftestdir || mkdir conftestdir
 cd conftestdir
@@ -333,6 +164,7 @@ else
 fi
 cd ..
 rm -rf conftest*
+AC_LANG_POP(Fortran)
 ])
 
 dnl -------------------------------------------------------------------------
@@ -344,8 +176,7 @@ dnl AC_CHECK_FLIB(LIBRARY, FUNCTION-BODY,
 dnl               [ACTION-IF-SUCCESS], [ACTION-IF-NOT-SUCCESS])
 dnl
 AC_DEFUN([AC_CHECK_FLIB],
-[AC_LANG_SAVE
-AC_LANG_FORTRAN9X
+[AC_LANG_PUSH(Fortran)
 
 test -d conftestdir || mkdir conftestdir
 cd conftestdir
@@ -371,6 +202,7 @@ else
 fi
 cd ..
 rm -rf conftest*
+AC_LANG_POP(Fortran)
 ])
 
 dnl -------------------------------------------------------------------------

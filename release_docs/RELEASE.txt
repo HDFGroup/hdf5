@@ -36,6 +36,28 @@ New Features
 
     Configuration:
     --------------
+	- HDF5 now uses automake 1.9.5 to generate Makefiles.in.
+	  This has a number of effects on users:
+          The Fortran compiler should be set using the environment
+          variable $FC, not $F9X.  F9X still works, but is depreciated.
+	  The output of make may be different.  This should be only a
+          cosmetic effect.
+	  make depened (or make dep) is no longer recognized, since automake
+	  handles dependency tracking.
+	  Some new configure options exist.  --enable-dependency-tracking
+          and --disable-dependency-tracking are used to control automake's
+	  dependency tracking.  Dependencies are on by default *on most
+	  platforms and compilers*.  If --enable-dependency-tracking is
+	  used, they will be enabled on any platform.  However, this can
+	  slow down builds or even cause build errors in some cases.
+	  Likewise, --disable-dependency-tracking can speed up builds and
+	  avoid some build errors.
+	  Some make targets have alternate names.  make check-install and
+	  make installcheck do the same thing, for instance.
+	  pmake on IRIX can be invoked from the root directory, but the
+	  -V flag must be used to invoke it in any subdirectory or it
+	  will give an error about undefined variables.
+	  JML 2005/01 - 2005/03
         - Hardware conversion between long double and integers is also added.
           SLU 2005/02/10
         - Started to support software conversion between long double and 

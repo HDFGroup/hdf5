@@ -280,13 +280,18 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   dnl
   FCFLAGS="${FCFLAGS} ${FFLAGS}"
 
+  dnl --------------------------------------------------------------------
+  dnl Fortran source extention
+  dnl
+  FC_SRCEXT=f90
+
   AC_SUBST([F9XSUFFIXFLAG])
   AC_SUBST([FSEARCH_DIRS])
 
   dnl --------------------------------------------------------------------
   dnl Check for a Fortran 9X compiler and how to include modules.
   dnl 
-  AC_PROG_FC([f90 pgf90 slf90 f95 g95 xlf95 efc],)
+  AC_PROG_FC([f90 pgf90 slf90 f95 g95 xlf95 efc ifort],)
   AC_F9X_MODS
 
   dnl It seems that libtool (as of Libtool 1.5.14) is trying to
@@ -295,7 +300,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   F77=$FC
 
   dnl Change to the Fortran 90 language
-  AC_LANG_FORTRAN9X
+  AC_LANG_PUSH(Fortran)
 
   dnl --------------------------------------------------------------------
   dnl See if the compiler will support the "-I." option
@@ -311,8 +316,8 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
      AC_MSG_RESULT(no)
      FCFLAGS="$FCFLAGS_saved")
 
-  dnl Change to the C language
-  AC_LANG_C
+  dnl Change back to the C language
+  AC_LANG_POP(Fortran)
 else
   echo "no"
 fi
@@ -338,7 +343,7 @@ if test "X$HDF_CXX" = "Xyes"; then
   HDF5_INTERFACES="$HDF5_INTERFACES c++"
 
   dnl Change to the C++ language
-  AC_LANG_CPLUSPLUS
+  AC_LANG_PUSH(C++)
 
   AC_MSG_CHECKING([if $CXX needs old style header files in includes])
   AC_TRY_RUN([
@@ -416,8 +421,8 @@ int main(void) {
     CXXFLAGS="${CXXFLAGS} -DNO_STATIC_CAST"
   ])
 
-  dnl Change to the C language
-  AC_LANG_C
+  dnl Change back to the C language
+  AC_LANG_POP(C++)
 else
   echo "no"
 fi
@@ -1992,7 +1997,7 @@ dnl `mpirun' from the same directory as mpif90 if it exists.
 dnl
 if test "X$HDF_FORTRAN" = "Xyes"; then
   dnl Change to the Fortran 90 language
-  AC_LANG_FORTRAN9X
+  AC_LANG_PUSH(Fortran)
 
   case "$FC" in
     *mpif90*)
@@ -2038,7 +2043,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   esac
 
   dnl Change to the C language
-  AC_LANG_C
+  AC_LANG_POP(Fortran)
 fi
 
 dnl ----------------------------------------------------------------------
@@ -2080,7 +2085,7 @@ case "X-$enable_parallel" in
 
     if test "X$HDF_FORTRAN" = "Xyes"; then
       dnl Change to the Fortran 90 language
-      AC_LANG_FORTRAN9X
+      AC_LANG_PUSH(Fortran)
 
       dnl Try link a simple MPI program.  If fail, try again with -lmpi.
       AC_TRY_FLINK(mpif.h, [
@@ -2104,7 +2109,7 @@ case "X-$enable_parallel" in
       fi
 
       dnl Change to the C language
-      AC_LANG_C
+      AC_LANG_POP(Fortran)
     fi
 
     dnl Set RUNPARALLEL to mpirun if not set yet.
