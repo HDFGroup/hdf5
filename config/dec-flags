@@ -12,8 +12,18 @@
 #
 if test X = "X$cc_flags_set"; then
     cc_vendor=DEC
-    cc_version="`$CC $CFLAGS -V 2>&1 |head -1 |\
-	        sed 's/.*DEC C \(V[0-9][-\.0-9]*\).*/\1/'`"
+    cc_version="`$CC $CFLAGS -V 2>&1 |head -1`"
+    case "$cc_version" in
+	DEC*)
+	    cc_version="`echo $cc_version |\
+			sed 's/.*DEC C \(V[0-9][-\.0-9]*\).*/\1/'`"
+	;;
+	Compaq*)
+	    cc_version="`echo $cc_version |\
+			sed 's/.*Compaq C \(V[0-9][-\.0-9]*\).*/\1/'`"
+	;;
+    esac
+
     if test X != "$gcc_version"; then
 	echo "compiler '$CC' is $cc_vendor-$cc_version"
     else
@@ -39,15 +49,32 @@ esac
 case "$cc_vendor-$cc_version" in
     DEC-V5.*)
 	# Production
-	PROD_CFLAGS="-g0 -verbose -warnprotos -std -O4 $ARCH -ansi_args -fp_reorder -readonly_strings -inline speed"
+	PROD_CFLAGS="-std -verbose -warnprotos -ieee -misalign -O4 $ARCH -ansi_args -fp_reorder -readonly_strings -inline speed"
 	PROD_CPPFLAGS="-D_INTRINSICS -D_INLINE_INTRINSICS"
 
 	# Debug
-	DEBUG_CFLAGS="-g -std -verbose -warnprotos"
+	DEBUG_CFLAGS="-g -std -verbose -warnprotos -ieee -misalign"
 	DEBUG_CPPFLAGS=
 
 	# Profile
-	PROFILE_CFLAGS="-pg -std -verbose -warnprotos"
+	PROFILE_CFLAGS="-pg -std -verbose -warnprotos -ieee -misalign"
+	PROFILE_CPPFLAGS=
+
+	# Flags are set
+	cc_flags_set=yes
+	;;
+
+    DEC-V6.*)
+	# Production
+	PROD_CFLAGS="-std1 -verbose -warnprotos -ieee -misalign -O4 $ARCH -fp_reorder -readonly_strings -inline speed"
+	PROD_CPPFLAGS="-D_INTRINSICS -D_INLINE_INTRINSICS"
+
+	# Debug
+	DEBUG_CFLAGS="-g -std1 -verbose -warnprotos -ieee -misalign"
+	DEBUG_CPPFLAGS=
+
+	# Profile
+	PROFILE_CFLAGS="-pg -std1 -verbose -warnprotos -ieee -misalign"
 	PROFILE_CPPFLAGS=
 
 	# Flags are set
