@@ -380,11 +380,12 @@ done:
 static H5Z_node *
 H5Z_parse_expression(H5Z_token *current)
 {
+    H5Z_node *expr;
     void*         ret_value=NULL;
-    
-    FUNC_ENTER_NOAPI(H5Z_parse_expression, NULL)
 
-    H5Z_node *expr = H5Z_parse_term(current);
+    FUNC_ENTER_NOAPI_NOINIT(H5Z_parse_expression)
+
+    expr = H5Z_parse_term(current);
 
     for (;;) {
         H5Z_node *new_node;
@@ -447,8 +448,6 @@ H5Z_parse_expression(H5Z_token *current)
 
 done:
     FUNC_LEAVE_NOAPI(expr)
-        
-
 }
 
 

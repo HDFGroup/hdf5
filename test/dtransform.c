@@ -60,7 +60,7 @@ int main()
             windchillCcalc[row][col] = (5/9.0)*(windchillF[row][col] - 32);
     }
     
-    if( (compare(windchillCread, windchillCcalc)) == 0)
+    if( (compare((int*)windchillCread, (int*)windchillCcalc)) == 0)
     {
         fprintf(stderr, "ERROR: Conversion failed to match computed data\n");
         TEST_ERROR;
@@ -68,7 +68,7 @@ int main()
     else
     {
         err = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFread);
-        if( (compare(windchillF, windchillFread)) == 0)
+        if( (compare((int *)windchillF, (int *)windchillFread)) == 0)
         {
             fprintf(stderr, "ERROR: Conversion failed to match computed data\n");
             TEST_ERROR;
