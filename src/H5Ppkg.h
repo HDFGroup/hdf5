@@ -38,7 +38,7 @@
 #include "H5Pprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5TBprivate.h"	/* TBBTs	  		        */
+#include "H5TBprivate.h"	/* Threaded, balanced, binary trees (TBBTs) */
 
 /* Define enum for type of object that property is within */
 typedef enum {
