@@ -39,7 +39,9 @@ static char RcsId[] = "@(#)$Revision$";
 #include <H5Mprivate.h> /* Meta-Object API */
 #include <H5Dprivate.h> /* Dataset functions */
 #include <H5Eprivate.h> /* Error handling */
+#include <H5Gprivate.h> /* Symbol tables */
 #include <H5Mprivate.h> /* Meta data */
+#include <H5Oprivate.h> /* Object headers */
 
 #define PABLO_MASK	H5D_mask
 
@@ -261,6 +263,8 @@ herr_t H5D_flush(hatom_t oid)
 {
     H5D_dataset_t *dataset;         /* dataset object to release */
     herr_t        ret_value = SUCCEED;
+    hdf5_file_t	  *file = NULL;
+    H5G_entry_t	  d_sym;
 
     FUNC_ENTER(H5D_flush, H5D_init_interface, FAIL);
 
@@ -270,65 +274,76 @@ herr_t H5D_flush(hatom_t oid)
     /* Get the object */
     if((dataset=H5Aatom_object(oid))==NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+    
     /* Check if we have information to flush to the file... */
-    if(dataset->modified==BTRUE)
-      {
-#if 0
-        /* Check if we need to create the dataset header and insert the dataset in the file's hierarchy */
-        if(dataset->header==0)
-          {
-            H5G_entry_t d_sym;
-            H5F_root_symtype_t root_type=H5F_root_type(dataset->file);
-            hdf5_file_t *file;
-            group_t dset_parent=H5Aatom_group(dataset->parent);
+    if (dataset->modified) {
+       /* Get the dataset's file... (I'm not fond of this. -QAK) */
+       if((file=H5Aatom_object(dataset->file))==NULL)
+	  HGOTO_ERROR(H5E_INTERNAL, H5E_BADATOM, FAIL);
 
-            /* Get the dataset's file... (I'm not fond of this. -QAK) */
-            if((file=H5Aatom_object(dataset->file))==NULL)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_BADATOM, FAIL);
 
-            /* Flush object header, etc. to the file... */
-            if(root_type==H5F_ROOT_ERROR)
-                HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL);
+       if (dataset->header<=0) {
+	  /*
+	   * Create the object header.
+	   */
+	  if ((dataset->header = H5O_new (file, 0, H5D_MINHDR_SIZE))<0) {
+	     HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't create header*/
+	  }
 
-            /* construct dataset symbol-table entry */
-            d_sym.name_off=0;
-            /* allocate the dataset's object header */
-            if((d_sym.header=H5O_new(file, 0, H5D_MINHDR_SIZE))<0)
-                HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
-            d_sym.type=H5G_NOTHING_CACHED;
-            dataset->header=d_sym.header;
+	  /*
+	   * Start creating the symbol table entry.  Inserting messages
+	   * into the header may cache things in this entry.
+	   */
+	  d_sym.header = dataset->header;
+	  d_sym.type = H5G_NOTHING_CACHED;
 
-            /* Insert dataset into parent directory, if there is one */
-            if(dset_parent!=H5_FILE ||
-                    (dset_parent==H5_FILE && root_type==H5F_ROOT_DIRECTORY))
-              {
-                /* Insert the dataset into the parent directory */
-                if(H5G_insert (file, NULL, NULL, dataset->name, &d_sym)==FAIL)
-                    HGOTO_ERROR(H5E_DIRECTORY, H5E_CANTINSERT, FAIL);
-              } /* end if */
-            else    /* insert dataset as root-object, or into root-directory */
-              {
-                if(root_type==H5F_ROOT_DATASET || H5F_ROOT_UNKNOWN)
-                  {
-                    /* Make the root directory and stuff the dataset into it */
-                    if(H5G_mkroot (file, H5G_DEFAULT_ROOT_SIZE)==FAIL)
-                        HGOTO_ERROR(H5E_DIRECTORY, H5E_CANTCREATE, FAIL);
-                    if(H5G_insert (file, NULL, NULL, dataset->name, &d_sym)==FAIL)
-                        HGOTO_ERROR(H5E_DIRECTORY, H5E_CANTINSERT, FAIL);
-                  } /* end if */
-                else
-                  {
-                    /* Set the root of the file to point to the dataset */
-                    if(root_type==H5F_ROOT_NONE)
-                        H5G_set_root(file, dataset->name, &d_sym);
-                  } /* end else */
-              } /* end else */
-            
-            /* Add the appropriate messages for the dataset */
-          } /* end if */
+	  /*
+	   * Write the necessary messages to the header.
+	   */
+	            /*
+		     * Quincey?  It should be just a matter of filling in the
+		     * appropriate H5O_*_t struct and passing it to
+		     * H5O_modify() along with &d_sym.
+		     */
+
+
+	  /*
+	   * Give the object header a name so others can access it.
+	   */
+#if 1 /* SEE_BELOW */
+	  d_sym.type = H5G_NOTHING_CACHED;
 #endif
-      } /* end if */
+	  if (H5G_insert (file, file->root_sym, NULL, dataset->name,
+			  &d_sym)<0) {
+	     HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL); /*can't name header*/
+	  }
+	     
 
+       } else {
+	  /*
+	   * Update existing header messages if necessary.  If updating the
+	   * header messages changes the symbol table entry because new
+	   * info is cached, then we must re-insert the symbol entry into
+	   * the directory.  I'm still working on caching things in symbol
+	   * table entries, so the easiest thing to do is:
+	   *
+	   * 	A. Don't change any messages, or
+	   *	B. Don't let the message cache anything, or
+	   *	C. Uncomment the `SEE_BELOW' statement above.
+	   */
+	  
+	             /*
+		      *	Quincey? It should be just a matter of filling in the
+		      *	appropriate H5O_*_t structs and passing them to
+		      *	H5O_modify(). Don't worry about caching things in
+		      *	the symbol table entry yet (pass NULL for the
+		      *	symbol table entry).
+		      */
+
+       }
+       dataset->modified = FALSE;
+    }
+       
 done:
   if(ret_value == FAIL)   
     { /* Error condition cleanup */
