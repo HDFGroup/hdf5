@@ -55,6 +55,7 @@
 ./config/hpux11.00
 ./config/hpux9.03
 ./config/i386-pc-cygwin32
+./config/ia64-linux-gnu
 ./config/intel-osf1
 ./config/irix5.x
 ./config/irix6.x
@@ -545,6 +546,7 @@
 ./fortran/config/hpux11.00
 ./fortran/config/hpux9.03
 ./fortran/config/i386-pc-cygwin32
+./fortran/config/ia64-linux-gnu
 ./fortran/config/intel-osf1
 ./fortran/config/irix5.x
 ./fortran/config/irix6.x
