@@ -1,9 +1,0 @@
-#############################
-Expected output for 'h5diff dset1.1 dset1.5 h5diff_test1.h5 h5diff_test2.h5'
-#############################
-$h5diff dset1.1 dset1.5 h5diff_test1.h5 h5diff_test2.h5
-Comparing <dset1.1> with <dset1.5>
-<dset1.1> is of rank 1 and <dset1.5> is of rank 2
-<dset1.1>: [ 7 ]
-<dset1.5>: [ 3 ]
-

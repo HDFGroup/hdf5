@@ -1,6 +1,0 @@
-#############################
-Expected output for 'h5diff dset1.1 compound h5diff_test1.h5 h5diff_test1.h5'
-#############################
-$h5diff dset1.1 compound h5diff_test1.h5 h5diff_test1.h5
-<dset1.1> in <h5diff_test1.h5> is of different type than <compound> in <h5diff_test1.h5>
-

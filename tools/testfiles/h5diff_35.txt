@@ -1,8 +1,0 @@
-#############################
-Expected output for 'h5diff h5diff_test4.h5 h5diff_test3.h5'
-#############################
-$h5diff h5diff_test4.h5 h5diff_test3.h5
-</dset_A> found in <h5diff_test4.h5> and </dset_A> found in <h5diff_test3.h5>
-</dset_B> is in <h5diff_test3.h5>, but not in <h5diff_test4.h5>
-</dset_C> is in <h5diff_test4.h5>, but not in <h5diff_test3.h5>
-

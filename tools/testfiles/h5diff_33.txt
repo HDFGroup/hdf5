@@ -1,6 +1,0 @@
-#############################
-Expected output for 'h5diff dset_C dset_A h5diff_test3.h5 h5diff_test4.h5'
-#############################
-$h5diff dset_C dset_A h5diff_test3.h5 h5diff_test4.h5
-Object <dset_C> could not be found in <h5diff_test3.h5>
-

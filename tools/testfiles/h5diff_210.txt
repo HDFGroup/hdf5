@@ -1,6 +1,0 @@
-#############################
-Expected output for 'h5diff dset2.1 dset2.2 h5diff_test1.h5 h5diff_test2.h5'
-#############################
-$h5diff dset2.1 dset2.2 h5diff_test1.h5 h5diff_test2.h5
-Cannot open dataset <dset2.1>
-

@@ -1,6 +1,0 @@
-#############################
-Expected output for 'h5diff soft soft h5diff_test1.h5 h5diff_test1.h5'
-#############################
-$h5diff soft soft h5diff_test1.h5 h5diff_test1.h5
-<soft> and <soft> are of type H5G_LINK
-

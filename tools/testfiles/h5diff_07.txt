@@ -1,5 +1,0 @@
-#############################
-Expected output for 'h5diff h5diff_test1.h6 h5diff_test2.h6'
-#############################
-$h5diff h5diff_test1.h6 h5diff_test2.h6
-h5diff: h5diff_test1.h6: No such file or directory

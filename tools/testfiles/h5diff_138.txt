@@ -1,7 +1,0 @@
-#############################
-Expected output for 'h5diff dset1.3.8 h5diff_test1.h5 h5diff_test1.h5'
-#############################
-$h5diff dset1.3.8 h5diff_test1.h5 h5diff_test1.h5
-Comparing <dset1.3.8> with <dset1.3.8>
-H5T_ARRAY comparison is not supported
-

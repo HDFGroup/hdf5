@@ -1,6 +1,0 @@
-#############################
-Expected output for 'h5diff g1.1 g1.1 h5diff_test1.h5 h5diff_test2.h5'
-#############################
-$h5diff g1.1 g1.1 h5diff_test1.h5 h5diff_test2.h5
-<g1.1> and <g1.1> are of type H5G_GROUP
-
