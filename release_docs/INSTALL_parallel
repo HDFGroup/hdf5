@@ -34,7 +34,7 @@ to the next section for more detailed explanations.
 Know parallel compilers
 ------
 
-HDF5 knows serveral parallel compilers: mpicc, hcc, mpcc, mpcc_r.
+HDF5 knows several parallel compilers: mpicc, hcc, mpcc, mpcc_r.
 To build parallel HDF5 with one of the above, just set CC as it
 and configure.  The "--enable-parallel" is optional in this case.
 
@@ -48,7 +48,7 @@ and configure.  The "--enable-parallel" is optional in this case.
 TFLOPS
 ------
 
-Follow the instuctions in INSTALL_TFLOPS.
+Follow the instructions in INSTALL_TFLOPS.
 
 -------
 IBM SP
@@ -75,6 +75,18 @@ Then do the following steps:
     $ make check	# verify the correctness
     $ make install
 
+
+We also suggest that you add "-qxlf90=autodealloc" to FFLAGS when 
+building parallel with fortran enabled.  This can be done by invoking:
+
+    setenv FFLAGS -qxlf90=autodealloc		# 32 bit build
+
+or
+
+    setenv FFLAGS "-q64 -qxlf90=autodealloc"	# 64 bit build
+
+prior to running configure.  Recall that the "-q64" is necessary
+for 64 bit builds.
 
 ---------------
 SGI Origin 2000
@@ -213,9 +225,9 @@ Parallel HDF5.  It usually exits with non-zero code if a required MPI-IO
 feature does not succeed as expected.  One exception is the testing of
 accessing files larger than 2GB.  If the underlaying filesystem or if
 the MPI-IO library fails to handle file sizes larger than 2GB, the test
-will print informational essages stating the failure but will not exit
+will print informational messages stating the failure but will not exit
 with non-zero code.  Failure to support file size greater than 2GB is
-not a fatal error for HDF5 becuase HDF5 can use other file-drivers such
+not a fatal error for HDF5 because HDF5 can use other file-drivers such
 as families of files to by pass the file size limit.
 
 By default, the parallel tests use the current directory as the test directory.
