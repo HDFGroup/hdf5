@@ -114,6 +114,22 @@ test_create(hid_t file)
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
     assert(create_parms >= 0);
+
+    /* Attempt to create a dataset with invalid chunk sizes */
+    csize[0] = dims[0]*2;
+    csize[1] = dims[1]*2;
+    status = H5Pset_chunk(create_parms, 2, csize);
+    assert(status >= 0);
+    H5E_BEGIN_TRY {
+        dataset = H5Dcreate(file, DSET_CHUNKED_NAME, H5T_NATIVE_DOUBLE, space,
+			create_parms);
+    } H5E_END_TRY;
+    if (dataset >= 0) {
+	FAILED();
+	puts("    Opened a dataset with incorrect chunking parameters.");
+	goto error;
+    }
+
     csize[0] = 5;
     csize[1] = 100;
     status = H5Pset_chunk(create_parms, 2, csize);
