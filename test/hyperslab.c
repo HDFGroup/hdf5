@@ -15,6 +15,9 @@
 #include <H5MMprivate.h>
 #include <H5Vprivate.h>
 
+#ifndef HAVE_FUNCTION
+#define __FUNCTION__ ""
+#endif
 #define AT() printf ("   at %s:%d in %s()\n",__FILE__,__LINE__,__FUNCTION__);
 
 #define TEST_SMALL	0x0001

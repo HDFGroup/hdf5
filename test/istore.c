@@ -30,6 +30,9 @@
 #define TEST_MEDIUM	0x0002
 #define TEST_LARGE	0x0004
 
+#ifndef HAVE_FUNCTION
+#define __FUNCTION__ ""
+#endif
 #define AT() printf ("   at %s:%d in %s()...\n",			    \
 		     __FILE__, __LINE__, __FUNCTION__);
 

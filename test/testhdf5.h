@@ -24,6 +24,7 @@
  * so we include the private headers here.
  */
 #include <H5private.h>
+#include <H5Eprivate.h>
 
 extern int num_errs;
 extern int Verbosity;
@@ -32,7 +33,7 @@ extern int Verbosity;
 /* Used to make certain a return value _is_not_ a value */
 #define CHECK(ret, val, where) \
 do {if (Verbosity>9) print_func("   Call to routine: %15s at line %4d in %s returned %ld \n",where,(int)__LINE__,__FILE__,(long)ret);\
-if(ret == val) {print_func("*** UNEXPECTED RETURN from %s is %ld at line %4d in %s\n", where, (long)ret, (int)__LINE__,__FILE__); num_errs++;} \
+if(ret == val) {print_func("*** UNEXPECTED RETURN from %s is %ld at line %4d in %s\n", where, (long)ret, (int)__LINE__,__FILE__); num_errs++;H5Eprint (H5E_thrdid_g, stdout);} \
 } while(0)
 
 #define CHECK_I(ret,where) {						      \
@@ -43,6 +44,7 @@ if(ret == val) {print_func("*** UNEXPECTED RETURN from %s is %ld at line %4d in 
    if ((ret)<0) {							      \
       print_func ("*** UNEXPECTED RETURN from %s is %ld line %4d in %s\n",    \
 		  (where), (long)(ret), (int)__LINE__, __FILE__);	      \
+      H5Eprint (H5E_thrdid_g, stdout);					      \
       num_errs++;							      \
    }									      \
 }
@@ -55,6 +57,7 @@ if(ret == val) {print_func("*** UNEXPECTED RETURN from %s is %ld at line %4d in 
    if (!(ret)) {							      \
       print_func ("*** UNEXPECTED RETURN from %s is NULL line %4d in %s\n",   \
 		  (where), (int)__LINE__, __FILE__);			      \
+      H5Eprint (H5E_thrdid_g, stdout);					      \
       num_errs++;							      \
    }									      \
 }
@@ -62,7 +65,7 @@ if(ret == val) {print_func("*** UNEXPECTED RETURN from %s is %ld at line %4d in 
 /* Used to make certain a return value _is_ a value */
 #define VERIFY(x, val, where) \
 do {if (Verbosity>9) print_func("   Call to routine: %15s at line %4d in %s had value %ld \n",where,(int)__LINE__,__FILE__,(long)x);\
-if(x != val) {print_func("*** UNEXPECTED VALUE from %s is %ld at line %4d in %s\n", where, (long)x,(int)__LINE__,__FILE__); num_errs++;} \
+if(x != val) {print_func("*** UNEXPECTED VALUE from %s is %ld at line %4d in %s\n", where, (long)x,(int)__LINE__,__FILE__); H5Eprint (H5E_thrdid_g, stdout); num_errs++;} \
 } while(0)
 
 /* Used to document process through a test and to check for errors */
@@ -70,7 +73,7 @@ if(x != val) {print_func("*** UNEXPECTED VALUE from %s is %ld at line %4d in %s\
 do { \
 if (Verbosity>8) print_func("   Call to routine: %15s at line %4d in %s returned %ld \n",func,(int)__LINE__,__FILE__,(long)ret); \
 if (Verbosity>9) HEprint(stdout,0); \
-if(ret == FAIL) {print_func("*** UNEXPECTED RETURN from %s is %ld at line %4d in %s\n", func, (long)ret,(int)__LINE__,__FILE__); num_errs++;} \
+if(ret == FAIL) {print_func("*** UNEXPECTED RETURN from %s is %ld at line %4d in %s\n", func, (long)ret,(int)__LINE__,__FILE__); H5Eprint (H5E_thrdid_g, stdout); num_errs++;} \
 } while(0)
 
 /* Used to document process through a test */

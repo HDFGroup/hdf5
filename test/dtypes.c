@@ -12,6 +12,9 @@
 #include <unistd.h>
 
 
+#ifndef HAVE_FUNCTION
+#define __FUNCTION__ ""
+#endif
 #define AT() printf ("   at %s:%d in %s()...\n",			    \
 		     __FILE__, __LINE__, __FUNCTION__);
 

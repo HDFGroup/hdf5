@@ -13,6 +13,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#ifndef HAVE_FUNCTION
+#define __FUNCTION__ ""
+#endif
 #define AT() printf ("   at %s:%d in %s()...\n",			    \
 		     __FILE__, __LINE__, __FUNCTION__);
 
@@ -41,7 +44,7 @@ static herr_t
 test_create (hid_t file)
 {
    hid_t	dataset, space, create_parms;
-   intn		dims[2];
+   size_t	dims[2];
    herr_t	status;
    size_t	csize[2];
    
@@ -206,7 +209,8 @@ test_simple_io (hid_t file)
    hid_t	dataset, space;
    herr_t	status;
    int		points[100][200], check[100][200];
-   int		i, j, n, dims[2];
+   int		i, j, n;
+   size_t	dims[2];
 
    printf ("%-70s", "Testing simple I/O");
 
