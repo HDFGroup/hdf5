@@ -60,8 +60,7 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><center>
+<hr><!-- #EndLibraryItem --><center>
 <h1>H5: General Library Functions</h1>
 </center>
 
@@ -96,29 +95,36 @@ and it users.
 
 <table border="0">
   <tr>
+
     <td valign="top">
+	<ul>
       <li><a href="#Library-VersCheck">H5check_version</a>
       <li><a href="#Library-Close">H5close</a>
-      <li><a href="#Library-DontAtExit">H5dont_atexit</a>      
+      <li><a href="#Library-DontAtExit">H5dont_atexit</a>
+	</ul>
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#Library-GarbageCollect">H5garbage_collect</a>
       <li><a href="#Library-Version">H5get_libversion</a>
       <li><a href="#Library-Open">H5open</a>
+	</ul>
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
     
     <td valign="top">
+	<ul>
       <li><a href="#Library-SetFreeListLimits">H5set_free_list_limits</a>
+	</ul>
     </td>
   </tr>
 </table>
 
-<p>
+<br>
 <strong>The FORTRAN90 Interfaces:</strong>
 
 <br>
@@ -132,6 +138,7 @@ information.  You will probably want to adjust the size and location of
 this external window so that both browser windows are visible and to 
 facilitate moving easily between them.</i>
 </font>
+<br>
 
 <table border=0>
 <tr><td valign=top>
@@ -153,250 +160,9 @@ facilitate moving easily between them.</i>
 </td></tr>
 </table>
 
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Library-Open">H5open</a>
-<dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5open</code>(<em>void</em>)
-<dt><strong>Purpose:</strong>
-    <dd>Initializes the HDF5 library.
-<dt><strong>Description:</strong>
-    <dd><code>H5open</code> initialize the library.  This function is 
-        normally called automatically, but if you find that an 
-        HDF5 library function is failing inexplicably, try calling 
-        this function first.
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt>None.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5_FORTRAN.html#h5open_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Library-Close">H5close</a>
-<dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5close</code>(<em>void</em>)
-<dt><strong>Purpose:</strong>
-    <dd>Flushes all data to disk, closes file identifiers, and cleans up memory.
-<dt><strong>Description:</strong>
-    <dd><code>H5close</code> flushes all data to disk, 
-        closes all file identifiers, and cleans up all memory used by
-        the library.  This function is generally called when the 
-        application calls <code>exit</code>, but may be called earlier 
-        in event of an emergency shutdown or out of desire to free all 
-        resources used by the HDF5 library.
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt>None.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5_FORTRAN.html#h5close_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Library-SetFreeListLimits">H5set_free_list_limits</a>
-<dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5set_free_list_limits</code>(<em>int</em> <code>reg_global_lim</code>, 
-                        <em>int</em> <code>reg_list_lim</code>, 
-			<em>int</em> <code>arr_global_lim</code>,
-                        <em>int</em> <code>arr_list_lim</code>, 
-			<em>int</em> <code>blk_global_lim</code>, 
-			<em>int</em> <code>blk_list_lim</code>
-                        )
-<dt><strong>Purpose:</strong>
-    <dd>Sets  free-list size limits.
-<dt><strong>Description:</strong>
-    <dd><code>H5set_free_list_limits</code> sets size limits 
-        on all types of free lists.
-	The HDF5 library uses free lists internally to manage memory.
-	There are three types of free lists:
-	<ul><li><span class=termDef>Regular</span> 
-	        free lists manage a single data structure.
-	    <li><span class=termDef>Array</span> 
-	        free lists manage arrays of a data structure.
-	    <li><span class=termDef>Block</span> 
-	        free lists manage blocks of bytes.
-	</ul> 
-	<em>Alternate phrasing?</em>:
-	<ul><li><span class=termDef>Regular</span> 
-	        free lists manage data structures containing atomic data.
-	    <li><span class=termDef>Array</span> 
-	        free lists manage data structures containing array data.
-	    <li><span class=termDef>Block</span> 
-	        free lists manage blocks of bytes.
-	</ul> 
-	<p>
-	These are global limits, but each limit applies only to 
-        free lists of the specified type. 
-        Therefore, if an application sets a 1Mb limit on each of 
-        the global lists, up to 3Mb of total storage might be 
-	allocated, 1Mb for each of the regular, array, and 
-	block type lists.
-	<p>
-        Using a value of <code?>-1</code> for a limit means that 
-	no limit is set for the specified type of free list.  
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>int</em> <code>reg_global_lim</code>
-	    <dd>IN: The limit on all regular free list memory used
-        <dt><em>int</em> <code>reg_list_lim</code>
-	    <dd>IN: The limit on memory used in each regular free list
-        <dt><em>int</em> <code>arr_global_lim</code>
-	    <dd>IN: The limit on all array free list memory used
-        <dt><em>int</em> <code>arr_list_lim</code>
-	    <dd>IN: The limit on memory used in each array free list
-        <dt><em>int</em> <code>blk_global_lim</code>
-	    <dd>IN: The limit on all block free list memory used
-        <dt><em>int</em> <code>blk_list_lim</code>
-	    <dd>IN: The limit on memory used in each block free list
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5_FORTRAN.html#h5set_free_list_limits_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-         <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Library-GarbageCollect">H5garbage_collect</a>
-<dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5garbage_collect</code>(<em>void</em>)
-<dt><strong>Purpose:</strong>
-    <dd>Garbage collects on all free-lists of all types.
-<dt><strong>Description:</strong>
-    <dd><code>H5garbage_collect</code> walks through all the garbage 
-        collection routines of the library, freeing any unused memory. 
-        <p>
-        It is not required that <code>H5garbage_collect</code> be called 
-        at any particular time; it is only necessary in certain situations 
-        where the application has performed actions that cause the library 
-        to allocate many objects.  The application should call
-        <code>H5garbage_collect</code> if it eventually releases those 
-        objects and wants to reduce the memory used by the library from
-        the peak usage required.  
-        <p>
-        The library automatically garbage collects all the free lists 
-        when the application ends.
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt>None.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5_FORTRAN.html#h5garbage_collect_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Library-DontAtExit">H5dont_atexit</a>
-<dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5dont_atexit</code>(<em>void</em>)
-<dt><strong>Purpose:</strong>
-    <dd>Instructs library not to install <code>atexit</code> cleanup routine.
-<dt><strong>Description:</strong>
-    <dd><code>H5dont_atexit</code> indicates to the library that an 
-        <code>atexit()</code> cleanup routine should not be installed.  
-        The major purpose for this is in situations where the 
-        library is dynamically linked into an application and is 
-        un-linked from the application before <code>exit()</code> gets 
-        called.  In those situations, a routine installed with 
-        <code>atexit()</code> would jump to a routine which was 
-        no longer in memory, causing errors.
-        <p>
-        In order to be effective, this routine <em>must</em> be called 
-        before any other HDF function calls, and must be called each 
-        time the library is loaded/linked into the application 
-        (the first time and after it's been un-loaded).
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt>None.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5_FORTRAN.html#h5dont_atexit_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Library-Version">H5get_libversion</a>
-<dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5get_libversion</code>(<em>unsigned *</em><code>majnum</code>,
-            <em>unsigned *</em><code>minnum</code>,
-            <em>unsigned *</em><code>relnum</code>
-        )
-<dt><strong>Purpose:</strong>
-    <dd>Returns the HDF library release number.
-<dt><strong>Description:</strong>
-    <dd><code>H5get_libversion</code> retrieves the major, minor, and release
-        numbers of the version of the HDF library which is linked to 
-        the application.
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>unsigned *</em><code>majnum</code>
-            <dd>OUT: The major version of the library.
-        <dt><em>unsigned *</em><code>minnum</code>
-            <dd>OUT: The minor version of the library.
-        <dt><em>unsigned *</em><code>relnum</code>
-            <dd>OUT: The release number of the library.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5_FORTRAN.html#h5get_libversion_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
+<!-- NEW PAGE -->
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5check_version" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Library-VersCheck">H5check_version</a>
@@ -493,6 +259,257 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5close" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Library-Close">H5close</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5close</code>(<em>void</em>)
+<dt><strong>Purpose:</strong>
+    <dd>Flushes all data to disk, closes file identifiers, and cleans up memory.
+<dt><strong>Description:</strong>
+    <dd><code>H5close</code> flushes all data to disk, 
+        closes all file identifiers, and cleans up all memory used by
+        the library.  This function is generally called when the 
+        application calls <code>exit</code>, but may be called earlier 
+        in event of an emergency shutdown or out of desire to free all 
+        resources used by the HDF5 library.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt>None.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5_FORTRAN.html#h5close_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5H5dont_atexit" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Library-DontAtExit">H5dont_atexit</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5dont_atexit</code>(<em>void</em>)
+<dt><strong>Purpose:</strong>
+    <dd>Instructs library not to install <code>atexit</code> cleanup routine.
+<dt><strong>Description:</strong>
+    <dd><code>H5dont_atexit</code> indicates to the library that an 
+        <code>atexit()</code> cleanup routine should not be installed.  
+        The major purpose for this is in situations where the 
+        library is dynamically linked into an application and is 
+        un-linked from the application before <code>exit()</code> gets 
+        called.  In those situations, a routine installed with 
+        <code>atexit()</code> would jump to a routine which was 
+        no longer in memory, causing errors.
+        <p>
+        In order to be effective, this routine <em>must</em> be called 
+        before any other HDF function calls, and must be called each 
+        time the library is loaded/linked into the application 
+        (the first time and after it's been un-loaded).
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt>None.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5_FORTRAN.html#h5dont_atexit_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5garbage_collect" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Library-GarbageCollect">H5garbage_collect</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5garbage_collect</code>(<em>void</em>)
+<dt><strong>Purpose:</strong>
+    <dd>Garbage collects on all free-lists of all types.
+<dt><strong>Description:</strong>
+    <dd><code>H5garbage_collect</code> walks through all the garbage 
+        collection routines of the library, freeing any unused memory. 
+        <p>
+        It is not required that <code>H5garbage_collect</code> be called 
+        at any particular time; it is only necessary in certain situations 
+        where the application has performed actions that cause the library 
+        to allocate many objects.  The application should call
+        <code>H5garbage_collect</code> if it eventually releases those 
+        objects and wants to reduce the memory used by the library from
+        the peak usage required.  
+        <p>
+        The library automatically garbage collects all the free lists 
+        when the application ends.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt>None.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5_FORTRAN.html#h5garbage_collect_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5get_libversion" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Library-Version">H5get_libversion</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5get_libversion</code>(<em>unsigned *</em><code>majnum</code>,
+            <em>unsigned *</em><code>minnum</code>,
+            <em>unsigned *</em><code>relnum</code>
+        )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the HDF library release number.
+<dt><strong>Description:</strong>
+    <dd><code>H5get_libversion</code> retrieves the major, minor, and release
+        numbers of the version of the HDF library which is linked to 
+        the application.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>unsigned *</em><code>majnum</code>
+            <dd>OUT: The major version of the library.
+        <dt><em>unsigned *</em><code>minnum</code>
+            <dd>OUT: The minor version of the library.
+        <dt><em>unsigned *</em><code>relnum</code>
+            <dd>OUT: The release number of the library.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5_FORTRAN.html#h5get_libversion_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5open" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Library-Open">H5open</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5open</code>(<em>void</em>)
+<dt><strong>Purpose:</strong>
+    <dd>Initializes the HDF5 library.
+<dt><strong>Description:</strong>
+    <dd><code>H5open</code> initialize the library.  This function is 
+        normally called automatically, but if you find that an 
+        HDF5 library function is failing inexplicably, try calling 
+        this function first.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt>None.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd>
+<a href="fortran/h5_FORTRAN.html#h5open_f" target="FortranWin">
+<img src="Graphics/FORTRAN.gif" border=0></a>
+
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5set_free_list_limits" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Library-SetFreeListLimits">H5set_free_list_limits</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5set_free_list_limits</code>(<em>int</em> <code>reg_global_lim</code>, 
+                        <em>int</em> <code>reg_list_lim</code>, 
+			<em>int</em> <code>arr_global_lim</code>,
+                        <em>int</em> <code>arr_list_lim</code>, 
+			<em>int</em> <code>blk_global_lim</code>, 
+			<em>int</em> <code>blk_list_lim</code>
+                        )
+<dt><strong>Purpose:</strong>
+    <dd>Sets  free-list size limits.
+<dt><strong>Description:</strong>
+    <dd><code>H5set_free_list_limits</code> sets size limits 
+        on all types of free lists.
+	The HDF5 library uses free lists internally to manage memory.
+	There are three types of free lists:
+	<ul><li><span class=termDef>Regular</span> 
+	        free lists manage a single data structure.
+	    <li><span class=termDef>Array</span> 
+	        free lists manage arrays of a data structure.
+	    <li><span class=termDef>Block</span> 
+	        free lists manage blocks of bytes.
+	</ul> 
+	<em>Alternate phrasing?</em>:
+	<ul><li><span class=termDef>Regular</span> 
+	        free lists manage data structures containing atomic data.
+	    <li><span class=termDef>Array</span> 
+	        free lists manage data structures containing array data.
+	    <li><span class=termDef>Block</span> 
+	        free lists manage blocks of bytes.
+	</ul> 
+	<p>
+	These are global limits, but each limit applies only to 
+        free lists of the specified type. 
+        Therefore, if an application sets a 1Mb limit on each of 
+        the global lists, up to 3Mb of total storage might be 
+	allocated, 1Mb for each of the regular, array, and 
+	block type lists.
+	<p>
+        Using a value of <code>-1</code> for a limit means that 
+	no limit is set for the specified type of free list.  
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>int</em> <code>reg_global_lim</code>
+	    <dd>IN: The limit on all regular free list memory used
+        <dt><em>int</em> <code>reg_list_lim</code>
+	    <dd>IN: The limit on memory used in each regular free list
+        <dt><em>int</em> <code>arr_global_lim</code>
+	    <dd>IN: The limit on all array free list memory used
+        <dt><em>int</em> <code>arr_list_lim</code>
+	    <dd>IN: The limit on memory used in each array free list
+        <dt><em>int</em> <code>blk_global_lim</code>
+	    <dd>IN: The limit on all block free list memory used
+        <dt><em>int</em> <code>blk_list_lim</code>
+	    <dd>IN: The limit on memory used in each block free list
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5_FORTRAN.html#h5set_free_list_limits_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+         <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
 <center>
@@ -527,14 +544,15 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.0, July 2003
-</address><!-- #EndLibraryItem -->
- 
-Last modified: 6 June 2003 
+</address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
+<!--
+document.writeln("Last modified: 3 October 2003");
+-->
+</SCRIPT>
 
 </body>
 </html>
