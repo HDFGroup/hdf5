@@ -40,7 +40,7 @@
 #include <winsock.h>
 
 #define H5FD_STREAM_SOCKET_TYPE            SOCKET
-#define H5FD_STREAM_INVALID_SOCKET         SOCKET_ERROR
+#define H5FD_STREAM_INVALID_SOCKET         INVALID_SOCKET
 
 #endif
 
@@ -59,11 +59,13 @@ typedef int (*H5FD_stream_broadcast_t) (unsigned char **file,
 typedef struct H5FD_stream_fapl_t
 {
   size_t       increment;            /* how much to grow memory in reallocs  */
-  H5FD_STREAM_SOCKET_TYPE socket;    /* external socket descriptor           */
+  H5FD_STREAM_SOCKET_TYPE socket;    /* externally provided socket descriptor*/
   hbool_t      do_socket_io;         /* do I/O on socket                     */
   int          backlog;              /* backlog argument for listen call     */
   H5FD_stream_broadcast_t broadcast_fn; /* READ broadcast callback           */
   void        *broadcast_arg;        /* READ broadcast callback user argument*/
+  unsigned int maxhunt;              /* how many more ports to try to bind to*/
+  unsigned short int port;           /* port a socket was bound/connected to */
 } H5FD_stream_fapl_t;
 
 
