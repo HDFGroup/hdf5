@@ -15,12 +15,11 @@
 
 #ifndef _H5f90i_H
 #define _H5f90i_H
-
-/* 
- * Standard header files needed all the time 
+/*
+ * This file is identical to the copy in hdf5/fortran/src except for
+ * the following line.
  */
-
-#include "H5private.h"
+/* #include "H5private.h" */
 
 #if (defined (UNICOS) || (defined (_UNICOS)))
 
