@@ -22,6 +22,8 @@
 #define FILE15 "tenum.h5"
 #define FILE16 "tobjref.h5"
 #define FILE17 "tdatareg.h5"
+#define FILE18 "tnestedcomp.h5"
+
 #define LENSTR 50
 #define LENSTR2 11
 
@@ -1569,6 +1571,76 @@ void test_datareg(void){
     free(drbuf);
 
 }
+void test_nestcomp(){
+
+	hid_t file,space,type,type2,dataset;
+	int i, maxdim = 5, status = 0;
+	hsize_t dim = 5;
+
+	typedef struct {
+		double re;   /*real part*/
+	    double im;   /*imaginary part*/
+	} complex_t;
+
+	typedef struct {
+		complex_t x;
+	    complex_t y;
+	} surf_t;
+	surf_t surft[5];
+    /*
+     * Initialize the data
+     */
+    for (i = 0; i< dim; i++) {
+		surft[i].x.re = i;
+		surft[i].x.im = i;
+
+		surft[i].y.re = i;
+		surft[i].y.im = i;
+    }
+
+    /*
+     * Create the data space.
+     */
+    space = H5Screate_simple(1, &dim, NULL);
+
+    /*
+     * Create the file.
+     */
+    file = H5Fcreate(FILE18, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /*
+     * Create the memory datatype. 
+     */
+    type = H5Tcreate (H5T_COMPOUND, sizeof(complex_t));
+
+    status = H5Tinsert(type, "re", HOFFSET(complex_t, re), H5T_NATIVE_DOUBLE);
+    status = H5Tinsert(type, "im", HOFFSET(complex_t, im), H5T_NATIVE_DOUBLE);
+
+    type2 = H5Tcreate (H5T_COMPOUND, sizeof(surf_t));
+
+    status = H5Tinsert(type2, "x", HOFFSET(surf_t, x), type);
+    status = H5Tinsert(type2, "y", HOFFSET(surf_t, y), type);
+
+    /* 
+     * Create the dataset.
+     */
+    dataset = H5Dcreate(file, "/nested compound", type2, space, H5P_DEFAULT);
+
+    /*
+     * Wtite data to the dataset; 
+     */
+    H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, surft);
+
+    /*
+     * Release resources
+     */
+    H5Tclose(type2);
+	H5Tclose(type);
+    H5Sclose(space);
+    H5Dclose(dataset);
+    H5Fclose(file);
+
+}
 
 int main(void){
 
@@ -1593,6 +1665,8 @@ test_enum();
 
 test_objref();
 test_datareg();
+
+test_nestcomp();
 return 0;
 
 }
