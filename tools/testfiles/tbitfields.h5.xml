@@ -38,8 +38,8 @@ Expected output for 'h5dump --xml tbitfields.h5'
          </DataType>
          <Data>
             <DataFromFile>
-            0xfffe 0xfdfc 0xfbfa 0xf9f8 0xf7f6 0xf5f4 0xf3f2 0xf1f0 0xefee 
-            0xedec 0xebea 0xe9e8 0xe7e6 0xe5e4 0xe3e2 0xe1e0
+            ff:fe fd:fc fb:fa f9:f8 f7:f6 f5:f4 f3:f2 f1:f0 ef:ee ed:ec eb:ea 
+            e9:e8 e7:e6 e5:e4 e3:e2 e1:e0
             </DataFromFile>
          </Data>
       </Dataset>

@@ -445,6 +445,11 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
  * 	Robb Matzke, 1999-09-29
  *	Understands the `per_line' property which indicates that every Nth
  *	element should begin a new line.
+ *
+ *      Robb Matzke, LLNL, 2003-06-05
+ *      Do not dereference the memory for a variable-length string here.
+ *      Deref in h5tools_str_sprint() instead so recursive types are
+ *      handled correctly.
  *-------------------------------------------------------------------------
  */
 static void
@@ -481,11 +486,6 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
     for (i = 0; i < nelmts; i++, ctx->cur_elmt++, elmt_counter++) {
         /* Render the element */
         h5tools_str_reset(&buffer);
-        if(H5Tis_variable_str(type)) {
-            tmp = ((unsigned char**)mem)[i];  
-            h5tools_str_sprint(&buffer, info, container, type, tmp, ctx);
-        
-        } else
             h5tools_str_sprint(&buffer, info, container, type, mem + i * size, ctx);
 
         if (i + 1 < nelmts || (flags & END_OF_DATA) == 0)
