@@ -1,4 +1,4 @@
-HDF5 version 1.6.3-post1 released on Sun Nov 14 21:33:40 CST 2004
+HDF5 version 1.6.4-pre1 released on Sun Nov 28 21:42:37 CST 2004
 ================================================================================
 
 
@@ -90,6 +90,8 @@ Bug Fixes since HDF5-1.6.3 release
 
     Tools
     -----
+	- Fixed h5dump to print attributes data in ASCII if -r option is used.
+	  AKC - 2004/11/18
         - Fixed space utilization reported in h5ls to correct error in formula
             used.  QAK - 2004/10/22
 
@@ -98,7 +100,9 @@ Bug Fixes since HDF5-1.6.3 release
 
     F90 API
     -------
-    
+       - on windows, previously Fortran DLL built and tested failed,
+                     now Fortran DLL has been built and tested successfully
+                         with Dec Fortran 6.6c or Dec Fortran 6.0.
     C++ API
     -------
 Documentation
