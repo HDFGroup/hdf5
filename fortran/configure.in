@@ -431,6 +431,7 @@ esac
 dnl ----------------------------------------------------------------------
 dnl Print some other parallel information and do some sanity checks.
 dnl
+ADD_PARALLEL_FILES=""
 if test -n "$PARALLEL"; then
    dnl We are building a parallel library
    AC_DEFINE(HAVE_PARALLEL)
@@ -462,7 +463,10 @@ if test -n "$PARALLEL"; then
    if test "X$RUNPARALLEL" = "Xnone"; then
       RUNPARALLEL=
    fi
+
+   ADD_PARALLEL_FILES="yes"
 fi
+AC_SUBST(ADD_PARALLEL_FILES)
 
 AC_MSG_CHECKING(make)
 AC_SUBST_FILE(DEPEND)

@@ -22,11 +22,12 @@ LIB=libhdf5_fortran.la
 CLEAN=H5fortran_types.f90
 
 ## Source and object files for the library
-CPARALLEL=${PARALLEL:yes="H5Pf_parallel.c"}
+ADD_PARALLEL_FILES=@ADD_PARALLEL_FILES@
+CPARALLEL=${ADD_PARALLEL_FILES:yes="H5Pf_parallel.c"}
 CLIB_SRC=H5f90kit.c H5f90misc.c H5Git.c H5Rf.c H5Ff.c  H5Sf.c H5Df.c H5Gf.c	\
 	 H5Af.c H5Tf.c H5Pf.c H5If.c H5Ef.c ${CPARALLEL:no=}
 
-FPARALLEL=${PARALLEL:yes="H5Pff_parallel.f90 HDF5_parallel.f90"}
+FPARALLEL=${ADD_PARALLEL_FILES:yes="H5Pff_parallel.f90 HDF5_parallel.f90"}
 FLIB_SRC=H5fortran_types.f90 H5fortran_flags.f90 H5f90global.f90 H5f90miscf.f90	\
          H5Rff.f90 H5Fff.f90 H5Sff.f90 H5Dff.f90 H5Gff.f90 H5Aff.f90 H5Tff.f90 	\
 	 H5Pff.f90 H5Iff.f90 H5Eff.f90 HDF5.f90 ${FPARALLEL:no=}

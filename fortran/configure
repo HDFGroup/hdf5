@@ -2540,6 +2540,7 @@ fi
       ;;
 esac
 
+ADD_PARALLEL_FILES=""
 if test -n "$PARALLEL"; then
       cat >> confdefs.h <<\EOF
 #define HAVE_PARALLEL 1
@@ -2547,23 +2548,23 @@ EOF
 
 
       echo $ac_n "checking prefix for running on one processor""... $ac_c" 1>&6
-echo "configure:2551: checking prefix for running on one processor" >&5
+echo "configure:2552: checking prefix for running on one processor" >&5
    echo "$ac_t""$RUNSERIAL" 1>&6
    echo $ac_n "checking prefix for running in parallel""... $ac_c" 1>&6
-echo "configure:2554: checking prefix for running in parallel" >&5
+echo "configure:2555: checking prefix for running in parallel" >&5
    echo "$ac_t""$RUNPARALLEL" 1>&6
 
       echo $ac_n "checking whether a simple MPI-IO program can be linked""... $ac_c" 1>&6
-echo "configure:2558: checking whether a simple MPI-IO program can be linked" >&5
+echo "configure:2559: checking whether a simple MPI-IO program can be linked" >&5
    cat > conftest.$ac_ext <<EOF
-#line 2560 "configure"
+#line 2561 "configure"
 #include "confdefs.h"
 
 int main() {
 MPI_Init();MPI_File_open();
 ; return 0; }
 EOF
-if { (eval echo configure:2567: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2568: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   echo "$ac_t""yes" 1>&6
 else
@@ -2585,10 +2586,13 @@ rm -f conftest*
    if test "X$RUNPARALLEL" = "Xnone"; then
       RUNPARALLEL=
    fi
+
+   ADD_PARALLEL_FILES="yes"
 fi
 
+
 echo $ac_n "checking make""... $ac_c" 1>&6
-echo "configure:2592: checking make" >&5
+echo "configure:2596: checking make" >&5
 
 if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
 	sed -n 1p|cut -c1-8`" = "GNU Make"; then
@@ -2605,7 +2609,7 @@ fi
 
 if test -n "$DEPEND"; then
    echo $ac_n "checking how to include a makefile""... $ac_c" 1>&6
-echo "configure:2609: checking how to include a makefile" >&5
+echo "configure:2613: checking how to include a makefile" >&5
 
       cat >makeinc <<EOF
 foo:
@@ -2854,6 +2858,7 @@ s%@PARALLEL@%$PARALLEL%g
 s%@RUNSERIAL@%$RUNSERIAL%g
 s%@RUNPARALLEL@%$RUNPARALLEL%g
 s%@TESTPARALLEL@%$TESTPARALLEL%g
+s%@ADD_PARALLEL_FILES@%$ADD_PARALLEL_FILES%g
 /@DEPEND@/r $DEPEND
 s%@DEPEND@%%g
 s%@DYNAMIC_DIRS@%$DYNAMIC_DIRS%g
