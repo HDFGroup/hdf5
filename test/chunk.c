@@ -231,7 +231,7 @@ test_rowmaj (int op, hsize_t cache_size, hsize_t io_size)
     H5Dclose (dset);
     H5Fclose (file);
 
-    return (double)SQUARE(CH_SIZE*DS_SIZE)/nio_g;
+    return (double)SQUARE(CH_SIZE*DS_SIZE)/(double)nio_g;
 }
 
 
@@ -291,7 +291,7 @@ test_diag (int op, hsize_t cache_size, hsize_t io_size, hsize_t offset)
     H5Dclose (dset);
     H5Fclose (file);
 
-    return (double)nio/nio_g;
+    return (double)nio/(double)nio_g;
 }
 
 
