@@ -127,6 +127,16 @@ int do_copy_refobjs(hid_t fidin,
     goto error;
 
 /*-------------------------------------------------------------------------
+ * check if the dataset creation property list has filters that 
+ * are not registered in the current configuration 
+ * 1) the external filters GZIP and SZIP might not be available
+ * 2) the internal filters might be turned off
+ *-------------------------------------------------------------------------
+ */
+   if (h5tools_canreadf((options->verbose?travt->objs[i].name:NULL),dcpl_id)==1)
+   {
+
+/*-------------------------------------------------------------------------
  * test for a valid output dataset
  *-------------------------------------------------------------------------
  */
@@ -311,7 +321,7 @@ int do_copy_refobjs(hid_t fidin,
  */
    if (copy_refs_attr(dset_in,dset_out,options,travt,fidout)<0) 
     goto error;
-
+   
 
 /*-------------------------------------------------------------------------
  * check for hard links
@@ -319,14 +329,18 @@ int do_copy_refobjs(hid_t fidin,
  */
    if (travt->objs[i].nlinks)
    {
-    for ( j=0; j<travt->objs[i].nlinks; j++)
-    {
-      H5Glink(fidout, 
+    for ( j=0; j<travt->objs[i].nlinks; j++){
+     H5Glink(fidout, 
       H5G_LINK_HARD,
       travt->objs[i].name,
       travt->objs[i].links[j].new_name);
     }
    }
+
+   if (H5Dclose(dset_out)<0) 
+    goto error;
+
+   }/*can_read*/
    
    /*-------------------------------------------------------------------------
     * close
@@ -343,9 +357,7 @@ int do_copy_refobjs(hid_t fidin,
     goto error;
    if (H5Dclose(dset_in)<0) 
     goto error;
-   if (H5Dclose(dset_out)<0) 
-    goto error;
-   
+      
    break;
    
   /*-------------------------------------------------------------------------
@@ -359,10 +371,8 @@ int do_copy_refobjs(hid_t fidin,
   
    if (H5Tclose(type_in)<0) 
     goto error;
- 
    
    break;
-   
    
   /*-------------------------------------------------------------------------
    * H5G_LINK

@@ -408,10 +408,10 @@ void read_info(const char *filename,
    break;
    
  /*-------------------------------------------------------------------------
-  * comp
+  * filter
   *-------------------------------------------------------------------------
   */
-  if (strcmp(stype,"-t") == 0) { 
+  if (strcmp(stype,"-f") == 0) { 
 
    /* find begining of info */
    i=0; c='0';
@@ -435,10 +435,10 @@ void read_info(const char *filename,
    }
   }
  /*-------------------------------------------------------------------------
-  * chunk
+  * layout
   *-------------------------------------------------------------------------
   */
-  else if (strcmp(stype,"-c") == 0) { 
+  else if (strcmp(stype,"-l") == 0) { 
    
    /* find begining of info */
    i=0; c='0';

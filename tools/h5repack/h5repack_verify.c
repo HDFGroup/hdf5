@@ -321,7 +321,8 @@ error:
   H5Sclose(space_id);
   H5Dclose(dset_id);
   H5Fclose(fid);
-  trav_table_free(travt);
+  if (travt)
+   trav_table_free(travt);
  } H5E_END_TRY;
  return -1;
 }

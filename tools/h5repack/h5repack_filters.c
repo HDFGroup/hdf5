@@ -110,9 +110,6 @@ int filter_this(const char* name,    /* object name from traverse list */
  *
  *-------------------------------------------------------------------------
  */
-
-
-
 int apply_filters(const char* name,    /* object name from traverse list */
                   int rank,            /* rank of dataset */
                   hsize_t *dims,       /* dimensions of dataset */
@@ -260,7 +257,6 @@ out:
  if (options->verbose)
   printf("Warning: Filter could not be applied to <%s>\n",name);
  return 0;
-
 }
 
 

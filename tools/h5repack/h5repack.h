@@ -18,6 +18,9 @@
 
 #include "hdf5.h"
 #include "h5trav.h"
+#include "h5diff.h"
+#include "h5tools.h"
+
 
 #if 0
 #define H5_REPACK_DEBUG
@@ -202,6 +205,10 @@ int check_szip(hid_t type_id,   /* dataset datatype */
                unsigned szip_options_mask /*IN*/,
                unsigned *szip_pixels_per_block /*IN,OUT*/,
                pack_opt_t *options);
+
+int can_read(const char* name,    /* object name from traverse list */
+             hid_t dcpl_id,       /* dataset creation property list */
+             pack_opt_t *options); /* repack options */
 
 
 /*-------------------------------------------------------------------------

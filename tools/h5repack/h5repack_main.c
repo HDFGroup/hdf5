@@ -66,7 +66,6 @@ int main(int argc, char **argv)
   }
 
   else if (strcmp(argv[i], "-m") == 0) {       
-   
    options.threshold = parse_number(argv[i+1]);
    if (options.threshold==-1) {
     printf("Error: Invalid treshold size <%s>\n",argv[i+1]);
@@ -115,7 +114,7 @@ int main(int argc, char **argv)
 static 
 void usage(void)
 {
- printf("h5repack -i input -o output [-h] [-v] [-t 'comp_info'] [-c 'chunk_info'][-m number] \n");
+ printf("h5repack -i input -o output [-h] [-v] [-f 'comp_info'] [-l 'chunk_info'][-m number][-e file] \n");
  printf("\n");
  printf("-i input          Input HDF5 File\n");
  printf("-o output         Output HDF5 File\n");
@@ -147,7 +146,7 @@ void usage(void)
  printf("       it is the chunk size of each dimension:\n");
  printf("       <dim_1 x dim_2 x ... dim_n>\n");
  printf("\n");
- printf("-e file           File with the above informatuion info in it (instead of the two above options)\n");
+ printf("-e file           File with the -f and -l options (only filter and layout flags)\n");
  printf("-m number         Do not apply the filter to objects which size in bytes is smaller than number.\n");
  printf("                  If no size is specified a minimum of 1024 bytes is assumed.\n");
  printf("\n");

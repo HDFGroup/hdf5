@@ -97,7 +97,8 @@ test_copy(void)
   TEST_ERROR;
 
 /*-------------------------------------------------------------------------
- * file with filters
+ * file with filters. we cannot compare with cmpdcpl, because the current
+ * configuration might not have saved datasets with deflate and SZIP filters
  *-------------------------------------------------------------------------
  */
  
@@ -109,9 +110,7 @@ test_copy(void)
   TEST_ERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   TEST_ERROR;
- if (h5repack_cmpdcpl(FNAME4,FNAME4OUT)<=0)
-  TEST_ERROR;
-  if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
 /*-------------------------------------------------------------------------
  * end
@@ -177,6 +176,7 @@ test_filter_none(void)
  *-------------------------------------------------------------------------
  */
 
+#ifdef H5_HAVE_FILTER_DEFLATE
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack_addfilter("dset_gzip:NONE",&pack_options)<0)
@@ -191,6 +191,7 @@ test_filter_none(void)
   TEST_ERROR;
  if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
+#endif
  
  PASSED();  
  return 0; 

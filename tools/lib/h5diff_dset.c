@@ -14,6 +14,7 @@
 
 #include "h5diff.h"
 #include "H5private.h" 
+#include "h5tools.h"
 #include <assert.h>
 
 /*-------------------------------------------------------------------------
@@ -36,9 +37,12 @@ int diff_dataset( hid_t file1_id,
                   const char *obj2_name, 
                   diff_opt_t *options )
 {
- hid_t        dset1_id  =-1;
- hid_t        dset2_id  =-1;
- int          gout=0, nfound;
+ hid_t dset1_id  =-1;
+ hid_t dset2_id  =-1;
+ hid_t dcpl1_id;
+ hid_t dcpl2_id;
+ int   gout=0, nfound=0;
+
 
  /* disable error reporting */
  H5E_BEGIN_TRY {
@@ -64,23 +68,36 @@ int diff_dataset( hid_t file1_id,
  if (gout)
   goto out;
 
- nfound=diff_datasetid(dset1_id,
+ if ((dcpl1_id=H5Dget_create_plist(dset1_id))<0) 
+  goto out;
+ if ((dcpl2_id=H5Dget_create_plist(dset2_id))<0) 
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * check if the dataset creation property list has filters that 
+ * are not registered in the current configuration 
+ * 1) the external filters GZIP and SZIP might not be available
+ * 2) the internal filters might be turned off
+ *-------------------------------------------------------------------------
+ */
+ if ((h5tools_canreadf((options->verbose?obj1_name:NULL),dcpl1_id)==1) &&
+     (h5tools_canreadf((options->verbose?obj2_name:NULL),dcpl2_id)==1)) 
+ {
+  nfound=diff_datasetid(dset1_id,
                        dset2_id,
                        obj1_name,
                        obj2_name,
                        options);
-
- 
-
+ }
 /*-------------------------------------------------------------------------
  * close
  *-------------------------------------------------------------------------
  */
-
 out:
-
  /* disable error reporting */
  H5E_BEGIN_TRY {
+  H5Pclose(dcpl1_id);
+  H5Pclose(dcpl2_id);
   H5Dclose(dset1_id);
   H5Dclose(dset2_id);
    /* enable error reporting */
@@ -377,11 +394,7 @@ out:
  } H5E_END_TRY;
  
  return nfound;
-
 }
-
-
-
 
 /*-------------------------------------------------------------------------
  * Function: diff_can_type

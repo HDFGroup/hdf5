@@ -1170,6 +1170,7 @@
 ./tools/lib/h5trav_table.c
 ./tools/lib/h5trav.h
 ./tools/lib/h5diff.h
+./tools/lib/h5tools_filters.c
 
 ./tools/misc/Dependencies
 ./tools/misc/Makefile.in
@@ -1465,6 +1466,9 @@
 ./tools/testfiles/h5diff_70.txt
 ./tools/testfiles/h5diff_80.txt
 
+#test files for h5repack
+./tools/testfiles/test4.h5
+./tools/testfiles/h5repack_info.txt
 
 ./windows/all.zip
 ./windows/all_withf90.zip

@@ -232,6 +232,15 @@ int do_copy_objects(hid_t fidin,
    if (options->verbose)
     print_filters(dcpl_id);
 
+/*-------------------------------------------------------------------------
+ * check if the dataset creation property list has filters that 
+ * are not registered in the current configuration 
+ * 1) the external filters GZIP and SZIP might not be available
+ * 2) the internal filters might be turned off
+ *-------------------------------------------------------------------------
+ */
+   if (h5tools_canreadf((options->verbose?travt->objs[i].name:NULL),dcpl_id)==1)
+   {
 
 /*-------------------------------------------------------------------------
  * references are a special case
@@ -314,6 +323,8 @@ int do_copy_objects(hid_t fidin,
      free(buf);
     
    }/*H5T_STD_REF_OBJ*/
+   }/*can_read*/
+
 
 /*-------------------------------------------------------------------------
  * close
