@@ -26,7 +26,7 @@ static int write_text_attribute(hid_t dataset_id , const char *attr_name,
         return -1;
 
     /* figure out size of the data */
-    attr_dims_size = strlen(attr_value) + 1;
+    attr_dims_size = 1;
 
     /* set the type to string */
     attr_type_id = H5Tcopy(H5T_C_S1);

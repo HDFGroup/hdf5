@@ -39,7 +39,7 @@ main(int argv , char *argc[])
     GifMemoryStruct.GifCommentExtension        = NULL;
 
     if (argv < 3) {
-        printf("\n\nWrong Usage. Use:\ngif2hdf <GIFFILE> <HDFFILE>\n\n");
+        printf("\n\nWrong Usage. Use:\ngif2h5 <GIFFILE> <HDFFILE>\n\n");
         return(-1);
     }
 
