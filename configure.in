@@ -1663,7 +1663,7 @@ done)dnl
 
 AC_MSG_RESULT([%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u])
 AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"], 
-                   [Width for printf() for type \`long long' or \`__int64', us. \`ll'])
+                   [Width for printf() for type \`long long' or \`__int64', use \`ll'])
 
 dnl ----------------------------------------------------------------------
 dnl Check if malloc(0) returns valid pointer
