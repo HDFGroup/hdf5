@@ -154,6 +154,9 @@ H5FL_BLK_DEFINE_STATIC(chunk_image);
 /* Declare external the free list for time_t's */
 H5FL_EXTERN(time_t);
 
+/* Declare extern the free list for H5O_cont_t's */
+H5FL_EXTERN(H5O_cont_t);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_init_interface
@@ -2918,7 +2921,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
      */
     oh->mesg[found_null].type = H5O_CONT;
     oh->mesg[found_null].dirty = TRUE;
-    if (NULL==(cont = H5MM_calloc(sizeof(H5O_cont_t))))
+    if (NULL==(cont = H5FL_MALLOC(H5O_cont_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, UFAIL, "memory allocation failed");
     cont->addr = HADDR_UNDEF;
     cont->size = 0;

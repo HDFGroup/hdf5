@@ -67,6 +67,9 @@ const H5O_class_t H5O_ATTR[1] = {{
 /* Flags for attribute flag encoding */
 #define H5O_ATTR_FLAG_TYPE_SHARED       0x01
 
+/* Declare extern the free list for H5A_t's */
+H5FL_EXTERN(H5A_t);
+
 /* Declare external the free list for H5S_t's */
 H5FL_EXTERN(H5S_t);
 
@@ -118,7 +121,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
     assert(f);
     assert(p);
 
-    if (NULL==(attr = H5MM_calloc(sizeof(H5A_t))))
+    if (NULL==(attr = H5FL_CALLOC(H5A_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Version number */
@@ -141,9 +144,8 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
     UINT16DECODE(p, attr->ds_size);
     
     /* Decode and store the name */
-    if (NULL==(attr->name=H5MM_malloc(name_len)))
+    if (NULL==(attr->name=H5MM_strdup((const char *)p)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    HDmemcpy(attr->name,p,name_len);
     if(version < H5O_ATTR_VERSION_NEW)
         p += H5O_ALIGN(name_len);    /* advance the memory pointer */
     else
@@ -378,14 +380,8 @@ H5O_attr_copy(const void *_src, void *_dst)
     assert(src);
 
     /* copy */
-    if (NULL == (dst = H5A_copy(src)))
+    if (NULL == (dst = H5A_copy(_dst,src)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "can't copy attribute");
-    /* was result already allocated? */
-    if (_dst) {
-        *((H5A_t *) _dst) = *dst;
-        H5MM_xfree(dst);
-        dst = (H5A_t *) _dst;
-    }
 
     /* Set return value */
     ret_value=dst;
@@ -491,13 +487,8 @@ H5O_attr_reset(void *_mesg)
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_reset);
 
-    if (attr) {
-        if (NULL==(tmp = H5MM_malloc(sizeof(H5A_t))))
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        HDmemcpy(tmp,attr,sizeof(H5A_t));
-        H5A_close(tmp);
-        HDmemset(attr, 0, sizeof(H5A_t));
-    }
+    if (attr)
+        H5A_free(attr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

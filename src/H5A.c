@@ -26,6 +26,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apkg.h"		/* Attributes				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Spkg.h"		/* Dataspace functions			*/
@@ -42,6 +43,9 @@ static herr_t H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new
 
 /* The number of reserved IDs in dataset ID group */
 #define H5A_RESERVED_ATOMS  0
+
+/* Declare the free lists for H5A_t's */
+H5FL_DEFINE(H5A_t);
 
 
 /*--------------------------------------------------------------------------
@@ -229,7 +233,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace extent has not been set")
 
     /* Build the attribute information */
-    if((attr = H5MM_calloc(sizeof(H5A_t)))==NULL)
+    if((attr = H5FL_CALLOC(H5A_t))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for attribute info")
 
     /* Copy the attribute name */
@@ -509,7 +513,7 @@ static hid_t
 H5A_open(H5G_entry_t *ent, unsigned idx, hid_t dxpl_id)
 {
     H5A_t       *attr = NULL;
-    hid_t	    ret_value = FAIL;
+    hid_t	    ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_open)
 
@@ -527,9 +531,8 @@ H5A_open(H5G_entry_t *ent, unsigned idx, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry")
 
     /* Hold the symbol table entry (and file) open */
-    if (H5O_open(&(attr->ent)) < 0) {
+    if (H5O_open(&(attr->ent)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open")
-    }
     attr->ent_opened=1;
 
     /* Register the new attribute and get an ID for it */
@@ -622,7 +625,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
     size_t		dst_type_size;		/* size of destination type*/
     size_t		buf_size;		/* desired buffer size	*/
     int			idx;			/* index of attribute in object header */
-    herr_t		ret_value = FAIL;
+    herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_write)
 
@@ -635,52 +638,65 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
         HGOTO_ERROR (H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
     H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,size_t);
 
-    /* Check for null dataspace */
     if(nelmts>0) {
         /* Get the memory and file datatype sizes */
         src_type_size = H5T_get_size(mem_type);
         dst_type_size = H5T_get_size(attr->dt);
 
-        /* Get the maximum buffer size needed and allocate it */
-        buf_size=nelmts*MAX(src_type_size,dst_type_size);
-        if (NULL==(tconv_buf = H5MM_malloc (buf_size)) || NULL==(bkg_buf = H5MM_calloc(buf_size)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-        /* Copy the user's data into the buffer for conversion */
-        HDmemcpy(tconv_buf,buf,(src_type_size*nelmts));
-
         /* Convert memory buffer into disk buffer */
         /* Set up type conversion function */
-        if (NULL == (tpath = H5T_path_find(mem_type, attr->dt, NULL, NULL, dxpl_id))) {
+        if (NULL == (tpath = H5T_path_find(mem_type, attr->dt, NULL, NULL, dxpl_id)))
             HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
-        } else if (!H5T_path_noop(tpath)) {
+
+        /* Check for type conversion required */
+        if (!H5T_path_noop(tpath)) {
             if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL)))<0 ||
                     (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(attr->dt, H5T_COPY_ALL)))<0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
-        }
 
-        /* Perform data type conversion */
-        if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "data type conversion failed")
+            /* Get the maximum buffer size needed and allocate it */
+            buf_size=nelmts*MAX(src_type_size,dst_type_size);
+            if (NULL==(tconv_buf = H5MM_malloc (buf_size)) || NULL==(bkg_buf = H5MM_calloc(buf_size)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-        /* Free the previous attribute data buffer, if there is one */
-        if(attr->data)
-            H5MM_xfree(attr->data);
+            /* Copy the user's data into the buffer for conversion */
+            HDmemcpy(tconv_buf,buf,(src_type_size*nelmts));
+
+            /* Perform data type conversion */
+            if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "data type conversion failed")
+
+            /* Free the previous attribute data buffer, if there is one */
+            if(attr->data)
+                H5MM_xfree(attr->data);
+
+            /* Set the pointer to the attribute data to the converted information */
+            attr->data=tconv_buf;
+        } /* end if */
+        /* No type conversion necessary */
+        else {
+            HDassert(dst_type_size==src_type_size);
+
+                /* Allocate the attribute buffer, if there isn't one */
+                if(attr->data==NULL)
+                    if (NULL==(attr->data = H5MM_malloc (dst_type_size*nelmts)))
+                        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+                /* Copy the attribute data into the user's buffer */
+                HDmemcpy(attr->data,buf,(dst_type_size*nelmts));
+        } /* end else */
 
         /* Look up the attribute for the object */
         if((idx=H5A_get_index(&(attr->ent),attr->name,dxpl_id))<0)
             HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "attribute not found")
 
         /* Modify the attribute data */
-        attr->data=tconv_buf;   /* Set the data pointer temporarily */
         if (H5O_modify(&(attr->ent), H5O_ATTR_ID, idx, 0, 1, attr, dxpl_id) < 0) 
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages")
     } /* end if */
 
     /* Indicate the the attribute doesn't need fill-values */
     attr->initialized=TRUE;
-
-    ret_value=SUCCEED;
 
 done:
     /* Release resources */
@@ -770,7 +786,7 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
     size_t		src_type_size;		/* size of source type 	*/
     size_t		dst_type_size;		/* size of destination type */
     size_t		buf_size;		/* desired buffer size	*/
-    herr_t		ret_value = FAIL;
+    herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_read)
 
@@ -783,7 +799,6 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
         HGOTO_ERROR (H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
     H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,size_t);
 
-    /* Check for null dataspace */
     if(nelmts>0) {
         /* Get the memory and file datatype sizes */
         src_type_size = H5T_get_size(attr->dt);
@@ -794,34 +809,41 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
             HDmemset(buf,0,(dst_type_size*nelmts));
         }   /* end if */
         else {  /* Attribute exists and has a value */
-            /* Get the maximum buffer size needed and allocate it */
-            buf_size=nelmts*MAX(src_type_size,dst_type_size);
-            if (NULL==(tconv_buf = H5MM_malloc (buf_size)) || NULL==(bkg_buf = H5MM_calloc(buf_size)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-            /* Copy the attribute data into the buffer for conversion */
-            HDmemcpy(tconv_buf,attr->data,(src_type_size*nelmts));
-
             /* Convert memory buffer into disk buffer */
             /* Set up type conversion function */
-            if (NULL == (tpath = H5T_path_find(attr->dt, mem_type, NULL, NULL, dxpl_id))) {
+            if (NULL == (tpath = H5T_path_find(attr->dt, mem_type, NULL, NULL, dxpl_id)))
                 HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
-            } else if (!H5T_path_noop(tpath)) {
+
+            /* Check for type conversion required */
+            if (!H5T_path_noop(tpath)) {
                 if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(attr->dt, H5T_COPY_ALL)))<0 ||
                         (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL)))<0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
-            }
 
-            /* Perform data type conversion.  */
-            if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "data type conversion failed")
+                /* Get the maximum buffer size needed and allocate it */
+                buf_size=nelmts*MAX(src_type_size,dst_type_size);
+                if (NULL==(tconv_buf = H5MM_malloc (buf_size)) || NULL==(bkg_buf = H5MM_calloc(buf_size)))
+                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-            /* Copy the converted data into the user's buffer */
-            HDmemcpy(buf,tconv_buf,(dst_type_size*nelmts));
+                /* Copy the attribute data into the buffer for conversion */
+                HDmemcpy(tconv_buf,attr->data,(src_type_size*nelmts));
+
+                /* Perform data type conversion.  */
+                if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "data type conversion failed")
+
+                /* Copy the converted data into the user's buffer */
+                HDmemcpy(buf,tconv_buf,(dst_type_size*nelmts));
+            } /* end if */
+            /* No type conversion necessary */
+            else {
+                HDassert(dst_type_size==src_type_size);
+
+                /* Copy the attribute data into the user's buffer */
+                HDmemcpy(buf,attr->data,(dst_type_size*nelmts));
+            } /* end else */
         } /* end else */
     } /* end if */
-
-    ret_value=SUCCEED;
 
 done:
     /* Release resources */
@@ -1217,7 +1239,7 @@ H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name, hid_t d
     assert(new_name);
     
     /* Build the attribute information */
-    if((found_attr = HDcalloc(1, sizeof(H5A_t)))==NULL)
+    if((found_attr = H5FL_CALLOC(H5A_t))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for attribute info")
         
     /* Read in the existing attributes to check for duplicates */
@@ -1489,9 +1511,10 @@ done:
  *-------------------------------------------------------------------------
  */
 H5A_t *
-H5A_copy(const H5A_t *old_attr)
+H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr)
 {
     H5A_t	*new_attr=NULL;
+    hbool_t     allocated_attr=FALSE;   /* Whether the attribute was allocated */
     H5A_t	*ret_value=NULL;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5A_copy, NULL)
@@ -1500,8 +1523,13 @@ H5A_copy(const H5A_t *old_attr)
     assert(old_attr);
 
     /* get space */
-    if (NULL==(new_attr = H5MM_calloc(sizeof(H5A_t))))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    if(_new_attr==NULL) {
+        if (NULL==(new_attr = H5FL_MALLOC(H5A_t)))
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        allocated_attr=TRUE;
+    } /* end if */
+    else
+        new_attr=_new_attr;
 
     /* Copy the top level of the attribute */
     *new_attr = *old_attr;
@@ -1524,12 +1552,53 @@ H5A_copy(const H5A_t *old_attr)
     
 done:
     if(ret_value==NULL) {
-        if(new_attr!=NULL)
+        if(new_attr!=NULL && allocated_attr)
             (void)H5A_close(new_attr);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_free
+ *
+ * Purpose:	Frees all memory associated with an attribute, but does not
+ *              free the H5A_t structure (which should be done in H5T_close).
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, November 15, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5A_free(H5A_t *attr)
+{
+    herr_t ret_value=SUCCEED;           /* Return value */
+
+    FUNC_ENTER_NOAPI(H5A_free, FAIL)
+
+    assert(attr);
+
+    /* Free dynamicly allocated items */
+    if(attr->name)
+        H5MM_xfree(attr->name);
+    if(attr->dt)
+        if(H5T_close(attr->dt)<0)
+	    HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release datatype info")
+    if(attr->ds)
+        if(H5S_close(attr->ds)<0)
+	    HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info")
+    if(attr->data)
+        H5MM_xfree(attr->data);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -1556,7 +1625,7 @@ H5A_close(H5A_t *attr)
     assert(attr);
 
     /* Check if the attribute has any data yet, if not, fill with zeroes */
-    if(attr->ent_opened && !attr->initialized && attr->data_size) {
+    if(attr->ent_opened && !attr->initialized) {
         uint8_t *tmp_buf=H5MM_calloc(attr->data_size);
         if (NULL == tmp_buf)
             HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed for attribute fill-value")
@@ -1570,27 +1639,19 @@ H5A_close(H5A_t *attr)
     } /* end if */
 
     /* Free dynamicly allocated items */
-    if(attr->name)
-        H5MM_xfree(attr->name);
-    if(attr->dt)
-        if(H5T_close(attr->dt)<0)
-	    HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release datatype info")
-    if(attr->ds)
-        if(H5S_close(attr->ds)<0)
-	    HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info")
-    if(attr->data)
-        H5MM_xfree(attr->data);
+    if(H5A_free(attr)<0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")
 
     /* Close the object's symbol-table entry */
     if(attr->ent_opened)
         if(H5O_close(&(attr->ent))<0)
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release object header info")
 
-    H5MM_xfree(attr);
+    H5FL_FREE(H5A_t, attr);
     
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5A_close() */
 
 
 /*-------------------------------------------------------------------------

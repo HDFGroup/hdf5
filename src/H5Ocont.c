@@ -32,6 +32,7 @@
 
 #include "H5private.h"
 #include "H5Eprivate.h"
+#include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5MMprivate.h"
 #include "H5Opkg.h"             /* Object header functions                 */
 
@@ -40,6 +41,7 @@
 /* PRIVATE PROTOTYPES */
 static void *H5O_cont_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg);
+static herr_t H5O_cont_free (void *mesg);
 static herr_t H5O_cont_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			     int indent, int fwidth);
 
@@ -53,13 +55,16 @@ const H5O_class_t H5O_CONT[1] = {{
     NULL,                   	/*no copy method                */
     NULL,                   	/*no size method                */
     NULL,                   	/*reset method			*/
-    NULL,		        /* free method			*/
+    H5O_cont_free,	        /* free method			*/
     NULL,		        /* file delete method		*/
     NULL,			/* link method			*/
     NULL, 		    	/*get share method		*/
     NULL,		    	/*set share method		*/
     H5O_cont_debug,         	/*debugging                     */
 }};
+
+/* Declare the free list for H5O_cont_t's */
+H5FL_DEFINE(H5O_cont_t);
 
 
 /*-------------------------------------------------------------------------
@@ -93,10 +98,11 @@ H5O_cont_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_t U
     assert (!sh);
 
     /* decode */
-    if (NULL==(cont = H5MM_calloc(sizeof(H5O_cont_t))))
+    if (NULL==(cont = H5FL_MALLOC(H5O_cont_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     H5F_addr_decode(f, &p, &(cont->addr));
     H5F_DECODE_LENGTH(f, p, cont->size);
+    cont->chunkno=0;
 
     /* Set return value */
     ret_value=cont;
@@ -139,6 +145,33 @@ H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_cont_free
+ *
+ * Purpose:	Free's the message
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, November 15, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_cont_free (void *mesg)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_cont_free);
+
+    assert (mesg);
+
+    H5FL_FREE(H5O_cont_t,mesg);
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* end H5O_cont_free() */
 
 
 /*-------------------------------------------------------------------------
