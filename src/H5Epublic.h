@@ -46,6 +46,28 @@
     H5Eset_auto (H5E_saved_efunc, H5E_saved_edata);			      \
 } while(0)
 
+/*
+ * Public API Convenience Macros for Error reporting - Documented
+ */
+/* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in */
+#define H5Epush_sim(func,maj,min,str) H5Epush(__FILE__,func,__LINE__,maj,min,str)
+
+/*
+ * Public API Convenience Macros for Error reporting - Undocumented
+ */
+/* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in */
+/*  And return after pushing error onto stack */
+#define H5Epush_ret(func,maj,min,str,ret) {         \
+    H5Epush(__FILE__,func,__LINE__,maj,min,str);    \
+    return(ret);                                    \
+}
+
+/* Use the Standard C __FILE__ & __LINE__ macros instead of typing them in */
+/*  And goto a label after pushing error onto stack */
+#define H5Epush_goto(func,maj,min,str,label) {      \
+    H5Epush(__FILE__,func,__LINE__,maj,min,str);    \
+    goto (label);                                   \
+}
 
 /*
  * Declare an enumerated type which holds all the valid major HDF error codes.
@@ -187,6 +209,8 @@ __DLL__ herr_t H5Ewalk (H5E_direction_t direction, H5E_walk_t func,
 __DLL__ herr_t H5Ewalk_cb (int n, H5E_error_t *err_desc, void *client_data);
 __DLL__ const char *H5Eget_major (H5E_major_t major_number);
 __DLL__ const char *H5Eget_minor (H5E_minor_t minor_number);
+__DLL__ herr_t H5Epush(const char *file, const char *func,
+            unsigned line, H5E_major_t maj, H5E_minor_t min, const char *str);
 
 #ifdef __cplusplus
 }

@@ -524,6 +524,37 @@ H5E_push(H5E_major_t maj_num, H5E_minor_t min_num, const char *function_name,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Epush
+ *
+ * Purpose:	Pushes a new error record onto error stack for the current
+ *		thread.  The error has major and minor numbers MAJ_NUM and
+ *		MIN_NUM, the name of a function where the error was detected,
+ *		the name of the file where the error was detected, the
+ *		line within that file, and an error description string.  The
+ *		function name, file name, and error description strings must
+ *		be statically allocated.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, October 18, 1999
+ *
+ * Notes: Basically a public API wrapper around the H5E_push function.
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+__DLL__ herr_t H5Epush(const char *file, const char *func,
+            unsigned line, H5E_major_t maj, H5E_minor_t min, const char *str)
+{
+    FUNC_ENTER(H5Epush, FAIL);
+
+    FUNC_LEAVE(H5E_push(maj,min,func,file,line,str));
+}   /* end H5Epush() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5E_clear
  *
  * Purpose:	Clears the error stack for the current thread.
