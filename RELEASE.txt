@@ -52,6 +52,10 @@ Library
       got dropped in some 1.3.x version. Re-implemented it with "new and
       improved" algorithm.  It keeps track of "wasted" file-fragment in
       the free-list too.
+    * Removed limitation that the data transfer buffer size needed to be
+      set for datasets whose dimensions were too large for the 'all' selection
+      code to handle.  Any size dimensioned datasets should be handled
+      correctly now.
 
 Configuration
 -------------
