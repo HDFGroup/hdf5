@@ -1201,10 +1201,44 @@ SUBROUTINE
     <dd>Delete one or more filters in the filter pipeline.
   <dt><strong>Description:</strong>
     <dd><code>H5Pdelete_filter</code> removes the specified 
-        <code>filter</code> from the filter pipeline.
+        <code>filter</code> from the filter pipeline in <code>plist</code>.
 	<p>
-        Passing <code>H5Z_FILTER_NONE</code> for the <code>filter</code>
-        parameter removes all the filters from the permanent filter pipeline.
+	The <code>filter</code> parameter specifies the filter to be removed.  
+	Valid values of filters to remove are as follows:
+
+        <center>
+        <table width=75%>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_NONE</code> 
+            </td><td>
+            Removes all filters from the permanent filter pipeline.
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_DEFLATE</code> 
+            </td><td>
+            Data compression filter, employing the gzip algorithm 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_SHUFFLE</code> 
+            </td><td>
+            Data shuffling filter 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_FLETCHER32&nbsp;&nbsp;</code> 
+            </td><td>
+            Error detection filter, employing the Fletcher32 checksum algorithm 
+        </td></tr>	
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_SZIP</code> 
+            </td><td>
+            Data compression filter, employing the SZIP algorithm 
+        </td></tr>
+	</table>
+	</center>
+        <p>
+        Additionally, user defined filters can be removed with this routine
+        as well by passing the filter ID they were registered with the library
+        with.
         <p>
         Attempting to remove a filter that is not in the permanent filter
         pipeline is an error.
@@ -1230,6 +1264,14 @@ SUBROUTINE h5pdelete_filter_f(prp_id, filter, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier
   INTEGER, INTENT(IN)        :: filter      ! Filter to be modified
+                                            ! Valid values are:
+                                            !
+                                            ! H5Z_FILTER_NONE_F
+                                            ! H5Z_FILTER_DEFLATE_F
+                                            ! H5Z_FILTER_SHUFFLE_F
+                                            ! H5Z_FILTER_FLETCHER32_F
+                                            ! H5Z_FILTER_SZIP_F
+                                            !
   INTEGER, INTENT(OUT)       :: hdferr      ! Error code
                                             ! 0 on success and -1 on failure
 END SUBROUTINE h5pdelete_filter_f
