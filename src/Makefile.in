@@ -27,7 +27,8 @@ LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fistore.c \
     H5Oattr.c H5Ocomp.c H5Ocont.c H5Odtype.c H5Oefl.c H5Ofill.c H5Olayout.c \
     H5Omtime.c H5Oname.c H5Onull.c H5Osdspace.c H5Oshared.c H5Ostab.c H5P.c \
     H5R.c H5RA.c H5S.c H5Sall.c H5Shyper.c H5Smpio.c H5Snone.c H5Spoint.c \
-    H5Sselect.c H5T.c H5Tbit.c H5Tconv.c H5Tinit.c H5Tvlen.c H5TB.c H5V.c H5Z.c
+    H5Sselect.c H5T.c H5Tbit.c H5Tconv.c H5Tinit.c H5Tvlen.c H5TB.c H5V.c \
+    H5Z.c H5Zdeflate.c
 
 LIB_OBJ=$(LIB_SRC:.c=.lo)
 

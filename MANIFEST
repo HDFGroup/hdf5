@@ -323,6 +323,7 @@
 ./src/H5V.c
 ./src/H5Vprivate.h
 ./src/H5Z.c
+./src/H5Zdeflate.c
 ./src/H5Zprivate.h
 ./src/H5Zpublic.h
 ./src/H5config.h.in
