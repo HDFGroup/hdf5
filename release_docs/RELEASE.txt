@@ -62,6 +62,8 @@ Bug Fixes since HDF5-1.6.3 release
 
     Library
     -------
+        - Fixed problem where chunked datasets were not able to be deleted
+            from a file under certain circumstances (QAK - 09/27/2004)
 
     Configuration
     -------------
