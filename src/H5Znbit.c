@@ -81,8 +81,6 @@ H5Z_class_t H5Z_NBIT[1] = {{
 }};
 
 /* Local macros */
-#define FALSE                    0
-#define TRUE                     1
 #define H5Z_NBIT_ATOMIC          1     /* Atomic datatype class for nbit */
 #define H5Z_NBIT_ARRAY           2     /* Array datatype class for nbit */
 #define H5Z_NBIT_COMPOUND        3     /* Compound datatype class for nbit */
@@ -100,10 +98,10 @@ H5Z_class_t H5Z_NBIT[1] = {{
  *                          stored as second entry in the filter's cd_values[]
  * parms_index: index of array parms[] used by compression/decompression functions
  */
-static unsigned int cd_values_index = 0;
-static unsigned int cd_values_actual_nparms = 0;
+static unsigned cd_values_index = 0;
+static unsigned cd_values_actual_nparms = 0;
 static unsigned char compress_ratio_is_zero = FALSE;
-static unsigned int parms_index = 0;
+static unsigned parms_index = 0;
 
 
 /*-------------------------------------------------------------------------
