@@ -2865,7 +2865,7 @@ done:
  *              If the callback returns non-zero, the iteration breaks out
  *              without finishing all the records.
  *
- * Return:	Value from callback, non-negative on success, negative on error
+ * Return:	Value from callback: non-negative on success, negative on error
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
