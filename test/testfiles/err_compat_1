@@ -4,17 +4,17 @@ Expected output for err_compat
 Testing error API based on data I/O                                   All error API tests passed.
    This program tests the Error API compatible with HDF5 v1.6.  There're supposed to be some error messages
 ********* Print error stack in HDF5 default way *********
-HDF5-DIAG: Error detected in HDF5 (1.7.5) thread 0:
-  #000: ../../hdf5/test/err_compat.c line 268 in main(): Error test failed
+HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+  #000: (file name) line (number) in main(): Error test failed
     major: Error API
     minor: Bad value
 
 ********* Print error stack in customized way *********
-    error #000: ../../hdf5/test/err_compat.c in main(): line 268
+    error #000: (file name) in main(): line (number)
         major: Error API
         minor: Bad value
 
-HDF5-DIAG: Error detected in HDF5 (1.7.5) thread 0:
-  #000: ../../hdf5/test/err_compat.c line 280 in main(): Error test failed
+HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+  #000: (file name) line (number) in main(): Error test failed
     major: Error API
     minor: Unrecognized message
