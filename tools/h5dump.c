@@ -775,15 +775,48 @@ done:
  *-----------------------------------------------------------------------*/
 static void
 dump_named_datatype (hid_t type, const char *name) {
+char *fname ;
+hid_t nmembers, mtype;
+int i, j, ndims, perm[H5DUMP_MAX_RANK];
+size_t dims[H5DUMP_MAX_RANK];
 
     indentation (indent);
     begin_obj(DATATYPE, name);
-    indentation (indent+COL);
-	print_datatype(type);	
-	printf("\n");	   
+
+    nmembers = H5Tget_nmembers(type);
+ 
+    for (i = 0; i < nmembers; i++) {
+
+         fname = H5Tget_member_name(type, i);
+
+         mtype = H5Tget_member_type(type, i);
+
+         ndims = H5Tget_member_dims(type, i, dims, perm);
+
+         indentation (indent+COL);
+		 if (H5T_ENUM == H5Tget_class(type)) {
+			print_datatype(type);
+			break;
+		 }
+		 else {
+			print_datatype(mtype);
+		 }
+         printf (" \"%s\"", fname);
+  
+         if (ndims != 1 || dims[0] != 1) {
+             for (j = 0; j < ndims; j++) 
+                  printf("[%d]",dims[j]);
+         }
+
+         printf (";\n");
+
+         free (fname);
+    }
+        
     indentation (indent);
     end_obj();
 }
+  
 
 /*-------------------------------------------------------------------------
  * Function:    dump_group
