@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>Enumeration Data Types in the Data Type Interface (H5T)</title>
+    <title>Data Type Interface (H5T)</title>
   </head>
 
   <body bgcolor="#FFFFFF">
@@ -20,47 +20,29 @@
 </td>
 <td valign=top align=right>
    And in this document, the 
-   <a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
-      <a href="Files.html">Files</a>&nbsp;&nbsp;
+   <a href="H5.user.html"><strong>HDF5 User's Guide:</strong></a>&nbsp;&nbsp;&nbsp;&nbsp;
       <br>
+      <a href="Files.html">Files</a>&nbsp;&nbsp;
       <a href="Datasets.html">Datasets</a>&nbsp;&nbsp;
       <a href="Datatypes.html">Data Types</a>&nbsp;&nbsp;
       <a href="Dataspaces.html">Dataspaces</a>&nbsp;&nbsp;
       <a href="Groups.html">Groups</a>&nbsp;&nbsp;
-      <a href="References.html">References</a>&nbsp;&nbsp;
       <br>
+      <a href="References.html">References</a>&nbsp;&nbsp;
       <a href="Attributes.html">Attributes</a>&nbsp;&nbsp;
       <a href="Properties.html">Property Lists</a>&nbsp;&nbsp;
       <a href="Errors.html">Error Handling</a>&nbsp;&nbsp;
-      <a href="Filters.html">Filters</a>&nbsp;&nbsp;
-      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
       <br>
+      <a href="Filters.html">Filters</a>&nbsp;&nbsp;
+      <a href="Palettes.html">Palettes</a>&nbsp;&nbsp;
+      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
       <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
+      <a href="MountingFiles.html">Mounting Files</a>&nbsp;&nbsp;
+      <br>
       <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
       <a href="Environment.html">Environment</a>&nbsp;&nbsp;
       <a href="ddl.html">DDL</a>&nbsp;&nbsp;
       <a href="Ragged.html">Ragged Arrays</a>&nbsp;&nbsp;
-<!--
-<hr>
-And in this document, the 
-<a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
-      <a href="Attributes.html">H5A</a>&nbsp;&nbsp;
-      <a href="Datasets.html">H5D</a>&nbsp;&nbsp;
-      <a href="Errors.html">H5E</a>&nbsp;&nbsp;
-      <a href="Files.html">H5F</a>&nbsp;&nbsp;
-      <a href="Groups.html">H5G</a>&nbsp;&nbsp;
-      <a href="Properties.html">H5P</a>&nbsp;&nbsp;
-      <a href="References.html">H5R & H5I</a>&nbsp;&nbsp;
-      <a href="Ragged.html">H5RA</a>&nbsp;&nbsp;
-      <a href="Dataspaces.html">H5S</a>&nbsp;&nbsp;
-      <a href="Datatypes.html">H5T</a>&nbsp;&nbsp;
-      <a href="Filters.html">H5Z</a>&nbsp;&nbsp;
-      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
-      <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
-      <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
-      <a href="Environment.html">Environment</a>&nbsp;&nbsp;
-      <a href="ddl.html">DDL</a>&nbsp;&nbsp;
--->
 </td></tr>
 </table>
 </center>
@@ -324,7 +306,7 @@ short data[1000] = {4, 2, 0, 0, 5, 1, ...};
 int i;
 char symbol[32];
 
-for (i=0; i<1000; i++) {
+for (i=0; i&lt;1000; i++) {
     if (H5Tenum_nameof(hdf_en_colors, data+i, symbol,
                        sizeof symbol))&lt;0) {
         if (symbol[0]) {
@@ -340,7 +322,6 @@ printf("}\n");</pre>
 	  <p>
           Output:
 	  <pre>
-
 4 BLACK
 2 BLUE
 0 RED
@@ -485,7 +466,7 @@ H5Tenum_insert(reverse, "GREEN", (val=3,&amp;val));
 H5Tenum_insert(reverse, "RED",   (val=4,&amp;val));
 
 /* Print data */
-for (i=0; i<5; i++) {
+for (i=0; i&lt;5; i++) {
     H5Tenum_nameof(hdf_en_colors, data+i, sym, sizeof sym);
     printf ("%d %s\n", data[i], sym);
 }
@@ -494,7 +475,7 @@ puts("Converting...");
 H5Tconvert(hdf_en_colors, reverse, 5, data, NULL);
 
 /* Print data */
-for (i=0; i<5; i++) {
+for (i=0; i&lt;5; i++) {
     H5Tenum_nameof(reverse, data+i, sym, sizeof sym);
     printf ("%d %s\n", data[i], sym);
 }</pre>
@@ -847,6 +828,7 @@ nameof(lang_t language, c_en_colors val, char *name, size_t size)
     <p align=right><font size=-1><i>
     (Return to <a href="Datatypes.html#Datatypes_Enum">Data Types Interface (H5T)</a>.)
     </font></i>
+    <p align=left>
 
 <hr>
 <center>
@@ -861,47 +843,29 @@ nameof(lang_t language, c_en_colors val, char *name, size_t size)
 </td>
 <td valign=top align=right>
    And in this document, the 
-   <a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
-      <a href="Files.html">Files</a>&nbsp;&nbsp;
+   <a href="H5.user.html"><strong>HDF5 User's Guide:</strong></a>&nbsp;&nbsp;&nbsp;&nbsp;
       <br>
+      <a href="Files.html">Files</a>&nbsp;&nbsp;
       <a href="Datasets.html">Datasets</a>&nbsp;&nbsp;
-      Data Types&nbsp;&nbsp;
+      <a href="Datatypes.html">Data Types</a>&nbsp;&nbsp;
       <a href="Dataspaces.html">Dataspaces</a>&nbsp;&nbsp;
       <a href="Groups.html">Groups</a>&nbsp;&nbsp;
-      <a href="References.html">References</a>&nbsp;&nbsp;
       <br>
+      <a href="References.html">References</a>&nbsp;&nbsp;
       <a href="Attributes.html">Attributes</a>&nbsp;&nbsp;
       <a href="Properties.html">Property Lists</a>&nbsp;&nbsp;
       <a href="Errors.html">Error Handling</a>&nbsp;&nbsp;
-      <a href="Filters.html">Filters</a>&nbsp;&nbsp;
-      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
       <br>
+      <a href="Filters.html">Filters</a>&nbsp;&nbsp;
+      <a href="Palettes.html">Palettes</a>&nbsp;&nbsp;
+      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
       <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
+      <a href="MountingFiles.html">Mounting Files</a>&nbsp;&nbsp;
+      <br>
       <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
       <a href="Environment.html">Environment</a>&nbsp;&nbsp;
       <a href="ddl.html">DDL</a>&nbsp;&nbsp;
       <a href="Ragged.html">Ragged Arrays</a>&nbsp;&nbsp;
-<!--
-<hr>
-And in this document, the 
-<a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
-      <a href="Attributes.html">H5A</a>&nbsp;&nbsp;
-      <a href="Datasets.html">H5D</a>&nbsp;&nbsp;
-      <a href="Errors.html">H5E</a>&nbsp;&nbsp;
-      <a href="Files.html">H5F</a>&nbsp;&nbsp;
-      <a href="Groups.html">H5G</a>&nbsp;&nbsp;
-      <a href="Properties.html">H5P</a>&nbsp;&nbsp;
-      <a href="References.html">H5R & H5I</a>&nbsp;&nbsp;
-      <a href="Ragged.html">H5RA</a>&nbsp;&nbsp;
-      <a href="Dataspaces.html">H5S</a>&nbsp;&nbsp;
-      <a href="Datatypes.html">H5T</a>&nbsp;&nbsp;
-      <a href="Filters.html">H5Z</a>&nbsp;&nbsp;
-      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
-      <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
-      <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
-      <a href="Environment.html">Environment</a>&nbsp;&nbsp;
-      <a href="ddl.html">DDL</a>&nbsp;&nbsp;
--->
 </td></tr>
 </table>
 </center>
@@ -911,9 +875,10 @@ And in this document, the
 <address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
 </address>
+
 <!-- Created: Thu Dec  4 14:57:32 EST 1997 -->
 <!-- hhmts start -->
-Last modified: 30 April 1999
+Last modified: 23 July 1999
 <!-- hhmts end -->
 
 
