@@ -160,7 +160,9 @@ int diff_dataset( hid_t file1_id,
  case H5T_STRING:
  case H5T_BITFIELD:
  case H5T_OPAQUE:
+#if 0
  case H5T_COMPOUND:
+#endif
  case H5T_REFERENCE:
  case H5T_ENUM:
  case H5T_VLEN:

@@ -22,8 +22,8 @@ Comparison not supported
 Comparison not supported
 </bitfield> is of class H5T_BITFIELD and </bitfield> is of class H5T_BITFIELD
 
-Comparison not supported
-</compound> is of class H5T_COMPOUND and </compound> is of class H5T_COMPOUND
+Comparing </compound> with </compound>
+0 differences found
 
 Comparison not supported
 </enum> is of class H5T_ENUM and </enum> is of class H5T_ENUM

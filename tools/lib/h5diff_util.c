@@ -22,13 +22,19 @@
  *
  * Purpose: Check if TYPE_ID is supported; only the listed types are 
  *  supported in the current version
+ * Date: May 30, 2003
+ *
+ * Modifications: October 29, 2003
+ *  Added support for H5T_COMPOUND types; 
  *
  *-------------------------------------------------------------------------
  */
 int diff_can(hid_t type_id)
 {
  int ret=0;
- if ( (H5Tequal(type_id, H5T_NATIVE_FLOAT)==1)||
+
+ if ( ((H5Tget_class(type_id) == H5T_COMPOUND)==1)|| /* get class */
+      (H5Tequal(type_id, H5T_NATIVE_FLOAT)==1)||
       (H5Tequal(type_id, H5T_NATIVE_DOUBLE)==1)||
       (H5Tequal(type_id, H5T_NATIVE_INT)==1)||
       (H5Tequal(type_id, H5T_NATIVE_UINT)==1)||
