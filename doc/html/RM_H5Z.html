@@ -44,32 +44,52 @@ And in this document, the
 </center>
 <hr>
 <!-- #EndLibraryItem --><center>
-<h1>H5Z: Compression Interface</h1>
+<h1>H5Z: Filter and Compression Interface</h1>
 </center>
 
-<h2>Compression API Functions</h2>
+<h2>Filter and Compression API Functions</h2>
 
-This function enable the user to configure a new compression
-method for the local environment.
+These functions enable the user to configure new filters
+for the local environment.
 
-<table border=0>
+<table border=0 width=80%>
 <tr><td valign=top>
 <ul>
     <li><a href="#Compression-Register">H5Zregister</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    &nbsp;
+    <li><a href="#Compression-Unregister">H5Zunregister</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Compression-FilterAvail">H5Zfilter_avail</a>
 </ul>
 </td></tr>
 </table>
 
 <p>
-HDF5 supports compression of raw data by compression methods 
-built into the library or defined by an application. 
-A compression method is associated with a dataset when the dataset is 
-created and is applied independently to each storage chunk of the dataset. 
-The dataset must use the <code>H5D_CHUNKED</code> storage layout. 
+HDF5 supports a filter pipeline that provides the capability for standard 
+and customized raw data processing during I/O operations.  
+HDF5 is distributed with a small set of standard filters such as 
+compression (gzip and a shuffling algorithm) and 
+error checking (Fletcher32 checksum).
+For further flexibility, the library includes tools enabling a 
+user application to extend the pipeline through the 
+creation and registration of customized filters.
+<p>
+As mentioned above, one set of filters distributed with HDF5 provides 
+built-in methods for raw data compression.  
+The flexibility of the filter pipeline implementation enables the 
+definition of additional compression methods by a user application.
+A compression method<br>
+&nbsp;&mdash;&nbsp;
+    is associated with a dataset when the dataset is created,<br>
+&nbsp;&mdash;&nbsp;
+    can be used only with chunked data (ie., datasets stored in the
+    <code>H5D_CHUNKED</code> storage layout), and<br>
+&nbsp;&mdash;&nbsp;
+    is applied independently to each chunk of the dataset.
 <p>
 The HDF5 library does not support compression for contiguous datasets 
 because of the difficulty of implementing random access for partial I/O. 
@@ -84,28 +104,42 @@ data compression.
 <dl>
 <dt><strong>Name:</strong> <a name="Compression-Register">H5Zregister</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Zregister</code>(<em>H5Z_method_t</em> <code>method</code>,
-        <em>const char *</em><code>name</code>,
+    <dd><em>herr_t</em> <code>H5Zregister</code>(<em>H5Z_filter_t</em> <code>filter</code>,
+        <em>const char *</em><code>comment</code>,
         <em>H5Z_func_t</em> <code>function</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd> Registers new compression / uncompression function.
+    <dd> Registers new filter.
 <dt><strong>Description:</strong>
-    <dd><code>H5Zregister</code> registers a new compression / uncompression 
-         function for the compression method specified by 
-         the method number, <code>method</code>.  
+    <dd><code>H5Zregister</code> registers a new filter with the
+         HDF5 library.  
+	 <p>
+	 Making a new filter available to an application is a two-step
+	 process.  The first step is to <span class="termEmphasis">define</span> 
+	 the new filter <code>function</code> as described below.
+	 This step can be skipped only when the filter is predifined, as is 
+	 the case with the Fletcher32 checksum and shuffle filters that
+	 are distributed with the HDF5 Library.
+	 This call to <code>H5Zregister</code>, 
+	 <span class="termEmphasis">registering</span> the filter with the 
+	 library, is the second step.  
+	 <p>
+	 The new filter is specified by the filter identifier 
+	 <code>filter</code>.  
          <p>
-         <code>name</code> is used for debugging and may be the null pointer. 
+         <code>comment</code> is used for debugging and may be 
+	 the null pointer. 
          <p>
-         <code>function</code> is a user-defined function providing both
-         compression and uncompression; it may be the null pointer.
+         <code>function</code> is a user-defined function 
+	 which performs the action of the filter.
          <p>
-         The statistics associated with a method number are not reset
+         The statistics associated with a filter are not reset
          by this function; they accumulate over the life of the library.
 
-    <p><strong>New filters</strong> are defined in two phases.  Before a filter can be 
-      linked into the application with <code>H5Zregister</code>, 
-      <code>H5Z_func_t</code> must first be defined as follows:
+    <p><strong>New filters.</strong>   Before a filter can be 
+         linked into an application with <code>H5Zregister</code>, 
+         the filter must be defined as described in the HDF5 Library 
+	 header file <code>H5Zpublic.h</code>:
 
     <dir>
           <em>typedef size_t</em> (*<code>H5Z_func_t</code>)
@@ -118,12 +152,12 @@ data compression.
     </dir>
 
     <p>The parameters <code>flags</code>, <code>cd_nelmts</code>, 
-      and <code>cd_values</code> are the same as for the
-      <code>H5Pset_filter()</code> function.
+      and <code>cd_values</code> are the same as for the function
+      <code>H5Pset_filter</code>.
       The additional flag <code>H5Z_FLAG_REVERSE</code> is set when 
       the filter is called as part of the input pipeline. 
       The parameter <code>*buf</code> points to the input buffer 
-      which has a total size of <code>*buf_size</code> bytes,
+      which has a size of <code>*buf_size</code> bytes,
       <code>nbytes</code> of which are valid data. 
     <p>The filter should perform the transformation in place if
       possible and return the number of valid bytes or zero for
@@ -136,18 +170,88 @@ data compression.
 
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>H5Z_method_t</em> <code>method</code>
-            <dd>IN: Number specifying compression method.
-        <dt><em>const char *</em><code>name</code>
-            <dd>IN: Name associated with the method number.  
-                Used for debugging purposes only.
+        <dt><em>H5Z_filter_t</em> <code>method</code>
+            <dd>IN: Filter identifier.
+        <dt><em>const char *</em><code>comment</code>
+            <dd>IN: String associated with the filter;  
+                used for debugging purposes only.
+		May be the null pointer.
         <dt><em>H5Z_func_t</em> <code>function</code>
-            <dd>IN: Compression / uncompression method.
+            <dd>IN: Filter function.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 </dl>
+
+
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Compression-Unregister">H5Zunregister</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Zunregister</code>(<em>H5Z_filter_t</em> <code>filter</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Unregisters a filter.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Zunregister</code> unregisters the filter 
+        specified in <code>filter</code>.  
+	<p>
+	After a call to <code>H5Zunregister</code>, the filter
+	specified in <code>filter</code> will no longer be 
+	available to the application.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>H5Z_filter_t</em> <code>filter</code>
+            <dd>IN: Identifier of the filter to be unregistered.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_nfilters_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Compression-FilterAvail">H5Zfilter_avail</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Zfilter_avail</code>(<em>H5Z_filter_t</em> <code>filter</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Determines whether a filter is available.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Zfilter_avail</code> determines whether the filter 
+        specified in <code>filter</code> is available to the application.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>H5Z_filter_t</em> <code>filter</code>
+            <dd>IN: Filter identifier.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_nfilters_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+
+
+
+
 
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
@@ -192,7 +296,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem --> 
 
-Last modified:  11 February 2003
+Last modified:  2 April 2003
  
 </body>
 </html>
