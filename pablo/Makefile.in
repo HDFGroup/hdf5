@@ -147,10 +147,10 @@ distclean: clean
 maintainer-clean: distclean
 	$(RM) *~ core core.* *.core *.bak *.contrib gmon.out
 
-
 .c.lo:
 	@$(LT_COMPILE) $(CFLAGS) $(CPPFLAGS) -c $(top_srcdir)/src/$*.c $<
 
+.PHONY: all progs test _test check dep depend
 
 PABLO_INCLUDES=HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h   \
                ProcTrace.inc
