@@ -444,17 +444,6 @@ SNAPTEST_CONFIG()
 }
 
 
-# Flush the AFS files if applicable.
-# Hopefully the flushing is done when the tests of this
-# host are done rather than when the launching site try
-# to pull them in at the same time.  This way, the afs
-# server updates are spread out.
-FLUSH_FILES()
-{
-    /usr/afsws/bin/fs flush $SNAPYARD
-}
-
-
 # Show usage page
 USAGE()
 {
@@ -750,8 +739,6 @@ while [ -n "$TEST" ]; do
 done
 # dec n_test to show the actual number of tests ran.
 n_test=`expr $n_test - 1`
-
-FLUSH_FILES
 
 PRINT_TRAILER
 
