@@ -840,6 +840,11 @@ done:
  * Purpose:	Returns a copy of the file access property list of the
  *		specified file.
  *
+ *              NOTE: Make sure that, if you are going to overwrite
+ *              information in the copied property list that was
+ *              previously opened and assigned to the property list, then
+ *              you must close it before overwriting the values.
+ *
  * Return:	Success:	Object ID for a copy of the file access
  *				property list.
  *
@@ -852,6 +857,11 @@ done:
  *		Raymond Lu, Oct 23, 2001
  *		Changed file access property list to the new generic 
  * 		property list.
+ *
+ *              Bill Wendling, Apr 21, 2003
+ *              Fixed bug where the driver ID and info in the property
+ *              list were being overwritten but the original ID and info
+ *              weren't being close.
  * 		
  *-------------------------------------------------------------------------
  */
