@@ -94,7 +94,7 @@ fi
 
 # Try solaris native compiler flags
 if test -z "$cxx_flags_set"; then
-  CXXFLAGS="$CXXFLAGS -instances=global"
+  CXXFLAGS="$CXXFLAGS -instances=static"
   CPPFLAGS="$CPPFLAGS -LANG:std"
   DEBUG_CXXFLAGS=-g
   DEBUG_CPPFLAGS=
