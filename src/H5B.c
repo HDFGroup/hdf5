@@ -2139,7 +2139,7 @@ H5B_copy(H5F_t *f, const H5B_t *old_bt)
      * Translate the keys from pointers into the old 'page' buffer into
      *  pointers into the new 'page' buffer.
      */
-    for (u = 0; u < nkeys; u++)
+    for (u = 0; u < (nkeys+1); u++)
         ret_value->key[u].rkey = (old_bt->key[u].rkey - old_bt->page) + ret_value->page;
 
 done:
