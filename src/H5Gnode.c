@@ -313,8 +313,8 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
      * Look for dirty entries and set the node dirty flag.
      */
     for (i = 0; i < sym->nsyms; i++) {
-	if (sym->entry[i].dirty)
-	    sym->dirty = TRUE;
+        if (sym->entry[i].dirty)
+            sym->dirty = TRUE;
     }
 
     /*
@@ -639,9 +639,8 @@ H5G_node_found(H5F_t *f, const haddr_t *addr, const void *_lt_key,
 	break;
 
     default:
-	HRETURN_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL,
-		      "internal erorr (unknown symbol find operation)");
-	break;
+        HRETURN_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL,
+                      "internal erorr (unknown symbol find operation)");
     }
     ret_value = SUCCEED;
 

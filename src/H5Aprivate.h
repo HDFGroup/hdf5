@@ -73,7 +73,7 @@
 typedef struct atom_info_struct_tag {
     hid_t                       id;       /*atom ID for this info            */
     uintn                       count;    /*ref. count for this atom         */
-    VOIDP                       *obj_ptr; /*pointer associated with the atom */
+    void                     * *obj_ptr;  /*pointer associated with the atom */
     struct atom_info_struct_tag *next;/*link to next atom (in case of hash-clash)*/
 } atom_info_t;
 
@@ -93,7 +93,7 @@ typedef struct atom_group_struct_tag {
 intn H5A_init_group (group_t grp, intn hash_size, uintn reserved,
 		     herr_t (*free_func)(void *));
 intn H5A_destroy_group (group_t grp);
-hid_t H5A_register (group_t grp, const void *object);
+hid_t H5A_register (group_t grp, void *object);
 void *H5A_object (hid_t atm);
 group_t H5A_group (hid_t atm);
 void *H5A_remove (hid_t atm);

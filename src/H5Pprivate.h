@@ -102,8 +102,8 @@ intn H5P_cmp (const H5P_t *ds1, const H5P_t *ds2);
 hbool_t H5P_is_simple (const H5P_t *sdim);
 uintn H5P_nelem (const H5P_t *space);
 const H5P_conv_t *H5P_find (const H5P_t *mem_space, const H5P_t *file_space);
-intn H5P_get_hyperslab (const H5P_t *ds, size_t offset[]/*out*/,
-			size_t size[]/*out*/, size_t stride[]/*out*/);
+intn H5P_get_hyperslab (const H5P_t *ds, int offset[]/*out*/,
+			int size[]/*out*/, int stride[]/*out*/);
 
 /* Conversion functions for simple data spaces */
 size_t H5P_simp_init (const struct H5O_layout_t *layout,

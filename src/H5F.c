@@ -258,8 +258,8 @@ H5Fget_create_template(hid_t fid)
        H5F_compare_files -- compare file objects for the atom API
  USAGE
        intn HPcompare_filename(obj, key)
-       const VOIDP obj;             IN: pointer to the file record
-       const VOIDP key;             IN: pointer to the search key
+       const void * obj;             IN: pointer to the file record
+       const void * key;             IN: pointer to the search key
 
  ERRORS
 
@@ -270,7 +270,7 @@ H5Fget_create_template(hid_t fid)
        keys.
 --------------------------------------------------------------------------*/
 static intn
-H5F_compare_files(const VOIDP _obj, const VOIDP _key)
+H5F_compare_files(const void * _obj, const void * _key)
 {
     const H5F_t            *obj = (const H5F_t *) _obj;
     const H5F_search_t     *key = (const H5F_search_t *) _key;
@@ -356,22 +356,22 @@ H5Fis_hdf5(const char *filename)
 {
     H5F_low_t              *f_handle = NULL;    /* file handle */
     haddr_t                 addr;       /* Address of file signature & header */
-    hbool_t                 ret_value = BFALSE;
+    hbool_t                 ret_value = FALSE;
 
-    FUNC_ENTER(H5Fis_hdf5, BFAIL);
+    FUNC_ENTER(H5Fis_hdf5, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
     if (filename == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, BFAIL, "no filename specified");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no filename specified");
 
     /* Open the file */
     if (NULL == (f_handle = H5F_low_open(H5F_LOW_DFLT, filename, 0, NULL))) {
-        HGOTO_ERROR(H5E_FILE, H5E_BADFILE, BFAIL,
+        HGOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL,
                     "low-level file open failure");
     }
     if (H5F_locate_signature(f_handle, &addr) >= 0) {
-        ret_value = BTRUE;
+        ret_value = TRUE;
     }
   done:
     H5F_low_close(f_handle);    /* close the file we opened */

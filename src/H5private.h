@@ -431,7 +431,7 @@ extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
    PABLO_TRACE_ON (PABLO_MASK, pablo_func_id);                                \
                                                                               \
    if (!library_initialize_g) {                                               \
-      library_initialize_g = TRUE;                                            \
+      library_initialize_g = TRUE;                                           \
       if (H5_init_library()<0) {                                              \
          HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,                          \
                         "library initialization failed");                     \
@@ -439,7 +439,7 @@ extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
    }                                                                          \
                                                                               \
    if (!thread_initialize_g) {                                                \
-      thread_initialize_g = TRUE;                                             \
+      thread_initialize_g = TRUE;                                            \
       if (H5_init_thread()<0) {                                               \
          HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,                          \
                         "thread initialization failed");                      \
@@ -447,7 +447,7 @@ extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
    }                                                                          \
                                                                               \
    if (!interface_initialize_g) {                                             \
-      interface_initialize_g = TRUE;                                          \
+      interface_initialize_g = TRUE;                                         \
       if (interface_init_func &&                                              \
           ((herr_t(*)(void))interface_init_func)()<0) {                       \
          HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,                          \

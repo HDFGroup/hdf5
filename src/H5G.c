@@ -1215,13 +1215,13 @@ H5G_insert(const char *name, H5G_entry_t *ent)
      * Make sure the root group exists.	 Ignore the failure if it's
      * because the group already exists.
      */
-    update_grp = H5F_addr_eq(&(grp.header),
+    update_grp = (hbool_t)H5F_addr_eq(&(grp.header),
 			     &(ent->file->shared->root_ent->header));
     if ((status = H5G_mkroot(ent->file, H5G_SIZE_HINT)) < 0 && -2 != status) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create root group");
     }
     H5ECLEAR;
-    if (update_grp)
+    if (update_grp==TRUE)
 	grp = *(ent->file->shared->root_ent);
 
     /*

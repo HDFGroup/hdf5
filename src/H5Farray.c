@@ -78,7 +78,6 @@ H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
 	assert ("not implemented yet" && 0);
 	HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL,
 		       "unsupported storage layout");
-	break;
     }
 
     FUNC_LEAVE (SUCCEED);
@@ -213,7 +212,6 @@ H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
 	assert ("not implemented yet" && 0);
 	HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL,
 		       "unsupported storage layout");
-	break;
     }
 
     FUNC_LEAVE (SUCCEED);
@@ -351,7 +349,6 @@ H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 	assert ("not implemented yet" && 0);
 	HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, FAIL,
 		       "unsupported storage layout");
-	break;
     }
 
     FUNC_LEAVE (SUCCEED);

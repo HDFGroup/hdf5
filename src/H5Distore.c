@@ -53,7 +53,7 @@ static herr_t           H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *
                                                   const size_t offset_f[],
                                                   const size_t size[],
                                                   const size_t offset_m[],
-                                          const size_t size_m[], void *buf);
+                                          const size_t size_m[], const void *buf);
 
 /*
  * B-tree key.  A key contains the minimum logical N-dimensional address and
@@ -355,7 +355,7 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
     assert(lt_key);
     assert(rt_key);
     assert(udata);
-    assert(udata->mesg.ndims >= 0 && udata->mesg.ndims < H5O_LAYOUT_NDIMS);
+    assert(udata->mesg.ndims > 0 && udata->mesg.ndims < H5O_LAYOUT_NDIMS);
     assert(addr);
 
     /* Allocate new storage */
@@ -490,7 +490,7 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr,
     H5B_ins_t               ret_value = H5B_INS_ERROR;
     size_t                  nbytes;
 
-    FUNC_ENTER(H5F_istore_insert, FAIL);
+    FUNC_ENTER(H5F_istore_insert, H5B_INS_ERROR);
 
     /* check args */
     assert(f);
@@ -509,7 +509,7 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr,
     if (cmp < 0) {
         /* Negative indices not supported yet */
         assert("HDF5 INTERNAL ERROR -- see rpm" && 0);
-        HRETURN_ERROR(H5E_STORAGE, H5E_UNSUPPORTED, FAIL, "internal error");
+        HRETURN_ERROR(H5E_STORAGE, H5E_UNSUPPORTED, H5B_INS_ERROR, "internal error");
 
     } else if (H5V_hyper_eq(udata->mesg.ndims,
                             udata->key.offset, udata->key.size,
@@ -545,7 +545,7 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr,
          * Allocate storage for the new chunk
          */
         if (H5MF_alloc(f, H5MF_RAW, nbytes, new_node /*out */ ) < 0) {
-            HRETURN_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
+            HRETURN_ERROR(H5E_IO, H5E_CANTINIT, H5B_INS_ERROR,
                           "file allocation failed");
         }
         udata->addr = *new_node;
@@ -554,7 +554,7 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr,
 
     } else {
         assert("HDF5 INTERNAL ERROR -- see rpm" && 0);
-        HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "internal error");
+        HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, H5B_INS_ERROR, "internal error");
     }
 
     FUNC_LEAVE(ret_value);
@@ -596,7 +596,7 @@ static herr_t
 H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout, H5F_isop_t op,
                           const size_t offset_f[], const size_t size[],
                           const size_t offset_m[], const size_t size_m[],
-                          void *buf)
+                          const void *buf)
 {
     intn                    i, carry;
     size_t                  idx_cur[H5O_LAYOUT_NDIMS];
@@ -714,7 +714,7 @@ H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout, H5F_isop_t op,
             }
         } else {
             H5V_hyper_copy(layout->ndims, sub_size,
-                           size_m, sub_offset_m, buf,
+                           size_m, sub_offset_m, (void *)buf,
                            udata.key.size, offset_wrt_chunk, chunk);
         }
 

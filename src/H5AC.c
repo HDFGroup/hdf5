@@ -842,7 +842,7 @@ H5AC_debug(H5F_t *f)
     fprintf(stderr, "   %18s  %8s %8s %8s %8s+%-8s\n",
             "", "Hits", "Misses", "MissRate", "Inits", "Flushes");
 
-    for (i = 0; i < H5AC_NTYPES; i++) {
+    for (i = H5AC_BT_ID; i < H5AC_NTYPES; i++) {
 
         switch (i) {
         case H5AC_BT_ID:

@@ -48,7 +48,7 @@ typedef enum {
 typedef int32 hid_t;
 
 /* Type of the function to compare objects & keys */
-typedef intn (*H5Asearch_func_t) (const VOIDP obj, const VOIDP key);
+typedef intn (*H5Asearch_func_t) (const void * obj, const void * key);
 
 /* # of bits to use for Group ID in each atom (change if MAXGROUP>16) */
 #define GROUP_BITS  8

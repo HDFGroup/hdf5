@@ -22,8 +22,6 @@
 /*
  * Data types
  */
-typedef void            VOID;
-typedef void           *VOIDP;
 typedef char            char8;
 typedef signed char int8;
 typedef unsigned char   uchar8, uint8;
@@ -99,11 +97,7 @@ typedef intn herr_t;
 /*
  * Boolean type.
  */
-typedef enum {
-    BFAIL        = (-1),        /*error value                                */
-    BFALSE       = 0,
-    BTRUE        = 1
-} hbool_t;
+typedef int hbool_t;
 
 #ifdef __cplusplus
 extern "C" {

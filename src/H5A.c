@@ -71,7 +71,7 @@ static char             RcsId[] = "@(#)$Revision$";
 /* Array of pointers to atomic groups */
 static hid_t            atom_id_cache[ATOM_CACHE_SIZE] =
 {-1, -1, -1, -1};
-static VOIDP            atom_obj_cache[ATOM_CACHE_SIZE] =
+static void *            atom_obj_cache[ATOM_CACHE_SIZE] =
 {NULL};
 #endif
 
@@ -272,7 +272,7 @@ H5A_destroy_group(group_t grp    /* IN: Group to destroy */
 *******************************************************************************/
 hid_t 
 H5A_register(group_t grp,   /* IN: Group to register the object in */
-	     const void *object     /* IN: Object to attach to atom */
+	     void *object     /* IN: Object to attach to atom */
 )
 {
     atom_group_t           *grp_ptr = NULL;     /* ptr to the atomic group */
@@ -395,7 +395,7 @@ H5A_inc_ref(hid_t atm)
     Returns object ptr if successful and NULL otherwise
 
 *******************************************************************************/
-VOIDP 
+void * 
 H5A_object(hid_t atm        /* IN: Atom to retrieve object for */
 )
 {
@@ -403,7 +403,7 @@ H5A_object(hid_t atm        /* IN: Atom to retrieve object for */
     uintn                   i;  /* local counter */
 #endif /* ATOMS_ARE_CACHED */
     atom_info_t            *atm_ptr = NULL;     /* ptr to the new atom */
-    VOIDP                   ret_value = NULL;
+    void *            ret_value = NULL;
 
     FUNC_ENTER(H5A_object, NULL);
 
@@ -414,7 +414,7 @@ H5A_object(hid_t atm        /* IN: Atom to retrieve object for */
             ret_value = atom_obj_cache[i];
             if (i > 0) {        /* Implement a simple "move forward" caching scheme */
                 hid_t                   t_atom = atom_id_cache[i - 1];
-                VOIDP                   t_obj = atom_obj_cache[i - 1];
+                void *            t_obj = atom_obj_cache[i - 1];
 
                 atom_id_cache[i - 1] = atom_id_cache[i];
                 atom_obj_cache[i - 1] = atom_obj_cache[i];
@@ -458,7 +458,7 @@ H5A_group(hid_t atm         /* IN: Atom to retrieve group for */
 {
     group_t                 ret_value = BADGROUP;
 
-    FUNC_ENTER(H5A_group, FAIL);
+    FUNC_ENTER(H5A_group, BADGROUP);
 
     ret_value = ATOM_TO_GROUP(atm);
     if (ret_value <= BADGROUP || ret_value >= MAXGROUP)
@@ -483,7 +483,7 @@ H5A_group(hid_t atm         /* IN: Atom to retrieve group for */
     Returns atom's object if successful and NULL otherwise
 
 *******************************************************************************/
-VOIDP 
+void * 
 H5A_remove(hid_t atm        /* IN: Atom to remove */
 )
 {
@@ -495,7 +495,7 @@ H5A_remove(hid_t atm        /* IN: Atom to remove */
 #ifdef ATOMS_ARE_CACHED
     uintn                   i;  /* local counting variable */
 #endif /* ATOMS_ARE_CACHED */
-    VOIDP                   ret_value = NULL;
+    void *            ret_value = NULL;
 
     FUNC_ENTER(H5A_remove, NULL);
 
@@ -574,7 +574,7 @@ H5A_dec_ref(hid_t atm)
     group_t                 grp = ATOM_TO_GROUP(atm);   /* Group the object is in */
     atom_group_t           *grp_ptr = NULL;     /* ptr to the atomic group */
     atom_info_t            *atm_ptr = NULL;     /* ptr to the new atom */
-    VOIDP                   obj;        /* object to call 'free' function with */
+    const void *            obj;        /* object to call 'free' function with */
     intn                    ret_value = FAIL;
 
     FUNC_ENTER(H5A_dec_ref, FAIL);
@@ -591,7 +591,7 @@ H5A_dec_ref(hid_t atm)
         /* If the reference count is zero, remove the object from the group */
         if (0 == atm_ptr->count && (obj = H5A_remove(atm)) != NULL) {
             /* call the user's 'free' function for the atom's information */
-            (*grp_ptr->free_func) (obj);
+            (*grp_ptr->free_func) ((void *)obj);
         }
         ret_value = SUCCEED;
     }
@@ -621,7 +621,7 @@ H5A_search(group_t grp,     /* IN: Group to search for the object in */
     atom_group_t           *grp_ptr = NULL;     /* ptr to the atomic group */
     atom_info_t            *atm_ptr = NULL;     /* ptr to the new atom */
     intn                    i;  /* local counting variable */
-    VOIDP                   ret_value = NULL;
+    void *            ret_value = NULL;
 
     FUNC_ENTER(H5A_search, NULL);
 

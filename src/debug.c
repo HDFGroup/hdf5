@@ -110,7 +110,7 @@ main(int argc, char *argv[])
          * subclass.  The subclass identifier is the byte immediately
          * after the B-tree signature.
          */
-        H5B_subid_t             subtype = sig[H5B_SIZEOF_MAGIC];
+        H5B_subid_t             subtype = (H5B_subid_t)sig[H5B_SIZEOF_MAGIC];
         switch (subtype) {
         case H5B_SNODE_ID:
             status = H5G_node_debug(f, &addr, stdout, 0, VCOL, &extra);

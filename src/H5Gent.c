@@ -177,6 +177,7 @@ herr_t
 H5G_ent_decode(H5F_t *f, const uint8 **pp, H5G_entry_t *ent)
 {
     const uint8            *p_ret = *pp;
+    uint32  tmp;
 
     FUNC_ENTER(H5G_ent_decode, FAIL);
 
@@ -190,7 +191,8 @@ H5G_ent_decode(H5F_t *f, const uint8 **pp, H5G_entry_t *ent)
     /* decode header */
     H5F_decode_length(f, *pp, ent->name_off);
     H5F_addr_decode(f, pp, &(ent->header));
-    UINT32DECODE(*pp, ent->type);
+    UINT32DECODE(*pp, tmp);
+    ent->type=(H5G_type_t)tmp;
 
     /* decode scratch-pad */
     switch (ent->type) {

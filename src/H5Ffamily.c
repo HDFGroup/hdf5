@@ -513,7 +513,7 @@ H5F_fam_access(const char *name, int mode, H5F_search_t *key /*out */ )
                  * of the family.  As long as we found the first member(s) the
                  * family exists.
                  */
-                HRETURN(membno > 0);
+                HRETURN(membno > 0 ? TRUE : FALSE);
             } else if (H5F_low_access(H5F_LOW_DFLT, member_name, F_OK, NULL)) {
                 /*
                  * The file exists but didn't have the write access permissions.

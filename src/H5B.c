@@ -138,7 +138,7 @@ static const H5AC_class_t H5AC_BT[1] = {
 
 /* Interface initialization? */
 #define INTERFACE_INIT NULL
-static                  interface_initialize_g = FALSE;
+static hbool_t interface_initialize_g = FALSE;
 
 /*-------------------------------------------------------------------------
  * Function:    H5B_create

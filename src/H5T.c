@@ -440,7 +440,7 @@ H5Tequal(hid_t type1_id, hid_t type2_id)
 	NULL == (dt2 = H5A_object(type2_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
-    ret_value = (0 == H5T_cmp(dt1, dt2));
+    ret_value = (0 == H5T_cmp(dt1, dt2)) ? TRUE : FALSE;
 
     FUNC_LEAVE(ret_value);
 }
@@ -1044,9 +1044,9 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb /*out */ , H5T_pad_t *msb /*out */ )
     }
     /* Get values */
     if (lsb)
-	*lsb = dt->u.atomic.lsb_pad;
+	*lsb = (H5T_pad_t)dt->u.atomic.lsb_pad;
     if (msb)
-	*msb = dt->u.atomic.msb_pad;
+	*msb = (H5T_pad_t)dt->u.atomic.msb_pad;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1267,15 +1267,15 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
     if (dt->locked) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
-    if (epos < 0 || epos + esize > dt->u.atomic.prec) {
+    if (epos + esize > dt->u.atomic.prec) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "exponent bit field size/location is invalid");
     }
-    if (mpos < 0 || mpos + msize > dt->u.atomic.prec) {
+    if (mpos + msize > dt->u.atomic.prec) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "mantissa bit field size/location is invalid");
     }
-    if (spos < 0 || spos >= dt->u.atomic.prec) {
+    if (spos >= dt->u.atomic.prec) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "sign location is not valid");
     }
@@ -1498,7 +1498,7 @@ H5Tget_inpad(hid_t type_id)
 		      "not a floating-point data type");
     }
     /* pad */
-    pad = dt->u.atomic.u.f.pad;
+    pad = (H5T_pad_t)dt->u.atomic.u.f.pad;
 
     FUNC_LEAVE(pad);
 }
@@ -2722,7 +2722,7 @@ H5T_sort_by_offset(H5T_t *dt)
 		H5T_member_t tmp = dt->u.compnd.memb[j];
 		dt->u.compnd.memb[j] = dt->u.compnd.memb[j+1];
 		dt->u.compnd.memb[j+1] = tmp;
-		swapped = 1;
+		swapped = TRUE;
 	    }
 	}
     }

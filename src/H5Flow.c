@@ -18,7 +18,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#define addr_defined(X) (-1!=(X)->offset && (X)->offset>=0)
+#define addr_defined(X) ((-1!=(X)->offset && (X)->offset>=0) ? TRUE : FALSE)
 
 #define PABLO_MASK      H5F_low
 static hbool_t          interface_initialize_g = FALSE;
@@ -378,14 +378,14 @@ H5F_low_access(const H5F_low_class_t *type, const char *name, int mode,
     hbool_t                 ret_value;
     struct stat             sb;
 
-    FUNC_ENTER(H5F_low_size, 0);
+    FUNC_ENTER(H5F_low_size, FAIL);
     assert(type);
 
     if (type->access) {
         ret_value = (type->access) (name, mode, key /*out */ );
 
     } else {
-        ret_value = (0 == access(name, mode));
+        ret_value = (0 == access(name, mode) ? TRUE : FALSE);
         if (key) {
             stat(name, &sb);
             key->dev = sb.st_dev;
@@ -588,7 +588,7 @@ hbool_t
 H5F_addr_zerop(const haddr_t *addr)
 {
     FUNC_ENTER(H5F_addr_zerop, FAIL);
-    FUNC_LEAVE(0 == addr->offset);
+    FUNC_LEAVE(0 == addr->offset ? TRUE : FALSE);
 }
 
 /*-------------------------------------------------------------------------

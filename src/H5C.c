@@ -66,7 +66,7 @@ H5C_init_interface(void)
      * atom groups aren't.
      */
     for (i = 0; i < H5C_NCLASSES; i++) {
-        status = H5A_init_group(H5_TEMPLATE_0 + i, H5A_TEMPID_HASHSIZE, 0, NULL);
+        status = H5A_init_group((group_t)(H5_TEMPLATE_0 +i), H5A_TEMPID_HASHSIZE, 0, NULL);
         if (status < 0)
             ret_value = FAIL;
     }
@@ -107,7 +107,7 @@ H5C_term_interface(void)
     intn                    i;
 
     for (i = 0; i < H5C_NCLASSES; i++) {
-        H5A_destroy_group(H5_TEMPLATE_0 + i);
+        H5A_destroy_group((group_t)(H5_TEMPLATE_0 + i));
     }
 }
 
@@ -202,7 +202,7 @@ H5C_create(H5C_class_t type, void *tmpl)
     assert(tmpl);
 
     /* Atomize the new template */
-    if ((ret_value = H5A_register(H5_TEMPLATE_0 + type, tmpl)) < 0) {
+    if ((ret_value = H5A_register((group_t)(H5_TEMPLATE_0 + type), tmpl)) < 0) {
         HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
                       "can't register template");
     }
@@ -269,7 +269,7 @@ H5Cget_class(hid_t tid)
         group < H5_TEMPLATE_0) {
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, H5C_NO_CLASS, "not a template");
     }
-    ret_value = group - H5_TEMPLATE_0;
+    ret_value = (H5C_class_t)(group - H5_TEMPLATE_0);
     FUNC_LEAVE(ret_value);
 }
 

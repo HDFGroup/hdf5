@@ -111,7 +111,6 @@ H5H_create(H5F_t *f, H5H_type_t heap_type, size_t size_hint,
                 "heap\n");
 #endif
     }
-    size_hint = MAX(0, size_hint);
     if (size_hint && size_hint < H5H_SIZEOF_FREE(f)) {
         size_hint = H5H_SIZEOF_FREE(f);
     }
@@ -416,7 +415,6 @@ H5H_read(H5F_t *f, const haddr_t *addr, size_t offset, size_t size, void *buf)
     if (!addr)
         addr = &(f->shared->smallobj_addr);
     assert(H5F_addr_defined(addr));
-    assert(offset >= 0);
 
     if (NULL == (heap = H5AC_find(f, H5AC_HEAP, addr, NULL, NULL))) {
         HRETURN_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL,
@@ -478,7 +476,6 @@ H5H_peek(H5F_t *f, const haddr_t *addr, size_t offset)
     if (!addr)
         addr = &(f->shared->smallobj_addr);
     assert(H5F_addr_defined(addr));
-    assert(offset >= 0);
 
     if (NULL == (heap = H5AC_find(f, H5AC_HEAP, addr, NULL, NULL))) {
         HRETURN_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL,
@@ -548,7 +545,7 @@ H5H_insert(H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
     size_t                  need_size, old_size, need_more;
     hbool_t                 found;
 #ifndef NDEBUG
-    static                  nmessages = 0;
+    static                  int nmessages = 0;
 #endif
 
     FUNC_ENTER(H5H_insert, (size_t)(-1));
@@ -604,7 +601,7 @@ H5H_insert(H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
      * can extend that free chunk.  Otherwise we'll have to make another
      * free chunk.  If the heap must expand, we double its size.
      */
-    if (!found) {
+    if (found==FALSE) {
 
         need_more = MAX3(need_size, heap->mem_alloc, H5H_SIZEOF_FREE(f));
 
@@ -719,7 +716,6 @@ H5H_write(H5F_t *f, const haddr_t *addr, size_t offset, size_t size,
     if (!addr)
         addr = &(f->shared->smallobj_addr);
     assert(H5F_addr_defined(addr));
-    assert(offset >= 0);
     assert(buf);
 
     if (NULL == (heap = H5AC_find(f, H5AC_HEAP, addr, NULL, NULL))) {
@@ -782,7 +778,6 @@ H5H_remove(H5F_t *f, const haddr_t *addr, size_t offset, size_t size)
     if (!addr)
         addr = &(f->shared->smallobj_addr);
     assert(H5F_addr_defined(addr));
-    assert(offset >= 0);
     assert(size > 0);
 
     if (NULL == (heap = H5AC_find(f, H5AC_HEAP, addr, NULL, NULL))) {

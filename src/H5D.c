@@ -824,7 +824,7 @@ H5D_open(H5F_t *f, const char *name)
 herr_t
 H5D_close(H5D_t *dataset)
 {
-    hbool_t		    free_failed;
+    uintn		    free_failed;
 
     FUNC_ENTER(H5D_close, FAIL);
 

@@ -822,7 +822,7 @@ H5P_cmp(const H5P_t *ds1, const H5P_t *ds2)
     hbool_t H5P_is_simple(sdim)
         H5P_t *sdim;            IN: Pointer to dataspace object to query
  RETURNS
-    BTRUE/BFALSE/BFAIL
+    TRUE/FALSE/FAIL
  DESCRIPTION
         This function determines the if a dataspace is "simple". ie. if it
     has orthogonal, evenly spaced dimensions.
@@ -830,15 +830,15 @@ H5P_cmp(const H5P_t *ds1, const H5P_t *ds2)
 hbool_t
 H5P_is_simple(const H5P_t *sdim)
 {
-    hbool_t                 ret_value = BFAIL;
+    hbool_t                 ret_value = FAIL;
 
-    FUNC_ENTER(H5P_is_simple, UFAIL);
+    FUNC_ENTER(H5P_is_simple, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
 
     assert(sdim);
-    ret_value = sdim->type == H5P_SIMPLE ? BTRUE : BFALSE;      /* Currently all dataspaces are simple, but check anyway */
+    ret_value = sdim->type == H5P_SIMPLE ? TRUE : FALSE;      /* Currently all dataspaces are simple, but check anyway */
 
     FUNC_LEAVE(ret_value);
 }
@@ -853,7 +853,7 @@ H5P_is_simple(const H5P_t *sdim)
     hbool_t H5Pis_simple(sid)
         hid_t sid;            IN: ID of dataspace object to query
  RETURNS
-    BTRUE/BFALSE/BFAIL
+    TRUE/FALSE/FAIL
  DESCRIPTION
         This function determines the if a dataspace is "simple". ie. if it
     has orthogonal, evenly spaced dimensions.
@@ -862,9 +862,9 @@ hbool_t
 H5Pis_simple(hid_t sid)
 {
     H5P_t                  *space = NULL;       /* dataspace to modify */
-    hbool_t                 ret_value = BFAIL;
+    hbool_t                 ret_value = FAIL;
 
-    FUNC_ENTER(H5Pis_simple, BFAIL);
+    FUNC_ENTER(H5Pis_simple, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -875,7 +875,7 @@ H5Pis_simple(hid_t sid)
     ret_value = H5P_is_simple(space);
 
   done:
-    if (ret_value == BFAIL) {   /* Error condition cleanup */
+    if (ret_value == FAIL) {   /* Error condition cleanup */
 
     }                           /* end if */
     /* Normal function cleanup */
@@ -1026,10 +1026,10 @@ H5Pset_space(hid_t sid, int rank, const size_t *dims)
     datasets which extend in arbitrary directions.
 --------------------------------------------------------------------------*/
 herr_t
-H5Pset_hyperslab(hid_t sid, const size_t *start, const size_t *count, const size_t *stride)
+H5Pset_hyperslab(hid_t sid, const intn *start, const intn *count, const intn *stride)
 {
     H5P_t                  *space = NULL;       /* dataspace to modify */
-    size_t                 *tmp_stride=NULL;    /* temp. copy of stride */
+    intn                   *tmp_stride=NULL;    /* temp. copy of stride */
     intn                    u;  /* local counting variable */
     herr_t                  ret_value = SUCCEED;
 
@@ -1049,7 +1049,7 @@ H5Pset_hyperslab(hid_t sid, const size_t *start, const size_t *count, const size
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,"unknown dataspace type");
 
     /* Set up stride values for later use */
-    tmp_stride= H5MM_xmalloc(space->u.simple.rank*sizeof(size_t));
+    tmp_stride= H5MM_xmalloc(space->u.simple.rank*sizeof(intn));
     for (u=0; u<space->u.simple.rank; u++) {
         tmp_stride[u] = stride ? stride[u] : 1;
     }
@@ -1109,8 +1109,8 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5Pget_hyperslab (hid_t sid, size_t offset[]/*out*/, size_t size[]/*out*/,
-		  size_t stride[]/*out*/)
+H5Pget_hyperslab (hid_t sid, int offset[]/*out*/, int size[]/*out*/,
+		  int stride[]/*out*/)
 {
     const H5P_t	*ds = NULL;
     intn	ret_value = FAIL;
@@ -1151,8 +1151,8 @@ H5Pget_hyperslab (hid_t sid, size_t offset[]/*out*/, size_t size[]/*out*/,
  *-------------------------------------------------------------------------
  */
 intn
-H5P_get_hyperslab (const H5P_t *ds, size_t offset[]/*out*/,
-		   size_t size[]/*out*/, size_t stride[]/*out*/)
+H5P_get_hyperslab (const H5P_t *ds, int offset[]/*out*/,
+		   int size[]/*out*/, int stride[]/*out*/)
 {
     intn		i;
     intn		ret_value = FAIL;
