@@ -2046,9 +2046,9 @@ H5S_hyper_bounds_helper (const H5S_hyper_span_info_t *spans, const hssize_t *off
     curr=spans->head;
     while(curr!=NULL) {
         /* Check if the current span extends the bounding box */
-        if((curr->low+offset[rank])<(hssize_t)start[rank])
+        if((hsize_t)(curr->low+offset[rank])<start[rank])
             start[rank]=curr->low+offset[rank];
-        if((curr->high+offset[rank])>(hssize_t)end[rank])
+        if((hsize_t)(curr->high+offset[rank])>end[rank])
             end[rank]=curr->high+offset[rank];
 
         /* Recurse if this node has down spans */
@@ -2109,7 +2109,7 @@ H5S_hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
     /* Set the start and end arrays up */
     rank=space->extent.u.simple.rank;
     for(i=0; i<rank; i++) {
-        start[i]=UINT_MAX;
+        start[i]=HSIZET_MAX;
         end[i]=0;
     } /* end for */
 

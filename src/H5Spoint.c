@@ -884,7 +884,7 @@ H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
 
     /* Set the start and end arrays up */
     for(i=0; i<rank; i++) {
-        start[i]=UINT_MAX;
+        start[i]=HSIZET_MAX;
         end[i]=0;
     } /* end for */
 
