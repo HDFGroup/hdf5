@@ -71,6 +71,9 @@ New Features
 
   o Parallel Library
   ==================
+    * Fixed bug in parallel I/O routines where a collective I/O which used
+      MPI derived types, followed by an independent I/O would cause the library
+      to hang.  QAK 2002/06/24
     * Added environment variable flag to control whether creating MPI derived
       typed is preferred or not.  This can affect performance, depending on
       which way the MPI-I/O library is optimized for.  The default is set to
