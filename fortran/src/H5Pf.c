@@ -739,12 +739,12 @@ nh5pget_istore_k_c (hid_t_f *prp_id, int_f* ik)
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pget_driver_c (hid_t_f *prp_id, int_f* driver)
+nh5pget_driver_c (hid_t_f *prp_id, hid_t_f* driver)
 {
      int ret_value = -1;
      /*
      hid_t c_prp_id;
-     H5F_driver_t c_driver;
+     hid_t c_driver;
      */
 
      /*
@@ -753,7 +753,7 @@ nh5pget_driver_c (hid_t_f *prp_id, int_f* driver)
      /*
      c_prp_id = *prp_id;
      c_driver = H5Pget_driver(c_prp_id);
-     *driver = (int_f) c_driver;
+     *driver = (hid_t_f) c_driver;
      if (c_driver < 0) return ret_value;
      */
      ret_value = 0;
@@ -761,114 +761,118 @@ nh5pget_driver_c (hid_t_f *prp_id, int_f* driver)
 } 
 
 /*----------------------------------------------------------------------------
- * Name:        h5pset_stdio_c
+ * Name:        h5pset_fapl_stdio_c
  * Purpose:     Call H5Pset_stdio to set the low level file driver to 
  *              use the functions declared in the stdio.h
  * Inputs:      prp_id - property list identifier
  * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Friday, February 25, 2000
+ * Programmer:  Elena Pourmal
+ *              March 7, 2001
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pset_stdio_c (hid_t_f *prp_id)
+nh5pset_fapl_stdio_c (hid_t_f *prp_id)
 {
      int ret_value = -1;
      hid_t c_prp_id;
      herr_t ret = -1;
      /*
-      * Call H5Pset_stdio function.
+      * Call H5Pset_fapl_stdio function.
       */
      c_prp_id = *prp_id;
-     /* ret = H5Pset_stdio(c_prp_id); */
+     ret = H5Pset_fapl_stdio(c_prp_id); 
      if (ret < 0) return ret_value;
      ret_value = 0;
      return ret_value;
 } 
-
+#ifdef NO_SUCH_F90_FUNCTION
 /*----------------------------------------------------------------------------
- * Name:        h5pget_stdio_c
- * Purpose:     Call H5Pget_stdio to determine whther the low level file driver 
+ * Name:        h5pget_fapl_stdio_c
+ * Purpose:     Call H5Pget_fapl_stdio to determine whther the low level file driver 
  *              uses the functions declared in the stdio.h
  * Inputs:      prp_id - property list identifier
  * Outputs:     io - value indicates whether the file driver uses
  *                   the functions declared in the stdio.h
  * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Friday, February 25, 2000
+ * Programmer:  Elena Pourmal
+ *              March 9, 2001
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pget_stdio_c (hid_t_f *prp_id, int_f* io)
+nh5pget_fapl_stdio_c (hid_t_f *prp_id, int_f* io)
 {
      int ret_value = -1;
      hid_t c_prp_id;
      herr_t ret = -1;
      /*
-      * Call H5Pget_stdio function.
+      * Call H5Pget_fapl_stdio function.
       */
      c_prp_id = *prp_id;
-     /* ret = H5Pget_stdio(c_prp_id); */
+     ret = H5Pget_fapl_stdio(c_prp_id); 
      if (ret < 0) return ret_value;
      *io = (int_f)ret;
      ret_value = 0;
      return ret_value;
 }
 
+#endif /*NO_SUCH_F90_FUNCTION*/
+
 /*----------------------------------------------------------------------------
- * Name:        h5pset_sec2_c
- * Purpose:     Call H5Pset_sec2 to set the low level file driver to 
+ * Name:        h5pset_fapl_sec2_c
+ * Purpose:     Call H5Pset_fapl_sec2 to set the low level file driver to 
  *              use the functions declared in the  unistd.h
  * Inputs:      prp_id - property list identifier
  * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Friday, February 25, 2000
+ * Programmer:  Elena Pourmal
+ *              March 9, 2001
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pset_sec2_c (hid_t_f *prp_id)
+nh5pset_fapl_sec2_c (hid_t_f *prp_id)
 {
      int ret_value = -1;
      hid_t c_prp_id;
      herr_t ret = -1;
      /*
-      * Call H5Pset_sec2 function.
+      * Call H5Pset_fapl_sec2 function.
       */
      c_prp_id = *prp_id;
-     /* ret = H5Pset_sec2(c_prp_id); */
+     ret = H5Pset_fapl_sec2(c_prp_id); 
      if (ret < 0) return ret_value;
      ret_value = 0;
      return ret_value;
 } 
 
+#ifdef NO_SUCH_F90_FUNCTION
 /*----------------------------------------------------------------------------
- * Name:        h5pget_sec2_c
- * Purpose:     Call H5Pget_stdio to determine whther the low level file driver 
+ * Name:        h5pget_fapl_sec2_c
+ * Purpose:     Call H5Pget_fapl_stdio to determine whther the low level file driver 
  *              uses the functions declared in the  unistd.h
  * Inputs:      prp_id - property list identifier
  * Outputs:     sec2 - value indicates whether the file driver uses
  *                   the functions declared in the  unistd.h
  * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Friday, February 25, 2000
+ * Programmer:  Elena Pourmal
+ *              March 9, 2001
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pget_sec2_c (hid_t_f *prp_id, int_f* sec2)
+nh5pget_fapl_sec2_c (hid_t_f *prp_id, int_f* sec2)
 {
      int ret_value = -1;
      hid_t c_prp_id;
      herr_t ret = -1;
      /*
-      * Call H5Pget_sec2 function.
+      * Call H5Pget_fapl_sec2 function.
       */
      c_prp_id = *prp_id;
-     /* ret = H5Pget_sec2(c_prp_id); */
+     ret = H5Pget_fapl_sec2(c_prp_id); 
      if (ret < 0) return ret_value;
      *sec2 = (int_f)ret;
      ret_value = 0;
      return ret_value;
 }
+#endif /*NO_SUCH_F90_FUNCTION*/
 
 /*----------------------------------------------------------------------------
  * Name:        h5pset_alignment_c
@@ -889,12 +893,12 @@ nh5pset_alignment_c (hid_t_f *prp_id, hsize_t_f* threshold, hsize_t_f* alignment
      hid_t c_prp_id;
      herr_t ret;
      hsize_t c_threshold, c_alignment;
-     c_threshold = *threshold;
-     c_alignment = * alignment;
+     c_threshold = (hsize_t)*threshold;
+     c_alignment = (hsize_t)* alignment;
      /*
       * Call H5Pset_alignment function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pset_alignment(c_prp_id, c_threshold, c_alignment);
      if (ret < 0) return ret_value;
      ret_value = 0;
@@ -923,7 +927,7 @@ nh5pget_alignment_c (hid_t_f *prp_id, hsize_t_f* threshold, hsize_t_f* alignment
      /*
       * Call H5Pget_alignment function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pget_alignment(c_prp_id, &c_threshold, &c_alignment);
      if (ret < 0) return ret_value;
      *threshold = (hsize_t_f)c_threshold;
@@ -934,78 +938,86 @@ nh5pget_alignment_c (hid_t_f *prp_id, hsize_t_f* threshold, hsize_t_f* alignment
 } 
 
 /*----------------------------------------------------------------------------
- * Name:        h5pset_core_c
- * Purpose:     Call H5Pset_core to set the low-level file driver
+ * Name:        h5pset_fapl_core_c
+ * Purpose:     Call H5Pset_fapl_core to set the low-level file driver
  *              to use malloc() and free()
  * Inputs:      prp_id - property list identifier
  *              increment - File block size in bytes
+ *              flag - Boolean flag indicating whether to write the 
+ *              file contents to disk when the file is closed. 
  * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Friday, February 25, 2000
+ * Programmer:  Elena Pourmal
+ *              March 9, 2001
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pset_core_c (hid_t_f *prp_id, size_t_f* increment)
+nh5pset_fapl_core_c (hid_t_f *prp_id, size_t_f* increment, int_f *flag)
 {
      int ret_value = -1;
      hid_t c_prp_id;
      herr_t ret = -1;
      size_t c_increment;
+     hbool_t c_backing_store;
      c_increment = (size_t)*increment;
+     c_backing_store = (hbool_t)*flag;
+     
      /*
-      * Call H5Pset_core function.
+      * Call H5Pset_fapl_core function.
       */
      c_prp_id = *prp_id;
-     /* ret = H5Pset_core(c_prp_id, c_increment); */
+     ret = H5Pset_fapl_core(c_prp_id, c_increment, c_backing_store); 
      if (ret < 0) return ret_value;
      ret_value = 0;
      return ret_value;
 }
 
 /*----------------------------------------------------------------------------
- * Name:        h5pget_core_c
- * Purpose:     Call H5Pget_core to determine whether the file access 
+ * Name:        h5pget_fapl_core_c
+ * Purpose:     Call H5Pget_fapl_core to determine whether the file access 
  *              property list is set to the core drive
  * Inputs:      prp_id - property list identifier
  * Outputs      increment - File block size in bytes
  * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Friday, February 25, 2000
+ * Programmer:  Elena Pourmal
+ *              March 9, 2001
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pget_core_c (hid_t_f *prp_id, size_t_f* increment)
+nh5pget_fapl_core_c (hid_t_f *prp_id, size_t_f* increment, int_f *flag)
 {
      int ret_value = -1;
      hid_t c_prp_id;
      herr_t ret = -1;
      size_t c_increment = 0;
+     hbool_t c_backing_store; 
+     *flag = 0; 
      /*
-      * Call H5Pset_increment function.
+      * Call H5Pset_fapl_core function.
       */
      c_prp_id = *prp_id;
-     /* ret = H5Pget_core(c_prp_id, &c_increment); */
+     ret = H5Pget_fapl_core(c_prp_id, &c_increment, &c_backing_store); 
      if (ret < 0) return ret_value;
      *increment = (size_t_f)c_increment;
+     if(c_backing_store  > 0) *flag = 1;
      ret_value = 0;
      return ret_value;
 } 
 
 /*----------------------------------------------------------------------------
- * Name:        h5pset_family_c
- * Purpose:     Call H5Pset_family to set the file access properties list 
+ * Name:        h5pset_fapl_family_c
+ * Purpose:     Call H5Pset_fapl_family to set the file access properties list 
  *              to the family driver
  * Inputs:      prp_id - property list identifier
  *              memb_size -  Logical size, in bytes, of each family member.
  *              memb_plist - Identifier of the file access property list
  *                           for each member of the family
  * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Friday, February 25, 2000
+ * Programmer:  Elena Pourmal
+ *              March 9, 2001
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pset_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist )
+nh5pset_fapl_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist )
 {
      int ret_value = -1;
      hid_t c_prp_id;
@@ -1013,32 +1025,32 @@ nh5pset_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist )
      hsize_t c_memb_size;
      hid_t c_memb_plist;
      c_memb_size =(hsize_t) *memb_size;
-     c_memb_plist =(hsize_t) *memb_plist;
+     c_memb_plist =(hid_t) *memb_plist;
      /*
-      * Call H5Pset_family function.
+      * Call H5Pset_fapl_family function.
       */
      c_prp_id = *prp_id;
-     /* ret = H5Pset_family(c_prp_id, c_memb_size, c_memb_plist); */
+     ret = H5Pset_fapl_family(c_prp_id, c_memb_size, c_memb_plist); 
      if (ret < 0) return ret_value;
      ret_value = 0;
      return ret_value;
 } 
 
 /*----------------------------------------------------------------------------
- * Name:        h5pget_family_c
- * Purpose:     Call H5Pget_family to determine whether the file access 
+ * Name:        h5pget_fapl_family_c
+ * Purpose:     Call H5Pget_fapl_family to determine whether the file access 
  *              property list is set to the family driver
  * Inputs:      prp_id - property list identifier
  *              memb_size -  Logical size, in bytes, of each family member.
  *              memb_plist - Identifier of the file access property list
  *                           for each member of the family
  * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Friday, February 25, 2000
+ * Programmer:  Elena Pourmal
+ *              March 9, 2001
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pget_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist)
+nh5pget_fapl_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist)
 {
      int ret_value = -1;
      hid_t c_prp_id;
@@ -1046,13 +1058,13 @@ nh5pget_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist)
      hsize_t c_memb_size = 0;
      hid_t c_memb_plist = -1;
      /*
-      * Call H5Pget_family function.
+      * Call H5Pget_fapl_family function.
       */
      c_prp_id = *prp_id;
-     /* ret = H5Pget_family(c_prp_id, &c_memb_size, &c_memb_plist); */
+     ret = H5Pget_fapl_family(c_prp_id, &c_memb_size, &c_memb_plist); 
      if (ret < 0) return ret_value;
      *memb_size = (hsize_t_f)c_memb_size;
-     *memb_plist = (hsize_t_f)c_memb_plist;
+     *memb_plist = (hid_t_f)c_memb_plist;
     
      ret_value = 0;
      return ret_value;
@@ -1141,8 +1153,8 @@ nh5pget_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, int_f* rdcc_nelmts, size_t_f
 } 
 
 /*----------------------------------------------------------------------------
- * Name:        h5pset_split_c
- * Purpose:     Call H5Pset_split to set he low-level driver to split meta data 
+ * Name:        h5pset_fapl_split_c
+ * Purpose:     Call H5Pset_fapl_split to set he low-level driver to split meta data 
  *              from raw data
  * Inputs:      prp_id - property list identifier
  *              meta_len - Length of meta_ext
@@ -1152,12 +1164,12 @@ nh5pget_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, int_f* rdcc_nelmts, size_t_f
  *              raw_ext - Name of the extension for the raw file filename.                 
  *              raw_plist - Identifier of the raw  file access property list
  * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Friday, February 25, 2000
+ * Programmer:  Elena Pourmal
+ *              March 9, 2001
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pset_split_c(hid_t_f *prp_id, int_f* meta_len, _fcd meta_ext, hid_t_f* meta_plist, int_f* raw_len, _fcd raw_ext, hid_t_f * raw_plist)
+nh5pset_fapl_split_c(hid_t_f *prp_id, int_f* meta_len, _fcd meta_ext, hid_t_f* meta_plist, int_f* raw_len, _fcd raw_ext, hid_t_f * raw_plist)
 {
      int ret_value = -1;
      hid_t c_prp_id;
@@ -1172,21 +1184,22 @@ nh5pset_split_c(hid_t_f *prp_id, int_f* meta_len, _fcd meta_ext, hid_t_f* meta_p
      if (c_raw_ext == NULL) return ret_value;
 
      /*
-      * Call H5Pset_split function.
+      * Call H5Pset_fapl_split function.
       */
      c_prp_id = *prp_id;
      c_meta_plist = *meta_plist;
      c_raw_plist = *raw_plist; 
-     /*ret = H5Pset_split(c_prp_id, c_meta_ext, c_meta_plist, c_raw_ext, c_raw_plist );*/
+     ret = H5Pset_fapl_split(c_prp_id, c_meta_ext, c_meta_plist, c_raw_ext, c_raw_plist );
      if (ret < 0) return ret_value;
      ret_value = 0;
      return ret_value;
 }
 
 
+#ifdef NO_SUCH_F90_FUNCTION
 /*----------------------------------------------------------------------------
- * Name:        h5pget_split_c
- * Purpose:     Call H5Pget_split to determine whether the file access 
+ * Name:        h5pget_fapl_split_c
+ * Purpose:     Call H5Pget_fapl_split to determine whether the file access 
  *              property list is set to the split driver
  * Inputs:      prp_id - property list identifier
  *              meta_ext_size - Number of characters of the meta file extension
@@ -1198,12 +1211,12 @@ nh5pset_split_c(hid_t_f *prp_id, int_f* meta_len, _fcd meta_ext, hid_t_f* meta_p
  *              raw_ext - Name of the extension for the raw file filename.                 
  *              raw_plist - Identifier of the raw  file access property list
  * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Friday, February 25, 2000
+ * Programmer:  Elena Pourmal
+ *              March 9 , 2001
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pget_split_c(hid_t_f *prp_id, size_t_f* meta_ext_size , _fcd meta_ext, hid_t_f* meta_plist, size_t_f* raw_ext_size, _fcd raw_ext, hid_t_f * raw_plist)
+nh5pget_fapl_split_c(hid_t_f *prp_id, size_t_f* meta_ext_size , _fcd meta_ext, hid_t_f* meta_plist, size_t_f* raw_ext_size, _fcd raw_ext, hid_t_f * raw_plist)
 {
      int ret_value = -1;
      hid_t c_prp_id;
@@ -1222,10 +1235,10 @@ nh5pget_split_c(hid_t_f *prp_id, size_t_f* meta_ext_size , _fcd meta_ext, hid_t_
      if(c_meta_ext == NULL || c_raw_ext == NULL) return ret_value;
 
      /*
-      * Call H5Pget_split function.
+      * Call H5Pget_fapl_split function.
       */
      c_prp_id = *prp_id;
-     /*ret = H5Pget_split(c_prp_id, c_meta_ext_size, c_meta_ext,&c_meta_plist, c_raw_ext_size, c_raw_ext, &c_raw_plist ); */
+     ret = H5Pget_fapl_split(c_prp_id, c_meta_ext_size, c_meta_ext,&c_meta_plist, c_raw_ext_size, c_raw_ext, &c_raw_plist ); 
 
      if (ret < 0) return ret_value;
      *meta_plist = c_meta_plist;
@@ -1236,6 +1249,7 @@ nh5pget_split_c(hid_t_f *prp_id, size_t_f* meta_ext_size , _fcd meta_ext, hid_t_
      ret_value = 0;
      return ret_value;
 } 
+#endif /*NO_SUCH_F90_FUNCTION*/
 
 /*----------------------------------------------------------------------------
  * Name:        h5pset_gc_references_c

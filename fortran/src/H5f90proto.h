@@ -597,20 +597,20 @@ nh5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id);
 #   define nh5pget_istore_k_c         FNAME(H5PGET_ISTORE_K_C)
 #   define nh5pset_istore_k_c         FNAME(H5PSET_ISTORE_K_C)
 #   define nh5pget_driver_c         FNAME(H5PGET_DRIVER_C)
-#   define nh5pset_stdio_c         FNAME(H5PSET_STDIO_C)
-#   define nh5pget_stdio_c         FNAME(H5PGET_STDIO_C)
-#   define nh5pset_sec2_c         FNAME(H5PSET_SEC2_C)
-#   define nh5pget_sec2_c         FNAME(H5PGET_SEC2_C)
+#   define nh5pset_fapl_stdio_c         FNAME(H5PSET_FAPL_STDIO_C)
+#   define nh5pget_fapl_stdio_c         FNAME(H5PGET_FAPL_STDIO_C)
+#   define nh5pset_fapl_sec2_c         FNAME(H5PSET_FAPL_SEC2_C)
+#   define nh5pget_fapl_sec2_c         FNAME(H5PGET_FAPL_SEC2_C)
 #   define nh5pset_alignment_c         FNAME(H5PSET_ALIGNMENT_C)
 #   define nh5pget_alignment_c         FNAME(H5PGET_ALIGNMENT_C)
-#   define nh5pset_core_c         FNAME(H5PSET_CORE_C)
-#   define nh5pget_core_c         FNAME(H5PGET_CORE_C)
-#   define nh5pset_family_c         FNAME(H5PSET_FAMILY_C)
-#   define nh5pget_family_c         FNAME(H5PGET_FAMILY_C)
+#   define nh5pset_fapl_core_c         FNAME(H5PSET_FAPL_CORE_C)
+#   define nh5pget_fapl_core_c         FNAME(H5PGET_FAPL_CORE_C)
+#   define nh5pset_fapl_family_c         FNAME(H5PSET_FAPL_FAMILY_C)
+#   define nh5pget_fapl_family_c         FNAME(H5PGET_FAPL_FAMILY_C)
 #   define nh5pset_cache_c         FNAME(H5PSET_CACHE_C)
 #   define nh5pget_cache_c         FNAME(H5PGET_CACHE_C)
-#   define nh5pset_split_c         FNAME(H5PSET_SPLIT_C)
-#   define nh5pget_split_c         FNAME(H5PGET_SPLIT_C)
+#   define nh5pset_fapl_split_c         FNAME(H5PSET_FAPL_SPLIT_C)
+#   define nh5pget_fapl_split_c         FNAME(H5PGET_FAPL_SPLIT_C)
 #   define nh5pset_gc_refernces_c         FNAME(H5PSET_GC_REFERENCES_C)
 #   define nh5pget_gc_refernces_c         FNAME(H5PGET_GC_REFERENCES_C)
 #   define nh5pset_layout_c         FNAME(H5PSET_LAYOUT_C)
@@ -654,20 +654,20 @@ nh5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id);
 #   define nh5pget_istore_k_c         FNAME(h5pget_istore_k_c)
 #   define nh5pset_istore_k_c         FNAME(h5pset_istore_k_c)
 #   define nh5pget_driver_c         FNAME(h5pget_driver_c)
-#   define nh5pset_stdio_c         FNAME(h5pset_stdio_c)
-#   define nh5pget_stdio_c         FNAME(h5pget_stdio_c)
-#   define nh5pset_sec2_c         FNAME(h5pset_sec2_c)
-#   define nh5pget_sec2_c         FNAME(h5pget_sec2_c)
+#   define nh5pset_fapl_stdio_c         FNAME(h5pset_fapl_stdio_c)
+#   define nh5pget_fapl_stdio_c         FNAME(h5pget_fapl_stdio_c)
+#   define nh5pset_fapl_sec2_c         FNAME(h5pset_fapl_sec2_c)
+#   define nh5pget_fapl_sec2_c         FNAME(h5pget_fapl_sec2_c)
 #   define nh5pset_alignment_c         FNAME(h5pset_alignment_c)
 #   define nh5pget_alignment_c         FNAME(h5pget_alignment_c)
-#   define nh5pset_core_c         FNAME(h5pset_core_c)
-#   define nh5pget_core_c         FNAME(h5pget_core_c)
-#   define nh5pset_family_c         FNAME(h5pset_family_c)
-#   define nh5pget_family_c         FNAME(h5pget_family_c)
+#   define nh5pset_fapl_core_c         FNAME(h5pset_fapl_core_c)
+#   define nh5pget_fapl_core_c         FNAME(h5pget_fapl_core_c)
+#   define nh5pset_fapl_family_c         FNAME(h5pset_fapl_family_c)
+#   define nh5pget_fapl_family_c         FNAME(h5pget_fapl_family_c)
 #   define nh5pset_cache_c         FNAME(h5pset_cache_c)
 #   define nh5pget_cache_c         FNAME(h5pget_cache_c)
-#   define nh5pset_split_c         FNAME(h5pset_split_c)
-#   define nh5pget_split_c         FNAME(h5pget_split_c)
+#   define nh5pset_fapl_split_c         FNAME(h5pset_fapl_split_c)
+#   define nh5pget_fapl_split_c         FNAME(h5pget_fapl_split_c)
 #   define nh5pset_gc_references_c         FNAME(h5pset_gc_references_c)
 #   define nh5pget_gc_references_c         FNAME(h5pget_gc_references_c)
 #   define nh5pset_layout_c         FNAME(h5pset_layout_c)
@@ -740,35 +740,35 @@ nh5pset_istore_k_c (hid_t_f *prp_id, int_f* ik);
 extern int_f 
 nh5pget_istore_k_c (hid_t_f *prp_id, int_f* ik);
 extern int_f 
-nh5pget_driver_c (hid_t_f *prp_id, int_f*driver);
+nh5pget_driver_c (hid_t_f *prp_id, hid_t_f*driver);
 extern int_f 
-nh5pset_stdio_c (hid_t_f *prp_id);
+nh5pset_fapl_stdio_c (hid_t_f *prp_id);
 extern int_f 
-nh5pget_stdio_c (hid_t_f *prp_id, int_f* io);
+nh5pget_fapl_stdio_c (hid_t_f *prp_id, int_f* io);
 extern int_f 
-nh5pset_sec2_c (hid_t_f *prp_id);
+nh5pset_fapl_sec2_c (hid_t_f *prp_id);
 extern int_f 
-nh5pget_sec2_c (hid_t_f *prp_id, int_f* sec2);
+nh5pget_fapl_sec2_c (hid_t_f *prp_id, int_f* sec2);
 extern int_f 
 nh5pset_alignment_c(hid_t_f *prp_id, hsize_t_f* threshold, hsize_t_f* alignment);
 extern int_f 
 nh5pget_alignment_c(hid_t_f *prp_id, hsize_t_f* threshold, hsize_t_f* alignment);
 extern int_f
-nh5pget_core_c (hid_t_f *prp_id, size_t_f* increment);
+nh5pget_fapl_core_c (hid_t_f *prp_id, size_t_f* increment, int_f *flag);
 extern int_f
-nh5pset_core_c (hid_t_f *prp_id, size_t_f* increment);
+nh5pset_fapl_core_c (hid_t_f *prp_id, size_t_f* increment, int_f *flag);
 extern int_f
-nh5pset_family_c (hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist );
+nh5pset_fapl_family_c (hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist );
 extern int_f
-nh5pget_family_c (hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist );
+nh5pget_fapl_family_c (hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist );
 extern int_f
 nh5pset_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, int_f* rdcc_nelmts, size_t_f* rdcc_nbytes, real_f* rdcc_w0);
 extern int_f
 nh5pget_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, int_f* rdcc_nelmts, size_t_f* rdcc_nbytes, real_f* rdcc_w0);
 extern int_f
-nh5pget_split_c(hid_t_f *prp_id, size_t_f* meta_ext_size , _fcd meta_ext, hid_t_f* meta_plist, size_t_f* raw_ext_size, _fcd raw_ext, hid_t_f * raw_plist);
+nh5pget_fapl_split_c(hid_t_f *prp_id, size_t_f* meta_ext_size , _fcd meta_ext, hid_t_f* meta_plist, size_t_f* raw_ext_size, _fcd raw_ext, hid_t_f * raw_plist);
 extern int_f
-nh5pset_split_c(hid_t_f *prp_id, int_f* meta_len, _fcd meta_ext, hid_t_f* meta_plist, int_f* raw_len, _fcd raw_ext, hid_t_f * raw_plist);
+nh5pset_fapl_split_c(hid_t_f *prp_id, int_f* meta_len, _fcd meta_ext, hid_t_f* meta_plist, int_f* raw_len, _fcd raw_ext, hid_t_f * raw_plist);
 extern int_f
 nh5pset_gc_references_c(hid_t_f *prp_id, int_f* gc_references);
 extern int_f
