@@ -11,7 +11,7 @@ class FloatType : public AtomType {
 	FloatType();
 
 	// Creates a floating-point datatype using an existing id
-	FloatType( hid_t existing_id );
+	FloatType( const hid_t existing_id );
 
         // Creates a floating-point type using a predefined type
         FloatType( const PredType& pred_type );

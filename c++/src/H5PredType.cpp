@@ -181,7 +181,8 @@ void PredType::commit( H5Object& loc, const string& name )
 
 bool PredType::committed()
 {
-   throw DataTypeIException( "Attempting to check for commit status on a predefined datatype.  This operation is invalid" );
+   throw DataTypeIException( "Error: Attempting to check for commit status on a predefined datatype." );
+   return (-1);
 }  
 
 // Destructor: calls ~AtomType immediately

@@ -20,7 +20,7 @@ IdComponent::IdComponent() : id( 0 )
 
 // Constructor that takes an HDF5 object id.  It creates an instance
 // of IdComponent to hold the HDF5 id
-IdComponent::IdComponent( hid_t h5_id ) : id( h5_id )
+IdComponent::IdComponent( const hid_t h5_id ) : id( h5_id )
 {
    // starts counting object references
    ref_count = new RefCounter;
@@ -82,7 +82,7 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
         its identifier, its reference counter will be deleted.  A new 
         reference counter is created for the new HDF5 object id.
 */
-void IdComponent::setId( hid_t new_id )
+void IdComponent::setId( const hid_t new_id )
 {
    // reset the identifier of this object, call appropriate H5Xclose
    resetIdComponent( this );

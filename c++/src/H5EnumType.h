@@ -16,7 +16,7 @@ class EnumType : public DataType {
 	EnumType();
 
 	// Creates an enumeration datatype using an existing id
-	EnumType( hid_t existing_id );
+	EnumType( const hid_t existing_id );
 
 	// Copy constructor: makes a copy of the original EnumType object.
 	EnumType( const EnumType& original );

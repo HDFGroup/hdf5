@@ -12,14 +12,14 @@ class IdComponent {
    public:
 	// Parent classes must reset the current IdComponent copy
 	// before setting new id to control reference count
-	void setId( hid_t new_id );
+	void setId( const hid_t new_id );
 
 	// Pure virtual function so appropriate close function can
 	// be called by subclasses' for the corresponding object
 	virtual void p_close() const = 0;
 
 	// Creates an object to hold an HDF5 identifier
-	IdComponent( hid_t h5_id );
+	IdComponent( const hid_t h5_id );
 
 	// Copy constructor: makes copy of the original IdComponent object.
 	IdComponent( const IdComponent& original );

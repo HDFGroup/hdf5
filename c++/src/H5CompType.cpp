@@ -80,6 +80,7 @@ size_t CompType::getMemberOffset( int member_num ) const
 int CompType::getMemberDims( int member_num, size_t* dims, int* perm ) const
 {
    throw DataTypeIException( "Error: getMemberDims is no longer supported." );
+   return (-1);
 }
 
 // Gets the type class of the specified member.

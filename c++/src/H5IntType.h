@@ -11,7 +11,7 @@ class IntType : public AtomType {
 	IntType();
 
 	// Creates a integer datatype using an existing id
-	IntType( hid_t existing_id );
+	IntType( const hid_t existing_id );
 
 	// Creates a integer type using a predefined type
 	IntType( const PredType& pred_type );

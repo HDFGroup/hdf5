@@ -14,7 +14,7 @@ class CompType : public DataType {
 	CompType();
 
 	// Creates a compound datatype using an existing id
-	CompType( hid_t existing_id );
+	CompType( const hid_t existing_id );
 
 	// Copy constructor - makes a copy of original object
 	CompType( const CompType& original );

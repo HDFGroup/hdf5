@@ -22,7 +22,11 @@ namespace H5 {
 extern "C" herr_t userAttrOpWrpr( hid_t loc_id, const char* attr_name, void* op_data )
 {
    string s_attr_name = string( attr_name );
+#ifdef NO_STATIC_CAST
+   UserData4Aiterate* myData = (UserData4Aiterate *) op_data;
+#else
    UserData4Aiterate* myData = static_cast <UserData4Aiterate *> (op_data);
+#endif
    myData->op( *myData->object, s_attr_name, myData->opData );
    return 0;
 }
@@ -32,7 +36,7 @@ extern "C" herr_t userAttrOpWrpr( hid_t loc_id, const char* attr_name, void* op_
 H5Object::H5Object() : IdComponent() {}
 
 // Constructs an object from an existing HDF5 id
-H5Object::H5Object( hid_t object_id ) : IdComponent( object_id ) {}
+H5Object::H5Object( const hid_t object_id ) : IdComponent( object_id ) {}
 
 // Copy constructor: makes a copy of the original H5Object instance
 H5Object::H5Object( const H5Object& original ) : IdComponent( original ) {}
@@ -85,7 +89,7 @@ Attribute H5Object::openAttribute( const string& name ) const
 }
 
 // Opens an attribute given its index.
-Attribute H5Object::openAttribute( unsigned int idx ) const
+Attribute H5Object::openAttribute( const unsigned int idx ) const
 {
    hid_t attr_id = H5Aopen_idx( id, idx );
    if( attr_id > 0 )

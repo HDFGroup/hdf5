@@ -14,7 +14,7 @@ class StrType : public AtomType {
 	StrType( const PredType& pred_type );
 
 	// Creates a string datatype using an existing id
-	StrType( hid_t existing_id );
+	StrType( const hid_t existing_id );
 
 	// Copy constructor - makes a copy of the original object
 	StrType( const StrType& original );
