@@ -41,10 +41,11 @@ fprintf(stderr,
 "\nUsage of HDF5 Dumper:\n\n  \
 h5dump [-h] [-bb] [-header] [-a <names>] [-d <names>] [-g <names>]\n  \
        [-l <names>] [-t <names>] [-w <number>] <file>\n\n\
-  -h            Print information on this command.\n\
+  -h            Print information on this command and exit.\n\
   -bb           Display the conent of the boot block. The default is not to display.\n\
   -header       Display header only; no data is displayed.\n\
-  -v			Display the object ids\n\
+  -v            Display the object ids\n\
+  -V            Display version information and exit.\n\
   -a <names>    Display the specified attribute(s).\n\
   -d <names>    Display the specified dataset(s).\n\
   -g <names>    Display the specified group(s) and all the members.\n\
@@ -1082,8 +1083,14 @@ main(int argc, char *argv[])
                  usage();
                  free(opts);
                  exit(0);
+             }
+	     else if (!strcmp(argv[curr_arg],"-V")){
+		print_version("h5dump");
+                free(opts);
+                exit(0);
+	    }
 
-             } else if (!strcmp(argv[curr_arg],"-bb"))
+	     else if (!strcmp(argv[curr_arg],"-bb"))
 
                  display_bb = 1;
 
@@ -1091,17 +1098,17 @@ main(int argc, char *argv[])
 
                  display_data=0;
 
-			 else if (!strcmp(argv[curr_arg],"-v"))
+	     else if (!strcmp(argv[curr_arg],"-v"))
 
-				 display_oid = 1;
+		     display_oid = 1;
 
-			 else if (!strcmp(argv[curr_arg],"-w")){
-				 /*
-				 this way we know which arg was the -w
-				 we know it won't be 0 since curr_arg starts at 1
-				 */
-				 newwidth = curr_arg;
-			 }
+	     else if (!strcmp(argv[curr_arg],"-w")){
+		     /*
+		     this way we know which arg was the -w
+		     we know it won't be 0 since curr_arg starts at 1
+		     */
+		     newwidth = curr_arg;
+	     }
              else if (strcmp(argv[curr_arg],"-a") &&
                       strcmp(argv[curr_arg],"-d") &&
                       strcmp(argv[curr_arg],"-g") &&

@@ -2509,3 +2509,12 @@ int h5dump_attr(hid_t oid, hid_t p_type){
 	return (status);
 }
 
+/* Print the program name and the version information which is */
+/* defined the same as the HDF5 library version. */
+void print_version(char *program_name)
+{
+    printf("%s: Version %u.%u.%u%s\n",
+       program_name, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
+       H5_VERS_SUBRELEASE);
+}
+

@@ -353,3 +353,8 @@ extern ProgType programtype;
 #define BEGIN		"{"
 #define END		"}"
 #endif
+
+
+/* Definitions of useful routines */
+void print_version(char *program_name);
+
