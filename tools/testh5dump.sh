@@ -1,0 +1,186 @@
+#! /bin/sh
+# Test scripts for h5dump.
+# See the USAGE function for command usage.
+
+
+# Definitions of commands and variables
+CMD='../h5dump'
+RM='rm -f'
+DIFF=diff
+CMP='cmp -s'
+nerrors=0		# number of errors (0)
+quitonerr=0		# quit on error (not)
+noclean=0		# no cleaning temp. files (yes)
+only=""			# dumper sub-command to test only
+except=""		# dumper sub-command to test not
+
+
+# Definitions of functions/shorthands
+#
+
+# Print Usage of the command
+USAGE()
+{
+    echo "Usage: $0 [-help] [-noclean] [-quit] [-except <command>] [-only <command>]"
+    echo "    -help: display help information"
+    echo "    -noclean: do not clean away temporary files"
+    echo "    -quit: quit immediately if any test fails"
+    echo "    -except: skip one specific command"
+    echo "    -only: test one specific command"
+    echo "<command> can be one of {list, dumpsds, dumprig, dumpvd, dumpvg, dumpgr}"
+}
+
+# Print message with formats according to message level ($1)
+MESG()
+{
+    level=$1
+    shift
+    case $level in
+	0)
+	    echo '============================='
+	    echo $*
+	    echo '============================='
+	    ;;
+	3)
+	    echo '-----------------------------'
+	    echo $*
+	    echo '-----------------------------'
+	    ;;
+	6)
+	    echo "*** $* ***"
+	    ;;
+	*)
+	    echo "MESG(): Unknown level ($level)"
+	    exit 1
+	    ;;
+    esac
+
+}
+
+
+# Run the test to produce an output file which is then
+# compared with the expected ($1) output.
+# Note that this can be used to produce the expected
+# output files by replace "$output" with "$expected"
+# in the run-the-test commands.
+TEST()
+{
+    # parse the arguments
+    output=tmp.out
+    expected=testfiles/$1
+    shift
+    # print a id banner
+    MESG 6 $@
+    # run the test
+    ( 
+	echo "#############################"
+	echo "Expected output for '$CMD $@'" 
+	echo "#############################"
+	cd testfiles
+        $CMD "$@"
+    ) > $output
+    $CMP $expected $output
+    if [ $? -ne 0 ]
+    then
+	echo $DIFF $expected $output
+	$DIFF $expected $output
+	echo "   <<< FAILED >>>"
+	nerrors=`expr $nerrors + 1`
+	if [ $quitonerr -gt 0 ]; 
+	then
+	    FINISH
+	fi
+    fi
+#    if [ $noclean -eq 0 ]
+#    then
+#	$RM $output
+#    fi
+}
+
+
+# Report the result and exit
+FINISH()
+{
+    if [ $nerrors -eq 0 ]
+    then
+	MESG 0 "All h5dump tests passed"
+    else
+	MESG 0 "h5dump tests failed: $nerrors"
+    fi
+    exit $nerrors
+}
+
+
+#===============
+# Main Body
+#===============
+
+# parse arguments
+while [ $# -gt 0 ]
+do
+    case "$1" in
+	"-quit")
+	    quitonerr=1
+	    ;;
+	"-noclean")
+	    noclean=1
+	    ;;
+	"-help")
+	    USAGE
+	    exit 0
+	    ;;
+	"-only")
+	    shift
+	    case "$1" in
+    		"h5dump")
+		    only="$1"
+		    ;;
+		*)
+		    echo "Unknown command: $1"
+		    USAGE
+		    exit 1
+		    ;;
+	    esac
+	    ;;
+	"-except")
+	    shift
+	    case "$1" in
+    		"h5dump")
+		    except="$1"
+		    ;;
+		*)
+		    echo "Unknown command: $1"
+		    USAGE
+		    exit 1
+		    ;;
+	    esac
+	    ;;
+	* )
+	    echo "Unknow option: $1"
+	    USAGE
+	    exit 1
+	    ;;
+    esac
+    shift
+done
+
+# Print a beginning banner
+MESG 0 "Running h5dump tests"
+
+# Test command list
+TestCmd=h5dump
+TestName="Test command $TestCmd"
+if [ "$except" != $TestCmd -a \( -z "$only" -o "$only" = $TestCmd \) ]
+then
+MESG 3 "$TestName"
+TEST tgroup.ddl tgroup.h5
+TEST tdset.ddl tdset.h5
+TEST tattr.ddl tattr.h5
+TEST tslink.ddl tslink.h5
+TEST tall.ddl tall.h5
+else
+MESG 3 "$TestName <<<SKIPPED>>>"
+fi
+
+# End of test
+FINISH
