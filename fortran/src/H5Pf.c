@@ -2906,3 +2906,215 @@ nh5pget_edc_check_c ( hid_t_f *prp_id, int_f *flag )
   *flag = (int_f)c_flag;
   return ret_value;
 }
+/*----------------------------------------------------------------------------
+ * Name:        h5pset_family_offset_c
+ * Purpose:     Call H5Pset_family_offset to set and offset for family driver
+ * Inputs:      prp_id - property list identifier 
+ *              offset - offset in bytes
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, 19 March 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5pset_family_offset_c ( hid_t_f *prp_id , hsize_t_f *offset)
+{
+  int ret_value = 0;
+  hid_t c_prp_id;
+  hsize_t c_offset;
+  herr_t status;
+
+  c_prp_id = (hid_t)*prp_id;
+  c_offset = (hsize_t)*offset;
+  status = H5Pset_family_offset(c_prp_id, c_offset);
+  if ( status < 0  ) ret_value = -1;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pset_fapl_multi_c
+ * Purpose:     Call H5Pset_fapl_multi to set multi file dirver
+ * Inputs:      prp_id - file_creation property list identifier 
+ *              mem_map - memory mapping array
+ *              memb_fapl - property list for each memory usage type 
+ *              memb_name - array with members names
+ *              len - array with the lenght of each name
+ *              lenmax - lenght of the name a sdeclared in Fortran
+ *              flag - flag allowing partila access when one of the files is missing
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Monday 24, March 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+/*nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, haddr_t_f *memb_addr, int_f *flag) */
+nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, real_f *memb_addr, int_f *flag)
+{
+  int ret_value = -1;
+  hid_t c_prp_id;
+  H5FD_mem_t c_memb_map[H5FD_MEM_NTYPES];
+  hid_t c_memb_fapl[H5FD_MEM_NTYPES];
+  const char *c_memb_name[H5FD_MEM_NTYPES]; 
+  haddr_t c_memb_addr[H5FD_MEM_NTYPES]; 
+  hbool_t relax; 
+  herr_t status;
+  char *tmp, *tmp_p, *tmp_pp;
+  int i;
+  int c_lenmax;
+  c_lenmax = (int)*lenmax;
+  relax = (hbool_t)*flag;
+/*
+ * Check that we got correct values from Fortran for memb_addr array
+ */
+  for (i=0; i < H5FD_MEM_NTYPES; i++) {
+       if(memb_addr[i] >= 1.) return ret_value;
+  }
+/*
+ * Take care of names array
+ */
+
+  tmp = (char *)HD5f2cstring(memb_name, c_lenmax*(H5FD_MEM_NTYPES));
+  if (tmp ==NULL) return ret_value; 
+  tmp_p = tmp;
+  for (i=0; i < H5FD_MEM_NTYPES; i++) {
+       c_memb_name[i] = (char *) malloc(len[i] + 1);
+       memcpy((char *)c_memb_name[i], tmp_p, len[i]);
+       tmp_pp = (char *)c_memb_name[i];
+       tmp_pp[len[i]] = '\0';
+       tmp_p = tmp_p + c_lenmax;
+/*       printf(" %d \n", len[i]);
+       printf("name %s \n", c_memb_name[i]);
+*/
+ } 
+/*
+ * Take care of othe arguments
+ */
+ 
+  c_prp_id = (hid_t)*prp_id;
+  for (i=0; i < H5FD_MEM_NTYPES; i++) {
+       c_memb_map[i] = (H5FD_mem_t)memb_map[i];
+       /*printf("map %d \n", c_memb_map[i]); */
+       c_memb_fapl[i] = (hid_t)memb_fapl[i];
+       /*printf("fapl %d \n", c_memb_fapl[i]); */
+       if(memb_addr[i] < 0) c_memb_addr[i] = HADDR_UNDEF;
+       else c_memb_addr[i] = (haddr_t)(((float)memb_addr[i])*(HADDR_MAX)); 
+       /*printf("address %Ld \n", c_memb_addr[i]); */
+  }     
+/*
+ * Call  H5Pset_fapl_multi function
+ */
+
+  status = H5Pset_fapl_multi(c_prp_id, c_memb_map, c_memb_fapl, c_memb_name, c_memb_addr, relax);
+  if ( status < 0  ) goto DONE;
+  ret_value = 0;
+
+DONE:
+  free(tmp);
+  for (i=0; i < H5FD_MEM_NTYPES; i++) free((char *)c_memb_name[i]);
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pset_fapl_multi_sc
+ * Purpose:     Call H5Pset_fapl_multi to set multi file dirver
+ * Inputs:      prp_id - file_creation property list identifier 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              March 31 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5pset_fapl_multi_sc ( hid_t_f *prp_id , int_f *flag)
+{
+  int ret_value = -1;
+  hid_t c_prp_id;
+  hbool_t relax; 
+  herr_t status;
+
+  relax = (hbool_t)*flag;
+  c_prp_id = (hid_t)*prp_id;
+/*
+ * Call  H5Pset_fapl_multi function
+ */
+
+  status = H5Pset_fapl_multi(c_prp_id, NULL, NULL, NULL, NULL, relax);
+  if ( status < 0  ) return ret_value;
+  ret_value = 0;
+  return ret_value;
+}
+/*----------------------------------------------------------------------------
+ * Name:        h5pget_fapl_multi_c
+ * Purpose:     Call H5Pget_fapl_multi to set multi file dirver
+ * Inputs:      prp_id - file_creation property list identifier 
+ *              lenmax - lenght of the name a sdeclared in Fortran
+ * Outputs:     memb_map - memory mapping array
+ *              memb_fapl - property list for each memory usage type 
+ *              memb_name - array with members names
+ *              len - array with the lenght of each name
+ *              flag - flag allowing partila access when one of the files is missing
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Monday 24, March 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5pget_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, real_f *memb_addr, int_f *flag, int_f *maxlen_out)
+{
+  int ret_value = -1;
+  hid_t c_prp_id;
+  H5FD_mem_t c_memb_map[H5FD_MEM_NTYPES];
+  hid_t c_memb_fapl[H5FD_MEM_NTYPES];
+  char *c_memb_name[H5FD_MEM_NTYPES]; 
+  haddr_t c_memb_addr[H5FD_MEM_NTYPES];
+  hbool_t relax; 
+  herr_t status;
+  char *tmp, *tmp_p;
+  int i;
+  int c_lenmax;
+  int length = 0;
+  c_lenmax = (int)*lenmax;
+
+  c_prp_id = (hid_t)*prp_id;
+/*
+ * Call  H5Pget_fapl_multi function
+ */
+
+  status = H5Pget_fapl_multi(c_prp_id, c_memb_map, c_memb_fapl, c_memb_name, c_memb_addr, &relax);
+  if ( status < 0  ) return ret_value; 
+
+/*
+ * Take care of names array
+ */
+  tmp = (char *)malloc(c_lenmax*H5FD_MEM_NTYPES + 1);
+  tmp_p = tmp;
+  for (i=0; i < c_lenmax*H5FD_MEM_NTYPES; i++) tmp[i] = ' ';
+  tmp[c_lenmax*H5FD_MEM_NTYPES] = '\0';
+  for (i=0; i < H5FD_MEM_NTYPES; i++) {
+       memcpy(tmp_p, c_memb_name[i], strlen(c_memb_name[i]));
+       len[i] = (int_f)strlen(c_memb_name[i]);
+       length = H5_MAX(length, strlen(c_memb_name[i]));
+       tmp_p = tmp_p + c_lenmax;
+ } 
+HD5packFstring(tmp, _fcdtocp(memb_name), c_lenmax*H5FD_MEM_NTYPES);
+
+/*
+ * Take care of other arguments
+ */
+ 
+  for (i=0; i < H5FD_MEM_NTYPES; i++) {
+       memb_map[i] = (int_f)c_memb_map[i];
+       memb_fapl[i] = (hid_t_f)c_memb_fapl[i];
+       if(c_memb_addr[i] == HADDR_UNDEF) memb_addr[i] = -1;
+       else memb_addr[i] = (real_f) ((float)c_memb_addr[i]/HADDR_MAX);
+  }     
+  *flag = (int_f)relax; 
+  *maxlen_out = (int_f)length;
+  ret_value = 0;
+  free(tmp);
+  for (i=0; i < H5FD_MEM_NTYPES; i++) free(c_memb_name[i]);
+  return ret_value;
+}

@@ -58,6 +58,12 @@
 ! End comment if on T3E
          MODULE PROCEDURE h5pinsert_char
        END INTERFACE
+       
+       INTERFACE h5pset_fapl_multi_f
+         MODULE PROCEDURE h5pset_fapl_multi_l
+         MODULE PROCEDURE h5pset_fapl_multi_s
+       END INTERFACE        
+
      
      CONTAINS
 
@@ -5893,4 +5899,270 @@
 
           END SUBROUTINE h5pset_fletcher32_f
 
+!----------------------------------------------------------------------
+! Name:		h5pset_family_offset_f 
+!
+! Purpose: 	Sets offset for family file driver.
+!
+! Inputs:  
+!		prp_id		- file creation property list identifier
+!               offset		- file offset
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		19 March 2003
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+
+          SUBROUTINE h5pset_family_offset_f(prp_id, offset, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_family_offset_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
+            INTEGER(HSIZE_T), INTENT(IN) :: offset ! Offset in bytes
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+
+!            INTEGER, EXTERNAL :: h5pset_family_offset_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5pset_family_offset_c(prp_id, offset)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FAMILY_OFFSET_C'::h5pset_family_offset_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: prp_id
+              INTEGER(HSIZE_T), INTENT(IN) :: offset 
+              END FUNCTION h5pset_family_offset_c
+            END INTERFACE
+            hdferr = h5pset_family_offset_c(prp_id, offset)
+
+          END SUBROUTINE h5pset_family_offset_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_fapl_multi_l 
+!
+! Purpose: 	Sets up use of the multi-file driver. 
+!
+! Inputs:  
+!		prp_id		- file creation property list identifier
+!               mem_map         - mapping array
+!               memb_fapl       - property list for each memory usage type
+!               memb_name       - names of member file
+!               relax           - flag 
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		20 March 2003
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+
+          SUBROUTINE h5pset_fapl_multi_l(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_fapl_multi_l
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
+            INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_map
+            INTEGER(HID_T), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_fapl
+            CHARACTER(LEN=*), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_name
+            !INTEGER(HADDR_T), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_addr
+            REAL, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_addr
+            LOGICAL, INTENT(IN) :: relax
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+            INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1) :: lenm
+            INTEGER :: maxlen
+            INTEGER :: flag
+            INTEGER :: i
+
+!            INTEGER, EXTERNAL :: h5pset_fapl_multi_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5pset_fapl_multi_c(prp_id, memb_map, memb_fapl, memb_name, lenm, &
+                                                   maxlen, memb_addr, flag)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FAPL_MULTI_C'::h5pset_fapl_multi_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
+              INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_map
+              INTEGER(HID_T), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_fapl
+              CHARACTER(LEN=*), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_name
+              REAL, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_addr
+              !INTEGER(HADDR_T), DIMENSION(H5FD_MEM_NTYPES_F), INTENT(IN) :: memb_addr
+              INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1) :: lenm
+              INTEGER :: maxlen
+              INTEGER, INTENT(IN) :: flag
+              END FUNCTION h5pset_fapl_multi_c
+            END INTERFACE
+            maxlen = LEN(memb_name(1))
+            do i=0, H5FD_MEM_NTYPES_F-1
+             lenm(i) = LEN_TRIM(memb_name(i))
+            enddo
+            flag = 0
+            if (relax) flag = 1
+            hdferr = h5pset_fapl_multi_c(prp_id, memb_map, memb_fapl, memb_name, lenm, maxlen, memb_addr, flag) 
+
+          END SUBROUTINE h5pset_fapl_multi_l
+!----------------------------------------------------------------------
+! Name:		h5pset_fapl_multi_s 
+!
+! Purpose: 	Sets up use of the multi-file driver. 
+!
+! Inputs:  
+!		prp_id		- file creation property list identifier
+!               relax           - flag 
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		31 March 2003
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+
+          SUBROUTINE h5pset_fapl_multi_s(prp_id, relax, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_fapl_multi_s
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
+            LOGICAL, INTENT(IN) :: relax
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+            INTEGER :: flag
+
+!            INTEGER, EXTERNAL :: h5pset_fapl_multi_sc
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5pset_fapl_multi_sc(prp_id,flag) 
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FAPL_MULTI_SC'::h5pset_fapl_multi_sc
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
+              INTEGER, INTENT(IN) :: flag
+              END FUNCTION h5pset_fapl_multi_sc
+            END INTERFACE
+            flag = 0
+            if (relax) flag = 1
+            hdferr = h5pset_fapl_multi_sc(prp_id, flag) 
+
+          END SUBROUTINE h5pset_fapl_multi_s
+!----------------------------------------------------------------------
+! Name:		h5pget_fapl_multi_f 
+!
+! Purpose: 	Sets up use of the multi-file driver. 
+!
+! Inputs:  
+!		prp_id		- file creation property list identifier
+! Outputs:  
+!               mem_map         - mapping array
+!               memb_fapl       - property list for each memory usage type
+!               memb_name       - names of member file
+!               relax           - flag 
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				maxlen_out - maximum length for memb_name array element 
+!
+! Programmer:	Elena Pourmal
+!		24 March 2003
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+
+          SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr, maxlen_out) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_fapl_multi_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
+            INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(OUT) :: memb_map
+            INTEGER(HID_T), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(OUT) :: memb_fapl
+            CHARACTER(LEN=*), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(OUT) :: memb_name
+            !INTEGER(HADDR_T), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(OUT) :: memb_addr
+            REAL, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(OUT) :: memb_addr
+            INTEGER, OPTIONAL, INTENT(OUT) :: maxlen_out 
+            LOGICAL, INTENT(OUT) :: relax
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+            INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1) :: lenm
+            INTEGER :: maxlen
+            INTEGER :: c_maxlen_out 
+            INTEGER :: flag
+            INTEGER :: i
+
+!            INTEGER, EXTERNAL :: h5pget_fapl_multi_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5pget_fapl_multi_c(prp_id, memb_map, memb_fapl, memb_name, lenm, &
+                                                   maxlen, memb_addr, flag, c_maxlen_out)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FAPL_MULTI_C'::h5pget_fapl_multi_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
+              INTEGER, DIMENSION(H5FD_MEM_NTYPES_F), INTENT(OUT) :: memb_map
+              INTEGER(HID_T), DIMENSION(H5FD_MEM_NTYPES_F), INTENT(OUT) :: memb_fapl
+              CHARACTER(LEN=*), DIMENSION(H5FD_MEM_NTYPES_F), INTENT(OUT) :: memb_name
+              REAL, DIMENSION(H5FD_MEM_NTYPES_F), INTENT(OUT) :: memb_addr
+              INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1) :: lenm
+              INTEGER :: maxlen
+              INTEGER :: c_maxlen_out 
+              INTEGER, INTENT(IN) :: flag
+              END FUNCTION h5pget_fapl_multi_c
+            END INTERFACE
+            maxlen = LEN(memb_name(0))
+            do i=0, H5FD_MEM_NTYPES_F-1
+             lenm(i) = LEN_TRIM(memb_name(i))
+            enddo
+            hdferr = h5pget_fapl_multi_c(prp_id, memb_map, memb_fapl, memb_name, lenm, maxlen, memb_addr, flag, c_maxlen_out) 
+            relax = .TRUE.
+            if(flag .eq. 0) relax = .FALSE. 
+            if(present(maxlen_out)) maxlen_out = c_maxlen_out
+          END SUBROUTINE h5pget_fapl_multi_f
      END MODULE H5P

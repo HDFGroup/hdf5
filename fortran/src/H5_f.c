@@ -162,6 +162,7 @@ nh5close_types_c( hid_t_f * types, int_f *lentypes,
  * Programmer:        Elena Pourmal  
  *                    Tuesday, August 3, 1999
  * Modifications:     Added Z flags. EIP,  March 12, 2003
+ *                    Added more FD flags and new H5LIB flags
  *---------------------------------------------------------------------------*/
 int_f
 nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
@@ -247,6 +248,15 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
  */
       h5fd_flags[0] = H5FD_MPIO_INDEPENDENT;
       h5fd_flags[1] = H5FD_MPIO_COLLECTIVE;
+      h5fd_flags[2] = H5FD_MEM_NOLIST;
+      h5fd_flags[3] = H5FD_MEM_DEFAULT;
+      h5fd_flags[4] = H5FD_MEM_SUPER;
+      h5fd_flags[5] = H5FD_MEM_BTREE;
+      h5fd_flags[6] = H5FD_MEM_DRAW;
+      h5fd_flags[7] = H5FD_MEM_GHEAP;
+      h5fd_flags[8] = H5FD_MEM_LHEAP;
+      h5fd_flags[9] = H5FD_MEM_OHDR; 
+      h5fd_flags[10] = H5FD_MEM_NTYPES;
 
 /*
  *  H5G flags
@@ -369,10 +379,18 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
       h5z_flags[7] = H5Z_ENABLE_EDC;
       h5z_flags[8] = H5Z_NO_EDC;
 
-
     ret_value = 0; 
     return ret_value;
 }
+/*
+int_f
+nh5init1_flags_c(haddr_t_f *h5lib_flags)
+{
+     int ret_value = -1;
+    ret_value = 0; 
+    return ret_value;
+}
+*/
 /*---------------------------------------------------------------------------
  * Name:              h5open_c
  * Purpose:           Calls H5open call to initialize C HDF5 library

@@ -11,5 +11,5 @@
 
 /* Constants used in H5Gf.c files */
 #define OBJECT_NAMELEN_DEFAULT_F -1
-
+#define H5_MAX(a,b)            (((a)>(b)) ? (a) : (b))
 #endif /* _H5f90_H */
