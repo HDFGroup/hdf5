@@ -264,7 +264,7 @@ FORTRAN Attribute API -- h5a
 <dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5awrite_f</strong>
 <pre>
 
-          SUBROUTINE h5awrite_f(attr_id, memtype_id,  buf, hdferr) 
+          SUBROUTINE h5awrite_f(attr_id, memtype_id,  buf, dims, hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 

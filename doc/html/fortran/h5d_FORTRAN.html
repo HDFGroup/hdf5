@@ -192,7 +192,7 @@ FORTRAN Dataset API -- h5d
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            TYPE, INTENT(INOUT) :: buf          ! Data buffer; may be scalar or an array
+            TYPE, INTENT(INOUT) :: buf          ! Data buffer; may be a scalar or an array
             INTEGER, INTENT(IN)  :: dims(7)     ! Array to hold corresponding
                                                 ! dimension sizes of data buffer buf;
                                                 ! dim(k) has value of the k-th dimension
@@ -264,7 +264,7 @@ FORTRAN Dataset API -- h5d
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            TYPE, INTENT(IN) :: buf             ! Data buffer; may be scalar or an array
+            TYPE, INTENT(IN) :: buf             ! Data buffer; may be a scalar or an array
             INTEGER, INTENT(IN)  :: dims(7)     ! Array to hold corresponding
                                                 ! dimension sizes of data buffer buf;
                                                 ! dim(k) has value of the k-th dimension
