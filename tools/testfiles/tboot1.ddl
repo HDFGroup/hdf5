@@ -1,7 +1,7 @@
 #############################
-Expected output for 'h5dump -H -B -d compact tfilters.h5'
+Expected output for 'h5dump -H -B -d compact tfcontents1.h5'
 #############################
-HDF5 "tfilters.h5" {
+HDF5 "tfcontents1.h5" {
 SUPER_BLOCK {
    SUPERBLOCK_VERSION 0
    FREELIST_VERSION 0
@@ -18,8 +18,6 @@ USER_BLOCK {
    USERBLOCK_SIZE 0
 }
 DATASET "compact" {
-COMMENT "This is a dataset with compact storage"
-   DATATYPE  H5T_STD_I32LE
-   DATASPACE  SIMPLE { ( 20, 10 ) / ( 20, 10 ) }
+   }
 }
-}
+h5dump error: unable to open dataset "compact"

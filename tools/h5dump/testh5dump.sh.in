@@ -211,14 +211,17 @@ TOOLTEST tchar1.ddl -r tchar.h5
 # Missing file name
 TOOLTEST tnofilename.ddl
 
+# rev. 2004
 
+# tests for super block
+TOOLTEST tboot1.ddl -H -B -d compact tfcontents1.h5
+TOOLTEST tboot2.ddl -B tfcontents2.h5
 
-
-# test for super block
-TOOLTEST tboot.ddl -H -B -d compact tfilters.h5
+# test -p with a non existing dataset
+TOOLTEST tperror.ddl -p -d bogus tfcontents1.h5
 
 # test for file contents
-TOOLTEST tcontents.ddl -n tfilters.h5
+TOOLTEST tcontents.ddl -n tfcontents1.h5
 
 # tests for storage layout
 # compact
@@ -230,25 +233,20 @@ TOOLTEST tchunked.ddl -H -p -d chunked tfilters.h5
 # external 
 TOOLTEST texternal.ddl -H -p -d external tfilters.h5
 
-# Fill values
-TOOLTEST tfillifset.ddl -H -p -d fill_time_ifset tfilters.h5
-TOOLTEST tfillalloc.ddl -H -p -d fill_time_alloc tfilters.h5
-TOOLTEST tfillnever.ddl -H -p -d fill_time_never tfilters.h5
-TOOLTEST tfillearly.ddl -H -p -d alloc_time_early tfilters.h5
-TOOLTEST tfillincr.ddl  -H -p -d alloc_time_incr tfilters.h5
-TOOLTEST tfilllate.ddl  -H -p -d alloc_time_late tfilters.h5
+# fill values
+TOOLTEST tfill.ddl -p tfvalues.h5
 
-
-# references , print path
-TOOLTEST treference.ddl -d reference  tfilters.h5
+# several datatype, with references , print path
+TOOLTEST treference.ddl  tattr2.h5
 
 # escape/not escape non printable characters
 TOOLTEST tstringe.ddl -e -d string  tfilters.h5
 TOOLTEST tstring.ddl -d string  tfilters.h5
 
-# array indices print/not print
+# array indices print/not print, large dataset
 TOOLTEST tindicesyes.ddl -d compact  tfilters.h5
 TOOLTEST tindicesno.ddl -y -d compact  tfilters.h5
+TOOLTEST tindiceslarge.ddl -p -d 3d tfilters.h5
 
 
 # tests for filters
@@ -290,16 +288,6 @@ fi
 TOOLTEST tuserfilter.ddl -H  -p -d myfilter  tfilters.h5
 
 		  
-		  
-
-
-
-
-
-		  
-
-    
-
 
 if test $nerrors -eq 0 ; then
    echo "All $DUMPER tests passed."
