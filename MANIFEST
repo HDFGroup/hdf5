@@ -751,7 +751,6 @@
 ./pablo/ProcIDs.h
 ./pablo/PabloSedscr
 ./pablo/ProcTrace.h
-./pablo/ProcTrace.inc
 ./pablo/READ_ME
 
 ./src/.indent.pro			_DO_NOT_DISTRIBUTE_
