@@ -2451,7 +2451,29 @@ EOF
 	libdir="$hardcode_libdirs"
 	eval rpath=\" $hardcode_libdir_flag_spec\"
       fi
-      finalize_rpath="$rpath"
+      
+      # Hack to fix the problem with compilers on Irix[56] machines which
+      # can't handle long -Wl flags being sent to the linker during a
+      # "recompile" just before execution. -BW 20. April 2001
+      case "$host" in
+      *irix[56]*)
+        bar='';
+        libs=`echo $rpath | sed -e "s#${wl}-rpath ${wl}##" | sed -e 's#:# #g'`;
+        for foo in X $libs; do
+          if test "$foo" != "X"; then
+            if test -n "$bar"; then
+              bar='$bar ${wl}-rpath ${wl}$foo';
+            else
+              bar='${wl}-rpath ${wl}$foo';
+            fi;
+          fi;
+        done
+        finalize_rpath="$bar";
+        ;;
+      *)
+        finalize_rpath="$rpath";
+        ;;
+      esac
 
       output_objdir=`$echo "X$output" | $Xsed -e 's%/[^/]*$%%'`
       if test "X$output_objdir" = "X$output"; then
