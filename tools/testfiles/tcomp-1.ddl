@@ -1,7 +1,7 @@
 #############################
 Expected output for 'h5dump tcompound.h5'
 #############################
-HDF5 "..\..\testfiles\tcompound.h5" {
+HDF5 "tcompound.h5" {
 GROUP "/" {
    DATATYPE "#5992:0" {
       H5T_STD_I32BE "int";
