@@ -571,6 +571,110 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_insert_overlap
+ *
+ * Purpose:	Basic tests for the block tracker code
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, March 10, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_insert_overlap(hid_t fapl)
+{
+    hid_t	file=-1;
+    char	filename[1024];
+    H5F_t	*f=NULL;
+    haddr_t     bt_addr;                /* Address of block tracker created */
+    herr_t      ret;                    /* Generic return value */
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+	
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	TEST_ERROR;
+    } /* end if */
+
+    if (H5BT_create(f, H5P_DATASET_XFER_DEFAULT, &bt_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Insert first block */
+    if (H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)10, (hsize_t)20)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /*
+     * Test inserting overlapping blocks
+     */
+    TESTING("insert overlapping blocks");
+
+    /* Insert same block again (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)10, (hsize_t)20);
+    } H5E_END_TRY;
+    if (ret != FAIL) TEST_ERROR;
+
+    /* Insert block of different size at same address (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)10, (hsize_t)10);
+    } H5E_END_TRY;
+    if (ret != FAIL) TEST_ERROR;
+
+    /* Insert block which overlaps beginning of existing block (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)5, (hsize_t)10);
+    } H5E_END_TRY;
+    if (ret != FAIL) TEST_ERROR;
+
+    /* Insert block which overlaps end of existing block (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)25, (hsize_t)10);
+    } H5E_END_TRY;
+    if (ret != FAIL) TEST_ERROR;
+
+    /* Insert block which includes existing block (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)5, (hsize_t)30);
+    } H5E_END_TRY;
+    if (ret != FAIL) TEST_ERROR;
+
+    /* Insert block which is inside existing block (should fail) */
+    H5E_BEGIN_TRY {
+        ret = H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, (haddr_t)15, (hsize_t)10);
+    } H5E_END_TRY;
+    if (ret != FAIL) TEST_ERROR;
+
+    PASSED();
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_insert_overlap() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test the block tracker code
@@ -603,6 +707,7 @@ main(void)
     nerrors += test_insert_one(fapl);
     nerrors += test_insert_few(fapl);
     nerrors += test_insert_many(fapl);
+    nerrors += test_insert_overlap(fapl);
 
     if (nerrors) goto error;
     puts("All block tracker tests passed.");
