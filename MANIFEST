@@ -1370,6 +1370,9 @@
 ./tools/testfiles/tname-lt.h5.xml
 ./tools/testfiles/tname-quot.h5.xml
 ./tools/testfiles/tname-sp.h5.xml
+./tools/testfiles/tnamed_dtype_attr.ddl
+./tools/testfiles/tnamed_dtype_attr.h5
+./tools/testfiles/tnamed_dtype_attr.h5.xml
 ./tools/testfiles/tnestedcomp.h5.xml
 ./tools/testfiles/tnodata.h5.xml
 ./tools/testfiles/tobjref.h5.xml
