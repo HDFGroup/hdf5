@@ -311,6 +311,9 @@
 /* Define if you have the <stdint.h> header file.  */
 #undef HAVE_STDINT_H
 
+/* Define if you have the <features.h> header file.  */
+#undef HAVE_FEATURES_H
+
 /* Define if you have the <sys/filio.h> header file.  */
 #undef HAVE_SYS_FILIO_H
 
@@ -328,6 +331,9 @@
 
 /* Define if you have the <sys/stat.h> header file.  */
 #undef HAVE_SYS_STAT_H
+
+/* Define if you have the <sys/resource.h> header file.  */
+#undef HAVE_SYS_RESOURCE_H
 
 /* Define if you have the <sys/sysinfo.h> header file.  */
 #undef HAVE_SYS_SYSINFO_H

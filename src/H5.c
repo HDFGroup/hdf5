@@ -31,16 +31,9 @@
 #include "H5FDmpio.h"
 
 /* we need this for the struct rusage declaration */
-#if defined(H5_HAVE_GETRUSAGE) && defined(linux)
+#if defined(H5_HAVE_GETRUSAGE) && defined(H5_HAVE_SYS_RESOURCE_H)
 #   include <sys/resource.h>
 #endif
-
-/* We need this on Irix64 even though we've included stdio.h as documented */
-#ifdef FIXME_ON_IRIX_THEN
-#if !defined __MWERKS__  
-FILE *fdopen(int fd, const char *mode);
-#endif
-#endif /* FIXME_ON_IRIX_THEN */
 
 #define PABLO_MASK      H5_mask
 

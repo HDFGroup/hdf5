@@ -26,7 +26,7 @@
  */
 #include "H5config.h"		/* Include all configuration info	*/
 
-/* include the pthread library */
+/* include the pthread header */
 #ifdef H5_HAVE_THREADSAFE
 #include <pthread.h>
 #endif

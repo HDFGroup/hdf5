@@ -29,7 +29,13 @@
  * prevent repeated include.
  */
 #include "H5pubconf.h"		/*from configure                             */
+
+#ifdef H5_HAVE_FEATURES_H
+#include <features.h>           /*for setting POSIX, BSD, etc. compatibility */
+#endif
+#ifdef H5_HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 #ifdef H5_STDC_HEADERS
 #   include <limits.h>		/*for H5T_NATIVE_CHAR defn in H5Tpublic.h    */
 #endif
