@@ -1677,6 +1677,15 @@ TABLE.list TD { border:none; }
       an atomic object.
     </P>
 
+    <P>The HDF5 library creates global heap collections as needed, so there may
+        be multiple collections throughout the file. The set of all of them is
+        abstractly called the "global heap", although they don't actually link
+        to each other, and there is no global place in the file where you can
+        discover all of the collections.  The collections are found simply by
+        finding a reference to one through another object in the file (eg.
+        variable-length datatype elements, etc).
+    </P>
+
     <br>
     <div align=center>
       <table class=format>
@@ -1814,7 +1823,7 @@ TABLE.list TD { border:none; }
         </tr>
           
         <tr>
-          <td colspan=2>Object ID</td>
+          <td colspan=2>Heap Object ID</td>
           <td colspan=2>Reference Count</td>
         </tr>
 
@@ -1849,7 +1858,7 @@ TABLE.list TD { border:none; }
         </tr>
 
         <tr>
-          <td>Object ID</td>
+          <td>Heap Object ID</td>
           <td>
             <P>Each object has a unique identification number within a
             collection.  The identification numbers are chosen so that
