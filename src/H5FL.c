@@ -57,6 +57,14 @@ static H5FL_gc_list_t *H5FL_gc_head=NULL;
 /* The head of the list of array things to garbage collect */
 static H5FL_gc_arr_list_t *H5FL_gc_arr_head=NULL;
 
+/* Macros for turning off free lists in the library */
+/* #define NO_FREE_LISTS */
+#ifdef NO_FREE_LISTS
+#define NO_REG_FREE_LISTS
+#define NO_ARR_FREE_LISTS
+#define NO_BLK_FREE_LISTS
+#endif /* NO_FREE_LISTS */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5FL_init
@@ -122,6 +130,12 @@ H5FL_free(H5FL_head_t *head, void *obj)
 
     FUNC_ENTER (H5FL_free, NULL);
 
+#ifdef NO_REG_FREE_LISTS
+#ifdef H5FL_DEBUG
+    HDmemset(obj,255,head->size);
+#endif /* H5FL_DEBUG */
+    H5MM_xfree(obj);
+#else /* NO_REG_FREE_LISTS */
     /* Make certain that the free list is initialized */
     assert(head->init);
 
@@ -141,6 +155,7 @@ H5FL_free(H5FL_head_t *head, void *obj)
 
     /* Increment the number of blocks on free list */
     head->onlist++;
+#endif /* NO_REG_FREE_LISTS */
 
     FUNC_LEAVE(NULL);
 }   /* end H5FL_free() */
@@ -169,6 +184,12 @@ H5FL_alloc(H5FL_head_t *head, uintn clear)
 
     FUNC_ENTER (H5FL_alloc, NULL);
 
+#ifdef NO_REG_FREE_LISTS
+    if(clear)
+        ret_value=H5MM_calloc(head->size);
+    else
+        ret_value=H5MM_malloc(head->size);
+#else /* NO_REG_FREE_LISTS */
     /* Make certain the list is initialized first */
     if(!head->init)
         H5FL_init(head);
@@ -207,6 +228,7 @@ H5FL_alloc(H5FL_head_t *head, uintn clear)
     /* Clear to zeros, if asked */
     if(clear)
         HDmemset(ret_value,0,head->size);
+#endif /* NO_REG_FREE_LISTS */
 
     FUNC_LEAVE (ret_value);
 }   /* end H5FL_alloc() */
@@ -509,6 +531,12 @@ H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, uintn clear)
 
     FUNC_ENTER(H5FL_blk_alloc, NULL);
 
+#ifdef NO_BLK_FREE_LISTS
+    if(clear)
+        ret_value=H5MM_calloc(size);
+    else
+        ret_value=H5MM_malloc(size);
+#else /* NO_BLK_FREE_LISTS */
     /* Make certain the list is initialized first */
     if(!head->init)
         H5FL_blk_init(head);
@@ -543,6 +571,7 @@ H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, uintn clear)
     /* Clear the block to zeros, if requested */
     if(clear)
         HDmemset(ret_value,0,size);
+#endif /* NO_BLK_FREE_LISTS */
 
 done:
     FUNC_LEAVE(ret_value);
@@ -575,6 +604,9 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
 
     FUNC_ENTER(H5FL_blk_free, NULL);
 
+#ifdef NO_BLK_FREE_LISTS
+    H5MM_xfree(block);
+#else /* NO_BLK_FREE_LISTS */
     /* Get the pointer to the native block info header in front of the native block to free */
     temp=(H5FL_blk_list_t *)((unsigned char *)block-offsetof(H5FL_blk_list_t,block));
 
@@ -592,6 +624,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
 
     /* Increment the number of blocks on free list */
     head->onlist++;
+#endif /* NO_BLK_FREE_LISTS */
 
     FUNC_LEAVE(NULL);
 } /* end H5FL_blk_free() */
@@ -622,6 +655,9 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size)
 
     FUNC_ENTER(H5FL_blk_realloc, NULL);
 
+#ifdef NO_BLK_FREE_LISTS
+    ret_value=H5MM_realloc(block,new_size);
+#else /* NO_BLK_FREE_LISTS */
     /* Check if we are actually re-allocating a block */
     if(block!=NULL) {
         /* Get the pointer to the chunk info header in front of the chunk to free */
@@ -639,6 +675,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size)
     /* Not re-allocating, just allocate a fresh block */
     else
         ret_value=H5FL_blk_alloc(head,new_size,0);
+#endif /* NO_BLK_FREE_LISTS */
 
     FUNC_LEAVE(ret_value);
 } /* end H5FL_blk_realloc() */
@@ -880,6 +917,9 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
 
     FUNC_ENTER (H5FL_arr_free, NULL);
 
+#ifdef NO_ARR_FREE_LISTS
+    H5MM_xfree(obj);
+#else /* NO_ARR_FREE_LISTS */
     /* Make certain that the free list is initialized */
     assert(head->init);
 
@@ -904,6 +944,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
     else {
         H5FL_blk_free(&(head->u.queue),obj);
     } /* end else */
+#endif /* NO_ARR_FREE_LISTS */
 
     FUNC_LEAVE(NULL);
 }   /* end H5FL_arr_free() */
@@ -932,6 +973,12 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, uintn elem, uintn clear)
 
     FUNC_ENTER (H5FL_arr_alloc, NULL);
 
+#ifdef NO_ARR_FREE_LISTS
+    if(clear)
+        ret_value=H5MM_calloc(elem*head->size);
+    else
+        ret_value=H5MM_malloc(elem*head->size);
+#else /* NO_ARR_FREE_LISTS */
     /* Make certain the list is initialized first */
     if(!head->init)
         H5FL_arr_init(head);
@@ -973,6 +1020,7 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, uintn elem, uintn clear)
     else {
         ret_value=H5FL_blk_alloc(&(head->u.queue),head->size*elem,clear);
     } /* end else */
+#endif /* NO_ARR_FREE_LISTS */
 
     FUNC_LEAVE (ret_value);
 }   /* end H5FL_arr_alloc() */
@@ -1001,6 +1049,9 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, uintn new_elem)
 
     FUNC_ENTER (H5FL_arr_realloc, NULL);
 
+#ifdef NO_ARR_FREE_LISTS
+    ret_value=H5MM_realloc(obj,new_elem*head->size);
+#else /* NO_ARR_FREE_LISTS */
     /* Check if we are really allocating the object */
     if(obj==NULL) {
         ret_value=H5FL_arr_alloc(head,new_elem,0);
@@ -1030,6 +1081,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, uintn new_elem)
             ret_value=H5FL_blk_realloc(&(head->u.queue),obj,head->size*new_elem);
         } /* end else */
     } /* end else */
+#endif /* NO_ARR_FREE_LISTS */
 
     FUNC_LEAVE (ret_value);
 }   /* end H5FL_arr_realloc() */
