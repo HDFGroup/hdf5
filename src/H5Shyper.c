@@ -988,15 +988,24 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
         acc*=file_space->extent.u.simple.size[i];
     } /* end for */
 
+#ifdef QAK
+    printf("%s: fast_dim=%d\n",FUNC,(int)fast_dim);
+    printf("%s: file_space->select.sel_info.hslab.diminfo[%d].start=%d\n",FUNC,(int)fast_dim,(int)file_space->select.sel_info.hslab.diminfo[fast_dim].start);
+    printf("%s: file_space->select.sel_info.hslab.diminfo[%d].stride=%d\n",FUNC,(int)fast_dim,(int)file_space->select.sel_info.hslab.diminfo[fast_dim].stride);
+#endif /* QAK */
     /* Check if we stopped in the middle of a sequence of elements */
-    if((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0) {
+    if((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
+        (file_iter->hyp.pos[fast_dim]!=file_space->select.sel_info.hslab.diminfo[fast_dim].start) && file_space->select.sel_info.hslab.diminfo[fast_dim].stride==1) {
         size_t leftover;  /* The number of elements left over from the last sequence */
 
 #ifdef QAK
 printf("%s: Check 1.0\n",FUNC);
 #endif /* QAK */
         /* Calculate the number of elements left in the sequence */
-        leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride);
+        if(file_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)
+            leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-(file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start);
+        else
+            leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't read too many */
         actual_read=MIN(leftover,nelmts);
@@ -1009,10 +1018,17 @@ printf("%s: Check 1.0\n",FUNC);
         /* Add in the selection offset */
         for(i=0; i<ndims; i++)
             offset[i] += file_space->select.offset[i];
+#ifdef QAK
+for(i=0; i<ndims+1; i++)
+    printf("%s: offset[%d]=%d\n",FUNC,(int)i,(int)offset[i]);
+#endif /* QAK */
 
         /* Compute the initial buffer offset */
         for(i=0,buf_off=0; i<ndims; i++)
             buf_off+=offset[i]*slab[i];
+#ifdef QAK
+printf("%s: buf_off=%ld, actual_read=%d, actual_bytes=%d\n",FUNC,(long)buf_off,(int)actual_read,(int)actual_bytes);
+#endif /* QAK */
 
         /* Read in the rest of the sequence */
         if (H5F_seq_read(f, dxpl_id, layout, pline, fill, efl, file_space,
@@ -1048,12 +1064,16 @@ printf("%s: Check 1.0\n",FUNC);
      */
     if(num_read<nelmts) { /* Just in case the "remainder" above filled the buffer */
 #ifdef QAK
-printf("%s: Check 2.0\n",FUNC);
+printf("%s: Check 2.0, ndims=%d, num_read=%d, nelmts=%d\n",FUNC,(int)ndims,(int)num_read,(int)nelmts);
 #endif /* QAK */
         /* Compute the arrays to perform I/O on */
         /* Copy the location of the point to get */
         HDmemcpy(offset, file_iter->hyp.pos,ndims*sizeof(hssize_t));
         offset[ndims] = 0;
+#ifdef QAK
+for(i=0; i<ndims+1; i++)
+    printf("%s: offset[%d]=%d\n",FUNC,(int)i,(int)offset[i]);
+#endif /* QAK */
 
         /* Add in the selection offset */
         for(i=0; i<ndims; i++)
@@ -1064,6 +1084,12 @@ printf("%s: Check 2.0\n",FUNC);
             tmp_count[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
             tmp_block[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
         } /* end for */
+#ifdef QAK
+for(i=0; i<ndims; i++) {
+    printf("%s: tmp_count[%d]=%d, tmp_block[%d]=%d\n",FUNC,(int)i,(int)tmp_count[i],(int)i,(int)tmp_block[i]);
+    printf("%s: slab[%d]=%d\n",FUNC,(int)i,(int)slab[i]);
+}
+#endif /* QAK */
 
         /* Compute the initial buffer offset */
         for(i=0,buf_off=0; i<ndims; i++)
@@ -1075,7 +1101,10 @@ printf("%s: Check 2.0\n",FUNC);
         /* Set the number of actual bytes */
         actual_bytes=actual_read*elmt_size;
 #ifdef QAK
-printf("%s: actual_read=%d\n",FUNC,(int)actual_read);
+printf("%s: buf_off=%ld, actual_read=%d, actual_bytes=%d\n",FUNC,(long)buf_off,(int)actual_read,(int)actual_bytes);
+#endif /* QAK */
+
+#ifdef QAK
 for(i=0; i<file_space->extent.u.simple.rank; i++)
     printf("%s: diminfo: start[%d]=%d, stride[%d]=%d, block[%d]=%d, count[%d]=%d\n",FUNC,
         (int)i,(int)file_space->select.sel_info.hslab.diminfo[i].start,
@@ -1561,14 +1590,18 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
     } /* end for */
 
     /* Check if we stopped in the middle of a sequence of elements */
-    if((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0) {
+    if((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
+        (file_iter->hyp.pos[fast_dim]!=file_space->select.sel_info.hslab.diminfo[fast_dim].start) && file_space->select.sel_info.hslab.diminfo[fast_dim].stride==1) {
         size_t leftover;  /* The number of elements left over from the last sequence */
 
 #ifdef QAK
 printf("%s: Check 1.0\n",FUNC);
 #endif /* QAK */
         /* Calculate the number of elements left in the sequence */
-        leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride);
+        if(file_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)
+            leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-(file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start);
+        else
+            leftover=file_space->select.sel_info.hslab.diminfo[fast_dim].block-((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't write too many */
         actual_write=MIN(leftover,nelmts);
@@ -2112,14 +2145,18 @@ for(i=0; i<ndims; i++)
 #endif /* QAK */
 
     /* Check if we stopped in the middle of a sequence of elements */
-    if((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0) {
+    if((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
+        (mem_iter->hyp.pos[fast_dim]!=mem_space->select.sel_info.hslab.diminfo[fast_dim].start) && mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1) {
         size_t leftover;  /* The number of elements left over from the last sequence */
 
 #ifdef QAK
 printf("%s: Check 1.0\n",FUNC);
 #endif /* QAK */
         /* Calculate the number of elements left in the sequence */
-        leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride);
+        if(mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)
+            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-(mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start);
+        else
+            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't read too many */
         actual_read=MIN(leftover,nelmts);
@@ -2619,14 +2656,18 @@ for(i=0; i<ndims; i++)
 #endif /* QAK */
 
     /* Check if we stopped in the middle of a sequence of elements */
-    if((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0) {
+    if((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0 ||
+        (mem_iter->hyp.pos[fast_dim]!=mem_space->select.sel_info.hslab.diminfo[fast_dim].start) && mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1) {
         uintn leftover;  /* The number of elements left over from the last sequence */
 
 #ifdef QAK
 printf("%s: Check 1.0\n",FUNC);
 #endif /* QAK */
         /* Calculate the number of elements left in the sequence */
-        leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride);
+        if(mem_space->select.sel_info.hslab.diminfo[fast_dim].stride==1)
+            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-(mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start);
+        else
+            leftover=mem_space->select.sel_info.hslab.diminfo[fast_dim].block-((mem_iter->hyp.pos[fast_dim]-mem_space->select.sel_info.hslab.diminfo[fast_dim].start)%mem_space->select.sel_info.hslab.diminfo[fast_dim].stride);
 
         /* Make certain that we don't write too many */
         actual_write=MIN(leftover,nelmts);
