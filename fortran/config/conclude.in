@@ -111,15 +111,20 @@ install-doc: $(PUB_DOCS) $(DOCDIR)
 ## Removes those things that `make install' (would have) installed.
 uninstall:
 	@for f in libhdf5.settings $(LIB); do				      \
-            $(LT_UNINSTALL) $(libdir)/$$f;				      \
+	  $(LT_UNINSTALL) $(libdir)/$$f;				      \
 	done
 	@if test "X$(PUB_HDR)" != X; then				      \
-	   set -x; cd $(includedir) && $(RM) $(PUB_HDR);		      \
+	  set -x; cd $(includedir) && $(RM) $(PUB_HDR);			      \
+	fi
+	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then	      \
+	  if test -f "$(libdir)/hdf5.$(F9XMODEXT)" -o -f "$(libdir)/HDF5.$(F9XMODEXT)"; then \
+	    set -x; $(RM) $(libdir)/*.$(F9XMODEXT);			      \
+	  fi;								      \
 	fi
 	@for f in X $(PUB_PROGS); do					      \
-	    if test $$f != X; then					      \
-	        $(LT_UNINSTALL) $(bindir)/$$f;				      \
-	    fi;								      \
+	  if test $$f != X; then					      \
+	    $(LT_UNINSTALL) $(bindir)/$$f;				      \
+	  fi;								      \
 	done
 
 ## Removes those things that `make install-doc' (would have) installed.
