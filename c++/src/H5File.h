@@ -39,9 +39,21 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	// Gets the file id
 	virtual hid_t getLocId() const;
 
-	// Throw file exception
-	virtual void throwException(const string func_name, const string msg) const;
+	// Returns the amount of free space in the file.
+	hssize_t getFreeSpace();
 
+	// Returns the number of opened object IDs (files, datasets, groups 
+	// and datatypes) in the same file.
+	int getObjCount(unsigned types);
+	int getObjCount();
+
+	// Retrieves a list of opened object IDs (files, datasets, groups 
+	// and datatypes) in the same file.
+	void getObjIDs(unsigned types, int max_objs, hid_t *oid_list);
+
+	// Returns the pointer to the file handle of the low-level file driver.
+	void getVFDHandle(FileAccPropList& fapl, void **file_handle);
+	void getVFDHandle(void **file_handle);
 
 	// Determines if a file, specified by its name, is in HDF5 format
 	static bool isHdf5(const string& name );
@@ -55,6 +67,9 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 
 	// Gets the access property list of this file
 	FileAccPropList getAccessPlist() const;
+
+	// Throw file exception
+	virtual void throwException(const string func_name, const string msg) const;
 
 	// Used by the API to appropriately close a file
 	void p_close() const;
