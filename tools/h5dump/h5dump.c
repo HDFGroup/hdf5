@@ -625,9 +625,11 @@ usage: %s [OPTIONS] file\n\
       -c L, --count=L     Number of blocks to include in selection\n\
       -k L, --block=L     Size of block in hyperslab\n\
 \n\
-  D - is a driver name either: \"sec2\", \"family\", \"split\", \"multi\", or \"stream\".\n\
-        By default, the file will be opened in the same order as specified\n\
-        above until one driver succeeds in opening the file.\n\
+  D - is the file driver to use in opening the file. Acceptable values\n\
+        are \"sec2\", \"family\", \"split\", \"multi\", and \"stream\". Without\n\
+        the file driver flag, the file will be opened with each driver in\n\
+        turn and in the order specified above until one driver succeeds\n\
+        in opening the file.\n\
   F - is a filename.\n\
   P - is the full path from the root group to the object.\n\
   N - is an integer greater than 1.\n\
