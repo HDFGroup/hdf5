@@ -1034,7 +1034,7 @@ H5FD_multi_fapl_copy(const void *_old_fa)
     H5Eclear_stack(H5E_DEFAULT);
 
     memcpy(new_fa, old_fa, sizeof(H5FD_multi_fapl_t));
-    for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
+    ALL_MEMBERS(mt) {
 	if (old_fa->memb_fapl[mt]>=0) {
 	    new_fa->memb_fapl[mt] = H5Pcopy(old_fa->memb_fapl[mt]);
 	    if (new_fa->memb_fapl[mt]<0) nerrors++;
@@ -1044,13 +1044,13 @@ H5FD_multi_fapl_copy(const void *_old_fa)
 	    assert(new_fa->memb_name[mt]);
 	    strcpy(new_fa->memb_name[mt], old_fa->memb_name[mt]);
 	}
-    }
+    } END_MEMBERS;
 
     if (nerrors) {
-        for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
+        ALL_MEMBERS(mt) {
             if (new_fa->memb_fapl[mt]>=0) (void)H5Pclose(new_fa->memb_fapl[mt]);
             if (new_fa->memb_name[mt]) free(new_fa->memb_name[mt]);
-        }
+        } END_MEMBERS;
         free(new_fa);
         H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "invalid freespace objects", NULL)
     }
@@ -1084,13 +1084,13 @@ H5FD_multi_fapl_free(void *_fa)
     /* Clear the error stack */
     H5Eclear_stack(H5E_DEFAULT);
 
-    for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
+    ALL_MEMBERS(mt) {
 	if (fa->memb_fapl[mt]>=0)
             if(H5Pclose(fa->memb_fapl[mt])<0)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTCLOSEOBJ, "can't close property list", -1)
 	if (fa->memb_name[mt])
             free(fa->memb_name[mt]);
-    }
+    } END_MEMBERS;
     free(fa);
 
     return 0;
@@ -1128,16 +1128,17 @@ H5FD_multi_dxpl_copy(const void *_old_dx)
     H5Eclear_stack(H5E_DEFAULT);
 
     memcpy(new_dx, old_dx, sizeof(H5FD_multi_dxpl_t));
-    for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
+    ALL_MEMBERS(mt) {
 	if (old_dx->memb_dxpl[mt]>=0) {
 	    new_dx->memb_dxpl[mt] = H5Pcopy(old_dx->memb_dxpl[mt]);
 	    if (new_dx->memb_dxpl[mt]<0) nerrors++;
 	}
-    }
+    } END_MEMBERS;
 
     if (nerrors) {
-        for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1))
+        ALL_MEMBERS(mt) {
             (void)H5Pclose(new_dx->memb_dxpl[mt]);
+        } END_MEMBERS;
         free(new_dx);
         H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "invalid freespace objects", NULL)
     }
@@ -1171,10 +1172,12 @@ H5FD_multi_dxpl_free(void *_dx)
     /* Clear the error stack */
     H5Eclear_stack(H5E_DEFAULT);
 
-    for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1))
+    ALL_MEMBERS(mt) {
         if (dx->memb_dxpl[mt]>=0)
             if(H5Pclose(dx->memb_dxpl[mt])<0)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTCLOSEOBJ, "can't close property list", -1)
+    } END_MEMBERS;
+
     free(dx);
     return 0;
 }
@@ -1372,13 +1375,13 @@ H5FD_multi_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     /* Clear the error stack */
     H5Eclear_stack(H5E_DEFAULT);
 
-    for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
+    ALL_MEMBERS(mt) {
 	if (f1->memb[mt] && f2->memb[mt]) break;
 	if (!cmp) {
 	    if (f1->memb[mt]) cmp = -1;
 	    else if (f2->memb[mt]) cmp = 1;
 	}
-    }
+    } END_MEMBERS;
     assert(cmp || mt<H5FD_MEM_NTYPES);
     if (mt>=H5FD_MEM_NTYPES) return cmp;
 
