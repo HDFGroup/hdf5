@@ -27,8 +27,6 @@
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5TBprivate.h"	/* Threaded, balanced, binary trees (TBBTs) */
 #include "H5Vprivate.h"		/* Vector and array functions		*/
-#include "H5Tpublic.h"
-#include "H5Zprivate.h"
 
 /*#define H5D_DEBUG*/
 
@@ -44,7 +42,7 @@
 /* Structure holding information about a chunk's selection for mapping */
 typedef struct H5D_chunk_info_t {
     hsize_t index;              /* "Index" of chunk in dataset (must be first for TBBT routines) */
-    hsize_t chunk_points;       /* Number of elements selected in chunk */
+    size_t chunk_points;        /* Number of elements selected in chunk */
     H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
     hssize_t coords[H5O_LAYOUT_NDIMS];    /* Coordinates of chunk in file dataset's dataspace */
     H5S_t *mspace;              /* Dataspace describing selection in memory corresponding to this chunk */
@@ -310,9 +308,6 @@ H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache)
     if (NULL == (dx_plist = H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
     
-    /* Get the data transform property */
-    H5P_get(dx_plist, H5D_XFER_XFORM, &cache->data_xform_prop);
-            
     /* Get maximum temporary buffer size */
     if(H5P_get(dx_plist, H5D_XFER_MAX_TEMP_BUF_NAME, &cache->max_temp_buf)<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve maximum temporary buffer size")
@@ -355,6 +350,10 @@ H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache)
     if(H5P_get(dx_plist, H5D_XFER_FILTER_CB_NAME, &cache->filter_cb)<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve filter callback function")
 
+    /* Get the data transform property */
+    if(H5P_get(dx_plist, H5D_XFER_XFORM_NAME, &cache->data_xform_prop)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve data transform info")
+            
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5D_get_dxpl_cache_real() */
@@ -1069,20 +1068,15 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
     hsize_t	smine_start;		/*strip mine start loc	*/
     hsize_t	n, smine_nelmts;	/*elements per strip	*/
     herr_t	ret_value = SUCCEED;	/*return value		*/
-
-    hid_t array_type;
        
     FUNC_ENTER_NOAPI_NOINIT(H5D_contig_read)
  
-    /* Inits for data transforms, if needed */    
-    array_type = H5Z_xform_find_type(mem_type);
-
     /*
      * If there is no type conversion then read directly into the
      * application's buffer.  This saves at least one mem-to-mem copy.
      */
                 
-    if ( (dxpl_cache->data_xform_prop == NULL) && H5T_path_noop(tpath)) {
+    if ( H5Z_xform_noop(dxpl_cache->data_xform_prop) && H5T_path_noop(tpath)) {
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
@@ -1221,12 +1215,9 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
 
 
         /* Added by LA to do data transforms */
-
-        if(dxpl_cache->data_xform_prop)
-            H5Z_xform_eval(dxpl_cache->data_xform_prop->parse_root, tconv_buf, smine_nelmts, array_type);
-
+        if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
+             H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, mem_type);
         /* end of LA additions */
-
 
         /*
          * Scatter the data into memory.
@@ -1318,20 +1309,14 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
     hsize_t	n, smine_nelmts;	/*elements per strip	*/
     herr_t	ret_value = SUCCEED;	/*return value		*/
     
-    hid_t array_type;
-            
     FUNC_ENTER_NOAPI_NOINIT(H5D_contig_write)
  
-    /*TODO: This should be the type of the destination file...not the memory source.  Where do we get this? */
-    /* Inits for the data transform, if needed */
-    array_type = H5Z_xform_find_type(mem_type);
-   
     /*
      * If there is no type conversion then write directly from the
      * application's buffer.  This saves at least one mem-to-mem copy.
      */
 
-    if ( (dxpl_cache->data_xform_prop == NULL) &&  H5T_path_noop(tpath)) {
+    if ( H5Z_xform_noop(dxpl_cache->data_xform_prop) && H5T_path_noop(tpath)) {
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
@@ -1473,10 +1458,11 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
         H5_timer_begin(&timer);
 #endif
  
-       /* LA additions for data transforms */ 
-        if(dxpl_cache->data_xform_prop)
-            H5Z_xform_eval(dxpl_cache->data_xform_prop->parse_root, tconv_buf, smine_nelmts, array_type);
+        /* LA additions for data transforms */ 
+        if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
+             H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, dataset->type);
         /* End of LA modifications */
+
         status = H5S_select_fscat(dataset->ent.file, &(dataset->layout), 
               &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), file_space, &file_iter,
               smine_nelmts, dxpl_cache, dxpl_id, tconv_buf);
@@ -1491,7 +1477,6 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
     } /* end for */
 
 done:
-
     /* Release selection iterators */
     if(file_iter_init) {
         if(H5S_select_iter_release(&file_iter)<0)
@@ -1568,7 +1553,6 @@ UNUSED
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
     herr_t	ret_value = SUCCEED;	/*return value		*/
-    hid_t array_type;
     
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_read)
     
@@ -1576,13 +1560,11 @@ UNUSED
     if(H5D_create_chunk_map(dataset, mem_type, file_space, mem_space, &fm)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build chunk mapping")
 
-    array_type = H5Z_xform_find_type(mem_type);
-            
     /*
      * If there is no type conversion then read directly into the
      * application's buffer.  This saves at least one mem-to-mem copy.
      */
-    if ( (dxpl_cache->data_xform_prop == NULL) && H5T_path_noop(tpath)) {
+    if ( H5Z_xform_noop(dxpl_cache->data_xform_prop) && H5T_path_noop(tpath)) {
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
@@ -1753,12 +1735,9 @@ UNUSED
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data type conversion failed")
 
            /* LA additions for data transforms */
-             if(dxpl_cache->data_xform_prop)
-                H5Z_xform_eval(dxpl_cache->data_xform_prop->parse_root, tconv_buf, smine_nelmts, array_type);
+            if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
+                 H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, mem_type);
 
-
-
-                    
             /*
              * Scatter the data into memory.
              */
@@ -1877,12 +1856,9 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
     herr_t	ret_value = SUCCEED;	/*return value		*/
-    hid_t       array_type;
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_write)
     
-    array_type = H5Z_xform_find_type(mem_type);
-     
 #ifdef QAK
 {
     int mpi_rank;
@@ -1909,7 +1885,7 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * If there is no type conversion then write directly from the
      * application's buffer.  This saves at least one mem-to-mem copy.
      */
-    if ((dxpl_cache->data_xform_prop == NULL) &&  H5T_path_noop(tpath)) {
+    if ( H5Z_xform_noop(dxpl_cache->data_xform_prop) && H5T_path_noop(tpath)) {
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
@@ -2103,12 +2079,9 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data type conversion failed")
 
             /* LA additions for data transforms */
-              if(dxpl_cache->data_xform_prop)
-                 H5Z_xform_eval(dxpl_cache->data_xform_prop->parse_root, tconv_buf, smine_nelmts, array_type);
+            if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
+                 H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, dataset->type);
 
-
-
-                    
             /*
              * Scatter the data out to the file.
              */
@@ -2765,7 +2738,7 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
             /* Get number of elements selected in chunk */
             if((schunk_points=H5S_get_select_npoints(tmp_fchunk))<0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection # of elements")
-            H5_ASSIGN_OVERFLOW(new_chunk_info->chunk_points,schunk_points,hssize_t,hsize_t);
+            H5_ASSIGN_OVERFLOW(new_chunk_info->chunk_points,schunk_points,hssize_t,size_t);
 
             /* Decrement # of points left in file selection */
             sel_points-=schunk_points;

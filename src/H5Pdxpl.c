@@ -31,6 +31,7 @@ static int             interface_initialize_g = 0;
 
 /* Static function prototypes */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_data_transform
  *
@@ -48,15 +49,14 @@ static int             interface_initialize_g = 0;
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5Pset_data_transform(hid_t plist_id, char* expression)
+herr_t H5Pset_data_transform(hid_t plist_id, const char* expression)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
+    H5Z_data_xform_t *data_xform_prop=NULL;    /* New data xform property */
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_data_transform, FAIL);
     
-    /*    H5TRACE4("e","izxx",plist_id,expression); */
-
     /* Check arguments */
     if (expression == NULL)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "expression cannot be NULL");
@@ -65,16 +65,23 @@ herr_t H5Pset_data_transform(hid_t plist_id, char* expression)
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
+    /* Create data transform info from expression */
+    if((data_xform_prop=H5Z_xform_create(expression))==NULL)
+        HGOTO_ERROR (H5E_PLINE, H5E_NOSPACE, FAIL, "unable to create data transform info")
+
     /* Update property list */
-    if(H5P_set(plist, H5D_XFER_XFORM, &expression)<0)
+    if(H5P_set(plist, H5D_XFER_XFORM_NAME, &data_xform_prop)<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Error setting data transform expression");
 
 done:
+    if(ret_value<0) {
+        if(data_xform_prop)
+            if(H5Z_xform_destroy(data_xform_prop)<0)
+                HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "unable to release data transform expression")
+    } /* end if */
+
     FUNC_LEAVE_API(ret_value);
 }
-
-
-
 
 
 /*-------------------------------------------------------------------------
