@@ -50,8 +50,9 @@ H5R&nbsp;&nbsp;
 
 The Reference interface allows the user to create references 
 to specific objects and data regions in an HDF5 file.
-<p>
 
+<p>
+<strong>The C Interfaces:</strong>
 
 <table border=0 width=98%>
 <tr><td valign=top width=33%>
@@ -70,6 +71,40 @@ to specific objects and data regions in an HDF5 file.
 </ul>
 </td></tr>
 </table>
+
+<p>
+<strong>The FORTRAN90 Interfaces:</strong>
+
+<br>
+<font size=-1>
+<i>In general, each FORTRAN90 subroutine performs exactly the same task 
+as the corresponding C function.  The links below go to the C function 
+descriptions, which serve as general descriptions for both.  A button, 
+under <strong>Non-C API(s)</strong> at the end of the C function description,
+opens an external browser window displaying the FORTRAN90-specific 
+information.  You will probably want to adjust the size and location of 
+this external window so that both browser windows are visible and to 
+facilitate moving easily between them.</i>
+</font>
+
+<table border=0>
+<tr><td valign=top>
+<ul>
+    <li><a href="#Reference-Create">h5rcreate_f</a>
+    <li><a href="#Reference-Dereference">h5rdereference_f</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Reference-GetRegion">h5rget_region_region_f</a>
+    <li><a href="#Reference-GetObjectType">h5rget_object_type_obj_f</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+
+</ul>
+</td></tr>
+</table>
+
 
 <p>
 
@@ -113,6 +148,13 @@ to specific objects and data regions in an HDF5 file.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5r_FORTRAN.html#h5rcreate_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -149,6 +191,13 @@ to specific objects and data regions in an HDF5 file.
 <dt><strong>Returns:</strong>
     <dd>Returns valid identifier if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5r_FORTRAN.html#h5rdereference_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -186,6 +235,13 @@ to specific objects and data regions in an HDF5 file.
 <dt><strong>Returns:</strong>
     <dd>Returns a valid identifier if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5r_FORTRAN.html#h5rget_region_region_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -214,6 +270,13 @@ to specific objects and data regions in an HDF5 file.
 <dt><strong>Returns:</strong>
     <dd>Returns an object type as defined in <code>H5Gpublic.h</code>;
         otherwise returns <code>H5G_UNKNOWN</code>.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5r_FORTRAN.html#h5rget_object_type_obj_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -257,7 +320,9 @@ H5R&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
 
 <br>
-Last modified:  30 October 1998
+Last modified:  13 July 2000
+<br>
+Describes HDF5 Version 1.3 (Unrelased development version. Dynamic.)
 
 </body>
 </html>
