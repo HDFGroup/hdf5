@@ -27,6 +27,7 @@
 ./bin/versinc
 ./config/BlankForm
 ./config/alpha-dec
+./config/alpha-dec-osf4.0
 ./config/commence.in
 ./config/conclude.in
 ./config/depend.in

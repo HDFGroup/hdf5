@@ -177,10 +177,8 @@ main (void)
     /* Tenth dataset */
 
     /* Eleventh dataset */
-#if 0
     s4_t		*s11 = NULL;
     int			ndims;
-#endif
 
     /* Other variables */
     unsigned int	i, j;
@@ -679,10 +677,7 @@ main (void)
      * Step 11: Write an array into the middle third of the dataset
      * initializeing only members `b' and `d' to -1.
      */
-#if 0
-    printf ("\
-STEP 11: Write an array back to the middle third of the dataset to\n\
-         initialize the `b' and `d' members to -1.\n");
+    printf("%-70s", "Testing hyperslab part initialized write");
     fflush (stdout);
     
     /* Create the memory array and initialize all fields to zero */
@@ -700,41 +695,55 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
     }
     
     /* Write to disk */
-    status = H5Dwrite (dataset, s4_tid, s8_m_sid, s8_f_sid, PRESERVE, s11);
-    assert (status>=0);
+    if (H5Dwrite (dataset, s4_tid, s8_m_sid, s8_f_sid, PRESERVE, s11)<0) {
+	goto error;
+    }
     free (s11);
     s11=NULL;
 
     /* Read the whole thing */
-    status = H5Dread (dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1);
-    assert (status>=0);
+    if (H5Dread (dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1)<0) {
+	goto error;
+    }
 
     /* Compare */
     for (i=0; i<NX; i++) {
 	for (j=0; j<NY; j++) {
 	    s1_t *ps1 = s1 + i*NY + j;
 	    
-	    assert (ps1->a == 8*(i*NY+j)+0);
-	    assert (ps1->c[0] == 8*(i*NY+j)+2);
-	    assert (ps1->c[1] == 8*(i*NY+j)+3);
-	    assert (ps1->c[2] == 8*(i*NY+j)+4);
-	    assert (ps1->c[3] == 8*(i*NY+j)+5);
-	    assert (ps1->e == 8*(i*NY+j)+7);
+	    if (ps1->a != 8*(i*NY+j)+0 ||
+		ps1->c[0] != 8*(i*NY+j)+2 ||
+		ps1->c[1] != 8*(i*NY+j)+3 ||
+		ps1->c[2] != 8*(i*NY+j)+4 ||
+		ps1->c[3] != 8*(i*NY+j)+5 ||
+		ps1->e != 8*(i*NY+j)+7) {
+		puts("*FAILED*");
+		puts("   Write clobbered values");
+		goto error;
+	    }
+	    
 	    if ((hssize_t)i>=f_offset[0] &&
 		(hsize_t)i<f_offset[0]+h_size[0] &&
 		(hssize_t)j>=f_offset[1] &&
 		(hsize_t)j<f_offset[1]+h_size[1]) {
-		assert (ps1->b == (unsigned)(-1));
-		assert (ps1->d == (unsigned)(-1));
+		if (ps1->b != (unsigned)(-1) ||
+		    ps1->d != (unsigned)(-1)) {
+		    puts("*FAILED*");
+		    puts("   Wrong values written or read");
+		    goto error;
+		}
 	    } else {
-		assert (ps1->b == 8*(i*NY+j)+1);
-		assert (ps1->d == 8*(i*NY+j)+6);
+		if (ps1->b != 8*(i*NY+j)+1 ||
+		    ps1->d != 8*(i*NY+j)+6) {
+		    puts("*FAILED*");
+		    puts("   Write clobbered values");
+		    goto error;
+		}
 	    }
 	}
     }
-#endif
-
-
+    free(s11);
+    puts(" PASSED");
 
     
     /*
