@@ -289,6 +289,16 @@ echo yes
 CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
 ])
 
+AC_MSG_CHECKING(if $CXX supports bool types)
+AC_TRY_RUN([
+int main(void) { bool flag; return 0; }
+], [
+echo yes
+], [
+echo no
+CXXFLAGS="${CXXFLAGS} -DBOOL_NOTDEFINED"
+])
+
 dnl ----------------------------------------------------------------------
 dnl Checks for header files.
 dnl
