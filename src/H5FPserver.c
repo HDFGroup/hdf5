@@ -102,7 +102,7 @@ typedef struct {
 
 /*
  * This marks the point at which we want to dump all of the metadata
- * write to a process so that that process can write them to the file.
+ * to a process so that that process can write them to the file.
  */
 #define H5FP_MDATA_CACHE_HIGHWATER_MARK     1024
 
