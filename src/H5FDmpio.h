@@ -61,6 +61,7 @@ __DLL__ herr_t H5FD_mpio_setup(H5FD_t *_file, MPI_Datatype btype, MPI_Datatype f
 		       haddr_t disp, hbool_t use_types);
 __DLL__ herr_t H5FD_mpio_wait_for_left_neighbor(H5FD_t *file);
 __DLL__ herr_t H5FD_mpio_signal_right_neighbor(H5FD_t *file);
+__DLL__ herr_t H5FD_mpio_closing(H5FD_t *file);
 #ifdef __cplusplus
 }
 #endif
