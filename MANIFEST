@@ -40,6 +40,7 @@
 ./html/Dataspaces.html
 ./html/Datatypes.html
 ./html/ExternalFiles.html
+./html/Files.html
 ./html/Groups.html
 ./html/H5.api.html
 ./html/H5.api_map.html
@@ -59,6 +60,9 @@
 ./html/group_p2.obj
 ./html/group_p3.gif
 ./html/group_p3.obj
+./html/ph5design.html
+./html/ph5example.c
+./html/ph5implement.txt
 ./html/heap.txt
 ./html/index.html
 ./html/move.html
@@ -170,6 +174,10 @@
 ./test/tmeta.c
 ./test/tohdr.c
 ./test/tstab.c
+./testpar/Makefile.irix64
+./testpar/README
+./testpar/phdf5sup.c
+./testpar/testphdf5.c
 ./tgif/APIGrammar.obj
 ./tgif/FileGrammar.obj
 ./tgif/IOPipe.obj
