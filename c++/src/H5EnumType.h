@@ -59,6 +59,9 @@ class H5_DLLCPP EnumType : public DataType {
 	int getMemberIndex(const char* name) const;
 	int getMemberIndex(const string& name) const;
 
+	// Returns the number of members in this enumeration datatype.
+	int getNmembers () const;
+
 	// Returns the value of an enumeration datatype member
 	void getMemberValue( int memb_no, void *value ) const;
 
