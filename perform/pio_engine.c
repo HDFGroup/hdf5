@@ -123,7 +123,7 @@ static char  *pio_create_filename(iotype iot, const char *base_name,
 static herr_t do_write(file_descr fd, iotype iot, long ndsets,
                        long nelmts, hid_t h5dset_space_id, char *buffer);
 static herr_t do_fopen(iotype iot, char *fname, file_descr fd /*out*/,
-    int flags, MPI_Comm comm);
+                       int flags, MPI_Comm comm);
 static herr_t do_fclose(iotype iot, file_descr fd);
 
 herr_t
@@ -138,20 +138,15 @@ do_pio(parameters param)
     iotype          iot;
 
     char            fname[FILENAME_MAX];
-    int    	    maxprocs, nfiles, nf;
-    long   	    ndsets;
-    long   	    nelmts;
-    int    	    niters;
-    long   	    nelmts_toread, nelmts_read;
-    off_t           next_offset;            /*offset of next I/O            */
+    int             maxprocs, nfiles, nf;
+    long            ndsets, nelmts;
+    int             niters;
     int             color;                  /*for communicator creation     */
     char           *buffer = NULL;          /*data buffer pointer           */
 
     /* HDF5 variables */
     herr_t          hrc;                    /*HDF5 return code              */
     hsize_t         h5dims[1];              /*dataset dim sizes             */
-    hsize_t         h5block[1], h5stride[1], h5count[1];
-    hssize_t        h5start[1];
     hid_t           h5dset_space_id = -1;   /*dataset space ID              */
     hid_t           h5mem_space_id = -1;    /*memory dataspace ID           */
 
@@ -505,7 +500,7 @@ do_write(file_descr fd, iotype iot, long ndsets,
         while (nelmts_written < nelmts){
             nelmts_towrite = nelmts - nelmts_written;
 
-            if (nelmts - nelmts_written >= NELMTS_IN_BUFFER) {
+            if (nelmts - nelmts_written >= (int)NELMTS_IN_BUFFER) {
                 nelmts_towrite = NELMTS_IN_BUFFER;
             } else {
                 /* last write of a partial buffer */

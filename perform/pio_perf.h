@@ -31,4 +31,6 @@ typedef struct parameters_ {
 #define FAIL        -1
 #endif  /* !FAIL */
 
+extern herr_t do_pio(parameters param);
+
 #endif  /* PIO_PERF_H__ */
