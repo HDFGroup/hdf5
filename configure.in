@@ -146,9 +146,9 @@ AC_ARG_ENABLE(fortran,
 if test "X$HDF_FORTRAN" = "Xyes"; then
    echo "yes"
    if test -z "$config_dirs"; then
-      config_dirs=fortran
+      config_dirs="fortran"
    else
-      config_dirs=${config_dirs} fortran
+      config_dirs="${config_dirs} fortran"
    fi
 else
    echo "no"
@@ -165,9 +165,9 @@ AC_ARG_ENABLE(cxx,
 if test "X$HDF_CXX" = "Xyes"; then
    echo "yes"
    if test -z "$config_dirs"; then
-      config_dirs=c++
+      config_dirs="c++"
    else
-      config_dirs=${config_dirs} c++
+      config_dirs="${config_dirs} c++"
    fi
 else
    echo "no"
