@@ -4960,15 +4960,15 @@ static void gent_fcontents(void)
  */
 
  /* soft link to "dset" */
- ret=H5Glink (fid, H5G_LINK_SOFT, "dset", "slink to dset");
+ ret=H5Glink (fid, H5G_LINK_SOFT, "dset", "softlink");
  assert(ret>=0);
 
  /* hard link to "dset" */
- ret=H5Glink (fid, H5G_LINK_HARD, "dset", "hlink to dset");
+ ret=H5Glink (fid, H5G_LINK_HARD, "dset", "dset1");
  assert(ret>=0);
 
  /* soft link to itself */
- ret=H5Glink (fid, H5G_LINK_SOFT, "link", "link");
+ ret=H5Glink (fid, H5G_LINK_SOFT, "mylink", "mylink");
  assert(ret>=0);
 
 /*-------------------------------------------------------------------------
@@ -5021,6 +5021,7 @@ static void gent_fcontents(void)
  ret=H5Fclose(fid);
  assert(ret>=0);
 }
+
 
 
 
