@@ -50,14 +50,12 @@
 
 
 
-<HTML>
-<HEAD>
-<TITLE>Proposed HDF5 Palette Specification</TITLE>
-<BODY>
 <H1>HDF5 Palette Specification </H1>
-<P>This page is a work in progress page. Please send comments to <A 
+
+<P>This section is a work in progress page. Please send comments to <A 
 href="mailto:davet@ncsa.uiuc.edu">davet@ncsa.uiuc.edu</A>. Anything and 
 everything on this page may be changed. 
+
 <P><B>Questions regarding this specification:</B> 
 <UL>
   <LI>Currently, the range index is referred to as an attribute of the palette. 
@@ -224,7 +222,9 @@ attributes.
 
 <HR>
 
-<H1>Specifying a Palette for a Dataset </H1>A dataset within an HDF5 file may 
+<H2>Specifying a Palette for a Dataset </H2>
+
+A dataset within an HDF5 file may 
 specify an array of palettes to be viewed with. The dataset will have an 
 attribute field called "<B>PALETTE</B>" which contains an array of object 
 reference pointers which refer to palettes in the file. The first palette in 

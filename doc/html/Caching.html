@@ -49,7 +49,9 @@
 <hr>
 
 
-    <h1>Meta Data Caching</h1>
+    <h1>Data Caching</h1>
+
+    <h2>1. Meta Data Caching</h2>
 
     <p>The HDF5 library caches two types of data: meta data and raw
       data.  The meta data cache holds file objects like the file
@@ -61,7 +63,7 @@
       are handled by preempting the older object in favor of the new
       one.
 
-    <h1>Raw Data Chunk Caching</h1>
+    <h2>2. Raw Data Chunk Caching</h2>
 
     <p>Raw data chunks are cached because I/O requests at the
       application level typically don't map well to chunks at the
@@ -94,7 +96,7 @@
       a diagonal accross the dataset where each request overlaps the
       previous request would benefit from a small <em>w0</em>.
 
-    <h1>The API</h1>
+    <h2>3. Data Caching Operations</h2>
 
     <p>The cache parameters for both caches are part of a file access
       property list and are set and queried with this pair of
