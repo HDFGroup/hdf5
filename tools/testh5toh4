@@ -39,6 +39,7 @@ CONVERT()
 
     "-m")
 
+	multirun=passed
 	shift
 	for i in $@
 	do
@@ -61,10 +62,13 @@ CONVERT()
     		tr '\n' ' ' <$expect |tr -s ' \t' |fold >$expect-norm
 
     		if $cmp $expect-norm $actual-norm; then
-			echo " PASSED"
-    		else
-			echo "*FAILED*"
-			echo "    Actual result (*.tmp) differs from expected result (*.dmp)"
+			set unrelated
+		else
+			if test "passed" = "$multirun"; then
+				echo "*FAILED*"
+				echo "    Actual result (*.tmp) differs from expected result (*.dmp)"
+				multirun=failed
+			fi
 			nerrors="`expr $nerrors + 1`"
 			test yes = "$verbose" && $diff $expect $actual |sed 's/^/    /'
     		fi
@@ -75,6 +79,9 @@ CONVERT()
 			rm -f $actual
     		fi
 	done
+	if test "passed" = "$multirun"; then
+		echo " PASSED"
+	fi
 
 	;;
 
