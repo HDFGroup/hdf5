@@ -285,7 +285,7 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Awrite</code>(<em>hid_t</em> <code>attr_id</code>,
         <em>hid_t</em> <code>mem_type_id</code>,
-        <em>void *</em><code>buf</code>
+        <em>const void *</em><code>buf</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Writes data to an attribute.
@@ -308,7 +308,7 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
             <dd>IN: Identifier of an attribute to write.
         <dt><em>hid_t</em> <code>mem_type_id</code>
             <dd>IN: Identifier of the attribute datatype (in memory).
-        <dt><em>void *</em><code>buf</code>
+        <dt><em>const void *</em><code>buf</code>
             <dd>IN: Data to be written.
     </dl>
 <dt><strong>Returns:</strong>
