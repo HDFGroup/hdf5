@@ -30,6 +30,7 @@ const char *FILENAME[] = {
     "filespace",
     "slashes",
     "resurrect",
+    "unlink_chunked",
     NULL
 };
 
@@ -1852,6 +1853,7 @@ test_resurrect_dataset(void)
     /* Close things */
     if(H5Dclose(d)<0) TEST_ERROR;
     if(H5Fclose(f)<0) TEST_ERROR;
+    if(H5Pclose(fapl)<0) TEST_ERROR;
 
     PASSED();
     return 0;
@@ -1861,9 +1863,101 @@ error:
 	H5Sclose(s);
 	H5Dclose(d);
 	H5Fclose(f);
+	H5Pclose(fapl);
     } H5E_END_TRY;
     return 1;
 } /* end test_resurrect_dataset() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_unlink_chunked_dataset
+ *
+ * Purpose:     Tests deleting a chunked dataset 
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, September 27, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_unlink_chunked_dataset(void)
+{
+    hid_t fapl_id=-1;
+    hid_t file_id=-1;
+    hid_t dset_id=-1;
+    hid_t space_id=-1;
+    hid_t dcpl_id=-1;
+    hsize_t dims[FILESPACE_NDIMS]={FILESPACE_DIM0,FILESPACE_DIM1,FILESPACE_DIM2};
+    hsize_t max_dims[FILESPACE_NDIMS]={H5S_UNLIMITED,H5S_UNLIMITED,H5S_UNLIMITED};
+    hsize_t chunk_dims[FILESPACE_NDIMS]={FILESPACE_CHUNK0,FILESPACE_CHUNK1,FILESPACE_CHUNK2};
+    char filename[1024];
+
+    TESTING("Unlinking chunked dataset");
+
+    /* Create file */
+    fapl_id = h5_fileaccess();
+    h5_fixname(FILENAME[7], fapl_id, filename, sizeof filename);
+
+    /* Create the file */
+    if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id))<0) TEST_ERROR;
+
+    /* Create the dataspace */
+    if((space_id=H5Screate_simple(FILESPACE_NDIMS,dims,max_dims))<0) TEST_ERROR;
+
+    /* Create the dataset creation filter */
+    if((dcpl_id=H5Pcreate(H5P_DATASET_CREATE))<0) TEST_ERROR;
+
+    /* Set to chunked storage */
+    if(H5Pset_chunk(dcpl_id,FILESPACE_NDIMS,chunk_dims)<0) TEST_ERROR;
+
+    /* Set to early space allocation */
+    if(H5Pset_alloc_time(dcpl_id,H5D_ALLOC_TIME_EARLY)<0) TEST_ERROR;
+
+    /* Create the dataset */
+    if((dset_id = H5Dcreate(file_id,DATASETNAME,H5T_NATIVE_INT,space_id,dcpl_id))<0) TEST_ERROR;
+
+    /* Close the dataspace */
+    if(H5Sclose(space_id)<0) TEST_ERROR;
+
+    /* Close the dataset creation property list */
+    if(H5Pclose(dcpl_id)<0) TEST_ERROR;
+
+    /* Close the dataset */
+    if(H5Dclose(dset_id)<0) TEST_ERROR;
+
+    /* Close the file */
+    if(H5Fclose(file_id)<0) TEST_ERROR;
+
+    /* Re-open the file */
+    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT))<0) TEST_ERROR;
+
+    /* Delete the dataset */
+    if(H5Gunlink(file_id, DATASETNAME)<0) TEST_ERROR;
+
+    /* Close the file */
+    if(H5Fclose(file_id)<0) TEST_ERROR;
+
+    /* Close the file access property list */
+    if(H5Pclose(fapl_id)<0) TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Pclose(dcpl_id);
+	H5Sclose(space_id);
+	H5Dclose(dset_id);
+	H5Fclose(file_id);
+	H5Pclose(fapl_id);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_unlink_chunked_dataset() */
 
 
 /*-------------------------------------------------------------------------
@@ -1942,6 +2036,9 @@ main(void)
     /* Test "resurrecting" objects */
     nerrors += test_resurrect_dataset();
  
+    /* Test unlinking chunked datasets */
+    nerrors += test_unlink_chunked_dataset();
+
     /* Close */
     if (H5Fclose(file)<0) TEST_ERROR;
     if (nerrors) {
