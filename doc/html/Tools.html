@@ -76,13 +76,17 @@ These tools enable the user to examine HDF5 files interactively.
     <dd><code>h5dump
         [-h]
         [-bb]
-        [-header] 
+        [-header]
+        [-v] 
         [-V]
+        [-xml]
         [-a </code><em>names</em><code>]
         [-d </code><em>names</em><code>]
         [-g </code><em>names</em><code>]
         [-l </code><em>names</em><code>]
-        [-t </code><em>names</em><code>] </code>
+        [-t </code><em>names</em><code>] 
+        [-w </code><em>number</em><code>]</code>
+        
         <em>file</em>
 <dt><strong>Purpose:</strong>
     <dd>Displays HDF5 file contents.
@@ -136,8 +140,12 @@ These tools enable the user to examine HDF5 files interactively.
                 <em>(This option is not yet implemented.)</em>
         <dt><code>-header</code>
             <dd>Displays header information only; no data is displayed.
+        <dt><code>-v</code>
+            <dd>Displays the object ids.
         <dt><code>-V</code>
             <dd>Displays version information and exits.
+        <dt><code>-xml</code>
+            <dd>Displays the output in XML format.
         <dt><code>-a</code> <em>names</em>
             <dd>Displays the specified attribute(s).
         <dt><code>-d</code> <em>names</em>
@@ -148,6 +156,8 @@ These tools enable the user to examine HDF5 files interactively.
             <dd>Displays the values of the specified soft link(s).
         <dt><code>-t</code> <em>names</em>
             <dd>Displays the specified named data type(s).
+        <dt><code>-w</code> <em>number</em>
+            <dd>Displays the information with the specified number of columns.
         <dt><em>file</em>
             <dd>The file to be examined.
     </dl>
@@ -183,6 +193,7 @@ These tools enable the user to examine HDF5 files interactively.
            <li>compound type 
            <dt>- named, unnamed and transient compound type
            <dt>- integer, floating or string type member
+           <li>opaque types
            <li>reference type
            <dt>- object references 
            <dt>- data regions
