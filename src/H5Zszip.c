@@ -43,11 +43,7 @@ static size_t H5Z_filter_szip (unsigned flags, size_t cd_nelmts,
 H5Z_class_t H5Z_SZIP[1] = {{
     H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
     H5Z_FILTER_SZIP,		/* Filter id number		*/
-#ifdef H5_SZIP_CAN_ENCODE
-    1,              /* Encoder present */
-#else
-    0,              /* Encoder disabled */
-#endif
+    1,              /* Assume encoder present: check before registering */
     1,                  /* decoder_present flag (set to true) */
     "szip",			    /* Filter name for debugging	*/
     H5Z_can_apply_szip,		/* The "can apply" callback     */

@@ -26,10 +26,6 @@
 #include "hdf5.h"
 #include "H5private.h"
 
-#ifdef H5_HAVE_FILTER_SZIP
-#include "szlib.h"
-#endif
-
 #define FILE1 "tgroup.h5"
 #define FILE2 "tdset.h5"
 #define FILE3 "tattr.h5"
@@ -4495,10 +4491,10 @@ static void gent_filters(void)
  hid_t    dcpl; /* dataset creation property list */
  hid_t    sid;  /* dataspace ID */
  hid_t    tid;  /* datatype ID */
-#if defined (H5_HAVE_FILTER_SZIP)
+#ifdef H5_HAVE_FILTER_SZIP
  unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
  unsigned szip_pixels_per_block=4;
-#endif
+#endif /* H5_HAVE_FILTER_SZIP */
  hsize_t  dims1[RANK]      = {DIM1,DIM2};
  hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};
  int      buf1[DIM1][DIM2];
@@ -4568,7 +4564,8 @@ static void gent_filters(void)
  * SZIP
  *-------------------------------------------------------------------------
  */
-#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
+#ifdef H5_HAVE_FILTER_SZIP
+ if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
  /* remove the filters from the dcpl */
  ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
  assert(ret>=0);
@@ -4579,7 +4576,8 @@ static void gent_filters(void)
 
  ret=make_dset(fid,"szip",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
-#endif
+ }
+#endif /* H5_HAVE_FILTER_SZIP */
 
 /*-------------------------------------------------------------------------
  * GZIP
@@ -4648,12 +4646,14 @@ static void gent_filters(void)
  assert(ret>=0);
 #endif
 
-#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
+#ifdef H5_HAVE_FILTER_SZIP
+ if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
  szip_options_mask=H5_SZIP_CHIP_OPTION_MASK | H5_SZIP_EC_OPTION_MASK;
  /* set szip data */
  ret=H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block);
  assert(ret>=0);
-#endif
+ }
+#endif /* H5_HAVE_FILTER_SZIP */
 
 #if defined (H5_HAVE_FILTER_DEFLATE)
  /* set deflate data */
