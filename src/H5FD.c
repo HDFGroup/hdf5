@@ -793,7 +793,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     file->accum_loc = HADDR_UNDEF;
     
     /* Retrieve the VFL driver feature flags */
-	if (H5FD_query(file, &(file->feature_flags))<0)
+    if (H5FD_query(file, &(file->feature_flags))<0)
         HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to query file driver");
 
     FUNC_LEAVE(file);
@@ -1017,11 +1017,12 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
  *-------------------------------------------------------------------------
  */
 int
-H5FDquery(const H5FD_t *f, unsigned long *flags)
+H5FDquery(const H5FD_t *f, unsigned long *flags/*out*/)
 {
     intn	ret_value;
 
     FUNC_ENTER(H5FDquery, FAIL);
+    H5TRACE2("Is","xx",f,flags);
     
     assert(f);
     assert(flags);
@@ -1029,7 +1030,7 @@ H5FDquery(const H5FD_t *f, unsigned long *flags)
     ret_value = H5FD_query(f, flags);
 
     FUNC_LEAVE(ret_value);
-} /* end H5FDquery() */
+}
 
 
 /*-------------------------------------------------------------------------
@@ -1049,7 +1050,7 @@ H5FDquery(const H5FD_t *f, unsigned long *flags)
  *-------------------------------------------------------------------------
  */
 int
-H5FD_query(const H5FD_t *f, unsigned long *flags)
+H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/)
 {
     intn	ret_value=0;
 
@@ -1065,7 +1066,7 @@ H5FD_query(const H5FD_t *f, unsigned long *flags)
         *flags=0;
 
     FUNC_LEAVE(ret_value);
-} /* end H5FD_query() */
+}
 
 
 /*-------------------------------------------------------------------------
