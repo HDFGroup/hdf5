@@ -166,8 +166,19 @@ The hdf5testDBG.bat file tests the debug version of the library and
 hdf5testREL.bat tests the release version of the library.
 
 The hdf5testdllDBG.bat file tests the debug version of the dll and 
-hdf5testdllREL.bat tests the release version of the dll.  The dll should be
-placed in the Windows\system directory before the dll tests are run.
+hdf5testdllREL.bat tests the release version of the dll.  The debug dll or
+the release dll should be placed in the Windows\system directory before the dll
+tests are run.  Both the release and the debug dlls have the same name so 
+only one may be used at a time.
+
+In the hdf5\tools directory, there are 4 batch files that can be used to test
+h5dump.  The file dumptestDBG.bat tests the debug version of the dump utility
+and the dumptestREL.bat tests the release version.  The dumptestDLLDBG.bat
+tests the debug dll version of the dumper and the dumptestDLLREL.bat tests
+the release dll version.  Some differences are expected in the output of these
+4 tests (dimensions of the dataspace).
+
+
 
 NOTE: The debug dll tests on the Alpha platform currently are not completely
       working.  The release dll is fine though.
