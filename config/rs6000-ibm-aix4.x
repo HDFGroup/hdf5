@@ -6,5 +6,8 @@
 #
 # See BlankForm in this directory for details.
 
+# CFLAGS must be set else configure set it to -g
+CFLAGS="$CFLAGS"
+
 # Cross compiling defaults
 ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
