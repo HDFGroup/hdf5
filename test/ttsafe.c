@@ -63,8 +63,6 @@ int num_errs = 0;
 int Verbosity;
 
 /* ANY new test needs to have a prototype in tproto.h */
-TestStruct Test[MAXNUMOFTESTS];
-int Index = 0;
 
 static void usage(void);
 

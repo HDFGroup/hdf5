@@ -51,9 +51,6 @@ int                     Verbosity;
 /* ANY new test needs to have a prototype in tproto.h */
 #include "testhdf5.h"
 
-struct TestStruct Test[MAXNUMOFTESTS];
-int              Index = 0;
-
 static void             usage(void);
 
 static void 

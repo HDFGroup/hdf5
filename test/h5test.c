@@ -89,6 +89,14 @@ MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
  */
 static const char *multi_letters = "msbrglo";
 
+/*
+ * Global variables used by InitTest().
+ * The code should be revised so that these do not need to be
+ * global.
+ */
+struct TestStruct Test[MAXNUMOFTESTS];
+int    Index = 0;
+
 #ifdef H5_WANT_H5_V1_6_COMPAT
 static herr_t h5_errors(void *client_data);
 #else /* H5_WANT_H5_V1_6_COMPAT */
