@@ -105,7 +105,7 @@ extern int get_table_idx(table_t *table, unsigned long *);
 extern int get_tableflag(table_t*, int);
 extern int set_tableflag(table_t*, int);
 extern char* get_objectname(table_t*, int);
-   
+extern hid_t H5ToolsFopen(char* fname, char* drivername);
 
 /*-------------------------------------------------------------------------
  * Function:	h5dump_str_close
@@ -2230,10 +2230,58 @@ get_objectname(table_t* table, int idx)
   return(strdup(table->objs[idx].objname));
 }
 
+/*-------------------------------------------------------------------------
+ * Function:   opens a file using the list of drivers
+ *
+ * Purpose:    
+ *
+ * Return:      Success:       a file id for the opened file
+ *
+ *              Failure:       -1;
+ *
+ *-----------------------------------------------------------------------*/
 
+hid_t H5ToolsFopen(char* fname, char* drivername){
 
+	typedef struct driver_t {
+		const char	*name;
+		hid_t		fapl;
+	} driver_t;
 
+	hid_t fid, fapl = H5P_DEFAULT;
+	int ndrivers = 0, drivernum;
+	driver_t driver[NDRIVERS];
 
+	/*taken from h5ls*/
+	driver[ndrivers].name = "sec2";
+    driver[ndrivers].fapl = H5P_DEFAULT;
+    ndrivers++;
+#if defined VERSION13   
+    driver[ndrivers].name = "family";
+    driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_family(fapl, 0, H5P_DEFAULT);
+    ndrivers++;
 
+    driver[ndrivers].name = "split";
+    driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
+    ndrivers++;
+
+    driver[ndrivers].name = "multi";
+    driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE);
+    ndrivers++;
+#endif
+	for (drivernum = 0; drivernum<ndrivers;drivernum++){
+		H5E_BEGIN_TRY {
+		    fid = H5Fopen(fname, H5F_ACC_RDONLY, driver[drivernum].fapl);
+		} H5E_END_TRY;
+		if (fid >= 0) break;
+	}
+	if (drivername){
+		memcpy(drivername,driver[drivernum].name,strlen(driver[drivernum].name));
+	}
+	return (fid);
+}
 
 

@@ -26,7 +26,7 @@
 #include <H5Fpublic.h>
 #endif
 
-#define NDRIVERS	10
+
 /*
  * If defined then include the file name as part of the object name when
  * printing full object names. Otherwise leave the file name off.
@@ -1905,24 +1905,19 @@ get_width(void)
 int
 main (int argc, char *argv[])
 {
-    hid_t	file=-1, root=-1, fapl=-1;
+    hid_t	file=-1, root=-1;
     char	*fname=NULL, *oname=NULL, *x;
     const char	*progname;
     const char	*s = NULL;
     char	*rest, *container=NULL;
-    int		argno, dno;
+    int		argno;
     H5G_stat_t	sb;
     iter_t	iter;
     static char	root_name[] = "/";
-
-    int		ndrivers=0;
-
-    struct {
-	const char	*name;
-	hid_t		fapl;
-    } driver[NDRIVERS];
+	char drivername[50];
 
 
+	memset(drivername, '\0',50);
     /* Build display table */
     DISPATCH(H5G_DATASET, "Dataset", H5Dopen, H5Dclose,
 	     dataset_list1, dataset_list2);
@@ -1960,7 +1955,7 @@ main (int argc, char *argv[])
 	} else if (!strcmp(argv[argno], "--full")) {
 	    fullname_g = TRUE;
 	} else if (!strcmp(argv[argno], "--group")) {
-	    grp_literal_g = TRUE;
+	    grp_literal_g = TRUE; 
 	} else if (!strcmp(argv[argno], "--label")) {
 	    label_g = TRUE;
 	} else if (!strcmp(argv[argno], "--recursive")) {
@@ -2077,31 +2072,7 @@ main (int argc, char *argv[])
     /* Turn off HDF5's automatic error printing unless you're debugging h5ls */
     if (!show_errors_g) H5Eset_auto(NULL, NULL);
 
-    /*
-     * Build a list of file access property lists which we should try when
-     * opening the file.  Eventually we'd like some way for the user to
-     * augment/replace this list interactively.
-     */
 
-    driver[ndrivers].name = "sec2";
-    driver[ndrivers].fapl = H5P_DEFAULT;
-    ndrivers++;
-#if defined VERSION13   
-    driver[ndrivers].name = "family";
-    driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_family(fapl, 0, H5P_DEFAULT);
-    ndrivers++;
-
-    driver[ndrivers].name = "split";
-    driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
-    ndrivers++;
-
-    driver[ndrivers].name = "multi";
-    driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE);
-    ndrivers++;
-#endif
     /*
      * Each remaining argument is an hdf5 file followed by an optional slash
      * and object name.
@@ -2122,16 +2093,13 @@ main (int argc, char *argv[])
 	file = -1;
 
 	while (fname && *fname) {
-	    for (dno=0; dno<ndrivers; dno++) {
-		H5E_BEGIN_TRY {
-		    file = H5Fopen(fname, H5F_ACC_RDONLY, driver[dno].fapl);
-		} H5E_END_TRY;
-		if (file>=0) break;
-	    }
+
+		file = H5ToolsFopen(fname, drivername);
+
 	    if (file>=0) {
 		if (verbose_g) {
 		    printf("Opened \"%s\" with %s driver.\n",
-			   fname, driver[dno].name);
+			   fname, drivername);
 		}
 		break; /*success*/
 	    }
