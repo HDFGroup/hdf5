@@ -46,12 +46,12 @@ static intn interface_initialize_g = FALSE;
 
 /* ID to type mapping */
 static const H5O_class_t *const message_type_g[] = {
-   H5O_NULL,		/*0x0000 Null 					*/
-   H5O_SIM_DIM,		/*0x0001 Simple dimensionality			*/
+   H5O_NULL,    /*0x0000 Null 					*/
+   H5O_SIM_DIM, /*0x0001 Simple dimensionality			*/
    NULL,		/*0x0002 Data space (fiber bundle?)		*/
-   H5O_SIM_DTYPE,	/*0x0003 Simple data type			*/
+   H5O_SIM_DTYPE, /*0x0003 Simple data type			*/
    NULL,		/*0x0004 Compound data type			*/
-   NULL,		/*0x0005 Data storage -- standard object	*/
+   H5O_STD_STORE, /*0x0005 Data storage -- standard object	*/
    NULL,		/*0x0006 Data storage -- compact object		*/
    NULL,		/*0x0007 Data storage -- external object	*/
    NULL,		/*0x0008 Data storage -- indexed object		*/

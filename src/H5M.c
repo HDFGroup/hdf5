@@ -113,9 +113,9 @@ static meta_func_t meta_func_arr[]={
         H5P_release             /* Dimensionality Release */
     },
     {   /* Dataset object meta-functions (defined in H5D.c) */
-        H5_DATASPACE,           /* Dataset Type ID */
+        H5_DATASET,             /* Dataset Type ID */
         H5D_create,             /* Dataset Create */
-        NULL,                   /* Dataset Access */
+        H5D_access,             /* Dataset Access */
         NULL,                   /* Dataset Copy */
         NULL,                   /* Dataset FindName */
         NULL,                   /* Dataset NameLen */

@@ -41,7 +41,8 @@ typedef struct H5P_sdim_t {
 /* Private functions */
 hatom_t H5P_create(hatom_t owner_id, hobjtype_t type, const char *name);
 uint32 H5P_get_lrank(H5P_sdim_t *sdim);
-hbool_t H5P_is_simple(H5P_sdim_t *sdim);
+hbool_t H5P_is_simple(H5P_dim_t *sdim);
+uintn H5P_nelem(H5P_dim_t *space);
 herr_t H5P_release(hatom_t oid);
 
 #endif

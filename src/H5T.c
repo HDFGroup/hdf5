@@ -260,6 +260,7 @@ hbool_t H5T_is_atomic(h5_datatype_t *type)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
 
+   assert (type);
     /* Check the base type of the datatype */
     if(H5T_COMPOUND==type->dt.base)
         ret_value=BFALSE;
@@ -301,6 +302,8 @@ hbool_t H5Tis_atomic(hatom_t tid)
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
+    if(H5Aatom_group(tid)!=H5_DATATYPE)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
 
     /* Go get the object */
     if((dt=H5Aatom_object(tid))==NULL)
@@ -519,6 +522,92 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5T_size
+ PURPOSE
+    Determine the size of a datatype (internal)
+ USAGE
+    uintn H5Tsize(dt, mem_flag)
+        h5_datatype_t *dt;      IN: Pointer to Datatype object to query
+        hbool_t mem_flag;       IN: Whether the memory or disk size is desired
+ RETURNS
+    The size of the datatype on success or UFAIL on failure.
+ DESCRIPTION
+        Ths function returns the size of the datatype in bytes as it is stored
+    on disk or in memory, depending on the mem_flag.  Setting the mem_flag to
+    BTRUE returns the size in memory, BFALSE returns the size on disk.
+--------------------------------------------------------------------------*/
+uintn H5T_size(h5_datatype_t *dt, hbool_t mem_flag)
+{
+    uintn ret_value = UFAIL;
+
+    FUNC_ENTER(H5T_size, H5T_init_interface, UFAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+
+    assert(dt);
+
+    if(dt->dt.base==H5T_COMPOUND)
+      {
+        intn i;             /* local counting variable */
+
+        /* Check the base type of the datatype */
+        if(H5T_COMPOUND!=dt->dt.base)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
+        
+        /* Check if the compound information has been initialized */
+        if(NULL==dt->ci)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, FAIL);
+
+        /* Grab the number of fields */
+        for(i=0; i<=dt->ci->n; i++)
+            ret_value+=H5Tsize(dt->ci->flist[i].dt.base, dt->ci->flist[i].dt.len,
+                    dt->ci->flist[i].dt.arch,mem_flag)*H5Pnelem(dt->ci->flist[i].dim_id);
+      } /* end if */
+    else
+      { /* Simple, user-defined datatypes */
+        switch(dt->dt.base)
+          {
+            case H5T_CHAR:
+            case H5T_INT:
+            case H5T_FLOAT:     /* All three of thes types use the length as the number of bytes */
+                ret_value=dt->dt.len;
+                break;
+
+            case H5T_DATE:
+                ret_value=8;    /* Number of characters for ISO 8601 format */
+                break;
+
+            case H5T_TIME:
+                ret_value=6;    /* Number of characters for ISO 8601 format */
+                break;
+
+            case H5T_SPTR:
+                HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, UFAIL);
+                break;
+
+            case H5T_PPTR:
+                HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, UFAIL);
+                break;
+
+            default:
+                HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, UFAIL);
+          } /* end switch */
+      } /* end else */
+
+done:
+  if(ret_value == UFAIL)
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5T_size() */
+
+/*--------------------------------------------------------------------------
+ NAME
     H5Tsize
  PURPOSE
     Determine the size of a datatype
@@ -580,53 +669,7 @@ uintn H5Tsize(hatom_t tid, uint8 len, uint8 arch, hbool_t mem_flag)
         if((dt=H5Aatom_object(tid))==NULL)
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
 
-        if(dt->dt.base==H5T_COMPOUND)
-          {
-            intn i;             /* local counting variable */
-
-            /* Check the base type of the datatype */
-            if(H5T_COMPOUND!=dt->dt.base)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
-            
-            /* Check if the compound information has been initialized */
-            if(NULL==dt->ci)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, FAIL);
-
-            /* Grab the number of fields */
-            for(i=0; i<=dt->ci->n; i++)
-                ret_value+=H5Tsize(dt->ci->flist[i].dt.base, dt->ci->flist[i].dt.len,
-                        dt->ci->flist[i].dt.arch,mem_flag)*H5Pnelem(dt->ci->flist[i].dim_id);
-          } /* end if */
-        else
-          { /* Simple, user-defined datatypes */
-            switch(dt->dt.base)
-              {
-                case H5T_CHAR:
-                case H5T_INT:
-                case H5T_FLOAT:     /* All three of thes types use the length as the number of bytes */
-                    ret_value=dt->dt.len;
-                    break;
-
-                case H5T_DATE:
-                    ret_value=8;    /* Number of characters for ISO 8601 format */
-                    break;
-
-                case H5T_TIME:
-                    ret_value=6;    /* Number of characters for ISO 8601 format */
-                    break;
-
-                case H5T_SPTR:
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, UFAIL);
-                    break;
-
-                case H5T_PPTR:
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, UFAIL);
-                    break;
-
-                default:
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, UFAIL);
-              } /* end switch */
-          } /* end else */
+        ret_value=H5T_size(dt,mem_flag);
       } /* end else */
 
 done:

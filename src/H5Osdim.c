@@ -292,12 +292,17 @@ H5O_sim_dim_cache (H5G_entry_t *ent, const void *mesg)
           } /* end if */
 
         /* Check each dimension */
-        for(u=0; u<sdim->rank; u++)
-            if (ent->cache.sdata.dim[u] != sdim->size[u])
-              {
-               modified = BTRUE;
-               ent->cache.sdata.dim[u] = sdim->size[u];
-              } /* end if */
+        if(ent->cache.sdata.dim==NULL)
+           modified = BTRUE;
+        else
+          {
+            for(u=0; u<sdim->rank; u++)
+                if (ent->cache.sdata.dim[u] != sdim->size[u])
+                  {
+                   modified = BTRUE;
+                   ent->cache.sdata.dim[u] = sdim->size[u];
+                  } /* end if */
+          } /* end else */
       } /* end else */
 
     FUNC_LEAVE (modified);

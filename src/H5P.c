@@ -171,7 +171,7 @@ done:
         This function determines the if a dataspace is "simple". ie. if it
     has orthogonal, evenly spaced dimensions.
 --------------------------------------------------------------------------*/
-hbool_t H5P_is_simple(H5P_sdim_t *sdim)
+hbool_t H5P_is_simple(H5P_dim_t *sdim)
 {
     hbool_t ret_value = BFAIL;
 
@@ -181,11 +181,14 @@ hbool_t H5P_is_simple(H5P_sdim_t *sdim)
     H5ECLEAR;
 
     assert(sdim);
-    ret_value=BTRUE;        /* Currently all dataspaces are simple */
+    if(sdim->type==H5P_TYPE_UNKNOWN)
+      {
+        HGOTO_ERROR (H5E_INTERNAL, H5E_UNINITIALIZED, FAIL);
+      }
+    else 
+        ret_value=sdim->type==H5P_TYPE_SIMPLE ? BTRUE : BFALSE; /* Currently all dataspaces are simple, but check anyway */
 
-#ifdef LATER
 done:
-#endif /* LATER */
   if(ret_value == BFAIL)
     { /* Error condition cleanup */
 
@@ -312,6 +315,58 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5P_nelem
+ PURPOSE
+    Return the number of elements in a dataspace (internal)
+ USAGE
+    uintn H5P_nelem(space)
+        H5P_dim_t *space;            IN: Pointer to the dataspace object to query
+ RETURNS
+    The number of elements in a dataspace on success, UFAIL on failure
+ DESCRIPTION
+        This function determines the number of dataset elements in a 
+    dataspace.  For example, a simple 3-dimensional dataspace with dimensions
+    2, 3 and 4 would have 24 elements.
+    UFAIL is returned on an error, otherwise the number of elements is returned.
+--------------------------------------------------------------------------*/
+uintn H5P_nelem(H5P_dim_t *space)
+{
+    uintn u;                    /* local counting variable */
+    uintn        ret_value = UFAIL;
+
+    FUNC_ENTER(H5P_nelem, H5P_init_interface, UFAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+
+    assert(space);
+
+    /* Check for anything but simple dataspaces for now */
+    if(space->type!=H5P_TYPE_SIMPLE)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
+    
+    /* Check for other form of scalar dataspaces */
+    if(space->s->rank==0)
+        ret_value=1;
+    else
+      {
+        for(ret_value=1, u=0; u<(uintn)space->s->rank; u++)
+            ret_value*=space->s->size[u];
+      } /* end else */
+
+done:
+  if(ret_value == UFAIL)
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5P_nelem() */
+
+/*--------------------------------------------------------------------------
+ NAME
     H5Pnelem
  PURPOSE
     Return the number of elements in a dataspace
@@ -329,7 +384,6 @@ done:
 uintn H5Pnelem(hatom_t sid)
 {
     H5P_dim_t *space=NULL;      /* dataspace to modify */
-    uintn u;                    /* local counting variable */
     uintn        ret_value = UFAIL;
 
     FUNC_ENTER(H5Pnelem, H5P_init_interface, UFAIL);
@@ -344,18 +398,7 @@ uintn H5Pnelem(hatom_t sid)
         if((space=H5Aatom_object(sid))==NULL)
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
 
-        /* Check for anything but simple dataspaces for now */
-        if(space->type!=H5P_TYPE_SIMPLE)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
-        
-        /* Check for other form of scalar dataspaces */
-        if(space->s->rank==0)
-            ret_value=1;
-        else
-          {
-            for(ret_value=1, u=0; u<(uintn)space->s->rank; u++)
-                ret_value*=space->s->size[u];
-          } /* end else */
+        ret_value=H5P_nelem(space);
      } /* end else */
 
 done:

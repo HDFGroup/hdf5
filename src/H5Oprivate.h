@@ -98,18 +98,7 @@ extern const H5O_class_t H5O_NULL[1];
 #define H5O_SIM_DIM_ID	0x0001
 extern const H5O_class_t H5O_SIM_DIM[1];
 
-/* Hmm, let's try this... */
-#ifdef QAK
-typedef struct {
-    uint32 rank;        /* Number of dimensions */
-    uint32 dim_flags;   /* Dimension flags */
-    uint32 *size;       /* Dimension sizes */
-    uint32 *max;        /* Maximum dimension sizes */
-    uint32 *perm;       /* Dimension permutations */
-} H5O_sim_dim_t;
-#else /* QAK */
 typedef H5P_sdim_t H5O_sim_dim_t;
-#endif /* QAK */
 
 /*
  * Simple Datatype message.
@@ -117,16 +106,18 @@ typedef H5P_sdim_t H5O_sim_dim_t;
 #define H5O_SIM_DTYPE_ID	0x0003
 extern const H5O_class_t H5O_SIM_DTYPE[1];
 
-/* Hmm, let's try this... */
-#ifdef QAK
-typedef struct {
-    uint8 length;   /* Number of bytes */
-    uint8 arch;     /* Architecture format of the data */
-    hatom_t type;   /* Type of the data */
-} H5O_sim_dtype_t;
-#else /* QAK */
 typedef h5_atomic_type_t H5O_sim_dtype_t;
-#endif /* QAK */
+
+/*
+ * Standard Data Storage message.
+ */
+#define H5O_STD_STORE_ID	0x0005
+extern const H5O_class_t H5O_STD_STORE[1];
+
+typedef struct H5O_std_store {
+    haddr_t off;
+    haddr_t len;
+  } H5O_std_store_t;
 
 /*
  * Object name message.

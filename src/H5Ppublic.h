@@ -24,7 +24,7 @@
 #include <H5Apublic.h>
 
 /* Define atomic datatypes */
-#define H5P_SCALAR  MAKE_ATOM(H5_DATASPACE,0)
+#define H5P_SCALAR  MAKE_ATOM(H5_DATASPACE,0)   /* Atom for scalar dataspace */
 
 /* Different types of dataspaces */
 #define H5P_TYPE_UNKNOWN    0 /* Dataspace is not unitialized */
