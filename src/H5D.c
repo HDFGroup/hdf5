@@ -3687,6 +3687,10 @@ herr_t H5Dset_extend( hid_t dset_id, const hsize_t *size )
  *-------------------------------------------------------------------------
  */
 
+/* declaration*/
+static herr_t H5D_update_chunck( H5D_t *dataset );
+
+
 herr_t H5D_set_extend( H5D_t *dataset, const hsize_t *size )
 {
  herr_t changed;
@@ -3744,25 +3748,68 @@ herr_t H5D_set_extend( H5D_t *dataset, const hsize_t *size )
    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value");
 
 
- /* Remove the chunk from the raw data cache */
-
+ /* Update chunk information */
  if ( H5D_CHUNKED == dataset->layout.type )
  {
 
+		if ( H5D_update_chunck( dataset ) < 0 )
+			goto done;
 
 
- }
+	}
 
 
- 
  } /* end if changed */
 
 
  ret_value = SUCCEED;
 
 done:
- H5S_close(space);
- FUNC_LEAVE (ret_value);
+ H5S_close( space );
+ FUNC_LEAVE( ret_value );
 }
 
 
+
+/*-------------------------------------------------------------------------
+ * Function: H5D_update_chunck
+ *
+ * Purpose: 
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Implementation: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *             Algorithm: Robb Matzke
+ *
+ * Date: March 13, 2002
+ *
+ * Comments: 
+ *
+ * Modifications:
+ *
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#if 1
+
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#include "H5Fpkg.h"
+
+herr_t H5D_update_chunck( H5D_t *dset )
+{
+ herr_t status;
+
+	H5F_istore_dump_btree( dset->ent.file, stdout, dset->layout.ndims, dset->layout.addr );
+
+	status = H5F_istore_debug( dset->ent.file, dset->layout.addr, stdout, 0, 50, 
+		dset->layout.ndims );
+
+
+ return 0;
+
+}
+
+
+
+#endif
