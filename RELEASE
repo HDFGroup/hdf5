@@ -65,6 +65,7 @@ Bug fixes since HDF5-1.2.1
    * QAK - 4/19/00 - Improved metadata hashing & caching algorithms to avoid
      many hash flushes and also remove some redundant I/O when moving metadata
      blocks in the file.
+   * The libhdf5.settings file shows the correct machine byte-sex.
 
 
 Known Problems:

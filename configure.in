@@ -801,10 +801,10 @@ AC_SUBST(CONFIG_MODE)
 
 # Byte sex from the AC_C_BIGENDIAN macro.
 AC_SUBST(BYTESEX)
-if test "X-$WORDS_BIGENDIAN" = "X-"; then
-    BYTESEX="little-endian"
-else
+if test $ac_cv_c_bigendian = yes; then
     BYTESEX="big-endian"
+else
+    BYTESEX="little-endian"
 fi
 
 # Are we compiling static libraries, shared libraries, or both?
