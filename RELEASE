@@ -378,6 +378,16 @@ Platforms Tested
 Known Problems
 ==============
 
+* The --enable-static-exec configure flag fails to compile for Solaris
+  platforms. This is due to the fact that not all of the system
+  libraries on Solaris are available in a static format.
+
+  The --enable-static-exec configure flag also fails to correctly compile
+  on Linux platforms using the gcc-2.95.2 compiler.
+  
+  It is suggested that you don't use this option on these platforms
+  during configuration.
+
 * With the gcc 2.95.2 compiler, HDF 5 uses the `-ansi' flag during
   compilation. The ANSI version of the compiler complains about not being
   able to handle the `long long' datatype with the warning:
