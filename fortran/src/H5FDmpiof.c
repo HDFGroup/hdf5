@@ -1,5 +1,17 @@
 #include "H5f90.h"
 #include <mpi.h> 
+#include "H5config_fortran.h"
+
+
+/* Support for C to Fortran translation in MPI */
+#ifndef HAVE_MPI_MULTI_LANG_Comm 
+#define MPI_Comm_c2f(comm) (int_f)(comm)
+#define MPI_Comm_f2c(comm) (MPI_Comm)(comm)
+#endif /*MPI Comm*/
+#ifndef HAVE_MPI_MULTI_LANG_Info
+#define MPI_Info_c2f(info) (int_f)(info)
+#define MPI_Info_f2c(info) (MPI_Info)(info)
+#endif /*MPI Info*/
 
 /*----------------------------------------------------------------------------
  * Name:        h5pset_fapl_mpio_c
@@ -21,8 +33,8 @@ nh5pset_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info)
      herr_t ret;
      MPI_Comm c_comm;
      MPI_Info c_info; 
-     c_comm = (MPI_Comm) *comm; 
-     c_info = (MPI_Info) *info;
+     c_comm = MPI_Comm_f2c(*comm); 
+     c_info = MPI_Info_f2c(*info);
 
      /*
       * Call H5Pset_mpi function.
@@ -60,8 +72,8 @@ nh5pget_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info)
      c_prp_id = *prp_id;
      ret = H5Pget_fapl_mpio(c_prp_id, &c_comm, &c_info);
      if (ret < 0) return ret_value;
-     *comm = (int_f) c_comm;
-     *info = (int_f) c_info;
+     *comm = (int_f) MPI_Comm_c2f(c_comm);
+     *info = (int_f) MPI_Info_c2f(c_info);
      ret_value = 0;
      return ret_value;
 } 
