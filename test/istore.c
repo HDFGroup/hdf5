@@ -319,7 +319,7 @@ test_extend(H5F_t *f, const char *prefix,
 
 	/* Write to disk */
 	if (H5F_arr_write(f, &layout, NULL, NULL, size, size, zero, offset,
-			  buf)<0) {
+			  H5D_XFER_DFLT, buf)<0) {
 	    puts("*FAILED*");
 	    if (!isatty(1)) {
 		AT();
@@ -330,7 +330,7 @@ test_extend(H5F_t *f, const char *prefix,
 	/* Read from disk */
 	memset(check, 0xff, (size_t)nelmts);
 	if (H5F_arr_read(f, &layout, NULL, NULL, size, size, zero, offset,
-			 check)<0) {
+			 H5D_XFER_DFLT, check)<0) {
 	    puts("*FAILED*");
 	    if (!isatty(1)) {
 		AT();
@@ -366,7 +366,7 @@ test_extend(H5F_t *f, const char *prefix,
     /* Now read the entire array back out and check it */
     memset(buf, 0xff, nx * ny * nz);
     if (H5F_arr_read(f, &layout, NULL, NULL, whole_size, whole_size, zero,
-		     zero, buf)<0) {
+		     zero, H5D_XFER_DFLT, buf)<0) {
 	puts("*FAILED*");
 	if (!isatty(1)) {
 	    AT();
@@ -490,7 +490,7 @@ test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
 
 	/* write to disk */
 	if (H5F_arr_write(f, &layout, NULL, NULL, size, size, zero, offset,
-			  buf)<0) {
+			  H5D_XFER_DFLT, buf)<0) {
 	    puts("*FAILED*");
 	    if (!isatty(1)) {
 		AT();
