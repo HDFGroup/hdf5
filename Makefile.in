@@ -118,8 +118,11 @@ uninstall-doc:
 ## Check if installation is correct by checking if examples can be built.
 ## This requires a proper "make install" has been done.
 check-install:
-	@@SETX@; for d in examples @HDF5_INTERFACES@; do		      \
+	(cd examples && $(MAKE) check) || exit 1
+	@@SETX@; for d in dummy @HDF5_INTERFACES@; do			      \
+	  if test $$d != "dummy"; then					      \
 	    (cd $$d && $(MAKE) $@) || exit 1;				      \
+	  fi;								      \
 	done
 
 ## Number format detection
