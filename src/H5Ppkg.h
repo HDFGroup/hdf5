@@ -34,7 +34,6 @@ typedef enum {
     H5P_MOD_DEC_LST,    /* Decrement the dependant list count*/
     H5P_MOD_INC_REF,    /* Increment the ID reference count*/
     H5P_MOD_DEC_REF,    /* Decrement the ID reference count*/
-    H5P_MOD_CHECK,      /* Just check about deleting the class */
     H5P_MOD_MAX         /* Upper limit on class modifications */
 } H5P_class_mod_t;
 

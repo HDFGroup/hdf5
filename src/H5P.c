@@ -402,11 +402,6 @@ H5P_copy_pclass(H5P_genclass_t *pclass)
         } /* end for */
     } /* end if */
 
-    /* Increment parent class's derived class value */
-    if(new_pclass->parent!=NULL)
-        if(H5P_access_class(new_pclass->parent,H5P_MOD_INC_CLS)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't increment parent class ref count");
-
     /* Set the return value */
     ret_value=new_pclass;
 
@@ -1007,16 +1002,20 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
             break;
 
         case H5P_MOD_INC_REF:        /* Increment the ID reference count*/
+            /* Reset the deleted flag if incrementing the reference count */
+            if(pclass->deleted)
+                pclass->deleted=0;
             pclass->ref_count++;
             break;
 
         case H5P_MOD_DEC_REF:        /* Decrement the ID reference count*/
             pclass->ref_count--;
+
+            /* Mark the class object as deleted if reference count drops to zero */
+            if(pclass->ref_count==0)
+                pclass->deleted=1;
             break;
 
-        case H5P_MOD_CHECK:         /* NOOP, just check if we can delete the class */
-            break;
-        
         case H5P_MOD_ERR:
         case H5P_MOD_MAX:
             assert(0 && "Invalid H5P class modification");
@@ -1024,6 +1023,8 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
 
     /* Check if we can release the class information now */
     if(pclass->deleted && pclass->plists==0 && pclass->classes==0 ) {
+        H5P_genclass_t *par_class=pclass->parent;       /* Pointer to class's parent */
+
         assert(pclass->name);
         H5MM_xfree(pclass->name);
 
@@ -1031,6 +1032,10 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
         H5P_free_all_prop(pclass->props,pclass->hashsize,0);
 
         H5MM_xfree(pclass);
+
+        /* Reduce the number of dependent classes on parent class also */
+        if(par_class!=NULL)
+            H5P_access_class(par_class, H5P_MOD_DEC_CLS);
     } /* end if */
 
     FUNC_LEAVE (SUCCEED);
@@ -5028,21 +5033,6 @@ H5P_close_class(void *_pclass)
     /* Decrement the reference count & check if the object should go away */
     if(H5P_access_class(pclass,H5P_MOD_DEC_REF)<0)
         HGOTO_ERROR (H5E_PLIST, H5E_NOTFOUND, FAIL, "Can't decrement ID ref count");
-
-    /* Check if the object should go away */
-    if(pclass->ref_count==0) {
-        /* Decrement parent class's dependant property class value! */
-        if(pclass->parent)
-            if (H5P_access_class(pclass->parent, H5P_MOD_DEC_CLS) < 0)
-                HGOTO_ERROR (H5E_PLIST, H5E_NOTFOUND, FAIL,"Can't decrement class ref count");
-        
-        /* Mark class as deleted */
-        pclass->deleted = 1;
-
-        /* Check dependancies on this class, deleting it if allowed */
-        if (H5P_access_class(pclass, H5P_MOD_CHECK) < 0)
-            HGOTO_ERROR (H5E_PLIST, H5E_NOTFOUND, FAIL,"Can't check class ref count");
-    } /* end if */
 
 done:
     FUNC_LEAVE (ret_value);
