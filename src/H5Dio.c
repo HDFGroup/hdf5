@@ -1153,6 +1153,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
     } /* end if */
     if (need_bkg && NULL==(bkg_buf=dxpl_cache->bkgr_buf)) {
         /* Allocate background buffer */
+        /* (Need calloc()-like call since memory needs to be initialized) */
         if((bkg_buf=H5FL_BLK_CALLOC(type_conv,(request_nelmts*dst_type_size)))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion")
     } /* end if */
@@ -1395,7 +1396,8 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
     } /* end if */
     if (need_bkg && NULL==(bkg_buf=dxpl_cache->bkgr_buf)) {
         /* Allocate background buffer */
-        if((bkg_buf=H5FL_BLK_CALLOC(type_conv,(request_nelmts*dst_type_size)))==NULL)
+        /* (Don't need calloc()-like call since file data is already initialized) */
+        if((bkg_buf=H5FL_BLK_MALLOC(type_conv,(request_nelmts*dst_type_size)))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion")
     } /* end if */
 
@@ -1649,6 +1651,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
     } /* end if */
     if (need_bkg && NULL==(bkg_buf=dxpl_cache->bkgr_buf)) {
         /* Allocate background buffer */
+        /* (Need calloc()-like call since memory needs to be initialized) */
         if((bkg_buf=H5FL_BLK_CALLOC(type_conv,(request_nelmts*dst_type_size)))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion")
     } /* end if */
@@ -1999,7 +2002,8 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
     } /* end if */
     if (need_bkg && NULL==(bkg_buf=dxpl_cache->bkgr_buf)) {
         /* Allocate background buffer */
-        if((bkg_buf=H5FL_BLK_CALLOC(type_conv,(request_nelmts*dst_type_size)))==NULL)
+        /* (Don't need calloc()-like call since file data is already initialized) */
+        if((bkg_buf=H5FL_BLK_MALLOC(type_conv,(request_nelmts*dst_type_size)))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion")
     } /* end if */
 
