@@ -98,13 +98,13 @@ converter.*/
 /*considering the string size of HDF4_DIMGROUP. we add this into 276.*/
 #define MAX_DIM_NAME   276
 
-int32 estnum_vg;
-int32 estnum_vd;
-int32 num_sds;
-int32 num_images;
-int   num_objects;
-int32 num_glsdsattrs;
-int32 num_glgrattrs;
+extern int32 estnum_vg;
+extern int32 estnum_vd;
+extern int32 num_sds;
+extern int32 num_images;
+extern int   num_objects;
+extern int32 num_glsdsattrs;
+extern int32 num_glgrattrs;
 
 /**********************************************/
 /*************** section II *******************/
@@ -129,13 +129,13 @@ struct name_table {
   struct name_table *next;
 };
 
-struct table* sds_hashtab;
-struct table* gr_hashtab;
-struct table* vg_hashtab;
-struct table* vd_hashtab;
-struct table* pal_hashtab;
-struct name_table* name_hashtab;
-struct name_table* dim_hashtab;
+extern struct table* sds_hashtab;
+extern struct table* gr_hashtab;
+extern struct table* vg_hashtab;
+extern struct table* vd_hashtab;
+extern struct table* pal_hashtab;
+extern struct name_table* name_hashtab;
+extern struct name_table* dim_hashtab;
 
 /* routine for zeroing out the memory. */
 void h4toh5_ZeroMemory(void*s,size_t n);

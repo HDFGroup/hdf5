@@ -1,5 +1,6 @@
 
 #include "h4toh5main.h"
+
 /*-------------------------------------------------------------------------
  * Function:	Image_h4_to_h5
  *
@@ -34,6 +35,9 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
   char     image_class[MAX_GR_NAME];
   char*    h5cimage_name;
   void*    image_data;
+  HDF_CHUNK_DEF c_def_out;
+  int32    chunk_dims[2];
+  int32    c_flags;
 
   /* define varibles for hdf5. */
 
@@ -51,9 +55,14 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
   size_t   fielddim[1];
   hsize_t  h5dims[2];
   herr_t   ret;
-
+  hid_t    create_plist;
   
   /* Obtain information of the image.*/  
+
+  if(GRgetchunkinfo(ri_id,&c_def_out,&c_flags)==FAIL){
+    printf("error in getting chunking information. \n");
+    return FAIL;
+  }
 
   istat = GRgetiminfo(ri_id, image_name, &ncomp, &image_dtype, 
 		      NULL, dimsizes, &ngrattrs);
@@ -144,6 +153,24 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
      return FAIL;
   }
 
+  /* create property list. */
+
+  create_plist = H5Pcreate(H5P_DATASET_CREATE);
+
+  if(c_flags == HDF_CHUNK || c_flags == (HDF_CHUNK | HDF_COMP)
+     || c_flags == (HDF_CHUNK | HDF_NBIT)  ){
+
+     chunk_dims[0] = c_def_out.chunk_lengths[0]; 
+     chunk_dims[1] = c_def_out.chunk_lengths[1];
+       
+     if(H5Pset_chunk(create_plist, 2, (hsize_t *)chunk_dims)<0) {
+       printf("failed to set up chunking information for ");
+       printf("property list.\n");
+       free(image_data);
+       H5Pclose(create_plist);
+       return FAIL;	
+     }
+  }
   if (ncomp == 1) {
 
      h5d_sid = H5Screate_simple(2,h5dims,NULL);
@@ -155,12 +182,13 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
        return FAIL;
      }
 
-     h5dset  = H5Dcreate(h5_group,h5cimage_name,h5ty_id,h5d_sid,H5P_DEFAULT);
+     h5dset  = H5Dcreate(h5_group,h5cimage_name,h5ty_id,h5d_sid,create_plist);
 
      if(h5dset < 0) {
        printf("error in creating hdf5 dataset converted from images. \n");
        free(image_data);
        free(h5cimage_name);
+       H5Pclose(create_plist);
        return FAIL;
      }
 
@@ -169,6 +197,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
         printf("error writing data for hdf5 dataset converted from images.\n");
 	free(image_data);
 	free(h5cimage_name);
+        H5Pclose(create_plist);
         return FAIL;
      }
 	
@@ -181,6 +210,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
        printf("error in generating hdf5 compound data type. \n");
        free(image_data);
        free(h5cimage_name);
+       H5Pclose(create_plist);
        return FAIL;
      }
 
@@ -189,6 +219,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
        printf("error in generating hdf5 memory compound data type. \n");
        free(image_data);
        free(h5cimage_name);
+       H5Pclose(create_plist);
        return FAIL;
      }
 
@@ -202,6 +233,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
        printf("error in inserting array of compound datatype. \n");
        free(image_data);
        free(h5cimage_name);
+       H5Pclose(create_plist);
        return FAIL;
      }
 
@@ -211,6 +243,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
        printf("error in inserting array of compound datatype at memory. \n");
        free(image_data);
        free(h5cimage_name);
+       H5Pclose(create_plist);
        return FAIL;
      }
 
@@ -219,15 +252,17 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
        printf("error in creating space. \n");
        free(image_data);
        free(h5cimage_name);
+       H5Pclose(create_plist);
        return FAIL;
      }
 
      h5dset      = H5Dcreate(h5_group,h5cimage_name,h5_ctype,h5d_sid,
-			     H5P_DEFAULT);
+			     create_plist);
      if(h5dset < 0) {
        printf("error in creating dataset. \n");
        free(image_data);
        free(h5cimage_name);
+       H5Pclose(create_plist);
        return FAIL;
      }
 
@@ -236,9 +271,9 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
         printf("error writing data\n");
 	free(image_data);
 	free(h5cimage_name);
+        H5Pclose(create_plist);
 	return FAIL;
      } 
-    
      ret   = H5Tclose(h5_ctype);
      if(ret < 0) {
        printf("error in closing h5_ctype. \n");
@@ -261,6 +296,9 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
     printf("failed to convert image annotation into hdf5 attribute.\n");
     free(image_data);
     free(h5cimage_name);
+    H5Pclose(create_plist);
+    H5Sclose(h5d_sid); 
+    H5Dclose(h5dset);
     return FAIL;
   }
 
@@ -268,6 +306,9 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
     printf("failed to convert image annotation into hdf5 attribute.\n");
     free(h5cimage_name);
     free(image_data);
+    H5Pclose(create_plist);
+    H5Sclose(h5d_sid); 
+    H5Dclose(h5dset);
     return FAIL;
   }
 
@@ -275,6 +316,9 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
     printf("failed to convert image annotation into hdf5 attribute.\n");
     free(h5cimage_name);
     free(image_data);
+    H5Pclose(create_plist);
+    H5Sclose(h5d_sid); 
+    H5Dclose(h5dset);
     return FAIL;
   }
   
@@ -285,6 +329,10 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
   check_gloattr = 0;
   if(gr_tranattrs(ri_id,h5dset,ngrattrs,check_gloattr)==FAIL){ 
     printf(" cannot obtain attributes. \n");
+     free(image_data);
+    H5Pclose(create_plist);
+    H5Sclose(h5d_sid); 
+    H5Dclose(h5dset);
     return FAIL;
   }
 
@@ -304,19 +352,31 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
   /* transfer hdf4 predefined attributes into hdf5 dataset.*/
   if(h4_transpredattrs(h5dset,HDF4_OBJECT_TYPE,grlabel)==FAIL){
     printf("error in getting hdf4 image type attribute \n");
+    H5Pclose(create_plist);
+    H5Sclose(h5d_sid); 
+    H5Dclose(h5dset);
     free(h5cimage_name);
+    free(image_data);
     return FAIL;
   }
 
   if(h4_transpredattrs(h5dset,HDF4_OBJECT_NAME,image_name)==FAIL){
     printf("error in getting hdf4 image name attribute. \n");
+    H5Pclose(create_plist);
+    H5Sclose(h5d_sid); 
+    H5Dclose(h5dset);
     free(h5cimage_name);
+    free(image_data);
     return FAIL;
   }
 
   if(h4_transpredattrs(h5dset,HDF4_IMAGE_CLASS,image_class)==FAIL){
     printf("error in getting hdf4 image class attribute. \n");
+    H5Pclose(create_plist);
+    H5Sclose(h5d_sid); 
+    H5Dclose(h5dset);
     free(h5cimage_name);
+    free(image_data);
     return FAIL;
   }
 
@@ -324,13 +384,21 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
 
   if(gr_ref == 0) {
     printf("error in obtaining reference number of GR.\n");
+    H5Pclose(create_plist);
+    H5Sclose(h5d_sid); 
+    H5Dclose(h5dset);
     free(h5cimage_name);
+    free(image_data);
     return FAIL;
   }
 
   if(h4_transnumattr(h5dset,HDF4_REF_NUM,gr_ref)==FAIL) {
     printf("error in getting hdf4 image number attribute.\n");
+    H5Pclose(create_plist);
+    H5Sclose(h5d_sid); 
+    H5Dclose(h5dset);
     free(h5cimage_name);
+    free(image_data);
     return FAIL;
   }
   
@@ -338,16 +406,20 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
 
   if(gr_palette(file_id,ri_id,h5dset,h5_palgroup)== FAIL) {
     printf("error in translating palette into h5 dataset.\n");
+    H5Pclose(create_plist);
+    H5Sclose(h5d_sid); 
+    H5Dclose(h5dset);
     free(h5cimage_name);
+    free(image_data);
     return FAIL;
   }
  
- 
+  ret   = H5Pclose(create_plist);
   ret   = H5Sclose(h5d_sid); 
   ret   = H5Dclose(h5dset);
   istat = GRendaccess(ri_id);
-  if(image_data != NULL) free(image_data);
-  if(h5cimage_name != NULL) free(h5cimage_name);
+  free(image_data);
+  free(h5cimage_name);
   return SUCCEED;
 }
 

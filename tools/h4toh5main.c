@@ -2,6 +2,21 @@
 
 #include "h4toh5main.h"
 
+int32 estnum_vg;
+int32 estnum_vd;
+int32 num_sds;
+int32 num_images;
+int   num_objects;
+int32 num_glsdsattrs;
+int32 num_glgrattrs;
+struct table* sds_hashtab;
+struct table* gr_hashtab;
+struct table* vg_hashtab;
+struct table* vd_hashtab;
+struct table* pal_hashtab;
+struct name_table* name_hashtab;
+struct name_table* dim_hashtab;
+
 /*-------------------------------------------------------------------------
  * Function:	main
  *
@@ -12,6 +27,8 @@
    Modfication: 
  *-------------------------------------------------------------------------
  */	
+
+
 
 int main(int argc, char ** argv) {
 
