@@ -730,6 +730,29 @@ case $withval in
     ;;
 esac
 
+dnl Is SSL library present?  It is needed by GLOBUS-GASS and Grid Storage
+dnl driver.  SSL must be tested before them.
+AC_SUBST(SSL) SSL=yes
+AC_ARG_WITH(ssl,[  --with-ssl=LIB          Use SSL libs from LIB [default=no]],
+	    ,withval=no)
+case "$withval" in
+   yes)
+      AC_CHECK_LIB(crypto,main,,unset SSL)
+      AC_CHECK_LIB(ssl,SSL_get_version,,unset SSL)
+      ;;
+   no)
+      AC_MSG_CHECKING(for SSL)
+      AC_MSG_RESULT(suppressed)
+      unset SSL
+      ;;
+   *)
+      saved_LDFLAGS="$LDFLAGS"
+      LDFLAGS="$LDFLAGS -L$with_ssl"
+      AC_CHECK_LIB(crypto,main,, LDFLAGS="$saved_LDFLAGS"; unset SSL)
+      AC_CHECK_LIB(ssl,SSL_get_version,, LDFLAGS="$saved_LDFLAGS"; unset SSL)
+      ;;
+esac
+
 dnl ----------------------------------------------------------------------
 dnl Is GLOBUS-GASS(1.1.0 or 1.1.1) Library present?  It is also needed by 
 dnl the Grid Storage driver.
@@ -903,19 +926,6 @@ esac
 
 if test -n "$GRIDSTORAGE"; then
   AC_DEFINE(HAVE_GRIDSTORAGE)
-fi
-
-if test -n "$GRIDSTORAGE" -o -n "$GASS"; then
-  dnl Is SSL library present?  It is needed by GLOBUS-GASS and Grid
-  dnl Storage driver.
-  AC_SUBST(SSL) SSL=yes
-  AC_ARG_WITH(ssl,[  --with-ssl=LIB          Use SSL libs from LIB ],,)
-  if test -n "$with_ssl"; then
-    LDFLAGS="$LDFLAGS -L$with_ssl"
-  fi
-
-  AC_CHECK_LIB(crypto,main,,unset SSL)
-  AC_CHECK_LIB(ssl,SSL_get_version,,unset SSL)
 fi
 
 dnl ----------------------------------------------------------------------
