@@ -2222,7 +2222,11 @@ int     nmembs, i, j, k, ndims, perm[4];
 
             case H5T_OPAQUE:
                  break;
-
+			case H5T_COMPOUND:
+				printf("\n");
+				display_compound_data (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, 0);
+				indentation(indent);
+				break;
             default: break;
 
             }
