@@ -1,7 +1,7 @@
 #############################
 Expected output for 'h5dump -a attr1 attr4 attr5 tattr.h5'
 #############################
-HDF5 "testfiles\tattr.h5" {
+HDF5 "tattr.h5" {
 ATTRIBUTE "attr1" {
    DATATYPE { H5T_STD_I8BE }
    DATASPACE { SIMPLE ( 24 ) / ( 24 ) }
