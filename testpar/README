@@ -1,6 +1,6 @@
 		hdf5/testpar/README
 		-------------------
-		(last update: Aug 3rd 1998)
+		(last update: Aug the 1998)
 
 This directory holds tests for the parallel HDF5 library.  It is in
 its "infancy" and is not integrated with the rest of the HDF5 software
