@@ -51,11 +51,10 @@ test_create(hid_t file)
     printf("%-70s", "Testing create/open/close");
 
     /* Create the data space */
-    space = H5Pcreate(H5P_SIMPLE);
     dims[0] = 256;
     dims[1] = 512;
-    status = H5Pset_space(space, 2, dims);
-    assert(status >= 0);
+    space = H5Pcreate_simple(2,dims);
+    assert(space != FAIL);
 
     /*
      * Create a dataset using the default dataset creation properties.  We're
@@ -204,11 +203,10 @@ test_simple_io(hid_t file)
     }
 
     /* Create the data space */
-    space = H5Pcreate(H5P_SIMPLE);
     dims[0] = 100;
     dims[1] = 200;
-    status = H5Pset_space(space, 2, dims);
-    assert(status >= 0);
+    space = H5Pcreate_simple(2,dims);
+    assert(space != FAIL);
 
     /* Create the dataset */
     dataset = H5Dcreate(file, DSET_SIMPLE_IO_NAME, H5T_NATIVE_INT, space,
@@ -294,11 +292,9 @@ test_tconv(hid_t file)
         ((int32 *) out)[i] = 0x11223344;
 
     /* Create the data space */
-    space = H5Pcreate(H5P_SIMPLE);
-    assert(space >= 0);
     dims[0] = 1000000;
-    status = H5Pset_space(space, 1, dims);
-    assert(status >= 0);
+    space = H5Pcreate_simple(1,dims);
+    assert(space != FAIL);
 
     /* Create the data set */
     dataset = H5Dcreate(file, DSET_TCONV_NAME, H5T_NATIVE_INT32, space,

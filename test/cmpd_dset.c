@@ -54,19 +54,6 @@ typedef struct s5_t {
 #define NY	2000
 
 
-static hid_t
-H5Pcreate_simple (int ndims, size_t *dim)
-{
-    herr_t status;
-    hid_t pid = H5Pcreate (H5P_SIMPLE);
-    assert (pid>=0);
-    status = H5Pset_space (pid, ndims, dim);
-    assert (status>=0);
-    return pid;
-}
-
-    
-
 /*-------------------------------------------------------------------------
  * Function:	main
  *
