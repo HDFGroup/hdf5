@@ -6,6 +6,125 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
 <HDF5-File>
 <RootGroup OBJ-XID="root">
    <Group Name="Group1" OBJ-XID="/Group1" Parents="/" >
+      <Dataset Name="Dataset space" OBJ-XID="/Group1/Dataset space" Parents="/Group1">
+         <Dataspace>
+            <SimpleDataspace Ndims="1">
+               <Dimension  DimSize="4" MaxDimSize="4"/>
+            </SimpleDataspace>
+         </Dataspace>
+         <DataType> 
+            <AtomicType>
+               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
+            </AtomicType>
+         </DataType>
+         <Data>
+            <DataFromFile>
+            0 0 0 0
+            </DataFromFile>
+         </Data>
+      </Dataset>
+      <Dataset Name="Dataset&quot;quote" OBJ-XID="/Group1/Dataset&quot;quote" Parents="/Group1">
+         <Dataspace>
+            <SimpleDataspace Ndims="1">
+               <Dimension  DimSize="4" MaxDimSize="4"/>
+            </SimpleDataspace>
+         </Dataspace>
+         <DataType> 
+            <AtomicType>
+               <IntegerType ByteOrder="BE" Sign="false" Size="4" />
+            </AtomicType>
+         </DataType>
+         <Data>
+            <DataFromFile>
+            0 3 6 9
+            </DataFromFile>
+         </Data>
+      </Dataset>
+      <Dataset Name="Dataset&amp;amp" OBJ-XID="/Group1/Dataset&amp;amp" Parents="/Group1">
+         <Dataspace>
+            <SimpleDataspace Ndims="1">
+               <Dimension  DimSize="4" MaxDimSize="4"/>
+            </SimpleDataspace>
+         </Dataspace>
+         <DataType> 
+            <AtomicType>
+               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
+            </AtomicType>
+         </DataType>
+         <Data>
+            <DataFromFile>
+            0 0 0 0
+            </DataFromFile>
+         </Data>
+      </Dataset>
+      <Dataset Name="Dataset&apos;apos" OBJ-XID="/Group1/Dataset&apos;apos" Parents="/Group1">
+         <Dataspace>
+            <SimpleDataspace Ndims="1">
+               <Dimension  DimSize="4" MaxDimSize="4"/>
+            </SimpleDataspace>
+         </Dataspace>
+         <DataType> 
+            <AtomicType>
+               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
+            </AtomicType>
+         </DataType>
+         <Data>
+            <DataFromFile>
+            0 0 0 0
+            </DataFromFile>
+         </Data>
+      </Dataset>
+      <Dataset Name="Dataset&lt;lt" OBJ-XID="/Group1/Dataset&lt;lt" Parents="/Group1">
+         <Dataspace>
+            <SimpleDataspace Ndims="1">
+               <Dimension  DimSize="4" MaxDimSize="4"/>
+            </SimpleDataspace>
+         </Dataspace>
+         <DataType> 
+            <AtomicType>
+               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
+            </AtomicType>
+         </DataType>
+         <Data>
+            <DataFromFile>
+            0 0 0 0
+            </DataFromFile>
+         </Data>
+      </Dataset>
+      <Dataset Name="Dataset&gt;gt" OBJ-XID="/Group1/Dataset&gt;gt" Parents="/Group1">
+         <Dataspace>
+            <SimpleDataspace Ndims="1">
+               <Dimension  DimSize="4" MaxDimSize="4"/>
+            </SimpleDataspace>
+         </Dataspace>
+         <DataType> 
+            <AtomicType>
+               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
+            </AtomicType>
+         </DataType>
+         <Data>
+            <DataFromFile>
+            0 0 0 0
+            </DataFromFile>
+         </Data>
+      </Dataset>
+      <Dataset Name="Dataset\slash" OBJ-XID="/Group1/Dataset\slash" Parents="/Group1">
+         <Dataspace>
+            <SimpleDataspace Ndims="1">
+               <Dimension  DimSize="4" MaxDimSize="4"/>
+            </SimpleDataspace>
+         </Dataspace>
+         <DataType> 
+            <AtomicType>
+               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
+            </AtomicType>
+         </DataType>
+         <Data>
+            <DataFromFile>
+            0 0 0 0
+            </DataFromFile>
+         </Data>
+      </Dataset>
       <Group Name="Group1.1" OBJ-XID="/Group1/Group1.1" Parents="/Group1" >
          <Dataset Name="Datasetrefs" OBJ-XID="/Group1/Group1.1/Datasetrefs" Parents="/Group1/Group1.1">
             <Dataspace>
@@ -158,125 +277,6 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
             </Data>
          </Dataset>
       </Group>
-      <Dataset Name="Dataset space" OBJ-XID="/Group1/Dataset space" Parents="/Group1">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="4" MaxDimSize="4"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
-            0 0 0 0
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <Dataset Name="Dataset&quot;quote" OBJ-XID="/Group1/Dataset&quot;quote" Parents="/Group1">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="4" MaxDimSize="4"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="false" Size="4" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
-            0 3 6 9
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <Dataset Name="Dataset&amp;amp" OBJ-XID="/Group1/Dataset&amp;amp" Parents="/Group1">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="4" MaxDimSize="4"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
-            0 0 0 0
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <Dataset Name="Dataset&apos;apos" OBJ-XID="/Group1/Dataset&apos;apos" Parents="/Group1">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="4" MaxDimSize="4"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
-            0 0 0 0
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <Dataset Name="Dataset&lt;lt" OBJ-XID="/Group1/Dataset&lt;lt" Parents="/Group1">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="4" MaxDimSize="4"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
-            0 0 0 0
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <Dataset Name="Dataset&gt;gt" OBJ-XID="/Group1/Dataset&gt;gt" Parents="/Group1">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="4" MaxDimSize="4"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
-            0 0 0 0
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <Dataset Name="Dataset\slash" OBJ-XID="/Group1/Dataset\slash" Parents="/Group1">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="4" MaxDimSize="4"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
-            0 0 0 0
-            </DataFromFile>
-         </Data>
-      </Dataset>
    </Group>
 </RootGroup>
 </HDF5-File>
