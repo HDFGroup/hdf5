@@ -4679,7 +4679,7 @@ TABLE.list TD { border:none; }
 
     <p><b>Purpose and Description:</b> Data layout describes how the
       elements of a multi-dimensional array are arranged in the linear
-      address space of the file. Two types of data layout are
+      address space of the file. Three types of data layout are
       supported:
 
     <ol>
@@ -4699,6 +4699,9 @@ TABLE.list TD { border:none; }
 	the size of the entire array; the size of the entire array can
 	be calculated by traversing the B-tree that stores the chunk
 	addresses.
+
+      <li>The array can be stored in one contiguous block, as part of
+        this object header message.
     </ol>
 
     <p>
@@ -4741,6 +4744,18 @@ TABLE.list TD { border:none; }
 	<tr align=center>
 	  <td colspan=4>...</td>
 	</tr>
+
+	<tr align=center>
+	  <td colspan=4>Compact Data Size (4-bytes)</td>
+	</tr>
+	
+	<tr align=center>
+	  <td colspan=4>Compact Data</td>
+	</tr>
+	
+	<tr align=center>
+	  <td colspan=4>...</td>
+	</tr>
       </table>
     </center>
 
@@ -4754,8 +4769,8 @@ TABLE.list TD { border:none; }
 
 	<tr valign=top>
 	  <td>Version</td>
-	  <td>A version number for the layout message. This
-	    documentation describes version one.</td>
+	  <td>A version number for the layout message. This value can be
+            either 1 or 2.</td>
 	</tr>
 
 	<tr valign=top>
@@ -4769,8 +4784,10 @@ TABLE.list TD { border:none; }
 	  <td>Layout Class</td>
 	  <td>The layout class specifies how the other fields of the
 	    layout message are to be interpreted.  A value of one
-	    indicates contiguous storage while a value of two
-	    indicates chunked storage.  Other values will be defined
+	    indicates contiguous storage, a value of two
+	    indicates chunked storage,
+	    while a value of three
+	    indicates compact storage.  Other values will be defined
 	    in the future.</td>
 	</tr>
 
@@ -4779,7 +4796,10 @@ TABLE.list TD { border:none; }
 	  <td>For contiguous storage, this is the address of the first
 	    byte of storage.  For chunked storage this is the address
 	    of the B-tree that is used to look up the addresses of the
-	    chunks.</td>
+	    chunks.  This field is not present for compact storage.
+            If the version for this message is set to 2, the address
+            may have the "undefined address" value, to indicate that
+            storage has not yet been allocated for this array.</td>
 	</tr>
 
 	<tr valign=top>
@@ -4787,6 +4807,17 @@ TABLE.list TD { border:none; }
 	  <td>For contiguous storage the dimensions define the entire
 	    size of the array while for chunked storage they define
 	    the size of a single chunk.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Compact Data Size</td>
+	  <td>This field is only present for compact data storage.
+            It contains the size of the raw data for the dataset array.</td>
+
+	<tr valign=top>
+	  <td>Compact Data</td>
+	  <td>This field is only present for compact data storage.
+            It contains the raw data for the dataset array.</td>
 	</tr>
       </table>
     </center>
