@@ -37,7 +37,7 @@ void parallel_print(const char* format, ...)
     if(g_nTasks < 2)
 	vprintf(format, ap);
     else
-	outBuffOffset += vsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
+	outBuffOffset += HDvsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
 
     va_end(ap);
 }
