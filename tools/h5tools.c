@@ -909,13 +909,16 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
                         h5dump_str_append(str,"%s",OPT(info->line_indent,""));
                     }
 		}
+		ctx->indent_level++;
 		h5dump_sprint(str, info, container, memb,
 			      (char*)vp+offset+i*size, ctx);
+		ctx->indent_level--;
 	    }
 	    if (nelmts>1) {
-		h5dump_str_append(str, "%s", OPT(info->arr_suf, "]"));
+ 		h5dump_str_append(str, "%s", OPT(info->arr_suf, "]"));
 	    }
 	    H5Tclose(memb);
+
 	}
 
 	h5dump_str_append(str, "%s", OPT(info->cmpd_end, ""));
@@ -928,8 +931,7 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
             h5dump_str_append(str,"%s",OPT(info->line_indent,""));
 	}
 
-	h5dump_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
-		
+	h5dump_str_append(str, "%s", OPT(info->cmpd_suf, "}"));	
     } else if (H5T_ENUM==H5Tget_class(type)) {
 	char enum_name[1024];
 	if (H5Tenum_nameof(type, vp, enum_name, sizeof enum_name)>=0) {
