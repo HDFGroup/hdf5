@@ -1,38 +1,39 @@
-# HDF5 Library Examples Makefile(.in)
-#
-# Copyright (C) 1997 National Center for Supercomputing Applications.
-#                    All rights reserved.
-#
+## HDF5 Library Examples Makefile(.in)
+##
+## Copyright (C) 1997 National Center for Supercomputing Applications.
+##                    All rights reserved.
+##
 top_srcdir=@top_srcdir@
 top_builddir=..
 srcdir=@srcdir@
 VPATH=.:@srcdir@
+.PATH: . @srcdir@
 @COMMENCE@
 
-# Add include directory to the C preprocessor flags and the hdf5 library
-# to the library list.
+## Add include directory to the C preprocessor flags and the hdf5 library
+## to the library list.
 CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 LIBHDF5=../src/libhdf5.la
 
-# These are the programs that `make all' or `make tests' will build and which
-# `make check' will run. List them in the order they should be run.
+## These are the programs that `make all' or `make tests' will build and which
+## `make check' will run. List them in the order they should be run.
 TEST_PROGS= h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
 	h5_group h5_select h5_attribute h5_mount h5_reference
 
-# These are the files that `make clean' (and derivatives) will remove from
-# this directory.
+## These are the files that `make clean' (and derivatives) will remove from
+## this directory.
 CLEAN=*.h5
 
-# List all source files here.  The list of object files will be
-# created by replacing the `.c' with a `.o'.  This list is necessary
-# for building automatic dependencies.
+## List all source files here.  The list of object files will be
+## created by replacing the `.c' with a `.o'.  This list is necessary
+## for building automatic dependencies.
 TEST_SRC=h5_chunk_read.c h5_compound.c h5_extend_write.c h5_group.c \
 	 h5_read.c h5_write.c h5_select.c h5_attribute.c h5_mount.c \
 	 h5_reference.c
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
 
-# How to build the programs... they all depend on the hdf5 library
+## How to build the programs... they all depend on the hdf5 library
 $(TEST_PROGS): $(LIBHDF5)
 h5_chunk_read: h5_chunk_read.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5_chunk_read.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)

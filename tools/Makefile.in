@@ -1,51 +1,52 @@
-# HDF5 Library Makefile(.in)
-#
-# Copyright (C) 1997 National Center for Supercomputing Applications.
-#                    All rights reserved.
-#
-# 
+## HDF5 Library Makefile(.in)
+##
+## Copyright (C) 1997 National Center for Supercomputing Applications.
+##                    All rights reserved.
+##
+## 
 top_srcdir=@top_srcdir@
 top_builddir=..
 srcdir=@srcdir@
 VPATH=.:@srcdir@
+.PATH: . @srcdir@
 @COMMENCE@
 
-# Add include directory to the C preprocessor flags, add -lh5tools and
-# -lhdf5 to the list of libraries.
+## Add include directory to the C preprocessor flags, add -lh5tools and
+## -lhdf5 to the list of libraries.
 CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 
-# Test programs and scripts.
+## Test programs and scripts.
 TEST_PROGS=
 TEST_SCRIPTS=$(srcdir)/testh5dump.sh @TESTH5TOH4@
 
-# These are our main targets: library and tools. We link this library
-# statically because some systems can only link executables to a single
-# shared library and libhdf5 is much bigger than libh5tools.
+## These are our main targets: library and tools. We link this library
+## statically because some systems can only link executables to a single
+## shared library and libhdf5 is much bigger than libh5tools.
 LT_LINK_LIB=$(LT) --mode=link $(CC) -static -rpath $(libdir)
 LIB=libh5tools.la
 LIBHDF5=../src/libhdf5.la
 PROGS=h5debug h5import h5ls h5repart h5dump h5dumptst @H5TOH4@
 
-# Source and object files for the library; do not install
+## Source and object files for the library; do not install
 LIB_SRC=h5tools.c h5findshd.c
 LIB_OBJ=$(LIB_SRC:.c=.lo)
 PUB_LIB=
 
-# Source and object files for programs...
+## Source and object files for programs...
 PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c h5dumputil.c \
 	h5toh4.c h5dumptst.c
 PROG_OBJ=$(PROG_SRC:.c=.lo)
 PRIVATE_HDR=h5tools.h
 
-# Source and object files for the tests
+## Source and object files for the tests
 TEST_SRC=
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
-# Programs have to be built before they can be tested!
+## Programs have to be built before they can be tested!
 check test _test: $(PROGS)
 
-# How to build the programs... They all depend on the hdf5 library and
-# the tools library compiled in this directory.
+## How to build the programs... They all depend on the hdf5 library and
+## the tools library compiled in this directory.
 $(PROGS): $(LIB) ../src/libhdf5.la
 
 h5debug: h5debug.lo

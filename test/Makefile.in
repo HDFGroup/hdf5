@@ -1,30 +1,31 @@
-# HDF5 Library Test Makefile(.in)
-#
-# Copyright (C) 1997 National Center for Supercomputing Applications.
-#                    All rights reserved.
-#
-# 
+## HDF5 Library Test Makefile(.in)
+##
+## Copyright (C) 1997 National Center for Supercomputing Applications.
+##                    All rights reserved.
+##
+## 
 top_srcdir=@top_srcdir@
 top_builddir=..
 srcdir=@srcdir@
 VPATH=.:@srcdir@
+.PATH: . @srcdir@
 @COMMENCE@
 
-# Add include directory to the C preprocessor flags and the h5test and hdf5
-# libraries to the library list.
+## Add include directory to the C preprocessor flags and the h5test and hdf5
+## libraries to the library list.
 CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 
-# These are our main targets. They should be listed in the order to be
-# executed, generally most specific tests to least specific tests.
+## These are our main targets. They should be listed in the order to be
+## executed, generally most specific tests to least specific tests.
 RUNTEST=$(LT_RUN)
 TEST_PROGS=testhdf5 lheap ohdr stab gheap hyperslab istore bittests dtypes   \
       dsets cmpd_dset extend external links unlink big mtime fillval mount   \
       flush1 flush2 enum
 TIMINGS=iopipe chunk ragged overhead
 
-# The libh5test.a library provides common support code for the tests. We link
-# this library statically because some systems can only link executables to
-# a single shared library and libhdf5 is much bigger than libh5test.
+## The libh5test.a library provides common support code for the tests. We link
+## this library statically because some systems can only link executables to
+## a single shared library and libhdf5 is much bigger than libh5test.
 LT_LINK_LIB=$(LT) --mode=link $(CC) -static -rpath $(libdir)
 LIBHDF5=../src/libhdf5.la
 LIB=libh5test.la
@@ -32,11 +33,11 @@ LIB_SRC=h5test.c
 LIB_OBJ=$(LIB_SRC:.c=.lo)
 PUB_LIB=
 
-# Temporary files.  These files are the ones created by setting the
-# HDF5_NOCLEANUP environment variable and running `make test' without
-# specifying a file prefix or low-level driver.  Changing the file
-# prefix or low-level driver with environment variables will influence 
-# the temporary file name in ways that the makefile is not aware of.
+## Temporary files.  These files are the ones created by setting the
+## HDF5_NOCLEANUP environment variable and running `make test' without
+## specifying a file prefix or low-level driver.  Changing the file
+## prefix or low-level driver with environment variables will influence 
+## the temporary file name in ways that the makefile is not aware of.
 MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 	    tfile3.h5 th5s1.h5 lheap.h5 ohdr.h5 stab1.h5 stab2.h5            \
 	    extern_1.h5 extern_2.h5 extern_3.h5 extern_1a.raw extern_1b.raw  \
@@ -49,10 +50,10 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 	    flush.h5 enum1.h5
 CLEAN=$(TIMINGS)
 
-# Source and object files for programs...  The TEST_SRC list contains all the
-# source files and is used for things like dependencies, archiving, etc.  The
-# other source lists are for the individual tests, the files of which may
-# overlap with other tests.
+## Source and object files for programs...  The TEST_SRC list contains all the
+## source files and is used for things like dependencies, archiving, etc.  The
+## other source lists are for the individual tests, the files of which may
+## overlap with other tests.
 TEST_SRC=big.c bittests.c chunk.c cmpd_dset.c dsets.c dtypes.c extend.c  \
      external.c fillval.c flush1.c flush2.c gheap.c h5test.c hyperslab.c \
      iopipe.c istore.c lheap.c links.c mount.c mtime.c ohdr.c overhead.c \
@@ -60,10 +61,10 @@ TEST_SRC=big.c bittests.c chunk.c cmpd_dset.c dsets.c dtypes.c extend.c  \
 	 tselect.c tvltypes.c unlink.c enum.c
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
-# Private header files (not to be installed)...
+## Private header files (not to be installed)...
 PRIVATE_HDR=testhdf5.h
 
-# Additional targets
+## Additional targets
 .PHONY: timings _timings
 timings _timings: $(TIMINGS)
 	@for timing in $(TIMINGS) dummy; do				      \
@@ -73,7 +74,7 @@ timings _timings: $(TIMINGS)
 	   fi;								      \
 	done;
 
-# How to build the tests...  They all depend on the test and hdf5 libraries.
+## How to build the tests...  They all depend on the test and hdf5 libraries.
 $(TEST_PROGS): $(LIB) $(LIBHDF5)
 TESTHDF5_OBJ=testhdf5.lo tattr.lo tfile.lo tmeta.lo trefer.lo tselect.lo tvltypes.lo th5s.lo
 testhdf5: $(TESTHDF5_OBJ)

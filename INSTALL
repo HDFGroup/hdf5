@@ -96,6 +96,30 @@ INSTALL.ascired for instructions.
 *** Bzip'd tar archive (*.tar.bz2)
 	$ bunzip2 <hdf5-1.2.0.tar.gz |tar xf -
 
+** Source vs. Build Directories
+	On most systems the build can occur in a directory other than
+	the source directory, allowing multiple concurrent builds
+	and/or read-only source code. In order to accomplish this, one 
+	should create a build directory, cd into that directory, and
+	run the `configure' script found in the source directory
+	(configure details are below).
+
+	Unfortunately, this does not work on recent Irix platforms
+	(6.5? and later) because that `make' doesn't understand the
+	VPATH variable. However, hdf5 also supports Irix `pmake' which
+	has a .PATH target which serves a similar purpose. Here's what
+	the man pages say about VPATH, which is the facility used by
+	HDF5 makefiles for this feature:
+
+	    The VPATH facility is a derivation of the undocumented
+	    VPATH feature in the System V Release 3 version of make.
+	    System V Release 4 has a new VPATH implementation, much
+	    like the pmake(1) .PATH feature.  This new feature is also
+	    undocumented in the standard System V Release 4 manual
+	    pages.  For this reason it is not available in the IRIX
+	    version of make.  The VPATH facility should not be used
+	    with the new parallel make option.
+
 ** Configuring
 	HDF5 uses the GNU autoconf system for configuration, which
 	detects various features of the host system and creates the

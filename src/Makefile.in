@@ -1,24 +1,25 @@
-# HDF5 Library Makefile(.in)
-#
-# Copyright (C) 1997 National Center for Supercomputing Applications.
-#                    All rights reserved.
-#
-# 
+## HDF5 Library Makefile(.in)
+##
+## Copyright (C) 1997 National Center for Supercomputing Applications.
+##                    All rights reserved.
+##
+## 
 top_srcdir=@top_srcdir@
 top_builddir=..
 srcdir=@srcdir@
 VPATH=.:@srcdir@
+.PATH: . @srcdir@
 @COMMENCE@
 
 TRACE=perl $(top_srcdir)/bin/trace
 
-# Add `-I.' to the C preprocessor flags.
+## Add `-I.' to the C preprocessor flags.
 CPPFLAGS=-I. -I@srcdir@ @CPPFLAGS@
 
-# This is our main target:
+## This is our main target:
 LIB=libhdf5.la
 
-# Source and object files for the library (lexicographically)...
+## Source and object files for the library (lexicographically)...
 LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fcore.c \
     H5Ffamily.c H5Fistore.c H5Flow.c H5Fmpio.c H5Fsec2.c H5Fsplit.c \
     H5Fstdio.c H5G.c H5Gent.c H5Gnode.c H5Gstab.c H5HG.c H5HL.c H5I.c H5MF.c \
@@ -30,28 +31,28 @@ LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fcore.c \
 
 LIB_OBJ=$(LIB_SRC:.c=.lo)
 
-# Temporary files
+## Temporary files
 MOSTLYCLEAN=H5detect.o H5detect H5Tinit.o H5Tinit.c
 
-# Public header files (to be installed)...
+## Public header files (to be installed)...
 PUB_HDR=H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Dpublic.h \
     H5Epublic.h H5Fpublic.h H5Gpublic.h H5HGpublic.h H5HLpublic.h \
     H5Ipublic.h H5MFpublic.h H5MMpublic.h H5Opublic.h H5Ppublic.h \
     H5Rpublic.h H5RApublic.h H5Spublic.h H5Tpublic.h H5Zpublic.h H5config.h \
     hdf5.h H5api_adpt.h
 
-# Other header files (not to be installed)...
+## Other header files (not to be installed)...
 PRIVATE_HDR=H5private.h H5Aprivate.h H5Apkg.h H5ACprivate.h H5Bprivate.h \
     H5Dprivate.h H5Eprivate.h H5Fprivate.h H5Gprivate.h H5Gpkg.h \
     H5HGprivate.h H5HLprivate.h H5Iprivate.h H5MFprivate.h H5MMprivate.h \
     H5Oprivate.h H5Pprivate.h H5Rprivate.h H5RAprivate.h H5Sprivate.h \
     H5Tprivate.h H5TBprivate.h H5Tpkg.h H5Vprivate.h H5Zprivate.h
 
-# Number format detection
+## Number format detection
 H5Tinit.c: H5detect
 	$(RUNSERIAL) ./H5detect >H5Tinit.c
 
-# no $(LIB) in the action below since that's being made now.
+## no $(LIB) in the action below since that's being made now.
 H5detect: H5detect.o
 	$(CC) $(CFLAGS) -o $@ H5detect.o $(LDFLAGS) $(LIBS)
 
