@@ -24,7 +24,7 @@ DUMPER=h5dump               # The dumper to use
 DUMPER_BIN=`pwd`/../$DUMPER    # The path of the dumper binary
 JAM=h5jam                     # Tool to test
 UNJAM=h5unjam                     # Tool to test
-JAM_BIN=`pwd`    # The path of the jam binary
+JAM_BIN="$RUNSERIAL "`pwd`    # The path of the jam binary
 UNJAM_BIN=`pwd`    # The path of the jam binary
 
 CMP='cmp -s'
@@ -186,7 +186,7 @@ CHECK_UB_1() {
 		else
 			cmpfile="tt2"
 			size=`expr $s2 + $s1`
-			./getub -c $s2 $origfile > $cmpfile
+			$JAM_BIN/getub -c $s2 $origfile > $cmpfile
 			cat $ufile >> $cmpfile
 		fi
 	else
@@ -199,7 +199,7 @@ CHECK_UB_1() {
 	# Extract 'size' bytes from the front of 'hfile'
 	# Compare to 'cmpfile', result is set in result1
 	tfile="tt1"
-	./getub -c $size $hfile > $tfile
+	$JAM_BIN/getub -c $size $hfile > $tfile
 	res=`cmp $cmpfile $tfile`
 	if [ "$?" != "0" ];
 	then
