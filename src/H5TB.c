@@ -1164,7 +1164,7 @@ H5TB_ffind(H5TB_NODE * root, void * key, unsigned fast_compare, H5TB_NODE ** pp)
             if (ptr) {
                 while (0 != (cmp_addr = (*(haddr_t *)key - *(haddr_t *)ptr->key))) {
                       parent = ptr;
-                      side = (cmp < 0) ? LEFT : RIGHT;
+                      side = (cmp_addr < 0) ? LEFT : RIGHT;
                       if (!HasChild(ptr, side))
                           break;
                       ptr = ptr->link[side];

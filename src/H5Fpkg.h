@@ -65,7 +65,7 @@
 #   define H5F_OVERFLOW_HSIZET2OFFT(X)					      \
     ((hsize_t)(X)>=(hsize_t)((hsize_t)1<<(8*sizeof(off_t)-1)))
 #else
-#   define H5F_OVERFLOW_SIZET2OFFT(X) 0
+#   define H5F_OVERFLOW_HSIZET2OFFT(X) 0
 #endif
 
 /* The raw data chunk cache */
