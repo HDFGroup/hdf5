@@ -35,6 +35,8 @@ const char *FILENAME[] = {
     "compact_dataset",
     "dset_offset",
     "max_compact_dataset",
+    "simple",
+    "set_local",
     NULL
 };
 
@@ -45,6 +47,7 @@ const char *FILENAME[] = {
 #define DSET_CHUNKED_NAME	"chunked"
 #define DSET_COMPACT_NAME       "compact"
 #define DSET_SIMPLE_IO_NAME	"simple_io"
+#define DSET_USERBLOCK_IO_NAME	"userblock_io"
 #define DSET_COMPACT_IO_NAME    "compact_io"
 #define DSET_COMPACT_MAX_NAME   "max_compact"
 #define DSET_COMPACT_MAX2_NAME   "max_compact_2"
@@ -281,9 +284,10 @@ test_create(hid_t file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_simple_io(hid_t file, char *fname)
+test_simple_io(hid_t fapl)
 {
-    hid_t		dataset, space, xfer;
+    char                filename[32];
+    hid_t		file, dataset, space, xfer;
     int			i, j, n;
     hsize_t		dims[2];
     void		*tconv_buf = NULL;
@@ -293,13 +297,16 @@ test_simple_io(hid_t file, char *fname)
     
     TESTING("simple I/O");
 
+    h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
+    
     /* Initialize the dataset */
-    for (i = n = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
+    for (i = n = 0; i < 100; i++)
+	for (j = 0; j < 200; j++)
 	    points[i][j] = n++;
-	}
-    }
 
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+	goto error;
+    
     /* Create the data space */
     dims[0] = 100;
     dims[1] = 200;
@@ -327,8 +334,27 @@ test_simple_io(hid_t file, char *fname)
      * compare it with the data written in.*/
     if((offset=H5Dget_offset(dataset))==HADDR_UNDEF) goto error;
 
-    H5Fflush(file, H5F_SCOPE_GLOBAL);
-    f = HDopen(fname, O_RDONLY, 0);
+    /* Read the dataset back */
+    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, check)<0)
+	goto error;
+
+    /* Check that the values read are the same as the values written */
+    for (i = 0; i < 100; i++) {
+	for (j = 0; j < 200; j++) {
+	    if (points[i][j] != check[i][j]) {
+		H5_FAILED();
+		printf("    Read different values than written.\n");
+		printf("    At index %d,%d\n", i, j);
+		goto error;
+	    }
+	}
+    }
+
+    if(H5Pclose (xfer)<0) goto error;
+    if(H5Dclose(dataset)<0) goto error;
+    if(H5Fclose(file)<0) goto error;
+
+    f = HDopen(filename, O_RDONLY, 0);
     HDlseek(f, (off_t)offset, SEEK_SET);
     HDread(f, rdata, sizeof(int)*100*200);
     
@@ -346,29 +372,11 @@ test_simple_io(hid_t file, char *fname)
 
     HDclose(f);
 
-    /* Read the dataset back */
-    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, check)<0)
-	goto error;
-
-    /* Check that the values read are the same as the values written */
-    for (i = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
-	    if (points[i][j] != check[i][j]) {
-		H5_FAILED();
-		printf("    Read different values than written.\n");
-		printf("    At index %d,%d\n", i, j);
-		goto error;
-	    }
-	}
-    }
-
-    i=H5Pclose (xfer);
-    H5Dclose(dataset);
     free (tconv_buf);
     PASSED();
     return 0;
 
-  error:
+error:
     return -1;
 }
 
@@ -416,7 +424,7 @@ test_userblock_offset(hid_t fapl)
     if ((space = H5Screate_simple(2, dims, NULL))<0) goto error;
 
     /* Create the dataset */
-    if ((dataset = H5Dcreate(file, DSET_SIMPLE_IO_NAME, H5T_NATIVE_INT, space,
+    if ((dataset = H5Dcreate(file, DSET_USERBLOCK_IO_NAME, H5T_NATIVE_INT, space,
 			     H5P_DEFAULT))<0) goto error;
 
     /* Write the data to the dataset */
@@ -428,7 +436,9 @@ test_userblock_offset(hid_t fapl)
      * compare it with the data written in.*/
     if((offset=H5Dget_offset(dataset))==HADDR_UNDEF) goto error;
 
-    H5Fflush(file, H5F_SCOPE_GLOBAL);
+    if(H5Dclose(dataset)<0) goto error;
+    if(H5Fclose(file)<0) goto error;
+
     f = HDopen(filename, O_RDONLY, 0);
     HDlseek(f, (off_t)offset, SEEK_SET);
     HDread(f, rdata, sizeof(int)*100*200);
@@ -447,13 +457,10 @@ test_userblock_offset(hid_t fapl)
 
     HDclose(f);
 
-    H5Fflush(file, H5F_SCOPE_GLOBAL);
-    H5Dclose(dataset);
-    H5Fclose(file);
     PASSED();
     return 0;
 
-  error:
+error:
     return -1;
 }
 
@@ -2517,8 +2524,9 @@ const H5Z_class_t H5Z_SET_LOCAL[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_set_local(const char *filename, hid_t fapl)
+test_set_local(hid_t fapl)
 {
+    char        filename[32];
     hid_t       file;           /* File ID */
     hid_t       dsid;           /* Dataset ID */
     hid_t       sid;            /* Dataspace ID */
@@ -2532,6 +2540,8 @@ test_set_local(const char *filename, hid_t fapl)
 
     TESTING("dataset filter 'set local' callback");
 
+    h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
+    
     /* Initialize the integer & floating-point dataset */
     for (i = n = 0; i < 100; i++)
 	for (j = 0; j < 200; j++) {
@@ -2540,10 +2550,10 @@ test_set_local(const char *filename, hid_t fapl)
 	}
 
     /* Open file */
-    if ((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0) {
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
         H5_FAILED();
         printf("    Line %d: Can't open file\n",__LINE__);
-        goto error;
+	goto error;
     }
     
     /* Create dcpl with special filter */
@@ -2814,9 +2824,7 @@ main(void)
     if (H5Gclose (grp)<0) goto error;
 
     nerrors += test_create(file)<0 	?1:0;
-#ifndef H5_NO_SHARED_WRITING
-    nerrors += test_simple_io(file, filename)<0	?1:0;
-#endif /* H5_NO_SHARED_WRITING */
+    nerrors += test_simple_io(fapl)<0	?1:0;
     nerrors += test_compact_io(fapl)<0  ?1:0;
     nerrors += test_max_compact(fapl)<0  ?1:0;
     nerrors += test_tconv(file)<0	?1:0; 
@@ -2824,15 +2832,11 @@ main(void)
     nerrors += test_onebyte_shuffle(file)<0 ?1:0;
     nerrors += test_multiopen (file)<0	?1:0;
     nerrors += test_types(file)<0       ?1:0;
-#ifndef H5_NO_SHARED_WRITING    
     nerrors += test_userblock_offset(fapl)<0     ?1:0;
-#endif /* H5_NO_SHARED_WRITING */    
     nerrors += test_missing_filter(file)<0	?1:0;
 #ifndef H5_WANT_H5_V1_4_COMPAT
     nerrors += test_can_apply(file)<0	?1:0; 
-#ifndef H5_NO_SHARED_WRITING    
-    nerrors += test_set_local(filename,fapl)<0	?1:0;
-#endif /* H5_NO_SHARED_WRITING */     
+    nerrors += test_set_local(fapl)<0	?1:0;
 #endif /* H5_WANT_H5_V1_4_COMPAT */
     nerrors += test_can_apply_szip(file)<0	?1:0; 
 
