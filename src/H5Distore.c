@@ -2411,6 +2411,10 @@ done:
  * 		Quincey Koziol, 2002-05-16
  *		Rewrote algorithm to allocate & write blocks without using
  *              lock/unlock code.
+ *
+ * 		Quincey Koziol, 2002-05-17
+ *		Added feature to avoid writing fill-values if user has indicated
+ *              that they should never be written.
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_PARALLEL
@@ -2422,6 +2426,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     hsize_t	chunk_size;     /* Size of chunk in bytes */
     H5O_pline_t pline;          /* I/O pipeline information */
     H5O_fill_t fill;            /* Fill value information */
+    H5D_fill_time_t fill_time;  /* When to write fill values */
     H5F_istore_ud1_t udata;	/* B-tree pass-through for creating chunk */
     void *chunk=NULL;           /* Chunk buffer for writing fill values */
     H5P_genplist_t *dx_plist;   /* Data xfer property list */
@@ -2429,7 +2434,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     int         mpi_rank;       /* This process's rank  */
     int         mpi_size;       /* Total # of processes */
     int         mpi_round=0;    /* Current process responsible for I/O */
-    unsigned    chunk_allocated=0; /* Flag to indicate that chunk was actually allocated */
+    unsigned    blocks_written=0; /* Flag to indicate that chunk was actually written */
     int		carry;          /* Flag to indicate that chunk increment carrys to higher dimension (sorta) */
     int		i;              /* Local index variable */
     unsigned	u;              /* Local index variable */
@@ -2452,6 +2457,8 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "can't get fill value");
     if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "can't get data pipeline");
+    if(H5P_get(dc_plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve fill time");
 
     /* Get necessary properties from dataset transfer property list */
     if (TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER) || NULL == (dx_plist = H5I_object(dxpl_id)))
@@ -2472,23 +2479,26 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         chunk_size *= layout->dim[u];
     } /* end for */
 
-    /* Allocate chunk buffer for processes to use when writing fill values */
-    if (NULL==(chunk = H5F_istore_chunk_alloc(chunk_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for chunk");
+    /* Check if fill values should be written to blocks */
+    if(fill_time != H5D_FILL_TIME_NEVER) {
+        /* Allocate chunk buffer for processes to use when writing fill values */
+        if (NULL==(chunk = H5F_istore_chunk_alloc(chunk_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for chunk");
 
-    /* Fill the chunk with the proper values */
-    if(fill.buf) {
-        /*
-         * Replicate the fill value throughout the chunk.
-         */
-        assert(0==chunk_size % fill.size);
-        H5V_array_fill(chunk, fill.buf, fill.size, chunk_size/fill.size);
-    } else {
-        /*
-         * No fill value was specified, assume all zeros.
-         */
-        HDmemset (chunk, 0, chunk_size);
-    } /* end else */
+        /* Fill the chunk with the proper values */
+        if(fill.buf) {
+            /*
+             * Replicate the fill value throughout the chunk.
+             */
+            assert(0==chunk_size % fill.size);
+            H5V_array_fill(chunk, fill.buf, fill.size, chunk_size/fill.size);
+        } else {
+            /*
+             * No fill value was specified, assume all zeros.
+             */
+            HDmemset (chunk, 0, chunk_size);
+        } /* end else */
+    } /* end if */
 
     /* Retrieve up MPI parameters */
     if ((mpi_rank=H5FD_mpio_mpi_rank(f->shared->lf))<0)
@@ -2513,15 +2523,18 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             if (H5B_insert(f, H5B_ISTORE, layout->addr, split_ratios, &udata)<0)
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to allocate chunk");
 
-            /* Round-robin write the chunks out from only one process */
-            if(mpi_round==mpi_rank) {
-                if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, dxpl_id, chunk)<0)
-                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file");
-            } /* end if */
-            mpi_round=(++mpi_round)%mpi_size;
+            /* Check if fill values should be written to blocks */
+            if(fill_time != H5D_FILL_TIME_NEVER) {
+                /* Round-robin write the chunks out from only one process */
+                if(mpi_round==mpi_rank) {
+                    if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, dxpl_id, chunk)<0)
+                        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file");
+                } /* end if */
+                mpi_round=(++mpi_round)%mpi_size;
 
-            /* Indicate that a chunk was allocated */
-            chunk_allocated=1;
+                /* Indicate that blocks are being written */
+                blocks_written=1;
+            } /* end if */
         } /* end if */
 	
         /* Increment indices */
@@ -2536,7 +2549,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     } /* end while */
 
     /* Only need to block at the barrier if we actually allocated a chunk */
-    if(chunk_allocated) {
+    if(blocks_written) {
         /* Wait at barrier to avoid race conditions where some processes are
          * still writing out chunks and other processes race ahead to read
          * them in, getting bogus data.
