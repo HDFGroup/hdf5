@@ -742,6 +742,11 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
     n_test=0
     runtest_type="hosts"
     for h in $TESTHOST; do
+	# Must do CONFIGNAME before $h got changed by the second cut.
+	# cut returns the whole string if there is no / in the string
+	# at all.  But that works okay for the CONFIGNAME too.
+	CONFIGNAME=`echo $h | cut -f2 -d/`
+	h=`echo $h | cut -f1 -d/`
 	n_test=`expr $n_test + 1`
 	TMP_OUTPUT="#$h.out"
 	(PRINT "=============="
@@ -751,7 +756,7 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
 	# run the remote shell command with output to $TMP_OUTPUT
 	case "$RSH" in
 	    rsh|ssh)
-		CMD="$RSH $h -n $PROGNAME -configname $h"
+		CMD="$RSH $h -n $PROGNAME -configname $CONFIGNAME"
 		PRINT $CMD
 		# kludge: some how eirene and houdin can not have
                 # rsh connections too close.  wait a few seconds
@@ -778,6 +783,7 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
     # wait for all launched tests to finish, then cat them back out.
     wait
     for h in $TESTHOST; do
+	h=`echo $h | cut -f1 -d/`
 	TMP_OUTPUT="#$h.out"
 	cat $TMP_OUTPUT
 	# Verify test script did complete by checking the last lines
