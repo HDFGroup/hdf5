@@ -44,7 +44,26 @@
 
 /* B-tree signatures */
 #define H5B2_HDR_MAGIC                  "BTHD"          /* Header */
+#define H5B2_INT_MAGIC                  "BTND"          /* Internal node */
 #define H5B2_LEAF_MAGIC                 "BTLF"          /* Leaf node */
+
+/* Size of storage for number of records per node (on disk) */
+#define H5B2_SIZEOF_RECORDS_PER_NODE    2
+
+/* Size of a "node pointer" (on disk) */
+#define H5B2_NODE_POINTER_SIZE(f)       (H5F_SIZEOF_ADDR(f)+H5B2_SIZEOF_RECORDS_PER_NODE+H5F_SIZEOF_SIZE(f))
+
+/* Size of the B-tree header on disk */
+#define H5B2_HEADER_SIZE(f)     (                                             \
+    4 + /* Signature */                                                       \
+    1 + /* Version */                                                         \
+    1 + /* Tree type */                                                       \
+    4 + /* Node size, in bytes */                                             \
+    2 + /* Key size, in bytes */                                              \
+    2 + /* Depth of tree */                                                   \
+    2 + /* Split % of full (as integer, ie. "98" means 98%) */                \
+    2 + /* Merge % of full (as integer, ie. "98" means 98%) */                \
+    H5B2_NODE_POINTER_SIZE(f))  /* Node pointer to root node in tree */
 
 /****************************/
 /* Package Private Typedefs */
@@ -67,9 +86,7 @@ typedef struct H5B2_shared_t {
     H5FL_fac_head_t     *int_fac;       /* Factory for internal node native key blocks */
     H5FL_fac_head_t     *leaf_fac;      /* Factory for leaf node native key blocks */
     H5FL_fac_head_t     *node_ptr_fac;  /* Factory for internal node node pointer blocks */
-    size_t              *int_nat_off;   /* Array of offsets of native keys in internal node block */
-    size_t              *leaf_nat_off;  /* Array of offsets of native keys in leaf node block */
-    size_t              *node_ptr_off;  /* Array of offsets of node pointers in internal node block */
+    size_t              *nat_off;       /* Array of offsets of native keys */
 
     /* Information set by user */
     unsigned    split_percent;  /* Percent full at which to split the node, when inserting */
@@ -97,7 +114,7 @@ typedef struct H5B2_t {
     H5RC_t	*shared;	/* Ref-counted shared info	              */
 } H5B2_t;
 
-/* B-tree leaf information */
+/* B-tree leaf node information */
 typedef struct H5B2_leaf_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
     H5AC_info_t cache_info;
@@ -105,12 +122,54 @@ typedef struct H5B2_leaf_t {
     /* Internal B-tree information */
     H5RC_t	*shared;	/* Ref-counted shared info	              */
     uint8_t     *leaf_native;   /* Pointer to native keys                     */
-    unsigned    nrec;           /* Number of records in leaf node             */
+    unsigned    nrec;           /* Number of records in node                  */
 } H5B2_leaf_t;
+
+/* B-tree internal node information */
+typedef struct H5B2_internal_t {
+    /* Information for H5AC cache functions, _must_ be first field in structure */
+    H5AC_info_t cache_info;
+
+    /* Internal B-tree information */
+    H5RC_t	*shared;	/* Ref-counted shared info	              */
+    uint8_t     *int_native;    /* Pointer to native keys                     */
+    H5B2_node_ptr_t *node_ptrs; /* Pointer to node pointers                   */
+    unsigned    nrec;           /* Number of records in node                  */
+} H5B2_internal_t;
+
+
+/*****************************/
+/* Package Private Variables */
+/*****************************/
+
+/* H5B2 header inherits cache-like properties from H5AC */
+H5_DLLVAR const H5AC_class_t H5AC_BT2_HDR[1];
+
+/* H5B2 internal node inherits cache-like properties from H5AC */
+H5_DLLVAR const H5AC_class_t H5AC_BT2_INT[1];
+
+/* H5B2 leaf node inherits cache-like properties from H5AC */
+H5_DLLVAR const H5AC_class_t H5AC_BT2_LEAF[1];
+
+/* Declare a free list to manage the H5B2_t struct */
+H5FL_EXTERN(H5B2_t);
+
+/* Declare a free list to manage the H5B2_internal_t struct */
+H5FL_EXTERN(H5B2_internal_t);
+
+/* Declare a free list to manage the H5B2_leaf_t struct */
+H5FL_EXTERN(H5B2_leaf_t);
+
 
 /******************************/
 /* Package Private Prototypes */
 /******************************/
+H5_DLL herr_t H5B2_shared_free (void *_shared);
+H5_DLL herr_t H5B2_shared_init (H5F_t *f, H5B2_t *bt2, const H5B2_class_t *type,
+    size_t node_size, size_t rkey_size, unsigned split_percent, unsigned merge_percent);
+H5_DLL herr_t H5B2_cache_hdr_dest(H5F_t *f, H5B2_t *b);
+H5_DLL herr_t H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *l);
+H5_DLL herr_t H5B2_cache_internal_dest(H5F_t *f, H5B2_internal_t *i);
 H5_DLL herr_t H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth, const H5B2_class_t *type);
 

@@ -31,9 +31,6 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 
-/* H5B2 inherits cache-like properties from H5AC */
-extern const H5AC_class_t H5AC_BT2_HDR[1];
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5B2_hdr_debug

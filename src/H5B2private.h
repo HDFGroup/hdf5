@@ -72,8 +72,11 @@ typedef struct H5B2_class_t {
     /* Compare records, according to a key */
     herr_t (*compare)(const H5F_t *f, hid_t dxpl_id, const void *rec1, const void *rec2);  /*  Compare two native records */
 
-    /* Encode, decode, debug record values */
-    herr_t (*encode)(const H5F_t *f, uint8_t *raw, const void *record);  /*  Store record in native key table */
+    /* Encode & decode record values */
+    herr_t (*encode)(const H5F_t *f, uint8_t *raw, const void *record);  /*  Encode record from native form to disk storage form */
+    herr_t (*decode)(const H5F_t *f, const uint8_t *raw, void *record);  /*  Decode record from disk storage form to native form */
+
+    /* Debug record values */
 
 } H5B2_class_t;
 

@@ -219,12 +219,13 @@ MOSTLYCLEANFILES = H5detect.o H5detect.lo H5detect H5Tinit.o H5Tinit.lo H5Tinit.
 DISTCLEAN = libhdf5.settings
 
 # library sources
-libhdf5_la_SOURCES = H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2dbg.c H5C.c H5D.c      \
+libhdf5_la_SOURCES = H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c H5C.c \
+        H5D.c \
         H5Dcontig.c \
         H5Dcompact.c \
         H5Defl.c H5Dio.c H5Distore.c H5Dmpio.c H5Dselect.c H5Dtest.c H5E.c H5F.c \
         H5Fdbg.c H5FD.c H5FDcore.c  \
-        H5FDfamily.c H5FDfphdf5.c H5FDgass.c H5FDlog.c H5FDmpi.c H5FDmpio.c     \
+        H5FDfamily.c H5FDfphdf5.c H5FDgass.c H5FDlog.c H5FDmpi.c H5FDmpio.c   \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDsrb.c H5FDstdio.c           \
         H5FDstream.c H5FL.c H5FO.c H5FP.c H5FPclient.c H5FPserver.c H5FS.c    \
         H5G.c H5Gent.c H5Gnode.c H5Gstab.c  \
@@ -234,7 +235,7 @@ libhdf5_la_SOURCES = H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2dbg.c H5C.c H5D.c      \
         H5Oname.c H5Onull.c H5Opline.c H5Osdspace.c H5Oshared.c H5Ostab.c     \
         H5P.c H5Pdcpl.c H5Pdxpl.c H5Pfapl.c H5Pfcpl.c H5Ptest.c H5R.c H5RC.c  \
         H5RS.c H5S.c H5Sall.c H5Shyper.c H5Smpio.c H5Snone.c H5Spoint.c       \
-        H5Sselect.c H5Stest.c H5SL.c H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c    \
+        H5Sselect.c H5Stest.c H5SL.c H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c \
         H5Tcompound.c H5Tconv.c H5Tcset.c H5Tenum.c H5Tfields.c H5Tfixed.c    \
         H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Topaque.c H5Torder.c   \
         H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvlen.c H5TS.c H5V.c H5Z.c  \
@@ -288,27 +289,27 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 
 libhdf5_la_LDFLAGS =
 libhdf5_la_LIBADD =
-am_libhdf5_la_OBJECTS = H5.lo H5A.lo H5AC.lo H5B.lo H5B2.lo H5B2dbg.lo \
-	H5C.lo H5D.lo H5Dcontig.lo H5Dcompact.lo H5Defl.lo H5Dio.lo \
-	H5Distore.lo H5Dmpio.lo H5Dselect.lo H5Dtest.lo H5E.lo H5F.lo \
-	H5Fdbg.lo H5FD.lo H5FDcore.lo H5FDfamily.lo H5FDfphdf5.lo \
-	H5FDgass.lo H5FDlog.lo H5FDmpi.lo H5FDmpio.lo H5FDmpiposix.lo \
-	H5FDmulti.lo H5FDsec2.lo H5FDsrb.lo H5FDstdio.lo H5FDstream.lo \
-	H5FL.lo H5FO.lo H5FP.lo H5FPclient.lo H5FPserver.lo H5FS.lo \
-	H5G.lo H5Gent.lo H5Gnode.lo H5Gstab.lo H5HG.lo H5HGdbg.lo \
-	H5HL.lo H5HLdbg.lo H5HP.lo H5I.lo H5MF.lo H5MM.lo H5O.lo \
-	H5Oattr.lo H5Obogus.lo H5Ocont.lo H5Odtype.lo H5Oefl.lo \
-	H5Ofill.lo H5Olayout.lo H5Omtime.lo H5Oname.lo H5Onull.lo \
-	H5Opline.lo H5Osdspace.lo H5Oshared.lo H5Ostab.lo H5P.lo \
-	H5Pdcpl.lo H5Pdxpl.lo H5Pfapl.lo H5Pfcpl.lo H5Ptest.lo H5R.lo \
-	H5RC.lo H5RS.lo H5S.lo H5Sall.lo H5Shyper.lo H5Smpio.lo \
-	H5Snone.lo H5Spoint.lo H5Sselect.lo H5Stest.lo H5SL.lo H5ST.lo \
-	H5T.lo H5Tarray.lo H5Tbit.lo H5Tcommit.lo H5Tcompound.lo \
-	H5Tconv.lo H5Tcset.lo H5Tenum.lo H5Tfields.lo H5Tfixed.lo \
-	H5Tfloat.lo H5Tinit.lo H5Tnative.lo H5Toffset.lo H5Topaque.lo \
-	H5Torder.lo H5Tpad.lo H5Tprecis.lo H5Tstrpad.lo H5Tvlen.lo \
-	H5TS.lo H5V.lo H5Z.lo H5Zdeflate.lo H5Zfletcher32.lo H5Znbit.lo \
-	H5Zshuffle.lo H5Zszip.lo H5Ztrans.lo
+am_libhdf5_la_OBJECTS = H5.lo H5A.lo H5AC.lo H5B.lo H5B2.lo H5B2cache.lo \
+	H5B2dbg.lo H5C.lo H5D.lo H5Dcontig.lo H5Dcompact.lo H5Defl.lo \
+	H5Dio.lo H5Distore.lo H5Dmpio.lo H5Dselect.lo H5Dtest.lo H5E.lo \
+	H5F.lo H5Fdbg.lo H5FD.lo H5FDcore.lo H5FDfamily.lo \
+	H5FDfphdf5.lo H5FDgass.lo H5FDlog.lo H5FDmpi.lo H5FDmpio.lo \
+	H5FDmpiposix.lo H5FDmulti.lo H5FDsec2.lo H5FDsrb.lo \
+	H5FDstdio.lo H5FDstream.lo H5FL.lo H5FO.lo H5FP.lo \
+	H5FPclient.lo H5FPserver.lo H5FS.lo H5G.lo H5Gent.lo H5Gnode.lo \
+	H5Gstab.lo H5HG.lo H5HGdbg.lo H5HL.lo H5HLdbg.lo H5HP.lo H5I.lo \
+	H5MF.lo H5MM.lo H5O.lo H5Oattr.lo H5Obogus.lo H5Ocont.lo \
+	H5Odtype.lo H5Oefl.lo H5Ofill.lo H5Olayout.lo H5Omtime.lo \
+	H5Oname.lo H5Onull.lo H5Opline.lo H5Osdspace.lo H5Oshared.lo \
+	H5Ostab.lo H5P.lo H5Pdcpl.lo H5Pdxpl.lo H5Pfapl.lo H5Pfcpl.lo \
+	H5Ptest.lo H5R.lo H5RC.lo H5RS.lo H5S.lo H5Sall.lo H5Shyper.lo \
+	H5Smpio.lo H5Snone.lo H5Spoint.lo H5Sselect.lo H5Stest.lo \
+	H5SL.lo H5ST.lo H5T.lo H5Tarray.lo H5Tbit.lo H5Tcommit.lo \
+	H5Tcompound.lo H5Tconv.lo H5Tcset.lo H5Tenum.lo H5Tfields.lo \
+	H5Tfixed.lo H5Tfloat.lo H5Tinit.lo H5Tnative.lo H5Toffset.lo \
+	H5Topaque.lo H5Torder.lo H5Tpad.lo H5Tprecis.lo H5Tstrpad.lo \
+	H5Tvlen.lo H5TS.lo H5V.lo H5Z.lo H5Zdeflate.lo H5Zfletcher32.lo \
+	H5Znbit.lo H5Zshuffle.lo H5Zszip.lo H5Ztrans.lo
 libhdf5_la_OBJECTS = $(am_libhdf5_la_OBJECTS)
 noinst_PROGRAMS = H5detect$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
@@ -327,9 +328,9 @@ depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/H5.Plo ./$(DEPDIR)/H5A.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/H5AC.Plo ./$(DEPDIR)/H5B.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/H5B2.Plo ./$(DEPDIR)/H5B2dbg.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/H5C.Plo ./$(DEPDIR)/H5D.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/H5Dcompact.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/H5B2.Plo ./$(DEPDIR)/H5B2cache.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/H5B2dbg.Plo ./$(DEPDIR)/H5C.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/H5D.Plo ./$(DEPDIR)/H5Dcompact.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/H5Dcontig.Plo ./$(DEPDIR)/H5Defl.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/H5Dio.Plo ./$(DEPDIR)/H5Distore.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/H5Dmpio.Plo ./$(DEPDIR)/H5Dselect.Plo \
@@ -484,6 +485,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5AC.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5B.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5B2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5B2cache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5B2dbg.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5C.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5D.Plo@am__quote@

@@ -39,12 +39,13 @@ MOSTLYCLEANFILES=H5detect.o H5detect.lo H5detect H5Tinit.o H5Tinit.lo H5Tinit.c
 DISTCLEAN=libhdf5.settings
 
 # library sources
-libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2dbg.c H5C.c H5D.c      \
+libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c H5C.c \
+        H5D.c \
         H5Dcontig.c \
         H5Dcompact.c \
         H5Defl.c H5Dio.c H5Distore.c H5Dmpio.c H5Dselect.c H5Dtest.c H5E.c H5F.c \
         H5Fdbg.c H5FD.c H5FDcore.c  \
-        H5FDfamily.c H5FDfphdf5.c H5FDgass.c H5FDlog.c H5FDmpi.c H5FDmpio.c     \
+        H5FDfamily.c H5FDfphdf5.c H5FDgass.c H5FDlog.c H5FDmpi.c H5FDmpio.c   \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDsrb.c H5FDstdio.c           \
         H5FDstream.c H5FL.c H5FO.c H5FP.c H5FPclient.c H5FPserver.c H5FS.c    \
         H5G.c H5Gent.c H5Gnode.c H5Gstab.c  \
@@ -54,7 +55,7 @@ libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2dbg.c H5C.c H5D.c      \
         H5Oname.c H5Onull.c H5Opline.c H5Osdspace.c H5Oshared.c H5Ostab.c     \
         H5P.c H5Pdcpl.c H5Pdxpl.c H5Pfapl.c H5Pfcpl.c H5Ptest.c H5R.c H5RC.c  \
         H5RS.c H5S.c H5Sall.c H5Shyper.c H5Smpio.c H5Snone.c H5Spoint.c       \
-        H5Sselect.c H5Stest.c H5SL.c H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c    \
+        H5Sselect.c H5Stest.c H5SL.c H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c \
         H5Tcompound.c H5Tconv.c H5Tcset.c H5Tenum.c H5Tfields.c H5Tfixed.c    \
         H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Topaque.c H5Torder.c   \
         H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvlen.c H5TS.c H5V.c H5Z.c  \
