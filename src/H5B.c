@@ -2109,15 +2109,19 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
         /* If there is a key debugging routine, use it to display the left & right keys */
 	if (type->debug_key) {
             /* Decode the 'left' key & print it */
+            HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
+                      "Left Key:");
             if(bt->key[i].nkey==NULL)
                 H5B_decode_key(f, bt, i);
-	    (type->debug_key)(stream, f, dxpl_id, indent+3, MAX (0, fwidth-3),
+	    (type->debug_key)(stream, f, dxpl_id, indent+6, MAX (0, fwidth-6),
 			      bt->key[i].nkey, udata);
 
             /* Decode the 'right' key & print it */
+            HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
+                      "Right Key:");
             if(bt->key[i+1].nkey==NULL)
                 H5B_decode_key(f, bt, i+1);
-	    (type->debug_key)(stream, f, dxpl_id, indent+3, MAX (0, fwidth-3),
+	    (type->debug_key)(stream, f, dxpl_id, indent+6, MAX (0, fwidth-6),
 			      bt->key[i+1].nkey, udata);
 	}
     }

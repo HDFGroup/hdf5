@@ -232,7 +232,10 @@ H5G_node_debug_key (FILE *stream, H5F_t *f, hid_t dxpl_id, int indent, int fwidt
     FUNC_ENTER_NOAPI(H5G_node_debug_key, FAIL);
     assert (key);
 
-    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Name :");
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Heap offset:",
+        (unsigned)key->offset);
+
+    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Name:");
     if (NULL == (s = H5HL_peek(f, dxpl_id, udata->heap_addr, key->offset)))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read symbol name");
     HDfprintf (stream, "%s\n", s);

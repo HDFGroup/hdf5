@@ -4125,7 +4125,7 @@ H5F_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE * stream, int inden
 	  int fwidth)
 {
     hsize_t userblock_size;
-    int     boot_vers, freespace_vers, obj_dir_vers, share_head_vers;
+    int     super_vers, freespace_vers, obj_dir_vers, share_head_vers;
     H5P_genplist_t *plist;              /* Property list */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -4144,59 +4144,59 @@ H5F_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE * stream, int inden
 
     if(H5P_get(plist, H5F_CRT_USER_BLOCK_NAME, &userblock_size)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get user block size");
-
-    if(H5P_get(plist, H5F_CRT_BOOT_VERS_NAME, &boot_vers)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get boot block version");
+    if(H5P_get(plist, H5F_CRT_BOOT_VERS_NAME, &super_vers)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get super block version");
     if(H5P_get(plist, H5F_CRT_FREESPACE_VERS_NAME, &freespace_vers)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get boot block version");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get super block version");
     if(H5P_get(plist, H5F_CRT_OBJ_DIR_VERS_NAME, &obj_dir_vers)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object directory version");
     if(H5P_get(plist, H5F_CRT_SHARE_HEAD_VERS_NAME, &share_head_vers)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get shared-header format version");
 
     /* debug */
-    HDfprintf(stream, "%*sFile Boot Block...\n", indent, "");
+    HDfprintf(stream, "%*sFile Super Block...\n", indent, "");
 
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "File name:",
 	      f->name);
     HDfprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth,
-	      "Flags",
+	      "File access flags",
 	      (unsigned) (f->shared->flags));
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Reference count:",
+	      "File open reference count:",
 	      (unsigned) (f->shared->nrefs));
-    HDfprintf(stream, "%*s%-*s 0x%08lx\n", indent, "", fwidth,
-	      "Consistency flags:",
-	      (unsigned long) (f->shared->consist_flags));
     HDfprintf(stream, "%*s%-*s %a (abs)\n", indent, "", fwidth,
-	      "Address of boot block:", f->shared->boot_addr);
-    HDfprintf(stream, "%*s%-*s %a (abs)\n", indent, "", fwidth,
-	      "Base address:", f->shared->base_addr);
-    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
-	      "Free list address:", f->shared->freespace_addr);
-    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
-	      "Driver information block:", f->shared->driver_addr);
-
+	      "Address of super block:", f->shared->boot_addr);
     HDfprintf(stream, "%*s%-*s %lu bytes\n", indent, "", fwidth,
 	      "Size of user block:", (unsigned long) userblock_size);
+
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Super block version number:", (unsigned) super_vers);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Free list version number:", (unsigned) freespace_vers);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Root group symbol table entry version number:", (unsigned) obj_dir_vers);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Shared header version number:", (unsigned) share_head_vers);
     HDfprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth,
-	      "Size of file size_t type:", (unsigned) f->shared->sizeof_size);
+	      "Size of file offsets (haddr_t type):", (unsigned) f->shared->sizeof_addr);
     HDfprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth,
-	      "Size of file haddr_t type:", (unsigned) f->shared->sizeof_addr);
+	      "Size of file lengths (hsize_t type):", (unsigned) f->shared->sizeof_size);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Symbol table leaf node 1/2 rank:", f->shared->sym_leaf_k);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Symbol table internal node 1/2 rank:",
               (unsigned) (f->shared->btree_k[H5B_SNODE_ID]));
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Boot block version number:", (unsigned) boot_vers);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Free list version number:", (unsigned) freespace_vers);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Object directory version number:", (unsigned) obj_dir_vers);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Shared header version number:", (unsigned) share_head_vers);
+    HDfprintf(stream, "%*s%-*s 0x%08lx\n", indent, "", fwidth,
+	      "File consistency flags:",
+	      (unsigned long) (f->shared->consist_flags));
+    HDfprintf(stream, "%*s%-*s %a (abs)\n", indent, "", fwidth,
+	      "Base address:", f->shared->base_addr);
+    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
+	      "Free list address:", f->shared->freespace_addr);
+
+    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
+	      "Address of driver information block:", f->shared->driver_addr);
 
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Root group symbol table entry:",

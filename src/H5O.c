@@ -3085,7 +3085,7 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     size_t	mesg_total = 0, chunk_total = 0;
     int		*sequence;
     haddr_t	tmp_addr;
-    herr_t	ret_value = FAIL;
+    herr_t	ret_value = SUCCEED;
     void	*(*decode)(H5F_t*, hid_t, const uint8_t*, H5O_shared_t*);
     herr_t      (*debug)(H5F_t*, hid_t, const void*, FILE*, int, int)=NULL;
 
@@ -3161,7 +3161,7 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 	/* message name and size */
 	HDfprintf(stream, "%*s%-*s 0x%04x %s(%d)\n",
 		  indent + 3, "", MAX(0, fwidth - 3),
-		  "Message ID:",
+		  "Message ID (sequence number):",
 		  (unsigned) (oh->mesg[i].type->id),
 		  oh->mesg[i].type->name,
 		  sequence[oh->mesg[i].type->id]++);
@@ -3207,10 +3207,12 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 	    debug = NULL;
 	
 	/* print the message */
+	HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
+		  "Message Information:");
 	if (debug)
-	    (debug)(f, dxpl_id, oh->mesg[i].native, stream, indent+3, MAX(0, fwidth-3));
+	    (debug)(f, dxpl_id, oh->mesg[i].native, stream, indent+6, MAX(0, fwidth-6));
 	else
-	    HDfprintf(stream, "%*sNo info for this message.\n", indent + 3, "");
+	    HDfprintf(stream, "%*s<No info for this message>\n", indent + 6, "");
 
 	/* If the message is shared then also print the pointed-to message */
 	if (oh->mesg[i].flags & H5O_FLAG_SHARED) {

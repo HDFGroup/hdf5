@@ -434,9 +434,14 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
 	      int indent, int fwidth, haddr_t heap)
 {
     const char		*lval = NULL;
+    int nested_indent, nested_fwidth;
     herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_ent_debug, FAIL);
+
+    /* Calculate the indent & field width values for nested information */
+    nested_indent=indent+3;
+    nested_fwidth=MAX(0,fwidth-3);
 
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	      "Name offset into private heap:",
@@ -449,38 +454,42 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
 	      "Dirty:",
 	      ent->dirty ? "Yes" : "No");
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth,
-	      "Symbol type:");
+	      "Cache info type:");
     switch (ent->type) {
-    case H5G_NOTHING_CACHED:
-        HDfprintf(stream, "Nothing Cached\n");
-        break;
+        case H5G_NOTHING_CACHED:
+            HDfprintf(stream, "Nothing Cached\n");
+            break;
 
-    case H5G_CACHED_STAB:
-        HDfprintf(stream, "Symbol Table\n");
+        case H5G_CACHED_STAB:
+            HDfprintf(stream, "Symbol Table\n");
 
-        HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-		  "B-tree address:", ent->cache.stab.btree_addr);
+            HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth,
+                      "Cached entry information:");
+            HDfprintf(stream, "%*s%-*s %a\n", nested_indent, "", nested_fwidth,
+                      "B-tree address:", ent->cache.stab.btree_addr);
 
-        HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-		  "Heap address:", ent->cache.stab.heap_addr);
-        break;
+            HDfprintf(stream, "%*s%-*s %a\n", nested_indent, "", nested_fwidth,
+                      "Heap address:", ent->cache.stab.heap_addr);
+            break;
 
-    case H5G_CACHED_SLINK:
-	HDfprintf (stream, "Symbolic Link\n");
-	HDfprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-		   "Link value offset:",
-		   (unsigned long)(ent->cache.slink.lval_offset));
-	if (H5F_addr_defined(heap)) {
-	    lval = H5HL_peek (ent->file, dxpl_id, heap, ent->cache.slink.lval_offset);
-	    HDfprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
-		       "Link value:",
-		       lval);
-	}
-	break;
-	
-    default:
-        HDfprintf(stream, "*** Unknown symbol type %d\n", ent->type);
-        break;
+        case H5G_CACHED_SLINK:
+            HDfprintf (stream, "Symbolic Link\n");
+            HDfprintf(stream, "%*s%-*s ", indent, "", fwidth,
+                      "Cached information:\n");
+            HDfprintf (stream, "%*s%-*s %lu\n", nested_indent, "", nested_fwidth,
+                       "Link value offset:",
+                       (unsigned long)(ent->cache.slink.lval_offset));
+            if (H5F_addr_defined(heap)) {
+                lval = H5HL_peek (ent->file, dxpl_id, heap, ent->cache.slink.lval_offset);
+                HDfprintf (stream, "%*s%-*s %s\n", nested_indent, "", nested_fwidth,
+                           "Link value:",
+                           lval);
+            }
+            break;
+            
+        default:
+            HDfprintf(stream, "*** Unknown symbol type %d\n", ent->type);
+            break;
     }
 
 done:
