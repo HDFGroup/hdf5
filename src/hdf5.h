@@ -46,7 +46,6 @@
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
 #include "H5FDsrb.h"        	/* Remote access using SRB              */
 #include "H5FDgass.h"		/* Remote files using GASS I/O		*/
-#include "H5FDdpss.h"       	/* Remote access using Storage Client API */
 #include "H5FDstream.h"     	/* in-memory files streamed via sockets */
 #include "H5FDmulti.h"		/* Usage-partitioned file family	*/
 #include "H5FDlog.h"        	/* sec2 driver with I/O logging (for debugging) */
