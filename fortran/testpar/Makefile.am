@@ -36,9 +36,33 @@ ptesthdf5_fortran_SOURCES=thdf5.f90 ptesthdf5_fortran.f90 thyperslab_wr.f90
 # The tests depend on several libraries.
 LDADD=$(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 
+# Fortran module files can have different extensions and different names
+# (e.g., different capitalizations) on different platforms.  Write rules
+# for them explicitly rather than trying to teach automake about them.
+# They should be installed as headers and removed during clean.
+maintainer-clean-local: clean-local
+distclean-local: clean-local
+clean-local:
+	if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
+	  $(RM) *.$(F9XMODEXT);                                         \
+	fi
+
+install-data-local:
+	if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
+	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(includedir)/. ; \
+	fi
+
+uninstall-local:
+	if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
+	  if test -f "$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(includedir)/HDF5.$(F9XMODEXT)"; then \
+	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
+	  fi;                                                           \
+	fi;                                                             \
+	$(RM) $(bindir)/$(H5FC_NAME)
+
 # Put in dependencies to the THDF5 module so that things will be built
 # in the correct order.
-thyperslab_wr.lo:           $(srcdir)/thyperslab_wr.f90 thdf5.lo
-ptesthdf5_fortran.lo:       $(srcdir)/ptesthdf5_fortran.f90 thdf5.lo
+thyperslab_wr.o:           $(srcdir)/thyperslab_wr.f90 thdf5.lo
+ptesthdf5_fortran.o:       $(srcdir)/ptesthdf5_fortran.f90 thdf5.lo
 
 include $(top_srcdir)/config/conclude.am
