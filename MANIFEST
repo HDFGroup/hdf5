@@ -740,6 +740,7 @@
 ./pablo/ProcTrace.h
 ./pablo/READ_ME
 
+./perform/Dependencies
 ./perform/Makefile.in
 ./perform/chunk.c
 ./perform/iopipe.c
