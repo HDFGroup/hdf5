@@ -279,6 +279,15 @@ H5S_mpio_space_type( const H5S_t *space, size_t elmt_size,
      size_t *count,
      hsize_t *extra_offset,
      hbool_t *is_derived_type );
+
+H5_DLL herr_t
+H5S_mpio_space_span_type( const H5S_t *space, size_t elmt_size,
+     /* out: */
+     MPI_Datatype *new_type,
+     size_t *count,
+     hsize_t *extra_offset,
+     hbool_t *is_derived_type );
+
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* _H5Sprivate_H */

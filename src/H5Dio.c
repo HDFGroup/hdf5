@@ -3315,7 +3315,13 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     } /* end if */
     else {
         /* Indicate that the I/O will _NOT_ be parallel */
+
+#ifdef KYANG
+      io_info->ops.read = H5D_mpio_spaces_span_read;
+      io_info->ops.write = H5D_mpio_spaces_span_write;
+#else      
         *use_par_opt_io=FALSE;
+#endif
 
 #endif /* H5_HAVE_PARALLEL */
         io_info->ops.read = H5D_select_read;

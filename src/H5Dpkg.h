@@ -288,6 +288,18 @@ H5_DLL herr_t H5D_mpio_spaces_write(H5D_io_info_t *io_info,
     const struct H5S_t *file_space, const struct H5S_t *mem_space,
     const void *buf);
 
+/* MPI-IO function to read directly from app buffer to file rky980813 */
+H5_DLL herr_t H5D_mpio_spaces_span_read(H5D_io_info_t *io_info,
+    size_t nelmts, size_t elmt_size,
+    const struct H5S_t *file_space, const struct H5S_t *mem_space,
+    void *buf/*out*/);
+
+/* MPI-IO function to write directly from app buffer to file rky980813 */
+H5_DLL herr_t H5D_mpio_spaces_span_write(H5D_io_info_t *io_info,
+    size_t nelmts, size_t elmt_size,
+    const struct H5S_t *file_space, const struct H5S_t *mem_space,
+    const void *buf);
+
 /* MPI-IO function to check if a direct I/O transfer is possible between
  * memory and the file */
 H5_DLL htri_t H5D_mpio_opt_possible(const H5D_t *file, const H5S_t *mem_space,
