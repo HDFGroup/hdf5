@@ -626,10 +626,16 @@ The <release> layout of <hdf5lib> should be:
 You may also find the similar layout for the <debug>.
 
 
-STEP 4: Building the C examples (Optional)
+STEP 4: Building HDF5 C/C++/Fortran examples (Optional)
+
+Several simple examples have been provided for users to test
+HDF5 C/C++/Fprtran library and tools.
+
+To build and test HDF5 C example:
 
    1. Invoke Microsoft Visual C++, go to "File" and select
       the "Open Workspace" option. 
+      
       Then open the workspace
       c:\myHDFstuff\hdf5\examples\allexamples\allexamples.dsw.
 
@@ -688,6 +694,127 @@ STEP 4: Building the C examples (Optional)
       passed." when the C examples are built successfully.  Otherwise,
       the difference between the expected outputs and actual outputs
       will be given.
+
+To build and test HDF5 C++ example:
+
+   1. Invoke Microsoft Visual C++, go to "File" and select
+      the "Open Workspace" option. 
+
+      Then open the workspace
+      c:\myHDFstuff\hdf5\c++\examples\allcppexamples\allcppexamples.dsw.
+
+   2. Select "Build", then Select "Set Active Configuration".
+
+      In "Project configurations", select the active configuration
+
+	 "allcppexamples -- Win32 Debug" to build debug versions of the
+                                         examples.
+
+             or
+	
+	 "allcppexamples -- Win32 Release" to build release versions the 
+                                           examples.
+
+      When the debug build or release build is done, there should be the 
+      following subdirectories in C:\myHDFstuff\hdf5\c++\examples\
+
+          chunkstest
+ 
+          compoundtest 
+
+          createtest 
+
+          extend_dstest 
+
+          h5grouptest 
+
+          readdatatest 
+
+          writedatatest 
+
+   3. Invoke a command prompt window and run the batch file 
+      "InstallcppExamples.bat" which resides in the top level directory
+      (C:\MyHDFstuff\hdf5).  This file creates 2 new directories, 
+      cppexamplesREL and cppexamplesDBG, in the
+      C:\MyHDFstuff\c++\examples directory and places all the
+      executables in it.  Both the release and debug versions of the
+      examples should be built before this step is done.
+
+
+   4. We provide a batch file named testcppExamples.bat in
+      c:\MyHDFstuff\hdf5\examples directory for you to test the
+      examples.
+      
+      testcppExamples.bat batch file has two options:
+
+         testcppExamples release -- test release version of the examples
+
+         testcppExamples debug   -- test debug version of the examples 
+
+      Invoke a command prompt window and run testcppExamples with
+      appropriate options.  You should get "All HDF5 C++ examples tests
+      passed." when the C++ examples are built successfully.  Otherwise,
+      the difference between the expected outputs and actual outputs
+      will be given.
+
+To build and test HDF5 C++ example:
+
+   1. Invoke Microsoft Visual C++, go to "File" and select
+      the "Open Workspace" option. 
+
+      Then open the workspace
+      c:\myHDFstuff\hdf5\fortran\examples\allf90examples\allf90examples.dsw.
+
+   2. Select "Build", then Select "Set Active Configuration".
+
+      In "Project configurations", select the active configuration
+
+	 "allf90cppexamples -- Win32 Debug" to build debug versions of the
+                                            examples.
+
+             or
+	
+	 "allf90cppexamples -- Win32 Release" to build release versions the 
+                                              examples.
+
+      When the debug build or release build is done, there should be the 
+      following subdirectories in C:\myHDFstuff\hdf5\fortran\examples\
+
+          attreexampletest
+ 
+          compoundtest 
+
+          dsetexampletest
+
+          fileexampletest
+
+          groupexampletest
+
+          grpdsetexampletest
+
+          grpittest
+
+          grpsexampletest
+
+          hyperslabtest
+
+          mountexampletest
+
+          refobjexampletest
+
+          refregexampletest
+
+          rwdsetexampletest
+
+          selecteletest
+
+   3. Invoke a command prompt window and run the batch file 
+      "Installf90Examples.bat" which resides in the top level directory
+      (C:\MyHDFstuff\hdf5).  This file creates 2 new directories, 
+      f90examplesREL and f90examplesDBG, in the
+      C:\MyHDFstuff\fortran\examples directory and places all the
+      executables in it.  Both the release and debug versions of the
+      examples should be built before this step is done.
 
 ************************************************************************
 

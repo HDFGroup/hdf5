@@ -44,16 +44,11 @@ STEP 1: Building HDF5 Libraries and Tools
        ONLY if you want to build HDF5 FORTRAN libraries
               
           flush1_fortran
-          flush1_fortrandll
           flush2_fortran
-          flush2_fortrandll
           hdf5_f90cstub
-          hdf5_f90cstubdll
           hdf5_fortran
-          hdf5_fortrandll
           libtest_fortran
           testhdf5_fortran
-          testhdf5_fortrandll
          
 4. Select "Build", then Select "Set Active Configuration".
 
@@ -113,7 +108,7 @@ Run the batch file c:\MyHDFstuff\hdf5\installhdf5lib.bat to install
 all HDF5 libraries and tools into c:\MyHDFstuff\hdf5\hdf5lib directory.
 
 
-STEP 4: Building the Examples (Optional)
+STEP 4: Building HDF5 Examples (Optional)
 
 Please read section II, step 4 in INSTALL_Windows.txt.
 
