@@ -40,12 +40,10 @@ static hid_t H5FD_MPIO_g = 0;
 #ifdef H5_HAVE_PARALLEL
 
 /*
- * The description of a file belonging to this driver.  If the ALLSAME
- * argument is set during a write operation then only p0 will do the actual
- * write (this assumes all procs would write the same data).  The EOF value
- * is only used just after the file is opened in order for the library to
- * determine whether the file is empty, truncated, or okay. The MPIO driver
- * doesn't bother to keep it updated since it's an expensive operation.
+ * The description of a file belonging to this driver.
+ * The EOF value is only used just after the file is opened in order for the
+ * library to determine whether the file is empty, truncated, or okay. The MPIO
+ * driver doesn't bother to keep it updated since it's an expensive operation.
  */
 typedef struct H5FD_mpio_t {
     H5FD_t	pub;		/*public stuff, must be first		*/
@@ -58,6 +56,7 @@ typedef struct H5FD_mpio_t {
     unsigned    closing;        /* Indicate that the file is closing immediately after call to flush */
     haddr_t	eof;		/*end-of-file marker			*/
     haddr_t	eoa;		/*end-of-address marker			*/
+    haddr_t	last_eoa;	/* Last known end-of-address marker	*/
     MPI_Datatype btype;		/*buffer type for xfers			*/
     MPI_Datatype ftype;		/*file type for xfers			*/
     haddr_t	 disp;		/*displacement for set_view in xfers	*/
@@ -818,13 +817,9 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     file->info = fa->info;
     file->mpi_rank = mpi_rank;
     file->mpi_size = mpi_size;
-    file->mpi_round = 0;        /* Start metadata writes with process 0 */
-    file->closing = FALSE;      /* Not closing yet */
+    file->eof = MPIOff_to_haddr(size);
     file->btype = MPI_DATATYPE_NULL;
     file->ftype = MPI_DATATYPE_NULL;
-
-
-    file->eof = MPIOff_to_haddr(size);
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t']) {
@@ -1609,25 +1604,26 @@ H5FD_mpio_flush(H5FD_t *_file)
      * Unfortunately, keeping track of EOF is an expensive operation, so
      * we can't just check whether EOF<EOA like with other drivers.
      * Therefore we'll just read the byte at EOA-1 and then write it back. */
-    /* But if eoa is zero, then nothing to flush.  Just return */
-    if (file->eoa == 0)
-	HRETURN(SUCCEED);
-    if (haddr_to_MPIOff(file->eoa-1, &mpi_off)<0) {
-        HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL,
-                      "cannot convert from haddr_t to MPI_Offset");
-    }
-    if (0==file->mpi_rank) {
-        if (MPI_SUCCESS != MPI_File_read_at(file->f, mpi_off, &byte,
-                                            1, MPI_BYTE, &mpi_stat)) {
-            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL,
-                          "MPI_File_read_at() failed");
-        }
-        if (MPI_SUCCESS != MPI_File_write_at(file->f, mpi_off, &byte,
-                                             1, MPI_BYTE, &mpi_stat)) {
-            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL,
-                          "MPI_File_write_at() failed");
-        }
-    }
+    if(file->eoa>file->last_eoa) {
+#ifdef OLD_WAY
+        if (0==file->mpi_rank) {
+            if (haddr_to_MPIOff(file->eoa-1, &mpi_off)<0)
+                HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset");
+            if (MPI_SUCCESS != MPI_File_read_at(file->f, mpi_off, &byte, 1, MPI_BYTE, &mpi_stat))
+                HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_read_at() failed");
+            if (MPI_SUCCESS != MPI_File_write_at(file->f, mpi_off, &byte, 1, MPI_BYTE, &mpi_stat))
+                HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_write_at() failed");
+        } /* end if */
+#else /* OLD_WAY */
+        if (haddr_to_MPIOff(file->eoa, &mpi_off)<0)
+            HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset");
+        if (MPI_SUCCESS != MPI_File_set_size(file->f, mpi_off))
+            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_set_size failed");
+#endif /* OLD_WAY */
+
+        /* Update the 'last' eoa value */
+        file->last_eoa=file->eoa;
+    } /* end if */
 
     /* Only sync the file if we are not going to immediately close it */
     if(!file->closing) {
