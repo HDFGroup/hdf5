@@ -157,9 +157,7 @@ int main(int argc, char *argv[])
     InitTest("heap", test_heap, "Object and Name Heaps");
     InitTest("ohdr", test_ohdr, "Object Headers");
     InitTest("stab", test_stab, "Symbol Tables");
-    InitTest("h5t", test_h5t, "Datatypes");
     InitTest("h5p", test_h5p, "Dataspaces");
-    InitTest("h5d", test_h5d, "Datasets");
 
     Verbosity = 4;  /* Default Verbosity is Low */
     H5version(&major, &minor, &release, &patch);

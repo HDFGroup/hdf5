@@ -60,7 +60,7 @@ test_heap (void)
    CHECK (f, NULL, "H5Aatom_object");
 
    /* Create a new heap */
-   status = H5H_new (f, H5H_LOCAL, 0, &heap_addr/*out*/);
+   status = H5H_create (f, H5H_LOCAL, 0, &heap_addr/*out*/);
    CHECK_I (status, "H5H_new");
 
    /* Add stuff to the heap */

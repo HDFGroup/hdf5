@@ -66,7 +66,7 @@ test_ohdr (void)
 
    /* the new object header */
    MESSAGE (8, ("Creating new object header...\n"));
-   status = H5O_new (f, 1, 64, &oh_addr/*out*/);
+   status = H5O_create (f, 1, 64, &oh_addr/*out*/);
    CHECK_I (status, "H5O_new");
 
    /*

@@ -71,13 +71,13 @@ static void test_h5p_basic(void)
     fid1=H5Fcreate(FILE,H5ACC_OVERWRITE,0,0);
     CHECK(fid1,FAIL,"H5Fcreate");
 
-    sid1=H5Mcreate(fid1,H5_DATASPACE,SPACE1_NAME);
+    sid1=H5Pcreate (H5P_SIMPLE);
     CHECK(sid1,FAIL,"H5Mcreate");
 
     ret=H5Pset_space(sid1,SPACE1_RANK,dims1);
     CHECK(ret,FAIL,"H5Pset_space");
     
-    n=H5Pnelem(sid1);
+    n=H5Pget_npoints(sid1);
     CHECK(n,UFAIL,"H5Pnelem");
     VERIFY(n,SPACE1_DIM1*SPACE1_DIM2*SPACE1_DIM3,"H5Pnelem");
     
@@ -89,13 +89,13 @@ static void test_h5p_basic(void)
     CHECK(ret,FAIL,"H5Pget_ldims");
     VERIFY(HDmemcmp(tdims,dims1,SPACE1_RANK*sizeof(uint32)),0,"H5Pget_ldims");
     
-    sid2=H5Mcreate(fid1,H5_DATASPACE,SPACE2_NAME);
+    sid2=H5Pcreate(H5P_SIMPLE);
     CHECK(sid2,FAIL,"H5Mcreate");
 
     ret=H5Pset_space(sid2,SPACE2_RANK,dims2);
     CHECK(ret,FAIL,"H5Pset_space");
     
-    n=H5Pnelem(sid2);
+    n=H5Pget_npoints(sid2);
     CHECK(n,UFAIL,"H5Pnelem");
     VERIFY(n,SPACE2_DIM1*SPACE2_DIM2*SPACE2_DIM3*SPACE2_DIM4,"H5Pnelem");
     
@@ -107,10 +107,10 @@ static void test_h5p_basic(void)
     CHECK(ret,FAIL,"H5Pget_ldims");
     VERIFY(HDmemcmp(tdims,dims2,SPACE2_RANK*sizeof(uint32)),0,"H5Pget_ldims");
     
-    ret=H5Mrelease(sid1);
+    ret=H5Mclose(sid1);
     CHECK(ret,FAIL,"H5Mrelease");
     
-    ret=H5Mrelease(sid2);
+    ret=H5Mclose(sid2);
     CHECK(ret,FAIL,"H5Mrelease");
     
     /* Close first file */

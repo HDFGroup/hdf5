@@ -9,21 +9,27 @@
 # Add include directory to the C preprocessor flags.
 CPPFLAGS=-I. -I../src @CPPFLAGS@
 
-# These are our main targets:
-PROGS=testhdf5 hyperslab istore
+# These are our main targets. They should be listed in the order to be
+# executed, generally most specific tests to least specific tests.
+PROGS=testhdf5  hyperslab istore dtypes dsets
 TESTS=$(PROGS)
 
 # Source and object files for programs...  The PROG_SRC list contains all the
 # source files and is used for things like dependencies, archiving, etc.  The
 # other source lists are for the individual tests, the files of which may
 # overlap with other tests.
-PROG_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5t.c th5p.c    \
-         th5d.c hyperslab.c istore.c
+PROG_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5p.c dtypes.c  \
+         hyperslab.c istore.c dsets.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 
-TESTHDF5_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5t.c       \
-	     th5p.c th5d.c
+TESTHDF5_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5p.c
 TESTHDF5_OBJ=$(TESTHDF5_SRC:.c=.o)
+
+DSETS_SRC=dsets.c
+DSETS_OBJ=$(DSETS_SRC:.c=.o)
+
+DTYPES_SRC=dtypes.c
+DTYPES_OBJ=$(DTYPES_SRC:.c=.o)
 
 HYPERSLAB_SRC=hyperslab.c
 HYPERSLAB_OBJ=$(HYPERSLAB_SRC:.c=.o)
@@ -37,6 +43,12 @@ PRIVATE_HDR=testhdf5.h
 # How to build the programs...
 testhdf5: $(TESTHDF5_OBJ) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) ../src/libhdf5.a $(LIBS)
+
+dsets: $(DSETS_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(DSETS_OBJ) ../src/libhdf5.a $(LIBS)
+
+dtypes: $(DTYPES_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(DTYPES_OBJ) ../src/libhdf5.a $(LIBS)
 
 hyperslab: $(HYPERSLAB_OBJ) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ $(HYPERSLAB_OBJ) ../src/libhdf5.a $(LIBS)

@@ -8,13 +8,14 @@
  * Purpose:	Tests various aspects of indexed raw data storage.
  */
 #include <H5private.h>
+#include <H5Cprivate.h>
 #include <H5Fprivate.h>
 #include <H5Gprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
 #include <H5Vprivate.h>
 
-#if 0
+#if 1
 #  define FILETYPE	H5F_LOW_DFLT
 #  define FILENAME	"istore.h5"
 #elif 0
@@ -118,7 +119,7 @@ new_object (H5F_t *f, const char *name, size_t ndims)
       }
    }
    
-   H5F_istore_new (f, &istore, ndims, alignment);
+   H5F_istore_create (f, &istore, ndims, alignment);
    if (H5O_modify (f, NO_ADDR, handle, H5O_ISTORE, H5O_NEW_MESG,
 		   &istore)<0) {
       printf ("*FAILED*\n");
@@ -525,7 +526,7 @@ main (int argc, char *argv[])
    uint8	offset_size;
    H5G_entry_t	*ent = NULL;
    hid_t	template_id;
-   file_create_temp_t *creation_template = NULL;
+   H5F_create_t	*creation_template = NULL;
 
    setbuf (stdout, NULL);
 
@@ -557,8 +558,8 @@ main (int argc, char *argv[])
     * Use larger file addresses...
     */
    offset_size = 8;
-   template_id = H5C_copy (H5C_get_default_atom (H5_TEMPLATE));
-   H5Csetparm (template_id, H5_OFFSET_SIZE, &offset_size);
+   template_id = H5Ccreate (H5C_FILE_CREATE);
+   H5Csetparm (template_id, H5F_OFFSET_SIZE, &offset_size);
    creation_template = H5Aatom_object (template_id);
    
    /* Create the test file */
@@ -577,7 +578,7 @@ main (int argc, char *argv[])
        * allocated a whole bunch of data.
        */
       haddr_t	addr;
-      addr.offset = (uint64)1<<33; /*8GB*/
+      addr.offset = 250 * ((uint64)1<<30); /*250 GB*/
       H5F_low_seteof (f->shared->lf, &addr);
    }
 #endif
