@@ -1339,6 +1339,7 @@ H5O_count_real (H5G_entry_t *ent, const H5O_class_t *type, hid_t dxpl_id)
 	if (oh->mesg[u].type==type)
             acc++;
     }
+    oh=NULL;
 
     /* Set return value */
     ret_value=acc;
@@ -1441,6 +1442,7 @@ H5O_exists_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t d
 	if (--sequence<0)
             break;
     }
+    oh=NULL;
 
     /* Set return value */
     ret_value=(sequence<0);

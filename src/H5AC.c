@@ -1229,6 +1229,7 @@ H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t old_addr,
      * We don't need to do anything if the object isn't cached or if the
      * new hash value is the same as the old one.
      */
+    assert(old_info);
     if (H5F_addr_ne((*old_info)->addr, old_addr) || (*old_info)->type!=type)
         HGOTO_DONE(SUCCEED)
     if (old_idx == new_idx) {

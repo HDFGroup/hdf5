@@ -637,6 +637,7 @@ H5HL_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, voi
     if (!buf && NULL==(buf = H5MM_malloc(size)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     HDmemcpy(buf, heap->chunk + H5HL_SIZEOF_HDR(f) + offset, size);
+    heap=NULL;
 
     /* Set return value */
     ret_value=buf;
@@ -696,6 +697,7 @@ H5HL_peek(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset)
 
     /* Set return value */
     ret_value = heap->chunk + H5HL_SIZEOF_HDR(f) + offset;
+    heap=NULL;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

@@ -1009,8 +1009,9 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
 	    }
 	}
 
-        if (snrt && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, *new_node_p, snrt, FALSE) != SUCCEED)
+        if (H5AC_unprotect(f, dxpl_id, H5AC_SNODE, *new_node_p, snrt, FALSE) != SUCCEED)
             HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
+        snrt=NULL;      /* Make certain future references will be caught */
     } else {
 	/* Where to insert the new entry? */
 	ret_value = H5B_INS_NOOP;
@@ -1289,6 +1290,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed");
     for (i=0; i<nsyms; i++)
         name_off[i] = sn->entry[i].name_off;
+    sn=NULL;    /* Make certain future references will be caught */
 
     /*
      * Iterate over the symbol table node entries.
@@ -1361,6 +1363,7 @@ H5G_node_sumup(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
     if (NULL == (sn = H5AC_find(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
     *num_objs += sn->nsyms;
+    sn=NULL;    /* Make certain future references will be caught */
     
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1418,6 +1421,7 @@ H5G_node_name(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
     }
 
     bt_udata->num_objs += sn->nsyms;
+    sn=NULL;    /* Make certain future references will be caught */
     
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1466,6 +1470,7 @@ H5G_node_type(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
     }
 
     bt_udata->num_objs += sn->nsyms;
+    sn=NULL;    /* Make certain future references will be caught */
     
 done:
     FUNC_LEAVE_NOAPI(ret_value);
