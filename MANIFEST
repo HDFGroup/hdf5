@@ -1157,6 +1157,7 @@
 ./tools/h5diff/testh5diff_util.c
 ./tools/h5diff/testh5diff.h
 ./tools/h5diff/testh5diff.sh
+./tools/h5diff/testph5diff.sh
 
 # h5repack sources
 ./tools/h5repack/Makefile.am
