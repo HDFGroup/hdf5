@@ -1,4 +1,4 @@
-HDF5 version 1.7.19-fph5_alpha0 released on Fri Feb 27 05:35:13 CST 2004
+HDF5 version 1.7.20 released on Wed Mar 17 08:15:57 CST 2004
 ================================================================================
 
 
@@ -42,6 +42,8 @@ New Features
 
     Library:
     --------
+        - Data type conversion(software) from integer to float was added.
+          SLU - 2004/3/13 
         - Data type conversion(software) from float to integer was added.
           Conversion from integer to float will be added later.  SLU -2004/2/4
         - Added new H5Premove_filter routine to remove I/O pipeline filters
@@ -109,6 +111,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed problem with fletcher32 filter when converting data of different
+	    endianess. PVN 2004/03/10
         - Fixed problem with H5Tget_native_type() not handling opaque fields
             correctly.  QAK - 2004/01/31
         - Fixed several errors in B-tree deletion code which could cause a
