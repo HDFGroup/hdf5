@@ -1,245 +1,114 @@
-#! /usr/local/bin/perl -w
-require 5.003;
-use Cwd;
+#!/bin/sh
 
-# Builds a release.  Arguments are zero or more of the words.
+# Make a release of hdf5.  The command-line switches are:
 #
-#	tar		-- build a tar file			*.tar
-#	compress	-- build a compressed tar file		*.tar.Z
-#	gzip		-- build a compressed tar file		*.tar.gz
-#	bzip2		-- build a compressed tar file		*.tar.bz2
+#  -d DIR	The name of the directory where the releas(es) should be
+#               placed.  By default, the directory is ./releases
+#          
+# The other command-line options are the names of the programs to use
+# for compressing the resulting tar archive (if none are given then
+# `tar' is assumed):
 #
-# If no arguments are given then `gzip' is assumed.  If the only argument
-# is the word `all' then all forms are used.
-
-$releases = "./releases";	# Directory for release tarballs
-
-##############################################################################
-# Read version info, return an array (MAJOR,MINOR,RELEASE) or
-# a string "MAJOR.MINOR.RELEASE"
+#   tar		-- use tar and don't do any compressing.
+#   compress	-- use compress and append `.Z' to the output name.
+#   gzip	-- use gzip with `-9' and append `.gz' to the output name.
+#   bzip2       -- use bzip2 with `-9' and append `.bz2' to the output name.
 #
-sub getver () {
-   my @ver;
-   open SRC, "./src/H5public.h" or die "cannot read HDF5 version";
-   while (<SRC>) {
-      $ver[0] = $1 if /define\s+H5_VERS_MAJOR\s+(\d+)/;
-      $ver[1] = $1 if /define\s+H5_VERS_MINOR\s+(\d+)/;
-      $ver[2] = $1 if /define\s+H5_VERS_RELEASE\s+(\d+)/;
-   }
-   close SRC;
-   wantarray ? @ver : "$ver[0].$ver[1].$ver[2]";
-}
-
-##############################################################################
-# Set version information.  Input is a string or an array.
+# Examples:
 #
-sub setver ($;$$) {
-   my @ver = @_;
-   local $_;
-
-   if ($ver[0]=~/\D/) {
-      @ver = $ver[0] =~ /^(\d+)\.(\d+)\.(\d+)$/ or return "";
-   }
-
-   $_ = `cat ./src/H5public.h`;
-   s/(define\s+H5_VERS_MAJOR\s+)(\d+)/$1$ver[0]/;
-   s/(define\s+H5_VERS_MINOR\s+)(\d+)/$1$ver[1]/;
-   s/(define\s+H5_VERS_RELEASE\s+)(\d+)/$1$ver[2]/;
-   open SRC, "> ./src/H5public.h" or return "";
-   print SRC $_;
-   close SRC;
-
-   return 1;
-}
-
-##############################################################################
-# Make sure MANIFEST contains all the necessary files.  If we are running
-# under CVS then look at the CVS/Entries files to get the names that should
-# be in the manifest.  Otherwise we really can't do anything.
+#   $ release
+#   releases/hdf5-1.0.38.tar
 #
-sub manifest () {
-    my ($fname, %manifest);
-    my $nprobs=0;
-
-    # We can't do anything if we're not running under cvs.
-    return "" unless -d "CVS";
-
-    # Read the files from the manifest.
-    open MANIFEST, "MANIFEST" or die "unable to read manifest";
-    while (<MANIFEST>) {
-	chomp;
-	$manifest{$_} = 1;
-    }
-    close MANIFEST;
-
-    # Read files from CVS/Entries
-    open FIND, "find . -name Entries -print | sort |" or
-	die "unable to find CVS entries";
-    while (defined($fname=<FIND>)) {
-	chomp $fname;
-	my ($dir) = $fname =~ m%(.*)/CVS/Entries%;
-	open ENTRIES, $fname or die "unable to open $fname";
-	while (<ENTRIES>) {
-	    my ($ename);
-	    next unless ($ename) = m%^/([^/]+)/[^-]%;
-	    $ename = "$dir/" . $ename;
-	    if (exists $manifest{$ename}) {
-		delete $manifest{$ename};
-	    } else {
-		print "NEW: $ename\n";
-		$nprobs++;
-	    }
-	}
-	close ENTRIES;
-    }
-    close FIND;
-
-    for (sort keys %manifest) {
-	print "OLD: $_\n";
-	$nprobs++;
-    }
-
-    if ($nprobs) {
-	print "Please add the new files to MANIFEST and remove the old\n";
-	print "files and try again.  The MANIFEST should contain all files\n";
-	print "that are to be distributed for a release.\n";
-	exit 1;
-    }
-}
-
-
-##############################################################################
-# Build a release
+#   $ release gzip
+#   releases/hdf5-1.0.38.tar.gz
 #
-sub release (@) {
-   my @types = @_;
-   my ($ver, $status, $created_symlink);
-   my ($batch) = 0;
-   local $_;
+#   $ release -d /tmp tar compress gzip bzip2
+#   /tmp/hdf5-1.0.38.tar
+#   /tmp/hdf5-1.0.38.tar.Z
+#   /tmp/hdf5-1.0.38.tar.gz
+#   /tmp/hdf5-1.0.38.tar.bz2
+#
 
-   if (@types>0 && $types[0] =~ /^-?-batch$/) {
-     $batch = 1;
-     shift @types;
-   }
+# Defaults
+DEST=releases
+VERS=`bin/h5vers`
+test "$VERS" || exit 1
+verbose=yes
 
-   # Make sure no one forgot to update MANIFEST
-   manifest;
+# Command-line arguments
+if [ "X$1" = "X-d" ]; then
+    DEST="$2"
+    shift
+    shift
+fi
+methods="$*"
+if [ "X$methods" = "X" ]; then
+    methods=tar
+fi
+test "$verbose" && echo "Releasing hdf5-$VERS to $DEST" 1>&2
+if [ ! -d $DEST ]; then
+    echo "   Destination directory $DEST does not exist" 1>&2
+    exit 1
+fi
 
-   # Make sure the version number is correct.
-   $ver = getver;
-   if ($batch) {
-     print "Releasing version $ver\n";
-   } else {
-     print "HDF version to release [$ver] ";
-     return "" unless defined ($_=<STDIN>);
-     chomp;
-     (setver ($ver=$_) or die "cannot set version") if /\S/;
-   }
-
-   # Update the README file to contain the new version and date
-   # information.
-   my $today = sprintf "19%02d-%02d-%02d %02d:%02d UTC", (gmtime)[5,4,3,2,1];
-   $_ = `cat README`;
-   s[^(This is hdf5-)\d+.\d+.\d+( released on )(\d+-?){3} \d+:\d+ UTC]
-    [$1$ver$2$today]s;
-   system ("cp -p README README~");
-   open README, ">README" or die "unable to open README: $!\n";
-   print README;
-   close README;
-   
-   # Move default top-level makefile into place.
-   $status = system "cp Makefile.dist Makefile";
-   die "cannot install default Makefile" if $status >> 8;
-
-   # Make sure release directory exists
-   (mkdir $releases, 0777 or die "cannot create $releases")
-       unless -d $releases;
-   die "no manifest" unless -r "MANIFEST";
-
-   # We build the release from above the root of the source tree so the
-   # hdf5 directory appears as part of the name in the tar file. We create
-   # a temporary symlink called something like `hdf5-1.0.0a' that points to
-   # our current working directory.
-   $_ = cwd;
-   my ($parent,$root) = m%(.*)/(.*)$% or die "cannot split directory";
-   if ($root ne "hdf5-$ver" && ! -e "../hdf5-$ver") {
-      symlink $root, "../hdf5-$ver" or die "cannot create link";
-      $created_symlink = 1;
-   }
-   my $name = "$root/$releases/hdf5-$ver";
-
-   # Build the releases.
-   @types = ("gzip") unless @types;
-   @types = qw/tar gzip compress bzip2/ if 1==@types && "all" eq $types[0];
-   $_ = `cat MANIFEST`;
-   s/^\.\///mg;
-   @filelist = ("Makefile", split /\s*\n/, $_);
-   $filelist = join " ", map {"hdf5-$ver/$_"} @filelist;
-
-   chdir ".." or die;
-   for (@types) {
-      print "Compressing with $_...\n";
-
-      /^tar$/ && do {
-	 $status = system "tar cf $name.tar $filelist";
-	 next;
-      };
-
-      /^gzip$/ && do {
-	 $status = system "tar cf - $filelist |gzip -9 >$name.tar.gz";
-	 next;
-      };
-
-      /^compress$/ && do {
-	 $status = system "tar cf - $filelist |compress -c >$name.tar.Z";
-	 next;
-      };
-
-      /^bzip2$/ && do {
-	 $status = system "tar cf - $filelist |bzip2 -9 >$name.tar.bz2";
-	 next;
-      };
-   } continue {
-      print STDERR "$_ failed\n" if $status >> 8;
-   }
-   chdir $root or die;
-
-   # Remove the temporary symlink we created above.
-   unlink "../hdf5-$ver" if $created_symlink;
-   
-
-   # Update version info
-   if ($batch) {
-     my ($v1,$v2,$v3) = $ver =~ /^(\d+)\.(\d+)\.(\d+)$/;
-     $v3 += 1;
-     setver ($ver = "$v1.$v2.$v3") or die "cannot set version";
-     print "Development version set to $ver\n";
-   } else {
-     print <<EOF;
-
-If this is a real release then the version number for continued development
-should be incremented.  Otherwise just press return.
-
+# Check that all the files in MANIFEST exist and that (if this is a
+# CVS checkout) that all the CVS-managed files appear in the
+# MANIFEST.
+test "$verbose" && echo "   Checking manifest..." 1>&2
+test -f MANIFEST || exit 1
+for file in `cat MANIFEST`; do
+    if [ ! -f $file ]; then
+       echo "- $file"
+       fail=yes
+    fi
+done
+for cvs in `find . -type d -name CVS -print`; do
+    path=`echo $cvs |sed s+/CVS++`
+    for file in `cut -d/ -f2 $cvs/Entries`; do
+	if (grep $path/$file MANIFEST >/dev/null); then
+	    :
+	else
+	    echo "+ $path/$file"
+	    fail=yes
+	fi
+    done
+done
+if [ "X$fail" = "Xyes" ]; then
+    cat 1>&2 <<EOF
+The MANIFEST is out of date. Files marked with a minus sign (-) no
+longer exist; files marked with a plus sign (+) are CVS-managed but do
+not appear in the MANIFEST.  Please remedy the situation and try again.
 EOF
-     print "Set development version to [", ($ver=getver), "] ";
-     return "" unless defined ($_ = <STDIN>);
-     chomp;
-     (setver ($ver=$_) or die "cannot set version") if /\S/;
+    exit 1
+fi
+   
+# Prepare the source tree for a release.
+test -h ../hdf5-$VERS && rm ../hdf5-$VERS
+(cd ..; ln -s hdf5 hdf5-$VERS || exit 1)
+mv Makefile ../Makefile.x 2>/dev/null #might fail
+cp -p Makefile.dist Makefile
+test "$verbose" && echo "   Running tar..." 1>&2
+(cd ..; tar cf x.tar `sed s+^.+hdf5-$VERS+ hdf5/MANIFEST` || exit 1)
 
-     if (-d "CVS") {
-       my $tag = $ver;
-       $tag =~ s/\./-/g;
-       print "Tag CVS sources with \"$tag\"? [n] ";
-       chomp ($_ = <STDIN>);
-       if ($_ eq 'y') {
-	 print "Tagging CVS sources...\n";
-	 my $status = system "cvs tag -R $tag";
-	 die "cvs tag failed" if $status >> 8;
-       }
-     }
-   }
+# Compress
+for comp in $methods; do
+    case $comp in
+	tar)
+	    cp -p ../x.tar $DEST/hdf5-$VERS.tar;;
+	compress)
+	    test "$verbose" && echo "   Running compress..." 1>&2
+	    compress -c <../x.tar >$DEST/hdf5-$VERS.tar.Z;;
+	gzip)
+	    test "$verbose" && echo "   Running gzip..." 1>&2
+	    gzip -9 <../x.tar >$DEST/hdf5-$VERS.tar.gz;;
+	bzip2)
+	    test "$verbose" && echo "   Running bzip2..." 1>&2
+	    bzip2 -9 <../x.tar >$DEST/hdf5-$VERS.tar.gz;;
+    esac
+done
 
-   return 1;
-}
-
-release @ARGV;
+# Remove temporary things
+test -f ../Makefile.x && mv ../Makefile.x Makefile
+rm -f ../hdf5-$VERS
+rm -f ../x.tar
+exit 0
