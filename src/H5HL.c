@@ -639,15 +639,13 @@ H5HL_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, voi
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     HDmemcpy(buf, heap->chunk + H5HL_SIZEOF_HDR(f) + offset, size);
 
-    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE) != SUCCEED)
-        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
-
-    heap=NULL;
-
     /* Set return value */
     ret_value=buf;
 
 done:
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE) != SUCCEED)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 #endif /* NOT_YET */
@@ -704,12 +702,10 @@ H5HL_peek(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset)
     /* Set return value */
     ret_value = heap->chunk + H5HL_SIZEOF_HDR(f) + offset;
 
-    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE) != SUCCEED)
-        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
-
-    heap=NULL;
-
 done:
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE) != SUCCEED)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -907,7 +903,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
     ret_value=offset;
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE) != SUCCEED && ret_value != (size_t)(-1))
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE) != SUCCEED)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, (size_t)(-1), "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1101,7 +1097,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size)
     heap->freelist = fl;
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE) != SUCCEED && ret_value != FAIL)
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE) != SUCCEED)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1167,15 +1163,8 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free local heap data");
     } /* end else */
 
-    /* Release the local heap metadata from the cache */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, TRUE)<0) {
-        heap = NULL;
-        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release local heap");
-    }
-    heap = NULL;
-
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE)<0 && ret_value<0)
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, TRUE)<0)
 	HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release local heap");
 
     FUNC_LEAVE_NOAPI(ret_value);

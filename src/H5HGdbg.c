@@ -131,11 +131,9 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 	}
     }
 
-    if (H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, addr, h, FALSE) != SUCCEED)
-        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
-
-    h = NULL;
-
 done:
+    if (h && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, addr, h, FALSE) != SUCCEED)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
+
     FUNC_LEAVE_NOAPI(ret_value);
 }

@@ -820,7 +820,7 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
     /*
      * Load the symbol table node for exclusive access.
      */
-    if (NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_WRITE)))
+    if (NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to protect symbol table node");
 
     /* Get base address of heap */
@@ -847,15 +847,15 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
 
     if (bt_udata->operation==H5G_OPER_FIND)
         /*
-         * The caller is querying the symbol entry.  Return just a pointer to
-         * the entry.  The pointer is valid until the next call to H5AC.
+         * The caller is querying the symbol entry, copy it into the UDATA
+         * entry field. (Hmm... should this use H5G_ent_copy()? - QAK)
          */
         bt_udata->ent = sn->entry[idx];
     else
         HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "internal erorr (unknown symbol find operation)");
 
 done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) < 0 && ret_value>=0)
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to release symbol table node");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1035,7 +1035,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
     insert_into->nsyms += 1;
 
 done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) < 0 && ret_value!=H5B_INS_ERROR)
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1235,7 +1235,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
     } /* end else */
     
 done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE)<0 && ret_value!=H5B_INS_ERROR)
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE)<0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1333,8 +1333,8 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
 done:
     if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) != SUCCEED)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
-
     name_off = H5MM_xfree (name_off);
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1377,12 +1377,10 @@ H5G_node_sumup(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
 
     *num_objs += sn->nsyms;
 
-    if (H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) != SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
-
-    sn=NULL;    /* Make certain future references will be caught */
-    
 done:
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) != SUCCEED)
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1438,12 +1436,10 @@ H5G_node_name(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
         bt_udata->num_objs += sn->nsyms;
     }
 
-    if (H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) != SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
-
-    sn=NULL;    /* Make certain future references will be caught */
-    
 done:
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) != SUCCEED)
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1491,12 +1487,10 @@ H5G_node_type(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
         bt_udata->num_objs += sn->nsyms;
     }
 
-    if (H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) != SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
-
-    sn=NULL;    /* Make certain future references will be caught */
-    
 done:
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) != SUCCEED)
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to release object header");
+    
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1573,9 +1567,6 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 	}
 	H5G_ent_debug(f, dxpl_id, sn->entry + i, stream, indent, fwidth, heap);
     }
-
-    H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE);
-    sn = NULL;
 
 done:
     if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) < 0)

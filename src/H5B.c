@@ -619,6 +619,9 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
     H5B_t	*bt = NULL;
     unsigned    idx=0, lt = 0, rt;        /* Final, left & right key indices */
     int	        cmp = 1;                /* Key comparison value */
+    int         level;                  /* Level of B-tree node */
+    haddr_t     child;                  /* Address of child to recurse to */
+    void       *nkey1, *nkey2;          /* Native keys of child */
     int		ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5B_find, FAIL)
@@ -637,7 +640,7 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
      * Perform a binary search to locate the child which contains
      * the thing for which we're searching.
      */
-    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, udata, H5AC_WRITE)))
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree node")
     rt = bt->nchildren;
 
@@ -660,16 +663,28 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
      * Follow the link to the subtree or to the data node.
      */
     assert(idx < bt->nchildren);
-    if (bt->level > 0) {
-	if (H5B_find(f, dxpl_id, type, bt->child[idx], udata) < 0)
+
+    /* Retrieve the rest of the B-tree information, so we can unlock it before recursing */
+    level = bt->level;
+    child = bt->child[idx];
+    nkey1=bt->key[idx].nkey;
+    nkey2=bt->key[idx+1].nkey;
+
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node")
+
+    bt = NULL;  /* Make certain future references will be caught */
+
+    if (level > 0) {
+	if (H5B_find(f, dxpl_id, type, child, udata) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "key not found in subtree")
     } else {
-	if ((type->found) (f, dxpl_id, bt->child[idx], bt->key[idx].nkey, udata, bt->key[idx+1].nkey) < 0)
+	if ((type->found) (f, dxpl_id, child, nkey1, udata, nkey2) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "key not found in leaf node")
     }
 
 done:
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) < 0 && ret_value>=0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) < 0)
 	HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -835,7 +850,7 @@ H5B_split(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_t *old_bt, haddr
     old_bt->right = *new_addr_p;
 
 done:
-    if (new_bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, *new_addr_p, new_bt, FALSE) < 0 && ret_value>=0)
+    if (new_bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, *new_addr_p, new_bt, FALSE) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1269,7 +1284,7 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 		  uint8_t *rt_key, hbool_t *rt_key_changed,
 		  haddr_t *new_node_p/*out*/)
 {
-    H5B_t	*bt = NULL, *twin = NULL, *tmp_bt = NULL;
+    H5B_t	*bt = NULL, *twin = NULL;
     unsigned	lt = 0, idx = 0, rt;    /* Left, final & right index values */
     int         cmp = -1;               /* Key comparison value */
     haddr_t	child_addr = HADDR_UNDEF;
@@ -1487,6 +1502,8 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	ret_value = H5B_INS_NOOP;
 
     } else if (H5B_INS_LEFT == my_ins || H5B_INS_RIGHT == my_ins) {
+        H5B_t	*tmp_bt;
+
 	/*
 	 * If this node is full then split it before inserting the new child.
 	 */
@@ -1948,7 +1965,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
     }
 
 done:
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE)<0 && ret_value>=0)
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE)<0)
 	HDONE_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to release node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2091,14 +2108,9 @@ H5B_delete(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
     if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, sizeof_node)<0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree node")
     
-    /* Release node in metadata cache */
-    if (H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, TRUE)<0)
-        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node in cache")
-    bt=NULL;    /* Make certain future references will be caught */
-
 done:
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE)<0)
-        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node in cache")
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, TRUE)<0)
+        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node in cache")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_delete() */

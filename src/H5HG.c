@@ -788,12 +788,10 @@ H5HG_peek (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
 	}
     }
 
-    if (H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, FALSE) != SUCCEED)
-        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
-
-    heap=NULL;
-    
 done:
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, FALSE)<0)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 #endif /* NOT_YET */
@@ -861,18 +859,11 @@ H5HG_read (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/)
 	}
     }
 
-    if (H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, FALSE) != SUCCEED) {
-        heap = NULL;
-        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
-    }
-
-    heap = NULL;
-
     /* Set return value */
     ret_value=object;
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, FALSE) != SUCCEED)
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, FALSE)<0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -913,25 +904,26 @@ H5HG_link (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, int adjust)
     if (0==(f->intent & H5F_ACC_RDWR))
 	HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file");
 
-    /* Load the heap */
-    if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL, H5AC_WRITE)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
+    if(adjust!=0) {
+        /* Load the heap */
+        if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
 
-    assert (hobj->idx>0 && hobj->idx<heap->nalloc);
-    assert (heap->obj[hobj->idx].begin);
-    if (heap->obj[hobj->idx].nrefs+adjust<0)
-	HGOTO_ERROR (H5E_HEAP, H5E_BADRANGE, FAIL, "new link count would be out of range");
-    if (heap->obj[hobj->idx].nrefs+adjust>H5HG_MAXLINK)
-	HGOTO_ERROR (H5E_HEAP, H5E_BADVALUE, FAIL, "new link count would be out of range");
-    heap->obj[hobj->idx].nrefs += adjust;
-    if (adjust)
+        assert (hobj->idx>0 && hobj->idx<heap->nalloc);
+        assert (heap->obj[hobj->idx].begin);
+        if (heap->obj[hobj->idx].nrefs+adjust<0)
+            HGOTO_ERROR (H5E_HEAP, H5E_BADRANGE, FAIL, "new link count would be out of range");
+        if (heap->obj[hobj->idx].nrefs+adjust>H5HG_MAXLINK)
+            HGOTO_ERROR (H5E_HEAP, H5E_BADVALUE, FAIL, "new link count would be out of range");
+        heap->obj[hobj->idx].nrefs += adjust;
         heap->cache_info.dirty = TRUE;
+    } /* end if */
 
     /* Set return value */
     ret_value=heap->obj[hobj->idx].nrefs;
 
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, FALSE) != SUCCEED && ret_value != FAIL)
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, FALSE)<0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
     FUNC_LEAVE_NOAPI(ret_value);
