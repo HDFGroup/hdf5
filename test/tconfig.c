@@ -108,7 +108,7 @@ test_config_ctypes(void)
 
     /* non-standard basic types */
 #if SIZEOF_LONG_LONG > 0
-    vrfy_ctype(long long, SIZEOF_LONG_LONG);
+    vrfy_ctype(long_long, SIZEOF_LONG_LONG);
 #endif
 
 #if SIZEOF_LONG_DOUBLE > 0
