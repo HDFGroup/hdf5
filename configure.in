@@ -401,7 +401,12 @@ dnl ----------------------------------------------------------------------
 dnl Check for system libraries.
 dnl
 AC_CHECK_LIB(m,ceil)
-AC_CHECK_LIB(nsl,xdr_int)	dnl ...for Solaris and hdf4
+
+if test `uname` = "SunOS"; then
+   dnl ...for Solaris and hdf4
+   AC_CHECK_LIB(nsl, xdr_int)
+fi
+
 dnl AC_CHECK_LIB(coug,main)		dnl ...for ASCI/Red
 
 dnl ----------------------------------------------------------------------
