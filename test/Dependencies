@@ -6,7 +6,7 @@ h5test.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -35,6 +35,7 @@ h5test.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -45,7 +46,7 @@ big.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -74,6 +75,7 @@ big.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -84,7 +86,7 @@ bittests.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -113,6 +115,7 @@ bittests.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -122,7 +125,7 @@ chunk.lo: \
    $(srcdir)/chunk.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -148,14 +151,13 @@ chunk.lo: \
    $(top_srcdir)/src/H5FDmpio.h \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDgass.h \
-   $(top_srcdir)/src/H5FDmulti.h
+   $(top_srcdir)/src/H5FDgass.h
 cmpd_dset.lo: \
    $(srcdir)/cmpd_dset.c \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -184,6 +186,7 @@ cmpd_dset.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -194,7 +197,7 @@ dsets.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -223,6 +226,7 @@ dsets.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -233,7 +237,7 @@ dtypes.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -262,6 +266,7 @@ dtypes.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -272,7 +277,7 @@ extend.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -301,6 +306,7 @@ extend.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -311,7 +317,7 @@ external.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -340,6 +346,7 @@ external.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -350,7 +357,7 @@ fillval.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -379,6 +386,7 @@ fillval.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -389,7 +397,7 @@ flush1.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -418,6 +426,7 @@ flush1.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -428,7 +437,7 @@ flush2.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -457,6 +466,7 @@ flush2.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -467,7 +477,7 @@ gheap.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -496,6 +506,7 @@ gheap.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -509,14 +520,15 @@ hyperslab.lo: \
    $(srcdir)/hyperslab.c \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5MMprivate.h
 iopipe.lo: \
    $(srcdir)/iopipe.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -549,7 +561,7 @@ istore.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -578,6 +590,7 @@ istore.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -596,7 +609,7 @@ lheap.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -625,6 +638,7 @@ lheap.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -637,7 +651,7 @@ links.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -666,6 +680,7 @@ links.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -676,7 +691,7 @@ mount.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -705,6 +720,7 @@ mount.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -715,7 +731,7 @@ mtime.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -744,6 +760,7 @@ mtime.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -754,7 +771,7 @@ ohdr.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -783,6 +800,7 @@ ohdr.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -798,7 +816,7 @@ overhead.lo: \
    $(srcdir)/overhead.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -824,47 +842,12 @@ overhead.lo: \
    $(top_srcdir)/src/H5FDmpio.h \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDgass.h \
-   $(top_srcdir)/src/H5FDmulti.h
+   $(top_srcdir)/src/H5FDgass.h
 ragged.lo: \
    $(srcdir)/ragged.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
-   $(top_srcdir)/src/H5api_adpt.h \
-   $(top_srcdir)/src/H5Ipublic.h \
-   $(top_srcdir)/src/H5Apublic.h \
-   $(top_srcdir)/src/H5ACpublic.h \
-   $(top_srcdir)/src/H5Bpublic.h \
-   $(top_srcdir)/src/H5Dpublic.h \
-   $(top_srcdir)/src/H5Epublic.h \
-   $(top_srcdir)/src/H5Fpublic.h \
-   $(top_srcdir)/src/H5FDpublic.h \
-   $(top_srcdir)/src/H5Gpublic.h \
-   $(top_srcdir)/src/H5HGpublic.h \
-   $(top_srcdir)/src/H5HLpublic.h \
-   $(top_srcdir)/src/H5MMpublic.h \
-   $(top_srcdir)/src/H5Opublic.h \
-   $(top_srcdir)/src/H5Ppublic.h \
-   $(top_srcdir)/src/H5Zpublic.h \
-   $(top_srcdir)/src/H5Rpublic.h \
-   $(top_srcdir)/src/H5RApublic.h \
-   $(top_srcdir)/src/H5Spublic.h \
-   $(top_srcdir)/src/H5Tpublic.h \
-   $(top_srcdir)/src/H5FDcore.h \
-   $(top_srcdir)/src/H5FDfamily.h \
-   $(top_srcdir)/src/H5FDmpio.h \
-   $(top_srcdir)/src/H5FDsec2.h \
-   $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDgass.h \
-   $(top_srcdir)/src/H5FDmulti.h \
-   $(top_srcdir)/src/H5private.h
-stab.lo: \
-   $(srcdir)/stab.c \
-   $(srcdir)/h5test.h \
-   $(top_srcdir)/src/hdf5.h \
-   $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -893,6 +876,42 @@ stab.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h
+stab.lo: \
+   $(srcdir)/stab.c \
+   $(srcdir)/h5test.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5public.h \
+   $(top_builddir)/src/H5pubconf.h \
+   $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5ACpublic.h \
+   $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5Dpublic.h \
+   $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Fpublic.h \
+   $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5HGpublic.h \
+   $(top_srcdir)/src/H5HLpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
+   $(top_srcdir)/src/H5Opublic.h \
+   $(top_srcdir)/src/H5Ppublic.h \
+   $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Rpublic.h \
+   $(top_srcdir)/src/H5RApublic.h \
+   $(top_srcdir)/src/H5Spublic.h \
+   $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5FDcore.h \
+   $(top_srcdir)/src/H5FDfamily.h \
+   $(top_srcdir)/src/H5FDmpio.h \
+   $(top_srcdir)/src/H5FDsec2.h \
+   $(top_srcdir)/src/H5FDstdio.h \
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDmulti.h \
+   $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -905,8 +924,9 @@ tattr.lo: \
    $(srcdir)/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Eprivate.h \
    $(top_srcdir)/src/H5Epublic.h \
    $(top_srcdir)/src/H5Ipublic.h \
@@ -939,16 +959,18 @@ testhdf5.lo: \
    $(srcdir)/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Eprivate.h
 tfile.lo: \
    $(srcdir)/tfile.c \
    $(srcdir)/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Eprivate.h \
    $(top_srcdir)/src/H5Epublic.h \
    $(top_srcdir)/src/H5Ipublic.h \
@@ -965,8 +987,9 @@ th5s.lo: \
    $(srcdir)/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Eprivate.h \
    $(top_srcdir)/src/H5Epublic.h \
    $(top_srcdir)/src/H5Ipublic.h \
@@ -997,8 +1020,9 @@ tmeta.lo: \
    $(srcdir)/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Eprivate.h \
    $(top_srcdir)/src/H5Epublic.h \
    $(top_srcdir)/src/H5Ipublic.h \
@@ -1009,8 +1033,9 @@ trefer.lo: \
    $(srcdir)/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Eprivate.h \
    $(top_srcdir)/src/H5Epublic.h \
    $(top_srcdir)/src/H5Ipublic.h \
@@ -1043,8 +1068,9 @@ tselect.lo: \
    $(srcdir)/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Eprivate.h \
    $(top_srcdir)/src/H5Epublic.h \
    $(top_srcdir)/src/H5Ipublic.h \
@@ -1077,8 +1103,9 @@ tvltypes.lo: \
    $(srcdir)/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Eprivate.h \
    $(top_srcdir)/src/H5Epublic.h \
    $(top_srcdir)/src/H5Ipublic.h \
@@ -1111,8 +1138,9 @@ tvlstr.lo: \
    $(srcdir)/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Eprivate.h \
    $(top_srcdir)/src/H5Epublic.h \
    $(top_srcdir)/src/H5Ipublic.h \
@@ -1145,7 +1173,7 @@ unlink.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -1174,6 +1202,7 @@ unlink.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -1184,7 +1213,7 @@ enum.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -1213,6 +1242,7 @@ enum.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -1223,7 +1253,7 @@ gass_write.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -1252,6 +1282,7 @@ gass_write.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -1262,7 +1293,7 @@ gass_read.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -1291,6 +1322,7 @@ gass_read.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -1303,7 +1335,7 @@ gass_append.lo: \
    $(srcdir)/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_builddir)/src/H5config.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -1332,6 +1364,7 @@ gass_append.lo: \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_builddir)/src/H5config.h \
    $(top_srcdir)/src/H5Tpkg.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Fprivate.h \
