@@ -172,44 +172,36 @@ test_mpio_offset()
     if (verbose)
         printf("MPIO OFFSET test\n");
 
+    /* verify correctness of assigning 2GB sizes */
+    mpi_off = 2 * 1024 * (MPI_Offset)MB;
+    VRFY((mpi_off>0), "2GB OFFSET assignment no overflow");
+    VRFY((mpi_off-1)==TWO_GB_LESS1, "2GB OFFSET assignment succeed");
+
     /* verify correctness of increasing from below 2 GB to above 2GB */
     mpi_off = TWO_GB_LESS1;
     for (i=0; i < 3; i++){
         mpi_off_old = mpi_off;
         mpi_off = mpi_off + 1;
-        VRFY((mpi_off>0), "OFFSET increment no overflow");      /* no overflow */
-        VRFY((mpi_off-1)==mpi_off_old, "OFFSET increment succeed");     /* correct inc. */
-    }
-
-    /* verify correctness of increasing from below 4 GB to above 4 GB */
-    mpi_off = TWO_GB_LESS1;
-    for (i=0; i < 3; i++){
-        mpi_off_old = mpi_off;
-        mpi_off = mpi_off + 1;
-        VRFY((mpi_off>0), "OFFSET increment no overflow");      /* no overflow */
-	VRFY((mpi_off-1)==mpi_off_old, "OFFSET increment succeed");     /* correct inc. */
-    }
-
-    /* verify correctness of assigning 2GB sizes */
-    mpi_off = 2 * 1024 * (MPI_Offset)MB;
-    VRFY((mpi_off>0), "OFFSET assignment no overflow");
-    VRFY((mpi_off-1)==TWO_GB_LESS1, "OFFSET assignment succeed");
-    for (i=0; i < 3; i++){
-        mpi_off_old = mpi_off;
-        mpi_off = mpi_off + 1;
-        VRFY((mpi_off>0), "OFFSET increment no overflow");      /* no overflow */
-	VRFY((mpi_off-1)==mpi_off_old, "OFFSET increment succeed");     /* correct inc. */
+	/* no overflow */
+        VRFY((mpi_off>0), "2GB OFFSET increment no overflow");
+	/* correct inc. */
+        VRFY((mpi_off-1)==mpi_off_old, "2GB OFFSET increment succeed");
     }
 
     /* verify correctness of assigning 4GB sizes */
     mpi_off = 4 * 1024 * (MPI_Offset)MB;
-    VRFY((mpi_off>0), "OFFSET assignment no overflow");
-    VRFY((mpi_off-1)==FOUR_GB_LESS1, "OFFSET assignment succeed");
+    VRFY((mpi_off>0), "4GB OFFSET assignment no overflow");
+    VRFY((mpi_off-1)==FOUR_GB_LESS1, "4GB OFFSET assignment succeed");
+
+    /* verify correctness of increasing from below 4 GB to above 4 GB */
+    mpi_off = FOUR_GB_LESS1;
     for (i=0; i < 3; i++){
         mpi_off_old = mpi_off;
         mpi_off = mpi_off + 1;
-        VRFY((mpi_off>0), "OFFSET increment no overflow");      /* no overflow */
-	VRFY((mpi_off-1)==mpi_off_old, "OFFSET increment succeed");     /* correct inc. */
+	/* no overflow */
+        VRFY((mpi_off>0), "4GB OFFSET increment no overflow");
+	/* correct inc. */
+	VRFY((mpi_off-1)==mpi_off_old, "4GB OFFSET increment succeed");
     }
 }
 
