@@ -892,7 +892,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
         heap->dirty = FALSE;
         H5_CHECK_OVERFLOW(heap->size,size_t,hsize_t);
         H5MF_xfree(f, H5FD_MEM_GHEAP, dxpl_id, heap->addr, (hsize_t)heap->size);
-        H5AC_flush (f, dxpl_id, H5AC_GHEAP, heap->addr, TRUE);
+        H5AC_flush (f, dxpl_id, H5AC_GHEAP, heap->addr, H5F_FLUSH_INVALIDATE);
         heap = NULL;
     } else {
         /*

@@ -165,7 +165,7 @@ H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, 
 H5_DLL void *H5AC_find(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
         haddr_t addr, const void *udata1, void *udata2);
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
-			  hbool_t destroy);
+			  unsigned flags);
 H5_DLL herr_t H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);
 H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);

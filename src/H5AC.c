@@ -385,7 +385,7 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
     assert(f->shared->cache);
     cache = f->shared->cache;
 
-    if (H5AC_flush(f, dxpl_id, NULL, HADDR_UNDEF, TRUE) < 0)
+    if (H5AC_flush(f, dxpl_id, NULL, HADDR_UNDEF, H5F_FLUSH_INVALIDATE) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
 
 #ifdef H5AC_DEBUG
@@ -713,13 +713,15 @@ H5AC_compare(const void *_a, const void *_b)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
+H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsigned flags)
 {
     unsigned                i;
     herr_t                  status;
     H5AC_flush_func_t       flush=NULL;
     H5AC_info_t           **info;
     int                   *map = NULL;
+    hbool_t                 destroy=(flags&H5F_FLUSH_INVALIDATE)>0;
+    hbool_t                 clear_only=(flags&H5F_FLUSH_CLEAR_ONLY)>0;
     unsigned               nslots;
     H5AC_t                 *cache;
     herr_t ret_value=SUCCEED;      /* Return value */
@@ -828,19 +830,25 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, hboo
 
                 flush = (*info)->type->flush;
 
-                /* Only block for all the processes on the first piece of metadata */
-                if(first_flush && (*info)->dirty) {
-                    status = (flush)(f, dxpl_id, destroy, (*info)->addr, (*info));
-                    first_flush=0;
-                } /* end if */
-                else
-                    status = (flush)(f, H5AC_noblock_dxpl_id, destroy, (*info)->addr, (*info));
-                if (status < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
-
+                /* Clear the dirty flag only, if requested */
+                if(clear_only)
+                    (*info)->dirty=0;
+                else {
+                    /* Only block for all the processes on the first piece of metadata */
+                    if(first_flush && (*info)->dirty) {
+                        status = (flush)(f, dxpl_id, destroy, (*info)->addr, (*info));
+                        first_flush=0;
+                    } /* end if */
+                    else
+                        status = (flush)(f, H5AC_noblock_dxpl_id, destroy, (*info)->addr, (*info));
+                    if (status < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
 #ifdef H5AC_DEBUG
                 cache->diagnostics[type_id].nflushes++;
 #endif /* H5AC_DEBUG */
+                } /* end else */
+
+                /* Destroy entry also, if asked */
                 if (destroy)
                     (*info)= NULL;
             }
@@ -915,12 +923,20 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, hboo
             /*
              * Flush just this entry.
              */
-            flush = (*info)->type->flush;
-            if((flush)(f, dxpl_id, destroy, (*info)->addr, (*info)) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush object");
+
+            /* Clear the dirty flag only, if requested */
+            if(clear_only)
+                (*info)->dirty=0;
+            else {
+                flush = (*info)->type->flush;
+                if((flush)(f, dxpl_id, destroy, (*info)->addr, (*info)) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush object");
 #ifdef H5AC_DEBUG
-            cache->diagnostics[type_id].nflushes++;
+                cache->diagnostics[type_id].nflushes++;
 #endif /* H5AC_DEBUG */
+            } /* end else */
+
+            /* Destroy entry also, if asked */
             if (destroy)
                 (*info)= NULL;
         } /* end if */

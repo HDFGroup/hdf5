@@ -1060,7 +1060,7 @@ H5F_istore_preempt(H5F_t *f, hid_t dxpl_id, H5F_rdcc_ent_t * ent, hbool_t flush)
 	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer");
     }
     else {
-	/* Reset, but do not free or remove from list */
+        /* Don't flush, just free chunk */
 	ent->layout = H5O_free(H5O_LAYOUT_ID, ent->layout);
 	ent->pline = H5O_free(H5O_PLINE_ID, ent->pline);
 	if(ent->chunk != NULL)
@@ -1110,7 +1110,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_flush (H5F_t *f, hid_t dxpl_id, hbool_t preempt)
+H5F_istore_flush (H5F_t *f, hid_t dxpl_id, unsigned flags)
 {
     H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
     int		nerrors=0;
@@ -1121,7 +1121,11 @@ H5F_istore_flush (H5F_t *f, hid_t dxpl_id, hbool_t preempt)
 
     for (ent=rdcc->head; ent; ent=next) {
 	next = ent->next;
-	if (preempt) {
+	if ((flags&H5F_FLUSH_CLEAR_ONLY)) {
+            /* Just mark cache entry as clean */
+            ent->dirty = FALSE;
+        } /* end if */
+	else if ((flags&H5F_FLUSH_INVALIDATE)) {
 	    if (H5F_istore_preempt(f, dxpl_id, ent, TRUE )<0)
 		nerrors++;
 	} else {

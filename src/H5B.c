@@ -1709,7 +1709,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	    sizeof_rkey = (type->get_sizeof_rkey)(f, udata);
 	    sizeof_node = H5B_nodesize(f, type, NULL, sizeof_rkey);
 	    if (H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt)<0 ||
-                    H5AC_flush(f, dxpl_id, H5AC_BT, addr, TRUE)<0 ||
+                    H5AC_flush(f, dxpl_id, H5AC_BT, addr, H5F_FLUSH_INVALIDATE)<0 ||
                     H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, sizeof_node)<0) {
 		bt = NULL;
 		HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to free B-tree node");

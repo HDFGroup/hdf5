@@ -1059,7 +1059,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
 	sn->nsyms = 0;
 	sn->cache_info.dirty = TRUE;
 	if (H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn)<0 ||
-                H5AC_flush(f, dxpl_id, H5AC_SNODE, addr, TRUE)<0 ||
+                H5AC_flush(f, dxpl_id, H5AC_SNODE, addr, H5F_FLUSH_INVALIDATE)<0 ||
                 H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size(f))<0) {
 	    sn = NULL;
 	    HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to free symbol table node");

@@ -35,11 +35,11 @@ typedef struct H5F_t H5F_t;
  *  Flags passed into the flush routines which indicate what type of
  *  flush we want to do. They can be ORed together.
  */
-#define H5_FLUSH_NONE       (0U)        /* No flags specified                       */
-#define H5_FLUSH_INVALIDATE (1U << 0)   /* Invalidate cached data                   */
-#define H5_FLUSH_ALLOC_ONLY (1U << 1)   /* Allocate space for user and super blocks */
-#define H5_FLUSH_CLOSING    (1U << 2)   /* Closing the file                         */
-#define H5_FLUSH_CLEAR_ONLY (1U << 3)   /* Don't write, just clear dirty flags      */
+#define H5F_FLUSH_NONE       (0U)       /* No flags specified                       */
+#define H5F_FLUSH_INVALIDATE (1U << 0)  /* Invalidate cached data                   */
+#define H5F_FLUSH_ALLOC_ONLY (1U << 1)  /* Allocate space for user and super blocks */
+#define H5F_FLUSH_CLOSING    (1U << 2)  /* Closing the file                         */
+#define H5F_FLUSH_CLEAR_ONLY (1U << 3)  /* Don't write, just clear dirty flags      */
 
 /*
  * Encode and decode macros for file meta-data.

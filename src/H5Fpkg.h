@@ -185,7 +185,7 @@ H5_DLL herr_t H5F_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
 
 /* Functions that operate on indexed storage */
 H5_DLL herr_t H5F_istore_init (H5F_t *f);
-H5_DLL herr_t H5F_istore_flush (H5F_t *f, hid_t dxpl_id, hbool_t preempt);
+H5_DLL herr_t H5F_istore_flush (H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5F_istore_dest (H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5F_istore_read(H5F_t *f, hid_t dxpl_id,
                                 const struct H5O_layout_t *layout,

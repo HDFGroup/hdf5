@@ -674,7 +674,7 @@ H5F_flush_all_cb(H5F_t *f, hid_t UNUSED fid, const void *_invalidate)
 
     FUNC_ENTER_NOINIT(H5F_flush_all_cb);
 
-    H5F_flush(f, H5F_SCOPE_LOCAL, (invalidate ? H5_FLUSH_INVALIDATE : H5_FLUSH_NONE));
+    H5F_flush(f, H5F_SCOPE_LOCAL, (invalidate ? H5F_FLUSH_INVALIDATE : H5F_FLUSH_NONE));
 
     FUNC_LEAVE_NOAPI(0);
 }
@@ -1894,7 +1894,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	shared->base_addr = shared->boot_addr;
 	shared->consist_flags = 0x03;
 
-	if (H5F_flush(file, dxpl_id, H5F_SCOPE_LOCAL, H5_FLUSH_ALLOC_ONLY) < 0)
+	if (H5F_flush(file, dxpl_id, H5F_SCOPE_LOCAL, H5F_FLUSH_ALLOC_ONLY) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock");
 
 	/* Create and open the root group */
@@ -2379,7 +2379,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not associated with a file");
 
     /* Flush the file */
-    if (H5F_flush(f, H5AC_dxpl_id, scope, H5_FLUSH_NONE) < 0)
+    if (H5F_flush(f, H5AC_dxpl_id, scope, H5F_FLUSH_NONE) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "flush failed");
 
 done:
@@ -2483,11 +2483,11 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
         for (i = 0; i < f->mtab.nmounts; i++)
             /* Flush but don't pass down the ALLOC_ONLY flag if there */
             if (H5F_flush(f->mtab.child[i].file, dxpl_id, scope,
-                          flags & ~H5_FLUSH_ALLOC_ONLY) < 0)
+                          flags & ~H5F_FLUSH_ALLOC_ONLY) < 0)
                 nerrors++;
 
     /* Avoid flushing buffers & caches when alloc_only set */
-    if ((flags & H5_FLUSH_ALLOC_ONLY) == 0) {
+    if ((flags & H5F_FLUSH_ALLOC_ONLY) == 0) {
         /* flush any cached compact storage raw data */
         if (H5D_flush(f, dxpl_id) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache");
@@ -2498,7 +2498,7 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
          * metadata and "small data" blocks back to the free lists in the
          * file.
          */
-        if (flags & H5_FLUSH_INVALIDATE) {
+        if (flags & H5F_FLUSH_INVALIDATE) {
             if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {
                 /* Return the unused portion of the metadata block to a free list */
                 if (f->shared->lf->eoma != 0)
@@ -2541,11 +2541,11 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
         } /* end if */
 
         /* flush the entire raw data cache */
-        if (H5F_istore_flush(f, dxpl_id, flags & H5_FLUSH_INVALIDATE) < 0)
+        if (H5F_istore_flush(f, dxpl_id, flags & (H5F_FLUSH_INVALIDATE|H5F_FLUSH_CLEAR_ONLY)) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush raw data cache");
         
         /* flush (and invalidate) the entire meta data cache */
-        if (H5AC_flush(f, dxpl_id, NULL, HADDR_UNDEF, flags & H5_FLUSH_INVALIDATE) < 0)
+        if (H5AC_flush(f, dxpl_id, NULL, HADDR_UNDEF, flags & (H5F_FLUSH_INVALIDATE|H5F_FLUSH_CLEAR_ONLY)) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache");
     } /* end if */
 
@@ -2619,7 +2619,7 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
         assert(driver_size<=sizeof(dbuf));
     } /* end if */
 
-    if (flags & H5_FLUSH_ALLOC_ONLY) {
+    if (flags & H5F_FLUSH_ALLOC_ONLY) {
 	haddr_t addr;
 
 	/*
@@ -2689,9 +2689,9 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     } /* end else */
 
     /* If we're not just allocating... */
-    if ((flags & H5_FLUSH_ALLOC_ONLY) == 0)
+    if ((flags & H5F_FLUSH_ALLOC_ONLY) == 0)
         /* ...flush file buffers to disk. */
-        if (H5FD_flush(f->shared->lf, dxpl_id, flags) < 0)
+        if (H5FD_flush(f->shared->lf, dxpl_id, (flags&H5F_FLUSH_CLOSING)>0) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
 
     /* Check flush errors for children - errors are already on the stack */
@@ -2894,7 +2894,7 @@ H5F_close(H5F_t *f)
 
 	/* Flush and destroy all caches */
 	if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
-                      H5_FLUSH_INVALIDATE | H5_FLUSH_CLOSING) < 0)
+                      H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
 	    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
     } /* end if */
 
