@@ -948,6 +948,9 @@
 ./tools/testfiles/tdset-2.ddl
 ./tools/testfiles/tdset.h5
 ./tools/testfiles/tdset2.h5
+./tools/testfiles/tempty.ddl
+./tools/testfiles/tempty.h5
+./tools/testfiles/tempty.ls
 ./tools/testfiles/tenum.h5
 ./tools/testfiles/tenum.ddl
 ./tools/testfiles/tgroup-1.ddl
