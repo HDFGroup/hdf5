@@ -605,6 +605,7 @@
 ./fortran/test/tH5S.f90
 ./fortran/test/tH5Sselect.f90
 ./fortran/test/tH5T.f90
+./fortran/test/tH5VL.f90
 
 ./fortran/testpar/Dependencies
 ./fortran/testpar/Makefile.in
