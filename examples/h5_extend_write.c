@@ -1,5 +1,5 @@
 /*  
- *   This example shows how to work with extendable dataset.
+ *   This example shows how to work with extendible dataset.
  *   In the current version of the library dataset MUST be
  *   chunked.
  *   
@@ -7,7 +7,7 @@
  
 #include "hdf5.h"
 
-#define FILE        "SDSextendable.h5"
+#define FILE        "SDSextendible.h5"
 #define DATASETNAME "ExtendableArray" 
 #define RANK         2
 #define NX     10

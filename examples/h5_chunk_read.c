@@ -5,8 +5,8 @@
  
 #include "hdf5.h"
 
-#define FILE        "SDSextendable.h5"
-#define DATASETNAME "ExtendableArray" 
+#define FILE        "SDSextendible.h5"
+#define DATASETNAME "ExtendibleArray" 
 #define RANK         2
 #define NX     10
 #define NY     5 
