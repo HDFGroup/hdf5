@@ -46,8 +46,8 @@
 #define H5TEST_DLLVAR extern
 #endif /* _HDF5TESTDLL_ */
 
-// Added to export or to import C++ APIs - BMR (02-15-2002)
-#if defined(HDF5_CPPDLL_EXPORTS) // this name is generated at creation
+/* Added to export or to import C++ APIs - BMR (02-15-2002) */
+#if defined(HDF5_CPPDLL_EXPORTS) /* this name is generated at creation */
 #define H5_DLLCPP __declspec(dllexport)
 #elif defined(HDF5CPP_USEDLL)
 #define H5_DLLCPP __declspec(dllimport)
