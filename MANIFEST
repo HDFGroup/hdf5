@@ -1299,6 +1299,7 @@
 ./tools/testfiles/tvldtypes4.h5
 ./tools/testfiles/tvlstr.h5
 ./tools/testfiles/tvlstr.ddl
+./tools/testfiles/tattr2.h5
 
 # Expected output from h5ls tests
 ./tools/testfiles/help-1.ls
@@ -1316,6 +1317,7 @@
 ./tools/testfiles/tsaf.ls
 ./tools/testfiles/tslink-1.ls
 ./tools/testfiles/tstr-1.ls
+./tools/testfiles/tattr2.ls
 
 #additional test input and output for h5dump XML
 ./tools/testfiles/tall.h5.xml
