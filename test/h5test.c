@@ -664,44 +664,95 @@ h5_show_hostname(void)
 #ifdef H5_HAVE_PARALLEL
 /*
  * Function:    h5_set_info_object
- * Purpose:     Process environment variables setting to set up MPI Info object.
+ * Purpose:     Process environment variables setting to set up MPI Info
+ *              object.
  * Return:      0 if all is fine; otherwise non-zero.
  * Programmer:  Albert Cheng, 2002/05/21.
  * Modifications:
+ *          Bill Wendling, 2002/05/31
+ *          Modified so that the HDF5_MPI_INFO environment variable can
+ *          be a semicolon separated list of "key=value" pairings. Most
+ *          of the code is to remove any whitespaces which might be
+ *          surrounding the "key=value" pairs.
  */
 int
 h5_set_info_object(void)
 {
     char	*envp;			/* environment pointer */
-    char	*namep, *valp;		/* name, value pointers */
     int		ret_value=0;
 
     /* handle any MPI INFO hints via $HDF5_MPI_INFO */
     if ((envp = getenv("HDF5_MPI_INFO")) != NULL){
-	envp = HDstrdup(envp);
+        char *next, *valp;
 
-	/* create an INFO object if not created yet */
-	if (h5_io_info_g==MPI_INFO_NULL)
-	    MPI_Info_create (&h5_io_info_g);
+        valp = envp = next = HDstrdup(envp);
 
-	/* parse only one setting.  Need to extend it to handle multiple */
-	/* settings.  LATER */
-	namep=envp;
-	valp=HDstrchr(namep, '=');
-	if (valp != NULL){
-	    /* change '=' to NULL, move valp down one */
-	    *valp++ = NULL;
-	    if (MPI_SUCCESS!=MPI_Info_set(h5_io_info_g, namep, valp)){
-		printf("MPI_Info_set failed\n");
-		ret_value = -1;
-	    }
+        /* create an INFO object if not created yet */
+        if (h5_io_info_g == MPI_INFO_NULL)
+            MPI_Info_create(&h5_io_info_g);
 
-	}
+        do {
+            size_t len;
+            char *key_val, *endp, *namep;
+
+            if (*valp == ';')
+                valp++;
+
+            /* copy key/value pair into temporary buffer */
+            len = strcspn(valp, ";");
+            next = &valp[len];
+            key_val = calloc(1, len + 1);
+
+            /* increment the next pointer past the terminating semicolon */
+            if (*next == ';')
+                ++next;
+
+            namep = HDstrncpy(key_val, valp, len);
+
+            /* pass up any beginning whitespaces */
+            while (*namep && (*namep == ' ' || *namep == '\t'))
+                namep++;
+
+            /* eat up any ending white spaces */
+            endp = &namep[strlen(namep) - 1];
+
+            while (endp && (*endp == ' ' || *endp == '\t'))
+                *endp-- = '\0';
+
+            /* find the '=' */
+            valp = HDstrchr(namep, '=');
+
+            if (valp != NULL) {     /* it's a valid key/value pairing */
+                char *tmp_val = valp + 1;
+
+                /* change '=' to \0, move valp down one */
+                *valp-- = '\0';
+
+                /* eat up ending whitespace on the "key" part */
+                while (*valp == ' ' || *valp == '\t')
+                    *valp-- = '\0';
+
+                valp = tmp_val;
+
+                /* eat up beginning whitespace on the "value" part */
+                while (*valp == ' ' || *valp == '\t')
+                    *valp++ = '\0';
+
+                /* actually set the darned thing */
+                if (MPI_SUCCESS != MPI_Info_set(h5_io_info_g, namep, valp)) {
+                    printf("MPI_Info_set failed\n");
+                    ret_value = -1;
+                }
+            }
+
+            valp = next;
+            HDfree(key_val);
+        } while (next && *next);
+
+        HDfree(envp);
     }
 
-    if (envp)
-	HDfree(envp);
-    return(ret_value);
+    return ret_value;
 }
 
 
