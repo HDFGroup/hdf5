@@ -701,6 +701,67 @@ H5SL_item(H5SL_node_t *slist_node)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5SL_iterate
+ PURPOSE
+    Iterate over all nodes in a skip list
+ USAGE
+    herr_t H5SL_iterate(slist, op, op_data)
+        H5SL_t *slist;          IN/OUT: Pointer to skip list to iterate over
+        H5SL_operator_t op;     IN: Callback function for iteration
+        void *op_data;          IN/OUT: Pointer to application data for callback
+
+ RETURNS
+    Returns a negative value if something is wrong, the return
+        value of the last operator if it was non-zero, or zero if all
+        nodes were processed.
+ DESCRIPTION
+    Iterate over all the nodes in a skip list, calling an application callback
+    with the item, key and any operator data.
+
+    The operator callback receives a pointer to the item and key for the list
+    being iterated over ('mesg'), and the pointer to the operator data passed
+    in to H5SL_iterate ('op_data').  The return values from an operator are:
+        A. Zero causes the iterator to continue, returning zero when all 
+            nodes of that type have been processed.
+        B. Positive causes the iterator to immediately return that positive
+            value, indicating short-circuit success.
+        C. Negative causes the iterator to immediately return that value,
+            indicating failure.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5SL_iterate(H5SL_t *slist, H5SL_operator_t op, void *op_data)
+{
+    H5SL_node_t *node;  /* Pointers to skip list nodes */
+    herr_t ret_value=0; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_iterate);
+
+    /* Check args */
+    assert(slist);
+
+    /* Check internal consistency */
+    /* (Pre-condition) */
+
+    /* Free skip list nodes */
+    node=slist->header->forward[0];
+    while(node!=NULL) {
+        /* Call the iterator callback */
+        if((ret_value=(op)(node->item,node->key,op_data))!=0)
+            break;
+
+        node=node->forward[0];
+    } /* end while */
+
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5SL_iterate() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5SL_release
  PURPOSE
     Release all nodes from a skip list
