@@ -109,8 +109,6 @@ static herr_t H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type,
         const H5S_t *file_space, const H5S_t *mem_space, fm_map *fm);
 static herr_t H5D_destroy_chunk_map(const fm_map *fm);
 static void H5D_free_chunk_info(void *chunk_info);
-static herr_t H5D_chunk_coords_assist(hssize_t *coords, size_t ndims,
-    const hsize_t chunks[], hsize_t chunk_idx);
 static herr_t H5D_create_chunk_file_map_hyper(const fm_map *fm);
 static herr_t H5D_create_chunk_mem_map_hyper(const fm_map *fm);
 static herr_t H5D_chunk_file_cb(void *elem, hid_t type_id, hsize_t ndims,
@@ -2239,44 +2237,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_chunk_coords_assist
- *
- * Purpose:	Compute the coords for a particular chunk (in CHUNK_IDX),
- *              based on the size of the dataset's dataspace (given in
- *              NDIMS and CHUNKS), putting the resulting chunk's coordinate
- *              offsets in the COORDS array.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *		Thursday, April 10, 2003
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t 
-H5D_chunk_coords_assist(hssize_t *coords, size_t ndims, const hsize_t chunks[], hsize_t chunk_idx)
-{
-    hsize_t tmp;                /* Size of "down elements" in each dimension */
-    size_t i, j;                /* Local index variables */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_chunk_coords_assist)
-
-    for(i=0; i<ndims; i++) {
-        tmp=1;
-        for(j=i+1; j<ndims; j++) 
-            tmp *= chunks[j];    
-        coords[i] = (hssize_t)(chunk_idx / tmp);
-        chunk_idx = chunk_idx % tmp;
-    }
-    coords[ndims] = 0;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-}
-        
-
-/*-------------------------------------------------------------------------
  * Function:	H5D_create_chunk_map
  *
  * Purpose:	Creates the mapping between elements selected in each chunk
@@ -2755,11 +2715,9 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
             new_chunk_info->mspace=NULL;
             new_chunk_info->mspace_shared=0;
 
-            /* Compute the chunk's coordinates */
-            if(H5D_chunk_coords_assist(new_chunk_info->coords, fm->f_ndims, fm->chunks, chunk_index)<0) {
-                H5D_free_chunk_info(new_chunk_info);
-                HGOTO_ERROR(H5E_DATASPACE,H5E_CANTCOUNT,FAIL,"can't compute chunk info")
-            } /* end if */
+            /* Copy the chunk's coordinates */
+            HDmemcpy(new_chunk_info->coords,coords,fm->f_ndims*sizeof(new_chunk_info->coords[0]));
+            new_chunk_info->coords[fm->f_ndims]=0;
 
             /* Insert the new chunk into the TBBT tree */
             if(H5TB_dins(fm->fsel,new_chunk_info,new_chunk_info)==NULL) {
@@ -2945,7 +2903,7 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
             /* Compensate for the chunk offset */
             for(u=0; u<fm->f_ndims; u++) {
                 H5_CHECK_OVERFLOW(fm->layout->dim[u],hsize_t,hssize_t);
-                chunk_adjust[u]=adjust[u]-(chunk_info->coords[u]*(hssize_t)fm->layout->dim[u]); /*lint !e771 The adjust array will always be initialized */
+                chunk_adjust[u]=adjust[u]-chunk_info->coords[u]; /*lint !e771 The adjust array will always be initialized */
             } /* end for */
 #ifdef QAK
     {
@@ -3075,12 +3033,14 @@ H5D_chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize
 
             /* Set the memory chunk dataspace */
             new_chunk_info->mspace=NULL;
+            new_chunk_info->mspace_shared=0;
 
             /* Compute the chunk's coordinates */
-            if(H5D_chunk_coords_assist(new_chunk_info->coords, fm->f_ndims, fm->chunks, chunk_index)<0) {
-                H5D_free_chunk_info(new_chunk_info);
-                HGOTO_ERROR(H5E_DATASPACE,H5E_CANTCOUNT,FAIL,"can't compute chunk info")
-            } /* end if */
+            for(u=0; u<fm->f_ndims; u++) {
+                H5_CHECK_OVERFLOW(fm->layout->dim[u],hsize_t,hssize_t);
+                new_chunk_info->coords[u]=(coords[u]/(hssize_t)fm->layout->dim[u])*(hssize_t)fm->layout->dim[u];
+            } /* end for */
+            new_chunk_info->coords[fm->f_ndims]=0;
 
             /* Insert the new chunk into the TBBT tree */
             if(H5TB_dins(fm->fsel,new_chunk_info,new_chunk_info)==NULL) {

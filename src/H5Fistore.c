@@ -1696,7 +1696,6 @@ H5F_istore_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxp
     void *buf)
 {
     haddr_t	        chunk_addr;     /* Chunk address on disk */
-    hssize_t	        chunk_coords_in_elmts[H5O_LAYOUT_NDIMS];
     size_t		u;              /* Local index variables */
     ssize_t             ret_value;      /* Return value */
     
@@ -1719,16 +1718,13 @@ H5F_istore_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxp
         assert(chunk_coords[u]>=0); /*negative coordinates not supported (yet) */
 #endif
     
-    for (u=0; u<layout->ndims; u++)
-        chunk_coords_in_elmts[u] = chunk_coords[u] * (hssize_t)(layout->dim[u]);
-
     /* Get the address of this chunk on disk */
 #ifdef QAK
-HDfprintf(stderr,"%s: chunk_coords_in_elmts={",FUNC);
+HDfprintf(stderr,"%s: chunk_coords={",FUNC);
 for(u=0; u<layout->ndims; u++)
-    HDfprintf(stderr,"%Hd%s",chunk_coords_in_elmts[u],(u<(layout->ndims-1) ? ", " : "}\n"));
+    HDfprintf(stderr,"%Hd%s",chunk_coords[u],(u<(layout->ndims-1) ? ", " : "}\n"));
 #endif /* QAK */
-    chunk_addr=H5F_istore_get_addr(f, dxpl_id, layout, chunk_coords_in_elmts, NULL);
+    chunk_addr=H5F_istore_get_addr(f, dxpl_id, layout, chunk_coords, NULL);
 #ifdef QAK
 HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Hu\n",FUNC,chunk_addr,layout->chunk_size);
 HDfprintf(stderr,"%s: chunk_len_arr[%Zu]=%Zu\n",FUNC,*chunk_curr_seq,chunk_len_arr[*chunk_curr_seq]);
@@ -1758,7 +1754,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
          * chunk.
          */
         if (NULL==(chunk=H5F_istore_lock(f, dxpl_cache, dxpl_id, layout, &dcpl_cache->pline, &dcpl_cache->fill, dcpl_cache->fill_time,
-                     chunk_coords_in_elmts, FALSE, &idx_hint)))
+                     chunk_coords, FALSE, &idx_hint)))
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk");
 
         /* Use the vectorized memory copy routine to do actual work */
@@ -1767,7 +1763,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
 
         H5_CHECK_OVERFLOW(naccessed,ssize_t,size_t);
         if (H5F_istore_unlock(f, dxpl_cache, dxpl_id, layout, &dcpl_cache->pline, FALSE,
-                  chunk_coords_in_elmts, &idx_hint, chunk, (size_t)naccessed)<0)
+                  chunk_coords, &idx_hint, chunk, (size_t)naccessed)<0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk");
 
         /* Set return value */
@@ -1803,7 +1799,6 @@ H5F_istore_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
     const void *buf)
 {
     haddr_t	        chunk_addr;     /* Chunk address on disk */
-    hssize_t	        chunk_coords_in_elmts[H5O_LAYOUT_NDIMS];
     size_t		u;              /* Local index variables */
     ssize_t             ret_value;      /* Return value */
     
@@ -1826,16 +1821,13 @@ H5F_istore_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
         assert(chunk_coords[u]>=0); /*negative coordinates not supported (yet) */
 #endif
     
-    for (u=0; u<layout->ndims; u++)
-        chunk_coords_in_elmts[u] = chunk_coords[u] * (hssize_t)(layout->dim[u]);
-
     /* Get the address of this chunk on disk */
 #ifdef QAK
-HDfprintf(stderr,"%s: chunk_coords_in_elmts={",FUNC);
+HDfprintf(stderr,"%s: chunk_coords={",FUNC);
 for(u=0; u<layout->ndims; u++)
-    HDfprintf(stderr,"%Hd%s",chunk_coords_in_elmts[u],(u<(layout->ndims-1) ? ", " : "}\n"));
+    HDfprintf(stderr,"%Hd%s",chunk_coords[u],(u<(layout->ndims-1) ? ", " : "}\n"));
 #endif /* QAK */
-    chunk_addr=H5F_istore_get_addr(f, dxpl_id, layout, chunk_coords_in_elmts, NULL);
+    chunk_addr=H5F_istore_get_addr(f, dxpl_id, layout, chunk_coords, NULL);
 #ifdef QAK
 HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Hu\n",FUNC,chunk_addr,layout->chunk_size);
 HDfprintf(stderr,"%s: chunk_len_arr[%Zu]=%Zu\n",FUNC,*chunk_curr_seq,chunk_len_arr[*chunk_curr_seq]);
@@ -1881,7 +1873,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
             relax = FALSE;
 
         if (NULL==(chunk=H5F_istore_lock(f, dxpl_cache, dxpl_id, layout, &dcpl_cache->pline, &dcpl_cache->fill, dcpl_cache->fill_time,
-                 chunk_coords_in_elmts, relax, &idx_hint)))
+                 chunk_coords, relax, &idx_hint)))
             HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to read raw data chunk");
 
         /* Use the vectorized memory copy routine to do actual work */
@@ -1890,7 +1882,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
 
         H5_CHECK_OVERFLOW(naccessed,ssize_t,size_t);
         if (H5F_istore_unlock(f, dxpl_cache, dxpl_id, layout, &dcpl_cache->pline, TRUE,
-                  chunk_coords_in_elmts, &idx_hint, chunk, (size_t)naccessed)<0)
+                  chunk_coords, &idx_hint, chunk, (size_t)naccessed)<0)
             HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "uanble to unlock raw data chunk");
 
         /* Set return value */
