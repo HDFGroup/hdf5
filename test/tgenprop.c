@@ -74,7 +74,7 @@ test_genprop_basic_class(void)
     herr_t		ret;		/* Generic return value	*/
 
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing Basic Generic Property List Creation Functionality\n"));
+    MESSAGE(5, ("Testing Basic Generic Property List Class Creation Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
     cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL);
@@ -368,6 +368,71 @@ test_genprop_class_iter(void)
 
 /****************************************************************
 **
+**  test_genprop_basic_list(): Test basic generic property list code.
+**      Tests creating new generic property lists.
+** 
+****************************************************************/
+static void 
+test_genprop_basic_list(void)
+{
+    hid_t		cid1;		/* Generic Property class ID */
+    hid_t		cid2;		/* Generic Property class ID */
+    hid_t		lid1;		/* Generic Property list ID */
+    herr_t		ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Basic Generic Property List Creation Functionality\n"));
+
+    /* Create a new generic class, derived from the root of the class hierarchy */
+    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL);
+    CHECK_I(cid1, "H5Pcreate_class");
+
+    /* Add several properties (several w/default values) */
+
+    /* Insert first property into class (with no callbacks) */
+    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL);
+    CHECK_I(ret, "H5Pregister");
+
+    /* Insert second property into class (with no callbacks) */
+    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL);
+    CHECK_I(ret, "H5Pregister");
+
+    /* Create a property list from the class */
+    lid1 = H5Pcreate_list(cid1);
+    CHECK_I(lid1, "H5Pcreate_list");
+
+    /* Get the list's class */
+    cid2 = H5Pget_class_new(lid1);
+    CHECK_I(cid2, "H5Pget_class_new");
+
+    /* Check that the list's class is correct */
+    ret = H5Pequal(cid1,cid2);
+    VERIFY(ret, 1, "H5Pequal");
+
+    /* Check "is a" class/list relationship */
+
+    /* Close class */
+    ret = H5Pclose_class(cid2);
+    CHECK_I(ret, "H5Pclose_class");
+
+    /* Check number of properties */
+    /* Check existence of properties */
+    /* Add temporary properties */
+    /* Check number of properties */
+    /* Check existence of new properties */
+
+    /* Close list */
+    ret = H5Pclose_list(lid1);
+    CHECK_I(ret, "H5Pclose_list");
+
+    /* Close class */
+    ret = H5Pclose_class(cid1);
+    CHECK_I(ret, "H5Pclose_class");
+
+} /* end test_genprop_basic_list() */
+
+/****************************************************************
+**
 **  test_genprop(): Main generic property testing routine.
 ** 
 ****************************************************************/
@@ -381,6 +446,7 @@ test_genprop(void)
     test_genprop_basic_class(); /* Test basic code for creating a generic class */
     test_genprop_basic_class_prop(); /* Test basic code for adding properties to a generic class */
     test_genprop_class_iter();  /* Test basic code for iterating over properties in a generic class */
+    test_genprop_basic_list();  /* Test basic code for creating a generic property list */
 
 }   /* test_genprop() */
 
