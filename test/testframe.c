@@ -36,7 +36,7 @@ typedef struct TestStruct {
 	char   Name[MAXTESTNAME];
 	void (*Call)(void);
 	void (*Cleanup)(void);
-	void *Parameters;
+	const void *Parameters;
 } TestStruct;
 
 
@@ -47,16 +47,17 @@ static int num_errs = 0;        /* Total number of errors during testing */
 static int Verbosity = VERBO_DEF;       /* Default Verbosity is Low */
 static TestStruct Test[MAXNUMOFTESTS];
 static int    Index = 0;
-static void *Test_parameters = NULL;
+static const void *Test_parameters = NULL;
 
 
 /*
  * Setup a test function and add it to the list of tests.
  *      It must have no parameters and returns void.
- * TheName--short test name
- * TheCall--the test routine
- * Cleanup--the cleanup routine for the test
- * TheDescr--Long description of the test
+ * TheName--short test name.
+ *    If the name starts with '-', do not run it by default.
+ * TheCall--the test routine.
+ * Cleanup--the cleanup routine for the test.
+ * TheDescr--Long description of the test.
  * Parameters--pointer to extra parameters. Use NULL if none used.
  *    Since only the pointer is copied, the contents should not change.
  */
@@ -82,11 +83,17 @@ AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), con
 
     /* Set up test function */
     HDstrcpy(Test[Index].Description, TheDescr);
-    HDstrcpy(Test[Index].Name, TheName);
+    if (*TheName != '-'){
+	HDstrcpy(Test[Index].Name, TheName);
+	Test[Index].SkipFlag = 0;
+    }
+    else {	/* skip test by default */
+	HDstrcpy(Test[Index].Name, TheName+1);
+	Test[Index].SkipFlag = 1;
+    }
     Test[Index].Call = TheCall;
     Test[Index].Cleanup = Cleanup;
     Test[Index].NumErrors = -1;
-    Test[Index].SkipFlag = 0;
     Test[Index].Parameters = Parameters;
 
     /* Increment test count */
@@ -338,7 +345,7 @@ int GetTestNumErrs(void)
 /*
  * Retrieve the current Test Parameters pointer.
  */
-void *GetTestParameters(void)
+const void *GetTestParameters(void)
 {
     return(Test_parameters);
 }

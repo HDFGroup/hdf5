@@ -108,7 +108,6 @@ extern "C" {
 #endif
 
 /* Generally useful testing routines */
-H5TEST_DLL herr_t h5_errors(void *client_data);
 H5TEST_DLL int h5_cleanup(const char *base_name[], hid_t fapl);
 H5TEST_DLL char *h5_fixname(const char *base_name, hid_t fapl, char *fullname,
 		 size_t size);
@@ -134,7 +133,7 @@ H5TEST_DLL int  GetTestVerbosity(void);
 H5TEST_DLL int  SetTestVerbosity(int newval);
 H5TEST_DLL void ParseTestVerbosity(char *argv);
 H5TEST_DLL int  GetTestNumErrs(void);
-H5TEST_DLL void *GetTestParameters(void);
+H5TEST_DLL const void *GetTestParameters(void);
 H5TEST_DLL int  TestErrPrintf(const char *format, ...);
 H5TEST_DLL void SetTest(const char *testname, int action);
 
