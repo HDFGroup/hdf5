@@ -335,9 +335,6 @@ H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint, H5G_entry_t *ent/*out*/, had
      * FPHDF5 driver or it is, but the captain only flag is set or if the
      * captain only flag just isn't set.
      */
-    /* XXX: These conditions cover all possible boolean combinations and
-     * probably aren't what was meant... - QAK
-     */
     if (!H5FD_is_fphdf5_driver(f->shared->lf) || !capt_only || (H5FD_fphdf5_is_captain(f->shared->lf) && capt_only))
         ;
 #endif  /* H5_HAVE_FPHDF5 */
