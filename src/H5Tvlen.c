@@ -791,7 +791,6 @@ H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t UNUSED 
         H5HG_t bg_hobjid;       /* "Background" VL info sequence's ID info */
 
         /* Get the length of the sequence and heap object ID from background data. */
-	HDmemset(&bg_hobjid,0,sizeof(H5HG_t));
         UINT32DECODE(bg, bg_seq_len);
 
         /* Get heap information */
@@ -844,7 +843,6 @@ H5T_vlen_disk_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg)
     uint8_t *vl=(uint8_t *)_vl; /*Pointer to the user's hvl_t information*/
     uint8_t *bg=(uint8_t *)_bg; /*Pointer to the old data hvl_t          */
     uint32_t seq_len=0;         /* Sequence length */
-    H5HG_t hobjid;              /* New VL sequence's heap ID */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5T_vlen_disk_setnull)
@@ -859,7 +857,6 @@ H5T_vlen_disk_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg)
         H5HG_t bg_hobjid;       /* "Background" VL info sequence's ID info */
 
         /* Get the length of the sequence and heap object ID from background data. */
-	HDmemset(&bg_hobjid,0,sizeof(H5HG_t));
         UINT32DECODE(bg, bg_seq_len);
 
         /* Get heap information */
@@ -877,12 +874,9 @@ H5T_vlen_disk_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg)
     /* Set the length of the sequence */
     UINT32ENCODE(vl, seq_len);
     
-    /* Set the "nil" pointer information for the heap ID */
-    HDmemset(&hobjid,0,sizeof(H5HG_t));
-
-    /* Encode the heap information */
-    H5F_addr_encode(f,&vl,hobjid.addr);
-    INT32ENCODE(vl,hobjid.idx);
+    /* Encode the "nil" heap pointer information */
+    H5F_addr_encode(f,&vl,(haddr_t)0);
+    INT32ENCODE(vl,0);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
