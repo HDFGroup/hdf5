@@ -152,7 +152,7 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-SetFaplStdio">H5Pset_fapl_stdio</a>
     <li><a href="#Property-SetFaplStream">H5Pset_fapl_stream</a>
     <li><a href="#Property-GetFaplStream">H5Pget_fapl_stream</a>
-    <li><a href="#Property-SetDriver">H5Pset_driver</a>
+<!--<li><a href="#Property-SetDriver">H5Pset_driver</a>                              -->
     <li><a href="#Property-GetDriver">H5Pget_driver</a>
     <li><a href="#Property-GetDriverInfo">H5Pget_driver_info</a>
     <li><a href="#Property-SetMetaBlockSize">H5Pset_meta_block_size</a>
@@ -353,7 +353,7 @@ See further notes in the description of each function.
       <li><a href="#Property-SetCache">H5Pset_cache</a>
       <li><a href="#Property-SetChunk">H5Pset_chunk</a>
       <li><a href="#Property-SetDeflate">H5Pset_deflate</a>
-      <li><a href="#Property-SetDriver">H5Pset_driver</a>
+<!--  <li><a href="#Property-SetDriver">H5Pset_driver</a>                              -->
       <li><a href="#Property-SetDxplMpio">H5Pset_dxpl_mpio</a>&nbsp;&nbsp;&nbsp;||
       <li><a href="#Property-SetDxplMulti">H5Pset_dxpl_multi</a>
       <li><a href="#Property-SetEdcCheck">H5Pset_edc_check</a>
@@ -468,12 +468,6 @@ facilitate moving easily between them.</i>
     <li><a href="#Property-GetIstoreK">h5pget_istore_k_f</a>
     </ul>
 
-    <i>File Close Properties</i>
-    <ul>
-    <li><a href="#Property-SetFcloseDegree">h5pset_fclose_degree_f</a>
-    <li><a href="#Property-GetFcloseDegree">h5pget_fclose_degree_f</a>
-	</ul>
-
 <!--<p><i>Variable-length Datatype Properties</i>                         -->
 <!--<ul>                                                                  -->
 <!--<li><a href="#Property-SetVLMemManager">h5pset_vlen_mem_manager_f</a> -->
@@ -483,7 +477,13 @@ facilitate moving easily between them.</i>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 
 
-    <i>Dataset Creation Properties</i>
+    <i>File Close Properties</i>
+    <ul>
+    <li><a href="#Property-SetFcloseDegree">h5pset_fclose_degree_f</a>
+    <li><a href="#Property-GetFcloseDegree">h5pget_fclose_degree_f</a>
+    </ul>
+
+    <p><i>Dataset Creation Properties</i>
     <ul>
     <li><a href="#Property-SetLayout">h5pset_layout_f</a>
     <li><a href="#Property-GetLayout">h5pget_layout_f</a>
@@ -502,13 +502,13 @@ facilitate moving easily between them.</i>
     <li><a href="#Property-GetAllocTime">h5pget_alloc_time_f</a>
     <li><a href="#Property-SetFilter">h5pset_filter_f</a>
 <!--<li><a href="#Property-AllFiltersAvail">h5pall_filters_avail_f</a>    -->
-<!--<li><a href="#Property-GetNFilters">h5pget_nfilters_f</a>             -->
+    <li><a href="#Property-GetNFilters">h5pget_nfilters_f</a>  
     <li><a href="#Property-GetFilter">h5pget_filter_f</a>
-<!--<<li><a href="#Property-GetFilterById">h5pget_filter_by_id_f</a>         -->
-<!--<<li><a href="#Property-ModifyFilter">h5pmodify_filter_f</a>             -->
+    <li><a href="#Property-GetFilterById">h5pget_filter_by_id_f</a> 
+    <li><a href="#Property-ModifyFilter">h5pmodify_filter_f</a>  
     <li><a href="#Property-SetFletcher32">h5pset_fletcher32_f</a>
     <li><a href="#Property-SetShuffle">h5pset_shuffle_f</a>
-<!--<li><a href="#Property-SetSzip">h5pset_szip_f</a>                     -->
+    <li><a href="#Property-SetSzip">h5pset_szip_f</a>  
     <li><a href="#Property-SetExternal">h5pset_external_f</a>
     <li><a href="#Property-GetExternalCount">h5pget_external_count_f</a>
     <li><a href="#Property-GetExternal">h5pget_external_f</a>
@@ -538,9 +538,9 @@ facilitate moving easily between them.</i>
     <li><a href="#Property-GetMetaBlockSize">h5pget_meta_block_size_f</a>
     <li><a href="#Property-SetSieveBufSize">h5pset_sieve_buf_size_f</a>
     <li><a href="#Property-GetSieveBufSize">h5Pget_sieve_buf_size_f</a>
-<!--<li><a href="#Property-SetStdio">h5pset_stdio_f</a>                   -->
-<!--<li><a href="#Property-GetStdio">h5pget_stdio_f</a>                   -->
-<!--<li><a href="#Property-SetSec2">h5pset_sec2_f</a>                     -->
+    <li><a href="#Property-SetStdio">h5pset_stdio_f</a> 
+    <li><a href="#Property-GetStdio">h5pget_stdio_f</a>  
+    <li><a href="#Property-SetSec2">h5pset_sec2_f</a>   
 <!--<li><a href="#Property-GetSec2">h5pget_sec2_f</a>                     -->
     <li><a href="#Property-SetAlignment">h5pset_alignment_f</a>
     <li><a href="#Property-GetAlignment">h5pget_alignment_f</a>
@@ -550,12 +550,12 @@ facilitate moving easily between them.</i>
     <li><a href="#Property-GetFaplMpio">h5pget_fapl_mpio_f</a>&nbsp;&nbsp;&nbsp;||
     <li><a href="#Property-SetFaplMpiPosix">h5pset_fapl_mpiposix_f</a>&nbsp;&nbsp;&nbsp;||
     <li><a href="#Property-GetFaplMpiPosix">h5pget_fapl_mpiposix_f</a>&nbsp;&nbsp;&nbsp;||
-<!--<li><a href="#Property-SetFamily">h5pset_family_f</a>                 -->
-<!--<li><a href="#Property-GetFamily">h5pget_family_f</a>                 -->
+    <li><a href="#Property-SetFamily">h5pset_family_f</a>  
+    <li><a href="#Property-GetFamily">h5pget_family_f</a> 
 <!--<li><a href="#Property-SetFamilyOffset">h5pset_family_offset_f</a>    -->
 <!--<li><a href="#Property-GetFamilyOffset">h5pget_family_offset_f</a>    -->
-<!--<li><a href="#Property-SetFaplMulti">h5pset_fapl_multi_f</a>          -->
-<!--<li><a href="#Property-GetFaplMulti">h5pget_fapl_multi_f</a>          -->
+    <li><a href="#Property-SetFaplMulti">h5pset_fapl_multi_f</a>
+    <li><a href="#Property-GetFaplMulti">h5pget_fapl_multi_f</a> 
 <!--<li><a href="#Property-SetMultiType">h5pset_multi_type_f</a>          -->
 <!--<li><a href="#Property-GetMultiType">h5pget_multi_type_f</a>          -->
     <li><a href="#Property-SetCache">h5pset_cache_f</a>
@@ -571,8 +571,8 @@ facilitate moving easily between them.</i>
     <ul>
     <li><a href="#Property-SetBuffer">h5pset_buffer_f</a>
     <li><a href="#Property-GetBuffer">h5pget_buffer_f</a>
-<!--<li><a href="#Property-SetPreserve">h5pset_preserve_f</a>             -->
-<!--<li><a href="#Property-GetPreserve">h5pget_preserve_f</a>             -->
+    <li><a href="#Property-SetPreserve">h5pset_preserve_f</a>  
+    <li><a href="#Property-GetPreserve">h5pget_preserve_f</a> 
     <li><a href="#Property-SetEdcCheck">h5pset_edc_check_f</a>
     <li><a href="#Property-GetEdcCheck">h5pget_edc_check_f</a>
     <li><a href="#Property-SetHyperCache">h5pset_hyper_cache_f</a>
@@ -3666,11 +3666,10 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns the number of filters in the pipeline if successful;
         otherwise returns a negative value.
-  <!--
   <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5p_FORTRAN.html#h5pget_nfilters_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
+        <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -3848,10 +3847,10 @@ facilitate moving easily between them.</i>
  <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--<dt><strong>Non-C API(s):</strong>
+    <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5p_FORTRAN.html#h5pget_filter_by_id_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+        <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -3902,10 +3901,10 @@ facilitate moving easily between them.</i>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 
-<!--<dt><strong>Non-C API(s):</strong>
+    dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5p_FORTRAN.html#h5pmodify_filter_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+        <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -4140,11 +4139,10 @@ END LIBRARY-SET OPTION TAGS -->
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
   <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5p_FORTRAN.html#h5pset_szip_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+        <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -4337,11 +4335,11 @@ END LIBRARY-SET OPTION TAGS -->
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
+<!--
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_nfilters_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_filter_callback_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
+ -->    <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5248,11 +5246,10 @@ END LIBRARY-SET OPTION TAGS -->
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_preserve_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
+        <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5277,11 +5274,10 @@ END LIBRARY-SET OPTION TAGS -->
   <dt><strong>Returns:</strong>
     <dd>Returns TRUE or FALSE if successful;
         otherwise returns a negative value.
-  <!--
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_preserve_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
+        <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -5639,11 +5635,9 @@ END LIBRARY-SET OPTION TAGS -->
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_family_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -5679,11 +5673,9 @@ END LIBRARY-SET OPTION TAGS -->
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fapl_family_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -5733,11 +5725,9 @@ END LIBRARY-SET OPTION TAGS -->
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_family_offset_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -6472,11 +6462,9 @@ END LIBRARY-SET OPTION TAGS -->
                   H5Pset_fapl_multi(fapl, memb_map, memb_fapl,
                                   memb_name, memb_addr, TRUE);
         </pre>
-  <!--
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_multi_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -6520,11 +6508,9 @@ END LIBRARY-SET OPTION TAGS -->
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <!--
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fapl_multi_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -6692,11 +6678,9 @@ fapl = H5Pcreate(H5P_FILE_ACCESS);
 H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "/pfs/%s-r.h5", H5P_DEFAULT);
 fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
 </pre>
-  <!--
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_split_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -6862,11 +6846,9 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <!--
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_sec2_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -6894,11 +6876,9 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <!--
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_stdio_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -7114,11 +7094,9 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a valid low-level driver identifier if successful.
         Otherwise returns a negative value.
-  <!--
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_driver_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -7409,11 +7387,9 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <!--
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_core_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
@@ -7448,11 +7424,9 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
-  <!--
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fapl_core_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
