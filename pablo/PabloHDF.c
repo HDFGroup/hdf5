@@ -138,7 +138,7 @@ extern void preInitIOTrace( void );
 #define	ID_timeStamp		9999
 #define	DUMMY_HDF		10000
 
-char HDFprocNames[][40] = {
+char HDFprocNames[][80] = {
 "noName",
 "noName",
 "noName",
@@ -150,7 +150,7 @@ char HDFprocNames[][40] = {
 
 void startHDFtraceEvent (int );
 void endHDFtraceEvent (int , int , char *, int );
-void getHDFprocName( int, char[41] );
+void getHDFprocName( int, char[81] );
 
 void setHDFcallLevel( int );
 void resetHDFcallLevel( void );
@@ -169,7 +169,7 @@ void unixIObaseInit( int captureType, int procNum );
 int hdfBaseInit( int captureType,
                  int procNum,
                  int numHDFentries,
-                 char HDFprocNames[][40] );
+                 char HDFprocNames[][80] );
 void timeStamp( void );
 void hdfBaseEnd( void );
 void unixIObaseEnd( void );
@@ -1219,7 +1219,7 @@ HDFtracePUTS( const char *s )
    return( ret );
 }
 
-void getHDFprocName ( int i, char buff[41] )
+void getHDFprocName ( int i, char buff[81] )
 {
    strcpy( buff, HDFprocNames[i] );
 }   
