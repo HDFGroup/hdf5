@@ -19,7 +19,7 @@ CPPFLAGS=-I. -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
 
 ## This is our main target
 LIB=libhdf5_fortran.la
-CLEAN=H5fortran_types.f90
+DISTCLEAN=H5fortran_types.f90
 
 ## Source and object files for the library
 ADD_PARALLEL_FILES=@ADD_PARALLEL_FILES@
