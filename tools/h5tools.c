@@ -1312,8 +1312,8 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 	}
 
 	/* Print the data */
-	flags = ((0==elmtno?START_OF_DATA:0) |
-		 (elmtno+hs_nelmts>=p_nelmts?END_OF_DATA:0));
+	flags = ((0==elmtno ? START_OF_DATA : 0) |
+		 (elmtno+hs_nelmts>=p_nelmts ? END_OF_DATA : 0));
 	if (programtype == UNKNOWN){
 		return FAIL;
 	} else if (programtype == H5LS){
@@ -1848,7 +1848,7 @@ int temp;
          if ((int)(strlen(out_buf)+tempstr.len+1) > (nCols-indent-COL)) {
 			 if (isref){
 			/* i added this */
-				 temp = strlen(out_buf);
+				 temp = (int)strlen(out_buf);
 				 if ((strlen(out_buf) + 7) < (totalspace)){ /* 7 for the word dataset */
 					 memcpy(out_buf+strlen(out_buf), tempstr.s, totalspace - strlen(out_buf));
 					 out_buf[totalspace] = '\0';
@@ -1959,7 +1959,7 @@ static void display_string
 (hsize_t hs_nelmts, hid_t p_type, unsigned char *sm_buf, size_t p_type_nbytes, 
  hsize_t p_nelmts, hsize_t dim_n_size, hsize_t elmtno) {
 	hsize_t i, row_size=0;
-	int j, m, x, y, z,  first_row=1;
+	int j, m, x, y, first_row=1;
 	int free_space, long_string = 0;
 	char* out_buf =  malloc(sizeof(char) * nCols);
 	struct h5dump_str_t tempstr;
@@ -1998,7 +1998,7 @@ static void display_string
 		tempstr.s[tempstr.len - 2] = '\0';
 		tempstr.len = tempstr.len - 2;
 
-		free_space = nCols - indent - COL - strlen(out_buf);
+		free_space = (int)(nCols - indent - COL - strlen(out_buf));
 
          if ((elmtno+i+1) == p_nelmts) { /* last element */
             /* 2 for double quotes */
@@ -2033,7 +2033,7 @@ static void display_string
                      indentation(indent+COL);     
 					 printf("%s\"", out_buf);
 					 memset(out_buf, '\0', nCols); 
-					 temp = copy_atomic_char(out_buf,tempstr.s,tempstr.len,x);
+					 temp = copy_atomic_char(out_buf,tempstr.s,(int)tempstr.len,x);
                      out_buf[x] = '\0';
 					 printf("%s\" %s\n",out_buf,CONCATENATOR);
 					 x = temp;
@@ -2042,10 +2042,7 @@ static void display_string
 
              y = nCols - indent -COL - 5;
 
-             m = (tempstr.len - x)/y;
-
-             z = (tempstr.len - x) % y;
-
+             m = (int)((tempstr.len - x)/y);
 
              for (j = 0; j < m - 1 ; j++) {
                   indentation(indent+COL);

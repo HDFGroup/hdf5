@@ -116,7 +116,7 @@ h5_cleanup(hid_t fapl)
 	    } else if (H5FD_MULTI==driver) {
 		H5FD_mem_t mt;
 		assert(strlen(multi_letters)==H5FD_MEM_NTYPES);
-		for (mt=0; mt<H5FD_MEM_NTYPES; mt++) {
+		for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt++) {
 		    HDsnprintf(temp, sizeof temp, "%s-%c.h5",
 			       filename, multi_letters[mt]);
 		    remove(temp); /*don't care if it fails*/
@@ -212,7 +212,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
     /* Prepend the prefix value to the base name */
     if (prefix && *prefix) {
-	if (HDsnprintf(fullname, size, "%s/%s", prefix, base_name)==(int)size) {
+	if (HDsnprintf(fullname, (long)size, "%s/%s", prefix, base_name)==(int)size) {
 	    return NULL; /*buffer is too small*/
 	}
     } else if (strlen(base_name)>=size) {
@@ -310,7 +310,7 @@ h5_fileaccess(void)
 	memset(memb_addr, 0, sizeof memb_addr);
 
 	assert(strlen(multi_letters)==H5FD_MEM_NTYPES);
-	for (mt=0; mt<H5FD_MEM_NTYPES; mt++) {
+	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt++) {
 	    memb_fapl[mt] = H5P_DEFAULT;
 	    sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
 	    memb_name[mt] = sv[mt];

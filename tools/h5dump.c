@@ -177,7 +177,7 @@ H5G_stat_t statbuf;
         cset = H5Tget_cset(type);
 
         indentation (indent+COL);
-        printf("%s %s %d;\n", BEGIN, STRSIZE, size);
+        printf("%s %s %d;\n", BEGIN, STRSIZE, (int)size);
   
         indentation (indent+COL);
         printf("  %s ", STRPAD);
@@ -301,7 +301,7 @@ H5G_stat_t statbuf;
 
                  if (ndims != 1 || dims[0] != 1) {
                      for (j = 0; j < ndims; j++) 
-                          printf("[%d]",dims[j]);
+                          printf("[%d]",(int)dims[j]);
                  }
 
                  printf (";\n");
@@ -522,7 +522,7 @@ char *obj_name, *attr_name;
 hid_t  oid, attr_id, type, space;
 H5G_stat_t statbuf;
 
-    j = strlen(name)-1;
+    j = (int)strlen(name)-1;
     obj_name = malloc ((j+2)* sizeof(char));
 
     /* find the last / */
@@ -798,7 +798,7 @@ size_t dims[H5DUMP_MAX_RANK];
   
          if (ndims != 1 || dims[0] != 1) {
              for (j = 0; j < ndims; j++) 
-                  printf("[%d]",dims[j]);
+                  printf("[%d]",(int)dims[j]);
          }
 
          printf (";\n");

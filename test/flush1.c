@@ -94,6 +94,3 @@ main(void)
     _exit(1);
 }
 
-    
-    
-	

@@ -62,10 +62,10 @@ void *test_vltypes_alloc_custom(size_t size, void *info)
      *  This weird contortion is required on the DEC Alpha to keep the
      *  alignment correct - QAK
      */
-    extra=MAX(sizeof(void *),sizeof(int));
+    extra=MAX(sizeof(void *),sizeof(size_t));
 
     if((ret_value=HDmalloc(extra+size))!=NULL) {
-        *(int *)ret_value=size;
+        *(size_t *)ret_value=size;
         *mem_used+=size;
     } /* end if */
     ret_value=((unsigned char *)ret_value)+extra;
@@ -90,11 +90,11 @@ void test_vltypes_free_custom(void *_mem, void *info)
      *  This weird contortion is required on the DEC Alpha to keep the
      *  alignment correct - QAK
      */
-    extra=MAX(sizeof(void *),sizeof(int));
+    extra=MAX(sizeof(void *),sizeof(size_t));
 
     if(_mem!=NULL) {
         mem=((unsigned char *)_mem)-extra;
-        *mem_used-=*(int *)mem;
+        *mem_used-=*(size_t *)mem;
         HDfree(mem);
     } /* end if */
 }
