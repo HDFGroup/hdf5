@@ -119,6 +119,9 @@
 #define H5D_XFER_VFL_INFO_SIZE       sizeof(void *)
 #define H5D_XFER_VFL_INFO_DEF  NULL
 /* Definitions for hyperslab vector size property */
+/* (Be cautious about increasing the default size, there are arrays allocated
+ *      on the stack which depend on it - QAK)
+ */
 #define H5D_XFER_HYPER_VECTOR_SIZE_NAME       "vec_size"
 #define H5D_XFER_HYPER_VECTOR_SIZE_SIZE       sizeof(size_t)
 #define H5D_XFER_HYPER_VECTOR_SIZE_DEF        1024
