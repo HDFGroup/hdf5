@@ -25,15 +25,15 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 	    shtype2a.h5 shtype2b.h5 shtype3.h5 links.h5 chunk.h5 big.data    \
 	    big[0-9][0-9][0-9][0-9][0-9].h5 dtypes1.h5 dtypes2.h5 tattr.h5   \
 	    tselect.h5 mtime.h5 ragged.h5 grptime.h5 unlink.h5 overhead.h5   \
-	    fillval_[0-9].h5
+	    fillval_[0-9].h5 trefer.h5
 CLEAN=$(TIMINGS)
 
 # Source and object files for programs...  The TEST_SRC list contains all the
 # source files and is used for things like dependencies, archiving, etc.  The
 # other source lists are for the individual tests, the files of which may
 # overlap with other tests.
-TEST_SRC=testhdf5.c tattr.c tfile.c theap.c tmeta.c tohdr.c tselect.c tstab.c \
-    th5s.c dtypes.c hyperslab.c istore.c dsets.c cmpd_dset.c extend.c \
+TEST_SRC=testhdf5.c tattr.c tfile.c theap.c tmeta.c tohdr.c trefer.c tselect.c \
+    tstab.c th5s.c dtypes.c hyperslab.c istore.c dsets.c cmpd_dset.c extend.c \
     external.c iopipe.c gheap.c shtype.c big.c links.c chunk.c bittests.c \
     mtime.c ragged.c unlink.c overhead.c fillval.c
 TEST_OBJ=$(TEST_SRC:.c=.o)
@@ -52,7 +52,7 @@ timings _timings: $(TIMINGS)
 	done;
 
 # How to build the programs...
-TESTHDF5_OBJ=testhdf5.o tattr.o tfile.o theap.o tmeta.o tohdr.o tselect.o tstab.o th5s.o
+TESTHDF5_OBJ=testhdf5.o tattr.o tfile.o theap.o tmeta.o tohdr.o trefer.o tselect.o tstab.o th5s.o
 testhdf5: $(TESTHDF5_OBJ) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) ../src/libhdf5.a $(LIBS)
 

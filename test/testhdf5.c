@@ -170,6 +170,7 @@ main(int argc, char *argv[])
     InitTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces");
     InitTest("attr", test_attr, cleanup_attr,  "Attributes");
     InitTest("select", test_select, cleanup_select,  "Selections");
+    InitTest("reference", test_reference, cleanup_reference,  "References");
 
     Verbosity = 4;              /* Default Verbosity is Low */
     H5get_libversion(&major, &minor, &release);
