@@ -1100,15 +1100,17 @@ H5S_select_serialize (const H5S_t *space, uint8_t *buf)
 herr_t
 H5S_select_deserialize (H5S_t *space, const uint8_t *buf)
 {
-    const uint32_t *sel_type;       /* Pointer to the selection type */
+    const uint8_t *tbuf;    /* Temporary pointer to the selection type */
+    uint32_t sel_type;       /* Pointer to the selection type */
     herr_t ret_value=FAIL;  /* return value */
 
     FUNC_ENTER (H5S_select_deserialize, FAIL);
 
     assert(space);
 
-    sel_type=(const uint32_t *)buf;
-    switch(*sel_type) {
+    tbuf=buf;
+    UINT32DECODE(tbuf, sel_type);
+    switch(sel_type) {
         case H5S_SEL_POINTS:         /* Sequence of points selected */
             ret_value=H5S_point_select_deserialize(space,buf);
             break;
