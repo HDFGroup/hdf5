@@ -84,7 +84,7 @@
 !                              H5T_IEEE_F32LE,  &
 !                              H5T_IEEE_F64BE,  &
 !                              H5T_IEEE_F64LE
-      COMMON /FLOATING_TYPES/ floatinig_types 
+      COMMON /FLOATING_TYPES/ floating_types 
 !
 !      COMMON /INTEGER_TYPES/ H5T_STD_I8BE,  &
 !                             H5T_STD_I8LE,    &
