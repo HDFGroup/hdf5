@@ -140,6 +140,7 @@ INSTRUMENT_LIBRARY = @INSTRUMENT_LIBRARY@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 LT_STATIC_EXEC = @LT_STATIC_EXEC@
+MAINT = @MAINT@
 MPE = @MPE@
 OBJDUMP = @OBJDUMP@
 OBJECT_NAMELEN_DEFAULT_F = @OBJECT_NAMELEN_DEFAULT_F@
@@ -402,10 +403,10 @@ all: H5config.h
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
-$(srcdir)/Makefile.in:  Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --foreign  src/Makefile
-Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
+Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
 
 H5config.h: stamp-h1
@@ -418,7 +419,7 @@ stamp-h1: $(srcdir)/H5config.h.in $(top_builddir)/config.status
 	@rm -f stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status src/H5config.h
 
-$(srcdir)/H5config.h.in:  $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+$(srcdir)/H5config.h.in: @MAINTAINER_MODE_TRUE@ $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOHEADER)
 	touch $(srcdir)/H5config.h.in
 

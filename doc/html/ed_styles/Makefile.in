@@ -126,6 +126,7 @@ INSTRUMENT_LIBRARY = @INSTRUMENT_LIBRARY@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 LT_STATIC_EXEC = @LT_STATIC_EXEC@
+MAINT = @MAINT@
 MPE = @MPE@
 OBJDUMP = @OBJDUMP@
 OBJECT_NAMELEN_DEFAULT_F = @OBJECT_NAMELEN_DEFAULT_F@
@@ -203,10 +204,10 @@ DIST_COMMON = Makefile.am Makefile.in
 all: all-am
 
 .SUFFIXES:
-$(srcdir)/Makefile.in:  Makefile.am $(top_srcdir)/config/commence-doc.am $(top_srcdir)/config/commence.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/config/commence-doc.am $(top_srcdir)/config/commence.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --foreign  doc/html/ed_styles/Makefile
-Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
+Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
 
 mostlyclean-libtool:
@@ -347,7 +348,7 @@ uninstall-am: uninstall-info-am uninstall-localdocDATA
 lib progs check test _test:
 	@echo "Nothing to be done"
 
-tests TAGS tags dep depend:
+tests dep depend:
 	@@SETX@; for d in X $(SUBDIRS); do                                  \
 	  if test $$d != X; then                                              \
 	    (cd $$d && $(MAKE) $@) || exit 1;                                 \

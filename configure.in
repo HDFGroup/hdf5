@@ -32,6 +32,18 @@ AM_CONFIG_HEADER([src/H5config.h])
 AC_CONFIG_AUX_DIR([bin])
 AM_INIT_AUTOMAKE
 
+dnl AM_MAINTAINER_MODE turns off "rebuild rules" that contain dependencies
+dnl for Makefiles, configure, src/H5config.h, etc.  If AM_MAINTAINER_MODE
+dnl is *not* included here, these files will be rebuilt if out of date.
+dnl This is a problem because if users try to build on a machine with
+dnl the wrong versions of autoconf and automake, these files will be
+dnl rebuilt with the wrong versions and bad things can happen.
+dnl Also, CVS doesn't preserve dependencies between timestamps, so
+dnl Makefiles will often think rebuilding needs to occur when it doesn't.
+dnl Developers should './configure --enable-maintainer-mode' to turn on
+dnl rebuild rules.
+AM_MAINTAINER_MODE
+
 AC_OUTPUT_COMMANDS([
   echo "creating src/H5pubconf.h"
   sed 's/#define /#define H5_/' <src/H5config.h |\

@@ -472,7 +472,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE build build_cpu build_vendor build_os host host_cpu host_vendor host_os CPPFLAGS DEFAULT_LIBS HSIZET CC CFLAGS LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE HDF5_INTERFACES R_LARGE R_INTEGER HADDR_T HSIZE_T HSSIZE_T HID_T SIZE_T OBJECT_NAMELEN_DEFAULT_F FFLAGS F9XSUFFIXFLAG FSEARCH_DIRS F9X F9XMODFLAG F9XMODEXT FC F77 CXX CXXFLAGS ac_ct_CXX CXXDEPMODE CXXCPP LT_STATIC_EXEC PERL AR LN_S ECHO RANLIB ac_ct_RANLIB CPP EGREP LIBTOOL USE_FILTER_DEFLATE USE_FILTER_SZIP SSL GASS TESTGASS SRB TESTSRB BUILD_PDB2HDF BUILD_PDB2HDF_CONDITIONAL_TRUE BUILD_PDB2HDF_CONDITIONAL_FALSE PTHREAD DEBUG_PKG TRACE_API INSTRUMENT_LIBRARY PARALLEL RUNSERIAL RUNPARALLEL TESTPARALLEL ADD_PARALLEL_FILES MPE FILTERS USE_FILTER_SHUFFLE USE_FILTER_FLETCHER32 USE_FILTER_NBIT H5_VERSION CONFIG_DATE CONFIG_USER CONFIG_MODE BYTESEX STATIC_SHARED CC_VERSION ROOT DYNAMIC_DIRS HL HL_FOR BUILD_CXX_CONDITIONAL_TRUE BUILD_CXX_CONDITIONAL_FALSE BUILD_PABLO_CONDITIONAL_TRUE BUILD_PABLO_CONDITIONAL_FALSE BUILD_PARALLEL_CONDITIONAL_TRUE BUILD_PARALLEL_CONDITIONAL_FALSE BUILD_FORTRAN_CONDITIONAL_TRUE BUILD_FORTRAN_CONDITIONAL_FALSE BUILD_HDF5_HL_CONDITIONAL_TRUE BUILD_HDF5_HL_CONDITIONAL_FALSE SEARCH SETX LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT build build_cpu build_vendor build_os host host_cpu host_vendor host_os CPPFLAGS DEFAULT_LIBS HSIZET CC CFLAGS LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE HDF5_INTERFACES R_LARGE R_INTEGER HADDR_T HSIZE_T HSSIZE_T HID_T SIZE_T OBJECT_NAMELEN_DEFAULT_F FFLAGS F9XSUFFIXFLAG FSEARCH_DIRS F9X F9XMODFLAG F9XMODEXT FC F77 CXX CXXFLAGS ac_ct_CXX CXXDEPMODE CXXCPP LT_STATIC_EXEC PERL AR LN_S ECHO RANLIB ac_ct_RANLIB CPP EGREP LIBTOOL USE_FILTER_DEFLATE USE_FILTER_SZIP SSL GASS TESTGASS SRB TESTSRB BUILD_PDB2HDF BUILD_PDB2HDF_CONDITIONAL_TRUE BUILD_PDB2HDF_CONDITIONAL_FALSE PTHREAD DEBUG_PKG TRACE_API INSTRUMENT_LIBRARY PARALLEL RUNSERIAL RUNPARALLEL TESTPARALLEL ADD_PARALLEL_FILES MPE FILTERS USE_FILTER_SHUFFLE USE_FILTER_FLETCHER32 USE_FILTER_NBIT H5_VERSION CONFIG_DATE CONFIG_USER CONFIG_MODE BYTESEX STATIC_SHARED CC_VERSION ROOT DYNAMIC_DIRS HL HL_FOR BUILD_CXX_CONDITIONAL_TRUE BUILD_CXX_CONDITIONAL_FALSE BUILD_PABLO_CONDITIONAL_TRUE BUILD_PABLO_CONDITIONAL_FALSE BUILD_PARALLEL_CONDITIONAL_TRUE BUILD_PARALLEL_CONDITIONAL_FALSE BUILD_FORTRAN_CONDITIONAL_TRUE BUILD_FORTRAN_CONDITIONAL_FALSE BUILD_HDF5_HL_CONDITIONAL_TRUE BUILD_HDF5_HL_CONDITIONAL_FALSE SEARCH SETX LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1026,6 +1026,8 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --enable-maintainer-mode enable make rules and dependencies not useful
+                          (and sometimes confusing) to the casual installer
   --disable-hsizet        Datasets can normally be larger than memory and/or
                           files but some compilers are unable to handle this
                           (including versions of GCC before 2.8.0). Disabling
@@ -1942,6 +1944,31 @@ INSTALL_STRIP_PROGRAM="\${SHELL} \$(install_sh) -c -s"
 # We need awk for the "check" target.  The system "awk" is bad on
 # some platforms.
 
+
+
+
+echo "$as_me:$LINENO: checking whether to enable maintainer-specific portions of Makefiles" >&5
+echo $ECHO_N "checking whether to enable maintainer-specific portions of Makefiles... $ECHO_C" >&6
+    # Check whether --enable-maintainer-mode or --disable-maintainer-mode was given.
+if test "${enable_maintainer_mode+set}" = set; then
+  enableval="$enable_maintainer_mode"
+  USE_MAINTAINER_MODE=$enableval
+else
+  USE_MAINTAINER_MODE=no
+fi;
+  echo "$as_me:$LINENO: result: $USE_MAINTAINER_MODE" >&5
+echo "${ECHO_T}$USE_MAINTAINER_MODE" >&6
+
+
+if test $USE_MAINTAINER_MODE = yes; then
+  MAINTAINER_MODE_TRUE=
+  MAINTAINER_MODE_FALSE='#'
+else
+  MAINTAINER_MODE_TRUE='#'
+  MAINTAINER_MODE_FALSE=
+fi
+
+  MAINT=$MAINTAINER_MODE_TRUE
 
 
 
@@ -6417,7 +6444,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6420 "configure"' > conftest.$ac_ext
+  echo '#line 6447 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -6975,7 +7002,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:6978: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:7005: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -8177,7 +8204,7 @@ linux-gnu*)
   libsuff=
   case "$host_cpu" in
   x86_64*|s390x*)
-    echo '#line 8180 "configure"' > conftest.$ac_ext
+    echo '#line 8207 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8925,7 +8952,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 8928 "configure"
+#line 8955 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -9023,7 +9050,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 9026 "configure"
+#line 9053 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -39828,6 +39855,13 @@ LIBOBJS=$ac_libobjs
 LTLIBOBJS=$ac_ltlibobjs
 
 
+if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"MAINTAINER_MODE\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"MAINTAINER_MODE\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${AMDEP_TRUE}" && test -z "${AMDEP_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"AMDEP\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -40482,6 +40516,9 @@ s,@ac_ct_STRIP@,$ac_ct_STRIP,;t t
 s,@INSTALL_STRIP_PROGRAM@,$INSTALL_STRIP_PROGRAM,;t t
 s,@AWK@,$AWK,;t t
 s,@SET_MAKE@,$SET_MAKE,;t t
+s,@MAINTAINER_MODE_TRUE@,$MAINTAINER_MODE_TRUE,;t t
+s,@MAINTAINER_MODE_FALSE@,$MAINTAINER_MODE_FALSE,;t t
+s,@MAINT@,$MAINT,;t t
 s,@build@,$build,;t t
 s,@build_cpu@,$build_cpu,;t t
 s,@build_vendor@,$build_vendor,;t t

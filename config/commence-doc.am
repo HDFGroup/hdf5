@@ -7,7 +7,7 @@ include $(top_srcdir)/config/commence.am
 lib progs check test _test:
 	@echo "Nothing to be done"
 
-tests TAGS tags dep depend:
+tests dep depend:
 	@@SETX@; for d in X $(SUBDIRS); do                                  \
 	  if test $$d != X; then                                              \
 	    (cd $$d && $(MAKE) $@) || exit 1;                                 \
