@@ -49,8 +49,8 @@ PRIVATE_HDR=H5private.h H5Aprivate.h H5Apkg.h H5ACprivate.h H5Bprivate.h \
     H5Dprivate.h H5Eprivate.h H5Fprivate.h H5FDprivate.h H5FLprivate.h \
     H5Gprivate.h H5Gpkg.h H5HGprivate.h H5HLprivate.h H5Iprivate.h \
     H5MFprivate.h H5MMprivate.h H5Oprivate.h H5Pprivate.h H5Rprivate.h \
-    H5RAprivate.h H5Sprivate.h H5Tprivate.h H5TBprivate.h H5Tpkg.h \
-    H5Vprivate.h H5Zprivate.h H5config.h
+    H5RAprivate.h H5Sprivate.h H5Tprivate.h H5TBprivate.h H5Tpkg.h
+    H5TSprivate.h H5Vprivate.h H5Zprivate.h H5config.h
 
 ## Number format detection
 ## The LD_LIBRARY_PATH setting is a klutch.

@@ -43,14 +43,9 @@ FILE *fdopen(int fd, const char *mode);
 /* statically initialize block for pthread_once call used in initializing */
 /* the first global mutex                                                 */
 #ifdef H5_HAVE_THREADSAFE
-pthread_once_t H5_first_init_g = PTHREAD_ONCE_INIT;
-pthread_key_t H5_errstk_key_g;
-pthread_key_t H5_cancel_key_g;
-hbool_t H5_allow_concurrent_g = FALSE; /* concurrent APIs override this */
-
 H5_api_t H5_g;
 #else
-hbool_t                 H5_libinit_g = FALSE;
+hbool_t H5_libinit_g = FALSE;
 #endif
 
 hbool_t                 dont_atexit_g = FALSE;
@@ -164,9 +159,9 @@ H5_term_library(void)
 #ifdef H5_HAVE_THREADSAFE
 
     /* explicit locking of the API */
-    pthread_once(&H5_first_init_g, H5_first_thread_init);
+    pthread_once(&H5TS_first_init_g, H5TS_first_thread_init);
 
-    H5_mutex_lock(&H5_g.init_lock);
+    H5TS_mutex_lock(&H5_g.init_lock);
 
     if (!H5_g.H5_libinit_g) return;
 #else
@@ -217,7 +212,7 @@ H5_term_library(void)
 #ifdef H5_HAVE_THREADSAFE
     H5_g.H5_libinit_g = FALSE;
 
-    H5_mutex_unlock(&H5_g.init_lock);
+    H5TS_mutex_unlock(&H5_g.init_lock);
 #else
     H5_libinit_g = FALSE;
 #endif
@@ -256,16 +251,16 @@ H5dont_atexit(void)
 
   /* locking code explicitly since FUNC_ENTER is not called */
 #ifdef H5_HAVE_THREADSAFE
-    pthread_once(&H5_first_init_g, H5_first_thread_init);
+    pthread_once(&H5TS_first_init_g, H5TS_first_thread_init);
 
-    H5_mutex_lock(&H5_g.init_lock);
+    H5TS_mutex_lock(&H5_g.init_lock);
 #endif
     H5_trace(FALSE, "H5dont_atexit", "");
     if (dont_atexit_g) return FAIL;
     dont_atexit_g = TRUE;
     H5_trace(TRUE, NULL, "e", SUCCEED);
 #ifdef H5_HAVE_THREADSAFE
-    H5_mutex_unlock(&H5_g.init_lock);
+    H5TS_mutex_unlock(&H5_g.init_lock);
 #endif
     return(SUCCEED);
 }
@@ -521,13 +516,13 @@ H5close (void)
      */
   /* Explicitly lock the call since FUNC_ENTER is not called */
 #ifdef H5_HAVE_THREADSAFE
-    pthread_once(&H5_first_init_g, H5_first_thread_init);
+    pthread_once(&H5TS_first_init_g, H5TS_first_thread_init);
 
-    H5_mutex_lock(&H5_g.init_lock);
+    H5TS_mutex_lock(&H5_g.init_lock);
 #endif
     H5_term_library();
 #ifdef H5_HAVE_THREADSAFE
-    H5_mutex_unlock(&H5_g.init_lock);
+    H5TS_mutex_unlock(&H5_g.init_lock);
 #endif
     return SUCCEED;
 }

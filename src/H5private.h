@@ -879,60 +879,43 @@ __DLL__ void H5_trace(hbool_t returning, const char *func, const char *type,
 
 /* Lock headers */
 #ifdef H5_HAVE_THREADSAFE
-typedef struct H5_mutex_struct {
-  pthread_t owner_thread;         /* current lock owner */
-  pthread_mutex_t atomic_lock;    /* lock for atomicity of new mechanism */
-  pthread_cond_t cond_var;        /* condition variable */
-  unsigned int lock_count;
-} H5_mutex_t;
 
-/* cancelability structure */
-typedef struct H5_cancel_struct {
-  int previous_state;
-  unsigned int cancel_count;
-} H5_cancel_t;
+/* Include required thread-safety header */
+#include <H5TSprivate.h>
 
 /* replacement structure for original global variable */
 typedef struct H5_api_struct {
-  H5_mutex_t init_lock;           /* API entrance mutex */
+  H5TS_mutex_t init_lock;           /* API entrance mutex */
   hbool_t H5_libinit_g;
 } H5_api_t;
 
-
 /* Macro for first thread initialization */
 #define H5_FIRST_THREAD_INIT                                                  \
-   pthread_once(&H5_first_init_g, H5_first_thread_init);
+   pthread_once(&H5TS_first_init_g, H5TS_first_thread_init);
 
 /* Macros for threadsafe HDF-5 Phase I locks */
 #define H5_INIT_GLOBAL H5_g.H5_libinit_g
 #define H5_API_LOCK_BEGIN                                                     \
    if (H5_IS_API(FUNC)) {                                                     \
-     H5_mutex_lock(&H5_g.init_lock);
+     H5TS_mutex_lock(&H5_g.init_lock);
 #define H5_API_LOCK_END }
 #define H5_API_UNLOCK_BEGIN                                                   \
   if (H5_IS_API(FUNC)) {                                                      \
-    H5_mutex_unlock(&H5_g.init_lock);
+    H5TS_mutex_unlock(&H5_g.init_lock);
 #define H5_API_UNLOCK_END }
 
 /* Macros for thread cancellation-safe mechanism */
 #define H5_API_UNSET_CANCEL                                                   \
   if (H5_IS_API(FUNC)) {                                                      \
-    H5_cancel_count_inc();                                                    \
+    H5TS_cancel_count_inc();                                                    \
   }
 
 #define H5_API_SET_CANCEL                                                     \
   if (H5_IS_API(FUNC)) {                                                      \
-    H5_cancel_count_dec();                                                    \
+    H5TS_cancel_count_dec();                                                    \
   }
 
-/* Extern global variables */
-extern pthread_once_t H5_first_init_g;
-extern pthread_key_t H5_errstk_key_g;
-extern pthread_key_t H5_cancel_key_g;
-extern hbool_t H5_allow_concurrent_g;
 extern H5_api_t H5_g;
-
-void H5_first_thread_init(void);
 
 #else
 

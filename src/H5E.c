@@ -197,12 +197,12 @@ void *H5E_auto_data_g = NULL;
 H5E_t *H5E_get_stack() {
   H5E_t *estack;
 
-  if (estack = pthread_getspecific(H5_errstk_key_g)) {
+  if ((estack = pthread_getspecific(H5TS_errstk_key_g))!=NULL) {
     return estack;
   } else {
     /* no associated value with current thread - create one */
     estack = (H5E_t *)malloc(sizeof(H5E_t));
-    pthread_setspecific(H5_errstk_key_g, (void *)estack);
+    pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
     return estack;
   }
 }
@@ -359,7 +359,7 @@ H5Eprint(FILE *stream)
     if (!stream) stream = stderr;
 #ifdef H5_HAVE_THREADSAFE
     fprintf (stream, "HDF5-DIAG: Error detected in thread %d."
-	     ,pthread_self());
+	     ,(int)pthread_self());
 #else
     fprintf (stream, "HDF5-DIAG: Error detected in thread 0.");
 #endif

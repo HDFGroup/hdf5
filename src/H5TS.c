@@ -22,11 +22,30 @@ static char             RcsId[] = "@(#)$Revision$";
 
 #ifdef H5_HAVE_THREADSAFE
 
+/* Module specific data structures */
+
+/* cancelability structure */
+typedef struct H5TS_cancel_struct {
+  int previous_state;
+  unsigned int cancel_count;
+} H5TS_cancel_t;
+
+/* Global variable definitions */
+pthread_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
+pthread_key_t H5TS_errstk_key_g;
+pthread_key_t H5TS_cancel_key_g;
+hbool_t H5TS_allow_concurrent_g = FALSE; /* concurrent APIs override this */
+
+/* Local function definitions */
+#ifdef NOT_USED
+static void H5TS_mutex_init(H5TS_mutex_t *mutex);
+#endif /* NOT_USED */
+
 /*--------------------------------------------------------------------------
  * NAME
- *    H5_first_thread_init
+ *    H5TS_first_thread_init
  * USAGE
- *    H5_first_thread_init()
+ *    H5TS_first_thread_init()
  * 
  * RETURNS
  *
@@ -42,26 +61,29 @@ static char             RcsId[] = "@(#)$Revision$";
  *
  *--------------------------------------------------------------------------
  */
-void H5_first_thread_init() {
-  /* initialize global API mutex lock                      */
-  H5_g.H5_libinit_g = FALSE;
-  H5_g.init_lock.owner_thread = NULL;
-  pthread_mutex_init(&H5_g.init_lock.atomic_lock, NULL);
-  pthread_cond_init(&H5_g.init_lock.cond_var, NULL);
-  H5_g.init_lock.lock_count = 0;
+void
+H5TS_first_thread_init(void)
+{
+    /* initialize global API mutex lock                      */
+    H5_g.H5_libinit_g = FALSE;
+    H5_g.init_lock.owner_thread = NULL;
+    pthread_mutex_init(&H5_g.init_lock.atomic_lock, NULL);
+    pthread_cond_init(&H5_g.init_lock.cond_var, NULL);
+    H5_g.init_lock.lock_count = 0;
 
-  /* initialize key for thread-specific error stacks       */
-  pthread_key_create(&H5_errstk_key_g, NULL);
+    /* initialize key for thread-specific error stacks       */
+    pthread_key_create(&H5TS_errstk_key_g, NULL);
 
-  /* initialize key for thread cancellability mechanism    */
-  pthread_key_create(&H5_cancel_key_g, NULL);
+    /* initialize key for thread cancellability mechanism    */
+    pthread_key_create(&H5TS_cancel_key_g, NULL);
 }
 
+#ifdef NOT_USED
 /*--------------------------------------------------------------------------
  * NAME
- *    H5_mutex_init
+ *    H5TS_mutex_init
  * USAGE
- *    H5_mutex_init(&mutex_var)
+ *    H5TS_mutex_init(&mutex_var)
  * 
  * RETURNS
  *
@@ -77,18 +99,21 @@ void H5_first_thread_init() {
  *
  *--------------------------------------------------------------------------
  */
-void H5_mutex_init(H5_mutex_t *H5_mutex) {
-  (*H5_mutex).owner_thread = NULL;
-  pthread_mutex_init(&(*H5_mutex).atomic_lock, NULL);
-  pthread_cond_init(&(*H5_mutex).cond_var, NULL);
-  (*H5_mutex).lock_count = 0;
+static void
+H5TS_mutex_init(H5TS_mutex_t *mutex)
+{
+    (*mutex).owner_thread = NULL;
+    pthread_mutex_init(&(*mutex).atomic_lock, NULL);
+    pthread_cond_init(&(*mutex).cond_var, NULL);
+    (*mutex).lock_count = 0;
 }
+#endif /* NOT_USED */
 
 /*--------------------------------------------------------------------------
  * NAME
- *    H5_mutex_lock
+ *    H5TS_mutex_lock
  * USAGE
- *    H5_mutex_lock(&mutex_var)
+ *    H5TS_mutex_lock(&mutex_var)
  * 
  * RETURNS
  *
@@ -104,36 +129,38 @@ void H5_mutex_init(H5_mutex_t *H5_mutex) {
  *
  *--------------------------------------------------------------------------
  */
-void H5_mutex_lock(H5_mutex_t *H5_mutex) {
-  pthread_mutex_lock(&(*H5_mutex).atomic_lock);
-  if (pthread_equal(pthread_self(), (*H5_mutex).owner_thread)) {
-    /* already owned by self - increment count */
-    (*H5_mutex).lock_count++;
-  } else {
-    if ((*H5_mutex).owner_thread == NULL) {
-      /* no one else has locked it - set owner and grab lock */
-      (*H5_mutex).owner_thread = pthread_self();
-      (*H5_mutex).lock_count = 1;
+void
+H5TS_mutex_lock(H5TS_mutex_t *mutex)
+{
+    pthread_mutex_lock(&(*mutex).atomic_lock);
+    if (pthread_equal(pthread_self(), (*mutex).owner_thread)) {
+        /* already owned by self - increment count */
+        (*mutex).lock_count++;
     } else {
-      /* if already locked by someone else */
-      while (1) {
-	pthread_cond_wait(&(*H5_mutex).cond_var, &(*H5_mutex).atomic_lock);
-	if ((*H5_mutex).owner_thread == NULL) {
-	  (*H5_mutex).owner_thread = pthread_self();
-	  (*H5_mutex).lock_count = 1;
-	  break;
-	} /* else do nothing and loop back to wait on condition*/
-      }
+        if ((*mutex).owner_thread == NULL) {
+            /* no one else has locked it - set owner and grab lock */
+            (*mutex).owner_thread = pthread_self();
+            (*mutex).lock_count = 1;
+        } else {
+            /* if already locked by someone else */
+            while (1) {
+                pthread_cond_wait(&(*mutex).cond_var, &(*mutex).atomic_lock);
+                if ((*mutex).owner_thread == NULL) {
+                    (*mutex).owner_thread = pthread_self();
+                    (*mutex).lock_count = 1;
+                    break;
+                } /* else do nothing and loop back to wait on condition*/
+            }
+        }
     }
-  }
-  pthread_mutex_unlock(&(*H5_mutex).atomic_lock);
+    pthread_mutex_unlock(&(*mutex).atomic_lock);
 }
 
 /*--------------------------------------------------------------------------
  * NAME
- *    H5_mutex_unlock
+ *    H5TS_mutex_unlock
  * USAGE
- *    H5_mutex_unlock(&mutex_var)
+ *    H5TS_mutex_unlock(&mutex_var)
  * 
  * RETURNS
  *
@@ -149,21 +176,23 @@ void H5_mutex_lock(H5_mutex_t *H5_mutex) {
  *
  *--------------------------------------------------------------------------
  */
-void H5_mutex_unlock(H5_mutex_t *H5_mutex) {
-  pthread_mutex_lock(&(*H5_mutex).atomic_lock);
-  (*H5_mutex).lock_count--;
-  if ((*H5_mutex).lock_count == 0) {
-    (*H5_mutex).owner_thread = NULL;
-    pthread_cond_signal(&(*H5_mutex).cond_var);
-  }
-  pthread_mutex_unlock(&(*H5_mutex).atomic_lock);
+void
+H5TS_mutex_unlock(H5TS_mutex_t *mutex)
+{
+    pthread_mutex_lock(&(*mutex).atomic_lock);
+    (*mutex).lock_count--;
+    if ((*mutex).lock_count == 0) {
+        (*mutex).owner_thread = NULL;
+        pthread_cond_signal(&(*mutex).cond_var);
+    }
+    pthread_mutex_unlock(&(*mutex).atomic_lock);
 }
 
 /*--------------------------------------------------------------------------
  * NAME
- *    H5_cancel_count_inc
+ *    H5TS_cancel_count_inc
  * USAGE
- *    H5_cancel_count_inc()
+ *    H5TS_cancel_count_inc()
  * 
  * RETURNS
  *
@@ -184,34 +213,33 @@ void H5_mutex_unlock(H5_mutex_t *H5_mutex) {
  *--------------------------------------------------------------------------
  */
 void
-H5_cancel_count_inc(void)
+H5TS_cancel_count_inc(void)
 {
-  H5_cancel_t *cancel_counter;
+    H5TS_cancel_t *cancel_counter;
 
-  if (cancel_counter = pthread_getspecific(H5_cancel_key_g)) {
-    /* do nothing here */
-  } else {
-    /* first time thread calls library - create new counter and associate
-       with key
-    */
-    cancel_counter = (H5_cancel_t *)malloc(sizeof(H5_cancel_t));
-    cancel_counter->cancel_count = 0;
-    pthread_setspecific(H5_cancel_key_g, (void *)cancel_counter);
-  }
+    if ((cancel_counter = pthread_getspecific(H5TS_cancel_key_g))!=NULL) {
+        /* do nothing here */
+    } else {
+        /* first time thread calls library - create new counter and associate
+         *  with key
+         */
+        cancel_counter = (H5TS_cancel_t *)malloc(sizeof(H5TS_cancel_t));
+        cancel_counter->cancel_count = 0;
+        pthread_setspecific(H5TS_cancel_key_g, (void *)cancel_counter);
+    }
 
-  if (cancel_counter->cancel_count == 0) {
-    /* thread entering library */
-    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,
-			   &(cancel_counter->previous_state));
-  }
-  cancel_counter->cancel_count++;
+    if (cancel_counter->cancel_count == 0) {
+        /* thread entering library */
+        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &(cancel_counter->previous_state));
+    }
+    cancel_counter->cancel_count++;
 }
 
 /*--------------------------------------------------------------------------
  * NAME
- *    H5_cancel_count_dec
+ *    H5TS_cancel_count_dec
  * USAGE
- *    H5_cancel_count_dec()
+ *    H5TS_cancel_count_dec()
  *   
  * RETURNS
  *
@@ -230,14 +258,14 @@ H5_cancel_count_inc(void)
  *--------------------------------------------------------------------------
  */
 void
-H5_cancel_count_dec(void)
+H5TS_cancel_count_dec(void)
 {
-  H5_cancel_t *cancel_counter = pthread_getspecific(H5_cancel_key_g);
+    H5TS_cancel_t *cancel_counter = pthread_getspecific(H5TS_cancel_key_g);
 
-  if (cancel_counter->cancel_count == 1) {
-    pthread_setcancelstate(cancel_counter->previous_state, NULL);
-  }
-  cancel_counter->cancel_count--;
+    if (cancel_counter->cancel_count == 1) {
+        pthread_setcancelstate(cancel_counter->previous_state, NULL);
+    }
+    cancel_counter->cancel_count--;
 }
 
 #endif
