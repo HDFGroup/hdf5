@@ -152,7 +152,7 @@ do_pio(parameters param)
 
     /* debug */
     if (pio_debug_level>=4) {
-	h5_dump_info_object(pio_info_g);
+	h5_dump_info_object(h5_io_info_g);
     }
 
     /* IO type */
@@ -1011,9 +1011,9 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
 
     case MPIO:
         if (flags & (PIO_CREATE | PIO_WRITE)) {
-            MPI_File_delete(fname, pio_info_g);
+            MPI_File_delete(fname, h5_io_info_g);
             mrc = MPI_File_open(pio_comm_g, fname, MPI_MODE_CREATE | MPI_MODE_RDWR,
-                                pio_info_g, &fd->mpifd);
+                                h5_io_info_g, &fd->mpifd);
 
             if (mrc != MPI_SUCCESS) {
                 fprintf(stderr, "MPI File Open failed(%s)\n", fname);
@@ -1030,7 +1030,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             }
         } else {
             mrc = MPI_File_open(pio_comm_g, fname, MPI_MODE_RDONLY,
-                                pio_info_g, &fd->mpifd);
+                                h5_io_info_g, &fd->mpifd);
 
             if (mrc != MPI_SUCCESS) {
                 fprintf(stderr, "MPI File Open failed(%s)\n", fname);
@@ -1048,7 +1048,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
         }
 
         /* Set the file driver to the MPI-I/O driver */
-        hrc = H5Pset_fapl_mpio(acc_tpl, pio_comm_g, pio_info_g);     
+        hrc = H5Pset_fapl_mpio(acc_tpl, pio_comm_g, h5_io_info_g);     
         if (hrc < 0) {
             fprintf(stderr, "HDF5 Property List Set failed\n");
             GOTOERROR(FAIL);
@@ -1166,7 +1166,7 @@ do_cleanupfile(iotype iot, char *fname)
             break;
         case MPIO:
         case PHDF5:
-            MPI_File_delete(fname, pio_info_g);
+            MPI_File_delete(fname, h5_io_info_g);
             break;
         }
     }

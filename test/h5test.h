@@ -27,7 +27,7 @@
  */
 extern char *paraprefix;
 #ifdef H5_HAVE_PARALLEL
-extern MPI_Info pio_info_g;         /* MPI INFO object to run the PIO */
+extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #endif
 
 /*
