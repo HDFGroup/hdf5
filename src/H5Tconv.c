@@ -295,13 +295,12 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 /* The main part of every integer hardware conversion macro */
 #define H5T_CONV(GUTS,ATYPE,STYPE,DTYPE,ST,DT,D_MIN,D_MAX,STRT) {	      \
     hsize_t	elmtno;			/*element number		*/    \
-    void	*src, *s;		/*source buffer			*/    \
-    void	*dst, *d;		/*destination buffer		*/    \
+    uint8_t	*src, *s;		/*source buffer			*/    \
+    uint8_t	*dst, *d;		/*destination buffer		*/    \
     H5T_t	*st, *dt;		/*data type descriptors		*/    \
     ATYPE	aligned;		/*aligned type			*/    \
     hbool_t	s_mv, d_mv;		/*move data to align it?	*/    \
     size_t	s_stride, d_stride;	/*src and dst strides		*/    \
-    int		direction;		/*1=left-to-right, -1=rt-to-lt	*/    \
 									      \
     switch (cdata->command) {						      \
     case H5T_CONV_INIT:							      \
@@ -333,10 +332,10 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
         if (STRT) {							      \
             src = (uint8_t*)buf+(STRT)*s_stride;			      \
             dst = (uint8_t*)buf+(STRT)*d_stride;			      \
-            direction = -1;						      \
+            s_stride = -s_stride;					      \
+            d_stride = -d_stride;					      \
         } else {							      \
             src = dst = buf;						      \
-            direction = 1;						      \
         }								      \
 									      \
 	/* Is alignment required for source or dest? */			      \
@@ -428,8 +427,8 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
         H5_GLUE(H5T_CONV_LOOP_,POST_DALIGN_GUTS)(DT)			      \
 									      \
         /* Advance pointers */						      \
-        src = (char *)src + direction * s_stride;			      \
-        dst = (char *)dst + direction * d_stride;			      \
+        src += s_stride;						      \
+        dst += d_stride;						      \
     }
 
 
