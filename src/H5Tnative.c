@@ -17,18 +17,18 @@
  *      a "native" datatype for the H5T interface.
  */
 
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
+#define H5T_PACKAGE  /*suppress error about including H5Tpkg   */
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5Tnative_mask
+#define PABLO_MASK H5Tnative_mask
 
-#include "H5private.h"		/*generic functions			  */
-#include "H5Eprivate.h"		/*error handling			  */
-#include "H5Iprivate.h"		/*ID functions		   		  */
-#include "H5Pprivate.h"		/*property list		   		  */
-#include "H5MMprivate.h"	/*memory management			  */
-#include "H5Tpkg.h"		/*data-type functions			  */
+#include "H5private.h"  /*generic functions     */
+#include "H5Eprivate.h"  /*error handling     */
+#include "H5Iprivate.h"  /*ID functions         */
+#include "H5Pprivate.h"  /*property list         */
+#include "H5MMprivate.h" /*memory management     */
+#include "H5Tpkg.h"  /*data-type functions     */
 
 /* Interface initialization */
 static int interface_initialize_g = 0;
@@ -38,7 +38,7 @@ static herr_t H5T_init_native_interface(void);
 /* Static local functions */
 static H5T_t *H5T_get_native_type(H5T_t *dt, H5T_direction_t direction, 
                                   size_t *struct_align, size_t *offset, size_t *comp_size);
-static H5T_t *H5T_get_native_integer(size_t size, H5T_sign_t sign, H5T_direction_t direction, 
+static H5T_t *H5T_get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction, 
                                      size_t *struct_align, size_t *offset, size_t *comp_size);
 static H5T_t *H5T_get_native_float(size_t size, H5T_direction_t direction, 
                                    size_t *struct_align, size_t *offset, size_t *comp_size);
@@ -148,7 +148,7 @@ done:
  * Programmer:  Raymond Lu
  *              Oct 3, 2002
  *              
- * Modifications:
+ * Modifications: 
  * 
  *-------------------------------------------------------------------------
  */
@@ -158,6 +158,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
     H5T_t       *dt;                /* Datatype to make native */
     H5T_class_t h5_class;           /* Class of datatype to make native */
     size_t      size;               /* Size of datatype to make native */
+    size_t      prec;               /* Precision of datatype to make native */
     int         nmemb;              /* Number of members in compound & enum types */
     H5T_t       *super_type;        /* Super type of VL, array and enum datatypes */
     H5T_t       *nat_super_type;    /* Native form of VL, array & enum super datatype */
@@ -182,8 +183,10 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
 
                 if((sign =  H5T_get_sign(dtype))==H5T_SGN_ERROR)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid signess");
-            
-                if((ret_value = H5T_get_native_integer(size, sign, direction, struct_align, offset, comp_size))==NULL)
+
+                prec =  dtype->u.atomic.prec;
+ 
+                if((ret_value = H5T_get_native_integer(prec, sign, direction, struct_align, offset, comp_size))==NULL)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve integer type");
             }
             break;
@@ -498,18 +501,23 @@ done:
  * Programmer:  Raymond Lu
  *              Oct 3, 2002
  *              
- * Modifications:
+ * Modifications: Pedro Vicente
+ *                Sep 4, 2004
+ * Choose the type based on the precision; this is to support cases
+ * like the Cray SV1, where the size of short is 8 but precision is 32
+ * (e.g an INT (size 8, prec 64) would be converted to a SHORT
+ * (size 8, prec 32) if the size was the deciding factor)
  * 
  *-------------------------------------------------------------------------
  */
 static H5T_t*
-H5T_get_native_integer(size_t size, H5T_sign_t sign, H5T_direction_t direction, 
-                              size_t *struct_align, size_t *offset, size_t *comp_size)
+H5T_get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction, 
+                       size_t *struct_align, size_t *offset, size_t *comp_size)
 {  
     H5T_t       *dt;            /* Appropriate native datatype to copy */
     hid_t       tid=(-1);       /* Datatype ID of appropriate native datatype */
     size_t      align=0;        /* Alignment necessary for native datatype */
-    size_t 	native_size=0;  /* Datatype size of the native type */
+    size_t  native_size=0;      /* Datatype size of the native type */
     enum match_type {           /* The different kinds of integers we can match */
         H5T_NATIVE_INT_MATCH_CHAR,
         H5T_NATIVE_INT_MATCH_SHORT,
@@ -522,72 +530,71 @@ H5T_get_native_integer(size_t size, H5T_sign_t sign, H5T_direction_t direction,
 
     FUNC_ENTER_NOAPI(H5T_get_native_integer, NULL);
 
-    assert(size>0);
-    
-    if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {         
-        if(size<=sizeof(char)) {
-            match=H5T_NATIVE_INT_MATCH_CHAR;
-	    native_size = sizeof(char);	
-        } else if(size<=sizeof(short)) {
-            match=H5T_NATIVE_INT_MATCH_SHORT;
-	    native_size = sizeof(short);	
-        } else if(size<=sizeof(int)) {
-            match=H5T_NATIVE_INT_MATCH_INT;
-	    native_size = sizeof(int);	
-        } else if(size<=sizeof(long)) {
-            match=H5T_NATIVE_INT_MATCH_LONG;
-	    native_size = sizeof(long);	
-        } else if(size<=sizeof(long_long)) {
-            match=H5T_NATIVE_INT_MATCH_LLONG;
-	    native_size = sizeof(long_long);	
-        } else {  /* If no native type matches the querried datatype, simply choose the type of biggest size. */
-            match=H5T_NATIVE_INT_MATCH_LLONG;
-	    native_size = sizeof(long_long);	
-	}
+    if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) 
+    {         
+     if(prec<=H5Tget_precision(H5T_NATIVE_SCHAR)) {
+      match=H5T_NATIVE_INT_MATCH_CHAR;
+      native_size = sizeof(char); 
+     } else if(prec<=H5Tget_precision(H5T_NATIVE_SHORT)) {
+      match=H5T_NATIVE_INT_MATCH_SHORT;
+      native_size = sizeof(short); 
+     } else if(prec<=H5Tget_precision(H5T_NATIVE_INT)) {
+      match=H5T_NATIVE_INT_MATCH_INT;
+      native_size = sizeof(int); 
+     } else if(prec<=H5Tget_precision(H5T_NATIVE_LONG)) {
+      match=H5T_NATIVE_INT_MATCH_LONG;
+      native_size = sizeof(long); 
+     } else if(prec<=H5Tget_precision(H5T_NATIVE_LLONG)) {
+      match=H5T_NATIVE_INT_MATCH_LLONG;
+      native_size = sizeof(long_long); 
+     } else {  /* If no native type matches the querried datatype, simply choose the type of biggest size. */
+      match=H5T_NATIVE_INT_MATCH_LLONG;
+      native_size = sizeof(long_long); 
+     }
     } else if(direction == H5T_DIR_DESCEND) {         
-        if(size>=sizeof(long_long)) { 
-            match=H5T_NATIVE_INT_MATCH_LLONG;
-	    native_size = sizeof(long_long);	
-        } else if(size>=sizeof(long)) {
-            if(size==sizeof(long)) {
-                match=H5T_NATIVE_INT_MATCH_LONG;
-	        native_size = sizeof(long);	
-            } else {
-                match=H5T_NATIVE_INT_MATCH_LLONG;
-	    	native_size = sizeof(long_long);	
-	    }
-        }
-        else if(size>=sizeof(int)) {
-            if(size==sizeof(int)) {
-                match=H5T_NATIVE_INT_MATCH_INT;
-	    	native_size = sizeof(int);	
-            } else {
-                match=H5T_NATIVE_INT_MATCH_LONG;
-	    	native_size = sizeof(long);	
-	    }
-        }
-        else if(size>=sizeof(short)) {
-            if(size==sizeof(short)) {
-                match=H5T_NATIVE_INT_MATCH_SHORT;
-	    	native_size = sizeof(short);	
-            } else {
-                match=H5T_NATIVE_INT_MATCH_INT;
-	    	native_size = sizeof(int);	
-	    }
-        }
-        else if(size>=sizeof(char)) {
-            if(size==sizeof(char)) {
-                match=H5T_NATIVE_INT_MATCH_CHAR;
-	    	native_size = sizeof(char);	
-            } else {
-                match=H5T_NATIVE_INT_MATCH_SHORT;
-	    	native_size = sizeof(short);	
-	    }
-        }
-        else {  /* If no native type matches the querried datatype, simple choose the type of smallest size. */
-            match=H5T_NATIVE_INT_MATCH_CHAR;
-	    native_size = sizeof(char);	
-	}
+     if(prec>=H5Tget_precision(H5T_NATIVE_LLONG)) { 
+      match=H5T_NATIVE_INT_MATCH_LLONG;
+      native_size = sizeof(long_long); 
+     } else if(prec>=H5Tget_precision(H5T_NATIVE_LONG)) {
+      if(prec==H5Tget_precision(H5T_NATIVE_LONG)) {
+       match=H5T_NATIVE_INT_MATCH_LONG;
+       native_size = sizeof(long); 
+      } else {
+       match=H5T_NATIVE_INT_MATCH_LLONG;
+       native_size = sizeof(long_long); 
+      }
+     }
+     else if(prec>=H5Tget_precision(H5T_NATIVE_INT)) {
+      if(prec==H5Tget_precision(H5T_NATIVE_INT)) {
+       match=H5T_NATIVE_INT_MATCH_INT;
+       native_size = sizeof(int); 
+      } else {
+       match=H5T_NATIVE_INT_MATCH_LONG;
+       native_size = sizeof(long); 
+      }
+     }
+     else if(prec>=H5Tget_precision(H5T_NATIVE_SHORT)) {
+      if(prec==H5Tget_precision(H5T_NATIVE_SHORT)) {
+       match=H5T_NATIVE_INT_MATCH_SHORT;
+       native_size = sizeof(short); 
+      } else {
+       match=H5T_NATIVE_INT_MATCH_INT;
+       native_size = sizeof(int); 
+      }
+     }
+     else if(prec>=H5Tget_precision(H5T_NATIVE_SCHAR)) {
+      if(prec==H5Tget_precision(H5T_NATIVE_SCHAR)) {
+       match=H5T_NATIVE_INT_MATCH_CHAR;
+       native_size = sizeof(char); 
+      } else {
+       match=H5T_NATIVE_INT_MATCH_SHORT;
+       native_size = sizeof(short); 
+      }
+     }
+     else {  /* If no native type matches the querried datatype, simple choose the type of smallest size. */
+      match=H5T_NATIVE_INT_MATCH_CHAR;
+      native_size = sizeof(char); 
+     }
     }
 
     /* Set the appropriate native datatype information */
@@ -645,8 +652,9 @@ H5T_get_native_integer(size_t size, H5T_sign_t sign, H5T_direction_t direction,
     assert(tid>=0);
     if(NULL==(dt=H5I_object(tid)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
+
     if((ret_value=H5T_copy(dt, H5T_COPY_TRANSIENT))==NULL)
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot copy type");
             
     /* compute size and offset of compound type member. */
     if(H5T_cmp_offset(comp_size, offset, native_size, 1, align, struct_align)<0)
@@ -655,6 +663,7 @@ H5T_get_native_integer(size_t size, H5T_sign_t sign, H5T_direction_t direction,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
 
 
 /*-------------------------------------------------------------------------
@@ -679,7 +688,7 @@ H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_alig
     H5T_t       *dt=NULL;       /* Appropriate native datatype to copy */
     hid_t       tid=(-1);       /* Datatype ID of appropriate native datatype */
     size_t      align=0;        /* Alignment necessary for native datatype */
-    size_t 	native_size=0;  /* Datatype size of the native type */
+    size_t  native_size=0;  /* Datatype size of the native type */
     enum match_type {           /* The different kinds of floating point types we can match */
         H5T_NATIVE_FLOAT_MATCH_FLOAT,
         H5T_NATIVE_FLOAT_MATCH_DOUBLE,
@@ -695,43 +704,43 @@ H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *struct_alig
     if(direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {        
         if(size<=sizeof(float)) {
             match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
-	    native_size = sizeof(float);	
+     native_size = sizeof(float); 
         } else if(size<=sizeof(double)) {
             match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
-	    native_size = sizeof(double);	
+     native_size = sizeof(double); 
         } else if(size<=sizeof(long double)) {
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
-	    native_size = sizeof(long double);	
+     native_size = sizeof(long double); 
         } else {   /* If not match, return the biggest datatype */
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
-	    native_size = sizeof(long double);
-	}	
+     native_size = sizeof(long double);
+ } 
     } else {
         if(size>=sizeof(long double)) {
             match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
-	    native_size = sizeof(long double);	
+     native_size = sizeof(long double); 
         } else if(size>=sizeof(double)) {
             if(size==sizeof(double)) {
                 match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
-	    	native_size = sizeof(double);	
+      native_size = sizeof(double); 
             } else {
                 match=H5T_NATIVE_FLOAT_MATCH_LDOUBLE;
-	    	native_size = sizeof(long double);
-	    }	
+      native_size = sizeof(long double);
+     } 
         }
         else if(size>=sizeof(float)) {
             if(size==sizeof(float)) {
                 match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
-	    	native_size = sizeof(float);	
+      native_size = sizeof(float); 
             } else {
                 match=H5T_NATIVE_FLOAT_MATCH_DOUBLE;
-	    	native_size = sizeof(double);
-	    }	
+      native_size = sizeof(double);
+     } 
         }    
         else {
             match=H5T_NATIVE_FLOAT_MATCH_FLOAT;
-	    native_size = sizeof(float);
-	}	
+     native_size = sizeof(float);
+ } 
     }
 
     /* Set the appropriate native floating point information */
@@ -773,18 +782,18 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_cmp_offset
+ * Function: H5T_cmp_offset
  *
- * Purpose:	This function is only for convenience.  It computes the 
+ * Purpose: This function is only for convenience.  It computes the 
  *              compound type size, offset of the member being considered
  *              and the alignment for the whole compound type.
  *
- * Return:	Success:        Non-negative value.	
+ * Return: Success:        Non-negative value. 
  *
- *		Failure:        Negative value.	
+ *  Failure:        Negative value. 
  *
- * Programmer:	Raymond Lu
- *		December  10, 2002 
+ * Programmer: Raymond Lu
+ *  December  10, 2002 
  *
  * Modifications:
  *
