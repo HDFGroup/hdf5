@@ -60,6 +60,8 @@ Bug Fixes since HDF5-1.6.1 release
 
     Library
     -------
+        - Fixed problems with fill values and variable-length types and also
+            I/O on VL values that were set to NULL.  QAK - 2003/11/08
         - Fixed problems with MPI datatypes that caused ASCI Q machine to
             hang.  QAK - 2003/10/28
         - Removed HDF5_MPI_PREFER_DERIVED_TYPES environment variable support,

@@ -743,9 +743,11 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
     assert (idx>0);
     
     /* Copy data into the heap */
-    HDmemcpy(heap->obj[idx].begin+H5HG_SIZEOF_OBJHDR(f), obj, size);
-    HDmemset(heap->obj[idx].begin+H5HG_SIZEOF_OBJHDR(f)+size, 0,
-	     need-(H5HG_SIZEOF_OBJHDR(f)+size));
+    if(size>0) {
+        HDmemcpy(heap->obj[idx].begin+H5HG_SIZEOF_OBJHDR(f), obj, size);
+        HDmemset(heap->obj[idx].begin+H5HG_SIZEOF_OBJHDR(f)+size, 0,
+                 need-(H5HG_SIZEOF_OBJHDR(f)+size));
+    } /* end if */
     heap->cache_info.dirty = TRUE;
 
     /* Return value */

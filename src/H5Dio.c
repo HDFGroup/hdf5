@@ -237,25 +237,27 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
     if (NULL==(tconv_buf = H5FL_BLK_MALLOC(type_elem,buf_size)) || NULL==(bkg_buf = H5FL_BLK_CALLOC(type_elem,buf_size)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-    /* Copy the user's data into the buffer for conversion */
+    /* Check for actual fill value to replicate */
     if(fill==NULL)
-        HDmemset(tconv_buf,0,src_type_size);
-    else
+        HDmemset(tconv_buf,0,dst_type_size);
+    else {
+        /* Copy the user's data into the buffer for conversion */
         HDmemcpy(tconv_buf,fill,src_type_size);
 
-    /* Convert memory buffer into disk buffer */
-    /* Set up type conversion function */
-    if (NULL == (tpath = H5T_path_find(fill_type, buf_type, NULL, NULL, dxpl_id))) {
-        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types");
-    } else if (!H5T_path_noop(tpath)) {
-        if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill_type, H5T_COPY_ALL)))<0 ||
-                (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(buf_type, H5T_COPY_ALL)))<0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
-    }
+        /* Convert memory buffer into disk buffer */
+        /* Set up type conversion function */
+        if (NULL == (tpath = H5T_path_find(fill_type, buf_type, NULL, NULL, dxpl_id))) {
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types");
+        } else if (!H5T_path_noop(tpath)) {
+            if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill_type, H5T_COPY_ALL)))<0 ||
+                    (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(buf_type, H5T_COPY_ALL)))<0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
+        }
 
-    /* Perform data type conversion */
-    if (H5T_convert(tpath, src_id, dst_id, (hsize_t)1, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed");
+        /* Perform data type conversion */
+        if (H5T_convert(tpath, src_id, dst_id, (hsize_t)1, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed");
+    } /* end if */
 
     /* Fill the selection in the memory buffer */
     if(H5S_select_fill(tconv_buf, dst_type_size, space, buf)<0)

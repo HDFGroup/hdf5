@@ -3,26 +3,26 @@ Expected output for 'h5dump --xml tvlstr.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
 <hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
-<hdf5:RootGroup OBJ-XID="xid_928-0" H5Path="/">
+<hdf5:RootGroup OBJ-XID="xid_928" H5Path="/">
    <hdf5:Attribute Name="test_scalar">
       <hdf5:Dataspace>
          <hdf5:ScalarDataspace />
       </hdf5:Dataspace>
-      <hdf5:NamedDataTypePtr OBJ-XID="xid_1576-0" H5Path="/vl_string_type" />
+      <hdf5:NamedDataTypePtr OBJ-XID="xid_1576" H5Path="/vl_string_type" />
       <hdf5:Data>
          <hdf5:DataFromFile>
          "This is the string for the attribute"
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Attribute>
-   <hdf5:NamedDataType Name="vl_string_type" OBJ-XID="xid_1576-0" H5Path="/vl_string_type" Parents="xid_928-0" H5ParentPaths="/">
+   <hdf5:NamedDataType Name="vl_string_type" OBJ-XID="xid_1576" H5Path="/vl_string_type" Parents="xid_928" H5ParentPaths="/">
       <hdf5:DataType>
          <hdf5:AtomicType>
             <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="H5T_VARIABLE" StrPad="H5T_STR_NULLPAD"/>
          </hdf5:AtomicType>
       </hdf5:DataType>
    </hdf5:NamedDataType>
-   <hdf5:Dataset Name="Dataset1" OBJ-XID="xid_976-0" H5Path= "/Dataset1" Parents="xid_928-0" H5ParentPaths="/">
+   <hdf5:Dataset Name="Dataset1" OBJ-XID="xid_976" H5Path= "/Dataset1" Parents="xid_928" H5ParentPaths="/">
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
       </hdf5:StorageLayout>
@@ -48,8 +48,8 @@ Expected output for 'h5dump --xml tvlstr.h5'
          <hdf5:DataFromFile>
          "Four score and seven years ago our forefathers brought forth on this continent a new nation,"
          "conceived in liberty and dedicated to the proposition that all men are created equal."
-         "Now we are engaged in a great civil war,"
-         "testing whether that nation or any nation so conceived and so dedicated can long endure."
+         ""
+         NULL
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Dataset>

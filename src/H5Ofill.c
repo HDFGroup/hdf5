@@ -879,38 +879,41 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		    "unable to convert between src and dst data types");
     }
-    if ((src_id = H5I_register(H5I_DATATYPE,
-			       H5T_copy(fill->type, H5T_COPY_TRANSIENT)))<0 ||
-            (dst_id = H5I_register(H5I_DATATYPE,
-			       H5T_copy(dset_type, H5T_COPY_TRANSIENT)))<0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy/register data type");
+    /* Don't bother doing anything if there will be no actual conversion */
+    if (!H5T_path_noop(tpath)) {
+        if ((src_id = H5I_register(H5I_DATATYPE,
+                                   H5T_copy(fill->type, H5T_COPY_TRANSIENT)))<0 ||
+                (dst_id = H5I_register(H5I_DATATYPE,
+                                   H5T_copy(dset_type, H5T_COPY_TRANSIENT)))<0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy/register data type");
 
-    /*
-     * Data type conversions are always done in place, so we need a buffer
-     * that is large enough for both source and destination.
-     */
-    if (H5T_get_size(fill->type)>=H5T_get_size(dset_type)) {
-	buf = fill->buf;
-    } else {
-	if (NULL==(buf=H5MM_malloc(H5T_get_size(dset_type))))
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
-	HDmemcpy(buf, fill->buf, H5T_get_size(fill->type));
-    }
-    if (H5T_path_bkg(tpath) && NULL==(bkg=H5MM_malloc(H5T_get_size(dset_type))))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
+        /*
+         * Data type conversions are always done in place, so we need a buffer
+         * that is large enough for both source and destination.
+         */
+        if (H5T_get_size(fill->type)>=H5T_get_size(dset_type)) {
+            buf = fill->buf;
+        } else {
+            if (NULL==(buf=H5MM_malloc(H5T_get_size(dset_type))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
+            HDmemcpy(buf, fill->buf, H5T_get_size(fill->type));
+        }
+        if (H5T_path_bkg(tpath) && NULL==(bkg=H5MM_malloc(H5T_get_size(dset_type))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
 
-    /* Do the conversion */
-    if (H5T_convert(tpath, src_id, dst_id, (hsize_t)1, 0, 0, buf, bkg, dxpl_id)<0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
+        /* Do the conversion */
+        if (H5T_convert(tpath, src_id, dst_id, (hsize_t)1, 0, 0, buf, bkg, dxpl_id)<0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
-    /* Update the fill message */
-    if (buf!=fill->buf) {
-	H5MM_xfree(fill->buf);
-	fill->buf = buf;
-    }
-    H5T_close(fill->type);
-    fill->type = NULL;
-    H5_ASSIGN_OVERFLOW(fill->size,H5T_get_size(dset_type),size_t,ssize_t);
+        /* Update the fill message */
+        if (buf!=fill->buf) {
+            H5MM_xfree(fill->buf);
+            fill->buf = buf;
+        }
+        H5T_close(fill->type);
+        fill->type = NULL;
+        H5_ASSIGN_OVERFLOW(fill->size,H5T_get_size(dset_type),size_t,ssize_t);
+    } /* end if */
 
 done:
     if (src_id>=0)

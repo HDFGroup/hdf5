@@ -510,8 +510,8 @@ char *
 h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
                    hid_t type, void *vp, h5tools_context_t *ctx)
 {
-    size_t         n, offset, size, nelmts, start;
-    char          *name, quote = '\0';
+    size_t         n, offset, size=0, nelmts, start;
+    char          *name;
     unsigned char *ucp_vp = (unsigned char *)vp;
     char          *cp_vp = (char *)vp;
     hid_t          memb, obj, region;
@@ -566,6 +566,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
         h5tools_print_char(str, info, (unsigned char)(*ucp_vp));
     } else if (H5T_STRING == H5Tget_class(type)) {
         unsigned int i;
+        char quote = '\0';
         char *s;
 
         quote = '\0';
@@ -573,64 +574,70 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
             /* cp_vp is the pointer into the struct where a `char*' is stored. So we have
              * to dereference the pointer to get the `char*' to pass to HDstrlen(). */
             s = *(char**)cp_vp;
-            size = HDstrlen(s);
+            if(s!=NULL)
+                size = HDstrlen(s);
         } else {
             s = cp_vp;
             size = H5Tget_size(type);
         }
         pad = H5Tget_strpad(type);
 
-        for (i=0; i<size && (s[i] || pad!=H5T_STR_NULLTERM); i++) {
-            int j = 1;
-
-            /*
-             * Count how many times the next character repeats. If the
-             * threshold is zero then that means it can repeat any number
-             * of times.
-             */
-            if (info->str_repeat > 0)
-                while (i + j < size && s[i] == s[i + j])
-                    j++;
-            
-            /*
-             * Print the opening quote.  If the repeat count is high enough to
-             * warrant printing the number of repeats instead of enumerating
-             * the characters, then make sure the character to be repeated is
-             * in it's own quote.
-             */
-            if (info->str_repeat > 0 && j > info->str_repeat) {
-                if (quote)
-                    h5tools_str_append(str, "%c", quote);
-
-                quote = '\'';
-                h5tools_str_append(str, "%s%c", i ? " " : "", quote);
-            } else if (!quote) {
-                quote = '"';
-                h5tools_str_append(str, "%s%c", i ? " " : "", quote);
-            }
-                
-            /* Print the character */
-            h5tools_print_char(str, info, (unsigned char)(s[i]));
-            
-            /* Print the repeat count */
-            if (info->str_repeat && j > info->str_repeat) {
-#ifdef REPEAT_VERBOSE
-                h5tools_str_append(str, "%c repeats %d times", quote, j - 1);
-#else
-                h5tools_str_append(str, "%c*%d", quote, j - 1);
-#endif  /* REPEAT_VERBOSE */
-                quote = '\0';
-                i += j - 1;
-            }
-
+        if(s==NULL) {
+            h5tools_str_append(str, "NULL");
         }
+        else {
+            for (i=0; i<size && (s[i] || pad!=H5T_STR_NULLTERM); i++) {
+                int j = 1;
 
-        if (quote)
-            h5tools_str_append(str, "%c", quote);
+                /*
+                 * Count how many times the next character repeats. If the
+                 * threshold is zero then that means it can repeat any number
+                 * of times.
+                 */
+                if (info->str_repeat > 0)
+                    while (i + j < size && s[i] == s[i + j])
+                        j++;
+                
+                /*
+                 * Print the opening quote.  If the repeat count is high enough to
+                 * warrant printing the number of repeats instead of enumerating
+                 * the characters, then make sure the character to be repeated is
+                 * in it's own quote.
+                 */
+                if (info->str_repeat > 0 && j > info->str_repeat) {
+                    if (quote)
+                        h5tools_str_append(str, "%c", quote);
 
-        if (i == 0)
-            /*empty string*/
-            h5tools_str_append(str, "\"\"");
+                    quote = '\'';
+                    h5tools_str_append(str, "%s%c", i ? " " : "", quote);
+                } else if (!quote) {
+                    quote = '"';
+                    h5tools_str_append(str, "%s%c", i ? " " : "", quote);
+                }
+                    
+                /* Print the character */
+                h5tools_print_char(str, info, (unsigned char)(s[i]));
+                
+                /* Print the repeat count */
+                if (info->str_repeat && j > info->str_repeat) {
+#ifdef REPEAT_VERBOSE
+                    h5tools_str_append(str, "%c repeats %d times", quote, j - 1);
+#else
+                    h5tools_str_append(str, "%c*%d", quote, j - 1);
+#endif  /* REPEAT_VERBOSE */
+                    quote = '\0';
+                    i += j - 1;
+                }
+
+            }
+
+            if (quote)
+                h5tools_str_append(str, "%c", quote);
+
+            if (i == 0)
+                /*empty string*/
+                h5tools_str_append(str, "\"\"");
+        } /* end else */
     } else if (H5Tequal(type, H5T_NATIVE_INT)) {
         memcpy(&tempint, vp, sizeof(int));
         h5tools_str_append(str, OPT(info->fmt_int, "%d"), tempint);
