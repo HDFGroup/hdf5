@@ -26,9 +26,7 @@
 #include "H5private.h"
 #include "h5tools.h"            /*for h5dump_t structure    */
 #include "h5tools_str.h"        /*function prototypes       */
-
-extern char     *lookup_ref_path(hobj_ref_t *);
-
+#include "h5tools_ref.h"
 
 /*
  * If REPEAT_VERBOSE is defined then character strings will be printed so
