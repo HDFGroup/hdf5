@@ -42,6 +42,9 @@ static herr_t H5G_node_decode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				  void *_key);
 static herr_t H5G_node_encode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				  void *_key);
+static herr_t H5G_node_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
+                                    int indent, int fwidth, const void *key,
+                                    const void *udata);
 static size_t H5G_node_size(H5F_t *f);
 static H5G_node_t *H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
 				 void *_udata2);
@@ -90,7 +93,7 @@ H5B_class_t H5B_SNODE[1] = {{
     H5G_node_remove,		/*remove		*/
     H5G_node_decode_key,	/*decode		*/
     H5G_node_encode_key,	/*encode		*/
-    NULL,			/*debug key		*/
+    H5G_node_debug_key,		/*debug			*/
 }};
 
 /* Interface initialization */
@@ -197,6 +200,42 @@ H5G_node_encode_key(H5F_t *f, H5B_t UNUSED *bt, uint8_t *raw, void *_key)
     assert(key);
 
     H5F_ENCODE_LENGTH(f, raw, key->offset);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_debug_key
+ *
+ * Purpose:	Prints a key.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, February 28, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_node_debug_key (FILE *stream, H5F_t *f, hid_t dxpl_id, int indent, int fwidth,
+		      const void *_key, const void *_udata)
+{
+    const H5G_node_key_t   *key = (const H5G_node_key_t *) _key;
+    const H5G_bt_ud1_t	   *udata = (const H5G_bt_ud1_t *) _udata;
+    const char		   *s;
+    herr_t      ret_value=SUCCEED;       /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5G_node_debug_key, FAIL);
+    assert (key);
+
+    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Name :");
+    if (NULL == (s = H5HL_peek(f, dxpl_id, udata->heap_addr, key->offset)))
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read symbol name");
+    HDfprintf (stream, "%s\n", s);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1350,8 +1389,11 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
      * B-tree node.
      */
     if (NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL))) {
+        H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
+
 	H5E_clear(); /*discard that error */
-	if ( H5B_debug(f, dxpl_id, addr, stream, indent, fwidth, H5B_SNODE, NULL) < 0)
+        udata.heap_addr = heap;
+	if ( H5B_debug(f, dxpl_id, addr, stream, indent, fwidth, H5B_SNODE, &udata) < 0)
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to debug B-tree node");
 	HGOTO_DONE(SUCCEED);
     }

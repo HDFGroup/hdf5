@@ -800,6 +800,8 @@ H5B_decode_key(H5F_t *f, H5B_t *bt, int idx)
 
     FUNC_ENTER_NOINIT(H5B_decode_key);
 
+    assert(bt->key[idx].dirty==0);
+
     bt->key[idx].nkey = bt->native + idx * bt->type->sizeof_nkey;
     if ((bt->type->decode) (f, bt, bt->key[idx].rkey, bt->key[idx].nkey) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, FAIL, "unable to decode key");
@@ -1658,6 +1660,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	bt->cache_info.dirty = TRUE;
 	bt->key[idx].dirty = TRUE;
 	if (idx>0) {
+            /* Don't propagate change out of this B-tree node */
 	    *lt_key_changed = FALSE;
 	} else {
 	    HDmemcpy(lt_key, bt->key[idx].nkey, type->sizeof_nkey);
@@ -1667,6 +1670,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	bt->cache_info.dirty = TRUE;
 	bt->key[idx+1].dirty = TRUE;
 	if (idx+1<bt->nchildren) {
+            /* Don't propagate change out of this B-tree node */
 	    *rt_key_changed = FALSE;
 	} else {
 	    HDmemcpy(rt_key, bt->key[idx+1].nkey, type->sizeof_nkey);
@@ -2102,10 +2106,20 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 	HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Address:", bt->child[i]);
 	
-	H5B_decode_key(f, bt, i);
-	if (type->debug_key)
-	    (type->debug_key)(stream, indent+3, MAX (0, fwidth-3),
+        /* If there is a key debugging routine, use it to display the left & right keys */
+	if (type->debug_key) {
+            /* Decode the 'left' key & print it */
+            if(bt->key[i].nkey==NULL)
+                H5B_decode_key(f, bt, i);
+	    (type->debug_key)(stream, f, dxpl_id, indent+3, MAX (0, fwidth-3),
 			      bt->key[i].nkey, udata);
+
+            /* Decode the 'right' key & print it */
+            if(bt->key[i+1].nkey==NULL)
+                H5B_decode_key(f, bt, i+1);
+	    (type->debug_key)(stream, f, dxpl_id, indent+3, MAX (0, fwidth-3),
+			      bt->key[i+1].nkey, udata);
+	}
     }
 
 done:

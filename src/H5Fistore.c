@@ -141,8 +141,9 @@ static herr_t H5F_istore_decode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				    void *_key);
 static herr_t H5F_istore_encode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				    void *_key);
-static herr_t H5F_istore_debug_key(FILE *stream, int indent, int fwidth,
-				   const void *key, const void *udata);
+static herr_t H5F_istore_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
+                                int indent, int fwidth, const void *key,
+                                    const void *udata);
 static haddr_t H5F_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 				  const hssize_t offset[]);
 static H5B_iterate_t H5F_istore_prune_extent(H5F_t *f, hid_t dxpl_id, void *_lt_key, haddr_t addr,
@@ -349,7 +350,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_debug_key (FILE *stream, int indent, int fwidth,
+H5F_istore_debug_key (FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int indent, int fwidth,
 		      const void *_key, const void *_udata)
 {
     const H5F_istore_key_t	*key = (const H5F_istore_key_t *)_key;

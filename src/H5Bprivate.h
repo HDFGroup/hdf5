@@ -105,7 +105,7 @@ typedef struct H5B_class_t {
     /* encode, decode, debug key values */
     herr_t	(*decode)(H5F_t*, struct H5B_t*, uint8_t*, void*);
     herr_t	(*encode)(H5F_t*, struct H5B_t*, uint8_t*, void*);
-    herr_t	(*debug_key)(FILE*, int, int, const void*, const void*);
+    herr_t	(*debug_key)(FILE*, H5F_t*, hid_t, int, int, const void*, const void*);
 
 } H5B_class_t;
 
