@@ -68,6 +68,7 @@
 #define FILE40  "tattr2.h5"
 #define FILE41  "tcompound_complex.h5"
 #define FILE42  "tnamed_dtype_attr.h5"
+#define FILE43 "tvldtypes5.h5"
 
 
 /* prototypes */
@@ -144,6 +145,10 @@ typedef struct s1_t {
 #define F42_DSETNAME "Dataset"
 #define F42_TYPENAME "Datatype"
 #define F42_ATTRNAME "Attribute"
+
+/* "File 43" macros */
+/* Name of dataset to create in datafile                              */
+#define F43_DSETNAME "Dataset"
 
 static void gent_group(void)
 {
@@ -2196,6 +2201,67 @@ static void gent_vldatatypes4(void)
     assert(ret>=0);
 }
 
+/* Generate a variable-length dataset with NULL values in it */
+static void gent_vldatatypes5(void)
+{
+    hvl_t wdata [SPACE1_DIM1];
+    hid_t		fid1;		      
+    hid_t		dataset;	    
+    hid_t		sid1;
+    hid_t		tid1;
+    hsize_t		dims1[] = {SPACE1_DIM1};
+    int                 i,j;          /* counting variable */
+    herr_t		ret;		/* Generic return value  */
+
+    /* initialize data for dataset */
+    for(i=0; i<SPACE1_DIM1; i++) {
+        if(i%2) {
+            wdata[i].len=0;
+            wdata[i].p=NULL;
+        } /* end if */
+        else {
+            wdata[i].len=i+5;
+            wdata[i].p=malloc(sizeof(unsigned)*(i+5));
+            for(j=0; j<i+5; j++)
+                ((unsigned *)wdata[i].p)[j]=j*2;
+        } /* end else */
+    } /* end for */
+
+    /* Create file */
+    fid1 = H5Fcreate (FILE43, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    assert(fid1>0);
+
+    /* Create dataspace for datasets */
+    sid1 = H5Screate_simple (SPACE1_RANK, dims1, NULL);
+    assert(sid1>0);
+
+    /* Create a datatype to refer to */
+    tid1 = H5Tvlen_create (H5T_NATIVE_UINT);
+    assert(tid1>0);
+
+    /* Create a dataset */
+    dataset = H5Dcreate (fid1, F43_DSETNAME, tid1, sid1, H5P_DEFAULT);
+    assert(dataset>0);
+
+    ret = H5Dwrite (dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    assert(ret>=0);
+
+    ret = H5Dclose (dataset);
+    assert(ret>=0);
+
+    ret = H5Dvlen_reclaim (tid1, sid1, H5P_DEFAULT, wdata);
+    assert(ret>=0);
+
+    ret = H5Tclose (tid1);
+    assert(ret>=0);
+
+    ret = H5Sclose (sid1);
+    assert(ret>=0);
+
+    ret = H5Fclose (fid1);
+    assert(ret>=0);
+}
+
 static void gent_array1(void)
 {
     int wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
@@ -2884,8 +2950,8 @@ static void gent_vlstr(void)
     const char *wdata[SPACE1_DIM1]= {
         "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
         "conceived in liberty and dedicated to the proposition that all men are created equal.",
-        "Now we are engaged in a great civil war,",
-        "testing whether that nation or any nation so conceived and so dedicated can long endure."
+        "",
+        NULL
         };   /* Information to write */
     const char *string_att= "This is the string for the attribute";
     hid_t  fid1;  /* HDF5 File IDs  */
@@ -4288,6 +4354,7 @@ int main(void)
     gent_vldatatypes2();
     gent_vldatatypes3();
     gent_vldatatypes4();
+    gent_vldatatypes5();
 
     gent_array1();
     gent_array2();

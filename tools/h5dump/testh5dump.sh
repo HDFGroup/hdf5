@@ -147,6 +147,7 @@ TOOLTEST tvldtypes1.ddl tvldtypes1.h5
 TOOLTEST tvldtypes2.ddl tvldtypes2.h5
 TOOLTEST tvldtypes3.ddl tvldtypes3.h5
 TOOLTEST tvldtypes4.ddl tvldtypes4.h5
+TOOLTEST tvldtypes5.ddl tvldtypes5.h5
 
 #test for file with variable length string data
 TOOLTEST tvlstr.ddl tvlstr.h5

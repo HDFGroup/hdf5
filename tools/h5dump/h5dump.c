@@ -4846,7 +4846,8 @@ xml_print_strs(hid_t did, int source)
     for (i = 0; i < ssiz; i++) {
         if(is_vlstr) {
             onestring = *(char **)bp;
-            str_size = (size_t)strlen(onestring);
+            if(onestring)
+                str_size = (size_t)strlen(onestring);
         } else {    
     	    strncpy(onestring, bp, tsiz);
             str_size = tsiz;
@@ -4854,7 +4855,7 @@ xml_print_strs(hid_t did, int source)
 	indentation(indent + COL);
 
 	if (!onestring) {
-	    printf("\"%s\"\n", "NULL");
+	    printf("NULL\n");
 	} else {
             char *t_onestring = xml_escape_the_string(onestring, (int)str_size);
 
