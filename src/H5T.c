@@ -3793,7 +3793,7 @@ H5Tget_member_value(hid_t type, int membno, void *value/*out*/)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+herr_t
 H5Tenum_nameof(hid_t type, void *value, char *name/*out*/, size_t size)
 {
     H5T_t	*dt = NULL;
@@ -3843,7 +3843,7 @@ H5Tenum_nameof(hid_t type, void *value, char *name/*out*/, size_t size)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+herr_t
 H5Tenum_valueof(hid_t type, const char *name, void *value/*out*/)
 {
     H5T_t	*dt = NULL;
