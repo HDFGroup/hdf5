@@ -31,6 +31,6 @@
 void *H5MM_realloc (void *mem, size_t size);
 char *H5MM_xstrdup (const char *s);
 char *H5MM_strdup (const char *s);
-void *H5MM_xfree (void *mem);
+HDF5API void *H5MM_xfree (void *mem);
 
 #endif

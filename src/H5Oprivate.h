@@ -18,7 +18,7 @@
 #define _H5Oprivate_H
 
 #include <H5Opublic.h>
-
+#include <H5api_adpt.h>
 /* Private headers needed by this file */
 #include <H5private.h>
 #include <H5Fprivate.h>
@@ -172,7 +172,7 @@ typedef struct H5O_efl_t {
  */
 #define H5O_LAYOUT_ID		0x0008
 #define H5O_LAYOUT_NDIMS	(H5S_MAX_RANK+1)
-extern const H5O_class_t H5O_LAYOUT[1];
+HDF5GLOBAL const H5O_class_t H5O_LAYOUT[1];
 
 typedef struct H5O_layout_t {
     int		type;			/*type of layout, H5D_layout_t	     */
@@ -257,7 +257,7 @@ typedef struct H5O_cont_t {
  * Symbol table message.
  */
 #define H5O_STAB_ID	0x0011
-extern const H5O_class_t H5O_STAB[1];
+HDF5GLOBAL const H5O_class_t H5O_STAB[1];
 
 void *H5O_stab_fast (const H5G_cache_t *cache, const H5O_class_t *type,
 		     void *_mesg);
@@ -268,24 +268,24 @@ typedef struct H5O_stab_t {
 } H5O_stab_t;
 
 /* General message operators */
-herr_t H5O_create (H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/);
+HDF5API herr_t H5O_create (H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/);
 herr_t H5O_open (H5G_entry_t *ent);
-herr_t H5O_close (H5G_entry_t *ent);
+HDF5API herr_t H5O_close (H5G_entry_t *ent);
 intn H5O_link (H5G_entry_t *ent, intn adjust);
 intn H5O_count (H5G_entry_t *ent, const H5O_class_t *type);
 htri_t H5O_exists(H5G_entry_t *ent, const H5O_class_t *type, intn sequence);
-void *H5O_read (H5G_entry_t *ent, const H5O_class_t *type, intn sequence,
+HDF5API void *H5O_read (H5G_entry_t *ent, const H5O_class_t *type, intn sequence,
 		void *mesg);
-intn H5O_modify (H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
+HDF5API intn H5O_modify (H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 		 uintn flags, const void *mesg);
 herr_t H5O_touch(H5G_entry_t *ent, hbool_t force);
-herr_t H5O_remove (H5G_entry_t *ent, const H5O_class_t *type, intn sequence);
+HDF5API herr_t H5O_remove (H5G_entry_t *ent, const H5O_class_t *type, intn sequence);
 herr_t H5O_reset (const H5O_class_t *type, void *native);
 void *H5O_free (const H5O_class_t *type, void *mesg);
 void *H5O_copy (const H5O_class_t *type, const void *mesg, void *dst);
 herr_t H5O_share (H5F_t *f, const H5O_class_t *type, const void *mesg,
 		  H5HG_t *hobj/*out*/);
-herr_t H5O_debug (H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
+HDF5API herr_t H5O_debug (H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 		  intn fwidth);
 
 /* EFL operators */

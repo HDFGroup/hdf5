@@ -52,32 +52,32 @@ extern "C" {
 #endif
 
 /* Functions in H5S.c */
-hid_t H5Screate(H5S_class_t type);
-hid_t H5Screate_simple (int rank, const hsize_t dims[],
+HDF5API hid_t H5Screate(H5S_class_t type);
+HDF5API hid_t H5Screate_simple (int rank, const hsize_t dims[],
 			const hsize_t maxdims[]);
-herr_t H5Sset_extent_simple (hid_t space_id, int rank, const hsize_t dims[],
+HDF5API herr_t H5Sset_extent_simple (hid_t space_id, int rank, const hsize_t dims[],
 			     const hsize_t max[]);
-hid_t H5Scopy (hid_t space_id);
-herr_t H5Sclose (hid_t space_id);
-hsize_t H5Sget_simple_extent_npoints (hid_t space_id);
-int H5Sget_simple_extent_ndims (hid_t space_id);
-int H5Sget_simple_extent_dims (hid_t space_id, hsize_t dims[],
+HDF5API hid_t H5Scopy (hid_t space_id);
+HDF5API herr_t H5Sclose (hid_t space_id);
+HDF5API hsize_t H5Sget_simple_extent_npoints (hid_t space_id);
+HDF5API int H5Sget_simple_extent_ndims (hid_t space_id);
+HDF5API int H5Sget_simple_extent_dims (hid_t space_id, hsize_t dims[],
 			       hsize_t maxdims[]);
-htri_t H5Sis_simple (hid_t space_id);
-herr_t H5Sset_space (hid_t space_id, int rank, const hsize_t *dims);
-hssize_t H5Sget_select_npoints (hid_t spaceid);
-herr_t H5Sselect_hyperslab (hid_t space_id, H5S_seloper_t op,
+HDF5API htri_t H5Sis_simple (hid_t space_id);
+HDF5API herr_t H5Sset_space (hid_t space_id, int rank, const hsize_t *dims);
+HDF5API hssize_t H5Sget_select_npoints (hid_t spaceid);
+HDF5API herr_t H5Sselect_hyperslab (hid_t space_id, H5S_seloper_t op,
 			    const hssize_t start[], const hsize_t _stride[],
 			    const hsize_t count[], const hsize_t _block[]);
-herr_t H5Sselect_elements (hid_t space_id, H5S_seloper_t op, size_t num_elemn,
+HDF5API herr_t H5Sselect_elements (hid_t space_id, H5S_seloper_t op, size_t num_elemn,
 			   const hssize_t **coord);
-H5S_class_t H5Sget_simple_extent_type (hid_t space_id);
-herr_t H5Sset_extent_none (hid_t space_id);
-herr_t H5Sextent_copy (hid_t dst_id,hid_t src_id);
-herr_t H5Sselect_all (hid_t spaceid);
-herr_t H5Sselect_none (hid_t spaceid);
-herr_t H5Soffset_simple (hid_t space_id, const hssize_t *offset);
-htri_t H5Sselect_valid (hid_t spaceid);
+HDF5API H5S_class_t H5Sget_simple_extent_type (hid_t space_id);
+HDF5API herr_t H5Sset_extent_none (hid_t space_id);
+HDF5API herr_t H5Sextent_copy (hid_t dst_id,hid_t src_id);
+HDF5API herr_t H5Sselect_all (hid_t spaceid);
+HDF5API herr_t H5Sselect_none (hid_t spaceid);
+HDF5API herr_t H5Soffset_simple (hid_t space_id, const hssize_t *offset);
+HDF5API htri_t H5Sselect_valid (hid_t spaceid);
 
 #ifdef __cplusplus
 }

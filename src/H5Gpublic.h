@@ -70,21 +70,21 @@ typedef struct H5G_stat_t {
 typedef herr_t (*H5G_iterate_t)(hid_t group, const char *group_name,
 				void *op_data);
 
-hid_t H5Gcreate (hid_t loc_id, const char *name, size_t size_hint);
-hid_t H5Gopen (hid_t loc_id, const char *name);
-herr_t H5Gclose (hid_t group_id);
-herr_t H5Giterate (hid_t loc_id, const char *name, int *idx, H5G_iterate_t op,
+HDF5API hid_t H5Gcreate (hid_t loc_id, const char *name, size_t size_hint);
+HDF5API hid_t H5Gopen (hid_t loc_id, const char *name);
+HDF5API herr_t H5Gclose (hid_t group_id);
+HDF5API herr_t H5Giterate (hid_t loc_id, const char *name, int *idx, H5G_iterate_t op,
 		   void *op_data);
-herr_t H5Gmove (hid_t loc_id, const char *src, const char *dst);
-herr_t H5Glink (hid_t loc_id, H5G_link_t type, const char *cur_name,
+HDF5API herr_t H5Gmove (hid_t loc_id, const char *src, const char *dst);
+HDF5API herr_t H5Glink (hid_t loc_id, H5G_link_t type, const char *cur_name,
 		const char *new_name);
-herr_t H5Gunlink (hid_t loc_id, const char *name);
-herr_t H5Gget_objinfo (hid_t loc_id, const char *name, hbool_t follow_link,
+HDF5API herr_t H5Gunlink (hid_t loc_id, const char *name);
+HDF5API herr_t H5Gget_objinfo (hid_t loc_id, const char *name, hbool_t follow_link,
 		H5G_stat_t *statbuf/*out*/);
-herr_t H5Gget_linkval (hid_t loc_id, const char *name, size_t size,
+HDF5API herr_t H5Gget_linkval (hid_t loc_id, const char *name, size_t size,
 		       char *buf/*out*/);
-herr_t H5Gset_comment(hid_t loc_id, const char *name, const char *comment);
-int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf);
+HDF5API herr_t H5Gset_comment(hid_t loc_id, const char *name, const char *comment);
+HDF5API int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf);
 
 #ifdef __cplusplus
 }

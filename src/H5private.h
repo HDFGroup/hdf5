@@ -13,7 +13,7 @@
 #ifndef _H5private_H
 #define _H5private_H
 #include <H5public.h>		/* Include Public Definitions	  */
-
+#include <H5api_adpt.h>
 /*
  * Include ANSI-C header files.
  */
@@ -402,10 +402,10 @@ typedef struct {
     double	etime;		/*elapsed wall-clock time	*/
 } H5_timer_t;
 
-void H5_timer_reset (H5_timer_t *timer);
-void H5_timer_begin (H5_timer_t *timer);
-void H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/);
-void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
+HDF5API void H5_timer_reset (H5_timer_t *timer);
+HDF5API void H5_timer_begin (H5_timer_t *timer);
+HDF5API void H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/);
+HDF5API void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 
 /*
  * Redefine all the POSIX functions.  We should never see a POSIX
@@ -478,7 +478,7 @@ void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 #define HDfopen(S,M)		fopen(S,M)
 #define HDfork()		fork()
 #define HDfpathconf(F,N)	fpathconf(F,N)
-int HDfprintf (FILE *stream, const char *fmt, ...);
+HDF5API int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDfputc(C,F)		fputc(C,F)
 #define HDfputs(S,F)		fputs(S,F)
 #define HDfread(M,Z,N,F)	fread(M,Z,N,F)
@@ -623,7 +623,7 @@ int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDstrtod(S,R)		strtod(S,R)
 #define HDstrtok(X,Y)		strtok(X,Y)
 #define HDstrtol(S,R,N)		strtol(S,R,N)
-int64_t HDstrtoll (const char *s, const char **rest, int base);
+HDF5API int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDstrtoul(S,R,N)	strtoul(S,R,N)
 #define HDstrxfrm(X,Y,Z)	strxfrm(X,Y,Z)
 #define HDsysconf(N)		sysconf(N)
@@ -670,7 +670,7 @@ char *strdup(const char *s);
 #define HDstrdup(S)		strdup(S)
 
 #ifndef HAVE_SNPRINTF
-int HDsnprintf(char *buf, size_t size, const char *fmt, ...);
+HDF5API int HDsnprintf(char *buf, size_t size, const char *fmt, ...);
 #endif
 
 /*

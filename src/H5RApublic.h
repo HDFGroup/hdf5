@@ -14,12 +14,12 @@
 extern "C" {
 #endif
 
-hid_t H5RAcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t plist_id);
-hid_t H5RAopen(hid_t loc_id, const char *name);
-herr_t H5RAclose(hid_t array_id);
-herr_t H5RAwrite(hid_t array_id, hssize_t start_row, hsize_t nrows,
+HDF5API hid_t H5RAcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t plist_id);
+HDF5API hid_t H5RAopen(hid_t loc_id, const char *name);
+HDF5API herr_t H5RAclose(hid_t array_id);
+HDF5API herr_t H5RAwrite(hid_t array_id, hssize_t start_row, hsize_t nrows,
 		hid_t type_id, hsize_t size[], void *buf[]);
-herr_t H5RAread(hid_t array_id, hssize_t start_row, hsize_t nrows,
+HDF5API herr_t H5RAread(hid_t array_id, hssize_t start_row, hsize_t nrows,
 	       hid_t type_id, hsize_t size[], void *buf[]);
 
 #ifdef __cplusplus

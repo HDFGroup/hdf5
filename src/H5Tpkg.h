@@ -133,7 +133,7 @@ typedef enum H5T_sdir_t {
 } H5T_sdir_t;
 
 /* The overflow handler */
-extern H5T_overflow_t H5T_overflow_g;
+HDF5GLOBAL H5T_overflow_t H5T_overflow_g;
 
 /*
  * Alignment information for native types. A value of N indicates that the
@@ -141,19 +141,19 @@ extern H5T_overflow_t H5T_overflow_g;
  * N=1 no alignment is required; N=0 implies that alignment constraints were
  * not calculated.
  */
-extern size_t	H5T_NATIVE_SCHAR_ALIGN_g;
-extern size_t	H5T_NATIVE_UCHAR_ALIGN_g;
-extern size_t	H5T_NATIVE_SHORT_ALIGN_g;
-extern size_t	H5T_NATIVE_USHORT_ALIGN_g;
-extern size_t	H5T_NATIVE_INT_ALIGN_g;
-extern size_t	H5T_NATIVE_UINT_ALIGN_g;
-extern size_t	H5T_NATIVE_LONG_ALIGN_g;
-extern size_t	H5T_NATIVE_ULONG_ALIGN_g;
-extern size_t	H5T_NATIVE_LLONG_ALIGN_g;
-extern size_t	H5T_NATIVE_ULLONG_ALIGN_g;
-extern size_t	H5T_NATIVE_FLOAT_ALIGN_g;
-extern size_t	H5T_NATIVE_DOUBLE_ALIGN_g;
-extern size_t	H5T_NATIVE_LDOUBLE_ALIGN_g;
+HDF5GLOBAL size_t	H5T_NATIVE_SCHAR_ALIGN_g;
+HDF5GLOBAL size_t	H5T_NATIVE_UCHAR_ALIGN_g;
+HDF5GLOBAL size_t	H5T_NATIVE_SHORT_ALIGN_g;
+HDF5GLOBAL size_t	H5T_NATIVE_USHORT_ALIGN_g;
+HDF5GLOBAL size_t	H5T_NATIVE_INT_ALIGN_g;
+HDF5GLOBAL size_t	H5T_NATIVE_UINT_ALIGN_g;
+HDF5GLOBAL size_t	H5T_NATIVE_LONG_ALIGN_g;
+HDF5GLOBAL size_t	H5T_NATIVE_ULONG_ALIGN_g;
+HDF5GLOBAL size_t	H5T_NATIVE_LLONG_ALIGN_g;
+HDF5GLOBAL size_t	H5T_NATIVE_ULLONG_ALIGN_g;
+HDF5GLOBAL size_t	H5T_NATIVE_FLOAT_ALIGN_g;
+HDF5GLOBAL size_t	H5T_NATIVE_DOUBLE_ALIGN_g;
+HDF5GLOBAL size_t	H5T_NATIVE_LDOUBLE_ALIGN_g;
 
 /* Conversion functions */
 herr_t H5T_conv_noop (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
@@ -365,12 +365,12 @@ herr_t H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			     size_t nelmts, void *_buf, void *bkg);
 
 /* Bit twiddling functions */
-void H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
+HDF5API void H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
 		   size_t src_offset, size_t size);
-void H5T_bit_set (uint8_t *buf, size_t offset, size_t size, hbool_t value);
-hsize_t H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size);
+HDF5API void H5T_bit_set (uint8_t *buf, size_t offset, size_t size, hbool_t value);
+HDF5API hsize_t H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size);
 void H5T_bit_set_d (uint8_t *buf, size_t offset, size_t size, hsize_t val);
-ssize_t H5T_bit_find (uint8_t *buf, size_t offset, size_t size,
+HDF5API ssize_t H5T_bit_find (uint8_t *buf, size_t offset, size_t size,
 		      H5T_sdir_t direction, hbool_t value);
 htri_t H5T_bit_inc(uint8_t *buf, size_t start, size_t size);
 
