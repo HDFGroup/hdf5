@@ -60,6 +60,9 @@ static const hdf_maj_error_messages_t hdf_maj_error_messages[] =
     {H5E_HEAP,		"Heap"},
     {H5E_OHDR,		"Object Header"},
     {H5E_DIRECTORY,	"Directory"},
+    {H5E_DATATYPE, 	"Datatype"},
+    {H5E_DATASPACE,	"Dataspace"},
+    {H5E_DATASET,  	"Dataset"}
 };
 
 static const hdf_min_error_messages_t hdf_min_error_messages[] =
@@ -378,7 +381,6 @@ H5Epush(hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_nam
     FUNC_ENTER(H5Epush, H5E_init_interface,FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
     if (function_name==NULL || file_name==NULL || H5Aatom_group(thrderrid)!=H5_ERR)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
 
