@@ -52,6 +52,7 @@
 ./html/H5.intro.html
 ./html/H5.sample_code.html
 ./html/H5.user.html
+./html/IOPipe.html
 ./html/MemoryManagement.html
 ./html/ObjectHeader.txt
 ./html/Properties.html
@@ -73,6 +74,16 @@
 ./html/ph5design.html
 ./html/ph5example.c
 ./html/ph5implement.txt
+./html/pipe1.gif
+./html/pipe1.gif
+./html/pipe2.gif
+./html/pipe2.gif
+./html/pipe3.gif
+./html/pipe3.obj
+./html/pipe4.obj
+./html/pipe4.obj
+./html/pipe5.obj
+./html/pipe5.obj
 ./html/heap.txt
 ./html/index.html
 ./html/move.html

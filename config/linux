@@ -33,10 +33,12 @@
 #	$debug $warn -DH5F_LOW_DFLT=H5F_LOW_SEC2
 #
 
+if [ arborea = `hostname` -a -z "$enable_parallel" ]; then
+    enable_parallel=mpio
+fi
+
 # The following flags only apply to the gcc compiler.
 CC=${CC:-gcc}
-
-
 
 # First set up the CFLAGS arguments.
 if test "X" = "X$CFLAGS"; then
