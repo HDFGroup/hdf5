@@ -43,18 +43,18 @@ typedef enum H5D_transfer_t {
 extern "C" {
 #endif
 
-HDF5API hid_t H5Dcreate (hid_t file_id, const char *name, hid_t type_id,
+__DLL__ hid_t H5Dcreate (hid_t file_id, const char *name, hid_t type_id,
 			 hid_t space_id, hid_t plist_id);
-HDF5API hid_t H5Dopen (hid_t file_id, const char *name);
-HDF5API herr_t H5Dclose (hid_t dset_id);
-HDF5API hid_t H5Dget_space (hid_t dset_id);
-HDF5API hid_t H5Dget_type (hid_t dset_id);
-HDF5API hid_t H5Dget_create_plist (hid_t dset_id);
-HDF5API herr_t H5Dread (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+__DLL__ hid_t H5Dopen (hid_t file_id, const char *name);
+__DLL__ herr_t H5Dclose (hid_t dset_id);
+__DLL__ hid_t H5Dget_space (hid_t dset_id);
+__DLL__ hid_t H5Dget_type (hid_t dset_id);
+__DLL__ hid_t H5Dget_create_plist (hid_t dset_id);
+__DLL__ herr_t H5Dread (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			hid_t file_space_id, hid_t plist_id, void *buf/*out*/);
-HDF5API herr_t H5Dwrite (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+__DLL__ herr_t H5Dwrite (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			 hid_t file_space_id, hid_t plist_id, const void *buf);
-HDF5API herr_t H5Dextend (hid_t dset_id, const hsize_t *size);
+__DLL__ herr_t H5Dextend (hid_t dset_id, const hsize_t *size);
 
 #ifdef __cplusplus
 }

@@ -404,13 +404,13 @@ typedef struct H5F_low_t {
 #ifndef H5F_LOW_DFLT
 #  define H5F_LOW_DFLT	H5F_LOW_SEC2	/* The default type	  */
 #endif
-extern const H5F_low_class_t H5F_LOW_SEC2_g[];	/* Posix section 2	*/
-extern const H5F_low_class_t H5F_LOW_STDIO_g[];	/* Posix stdio		*/
-extern const H5F_low_class_t H5F_LOW_CORE_g[];	/* In-core temp file	*/
-extern const H5F_low_class_t H5F_LOW_FAMILY_g[];/* File family		*/
-extern const H5F_low_class_t H5F_LOW_SPLIT_g[];	/* Split meta/raw data	*/
+__DLLVAR__ const H5F_low_class_t H5F_LOW_SEC2_g[];	/* Posix section 2	*/
+__DLLVAR__ const H5F_low_class_t H5F_LOW_STDIO_g[];	/* Posix stdio		*/
+__DLLVAR__ const H5F_low_class_t H5F_LOW_CORE_g[];	/* In-core temp file	*/
+__DLLVAR__ const H5F_low_class_t H5F_LOW_FAMILY_g[];/* File family		*/
+__DLLVAR__ const H5F_low_class_t H5F_LOW_SPLIT_g[];	/* Split meta/raw data	*/
 #ifdef HAVE_PARALLEL
-extern const H5F_low_class_t H5F_LOW_MPIO_g[];	/* MPI-IO		*/
+__DLLVAR__ const H5F_low_class_t H5F_LOW_MPIO_g[];	/* MPI-IO		*/
 #endif
 
 /* The raw data chunk cache */
@@ -535,31 +535,31 @@ struct H5O_fill_t;
 struct H5G_entry_t;
 
 /* library variables */
-extern const H5F_create_t H5F_create_dflt;
-extern H5F_access_t H5F_access_dflt;
-extern const H5F_mprop_t H5F_mount_dflt;
+__DLLVAR__ const H5F_create_t H5F_create_dflt;
+__DLLVAR__ H5F_access_t H5F_access_dflt;
+__DLLVAR__ const H5F_mprop_t H5F_mount_dflt;
 
 #ifdef HAVE_PARALLEL
-extern  hbool_t H5_mpi_1_metawrite_g;
+__DLLVAR__  hbool_t H5_mpi_1_metawrite_g;
 #endif /* HAVE_PARALLEL */
 
 /* Private functions, not part of the publicly documented API */
-herr_t H5F_init(void);
-void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l);
-H5F_t *H5F_open(const char *name, uintn flags,
+__DLL__ herr_t H5F_init(void);
+__DLL__ void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l);
+__DLL__ H5F_t *H5F_open(const char *name, uintn flags,
 		const H5F_create_t *create_parms,
 		const H5F_access_t *access_parms);
-herr_t H5F_close(H5F_t *f);
-HDF5API herr_t H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
+__DLL__ herr_t H5F_close(H5F_t *f);
+__DLL__ herr_t H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
 			 intn indent, intn fwidth);
-HDF5API herr_t H5F_istore_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
+__DLL__ herr_t H5F_istore_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
 				intn indent, intn fwidth, int ndims);
-herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
+__DLL__ herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
 
 /* Functions that operate on array storage */
-HDF5API herr_t H5F_arr_create(H5F_t *f,
+__DLL__ herr_t H5F_arr_create(H5F_t *f,
 			      struct H5O_layout_t *layout /*in,out*/);
-HDF5API herr_t H5F_arr_read (H5F_t *f, const struct H5D_xfer_t *xfer,
+__DLL__ herr_t H5F_arr_read (H5F_t *f, const struct H5D_xfer_t *xfer,
 			     const struct H5O_layout_t *layout,
 			     const struct H5O_pline_t *pline,
 			     const struct H5O_fill_t *fill,
@@ -568,7 +568,7 @@ HDF5API herr_t H5F_arr_read (H5F_t *f, const struct H5D_xfer_t *xfer,
 			     const hsize_t mem_size[],
 			     const hssize_t mem_offset[],
 			     const hssize_t file_offset[], void *_buf/*out*/);
-HDF5API herr_t H5F_arr_write (H5F_t *f, const struct H5D_xfer_t *xfer,
+__DLL__ herr_t H5F_arr_write (H5F_t *f, const struct H5D_xfer_t *xfer,
 			      const struct H5O_layout_t *layout,
 			      const struct H5O_pline_t *pline,
 			      const struct H5O_fill_t *fill,
@@ -579,24 +579,24 @@ HDF5API herr_t H5F_arr_write (H5F_t *f, const struct H5D_xfer_t *xfer,
 			      const hssize_t file_offset[], const void *_buf);
 
 /* Functions that operate on indexed storage */
-herr_t H5F_istore_init (H5F_t *f);
-herr_t H5F_istore_flush (H5F_t *f, hbool_t preempt);
-herr_t H5F_istore_dest (H5F_t *f);
-herr_t H5F_istore_stats (H5F_t *f, hbool_t headers);
-herr_t H5F_istore_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);
-herr_t H5F_istore_read(H5F_t *f, const struct H5D_xfer_t *xfer,
+__DLL__ herr_t H5F_istore_init (H5F_t *f);
+__DLL__ herr_t H5F_istore_flush (H5F_t *f, hbool_t preempt);
+__DLL__ herr_t H5F_istore_dest (H5F_t *f);
+__DLL__ herr_t H5F_istore_stats (H5F_t *f, hbool_t headers);
+__DLL__ herr_t H5F_istore_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);
+__DLL__ herr_t H5F_istore_read(H5F_t *f, const struct H5D_xfer_t *xfer,
 		       const struct H5O_layout_t *layout,
 		       const struct H5O_pline_t *pline,
 		       const struct H5O_fill_t *fill,
 		       const hssize_t offset[], const hsize_t size[],
 		       void *buf /*out */ );
-herr_t H5F_istore_write(H5F_t *f, const struct H5D_xfer_t *xfer,
+__DLL__ herr_t H5F_istore_write(H5F_t *f, const struct H5D_xfer_t *xfer,
 			const struct H5O_layout_t *layout,
 			const struct H5O_pline_t *pline,
 			const struct H5O_fill_t *fill,
 			const hssize_t offset[], const hsize_t size[],
 			const void *buf);
-herr_t H5F_istore_allocate (H5F_t *f,
+__DLL__ herr_t H5F_istore_allocate (H5F_t *f,
 			    const struct H5O_layout_t *layout,
 			    const hsize_t *space_dim,
 			    const double split_ratios[], 
@@ -604,34 +604,34 @@ herr_t H5F_istore_allocate (H5F_t *f,
 			    const struct H5O_fill_t *fill);
 
 /* Functions that operate on contiguous storage wrt boot block */
-HDF5API herr_t H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,
+__DLL__ herr_t H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,
 			      const H5D_transfer_t xfer_mode, void *buf);
-herr_t H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size,
+__DLL__ herr_t H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size,
 		       const H5D_transfer_t xfer_mode, const void *buf);
 
 /* Functions that operate directly on low-level files */
-const H5F_low_class_t *H5F_low_class (H5F_driver_t driver);
-herr_t H5F_low_extend(H5F_low_t *lf, const H5F_access_t *access_parms,
+__DLL__ const H5F_low_class_t *H5F_low_class (H5F_driver_t driver);
+__DLL__ herr_t H5F_low_extend(H5F_low_t *lf, const H5F_access_t *access_parms,
 		      intn op, hsize_t size, haddr_t *addr/*out*/);
-HDF5API herr_t H5F_low_seteof(H5F_low_t *lf, const haddr_t *addr);
-intn H5F_low_alloc (H5F_low_t *lf, intn op, hsize_t alignment,
+__DLL__ herr_t H5F_low_seteof(H5F_low_t *lf, const haddr_t *addr);
+__DLL__ intn H5F_low_alloc (H5F_low_t *lf, intn op, hsize_t alignment,
 		    hsize_t threshold, hsize_t size, H5MF_free_t *blk,
 		    haddr_t *addr/*out*/);
-htri_t H5F_low_access(const H5F_low_class_t *type, const char *name,
+__DLL__ htri_t H5F_low_access(const H5F_low_class_t *type, const char *name,
 		      const H5F_access_t *access_parms, int mode,
 		      H5F_search_t *key);
-H5F_low_t *H5F_low_open(const H5F_low_class_t *type, const char *name,
+__DLL__ H5F_low_t *H5F_low_open(const H5F_low_class_t *type, const char *name,
 			const H5F_access_t *access_parms, uintn flags,
 			H5F_search_t *key);
-H5F_low_t *H5F_low_close(H5F_low_t *lf, const H5F_access_t *access_parms);
-hsize_t H5F_low_size(H5F_low_t *lf, haddr_t *addr);
-herr_t H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
+__DLL__ H5F_low_t *H5F_low_close(H5F_low_t *lf, const H5F_access_t *access_parms);
+__DLL__ hsize_t H5F_low_size(H5F_low_t *lf, haddr_t *addr);
+__DLL__ herr_t H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 		    const H5D_transfer_t xfer_mode,
 		    const haddr_t *addr, size_t size, uint8_t *buf);
-herr_t H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
+__DLL__ herr_t H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 		     const H5D_transfer_t xfer_mode,
 		     const haddr_t *addr, size_t size, const uint8_t *buf);
-herr_t H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
+__DLL__ herr_t H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 
 /* Functions that operate on addresses */
 #define H5F_addr_eq(A1,A2) (H5F_addr_cmp(A1,A2)==0)
@@ -641,26 +641,26 @@ herr_t H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 #define H5F_addr_gt(A1,A2) (H5F_addr_cmp(A1,A2)>0)
 #define H5F_addr_ge(A1,A2) (H5F_addr_cmp(A1,A2)>=0)
 
-HDF5API intn H5F_addr_cmp(const haddr_t *, const haddr_t *);
-htri_t H5F_addr_defined(const haddr_t *);
-void H5F_addr_undef(haddr_t *);
-HDF5API void H5F_addr_reset(haddr_t *);
-htri_t H5F_addr_zerop(const haddr_t *);
-void H5F_addr_encode(H5F_t *, uint8_t **, const haddr_t *);
-void H5F_addr_decode(H5F_t *, const uint8_t **, haddr_t *);
-HDF5API void H5F_addr_print(FILE *, const haddr_t *);
-void H5F_addr_pow2(uintn, haddr_t *);
-void H5F_addr_inc(haddr_t *addr/*in,out*/, hsize_t inc);
-void H5F_addr_adj(haddr_t *addr/*in,out*/, hssize_t adj);
-void H5F_addr_add(haddr_t *, const haddr_t *);
-uintn H5F_addr_hash(const haddr_t *, uintn mod);
-herr_t H5F_addr_pack(H5F_t *f, haddr_t *addr, const long objno[2]);
+__DLL__ intn H5F_addr_cmp(const haddr_t *, const haddr_t *);
+__DLL__ htri_t H5F_addr_defined(const haddr_t *);
+__DLL__ void H5F_addr_undef(haddr_t *);
+__DLL__ void H5F_addr_reset(haddr_t *);
+__DLL__ htri_t H5F_addr_zerop(const haddr_t *);
+__DLL__ void H5F_addr_encode(H5F_t *, uint8_t **, const haddr_t *);
+__DLL__ void H5F_addr_decode(H5F_t *, const uint8_t **, haddr_t *);
+__DLL__ void H5F_addr_print(FILE *, const haddr_t *);
+__DLL__ void H5F_addr_pow2(uintn, haddr_t *);
+__DLL__ void H5F_addr_inc(haddr_t *addr/*in,out*/, hsize_t inc);
+__DLL__ void H5F_addr_adj(haddr_t *addr/*in,out*/, hssize_t adj);
+__DLL__ void H5F_addr_add(haddr_t *, const haddr_t *);
+__DLL__ uintn H5F_addr_hash(const haddr_t *, uintn mod);
+__DLL__ herr_t H5F_addr_pack(H5F_t *f, haddr_t *addr, const long objno[2]);
 
 /* Functions for MPI-IO */
 #ifdef HAVE_PARALLEL
-htri_t H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval );
-herr_t H5PC_Wait_for_left_neighbor( MPI_Comm comm );
-herr_t H5PC_Signal_right_neighbor( MPI_Comm comm );
+__DLL__ htri_t H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval );
+__DLL__ herr_t H5PC_Wait_for_left_neighbor( MPI_Comm comm );
+__DLL__ herr_t H5PC_Signal_right_neighbor( MPI_Comm comm );
 #endif /* HAVE_PARALLEL */
 
 #endif

@@ -30,13 +30,13 @@ typedef struct H5Z_class_t {
 
 struct H5O_pline_t; /*forward decl*/
 
-herr_t H5Z_register(H5Z_filter_t id, const char *comment, H5Z_func_t filter);
-herr_t H5Z_append(struct H5O_pline_t *pline, H5Z_filter_t filter, uintn flags,
+__DLL__ herr_t H5Z_register(H5Z_filter_t id, const char *comment, H5Z_func_t filter);
+__DLL__ herr_t H5Z_append(struct H5O_pline_t *pline, H5Z_filter_t filter, uintn flags,
 		  size_t cd_nelmts, const unsigned int cd_values[]);
-herr_t H5Z_pipeline(H5F_t *f, const struct H5O_pline_t *pline, uintn flags,
+__DLL__ herr_t H5Z_pipeline(H5F_t *f, const struct H5O_pline_t *pline, uintn flags,
 		    uintn *filter_mask/*in,out*/, size_t *nbytes/*in,out*/,
 		    size_t *buf_size/*in,out*/, void **buf/*in,out*/);
-H5Z_class_t *H5Z_find(H5Z_filter_t id);
+__DLL__ H5Z_class_t *H5Z_find(H5Z_filter_t id);
 
 
 #endif

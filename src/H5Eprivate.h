@@ -103,15 +103,15 @@ typedef struct H5E_t {
     H5E_error_t slot[H5E_NSLOTS];	/*array of error records	     */
 } H5E_t;
 
-extern const hbool_t H5E_clearable_g;	/*safe to call H5E_clear() on enter? */
-extern herr_t (*H5E_auto_g)(void *client_data);
-extern void *H5E_auto_data_g;
+__DLLVAR__ const hbool_t H5E_clearable_g;	/*safe to call H5E_clear() on enter? */
+__DLLVAR__ herr_t (*H5E_auto_g)(void *client_data);
+__DLLVAR__ void *H5E_auto_data_g;
 
-herr_t H5E_push (H5E_major_t maj_num, H5E_minor_t min_num,
+__DLL__ herr_t H5E_push (H5E_major_t maj_num, H5E_minor_t min_num,
 		 const char *func_name, const char *file_name, unsigned line,
 		 const char *desc);
-herr_t H5E_clear (void);
-herr_t H5E_walk (H5E_direction_t dir, H5E_walk_t func, void *client_data);
+__DLL__ herr_t H5E_clear (void);
+__DLL__ herr_t H5E_walk (H5E_direction_t dir, H5E_walk_t func, void *client_data);
 
 
 #endif

@@ -63,26 +63,26 @@ typedef struct H5D_xfer_t {
 } H5D_xfer_t;
 
 typedef struct H5D_t H5D_t;
-extern const H5D_create_t H5D_create_dflt;
-HDF5GLOBAL const H5D_xfer_t H5D_xfer_dflt;
+__DLLVAR__ const H5D_create_t H5D_create_dflt;
+__DLLVAR__ const H5D_xfer_t H5D_xfer_dflt;
 
 /* Functions defined in H5D.c */
-H5D_t *H5D_create (H5G_entry_t *loc, const char *name, const H5T_t *type,
+__DLL__ H5D_t *H5D_create (H5G_entry_t *loc, const char *name, const H5T_t *type,
 		   const H5S_t *space, const H5D_create_t *create_parms);
-H5D_t *H5D_open (H5G_entry_t *loc, const char *name);
-herr_t H5D_close (H5D_t *dataset);
-htri_t H5D_isa(H5G_entry_t *ent);
-herr_t H5D_read (H5D_t *dataset, const H5T_t *mem_type,
+__DLL__ H5D_t *H5D_open (H5G_entry_t *loc, const char *name);
+__DLL__ herr_t H5D_close (H5D_t *dataset);
+__DLL__ htri_t H5D_isa(H5G_entry_t *ent);
+__DLL__ herr_t H5D_read (H5D_t *dataset, const H5T_t *mem_type,
 		 const H5S_t *mem_space, const H5S_t *file_space,
 		 const H5D_xfer_t *xfer_parms, void *buf/*out*/);
-herr_t H5D_write (H5D_t *dataset, const H5T_t *mem_type,
+__DLL__ herr_t H5D_write (H5D_t *dataset, const H5T_t *mem_type,
 		  const H5S_t *mem_space, const H5S_t *file_space,
 		  const H5D_xfer_t *xfer_parms, const void *buf);
-herr_t H5D_extend (H5D_t *dataset, const hsize_t *size);
-H5G_entry_t *H5D_entof (H5D_t *dataset);
-H5T_t *H5D_typeof (H5D_t *dset);
-H5S_t *H5D_get_space(H5D_t *dset);
-H5D_t * H5D_open_oid(H5G_entry_t *ent);
-H5F_t * H5D_get_file(const H5D_t *dset);
+__DLL__ herr_t H5D_extend (H5D_t *dataset, const hsize_t *size);
+__DLL__ H5G_entry_t *H5D_entof (H5D_t *dataset);
+__DLL__ H5T_t *H5D_typeof (H5D_t *dset);
+__DLL__ H5S_t *H5D_get_space(H5D_t *dset);
+__DLL__ H5D_t * H5D_open_oid(H5G_entry_t *ent);
+__DLL__ H5F_t * H5D_get_file(const H5D_t *dset);
 
 #endif
