@@ -35,12 +35,12 @@ typedef int (*H5TB_cmp_t)(void *k1, void *k2, int cmparg);
 # define  Rchild    link[RIGHT]
 
 /* Tree-balancing flags */
-# define  TBBT_HEAVY(s) s       /* If the `s' sub-tree is deeper than the other */
-# define  TBBT_DOUBLE   4       /* If "heavy" sub-tree is two levels deeper */
-# define  TBBT_INTERN   8       /* If node is internal (has two children) */
-# define  TBBT_UNBAL    ( TBBT_HEAVY(LEFT) | TBBT_HEAVY(RIGHT) )
-# define  TBBT_FLAGS    ( TBBT_UNBAL | TBBT_INTERN | TBBT_DOUBLE )
-# define  TBBT_CHILD(s) ( TBBT_INTERN | TBBT_HEAVY(s) )
+# define  H5TB_HEAVY(s) s       /* If the `s' sub-tree is deeper than the other */
+# define  H5TB_DOUBLE   4       /* If "heavy" sub-tree is two levels deeper */
+# define  H5TB_INTERN   8       /* If node is internal (has two children) */
+# define  H5TB_UNBAL    ( H5TB_HEAVY(LEFT) | H5TB_HEAVY(RIGHT) )
+# define  H5TB_FLAGS    ( H5TB_UNBAL | H5TB_INTERN | H5TB_DOUBLE )
+# define  H5TB_CHILD(s) ( H5TB_INTERN | H5TB_HEAVY(s) )
 
 /* Internal macros */
 # define  LeftCnt(node) ( (node)->lcnt )    /* Left descendants */
@@ -52,70 +52,70 @@ typedef int (*H5TB_cmp_t)(void *k1, void *k2, int cmparg);
 # define  Intern(n)     ( LeftCnt(n) && RightCnt(n) )
 # define  UnBal(n)      ( LeftCnt(n)>RightCnt(n) ? LEFT : \
                  LeftCnt(n)==RightCnt(n) ? 0 : RIGHT)
-# define  Double(n)     ( TBBT_DOUBLE & (n)->flags )
+# define  Double(n)     ( H5TB_DOUBLE & (n)->flags )
 # define  Other(side)   ( LEFT + RIGHT - (side) )
 # define  Delta(n,s)    (  ( Heavy(n,s) ? 1 : -1 )                          \
                             *  ( Double(n) ? 2 : UnBal(n) ? 1 : 0 )  )
-# define  SetFlags(n,s,b,i)   (  ( -2<(b) && (b)<2 ? 0 : TBBT_DOUBLE )   \
-    |  ( 0>(b) ? TBBT_HEAVY(s) : (b)>0 ? TBBT_HEAVY(Other(s)) : 0 )        \
-    |  ( (i) ? TBBT_INTERN : 0 )  )
+# define  SetFlags(n,s,b,i)   (  ( -2<(b) && (b)<2 ? 0 : H5TB_DOUBLE )   \
+    |  ( 0>(b) ? H5TB_HEAVY(s) : (b)>0 ? H5TB_HEAVY(Other(s)) : 0 )        \
+    |  ( (i) ? H5TB_INTERN : 0 )  )
 
 /* Internal types for flags & leaf counts */
-typedef unsigned long tbbt_flag;
-typedef unsigned long tbbt_leaf;
+typedef unsigned long H5TB_flag;
+typedef unsigned long H5TB_leaf;
 
 /* Threaded node structure */
-typedef struct tbbt_node
+typedef struct H5TB_node
 {
     void *       data;          /* Pointer to user data to be associated with node */
     void *       key;           /* Field to sort nodes on */
 
-    struct tbbt_node *link[3];  /* Pointers to parent, left child, and right child */
-    tbbt_flag flags;        /* Combination of the bit fields */
-    tbbt_leaf lcnt;         /* count of left children */
-    tbbt_leaf rcnt;         /* count of right children */
-} TBBT_NODE;
+    struct H5TB_node *link[3];  /* Pointers to parent, left child, and right child */
+    H5TB_flag flags;        /* Combination of the bit fields */
+    H5TB_leaf lcnt;         /* count of left children */
+    H5TB_leaf rcnt;         /* count of right children */
+} H5TB_NODE;
 
 /* Threaded tree structure */
-typedef struct tbbt_tree
+typedef struct H5TB_tree
 {
-    TBBT_NODE  *root;       /* Pointer to actual root of tbbt tree */
+    H5TB_NODE  *root;       /* Pointer to actual root of tbbt tree */
     unsigned long count;    /* The number of nodes in the tree currently */
     unsigned fast_compare;  /* use a faster in-line compare (with casts) instead of function call */
     H5TB_cmp_t  compar;     /* Key comparison function */
     int cmparg;
-} TBBT_TREE;
+} H5TB_TREE;
 
 /* Define the "fast compare" values */
-#define TBBT_FAST_HADDR_COMPARE    1
-#define TBBT_FAST_INTN_COMPARE     2
+#define H5TB_FAST_HADDR_COMPARE    1
+#define H5TB_FAST_INTN_COMPARE     2
 
 #if defined c_plusplus || defined __cplusplus
 extern      "C"
 {
 #endif                          /* c_plusplus || __cplusplus */
 
-__DLL__ TBBT_TREE  *H5TB_dmake (H5TB_cmp_t cmp, int arg, unsigned fast_compare);
-__DLL__ TBBT_NODE  *H5TB_dfind (TBBT_TREE * tree, void * key, TBBT_NODE ** pp);
-__DLL__ TBBT_NODE  *H5TB_find(TBBT_NODE * root, void * key, H5TB_cmp_t cmp,
-                 int arg, TBBT_NODE ** pp);
-__DLL__ TBBT_NODE  *H5TB_dless (TBBT_TREE * tree, void * key, TBBT_NODE ** pp);
-__DLL__ TBBT_NODE  *H5TB_less (TBBT_NODE * root, void * key, H5TB_cmp_t cmp,
-                 int arg, TBBT_NODE ** pp);
-__DLL__ TBBT_NODE  *H5TB_index (TBBT_NODE * root, unsigned indx);
-__DLL__ TBBT_NODE  *H5TB_dins (TBBT_TREE * tree, void * item, void * key);
-__DLL__ TBBT_NODE  *H5TB_ins (TBBT_NODE ** root, void * item, void * key, H5TB_cmp_t cmp, int arg);
-__DLL__ void *H5TB_rem(TBBT_NODE ** root, TBBT_NODE * node, void * *kp);
-__DLL__ TBBT_NODE  *H5TB_first (TBBT_NODE * root);
-__DLL__ TBBT_NODE  *H5TB_last (TBBT_NODE * root);
-__DLL__ TBBT_NODE  *H5TB_next (TBBT_NODE * node);
-__DLL__ TBBT_NODE  *H5TB_prev (TBBT_NODE * node);
-__DLL__ TBBT_TREE  *H5TB_dfree (TBBT_TREE * tree, void(*fd) (void *), void(*fk) (void *));
-__DLL__ void       *H5TB_free (TBBT_NODE ** root, void(*fd) (void *), void(*fk) (void *));
-__DLL__ long        H5TB_count (TBBT_TREE * tree);
+__DLL__ H5TB_TREE  *H5TB_dmake (H5TB_cmp_t cmp, int arg, unsigned fast_compare);
+__DLL__ H5TB_NODE  *H5TB_dfind (H5TB_TREE * tree, void * key, H5TB_NODE ** pp);
+__DLL__ H5TB_NODE  *H5TB_find(H5TB_NODE * root, void * key, H5TB_cmp_t cmp,
+                 int arg, H5TB_NODE ** pp);
+__DLL__ H5TB_NODE  *H5TB_dless (H5TB_TREE * tree, void * key, H5TB_NODE ** pp);
+__DLL__ H5TB_NODE  *H5TB_less (H5TB_NODE * root, void * key, H5TB_cmp_t cmp,
+                 int arg, H5TB_NODE ** pp);
+__DLL__ H5TB_NODE  *H5TB_index (H5TB_NODE * root, unsigned indx);
+__DLL__ H5TB_NODE  *H5TB_dins (H5TB_TREE * tree, void * item, void * key);
+__DLL__ H5TB_NODE  *H5TB_ins (H5TB_NODE ** root, void * item, void * key, H5TB_cmp_t cmp, int arg);
+__DLL__ void *H5TB_rem(H5TB_NODE ** root, H5TB_NODE * node, void * *kp);
+__DLL__ H5TB_NODE  *H5TB_first (H5TB_NODE * root);
+__DLL__ H5TB_NODE  *H5TB_last (H5TB_NODE * root);
+__DLL__ H5TB_NODE  *H5TB_next (H5TB_NODE * node);
+__DLL__ H5TB_NODE  *H5TB_prev (H5TB_NODE * node);
+__DLL__ H5TB_TREE  *H5TB_dfree (H5TB_TREE * tree, void(*fd) (void *), void(*fk) (void *));
+__DLL__ void       *H5TB_free (H5TB_NODE ** root, void(*fd) (void *), void(*fk) (void *));
+__DLL__ long        H5TB_count (H5TB_TREE * tree);
 
 #ifdef H5TB_DEBUG
-__DLL__ herr_t      H5TB_dump(TBBT_TREE *ptree, void (*key_dump)(void *,void *), intn method);
+__DLL__ herr_t      H5TB_dump(H5TB_TREE *ptree, void (*key_dump)(void *,void *), intn method);
 #endif /* H5TB_DEBUG */
 
 #if defined c_plusplus || defined __cplusplus

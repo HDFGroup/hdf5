@@ -75,21 +75,21 @@ static char RcsId[] = "@(#)$Revision$";
 #define   Max(a,b)  ( (a) > (b) ? (a) : (b) )
 
 /* Local Function Prototypes */
-static TBBT_NODE * H5TB_end(TBBT_NODE * root, intn side);
-static TBBT_NODE *H5TB_ffind(TBBT_NODE * root, void * key, uintn fast_compare,
-    TBBT_NODE ** pp);
-static herr_t H5TB_balance(TBBT_NODE ** root, TBBT_NODE * ptr, intn side, intn added);
-static TBBT_NODE *H5TB_swapkid(TBBT_NODE ** root, TBBT_NODE * ptr, intn side);
-static TBBT_NODE *H5TB_nbr(TBBT_NODE * ptr, intn side);
+static H5TB_NODE * H5TB_end(H5TB_NODE * root, intn side);
+static H5TB_NODE *H5TB_ffind(H5TB_NODE * root, void * key, uintn fast_compare,
+    H5TB_NODE ** pp);
+static herr_t H5TB_balance(H5TB_NODE ** root, H5TB_NODE * ptr, intn side, intn added);
+static H5TB_NODE *H5TB_swapkid(H5TB_NODE ** root, H5TB_NODE * ptr, intn side);
+static H5TB_NODE *H5TB_nbr(H5TB_NODE * ptr, intn side);
 
 #ifdef H5TB_DEBUG
-static herr_t tbbt_printNode(TBBT_NODE * node, void(*key_dump)(void *,void *));
-static herr_t tbbt_dumpNode(TBBT_NODE *node, void (*key_dump)(void *,void *),
+static herr_t H5TB_printNode(H5TB_NODE * node, void(*key_dump)(void *,void *));
+static herr_t H5TB_dumpNode(H5TB_NODE *node, void (*key_dump)(void *,void *),
                           intn method);
 #endif /* H5TB_DEBUG */
 
-/* Declare a free list to manage the TBBT_NODE struct */
-H5FL_DEFINE_STATIC(TBBT_NODE);
+/* Declare a free list to manage the H5TB_NODE struct */
+H5FL_DEFINE_STATIC(H5TB_NODE);
 
 #define PABLO_MASK	H5TB_mask
 static intn		interface_initialize_g = 0;
@@ -105,13 +105,13 @@ static intn		interface_initialize_g = 0;
  * (H5TB_dfind, H5TB_dins, H5TB_dfree) on them.
  * Examples:
  *     int keycmp();
- *     TBBT_ROOT *root= H5TB_dmake( keycmp, (int)keysiz , 0);
+ *     H5TB_ROOT *root= H5TB_dmake( keycmp, (int)keysiz , 0);
  * or
  *     void *root= H5TB_dmake( strcmp, 0 , 0);
  * or
- *     void *root= H5TB_dmake( keycmp, (int)keysiz , TBBT_FAST_HADDR_COMPARE);
+ *     void *root= H5TB_dmake( keycmp, (int)keysiz , H5TB_FAST_HADDR_COMPARE);
  * or
- *     TBBT_NODE *root= NULL;        (* Don't use H5TB_d* routines *)
+ *     H5TB_NODE *root= NULL;        (* Don't use H5TB_d* routines *)
  *
  * `cmp' is the routine to be used to compare two key values [in H5TB_dfind()
  * and H5TB_dins()].  The arguments to `cmp' are the two keys to compare
@@ -134,12 +134,12 @@ static intn		interface_initialize_g = 0;
  *
  * Most of the other routines expect a pointer to a root node of a tree, not
  * a pointer to the tree's control structure (only H5TB_dfind(), H5TB_dins(),
- * and H5TB_dfree() expect pointers to control structures).  However TBBT_TREE
- * is just defined as "**TBBT_NODE" (unless you have defined TBBT_INTERNALS so
+ * and H5TB_dfree() expect pointers to control structures).  However H5TB_TREE
+ * is just defined as "**H5TB_NODE" (unless you have defined H5TB_INTERNALS so
  * you have access to the internal structure of the nodes) so
- *     TBBT_TREE *tree1= H5TB_dmake( NULL, 0 );
+ *     H5TB_TREE *tree1= H5TB_dmake( NULL, 0 );
  * is equivalent to
- *     TBBT_NODE **tree1= H5TB_dmake( NULL, 0 );
+ *     H5TB_NODE **tree1= H5TB_dmake( NULL, 0 );
  * So could be used as:
  *     node= H5TB_dfind( tree1, key, NULL );
  *     node= H5TB_find( *tree1, key, compar, arg, NULL );
@@ -151,7 +151,7 @@ static intn		interface_initialize_g = 0;
  *     item= H5TB_rem( tree1, H5TB_find(*tree1,key,compar,arg,NULL), NULL );
  *     tree1= H5TB_dfree( tree1, free, NULL );       (* or whatever *)
  * while
- *     TBBT_NODE *root= NULL;
+ *     H5TB_NODE *root= NULL;
  * would be used like:
  *     node= H5TB_find( root, key );
  *     node= H5TB_ins( &root, item, key );
@@ -160,7 +160,7 @@ static intn		interface_initialize_g = 0;
  * Never use H5TB_free() on a tree allocated with H5TB_dmake() or on a sub-tree
  * of ANY tree.  Never use H5TB_dfree() except on a H5TB_dmake()d tree.
  *
- * Return:	Success:	Pointer to a valid TBBT tree
+ * Return:	Success:	Pointer to a valid H5TB tree
  * 		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -170,14 +170,14 @@ static intn		interface_initialize_g = 0;
  * 	
  *-------------------------------------------------------------------------
  */
-TBBT_TREE  *
+H5TB_TREE  *
 H5TB_dmake(H5TB_cmp_t cmp, intn arg, uintn fast_compare)
 {
-    TBBT_TREE  *tree;
+    H5TB_TREE  *tree;
 
     FUNC_ENTER (H5TB_dmake, NULL);
 
-    if (NULL == (tree = H5MM_malloc(sizeof(TBBT_TREE))))
+    if (NULL == (tree = H5MM_malloc(sizeof(H5TB_TREE))))
         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     tree->root = NULL;
@@ -204,7 +204,7 @@ H5TB_dmake(H5TB_cmp_t cmp, intn arg, uintn fast_compare)
  * create using H5TB_dmake() and is used on any tree (or subtree) created with-
  * out using H5TB_dmake().]
  *
- * Return:	Success:	Pointer to a valid TBBT node
+ * Return:	Success:	Pointer to a valid H5TB node
  * 		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -214,10 +214,10 @@ H5TB_dmake(H5TB_cmp_t cmp, intn arg, uintn fast_compare)
  * 	
  *-------------------------------------------------------------------------
  */
-TBBT_NODE  *
-H5TB_dfind(TBBT_TREE * tree, void * key, TBBT_NODE ** pp)
+H5TB_NODE  *
+H5TB_dfind(H5TB_TREE * tree, void * key, H5TB_NODE ** pp)
 {
-    TBBT_NODE *ret_value=NULL;
+    H5TB_NODE *ret_value=NULL;
 
     FUNC_ENTER (H5TB_dfind, NULL);
 
@@ -246,7 +246,7 @@ H5TB_dfind(TBBT_TREE * tree, void * key, TBBT_NODE ** pp)
  * create using H5TB_dmake() and is used on any tree (or subtree) created with-
  * out using H5TB_dmake().]
  *
- * Return:	Success:	Pointer to a valid TBBT node
+ * Return:	Success:	Pointer to a valid H5TB node
  * 		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -259,12 +259,12 @@ H5TB_dfind(TBBT_TREE * tree, void * key, TBBT_NODE ** pp)
  * 	
  *-------------------------------------------------------------------------
  */
-TBBT_NODE  *
-H5TB_find(TBBT_NODE * root, void * key,
-     H5TB_cmp_t compar, intn arg, TBBT_NODE ** pp)
+H5TB_NODE  *
+H5TB_find(H5TB_NODE * root, void * key,
+     H5TB_cmp_t compar, intn arg, H5TB_NODE ** pp)
 {
-    TBBT_NODE  *ptr = root;
-    TBBT_NODE  *parent = NULL;
+    H5TB_NODE  *ptr = root;
+    H5TB_NODE  *parent = NULL;
     intn        cmp = 1;
     intn        side;
 
@@ -301,7 +301,7 @@ H5TB_find(TBBT_NODE * root, void * key,
  * subtree of a tree create using H5TB_dmake() and is used on any tree (or
  * subtree) created with-out using H5TB_dmake().]
  *
- * Return:	Success:	Pointer to a valid TBBT node
+ * Return:	Success:	Pointer to a valid H5TB node
  * 		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -313,8 +313,8 @@ H5TB_find(TBBT_NODE * root, void * key,
  * 	
  *-------------------------------------------------------------------------
  */
-TBBT_NODE  *
-H5TB_dless(TBBT_TREE * tree, void * key, TBBT_NODE ** pp)
+H5TB_NODE  *
+H5TB_dless(H5TB_TREE * tree, void * key, H5TB_NODE ** pp)
 {
     FUNC_ENTER(H5TB_dless,NULL);
 
@@ -338,7 +338,7 @@ H5TB_dless(TBBT_TREE * tree, void * key, TBBT_NODE ** pp)
  * subtree of a tree create using H5TB_dmake() and is used on any tree (or
  * subtree) created with-out using H5TB_dmake().]
  *
- * Return:	Success:	Pointer to a valid TBBT node
+ * Return:	Success:	Pointer to a valid H5TB node
  * 		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -350,11 +350,11 @@ H5TB_dless(TBBT_TREE * tree, void * key, TBBT_NODE ** pp)
  * 	
  *-------------------------------------------------------------------------
  */
-TBBT_NODE  *
-H5TB_less(TBBT_NODE * root, void * key, H5TB_cmp_t compar, intn arg, TBBT_NODE ** pp)
+H5TB_NODE  *
+H5TB_less(H5TB_NODE * root, void * key, H5TB_cmp_t compar, intn arg, H5TB_NODE ** pp)
 {
-    TBBT_NODE  *ptr = root;
-    TBBT_NODE  *parent = NULL;
+    H5TB_NODE  *ptr = root;
+    H5TB_NODE  *parent = NULL;
     intn        cmp = 1;
     intn        side;
 
@@ -401,7 +401,7 @@ H5TB_less(TBBT_NODE * root, void * key, H5TB_cmp_t compar, intn arg, TBBT_NODE *
  * followed by `indx' H5TB_next()s.  Thus `H5TB_index(&root,0L)' is equivalent to
  * (and almost as fast as) `H5TB_first(root)'.
  *
- * Return:	Success:	Pointer to a valid TBBT node
+ * Return:	Success:	Pointer to a valid H5TB node
  * 		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -413,10 +413,10 @@ H5TB_less(TBBT_NODE * root, void * key, H5TB_cmp_t compar, intn arg, TBBT_NODE *
  * 	
  *-------------------------------------------------------------------------
  */
-TBBT_NODE  *
-H5TB_index(TBBT_NODE * root, unsigned indx)
+H5TB_NODE  *
+H5TB_index(H5TB_NODE * root, unsigned indx)
 {
-    TBBT_NODE  *ptr = root;
+    H5TB_NODE  *ptr = root;
 
     FUNC_ENTER(H5TB_index,NULL);
 
@@ -454,7 +454,7 @@ H5TB_index(TBBT_NODE * root, unsigned indx)
  * inserted), otherwise a pointer to the inserted node is returned.  `cmp' and
  * `arg' are as for H5TB_find().
  *
- * Return:	Success:	Pointer to a valid TBBT node
+ * Return:	Success:	Pointer to a valid H5TB node
  * 		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -466,10 +466,10 @@ H5TB_index(TBBT_NODE * root, unsigned indx)
  * 	
  *-------------------------------------------------------------------------
  */
-TBBT_NODE  *
-H5TB_dins(TBBT_TREE * tree, void * item, void * key)
+H5TB_NODE  *
+H5TB_dins(H5TB_TREE * tree, void * item, void * key)
 {
-    TBBT_NODE  *ret_node;       /* the node to return */
+    H5TB_NODE  *ret_node;       /* the node to return */
 
     FUNC_ENTER(H5TB_dins,NULL);
 
@@ -495,7 +495,7 @@ H5TB_dins(TBBT_TREE * tree, void * item, void * key)
  * inserted), otherwise a pointer to the inserted node is returned.  `cmp' and
  * `arg' are as for H5TB_find().
  *
- * Return:	Success:	Pointer to a valid TBBT node
+ * Return:	Success:	Pointer to a valid H5TB node
  * 		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -507,11 +507,11 @@ H5TB_dins(TBBT_TREE * tree, void * item, void * key)
  * 	
  *-------------------------------------------------------------------------
  */
-TBBT_NODE  *
-H5TB_ins(TBBT_NODE ** root, void * item, void * key, H5TB_cmp_t compar, intn arg)
+H5TB_NODE  *
+H5TB_ins(H5TB_NODE ** root, void * item, void * key, H5TB_cmp_t compar, intn arg)
 {
     intn        cmp;
-    TBBT_NODE  *ptr, *parent;
+    H5TB_NODE  *ptr, *parent;
 
     FUNC_ENTER(H5TB_ins,NULL);
 
@@ -520,7 +520,7 @@ H5TB_ins(TBBT_NODE ** root, void * item, void * key, H5TB_cmp_t compar, intn arg
 
     if (NULL != H5TB_find(*root, (key ? key : item), compar, arg, &parent))
         HRETURN_ERROR (H5E_TBBT, H5E_EXISTS, NULL, "node already in tree");
-    if (NULL == (ptr = H5FL_ALLOC(TBBT_NODE,0)))
+    if (NULL == (ptr = H5FL_ALLOC(H5TB_NODE,0)))
         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     ptr->data = item;
     ptr->key = key ? key : item;
@@ -584,11 +584,11 @@ H5TB_ins(TBBT_NODE ** root, void * item, void * key, H5TB_cmp_t compar, intn arg
  *-------------------------------------------------------------------------
  */
 void *
-H5TB_rem(TBBT_NODE ** root, TBBT_NODE * node, void * *kp)
+H5TB_rem(H5TB_NODE ** root, H5TB_NODE * node, void * *kp)
 {
-    TBBT_NODE  *leaf;   /* Node with one or zero children */
-    TBBT_NODE  *par;    /* Parent of `leaf' */
-    TBBT_NODE  *next;   /* Next/prev node near `leaf' (`leaf's `side' thread) */
+    H5TB_NODE  *leaf;   /* Node with one or zero children */
+    H5TB_NODE  *par;    /* Parent of `leaf' */
+    H5TB_NODE  *next;   /* Next/prev node near `leaf' (`leaf's `side' thread) */
     intn        side;   /* `leaf' is `side' child of `par' */
     void *      data;   /* Saved pointer to data item of deleted node */
 
@@ -648,7 +648,7 @@ H5TB_rem(TBBT_NODE ** root, TBBT_NODE * node, void * *kp)
                 else {
                       *root = NULL;
                   }     /* end else */
-                H5FL_FREE(TBBT_NODE,node);
+                H5FL_FREE(H5TB_NODE,node);
                 HRETURN(data);
             }
           side = (par->Rchild == leaf) ? RIGHT : LEFT;
@@ -680,11 +680,11 @@ H5TB_rem(TBBT_NODE ** root, TBBT_NODE * node, void * *kp)
     /* Case 2: `leaf' has no children: */
     if (!UnBal(leaf)) {
           par->link[side] = leaf->link[side];
-          par->flags &= (tbbt_flag)(~(TBBT_INTERN | TBBT_HEAVY(side)));
+          par->flags &= (H5TB_flag)(~(H5TB_INTERN | H5TB_HEAVY(side)));
       } /* end if */
     /* Case 1: `leaf' has one child: */
     else {
-          TBBT_NODE  *n;
+          H5TB_NODE  *n;
 
           /* two-in-a-row cases */
           if (HasChild(leaf, side)) {
@@ -708,10 +708,10 @@ H5TB_rem(TBBT_NODE ** root, TBBT_NODE * node, void * *kp)
             }   /* end else */
       } /* end else */
 
-    H5FL_FREE(TBBT_NODE,leaf);
+    H5FL_FREE(H5TB_NODE,leaf);
     H5TB_balance(root, par, side, -1);
 
-    ((TBBT_TREE *) root)->count--;
+    ((H5TB_TREE *) root)->count--;
 
     FUNC_LEAVE(data);
 }   /* end H5TB_rem() */
@@ -725,7 +725,7 @@ H5TB_rem(TBBT_NODE ** root, TBBT_NODE * node, void * *kp)
  *     node= H5TB_first(*tree);
  *     node= H5TB_first(root);
  *
- * Return:	Success:	Pointer to a valid TBBT node
+ * Return:	Success:	Pointer to a valid H5TB node
  * 		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -737,8 +737,8 @@ H5TB_rem(TBBT_NODE ** root, TBBT_NODE * node, void * *kp)
  * 	
  *-------------------------------------------------------------------------
  */
-TBBT_NODE  *
-H5TB_first(TBBT_NODE * root)
+H5TB_NODE  *
+H5TB_first(H5TB_NODE * root)
 {
     FUNC_ENTER(H5TB_first,NULL);
 
@@ -754,7 +754,7 @@ H5TB_first(TBBT_NODE * root)
  *     node= H5TB_last(tree->root);
  *     node= H5TB_last(node);        (* Last node in a sub-tree *)
  *
- * Return:	Success:	Pointer to a valid TBBT node
+ * Return:	Success:	Pointer to a valid H5TB node
  * 		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -766,8 +766,8 @@ H5TB_first(TBBT_NODE * root)
  * 	
  *-------------------------------------------------------------------------
  */
-TBBT_NODE  *
-H5TB_last(TBBT_NODE * root)
+H5TB_NODE  *
+H5TB_last(H5TB_NODE * root)
 {
     FUNC_ENTER(H5TB_last,NULL);
 
@@ -782,7 +782,7 @@ H5TB_last(TBBT_NODE * root)
  * key value relative to the node pointed to by `node'.  If `node' points the
  * last node of the tree, NULL is returned.
  *
- * Return:	Success:	Pointer to a valid TBBT node
+ * Return:	Success:	Pointer to a valid H5TB node
  * 		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -794,8 +794,8 @@ H5TB_last(TBBT_NODE * root)
  * 	
  *-------------------------------------------------------------------------
  */
-TBBT_NODE  *
-H5TB_next(TBBT_NODE * node)
+H5TB_NODE  *
+H5TB_next(H5TB_NODE * node)
 {
     FUNC_ENTER(H5TB_next,NULL);
 
@@ -810,7 +810,7 @@ H5TB_next(TBBT_NODE * node)
  * key value relative to the node pointed to by `node'.  If `node' points the
  * first node of the tree, NULL is returned.
  *
- * Return:	Success:	Pointer to a valid TBBT node
+ * Return:	Success:	Pointer to a valid H5TB node
  * 		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -822,8 +822,8 @@ H5TB_next(TBBT_NODE * node)
  * 	
  *-------------------------------------------------------------------------
  */
-TBBT_NODE  *
-H5TB_prev(TBBT_NODE * node)
+H5TB_NODE  *
+H5TB_prev(H5TB_NODE * node)
 {
     FUNC_ENTER(H5TB_prev,NULL);
 
@@ -856,8 +856,8 @@ H5TB_prev(TBBT_NODE * node)
  * 	
  *-------------------------------------------------------------------------
  */
-TBBT_TREE  *
-H5TB_dfree(TBBT_TREE * tree, void(*fd) (void * /* item */), void(*fk) (void * /* key */))
+H5TB_TREE  *
+H5TB_dfree(H5TB_TREE * tree, void(*fd) (void * /* item */), void(*fk) (void * /* key */))
 {
     FUNC_ENTER(H5TB_dfree,NULL);
 
@@ -900,9 +900,9 @@ H5TB_dfree(TBBT_TREE * tree, void(*fd) (void * /* item */), void(*fk) (void * /*
  *-------------------------------------------------------------------------
  */
 void *
-H5TB_free(TBBT_NODE ** root, void(*fd) (void * /* item */), void(*fk) (void * /* key */))
+H5TB_free(H5TB_NODE ** root, void(*fd) (void * /* item */), void(*fk) (void * /* key */))
 {
-    TBBT_NODE  *par, *node = *root;
+    H5TB_NODE  *par, *node = *root;
 
     FUNC_ENTER(H5TB_free,NULL);
 
@@ -933,7 +933,7 @@ H5TB_free(TBBT_NODE ** root, void(*fd) (void * /* item */), void(*fk) (void * /*
                       else
                           par->Rchild = NULL;   /* Ditto */
 
-                      H5FL_FREE(TBBT_NODE,node);
+                      H5FL_FREE(H5TB_NODE,node);
 
                       node = par;   /* Move up tree; remember which node to do next */
                   } /* end else */
@@ -961,7 +961,7 @@ H5TB_free(TBBT_NODE ** root, void(*fd) (void * /* item */), void(*fk) (void * /*
  *-------------------------------------------------------------------------
  */
 long
-H5TB_count(TBBT_TREE * tree)
+H5TB_count(H5TB_TREE * tree)
 {
     FUNC_ENTER(H5TB_count,FAIL);
 
@@ -992,11 +992,11 @@ H5TB_count(TBBT_TREE * tree)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TB_dump(TBBT_TREE *tree, void (*key_dump)(void *,void *), intn method)
+H5TB_dump(H5TB_TREE *tree, void (*key_dump)(void *,void *), intn method)
 {
     FUNC_ENTER(H5TB_dump,FAIL);
 
-	printf("TBBT-tree dump  %p:\n",tree);
+	printf("H5TB-tree dump  %p:\n",tree);
 	printf("capacity = %ld\n\n",(long)tree->count);
 	H5TB_dumpNode(tree->root,key_dump, method);
 
@@ -1021,7 +1021,7 @@ H5TB_dump(TBBT_TREE *tree, void (*key_dump)(void *,void *), intn method)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5TB_printNode(TBBT_NODE * node, void(*key_dump)(void *,void *))
+H5TB_printNode(H5TB_NODE * node, void(*key_dump)(void *,void *))
 {
     FUNC_ENTER(H5TB_printNode,FAIL);
 
@@ -1061,7 +1061,7 @@ H5TB_printNode(TBBT_NODE * node, void(*key_dump)(void *,void *))
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5TB_dumpNode(TBBT_NODE *node, void (*key_dump)(void *,void *),
+H5TB_dumpNode(H5TB_NODE *node, void (*key_dump)(void *,void *),
                         intn method)
 {
     FUNC_ENTER(H5TB_dumpNode,FAIL);
@@ -1118,8 +1118,8 @@ H5TB_dumpNode(TBBT_NODE *node, void (*key_dump)(void *,void *),
  * 	
  *-------------------------------------------------------------------------
  */
-static TBBT_NODE *
-H5TB_end(TBBT_NODE * root, intn side)
+static H5TB_NODE *
+H5TB_end(H5TB_NODE * root, intn side)
 {
     FUNC_ENTER (H5TB_end, NULL);
 
@@ -1133,8 +1133,8 @@ H5TB_end(TBBT_NODE * root, intn side)
 }   /* end H5TB_end() */
 
 /* Returns pointer to neighboring node (to LEFT or RIGHT): */
-static TBBT_NODE *
-H5TB_nbr(TBBT_NODE * ptr, intn side)
+static H5TB_NODE *
+H5TB_nbr(H5TB_NODE * ptr, intn side)
 {
     FUNC_ENTER (H5TB_nbr, NULL);
 
@@ -1151,18 +1151,18 @@ H5TB_nbr(TBBT_NODE * ptr, intn side)
 /* H5TB_ffind -- Look up a node in a tree based on a key value */
 /* This routine is based on tbbtfind (fix bugs in both places!) */
 /* Returns a pointer to the found node (or NULL) */
-static TBBT_NODE  *
-H5TB_ffind(TBBT_NODE * root, void * key, uintn fast_compare, TBBT_NODE ** pp)
+static H5TB_NODE  *
+H5TB_ffind(H5TB_NODE * root, void * key, uintn fast_compare, H5TB_NODE ** pp)
 {
-    TBBT_NODE  *ptr = root;
-    TBBT_NODE  *parent = NULL;
+    H5TB_NODE  *ptr = root;
+    H5TB_NODE  *parent = NULL;
     intn        side;
     intn        cmp = 1;
 
     FUNC_ENTER (H5TB_ffind, NULL);
 
     switch(fast_compare) {
-        case TBBT_FAST_HADDR_COMPARE:
+        case H5TB_FAST_HADDR_COMPARE:
             if (ptr) {
                 while (0 != (cmp = (*(haddr_t *)key - *(haddr_t *)ptr->key))) {
                       parent = ptr;
@@ -1176,7 +1176,7 @@ H5TB_ffind(TBBT_NODE * root, void * key, uintn fast_compare, TBBT_NODE ** pp)
                 *pp = parent;
             break;
 
-        case TBBT_FAST_INTN_COMPARE:
+        case H5TB_FAST_INTN_COMPARE:
             if (ptr) {
                 while (0 != (cmp = (*(intn *)key - *(intn *)ptr->key))) {
                       parent = ptr;
@@ -1217,14 +1217,14 @@ H5TB_ffind(TBBT_NODE * root, void * key, uintn fast_compare, TBBT_NODE ** pp)
  * [A], [B], or [C] can have depth 0 so `link[]' contains threads rather than
  * pointers to children.
  */
-static TBBT_NODE *
-H5TB_swapkid(TBBT_NODE ** root, TBBT_NODE * ptr, intn side)
+static H5TB_NODE *
+H5TB_swapkid(H5TB_NODE ** root, H5TB_NODE * ptr, intn side)
 {
-    TBBT_NODE  *kid = ptr->link[side];  /* Sibling to be swapped with parent */
+    H5TB_NODE  *kid = ptr->link[side];  /* Sibling to be swapped with parent */
     intn        deep[3];        /* Relative depths of three sub-trees involved. */
     /* 0:ptr->link[Other(side)], 1:kid->link[Other(side)], 2:kid->link[side] */
-    tbbt_flag   ptrflg;         /* New value for ptr->flags (ptr->flags used after set) */
-    tbbt_leaf   plcnt, prcnt,   /* current values of the ptr's and kid's leaf count */
+    H5TB_flag   ptrflg;         /* New value for ptr->flags (ptr->flags used after set) */
+    H5TB_leaf   plcnt, prcnt,   /* current values of the ptr's and kid's leaf count */
                 klcnt, krcnt;
 
     FUNC_ENTER (H5TB_swapkid, NULL);
@@ -1232,7 +1232,7 @@ H5TB_swapkid(TBBT_NODE ** root, TBBT_NODE * ptr, intn side)
     deep[2] = (deep[1] = 0) + Delta(kid, side);
     deep[0] = Max(0, deep[2]) + 1 - Delta(ptr, side);
     kid->Parent = ptr->Parent;
-    ptrflg = (tbbt_flag)SetFlags(ptr, side, deep[0],
+    ptrflg = (H5TB_flag)SetFlags(ptr, side, deep[0],
                   HasChild(ptr, Other(side)) && HasChild(kid, Other(side)));
     plcnt = LeftCnt(ptr);
     prcnt = RightCnt(ptr);
@@ -1257,7 +1257,7 @@ H5TB_swapkid(TBBT_NODE ** root, TBBT_NODE * ptr, intn side)
       }
     ptr->Parent = kid;
     kid->link[Other(side)] = ptr;
-    kid->flags = (tbbt_flag)SetFlags(kid, Other(side),
+    kid->flags = (H5TB_flag)SetFlags(kid, Other(side),
                         deep[2] - 1 - Max(deep[0], 0), HasChild(kid, side));
 
     /* update leaf counts */
@@ -1323,7 +1323,7 @@ H5TB_swapkid(TBBT_NODE ** root, TBBT_NODE * ptr, intn side)
  * are usually required.
  */
 static      herr_t
-H5TB_balance(TBBT_NODE ** root, TBBT_NODE * ptr, intn side, intn added)
+H5TB_balance(H5TB_NODE ** root, H5TB_NODE * ptr, intn side, intn added)
 {
     intn        deeper = added; /* 1 if sub-tree got longer; -1 if got shorter */
     intn        odelta;
@@ -1347,9 +1347,9 @@ H5TB_balance(TBBT_NODE ** root, TBBT_NODE * ptr, intn side, intn added)
             {   /* One leg got longer or shorter: */
                 if ((deeper < 0 && odelta < 0) || (deeper > 0 && odelta > 0))
                   {     /* Became too unbalanced: */
-                      TBBT_NODE  *kid;
+                      H5TB_NODE  *kid;
 
-                      ptr->flags |= TBBT_DOUBLE;    /* Mark node too unbalanced */
+                      ptr->flags |= H5TB_DOUBLE;    /* Mark node too unbalanced */
                       if (deeper < 0)   /* Just removed a node: */
                           side = Other(side);   /* Swap with child from other side. */
                       else
@@ -1375,10 +1375,10 @@ H5TB_balance(TBBT_NODE ** root, TBBT_NODE * ptr, intn side, intn added)
                   }
                 else if (obal)
                   {     /* Just became balanced: */
-                      ptr->flags &= ~TBBT_UNBAL;
+                      ptr->flags &= ~H5TB_UNBAL;
                       if (0 < deeper)
                         {   /* Shorter of legs lengthened */
-                            ptr->flags |= TBBT_INTERN;  /* Mark as internal node now */
+                            ptr->flags |= H5TB_INTERN;  /* Mark as internal node now */
                             deeper = 0;     /* so max length unchanged */
                         }   /* end if */
                   }
@@ -1386,7 +1386,7 @@ H5TB_balance(TBBT_NODE ** root, TBBT_NODE * ptr, intn side, intn added)
                   {     /* Just became unbalanced: */
                       if (ptr->link[Other(side)] != NULL && ptr->link[Other(side)]->Parent == ptr)
                         {
-                            ptr->flags |= (tbbt_flag)TBBT_HEAVY(Other(side));  /* Other side longer */
+                            ptr->flags |= (H5TB_flag)H5TB_HEAVY(Other(side));  /* Other side longer */
                             if (ptr->Parent) {
                                 if (ptr->Parent->Rchild == ptr) {
                                     /* we're the right child */
@@ -1406,7 +1406,7 @@ H5TB_balance(TBBT_NODE ** root, TBBT_NODE * ptr, intn side, intn added)
                   }
                 else
                   {     /* Just became unbalanced: */
-                      ptr->flags |= (tbbt_flag)TBBT_HEAVY(side);   /* 0<deeper: Our side longer */
+                      ptr->flags |= (H5TB_flag)H5TB_HEAVY(side);   /* 0<deeper: Our side longer */
                   }     /* end else */
             }
           if (ptr->Parent)
