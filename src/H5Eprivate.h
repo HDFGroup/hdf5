@@ -204,7 +204,11 @@ typedef struct H5E_t_new {
  * and a FUNC_LEAVE() within a function body.  The arguments are the major
  * error number, the minor error number, and a description of the error.
  */
+#ifdef NEW_ERR
+#define HERROR(maj, min, str) H5E_push_new(H5E_DEFAULT, __FILE__, FUNC, __LINE__, maj, min, str)
+#else
 #define HERROR(maj, min, str) H5E_push(maj, min, FUNC, __FILE__, __LINE__, str)
+#endif /* NEW_ERR */
 
 /*
  * HCOMMON_ERROR macro, used by HDONE_ERROR and HGOTO_ERROR
@@ -288,12 +292,17 @@ H5_DLL herr_t H5E_close_msg(H5E_msg_t *err);
 H5_DLL hid_t  H5E_create_msg(hid_t cls_id, H5E_type_t msg_type, const char *msg);
 H5_DLL hid_t  H5E_get_current_stack(void);
 H5_DLL herr_t H5E_close_stack(H5E_t_new *err_stack);
-H5_DLL ssize_t H5E_get_class(H5E_cls_t *cls, char *name, size_t size);
+H5_DLL ssize_t H5E_get_class_name(H5E_cls_t *cls, char *name, size_t size);
 H5_DLL ssize_t H5E_get_msg(H5E_msg_t *msg_ptr, H5E_type_t *type, char *msg, size_t size);
 H5_DLL int     H5E_get_num(H5E_t_new *err_stack);
 H5_DLL herr_t  H5E_set_current_stack(H5E_t_new *estack);
 H5_DLL herr_t  H5E_push_new(H5E_t_new *estack, const char *file, const char *func, unsigned line, 
                             hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc);
+H5_DLL herr_t  H5E_pop(H5E_t_new *err_stack, size_t count);
+H5_DLL herr_t  H5E_clear_new(H5E_t_new *estack);
+H5_DLL herr_t  H5E_print_new(H5E_t_new *estack, FILE *stream);
+H5_DLL herr_t  H5E_walk_new (H5E_t_new *estack, H5E_direction_t direction, H5E_walk_t_new func, 
+                             void *client_data);
 
 #endif /* NEW_ERR */
 

@@ -32,28 +32,39 @@ const char *FILENAME[] = {
 int	ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
 
 hid_t   ERR_CLS;
+hid_t   ERR_STACK;
 
 hid_t   ERR_MAJ_TEST;
 hid_t   ERR_MAJ_IO;
+hid_t   ERR_MAJ_API;
 
 hid_t   ERR_MIN_SUBROUTINE;
+hid_t   ERR_MIN_ERRSTACK;
 hid_t   ERR_MIN_CREATE;
+hid_t   ERR_MIN_GETNUM;
 
 #define DSET_NAME               "a_dataset"
 
 #define ERR_CLS_NAME            "Error Test"
 #define PROG_NAME               "Error Program"
 #define PROG_VERS               "1.0"
+
 #define ERR_MAJ_TEST_MSG             "Error in test"
 #define ERR_MAJ_IO_MSG               "Error in IO"
+#define ERR_MAJ_API_MSG              "Error in API"
 #define ERR_MIN_SUBROUTINE_MSG       "Error in subroutine"
+#define ERR_MIN_ERRSTACK_MSG         "Error in error stack"
 #define ERR_MIN_CREATE_MSG           "Error in H5Dcreate"
+#define ERR_MIN_GETNUM_MSG           "Error in H5Eget_num"
 
+#define MSG_SIZE                64
 #define SPACE1_DIM1             4
 #define SPACE1_RANK             1
 #define SPACE2_RANK	        2
 #define SPACE2_DIM1	        10
 #define SPACE2_DIM2	        10
+
+herr_t custom_print_cb(int n, H5E_error_t_new *err_desc, void* client_data);
 
 
 /*-------------------------------------------------------------------------
@@ -81,7 +92,7 @@ test_error(hid_t file)
     int			i, j, n;
     hsize_t		dims[2];
     void                *tmp;
-    char                *FUNC_test_error="test_error()";
+    const char          *FUNC_test_error="test_error";
     
     TESTING("error API based on atomic datatype");
 
@@ -99,14 +110,16 @@ test_error(hid_t file)
 
     /*------------------- Test data values ------------------------*/
     /* Create the dataset */
+    /* Make it H5Dcreate fail */
+    /*file = 0;*/
     if ((dataset = H5Dcreate(file, DSET_NAME, H5T_STD_I32BE, space,
 			     H5P_DEFAULT))<0) {
 #ifndef NEW_ERR
         H5Epush_new(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_MAJ_IO, ERR_MIN_CREATE, 
                 "H5Dcreate failed");
 #endif /* NEW_ERR */        
-
-        TEST_ERROR;
+        goto error;
+        /*TEST_ERROR;*/
     }
 
     /* Write the data to the dataset */
@@ -192,16 +205,18 @@ test_error(hid_t file)
 static herr_t 
 init_error(void)
 {
-    size_t cls_size = strlen(ERR_CLS_NAME)+1;
+    ssize_t cls_size = strlen(ERR_CLS_NAME)+1;
     char *cls_name = malloc(strlen(ERR_CLS_NAME)+1);
-    size_t msg_size = strlen(ERR_MIN_SUBROUTINE_MSG) + 1;
+    ssize_t msg_size = strlen(ERR_MIN_SUBROUTINE_MSG) + 1;
     char *msg = malloc(strlen(ERR_MIN_SUBROUTINE_MSG)+1);
     H5E_type_t *msg_type= malloc(sizeof(H5E_type_t));
     
     if((ERR_CLS = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS))<0)
         TEST_ERROR;
+    if((ERR_CLS = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS))<0)
+        TEST_ERROR;
 
-    if(cls_size != H5Eget_class(ERR_CLS, cls_name, cls_size) + 1) 
+    if(cls_size != H5Eget_class_name(ERR_CLS, cls_name, (size_t)cls_size) + 1) 
         TEST_ERROR;
     if(strcmp(ERR_CLS_NAME, cls_name)) 
         TEST_ERROR;
@@ -210,13 +225,19 @@ init_error(void)
         TEST_ERROR;
     if((ERR_MAJ_IO = H5Ecreate_msg(ERR_CLS, H5E_MAJOR_new, ERR_MAJ_IO_MSG))<0)
         TEST_ERROR;
+    if((ERR_MAJ_API = H5Ecreate_msg(ERR_CLS, H5E_MAJOR_new, ERR_MAJ_API_MSG))<0)
+        TEST_ERROR;
 
     if((ERR_MIN_SUBROUTINE = H5Ecreate_msg(ERR_CLS, H5E_MINOR_new, ERR_MIN_SUBROUTINE_MSG))<0)
         TEST_ERROR;
+    if((ERR_MIN_ERRSTACK = H5Ecreate_msg(ERR_CLS, H5E_MINOR_new, ERR_MIN_ERRSTACK_MSG))<0)
+        TEST_ERROR;
     if((ERR_MIN_CREATE = H5Ecreate_msg(ERR_CLS, H5E_MINOR_new, ERR_MIN_CREATE_MSG))<0)
         TEST_ERROR;
+    if((ERR_MIN_GETNUM = H5Ecreate_msg(ERR_CLS, H5E_MINOR_new, ERR_MIN_GETNUM_MSG))<0)
+        TEST_ERROR;
 
-    if(msg_size != H5Eget_msg(ERR_MIN_SUBROUTINE, msg_type, msg, msg_size) + 1)
+    if(msg_size != H5Eget_msg(ERR_MIN_SUBROUTINE, msg_type, msg, (size_t)msg_size) + 1)
         TEST_ERROR;
     if(*msg_type != H5E_MINOR_new)
         TEST_ERROR;
@@ -255,23 +276,30 @@ init_error(void)
 static herr_t 
 error_stack(void)
 {
-    hid_t err_stack;
     int err_num;
+    const char          *FUNC_error_stack="error_stack";
     
     if((err_num = H5Eget_num(H5E_DEFAULT))<0)
         TEST_ERROR;
     if(err_num)
         TEST_ERROR;
     
-    if((err_stack = H5Eget_current_stack())<0)
+    if((ERR_STACK = H5Eget_current_stack())<0)
         TEST_ERROR;
 
-    if((err_num = H5Eget_num(err_stack))<0)
-        TEST_ERROR;
+    /* Make it push error */
+    if((err_num = H5Eget_num(ERR_STACK))<0) {
+        H5Epush_new(ERR_STACK, __FILE__, FUNC_error_stack, __LINE__, ERR_MAJ_API, ERR_MIN_GETNUM, 
+                "Get number test failed, returned %d", err_num);
+        goto error;
+        /*TEST_ERROR;*/
+    } 
     if(err_num)
         TEST_ERROR;
-
-    if(H5Eclose_stack(err_stack)<0)
+  
+    if(H5Eclear_new(ERR_STACK)<0)
+        TEST_ERROR; 
+    if(H5Eclose_stack(ERR_STACK)<0)
         TEST_ERROR;
     
     PASSED();
@@ -281,6 +309,86 @@ error_stack(void)
     return -1;
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    dump_error	
+ *
+ * Purpose:	Prints error stack in default and customized ways.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *		July 17, 2003
+ *
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+dump_error(hid_t estack)
+{
+    /* Print errors in library default way */
+    fprintf(stderr, "********* Print error stack in HDF5 default way *********\n");
+    H5Eprint_new(estack, stderr);
+    
+    /* Customized way to print errors */
+    fprintf(stderr, "\n********* Print error stack in customized way *********\n");
+    H5Ewalk_new(estack, H5E_WALK_UPWARD, custom_print_cb, stderr);
+    
+    PASSED();
+    return 0;
+
+  error:
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    custom_print_cb
+ *
+ * Purpose:	Callback function to print error stack in customized way.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *		July 17, 2003
+ *
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+custom_print_cb(int n, H5E_error_t_new *err_desc, void* client_data)
+{
+    FILE		*stream  = (FILE *)client_data;
+    char                maj[MSG_SIZE];
+    char                min[MSG_SIZE];
+    char                cls[MSG_SIZE];
+    const int		indent = 4;
+
+    /* Get descriptions for the major and minor error numbers */
+    H5Eget_class_name(err_desc->cls_id, cls, MSG_SIZE);
+    H5Eget_msg(err_desc->maj_id, NULL, maj, MSG_SIZE);
+    H5Eget_msg(err_desc->maj_id, NULL, min, MSG_SIZE);
+
+    fprintf (stream, "%*serror #%03d: %s in %s(): line %u\n",
+	     indent, "", n, err_desc->file_name,
+	     err_desc->func_name, err_desc->line);
+    fprintf (stream, "%*sclass: %s\n", indent*2, "", cls);
+    fprintf (stream, "%*smajor: %s\n", indent*2, "", maj);
+    fprintf (stream, "%*sminor: %s\n", indent*2, "", min);
+
+    PASSED();
+    return 0;
+
+  error:
+    return -1;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -340,7 +448,7 @@ main(void)
 {
     hid_t		file, fapl;
     char		filename[1024];
-    const char          *FUNC_main="main()";
+    const char          *FUNC_main="main";
 
     h5_reset();
 #ifndef NEW_ERR 
@@ -355,16 +463,25 @@ main(void)
 	TEST_ERROR ;
     
 #ifndef NEW_ERR 
-    if(error_stack()<0)
-        TEST_ERROR ;
+    if(error_stack()<0) {
+        H5Epush_new(ERR_STACK, __FILE__, FUNC_main, __LINE__, ERR_MAJ_TEST, ERR_MIN_ERRSTACK, 
+                "Error stack test failed"); 
+        H5Epop(ERR_STACK, 1);
+        dump_error(ERR_STACK);
+        /*H5Eprint_new(ERR_STACK, stderr);*/
+        H5Eclose_stack(ERR_STACK);
+        TEST_ERROR;
+    }
 #endif /* NEW_ERR */
 
     if(test_error(file)<0) {
 #ifndef NEW_ERR
         H5Epush_new(H5E_DEFAULT, __FILE__, FUNC_main, __LINE__, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, 
-                "Error test failed because %s", "it's wrong");
-#endif /* NEW_ERR */        
-        TEST_ERROR ;
+                "Error test failed, %s", "it's wrong");
+        H5Eprint_new(H5E_DEFAULT, stderr);
+#endif /* NEW_ERR */
+        goto error;        
+        /*TEST_ERROR;*/
     }
     
     if (H5Fclose(file)<0) TEST_ERROR ;
