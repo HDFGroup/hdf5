@@ -112,6 +112,7 @@ New Features
     * h5redeploy utility was added. It updates HDF5 compiler tools
       after the HDF5 software has been installed in a new location.
 
+
   o Support for new platforms and languages
   =========================================
     * Parallel Fortran Library works now on HP-UX B.11.00 Sys V.
