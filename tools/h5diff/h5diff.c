@@ -277,7 +277,7 @@ int main(int argc, const char *argv[])
      break;
     case 'd': 
      /* if it is not another option */
-     if ( '-' != argv[i+1][0] )
+     if ( i<argc-1 &&'-' != argv[i+1][0] )
      {
       options.d=1;
       if ( check_f_input(argv[i+1])==-1)
@@ -294,7 +294,7 @@ int main(int argc, const char *argv[])
      }
      break;
     case 'p': 
-     if ( '-' !=argv[i+1][0] )
+     if ( i<argc-1 &&'-' !=argv[i+1][0] )
      {
       options.p=1;
       if ( check_f_input(argv[i+1])==-1)
@@ -306,7 +306,7 @@ int main(int argc, const char *argv[])
      }
      break;
     case 'n': 
-     if ( '-' !=argv[i+1][0] )
+     if ( i<argc-1 && '-' !=argv[i+1][0] )
      {
       options.n=1;
       if ( check_n_input(argv[i+1])==-1)
