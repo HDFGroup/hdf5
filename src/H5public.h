@@ -38,6 +38,12 @@ static char             RcsId[] = "@(#)$Revision$";
 #   include <mpio.h>
 #endif
 #endif
+
+#ifdef HAVE_GASS
+#include "globus_common.h"
+#include "globus_gass_file.h"
+#endif
+
 #include <H5api_adpt.h>
 
 /* Version numbers */

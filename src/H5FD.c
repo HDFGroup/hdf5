@@ -163,14 +163,17 @@ H5FDregister(const H5FD_class_t *cls)
 	HRETURN_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
 		      "null class pointer is disallowed");
     }
+
     if (!cls->open || !cls->close) {
 	HRETURN_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
 		      "`open' and/or `close' methods are not defined");
     }
+
     if (!cls->get_eoa || !cls->set_eoa) {
 	HRETURN_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
 		      "`get_eoa' and/or `set_eoa' methods are not defined");
     }
+
     if (!cls->get_eof) {
 	HRETURN_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL,
 		      "`get_eof' method is not defined");

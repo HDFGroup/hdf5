@@ -11,7 +11,7 @@
 * MODIFICATIONS
 *	Robb Matzke, 30 Aug 1997
 *	Added `ERRORS' fields to function prologues.
-*									   *
+*
 ****************************************************************************/
 
 #ifdef RCSID
@@ -24,6 +24,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5FDcore.h>		/*temporary in-memory files		  */
 #include <H5FDfamily.h>		/*family of files			  */
 #include <H5FDmpio.h>		/*MPI-2 I/O				  */
+#include <H5FDgass.h>           /*GASS I/O                                */
 #include <H5FDmulti.h>		/*multiple files partitioned by mem usage */
 #include <H5FDsec2.h>		/*Posix unbuffered I/O			  */
 
@@ -202,6 +203,9 @@ H5F_init_interface(void)
     H5E_BEGIN_TRY {
 	if ((status=H5FD_SEC2)<0) goto end_registration;
 	if ((status=H5FD_FAMILY)<0) goto end_registration;
+#ifdef HAVE_GASS
+	if ((status=H5FD_GASS)<0) goto end_registration;
+#endif
 	if ((status=H5FD_CORE)<0) goto end_registration;
 	if ((status=H5FD_MULTI)<0) goto end_registration;
 #ifdef HAVE_PARALLEL
@@ -209,6 +213,7 @@ H5F_init_interface(void)
 #endif
     end_registration: ;
 	} H5E_END_TRY;
+
     if (status<0) {
 	HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
 		      "file driver registration failed");

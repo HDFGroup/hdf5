@@ -100,6 +100,7 @@ typedef enum H5E_minor_t {
     H5E_FILEOPEN,               /*file already open                          */
     H5E_CANTCREATE,             /*Can't create file                          */
     H5E_CANTOPENFILE,           /*Can't open file                            */
+    H5E_CANTCLOSEFILE,          /*Can't close file			     */
     H5E_NOTHDF5,                /*not an HDF5 format file                    */
     H5E_BADFILE,                /*bad file ID accessed                       */
     H5E_TRUNCATED,              /*file has been truncated                    */

@@ -22,7 +22,7 @@ CLEAN=libhdf5.settings
 
 ## Source and object files for the library (lexicographically)...
 LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fistore.c \
-    H5FD.c H5FDsec2.c H5FDfamily.c H5FDmpio.c H5FDcore.c H5FDmulti.c H5G.c \
+    H5FD.c H5FDsec2.c H5FDfamily.c H5FDmpio.c H5FDcore.c H5FDmulti.c H5FDgass.c H5G.c \
     H5Gent.c H5Gnode.c H5Gstab.c H5HG.c H5HL.c H5I.c H5MF.c H5MM.c H5O.c \
     H5Oattr.c H5Ocomp.c H5Ocont.c H5Odtype.c H5Oefl.c H5Ofill.c H5Olayout.c \
     H5Omtime.c H5Oname.c H5Onull.c H5Osdspace.c H5Oshared.c H5Ostab.c H5P.c \
