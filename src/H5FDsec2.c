@@ -18,7 +18,13 @@
 #include <hdf5.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 
 
 #undef MAX
@@ -236,7 +242,11 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id/*unused*/,
     int		fd;
     struct stat	sb;
     H5FD_sec2_t	*file=NULL;
-    
+#ifdef WIN32
+	HFILE filehandle;
+	struct _BY_HANDLE_FILE_INFORMATION fileinfo;
+	int results;   
+#endif
     /* Check arguments */
     if (!name || !*name) return NULL;
     if (0==maxaddr || HADDR_UNDEF==maxaddr) return NULL;
@@ -247,8 +257,13 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id/*unused*/,
     if (H5F_ACC_TRUNC & flags) o_flags |= O_TRUNC;
     if (H5F_ACC_CREAT & flags) o_flags |= O_CREAT;
     if (H5F_ACC_EXCL & flags) o_flags |= O_EXCL;
-
+#ifdef WIN32
+	/*this is included since we aren't using HDopen which would
+	 normally include this flag for us*/
+	o_flags |= O_BINARY;
+#endif
     /* Open the file */
+
     if ((fd=open(name, o_flags, 0666))<0) return NULL;
     if (fstat(fd, &sb)<0) {
 	close(fd);
@@ -261,9 +276,15 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id/*unused*/,
     file->eof = sb.st_size;
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
+#ifdef WIN32
+	filehandle = _get_osfhandle(fd);
+	results = GetFileInformationByHandle(filehandle, &fileinfo);
+	file->fileindexhi = fileinfo.nFileIndexHigh;
+	file->fileindexlo = fileinfo.nFileIndexLow;
+#else
     file->device = sb.st_dev;
     file->inode = sb.st_ino;
-
+#endif
     return (H5FD_t*)file;
 }
 
@@ -319,13 +340,20 @@ H5FD_sec2_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
     const H5FD_sec2_t	*f1 = (const H5FD_sec2_t*)_f1;
     const H5FD_sec2_t	*f2 = (const H5FD_sec2_t*)_f2;
+#ifdef WIN32
+    if (f1->fileindexhi < f2->fileindexhi) return -1;
+    if (f1->fileindexhi > f2->fileindexhi) return 1;
 
+    if (f1->fileindexlo < f2->fileindexlo) return -1;
+    if (f1->fileindexlo > f2->fileindexlo) return 1;
+
+#else
     if (f1->device < f2->device) return -1;
     if (f1->device > f2->device) return 1;
 
     if (f1->inode < f2->inode) return -1;
     if (f1->inode > f2->inode) return 1;
-
+#endif
     return 0;
 }
 
