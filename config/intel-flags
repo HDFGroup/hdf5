@@ -15,7 +15,7 @@ if test X = "X$cc_flags_set"; then
     cc_version="`$CC $CFLAGS -V 2>&1 |grep '^Intel'`"
     if test X != "X$cc_version"; then
         cc_vendor=icc
-        cc_version="`$CC $CFLAGS --version 2>&1`"
+        cc_version=`echo $cc_version |sed 's/.*Version \([-a-z0-9\.\-]*\).*/\1/'`
         echo "compiler '$CC' is Intel $cc_vendor-$cc_version"
 
         # Some version numbers

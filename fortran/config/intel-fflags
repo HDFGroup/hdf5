@@ -16,7 +16,7 @@ if test X = "X$f9x_flags_set"; then
     f9x_version="`$F9X $FFLAGS -V 2>&1 |grep '^Intel'`"
     if test X != "X$f9x_version"; then
         f9x_vendor=ifort
-        f9x_version="`$F9X $FFLAGS -v 2>&1 |sed 's/Version \([-a-z0-9\.\-]*\).*/\1/'`"
+        f9x_version="`echo $f9x_version |sed 's/.*Version \([-a-z0-9\.\-]*\).*/\1/'`"
         echo "compiler '$F9X' is Intel $f9x_vendor-$f9x_version"
 
         # Some version numbers
