@@ -26,14 +26,19 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 TEST_SCRIPT = $(top_srcdir)/test/testerror.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 
+# Build and run SRB tests only if SRB driver is enabled.
+if BUILD_SRB_CONDITIONAL
+   SRB_TESTS=srb_write srb_append srb_read
+endif
+
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
 TEST_PROG=testhdf5 lheap ohdr stab gheap cache hyperslab istore bittests     \
            dtypes dsets cmpd_dset extend external links unlink big mtime     \
            fillval mount flush1 flush2 enum \
-           set_extent srb_write srb_append srb_read ttsafe stream_test       \
+           set_extent ttsafe stream_test       \
            getname file_handle ntypes dangle dtransform filename reserved    \
-           btree2 blocktrack
+           btree2 blocktrack $(SRB_TESTS)
 
 # List programs to be built when testing here. error_test and err_compat are
 # built at the same time as the other tests, but executed by testerror.sh.

@@ -1264,6 +1264,8 @@ if test -n "$SRB"; then
   AC_DEFINE([HAVE_SRB], [1], [Define if the SRB is defined])
 fi
 
+AM_CONDITIONAL([BUILD_SRB_CONDITIONAL], [test -n "$SRB"])
+
 dnl ----------------------------------------------------------------------
 dnl Is LLNL's PDB present? If so then we'll compile the PDB-to-HDF5
 dnl translator.
