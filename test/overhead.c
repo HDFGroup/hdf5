@@ -18,6 +18,9 @@
 #   include <stdlib.h>
 #   include <sys/stat.h>
 #   include <string.h>
+#endif
+
+#ifdef HAVE_IO_H
 #	include <io.h>
 #endif
 
