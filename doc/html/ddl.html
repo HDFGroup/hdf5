@@ -101,7 +101,7 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;boot_block_content&gt; ::= TBD
 
-&lt;root_group&gt; ::= GROUP "/" { &lt;unamed_datatype&gt;* &lt;group_attribute&gt;* &lt;group_member&gt;* }  
+&lt;root_group&gt; ::= GROUP "/" { &lt;unamed_datatype&gt;* &lt;object_id&gt;<FONT SIZE=1.7>opt</FONT> &lt;group_attribute&gt;* &lt;group_member&gt;* }  
 
 &lt;unamed_datatype&gt ::= DATATYPE &lt;unamed_type_name&gt; { &lt;compound_type&gt; }
 
@@ -158,8 +158,9 @@ This section contains a brief explanation of the symbols used in the DDL.
 &lt;group_attribute&gt; ::= &lt;attribute&gt; 
 
 &lt;attribute&gt; ::= ATTRIBUTE &lt;attr_name&gt { &lt;datatype&gt;    
-                                          &lt;dataspace&gt;   
-                                          &lt;data&gt;<FONT SIZE=1.7>opt</FONT>  } 
+                                        &lt;dataspace&gt;
+                                        &lt;object_id&gt;<FONT SIZE=1.7>opt</FONT>
+                                        &lt;data&gt;<FONT SIZE=1.7>opt</FONT>  } 
 // &lt;datatype&gt; and &lt;dataspace&gt; must appear before &lt;data&gt;.
 
 &lt;attr_name&gt; ::= &lt;identifier&gt
@@ -219,13 +220,15 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;reference_data&gt; ::= &lt;object_ref_data&gt; | &lt;data_region_data&gt; | NULL
 
-&lt;object_ref_data&gt; ::= &lt;object_type&gt; &lt;object_id&gt;
+&lt;object_ref_data&gt; ::= &lt;object_type&gt; &lt;object_num&gt;
 
 &lt;object_type&gt; ::= DATASET | GROUP | DATATYPE
 
-&lt;object_id&gt; ::= an integer:an integer 
+&lt;object_id&gt; ::= OBJECTID { &lt;object_num&gt; }
 
-&lt;data_region_data&gt; ::= H5T_STD_REF_DSETREG &lt;object_id&gt; {&lt;data_region_data_info&gt;, 
+&lt;object_num&gt; ::= an integer:an integer | an integer
+
+&lt;data_region_data&gt; ::= H5T_STD_REF_DSETREG &lt;object_num&gt; {&lt;data_region_data_info&gt;, 
                      &lt;data_region_data_info&gt;, ...}
 
 &lt;data_region_data_info&gt; ::= &lt;region_info&gt; | &lt;point_info&gt;
@@ -264,7 +267,7 @@ This section contains a brief explanation of the symbols used in the DDL.
 &lt;named_dataspace&gt; ::= TBD
 
 &lt;group&gt; ::= GROUP &lt;group_name&gt; { &lt;hardlink&gt; } |
-            GROUP &lt;group_name&gt; { &lt;group_attribute&gt;* &lt;group_member&gt;* } 
+            GROUP &lt;object_id&gt;<FONT SIZE=1.7>opt</FONT> &lt;group_name&gt; { &lt;group_attribute&gt;* &lt;group_member&gt;* } 
             
 &lt;group_name&gt; ::= &lt;identifier&gt;
 
@@ -272,11 +275,12 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 &lt;dataset&gt; ::= DATASET &lt;dataset_name&gt; { &lt;hardlink&gt; } |
               DATASET &lt;dataset_name&gt; { &lt;datatype&gt;  
-                                         &lt;dataspace&gt; 
-                                         &lt;storagelayout&gt;<FONT SIZE=1.7>opt</FONT>
-                                         &lt;compression&gt;<FONT SIZE=1.7>opt</FONT>
-                                         &lt;dataset_attribute&gt;*
-                                         &lt;data&gt;<FONT SIZE=1.7>opt</FONT>  } 
+                                       &lt;dataspace&gt; 
+                                       &lt;storagelayout&gt;<FONT SIZE=1.7>opt</FONT>
+                                       &lt;compression&gt;<FONT SIZE=1.7>opt</FONT>
+                                       &lt;dataset_attribute&gt;*
+                                       &lt;object_id&gt;<FONT SIZE=1.7>opt</FONT>
+                                       &lt;data&gt;<FONT SIZE=1.7>opt</FONT>  } 
 // Tokens within {} can be in any order  as long as &lt;data&gt; and &lt;dataset_attribute&gt;
 // are after &lt;datatype&gt; and &lt;dataspace&gt;.
 
