@@ -777,6 +777,8 @@
 ./src/H5Dprivate.h
 ./src/H5Dpublic.h
 ./src/H5Dpkg.h
+./src/H5DZ.c
+./src/H5DZtrans.c
 ./src/H5E.c
 ./src/H5Edefin.h
 ./src/H5Einit.h
