@@ -349,7 +349,7 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
     
     /* Obtain a pointer to gass-specific file access properties */
     if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
     if (H5P_DEFAULT==fapl_id || H5FD_GASS!=H5P_get_driver(plist)) {
         GASS_INFO_NULL (_fa.info);
         /* _fa.info = GASS_INFO_NULL; */
