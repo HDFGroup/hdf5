@@ -26,7 +26,7 @@ void write_dataset(hid_t, hid_t, hid_t);
 int  read_dataset(hid_t, hid_t, hid_t);
 void create_group_recursive(hid_t, hid_t, hid_t, int);
 void recursive_read_group(hid_t, hid_t, hid_t, int);
-void group_dataset_read(hid_t fid, int mpi_rank, int mpi_size, int m);
+void group_dataset_read(hid_t fid, int mpi_rank, int m);
 void write_attribute(hid_t, int, int);
 int  read_attribute(hid_t, int, int);
 int  check_value(DATATYPE *, DATATYPE *);
@@ -295,12 +295,11 @@ void collective_group_write(char *filename, int ngroups)
  */
 void independent_group_read(char *filename, int ngroups)
 {
-    int      mpi_rank, mpi_size, m;
+    int      mpi_rank, m;
     hid_t    plist, fid;
     hbool_t  use_gpfs = FALSE;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
     fid = H5Fopen(filename, H5F_ACC_RDONLY, plist);
@@ -311,17 +310,17 @@ void independent_group_read(char *filename, int ngroups)
      * from the beginning. */
     if(mpi_rank%2==0) {
         for(m=ngroups-1; m==0; m-=2) 
-            group_dataset_read(fid, mpi_rank, mpi_size, m);
+            group_dataset_read(fid, mpi_rank, m);
     } else {
         for(m=0; m<ngroups; m+=2)
-            group_dataset_read(fid, mpi_rank, mpi_size, m);
+            group_dataset_read(fid, mpi_rank, m);
     }
 
     H5Fclose(fid);
 }
 
 /* Open and read datasets and compare data */
-void group_dataset_read(hid_t fid, int mpi_rank, int mpi_size, int m)
+void group_dataset_read(hid_t fid, int mpi_rank, int m)
 {
     int      ret, i, j;
     char     gname[64], dname[32];

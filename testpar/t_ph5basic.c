@@ -221,7 +221,6 @@ test_fapl_mpiposix_dup(void)
     hid_t acc_pl;		/* File access properties */
     hbool_t use_gpfs = FALSE;
     herr_t ret;			/* hdf5 return value */
-    int nkeys, nkeys_tmp;
 
     if (verbose)
 	printf("Verify fapl_mpiposix duplicates communicator object\n");

@@ -77,7 +77,9 @@ static int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_
  *-------------------------------------------------------------------------
  */
 
+#ifdef NOT_YET
 static void list( const char *filename, int nobjects, info_t *info );
+#endif /* NOT_YET */
 static hid_t fixtype( hid_t f_type );
 static int h5diff_can_diff( hid_t type_id );
 static void print_datatype(hid_t type);
@@ -184,8 +186,8 @@ int main(int argc, const char *argv[])
  options_t  options = {0,0,0,0,0,0,0};
  void       *edata;
  hid_t      (*func)(void*);
- const char *file1_name;
- const char *file2_name;
+ const char *file1_name = NULL;
+ const char *file2_name = NULL;
  const char *obj1_name  = NULL;
  const char *obj2_name  = NULL;
  int        nfound=0, ret;
@@ -490,6 +492,7 @@ int check_f_input( const char *str )
  *
  *-------------------------------------------------------------------------
  */
+#ifdef NOT_YET
 static 
 void list( const char *filename, int nobjects, info_t *info )
 {
@@ -519,6 +522,7 @@ void list( const char *filename, int nobjects, info_t *info )
  }
 
 }
+#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------
@@ -2778,6 +2782,7 @@ get_class(H5T_class_t tclass)
  *
  *-------------------------------------------------------------------------
  */
+#if defined (H5DIFF_DEBUG)
 static 
 void print_sizes( const char *obj1, const char *obj2,
                   hid_t f_type1, hid_t f_type2,
@@ -2820,5 +2825,6 @@ void print_sizes( const char *obj1, const char *obj2,
  printf("size on memory %u\n", m_size2 );
  printf("\n");
 }
+#endif /* H5DIFF_DEBUG */
 
 

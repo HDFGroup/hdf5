@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
   int    token;
   int    i;
   int    state = 0;
-  struct Input *in;
+  struct Input *in=NULL;
 
   const char *err1 = "Invalid number of arguments:  %d.\n";
   const char *err2 = "Error in state table.\n";
@@ -1851,7 +1851,7 @@ setDefaultValues(struct Input *in, int count)
 hid_t 
 createOutputDataType(struct Input in)
 {
-  hid_t new_type;
+  hid_t new_type = (-1);
   const char *err1 = "Invalid value for output class.\n";
   
   switch (in.outputClass)
@@ -2093,7 +2093,7 @@ createOutputDataType(struct Input in)
 hid_t 
 createInputDataType(struct Input in)
 {
-  hid_t new_type;
+  hid_t new_type = (-1);
   const char *err1 = "Invalid value for input class.\n";
 
   switch (in.inputClass)
@@ -2172,7 +2172,7 @@ process(struct Options *opt)
 {
   struct  Input *in;
   hid_t   file_id, group_id, handle;  
-  hid_t   dataset, dataspace;   
+  hid_t   dataset, dataspace = (-1);   
   FILE *strm, *extfile;
   hid_t intype, outtype;
   hid_t proplist;  
@@ -2285,7 +2285,7 @@ process(struct Options *opt)
         return (-1);    
       }
       HDfclose(extfile);
-      H5Pset_external (proplist, in->externFilename, 0, numOfElements * in->inputSize / 8);
+      H5Pset_external (proplist, in->externFilename, (off_t)0, numOfElements * in->inputSize / 8);
     }
     
     /* create dataspace */
