@@ -2146,6 +2146,7 @@ H5F_istore_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent,
  *
  *-------------------------------------------------------------------------
  */
+#ifdef HAVE_PARALLEL
 static herr_t
 H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
 		    const hssize_t offset[], void *_udata/*out*/)
@@ -2161,7 +2162,6 @@ H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
     assert(offset);
     assert(udata);
 
-
     for (i=0; i<layout->ndims; i++) {
 	udata->key.offset[i] = offset[i];
     }
@@ -2174,6 +2174,7 @@ H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
 
     FUNC_LEAVE (FAIL);
 }
+#endif /* HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------

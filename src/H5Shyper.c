@@ -2975,7 +2975,7 @@ H5S_hyper_select_contiguous(const H5S_t *space)
 	 */
 	ret_value=TRUE;	/* assume true and reset if the dimensions don't match */
 	for(i=1; i<rank; i++) {
-		if(((node->end[i]-node->start[i])+1)!=space->extent.u.simple.size[i]) {
+		if(((node->end[i]-node->start[i])+1)!=(hssize_t)space->extent.u.simple.size[i]) {
 			ret_value=FALSE;
 			break;
 		} /* end if */

@@ -765,8 +765,8 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 
     /* Decode name templates */
     UNIQUE_MEMBERS(map, mt) {
-	size_t n = strlen((char *)buf)+1;
-	memb_name[_unmapped] = (char *)buf;
+	size_t n = strlen((const char *)buf)+1;
+	memb_name[_unmapped] = (const char *)buf;
 	buf += (n+7) & ~0x0007;
     } END_MEMBERS;
 

@@ -2665,10 +2665,8 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
     /* Check args */
     if (NULL==op)
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid operator");
-#ifdef OLD_WAY
     if (buf==NULL)
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer");
-#endif /* OLD_WAY */
     if (H5I_DATATYPE != H5I_get_type(type_id))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype");
     if (H5I_DATASPACE != H5I_get_type(space_id) ||
@@ -2701,7 +2699,8 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
 herr_t
 H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
 {
-    const H5F_xfer_t	   *xfer_parms = NULL;
+    H5F_xfer_t	   tmp_xfer_parms;      /* Temporary copy of the default xfer parms */
+    H5F_xfer_t	   *xfer_parms = NULL;  /* xfer parms as iterator op_data */
     herr_t ret_value=FAIL;
 
     FUNC_ENTER(H5Dvlen_reclaim, FAIL);
@@ -2716,15 +2715,15 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
 
     /* Retrieve dataset transfer property list */
     if (H5P_DEFAULT == plist_id) {
-        xfer_parms = &H5F_xfer_dflt;
+        HDmemcpy(&tmp_xfer_parms,&H5F_xfer_dflt,sizeof(H5F_xfer_t));
+        xfer_parms = &tmp_xfer_parms;
     } else if (H5P_DATA_XFER != H5P_get_class(plist_id) ||
 	       NULL == (xfer_parms = H5I_object(plist_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     }
 
     /* Call H5Diterate with args, etc. */
-    ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,
-			 (void*/*FIXME*/)xfer_parms);
+    ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,xfer_parms);
 
     FUNC_LEAVE(ret_value);
 }   /* end H5Dvlen_reclaim() */

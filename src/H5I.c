@@ -1158,6 +1158,7 @@ H5I_release_id_node(H5I_id_info_t *id)
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5I_DEBUG
 static herr_t
 H5I_debug(H5I_type_t grp)
 {
@@ -1204,4 +1205,5 @@ H5I_debug(H5I_type_t grp)
 
     FUNC_LEAVE(SUCCEED);
 }
+#endif /* H5I_DEBUG */
 

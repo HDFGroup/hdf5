@@ -239,7 +239,7 @@ H5FD_core_fapl_get(H5FD_t *_file)
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
-H5FD_core_open(const char *name, unsigned flags/*unused*/, hid_t fapl_id,
+H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
 	       haddr_t maxaddr)
 {
     H5FD_core_t		*file=NULL;
@@ -438,7 +438,7 @@ H5FD_core_get_eof(H5FD_t *_file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_read(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
+H5FD_core_read(H5FD_t *_file, hid_t UNUSED dxpl_id, haddr_t addr,
 	       hsize_t size, void *buf/*out*/)
 {
     H5FD_core_t		*file = (H5FD_core_t*)_file;
@@ -488,7 +488,7 @@ H5FD_core_read(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_write(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
+H5FD_core_write(H5FD_t *_file, hid_t UNUSED dxpl_id, haddr_t addr,
 		hsize_t size, const void *buf)
 {
     H5FD_core_t		*file = (H5FD_core_t*)_file;
