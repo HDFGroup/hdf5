@@ -14,7 +14,7 @@
 #undef NDEBUG
 #include <hdf5.h>
 
-#ifdef STDC_HEADERS
+#ifdef H5_STDC_HEADERS
 #   include <assert.h>
 #   include <stdio.h>
 #   include <stdlib.h>

@@ -10,7 +10,7 @@
 #undef NDEBUG
 #include <hdf5.h>
 
-#ifdef STDC_HEADERS
+#ifdef H5_STDC_HEADERS
 #   include <assert.h>
 #   include <fcntl.h>
 #   include <stdio.h>
@@ -18,29 +18,29 @@
 #   include <stdlib.h>
 #endif
 
-#ifdef HAVE_UNISTD_H
+#ifdef H5_HAVE_UNISTD_H
 #   include <sys/types.h>
 #   include <unistd.h>
 #endif
 
-#if defined(TIME_WITH_SYS_TIME)
+#if defined(H5_TIME_WITH_SYS_TIME)
 #   include <sys/time.h>
 #   include <time.h>
-#elif defined(HAVE_SYS_TIME_H)
+#elif defined(H5_HAVE_SYS_TIME_H)
 #   include <sys/time.h>
 #else
 #   include <time.h>
 #endif
 
-#ifdef HAVE_SYS_RESOURCE_H
+#ifdef H5_HAVE_SYS_RESOURCE_H
 #   include <sys/resource.h>
 #endif
 
-#ifdef HAVE_WINSOCK_H
+#ifdef H5_HAVE_WINSOCK_H
 #include <Winsock.h>
 #endif
 
-#ifdef HAVE_SYS_TIMEB 
+#ifdef H5_HAVE_SYS_TIMEB 
 #include <sys/timeb.h>
 #endif
 
