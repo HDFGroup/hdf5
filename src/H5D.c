@@ -1378,7 +1378,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * mem-and-file-dataspace-xfer functions
      * (the latter in case the arguments to sconv_funcs
      * turn out to be inappropriate for MPI-IO).  */
-    if (dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO) {
+    if (H5_mpi_opt_types_g &&
+        H5F_LOW_MPIO==dataset->ent.file->shared->access_parms->driver) {
 	sconv->read = H5S_mpio_spaces_read;
     }
 #endif /*HAVE_PARALLEL*/
@@ -1730,7 +1731,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * mem-and-file-dataspace-xfer functions
      * (the latter in case the arguments to sconv_funcs
      * turn out to be inappropriate for MPI-IO).  */
-    if (dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO) {
+    if (H5_mpi_opt_types_g &&
+        H5F_LOW_MPIO==dataset->ent.file->shared->access_parms->driver) {
 	sconv->write = H5S_mpio_spaces_write;
     }
 #endif /*HAVE_PARALLEL*/

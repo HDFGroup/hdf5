@@ -344,6 +344,12 @@ hbool_t H5S_hyper_select_valid (const H5S_t *space);
 		    const struct H5O_efl_t *efl, size_t elmt_size,
 		    const H5S_t *file_space, const H5S_t *mem_space,
 		    const H5D_transfer_t xfer_mode, const void *buf);
+
+#ifndef _H5S_IN_H5S_C
+    /* Global var whose value comes from environment variable */
+    extern hbool_t		H5_mpi_opt_types_g;
+#endif /* _H5S_IN_H5S_C */
+
 #endif
 
 #endif
