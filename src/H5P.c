@@ -2810,7 +2810,7 @@ H5Pset_buffer(hid_t plist_id, hsize_t size, void *tconv, void *bkg)
     H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pset_buffer, FAIL);
-    H5TRACE4("e","izxx",plist_id,size,tconv,bkg);
+    H5TRACE4("e","ihxx",plist_id,size,tconv,bkg);
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
@@ -2854,7 +2854,7 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
     H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pget_buffer, 0);
-    H5TRACE3("z","ixx",plist_id,tconv,bkg);
+    H5TRACE3("h","ixx",plist_id,tconv,bkg);
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
