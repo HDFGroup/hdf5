@@ -127,7 +127,7 @@ test_insert_basic(hid_t fapl)
     /*
      * Test inserting record into v2 B-tree 
      */
-    TESTING("B-tree insert - several records");
+    TESTING("B-tree insert: several records");
     record=42;
     if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
 	H5_FAILED();
@@ -231,7 +231,7 @@ test_insert_split_root(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree 
      */
-    TESTING("B-tree insert - split root");
+    TESTING("B-tree insert: split root");
 
     for(u=0; u<INSERT_SPLIT_ROOT_NREC; u++) {
         record=u+2;
@@ -332,7 +332,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree 
      */
-    TESTING("B-tree insert - redistribute 2 leaves in level 1 B-tree (l->r)");
+    TESTING("B-tree insert: redistribute 2 leaves in level 1 B-tree (l->r)");
 
     /* Insert enough records to force root to split into 2 leaves */
     for(u=0; u<INSERT_SPLIT_ROOT_NREC; u++) {
@@ -367,7 +367,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree 
      */
-    TESTING("B-tree insert - redistribute 2 leaves in level 1 B-tree (r->l)");
+    TESTING("B-tree insert: redistribute 2 leaves in level 1 B-tree (r->l)");
 
     /* Insert enough records to force root to split into 2 leaves */
     for(u=0; u<INSERT_SPLIT_ROOT_NREC; u++) {
@@ -455,7 +455,7 @@ test_insert_level1_2leaf_split(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree 
      */
-    TESTING("B-tree insert - split 2 leaves to 3 in level 1 B-tree (l->r)");
+    TESTING("B-tree insert: split 2 leaves to 3 in level 1 B-tree (l->r)");
 
     /* Insert enough records to force root to split into 2 leaves */
     for(u=0; u<INSERT_SPLIT_ROOT_NREC; u++) {
@@ -490,7 +490,7 @@ test_insert_level1_2leaf_split(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree 
      */
-    TESTING("B-tree insert - split 2 leaves to 3 in level 1 B-tree (r->l)");
+    TESTING("B-tree insert: split 2 leaves to 3 in level 1 B-tree (r->l)");
 
     /* Insert enough records to force root to split into 2 leaves */
     for(u=0; u<INSERT_SPLIT_ROOT_NREC; u++) {
@@ -580,7 +580,7 @@ test_insert_level1_3leaf_redistrib(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree 
      */
-    TESTING("B-tree insert - redistribute 3 leaves in level 1 B-tree");
+    TESTING("B-tree insert: redistribute 3 leaves in level 1 B-tree");
 
     /* Insert enough records to force root to split into 2 leaves */
     for(u=0; u<INSERT_SPLIT_ROOT_NREC; u++) {
@@ -681,7 +681,7 @@ test_insert_level1_3leaf_split(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree 
      */
-    TESTING("B-tree insert - split 3 leaves to 4 in level 1 B-tree");
+    TESTING("B-tree insert: split 3 leaves to 4 in level 1 B-tree");
 
     /* Insert enough records to force root to split into 2 leaves */
     for(u=0; u<INSERT_SPLIT_ROOT_NREC; u++) {
@@ -767,7 +767,7 @@ test_insert_make_level2(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree 
      */
-    TESTING("B-tree insert - make level 2 B-tree");
+    TESTING("B-tree insert: make level 2 B-tree");
 
     /* Insert enough records to force root to split into 2 leaves */
     for(u=0; u<INSERT_SPLIT_ROOT_NREC*5; u++) {
@@ -893,7 +893,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree 
      */
-    TESTING("B-tree insert - redistrib right-most leaf in level 2 B-tree");
+    TESTING("B-tree insert: redistrib right-most leaf in level 2 B-tree");
 
     /* Insert enough records to force root to split into 2 internal nodes */
     /* Also redistributes right leaf */
@@ -916,7 +916,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
 
     PASSED();
 
-    TESTING("B-tree insert - redistrib left-most leaf in level 2 B-tree");
+    TESTING("B-tree insert: redistrib left-most leaf in level 2 B-tree");
 
     /* Add more records to left-most leaf, to force a 2 node redistribution on left leaf */
     for(u=0; u<INSERT_SPLIT_ROOT_NREC/2; u++) {
@@ -930,7 +930,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
 
     PASSED();
 
-    TESTING("B-tree insert - redistrib middle leaf in level 2 B-tree");
+    TESTING("B-tree insert: redistrib middle leaf in level 2 B-tree");
 
     /* Add more records to middle leaf, to force a 3 node redistribution on middle leaf */
     for(u=0; u<INSERT_SPLIT_ROOT_NREC/2; u++) {
@@ -1019,7 +1019,7 @@ test_insert_level2_leaf_split(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree 
      */
-    TESTING("B-tree insert - split right-most leaf in level 2 B-tree");
+    TESTING("B-tree insert: split right-most leaf in level 2 B-tree");
 
     /* Insert enough records to force root to split into 2 internal nodes */
     /* Also splits right leaf */
@@ -1042,7 +1042,7 @@ test_insert_level2_leaf_split(hid_t fapl)
 
     PASSED();
 
-    TESTING("B-tree insert - split left-most leaf in level 2 B-tree");
+    TESTING("B-tree insert: split left-most leaf in level 2 B-tree");
 
     /* Add more records to left-most leaf, to force a 2->3 node split on left leaf */
     for(u=0; u<INSERT_SPLIT_ROOT_NREC; u++) {
@@ -1056,7 +1056,7 @@ test_insert_level2_leaf_split(hid_t fapl)
 
     PASSED();
 
-    TESTING("B-tree insert - split middle leaf in level 2 B-tree");
+    TESTING("B-tree insert: split middle leaf in level 2 B-tree");
 
     /* Add more records to middle leaf, to force a 3->4 node split on middle leaf */
     for(u=0; u<INSERT_SPLIT_ROOT_NREC; u++) {
@@ -1146,7 +1146,7 @@ test_insert_level2_2internal_redistrib(hid_t fapl)
     /*
      * Test inserting many records into v2 B-tree 
      */
-    TESTING("B-tree insert - redist. 2 internal (r->l) in level 2 B-tree");
+    TESTING("B-tree insert: redist. 2 internal (r->l) in level 2 B-tree");
 
     /* Insert enough records to force root to split into 2 internal nodes */
     /* Also forces right-most internal node to redistribute */
@@ -1161,7 +1161,7 @@ test_insert_level2_2internal_redistrib(hid_t fapl)
 
     PASSED();
 
-    TESTING("B-tree insert - redist. 2 internal (l->r) in level 2 B-tree");
+    TESTING("B-tree insert: redist. 2 internal (l->r) in level 2 B-tree");
 
     /* Force left-most internal node to redistribute */
     for(u=0; u<INSERT_SPLIT_ROOT_NREC*3; u++) {
@@ -1196,6 +1196,111 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* test_insert_level2_2internal_redistrib() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_insert_level2_2internal_split
+ *
+ * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ *              records to make a level 2 B-tree and then adds enough more
+ *              records to force the left-most and right-most internal nodes to
+ *              split.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, February 18, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_insert_level2_2internal_split(hid_t fapl)
+{
+    hid_t	file=-1;
+    char	filename[1024];
+    H5F_t	*f=NULL;
+    hsize_t     record;                 /* Record to insert into tree */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
+    unsigned    u;                      /* Local index variable */
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+	
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /*
+     * Create v2 B-tree 
+     */
+    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /*
+     * Test inserting many records into v2 B-tree 
+     */
+    TESTING("B-tree insert: split 2 internals to 3 in level 2 B-tree (r->l)");
+
+    /* Insert enough records to force root to split into 2 internal nodes */
+    /* Also forces right-most internal node to split */
+    for(u=0; u<(INSERT_SPLIT_ROOT_NREC*21); u++) {
+        record=u+(INSERT_SPLIT_ROOT_NREC*8);
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    }
+
+    PASSED();
+
+    TESTING("B-tree insert: split 2 internals to 3 in level 2 B-tree (l->r)");
+
+    /* Force left-most internal node to split */
+    for(u=0; u<INSERT_SPLIT_ROOT_NREC*8; u++) {
+        record=u;
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    }
+
+    /* Iterate over B-tree to check records have been inserted correctly */
+    idx = 0;
+    if(H5B2_iterate(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, iter_cb, &idx)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /* Make certain that the index is correct */
+    if(idx != (INSERT_SPLIT_ROOT_NREC*29)) TEST_ERROR;
+
+    PASSED();
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_insert_level2_2internal_split() */
 
 
 /*-------------------------------------------------------------------------
@@ -1235,6 +1340,7 @@ main(void)
     nerrors += test_insert_level2_leaf_redistrib(fapl);
     nerrors += test_insert_level2_leaf_split(fapl);
     nerrors += test_insert_level2_2internal_redistrib(fapl);
+    nerrors += test_insert_level2_2internal_split(fapl);
 
     if (nerrors) goto error;
     puts("All v2 B-tree tests passed.");
