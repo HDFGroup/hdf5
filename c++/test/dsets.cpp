@@ -402,11 +402,7 @@ static herr_t
 test_compression(H5File& file)
 {
     const char		*not_supported;
-    not_supported = "    Deflate compression is not supported.\n"
-		    "    The zlib was not found when hdf5 was configured.";
-    
-    TESTING("compression (setup)");
-    
+    not_supported = "    Deflate compression is not enabled.";
     int		points[100][200];
     int		check[100][200];
     hsize_t	i, j, n;
@@ -441,16 +437,16 @@ test_compression(H5File& file)
 	dscreatplist.setChunk (2, chunk_size);
 	dscreatplist.setDeflate (6);
   
+	DataSet* dataset;
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+    TESTING("compression (setup)");
+    
 	/* Create the dataset */
-	DataSet* dataset = new DataSet (file.createDataSet 
+	dataset = new DataSet (file.createDataSet 
 	    (DSET_COMPRESS_NAME, PredType::NATIVE_INT, space1, dscreatplist));
   
-#ifdef H5_HAVE_COMPRESSION
     PASSED();
-#else
-    SKIPPED();
-    cout << not_supported << endl;
-#endif
 
 	/*----------------------------------------------------------------------
 	* STEP 1: Read uninitialized data.  It should be zero.
@@ -471,12 +467,7 @@ test_compression(H5File& file)
 		}
 	    }
 	}
-#ifdef H5_HAVE_COMPRESSION
     PASSED();
-#else
-    SKIPPED();
-    cout << not_supported << endl;
-#endif
 
 	/*----------------------------------------------------------------------
 	* STEP 2: Test compression by setting up a chunked dataset and writing
@@ -496,12 +487,7 @@ test_compression(H5File& file)
 	//if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, points)<0) goto error;
 	dataset->write ((void*) points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
-#ifdef H5_HAVE_COMPRESSION
     PASSED();
-#else
-    SKIPPED();
-    cout << not_supported << endl;
-#endif
 
 	/*----------------------------------------------------------------------
 	* STEP 3: Try to read the data we just wrote.
@@ -520,12 +506,7 @@ test_compression(H5File& file)
 		if (status == -1) goto error;
 	    }
 
-#ifdef H5_HAVE_COMPRESSION
     PASSED();
-#else
-    SKIPPED();
-    cout << not_supported << endl;
-#endif
 
 	/*----------------------------------------------------------------------
 	* STEP 4: Write new data over the top of the old data.  The new data is
@@ -556,12 +537,7 @@ test_compression(H5File& file)
 		if (status == -1) goto error;
 	    }
 
-#ifdef H5_HAVE_COMPRESSION
     PASSED();
-#else
-    SKIPPED();
-    cout << not_supported << endl;
-#endif
 
 	/*----------------------------------------------------------------------
 	* STEP 5: Close the dataset and then open it and read it again.  This
@@ -585,12 +561,7 @@ test_compression(H5File& file)
 		if (status == -1) goto error;
 	    }
 
-#ifdef H5_HAVE_COMPRESSION
     PASSED();
-#else
-    SKIPPED();
-    cout << not_supported << endl;
-#endif
     
 
 	/*----------------------------------------------------------------------
@@ -628,9 +599,13 @@ test_compression(H5File& file)
 	    }
 	}
 	}
-#ifdef H5_HAVE_COMPRESSION
+
+	delete dataset;
+
     PASSED();
+
 #else
+    TESTING("deflate filter");
     SKIPPED();
     cout << not_supported << endl;
 #endif
@@ -646,7 +621,6 @@ test_compression(H5File& file)
 	if (H5Zregister (H5Z_BOGUS, DSET_BOGUS_NAME, bogus)<0) goto error;
 	if (H5Pset_filter (dscreatplist.getId(), H5Z_BOGUS, 0, 0, NULL)<0) goto error;
 	dscreatplist.setFilter (H5Z_BOGUS, 0, 0, NULL);
-	delete dataset;
 
 	DataSpace space2 (2, size, NULL);
 	dataset = new DataSet (file.createDataSet (DSET_BOGUS_NAME, PredType::NATIVE_INT, space2, dscreatplist));
