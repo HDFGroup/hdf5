@@ -74,6 +74,8 @@ static int interface_initialize_g = 0;
 #define INTERFACE_INIT NULL 
 
 /* Local functions */
+static herr_t H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
+    const H5T_t *buf_type, const H5S_t *space, hid_t dxpl_id);
 static herr_t H5D_read(H5D_t *dataset, hid_t mem_type_id,
 			const H5S_t *mem_space, const H5S_t *file_space,
 			hid_t dset_xfer_plist, void *buf/*out*/);
@@ -81,24 +83,24 @@ static herr_t H5D_write(H5D_t *dataset, hid_t mem_type_id,
 			 const H5S_t *mem_space, const H5S_t *file_space,
 			 hid_t dset_xfer_plist, const void *buf);
 static herr_t 
-H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
-            const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
-            const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
+            const H5T_t *mem_type, const H5S_t *mem_space,
+            const H5S_t *file_space, H5T_path_t *tpath,
             hid_t src_id, hid_t dst_id, void *buf/*out*/);
 static herr_t
-H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
-	    const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
-            const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
+            const H5T_t *mem_type, const H5S_t *mem_space,
+	    const H5S_t *file_space, H5T_path_t *tpath,
             hid_t src_id, hid_t dst_id, const void *buf);
 static herr_t
-H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
-            const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
-            const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts, 
+            const H5T_t *mem_type, const H5S_t *mem_space,
+            const H5S_t *file_space, H5T_path_t *tpath,
             hid_t src_id, hid_t dst_id, void *buf/*out*/);
 static herr_t
-H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
-	    const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
-            const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts, 
+            const H5T_t *mem_type, const H5S_t *mem_space,
+	    const H5S_t *file_space, H5T_path_t *tpath,
             hid_t src_id, hid_t dst_id, const void *buf);
 #ifdef H5_HAVE_PARALLEL
 static herr_t 
@@ -106,7 +108,19 @@ H5D_io_assist_mpio(hid_t dxpl_id, H5D_dxpl_cache_t *dxpl_cache,
             hbool_t *xfer_mode_changed);
 static herr_t 
 H5D_io_restore_mpio(hid_t dxpl_id);
-#endif /*H5_HAVE_PARALLEL*/
+static htri_t
+H5D_get_collective_io_consensus(const H5F_t *file,
+            const htri_t local_opinion,
+            const unsigned flags);
+#endif /* H5_HAVE_PARALLEL */
+
+/* I/O info operations */
+static herr_t 
+H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    const H5S_t *mem_space, const H5S_t *file_space,
+    unsigned flags, hbool_t *use_par_opt_io, H5D_io_info_t *io_info);
+
+/* Chunk operations */
 static herr_t H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type,
         const H5S_t *file_space, const H5S_t *mem_space, fm_map *fm);
 static herr_t H5D_destroy_chunk_map(const fm_map *fm);
@@ -117,9 +131,6 @@ static herr_t H5D_chunk_file_cb(void *elem, hid_t type_id, hsize_t ndims,
     hssize_t *coords, void *fm);
 static herr_t H5D_chunk_mem_cb(void *elem, hid_t type_id, hsize_t ndims,
     hssize_t *coords, void *fm);
-static herr_t H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
-    const H5T_t *buf_type, const H5S_t *space, hid_t dxpl_id);
-
 
 /* Declare a free list to manage blocks of single datatype element data */
 H5FL_BLK_DEFINE(type_elem);
@@ -639,7 +650,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hsize_t	nelmts;                 /*total number of elmts	*/
     H5T_path_t	*tpath = NULL;		/*type conversion info	*/
     const H5T_t	*mem_type = NULL;       /* Memory datatype */
-    H5S_conv_t	*sconv=NULL;	        /*space conversion funcs*/
+    H5D_io_info_t io_info;              /* Dataset I/O info     */
     hbool_t     use_par_opt_io=FALSE;   /* Whether the 'optimized' I/O routines with be parallel */
 #ifdef H5_HAVE_PARALLEL
     hbool_t     xfer_mode_changed=FALSE;    /* Whether the transfer mode was changed */
@@ -758,9 +769,9 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
             assert(0 && "Unhandled layout type!");
     } /* end switch */
 
-    /* Get dataspace functions */
-    if (NULL==(sconv=H5S_find(dataset->ent.file, mem_space, file_space, sconv_flags, &use_par_opt_io, &dataset->shared->layout)))
-        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from file to memory data space")
+    /* Set up I/O operation */
+    if(H5D_ioinfo_init(dataset,dxpl_cache,dxpl_id,mem_space,file_space,sconv_flags,&use_par_opt_io,&io_info)<0)
+        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
 
 #ifdef H5_HAVE_PARALLEL
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
@@ -793,13 +804,13 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
     /* Determine correct I/O routine to invoke */
     if(dataset->shared->layout.type!=H5D_CHUNKED) {
-        if(H5D_contig_read(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                dxpl_cache, dxpl_id, dataset->shared->type_id, mem_type_id, buf)<0)
+        if(H5D_contig_read(&io_info, nelmts, mem_type, mem_space, file_space, tpath,
+                dataset->shared->type_id, mem_type_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     } /* end if */
     else {
-        if(H5D_chunk_read(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                dxpl_cache, dxpl_id, dataset->shared->type_id, mem_type_id, buf)<0)
+        if(H5D_chunk_read(&io_info, nelmts, mem_type, mem_space, file_space, tpath,
+                dataset->shared->type_id, mem_type_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     } /* end else */
 
@@ -868,7 +879,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hsize_t	nelmts;                 /*total number of elmts	*/
     H5T_path_t	*tpath = NULL;		/*type conversion info	*/
     const H5T_t	*mem_type = NULL;       /* Memory datatype */
-    H5S_conv_t	*sconv=NULL;		/*space conversion funcs*/
+    H5D_io_info_t io_info;              /* Dataset I/O info     */
     hbool_t     use_par_opt_io=FALSE;   /* Whether the 'optimized' I/O routines with be parallel */
 #ifdef H5_HAVE_PARALLEL
     hbool_t     xfer_mode_changed=FALSE;    /* Whether the transfer mode was changed */
@@ -1007,9 +1018,9 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
             assert(0 && "Unhandled layout type!");
     } /* end switch */
 
-    /* Get dataspace functions */
-    if (NULL==(sconv=H5S_find(dataset->ent.file, mem_space, file_space, sconv_flags, &use_par_opt_io, &dataset->shared->layout)))
-	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from memory to file data space")
+    /* Set up I/O operation */
+    if(H5D_ioinfo_init(dataset,dxpl_cache,dxpl_id,mem_space,file_space,sconv_flags,&use_par_opt_io,&io_info)<0)
+        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
         
 #ifdef H5_HAVE_PARALLEL
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
@@ -1018,20 +1029,20 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
           a more general collective chunk IO algorithm is applied.
     */
 
-     if(dataset->shared->layout.type == H5D_CHUNKED) { /*only check for chunking storage */
+    if(dataset->shared->layout.type == H5D_CHUNKED) { /*only check for chunking storage */
          
-       check_prop = H5Pexist(dxpl_id,H5D_XFER_COLL_CHUNK_NAME);
-       if(check_prop < 0) 
-          HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to check property list");
-       if(check_prop > 0) {
-         if(H5Pget(dxpl_id,H5D_XFER_COLL_CHUNK_NAME,&prop_value)<0) 
-           HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to get property value"); 
-         if(!use_par_opt_io) {
-           new_value = 0;
-           if(H5Pset(dxpl_id,H5D_XFER_COLL_CHUNK_NAME,&new_value)<0)
-             HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to set property value");
-         }
-       }
+        check_prop = H5Pexist(dxpl_id,H5D_XFER_COLL_CHUNK_NAME);
+        if(check_prop < 0) 
+            HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to check property list");
+        if(check_prop > 0) {
+            if(H5Pget(dxpl_id,H5D_XFER_COLL_CHUNK_NAME,&prop_value)<0) 
+                HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to get property value"); 
+            if(!use_par_opt_io) {
+                new_value = 0;
+                if(H5Pset(dxpl_id,H5D_XFER_COLL_CHUNK_NAME,&new_value)<0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to set property value");
+            }
+        }
      }
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
@@ -1042,13 +1053,13 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
     /* Determine correct I/O routine to invoke */
     if(dataset->shared->layout.type!=H5D_CHUNKED) {
-        if(H5D_contig_write(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                dxpl_cache, dxpl_id, mem_type_id, dataset->shared->type_id, buf)<0)
+        if(H5D_contig_write(&io_info, nelmts, mem_type, mem_space, file_space, tpath,
+                mem_type_id, dataset->shared->type_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     } /* end if */
     else {
-        if(H5D_chunk_write(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                dxpl_cache, dxpl_id, mem_type_id, dataset->shared->type_id, buf)<0)
+        if(H5D_chunk_write(&io_info, nelmts, mem_type, mem_space, file_space, tpath,
+                mem_type_id, dataset->shared->type_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     } /* end else */
 
@@ -1095,12 +1106,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
+H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
     const H5T_t *mem_type, const H5S_t *mem_space,
-    const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
-    const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    const H5S_t *file_space, H5T_path_t *tpath,
     hid_t src_id, hid_t dst_id, void *buf/*out*/)
 {
+    H5D_t *dataset=io_info->dset;       /* Local pointer to dataset info */
+    const H5D_dxpl_cache_t *dxpl_cache=io_info->dxpl_cache;     /* Local pointer to dataset transfer info */
     herr_t      status;                 /*function return status*/     
 #ifdef H5S_DEBUG
     H5_timer_t	timer;
@@ -1122,7 +1134,6 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
     hsize_t	smine_start;		/*strip mine start loc	*/
     size_t	n, smine_nelmts;	/*elements per strip	*/
     H5D_storage_t store;                /*union of storage info for dataset */
-    H5D_io_info_t io_info;              /* Dataset I/O info     */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_contig_read)
@@ -1135,8 +1146,8 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
         store.contig.dset_size=dataset->shared->layout.u.contig.size;
     } /* end if */
 
-    /* Construct dataset I/O info */
-    H5D_BUILD_IO_INFO(&io_info,dataset,dxpl_cache,dxpl_id,&store);
+    /* Set dataset storage for I/O info */
+    io_info->store=&store;
 
     /*
      * If there is no type conversion then read directly into the
@@ -1152,14 +1163,14 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
                 || dataset->shared->efl.nused>0 || 0 == nelmts
                 || dataset->shared->layout.type==H5D_COMPACT);
         H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
-        status = (sconv->read)(&io_info, dataset->shared->layout.readvv,
+        status = (io_info->ops.read)(io_info,
             (size_t)nelmts, H5T_get_size(dataset->shared->type), 
             file_space, mem_space,
             buf/*out*/);
 #ifdef H5S_DEBUG
-        H5_timer_end(&(sconv->stats[1].read_timer), &timer);
-        sconv->stats[1].read_nbytes += nelmts * H5T_get_size(dataset->shared->type);
-        sconv->stats[1].read_ncalls++;
+        H5_timer_end(&(io_info->stats->stats[1].read_timer), &timer);
+        io_info->stats->stats[1].read_nbytes += nelmts * H5T_get_size(dataset->shared->type);
+        io_info->stats->stats[1].read_ncalls++;
 #endif
 
         /* Check return value from optimized read */
@@ -1258,14 +1269,14 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
                 || (dataset->shared->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->shared->layout.u.chunk.addr)))
             || dataset->shared->efl.nused>0 || 
              dataset->shared->layout.type==H5D_COMPACT);
-        n = H5S_select_fgath(&io_info, dataset->shared->layout.readvv,
+        n = H5D_select_fgath(io_info,
             file_space, &file_iter, smine_nelmts,
             tconv_buf/*out*/);
 
 #ifdef H5S_DEBUG
-	H5_timer_end(&(sconv->stats[1].gath_timer), &timer);
-	sconv->stats[1].gath_nbytes += n * src_type_size;
-	sconv->stats[1].gath_ncalls++;
+	H5_timer_end(&(io_info->stats->stats[1].gath_timer), &timer);
+	io_info->stats->stats[1].gath_nbytes += n * src_type_size;
+	io_info->stats->stats[1].gath_ncalls++;
 #endif
 	if (n!=smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
@@ -1274,12 +1285,12 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            n = H5S_select_mgath(buf, mem_space, &bkg_iter,
+            n = H5D_select_mgath(buf, mem_space, &bkg_iter,
 				 smine_nelmts, dxpl_cache, bkg_buf/*out*/);
 #ifdef H5S_DEBUG
-            H5_timer_end(&(sconv->stats[1].bkg_timer), &timer);
-            sconv->stats[1].bkg_nbytes += n * dst_type_size;
-            sconv->stats[1].bkg_ncalls++;
+            H5_timer_end(&(io_info->stats->stats[1].bkg_timer), &timer);
+            io_info->stats->stats[1].bkg_nbytes += n * dst_type_size;
+            io_info->stats->stats[1].bkg_ncalls++;
 #endif
             if (n!=smine_nelmts)
                 HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
@@ -1288,7 +1299,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
 	/*
          * Perform data type conversion.
          */
-        if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
+        if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, 0, tconv_buf, bkg_buf, io_info->dxpl_id)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data type conversion failed")
 
         /*
@@ -1297,12 +1308,12 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-        status = H5S_select_mscat(tconv_buf, mem_space,
+        status = H5D_select_mscat(tconv_buf, mem_space,
                           &mem_iter, smine_nelmts, dxpl_cache, buf/*out*/);
 #ifdef H5S_DEBUG
-	H5_timer_end(&(sconv->stats[1].scat_timer), &timer);
-	sconv->stats[1].scat_nbytes += smine_nelmts * dst_type_size;
-	sconv->stats[1].scat_ncalls++;
+	H5_timer_end(&(io_info->stats->stats[1].scat_timer), &timer);
+	io_info->stats->stats[1].scat_nbytes += smine_nelmts * dst_type_size;
+	io_info->stats->stats[1].scat_ncalls++;
 #endif
 	if (status<0)
             HGOTO_ERROR (H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
@@ -1350,12 +1361,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
+H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
     const H5T_t *mem_type, const H5S_t *mem_space,
-    const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
-    const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    const H5S_t *file_space, H5T_path_t *tpath,
     hid_t src_id, hid_t dst_id, const void *buf)
 {
+    H5D_t *dataset=io_info->dset;       /* Local pointer to dataset info */
+    const H5D_dxpl_cache_t *dxpl_cache=io_info->dxpl_cache;     /* Local pointer to dataset transfer info */
     herr_t      status;                 /*function return status*/     
 #ifdef H5S_DEBUG
     H5_timer_t	timer;
@@ -1377,7 +1389,6 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
     hsize_t	smine_start;		/*strip mine start loc	*/
     size_t	n, smine_nelmts;	/*elements per strip	*/
     H5D_storage_t store;                /*union of storage info for dataset */
-    H5D_io_info_t io_info;              /* Dataset I/O info     */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_contig_write)
@@ -1390,8 +1401,8 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
         store.contig.dset_size=dataset->shared->layout.u.contig.size;
     } /* end if */
 
-    /* Construct dataset I/O info */
-    H5D_BUILD_IO_INFO(&io_info,dataset,dxpl_cache,dxpl_id,&store);
+    /* Set dataset storage for I/O info */
+    io_info->store=&store;
 
     /*
      * If there is no type conversion then write directly from the
@@ -1402,14 +1413,14 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
 	H5_timer_begin(&timer);
 #endif
         H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
-        status = (sconv->write)(&io_info, dataset->shared->layout.writevv,
+        status = (io_info->ops.write)(io_info,
             (size_t)nelmts, H5T_get_size(dataset->shared->type),
             file_space, mem_space,
             buf);
 #ifdef H5S_DEBUG
-        H5_timer_end(&(sconv->stats[0].write_timer), &timer);
-        sconv->stats[0].write_nbytes += nelmts * H5T_get_size(mem_type);
-        sconv->stats[0].write_ncalls++;
+        H5_timer_end(&(io_info->stats->stats[0].write_timer), &timer);
+        io_info->stats->stats[0].write_nbytes += nelmts * H5T_get_size(mem_type);
+        io_info->stats->stats[0].write_ncalls++;
 #endif
 
         /* Check return value from optimized write */
@@ -1507,12 +1518,12 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-        n = H5S_select_mgath(buf, mem_space, &mem_iter,
+        n = H5D_select_mgath(buf, mem_space, &mem_iter,
 			     smine_nelmts, dxpl_cache, tconv_buf/*out*/);
 #ifdef H5S_DEBUG
-	H5_timer_end(&(sconv->stats[0].gath_timer), &timer);
-	sconv->stats[0].gath_nbytes += n * src_type_size;
-	sconv->stats[0].gath_ncalls++;
+	H5_timer_end(&(io_info->stats->stats[0].gath_timer), &timer);
+	io_info->stats->stats[0].gath_nbytes += n * src_type_size;
+	io_info->stats->stats[0].gath_ncalls++;
 #endif
         if (n!=smine_nelmts)
             HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed")
@@ -1521,14 +1532,14 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            n = H5S_select_fgath(&io_info, dataset->shared->layout.readvv,
+            n = H5D_select_fgath(io_info,
                 file_space, &bkg_iter, smine_nelmts,
                 bkg_buf/*out*/); 
 
 #ifdef H5S_DEBUG
-            H5_timer_end(&(sconv->stats[0].bkg_timer), &timer);
-            sconv->stats[0].bkg_nbytes += n * dst_type_size;
-            sconv->stats[0].bkg_ncalls++;
+            H5_timer_end(&(io_info->stats->stats[0].bkg_timer), &timer);
+            io_info->stats->stats[0].bkg_nbytes += n * dst_type_size;
+            io_info->stats->stats[0].bkg_ncalls++;
 #endif
             if (n!=smine_nelmts)
                 HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "file gather failed")
@@ -1537,7 +1548,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
 	/*
          * Perform data type conversion.
          */
-        if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, 0, tconv_buf, bkg_buf, dxpl_id)<0)
+        if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, 0, tconv_buf, bkg_buf, io_info->dxpl_id)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data type conversion failed")
 
         /*
@@ -1546,13 +1557,13 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
 #ifdef H5S_DEBUG
         H5_timer_begin(&timer);
 #endif
-	status = H5S_select_fscat(&io_info, dataset->shared->layout.writevv,
+	status = H5D_select_fscat(io_info,
             file_space, &file_iter, smine_nelmts,
             tconv_buf);
 #ifdef H5S_DEBUG
-        H5_timer_end(&(sconv->stats[0].scat_timer), &timer);
-        sconv->stats[0].scat_nbytes += smine_nelmts * dst_type_size;
-        sconv->stats[0].scat_ncalls++;
+        H5_timer_end(&(io_info->stats->stats[0].scat_timer), &timer);
+        io_info->stats->stats[0].scat_nbytes += smine_nelmts * dst_type_size;
+        io_info->stats->stats[0].scat_ncalls++;
 #endif
         if (status<0)
             HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "scatter failed")
@@ -1599,12 +1610,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
+H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
     const H5T_t *mem_type, const H5S_t *mem_space,
-    const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
-    const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    const H5S_t *file_space, H5T_path_t *tpath,
     hid_t src_id, hid_t dst_id, void *buf/*out*/)
 {
+    H5D_t *dataset=io_info->dset;       /* Local pointer to dataset info */
+    const H5D_dxpl_cache_t *dxpl_cache=io_info->dxpl_cache;     /* Local pointer to dataset transfer info */
     fm_map      fm;                     /* File<->memory mapping */
     H5TB_NODE   *chunk_node;           /* Current node in chunk TBBT */
     herr_t      status;                 /*function return status*/     
@@ -1628,7 +1640,6 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
     uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
-    H5D_io_info_t io_info;              /* Dataset I/O info     */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_read)
@@ -1637,8 +1648,8 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
     if(H5D_create_chunk_map(dataset, mem_type, file_space, mem_space, &fm)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build chunk mapping")
 
-    /* Construct dataset I/O info */
-    H5D_BUILD_IO_INFO(&io_info,dataset,dxpl_cache,dxpl_id,&store);
+    /* Set dataset storage for I/O info */
+    io_info->store=&store;
 
     /*
      * If there is no type conversion then read directly into the
@@ -1669,7 +1680,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
             store.chunk.index = chunk_info->index;
 
             /* Perform the actual read operation */
-            status = (sconv->read)(&io_info,dataset->shared->layout.readvv,
+            status = (io_info->ops.read)(io_info,
                 chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
                 chunk_info->fspace, chunk_info->mspace,
                 buf);
@@ -1683,9 +1694,9 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
         } /* end while */
         
 #ifdef H5S_DEBUG
-        H5_timer_end(&(sconv->stats[1].read_timer), &timer);
-        sconv->stats[1].read_nbytes += nelmts * H5T_get_size(dataset->shared->type);
-        sconv->stats[1].read_ncalls++;
+        H5_timer_end(&(io_info->stats->stats[1].read_timer), &timer);
+        io_info->stats->stats[1].read_nbytes += nelmts * H5T_get_size(dataset->shared->type);
+        io_info->stats->stats[1].read_ncalls++;
 #endif
 
 	/* direct xfer accomplished successfully */
@@ -1794,14 +1805,14 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
             assert(((dataset->shared->layout.type==H5D_CONTIGUOUS && H5F_addr_defined(dataset->shared->layout.u.contig.addr))
                     || (dataset->shared->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->shared->layout.u.chunk.addr)))
                 || dataset->shared->efl.nused>0 || dataset->shared->layout.type==H5D_COMPACT);
-            n = H5S_select_fgath(&io_info, dataset->shared->layout.readvv,
+            n = H5D_select_fgath(io_info, 
                 chunk_info->fspace, &file_iter, smine_nelmts,
                 tconv_buf/*out*/);
 
 #ifdef H5S_DEBUG
-            H5_timer_end(&(sconv->stats[1].gath_timer), &timer);
-            sconv->stats[1].gath_nbytes += n * src_type_size;
-            sconv->stats[1].gath_ncalls++;
+            H5_timer_end(&(io_info->stats->stats[1].gath_timer), &timer);
+            io_info->stats->stats[1].gath_nbytes += n * src_type_size;
+            io_info->stats->stats[1].gath_ncalls++;
 #endif
             if (n!=smine_nelmts)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
@@ -1810,12 +1821,12 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
 #ifdef H5S_DEBUG
                 H5_timer_begin(&timer);
 #endif
-                n = H5S_select_mgath(buf, chunk_info->mspace, &bkg_iter,
+                n = H5D_select_mgath(buf, chunk_info->mspace, &bkg_iter,
                                  smine_nelmts, dxpl_cache, bkg_buf/*out*/);
 #ifdef H5S_DEBUG
-                H5_timer_end(&(sconv->stats[1].bkg_timer), &timer);
-                sconv->stats[1].bkg_nbytes += n * dst_type_size;
-                sconv->stats[1].bkg_ncalls++;
+                H5_timer_end(&(io_info->stats->stats[1].bkg_timer), &timer);
+                io_info->stats->stats[1].bkg_nbytes += n * dst_type_size;
+                io_info->stats->stats[1].bkg_ncalls++;
 #endif
                 if (n!=smine_nelmts)
                     HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
@@ -1825,7 +1836,7 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
              * Perform data type conversion.
              */
             if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, 0, 
-                    tconv_buf, bkg_buf, dxpl_id)<0)
+                    tconv_buf, bkg_buf, io_info->dxpl_id)<0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data type conversion failed")
 
             /*
@@ -1834,12 +1845,12 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            status = H5S_select_mscat(tconv_buf, chunk_info->mspace,
+            status = H5D_select_mscat(tconv_buf, chunk_info->mspace,
                         &mem_iter, smine_nelmts, dxpl_cache, buf/*out*/);
 #ifdef H5S_DEBUG
-            H5_timer_end(&(sconv->stats[1].scat_timer), &timer);
-            sconv->stats[1].scat_nbytes += smine_nelmts * dst_type_size;
-            sconv->stats[1].scat_ncalls++;
+            H5_timer_end(&(io_info->stats->stats[1].scat_timer), &timer);
+            io_info->stats->stats[1].scat_nbytes += smine_nelmts * dst_type_size;
+            io_info->stats->stats[1].scat_ncalls++;
 #endif
             if (status<0)
                 HGOTO_ERROR (H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
@@ -1911,12 +1922,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
+H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
     const H5T_t *mem_type, const H5S_t *mem_space,
-    const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
-    const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    const H5S_t *file_space, H5T_path_t *tpath,
     hid_t src_id, hid_t dst_id, const void *buf)
 {
+    H5D_t *dataset=io_info->dset;       /* Local pointer to dataset info */
+    const H5D_dxpl_cache_t *dxpl_cache=io_info->dxpl_cache;     /* Local pointer to dataset transfer info */
     fm_map      fm;                     /* File<->memory mapping */
     H5TB_NODE   *chunk_node;           /* Current node in chunk TBBT */
     herr_t      status;                 /*function return status*/     
@@ -1940,7 +1952,6 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
     uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
-    H5D_io_info_t io_info;              /* Dataset I/O info     */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_write)
@@ -1949,8 +1960,8 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
     if(H5D_create_chunk_map(dataset, mem_type, file_space, mem_space, &fm)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build chunk mapping")
    
-    /* Construct dataset I/O info */
-    H5D_BUILD_IO_INFO(&io_info,dataset,dxpl_cache,dxpl_id,&store);
+    /* Set dataset storage for I/O info */
+    io_info->store=&store;
 
     /*
      * If there is no type conversion then write directly from the
@@ -1975,7 +1986,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
             store.chunk.index = chunk_info->index;
 
             /* Perform the actual write operation */
-            status = (sconv->write)(&io_info, dataset->shared->layout.writevv,
+            status = (io_info->ops.write)(io_info, 
                 chunk_info->chunk_points, H5T_get_size(dataset->shared->type),
                 chunk_info->fspace, chunk_info->mspace,
                 buf);
@@ -1989,9 +2000,9 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
         } /* end while */
         
 #ifdef H5S_DEBUG
-	H5_timer_end(&(sconv->stats[0].write_timer), &timer);
-	sconv->stats[0].write_nbytes += nelmts * H5T_get_size(mem_type);
-	sconv->stats[0].write_ncalls++;
+	H5_timer_end(&(io_info->stats->stats[0].write_timer), &timer);
+	io_info->stats->stats[0].write_nbytes += nelmts * H5T_get_size(mem_type);
+	io_info->stats->stats[0].write_ncalls++;
 #endif
 
 	/* direct xfer accomplished successfully */
@@ -2100,13 +2111,13 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            n = H5S_select_mgath(buf, chunk_info->mspace, &mem_iter,
+            n = H5D_select_mgath(buf, chunk_info->mspace, &mem_iter,
                                  smine_nelmts, dxpl_cache, tconv_buf/*out*/);
     
 #ifdef H5S_DEBUG
-            H5_timer_end(&(sconv->stats[1].gath_timer), &timer);
-            sconv->stats[1].gath_nbytes += n * src_type_size;
-            sconv->stats[1].gath_ncalls++;
+            H5_timer_end(&(io_info->stats->stats[1].gath_timer), &timer);
+            io_info->stats->stats[1].gath_nbytes += n * src_type_size;
+            io_info->stats->stats[1].gath_ncalls++;
 #endif
             if (n!=smine_nelmts)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
@@ -2115,14 +2126,14 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
 #ifdef H5S_DEBUG
                 H5_timer_begin(&timer);
 #endif
-                n = H5S_select_fgath(&io_info, dataset->shared->layout.readvv,
+                n = H5D_select_fgath(io_info,
                     chunk_info->fspace, &bkg_iter, smine_nelmts,
                     bkg_buf/*out*/); 
 
 #ifdef H5S_DEBUG
-                H5_timer_end(&(sconv->stats[0].bkg_timer), &timer);
-                sconv->stats[0].bkg_nbytes += n * dst_type_size;
-                sconv->stats[0].bkg_ncalls++;
+                H5_timer_end(&(io_info->stats->stats[0].bkg_timer), &timer);
+                io_info->stats->stats[0].bkg_nbytes += n * dst_type_size;
+                io_info->stats->stats[0].bkg_ncalls++;
 #endif
                 if (n!=smine_nelmts)
                     HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "file gather failed")
@@ -2132,7 +2143,7 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
              * Perform data type conversion.
              */
             if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, 0, 
-                    tconv_buf, bkg_buf, dxpl_id)<0)
+                    tconv_buf, bkg_buf, io_info->dxpl_id)<0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data type conversion failed")
 
             /*
@@ -2141,14 +2152,14 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            status = H5S_select_fscat(&io_info, dataset->shared->layout.writevv,
+            status = H5D_select_fscat(io_info,
                 chunk_info->fspace, &file_iter, smine_nelmts,
                 tconv_buf);
 
 #ifdef H5S_DEBUG
-            H5_timer_end(&(sconv->stats[0].scat_timer), &timer);
-            sconv->stats[0].scat_nbytes += n * dst_type_size;
-            sconv->stats[0].scat_ncalls++;
+            H5_timer_end(&(io_info->stats->stats[0].scat_timer), &timer);
+            io_info->stats->stats[0].scat_nbytes += n * dst_type_size;
+            io_info->stats->stats[0].scat_ncalls++;
 #endif
             if (status<0)
                 HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "scatter failed")
@@ -3108,3 +3119,189 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize_
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_chunk_mem_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5S_get_collective_io_consensus
+ *
+ * Purpose:     Compare notes with all other processes involved in this I/O
+ *              and see if all are go for collective I/O.
+ *
+ *              If all are, return TRUE.
+ *
+ *              If any process can't manage collective I/O, then collective
+ *              I/O is impossible, and we return FALSE.
+ *
+ *              If the flags indicate that collective I/O is impossible,
+ *              skip the interprocess communication and just return FALSE.
+ *
+ *              In any error is detected, return FAIL.
+ *
+ * Return:      Success:        TRUE or FALSE
+ *
+ *              Failure:        FAIL
+ *
+ * Programmer:  JRM -- 8/30/04
+ *
+ * Modifications:
+ *
+ *      None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#ifdef H5_HAVE_PARALLEL
+static htri_t
+H5D_get_collective_io_consensus(const H5F_t *file,
+                                const htri_t local_opinion,
+                                const unsigned flags)
+{
+    htri_t      ret_value = FAIL;       /* will update if successful */
+    MPI_Comm    comm;
+    int         int_local_opinion;
+    int         consensus;
+    int         mpi_result;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_get_collective_io_consensus);
+
+    HDassert ( ( local_opinion == TRUE ) || ( local_opinion == FALSE ) );
+
+    /* Don't do the interprocess communication unless the Parallel I/O
+     * conversion flag is set -- there may not be other processes to
+     * talk to.
+     */
+    if ( ! ( flags & flags&H5S_CONV_PAR_IO_POSSIBLE ) ) {
+
+        HGOTO_DONE(FALSE);
+    }
+
+    comm = H5F_mpi_get_comm(file);
+
+    if ( comm == MPI_COMM_NULL )
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, \
+                    "can't retrieve MPI communicator")
+
+    if ( local_opinion == TRUE ) {
+
+        int_local_opinion = 1;
+
+    } else {
+
+        int_local_opinion = 0;
+    }
+
+    mpi_result = MPI_Allreduce((void *)(&int_local_opinion),
+                               (void *)(&consensus),
+                               1,
+                               MPI_INT,
+                               MPI_LAND,
+                               comm);
+
+    if ( mpi_result != MPI_SUCCESS )
+        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_result)
+
+    if ( consensus ) {
+
+        ret_value = TRUE;
+
+    } else {
+
+        ret_value = FALSE;
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value);
+
+} /* H5D_get_collective_io_consensus() */
+
+#endif /* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_chunk_mem_cb
+ *
+ * Purpose:	Routine for determining correct I/O operations for
+ *              each I/O action.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, September 30, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    const H5S_t *mem_space, const H5S_t *file_space,
+    unsigned flags, hbool_t *use_par_opt_io, H5D_io_info_t *io_info)
+{
+#ifdef H5_HAVE_PARALLEL
+    htri_t opt;         /* Flag whether a selection is optimizable */
+#endif /* H5_HAVE_PARALLEL */
+    herr_t	ret_value = SUCCEED;	/* Return value	*/
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_ioinfo_init)
+
+    /* check args */
+    HDassert(dset);
+    HDassert(dset->ent.file);
+    HDassert(mem_space);
+    HDassert(file_space);
+    HDassert(use_par_opt_io);
+    HDassert(io_info);
+
+    /* Set up "normal" I/O fields */
+    io_info->dset=dset;
+    io_info->dxpl_cache=dxpl_cache;
+    io_info->dxpl_id=dxpl_id;
+    io_info->store=NULL;        /* Set later in I/O routine? */
+
+    /* Set I/O operations to initial values */
+    io_info->ops=dset->shared->io_ops;
+
+#ifdef H5_HAVE_PARALLEL
+    /*
+     * Check if we can set direct MPI-IO read/write functions
+     */
+    opt=H5D_mpio_opt_possible(dset->ent.file,mem_space,file_space,flags,&dset->shared->layout);
+    if(opt==FAIL)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for direct IO dataspace ");
+
+    opt = H5D_get_collective_io_consensus(dset->ent.file, opt, flags);
+
+    if ( opt == FAIL )
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, \
+                    "check for collective I/O consensus failed.");
+
+    /* Check if we can use the optimized parallel I/O routines */
+    if(opt==TRUE) {
+        /* Set the pointers to the MPI-specific routines */
+        io_info->ops.read = H5D_mpio_spaces_read;
+        io_info->ops.write = H5D_mpio_spaces_write;
+
+        /* Indicate that the I/O will be parallel */
+        *use_par_opt_io=TRUE;
+    } /* end if */
+    else {
+        /* Indicate that the I/O will _NOT_ be parallel */
+        *use_par_opt_io=FALSE;
+
+#endif /* H5_HAVE_PARALLEL */
+        io_info->ops.read = H5D_select_read;
+        io_info->ops.write = H5D_select_write;
+#ifdef H5_HAVE_PARALLEL
+    } /* end else */
+#endif /* H5_HAVE_PARALLEL */
+
+#ifdef H5S_DEBUG
+    /* Get the information for the I/O statistics */
+    if((io_info->stats=H5S_find(mem_space,file_space))==NULL)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "can't set up selection statistics");
+#endif /* H5S_DEBUG */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_ioinfo_init() */

@@ -35,6 +35,10 @@ H5FL_SEQ_DEFINE_STATIC(size_t);
 /* Declare a free list to manage sequences of hsize_t */
 H5FL_SEQ_DEFINE_STATIC(hsize_t);
 
+/* Interface initialization */
+#define INTERFACE_INIT  NULL
+static int             interface_initialize_g = 0;
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_select_fscat

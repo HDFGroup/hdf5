@@ -1084,12 +1084,14 @@
 ./src/H5D.c
 ./src/H5Dcontig.c
 ./src/H5Dcompact.c
+./src/H5Defl.c
 ./src/H5Dio.c
 ./src/H5Distore.c
 ./src/H5Dmpio.c
 ./src/H5Dprivate.h
 ./src/H5Dpublic.h
 ./src/H5Dpkg.h
+./src/H5Dselect.c
 ./src/H5Dtest.c
 ./src/H5E.c
 ./src/H5Eprivate.h

@@ -36,9 +36,6 @@
 #define H5S_VALID_MAX	0x01
 #define H5S_VALID_PERM	0x02
 
-/* Flags for "get_seq_list" methods */
-#define H5S_GET_SEQ_LIST_SORTED         0x0001
-
 /* 
  * Dataspace extent information
  */
@@ -222,14 +219,6 @@ H5_DLL herr_t H5S_extent_release(H5S_extent_t *extent);
 H5_DLL herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src);
 
 /* Operations on selections */
-
-#ifdef H5_HAVE_PARALLEL
-/* MPI-IO function to check if a direct I/O transfer is possible between
- * memory and the file */
-H5_DLL htri_t H5S_mpio_opt_possible(const H5F_t *file, const H5S_t *mem_space,
-    const H5S_t *file_space, const unsigned flags, const H5O_layout_t *layout);
-
-#endif /* H5_HAVE_PARALLEL */
 
 /* Testing functions */
 #ifdef H5S_TESTING

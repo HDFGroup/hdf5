@@ -34,6 +34,10 @@ static herr_t H5D_efl_read (const H5O_efl_t *efl, haddr_t addr, size_t size,
 static herr_t H5D_efl_write(const H5O_efl_t *efl, haddr_t addr, size_t size,
     const uint8_t *buf);
 
+/* Interface initialization */
+static int interface_initialize_g = 0;
+#define INTERFACE_INIT	NULL
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_efl_read

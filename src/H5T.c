@@ -1418,13 +1418,13 @@ H5Topen(hid_t loc_id, const char *name)
     if ((type=H5T_open (&ent, dxpl_id)) ==NULL)
         HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named data type");
 
-    /* Register an atom for the datatype */
-    if ((ret_value = H5I_register(H5I_DATATYPE, type)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register type");
+    /* Register the type and return the ID */
+    if ((ret_value=H5I_register (H5I_DATATYPE, type))<0)
+        HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register named data type");
 
 done:
-    if(ret_value <0)
-        if(type !=NULL)
+    if(ret_value<0)
+        if(type!=NULL)
             H5T_close(type);
 
     FUNC_LEAVE_API(ret_value);
@@ -2363,7 +2363,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
             H5FL_FREE(H5T_path_t,path);
             H5E_clear(); /*ignore all shutdown errors*/
         } /* end else */
-    }
+    } /* end for */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2686,7 +2686,7 @@ H5T_create(H5T_class_t type, size_t size)
     }
 
     dt->ent.header = HADDR_UNDEF;
-    dt->shared->fo_count =1;
+    dt->shared->fo_count = 1;
     dt->shared->size = size;
 
     /* Set return value */
@@ -2846,16 +2846,18 @@ H5T_open_oid (H5G_entry_t *ent, hid_t dxpl_id)
 
     if(NULL==(dt=H5FL_CALLOC(H5T_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    if(NULL==(dt->shared=H5FL_MALLOC(H5T_t)))
+    if(NULL==(dt->shared=H5FL_MALLOC(H5T_shared_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     if (H5O_open (ent)<0)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open named data type");
+    /* The fourth argument to H5O_read is dt because we've already CALLOC'ed memory for it */
     if (NULL==(dt=H5O_read (ent, H5O_DTYPE_ID, 0, dt, dxpl_id)))
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to load type message from object header");
 
     /* Mark the type as named and open */
     dt->shared->state = H5T_STATE_OPEN;
+
     /* Shallow copy (take ownership) of the group entry object */
     H5G_ent_copy(&(dt->ent),ent,H5G_COPY_SHALLOW);
 
@@ -2923,7 +2925,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     assert(old_dt);
 
     /* Allocate space */
-    if (NULL==(new_dt = H5FL_CALLOC(H5T_t)))
+    if (NULL==(new_dt = H5FL_MALLOC(H5T_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     if (NULL==(new_dt->shared = H5FL_MALLOC(H5T_shared_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -2934,7 +2936,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     new_dt->shared->fo_count = 1;
 
     /* Copy parent information */
-    if (new_dt->shared && new_dt->shared->parent)
+    if (new_dt->shared->parent)
         new_dt->shared->parent = H5T_copy(new_dt->shared->parent, method);
 
     /* Check what sort of copy we are making */
@@ -2966,6 +2968,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
              * type.  Immutable transient types are degraded to read-only.
              */
             if (H5F_addr_defined(new_dt->ent.header)) {
+                /* Check if the object is already open */
                 if((reopened_fo=H5FO_opened(new_dt->ent.file,new_dt->ent.header))==NULL) {
                     /* Clear any errors from H5FO_opened() */
                     H5E_clear();
@@ -3038,8 +3041,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                 /* If the field changed size, add that change to the accumulated size change */
                 if(new_dt->shared->u.compnd.memb[i].type->shared->size != old_dt->shared->u.compnd.memb[old_match].type->shared->size) {
                     /* Adjust the size of the member */
-                    new_dt->shared->u.compnd.memb[i].size = (old_dt->shared->u.compnd.memb[old_match].size*tmp->shared->size)/
-                        old_dt->shared->u.compnd.memb[old_match].type->shared->size;
+                    new_dt->shared->u.compnd.memb[i].size = (old_dt->shared->u.compnd.memb[old_match].size*tmp->shared->size)/old_dt->shared->u.compnd.memb[old_match].type->shared->size;
 
                     accum_change += (new_dt->shared->u.compnd.memb[i].type->shared->size - old_dt->shared->u.compnd.memb[old_match].type->shared->size);
                 } /* end if */
@@ -3187,11 +3189,12 @@ H5T_free(H5T_t *dt)
     assert(dt && dt->shared);
 
     /*
-     * If a named type is being closed then close the object header also.
+     * If a named type is being closed then close the object header and
+     * remove from the list of open objects in the file.
      */
     if (H5T_STATE_OPEN==dt->shared->state) {
         assert (H5F_addr_defined(dt->ent.header));
-        /* Remove the dataset from the list of opened objects in the file */
+        /* Remove the datatype from the list of opened objects in the file */
         if(H5FO_delete(dt->ent.file, H5AC_dxpl_id, dt->ent.header)<0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't remove datatype from list of open objects")
         if (H5O_close(&(dt->ent))<0)
@@ -4604,8 +4607,15 @@ H5T_print_stats(H5T_path_t UNUSED * path, int UNUSED * nprint/*in,out*/)
 		       "----------", "-----", "-----", "----",
 		       "------", "-------", "---------");
 	}
-	nbytes = MAX (H5T_get_size (path->src),
-		      H5T_get_size (path->dst));
+        if(path->src && path->dst)
+            nbytes = MAX (H5T_get_size (path->src),
+                          H5T_get_size (path->dst));
+        else if(path->src)
+            nbytes = H5T_get_size (path->src);
+        else if(path->dst)
+            nbytes = H5T_get_size (path->dst);
+        else
+            nbytes = 0;
 	nbytes *= path->stats.nelmts;
 	H5_bandwidth(bandwidth, (double)nbytes,
 		     path->stats.timer.etime);
