@@ -1037,6 +1037,35 @@ display_opaque_type(hid_t type, int ind)
     return TRUE;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    display_vlen_type
+ *
+ * Purpose:     Print information about a variable-length type
+ *
+ * Return:      Success:        TRUE
+ *
+ *              Failure:        FALSE
+ *
+ * Programmer:  Robb Matzke
+ *              Friday, December  1, 2000
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+display_vlen_type(hid_t type, int ind)
+{
+    hid_t       super;
+    
+    if (H5T_VLEN!=H5Tget_class(type)) return FALSE;
+
+    printf("variable length of\n%*s", ind+4, "");
+    super = H5Tget_super(type);
+    display_type(super, ind+4);
+    H5Tclose(super);
+    return TRUE;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	display_type
@@ -1090,6 +1119,7 @@ display_type(hid_t type, int ind)
 	display_enum_type(type, ind) ||
 	display_string_type(type, ind) ||
 	display_reference_type(type, ind) ||
+        display_vlen_type(type, ind) ||
 	display_opaque_type(type, ind)) {
 	return;
     }
