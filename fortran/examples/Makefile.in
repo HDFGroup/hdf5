@@ -277,7 +277,7 @@ H5FC = $(bindir)/h5fc
 H5FC_PP = $(bindir)/h5pfc
 
 # Compile parallel fortran examples only if parallel is enabled
-@BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = 
+@BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = ph5example
 
 # These are the programs that 'make all' or 'make tests' will build and
 # that 'make check' will run.  List them in the order in which they should
@@ -297,7 +297,7 @@ EXAMPLE_PROG = $(EXTRA_PROG)
 INSTALL_FILES = dsetexample.f90 fileexample.f90 rwdsetexample.f90             \
        attrexample.f90 groupexample.f90 grpsexample.f90 grpdsetexample.f90  \
        hyperslab.f90 selectele.f90 grpit.f90 refobjexample.f90              \
-       refregexample.f90 mountexample.f90 compound.f90
+       refregexample.f90 mountexample.f90 compound.f90 ph5example.f90
 
 
 # Tell automake which files to clean

@@ -22,7 +22,7 @@ include $(top_srcdir)/config/commence.am
 
 # Compile parallel fortran examples only if parallel is enabled
 if BUILD_PARALLEL_CONDITIONAL
-   TEST_PROG_PARA=
+   TEST_PROG_PARA=ph5example
 endif
 
 # These are the programs that 'make all' or 'make tests' will build and
@@ -42,7 +42,7 @@ EXAMPLE_PROG=$(EXTRA_PROG)
 INSTALL_FILES=dsetexample.f90 fileexample.f90 rwdsetexample.f90             \
        attrexample.f90 groupexample.f90 grpsexample.f90 grpdsetexample.f90  \
        hyperslab.f90 selectele.f90 grpit.f90 refobjexample.f90              \
-       refregexample.f90 mountexample.f90 compound.f90
+       refregexample.f90 mountexample.f90 compound.f90 ph5example.f90
 
 # Tell automake which files to clean
 CLEANFILES=*.h5 $(EXTRA_PROG)
