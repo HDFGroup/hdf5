@@ -27,6 +27,9 @@
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
 
+/* Define if we want flexible parallel HDF5 support */
+#undef HAVE_FPHDF5
+
 /* Define to 1 if you have the `fseek64' function. */
 #undef HAVE_FSEEK64
 
