@@ -179,6 +179,8 @@ maintainer-clean: distclean
 # These files are part of the distribution and are generated automatically on
 # GNU/GCC systems.
 #------------------------------------------------------------------------------
+.PHONY: dep depend
+dep depend: .distdep
 
 @DEPEND1@
 @DEPEND2@
