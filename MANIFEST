@@ -448,8 +448,10 @@
 ./src/H5Farray.c
 ./src/H5Fcontig.c
 ./src/H5Fistore.c
+./src/H5Fpkg.h
 ./src/H5Fprivate.h
 ./src/H5Fpublic.h
+./src/H5Fseq.c
 ./src/H5FD.c
 ./src/H5FDcore.c
 ./src/H5FDcore.h
@@ -529,6 +531,7 @@
 ./src/H5Smpio.c
 ./src/H5Snone.c
 ./src/H5Spoint.c
+./src/H5Spkg.h
 ./src/H5Sprivate.h
 ./src/H5Spublic.h
 ./src/H5Sselect.c
@@ -649,6 +652,7 @@
 ./tools/h4toh5vdata.c
 ./tools/h4toh5anno.c
 ./tools/pdb2hdf.c
+./tools/talign.c
 ./tools/testh5dump.sh
 ./tools/testh5toh4
 ./tools/testh4toh5
