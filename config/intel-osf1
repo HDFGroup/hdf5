@@ -54,6 +54,9 @@ enable_shared="${enable_shared:-no}"
 # `ll' or if the format would be `%qd' set it to `q'.
 hdf5_cv_printf_ll=${hdf5_cv_printf_ll='ll'}
 
+# Hard set sizeof of the following types to 0 because they are not supported.
+ac_cv_sizeof___int64=${ac_cv_sizeof___int64='0'}
+
 # Hard set sizeof_intN_t to 0 because they are not supported.
 ac_cv_sizeof_int8_t=${ac_cv_sizeof_int8_t='0'}
 ac_cv_sizeof_int16_t=${ac_cv_sizeof_int16_t='0'}
