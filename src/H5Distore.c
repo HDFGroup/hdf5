@@ -106,7 +106,7 @@ typedef H5F_rdcc_ent_t *H5F_rdcc_ent_ptr_t; /* For free lists */
 static size_t H5F_istore_sizeof_rkey(H5F_t *f, const void *_udata);
 static herr_t H5F_istore_new_node(H5F_t *f, H5B_ins_t, void *_lt_key,
 				  void *_udata, void *_rt_key,
-				  haddr_t*/*out*/);
+				  haddr_t*addr_p/*out*/);
 static int H5F_istore_cmp2(H5F_t *f, void *_lt_key, void *_udata,
 			    void *_rt_key);
 static int H5F_istore_cmp3(H5F_t *f, void *_lt_key, void *_udata,

@@ -7385,7 +7385,7 @@ H5T_array_create(H5T_t *base, int ndims, const hsize_t dim[/* ndims */],
     /* Copy the array dimensions & compute the # of elements in the array */
     for(i=0, ret_value->u.array.nelem=1; i<ndims; i++) {
         H5_ASSIGN_OVERFLOW(ret_value->u.array.dim[i],dim[i],hsize_t,size_t);
-        ret_value->u.array.nelem *= dim[i];
+        ret_value->u.array.nelem *=(size_t)dim[i];
     } /* end for */
 
     /* Copy the dimension permutations */

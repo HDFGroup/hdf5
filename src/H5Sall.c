@@ -290,7 +290,7 @@ H5S_all_mgath (const void *_buf, size_t elmt_size,
 	       hsize_t nelmts, void *tconv_buf/*out*/)
 {
     const uint8_t *buf=(const uint8_t*)_buf;   /* Get local copies for address arithmetic */
-    size_t      actual_bytes;       /* The actual number of bytes to read */
+    hsize_t      actual_bytes;       /* The actual number of bytes to read */
 
     FUNC_ENTER (H5S_all_mgath, 0);
 

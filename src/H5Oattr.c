@@ -155,7 +155,7 @@ H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     p += H5O_ALIGN(attr->ds_size);
 
     /* Compute the size of the data */
-    attr->data_size=H5S_get_simple_extent_npoints(attr->ds)*H5T_get_size(attr->dt);
+    H5_ASSIGN_OVERFLOW(attr->data_size,H5S_get_simple_extent_npoints(attr->ds)*H5T_get_size(attr->dt),hsize_t,size_t);    
 
     /* Go get the data */
     if (NULL==(attr->data = H5MM_malloc(attr->data_size))) {

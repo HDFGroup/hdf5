@@ -2356,10 +2356,9 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
                     } /* end if */
 
                     /* Calculate the proper offset of the existing metadata */
-                    old_offset=(addr+size)-file->accum_loc;
+                    H5_ASSIGN_OVERFLOW(old_offset,(addr+size)-file->accum_loc,hsize_t,size_t);/*check for overflow*/
 
                     /* Move the existing metadata to the proper location */
-                    H5_ASSIGN_OVERFLOW(old_offset,(addr+size)-file->accum_loc,hsize_t,size_t);/*check for overflow*/
                     HDmemmove(file->meta_accum+size,file->meta_accum+old_offset,(size_t)(file->accum_size-old_offset));
 
                     /* Copy the new metadata at the front */

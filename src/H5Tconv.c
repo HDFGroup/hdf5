@@ -2345,8 +2345,9 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 /* Get length of sequences in bytes */
                 seq_len=(*(src->u.vlen.getlen))(src->u.vlen.f,s);
                 assert(seq_len>=0);
-                src_size=seq_len*src_base_size;
-                dst_size=seq_len*dst_base_size;
+                H5_CHECK_OVERFLOW(seq_len,hssize_t,size_t);
+                src_size=(size_t)seq_len*src_base_size;
+                dst_size=(size_t)seq_len*dst_base_size;
 
                 /* Check if conversion buffer is large enough, resize if
                  * necessary */      
@@ -3203,7 +3204,8 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 		 * accomodate that value.  The mantissa of course is no
 		 * longer normalized.
 		 */
-		mrsh += 1-expo;
+                 H5_ASSIGN_OVERFLOW(mrsh,(mrsh+1-expo),hssize_t,size_t);
+		/*mrsh += 1-expo;*/
 		expo = 0;
 		
 	    } else if (expo>=expo_max) {

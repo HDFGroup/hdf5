@@ -577,7 +577,7 @@ H5FD_core_get_eof(H5FD_t *_file)
  */
 static herr_t
 H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
-	       hsize_t size, void *buf/*out*/)
+	       hsize_t size, void *buf)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     

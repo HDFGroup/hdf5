@@ -600,7 +600,7 @@ H5FL_blk_create_list(H5FL_blk_node_t **head, hsize_t size)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for chunk info");
     
     /* Set the correct values for the new free list */
-    temp->size=size;
+    H5_ASSIGN_OVERFLOW(temp->size,size,hsize_t,size_t);
     temp->list=NULL;
 
     /* Attach to head of priority queue */
@@ -713,10 +713,12 @@ H5FL_blk_alloc(H5FL_blk_head_t *head, hsize_t size, unsigned clear)
 
         /* Decrement the number of blocks & memory used on free list */
         head->onlist--;
-        head->list_mem-=size;
+        H5_ASSIGN_OVERFLOW(head->list_mem,head->list_mem-size,hsize_t,size_t);
+        /*head->list_mem-=size;*/
 
         /* Decrement the amount of global "block" free list memory in use */
-        H5FL_blk_gc_head.mem_freed-=size;
+        H5_ASSIGN_OVERFLOW(H5FL_blk_gc_head.mem_freed,H5FL_blk_gc_head.mem_freed-size,hsize_t,size_t);
+        /*H5FL_blk_gc_head.mem_freed-=size;*/
 
     } /* end if */
     /* No free list available, or there are no nodes on the list, allocate a new node to give to the user */
@@ -729,7 +731,7 @@ H5FL_blk_alloc(H5FL_blk_head_t *head, hsize_t size, unsigned clear)
         head->allocated++;
 
         /* Initialize the block allocated */
-        temp->size=size;
+        H5_ASSIGN_OVERFLOW(temp->size,size,hsize_t,size_t);
         temp->next=NULL;
 
         /* Set the return value to the block itself */
@@ -1156,7 +1158,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
         head->u.list_arr[temp->nelem]=temp;
 
         /* Set the amount of memory being freed */
-        mem_size=temp->nelem*head->size;
+        H5_ASSIGN_OVERFLOW(mem_size,temp->nelem*head->size,hsize_t,size_t);
 
         /* Increment the number of blocks & memory used on free list */
         head->onlist[temp->nelem]++;
@@ -1240,7 +1242,7 @@ H5FL_arr_alloc(H5FL_arr_head_t *head, hsize_t elem, unsigned clear)
             head->list_mem-=mem_size;
 
             /* Decrement the amount of global "array" free list memory in use */
-            H5FL_arr_gc_head.mem_freed-=mem_size;
+            H5_ASSIGN_OVERFLOW(H5FL_arr_gc_head.mem_freed,H5FL_arr_gc_head.mem_freed-mem_size,hsize_t,size_t);
 
         } /* end if */
         /* Otherwise allocate a node */
@@ -1373,7 +1375,7 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
         for(i=0; i<head->maxelem; i++) {
             if(head->onlist[i]>0) {
                 /* Calculate the total memory used on this list */
-                total_mem=head->onlist[i]*i*head->size;
+                H5_ASSIGN_OVERFLOW(total_mem,head->onlist[i]*i*head->size,hsize_t,size_t);
 
                 /* For each free list being garbage collected, walk through the nodes and free them */
                 arr_free_list=head->u.list_arr[i];

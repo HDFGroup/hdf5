@@ -648,7 +648,7 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsi
      * Read zeros past the logical end of file (physical is handled below)
      */
     if ((size_t) addr + size > file->eof) {
-        size_t nbytes = (size_t) addr + size - file->eof;
+         size_t nbytes = (size_t) addr + size - file->eof; 
         memset((unsigned char *)buf + size - nbytes, 0, nbytes);
         size -= nbytes;
     }
