@@ -1000,6 +1000,13 @@ dump_dataset_values(hid_t dset)
     info.line_ncols = width_g;
     info.line_multi_new = 1;
     if (label_g) info.cmpd_name = "%s=";
+    
+    /*
+     * If a compound datatype is split across multiple lines then indent
+     * the continuation line.
+     */
+    info.line_pre  = "        %s ";
+    info.line_cont = "        %s  ";
 
     if (hexdump_g) {
 	/*
@@ -1018,14 +1025,6 @@ dump_dataset_values(hid_t dset)
 	info.line_pre ="        %s \"";
 	info.line_suf = "\"";
     }
-
-
-    /*
-     * If a compound datatype is split across multiple lines then add an
-     * ellipsis to the beginning of the continuation line.
-     */
-    info.line_pre  = "        %s ";
-    info.line_cont = "        %s  ";
     
     /*
      * Print all the values.

@@ -316,7 +316,7 @@ test_reference_region(void)
     MESSAGE(5, ("Testing Dataset Region Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf=malloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
+    wbuf=calloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
     rbuf=malloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
     dwbuf=malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
     drbuf=calloc(sizeof(uint8_t),SPACE2_DIM1*SPACE2_DIM2);
