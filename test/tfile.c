@@ -1016,7 +1016,7 @@ test_file_freespace(void)
     /* Create datasets in file */
     for(u=0; u<10; u++) {
         sprintf(name,"Dataset %u",u);
-        dset = H5Dcreate(file, name, H5T_NATIVE_INT, dspace, dcpl);
+        dset = H5Dcreate(file, name, H5T_STD_U32LE, dspace, dcpl);
         CHECK(dset, FAIL, "H5Dcreate");
 
         ret = H5Dclose(dset);

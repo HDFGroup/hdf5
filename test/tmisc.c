@@ -2826,7 +2826,7 @@ test_misc18(void)
     CHECK(sid, FAIL, "H5Screate_simple");
 
     /* Create first dataset */
-    did1 = H5Dcreate(fid, MISC18_DSET1_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    did1 = H5Dcreate(fid, MISC18_DSET1_NAME, H5T_STD_U32LE, sid, H5P_DEFAULT);
     CHECK(did1, FAIL, "H5Screate_simple");
 
     /* Get object information */
@@ -2838,7 +2838,7 @@ test_misc18(void)
     VERIFY(statbuf.ohdr.free, 152, "H5Gget_objinfo");
 
     /* Create second dataset */
-    did2 = H5Dcreate(fid, MISC18_DSET2_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    did2 = H5Dcreate(fid, MISC18_DSET2_NAME, H5T_STD_U32LE, sid, H5P_DEFAULT);
     CHECK(did2, FAIL, "H5Screate_simple");
 
     /* Get object information */
@@ -2855,14 +2855,14 @@ test_misc18(void)
         sprintf(attr_name,"Attr %u",u);
 
         /* Create & close attribute on first dataset */
-        aid = H5Acreate(did1, attr_name, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+        aid = H5Acreate(did1, attr_name, H5T_STD_U32LE, sid, H5P_DEFAULT);
         CHECK(aid, FAIL, "H5Gget_objinfo");
 
         ret = H5Aclose(aid);
         CHECK(ret, FAIL, "HAclose");
 
         /* Create & close attribute on second dataset */
-        aid = H5Acreate(did2, attr_name, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+        aid = H5Acreate(did2, attr_name, H5T_STD_U32LE, sid, H5P_DEFAULT);
         CHECK(aid, FAIL, "H5Gget_objinfo");
 
         ret = H5Aclose(aid);
