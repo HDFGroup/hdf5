@@ -12,6 +12,7 @@
  *		I/O from this driver with I/O from other parts of the
  *		application to the same file).
  */
+#include <H5private.h>
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -257,11 +258,6 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id/*unused*/,
     if (H5F_ACC_TRUNC & flags) o_flags |= O_TRUNC;
     if (H5F_ACC_CREAT & flags) o_flags |= O_CREAT;
     if (H5F_ACC_EXCL & flags) o_flags |= O_EXCL;
-#ifdef WIN32
-	/*this is included since we aren't using HDopen which would
-	 normally include this flag for us*/
-	o_flags |= O_BINARY;
-#endif
     /* Open the file */
 
     if ((fd=open(name, o_flags, 0666))<0) return NULL;
