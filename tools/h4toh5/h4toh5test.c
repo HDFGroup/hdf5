@@ -1177,8 +1177,6 @@ int test_imageattr() {
   uint8 palette_data[NUM_COLORS * 3];
   int32 num_comp,num_entries;
   intn i, j;
-  char* ri_attrname;
-  char*file_attrname;
 
   /* Open the file. */
   file_id = Hopen(FILEGRPAL, DFACC_CREATE, 0);
@@ -1219,23 +1217,17 @@ int test_imageattr() {
 
   /* set GR global attribute. */
 
-  file_attrname=malloc(strlen(F_ATT1_NAME));
-  strcpy(file_attrname,F_ATT1_NAME);
-  istat = GRsetattr(gr_id,file_attrname,DFNT_CHAR8,F_ATT1_N_VALUES,(VOIDP)F_ATT1_VAL);
+  istat = GRsetattr(gr_id,"File Attribute",DFNT_CHAR8,F_ATT1_N_VALUES,(VOIDP)F_ATT1_VAL);
    if(istat == FAIL) {
     printf("fail to set GR global attribute.\n");
     return FAIL;
   }
   /* set GR attribute. */
-   ri_attrname=malloc(strlen(RI_ATT1_NAME));
-   strcpy(ri_attrname,RI_ATT1_NAME);
-  istat = GRsetattr(ri_id,ri_attrname,DFNT_CHAR8,RI_ATT1_N_VALUES,(VOIDP)RI_ATT1_VAL);
+  istat = GRsetattr(ri_id,"Image Attribute",DFNT_CHAR8,RI_ATT1_N_VALUES,(VOIDP)RI_ATT1_VAL);
   if(istat == FAIL) {
     printf("fail to set GR  attribute.\n");
     return FAIL;
   }  
-  free(file_attrname);
-  free(ri_attrname);
   /* Write the stored data to the image array. */
   istat = GRwriteimage(ri_id, start, NULL, edges, (VOIDP)image_data);
    if(istat == FAIL) {
