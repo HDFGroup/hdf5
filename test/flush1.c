@@ -107,8 +107,13 @@ main(void)
 
     /* Write some data */
     for (i=0; i<ds_size[0]; i++) {
+	   /*
+	    * The extra cast in the following statement is a bug workaround
+	    * for the Win32 version 5.0 compiler.
+	    * 1998-11-06 ptl
+	    */
 	for (j=0; j<ds_size[1]; j++) {
-	    the_data[i][j] = (double)i/((double)j+1);
+	    the_data[i][j] = (double)((hssize_t)(i/(j+1)));
 	}
     }
     if (H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT,
