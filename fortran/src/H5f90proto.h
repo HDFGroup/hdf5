@@ -1259,7 +1259,7 @@ H5_FCDLL int_f nh5dont_atexit_c(void);
 #endif
 H5_FCDLL int_f nh5zunregister_c (int_f *filter);
 H5_FCDLL int_f nh5zfilter_avail_c ( int_f *filter , int_f *flag );
-
+H5_FCDLL int_f nh5zget_filter_info_c ( int_f *filter , int_f *flag );
 
 
 #endif /* _H5f90proto_H */
