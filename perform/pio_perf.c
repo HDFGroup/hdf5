@@ -587,7 +587,7 @@ output_all_info(FILE *output, minmax *mm, int count, int indent_level)
 
     for (i = 0; i < count; ++i) {
         print_indent(output, indent_level);
-        output_report(output, "Iteration %d:\n", i);
+        output_report(output, "Iteration %d:\n", i + 1);
         print_indent(output, indent_level + 1);
         output_report(output, "Minimum Time: %.2fs\n", mm[i].min);
         print_indent(output, indent_level + 1);
@@ -634,7 +634,7 @@ accumulate_minmax_stuff(minmax *mm, long raw_size, int count)
     total_mm.num = count;
 
     for (i = 1; i < count; ++i) {
-        double m = MB_PER_SEC(raw_size, total_mm.max);
+        double m = MB_PER_SEC(raw_size, mm[i].max);
 
         total_mm.sum += m;
 
