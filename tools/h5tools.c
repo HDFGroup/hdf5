@@ -1476,7 +1476,6 @@ struct h5dump_str_t tempstr;
     for (i=0; i<hs_nelmts && (elmtno+i) < p_nelmts; i++) {
 		h5dump_str_reset(&tempstr);  
 		h5dump_sprint(&tempstr, &info, p_type, sm_buf+i*p_type_nbytes, -1);
-		tempstr.len = tempstr.len - 2; /* since there are 2 quotes added from the h5dump_sprint function*/
          if ((int)(strlen(out_buf)+tempstr.len+1) > (NCOLS-indent-COL)) {
              /* first row of member */
              if (compound_data && (elmtno+i+1) == dim_n_size)
