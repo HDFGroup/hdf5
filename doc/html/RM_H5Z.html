@@ -87,6 +87,30 @@ for the local environment.
 </td></tr>
 </table>
 
+<br>
+<strong>The FORTRAN90 Interfaces:</strong>
+<br>
+In general, each FORTRAN90 subroutine performs exactly the same task 
+as the corresponding C function.  
+<br>
+
+<table border=0 width=80%>
+<tr><td valign=top>
+    <ul>
+    <li><a href="#Compression-FilterAvail">h5zfilter_avail_f</a>
+    </ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+    <ul>
+<!--<li><a href="#Compression-Register">h5zregister_f</a>        -->
+    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+    </ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+    <ul>
+    <li><a href="#Compression-Unregister">h5zunregister_f</a>
+    </ul>
+</td></tr>
+</table>
+
 <p>
 HDF5 supports a filter pipeline that provides the capability for standard 
 and customized raw data processing during I/O operations.  
@@ -119,38 +143,6 @@ See <a href="Datasets.html"><cite>The Dataset Interface (H5D)</cite></a>
 in the <cite>HDF5 User's Guide</cite> for further information regarding 
 data compression.
 
-<br>
-<strong>The FORTRAN90 Interfaces:</strong>
-
-<br>
-<font size=-1>
-<i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below (electronic versions only) go to the C function 
-descriptions, which serve as general descriptions for both.  A button, 
-under <strong>Non-C API(s)</strong> at the end of the C function description,
-opens an external browser window displaying the FORTRAN90-specific 
-information.  You will probably want to adjust the size and location of 
-this external window so that both browser windows are visible and to 
-facilitate moving easily between them.</i>
-</font><br>
-
-<table border=0 width=80%>
-<tr><td valign=top>
-    <ul>
-    <li><a href="#Compression-FilterAvail">h5zfilter_avail_f</a>
-    </ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-    <ul>
-<!--<li><a href="#Compression-Register">h5zregister_f</a>        -->
-    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-    </ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-    <ul>
-    <li><a href="#Compression-Unregister">h5zunregister_f</a>
-    </ul>
-</td></tr>
-</table>
-
 <!-- NEW PAGE -->
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Zfilter_avail" -->
@@ -172,10 +164,23 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5z_FORTRAN.html#h5zfilter_avail_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5zfilter_avail_f
+    <dd>
+	<pre>
+SUBROUTINE h5zfilter_avail_f(filter, status, hdferr)
+  IMPLICIT NONE
+  INTEGER, INTENT(IN)  :: filter     ! Filter; one of the possible values:
+                                     !    H5Z_FILTER_DEFLATE_F
+                                     !    H5Z_FILTER_SHUFFLE_F
+                                     !    H5Z_FILTER_FLETCHER32_F
+  LOGICAL, INTENT(OUT) :: status     ! Flag, idicates if filter
+                                     ! is availble (.TRUE. or .FALSE.)
+END SUBROUTINE h5zfilter_avail_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -378,11 +383,17 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5z_FORTRAN.html#h5zregister_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+	<pre>
+
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -412,10 +423,23 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5z_FORTRAN.html#h5zunregister_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5zunregister_f
+    <dd>
+	<pre>
+SUBROUTINE h5zunregister_f(filter, hdferr) 
+  IMPLICIT NONE
+  INTEGER, INTENT(IN)  :: filter  ! Filter; one of the possible values:
+                                  !    H5Z_FILTER_DEFLATE_F
+                                  !    H5Z_FILTER_SHUFFLE_F
+                                  !    H5Z_FILTER_FLETCHER32_F
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+                                  ! 0 on success, and -1 on failure
+END SUBROUTINE h5zunregister_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -461,7 +485,7 @@ And in this document, the
 Describes HDF5 Release 1.6.0, July 2003
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified:  3 October 2003");
+document.writeln("Last modified:  23 October 2003");
 -->
 </SCRIPT>
  
