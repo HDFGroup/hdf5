@@ -101,9 +101,24 @@ case "$host_os-$host_cpu" in
         ;;
 
     *-i686)
+        # Large file system support has to be compiled with these flags.
+        LFS_FLAGS="-D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE"
         case "$cc_vendor-$cc_version" in
             gcc-2.95*)
-                ARCH=${ARCH:="-march=i686 -malign-double"}
+                case "`uname -r`" in
+                    # For kernels 2.2 and below, we don't have support
+                    # for >2GB files. We care only about >2.3.
+                    [2-9].[3-9].*)
+                        # The -malign-double flag is bad for our
+                        # architecture with large file support. Define
+                        # these flags so that we can have large file
+                        # support in the library.
+                        ARCH=${ARCH:="-march=i686 $LFS_FLAGS"}
+                        ;;
+                    *)
+                        ARCH=${ARCH:="-march=i686 -malign-double"}
+                        ;;
+                esac
                 ;;
             gcc-*|egcs-*|pgcc-*)
                 ARCH=${ARCH:="-mcpu=pentiumpro -march=pentiumpro -malign-double"}
