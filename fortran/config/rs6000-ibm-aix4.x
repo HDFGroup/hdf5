@@ -33,7 +33,7 @@ if test "X-" = "X-$F9X"; then
 fi
 
 if test "X-" = "X-$f9x_flags_set"; then
-    FFLAGS="-static -O -qsuffix=f=f90 -qmoddir=./ -I./ -k"
+    FFLAGS="-static -O -qsuffix=f=f90 -qmoddir=./ -I./ -I../src -k"
     DEBUG_FFLAGS="-O"
     PROD_FFLAGS="-O"
     PROFILE_FFLAGS="-O"
