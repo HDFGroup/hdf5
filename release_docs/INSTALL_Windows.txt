@@ -1,4 +1,4 @@
-HDF5 Build and Install Instructions for Windows 2000/NT/98.
+HDF5 Build and Install Instructions for Windows 2000/NT.
 ----------------------------------------------------------
 
 The instructions which follow assume that you will be using the 
@@ -19,7 +19,7 @@ Preconditions
 	    c:\					(any drive)
 	   MyHDFstuff\				(any folder name)
 
-   3. Run WinZip on hdf5-1_4_3.zip (the entire source tree) and
+   3. Run WinZip on hdf5-1_4_4.zip (the entire source tree) and
       extract hdf5 package into c:\MyHDFstuff(or whatever drive 
       and folder name you would like to choose). This creates a 
       directory called 'hdf5xxx'under MyHDFstuff which contains 
@@ -47,7 +47,7 @@ The following sections discuss installation procedures in detail:
   Section III: Building an application using the HDF5 library or 
               DLL
   Section IV: Some more helpful pointers
-  Section V: ZLIB library - removing or changing the path
+  Section V: Disable gzip compression  
 
 ***************************************************************
 
@@ -516,7 +516,7 @@ using the Visual C++ Development Environment.
 Project name and location issues: 
        
     The files in all.zip must end up in the hdf5\ directory installed by
-    hdf5-1_4_3.zip
+    hdf5-1_4_4.zip
 
     If you must install all.dsw and all.dsp in another directory,
     relative to hdf5\ , you will be asked to locate the sub-project
@@ -569,13 +569,12 @@ DLL... hints:
 
 
 Section V:
-ZLIB LIBRARY- REMOVING OR CHANGING THE PATH
+Disable gzip compression 
 ============================================
 
-If you would like to remove the zlib library from the hdf5 library or 
-use your own version of the zlib library then follow the steps below.
+If you would like to gzip compression from the hdf5 library  
+follow the steps below.
 
-Removing the zlib library completely:
 
     1) Open the H5pubconf.h file from the src directory and remove the 
     following two lines:
