@@ -25,23 +25,29 @@ Glossary
 <h1>HDF5 Glossary</h1>
 </center>
 
-<i>(<b>Under construction!</b>  
-    This is the bare beginning of a Glossary to accompany the HDF5 documentation;
-    it is by no means complete.)</i>
+<i>(<b>Under construction!</b> 
+    This is the bare beginning of a Glossary to accompany the HDF5 
+    documentation; it is by no means complete.)</i>
 
-<ol type=A>
-    <li><a href="#Glossary-Basic">Basic Types</a>
-    <li><a href="#Glossary-Complex">Complex Types</a>
-    <li><a href="#Glossary-DiskIO">Disk I/O Types</a>
-</ol>
+<ul>
+    <li><a href="#Glossary-Basic">basic data types</a>
+    <li><a href="#Glossary-Complex">complex data types</a>
+    <li>data types
+<ul>
+        <li><a href="#Glossary-Basic">basic data types</a>
+        <li><a href="#Glossary-Complex">complex data types</a>
+        <li><a href="#Glossary-DiskIO">disk I/O data types</a>
+</ul>
+    <li><a href="#Glossary-DiskIO">disk I/O data types</a>
+</ul>
 
-<P>Since many of the typedefs in the HDF5 API are not well-defined yet,
-the types below may change radically en route to a final API...
 
 <hr>
 
-<a name="Glossary-Basic">Basic Types:</a>
+<a name="Glossary-Basic">basic data types:</a>
 <ul>
+    <li><em>(Some data types may change substantially en route to 
+        Release 1.0.)</em>
     <li>char     - 8-bit character (only for ASCII information)
     <li>int8     - 8-bit signed integer
     <li>uint8    - 8-bit unsigned integer
@@ -57,8 +63,10 @@ the types below may change radically en route to a final API...
     <li>float64  - 64-bit IEEE float
 </ul>
 
-<a name="Glossary-Complex">Complex Types:</a>
+<a name="Glossary-Complex">Complex data types:</a>
 <ul>
+    <li><em>(Some data types may change substantially en route to 
+        Release 1.0.)</em>
     <li>hid_t   - 32-bit unsigned integer used as ID for memory objects
     <li>hoid_t  - 32-bit unsigned integer (currently) used as ID for disk-based
                 objects
@@ -66,8 +74,10 @@ the types below may change radically en route to a final API...
     <li>herr_t  - 32-bit integer to indicate succeed/fail codes from functions
 </ul>
 
-<a name="Glossary-DiskIO">Disk I/O Types:</a>
+<a name="Glossary-DiskIO">disk I/O data types:</a>
 <ul>
+    <li><em>(Some data types may change substantially en route to 
+        Release 1.0.)</em>
     <li>hoff_t  - (64-bit?) offset on disk in bytes
     <li>hlen_t  - (64-bit?) length on disk in bytes
 </ul>

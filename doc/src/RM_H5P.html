@@ -18,14 +18,16 @@ H5P&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<!--
 <a href="Glossary.html">Glossary</a>
+-->
 </center>
 <hr>
 
 <center>
 <h1>H5P: Property List Interface</h1>
 </center>
-
 <h2>Property List API Functions</h2>
 
 These functions manipulate property list objects to allow objects which require
@@ -88,9 +90,14 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-SetChunk">H5Pset_chunk</a>
     <li><a href="#Property-GetChunk">H5Pget_chunk</a>
     <li><a href="#Property-SetDeflate">H5Pset_deflate</a>
+<!--
     <li><a href="#Property-GetDeflate">H5Pget_deflate</a>
     <li><a href="#Property-SetCompression">H5Pset_compression</a>
     <li><a href="#Property-GetCompression">H5Pget_compression</a>
+-->
+    <li><a href="#Property-SetFilter">H5Pset_filter</a>
+    <li><a href="#Property-GetNFilters">H5Pget_nfilters</a>
+    <li><a href="#Property-GetFilter">H5Pget_filter</a>
     <li><a href="#Property-SetExternal">H5Pset_external</a>
     <li><a href="#Property-GetExternalCount">H5Pget_external_count</a>
     <li><a href="#Property-GetExternal">H5Pget_external</a>
@@ -160,7 +167,6 @@ many different parameters to be easily manipulated.
     <dd>Returns a property list identifier (<code>plist</code>) if successful; 
         otherwise Fail (-1).
 </dl>
-
 
 <hr>
 <dl>
@@ -439,7 +445,7 @@ many different parameters to be easily manipulated.
         <dd><code>H5Pget_mpi</code> retrieves the communicator and info object
 	    that have been set by H5Pset_mpi.
 	    This function is available only in the parallel HDF5 library
-          and is not a collective function.
+            and is not a collective function.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -504,10 +510,10 @@ many different parameters to be easily manipulated.
   <dt><strong>Purpose:</strong>
     <dd>Retrieves the transfer mode from the dataset transfer property list.
   <dt><strong>Description:</strong>
-        <dd><code>H5Pget_xfer</code> retrieves the transfer mode from the dataset
-	    transfer property list.
+        <dd><code>H5Pget_xfer</code> retrieves the transfer mode from the 
+            dataset transfer property list.
 	    This function is available only in the parallel HDF5 library
-          and is not a collective function.
+            and is not a collective function.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -532,22 +538,23 @@ many different parameters to be easily manipulated.
   <dt><strong>Purpose:</strong>
     <dd>Sets the size of parameters used to control the symbol table nodes.
   <dt><strong>Description:</strong>
-        <dd><code>H5Pset_sym_k</code> sets the size of parameters used to control the
-            symbol table nodes.  This function is only valid for
-            file creation property lists.  Passing in a value of 0 for one of the
-            parameters retains the current value. 
+        <dd><code>H5Pset_sym_k</code> sets the size of parameters used to 
+            control the symbol table nodes.  This function is only valid 
+            for file creation property lists.  Passing in a value of 0 for 
+            one of the parameters retains the current value. 
             <p>
             <code>ik</code> is one half the rank of a tree that stores a symbol
             table for a group.  Internal nodes of the symbol table are on
             average 75% full.  That is, the average rank of the tree is
             1.5 times the value of <code>ik</code>.
             <p>
-            <code>lk</code> is one half of the number of symbols that can be stored in
-            a symbol table node.  A symbol table node is the leaf of a
-            symbol table tree which is used to store a group.  When
-            symbols are inserted randomly into a group, the group's
+            <code>lk</code> is one half of the number of symbols that can 
+            be stored in a symbol table node.  A symbol table node is the 
+            leaf of a symbol table tree which is used to store a group.  
+            When symbols are inserted randomly into a group, the group's
             symbol table nodes are 75% full on average.  That is, they
-            contain 1.5 times the number of symbols specified by <code>lk</code>.
+            contain 1.5 times the number of symbols specified by 
+            <code>lk</code>.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -576,11 +583,12 @@ many different parameters to be easily manipulated.
         and the symbol table leaf node 1/2 size.
   <dt><strong>Description:</strong>
         <dd><code>H5Pget_sym_k</code> retrieves the size of the 
-            symbol table B-tree 1/2 rank and the symbol table leaf node 1/2 size.  
-            This function is only valid for file creationproperty lists.  
-            If a parameter valued is set to NULL, that parameter is not retrieved.  
-            See the description for <a href="#Property-SetSymK">H5Pset_sym_k</a> 
-            for more information.  
+            symbol table B-tree 1/2 rank and the symbol table leaf 
+            node 1/2 size.  This function is only valid for file creation 
+            property lists.  If a parameter valued is set to NULL, that
+            parameter is not retrieved.  See the description for 
+            <a href="#Property-SetSymK">H5Pset_sym_k</a> for more 
+            information.  
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -607,14 +615,16 @@ many different parameters to be easily manipulated.
     <dd>Sets the size of the parameter used to control the
         B-trees for indexing chunked datasets.  
   <dt><strong>Description:</strong>
-        <dd><code>H5Pset_istore_k</code> sets the size of the parameter used to control the
-            B-trees for indexing chunked datasets.  This function is only valid for
-            file creation property lists.  Passing in a value of 0 for one of the
-            parameters retains the current value. 
+        <dd><code>H5Pset_istore_k</code> sets the size of the parameter 
+            used to control the B-trees for indexing chunked datasets.  
+            This function is only valid for file creation property lists.
+            Passing in a value of 0 for one of the parameters retains 
+            the current value. 
             <p>
-            <code>ik</code> is one half the rank of a tree that stores chunked raw
-            data.  On average, such a tree will be 75% full, or have an
-            average rank of 1.5 times the value of <code>ik</code>.
+            <code>ik</code> is one half the rank of a tree that stores 
+            chunked raw data.  On average, such a tree will be 75% full, 
+            or have an average rank of 1.5 times the value of 
+            <code>ik</code>.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -705,9 +715,9 @@ many different parameters to be easily manipulated.
   <dt><strong>Purpose:</strong>
     <dd>Returns the layout of the raw data for a dataset.
   <dt><strong>Description:</strong>
-    <dd><code>H5Pget_layout</code> returns the layout of the raw data for a dataset.
-            This function is only valid for dataset creation property lists.
-            Valid types for <code>layout</code> are:
+    <dd><code>H5Pget_layout</code> returns the layout of the raw data for 
+        a dataset.  This function is only valid for dataset creation 
+        property lists.  Valid types for <code>layout</code> are:
             <ul> <dl>
                 <dt>H5D_COMPACT
                     <dd>Raw data and object header stored contiguously in file.
@@ -741,13 +751,14 @@ many different parameters to be easily manipulated.
   <dt><strong>Purpose:</strong>
     <dd>Sets the size of the chunks used to store a chunked layout dataset.  
   <dt><strong>Description:</strong>
-    <dd><code>H5Pset_chunk</code> sets the size of the chunks used to store a chunked
-            layout dataset.  This function is only valid for dataset creation
-            property lists.  The <code>ndims</code> parameter currently must be the
-            same size as the rank of the dataset.  The values of the
-            <code>dim</code> array define the size of the chunks to store the
-            dataset's raw data.  As a side-effect, the layout of the dataset is
-            changed to H5D_CHUNKED, if it isn't already.
+    <dd><code>H5Pset_chunk</code> sets the size of the chunks used to 
+        store a chunked layout dataset.  This function is only valid 
+        for dataset creation property lists.  
+        The <code>ndims</code> parameter currently must be the same size 
+        as the rank of the dataset.  The values of the <code>dim</code> 
+        array define the size of the chunks to store the dataset's raw data.
+        As a side-effect, the layout of the dataset is changed to 
+        <code>H5D_CHUNKED</code>, if it is not already.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -773,6 +784,7 @@ many different parameters to be easily manipulated.
         )
   <dt><strong>Purpose:</strong>
     <dd>Retrieves the size of chunks for the raw data of a chunked layout dataset.  
+
   <dt><strong>Description:</strong>
     <dd><code>H5Pget_chunk</code> retrieves the size of chunks for the 
             raw data of a chunked layout dataset.  
@@ -940,8 +952,8 @@ many different parameters to be easily manipulated.
   <dt><strong>Purpose:</strong>
     <dd>Returns information about an external file.  
   <dt><strong>Description:</strong>
-    <dd><code>H5Pget_external</code> returns information about an external file.  
-        The external file is specified by its index, <code>idx</code>,
+    <dd><code>H5Pget_external</code> returns information about an external 
+        file.  The external file is specified by its index, <code>idx</code>,
         which is a number from zero to N-1, where N is the value 
         returned by <code>H5Pget_external_count()</code>.  
         At most <code>name_size</code> characters are copied into the 
@@ -972,6 +984,189 @@ many different parameters to be easily manipulated.
   <dt><strong>Returns:</strong>
     <dd>Returns SUCCEED (0) if successful;
         otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFilter">H5Pset_filter</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_filter</code>(<em>hid_t</em> <code>plist</code>,
+        <em>H5Z_filter_t</em> <code>filter</code>,
+        <em>unsigned int</em> <code>flags</code>,
+        <em>size_t</em> <code>cd_nelmts</code>,
+        <em>const unsigned int</em> <code>cd_values[]</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Adds a filter to the filter pipeline.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_filter</code> adds the specified 
+        <code>filter</code> and corresponding properties to the 
+        end of an output filter pipeline.
+        If <code>plist</code> is a dataset creation property list, 
+        the filter is added to the permanent filter pipeline; 
+        if <code>plist</code> is a dataset transfer property list, 
+        the filter is added to the transient filter pipeline.
+        <p>
+        The array <code>cd_values</code> contains
+        <code>cd_nelmts</code> integers which are auxiliary data 
+        for the filter.  The integer values will be stored in the 
+        dataset object header as part of the filter information.
+        <p>
+        The <code>flags</code> argument is a  bit vector with 
+        the following fields specifying certain general properties 
+        of the filter:  
+        <center>
+        <table align=center width="80%">
+          <tr valign=top>
+            <td valign=top><code>H5Z_FLAG_OPTIONAL</code></td>
+            <td>&nbsp;&nbsp;</td>
+            <td valign=top>If this bit is set then the filter is 
+              optional.  If the filter fails (see below) during an
+              <code>H5Dwrite()</code> operation then the filter is
+              just excluded from the pipeline for the chunk for which
+              it failed; the filter will not participate in the
+              pipeline during an <code>H5Dread()</code> of the chunk.
+              This is commonly used for compression filters: if the
+              compression result would be larger than the input then
+              the compression filter returns failure and the
+              uncompressed data is stored in the file.  If this bit is
+              clear and a filter fails then <code>H5Dwrite()</code> 
+              or <code>H5Dread()</code> also fails.</td>
+          </tr>
+        </table>
+        </center>
+  <dt><strong>Note:</strong>
+    <dd>This function currently supports only the permanent filter
+        pipeline; <code>plist_id</code> must be a dataset creation 
+        property list.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Property list identifier.
+        <dt><em>H5Z_filter_t</em> <code>filter</code>
+            <dd>IN: Filter to be added to the pipeline.
+        <dt><em>unsigned int</em> <code>flags</code>
+            <dd>IN:  Bit vector specifying certain general properties
+                of the filter.
+        <dt><em>size_t</em> <code>cd_nelmts</code>
+            <dd>IN: Number of elements in <code>cd_values</code>
+        <dt><em>const unsigned int</em> <code>cd_values[]</code>
+            <dd>IN: Auxiliary data for the filter.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetNFilters">H5Pget_nfilters</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Pget_nfilters</code>(<em>hid_t</em> <code>plist</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Returns the number of filters in the pipeline.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_nfilters</code> returns the number of filters 
+        defined in the filter pipeline associated with the property list 
+        <code>plist</code>.
+        <p>
+        In each pipeline, the filters are numbered from
+        0 through <em>N</em>-1, where <em>N</em> is the value returned
+        by this function. During output to the file, the filters are 
+        applied in increasing order; during input from the file, they
+        are applied in decreasing order.
+        <p>
+        <code>H5Pget_nfilters</code> returns the number of filters 
+        in the pipeline, including zero (<code>0</code>) if there 
+        are none.
+  <dt><strong>Note:</strong>
+    <dd>This function currently supports only the permanent filter
+        pipeline; <code>plist_id</code> must be a dataset creation 
+        property list.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Property list identifier.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns the number of filters in the pipeline if successful;
+        otherwise returns FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFilter">H5Pget_filter</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>H5Z_filter_t</em> <code>H5Pget_filter</code>(<em>hid_t</em> <code>plist</code>,
+        <em>int</em> <code>filter_number</code>,
+        <em>unsigned int *</em><code>flags</code>,
+        <em>size_t *</em><code>cd_nelmts</code>,
+        <em>unsigned int *</em><code>cd_values</code>,
+        <em>size_t</em> <code>namelen</code>,
+        <em>char</em> <code>name[]</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns information about a filter in a pipeline.
+  <dt><strong>Description:</strong>
+    <dd><code> </code> 
+        <code>H5Pget_filter</code> returns information about a
+        filter, specified by its filter number, in a filter pipeline,
+        specified by the property list with which it is associated.
+        <p>
+        If <code>plist</code> is a dataset creation property list, 
+        the pipeline is a permanent filter pipeline; 
+        if <code>plist</code> is a dataset transfer property list, 
+        the pipeline is a transient filter pipeline.
+        <p>
+        On input, <code>cd_nelmts</code> indicates the number of entries 
+        in the <code>cd_values</code> array, as allocated by the caller;
+        on return,<code>cd_nelmts</code> contains the number of values 
+        defined by the filter. 
+        <p>
+        <code>filter_number</code> is a value between zero and 
+        <em>N</em>-1, as described in 
+        <a href="#Property-GetNFilters"><code>H5Pget_nfilters()</code></a>.
+        The function will return FAIL (-1) if the filter number is out 
+        of range.  
+        <p>
+        If <code>name</code> is a pointer to an array of at least 
+        <code>namelen</code> bytes, the filter name will be copied 
+        into that array.  The name will be null terminated if 
+        <code>namelen</code> is large enough.  The filter name returned 
+        will be the name appearing in the file, the name registered
+        for the filter, or an empty string.  
+        <p>
+        The structure of the <code>flags</code> argument is discussed
+        in <a href="#Property-SetFilter"><code>H5Pset_filter()</code></a>.
+  <dt><strong>Note:</strong>
+    <dd>This function currently supports only the permanent filter
+        pipeline; <code>plist</code> must be a dataset creation property 
+        list.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Property list identifier.
+        <dt><em>int</em> <code>filter_number</code>
+            <dd>IN: Sequence number within the filter pipeline of 
+                the filter for which information is sought.
+        <dt><em>unsigned int *</em><code>flags</code>
+            <dd>OUT: Bit vector specifying certain general properties
+                of the filter.
+        <dt><em>size_t *</em><code>cd_nelmts</code>
+            <dd>IN/OUT: Number of elements in <code>cd_values</code>
+        <dt><em>unsigned int *</em><code>cd_values</code>
+            <dd>OUT: Auxiliary data for the filter.
+        <dt><em>size_t</em> <code>namelen</code>
+            <dd>IN: Anticipated number of characters in <code>name</code>.
+        <dt><em>char</em> <code>name[]</code>
+            <dd>OUT: Name of the filter.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns the filter identification number if successful.
+        Otherwise returns H5Z_FILTER_ERROR (-1).
 </dl>
 
 
@@ -1015,9 +1210,8 @@ many different parameters to be easily manipulated.
         in the stdio.h.
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_stdio</code> sets the low level file driver to use 
-        the functions declared
-        in the stdio.h file: fopen(), fseek() or fseek64(), fread(),
-        fwrite(), and fclose().
+        the functions declared in the stdio.h file: fopen(), fseek() 
+        or fseek64(), fread(), fwrite(), and fclose().
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -1113,13 +1307,14 @@ many different parameters to be easily manipulated.
   <dt><strong>Purpose:</strong>
     <dd>Sets the low-level file driver to use malloc() and free().
   <dt><strong>Description:</strong>
-    <dd><code>H5Pset_core</code> sets the low-level file driver to use malloc() and free().
+    <dd><code>H5Pset_core</code> sets the low-level file driver to use 
+        <code>malloc()</code> and <code>free()</code>.  
         This driver is restricted to temporary files which are not
-        larger than the amount of virtual memory available. The
-        INCREMENT argument determines the file block size and memory
-        will be allocated in multiples of INCREMENT bytes. A liberal
-        INCREMENT results in fewer calls to realloc() and probably
-        less memory fragmentation.
+        larger than the amount of virtual memory available. 
+        The <code>increment</code> argument determines the file block size 
+        and memory will be allocated in multiples of INCREMENT bytes. 
+        A liberal <code>increment</code> results in fewer calls to 
+        <code>realloc()</code> and probably less memory fragmentation.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -1146,10 +1341,10 @@ many different parameters to be easily manipulated.
   <dt><strong>Description:</strong>
     <dd><code>H5Pget_core</code> checks to determine whether the 
         file access property list is set to the core driver.
-        On success, the block size is returned
-        through the INCREMENT argument if it isn't the null pointer.
+        On success, the block size is returned through the 
+        <code>increment</code> if it is not the null pointer.
         In the future, additional arguments may be added to this
-        function to match those added to H5Pset_core(). 
+        function to match those added to <code>H5Pset_core()</code>. 
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -1181,7 +1376,7 @@ many different parameters to be easily manipulated.
         split meta data from raw data, storing meta data in one file and 
         raw data in another file.  The meta file will have a name 
         which is formed by adding <em>meta_extension</em> (recommended 
-	  default value: <code>.meta</code>) to the end of the base name 
+        default value: <code>.meta</code>) to the end of the base name 
         and will be accessed according to the <em>meta_properties</em>. 
         The raw file will have a name which is formed by appending 
         <em>raw_extension</em> (recommended default value: 
@@ -1228,15 +1423,15 @@ many different parameters to be easily manipulated.
     <dd><code>H5Pget_split</code> checks to determine whether the file  
         access property list is set to the split driver.
         On successful return,
-	<em>meta_properties</em> and <em>raw_properties</em> will
+	<code>meta_properties</code> and <code>raw_properties</code> will
 	point to copies of the meta and raw access property lists
 	which should be closed by calling <code>H5Pclose()</code> when
 	the application is finished with them, but if the meta and/or
 	raw file has no property list then a negative value is
 	returned for that property list identifier. Also, if
-	<em>meta_extension</em> and/or <em>raw_extension</em> are
-	non-null pointers, at most <em>meta_ext_size</em> or
-	<em>raw_ext_size</em> characters of the meta or raw file name
+	<code>meta_extension</code> and/or <code>raw_extension</code> are
+	non-null pointers, at most <code>meta_ext_size</code> or
+	<code>raw_ext_size</code> characters of the meta or raw file name
 	extension will be copied to the specified buffer. If the
 	actual name is longer than what was requested then the result
 	will not be null terminated (similar to
@@ -1281,6 +1476,7 @@ many different parameters to be easily manipulated.
     <dd>Sets the file access properties list to the <em>family</em>
 	  driver.
   <dt><strong>Description:</strong>
+    <dd><i>Original version.  Edited version below.</i>
     <dd><code>H5Pset_family</code> sets the file access properties 
         to use the <em>family</em>
 	driver; any previously defined driver properties are erased
@@ -1297,6 +1493,60 @@ many different parameters to be easily manipulated.
 	2^31-1 because the byte at offset 2,147,483,647 is generally
 	inaccessable.  Additional parameters may be added to this
 	function in the future.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Identifier of the file access property list.
+        <dt><em>hsize_t</em> <code>memb_size</code>
+            <dd>IN: Logical size, in bytes, of each family member.
+        <dt><em>hid_t</em> <code>memb_plist</code>
+            <dd>IN: Identifier of the file access property list 
+                for each member of the family.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns SUCCEED (0) if successful;
+        otherwise FAIL (-1).
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFamily">H5Pset_family</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_family</code>(<em>hid_t</em> <code>plist</code>,
+        <em>hsize_t</em> <code>memb_size</code>,
+        <em>hid_t</em> <code>memb_plist</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the file access properties list to the <code>family</code>
+	  driver.
+  <dt><strong>Description:</strong>
+    <dd><i>Edited version.  Original version above.</i>
+    <dd><code>H5Pset_family</code> sets the file access properties 
+        to use the <code>family</code> driver; any previously defined 
+        driver properties are erased from the property list.  
+        See <a href="Files.html#File_Families">File Families</a>
+        in the <cite>HDF5 User's Guide</dite> for a discussion
+        of file families.
+        <p>
+        Each member of the file family will use <code>memb_plist</code>
+        as its file access property list. 
+        <p>
+        The <code>memb_size</code> argument gives the logical size
+	in bytes of each family member; the actual size could be
+	smaller depending on whether the file contains holes.
+        The member size is only used when creating a new file or
+	truncating an existing file; otherwise the member size comes
+	from the size of the first member of the family being
+	opened. 
+        <p>
+        Note: If the size of the <code>off_t</code> type is
+	four bytes, then the maximum family member size is usually
+	2^31-1 because the byte at offset 2,147,483,647 is generally
+	inaccessable.  
+        <p>
+        Additional parameters may be added to this function in the 
+        future.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -1365,8 +1615,9 @@ many different parameters to be easily manipulated.
     <dd>Sets the number of elements in the meta data cache and the
         total number of bytes in the raw data chunk cache.
   <dt><strong>Description:</strong>
-    <dd><code>H5Pset_cache</code> sets the number of elements (objects) in the meta data cache and the
-        total number of bytes in the raw data chunk cache.
+    <dd><code>H5Pset_cache</code> sets the number of elements (objects) 
+        in the meta data cache and the total number of bytes in the 
+        raw data chunk cache.
         <p>
         Sets or queries the meta data cache and raw data chunk cache 
 	parameters.  The <em>plist</em> is a file access property
@@ -1458,8 +1709,8 @@ many different parameters to be easily manipulated.
          hyperslab of a simple data space the buffer must be large
          enough to hold a 1x200x300 slab.  
          <p>
-         If TCONV and/or BKG are null pointers then buffers will be
-         allocated and freed during the data transfer.  
+         If <code>tconv</code> and/or <code>bkg</code> are null pointers,
+         then buffers will be allocated and freed during the data transfer.  
          <p>
          The default value for the maximum buffer is 1 Mb.
   <dt><strong>Parameters:</strong>
@@ -1562,6 +1813,8 @@ many different parameters to be easily manipulated.
 </dl>
 
 
+<!--
+
 <hr>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-SetCompression">H5Pset_compression</a>
@@ -1575,8 +1828,9 @@ many different parameters to be easily manipulated.
   <dt><strong>Purpose:</strong>
     <dd>Sets compression method.
   <dt><strong>Description:</strong>
-    <dd> <code>H5Pset_compression</code> sets the compression method in a dataset creation property
-         list.  This is a catch-all function for defining compresion methods
+    <dd><code>H5Pset_compression</code> sets the compression method 
+        in a dataset creation property list.  This is a catch-all 
+        function for defining compresion methods
 	and is intended to be called from a wrapper such as
 	<code>H5Pset_deflate()</code>. The dataset creation property
 	list <em>plist</em> is adjusted to use the specified
@@ -1586,13 +1840,13 @@ many different parameters to be easily manipulated.
 	<em>client_data</em> is a byte array of length
 	<em>cd_size</em> which is copied to the file and passed to the
 	compress and uncompress methods.
-         <p>
-         The FLAGS, CD_SIZE, and CLIENT_DATA are copied to the
-         property list and eventually to the file and passed to the
-         compression functions.
-         <p>
-         See <a href="Compression.html"><cite>Compression</cite></a>
-         in the <cite>HDF5 User's Guide</cite> for further information.
+        <p>
+        The FLAGS, CD_SIZE, and CLIENT_DATA are copied to the
+        property list and eventually to the file and passed to the
+        compression functions.
+        <p>
+        See <a href="Compression.html"><cite>Compression</cite></a>
+        in the <cite>HDF5 User's Guide</cite> for further information.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -1611,6 +1865,10 @@ many different parameters to be easily manipulated.
         otherwise FAIL (-1).
 </dl>
 
+-->
+
+
+<!--
 
 <hr>
 <dl>
@@ -1626,11 +1884,12 @@ many different parameters to be easily manipulated.
   <dt><strong>Description:</strong>
     <dd><code>H5Pget_compression</code> gets the compression method 
         information from a dataset creation property list.  
-        The CLIENT_DATA buffer is initially CD_SIZE bytes.  
-        On return, CLIENT_DATA will be initialized
-        with at most that many bytes, and CD_SIZE will contain the
-        actual size of the client data, which might be larger than
-        its original value.<dt><strong>Parameters:</strong>
+        The <code>client_data</code> buffer is initially 
+        <code>cd_size</code> bytes.  On return, <code>client_data</code>
+        will be initialized with at most that many bytes, and 
+        <code>cd_size</code> will contain the actual size of the 
+        client data, which might be larger than its original value.
+  <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
             <dd>IN: Identifier for the dataset creation property list.
@@ -1646,6 +1905,8 @@ many different parameters to be easily manipulated.
         otherwise FAIL (-1).
 </dl>
 
+-->
+
 
 <hr>
 <dl>
@@ -1658,12 +1919,11 @@ many different parameters to be easily manipulated.
     <dd>Sets compression method and compression level. 
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_deflate</code> sets the compression method for a 
-        dataset creation property
-        list to H5D_COMPRESS_DEFLATE and the compression level to
-        LEVEL which should be a value between zero and nine,
-        inclusive.  Lower compression levels are faster but result in
-        less compression.  This is the same algorithm as used by the
-        GNU gzip program.
+        dataset creation property list to <code>H5D_COMPRESS_DEFLATE</code>
+        and the compression level to <code>level<>/code>, which should 
+        be a value from zero to nine, inclusive.  
+        Lower compression levels are faster but result in less compression.  
+        This is the same algorithm as used by the GNU gzip program.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -1676,6 +1936,8 @@ many different parameters to be easily manipulated.
         otherwise FAIL (-1).
 </dl>
 
+
+<!--
 
 <hr>
 <dl>
@@ -1699,6 +1961,8 @@ many different parameters to be easily manipulated.
         Otherwise returns FAIL (-1).
 </dl>
 
+-->
+
 
 <hr>
 <center>
@@ -1713,15 +1977,20 @@ H5P&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<!--
 <a href="Glossary.html">Glossary</a>
+-->
 </center>
 <hr>
+
 
 <address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  14 July 1998
+Last modified:  25 August 1998
 
 </body>
 </html>
+

@@ -139,12 +139,12 @@ These tools enable the user to examine HDF5 files interactively.
     <dd><code>h5ls
         [</code><em>options</em><code>]</code><em>
         file</em><code> 
-        [</code><em>group</em><code>]</code>
+        [</code><em>objects...</em><code>]</code>
 <dt><strong>Purpose:</strong>
     <dd>Prints information about a file or dataset.
 <dt><strong>Description:</strong>
-    <dd><code>h5ls</code> prints selected information about a file 
-        or dataset in the specified format.
+    <dd><code>h5ls</code> prints selected information about file objects 
+        in the specified format.
 <dt><strong>Options and Parameters:</strong>
     <dl>
         <dt><code>-h</code> &nbsp;&nbsp;or&nbsp;&nbsp; <code>-?</code> &nbsp;&nbsp;or&nbsp;&nbsp; <code>--help</code>
@@ -160,19 +160,19 @@ These tools enable the user to examine HDF5 files interactively.
         <dt><em>file</em>
             <dd>The file name may include a printf(3C) integer format 
                 such as <code>%%05d</code> to open a file family.
-        <dt><em>group</em>
-            <dd>If a group name is not specified then the contents of 
-                the root group, /, are displayed.
-
-        <dt><code> </code>
-            <dd>
-        <dt><code> </code>
-            <dd>
+        <dt><em>objects</em>
+            <dd>The names of zero or more objects about which information 
+                should be displayed.  If a group is mentioned then 
+                information about each of its members is displayed.  
+                If no object names are specified then information about 
+                all of the objects in the root group is displayed.
     </dl>
+<!--
 <dt><strong>Current Status:</strong>
     <dd>
 <dt><strong>See Also:</strong>
     <dd>
+-->
 </dl>
 
 
@@ -200,7 +200,8 @@ These tools enable the user to examine HDF5 files interactively.
         <code>m</code> for megabytes, or <code>k</code> for kilobytes.
         <p>
         File family names include an integer <code>printf</code> 
-        format such as <code>%%d</code>.
+        format such as <code>%d</code>.
+
 <dt><strong>Options and Parameters:</strong>
     <dl>
         <dt><code>-v</code>
@@ -216,10 +217,12 @@ These tools enable the user to examine HDF5 files interactively.
         <dt><em>dest_file</em>
             <dd>The name of the destination files
     </dl>
+<!--
 <dt><strong>Current Status:</strong>
     <dd>
 <dt><strong>See Also:</strong>
     <dd>
+-->
 </dl>
 
 

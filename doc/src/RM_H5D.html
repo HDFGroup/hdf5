@@ -18,7 +18,10 @@ H5D&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<!--
 <a href="Glossary.html">Glossary</a>
+-->
 </center>
 <hr>
 
@@ -246,6 +249,14 @@ and set and retrieve their constant or persistent properties.
         <code>xfer_plist_id</code> can be the constant <code>H5P_DEFAULT</code>, 
         in which case the default data transfer properties are used.
  
+        <p>
+        Datatype conversion takes place at the time of a read or write
+        and is automatic.  See the
+        <a href="Datatypes.html#Datatypes-DataConversion">Data Conversion</a> 
+        section of <cite>The Data Type Interface (H5T)</cite> in the 
+        <cite>HDF5 User's Guide</cite> for a discussion of 
+        data conversion, including the range of conversions currently 
+        supported by the HDF5 libraries.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset_id</code>
@@ -305,6 +316,17 @@ and set and retrieve their constant or persistent properties.
         <p>
         <code>xfer_plist_id</code> can be the constant <code>H5P_DEFAULT</code>.
         in which case the default data transfer properties are used.           
+        <p>
+        Writing to an external dataset will fail if the HDF5 file is 
+        not open for writing.
+        <p>
+        Datatype conversion takes place at the time of a read or write
+        and is automatic.  See the
+        <a href="Datatypes.html#Datatypes-DataConversion">Data Conversion</a> 
+        section of <cite>The Data Type Interface (H5T)</cite> in the 
+        <cite>HDF5 User's Guide</cite> for a discussion of 
+        data conversion, including the range of conversions currently 
+        supported by the HDF5 libraries.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset_id</code>
@@ -391,7 +413,10 @@ H5D&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<!--
 <a href="Glossary.html">Glossary</a>
+-->
 </center>
 <hr>
 
@@ -399,7 +424,7 @@ H5D&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  14 July 1998
+Last modified:  12 August 1998
 
 </body>
 </html>

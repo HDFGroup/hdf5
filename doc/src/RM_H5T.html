@@ -18,7 +18,10 @@ HDF5/H5T Draft API Specification
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 H5T&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<!--
 <a href="Glossary.html">Glossary</a>
+-->
 </center>
 <hr>
 
@@ -121,7 +124,7 @@ A <em>data point</em> is an instance of a <em>datatype</em>,
 
 <p>
 See <a href="Datatypes.html"><cite>The Datatype Interface (H5T)</cite></a>
-in the <cite>HDF5 User's Guide</cite> for further information.
+in the <cite>HDF5 User's Guide</cite> for further information, including a complete list of all supported datatypes.
 
 
 <hr>
@@ -489,6 +492,14 @@ H5Tget_overflow ()
                 <dd> Native single-precision float type, declare dataset array as 'float'
             <dt>H5T_NATIVE_DOUBLE
                 <dd> Native double-precision float type, declare dataset array as 'double'
+            <dt>H5T_NATIVE_HSIZE
+                <dd> Native size_t type, declare dataset array as 'hsize_t'
+            <dt>H5T_NATIVE_HSSIZE
+                <dd> Native signed size_t type, declare dataset array as 'hssize_t'
+            <dt>H5T_NATIVE_HERR
+                <dd> Native error type, declare dataset array as 'herr_t'
+            <dt>H5T_NATIVE_HBOOL
+                <dd> Native boolean type, declare dataset array as 'hbool_t'
         </dl> </ul>
 -->
 <dt><strong>Parameters:</strong>
@@ -1741,7 +1752,10 @@ zero.
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 H5T&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<!--
 <a href="Glossary.html">Glossary</a>
+-->
 </center>
 <hr>
 
@@ -1749,7 +1763,7 @@ H5T&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  14 July 1998
+Last modified:  2 September 1998
 
 </body>
 </html>
