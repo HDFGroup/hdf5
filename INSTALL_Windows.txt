@@ -28,9 +28,9 @@ To build the HDF5 and tests, it is assumed that you have done the following:
       This creates a directory called 'hdf5' which 
       contains several files and directories.
 
-	4. You do not have a version of the zlib library and you would like to 
-	use it.  If you do not want to use the zlib library or have your own
-	version read the section about the zlib library.
+      4. You do not have a version of the zlib library and you would like to 
+      use it.  If you do not want to use the zlib library or have your own
+      version read the section about the zlib library.
 
 
 STEP II: Building the Libraries and tests.
@@ -166,8 +166,7 @@ like to test.
 
 To test the h5dump utility, cd into hdf5\tools.  Then type:
 "dumptest [debug or release] [dll]" depending on which version you would like
-to test. Some differences are expected in the output of these 4 tests (the 
-errors are in the dimensions of the dataspace).
+to test. Some differences are expected in the output of these 4 tests. 
 
 
 NOTE: the appropriate dll should be placed in the Windows\system directory
@@ -175,7 +174,7 @@ before using the dlls.
 
 NOTE: The debug dll tests on the Alpha platform currently are not completely
       working.  The release dll is fine though.
-
+NOTE: The dll versions of h5dump are currently not working correctly.
         
 STEP IV: BUILDING THE EXAMPLES
 
