@@ -80,6 +80,7 @@
         H5FD.c
         H5FDcore.c
         H5FDfamily.c
+        H5FDlog.c
 
         H5V.c
         H5Z.c
@@ -87,4 +88,9 @@
         H5Zfletcher32.c
         H5Zshuffle.c
         H5Zszip.c
+
+    The following files have had their FUNC_ENTER, FUNC_LEAVE & HGOTO*
+    macros cleaned up and the PABLO_MASK adjusted, but have not been linted:
+        H5FDfphdf5.c
+        H5FDgass.c
 */
