@@ -1155,8 +1155,8 @@ int h4toh5lonevds(int32 file_id, hid_t h5group,int h4_attr){
 	     return FAIL;
 	   }
            free(h5cvdata_name);
+	 
 	 }
-       
        VSdetach(vdata_id);
        }
      free(ref_vdata_array);

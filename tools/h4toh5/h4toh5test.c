@@ -2862,7 +2862,6 @@ int test_vghl() {
 }
 /* this is a comprehensive testing file for h4-h5 converter. It includes
    annotation,vdata,image,sds,palette and vgroup objects*/
-
 /* the structure of the hdf5 file is as follows:
             root
             /  \
