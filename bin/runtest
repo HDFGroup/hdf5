@@ -47,13 +47,13 @@ ENABLE_PARALLEL="op-configure --enable-parallel"
 #***************
 # DEC
 # Gondolin: DEC
-#DECHOST="skydive"	# skydive is being upgraded.
-			# gondolin rsh/ssh don't work.
+#DECHOST="skydive"	# skydive is dead.
+			# gondolin rsh/ssh don't work. run as alone-host.
 # HP
 # sangamon: HPUX 10
-# opus: HPUX 11
-HPHOST="sangamon"	# HPUX 10 & 11 # opus removed because both its
-			# NFS and AFS filesystems have problems.
+# kelgia: HPUX 11
+HPHOST="kelgia sangamon"	# HPUX 10 & 11 
+
 # Linux
 # Dangermouse, eirene: Linux
 # Dangermouse used to die if gmake -j is used.
