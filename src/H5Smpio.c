@@ -539,7 +539,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
     assert (file_space);
     assert (mem_space);
     assert (buf);
-    assert (H5FD_MPIO==f->shared->fapl->driver_id);
+    assert (H5FD_MPIO==f->shared->driver_id);
 
     /* INCOMPLETE!!!  rky 980816 */
     /* Currently can only handle H5D_CONTIGUOUS layout */

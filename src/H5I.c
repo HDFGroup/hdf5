@@ -368,6 +368,13 @@ H5I_nmembers(H5I_type_t grp)
  *		failed is not removed.  This function returns failure if
  *		items could not be removed.
  *
+ * 		Robb Matzke, 1999-08-17
+ *		If the object reference count is larger than one then it must
+ *		be because the library is using the object internally. This
+ *		happens for instance for file driver ID's which are stored in
+ *		things like property lists, files, etc.  Objects that have a
+ *		reference count larger than one are not affected unless FORCE
+ *		is non-zero.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -407,6 +414,12 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
      */
     for (i=0; i<grp_ptr->hash_size; i++) {
 	for (cur=grp_ptr->id_list[i]; cur; cur=next) {
+	    /*
+	     * Do nothing to the object if the reference count is larger than
+	     * one and forcing is off.
+	     */
+	    if (!force && cur->count>1) continue;
+
 	    /* Free the object regardless of reference count */
 	    if (grp_ptr->free_func && (grp_ptr->free_func)(cur->obj_ptr)<0) {
 		if (force) {

@@ -101,8 +101,13 @@ H5_init_library(void)
 
     /*
      * Initialize interfaces that might not be able to initialize themselves
-     * soon enough.
+     * soon enough.  The file interface must be initialized because calling
+     * H5Pcreate() might require the H5F_access_dflt to be initialized.
      */
+    if (H5F_init()<0) {
+	HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
+		      "unable to initialize file interface");
+    }
     if (H5T_init()<0) {
         HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
                       "unable to initialize type interface");

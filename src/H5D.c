@@ -900,7 +900,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 
 #ifdef HAVE_PARALLEL
     /* If MPIO is used, no filter support yet. */
-    if (H5FD_MPIO==f->shared->fapl->driver_id &&
+    if (H5FD_MPIO==f->shared->driver_id &&
 	create_parms->pline.nfilters>0) {
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
 		     "Parallel IO does not support filters yet");
@@ -1277,7 +1277,7 @@ H5D_open_oid(H5G_entry_t *ent)
 
 #ifdef HAVE_PARALLEL
     /* If MPIO is used, no filter support yet. */
-    if (H5FD_MPIO==dataset->ent.file->shared->fapl->driver_id &&
+    if (H5FD_MPIO==dataset->ent.file->shared->driver_id &&
 	dataset->create_parms->pline.nfilters>0){
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
 		     "Parallel IO does not support filters yet");
@@ -1511,8 +1511,9 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     {
 	/* Collective access is not permissible with the MPIO driver */
 	H5FD_mpio_dxpl_t *dx;
-	if (H5FD_MPIO==dataset->ent.file->shared->fapl->driver_id &&
-	    (dx=dataset->ent.file->shared->fapl->driver_info) &&
+	if (H5FD_MPIO==dataset->ent.file->shared->driver_id &&
+	    H5FD_MPIO==xfer_parms->driver_id &&
+	    (dx=xfer_parms->driver_info) &&
 	    H5FD_MPIO_COLLECTIVE==dx->xfer_mode) {
 	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 			 "collective access not permissible");
@@ -1556,7 +1557,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * (the latter in case the arguments to sconv_funcs
      * turn out to be inappropriate for MPI-IO).  */
     if (H5_mpi_opt_types_g &&
-        H5FD_MPIO==dataset->ent.file->shared->fapl->driver_id) {
+        H5FD_MPIO==dataset->ent.file->shared->driver_id) {
 	sconv->read = H5S_mpio_spaces_read;
     }
 #endif /*HAVE_PARALLEL*/
@@ -1867,7 +1868,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* If MPIO is used, no VL datatype support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
-    if (H5FD_MPIO==dataset->ent.file->shared->fapl->driver_id &&
+    if (H5FD_MPIO==dataset->ent.file->shared->driver_id &&
 	H5T_get_class(mem_type)==H5T_VLEN) {
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "Parallel IO does not support writing VL datatypes yet");
@@ -1877,7 +1878,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* If MPIO is used, no dataset region reference support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
-    if (H5FD_MPIO==dataset->ent.file->shared->fapl->driver_id &&
+    if (H5FD_MPIO==dataset->ent.file->shared->driver_id &&
 	H5T_get_class(mem_type)==H5T_REFERENCE &&
 	H5T_get_ref_type(mem_type)==H5R_DATASET_REGION) {
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
@@ -1917,8 +1918,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     {
 	/* Collective access is not permissible with the MPIO driver */
 	H5FD_mpio_dxpl_t *dx;
-	if (H5FD_MPIO==dataset->ent.file->shared->fapl->driver_id &&
-	    (dx=dataset->ent.file->shared->fapl->driver_info) &&
+	if (H5FD_MPIO==dataset->ent.file->shared->driver_id &&
+	    H5FD_MPIO==xfer_parms->driver_id &&
+	    (dx=xfer_parms->driver_info) &&
 	    H5FD_MPIO_COLLECTIVE==dx->xfer_mode) {
 	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 			 "collective access not permissible");
@@ -1969,7 +1971,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * (the latter in case the arguments to sconv_funcs
      * turn out to be inappropriate for MPI-IO).  */
     if (H5_mpi_opt_types_g &&
-        H5FD_MPIO==dataset->ent.file->shared->fapl->driver_id) {
+        H5FD_MPIO==dataset->ent.file->shared->driver_id) {
 	sconv->write = H5S_mpio_spaces_write;
     }
 #endif /*HAVE_PARALLEL*/
