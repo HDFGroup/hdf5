@@ -867,7 +867,7 @@ H5I_dec_ref(hid_t id)
 		H5I_remove(id);
 		ret_value = 0;
 	    } else {
-		ret_value = 1;
+		ret_value = FAIL;
 	    }
 	} else {
 	    ret_value = --(id_ptr->count);
