@@ -770,6 +770,10 @@ static herr_t
 H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 		size_t size, const void *buf)
 {
+#ifdef WIN32
+    fpos_t tempos;
+#endif
+
     H5FD_stdio_t		*file = (H5FD_stdio_t*)_file;
     static const char *func="H5FD_stdio_write";  /* Function Name for error reporting */
 
@@ -794,7 +798,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     if ((file->op != H5FD_STDIO_OP_WRITE && file->op != H5FD_STDIO_OP_SEEK) ||
                 file->pos != addr) {
 #ifdef WIN32
-	    fpos_t tempos =(fpos_t)(addr+SEEK_SET);
+	    tempos =(fpos_t)(addr+SEEK_SET);
 
 	    if (fsetpos(file->fp,&tempos) != 0) {
 		file->op = H5FD_STDIO_OP_UNKNOWN;
@@ -827,7 +831,18 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
      */
     file->op = H5FD_STDIO_OP_WRITE;
     file->pos = addr + size;
+/* The following code needs to be added for windows VC 6.0. This should be a VC++
+   compiler bug. When not using ftell and fseek, although you reset the position to 
+    the starting of the file, fwrite will somehow to go to the end of the file and
+    add contents. It seems they used a circular seeking algorithm, the starting point
+    overlaps with the ending point and windows doesn't handle correctly for the case when
+    file was written to the disk close to the end of the file and rewrite from the beginning
+    of the file. This is how HDF5 signature was written for some failing cases. */
 
+#ifdef WIN32
+   tempos = ftell(file->fp);
+   fseek(file->fp,tempos,SEEK_SET);
+#endif
     /* Update EOF if necessary */
     if (file->pos>file->eof)
         file->eof = file->pos;
