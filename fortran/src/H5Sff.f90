@@ -436,9 +436,9 @@
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
-            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: start
+            INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) :: start
                                              !Starting coordinates of the bounding box. 
-            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: end
+            INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) :: end
                                              !Ending coordinates of the bounding box,
                                              !i.e., the coordinates of the diagonally 
                                              !opposite corner 
@@ -454,8 +454,8 @@
 !MS$ATTRIBUTES C,reference,alias:'_H5SGET_SELECT_BOUNDS_C'::h5sget_select_bounds_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: space_id
-              INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: start
-              INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: end
+              INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) :: start
+              INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) :: end
               END FUNCTION h5sget_select_bounds_c
             END INTERFACE
 

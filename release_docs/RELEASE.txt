@@ -58,6 +58,9 @@ Library:
     
     Complete list of changes:
 
+    * Changed H5Sget_select_bounds to use 'hssize_t *' for start and end
+      parameters, instead of 'hsize_t *', to better match other parts of the
+      dataspace API.  QAK - 2003/06/04
     * Changed raw data I/O to only access each chunk once, improving performance
       in many situations with hyperslabs and large chunks or chunks with
       filters.  These improvements are currently limited to serial I/O, with

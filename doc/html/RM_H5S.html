@@ -1165,8 +1165,8 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Name:</strong> <a name="Dataspace-SelectBounds">H5Sget_select_bounds</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Sget_select_bounds</code>(<em>hid_t </em><code>space_id</code>,
-        <em>hsize_t *</em><code>start</code>,
-        <em>hsize_t *</em><code>end</code>
+        <em>hssize_t *</em><code>start</code>,
+        <em>hssize_t *</em><code>end</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Gets the bounding box containing the current selection.
@@ -1192,9 +1192,9 @@ of the <cite>HDF5 User's Guide.</cite>.
     <dl>
         <dt><em>hid_t</em> <code>space_id</code>
             <dd>IN: Identifier of dataspace to query.
-        <dt><em>hsize_t *</em><code>start</code>
+        <dt><em>hssize_t *</em><code>start</code>
             <dd>OUT: Starting coordinates of the bounding box.
-        <dt><em>hsize_t *</em><code>end</code>
+        <dt><em>hssize_t *</em><code>end</code>
             <dd>OUT: Ending coordinates of the bounding box, 
                 i.e., the coordinates of the diagonally opposite corner.
     </dl>

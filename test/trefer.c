@@ -326,8 +326,13 @@ test_reference_region(void)
     hsize_t		block[SPACE2_RANK];     /* Block size of hyperslab */
     hssize_t	coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
     hsize_t *   coords;             /* Coordinate buffer */
+#ifdef H5_WANT_H5_V1_4_COMPAT
     hsize_t		low[SPACE2_RANK];   /* Selection bounds */
     hsize_t		high[SPACE2_RANK];     /* Selection bounds */
+#else /* H5_WANT_H5_V1_4_COMPAT */
+    hssize_t		low[SPACE2_RANK];   /* Selection bounds */
+    hssize_t		high[SPACE2_RANK];     /* Selection bounds */
+#endif /* H5_WANT_H5_V1_4_COMPAT */
     hdset_reg_ref_t      *wbuf,      /* buffer to write to disk */
                *rbuf;       /* buffer read from disk */
     uint8_t    *dwbuf,      /* Buffer for writing numeric data to disk */
@@ -587,8 +592,8 @@ test_reference_region_1D(void)
     hsize_t	block[SPACE3_RANK];     /* Block size of hyperslab */
     hssize_t	coord1[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
     hsize_t *   coords;                 /* Coordinate buffer */
-    hsize_t	low[SPACE3_RANK];       /* Selection bounds */
-    hsize_t	high[SPACE3_RANK];      /* Selection bounds */
+    hssize_t	low[SPACE3_RANK];       /* Selection bounds */
+    hssize_t	high[SPACE3_RANK];      /* Selection bounds */
     hdset_reg_ref_t      *wbuf,         /* buffer to write to disk */
                *rbuf;   /* buffer read from disk */
     uint8_t    *dwbuf,  /* Buffer for writing numeric data to disk */

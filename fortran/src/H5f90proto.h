@@ -159,7 +159,7 @@ H5_DLL int_f nh5scopy_c ( hid_t_f *space_id , hid_t_f *new_space_id);
 H5_DLL int_f nh5sget_select_hyper_nblocks_c( hid_t_f *space_id , hssize_t_f * num_blocks);
 H5_DLL int_f nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock, hsize_t_f * num_blocks, hsize_t_f * buf);
 
-H5_DLL int_f nh5sget_select_bounds_c( hid_t_f *space_id , hsize_t_f * start, hsize_t_f * end);
+H5_DLL int_f nh5sget_select_bounds_c( hid_t_f *space_id , hssize_t_f * start, hssize_t_f * end);
 
 H5_DLL int_f nh5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points);
 

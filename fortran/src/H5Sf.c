@@ -246,28 +246,28 @@ nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock,
  *---------------------------------------------------------------------------*/
 
 int_f 
-nh5sget_select_bounds_c( hid_t_f *space_id , hsize_t_f * start, hsize_t_f * end)
+nh5sget_select_bounds_c( hid_t_f *space_id , hssize_t_f * start, hssize_t_f * end)
 {
   int ret_value = -1;
   hid_t c_space_id;
-  hsize_t* c_start, *c_end;
+  hssize_t* c_start, *c_end;
   int i, rank;
 
   c_space_id = *space_id;
   rank = H5Sget_simple_extent_ndims(c_space_id);
   if (rank < 0 ) return ret_value;
 
-  c_start =(hsize_t*) malloc(sizeof(hsize_t)*rank);
+  c_start =(hssize_t*) malloc(sizeof(hssize_t)*rank);
   if (!c_start) return ret_value;
 
-  c_end = (hsize_t*)malloc(sizeof(hsize_t)*rank);
+  c_end = (hssize_t*)malloc(sizeof(hssize_t)*rank);
   if(!c_end) return ret_value;
 
   ret_value = H5Sget_select_bounds(c_space_id, c_start, c_end);
   for(i = 0; i < rank; i++)
   {
-    start[i] = (hsize_t_f)(c_start[i]+1);
-    end[i] = (hsize_t_f)(c_end[i]+1);
+    start[i] = (hssize_t_f)(c_start[i]+1);
+    end[i] = (hssize_t_f)(c_end[i]+1);
   }
   if (ret_value  >= 0  ) ret_value = 0;
 

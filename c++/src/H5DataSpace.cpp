@@ -266,7 +266,7 @@ void DataSpace::getSelectElemPointlist ( hsize_t startpoint, hsize_t numpoints, 
 }
 
 // Gets the bounding box containing the current selection
-void DataSpace::getSelectBounds ( hsize_t* start, hsize_t* end ) const
+void DataSpace::getSelectBounds ( hssize_t* start, hssize_t* end ) const
 {
    herr_t ret_value = H5Sget_select_bounds( id, start, end );
    if( ret_value < 0 )

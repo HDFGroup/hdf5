@@ -97,6 +97,10 @@ H5function6
                 following the call to "flush".  Actions in the "flush" call
                 that are duplicated in the VFL "close" call may be omitted by
                 the VFL driver.
+        <dt><code>H5Sget_select_bounds</code>
+          <dd>The 'start' and 'end' parameters have changed from
+                <code>'hsize_t *'</code>
+                to <code>'hssize_t *'</code> to better match the rest of the dataspace API.
         <dt><code>H5function</code>
           <dd>Description of change
         </dl>

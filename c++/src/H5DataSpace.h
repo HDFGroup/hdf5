@@ -81,7 +81,7 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	void getSelectElemPointlist( hsize_t startpoint, hsize_t numpoints, hsize_t *buf ) const;
 
 	// Gets the bounding box containing the current selection.
-	void getSelectBounds( hsize_t* start, hsize_t* end ) const;
+	void getSelectBounds( hssize_t* start, hssize_t* end ) const;
 
 	// Selects array elements to be included in the selection for 
 	// this dataspace.

@@ -792,9 +792,9 @@
      INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:) :: pointlist
 
      !
-     !start and end bounds in the current dataspac selection 
+     !start and end bounds in the current dataspace selection 
      !
-     INTEGER(HSIZE_T), DIMENSION(RANK) :: startout, endout
+     INTEGER(HSSIZE_T), DIMENSION(RANK) :: startout, endout
 
      !
      !data to write 

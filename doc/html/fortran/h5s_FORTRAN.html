@@ -795,9 +795,9 @@ FORTRAN Dataspace API -- h5s
             IMPLICIT NONE
  
             INTEGER(HID_T), INTENT(IN)   :: space_id ! Dataspace identifier
-            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: start
+            INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) :: start
                                             ! Starting coordinate of the bounding box
-            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) ::end 
+            INTEGER(HSSIZE_T), DIMENSION(*), INTENT(OUT) ::end 
                                             ! Ending coordinate (opposite corner)
                                             ! of the bounding box
             INTEGER, INTENT(OUT) :: hdferr         ! Error code
