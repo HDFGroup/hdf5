@@ -9,12 +9,13 @@ top_builddir=../..
 srcdir=@srcdir@
 @COMMENCE@
 
-hdf5_dir=$(top_builddir)/../src
+hdf5_builddir=$(top_builddir)/../src
+hdf5_builddir=$(top_srcdir)/../src
 
 TRACE=perl $(top_srcdir)/bin/trace
 
 ## Add `-I.' to the C preprocessor flags.
-CPPFLAGS=-I. -I$(hdf5_dir) @CPPFLAGS@
+CPPFLAGS=-I. -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
 
 ## This is our main target
 LIB=libhdf5_fortran.la

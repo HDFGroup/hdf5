@@ -9,7 +9,8 @@ top_builddir=../..
 srcdir=@srcdir@
 @COMMENCE@
 
-hdf5_dir=$(top_builddir)/../src
+hdf5_builddir=$(top_builddir)/../src
+hdf5_builddir=$(top_builddir)/../src
 
 ## Add include directory to the C preprocessor flags and the h5test and hdf5
 ## libraries to the library list.
@@ -17,7 +18,7 @@ LT_LINK_LIB=$(LT) --mode=link $(F9X) -static -rpath $(libdir)
 MFLAG=@F9XMODFLAG@
 FFLAGS=$(MFLAG). $(MFLAG)../src
 FLIB=../src/libhdf5_fortran.la
-HDF5LIB=$(hdf5_dir)/libhdf5.la
+HDF5LIB=$(hdf5_builddir)/libhdf5.la
 
 TEST_PROGS_SRC=fortranlib_test.f90 fflush1.f90 fflush2.f90
 TEST_PROGS=$(TEST_PROGS_SRC:.f90=)
