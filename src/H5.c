@@ -808,7 +808,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    }
 
 	    /* Type modifier */
-	    if (HDstrchr ("ZHhlq", *s)) {
+	    if (HDstrchr ("ZHhlqL", *s)) {
 		switch (*s) {
 		case 'H':
 		    if (sizeof(hsize_t)<sizeof(long)) {
