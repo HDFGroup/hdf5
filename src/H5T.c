@@ -2601,6 +2601,10 @@ H5T_create(H5T_class_t type, size_t size)
             dt->type = type;
             if(type==H5T_COMPOUND)
                 dt->u.compnd.packed=TRUE;       /* Start out packed */
+            else if(type==H5T_OPAQUE)
+                /* Initialize the tag in case it's not set later.  A null tag will 
+                 * cause problems for later operations. */
+                dt->u.opaque.tag = H5MM_strdup("");
             break;
 
         case H5T_ENUM:
@@ -2629,7 +2633,6 @@ H5T_create(H5T_class_t type, size_t size)
 
         case H5T_ARRAY:  /* Array datatype */
             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL, "base type required - use H5Tarray_create()");
-
         default:
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, NULL, "unknown data type class");
     }
@@ -3586,8 +3589,9 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
             break;
 
         case H5T_OPAQUE:
-            HGOTO_DONE(HDstrcmp(dt1->u.opaque.tag,dt2->u.opaque.tag));
-
+            if(dt1->u.opaque.tag && dt2->u.opaque.tag) {
+                HGOTO_DONE(HDstrcmp(dt1->u.opaque.tag,dt2->u.opaque.tag));
+            }
         case H5T_ARRAY:
             if (dt1->u.array.ndims < dt2->u.array.ndims)
                 HGOTO_DONE(-1);
