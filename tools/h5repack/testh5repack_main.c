@@ -952,6 +952,67 @@ if (szip_can_encode) {
 #endif
 
  
+ TESTING("    copy of nbit filter");
+ 
+#ifdef H5_HAVE_FILTER_NBIT
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME12,FNAME12OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME12,FNAME12OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME12OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+ PASSED();
+#else
+ SKIPPED();
+#endif
+
+  TESTING("    removing nbit filter");
+
+#ifdef H5_HAVE_FILTER_NBIT
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_nbit:NONE",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME12,FNAME12OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME12,FNAME12OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME12OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+ PASSED();  
+#else
+ SKIPPED();
+#endif
+
+  TESTING("    adding nbit filter");
+
+#ifdef H5_HAVE_FILTER_NBIT
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_int31:NBIT",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME12,FNAME12OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME12,FNAME12OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME12OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+ PASSED();  
+#else
+ SKIPPED();
+#endif
+
 /*-------------------------------------------------------------------------
  * file with all filters 
  *  dset_all

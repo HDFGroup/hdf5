@@ -147,10 +147,12 @@ void usage(void)
  printf("       SZIP, to apply the HDF5 SZIP filter (SZIP compression)\n");
  printf("       SHUF, to apply the HDF5 shuffle filter\n");
  printf("       FLET, to apply the HDF5 checksum filter\n");
+ printf("       NBIT, to apply the HDF5 NBIT filter (NBIT compression)\n");
  printf("       NONE, to remove the filter\n");
  printf("     <filter parameters> is optional compression info\n");
  printf("       SHUF (no parameter)\n");
  printf("       FLET (no parameter)\n");
+ printf("       NBIT (no parameter)\n");
  printf("       GZIP=<deflation level> from 1-9\n");
  printf("       SZIP=<pixels per block,coding> (pixels per block is a even number in 2-32 and coding method is 'EC' or 'NN')\n");
  printf("[-l 'layout']     Layout type. 'layout' is a string with the format\n");

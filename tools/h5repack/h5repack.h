@@ -275,6 +275,8 @@ int         parse_number(char *str);
 #define FNAME9OUT     "test_shuffle.out.h5"
 #define FNAME10OUT    "test_fletcher32.out.h5"
 #define FNAME11OUT    "test_all.out.h5"
+#define FNAME12    "test_nbit.h5"
+#define FNAME12OUT    "test_nbit.out.h5"
 
 int make_testfiles(void);
 

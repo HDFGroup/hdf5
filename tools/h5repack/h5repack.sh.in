@@ -18,6 +18,7 @@ USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
 USE_FILTER_SHUFFLE="@USE_FILTER_SHUFFLE@"
 USE_FILTER_FLETCHER32="@USE_FILTER_FLETCHER32@"
+USE_FILTER_NBIT="@USE_FILTER_NBIT@"
 
 
 H5REPACK=h5repack               # The tool name
@@ -282,9 +283,33 @@ else
  TOOLTEST $arg
 fi        
 
+# nbit copy
+arg="test_nbit.h5"
+if test $USE_FILTER_NBIT != "yes" ; then
+ SKIP $arg
+else
+ TOOLTEST $arg
+fi
+
+# nbit remove
+arg="test_nbit.h5 -f dset_nbit:NONE"
+if test $USE_FILTER_NBIT != "yes" ; then
+ SKIP $arg
+else
+ TOOLTEST $arg
+fi        
+
+# nbit add
+arg="test_nbit.h5 -f dset_int31:NBIT"
+if test $USE_FILTER_NBIT != "yes" ; then
+ SKIP $arg
+else
+ TOOLTEST $arg
+fi
+
 # remove all  filters
 arg="test_all.h5 -f NONE"
-if test $USE_FILTER_FLETCHER32 != "yes" -o $USE_FILTER_DEFLATE != "yes" -o $USE_FILTER_SZIP != "yes" -o $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SHUFFLE != "yes"  ; then
+if test $USE_FILTER_FLETCHER32 != "yes" -o $USE_FILTER_DEFLATE != "yes" -o $USE_FILTER_SZIP != "yes" -o $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SHUFFLE != "yes"  -o $USE_FILTER_NBIT != "yes"  ; then
  SKIP $arg
 else
  TOOLTEST $arg

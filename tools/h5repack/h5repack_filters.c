@@ -287,6 +287,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
  * H5Z_FILTER_SHUFFLE    2 , shuffle the data
  * H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
  * H5Z_FILTER_SZIP       4 , szip compression 
+ * H5Z_FILTER_NBIT       5 , nbit compression 
  *-------------------------------------------------------------------------
  */
 	
@@ -367,6 +368,16 @@ int apply_filters(const char* name,    /* object name from traverse list */
 				if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
 					return -1;
 				if (H5Pset_fletcher32(dcpl_id)<0) 
+					return -1;
+				break;
+				/*-------------------------------------------------------------------------
+				* H5Z_FILTER_NBIT , NBIT compression
+				*-------------------------------------------------------------------------
+				*/
+			case H5Z_FILTER_NBIT:
+				if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
+					return -1;
+				if (H5Pset_nbit(dcpl_id)<0) 
 					return -1;
 				break;
 			} /* switch */

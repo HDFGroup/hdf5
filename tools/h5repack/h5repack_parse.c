@@ -34,6 +34,7 @@
  *  SZIP, to apply the HDF5 SZIP filter (SZIP compression)
  *  SHUF, to apply the HDF5 shuffle filter
  *  FLET, to apply the HDF5 checksum filter
+ *  NBIT, to apply the HDF5 NBIT filter (NBIT compression)
  *  NONE, to remove the filter 
  *
  * Examples: 
@@ -270,6 +271,19 @@ obj_list_t* parse_filter(const char *str,
      exit(1);
     }
    }
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_NBIT
+ *-------------------------------------------------------------------------
+ */
+   else if (strcmp(scomp,"NBIT")==0)
+   {
+    filt->filtn=H5Z_FILTER_NBIT;
+    if (m>0){ /*nbit does not have parameter */
+     if (obj_list) free(obj_list);
+     printf("Input Error: Extra parameter in NBIT <%s>\n",str);
+     exit(1);
+    }
+   }
    else {
     if (obj_list) free(obj_list);
     printf("Input Error: Invalid filter type in <%s>\n",str);
@@ -341,6 +355,8 @@ const char* get_sfilter(H5Z_filter_t filtn)
   return "SHUFFLE";
  else if (filtn==H5Z_FILTER_FLETCHER32)
   return "FLETCHER32";
+ else if (filtn==H5Z_FILTER_NBIT)
+  return "NBIT";
  else {
   printf("Input error in filter type\n");
   exit(1);
