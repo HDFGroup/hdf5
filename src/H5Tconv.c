@@ -361,16 +361,16 @@ H5FL_BLK_DEFINE_STATIC(vlen_seq);
 
 /* Print alignment statistics */
 #   define CI_PRINT_STATS(STYPE,DTYPE) {				      \
-    if (H5DEBUG(T) && cdata->priv->s_aligned) {				      \
+    if (H5DEBUG(T) && ((H5T_conv_hw_t *)cdata->priv)->s_aligned) {				      \
 	HDfprintf(H5DEBUG(T),						      \
 		  "      %Hu src elements aligned on %lu-byte boundaries\n",  \
-		  cdata->priv->s_aligned,					      \
+		  ((H5T_conv_hw_t *)cdata->priv)->s_aligned,				\
 		  (unsigned long)H5T_NATIVE_##STYPE##_ALIGN_g);		      \
     }									      \
-    if (H5DEBUG(T) && cdata->priv->d_aligned) {				      \
+    if (H5DEBUG(T) && ((H5T_conv_hw_t *)cdata->priv)->d_aligned) {				      \
 	HDfprintf(H5DEBUG(T),						      \
 		  "      %Hu dst elements aligned on %lu-byte boundaries\n",  \
-		  cdata->priv->d_aligned,					      \
+		  ((H5T_conv_hw_t *)cdata->priv)->d_aligned,				\
 		  (unsigned long)H5T_NATIVE_##DTYPE##_ALIGN_g);		      \
     }									      \
 }
@@ -388,10 +388,10 @@ H5FL_BLK_DEFINE_STATIC(vlen_seq);
         cdata->priv = H5MM_xfree(cdata->priv);
 
 /* Increment source alignment counter */
-#   define CI_INC_SRC(s)   if (s) cdata->priv->s_aligned += nelmts;
+#   define CI_INC_SRC(s)   if (s) ((H5T_conv_hw_t *)cdata->priv)->s_aligned += nelmts;
 
 /* Increment destination alignment counter */
-#   define CI_INC_DST(d)   if (d) cdata->priv->d_aligned += nelmts;
+#   define CI_INC_DST(d)   if (d) ((H5T_conv_hw_t *)cdata->priv)->d_aligned += nelmts;
 #else
 #   define CI_PRINT_STATS(STYPE,DTYPE) /*void*/
 #   define CI_ALLOC_PRIV cdata->priv=NULL;
