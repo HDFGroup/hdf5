@@ -11,6 +11,7 @@
  ****************************************************************************/
 
 #include "H5TB.h"
+#include "H5HL_private.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -328,42 +329,10 @@ herr_t H5TBappend_records( hid_t loc_id,
  if ((mem_type_id=H5TB_create_type(loc_id,dset_name,dst_size,dst_offset,dst_sizes,tid))<0)
   goto out;
 
- /* Extend the dataset */
- dims[0] = nrecords_orig;
- dims[0] += nrecords;
+ /* Append the records */
+ if ((H5TBcommon_append_records(did, mem_type_id, nrecords, nrecords_orig, data))<0)
+  goto out; 
 
- if ( H5Dextend ( did, dims ) < 0 )
-  goto out;
-
- /* Create a simple memory data space */
- mem_dims[0]=nrecords;
- if ( (mem_space_id = H5Screate_simple( 1, mem_dims, NULL )) < 0 )
-  return -1;
-
- /* Get the file data space */
- if ( (sid = H5Dget_space( did )) < 0 )
-  return -1;
-
- /* Get the dimensions */
- if ( H5Sget_simple_extent_dims( sid, dims, NULL ) != 1 )
-  goto out;
-
- /* Define a hyperslab in the dataset */
- offset[0] = nrecords_orig;
- count[0]  = nrecords;
- if ( H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
-  goto out;
-
- if ( H5Dwrite( did, mem_type_id, mem_space_id, sid, H5P_DEFAULT, data ) < 0 )
-  goto out;
- 
- /* Terminate access to the dataspace */
- if ( H5Sclose( mem_space_id ) < 0 )
-  goto out;
-
- if ( H5Sclose( sid ) < 0 )
-  goto out;
- 
  /* Release the datatype. */
  if ( H5Tclose( tid ) < 0 )
   return -1;
@@ -973,6 +942,10 @@ herr_t H5TBread_records( hid_t loc_id,
   goto out;
  
  if ((mem_type_id=H5TB_create_type(loc_id,dset_name,dst_size,dst_offset,dst_sizes,ftype_id))<0)
+  goto out;
+
+ /* Read the records */
+ if ((H5TBcommon_read_records(did, mem_type_id, start, nrecords, nrecords_orig, data)) < 0)
   goto out;
 
  /* get the dataspace handle */

@@ -10,15 +10,14 @@
 include $(top_srcdir)/config/commence.am
 
 # Add include directories to the C preprocessor flags
-#AM_CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src -I$(top-srcdir)/tools/lib
 AM_CPPFLAGS=-I$(top_srcdir)/src
 
 # This library is our main target.
 lib_LTLIBRARIES=libhdf5_hl.la
 
-libhdf5_hl_la_SOURCES=H5LT.c H5TB.c H5IM.c H5DS.c
+libhdf5_hl_la_SOURCES=H5LT.c H5TB.c H5IM.c H5DS.c H5PT.c H5HL_private.c
 
 # Public header files (to be installed)
-include_HEADERS=H5IM.h H5LT.h H5TB.h H5DS.h
+include_HEADERS=H5IM.h H5LT.h H5TB.h H5DS.h H5PT.h
 
 include $(top_srcdir)/config/conclude.am

@@ -18,7 +18,7 @@ LDADD=$(LIBH5_HL) $(LIBHDF5)
 
 # Test programs.  These are our main targets.  They should be listed in the
 # order to be executed, generally most specific tests to least specific tests.
-TEST_PROG=test_lite test_image test_table test_ds
+TEST_PROG=test_lite test_image test_table test_ds test_packet
 check_PROGRAMS=$(TEST_PROG)
 
 # Temporary files.  These files are the ones created by running `make test'.

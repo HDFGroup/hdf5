@@ -66,7 +66,8 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_hl_la_LIBADD =
-am_libhdf5_hl_la_OBJECTS = H5LT.lo H5TB.lo H5IM.lo H5DS.lo
+am_libhdf5_hl_la_OBJECTS = H5LT.lo H5TB.lo H5IM.lo H5DS.lo H5PT.lo \
+	H5HL_private.lo
 libhdf5_hl_la_OBJECTS = $(am_libhdf5_hl_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
@@ -280,15 +281,14 @@ H5FC = $(bindir)/h5fc
 H5FC_PP = $(bindir)/h5pfc
 
 # Add include directories to the C preprocessor flags
-#AM_CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src -I$(top-srcdir)/tools/lib
 AM_CPPFLAGS = -I$(top_srcdir)/src
 
 # This library is our main target.
 lib_LTLIBRARIES = libhdf5_hl.la
-libhdf5_hl_la_SOURCES = H5LT.c H5TB.c H5IM.c H5DS.c
+libhdf5_hl_la_SOURCES = H5LT.c H5TB.c H5IM.c H5DS.c H5PT.c H5HL_private.c
 
 # Public header files (to be installed)
-include_HEADERS = H5IM.h H5LT.h H5TB.h H5DS.h
+include_HEADERS = H5IM.h H5LT.h H5TB.h H5DS.h H5PT.h
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -372,8 +372,10 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5DS.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HL_private.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IM.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5LT.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5PT.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5TB.Plo@am__quote@
 
 .c.o:
