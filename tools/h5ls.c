@@ -835,10 +835,10 @@ display_enum_type(hid_t type, int ind)
 	    }
 	} else if (H5T_SGN_NONE==H5Tget_sign(native)) {
 	    printf("%"PRINTF_LL_WIDTH"u",
-		   *((unsigned long_long*)(value+i*dst_size)));
+		   *((unsigned long_long*)((void*)(value+i*dst_size))));
 	} else {
 	    printf("%"PRINTF_LL_WIDTH"d",
-		   *((long_long*)(value+i*dst_size)));
+		   *((long_long*)((void*)(value+i*dst_size))));
 	}
     }
 

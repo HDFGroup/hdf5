@@ -1385,7 +1385,7 @@ void test_objref(void){
     /* Create a dataset (inside Group1) */
     dataset=H5Dcreate(group,"Dataset1",H5T_STD_U32BE,sid1,H5P_DEFAULT);
 
-    for(tu32=(uint32_t *)wbuf,i=0; i<SPACE1_DIM1; i++)
+    for(tu32=(uint32_t *)((void*)wbuf),i=0; i<SPACE1_DIM1; i++)
         *tu32++=i*3;
 
     /* Write selection to disk */
