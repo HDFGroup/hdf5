@@ -136,8 +136,10 @@
 ./doc/html/Lib_Maint.html		_DO_NOT_DISTRIBUTE_
 ./doc/html/Makefile.in
 ./doc/html/MemoryManagement.html	_DO_NOT_DISTRIBUTE_
+./doc/html/MountingFiles.html
 ./doc/html/NCSAfooterlogo.gif
 ./doc/html/ObjectHeader.txt		_DO_NOT_DISTRIBUTE_
+./doc/html/Performance.html
 ./doc/html/PredefDTypes.html
 ./doc/html/Properties.html
 ./doc/html/Ragged.html
@@ -209,8 +211,6 @@
 ./doc/html/Tutor/ContentsIntro.html
 ./doc/html/Tutor/Copyright.html
 ./doc/html/Tutor/Dependencies
-./doc/html/Tutor/Graphics
-./doc/html/Tutor/H5DocInsert
 ./doc/html/Tutor/Makefile.in
 ./doc/html/Tutor/answers.html
 ./doc/html/Tutor/api.html
@@ -304,10 +304,6 @@
 ./doc/html/chunk1.gif
 ./doc/html/chunk1.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/compat.html
-
-./doc/html/cpplus/CppInterfaces.html
-./doc/html/cpplus/CppUserNotes.doc      _DO_NOT_DISTRIBUTE_
-./doc/html/cpplus/CppUserNotes.pdf
 
 ./doc/html/dataset_p1.gif
 ./doc/html/dataset_p1.obj
