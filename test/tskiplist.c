@@ -149,7 +149,7 @@ test_skiplist_insert(void)
     /* Output message about test being performed */
     MESSAGE(7, ("Testing Insertion Into Skip List\n"));
 
-    /* Create a Heap */
+    /* Create a skip list */
     slist=H5SL_create(H5SL_TYPE_INT, 0.5, 16);
     CHECK(slist, NULL, "H5SL_create");
 
@@ -210,7 +210,7 @@ test_skiplist_insert_many(void)
     /* Output message about test being performed */
     MESSAGE(7, ("Testing Insertion of Many Items Into Skip List\n"));
 
-    /* Create a Heap */
+    /* Create a skip list */
     slist=H5SL_create(H5SL_TYPE_INT, 0.5, 16);
     CHECK(slist, NULL, "H5SL_create");
 
@@ -284,7 +284,7 @@ test_skiplist_remove(void)
     /* Output message about test being performed */
     MESSAGE(7, ("Testing Removal From Skip List\n"));
 
-    /* Create a Heap */
+    /* Create a skip list */
     slist=H5SL_create(H5SL_TYPE_INT, 0.5, 16);
     CHECK(slist, NULL, "H5SL_create");
 
@@ -363,7 +363,7 @@ test_skiplist_remove_many(void)
     /* Output message about test being performed */
     MESSAGE(7, ("Testing Removal of Many Items From Skip List\n"));
 
-    /* Create a Heap */
+    /* Create a skip list */
     slist=H5SL_create(H5SL_TYPE_INT, 0.5, 16);
     CHECK(slist, NULL, "H5SL_create");
 
@@ -392,7 +392,7 @@ test_skiplist_remove_many(void)
     num=H5SL_count(slist);
     VERIFY(num, 0, "H5SL_count");
 
-/* Insert & remove again (in sorted order), to check that completely empty heaps can be added again */
+/* Insert & remove again (in sorted order), to check that completely empty skip lists can be added again */
 
     /* Insert many objects into the skip list */
     for(u=0; u<NUM_ELEMS; u++) {
@@ -415,7 +415,7 @@ test_skiplist_remove_many(void)
     num=H5SL_count(slist);
     VERIFY(num, 0, "H5SL_count");
 
-/* Insert & remove again (in reverse sorted order), to check that completely empty heaps can be added again */
+/* Insert & remove again (in reverse sorted order), to check that completely empty skip lists can be added again */
 
     /* Insert many objects into the skip list */
     for(u=0; u<NUM_ELEMS; u++) {
@@ -463,7 +463,7 @@ test_skiplist_iterate(void)
     /* Output message about test being performed */
     MESSAGE(7, ("Testing Iterating Over Skip List\n"));
 
-    /* Create a Heap */
+    /* Create a skip list */
     slist=H5SL_create(H5SL_TYPE_INT, 0.5, 16);
     CHECK(slist, NULL, "H5SL_create");
 
@@ -499,6 +499,85 @@ test_skiplist_iterate(void)
 
 /****************************************************************
 **
+**  test_skiplist_string(): Test H5SL (skip list) code.
+**      Tests using strings for keys in skip lists.
+** 
+****************************************************************/
+static void 
+test_skiplist_string(void)
+{
+    H5SL_t *slist;      /* Skip list created */
+    H5SL_node_t *node;  /* Skip list node */
+    ssize_t num;        /* Number of elements in skip list */
+    size_t u;           /* Local index variable */
+    typedef struct string_node {
+        int i;
+        const char *s;
+    } string_node;
+    string_node data[10]={
+        {10,"10"},
+        {20,"20"},
+        {15,"15"},
+        { 5,"05"},
+        {50,"50"},
+        {30,"30"},
+        {31,"31"},
+        {32,"32"},
+        {80,"80"},
+        {90,"90"}};
+    string_node sorted_data[10]={
+        { 5,"05"},
+        {10,"10"},
+        {15,"15"},
+        {20,"20"},
+        {30,"30"},
+        {31,"31"},
+        {32,"32"},
+        {50,"50"},
+        {80,"80"},
+        {90,"90"}};
+    string_node *found_item;    /* Item found in skip list */
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(7, ("Testing Skip List With String Keys\n"));
+
+    /* Create a skip list */
+    slist=H5SL_create(H5SL_TYPE_STR, 0.5, 16);
+    CHECK(slist, NULL, "H5SL_create");
+
+    /* Check that the skip list has no elements */
+    num=H5SL_count(slist);
+    VERIFY(num, 0, "H5SL_count");
+
+    /* Insert objects into the skip list */
+    for(u=0; u<10; u++) {
+        ret=H5SL_insert(slist,&data[u],&data[u].s);
+        CHECK(ret, FAIL, "H5SL_insert");
+    } /* end for */
+
+    /* Check that the skip list has correct # of elements */
+    num=H5SL_count(slist);
+    VERIFY(num, 10, "H5SL_count");
+
+    /* Iterate over all the nodes in the skip list */
+    node=H5SL_first(slist);
+    u=0;
+    while(node!=NULL) {
+        found_item=H5SL_item(node);
+        VERIFY(found_item->i,sorted_data[u].i,"H5SL_next");
+        u++;
+        node=H5SL_next(node);
+    } /* end while */
+
+    /* Close the skip list */
+    ret=H5SL_close(slist);
+    CHECK(ret, FAIL, "H5SL_close");
+
+} /* end test_skiplist_string() */
+
+/****************************************************************
+**
 **  test_skiplist(): Main H5SL testing routine.
 ** 
 ****************************************************************/
@@ -518,7 +597,7 @@ test_skiplist(void)
     test_skiplist_remove();     /* Test basic skip list removal */
     test_skiplist_remove_many(); /* Test removal of many items from skip list */
     test_skiplist_iterate();    /* Test iteration over skip list nodes */
+    test_skiplist_string();     /* Test skip list string keys */
 
 }   /* end test_skiplist() */
-
 

@@ -76,34 +76,50 @@
 /* Define a code template for _NOT_ updating the "update" vector for the "DOUPDATE" in the H5SL_FIND macro */
 #define H5SL_FIND_NO_UPDATE(X,UPDATE,I)
 
+/* Define a code template for comparing scalar keys for the "CMP" in the H5SL_FIND macro */
+#define H5SL_FIND_SCALAR_CMP(TYPE,PKEY1,PKEY2)                          \
+        (*(TYPE *)PKEY1<*(TYPE *)PKEY2)
+
+/* Define a code template for comparing string keys for the "CMP" in the H5SL_FIND macro */
+#define H5SL_FIND_STRING_CMP(TYPE,PKEY1,PKEY2)                          \
+        (HDstrcmp(*(TYPE *)PKEY1,*(TYPE *)PKEY2)<0)
+
+/* Define a code template for comparing scalar keys for the "EQ" in the H5SL_FIND macro */
+#define H5SL_FIND_SCALAR_EQ(TYPE,PKEY1,PKEY2)                           \
+        (*(TYPE *)PKEY1==*(TYPE *)PKEY2)
+
+/* Define a code template for comparing string keys for the "EQ" in the H5SL_FIND macro */
+#define H5SL_FIND_STRING_EQ(TYPE,PKEY1,PKEY2)                           \
+        (HDstrcmp(*(TYPE *)PKEY1,*(TYPE *)PKEY2)==0)
+
 /* Macro used to find node for operation */
-#define H5SL_FIND(OP,DOUPDATE,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)   \
+#define H5SL_FIND(OP,DOUPDATE,CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED) \
     CHECKED=NULL;                                                       \
     for(I=(int)SLIST->curr_level; I>=0; I--) {                          \
         if(X->forward[I]!=CHECKED) {                                    \
-            while(X->forward[I] && *(TYPE *)X->forward[I]->key<*(TYPE *)KEY) \
+            while(X->forward[I] && H5_GLUE3(H5SL_FIND_,CMP,_CMP)(TYPE,X->forward[I]->key,KEY) ) \
                 X=X->forward[I];                                        \
             CHECKED=X->forward[I];                                      \
         } /* end if */                                                  \
         H5_GLUE3(H5SL_FIND_,DOUPDATE,_UPDATE)(X,UPDATE,I)               \
     } /* end for */                                                     \
     X=X->forward[0];                                                    \
-    if(X!=NULL && *(TYPE *)X->key==*(TYPE *)key) {                      \
+    if(X!=NULL && H5_GLUE3(H5SL_FIND_,CMP,_EQ)(TYPE,X->key,KEY) ) {     \
         /* What to do when a node is found */				\
         H5_GLUE3(H5SL_FIND_,OP,_FOUND)(SLIST,X,UPDATE,I,ITEM)           \
     } /* end if */
 
 /* Macro used to insert node */
-#define H5SL_INSERT(SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)             \
-    H5SL_FIND(INSERT,YES,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)
+#define H5SL_INSERT(CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)         \
+    H5SL_FIND(INSERT,YES,CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)
 
 /* Macro used to remove node */
-#define H5SL_REMOVE(SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)             \
-    H5SL_FIND(REMOVE,YES,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)
+#define H5SL_REMOVE(CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)         \
+    H5SL_FIND(REMOVE,YES,CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)
 
 /* Macro used to search for node */
-#define H5SL_SEARCH(SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)             \
-    H5SL_FIND(SEARCH,NO,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)
+#define H5SL_SEARCH(CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)         \
+    H5SL_FIND(SEARCH,NO,CMP,SLIST,X,UPDATE,I,TYPE,ITEM,KEY,CHECKED)
 
 
 /* Private typedefs & structs */
@@ -288,7 +304,7 @@ H5SL_create(H5SL_type_t type, double p, size_t max_level)
     /* Check args */
     HDassert(p>0.0 && p<1.0);
     HDassert(max_level>0 && max_level<=H5SL_LEVEL_MAX);
-    HDassert(type>=H5SL_TYPE_INT && type<=H5SL_TYPE_HADDR);
+    HDassert(type>=H5SL_TYPE_INT && type<=H5SL_TYPE_STR);
 
     /* Allocate skip list structure */
     if((new_slist=H5FL_MALLOC(H5SL_t))==NULL)
@@ -411,11 +427,15 @@ H5SL_insert(H5SL_t *slist, void *item, void *key)
     x=slist->header;
     switch(slist->type) {
         case H5SL_TYPE_INT:
-            H5SL_INSERT(slist,x,update,i,int,item,key,checked)
+            H5SL_INSERT(SCALAR,slist,x,update,i,int,item,key,checked)
             break;
 
         case H5SL_TYPE_HADDR:
-            H5SL_INSERT(slist,x,update,i,haddr_t,item,key,checked)
+            H5SL_INSERT(SCALAR,slist,x,update,i,haddr_t,item,key,checked)
+            break;
+
+        case H5SL_TYPE_STR:
+            H5SL_INSERT(STRING,slist,x,update,i,char *,item,key,checked)
             break;
     } /* end switch */
 
@@ -496,11 +516,15 @@ H5SL_search(H5SL_t *slist, void *key)
     x=slist->header;
     switch(slist->type) {
         case H5SL_TYPE_INT:
-            H5SL_SEARCH(slist,x,-,i,int,-,key,checked)
+            H5SL_SEARCH(SCALAR,slist,x,-,i,int,-,key,checked)
             break;
 
         case H5SL_TYPE_HADDR:
-            H5SL_SEARCH(slist,x,-,i,haddr_t,-,key,checked)
+            H5SL_SEARCH(SCALAR,slist,x,-,i,haddr_t,-,key,checked)
+            break;
+
+        case H5SL_TYPE_STR:
+            H5SL_SEARCH(STRING,slist,x,-,i,char *,-,key,checked)
             break;
     } /* end switch */
 
@@ -557,11 +581,15 @@ H5SL_remove(H5SL_t *slist, void *key)
     x=slist->header;
     switch(slist->type) {
         case H5SL_TYPE_INT:
-            H5SL_REMOVE(slist,x,update,i,int,-,key,checked)
+            H5SL_REMOVE(SCALAR,slist,x,update,i,int,-,key,checked)
             break;
 
         case H5SL_TYPE_HADDR:
-            H5SL_REMOVE(slist,x,update,i,haddr_t,-,key,checked)
+            H5SL_REMOVE(SCALAR,slist,x,update,i,haddr_t,-,key,checked)
+            break;
+
+        case H5SL_TYPE_STR:
+            H5SL_REMOVE(STRING,slist,x,update,i,char *,-,key,checked)
             break;
     } /* end switch */
 

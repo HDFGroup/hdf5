@@ -41,7 +41,8 @@ typedef struct H5SL_node_t H5SL_node_t;
 /* Typedef for kinds of skip lists supported */
 typedef enum {
     H5SL_TYPE_INT,      /* Skip list keys are 'int's */
-    H5SL_TYPE_HADDR     /* Skip list keys are 'haddr_t's */
+    H5SL_TYPE_HADDR,    /* Skip list keys are 'haddr_t's */
+    H5SL_TYPE_STR       /* Skip list keys are 'char *'s (ie. strings) */
 } H5SL_type_t;
 
 /**********/
