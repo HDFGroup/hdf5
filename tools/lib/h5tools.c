@@ -1001,6 +1001,28 @@ h5tools_fixtype(hid_t f_type)
 	for (i = 0, size = 0; i < nmembs; i++) {
 	    /* Get the member type and fix it */
 	    f_memb = H5Tget_member_type(f_type, i);
+#ifdef WANT_H5_V1_2_COMPAT
+            /* v1.2 returns the base type of an array field, work around this */
+            {
+                hid_t new_f_memb;   /* datatype for array, if necessary */
+                int     arrndims;      /* Array rank for reading */
+                size_t	dims[H5S_MAX_RANK];    /* Array dimensions for reading */
+                hsize_t	arrdims[H5S_MAX_RANK];    /* Array dimensions for reading */
+                int j;              /* Local index variable */
+
+                /* Get the array dimensions */
+                arrndims=H5Tget_member_dims(f_type,i,dims,NULL);
+
+                /* Patch up array information */
+                if(arrndims>0) {
+                    for(j=0; j<arrndims; j++)
+                        arrdims[j]=dims[j];
+                    new_f_memb=H5Tarray_create(f_memb,arrndims,arrdims,NULL);
+                    H5Tclose(f_memb);
+                    f_memb=new_f_memb;
+                } /* end if */
+            }
+#endif /* WANT_H5_V1_2_COMPAT */
 	    memb[i] = h5tools_fixtype(f_memb);
 	    H5Tclose(f_memb);
 

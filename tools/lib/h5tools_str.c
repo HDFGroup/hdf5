@@ -682,6 +682,28 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
             /* The value */
             offset = H5Tget_member_offset(type, j);
             memb = H5Tget_member_type(type, j);
+#ifdef WANT_H5_V1_2_COMPAT
+            /* v1.2 returns the base type of an array field, work around this */
+            {
+                hid_t new_memb;         /* datatype for array, if necessary */
+                int     arrndims;       /* Array rank for reading */
+                size_t	dims[H5S_MAX_RANK];    /* Array dimensions for reading */
+                hsize_t	arrdims[H5S_MAX_RANK];    /* Array dimensions for reading */
+                int k;              /* Local index variable */
+
+                /* Get the array dimensions */
+                arrndims=H5Tget_member_dims(type,j,dims,NULL);
+
+                /* Patch up array information */
+                if(arrndims>0) {
+                    for(k=0; k<arrndims; k++)
+                        arrdims[k]=dims[k];
+                    new_memb=H5Tarray_create(memb,arrndims,arrdims,NULL);
+                    H5Tclose(memb);
+                    memb=new_memb;
+                } /* end if */
+            }
+#endif /* WANT_H5_V1_2_COMPAT */
 
             ctx->indent_level++;
             h5tools_str_sprint(str, info, container, memb, cp_vp + offset , ctx);

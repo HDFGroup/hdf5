@@ -862,6 +862,28 @@ print_datatype(hid_t type)
 	    for (i = 0; i < nmembers; i++) {
 		fname = H5Tget_member_name(type, i);
 		mtype = H5Tget_member_type(type, i);
+#ifdef WANT_H5_V1_2_COMPAT
+            /* v1.2 returns the base type of an array field, work around this */
+            {
+                hid_t new_mtype;         /* datatype for array, if necessary */
+                int     arrndims;       /* Array rank for reading */
+                size_t	dims[H5S_MAX_RANK];    /* Array dimensions for reading */
+                hsize_t	arrdims[H5S_MAX_RANK];    /* Array dimensions for reading */
+                int k;              /* Local index variable */
+
+                /* Get the array dimensions */
+                arrndims=H5Tget_member_dims(type,i,dims,NULL);
+
+                /* Patch up array information */
+                if(arrndims>0) {
+                    for(k=0; k<arrndims; k++)
+                        arrdims[k]=dims[k];
+                    new_mtype=H5Tarray_create(mtype,arrndims,arrdims,NULL);
+                    H5Tclose(mtype);
+                    mtype=new_mtype;
+                } /* end if */
+            }
+#endif /* WANT_H5_V1_2_COMPAT */
 
 		indentation(indent + COL);
 
@@ -3623,6 +3645,28 @@ xml_print_datatype(hid_t type)
 
 		fname = H5Tget_member_name(type, i);
 		mtype = H5Tget_member_type(type, i);
+#ifdef WANT_H5_V1_2_COMPAT
+            /* v1.2 returns the base type of an array field, work around this */
+            {
+                hid_t new_mtype;         /* datatype for array, if necessary */
+                int     arrndims;       /* Array rank for reading */
+                size_t	dims[H5S_MAX_RANK];    /* Array dimensions for reading */
+                hsize_t	arrdims[H5S_MAX_RANK];    /* Array dimensions for reading */
+                int k;              /* Local index variable */
+
+                /* Get the array dimensions */
+                arrndims=H5Tget_member_dims(type,i,dims,NULL);
+
+                /* Patch up array information */
+                if(arrndims>0) {
+                    for(k=0; k<arrndims; k++)
+                        arrdims[k]=dims[k];
+                    new_mtype=H5Tarray_create(mtype,arrndims,arrdims,NULL);
+                    H5Tclose(mtype);
+                    mtype=new_mtype;
+                } /* end if */
+            }
+#endif /* WANT_H5_V1_2_COMPAT */
 		indentation(indent);
                 t_fname = xml_escape_the_name(fname);
 		printf("<Field FieldName=\"%s\">\n", t_fname);
@@ -4180,6 +4224,28 @@ xml_dump_named_datatype(hid_t type, const char *name)
 
 	    fname = H5Tget_member_name(type, x);
 	    mtype = H5Tget_member_type(type, x);
+#ifdef WANT_H5_V1_2_COMPAT
+            /* v1.2 returns the base type of an array field, work around this */
+            {
+                hid_t new_mtype;         /* datatype for array, if necessary */
+                int     arrndims;       /* Array rank for reading */
+                size_t	dims[H5S_MAX_RANK];    /* Array dimensions for reading */
+                hsize_t	arrdims[H5S_MAX_RANK];    /* Array dimensions for reading */
+                int k;              /* Local index variable */
+
+                /* Get the array dimensions */
+                arrndims=H5Tget_member_dims(type,x,dims,NULL);
+
+                /* Patch up array information */
+                if(arrndims>0) {
+                    for(k=0; k<arrndims; k++)
+                        arrdims[k]=dims[k];
+                    new_mtype=H5Tarray_create(mtype,arrndims,arrdims,NULL);
+                    H5Tclose(mtype);
+                    mtype=new_mtype;
+                } /* end if */
+            }
+#endif /* WANT_H5_V1_2_COMPAT */
 	    indentation(indent);
             t_fname = xml_escape_the_name(fname);
 	    printf("<Field FieldName=\"%s\">\n", t_fname);
