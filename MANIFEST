@@ -478,6 +478,12 @@
 ./examples/h5_reference.c
 ./examples/ph5example.c
 ./examples/run_examples.sh
+./examples/image/image_demo.c
+./examples/image/pal_rgb.h
+./examples/image/image_demo.h5
+./examples/image/jet2.txt
+./examples/image/image24_interleave_pixel.txt
+./examples/image/image24_interleave_plane.txt
 
 #------------------------------------------------------------------------------
 #
