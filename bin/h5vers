@@ -182,7 +182,7 @@ if ($set) {
   } elsif ($inc eq "annot") {
     @newver[0,1,2] = @curver[0,1,2];
     $newver[3] = $curver[3];
-    $newver[3] =~ s/(\d+)/$1+1/e or
+    $newver[3] =~ s/(\d+)\D*$/$1+1/e or
       die "Annotation \"".$newver[3]."\" cannot be incremented.\n";
   } else {
     die "unknown increment field: $inc\n";
