@@ -16,34 +16,34 @@ fi
 # `--enable-debug' switch of configure.  For ecc 7.1, because of the 
 # overlapping definitions of int64_t(starting from int8_t) in sys/types.h 
 # and stdint.h, we added -D__GNUC__ to CFLAGS.
+# This problem is no longer true and the -D_GNUC__ actually caused failure.
+# So it is removed.
 
 case $CC_BASENAME in
-  ecc)
-    CFLAGS="$CFLAGS -std=c99 -w2 -Wall -D__GNUC__"
+    ecc)
+	# Default to C99 standard.
+	CFLAGS="${CFLAGS:--std=c99}"
+	DEBUG_CFLAGS="-w2 -Wall -g -O0"
+	DEBUG_CPPFLAGS=
+	PROD_CFLAGS=""		# ecc has -O2 as default
+	PROD_CPPFLAGS=
+	PROFILE_CFLAGS="-p"
+	PROFILE_CPPFLAGS=
+	;;
 
-    DEBUG_CFLAGS="-g -O0"
-    DEBUG_CPPFLAGS=
+    gcc)
+	. $srcdir/config/gnu-flags
+	;;
 
-    PROD_CFLAGS=""
-    PROD_CFLAGS=""		# ecc has -O2 as default
-    PROD_CPPFLAGS=
-    PROFILE_CFLAGS="-p"
-    PROFILE_CPPFLAGS=
-    ;;
-
-  gcc)
-    . $srcdir/config/gnu-flags
-    ;;
-
-  *)
-    CFLAGS="$CFLAGS -ansi"
-    DEBUG_CFLAGS="-g"
-    DEBUG_CPPFLAGS=
-    PROD_CFLAGS="-O"
-    PROD_CPPFLAGS=
-    PROFILE_CFLAGS="-pg"
-    PROFILE_CPPFLAGS=
-    ;;
+    *)
+	CFLAGS="$CFLAGS -ansi"
+	DEBUG_CFLAGS="-g"
+	DEBUG_CPPFLAGS=
+	PROD_CFLAGS="-O"
+	PROD_CPPFLAGS=
+	PROFILE_CFLAGS="-pg"
+	PROFILE_CPPFLAGS=
+	;;
 esac
 
 # The default Fortran 90 compiler
