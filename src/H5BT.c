@@ -142,6 +142,37 @@ H5BT_insert_neighbor_cb(const void *_record, void *_op_data)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5BT_insert_modify_cb
+ *
+ * Purpose:	v2 B-tree modify callback for H5BT_insert()
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, March 11, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5BT_insert_modify_cb(void *_record, void *_op_data, hbool_t *changed)
+{
+    H5BT_blk_info_t *record = (H5BT_blk_info_t *)_record;
+    H5BT_blk_info_t *modify = (H5BT_blk_info_t *)_op_data;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5BT_insert_modify_cb)
+
+    *record = *modify;
+    *changed = TRUE;
+
+    FUNC_LEAVE_NOAPI(0)
+} /* end H5BT_insert_modify_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5BT_insert
  *
  * Purpose:	Insert new block (offset/length) into a block tracker.
@@ -163,6 +194,7 @@ H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t lengt
     hbool_t lower_valid = FALSE, upper_valid = FALSE;   /* Lower & upper blocks valid? */
     H5BT_blk_info_t new_block;          /* Info for new block */
     hsize_t nblks;                      /* Number of blocks tracked */
+    unsigned merged = 0;                /* How many blocks were merged with */
     herr_t ret_value=SUCCEED;
 
     FUNC_ENTER_NOAPI(H5BT_insert, FAIL)
@@ -205,51 +237,161 @@ H5BT_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset, hsize_t lengt
     /* Clear any errors from H5B2_neighbor() */
     H5E_clear_stack(NULL);
 
-#ifdef QAK
     /* Check for merged blocks */
     if(lower_valid || upper_valid) {
-HDfprintf(stderr,"%s: Lower & upper block merging not supported yet!\n",FUNC);
-HGOTO_ERROR(H5E_BLKTRK, H5E_UNSUPPORTED, FAIL, "lower or upper block found!")
+        H5BT_blk_info_t *old_block=NULL;    /* Pointer to info for block merged with */
+
+        /* Check if the new block should merge with both the lower & upper blocks */
+        if((lower_valid && (lower.addr+lower.len) == offset)
+                && (upper_valid && (offset+length) == upper.addr)) {
+            /* Delete upper block */
+            if(H5B2_remove(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &upper)<0)
+                HGOTO_ERROR(H5E_BLKTRK, H5E_CANTDELETE, FAIL, "can't remove block")
+
+            /* Update existing lower block */
+            new_block.addr = lower.addr;
+            new_block.len = lower.len + length + upper.len;
+            if(H5B2_modify(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &lower, H5BT_insert_modify_cb, &new_block) < 0)
+                HGOTO_ERROR(H5E_BLKTRK, H5E_CANTMODIFY, FAIL, "can't change block size")
+
+            /* Merged with 2 blocks */
+            merged = 2;
+        } /* end if */
+        /* Check if the new block should merge with just the lower block */
+        else if(lower_valid && (lower.addr+lower.len) == offset) {
+            /* Update existing lower block */
+            new_block.addr = lower.addr;
+            new_block.len = lower.len + length;
+            if(H5B2_modify(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &lower, H5BT_insert_modify_cb, &new_block) < 0)
+                HGOTO_ERROR(H5E_BLKTRK, H5E_CANTMODIFY, FAIL, "can't change block size")
+
+            /* Indicate which block we merged with */
+            old_block = &lower;
+
+            /* Merged with 1 block */
+            merged = 1;
+        } /* end else */
+        /* Check if the new block should merge with just the upper block */
+        else if(upper_valid && (offset+length) == upper.addr) {
+            /* Update existing upper block */
+            new_block.addr = offset;
+            new_block.len = length + upper.len;
+            if(H5B2_modify(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &upper, H5BT_insert_modify_cb, &new_block) < 0)
+                HGOTO_ERROR(H5E_BLKTRK, H5E_CANTMODIFY, FAIL, "can't change block size")
+
+            /* Indicate which block we merged with */
+            old_block = &upper;
+
+            /* Merged with 1 block */
+            merged = 1;
+        } /* end else */
+
+        /* Check for adjusting the block tracking metadata */
+        if(merged == 1) {
+            /* Check for adjusting the max. block size tracked */
+            if(new_block.len > bt->max_block_size) {
+                bt->max_block_size = new_block.len;
+                bt->max_block_cnt = 1;
+            } /* end if */
+            else if(new_block.len == bt->max_block_size)
+                bt->max_block_cnt++;
+
+            /* Check for adjusting the min. block size tracked */
+            if(old_block->len < bt->min_block_size) {
+                /* This should only happen if we don't have full knowledge of all the blocks' sizes */
+                HDassert((bt->status & H5BT_STATUS_MIN_VALID) == 0);
+
+                if(new_block.len < bt->min_block_size) {
+                    bt->min_block_size = new_block.len;
+                    bt->min_block_cnt = 1;
+                } /* end if */
+            } /* end if */
+            else if(old_block->len == bt->min_block_size) {
+                /* If this was the minimum block, indicate that the min. size
+                 * is no longer guaranteed valid over the whole set of blocks
+                 * tracked and use the new block size as the minimum value */
+                if(bt->min_block_cnt == 1) {
+                    bt->min_block_size = new_block.len;
+                    bt->status &= ~H5BT_STATUS_MIN_VALID;
+                } /* end if */
+                else
+                    /* Decrement the ref. count for the min. block size */
+                    bt->min_block_cnt--;
+            } /* end if */
+        } /* end if */
+        else if(merged == 2) {
+            /* Check for adjusting the max. block size tracked */
+            if(new_block.len > bt->max_block_size) {
+                bt->max_block_size = new_block.len;
+                bt->max_block_cnt = 1;
+            } /* end if */
+            else if(new_block.len == bt->max_block_size)
+                bt->max_block_cnt++;
+
+            /* Check for adjusting the min. block size tracked */
+            if(upper.len < bt->min_block_size || lower.len < bt->min_block_size) {
+                /* This should only happen if we don't have full knowledge of all the blocks' sizes */
+                HDassert((bt->status & H5BT_STATUS_MIN_VALID) == 0);
+
+                if(new_block.len < bt->min_block_size) {
+                    bt->min_block_size = new_block.len;
+                    bt->min_block_cnt = 1;
+                } /* end if */
+            } /* end if */
+            else if(upper.len == bt->min_block_size || lower.len == bt->min_block_size) {
+                /* If this was the minimum block, indicate that the min. size
+                 * is no longer guaranteed valid over the whole set of blocks
+                 * tracked and use the new block size as the minimum value */
+                if(bt->min_block_cnt == 1) {
+                    bt->min_block_size = new_block.len;
+                    bt->status &= ~H5BT_STATUS_MIN_VALID;
+                } /* end if */
+                else
+                    /* Decrement the ref. count for the min. block size */
+                    bt->min_block_cnt--;
+            } /* end if */
+        } /* end if */
     } /* end if */
-#endif /* QAK */
 
-    /* Insert new block into B-tree */
-    new_block.addr = offset;
-    new_block.len = length;
-    if(H5B2_insert(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &new_block) < 0)
-        HDONE_ERROR(H5E_BLKTRK, H5E_CANTINSERT, FAIL, "unable to insert block")
+    /* Insert new block into B-tree, if it wasn't marged already*/
+    if(!merged) {
+        new_block.addr = offset;
+        new_block.len = length;
+        if(H5B2_insert(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &new_block) < 0)
+            HGOTO_ERROR(H5E_BLKTRK, H5E_CANTINSERT, FAIL, "unable to insert block")
 
-/* Update block tracker metadata */
+        /* Update block tracker metadata */
 
-    /* Determine the number of blocks being tracked */
-    if(H5B2_get_nrec(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &nblks) < 0)
-        HDONE_ERROR(H5E_BLKTRK, H5E_CANTINSERT, FAIL, "unable to determine # of blocks")
+        /* Determine the number of blocks being tracked */
+        if(H5B2_get_nrec(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, &nblks) < 0)
+            HGOTO_ERROR(H5E_BLKTRK, H5E_CANTINSERT, FAIL, "unable to determine # of blocks")
 
-    /* This is the only block tracked so far */
-    if(nblks == 1) {
-        bt->max_block_size = length;
-        bt->max_block_cnt = 1;
-        bt->status |= H5BT_STATUS_MAX_VALID;
-        bt->min_block_size = length;
-        bt->min_block_cnt = 1;
-        bt->status |= H5BT_STATUS_MIN_VALID;
-    } /* end if */
-    else {
-        /* Update maximum block size */
-        if (length > bt->max_block_size) {
+        /* This is the only block tracked so far */
+        if(nblks == 1) {
             bt->max_block_size = length;
             bt->max_block_cnt = 1;
-        } /* end if */
-        else if (length == bt->max_block_size)
-            bt->max_block_cnt++;
-
-        /* Update minimum block size */
-        if (length < bt->min_block_size) {
+            bt->status |= H5BT_STATUS_MAX_VALID;
             bt->min_block_size = length;
             bt->min_block_cnt = 1;
+            bt->status |= H5BT_STATUS_MIN_VALID;
         } /* end if */
-        else if (length == bt->min_block_size)
-            bt->min_block_cnt++;
+        else {
+            /* Update maximum block size */
+            if (length > bt->max_block_size) {
+                bt->max_block_size = length;
+                bt->max_block_cnt = 1;
+            } /* end if */
+            else if (length == bt->max_block_size)
+                bt->max_block_cnt++;
+
+            /* Update minimum block size */
+            if (length < bt->min_block_size) {
+                bt->min_block_size = length;
+                bt->min_block_cnt = 1;
+            } /* end if */
+            else if (length == bt->min_block_size)
+                bt->min_block_cnt++;
+        } /* end if */
     } /* end if */
 
     /* Increment total number of bytes tracked in all blocks */
