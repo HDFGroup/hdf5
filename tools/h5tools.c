@@ -2480,3 +2480,167 @@ int h5dump_attr(hid_t oid, hid_t p_type){
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function:    search_obj
+ *
+ * Purpose:     search the object specified by objno in the table
+ *
+ * Return:      an integer, the location of the object
+ *              -1   if object is not found
+ *
+ *
+ * Programmer:  Ruey-Hsia Li
+ *
+ * Modifications:
+ *
+ *-----------------------------------------------------------------------*/
+int 
+search_obj (table_t *table, unsigned long *objno) {
+int i=0, found=0;
+
+    while (i < table->nobjs && !found) 
+           if (table->objs[i].objno[0] == *(objno) &&
+               table->objs[i].objno[1] == *(objno+1) )  found = 1;
+           else     i++; 
+  
+    if (!found) return -1;
+    else return i;
+
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    add_obj
+ *
+ * Purpose:     add a shared object to the table
+ *              realloc the table if necessary
+ *
+ * Return:      void
+ *
+ * Programmer:  Ruey-Hsia Li
+ *
+ * Modifications:
+ *
+ *-----------------------------------------------------------------------*/
+void
+add_obj (table_t *table, unsigned long *objno, char *objname) {
+int i;
+
+    if (table->nobjs == table->size) {
+        table->size *= 2;
+        table->objs = realloc (table->objs, table->size*sizeof(obj_t));
+        for (i = table->nobjs; i < table->size; i++) {
+             table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
+             table->objs[i].displayed = 0;
+             table->objs[i].recorded = 0;
+        }
+    }
+
+    i = table->nobjs++;
+    table->objs[i].objno[0] = *objno;
+    table->objs[i].objno[1] = *(objno+1);
+    strcpy (table->objs[i].objname, objname);
+
+}
+/*-------------------------------------------------------------------------
+ * Function:   Find_objs 
+ *
+ * Purpose:    Find objects, committed types and store them in tables
+ *
+ * Return:      Success:        SUCCEED
+ *
+ *              Failure:        FAIL
+ *
+ * Programmer:  Ruey-Hsia Li
+ *
+ * Modifications:
+ *
+ *-----------------------------------------------------------------------*/
+herr_t find_objs(hid_t group, const char *name, void *op_data)
+{
+	hid_t obj, type;
+	H5G_stat_t statbuf;
+	char *tmp;
+	int i;
+	find_objs_t *info = (find_objs_t*)op_data;
+
+	if (info->threshold > 1) { /*will get an infinite loop if greater than 1*/
+		return(FAIL);
+	}
+
+    H5Gget_objinfo(group, name, TRUE, &statbuf);
+
+    tmp = (char *) malloc ((strlen(info->prefix)+strlen(name)+2) * sizeof(char));
+
+    strcpy(tmp, info->prefix); 
+
+    switch (statbuf.type) {
+
+    case H5G_GROUP:
+        if ((obj=H5Gopen (group, name))>=0) {
+
+            if (info->prefix_len < (int)(strlen(info->prefix) + strlen(name) + 2)) {
+                info->prefix_len *= 2;
+                info->prefix = realloc (info->prefix, info->prefix_len * sizeof(char));
+            } 
+            strcat(strcat(info->prefix,"/"), name);
+
+            if (statbuf.nlink > info->threshold) {
+                if (search_obj (info->group_table,  statbuf.objno) < 0) {
+                    add_obj (info->group_table, statbuf.objno, info->prefix); 
+                    H5Giterate (obj, ".", NULL, find_objs, (void*)info);
+                }
+            } else 
+                H5Giterate (obj, ".", NULL, find_objs, (void*)info);
+
+            strcpy(info->prefix, tmp);
+            H5Gclose (obj);
+
+        } else 
+            info->status = 1;
+
+        break;
+
+    case H5G_DATASET:
+
+        strcat(tmp,"/");
+        strcat(tmp,name); /* absolute name of the data set */
+        if (statbuf.nlink > info->threshold  && 
+            search_obj (info->dset_table, statbuf.objno) < 0)
+            add_obj (info->dset_table, statbuf.objno, tmp);
+
+        if ((obj=H5Dopen (group, name))>=0) {              
+             type = H5Dget_type (obj);
+             if (H5Tcommitted(type) > 0 ) {
+                 H5Gget_objinfo(type, ".", TRUE, &statbuf);
+                 if (search_obj (info->type_table, statbuf.objno) < 0) 
+                     add_obj (info->type_table, statbuf.objno, tmp) ;
+             }
+             H5Tclose(type);
+             H5Dclose (obj);
+        } else
+             info->status = 1;
+            
+        break;
+
+    case H5G_TYPE:
+         strcat(tmp,"/");
+         strcat(tmp,name); /* absolute name of the type */
+         i = search_obj (info->type_table, statbuf.objno);
+         if (i < 0) {
+             add_obj (info->type_table, statbuf.objno, tmp) ;
+             info->type_table->objs[info->type_table->nobjs-1].recorded = 1; /* named data type */
+         } else {
+             strcpy (info->type_table->objs[i].objname, tmp);
+             info->type_table->objs[i].recorded = 1; 
+         }
+         break;
+
+    default:
+        break;
+    }
+
+    free (tmp);
+
+    return SUCCEED;
+}

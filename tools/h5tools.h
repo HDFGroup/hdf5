@@ -15,6 +15,7 @@
 
 #define ESCAPE_HTML	1
 
+
 /*
  * Information about how to format output.
  */
@@ -256,7 +257,6 @@ int h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
 	       void *mem);
 int copy_atomic_char(char* output, char* input, int numchar, int freespace);
 
-
 /*if we get a new program that needs to use the library add its name here*/
 typedef enum {
     UNKNOWN,
@@ -264,6 +264,40 @@ typedef enum {
     H5DUMP
 } ProgType;
 
+
+
+/*struct taken from the dumper. needed in table struct*/
+typedef struct obj_t{
+unsigned long objno[2];
+char objname[1024];
+int displayed;
+int recorded;
+} obj_t;
+
+
+/*struct for the tables that the find_objs function uses*/
+
+typedef struct table_t{
+int size;
+int nobjs;
+obj_t *objs;
+} table_t;
+
+
+
+/*this struct stores the information that is passed to the find_objs function*/
+typedef struct find_objs_t {
+	int prefix_len; 
+	char *prefix;
+	int threshold; /* should be 0 or 1 */
+	table_t *group_table;
+	table_t *type_table;
+	table_t *dset_table;
+	int status;
+} find_objs_t;
+
+herr_t find_objs(hid_t group, const char *name, void *op_data);
+int search_obj (table_t *temp, unsigned long *);
 
 /*
 	taken from h5dump.h
