@@ -592,6 +592,7 @@
 ./fortran/test/hdf5test.f90
 ./fortran/test/tH5A.f90
 ./fortran/test/tH5D.f90
+./fortran/test/tH5E.f90
 ./fortran/test/tH5F.f90
 ./fortran/test/tH5G.f90
 ./fortran/test/tH5I.f90
