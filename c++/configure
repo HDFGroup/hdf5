@@ -1903,7 +1903,7 @@ else
 #line 1904 "configure"
 #include "confdefs.h"
 #ifdef __cplusplus
-extern "C" void exit(int) throw();
+extern "C" void exit(int);
 #endif
 
 #include <iostream>
@@ -1938,7 +1938,7 @@ else
 #line 1939 "configure"
 #include "confdefs.h"
 #ifdef __cplusplus
-extern "C" void exit(int) throw();
+extern "C" void exit(int);
 #endif
 
 #ifdef OLD_HEADER_FILENAME
@@ -1987,7 +1987,7 @@ else
 #line 1988 "configure"
 #include "confdefs.h"
 #ifdef __cplusplus
-extern "C" void exit(int) throw();
+extern "C" void exit(int);
 #endif
 
 int main(void) {
@@ -2023,7 +2023,7 @@ else
 #line 2024 "configure"
 #include "confdefs.h"
 #ifdef __cplusplus
-extern "C" void exit(int) throw();
+extern "C" void exit(int);
 #endif
 
 int main(void) {
