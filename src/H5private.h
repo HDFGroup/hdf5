@@ -143,12 +143,15 @@
 /*
 inline is now in C but in the C99 standard and not the old C89 version so
 MS doesn't recognize it yet (as of April 2001)
+Move H5_inline into windows version of H5pubconf.h; avoid duplicating warnings.
 */
+/*
 #if defined(__MWERKS__) || defined(__cplusplus)
 # define H5_inline   inline
 # else
 # define H5_inline 
 #endif
+*/
 
 #endif /*WIN32*/
 
@@ -602,7 +605,11 @@ __DLL__ int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDmemcpy(X,Y,Z)		memcpy((char*)(X),(const char*)(Y),Z)
 #define HDmemmove(X,Y,Z)	memmove((char*)(X),(const char*)(Y),Z)
 #define HDmemset(X,C,Z)		memset(X,C,Z)
-#define HDmkdir(S,M)		mkdir(S,M)
+#ifdef WIN32
+#define HDmkdir(S,M)		_mkdir(S)
+#else
+#define HDmkdir(S,M)            mkdir(S,M)
+#endif
 #define HDmkfifo(S,M)		mkfifo(S,M)
 #define HDmktime(T)		mktime(T)
 #define HDmodf(X,Y)		modf(X,Y)
