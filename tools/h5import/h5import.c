@@ -43,7 +43,6 @@ int main(int argc, char *argv[])
   (void) setvbuf(stderr, (char *) NULL, _IOLBF, 0);
   (void) setvbuf(stdout, (char *) NULL, _IOLBF, 0);
 
-
  /*
   * validate the number of command line arguments
   */
@@ -1827,7 +1826,7 @@ setDefaultValues(struct Input *in, int count)
   HDstrcpy(in->path.group[0], temp);
 
   in->outputArchitecture = 0; /* NATIVE */
-  in->outputByteOrder = 0;  /* BE    */
+  in->outputByteOrder = -1;  /* use default    */
   in->compressionType = 0;  /* GZIP   */
   for (i=0; i<NUM_KEYS; i++)
     in->configOptionVector[i] = 0;
@@ -1865,6 +1864,8 @@ createOutputDataType(struct Input *in)
           }
               switch(in->outputByteOrder)
               {
+                case -1: /* default */
+                break;
                 case 0:
                   H5Tset_order (new_type,H5T_ORDER_BE);
                 break;
@@ -1881,6 +1882,7 @@ createOutputDataType(struct Input *in)
             case 8:
               switch(in->outputByteOrder)
               {
+                case -1:
                 case 0:
                   new_type = H5Tcopy (H5T_STD_I8BE);
                 break;
@@ -1894,6 +1896,7 @@ createOutputDataType(struct Input *in)
             case 16:
               switch(in->outputByteOrder)
               {
+                case -1:
                 case 0:
                   new_type = H5Tcopy (H5T_STD_I16BE);
                 break;
@@ -1907,6 +1910,7 @@ createOutputDataType(struct Input *in)
             case 32:
               switch(in->outputByteOrder)
               {
+                case -1:
                 case 0:
                   new_type = H5Tcopy (H5T_STD_I32BE);
                 break;
@@ -1920,6 +1924,7 @@ createOutputDataType(struct Input *in)
             case 64:
               switch(in->outputByteOrder)
               {
+                case -1:
                 case 0:
                   new_type = H5Tcopy (H5T_STD_I64BE);
                 break;
@@ -1951,6 +1956,8 @@ createOutputDataType(struct Input *in)
           }
               switch(in->outputByteOrder)
               {
+                case -1: /* DEFAULT */
+                break;
                 case 0:
                   H5Tset_order (new_type,H5T_ORDER_BE);
                 break;
@@ -1971,6 +1978,7 @@ createOutputDataType(struct Input *in)
             case 32:
               switch(in->outputByteOrder)
               {
+                case -1:
                 case 0:
                   new_type = H5Tcopy (H5T_IEEE_F32BE);
                 break;
@@ -1984,6 +1992,7 @@ createOutputDataType(struct Input *in)
             case 64:
               switch(in->outputByteOrder)
               {
+                case -1:
                 case 0:
                   new_type = H5Tcopy (H5T_IEEE_F64BE);
                 break;
@@ -2023,6 +2032,8 @@ createOutputDataType(struct Input *in)
             }
               switch(in->outputByteOrder)
               {
+                case -1: /* Default */
+                break;
                 case 0:
                   H5Tset_order (new_type,H5T_ORDER_BE);
                 break;
@@ -2039,6 +2050,7 @@ createOutputDataType(struct Input *in)
               case 8:
                 switch(in->outputByteOrder)
                 {
+                  case -1:
                   case 0:
                     new_type = H5Tcopy (H5T_STD_U8BE);
                   break;
@@ -2052,6 +2064,7 @@ createOutputDataType(struct Input *in)
               case 16:
                 switch(in->outputByteOrder)
                 {
+                  case -1:
                   case 0:
                     new_type = H5Tcopy (H5T_STD_U16BE);
                   break;
@@ -2065,6 +2078,7 @@ createOutputDataType(struct Input *in)
               case 32:
                 switch(in->outputByteOrder)
                 {
+                  case -1:
                   case 0:
                     new_type = H5Tcopy (H5T_STD_U32BE);
                   break;
@@ -2078,6 +2092,7 @@ createOutputDataType(struct Input *in)
               case 64:
                 switch(in->outputByteOrder)
                 {
+                  case -1:
                   case 0:
                     new_type = H5Tcopy (H5T_STD_U64BE);
                   break;
