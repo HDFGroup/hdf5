@@ -171,15 +171,15 @@ create or access function.
         <p>
         The return value is a group identifier for the open group.
 	This group identifier should be closed by calling 
-        <code>H5Gclose()</code> when it is no longer needed. 
+        <code>H5Gclose</code> when it is no longer needed. 
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>The file or group identifier.
+        <dd>IN: File or group identifier.
       <dt><em>const char *</em><code>name</code>
-        <dd>The absolute or relative name of the new group.
+        <dd>IN: Absolute or relative name of the new group.
       <dt><em>size_t</em> <code>size_hint</code>
-        <dd>An optional parameter indicating the number of bytes 
+        <dd>IN: Optional parameter indicating the number of bytes 
             to reserve for the names that will appear in the group. 
             A conservative estimate could result in multiple 
             system-level I/O requests to read the group name heap; 
@@ -222,13 +222,13 @@ create or access function.
         <p>
         <code>H5Gopen</code> returns a group identifier for the group
         that was opened.  This group identifier should be released by 
-        calling <code>H5Gclose()</code> when it is no longer needed.  
+        calling <code>H5Gclose</code> when it is no longer needed.  
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>File or group identifier within which group is to be open.
+        <dd>IN: File or group identifier within which group is to be open.
       <dt><em>const char *</em> <code>name</code>
-        <dd>Name of group to open.
+        <dd>IN: Name of group to open.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a valid group identifier if successful; 
@@ -255,14 +255,14 @@ create or access function.
     <dd>Closes the specified group.
   <dt><strong>Description:</strong>
     <dd><code>H5Gclose</code> releases resources used by a group which was
-        opened by <code>H5Gcreate()</code> or <code>H5Gopen()</code>. 
+        opened by <code>H5Gcreate</code> or <code>H5Gopen</code>. 
         After closing a group, the <code>group_id</code> cannot be used again.  
         <p>
         Failure to release a group with this call will result in resource leaks.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>group_id</code>
-        <dd>Group identifier to release.
+        <dd>IN: Group identifier to release.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -313,15 +313,16 @@ create or access function.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>File or group identifier.
+        <dd>IN: File or group identifier.
       <dt><em>H5G_link_t</em> <code>link_type</code>
-        <dd>Link type.
-            Possible values are <code>H5G_LINK_HARD</code> and <code>H5G_LINK_SOFT</code>.
+        <dd>IN: Link type.
+            Possible values are <code>H5G_LINK_HARD</code> and 
+            <code>H5G_LINK_SOFT</code>.
       <dt><em>const char *</em> <code>current_name</code>
-        <dd>Name of the existing object if link is a hard link.
+        <dd>IN: Name of the existing object if link is a hard link.
             Can be anything for the soft link.
       <dt><em>const char *</em> <code>new_name</code>
-        <dd>New name for the object.
+        <dd>IN: New name for the object.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -378,9 +379,9 @@ create or access function.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>Identifier of the file containing the object.
+        <dd>IN: Identifier of the file or group containing the object.
       <dt><em>const char *</em> <code>name</code>
-        <dd>Name of the object to unlink.
+        <dd>IN: Name of the object to unlink.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -525,11 +526,11 @@ create or access function.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>File or group identifier.
+        <dd>IN: File or group identifier.
       <dt><em>const char</em> <code>*src</code>
-        <dd>Object's original name.
+        <dd>IN: Object's original name.
       <dt><em>const char</em> <code>*dst</code>
-        <dd>Object's new name.
+        <dd>IN: Object's new name.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -570,7 +571,7 @@ create or access function.
         The existence of an object can be tested by calling this function 
         with a null <code>statbuf</code>.
         <p>
-        <code>H5Gget_objinfo()</code> fills in the following data structure:
+        <code>H5Gget_objinfo</code> fills in the following data structure:
         <pre>
                   typedef struct H5G_stat_t {
                       unsigned long fileno[2];
@@ -660,7 +661,7 @@ create or access function.
         The presence of a symbolic link can be tested by passing zero for  
         <code>size</code> and NULL for <code>value</code>.  
         <p>
-        This function should be used only after <code>H5Gget_objinfo()</code> has been called
+        This function should be used only after <code>H5Gget_objinfo</code> has been called
         to verify that <code>name</code> is a symbolic link.
   <dt><strong>Parameters:</strong>
     <dl>
@@ -827,7 +828,7 @@ H5G&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  2 August 2001
+Last modified:  18 August 2001
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 
