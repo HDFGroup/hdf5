@@ -1106,8 +1106,8 @@ test_misc8(void)
 
     /* Select a hyperslab which coincides with chunk boundaries */
     /* (For later use) */
-    start[0]=0; start[1]=0;
-    count[0]=MISC8_CHUNK_DIM0*2; count[1]=MISC8_CHUNK_DIM1*2;
+    start[0]=1; start[1]=1;
+    count[0]=(MISC8_CHUNK_DIM0*2)-1; count[1]=(MISC8_CHUNK_DIM1*2)-1;
     ret = H5Sselect_hyperslab(sid,H5S_SELECT_SET,start,NULL,count,NULL);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
@@ -1275,10 +1275,17 @@ test_misc8(void)
     did = H5Dcreate(fid, MISC8_DSETNAME5, H5T_NATIVE_INT, sid, dcpl);
     CHECK(did, FAIL, "H5Dcreate");
 
+    /* Write part of the dataset */
+    ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
     /* Check the storage size after data is written */
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
-    VERIFY(storage_size, MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+        num_errs++;
+        printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
+    } 
 
     /* Close dataset ID */
     ret = H5Dclose(did);
