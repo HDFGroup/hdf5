@@ -13,11 +13,16 @@
  *          read from/written to a socket during an open/flush operation.
  */
 
+/* for windows platform, use winsock.h */
+#ifdef WIN32
+#include <winsock.h>
+#else
 #include <netdb.h>                    /* gethostbyname                       */
 #include <sys/types.h>                /* socket stuff                        */
 #include <sys/socket.h>               /* socket stuff                        */
 #include <netinet/in.h>               /* socket stuff                        */
 #include <netinet/tcp.h>              /* socket stuff                        */
+#endif
 
 #include <H5Eprivate.h>               /* error handling                      */
 #include <H5FDpublic.h>               /* VFD structures                      */
