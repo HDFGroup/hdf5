@@ -1031,7 +1031,8 @@ nh5tget_member_offset_c ( hid_t_f *type_id ,int_f* member_no, size_t_f * offset)
  * Returns:     0 on success, -1 on failure
  * Programmer:  XIANGYANG SU
  *              Thursday, February 3, 2000
- * Modifications:
+ * Modifications: WANT_H5_V1_2_COMPAT added for backward compatibility
+ *                November 16, 2000 EP
  *---------------------------------------------------------------------------*/
 
 int_f 
@@ -1043,6 +1044,8 @@ nh5tget_member_dims_c ( hid_t_f *type_id ,int_f* field_idx, int_f * dims, size_t
   int* c_perm;
   size_t * c_field_dims;
   int c_field_idx;
+
+#ifdef WANT_H5_V1_2_COMPAT
 
   c_field_dims = (size_t*)malloc(sizeof(size_t)*4);
   if(!c_field_dims) return ret_value;
@@ -1065,8 +1068,112 @@ nh5tget_member_dims_c ( hid_t_f *type_id ,int_f* field_idx, int_f * dims, size_t
   ret_value = 0; 
   HDfree(c_field_dims);
   HDfree(c_perm);
+
+#endif /* WANT_H5_V1_2_COMPAT */
+
   return ret_value;
 }
+
+/*----------------------------------------------------------------------------
+ * Name:        h5tget_array_dims_c
+ * Purpose:     Call H5Tget_array_dims to get  
+ *              dimensions of array datatype
+ * Inputs:      type_id - identifier of the array datatype
+ * Outputs:     dims -  dimensions(sizes of dimensions) of the array
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Thursday, November 16, 2000
+ * Modifications: 
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5tget_array_dims_c ( hid_t_f *type_id , hsize_t_f * dims)
+{
+  int ret_value = -1;
+  hid_t c_type_id;
+  hsize_t * c_dims;
+  int rank, i;
+  herr_t status;
+
+  rank = H5Tget_array_ndims((hid_t)*type_id);
+  if (rank < 0) return ret_value;
+  c_dims = (hsize_t*)malloc(sizeof(hsize_t)*rank);
+  if(!c_dims) return ret_value;
+
+  c_type_id = (hid_t)*type_id;
+  status = H5Tget_array_dims(c_type_id, c_dims, NULL);
+  if (status < 0) {
+             HDfree(c_dims);
+             return ret_value;
+  }
+
+  for(i =0; i < rank; i++)
+  {
+      dims[rank-i-1] = (hsize_t_f)c_dims[i];
+  }
+
+  ret_value = 0; 
+  HDfree(c_dims);
+
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5tget_array_ndims_c
+ * Purpose:     Call H5Tget_array_ndims to get number 
+ *              of dimensions of array datatype
+ * Inputs:      type_id - identifier of the array datatype
+ * Outputs:     ndims -  number of dimensions of the array
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Thursday, November 16, 2000
+ * Modifications: 
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5tget_array_ndims_c ( hid_t_f *type_id , int_f * ndims)
+{
+  int ret_value = -1;
+  hid_t c_type_id;
+  int c_ndims;
+
+  c_type_id = (hid_t)*type_id;
+  c_ndims = H5Tget_array_ndims(c_type_id);
+  if (c_ndims < 0) return ret_value;
+
+  *ndims = (int_f)c_ndims;
+  ret_value = 0; 
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5tget_super_c
+ * Purpose:     Call H5Tget_super to get base datatype from which 
+ *              datatype was derived 
+ * Inputs:      type_id - identifier of the array datatype
+ * Outputs:     base_type_id - base datatype identifier 
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Thursday, November 16, 2000
+ * Modifications: 
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id)
+{
+  int ret_value = -1;
+  hid_t c_type_id;
+  hid_t c_base_type_id;
+
+  c_type_id = (hid_t)*type_id;
+  c_base_type_id = H5Tget_super(c_type_id);
+  if (c_base_type_id < 0) return ret_value;
+
+  *base_type_id = (hid_t_f)c_base_type_id;
+  ret_value = 0; 
+  return ret_value;
+}
+
 
 /*----------------------------------------------------------------------------
  * Name:        h5tget_member_type_c
@@ -1210,7 +1317,8 @@ nh5tpack_c(hid_t_f * type_id)
  * Returns:     0 on success, -1 on failure
  * Programmer:  XIANGYANG SU
  *              Thursday, February 3, 2000
- * Modifications:
+ * Modifications: WANT_H5_V1_2_COMPAT added for backward compatibility
+ *                November 16, 2000 EP
  *---------------------------------------------------------------------------*/
 int_f
 nh5tinsert_array_c(hid_t_f * parent_id, _fcd name, int_f* namelen, size_t_f* offset, int_f* ndims, size_t_f* dims, hid_t_f* member_id, int_f* perm )
@@ -1226,6 +1334,7 @@ nh5tinsert_array_c(hid_t_f * parent_id, _fcd name, int_f* namelen, size_t_f* off
   int c_namelen;
   int * c_perm, i;
 
+#ifdef WANT_H5_V1_2_COMPAT
   c_offset = *offset;   
   c_dims = (size_t*)malloc(sizeof(size_t)*(*ndims));
   if(!c_dims) return ret_value;
@@ -1252,6 +1361,7 @@ nh5tinsert_array_c(hid_t_f * parent_id, _fcd name, int_f* namelen, size_t_f* off
   if(status < 0) return ret_value;
   ret_value = 0;
 
+#endif /* WANT_H5_V1_2_COMPAT */
   return ret_value;
 
 }
@@ -1274,7 +1384,8 @@ nh5tinsert_array_c(hid_t_f * parent_id, _fcd name, int_f* namelen, size_t_f* off
  * Returns:     0 on success, -1 on failure
  * Programmer:  XIANGYANG SU
  *              Thursday, February 3, 2000
- * Modifications:
+ * Modifications: WANT_H5_V1_2_COMPAT added for backward compatibility
+ *                November 16, 2000 EP
  *---------------------------------------------------------------------------*/
 int_f
 nh5tinsert_array_c2(hid_t_f * parent_id, _fcd name, int_f* namelen, size_t_f* offset, int_f* ndims, size_t_f* dims, hid_t_f* member_id )
@@ -1289,6 +1400,8 @@ nh5tinsert_array_c2(hid_t_f * parent_id, _fcd name, int_f* namelen, size_t_f* of
   char* c_name;
   int c_namelen;
   int i;
+
+#ifdef WANT_H5_V1_2_COMPAT
 
   c_offset = *offset;   
   c_dims = (size_t*)malloc(sizeof(size_t)*(*ndims));
@@ -1312,9 +1425,61 @@ nh5tinsert_array_c2(hid_t_f * parent_id, _fcd name, int_f* namelen, size_t_f* of
   if(status < 0) return ret_value;
   ret_value = 0;
 
+#endif /* WANT_H5_V1_2_COMPAT */
+
   return ret_value;
 
 }
+/*----------------------------------------------------------------------------
+ * Name:        h5tarray_create_c
+ * Purpose:     Call H5Tcreate_array to create array datatype
+ * Inputs:      base_id - identifier of array base datatype
+ *              rank - array's rank
+ *              dims - Size of new member array
+ *              type_id - identifier of the array datatype
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal 
+ *              Thursday, November 16, 2000
+ * Modifications: 
+ *---------------------------------------------------------------------------*/
+int_f
+nh5tarray_create_c(hid_t_f * base_id, int_f *rank, hsize_t_f* dims, hid_t_f* type_id)
+{
+  int ret_value = -1;
+  hid_t c_base_id;
+  hid_t c_type_id;
+  int c_rank;
+  herr_t status;
+  hsize_t *c_dims;
+  int i;
+
+  c_dims = (hsize_t*)malloc(sizeof(hsize_t)*(*rank));
+  if(!c_dims) return ret_value;
+
+
+  /*
+   * Transpose dimension arrays because of C-FORTRAN storage order
+   */
+  for (i = 0; i < *rank ; i++) {
+     c_dims[i] =  (hsize_t)dims[*rank - i - 1];
+  }
+  
+  c_base_id = (hid_t)*base_id;
+  c_rank = (int)*rank;
+  c_type_id = H5Tcreate_array(c_base_id, c_rank, c_dims, NULL);
+
+  if(c_type_id < 0) {
+          HDfree(c_dims);
+          return ret_value;
+  }
+
+  *type_id = (hid_t_f)c_type_id;
+  ret_value = 0;
+  HDfree(c_dims);
+  return ret_value;
+
+}
+
 
 /*----------------------------------------------------------------------------
  * Name:        h5tenum_create_c

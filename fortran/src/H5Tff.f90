@@ -425,22 +425,57 @@
             hdferr = h5tget_member_offset_c(type_id, member_no, offset )
           END SUBROUTINE h5tget_member_offset_f
 
-          SUBROUTINE h5tget_member_dims_f(type_id, field_idx,dims, field_dims, perm, hdferr) 
+!          SUBROUTINE h5tget_member_dims_f(type_id, field_idx,dims, field_dims, perm, hdferr) 
+!            IMPLICIT NONE
+!            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+!            INTEGER, INTENT(IN) :: field_idx !Field index (0-based) of 
+!                                             !field_dims, perm)
+!            INTEGER, INTENT(OUT) :: dims     !number of dimensions of the field
+!
+!            INTEGER(SIZE_T),DIMENSION(*), INTENT(OUT) ::  field_dims !buffer to store the 
+!                                                                      !dimensions of the field
+!            INTEGER, DIMENSION(*), INTENT(OUT)  ::  perm  !buffer to store the 
+!                                                                   !permutation vector of the field
+!            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+!            INTEGER, EXTERNAL :: h5tget_member_dims_c
+!            hdferr = h5tget_member_dims_c(type_id, field_idx, dims, field_dims, perm)
+!
+!          END SUBROUTINE h5tget_member_dims_f
+
+          SUBROUTINE h5tget_array_dims_f(type_id, dims, hdferr) 
+
             IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
-            INTEGER, INTENT(IN) :: field_idx !Field index (0-based) of 
-                                             !field_dims, perm)
-            INTEGER, INTENT(OUT) :: dims     !number of dimensions of the field
-
-            INTEGER(SIZE_T),DIMENSION(*), INTENT(OUT) ::  field_dims !buffer to store the 
-                                                                      !dimensions of the field
-            INTEGER, DIMENSION(*), INTENT(OUT)  ::  perm  !buffer to store the 
-                                                                   !permutation vector of the field
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Array datatype identifier 
+            INTEGER(HSIZE_T),DIMENSION(*), INTENT(OUT) ::  dims !buffer to store array datatype
+                                                                ! dimensions 
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
-            INTEGER, EXTERNAL :: h5tget_member_dims_c
-            hdferr = h5tget_member_dims_c(type_id, field_idx, dims, field_dims, perm)
+            INTEGER, EXTERNAL :: h5tget_array_dims_c
+            hdferr = h5tget_array_dims_c(type_id, dims)
 
-          END SUBROUTINE h5tget_member_dims_f
+          END SUBROUTINE h5tget_array_dims_f
+
+          SUBROUTINE h5tget_array_ndims_f(type_id, ndims, hdferr) 
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Array datatype identifier 
+            INTEGER, INTENT(OUT) ::  ndims ! number of array dimensions
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+            INTEGER, EXTERNAL :: h5tget_array_ndims_c
+            hdferr = h5tget_array_ndims_c(type_id, ndims)
+
+          END SUBROUTINE h5tget_array_ndims_f
+
+          SUBROUTINE h5tget_super_f(type_id, base_type_id, hdferr) 
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! datatype identifier 
+            INTEGER(HID_T), INTENT(OUT) :: base_type_id ! identifier of the datatype
+                                           ! from which datatype (type_id) was derived
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+            INTEGER, EXTERNAL :: h5tget_super_c
+            hdferr = h5tget_super_c(type_id, base_type_id)
+
+          END SUBROUTINE h5tget_super_f
 
           SUBROUTINE h5tget_member_type_f(type_id,  field_idx, datatype, hdferr) 
             IMPLICIT NONE
@@ -490,32 +525,45 @@
             hdferr = h5tpack_c(type_id) 
           END SUBROUTINE h5tpack_f
 
-          SUBROUTINE h5tinsert_array_f(parent_id,name,offset, ndims, dims, member_id, hdferr, perm) 
+!          SUBROUTINE h5tinsert_array_f(parent_id,name,offset, ndims, dims, member_id, hdferr, perm) 
+!            IMPLICIT NONE
+!            INTEGER(HID_T), INTENT(IN) :: parent_id ! identifier of the parent compound datatype
+!            CHARACTER(LEN=*), INTENT(IN) :: name !Name of the new member
+!            INTEGER(SIZE_T), INTENT(IN) :: offset !Offset to start of new member 
+!                                                   !within compound datatype
+!            INTEGER, INTENT(IN) ::  ndims !Dimensionality of new member. 
+!                                          !Valid values are 0 (zero) through 4 (four)
+!            INTEGER(SIZE_T), DIMENSION(*), INTENT(IN) :: dims !Size of new member array
+!            INTEGER(HID_T), INTENT(IN) :: member_id ! identifier of the datatype of the new member
+!            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+!
+!            INTEGER, DIMENSION(*), OPTIONAL, INTENT(IN) :: perm 
+!                                                               !Pointer to buffer to store 
+!                                                               !the permutation vector of the field
+!            INTEGER :: namelen, sizeofperm
+!            INTEGER, EXTERNAL :: h5tinsert_array_c,  h5tinsert_array_c2
+!            namelen = LEN(name)
+!            if (present(perm)) then
+!              hdferr = h5tinsert_array_c(parent_id, name, namelen, offset, ndims,dims, member_id, perm)
+!            else
+!              hdferr = h5tinsert_array_c2(parent_id, name, namelen, offset, ndims,dims, member_id)  
+!            end if           
+!           
+!         END SUBROUTINE h5tinsert_array_f
+         
+          SUBROUTINE h5tarray_create_f(base_id, rank, dims, type_id, hdferr) 
             IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: parent_id ! identifier of the parent compound datatype
-            CHARACTER(LEN=*), INTENT(IN) :: name !Name of the new member
-            INTEGER(SIZE_T), INTENT(IN) :: offset !Offset to start of new member 
-                                                   !within compound datatype
-            INTEGER, INTENT(IN) ::  ndims !Dimensionality of new member. 
-                                          !Valid values are 0 (zero) through 4 (four)
-            INTEGER(SIZE_T), DIMENSION(*), INTENT(IN) :: dims !Size of new member array
-            INTEGER(HID_T), INTENT(IN) :: member_id ! identifier of the datatype of the new member
+            INTEGER(HID_T), INTENT(IN) :: base_id ! identifier of array base datatype
+            INTEGER, INTENT(IN) ::  rank ! Rank of the array
+            INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims !Sizes of each array dimension
+            INTEGER(HID_T), INTENT(OUT) :: type_id ! identifier of the array datatype 
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
 
-            INTEGER, DIMENSION(*), OPTIONAL, INTENT(IN) :: perm 
-                                                               !Pointer to buffer to store 
-                                                               !the permutation vector of the field
-            INTEGER :: namelen, sizeofperm
-            INTEGER, EXTERNAL :: h5tinsert_array_c,  h5tinsert_array_c2
-            namelen = LEN(name)
-            if (present(perm)) then
-              hdferr = h5tinsert_array_c(parent_id, name, namelen, offset, ndims,dims, member_id, perm)
-            else
-              hdferr = h5tinsert_array_c2(parent_id, name, namelen, offset, ndims,dims, member_id)  
-            end if           
+            INTEGER, EXTERNAL :: h5tarray_create_c
+              hdferr = h5tarray_create_c(base_id, rank, dims, type_id)
            
-         END SUBROUTINE h5tinsert_array_f
-         
+         END SUBROUTINE h5tarray_create_f
+
           SUBROUTINE h5tenum_create_f(parent_id, new_type_id, hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: parent_id  ! Datatype identifier for

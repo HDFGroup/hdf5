@@ -424,8 +424,13 @@ extern int_f nh5aget_name_c(hid_t_f *attr_id, size_t_f *size, _fcd buf);
 #   define nh5tenum_nameof_c             FNAME(H5TENUM_NAMEOF_C)
 #   define nh5tenum_valueof_c             FNAME(H5TENUM_VALUEOF_C)
 #   define nh5tget_member_value_c         FNAME(H5TGET_MEMBER_VALUE_C)
-#   define nh5set_tag_c                  FNAME(H5TSET_TAG_C)
-#   define nh5get_tag_c                  FNAME(H5TGET_TAG_C)
+#   define nh5tset_tag_c                  FNAME(H5TSET_TAG_C)
+#   define nh5tget_tag_c                  FNAME(H5TGET_TAG_C)
+#   define nh5tarray_create_c             FNAME(H5TARRAY_CREATE_C)
+#   define nh5tget_array_ndims_c          FNAME(H5TGET_ARRAY_NDIMS_C)
+#   define nh5tget_array_dims_c          FNAME(H5TGET_ARRAY_DIMS_C)
+#   define nh5tget_super_c               FNAME(H5TGET_SUPER_C)
+
 #else
 #   define nh5topen_c         FNAME(h5topen_c)
 #   define nh5tcommit_c       FNAME(h5tcommit_c)
@@ -475,6 +480,10 @@ extern int_f nh5aget_name_c(hid_t_f *attr_id, size_t_f *size, _fcd buf);
 #   define nh5tget_member_value_c             FNAME(h5tget_member_value_c)
 #   define nh5tset_tag_c                  FNAME(h5tset_tag_c)
 #   define nh5tget_tag_c                  FNAME(h5tget_tag_c)
+#   define nh5tarray_create_c             FNAME(h5tarray_create_c)
+#   define nh5tget_array_ndims_c          FNAME(h5tget_array_ndims_c)
+#   define nh5tget_array_dims_c          FNAME(h5tget_array_dims_c)
+#   define nh5tget_super_c               FNAME(h5tget_super_c)
 #endif
 #endif
 
@@ -548,6 +557,14 @@ extern int_f
 nh5tset_tag_c(hid_t_f* type_id, _fcd tag, int_f* namelen);
 extern int_f
 nh5tget_tag_c(hid_t_f* type_id, _fcd tag, int_f* namelen);
+extern int_f
+nh5tarray_create_c(hid_t_f * base_id, int_f *rank, hsize_t_f* dims, hid_t_f* type_id);
+extern int_f
+nh5tget_array_dims_c ( hid_t_f *type_id , hsize_t_f * dims);
+extern int_f
+nh5tget_array_ndims_c ( hid_t_f *type_id , int_f * ndims);
+extern int_f
+nh5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id);
 
 
 /* 
