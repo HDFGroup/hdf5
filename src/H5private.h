@@ -445,6 +445,22 @@ MS doesn't recognize it yet (as of April 2001)
 #endif /* NDEBUG */
 
 /*
+ * A macro for detecting over/under-flow when assigning between types
+ */
+#ifndef NDEBUG
+#define H5_ASSIGN_OVERFLOW(var,expr,vartype,casttype)   \
+{                                                       \
+    vartype _tmp_overflow=(vartype)(expr);              \
+    casttype _tmp_overflow2=(casttype)(_tmp_overflow);  \
+    assert((casttype)_tmp_overflow==_tmp_overflow2);    \
+    (var)=_tmp_overflow2;                               \
+}
+#else /* NDEBUG */
+#define H5_ASSIGN_OVERFLOW(var,expr,vartype,casttype)   \
+    (var)=(casttype)(expr);
+#endif /* NDEBUG */
+
+/*
  * Data types and functions for timing certain parts of the library.
  */
 typedef struct {
