@@ -146,3 +146,5 @@ maintainer-clean: distclean
 
 @DEPEND1@
 @DEPEND2@
+@DEPEND3@
+@DEPEND4@

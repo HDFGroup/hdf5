@@ -1,4 +1,4 @@
-h5test.o: \
+h5test.lo: \
    h5test.c \
    h5test.h \
    ../src/hdf5.h \
@@ -30,7 +30,7 @@ h5test.o: \
    ../src/H5Fprivate.h \
    ../src/H5Rprivate.h \
    ../src/H5Tprivate.h
-big.o: \
+big.lo: \
    big.c \
    h5test.h \
    ../src/hdf5.h \
@@ -62,7 +62,7 @@ big.o: \
    ../src/H5Fprivate.h \
    ../src/H5Rprivate.h \
    ../src/H5Tprivate.h
-bittests.o: \
+bittests.lo: \
    bittests.c \
    h5test.h \
    ../src/hdf5.h \
@@ -94,7 +94,7 @@ bittests.o: \
    ../src/H5Fprivate.h \
    ../src/H5Rprivate.h \
    ../src/H5Tprivate.h
-chunk.o: \
+chunk.lo: \
    chunk.c \
    ../src/hdf5.h \
    ../src/H5public.h \
@@ -119,7 +119,7 @@ chunk.o: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h
-cmpd_dset.o: \
+cmpd_dset.lo: \
    cmpd_dset.c \
    h5test.h \
    ../src/hdf5.h \
@@ -151,7 +151,7 @@ cmpd_dset.o: \
    ../src/H5Fprivate.h \
    ../src/H5Rprivate.h \
    ../src/H5Tprivate.h
-dsets.o: \
+dsets.lo: \
    dsets.c \
    h5test.h \
    ../src/hdf5.h \
@@ -183,7 +183,7 @@ dsets.o: \
    ../src/H5Fprivate.h \
    ../src/H5Rprivate.h \
    ../src/H5Tprivate.h
-dtypes.o: \
+dtypes.lo: \
    dtypes.c \
    h5test.h \
    ../src/hdf5.h \
@@ -215,7 +215,7 @@ dtypes.o: \
    ../src/H5Fprivate.h \
    ../src/H5Rprivate.h \
    ../src/H5Tprivate.h
-extend.o: \
+extend.lo: \
    extend.c \
    h5test.h \
    ../src/hdf5.h \
@@ -247,7 +247,7 @@ extend.o: \
    ../src/H5Fprivate.h \
    ../src/H5Rprivate.h \
    ../src/H5Tprivate.h
-external.o: \
+external.lo: \
    external.c \
    h5test.h \
    ../src/hdf5.h \
@@ -279,7 +279,7 @@ external.o: \
    ../src/H5Fprivate.h \
    ../src/H5Rprivate.h \
    ../src/H5Tprivate.h
-fillval.o: \
+fillval.lo: \
    fillval.c \
    h5test.h \
    ../src/hdf5.h \
@@ -311,7 +311,7 @@ fillval.o: \
    ../src/H5Fprivate.h \
    ../src/H5Rprivate.h \
    ../src/H5Tprivate.h
-flush1.o: \
+flush1.lo: \
    flush1.c \
    h5test.h \
    ../src/hdf5.h \
@@ -343,7 +343,7 @@ flush1.o: \
    ../src/H5Fprivate.h \
    ../src/H5Rprivate.h \
    ../src/H5Tprivate.h
-flush2.o: \
+flush2.lo: \
    flush2.c \
    h5test.h \
    ../src/hdf5.h \
@@ -375,7 +375,7 @@ flush2.o: \
    ../src/H5Fprivate.h \
    ../src/H5Rprivate.h \
    ../src/H5Tprivate.h
-gheap.o: \
+gheap.lo: \
    gheap.c \
    h5test.h \
    ../src/hdf5.h \
@@ -410,7 +410,7 @@ gheap.o: \
    ../src/H5Gprivate.h \
    ../src/H5Bprivate.h \
    ../src/H5Eprivate.h
-hyperslab.o: \
+hyperslab.lo: \
    hyperslab.c \
    ../src/H5private.h \
    ../src/H5public.h \
@@ -418,7 +418,7 @@ hyperslab.o: \
    ../src/H5api_adpt.h \
    ../src/H5MMprivate.h \
    ../src/H5MMpublic.h
-iopipe.o: \
+iopipe.lo: \
    iopipe.c \
    ../src/hdf5.h \
    ../src/H5public.h \
@@ -443,7 +443,7 @@ iopipe.o: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h
-istore.o: \
+istore.lo: \
    istore.c \
    h5test.h \
    ../src/hdf5.h \
@@ -484,7 +484,7 @@ istore.o: \
    ../src/H5Iprivate.h \
    ../src/H5Pprivate.h \
    ../src/H5MMprivate.h
-lheap.o: \
+lheap.lo: \
    lheap.c \
    h5test.h \
    ../src/hdf5.h \
@@ -519,7 +519,7 @@ lheap.o: \
    ../src/H5Gprivate.h \
    ../src/H5Bprivate.h \
    ../src/H5HLprivate.h
-links.o: \
+links.lo: \
    links.c \
    h5test.h \
    ../src/hdf5.h \
@@ -551,7 +551,7 @@ links.o: \
    ../src/H5Fprivate.h \
    ../src/H5Rprivate.h \
    ../src/H5Tprivate.h
-mount.o: \
+mount.lo: \
    mount.c \
    h5test.h \
    ../src/hdf5.h \
@@ -583,7 +583,7 @@ mount.o: \
    ../src/H5Fprivate.h \
    ../src/H5Rprivate.h \
    ../src/H5Tprivate.h
-mtime.o: \
+mtime.lo: \
    mtime.c \
    h5test.h \
    ../src/hdf5.h \
@@ -615,7 +615,7 @@ mtime.o: \
    ../src/H5Fprivate.h \
    ../src/H5Rprivate.h \
    ../src/H5Tprivate.h
-ohdr.o: \
+ohdr.lo: \
    ohdr.c \
    h5test.h \
    ../src/hdf5.h \
@@ -653,7 +653,7 @@ ohdr.o: \
    ../src/H5Oprivate.h \
    ../src/H5Sprivate.h \
    ../src/H5Zprivate.h
-overhead.o: \
+overhead.lo: \
    overhead.c \
    ../src/hdf5.h \
    ../src/H5public.h \
@@ -678,7 +678,7 @@ overhead.o: \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h
-ragged.o: \
+ragged.lo: \
    ragged.c \
    ../src/hdf5.h \
    ../src/H5public.h \
@@ -704,7 +704,7 @@ ragged.o: \
    ../src/H5Spublic.h \
    ../src/H5Tpublic.h \
    ../src/H5private.h
-stab.o: \
+stab.lo: \
    stab.c \
    h5test.h \
    ../src/hdf5.h \
@@ -739,7 +739,7 @@ stab.o: \
    ../src/H5Gprivate.h \
    ../src/H5Bprivate.h \
    ../src/H5Gpkg.h
-tattr.o: \
+tattr.lo: \
    tattr.c \
    testhdf5.h \
    ../src/H5private.h \
@@ -766,7 +766,7 @@ tattr.o: \
    ../src/H5Rpublic.h \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h
-testhdf5.o: \
+testhdf5.lo: \
    testhdf5.c \
    testhdf5.h \
    ../src/H5private.h \
@@ -775,7 +775,7 @@ testhdf5.o: \
    ../src/H5api_adpt.h \
    ../src/H5Eprivate.h \
    ../src/H5Epublic.h
-tfile.o: \
+tfile.lo: \
    tfile.c \
    testhdf5.h \
    ../src/H5private.h \
@@ -790,7 +790,7 @@ tfile.o: \
    ../src/H5Fprivate.h \
    ../src/H5Fpublic.h \
    ../src/H5Dpublic.h
-th5s.o: \
+th5s.lo: \
    th5s.c \
    testhdf5.h \
    ../src/H5private.h \
@@ -817,7 +817,7 @@ th5s.o: \
    ../src/H5Tpublic.h \
    ../src/H5Zprivate.h \
    ../src/H5Zpublic.h
-tmeta.o: \
+tmeta.lo: \
    tmeta.c \
    testhdf5.h \
    ../src/H5private.h \
@@ -829,7 +829,7 @@ tmeta.o: \
    ../src/H5Ipublic.h \
    ../src/H5Fprivate.h \
    ../src/H5Fpublic.h
-trefer.o: \
+trefer.lo: \
    trefer.c \
    testhdf5.h \
    ../src/H5private.h \
@@ -856,7 +856,7 @@ trefer.o: \
    ../src/H5Rpublic.h \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h
-tselect.o: \
+tselect.lo: \
    tselect.c \
    testhdf5.h \
    ../src/H5private.h \
@@ -883,7 +883,7 @@ tselect.o: \
    ../src/H5Rpublic.h \
    ../src/H5RApublic.h \
    ../src/H5Spublic.h
-unlink.o: \
+unlink.lo: \
    unlink.c \
    h5test.h \
    ../src/hdf5.h \
@@ -915,7 +915,7 @@ unlink.o: \
    ../src/H5Fprivate.h \
    ../src/H5Rprivate.h \
    ../src/H5Tprivate.h
-enum.o: \
+enum.lo: \
    enum.c \
    h5test.h \
    ../src/hdf5.h \

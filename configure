@@ -4768,9 +4768,13 @@ fi
 if test "X$GCC" = "Xyes" && test "X$GMAKE" = "Xyes"; then
     DEPEND1=config/depend
     DEPEND2=/dev/null
+    DEPEND3=/dev/null
+    DEPEND4=/dev/null
 else
-    DEPEND1=src/.distdep
-    DEPEND2=test/.distdep
+    DEPEND1=$srcdir/src/.distdep
+    DEPEND2=$srcdir/test/.distdep
+    DEPEND3=$srcdir/testpar/.distdep
+    DEPEND4=$srcdirtools/.distdep
 fi
 
 if test "X$GMAKE" = "Xyes"; then
@@ -4961,6 +4965,10 @@ s%@CONCLUDE@%%g
 s%@DEPEND1@%%g
 /@DEPEND2@/r $DEPEND2
 s%@DEPEND2@%%g
+/@DEPEND3@/r $DEPEND3
+s%@DEPEND3@%%g
+/@DEPEND4@/r $DEPEND4
+s%@DEPEND4@%%g
 s%@SETX@%$SETX%g
 s%@ROOT@%$ROOT%g
 

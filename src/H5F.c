@@ -509,11 +509,9 @@ H5F_compare_files(void * _obj, const void * _key)
 
     FUNC_ENTER(H5F_compare_files, FALSE);
 #if WIN32
-
 	ret_value = (obj->shared->key.dev == key->dev && 
 		obj->shared->key.fileindexhi == key->fileindexhi &&
 		obj->shared->key.fileindexlo == key->fileindexlo);
-
 #else
     ret_value = (obj->shared->key.dev == key->dev &&
 		 obj->shared->key.ino == key->ino);	

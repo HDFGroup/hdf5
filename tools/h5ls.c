@@ -18,7 +18,8 @@
 /* Command-line switches */
 static int verbose_g = 0;		/*lots of extra output		     */
 static int width_g = 80;		/*output width in characters	     */
-static hbool_t dump_g = FALSE;		/*display dataset values?	     */
+static hbool_t address_g = FALSE;	/*print raw data addresses	     */
+static hbool_t data_g = FALSE;		/*display dataset values?	     */
 static hbool_t label_g = FALSE;		/*label compound values?	     */
 static hbool_t string_g = FALSE;	/*print 1-byte numbers as ASCII?     */
 static hbool_t fullname_g = FALSE;	/*print full path names		     */
@@ -83,7 +84,8 @@ usage (const char *progname)
 usage: %s [OPTIONS] FILE [OBJECTS...]\n\
    OPTIONS\n\
       -h, -?, --help   Print a usage message and exit\n\
-      -d, --dump       Print the values of datasets\n\
+      -a, --address    Print addresses for raw data\n\
+      -d, --data       Print the values of datasets\n\
       -f, --full       Print full path names instead of base names\n\
       -g, --group      Show information about a group, not its contents\n\
       -l, --label      Label members of compound datasets\n\
@@ -1312,13 +1314,16 @@ dataset_list2(hid_t dset, const char UNUSED *name)
 	display_type(type, 15);
 	printf("\n");
 
+	/* Print address information */
+	if (address_g) H5Ddebug(dset, 0);
+
 	/* Close stuff */
 	H5Tclose(type);
 	H5Sclose(space);
 	H5Pclose(dcpl);
     }
 
-    if (dump_g) dump_dataset_values(dset);
+    if (data_g) dump_dataset_values(dset);
     return 0;
 }
 
@@ -1402,7 +1407,7 @@ datatype_list2(hid_t type, const char UNUSED *name)
 static herr_t
 ragged_list2(hid_t UNUSED ra, const char UNUSED *name)
 {
-    if (dump_g) {
+    if (data_g) {
 	puts("    Data:      Not implemented yet (see values of member");
 	puts("               datasets `raw', `over', and `meta')");
     }
@@ -1752,10 +1757,12 @@ main (int argc, char *argv[])
 	} else if (!strcmp(argv[argno], "--help")) {
 	    usage(progname);
 	    exit(0);
+	} else if (!strcmp(argv[argno], "--address")) {
+	    address_g = TRUE;
 	} else if (!strcmp(argv[argno], "--group")) {
 	    grp_literal_g = TRUE;
-	} else if (!strcmp(argv[argno], "--dump")) {
-	    dump_g = TRUE;
+	} else if (!strcmp(argv[argno], "--data")) {
+	    data_g = TRUE;
 	} else if (!strcmp(argv[argno], "--full")) {
 	    fullname_g = TRUE;
 	} else if (!strcmp(argv[argno], "--label")) {
@@ -1799,8 +1806,11 @@ main (int argc, char *argv[])
 		case 'h':	/* --help */
 		    usage(progname);
 		    exit(0);
-		case 'd':	/* --dump */
-		    dump_g++;
+		case 'a':	/* --address */
+		    address_g = TRUE;
+		    break;
+		case 'd':	/* --data */
+		    data_g = TRUE;
 		    break;
 		case 'f':	/* --full */
 		    fullname_g = TRUE;

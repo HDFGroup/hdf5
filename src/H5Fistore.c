@@ -147,6 +147,7 @@ typedef struct H5F_istore_ud1_t {
     haddr_t		addr;			/*file address of chunk */
     H5O_layout_t	mesg;			/*layout message	*/
     hsize_t		total_storage;		/*output from iterator	*/
+    FILE		*stream;		/*debug output stream	*/
 } H5F_istore_ud1_t;
 
 /* inherits B-tree like properties from H5B */
@@ -724,7 +725,9 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
 /*-------------------------------------------------------------------------
  * Function:	H5F_istore_iterate
  *
- * Purpose:	Simply counts the number of chunks for a dataset.
+ * Purpose:	Simply counts the number of chunks for a dataset. If the
+ *		UDATA.STREAM member is non-null then debugging information is
+ *		written to that stream.
  *
  * Return:	Success:	Non-negative
  *
@@ -744,8 +747,27 @@ H5F_istore_iterate (H5F_t UNUSED *f, void *_lt_key,
 {
     H5F_istore_ud1_t	*bt_udata = (H5F_istore_ud1_t *)_udata;
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *)_lt_key;
+    int			i;
 
     FUNC_ENTER(H5F_istore_iterate, FAIL);
+
+    if (bt_udata->stream) {
+	if (0==bt_udata->total_storage) {
+	    fprintf(bt_udata->stream, "    Address:\n");
+	    fprintf(bt_udata->stream,
+		    "             Flags    Bytes    Address Logical Offset\n");
+	    fprintf(bt_udata->stream,
+		    "        ========== ======== ========== "
+		    "==============================\n");
+	}
+	HDfprintf(bt_udata->stream, "        0x%08x %8Zu %10a [",
+		  lt_key->filter_mask, lt_key->nbytes, addr);
+	for (i=0; i<bt_udata->mesg.ndims; i++) {
+	    HDfprintf(bt_udata->stream, "%s%Hd", i?", ":"", lt_key->offset[i]);
+	}
+	fputs("]\n", bt_udata->stream);
+    }
+
     bt_udata->total_storage += lt_key->nbytes;
     FUNC_LEAVE(SUCCEED);
 }
@@ -1952,13 +1974,47 @@ H5F_istore_allocated(H5F_t *f, int ndims, haddr_t *addr)
     H5F_istore_ud1_t	udata;
 
     FUNC_ENTER(H5F_istore_nchunks, 0);
+    HDmemset(&udata, 0, sizeof udata);
     udata.mesg.ndims = ndims;
-    udata.total_storage = 0;
     if (H5B_iterate(f, H5B_ISTORE, addr, &udata)<0) {
 	HRETURN_ERROR(H5E_IO, H5E_INTERNAL, 0,
 		      "unable to iterate over chunk B-tree");
     }
     FUNC_LEAVE(udata.total_storage);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_dump_btree
+ *
+ * Purpose:	Prints information about the storage B-tree to the specified
+ *		stream.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 28, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_istore_dump_btree(H5F_t *f, FILE *stream, int ndims, haddr_t *addr)
+{
+    H5F_istore_ud1_t	udata;
+
+    FUNC_ENTER(H5F_istore_dump_btree, FAIL);
+    HDmemset(&udata, 0, sizeof udata);
+    udata.mesg.ndims = ndims;
+    udata.stream = stream;
+    if (H5B_iterate(f, H5B_ISTORE, addr, &udata)<0) {
+	HRETURN_ERROR(H5E_IO, H5E_INTERNAL, 0,
+		      "unable to iterate over chunk B-tree");
+    }
+    FUNC_LEAVE(SUCCEED);
 }
 
 

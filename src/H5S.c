@@ -134,7 +134,9 @@ H5S_term_interface(void)
 		    for (j=0; j<2; j++) {
 			if (0==path->stats[j].gath_ncalls &&
 			    0==path->stats[j].scat_ncalls &&
-			    0==path->stats[j].bkg_ncalls) {
+			    0==path->stats[j].bkg_ncalls &&
+			    0==path->stats[j].read_ncalls &&
+			    0==path->stats[j].write_ncalls) {
 			    continue;
 			}
 			if (0==nprints++) {
@@ -200,6 +202,38 @@ H5S_term_interface(void)
 				      path->stats[j].bkg_timer.utime, 
 				      path->stats[j].bkg_timer.stime, 
 				      path->stats[j].bkg_timer.etime,
+				      buf);
+			}
+
+			/* Read */
+			if (path->stats[j].read_ncalls) {
+			    H5_bandwidth(buf,
+					 (double)(path->stats[j].read_nbytes),
+					 path->stats[j].read_timer.etime);
+			    HDfprintf(H5DEBUG(S),
+				      "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f "
+				      "%10s\n", "read",
+				      path->stats[j].read_nbytes,
+				      path->stats[j].read_ncalls,
+				      path->stats[j].read_timer.utime,
+				      path->stats[j].read_timer.stime,
+				      path->stats[j].read_timer.etime,
+				      buf);
+			}
+			
+			/* Write */
+			if (path->stats[j].write_ncalls) {
+			    H5_bandwidth(buf,
+					 (double)(path->stats[j].write_nbytes),
+					 path->stats[j].write_timer.etime);
+			    HDfprintf(H5DEBUG(S),
+				      "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f "
+				      "%10s\n", "write",
+				      path->stats[j].write_nbytes,
+				      path->stats[j].write_ncalls,
+				      path->stats[j].write_timer.utime,
+				      path->stats[j].write_timer.stime,
+				      path->stats[j].write_timer.etime,
 				      buf);
 			}
 		    }

@@ -303,16 +303,17 @@ typedef struct H5F_search_t {
     dev_t	dev;		/* Device number containing file	*/
     ino_t	ino;		/* Unique file number on device		*/
 #if WIN32
-/*
-	Specifies the low-order word of a unique identifier associated with the file. 
-	This identifier and the volume serial number uniquely identify a file. This number 
-	may change when the system is restarted or when the file is opened. After a process 
-	opens a file, the identifier is constant until the file is closed. An application can 
-	use this identifier and the volume serial number to determine whether two handles refer 
-	to the same file. 
-*/
-	int fileindexlo;
-	int fileindexhi;
+    /*
+     * Specifies the low-order word of a unique identifier associated with the
+     * file.  This identifier and the volume serial number uniquely identify a
+     * file. This number may change when the system is restarted or when the
+     * file is opened. After a process opens a file, the identifier is
+     * constant until the file is closed. An application can use this
+     * identifier and the volume serial number to determine whether two
+     * handles refer to the same file.
+     */
+    int fileindexlo;
+    int fileindexhi;
 #endif
 } H5F_search_t;
 
@@ -658,6 +659,8 @@ __DLL__ herr_t H5F_istore_allocate (H5F_t *f,
 				    const double split_ratios[], 
 				    const struct H5O_pline_t *pline,
 				    const struct H5O_fill_t *fill);
+__DLL__ herr_t H5F_istore_dump_btree(H5F_t *f, FILE *stream, int ndims,
+				     haddr_t *addr);
 
 /* Functions that operate on contiguous storage wrt boot block */
 __DLL__ herr_t H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,

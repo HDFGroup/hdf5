@@ -278,6 +278,12 @@ typedef struct H5S_conv_t {
 	H5_timer_t	bkg_timer;		/*time for background	*/
 	hsize_t		bkg_nbytes;		/*background throughput	*/
 	hsize_t		bkg_ncalls;		/*number of calls	*/
+	H5_timer_t	read_timer;		/*time for read calls	*/
+	hsize_t		read_nbytes;		/*total bytes read	*/
+	hsize_t		read_ncalls;		/*number of calls	*/
+	H5_timer_t	write_timer;		/*time for write calls	*/
+	hsize_t		write_nbytes;		/*total bytes written	*/
+	hsize_t		write_ncalls;		/*number of calls	*/
     } stats[2];		/* 0=output, 1=input */
 #endif
 } H5S_conv_t;

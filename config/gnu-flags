@@ -44,14 +44,14 @@ EOF
         v2=`echo $cc_version |cut -f2 -d.`
 	v3=`echo $cc_version |cut -f3 -d.`
 	v=`expr $v2 '*' 1000 + $v3`
-	if test $v -lt 91060; then
+	if test $v -le 91066; then
 	    cat <<EOF
     **
     ** This compiler may have problems allocating registers for long
     ** long data types when optimizations are enabled. There may be
-    ** other code generation problems as well. Please upgrade to at
-    ** least pgcc-2.91.60 (egcs-1.1.1) before reporting bugs to the
-    ** HDF5 team.
+    ** other code generation problems as well. We know of no version
+    ** of pgcc which is capable of compiling HDF5 in production mode.
+    ** Please use gcc-2.8 or egcs-1.1.1 before reporting bugs.
     **
 EOF
 	    sleep 5

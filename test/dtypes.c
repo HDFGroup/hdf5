@@ -2265,6 +2265,59 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_conv_int_2
+ *
+ * Purpose:	Tests overlap calculates in H5T_conv_i_i(), which should be
+ *		the same as for H5T_conv_f_f() and H5T_conv_s_s().
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, April 30, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_int_2(void)
+{
+    int		i, j;
+    hid_t	src_type, dst_type;
+    char	buf[32*100];
+
+    printf("%-70s", "Testing overlap calculations");
+    fflush(stdout);
+    
+    memset(buf, 0, sizeof buf);
+    for (i=1; i<=32; i++) {
+	for (j=1; j<=32; j++) {
+
+	    /* Source type */
+	    src_type = H5Tcopy(H5T_NATIVE_CHAR);
+	    H5Tset_size(src_type, i);
+
+	    /* Destination type */
+	    dst_type = H5Tcopy(H5T_NATIVE_CHAR);
+	    H5Tset_size(dst_type, j);
+
+	    /*
+	     * Conversion. If overlap calculations aren't right then an
+	     * assertion will fail in H5T_conv_i_i()
+	     */
+	    H5Tconvert(src_type, dst_type, 100, buf, NULL);
+	    H5Tclose(src_type);
+	    H5Tclose(dst_type);
+	}
+    }
+    PASSED();
+    return 0;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	my_isnan
  *
  * Purpose:	Determines whether VAL points to NaN.
@@ -2984,6 +3037,7 @@ main(void)
     reset_hdf5();
 
     /* Test software integer conversion functions */
+    nerrors += test_conv_int_2();
     nerrors += run_integer_tests("sw");
 
     /* Test software floating-point conversion functions */

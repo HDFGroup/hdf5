@@ -1259,16 +1259,19 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    direction = 1;
 	    olap = nelmts;
 	} else if (src->size>=dst->size) {
+	    double olap_d = HDceil((double)(dst->size)/
+				   (double)(src->size-dst->size));
+	    
+	    olap = (size_t)olap_d;
 	    sp = dp = (uint8_t*)buf;
 	    direction = 1;
-	    olap = (size_t)(HDceil((double)(src->size)/
-				   (double)(src->size-dst->size))-1);
 	} else {
+	    double olap_d = HDceil((double)(src->size)/
+				   (double)(dst->size-src->size));
+	    olap = (size_t)olap_d;
 	    sp = (uint8_t*)buf + (nelmts-1) * src->size;
 	    dp = (uint8_t*)buf + (nelmts-1) * dst->size;
 	    direction = -1;
-	    olap = (size_t)(HDceil((double)(dst->size)/
-				   (double)(dst->size-src->size))-1);
 	}
 
 	/* The conversion loop */
@@ -1283,7 +1286,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		d = elmtno<olap ? dbuf : dp;
 	    } else {
 		s = sp;
-		d = elmtno >= nelmts-olap ? dbuf : dp;
+		d = elmtno+olap >= nelmts ? dbuf : dp;
 	    }
 #ifndef NDEBUG
 	    /* I don't quite trust the overlap calculations yet --rpm */
@@ -1636,16 +1639,18 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    direction = 1;
 	    olap = nelmts;
 	} else if (src_p->size>=dst_p->size) {
+	    double olap_d = HDceil((double)(dst_p->size)/
+				   (double)(src_p->size-dst_p->size));
+	    olap = (size_t)olap_d;
 	    sp = dp = (uint8_t*)buf;
 	    direction = 1;
-	    olap = (size_t)(HDceil((double)(src_p->size)/
-				   (double)(src_p->size-dst_p->size))-1);
 	} else {
+	    double olap_d = HDceil((double)(src_p->size)/
+				   (double)(dst_p->size-src_p->size));
+	    olap = (size_t)olap_d;
 	    sp = (uint8_t*)buf + (nelmts-1) * src_p->size;
 	    dp = (uint8_t*)buf + (nelmts-1) * dst_p->size;
 	    direction = -1;
-	    olap = (size_t)(HDceil((double)(dst_p->size)/
-				   (double)(dst_p->size-src_p->size))-1);
 	}
 
 	/* The conversion loop */
@@ -1659,7 +1664,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		d = elmtno<olap ? dbuf : dp;
 	    } else {
 		s = sp;
-		d = elmtno >= nelmts-olap ? dbuf : dp;
+		d = elmtno+olap >= nelmts ? dbuf : dp;
 	    }
 #ifndef NDEBUG
 	    /* I don't quite trust the overlap calculations yet --rpm */

@@ -710,9 +710,13 @@ AC_SUBST_FILE(CONCLUDE) CONCLUDE=config/conclude
 if test "X$GCC" = "Xyes" && test "X$GMAKE" = "Xyes"; then
    AC_SUBST_FILE(DEPEND1) DEPEND1=config/depend
    AC_SUBST_FILE(DEPEND2) DEPEND2=/dev/null
+   AC_SUBST_FILE(DEPEND3) DEPEND3=/dev/null
+   AC_SUBST_FILE(DEPEND4) DEPEND4=/dev/null
 else
-   AC_SUBST_FILE(DEPEND1) DEPEND1=src/.distdep
-   AC_SUBST_FILE(DEPEND2) DEPEND2=test/.distdep
+   AC_SUBST_FILE(DEPEND1) DEPEND1=$srcdir/src/.distdep
+   AC_SUBST_FILE(DEPEND2) DEPEND2=$srcdir/test/.distdep
+   AC_SUBST_FILE(DEPEND3) DEPEND3=$srcdir/testpar/.distdep
+   AC_SUBST_FILE(DEPEND4) DEPEND4=$srcdirtools/.distdep
 fi
 
 dnl We don't need to say when we're entering directories if we're using

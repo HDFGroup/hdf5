@@ -1545,6 +1545,9 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * application's buffer.  This saves at least one mem-to-mem copy.
      */
     if (H5T_IS_NOOP(tpath) && sconv->read) {
+#ifdef H5S_DEBUG
+	H5_timer_begin(&timer);
+#endif
         status = (sconv->read)(dataset->ent.file, &(dataset->layout),
 			       &(dataset->create_parms->pline),
 			       &(dataset->create_parms->efl),
@@ -1561,6 +1564,12 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	     * fall through and xfer the data in the more roundabout way */
 	} else {
 	    /* direct xfer accomplished successfully */
+#ifdef H5S_DEBUG
+	    H5_timer_end(&(sconv->stats[1].read_timer), &timer);
+	    sconv->stats[1].read_nbytes += nelmts *
+					   H5T_get_size(dataset->type);
+	    sconv->stats[1].read_ncalls++;
+#endif
 	    goto succeed;
 	}
 #ifdef H5D_DEBUG
@@ -1920,6 +1929,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * application buffer to file.
      */
     if (H5T_IS_NOOP(tpath) && sconv->write) {
+#ifdef H5S_DEBUG
+	H5_timer_begin(&timer);
+#endif
 	status = (sconv->write)(dataset->ent.file, &(dataset->layout),
 				&(dataset->create_parms->pline),
 				&(dataset->create_parms->efl),
@@ -1936,6 +1948,11 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	     * fall through and xfer the data in the more roundabout way */
 	} else {
 	    /* direct xfer accomplished successfully */
+#ifdef H5S_DEBUG
+	    H5_timer_end(&(sconv->stats[0].write_timer), &timer);
+	    sconv->stats[0].write_nbytes += nelmts * H5T_get_size(mem_type);
+	    sconv->stats[0].write_ncalls++;
+#endif
 	    goto succeed;
 	}
 #ifdef H5D_DEBUG
@@ -2514,4 +2531,48 @@ H5D_get_storage_size(H5D_t *dset)
     }
 	
     FUNC_LEAVE(size);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Ddebug
+ *
+ * Purpose:	Prints various information about a dataset.  This function is
+ *		not to be documented in the API at this time.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 28, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Ddebug(hid_t dset_id, unsigned UNUSED flags)
+{
+    H5D_t	*dset=NULL;
+
+    FUNC_ENTER(H5Ddebug, FAIL);
+    H5TRACE2("e","iIu",dset_id,flags);
+
+    /* Check args */
+    if (H5I_DATASET!=H5I_get_type(dset_id) ||
+	NULL==(dset=H5I_object(dset_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    }
+
+    /* Print B-tree information */
+    if (H5D_CHUNKED==dset->layout.type) {
+	H5F_istore_dump_btree(dset->ent.file, stdout, dset->layout.ndims,
+			      &(dset->layout.addr));
+    } else if (H5D_CONTIGUOUS==dset->layout.type) {
+	HDfprintf(stdout, "    %-10s %a\n", "Address:",
+		  &(dset->layout.addr));
+    }
+    
+    FUNC_LEAVE(SUCCEED);
 }

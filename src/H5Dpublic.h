@@ -56,6 +56,7 @@ __DLL__ herr_t H5Dread (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 __DLL__ herr_t H5Dwrite (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			 hid_t file_space_id, hid_t plist_id, const void *buf);
 __DLL__ herr_t H5Dextend (hid_t dset_id, const hsize_t *size);
+__DLL__ herr_t H5Ddebug(hid_t dset_id, unsigned int flags);
 
 #ifdef __cplusplus
 }
