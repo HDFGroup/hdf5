@@ -12,7 +12,7 @@ VPATH=.:@srcdir@
 @COMMENCE@
 
 # Subdirectories in build-order (not including `examples')
-SUBDIRS=ADGuide Graphics PSandPDF TechNotes Tutor cpplus fortran
+SUBDIRS=ADGuide Graphics Intro PSandPDF TechNotes Tutor cpplus fortran
 DOCDIR=$(docdir)/hdf5
 
 # Public doc files (to be installed)...
