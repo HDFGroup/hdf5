@@ -342,8 +342,10 @@
 ./doc/html/Tutor/examples/h5_mount.c
 ./doc/html/Tutor/examples/h5_rdwt.c
 ./doc/html/Tutor/examples/h5_read.c
+./doc/html/Tutor/examples/h5_ref2obj.c
 ./doc/html/Tutor/examples/h5_ref2objr.c
 ./doc/html/Tutor/examples/h5_ref2objw.c
+./doc/html/Tutor/examples/h5_ref2reg.c
 ./doc/html/Tutor/examples/h5_ref2regr.c
 ./doc/html/Tutor/examples/h5_ref2regw.c
 ./doc/html/Tutor/examples/h5_reference.c
