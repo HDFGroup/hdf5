@@ -1109,46 +1109,31 @@ h5dump_simple_prefix(FILE *stream, const h5dump_t *info,
 
     /* Write new prefix to output */
     if (ctx->indent_level >= 0) {
-        if (0==elmtno && 0==secnum && info->line_1st) {
-            fputs(h5dump_str_fmt(&prefix, 0, info->line_1st), stream);
-        } else if (secnum && info->line_cont) {
-            fputs(h5dump_str_fmt(&prefix, 0, info->line_cont),
-                  stream);
-        } else {
-            fputs(h5dump_str_fmt(&prefix, 0, info->line_pre), stream);
-        }
-        templength = h5dump_str_len(&prefix);
         indentlevel = ctx->indent_level;
-		for (i = 0; i < indentlevel; i++){
-			fputs(h5dump_str_fmt(&prefix, 0, info->line_indent), stream);
-			templength += h5dump_str_len(&prefix);
-		}
     } else {
         /* this is because sometimes we dont print out all the header
          * info for the data(like the tattr-2.ddl example. if that happens
          * the ctx->indent_level a negative so we need to skip the above
-         * and just print out 2 indent levels. maybe the 2 should be a value
-         * of the ctx struct?? */
-        if (0==elmtno && 0==secnum && info->line_1st) {
-            fputs(h5dump_str_fmt(&prefix, 0, info->line_1st), stream);
-        } else if (secnum && info->line_cont) {
-            fputs(h5dump_str_fmt(&prefix, 0, info->line_cont),
-                  stream);
-        } else {
-            fputs(h5dump_str_fmt(&prefix, 0, info->line_pre), stream);
-        }
-        templength = h5dump_str_len(&prefix);      
+         * and just print out the default indent levels. */      
 		indentlevel = ctx->default_indent_level;
-		for (i = 0; i < indentlevel; i++){
-			fputs(h5dump_str_fmt(&prefix, 0, info->line_indent), stream);
-			templength += h5dump_str_len(&prefix);
-		}
-    }	
- /*   for (i = 0; i < indentlevel; i++){
-        fputs(h5dump_str_fmt(&prefix, 0, info->line_indent), stream);
-        templength += h5dump_str_len(&prefix);
     }
-*/
+
+	if (0==elmtno && 0==secnum && info->line_1st) {
+		fputs(h5dump_str_fmt(&prefix, 0, info->line_1st), stream);
+	} else if (secnum && info->line_cont) {
+		fputs(h5dump_str_fmt(&prefix, 0, info->line_cont),
+			stream);
+	} else {
+		fputs(h5dump_str_fmt(&prefix, 0, info->line_pre), stream);
+	}
+	templength = h5dump_str_len(&prefix);      
+	for (i = 0; i < indentlevel; i++){
+		fputs(h5dump_str_fmt(&prefix, 0, info->line_indent), stream);
+		templength += h5dump_str_len(&prefix);
+	}	
+
+
+
     ctx->cur_column = ctx->prev_prefix_len = templength;
 
     ctx->cur_elmt = 0;
