@@ -4,15 +4,15 @@ Expected output for 'h5dump tall.h5'
 HDF5 "tall.h5" {
 GROUP "/" {
    ATTRIBUTE "attr1" {
-      DATATYPE { H5T_STD_I8BE } 
-      DATASPACE { SIMPLE ( 10 ) / ( 10 ) } 
+      DATATYPE  H5T_STD_I8BE  
+      DATASPACE  SIMPLE { ( 10 ) / ( 10 ) } 
       DATA {
          97, 98, 99, 100, 101, 102, 103, 104, 105, 0
       } 
    } 
    ATTRIBUTE "attr2" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 2, 2 ) / ( 2, 2 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 2, 2 ) / ( 2, 2 ) } 
       DATA {
          0, 1,
          2, 3
@@ -21,8 +21,8 @@ GROUP "/" {
    GROUP "g1" {
       GROUP "g1.1" {
          DATASET "dset1.1.1" {
-            DATATYPE { H5T_STD_I32BE } 
-            DATASPACE { SIMPLE ( 10, 10 ) / ( 10, 10 ) } 
+            DATATYPE  H5T_STD_I32BE  
+            DATASPACE  SIMPLE { ( 10, 10 ) / ( 10, 10 ) } 
             DATA {
                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
@@ -36,16 +36,16 @@ GROUP "/" {
                0, 9, 18, 27, 36, 45, 54, 63, 72, 81
             } 
             ATTRIBUTE "attr1" {
-               DATATYPE { H5T_STD_I8BE } 
-               DATASPACE { SIMPLE ( 27 ) / ( 27 ) } 
+               DATATYPE  H5T_STD_I8BE  
+               DATASPACE  SIMPLE { ( 27 ) / ( 27 ) } 
                DATA {
                   49, 115, 116, 32, 97, 116, 116, 114, 105, 98, 117, 116, 101,
                   32, 111, 102, 32, 100, 115, 101, 116, 49, 46, 49, 46, 49, 0
                } 
             } 
             ATTRIBUTE "attr2" {
-               DATATYPE { H5T_STD_I8BE } 
-               DATASPACE { SIMPLE ( 27 ) / ( 27 ) } 
+               DATATYPE  H5T_STD_I8BE  
+               DATASPACE  SIMPLE { ( 27 ) / ( 27 ) } 
                DATA {
                   50, 110, 100, 32, 97, 116, 116, 114, 105, 98, 117, 116, 101,
                   32, 111, 102, 32, 100, 115, 101, 116, 49, 46, 49, 46, 49, 0
@@ -53,8 +53,8 @@ GROUP "/" {
             } 
          } 
          DATASET "dset1.1.2" {
-            DATATYPE { H5T_STD_I32BE } 
-            DATASPACE { SIMPLE ( 20 ) / ( 20 ) } 
+            DATATYPE  H5T_STD_I32BE  
+            DATASPACE  SIMPLE { ( 20 ) / ( 20 ) } 
             DATA {
                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
                19
@@ -71,15 +71,15 @@ GROUP "/" {
    } 
    GROUP "g2" {
       DATASET "dset2.1" {
-         DATATYPE { H5T_IEEE_F32BE } 
-         DATASPACE { SIMPLE ( 10 ) / ( 10 ) } 
+         DATATYPE  H5T_IEEE_F32BE  
+         DATASPACE  SIMPLE { ( 10 ) / ( 10 ) } 
          DATA {
             1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9
          } 
       } 
       DATASET "dset2.2" {
-         DATATYPE { H5T_IEEE_F32BE } 
-         DATASPACE { SIMPLE ( 3, 5 ) / ( 3, 5 ) } 
+         DATATYPE  H5T_IEEE_F32BE  
+         DATASPACE  SIMPLE { ( 3, 5 ) / ( 3, 5 ) } 
          DATA {
             0, 0.1, 0.2, 0.3, 0.4,
             0, 0.2, 0.4, 0.6, 0.8,

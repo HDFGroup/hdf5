@@ -4,20 +4,21 @@ Expected output for 'h5dump tnestedcomp.h5'
 HDF5 "tnestedcomp.h5" {
 GROUP "/" {
    DATASET "ArrayOfStructures" {
-      DATATYPE {
+      DATATYPE  H5T_COMPOUND {
          H5T_STD_I32LE "a_name";
          H5T_IEEE_F32LE "b_name";
          H5T_IEEE_F64LE "c_name";
-         {
-            { STRSIZE 1;
-              STRPAD H5T_STR_NULLTERM;
-              CSET H5T_CSET_ASCII;
-              CTYPE H5T_C_S1;
+         H5T_COMPOUND {
+            H5T_STRING {
+               STRSIZE 1;
+               STRPAD H5T_STR_NULLTERM;
+               CSET H5T_CSET_ASCII;
+               CTYPE H5T_C_S1;
             } "char_name";
-            H5T_ARRAY [2] of H5T_IEEE_F32LE "array_name";
+            H5T_ARRAY { [2] H5T_IEEE_F32LE } "array_name";
          } "d_name";
-      } 
-      DATASPACE { SIMPLE ( 10 ) / ( 10 ) } 
+      }        
+      DATASPACE  SIMPLE { ( 10 ) / ( 10 ) } 
       DATA {
          {
             0,

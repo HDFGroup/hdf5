@@ -125,7 +125,10 @@ TOOLTEST tstr-1.ls -w80 -r -d tstr.h5
 TOOLTEST tsaf.ls -w80 -r -d tsaf.h5
 
 # test for variable length data types
-TOOLTEST tvldtypes.ls -w80 -r -d tvldtypes.h5
+TOOLTEST tvldtypes1.ls -w80 -r -d tvldtypes1.h5
+
+# test for array data types
+TOOLTEST tarray1.ls -w80 -r -d tarray1.h5
 
 if test $nerrors -eq 0 ; then
 	echo "All $h5tool tests passed."

@@ -4,8 +4,8 @@ Expected output for 'h5dump tsaf.h5'
 HDF5 "tsaf.h5" {
 GROUP "/" {
    DATASET ".DSL_METADATA" {
-      DATATYPE { H5T_STD_U8LE } 
-      DATASPACE { SIMPLE ( 5919 ) / ( H5S_UNLIMITED ) } 
+      DATATYPE  H5T_STD_U8LE  
+      DATASPACE  SIMPLE { ( 5919 ) / ( H5S_UNLIMITED ) } 
       DATA {
          47, 32, 67, 79, 78, 84, 65, 73, 78, 69, 82, 10, 47, 46, 97, 116, 116,
          114, 105, 98, 117, 116, 101, 115, 32, 67, 79, 78, 84, 65, 73, 78, 69,
@@ -372,85 +372,93 @@ GROUP "/" {
    GROUP ".attributes" {
       GROUP "database" {
          DATASET ".SAF_DbProps" {
-            DATATYPE {
+            DATATYPE  H5T_COMPOUND {
                H5T_STD_I32BE "magic";
-               { STRSIZE 1024;
-                 STRPAD H5T_STR_NULLTERM;
-                 CSET H5T_CSET_ASCII;
-                 CTYPE H5T_C_S1;
+               H5T_STRING {
+                  STRSIZE 1024;
+                  STRPAD H5T_STR_NULLTERM;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
                } "SFileDir";
-               { STRSIZE 1024;
-                 STRPAD H5T_STR_NULLTERM;
-                 CSET H5T_CSET_ASCII;
-                 CTYPE H5T_C_S1;
+               H5T_STRING {
+                  STRSIZE 1024;
+                  STRPAD H5T_STR_NULLTERM;
+                  CSET H5T_CSET_ASCII;
+                  CTYPE H5T_C_S1;
                } "ImportFile";
                H5T_STD_I32BE "parallel";
-               {
+               H5T_COMPOUND {
                   H5T_STD_I32BE "vmajor";
                   H5T_STD_I32BE "vminor";
                   H5T_STD_I32BE "rel";
-                  { STRSIZE 10;
-                    STRPAD H5T_STR_NULLTERM;
-                    CSET H5T_CSET_ASCII;
-                    CTYPE H5T_C_S1;
+                  H5T_STRING {
+                     STRSIZE 10;
+                     STRPAD H5T_STR_NULLTERM;
+                     CSET H5T_CSET_ASCII;
+                     CTYPE H5T_C_S1;
                   } "annot";
                } "safapi";
-               {
+               H5T_COMPOUND {
                   H5T_STD_I32BE "vmajor";
                   H5T_STD_I32BE "vminor";
                   H5T_STD_I32BE "rel";
-                  { STRSIZE 10;
-                    STRPAD H5T_STR_NULLTERM;
-                    CSET H5T_CSET_ASCII;
-                    CTYPE H5T_C_S1;
+                  H5T_STRING {
+                     STRSIZE 10;
+                     STRPAD H5T_STR_NULLTERM;
+                     CSET H5T_CSET_ASCII;
+                     CTYPE H5T_C_S1;
                   } "annot";
                } "saflib";
-               {
+               H5T_COMPOUND {
                   H5T_STD_I32BE "vmajor";
                   H5T_STD_I32BE "vminor";
                   H5T_STD_I32BE "rel";
-                  { STRSIZE 10;
-                    STRPAD H5T_STR_NULLTERM;
-                    CSET H5T_CSET_ASCII;
-                    CTYPE H5T_C_S1;
+                  H5T_STRING {
+                     STRSIZE 10;
+                     STRPAD H5T_STR_NULLTERM;
+                     CSET H5T_CSET_ASCII;
+                     CTYPE H5T_C_S1;
                   } "annot";
                } "vbt";
-               {
+               H5T_COMPOUND {
                   H5T_STD_I32BE "vmajor";
                   H5T_STD_I32BE "vminor";
                   H5T_STD_I32BE "rel";
-                  { STRSIZE 10;
-                    STRPAD H5T_STR_NULLTERM;
-                    CSET H5T_CSET_ASCII;
-                    CTYPE H5T_C_S1;
+                  H5T_STRING {
+                     STRSIZE 10;
+                     STRPAD H5T_STR_NULLTERM;
+                     CSET H5T_CSET_ASCII;
+                     CTYPE H5T_C_S1;
                   } "annot";
                } "dsl";
-               {
+               H5T_COMPOUND {
                   H5T_STD_I32BE "vmajor";
                   H5T_STD_I32BE "vminor";
                   H5T_STD_I32BE "rel";
-                  { STRSIZE 10;
-                    STRPAD H5T_STR_NULLTERM;
-                    CSET H5T_CSET_ASCII;
-                    CTYPE H5T_C_S1;
+                  H5T_STRING {
+                     STRSIZE 10;
+                     STRPAD H5T_STR_NULLTERM;
+                     CSET H5T_CSET_ASCII;
+                     CTYPE H5T_C_S1;
                   } "annot";
                } "hdf5";
-               {
+               H5T_COMPOUND {
                   H5T_STD_I32BE "vmajor";
                   H5T_STD_I32BE "vminor";
                   H5T_STD_I32BE "rel";
-                  { STRSIZE 10;
-                    STRPAD H5T_STR_NULLTERM;
-                    CSET H5T_CSET_ASCII;
-                    CTYPE H5T_C_S1;
+                  H5T_STRING {
+                     STRSIZE 10;
+                     STRPAD H5T_STR_NULLTERM;
+                     CSET H5T_CSET_ASCII;
+                     CTYPE H5T_C_S1;
                   } "annot";
                } "mpi";
                H5T_STD_I32BE "DoToc";
                H5T_STD_I32BE "ReadOnly";
                H5T_STD_I32BE "Clobber";
                H5T_STD_I32BE "OSModes";
-            } 
-            DATASPACE { SIMPLE ( 1 ) / ( 1 ) } 
+            }              
+            DATASPACE  SIMPLE { ( 1 ) / ( 1 ) } 
             DATA {
                {
                   -604320037,
@@ -503,7 +511,7 @@ GROUP "/" {
       } 
    } 
    DATASET "Blob" {
-      DATATYPE {
+      DATATYPE  H5T_COMPOUND {
          H5T_STD_I32BE "file_id";
          H5T_STD_I32BE "dataset_id";
          H5T_STD_I32BE "offset";
@@ -511,8 +519,8 @@ GROUP "/" {
          H5T_STD_I32BE "count";
          H5T_STD_I32BE "base_id";
          H5T_STD_I32BE "num_recs";
-      } 
-      DATASPACE { SIMPLE ( 24 ) / ( H5S_UNLIMITED ) } 
+      }        
+      DATASPACE  SIMPLE { ( 24 ) / ( H5S_UNLIMITED ) } 
       DATA {
          {
             -1,
@@ -733,33 +741,34 @@ GROUP "/" {
       } 
    } 
    DATASET "Cat" {
-      DATATYPE {
-         { STRSIZE 64;
-           STRPAD H5T_STR_NULLTERM;
-           CSET H5T_CSET_ASCII;
-           CTYPE H5T_C_S1;
+      DATATYPE  H5T_COMPOUND {
+         H5T_STRING {
+            STRSIZE 64;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
          } "name";
-         H5T_ENUM
-         { H5T_STD_I32BE;
-          "TOPO"             0;
-          "BND"              1;
-          "PROC"             2;
-          "DOMN"             3;
-          "BLOCK"            4;
-          "ASSY"             5;
-          "MAT"              6;
-          "XPROD"            7;
-          "USERD"            8;
-          "ANY"              -1;
-          "INVALID"          -2;
-          "NA"               -3;
-          "UNKNOWN"          -4;
+         H5T_ENUM {
+            H5T_STD_I32BE;
+            "TOPO"             0;
+            "BND"              1;
+            "PROC"             2;
+            "DOMN"             3;
+            "BLOCK"            4;
+            "ASSY"             5;
+            "MAT"              6;
+            "XPROD"            7;
+            "USERD"            8;
+            "ANY"              -1;
+            "INVALID"          -2;
+            "NA"               -3;
+            "UNKNOWN"          -4;
          } "role";
          H5T_STD_I32BE "tdim";
          H5T_STD_I32BE "base_id";
          H5T_STD_I32BE "num_recs";
-      } 
-      DATASPACE { SIMPLE ( 5 ) / ( H5S_UNLIMITED ) } 
+      }        
+      DATASPACE  SIMPLE { ( 5 ) / ( H5S_UNLIMITED ) } 
       DATA {
          {
             "nodes",
@@ -799,31 +808,31 @@ GROUP "/" {
       } 
    } 
    DATASET "Collection" {
-      DATATYPE {
+      DATATYPE  H5T_COMPOUND {
          H5T_STD_I32BE "containing_set_id";
          H5T_STD_I32BE "cat_id";
-         H5T_ENUM
-         { H5T_STD_I32BE;
-          "NONE"             0;
-          "POINT"            1;
-          "LINE"             2;
-          "TRI"              3;
-          "QUAD"             4;
-          "TET"              5;
-          "PYRAMID"          6;
-          "PRISM"            7;
-          "HEX"              8;
-          "MIXED"            9;
-          "ARB"              10;
-          "1BALL"            11;
-          "2BALL"            12;
-          "3BALL"            13;
-          "1SHELL"           14;
-          "2SHELL"           15;
-          "ANY"              -1;
-          "INVALID"          -2;
-          "NA"               -3;
-          "UNKNOWN"          -4;
+         H5T_ENUM {
+            H5T_STD_I32BE;
+            "NONE"             0;
+            "POINT"            1;
+            "LINE"             2;
+            "TRI"              3;
+            "QUAD"             4;
+            "TET"              5;
+            "PYRAMID"          6;
+            "PRISM"            7;
+            "HEX"              8;
+            "MIXED"            9;
+            "ARB"              10;
+            "1BALL"            11;
+            "2BALL"            12;
+            "3BALL"            13;
+            "1SHELL"           14;
+            "2SHELL"           15;
+            "ANY"              -1;
+            "INVALID"          -2;
+            "NA"               -3;
+            "UNKNOWN"          -4;
          } "cell_type";
          H5T_STD_I32BE "count";
          H5T_STD_I32BE "indexing_id";
@@ -831,8 +840,8 @@ GROUP "/" {
          H5T_STD_I32BE "members_blob_id";
          H5T_STD_I32BE "base_id";
          H5T_STD_I32BE "num_recs";
-      } 
-      DATASPACE { SIMPLE ( 24 ) / ( H5S_UNLIMITED ) } 
+      }        
+      DATASPACE  SIMPLE { ( 24 ) / ( H5S_UNLIMITED ) } 
       DATA {
          {
             0,
@@ -1101,40 +1110,41 @@ GROUP "/" {
       } 
    } 
    DATASET "Field" {
-      DATATYPE {
+      DATATYPE  H5T_COMPOUND {
          H5T_STD_I32BE "ftmpl_id";
-         { STRSIZE 64;
-           STRPAD H5T_STR_NULLTERM;
-           CSET H5T_CSET_ASCII;
-           CTYPE H5T_C_S1;
+         H5T_STRING {
+            STRSIZE 64;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
          } "name";
          H5T_STD_I32BE "units_id";
          H5T_STD_I32BE "storage_decomp_cat_id";
-         H5T_ENUM
-         { H5T_STD_I32BE;
-          "COMPONENT"        0;
-          "VECTOR"           1;
-          "INDEPENDENT"      2;
-          "NONE"             3;
-          "ANY"              -1;
-          "INVALID"          -2;
-          "NA"               -3;
-          "UNKNOWN"          -4;
+         H5T_ENUM {
+            H5T_STD_I32BE;
+            "COMPONENT"        0;
+            "VECTOR"           1;
+            "INDEPENDENT"      2;
+            "NONE"             3;
+            "ANY"              -1;
+            "INVALID"          -2;
+            "NA"               -3;
+            "UNKNOWN"          -4;
          } "comp_intlv";
          H5T_STD_I32BE "indexing_id";
          H5T_STD_I32BE "dof_assoc_cat_id";
          H5T_STD_I32BE "assoc_ratio";
          H5T_STD_I32BE "eval_decomp_cat_id";
-         H5T_ENUM
-         { H5T_STD_I32BE;
-          "CONSTANT"         0;
-          "UNIFORM"          1;
-          "PWCONST"          2;
-          "PWLINEAR"         3;
-          "ANY"              -1;
-          "INVALID"          -2;
-          "NA"               -3;
-          "UNKNOWN"          -4;
+         H5T_ENUM {
+            H5T_STD_I32BE;
+            "CONSTANT"         0;
+            "UNIFORM"          1;
+            "PWCONST"          2;
+            "PWLINEAR"         3;
+            "ANY"              -1;
+            "INVALID"          -2;
+            "NA"               -3;
+            "UNKNOWN"          -4;
          } "eval_func";
          H5T_STD_I32BE "is_homogeneous";
          H5T_STD_I32BE "is_coord_field";
@@ -1144,8 +1154,8 @@ GROUP "/" {
          H5T_STD_I32BE "dof_blob_id";
          H5T_STD_I32BE "base_id";
          H5T_STD_I32BE "num_recs";
-      } 
-      DATASPACE { SIMPLE ( 14 ) / ( H5S_UNLIMITED ) } 
+      }        
+      DATASPACE  SIMPLE { ( 14 ) / ( H5S_UNLIMITED ) } 
       DATA {
          {
             1,
@@ -1430,50 +1440,51 @@ GROUP "/" {
       } 
    } 
    DATASET "FieldTmpl" {
-      DATATYPE {
-         { STRSIZE 64;
-           STRPAD H5T_STR_NULLTERM;
-           CSET H5T_CSET_ASCII;
-           CTYPE H5T_C_S1;
+      DATATYPE  H5T_COMPOUND {
+         H5T_STRING {
+            STRSIZE 64;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
          } "name";
          H5T_STD_I32BE "base_space_id";
-         H5T_ENUM
-         { H5T_STD_I32BE;
-          "CONSTANT"         0;
-          "COMPONENT"        1;
-          "SCALAR"           2;
-          "VECTOR"           3;
-          "TENSOR"           4;
-          "SYM_TENSOR"       5;
-          "FIELD"            6;
-          "STATE"            7;
-          "TUPLE"            8;
-          "ANY"              -1;
-          "INVALID"          -2;
-          "NA"               -3;
-          "UNKNOWN"          -4;
+         H5T_ENUM {
+            H5T_STD_I32BE;
+            "CONSTANT"         0;
+            "COMPONENT"        1;
+            "SCALAR"           2;
+            "VECTOR"           3;
+            "TENSOR"           4;
+            "SYM_TENSOR"       5;
+            "FIELD"            6;
+            "STATE"            7;
+            "TUPLE"            8;
+            "ANY"              -1;
+            "INVALID"          -2;
+            "NA"               -3;
+            "UNKNOWN"          -4;
          } "alg_type";
-         H5T_ENUM
-         { H5T_STD_I32BE;
-          "UNITY"            0;
-          "CARTESIAN"        1;
-          "SPHERICAL"        2;
-          "CYLINDRICAL"      3;
-          "UPPER_TRI"        4;
-          "FOURIER"          5;
-          "VARIABLE"         6;
-          "ANY"              -1;
-          "INVALID"          -2;
-          "NA"               -3;
-          "UNKNOWN"          -4;
+         H5T_ENUM {
+            H5T_STD_I32BE;
+            "UNITY"            0;
+            "CARTESIAN"        1;
+            "SPHERICAL"        2;
+            "CYLINDRICAL"      3;
+            "UPPER_TRI"        4;
+            "FOURIER"          5;
+            "VARIABLE"         6;
+            "ANY"              -1;
+            "INVALID"          -2;
+            "NA"               -3;
+            "UNKNOWN"          -4;
          } "basis";
          H5T_STD_I32BE "quantity_id";
          H5T_STD_I32BE "num_comps";
          H5T_STD_I32BE "ftmpl_ids_blob_id";
          H5T_STD_I32BE "base_id";
          H5T_STD_I32BE "num_recs";
-      } 
-      DATASPACE { SIMPLE ( 8 ) / ( H5S_UNLIMITED ) } 
+      }        
+      DATASPACE  SIMPLE { ( 8 ) / ( H5S_UNLIMITED ) } 
       DATA {
          {
             "coordinate_tmpl",
@@ -1566,30 +1577,30 @@ GROUP "/" {
       } 
    } 
    DATASET "IndexSpec" {
-      DATATYPE {
+      DATATYPE  H5T_COMPOUND {
          H5T_STD_I32BE "ndims";
-         {
-            H5T_ARRAY [8] of H5T_STD_I32BE "_";
+         H5T_COMPOUND {
+            H5T_ARRAY { [8] H5T_STD_I32BE } "_";
          } "origins";
-         {
-            H5T_ARRAY [8] of H5T_STD_I32BE "_";
+         H5T_COMPOUND {
+            H5T_ARRAY { [8] H5T_STD_I32BE } "_";
          } "sizes";
-         {
-            H5T_ARRAY [8] of H5T_STD_I32BE "_";
+         H5T_COMPOUND {
+            H5T_ARRAY { [8] H5T_STD_I32BE } "_";
          } "order";
-         H5T_ENUM
-         { H5T_STD_I32BE;
-          "C_ORDER"          0;
-          "F_ORDER"          1;
-          "ANY"              -1;
-          "INVALID"          -2;
-          "NA"               -3;
-          "UNKNOWN"          -4;
+         H5T_ENUM {
+            H5T_STD_I32BE;
+            "C_ORDER"          0;
+            "F_ORDER"          1;
+            "ANY"              -1;
+            "INVALID"          -2;
+            "NA"               -3;
+            "UNKNOWN"          -4;
          } "index_type";
          H5T_STD_I32BE "base_id";
          H5T_STD_I32BE "num_recs";
-      } 
-      DATASPACE { SIMPLE ( 24 ) / ( H5S_UNLIMITED ) } 
+      }        
+      DATASPACE  SIMPLE { ( 24 ) / ( H5S_UNLIMITED ) } 
       DATA {
          {
             1,
@@ -1954,49 +1965,49 @@ GROUP "/" {
       } 
    } 
    DATASET "Relation" {
-      DATATYPE {
+      DATATYPE  H5T_COMPOUND {
          H5T_STD_I32BE "sub_id";
          H5T_STD_I32BE "sub_cat_id";
          H5T_STD_I32BE "sub_decomp_cat_id";
          H5T_STD_I32BE "sup_id";
          H5T_STD_I32BE "sup_cat_id";
          H5T_STD_I32BE "sup_decomp_cat_id";
-         H5T_ENUM
-         { H5T_STD_I32BE;
-          "SUBSET"           0;
-          "SUPSET"           1;
-          "BOUND"            2;
-          "PERMUTE"          3;
-          "NEIGHBOR"         4;
-          "COPY"             5;
-          "EQUAL"            6;
-          "ANY"              -1;
-          "INVALID"          -2;
-          "NA"               -3;
-          "UNKNOWN"          -4;
+         H5T_ENUM {
+            H5T_STD_I32BE;
+            "SUBSET"           0;
+            "SUPSET"           1;
+            "BOUND"            2;
+            "PERMUTE"          3;
+            "NEIGHBOR"         4;
+            "COPY"             5;
+            "EQUAL"            6;
+            "ANY"              -1;
+            "INVALID"          -2;
+            "NA"               -3;
+            "UNKNOWN"          -4;
          } "kind";
-         H5T_ENUM
-         { H5T_STD_I32BE;
-          "IDENTITY"         0;
-          "HLIST"            1;
-          "TLIST"            2;
-          "TLIST_1"          3;
-          "ELIST"            4;
-          "STRUCTURED"       5;
-          "UNSTRUCTURED"     6;
-          "ARBITRARY_R"      7;
-          "ARBITRARY_DR"     8;
-          "ANY"              -1;
-          "INVALID"          -2;
-          "NA"               -3;
-          "UNKNOWN"          -4;
+         H5T_ENUM {
+            H5T_STD_I32BE;
+            "IDENTITY"         0;
+            "HLIST"            1;
+            "TLIST"            2;
+            "TLIST_1"          3;
+            "ELIST"            4;
+            "STRUCTURED"       5;
+            "UNSTRUCTURED"     6;
+            "ARBITRARY_R"      7;
+            "ARBITRARY_DR"     8;
+            "ANY"              -1;
+            "INVALID"          -2;
+            "NA"               -3;
+            "UNKNOWN"          -4;
          } "rep_type";
          H5T_STD_I32BE "d_blob_id";
          H5T_STD_I32BE "r_blob_id";
          H5T_STD_I32BE "base_id";
          H5T_STD_I32BE "num_recs";
-      } 
-      DATASPACE { SIMPLE ( 21 ) / ( H5S_UNLIMITED ) } 
+      }        
+      DATASPACE  SIMPLE { ( 21 ) / ( H5S_UNLIMITED ) } 
       DATA {
          {
             1,
@@ -2295,30 +2306,31 @@ GROUP "/" {
       } 
    } 
    DATASET "Set" {
-      DATATYPE {
+      DATATYPE  H5T_COMPOUND {
          H5T_STD_I32BE "user_id";
-         { STRSIZE 64;
-           STRPAD H5T_STR_NULLTERM;
-           CSET H5T_CSET_ASCII;
-           CTYPE H5T_C_S1;
+         H5T_STRING {
+            STRSIZE 64;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
          } "name";
          H5T_STD_I32BE "tdim";
-         H5T_ENUM
-         { H5T_STD_I32BE;
-          "TIME"             0;
-          "SPACE"            1;
-          "STATE"            2;
-          "PARAM"            3;
-          "CTYPE"            4;
-          "ATYPE"            5;
-          "USERD"            6;
-          "ANY"              -1;
-          "INVALID"          -2;
-          "NA"               -3;
-          "UNKNOWN"          -4;
+         H5T_ENUM {
+            H5T_STD_I32BE;
+            "TIME"             0;
+            "SPACE"            1;
+            "STATE"            2;
+            "PARAM"            3;
+            "CTYPE"            4;
+            "ATYPE"            5;
+            "USERD"            6;
+            "ANY"              -1;
+            "INVALID"          -2;
+            "NA"               -3;
+            "UNKNOWN"          -4;
          } "srole";
-         {
-            H5T_ARRAY [16] of H5T_STD_I32BE "_";
+         H5T_COMPOUND {
+            H5T_ARRAY { [16] H5T_STD_I32BE } "_";
          } "coll_ids";
          H5T_STD_I32BE "is_top";
          H5T_STD_I32BE "is_extendible";
@@ -2326,8 +2338,8 @@ GROUP "/" {
          H5T_STD_I32BE "bnd_set_id";
          H5T_STD_I32BE "base_id";
          H5T_STD_I32BE "num_recs";
-      } 
-      DATASPACE { SIMPLE ( 9 ) / ( H5S_UNLIMITED ) } 
+      }        
+      DATASPACE  SIMPLE { ( 9 ) / ( H5S_UNLIMITED ) } 
       DATA {
          {
             0,
@@ -2467,16 +2479,16 @@ GROUP "/" {
       } 
    } 
    DATASET "field-coords_0002" {
-      DATATYPE { H5T_IEEE_F32BE } 
-      DATASPACE { SIMPLE ( 36 ) / ( 36 ) } 
+      DATATYPE  H5T_IEEE_F32BE  
+      DATASPACE  SIMPLE { ( 36 ) / ( 36 ) } 
       DATA {
          0, 4, 1, 4, 2, 4, 2.5, 4, 0, 3, 1, 3, 2, 3, 2.5, 3, 0, 2, 1, 2, 2, 2,
          2.5, 2, 0, 1, 2, 1, 2.5, 1, 0, 0, 2, 0, 2.5, 0
       } 
    } 
    DATASET "field-displacements_0007" {
-      DATATYPE { H5T_IEEE_F32BE } 
-      DATASPACE { SIMPLE ( 36 ) / ( 36 ) } 
+      DATATYPE  H5T_IEEE_F32BE  
+      DATASPACE  SIMPLE { ( 36 ) / ( 36 ) } 
       DATA {
          0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25,
          0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25,
@@ -2484,53 +2496,53 @@ GROUP "/" {
       } 
    } 
    DATASET "field-distribution_factors_0003" {
-      DATATYPE { H5T_IEEE_F32BE } 
-      DATASPACE { SIMPLE ( 5 ) / ( 5 ) } 
+      DATATYPE  H5T_IEEE_F32BE  
+      DATASPACE  SIMPLE { ( 5 ) / ( 5 ) } 
       DATA {
          4, 3, 2, 1, 0
       } 
    } 
    DATASET "field-pressure_0013" {
-      DATATYPE { H5T_IEEE_F32BE } 
-      DATASPACE { SIMPLE ( 2 ) / ( 2 ) } 
+      DATATYPE  H5T_IEEE_F32BE  
+      DATASPACE  SIMPLE { ( 2 ) / ( 2 ) } 
       DATA {
          45, 55
       } 
    } 
    DATASET "field-stress_0011" {
-      DATATYPE { H5T_IEEE_F32BE } 
-      DATASPACE { SIMPLE ( 12 ) / ( 12 ) } 
+      DATATYPE  H5T_IEEE_F32BE  
+      DATASPACE  SIMPLE { ( 12 ) / ( 12 ) } 
       DATA {
          0.5, 0.25, 0.5, 0.5, 0.25, 0.5, 0.5, 0.25, 0.5, 0.5, 0.25, 0.5
       } 
    } 
    DATASET "field-temperature_0004" {
-      DATATYPE { H5T_IEEE_F32BE } 
-      DATASPACE { SIMPLE ( 5 ) / ( 5 ) } 
+      DATATYPE  H5T_IEEE_F32BE  
+      DATASPACE  SIMPLE { ( 5 ) / ( 5 ) } 
       DATA {
          100, 150, 150, 100, 75
       } 
    } 
    DATASET "field-temperature_0012" {
-      DATATYPE { H5T_IEEE_F32BE } 
-      DATASPACE { SIMPLE ( 7 ) / ( 7 ) } 
+      DATATYPE  H5T_IEEE_F32BE  
+      DATASPACE  SIMPLE { ( 7 ) / ( 7 ) } 
       DATA {
          75, 95, 120, 80, 115, 85, 110
       } 
    } 
    DATASET "metablob00000.blob" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 19 ) / ( H5S_UNLIMITED ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 19 ) / ( H5S_UNLIMITED ) } 
       DATA {
          1, 7, 8, 3, -2, -2, -2, -2, -2, -2, -2, -2, 0, 1, 5, 6, 8, 9, 10
       } 
    } 
    DATASET "metablob00000.index" {
-      DATATYPE {
+      DATATYPE  H5T_COMPOUND {
          H5T_STD_I32BE "index";
          H5T_STD_I32BE "length";
-      } 
-      DATASPACE { SIMPLE ( 10 ) / ( H5S_UNLIMITED ) } 
+      }        
+      DATASPACE  SIMPLE { ( 10 ) / ( H5S_UNLIMITED ) } 
       DATA {
          {
             0,
@@ -2575,120 +2587,120 @@ GROUP "/" {
       } 
    } 
    DATASET "ssrel-_0000" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 9 ) / ( 9 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 9 ) / ( 9 ) } 
       DATA {
          1, 2, 3, 5, 6, 7, 9, 10, 11
       } 
    } 
    DATASET "ssrel-_0001" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 4 ) / ( 4 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 4 ) / ( 4 ) } 
       DATA {
          1, 2, 4, 5
       } 
    } 
    DATASET "ssrel-_0002" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 7 ) / ( 7 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 7 ) / ( 7 ) } 
       DATA {
          9, 10, 11, 13, 14, 16, 17
       } 
    } 
    DATASET "ssrel-_0003" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 4 ) / ( 4 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 4 ) / ( 4 ) } 
       DATA {
          7, 8, 9, 11
       } 
    } 
    DATASET "ssrel-_0004" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 5 ) / ( 5 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 5 ) / ( 5 ) } 
       DATA {
          9, 10, 11, 13, 14
       } 
    } 
    DATASET "ssrel-_0005" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 3 ) / ( 3 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 3 ) / ( 3 ) } 
       DATA {
          7, 8, 9
       } 
    } 
    DATASET "ssrel-_0006" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 4 ) / ( 4 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 4 ) / ( 4 ) } 
       DATA {
          13, 14, 16, 17
       } 
    } 
    DATASET "ssrel-_0007" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 1 ) / ( 1 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 1 ) / ( 1 ) } 
       DATA {
          11
       } 
    } 
    DATASET "ssrel-_0008" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 10 ) / ( 10 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 10 ) / ( 10 ) } 
       DATA {
          3, 4, 7, 8, 11, 12, 14, 15, 17, 18
       } 
    } 
    DATASET "ssrel-_0009" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 4 ) / ( 4 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 4 ) / ( 4 ) } 
       DATA {
          3, 6, 10, 12
       } 
    } 
    DATASET "ssrel-_0010" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 3 ) / ( 3 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 3 ) / ( 3 ) } 
       DATA {
          9, 10, 11
       } 
    } 
    DATASET "ssrel-_0011" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 5 ) / ( 5 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 5 ) / ( 5 ) } 
       DATA {
          1, 5, 9, 13, 16
       } 
    } 
    DATASET "ssrel-_0012" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 5 ) / ( 5 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 5 ) / ( 5 ) } 
       DATA {
          4, 8, 12, 15, 18
       } 
    } 
    DATASET "toporel-_0017" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 16 ) / ( 16 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 16 ) / ( 16 ) } 
       DATA {
          1, 2, 6, 5, 2, 3, 7, 6, 5, 6, 10, 9, 6, 7, 11, 10
       } 
    } 
    DATASET "toporel-_0018" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 9 ) / ( 9 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 9 ) / ( 9 ) } 
       DATA {
          9, 10, 13, 10, 14, 13, 10, 11, 14
       } 
    } 
    DATASET "toporel-_0019" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 4 ) / ( 4 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 4 ) / ( 4 ) } 
       DATA {
          13, 14, 17, 16
       } 
    } 
    DATASET "toporel-_0020" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 16 ) / ( 16 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 16 ) / ( 16 ) } 
       DATA {
          3, 4, 8, 7, 7, 8, 12, 11, 11, 12, 15, 14, 14, 15, 18, 17
       } 

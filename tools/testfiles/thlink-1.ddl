@@ -4,8 +4,8 @@ Expected output for 'h5dump thlink.h5'
 HDF5 "thlink.h5" {
 GROUP "/" {
    DATASET "dset1" {
-      DATATYPE { H5T_STD_I32BE } 
-      DATASPACE { SIMPLE ( 5 ) / ( 5 ) } 
+      DATATYPE  H5T_STD_I32BE  
+      DATASPACE  SIMPLE { ( 5 ) / ( 5 ) } 
       DATA {
          0, 1, 2, 3, 4
       } 

@@ -119,12 +119,26 @@ TOOLTEST tloop-1.ddl tloop.h5
 
 # test for string 
 TOOLTEST tstr-1.ddl tstr.h5
+TOOLTEST tstr-2.ddl tstr2.h5
 
 # test for file created by Lib SAF team
 TOOLTEST tsaf.ddl tsaf.h5
 
 # test for file with variable length data
-TOOLTEST tvldtypes.ddl tvldtypes.h5
+TOOLTEST tvldtypes1.ddl tvldtypes1.h5
+TOOLTEST tvldtypes2.ddl tvldtypes2.h5
+TOOLTEST tvldtypes3.ddl tvldtypes3.h5
+TOOLTEST tvldtypes4.ddl tvldtypes4.h5
+
+# test for files with array data
+TOOLTEST tarray1.ddl tarray1.h5
+TOOLTEST tarray2.ddl tarray2.h5
+TOOLTEST tarray3.ddl tarray3.h5
+TOOLTEST tarray4.ddl tarray4.h5
+#dumping tarray5.h5 is causing core-dumps currently - QAK
+#TOOLTEST tarray5.ddl tarray5.h5
+TOOLTEST tarray6.ddl tarray6.h5
+TOOLTEST tarray7.ddl tarray7.h5
 
 if test $nerrors -eq 0 ; then
 	echo "All $h5tool tests passed."
