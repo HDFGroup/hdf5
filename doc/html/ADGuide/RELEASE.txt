@@ -1,4 +1,4 @@
-HDF5 version 1.5.49 released on Sat Mar 15 07:08:29 CST 2003
+HDF5 version 1.5.50 released on Sat Apr 12 04:27:55 CDT 2003
 ================================================================================
 
 
@@ -35,6 +35,14 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Fixed error in B-tree deletion routine which could cause groups to be
+      corrupted when objects are removed from them.
+      QAK - 2003/04/11
+    * Fixed error in file space freeing code which could cause metadata to
+      fail to be written to the file.
+      QAK - 2003/04/11
+    * -O caused errors in AIX 5.x platforms.  Removed it from
+      --enable-production mode.  AKC - 2003/03/31
     * Corrected metadata caching bug in parallel I/O which could cause hangs
       when chunked datasets were accessed with independent transfer mode.
       QAK - 2003/02/10
@@ -193,6 +201,12 @@ Library
 Configuration
 -------------
 
+    * When using gcc 3.x, we use -std=gnu99 instead of -ansi for compiling.
+      QAK - 2003/04/11
+    * IA64 platform has its own configure setting and use Intel Compilers as
+      the default compilers (were gcc and pgf90 before.)  This also eliminated
+      the segmentation fault in the fortran test.  The missing reference of
+      "exit" is fixed too.  AKC - 2003/04/02
     * Added "--with-dmalloc" flag, to easily enable support for the 'dmalloc'
       debugging malloc implementation. -QAK, 2002/07/15
     * Can use just enable-threadsafe if the C compiler has builtin pthreads
@@ -263,6 +277,15 @@ Documentation
 New Features
 ============
 
+    * Added new dataset creation property list functions for working with
+      I/O filters: H5Pmodify_filter, H5Pget_filter_by_id and
+      H5Pall_filters_avail.  Also changed H5Zregister to use new method
+      of registering filters with library.  QAK - 2003/04/08
+    * The first version of szip compression support were implemented. 
+      User should have static szlib library installed. Using function
+      H5Pset_szip to pass the szip parameters to the HDF5 library.
+      More detailed decription of the process will be followed.
+      KY-2003/04/01
     * Added Fletcher32 checksum as a filter in pipeline.  It only works in 
       chunked dataset.  SLU - 2003/2/11
     * MPICH/MPE instrumentation feature added.  Use --enable-mpe to configure
@@ -484,6 +507,7 @@ Support for new platforms and languages
 =======================================
     * Parallel Fortran Library works now on HP-UX B.11.00 Sys V
       EIP - 2002/05/06
+    * Added C++ API support on HPUX11.00.  BMR - 2003/03/19
 
 Platforms Tested
 ================
@@ -498,6 +522,7 @@ Platforms Tested
   HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
   HP-UX B.11.00                 HP C  HP92453-01 A.11.00.13
                                 HP C  HP92453-01 A.11.01.20
+                                HP ANSI C++ B3910B A.03.13
   IRIX 6.5                      MIPSpro cc 7.30
   IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
                                 mpt.1.4.0.2
@@ -544,7 +569,7 @@ Supported Configuration Features Summary
     IRIX64_6.5 64  y  y (2)     y    y         n     y          y     y
     IRIX64_6.5 32  y  y (2)     n    n         n     y          y     y
     HPUX10.20      y  n         y    n         n     y          y     y
-    HPUX11.00      y  y         y    n         n     y          y     y
+    HPUX11.00      y  y         y    n         y     y          y     y
     HPUX11 SysV    y  y         y    y         n     y          y     y
     DECOSF         y  n         y    n         y     y          y     y
     T3E            y  y         y    y         n     n          y     y
