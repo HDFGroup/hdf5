@@ -108,9 +108,9 @@
           CHARACTER(LEN=80) :: fix_filename 
           CHARACTER(LEN=4), PARAMETER :: dsetname = "dset"     ! Dataset name
           INTEGER, PARAMETER :: N = 1024
-          INTEGER, PARAMETER :: NN = 16
+          INTEGER, PARAMETER :: NN = 64
           INTEGER, PARAMETER :: M = 512
-          INTEGER, PARAMETER :: MM = 8
+          INTEGER, PARAMETER :: MM = 32
 
           INTEGER(HID_T) :: file_id       ! File identifier 
           INTEGER(HID_T) :: dset_id       ! Dataset identifier 
@@ -124,6 +124,7 @@
 
           INTEGER, DIMENSION(N,M) :: dset_data, data_out ! Data buffers
           INTEGER     ::   error ! Error flag
+          INTEGER     ::   num_errors = 0 ! Number of data errors
 
           INTEGER     :: i, j    !general purpose integers
           INTEGER(HSIZE_T), DIMENSION(7) :: data_dims_b
@@ -265,10 +266,18 @@
               do j = 1, M
                   IF (data_out(i,j) .NE. dset_data(i, j)) THEN 
                       write(*, *) "dataset test error occured"
-                      write(*,*) "data read is not the same as the data writen"
+                      write(*,*) "data read is not the same as the data written"
+                      num_errors = num_errors + 1
+                      IF (num_errors .GE. 512) THEN
+                        write(*, *) "maximum data errors reached"
+                        goto 100
+                      END IF
                   END IF
               end do    
           end do
+100       IF (num_errors .GT. 0) THEN
+            total_error=total_error + 1
+          END IF
 
           !   
           ! End access to the dataset and release resources used by it.
