@@ -1314,16 +1314,41 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
      * is the SAP executing this code, then skip the send to the SAP and
      * try to do the actual allocations.
      */
-    if (file->driver_id == H5FD_FPHDF5 && !H5FD_fphdf5_is_sap(file)) {
+    if (H5FD_is_fphdf5_driver(file) && !H5FD_fphdf5_is_sap(file)) {
         unsigned        req_id;
+        unsigned        capt_only = 0;
         H5FP_status_t   status;
+        H5P_genplist_t *plist;
 
-        /* Send the request to the SAP */
-        if (H5FP_request_allocate(file, type, size, &ret_value, &req_id,
-                                  &status) != SUCCEED)
-            /* FIXME: Should we check the "status" variable here? */
-            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTALLOC, HADDR_UNDEF,
-                        "server couldn't allocate from file");
+        /* Get the data xfer property list */
+        if ((plist = H5I_object(dxpl_id)) == NULL)
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, HADDR_UNDEF, "not a dataset transfer list");
+
+        if (H5P_exist_plist(plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY) > 0)
+            if (H5P_get(plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY, &capt_only) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, HADDR_UNDEF,
+                            "can't remove FPHDF5 property");
+
+        /*
+         * If the captain is the only one who should allocate resources,
+         * then do just that...
+         */
+        if (!capt_only || H5FD_fphdf5_is_captain(file))
+            /* Send the request to the SAP */
+            if (H5FP_request_allocate(file, type, size, &ret_value, &req_id,
+                                      &status) != SUCCEED)
+                /* FIXME: Should we check the "status" variable here? */
+                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTALLOC, HADDR_UNDEF,
+                            "server couldn't allocate from file");
+
+        if (capt_only) {
+            int mrc;
+
+            if ((mrc = MPI_Bcast(&ret_value, 1, HADDR_AS_MPI_TYPE,
+                                 (int)H5FP_capt_barrier_rank,
+                                 H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(HADDR_UNDEF, "MPI_Bcast failed", mrc);
+        }
 
         /* We've succeeded -- return the value */
         HGOTO_DONE(ret_value);
@@ -1865,6 +1890,16 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     assert(type >= 0 && type < H5FD_MEM_NTYPES);
     assert(size > 0);
     
+#ifdef H5_HAVE_FPHDF5
+    /*
+     * When we're using the FPHDF5 driver, and this section of code is
+     * only reached via the SAP. So just update the EOA and be done with
+     * it.
+     */
+    if ((ret_value = H5FD_update_eoa(file, type, dxpl_id, size)) == HADDR_UNDEF)
+        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
+                    "driver eoa update request failed");
+#else
     /*
      * Dispatch to driver `alloc' callback or extend the end-of-address
      * marker
@@ -1878,6 +1913,7 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
             HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
                         "driver eoa update request failed");
     }
+#endif  /* H5_HAVE_FPHDF5 */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
