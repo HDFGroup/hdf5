@@ -24,6 +24,7 @@
 
 ./bin/checkapi				_DO_NOT_DISTRIBUTE_
 ./bin/checkposix			_DO_NOT_DISTRIBUTE_
+./bin/bin/chkmanifest
 ./bin/config.guess
 ./bin/config.sub
 ./bin/config_para_ibm_sp.sh
