@@ -71,8 +71,9 @@ status = H5Dwrite(dataset, H5T_NATIVE_INT, H5P_ALL, H5P_ALL,
 /*
  * Close/release resources.
  */
-H5Dclose(dataset);
 H5Pclose(dataspace);
+H5Tclose(datatype);
+H5Dclose(dataset);
 H5Fclose(file);
  
 }     
