@@ -36,13 +36,17 @@
 /* Library Private Macros */
 /**************************/
 
-/*
- * Feature: Define this constant if you want to check B-tree consistency
- *	    after each B-tree operation.  Note that this slows down the
- *	    library considerably! Debugging the B-tree depends on assert()
- *	    being enabled.
+/* Define return values from operator callback function for H5B2_iterate */
+/* (Actually, any positive value will cause the iterator to stop and pass back
+ *      that positive value to the function that called the iterator)
  */
-/* #define H5B2_DEBUG */
+#define H5B2_ITER_ERROR  (-1)
+#define H5B2_ITER_CONT   (0)
+#define H5B2_ITER_STOP   (1)
+
+/* Define the operator callback function pointer for H5B2_iterate() */
+typedef int (*H5B2_operator_t)(const void *record, void *op_data);
+
      
 /****************************/
 /* Library Private Typedefs */
@@ -88,6 +92,8 @@ H5_DLL herr_t H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t *addr_p);
 H5_DLL herr_t H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, void *udata);
+H5_DLL herr_t H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
+    haddr_t addr, H5B2_operator_t op, void *op_data);
 
 #endif /* _H5B2private_H */
 

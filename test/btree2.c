@@ -37,6 +37,36 @@ const char *FILENAME[] = {
 
 
 /*-------------------------------------------------------------------------
+ * Function:	iter_cb
+ *
+ * Purpose:	v2 B-tree iterator callback
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, February 16, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+iter_cb(const void *_record, void *_op_data)
+{
+    const hsize_t *record = (const hsize_t *)_record;
+    hsize_t *idx = (hsize_t *)_op_data;
+
+    if(*record != *idx)
+        return(H5B2_ITER_ERROR);
+
+    (*idx)++;
+    return(H5B2_ITER_CONT);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_insert_basic
  *
  * Purpose:	Basic tests for the B-tree v2 code
@@ -59,6 +89,7 @@ test_insert_basic(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
     haddr_t     bt2_addr;               /* Address of B-tree created */
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -82,6 +113,16 @@ test_insert_basic(hid_t fapl)
 	goto error;
     }
     PASSED();
+
+    /* Attempt to iterate over a B-tree with no records */
+    idx = 0;
+    if(H5B2_iterate(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, iter_cb, &idx)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+    /* Make certain that the index hasn't changed */
+    if(idx != 0) TEST_ERROR;
 
     /*
      * Test inserting record into v2 B-tree 
@@ -163,6 +204,7 @@ test_insert_split_root(hid_t fapl)
     char	filename[1024];
     H5F_t	*f=NULL;
     hsize_t     record;                 /* Record to insert into tree */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     unsigned    u;                      /* Local index variable */
 
@@ -192,7 +234,7 @@ test_insert_split_root(hid_t fapl)
     TESTING("B-tree many - split root");
 
     for(u=0; u<INSERT_SPLIT_ROOT_NREC; u++) {
-        record=u+10;
+        record=u+2;
         if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -210,6 +252,14 @@ test_insert_split_root(hid_t fapl)
         H5_FAILED();
         H5Eprint_stack(H5E_DEFAULT, stdout);
         goto error;
+    }
+
+    /* Iterate over B-tree to check records have been inserted correctly */
+    idx = 0;
+    if(H5B2_iterate(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, iter_cb, &idx)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
     }
 
     PASSED();

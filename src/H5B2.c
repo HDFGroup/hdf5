@@ -69,6 +69,9 @@ static herr_t H5B2_split2(H5F_t *f, hid_t dxpl_id, unsigned depth,
     H5B2_internal_t *internal, unsigned idx);
 static herr_t H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth,
     H5B2_internal_t *internal, unsigned idx);
+static herr_t H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
+    unsigned depth, const H5B2_node_ptr_t *curr_node, H5B2_operator_t op,
+    void *op_data);
 
 
 /* Package variables */
@@ -1629,4 +1632,177 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_create_internal() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_iterate_node
+ *
+ * Purpose:	Iterate over all the records from a B-tree node, in "in-order"
+ *		order, making a callback for each record.
+ *
+ *              If the callback returns non-zero, the iteration breaks out
+ *              without finishing all the records.
+ *
+ * Return:	Value from callback, non-negative on success, negative on error
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 11 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
+    const H5B2_node_ptr_t *curr_node, H5B2_operator_t op, void *op_data)
+{
+    H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
+    const H5AC_class_t *curr_node_class=NULL; /* Pointer to current node's class info */
+    void *node=NULL;                    /* Pointers to current node */
+    uint8_t *native;                    /* Pointers to node's native records */
+    H5B2_node_ptr_t *node_ptrs=NULL;    /* Pointers to node's node pointers */
+    unsigned u;                         /* Local index */
+    herr_t	ret_value = H5B2_ITER_CONT;
+
+    FUNC_ENTER_NOAPI(H5B2_iterate_node, FAIL)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(bt2_shared);
+    HDassert(curr_node);
+    HDassert(op);
+
+    /* Get the pointer to the shared B-tree info */
+    shared=H5RC_GET_OBJ(bt2_shared);
+    HDassert(shared);
+
+    if(depth>0) {
+        H5B2_internal_t *internal;     /* Pointer to internal node */
+
+        /* Lock the current B-tree node */
+        if (NULL == (internal = H5AC_protect(f, dxpl_id, H5AC_BT2_INT, curr_node->addr, &(curr_node->node_nrec), shared, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
+
+        /* Set up information about current node */
+        curr_node_class = H5AC_BT2_INT;
+        node = internal;
+        native = internal->int_native;
+        node_ptrs = internal->node_ptrs;
+    } /* end if */
+    else {
+        H5B2_leaf_t *leaf;             /* Pointer to leaf node */
+
+        /* Lock the current B-tree node */
+        if (NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node->addr, &(curr_node->node_nrec), shared, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree leaf node")
+
+        /* Set up information about current node */
+        curr_node_class = H5AC_BT2_LEAF;
+        node = leaf;
+        native = leaf->leaf_native;
+    } /* end else */
+
+    /* Iterate through records */
+    for(u=0, ret_value; u<curr_node->node_nrec && !ret_value; u++) {
+        /* Descend into child node, if current node is an internal node */
+        if(depth>0) {
+            if((ret_value = H5B2_iterate_node(f,dxpl_id,bt2_shared,depth-1,&(node_ptrs[u]),op,op_data))<0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "node iteration failed")
+        } /* end if */
+
+        /* Make callback for current record */
+        if ((ret_value = (op)(H5B2_NAT_NREC(native,shared,u), op_data)) <0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "iterator function failed")
+    } /* end for */
+
+    /* Descend into last child node, if current node is an internal node */
+    if(depth>0) {
+        if((ret_value = H5B2_iterate_node(f,dxpl_id,bt2_shared,depth-1,&(node_ptrs[u]),op,op_data))<0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "node iteration failed")
+    } /* end if */
+
+done:
+    /* Unlock current node */
+    if(node)
+        if (H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, H5AC__NO_FLAGS_SET) < 0)
+            HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2_iterate_node() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_iterate
+ *
+ * Purpose:	Iterate over all the records in the B-tree, in "in-order"
+ *		order, making a callback for each record.
+ *
+ *              If the callback returns non-zero, the iteration breaks out
+ *              without finishing all the records.
+ *
+ * Return:	Value from callback, non-negative on success, negative on error
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 11 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
+    H5B2_operator_t op, void *op_data)
+{
+    H5B2_t	*bt2=NULL;              /* Pointer to the B-tree header */
+    H5RC_t      *bt2_shared=NULL;       /* Pointer to ref-counter for shared B-tree info */
+    hbool_t     incr_rc=FALSE;          /* Flag to indicate that we've incremented the B-tree's shared info reference count */
+    H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
+    H5B2_node_ptr_t root_ptr;           /* Node pointer info for root node */
+    unsigned    depth;                  /* Current depth of the tree */
+    herr_t	ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5B2_iterate, FAIL)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(type);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(op);
+
+    /* Look up the B-tree header */
+    if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
+
+    /* Get the pointer to the shared B-tree info */
+    shared=H5RC_GET_OBJ(bt2->shared);
+    HDassert(shared);
+
+    /* Safely grab pointer to reference counted shared B-tree info, so we can release the B-tree header if necessary */
+    bt2_shared=bt2->shared;
+    H5RC_INC(bt2_shared);
+    incr_rc=TRUE;
+
+    /* Make copy of the root node pointer */
+    root_ptr = bt2->root;
+
+    /* Current depth of the tree */
+    depth=bt2->depth;
+
+    /* Release header */
+    if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree header info")
+    bt2=NULL;
+
+    /* Iterate through records */
+    if(root_ptr.node_nrec>0) {
+        /* Iterate through nodes */
+        if((ret_value=H5B2_iterate_node(f,dxpl_id,bt2_shared,depth,&root_ptr,op,op_data))<0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "node iteration failed")
+    } /* end if */
+
+done:
+    /* Check if we need to decrement the reference count for the B-tree's shared info */
+    if(incr_rc)
+        H5RC_DEC(bt2_shared);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2_iterate() */
 
