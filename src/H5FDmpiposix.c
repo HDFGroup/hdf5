@@ -41,6 +41,14 @@
 #include "H5MMprivate.h"        /*memory allocation                     */
 #include "H5Pprivate.h"		/*property lists			*/
 
+/* Features:
+ *   USE_GPFS_HINTS -- issue gpfs_fcntl() calls to hopefully improve
+ *                     performance when accessing files on a GPFS
+ *                     file system.
+ *
+ *   REPORT_IO      -- if set then report all POSIX file calls to stderr.
+ *
+ */
 #ifdef USE_GPFS_HINTS
 #   include <gpfs_fcntl.h>
 #endif
@@ -632,12 +640,14 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
         HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code);
 
 #ifdef USE_GPFS_HINTS
-    /* Prevent GPFS from prefetching byte range (BR) tokens */
     {
+        /* Free all byte range tokens. This is a good thing to do if raw data is aligned on 256kB boundaries (a GPFS page is
+         * 256kB). Care should be taken that there aren't too many sub-page writes, or the mmfsd may become overwhelmed.  This
+         * should probably eventually be passed down here as a property. The gpfs_fcntl() will most likely fail if `fd' isn't
+         * on a GPFS file system. */
         struct {
             gpfsFcntlHeader_t   hdr;
             gpfsFreeRange_t     fr;
-            gpfsMultipleAccessRange_t mar;
         } hint;
         memset(&hint, 0, sizeof hint);
         hint.hdr.totalLength = sizeof hint;
@@ -646,15 +656,8 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
         hint.fr.structType = GPFS_FREE_RANGE;
         hint.fr.start = 0;
         hint.fr.length = 0;
-        hint.mar.structLen = sizeof hint.mar;
-        hint.mar.structType = GPFS_MULTIPLE_ACCESS_RANGE;
-        hint.mar.accRangeCnt = 1;
-        hint.mar.accRangeArray[0].blockNumber = 1 + mpi_rank;
-        hint.mar.accRangeArray[0].start = 0;
-        hint.mar.accRangeArray[0].length = sb.st_blksize;
-        hint.mar.accRangeArray[0].isWrite = true;
         
-        if (gpfs_fcntl(f->fd, &hint)<0)
+        if (gpfs_fcntl(fd, &hint)<0)
             HGOTO_ERROR(H5E_FILE, H5E_FCNTL, NULL, "failed to send hints to GPFS");
 
         if (0==mpi_rank)
@@ -665,6 +668,10 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Build the file struct and initialize it */
     if (NULL==(file=H5MM_calloc(sizeof(H5FD_mpiposix_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+#ifdef REPORT_IO
+    fprintf(stderr, "open:  rank=%d name=%s file=0x%08lx\n", mpi_rank, name, (unsigned long)file);
+#endif
 
     /* Set the general file information */
     file->fd = fd;
@@ -1030,6 +1037,15 @@ H5FD_mpiposix_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, 
     if (addr+size>file->eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow");
 
+#ifdef REPORT_IO
+    {
+        int commrank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &commrank);
+        fprintf(stderr, "read:  rank=%d file=0x%08lx type=%d, addr=%lu size=%lu\n",
+                commrank, (unsigned long)file, (int)type, (unsigned long)addr, (unsigned long)size);
+    }
+#endif
+
     /* Seek to the correct location */
     if ((addr!=file->pos || OP_READ!=file->op) &&
             file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0)
@@ -1150,6 +1166,38 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
                 HGOTO_DONE(SUCCEED) /* skip the actual write */
     } /* end if */
 
+#ifdef REPORT_IO
+    {
+        int commrank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &commrank);
+        fprintf(stderr, "write: rank=%d file=0x%08lx type=%d, addr=%lu size=%lu %s\n",
+                commrank, (unsigned long)file, (int)type, (unsigned long)addr, (unsigned long)size,
+                0==file->naccess?"(FIRST ACCESS)":"");
+    }
+#endif
+
+    if (0==file->naccess++) {
+        /* First write access to this file */
+#ifdef USE_GPFS_HINTS
+        struct {
+            gpfsFcntlHeader_t           hdr;
+            gpfsMultipleAccessRange_t   mar;
+        } hint;
+        memset(&hint, 0, sizeof hint);
+        hint.hdr.totalLength = sizeof hint;
+        hint.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
+        hint.mar.structLen = sizeof hint.mar;
+        hint.mar.structType = GPFS_MULTIPLE_ACCESS_RANGE;
+        hint.mar.accRangeCnt = 1;
+        hint.mar.accRangeArray[0].blockNumber = addr / file->blksize;
+        hint.mar.accRangeArray[0].start = addr % file->blksize;
+        hint.mar.accRangeArray[0].length = MIN(file->blksize-hint.mar.accRangeArray[0].start, size);
+        hint.mar.accRangeArray[0].isWrite = 1;
+        if (gpfs_fcntl(file->fd, &hint)<0)
+            HGOTO_ERROR(H5E_FILE, H5E_FCNTL, NULL, "failed to send hints to GPFS");
+#endif
+    }
+    
     /* Seek to the correct location */
     if ((addr!=file->pos || OP_WRITE!=file->op) &&
             file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0)
