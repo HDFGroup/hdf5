@@ -64,6 +64,7 @@ static void test_file_create(void)
     hatom_t fid1,fid2,fid3;    /* HDF5 File IDs */
     hatom_t tmpl1,tmpl2;       /* File creation templates */
     uintn parm;           /* File-creation parameters */
+    uint8 parm2;          /* File-creation parameters */
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
@@ -83,27 +84,22 @@ static void test_file_create(void)
 
     /* Get the file-creation parameters */
     ret=H5Cgetparm(tmpl1,H5_USERBLOCK_SIZE,&parm);
-printf("USERBLOCK_SIZE=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F1_USERBLOCK_SIZE,"H5Cgetparm");
 
     ret=H5Cgetparm(tmpl1,H5_OFFSET_SIZE,&parm);
-printf("OFFSET_SIZE=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F1_OFFSET_SIZE,"H5Cgetparm");
 
     ret=H5Cgetparm(tmpl1,H5_LENGTH_SIZE,&parm);
-printf("LENGTH_SIZE=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F1_LENGTH_SIZE,"H5Cgetparm");
 
     ret=H5Cgetparm(tmpl1,H5_SYM_LEAF_K,&parm);
-printf("SYM_LEAF_K=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F1_SYM_LEAF_K,"H5Cgetparm");
 
     ret=H5Cgetparm(tmpl1,H5_SYM_INTERN_K,&parm);
-printf("SYM_INTERN_K=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F1_SYM_INTERN_K,"H5Cgetparm");
 
@@ -154,27 +150,22 @@ printf("SYM_INTERN_K=%u\n",parm);
 
     /* Get the file-creation parameters */
     ret=H5Cgetparm(tmpl1,H5_USERBLOCK_SIZE,&parm);
-printf("USERBLOCK_SIZE=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F2_USERBLOCK_SIZE,"H5Cgetparm");
 
-    ret=H5Cgetparm(tmpl1,H5_OFFSET_SIZE,&parm);
-printf("OFFSET_SIZE=%u\n",parm);
+    ret=H5Cgetparm(tmpl1,H5_OFFSET_SIZE,&parm2);
     CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F2_LENGTH_SIZE,"H5Cgetparm");
+    VERIFY(parm2,F2_LENGTH_SIZE,"H5Cgetparm");
 
-    ret=H5Cgetparm(tmpl1,H5_LENGTH_SIZE,&parm);
-printf("LENGTH_SIZE=%u\n",parm);
+    ret=H5Cgetparm(tmpl1,H5_LENGTH_SIZE,&parm2);
     CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F2_OFFSET_SIZE,"H5Cgetparm");
+    VERIFY(parm2,F2_OFFSET_SIZE,"H5Cgetparm");
 
     ret=H5Cgetparm(tmpl1,H5_SYM_LEAF_K,&parm);
-printf("SYM_LEAF_K=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F2_SYM_LEAF_K,"H5Cgetparm");
 
     ret=H5Cgetparm(tmpl1,H5_SYM_INTERN_K,&parm);
-printf("SYM_INTERN_K=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F2_SYM_INTERN_K,"H5Cgetparm");
 
@@ -205,27 +196,22 @@ printf("SYM_INTERN_K=%u\n",parm);
 
     /* Get the file-creation parameters */
     ret=H5Cgetparm(tmpl1,H5_USERBLOCK_SIZE,&parm);
-printf("USERBLOCK_SIZE=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F3_USERBLOCK_SIZE,"H5Cgetparm");
 
     ret=H5Cgetparm(tmpl1,H5_OFFSET_SIZE,&parm);
-printf("OFFSET_SIZE=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F3_LENGTH_SIZE,"H5Cgetparm");
 
     ret=H5Cgetparm(tmpl1,H5_LENGTH_SIZE,&parm);
-printf("LENGTH_SIZE=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F3_OFFSET_SIZE,"H5Cgetparm");
 
     ret=H5Cgetparm(tmpl1,H5_SYM_LEAF_K,&parm);
-printf("SYM_LEAF_K=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F3_SYM_LEAF_K,"H5Cgetparm");
 
     ret=H5Cgetparm(tmpl1,H5_SYM_INTERN_K,&parm);
-printf("SYM_INTERN_K=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F3_SYM_INTERN_K,"H5Cgetparm");
 
@@ -257,6 +243,7 @@ static void test_file_open(void)
     hatom_t fid1;    /* HDF5 File IDs */
     hatom_t tmpl1;       /* File creation templates */
     uintn parm;           /* File-creation parameters */
+    uint8 parm2;          /* File-creation parameters */
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
@@ -272,27 +259,22 @@ static void test_file_open(void)
 
     /* Get the file-creation parameters */
     ret=H5Cgetparm(tmpl1,H5_USERBLOCK_SIZE,&parm);
-printf("USERBLOCK_SIZE=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F2_USERBLOCK_SIZE,"H5Cgetparm");
 
-    ret=H5Cgetparm(tmpl1,H5_OFFSET_SIZE,&parm);
-printf("OFFSET_SIZE=%u\n",parm);
+    ret=H5Cgetparm(tmpl1,H5_OFFSET_SIZE,&parm2);
     CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F2_OFFSET_SIZE,"H5Cgetparm");
+    VERIFY(parm2,F2_OFFSET_SIZE,"H5Cgetparm");
 
-    ret=H5Cgetparm(tmpl1,H5_LENGTH_SIZE,&parm);
-printf("LENGTH_SIZE=%u\n",parm);
+    ret=H5Cgetparm(tmpl1,H5_LENGTH_SIZE,&parm2);
     CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F2_LENGTH_SIZE,"H5Cgetparm");
+    VERIFY(parm2,F2_LENGTH_SIZE,"H5Cgetparm");
 
     ret=H5Cgetparm(tmpl1,H5_SYM_LEAF_K,&parm);
-printf("SYM_LEAF_K=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F2_SYM_LEAF_K,"H5Cgetparm");
 
     ret=H5Cgetparm(tmpl1,H5_SYM_INTERN_K,&parm);
-printf("SYM_INTERN_K=%u\n",parm);
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F2_SYM_INTERN_K,"H5Cgetparm");
 
