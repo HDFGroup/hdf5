@@ -957,15 +957,15 @@ H5FP_sap_handle_lock_request(H5FP_request_t *req)
         H5FP_file_info     *info;
         H5FP_object_lock   *lock;
     } *oids;
-    unsigned list_size = 2; /* the size of the "oids" list */
-    H5FP_status_t exit_state = H5FP_STATUS_LOCK_ACQUIRED;
-    herr_t ret_value = SUCCEED;
-    unsigned i, j;
+    unsigned        list_size = 2; /* the size of the "oids" list */
+    H5FP_status_t   exit_state = H5FP_STATUS_LOCK_ACQUIRED;
+    unsigned        i, j;
+    herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_lock_request);
 
     if ((oids = (struct lock_group *)H5MM_malloc(list_size *
-                                              sizeof(struct lock_group))) == NULL) {
+                                                 sizeof(struct lock_group))) == NULL) {
         exit_state = H5FP_STATUS_OOM;
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory");
     }

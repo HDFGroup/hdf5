@@ -464,6 +464,13 @@ H5FP_request_write_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
                         "can't write metadata update to file");
         }
 
+        if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply, (int)H5FP_sap_rank,
+                            H5FP_TAG_REPLY, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
+
+        if (sap_reply.status != H5FP_STATUS_OK)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCHANGE, FAIL, "can't write metadata to server");
+
         break;
     default:
         *status = sap_reply.status;
@@ -543,6 +550,13 @@ H5FP_request_flush_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
             HGOTO_ERROR(H5E_FPHDF5, H5E_WRITEERROR, FAIL,
                         "can't write metadata update to file");
         }
+
+        if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply, (int)H5FP_sap_rank,
+                            H5FP_TAG_REPLY, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
+        
+        if (sap_reply.status != H5FP_STATUS_OK)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCHANGE, FAIL, "can't write metadata to server");
 
         break;
     default:
