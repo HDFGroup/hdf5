@@ -2108,13 +2108,13 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+herr_t
 H5Funmount(hid_t loc_id, const char *name)
 {
     H5G_entry_t		*loc = NULL;
     
     FUNC_ENTER(H5Funmount, FAIL);
-    H5TRACE2("i","is",loc_id,name);
+    H5TRACE2("e","is",loc_id,name);
 
     /* Check args */
     if (NULL==(loc=H5G_loc(loc_id))) {
@@ -2131,6 +2131,57 @@ H5Funmount(hid_t loc_id, const char *name)
     }
 
     FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Freopen
+ *
+ * Purpose:	Reopen a file.  The new file handle which is returned points
+ *		to the same file as the specified file handle.  Both handles
+ *		share caches and other information.  The only difference
+ *		between the handles is that the new handle is not mounted
+ *		anywhere and no files are mounted on it.
+ *
+ * Return:	Success:	New file ID
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, October 16, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Freopen(hid_t file_id)
+{
+    H5F_t	*old_file=NULL;
+    H5F_t	*new_file=NULL;
+    hid_t	ret_value = -1;
+    
+
+    FUNC_ENTER(H5Freopen, FAIL);
+    H5TRACE1("i","i",file_id);
+
+    if (H5I_FILE!=H5I_get_type(file_id) ||
+	NULL==(old_file=H5I_object(file_id))) {
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
+    }
+    if (NULL==(new_file=H5F_new(old_file->shared, NULL, NULL))) {
+	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file");
+    }
+    if ((ret_value=H5I_register(H5I_FILE, new_file))<0) {
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
+		    "unable to atomize file handle");
+    }
+
+ done:
+    if (ret_value<0 && new_file) {
+	H5F_close(new_file);
+    }
+    FUNC_LEAVE(ret_value);
 }
 
 
