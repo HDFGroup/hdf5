@@ -38,6 +38,9 @@
 #define F2_LENGTH_SIZE	   8
 #define F2_SYM_LEAF_K	   8
 #define F2_SYM_INTERN_K	   32
+#define F2_RANK            2
+#define F2_DIM0            4
+#define F2_DIM1            6
 #define FILE2	"tfile2.h5"
 
 #define F3_USERBLOCK_SIZE  (hsize_t)0
@@ -166,6 +169,35 @@ test_file_create(void)
     /* Release file-creation template */
     ret = H5Pclose(tmpl1);
     CHECK(ret, FAIL, "H5Pclose");
+
+    /* Make certain we can create a dataset properly in the file with the userblock */
+    {
+       hid_t       dataset_id, dataspace_id;  /* identifiers */
+       hsize_t     dims[F2_RANK];
+       int         data[F2_DIM0][F2_DIM1];
+
+       /* Create the data space for the dataset. */
+       dims[0] = F2_DIM0; 
+       dims[1] = F2_DIM1; 
+       dataspace_id = H5Screate_simple(F2_RANK, dims, NULL);
+       CHECK(dataspace_id, FAIL, "H5Screate_simple");
+
+       /* Create the dataset. */
+       dataset_id = H5Dcreate(fid2, "/dset", H5T_NATIVE_INT, dataspace_id, H5P_DEFAULT);
+       CHECK(dataset_id, FAIL, "H5Dcreate");
+
+       /* Write data to the new dataset */
+       ret = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+       CHECK(ret, FAIL, "H5Dwrite");
+
+       /* End access to the dataset and release resources used by it. */
+       ret = H5Dclose(dataset_id);
+       CHECK(ret, FAIL, "H5Dclose");
+
+       /* Terminate access to the data space. */ 
+       ret = H5Sclose(dataspace_id);
+       CHECK(ret, FAIL, "H5Sclose");
+    }
 
     /* Get the file-creation template */
     tmpl1 = H5Fget_create_plist(fid2);
