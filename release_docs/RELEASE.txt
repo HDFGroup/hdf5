@@ -74,6 +74,21 @@ New Features
 
     Tools:
     ------
+        - h5repack was added to the tools suite. h5repack regenerates an HDF5 file 
+	  from another HDF5 file, optionally applying HDF5 filters (compression) 
+	  and/or chunking to the copied file. The filters options are read from 
+	  the command line. See /doc/html/Tools.html for more details.
+	  PVN - 2004/9/13
+
+        - h5dump includes new features:
+           1) Printing of dataset filters, storage layout and fill value information.
+           2) Print a list of the file contents.
+	   3) Escape non printing characters.
+	   4) Print the content of the boot block.
+	   5) Print array indices with the data (the default).
+	  These options are all switch controlled. See /doc/html/Tools.html for more details.
+	  PVN - 2004/9/13
+	      
 
     F90 API:
     --------
