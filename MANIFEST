@@ -1605,7 +1605,6 @@
 ./hl/test/image24plane.txt
 ./hl/test/usa.wri
 
-
 # hl fortran
 ./hl/fortran/src/H5f90i.h
 ./hl/fortran/src/H5IMfc.c
@@ -1625,5 +1624,16 @@
 ./hl/fortran/Makefile.am
 ./hl/fortran/Makefile.in
 
+# hl c++
+./hl/c++/src/H5PacketTable.h
+./hl/c++/src/H5PacketTable.cpp
+./hl/c++/src/Makefile.am
+./hl/c++/src/Makefile.in
+./hl/c++/test/ptableTest.h
+./hl/c++/test/ptableTest.cpp
+./hl/c++/test/Makefile.am
+./hl/c++/test/Makefile.in
+./hl/c++/Makefile.am
+./hl/c++/Makefile.in
 
 ./windows/all.zip

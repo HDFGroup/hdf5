@@ -27,10 +27,11 @@
 # http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 #
-# HDF5 Library Makefile(.in)
-#
+# HDF5-C++ Makefile(.in)
+# 
 
-SOURCES = h5ls.c
+
+SOURCES = $(libhdf5_hl_cpp_la_SOURCES)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -38,7 +39,7 @@ VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
-top_builddir = ../..
+top_builddir = ../../..
 am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
 INSTALL = @INSTALL@
 install_sh_DATA = $(install_sh) -c -m 644
@@ -54,11 +55,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(top_srcdir)/config/commence.am \
+DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
-bin_PROGRAMS = h5ls$(EXEEXT)
-subdir = tools/h5ls
+subdir = hl/c++/src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -66,28 +66,33 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)"
-binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-PROGRAMS = $(bin_PROGRAMS)
-h5ls_SOURCES = h5ls.c
-h5ls_OBJECTS = h5ls.$(OBJEXT)
-h5ls_LDADD = $(LDADD)
-am__DEPENDENCIES_1 = $(top_builddir)/tools/lib/libh5tools.la
-am__DEPENDENCIES_2 = $(top_builddir)/src/libhdf5.la
-h5ls_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
+libLTLIBRARIES_INSTALL = $(INSTALL)
+LTLIBRARIES = $(lib_LTLIBRARIES)
+libhdf5_hl_cpp_la_LIBADD =
+am_libhdf5_hl_cpp_la_OBJECTS = H5PacketTable.lo
+libhdf5_hl_cpp_la_OBJECTS = $(am_libhdf5_hl_cpp_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
 	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
-	$(AM_CFLAGS) $(CFLAGS)
-CCLD = $(CC)
-LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = h5ls.c
-DIST_SOURCES = h5ls.c
+	$(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+SOURCES = $(libhdf5_hl_cpp_la_SOURCES)
+DIST_SOURCES = $(libhdf5_hl_cpp_la_SOURCES)
+includeHEADERS_INSTALL = $(INSTALL_HEADER)
+HEADERS = $(include_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -285,15 +290,23 @@ H5CC_PP = $(bindir)/h5pcc
 H5FC = $(bindir)/h5fc
 H5FC_PP = $(bindir)/h5pfc
 
-# Include src and tools/lib directories
-INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
+# Include src directory
+INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/hl/src
 
-# Test programs and scripts
-TEST_SCRIPT = $(srcdir)/testh5ls.sh
-check_SCRIPTS = $(TEST_SCRIPT)
+# Build the library statically because some compliers can only link one
+# dynamic library, and that's the main hdf5 library (which is much larger
+# than this one).
+AM_LDFLAGS = -static
 
-# All programs depend on the hdf5 and h5tools libraries
-LDADD = $(LIBH5TOOLS) $(LIBHDF5)
+# This is our main target
+lib_LTLIBRARIES = libhdf5_hl_cpp.la
+
+# Source files for the library
+# At the moment, only the H5PT Packet Table has a C++ API.
+libhdf5_hl_cpp_la_SOURCES = H5PacketTable.cpp
+
+# Public headers
+include_HEADERS = H5PacketTable.h
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -310,7 +323,7 @@ TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST)
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
+.SUFFIXES: .cpp .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -320,9 +333,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  tools/h5ls/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  hl/c++/src/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  tools/h5ls/Makefile
+	  $(AUTOMAKE) --foreign  hl/c++/src/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -340,37 +353,35 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-install-binPROGRAMS: $(bin_PROGRAMS)
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
-	test -z "$(bindir)" || $(mkdir_p) "$(DESTDIR)$(bindir)"
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  if test -f $$p \
-	     || test -f $$p1 \
-	  ; then \
-	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) '$$p' '$(DESTDIR)$(bindir)/$$f'"; \
-	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) "$$p" "$(DESTDIR)$(bindir)/$$f" || exit 1; \
+	test -z "$(libdir)" || $(mkdir_p) "$(DESTDIR)$(libdir)"
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    f=$(am__strip_dir) \
+	    echo " $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) '$$p' '$(DESTDIR)$(libdir)/$$f'"; \
+	    $(LIBTOOL) --mode=install $(libLTLIBRARIES_INSTALL) $(INSTALL_STRIP_FLAG) "$$p" "$(DESTDIR)$(libdir)/$$f"; \
 	  else :; fi; \
 	done
 
-uninstall-binPROGRAMS:
+uninstall-libLTLIBRARIES:
 	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
-	  echo " rm -f '$(DESTDIR)$(bindir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(bindir)/$$f"; \
+	@set -x; list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  p=$(am__strip_dir) \
+	  echo " $(LIBTOOL) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$p'"; \
+	  $(LIBTOOL) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$p"; \
 	done
 
-clean-binPROGRAMS:
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  echo " rm -f $$p $$f"; \
-	  rm -f $$p $$f ; \
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
+	  test "$$dir" != "$$p" || dir=.; \
+	  echo "rm -f \"$${dir}/so_locations\""; \
+	  rm -f "$${dir}/so_locations"; \
 	done
-h5ls$(EXEEXT): $(h5ls_OBJECTS) $(h5ls_DEPENDENCIES) 
-	@rm -f h5ls$(EXEEXT)
-	$(LINK) $(h5ls_LDFLAGS) $(h5ls_OBJECTS) $(h5ls_LDADD) $(LIBS)
+libhdf5_hl_cpp.la: $(libhdf5_hl_cpp_la_OBJECTS) $(libhdf5_hl_cpp_la_DEPENDENCIES) 
+	$(CXXLINK) -rpath $(libdir) $(libhdf5_hl_cpp_la_LDFLAGS) $(libhdf5_hl_cpp_la_OBJECTS) $(libhdf5_hl_cpp_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -378,28 +389,28 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5ls.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5PacketTable.Plo@am__quote@
 
-.c.o:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+.cpp.o:
+@am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
 
-.c.obj:
-@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+.cpp.obj:
+@am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
-.c.lo:
-@am__fastdepCC_TRUE@	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
-@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+.cpp.lo:
+@am__fastdepCXX_TRUE@	if $(LTCXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -410,6 +421,23 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
+install-includeHEADERS: $(include_HEADERS)
+	@$(NORMAL_INSTALL)
+	test -z "$(includedir)" || $(mkdir_p) "$(DESTDIR)$(includedir)"
+	@list='$(include_HEADERS)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(includeHEADERS_INSTALL) '$$d$$p' '$(DESTDIR)$(includedir)/$$f'"; \
+	  $(includeHEADERS_INSTALL) "$$d$$p" "$(DESTDIR)$(includedir)/$$f"; \
+	done
+
+uninstall-includeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(include_HEADERS)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(includedir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(includedir)/$$f"; \
+	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -460,7 +488,7 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
-	$(mkdir_p) $(distdir)/../../config
+	$(mkdir_p) $(distdir)/../../../config
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -488,12 +516,11 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(PROGRAMS) all-local
+all-am: Makefile $(LTLIBRARIES) $(HEADERS) all-local
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: install-am
@@ -522,7 +549,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
+clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
+	mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -540,9 +568,9 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-includeHEADERS
 
-install-exec-am: install-binPROGRAMS
+install-exec-am: install-libLTLIBRARIES
 
 install-info: install-info-am
 
@@ -568,20 +596,22 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-info-am
+uninstall-am: uninstall-includeHEADERS uninstall-info-am \
+	uninstall-libLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am all-local check check-TESTS check-am \
-	clean clean-binPROGRAMS clean-generic clean-libtool ctags \
+	clean clean-generic clean-libLTLIBRARIES clean-libtool ctags \
 	distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-exec install-exec-am \
-	install-info install-info-am install-man install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
+	html-am info info-am install install-am install-data \
+	install-data-am install-exec install-exec-am \
+	install-includeHEADERS install-info install-info-am \
+	install-libLTLIBRARIES install-man install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-info-am
+	tags uninstall uninstall-am uninstall-includeHEADERS \
+	uninstall-info-am uninstall-libLTLIBRARIES
 
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets

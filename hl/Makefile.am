@@ -20,9 +20,9 @@ include $(top_srcdir)/config/commence.am
 if BUILD_FORTRAN_CONDITIONAL
   FORTRAN_DIR = fortran
 endif
-##if BUILD_CXX_CONDITIONAL
-##  CXX_DIR = c++
-##endif
+if BUILD_CXX_CONDITIONAL
+  CXX_DIR = c++
+endif
 
 SUBDIRS=src test $(CXX_DIR) $(FORTRAN_DIR)
 

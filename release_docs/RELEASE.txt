@@ -202,6 +202,12 @@ New Features
             "<number>:<number>:<number>:<number>" to "<number>:<number>"
             QAK - 2003/08/08
 
+    High-Level APIs:
+    ------
+        - Added Packet Table API for creating tables with less overhead than
+            H5TB API.  Added C++ wrapper for Packet Tables.  See documentation.
+            JML - 2004/03/28
+
 
 Support for new platforms, languages and compilers.
 =======================================

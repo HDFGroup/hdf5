@@ -265,6 +265,7 @@ LIBH5CPP = $(top_builddir)/c++/src/libhdf5_cpp.la
 LIBH5TOOLS = $(top_builddir)/tools/lib/libh5tools.la
 LIBH5_HL = $(top_builddir)/hl/src/libhdf5_hl.la
 LIBH5F_HL = $(top_builddir)/hl/fortran/src/libhdf5hl_fortran.la
+LIBH5CPP_HL = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 docdir = $(exec_prefix)/doc
 
 # Scripts used to build examples

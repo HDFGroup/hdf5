@@ -3017,6 +3017,9 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/Makefile
                  hl/src/Makefile
                  hl/test/Makefile
+                 hl/c++/Makefile
+                 hl/c++/src/Makefile
+                 hl/c++/test/Makefile
                  hl/fortran/Makefile
                  hl/fortran/src/Makefile
                  hl/fortran/test/Makefile])
