@@ -11,10 +11,20 @@
  * and the two datasets in it.  Then each process reads a hyperslab from
  * each dataset in an independent mode and prints them out.
  * All processes collectively close the datasets and the file.
+ *
+ * The need of requirement of parallel file prefix is that in general 
+ * the current working directory in which compiling is done, is not suitable
+ * for parallel I/O and there is no standard pathname for parallel file
+ * systems.  In some cases, the parallel file name may even needs some
+ * parallel file type prefix such as: "pfs:/GF/...".  Therefore, this
+ * example requires an explicite parallel file prefix.  See the usage
+ * for more detail.
  */
 
 #include <assert.h>
 #include "hdf5.h"
+#include <string.h>
+#include <stdlib.h>
 
 #ifdef H5_HAVE_PARALLEL
 /* Temporary source code */
@@ -48,12 +58,19 @@
 #define BYROW		1	/* divide into slabs of rows */
 #define BYCOL		2	/* divide into blocks of columns */
 
+#define PARAPREFIX	"HDF5_PARAPREFIX"	/* file prefix environment variable name */
+
 
 /* dataset data type.  Int's can be easily octo dumped. */
 typedef int DATATYPE;
 
 /* global variables */
 int nerrors = 0;				/* errors count */
+#ifndef PATH_MAX
+#define PATH_MAX    512
+#endif  /* !PATH_MAX */
+char    testfiles[2][PATH_MAX];
+
 
 int mpi_size, mpi_rank;				/* mpi variables */
 
@@ -61,6 +78,7 @@ int mpi_size, mpi_rank;				/* mpi variables */
 int verbose = 0;			/* verbose, default as no. */
 int doread=1;				/* read test */
 int dowrite=1;				/* write test */
+int docleanup=1;			/* cleanup */
 
 /* Prototypes */
 void slab_set(hssize_t start[], hsize_t count[], hsize_t stride[], int mode);
@@ -71,8 +89,11 @@ void phdf5writeInd(char *filename);
 void phdf5readInd(char *filename);
 void phdf5writeAll(char *filename);
 void phdf5readAll(char *filename);
-void test_split_comm_access(char *filenames[]);
+void test_split_comm_access(char filenames[][PATH_MAX]);
 int parse_options(int argc, char **argv);
+void usage(void);
+int mkfilenames(char *prefix);
+void cleanup(void);
 
 
 /*
@@ -826,7 +847,7 @@ if (verbose)
  * sooner or later due to barrier mixed up.
  */
 void
-test_split_comm_access(char *filenames[])
+test_split_comm_access(char filenames[][PATH_MAX])
 {
     MPI_Comm comm;
     MPI_Info info = MPI_INFO_NULL;
@@ -884,7 +905,11 @@ test_split_comm_access(char *filenames[])
 void
 usage()
 {
-    printf("Usage: testphdf5 [-r] [-w] [-v]\n");
+    printf("Usage: testphdf5 -f <prefix> [-r] [-w] [-v]\n");
+    printf("\t-f\tfile prefix for parallel test files.\n");
+    printf("\t  \te.g. pfs:/PFS/myname\n");
+    printf("\t  \tcan be set via $" PARAPREFIX ".\n");
+    printf("\t-c\tno cleanup\n");
     printf("\t-r\tno read\n");
     printf("\t-w\tno write\n");
     printf("\t-v\tverbose on\n");
@@ -894,15 +919,68 @@ usage()
 
 
 /*
+ * compose the test filename with the prefix supplied.
+ * return code: 0 if no error
+ *              1 otherwise.
+ */
+int
+mkfilenames(char *prefix)
+{
+    int i, n;
+    size_t strsize;
+
+    /* filename will be prefix/ParaEgN.h5 where N is 0 to 9. */
+    /* So, string must be big enough to hold the prefix, / and 10 more chars */
+    /* and the terminating null. */
+    strsize = strlen(prefix) + 12;
+    if (strsize > PATH_MAX){
+	printf("File prefix too long;  Use a short path name.\n");
+	return(1);
+    }
+    n = sizeof(testfiles)/sizeof(testfiles[0]);
+    if (n > 9){
+	printf("Warning: Too many entries in testfiles. "
+	    "Need to adjust the code to accommodate the large size.\n");
+    }
+    for (i=0; i<n; i++){
+	sprintf(testfiles[i], "%s/ParaEg%d.h5", prefix, i);
+    }
+    return(0);
+
+}
+
+
+/*
  * parse the command line options
  */
 int
 parse_options(int argc, char **argv){
+    int i, n;
+
+    /* initialize testfiles to nulls */
+    n = sizeof(testfiles)/sizeof(testfiles[0]);
+    for (i=0; i<n; i++){
+	testfiles[i][0] = '\0';
+    }
+
     while (--argc){
 	if (**(++argv) != '-'){
 	    break;
 	}else{
 	    switch(*(*argv+1)){
+		case 'f':   ++argv;
+			    if (--argc < 1){
+				usage();
+				nerrors++;
+				return(1);
+			    }
+			    if (mkfilenames(*argv)){
+				nerrors++;
+				return(1);
+			    }
+			    break;
+		case 'c':   docleanup = 0;	/* no cleanup */
+			    break;
 		case 'r':   doread = 0;
 			    break;
 		case 'w':   dowrite = 0;
@@ -915,17 +993,44 @@ parse_options(int argc, char **argv){
 	    }
 	}
     }
+
+    /* check the file prefix */
+    if (testfiles[0][0] == '\0'){
+	/* try get it from environment variable HDF5_PARAPREFIX */
+	char *env;
+	if ((env=getenv(PARAPREFIX))==NULL){
+	    usage();
+	    nerrors++;
+	    return(1);
+	}
+	mkfilenames(env);
+    }
     return(0);
 }
 
 
+/*
+ * cleanup test files created
+ */
+void
+cleanup(void)
+{
+    int i, n;
+
+    n = sizeof(testfiles)/sizeof(testfiles[0]);
+    for (i=0; i<n; i++){
+	MPI_File_delete(testfiles[i], MPI_INFO_NULL);
+    }
+}
+
+
+/* Main Program */
 int
 main(int argc, char **argv)
 {
-    char    *filenames[]={ "ParaEg1.h5", "ParaEg2.h5" };
-
     int mpi_namelen;		
     char mpi_name[MPI_MAX_PROCESSOR_NAME];
+    int i, n;
 
     MPI_Init(&argc,&argv);
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
@@ -942,19 +1047,28 @@ main(int argc, char **argv)
     if (parse_options(argc, argv) != 0)
 	goto finish;
 
+    /* show test file names */
+    if (mpi_rank == 0){
+	n = sizeof(testfiles)/sizeof(testfiles[0]);
+	printf("Parallel test files are:\n");
+	for (i=0; i<n; i++){
+	    printf("   %s\n", testfiles[i]);
+	}
+    }
+
     if (dowrite){
 	MPI_BANNER("testing PHDF5 dataset using split communicators...");
-	test_split_comm_access(filenames);
+	test_split_comm_access(testfiles);
 	MPI_BANNER("testing PHDF5 dataset independent write...");
-	phdf5writeInd(filenames[0]);
+	phdf5writeInd(testfiles[0]);
 	MPI_BANNER("testing PHDF5 dataset collective write...");
-	phdf5writeAll(filenames[1]);
+	phdf5writeAll(testfiles[1]);
     }
     if (doread){
 	MPI_BANNER("testing PHDF5 dataset independent read...");
-	phdf5readInd(filenames[0]);
+	phdf5readInd(testfiles[0]);
 	MPI_BANNER("testing PHDF5 dataset collective read...");
-	phdf5readAll(filenames[1]);
+	phdf5readAll(testfiles[1]);
     }
 
     if (!(dowrite || doread)){
@@ -972,6 +1086,8 @@ finish:
 	    printf("===================================\n");
 	}
     }
+    if (docleanup)
+	cleanup();
     MPI_Finalize();
 
     return(nerrors);
