@@ -1,4 +1,4 @@
-HDF5 version 1.4.3-snap9 released on Sat Dec  8 10:21:29 CST 2001
+HDF5 version 1.4.3-snap10 released on Sat Jan  5 08:20:37 CST 2002
 ==============================================================================
 
 
@@ -52,9 +52,13 @@ New Features
       command.
     * Improved performance of single, contiguous hyperslabs when reading or
       writing.
+    * Changed internal error handling macros to reduce code size of library by
+      about 10%.
+    * Parallel HDF5 now works on HP-UX platforms.
+    * Can use just enable-threadsafe if the C compiler has builtin pthreads
+      support.
 
 
-         
 Bug Fixes since HDF5-1.4.2 Release
 ==================================
     * Fixed a bug when reading chunked datasets where the edge of the dataset
@@ -73,6 +77,17 @@ Bug Fixes since HDF5-1.4.2 Release
     * Fixed a bug in the 'big' test where quota limits weren't being detected
       properly if they caused close() to fail.
     * Fixed a bug in internal B-tree code where a B-tree was not being copied
+      correctly.
+    * Fixed an off-by-one error in H5Sselect_valid when hyperslab selections
+      which would allow hyperslab selections which overlapped the edge of the
+      selection by one element as valid.
+    * Fixed the internal macros used to encode & decode file metadata, to avoid
+      an unaligned access warning on IA64 machines.
+    * Corrected behavior of H5Tinsert to not allow compound datatype fields to
+      be inserted past the end of the datatype.
+    * Retired the DPSS virtual file driver (--with-gridstorage configure
+      option).
+    * Fixed bug where variable-length datatypes for attributes was not working
       correctly.
 
 
@@ -158,8 +173,8 @@ Supported Configuration Features Summary
     IRIX64_6.5 64  y  y (2)     y    y         n    y          y     y
     IRIX64_6.5 32  y  y (2)     n    n         n    y          y     y
     HPUX10.20      y  n         y    n         n    y          y     y
-    HPUX11.00      y  n         y    n         n    y          y     y
-    HPUX11 SysV    y  n         y    n         n    y          y     y
+    HPUX11.00      y  y         y    n         n    y          y     y
+    HPUX11 SysV    y  y         y    n         n    y          y     y
     DECOSF         y  n         y    n         n    y          y     y
     T3E            y  y         y    y         n    n          y     y
     SV1            y  n         y    n         n    n          y     y
