@@ -2179,8 +2179,10 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     uint8_t 	**dptr;		        /*pointer to correct destination pointer*/
     uint8_t	*bg_ptr=NULL;		/*background buf traversal pointer   */
     uint8_t	*bg=NULL;		
+    H5HG_t	bg_hobjid;
     size_t	src_delta, dst_delta, bkg_delta;/*source & destination stride*/
     hssize_t 	seq_len;                /*the number of elements in the current sequence*/
+    hsize_t	bg_seq_len=0;
     size_t	src_base_size, dst_base_size;/*source & destination base size*/
     size_t	src_size, dst_size;     /*source & destination total size in bytes*/
     void	*conv_buf=NULL;     	/*temporary conversion buffer 	     */
@@ -2301,7 +2303,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
             }
 
             /* Check if we need a temporary buffer for this conversion */
-            if(tpath->cdata.need_bkg) {
+            if(tpath->cdata.need_bkg||H5T_detect_class(dst->parent,H5T_VLEN)) {
                 /* Set up initial background buffer */
                 tmp_buf_size=MAX(src_base_size,dst_base_size);
                 if ((tmp_buf=H5FL_BLK_ALLOC(vlen_seq,tmp_buf_size,1))==NULL)
@@ -2337,13 +2339,28 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 
                 /* Check if temporary buffer is large enough, resize if necessary */      
                 /* (Chain off the conversion buffer size) */
-                if(tpath->cdata.need_bkg && tmp_buf_size<conv_buf_size) {
+                if((tpath->cdata.need_bkg||H5T_detect_class(dst->parent,
+		    H5T_VLEN)) && tmp_buf_size<conv_buf_size) {
                     /* Set up initial background buffer */
                     tmp_buf_size=conv_buf_size;
                     if((tmp_buf=H5FL_BLK_REALLOC(vlen_seq,tmp_buf,tmp_buf_size))==NULL)
                         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
 		    HDmemset(tmp_buf,0,tmp_buf_size);	
                 } /* end if */
+
+		/* If we are writing and there is a nested VL type, read 
+		 * the sequence into the background buffer */
+		if(dst->u.vlen.f!=NULL && H5T_detect_class(dst->parent,H5T_VLEN) 		    && bg!=NULL) {
+		    UINT32DECODE(bg, bg_seq_len);
+		    if(bg_seq_len>0) {
+			H5F_addr_decode(dst->u.vlen.f, (const uint8_t **)&bg,
+					&(bg_hobjid.addr));
+		    	INT32DECODE(bg, bg_hobjid.idx);
+		    	if(H5HG_read(dst->u.vlen.f,&bg_hobjid,tmp_buf)==NULL)
+			    HRETURN_ERROR (H5E_DATATYPE, H5E_READERROR, FAIL, 
+			    "can't read VL sequence into background buffer");
+		    } /* end if */
+		} /* end if */
 
                 /* Convert VL sequence */
                 H5_CHECK_OVERFLOW(seq_len,hssize_t,hsize_t);
