@@ -124,6 +124,9 @@ herr_t H5Pset_xfer (hid_t plist_id, H5D_transfer_t data_xfer_mode);
 herr_t H5Pget_xfer (hid_t plist_id, H5D_transfer_t *data_xfer_mode/*out*/);
 #endif
 
+herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
+herr_t H5Pget_gc_reference(hid_t fapl_id, unsigned *gc_ref/*out*/);
+
 #ifdef __cplusplus
 }
 #endif

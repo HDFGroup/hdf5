@@ -25,6 +25,7 @@
 
 #include <H5HGprivate.h>
 #include <H5Rprivate.h>
+#include <H5Rpublic.h>  /* Publicly accessible reference information needed also */
 #include <H5Tprivate.h>
 
 #define H5T_NAMELEN	10	/*length of debugging name buffer	     */

@@ -164,6 +164,7 @@ H5F_init_interface(void)
     H5F_access_dflt.rdcc_w0 = 0.75; /*preempt fully read chunks*/
     H5F_access_dflt.threshold = 1; /*alignment applies to everything*/
     H5F_access_dflt.alignment = 1; /*no alignment*/
+    H5F_access_dflt.gc_ref = 0;     /* Don't garbage-collect references unless user chooses to */
     H5F_access_dflt.driver = H5F_LOW_DFLT;
 #if (H5F_LOW_DFLT == H5F_LOW_SEC2)
     /* Nothing to initialize */

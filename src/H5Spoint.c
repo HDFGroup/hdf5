@@ -918,7 +918,7 @@ H5S_point_select_serialize (const H5S_t *space, uint8_t *buf)
     buf+=4;             /* skip over space for length */
 
     /* Encode number of dimensions */
-    UINT32ENCODE(buf, (uint32_t)space->extent.u.simple.rank);
+    INT32ENCODE(buf, (uint32_t)space->extent.u.simple.rank);
     len+=4;
 
     /* Encode number of elements */
@@ -946,3 +946,67 @@ H5S_point_select_serialize (const H5S_t *space, uint8_t *buf)
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_point_select_serialize() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_point_select_deserialize
+ PURPOSE
+    Deserialize the current selection from a user-provided buffer.
+ USAGE
+    herr_t H5S_point_select_deserialize(space, buf)
+        H5S_t *space;           IN/OUT: Dataspace pointer to place selection into
+        uint8 *buf;             IN: Buffer to retrieve serialized selection from
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Deserializes the current selection into a buffer.  (Primarily for retrieving
+    from disk).
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_point_select_deserialize (H5S_t *space, const uint8_t *buf)
+{
+    H5S_seloper_t op=H5S_SELECT_SET;    /* Selection operation */
+    int32_t rank;           /* Rank of points */
+    size_t num_elem=0;      /* Number of elements in selection */
+    hssize_t *coord=NULL, *tcoord;   /* Pointer to array of elements */
+    uintn i,j;              /* local counting variables */
+    herr_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_point_select_deserialize, FAIL);
+
+    /* Check args */
+    assert(space);
+    assert(buf);
+
+    /* Deserialize points to select */
+    buf+=16;    /* Skip over selection header */
+    INT32DECODE(buf,rank);  /* decode the rank of the point selection */
+    if(rank!=space->extent.u.simple.rank)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "rank of pointer does not match dataspace");
+    UINT32DECODE(buf,num_elem);  /* decode the number of points */
+
+    /* Allocate space for the coordinates */
+    if((coord = H5MM_malloc(num_elem*rank*sizeof(hssize_t)))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate coordinate information");
+    
+    /* Retrieve the coordinates from the buffer */
+    for(tcoord=coord,i=0; i<num_elem; i++)
+        for(j=0; j<(unsigned)rank; j++,tcoord++)
+            UINT32DECODE(buf, *tcoord);
+
+    /* Select points */
+    if((ret_value=H5S_select_elements(space,op,num_elem,(const hssize_t **)coord))<0) {
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
+    } /* end if */
+
+done:
+    /* Free the coordinate array if necessary */
+    if(coord!=NULL)
+        H5MM_xfree(coord);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_point_select_deserialize() */

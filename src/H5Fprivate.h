@@ -245,6 +245,7 @@ typedef struct H5F_access_t {
     double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
+    uintn	gc_ref;     /* Garbage-collect references? */
     H5F_driver_t driver;	/* Low level file driver		*/
     union {
 

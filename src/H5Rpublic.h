@@ -40,17 +40,23 @@ typedef struct {
 } href_t;
 #endif /* LATER */
 
+/* Note! Be careful with the sizes of the references because they should really
+ * depend on the run-time values in the file.  Unfortunately, the arrays need
+ * to be defined at run-time, so we have to go with the worst case sizes for
+ * them.  -QAK
+ */
+#define H5R_OBJ_REF_BUF_SIZE    sizeof(hsize_t)
 /* Object reference structure for user's code */
 typedef struct {
-    unsigned long oid[2];       /* OID of object referenced */
+    unsigned char oid[H5R_OBJ_REF_BUF_SIZE];    /* Buffer to store OID of object referenced */
+                                /* Needs to be large enough to store largest haddr_t in a worst case machine (ie. 8 bytes currently) */
 } hobj_ref_t;
 
+#define H5R_DSET_REG_REF_BUF_SIZE    (sizeof(hsize_t)+sizeof(int))
 /* Dataset Region reference structure for user's code */
 typedef struct {
-    unsigned long oid[2];       /* OID of object referenced */
-    unsigned long region[2];    /* heap ID of region in object */
-    unsigned long bsize;        /* Memory buffer size */
-    unsigned char *buf;         /* Serialized selection information */
+    unsigned char heapid[H5R_DSET_REG_REF_BUF_SIZE];    /* Buffer to store heap ID and index */
+                                /* Needs to be large enough to store largest haddr_t in a worst case machine (ie. 8 bytes currently) plus an int (4 bytes typically, but could be 8 bytes) */
 } hdset_reg_ref_t;
 
 /* Publicly visible datastructures */

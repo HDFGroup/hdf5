@@ -2977,6 +2977,84 @@ H5Pget_xfer(hid_t plist_id, H5D_transfer_t *data_xfer_mode)
 #endif /*HAVE_PARALLEL*/
 
 
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_gc_references
+ *
+ * Purpose:	Sets the flag for garbage collecting references for the file.
+ *      Dataset region references (and other reference types probably) use
+ *      space in the file heap.  If garbage collection is on and the user
+ *      passes in an uninitialized value in a reference structure, the heap
+ *      might get corrupted.  When garbage collection is off however and the
+ *      user re-uses a reference, the previous heap block will be orphaned and
+ *      not returned to the free heap space.  When garbage collection is on,
+ *      the user must initialize the reference structures to 0 or risk heap
+ *      corruption.
+ *
+ *		Default value for garbage collecting references is off, just to be
+ *      on the safe side.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, November 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref)
+{
+    H5F_access_t	*fapl = NULL;
+    
+    FUNC_ENTER (H5Pset_gc_references, FAIL);
+
+    /* Check args */
+    if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) || NULL == (fapl = H5I_object (fapl_id))) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    }
+
+    /* Set values */
+    fapl->gc_ref = (gc_ref!=0);
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_gc_refernces
+ *
+ * Purpose:	Returns the current setting for the garbage collection refernces
+ *      property from a file access property list.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, June  9, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_gc_reference(hid_t fapl_id, unsigned *gc_ref/*out*/)
+{
+    H5F_access_t	*fapl = NULL;
+
+    FUNC_ENTER (H5Pget_alignment, FAIL);
+
+    /* Check args */
+    if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) || NULL == (fapl = H5I_object (fapl_id))) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    }
+
+    /* Get values */
+    if (gc_ref) *gc_ref = fapl->gc_ref;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
 /*--------------------------------------------------------------------------
  NAME
     H5Pcopy

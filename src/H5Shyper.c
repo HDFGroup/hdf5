@@ -2774,7 +2774,7 @@ H5S_hyper_select_serialize (const H5S_t *space, uint8_t *buf)
         for(i=0; i<space->extent.u.simple.rank; i++)
             UINT32ENCODE(buf, (uint32_t)curr->start[i]);
 
-        /* Encode starting point */
+        /* Encode ending point */
         for(i=0; i<space->extent.u.simple.rank; i++)
             UINT32ENCODE(buf, (uint32_t)curr->end[i]);
 
@@ -2789,3 +2789,75 @@ H5S_hyper_select_serialize (const H5S_t *space, uint8_t *buf)
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_select_serialize() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_select_deserialize
+ PURPOSE
+    Deserialize the current selection from a user-provided buffer.
+ USAGE
+    herr_t H5S_hyper_select_deserialize(space, buf)
+        H5S_t *space;           IN/OUT: Dataspace pointer to place selection into
+        uint8 *buf;             IN: Buffer to retrieve serialized selection from
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Deserializes the current selection into a buffer.  (Primarily for retrieving
+    from disk).
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_hyper_select_deserialize (H5S_t *space, const uint8_t *buf)
+{
+    int32_t rank;           /* Rank of points */
+    size_t num_elem=0;      /* Number of elements in selection */
+    hsize_t *start=NULL,*count=NULL;    /* hyperslab information */
+    hsize_t *tstart,*tcount;    /* temporary hyperslab pointers */
+    uintn i,j;              /* local counting variables */
+    herr_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_hyper_select_deserialize, FAIL);
+
+    /* Check args */
+    assert(space);
+    assert(buf);
+
+    /* Deserialize slabs to select */
+    buf+=16;    /* Skip over selection header */
+    INT32DECODE(buf,rank);  /* decode the rank of the point selection */
+    if(rank!=space->extent.u.simple.rank)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "rank of pointer does not match dataspace");
+    UINT32DECODE(buf,num_elem);  /* decode the number of points */
+
+    /* Allocate space for the coordinates */
+    if((start = H5MM_malloc(rank*sizeof(hssize_t)))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab information");
+    if((count = H5MM_malloc(rank*sizeof(hssize_t)))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab information");
+    
+    /* Retrieve the coordinates from the buffer */
+    for(i=0; i<num_elem; i++) {
+        /* Decode the starting points */
+        for(tstart=start,j=0; j<(unsigned)rank; j++,tstart++)
+            UINT32DECODE(buf, *tstart);
+
+        /* Decode the ending points */
+        for(tcount=count,j=0; j<(unsigned)rank; j++,tcount++)
+            UINT32DECODE(buf, *tcount);
+
+        /* Change the ending points into counts */
+        for(tcount=count,tstart=start,j=0; j<(unsigned)rank; j++,tcount++)
+            *tcount=(*tcount-*tstart)+1;
+
+        /* Select or add the hyperslab to the current selection */
+        if((ret_value=H5S_select_hyperslab(space,(i==0 ? H5S_SELECT_SET : H5S_SELECT_OR),start,NULL,count,NULL))<0) {
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
+        } /* end if */
+    } /* end for */
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5S_hyper_select_deserialize() */

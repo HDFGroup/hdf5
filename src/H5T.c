@@ -613,7 +613,7 @@ H5T_init_interface(void)
     dt->state = H5T_STATE_IMMUTABLE;
     H5F_addr_undef (&(dt->ent.header));
     dt->type = H5T_REFERENCE;
-    dt->size = sizeof(haddr_t);
+    dt->size = H5R_OBJ_REF_BUF_SIZE;
     dt->u.atomic.order = H5T_ORDER_NONE;
     dt->u.atomic.offset = 0;
     dt->u.atomic.prec = 8 * dt->size;
@@ -632,7 +632,7 @@ H5T_init_interface(void)
     dt->state = H5T_STATE_IMMUTABLE;
     H5F_addr_undef (&(dt->ent.header));
     dt->type = H5T_REFERENCE;
-    dt->size = sizeof(haddr_t);
+    dt->size = H5R_DSET_REG_REF_BUF_SIZE;
     dt->u.atomic.order = H5T_ORDER_NONE;
     dt->u.atomic.offset = 0;
     dt->u.atomic.prec = 8 * dt->size;
