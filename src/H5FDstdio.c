@@ -139,6 +139,18 @@ typedef struct H5FD_stdio_t {
     sizeof(long)<sizeof(size_t) || HADDR_UNDEF==(A)+(Z) || (long)((A)+(Z))<(long)(A))
 #endif
 
+#ifdef H5_HAVE_LSEEK64
+#   define file_offset_t	off64_t
+#   define file_truncate	ftruncate64
+#elif defined (WIN32) && !defined(__MWERKS__)
+# /*MSVC*/
+#   define file_offset_t __int64
+#   define file_truncate	_ftruncatei64
+#else
+#   define file_offset_t	off_t
+#   define file_truncate	ftruncate
+#endif
+
 /* Prototypes */
 static H5FD_t *H5FD_stdio_open(const char *name, unsigned flags,
                  hid_t fapl_id, haddr_t maxaddr);
@@ -857,22 +869,33 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
 
     /* Only try to flush the file if we have write access */
     if(file->write_access) {
-         /* Makes sure that the true file size is the same (or larger) than the end-of-address. */
-        if (file->eoa>file->eof) {
-            if (fseek(file->fp, (long)(file->eoa-1), SEEK_SET)<0)
-                H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
-            if (fwrite("", 1, 1, file->fp)!=1)
-                H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "EOF fwrite failed", -1);
-            file->eof = file->eoa;
-            file->pos = file->eoa;
-            /* fall through to set the IO operation */
-        }
+        /* Makes sure that the true file size is the same as the end-of-address. */
+        if (file->eoa!=file->eof) {
+            int fd=fileno(file->fp);     /* File descriptor for HDF5 file */
+#ifdef WIN32
+            HFILE filehandle;   /* Windows file handle */
+            LARGE_INTEGER li;   /* 64-bit integer for SetFilePointer() call */
 
-        /*
-         * What happens to the file position?  Is it guaranteed to be the same
-         * after the fflush() as it was before?
-         */
-        file->op = H5FD_STDIO_OP_UNKNOWN;
+            /* Map the posix file handle to a Windows file handle */
+            filehandle = _get_osfhandle(file->fd);
+
+            /* Translate 64-bit integers into form Windows wants */
+            /* [This algorithm is from the Windows documentation for SetFilePointer()] */
+            li.QuadPart = file->eoa;
+            SetFilePointer((HANDLE)filehandle,li.LowPart,&li.HighPart,FILE_BEGIN);
+            if(SetEndOfFile((HANDLE)filehandle)==0)
+                H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "unable to extend file properly", -1);
+#else /* WIN32 */
+            if (-1==file_truncate(fd, (file_offset_t)file->eoa))
+                H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "unable to extend file properly", -1);
+#endif /* WIN32 */
+            /* Update the eof value */
+            file->eof = file->eoa;
+
+            /* Reset last file I/O information */
+            file->pos = HADDR_UNDEF;
+            file->op = H5FD_STDIO_OP_UNKNOWN;
+        } /* end if */
 
         /*
          * Flush
@@ -881,7 +904,7 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
             if (fflush(file->fp) < 0)
                 H5Epush_ret(func, H5E_IO, H5E_WRITEERROR, "fflush failed", -1);
         } /* end if */
-      } /* end if */
+    } /* end if */
     else {
         /* Double-check for problems */
         if (file->eoa>file->eof)

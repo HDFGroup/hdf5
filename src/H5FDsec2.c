@@ -796,10 +796,6 @@ static herr_t
 H5FD_sec2_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 {
     H5FD_sec2_t	*file = (H5FD_sec2_t*)_file;
-#ifdef WIN32
-    HFILE filehandle;   /* Windows file handle */
-    LARGE_INTEGER li;   /* 64-bit integer for SetFilePointer() call */
-#endif /* WIN32 */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_sec2_flush, FAIL);
@@ -809,6 +805,9 @@ H5FD_sec2_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
     /* Extend the file to make sure it's large enough */
     if (file->eoa!=file->eof) {
 #ifdef WIN32
+        HFILE filehandle;   /* Windows file handle */
+        LARGE_INTEGER li;   /* 64-bit integer for SetFilePointer() call */
+
         /* Map the posix file handle to a Windows file handle */
         filehandle = _get_osfhandle(file->fd);
 
