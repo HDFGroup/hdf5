@@ -1,0 +1,54 @@
+#!/bin/sh
+set -x
+#
+# This script should be run nightly from cron.  It checks out hdf5
+# from the CVS source tree and compares it against the previous
+# snapshot.  If anything significant changed then a new snapshot is
+# created, the minor version number is incremented, and the change is
+# checked back into the CVS repository.
+#
+
+# Where are the snapshots stored?
+ARCHIVES=/hdf3/ftp/pub/outgoing/hdf5/snapshots
+if [ "$1" ]; then
+    ARCHIVES="$1"
+    shift
+fi
+
+# Create a working directory.  Hopefully one is left over from last
+# time that still has the contents of the previous release.  But if
+# not, just create one and assume that a snapshot is necessary.
+COMPARE=${HOME}/hdf5-snapshots
+test -d ${COMPARE} || mkdir -p ${COMPARE} || exit 1
+
+# Check out the current version from CVS
+if [ -z "$CVSROOT" ]; then
+    echo "Where is the CVS repository?" 1>&2
+    exit 1
+fi
+cvs -Q co -d ${COMPARE}/current hdf5 || exit 1
+
+# Compare it with the previous version.
+if [ -d ${COMPARE}/previous ]; then
+    if (diff -r -I H5_VERS_RELEASE -I " release on " \
+	    ${COMPARE}/previous ${COMPARE}/current >/dev/null); then
+	update=yes
+    else
+        update=no
+    fi
+else
+    update=yes
+fi
+
+# Release snapshot, update version, and commit to cvs
+if [ "$update" = "yes" ]; then
+   (cd ${COMPARE}/current; \
+	./bin/release -d $ARCHIVES tar compress gzip bzip2; \
+	./bin/h5vers -i; \
+	cvs -Q commit -m Snapshot )
+fi
+
+# Replace the previous version with the current version.
+rm -rf ${COMPARE}/previous
+mv ${COMPARE}/current ${COMPARE}/previous
+exit 1
