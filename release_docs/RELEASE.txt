@@ -162,8 +162,14 @@ Documentation
 New Features
 ============
 
+    * Modified VFL file driver 'flush' function to accept an extra parameter,
+      which indicates that the file will be immediately closed.  This may allow
+      VFL drivers to bypass syncronizations that are also performed when the
+      file is closed.  Specifically, the MPI-I/O VFL driver bypasses the
+      MPI_File_sync() call, since MPI_File_close performs file syncronization
+      also.  QAK - 2002/05/10
     * Allow the metadata writes to be shared among all processes, easing the
-      burden on process 0.
+      burden on process 0.  QAK - 2002/05/10
     * New functions H5Glink2 and H5Gmove2 were added to allow link and move to
       be in different locations in the same file.  The old functions H5Glink 
       and H5Gmove remain valid.  SLU - 2002/04/26 
