@@ -1673,8 +1673,8 @@ EOF
 EOF
 
       PARALLEL_SRC='$(PARALLEL_SRC)'
-      CFLAGS="$CFLAGS -I/foo/bar/parallel/include"
-      CFLAGS="$CFLAGS -L/foo/bar/parallel/lib"
+      CFLAGS="$CFLAGS $MPI_INC"
+      CFLAGS="$CFLAGS $MPI_LIB"
       echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
 echo "configure:1680: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
@@ -1759,7 +1759,7 @@ EOF
 else
   echo "$ac_t""no" 1>&6
 fi
-       RUNTEST=mpirun
+       RUNTEST='mpirun -np 1'
       ;;
 
    *)

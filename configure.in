@@ -151,11 +151,11 @@ case "X-$PARALLEL" in
       AC_DEFINE(PHDF5)	dnl THIS WILL GO AWAY SHORTLY!!!
       AC_DEFINE(HAVE_PARALLEL)
       PARALLEL_SRC='$(PARALLEL_SRC)'
-      CFLAGS="$CFLAGS -I/foo/bar/parallel/include"
-      CFLAGS="$CFLAGS -L/foo/bar/parallel/lib"
+      CFLAGS="$CFLAGS $MPI_INC"
+      CFLAGS="$CFLAGS $MPI_LIB"
       AC_CHECK_LIB(mpi,main)  dnl Replace `main' with some function
       AC_CHECK_LIB(mpio,main) dnl Replace `main' with some function
-      RUNTEST=mpirun
+      RUNTEST='mpirun -np 1'
       ;;
 
    *)

@@ -46,7 +46,7 @@ PRIVATE_HDR=H5private.h H5Aprivate.h H5ACprivate.h H5Bprivate.h		      \
 
 # Number format detection
 H5Tinit.c: H5detect
-	./H5detect >H5Tinit.c
+	$(RUNTEST) ./H5detect >H5Tinit.c
 
 H5detect: H5detect.o
 	$(CC) $(CFLAGS) -o $@ H5detect.o
