@@ -64,7 +64,7 @@ typedef struct H5G_node_key_t {
 /* PRIVATE PROTOTYPES */
 static herr_t H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf);
 static size_t H5G_node_size(H5F_t *f);
-static herr_t H5G_node_page_free (void *page);
+static herr_t H5G_node_shared_free(void *shared);
 
 /* Metadata cache callbacks */
 static H5G_node_t *H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
@@ -77,7 +77,7 @@ static herr_t H5G_compute_size(H5F_t *f, H5G_node_t *sym, size_t *size_ptr);
 
 /* B-tree callbacks */
 static size_t H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
-static void *H5G_node_get_page(H5F_t *f, const void *_udata);
+static H5RC_t *H5G_node_get_shared(H5F_t *f, const void *_udata);
 static herr_t H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t op, void *_lt_key,
 			      void *_udata, void *_rt_key,
 			      haddr_t *addr_p/*out*/);
@@ -118,7 +118,7 @@ H5B_class_t H5B_SNODE[1] = {{
     H5B_SNODE_ID,		/*id			*/
     sizeof(H5G_node_key_t), 	/*sizeof_nkey		*/
     H5G_node_sizeof_rkey,	/*get_sizeof_rkey	*/
-    H5G_node_get_page,		/*get_page		*/
+    H5G_node_get_shared,	/*get_shared		*/
     H5G_node_create,		/*new			*/
     H5G_node_cmp2,		/*cmp2			*/
     H5G_node_cmp3,		/*cmp3			*/
@@ -132,6 +132,9 @@ H5B_class_t H5B_SNODE[1] = {{
     H5G_node_debug_key,		/*debug			*/
 }};
 
+/* Declare a free list to manage the H5B_shared_t struct */
+H5FL_EXTERN(H5B_shared_t);
+
 /* Declare a free list to manage the H5G_node_t struct */
 H5FL_DEFINE_STATIC(H5G_node_t);
 
@@ -140,6 +143,9 @@ H5FL_SEQ_DEFINE_STATIC(H5G_entry_t);
 
 /* Declare a free list to manage blocks of symbol node data */
 H5FL_BLK_DEFINE_STATIC(symbol_node);
+
+/* Declare a free list to manage the native key offset sequence information */
+H5FL_SEQ_DEFINE_STATIC(size_t);
 
 /* Declare a free list to manage the raw page information */
 H5FL_BLK_DEFINE_STATIC(grp_page);
@@ -174,9 +180,9 @@ H5G_node_sizeof_rkey(H5F_t *f, const void UNUSED * udata)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_get_page
+ * Function:	H5G_node_get_shared
  *
- * Purpose:	Returns the raw data page for the specified UDATA.
+ * Purpose:	Returns the shared B-tree info for the specified UDATA.
  *
  * Return:	Success:	Pointer to the raw B-tree page for this
                                 file's groups
@@ -190,19 +196,22 @@ H5G_node_sizeof_rkey(H5F_t *f, const void UNUSED * udata)
  *
  *-------------------------------------------------------------------------
  */
-static void *
-H5G_node_get_page(H5F_t *f, const void UNUSED *_udata)
+static H5RC_t *
+H5G_node_get_shared(H5F_t *f, const void UNUSED *_udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_get_page);
+    H5RC_t *rc;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_get_shared);
 
     assert(f);
 
-    /* Increment reference count on B-tree node */
-    H5RC_INC(H5F_RC_PAGE(f));
+    /* Increment reference count on shared B-tree node */
+    rc=H5F_GRP_BTREE_SHARED(f);
+    H5RC_INC(rc);
 
-    /* Get the pointer to the ref-count object */
-    FUNC_LEAVE_NOAPI(H5F_RC_PAGE(f));
-} /* end H5G_node_get_page() */
+    /* Return the pointer to the ref-count object */
+    FUNC_LEAVE_NOAPI(rc);
+} /* end H5G_node_get_shared() */
 
 
 /*-------------------------------------------------------------------------
@@ -1721,15 +1730,13 @@ done:
  * Programmer:  Quincey Koziol
  *              Jul  5, 2004
  *
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5G_node_init(H5F_t *f)
 {
-    size_t	sizeof_rkey;            /* Single raw key size */
-    size_t      size;                   /* Raw B-tree node size */
-    void        *page;                  /* Buffer for raw B-tree node */
+    H5B_shared_t *shared;               /* Shared B-tree node info */
+    size_t	u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_node_init, FAIL);
@@ -1737,17 +1744,28 @@ H5G_node_init(H5F_t *f)
     /* Check arguments. */
     assert(f);
 
+    /* Allocate space for the shared structure */
+    if(NULL==(shared=H5FL_MALLOC(H5B_shared_t)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for shared B-tree info")
+
     /* Set up the "global" information for this file's groups */
-    sizeof_rkey = H5G_node_sizeof_rkey(f, NULL);
-    assert(sizeof_rkey);
-    size = H5B_nodesize(f, H5B_SNODE, NULL, sizeof_rkey);
-    assert(size);
-    if(NULL==(page=H5FL_BLK_MALLOC(grp_page,size)))
+    shared->type= H5B_SNODE;
+    shared->sizeof_rkey = H5G_node_sizeof_rkey(f, NULL);
+    assert(shared->sizeof_rkey);
+    shared->sizeof_rnode = H5B_nodesize(f, H5B_SNODE, &shared->sizeof_keys, shared->sizeof_rkey);
+    assert(shared->sizeof_rnode);
+    if(NULL==(shared->page=H5FL_BLK_MALLOC(grp_page,shared->sizeof_rnode)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
+    if(NULL==(shared->nkey=H5FL_SEQ_MALLOC(size_t,(size_t)(2*H5F_KVALUE(f,H5B_SNODE)+1))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
 
-    /* Make page buffer reference counted */
-    if(NULL==(f->shared->rc_page=H5RC_create(page,H5G_node_page_free)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for page")
+    /* Initialize the offsets into the native key buffer */
+    for(u=0; u<(2*H5F_KVALUE(f,H5B_SNODE)+1); u++)
+        shared->nkey[u]=u*H5B_SNODE->sizeof_nkey;
+
+    /* Make shared B-tree info reference counted */
+    if(NULL==(f->shared->grp_btree_shared=H5RC_create(shared,H5G_node_shared_free)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1778,16 +1796,16 @@ H5G_node_close(const H5F_t *f)
     assert(f);
 
     /* Free the raw B-tree node buffer */
-    H5RC_DEC(f->shared->rc_page);
+    H5RC_DEC(H5F_GRP_BTREE_SHARED(f));
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5G_node_close */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_page_free
+ * Function:	H5G_node_shared_free
  *
- * Purpose:	Free a B-tree node
+ * Purpose:	Free B-tree shared info
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1799,15 +1817,23 @@ H5G_node_close(const H5F_t *f)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_page_free (void *page)
+H5G_node_shared_free (void *_shared)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_page_free)
+    H5B_shared_t *shared = (H5B_shared_t *)_shared;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_shared_free)
 
     /* Free the raw B-tree node buffer */
-    H5FL_BLK_FREE(grp_page,page);
+    H5FL_BLK_FREE(grp_page,shared->page);
+
+    /* Free the B-tree native key offsets buffer */
+    H5FL_SEQ_FREE(size_t,shared->nkey);
+
+    /* Free the shared B-tree info */
+    H5FL_FREE(H5B_shared_t,shared);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_node_page_free() */
+} /* end H5G_node_shared_free() */
 
 
 /*-------------------------------------------------------------------------

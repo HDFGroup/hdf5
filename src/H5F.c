@@ -1842,7 +1842,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
          * We've just opened a fresh new file (or truncated one). We need
          * to create & write the superblock.
          */
-
 #ifdef H5_HAVE_FPHDF5
         if (!H5FD_is_fphdf5_driver(lf) || H5FD_fphdf5_is_captain(lf)) {
 #endif  /* H5_HAVE_FPHDF5 */
@@ -4468,13 +4467,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_rc_page
+ * Function:	H5F_grp_btree_shared
  *
- * Purpose:	Replaced a macro to retrieve the raw B-tree page value
+ * Purpose:	Replaced a macro to retrieve the shared B-tree node info
  *              now that the generic properties are being used to store
  *              the values.
  *
- * Return:	Success:	Non-void, and the raw B-tree page value
+ * Return:	Success:	Non-void, and the shared B-tree node info
  *                              is returned.
  *
  * 		Failure:	void (should not happen)
@@ -4487,16 +4486,16 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5RC_t *H5F_rc_page(const H5F_t *f)
+H5RC_t *H5F_grp_btree_shared(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_rc_page)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_grp_btree_shared)
 
     assert(f);
     assert(f->shared);
 
-    FUNC_LEAVE_NOAPI(f->shared->rc_page)
-} /* end H5F_raw_page() */
+    FUNC_LEAVE_NOAPI(f->shared->grp_btree_shared)
+} /* end H5F_grp_btree_shared() */
 
 
 /*-------------------------------------------------------------------------
