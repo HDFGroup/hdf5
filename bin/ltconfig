@@ -698,7 +698,11 @@ else
   case "$host_os" in
   aix3* | aix4*)
     # All AIX code is PIC.
-    link_static_flag='-bnso -bI:/lib/syscalls.exp'
+	####################################################################
+	## HACK Alert! This is causing problems with C++ on SP3...We'll just
+	## remove this...THERE! All better now.
+	####################################################################
+    ##link_static_flag='-bnso -bI:/lib/syscalls.exp'
     ;;
 
   hpux9* | hpux10* | hpux11*)
@@ -1285,7 +1289,7 @@ else
 
     case "$hname" in
       *pacific.llnl.gov* | *s0*)
-        hardcode_libdir_flag_spec=' '
+        hardcode_libdir_flag_spec='${wl}-b ${wl}libpath:$libdir:/usr/lib:/lib'
 	;;
       *)
         hardcode_libdir_flag_spec='${wl}-b ${wl}nolibpath ${wl}-b ${wl}libpath:$libdir:/usr/lib:/lib'
