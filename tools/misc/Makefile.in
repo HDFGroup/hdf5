@@ -26,7 +26,7 @@ TEST_SCRIPTS=
 LIBTOOLS=../lib/libh5tools.la
 LIBHDF5=$(top_builddir)/src/libhdf5.la
 
-PUB_PROGS=h5debug h5import h5repart @PDB2HDF@
+PUB_PROGS=h5cc h5debug h5import h5repart @PDB2HDF@
 PROGS=$(PUB_PROGS) $(TEST_PROGS)
 
 ## Source and object files for the library; do not install
@@ -55,6 +55,9 @@ check test _test: $(PROGS)
 ## the tools library compiled in this directory.
 ##
 $(PROGS): $(LIBTOOLS) $(LIBHDF5)
+
+h5cc: h5cc.in
+	@true
 
 h5debug: h5debug.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5debug.lo $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)

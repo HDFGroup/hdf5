@@ -1,7 +1,8 @@
 dnl Process this file with autoconf to produce configure.
 dnl
-dnl Copyright (C) 1997-2001 National Center for Supercomputing Applications
-dnl                         All rights reserved.
+dnl Copyright (C) 1997, 1998, 1999, 2000, 2001
+dnl     National Center for Supercomputing Applications
+dnl     All rights reserved.
 
 dnl ----------------------------------------------------------------------
 dnl Initialize configure.
@@ -613,47 +614,78 @@ AC_SUBST(H4TOH5) H4TOH5=h4toh5
 AC_SUBST(H4TOH5TEST) H4TOH5TEST=h4toh5test
 AC_SUBST(TESTH4TOH5) TESTH4TOH5='$(srcdir)/testh4toh5.sh'
 
-AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=no)
+AC_ARG_WITH(hdf4,
+  [  --with-hdf4=DIR         Use the HDF4 library. DIR can be either a
+                          single directory off of which the \`include/'
+                          and \`lib/' subdirectories are located. Or you
+                          can specify the include and library directories
+                          separated by a comma.],,
+  withval=no)
 case "$withval" in
-   yes)
-      AC_CHECK_HEADERS(mfhdf.h,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-      AC_CHECK_LIB(z,compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-      AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-      AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-      AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-      ;;
-   no)
-      AC_MSG_CHECKING(for HDF4)
-      AC_MSG_RESULT(suppressed)
+  yes)
+    failed="no"
+    AC_CHECK_LIB(z, compress,
+                 AC_CHECK_LIB(jpeg, jpeg_start_compress,
+                              AC_CHECK_LIB(df, Hstartaccess,
+                                           AC_CHECK_LIB(mfhdf, SDstart,,
+                                                        failed="yes"),
+                                           failed="yes"),
+                              failed="yes"),
+                 failed="yes")
+
+    if test "$failed" = "yes"; then
       unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5
-      ;;
-   *)
-      hdf4_inc="`echo $withval |cut -f1 -d,`"
-      if test -n "$hdf4_inc"; then
-         saved_CPPFLAGS="$CPPFLAGS"
-         CPPFLAGS="$CPPFLAGS -I$hdf4_inc"
-         AC_CHECK_HEADERS(mfhdf.h,,
-                          CPPFLAGS="$saved_CPPFLAGS"
-                          unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-      else
-         AC_CHECK_HEADERS(mfhdf.h)
-      fi
-	
-      hdf4_lib="`echo $withval |cut -f2 -d, -s`"
-      if test -n "$hdf4_lib"; then
-         saved_LDFLAGS="$LDFLAGS"
-         LDFLAGS="$LDFLAGS -L$hdf4_lib"
-         AC_CHECK_LIB(z,compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-         AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-         AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-         AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-      else
-         AC_CHECK_LIB(z,compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-         AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5)
-         AC_CHECK_LIB(df,Hstartaccess)
-         AC_CHECK_LIB(mfhdf,SDstart)
-      fi
-      ;;
+    fi
+    ;;
+  no)
+    AC_MSG_CHECKING(for HDF4)
+    AC_MSG_RESULT(suppressed)
+    unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5
+    ;;
+  *)
+    case "$withval" in
+      *,*)
+        hdf4_inc="`echo $withval |cut -f1 -d,`"
+        hdf4_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          hdf4_inc="$withval/include"
+          hdf4_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    if test -n "$hdf4_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$hdf4_inc"
+    fi
+
+    failed=no
+    AC_CHECK_HEADERS(mfhdf.h,, failed="yes")
+
+    if test -n "$hdf4_lib"; then
+      LDFLAGS="$LDFLAGS -L$hdf4_lib"
+    fi
+
+    if test "$failed" != "yes"; then
+      AC_CHECK_LIB(z, compress,
+                   AC_CHECK_LIB(jpeg, jpeg_start_compress,
+                                AC_CHECK_LIB(df, Hstartaccess,
+                                             AC_CHECK_LIB(mfhdf, SDstart,,
+                                                          failed="yes"),
+                                             failed="yes"),
+                                failed="yes"),
+                   failed="yes")
+    fi
+
+    if test "$failed" = "yes"; then
+      CPPFLAGS="$saved_CPPFLAGS"
+      LDFLAGS="$saved_LDFLAGS"
+      unset H5TOH4 TESTH5TOH4 H4TOH5 H4TOH5TEST TESTH4TOH5
+    fi
+    ;;
 esac
 
 dnl ----------------------------------------------------------------------
@@ -663,7 +695,11 @@ dnl command-line switch. The value is an include path and/or a library path.
 dnl If the library path is specified then it must be preceded by a comma.
 dnl
 AC_ARG_WITH(zlib,
-  [  --with-zlib=INC,LIB     Use the GNU zlib compression],,
+  [  --with-zlib=DIR         Use the GNU zlib compression. DIR can
+                          be either a single directory off of which the
+                          \`include/' and \`lib/' subdirectories are
+                          located. Or you can specify the include and
+                          library directories separated by a comma.],,
   withval=yes)
 
 case $withval in
@@ -676,24 +712,35 @@ case $withval in
     AC_MSG_RESULT(suppressed)
     ;;
   *)
-    zlib_inc="`echo $withval |cut -f1 -d,`"
+    case "$withval" in
+      *,*)
+        zlib_inc="`echo $withval |cut -f1 -d,`"
+        zlib_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          zlib_inc="$withval/include"
+          zlib_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+
     if test -n "$zlib_inc"; then
-      saved_CPPFLAGS="$CPPFLAGS"
       CPPFLAGS="$CPPFLAGS -I$zlib_inc"
-      AC_CHECK_HEADERS(zlib.h,,CPPFLAGS="$saved_CPPFLAGS")
-    else
-      AC_CHECK_HEADERS(zlib.h)
     fi
 
-    zlib_lib="`echo $withval |cut -f2 -d, -s`"
+    AC_CHECK_HEADERS(zlib.h,,
+                     CPPFLAGS="$saved_CPPFLAGS")
 
     if test -n "$zlib_lib"; then
-      saved_LDFLAGS="$LDFLAGS"
       LDFLAGS="$LDFLAGS -L$zlib_lib"
-      AC_CHECK_LIB(z, compress,,LDFLAGS="$saved_LDFLAGS")
-    else
-      AC_CHECK_LIB(z, compress)
     fi
+
+    AC_CHECK_LIB(z, compress,,
+                 LDFLAGS="$saved_LDFLAGS")
     ;;
 esac
 
@@ -1705,6 +1752,7 @@ AC_OUTPUT(src/libhdf5.settings
           tools/h5ls/Makefile
           tools/lib/Makefile
           tools/misc/Makefile
+          tools/misc/h5cc
           tools/gifconv/Makefile
           $EXTRA_H4_MAKEFILES
           examples/Makefile

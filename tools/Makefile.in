@@ -1,7 +1,8 @@
 ## Tools HDF5 Makefile(.in)
 ##
-## Copyright (C) 2001 National Center for Supercomputing Applications.
-##                    All rights reserved.
+## Copyright (C) 2001
+##     National Center for Supercomputing Applications.
+##     All rights reserved.
 ##
 top_srcdir=@top_srcdir@
 top_builddir=..

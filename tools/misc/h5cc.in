@@ -1,0 +1,246 @@
+#! /bin/sh
+##
+## Copyright (C) 2001
+##     National Center for Supercomputing Applications
+##     All rights reserved.
+##
+
+############################################################################
+##                                                                        ##
+## Things You May Have to Modify:                                         ##
+##                                                                        ##
+## If the following paths don't point to the place were HDF5 is installed ##
+## on your system (i.e., you received a binary distribution or moved the  ##
+## files from the originally installed directory to another directory)    ##
+## then modify them accordingly to represent the new paths.               ##
+##                                                                        ##
+############################################################################
+prefix="@prefix@"
+libdir="@libdir@"
+includedir="@includedir@"
+
+############################################################################
+##                                                                        ##
+## You shouldn't have to modify anything below this line.                 ##
+##                                                                        ##
+############################################################################
+
+host_os="@host_os@"
+
+prog_name="`basename $0`"
+
+allargs=""
+compile_args=""
+link_args=""
+link_objs=""
+clibpath=""
+
+do_link="yes"
+do_compile="no"
+dash_o="no"
+dash_c="no"
+get_output_file="no"
+
+SHOW="eval"
+CCBASE="@CC@"
+CLINKERBASE="@CC@"
+CFLAGS="@CFLAGS@"
+LDFLAGS="@LDFLAGS@"
+LIBS="@LIBS@"
+
+CC="${HDF5_CC:-$CCBASE}"
+CLINKER="${HDF5_CLINKER:-$CLINKERBASE}"
+
+USE_SHARED_LIB="${HDF5_USE_SHLIB:-no}"
+
+usage() {
+  # A wonderfully informative "usage" message.
+  echo "usage: $prog_name [OPTIONS] <compile line>"
+  echo "  OPTIONS:"
+  echo "    -help        This help message."
+  echo "    -echo        Show all the shell commands executed"
+  echo "    -prefix=DIR  Prefix directory to find HDF5 lib/ and include/"
+  echo "                   subdirectories [default: $prefix]"
+  echo "    -show        Show the commands without executing them"
+  echo "    -shlib       Compile with shared HDF5 libraries"
+  echo "    -noshlib     Compile with static HDF5 libraries [default]"
+  echo " "
+  echo "  <compile line>  - the normal compile line options for your compiler."
+  echo "                    $prog_name uses the same compiler you used to compile"
+  echo "                    HDF5. Check with your compiler's man pages for more"
+  echo "                    information on which options are needed."
+  echo " "
+  echo " You can override the compiler, linker, and whether or not to use static"
+  echo " or shared libraries to compile your program by setting the following"
+  echo " environment variables accordingly:"
+  echo " "
+  echo "   HDF5_CC                  -  use a different C compiler"
+  echo "   HDF5_CLINKER             -  use a different linker"
+  echo "   HDF5_USE_SHLIB=[yes|no]  -  use shared or static version of the HDF5 library"
+  echo "                                 [default: no]"
+  echo " "
+  exit 1
+}
+
+if test "$#" = "0"; then
+  # No parameters specified, issue usage statement and exit.
+  usage
+fi
+
+case "$CC" in
+  gcc)
+    kind="gcc"
+    ;;
+  mpicc|mpcc|mpicc_r)
+    # Is this gcc masquarading as an MPI compiler?
+    if test "`${CC} -v 2>&1 | sed -n 2p | cut -c1-3`" = "gcc"; then
+      kind="gcc"
+    else
+      # Nope
+      kind="$host_os"
+    fi
+    ;;
+  *)
+    kind="$host_os"
+    ;;
+esac
+
+for arg in $@ ; do
+  if test "x$get_output_file" = "xyes"; then
+    link_args="$link_args $arg"
+    output_file="$arg"
+    get_output_file="no"
+    continue
+  fi
+
+  case "$arg" in
+    -c)
+      allargs="$allargs $arg"
+      compile_args="$compile_args $arg"
+
+      if test "x$do_link" = "xyes" -a -n "$output_file"; then
+        compile_args="$compile_args -o $outputfile"
+      fi
+
+      do_link="no"
+      dash_c="yes"
+      ;;
+    -o)
+      allargs="$allargs $arg"
+      dash_o="yes"
+
+      if test "x$dash_c" = "xyes"; then
+        compile_args="$compile_args $arg"
+      else
+        link_args="$link_args $arg"
+        do_link="yes"
+        get_output_file="yes"
+      fi
+      ;;
+    -E|-M)
+      allargs="$allargs $arg"
+      compile_args="$compile_args $arg"
+      dash_c="yes"
+      dash_o="no"
+      ;;
+    -l*)
+      link_args="$link_args $arg"
+      allargs="$allargs $arg"
+      ;;
+    -prefix=*)
+      prefix="`expr "$arg" : '-prefix=\(.*\)'`"
+      ;;
+    -echo)
+      set -x
+      ;;
+    -show)
+      SHOW="echo"
+      ;;
+    -shlib)
+      USE_SHARED_LIB="yes"
+      ;;
+    -noshlib)
+      USE_SHARED_LIB="no"
+      ;;
+    -help)
+      usage
+      ;;
+    *\"*)
+      qarg="'"$arg"'"
+      allargs="$allargs $qarg"
+      ;;
+    *\'*)
+      qarg='\"'"$arg"'\"'
+      allargs="$allargs $qarg"
+      ;;
+    *)
+      allargs="$allargs $qarg"
+
+      if test -s "$arg"; then
+        ext=`expr "$arg" : '.*\(\..*\)'`
+
+        if test "x$ext" = "x.c"; then
+          do_compile="yes"
+          compile_args="$compile_args $arg"
+          fname=`basename $arg .c`
+          link_objs="$link_objs $fname.o"
+        elif test "x$ext" = "x.o"; then
+          if test "x$dash_c" = "xyes"; then
+            compile_args="$compile_args $arg"
+          else
+            do_link="yes"
+            link_objs="$link_objs $arg"
+          fi
+        else
+          compile_args="$compile_args $arg"
+          link_args="$link_args $arg"
+        fi
+      else
+        compile_args="$compile_args $arg"
+        link_args="$link_args $arg"
+      fi
+      ;;
+  esac
+done
+
+if test "x$do_compile" = "xyes"; then
+  if test "x$dash_c" != "xyes"; then
+    compile_args="-c $compile_args"
+  fi
+
+  $SHOW $CC $CFLAGS -I$includedir $compile_args
+  status=$?
+
+  if test "$status" != "0"; then
+    exit $status
+  fi
+fi
+
+if test "x$do_link" = "xyes"; then
+  shared_link=""
+
+  if test "x$USE_SHARED_LIB" = "xyes"; then
+    case "$kind" in
+      gcc|linux*)           flag="-Wl,-rpath -Wl," ;;
+      hpux*)                flag="-Wl,+b -Wl," ;;
+      freebsd*|solaris*)    flag="-R" ;;
+      rs6000*|aix*)         flag="-L" ;;
+      irix*|sgi)            flag="-rpath " ;;
+      *)                    flag="" ;;
+    esac
+
+    if test -n "$flag"; then
+      shared_link="${flag}${libdir}"
+    fi
+
+    link_args="$link_args -L${libdir} -lhdf5"
+  else
+    link_args="$link_args ${libdir}/libhdf5.a"
+  fi
+
+  link_args="$link_args $LIBS"
+  $SHOW $CLINKER $LDFLAGS $clibpath $link_objs $link_args $shared_link
+  status=$?
+fi
+
+exit $status
