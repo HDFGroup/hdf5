@@ -198,7 +198,7 @@ h5tools_fopen(const char *fname, char *drivername, size_t drivername_size)
     }
 
     /* Save the driver name */
-    if (drivername && drivername_size){
+    if (drivername && drivername_size) {
         if (fid >= 0) {
             strncpy(drivername, driver[drivernum].name, drivername_size);
             drivername[drivername_size - 1] = '\0';
@@ -380,7 +380,7 @@ h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
         h5tools_str_reset(&buffer);
         h5tools_str_sprint(&buffer, info, container, type, mem + i * size, ctx);
 
-        if (i + 1 < nelmts || 0 == (flags & END_OF_DATA))
+        if (i + 1 < nelmts || (flags & END_OF_DATA) == 0)
             h5tools_str_append(&buffer, "%s", OPT(info->elmt_suf1, ","));
 
         s = h5tools_str_fmt(&buffer, 0, "%s");
@@ -517,8 +517,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
     herr_t              ret;                    /*the value to return   */
     hid_t		f_space;		/*file data space	*/
     hsize_t		elmtno, i;		/*counters		*/
-    int			carry;			/*counter carry value	*/
-    hssize_t		zero[8];		/*vector of zeros	*/
+    hssize_t		zero = 0;               /*vector of zeros	*/
     unsigned int	flags;			/*buffer extent flags	*/
     hsize_t		total_size[H5S_MAX_RANK];/*total size of dataset*/
 
@@ -533,11 +532,6 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
     hsize_t		sm_nelmts;		/*elements per stripmine*/
     unsigned char      *sm_buf = NULL;		/*buffer for raw data	*/
     hid_t		sm_space;		/*stripmine data space	*/
-
-    /* Hyperslab info */
-    hssize_t		hs_offset[H5S_MAX_RANK];/*starting offset	*/
-    hsize_t		hs_size[H5S_MAX_RANK];	/*size this pass	*/
-    hsize_t		hs_nelmts;		/*elements in request	*/
 
     ret = FAIL;     /* be pessimistic */
     f_space = H5Dget_space(dset);
@@ -567,12 +561,10 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
     ctx.size_last_dim = total_size[ctx.ndims - 1];
 
     /* calculate the potential number of elements we're going to print */
-    p_nelmts = 1;
+    H5Sselect_hyperslab(f_space, H5S_SELECT_SET, sset->start, sset->stride,
+                        sset->count, sset->block);
+    p_nelmts = H5Sget_select_npoints(f_space);
 
-    if (ctx.ndims > 0)
-        for (i = 0; i < (hsize_t)ctx.ndims; i++)
-            p_nelmts *= total_size[i];
- 
     if (p_nelmts == 0) {
         /* nothing to print */
         ret = SUCCEED;
@@ -593,13 +585,36 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
         }
 
     assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
-    sm_buf = malloc((size_t)sm_nbytes);
-    sm_nelmts = sm_nbytes / p_type_nbytes;
+    sm_buf = malloc((size_t)p_nelmts * p_type_nbytes);
+    sm_nelmts = p_nelmts;
     sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
 
-    /* the stripmine loop */
-    memset(hs_offset, 0, sizeof hs_offset);
-    memset(zero, 0, sizeof zero);
+    H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, &zero, NULL, &sm_nelmts, NULL);
+
+    /* Read the data */
+    if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) < 0) {
+        H5Sclose(f_space);
+        H5Sclose(sm_space);
+        free(sm_buf);
+        return FAIL;
+    }
+
+    /* Print the data */
+    flags = START_OF_DATA | END_OF_DATA;
+
+    for (i = 0; i < (hsize_t)ctx.ndims; i++) {
+        ctx.p_max_idx[i] = ctx.p_min_idx[i] + MIN(total_size[i], sm_size[i]);
+    }
+
+    h5tools_dump_simple_data(stream, info, dset, &ctx, flags, sm_nelmts,
+                             p_type, sm_buf);
+
+    /* Terminate the output */
+    if (ctx.cur_column) {
+        fputs(OPT(info->line_suf, ""), stream);
+        putc('\n', stream);
+        fputs(OPT(info->line_sep, ""), stream);
+    }
 
     ret = SUCCEED;
 
