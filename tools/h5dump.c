@@ -1713,7 +1713,7 @@ main(int argc, const char *argv[])
                 exit(EXIT_FAILURE);
             }
             break;
-#ifdef 0
+#if 0
         case 'x':
             /* select XML output */
             doxml = TRUE;
