@@ -1,0 +1,262 @@
+<html>
+<head><title>
+FORTRAN Dataset API -- h5d
+</title></head>
+
+<body bgcolor="#FFFFFF">
+
+
+
+<center>
+<h1>The FORTRAN 90 API to HDF5<br>h5d: Datasets</h1>
+</center>
+
+
+<dl>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5dclose_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5dclose_f</strong>
+<pre>
+          SUBROUTINE h5dclose_f(dset_id, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id ! Dataset identifier  
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code  
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5dclose_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5dcreate_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5dcreate_f</strong>
+<pre>
+          SUBROUTINE h5dcreate_f(loc_id, name, type_id, space_id, dset_id, & 
+                                 hdferr, creation_prp) 
+            IMPLICIT NONE 
+            INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+            CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the dataset 
+            INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier
+            INTEGER(HID_T), INTENT(OUT) :: dset_id ! Dataset identifier
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code 
+                                                 ! 0 on success and -1 on failure
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp
+                                                   ! Dataset creation propertly 
+                                                   ! list identifier , default
+                                                   ! value is H5P_DEFAULT_F (6) 
+          END SUBROUTINE h5dcreate_f  
+</pre> 
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5dextend_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5dextend_f</strong>
+<pre>
+          SUBROUTINE h5dextend_f(dataset_id, size, hdferr) 
+            IMPLICIT NONE 
+            INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
+            INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN)  :: size
+                                                          ! Array containing 
+                                                          ! dimensions' sizes 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code 
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5dextend_f  
+</pre> 
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5dget_create_plist_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5dget_create_plist_f</strong>
+<pre>
+          SUBROUTINE h5dget_create_plist_f(dataset_id, creation_prp, hdferr) 
+            IMPLICIT NONE 
+            INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
+            INTEGER(HID_T), INTENT(OUT) :: creation_id    ! Dataset creation
+                                                          ! property list identifier
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code 
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5dget_create_plist_f  
+</pre> 
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5dget_space_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5dget_space_f</strong>
+<pre>
+          SUBROUTINE h5dget_space_f(dataset_id, dataspace_id, hdferr) 
+            IMPLICIT NONE 
+            INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
+            INTEGER(HID_T), INTENT(OUT) :: dataspace_id   ! Dataspace identifier
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code 
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5dget_space_f  
+</pre> 
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5dget_type_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5dget_type_f</strong>
+<pre>
+          SUBROUTINE h5dget_type_f(dataset_id, datatype_id, hdferr) 
+            IMPLICIT NONE 
+            INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
+            INTEGER(HID_T), INTENT(OUT) :: datatype_id    ! Datatype identifier
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code 
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5dget_type_f  
+</pre> 
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5dopen_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5dopen_f</strong>
+<pre>
+          SUBROUTINE h5dopen_f(loc_id, name, hdferr) 
+            IMPLICIT NONE 
+            INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+            CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the dataset 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code 
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5dopen_f  
+</pre> 
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5dread_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5dread_f</strong>
+<pre>
+
+          SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, hdferr, &
+                               mem_space_id, file_space_id, xfer_prp)
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
+            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+            TYPE, INTENT(IN) :: buf(*,...*)     ! Data buffer of rank k
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
+                                                ! 0 on success and -1 on failure
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+                                                ! Memory dataspace identfier 
+                                                ! Default value is H5S_ALL_F 
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
+                                                ! File dataspace identfier 
+                                                ! Default value is H5S_ALL_F
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
+                                                ! Transfer property list identifier 
+                                                ! Default value is H5P_DEFAULT_F 
+            
+          END SUBROUTINE h5dread_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5dwrite_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5dwrite_f</strong>
+<pre>
+
+          SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, hdferr, &
+                                mem_space_id, file_space_id, xfer_prp)
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
+            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+            TYPE, INTENT(IN) :: buf(*,...*)     ! Data buffer of rank k
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
+                                                ! 0 on success and -1 on failure
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+                                                ! Memory dataspace identfier 
+                                                ! Default value is H5S_ALL_F
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
+                                                ! File dataspace identfier 
+                                                ! Default value is H5S_ALL_F
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
+                                                ! Transfer property list identifier 
+                                                ! Default value is H5P_DEFAULT_F 
+            
+          END SUBROUTINE h5dwrite_f
+</pre>
+
+
+</dl>
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+
+
+
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
+</address>
+
+Last modified:  20 October 1999
+<br>
+Describes HDF5 Release 1.2.2, July 2000
+
+</body>
+</html>

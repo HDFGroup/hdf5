@@ -1,0 +1,149 @@
+<html>
+<head><title>
+FORTRAN File API -- h5f
+</title></head>
+
+<body bgcolor="#FFFFFF">
+
+
+
+<center>
+<h1>The FORTRAN 90 API to HDF5<br>h5f: Files</h1>
+</center>
+
+
+<dl>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5fclose_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5fclose_f</strong>
+
+<pre>
+         SUBROUTINE h5fclose_f(file_id, hdferr) 
+           IMPLICIT NONE
+           INTEGER(HID_T), INTENT(IN) :: file_id ! File identifier
+           INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                                 ! 0 on success and -1 on failure
+         END SUBROUTINE h5fclose_f 
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5fcreate_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5fcreate_f</strong>
+<pre>
+         SUBROUTINE h5fcreate_f(name, access_flags, file_id, hdferr, &  
+                                creation_prp, access_prp)
+           IMPLICIT NONE 
+           CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
+           INTEGER, INTENT(IN) :: access_flag     ! File access flags 
+                                                  ! Possible values are:
+                                                  ! H5F_ACC_RDWR_F   
+                                                  ! H5F_ACC_RDONLY_F   
+                                                  ! H5F_ACC_TRUNC_F  
+                                                  ! H5F_ACC_EXCL_F    
+                                                  ! H5F_ACC_DEBUG_F   
+           INTEGER(HID_T), INTENT(OUT) :: file_id ! File identifier 
+           INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                                  ! 0 on success and -1 on failure
+           INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp 
+                                                  ! File creation propertly 
+                                                  ! list identifier, if not 
+                                                  ! specified its value is
+                                                  ! H5P_DEFAULT_F  
+           INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp  
+                                                  ! File access property list 
+                                                  ! identifier, if not 
+                                                  ! specified its value is
+                                                  ! H5P_DEFAULT_F  
+         END SUBROUTINE h5fcreate_f 
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5fis_hdf5_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5fis_hdf5_f</strong>
+<pre>
+         SUBROUTINE h5fis_hdf5_f(name, status, hdferr)   
+           IMPLICIT NONE 
+           CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
+           LOGICAL, INTENT(OUT) :: status         ! This parameter
+                                                  ! indicates if file is 
+                                                  ! an HDF5 file 
+                                                  ! ( TRUE or FALSE ) 
+           INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                                  ! 0 on success and -1 on failure
+         END SUBROUTINE h5fis_hdf5_f 
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5fopen_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5fopen_f</strong>
+<pre>
+         SUBROUTINE h5fopen_f(name, access_flags, file_id, hdferr, &  
+                              access_prp)
+           IMPLICIT NONE 
+           CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
+           INTEGER, INTENT(IN) :: access_flag     ! File access flags  
+                                                  ! Possible values are:
+                                                  ! H5F_ACC_RDWR_F   
+                                                  ! H5F_ACC_RDONLY_F    
+           INTEGER(HID_T), INTENT(OUT) :: file_id ! File identifier 
+           INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                                  ! 0 on success and -1 on failure
+           INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp  
+                                                  ! File access property list 
+                                                  ! identifier  
+         END SUBROUTINE h5fopen_f 
+</pre>
+
+
+
+</dl>
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+
+
+
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
+</address>
+
+Last modified:  20 October 1999
+<br>
+Describes HDF5 Release 1.2.2, July 2000
+
+</body>
+</html>

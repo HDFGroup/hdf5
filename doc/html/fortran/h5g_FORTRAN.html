@@ -1,0 +1,276 @@
+<html>
+<head><title>
+FORTRAN Group API -- h5g
+</title></head>
+
+<body bgcolor="#FFFFFF">
+
+
+
+<center>
+<h1>The FORTRAN 90 API to HDF5<br>h5g: Groups</h1>
+</center>
+
+
+<dl>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5gclose_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface: &nbsp; <code>h5gclose_f</code></strong>
+<pre>    
+         SUBROUTINE h5gclose_f( gr_id, hdferr)
+           IMPLICIT NONE
+           INTEGER(HID_T), INTENT(IN) :: gr_id        ! Group identifier
+           INTEGER, INTENT(OUT) :: hdferr        ! Error code 
+                                                 ! 0 on success and -1 on failure
+         END SUBROUTINE h5gclose_f           
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5gcreate_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface: &nbsp; <code>h5gcreate_f</code></strong>
+<pre>    
+         SUBROUTINE h5gcreate_f(loc_id, name, gr_id, hdferr, size_hint)
+
+           IMPLICIT NONE
+           INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+           CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the group to be created 
+           INTEGER(HID_T), INTENT(OUT) :: gr_id       ! Group identifier
+           INTEGER, INTENT(OUT) :: hdferr        ! Error code 
+                                                 ! 0 on success and -1 on failure
+           INTEGER(SIZE_T), OPTIONAL, INTENT(IN) :: size_hint  
+                                       ! Number of bytes to store the names 
+                                       ! of objects in the group. 
+                                       ! Default value is OBJECT_NAMELEN_DEFAULT_F
+         END SUBROUTINE h5gcreate_f           
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5gget_comment_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface: &nbsp; <code>h5gget_comment_f</code></strong>
+<pre>    
+         SUBROUTINE h5gget_comment_f(loc_id, name, size, buffer, hdferr)
+           IMPLICIT NONE
+           INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+           CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the object link 
+           CHARACTER(LEN=size), INTENT(OUT) :: buffer   ! Buffer to hold a
+                                                        ! comment  
+           INTEGER, INTENT(OUT) :: hdferr        ! Error code 
+                                                 ! 0 on success and -1 on failure
+         END SUBROUTINE h5gget_comment_f           
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5gget_linkval_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface: &nbsp; <code>h5gget_linkval_f</code></strong>
+<pre>    
+         SUBROUTINE h5gget_linkval_f(loc_id, name, size, buffer, hdferr)
+           IMPLICIT NONE
+           INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+           CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the symbolic link 
+           CHARACTER(LEN=size), INTENT(OUT) :: buffer   ! Buffer to hold a
+                                                        ! name of the object 
+                                                        ! symbolic link points to
+           INTEGER, INTENT(OUT) :: hdferr        ! Error code 
+                                                 ! 0 on success and -1 on failure
+         END SUBROUTINE h5gget_linkval_f           
+</pre>
+
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5gget_obj_info_idx_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface: &nbsp; <code>h5gget_obj_info_idx_f</code></strong>
+<pre>    
+          SUBROUTINE h5gget_obj_info_idx_f(loc_id, name, idx, &
+                                           obj_name, obj_type, hdferr)
+           
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the group 
+            INTEGER, INTENT(IN) :: idx             ! Index of member object 
+            CHARACTER(LEN=*), INTENT(OUT) :: obj_name   ! Name of the object 
+            INTEGER, INTENT(OUT) :: obj_type       ! Object type : 
+                                                   ! H5G_LINK_F 
+                                                   ! H5G_GROUP_F 
+                                                   ! H5G_DATASET_F 
+                                                   ! H5G_TYPE_F 
+            INTEGER, INTENT(OUT) :: hdferr   ! Error code 
+                                             ! 0 on success and -1 on failure
+
+          END SUBROUTINE h5gget_obj_info_idx_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5gmove_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface: &nbsp; <code>h5gmove_f</code></strong>
+<pre>    
+         SUBROUTINE h5gmove_f(loc_id, name, new_name, hdferr)
+           IMPLICIT NONE
+           INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+           CHARACTER(LEN=*), INTENT(IN) :: name   ! Original name of an object 
+           CHARACTER(LEN=*), INTENT(IN) :: new_name   ! New name of an object 
+           INTEGER, INTENT(OUT) :: hdferr        ! Error code 
+                                                 ! 0 on success and -1 on failure
+         END SUBROUTINE h5gmove_f           
+</pre>
+
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5gn_members_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface: &nbsp; <code>h5gn_members_f</code></strong>
+<pre>    
+          SUBROUTINE h5gn_members_f(loc_id, name, nmembers, hdferr)
+           
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the group 
+            INTEGER, INTENT(OUT) :: nmembers       ! Number of members in the
+                                                   ! group 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code 
+                                                 ! 0 on success and -1 on failure
+
+          END SUBROUTINE h5gn_members_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5gopen_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface: &nbsp; <code>h5gopen_f</code></strong>
+<pre>    
+         SUBROUTINE h5gopen_f(loc_id, name, gr_id, hdferr)
+           IMPLICIT NONE
+           INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+           CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the group to open 
+           INTEGER(HID_T), INTENT(OUT) :: gr_id   ! Group identifier
+           INTEGER, INTENT(OUT) :: hdferr        ! Error code 
+                                                 ! 0 on success and -1 on failure
+         END SUBROUTINE h5gopen_f           
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5gset_comment_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface: &nbsp; <code>h5gset_comment_f</code></strong>
+<pre>    
+         SUBROUTINE h5gset_comment_f(loc_id, name, comment, hdferr)
+           IMPLICIT NONE
+           INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+           CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of object 
+           CHARACTER(LEN=*), INTENT(IN) :: comment   ! Comment for the object 
+           INTEGER, INTENT(OUT) :: hdferr        ! Error code 
+                                                 ! 0 on success and -1 on failure
+         END SUBROUTINE h5gset_comment_f           
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5gunlink_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface: &nbsp; <code>h5gunlink_f</code></strong>
+<pre>    
+         SUBROUTINE h5gunlink_f(loc_id, name, hdferr)
+           IMPLICIT NONE
+           INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+           CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the object to unlink 
+           INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                                  ! 0 on success and -1 on failure
+         END SUBROUTINE h5gunlink_f           
+</pre>
+
+
+
+
+</dl>
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+
+
+
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
+</address>
+
+Last modified:  20 October 1999
+<br>
+Describes HDF5 Release 1.2.2, July 2000
+
+</body>
+</html>

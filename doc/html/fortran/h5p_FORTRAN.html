@@ -1,0 +1,1315 @@
+<html>
+<head><title>
+FORTRAN Property List API -- h5p
+</title></head>
+
+<body bgcolor="#FFFFFF">
+
+
+
+<center>
+<h1>The FORTRAN 90 API to HDF5<br>h5p: Property Lists</h1>
+</center>
+
+
+<dl>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pclose_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pclose_f</strong>
+<pre>
+
+          SUBROUTINE h5pclose_f(prp_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                                  ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5pclose_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pcopy_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pcopy_f</strong>
+<pre>
+
+          SUBROUTINE h5pcopy_f(prp_id, new_prp_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
+            INTEGER(HID_T), INTENT(OUT) :: new_prp_id 
+                                                ! Identifier  of property list
+                                                ! copy  
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code
+                                                ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5pcopy_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pcreate_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pcreate_f</strong>
+<pre>
+
+          SUBROUTINE h5pcreate_f(classtype, prp_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER, INTENT(IN) :: classtype  ! The type of the property list 
+                                              ! to be created. Possible values
+                                              ! are: 
+                                              !  H5P_FILE_CREATE_F 
+                                              !  H5P_FILE_ACCESS_F
+                                              !  H5P_DATASET_CREATE_F
+                                              !  H5P_DATASET_XFER_F 
+                                              !  H5P_MOUNT_F 
+            INTEGER(HID_T), INTENT(OUT) :: prp_id ! Property list identifier 
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                                  ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5pcreate_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_chunk_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pget_chunk_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_chunk_f(prp_id, ndims, dims, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
+            INTEGER, INTENT(IN) :: ndims    ! Number of chunk dimensions to
+                                            ! to return
+            INTEGER(HSIZE_T), DIMENSION(ndims), INTENT(OUT) :: dims    
+                                            ! Array containing sizes of
+                                            ! chunk dimensions
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+                                            ! chunk rank on success and -1 on failure
+ 
+          END SUBROUTINE h5pget_chunk_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_class_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pget_class_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_class_f(prp_id, classtype, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
+            INTEGER, INTENT(OUT) :: classtype  ! The type of the property list 
+                                              ! to be created. Possible values
+                                              ! are: 
+                                              !  H5P_NO_CLASS  
+                                              !  H5P_FILE_CREATE_F 
+                                              !  H5P_FILE_ACCESS_F 
+                                              !  H5PE_DATASET_CREATE_F 
+                                              !  H5P_DATASET_XFER_F
+                                              !  H5P_MOUNT_F 
+            INTEGER, INTENT(OUT) :: hdferr    ! Error code
+                                              ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5pget_class_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_fill_value_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pget_fill_value_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_fill_value_f(prp_id, type_id, fillvalue, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
+                                                  ! of fillvalue datatype
+                                                  ! (in memory) 
+            TYPE(VOID), INTENT(IN) :: fillvalue   ! Fillvalue
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+                                            ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5pget_fill_value_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_chunk_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pset_chunk_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_chunk_f(prp_id, ndims, dims, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
+            INTEGER, INTENT(IN) :: ndims    ! Number of chunk dimensions
+            INTEGER(HSIZE_T), DIMENSION(ndims), INTENT(IN) :: dims    
+                                            ! Array containing sizes of
+                                            ! chunk dimensions
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+                                            ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5pset_chunk_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_deflate_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pset_deflate_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_deflate_f(prp_id, level, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
+            INTEGER, INTENT(IN) :: leveli        ! Compression level 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5pset_deflate_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_fill_value_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pset_fill_value_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_fill_value_f(prp_id, type_id, fillvalue, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
+                                                  ! of fillvalue datatype 
+                                                  ! (in memory)
+            TYPE(VOID), INTENT(IN) :: fillvalue   ! Fillvalue
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+                                            ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5pset_fill_value_f
+</pre>          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_version_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_version_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_version_f(prp_id, boot, freelist, &
+                                    stab, shhdr, hdferr)
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, DIMENSION(:), INTENT(OUT) :: boot  !array to put boot
+                                                        !block version number
+            INTEGER, DIMENSION(:), INTENT(OUT) :: freelist  !array to put global
+                                                        !freelist version number
+
+            INTEGER, DIMENSION(:), INTENT(OUT) :: stab  !array to put symbol
+                                                        !table version number
+            INTEGER, DIMENSION(:), INTENT(OUT) :: shhdr !array to put shared
+                                                        !object header version number
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_version_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_userblock_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_userblock_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_userblock_f (prp_id, size, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER(HSIZE_T), INTENT(IN) :: size !Size of the user-block in bytes
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_userblock_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_userblock_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_userblock_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_userblock_f(prp_id, block_size, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER(HSIZE_T), DIMENSION(:), INTENT(OUT) ::  block_size !Size of the
+                                                               !user-block in bytes
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_userblock_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_sizes_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_sizes_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_sizes_f (prp_id, sizeof_addr, sizeof_size, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER(SIZE_T), INTENT(IN) :: sizeof_addr !Size of an object
+                                                       !offset in bytes
+            INTEGER(SIZE_T), INTENT(IN) :: sizeof_size !Size of an object
+                                                       !length in bytes
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_sizes_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_sizes_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_sizes_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_sizes_f(prp_id, sizeof_addr, sizeof_size, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER(SIZE_T), DIMENSION(:), INTENT(OUT) :: sizeof_addr !Size of an object
+                                                                      !offset in bytes
+            INTEGER(SIZE_T), DIMENSION(:), INTENT(OUT) :: sizeof_size !Size of an object
+                                                                      !length in bytes
+
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_sizes_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_sym_k_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_sym_k_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_sym_k_f (prp_id, ik, lk, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(IN) :: ik ! Symbol table tree rank
+            INTEGER, INTENT(IN) :: lk ! Symbol table node size
+
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_sym_k_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_sym_k_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_sym_k_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_sym_k_f(prp_id, ik, lk, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(OUT) :: ik !Symbol table tree rank
+            INTEGER, INTENT(OUT) :: lk !Symbol table node size
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_sym_k_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_istore_k_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_istore_k_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_istore_k_f (prp_id, ik, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(IN) :: ik ! 1/2 rank of chunked storage B-tree
+
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_istore_k_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_istore_k_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_istore_k_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_istore_k_f(prp_id, ik, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(OUT) :: ik !1/2 rank of chunked storage B-tree
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_istore_k_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_driver_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_driver_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_driver_f(prp_id, driver, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(OUT) :: driver !low-level file driver identifier
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_driver_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_stdio_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_stdio_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_stdio_f (prp_id, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_stdio_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_stdio_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_stdio_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_stdio_f (prp_id, io, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(OUT) :: io   ! value indicates that the file
+                                         !access property list is set to
+                                         !the stdio driver
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_stdio_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_sec2_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_sec2_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_sec2_f (prp_id, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_sec2_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_sec2_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_sec2_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_sec2_f (prp_id, sec2, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(OUT) :: sec2   ! value indicates whether the file
+                                           !driver uses the functions declared
+                                           !in the unistd.h file
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_sec2_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_alignment_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_alignment_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_alignment_f(prp_id, threshold,  alignment, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER(HSIZE_T), INTENT(IN) :: threshold ! Threshold value
+            INTEGER(HSIZE_T), INTENT(IN) :: alignment ! alignment value
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_alignment_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_alignment_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_alignment_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_alignment_f(prp_id, threshold,  alignment, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER(HSIZE_T), INTENT(OUT) :: threshold ! Threshold value
+            INTEGER(HSIZE_T), INTENT(OUT) :: alignment ! alignment value
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_alignment_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_core_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_core_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_core_f(prp_id, increment, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER(SIZE_T), INTENT(IN) :: increment ! File block size in bytes.
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_core_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_core_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_core_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_core_f(prp_id, increment, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER(SIZE_T), INTENT(OUT) :: increment ! File block size in bytes.
+
+          END SUBROUTINE h5pget_core_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_family_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_family_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_family_f(prp_id, memb_size, memb_plist , hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER(HSIZE_T), INTENT(IN) :: memb_size ! Logical size, in bytes,
+                                                      !of each family member
+            INTEGER(HID_T), INTENT(IN) :: memb_plist !Identifier of the file
+                                                     !access property list for
+                                                     !each member of the family
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_family_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_family_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_family_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_family_f(prp_id, memb_size, memb_plist , hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER(HSIZE_T), INTENT(OUT) :: memb_size ! Logical size, in bytes,
+                                                      !of each family member
+            INTEGER(HID_T), INTENT(OUT) :: memb_plist !Identifier of the file
+                                                     !access property list for
+                                                     !each member of the family
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_family_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_cache_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_cache_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_cache_f(prp_id, mdc_nelmts,rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(IN) :: mdc_nelmts  !Number of elements (objects)
+                                                        ! in the meta data cache
+            INTEGER, INTENT(IN) :: rdcc_nelmts  !Number of elements (objects)
+                                                        ! in the meta data cache
+            INTEGER(SIZE_T), INTENT(IN) :: rdcc_nbytes !Total size of the raw data
+                                                      !chunk cache, in bytes
+            REAL, INTENT(IN) :: rdcc_w0 !Preemption policy
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_cache_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_cache_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_cache_f</strong>
+<pre>
+
+
+          SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(OUT) :: mdc_nelmts  !Number of elements (objects)
+                                                        ! in the meta data cache
+            INTEGER, INTENT(OUT) :: rdcc_nelmts  !Number of elements (objects)
+                                                        ! in the meta data cache
+            INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nbytes !Total size of the raw data
+                                                      !chunk cache, in bytes
+            REAL, INTENT(OUT) :: rdcc_w0 !Preemption policy
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_cache_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_split_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_split_f</strong>
+<pre>
+
+
+          SUBROUTINE h5pset_split_f(prp_id, meta_ext, meta_plist, raw_ext, raw_plist, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            CHARACTER(LEN=*), INTENT(IN) :: meta_ext  !Name of the extension for
+                                                      !the metafile filename
+            INTEGER(HID_T), INTENT(IN) :: meta_plist  ! Identifier of the meta file
+                                                      ! access property list
+            CHARACTER(LEN=*), INTENT(IN) :: raw_ext  !Name extension for the raw file filename
+            INTEGER(HID_T), INTENT(IN) :: raw_plist  !Identifier of the raw file
+                                                     !access property list
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_split_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_split_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_split_f</strong>
+<pre>
+
+
+
+          SUBROUTINE h5pget_split_f(prp_id, meta_ext_size, meta_ext, meta_plist,raw_ext_size,&
+                                     raw_ext, raw_plist, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER(SIZE_T), INTENT(IN) :: meta_ext_size ! Number of characters of the meta
+                                                         ! file extension to be copied to the
+                                                         ! meta_ext buffer
+
+            CHARACTER(LEN=*), INTENT(OUT) :: meta_ext  !Name of the extension for
+                                                      !the metafile filename
+            INTEGER(HID_T), INTENT(OUT) :: meta_plist  ! Identifier of the meta file
+                                                      ! access property list
+            INTEGER(SIZE_T), INTENT(IN) :: raw_ext_size ! Number of characters of the raw
+                                                         ! file extension to be copied to the
+                                                         ! raw_ext buffer
+            CHARACTER(LEN=*), INTENT(OUT) :: raw_ext  !Name extension for the raw file filename
+            INTEGER(HID_T), INTENT(OUT) :: raw_plist  !Identifier of the raw file
+                                                     !access property list
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_split_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_gc_references_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_gc_references_f</strong>
+<pre>
+
+
+
+          SUBROUTINE h5pset_gc_references_f (prp_id, gc_reference, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(IN) :: gc_reference !the flag for garbage collecting
+                                                ! references for the file
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_gc_references_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_gc_references_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_gc_references_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_gc_references_f (prp_id, gc_reference, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(OUT) :: gc_reference !the flag for garbage collecting
+                                                ! references for the file
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_gc_references_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_layout_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_layout_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_layout_f (prp_id, layout, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(IN) :: layout !Type of storage layout for raw data
+                                          !possible values are:
+                                          !H5D_COMPACT_F(0)
+                                          !H5D_CONTIGUOUS_F(1)
+                                          !H5D_CHUNKED_F(2)
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+          END SUBROUTINE h5pset_layout_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_layout_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_layout_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_layout_f (prp_id, layout, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(OUT) :: layout !Type of storage layout for raw data
+                                          !possible values are:
+                                          !H5D_COMPACT_F(0)
+                                          !H5D_CONTIGUOUS_F(1)
+                                          !H5D_CHUNKED_F(2)
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_filter_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_filter_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(IN) :: filter  !Filter to be added to the pipeline.
+            INTEGER, INTENT(IN) :: flags  !Bit vector specifying certain general
+                                          !properties of the filter.
+            INTEGER(SIZE_T), INTENT(IN) :: cd_nelmts  !Number of elements in cd_values.
+            INTEGER, DIMENSION(*), INTENT(IN) :: cd_values  !Auxiliary data for the filter.
+
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_filter_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_filter_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_filter_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_filter_f(prp_id, filter_number, flags, cd_nelmts, cd_values, namelen, name, filter_id, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(IN) :: filter_number  !Sequence number within the filter
+                                                  !pipeline of the filter for which
+                                                  !information is sought
+            INTEGER, DIMENSION(*), INTENT(OUT) :: cd_values  !Auxiliary data for the filter.
+            INTEGER, INTENT(OUT) :: flags  !Bit vector specifying certain general
+                                          !properties of the filter.
+            INTEGER(SIZE_T), INTENT(INOUT) :: cd_nelmts  !Number of elements in cd_values.
+            INTEGER(SIZE_T), INTENT(IN) :: namelen !Anticipated number of characters in name.
+            CHARACTER(LEN=*), INTENT(OUT) :: name !Name of the filter
+            INTEGER, INTENT(OUT) :: filter_id ! filter identification number
+
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_filter_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_external_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_external_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_external_f(prp_id, name, offset,bytes, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            CHARACTER(LEN=*), INTENT(IN) :: name !Name of an external file
+            INTEGER, INTENT(IN) :: offset !Offset, in bytes, from the beginning
+                                          !of the file to the location in the file
+                                          !where the data starts.
+            INTEGER(HSIZE_T), INTENT(IN) :: bytes ! Number of bytes reserved in the
+                                                 !file for the data
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_external_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_external_count_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_external_count_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_external_count_f (prp_id, count, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(OUT) :: count !number of external files for the
+                                          !specified dataset
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_external_count_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_external_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_external_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(IN) :: idx !External file index.
+            INTEGER, INTENT(IN) :: name_size !Maximum length of name array
+            CHARACTER(LEN=*), INTENT(OUT) :: name !Name of an external file
+            INTEGER, INTENT(OUT) :: offset !Offset, in bytes, from the beginning
+                                          !of the file to the location in the file
+                                          !where the data starts.
+            INTEGER(HSIZE_T), INTENT(OUT) :: bytes ! Number of bytes reserved in the
+                                                 !file for the data
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_external_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_hyper_cache_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_hyper_cache_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_hyper_cache_f(prp_id, cache, limit, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(IN) :: cache !
+            INTEGER, INTENT(IN) :: limit ! Maximum size of the hyperslab block to
+                                         !cache. 0 (zero) indicates no limit.
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_hyper_cache_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_hyper_cache_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_hyper_cache_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_hyper_cache_f(prp_id, cache, limit, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(OUT) :: cache !
+            INTEGER, INTENT(OUT) :: limit ! Maximum size of the hyperslab block to
+                                         !cache. 0 (zero) indicates no limit.
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_hyper_cache_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_btree_ratios_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_btree_ratios_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_btree_ratios_f(prp_id, left, middle, right, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            REAL, INTENT(IN) :: left !The B-tree split ratio for left-most nodes.
+            REAL, INTENT(IN) :: middle !The B-tree split ratio for all other nodes
+            REAL, INTENT(IN) :: right !The B-tree split ratio for right-most
+                                      !nodes and lone nodes.
+
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pset_btree_ratios_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_btree_ratios_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_btree_ratios_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_btree_ratios_f(prp_id, left, middle, right, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            REAL, INTENT(OUT) :: left !The B-tree split ratio for left-most nodes.
+            REAL, INTENT(OUT) :: middle !The B-tree split ratio for all other nodes
+            REAL, INTENT(OUT) :: right !The B-tree split ratio for right-most
+                                      !nodes and lone nodes.
+
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5pget_btree_ratios_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_mpi_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_mpi_f</strong>
+<pre>
+
+         SUBROUTINE h5pset_mpi_f(prp_id, comm, info, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(IN) :: comm ! MPI communicator to be used for file open
+                                        ! as defined in MPI_FILE_OPEN of MPI-2
+            INTEGER, INTENT(IN) :: info ! MPI info object to be used for file open
+                                        ! as defined in MPI_FILE_OPEN of MPI-2
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+          END SUBROUTINE h5pset_mpi_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_mpi_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_mpi_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_mpi_f(prp_id, comm, info, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(OUT) :: comm ! buffer to return communicator 
+            INTEGER, INTENT(IN) :: info ! buffer to return info object 
+                                        ! as defined in MPI_FILE_OPEN of MPI-2
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+          END SUBROUTINE h5pget_mpi_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_xfer_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_xfer_f</strong>
+<pre>
+
+         SUBROUTINE h5pset_xfer_f(prp_id, data_xfer_mode, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(IN) :: data_xfer_mode ! Data transfer mode. Possible values are:
+                                                  ! H5D_XFER_INDEPENDENT_F (0)
+                                                  ! H5D_XFER_COLLECTIVE_F  (1)
+                                                  ! H5D_XFER_DFLT_F        (2) 
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+          END SUBROUTINE h5pset_xfer_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_xfer_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_xfer_f</strong>
+<pre>
+
+         SUBROUTINE h5pget_xfer_f(prp_id, data_xfer_mode, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+            INTEGER, INTENT(OUT) :: data_xfer_mode ! Data transfer mode. Possible values are:
+                                                  ! H5D_XFER_INDEPENDENT_F (0)
+                                                  ! H5D_XFER_COLLECTIVE_F  (1)
+                                                  ! H5D_XFER_DFLT_F        (2) 
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+          END SUBROUTINE h5pget_xfer_f 
+</pre>
+
+
+
+
+</dl>
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+
+
+
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
+</address>
+
+Last modified:  17 July 2000
+<br>
+Describes HDF5 Release 1.2.2, July 2000
+
+</body>
+</html>

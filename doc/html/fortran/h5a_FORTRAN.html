@@ -1,0 +1,291 @@
+<html>
+<head><title>
+FORTRAN Attribute API -- h5a
+</title></head>
+
+<body bgcolor="#FFFFFF">
+
+
+
+<center>
+<h1>The FORTRAN 90 API to HDF5<br>h5a: Attributes</h1> 
+</center>
+
+
+<dl>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5aclose_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5aclose_f</strong>
+<pre>
+
+          SUBROUTINE h5aclose_f(attr_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5aclose_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5acreate_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5acreate_f</strong>
+<pre>
+
+          SUBROUTINE h5acreate_f(obj_id, name, type_id, space_id, attr_id, &
+                                 hdferr, creation_prp) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
+            INTEGER(HID_T), INTENT(IN) :: type_id   ! Attribute datatype identifier 
+            INTEGER(HID_T), INTENT(IN) :: space_id  ! Attribute dataspace identifier
+            INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code:
+                                                 ! 0 on success and -1 on failure
+            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp
+                                                 ! Attribute creation property 
+                                                 ! list identifier 
+          END SUBROUTINE h5acreate_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5adelete_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5adelete_f</strong>
+<pre>
+
+          SUBROUTINE h5adelete_f(obj_id, name, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5adelete_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5aget_name_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5aget_name_f</strong>
+<pre>
+
+          SUBROUTINE h5aget_name_f(attr_id, size, buf, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier 
+            INTEGER, INTENT(IN) :: size            ! Buffer size 
+            CHARACTER(LEN=*), INTENT(OUT) :: buf   ! Buffer to hold attribute name
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code : name length  
+                                                 ! on success and -1 on failure
+          END SUBROUTINE h5aget_name_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5aget_num_attrs_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5aget_num_attrs_f</strong>
+<pre>
+
+          SUBROUTINE h5aget_num_attrs_f(obj_id, attr_num, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: obj_id  ! Object identifier 
+            INTEGER, INTENT(OUT) :: attr_num      ! Number of attributes of the
+                                                  ! object
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5aget_num_attrs_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5aget_space_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5aget_space_f</strong>
+<pre>
+
+          SUBROUTINE h5aget_space_f(attr_id, space_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier 
+            INTEGER(HID_T), INTENT(OUT) :: space_id ! Attribute dataspace identifier
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5aget_space_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5aget_type_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5aget_type_f</strong>
+<pre>
+
+          SUBROUTINE h5aget_type_f(attr_id, type_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier 
+            INTEGER(HID_T), INTENT(OUT) :: type_id ! Attribute datatype identifier
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5aget_type_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5aopen_idx_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5aopen_idx_f</strong>
+<pre>
+
+          SUBROUTINE h5aopen_idx_f(obj_id, index, attr_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier 
+            INTEGER, INTENT(IN) :: index            ! Attribute index 
+            INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5aopen_idx_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5aopen_name_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5aopen_name_f</strong>
+<pre>
+
+          SUBROUTINE h5aopen_name_f(obj_id, name, attr_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
+            INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5aopen_name_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5aread_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5aread_f</strong>
+<pre>
+
+          SUBROUTINE h5aread_f(attr_id, memtype_id,  buf, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
+            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+                                                     ! identifier  (in memory)
+            TYPE(VOID), INTENT(OUT) :: buf            ! Attribute data 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5aread_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5awrite_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5awrite_f</strong>
+<pre>
+
+          SUBROUTINE h5awrite_f(attr_id, memtype_id,  buf, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
+            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+                                                     ! identifier  (in memory)
+            TYPE(VOID), INTENT(IN) :: buf            ! Attribute data 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5awrite_f
+</pre>          
+
+
+</dl>
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+
+
+
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
+</address>
+
+Last modified:  20 October 1999
+<br>
+Describes HDF5 Release 1.2.2, July 2000
+
+</body>
+</html>

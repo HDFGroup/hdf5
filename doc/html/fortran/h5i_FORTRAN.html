@@ -1,0 +1,65 @@
+<html>
+<head><title>
+FORTRAN Identifier API -- h5i
+</title></head>
+
+<body bgcolor="#FFFFFF">
+
+
+
+<center>
+<h1>The FORTRAN 90 API to HDF5<br>h5i: Identifiers</h1>
+</center>
+
+
+<dl>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5iget_type_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5iget_type_f</strong>
+
+<pre>
+          SUBROUTINE h5iget_type_f(obj_id, type, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
+            INTEGER, INTENT(OUT) :: type !type of an object. 
+                                         !possible values are:
+                                         !H5I_FILE_F(1)
+                                         !H5I_GROUP_F(2)
+                                         !H5I_DATATYPE_F(3)
+                                         !H5I_DATASPACE_F(4)
+                                         !H5I_DATASET_F(5)
+                                         !H5I_ATTR_F(6)
+                                         !H5I_BADID_F(-1)
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5iget_type_f
+</pre>
+
+
+</dl>
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+
+
+
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
+</address>
+
+Last modified:  14 July 2000
+<br>
+Describes HDF5 Release 1.2.2, July 2000
+
+</body>
+</html>

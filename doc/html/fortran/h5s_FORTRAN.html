@@ -1,0 +1,535 @@
+<html>
+<head><title>
+FORTRAN Dataspace API -- h5s
+</title></head>
+
+<body bgcolor="#FFFFFF">
+
+
+
+<center>
+<h1>The FORTRAN 90 API to HDF5<br>h5s: Dataspaces</h1>
+</center>
+
+
+<dl>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sclose_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sclose_f</strong>
+<pre>
+
+          SUBROUTINE h5sclose_f(space_id, hdferr)
+     
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+
+          END SUBROUTINE h5sclose_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5scopy_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5scopy_f</strong>
+<pre>
+
+          SUBROUTINE h5scopy_f(space_id, new_space_id, hdferr) 
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
+            INTEGER(HID_T), INTENT(OUT) :: new_space_id 
+                                               ! Identifier of dataspace's copy 
+            INTEGER, INTENT(OUT) :: hdferr     ! Error code
+                                               ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5scopy_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5screate_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5screate_f</strong>
+<pre>
+
+          SUBROUTINE h5screate_f(classtype, space_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER, INTENT(IN) :: classtype     ! The type of the dataspace
+                                                 ! to be created. Possible values
+                                                 ! are: 
+                                                 !  H5S_SCALAR_F 
+                                                 !  H5S_SIMPLE_F 
+            INTEGER(HID_T), INTENT(OUT) :: space_id ! Dataspace identifier 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5screate_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5screate_simple_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5screate_simple_f</strong>
+<pre>
+
+          SUBROUTINE h5screate_simple_f(rank, dims, space_id, hdferr, maxdims) 
+            IMPLICIT NONE
+            INTEGER, INTENT(IN) :: rank     ! Number of dataspace dimensions 
+            INTEGER(HSIZE_T), INTENT(IN) :: dims(*) ! Array with the dimension 
+                                                    ! sizes 
+            INTEGER(HID_T), INTENT(OUT) :: space_id ! Dataspace identifier 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+            INTEGER(HSIZE_T), OPTIONAL, INTENT(IN) :: maxdims(*) 
+                                                    ! Array with the maximum 
+                                                    ! dimension sizes 
+ 
+          END SUBROUTINE h5screate_simple_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sextent_copy_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sextent_copy_f</strong>
+<pre>
+
+          SUBROUTINE h5sextent_copy_f(dest_space_id, source_space_id, hdferr) 
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dest_space_id  ! Identifier of destination
+                                                         ! dataspace
+            INTEGER(HID_T), INTENT(IN) :: source_space_id ! Identifier of source 
+                                                          ! dataspace
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5sextent_copy_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sget_select_npoints_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sget_select_npoints_f</strong>
+<pre>
+
+          SUBROUTINE h5sget_select_npoints_f(space_id, npoints, hdferr) 
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id     ! Dataspace identifier 
+            INTEGER(HSSIZE_T), INTENT(OUT) :: npoints  ! Number of elements in the
+                                                       ! selection 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5sget_select_npoints_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sget_simple_extent_dims_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sget_simple_extent_dims_f</strong>
+<pre>
+
+          SUBROUTINE h5sget_simple_extent_dims_f(space_id, dims, maxdims, hdferr) 
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
+            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: dims 
+                                                   ! Array to store dimension sizes 
+            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: maxdims 
+                                                   ! Array to store max dimension 
+                                                   ! sizes  
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5sget_simple_extent_dims_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sget_simple_extent_ndims_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sget_simple_extent_ndims_f</strong>
+<pre>
+
+          SUBROUTINE h5sget_simple_extent_ndims_f(space_id, rank, hdferr) 
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id     ! Dataspace identifier 
+            INTEGER, INTENT(OUT) :: rank               ! Number of dimensions 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5sget_simple_extent_ndims_f
+</pre>          
+
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sget_simple_extent_npoints_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sget_simple_extent_npoints_f</strong>
+<pre>
+
+          SUBROUTINE h5sget_simple_extent_npoints_f(space_id, npoints, hdferr) 
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id    ! Dataspace identifier 
+            INTEGER(HSIZE_T), INTENT(OUT) :: npoints  ! Number of elements in 
+                                                      ! dataspace
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5sget_simple_extent_npoints_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sget_simple_extent_type_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sget_simple_extent_type_f</strong>
+<pre>
+
+          SUBROUTINE h5sget_simple_extent_type_f(space_id, classtype, hdferr) 
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
+            INTEGER, INTENT(OUT) :: classtype      ! Class type , possible values
+                                                   ! are: 
+                                                   !  H5S_NO_CLASS_F 
+                                                   !  H5S_SCALAR_F 
+                                                   !  H5S_SIMPLE_F 
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                                  ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5sget_simple_extent_type_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sis_simple_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sis_simple_f</strong>
+<pre>
+
+          SUBROUTINE h5sis_simple_f(space_id, flag, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
+            LOGICAL, INTENT(OUT) :: flag            ! Flag, idicates if dataspace
+                                                    ! is simple or not ( TRUE or
+                                                    ! FALSE)  
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5sis_simple_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5soffset_simple_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5soffset_simple_f</strong>
+<pre>
+
+          SUBROUTINE h5soffset_simple_f(space_id, offset, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
+            INTEGER(HSSIZE_T), DIMENSION(*), INTENT(IN) ::  offset
+                                                 ! The offset at which to position
+                                                 ! the selection  
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5soffset_simple_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sselect_all_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sselect_all_f</strong>
+<pre>
+
+          SUBROUTINE h5sselect_all_f(space_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5sselect_all_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sselect_elements_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sselect_elements_f</strong>
+<pre>
+
+          SUBROUTINE h5sselect_elements_f(space_id, operator, num_elements, &
+                                          coord, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
+            INTEGER, INTENT(IN) :: op     ! Flag, valid values are:
+                                          ! H5S_SELECT_SET_F 
+                                          ! H5S_SELECT_OR_F 
+            INTEGER, INTENT(IN) :: num_elements  ! Number of elements to be
+                                                 ! selected
+            INTEGER(HSSIZE_T), DIMENSION(*,*), INTENT(IN) :: coord 
+                                          ! Array with the coordinates
+                                          ! of the selected elements
+                                          ! coord(num_elements, rank)
+            INTEGER, INTENT(OUT) :: hdferr     ! Error code
+                                               ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5sselect_elements_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sselect_hyperslab_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sselect_hyperslab_f</strong>
+<pre>
+
+          SUBROUTINE h5sselect_hyperslab_f(space_id, operator, start, count, &
+                                           hdferr, stride, block) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
+            INTEGER, INTENT(IN) :: op     ! Flag, valid values are:
+                                          ! H5S_SELECT_SET_F
+                                          ! H5S_SELECT_OR_F
+                                          !  
+            INTEGER(HSSIZE_T), DIMENSION(*), INTENT(IN) :: start
+                                          ! Starting coordinates of the hyperslab 
+            INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: count 
+                                          ! Number of blocks to select 
+                                          ! from dataspace 
+            INTEGER, INTENT(OUT) :: hdferr     ! Error code
+                                               ! 0 on success and -1 on failure
+            INTEGER(HSIZE_T), DIMENSION(*), OPTIONAL, INTENT(IN) :: stride
+                                          ! Array of how many elements to move
+                                          ! in each direction
+            INTEGER(HSIZE_T), DIMENSION(*), OPTIONAL, INTENT(IN) :: block 
+                                          ! Size of the element block 
+ 
+          END SUBROUTINE h5sselect_hyperslab_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sselect_none_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sselect_none_f</strong>
+<pre>
+
+          SUBROUTINE h5sselect_none_f(space_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5sselect_none_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sselect_valid_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sselect_valid_f</strong>
+<pre>
+
+          SUBROUTINE h5sselect_valid_f(space_id, flag, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
+            LOGICAL, INTENT(OUT) :: flag            ! TRUE if the selection is
+                                                    ! contained within the extent,
+                                                    ! FALSE otherwise. 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5sselect_valid_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sset_extent_none_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sset_extent_none_f</strong>
+<pre>
+
+          SUBROUTINE h5sset_extent_none_f(space_id, hdferr) 
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5sset_extent_none_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5sset_extent_simple_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5sset_extent_simple_f</strong>
+<pre>
+
+          SUBROUTINE h5sset_extent_simple_f(space_id, rank, current_size, &
+                                            maximum_size, hdferr) 
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
+            INTEGER, INTENT(IN) :: rank            ! Dataspace rank 
+            INTEGER(HSIZE_T), DIMENSION(rank), INTENT(IN) :: current_size 
+                                                   ! Array with the new sizes
+                                                   ! of dimensions 
+            INTEGER(HSIZE_T), DIMENSION(rank), INTENT(IN) ::  
+                                                   ! Array with the new maximum
+                                                   ! sizes of dimensions 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5sset_extent_simple_f
+</pre>          
+
+
+
+</dl>
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+
+
+
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
+</address>
+
+Last modified:  20 October 1999
+<br>
+Describes HDF5 Release 1.2.2, July 2000
+
+</body>
+</html>

@@ -1,0 +1,166 @@
+<html>
+<head><title>
+FORTRAN Reference API -- h5r
+</title></head>
+
+<body bgcolor="#FFFFFF">
+
+
+
+<center>
+<h1>The FORTRAN 90 API to HDF5<br>h5r: References</h1>
+</center>
+
+
+<dl>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5rcreate_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5rcreate_f</strong>
+<br><strong>To create an object reference</strong>
+<pre>
+
+          SUBROUTINE h5rcreate_f(loc_id, name, ref, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: loc_id   ! Location identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the object at location specified
+                                                   ! by loc_id identifier 
+            TYPE(hobj_ref_t_f), INTENT(OUT) :: ref   ! Object reference 
+            INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+
+          END SUBROUTINE h5rcreate_f
+</pre>
+
+
+<dt><strong>To create a region reference</strong>
+<pre>
+
+          SUBROUTINE h5rcreate_f(loc_id, name, space_id, ref, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: loc_id   ! Location identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the dataset at location specified
+                                                   ! by loc_id identifier 
+            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataset's dataspace identifier 
+            TYPE(hdset_reg_ref_t_f), INTENT(OUT) :: ref ! Dataset region reference 
+            INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+
+          END SUBROUTINE h5rcreate_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5rdereference_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5rdereference_f</strong>
+<br><strong>To dereference an object</strong>
+<pre>
+
+          SUBROUTINE h5rdereference_f(dset_id, ref, obj_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
+            TYPE(hobj_ref_t_f), INTENT(IN) :: ref   ! Object reference 
+            INTEGER(HID_T), INTENT(OUT) :: obj_id   ! Object identifier 
+            INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+
+          END SUBROUTINE h5rdereference_f
+</pre>
+
+
+<dt><strong>To dereference a region</strong>
+<pre>
+
+          SUBROUTINE h5rdereference_f(dset_id, ref, obj_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
+            TYPE(hdset_reg_ref_t_f), INTENT(IN) :: ref   ! Object reference 
+            INTEGER(HID_T), INTENT(OUT) :: obj_id   ! Object identifier 
+            INTEGER, INTENT(OUT) :: hdferr          ! Error code 
+          
+          END SUBROUTINE h5rdereference_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5rget_region_region_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5rget_region_region_f</strong>
+<pre>
+
+          SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
+            TYPE(hdset_reg_ref_t_f), INTENT(IN) :: ref   ! Dataset region reference 
+            INTEGER(HID_T), INTENT(OUT) :: space_id   ! Space identifier 
+            INTEGER, INTENT(OUT) :: hdferr          ! Error code
+ 
+          END SUBROUTINE h5rget_region_region_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5rget_object_type_obj_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5rget_object_type_obj_f</strong>
+<pre>
+
+          SUBROUTINE h5rget_object_type_obj_f(dset_id, ref, obj_type, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
+            TYPE(hobj_ref_t_f), INTENT(IN) :: ref   ! Object reference 
+            INTEGER, INTENT(OUT) :: obj_type   ! Object type  
+                                               !  H5G_UNKNOWN_F     (-1)
+                                               !  H5G_LINK_F         0
+                                               !  H5G_GROUP_F        1
+                                               !  H5G_DATASET_F      2
+                                               !  H5G_TYPE_F         3
+
+            INTEGER, INTENT(OUT) :: hdferr          ! Error code 
+
+          END SUBROUTINE h5rget_object_type_obj_f
+</pre>
+
+ 
+</dl>
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+
+
+
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
+</address>
+
+Last modified:  13 July 2000
+<br>
+Describes HDF5 Release 1.2.2, July 2000
+
+</body>
+</html>

@@ -1,0 +1,1225 @@
+<html>
+<head><title>
+FORTRAN Datatype API -- h5t
+</title></head>
+
+<body bgcolor="#FFFFFF">
+
+
+
+<center>
+<h1>The FORTRAN 90 API to HDF5<br>h5t: Datatypes</h1>
+</center>
+
+
+<dl>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tclose_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5tclose_f</strong>
+<pre>
+
+          SUBROUTINE h5tclose_f(type_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                                  ! 0 on success and -1 on failure
+          END SUBROUTINE h5tclose_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tcommit_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5tcommit_f</strong>
+<pre>
+
+          SUBROUTINE h5tcommit_f(loc_id, name, type_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Datatype name within file or
+                                                  ! group
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                                  ! 0 on success and -1 on failure
+          END SUBROUTINE h5tcommit_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tcopy_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5tcopy_f</strong>
+<pre>
+
+          SUBROUTINE h5tcopy_f(type_id, new_type_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER(HID_T), INTENT(OUT) :: new_type_id ! Identifier of datatype's 
+                                                       ! copy 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5tcopy_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_class_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5tget_class_f</strong>
+<pre>
+
+          SUBROUTINE h5tget_class_f(type_id, class, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: class ! Datatype class, possible values are:
+
+                                          ! H5T_NO_CLASS_F 
+                                          ! H5T_INTEGER_F 
+                                          ! H5T_FLOAT_F
+                                          ! H5T_TIME_F
+                                          ! H5T_STRING_F
+                                          ! H5T_BITFIELD_F
+                                          ! H5T_OPAQUE_F
+                                          ! H5T_COMPOUND_F
+                                          ! H5T_REFERENCE_F
+                                          ! H5T_ENUM_F
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5tget_class_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_order_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5tget_order_f</strong>
+<pre>
+
+          SUBROUTINE h5tget_order_f(type_id, order, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: order ! Datatype byte order, bossible values
+                                          ! are:
+                                          ! H5T_ORDER_LE_F 
+                                          ! H5T_ORDER_BE_F 
+                                          ! H5T_ORDER_VAX_F  
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5tget_order_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_size_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5tget_size_f</strong>
+<pre>
+
+          SUBROUTINE h5tget_size_f(type_id, size, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: size ! Datatype size
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5tget_size_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5topen_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5topen_f</strong>
+<pre>
+
+          SUBROUTINE h5topen_f(loc_id, name, type_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  ! Datatype name within file or
+                                                  ! group
+            INTEGER(HID_T), INTENT(out) :: type_id  ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5topen_f
+</pre>          
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tset_order_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5tset_order_f</strong>
+<pre>
+
+          SUBROUTINE h5tset_order_f(type_id, order, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: order ! Datatype byte order, bossible values
+                                          ! are:
+                                          ! H5T_ORDER_LE_F 
+                                          ! H5T_ORDER_BE_F 
+                                          ! H5T_ORDER_VAX_F  
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5tset_order_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tset_size_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5tset_size_f</strong>
+<pre>
+
+          SUBROUTINE h5tset_size_f(type_id, size, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: size ! Datatype size
+            INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                                 ! 0 on success and -1 on failure
+          END SUBROUTINE h5tset_size_f
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tequal_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tequal_f</strong>
+<pre>
+
+          SUBROUTINE h5tequal_f(type1_id, type2_id, flag, hdferr)
+ 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type1_id ! Datatype identifier 
+            INTEGER(HID_T), INTENT(IN) :: type2_id ! Datatype identifier 
+            LOGICAL, INTENT(OUT) :: flag ! TRUE/FALSE flag to indicate if two
+                                         ! datatypes are equal
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tequal_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tcommitted_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tcommitted_f</strong>
+<pre>
+
+          SUBROUTINE h5tcommitted_f(type_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tcommitted_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_precision_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_precision_f</strong>
+<pre>
+
+          SUBROUTINE h5tget_precision_f(type_id, precision, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: precision ! Datatype precision
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_precision_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tset_precision_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tset_precision_f</strong>
+<pre>
+
+          SUBROUTINE h5tset_precision_f(type_id, precision, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: precision ! Datatype precision
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tset_precision_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_offset_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_offset_f</strong>
+<pre>
+
+          SUBROUTINE h5tget_offset_f(type_id, offset, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: offset ! Datatype bit offset of the
+                                           ! first significant bit
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_offset_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tset_offset_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tset_offset_f</strong>
+<pre>
+
+          SUBROUTINE h5tset_offset_f(type_id, offset, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: offset ! Datatype bit offset of the
+                                           ! first significant bit
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tset_offset_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_pad_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_pad_f</strong>
+<pre>
+
+          SUBROUTINE h5tget_pad_f(type_id, lsbpad, msbpad, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: lsbpad ! padding type of the  
+                                           ! least significant bit
+            INTEGER, INTENT(OUT) :: msbpad ! padding type of the 
+                                           ! most significant bit
+                                           ! Possible values of padding type are:
+                                           ! H5T_PAD_ZERO_F = 0
+                                           ! H5T_PAD_ONE_F = 1
+                                           ! H5T_PAD_BACKGROUND_F = 2
+                                           ! H5T_PAD_ERROR_F      = -1
+                                           ! H5T_PAD_NPAD_F      = 3
+
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_pad_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tset_pad_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tset_pad_f</strong>
+<pre>
+
+          SUBROUTINE h5tset_pad_f(type_id, lsbpad, msbpad, hdferr) 
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: lsbpad ! padding type of the 
+                                           ! least significant bit
+            INTEGER, INTENT(IN) :: msbpad ! padding type of the 
+                                           ! most significant bit
+                                           ! Possible values of padding type are:
+                                           ! H5T_PAD_ZERO_F = 0
+                                           ! H5T_PAD_ONE_F = 1
+                                           ! H5T_PAD_BACKGROUND_F = 2
+                                           ! H5T_PAD_ERROR_F      = -1
+                                           ! H5T_PAD_NPAD_F      = 3
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tset_pad_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_sign_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_sign_f</strong>
+<pre>
+
+          SUBROUTINE h5tget_sign_f(type_id, sign, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: sign ! sign type for an integer type
+                                         !possible values are:
+                                         !Unsigned integer type H5T_SGN_NONE_F = 0
+                                         !Two's complement signed integer type
+                                         !H5T_SGN_2_F = 1
+                                         !or error value: H5T_SGN_ERROR_F=-1 
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_sign_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tset_sign_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tset_sign_f</strong>
+<pre>
+
+          SUBROUTINE h5tset_sign_f(type_id, sign, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: sign !sign type for an integer type 
+                                         !possible values are:
+                                         !Unsigned integer type H5T_SGN_NONE_F = 0
+                                         !Two's complement signed integer type
+                                         !H5T_SGN_2_F = 1
+                                         !or error value: H5T_SGN_ERROR_F=-1 
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tset_sign_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_fields_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_fields_f</strong>
+<pre>
+ 
+          SUBROUTINE h5tget_fields_f(type_id, epos, esize, mpos, msize, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: epos   ! exponent bit-position 
+            INTEGER, INTENT(OUT) :: esize  ! size of exponent in bits
+            INTEGER, INTENT(OUT) :: mpos   ! mantissa bit-position 
+            INTEGER, INTENT(OUT) :: msize  ! size of mantissa in bits
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_fields_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tset_fields_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tset_fields_f</strong>
+<pre>
+ 
+          SUBROUTINE h5tset_fields_f(type_id, epos, esize, mpos, msize, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
+            INTEGER, INTENT(IN) :: epos   ! exponent bit-position 
+            INTEGER, INTENT(IN) :: esize  ! size of exponent in bits
+            INTEGER, INTENT(IN) :: mpos   ! mantissa bit-position 
+            INTEGER, INTENT(IN) :: msize  ! size of mantissa in bits
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tset_fields_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_ebiass_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_ebiass_f</strong>
+<pre>
+ 
+          SUBROUTINE h5tget_ebias_f(type_id, ebias, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: ebias ! Datatype exponent bias of a floating-point type
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_ebias_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tset_ebiass_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tset_ebiass_f</strong>
+<pre>
+ 
+          SUBROUTINE h5tset_ebias_f(type_id, ebias, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: ebias !Datatype exponent bias of a 
+                                         !floating-point type, which can't
+                                         !be 0
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tset_ebias_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_norm_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_norm_f</strong>
+
+<pre>
+          SUBROUTINE h5tget_norm_f(type_id, norm, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: norm !mantissa normalization of a floating-point datatype
+                                         !Valid normalization types are:
+                                         !H5T_NORM_IMPLIED_F(0),MSB of mantissa is not 
+                                         !stored, always 1,  H5T_NORM_MSBSET_F(1), MSB of 
+                                         !mantissa is always 1, H5T_NORM_NONE_F(2)
+                                         !Mantissa is not normalize
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_norm_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tset_norm_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tset_norm_f</strong>
+<pre>
+ 
+          SUBROUTINE h5tset_norm_f(type_id, norm, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: norm !mantissa normalization of a floating-point datatype
+                                         !Valid normalization types are:
+                                         !H5T_NORM_IMPLIED_F(0),MSB of mantissa is not 
+                                         !stored, always 1,  H5T_NORM_MSBSET_F(1), MSB of 
+                                         !mantissa is always 1, H5T_NORM_NONE_F(2)
+                                         !Mantissa is not normalize
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tset_norm_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_inpad_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_inpad_f</strong>
+<pre>
+ 
+          SUBROUTINE h5tget_inpad_f(type_id, padtype, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: padtype ! padding type for unused bits 
+                                            ! in floating-point datatypes.
+                                            ! Possible values of padding type are:
+                                            ! H5T_PAD_ZERO_F = 0
+                                            ! H5T_PAD_ONE_F = 1
+                                            ! H5T_PAD_BACKGROUND_F = 2
+
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_inpad_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tset_inpad_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tset_inpad_f</strong>
+<pre>
+ 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: padtype ! padding type for unused bits 
+                                           ! in floating-point datatypes.
+                                           ! Possible values of padding type are:
+                                           ! H5T_PAD_ZERO_F = 0
+                                           ! H5T_PAD_ONE_F = 1
+                                           ! H5T_PAD_BACKGROUND_F = 2
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tset_inpad_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_cset_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_cset_f</strong>
+<pre>
+ 
+          SUBROUTINE h5tget_cset_f(type_id, cset, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: cset ! character set type of a string datatype 
+                                            ! Possible values of padding type are:
+                                            !H5T_CSET_ASCII_F = 0
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+ 
+          END SUBROUTINE h5tget_cset_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tset_cset_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tset_cset_f</strong>
+<pre>
+ 
+          SUBROUTINE h5tset_cset_f(type_id, cset, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: cset !character set type of a string datatype  
+                                           !Possible values of padding type are:
+                                           !H5T_CSET_ASCII_F = 0
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tset_cset_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_strpad_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_strpad_f</strong>
+<pre>
+ 
+          SUBROUTINE h5tget_strpad_f(type_id, strpad, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: strpad ! string padding method for a string datatype 
+                                           ! Possible values of padding type are:
+                                           !Pad with zeros (as C does): H5T_STR_NULL_F(0), 
+                                           !Pad with spaces (as FORTRAN does): 
+                                           !H5T_STR_SPACE_F(1)
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_strpad_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tset_strpad_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tset_strpad_f</strong>
+<pre>
+ 
+          SUBROUTINE h5tset_strpad_f(type_id, strpad, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: strpad ! string padding method for a string datatype 
+                                          ! Possible values of padding type are:
+                                          !Pad with zeros (as C does): H5T_STR_NULL_F(0), 
+                                          !Pad with spaces (as FORTRAN does): 
+                                          !H5T_STR_SPACE_F(1)
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tset_strpad_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_nmembers_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_nmembers_f</strong>
+<pre>
+ 
+          SUBROUTINE h5tget_nmembers_f(type_id, num_members, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: num_members !number of fields in a compound datatype 
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+
+          END SUBROUTINE h5tget_nmembers_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_member_name_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_member_name_f</strong>
+<pre>
+ 
+           SUBROUTINE h5tget_member_name_f(type_id,index, member_name,  namelen, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: index !Field index (0-based) of the field name to retrieve 
+            CHARACTER(LEN=*), INTENT(OUT) :: member_name !name of a field of
+                                                         !a compound datatype 
+            INTEGER, INTENT(OUT) :: namelen ! Length the name 
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_member_name_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_member_offset_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_member_offset_f</strong>
+<pre>
+ 
+          SUBROUTINE h5tget_member_offset_f(type_id, member_no, offset, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: member_no !Number of the field  
+                                                       !whose offset is requested
+            INTEGER(SIZE_T), INTENT(OUT) :: offset !byte offset of the the beginning of the field
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_member_offset_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_member_dims_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_member_dims_f</strong>
+<pre>
+ 
+          SUBROUTINE h5tget_member_dims_f(type_id, field_idx,dims, field_dims, perm, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: field_idx !Field index (0-based) of 
+                                             !field_dims, perm)
+            INTEGER, INTENT(OUT) :: dims     !number of dimensions of the field
+
+            INTEGER(SIZE_T),DIMENSION(*), INTENT(OUT) ::  field_dims !buffer to store the 
+                                                                      !dimensions of the field
+            INTEGER, DIMENSION(*), INTENT(OUT)  ::  perm  !buffer to store the 
+                                                                   !permutation vector of the field
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_member_dims_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_member_type_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_member_type_f</strong>
+<pre>
+ 
+          SUBROUTINE h5tget_member_type_f(type_id,  field_idx, datatype, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: field_idx !Field index (0-based) of the field type to retrieve
+            INTEGER(HID_T), INTENT(OUT) :: datatype !identifier of a copy of 
+                                                    !the datatype of the field 
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_member_type_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tcreate_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tcreate_f</strong>
+<pre>
+ 
+           SUBROUTINE h5tcreate_f(class, size, type_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER, INTENT(IN) :: class ! Datatype class cna be one of
+                                         ! H5T_COMPOUND_F (6)
+                                         ! H5T_ENUM_F     (8)
+                                         ! H5T_OPAQUE_F   (9)
+            INTEGER(SIZE_T), INTENT(IN) :: size ! Size of the datatype
+            INTEGER(HID_T), INTENT(OUT) :: type_id ! Datatype identifier
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tcreate_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tinsert_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tinsert_f</strong>
+<pre>
+ 
+          SUBROUTINE h5tinsert_f(type_id,  name, offset, field_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name !Name of the field to insert
+            INTEGER(SIZE_T), INTENT(IN) :: offset !Offset in memory structure of the field to insert
+            INTEGER(HID_T), INTENT(IN) :: field_id !datatype identifier of the new member
+
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tinsert_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tpack_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tpack_f</strong>
+<pre>
+ 
+           SUBROUTINE h5tpack_f(type_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tpack_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tinsert_array_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tinsert_array_f</strong>
+<pre>
+          SUBROUTINE h5tinsert_array_f(parent_id,name,offset, ndims, dims, member_id, hdferr, perm) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: parent_id ! identifier of the parent compound datatype
+            CHARACTER(LEN=*), INTENT(IN) :: name !Name of the new member
+            INTEGER(SIZE_T), INTENT(IN) :: offset !Offset to start of new member 
+                                                   !within compound datatype
+            INTEGER, INTENT(IN) ::  ndims !Dimensionality of new member. 
+                                          !Valid values are 0 (zero) through 4 (four)
+            INTEGER(SIZE_T), DIMENSION(*), INTENT(IN) :: dims !Size of new member array
+            INTEGER(HID_T), INTENT(IN) :: member_id ! identifier of the datatype of the new member
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+            INTEGER(SIZE_T), DIMENSION(*), OPTIONAL, INTENT(IN) :: perm 
+                                                               !Pointer to buffer to store 
+                                                               !the permutation vector of the field
+ 
+         END SUBROUTINE h5tinsert_array_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tenum_create_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tenum_create_f</strong>
+<pre>
+
+          SUBROUTINE h5tenum_create_f(parent_id, new_type_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: parent_id  ! Datatype identifier for
+                                                     ! the  base datatype
+            INTEGER(HID_T), INTENT(OUT) :: new_type_id 
+                                                     !datatype identifier for the
+                                                     ! new enumeration datatype    
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tenum_create_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tenum_insert_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tenum_insert_f</strong>
+<pre>
+          SUBROUTINE h5tenum_insert_f(type_id,  name, value, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  !Name of  the new member
+            INTEGER, INTENT(IN) :: value !value of the new member
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tenum_insert_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tenum_nameof_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tenum_nameof_f</strong>
+<pre>
+
+          SUBROUTINE h5tenum_nameof_f(type_id,  name, namelen, value, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            CHARACTER(LEN=*), INTENT(OUT) :: name  !Name of the  enumeration datatype.
+            INTEGER(SIZE_T), INTENT(IN) :: namelen !length of the name
+            INTEGER, INTENT(IN) :: value !value of the  enumeration datatype.
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tenum_nameof_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tenum_valueof_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tenum_valueof_f</strong>
+<pre>
+
+          SUBROUTINE h5tenum_valueof_f(type_id,  name, value, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  !Name of the  enumeration datatype.
+            INTEGER, INTENT(OUT) :: value !value of the  enumeration datatype.
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tenum_valueof_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_member_value_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_member_value_f</strong>
+<pre>
+
+          SUBROUTINE h5tget_member_value_f(type_id,  member_no, value, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            INTEGER, INTENT(IN) :: member_no !Number of the enumeration datatype member
+            INTEGER, INTENT(OUT) :: value !value of the  enumeration datatype.
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_member_value_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tset_tag_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tset_tag_f</strong>
+<pre>
+
+          SUBROUTINE h5tset_tag_f(type_id, tag, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: tag !Unique ASCII string with which 
+                                                !the opaque datatype is to be tagged 
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tset_tag_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_tag_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_tag_f</strong>
+<pre>
+
+          SUBROUTINE h5tget_tag_f(type_id, tag,taglen, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            CHARACTER(LEN=*), INTENT(OUT) :: tag !Unique ASCII string with which 
+                                                !the opaque datatype is to be tagged
+            INTEGER, INTENT(OUT) :: taglen !length of tag 
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_tag_f
+</pre>
+
+
+
+
+
+
+
+
+
+
+</dl>
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+
+
+
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
+</address>
+
+Last modified:  14 July 2000
+<br>
+Describes HDF5 Release 1.2.2, July 2000
+
+</body>
+</html>

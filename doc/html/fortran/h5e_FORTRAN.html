@@ -1,0 +1,149 @@
+<html>
+<head><title>
+FORTRAN Error Handling API -- h5e
+</title></head>
+
+<body bgcolor="#FFFFFF">
+
+
+
+<center>
+<h1>The FORTRAN 90 API to HDF5<br>h5e: Error Handling</h1>
+</center>
+
+
+<dl>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5eclear_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5eclear_f</strong>
+<pre>
+
+          SUBROUTINE h5eclear_f(hdferr) 
+            IMPLICIT NONE
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+          END SUBROUTINE h5eclear_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5eprint_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5eprint_f</strong>
+<pre>
+
+          SUBROUTINE h5eprint_f(hdferr, name)
+            CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: name ! File name
+            INTEGER, INTENT(OUT) :: hdferr          ! Error code
+
+          END SUBROUTINE h5eprint_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5eget_major_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5eget_major_f</strong>
+<pre>
+
+          SUBROUTINE h5eget_major_f(error_no, name, hdferr)
+            INTEGER, INTENT(IN) :: error_no !Major error number
+            CHARACTER(LEN=*), INTENT(OUT) :: name ! File name
+            INTEGER, INTENT(OUT) :: hdferr          ! Error code
+
+          END SUBROUTINE h5eget_major_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5eget_minor_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5eget_minor_f</strong>
+<pre>
+
+          SUBROUTINE h5eget_minor_f(error_no, name, hdferr)
+            INTEGER, INTENT(IN) :: error_no !Major error number
+            CHARACTER(LEN=*), INTENT(OUT) :: name ! File name
+            INTEGER, INTENT(OUT) :: hdferr          ! Error code
+
+          END SUBROUTINE h5eget_minor_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5eset_auto_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5eset_auto_f</strong>
+<pre>
+
+          SUBROUTINE h5eset_auto_f(printflag, hdferr)
+            INTEGER, INTENT(IN) :: printflag  !flag to turn automatic error
+                                              !printing on or off
+                                              !possible values are:
+                                              !printon (1)
+                                              !printoff(0)
+            INTEGER, INTENT(OUT) :: hdferr          ! Error code
+
+          END SUBROUTINE h5eset_auto_f
+</pre>
+
+
+
+
+
+
+
+
+
+<!-- Keep the rest; it's file closing stuff. -->
+</dl>
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+
+
+
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
+</address>
+
+Last modified:  13 July 2000
+<br>
+Describes HDF5 Release 1.2.2, July 2000
+
+</body>
+</html>
