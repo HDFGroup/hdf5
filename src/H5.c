@@ -251,7 +251,7 @@ done:
 herr_t 
 H5dont_atexit(void)
 {
-    FUNC_ENTER_NOINIT(H5dont_atexit);
+    FUNC_ENTER_API_NOINIT(H5dont_atexit);
 
     H5_trace(FALSE, "H5dont_atexit", "");
 
