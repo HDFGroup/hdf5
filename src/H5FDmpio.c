@@ -449,6 +449,62 @@ H5FD_mpio_communicator(H5FD_t *_file)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_mpio_mpi_rank
+ *
+ * Purpose:	Returns the MPI rank for a process
+ *
+ * Return:	Success: non-negative
+ *		Failure: negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, May 16, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5FD_mpio_mpi_rank(H5FD_t *_file)
+{
+    H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
+
+    FUNC_ENTER(H5FD_mpio_mpi_rank, FAIL);
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
+
+    FUNC_LEAVE(file->mpi_rank);
+} /* end H5FD_mpio_mpi_rank() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_mpio_mpi_size
+ *
+ * Purpose:	Returns the number of MPI processes
+ *
+ * Return:	Success: non-negative
+ *		Failure: negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, May 16, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5FD_mpio_mpi_size(H5FD_t *_file)
+{
+    H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
+
+    FUNC_ENTER(H5FD_mpio_mpi_rank, FAIL);
+    assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
+
+    FUNC_LEAVE(file->mpi_size);
+} /* end H5FD_mpio_mpi_size() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_mpio_setup
  *
  * Purpose:	Set the buffer type BTYPE, file type FTYPE, and absolute base
