@@ -98,23 +98,12 @@ struct H5S_hyper_span_info_t {
     struct H5S_hyper_span_t *head;  /* Pointer to list of spans in next dimension down */
 };
 
-/* Information about one dimension in a hyperslab selection */
-struct H5S_hyper_dim_t {
-    hssize_t start;
-    hsize_t  stride;
-    hsize_t  count;
-    hsize_t  block;
-};
-
 /* Information about new-style hyperslab selection */
 typedef struct {
-    H5S_hyper_dim_t *diminfo;    /* ->[rank] of per-dim selection info */
-	/* diminfo only points to one array, which holds the information
-	 * for one hyperslab selection. Perhaps this might need to be
-	 * expanded into a list of arrays when the H5Sselect_hyperslab's
-	 * restriction to H5S_SELECT_SET is removed. */
-    H5S_hyper_dim_t *app_diminfo;/* ->[rank] of per-dim selection info */
-	/* 'diminfo' points to a [potentially] optimized version of the user's
+    hbool_t diminfo_valid;                      /* Whether the dataset has valid diminfo */
+    H5S_hyper_dim_t opt_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
+    H5S_hyper_dim_t app_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
+	/* 'opt_diminfo' points to a [potentially] optimized version of the user's
          * hyperslab information.  'app_diminfo' points to the actual parameters
          * that the application used for setting the hyperslab selection.  These
          * are only used for re-gurgitating the original values used to set the

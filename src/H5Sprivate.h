@@ -42,7 +42,14 @@ typedef struct H5S_t H5S_t;
 typedef struct H5S_pnt_node_t H5S_pnt_node_t;
 typedef struct H5S_hyper_span_t H5S_hyper_span_t;
 typedef struct H5S_hyper_span_info_t H5S_hyper_span_info_t;
-typedef struct H5S_hyper_dim_t H5S_hyper_dim_t;
+
+/* Information about one dimension in a hyperslab selection */
+typedef struct H5S_hyper_dim_t {
+    hssize_t start;
+    hsize_t  stride;
+    hsize_t  count;
+    hsize_t  block;
+} H5S_hyper_dim_t;
 
 /* Point selection iteration container */
 typedef struct {
@@ -52,22 +59,23 @@ typedef struct {
 /* Hyperslab selection iteration container */
 typedef struct {
     /* Common fields for all hyperslab selections */
-    hssize_t *off;          /* Offset in span node (used as position for regular hyperslabs) */
+    hssize_t off[H5S_MAX_RANK];          /* Offset in span node (used as position for regular hyperslabs) */
     unsigned iter_rank;     /* Rank of iterator information */
                             /* (This should always be the same as the dataspace
                              * rank, except for regular hyperslab selections in
                              * which there are contiguous regions in the lower
                              * dimensions which have been "flattened" out
                              */
+    hbool_t diminfo_valid;         /* Whether the dimension information is valid */
 
     /* "Flattened" regular hyperslab selection fields */
-    H5S_hyper_dim_t *diminfo;   /* "Flattened" regular selection information */
-    hsize_t *size;          /* "Flattened" dataspace extent information */
-    hssize_t *sel_off;      /* "Flattened" selection offset information */
+    H5S_hyper_dim_t diminfo[H5S_MAX_RANK];   /* "Flattened" regular selection information */
+    hsize_t size[H5S_MAX_RANK];          /* "Flattened" dataspace extent information */
+    hssize_t sel_off[H5S_MAX_RANK];      /* "Flattened" selection offset information */
 
     /* Irregular hyperslab selection fields */
     H5S_hyper_span_info_t *spans;  /* Pointer to copy of the span tree */
-    H5S_hyper_span_t **span;/* Array of pointers to span nodes */
+    H5S_hyper_span_t *span[H5S_MAX_RANK];/* Array of pointers to span nodes */
 } H5S_hyper_iter_t;
 
 /* "All" selection iteration container */
