@@ -1150,7 +1150,6 @@ dump_data (hid_t obj_id, int obj_data) {
 	    H5Tclose(p_type); 
 		H5Sclose(space);
 		H5Tclose(type);
-		H5Aclose(attr);
 	}
 
 	
