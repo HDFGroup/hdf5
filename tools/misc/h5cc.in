@@ -41,6 +41,7 @@ prog_name="`basename $0`"
 allargs=""
 compile_args=""
 libraries=""
+archives=""
 link_args=""
 link_objs=""
 clibpath=""
@@ -204,7 +205,7 @@ for arg in $@ ; do
           fi
         elif test "x$ext" = "x.a"; then
           # This is an archive that we're linking in
-          libraries=" $libraries $arg "
+          archives=" $archives $arg "
         else
           compile_args="$compile_args $arg"
           link_args="$link_args $arg"
@@ -278,7 +279,7 @@ if test "x$do_link" = "xyes"; then
     fi
   done
 
-  $SHOW $CLINKER $LDFLAGS $clibpath $link_objs $link_args $shared_link
+  $SHOW $CLINKER $CFLAGS $LDFLAGS $clibpath $link_objs $archives $link_args $shared_link
   status=$?
 fi
 
