@@ -25,12 +25,20 @@ TIMESTAMP()
     echo "=====" "$1": "`date`" "====="
 }
 
+EXIT_BANNER()
+{
+TIMESTAMP "Exit $0 with status=$?"
+}
+
 # MAIN
 echo "====================================="
 echo "$0 $*"
 echo "====================================="
 TIMESTAMP MAIN
 uname -a
+
+# setup exit banner message
+trap EXIT_BANNER 0
 
 # The path isn't properly initialized on hawkwind -- /usr/local/bin is
 # either missing or is after /usr/bin when it should be before.
