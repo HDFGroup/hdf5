@@ -120,12 +120,18 @@ test_reference_obj(void)
     /* Create references */
     ret = H5Rcreate(&wbuf[0],fid1,"/Dataset1",H5R_OBJECT,-1);
     CHECK(ret, FAIL, "H5Rcreate");
+    ret = H5Rget_object_type(dataset,&wbuf[0]);
+    VERIFY(ret, H5G_DATASET, "H5Rcreate");
 
     ret = H5Rcreate(&wbuf[1],fid1,"/Dataset2",H5R_OBJECT,-1);
     CHECK(ret, FAIL, "H5Rcreate");
+    ret = H5Rget_object_type(dataset,&wbuf[1]);
+    VERIFY(ret, H5G_DATASET, "H5Rcreate");
 
     ret = H5Rcreate(&wbuf[2],fid1,"/Group1",H5R_OBJECT,-1);
     CHECK(ret, FAIL, "H5Rcreate");
+    ret = H5Rget_object_type(dataset,&wbuf[2]);
+    VERIFY(ret, H5G_GROUP, "H5Rcreate");
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
