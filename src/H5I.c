@@ -1051,7 +1051,7 @@ H5I_dec_ref(hid_t id)
     /* Check arguments */
     grp = H5I_GRP(id);
     if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "invalid group number");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
     grp_ptr = H5I_id_group_list_g[grp];
     if (grp_ptr == NULL || grp_ptr->count <= 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
@@ -1154,7 +1154,7 @@ H5I_inc_ref(hid_t id)
     /* Check arguments */
     grp = H5I_GRP(id);
     if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "invalid group number");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
     grp_ptr = H5I_id_group_list_g[grp];
     if (!grp_ptr || grp_ptr->count<=0)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid group");
@@ -1239,7 +1239,7 @@ H5I_get_ref(hid_t id)
     /* Check arguments */
     grp = H5I_GRP(id);
     if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "invalid group number");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid group number");
     grp_ptr = H5I_id_group_list_g[grp];
     if (!grp_ptr || grp_ptr->count<=0)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid group");
@@ -1341,7 +1341,7 @@ H5I_find_id(hid_t id)
     unsigned		hash_loc;		/*bucket pointer	*/
     H5I_id_info_t	*ret_value = NULL;	/*return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT(H5I_find_id);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5I_find_id);
 
     /* Check arguments */
     grp = H5I_GRP(id);
@@ -1372,7 +1372,6 @@ H5I_find_id(hid_t id)
     /* Set the return value */
     ret_value = id_ptr;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 

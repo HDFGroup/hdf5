@@ -131,20 +131,20 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-int
+MPI_Comm
 H5FD_mpi_get_comm(const H5FD_t *file)
 {
     const H5FD_class_mpi_t *cls=(const H5FD_class_mpi_t *)(file->cls);
-    int	ret_value;
+    MPI_Comm	ret_value;
 
-    FUNC_ENTER_NOAPI(H5FD_mpi_get_comm, FAIL)
+    FUNC_ENTER_NOAPI(H5FD_mpi_get_comm, MPI_COMM_NULL)
 
     assert(file && cls);
     assert(cls->get_comm);        /* All MPI drivers must implement this */
     
     /* Dispatch to driver */
-    if ((ret_value=(cls->get_comm)(file))<0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_comm request failed")
+    if ((ret_value=(cls->get_comm)(file))==MPI_COMM_NULL)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
