@@ -42,7 +42,7 @@ typedef enum{
 	GREEN,
 	BLUE,
 	WHITE,
-	BLACK,
+	BLACK
 } enumtype;
 
 /* Compound datatype */
