@@ -610,7 +610,20 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
     static char	fmt_llong[8], fmt_ullong[8];
     H5T_str_t 	pad;
     H5G_stat_t	sb;
-    
+
+    /*some tempvars to store the value before we append it to the string
+      to get rid of the memory alignment problem*/
+    float tempfloat;
+    double tempdouble;
+    int tempint;
+    unsigned int tempuint;
+    short tempshort;
+    unsigned short tempushort;
+    long templong;
+    unsigned long tempulong;
+    unsigned long_long tempullong;
+    long_long templlong;
+ 
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
 	sprintf(fmt_llong, "%%%sd", PRINTF_LL_WIDTH);
@@ -629,10 +642,12 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	}
 	
     } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
-	h5dump_str_append(str, OPT(info->fmt_double, "%g"), *((double*)vp));
+        memcpy(&tempdouble,vp,sizeof(double)); 
+	h5dump_str_append(str, OPT(info->fmt_double, "%g"), tempdouble);
 		
     } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
-	h5dump_str_append(str, OPT(info->fmt_double, "%g"), *((float*)vp));
+        memcpy(&tempfloat,vp,sizeof(float));	
+        h5dump_str_append(str, OPT(info->fmt_double, "%g"), tempfloat);
 		
     } else if (info->ascii &&
 	       (H5Tequal(type, H5T_NATIVE_SCHAR) ||
@@ -773,12 +788,14 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	
 		
     } else if (H5Tequal(type, H5T_NATIVE_INT)) {
+        memcpy(&tempint, vp, sizeof(int));
 	h5dump_str_append(str, OPT(info->fmt_int, "%d"),
-			  *((int*)vp));
+			  tempint);
 		
     } else if (H5Tequal(type, H5T_NATIVE_UINT)) {
+        memcpy(&tempuint, vp, sizeof(unsigned int));
 	h5dump_str_append(str, OPT(info->fmt_uint, "%u"),
-			  *((unsigned*)vp));
+			  tempuint);
 		
     } else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
 	h5dump_str_append(str, OPT(info->fmt_schar, "%d"),
@@ -789,51 +806,63 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 			  *((unsigned char*)vp));
 		
     } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
+        memcpy(&tempshort, vp, sizeof(short));
 	h5dump_str_append(str, OPT(info->fmt_short, "%d"),
-			  *((short*)vp));
+			  tempshort);
 		
     } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
+        memcpy(&tempushort, vp, sizeof(unsigned short));
 	h5dump_str_append(str, OPT(info->fmt_ushort, "%u"),
-			  *((unsigned short*)vp));
+			  tempushort);
 		
     } else if (H5Tequal(type, H5T_NATIVE_LONG)) {
+        memcpy(&templong, vp, sizeof(long));
 	h5dump_str_append(str, OPT(info->fmt_long, "%ld"),
-			  *((long*)vp));
+			  templong);
 		
     } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
+        memcpy(&tempulong, vp, sizeof(unsigned long));
 	h5dump_str_append(str, OPT(info->fmt_ulong, "%lu"),
-			  *((unsigned long*)vp));
+			  tempulong);
 		
     } else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
+        memcpy(&templlong, vp, sizeof(long_long));
 	h5dump_str_append(str, OPT(info->fmt_llong, fmt_llong),
-			  *((long_long*)vp));
+			  templlong);
 		
     } else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
+        memcpy(&tempullong, vp, sizeof(unsigned long_long));
 	h5dump_str_append(str, OPT(info->fmt_ullong, fmt_ullong),
-			  *((unsigned long_long*)vp));
+			  tempullong);
 		
     } else if (H5Tequal(type, H5T_NATIVE_HSSIZE)) {
 	if (sizeof(hssize_t)==sizeof(int)) {
+	    memcpy(&tempint, vp, sizeof(int));	  
 	    h5dump_str_append(str, OPT(info->fmt_int, "%d"),
-			      *((int*)vp));
+			      tempint);
 	} else if (sizeof(hssize_t)==sizeof(long)) {
+	    memcpy(&templong, vp, sizeof(long));
 	    h5dump_str_append(str, OPT(info->fmt_long, "%ld"),
-			      *((long*)vp));
+			      templong);
 	} else {
+	    memcpy(&templlong, vp, sizeof(long_long));
 	    h5dump_str_append(str, OPT(info->fmt_llong, fmt_llong),
-			      *((int64_t*)vp));
+			      templlong);
 	}
 		
     } else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
 	if (sizeof(hsize_t)==sizeof(int)) {
+            memcpy(&tempuint, vp, sizeof(unsigned int));
 	    h5dump_str_append(str, OPT(info->fmt_uint, "%u"),
-			      *((unsigned*)vp));
+			      tempuint);
 	} else if (sizeof(hsize_t)==sizeof(long)) {
+	    memcpy(&tempulong, vp, sizeof(long));
 	    h5dump_str_append(str, OPT(info->fmt_ulong, "%lu"),
-			      *((unsigned long*)vp));
+			      tempulong);
 	} else {
+            memcpy(&tempullong, vp, sizeof(unsigned long_long));
 	    h5dump_str_append(str, OPT(info->fmt_ullong, fmt_ullong),
-			      *((uint64_t*)vp));
+			      tempullong);
 	}
 		
     } else if (H5T_COMPOUND==H5Tget_class(type)) {
