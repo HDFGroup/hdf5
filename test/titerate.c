@@ -781,7 +781,7 @@ static void test_grp_memb_funcs(void)
     file=H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
 
-    /* These twp functions, H5Gget_num_objs and H5Gget_objname_by_idx, actually
+    /* These two functions, H5Gget_num_objs and H5Gget_objname_by_idx, actually
      * iterate through B-tree for group members in internal library design.
      */
     root_group = H5Gopen(file, "/");
@@ -796,7 +796,7 @@ static void test_grp_memb_funcs(void)
         name_len = H5Gget_objname_by_idx(root_group, (hsize_t)i, NULL, NAMELEN);
         CHECK(name_len, FAIL, "H5Gget_objname_by_idx");
         
-        ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, NAMELEN);
+        ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, name_len+1);
         CHECK(ret, FAIL, "H5Gget_objname_by_idx");
 
         /* Double-check that the length is the same */
@@ -848,6 +848,76 @@ static void test_grp_memb_funcs(void)
 
 /****************************************************************
 **
+**  test_links(): Test soft and hard link iteration
+** 
+****************************************************************/
+static void test_links(void)
+{
+    hid_t file;             /* File ID */
+    char obj_name[NAMELEN]; /* Names of the object in group */
+    ssize_t name_len;       /* Length of object's name */
+    herr_t ret;		    /* Generic return value */
+    hid_t    gid, gid1;
+    int i;
+    H5G_obj_t obj_type;     /* Type of object */
+    hsize_t   nobjs;        /* Number of objects */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Soft and Hard Link Iteration Functionality\n"));
+
+    /* Create the test file with the datasets */
+    file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* create groups */
+    gid = H5Gcreate (file, "/g1", 0);
+    CHECK(gid, FAIL, "H5Gcreate");
+    
+    gid1 = H5Gcreate (file, "/g1/g1.1", 0);
+    CHECK(gid1, FAIL, "H5Gcreate");
+
+    /* create soft and hard links to the group "/g1". */
+    ret = H5Glink (gid, H5G_LINK_SOFT, "something", "softlink");
+    CHECK(ret, FAIL, "H5Glink");
+
+    ret = H5Glink (gid, H5G_LINK_HARD, "/g1", "hardlink");
+    CHECK(ret, FAIL, "H5Glink");
+
+    ret = H5Gget_num_objs(gid, &nobjs);
+    CHECK(ret, FAIL, "H5Gget_num_objs");
+    VERIFY(nobjs,3,"H5Gget_num_objs");
+
+    /* Test these two functions, H5Gget_num_objs and H5Gget_objname_by_idx */
+    for(i=0; i<nobjs; i++) {
+        /* Get object name */
+        name_len = H5Gget_objname_by_idx(gid, (hsize_t)i, obj_name, NAMELEN);
+        CHECK(name_len, FAIL, "H5Gget_objname_by_idx");
+        
+        obj_type = H5Gget_objtype_by_idx(gid, (hsize_t)i);
+        CHECK(obj_type, H5G_UNKNOWN, "H5Gget_objtype_by_idx");
+
+        if(!HDstrcmp(obj_name, "g1.1"))
+            VERIFY(obj_type, H5G_GROUP, "H5Gget_objname_by_idx");
+        else if(!HDstrcmp(obj_name, "hardlink"))
+            VERIFY(obj_type, H5G_GROUP, "H5Gget_objname_by_idx");
+        else if(!HDstrcmp(obj_name, "softlink"))
+            VERIFY(obj_type, H5G_LINK, "H5Gget_objname_by_idx");
+        else
+            CHECK(0, 0, "unknown object name");
+    }
+
+    ret=H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret=H5Gclose(gid1);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret=H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* test_links() */
+
+/****************************************************************
+**
 **  test_iterate(): Main iteration testing routine.
 ** 
 ****************************************************************/
@@ -862,6 +932,7 @@ test_iterate(void)
     test_iter_group_large(); /* Test group iteration for large # of objects */
     test_iter_attr();        /* Test attribute iteration */
     test_grp_memb_funcs();   /* Test group member information functions */
+    test_links();            /* Test soft and hard link iteration */
 }   /* test_iterate() */
 
 
