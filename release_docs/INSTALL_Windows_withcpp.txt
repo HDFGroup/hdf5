@@ -41,7 +41,7 @@ Building the HDF5 C and C++ libraries (both static and shared)
     1. Unpack all.zip, found in the c:\MyHDFstuff\hdf5\windows directory, 
        into c:\MyHDFstuff.
 
-    2. Go to the hdf5\proj\ directory and double-click on the file all.dsw. 
+    2. Go to the hdf5\proj\all directory and double-click on the file all.dsw. 
        This will invoke MS VC++.
      
     3. Make sure that "all" is "Set as Active Project" by selecting
@@ -104,8 +104,10 @@ Testing libraries and tools
     1. See the file INSTALL_Windows.txt (Section II) for instruction on 
        testing the C HDF5 library and non-hdf4-related tools.
 
-    2. To test C++ HDF5 Library, you first need to copy the appropriate
-       DLL files to the Windows system directory.
+    2. To test C++ HDF5 Library, you first need to copy the 
+       DLL files listed above, and to copy test library DLLs 
+       from the hdf5\test\libtestD\Debug\ and hdf5\test\libtestD\Release 
+       directories to the Windows system directory.
 
          The system directory can usually be found under the path
                 C:\WINNT\system or C:\WINDOWS\system

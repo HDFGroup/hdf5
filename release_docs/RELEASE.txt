@@ -304,7 +304,7 @@ T90 IEEE                    y        n        n     n     y        y      n
 TFLOPS                      y        n        n     n     n        n      n
 AIX-5.1 32-bit              y        n        y     n     y        y      y
 AIX-5.1 64-bit              y        n        y     n     y        y      y
-WinXP Visual Studio (7)     y        n        y     n     n        y      y
+WinXP Visual Studio         y        n        y     n     n        y      y
 WinXP Intel                 y        n        y     n     n        y      y
 WinXP CW                    y        n        y     n     n        y      y
 Win2000 Visual Studio       y        n        y     n     n        y      y
@@ -336,8 +336,6 @@ Footnotes:  (1) Using mpich 1.2.4.
             (5) Using mpt.
             (6) Includes the H4toH5 Library and the h4toh5 and h5toh4 
                 utilities.
-            (7) Binaries only; source code for this platform is not being 
-                released at this time.
 
 
 Known Problems
