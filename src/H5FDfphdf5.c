@@ -197,7 +197,7 @@ done:
  * Modifications:
  *-------------------------------------------------------------------------
  */
-hid_t
+herr_t
 H5Pset_fapl_fphdf5(hid_t fapl_id, MPI_Comm comm, MPI_Comm barrier_comm,
                    MPI_Info info, unsigned sap_rank)
 {
@@ -207,7 +207,7 @@ H5Pset_fapl_fphdf5(hid_t fapl_id, MPI_Comm comm, MPI_Comm barrier_comm,
     herr_t              ret_value;
     
     FUNC_ENTER_API(H5Pset_fapl_fphdf5, FAIL);
-    H5TRACE5("i","iMcMcMiIu",fapl_id,comm,barrier_comm,info,sap_rank);
+    H5TRACE5("e","iMcMcMiIu",fapl_id,comm,barrier_comm,info,sap_rank);
 
     if (fapl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL,
@@ -1402,7 +1402,7 @@ H5FD_fphdf5_write(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_write, FAIL);
 
-HDfprintf(stderr, "%s: Entering: rank==%d, addr==%Hd, size==%d\n",
+HDfprintf(stderr, "%s: Entering: rank==%d, addr==%a, size==%Zu\n",
           FUNC, file->mpi_rank, addr, size);
 
     /* check args */
@@ -1536,7 +1536,7 @@ H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, MPI_Offset mpi_off, int siz
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_write_real, FAIL);
 
-HDfprintf(stderr, "%s: %d: Entering: addr=%Hd, size=%d\n", FUNC,
+HDfprintf(stderr, "%s: %d: Entering: addr=%a, size=%Zu\n", FUNC,
           H5FD_fphdf5_mpi_rank(_file), (haddr_t)mpi_off, size);
 
     /* check args */
@@ -1607,7 +1607,7 @@ HDfprintf(stderr, "%s: %d: Entering: addr=%Hd, size=%d\n", FUNC,
         int i;
 
         sleep(3);
-        HDfprintf(stderr, "%s: writing at %Hd\n", FUNC, (haddr_t)mpi_off);
+        HDfprintf(stderr, "%s: writing at %a\n", FUNC, (haddr_t)mpi_off);
 
         for (i = 0; i < size; ++i) {
             if (i % 7 == 0)

@@ -74,7 +74,7 @@ H5FP_request_open(H5FP_obj_t obj_type, haddr_t maxaddr,
                   hsize_t sdata_block_size, hsize_t threshold,
                   hsize_t alignment, unsigned *file_id, unsigned *req_id)
 {
-    H5FP_request req;
+    H5FP_request_t req;
     MPI_Status mpi_status;
     int mrc, my_rank;
     int ret_value = SUCCEED;
@@ -108,7 +108,7 @@ H5FP_request_open(H5FP_obj_t obj_type, haddr_t maxaddr,
         req.threshold = threshold;
         req.alignment = alignment;
 
-        if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
+        if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                             H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
 
@@ -139,7 +139,7 @@ H5FP_request_lock(unsigned file_id, unsigned char *obj_oid,
                   H5FP_lock_t rw_lock, int last, unsigned *req_id,
                   H5FP_status_t *status)
 {
-    H5FP_request req;
+    H5FP_request_t req;
     int mrc, my_rank;
     int ret_value = SUCCEED;
 
@@ -164,7 +164,7 @@ H5FP_request_lock(unsigned file_id, unsigned char *obj_oid,
     req.proc_rank = my_rank;
     H5FP_COPY_OID(req.oid, obj_oid);
 
-    if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
+    if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS) {
         *status = H5FP_STATUS_LOCK_FAILED;
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
@@ -175,12 +175,12 @@ H5FP_request_lock(unsigned file_id, unsigned char *obj_oid,
          * On the last lock in the lock-group to be acquired, we expect a
          * reply from the SAP
          */
-        H5FP_reply sap_reply;
-        MPI_Status mpi_status;
+        H5FP_reply_t    sap_reply;
+        MPI_Status      mpi_status;
 
         HDmemset(&mpi_status, 0, sizeof(mpi_status));
 
-        if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply_t, (int)H5FP_sap_rank,
+        if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply, (int)H5FP_sap_rank,
                             H5FP_TAG_REPLY, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 
@@ -211,7 +211,7 @@ herr_t
 H5FP_request_release_lock(unsigned file_id, unsigned char *obj_oid,
                           int last, unsigned *req_id, H5FP_status_t *status)
 {
-    H5FP_request req;
+    H5FP_request_t req;
     int mrc, my_rank;
     herr_t ret_value = SUCCEED;
 
@@ -235,7 +235,7 @@ H5FP_request_release_lock(unsigned file_id, unsigned char *obj_oid,
     req.md_size = 0;
     req.proc_rank = my_rank;
 
-    if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
+    if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS) {
         *status = H5FP_STATUS_LOCK_RELEASE_FAILED;
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
@@ -246,12 +246,12 @@ H5FP_request_release_lock(unsigned file_id, unsigned char *obj_oid,
          * On the last lock released in this lock-group, we expect a
          * reply from the SAP
          */
-        H5FP_reply sap_reply;
-        MPI_Status mpi_status;
+        H5FP_reply_t    sap_reply;
+        MPI_Status      mpi_status;
 
         HDmemset(&mpi_status, 0, sizeof(mpi_status));
 
-        if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply_t, (int)H5FP_sap_rank,
+        if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply, (int)H5FP_sap_rank,
                             H5FP_TAG_REPLY, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 
@@ -288,8 +288,8 @@ H5FP_request_read_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
                            size_t size, uint8_t **buf, int *bytes_read,
                            unsigned *req_id, H5FP_status_t *status)
 {
-    H5FP_request req;
-    H5FP_read sap_read;
+    H5FP_request_t req;
+    H5FP_read_t sap_read;
     MPI_Status mpi_status;
     int mrc, my_rank;
     herr_t ret_value = SUCCEED;
@@ -315,13 +315,13 @@ H5FP_request_read_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
     req.proc_rank = my_rank;
     req.addr = addr;
 
-    if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
+    if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
 
     HDmemset(&mpi_status, 0, sizeof(mpi_status));
 
-    if ((mrc = MPI_Recv(&sap_read, 1, H5FP_read_t, (int)H5FP_sap_rank, H5FP_TAG_READ,
+    if ((mrc = MPI_Recv(&sap_read, 1, H5FP_read, (int)H5FP_sap_rank, H5FP_TAG_READ,
                         H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 
@@ -388,9 +388,9 @@ H5FP_request_write_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
                             int mdata_size, const char *mdata,
                             unsigned *req_id, H5FP_status_t *status)
 {
-    H5FP_reply sap_reply;
+    H5FP_reply_t sap_reply;
     MPI_Status mpi_status;
-    H5FP_request req;
+    H5FP_request_t req;
     int mrc, my_rank;
     herr_t ret_value = SUCCEED;
 
@@ -415,7 +415,7 @@ H5FP_request_write_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
     req.addr = addr;
     req.md_size = mdata_size;
 
-    if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
+    if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
 
@@ -425,7 +425,7 @@ H5FP_request_write_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
 
     HDmemset(&mpi_status, 0, sizeof(mpi_status));
 
-    if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply_t, (int)H5FP_sap_rank,
+    if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply, (int)H5FP_sap_rank,
                         H5FP_TAG_REPLY, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 
@@ -481,8 +481,8 @@ herr_t
 H5FP_request_flush_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
                             unsigned *req_id, H5FP_status_t *status)
 {
-    H5FP_reply sap_reply;
-    H5FP_request req;
+    H5FP_reply_t sap_reply;
+    H5FP_request_t req;
     MPI_Status mpi_status;
     int mrc, my_rank;
     int ret_value = SUCCEED;
@@ -504,13 +504,13 @@ H5FP_request_flush_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
     req.file_id = file_id;
     req.proc_rank = my_rank;
 
-    if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
+    if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
 
     HDmemset(&mpi_status, 0, sizeof(mpi_status));
 
-    if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply_t, (int)H5FP_sap_rank,
+    if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply, (int)H5FP_sap_rank,
                         H5FP_TAG_REPLY, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 
@@ -564,8 +564,8 @@ herr_t
 H5FP_request_close(H5FD_t *file, unsigned file_id, unsigned *req_id,
                    H5FP_status_t *status)
 {
-    H5FP_reply      sap_reply;
-    H5FP_request    req;
+    H5FP_reply_t    sap_reply;
+    H5FP_request_t  req;
     MPI_Status      mpi_status;
     int             mrc;
     herr_t          ret_value = SUCCEED;
@@ -583,13 +583,13 @@ H5FP_request_close(H5FD_t *file, unsigned file_id, unsigned *req_id,
     req.file_id = file_id;
     req.proc_rank = H5FD_fphdf5_mpi_rank(file);
 
-    if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
+    if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
 
     HDmemset(&mpi_status, 0, sizeof(mpi_status));
 
-    if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply_t, (int)H5FP_sap_rank,
+    if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply, (int)H5FP_sap_rank,
                         H5FP_TAG_REPLY, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 
@@ -615,8 +615,8 @@ herr_t
 H5FP_request_allocate(H5FD_t *file, H5FD_mem_t mem_type, hsize_t size,
                       haddr_t *addr, unsigned *req_id, H5FP_status_t *status)
 {
-    H5FP_alloc      sap_alloc;
-    H5FP_request    req;
+    H5FP_alloc_t    sap_alloc;
+    H5FP_request_t  req;
     MPI_Status      mpi_status;
     int             mrc;
     herr_t          ret_value = SUCCEED;
@@ -637,13 +637,13 @@ H5FP_request_allocate(H5FD_t *file, H5FD_mem_t mem_type, hsize_t size,
     req.mem_type = mem_type;
     req.meta_block_size = size; /* use this field as the size to allocate */
 
-    if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
+    if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
 
     HDmemset(&mpi_status, 0, sizeof(mpi_status));
 
-    if ((mrc = MPI_Recv(&sap_alloc, 1, H5FP_alloc_t, (int)H5FP_sap_rank,
+    if ((mrc = MPI_Recv(&sap_alloc, 1, H5FP_alloc, (int)H5FP_sap_rank,
                         H5FP_TAG_ALLOC, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 
@@ -670,8 +670,8 @@ herr_t
 H5FP_request_free(H5FD_t *file, H5FD_mem_t mem_type, haddr_t addr,
                   hsize_t size, unsigned *req_id, H5FP_status_t *status)
 {
-    H5FP_reply      sap_reply;
-    H5FP_request    req;
+    H5FP_reply_t    sap_reply;
+    H5FP_request_t  req;
     MPI_Status      mpi_status;
     int             mrc;
     herr_t          ret_value = SUCCEED;
@@ -693,13 +693,13 @@ H5FP_request_free(H5FD_t *file, H5FD_mem_t mem_type, haddr_t addr,
     req.addr = addr;
     req.meta_block_size = size; /* use this field as the size to free */
 
-    if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
+    if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
 
     HDmemset(&mpi_status, 0, sizeof(mpi_status));
 
-    if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply_t, (int)H5FP_sap_rank,
+    if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply, (int)H5FP_sap_rank,
                         H5FP_TAG_REPLY, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 
@@ -746,7 +746,7 @@ H5FP_gen_request_id()
 static herr_t
 H5FP_dump_to_file(H5FD_t *file, hid_t dxpl_id)
 {
-    H5FP_read sap_read;
+    H5FP_read_t sap_read;
     hid_t new_dxpl_id = FAIL;
     H5P_genplist_t *plist = NULL, *old_plist;
     unsigned dumping = 1;
@@ -788,7 +788,7 @@ H5FP_dump_to_file(H5FD_t *file, hid_t dxpl_id)
 
         HDmemset(&mpi_status, 0, sizeof(mpi_status));
 
-        if ((mrc = MPI_Recv(&sap_read, 1, H5FP_read_t, (int)H5FP_sap_rank,
+        if ((mrc = MPI_Recv(&sap_read, 1, H5FP_read, (int)H5FP_sap_rank,
                             H5FP_TAG_DUMP, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 

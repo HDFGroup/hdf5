@@ -183,9 +183,9 @@ typedef struct {
     hsize_t         alignment;  /* Alignment (really!)                      */
     haddr_t         addr;       /* Address of the metadata                  */
     unsigned char   oid[H5R_OBJ_REF_BUF_SIZE]; /* Buffer to store OID of object */
-} H5FP_request;
+} H5FP_request_t;
 
-extern MPI_Datatype H5FP_request_t; /* MPI datatype for the H5FP_request obj*/
+extern MPI_Datatype H5FP_request; /* MPI datatype for the H5FP_request obj  */
 
 /*===----------------------------------------------------------------------===
  *                               H5FP_reply
@@ -198,9 +198,9 @@ typedef struct {
     unsigned        file_id;    /* File ID assigned to an open file         */
     H5FP_status_t   status;     /* Status of the request                    */
     unsigned        md_size;    /* Size of the metadata sent in next msg    */
-} H5FP_reply;
+} H5FP_reply_t;
 
-extern MPI_Datatype H5FP_reply_t;   /* MPI datatype for the H5FP_reply obj  */
+extern MPI_Datatype H5FP_reply; /* MPI datatype for the H5FP_reply obj      */
 
 /*===----------------------------------------------------------------------===
  *                               H5FP_read
@@ -215,9 +215,9 @@ typedef struct {
     H5FD_mem_t      mem_type;   /* Type of memory updated, if req'd         */
     unsigned        md_size;    /* Size of the metadata sent in next msg    */
     MPI_Offset      addr;       /* Address of the metadata                  */
-} H5FP_read;
+} H5FP_read_t;
 
-extern MPI_Datatype H5FP_read_t; /* MPI datatype for the H5FP_read obj      */
+extern MPI_Datatype H5FP_read;  /* MPI datatype for the H5FP_read obj       */
 
 /*===----------------------------------------------------------------------===
  *                              H5FP_alloc
@@ -231,9 +231,9 @@ typedef struct {
     H5FP_status_t   status;     /* Status of the request                    */
     H5FD_mem_t      mem_type;   /* Type of memory updated, if req'd         */
     haddr_t         addr;       /* Address of the metadata                  */
-} H5FP_alloc;
+} H5FP_alloc_t;
 
-extern MPI_Datatype H5FP_alloc_t; /* MPI datatype for the H5FP_alloc obj    */
+extern MPI_Datatype H5FP_alloc; /* MPI datatype for the H5FP_alloc obj      */
 
 /* Handy #define for copying OIDs */
 #define H5FP_COPY_OID(dst, src)     HDmemcpy((dst), (src), H5R_OBJ_REF_BUF_SIZE)

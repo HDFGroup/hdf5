@@ -1890,16 +1890,6 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     assert(type >= 0 && type < H5FD_MEM_NTYPES);
     assert(size > 0);
     
-#ifdef H5_HAVE_FPHDF5
-    /*
-     * When we're using the FPHDF5 driver, and this section of code is
-     * only reached via the SAP. So just update the EOA and be done with
-     * it.
-     */
-    if ((ret_value = H5FD_update_eoa(file, type, dxpl_id, size)) == HADDR_UNDEF)
-        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
-                    "driver eoa update request failed");
-#else
     /*
      * Dispatch to driver `alloc' callback or extend the end-of-address
      * marker
@@ -1913,7 +1903,6 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
             HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
                         "driver eoa update request failed");
     }
-#endif  /* H5_HAVE_FPHDF5 */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
