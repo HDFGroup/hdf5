@@ -58,6 +58,10 @@ int                     Verbosity;
 /* ANY new test needs to have a prototype in tproto.h */
 #include <testhdf5.h>
 
+const char *FILENAME[] = {
+    NULL
+};
+
 struct TestStruct {
     int    NumErrors;
     char   Description[64];
