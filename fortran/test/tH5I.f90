@@ -11,7 +11,7 @@
 
      CHARACTER(LEN=6), PARAMETER :: filename = "itestf" ! File name
      CHARACTER(LEN=80) :: fix_filename
-     CHARACTER(LEN=9), PARAMETER :: dsetname = "itestdset" ! Dataset name
+     CHARACTER(LEN=10), PARAMETER :: dsetname = "/itestdset" ! Dataset name
      CHARACTER(LEN=10), PARAMETER :: groupname = "itestgroup"! group name
      CHARACTER(LEN=10), PARAMETER :: aname = "itestattr"! group name
           
@@ -38,6 +38,9 @@
      INTEGER     ::   type !object identifier
      INTEGER     ::   error ! Error flag
      INTEGER, DIMENSION(7) :: data_dims
+     CHARACTER(LEN=80) name_buf
+     INTEGER(SIZE_T)   buf_size
+     INTEGER(SIZE_T)   name_size
 
 
      !
@@ -69,6 +72,19 @@
      CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dspace_id, &
                dset_id, error)
      CALL check("h5dcreate_f",error,total_error)
+     buf_size = 80
+     CALL h5iget_name_f(dset_id, name_buf, buf_size, name_size, error)
+     CALL check("h5iget_name_f",error,total_error)
+          if (name_size .ne. len(dsetname)) then
+              write(*,*) "h5iget_name returned wrong name size"
+              total_error = total_error + 1
+              goto 100
+          endif
+          if (name_buf(1:name_size) .ne. dsetname) then
+              write(*,*) "h5iget_name returned wrong name"
+              total_error = total_error + 1
+          endif
+100       continue
 
      !
      ! Write data_in to the dataset

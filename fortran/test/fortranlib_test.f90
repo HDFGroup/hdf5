@@ -44,6 +44,7 @@
      INTEGER :: group_total_error = 0
      INTEGER :: error_total_error = 0
      INTEGER :: vl_total_error = 0
+     INTEGER :: z_total_error = 0
      INTEGER :: majnum, minnum, relnum
      CHARACTER(LEN=8) error_string
      CHARACTER(LEN=8) :: success = ' PASSED '
@@ -255,6 +256,14 @@
      write(*, fmt = '(54x,a)', advance = 'no')  ' '
      write(*, fmt = e_format) error_string
      total_error = total_error + identifier_total_error 
+
+     error_string = failure
+     CALL filters_test(cleanup, z_total_error)
+     IF (z_total_error == 0) error_string = success
+     write(*, fmt = '(13a)', advance = 'no') ' Filters test'     
+     write(*, fmt = '(57x,a)', advance = 'no')  ' '
+     write(*, fmt = e_format) error_string
+     total_error = total_error + z_total_error 
 
 !     write(*,*)
 !     write(*,*) '========================================='

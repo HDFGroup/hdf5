@@ -208,6 +208,8 @@
           INTEGER     :: i, j    !general purpose integers
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims = (/5,6/)
           INTEGER(SIZE_T)  max_len
+          INTEGER(HID_T) ::  vl_type_id
+          LOGICAL        ::  vl_flag
 
           !
           ! Initialize the vl_int_data array.
@@ -257,6 +259,15 @@
           CALL h5dcreate_f(file_id, dsetname, vltype_id, dspace_id, &
                            dset_id, error)
               CALL check("h5dcreate_f", error, total_error)
+          CALL h5dget_type_f(dset_id, vl_type_id, error)
+              CALL check("h5dget_type_f", error, total_error)
+          CALL h5tis_variable_str_f( vl_type_id, vl_flag, error)
+              CALL check("h5tis_variable_str_f", error, total_error)
+              if( vl_flag ) then
+                 write(*,*) "type is wrong"
+                 total_error = total_error + 1
+              endif
+
 
           !
           ! Write the dataset.
@@ -368,6 +379,8 @@
 
           INTEGER     :: i, j    !general purpose integers
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims = (/10,4/)
+          INTEGER(HID_T) :: vl_type_id
+          LOGICAL        :: vl_flag
 
           !
           ! Initialize the string_data array.
@@ -407,6 +420,17 @@
           CALL h5dcreate_f(file_id, dsetname, H5T_STRING, dspace_id, &
                            dset_id, error)
               CALL check("h5dcreate_f", error, total_error)
+          !
+          ! Check that dataset has a string datatype
+          !
+          CALL h5dget_type_f(dset_id, vl_type_id, error)
+              CALL check("h5dget_type_f", error, total_error)
+          CALL h5tis_variable_str_f( vl_type_id, vl_flag, error)
+              CALL check("h5tis_variable_str_f", error, total_error)
+              if( .NOT. vl_flag ) then
+                 write(*,*) "type is wrong"
+                 total_error = total_error + 1
+              endif
 
           !
           ! Write the dataset.
