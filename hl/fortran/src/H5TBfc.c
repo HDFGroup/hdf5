@@ -14,7 +14,7 @@
 
 /* This files contains C stubs for H5D Fortran APIs */
 
-#include "H5TA.h"
+#include "H5TB.h"
 #include "H5LTf90proto.h"
 #include <stdlib.h> 
 
