@@ -22,6 +22,7 @@
 
 #include "testhdf5.h"
 #include "hdf5.h"
+#include "H5Dprivate.h"         /* For Datset creation property list names */
 
 #define FILENAME   "tgenprop.h5"
 
@@ -1202,6 +1203,170 @@ test_genprop_list_callback(void)
 
 /****************************************************************
 **
+**  test_genprop_list_addprop(): Test adding properties to a
+**      standard HDF5 property list and verify that the library
+**      ignores the extra properties.
+** 
+****************************************************************/
+static void 
+test_genprop_list_addprop(void)
+{
+    hid_t fid;          /* File ID */
+    hid_t did;          /* Dataset ID */
+    hid_t sid;          /* Dataspace ID */
+    hid_t pid;          /* Property List ID */
+    int   prop1_value;  /* Value for property #1 */
+    herr_t ret;		/* Generic return value	*/
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create scalar dataspace for dataset */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create a dataset creation property list */
+    pid = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(pid, FAIL, "H5Pcreate");
+    
+    /* Insert temporary property into class (with no callbacks) */
+    ret = H5Pinsert(pid,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    CHECK_I(ret, "H5Pinsert");
+
+    /* Check existence of added property */
+    ret = H5Pexist(pid,PROP1_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
+    /* Check values of property (set with default value) */
+    ret = H5Pget(pid,PROP1_NAME,&prop1_value);
+    CHECK_I(ret, "H5Pget");
+    VERIFY(prop1_value, *PROP1_DEF_VALUE, "H5Pget");
+
+    /* Create a dataset */
+    did=H5Dcreate(fid,"Dataset1",H5T_NATIVE_INT,sid,pid);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Check existence of added property (after using property list) */
+    ret = H5Pexist(pid,PROP1_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
+    /* Check values of property (set with default value) (after using property list) */
+    ret = H5Pget(pid,PROP1_NAME,&prop1_value);
+    CHECK_I(ret, "H5Pget");
+    VERIFY(prop1_value, *PROP1_DEF_VALUE, "H5Pget");
+
+    /* Close property list */
+    ret = H5Pclose(pid);
+    CHECK(ret, FAIL, "H5Pclose");
+    
+    /* Close disk dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close Dataset */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+} /* end test_genprop_list_addprop() */
+
+/****************************************************************
+**
+**  test_genprop_class_addprop(): Test adding properties to a
+**      standard HDF5 property class and verify that the library
+**      ignores the extra properties and continues to recognize the
+**      derived class as a valid version of the derived-from class.
+** 
+****************************************************************/
+static void 
+test_genprop_class_addprop(void)
+{
+    hid_t fid;          /* File ID */
+    hid_t did;          /* Dataset ID */
+    hid_t sid;          /* Dataspace ID */
+    hid_t cid;          /* Property Class ID */
+    hid_t pid;          /* Property List ID */
+    int   prop1_value;  /* Value for property #1 */
+    herr_t ret;		/* Generic return value	*/
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create scalar dataspace for dataset */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create a new class, dervied from the dataset creation property list class */
+    cid = H5Pcreate_class(H5P_DATASET_CREATE,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
+    CHECK_I(cid, "H5Pcreate_class");
+
+    /* Check existence of an original property */
+    ret = H5Pexist(cid,H5D_CRT_DATA_PIPELINE_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
+    /* Insert first property into class (with no callbacks) */
+    ret = H5Pregister(cid,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
+    CHECK_I(ret, "H5Pregister");
+
+    /* Create a derived dataset creation property list */
+    pid = H5Pcreate(cid);
+    CHECK(pid, FAIL, "H5Pcreate");
+    
+    /* Check existence of an original property */
+    ret = H5Pexist(pid,H5D_CRT_DATA_PIPELINE_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
+    /* Check existence of added property */
+    ret = H5Pexist(pid,PROP1_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
+    /* Check values of property (set with default value) */
+    ret = H5Pget(pid,PROP1_NAME,&prop1_value);
+    CHECK_I(ret, "H5Pget");
+    VERIFY(prop1_value, *PROP1_DEF_VALUE, "H5Pget");
+
+    /* Create a dataset */
+    did=H5Dcreate(fid,"Dataset1",H5T_NATIVE_INT,sid,pid);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Check existence of added property (after using property list) */
+    ret = H5Pexist(pid,PROP1_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
+    /* Check values of property (set with default value) (after using property list) */
+    ret = H5Pget(pid,PROP1_NAME,&prop1_value);
+    CHECK_I(ret, "H5Pget");
+    VERIFY(prop1_value, *PROP1_DEF_VALUE, "H5Pget");
+
+    /* Close property class */
+    ret = H5Pclose_class(cid);
+    CHECK(ret, FAIL, "H5Pclose");
+    
+    /* Close property list */
+    ret = H5Pclose(pid);
+    CHECK(ret, FAIL, "H5Pclose");
+    
+    /* Close disk dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close Dataset */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+} /* end test_genprop_class_addprop() */
+
+/****************************************************************
+**
 **  test_genprop(): Main generic property testing routine.
 ** 
 ****************************************************************/
@@ -1221,6 +1386,9 @@ test_genprop(void)
     test_genprop_basic_list_prop(); /* Test basic code for adding properties to a generic property list */
     test_genprop_list_iter();  /* Test basic code for iterating over properties in a generic property list */
     test_genprop_list_callback();  /* Test code for property list callbacks */
+
+    test_genprop_list_addprop();    /* Test adding properties to HDF5 property list */
+    test_genprop_class_addprop();   /* Test adding properties to HDF5 property class */
 
 }   /* test_genprop() */
 
