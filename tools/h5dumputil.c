@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "H5tools.h"
+#include "h5tools.h"
 
 /*
  * The output functions need a temporary buffer to hold a piece of the
