@@ -3335,6 +3335,7 @@ H5Tget_member_class(hid_t type_id, int membno)
     H5T_class_t	ret_value = H5T_NO_CLASS;
 
     FUNC_ENTER(H5Tget_member_class, H5T_NO_CLASS);
+    H5TRACE2("Tt","iIs",type_id,membno);
 
     /* Check args */
     if (H5I_DATATYPE != H5I_get_type(type_id) ||
@@ -6891,7 +6892,7 @@ H5Tarray_create(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
     hid_t	ret_value = FAIL;	/* return value			*/
     
     FUNC_ENTER(H5Tarray_create, FAIL);
-    H5TRACE1("i","i",base_id);
+    H5TRACE4("i","iIs*h*Is",base_id,ndims,dim,perm);
 
     /* Check args */
     if (ndims<1 || ndims>H5S_MAX_RANK)
@@ -7009,6 +7010,7 @@ H5Tget_array_ndims(hid_t type_id)
     int	ret_value = FAIL;	    /* return value			*/
     
     FUNC_ENTER(H5Tget_array_ndims, FAIL);
+    H5TRACE1("Is","i",type_id);
 
     /* Check args */
     if (H5I_DATATYPE!=H5I_get_type(type_id) || NULL==(dt=H5I_object(type_id)))
@@ -7046,6 +7048,7 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
     intn    i;                  /* Local index variable */
     
     FUNC_ENTER(H5Tget_array_dims, FAIL);
+    H5TRACE3("e","i*h*Is",type_id,dims,perm);
 
     /* Check args */
     if (H5I_DATATYPE!=H5I_get_type(type_id) || NULL==(dt=H5I_object(type_id)))
