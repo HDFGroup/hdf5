@@ -134,6 +134,15 @@ fi # Do CVS checkout
 # Run Test the HDF5 library
 #=============================
 if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
+    # Make sure current version exists and is clean
+    if [ -d ${COMPARE}/current ]; then
+	(cd ${COMPARE}/current && make distclean)
+    else
+	errcode=$?
+        snapshot=no
+        exit $errcode
+    fi
+
     # Compare it with the previous version.  Compare only files listed in
     # the MANIFEST plus the MANIFEST itself.
     if [ -d ${COMPARE}/previous ]; then
@@ -153,7 +162,7 @@ if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
     if [ "$snapshot" = "yes" ]; then
 	if (cd ${COMPARE}/current; \
 	    ${CONFIGURE}; \
-	    make _test); then
+	    make check); then
 	    :
 	else
 	    errcode=$?
