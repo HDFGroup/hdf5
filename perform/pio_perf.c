@@ -117,14 +117,11 @@ static const char  *progname = "h5perf";
  * adding more, make sure that they don't clash with each other.
  */
 #if 1
-static const char *s_opts = "ha:A:B:cCd:D:e:F:i:Ino:p:P:stT:wx:X:";
+static const char *s_opts = "a:A:B:cCd:D:e:F:hi:Ino:p:P:stT:wx:X:";
 #else
-static const char *s_opts = "ha:A:bB:cCd:D:e:F:i:Ino:p:P:stT:wx:X:";
+static const char *s_opts = "a:A:bB:cCd:D:e:F:hi:Ino:p:P:stT:wx:X:";
 #endif  /* 1 */
 static struct long_options l_opts[] = {
-    { "help", no_arg, 'h' },
-    { "hel", no_arg, 'h' },
-    { "he", no_arg, 'h' },
     { "align", require_arg, 'a' },
     { "alig", require_arg, 'a' },
     { "ali", require_arg, 'a' },
@@ -165,6 +162,9 @@ static struct long_options l_opts[] = {
     { "debu", require_arg, 'D' },
     { "deb", require_arg, 'D' },
     { "de", require_arg, 'D' },
+    { "help", no_arg, 'h' },
+    { "hel", no_arg, 'h' },
+    { "he", no_arg, 'h' },
     { "interleaved", require_arg, 'I' },
     { "interleave", require_arg, 'I' },
     { "interleav", require_arg, 'I' },
@@ -219,7 +219,6 @@ static struct long_options l_opts[] = {
     { "num-byte", require_arg, 'e' },
     { "num-byt", require_arg, 'e' },
     { "num-by", require_arg, 'e' },
-    { "num-b", require_arg, 'e' },
     { "num-b", require_arg, 'e' },
     { "num-dsets", require_arg, 'd' },
     { "num-dset", require_arg, 'd' },
@@ -1343,7 +1342,9 @@ usage(const char *prog)
 #if 0
         printf("     -b, --binary                The elusive binary option\n");
 #endif  /* 0 */
-        printf("     -B N, --block-size=N        Block size within transfer buffer [default:128K]\n");
+        printf("     -B S, --block-size=S        Block size within transfer buffer\n");
+        printf("                                 (see below for description)\n");
+        printf("                                 [default:128K]\n");
         printf("     -c, --chunk                 Create HDF5 datasets chunked [default: off]\n");
         printf("     -C, --collective            Use collective I/O for MPI and HDF5 APIs\n");
         printf("                                 [default: off (i.e. independent I/O)]\n");
@@ -1378,7 +1379,7 @@ usage(const char *prog)
         printf("          M - Megabyte (%d)\n", ONE_MB);
         printf("          G - Gigabyte (%d)\n", ONE_GB);
         printf("\n");
-        printf("      Example: 37M = 37 Megabytes = %d bytes\n", 37*ONE_MB);
+        printf("      Example: '37M' is 37 megabytes or %d bytes\n", 37*ONE_MB);
         printf("\n");
         printf("  AL - is an API list. Valid values are:\n");
         printf("          phdf5 - Parallel HDF5\n");
@@ -1387,12 +1388,34 @@ usage(const char *prog)
         printf("\n");
         printf("      Example: --api=mpiio,phdf5\n");
         printf("\n");
+        printf("  Block size vs. Transfer buffer size:\n");
+        printf("      The transfer buffer size is the size of a buffer in memory, which is\n");
+        printf("      broken into 'block size' pieces and written to the file.  The pattern\n");
+        printf("      of the blocks in the file is described below in the 'Interleaved vs.\n");
+        printf("      Contiguous blocks' example.\n");
+        printf("\n");
+        printf("      If the collective I/O option is given, the blocks in each transfer buffer\n");
+        printf("      are written at once with an MPI derived type, for the MPI-I/O and PHDF5\n");
+        printf("      APIs.\n");
+        printf("\n");
         printf("  Interleaved vs. Contiguous blocks:\n");
-        printf("      For example, with a 4 process run,\n");
-        printf("          Contiguous blocks are written to the file like so:\n");
-        printf("              1111222233334444\n");
-        printf("          Interleaved blocks are written to the file like so:\n");
-        printf("              1234123412341234\n");
+        printf("      When contiguous blocks are written to a dataset, the dataset is divided\n");
+        printf("      into '# processes' regions and each process writes data to its own region.\n");
+        printf("      When interleaved blocks are written to a dataset, space for the first\n");
+        printf("      block of the first process is allocated in the dataset, then space is\n");
+        printf("      allocated for the first block of the second process, etc. until space is\n");
+        printf("      allocated for the first block of each process, then space is allocated for\n");
+        printf("      the second block of the first process, the second block of the second\n");
+        printf("      process, etc.\n");
+        printf("\n");
+        printf("      For example, with a 4 process run, 1MB bytes-per-process, 256KB transfer\n");
+        printf("        buffer size, and 64KB block size,\n");
+        printf("          16 contiguous blocks per process are written to the file like so:\n");
+        printf("              1111111111111111222222222222222233333333333333334444444444444444\n");
+        printf("          16 interleaved blocks per process are written to the file like so:\n");
+        printf("              1234123412341234123412341234123412341234123412341234123412341234\n");
+        printf("        If collective I/O is turned on, all of the four blocks per transfer\n");
+        printf("        buffer will be written in one collective I/O call.\n");
         printf("\n");
         printf("  DL - is a list of debugging flags. Valid values are:\n");
         printf("          1 - Minimal\n");
