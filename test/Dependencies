@@ -2,8 +2,8 @@
 ## Only temporary changes may be made here.
 
 h5test.lo: \
-   $(srcdir)/h5test.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/h5test.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -54,8 +54,8 @@ h5test.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 big.lo: \
-   $(srcdir)/big.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/big.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -106,8 +106,8 @@ big.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 bittests.lo: \
-   $(srcdir)/bittests.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/bittests.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -158,8 +158,8 @@ bittests.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 cmpd_dset.lo: \
-   $(srcdir)/cmpd_dset.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/cmpd_dset.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -210,8 +210,8 @@ cmpd_dset.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 dsets.lo: \
-   $(srcdir)/dsets.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/dsets.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -263,8 +263,8 @@ dsets.lo: \
    $(top_srcdir)/src/H5Zprivate.h \
    $(top_srcdir)/src/H5Zpkg.h
 dtypes.lo: \
-   $(srcdir)/dtypes.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/dtypes.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -315,8 +315,8 @@ dtypes.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 extend.lo: \
-   $(srcdir)/extend.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/extend.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -367,8 +367,8 @@ extend.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 external.lo: \
-   $(srcdir)/external.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/external.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -419,8 +419,8 @@ external.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 fillval.lo: \
-   $(srcdir)/fillval.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/fillval.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -471,8 +471,8 @@ fillval.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 flush1.lo: \
-   $(srcdir)/flush1.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/flush1.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -523,8 +523,8 @@ flush1.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 flush2.lo: \
-   $(srcdir)/flush2.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/flush2.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -575,8 +575,8 @@ flush2.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 gheap.lo: \
-   $(srcdir)/gheap.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/gheap.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -630,8 +630,8 @@ gheap.lo: \
    $(top_srcdir)/src/H5Iprivate.h \
    $(top_srcdir)/src/H5Pprivate.h
 hyperslab.lo: \
-   $(srcdir)/hyperslab.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/hyperslab.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -685,8 +685,8 @@ hyperslab.lo: \
    $(top_srcdir)/src/H5MMprivate.h \
    $(top_srcdir)/src/H5Vprivate.h
 istore.lo: \
-   $(srcdir)/istore.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/istore.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -745,8 +745,8 @@ istore.lo: \
    $(top_srcdir)/src/H5MMprivate.h \
    $(top_srcdir)/src/H5Vprivate.h
 lheap.lo: \
-   $(srcdir)/lheap.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/lheap.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -799,8 +799,8 @@ lheap.lo: \
    $(top_srcdir)/src/H5HLprivate.h \
    $(top_srcdir)/src/H5Iprivate.h
 links.lo: \
-   $(srcdir)/links.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/links.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -851,8 +851,8 @@ links.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 mount.lo: \
-   $(srcdir)/mount.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/mount.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -903,8 +903,8 @@ mount.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 mtime.lo: \
-   $(srcdir)/mtime.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/mtime.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -955,8 +955,8 @@ mtime.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 ohdr.lo: \
-   $(srcdir)/ohdr.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/ohdr.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1010,8 +1010,8 @@ ohdr.lo: \
    $(top_srcdir)/src/H5Opkg.h \
    $(top_srcdir)/src/H5Gpkg.h
 stab.lo: \
-   $(srcdir)/stab.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/stab.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1063,8 +1063,8 @@ stab.lo: \
    $(top_srcdir)/src/H5Zprivate.h \
    $(top_srcdir)/src/H5Gpkg.h
 tarray.lo: \
-   $(srcdir)/tarray.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/tarray.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1104,8 +1104,8 @@ tarray.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h
 tattr.lo: \
-   $(srcdir)/tattr.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/tattr.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1145,7 +1145,7 @@ tattr.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h
 tconfig.lo: \
-   $(srcdir)/tconfig.c \
+   $(top_srcdir)/test/tconfig.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1180,14 +1180,14 @@ tconfig.lo: \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/src/H5FSprivate.h \
    $(top_srcdir)/src/H5Eprivate.h
 testhdf5.lo: \
-   $(srcdir)/testhdf5.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/testhdf5.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1198,7 +1198,7 @@ testhdf5.lo: \
    $(top_srcdir)/src/H5Epublic.h \
    $(top_srcdir)/src/H5Ipublic.h
 testmeta.lo: \
-   $(srcdir)/testmeta.c \
+   $(top_srcdir)/test/testmeta.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1234,7 +1234,7 @@ testmeta.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h
 tfile.lo: \
-   $(srcdir)/tfile.c \
+   $(top_srcdir)/test/tfile.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1269,7 +1269,7 @@ tfile.lo: \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/src/H5FSprivate.h \
@@ -1286,8 +1286,8 @@ tfile.lo: \
    $(top_srcdir)/src/H5Rprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 tgenprop.lo: \
-   $(srcdir)/tgenprop.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/tgenprop.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1341,8 +1341,8 @@ tgenprop.lo: \
    $(top_srcdir)/src/H5Pprivate.h \
    $(top_srcdir)/src/H5TBprivate.h
 th5s.lo: \
-   $(srcdir)/th5s.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/th5s.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1380,8 +1380,8 @@ th5s.lo: \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5MMpublic.h
 theap.lo: \
-   $(srcdir)/theap.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/theap.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1393,8 +1393,8 @@ theap.lo: \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5HPprivate.h
 titerate.lo: \
-   $(srcdir)/titerate.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/titerate.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1434,8 +1434,8 @@ titerate.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h
 tmeta.lo: \
-   $(srcdir)/tmeta.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/tmeta.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1449,8 +1449,8 @@ tmeta.lo: \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h
 trefer.lo: \
-   $(srcdir)/trefer.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/trefer.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1490,8 +1490,8 @@ trefer.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h
 trefstr.lo: \
-   $(srcdir)/trefstr.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/trefstr.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1504,8 +1504,8 @@ trefstr.lo: \
    $(top_srcdir)/src/H5FLprivate.h \
    $(top_srcdir)/src/H5RSprivate.h
 tselect.lo: \
-   $(srcdir)/tselect.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/tselect.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1559,8 +1559,8 @@ tselect.lo: \
    $(top_srcdir)/src/H5Zprivate.h \
    $(top_srcdir)/src/H5Pprivate.h
 ttime.lo: \
-   $(srcdir)/ttime.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/ttime.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1600,8 +1600,8 @@ ttime.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h
 ttbbt.lo: \
-   $(srcdir)/ttbbt.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/ttbbt.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1613,8 +1613,8 @@ ttbbt.lo: \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5TBprivate.h
 ttst.lo: \
-   $(srcdir)/ttst.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/ttst.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1626,8 +1626,8 @@ ttst.lo: \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5STprivate.h
 tvltypes.lo: \
-   $(srcdir)/tvltypes.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/tvltypes.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1667,8 +1667,8 @@ tvltypes.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h
 tvlstr.lo: \
-   $(srcdir)/tvlstr.c \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/tvlstr.c \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1708,7 +1708,7 @@ tvlstr.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h
 tmisc.lo: \
-   $(srcdir)/tmisc.c \
+   $(top_srcdir)/test/tmisc.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1743,14 +1743,14 @@ tmisc.lo: \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
-   $(srcdir)/testhdf5.h \
+   $(top_srcdir)/test/testhdf5.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/src/H5FSprivate.h \
    $(top_srcdir)/src/H5Eprivate.h
 unlink.lo: \
-   $(srcdir)/unlink.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/unlink.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1801,8 +1801,8 @@ unlink.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 enum.lo: \
-   $(srcdir)/enum.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/enum.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1853,8 +1853,8 @@ enum.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 ttsafe.lo: \
-   $(srcdir)/ttsafe.c \
-   $(srcdir)/ttsafe.h \
+   $(top_srcdir)/test/ttsafe.c \
+   $(top_srcdir)/test/ttsafe.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1894,8 +1894,8 @@ ttsafe.lo: \
    $(top_srcdir)/src/H5FSprivate.h \
    $(top_srcdir)/src/H5Eprivate.h
 ttsafe_dcreate.lo: \
-   $(srcdir)/ttsafe_dcreate.c \
-   $(srcdir)/ttsafe.h \
+   $(top_srcdir)/test/ttsafe_dcreate.c \
+   $(top_srcdir)/test/ttsafe.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1935,8 +1935,8 @@ ttsafe_dcreate.lo: \
    $(top_srcdir)/src/H5FSprivate.h \
    $(top_srcdir)/src/H5Eprivate.h
 ttsafe_error.lo: \
-   $(srcdir)/ttsafe_error.c \
-   $(srcdir)/ttsafe.h \
+   $(top_srcdir)/test/ttsafe_error.c \
+   $(top_srcdir)/test/ttsafe.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -1976,8 +1976,8 @@ ttsafe_error.lo: \
    $(top_srcdir)/src/H5FSprivate.h \
    $(top_srcdir)/src/H5Eprivate.h
 ttsafe_cancel.lo: \
-   $(srcdir)/ttsafe_cancel.c \
-   $(srcdir)/ttsafe.h \
+   $(top_srcdir)/test/ttsafe_cancel.c \
+   $(top_srcdir)/test/ttsafe.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -2017,8 +2017,8 @@ ttsafe_cancel.lo: \
    $(top_srcdir)/src/H5FSprivate.h \
    $(top_srcdir)/src/H5Eprivate.h
 ttsafe_acreate.lo: \
-   $(srcdir)/ttsafe_acreate.c \
-   $(srcdir)/ttsafe.h \
+   $(top_srcdir)/test/ttsafe_acreate.c \
+   $(top_srcdir)/test/ttsafe.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -2058,8 +2058,8 @@ ttsafe_acreate.lo: \
    $(top_srcdir)/src/H5FSprivate.h \
    $(top_srcdir)/src/H5Eprivate.h
 gass_write.lo: \
-   $(srcdir)/gass_write.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/gass_write.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -2110,8 +2110,8 @@ gass_write.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 gass_read.lo: \
-   $(srcdir)/gass_read.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/gass_read.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -2162,8 +2162,8 @@ gass_read.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 gass_append.lo: \
-   $(srcdir)/gass_append.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/gass_append.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -2214,8 +2214,8 @@ gass_append.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 srb_read.lo: \
-   $(srcdir)/srb_read.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/srb_read.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -2266,8 +2266,8 @@ srb_read.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 srb_write.lo: \
-   $(srcdir)/srb_write.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/srb_write.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -2318,8 +2318,8 @@ srb_write.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 srb_append.lo: \
-   $(srcdir)/srb_append.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/srb_append.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -2370,7 +2370,7 @@ srb_append.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 stream_test.lo: \
-   $(srcdir)/stream_test.c \
+   $(top_srcdir)/test/stream_test.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -2406,7 +2406,7 @@ stream_test.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h
 set_extent.lo: \
-   $(srcdir)/set_extent.c \
+   $(top_srcdir)/test/set_extent.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -2441,7 +2441,7 @@ set_extent.lo: \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/src/H5FSprivate.h \
@@ -2458,7 +2458,7 @@ set_extent.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 getname.lo: \
-   $(srcdir)/getname.c \
+   $(top_srcdir)/test/getname.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -2493,7 +2493,7 @@ getname.lo: \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/src/H5FSprivate.h \
@@ -2510,8 +2510,8 @@ getname.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 file_handle.lo: \
-   $(srcdir)/file_handle.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/file_handle.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -2562,8 +2562,8 @@ file_handle.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 ntypes.lo: \
-   $(srcdir)/ntypes.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/ntypes.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -2614,8 +2614,60 @@ ntypes.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h
 dangle.lo: \
-   $(srcdir)/dangle.c \
-   $(srcdir)/h5test.h \
+   $(top_srcdir)/test/dangle.c \
+   $(top_srcdir)/test/h5test.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5public.h \
+   $(top_builddir)/src/H5pubconf.h \
+   $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5ACpublic.h \
+   $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5Dpublic.h \
+   $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Fpublic.h \
+   $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5HGpublic.h \
+   $(top_srcdir)/src/H5HLpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
+   $(top_srcdir)/src/H5Opublic.h \
+   $(top_srcdir)/src/H5Ppublic.h \
+   $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Rpublic.h \
+   $(top_srcdir)/src/H5Spublic.h \
+   $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5FDcore.h \
+   $(top_srcdir)/src/H5FDfamily.h \
+   $(top_srcdir)/src/H5FDfphdf5.h \
+   $(top_srcdir)/src/H5FDmpio.h \
+   $(top_srcdir)/src/H5FDgass.h \
+   $(top_srcdir)/src/H5FDlog.h \
+   $(top_srcdir)/src/H5FDmpiposix.h \
+   $(top_srcdir)/src/H5FDmulti.h \
+   $(top_srcdir)/src/H5FDsec2.h \
+   $(top_srcdir)/src/H5FDsrb.h \
+   $(top_srcdir)/src/H5FDstdio.h \
+   $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/src/H5private.h \
+   $(top_srcdir)/src/H5MPprivate.h \
+   $(top_srcdir)/src/H5FSprivate.h \
+   $(top_srcdir)/src/H5Tpkg.h \
+   $(top_srcdir)/src/H5Tprivate.h \
+   $(top_srcdir)/src/H5Gprivate.h \
+   $(top_srcdir)/src/H5Bprivate.h \
+   $(top_srcdir)/src/H5ACprivate.h \
+   $(top_srcdir)/src/H5Fprivate.h \
+   $(top_srcdir)/src/H5RSprivate.h \
+   $(top_srcdir)/src/H5Rprivate.h \
+   $(top_srcdir)/src/H5Dprivate.h \
+   $(top_srcdir)/src/H5Oprivate.h \
+   $(top_srcdir)/src/H5HGprivate.h \
+   $(top_srcdir)/src/H5Zprivate.h
+errors.lo: \
+   $(top_srcdir)/test/errors.c \
+   $(top_srcdir)/test/h5test.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
