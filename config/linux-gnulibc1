@@ -12,8 +12,12 @@ if test -z "$CC"; then
    CC_BASENAME=gcc
 fi
 
-# Omit frame pointer for optimized code?
-NOFP=${NOFP:=-fomit-frame-pointer}
-
-# Figure out compiler flags
+# Figure out GNU C compiler flags
 . $srcdir/config/gnu-flags
+
+# Figure out PGI C compiler flags
+. $srcdir/config/pgi-flags
+
+# Figure out Intel C compiler flags
+. $srcdir/config/intel-flags
+

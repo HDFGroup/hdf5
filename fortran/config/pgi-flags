@@ -1,28 +1,28 @@
 #							-*- shell-script -*-
 #
 # This file should be sourced into configure if the compiler is the
-# Intel icc compiler or a derivative.  It is careful not to do anything
-# if the compiler is not Intel; otherwise `cc_flags_set' is set to `yes'
+# PGI pgcc compiler or a derivative.  It is careful not to do anything
+# if the compiler is not PGI; otherwise `cc_flags_set' is set to `yes'
 #
 
-# Get the compiler version in a way that works for icc
-# icc unless a compiler version is already known
+# Get the compiler version in a way that works for pgcc
+# pgcc unless a compiler version is already known
 #
-#   cc_vendor:    The compiler name: icc
-#   cc_version:   Version number: 8.0
+#   cc_vendor:    The compiler name: pgcc
+#   cc_version:   Version number: 5.0-2, 5.2-2
 #
 if test X = "X$cc_flags_set"; then
-    cc_version="`$CC $CFLAGS -V 2>&1 |grep '^Intel'`"
+    cc_version="`$CC $CFLAGS -V 2>&1 |grep '^pgcc'`"
     if test X != "X$cc_version"; then
-        cc_vendor=icc
-        cc_version="`$CC $CFLAGS --version 2>&1`"
-        echo "compiler '$CC' is Intel $cc_vendor-$cc_version"
+        cc_vendor=`echo $cc_version |sed 's/\([a-z]*\).*/\1/'`
+        cc_version=`echo $cc_version |sed 's/pgcc \([-a-z0-9\.\-]*\).*/\1/'`
+        echo "compiler '$CC' is PGI $cc_vendor-$cc_version"
 
         # Some version numbers
-        # Intel version numbers are of the form: "major.minor"
+        # PGI version numbers are of the form: "major.minor-patch"
         cc_vers_major=`echo $cc_version | cut -f1 -d.`
-        cc_vers_minor=`echo $cc_version | cut -f2 -d.`
-        #cc_vers_patch=`echo $cc_version | cut -f2 -d.`
+        cc_vers_minor=`echo $cc_version | cut -f2 -d. | cut -f1 -d-`
+        cc_vers_patch=`echo $cc_version | cut -f2 -d. | cut -f2 -d-`
         test -n "$cc_vers_major" || cc_vers_major=0
         test -n "$cc_vers_minor" || cc_vers_minor=0
         test -n "$cc_vers_patch" || cc_vers_patch=0
@@ -30,8 +30,8 @@ if test X = "X$cc_flags_set"; then
     fi
 fi
 
-# Common Intel flags for various situations
-if test "X-icc" = "X-$cc_vendor"; then
+# Common PGI flags for various situations
+if test "X-pgcc" = "X-$cc_vendor"; then
     # Insert section about version specific problems from gnu-flags here, if
     # necessary.
 
@@ -53,24 +53,24 @@ if test "X-icc" = "X-$cc_vendor"; then
     #esac
 
     # General
-    CFLAGS="$CFLAGS $arch -Wall -Wcheck"
+    CFLAGS="$CFLAGS $arch -Minform,warn"
 
     # Production
 
     # Omit frame pointer for optimized code?
-    #NOFP=${NOFP:=-Mnoframe}
+    NOFP=${NOFP:=-Mnoframe}
 
-    #PROD_CFLAGS="-O3 $NOFP"
-    PROD_CFLAGS="-O3"
+    PROD_CFLAGS="-fast -s $NOFP"
     PROD_CPPFLAGS=
 
     # Debug
-    DEBUG_CFLAGS="-g"
+    DEBUG_CFLAGS="-g -Mbounds -Mchkfpstk"
     DEBUG_CPPFLAGS=
 
     # Profile
+    PROFILE_CFLAGS="-g -Mprof=func,line"
     # Use this for profiling with gprof
-    PROFILE_CFLAGS="-g -p"
+    #PROFILE_CFLAGS="-g -pg"
     PROFILE_CPPFLAGS=
 
     # Flags are set
@@ -83,5 +83,4 @@ if test "X-$cc_flags_set" = "X-"; then
   cc_vendor=
   cc_version=
 fi
-
 

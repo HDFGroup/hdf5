@@ -11,11 +11,5 @@ if test "X-" = "X-$CC"; then
     CC_BASENAME=gcc
 fi
 
-# Architecture-specific flags
-ARCH=
-
-# Omit frame pointer for optimized code?
-NOFP=${NOFP:=-fomit-frame-pointer}
-
 # Figure out compiler flags
 . $srcdir/config/gnu-flags

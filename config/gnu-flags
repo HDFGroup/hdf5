@@ -89,42 +89,47 @@ EOF
 
 fi
 
-arch=
-# Architecture-specific flags
-case "$host_os-$host_cpu" in
-    # FreeBSD sets the information from "uname -m" to the general machine
-    # architecture, not the specific CPU for the machine, so even our
-    # Pentium II Xeon server is set to "i386".  Once we know we are on a FreeBSD
-    # machine, use the "sysctl" command to get the CPU hardware model.
-    freebsd*-i386)
-        host_cpu_model=`sysctl -n hw.model`
-        case "$host_cpu_model" in
-            # Hmm.. this might not catch Celerons, but it won't hurt them either...
-            *Pro*|*II*|*III*|*IV*|*Athlon*)
-                arch="-march=i686"
-            ;;
-        esac
-        ;;
-
-    *-i686)
-        arch="-march=i686"
-        ;;
-esac
-
-# Host-specific flags
-case "`hostname`" in
-    sleipnir.ncsa.uiuc.edu)
-        arch="$arch -pipe"
-        ;;
-esac
-
 # Common GCC flags for various situations
 case "$cc_vendor-$cc_version" in
   gcc*|egcs*|pgcc*)
+
+    # Architecture-specific flags
+    arch=
+    case "$host_os-$host_cpu" in
+        # FreeBSD sets the information from "uname -m" to the general machine
+        # architecture, not the specific CPU for the machine, so even our
+        # Pentium II Xeon server is set to "i386".  Once we know we are on a FreeBSD
+        # machine, use the "sysctl" command to get the CPU hardware model.
+        freebsd*-i386)
+            host_cpu_model=`sysctl -n hw.model`
+            case "$host_cpu_model" in
+                # Hmm.. this might not catch Celerons, but it won't hurt them either...
+                *Pro*|*II*|*III*|*IV*|*Athlon*)
+                    arch="-march=i686"
+                ;;
+            esac
+            ;;
+
+        *-i686)
+            arch="-march=i686"
+            ;;
+    esac
+
+    # Host-specific flags
+    case "`hostname`" in
+        sleipnir.ncsa.uiuc.edu)
+            arch="$arch -pipe"
+            ;;
+    esac
+
     # General
     CFLAGS="$CFLAGS $arch -ansi -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline"
 
     # Production
+
+    # Omit frame pointer for optimized code?
+    NOFP=${NOFP:=-fomit-frame-pointer}
+
     case "$cc_vendor-$cc_version" in
       gcc-2.95.[34])
         PROD_CFLAGS="-O3 $NOFP"
@@ -157,6 +162,9 @@ case "$cc_vendor-$cc_version" in
     # Profile
     PROFILE_CFLAGS="-g -pg"
     PROFILE_CPPFLAGS=
+
+    # Flags are set
+    cc_flags_set=yes
     ;;
 esac
 
@@ -190,9 +198,6 @@ case "$cc_vendor-$cc_version" in
 
     # Append more extra warning flags that only gcc3.4+ know about
     CFLAGS="$CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
-
-    # Flags are set
-    cc_flags_set=yes
     ;;
 
   gcc-3.3*)
@@ -217,9 +222,6 @@ case "$cc_vendor-$cc_version" in
 
     # Append more extra warning flags that only gcc3.3+ know about
     CFLAGS="$CFLAGS -Wendif-labels"
-
-    # Flags are set
-    cc_flags_set=yes
     ;;
 
   gcc-3.2*)
@@ -241,9 +243,6 @@ case "$cc_vendor-$cc_version" in
 
     # The "unreachable code" warning does not appear to be reliable yet...
     #CFLAGS="$CFLAGS -Wunreachable-code"
-
-    # Flags are set
-    cc_flags_set=yes
     ;;
 
   gcc-3*)
@@ -255,17 +254,11 @@ case "$cc_vendor-$cc_version" in
 
     # Append some extra warning flags that only gcc3+ know about
     CFLAGS="$CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
-
-    # Flags are set
-    cc_flags_set=yes
     ;;
 
   gcc-2.9[56]*)
     # Disable warnings about using 'long long' type
     CFLAGS="$CFLAGS -Wno-long-long"
-
-    # Flags are set
-    cc_flags_set=yes
     ;;
 esac
 

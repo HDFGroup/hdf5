@@ -11,20 +11,17 @@ if test "X-" = "X-$CC"; then
     CC_BASENAME=gcc
 fi
 
-# Architecture-specific flags
-ARCH=
-
-
-# Omit frame pointer for optimized code?
-NOFP=${NOFP:=-fomit-frame-pointer}
-
 . $srcdir/config/gnu-flags
-    if test "X-$F9X" = "X-f95"; then
-    CFLAGS="$CFLAGS -DH5_ABSOFT"
-    fi
 
 
 # The default Fortran 90 compiler
+if test "X-" = "X-$F9X"; then
+    F9X=xlf
+    F9X_BASENAME=xlf
+  else
+    F9X_BASENAME=f95
+    
+fi
 
 #
 # HDF5 integers
@@ -42,36 +39,32 @@ HID_T='SELECTED_INT_KIND(R_INTEGER)'
 SIZE_T='SELECTED_INT_KIND(R_INTEGER)'
 OBJECT_NAMELEN_DEFAULT_F=-1
 
-if test "X-" = "X-$F9X"; then
-    F9X=xlf
-    F9X_BASENAME=xlf
-  else
-    F9X_BASENAME=f95
-    
-fi
-
 case $F9X_BASENAME in
     xlf) 
-    F9XSUFFIXFLAG="-qsuffix=f=f90 -qfree=f90"
-    FFLAGS="$FFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ "
-    FSEARCH_DIRS="-I./ -I../src"
-    DEBUG_FFLAGS="-O"
-    PROD_FFLAGS="-O"
-    PROFILE_FFLAGS="-O"
-    f9x_flags_set=yes
-    ;;
-#
-# Assume Absoft compiler
-#
-    f95)
-    F9XSUFFIXFLAG=""
-#We enforce that external name will appear in upper case (this is a default for Absoft)
-    FFLAGS="$FFLAGS -YEXT_NAMES=UCS"
-    FSEARCH_DIRS=""
-    DEBUG_FFLAGS="-O"
-    PROD_FFLAGS="-O"
-    PROFILE_FFLAGS="-O"
-    f9x_flags_set=yes
-    ;;
+        F9XSUFFIXFLAG="-qsuffix=f=f90 -qfree=f90"
+        FFLAGS="$FFLAGS -static -O ${F9XSUFFIXFLAG} -qmoddir=./ "
+        FSEARCH_DIRS="-I./ -I../src"
+        DEBUG_FFLAGS="-g"
+        PROD_FFLAGS="-O"
+        PROFILE_FFLAGS="-g -pg"
+        f9x_flags_set=yes
+        ;;
 
-esac  
+    #
+    # Assume Absoft compiler
+    #
+    f95)
+        # Set required flag for compiling C stubs
+        CFLAGS="$CFLAGS -DH5_ABSOFT"
+
+        F9XSUFFIXFLAG=""
+#We enforce that external name will appear in upper case (this is a default for Absoft)
+        FFLAGS="$FFLAGS -YEXT_NAMES=UCS"
+        FSEARCH_DIRS=""
+        DEBUG_FFLAGS="-g"
+        PROD_FFLAGS="-O"
+        PROFILE_FFLAGS="-g"
+        f9x_flags_set=yes
+        ;;
+
+esac

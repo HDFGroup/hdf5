@@ -292,21 +292,36 @@ case "X-$enable_production" in
       CFLAGS=$CFLAGS_temp
     fi
 
+    dnl Remove the "-g" flag from FFLAGS if it's in there.
+    dnl
+    FFLAGS_temp=""
+    if test -n "$FFLAGS"; then
+      for d in $FFLAGS ; do
+        if test "X$d" != "X-g"; then
+          FFLAGS_temp="$FFLAGS_temp $d"
+        fi
+      done
+      FFLAGS=$FFLAGS_temp
+    fi
+
     CONFIG_MODE=production
     CFLAGS="$CFLAGS $PROD_CFLAGS"
     CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
+    FFLAGS="$FFLAGS $PROD_FFLAGS"
     ;;
   X-no)
     AC_MSG_RESULT("development")
     CONFIG_MODE=development
     CFLAGS="$CFLAGS $DEBUG_CFLAGS"
     CPPFLAGS="$CPPFLAGS $DEBUG_CPPFLAGS"
+    FFLAGS="$FFLAGS $DEBUG_FFLAGS"
     ;;
   X-pg|X-profile)
     AC_MSG_RESULT("profile")
     CONFIG_MODE=profile
-    CFLAGS="$CXXFLAGS $PROFILE_CFLAGS"
+    CFLAGS="$CFLAGS $PROFILE_CFLAGS"
     CPPFLAGS="$CPPFLAGS $PROFILE_CPPFLAGS"
+    FFLAGS="$FFLAGS $PROFILE_FFLAGS"
     ;;
   *)
     AC_MSG_RESULT("user-defined")
