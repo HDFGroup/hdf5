@@ -10,7 +10,7 @@ GROUP "/" {
          DATATYPE  "/Datatype"
          DATASPACE  SCALAR
          DATA {
-            8
+         (0): 8
          }
       }
    }

@@ -7,7 +7,7 @@ GROUP "/" {
       DATATYPE  "/vl_string_type"
       DATASPACE  SCALAR
       DATA {
-         "This is the string for the attribute"
+      (0): "This is the string for the attribute"
       }
    }
    DATASET "Dataset1" {
@@ -19,9 +19,9 @@ GROUP "/" {
          }
       DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
       DATA {
-        (0): "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
-        (1): "conceived in liberty and dedicated to the proposition that all men are created equal.",
-        (2): "", NULL
+      (0): "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
+      (1): "conceived in liberty and dedicated to the proposition that all men are created equal.",
+      (2): "", NULL
       }
    }
    DATATYPE "vl_string_type"       H5T_STRING {
