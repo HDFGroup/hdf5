@@ -639,7 +639,7 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
     H5AC_slot_t            *slot = NULL;
 
 #ifdef H5AC_DEBUG
-    static                  ncalls = 0;
+    static int		    ncalls = 0;
     if (0 == ncalls++) {
         fprintf(stderr, "HDF5-DIAG: debugging cache (expensive)\n");
     }
