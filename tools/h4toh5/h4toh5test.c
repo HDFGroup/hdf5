@@ -1071,7 +1071,13 @@ int  test_ras24() {
   int32 start[2], edges[2],dims[2];
   int8 image_data24[Y_LENGTH][X_LENGTH][3];
   uint8 image_datau24[Y_LENGTH][X_LENGTH][3];
+<<<<<<< h4toh5test.c
+  unsigned char t24[13][15][3],tl24[13][3][15],tp24[3][13][15];
+  int32 dimst24[2];
+  intn i, j,k,m,n,p,q,co;
+=======
   int i, j;
+>>>>>>> 1.3.2.5
   int32 CUB_SIZE;
 
 
@@ -1094,6 +1100,69 @@ int  test_ras24() {
 			
     }
   }
+
+  k =0;
+  m = 0;
+  n = 0;
+  for (j = 0; j < 13; j++) {
+    for (i = 0; i < 15; i++) {
+      t24[j][i][0] = k;
+      t24[j][i][1] = k;
+      t24[j][i][2] = k;
+      k = k+1;
+      n = n+1;
+     if(n%13==0) {
+      k=m+1;		
+      m++;
+     }
+   } 
+  }
+
+  k = 0;
+  m = 0;
+  n = 0;
+  p = 0;
+  for (j = 0; j < 13; j++) {
+   for (co =0;co<3;co++) {
+    for (i = 0; i < 15; i++) {
+      tl24[j][co][i] = k;
+      k = k+1;
+      p = p+1;
+     if(p%13==0) {
+      m=m+1;		
+      if(m%3==0) n++;
+      k = n;
+     }
+   } 
+   }
+  }
+  
+  k = 0;
+  m = 0;
+  n = 0;
+  p = 0;
+  q = 0;
+  for (co = 0; co < 3; co++) {
+   for (j =0;j<13;j++) {
+    for (i = 0; i < 15; i++) {
+      tp24[co][j][i] = k;
+      k++;
+      m++;
+      q++;
+      p++;
+      if(p%13 ==0) {
+        n++;
+        k = n;
+      }
+     if(q%(13*15)==0) {
+        k = 0;
+        n = 0;
+     }
+   } 
+   }
+  }
+  dimst24[0] = 13;
+  dimst24[1] = 15;
 
   /* Open the file. */
   file_id = Hopen(FILERAS24, DFACC_CREATE, 0);
@@ -1153,6 +1222,85 @@ int  test_ras24() {
   }
   /* Write the stored data to the image array. */
   istat = GRwriteimage(ri_id, start, NULL, edges, (VOIDP)image_data24);
+  if(istat == FAIL) {
+    printf("fail to write GR image.\n");
+    return FAIL;
+  }
+  /* Terminate access to the image. */
+  GRendaccess(ri_id);
+
+
+/* pixel interlaced.*/
+ncomp = 3;
+il = MFGR_INTERLACE_PIXEL;
+for(i=0;i<2;i++) 
+{   
+  
+   start[i] =0;
+   edges[i] = dimst24[i];
+}
+  ri_id = GRcreate(gr_id, "t24", ncomp, DFNT_UCHAR8, il, dimst24);
+  if(ri_id == FAIL) {
+    printf("fail to create GR object.\n");
+    return FAIL;
+  }
+  istat = GRwriteimage(ri_id, start, NULL, edges, (VOIDP)t24);
+  if(istat == FAIL) {
+    printf("fail to write GR image.\n");
+    return FAIL;
+  }
+
+  GRendaccess(ri_id);
+
+  /* we will use DF24 APIs to test interlace function of image. */
+  DF24setil(MFGR_INTERLACE_PIXEL);
+  DF24addimage("ras24il.hdf",(VOIDP)t24,13,15);     
+   DF24setil(MFGR_INTERLACE_COMPONENT);    
+  DF24addimage("ras24il.hdf",(VOIDP)tp24,13,15);
+
+/* component interlaced.*/
+  ncomp = 3;
+  il = MFGR_INTERLACE_COMPONENT;
+
+for(i=0;i<2;i++) 
+{   
+  
+   start[i] =0;
+   edges[i] = dimst24[i];
+}
+  /* Create the array. */
+  ri_id = GRcreate(gr_id, "tp24", ncomp, DFNT_UCHAR8, il, dimst24);
+  if(ri_id == FAIL) {
+    printf("fail to create GR object.\n");
+    return FAIL;
+  }
+  /* Write the stored data to the image array. */
+  istat = GRwriteimage(ri_id, start, NULL, edges, (VOIDP)tp24);
+  if(istat == FAIL) {
+    printf("fail to write GR image.\n");
+    return FAIL;
+  }
+
+  /* Terminate access to the image. */
+  GRendaccess(ri_id);
+
+/* line interlaced. */
+  ncomp = 3;
+  il = MFGR_INTERLACE_LINE;
+for(i=0;i<2;i++) 
+{   
+  
+   start[i] =0;
+   edges[i] = dimst24[i];
+}
+  /* Create the array. */
+  ri_id = GRcreate(gr_id, "tl24", ncomp, DFNT_UCHAR8, il, dimst24);
+  if(ri_id == FAIL) {
+    printf("fail to create GR object.\n");
+    return FAIL;
+  }
+  /* Write the stored data to the image array. */
+  istat = GRwriteimage(ri_id, start, NULL, edges, (VOIDP)tl24);
   if(istat == FAIL) {
     printf("fail to write GR image.\n");
     return FAIL;

@@ -118,7 +118,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   }
 
   istat = GRgetiminfo(ri_id, image_name, &ncomp, &image_dtype, 
-		      NULL, dimsizes, &ngrattrs);
+		      &interlace_mode, dimsizes, &ngrattrs);
 
   if(istat == FAIL) {
     printf("Cannot obtain GR info. at Image routine.\n");
@@ -154,7 +154,16 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
     printf("error in allocating memory for image data. \n");
     return FAIL;
   }
-
+  /* GRreqimageil or GRreadimage are not working, comment this out for the time being.
+  if(interlace_mode == MFGR_INTERLACE_LINE){
+    istat = GRreqimageil(ri_id,MFGR_INTERLACE_PIXEL);
+    if(istat == FAIL){
+      printf("error in setting interlace_mode.\n");
+      free(image_data);
+      return FAIL;
+    }
+  }
+  */
   istat = GRreadimage(ri_id, start, NULL, edges, (VOIDP)image_data);
 
   if (istat == FAIL) {
@@ -179,13 +188,16 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
       h5dims24[1] = edges[0]-start[0];
       h5dims24[2] = 3;
     }
-    /* currently scan-line is not supported.
+    /* currently scan-line is not supported. */
     else if (interlace_mode == MFGR_INTERLACE_LINE){
-      h5dims24[0] = 3;
+      printf("currently line interleaving is not supported.\n");
+      printf("the image %s will not be converted.\n",image_name);
+       free(image_data);
+       return SUCCEED;     
+      /*h5dims24[0] = 3;
       h5dims24[1] = edges[1]-start[1];
-      h5dims24[2] = edges[0]-start[0];
+      h5dims24[2] = edges[0]-start[0];*/
     }
-    */
     else if (interlace_mode == MFGR_INTERLACE_COMPONENT){
       h5dims24[0] = 3;
       h5dims24[1] = edges[1]-start[1];
@@ -411,6 +423,18 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   /* HDF4 can support various compression methods including simple RLE, NBIT, Skip Huffman, gzip,Jpeg , HDF5 currently only supports gzip compression. 
  By default, we will compress HDF5 dataset by using gzip compression if HDF5 file is compressed. */
 
+  /* we don't use data transfer property list. 
+ write_plist = H5Pcreate_list(H5P_DATASET_XFER_NEW);
+ bufsize = h4memsize *h5dims[1]*ncomp;
+
+  if(H5Pset_buffer(write_plist,bufsize,NULL,NULL)<0) {
+    printf("fail to create data transfer property list.\n");
+    free(image_data);
+    free(h5cimage_name);
+    H5Pclose(create_plist);
+    return FAIL;		
+  }
+  */
  if (ncomp == 1) {
 
      h5d_sid = H5Screate_simple(2,h5dims,NULL);
@@ -442,18 +466,11 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
         return FAIL;
      }
 	
-  }
+ }
 
-  else { /* 24-bit image */
+   else { /* 24-bit image */
 
      h5d_sid     = H5Screate_simple(3,h5dims24,NULL);
-     if(h5d_sid < 0) {
-       printf("error in creating space. \n");
-       free(image_data);
-       free(h5cimage_name);
-       H5Pclose(create_plist);
-       return FAIL;
-     }
 
      h5dset      = H5Dcreate(h5_group,h5cimage_name,h5ty_id,h5d_sid,
 			     create_plist);
@@ -473,7 +490,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
         H5Pclose(create_plist);
 	return FAIL;
      } 
-  }
+   }
  
  free(image_data);
 /* convert image annotation into attribute of image dataset.
@@ -652,7 +669,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   istat = GRendaccess(ri_id);
   free(h5cimage_name);
   return SUCCEED;
-}
+  }
 
 /**** palette routine. ****/
 /*-------------------------------------------------------------------------

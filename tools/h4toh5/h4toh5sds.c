@@ -55,7 +55,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   int32*  sds_stride;
   int32   count_sdsdata;
   int32   sds_ref;
-  int   sds_empty;
+  intn   sds_empty;
   int32   istat;
   int     i;
   int32   num_sdsattrs;
@@ -453,7 +453,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   }
   if (H5Dwrite(h5dset,h5_memtype,h5d_sid,h5d_sid,write_plist,	    
   (void *)sds_data)<0) {	*/
-  if (H5Dwrite(h5dset,h5_memtype,h5d_sid,h5d_sid,NULL,	    
+  if (H5Dwrite(h5dset,h5_memtype,h5d_sid,h5d_sid,H5P_DEFAULT,	    
   (void *)sds_data)<0) {		      
     printf("failed to write data into hdf5 dataset");	
     printf(" converted from SDS.\n");
