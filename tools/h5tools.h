@@ -295,6 +295,7 @@ extern ProgType programtype;
 #define CTYPE		"CTYPE"
 #define CONCATENATOR "//"
 #define DATASET "DATASET"
+#define OBJECTID "OBJECTID"
 #define BEGIN		"{"
 #define END		"}"
 #endif
