@@ -41,6 +41,8 @@ New Features
 
 Bug Fixes since HDF5-1.4.1 Release
 ==================================
+   * Fixed bug with non-zero userblock sizes causing raw data to not write
+     correctly.
 
 
 
