@@ -19,6 +19,7 @@ herr_t H5RA_close(H5RA_t *ra);
 H5RA_t *H5RA_create(H5G_entry_t *loc, const char *name, H5T_t *type,
 		  const H5D_create_t *dcpl);
 H5RA_t *H5RA_open(H5G_entry_t *loc, const char *name);
+htri_t H5RA_isa(H5G_entry_t *ent);
 herr_t H5RA_write(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 		 hsize_t size[], void *buf[]);
 herr_t H5RA_read(H5RA_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,

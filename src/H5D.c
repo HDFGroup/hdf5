@@ -1101,7 +1101,57 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     FUNC_LEAVE(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
+ * Function:	H5D_isa
+ *
+ * Purpose:	Determines if an object has the requisite messages for being
+ *		a dataset.
+ *
+ * Return:	Success:	TRUE if the required dataset messages are
+ *				present; FALSE otherwise.
+ *
+ *		Failure:	FAIL if the existence of certain messages
+ *				cannot be determined.
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, November  2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5D_isa(H5G_entry_t *ent)
+{
+    htri_t	exists;
+    
+    FUNC_ENTER(H5D_isa, FAIL);
+    assert(ent);
+
+    /* Data type */
+    if ((exists=H5O_exists(ent, H5O_DTYPE, 0))<0) {
+	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+		      "unable to read object header");
+    } else if (!exists) {
+	HRETURN(FALSE);
+    }
+
+    /* Layout */
+    if ((exists=H5O_exists(ent, H5O_LAYOUT, 0))<0) {
+	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+		      "unable to read object header");
+    } else if (!exists) {
+	HRETURN(FALSE);
+    }
+    
+
+    
+    FUNC_LEAVE(TRUE);
+}
+
+/*
+ *------------------------------------------------------------------------- 
  * Function:	H5D_open
  *
  * Purpose:	Finds a dataset named NAME in file F and builds a descriptor
@@ -1130,7 +1180,7 @@ H5D_open(H5G_entry_t *loc, const char *name)
 {
     H5D_t	*dataset = NULL;	/*the dataset which was found	*/
     H5D_t	*ret_value = NULL;	/*return value			*/
-    H5G_entry_t ent;            /* Dataset symbol table entry */
+    H5G_entry_t ent;            	/*dataset symbol table entry	*/
     
     FUNC_ENTER(H5D_open, NULL);
 
@@ -1173,10 +1223,10 @@ done:
 H5D_t *
 H5D_open_oid(H5G_entry_t *ent)
 {
-    H5D_t *dataset = NULL;      /* New dataset struct */
-    H5D_t *ret_value = NULL;	/*return value			*/
+    H5D_t 	*dataset = NULL;	/*new dataset struct 		*/
+    H5D_t 	*ret_value = NULL;	/*return value			*/
+    H5S_t	*space = NULL;		/*data space			*/
     intn	i;
-    H5S_t	*space = NULL;
     
     FUNC_ENTER(H5D_open_oid, NULL);
 
@@ -1290,8 +1340,7 @@ H5D_open_oid(H5G_entry_t *ent)
     ret_value = dataset;
 
 done:
-    if (space)
-        H5S_close (space);
+    if (space) H5S_close (space);
     if (ret_value==NULL && dataset) {
         if (H5F_addr_defined(&(dataset->ent.header))) {
             H5O_close(&(dataset->ent));

@@ -96,9 +96,22 @@ typedef struct H5G_entry_t {
 typedef struct H5G_t H5G_t;
 
 /*
+ * This table contains a list of object types, descriptions, and the
+ * functions that determine if some object is a particular type.  The table
+ * is allocated dynamically.
+ */
+typedef struct H5G_typeinfo_t {
+    intn	type;			/*one of the public H5G_* types	     */
+    htri_t	(*isa)(H5G_entry_t*);	/*function to determine type	     */
+    char	*desc;			/*description of object type	     */
+} H5G_typeinfo_t;
+
+/*
  * Library prototypes...  These are the ones that other packages routinely
  * call.
  */
+herr_t H5G_register_type(intn type, htri_t(*isa)(H5G_entry_t*),
+			 const char *desc);
 H5G_entry_t *H5G_loc (hid_t loc_id);
 herr_t H5G_mkroot (H5F_t *f, H5G_entry_t *root_entry);
 H5G_entry_t *H5G_entof (H5G_t *grp);
@@ -108,8 +121,10 @@ H5G_t *H5G_open (H5G_entry_t *loc, const char *name);
 H5G_t *H5G_reopen (H5G_t *grp);
 herr_t H5G_close (H5G_t *grp);
 H5G_t *H5G_rootof(H5F_t *f);
+htri_t H5G_isa(H5G_entry_t *ent);
 herr_t H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
 		 const char *new_name, uintn namei_flags);
+intn H5G_get_type(H5G_entry_t *ent);
 herr_t H5G_get_objinfo (H5G_entry_t *loc, const char *name,
 			hbool_t follow_link, H5G_stat_t *statbuf/*out*/);
 herr_t H5G_linkval (H5G_entry_t *loc, const char *name, size_t size,

@@ -3466,6 +3466,41 @@ H5T_create(H5T_class_t type, size_t size)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5T_isa
+ *
+ * Purpose:	Determines if an object has the requisite messages for being
+ *		a data type.
+ *
+ * Return:	Success:	TRUE if the required data type messages are
+ *				present; FALSE otherwise.
+ *
+ *		Failure:	FAIL if the existence of certain messages
+ *				cannot be determined.
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, November  2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5T_isa(H5G_entry_t *ent)
+{
+    htri_t	exists;
+    
+    FUNC_ENTER(H5T_isa, FAIL);
+    assert(ent);
+
+    if ((exists=H5O_exists(ent, H5O_DTYPE, 0))<0) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		      "unable to read object header");
+    }
+    FUNC_LEAVE(exists);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5T_open
  *
  * Purpose:	Open a named data type.

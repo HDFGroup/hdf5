@@ -22,7 +22,7 @@
  * size of that temporary buffer in bytes.  For efficiency's sake, choose the
  * largest value suitable for your machine (for testing use a small value).
  */
-#if 0
+#if 1
 #define H5DUMP_BUFSIZE	(1024*1024)
 #else
 #define H5DUMP_BUFSIZE	(1024)
@@ -126,8 +126,9 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
     } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
 	sprintf(temp, "%g", *((float*)vp));
 	
-    } else if (H5Tequal(type, H5T_NATIVE_CHAR) ||
-	       H5Tequal(type, H5T_NATIVE_UCHAR)) {
+    } else if (info->ascii &&
+	       (H5Tequal(type, H5T_NATIVE_CHAR) ||
+		H5Tequal(type, H5T_NATIVE_UCHAR))) {
 	switch (*((char*)vp)) {
 	case '"':
 	    strcpy(temp, "\\\"");
@@ -223,7 +224,13 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	    }
 	}
 	if (quote) sprintf(temp+strlen(temp), "%c", quote);
-
+	
+    } else if (H5Tequal(type, H5T_NATIVE_CHAR)) {
+	sprintf(temp, "%d", *((signed char*)vp));
+	
+    } else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
+	sprintf(temp, "%u", *((unsigned char*)vp));
+	
     } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
 	sprintf(temp, "%d", *((short*)vp));
 	

@@ -878,6 +878,55 @@ H5O_count (H5G_entry_t *ent, const H5O_class_t *type)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_exists
+ *
+ * Purpose:	Determines if a particular message exists in an object
+ *		header without trying to decode the message.
+ *
+ * Return:	Success:	FALSE if the message does not exist; TRUE if
+ *				th message exists.
+ *
+ *		Failure:	FAIL if the existence of the message could
+ *				not be determined due to some error such as
+ *				not being able to read the object header.
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, November  2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5O_exists(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
+{
+    H5O_t	*oh=NULL;
+    intn	i;
+    
+    FUNC_ENTER(H5O_exists, FAIL);
+    assert(ent);
+    assert(ent->file);
+    assert(type);
+    assert(sequence>=0);
+
+    /* Load the object header */
+    if (NULL==(oh=H5AC_find(ent->file, H5AC_OHDR, &(ent->header),
+			    NULL, NULL))) {
+	HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL,
+		      "unable to load object header");
+    }
+
+    /* Scan through the messages looking for the right one */
+    for (i=0; i<oh->nmesgs; i++) {
+	if (type->id!=oh->mesg[i].type->id) continue;
+	if (--sequence<0) break;
+    }
+
+    FUNC_LEAVE(sequence<0);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_read
  *
  * Purpose:	Reads a message from an object header and returns a pointer

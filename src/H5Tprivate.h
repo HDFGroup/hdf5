@@ -44,6 +44,7 @@ typedef enum H5T_copy_t {
 /* Private functions */
 herr_t H5T_init (void);
 herr_t H5T_init_interface (void);
+htri_t H5T_isa(H5G_entry_t *ent);
 H5T_t *H5T_open (H5G_entry_t *loc, const char *name);
 H5T_t *H5T_create (H5T_class_t type, size_t size);
 H5T_t *H5T_copy (const H5T_t *old_dt, H5T_copy_t method);

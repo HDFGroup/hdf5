@@ -95,6 +95,9 @@ static hbool_t interface_initialize_g = FALSE;
 #define INTERFACE_INIT	H5G_init_interface
 static herr_t H5G_init_interface(void);
 static void H5G_term_interface(void);
+static H5G_typeinfo_t *H5G_type_g = NULL;	/*object typing info	*/
+static size_t H5G_ntypes_g = 0;			/*entries in type table	*/
+static size_t H5G_atypes_g = 0;			/*entries allocated	*/
 
 
 /*-------------------------------------------------------------------------
@@ -523,8 +526,9 @@ H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link,
  *		most SIZE characters (counting the null terminator) are
  *		copied to the BUF result buffer.
  *
- * Return:	Non-negative on success (the link value is in BUF.) /Negative on
- *              failure
+ * Return:	Success:	Non-negative with the link value in BUF.
+ *
+ * 		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Monday, April 13, 1998
@@ -684,6 +688,17 @@ H5G_init_interface(void)
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 		      "unable to initialize interface");
     }
+
+    /*
+     * Initialize the type info table.  Begin with the most general types and
+     * end with the most specific. For instance, any object that has a data
+     * type message is a data type but only some of them are datasets.
+     */
+    H5G_register_type(H5G_TYPE,    H5T_isa,  "data type");
+    H5G_register_type(H5G_GROUP,   H5G_isa,  "group");
+    H5G_register_type(H5G_DATASET, H5D_isa,  "dataset");
+    H5G_register_type(H5G_RAGGED,  H5RA_isa, "ragged array");
+
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -706,6 +721,85 @@ static void
 H5G_term_interface(void)
 {
     H5I_destroy_group(H5I_GROUP);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_register_type
+ *
+ * Purpose:	Register a new object type so H5G_get_type() can detect it.
+ *		One should always register a general type before a more
+ *		specific type.  For instance, any object that has a data type
+ *		message is a data type, but only some of those objects are
+ *		datasets.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, November  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_register_type(intn type, htri_t(*isa)(H5G_entry_t*), const char *_desc)
+{
+    char	*desc = NULL;
+    size_t	i;
+    herr_t	ret_value = FAIL;
+    
+    FUNC_ENTER(H5G_register_type, FAIL);
+    assert(type>=0);
+    assert(isa);
+    assert(_desc);
+
+    /* Copy the description */
+    if (NULL==(desc=H5MM_strdup(_desc))) {
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		    "memory allocation failed for object type description");
+    }
+
+    /*
+     * If the type is already registered then just update its entry without
+     * moving it to the end
+     */
+    for (i=0; i<H5G_ntypes_g; i++) {
+	if (H5G_type_g[i].type==type) {
+	    H5G_type_g[i].isa = isa;
+	    H5MM_xfree(H5G_type_g[i].desc);
+	    H5G_type_g[i].desc = desc;
+	    ret_value = SUCCEED;
+	    goto done;
+	}
+    }
+
+    /* Increase table size */
+    if (H5G_ntypes_g>=H5G_atypes_g) {
+	size_t n = MAX(32, 2*H5G_atypes_g);
+	H5G_typeinfo_t *x = H5MM_realloc(H5G_type_g,
+					 n*sizeof(H5G_typeinfo_t));
+	if (!x) {
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			"memory allocation failed for objec type table");
+	}
+	H5G_atypes_g = n;
+	H5G_type_g = x;
+    }
+    
+    /* Add a new entry */
+    H5G_type_g[H5G_ntypes_g].type = type;
+    H5G_type_g[H5G_ntypes_g].isa = isa;
+    H5G_type_g[H5G_ntypes_g].desc = desc; /*already copied*/
+    H5G_ntypes_g++;
+
+    ret_value = SUCCEED;
+
+ done:
+    if (ret_value<0) H5MM_xfree(desc);
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -842,14 +936,14 @@ H5G_basename(const char *name, size_t *size_p)
  *		
  * Errors:
  *
- * Return:	Success:	Non-negative if name can be fully resolved.	See
- *				above for values of REST, GRP_ENT, and
+ * Return:	Success:	Non-negative if name can be fully resolved.
+ *				See above for values of REST, GRP_ENT, and
  *				OBJ_ENT.  NLINKS has been decremented for
  *				each symbolic link that was followed.
  *
- *		Failure:	Negative if the name could not be fully resolved.
- *				See above for values of REST, GRP_ENT, and
- *				OBJ_ENT.
+ *		Failure:	Negative if the name could not be fully
+ *				resolved. See above for values of REST,
+ *				GRP_ENT, and OBJ_ENT.
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -1191,6 +1285,42 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
     grp->nref = 1;
     FUNC_LEAVE(grp);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_isa
+ *
+ * Purpose:	Determines if an object has the requisite messages for being
+ *		a group.
+ *
+ * Return:	Success:	TRUE if the required group messages are
+ *				present; FALSE otherwise.
+ *
+ *		Failure:	FAIL if the existence of certain messages
+ *				cannot be determined.
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, November  2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5G_isa(H5G_entry_t *ent)
+{
+    htri_t	exists;
+    
+    FUNC_ENTER(H5G_isa, FAIL);
+    assert(ent);
+
+    if ((exists=H5O_exists(ent, H5O_STAB, 0))<0) {
+	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+		      "unable to read object header");
+    }
+    FUNC_LEAVE(exists);
+}
+    
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_open
@@ -1431,8 +1561,8 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
  *
  * Errors:
  *
- * Return:	Success:	Non-negative, see above for values of GRP_ENT and
- *				OBJ_ENT.
+ * Return:	Success:	Non-negative, see above for values of GRP_ENT
+ *				and OBJ_ENT.
  *
  *		Failure:	Negative
  *
@@ -1761,12 +1891,54 @@ H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_get_type
+ *
+ * Purpose:	Returns the type of object pointed to by `ent'.
+ *
+ * Return:	Success:	An object type defined in H5Gpublic.h
+ *
+ *		Failure:	H5G_UNKNOWN
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, November  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+intn
+H5G_get_type(H5G_entry_t *ent)
+{
+    htri_t	isa;
+    size_t	i;
+    
+    FUNC_ENTER(H5G_get_type, H5G_UNKNOWN);
+
+    for (i=H5G_ntypes_g; i>0; --i) {
+	if ((isa=(H5G_type_g[i-1].isa)(ent))<0) {
+	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+			  "unable to determine object type");
+	} else if (isa) {
+	    HRETURN(H5G_type_g[i-1].type);
+	}
+    }
+
+    if (0==i) {
+	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+		      "unable to determine object type");
+    }
+    FUNC_LEAVE(H5G_UNKNOWN);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_get_objinfo
  *
  * Purpose:	Returns information about an object.
  *
- * Return:	Success:	Non-negative with info about the object returned
- *				through STATBUF if it isn't the null pointer.
+ * Return:	Success:	Non-negative with info about the object
+ *				returned through STATBUF if it isn't the null
+ *				pointer.
  *
  *		Failure:	Negative
  *
@@ -1784,9 +1956,6 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
     H5O_stab_t		stab_mesg;
     H5G_entry_t		grp_ent, obj_ent;
     const char		*s = NULL;
-    H5D_t		*temp_dset = NULL;
-    H5G_t		*temp_grp = NULL;
-    H5T_t		*temp_type = NULL;
     
     FUNC_ENTER (H5G_get_objinfo, FAIL);
 
@@ -1833,24 +2002,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 		H5E_clear();
 		statbuf->mtime = 0;
 	    }
-
-	    /*
-	     * Determining the type of an object is a rather expensive
-	     * operation compared to the other stuff here.  It's also not
-	     * very flexible.
-	     */
-	    if (NULL!=(temp_dset=H5D_open (loc, name))) {
-		statbuf->type = H5G_DATASET;
-		H5D_close (temp_dset);
-	    } else if (NULL!=(temp_grp=H5G_open (loc, name))) {
-		statbuf->type = H5G_GROUP;
-		H5G_close (temp_grp);
-	    } else if (NULL!=(temp_type=H5T_open(loc, name))) {
-		statbuf->type = H5G_TYPE;
-		H5T_close(temp_type);
-	    } else {
-		statbuf->type = H5G_UNKNOWN;
-	    }
+	    statbuf->type = H5G_get_type(&obj_ent);
 	    H5E_clear(); /*clear errors resulting from checking type*/
 	}
     }
@@ -1864,8 +2016,8 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
  *
  * Purpose:	Returns the value of a symbolic link.
  *
- * Return:	Success:	Non-negative, with at most SIZE bytes of the link
- *				value copied into the BUF buffer.  If the
+ * Return:	Success:	Non-negative, with at most SIZE bytes of the
+ *				link value copied into the BUF buffer.  If the
  *				link value is larger than SIZE characters
  *				counting the null terminator then the BUF
  *				result will not be null terminated.

@@ -398,6 +398,67 @@ H5RAopen(hid_t loc_id, const char *name)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5RA_isa
+ *
+ * Purpose:	Determines if an object is a ragged array.
+ *
+ * Return:	Success:	TRUE if the object is a ragged array; FALSE
+ *				otherwise.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, November  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5RA_isa(H5G_entry_t *ent)
+{
+    htri_t	exists;
+    H5G_entry_t	d_ent;
+    
+    FUNC_ENTER(H5RA_isa, FAIL);
+
+    /* Open the container group */
+    if ((exists=H5G_isa(ent))<0) {
+	HRETURN_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
+		      "unable to read object header");
+    } else if (!exists) {
+	HRETURN(FALSE);
+    }
+
+    /* Is `raw' a dataset? */
+    if (H5G_find(ent, "raw", NULL, &d_ent)<0 ||
+	(exists=H5D_isa(&d_ent))<0) {
+	HRETURN_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found");
+    } else if (!exists) {
+	HRETURN(FALSE);
+    }
+
+    /* Is `over' a dataset? */
+    if (H5G_find(ent, "over", NULL, &d_ent)<0 ||
+	(exists=H5D_isa(&d_ent))<0) {
+	HRETURN_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found");
+    } else if (!exists) {
+	HRETURN(FALSE);
+    }
+
+    /* Is `meta' a dataset? */
+    if (H5G_find(ent, "meta", NULL, &d_ent)<0 ||
+	(exists=H5D_isa(&d_ent))<0) {
+	HRETURN_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found");
+    } else if (!exists) {
+	HRETURN(FALSE);
+    }
+
+    FUNC_LEAVE(TRUE);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5RA_open
  *
  * Purpose:	Open a ragged array.  The name of the array is the same as

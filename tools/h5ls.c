@@ -5,14 +5,15 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Monday, March 23, 1998
  */
-#include <ctype.h>
-#include <h5tools.h>
-#include <hdf5.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
+
+/*
+ * We include the private header file so we can get to the uniform
+ * programming environment it declares.
+ */
 #include <H5private.h>
+#include <h5tools.h>
+
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
@@ -25,6 +26,7 @@
 static int verbose_g = 0;
 static int dump_g = 0;
 static int width_g = 80;
+static int string_g = FALSE;
 
 /* Information about how to display each type of object */
 static struct dispatch_t {
@@ -68,6 +70,7 @@ usage: %s [OPTIONS] FILE [OBJECTS...]\n\
    OPTIONS\n\
       -h, -?, --help   Print a usage message and exit\n\
       -d, --dump       Print the values of datasets\n\
+      -s, --string     Print 1-byte integer datasets as ASCII\n\
       -wN, --width=N   Set the number of columns of output\n\
       -v, --verbose    Generate more verbose output\n\
       -V, --version    Print version number and exit\n\
@@ -112,9 +115,11 @@ dump_dataset_values(hid_t dset)
 
     /*
      * If the dataset is a 1-byte integer type then format it as an ASCI
-     * character string instead of integers.
+     * character string instead of integers if the `-s' or `--string'
+     * command-line option was given.
      */
-    if (1==size && H5T_INTEGER==H5Tget_class(f_type)) {
+    if (string_g && 1==size && H5T_INTEGER==H5Tget_class(f_type)) {
+	info.ascii = TRUE;
 	info.elmt_suf1 = "";
 	info.elmt_suf2 = "";
 	info.idx_fmt = "        (%s) \"";
@@ -286,6 +291,34 @@ dataset_list2(hid_t dset)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	ragged_list2
+ *
+ * Purpose:	List information about a ragged array which should appear
+ *		after information which is general to all objects.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, November  5, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+ragged_list2(hid_t __unused__ ra)
+{
+    if (dump_g) {
+	puts("    Data:      Not implemented yet (see values of member");
+	puts("               datasets `raw', `over', and `meta')");
+    }
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	link_open
  *
  * Purpose:	This gets called to open a symbolic link.  Since symbolic
@@ -399,7 +432,6 @@ list (hid_t group, const char *name, void __unused__ *cd)
     return 0;
 }
 
-
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -426,6 +458,7 @@ main (int argc, char *argv[])
     const char	*s;
     char	*rest;
     int		argno;
+    H5G_stat_t	sb;
 
     DISPATCH(H5G_DATASET, "Dataset", H5Dopen, H5Dclose,
 	     dataset_list1, dataset_list2);
@@ -435,6 +468,8 @@ main (int argc, char *argv[])
 	     NULL, NULL);
     DISPATCH(H5G_LINK, "-> ", link_open, NULL,
 	     NULL, NULL);
+    DISPATCH(H5G_RAGGED, "Ragged Array", H5Gopen, H5Gclose,
+	     NULL, ragged_list2);
 
     /* Name of this program without the path */
     if ((progname=strrchr (argv[0], '/'))) progname++;
@@ -451,6 +486,8 @@ main (int argc, char *argv[])
 	    exit(0);
 	} else if (!strcmp(argv[argno], "--dump")) {
 	    dump_g++;
+	} else if (!strcmp(argv[argno], "--string")) {
+	    string_g = TRUE;
 	} else if (!strncmp(argv[argno], "--width=", 8)) {
 	    width_g = strtol(argv[argno]+8, &rest, 0);
 	    if (width_g<=0 || *rest) {
@@ -487,6 +524,9 @@ main (int argc, char *argv[])
 		    exit(0);
 		case 'd':	/* --dump */
 		    dump_g++;
+		    break;
+		case 's':
+		    string_g = TRUE;
 		    break;
 		case 'v':	/* --verbose */
 		    verbose_g++;
@@ -531,17 +571,15 @@ main (int argc, char *argv[])
 	H5Giterate(file, "/", NULL, list, NULL);
     } else {
 	for (/*void*/; argno<argc; argno++) {
-	    H5E_BEGIN_TRY {
-		root = H5Gopen (file, argv[argno]);
-	    } H5E_END_TRY;
-	    if (root>=0) {
+	    if (H5Gget_objinfo(file, argv[argno], TRUE, &sb)>=0 &&
+		H5G_GROUP==sb.type) {
 		H5Giterate(file, argv[argno], NULL, list, NULL);
 	    } else if ((root=H5Gopen(file, "/"))<0) {
 		exit(1);
 	    } else {
 		list(root, argv[argno], NULL);
+		if (H5Gclose(root)<0) exit(1);
 	    }
-	    if (H5Gclose(root)<0) exit(1);
 	}
     }
 
