@@ -121,6 +121,11 @@ static hbool_t overflows(unsigned char *origin_bits, dtype_t src_dtype,
             size_t src_size_bytes, size_t dst_num_bits);
 static int my_isnan(dtype_t type, void *val);
 static int opaque_check(int tag_it);
+static herr_t convert_opaque(hid_t UNUSED st, hid_t UNUSED dt,
+               H5T_cdata_t *cdata,
+	       size_t UNUSED nelmts, size_t UNUSED buf_stride,
+               size_t UNUSED bkg_stride, void UNUSED *_buf,
+	       void UNUSED *bkg, hid_t UNUSED dset_xfer_plid);
 
 
 /*-------------------------------------------------------------------------
@@ -1860,6 +1865,211 @@ test_compound_10(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_compound_11
+ *
+ * Purpose:     Tests whether registering/unregistering a type conversion
+ *              function correctly causes compound datatypes to recalculate
+ *              their cached field conversion information
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, August 7, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_11(void)
+{
+    typedef struct {
+        double d1;
+        int i1;
+        char *s1;
+        int i2;
+        double d2;
+        double d3;
+    } big_t;
+
+    typedef struct {
+        double d1;
+        int i1;
+        char *s1;
+    } little_t;
+
+    hid_t var_string_tid;  /* Datatype IDs for type conversion */
+    hid_t big_tid, little_tid;  /* Datatype IDs for type conversion */
+    hid_t big_tid2, little_tid2;  /* Datatype IDs for type conversion */
+    hid_t opaq_src_tid, opaq_dst_tid;  /* Datatype IDs for type conversion */
+    void *buf,          /* Conversion buffer */
+        *buf_orig,      /* Copy of original conversion buffer */
+        *bkg;           /* Background buffer */
+    size_t u;           /* Local index variable */
+
+    TESTING("registering type conversion routine with compound conversions");
+
+    /* Create variable string type for use in both structs */
+    if((var_string_tid=H5Tcopy(H5T_C_S1))<0) TEST_ERROR
+    if(H5Tset_size(var_string_tid,H5T_VARIABLE)<0) TEST_ERROR
+
+    /* Create type for 'big' struct */
+    if((big_tid = H5Tcreate(H5T_COMPOUND, sizeof(big_t)))<0) TEST_ERROR
+
+    if(H5Tinsert(big_tid, "d1", HOFFSET(big_t, d1), H5T_NATIVE_DOUBLE)<0) TEST_ERROR
+    if(H5Tinsert(big_tid, "i1", HOFFSET(big_t, i1), H5T_NATIVE_INT)<0) TEST_ERROR
+    if(H5Tinsert(big_tid, "s1", HOFFSET(big_t, s1), var_string_tid)<0) TEST_ERROR
+    if(H5Tinsert(big_tid, "i2", HOFFSET(big_t, i2), H5T_NATIVE_INT)<0) TEST_ERROR
+    if(H5Tinsert(big_tid, "d2", HOFFSET(big_t, d2), H5T_NATIVE_DOUBLE)<0) TEST_ERROR
+    if(H5Tinsert(big_tid, "d3", HOFFSET(big_t, d3), H5T_NATIVE_DOUBLE)<0) TEST_ERROR
+
+    /* Create type for 'little' struct (with "out of order" inserts) */
+    if((little_tid = H5Tcreate(H5T_COMPOUND, sizeof(little_t)))<0) TEST_ERROR
+
+    if(H5Tinsert(little_tid, "d1", HOFFSET(little_t, d1), H5T_NATIVE_DOUBLE)<0) TEST_ERROR
+    if(H5Tinsert(little_tid, "s1", HOFFSET(little_t, s1), var_string_tid)<0) TEST_ERROR
+    if(H5Tinsert(little_tid, "i1", HOFFSET(little_t, i1), H5T_NATIVE_INT)<0) TEST_ERROR
+
+    /* Allocate buffers */
+    if((buf=HDmalloc(sizeof(big_t)*NTESTELEM))==NULL) TEST_ERROR
+    if((buf_orig=HDmalloc(sizeof(big_t)*NTESTELEM))==NULL) TEST_ERROR
+    if((bkg=HDmalloc(sizeof(big_t)*NTESTELEM))==NULL) TEST_ERROR
+
+    /* Initialize buffer */
+    for(u=0; u<NTESTELEM; u++) {
+        ((big_t *)buf)[u].d1=(double)u*(double)1.5;
+        ((big_t *)buf)[u].d2=(double)u*(double)2.5;
+        ((big_t *)buf)[u].d2=(double)u*(double)3.5;
+        ((big_t *)buf)[u].i1=u*3;
+        ((big_t *)buf)[u].i2=u*5;
+        ((big_t *)buf)[u].s1=HDmalloc(32);
+        sprintf(((big_t *)buf)[u].s1,"%u",(unsigned)u);
+    } /* end for */
+
+    /* Make copy of buffer before conversion */
+    HDmemcpy(buf_orig,buf,sizeof(big_t)*NTESTELEM);
+
+    /* Make copies of the 'big' and 'little' datatypes, so the type
+     * conversion routine doesn't use the same ones this time and next time
+     */
+    if((big_tid2=H5Tcopy(big_tid))<0) TEST_ERROR
+    if((little_tid2=H5Tcopy(little_tid))<0) TEST_ERROR
+
+    /* Convert buffer from 'big' to 'little' struct */
+    if(H5Tconvert(big_tid2,little_tid2,NTESTELEM,buf,bkg,H5P_DEFAULT)<0) TEST_ERROR
+
+    /* Verify converted buffer is correct */
+    for(u=0; u<NTESTELEM; u++) {
+        if(((big_t *)buf_orig)[u].d1!=((little_t *)buf)[u].d1) {
+            printf("Error, line #%d: buf_orig[%u].d1=%f, buf[%u].d1=%f\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].d1,(unsigned)u,((little_t *)buf)[u].d1);
+            TEST_ERROR
+        } /* end if */
+        if(((big_t *)buf_orig)[u].i1!=((little_t *)buf)[u].i1) {
+            printf("Error, line #%d: buf_orig[%u].i1=%d, buf[%u].i1=%d\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].i1,(unsigned)u,((little_t *)buf)[u].i1);
+            TEST_ERROR
+        } /* end if */
+        if(((big_t *)buf_orig)[u].s1==NULL || ((little_t *)buf)[u].s1==NULL) {
+            printf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
+            TEST_ERROR
+        } /* end if */
+        else if(HDstrcmp(((big_t *)buf_orig)[u].s1,((little_t *)buf)[u].s1)) {
+            printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
+            TEST_ERROR
+        } /* end if */
+        HDfree(((little_t *)buf)[u].s1);
+    } /* end for */
+
+    /* Build source and destination types for conversion routine */
+    if((opaq_src_tid=H5Tcreate(H5T_OPAQUE, 4))<0) TEST_ERROR
+    if(H5Tset_tag(opaq_src_tid, "opaque source type")<0) TEST_ERROR
+    if((opaq_dst_tid=H5Tcreate(H5T_OPAQUE, 4))<0) TEST_ERROR
+    if(H5Tset_tag(opaq_dst_tid, "opaque destination type")<0) TEST_ERROR
+
+    /* Register new type conversion routine */
+    if(H5Tregister(H5T_PERS_HARD, "opaq_test", opaq_src_tid, opaq_dst_tid, convert_opaque)<0) TEST_ERROR
+
+    /* Recover the original buffer information */
+    HDmemcpy(buf,buf_orig,sizeof(big_t)*NTESTELEM);
+
+    /* Convert buffer from 'big' to 'little' struct */
+    if(H5Tconvert(big_tid,little_tid,NTESTELEM,buf,bkg,H5P_DEFAULT)<0) TEST_ERROR
+
+    /* Verify converted buffer is correct */
+    for(u=0; u<NTESTELEM; u++) {
+        if(((big_t *)buf_orig)[u].d1!=((little_t *)buf)[u].d1) {
+            printf("Error, line #%d: buf_orig[%u].d1=%f, buf[%u].d1=%f\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].d1,(unsigned)u,((little_t *)buf)[u].d1);
+            TEST_ERROR
+        } /* end if */
+        if(((big_t *)buf_orig)[u].i1!=((little_t *)buf)[u].i1) {
+            printf("Error, line #%d: buf_orig[%u].i1=%d, buf[%u].i1=%d\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].i1,(unsigned)u,((little_t *)buf)[u].i1);
+            TEST_ERROR
+        } /* end if */
+        if(((big_t *)buf_orig)[u].s1==NULL || ((little_t *)buf)[u].s1==NULL) {
+            printf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
+            TEST_ERROR
+        } /* end if */
+        else if(HDstrcmp(((big_t *)buf_orig)[u].s1,((little_t *)buf)[u].s1)) {
+            printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
+            TEST_ERROR
+        } /* end if */
+        HDfree(((little_t *)buf)[u].s1);
+    } /* end for */
+
+    /* Unregister the conversion routine */
+    if(H5Tunregister(H5T_PERS_HARD, "opaq_test", opaq_src_tid, opaq_dst_tid, convert_opaque)<0) TEST_ERROR
+
+    /* Recover the original buffer information */
+    HDmemcpy(buf,buf_orig,sizeof(big_t)*NTESTELEM);
+
+    /* Convert buffer from 'big' to 'little' struct */
+    if(H5Tconvert(big_tid,little_tid,NTESTELEM,buf,bkg,H5P_DEFAULT)<0) TEST_ERROR
+
+    /* Verify converted buffer is correct */
+    for(u=0; u<NTESTELEM; u++) {
+        if(((big_t *)buf_orig)[u].d1!=((little_t *)buf)[u].d1) {
+            printf("Error, line #%d: buf_orig[%u].d1=%f, buf[%u].d1=%f\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].d1,(unsigned)u,((little_t *)buf)[u].d1);
+            TEST_ERROR
+        } /* end if */
+        if(((big_t *)buf_orig)[u].i1!=((little_t *)buf)[u].i1) {
+            printf("Error, line #%d: buf_orig[%u].i1=%d, buf[%u].i1=%d\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].i1,(unsigned)u,((little_t *)buf)[u].i1);
+            TEST_ERROR
+        } /* end if */
+        if(((big_t *)buf_orig)[u].s1==NULL || ((little_t *)buf)[u].s1==NULL) {
+            printf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
+            TEST_ERROR
+        } /* end if */
+        else if(HDstrcmp(((big_t *)buf_orig)[u].s1,((little_t *)buf)[u].s1)) {
+            printf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n",__LINE__,(unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
+            TEST_ERROR
+        } /* end if */
+        HDfree(((little_t *)buf)[u].s1);
+    } /* end for */
+
+    /* Free everything */
+    for(u=0; u<NTESTELEM; u++)
+        HDfree(((big_t *)buf_orig)[u].s1);
+    if(H5Tclose(opaq_dst_tid)<0) TEST_ERROR
+    if(H5Tclose(opaq_src_tid)<0) TEST_ERROR
+    if(H5Tclose(little_tid2)<0) TEST_ERROR
+    if(H5Tclose(big_tid2)<0) TEST_ERROR
+    HDfree(bkg);
+    HDfree(buf_orig);
+    HDfree(buf);
+    if(H5Tclose(little_tid)<0) TEST_ERROR
+    if(H5Tclose(big_tid)<0) TEST_ERROR
+    if(H5Tclose(var_string_tid)<0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+ error:
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_encode
  *
  * Purpose:     Tests functions of encoding and decoding data type.
@@ -3294,6 +3504,10 @@ opaque_check(int tag_it)
 	goto error;
     }
     
+    /* Unregister conversion function */
+    if (H5Tunregister(H5T_PERS_HARD, "o_test", st, dt, convert_opaque)<0)
+	goto error;
+
     H5Tclose(st);
     H5Tclose(dt);
     return 0;
@@ -6387,6 +6601,7 @@ main(void)
     nerrors += test_compound_8();
     nerrors += test_compound_9();
     nerrors += test_compound_10();
+    nerrors += test_compound_11();
     nerrors += test_conv_int ();
     nerrors += test_conv_enum_1();
     nerrors += test_conv_enum_2();

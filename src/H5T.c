@@ -2367,36 +2367,48 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
     for (i=H5T_g.npaths-1; i>0; --i) {
         path = H5T_g.path[i];
         assert(path);
-        if ((H5T_PERS_SOFT==pers && path->is_hard) ||
-            (H5T_PERS_HARD==pers && !path->is_hard)) continue;
-        if (name && *name && HDstrcmp(name, path->name)) continue;
-        if (src && H5T_cmp(src, path->src)) continue;
-        if (dst && H5T_cmp(dst, path->dst)) continue;
-        if (func && func!=path->func) continue;
-        
-        /* Remove from table */
-        HDmemmove(H5T_g.path+i, H5T_g.path+i+1,
-              (H5T_g.npaths-(i+1))*sizeof(H5T_path_t*));
-        --H5T_g.npaths;
 
-        /* Shut down path */
-        H5T_print_stats(path, &nprint);
-        path->cdata.command = H5T_CONV_FREE;
-        if ((path->func)(FAIL, FAIL, &(path->cdata), 0, 0, 0, NULL, NULL,
-                         dxpl_id)<0) {
+        /* Not a match */
+        if (((H5T_PERS_SOFT==pers && path->is_hard) ||
+                    (H5T_PERS_HARD==pers && !path->is_hard)) ||
+                (name && *name && HDstrcmp(name, path->name)) ||
+                (src && H5T_cmp(src, path->src)) ||
+                (dst && H5T_cmp(dst, path->dst)) ||
+                (func && func!=path->func)) {
+            /*
+             * Notify all other functions to recalculate private data since some
+             * functions might cache a list of conversion functions.  For
+             * instance, the compound type converter caches a list of conversion
+             * functions for the members, so removing a function should cause
+             * the list to be recalculated to avoid the removed function.
+             */
+            path->cdata.recalc = TRUE;
+        } /* end if */
+        else {
+            /* Remove from table */
+            HDmemmove(H5T_g.path+i, H5T_g.path+i+1,
+                  (H5T_g.npaths-(i+1))*sizeof(H5T_path_t*));
+            --H5T_g.npaths;
+
+            /* Shut down path */
+            H5T_print_stats(path, &nprint);
+            path->cdata.command = H5T_CONV_FREE;
+            if ((path->func)(FAIL, FAIL, &(path->cdata), 0, 0, 0, NULL, NULL,
+                             dxpl_id)<0) {
 #ifdef H5T_DEBUG
-	    if (H5DEBUG(T)) {
-		fprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx failed "
-			"to free private data for %s (ignored)\n",
-			(unsigned long)(path->func), path->name);
-	    }
+                if (H5DEBUG(T)) {
+                    fprintf(H5DEBUG(T), "H5T: conversion function 0x%08lx failed "
+                            "to free private data for %s (ignored)\n",
+                            (unsigned long)(path->func), path->name);
+                }
 #endif
-        }
-        H5T_close(path->src);
-        H5T_close(path->dst);
-        H5FL_FREE(H5T_path_t,path);
-        H5E_clear(NULL); /*ignore all shutdown errors*/
-    }
+            }
+            H5T_close(path->src);
+            H5T_close(path->dst);
+            H5FL_FREE(H5T_path_t,path);
+            H5E_clear(NULL); /*ignore all shutdown errors*/
+        } /* end else */
+    } /* end for */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

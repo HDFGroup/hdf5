@@ -1534,6 +1534,12 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
             }
         }
     }
+    else {
+        /* Restore sorted conditions for the datatypes */
+        /* (Required for the src2dst array to be valid) */
+        H5T_sort_value(src, NULL);
+        H5T_sort_value(dst, NULL);
+    } /* end else */
 
     /*
      * (Re)build the cache of member conversion functions and pointers to
