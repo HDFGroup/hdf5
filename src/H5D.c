@@ -3887,7 +3887,7 @@ H5Ddebug(hid_t dset_id, unsigned UNUSED flags)
     herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(H5Ddebug, FAIL)
-    H5TRACE1("e","i",dset_id);
+    H5TRACE2("e","iIu",dset_id,flags);
 
     /* Check args */
     if (NULL==(dset=H5I_object_verify(dset_id, H5I_DATASET)))

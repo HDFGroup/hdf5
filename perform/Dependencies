@@ -224,7 +224,13 @@ pio_perf.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h
+   $(top_srcdir)/src/H5FDstream.h \
+   $(top_srcdir)/tools/lib/h5tools_utils.h \
+   $(srcdir)/pio_perf.h \
+   $(srcdir)/pio_timer.h \
+   $(top_srcdir)/src/H5private.h \
+   $(top_srcdir)/src/H5MPprivate.h \
+   $(top_srcdir)/test/h5test.h
 pio_engine.lo: \
    $(srcdir)/pio_engine.c \
    $(top_srcdir)/src/hdf5.h \
@@ -260,7 +266,12 @@ pio_engine.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h
+   $(top_srcdir)/src/H5FDstream.h \
+   $(srcdir)/pio_perf.h \
+   $(srcdir)/pio_timer.h \
+   $(top_srcdir)/src/H5private.h \
+   $(top_srcdir)/src/H5MPprivate.h \
+   $(top_srcdir)/test/h5test.h
 pio_timer.lo: \
    $(srcdir)/pio_timer.c \
    $(srcdir)/pio_timer.h \
@@ -297,4 +308,8 @@ pio_timer.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h
+   $(top_srcdir)/src/H5FDstream.h \
+   $(srcdir)/pio_perf.h \
+   $(top_srcdir)/src/H5private.h \
+   $(top_srcdir)/src/H5MPprivate.h \
+   $(top_srcdir)/test/h5test.h
