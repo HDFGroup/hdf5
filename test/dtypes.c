@@ -114,6 +114,7 @@ void some_dummy_func(float x);
 static hbool_t overflows(unsigned char *origin_bits, dtype_t src_dtype, 
             size_t src_size_bytes, size_t dst_num_bits);
 static int my_isnan(dtype_t type, void *val);
+static int opaque_check(int tag_it);
 
 
 /*-------------------------------------------------------------------------
