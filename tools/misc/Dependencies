@@ -5,7 +5,7 @@ h5debug.lo: \
    $(srcdir)/h5debug.c \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_srcdir)/src/H5pubconf.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Iprivate.h \
    $(top_srcdir)/src/H5Ipublic.h \
@@ -45,7 +45,7 @@ pdb2hdf.lo: \
    $(srcdir)/pdb2hdf.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
-   $(top_srcdir)/src/H5pubconf.h \
+   $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
