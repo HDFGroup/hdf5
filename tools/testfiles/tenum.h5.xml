@@ -3,14 +3,14 @@ Expected output for 'h5dump --xml tenum.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
 <hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
-<hdf5:RootGroup OBJ-XID="xid_696-0" H5Path="/">
-   <hdf5:NamedDataType Name="enum normal" OBJ-XID="xid_744-0" H5Path="/enum normal" Parents="xid_696-0" H5ParentPaths="/">
+<hdf5:RootGroup OBJ-XID="xid_928-0" H5Path="/">
+   <hdf5:NamedDataType Name="enum normal" OBJ-XID="xid_976-0" H5Path="/enum normal" Parents="xid_928-0" H5ParentPaths="/">
       <hdf5:DataType>
          <hdf5:AtomicType>
             <hdf5:EnumType Nelems="5">
             <hdf5:DataType>
             <hdf5:AtomicType>
-               <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+               <hdf5:IntegerType ByteOrder="LE" Sign="true" Size="4" />
             </hdf5:AtomicType>
             </hdf5:DataType>
                <hdf5:EnumElement>
@@ -21,24 +21,25 @@ Expected output for 'h5dump --xml tenum.h5'
                </hdf5:EnumValue>
                <hdf5:EnumElement>
                   GREEN
+green
                </hdf5:EnumElement>
                <hdf5:EnumValue>
                   1
                </hdf5:EnumValue>
                <hdf5:EnumElement>
-                  BLUE
+                  BLUE blue
                </hdf5:EnumElement>
                <hdf5:EnumValue>
                   2
                </hdf5:EnumValue>
                <hdf5:EnumElement>
-                  WHITE
+                  WHITE &quot;white&quot;
                </hdf5:EnumElement>
                <hdf5:EnumValue>
                   3
                </hdf5:EnumValue>
                <hdf5:EnumElement>
-                  BLACK
+                  BLACK &apos;black&apos;
                </hdf5:EnumElement>
                <hdf5:EnumValue>
                   4
@@ -47,13 +48,17 @@ Expected output for 'h5dump --xml tenum.h5'
          </hdf5:AtomicType>
       </hdf5:DataType>
    </hdf5:NamedDataType>
-   <hdf5:Dataset Name="table" OBJ-XID="xid_1152-0" H5Path= "/table" Parents="xid_696-0" H5ParentPaths="/">
+   <hdf5:Dataset Name="table" OBJ-XID="xid_1384-0" H5Path= "/table" Parents="xid_928-0" H5ParentPaths="/">
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
       </hdf5:StorageLayout>
          <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
          <hdf5:FillValue>
-               <hdf5:NoFill/>
+               <hdf5:Data>
+                  <hdf5:DataFromFile>
+                  "RED"
+                  </hdf5:DataFromFile>
+               </hdf5:Data>
          </hdf5:FillValue>
       </hdf5:FillValueInfo>
       <hdf5:Dataspace>
@@ -61,11 +66,13 @@ Expected output for 'h5dump --xml tenum.h5'
             <hdf5:Dimension  DimSize="20" MaxDimSize="20"/>
          </hdf5:SimpleDataspace>
       </hdf5:Dataspace>
-      <hdf5:NamedDataTypePtr OBJ-XID="xid_744-0" H5Path="/enum normal" />
+      <hdf5:NamedDataTypePtr OBJ-XID="xid_976-0" H5Path="/enum normal" />
       <hdf5:Data>
          <hdf5:DataFromFile>
-         RED GREEN BLUE GREEN WHITE WHITE BLACK GREEN BLUE RED RED BLUE GREEN
-         BLACK WHITE RED WHITE GREEN GREEN BLUE
+         RED GREEN\ngreen BLUE blue GREEN\ngreen WHITE \"white\" WHITE \"white\"
+         BLACK \'black\' GREEN\ngreen BLUE blue RED RED BLUE blue GREEN\ngreen
+         BLACK \'black\' WHITE \"white\" RED WHITE \"white\" GREEN\ngreen
+         GREEN\ngreen BLUE blue
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Dataset>

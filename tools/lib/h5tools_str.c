@@ -963,14 +963,23 @@ h5tools_escape(char *s/*in,out*/, size_t size, int escape_spaces)
     size_t n = strlen(s);
     const char *escape;
     char octal[8];
-    
+
     for (i = 0; i < n; i++) {
 	switch (s[i]) {
-	case '"':
+	case '\'':
+	    escape = "\\\'";
+	    break;
+	case '\"':
 	    escape = "\\\"";
 	    break;
 	case '\\':
 	    escape = "\\\\";
+	    break;
+	case '\?':
+	    escape = "\\\?";
+	    break;
+	case '\a':
+	    escape = "\\a";
 	    break;
 	case '\b':
 	    escape = "\\b";
@@ -987,11 +996,11 @@ h5tools_escape(char *s/*in,out*/, size_t size, int escape_spaces)
 	case '\t':
 	    escape = "\\t";
 	    break;
-	case ' ':
-	    escape = escape_spaces ? "\\ " : NULL;
+	case '\v':
+	    escape = "\\v";
 	    break;
 	default:
-	    if (!isprint((int)*s)) {
+	    if (!isprint(s[i])) {
 		sprintf(octal, "\\%03o", (unsigned char)s[i]);
 		escape = octal;
 	    } else {
@@ -1008,10 +1017,10 @@ h5tools_escape(char *s/*in,out*/, size_t size, int escape_spaces)
 		/*would overflow*/
 		return NULL;
 
-	    memmove(s + i + esc_size, s + i, (n - i) + 1); /*make room*/
+	    memmove(s + i + esc_size, s + i + 1, n - i); /*make room*/
 	    memcpy(s + i, escape, esc_size); /*insert*/
-	    n += esc_size;
-	    i += esc_size - 1;
+	    n += esc_size - 1;  /* adjust total string size */
+	    i += esc_size;      /* adjust string position */
 	}
     }
 
