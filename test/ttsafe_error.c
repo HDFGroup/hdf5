@@ -166,10 +166,10 @@ void *tts_error_thread(void UNUSED *arg)
     H5Eset_auto(error_callback, NULL);
 #else /*H5_WANT_H5_V1_6_COMPAT*/
     /* preserve previous error stack handler */
-    H5Eget_auto(H5E_DEFAULT, &old_error_cb, &old_error_client_data);
+    H5Eget_auto_stack(H5E_DEFAULT, &old_error_cb, &old_error_client_data);
 
     /* set each thread's error stack handler */
-    H5Eset_auto(H5E_DEFAULT, error_callback, NULL);
+    H5Eset_auto_stack(H5E_DEFAULT, error_callback, NULL);
 #endif /* H5_WANT_H5_V1_6_COMPAT */
 
     /* define dataspace for dataset */
@@ -218,7 +218,7 @@ herr_t error_callback(hid_t estack, void *client_data)
     pthread_mutex_lock(&error_mutex);
     error_count++;
     pthread_mutex_unlock(&error_mutex);
-    return H5Ewalk(estack, H5E_WALK_DOWNWARD, walk_error_callback, client_data);
+    return H5Ewalk_stack(estack, H5E_WALK_DOWNWARD, walk_error_callback, client_data);
 }
 #endif /* H5_WANT_H5_V1_6_COMPAT */
 
