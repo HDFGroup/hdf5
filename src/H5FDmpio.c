@@ -187,8 +187,7 @@ H5FD_mpio_init(void)
  * Purpose:	Store the user supplied MPIO communicator COMM and INFO in
  *		the file access property list FAPL_ID which can then be used
  *		to create and/or open the file.  This function is available
- *		only in the parallel HDF5 library and is not a collective
- *		function.
+ *		only in the parallel HDF5 library and is not collective.
  *
  *		COMM is the MPI communicator to be used for file open as
  *		defined in MPI_FILE_OPEN of MPI-2. This function does not
@@ -360,7 +359,7 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
  * Function:	H5Pget_dxpl_mpio
  *
  * Purpose:	Queries the transfer mode current set in the data transfer
- *		property list DXPL_ID. This is not a collective function.
+ *		property list DXPL_ID. This is not collective.
  *
  * Return:	Success:	Non-negative, with the transfer mode returned
  *				through the XFER_MODE argument if it is
@@ -659,7 +658,7 @@ H5FD_mpio_fapl_get(H5FD_t *_file)
  *		are defined in H5Fpublic.h. The file access property list
  *		FAPL_ID contains the properties driver properties and MAXADDR
  *		is the largest address which this file will be expected to
- *		access.
+ *		access.  This is collective.
  *
  * Return:      Success:        A new file pointer.
  *
@@ -829,7 +828,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 /*-------------------------------------------------------------------------
  * Function:    H5FD_mpio_close
  *
- * Purpose:     Closes a file.
+ * Purpose:     Closes a file.  This is collective.
  *
  * Return:      Success:	Non-negative
  *
@@ -1482,7 +1481,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD_mpio_flush
  *
- * Purpose:     Makes sure that all data is on disk.
+ * Purpose:     Makes sure that all data is on disk.  This is collective.
  *
  * Return:      Success:	Non-negative
  *
@@ -1512,7 +1511,7 @@ H5FD_mpio_flush(H5FD_t *_file)
     MPI_Status          mpi_stat;
     MPI_Offset          mpi_off;
 
-    FUNC_ENTER(H5FD_family_flush, FAIL);
+    FUNC_ENTER(H5FD_mpio_flush, FAIL);
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
