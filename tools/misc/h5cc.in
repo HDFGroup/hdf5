@@ -1,6 +1,6 @@
 #! /bin/sh
 ##
-## Copyright (C) 2001
+## Copyright (C) 2001, 2002
 ##     National Center for Supercomputing Applications
 ##     All rights reserved.
 ##
@@ -16,6 +16,7 @@
 ##                                                                        ##
 ############################################################################
 prefix="@prefix@"
+exec_prefix="@exec_prefix@"
 libdir="@libdir@"
 includedir="@includedir@"
 
