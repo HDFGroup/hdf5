@@ -55,6 +55,28 @@ sub setvers {
   $_[0] =~ s/^(\#\s*define\s+H5_VERS_RELEASE\s+)\d+/$1$vers[2]/m;
 }
 
+sub usage {
+  my ($prog) = $0 =~ /([^\/]+)$/;
+  print STDERR <<EOF;
+Usage: $prog [OPTS] [FILE]
+    -i major|minor|release
+        Increment specified version component and set following components
+        to zero.
+    -s VERSION
+        Set the version as specified. The version number can be embedded in
+        some other string such as \"hdf5-1.1.0.tar.bz2\" or even \"this is
+        hdf5 version 1.1 release 0\" for convenience.
+    -v
+        Instead of displaying only a dotted triple version number a line such
+        as \"version 1.1 release 0\" will be printed.
+    FILE
+        The name of the file that contains version information.  This is
+        seldom necessary since files H5public.h, src/H5public.h and
+        ../src/H5public.h are automatically checked.
+EOF
+  exit 1;
+}
+
 # Parse arguments
 my ($verbose, $set, $inc, $file);
 my (@files) = ("H5public.h", "src/H5public.h", "../src/H5public.h");
@@ -78,11 +100,11 @@ while ($_ = shift) {
     $verbose = 1;
     next;
   };
-    
 
-  /^-/ && die "unrecognized option: $ARGV[0]\n";
+  /^-(h|\?|-?help)$/ && usage;
+  /^-/ && die "unrecognized option: $_\n";
   die "only one file name can be specified\n" if $file;
-  $file = _;
+  $file = $_;
 }
 die "mutually exclusive options given\n" if $set && $inc;
 

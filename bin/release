@@ -68,7 +68,7 @@ for file in `cat $MANIFEST`; do
 done
 for cvs in `find . -type d -name CVS -print`; do
     path=`echo $cvs |sed s+/CVS++`
-    for file in `cut -d/ -f2 $cvs/Entries`; do
+    for file in `grep '^\/' $cvs/Entries |cut -d/ -f2`; do
 	if (grep $path/$file $MANIFEST >/dev/null); then
 	    :
 	else
@@ -77,7 +77,7 @@ for cvs in `find . -type d -name CVS -print`; do
 	fi
     done
 done
-for file in ./Changes `svf ls`; do
+for file in ./Changes `sh -c 'svf ls' 2>/dev/null`; do
     if (grep $file $MANIFEST >/dev/null); then
 	:
     elif [ $file = ./Changes ]; then
