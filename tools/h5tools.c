@@ -566,7 +566,6 @@ h5dump_fixtype(hid_t f_type)
     case H5T_STRING:
 	m_type = H5Tcopy(f_type);
 	H5Tset_cset(m_type, H5T_CSET_ASCII);
-	H5Tset_strpad(m_type, H5T_STR_NULLPAD);
 	break;
 
     case H5T_COMPOUND:
