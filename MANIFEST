@@ -3,6 +3,7 @@
 ./INSTALL.ibm.sp.parallel
 ./INSTALL_MAINT
 ./INSTALL_parallel
+./INSTALL_parallel.ascired
 ./MANIFEST
 ./Makefile.dist
 ./Makefile.in
@@ -34,12 +35,14 @@
 ./config/solaris2.5
 ./configure
 ./configure.in
+./examples/Attributes.txt
 ./examples/h5_chunk_read.c
 ./examples/h5_compound.c
 ./examples/h5_extend_write.c
 ./examples/h5_group.c
 ./examples/h5_read.c
 ./examples/h5_write.c
+./html/Attributes.html
 ./html/Big.html
 ./html/CodeReview.html
 ./html/Coding.html
@@ -123,7 +126,6 @@
 ./src/H5D.c
 ./src/H5Dprivate.h
 ./src/H5Dpublic.h
-./src/H5Dpkg.h
 ./src/H5E.c
 ./src/H5Eprivate.h
 ./src/H5Epublic.h
@@ -223,6 +225,7 @@
 ./test/tmeta.c
 ./test/tohdr.c
 ./test/tstab.c
+./testpar/Makefile.ascired
 ./testpar/Makefile.irix64
 ./testpar/README
 ./testpar/testphdf5.c
