@@ -1215,6 +1215,8 @@ H5FP.lo: \
    $(top_srcdir)/src/H5Epublic.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Epubgen.h \
+   $(top_srcdir)/src/H5MMprivate.h \
+   $(top_srcdir)/src/H5MMpublic.h \
    $(top_srcdir)/src/H5Oprivate.h \
    $(top_srcdir)/src/H5Opublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
@@ -1307,6 +1309,8 @@ H5FPserver.lo: \
    $(top_srcdir)/src/H5FDfphdf5.h \
    $(top_srcdir)/src/H5FDmpio.h \
    $(top_srcdir)/src/H5FDmpiposix.h \
+   $(top_srcdir)/src/H5MMprivate.h \
+   $(top_srcdir)/src/H5MMpublic.h \
    $(top_srcdir)/src/H5Oprivate.h \
    $(top_srcdir)/src/H5Opublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
@@ -1326,7 +1330,6 @@ H5FPserver.lo: \
    $(top_srcdir)/src/H5Zpublic.h \
    $(top_srcdir)/src/H5Pprivate.h \
    $(top_srcdir)/src/H5Ppublic.h \
-   $(top_srcdir)/src/H5MMpublic.h \
    $(top_srcdir)/src/H5TBprivate.h
 H5FS.lo: \
    $(top_srcdir)/src/H5FS.c \
@@ -1335,9 +1338,7 @@ H5FS.lo: \
    H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5MPprivate.h \
-   $(top_srcdir)/src/H5FSprivate.h \
-   $(top_srcdir)/src/H5MMprivate.h \
-   $(top_srcdir)/src/H5MMpublic.h
+   $(top_srcdir)/src/H5FSprivate.h
 H5G.lo: \
    $(top_srcdir)/src/H5G.c \
    $(top_srcdir)/src/H5private.h \
