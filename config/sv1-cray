@@ -102,7 +102,7 @@ case $CC_BASENAME in
 	CFLAGS="$CFLAGS"
 	DEBUG_CFLAGS="-g -h zero"
 	DEBUG_CPPFLAGS=
-	PROD_CFLAGS="-O2 -h scalar0"
+	PROD_CFLAGS="-O2 -h scalar0 -h vector0 -h task1"
 	PROD_CPPFLAGS=
 	PROFILE_CFLAGS="-pg"
 	PROFILE_CPPFLAGS=
