@@ -6,6 +6,8 @@
 #
 # See BlankForm in this directory for details.
 
+RUNPARALLEL=${RUNPARALLEL="MP_PROCS=3 MP_TASKS_PER_NODE=3 poe"}
+
 # Cross compiling defaults
 ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
 ac_cv_header_stdc=${ac_cv_header_stdc='yes'}

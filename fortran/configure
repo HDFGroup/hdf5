@@ -8088,10 +8088,10 @@ ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $L
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
- PARALLEL=""
- RUNSERIAL=""
- RUNPARALLEL=""
- TESTPARALLEL=""
+
+
+
+
 
 case "$F9X" in
   mpif90)
@@ -8114,9 +8114,8 @@ echo $ECHO_N "checking for mpirun... $ECHO_C" >&6
       echo "$as_me:$LINENO: result: $path/mpirun" >&5
 echo "${ECHO_T}$path/mpirun" >&6
       RUNSERIAL="${RUNSERIAL:-none}"
-
       if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
+        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=3}"
       fi
     else
       echo "$as_me:$LINENO: result: none" >&5
@@ -8315,8 +8314,8 @@ rm -rf conftest*
 
     fi
 
-        if test "X$PARALLEL" = "Xyes" && test -z "$RUNPARALLEL"; then
-      RUNPARALLEL="mpirun -np \$\${NPROCS:=2}"
+        if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
+      RUNPARALLEL="mpirun -np \$\${NPROCS:=3}"
     fi
     ;;
 

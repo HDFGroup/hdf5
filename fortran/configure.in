@@ -1,10 +1,16 @@
-dnl ----------------------------------------------------------------------
 dnl Process this file with autoconf to produce configure.
 dnl
-dnl Copyright (C) 2000, 2001, 2002
-dnl     National Center for Supercomputing Applications.
-dnl     All rights reserved.
-dnl ----------------------------------------------------------------------
+dnl Copyright by the Board of Trustees of the University of Illinois.
+dnl All rights reserved.
+dnl
+dnl This file is part of HDF5.  The full HDF5 copyright notice, including
+dnl terms governing use, modification, and redistribution, is contained in
+dnl the files COPYING and Copyright.html.  COPYING can be found at the root
+dnl of the source code distribution tree; Copyright.html can be found at the
+dnl root level of an installed copy of the electronic HDF5 document set and
+dnl is linked from the top-level documents page.  It can also be found at
+dnl http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+dnl access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 
 dnl ----------------------------------------------------------------------
 dnl Initialize configure.
@@ -455,10 +461,10 @@ dnl			   protect the expansion until make executes the
 dnl			   command).  The value of this variable is
 dnl			   substituted in *.in files.
 dnl
-AC_SUBST(PARALLEL) PARALLEL=""
-AC_SUBST(RUNSERIAL) RUNSERIAL=""
-AC_SUBST(RUNPARALLEL) RUNPARALLEL=""
-AC_SUBST(TESTPARALLEL) TESTPARALLEL=""
+AC_SUBST(PARALLEL)
+AC_SUBST(RUNSERIAL)
+AC_SUBST(RUNPARALLEL)
+AC_SUBST(TESTPARALLEL)
 
 dnl ----------------------------------------------------------------------
 dnl If the compiler is obviously a parallel compiler then we're building
@@ -490,9 +496,8 @@ case "$F9X" in
     if test -x $path/mpirun; then
       AC_MSG_RESULT($path/mpirun)
       RUNSERIAL="${RUNSERIAL:-none}"
-
       if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
+        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=3}"
       fi
     else
       AC_MSG_RESULT(none)
@@ -554,8 +559,8 @@ case "X-$enable_parallel" in
     fi
 
     dnl Set RUNPARALLEL to mpirun if not set yet.
-    if test "X$PARALLEL" = "Xyes" && test -z "$RUNPARALLEL"; then
-      RUNPARALLEL="mpirun -np \$\${NPROCS:=2}"
+    if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
+      RUNPARALLEL="mpirun -np \$\${NPROCS:=3}"
     fi
     ;;
 
