@@ -285,12 +285,13 @@ test_simple_io(hid_t file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_compact_io(void)
+test_compact_io(hid_t fapl)
 {
     hid_t       file, dataset, space, plist;
     hsize_t     dims[2];
     herr_t      status;
     int         wbuf[16][8], rbuf[16][8];
+    char	filename[1024];
     int         i, j, n;
 
     TESTING("compact dataset I/O");
@@ -310,7 +311,8 @@ test_compact_io(void)
     assert(space>=0);
 
     /* Create a file */
-   if((file=H5Fcreate(FILENAME[1], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
         goto error;
 
     /* Create property list for compact dataset creation */
@@ -337,7 +339,7 @@ test_compact_io(void)
     /*
      * Open the file and check data 
      */
-    if((file=H5Fopen(FILENAME[1], H5F_ACC_RDONLY, H5P_DEFAULT))<0)
+    if((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0)
         goto error;
     if((dataset = H5Dopen(file, DSET_COMPACT_IO_NAME))<0)
         goto error;
@@ -986,7 +988,6 @@ main(void)
 #endif
     
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
 	goto error;
     }
@@ -999,7 +1000,7 @@ main(void)
 
     nerrors += test_create(file)<0 	?1:0;
     nerrors += test_simple_io(file)<0	?1:0;
-    nerrors += test_compact_io()<0      ?1:0;
+    nerrors += test_compact_io(fapl)<0  ?1:0;
     nerrors += test_tconv(file)<0	?1:0;
     nerrors += test_compression(file)<0	?1:0;
     nerrors += test_multiopen (file)<0	?1:0;

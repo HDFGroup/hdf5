@@ -43,7 +43,7 @@ const char *FILENAME[] = {
 static herr_t          
 test_sec2(void)
 {
-    hid_t       file, fapl;
+    hid_t       file=(-1), fapl;
     char        filename[1024];
     int         *fhandle=NULL;
 
@@ -59,7 +59,7 @@ test_sec2(void)
         goto error;
 
     /* Check file handle API */
-    if(H5Fget_vfd_handle(file, H5P_DEFAULT, &fhandle)<0)
+    if(H5Fget_vfd_handle(file, H5P_DEFAULT, (void **)&fhandle)<0)
         goto error;
     if(*fhandle<0)
         goto error;
@@ -98,7 +98,7 @@ error:
 static herr_t
 test_core(void)
 {
-    hid_t       file, fapl;
+    hid_t       file=(-1), fapl;
     char        filename[1024];
     void        *fhandle=NULL;
 
@@ -155,7 +155,7 @@ error:
 static herr_t
 test_family(void)
 {
-    hid_t       file, fapl, fapl2, space, dset;
+    hid_t       file=(-1), fapl, fapl2=(-1), space=(-1), dset=(-1);
     char        filename[1024];
     char        dname[]="dataset";
     int         i, j;
@@ -167,7 +167,7 @@ test_family(void)
 
     /* Set property list and file name for FAMILY driver */
     fapl = h5_fileaccess();
-    if(H5Pset_fapl_family(fapl, FAMILY_SIZE, H5P_DEFAULT)<0)
+    if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT)<0)
         goto error;
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
@@ -189,17 +189,17 @@ test_family(void)
     /* check file handle API */
     if((fapl2=H5Pcreate(H5P_FILE_ACCESS))<0)
         goto error;
-    if(H5Pset_family_offset(fapl2, 0)<0)
+    if(H5Pset_family_offset(fapl2, (hsize_t)0)<0)
         goto error;
 
-    if(H5Fget_vfd_handle(file, fapl2, &fhandle)<0)
+    if(H5Fget_vfd_handle(file, fapl2, (void **)&fhandle)<0)
         goto error;
     if(*fhandle<0)
         goto error;
 
-    if(H5Pset_family_offset(fapl2, FAMILY_SIZE*2)<0)
+    if(H5Pset_family_offset(fapl2, (hsize_t)(FAMILY_SIZE*2))<0)
         goto error;
-    if(H5Fget_vfd_handle(file, fapl2, &fhandle2)<0)
+    if(H5Fget_vfd_handle(file, fapl2, (void **)&fhandle2)<0)
         goto error;
     if(*fhandle2<0)
         goto error;
@@ -247,7 +247,7 @@ error:
 static herr_t
 test_multi(void)
 {
-    hid_t       file, fapl, fapl2, dset, space;
+    hid_t       file=(-1), fapl, fapl2=(-1), dset=(-1), space=(-1);
     char        filename[1024];
     int         *fhandle2=NULL, *fhandle=NULL;
     H5FD_mem_t  mt, memb_map[H5FD_MEM_NTYPES];
@@ -275,12 +275,12 @@ test_multi(void)
     memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
 
     memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
-    sprintf(sv[H5FD_MEM_SUPER], "%c.meta", 's');
+    sprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
     memb_fapl[H5FD_MEM_DRAW] = H5P_DEFAULT; 
-    sprintf(sv[H5FD_MEM_DRAW], "%c.raw", 'r');
+    sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
 
@@ -307,14 +307,14 @@ test_multi(void)
         goto error;
     if(H5Pset_multi_type(fapl2, H5FD_MEM_SUPER)<0)
         goto error;
-    if(H5Fget_vfd_handle(file, fapl2, &fhandle)<0)
+    if(H5Fget_vfd_handle(file, fapl2, (void **)&fhandle)<0)
         goto error;
     if(*fhandle<0)
         goto error;
 
     if(H5Pset_multi_type(fapl2, H5FD_MEM_DRAW)<0)
         goto error;
-    if(H5Fget_vfd_handle(file, fapl2, &fhandle2)<0)
+    if(H5Fget_vfd_handle(file, fapl2, (void **)&fhandle2)<0)
         goto error;
     if(*fhandle2<0)
         goto error;
@@ -365,7 +365,6 @@ error:
 int
 main(void)
 {   
-    hid_t               file;
     int                 nerrors=0;
                
     h5_reset(); 
