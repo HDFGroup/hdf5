@@ -36,9 +36,6 @@
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
 
-/* Define if we want flexible parallel HDF5 support */
-#undef HAVE_FPHDF5
-
 /* Define to 1 if you have the `fseek64' function. */
 #undef HAVE_FSEEK64
 
@@ -339,6 +336,9 @@
 
 /* Define if your system has a working `malloc' function. */
 #undef MALLOC_WORKS
+
+/* Define if shared writing must be disabled (CodeWarrior only) */
+#undef NO_SHARED_WRITING
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT

@@ -30908,6 +30908,14 @@ _ACEOF
   done
 fi
 
+if test 1 = 2; then
+
+cat >>confdefs.h <<\_ACEOF
+#define NO_SHARED_WRITING 1
+_ACEOF
+
+fi
+
 
 H5_VERSION="`cut -d' ' -f3 $srcdir/README.txt | head -1`"
 
