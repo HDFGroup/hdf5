@@ -322,12 +322,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5garbage_collect(void)
 {
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5garbage_collect, FAIL);
+    H5TRACE0("e","");
 
     /* Call the garbage collection routines in the library */
     H5FL_garbage_coll();
