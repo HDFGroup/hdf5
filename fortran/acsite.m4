@@ -223,7 +223,7 @@ cd ..
 
 AC_MSG_CHECKING(how $F9X finds modules)
 
-for flag in "-p" "-M" "-I"; do
+for flag in "-M" "-I" "-p"; do
   cat >conftest.$ac_ext <<EOF
       program conftest
           use module
