@@ -373,41 +373,95 @@ H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned rese
 	FUNC_LEAVE_NOAPI(ret_value);
 }
 
-
 /*-------------------------------------------------------------------------
- * Function:	H5Inmembers
+ * Function:	H5Itype_exists
  *
- * Purpose:	Returns the number of members in a type.  Public interface to
- *			H5I_nmembers.
+ * Purpose:     Query function to inform the user if a given type is 
+ *              currently registered with the library. 
  *
- * Return:	Success:	Number of members; zero if the type is empty
- *				or has been deleted.
+ * Return:	Success:        1 if the type is registered, 0 if it is not	
  *
  *		Failure:	Negative
  *
  * Programmer:	James Laird
- *				Nathaniel Furrer
- *              Friday, April 23, 2004
+ *		Nathaniel Furrer
+ *              Tuesday, June 29, 2004
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-int H5Inmembers(H5I_type_t type)
+htri_t H5Itype_exists(H5I_type_t type)
 {
-	int ret_value;                      /* Return value */
+    htri_t ret_value = TRUE;                      /* Return value */
+
+    FUNC_ENTER_API(H5Itype_exists, FAIL);
+
+    if (type<=H5I_BADID || type>=H5I_next_type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number");
+
+    if (H5I_id_type_list_g[type] == NULL)
+        ret_value = FALSE;
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Inmembers
+ *
+ * Purpose:	Returns the number of members in a type.  Public interface to
+ *		H5I_nmembers.  The public interface throws an error if the
+ *              supplied type does not exist.  This is different than the
+ *              private interface, which will just return 0.
+ *
+ * Return:	Success:	Zero
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	James Laird
+ *		Nathaniel Furrer
+ *              Friday, April 23, 2004
+ *
+ * Modifications:
+ *              June 29, 2004
+ *              Nat Furrer and James Laird
+ *              Changed function signature to return the number of members
+ *              by reference.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5Inmembers(H5I_type_t type, int *num_members)
+{
+    int ret_value = SUCCEED;                      /* Return value */
 
     FUNC_ENTER_API(H5Inmembers, FAIL);
 
-	if( H5I_IS_LIB_TYPE( type ) )
-	{
-		HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "cannot call public function on library type");
-	}
+    if( H5I_IS_LIB_TYPE( type ) )
+    {
+        HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "cannot call public function on library type");
+    }
 
-	ret_value = H5I_nmembers(type);
+    /* Validate parameters.  This needs to be done here, instead of letting
+     * the private interface handle it, because the public interface throws
+     * an error when the supplied type does not exist.
+     */
+    if (type<=H5I_BADID || type>=H5I_next_type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number");
+    if (NULL==H5I_id_type_list_g[type])
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "supplied type does not exist");
 
-	done:
-		FUNC_LEAVE_API(ret_value);
+    if (num_members)
+    {
+        *num_members = H5I_nmembers(type);
+
+        if (*num_members < 0)
+            ret_value = FAIL;
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value);
 }
 
 

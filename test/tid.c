@@ -17,7 +17,7 @@ int id_test()
 	hid_t testID;
 	ssize_t testSize = -1;
 	herr_t err;
-	int num_ref;
+	int num_ref, num_members;
 
 	testObj = malloc(7 * sizeof(int));
 
@@ -106,9 +106,15 @@ int id_test()
 	VERIFY(err, 0, "H5Idestroy_type");
 	if( err != 0)
 		goto out;
-	VERIFY(H5Inmembers(myType), 0, "H5Inmembers");
-	if(H5Inmembers(myType) != 0)
+        VERIFY(H5Itype_exists(myType), 0, "H5Itype_exists");
+        if(H5Itype_exists(myType) != 0)
+            goto out;
+
+        H5E_BEGIN_TRY
+	VERIFY(H5Inmembers(myType, NULL), -1, "H5Inmembers");
+	if(H5Inmembers(myType, NULL) != -1)
 		goto out;
+        H5E_END_TRY
 
 		/* Register another type and another object in that type */
 	myType = H5Iregister_type(64, 0, (H5I_free_t) free );
@@ -123,8 +129,12 @@ int id_test()
 	CHECK(arrayID, H5I_INVALID_HID, "H5Iregister");
 	if(arrayID == H5I_INVALID_HID)
 		goto out;
-	VERIFY(H5Inmembers(myType), 1, "H5Inmembers");
-	if(H5Inmembers(myType) != 1)
+	err = H5Inmembers(myType, &num_members);
+        CHECK(err, -1, "H5Inmembers");
+        if (err < 0)
+            goto out;
+	VERIFY(num_members, 1, "H5Inmembers");
+	if(num_members != 1)
 		goto out;
 
 		/* Increment references to type and ensure that dec_type_ref
@@ -137,8 +147,12 @@ int id_test()
 	VERIFY(num_ref, 1, "H5Idec_type_ref");
 	if(num_ref != 1)
 		goto out;
-	VERIFY(H5Inmembers(myType), 1, "H5Inmembers");
-	if(H5Inmembers(myType) != 1)
+        err = H5Inmembers(myType, &num_members);
+        CHECK(err, -1, "H5Inmembers");
+        if (err < 0)
+            goto out;
+	VERIFY(num_members, 1, "H5Inmembers");
+	if(num_members != 1)
 		goto out;
 
 		/* This call to dec_type_ref should destroy the type */
@@ -146,9 +160,15 @@ int id_test()
 	VERIFY(num_ref, 0, "H5Idec_type_ref");
 	if(num_ref != 0)
 		goto out;
-	VERIFY(H5Inmembers(myType), 0, "H5Inmembers");
-	if(H5Inmembers(myType) != 0)
+        VERIFY(H5Itype_exists(myType), 0, "H5Itype_exists");
+        if (H5Itype_exists(myType) != 0)
+            goto out;
+
+        H5E_BEGIN_TRY
+        err = H5Inmembers(myType, &num_members);
+	if(err >= 0)
 		goto out;
+        H5E_END_TRY
 
 	return 0;
 
@@ -195,11 +215,11 @@ int id_predefined_test()
 		goto out;
 
 	H5E_BEGIN_TRY
-		testInt = H5Inmembers(H5I_ERROR_STACK);
+		testErr = H5Inmembers(H5I_ERROR_STACK, &testInt);
 	H5E_END_TRY
 
-	VERIFY(testInt, -1, "H5Inmembers");
-	if(testInt != -1)
+	VERIFY(testErr, -1, "H5Inmembers");
+	if(testErr != -1)
 		goto out;
 
 	H5E_BEGIN_TRY
