@@ -89,7 +89,7 @@ static H5TB_TREE *fs_tree;
  *  is a mod by 8. (Note that rank should be unsigned at this point). So, the
  *  code
  *
- *          fm->procs_notified[rank << 3] |= 1 << (rank & 7);
+ *          fm->procs_notified[rank >> 3] |= 1 << (rank & 7);
  *
  *  is equivalent to
  *
@@ -192,7 +192,7 @@ H5FP_sap_receive_loop(void)
         switch (req.req_type) {
         case H5FP_REQ_OPEN:
             if ((hrc = H5FP_sap_handle_open_request(req, buf, req.md_len)) != SUCCEED)
-                fprintf(stderr, "Failed on opening file: %d\n", hrc);
+                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTOPENOBJ, FAIL, "cannot open file");
 
             break;
         case H5FP_REQ_LOCK:
@@ -218,9 +218,7 @@ H5FP_sap_receive_loop(void)
 
             break;
         default:
-            HDfprintf(stderr,
-                      "error: H5FP_sap_receive_loop: invalid request type %d\n",
-                      req.req_type);
+            HGOTO_ERROR(H5E_FPHDF5, H5E_ARGS, FAIL, "invalid request type");
         }
 
         if (hrc != SUCCEED)
@@ -283,12 +281,11 @@ done:
  */
 static int H5FP_object_lock_cmp(struct sap_obj_lock *o1,
                                 struct sap_obj_lock *o2,
-                                int cmparg)
+                                int UNUSED cmparg)
 {
     FUNC_ENTER_NOINIT(H5FP_object_lock_cmp);
     assert(o1);
     assert(o2);
-    cmparg = cmparg;
     FUNC_LEAVE(HDmemcmp(o1->oid, o2->oid, sizeof(o1->oid)));
 }
 
@@ -410,12 +407,11 @@ H5FP_remove_object_lock_from_list(struct sap_file_struct *fs,
  * Modifications:
  */
 static int
-H5FP_file_mod_cmp(struct sap_file_mod *k1, struct sap_file_mod *k2, int cmparg)
+H5FP_file_mod_cmp(struct sap_file_mod *k1, struct sap_file_mod *k2, int UNUSED cmparg)
 {
     FUNC_ENTER_NOINIT(H5FP_file_mod_cmp);
     assert(k1);
     assert(k2);
-    cmparg = cmparg;    /* shut compiler up */
     FUNC_LEAVE(k1->key - k2->key);
 }
 
@@ -597,12 +593,11 @@ H5FP_free_file_struct_node(struct sap_file_struct *fs)
  * Modifications:
  */
 static int
-H5FP_file_struct_cmp(struct sap_file_struct *k1, struct sap_file_struct *k2, int cmparg)
+H5FP_file_struct_cmp(struct sap_file_struct *k1, struct sap_file_struct *k2, int UNUSED cmparg)
 {
     FUNC_ENTER_NOINIT(H5FP_file_struct_cmp);
     assert(k1);
     assert(k2);
-    cmparg = cmparg;    /* shut compiler up */
     FUNC_LEAVE(k1->sap_file_id - k2->sap_file_id);
 }
 
@@ -626,7 +621,7 @@ H5FP_new_file_struct_node(unsigned int sap_file_id, char *filename)
 
     ret_value->sap_file_id = sap_file_id;
     ret_value->filename = filename;
-    ret_value->closing = 0;
+    ret_value->closing = FALSE;
     ret_value->mod_tree = NULL;
     ret_value->locks = NULL;
 
@@ -785,7 +780,7 @@ H5FP_gen_sap_file_id()
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_open_request(struct SAP_request req, char *mdata, int md_len)
+H5FP_sap_handle_open_request(struct SAP_request req, char *mdata, int UNUSED md_len)
 {
     herr_t ret_value = SUCCEED;
     int mrc;
@@ -797,9 +792,8 @@ H5FP_sap_handle_open_request(struct SAP_request req, char *mdata, int md_len)
         int i;
 
         if (H5FP_add_new_file_struct_to_list(new_file_id, mdata) != SUCCEED)
-            /* FIXME: This should be a different error message */
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
-                        "can't insert file structure into tree");
+                        "can't insert new file structure to list");
 
         /* broadcast the file id to all processes */
         /* FIXME: Isn't there some way to broadcast this result to the barrier group? -QAK */
@@ -822,17 +816,7 @@ H5FP_sap_handle_open_request(struct SAP_request req, char *mdata, int md_len)
                      * we couldn't continue...but how to do that?!?
                      */
                     HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
-
-        printf("broadcast %d from %d\n", new_file_id, H5FP_sap_rank);
-        HDfflush(stdout);
     }
-
-    md_len = md_len;
-    printf("request_type == H5FP_REQ_OPEN, request_id == %d, proc_rank == %d,\n"
-             "sap_file_id == %d, obj_type == %d, action == %d\n",
-             req.req_id, req.proc_rank, req.sap_file_id, req.obj_type,
-             req.action);
-    HDfflush(stdout);
 
 done:
     FUNC_LEAVE(ret_value);
@@ -1008,12 +992,6 @@ H5FP_sap_handle_lock_request(struct SAP_request req)
         }
     }
 
-    printf("request_type == H5FP_REQ_LOCK, request_id == %d, proc_rank == %d,\n"
-             "sap_file_id == %d, obj_type == %d, action == %d\n",
-             req.req_id, req.proc_rank, req.sap_file_id, req.obj_type,
-             req.action);
-    HDfflush(stdout);
-
     goto done;
 
     /* Error handling code */
@@ -1024,7 +1002,7 @@ rollback:
      * possible to release those locks, we're in big trouble. The file is
      * now in an inconsistent state, as far as the SAP is concerned. The
      * only options left to the program are either to abort or completely
-     * close the file and reopen.
+     * close the file and reopen which could cause corruption.
      */
     for (j = 0; j <= i; ++j) {
         if (oids[j].locked) {
@@ -1049,8 +1027,7 @@ rollback:
 done:
     if (ret_value != SUCCEED) {
         /* Can't lock the whole group at one time for some reason */
-        printf("locking failure!!\n");
-        HDfflush(stdout);
+HDfprintf(stderr, "%s: locking failure (%d)!!\n", FUNC, ret_value);
     }
 
     HDfree(oids);
@@ -1158,14 +1135,8 @@ H5FP_sap_handle_release_lock_request(struct SAP_request req)
         }
     }
 
-    printf("request_type == H5FP_REQ_RELEASE, request_id == %d, proc_rank == %d,\n"
-           "sap_file_id == %d, obj_type == %d, action == %d\n",
-           req.req_id, req.proc_rank, req.sap_file_id, req.obj_type,
-           req.action);
-
-    HDfflush(stdout);
-
 done:
+HDfprintf(stderr, "exit_state == %d\n", exit_state);
     HDfree(oids);
     H5FP_send_reply(req.proc_rank, req.req_id, req.sap_file_id, exit_state);
     FUNC_LEAVE(ret_value);
@@ -1217,12 +1188,6 @@ H5FP_sap_handle_change_request(struct SAP_request req, char *mdata, int md_len)
         ret_value = FAIL;
     }
 
-    printf("request_type == H5FP_REQ_CHANGE, request_id == %d, proc_rank == %d,\n"
-           "sap_file_id == %d, obj_type == %d, action == %d\n",
-           req.req_id, req.proc_rank, req.sap_file_id, req.obj_type,
-           req.action);
-    printf("metadata received == %s, len == %d\n", mdata, md_len);
-
     H5FP_send_reply(req.proc_rank, req.req_id, req.sap_file_id, exit_state);
     FUNC_LEAVE(ret_value);
 }
@@ -1245,6 +1210,8 @@ H5FP_sap_handle_sync_request(struct SAP_request req)
     int mrc, sync_id = 0;
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_sync_request);
+
+HDfprintf(stderr, "%s: Trying to Synchronize!\n", FUNC);
 
     s.req_id = req.req_id;
     s.sap_file_id = req.sap_file_id;
@@ -1302,12 +1269,6 @@ H5FP_sap_handle_sync_request(struct SAP_request req)
                         H5FP_TAG_SYNC, H5FP_SAP_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
 
-    printf("request_type == H5FP_REQ_SYNC, request_id == %d, proc_rank == %d,\n"
-           "sap_file_id == %d, obj_type == %d, action == %d\n",
-           req.req_id, req.proc_rank, req.sap_file_id, req.obj_type,
-           req.action);
-    HDfflush(stdout);
-
 done:
     FUNC_LEAVE(ret_value);
 }
@@ -1338,11 +1299,6 @@ H5FP_sap_handle_close_request(struct SAP_request req)
             if (H5FP_remove_file_id_from_list(req.sap_file_id) != SUCCEED)
                 HGOTO_ERROR(H5E_FPHDF5, H5E_NOTFOUND, FAIL, "cannot remove file ID from list");
     }
-
-    printf("request_type == H5FP_REQ_CLOSE, request_id == %d, proc_rank == %d,\n"
-           "sap_file_id == %d, obj_type == %d, action == %d\n",
-           req.req_id, req.proc_rank, req.sap_file_id, req.obj_type,
-           req.action);
 
 done:
     FUNC_LEAVE(ret_value);

@@ -66,6 +66,13 @@ H5FPinit(MPI_Comm comm, int sap_rank)
     FUNC_ENTER_API(H5FPinit, FAIL);
     H5TRACE2("e","McIs",comm,sap_rank);
 
+    /* initialize to NULL so that we can release if an error occurs */
+    SAP_request_t = MPI_DATATYPE_NULL;
+    SAP_reply_t = MPI_DATATYPE_NULL;
+    SAP_sync_t = MPI_DATATYPE_NULL;
+    H5FP_SAP_COMM = MPI_COMM_NULL;
+    H5FP_SAP_BARRIER_COMM = MPI_COMM_NULL;
+
     /* Set the global variable to track the SAP's rank */
     H5FP_sap_rank = sap_rank;
 
@@ -110,6 +117,30 @@ H5FPinit(MPI_Comm comm, int sap_rank)
     /* Fall through and return to user, if not SAP */
 
 done:
+    if (ret_value == FAIL) {
+        /* we've encountered an error...clean up */
+        if (SAP_request_t != MPI_DATATYPE_NULL)
+            if (MPI_Type_free(&SAP_request_t) != MPI_SUCCESS)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
+
+        if (SAP_reply_t != MPI_DATATYPE_NULL)
+            if (MPI_Type_free(&SAP_reply_t) != MPI_SUCCESS)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
+
+        if (SAP_sync_t != MPI_DATATYPE_NULL)
+            if (MPI_Type_free(&SAP_sync_t) != MPI_SUCCESS)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
+
+        if (H5FP_SAP_BARRIER_COMM != MPI_COMM_NULL)
+            /* this comm will be NULL for the SAP */
+            if (MPI_Comm_free(&H5FP_SAP_BARRIER_COMM) != MPI_SUCCESS)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_free failed");
+
+        if (H5FP_SAP_COMM != MPI_COMM_NULL)
+            if (MPI_Comm_free(&H5FP_SAP_COMM) != MPI_SUCCESS)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_free failed");
+    }
+
     if (sap_group != MPI_GROUP_NULL)
         MPI_Group_free(&sap_group);
 
@@ -218,19 +249,20 @@ H5FP_commit_sap_datatypes(void)
     MPI_Aint displs[2];
     MPI_Datatype old_types[2];
     struct SAP_request req;
+    struct SAP_sync sap_sync;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FP_commit_sap_datatypes, FAIL);
 
     /* Commit the SAP_request_t datatype */
-    block_length[0] = 8;
+    block_length[0] = 10;
     block_length[1] = sizeof(req.oid);
+    old_types[0] = MPI_INT;
+    old_types[1] = MPI_UNSIGNED_CHAR;
     MPI_Address(&req.req_type, &displs[0]);
     MPI_Address(&req.oid, &displs[1]);
     displs[1] -= displs[0];
     displs[0] -= displs[0];
-    old_types[0] = MPI_INT;
-    old_types[1] = MPI_UNSIGNED_CHAR;
 
     if (MPI_Type_struct(2, block_length, displs, old_types, &SAP_request_t) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_struct failed");
@@ -250,9 +282,14 @@ H5FP_commit_sap_datatypes(void)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_commit failed");
 
     /* Commit the SAP_sync_t datatype */
-    block_length[0] = 8;
-    displs[0] = 0;
+    block_length[0] = 9;
+    block_length[1] = 1;
     old_types[0] = MPI_INT;
+    old_types[1] = MPI_LONG_LONG;
+    MPI_Address(&sap_sync.req_id, &displs[0]);
+    MPI_Address(&sap_sync.size, &displs[1]);
+    displs[1] -= displs[0];
+    displs[0] -= displs[0];
 
     if (MPI_Type_struct(1, block_length, displs, old_types, &SAP_sync_t) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_struct failed");

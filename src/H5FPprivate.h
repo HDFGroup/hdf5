@@ -15,6 +15,7 @@
 #define H5FPPRIVATE_H__ 0
 
 #include "H5FPpublic.h"         /* Flexible Parallel HDF5               */
+#include "H5Oprivate.h"         /* Object Headers                       */
 #include "H5Rprivate.h"         /* References                           */
 
 #define H5FP_BYTE_BITS   8
@@ -36,22 +37,23 @@
  * for that object.
  */
 enum sap_request {
-    H5FP_REQ_OPEN,              /* Open a file (or eventually an object) */
-    H5FP_REQ_LOCK,              /* Lock an object (in a sequence) */
-    H5FP_REQ_LOCK_END,          /* Last lock request in lock sequence */
-    H5FP_REQ_RELEASE,           /* Unlock an object (in a sequence) */
-    H5FP_REQ_RELEASE_END,       /* Last unlock request in unlock sequence */
-    H5FP_REQ_CHANGE,            /* Change an object */
-    H5FP_REQ_SYNC,              /* Syncronize changes in file */
-    H5FP_REQ_CLOSE,             /* Close a file (or eventually an object) */
-    H5FP_REQ_STOP               /* Stop SAP */
+    H5FP_REQ_OPEN,              /* Open a file (or eventually an object)    */
+    H5FP_REQ_LOCK,              /* Lock an object (in a sequence)           */
+    H5FP_REQ_LOCK_END,          /* Last lock request in lock sequence       */
+    H5FP_REQ_RELEASE,           /* Unlock an object (in a sequence)         */
+    H5FP_REQ_RELEASE_END,       /* Last unlock request in unlock sequence   */
+    H5FP_REQ_CHANGE,            /* Change an object                         */
+    H5FP_REQ_SYNC,              /* Syncronize changes in file               */
+    H5FP_REQ_CLOSE,             /* Close a file (or eventually an object)   */
+    H5FP_REQ_STOP               /* Stop SAP                                 */
 };
 
 /* Actions to take when performing a change */
 enum sap_action {
     H5FP_ACT_CREATE,
     H5FP_ACT_EXTEND,
-    H5FP_ACT_DELETE
+    H5FP_ACT_DELETE,
+    H5FP_ACT_UPDATE
 };
 
 /* Types of objects we can change */
@@ -60,7 +62,8 @@ enum sap_obj_type {
     H5FP_OBJ_GROUP,
     H5FP_OBJ_DATASET,
     H5FP_OBJ_DATATYPE,
-    H5FP_OBJ_ATTRIBUTE
+    H5FP_OBJ_ATTRIBUTE,
+    H5FP_OBJ_MEMORY
 };
 
 /* Types of locks we can get */
@@ -75,10 +78,12 @@ struct SAP_request {
     unsigned int req_id;        /* ID for request set by sending process    */
     unsigned int proc_rank;     /* Rank of sending process                  */
     unsigned int sap_file_id;   /* SAP's file ID for the specific file      */
-    int md_len;                 /* Length of the metadata sent in next msg  */
     enum sap_obj_type obj_type; /* Type of object                           */
     enum sap_action action;     /* Action to do to object (H5FP_REQ_CHANGE only) */
     enum sap_lock_type rw_lock; /* Indicates read or write lock             */
+    H5FD_mem_t mem_type;        /* Type of memory updated, if req'd         */
+    unsigned long size;         /* Size of memory updated, if req'd         */
+    int md_len;                 /* Length of the metadata sent in next msg  */
     unsigned char oid[H5R_OBJ_REF_BUF_SIZE]; /* Buffer to store OID of object referenced */
 };
 
@@ -95,7 +100,7 @@ enum sap_status {
     /* For releasing locks */
     H5FP_STATUS_LOCK_RELEASED,
     H5FP_STATUS_LOCK_RELEASE_FAILED,
-    H5FP_STATUS_BAD_LOCK,       /* Process doesn't own a lock on the OID */
+    H5FP_STATUS_BAD_LOCK,       /* Process doesn't own a lock on the OID    */
 
     /* For change requests */
     H5FP_STATUS_FILE_CLOSING,
@@ -126,10 +131,12 @@ struct SAP_sync {
     unsigned int sync_id;       /* Sync ID to order the sync messages       */
     unsigned int sap_file_id;   /* SAP's file ID for the specific file      */
     unsigned int last_msg;      /* Indicates this is the last sync msg sent */
-    int md_len;                 /* Length of the metadata sent in next msg  */
     enum sap_obj_type obj_type; /* Type of object                           */
     enum sap_action action;     /* Action done on the object                */
     enum sap_status status;     /* Status of the request                    */
+    int md_len;                 /* Length of the metadata sent in next msg  */
+    H5FD_mem_t mem_type;        /* Type of memory updated, if req'd         */
+    hsize_t size;               /* Size of memory updated, if req'd         */
 };
 
 extern MPI_Datatype SAP_sync_t; /* MPI datatype for the SAP_sync obj    */
@@ -178,13 +185,22 @@ extern herr_t H5FP_request_lock(unsigned int sap_file_id, unsigned char *mdata,
                                 enum sap_lock_type rw_lock, int last, unsigned *req_id,
                                 enum sap_status *status);
 extern herr_t H5FP_request_release_lock(unsigned int sap_file_id, unsigned char *mdata,
-                                        int last, unsigned *req_id, enum sap_status *status);
-extern herr_t H5FP_request_change(unsigned int sap_file_id, enum sap_obj_type obj_type,
-                                  enum sap_action action, int mdata_len, const char *mdata,
-                                  unsigned *req_id);
+                                        int last, unsigned *req_id,
+                                        enum sap_status *status);
+extern herr_t H5FP_request_change(unsigned int sap_file_id, unsigned char *obj_oid,
+                                  enum sap_obj_type obj_type, enum sap_action action,
+                                  int mdata_len, const char *mdata, unsigned *req_id,
+                                  enum sap_status *status);
 extern herr_t H5FP_request_sync(unsigned int sap_file_id, hid_t hdf_file_id,
                                 unsigned *req_id, enum sap_status *status);
 extern herr_t H5FP_request_close(unsigned sap_file_id, unsigned *req_id);
+
+/* Helper functions */
+extern void H5FP_fill_fphdf5_struct(H5O_fphdf5_t *fphdf5, uint8_t *oid, haddr_t header,
+                                    struct H5S_simple_t *sdim, H5T_t *dtype,
+                                    time_t *mtime, H5O_layout_t *layout,
+                                    H5O_name_t *group, H5O_name_t *dataset,
+                                    struct H5P_genplist_t *plist);
 
 #ifdef __cplusplus
 }
