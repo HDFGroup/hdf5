@@ -1,6 +1,6 @@
 <html>
 <head><title>
-HDF5/H5R Draft API Specification
+HDF5/H5RA Draft API Specification
 </title></head>
 
 <body>
@@ -15,7 +15,7 @@ HDF5/H5R Draft API Specification
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
-H5R&nbsp;&nbsp;
+H5RA&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
@@ -27,14 +27,14 @@ H5R&nbsp;&nbsp;
 <hr>
 
 <center>
-<h1>H5R: Ragged Array Interface</h1>
+<h1>H5RA: Ragged Array Interface</h1>
 </center>
 
 <h2>Ragged Array API Functions</h2>
 <table border=1>
 <tr><th align=left>
 <font color=red>
-The H5R Interface is strictly experimental at this time;
+The H5RA Interface is strictly experimental at this time;
 the interface may change dramatically or support for ragged arrays
 may be unavailable in future in releases.  As a result, future releases 
 may be unable to retrieve data stored with this interface.
@@ -50,14 +50,14 @@ These functions enable the user to store and retrieve data in ragged arrays.
 <table border=0>
 <tr><td valign=top>
 <ul>
-    <li><a href="#Ragged-Create">H5Rcreate</a>
-    <li><a href="#Ragged-Open">H5Ropen</a>
-    <li><a href="#Ragged-Close">H5Rclose</a>
+    <li><a href="#Ragged-Create">H5RAcreate</a>
+    <li><a href="#Ragged-Open">H5RAopen</a>
+    <li><a href="#Ragged-Close">H5RAclose</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    <li><a href="#Ragged-Write">H5Rwrite</a>
-    <li><a href="#Ragged-Read">H5Rread</a>
+    <li><a href="#Ragged-Write">H5RAwrite</a>
+    <li><a href="#Ragged-Read">H5RAread</a>
 </ul>
 </td></tr>
 </table>
@@ -68,16 +68,16 @@ These functions enable the user to store and retrieve data in ragged arrays.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Ragged-Create">H5Rcreate</a>
+<dt><strong>Name:</strong> <a name="Ragged-Create">H5RAcreate</a>
 <dt><strong>Signature:</strong>
-    <dd><em> </em> <code>H5Rcreate</code>(<em> </em> <code> </code>,
+    <dd><em> </em> <code>H5RAcreate</code>(<em> </em> <code> </code>,
         <em> </em> <code> </code>,
         <em> </em> <code> </code>
     )
 <dt><strong>Purpose:</strong>
     <dd>
 <dt><strong>Description:</strong>
-    <dd><code>H5Rcreate</code>
+    <dd><code>H5RAcreate</code>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em> </em> <code> </code>
@@ -95,16 +95,16 @@ These functions enable the user to store and retrieve data in ragged arrays.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Ragged-Open">H5Ropen</a>
+<dt><strong>Name:</strong> <a name="Ragged-Open">H5RAopen</a>
 <dt><strong>Signature:</strong>
-    <dd><em> </em> <code>H5Ropen</code>(<em> </em> <code> </code>,
+    <dd><em> </em> <code>H5RAopen</code>(<em> </em> <code> </code>,
         <em> </em> <code> </code>,
         <em> </em> <code> </code>
     )
 <dt><strong>Purpose:</strong>
     <dd>
 <dt><strong>Description:</strong>
-    <dd><code>H5Ropen</code>
+    <dd><code>H5RAopen</code>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em> </em> <code> </code>
@@ -122,16 +122,16 @@ These functions enable the user to store and retrieve data in ragged arrays.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Ragged-Close">H5Rclose</a>
+<dt><strong>Name:</strong> <a name="Ragged-Close">H5RAclose</a>
 <dt><strong>Signature:</strong>
-    <dd><em> </em> <code>H5Rclose</code>(<em> </em> <code> </code>,
+    <dd><em> </em> <code>H5RAclose</code>(<em> </em> <code> </code>,
         <em> </em> <code> </code>,
         <em> </em> <code> </code>
     )
 <dt><strong>Purpose:</strong>
     <dd>
 <dt><strong>Description:</strong>
-    <dd><code>H5Rclose</code>
+    <dd><code>H5RAclose</code>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em> </em> <code> </code>
@@ -149,16 +149,16 @@ These functions enable the user to store and retrieve data in ragged arrays.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Ragged-Write">H5Rwrite</a>
+<dt><strong>Name:</strong> <a name="Ragged-Write">H5RAwrite</a>
 <dt><strong>Signature:</strong>
-    <dd><em> </em> <code>H5Rwrite</code>(<em> </em> <code> </code>,
+    <dd><em> </em> <code>H5RAwrite</code>(<em> </em> <code> </code>,
         <em> </em> <code> </code>,
         <em> </em> <code> </code>
     )
 <dt><strong>Purpose:</strong>
     <dd>
 <dt><strong>Description:</strong>
-    <dd><code>H5Rwrite</code>
+    <dd><code>H5RAwrite</code>
         <p>
         Datatype conversion takes place at the time of a read or write
         and is automatic.  See the
@@ -184,16 +184,16 @@ These functions enable the user to store and retrieve data in ragged arrays.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Ragged-Read">H5Rread</a>
+<dt><strong>Name:</strong> <a name="Ragged-Read">H5RAread</a>
 <dt><strong>Signature:</strong>
-    <dd><em> </em> <code>H5Rread</code>(<em> </em> <code> </code>,
+    <dd><em> </em> <code>H5RAread</code>(<em> </em> <code> </code>,
         <em> </em> <code> </code>,
         <em> </em> <code> </code>
     )
 <dt><strong>Purpose:</strong>
     <dd>
 <dt><strong>Description:</strong>
-    <dd><code>H5Rread</code>
+    <dd><code>H5RAread</code>
         <p>
         Datatype conversion takes place at the time of a read or write
         and is automatic.  See the
@@ -227,7 +227,7 @@ These functions enable the user to store and retrieve data in ragged arrays.
 <a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
 <a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
 <a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
-H5R&nbsp;&nbsp;
+H5RA&nbsp;&nbsp;
 <a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
 <a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
 <a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;

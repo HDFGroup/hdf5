@@ -10,7 +10,7 @@
 <table border=1>
 <tr><th align=left>
 <font color=red>
-The H5R Interface is strictly experimental at this time;
+The H5RA Interface is strictly experimental at this time;
 the interface may change dramatically or support for ragged arrays
 may be unavailable in future in releases.  As a result, future releases
 may be unable to retrieve data stored with this interface.
@@ -67,7 +67,7 @@ Do not create any archives using this interface!</center>
     <h2>2. Opening and Closing</h2>
 
     <dl>
-      <dt><code>hid_t H5Rcreate (hid_t <em>location</em>, const char
+      <dt><code>hid_t H5RAcreate (hid_t <em>location</em>, const char
 	  *<em>name</em>, hid_t <em>type</em>, hid_t
 	  <em>plist</em>)</code>
       <dd>This function creates a new ragged array by creating the
@@ -81,7 +81,7 @@ Do not create any archives using this interface!</center>
 	cannot be created.
 
 	<br><br>
-      <dt><code>hid_t H5Ropen (hid_t <em>location</em>, const char
+      <dt><code>hid_t H5RAopen (hid_t <em>location</em>, const char
 	  *<em>name</em>)</code>
       <dd>This function opens a ragged array by opening the specified
 	group and the component datasets (which should not be accessed 
@@ -89,7 +89,7 @@ Do not create any archives using this interface!</center>
 	be opened.
 
 	<br><br>
-      <dt><code>herr_t H5Rclose (hid_t <em>array</em>)</code>
+      <dt><code>herr_t H5RAclose (hid_t <em>array</em>)</code>
       <dd>All ragged arrays should be closed by calling this
 	function.  The group and component datasets will be closed
 	automatically by the library.
@@ -104,7 +104,7 @@ Do not create any archives using this interface!</center>
       number of rows on which to operate.
 
     <dl>
-      <dt><code>herr_t H5Rwrite (hid_t <em>array_id</em>, hssize_t
+      <dt><code>herr_t H5RAwrite (hid_t <em>array_id</em>, hssize_t
 	  <em>start_row</em>, hsize_t <em>nrows</em>, hid_t
 	  <em>type</em>, hsize_t <em>size</em>[], void
 	  *<em>buf</em>[])</code>
@@ -119,7 +119,7 @@ Do not create any archives using this interface!</center>
 	the first row on which to operate.
 
 	<br><br>
-      <dt><code>herr_t H5Rread (hid_t <em>array_id</em>, hssize_t
+      <dt><code>herr_t H5RAread (hid_t <em>array_id</em>, hssize_t
 	  <em>start_row</em>, hsize_t <em>nrows</em>, hid_t
 	  <em>type</em>, hsize_t <em>size</em>[], void
 	  *<em>buf</em>[])</code>

@@ -4,7 +4,7 @@
 <META NAME="Generator" CONTENT="Microsoft Word 97">
 <TITLE>Introduction to HDF5</TITLE>
 </HEAD>
-<BODY LINK="#0000ff" VLINK="#800080">
+<BODY LINK="#0000ff" VLINK="#800080" bgcolor="#FFFFFF">
 
 
 <!--
@@ -373,7 +373,23 @@ status_n  = H5Sget_simple_extent_dims(dataspace, dims_out);
 printf("rank %d, dimensions %d x %d \n", rank, dims_out[0], dims_out[1]);</PRE>
 </CODE><H4><A NAME="_Toc429885316">Reading and writing a portion of a dataset</A></H4>
 <P>In the previous discussion, we describe how to access an entire dataset with one write (or read) operation. HDF5 also supports access to portions (or selections) of a dataset in one read/write operation. Currently selections are limited to hyperslabs and the lists of independent points. Both types of selection will be discussed in the following sections. Several sample cases of selection reading/writing are shown on the following figure.
-<p align=center><img src="H5.intro.datamap.gif"></p>
+<center>
+<table bgcolor="#FFFFFF" border=1>
+<tr><td align=center>
+<img src="IH_mapHead.gif">
+</tr></td><tr><td align=center>
+<img src="IH_map1.gif">
+</tr></td><tr><td align=center>
+<img src="IH_map2.gif">
+</tr></td><tr><td align=center>
+<img src="IH_map3.gif">
+</tr></td><tr><td align=center>
+<img src="IH_map4.gif">
+</tr></td><tr><td align=center>
+<img src="IH_mapFoot.gif">
+</tr></td>
+</table>
+</center>
 </B><P>In example (a) a single hyperslab is read from the midst of a two-dimensional array in a file and stored in the corner of a smaller two-dimensional array in memory.  In (b) a regular series of blocks is read from a two-dimensional array in the file and stored as a contiguous sequence of values at a certain offset in a one-dimensional array in memory.  In (c) a sequence of points with no regular pattern is read from a two-dimensional array in a file and stored as a sequence of points with no regular pattern in a three-dimensional array in memory. 
 <P>As these examples illustrate, whenever we perform partial read/write operations on the data, the following information must be provided: file dataspace, file dataspace selection, memory dataspace and memory dataspace selection. After the required information is specified, actual read/write operation on the portion of data is done in a single call to the HDF5 read/write functions H5Dread(write).
 <H5><A NAME="_Toc429885317">Selecting hyperslabs</A></H5>
@@ -998,6 +1014,7 @@ ret = H5Dwrite(dataset, H5T_NATIVE_INT, mid2, fid, H5P_DEFAULT, values);
 
 <P>&nbsp;
 </FONT><P>After these operations, the file dataspace will have the following values:
+<center>
 <TABLE BORDER CELLSPACING=1 CELLPADDING=7 WIDTH=460>
 <TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
 <B><CODE><P>53</B></CODE></TD>
@@ -1156,8 +1173,416 @@ ret = H5Dwrite(dataset, H5T_NATIVE_INT, mid2, fid, H5P_DEFAULT, values);
 <TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
 </TR>
 </TABLE>
+</center>
 
 <P><A HREF="#WriteSelected"><FONT FACE="Times">Example 3</FONT></A><FONT FACE="Times"> contains a complete program that performs these subsetting operations.
+
+<H5><A NAME="_SelectUnion">Selecting a union of hyperslabs</A></H5>
+
+</font>
+The HDF5 Library allows the user to select a union of hyperslabs and 
+write or read the selection into another selection.  The shapes of
+the two selections may differ, but the number of elements must be equal.
+<p>
+Suppose that we want to read two overlapping hyperslabs from the dataset 
+written in the previous example into a union of hyperslabs in the memory 
+dataset.  This exercise is illustrated in the two figures immediately below.
+Note that the memory dataset has a different shape from the previously
+written dataset.  Similarly, the selection in the memory dataset
+could have a different shape than the selected union of hyperslabs in 
+the original file; for simplicity, we will preserve the selection's shape
+in this example.
+<p>
+
+<center>
+<b>Selection of a union of hyperslabs in a file dataset</b><br>
+<TABLE BORDER CELLSPACING=1 CELLPADDING=7 WIDTH=460>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<B><CODE><P>53</B></CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>1</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>2</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>3</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>4</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>5</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>6</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>7</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>8</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>9</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">
+<CODE><P>10</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">
+<CODE><P>11</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">
+<CODE><P>12</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>13</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>14</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>15</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>16</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>17</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">
+<CODE><P>18</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#88FF88">
+<CODE><P>19</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#88FF88">
+<CODE><P>20</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>21</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44" border=1>
+<CODE><P>22</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>23</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>24</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">
+<B><CODE><P>59</B></CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#88FF88">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#88FF88">
+<B><CODE><P>61</B></CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>25</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>26</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>27</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>28</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>29</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>30</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>31</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>32</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>33</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>34</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>35</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>36</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<B><CODE><P>67</B></CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>37</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>38</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>39</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>40</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>41</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>42</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>43</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>44</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>45</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>46</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>47</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>48</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+</TR>
+</TABLE>
+<font size=-1><i>(Note: The above table highlights hyperslab selections 
+with green, blue, and yellow <br> shading.  This shading may not 
+appear properly in black-and-white printed copies.)</i></font>
+</center>
+
+
+<p>
+
+<center>
+<b>Selection of a union of hyperslabs in a memory dataset</b><br>
+<font size=-1>Blank cells in this figure actually contain values written 
+when the dataset was initialized.</font>
+<TABLE BORDER CELLSPACING=1 CELLPADDING=7 WIDTH=345>
+<TR>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">
+<CODE><P>10</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">
+<CODE><P>11</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">
+<CODE><P>12</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+</TR>
+<TR>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">
+<CODE><P>18</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#88FF88">
+<CODE><P>19</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#88FF88">
+<CODE><P>20</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>21</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44" border=1>
+<CODE><P>22</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+</TR>
+<TR>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#44FFFF">
+<B><CODE><P>59</B></CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#88FF88">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#88FF88">
+<B><CODE><P>61</B></CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+</TR>
+<TR>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>27</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>28</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>29</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>30</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+</TR>
+<TR>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>35</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>36</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<B><CODE><P>67</B></CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>37</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>38</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+</TR>
+<TR>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>43</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>44</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>45</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1 bgcolor="#FFFF44">
+<CODE><P>46</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+</TR>
+<TR>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+</TR>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>&nbsp;</TD>
+</TR>
+</TABLE>
+<font size=-1><i>(Note: The above table highlights hyperslab selections 
+with green, blue, and yellow <br> shading.  This shading may not 
+appear properly in black-and-white printed copies.)</i></font>
+</center>
+
+
+<p>
+The following lines of code show the required steps.
+<p>
+First obtain the dataspace identifier for the dataset in the file.
+
+<pre>
+    /*
+     * Get dataspace of the open dataset.
+     */  
+    fid = H5Dget_space(dataset);
+</pre>
+
+Then select the hyperslab with the size 3x4 and 
+the left upper corner at the position (1,2):
+
+<pre>
+    /*
+     * Select first hyperslab for the dataset in the file. The following
+     * elements are selected:
+     *                     10  0 11 12
+     *                     18  0 19 20
+     *                      0 59  0 61
+     *   
+     */ 
+    start[0] = 1; start[1] = 2;
+    block[0] = 1; block[1] = 1;
+    stride[0] = 1; stride[1] = 1;
+    count[0]  = 3; count[1]  = 4;
+    ret = H5Sselect_hyperslab(fid, H5S_SELECT_SET, start, stride, count, block); 
+</pre>
+
+Now select the second hyperslab with the size 6x5 at the position (2,4), 
+and create the union with the first hyperslab.
+
+<pre>
+    /*
+     * Add second selected hyperslab to the selection.
+     * The following elements are selected:
+     *                    19 20  0 21 22
+     *                     0 61  0  0  0
+     *                    27 28  0 29 30
+     *                    35 36 67 37 38
+     *                    43 44  0 45 46
+     *                     0  0  0  0  0
+     * Note that two hyperslabs overlap. Common elements are:
+     *                                              19 20
+     *                                               0 61
+     */
+    start[0] = 2; start[1] = 4;
+    block[0] = 1; block[1] = 1;
+    stride[0] = 1; stride[1] = 1;
+    count[0]  = 6; count[1]  = 5;
+    ret = H5Sselect_hyperslab(fid, H5S_SELECT_OR, start, stride, count, block);
+</pre>
+ 
+Note that when we add the selected hyperslab to the union, the 
+second argument to the <code>H5Sselect_hyperslab</code> function 
+has to be <code>H5S_SELECT_OR</code> instead of <code>H5S_SELECT_SET</code>. 
+Using <code>H5S_SELECT_SET</code> would be reset the selection to 
+the second hyperslab.
+<p>
+Now define the memory dataspace and select the union of the hyperslabs 
+in the memory dataset.
+
+<pre>
+ /*
+     * Create memory dataspace.
+     */
+    mid = H5Screate_simple(MSPACE_RANK, mdim, NULL);
+     
+    /*
+     * Select two hyperslabs in memory. Hyperslabs has the same
+     * size and shape as the selected hyperslabs for the file dataspace.
+     */
+    start[0] = 0; start[1] = 0;
+    block[0] = 1; block[1] = 1;
+    stride[0] = 1; stride[1] = 1;
+    count[0]  = 3; count[1]  = 4;
+    ret = H5Sselect_hyperslab(mid, H5S_SELECT_SET, start, stride, count, block);     
+    start[0] = 1; start[1] = 2;
+    block[0] = 1; block[1] = 1;
+    stride[0] = 1; stride[1] = 1;
+    count[0]  = 6; count[1]  = 5;
+    ret = H5Sselect_hyperslab(mid, H5S_SELECT_OR, start, stride, count, block);
+</pre>
+     
+Finally we can read the selected data from the file dataspace to the selection
+in memory with one call to the <code>H5Dread</code> function.
+
+<pre>
+    ret = H5Dread(dataset, H5T_NATIVE_INT, mid, fid, H5P_DEFAULT, matrix_out);
+</pre>
+
+<P>
+<A HREF="#WriteSelected">Example 3</a> includes this code along with 
+the previous selection example.
+
+
+
 </FONT><H4><A NAME="_Toc429885319">Creating compound datatypes</A></H4>
 <B><P>Properties of compound datatypes. </B>A compound datatype is similar to a struct in C or a common block in Fortran. It is a collection of one or more atomic types or small arrays of such types. To create and use of a compound datatype you need to refer to various <i>properties</i> of the data compound datatype:
 
@@ -2765,7 +3190,7 @@ attr_info(hid_t loc_id, const char *name, void *opdata)
 <tr><td align=left valign=top>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
 <br>
-Last modified:  11 September 1998
+Last modified:  20 October 1998
 
 </td><td align=right valign=top>
 <a href="Copyright.html">Copyright</a>&nbsp;&nbsp;
