@@ -391,6 +391,7 @@ test_compound_1(void)
 {
     complex_t               tmp;
     hid_t                   complex_id;
+    herr_t ret;
 
     TESTING("compound data types");
 
@@ -398,7 +399,14 @@ test_compound_1(void)
     if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof tmp))<0) goto error;
 
     /* Attempt to add the new compound datatype as a field within itself */
-    if (H5Tinsert(complex_id, "compound", 0, complex_id)>=0) goto error;
+    H5E_BEGIN_TRY {
+        ret=H5Tinsert(complex_id, "compound", 0, complex_id);
+    } H5E_END_TRY;
+    if (ret>=0) {
+        H5_FAILED();
+        printf("Inserted compound datatype into itself?\n");
+        goto error;
+    } /* end if */
 
     /* Add a couple fields */
     if (H5Tinsert(complex_id, "real", HOFFSET(complex_t, re),
