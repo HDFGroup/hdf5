@@ -162,6 +162,7 @@
 ./test/istore.c
 ./test/testhdf5.c
 ./test/testhdf5.h
+./test/testphdf5.c
 ./test/tfile.c
 ./test/th5p.c
 ./test/theap.c
