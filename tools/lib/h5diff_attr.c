@@ -189,7 +189,12 @@ int diff_attr(hid_t      loc1_id,
  */
  sprintf(name1,"%s of <%s>",name1,path1);
  sprintf(name2,"%s of <%s>",name2,path2);
- nfound = diff_array(buf1, 
+
+ /* always print name */
+ if (options->m_verbose)
+ {
+  printf( "Attribute:   <%s> and <%s>\n",name1,name2); 
+  nfound = diff_array(buf1, 
                      buf2,
                      nelmts1,
                      rank1,
@@ -200,18 +205,64 @@ int diff_attr(hid_t      loc1_id,
                      mtype1_id,
                      attr1_id,
                      attr2_id);
- 
+  print_found(nfound);
+  
+ }
+ /* check first if we have differences */
+ else
+ {
+  if (options->m_quiet==0)
+  {
+   /* shut up temporarily */
+   options->m_quiet=1;
+   nfound = diff_array(buf1, 
+                     buf2,
+                     nelmts1,
+                     rank1,
+                     dims1,
+                     options,
+                     name1,
+                     name2,
+                     mtype1_id,
+                     attr1_id,
+                     attr2_id);
+   /* print again */
+   options->m_quiet=0;
+   if (nfound) 
+   {
+    printf( "Attribute:   <%s> and <%s>\n",name1,name2); 
+    nfound = diff_array(buf1, 
+                     buf2,
+                     nelmts1,
+                     rank1,
+                     dims1,
+                     options,
+                     name1,
+                     name2,
+                     mtype1_id,
+                     attr1_id,
+                     attr2_id);
+    print_found(nfound);
+   } /*if*/
+  } /*if*/
+  /* in quiet mode, just count differences */
+  else
+  {
+   nfound = diff_array(buf1, 
+                     buf2,
+                     nelmts1,
+                     rank1,
+                     dims1,
+                     options,
+                     name1,
+                     name2,
+                     mtype1_id,
+                     attr1_id,
+                     attr2_id);
+  } /*else quiet */
+ } /*else verbose */
  }/*cmp*/
 
-/*-------------------------------------------------------------------------
- * print how many differences were found
- *-------------------------------------------------------------------------
- */
- if (print_objname(options,nfound))
- {
-  printf( "Attribute:   <%s> and <%s>\n",name1,name2);
-  print_found(nfound);
- }
 
 
 /*-------------------------------------------------------------------------
