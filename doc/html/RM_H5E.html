@@ -56,18 +56,19 @@ These functions provide error handling capabilities in the HDF5 environment.
 <table border=0>
 <tr><td valign=top>
 <ul>
+    <li><a href="#Error-Clear">H5Eclear</a>
+    <li><a href="#Error-Print">H5Eprint</a>
+    <li><a href="#Error-Push">H5Epush</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
     <li><a href="#Error-SetAuto">H5Eset_auto</a>
     <li><a href="#Error-GetAuto">H5Eget_auto</a>
-    <li><a href="#Error-Clear">H5Eclear</a>
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
-    <li><a href="#Error-Print">H5Eprint</a>
     <li><a href="#Error-Walk">H5Ewalk</a>
-    <li><a href="#Error-WalkCB">H5Ewalk_cb</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
+    <li><a href="#Error-WalkCB">H5Ewalk_cb</a>
     <li><a href="#Error-GetMajor">H5Eget_major</a>
     <li><a href="#Error-GetMinor">H5Eget_minor</a>
 </ul>
@@ -243,6 +244,63 @@ errors within the H5E package.
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5e_FORTRAN.html#h5eclear_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-Push">H5Epush</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Epush</code>(
+            <em>const char *</em><code>file</code>,
+            <em>const char *</em><code>func</code>,
+            <em>unsigned</em> <code>line</code>,
+            <em>H5E_major_t</em> <code>maj_num</code>,
+            <em>H5E_minor_t</em> <code>min_num</code>,
+            <em>const char *</em><code>str</code>
+            )
+<dt><strong>Purpose:</strong>
+    <dd>Pushes new error record onto error stack.
+<dt><strong>Description:</strong>
+    <dd><code>H5Epush</code> pushes a new error record onto the 
+        error stack for the current thread.  
+        <p>
+        The error has major and minor numbers <code>maj_num</code> and 
+        <code>min_num</code>, 
+        the function <code>func</code> where the error was detected,
+        the name of the file <code>file</code> where the error was detected, 
+        the line <code>line</code> within that file, 
+        and an error description string <code>str</code>.  
+        <p>
+        The function name, file name, and error description strings 
+        must be statically allocated.   
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>const char *</em><code>file</code>,
+            <dd>IN: Name of the file in which the error was detected.
+        <dt><em>const char *</em><code>func</code>,
+            <dd>IN: Name of the function in which the error was detected.
+        <dt><em>unsigned</em> <code>line</code>,
+            <dd>IN: Line within the file at which the error was detected.
+        <dt><em>H5E_major_t</em> <code>maj_num</code>,
+            <dd>IN: Major error number.
+        <dt><em>H5E_minor_t</em> <code>min_num</code>,
+            <dd>IN: Minor error number.
+        <dt><em>const char *</em><code>str</code>
+            <dd>IN: Error description string.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5e_FORTRAN.html#h5epush_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">

@@ -67,7 +67,7 @@ and set and retrieve their constant or persistent properties.
 <ul>
     <li><a href="#Dataset-GetCreatePlist">H5Dget_create_plist</a>
     <li><a href="#Dataset-GetStorageSize">H5Dget_storage_size</a>
-    <li><a href="#Dataset-GetVLBuf">H5Dget_vlen_buf_size</a>
+    <li><a href="#Dataset-VLGetBuf">H5Dvlen_get_buf_size</a>
     <li><a href="#Dataset-VLReclaim">H5Dvlen_reclaim</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
@@ -111,7 +111,7 @@ facilitate moving easily between them.</i>
     <li><a href="#Dataset-GetType">h5dget_type_f</a>
     <li><a href="#Dataset-GetCreatePlist">h5dget_create_plist_f</a>
 <!--<li><a href="#Dataset-GetStorageSize">h5dget_storage_size_f</a>      -->
-<!--<li><a href="#Dataset-GetVLBuf">h5dget_vlen_buf_size_f</a>           -->
+<!--<li><a href="#Dataset-VLGetBuf">h5dvlen_get_buf_size_f</a>           -->
 <!--<li><a href="#Dataset-VLReclaim">h5dvlen_reclaim_f</a>               -->
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
@@ -355,10 +355,9 @@ facilitate moving easily between them.</i>
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Dataset-GetVLBuf">H5Dget_vlen_buf_size</a>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i><b>(Not yet implemented.)</b></i>
+<dt><strong>Name:</strong> <a name="Dataset-VLGetBuf">H5Dvlen_get_buf_size</a>
 <dt><strong>Signature:</strong>   
-    <dd><em>herr_t </em><code>H5Dget_vlen_buf_size</code>(<em>hid_t </em><code>dataset_id</code>,
+    <dd><em>herr_t </em><code>H5Dvlen_get_buf_size</code>(<em>hid_t </em><code>dataset_id</code>,
     <em>hid_t</em> <code>type_id</code>,
     <em>hid_t</em> <code>space_id</code>,
     <em>hsize_t</em> *<code>size</code>
@@ -366,31 +365,31 @@ facilitate moving easily between them.</i>
 <dt><strong>Purpose:</strong>
     <dd>Determines the number of bytes required to store VL data.
 <dt><strong>Description:</strong>
-    <dd><code>H5Dget_vlen_buf_size</code> determines the number of bytes 
+    <dd><code>H5Dvlen_get_buf_size</code> determines the number of bytes 
         required to store the VL data from the dataset, using the 
         <code>space_id</code> for the selection in the dataset on 
         disk and the <code>type_id</code> for the memory representation 
         of the VL data in memory.  
         <p>
-        <code>*size</code> is returned with the number of bytes are 
+        <code>*size</code> is returned with the number of bytes 
         required to store the VL data in memory.          
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset_id</code>
             <dd>Identifier of the dataset to query.
         <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of the datatype.
+            <dd>Datatype identifier.
         <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Identifier of the dataspace.
+            <dd>Dataspace identifier.
         <dt><em>hsize_t</em> *<code>size</code>
-            <dd>The size in bytes of the buffer required to store the VL data.
+            <dd>The size in bytes of the memory buffer required to store the VL data.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns non-negative value if successful;
         otherwise returns a negative value.
 <!--
 <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_vlen_buf_size_f" 
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dvlen_get_buf_size_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
 -->     <!--
         <img src="Graphics/Java.gif"> 

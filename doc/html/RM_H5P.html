@@ -88,27 +88,47 @@ many different parameters to be easily manipulated.
 
     <i>File Access Properties</i>
     <ul>
+    <li><a href="#Property-SetFaplFamily">H5Pset_fapl_family</a>
+    <li><a href="#Property-GetFaplFamily">H5Pget_fapl_family</a>
+    <li><a href="#Property-SetFaplLog">H5Pset_fapl_log</a>
+    <li><a href="#Property-SetFaplMpio">H5Pset_fapl_mpio</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-GetFaplMpio">H5Pget_fapl_mpio</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-SetDxplMpio">H5Pset_dxpl_mpio</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-GetDxplMpio">H5Pget_dxpl_mpio</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-SetFaplMulti">H5Pset_fapl_multi</a>
+    <li><a href="#Property-GetFaplMulti">H5Pget_fapl_multi</a>
+    <li><a href="#Property-SetDxplMulti">H5Pset_dxpl_multi</a>
+    <li><a href="#Property-GetDxplMulti">H5Pget_dxpl_multi</a>
+    <li><a href="#Property-SetFaplSplit">H5Pset_fapl_split</a>
+    <li><a href="#Property-SetFaplSec2">H5Pset_fapl_sec2</a>
+    <li><a href="#Property-SetFaplStdio">H5Pset_fapl_stdio</a>
+    <li><a href="#Property-SetFaplStream">H5Pset_fapl_stream</a>
+    <li><a href="#Property-GetFaplStream">H5Pget_fapl_stream</a>
+    <li><a href="#Property-SetDriver">H5Pset_driver</a>
+    <li><a href="#Property-GetDriver">H5Pget_driver</a>
+    <li><a href="#Property-GetDriverInfo">H5Pget_driver_info</a>
     <li><a href="#Property-xxx">xxx</a>
     <li><a href="#Property-xxx">xxx</a>
-    <li><a href="#Property-xxx">xxx</a>
-    <li><a href="#Property-xxx">xxx</a>
-    <li><a href="#Property-xxx">xxx</a>
+    <li><a href="#Property-SetMetaBlockSize">H5Pset_meta_block_size</a>
+    <li><a href="#Property-GetMetaBlockSize">H5Pget_meta_block_size</a>
+    <li><a href="#Property-SetSieveBufSize">H5Pset_sieve_buf_size</a>
+    <li><a href="#Property-GetSieveBufSize">H5Pget_sieve_buf_size</a>
     <li><a href="#Property-SetAlignment">H5Pset_alignment</a>
     <li><a href="#Property-GetAlignment">H5Pget_alignment</a>
-    <li><a href="#Property-xxx">xxx</a>
-    <li><a href="#Property-xxx">xxx</a>
-    <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
-    <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
-<!--  Not implemented.  Probably never will be.
-    <li><a href="#Property-xxx">xxx</a>
-    <li><a href="#Property-xxx">xxx</a>
--->
     <li><a href="#Property-SetCache">H5Pset_cache</a>
     <li><a href="#Property-GetCache">H5Pget_cache</a>
-    <li><a href="#Property-xxx">xxx</a>
-    <li><a href="#Property-xxx">xxx</a>
     <li><a href="#Property-SetGCReferences">H5Pset_gc_references</a>
     <li><a href="#Property-GetGCReferences">H5Pget_gc_references</a>
+    <li><a href="#Property-SetFaplGass">H5Pset_fapl_gass</a>
+    <li><a href="#Property-GetFaplGass">H5Pget_fapl_gass</a>
+    <li><a href="#Property-SetFaplDpss">H5Pset_fapl_dpss</a>
+    <li><a href="#Property-SetFaplSrb">H5Pset_fapl_srb</a>
+    <li><a href="#Property-GetFaplSrb">H5Pget_fapl_srb</a>
+    <li><a href="#Property-xxx">xxx</a>
+    <li><a href="#Property-xxx">xxx</a>
+    <li><a href="#Property-xxx">xxx</a>
+    <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
     </ul>
 
 <br>&nbsp;
@@ -1424,8 +1444,7 @@ facilitate moving easily between them.</i>
   <dt><strong>Purpose:</strong>
     <dd>Returns information about a filter in a pipeline.
   <dt><strong>Description:</strong>
-    <dd><code> </code> 
-        <code>H5Pget_filter</code> returns information about a
+    <dd><code>H5Pget_filter</code> returns information about a
         filter, specified by its filter number, in a filter pipeline,
         specified by the property list with which it is associated.
         <p>
@@ -1492,34 +1511,184 @@ facilitate moving easily between them.</i>
 
 <hr>
 <dl>
-  <dt><strong>Name:</strong> <a name="Property-xxx">xxx</a>
+  <dt><strong>Name:</strong> <a name="Property-SetMetaBlockSize">H5Pset_meta_block_size</a>
   <dt><strong>Signature:</strong>
-    <dd><em>xxx</em> <code>xxx</code>(<em>xxx</em> <code>xxx</code>
+    <dd><em>herr_t</em> <code>H5Pset_meta_block_size</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>hsize_t</em> <code>size</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>
+    <dd>Sets the minimum metadata block size.
   <dt><strong>Description:</strong>
-    <dd><code>xxx</code>
-        
+    <dd><code>H5Pset_meta_block_size</code> sets the 
+        minimum size, in bytes, of metadata block allocations when 
+        <code>H5FD_FEAT_AGGREGATE_METADATA</code> is set by a VFL driver.
+        <p>
+        Each <i>raw</i> metadata block is initially allocated to be of the 
+        given size.  Specific metadata objects (e.g., object headers, 
+        local heaps, B-trees) are then sub-allocated from this block.
+        <p>
+        The default setting is 2048 bytes, meaning that the library 
+        will attempt to aggregate metadata in at least 2K blocks in the file.
+        Setting the value to <code>0</code> (zero) with this function 
+        will turn off metadata aggregation, even if the VFL driver attempts 
+        to use the metadata aggregation strategy.               
+        <p>
+        Metadata aggregation reduces the number of small data objects 
+        in the file that would otherwise be required for metadata.  
+        The aggregated block of metadata is usually written in a 
+        single write action and always in a contiguous block, 
+        potentially significantly improving library and application 
+        performance.
   <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>xxx</em> <code>xxx</code>
-            <dd>IN: 
-            <dd>OUT: 
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>hsize_t</em> <code>size</code>
+            <dd>IN: Minimum size, in bytes, of metadata block allocations.
     </dl>
   <dt><strong>Returns:</strong>
-    <dd>Returns xxx if successful.
-        Otherwise returns xxx.
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
   <!--
   <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        -->
+  -->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
 </dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetMetaBlockSize">H5Pget_meta_block_size</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_meta_block_size</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>hsize_t *</em><code>size</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns the current metadata block size setting.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_meta_block_size</code> returns the current 
+        minimum size, in bytes, of new metadata block allocations. 
+        This setting is retrieved from the file access property list
+        <code>fapl_id</code>. 
+        <p>
+        This value is set by 
+        <a href="#Property-SetMetaBlockSize">H5Pset_meta_block_size</a>
+        and is retrieved from the file access property list
+        <code>fapl_id</code>. 
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>hsize_t *</em><code>size</code>
+            <dd>OUT: Minimum size, in bytes, of metadata block allocations.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetSieveBufSize">H5Pset_sieve_buf_size</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>xxx</em> <code>H5Pset_sieve_buf_size</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>hsize_t</em> <code>size</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_sieve_buf_size</code> sets <code>size</code>, 
+        the maximum size in bytes of the data seive buffer, which is 
+        used by file drivers that are capable of using data sieving.
+        <p>
+        The data sieve buffer is used when performing I/O on datasets in the file.  Using a buffer which is large anough to hold several pieces of the dataset being read in for hyperslab selections boosts performance by quite a bit. 
+        <p>
+        The default value is set to 64KB, indicating that file I/O for raw data reads and writes will occur in at least 64KB blocks.  Setting the value to 0 with this API function will turn off the data sieving, even if the VFL driver attempts to use that strategy. 
+        <p>
+        <b><i><font color=red>Need a conceptual understanding of data sieving to finish this. -- FB</font></i></b>
+        
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>hsize_t</em> <code>size</code>
+            <dd>IN: Maximum size, in bytes, of data sieve buffer.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetSieveBufSize">H5Pget_sieve_buf_size</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_sieve_buf_size</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>hsize_t *</em><code>size</code>
+    )
+<br>
+<br>
+  <dt><strong>Purpose:</strong>
+    <dd> Returns maximum data sieve buffer size.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_sieve_buf_size</code> retrieves, <code>size</code>,
+        the current maximum size of the data sieve buffer.
+        <p>
+        This value is set by 
+        <a href="#Property-SetSieveBufSize">H5Pset_sieve_buf_size</a>
+        and is retrieved from the file access property list
+        <code>fapl_id</code>. 
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>hsize_t *</em><code>size</code>
+            <dd>IN: Maximum size, in bytes, of data sieve buffer.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
 
 
 <hr>
@@ -2377,6 +2546,1275 @@ facilitate moving easily between them.</i>
 </dl>
 
 
+<!--                                            -->
+<!--     The new *fapl* functions with R1.4     -->
+<!--                                            -->
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplFamily">H5Pset_fapl_family</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fapl_family</code> (
+                        <em>hid_t</em> <code>fapl_id</code>,
+                        <em> hsize_t</em> <code>memb_size</code>,
+                        <em>hid_t</em> <code>memb_fapl_id</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the file access property list to use the family driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fapl_family</code> sets the file access property list 
+        identifier, <code>fapl_id</code>, to use the family driver.
+        <p>
+        <code>memb_size</code> is the size in bytes of each file member 
+        and is used only when creating a new file.
+        <p>
+        <code>memb_fapl_id</code> is the identifier of the 
+        file access property list to be used for each family member. 
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em> hsize_t</em> <code>memb_size</code>
+            <dd>IN: Size in bytes of each file member.
+        <dt><em>hid_t</em> <code>memb_fapl_id</code>
+            <dd>IN: Identifier of file access property list for each 
+                    family member.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFaplFamily">H5Pget_fapl_family</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_fapl_family</code> (
+                        <em>hid_t</em> <code>fapl_id</code>,
+                        <em>hsize_t *</em><code>memb_size</code>,
+                        <em>hid_t *</em><code>memb_fapl_id</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns file access property list information.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_fapl_family</code> returns file access property list 
+        for use with the family driver.
+        This information is returned through the output parameters.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em> hsize_t *</em><code>memb_size</code>
+            <dd>OUT: Size in bytes of each file member.
+        <dt><em>hid_t *</em><code>memb_fapl_id</code>
+            <dd>OUT: Identifier of file access property list for each 
+                    family member.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplLog">H5Pset_fapl_log</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fapl_log</code>(
+                        <em>hid_t</em> <code>fapl_id</code>,
+                        <em>char *</em><code>logfile</code>,
+                        <em>int</em> <code>verbosity</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets up the use of the logging driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Psget_fapl_log</code> modifies the 
+        file access property list to use the logging driver .
+        <b><i><font color=red>(H5FD_LOG ??)</font></i></b>
+        There are no driver-specific properties.
+        <p>
+        <code>logfile</code> is the name of the file in which the 
+        logging entries are to be recorded.
+        <p>
+        <code>verbosity</code> indicates the extent of the logging 
+        activity intended, with a value of <code>0</code> indicating
+        no logging.
+        <b><font color=red>(Other values, range, ... ??)</font></b>
+ 
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>char *</em><code>logfile</code>
+            <dd>IN: Name of the log file.
+        <dt><em>int</em> <code>verbosity</code>
+            <dd>IN: The extent of logging activity intended.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns non-negative if successful.
+        Otherwise returns negative.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplMpio">H5Pset_fapl_mpio</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fapl_mpio</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>MPI_Comm</em> <code>comm</code>,
+                     <em>MPI_Info</em> <code>info</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Stores MPIO communicator information to the file access property list.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fapl_mpio</code> stores the user supplied 
+        MPIO communicator <code>comm</code> and <code>info</code> in
+        the file access property list <code>fapl_id</code>, 
+        which can then be used to create and/or open the file.  
+        <p>
+        <code>H5Pset_fapl_mpio</code> is available only in the 
+        parallel HDF5 library and is not a collective function.
+        <p>
+        <code>comm</code> is the MPI communicator to be used for 
+        file open as defined in <code>MPI_FILE_OPEN</code> of MPI-2. 
+        This function does not create a duplicated communicator. 
+        Modifications to <code>comm</code> after this function call 
+        returns may have an undetermined effect on the access property list. 
+        Users should not modify the communicator while it is defined 
+        in a property list.
+        <p>
+        <code>info</code> is the MPI info object to be used for 
+        file open as defined in <code>MPI_FILE_OPEN</code> of MPI-2. 
+        This function does not create a duplicated info object. 
+        Any modification to the info object after this function call 
+        returns may have an undetermined effect on the access property list. 
+        Users should not modify the info while it is defined 
+        in a property list.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>MPI_Comm</em> <code>comm</code>
+            <dd>IN: MPI-2 communicator.
+        <dt><em>MPI_Info</em> <code>info</code>
+            <dd>IN: MPI-2 info object.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFaplMpio">H5Pget_fapl_mpio</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_fapl_mpio</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>MPI_Comm *</em><code>comm</code>,
+                     <em>MPI_Info *</em><code>info</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd> Returns MPI communicator information.
+  <dt><strong>Description:</strong>
+    <dd>If the file access property list is set to the H5FD_MPIO driver,
+        <code>H5Pget_fapl_mpio</code> returns the MPI communicator and 
+        information through the <code>comm</code> and <code>info</code>
+        pointers, if those values are non-null.
+        <p>
+        Neither <code>comm</code> nor <code>info</code> is copied, 
+        so they are valid only until the file access property list 
+        is either modified or closed.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>MPI_Comm *</em><code>comm</code>
+            <dd>OUT: MPI-2 communicator.
+        <dt><em>MPI_Info *</em><code>info</code>
+            <dd>OUT: MPI-2 info object.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetDxplMpio">H5Pset_dxpl_mpio</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_dxpl_mpio</code>(
+                     <em>hid_t</em> <code>dxpl_id</code>,
+                     <em>H5FD_mpio_xfer_t</em> <code>xfer_mode</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets data transfer mode.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_dxpl_mpio</code> sets the data transfer property list 
+        <code>dxpl_id</code> to use transfer mode <code>xfer_mode</code>. 
+        The property list can then be used to control the I/O transfer mode 
+        during data I/O operations. 
+        <p>
+        Valid transfer modes are as follows:
+        <dir>
+        <dl>
+          <dt><code>H5FD_MPIO_INDEPENDENT</code>
+            <dd>Use independent I/O access (default).
+          <dt><code>H5FD_MPIO_COLLECTIVE</code>
+            <dd>Use collective I/O access.
+        </dl>
+        </dir>
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>dxpl_id</code>
+            <dd>IN: Data transfer property list identifier.
+        <dt><em>H5FD_mpio_xfer_t</em> <code>xfer_mode</code>
+            <dd>IN: Transfer mode.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetDxplMpio">H5Pget_dxpl_mpio</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_dxpl_mpio</code>(
+                     <em>hid_t</em> <code>dxpl_id</code>,
+                     <em>H5FD_mpio_xfer_t *</em><code>xfer_mode</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns the data transfer mode.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_dxpl_mpio</code> queries the data transfer mode 
+        currently set in the data transfer property list <code>dxpl_id</code>. 
+        <p>
+        Upon return, <code>xfer_mode</code> contains the data transfer mode, 
+        if it is non-null.        
+        <p>
+        <code>H5Pget_dxpl_mpio</code> is not a collective function.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>dxpl_id</code>
+            <dd>IN: Data transfer property list identifier.
+        <dt><em>H5FD_mpio_xfer_t *</em><code>xfer_mode</code>
+            <dd>OUT: Data transfer mode.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplMulti">H5Pset_fapl_multi</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fapl_multi</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>const H5FD_mem_t *</em><code>memb_map</code>,
+                     <em>const hid_t *</em><code>memb_fapl</code>,
+                     <em>const char **</em><code>memb_name</code>,
+                     <em>const haddr_t *</em><code>memb_addr</code>,
+                     <em>hbool_t</em> <code>relax</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets up use of the multi-file driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fapl_multi</code> sets the file access property list 
+        <code>fapl_id</code> to use the multi-file driver. 
+        <p>
+        The array <code>memb_map</code> maps memory usage types to other
+        memory usage types and is the mechanism that allows the caller 
+        to specify how many files are created. 
+        The array contains <code>H5FD_MEM_NTYPES</code> entries, 
+        which are either the value <code>H5FD_MEM_DEFAULT</code>
+        or a memory usage type.
+        The number of unique values determines the number of files 
+        that are opened.  
+        <p>
+        The array <code>memb_fapl</code> contains a property list
+        for each memory usage type that will be associated with a file. 
+        <p>
+        The array <code>memb_name</code> should be a name generator 
+        (a printf-style format with a %s which will be replaced with the
+        name passed to <code>H5FDopen()</code>, usually from 
+        <code>H5Fcreate()</code> or <code>H5Fopen()</code>).
+        <p>
+        The array <code>memb_addr</code> ....
+        <p>
+        If <code>relax</code> is set to <code>TRUE</code> (or <code>1</code>),
+        then opening an existing file for read-only access will not fail 
+        if some file members are missing.  
+        This allows a file to be accessed in a limited sense if just the
+        meta data is available.
+        <p>
+        Default values for each of the optional arguments are as follows:
+        <dir>
+        <dl>
+          <dt><code>memb_map</code>
+            <dd>The default member map contains the value
+              <code>H5FD_MEM_DEFAULT</code> for each element.
+          <dt><code>memb_fapl</code>
+            <dd>The default value is <code>H5P_DEFAULT</code> for each element.
+          <dt><code>memb_name</code>
+            <dd>The default string is &nbsp; <code>%s-<i>X</i>.h5</code> &nbsp;
+              where &nbsp; <code><i>X</i></code> &nbsp; is one of the 
+              following letters:
+              <dir>
+                  <code>s</code> for <code>H5FD_MEM_SUPER</code>
+                  <br>
+                  <code>b</code> for <code>H5FD_MEM_BTREE</code>
+                  <br>
+                  <code>r</code> for <code>H5FD_MEM_DRAW</code>
+                  <br>
+                  <code>g</code> for <code>H5FD_MEM_GHEAP</code>
+                  <br>
+                  <code>l</code> for <code>H5FD_MEM_LHEAP</code>
+                  <br>
+                  <code>o</code> for <code>H5FD_MEM_OHDR</code>
+              </dir>
+          <dt><code>memb_addr</code>
+            <dd>The default value is <code>HADDR_UNDEF</code> for each element.
+        </dl>
+        </dir>
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>const H5FD_mem_t *</em><code>memb_map</code>
+            <dd>IN: Maps memory usage types to other memory usage types.
+        <dt><em>const hid_t *</em><code>memb_fapl</code>
+            <dd>IN: Property list for each memory usage type.
+        <dt><em>const char **</em><code>memb_name</code>
+            <dd>IN: Name generator for names of member files.
+        <dt><em>const haddr_t *</em><code>memb_addr</code>
+            <dd>IN: 
+        <dt><em>hbool_t</em> <code>relax</code>
+            <dd>IN: Allows read-only access to incomplete file sets 
+                when <code>TRUE</code>.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Example:</strong>
+    <dd>The following code sample sets up a multi-file access property list 
+        that partitions data into meta and raw files, each being 
+        one-half of the address:
+        <pre>
+                  H5FD_mem_t mt, memb_map[H5FD_MEM_NTYPES];
+                  hid_t memb_fapl[H5FD_MEM_NTYPES];
+                  const char *memb[H5FD_MEM_NTYPES];
+                  haddr_t memb_addr[H5FD_MEM_NTYPES];
+ 
+                  // The mapping...
+                  for (mt=0; mt&lt;H5FD_MEM_NTYPES; mt++) {
+                     memb_map[mt] = H5FD_MEM_SUPER;
+                  }
+                  memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
+ 
+                  // Member information
+                  memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
+                  memb_name[H5FD_MEM_SUPER] = "%s.meta";
+                  memb_addr[H5FD_MEM_SUPER] = 0;
+ 
+                  memb_fapl[H5FD_MEM_DRAW] = H5P_DEFAULT;
+                  memb_name[H5FD_MEM_DRAW] = "%s.raw";
+                  memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
+ 
+                  hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+                  H5Pset_fapl_multi(fapl, memb_map, memb_fapl,
+                                  memb_name, memb_addr, TRUE);
+        </pre>
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFaplMulti">H5Pget_fapl_multi</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_fapl_multi</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>const H5FD_mem_t *</em><code>memb_map</code>,
+                     <em>const hid_t *</em><code>memb_fapl</code>,
+                     <em>const char **</em><code>memb_name</code>,
+                     <em>const haddr_t *</em><code>memb_addr</code>,
+                     <em>hbool_t *</em><code>relax</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns information about the multi-file access property list.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_fapl_multi</code> returns information about the 
+        multi-file access property list.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>const H5FD_mem_t *</em><code>memb_map</code>
+            <dd>OUT: Maps memory usage types to other memory usage types.
+        <dt><em>const hid_t *</em><code>memb_fapl</code>
+            <dd>OUT: Property list for each memory usage type.
+        <dt><em>const char **</em><code>memb_name</code>
+            <dd>OUT: Name generator for names of member files.
+        <dt><em>const haddr_t *</em><code>memb_addr</code>
+            <dd>OUT: 
+        <dt><em>hbool_t *</em><code>relax</code>
+            <dd>OUT: Allows read-only access to incomplete file sets 
+                when <code>TRUE</code>.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetDxplMulti">H5Pset_dxpl_multi</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_dxpl_multi</code>(
+                     <em>hid_t</em> <code>dxpl_id</code>,
+                     <em>const hid_t *</em><code>memb_dxpl</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the data transfer property list for the multi-file driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_dxpl_multi</code> sets the data transfer property list 
+        <code>dxpl_id</code> to use the multi-file driver for each 
+        memory usage type <code>memb_dxpl[]</code> 
+       (after the usage map is applied).
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>dxpl_id</code>,
+            <dd>IN: Data transfer property list identifier.
+        <dt><em>const hid_t *</em><code>memb_dxpl</code>
+            <dd>IN: Array of memory usage types for ...
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetDxplMulti">H5Pget_dxpl_multi</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_dxpl_multi</code>(
+                     <em>hid_t</em> <code>dxpl_id</code>,
+                     <em>const hid_t *</em><code>memb_dxpl</code>
+    )
+<br>
+<br>
+  <dt><strong>Purpose:</strong>
+    <dd>Returns multi-file data transfer property list information.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_dxpl_multi</code> returns the data transfer property list
+        information for the multi-file driver.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>dxpl_id</code>,
+            <dd>IN: Data transfer property list identifier.
+        <dt><em>const hid_t *</em><code>memb_dxpl</code>
+            <dd>OUT: Array of memory usage types for ...
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplSplit">H5Pset_fapl_split</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fapl_split</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>const char *</em><code>meta_ext</code>,
+                     <em>hid_t</em> <code>meta_plist_id</code>,
+                     <em>const char *</em><code>raw_ext</code>,
+                     <em>hid_t</em> <code>raw_plist_id</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Emulates the old split file driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fapl_split</code> is a compatability function that
+        enables the multi-file driver to emulate the split driver from 
+        HDF5 Releases 1.0 and 1.2.
+        <p> 
+        <code>fapl_id</code> is ....
+        <p> 
+        <code>meta_ext</code> is ....
+        <p> 
+        <code>meta_plist_id</code> is the file property list identifier for
+        the meta data file.
+        <p> 
+        <code>raw_ext</code> is ....
+        <p> 
+        <code>raw_plist_id</code> is the file property list identifier for
+        the raw data file.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt>
+        <dt><em>hid_t</em> <code>fapl_id</code>,
+            <dd>IN: 
+        <dt><em>const char *</em><code>meta_ext</code>,
+            <dd>IN: 
+        <dt><em>hid_t</em> <code>meta_plist_id</code>,
+            <dd>IN: 
+        <dt><em>const char *</em><code>raw_ext</code>,
+            <dd>IN: 
+        <dt><em>hid_t</em> <code>raw_plist_id</code>
+            <dd>IN: 
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplSec2">H5Pset_fapl_sec2</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Psget_fapl_sec2</code>(
+                     <em>hid_t</em> <code>fapl_id</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the sec2 driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Psget_fapl_sec2</code> modifies the file access property list 
+        to use the <code>H5FD_SEC2</code> driver.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplStdio">H5Pset_fapl_stdio</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Psget_fapl_stdio</code>(
+                     <em>hid_t</em> <code>fapl_id</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the standard I/O driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Psget_fapl_stdio</code> modifies the file access property list 
+        to use the standard I/O driver, <code>H5FD_STDIO</code>.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplStream">H5Pset_fapl_stream</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fapl_stream</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>H5FD_stream_fapl_t *</em><code>fapl</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets up the use of the streaming I/O driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fapl_stream</code> sets up the use of the 
+        streaming I/O driver.
+        <p>
+        <code>fapl_id</code> is the identifier for the 
+        file access property list currently in use.
+        <p>
+        <code>fapl</code> is ...
+        <p>
+        The <code>H5FD_stream_fapl_t</code> struct contains the following 
+        elements:
+        <dir>
+            <table border=0>
+              <tr align=left>
+                <td><em>size_t</em></td>
+                <td><code>increment</code></td></tr>
+              <tr align=left>
+                <td><em><font size=-1>H5FD_STREAM_SOCKET_TYPE</font></em></td>
+                <td><code>socket</code></td></tr>
+              <tr align=left>
+                <td><em>hbool_t</em></td>
+                <td><code>do_socket_io</code></td></tr>
+              <tr align=left>
+                <td><em>unsigned int</em></td>
+                <td><code>backlog</code></td></tr>
+              <tr align=left>
+                <td><em><font size=-1>H5FD</font>_stream_broadcast_t</em></td>
+                <td><code>broadcast_fn</code></td></tr>
+              <tr align=left>
+                <td><em>void *</em></td>
+                <td><code>broadcast_arg</code></td></tr>
+            </table>
+            <ul>
+            <li><code>increment</code> specifies how much memory to allocate
+              each time additional memory is required.  
+            <li><code>socket</code> is an external socket descriptor;
+              if a valid socket argument is provided, that socket will be used.
+            <li><code>do_socket_io</code> is a boolean value specifying whether
+              to perform I/O on <code>socket</code>.
+            <li><code>backlog</code> is the argument for the 
+              <code>listen</code> call.
+            <li><code>broadcast_fn</code> is the broadcast callback function.
+            <li><code>broadcast_arg</code> is the user argument to 
+              the broadcast callback function.
+            </ul>
+        </dir>
+        <p>
+        <code>H5Pset_fapl_stream</code> and <code>H5Pget_fapl_stream</code> 
+        are not intended for use in a parallel environment.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>H5FD_stream_fapl_t *</em><code>fapl</code>
+            <dd>IN: The streaming I/O file access property list.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFaplStream">H5Pget_fapl_stream</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_fapl_stream</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>H5FD_stream_fapl_t *</em><code>fapl</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns the streaming I/O driver settings.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_fapl_stream</code> returns the file access properties 
+        set for the use of the streaming I/O driver.
+        <p>
+        <code>H5Pset_fapl_stream</code> and <code>H5Pget_fapl_stream</code> 
+        are not intended for use in a parallel environment.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>H5FD_stream_fapl_t *</em><code>fapl</code>
+            <dd>OUT: The streaming I/O file access property list.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetDriver">H5Pset_driver</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_driver</code>(
+                     <em>hid_t</em> <code>plist_id</code>,
+                     <em>hid_t</em> <code>driver_id</code>,
+                     <em>const void *</em> <code>driver_info</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the file driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_driver</code> sets the file driver, 
+        <code>driver_id</code>, for a file access or data transfer 
+        property list, <code>plist_id</code>, and supplies an 
+        optional struct containing the driver-specific properites, 
+        <code>driver_info</code>.
+        <p>
+        <font color=red><b><i>Need <code>driver_info</code> struct definition.</i></b></font>
+        <p>
+        The driver properties will be copied into the property list 
+        and the reference count on the driver will be incremented, 
+        allowing the caller to close the driver identifier but still use 
+        the property list.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>IN: File access or data transfer property list identifier.
+        <dt><em>hid_t</em> <code>driver_id</code>
+            <dd>IN: Driver indentifier.
+        <dt><em>const void *</em> <code>driver_info</code>
+            <dd>IN: Optional struct containing driver properties.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetDriver">H5Pget_driver</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Pget_driver</code>(
+                     <em>hid_t</em> <code>plist_id</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns low-lever driver identifier.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_driver</code> returns the identifier of the 
+        low-level file driver associated with the file access property list 
+        or data transfer propert list <code>plist_id</code>.
+        <p>
+        The returned driver identifier is only valid as long as the 
+        file driver remains registered.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>IN: File access or data transfer property list identifier.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a vaild low-level driver identifier if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetDriverInfo">H5Pget_driver_info</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>void *</em><code>H5Pget_driver_info</code>(
+                     <em>hid_t</em> <code>plist_id</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns a pointer to file driver information.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_driver_info</code> returns a pointer to 
+        file driver-specific information for the low-level driver 
+        associated with the file access or data transfer property list
+        <code>plist_id</code>.
+
+        <p>
+        <font color=red><b><i>Need more on "a pointer" or on what 
+        is "pointed to."  Might this be the <code>driver_info</code> 
+        struct definition in <code>H5Pset_driver</code>?</i></b></font>
+        
+        <p>
+        If  no driver-specific properties have been registered, 
+        <code>H5Pget_driver_info</code> returns <code>NULL</code>. 
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>IN: File access or data transfer property list identifier.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a pointer to the struct containing 
+        low-level driver information. 
+        Otherwise returns <code>NULL</code>.
+        <p>
+        <code>NULL</code> is also returned if no driver-specific properties
+        have been registered.  
+        No error is pushed on the stack in this case.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplGass">H5Pset_fapl_gass</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Psget_fapl_gass</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>GASS_Info</em> <code>info</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Stores user-supplied GASS information.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Psget_fapl_gass</code> stores user-supplied GASS information,
+        the <em>GASS_Info</em> struct data as passed in <code>info</code>, 
+        to the file access property list <code>fapl_id</code>.
+        <code>fapl_id</code> can then be used to create and/or open the file. 
+        <p>
+        The <em>GASS_Info</em> object, <code>info</code>, is used for 
+        file open operations when using GASS in the Globus environment. 
+        <p>
+        Any modification to <code>info</code> after this function call 
+        returns may have undetermined effect to the access property list.  
+        Users must call <code>H5Psget_fapl_gass</code> again to setup 
+        the property list.   
+  <dt><strong>Note:</strong>
+    <dd><code>H5Psget_fapl_gass</code> is an experimental function.
+        It is designed for use only when accessing files via the 
+        GASS facility of the Globus environment. 
+        <font color=red><b><i>URL ??</i></b></font>
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>,
+            <dd>IN: File access property list identifier.
+        <dt><em>GASS_Info</em> <code>info</code>
+            <dd>IN: Pointer to the GASS information structure.
+
+        <p>
+        <font color=red><b><i>Need GASS_Info struct.</i></b></font>
+
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFaplGass">H5Pget_fapl_gass</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_fapl_gass</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>GASS_Info *</em><code>info</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves GASS information.
+  <dt><strong>Description:</strong>
+    <dd>If the file access property list <code>fapl_id</code> is set 
+        for use of the <code>H5FD_GASS</code> driver, 
+        <code>H5Pget_fapl_gass</code> returns the <em>GASS_Info</em>
+        object through the <code>info</code> pointer.
+        <p>
+        The <em>GASS_Info</em> information is copied, so it is valid 
+        only until the file access property list is modified or closed.
+  <dt><strong>Note:</strong>
+    <dd><code>H5Pget_fapl_gass</code> is an experimental function.
+        It is designed for use only when accessing files via the 
+        GASS facility of the Globus environment. 
+        <font color=red><b><i>URL ??</i></b></font>
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>,
+            <dd>IN: File access property list identifier.
+        <dt><em>GASS_Info *</em><code>info</code>
+            <dd>OUT: Pointer to the GASS information structure.
+
+        <p>
+        <font color=red><b><i>Need GASS_Info struct.</i></b></font>
+
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplDpss">H5Pset_fapl_dpss</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fapl_dpss</code>(
+                     <em>hid_t</em> <code>fapl_id</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets use of the DPSS I/O driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fapl_dpss</code> modifies the file access property list
+        <code>fapl_id</code> to use the DPSS I/O driver in a
+        Globus evnvironment.
+  <dt><strong>Note:</strong>
+    <dd><code>H5Pget_fapl_dpss</code> is an experimental function.
+        It is designed for use only when accessing files via the 
+        DPSS facility of the Globus environment. 
+        <font color=red><b><i>URL ??</i></b></font>
+        <p>
+        As of HDF5 Release 1.4 Beta, the Globus project has deprecated 
+        the DPSS facility in favor of an FTP-based facility, which is still 
+        under development.
+        While the DPSS functionality is still available, 
+        it may be unavailable in future Globus releases.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplSrb">H5Pset_fapl_srb</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fapl_srb</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>SRB_Info</em> <code>info</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Saves SRB connection handler and sets SRB settings.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fapl_srb</code> stores the SRB client-to-server 
+        connection handler <code>SRB_CONN</code> after the connection
+        is established and other user-supplied SRB information.
+        <p>
+        The  user-supplied SRB information is contained in the 
+        <em>SRB_Info</em> struct pointed to by <code>info</code>
+        and is stored in the file access property list <code>fapl_id</code>.
+        This information can then be used to create or open a file.           
+  <dt><strong>Note:</strong>
+    <dd><code>H5Pset_fapl_gass</code> is an experimental function.
+        It is designed for use only when accessing files via the 
+        GASS facility of the Storage Resource Broker (SRB).
+        <font color=red><b><i>URL ??</i></b></font>
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>SRB_Info</em> <code>info</code>
+            <dd>IN: Pointer to the SRB information structure.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFaplSrb">H5Pget_fapl_srb</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_fapl_srb</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>SRB_Info *</em><code>info</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves SRB information.
+  <dt><strong>Description:</strong>
+    <dd>If the file access property list <code>fapl_id</code> is set 
+        for use of the <code>H5FD_SRB</code> driver, 
+        <code>H5Pget_fapl_srb</code> returns the <em>SRB_Info</em>
+        object through the <code>info</code> pointer.
+        <p>
+        The <em>SRB_Info</em> information is copied, so it is valid 
+        only until the file access property list is modified or closed.
+  <dt><strong>Note:</strong>
+    <dd><code>H5Pset_fapl_gass</code> is an experimental function.
+        It is designed for use only when accessing files via the 
+        GASS facility of the Storage Resource Broker (SRB).
+        <font color=red><b><i>URL ??</i></b></font>
+  <dt><strong>Parameters:</strong>
+    <dl>
+    <dl>
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>SRB_Info *</em><code>info</code>
+            <dd>OUT: Pointer to the SRB information structure.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SGetFaplxxx">H5Psget_fapl_xxx</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>xxx</em> <code>H5Psget_fapl_xxx</code>(
+                     <em>xxx</em> <code>xxx</code>,
+                     <em>xxx</em> <code>xxx</code>,
+                     <em>xxx</em> <code>xxx</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>
+  <dt><strong>Description:</strong>
+    <dd><code>H5Psget_fapl_xxx</code>
+        
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>xxx</em> <code>xxx</code>
+            <dd>IN: 
+            <dd>OUT: 
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-xxx">xxx</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>xxx</em> <code>xxx</code>(
+                     <em>xxx</em> <code>xxx</code>,
+                     <em>xxx</em> <code>xxx</code>,
+                     <em>xxx</em> <code>xxx</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>
+  <dt><strong>Description:</strong>
+    <dd><code>xxx</code>
+        
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>xxx</em> <code>xxx</code>
+            <dd>IN: 
+            <dd>OUT: 
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns xxx if successful.
+        Otherwise returns xxx.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
 <hr>
 <center>
 <table border=0 width=98%>
@@ -2417,7 +3855,7 @@ H5P&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  13 July 2000
+Last modified:  1 November 2000
 <br>
 Describes HDF5 Version 1.3 (Unrelased development version. Dynamic.)
 

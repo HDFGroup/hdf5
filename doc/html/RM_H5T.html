@@ -91,11 +91,11 @@ of a dataset.
     <li><a href="#Datatype-SetPad">H5Tset_pad</a>
     <li><a href="#Datatype-GetSign">H5Tget_sign</a>
     <li><a href="#Datatype-SetSign">H5Tset_sign</a>
+  </td><td valign=top>
     <li><a href="#Datatype-GetFields">H5Tget_fields</a>
     <li><a href="#Datatype-SetFields">H5Tset_fields</a>
     <li><a href="#Datatype-GetEbias">H5Tget_ebias</a>
     <li><a href="#Datatype-SetEbias">H5Tset_ebias</a>
-  </td><td valign=top>
     <li><a href="#Datatype-GetNorm">H5Tget_norm</a>
     <li><a href="#Datatype-SetNorm">H5Tset_norm</a>
     <li><a href="#Datatype-GetInpad">H5Tget_inpad</a>
@@ -108,6 +108,11 @@ of a dataset.
 <p>
 <i>Variable-length Datatypes</i>
     <li><a href="#Datatype-VLCreate">H5Tvlen_create</a>
+<p>
+<i>Array Datatypes</i>
+    <li><a href="#Datatype-ArrayCreate">H5Tarray_create</a>
+    <li><a href="#Datatype-GetArrayNdims">H5Tget_array_ndims</a>
+    <li><a href="#Datatype-GetArrayDims">H5Tget_array_dims</a>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <i>Compound Datatype Properties</i>
     <li><a href="#Datatype-GetNmembers">H5Tget_nmembers</a>
@@ -199,6 +204,11 @@ facilitate moving easily between them.</i>
     <li><a href="#Datatype-GetStrpad">h5tget_strpad_f</a>
     <li><a href="#Datatype-SetStrpad">h5tset_strpad_f</a>
 <!--  </td></tr></table>                                                    -->
+<!--<p>                                                                     -->
+<!--<i>Array Datatypes</i>
+<!--    <li><a href="#Datatype-ArrayCreate">H5Tarray_create</a>             -->
+<!--    <li><a href="#Datatype-GetArrayNdims">H5Tget_array_ndims</a>        -->
+<!--    <li><a href="#Datatype-GetArrayDims">H5Tget_array_dims</a>          -->
 <!--<p>                                                                     -->
 <!--<i>Variable-length Datatypes</i>                                        -->
 <!--<li><a href="#Datatype-VLCreate">h5tvlen_create_f</a>               -->
@@ -2573,6 +2583,139 @@ zero.
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5t_FORTRAN.html#h5tget_tag_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-ArrayCreate">H5Tarray_create</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> *<code>H5Tarray_create</code>(
+                       <em>hid_t</em> <code>base</code>,
+                       <em>int</em> <code>rank</code>,
+                       <em>const hsize_t</em> <code>dims[/*rank*/]</code>,
+                       <em>const int</em> <code>perm[/*rank*/]</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Creates an array datatype object.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tarray_create</code> creates a new array datatype object.
+         <p>
+         <code>base</code> is the datatype of every element of the array, 
+         i.e., of the number at each position in the array.
+         <p>
+         <code>rank</code> is the number of dimensions and the 
+         size of each dimension is specified in the array <code>dims</code>.
+         The value of <code>rank</code> is currently limited to
+         <code>H5S_MAX_RANK</code> and must be greater than <code>0</code> 
+         (zero).
+         All dimension sizes specified in <code>dims</code> must be greater
+         than <code>0</code> (zero).
+         <p>
+         The array <code>perm</code> is designed to contain the dimension 
+         permutation, i.e. C versus FORTRAN array order.  
+         &nbsp;
+         <b><i>(The parameter </i><code>perm</code><i> is currently unused and is not yet implemented.)</i></b>
+         <p>
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>base</code>
+            <dd>IN: Datatype identifier for the array base datatype.
+        <dt><em>int</em> <code>rank</code>
+            <dd>IN: Rank of the array.
+        <dt><em>const hsize_t</em> <code>dims[/*rank*/]</code>
+            <dd>IN: Size of each array dimension.
+        <dt><em>const int</em> <code>perm[/*rank*/]</code>
+            <dd>IN: Dimension permutation.  
+                &nbsp;
+                <b><i>(Currently not implemented.)</i></b>
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5txxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetArrayNdims">H5Tget_array_ndims</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> *<code>H5Tget_array_ndims</code>(
+                       <em>hid_t</em> <code>adtype_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the rank of an array datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_array_ndims</code> returns the rank, 
+        the number of dimensions, of an array datatype object.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>adtype_id</code>
+            <dd>IN: Datatype identifier of array object.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the rank of the array if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5txxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetArrayDims">H5Tget_array_dims</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> *<code>H5Tget_array_dims</code>(
+                       <em>hid_t</em> <code>adtype_id</code>,
+                       <em>hsize_t *</em><code>dims[]</code>,
+                       <em>int *</em><code>perm[]</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns sizes of array dimensions and dimension permutations.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_array_dims</code> returns the sizes of the dimensions
+        and the dimension permutations of the specified array datatype object.
+        <p>
+        The sizes of the dimensions are returned in the array <code>dims</code>.
+        The dimension permutations, i.e., C versus FORTRAN array order,
+        are returned in the array <code>perm</code>.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>adtype_id</code>
+            <dd>IN: Datatype identifier of array object.
+        <dt><em>hsize_t *</em><code>dims[]</code>
+            <dd>OUT: Sizes of array dimensions.
+        <dt><em>int *</em><code>perm[]</code>
+            <dd>OUT: Dimension permutations.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5txxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->
         <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
