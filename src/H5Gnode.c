@@ -46,9 +46,9 @@ static size_t H5G_node_size(H5F_t *f);
 static herr_t H5G_node_create(H5F_t *f, H5B_ins_t op, void *_lt_key,
 			      void *_udata, void *_rt_key,
 			      haddr_t *addr_p/*out*/);
-static herr_t H5G_node_flush(H5F_t *f, hbool_t destroy, haddr_t addr,
+static herr_t H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 			     H5G_node_t *sym);
-static H5G_node_t *H5G_node_load(H5F_t *f, haddr_t addr, const void *_udata1,
+static H5G_node_t *H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
 				 void *_udata2);
 static int H5G_node_cmp2(H5F_t *f, void *_lt_key, void *_udata,
 			  void *_rt_key);
@@ -70,7 +70,7 @@ static size_t H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
 const H5AC_class_t H5AC_SNODE[1] = {{
     H5AC_SNODE_ID,
     (H5AC_load_func_t)H5G_node_load,
-    (herr_t (*)(H5F_t*, hbool_t, haddr_t, void*))H5G_node_flush,
+    (H5AC_flush_func_t)H5G_node_flush,
 }};
 
 /* H5G inherits B-tree like properties from H5B */
@@ -315,10 +315,14 @@ H5G_node_create(H5F_t *f, H5B_ins_t UNUSED op, void *_lt_key,
  *
  * 		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
+ *
+ *	Quincey Koziol, 2002-7-180
+ *	Added dxpl parameter to allow more control over I/O from metadata
+ *      cache.
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
+H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
 {
     uint8_t	*buf = NULL, *p = NULL;
     size_t	size;
@@ -376,7 +380,7 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
         H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms);
         HDmemset(p, 0, size - (p - buf));
 
-        status = H5F_block_write(f, H5FD_MEM_BTREE, addr, size, H5P_DATASET_XFER_DEFAULT, buf);
+        status = H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, buf);
         if (status < 0)
             HRETURN_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL,
                   "unable to write symbol table node to the file");
@@ -415,10 +419,14 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
  * Modifications:
  *		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
+ *
+ *	Quincey Koziol, 2002-7-180
+ *	Added dxpl parameter to allow more control over I/O from metadata
+ *      cache.
  *-------------------------------------------------------------------------
  */
 static H5G_node_t *
-H5G_node_load(H5F_t *f, haddr_t addr, const void * UNUSED _udata1,
+H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void * UNUSED _udata1,
 	      void * UNUSED _udata2)
 {
     H5G_node_t		   *sym = NULL;
@@ -450,9 +458,9 @@ H5G_node_load(H5F_t *f, haddr_t addr, const void * UNUSED _udata1,
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
-    if (H5F_block_read(f, H5FD_MEM_BTREE, addr, size, H5P_DATASET_XFER_DEFAULT, buf) < 0) {
+    if (H5F_block_read(f, H5FD_MEM_BTREE, addr, size, dxpl_id, buf) < 0) {
 	HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL,
-		    "unabel to read symbol table node");
+		    "unable to read symbol table node");
     }
     /* magic */
     if (HDmemcmp(p, H5G_NODE_MAGIC, H5G_NODE_SIZEOF_MAGIC)) {

@@ -1181,6 +1181,7 @@ __DLL__ void H5_term_library(void);
 
 /* Functions to terminate interfaces */
 __DLL__ int H5A_term_interface(void);
+__DLL__ int H5AC_term_interface(void);
 __DLL__ int H5D_term_interface(void);
 __DLL__ int H5F_term_interface(void);
 __DLL__ int H5G_term_interface(void);

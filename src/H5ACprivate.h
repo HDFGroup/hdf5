@@ -58,8 +58,8 @@ typedef enum H5AC_subid_t {
     H5AC_NTYPES		= 5	/*THIS MUST BE LAST!			     */
 } H5AC_subid_t;
 
-typedef void *(*H5AC_load_func_t)(H5F_t*, haddr_t addr, const void *udata1, void *udata2);
-typedef herr_t (*H5AC_flush_func_t)(H5F_t*, hbool_t dest, haddr_t addr, void *thing);
+typedef void *(*H5AC_load_func_t)(H5F_t*, hid_t dxpl_id, haddr_t addr, const void *udata1, void *udata2);
+typedef herr_t (*H5AC_flush_func_t)(H5F_t*, hid_t dxpl_id, hbool_t dest, haddr_t addr, void *thing);
 
 typedef struct H5AC_class_t {
     H5AC_subid_t	id;
@@ -106,6 +106,13 @@ typedef struct H5AC_t {
 	unsigned	nflushes;		/*number of flushes to disk	     */
     } diagnostics[H5AC_NTYPES];		/*diagnostics for each type of object*/
 } H5AC_t;
+
+#ifdef H5_HAVE_PARALLEL
+/* Definitions for "block before metadata write" property */
+#define H5AC_BLOCK_BEFORE_META_WRITE_NAME       "H5AC_block_before_meta_write"
+#define H5AC_BLOCK_BEFORE_META_WRITE_SIZE       sizeof(unsigned)
+#define H5AC_BLOCK_BEFORE_META_WRITE_DEF        0
+#endif /* H5_HAVE_PARALLEL */
 
 /*
  * Library prototypes.

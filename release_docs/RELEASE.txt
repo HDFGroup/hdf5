@@ -35,21 +35,23 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Fixed metadata corruption problem which could occur when many objects
+      are created in a file during parallel I/O.  QAK - 2002/07/19
     * Fixed VL memory leak when data is overwritten.  The heap objects holding
       old data are freed.  If the fill value writting time is set to 
       H5D_FILL_TIME_NEVER, the library prohibits user to create VL type dataset.
       The library free all the heap objects storing VL type if there is nested 
-      VL type(a VL type contains another VL type).  SLU 2002/07/10 
+      VL type(a VL type contains another VL type).  SLU - 2002/07/10 
     * Fixed bug in parallel I/O routines where a collective I/O which used
       MPI derived types, followed by an independent I/O would cause the library
-      to hang.  QAK 2002/06/24
+      to hang.  QAK - 2002/06/24
     * Fixed bug in chunking routines where they were using internal allocation
       free routines, instead of malloc/free, preventing user filters from
       working correctly.  Chunks are now allocated/freed with malloc/free and
-      so should the chunks in user filters.  QAK 2002/06/18
+      so should the chunks in user filters.  QAK - 2002/06/18
     * Fixed bug where regular hyperslab selection could get incorrectly
       transferred when the number of elements in a row did not fit evenly
-      into the buffer provided.  QAK 2002/06/12
+      into the buffer provided.  QAK - 2002/06/12
     * Fixed bug (#499) which allowed an "empty" compound or enumerated datatype
       (one with no members) to be used to create a dataset or committed to a
       file.  QAK - 2002/06/11

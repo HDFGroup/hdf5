@@ -201,6 +201,7 @@ H5_term_library(void)
 	pending += DOWN(TN);
 	pending += DOWN(T);
 	pending += DOWN(A);
+	pending += DOWN(AC);
 	pending += DOWN(P);
 	pending += DOWN(I);
     } while (pending && ntries++ < 100);

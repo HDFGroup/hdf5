@@ -118,8 +118,8 @@ static H5B_ins_t H5B_insert_helper(H5F_t *f, haddr_t addr,
 static herr_t H5B_insert_child(H5F_t *f, const H5B_class_t *type,
 			       H5B_t *bt, int idx, haddr_t child,
 			       H5B_ins_t anchor, void *md_key);
-static herr_t H5B_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5B_t *b);
-static H5B_t *H5B_load(H5F_t *f, haddr_t addr, const void *_type, void *udata);
+static herr_t H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *b);
+static H5B_t *H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata);
 static herr_t H5B_decode_key(H5F_t *f, H5B_t *bt, int idx);
 static herr_t H5B_decode_keys(H5F_t *f, H5B_t *bt, int idx);
 static size_t H5B_nodesize(H5F_t *f, const H5B_class_t *type,
@@ -137,8 +137,8 @@ static herr_t H5B_assert(H5F_t *f, haddr_t addr, const H5B_class_t *type,
 /* H5B inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_BT[1] = {{
     H5AC_BT_ID,
-    (void *(*)(H5F_t*, haddr_t, const void*, void*))H5B_load,
-    (herr_t (*)(H5F_t*, hbool_t, haddr_t, void*))H5B_flush,
+    (H5AC_load_func_t)H5B_load,
+    (H5AC_flush_func_t)H5B_flush,
 }};
 
 /* Interface initialization? */
@@ -343,10 +343,14 @@ H5B_Kvalue(H5F_t *f, const H5B_class_t *type)
  * Modifications:
  *		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
+ *
+ *	Quincey Koziol, 2002-7-180
+ *	Added dxpl parameter to allow more control over I/O from metadata
+ *      cache.
  *-------------------------------------------------------------------------
  */
 static H5B_t *
-H5B_load(H5F_t *f, haddr_t addr, const void *_type, void *udata)
+H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
 {
     const H5B_class_t	*type = (const H5B_class_t *) _type;
     size_t		total_nkey_size;
@@ -380,7 +384,7 @@ H5B_load(H5F_t *f, haddr_t addr, const void *_type, void *udata)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
-    if (H5F_block_read(f, H5FD_MEM_BTREE, addr, size, H5P_DATASET_XFER_DEFAULT, bt->page)<0) {
+    if (H5F_block_read(f, H5FD_MEM_BTREE, addr, size, dxpl_id, bt->page)<0) {
 	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, NULL,
 		      "can't read B-tree node");
     }
@@ -456,10 +460,14 @@ H5B_load(H5F_t *f, haddr_t addr, const void *_type, void *udata)
  *
  * 		Robb Matzke, 1999-07-28
  *		The ADDR argument is passed by value.
+ *
+ *	Quincey Koziol, 2002-7-180
+ *	Added dxpl parameter to allow more control over I/O from metadata
+ *      cache.
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5B_t *bt)
+H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt)
 {
     int	i;
     size_t	size = 0;
@@ -525,7 +533,7 @@ H5B_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5B_t *bt)
 	 * bother writing data for the child entries that don't exist or
 	 * for the final unchanged children.
 	 */
-	if (H5F_block_write(f, H5FD_MEM_BTREE, addr, size, H5P_DATASET_XFER_DEFAULT, bt->page)<0) {
+	if (H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, bt->page)<0) {
 	    HRETURN_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL,
 			  "unable to save B-tree node to disk");
 	}

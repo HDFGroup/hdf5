@@ -31,7 +31,9 @@
 #include "H5Eprivate.h"
 #include "H5Fpkg.h"
 #include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5Iprivate.h"         /* IDs */
 #include "H5MMprivate.h"
+#include "H5Pprivate.h"         /* Property lists */
 
 /*
  * Sorting the cache by address before flushing is sometimes faster
@@ -43,8 +45,16 @@
  * Private file-scope variables.
  */
 #define PABLO_MASK      H5AC_mask
-#define INTERFACE_INIT  NULL
+
+/* Interface initialization */
 static int             interface_initialize_g = 0;
+#define INTERFACE_INIT H5AC_init_interface
+static herr_t H5AC_init_interface(void);
+
+#ifdef H5_HAVE_PARALLEL
+/* Dataset transfer property list for flush calls */
+static hid_t H5AC_dxpl_id=(-1);
+#endif /* H5_HAVE_PARALLEL */
 
 #ifdef H5AC_SORT_BY_ADDR
 static H5AC_t          *current_cache_g = NULL;         /*for sorting */
@@ -63,6 +73,107 @@ H5FL_ARR_DEFINE_STATIC(H5AC_info_ptr_t,-1);
 /* Declare a PQ free list to manage the protected slot array information */
 H5FL_ARR_DEFINE_STATIC(H5AC_prot_t,-1);
 #endif /* H5AC_DEBUG */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5AC_init_interface
+ *
+ * Purpose:	Initialize interface-specific information
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, July 18, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5AC_init_interface(void)
+{
+#ifdef H5_HAVE_PARALLEL
+    H5P_genclass_t  *xfer_pclass;   /* Dataset transfer property list class object */
+    H5P_genplist_t  *xfer_plist;    /* Dataset transfer property list object */
+    unsigned block_before_meta_write=1; /* Custom value for "block before meta write" property */
+#endif /* H5_HAVE_PARALLEL */
+
+    FUNC_ENTER_NOINIT(H5AC_init_interface);
+
+#ifdef H5_HAVE_PARALLEL
+    /* Sanity check */
+    assert(H5P_CLS_DATASET_XFER_g!=(-1));
+
+    /* Get the dataset transfer property list class object */
+    if (H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_DATASET_XFER_g) || NULL == (xfer_pclass = H5I_object(H5P_CLS_DATASET_XFER_g)))
+        HRETURN_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get property list class");
+
+    /* Create a new dataset transfer property list */
+    if ((H5AC_dxpl_id=H5P_create_id(xfer_pclass)) < 0)
+        HRETURN_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list");
+
+    /* Get the property list object */
+    if (NULL == (xfer_plist = H5I_object(H5AC_dxpl_id)))
+        HRETURN_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object");
+
+    /* Insert 'block before metadata write' property */
+    if(H5P_insert(xfer_plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME,H5AC_BLOCK_BEFORE_META_WRITE_SIZE,&block_before_meta_write,NULL,NULL,NULL,NULL,NULL)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property");
+#endif /* H5_HAVE_PARALLEL */
+
+    FUNC_LEAVE(SUCCEED);
+} /* end H5AC_init_interface() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5AC_term_interface
+ *
+ * Purpose:	Terminate this interface.
+ *
+ * Return:	Success:	Positive if anything was done that might
+ *				affect other interfaces; zero otherwise.
+ *
+ * 		Failure:	Negative.
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, July 18, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5AC_term_interface(void)
+{
+    int		n=0;
+
+    FUNC_ENTER_NOINIT(H5AC_term_interface);
+
+    if (interface_initialize_g) {
+#ifdef H5_HAVE_PARALLEL
+        if(H5AC_dxpl_id>0) {
+            /* Indicate more work to do */
+            n = 1; /* H5I */
+
+            /* Close H5AC dxpl */
+            if (H5Pclose(H5AC_dxpl_id) < 0)
+                H5E_clear(); /*ignore the error*/
+            else {
+                /* Reset static ID */
+                H5AC_dxpl_id=(-1);
+
+                /* Reset interface initialization flag */
+                interface_initialize_g = 0;
+            } /* end else */
+        } /* end if */
+        else
+#endif /* H5_HAVE_PARALLEL */
+            /* Reset interface initialization flag */
+            interface_initialize_g = 0;
+    } /* end if */
+
+    FUNC_LEAVE(n);
+} /* end H5AC_term_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -273,7 +384,7 @@ H5AC_find_f(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
      * Load a new thing.  If it can't be loaded, then return an error
      * without preempting anything.
      */
-    if (NULL == (thing = (type->load)(f, addr, udata1, udata2))) {
+    if (NULL == (thing = (type->load)(f, H5P_DATASET_XFER_DEFAULT, addr, udata1, udata2))) {
         HRETURN_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "unable to load object");
     }
     /*
@@ -283,13 +394,13 @@ H5AC_find_f(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
         H5AC_subid_t type_id=(*info)->type->id;  /* Remember this for later */
 
         flush = (*info)->type->flush;
-        status = (flush)(f, TRUE, (*info)->addr, (*info));
+        status = (flush)(f, H5AC_dxpl_id, TRUE, (*info)->addr, (*info));
         if (status < 0) {
             /*
              * The old thing could not be removed from the stack.
              * Release the new thing and fail.
              */
-            if ((type->flush)(f, TRUE, addr, thing) < 0) {
+            if ((type->flush)(f, H5AC_dxpl_id, TRUE, addr, thing) < 0) {
                 HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL,
                               "unable to flush just-loaded object");
             }
@@ -413,6 +524,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
     cache = f->shared->cache;
 
     if (!H5F_addr_defined(addr)) {
+        unsigned first_flush=1;     /* Indicate if this is the first flush */
 
 #ifdef H5AC_SORT_BY_ADDR
         /*
@@ -457,7 +569,14 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
                 H5AC_subid_t type_id=(*info)->type->id;  /* Remember this for later */
 
                 flush = (*info)->type->flush;
-                status = (flush)(f, destroy, (*info)->addr, (*info));
+
+                /* Only block for all the processes on the first piece of metadata */
+                if(first_flush) {
+                    status = (flush)(f, H5AC_dxpl_id, destroy, (*info)->addr, (*info));
+                    first_flush=0;
+                } /* end if */
+                else
+                    status = (flush)(f, H5P_DATASET_XFER_DEFAULT, destroy, (*info)->addr, (*info));
                 if (status < 0) {
 #ifdef H5AC_SORT_BY_ADDR
                     map = H5FL_ARR_FREE(int,map);
@@ -493,7 +612,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
              * Flush just this entry.
              */
             flush = cache->slot[i]->type->flush;
-            status = (flush)(f, destroy, cache->slot[i]->addr,
+            status = (flush)(f, H5AC_dxpl_id, destroy, cache->slot[i]->addr,
 			     cache->slot[i]);
             if (status < 0) {
                 HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
@@ -567,7 +686,7 @@ H5AC_set(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
         H5AC_subid_t type_id=(*info)->type->id;  /* Remember this for later */
 
         flush = (*info)->type->flush;
-        status = (flush)(f, TRUE, (*info)->addr, (*info));
+        status = (flush)(f, H5AC_dxpl_id, TRUE, (*info)->addr, (*info));
         if (status < 0) {
             HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                           "unable to flush object");
@@ -656,7 +775,7 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr,
         H5AC_subid_t type_id=cache->slot[new_idx]->type->id;  /* Remember this for later */
 
         flush = cache->slot[new_idx]->type->flush;
-        status = (flush)(f, TRUE, cache->slot[new_idx]->addr,
+        status = (flush)(f, H5AC_dxpl_id, TRUE, cache->slot[new_idx]->addr,
 			 cache->slot[new_idx]);
         if (status < 0) {
             HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
@@ -774,7 +893,7 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
          * without preempting anything.
          */
         cache->diagnostics[type->id].nmisses++;
-        if (NULL == (thing = (type->load)(f, addr, udata1, udata2))) {
+        if (NULL == (thing = (type->load)(f, H5P_DATASET_XFER_DEFAULT, addr, udata1, udata2))) {
             HRETURN_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL,
                           "unable to load object");
         }
@@ -860,7 +979,7 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
 
         assert(H5F_addr_ne((*info)->addr, addr));
         flush = (*info)->type->flush;
-        status = (flush)(f, TRUE, (*info)->addr, (*info));
+        status = (flush)(f, H5AC_dxpl_id, TRUE, (*info)->addr, (*info));
         if (status < 0) {
             HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                           "unable to flush object");

@@ -30,8 +30,8 @@
 #define PABLO_MASK	H5O_mask
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh);
-static H5O_t *H5O_load(H5F_t *f, haddr_t addr, const void *_udata1,
+static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh);
+static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
 		       void *_udata2);
 static unsigned H5O_find_in_ohdr(H5F_t *f, haddr_t addr,
 			     const H5O_class_t **type_p, int sequence);
@@ -44,8 +44,8 @@ static herr_t H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force);
 /* H5O inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_OHDR[1] = {{
     H5AC_OHDR_ID,
-    (void *(*)(H5F_t *, haddr_t, const void *, void *)) H5O_load,
-    (herr_t (*)(H5F_t *, hbool_t, haddr_t, void *)) H5O_flush,
+    (H5AC_load_func_t)H5O_load,
+    (H5AC_flush_func_t)H5O_flush,
 }};
 
 /* Interface initialization */
@@ -339,10 +339,14 @@ H5O_close(H5G_entry_t *obj_ent)
  *
  * 	Robb Matzke, 1999-07-28
  *	The ADDR argument is passed by value.
+ *
+ *	Quincey Koziol, 2002-7-180
+ *	Added dxpl parameter to allow more control over I/O from metadata
+ *      cache.
  *-------------------------------------------------------------------------
  */
 static H5O_t *
-H5O_load(H5F_t *f, haddr_t addr, const void * UNUSED _udata1,
+H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void * UNUSED _udata1,
 	 void * UNUSED _udata2)
 {
     H5O_t	*oh = NULL;
@@ -376,7 +380,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void * UNUSED _udata1,
     /* read fixed-lenth part of object header */
     hdr_size = H5O_SIZEOF_HDR(f);
     assert(hdr_size<=sizeof(buf));
-    if (H5F_block_read(f, H5FD_MEM_OHDR, addr, hdr_size, H5P_DATASET_XFER_DEFAULT, buf) < 0) {
+    if (H5F_block_read(f, H5FD_MEM_OHDR, addr, hdr_size, dxpl_id, buf) < 0) {
 	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL,
 		    "unable to read object header");
     }
@@ -434,7 +438,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void * UNUSED _udata1,
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			 "memory allocation failed");
 	}
-	if (H5F_block_read(f, H5FD_MEM_OHDR, chunk_addr, chunk_size, H5P_DATASET_XFER_DEFAULT,
+	if (H5F_block_read(f, H5FD_MEM_OHDR, chunk_addr, chunk_size, dxpl_id,
 			   oh->chunk[chunkno].image) < 0) {
 	    HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL,
 			"unable to read object header data");
@@ -537,10 +541,14 @@ done:
  *
  * 	Robb Matzke, 1999-07-28
  *	The ADDR argument is passed by value.
+ *
+ *	Quincey Koziol, 2002-7-180
+ *	Added dxpl parameter to allow more control over I/O from metadata
+ *      cache.
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
+H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
 {
     uint8_t	buf[16], *p;
     int	id;
@@ -586,7 +594,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
         } /* end if */
         else {
             if (H5F_block_write(f, H5FD_MEM_OHDR, addr, H5O_SIZEOF_HDR(f), 
-                        H5P_DATASET_XFER_DEFAULT, buf) < 0) {
+                        dxpl_id, buf) < 0) {
                 HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
                       "unable to write object header hdr to disk");
             }
@@ -669,7 +677,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
                     /* Write the combined prefix/chunk out */
                     if (H5F_block_write(f, H5FD_MEM_OHDR, addr,
                                 (H5O_SIZEOF_HDR(f)+oh->chunk[u].size),
-                                H5P_DATASET_XFER_DEFAULT, p) < 0) {
+                                dxpl_id, p) < 0) {
                         HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
                               "unable to write object header data to disk");
                     } /* end if */
@@ -680,7 +688,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
                 else {
                     if (H5F_block_write(f, H5FD_MEM_OHDR, oh->chunk[u].addr,
                                 (oh->chunk[u].size),
-                                H5P_DATASET_XFER_DEFAULT, oh->chunk[u].image) < 0) {
+                                dxpl_id, oh->chunk[u].image) < 0) {
                         HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
                               "unable to write object header data to disk");
                     } /* end if */
