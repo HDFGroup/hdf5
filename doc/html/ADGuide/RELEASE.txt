@@ -1,4 +1,4 @@
-HDF5 version 1.7.13 released on Sun Dec 28 03:18:31 CST 2003
+HDF5 version 1.7.14 released on Sun Jan  4 03:13:02 CST 2004
 ================================================================================
 
 
@@ -93,6 +93,18 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Detect situation where szip 'pixels per block' is larger than the
+            fastest changing dimension of a dataset's chunk size and disallow
+            this (due to limits in szip library).  QAK - 2003/12/31
+        - Fixed bug with flattened hyperslab selections that would generate
+            incorrect hyperslab information with certain high-dimensionality
+            combinations of start/stride/count/block information.
+            QAK - 2003/12/31
+        - Fixed bug with variable-length datatypes used in compound datatypes.
+            SLU - 2003/12/29
+        - Fixed bug in parallel I/O routines that would cause reads from
+            "short datasets" (datasets which were only partially written out)
+            to return invalid data.  QAK & AKC - 2003/12/19
         - Fixed bug where scalar dataspaces for attributes were reporting as
             simple dataspaces.  QAK - 2003/12/13
         - Fixed problem with selection offsets of hyperslab selections in
