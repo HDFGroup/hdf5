@@ -35,6 +35,13 @@
 #define H5F_ACC_EXCL	(H5check(),0x0004u)	/*fail if file already exists*/
 #define H5F_ACC_DEBUG	(H5check(),0x0008u)	/*print debug info	     */
 
+#ifdef HAVE_PARALLEL
+/* Use this constant string as the MPI_Info key to set H5Fmpio debug flags.
+ * To turn on H5Fmpio debug flags,
+ * set the MPI_Info value with this key to have the value of a string
+ * consisting of the characters that turn on the desired flags. */
+#define H5F_MPIO_DEBUG_KEY "H5F_mpio_debug_key"
+#endif
 
 #ifdef LATER
 /*
