@@ -74,6 +74,9 @@
 /* Define if the ioctl TIOCGWINSZ is defined */
 #undef HAVE_TIOCGWINSZ
 
+/* Define if we have Globus GASS support */
+#undef HAVE_GASS
+
 /* The number of bytes in a __int64.  */
 #undef SIZEOF___INT64
 
@@ -248,6 +251,9 @@
 /* Define if you have the waitpid function.  */
 #undef HAVE_WAITPID
 
+/* Define if you have the <globus_common.h> header file.  */
+#undef HAVE_GLOBUS_COMMON_H
+
 /* Define if you have the <io.h> header file.  */
 #undef HAVE_IO_H
 
@@ -299,6 +305,24 @@
 /* Define if you have the df library (-ldf).  */
 #undef HAVE_LIBDF
 
+/* Define if you have the globus_common library (-lglobus_common).  */
+#undef HAVE_LIBGLOBUS_COMMON
+
+/* Define if you have the globus_dc library (-lglobus_dc).  */
+#undef HAVE_LIBGLOBUS_DC
+
+/* Define if you have the globus_gass_cache library (-lglobus_gass_cache).  */
+#undef HAVE_LIBGLOBUS_GASS_CACHE
+
+/* Define if you have the globus_gass_client library (-lglobus_gass_client).  */
+#undef HAVE_LIBGLOBUS_GASS_CLIENT
+
+/* Define if you have the globus_gass_file library (-lglobus_gass_file).  */
+#undef HAVE_LIBGLOBUS_GASS_FILE
+
+/* Define if you have the globus_nexus library (-lglobus_nexus).  */
+#undef HAVE_LIBGLOBUS_NEXUS
+
 /* Define if you have the jpeg library (-ljpeg).  */
 #undef HAVE_LIBJPEG
 
@@ -313,6 +337,9 @@
 
 /* Define if you have the nsl library (-lnsl).  */
 #undef HAVE_LIBNSL
+
+/* Define if you have the xnet library (-lxnet).  */
+#undef HAVE_LIBXNET
 
 /* Define if you have the z library (-lz).  */
 #undef HAVE_LIBZ

@@ -39,3 +39,6 @@
 
 /* Define if the ioctl TIOCGWINSZ is defined */
 #undef HAVE_TIOCGWINSZ
+
+/* Define if we have Globus GASS support */
+#undef HAVE_GASS

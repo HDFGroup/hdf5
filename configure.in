@@ -360,6 +360,73 @@ case $withval in
 esac
 
 dnl ----------------------------------------------------------------------
+dnl Is Globus-GASS present?  If so then we can compile in the GASS driver.
+dnl The reason we need to check for so many libs because globus is not
+dnl quite modular yet.  Globus folks plan to reduce the library dependencies.
+dnl
+AC_SUBST(GASS)
+sASS=yes
+AC_SUBST(TESTGASS)
+TESTGASS='$(srcdir)/testgass'
+
+AC_ARG_WITH(gass,[  --with-gass=INC,LIB     Use the GASS driver [default=no]],
+	    ,withval=no)
+case $withval in
+    yes)
+	AC_CHECK_HEADERS(globus_common.h,,unset GASS TESTGASS)
+	AC_CHECK_LIB(xnet,main,,unset GASS TESTGASS)
+	AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
+	AC_CHECK_LIB(globus_dc,main,,unset GASS TESTGASS)
+	AC_CHECK_LIB(globus_nexus,main,,unset GASS TESTGASS)
+	AC_CHECK_LIB(globus_gass_client,main,,unset GASS TESTGASS)
+	AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
+	AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
+	;;
+    no)
+	AC_MSG_CHECKING(for GASS)
+	AC_MSG_RESULT(suppressed)
+	unset GASS TESTGASS
+	;;
+    *)
+	gass_inc="`echo $withval |cut -f1 -d,`"
+	if test "X" != "$gass_inc"; then
+	    saved_CPPFLAGS="$CPPFLAGS"
+	    CPPFLAGS="$CPPFLAGS -I$gass_inc"
+	    AC_CHECK_HEADERS(globus_common.h,,
+	        CPPFLAGS="$saved_CPPFLAGS"
+	        unset GASS TESTGASS
+            )
+	else
+	    AC_CHECK_HEADERS(globus_common.h)
+	fi
+	
+	gass_lib="`echo $withval |cut -f2 -d, -s`"
+	if test "X" != "$gass_lib"; then
+	    saved_LDFLAGS="$LDFLAGS"
+	    LDFLAGS="$LDFLAGS -L$gass_lib"
+	    AC_CHECK_LIB(xnet,main,,unset GASS TESTGASS)
+	    AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
+	    AC_CHECK_LIB(globus_dc,main,,unset GASS TESTGASS)
+	    AC_CHECK_LIB(globus_nexus,main,,unset GASS TESTGASS)
+	    AC_CHECK_LIB(globus_gass_client,main,,unset GASS TESTGASS)
+	    AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
+	    AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
+	else
+	    AC_CHECK_LIB(xnet,main,,unset GASS TESTGASS)
+	    AC_CHECK_LIB(globus_common,globus_module_activate,,unset GASS TESTGASS)
+	    AC_CHECK_LIB(globus_dc,main,,unset GASS TESTGASS)
+	    AC_CHECK_LIB(globus_nexus,main,,unset GASS TESTGASS)
+	    AC_CHECK_LIB(globus_gass_client,main,,unset GASS TESTGASS)
+	    AC_CHECK_LIB(globus_gass_cache,main,,unset GASS TESTGASS)
+	    AC_CHECK_LIB(globus_gass_file,globus_gass_open,,unset GASS TESTGASS)
+	fi
+	;;
+esac
+if test "X-" != "X-$GASS"; then
+    AC_DEFINE(HAVE_GASS)
+fi
+
+dnl ----------------------------------------------------------------------
 dnl How does one figure out the local time zone?  Anyone know of a
 dnl Posix way to do this?
 dnl
