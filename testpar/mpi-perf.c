@@ -4,6 +4,7 @@
  * See COPYING in top-level directory.
  *
  * This is contributed by Robert Ross to the HDF5 software.
+ * and was called mpi-io-test.c
  */
 
 /* mpi-perf.c
@@ -24,6 +25,14 @@
  * the processes that make up the parallel job, which isn't always the case.
  * So if it doesn't work on some platform, that might be why.
  */
+/* Modifications:
+ *    Albert Cheng, Apr 30, 20001
+ *    Changed MPI_File_open to use MPI_COMM_WORLD (was MPI_COMM_SELF).
+ *    Albert Cheng, May 5, 20001
+ *    Changed MPI_File_seek then MPI_File_write or MPI_File_read to just
+ *    MPI_File_write_at and MPI_File_read_at.  Some compiler, e.g., IBM
+ *    mpcc_r does not support MPI_File_seek and MPI_File_read or MPI_File_write.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,7 +42,10 @@
 #include <string.h>
 #include <sys/time.h>
 #include <mpi.h>
-#include "mpio.h"
+#ifndef MPI_FILE_NULL           /*MPIO may be defined in mpi.h already       */
+#   include <mpio.h>
+#endif
+
 
 
 /* DEFAULT VALUES FOR OPTIONS */
@@ -136,7 +148,7 @@ int main(int argc, char **argv)
 		 * rank of the current process */
 		seek_position = (j*iter_jump)+(mynod*opt_block);
 
-		MPI_File_seek(fh, seek_position, MPI_SEEK_SET);
+/*		MPI_File_seek(fh, seek_position, MPI_SEEK_SET);*/
 
 		if (opt_correct) /* fill in buffer for iteration */ {
 			for (i=mynod+j, check=buf; i<opt_block; i++,check++) *check=(char)i;
@@ -148,7 +160,7 @@ int main(int argc, char **argv)
 
 		/* write out the data */
 		nchars = opt_block/sizeof(char);
-		err = MPI_File_write(fh, buf, nchars, MPI_CHAR, &status);
+		err = MPI_File_write_at(fh, seek_position, buf, nchars, MPI_CHAR, &status);
 		if(err){
 			fprintf(stderr, "node %d, write error: %s\n", mynod, 
 			strerror(errno));
@@ -185,7 +197,7 @@ int main(int argc, char **argv)
 		/* seek to the appropriate spot give the current iteration and
 		 * rank within the MPI processes */
 		seek_position = (j*iter_jump)+(mynod*opt_block);
-		MPI_File_seek(fh, seek_position, MPI_SEEK_SET);
+/*		MPI_File_seek(fh, seek_position, MPI_SEEK_SET);*/
 
 		/* discover the start time */
 	   MPI_Barrier(MPI_COMM_WORLD);
@@ -193,10 +205,10 @@ int main(int argc, char **argv)
 
 		/* read in the file data */
 		if (!opt_correct){
-			err = MPI_File_read(fh, buf, nchars, MPI_CHAR, &status);
+			err = MPI_File_read_at(fh, seek_position, buf, nchars, MPI_CHAR, &status);
 		}
 		else{
-			err = MPI_File_read(fh, buf2, nchars, MPI_CHAR, &status);
+			err = MPI_File_read_at(fh, seek_position, buf2, nchars, MPI_CHAR, &status);
 		}
 		myerrno = errno;
 
