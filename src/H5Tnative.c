@@ -238,7 +238,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                 /* Decide if the data type is object or dataset region reference. */
                 if(NULL==(dt=H5I_object(H5T_STD_REF_OBJ_g)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type")
-                not_equal = H5T_cmp(ret_value, dt);
+                not_equal = H5T_cmp(ret_value, dt, FALSE);
 
                 /* Update size, offset and compound alignment for parent. */
                 if(!not_equal) {                    

@@ -227,6 +227,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed error in opening object in group that was opened in mounted
+            file which has been unmounted.  QAK - 2005/03/17
         - Fixed a racing condition in MPIPOSIX virtual file drive close
 	  function.  Now all processes must completed the close before any
 	  of them is returned.  This prevents some "faster" processes start
@@ -435,6 +437,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Performance
     -------------
+        - Optimized I/O for enumerated datatypes that are a superset of source
+            enumerated datatype.  QAK - 2005/03/19
         - More optimizations to inner loops of datatype conversions for
             integers and floats which give a 10-50% speedup.  QAK - 2003/11/07
         - Hoisted invariant 'if/else's out of inner datatype conversion loop for

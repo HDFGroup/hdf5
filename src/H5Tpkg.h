@@ -199,8 +199,8 @@ typedef enum H5T_state_t {
 typedef struct H5T_shared_t {
     hsize_t		fo_count; /* number of references to this file object */
     H5T_state_t		state;	/*current state of the type		     */
-    H5F_t		*sh_file;/*file pointer if this is a shared type     */
     H5T_class_t		type;	/*which class of type is this?		     */
+    H5F_t		*sh_file;/*file pointer if this is a shared type     */
     size_t		size;	/*total size of an instance of this type     */
     hbool_t		force_conv;/* Set if this type always needs to be converted and H5T_conv_noop cannot be called */
     struct H5T_t	*parent;/*parent type for derived datatypes	     */
