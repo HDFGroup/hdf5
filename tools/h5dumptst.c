@@ -1716,6 +1716,8 @@ void test_nestcomp(void)
      * Wtite data to the dataset; 
      */
     status = H5Dwrite(dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1);
+    if (status < 0)
+	fprintf(stderr, "test_nestcomp H5Dwrite failed\n");
 
     /*
      * Release resources
@@ -1827,8 +1829,9 @@ void test_vldatatypes(void)
     hid_t file, dset, space, type;
     hsize_t dims[] = { SPACE1_DIM1 };
     int i;
-    herr_t ret;
+    herr_t ret=0;
 
+    ret = ret;	/* so that compiler won't complain "is set but never used" */
     file = H5Fcreate(FILE21, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
    
     /* Allocate and initialize VL dataset to write */
