@@ -50,6 +50,8 @@ H5G&nbsp;&nbsp;
 
 The Group interface functions create and manipulate groups
 of objects in an HDF5 file.
+<p>
+<strong>The C Interfaces:</strong>
 
 <table border=0>
 <tr><td valign=top>
@@ -71,6 +73,48 @@ of objects in an HDF5 file.
     <li><a href="#Group-GetLinkval">H5Gget_linkval</a>
     <li><a href="#Group-SetComment">H5Gset_comment</a>
     <li><a href="#Group-GetComment">H5Gget_comment</a>
+</ul>
+</td></tr>
+</table>
+
+<p>
+<strong>The FORTRAN90 Interfaces:</strong>
+
+<br>
+<font size=-1>
+<i>In general, each FORTRAN90 subroutine performs exactly the same task 
+as the corresponding C function.  The links below go to the C function 
+descriptions, which serve as general descriptions for both.  A button, 
+under <strong>Non-C API(s)</strong> at the end of the C function description,
+opens an external browser window displaying the FORTRAN90-specific 
+information.  You will probably want to adjust the size and location of 
+this external window so that both browser windows are visible and to 
+facilitate moving easily between them.</i>
+</font>
+
+<table border=0>
+<tr><td valign=top>
+<ul>
+    <li><a href="#Group-Create">h5gcreate_f</a>
+    <li><a href="#Group-Open">h5gopen_f</a>
+    <li><a href="#Group-Close">h5gclose_f</a>
+<!--<li><a href="#Group-Link">h5glink_f</a>
+                          -->
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Group-Unlink">h5gunlink_f</a>  
+    <li><a href="#Group-Iterate">h5gget_obj_info_idx_f</a>
+    <li><a href="#Group-Iterate">h5gn_members_f</a>
+    <li><a href="#Group-Move">h5gmove_f</a> 
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+<!--<li><a href="#Group-GetObjinfo">h5gget_objinfo_f</a>
+             -->
+    <li><a href="#Group-GetLinkval">h5gget_linkval_f</a>
+    <li><a href="#Group-SetComment">h5gset_comment_f</a>
+    <li><a href="#Group-GetComment">h5gget_comment_f</a>
 </ul>
 </td></tr>
 </table>
@@ -126,7 +170,7 @@ create or access function.
         then a default size is chosen.
         <p>
         The return value is a group identifier for the open group.
-	  This group identifier should be closed by calling 
+	This group identifier should be closed by calling 
         <code>H5Gclose()</code> when it is no longer needed. 
   <dt><strong>Parameters:</strong>
     <dl>
@@ -146,7 +190,18 @@ create or access function.
   <dt><strong>Returns:</strong>
     <dd>Returns a valid group identifier for the open group if successful; 
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+<!--
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gcreate_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5gcreate_f&quot;,&quot;FortWin&quot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
+-->
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gcreate_f"
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
+
 
 
 <hr>
@@ -178,6 +233,16 @@ create or access function.
   <dt><strong>Returns:</strong>
     <dd>Returns a valid group identifier if successful; 
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+<!--
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gopen_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5gopen_f&quot;,&quot;FortWin&nquot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
+-->
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gopen_f"
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -202,6 +267,16 @@ create or access function.
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+<!--
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gclose_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5gclose_f&quot;,&quot;FortWin&nquot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
+-->
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gclose_f"
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -251,6 +326,16 @@ create or access function.
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+<!--
+    <dd><a href="fortran/h5g_FORTRAN.html#h5glink_f" target="FortWin" onClick="window.open(&quot;fortran/h5g_FORTRAN.html#h5glink_f&quot;,&quot;FortWin&nquot;,&quot;toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=yes,resizable=1,width=500,height=250,titlebar=yes&quot;)"><img src="Graphics/FORTRAN.gif"></a>
+-->
+    <dd><a href="fortran/h5g_FORTRAN.html#h5glink_f"
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -285,6 +370,13 @@ create or access function.
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gunlink_f"
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -355,6 +447,35 @@ create or access function.
     <dd>Returns the return value of the last operator if it was non-zero, 
         or zero if all group members were processed.
         Otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd>There is no direct FORTRAN couterpart for the C function 
+        <code>H5Giterate</code>.  
+        Instead, that functionality is provided by two FORTRAN functions:
+        <center>
+        <table width=80%>
+	<tr valign=top align=left>
+            <td>
+            <a href="fortran/h5g_FORTRAN.html#h5gn_members_f"
+                target="FortranWin"><code>h5gn_members_f</code></a>.
+            </td><td>&nbsp;&nbsp;</td><td>
+            <strong>Purpose:</strong>
+            Returns the number of group members.
+        </tr><tr valign=top align=left>
+            <td>
+            <a href="fortran/h5g_FORTRAN.html#h5gget_obj_info_idx_f"
+               target="FortranWin"><code>h5gget_obj_info_idx_f</code></a> 
+            </td><td>&nbsp;&nbsp;</td><td>
+            <strong>Purpose:</strong>
+            Returns name and type of the group member identified by its index.
+            </td>
+        </table>
+        </center>
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gn_members_f"
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -387,6 +508,13 @@ create or access function.
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gmove_f"
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -422,7 +550,7 @@ create or access function.
                       unsigned long fileno[2];
                       unsigned long objno[2];
                       unsigned nlink;
-                      H5G_type_t type;
+                      int type;
                       time_t mtime; 
                       size_t linklen;
                   } H5G_stat_t
@@ -467,6 +595,13 @@ create or access function.
     <dd> Returns a non-negative value if successful, with the fields of 
          <code>statbuf</code> (if non-null) initialized.
          Otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gget_objinfo_f"
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -515,6 +650,13 @@ create or access function.
     <dd>Returns a non-negative value, with the link value in <code>value</code>, 
         if successful.
         Otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gget_linkval_f"
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -558,6 +700,13 @@ create or access function.
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gset_comment_f"
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -600,6 +749,13 @@ create or access function.
         counting the null terminator, if successful; the value 
         returned may be larger than <code>bufsize</code>.
         Otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5g_FORTRAN.html#h5gget_comment_f"
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -643,7 +799,7 @@ H5G&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  26 April 1999
+Last modified:  20 October 1999
 
 </body>
 </html>

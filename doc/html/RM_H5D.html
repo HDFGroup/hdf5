@@ -51,24 +51,76 @@ H5D&nbsp;&nbsp;
 These functions create and manipulate dataset objects, 
 and set and retrieve their constant or persistent properties.
 
+<p>
+<strong>The C Interfaces:</strong>
+
 <table border=0>
 <tr><td valign=top>
 <ul>
     <li><a href="#Dataset-Create">H5Dcreate</a>
     <li><a href="#Dataset-Open">H5Dopen</a>
-    <li><a href="#Dataset-GetSpace">H5Dget_space</a>
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
-    <li><a href="#Dataset-GetType">H5Dget_type</a>
-    <li><a href="#Dataset-GetCreatePlist">H5Dget_create_plist</a>
-    <li><a href="#Dataset-Read">H5Dread</a>
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
-    <li><a href="#Dataset-Write">H5Dwrite</a>
-    <li><a href="#Dataset-Extend">H5Dextend</a>
     <li><a href="#Dataset-Close">H5Dclose</a>
+    <li><a href="#Dataset-GetSpace">H5Dget_space</a>
+    <li><a href="#Dataset-GetType">H5Dget_type</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Dataset-GetCreatePlist">H5Dget_create_plist</a>
+    <li><a href="#Dataset-GetStorageSize">H5Dget_storage_size</a>
+    <li><a href="#Dataset-GetVLBuf">H5Dget_vlen_buf_size</a>
+    <li><a href="#Dataset-VLReclaim">H5Dvlen_reclaim</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Dataset-Read">H5Dread</a>
+    <li><a href="#Dataset-Write">H5Dwrite</a>
+    <li><a href="#Dataset-Iterate">H5Diterate</a>
+<!--
+    <li><a href="#Dataset-Debug">H5Ddebug</a>
+-->
+    <li><a href="#Dataset-Extend">H5Dextend</a>
+</ul>
+</td></tr>
+</table>
+
+<p>
+<strong>The FORTRAN90 Interfaces:</strong>
+
+<br>
+<font size=-1>
+<i>In general, each FORTRAN90 subroutine performs exactly the same task 
+as the corresponding C function.  The links below go to the C function 
+descriptions, which serve as general descriptions for both.  A button, 
+under <strong>Non-C API(s)</strong> at the end of the C function description,
+opens an external browser window displaying the FORTRAN90-specific 
+information.  You will probably want to adjust the size and location of 
+this external window so that both browser windows are visible and to 
+facilitate moving easily between them.</i>
+</font>
+
+<table border=0>
+<tr><td valign=top>
+<ul>
+    <li><a href="#Dataset-Create">h5dcreate_f</a>
+    <li><a href="#Dataset-Open">h5dopen_f</a>
+    <li><a href="#Dataset-Close">h5dclose_f</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Dataset-GetSpace">h5dget_space_f</a>
+    <li><a href="#Dataset-GetType">h5dget_type_f</a>
+    <li><a href="#Dataset-GetCreatePlist">h5dget_create_plist_f</a>
+<!--<li><a href="#Dataset-GetStorageSize">h5dget_storage_size_f</a>      -->
+<!--<li><a href="#Dataset-GetVLBuf">h5dget_vlen_buf_size_f</a>           -->
+<!--<li><a href="#Dataset-VLReclaim">h5dvlen_reclaim_f</a>               -->
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Dataset-Read">h5dread_f</a>
+    <li><a href="#Dataset-Write">h5dwrite_f</a>
+<!--<li><a href="#Dataset-Iterate">h5diterate_f</a>                     -->
+<!--<li><a href="#Dataset-Debug">h5ddebug_f</a>                         -->
+    <li><a href="#Dataset-Extend">h5dextend_f</a>
 </ul>
 </td></tr>
 </table>
@@ -121,6 +173,13 @@ and set and retrieve their constant or persistent properties.
 <dt><strong>Returns:</strong>
     <dd>Returns a dataset identifier if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dcreate_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -148,6 +207,13 @@ and set and retrieve their constant or persistent properties.
 <dt><strong>Returns:</strong>
     <dd>Returns a dataset identifier if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dopen_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -172,6 +238,13 @@ and set and retrieve their constant or persistent properties.
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_space_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -200,6 +273,13 @@ and set and retrieve their constant or persistent properties.
 <dt><strong>Returns:</strong>
     <dd>Returns a datatype identifier if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_type_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -225,6 +305,146 @@ and set and retrieve their constant or persistent properties.
 <dt><strong>Returns:</strong>
     <dd>Returns a dataset creation property list identifier if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_create_plist_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-GetStorageSize">H5Dget_storage_size</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hsize_t </em><code>H5Dget_storage_size</code>(<em>hid_t </em><code>dataset_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the amount of storage required for a dataset.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dget_storage_size</code> returns the amount of storage 
+        that is required for the specified dataset, <code>dataset_id</code>. 
+        For chunked datasets, this is the number of allocated chunks times 
+        the chunk size.        
+        The return value may be zero if no data has been stored.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>dataset_id</code>
+            <dd>Identifier of the dataset to query.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the amount of storage space allocated for the dataset, 
+        not counting meta data; 
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_storage_size" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-GetVLBuf">H5Dget_vlen_buf_size</a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i><b>(Not yet implemented.)</b></i>
+<dt><strong>Signature:</strong>   
+    <dd><em>herr_t </em><code>H5Dget_vlen_buf_size</code>(<em>hid_t </em><code>dataset_id</code>,
+    <em>hid_t</em> <code>type_id</code>,
+    <em>hid_t</em> <code>space_id</code>,
+    <em>hsize_t</em> *<code>size</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Determines the number of bytes required to store VL data.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dget_vlen_buf_size</code> determines the number of bytes 
+        required to store the VL data from the dataset, using the 
+        <code>space_id</code> for the selection in the dataset on 
+        disk and the <code>type_id</code> for the memory representation 
+        of the VL data in memory.  
+        <p>
+        <code>*size</code> is returned with the number of bytes are 
+        required to store the VL data in memory.          
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>dataset_id</code>
+            <dd>Identifier of the dataset to query.
+        <dt><em>hid_t</em> <code>type_id</code>
+            <dd>Identifier of the datatype.
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>Identifier of the dataspace.
+        <dt><em>hsize_t</em> *<code>size</code>
+            <dd>The size in bytes of the buffer required to store the VL data.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_vlen_buf_size_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-VLReclaim">H5Dvlen_reclaim</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Dvlen_reclaim</code>(<em>hid_t </em><code>type_id</code>
+    <em>hid_t</em> <code>space_id</code>,
+    <em>hid_t</em> <code>plist_id</code>,
+    <em>void</em> *<code>buf</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Reclaims VL datatype memory buffers.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dvlen_reclaim</code> reclaims memory buffers created to 
+        store VL datatypes.
+        <p>
+        The <code>type_id</code> must be the datatype stored in the buffer.
+        The <code>space_id</code> describes the selection for the memory buffer 
+        to free the VL datatypes within.  
+        The <code>plist_id</code> is the dataset transfer property list which 
+        was used for the I/O transfer to create the buffer.
+        And <code>buf</code> is the pointer to the buffer to be reclaimed.
+        <p>
+        The VL structures (<code>hvl_t</code>) in the user's buffer are 
+        modified to zero out the VL information after the memory has been reclaimed.
+        <p>
+        If nested VL datatypes were used to create the buffer, 
+        this routine frees them <em>from the bottom up</em>, releasing all 
+        the memory without creating memory leaks.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type_id</code>
+            <dd>Identifier of the datatype.
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>Identifier of the dataspace.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Identifier of the property list used to create the buffer.
+        <dt><em>void</em> *<code>buf</code>
+            <dd>Pointer to the buffer to be reclaimed.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dvlen_reclaim_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -293,6 +513,13 @@ and set and retrieve their constant or persistent properties.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dread_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -363,6 +590,13 @@ and set and retrieve their constant or persistent properties.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dwrite_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -391,6 +625,13 @@ and set and retrieve their constant or persistent properties.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dextend_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -401,7 +642,7 @@ and set and retrieve their constant or persistent properties.
     <dd><em>hid_t </em><code>H5Dclose</code>(<em>hid_t </em><code>dataset_id</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>
+    <dd>Closes the specified dataset.
 <dt><strong>Description:</strong>
     <dd><code>H5Dclose</code> ends access to a dataset specified by 
         <code>dataset_id</code> and releases resources used by it.
@@ -415,7 +656,72 @@ and set and retrieve their constant or persistent properties.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5d_FORTRAN.html#h5dclose_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-Iterate">H5Diterate</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Diterate</code>(
+        <em>void *</em><code>buf</code>,
+        <em>hid_t </em><code>type_id</code>,
+        <em>hid_t </em><code>space_id</code>,
+        <em>H5D_operator_t </em><code>operator</code>,
+        <em>void *</em><code>operator_data</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Iterates over all selected elements in a dataspace.
+<dt><strong>Description:</strong>
+    <dd><code>H5Diterate</code> iterates over all the elements selected 
+        in a memory buffer.  The callback function is called once for each 
+        element selected in the dataspace.  
+        <p>
+        The selection in the dataspace is modified so that any elements 
+        already iterated over are removed from the selection if the 
+        iteration is interrupted (by the <code>H5D_operator_t</code> 
+        function returning non-zero) before the iteration is complete;
+        the iteration may then be re-started by the user where it left off.  
+        
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>void *</em><code>buf</code>
+            <dd>IN/OUT: Pointer to the buffer in memory containing the 
+                elements to iterate over.
+        <dt><em>hid_t </em><code>type_id</code>
+            <dd>IN:  Datatype identifier for the elements stored in 
+                <code>buf</code>.
+        <dt><em>hid_t </em><code>space_id</code>
+            <dd>IN: Dataspace identifier for <code>buf</code>.  
+                Also contains the selection to iterate over.
+        <dt><em>H5D_operator_t </em><code>operator</code>
+            <dd>IN: Function pointer to the routine to be called 
+                for each element in <code>buf</code> iterated over.
+        <dt><em>void *</em><code>operator_data</code>
+            <dd>IN/OUT: Pointer to any user-defined data associated 
+                with the operation.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the return value of the last operator if it was non-zero,
+        or zero if all elements have been processed.
+        Otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5d_FORTRAN.html#h5diterate_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
 
 
 <hr>
@@ -458,7 +764,7 @@ H5D&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  30 October 1998
+Last modified:  20 October 1999
 
 </body>
 </html>

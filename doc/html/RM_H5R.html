@@ -57,14 +57,16 @@ to specific objects and data regions in an HDF5 file.
 <tr><td valign=top width=33%>
 <ul>
     <li><a href="#Reference-Create">H5Rcreate</a>
+    <li><a href="#Reference-Dereference">H5Rdereference</a>
 </ul>
 </td><td valign=top width=33%>
 <ul>
-    <li><a href="#Reference-Dereference">H5Rdereference</a>
+    <li><a href="#Reference-GetRegion">H5Rget_region</a>
+    <li><a href="#Reference-GetObjectType">H5Rget_object_type</a>
 </ul>
 </td><td valign=top width=34%>
 <ul>
-    <li><a href="#Reference-GetRegion">H5Rget_region</a>
+    
 </ul>
 </td></tr>
 </table>
@@ -129,10 +131,12 @@ to specific objects and data regions in an HDF5 file.
         opens that object and returns an identifier.
         <p>
         The parameter <code>ref_type</code> specifies the reference type
-        of <code>ref</code>.  See 
-        <a href="References.html#Reference-RefTypes">Reference Types</a> in 
-        <a href="References.html"><i>References (H5R)</i></a> 
-        for a list of valid reference types.
+        of <code>ref</code>. 
+        <code>ref_type</code> may contain either of the following values:
+        <ul>
+        <li><code>H5R_OBJECT</code>  (<code>0</code>)
+        <li><code>H5R_DATASET_REGION</code>  (<code>1</code>)
+        </ul>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset</code>
@@ -151,9 +155,8 @@ to specific objects and data regions in an HDF5 file.
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Reference-GetRegion">H5Rget_region</a>
-&nbsp;&nbsp;<i>(Not yet implemented.)</i>
 <dt><strong>Signature:</strong>
-    <dd><em>H5S_t</em> <code>H5Rget_region</code>(<em>H5D_t</em> <code>dataset</code>,
+    <dd><em>hid_t</em> <code>H5Rget_region</code>(<em>hid_t</em> <code>dataset</code>,
     <em>H5R_type_t</em> <code>ref_type</code>,
     <em>void *</em><code>ref</code>
     )
@@ -166,10 +169,11 @@ to specific objects and data regions in an HDF5 file.
         which is the region pointed to.
         <p>
         The parameter <code>ref_type</code> specifies the reference type
-        of <code>ref</code>.  See 
-        <a href="References.html#Reference-RefTypes">Reference Types</a> in 
-        <a href="References.html"><i>References (H5R)</i></a> 
-        for a list of valid reference types.
+        of <code>ref</code>. 
+        <code>ref_type</code> may contain the following value:
+        <ul>
+        <li><code>H5R_DATASET_REGION</code>  (<code>1</code>)
+        </ul>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset</code>,
@@ -182,6 +186,34 @@ to specific objects and data regions in an HDF5 file.
 <dt><strong>Returns:</strong>
     <dd>Returns a valid identifier if successful;
         otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Reference-GetObjectType">H5Rget_object_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Rget_object_type</code>(<em>hid_t</em> <code>id</code>,
+    <em>void *</em><code>ref</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the type of object that an object reference points to.
+<dt><strong>Description:</strong>
+    <dd>Given a reference to an object <code>ref</code>, 
+        <code>H5Rget_object_type</code> returns the 
+        type of the object pointed to.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>id</code>,
+            <dd>IN: The dataset containing the reference object or 
+                the location identifier of the object that the dataset 
+                is located within.
+        <dt><em>void *</em><code>ref</code>
+            <dd>IN: Reference to query.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns an object type as defined in <code>H5Gpublic.h</code>;
+        otherwise returns <code>H5G_UNKNOWN</code>.
 </dl>
 
 

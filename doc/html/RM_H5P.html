@@ -50,7 +50,10 @@ H5P&nbsp;&nbsp;
 These functions manipulate property list objects to allow objects which require
 many different parameters to be easily manipulated.
 
-<dir>
+
+<p>
+<strong>The C Interfaces:</strong>
+
 <table border=0>
 <tr><td valign=top>
 
@@ -74,11 +77,12 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-SetIstoreK">H5Pset_istore_k</a>
     <li><a href="#Property-GetIstoreK">H5Pget_istore_k</a>
     </ul>
-<br>&nbsp;
-<br>
-||&nbsp;&nbsp;&nbsp;<i>Available only in the 
-<br>&nbsp;&nbsp;&nbsp;&nbsp;
-parallel HDF5 library.</i>
+
+    <p><i>Variable-length Datatype Properties</i>
+    <ul>
+    <li><a href="#Property-SetVLMemManager">H5Pset_vlen_mem_manager</a>
+    <li><a href="#Property-GetVLMemManager">H5Pget_vlen_mem_manager</a>
+    </ul>
 
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 
@@ -101,7 +105,15 @@ parallel HDF5 library.</i>
     <li><a href="#Property-GetCache">H5Pget_cache</a>
     <li><a href="#Property-SetSplit">H5Pset_split</a>
     <li><a href="#Property-GetSplit">H5Pget_split</a>
+    <li><a href="#Property-SetGCReferences">H5Pset_gc_references</a>
+    <li><a href="#Property-GetGCReferences">H5Pget_gc_references</a>
     </ul>
+
+<br>&nbsp;
+<br>&nbsp;
+<br>
+||&nbsp;&nbsp;<i>Available only in the 
+parallel HDF5 library.</i>
 
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 
@@ -133,6 +145,10 @@ parallel HDF5 library.</i>
     <li><a href="#Property-GetBuffer">H5Pget_buffer</a>
     <li><a href="#Property-SetPreserve">H5Pset_preserve</a>
     <li><a href="#Property-GetPreserve">H5Pget_preserve</a>
+    <li><a href="#Property-SetHyperCache">H5Pset_hyper_cache</a>
+    <li><a href="#Property-GetHyperCache">H5Pget_hyper_cache</a>
+    <li><a href="#Property-SetBTreeRatios">H5Pset_btree_ratios</a>
+    <li><a href="#Property-GetBTreeRatios">H5Pget_btree_ratios</a>
     <li><a href="#Property-SetXfer">H5Pset_xfer</a>&nbsp;&nbsp;&nbsp;||
     <li><a href="#Property-GetXfer">H5Pget_xfer</a>&nbsp;&nbsp;&nbsp;||
     </ul>
@@ -147,8 +163,118 @@ parallel HDF5 library.</i>
 -->
 
 </table>
-</dir
 
+<p>
+<strong>The FORTRAN90 Interfaces:</strong>
+
+<br>
+<font size=-1>
+<i>In general, each FORTRAN90 subroutine performs exactly the same task 
+as the corresponding C function.  The links below go to the C function 
+descriptions, which serve as general descriptions for both.  A button, 
+under <strong>Non-C API(s)</strong> at the end of the C function description,
+opens an external browser window displaying the FORTRAN90-specific 
+information.  You will probably want to adjust the size and location of 
+this external window so that both browser windows are visible and to 
+facilitate moving easily between them.</i>
+</font>
+
+<table border=0>
+<tr><td valign=top>
+
+    <i>General Property List Operations</i>
+    <ul>
+    <li><a href="#Property-Create">h5pcreate_f</a>
+    <li><a href="#Property-GetClass">h5pget_class_f</a>
+    <li><a href="#Property-Copy">h5pcopy_f</a>
+    <li><a href="#Property-Close">h5pclose_f</a>
+    </ul>
+
+<!--<p><i>File Creation Properties</i>                                    -->
+<!--<ul>                                                                  -->
+<!--<li><a href="#Property-GetVersion">h5pget_version_f</a>               -->
+<!--<li><a href="#Property-SetUserblock">h5pset_userblock_f</a>           -->
+<!--<li><a href="#Property-GetUserblock">h5pget_userblock_f</a>           -->
+<!--<li><a href="#Property-SetSizes">h5pset_sizes_f</a>                   -->
+<!--<li><a href="#Property-GetSizes">h5pget_sizes_f</a>                   -->
+<!--<li><a href="#Property-SetSymK">h5pset_sym_k_f</a>                    -->
+<!--<li><a href="#Property-GetSymK">h5pget_sym_k_f</a>                    -->
+<!--<li><a href="#Property-SetIstoreK">h5pset_istore_k_f</a>              -->
+<!--<li><a href="#Property-GetIstoreK">h5pget_istore_k_f</a>              -->
+<!--</ul>                                                                 -->
+
+<!--<p><i>Variable-length Datatype Properties</i>                         -->
+<!--<ul>                                                                  -->
+<!--<li><a href="#Property-SetVLMemManager">h5pset_vlen_mem_manager_f</a> -->
+<!--<li><a href="#Property-GetVLMemManager">h5pget_vlen_mem_manager_f</a> -->
+<!--</ul>                                                                 -->
+
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+
+<!-- DELETE THIS LINE AND NEXT IF ANY APIs IN THIS SECTION COME INTO USE -->
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<!--<i>File Access Properties</i>                                         -->
+<!--<ul>                                                                  -->
+<!--<li><a href="#Property-GetDriver">h5pget_driver_f</a>                 -->
+<!--<li><a href="#Property-SetStdio">h5pset_stdio_f</a>                   -->
+<!--<li><a href="#Property-GetStdio">h5pget_stdio_f</a>                   -->
+<!--<li><a href="#Property-SetSec2">h5pset_sec2_f</a>                     -->
+<!--<li><a href="#Property-GetSec2">h5pget_sec2_f</a>                     -->
+<!--<li><a href="#Property-SetAlignment">h5pset_alignment_f</a>           -->
+<!--<li><a href="#Property-GetAlignment">h5pget_alignment_f</a>           -->
+<!--<li><a href="#Property-SetCore">h5pset_core_f</a>                     -->
+<!--<li><a href="#Property-GetCore">h5pget_core_f</a>                     -->
+<!--<li><a href="#Property-SetMPI">h5pset_mpi_f</a>&nbsp;&nbsp;&nbsp;||   -->
+<!--<li><a href="#Property-GetMPI">h5pget_mpi_f</a>&nbsp;&nbsp;&nbsp;||   -->
+<!--<li><a href="#Property-SetFamily">h5pset_family_f</a>                 -->
+<!--<li><a href="#Property-GetFamily">h5pget_family_f</a>                 -->
+<!--<li><a href="#Property-SetCache">h5pset_cache_f</a>                   -->
+<!--<li><a href="#Property-GetCache">h5pget_cache_f</a>                   -->
+<!--<li><a href="#Property-SetSplit">h5pset_split_f</a>                   -->
+<!--<li><a href="#Property-GetSplit">h5pget_split_f</a>                   -->
+<!--<li><a href="#Property-SetGCReferences">h5pset_gc_references_f</a>    -->
+<!--<li><a href="#Property-GetGCReferences">h5pget_gc_references_f</a>    -->
+<!--</ul>                                                                 -->
+
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+
+    <i>Dataset Creation Properties</i>
+    <ul>
+<!--<li><a href="#Property-SetLayout">h5pset_layout_f</a>                 -->
+<!--<li><a href="#Property-GetLayout">h5pget_layout_f</a>                 -->
+    <li><a href="#Property-SetChunk">h5pset_chunk_f</a>
+    <li><a href="#Property-GetChunk">h5pget_chunk_f</a>
+    <li><a href="#Property-SetDeflate">h5pset_deflate_f</a>
+<!--<li><a href="#Property-GetDeflate">h5pget_deflate_f</a>               -->
+<!--<li><a href="#Property-SetCompression">h5pset_compression_f</a>       -->
+<!--<li><a href="#Property-GetCompression">h5pget_compression_f</a>       -->
+    <li><a href="#Property-SetFillValue">h5pset_fill_value_f</a>
+    <li><a href="#Property-GetFillValue">h5pget_fill_value_f</a>
+<!--<li><a href="#Property-SetFilter">h5pset_filter_f</a>                 -->
+<!--<li><a href="#Property-GetNFilters">h5pget_nfilters_f</a>             -->
+<!--<li><a href="#Property-GetFilter">h5pget_filter_f</a>                 -->
+<!--<li><a href="#Property-SetExternal">h5pset_external_f</a>             -->
+<!--<li><a href="#Property-GetExternalCount">h5pget_external_count_f</a>  -->
+<!--<li><a href="#Property-GetExternal">h5pget_external_f</a>             -->
+    </ul>
+
+<!--<p><i>Dataset Memory and Transfer Properties</i>                      -->
+<!--<ul>                                                                  -->
+<!--<li><a href="#Property-SetBuffer">h5pset_buffer_f</a>                 -->
+<!--<li><a href="#Property-GetBuffer">h5pget_buffer_f</a>                 -->
+<!--<li><a href="#Property-SetPreserve">h5pset_preserve_f</a>             -->
+<!--<li><a href="#Property-GetPreserve">h5pget_preserve_f</a>             -->
+<!--<li><a href="#Property-SetHyperCache">h5pset_hyper_cache_f</a>        -->
+<!--<li><a href="#Property-GetHyperCache">h5pget_hyper_cache_f</a>        -->
+<!--<li><a href="#Property-SetBTreeRatios">h5pset_btree_ratios_f</a>      -->
+<!--<li><a href="#Property-GetBTreeRatios">h5pget_btree_ratios_f</a>      -->
+<!--<li><a href="#Property-SetXfer">h5pset_xfer_f</a>&nbsp;&nbsp;&nbsp;|| -->
+<!--<li><a href="#Property-GetXfer">h5pget_xfer_f</a>&nbsp;&nbsp;&nbsp;|| -->
+<!--</ul>                                                                 -->
+
+</td></tr>
+</table>
 
 <hr>
 <dl>
@@ -197,6 +323,13 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a property list identifier (<code>plist</code>) if successful; 
         otherwise Fail (-1).
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pcreate_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <hr>
@@ -220,6 +353,13 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pclose_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -244,6 +384,13 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a property list class if successful.
         Otherwise returns H5P_NO_CLASS (-1).
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_class_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -268,6 +415,13 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a property list identifier if successful;
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pcopy_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -304,6 +458,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -331,6 +493,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -356,6 +526,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -389,6 +567,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -418,6 +604,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -459,6 +653,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -490,6 +692,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if the file access property list is set to the MPI.
         Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -528,6 +738,14 @@ parallel HDF5 library.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -555,6 +773,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -598,6 +824,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -632,6 +866,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -666,6 +908,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -695,6 +945,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -713,7 +971,7 @@ parallel HDF5 library.</i>
         This function is only valid for dataset creation property lists.
         Valid parameters for <code>layout</code> are:
             <ul><dl>
-                <dt>H5D_COMPACT
+                <dt>H5D_COMPACT  &nbsp;&nbsp; <i><b>(Not yet implemented.)</b></i>
                     <dd>Store raw data and object header contiguously in file.
                         This should only be used for very small amounts of raw
                         data (suggested less than 1KB).
@@ -735,6 +993,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -750,7 +1016,7 @@ parallel HDF5 library.</i>
         a dataset.  This function is only valid for dataset creation 
         property lists.  Valid types for <code>layout</code> are:
             <ul> <dl>
-                <dt>H5D_COMPACT
+                <dt>H5D_COMPACT  &nbsp;&nbsp; <i><b>(Not yet implemented.)</b></i>
                     <dd>Raw data and object header stored contiguously in file.
                 <dt>H5D_CONTIGUOUS
                     <dd>Raw data stored separately from object header in one
@@ -768,6 +1034,14 @@ parallel HDF5 library.</i>
     <dd>Returns the layout type of a a dataset creation property list 
         if successful.
         Otherwise returns H5D_LAYOUT_ERROR (-1).
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -802,6 +1076,13 @@ parallel HDF5 library.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_chunk_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -834,6 +1115,13 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns chunk dimensionality successful;
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_chunk_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -874,6 +1162,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -905,6 +1201,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -925,10 +1229,16 @@ parallel HDF5 library.</i>
         <p>
         If a dataset is split across multiple files then the files
         should be defined in order. The total size of the dataset is
-        the sum of the SIZE arguments for all the external files.  If
+        the sum of the <code>size</code> arguments for all the external files.  If
         the total size is larger than the size of a dataset then the
         dataset can be extended (provided the data space also allows
         the extending).
+        <p>
+        The <code>size</code> argument specifies number of bytes reserved 
+        for data in the external file.
+        If  <code>size</code> is set to <code>H5F_UNLIMITED</code>, the 
+        external file can be of unlimited size and no more files can be added to
+        the external files list.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -944,6 +1254,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -966,6 +1284,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns the number of external files if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1015,6 +1341,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 <hr>
@@ -1059,6 +1393,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fill_value_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
 
 
 <hr>
@@ -1094,6 +1436,13 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fill_value_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1169,6 +1518,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1205,6 +1562,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns the number of filters in the pipeline if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1279,6 +1644,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns the filter identification number if successful.
         Otherwise returns H5Z_FILTER_ERROR (-1).
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1309,6 +1682,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a low-level driver identifier if successful.
         Otherwise returns H5F_LOW_ERROR (-1).
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1332,6 +1713,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1357,6 +1746,14 @@ parallel HDF5 library.</i>
     <dd>Returns a non-negative value if the file access property list is set 
         to the stdio driver.
         Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1381,6 +1778,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1406,6 +1811,14 @@ parallel HDF5 library.</i>
     <dd>Returns a non-negative value if the file access property list is set 
         to the sec2 driver.
         Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1437,12 +1850,20 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
 <hr>
 <dl>
-  <dt><strong>Name:</strong> <a name="Property-GetCore"></a>
+  <dt><strong>Name:</strong> <a name="Property-GetCore">H5Pget_core</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Pget_core</code>(<em>hid_t</em> <code>plist</code>,
         <em>size_t</em> <code>*increment</code>
@@ -1468,6 +1889,14 @@ parallel HDF5 library.</i>
     <dd>Returns a non-negative value if the file access property list is set 
         to the core driver.
         Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1513,6 +1942,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1557,8 +1994,8 @@ parallel HDF5 library.</i>
         <dt><em>size_t</em> <code>meta_ext_size</code>
             <dd>IN: Number of characters of the meta file extension to be  
                 copied to the <code>meta_ext</code> buffer.
-        <dt><em>OUT</em> <code>*meta_ext</code>
-            <dd>IN: Meta file extension.
+        <dt><em>char</em> <code>*meta_ext</code>
+            <dd>OUT: Meta file extension.
         <dt><em>hid_t</em> <code>*meta_properties</code>
             <dd>OUT: Pointer to a copy of the meta file access property list.
         <dt><em>size_t</em> <code>raw_ext_size</code>
@@ -1573,51 +2010,94 @@ parallel HDF5 library.</i>
     <dd>Returns a non-negative value if the file access property list is set 
         to the split driver.
         Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
 <hr>
 <dl>
-  <dt><strong>Name:</strong> <a name="Property-SetFamily">H5Pset_family</a>
+  <dt><strong>Name:</strong> <a name="Property-SetGCReferences">H5Pset_gc_references</a>
   <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_family</code>(<em>hid_t</em> <code>plist</code>,
-        <em>hsize_t</em> <code>memb_size</code>,
-        <em>hid_t</em> <code>memb_plist</code>
+    <dd><em>herr_t</em> <code>H5Pset_split</code>(<em>hid_t</em> <code>plist</code>,
+        <em>unsigned</em> <code>gc_ref</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Sets the file access properties list to the <em>family</em>
-	  driver.
+    <dd>Sets garbage collecting references flag.
   <dt><strong>Description:</strong>
-    <dd><i>Original version.  Edited version below.</i>
-    <dd><code>H5Pset_family</code> sets the file access properties 
-        to use the <em>family</em>
-	driver; any previously defined driver properties are erased
-	from the property list.  Each member of the file family will
-	use <em>member_properties</em> as its file access property
-	list. The <em>memb_size</em> argument gives the logical size
-	in bytes of each family member but the actual size could be
-	smaller depending on whether the file contains holes.  The
-	member size is only used when creating a new file or
-	truncating an existing file; otherwise the member size comes
-	from the size of the first member of the family being
-	opened. Note: if the size of the <code>off_t</code> type is
-	four bytes then the maximum family member size is usually
-	2^31-1 because the byte at offset 2,147,483,647 is generally
-	inaccessible.  Additional parameters may be added to this
-	function in the future.
+    <dd><code>H5Pset_gc_references</code> sets the flag for 
+        garbage collecting references for the file.  
+        <p>
+        Dataset region references and other reference types use space 
+        in an HDF5 file's global heap.  If garbage collection is on 
+        and the user passes in an uninitialized value in a reference structure, 
+        the heap might get corrupted.  When garbage collection is off, however,
+        and the user re-uses a reference, the previous heap block will be 
+        orphaned and not returned to the free heap space.  
+        <p>
+        When garbage collection is on, the user must initialize the 
+        reference structures to 0 or risk heap corruption.
+        <p>
+        The default value for garbage collecting references is off.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
-            <dd>IN: Identifier of the file access property list.
-        <dt><em>hsize_t</em> <code>memb_size</code>
-            <dd>IN: Logical size, in bytes, of each family member.
-        <dt><em>hid_t</em> <code>memb_plist</code>
-            <dd>IN: Identifier of the file access property list 
-                for each member of the family.
+            <dd>IN: File access property list identifier.
+        <dt><em>unsigned</em> <code>gc_ref</code>
+            <dd>IN: 
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetGCReferences">H5Pget_gc_references</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_split</code>(<em>hid_t</em> <code>plist</code>,
+        <em>unsigned</em> *<code>gc_ref</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns garbage collecting references setting.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_gc_references</code> returns the current setting 
+        for the garbage collection references property from 
+        the specified file access property list.  
+        The garbage collection references property is set 
+        by <a href="#Property-SetGCReferences">H5Pset_gc_references</a>.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>unsigned</em> <code>gc_ref</code>
+            <dd>OUT:
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1633,7 +2113,6 @@ parallel HDF5 library.</i>
     <dd>Sets the file access properties list to the <code>family</code>
 	  driver.
   <dt><strong>Description:</strong>
-    <dd><i>Edited version.  Original version above.</i>
     <dd><code>H5Pset_family</code> sets the file access properties 
         to use the <code>family</code> driver; any previously defined 
         driver properties are erased from the property list.  
@@ -1672,6 +2151,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1711,6 +2198,14 @@ parallel HDF5 library.</i>
     <dd>Returns a non-negative value if the file access property list is set 
         to the family driver.
         Otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1759,6 +2254,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1793,6 +2296,193 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetHyperCache">H5Pset_hyper_cache</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_hyper_cache</code>(<em>hid_t</em> <code>plist</code>,
+        <em>unsigned</em> <code>cache</code>,
+        <em>unsigned</em> <code>limit</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Indicates whether to cache hyperslab blocks during I/O.
+  <dt><strong>Description:</strong>
+    <dd>Given a dataset transfer property list, <code>H5Pset_hyper_cache</code> 
+        indicates whether to cache hyperslab blocks during I/O, 
+        a process which can significantly increase I/O speeds.  
+        <p>
+        The parameter <code>limit</code> sets the maximum size of the 
+        hyperslab block to cache.  If a block is smaller than that limit, 
+        it may still not be cached if no memory is available. 
+        Setting the limit to <code>0</code> (zero) indicates no limitation on the size of 
+        block to attempt to cache.
+        <p>
+        The default is to cache blocks with no limit on block size 
+        for serial I/O and to not cache blocks for parallel I/O.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Dataset transfer property list identifier.
+        <dt><em>unsigned</em> <code>cache</code>
+            <dd>IN: 
+        <dt><em>unsigned</em> <code>limit</code>
+            <dd>IN: Maximum size of the hyperslab block to cache. 
+                <code>0</code> (zero) indicates no limit.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetHyperCache">H5Pget_hyper_cache</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_hyper_cache</code>(<em>hid_t</em> <code>plist</code>,
+        <em>unsigned</em> <code>cache</code>,
+        <em>unsigned</em> <code>limit</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns information regarding the caching of hyperslab blocks during I/O.
+  <dt><strong>Description:</strong>
+    <dd>Given a dataset transfer property list, <code>H5Pget_hyper_cache</code> 
+        returns instructions regarding the caching of hyperslab blocks during I/O.
+        These parameters are set with the <code>H5Pset_hyper_cache</code> function.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Dataset transfer property list identifier.
+        <dt><em>unsigned</em> <code>cache</code>
+            <dd>OUT: 
+        <dt><em>unsigned</em> <code>limit</code>
+            <dd>OUT: Maximum size of the hyperslab block to cache. 
+                <code>0</code> (zero) indicates no limit.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetBTreeRatios">H5Pset_btree_ratios</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_btree_ratios</code>(<em>hid_t</em> <code>plist</code>,
+        <em>double</em> <code>left</code>,
+        <em>double</em> <code>middle</code>,
+        <em>double</em> <code>right</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets B-tree split ratios for a dataset transfer property list.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_btree_ratios</code> sets the B-tree split ratios 
+        for a dataset transfer property list. The split ratios determine 
+        what percent of children go in the first node when a node splits.  
+        <p>
+        The ratio <code>left</code> is used when the splitting node is 
+        the left-most node at its level in the tree; 
+        the ratio <code>right</code> is used when the splitting node is 
+        the right-most node at its level; 
+        and the ratio <code>middle</code> is used for all other cases.  
+        <p>
+        A node which is the only node at its level in the tree uses 
+        the ratio <code>right</code> when it splits.  
+        <p>
+        All ratios are real numbers between 0 and 1, inclusive. 
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: The dataset transfer property list identifier.
+        <dt><em>double</em> <code>left</code>
+            <dd>IN: The B-tree split ratio for left-most nodes.
+        <dt><em>double</em> <code>right</code>
+            <dd>IN: The B-tree split ratio for right-most nodes and lone nodes.
+        <dt><em>double</em> <code>middle</code>
+            <dd>IN: The B-tree split ratio for all other nodes.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetBTreeRatios">H5Pget_btree_ratios</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_btree_ratios</code>(<em>hid_t</em> <code>plist</code>,
+        <em>double</em> *<code>left</code>,
+        <em>double</em> *<code>middle</code>,
+        <em>double</em> *<code>right</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Gets B-tree split ratios for a dataset transfer property list.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_btree_ratios</code> returns the B-tree split ratios 
+        for a dataset transfer property list.
+        <p>
+        The B-tree split ratios are returned through the non-<code>NULL</code>
+        arguments <code>left</code>, <code>middle</code>, and <code>right</code>,
+        as set by the <a href="#Property-SetBTreeRatios">H5Pset_btree_ratios</a> function.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: The dataset transfer property list identifier.
+        <dt><em>double</em> <code>left</code>
+            <dd>OUT: The B-tree split ratio for left-most nodes.
+        <dt><em>double</em> <code>right</code>
+            <dd>OUT: The B-tree split ratio for right-most nodes and lone nodes.
+        <dt><em>double</em> <code>middle</code>
+            <dd>OUT: The B-tree split ratio for all other nodes.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1811,15 +2501,21 @@ parallel HDF5 library.</i>
     <dd> Given a dataset transfer property list, <code>H5Pset_buffer</code> 
          sets the maximum size
          for the type conversion buffer and background buffer and
-         optionally supply pointers to application-allocated buffers.
+         optionally supplies pointers to application-allocated buffers.
          If the buffer size is smaller than the entire amount of data
-         being transferred between application and file, and a type
-         conversion buffer or background buffer is required then
-         strip mining will be used.  However, certain restrictions
-         apply for the size of buffer which can be used for strip
-         mining.  For instance, when strip mining a 100x200x300
-         hyperslab of a simple data space the buffer must be large
-         enough to hold a 1x200x300 slab.  
+         being transferred between the application and the file, and a type
+         conversion buffer or background buffer is required, then
+         strip mining will be used.  
+         <p>
+         Note that there are minimum size requirements for the buffer.
+         Strip mining can only break the data up along the first dimension,
+         so the buffer must be large enough to accommodate a complete slice 
+         that encompasses all of the remaining dimensions.  
+         For example, when strip mining a 100x200x300 hyperslab 
+         of a simple data space, the buffer must be large enough to 
+         hold 1x200x300 data elements.  
+         When strip mining a 100x200x300x150 hyperslab of a simple data space, 
+         the buffer must be large enough to hold 1x200x300x150 data elements.  
          <p>
          If <code>tconv</code> and/or <code>bkg</code> are null pointers,
          then buffers will be allocated and freed during the data transfer.  
@@ -1839,6 +2535,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1869,6 +2573,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns buffer size if successful;
         otherwise 0 on failure.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1901,6 +2613,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1922,6 +2642,14 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns TRUE or FALSE if successful;
         otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1975,6 +2703,11 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
 </dl>
 
 -->
@@ -2015,6 +2748,11 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns compression method if successful;
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
 </dl>
 
 -->
@@ -2032,7 +2770,7 @@ parallel HDF5 library.</i>
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_deflate</code> sets the compression method for a 
         dataset creation property list to <code>H5D_COMPRESS_DEFLATE</code>
-        and the compression level to <code>level<>/code>, which should 
+        and the compression level to <code>level</code>, which should 
         be a value from zero to nine, inclusive.  
         Lower compression levels are faster but result in less compression.  
         This is the same algorithm as used by the GNU gzip program.
@@ -2046,6 +2784,13 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_deflate_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -2071,9 +2816,143 @@ parallel HDF5 library.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns compression level, a value between 0 and 9, if successful.
         Otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
 </dl>
 
 -->
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetVLMemManager">H5Pset_vlen_mem_manager</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_vlen_mem_manager</code>(<em>hid_t</em> <code>plist</code>,
+        <em>H5MM_allocate_t</em> <code>alloc</code>,
+        <em>void</em> *<code>alloc_info</code>,
+        <em>H5MM_free_t</em> <code>free</code>,
+        <em>void</em> *<code>free_info</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the memory manager for variable-length datatype allocation in 
+        <code>H5Dread</code> and <code>H5Dvlen_reclaim</code>.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_vlen_mem_manager</code> sets the memory manager for 
+        variable-length datatype allocation in <code>H5Dread</code> 
+        and free in <code>H5Dvlen_reclaim</code>.
+        <p>
+        The <code>alloc</code> and <code>free</code> parameters 
+        identify the memory management routines to be used.
+        If the user has defined custom memory management routines,
+        <code>alloc</code> and/or <code>free</code> should be set to make 
+        those routine calls (i.e., the name of the routine is used as 
+        the value of the parameter);  
+        if the user prefers to use the system's <code> malloc</code>
+        and/or <code>free</code>, the <code>alloc</code> and 
+        <code>free</code> parameters, respectively, should be set to 
+        <code> NULL</code>
+        <p>
+        The prototypes for these user-defined functions would appear as follows:
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            <em>typedef void</em> *(*<code>H5MM_allocate_t</code>)(<em>size_t</em> <code>size</code>, 
+                <em>void</em> *<code>alloc_info</code>) ;
+           
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            <em>typedef void</em> (*<code>H5MM_free_t</code>)(<em>void</em> *<code>mem</code>, 
+                <em>void</em> *<code>free_info</code>) ;
+        <br>
+        The <code>alloc_info</code> and <code>free_info</code> parameters 
+        can be used to pass along any required information to 
+        the user's memory management routines.
+        <p>
+        In summary, if the user has defined custom memory management 
+        routines, the name(s) of the routines are passed in the 
+        <code>alloc</code> and <code>free</code> parameters and the 
+        custom routines' parameters are passed in the 
+        <code>alloc_info</code> and <code>free_info</code> parameters.
+        If the user wishes to use the system <code> malloc</code> and 
+        <code>free</code> functions, the <code>alloc</code> and/or 
+        <code>free</code> parameters are set to <code> NULL</code> 
+        and the  <code>alloc_info</code> and <code>free_info</code> 
+        parameters are ignored.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Identifier for the dataset transfer property list.
+        <dt><em>H5MM_allocate_t</em> <code>alloc</code>
+            <dd>IN: User's allocate routine, or &nbsp; <code> NULL</code> for system &nbsp; <code> malloc</code>. 
+        <dt><em>void</em> *<code>alloc_info</code>
+            <dd>IN: Extra parameter for user's allocation routine.  
+                Ignored if preceding parameter is &nbsp; <code> NULL</code>.
+        <dt><em>H5MM_free_t</em> <code>free</code>
+            <dd>IN: User's free routine, or &nbsp; <code> NULL</code> for system <code>free</code>. 
+        <dt><em>void</em> *<code>free_info</code>
+            <dd>IN: Extra parameter for user's free routine.  
+                Ignored if preceding parameter is &nbsp; <code> NULL</code>.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetVLMemManager">H5Pget_vlen_mem_manager</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_vlen_mem_manager</code>(<em>hid_t</em> <code>plist</code>,
+        <em>H5MM_allocate_t</em> *<code>alloc</code>,
+        <em>void</em> **<code>alloc_info</code>,
+        <em>H5MM_free_t</em> *<code>free</code>,
+        <em>void</em> **<code>free_info</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Gets the memory manager for variable-length datatype allocation in 
+        <code>H5Dread</code> and <code>H5Treclaim_vlen</code>.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_vlen_mem_manager</code> is the companion function to
+        <code>H5Pset_vlen_mem_manager</code>, returning the parameters
+        set by that function.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Identifier for the dataset transfer property list.
+        <dt><em>H5MM_allocate_t</em> <code>alloc</code>
+            <dd>OUT: User's allocate routine, or &nbsp; <code> NULL</code> 
+                for system &nbsp; <code> malloc</code>. 
+        <dt><em>void</em> *<code>alloc_info</code>
+            <dd>OUT: Extra parameter for user's allocation routine.  
+                Ignored if preceding parameter is &nbsp; <code> NULL</code>.
+        <dt><em>H5MM_free_t</em> <code>free</code>
+            <dd>OUT: User's free routine, or &nbsp; <code> NULL</code> for 
+                system <code>free</code>. 
+        <dt><em>void</em> *<code>free_info</code>
+            <dd>OUT: Extra parameter for user's free routine.  
+                Ignored if preceding parameter is &nbsp; <code> NULL</code>.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+  -->   <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
 
 
 <hr>
@@ -2116,7 +2995,7 @@ H5P&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  30 October 1998
+Last modified:  20 October 1999
 
 </body>
 </html>

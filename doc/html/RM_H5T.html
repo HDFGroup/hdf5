@@ -51,6 +51,10 @@ H5T&nbsp;&nbsp;
 These functions create and manipulate the datatype which describes elements
 of a dataset.
 
+
+<p>
+<strong>The C Interfaces:</strong>
+
 <table border=0>
 <tr><td valign=top>
 <i>General Datatype Operations</i>
@@ -63,10 +67,19 @@ of a dataset.
     <li><a href="#Datatype-Lock">H5Tlock</a>
     <li><a href="#Datatype-GetClass">H5Tget_class</a>
     <li><a href="#Datatype-GetSize">H5Tget_size</a>
+    <li><a href="#Datatype-GetSuper">H5Tget_super</a>
     <li><a href="#Datatype-Close">H5Tclose</a>
 <p>
+<i>Conversion Functions</i>
+    <li><a href="#Datatype-Convert">H5Tconvert</a>
+    <li><a href="#Datatype-Find">H5Tfind</a>
+    <li><a href="#Datatype-SetOverflow">H5Tset_overflow</a>
+    <li><a href="#Datatype-GetOverflow">H5Tget_overflow</a>
+    <li><a href="#Datatype-Register">H5Tregister</a>
+    <li><a href="#Datatype-Unregister">H5Tunregister</a>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<i>Atomic Datatype</i>
+<i>Atomic Datatype Properties</i>
+  <table><tr><td valign=top>
     <li><a href="#Datatype-SetSize">H5Tset_size</a>
     <li><a href="#Datatype-GetOrder">H5Tget_order</a>
     <li><a href="#Datatype-SetOrder">H5Tset_order</a>
@@ -78,12 +91,11 @@ of a dataset.
     <li><a href="#Datatype-SetPad">H5Tset_pad</a>
     <li><a href="#Datatype-GetSign">H5Tget_sign</a>
     <li><a href="#Datatype-SetSign">H5Tset_sign</a>
-</td><td valign=top>
-<i>Properties</i>
     <li><a href="#Datatype-GetFields">H5Tget_fields</a>
     <li><a href="#Datatype-SetFields">H5Tset_fields</a>
     <li><a href="#Datatype-GetEbias">H5Tget_ebias</a>
     <li><a href="#Datatype-SetEbias">H5Tset_ebias</a>
+  </td><td valign=top>
     <li><a href="#Datatype-GetNorm">H5Tget_norm</a>
     <li><a href="#Datatype-SetNorm">H5Tset_norm</a>
     <li><a href="#Datatype-GetInpad">H5Tget_inpad</a>
@@ -92,9 +104,12 @@ of a dataset.
     <li><a href="#Datatype-SetCset">H5Tset_cset</a>
     <li><a href="#Datatype-GetStrpad">H5Tget_strpad</a>
     <li><a href="#Datatype-SetStrpad">H5Tset_strpad</a>
+  </td></tr></table>
 <p>
+<i>Variable-length Datatypes</i>
+    <li><a href="#Datatype-VLCreate">H5Tvlen_create</a>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<i>Properties of Compound Types</i>
+<i>Compound Datatype Properties</i>
     <li><a href="#Datatype-GetNmembers">H5Tget_nmembers</a>
     <li><a href="#Datatype-GetMemberName">H5Tget_member_name</a>
     <li><a href="#Datatype-GetMemberOffset">H5Tget_member_offset</a>
@@ -104,16 +119,115 @@ of a dataset.
     <li><a href="#Datatype-Pack">H5Tpack</a>
     <li><a href="#Datatype-InsertArray">H5Tinsert_array</a>
 <p>
-<i>Conversion Functions</i>
-    <li><a href="#Datatype-Convert">H5Tconvert</a>
-    <li><a href="#Datatype-Find">H5Tfind</a>
-    <li><a href="#Datatype-SetOverflow">H5Tset_overflow</a>
-    <li><a href="#Datatype-GetOverflow">H5Tget_overflow</a>
-    <li><a href="#Datatype-RegisterHard">H5Tregister_hard</a>
-    <li><a href="#Datatype-RegisterSoft">H5Tregister_soft</a>
-    <li><a href="#Datatype-Unregister">H5Tunregister</a>
+<i>Enumeration Datatypes</i>
+    <li><a href="#Datatype-EnumCreate">H5Tenum_create</a>
+    <li><a href="#Datatype-EnumInsert">H5Tenum_insert</a>
+    <li><a href="#Datatype-EnumNameOf">H5Tenum_nameof</a>
+    <li><a href="#Datatype-EnumValueOf">H5Tenum_valueof</a>
+    <li><a href="#Datatype-GetMemberValue">H5Tget_member_value</a>
+<p>
+<i>Opaque Datatypes</i>
+    <li><a href="#Datatype-SetTag">H5Tset_tag</a>
+    <li><a href="#Datatype-GetTag">H5Tget_tag</a>
 </td></tr>
 </table>
+
+<p>
+<strong>The FORTRAN90 Interfaces:</strong>
+<br>
+
+<font size=-1>
+<i>In general, each FORTRAN90 subroutine performs exactly the same task 
+as the corresponding C function.  The links below go to the C function 
+descriptions, which serve as general descriptions for both.  A button, 
+under <strong>Non-C API(s)</strong> at the end of the C function description,
+opens an external browser window displaying the FORTRAN90-specific 
+information.  You will probably want to adjust the size and location of 
+this external window so that both browser windows are visible and to 
+facilitate moving easily between them.</i>
+</font>
+
+<table border=0>
+<tr><td valign=top>
+<i>General Datatype Operations</i>
+<!--<li><a href="#Datatype-Create">h5tcreate_f</a>                      -->
+    <li><a href="#Datatype-Open">h5topen_f</a>
+    <li><a href="#Datatype-Commit">h5tcommit_f</a>
+<!--<li><a href="#Datatype-Committed">h5tcommitted_f</a>                -->
+    <li><a href="#Datatype-Copy">h5tcopy_f</a>
+<!--<li><a href="#Datatype-Equal">h5tequal_f</a>                        -->
+<!--<li><a href="#Datatype-Lock">h5tlock_f</a>                          -->
+</td><td valign=top>
+<br>
+    <li><a href="#Datatype-GetClass">h5tget_class_f</a>
+    <li><a href="#Datatype-GetSize">h5tget_size_f</a>
+<!--<li><a href="#Datatype-GetSuper">h5tget_super_f</a>                 -->
+    <li><a href="#Datatype-Close">h5tclose_f</a>
+<!--<p>                                                                     -->
+<!--<i>Conversion Functions</i>                                             -->
+<!--<li><a href="#Datatype-Convert">h5tconvert_f</a>                    -->
+<!--<li><a href="#Datatype-Find">h5tfind_f</a>                          -->
+<!--<li><a href="#Datatype-SetOverflow">h5tset_overflow_f</a>           -->
+<!--<li><a href="#Datatype-GetOverflow">h5tget_overflow_f</a>           -->
+<!--<li><a href="#Datatype-Register">h5tregister_f</a>                  -->
+<!--<li><a href="#Datatype-Unregister">h5tunregister_f</a>              -->
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<i>Atomic Datatype Properties</i>
+<!--  <table><tr><td valign=top>                                            -->
+    <li><a href="#Datatype-SetSize">h5tset_size_f</a>
+    <li><a href="#Datatype-GetOrder">h5tget_order_f</a>
+    <li><a href="#Datatype-SetOrder">h5tset_order_f</a>
+<!--<li><a href="#Datatype-GetPrecision">h5tget_precision_f</a>         -->
+<!--<li><a href="#Datatype-SetPrecision">h5tset_precision_f</a>         -->
+<!--<li><a href="#Datatype-GetOffset">h5tget_offset_f</a>               -->
+<!--<li><a href="#Datatype-SetOffset">h5tset_offset_f</a>               -->
+<!--<li><a href="#Datatype-GetPad">h5tget_pad_f</a>                     -->
+<!--<li><a href="#Datatype-SetPad">h5tset_pad_f</a>                     -->
+<!--<li><a href="#Datatype-GetSign">h5tget_sign_f</a>                   -->
+<!--<li><a href="#Datatype-SetSign">h5tset_sign_f</a>                   -->
+<!--<li><a href="#Datatype-GetFields">h5tget_fields_f</a>               -->
+<!--<li><a href="#Datatype-SetFields">h5tset_fields_f</a>               -->
+<!--<li><a href="#Datatype-GetEbias">h5tget_ebias_f</a>                 -->
+<!--<li><a href="#Datatype-SetEbias">h5tset_ebias_f</a>                 -->
+<!--  </td><td valign=top>                                                  -->
+<!--<li><a href="#Datatype-GetNorm">h5tget_norm_f</a>                   -->
+<!--<li><a href="#Datatype-SetNorm">h5tset_norm_f</a>                   -->
+<!--<li><a href="#Datatype-GetInpad">h5tget_inpad_f</a>                 -->
+<!--<li><a href="#Datatype-SetInpad">h5tset_inpad_f</a>                 -->
+<!--<li><a href="#Datatype-GetCset">h5tget_cset_f</a>                   -->
+<!--<li><a href="#Datatype-SetCset">h5tset_cset_f</a>                   -->
+<!--<li><a href="#Datatype-GetStrpad">h5tget_strpad_f</a>               -->
+<!--<li><a href="#Datatype-SetStrpad">h5tset_strpad_f</a>               -->
+<!--  </td></tr></table>                                                    -->
+<!--<p>                                                                     -->
+<!--<i>Variable-length Datatypes</i>                                        -->
+<!--<li><a href="#Datatype-VLCreate">h5tvlen_create_f</a>               -->
+<!--</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>       -->
+<!--<i>Compound Datatype Properties</i>                                     -->
+<!--<li><a href="#Datatype-GetNmembers">h5tget_nmembers_f</a>           -->
+<!--<li><a href="#Datatype-GetMemberName">h5tget_member_name_f</a>      -->
+<!--<li><a href="#Datatype-GetMemberOffset">h5tget_member_offset_f</a>  -->
+<!--<li><a href="#Datatype-GetMemberDims">h5tget_member_dims_f</a>      -->
+<!--<li><a href="#Datatype-GetMemberType">h5tget_member_type_f</a>      -->
+<!--<li><a href="#Datatype-Insert">h5tinsert_f</a>                      -->
+<!--<li><a href="#Datatype-Pack">h5tpack_f</a>                          -->
+<!--<li><a href="#Datatype-InsertArray">h5tinsert_array_f</a>           -->
+<!--<p>                                                                     -->
+<!--<i>Enumeration Datatypes</i>                                            -->
+<!--<li><a href="#Datatype-EnumCreate">h5tenum_create_f</a>             -->
+<!--<li><a href="#Datatype-EnumInsert">h5tenum_insert_f</a>             -->
+<!--<li><a href="#Datatype-EnumNameOf">h5tenum_nameof_f</a>             -->
+<!--<li><a href="#Datatype-EnumValueOf">h5tenum_valueof_f</a>           -->
+<!--<li><a href="#Datatype-GetMemberValue">h5tget_member_value_f</a>    -->
+<!--<p>                                                                     -->
+<!--<i>Opaque Datatypes</i>                                                 -->
+<!--<li><a href="#Datatype-SetTag">h5tset_tag_f</a>                     -->
+<!--<li><a href="#Datatype-GetTag">h5tget_tag_f</a>                     -->
+</td></tr>
+</table>
+
 
 <p>
 The Datatype interface, H5T, provides a mechanism to describe the
@@ -162,13 +276,20 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>A file, group, or datatype identifier.
+            <dd>IN: A file or group identifier.
         <dt><em>const char *</em> <code>name</code>
-            <dd>A datatype name.
+            <dd>IN: A datatype name, defined within the file or group identified by <code>loc_id</code>.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a named datatype identifier if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5topen_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -191,15 +312,22 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>A file or group identifier.
+            <dd>IN: A file or group identifier.
         <dt><em>const char *</em> <code>name</code>
-            <dd>A datatype name.
+            <dd>IN: A datatype name.
         <dt><em>hid_t</em> <code>type</code>
-            <dd>A datatype identifier.
+            <dd>IN: A datatype identifier.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5tcommit_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -207,7 +335,7 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-Committed">H5Tcommitted</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hbool_t</em><code>H5Tcommitted</code>(<em>hid_t</em> <code>type</code>)
+    <dd><em>htri_t</em><code>H5Tcommitted</code>(<em>hid_t</em> <code>type</code>)
 <dt><strong>Purpose:</strong>
     <dd>Determines whether a datatype is a named type or a transient type.  
 <dt><strong>Description:</strong>
@@ -220,12 +348,22 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
         able to share the datatype with other datasets in the same file.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt>hid_t</em> <code>type</code>
-            <dd>Datatype identifier.
+        <dt><em>hid_t</em> <code>type</code>
+            <dd>IN: Datatype identifier.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>The successful return values are TRUE if committed, else FALSE.
+    <dd>When successful, returns a positive value, for <code>TRUE</code>, 
+        if the datatype has been committed, or <code>0</code> (zero), 
+        for <code>FALSE</code>, if the datatype has not been committed.
         Otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -250,31 +388,51 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
         and the size of the array is </em><code>dim</code>.
         The new member's name, <code>name</code>, must be unique 
         within the compound datatype.  
-        The <code>offset</code> argument defines the start of the 
+        The <code>offset</code> argument defines the byte offset of the start of the 
         member in an instance of the compound datatype and
         <code>member_id</code> is the type identifier of the new member.  
         The total member size should be relatively small.
+        <p>
+        The functionality of the <code>perm</code> parameter has 
+        not yet been implemented.  
+        Currently, <code>perm</code> is best set to <code>NULL</code>.
+        (When implemented, <code>perm</code> will specify the mapping 
+        of dimensions within a struct.  At that time, a 
+        <code>NULL</code> value for <code>perm</code> will mean 
+        no mappiing change is to take place.  Thus, using a value 
+        of <code>NULL</code> ensures that application behavior will 
+        remain unchanged upon implementation of this functionality.)
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>parent_id</code>
-            <dd>Identifier of the parent compound datatype.
+            <dd>IN: Identifier of the parent compound datatype.
         <dt><em>const char *</em><code>name</code>
-            <dd>Name of new member.
+            <dd>IN: Name of new member.
         <dt><em>size_t</em> <code>offset</code>
-            <dd>Offset to start of new member within compound datatype.
+            <dd>IN: Offset to start of new member within compound datatype.
         <dt><em>int</em> <code>ndims</code>
-            <dd>Dimensionality of new member.
+            <dd>IN: Dimensionality of new member.
+                Valid values are  <code>0</code> (zero) 
+                through <code>4</code> (four).
         <dt><em>const size_t *</em><code>dim</code>
-            <dd>Size of new member array.
+            <dd>IN: Size of new member array.
         <dt><em>const int *</em><code>perm</code>
-            <dd>Pointer to buffer to store the permutation vector of 
+            <dd>IN: Pointer to buffer to store the permutation vector of 
                 the field.
         <dt><em>hid_t</em> <code>member_id</code>
-            <dd>Identifier of the datatype of the new member.
+            <dd>IN: Identifier of the datatype of the new member.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -299,15 +457,23 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>src_id</code>
-            <dd>Identifier for the source datatype.
+            <dd>IN: Identifier for the source datatype.
         <dt><em>hid_t</em> <code>dst_id</code>
-            <dd>Identifier for the destination datatype.
+            <dd>IN: Identifier for the destination datatype.
         <dt><em>H5T_cdata_t **</em><code>pcdata</code>
-            <dd>Pointer to type conversion data.
+            <dd>IN: Pointer to type conversion data.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a pointer to a suitable conversion function if successful.
         Otherwise returns NULL.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -353,6 +519,14 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -386,6 +560,14 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -412,6 +594,14 @@ H5Tget_overflow ()
     <dd>Returns a pointer to an application-defined function if successful.
         Otherwise returns NULL; this can happen if no overflow handling
         function is registered.  
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -427,9 +617,16 @@ H5Tget_overflow ()
 <dt><strong>Description:</strong>
     <dd><code>H5Tcreate</code> creates a new dataype of the specified 
         class with the specified number of bytes.  
-        Currently, only the <code>H5T_COMPOUND</code> datatype class is 
-        supported with this function.  Use <code>H5Tcopy</code>
-        to create integer or floating-point datatypes.  
+        <p>
+        The following datatype classes are supported with this function:
+        <ul>
+            <li><code>H5T_COMPOUND</code> 
+            <li><code>H5T_OPAQUE</code> 
+            <li><code>H5T_ENUM</code> 
+        </ul>
+        <p>
+        Use <code>H5Tcopy</code> to create integer or floating-point datatypes. 
+        <p>
         The datatype identifier returned from this function should be 
         released with <code>H5Tclose</code> or resource leaks will result.
 <dt><strong>Parameters:</strong>
@@ -442,6 +639,54 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns datatype identifier if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-VLCreate">H5Tvlen_create</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Tvlen_create</code>(<em>hid_t </em><code>base_type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Creates a new variable-length dataype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tvlen_create</code> creates a new variable-length (VL) dataype.
+        <p>
+        The base datatype will be the datatype that the sequence is composed of,
+        characters for character strings, vertex coordinates for polygon lists, etc.
+        The base type specified for the VL datatype can be of any HDF5 datatype,
+        including another VL datatype, a compound datatype or an atomic datatype.
+        <p>
+        When necessary, use <code>H5Tget_super</code> to determine the base type 
+        of the VL datatype.
+        <p>
+        The datatype identifier returned from this function should be 
+        released with <code>H5Tclose</code> or resource leaks will result.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>base_type_id</code>
+            <dd>Base type of datatype to create.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns datatype identifier if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -529,6 +774,13 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a datatype identifier if successful;
         otherwise returns a negative value
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5tcopy_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -536,7 +788,7 @@ H5Tget_overflow ()
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-Equal">H5Tequal</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hbool_t </em><code>H5Tequal</code>(<em>hid_t </em><code>type_id1</code>,
+    <dd><em>htri_t </em><code>H5Tequal</code>(<em>hid_t </em><code>type_id1</code>,
         <em>hid_t</em><code>type_id2</code>
     )
 <dt><strong>Purpose:</strong>
@@ -552,9 +804,18 @@ H5Tget_overflow ()
             <dd>Identifier of datatype to compare.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>When successful, returns TRUE if the datatype identifiers
-        refer to the same datatype, else FALSE.
+    <dd>When successful, returns a positive value, for <code>TRUE</code>, 
+        if the datatype identifiers refer to the same datatype, 
+        or <code>0</code> (zero), for <code>FALSE</code>.
         Otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -581,6 +842,14 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -603,6 +872,8 @@ H5Tget_overflow ()
             <li><code>H5T_BITFIELD</code> (<code>4</code>)
             <li><code>H5T_OPAQUE</code> (<code>5</code>)
             <li><code>H5T_COMPOUND</code> (<code>6</code>)
+            <li><code>H5T_ENUM</code> (<code>7</code>)
+            <li><code>H5T_REFERENCE</code> (<code>8</code>)
         </ul>
 <dt><strong>Parameters:</strong>
     <dl>
@@ -612,6 +883,13 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns datatype class identifier if successful;
         otherwise H5T_NO_CLASS (-1).
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_class_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -633,6 +911,13 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns the size of the datatype in bytes if successful;
         otherwise 0.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_size_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -666,6 +951,45 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_size_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetSuper">H5Tget_super</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Tget_super</code>(<em>hid_t</em> <code>type</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the base datatype from which a datatype is derived.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_super</code> returns the base datatype from which the 
+        datatype <code>type</code> is derived.  
+        <P>
+        In the case of an enumeration type, the return value is an integer type.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type</code>
+            <dd>Datatype identifier for the derived datatype.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the datatype identifier for the base datatype if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -698,6 +1022,13 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a byte order constant if successful;
         otherwise <code>H5T_ORDER_ERROR</code> (-1).
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_order_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -731,6 +1062,13 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_order_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -754,6 +1092,14 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns the number of significant bits if successful;
         otherwise 0.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -788,6 +1134,14 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -855,6 +1209,14 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a positive offset value if successful;
         otherwise 0.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -932,6 +1294,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -970,6 +1340,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1005,6 +1383,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1033,6 +1419,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a valid sign type if successful;
         otherwise <code>H5T_SGN_ERROR</code> (-1).
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1063,6 +1457,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1100,6 +1502,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1139,6 +1549,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1160,6 +1578,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns the bias if successful;
         otherwise 0.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1184,6 +1610,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1214,6 +1648,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a valid normalization type if successful;
         otherwise <code>H5T_NORM_ERROR</code> (-1).
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1247,6 +1689,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1278,6 +1728,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a valid padding type if successful;
         otherwise <code>H5T_PAD_ERROR</code> (-1).
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1314,6 +1772,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1340,6 +1806,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a valid character set type if successful;
         otherwise <code>H5T_CSET_ERROR</code> (-1).
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1372,6 +1846,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1400,6 +1882,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a valid string padding type if successful;
         otherwise <code>H5T_STR_ERROR</code> (-1).
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1434,6 +1924,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1441,7 +1939,7 @@ zero.
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetNmembers">H5Tget_nmembers</a>
 <dt><strong>Signature:</strong>
-    <dd><em>intn </em><code>H5Tget_nmembers</code>(<em>hid_t </em><code>type_id</code>
+    <dd><em>int </em><code>H5Tget_nmembers</code>(<em>hid_t </em><code>type_id</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Retrieves the number of fields in a compound datatype.
@@ -1455,6 +1953,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns number of members datatype has if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1484,7 +1990,54 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a valid pointer if successful;
         otherwise NULL.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetMemberOffset">H5Tget_member_offset</a>
+<dt><strong>Signature:</strong>
+    <dd><em>size_t</em> <code>H5Tget_member_offset</code>(<em>hid_t </em><code>type_id</code>,
+        <em>int</em> <code>memb_no</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the offset of a field of a compound datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_member_offset</code> retrieves the 
+        byte offset of the beginning of a field within a 
+        compound datatype with respect to the beginning 
+        of the compound data type datum. 
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type_id</code>
+            <dd>Identifier of datatype to query.
+        <dt><em>int</em> <code>memb_no</code>
+            <dd>Number of the field whose offset is requested.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the byte offset of the field if successful;
+        otherwise returns <code>0</code> (zero).
+        Note that zero is a valid offset and that this function 
+        will fail only if a call to <code>H5Tget_member_dims()</code> 
+        fails with the same arguments.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
 
 
 <hr>
@@ -1521,6 +2074,14 @@ zero.
     <dd>Returns the number of dimensions, a number from 0 to 4, 
         if successful.
         Otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1547,6 +2108,14 @@ zero.
     <dd>Returns the identifier of a copy of the datatype of the field
         if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1556,7 +2125,7 @@ zero.
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Tinsert</code>(<em>hid_t </em><code>type_id</code>,
         <em>const char *</em> <code>name</code>,
-        <em>off_t</em> <code>offset</code>,
+        <em>size_t</em> <code>offset</code>,
         <em>hid_t</em> <code>field_id</code>
     )
 <dt><strong>Purpose:</strong>
@@ -1569,16 +2138,15 @@ zero.
         in an instance of the compound datatype, and <code>field_id</code> 
         is the datatype identifier of the new member.
         <P>
-        Note: All members of a compound datatype must be atomic; a
-        compound datatype cannot have a member which is a compound 
-        datatype.
+        Note: Members of a compound datatype do not have to be atomic datatypes; 
+        a compound datatype can have a member which is a compound datatype.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
             <dd>Identifier of compound datatype to modify.
         <dt><em>const char *</em> <code>name</code>
             <dd>Name of the field to insert.
-        <dt><em>off_t</em> <code>offset</code>
+        <dt><em>size_t</em> <code>offset</code>
             <dd>Offset in memory structure of the field to insert.
         <dt><em>hid_t</em> <code>field_id</code>
             <dd>Datatype identifier of the field to insert.
@@ -1586,6 +2154,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1608,43 +2184,71 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Datatype-RegisterHard">H5Tregister_hard</a>
+<dt><strong>Name:</strong> <a name="Datatype-Register">H5Tregister</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Tregister_hard</code>(<em>const char
-        *</em> <code>name</code>, <em>hid_t </em><code>src_id</code>,
+    <dd><em>herr_t</em> <code>H5Tregister</code>(<em>H5T_pers_t</em> <code>pers</code>, 
+        <em>const char *</em> <code>name</code>, 
+        <em>hid_t </em><code>src_id</code>,
         <em>hid_t</em> <code>dst_id</code>,
         <em>H5T_conv_t</em> <code>func</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>Registers a hard conversion function.  
+    <dd>Registers a conversion function.
 <dt><strong>Description:</strong>
-    <dd><code>H5Tregister_hard</code> registers a hard conversion function for a datatype
-        conversion path.  The path is specified by the source and destination
-        datatypes <code>src_id</code> and <code>dst_id</code>.  A conversion
-        path can only have one hard function, so <code>func</code> replaces any
-        previous hard function.
+    <dd><code>H5Tregister</code> registers a hard or soft conversion function 
+        for a datatype conversion path.  
         <p>
-        If <code>func</code> is the null pointer then any hard function
-        registered for this path is removed from this path.  The soft functions
-        are then used when determining which conversion function is appropriate
-        for this path.  The <code>name</code> argument is used only
-        for debugging and should be a short identifier for the function.
+        The parameter <code>pers</code> indicates whether a conversion function 
+        is <code>HARD</code> or <code>SOFT</code>.
+        <p>
+        A conversion path can have only one hard function.
+        When <code>pers</code> is <code>HARD</code>, <code>func</code> replaces 
+        any previous hard function.
+        If  <code>pers</code> is <code>HARD</code> and <code>func</code> 
+        is the null pointer, then any hard function registered for this 
+        path is removed.  
+        <p>
+        When <code>pers</code> is <code>SOFT</code>, <code>H5Tregister</code> 
+        adds the function to the end of the master soft list and replaces 
+        the soft function in all applicable existing conversion paths. 
+        Soft functions are used when determining which conversion function 
+        is appropriate for this path.  
+        <p>
+        The <code>name</code> is used only for debugging and should be a 
+        short identifier for the function.  
+        <p>
+        The path is specified by the source and destination datatypes 
+        <code>src_id</code> and <code>dst_id</code>.  
+        For soft conversion functions, only the class of these types is important.
         <p>
         The type of the conversion function pointer is declared as:
-        <br>
-        <code>typedef</code> <em>herr_t </em>(<code>*H5T_conv_t</code>) (<em>hid_t </em><code>src_id</code>, 
+        <dl>
+        <dd><code>typedef</code> <em>herr_t </em>(<code>*H5T_conv_t</code>) 
+                   (<em>hid_t </em><code>src_id</code>, 
                     <em>hid_t </em><code>dst_id</code>, 
                     <em>H5T_cdata_t *</em><code>cdata</code>,
                     <em>size_t </em><code>nelmts</code>, 
                     <em>void *</em><code>buf</code>, 
-                    <em>void *</em><code>bkg)</code>;
+                    <em>void *</em><code>bkg</code>);
+        </dl>
 <dt><strong>Parameters:</strong>
     <dl>
+        <dt><em>H5T_pers_t</em> <code>pers</code>
+            <dd><code>HARD</code> for hard conversion functions;
+                <code>SOFT</code> for soft conversion functions.
         <dt><em>const char *</em> <code>name</code>
             <dd>Name displayed in diagnostic output.
         <dt><em>hid_t</em> <code>src_id</code>
@@ -1657,49 +2261,14 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-</dl>
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Datatype-RegisterSoft">H5Tregister_soft</a>
-<dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Tregister_soft</code>(<em>const char
-    *</em> <code>name</code>, <em>H5T_class_t </em><code>src_cls</code>,
-        <em>H5T_class_t</em> <code>dst_cls</code>,
-        <em>H5T_conv_t</em> <code>func</code>
-    )
-<dt><strong>Purpose:</strong>
-    <dd>Registers a soft conversion function.
-<dt><strong>Description:</strong>
-    <dd><code>H5Tregister_soft</code> registers a soft conversion function by adding it to the
-        end of the master soft list and replacing the soft function in all
-        applicable existing conversion paths.  The <code>name</code>
-        is used only for debugging and should be a short identifier
-        for the function.
-        <P>
-        The type of the conversion function pointer is declared as:
-        <br>
-        <code>typedef</code> <em>herr_t </em>(<code>*H5T_conv_t</code>) (<em>hid_t </em><code>src_id</code>, 
-                    <em>hid_t </em><code>dst_id</code>, 
-                    <em>H5T_cdata_t *</em><code>cdata</code>,
-                    <em>size_t </em><code>nelmts</code>, 
-                    <em>void *</em><code>buf</code>, 
-                    <em>void *</em><code>bkg)</code>;
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>const char *</em> <code>name</code>
-            <dd>Name displayed in diagnostic output.
-        <dt><em>H5T_class_t</em> <code>src_cls</code>
-            <dd>Identifier of source datatype class.
-        <dt><em>H5T_class_t</em> <code>dst_cls</code>
-            <dd>Identifier of destination datatype class.
-        <dt><em>H5T_conv_t</em> <code>func</code>
-            <dd>Function to convert between source and destination datatypes.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful;
-        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1714,14 +2283,8 @@ zero.
 <dt><strong>Description:</strong>
     <dd><code>H5Tunregister</code> removes a conversion function from all conversion paths.
         <P>
-        The type of the conversion function pointer is declared as:
-        <br>
-        <code>typedef</code> <em>herr_t </em>(<code>*H5T_conv_t</code>) (<em>hid_t </em><code>src_id</code>, 
-                    <em>hid_t </em><code>dst_id</code>, 
-                    <em>H5T_cdata_t *</em><code>cdata</code>,
-                    <em>size_t </em><code>nelmts</code>, 
-                    <em>void *</em><code>buf</code>, 
-                    <em>void *</em><code>bkg)</code>;
+        The conversion function pointer type declaration is described in 
+        <a href="#Datatype-Register">H5Tregister</a>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5T_conv_t</em> <code>func</code>
@@ -1730,6 +2293,288 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-EnumCreate">H5Tenum_create</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Tenum_create</code>(<em>hid_t</em> <code>parent_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Creates a new enumeration datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tenum_create</code> creates a new enumeration datatype 
+        based on the specified base datatype, <code>parent_id</code>, 
+        which must be an integer type.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>parent_id</code>
+            <dd>IN: Datatype identifier for the base datatype.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the datatype identifier for the new enumeration datatype if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-EnumInsert">H5Tenum_insert</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tenum_insert</code>(<em>hid_t</em> <code>type</code>,
+        <em>const char</em> *<code>name</code>,
+        <em>void</em> *<code>value</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Inserts a new enumeration datatype member.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tenum_insert</code> inserts a 
+        new enumeration datatype member into an enumeration datatype. 
+        <p>
+        <code>type</code> is the enumeration datatype, 
+        <code>name</code> is the name of the new member, and 
+        <code>value</code> points to the value of the new member.
+        <p>
+        <code>name</code> and <code>value</code> must both 
+        be unique within <code>type</code>. 
+        <p>
+        <code>value</code> points to data which is of the 
+        datatype defined when the enumeration datatype was created.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type</code>
+            <dd>IN: Datatype identifier for the enumeration datatype.
+        <dt><em>const char</em> *<code>name</code>
+            <dd>IN: Name of the new member.
+        <dt><em>void</em> *<code>value</code>
+            <dd>IN: Pointer to the value of the new member.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-EnumNameOf">H5Tenum_nameof</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tenum_nameof</code>(<em>hid_t</em> <code>type</code>
+        <em>void</em> *<code>value</code>,
+        <em>char</em> *<code>name</code>,
+        <em>size_t</em> <code>size</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the symbol name corresponding to a specified member of an enumeration datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tenum_nameof</code> finds the symbol name that 
+        corresponds to the specified <code>value</code>
+        of the enumeration datatype <code>type</code>. 
+        <p>
+        At most <code>size</code> characters of the symbol 
+        name are copied into the <code>name</code> buffer. 
+        If the entire symbol name and null terminator 
+        do not fit in the <code>name</code> buffer, then as 
+        many characters as possible are copied 
+        (not null terminated) and the function fails.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type</code>
+            <dd>IN: Enumeration datatype identifier.
+        <dt><em>void</em> *<code>value</code>,
+            <dd>IN: Value of the enumeration datatype.
+        <dt><em>char</em> *<code>name</code>,
+            <dd>OUT: Buffer for output of the symbol name.
+        <dt><em>size_t</em> <code>size</code>
+            <dd>IN: Anticipated size of the symbol name, in bytes (characters).
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value 
+        and, if <code>size</code> allows it, 
+        the first character of <code>name</code> is 
+        set to <code>NULL</code>.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-EnumValueOf">H5Tenum_valueof</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tenum_valueof</code>(<em>hid_t</em> <code>type</code>
+        <em>char</em> *<code>name</code>,
+        <em>void</em> *<code>value</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the value corresponding to a specified member of an enumeration datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tenum_valueof</code> finds the value that
+        corresponds to the specified <code>name</code>
+        of the enumeration datatype <code>type</code>. 
+        <p>
+        The <code>value</code> argument should be at least
+        as large as the value of <code>H5Tget_size(type)</code>
+        in order to hold the result.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type</code>
+            <dd>IN: Enumeration datatype identifier.
+        <dt><em>const char</em> *<code>name</code>,
+            <dd>IN: Symbol name of the enumeration datatype.
+        <dt><em>void</em> *<code>value</code>,
+            <dd>OUT: Buffer for output of the value of the enumeration datatype.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetMemberValue">H5Tget_member_value</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Tget_member_value</code>(<em>hid_t</em> <code>type</code>
+        <em>int</em> <code>memb_no</code>,
+        <em>void</em> *<code>value</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the value of an enumeration datatype member.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_member_value</code> returns the value of 
+        the enumeration datatype member <code>memb_no</code>.
+        <p>
+        The member value is returned in a user-supplied buffer 
+        pointed to by <code>value</code>.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type</code>
+            <dd>IN: Datatype identifier for the enumeration datatype.
+        <dt><em>int</em> <code>memb_no</code>,
+            <dd>IN: Number of the enumeration datatype member.
+        <dt><em>void</em> *<code>value</code>
+            <dd>OUT: Pointer to a buffer for output of the 
+                value of the enumeration datatype member.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetTag">H5Tset_tag</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tset_tag</code>(<em>hid_t</em> <code>type_id</code>
+        <em>const char</em> *<code>tag</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Tags an opaque datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tset_tag</code> tags an opaque datatype <code>type_id</code>
+        with a unique ASCII identifier <code>tag</code>.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type_id</code>
+            <dd>IN: Datatype identifier for the opaque datatype to be tagged.
+        <dt><em>const char</em> *<code>tag</code>
+            <dd>IN: Unique ASCII string with which the opaque datatype is to be tagged.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetTag">H5Tget_tag</a>
+<dt><strong>Signature:</strong>
+    <dd><em>char</em> *<code>H5Tget_tag</code>(<em>hid_t</em> <code>type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Gets the tag associated with an opaque datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_tag</code> returns the tag associated with 
+        the opaque datatype <code>type_id</code>.
+        <P>
+        The tag is returned via a pointer to an 
+        allocated string, which the caller must free.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type_id</code>
+            <dd>Datatype identifier for the opaque datatype.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a pointer to an allocated string if successful;
+        otherwise returns <code>NULL</code>.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1753,6 +2598,13 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5tclose_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -1796,7 +2648,7 @@ H5T&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  30 October 1998
+Last modified:  20 October 1999
 
 </body>
 </html>

@@ -52,25 +52,69 @@ These functions are designed to provide file-level access to HDF5 files.
 Further manipulation of objects inside a file is performed through one of APIs
 documented below.
 
+<p>
+<strong>The C Interfaces:</strong>
+
 <table border=0>
 <tr><td valign=top>
 <ul>
-    <li><a href="#File-Open">H5Fopen</a>
     <li><a href="#File-Create">H5Fcreate</a>
-    <li><a href="#File-IsHDF5">H5Fis_hdf5</a>
+    <li><a href="#File-Open">H5Fopen</a>
+    <li><a href="#File-Reopen">H5Freopen</a>
+    <li><a href="#File-Close">H5Fclose</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
     <li><a href="#File-Flush">H5Fflush</a>
-    <li><a href="#File-Close">H5Fclose</a>
+    <li><a href="#File-IsHDF5">H5Fis_hdf5</a>
     <li><a href="#File-Mount">H5Fmount</a>
     <li><a href="#File-Unmount">H5Funmount</a>
-    <li><a href="#File-Reopen">H5Freopen</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
     <li><a href="#File-GetCreatePlist">H5Fget_create_plist</a>
     <li><a href="#File-GetAccessPlist">H5Fget_access_plist</a>
+</ul>
+</td></tr>
+</table>
+
+<p>
+<strong>The FORTRAN90 Interfaces:</strong>
+
+<br>
+<font size=-1>
+<i>In general, each FORTRAN90 subroutine performs exactly the same task 
+as the corresponding C function.  The links below go to the C function 
+descriptions, which serve as general descriptions for both.  A button, 
+under <strong>Non-C API(s)</strong> at the end of the C function description,
+opens an external browser window displaying the FORTRAN90-specific 
+information.  You will probably want to adjust the size and location of 
+this external window so that both browser windows are visible and to 
+facilitate moving easily between them.</i>
+</font>
+
+<table border=0>
+<tr><td valign=top>
+<ul>
+    <li><a href="#File-Create">h5fcreate_f</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#File-Open">h5fopen_f</a>
+<!--<li><a href="#File-Reopen">h5freopen_f</a>                        -->
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#File-Close">h5fclose_f</a>
+<!--<li><a href="#File-Flush">h5fflush_f</a>                          -->
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#File-IsHDF5">h5fis_hdf5_f</a>
+<!--<li><a href="#File-Mount">h5fmount_f</a>                          -->
+<!--<li><a href="#File-Unmount">h5funmount_f</a>                      -->
+<!--<li><a href="#File-GetCreatePlist">h5fget_create_plist_f</a>      -->
+<!--<li><a href="#File-GetAccessPlist">h5fget_access_plist_f</a>      -->
 </ul>
 </td></tr>
 </table>
@@ -115,14 +159,36 @@ documented below.
         <dt><em>const char *</em><code>name</code>
             <dd>Name of the file to access.
         <dt><em>unsigned</em> <code>flags</code>
-            <dd>File access flags.  See the <code>H5Fcreate</code>
-                parameters list for a list of possible values.
+            <dd>File access flags.  Allowable values include:
+                <ul><dl>
+                    <dt>H5F_ACC_RDWR
+                        <dd>Allow read and write access to file.
+                    <dt>H5F_ACC_RDONLY
+                        <dd>Allow read-only access to file.
+                    <dt>H5F_ACC_DEBUG
+                        <dd>Print debug information.
+                            (Used only by HDF5 library developers.
+                             Do not use this flag in applications.)
+                </dl></ul>
+                <code>H5F_ACC_RDWR</code> and <code>H5F_ACC_RDONLY</code> 
+                are mutually exclusive; use exactly one.
         <dt><em>hid_t</em> <code>access_id</code>
             <dd>Identifier for the file access properties list.
+                If parallel file access is desired, this is a collective
+                call according to the communicator stored in the
+                <code>access_id</code>. 
+                Use <code>H5P_DEFAULT</code> for default file access properties.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a file identifier if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5fopen_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -158,12 +224,8 @@ documented below.
         <dt><em>const char *</em><code>name</code>
             <dd>Name of the file to access.
         <dt><em>uintn</em> <code>flags</code>
-            <dd>File access flags.  Possible values include:
+            <dd>File access flags.  Allowable values include:
                 <ul><dl>
-                    <dt>H5F_ACC_RDWR
-                        <dd>Allow read and write access to file.
-                    <dt>H5F_ACC_RDONLY
-                        <dd>Allow read-only access to file.
                     <dt>H5F_ACC_TRUNC
                         <dd>Truncate file, if it already exists,  
                             erasing all data previously stored in the file.
@@ -171,22 +233,32 @@ documented below.
                         <dd>Fail if file already exists.
                     <dt>H5F_ACC_DEBUG
                         <dd>Print debug information.
-                    <dt>H5P_DEFAULT
-                        <dd>Apply default file access and creation properties.
+                            (Used only by HDF5 library developers.
+                             Do not use this flag in applications.)
                 </dl></ul>
+                <code>H5F_ACC_TRUNC</code> and <code>H5F_ACC_EXCL</code> 
+                are mutually exclusive; use exactly one.
         <dt><em>hid_t</em> <code>create_id</code>
             <dd>File creation property list identifier, used when modifying
                 default file meta-data.
+                Use <code>H5P_DEFAULT</code> for default file creation properties.
         <dt><em>hid_t</em> <code>access_id</code>
             <dd>File access property list identifier.
                 If parallel file access is desired, this is a collective
                 call according to the communicator stored in the
                 <code>access_id</code>. 
-                Use <code>0</code> for default access properties.
+                Use <code>H5P_DEFAULT</code> for default file access properties.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a file identifier if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5fcreate_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -222,7 +294,7 @@ documented below.
         </center>       
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>const char *</em><code>object_id</code>
+        <dt><em>hid_t </em><code>object_id</code>
             <dd>Identifier of object used to identify the file.
         <dt><em>H5F_scope_t</em> <code>scope</code>
             <dd>Specifies the scope of the flushing action.
@@ -230,6 +302,14 @@ documented below.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5fflush_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -237,7 +317,7 @@ documented below.
 <dl>
 <dt><strong>Name:</strong> <a name="File-IsHDF5">H5Fis_hdf5</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hbool_t </em><code>H5Fis_hdf5</code>(<em>const char *</em><code>name</code>
+    <dd><em>htri_t </em><code>H5Fis_hdf5</code>(<em>const char *</em><code>name</code>
         )
 <dt><strong>Purpose:</strong>
         <dd>Determines whether a file is in the HDF5 format.
@@ -250,8 +330,16 @@ documented below.
             <dd>File name to check format.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns <code>TRUE</code> or <code>FALSE</code> if successful.
+    <dd>When successful, returns a positive value, for <code>TRUE</code>,
+        or <code>0</code> (zero), for <code>FALSE</code>.
         Otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5fis_hdf5_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -284,6 +372,14 @@ documented below.
 <dt><strong>Returns:</strong>
     <dd>Returns a file creation property list identifier if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5fget_create_plist_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -313,6 +409,14 @@ documented below.
 <dt><strong>Returns:</strong>
     <dd>Returns a file access property list identifier if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5fget_access_plist_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -337,6 +441,13 @@ documented below.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5fclose_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -357,8 +468,8 @@ documented below.
             <code>loc_id</code> and <code>name</code> using 
             the mount properties <code>plist_id</code>.
             <p>
-            Note that <code>loc_id</code> identifies a file or group.
-            <code>name</code> then specifies a group relative to <code>loc_id</code>.
+            Note that <code>loc_id</code> is either a file or group identifier
+            and <code>name</code> is relative to <code>loc_id</code>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
@@ -376,6 +487,14 @@ documented below.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5fmount_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -394,23 +513,34 @@ documented below.
             from the file mounted there.  This function
             does  not close either file.
             <p> 
-            The mount point can either be the group in the
+            The mount point can be either the group in the
             parent or the root group of the mounted file 
             (both groups have the same name).  If the mount 
             point was opened before the mount then it is the 
             group in the parent; if it was opened after the 
             mount then it is the root group of the child.
+            <p>
+            Note that <code>loc_id</code> is either a file or group identifier
+            and <code>name</code> is relative to <code>loc_id</code>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
             <dd>The file or group identifier for the location at which
                 the specified file is to be unmounted.
         <dt><em>const char *</em><code>name</code>
-            <dd>The name of the file to be unmounted.
+            <dd>The name of the mount point.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5funmount_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -423,7 +553,7 @@ documented below.
 <dt><strong>Purpose:</strong>
         <dd>Reopens an HDF5 file.
 <dt><strong>Description:</strong>
-        <dd><code>H5Freopen</code> reopens an HDF5 file.  The new 
+            <code>H5Freopen</code> reopens an HDF5 file.  The new 
             file identifier which is returned points to the same file 
             as the specified file idetifier, <code>file_id</code>.  
             Both identifiers share caches and other information.  
@@ -438,6 +568,14 @@ documented below.
 <dt><strong>Returns:</strong>
     <dd>Returns a new file identifier if successful;
         otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5freopen_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
@@ -481,7 +619,7 @@ H5F&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  30 October 1998
+Last modified:  20 October 1999
 
 </body>
 </html>

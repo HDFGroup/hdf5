@@ -7,33 +7,45 @@
 top_srcdir=@top_srcdir@
 top_builddir=../..
 srcdir=@srcdir@
+VPATH=.:@srcdir@
 @COMMENCE@
 
 # Subdirectories in build-order (not including `examples')
 SUBDIRS=Tutor
 DOCDIR=$(docdir)/hdf5
 
+TRACE=perl $(top_srcdir)/bin/trace
+
+# Add `-I.' to the C preprocessor flags.
+CPPFLAGS=-I. -I@srcdir@ @CPPFLAGS@
+
+# Temporary files
+MOSTLYCLEAN=
+
 # Public doc files (to be installed)...
-PUB_DOCS=Attributes.html Big.html Caching.html Chunking.html Chunk_f1.gif \
+PUB_DOCS= Attributes.html Big.html Caching.html Chunking.html Chunk_f1.gif \
 	Chunk_f2.gif Chunk_f3.gif Chunk_f4.gif Chunk_f5.gif Chunk_f6.gif \
 	Coding.html Copyright.html Datasets.html Dataspaces.html \
 	Datatypes.html ddl.html Debugging.html EnumMap.gif Environment.html \
-	Errors.html Files.html Filters.html Glossary.html Groups.html \
-	H5.api_map.html H5.format.html H5.intro.html H5.sample_code.html \
-	H5.user.html H5.user.PrintGen.html H5.user.PrintTpg.html IH_map1.gif \
-	IH_map2.gif IH_map3.gif IH_map4.gif IH_mapFoot.gif IH_mapHead.gif \
-	IOPipe.html NCSAfooterlogo.gif Properties.html Ragged.html \
-	References.html RM_H5.html RM_H5A.html RM_H5D.html RM_H5E.html \
-	RM_H5F.html RM_H5Front.html RM_H5G.html RM_H5I.html RM_H5P.html \
-	RM_H5R.html RM_H5RA.html RM_H5S.html RM_H5T.html RM_H5Z.html \
-	Tools.html Version.html chunk1.gif compat.html dataset_p1.gif \
-	dataset_p1.obj extern1.gif extern2.gif group_p1.gif group_p2.gif \
-	group_p3.gif h5s.examples hdf2.jpg ph5design.html ph5example.c \
-	ph5implement.txt pipe1.gif pipe2.gif pipe3.gif pipe4.gif pipe5.gif \
-	index.html version.gif
+	Errors.html FF-IH_FileGroup.gif FF-IH_FileObject.gif Files.html \
+	Filters.html FF-IH_FileGroup.gif FF-IH_FileObject.gif Glossary.html \
+	Groups.html H5.api_map.html H5.format.html H5.intro.html \
+	H5.sample_code.html H5.user.html H5.user.PrintGen.html \
+	H5.user.PrintTpg.html IH_map1.gif IH_map2.gif IH_map3.gif IH_map4.gif \
+	IH_mapFoot.gif IH_mapHead.gif IOPipe.html MountingFiles.html \
+	NCSAfooterlogo.gif PaletteExample1.gif Palettes.fm.anc.gif \
+	Palettes.html Performance.html Properties.html Ragged.html 
+	References.html RM_H5.html \
+	RM_H5A.html RM_H5D.html RM_H5E.html RM_H5F.html RM_H5Front.html \
+	RM_H5G.html RM_H5I.html RM_H5P.html RM_H5R.html RM_H5RA.html \
+	RM_H5S.html RM_H5T.html RM_H5Z.html Tools.html Version.html chunk1.gif \
+	compat.html dataset_p1.gif dataset_p1.obj extern1.gif extern2.gif \
+	group_p1.gif group_p2.gif group_p3.gif h5s.examples hdf2.jpg \
+	ph5design.html ph5example.c ph5implement.txt pipe1.gif pipe2.gif \
+	pipe3.gif pipe4.gif pipe5.gif index.html version.gif
 
 # Other doc files (not to be installed)...
-PRIVATE_DOCS=Chunk_f1.obj Chunk_f2.obj Chunk_f6.obj CodeReview.html \
+PRIVATE_DOCS= Chunk_f1.obj Chunk_f2.obj Chunk_f6.obj CodeReview.html \
 	ExternalFiles.html MemoryManagement.html ObjectHeader.txt chunk1.obj \
 	extern1.obj extern2.obj group_p1.obj group_p2.obj group_p3.obj \
 	pipe1.obj pipe2.obj pipe3.obj pipe4.obj pipe5.obj heap.txt move.html \

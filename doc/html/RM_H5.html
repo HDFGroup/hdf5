@@ -162,11 +162,11 @@ and it users.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>unsigned *</em><code>majnum</code>
-            <dd>The major version of the library.
+            <dd>OUT: The major version of the library.
         <dt><em>unsigned *</em><code>minnum</code>
-            <dd>The minor version of the library.
+            <dd>OUT: The minor version of the library.
         <dt><em>unsigned *</em><code>relnum</code>
-            <dd>The release number of the library.
+            <dd>OUT: The release number of the library.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -187,22 +187,24 @@ and it users.
 <dt><strong>Description:</strong>
     <dd><code>H5check_version</code> verifies that the arguments match the 
         version numbers compiled into the library.  This function is intended 
-        to be called from user to verify that the versions of header files 
-        compiled into the application match the version of the HDF5 library.  
+        to be called by the user to verify that the version of the header files 
+        compiled into the application match the version of the HDF5 library being used.
         <p>
         Due to the risks of data corruption or segmentation faults, 
         <code>H5check_version</code> causes the application to abort if the
         version numbers do not match.
+        <p>
+        If the version numbers of the library do not match 
+	the version numbers in the header files being checked, the library calls the
+        standard C function <code>abort()</code>.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>unsigned *</em><code>majnum</code>
-            <dd>The major version of the library.
-        <dt><em>unsigned *</em><code>minnum</code>
-            <dd>The minor version of the library.
-        <dt><em>unsigned *</em><code>relnum</code>
-            <dd>The release number of the library.
-        <dt><em>unsigned *</em><code>patnum</code>
-            <dd>The patch number of the library.
+        <dt><em>unsigned </em><code>majnum</code>
+            <dd>IN: The major version of the library.
+        <dt><em>unsigned </em><code>minnum</code>
+            <dd>IN: The minor version of the library.
+        <dt><em>unsigned </em><code>relnum</code>
+            <dd>IN: The release number of the library.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
 <head>
-<title>References</title>
+<title>Reference (H5R) and Identifier Interfaces (H5I)</title>
 </head>
 
 <body bgcolor="#FFFFFF">
@@ -20,47 +20,31 @@
 </td>
 <td valign=top align=right>
    And in this document, the 
-   <a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
-      <a href="Files.html">Files</a>&nbsp;&nbsp;
+   <a href="H5.user.html"><strong>HDF5 User's Guide:</strong></a>&nbsp;&nbsp;&nbsp;&nbsp;
       <br>
+      <a href="Files.html">Files</a>&nbsp;&nbsp;
       <a href="Datasets.html">Datasets</a>&nbsp;&nbsp;
-      <a href="Datatypes.html">Data Types</a>&nbsp;&nbsp;
+      <a href="Datatypes.html">Datatypes</a>&nbsp;&nbsp;
       <a href="Dataspaces.html">Dataspaces</a>&nbsp;&nbsp;
       <a href="Groups.html">Groups</a>&nbsp;&nbsp;
-      References&nbsp;&nbsp;
       <br>
+      References&nbsp;&nbsp;
       <a href="Attributes.html">Attributes</a>&nbsp;&nbsp;
       <a href="Properties.html">Property Lists</a>&nbsp;&nbsp;
       <a href="Errors.html">Error Handling</a>&nbsp;&nbsp;
-      <a href="Filters.html">Filters</a>&nbsp;&nbsp;
-      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
       <br>
-      <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
-      <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
-      <a href="Environment.html">Environment</a>&nbsp;&nbsp;
-      <a href="ddl.html">DDL</a>&nbsp;&nbsp;
-      <a href="Ragged.html">Ragged Arrays</a>&nbsp;&nbsp;
-<!--
-<hr>
-And in this document, the 
-<a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
-      <a href="Attributes.html">H5A</a>&nbsp;&nbsp;
-      <a href="Datasets.html">H5D</a>&nbsp;&nbsp;
-      <a href="Errors.html">H5E</a>&nbsp;&nbsp;
-      <a href="Files.html">H5F</a>&nbsp;&nbsp;
-      <a href="Groups.html">H5G</a>&nbsp;&nbsp;
-      <a href="Properties.html">H5P</a>&nbsp;&nbsp;
-      <a href="References.html">H5R & H5I</a>&nbsp;&nbsp;
-      <a href="Ragged.html">H5RA</a>&nbsp;&nbsp;
-      <a href="Dataspaces.html">H5S</a>&nbsp;&nbsp;
-      <a href="Datatypes.html">H5T</a>&nbsp;&nbsp;
-      <a href="Filters.html">H5Z</a>&nbsp;&nbsp;
+      <a href="Filters.html">Filters</a>&nbsp;&nbsp;
+      <a href="Palettes.html">Palettes</a>&nbsp;&nbsp;
       <a href="Caching.html">Caching</a>&nbsp;&nbsp;
       <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
+      <a href="MountingFiles.html">Mounting Files</a>&nbsp;&nbsp;
+      <br>
+      <a href="Performance.html">Performance</a>&nbsp;&nbsp;
       <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
       <a href="Environment.html">Environment</a>&nbsp;&nbsp;
       <a href="ddl.html">DDL</a>&nbsp;&nbsp;
--->
+      <br>
+      <a href="Ragged.html">Ragged Arrays</a>&nbsp;&nbsp;
 </td></tr>
 </table>
 </center>
@@ -206,7 +190,7 @@ The H5I function is also useful outside the context of references.
         <tr><td><code>H5I_GROUP</code></td>
             <td>Group objects</td></tr>
         <tr><td><code>H5I_DATATYPE</code></td>
-            <td>Data type objects</td></tr>
+            <td>Datatype objects</td></tr>
         <tr><td><code>H5I_DATASPACE</code></td>
             <td>Dataspace objects</td></tr>
         <tr><td><code>H5I_DATASET</code></td>
@@ -219,7 +203,7 @@ The H5I function is also useful outside the context of references.
         This function was inspired by the need of users to figure 
         out which type of object closing function 
         (<code>H5Dclose</code>, <code>H5Gclose</code>, etc.) 
-        to call after a call to <code>H5Ddereference</code>, 
+        to call after a call to <code>H5Rdereference</code>, 
         but it is also of general use.
         <p>
 </dl>
@@ -494,7 +478,7 @@ Notes:
 <h2>Comments</h2>
 <pre>
     Reference types are atomic types and may be included as fields in compound
-        data types.
+        datatypes.
 
     There are (at least) three levels of reference strength:
         Weak - We allow the user to store any type of reference in an array
@@ -502,14 +486,14 @@ Notes:
             could be a mix of Object, Dataset Region and Internal references)
         Medium - We force the user to stick with a particular type of
             reference within a dataset, but the datasets pointed to (with
-            Object and Dataset Region references) may be of any data type
+            Object and Dataset Region references) may be of any datatype
             or dataspace.
         Strong - We force the user to stick with a particular type of
             reference and Object and Dataset Region references must point to
-            datasets with the same data type.
+            datasets with the same datatype.
         Extra Strong - We force the user to stick with a particular type of
             reference and Object and Dataset Region references must point to
-            datasets with the same data type _and_ dataspace.
+            datasets with the same datatype <i>and</i> dataspace.
 
     The library is currently implemented with "medium" strength references.
 </pre>
@@ -622,47 +606,31 @@ Notes:
 </td>
 <td valign=top align=right>
    And in this document, the 
-   <a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
-      <a href="Files.html">Files</a>&nbsp;&nbsp;
+   <a href="H5.user.html"><strong>HDF5 User's Guide:</strong></a>&nbsp;&nbsp;&nbsp;&nbsp;
       <br>
+      <a href="Files.html">Files</a>&nbsp;&nbsp;
       <a href="Datasets.html">Datasets</a>&nbsp;&nbsp;
-      <a href="Datatypes.html">Data Types</a>&nbsp;&nbsp;
+      <a href="Datatypes.html">Datatypes</a>&nbsp;&nbsp;
       <a href="Dataspaces.html">Dataspaces</a>&nbsp;&nbsp;
       <a href="Groups.html">Groups</a>&nbsp;&nbsp;
-      References&nbsp;&nbsp;
       <br>
+      References&nbsp;&nbsp;
       <a href="Attributes.html">Attributes</a>&nbsp;&nbsp;
       <a href="Properties.html">Property Lists</a>&nbsp;&nbsp;
       <a href="Errors.html">Error Handling</a>&nbsp;&nbsp;
-      <a href="Filters.html">Filters</a>&nbsp;&nbsp;
-      <a href="Caching.html">Caching</a>&nbsp;&nbsp;
       <br>
-      <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
-      <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
-      <a href="Environment.html">Environment</a>&nbsp;&nbsp;
-      <a href="ddl.html">DDL</a>&nbsp;&nbsp;
-      <a href="Ragged.html">Ragged Arrays</a>&nbsp;&nbsp;
-<!--
-<hr>
-And in this document, the 
-<a href="H5.user.html">HDF5 User's Guide</a>:&nbsp;&nbsp;&nbsp;&nbsp;
-      <a href="Attributes.html">H5A</a>&nbsp;&nbsp;
-      <a href="Datasets.html">H5D</a>&nbsp;&nbsp;
-      <a href="Errors.html">H5E</a>&nbsp;&nbsp;
-      <a href="Files.html">H5F</a>&nbsp;&nbsp;
-      <a href="Groups.html">H5G</a>&nbsp;&nbsp;
-      <a href="Properties.html">H5P</a>&nbsp;&nbsp;
-      <a href="References.html">H5R & H5I</a>&nbsp;&nbsp;
-      <a href="Ragged.html">H5RA</a>&nbsp;&nbsp;
-      <a href="Dataspaces.html">H5S</a>&nbsp;&nbsp;
-      <a href="Datatypes.html">H5T</a>&nbsp;&nbsp;
-      <a href="Filters.html">H5Z</a>&nbsp;&nbsp;
+      <a href="Filters.html">Filters</a>&nbsp;&nbsp;
+      <a href="Palettes.html">Palettes</a>&nbsp;&nbsp;
       <a href="Caching.html">Caching</a>&nbsp;&nbsp;
       <a href="Chunking.html">Chunking</a>&nbsp;&nbsp;
+      <a href="MountingFiles.html">Mounting Files</a>&nbsp;&nbsp;
+      <br>
+      <a href="Performance.html">Performance</a>&nbsp;&nbsp;
       <a href="Debugging.html">Debugging</a>&nbsp;&nbsp;
       <a href="Environment.html">Environment</a>&nbsp;&nbsp;
       <a href="ddl.html">DDL</a>&nbsp;&nbsp;
--->
+      <br>
+      <a href="Ragged.html">Ragged Arrays</a>&nbsp;&nbsp;
 </td></tr>
 </table>
 </center>
@@ -673,7 +641,7 @@ And in this document, the
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
 </address>
 
-Last modified:  30 October 1998
+Last modified:  14 October 1999
 
   </body>
 </html>

@@ -49,6 +49,28 @@ HDF5 Reference Manual&nbsp;&nbsp;
 The HDF5 library provides several interfaces, each of which provides the 
 tools required to meet specific aspects of the HDF5 data-handling requirements.
 
+<p>
+<i><strong>A note regarding the prototype FORTRAN90 APIs:</strong><br>
+This version of the </i>HDF5 Reference Manual<i> includes a description
+of a partial FORTRAN90 <strong>prototype</strong> API to HDF5.
+Prototype Fortran subroutines exist in the H5A, H5D, H5F, H5G, H5P, H5S, and H5T
+interfaces and are described on those pages.
+<p>  
+In general, each Fortran subroutine performs exactly the same task 
+as the corresponding C function.  The links at the top of each reference manual 
+section go to the C function descriptions, which serve as general descriptions 
+for both the C and Fortran APIs.  A button, 
+under <strong>Non-C API(s)</strong> at the end of the C function description,
+opens an external browser window displaying the Fortran-specific 
+information.  You will probably want to adjust the size and location of 
+this external window so that both browser windows are visible and to 
+facilitate moving easily between them.
+<p>
+See <a href="README_Fortran90.html" target="FortranWin">README_Fortran90.html</a>,
+a copy of the README file in the Fortran prototype source code directory, 
+for more detailed notes regarding the prototype API.  </i>
+<p>
+
 <center>
 <table border=0>
 
@@ -104,7 +126,7 @@ tools required to meet specific aspects of the HDF5 data-handling requirements.
 </table>
 </center>
 
-
+<br><br>
 
 <hr>
 <center>
