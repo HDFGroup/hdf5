@@ -75,7 +75,7 @@ TEST() {
       echo "*FAILED*"
       echo "    Expected result differs from actual result"
       nerrors="`expr $nerrors + 1`"
-      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+      test yes = "$verbose" && $DIFF $expect1 $actual |sed 's/^/    /'
    fi
 
    # Clean up output file
