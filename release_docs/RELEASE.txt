@@ -140,6 +140,13 @@ Documentation
 
     Windows installation documentation
     ----------------------------------
+    1. On Windows zlib has been updated to 1.2.2. You may find the binary at
+       either http://www.zlib.net/zlib122-dll.zip or
+              ftp://hdf.ncsa.uiuc.edu/lib-external/zlib/bin/windows
+
+    2. Only DLL of external libraries(zlib and szip) are linked with HDF5
+       library. We will no longer provide binary to link static library with
+       HDF5. For details, please check INSTALL_Windows under this directory.
         
 
 
