@@ -305,7 +305,7 @@ static intn interface_initialize_g = 0;
 	if (d_mv) priv->d_aligned += nelmts;				      \
 	for (elmtno=0; elmtno<nelmts; elmtno++, DIR src,  DIR dst) {	      \
 	    if (s_mv) {							      \
-		HDmemcpy(&aligned, src, sizeof(ST));			      \
+		HDmemmove(&aligned, src, sizeof(ST));			      \
 		s = (ST*)&aligned;					      \
 	    } else {							      \
 		s = src;						      \
