@@ -37,29 +37,24 @@ TFLOPS
 Follow the instuctions in INSTALL_TFLOPS.
 
 -------
-IBM SP2
+IBM SP
 -------
 
 First of all, make sure your environment variables are set correctly
-to compile and execute a single process mpi applications for the SP2
-machine. They should be similar to the following:
+to compile and execute a single process mpi applications for the SP
+machine. Unfortunately, the setting varies from machine to machine.
+E.g., the following works for the Blue machine of LLNL.
 
-    setenv CC              mpcc_r
-    setenv MP_PROCS         1
-    setenv MP_NODES         1
-    setenv MP_LABELIO       no
-    setenv MP_RMPOOL        0
-    setenv RUNPARALLEL      "MP_PROCS=2 MP_TASKS_PER_NODE=2 poe"
-    setenv LLNL_COMPILE_SINGLE_THREADED TRUE
+    setenv CC           mpcc_r
+    setenv F9X		mpxlf_r		# if parallel Fortran API is wanted
+    setenv MP_PROCS     1
+    setenv MP_NODES     1
+    setenv MP_LABELIO   no
+    setenv MP_RMPOOL    0
+    setenv RUNPARALLEL  "MP_PROCS=2 MP_TASKS_PER_NODE=2 poe"
 
 The shared library configuration for this version is broken. So, only
 static library is supported.
-
-An error for powerpc-ibm-aix4.3.2.0's (LLNL Blue) install method was
-discovered after the code freeze. You need to remove the following line
-from config/powerpc-ibm-aix4.3.2.0 before configuration:
-
-    ac_cv_path_install=${ac_cv_path_install='cp -r'}
 
 Then do the following steps:
 
@@ -81,10 +76,26 @@ RUNPARALLEL="mpirun -np 3"
 export RUNPARALLEL
 LIBS="-lmpi"
 export LIBS
-./configure --enable-parallel --disable-shared --prefix=$PWD/installdir
+./configure --enable-parallel --prefix=$PWD/installdir
 make
 make check
 make install
+
+
+***Known problem***
+Some O2K system may encounter an error during make.
+    ld32: FATAL 9: I/O error (-lmpi): No such file or directory
+
+This is because libtool tries too hard to locate the loader 'ld'
+but ends up with one that does not know where to find the right
+version of libmpi.a for the particular ABI requested.
+The fix is to edit the file 'libtool' at the top of the build directory.
+Search for a string that looks like the following:
+    LD="/opt/MIPSpro/MIPSpro_default/opt/MIPSpro/bin/ld -n32"
+
+Replace it with something that knows how to find the right libmpi.a.
+E.g.,
+    LD="/opt/MIPSpro/MIPSpro_default/opt/MIPSpro/bin/cc -n32"
 
 
 ---------------
@@ -112,7 +123,7 @@ export RUNPARALLEL
 LIBS="-lmpio -lmpi"
 export LIBS
 
-./configure --enable-parallel --disable-shared --prefix=$PWD/installdir
+./configure --enable-parallel --prefix=$PWD/installdir
 make
 make check
 make install

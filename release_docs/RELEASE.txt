@@ -218,7 +218,6 @@ Supported Configuration Features Summary
     Platform       C  C         F90  F90       C++   Shared     zlib  Tools
                       parallel       parallel        libraries
                                                      (5)
-    Solaris2.6     y  n         y    n         y     y          y     y
     Solaris2.7     y  y (1)     y    n         y     y          y     y
     Solaris2.8 64  y  n         n    n         y     y          y     y
     Solaris2.8 32  y  n         y    n         y     y          y     y
@@ -246,14 +245,13 @@ Supported Configuration Features Summary
 
     Platform       1.2            static-   Thread-  SRB  GASS	STREAM-
                    compatibility  exec      safe                VFD
-    Solaris2.6     n              x         n        n    n     y
     Solaris2.7     n              x         y        n    n     y
     Solaris2.8 64  n              y         n        n    n     y
     Solaris2.8 32  n              x         n        n    n     y
     IA-64          n              n         n        n    n     y   
     IRIX6.5        n              x         y        n    n     y
-    IRIX64_6.5 64  n              x         n        n    n     y
-    IRIX64_6.5 32  n              x         n        n    n     y
+    IRIX64_6.5 64  n              x         y        n    y     y
+    IRIX64_6.5 32  n              x         y        n    y     y
     HPUX10.20      n              y         n        n    n     y
     HPUX11.00      n              x         n        n    n     y
     HPUX11 SysV    n              x         n        n    n     y
