@@ -24,10 +24,13 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5S_mpio_mask
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* Files				*/
-#include "H5FDmpio.h"		/* MPIO file driver			*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Pprivate.h"         /* Property lists                       */
@@ -36,7 +39,6 @@
 #ifdef H5_HAVE_PARALLEL
 
 /* Interface initialization */
-#define PABLO_MASK      H5Sall_mask
 #define INTERFACE_INIT  NULL
 static int             interface_initialize_g = 0;
 
@@ -682,7 +684,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5D_t *dset, size_t elmt_size,
      * Pass buf type, file type to the file driver. Request an MPI type
      * transfer (instead of an elementary byteblock transfer).
      */
-    if(H5FD_mpio_setup(dxpl_id, mpi_buf_type, mpi_file_type)<0)
+    if(H5FD_mpi_setup_collective(dxpl_id, mpi_buf_type, mpi_file_type)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O properties");
     plist_is_setup=1;
 
@@ -701,7 +703,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5D_t *dset, size_t elmt_size,
 done:
     /* Reset the dxpl settings */
     if(plist_is_setup) {
-        if(H5FD_mpio_teardown(dxpl_id)<0)
+        if(H5FD_mpi_teardown_collective(dxpl_id)<0)
     	    HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to reset dxpl values");
     } /* end if */
 
@@ -826,9 +828,13 @@ H5S_mpio_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const un
     assert(mem_space);
     assert(file_space);
 
+    /* Parallel I/O conversion flag must be set, if it is not collective IO, go to false. */
+    if(!(flags&H5S_CONV_PAR_IO_POSSIBLE))
+        HGOTO_DONE(FALSE);
+
     /* Check whether these are both simple or scalar dataspaces */
     if (!((H5S_SIMPLE==H5S_GET_EXTENT_TYPE(mem_space) || H5S_SCALAR==H5S_GET_EXTENT_TYPE(mem_space))
-         && (H5S_SIMPLE==H5S_GET_EXTENT_TYPE(file_space) || H5S_SCALAR==H5S_GET_EXTENT_TYPE(file_space))))
+            && (H5S_SIMPLE==H5S_GET_EXTENT_TYPE(file_space) || H5S_SCALAR==H5S_GET_EXTENT_TYPE(file_space))))
         HGOTO_DONE(FALSE);
 
     /* Check whether both selections are "regular" */
@@ -845,10 +851,6 @@ H5S_mpio_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const un
 
     /* Dataset storage must be contiguous currently */
     if ((flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CONTIGUOUS)
-        HGOTO_DONE(FALSE);
-
-    /* Parallel I/O conversion flag must be set */
-    if(!(flags&H5S_CONV_PAR_IO_POSSIBLE))
         HGOTO_DONE(FALSE);
 
 done:

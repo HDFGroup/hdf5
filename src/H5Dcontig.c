@@ -40,11 +40,6 @@
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 
-/* MPIO, MPIPOSIX, & FPHDF5 drivers needed for special checks */
-#include "H5FDfphdf5.h"
-#include "H5FDmpio.h"
-#include "H5FDmpiposix.h"
-
 /* Private prototypes */
 static herr_t H5D_contig_write(H5F_t *f, hid_t dxpl_id, H5D_t *dset,
     hsize_t offset, size_t size, const void *buf);

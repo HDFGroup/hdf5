@@ -16,9 +16,11 @@ h5debug.lo: \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5RCprivate.h \
    $(top_srcdir)/src/H5Dprivate.h \
    $(top_srcdir)/src/H5Dpublic.h \
-   $(top_srcdir)/src/H5FDfphdf5.h \
+   $(top_srcdir)/src/H5FDprivate.h \
+   $(top_srcdir)/src/H5FDmpi.h \
    $(top_srcdir)/src/H5FDmpio.h \
    $(top_srcdir)/src/H5FDmpiposix.h \
    $(top_srcdir)/src/H5Oprivate.h \
@@ -52,8 +54,8 @@ h5repart.lo: \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
-   $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5ACpublic.h \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
@@ -72,10 +74,10 @@ h5repart.lo: \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
    $(top_srcdir)/src/H5FDfamily.h \
-   $(top_srcdir)/src/H5FDfphdf5.h \
-   $(top_srcdir)/src/H5FDmpio.h \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDlog.h \
+   $(top_srcdir)/src/H5FDmpi.h \
+   $(top_srcdir)/src/H5FDmpio.h \
    $(top_srcdir)/src/H5FDmpiposix.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5FDsec2.h \
@@ -90,8 +92,8 @@ pdb2hdf.lo: \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
-   $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
+   $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5ACpublic.h \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
@@ -110,10 +112,10 @@ pdb2hdf.lo: \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
    $(top_srcdir)/src/H5FDfamily.h \
-   $(top_srcdir)/src/H5FDfphdf5.h \
-   $(top_srcdir)/src/H5FDmpio.h \
    $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDlog.h \
+   $(top_srcdir)/src/H5FDmpi.h \
+   $(top_srcdir)/src/H5FDmpio.h \
    $(top_srcdir)/src/H5FDmpiposix.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5FDsec2.h \

@@ -20,14 +20,19 @@
  *		only the HDF5 public API. This driver is useful for fast
  *		access to small, temporary hdf5 files.
  */
-#include "H5private.h"		/*library functions			*/
-#include "H5Eprivate.h"		/*error handling			*/
-#include "H5Fprivate.h"		/*files					*/
-#include "H5FDprivate.h"	/*file driver				  */
-#include "H5FDcore.h"           /* Core file driver */
-#include "H5Iprivate.h"		/*object IDs				  */
-#include "H5MMprivate.h"        /* Memory allocation */
-#include "H5Pprivate.h"		/*property lists			*/
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5FD_core_mask
+
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"		/* File access				*/
+#include "H5FDprivate.h"	/* File drivers				*/
+#include "H5FDcore.h"           /* Core file driver			*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Pprivate.h"		/* Property lists			*/
 
 #undef MAX
 #define MAX(X,Y)	((X)>(Y)?(X):(Y))
@@ -134,9 +139,30 @@ static const H5FD_class_t H5FD_core_g = {
 };
 
 /* Interface initialization */
-#define PABLO_MASK	H5FD_core_mask
-#define INTERFACE_INIT	H5FD_core_init
+#define INTERFACE_INIT	H5FD_core_init_interface
 static int interface_initialize_g = 0;
+
+
+/*--------------------------------------------------------------------------
+NAME
+   H5FD_core_init_interface -- Initialize interface-specific information
+USAGE
+    herr_t H5FD_core_init_interface()
+   
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.  (Just calls
+    H5FD_core_init currently).
+
+--------------------------------------------------------------------------*/
+static herr_t
+H5FD_core_init_interface(void)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_core_init_interface)
+
+    FUNC_LEAVE_NOAPI(H5FD_core_init())
+} /* H5FD_core_init_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -161,17 +187,43 @@ H5FD_core_init(void)
 {
     hid_t ret_value=H5FD_CORE_g;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_init, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_core_init, FAIL)
 
     if (H5I_VFL!=H5Iget_type(H5FD_CORE_g))
-        H5FD_CORE_g = H5FDregister(&H5FD_core_g);
+        H5FD_CORE_g = H5FD_register(&H5FD_core_g,sizeof(H5FD_class_t));
 
     /* Set return value */
     ret_value=H5FD_CORE_g;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
+
+
+/*---------------------------------------------------------------------------
+ * Function:	H5FD_core_term
+ *
+ * Purpose:	Shut down the VFD
+ *
+ * Return:	<none>
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, Jan 30, 2004
+ *
+ * Modification:
+ *
+ *---------------------------------------------------------------------------
+ */
+void
+H5FD_core_term(void)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_core_term)
+
+    /* Reset VFL ID */
+    H5FD_CORE_g=0;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5FD_core_term() */
 
 
 /*-------------------------------------------------------------------------
@@ -204,12 +256,12 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
-    FUNC_ENTER_API(H5Pset_fapl_core, FAIL);
+    FUNC_ENTER_API(H5Pset_fapl_core, FAIL)
     H5TRACE3("e","izb",fapl_id,increment,backing_store);
 
     /* Check argument */
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
     fa.increment = increment;
     fa.backing_store = backing_store;
@@ -217,7 +269,7 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
     ret_value= H5P_set_driver(plist, H5FD_CORE, &fa);
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -251,16 +303,15 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/,
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pget_fapl_core, FAIL);
+    FUNC_ENTER_API(H5Pget_fapl_core, FAIL)
     H5TRACE3("e","ixx",fapl_id,increment,backing_store);
 
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
-                      "not a file access property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
     if (H5FD_CORE!=H5P_get_driver(plist))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
     if (NULL==(fa=H5P_get_driver_info(plist)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
     
     if (increment)
         *increment = fa->increment;
@@ -268,7 +319,7 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/,
         *backing_store = fa->backing_store;
     
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -295,10 +346,10 @@ H5FD_core_fapl_get(H5FD_t *_file)
     H5FD_core_fapl_t	*fa = NULL;
     void      *ret_value;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_fapl_get, NULL);
+    FUNC_ENTER_NOAPI(H5FD_core_fapl_get, NULL)
 
     if (NULL==(fa=H5MM_calloc(sizeof(H5FD_core_fapl_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     fa->increment = file->increment;
     fa->backing_store = (file->fd>=0);
@@ -307,7 +358,7 @@ H5FD_core_fapl_get(H5FD_t *_file)
     ret_value=fa;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -340,29 +391,29 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
     int			fd=-1;
     H5FD_t		*ret_value;
 
-    FUNC_ENTER_NOAPI(H5FD_core_open, NULL);
+    FUNC_ENTER_NOAPI(H5FD_core_open, NULL)
     
     /* Check arguments */
     if (!(H5F_ACC_CREAT & flags))
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL, "must create core files, not open them");
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL, "must create core files, not open them")
     if (0==maxaddr || HADDR_UNDEF==maxaddr)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr")
     if (ADDR_OVERFLOW(maxaddr))
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "maxaddr overflow");
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "maxaddr overflow")
     if (H5P_DEFAULT!=fapl_id) {
         if(NULL == (plist = H5I_object(fapl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
         fa = H5P_get_driver_info(plist);
     } /* end if */
 
     /* Open backing store */
     if (fa && fa->backing_store && name &&
-            (fd=HDopen(name, O_CREAT|O_TRUNC|O_RDWR, 0666))<0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open backing store");
+            (fd=HDopen(name, (O_CREAT|O_TRUNC|O_RDWR), 0666))<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open backing store")
 
     /* Create the new file struct */
     if (NULL==(file=H5MM_calloc(sizeof(H5FD_core_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct")
     file->fd = fd;
     if (name && *name)
         file->name = HDstrdup(name);
@@ -378,7 +429,7 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
     ret_value=(H5FD_t *)file;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -406,7 +457,7 @@ H5FD_core_close(H5FD_t *_file)
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_close, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_core_close, FAIL)
 
     /* Release resources */
     if (file->fd>=0)
@@ -419,7 +470,7 @@ H5FD_core_close(H5FD_t *_file)
     H5MM_xfree(file);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -450,25 +501,25 @@ H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_core_t	*f2 = (const H5FD_core_t*)_f2;
     int			ret_value;
 
-    FUNC_ENTER_NOAPI(H5FD_core_cmp, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_core_cmp, FAIL)
 
     if (NULL==f1->name && NULL==f2->name) {
         if (f1<f2)
-            HGOTO_DONE(-1);
+            HGOTO_DONE(-1)
         if (f1>f2)
-            HGOTO_DONE(1);
-        HGOTO_DONE(0);
+            HGOTO_DONE(1)
+        HGOTO_DONE(0)
     }
     
     if (NULL==f1->name)
-        HGOTO_DONE(-1);
+        HGOTO_DONE(-1)
     if (NULL==f2->name)
-        HGOTO_DONE(1);
+        HGOTO_DONE(1)
 
     ret_value = HDstrcmp(f1->name, f2->name);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -497,13 +548,13 @@ H5FD_core_get_eoa(H5FD_t *_file)
 
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     
-    FUNC_ENTER_NOAPI(H5FD_core_get_eoa, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_core_get_eoa, HADDR_UNDEF)
 
     /* Set return value */
     ret_value=file->eoa;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -531,15 +582,15 @@ H5FD_core_set_eoa(H5FD_t *_file, haddr_t addr)
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_core_set_eoa, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_core_set_eoa, FAIL)
 
     if (ADDR_OVERFLOW(addr))
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "address overflow");
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "address overflow")
 
     file->eoa = addr;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -570,13 +621,13 @@ H5FD_core_get_eof(H5FD_t *_file)
 
     H5FD_core_t	*file = (H5FD_core_t*)_file;
 
-    FUNC_ENTER_NOAPI(H5FD_core_get_eof, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_core_get_eof, HADDR_UNDEF)
 
     /* Set return value */
     ret_value=MAX(file->eof, file->eoa);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -594,21 +645,22 @@ done:
  * 
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t
 H5FD_core_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
 {   
     H5FD_core_t         *file = (H5FD_core_t *)_file;
     herr_t              ret_value = SUCCEED;
                                                    
-    FUNC_ENTER_NOAPI(H5FD_core_get_handle, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_core_get_handle, FAIL)
 
     if(!file_handle)
-         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid");
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
 
     *file_handle = &(file->mem);
 
 done:   
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   
 
 
@@ -631,6 +683,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t
 H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
 	       size_t size, void *buf/*out*/)
@@ -638,18 +691,18 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5FD_core_read, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_core_read, FAIL)
 
     assert(file && file->pub.cls);
     assert(buf);
 
     /* Check for overflow conditions */
     if (HADDR_UNDEF == addr)
-        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
+        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
     if (REGION_OVERFLOW(addr, size))
-        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
+        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
     if (addr + size > file->eoa)
-        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
+        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
 
     /* Read the part which is before the EOF marker */
     if (addr < file->eof) {
@@ -675,7 +728,7 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
         HDmemset(buf, 0, size);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -697,6 +750,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t
 H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
 		size_t size, const void *buf)
@@ -704,16 +758,16 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
     H5FD_core_t		*file = (H5FD_core_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5FD_core_write, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_core_write, FAIL)
 
     assert(file && file->pub.cls);
     assert(buf);
 
     /* Check for overflow conditions */
     if (REGION_OVERFLOW(addr, size))
-        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
+        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
     if (addr+size>file->eoa)
-        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
+        HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
 
     /*
      * Allocate more memory if necessary, careful of overflow. Also, if the
@@ -734,7 +788,7 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
         else
             x = H5MM_realloc(file->mem, new_eof);
         if (!x)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block")
         file->mem = x;
         file->eof = new_eof;
     }
@@ -744,7 +798,7 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
     file->dirty = TRUE;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -765,13 +819,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t
 H5FD_core_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5FD_core_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_core_flush, FAIL)
 
     /* Write to backing store */
     if (file->dirty && file->fd>=0) {
@@ -779,7 +834,7 @@ H5FD_core_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
         unsigned char *ptr = file->mem;
 
         if (0!=HDlseek(file->fd, (off_t)0, SEEK_SET))
-            HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store");
+            HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store")
 
         while (size) {
             ssize_t n;
@@ -789,7 +844,7 @@ H5FD_core_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
             if (n<0 && EINTR==errno)
                 continue;
             if (n<0)
-                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "error writing backing store");
+                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "error writing backing store")
             ptr += (size_t)n;
             size -= (size_t)n;
         }
@@ -797,6 +852,5 @@ H5FD_core_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
-

@@ -18,20 +18,6 @@
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5F_mask
 
-/* Predefined file drivers */
-#include "H5FDcore.h"		/*temporary in-memory files		  */
-#include "H5FDfamily.h"		/*family of files			  */
-#include "H5FDfphdf5.h"		/*FPHDF5                                  */
-#include "H5FDgass.h"           /*GASS I/O                                */
-#include "H5FDlog.h"            /* sec2 driver with logging, for debugging */
-#include "H5FDmpio.h"		/*MPI-2 I/O				  */
-#include "H5FDmpiposix.h"	/*MPI-2 & posix I/O			  */
-#include "H5FDmulti.h"		/*multiple files partitioned by mem usage */
-#include "H5FDsec2.h"		/*Posix unbuffered I/O			  */
-#include "H5FDsrb.h"            /*SRB I/O                                 */
-#include "H5FDstdio.h"		/* Standard C buffered I/O		  */
-#include "H5FDstream.h"         /*in-memory files streamed via sockets    */
-
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Aprivate.h"		/* Attributes				*/
@@ -41,12 +27,23 @@
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free lists                           */
-#include "H5FPprivate.h"        /* Flexible parallel			*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Tprivate.h"		/* Datatypes				*/
+
+/* Predefined file drivers */
+#include "H5FDcore.h"		/*temporary in-memory files		*/
+#include "H5FDfamily.h"		/*family of files			*/
+#include "H5FDgass.h"           /*GASS I/O                              */
+#include "H5FDlog.h"            /* sec2 driver with logging, for debugging */
+#include "H5FDmpi.h"            /* MPI-based file drivers		*/
+#include "H5FDmulti.h"		/*multiple files partitioned by mem usage */
+#include "H5FDsec2.h"		/*Posix unbuffered I/O			*/
+#include "H5FDsrb.h"            /*SRB I/O                               */
+#include "H5FDstdio.h"		/* Standard C buffered I/O		*/
+#include "H5FDstream.h"         /*in-memory files streamed via sockets  */
 
 /* Interface initialization */
 static int interface_initialize_g = 0;
@@ -159,7 +156,6 @@ H5F_init_interface(void)
 {
     size_t      nprops;                 /* Number of properties */
     herr_t	ret_value = SUCCEED;
-    herr_t	status;
 
     /* File creation property class variables.  In sequence, they are
      * - File create property list class to modify
@@ -292,35 +288,6 @@ H5F_init_interface(void)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
     } /* end if */
 
-    /* Register predefined file drivers */
-    H5E_BEGIN_TRY {
-	if ((status=H5FD_SEC2)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-	if ((status=H5FD_STDIO)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-	if ((status=H5FD_FAMILY)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-#ifdef H5_HAVE_GASS
-	if ((status=H5FD_GASS)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-#endif
-#ifdef H5_HAVE_SRB
-	if ((status=H5FD_SRB)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-#endif
-	if ((status=H5FD_CORE)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-	if ((status=H5FD_MULTI)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-#ifdef H5_HAVE_PARALLEL
-	if ((status=H5FD_MPIO)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-	if ((status=H5FD_MPIPOSIX)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-#ifdef H5_HAVE_FPHDF5
-	if ((status=H5FD_FPHDF5)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-#endif /* H5_HAVE_FPHDF5 */
-#endif /* H5_HAVE_PARALLEL */
-#ifdef H5_HAVE_STREAM
-	if ((status=H5FD_STREAM)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-#endif
-end_registration: ;
-	} H5E_END_TRY;
-
-    if (status<0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "file driver registration failed")
-    
     /* ========== File Access Property Class Initialization ============*/
     assert(H5P_CLS_FILE_ACCESS_g!=-1);
 
@@ -1928,28 +1895,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
          * We've just opened a fresh new file (or truncated one). We need
          * to create & write the superblock.
          */
-#ifdef H5_HAVE_FPHDF5
-        /*
-         * If this is an FPHDF5 driver, then we want to set a property
-         * which says so and that only the captain process will be able
-         * to allocate things for the duration. That is, only the captain
-         * process should allocate the superblock of a file.
-         */
-        if (H5FD_is_fphdf5_driver(lf)) {
-            unsigned value = 1;
-            H5P_genplist_t *d_plist;
-
-            /* Get the data xfer property list */
-            if ((d_plist = H5I_object(dxpl_id)) == NULL)
-                HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a dataset transfer list");
-
-            /* Set that only captain should allocate */
-            if (H5P_insert(d_plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY,
-                           H5FD_FPHDF5_CAPTN_ALLOC_SIZE, &value,
-                           NULL, NULL, NULL, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't insert FPHDF5 property");
-        }
-#endif  /* H5_HAVE_FPHDF5 */
 
 	/*
 	 * The superblock starts immediately after the user-defined header,
@@ -1969,23 +1914,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	if (H5G_mkroot(file, dxpl_id, NULL)<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group");
 
-#ifdef H5_HAVE_FPHDF5
-        /*
-         * If this is an FPHDF5 driver, then remove the property which
-         * says so since we're allocating the superblock.
-         */
-        if (H5FD_is_fphdf5_driver(lf)) {
-            H5P_genplist_t *d_plist;
-
-            /* Get the data xfer property list */
-            if ((d_plist = H5I_object(dxpl_id)) == NULL)
-                HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a dataset transfer list");
-
-            if (H5P_remove(dxpl_id, d_plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, NULL,
-                            "can't remove FPHDF5 property");
-        }
-#endif  /* H5_HAVE_FPHDF5 */
     } else if (1==shared->nrefs) {
 	/* Read the superblock if it hasn't been read before. */
 	if (HADDR_UNDEF==(shared->super_addr=H5F_locate_signature(lf,dxpl_id)))
@@ -2630,24 +2558,6 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
          * file.
          */
         if (flags & H5F_FLUSH_INVALIDATE) {
-#ifdef H5_HAVE_FPHDF5
-            /*
-             * If this is not the SAP, then we want to send a "free"
-             * command to the SAP to free up the EOMA and EOSDA
-             * information. This might also update the EOA information on
-             * the clients...
-             */
-            if (H5FD_is_fphdf5_driver(f->shared->lf) && !H5FD_fphdf5_is_sap(f->shared->lf)) {
-                unsigned        req_id;
-                H5FP_status_t   status;
-
-                /* Send the request to the SAP */
-                if (H5FP_request_free(f->shared->lf, &req_id, &status) != SUCCEED)
-                    /* FIXME: Should we check the "status" variable here? */
-                    HGOTO_ERROR(H5E_FPHDF5, H5E_CANTFREE, FAIL,
-                                "server couldn't free from file");
-            } else {
-#endif  /* H5_HAVE_FPHDF5 */
 
                 if (f->shared->lf->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {
                     /* Return the unused portion of the metadata block to a free list */
@@ -2677,9 +2587,6 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
                     f->shared->lf->cur_sdata_block_size=0;
                 } /* end if */
 
-#ifdef H5_HAVE_FPHDF5
-            }
-#endif  /* H5_HAVE_FPHDF5 */
         } /* end if */
 
         /* flush (and invalidate) the entire meta data cache */
@@ -3086,36 +2993,12 @@ H5F_close(H5F_t *f)
 
         /* Only try to flush the file if it was opened with write access */
         if(f->intent&H5F_ACC_RDWR) {
-#ifdef H5_HAVE_FPHDF5
-            /*
-             * We only want the captain to perform the flush of the metadata
-             * to the file.
-             */
-            if (!H5FD_is_fphdf5_driver(f->shared->lf) ||
-                    H5FD_fphdf5_is_captain(f->shared->lf)) {
-#endif  /* H5_HAVE_FPHDF5 */
 
                 /* Flush and destroy all caches */
                 if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
                               H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
 
-#ifdef H5_HAVE_FPHDF5
-            } else {
-                /*
-                 * If this isn't the captain process, flush but only clear
-                 * the flags.
-                 */
-                if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
-                              H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING | H5F_FLUSH_CLEAR_ONLY) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
-
-            }
-
-            /* Let's all meet up now... */
-            if (H5FD_is_fphdf5_driver(f->shared->lf))
-                MPI_Barrier(H5FP_SAP_BARRIER_COMM);
-#endif  /* H5_HAVE_FPHDF5 */
         } /* end if */
     } /* end if */
 
@@ -4585,30 +4468,15 @@ done:
 int
 H5F_mpi_get_rank(const H5F_t *f)
 {
-    int	ret_value=FAIL;
+    int	ret_value;
 
     FUNC_ENTER_NOAPI(H5F_mpi_get_rank, FAIL)
 
     assert(f && f->shared);
     
     /* Dispatch to driver */
-    if(IS_H5FD_MPIO(f)) {
-        /* Get the MPI rank & size */
-        if ((ret_value=H5FD_mpio_mpi_rank(f->shared->lf))<0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
-    } /* end if */
-    else if(IS_H5FD_MPIPOSIX(f)) {
-        /* Get the MPI rank & size */
-        if ((ret_value=H5FD_mpiposix_mpi_rank(f->shared->lf))<0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
-    } /* end else */
-#ifdef H5_HAVE_FPHDF5
-    else if (IS_H5FD_FPHDF5(f)) {
-        /* Get the MPI rank & size */
-        if ((ret_value = H5FD_fphdf5_mpi_rank(f->shared->lf)) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
-    } /* end if */
-#endif  /* H5_HAVE_FPHDF5 */
+    if ((ret_value=H5FD_mpi_get_rank(f->shared->lf))<0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_rank request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4634,30 +4502,15 @@ done:
 MPI_Comm
 H5F_mpi_get_comm(const H5F_t *f)
 {
-    MPI_Comm	ret_value=MPI_COMM_NULL;
+    MPI_Comm	ret_value;
 
     FUNC_ENTER_NOAPI(H5F_mpi_get_comm, MPI_COMM_NULL)
 
     assert(f && f->shared);
     
     /* Dispatch to driver */
-    if(IS_H5FD_MPIO(f)) {
-        /* Get the MPI communicator */
-        if (MPI_COMM_NULL == (ret_value=H5FD_mpio_communicator(f->shared->lf)))
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
-    } /* end if */
-    else if(IS_H5FD_MPIPOSIX(f)) {
-        /* Get the MPI communicator */
-        if (MPI_COMM_NULL == (ret_value=H5FD_mpiposix_communicator(f->shared->lf)))
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
-    } /* end else */
-#ifdef H5_HAVE_FPHDF5
-    else if (IS_H5FD_FPHDF5(f)) {
-        /* Get the FPHDF5 barrier communicator */
-        if (MPI_COMM_NULL == (ret_value = H5FD_fphdf5_barrier_communicator(f->shared->lf)))
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI communicator");
-    } /* end if */
-#endif  /* H5_HAVE_FPHDF5 */
+    if ((ret_value=H5FD_mpi_get_comm(f->shared->lf))==MPI_COMM_NULL)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

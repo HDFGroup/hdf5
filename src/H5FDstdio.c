@@ -27,6 +27,11 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
+/* Disable certain warnings in PC-Lint: */
+/*lint --emacro( {534, 830}, H5P_FILE_ACCESS) */
+/*lint --emacro( {534, 830}, H5F_ACC_RDWR, H5F_ACC_EXCL) */
+/*lint -esym( 534, H5Eclear, H5Epush) */
+
 #include "hdf5.h"
 
 #ifdef H5_HAVE_STDIO_H
@@ -39,6 +44,12 @@
 #ifdef WIN32
 #include <windows.h>
 #include <io.h>
+
+/* This is not defined in the Windows header files */
+#ifndef F_OK
+#define F_OK 00
+#endif
+
 #endif
 
 
@@ -46,12 +57,6 @@
 #undef MAX
 #endif /* MAX */
 #define MAX(X,Y)	((X)>(Y)?(X):(Y))
-
-#ifndef F_OK
-#define F_OK 00
-#define W_OK 02
-#define R_OK 04
-#endif
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_STDIO_g = 0;
@@ -101,8 +106,8 @@ typedef struct H5FD_stdio_t {
      * identifier and the volume serial number to determine whether two
      * handles refer to the same file.
      */
-    int fileindexlo;
-    int fileindexhi;
+    DWORD fileindexlo;
+    DWORD fileindexhi;
 #endif
 } H5FD_stdio_t;
 
@@ -122,22 +127,11 @@ typedef struct H5FD_stdio_t {
  *			argument of the file seek function.
  */
 /* adding for windows NT filesystem support. */
-#ifdef WIN32
-#define MAXADDR (((haddr_t)1<<(8*sizeof(LONGLONG)-1))-1)
-#else 
-#define MAXADDR (((haddr_t)1<<(8*sizeof(long)-1))-1)
-#endif
-
+#define MAXADDR (((haddr_t)1<<(8*sizeof(file_offset_t)-1))-1)
 #define ADDR_OVERFLOW(A)	(HADDR_UNDEF==(A) || ((A) & ~(haddr_t)MAXADDR))
 #define SIZE_OVERFLOW(Z)	((Z) & ~(hsize_t)MAXADDR)
-
-#ifdef WIN32
-#define REGION_OVERFLOW(A,Z)    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || \
-     sizeof(LONGLONG)<sizeof(size_t) || HADDR_UNDEF==(A)+(Z) || (LONGLONG)((A)+(Z))<(LONGLONG)(A))
-#else
 #define REGION_OVERFLOW(A,Z)	(ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || \
-    sizeof(long)<sizeof(size_t) || HADDR_UNDEF==(A)+(Z) || (long)((A)+(Z))<(long)(A))
-#endif
+    HADDR_UNDEF==(A)+(Z) || (file_offset_t)((A)+(Z))<(file_offset_t)(A))
 
 #ifdef H5_HAVE_LSEEK64
 #   define file_offset_t	off64_t
@@ -145,7 +139,7 @@ typedef struct H5FD_stdio_t {
 #elif defined (WIN32) && !defined(__MWERKS__)
 # /*MSVC*/
 #   define file_offset_t __int64
-#   define file_truncate	_ftruncatei64
+#   define file_truncate	_chsize
 #else
 #   define file_offset_t	off_t
 #   define file_truncate	ftruncate
@@ -230,6 +224,29 @@ H5FD_stdio_init(void)
 }
 
 
+/*---------------------------------------------------------------------------
+ * Function:	H5FD_stdio_term
+ *
+ * Purpose:	Shut down the VFD
+ *
+ * Return:	<none>
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, Jan 30, 2004
+ *
+ * Modification:
+ *
+ *---------------------------------------------------------------------------
+ */
+void
+H5FD_stdio_term(void)
+{
+    /* Reset VFL ID */
+    H5FD_STDIO_g=0;
+
+} /* end H5FD_stdio_term() */
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_fapl_stdio
  *
@@ -304,10 +321,12 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
 	HFILE filehandle;
 	struct _BY_HANDLE_FILE_INFORMATION fileinfo;
         int fd;
-	int results;   
 #else /* WIN32 */
     struct stat		    sb;
 #endif  /* WIN32 */
+
+    /* Sanity check on file offsets */
+    assert(sizeof(file_offset_t)>=sizeof(size_t));
 
     /* Shut compiler up */
     fapl_id=fapl_id;
@@ -356,7 +375,7 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
     } else {
         long x = ftell (file->fp);
         assert (x>=0);
-        file->eof = x;
+        file->eof = (haddr_t)x;
     }
 
     /* The unique key */
@@ -364,7 +383,7 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
 /*#error "Needs correct fileindexhi & fileindexlo, code below is from sec2 driver"*/
     fd = _fileno(f);
     filehandle = _get_osfhandle(fd);
-    results = GetFileInformationByHandle((HANDLE)filehandle, &fileinfo);
+    (void)GetFileInformationByHandle((HANDLE)filehandle, &fileinfo);
     file->fileindexhi = fileinfo.nFileIndexHigh;
     file->fileindexlo = fileinfo.nFileIndexLow;
 #else
@@ -625,7 +644,7 @@ H5FD_stdio_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
    
     /* Clear the error stack */
     H5Eclear();
-             
+
     *file_handle = &(file->fp);
     if(*file_handle==NULL)
         H5Epush_ret(func, H5E_IO, H5E_WRITEERROR, "get handle failed", -1);
@@ -683,7 +702,7 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
     /* Check easy cases */
     if (0 == size)
         return(0);
-	if ((haddr_t)addr >= file->eof) {
+    if ((haddr_t)addr >= file->eof) {
         memset(buf, 0, size);
         return(0);
     }
@@ -693,28 +712,18 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
      */
     if (!(file->op == H5FD_STDIO_OP_READ || file->op==H5FD_STDIO_OP_SEEK) ||
             file->pos != addr) {
-#ifdef WIN32
-        fpos_t tempos =(fpos_t)(addr+SEEK_SET);
-	if (fsetpos(file->fp,&tempos)!=0) {
-	    file->op = H5FD_STDIO_OP_UNKNOWN;
-            file->pos = HADDR_UNDEF;
-            H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fsetpos failed", -1);
-	}
-#else
-
         if (fseek(file->fp, (long)addr, SEEK_SET) < 0) {
             file->op = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
             H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
         }
-#endif
         file->pos = addr;
     }
 
     /*
      * Read zeros past the logical end of file (physical is handled below)
      */
-    if ((size_t) addr + size > file->eof) {
+    if (addr + size > file->eof) {
         size_t nbytes = (size_t) (addr + size - file->eof);
         memset((unsigned char *)buf + size - nbytes, 0, nbytes);
         size -= nbytes;
@@ -722,11 +731,11 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
     
     /*
      * Read the data.  Since we're reading single-byte values, a partial read
-     * will advance the file position by N.  If N is negative or an error
+     * will advance the file position by N.  If N is zero or an error
      * occurs then the file position is undefined.
      */
     n = fread(buf, 1, size, file->fp);
-    if (n <= 0 && ferror(file->fp)) {
+    if (n == 0 && ferror(file->fp)) {
         file->op = H5FD_STDIO_OP_UNKNOWN;
         file->pos = HADDR_UNDEF;
         H5Epush_ret(func, H5E_IO, H5E_READERROR, "fread failed", -1);
@@ -770,10 +779,6 @@ static herr_t
 H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 		size_t size, const void *buf)
 {
-#ifdef WIN32
-    fpos_t tempos;
-#endif
-
     H5FD_stdio_t		*file = (H5FD_stdio_t*)_file;
     static const char *func="H5FD_stdio_write";  /* Function Name for error reporting */
 
@@ -797,21 +802,11 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
      */
     if ((file->op != H5FD_STDIO_OP_WRITE && file->op != H5FD_STDIO_OP_SEEK) ||
                 file->pos != addr) {
-#ifdef WIN32
-	    tempos =(fpos_t)(addr+SEEK_SET);
-
-	    if (fsetpos(file->fp,&tempos) != 0) {
-		file->op = H5FD_STDIO_OP_UNKNOWN;
-		file->pos = HADDR_UNDEF;
-		H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fsetpos failed", -1);
-	    }
-#else
         if (fseek(file->fp, (long)addr, SEEK_SET) < 0) {
             file->op = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
             H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
         }
-#endif	/* WIN32 */
         file->pos = addr;
     }
     
@@ -831,18 +826,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
      */
     file->op = H5FD_STDIO_OP_WRITE;
     file->pos = addr + size;
-/* The following code needs to be added for windows VC 6.0. This should be a VC++
-   compiler bug. When not using ftell and fseek, although you reset the position to 
-    the starting of the file, fwrite will somehow to go to the end of the file and
-    add contents. It seems they used a circular seeking algorithm, the starting point
-    overlaps with the ending point and windows doesn't handle correctly for the case when
-    file was written to the disk close to the end of the file and rewrite from the beginning
-    of the file. This is how HDF5 signature was written for some failing cases. */
 
-#ifdef WIN32
-   tempos = ftell(file->fp);
-   fseek(file->fp,(long)tempos,SEEK_SET);
-#endif
     /* Update EOF if necessary */
     if (file->pos>file->eof)
         file->eof = file->pos;
@@ -886,22 +870,23 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
     if(file->write_access) {
         /* Makes sure that the true file size is the same as the end-of-address. */
         if (file->eoa!=file->eof) {
-            int fd=fileno(file->fp);     /* File descriptor for HDF5 file */
 #ifdef WIN32
+            int fd=_fileno(file->fp);     /* File descriptor for HDF5 file */
             HFILE filehandle;   /* Windows file handle */
             LARGE_INTEGER li;   /* 64-bit integer for SetFilePointer() call */
-            fd = _fileno(file->fp);
 
             /* Map the posix file handle to a Windows file handle */
             filehandle = _get_osfhandle(fd);
 
             /* Translate 64-bit integers into form Windows wants */
             /* [This algorithm is from the Windows documentation for SetFilePointer()] */
-            li.QuadPart = file->eoa;
-            SetFilePointer((HANDLE)filehandle,li.LowPart,&li.HighPart,FILE_BEGIN);
+            li.QuadPart = (LONGLONG)file->eoa;
+            (void)SetFilePointer((HANDLE)filehandle,li.LowPart,&li.HighPart,FILE_BEGIN);
             if(SetEndOfFile((HANDLE)filehandle)==0)
                 H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "unable to extend file properly", -1);
 #else /* WIN32 */
+            int fd=fileno(file->fp);     /* File descriptor for HDF5 file */
+
             if (-1==file_truncate(fd, (file_offset_t)file->eoa))
                 H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "unable to extend file properly", -1);
 #endif /* WIN32 */

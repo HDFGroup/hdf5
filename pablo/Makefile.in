@@ -50,10 +50,10 @@ SRCDIRS=./. ../src/.
 # problems somewhere). - QAK
 #
 LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5Dio.c H5E.c H5F.c H5FD.c \
-	H5FDcore.c H5FDfamily.c H5FDfphdf5.c H5FDgass.c H5FDlog.c \
+	H5FDcore.c H5FDfamily.c H5FDgass.c H5FDlog.c \
 	H5FDmpio.c H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDsrb.c \
-	H5FDstdio.c H5FDstream.c H5FL.c H5FO.c H5FP.c H5FPclient.c \
-	H5FPserver.c H5FS.c H5Fcompact.c H5Fcontig.c H5Fistore.c H5Fseq.c \
+	H5FDstdio.c H5FDstream.c H5FL.c H5FO.c \
+	H5FS.c H5Fcompact.c H5Fcontig.c H5Fistore.c H5Fseq.c \
 	H5G.c H5Gent.c H5Gnode.c H5Gstab.c H5HG.c H5HL.c H5HP.c H5I.c \
 	H5MF.c H5MM.c H5O.c H5Oattr.c H5Obogus.c H5Ocont.c H5Odtype.c \
 	H5Oefl.c H5Ofill.c H5Olayout.c H5Omtime.c H5Oname.c H5Onull.c \
@@ -225,7 +225,6 @@ H5F.c: $(top_srcdir)/src/H5F.c
 H5FD.c: $(top_srcdir)/src/H5FD.c
 H5FDcore.c: $(top_srcdir)/src/H5FDcore.c
 H5FDfamily.c: $(top_srcdir)/src/H5FDfamily.c
-H5FDfphdf5.c: $(top_srcdir)/src/H5FDfphdf5.c
 H5FDgass.c: $(top_srcdir)/src/H5FDgass.c
 H5FDlog.c: $(top_srcdir)/src/H5FDlog.c
 H5FDmpio.c: $(top_srcdir)/src/H5FDmpio.c
@@ -237,9 +236,6 @@ H5FDstdio.c: $(top_srcdir)/src/H5FDstdio.c
 H5FDstream.c: $(top_srcdir)/src/H5FDstream.c
 H5FL.c: $(top_srcdir)/src/H5FL.c
 H5FO.c: $(top_srcdir)/src/H5FO.c
-H5FP.c: $(top_srcdir)/src/H5FP.c
-H5FPclient.c: $(top_srcdir)/src/H5FPclient.c
-H5FPserver.c: $(top_srcdir)/src/H5FPserver.c
 H5FS.c: $(top_srcdir)/src/H5FS.c
 H5Fcompact.c: $(top_srcdir)/src/H5Fcompact.c
 H5Fcontig.c: $(top_srcdir)/src/H5Fcontig.c

@@ -18,14 +18,19 @@
  *
  * Purpose:    SRB I/O driver.
  */
-#include "H5private.h"		/*library functions			*/
-#include "H5Eprivate.h"		/*error handling			*/
-#include "H5Fprivate.h"		/*files					*/
-#include "H5FDprivate.h"	/*file driver				  */
-#include "H5FDsrb.h"            /* Core file driver                     */
-#include "H5Iprivate.h"		/*object IDs				  */
-#include "H5MMprivate.h"        /* Memory allocation                    */
-#include "H5Pprivate.h"		/*property lists			*/
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK      H5FD_srb_mask
+
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"		/* File access				*/
+#include "H5FDprivate.h"	/* File drivers				*/
+#include "H5FDsrb.h"		/* SRB file driver			*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Pprivate.h"		/* Property lists			*/
 
 
 #ifdef H5_HAVE_SRB
@@ -153,9 +158,30 @@ static const H5FD_class_t H5FD_srb_g = {
 };
 
 /* Interface initialization */
-#define PABLO_MASK      H5FD_srb_mask
-#define INTERFACE_INIT  H5FD_srb_init
+#define INTERFACE_INIT  H5FD_srb_init_interface
 static int interface_initialize_g = 0;
+
+
+/*--------------------------------------------------------------------------
+NAME
+   H5FD_srb_init_interface -- Initialize interface-specific information
+USAGE
+    herr_t H5FD_srb_init_interface()
+   
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.  (Just calls
+    H5FD_srb_init currently).
+
+--------------------------------------------------------------------------*/
+static herr_t
+H5FD_srb_init_interface(void)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_srb_init_interface)
+
+    FUNC_LEAVE_NOAPI(H5FD_srb_init())
+} /* H5FD_srb_init_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -179,17 +205,43 @@ H5FD_srb_init(void)
 {
     hid_t ret_value=H5FD_SRB_g; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_srb_init, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_srb_init, FAIL)
 
     if(H5I_VFL != H5Iget_type(H5FD_SRB_g))
-        H5FD_SRB_g = H5FDregister(&H5FD_srb_g);  
+        H5FD_SRB_g = H5FD_register(&H5FD_srb_g,sizeof(H5FD_class_t));
 
     /* Set return value */
     ret_value=H5FD_SRB_g;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
+
+
+/*---------------------------------------------------------------------------
+ * Function:	H5FD_srb_term
+ *
+ * Purpose:	Shut down the VFD
+ *
+ * Return:	<none>
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, Jan 30, 2004
+ *
+ * Modification:
+ *
+ *---------------------------------------------------------------------------
+ */
+void
+H5FD_srb_term(void)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_srb_term)
+
+    /* Reset VFL ID */
+    H5FD_SRB_g=0;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5FD_srb_term() */
 
 
 /*-------------------------------------------------------------------------
@@ -222,11 +274,11 @@ H5Pset_fapl_srb(hid_t fapl_id, SRB_Info info)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value;
 
-    FUNC_ENTER_API(H5Pset_fapl_srb, FAIL);
+    FUNC_ENTER_API(H5Pset_fapl_srb, FAIL)
     /*NO TRACE*/
 
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
     /*connect to SRB server */
     fa.srb_conn = clConnect(info.srbHost, info.srbPort, info.srbAuth);
@@ -235,14 +287,14 @@ H5Pset_fapl_srb(hid_t fapl_id, SRB_Info info)
         clFinish(fa.srb_conn);
 
         /*not sure about first 2 parameters. */
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "Connection to srbMaster failed."); 
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "Connection to srbMaster failed.")
     }
 
     fa.info = info;
     ret_value = H5P_set_driver(plist, H5FD_SRB, &fa);
  
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -273,21 +325,21 @@ H5Pget_fapl_srb(hid_t fapl_id, SRB_Info *info/*out*/)
     H5FD_srb_fapl_t *fa;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Pget_fapl_srb, FAIL);
+    FUNC_ENTER_API(H5Pget_fapl_srb, FAIL)
     H5TRACE2("e","ix",fapl_id,info);
 
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
     if(H5FD_SRB != H5P_get_driver(plist))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
     if(NULL==(fa=H5P_get_driver_info(plist)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
     if(info)
         *info = fa->info;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -321,18 +373,18 @@ H5FD_srb_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5P_genplist_t *plist;      /* Property list pointer */
     H5FD_t            *ret_value;
 
-    FUNC_ENTER_NOAPI(H5FD_srb_open, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_srb_open, FAIL)
 
     /* Check arguments */
     if (!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name")
     if (0==maxaddr || HADDR_UNDEF==maxaddr)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr")
     if (ADDR_OVERFLOW(maxaddr))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr")
 
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
     if(H5P_FILE_ACCESS_DEFAULT==fapl_id || H5FD_SRB!=H5P_get_driver(plist)) {
         HDmemset((void*)&_fa, 0, sizeof(H5FD_srb_fapl_t));        
         fa = &_fa;
@@ -386,9 +438,9 @@ H5FD_srb_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         fprintf(stderr, "cannot open file %s\n", name);
         fprintf(stderr,"%s",clErrorMessage(fa->srb_conn));
         clFinish(fa->srb_conn);       
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "cannot open file");    
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "cannot open file")
 #else /* OLD_WAY */
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, clErrorMessage(fa->srb_conn));
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, clErrorMessage(fa->srb_conn))
 #endif /* OLD_WAY */
     }
 
@@ -397,14 +449,14 @@ H5FD_srb_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 #ifdef OLD_WAY
         srbFileClose(fa->srb_conn, srb_fid);
         clFinish(fa->srb_conn);    
-        HGOTO_ERROR(H5E_IO, H5E_BADFILE, NULL, "SRB file stat failed");
+        HGOTO_ERROR(H5E_IO, H5E_BADFILE, NULL, "SRB file stat failed")
 #else /* OLD_WAY */
-        HGOTO_ERROR(H5E_IO, H5E_BADFILE, NULL, "SRB file stat failed");
+        HGOTO_ERROR(H5E_IO, H5E_BADFILE, NULL, "SRB file stat failed")
 #endif /* OLD_WAY */
     }
 
     if (NULL==(file=H5MM_calloc(sizeof(H5FD_srb_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate file struct");    
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate file struct")
 
     file->fd = srb_fid;
     file->eof = srb_stat.st_size;
@@ -422,7 +474,7 @@ done:
         if(srb_fid>=0)
             srbFileClose(fa->srb_conn, srb_fid);
     } /* end if */
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -445,7 +497,7 @@ H5FD_srb_close(H5FD_t *_file)
     H5FD_srb_t *file = (H5FD_srb_t *)_file;
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_srb_close, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_srb_close, FAIL)
 
     srbFileClose(file->srb_conn, file->fd);
     clFinish(file->srb_conn);
@@ -453,7 +505,7 @@ H5FD_srb_close(H5FD_t *_file)
     H5MM_xfree(file);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -479,7 +531,7 @@ H5FD_srb_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_srb_query, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_srb_query, FAIL)
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -489,7 +541,7 @@ H5FD_srb_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -516,13 +568,13 @@ H5FD_srb_get_eoa(H5FD_t *_file)
     H5FD_srb_t *file = (H5FD_srb_t *)_file;
     haddr_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_srb_get_eoa, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_srb_get_eoa, HADDR_UNDEF)
 
     /* Set return value */
     ret_value=file->eoa; 
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -550,12 +602,12 @@ H5FD_srb_set_eoa(H5FD_t *_file, haddr_t addr)
     H5FD_srb_t *file = (H5FD_srb_t *)_file;
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_srb_set_eoa, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_srb_set_eoa, FAIL)
 
     file->eoa = addr;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -581,13 +633,13 @@ H5FD_srb_get_eof(H5FD_t *_file)
     H5FD_srb_t *file = (H5FD_srb_t *)_file;
     haddr_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_srb_get_eof, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI(H5FD_srb_get_eof, HADDR_UNDEF)
 
     /* Set return value */
     ret_value=file->eof; 
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -611,15 +663,15 @@ H5FD_srb_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
     H5FD_srb_t          *file = (H5FD_srb_t *)_file;
     herr_t              ret_value = SUCCEED;
                             
-    FUNC_ENTER_NOAPI(H5FD_srb_get_eof, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_srb_get_eof, FAIL)
 
     if(!file_handle)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
 
     *file_handle = &(file->fd);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -645,19 +697,19 @@ H5FD_srb_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
     ssize_t    nbytes;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_srb_read, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_srb_read, FAIL)
 
     /* Check for overflow conditions */
     if (HADDR_UNDEF==addr)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "addr undefined");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "addr undefined")
     if (REGION_OVERFLOW(addr, size))
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr too large");
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr too large")
     if (addr+size>file->eoa)
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr too large");
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr too large")
 
     if( addr!=file->pos &&
             srbFileSeek(file->srb_conn, (int)file->fd, (int)addr, SEEK_SET)<0 )
-        HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "srb file seek failed");
+        HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "srb file seek failed")
 
     /*
      * Read data, being careful of interrupted system calls, partial results,
@@ -665,7 +717,7 @@ H5FD_srb_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
      */
     while(size>0) {
         if((nbytes=srbFileRead(file->srb_conn, (int)file->fd, (char*)buf, size))<0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "srb file write failed");
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "srb file write failed")
 
         if (0==nbytes) {
             /*end of file but not end of format address space*/
@@ -690,7 +742,7 @@ done:
         clFinish(file->srb_conn);    
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -717,23 +769,23 @@ H5FD_srb_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
     ssize_t    nbytes;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_srb_write, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_srb_write, FAIL)
 
     /* Check for overflow conditions */
     if (HADDR_UNDEF==addr)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "addr undefined");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "addr undefined")
     if (REGION_OVERFLOW(addr, size))
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr too large");
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr too large")
     if (addr+size>file->eoa)
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr too large");
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr too large")
 
     if( addr!=file->pos &&
             srbFileSeek(file->srb_conn, (int)file->fd, (int)addr, SEEK_SET)<0 )
-        HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "srb file seek failed");
+        HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "srb file seek failed")
 
     while(size>0) {
         if( (nbytes=srbFileWrite(file->srb_conn, (int)file->fd, (char*)buf, size)) < 0 )
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "srb file write failed");
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "srb file write failed")
       
         size -= nbytes; 
         addr += (haddr_t)nbytes;
@@ -755,7 +807,7 @@ done:
         clFinish(file->srb_conn);    
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -778,10 +830,10 @@ H5FD_srb_flush(H5FD_t *_file, hid_t dxpl_id, unsigned UNUSED closing)
     H5FD_srb_t *file = (H5FD_srb_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_srb_flush, FAIL);
+    FUNC_ENTER_NOAPI(H5FD_srb_flush, FAIL)
 
     if(srbFileSync(file->srb_conn, file->fd) != 0)
-        HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "srb file sync failed");
+        HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "srb file sync failed")
 
 done:
     if(ret_value<0) {
@@ -789,7 +841,7 @@ done:
         clFinish(file->srb_conn);    
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 #endif  /* H5_HAVE_SRB */

@@ -21,7 +21,6 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
 #include "H5HLprivate.h"	/* Local heaps				*/
@@ -31,15 +30,6 @@
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
 
 /*#define H5D_DEBUG*/
-
-/*
- * The MPIO, MPIPOSIX, & FPHDF5 drivers are needed because there are
- * kludges in this file and places where we check for things that aren't
- * handled by these drivers.
- */
-#include "H5FDfphdf5.h"
-#include "H5FDmpio.h"
-#include "H5FDmpiposix.h"
 
 /* Interface initialization */
 static int interface_initialize_g = 0;
@@ -177,7 +167,9 @@ H5D_init_interface(void)
     hid_t           def_vfl_id               = H5D_XFER_VFL_ID_DEF;     
     void            *def_vfl_info            = H5D_XFER_VFL_INFO_DEF;    
     size_t          def_hyp_vec_size         = H5D_XFER_HYPER_VECTOR_SIZE_DEF; 
+#ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t def_io_xfer_mode        = H5D_XFER_IO_XFER_MODE_DEF;
+#endif /* H5_HAVE_PARALLEL */
     H5Z_EDC_t       enable_edc               = H5D_XFER_EDC_DEF;
     H5Z_cb_t        filter_cb                = H5D_XFER_FILTER_CB_DEF;
 
@@ -282,9 +274,11 @@ H5D_init_interface(void)
         if(H5P_register(xfer_pclass,H5D_XFER_HYPER_VECTOR_SIZE_NAME,H5D_XFER_HYPER_VECTOR_SIZE_SIZE,&def_hyp_vec_size,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+#ifdef H5_HAVE_PARALLEL
         /* Register the I/O transfer mode property */
         if(H5P_register(xfer_pclass,H5D_XFER_IO_XFER_MODE_NAME,H5D_XFER_IO_XFER_MODE_SIZE,&def_io_xfer_mode,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+#endif /* H5_HAVE_PARALLEL */
 
         /* Register the EDC property */
         if(H5P_register(xfer_pclass,H5D_XFER_EDC_NAME,H5D_XFER_EDC_SIZE,&enable_edc,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
@@ -2030,7 +2024,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
 
     /* Check if the dataspace has an extent set (or is NULL) */
     if( !(H5S_has_extent(space)) )
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "dataspace extent has not been set")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "dataspace extent has not been set.")
 
     /* Initialize the dataset object */
     if(NULL == (new_dset = H5D_new(dcpl_id,TRUE,has_vl_type)))
@@ -2188,7 +2182,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
                 assert((unsigned)(new_dset->layout.u.chunk.ndims) <= NELMTS(new_dset->layout.u.chunk.dim));
 
                 new_dset->layout.u.chunk.addr = HADDR_UNDEF;        /* Initialize to no address */
-               
+
                 /*
                  * Chunked storage allows any type of data space extension, so we
                  * don't even bother checking.

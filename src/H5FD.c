@@ -30,15 +30,25 @@
 #define PABLO_MASK	H5FD_mask
 
 /* Packages needed by this file */
-#include "H5private.h"		/*library functions			*/
-#include "H5Dprivate.h"		/*datasets      			*/
-#include "H5Eprivate.h"		/*error handling			*/
-#include "H5Fpkg.h"		/*files					*/
-#include "H5FDprivate.h"	/*virtual file driver			*/
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5Iprivate.h"		/*interface abstraction layer		*/
-#include "H5MMprivate.h"	/*memory management			*/
-#include "H5Pprivate.h"		/*property lists			*/
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"             /* File access				*/
+#include "H5FDprivate.h"	/* File drivers				*/
+#include "H5FDcore.h"		/* Files stored entirely in memory	*/
+#include "H5FDfamily.h"		/* File families 			*/
+#include "H5FDgass.h"		/* Remote files using GASS I/O		*/
+#include "H5FDlog.h"        	/* sec2 driver with I/O logging (for debugging) */
+#include "H5FDmpi.h"            /* MPI-based file drivers		*/
+#include "H5FDmulti.h"		/* Usage-partitioned file family	*/
+#include "H5FDsec2.h"		/* POSIX unbuffered file I/O		*/
+#include "H5FDsrb.h"        	/* Remote access using SRB              */
+#include "H5FDstdio.h"		/* Standard C buffered I/O		*/
+#include "H5FDstream.h"     	/* In-memory files streamed via sockets */
+#include "H5FLprivate.h"	/* Free lists                           */
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Pprivate.h"		/* Property lists			*/
 
 /* Interface initialization */
 #define INTERFACE_INIT	H5FD_init_interface
@@ -151,6 +161,29 @@ H5FD_term_interface(void)
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_VFL))) {
 	    H5I_clear_group(H5I_VFL, FALSE);
+
+            /* Reset the VFL drivers, if they've been closed */
+            if(H5I_nmembers(H5I_VFL)==0) {
+                H5FD_sec2_term();
+                H5FD_log_term();
+                H5FD_stdio_term();
+                H5FD_family_term();
+#ifdef H5_HAVE_GASS
+                H5FD_gass_term();
+#endif
+#ifdef H5_HAVE_SRB
+                H5FD_srb_term();
+#endif
+                H5FD_core_term();
+                H5FD_multi_term();
+#ifdef H5_HAVE_PARALLEL
+                H5FD_mpio_term();
+                H5FD_mpiposix_term();
+#endif /* H5_HAVE_PARALLEL */
+#ifdef H5_HAVE_STREAM
+                H5FD_stream_term();
+#endif
+            } /* end if */
 	} else {
 	    H5I_destroy_group(H5I_VFL);
 	    interface_initialize_g = 0;
@@ -208,6 +241,9 @@ H5FD_free_cls(H5FD_class_t *cls)
  *              Monday, July 26, 1999
  *
  * Modifications:
+ *              Copied guts of function info H5FD_register
+ *              Quincey Koziol
+ *              Friday, January 30, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -215,7 +251,6 @@ hid_t
 H5FDregister(const H5FD_class_t *cls)
 {
     hid_t		ret_value;
-    H5FD_class_t	*saved=NULL;
     H5FD_mem_t		type;
 
     FUNC_ENTER_API(H5FDregister, FAIL)
@@ -232,16 +267,69 @@ H5FDregister(const H5FD_class_t *cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "`get_eof' method is not defined")
     if (!cls->read || !cls->write)
 	HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "`read' and/or `write' method is not defined")
-    for (type=H5FD_MEM_DEFAULT; type<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,type)) {
-	if (cls->fl_map[type]<H5FD_MEM_NOLIST ||
-                cls->fl_map[type]>=H5FD_MEM_NTYPES)
+    for (type=H5FD_MEM_DEFAULT; type<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,type))
+	if (cls->fl_map[type]<H5FD_MEM_NOLIST || cls->fl_map[type]>=H5FD_MEM_NTYPES)
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid free-list mapping")
-    }
+
+    /* Create the new class ID */
+    if ((ret_value=H5FD_register(cls, sizeof(H5FD_class_t)))<0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register file driver ID")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDregister() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_register
+ *
+ * Purpose:	Registers a new file driver as a member of the virtual file
+ *		driver class.  Certain fields of the class struct are
+ *		required and that is checked here so it doesn't have to be
+ *		checked every time the field is accessed.
+ *
+ * Return:	Success:	A file driver ID which is good until the
+ *				library is closed or the driver is
+ *				unregistered.
+ *
+ *		Failure:	A negative value.
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July 26, 1999
+ *
+ * Modifications:
+ *              Broke into public and internal routines & added 'size'
+ *              parameter to internal routine, which allows us to create
+ *              sub-classes of H5FD_class_t for internal support (see the
+ *              MPI drivers, etc.)
+ *              Quincey Koziol
+ *              January 30, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5FD_register(const void *_cls, size_t size)
+{
+    hid_t		ret_value;
+    const H5FD_class_t	*cls=(const H5FD_class_t *)_cls;
+    H5FD_class_t	*saved=NULL;
+    H5FD_mem_t		type;
+
+    FUNC_ENTER_NOAPI(H5FD_register, FAIL)
+
+    /* Check arguments */
+    assert(cls);
+    assert(cls->open && cls->close);
+    assert(cls->get_eoa && cls->set_eoa);
+    assert(cls->get_eof);
+    assert(cls->read && cls->write);
+    for (type=H5FD_MEM_DEFAULT; type<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,type))
+        assert(cls->fl_map[type]>=H5FD_MEM_NOLIST && cls->fl_map[type]<H5FD_MEM_NTYPES);
 
     /* Copy the class structure so the caller can reuse or free it */
-    if (NULL==(saved=H5MM_malloc(sizeof(H5FD_class_t))))
+    if (NULL==(saved=H5MM_malloc(size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for file driver class struct")
-    *saved = *cls;
+    HDmemcpy(saved,cls,size);
 
     /* Create the new class ID */
     if ((ret_value=H5I_register(H5I_VFL, saved))<0)
@@ -252,8 +340,8 @@ done:
         if(saved)
             H5MM_xfree(saved);
 
-    FUNC_LEAVE_API(ret_value)
-} /* end H5FDregister() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_register() */
 
 
 /*-------------------------------------------------------------------------
@@ -2336,6 +2424,9 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver free request failed")
     } else {
         /* leak memory */
+#ifdef H5F_DEBUG
+HDfprintf(stderr, "%s: LEAKED MEMORY!!!!!!\n", FUNC);
+#endif /* H5F_DEBUG */
     }
 
 done:
@@ -3344,6 +3435,9 @@ HDmemset(file->meta_accum+file->accum_size,0,(file->accum_buf_size-file->accum_s
 
                     /* Note the new buffer size */
                     file->accum_buf_size=size;
+#ifdef H5_USING_PURIFY
+HDmemset(file->meta_accum+file->accum_size,0,(file->accum_buf_size-file->accum_size));
+#endif /* H5_USING_PURIFY */
                 } /* end if */
                 else {
                     /* Check if we should shrink the accumulator buffer */
@@ -3357,9 +3451,6 @@ HDmemset(file->meta_accum+file->accum_size,0,(file->accum_buf_size-file->accum_s
 
                         /* Note the new buffer size */
                         file->accum_buf_size=tmp_size;
-#ifdef H5_USING_PURIFY
-HDmemset(file->meta_accum+file->accum_size,0,(file->accum_buf_size-file->accum_size));
-#endif /* H5_USING_PURIFY */
                     } /* end if */
                 } /* end else */
 

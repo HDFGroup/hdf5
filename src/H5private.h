@@ -1004,7 +1004,7 @@ extern H5_debug_t		H5_debug_g;
 #define H5TRACE_RETURN(V)		                /*void*/
 #endif
 
-H5_DLL double H5_trace(double *calltime, const char *func, const char *type, ...);
+H5_DLL double H5_trace(const double *calltime, const char *func, const char *type, ...);
 
 
 /*-------------------------------------------------------------------------

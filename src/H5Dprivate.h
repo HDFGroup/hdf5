@@ -22,9 +22,7 @@
 #include "H5Dpublic.h"
 
 /* Private headers needed by this file */
-#include "H5FDfphdf5.h"
-#include "H5FDmpio.h"
-#include "H5FDmpiposix.h"
+#include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 
 /*

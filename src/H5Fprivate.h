@@ -225,7 +225,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_RDCC_W0(F)          (H5F_rdcc_w0(F))
 #define H5F_HAS_FEATURE(F,FL)   (H5F_has_feature(F,FL))
 #define H5F_GRP_BTREE_SHARED(F) (H5F_grp_btree_shared(F))
-#define H5F_BASE_ADDR(F)        (H5F_base_addr(F))
+#define H5F_BASE_ADDR(F)        (H5F_get_base_addr(F))
 #endif /* H5F_PACKAGE */
 
 

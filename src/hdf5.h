@@ -21,7 +21,6 @@
 #define _HDF5_H
 
 #include "H5public.h"
-#include "H5Ipublic.h"		/* Interface abstraction		*/
 #include "H5Apublic.h"		/* Attributes				*/
 #include "H5ACpublic.h"		/* Metadata cache			*/
 #include "H5Bpublic.h"		/* B-trees				*/
@@ -32,6 +31,7 @@
 #include "H5Gpublic.h"		/* Groups				*/
 #include "H5HGpublic.h"		/* Global heaps				*/
 #include "H5HLpublic.h"		/* Local heaps				*/
+#include "H5Ipublic.h"		/* ID management			*/
 #include "H5MMpublic.h"		/* Memory management			*/
 #include "H5Opublic.h"		/* Object headers			*/
 #include "H5Ppublic.h"		/* Property lists			*/
@@ -43,11 +43,9 @@
 /* Predefined file drivers */
 #include "H5FDcore.h"		/* Files stored entirely in memory	*/
 #include "H5FDfamily.h"		/* File families 			*/
-#include "H5FDfphdf5.h" 	/* Flexible Parallel HDF5               */
 #include "H5FDgass.h"		/* Remote files using GASS I/O		*/
 #include "H5FDlog.h"        	/* sec2 driver with I/O logging (for debugging) */
-#include "H5FDmpio.h"		/* Parallel files using MPI-2 I/O	*/
-#include "H5FDmpiposix.h"	/* Parallel files using combination MPI-2 & posix I/O */
+#include "H5FDmpi.h"            /* MPI-based file drivers		*/
 #include "H5FDmulti.h"		/* Usage-partitioned file family	*/
 #include "H5FDsec2.h"		/* POSIX unbuffered file I/O		*/
 #include "H5FDsrb.h"        	/* Remote access using SRB              */

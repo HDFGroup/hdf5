@@ -867,8 +867,6 @@
 ./src/H5FDcore.h
 ./src/H5FDfamily.c
 ./src/H5FDfamily.h
-./src/H5FDfphdf5.c
-./src/H5FDfphdf5.h
 ./src/H5FDgass.c
 ./src/H5FDgass.h
 ./src/H5FDlog.c
@@ -893,11 +891,6 @@
 ./src/H5FLprivate.h
 ./src/H5FO.c
 ./src/H5FOprivate.h
-./src/H5FP.c
-./src/H5FPclient.c
-./src/H5FPprivate.h
-./src/H5FPpublic.h
-./src/H5FPserver.c
 ./src/H5FS.c
 ./src/H5FSprivate.h
 ./src/H5G.c

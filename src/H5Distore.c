@@ -52,6 +52,7 @@
 #include "H5Dpkg.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files				*/
+#include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFprivate.h"	/* File space management		*/
@@ -60,11 +61,6 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Sprivate.h"         /* Dataspaces                           */
 #include "H5Vprivate.h"		/* Vector and array functions		*/
-
-/* MPIO, MPIPOSIX, & FPHDF5 drivers needed for special checks */
-#include "H5FDfphdf5.h"
-#include "H5FDmpio.h"
-#include "H5FDmpiposix.h"
 
 /*
  * Feature: If this constant is defined then every cache preemption and load
@@ -2245,9 +2241,6 @@ H5D_istore_chunk_alloc(size_t size, const H5O_pline_t *pline)
         ret_value=H5MM_malloc(size);
     else
         ret_value=H5FL_BLK_MALLOC(chunk,size);
-#ifdef H5_USING_PURIFY
-HDmemset(ret_value,0,size);
-#endif /* H5_USING_PURIFY */
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5D_istore_chunk_alloc() */

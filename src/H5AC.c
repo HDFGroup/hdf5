@@ -36,25 +36,20 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5AC_mask
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* Files				*/
+#include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"         /* Property lists                       */
-
-/*
- * The MPIO, MPIPOSIX, & FPHDF5 drivers are needed because there are
- * places where we check for the parallel I/O transfer mode.
- */
-#include "H5FDfphdf5.h"
-#include "H5FDmpio.h"
-#include "H5FDmpiposix.h"
-
-#define PABLO_MASK      H5AC_mask
 
 /* Interface initialization */
 static int             interface_initialize_g = 0;
@@ -196,85 +191,86 @@ H5AC_init_interface(void)
     H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
     herr_t ret_value=SUCCEED;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5AC_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT(H5AC_init_interface)
 
     /* Sanity check */
-    assert(H5P_CLS_DATASET_XFER_g!=(-1));
+    HDassert(H5P_CLS_DATASET_XFER_g!=(-1));
 
     /* Get the dataset transfer property list class object */
     if (NULL == (xfer_pclass = H5I_object(H5P_CLS_DATASET_XFER_g)))
-        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get property list class");
+        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get property list class")
 
     /* Get an ID for the blocking, collective H5AC dxpl */
     if ((H5AC_dxpl_id=H5P_create_id(xfer_pclass)) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list");
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
 
     /* Get the property list object */
     if (NULL == (xfer_plist = H5I_object(H5AC_dxpl_id)))
-        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object");
+        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
 
     /* Insert 'block before metadata write' property */
     block_before_meta_write=1;
     if(H5P_insert(xfer_plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME,H5AC_BLOCK_BEFORE_META_WRITE_SIZE,&block_before_meta_write,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
     /* Insert 'library internal' property */
     if(H5P_insert(xfer_plist,H5AC_LIBRARY_INTERNAL_NAME,H5AC_LIBRARY_INTERNAL_SIZE,&library_internal,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
     /* Set the transfer mode */
     xfer_mode=H5FD_MPIO_COLLECTIVE;
     if (H5P_set(xfer_plist,H5D_XFER_IO_XFER_MODE_NAME,&xfer_mode)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
 
     /* Get an ID for the non-blocking, collective H5AC dxpl */
     if ((H5AC_noblock_dxpl_id=H5P_create_id(xfer_pclass)) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list");
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
 
     /* Get the property list object */
     if (NULL == (xfer_plist = H5I_object(H5AC_noblock_dxpl_id)))
-        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object");
+        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
 
     /* Insert 'block before metadata write' property */
     block_before_meta_write=0;
     if(H5P_insert(xfer_plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME,H5AC_BLOCK_BEFORE_META_WRITE_SIZE,&block_before_meta_write,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
     /* Insert 'library internal' property */
     if(H5P_insert(xfer_plist,H5AC_LIBRARY_INTERNAL_NAME,H5AC_LIBRARY_INTERNAL_SIZE,&library_internal,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
     /* Set the transfer mode */
     xfer_mode=H5FD_MPIO_COLLECTIVE;
     if (H5P_set(xfer_plist,H5D_XFER_IO_XFER_MODE_NAME,&xfer_mode)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
 
     /* Get an ID for the non-blocking, independent H5AC dxpl */
     if ((H5AC_ind_dxpl_id=H5P_create_id(xfer_pclass)) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list");
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
 
     /* Get the property list object */
     if (NULL == (xfer_plist = H5I_object(H5AC_ind_dxpl_id)))
-        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object");
+        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
 
     /* Insert 'block before metadata write' property */
     block_before_meta_write=0;
     if(H5P_insert(xfer_plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME,H5AC_BLOCK_BEFORE_META_WRITE_SIZE,&block_before_meta_write,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
     /* Insert 'library internal' property */
     if(H5P_insert(xfer_plist,H5AC_LIBRARY_INTERNAL_NAME,H5AC_LIBRARY_INTERNAL_SIZE,&library_internal,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
     /* Set the transfer mode */
     xfer_mode=H5FD_MPIO_INDEPENDENT;
     if (H5P_set(xfer_plist,H5D_XFER_IO_XFER_MODE_NAME,&xfer_mode)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
+
 #else /* H5_HAVE_PARALLEL */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5AC_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5AC_init_interface)
 
     /* Sanity check */
     assert(H5P_LST_DATASET_XFER_g!=(-1));
@@ -283,7 +279,7 @@ done:
     H5AC_noblock_dxpl_id=H5P_DATASET_XFER_DEFAULT;
     H5AC_ind_dxpl_id=H5P_DATASET_XFER_DEFAULT;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 #endif /* H5_HAVE_PARALLEL */
 } /* end H5AC_init_interface() */
 
@@ -310,7 +306,7 @@ H5AC_term_interface(void)
 {
     int		n=0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5AC_term_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5AC_term_interface)
 
     if (interface_initialize_g) {
 #ifdef H5_HAVE_PARALLEL
@@ -345,7 +341,7 @@ H5AC_term_interface(void)
             interface_initialize_g = 0;
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(n);
+    FUNC_LEAVE_NOAPI(n)
 } /* end H5AC_term_interface() */
 
 
@@ -544,7 +540,7 @@ H5AC_find(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 
 #ifdef H5_HAVE_PARALLEL
     /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
-    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
+    if(IS_H5FD_MPI(f)) {
         H5AC_dest_func_t        dest;
 
         /* Get local pointer to file's dirty cache information */
@@ -622,7 +618,7 @@ H5AC_find(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 
 #ifdef H5_HAVE_PARALLEL
     /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
-    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
+    if(IS_H5FD_MPI(f)) {
         H5P_genplist_t *dxpl;           /* Dataset transfer property list */
         H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
 
@@ -804,7 +800,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 #ifdef H5_HAVE_PARALLEL
         /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
-        if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
+        if(IS_H5FD_MPI(f)) {
             H5AC_info_t       **dinfo;
 #ifdef H5AC_DEBUG
             H5AC_subid_t        type_id;
@@ -931,7 +927,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
         info = cache->slot + i;
 #ifdef H5_HAVE_PARALLEL
         /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
-        if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
+        if(IS_H5FD_MPI(f)) {
             H5AC_info_t       **dinfo;
 #ifdef H5AC_DEBUG
             H5AC_subid_t        type_id;
@@ -1080,7 +1076,7 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
 
 #ifdef H5_HAVE_PARALLEL
     /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
-    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
+    if(IS_H5FD_MPI(f)) {
         H5AC_info_t       **dinfo;
 #ifdef H5AC_DEBUG
         H5AC_subid_t        type_id;
@@ -1253,7 +1249,7 @@ H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t old_addr,
 
 #ifdef H5_HAVE_PARALLEL
     /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
-    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
+    if(IS_H5FD_MPI(f)) {
         H5AC_info_t       **new_dinfo;
 #ifdef H5AC_DEBUG
         H5AC_subid_t        type_id;
@@ -1351,7 +1347,7 @@ H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t old_addr,
 
 #ifdef H5_HAVE_PARALLEL
     /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
-    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
+    if(IS_H5FD_MPI(f)) {
         H5AC_info_t       **old_dinfo;
 #ifdef H5AC_DEBUG
         H5AC_subid_t        type_id;
@@ -1463,7 +1459,7 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 
 #ifdef H5_HAVE_PARALLEL
     /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
-    if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
+    if(IS_H5FD_MPI(f)) {
         H5AC_info_t       **dinfo;
 
         /* Get pointer to new 'held' information */
@@ -1685,7 +1681,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, 
     if(!deleted) {
 #ifdef H5_HAVE_PARALLEL
         /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
-        if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f)) {
+        if(IS_H5FD_MPI(f)) {
             H5AC_info_t       **dinfo;
 #ifdef H5AC_DEBUG
             H5AC_subid_t        type_id;
