@@ -3622,6 +3622,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_convert() */
 
+#ifdef LATER
 
 /*--------------------------------------------------------------------------
  NAME
@@ -3738,6 +3739,127 @@ H5S_hyper_intersect (H5S_t *space1, H5S_t *space2)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_intersect() */
+#endif /* LATER */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_intersect_block_helper
+ PURPOSE
+    Helper routine to detect intersections in span trees
+ USAGE
+    htri_t H5S_hyper_intersect_block_helper(spans, start, end)
+        H5S_hyper_span_info_t *spans;     IN: First span tree to operate with
+        hssize_t *offset;   IN: Selection offset coordinate
+        hssize_t *start;    IN: Starting coordinate for block
+        hssize_t *end;      IN: Ending coordinate for block
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Quickly detect intersections between span tree and block
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static htri_t
+H5S_hyper_intersect_block_helper (const H5S_hyper_span_info_t *spans, hssize_t *offset, hssize_t *start, hssize_t *end)
+{
+    H5S_hyper_span_t *curr;     /* Pointer to current span in 1st span tree */
+    htri_t status;              /* Status from recursive call */
+    htri_t ret_value=FALSE;     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_intersect_block_helper);
+
+    /* Sanity check */
+    assert(spans);
+    assert(offset);
+    assert(start);
+    assert(end);
+
+    /* Get the span list for spans in this tree */
+    curr=spans->head;
+
+    /* Iterate over the spans in the tree */
+    while(curr!=NULL) {
+        /* Check for span entirely before block */
+        if((curr->high+*offset)<*start)
+            /* Advance to next span in this dimension */
+            curr=curr->next;
+        /* If this span is past the end of the block, then we're done in this dimension */
+        else if((curr->low+*offset)>*end)
+            HGOTO_DONE(FALSE)
+        /* block & span overlap */
+        else {
+            if(curr->down==NULL)
+                HGOTO_DONE(TRUE)
+            else {
+                /* Recursively check spans in next dimension down */
+                if((status=H5S_hyper_intersect_block_helper(curr->down,offset+1,start+1,end+1))<0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab intersection check");
+
+                /* If there is a span intersection in the down dimensions, the span trees overlap */
+                if(status==TRUE)
+                    HGOTO_DONE(TRUE);
+
+                /* No intersection in down dimensions, advance to next span */
+                curr=curr->next;
+            } /* end else */
+        } /* end else */
+    } /* end while */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_hyper_intersect_block_helper() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_intersect_block
+ PURPOSE
+    Detect intersections in span trees
+ USAGE
+    htri_t H5S_hyper_intersect_block(space, start, end)
+        H5S_t *space;       IN: First dataspace to operate on span tree
+        hssize_t *start;    IN: Starting coordinate for block
+        hssize_t *end;      IN: Ending coordinate for block
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Quickly detect intersections between span tree and block
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t 
+H5S_hyper_intersect_block (const H5S_t *space, hssize_t *start, hssize_t *end)
+{
+    htri_t ret_value=FAIL;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_intersect_block);
+
+    /* Sanity check */
+    assert(space);
+    assert(start);
+    assert(end);
+
+    /* Check for 'all' selection, instead of a hyperslab selection */
+    /* (Technically, this shouldn't be in the "hyperslab" routines...) */
+    if(space->select.type==H5S_SEL_ALL)
+        HGOTO_DONE(TRUE);
+
+    /* Check that the space selections both have span trees */
+    if(space->select.sel_info.hslab.span_lst==NULL)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL, "dataspace does not have span tree");
+
+    /* Perform the span-by-span intersection check */
+    if((ret_value=H5S_hyper_intersect_block_helper(space->select.sel_info.hslab.span_lst,space->select.offset,start,end))<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab intersection check");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_hyper_intersect_block() */
 
 
 /*--------------------------------------------------------------------------
