@@ -4354,6 +4354,8 @@ relink_command=\"$relink_command\""
               tmpdir=`mktemp -d $tmpdir/libtool-XXXXXX 2> /dev/null`
               if test $? = 0 ; then :
               else
+                tmpdir="/tmp"
+                test -n "$TMPDIR" && tmpdir="$TMPDIR"
                 tmpdir="$tmpdir/libtool-$$"
               fi
 	      if $mkdir -p "$tmpdir" && chmod 700 "$tmpdir"; then :
