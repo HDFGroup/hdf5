@@ -439,7 +439,7 @@ H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_sym_k, FAIL);
-    H5TRACE3("e","iIsIu",plist_id,ik,lk);
+    H5TRACE3("e","iIuIu",plist_id,ik,lk);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
@@ -636,7 +636,7 @@ H5Pset_istore_k(hid_t plist_id, unsigned ik)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_istore_k, FAIL);
-    H5TRACE2("e","iIs",plist_id,ik);
+    H5TRACE2("e","iIu",plist_id,ik);
 
     /* Check arguments */
     if (ik == 0)

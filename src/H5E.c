@@ -280,6 +280,39 @@ done:
 }
 #endif  /* H5_HAVE_THREADSAFE */
 
+#ifndef NEW_ERR
+
+/*--------------------------------------------------------------------------
+ * Function:    H5E_init_interface
+ *
+ * Purpose:     Initialize interface-specific information
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, July 11, 2003
+ *               
+ *--------------------------------------------------------------------------
+ */
+static herr_t
+H5E_init_interface(void)
+{
+    herr_t          ret_value                = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOINIT(H5E_init_interface);
+
+    /* Initialize the atom group for the dataset IDs */
+    H5I_init_group(H5I_ERROR_CLASS, H5I_ERRORCLS_HASHSIZE, H5E_RESERVED_ATOMS, 
+                    (H5I_free_t)H5E_unregister_class);
+
+    /* From the old function; take out later */
+    H5E_auto_data_g = stderr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+#else /* NEW_ERR */
 
 /*-------------------------------------------------------------------------
  * Function:	H5E_init_interface
@@ -308,6 +341,147 @@ H5E_init_interface (void)
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
+#endif /* NEW_ERR */
+
+#ifndef NEW_ERR
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Eregister_class
+ *
+ * Purpose:	Registers an error class.
+ *
+ * Return:	Non-negative value as class ID on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 11, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Eregister_class(const char *cls_name, const char *lib_name, const char *version)
+{
+    hid_t       ret_value;   /* Return value */
+
+    FUNC_ENTER_API(H5Eregister_class, FAIL);
+    H5TRACE3("i","sss",cls_name,lib_name,version);
+    
+    /* Add HGOTO_ERROR later */
+    ret_value=H5E_register_class(cls_name, lib_name, version);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_register_class
+ *
+ * Purpose:	Private function to register an error class.
+ *
+ * Return:	Non-negative value as class ID on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 11, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5E_register_class(const char *cls_name, const char *lib_name, const char *version)
+{
+    hid_t       ret_value;   /* Return value */
+    H5E_cls_t   *cls;
+    
+    FUNC_ENTER_NOAPI(H5E_register_class, FAIL);
+    
+    cls = HDmalloc(sizeof(H5E_cls_t));
+
+    cls->cls_name = (char*)HDmalloc(sizeof(char)*(HDstrlen(cls_name)+1));
+    HDstrcpy(cls->cls_name, cls_name);
+
+    cls->lib_name = HDmalloc(sizeof(char)*(strlen(lib_name)+1));
+    HDstrcpy(cls->lib_name, lib_name);
+
+    cls->lib_vers = HDmalloc(sizeof(char)*(strlen(version)+1));
+    HDstrcpy(cls->lib_vers, version);
+
+    /* Register the new error class to get an ID for it */
+    ret_value = H5I_register(H5I_ERROR_CLASS, cls);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Eunregister_class
+ *
+ * Purpose:	Closes an error class.
+ *
+ * Return:	Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 11, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Eunregister_class(hid_t class_id)
+{
+    herr_t       ret_value = SUCCEED;   /* Return value */
+    H5E_cls_t    *cls;
+
+    FUNC_ENTER_API(H5Eunregister_class, FAIL);
+    H5TRACE1("e","i",class_id);
+    
+    cls = H5I_object_verify(class_id, H5I_ERROR_CLASS);
+
+    /*
+     * Decrement the counter on the dataset.  It will be freed if the count
+     * reaches zero.
+     */
+    H5I_dec_ref(class_id);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_unregister_class
+ *
+ * Purpose:	Private function to close an error class.
+ *
+ * Return:	Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 11, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5E_unregister_class(H5E_cls_t *cls)
+{
+    herr_t       ret_value = SUCCEED;   /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5E_unregister_class, FAIL);
+    
+    HDfree(cls->cls_name);
+    HDfree(cls->lib_name);
+    HDfree(cls->lib_vers);
+    HDfree(cls);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+#endif /* NEW_ERR */
+
+
 
 
 /*-------------------------------------------------------------------------
@@ -837,4 +1011,3 @@ H5E_walk (H5E_direction_t direction, H5E_walk_t func, void *client_data)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-
