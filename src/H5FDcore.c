@@ -104,7 +104,7 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD_core_open,				/*open			*/
     H5FD_core_close,				/*close			*/
     H5FD_core_cmp,				/*cmp			*/
-    NULL,				    /*query			*/
+    NULL,				        /*query			*/
     NULL,					/*alloc			*/
     NULL,					/*free			*/
     H5FD_core_get_eoa,				/*get_eoa		*/
