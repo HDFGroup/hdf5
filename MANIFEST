@@ -1551,8 +1551,8 @@
 ./hl/src/H5IM.h
 ./hl/src/H5LT.c
 ./hl/src/H5LT.h
-./hl/src/H5TA.c
-./hl/src/H5TA.h
+./hl/src/H5TB.c
+./hl/src/H5TB.h
 ./hl/test/Dependencies
 ./hl/test/Makefile.in
 ./hl/test/test_image.c
