@@ -1,13 +1,15 @@
-#include <H5private.h>
-#include <h5dump.h>
+#include "h5dump.h"
+#include <stdio.h>
+#include "H5private.h"
 
 static int indent = 0;
+static int display_data = 1;
+static int status = 0;
 
 static void dump_group (hid_t , const char* );
-static void dump_dataset (hid_t, const  char* );
+static void dump_dataset (hid_t, const  char*);
 static void dump_data (hid_t, int);
 static void dump_named_datatype (hid_t , const char *);
-
 
 /*-------------------------------------------------------------------------
  * Function:    usage
@@ -24,29 +26,18 @@ static void dump_named_datatype (hid_t , const char *);
 static void
 usage(void)
 {
+fprintf(stderr, 
+"\nUsage of HDF5 Dumper:\n\n  \
+h5dump [-h] [-bb] [-header] [-a <names>] [-d <names>] [-g <names>]\n  \
+       [-l <names>] <file>\n\n\
+  -h            Print information on this command.\n\
+  -bb           Display the conent of boot block. The default is not to display.\n\
+  -header       Display header only; that is, no data displayed.\n\
+  -a <names>    Display the specified attribute(s).\n\
+  -d <names>    Display the specified dataset(s).\n\
+  -g <names>    Display all the objects within the specified group(s).\n\
+  -l <names>    Display the specified link value(s).\n\n"); 
 
-printf("Usage: h5dump <file>\n");
-
-/*
-     h5dump [-h] [-bb] [-header] [-a <names>] [-d <names>] [-g <names>] 
-            [-l <names>] <files>
-
-     -h               Print information on this command.
-
-     -bb              Display the conent of boot block. The default is not to
-                      display.
-
-     -header          Display header only; that is, no data displayed.
-
-     -a <names>       Display the specified attribute.
-
-     -d <names>       Display the specified dataset.
-
-     -g <names>       Display all the objects within the specified group.
-
-     -l <names>       Display the specified link value.
-
-*/
 }
 
 
@@ -75,132 +66,140 @@ static void indentation(int x) {
 /*-------------------------------------------------------------------------
  * Function:    datatype_name
  *
- * Purpose:     Returns the name of data type. 
+ * Purpose:     Prints the name of data type. 
  *
- * Return:      Returns a pointer to a string. 
+ * Return:      void
  *
  * Programmer:  Ruey-Hsia Li
  *
  * Modifications:
  *
  *-----------------------------------------------------------------------*/
-static const char*
+static void
 datatype_name(hid_t type) {
 
     switch (H5Tget_class(type)) {
 
     case H5T_INTEGER:
 
-        if (H5Tequal(type, H5T_NATIVE_CHAR)) 
-            return "H5T_NATIVE_CHAR";
-        else if (H5Tequal(type, H5T_NATIVE_UCHAR))
-            return "H5T_NATIVE_UCHAR";
-        else if (H5Tequal(type, H5T_NATIVE_SHORT))
-            return "H5T_NATIVE_SHORT";
-        else if (H5Tequal(type, H5T_NATIVE_USHORT))
-            return "H5T_NATIVE_USHORT";
-        else if (H5Tequal(type, H5T_NATIVE_INT))
-            return "H5T_NATIVE_INT";
-        else if (H5Tequal(type, H5T_NATIVE_UINT))
-            return "H5T_NATIVE_UINT";
-        else if (H5Tequal(type, H5T_NATIVE_LONG))
-            return "H5T_NATIVE_LONG";
-        else if (H5Tequal(type, H5T_NATIVE_ULONG))
-            return "H5T_NATIVE_ULONG";
-        else if (H5Tequal(type, H5T_NATIVE_LLONG))
-            return "H5T_NATIVE_LLONG";
-        else if (H5Tequal(type, H5T_NATIVE_ULLONG))
-            return "H5T_NATIVE_ULLONG";
-        else if (H5Tequal(type, H5T_STD_I8BE))
-            return "H5T_STD_I8BE";
+        if (H5Tequal(type, H5T_STD_I8BE))
+            printf( "H5T_STD_I8BE");
         else if (H5Tequal(type, H5T_STD_I8LE))
-            return "H5T_STD_I8LE";
+            printf( "H5T_STD_I8LE");
         else if (H5Tequal(type, H5T_STD_I16BE))
-            return "H5T_STD_I16BE";
+            printf( "H5T_STD_I16BE");
         else if (H5Tequal(type, H5T_STD_I16LE))
-            return "H5T_STD_I16LE";
+            printf( "H5T_STD_I16LE");
         else if (H5Tequal(type, H5T_STD_I32BE))
-            return "H5T_STD_I32BE";
+            printf( "H5T_STD_I32BE");
         else if (H5Tequal(type, H5T_STD_I32LE))
-            return "H5T_STD_I32LE";
+            printf( "H5T_STD_I32LE");
         else if (H5Tequal(type, H5T_STD_I64BE))
-            return "H5T_STD_I64BE";
+            printf( "H5T_STD_I64BE");
         else if (H5Tequal(type, H5T_STD_I64LE))
-            return "H5T_STD_I64LE";
+            printf( "H5T_STD_I64LE");
         else if (H5Tequal(type, H5T_STD_U8BE))
-            return "H5T_STD_U8BE";
+            printf( "H5T_STD_U8BE");
         else if (H5Tequal(type, H5T_STD_U8LE))
-            return "H5T_STD_U8LE";
+            printf( "H5T_STD_U8LE");
         else if (H5Tequal(type, H5T_STD_U16BE))
-            return "H5T_STD_U16BE";
+            printf( "H5T_STD_U16BE");
         else if (H5Tequal(type, H5T_STD_U16LE))
-            return "H5T_STD_U16LE";
+            printf( "H5T_STD_U16LE");
         else if (H5Tequal(type, H5T_STD_U32BE))
-            return "H5T_STD_U32BE";
+            printf( "H5T_STD_U32BE");
         else if (H5Tequal(type, H5T_STD_U32LE))
-            return "H5T_STD_U32LE";
+            printf( "H5T_STD_U32LE");
         else if (H5Tequal(type, H5T_STD_U64BE))
-            return "H5T_STD_U64BE";
+            printf( "H5T_STD_U64BE");
         else if (H5Tequal(type, H5T_STD_U64LE))
-            return "H5T_STD_U64LE";
-        else return "unknown integer";
+            printf( "H5T_STD_U64LE");
+        else if (H5Tequal(type, H5T_NATIVE_CHAR)) 
+            printf( "H5T_NATIVE_CHAR");
+        else if (H5Tequal(type, H5T_NATIVE_UCHAR))
+            printf( "H5T_NATIVE_UCHAR");
+        else if (H5Tequal(type, H5T_NATIVE_SHORT))
+            printf( "H5T_NATIVE_SHORT");
+        else if (H5Tequal(type, H5T_NATIVE_USHORT))
+            printf( "H5T_NATIVE_USHORT");
+        else if (H5Tequal(type, H5T_NATIVE_INT))
+            printf( "H5T_NATIVE_INT");
+        else if (H5Tequal(type, H5T_NATIVE_UINT))
+            printf( "H5T_NATIVE_UINT");
+        else if (H5Tequal(type, H5T_NATIVE_LONG))
+            printf( "H5T_NATIVE_LONG");
+        else if (H5Tequal(type, H5T_NATIVE_ULONG))
+            printf( "H5T_NATIVE_ULONG");
+        else if (H5Tequal(type, H5T_NATIVE_LLONG))
+            printf( "H5T_NATIVE_LLONG");
+        else if (H5Tequal(type, H5T_NATIVE_ULLONG))
+            printf( "H5T_NATIVE_ULLONG");
+        else printf( "unknown integer");
+        break;
 
     case H5T_FLOAT: 
-
-        if (H5Tequal(type, H5T_NATIVE_FLOAT))
-            return "H5T_NATIVE_FLOAT";
-        else if (H5Tequal(type, H5T_NATIVE_DOUBLE))
-            return "H5T_NATIVE_DOUBLE";
-        else if (H5Tequal(type, H5T_NATIVE_LDOUBLE))
-            return "H5T_NATIVE_LDOUBLE";
-        else if (H5Tequal(type, H5T_IEEE_F32BE))
-            return "H5T_IEEE_F32BE";
+        if (H5Tequal(type, H5T_IEEE_F32BE))
+            printf( "H5T_IEEE_F32BE");
         else if (H5Tequal(type, H5T_IEEE_F32LE))
-            return "H5T_IEEE_F32LE";
+            printf( "H5T_IEEE_F32LE");
         else if (H5Tequal(type, H5T_IEEE_F64BE))
-            return "H5T_IEEE_F64BE";
+            printf( "H5T_IEEE_F64BE");
         else if (H5Tequal(type, H5T_IEEE_F64LE))
-            return "H5T_IEEE_F64LE";
-        else return "unknown float";
+            printf( "H5T_IEEE_F64LE");
+        else if (H5Tequal(type, H5T_NATIVE_FLOAT))
+            printf( "H5T_NATIVE_FLOAT");
+        else if (H5Tequal(type, H5T_NATIVE_DOUBLE))
+            printf( "H5T_NATIVE_DOUBLE");
+        else if (H5Tequal(type, H5T_NATIVE_LDOUBLE))
+            printf( "H5T_NATIVE_LDOUBLE");
+        else printf( "unknown float");
+        break;
 
-    case H5T_TIME: return "time: not yet implemented";
+    case H5T_TIME: 
+        printf( "time: not yet implemented");
 
     case H5T_STRING: 
 
         if (H5Tequal(type,H5T_C_S1))
-            return "H5T_C_S1";
+            printf( "H5T_C_S1");
         else if (H5Tequal(type,H5T_FORTRAN_S1))
-            return "H5T_FORTRAN_S1";
-        else return "unknown string";
+            printf( "H5T_FORTRAN_S1");
+        else printf( "unknown string");
+        break;
 
     case H5T_BITFIELD: 
 
         if (H5Tequal(type, H5T_STD_B8BE))
-            return "H5T_STD_B8BE";
+            printf( "H5T_STD_B8BE");
         else if (H5Tequal(type, H5T_STD_B8LE))
-            return "H5T_STD_B8LE";
+            printf( "H5T_STD_B8LE");
         else if (H5Tequal(type, H5T_STD_B16BE))
-            return "H5T_STD_B16BE";
+            printf( "H5T_STD_B16BE");
         else if (H5Tequal(type, H5T_STD_B16LE))
-            return "H5T_STD_B16LE";
+            printf( "H5T_STD_B16LE");
         else if (H5Tequal(type, H5T_STD_B32BE))
-            return "H5T_STD_B32BE";
+            printf( "H5T_STD_B32BE");
         else if (H5Tequal(type, H5T_STD_B32LE))
-            return "H5T_STD_B32LE";
+            printf( "H5T_STD_B32LE");
         else if (H5Tequal(type, H5T_STD_B64BE))
-            return "H5T_STD_B64BE";
+            printf( "H5T_STD_B64BE");
         else if (H5Tequal(type, H5T_STD_B64LE))
-            return "H5T_STD_B64LE";
-        else return "unknown bitfield";
+            printf( "H5T_STD_B64LE");
+        else printf( "unknown bitfield");
+        break;
 
-    case H5T_OPAQUE: return "opaque: not yet implemented";
+    case H5T_OPAQUE: 
+        printf( "opaque: not yet implemented");
+        break;
 
     case H5T_COMPOUND: 
 
-         return "compound: not yet implemented";
+        printf( "compound: not yet implemented");
+        break;
 
     default:
-            return "unknown data type";
+        printf( "unknown data type");
+        break;
     }
 
 }
@@ -218,14 +217,12 @@ datatype_name(hid_t type) {
  * Modifications:
  *
  *-----------------------------------------------------------------------*/
-/*
 static void
-dump_bb() {
+dump_bb(void) {
 
-    printf ("%s %s %s\n", BOOT_BLOCK, BEGIN, END);
+    printf ("%s %s boot block not yet implemented %s\n", BOOT_BLOCK, BEGIN, END);
 
 }
-*/
 
 
 /*-------------------------------------------------------------------------
@@ -243,13 +240,11 @@ dump_bb() {
  *-----------------------------------------------------------------------*/
 static void
 dump_datatype (hid_t type) {
-const char *pt;
 
-    indent += col;
-    indentation (indent);
-    pt = datatype_name(type);
-    printf ("%s %s \"%s\" %s\n", DATATYPE, BEGIN, pt, END);
-    indent -= col;
+    indentation (indent+col);
+    printf ("%s %s \"", DATATYPE, BEGIN);
+    datatype_name(type);
+    printf ("\" %s\n", END);
 }
 
 
@@ -274,9 +269,7 @@ dump_dataspace (hid_t space)
     int ndims = H5Sget_simple_extent_dims(space, size, maxsize);
     int i;
 
-    indent += col;
-
-    indentation (indent);
+    indentation (indent+col);
 
     printf("%s ", DATASPACE);
 
@@ -303,8 +296,6 @@ dump_dataspace (hid_t space)
     } else
 
         printf("%s not yet implemented %s\n", BEGIN, END);
-
-    indent -= col;
 
 }
 
@@ -337,26 +328,149 @@ hid_t  attr_id, type, space;
         space = H5Aget_space(attr_id);
         dump_datatype(type);
         dump_dataspace(space);
-        dump_data(attr_id, ATTRIBUTE_DATA);
+        if (display_data) dump_data(attr_id, ATTRIBUTE_DATA);
         H5Tclose(type);
         H5Sclose(space);
 	H5Aclose (attr_id);
+        indentation (indent);
+        end_obj();
 
     } else {
-        indent += col;
+        indentation (indent+col);
+        printf("h5dump error: unable to open attribute.\n");
         indentation (indent);
-        printf("Unable to open attribute %s.\n", attr_name);
-        indent -= col;
+        end_obj();
+        status = 1;
         return FAIL;
     }
 
-    indentation (indent);
-    end_obj();
 
     return SUCCEED;
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    dump_selected_attr
+ *
+ * Purpose:     dump the selected attribute
+ *
+ * Return:      Success:        SUCCEED
+ *
+ *              Failure:        FAIL
+ *
+ * Programmer:  Ruey-Hsia Li
+ *
+ * Modifications:
+ *
+ *-----------------------------------------------------------------------*/
+static herr_t
+dump_selected_attr (hid_t loc_id, char *name)
+{
+int j;
+char *obj_name, *attr_name;
+hid_t  oid, attr_id, type, space;
+H5G_stat_t statbuf;
+
+
+
+    j = strlen(name)-1;
+    obj_name = malloc ((j+2) * sizeof(char));
+    /* find the last / */
+    while (name[j] != '/' && j >=0) j--;
+    /* object name */
+    if (j == -1) strcpy(obj_name, "/");
+    else strncpy(obj_name, name, j+1);
+ 
+    attr_name = name+j+1;
+
+    begin_obj (ATTRIBUTE, name);
+
+    H5Gget_objinfo(loc_id, obj_name, FALSE, &statbuf);
+    switch (statbuf.type) {
+    case H5G_GROUP:
+         if ((oid = H5Gopen (loc_id, obj_name))<0) {
+             indentation (col);
+             fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
+             end_obj();
+             status = 1;
+             return FAIL;
+         }
+         break;
+    case H5G_DATASET:
+         if ((oid = H5Dopen (loc_id, obj_name))<0) {
+             indentation (col);
+             fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
+             end_obj();
+             status = 1;
+             return FAIL;
+         }
+         break;
+    case H5G_TYPE:
+         if ((oid =  H5Topen(loc_id, obj_name)) < 0 ) {
+             indentation (col);
+             fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
+             end_obj();
+             status = 1;
+             return FAIL;
+         } 
+         break;
+    default:
+         indentation (col);
+         fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
+         end_obj();
+         status = 1;
+         return FAIL;
+    }
+
+    if ((attr_id = H5Aopen_name (oid, attr_name))>= 0) {
+
+        type = H5Aget_type(attr_id);
+        space = H5Aget_space(attr_id);
+        dump_datatype(type);
+        dump_dataspace(space);
+        if (display_data) dump_data(attr_id, ATTRIBUTE_DATA);
+        H5Tclose(type);
+        H5Sclose(space);
+	H5Aclose (attr_id);
+        end_obj();
+
+    } else {
+        indentation (col);
+        printf("h5dump error: unable to open attribute.\n");
+        end_obj();
+        status = 1;
+        return FAIL;
+    }
+
+    switch (statbuf.type) {
+    case H5G_GROUP:
+         if (H5Gclose (oid) < 0) {
+         status = 1;
+         return FAIL;
+         } 
+         break;
+          
+    case H5G_DATASET:
+         if (H5Dclose (oid) < 0 ) {
+             status = 1;
+             return FAIL;
+         } 
+         break;
+
+    case H5G_TYPE:
+         if (H5Tclose(oid) < 0 ) {
+             status = 1;
+             return FAIL;
+         } 
+         break;
+    default:
+         status = 1;
+         return FAIL;
+    }
+
+    free(obj_name);
+    return SUCCEED;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    dump all
@@ -388,22 +502,22 @@ dump_all (hid_t group, const char *name, void __unused__ *op_data)
 
     H5Gget_objinfo(group, name, FALSE, &statbuf);
 
+
     switch (statbuf.type) {
     case H5G_LINK:
-
         indentation (indent);
 
         buf = malloc (statbuf.linklen*sizeof(char));
 
         begin_obj(SOFTLINK, name);
-        indent += col;
-        indentation (indent);
+        indentation (indent+col);
         if (H5Gget_linkval (group, name, statbuf.linklen, buf)>=0) 
             printf ("linktarget \"%s\"\n", buf);
-        else
-            printf ("unable to get link value.\n");
+        else {
+            printf ("h5dump error: unable to get link value.\n");
+            status = 1;
+        }
 
-        indent -= col;
         indentation (indent);
         end_obj();
         free (buf);
@@ -413,8 +527,10 @@ dump_all (hid_t group, const char *name, void __unused__ *op_data)
          if ((obj=H5Gopen (group, name))>=0) {
              dump_group (obj, name);
              H5Gclose (obj);
-         } else 
-             printf ("unable to dump group %s\n",name);
+         } else {
+             printf ("h5dump error: unable to dump group %s\n",name);
+             status = 1;
+         }
 
          break;
 
@@ -423,8 +539,10 @@ dump_all (hid_t group, const char *name, void __unused__ *op_data)
          if ((obj=H5Dopen (group, name))>=0) {              
              dump_dataset (obj, name);
              H5Dclose (obj);
-         } else 
-             printf ("unable to dump dataset %s\n",name);
+         } else {
+             printf ("h5dump error: unable to dump dataset %s\n",name);
+             status = 1;
+         }
 
          break;
 
@@ -435,6 +553,7 @@ dump_all (hid_t group, const char *name, void __unused__ *op_data)
 
     default:
          printf ("Unknown Object %s\n", name);
+         status = 1; 
          H5Eset_auto (func, edata);
          return FAIL;
          break;
@@ -476,10 +595,8 @@ id = type_id; /*doesn't like warning message */
     indentation (indent);
     begin_obj(DATATYPE, name);
 
-    indent += col;
-    indentation(indent);
+    indentation(indent+col);
     printf("named data type: not yet implemented.\n");
-    indent -= col;
 
     indentation (indent);
     end_obj();
@@ -501,10 +618,21 @@ id = type_id; /*doesn't like warning message */
  *-----------------------------------------------------------------------*/
 static void
 dump_group (hid_t gid, const char *name) {
+H5G_stat_t statbuf;
 
     indentation (indent);
     begin_obj(GROUP, name);
     indent += col;
+
+    /* hard link */
+    H5Gget_objinfo(gid, ".", TRUE, &statbuf);
+    if (statbuf.nlink > 1) { 
+        indentation (indent);
+        printf("%s %s (%s %u) (%s %lu %lu) (%s %lu %lu ) %s\n", 
+               HARDLINK, BEGIN, NLINK, statbuf.nlink, FILENO, statbuf.fileno[0],
+               statbuf.fileno[1], OBJNO, statbuf.objno[0], statbuf.objno[1], END); 
+    }
+
     H5Aiterate (gid, NULL, dump_attr, NULL);
     H5Giterate (gid, ".", NULL, dump_all, NULL);
     indent -= col;
@@ -529,14 +657,26 @@ dump_group (hid_t gid, const char *name) {
 static void
 dump_dataset (hid_t did, const char *name) {
 hid_t  type, space;
+H5G_stat_t statbuf;
 
     indentation (indent);
     begin_obj(DATASET, name);
+
+    /* hard link */
+    H5Gget_objinfo(did, ".", TRUE, &statbuf);
+    if (statbuf.nlink > 1) {
+        indentation (indent+col);
+        printf("%s %s (%s %u) (%s %lu %lu) (%s %lu %lu ) %s\n",
+               HARDLINK, BEGIN, NLINK, statbuf.nlink, FILENO, statbuf.fileno[0],
+               statbuf.fileno[1], OBJNO, statbuf.objno[0], statbuf.objno[1], END);
+    }
+
     type = H5Dget_type (did);
     space = H5Dget_space (did);
     dump_datatype(type);
     dump_dataspace(space);
 
+    if (display_data)
     switch (H5Tget_class(type)) {
     case H5T_INTEGER:
          dump_data(did, DATASET_DATA);
@@ -657,7 +797,7 @@ dump_data (hid_t obj_id, int obj_data) {
 
 
 /*-------------------------------------------------------------------------
- * Function:    main
+ * Function:    
  *
  * Purpose:     HDF5 dumper
  *
@@ -671,34 +811,209 @@ dump_data (hid_t obj_id, int obj_data) {
  *-----------------------------------------------------------------------*/
 int
 main(int argc, char *argv[]) {
-hid_t fid, gid;
+hid_t fid, gid, dsetid;
 hid_t plist=H5P_DEFAULT;
 const char *fname = NULL;
+int i, curr_arg, display_bb=0, display_all=1;
+int nopts=0, *opts;
+char *buf;
+H5G_stat_t statbuf;
+void __unused__ *op_data;
 
-    if (argc > 2 || argc <= 1) {
+    if (argc < 2 ) {
         usage();
         exit(1);
     }
 
-    /* arguments */
-    fname = argv[1];
+    opts = malloc((argc/2) * sizeof (int));
+    opts[0] = -1;
+    /* parse command line options */
+    for (curr_arg = 1; curr_arg < argc; curr_arg++) 
 
-    /* open file */
-    if ((fid = H5Fopen (fname, H5F_ACC_RDONLY, plist))<0) exit(1);
-   
+         if (argv[curr_arg][0] == '-') {
+
+             opts[nopts++] = curr_arg;
+
+             if (!strcmp(argv[curr_arg],"-h")) {
+
+                 usage();
+                 exit(0);
+
+             } else if (!strcmp(argv[curr_arg],"-bb"))
+
+                 display_bb = 1;
+
+             else if (!strcmp(argv[curr_arg],"-header")) 
+
+                 display_data=0;
+
+             else if (strcmp(argv[curr_arg],"-a") &&
+                      strcmp(argv[curr_arg],"-d") &&
+                      strcmp(argv[curr_arg],"-g") &&
+                      strcmp(argv[curr_arg],"-l")) {
+
+                 fprintf(stderr, "h5dump error: illegal option %s \n", 
+                         argv[curr_arg]);
+                 usage();
+                 exit(1);
+             } else display_all = 0;
+         } 
+
+    /* check names */
+    if (argc == 2) {
+        if (opts[0] == 1) { /* argv[1] is an option */
+            fprintf(stderr, "h5dump error: no <names> or no <file>\n");
+            usage();
+            exit(1);
+        }
+    } else {
+        for (i = 0; i < nopts-1; i++) {
+             if (opts[i+1]-opts[i] == 1) {
+                if (strcmp(argv[opts[i]], "-bb") &&
+                    strcmp(argv[opts[i]], "-header") ) {
+                    fprintf(stderr,"h5dump error: no <names> after option %s\n",
+                            argv[opts[i]]);
+                    usage();
+                    exit(1);
+                } 
+             }
+        }
+        if (argc - opts[nopts-1] == 1) {
+            fprintf(stderr,"h5dump error: no <file>\n");
+            usage();
+            exit(1);
+        } 
+        if (argc - opts[nopts-1] == 2) {
+            if (strcmp(argv[opts[i]], "-bb") &&
+                strcmp(argv[opts[i]], "-header") ) {
+                fprintf (stderr, "h5dump error: no <file> or no <names> after option %s\n", argv[opts[i]]);
+                usage();
+                exit(1);
+            }
+        }
+    } 
+
+
+    if (argv[argc-1][0] == '\\') fname = &argv[argc-1][1];
+    else fname = argv[argc-1];
+
+    if ((fid = H5Fopen (fname, H5F_ACC_RDONLY, plist)) < 0) {
+         fprintf (stderr, "h5dump error: unable to open file %s \n", fname);
+         exit(1);
+    }
+
     begin_obj("HDF5", fname);
 
-    gid = H5Gopen (fid, "/");
+    if (display_bb) dump_bb();
+ 
+    if (display_all) {
 
-    dump_group(gid, "/");
+        if ((gid = H5Gopen (fid, "/")) < 0 ) {
+             fprintf(stdout, "h5dump error: unable to open root group\n");
+             status = 1;
+        } else
+             dump_group(gid, "/");
+
+        if (H5Gclose (gid) < 0) {
+            fprintf(stdout, "h5dump error: unable to close root group\n");
+            status = 1;
+        }
+
+    } else
+
+      for (i = 0; i < nopts; i++) {
+           if (!strcmp(argv[opts[i]],"-a")) { 
+
+               for (curr_arg = opts[i]+1; 
+                    curr_arg < ((i+1)==nopts?(argc-1):opts[i+1]); 
+                    curr_arg++) 
+
+                    dump_selected_attr (fid, argv[curr_arg]);
+
+           } else if (!strcmp(argv[opts[i]],"-d")) {
+                for (curr_arg = opts[i]+1; 
+                     curr_arg < ((i+1)==nopts?(argc-1):opts[i+1]); 
+                     curr_arg++) {
+
+                     if ((dsetid = H5Dopen (fid, argv[curr_arg]))<0) {
+                         begin_obj (DATASET, argv[curr_arg]); 
+                         indentation (col);
+                         fprintf (stdout, "h5dump error: unable to open %s\n", 
+                                  argv[curr_arg]);
+                         end_obj();
+                         status = 1;
+                     } else {
+                         dump_dataset(dsetid, argv[curr_arg]);
+                         if (H5Dclose(dsetid)<1) status = 1;
+                     }
+          
+                }
+
+           } else if (!strcmp(argv[opts[i]],"-g")) {
+
+                for (curr_arg = opts[i]+1; 
+                     curr_arg < ((i+1)==nopts?(argc-1):opts[i+1]); 
+                     curr_arg++) {
+                     if ((gid = H5Gopen (fid, argv[curr_arg])) < 0) {
+                         begin_obj (GROUP, argv[curr_arg]); 
+                         indentation (col);
+                         fprintf (stdout, "h5dump error: unable to open %s\n", 
+                                  argv[curr_arg]);
+                         end_obj();
+                         status = 1;
+                     } else {
+                         dump_group(gid, argv[curr_arg]);
+                         if (H5Gclose (gid) < 0) status = 1;
+                     }
+                }
+
+           } else if (!strcmp(argv[opts[i]],"-l")) {
+
+                for (curr_arg = opts[i]+1; 
+                     curr_arg < ((i+1)==nopts?(argc-1):opts[i+1]); 
+                     curr_arg++) {
+
+
+                     if (H5Gget_objinfo(fid, argv[curr_arg], FALSE, &statbuf) < 0) {
+                         begin_obj(SOFTLINK, argv[curr_arg]);
+                         indentation (col);
+                         fprintf(stdout, "h5dump error: unable to get obj info from %s\n", argv[curr_arg]);
+                         end_obj();
+                         status = 1;
+
+                     } else if (statbuf.type == H5G_LINK) {
+
+                         buf = malloc(statbuf.linklen*sizeof(char));
+                         begin_obj(SOFTLINK, argv[curr_arg]);
+                         indentation (col);
+                         if (H5Gget_linkval (fid, argv[curr_arg], statbuf.linklen, buf)>=0) 
+                             printf ("linktarget \"%s\"\n", buf);
+                         else {
+                             fprintf (stdout, "h5dump error: unable to get link value\n");
+                             status = 1;
+                         }
+                         end_obj();
+                         free(buf);
+
+                     } else {
+                         begin_obj(SOFTLINK, argv[curr_arg]);
+                         indentation (col);
+                         fprintf(stdout, "h5dump error: %s is not a link\n", argv[curr_arg]);
+                         end_obj();
+                         status = 1;
+                     }
+
+                 }
+
+           }
+      }
 
     end_obj();
-    
-    if (H5Gclose (gid) < 0) exit(1);
+
+    free(opts);
 
     if (H5Fclose (fid) < 0) exit(1);
-    
 
-    return 0;
+    return status;
 
 }

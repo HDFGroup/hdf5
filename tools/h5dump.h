@@ -16,7 +16,10 @@
 #define COMPRESSION	"COMPRESSION"
 #define EXTERNAL	"EXTERNAL"
 #define SOFTLINK	"SOFTLINK"
+#define HARDLINK	"HARDLINK"
 #define NLINK		"NLINK"
+#define FILENO		"FILENO"
+#define OBJNO		"OBJNO"
 
 #define BEGIN		"{"
 #define END		"}"
@@ -25,10 +28,20 @@
 #define DATASET_DATA	1
 
 
-#define begin_obj(x,y)	printf("%s \"%s\" %s\n", x, y, BEGIN)
-#define end_obj()	printf("%s\n", END);
+#define begin_obj(obj,name)	printf("%s \"%s\" %s\n", obj, name, BEGIN)
+#define end_obj()		printf("%s\n", END);
 
-#define col 3;
+#define col 3
+
+
+/*
+typedef enum
+  {
+     h, bb, header, a, d, g, l
+  }
+command_t;
+*/
+
 
 #endif
 

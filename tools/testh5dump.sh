@@ -173,11 +173,29 @@ TestName="Test command $TestCmd"
 if [ "$except" != $TestCmd -a \( -z "$only" -o "$only" = $TestCmd \) ]
 then
 MESG 3 "$TestName"
-TEST tgroup.ddl tgroup.h5
-TEST tdset.ddl tdset.h5
-TEST tattr.ddl tattr.h5
-TEST tslink.ddl tslink.h5
-TEST tall.ddl tall.h5
+TEST tgroup-1.ddl tgroup.h5
+TEST tgroup-2.ddl -g / tgroup.h5
+TEST tgroup-3.ddl -g /g2 /y tgroup.h5
+
+TEST tdset-1.ddl tdset.h5
+TEST tdset-2.ddl -d dset1 /dset2 tdset.h5
+TEST tdset-3.ddl -d /dset1 -header tdset.h5
+TEST tdset-4.ddl -d dset3 tdset.h5
+
+TEST tattr-1.ddl tattr.h5
+TEST tattr-2.ddl -a attr1 attr3 tattr.h5
+TEST tattr-3.ddl -header -a attr2 tattr.h5
+TEST tattr-4.ddl -a attr4 tattr.h5
+
+TEST tslink-1.ddl tslink.h5
+TEST tslink-2.ddl -l slink2 tslink.h5
+
+#TEST thlink-1.ddl thlink.h5
+
+TEST tall-1.ddl tall.h5
+TEST tall-2.ddl -header -g /g1/g1.1 -a attr2 tall.h5
+TEST tall-3.ddl -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5
+
 else
 MESG 3 "$TestName <<<SKIPPED>>>"
 fi
