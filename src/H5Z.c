@@ -1,20 +1,27 @@
-/*
- * Copyright (C) 1998-2001 NCSA
- *                         All rights reserved.
- *
- * Programmer:  Robb Matzke <matzke@llnl.gov>
- *              Thursday, April 16, 1998
- *
- * Purpose:	Functions for data filters.
- */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include "H5private.h"
 #include "H5Eprivate.h"
 #include "H5MMprivate.h"
 #include "H5Oprivate.h"
 #include "H5Zprivate.h"
 
-/* Interface initialization */
+/* Pablo mask */
 #define PABLO_MASK	H5Z_mask
+
+/* Interface initialization */
 #define INTERFACE_INIT H5Z_init_interface
 static int interface_initialize_g = 0;
 static herr_t H5Z_init_interface (void);
@@ -215,7 +222,7 @@ H5Z_register (H5Z_filter_t id, const char *comment, H5Z_func_t func)
     }
     if (i>=H5Z_table_used_g) {
 	if (H5Z_table_used_g>=H5Z_table_alloc_g) {
-	    size_t n = MAX(32, 2*H5Z_table_alloc_g);
+	    size_t n = MAX(H5Z_MAX_NFILTERS, 2*H5Z_table_alloc_g);
 	    H5Z_class_t *table = H5MM_realloc(H5Z_table_g,
 					      n*sizeof(H5Z_class_t));
 	    if (!table)
@@ -394,13 +401,13 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
      * Check filter limit.  We do it here for early warnings although we may
      * decide to relax this restriction in the future.
      */
-    if (pline->nfilters>=32)
+    if (pline->nfilters>=H5Z_MAX_NFILTERS)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "too many filters in pipeline");
 
     /* Allocate additional space in the pipeline if it's full */
     if (pline->nfilters>=pline->nalloc) {
 	H5O_pline_t x;
-	x.nalloc = MAX(32, 2*pline->nalloc);
+	x.nalloc = MAX(H5Z_MAX_NFILTERS, 2*pline->nalloc);
 	x.filter = H5MM_realloc(pline->filter, x.nalloc*sizeof(x.filter[0]));
 	if (NULL==x.filter)
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for filter pipeline");
@@ -516,7 +523,7 @@ H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, unsigned flags,
     assert(nbytes && *nbytes>0);
     assert(buf_size && *buf_size>0);
     assert(buf && *buf);
-    assert(!pline || pline->nfilters<32);
+    assert(!pline || pline->nfilters<H5Z_MAX_NFILTERS);
 
     if (pline && (flags & H5Z_FLAG_REVERSE)) { /* Read */
 	for (i=pline->nfilters; i>0; --i) {

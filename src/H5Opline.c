@@ -27,8 +27,10 @@
 #include "H5MMprivate.h"
 #include "H5Opkg.h"             /* Object header functions                  */
 
-/* Interface initialization */
+/* Pablo mask */
 #define PABLO_MASK	H5O_pline_mask
+
+/* Interface initialization */
 static int		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 
@@ -101,7 +103,7 @@ H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     if (version!=H5O_PLINE_VERSION)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "bad version number for filter pipeline message");
     pline->nfilters = *p++;
-    if (pline->nfilters>32)
+    if (pline->nfilters>H5Z_MAX_NFILTERS)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter pipeline message has too many filters");
     p += 6;	/*reserved*/
     pline->nalloc = pline->nfilters;
