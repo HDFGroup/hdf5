@@ -25,7 +25,7 @@ case "X-$CC" in
     ;;
 
   *)
-    CFLAGS="$CFLAGS -Ae"
+    CFLAGS="$CFLAGS -Ae -Wp,-H65536"  #increase the size of macro definition table. For test/dtypes.c
     DEBUG_CFLAGS=-g
     DEBUG_CPPFLAGS="-Ae"
     PROD_CFLAGS=-O
