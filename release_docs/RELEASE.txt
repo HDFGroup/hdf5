@@ -35,115 +35,118 @@ Bug Fixes since HDF5-1.4.2
 Library
 -------
 
-    * Fixed bug with contiguous hyperslabs not being detected, causing
-      slower I/O than necessary.
-    * Fixed bug where non-aligned hyperslab I/O on chunked datasets was
-      causing errors during I/O
-    * The RCSID string in H5public.h was causing the C++ compiling problem
-      because when it was included multiple times, C++ did not like multiple
-      definitions of the same static variable.  All occurance of RCSID
-      definition are removed since we have not used it consistently before.
-    * Fixed bug with non-zero userblock sizes causing raw data to not write
-      correctly. 
-    * Fixed build on Linux systems with --enable-static-exec flag. It now
-      works correctly.
-    * IMPORTANT: Fixed file metadata corruption bug which could cause metadata
-      data loss in certain situations.
-    * The allocation by alignment (H5Pset_alignment) feature code somehow
-      got dropped in some 1.3.x version. Re-implemented it with "new and
-      improved" algorithm.  It keeps track of "wasted" file-fragment in
-      the free-list too.
-    * Removed limitation that the data transfer buffer size needed to be
-      set for datasets whose dimensions were too large for the 'all' selection
-      code to handle.  Any size dimensioned datasets should be handled
-      correctly now.
-    * Changed behavior of H5Tget_member_type to correctly emulate HDF5 v1.2.x
-      when --enable-hdf5v1_2 configure flag is enabled.
-    * Tweaked a few API functions to use 'size_t' instead of 'unsigned' or
-      'hsize_t', which may cause errors in some cases.
-    * Fixed a bug of H5pubconf.h causing repeated definitions if it is included
-      more than once.  hdf5.h now includes H5public.h which includes
-      H5pubconf.h.  Applications should #include hdf5.h which handles multiple
-      inclusion correctly.
-    * Fixed H5FDmpio.h to be C++ friendly by making Parallel HDF5 API's to be
-      external to C++.
-    * Fixed a bug in H5FD_mpio_flush() that might result in negative file seek
-      if both MPIO and Split-file drivers are used together.
-    * Added new parallel hdf5 tests in t_mpi.  The new test checks if the
-      filesystem or the MPI-IO can really handle greater than 2GB files.
-      If it fails, it prints information message only without failing the
-      test.
-    * Fixed a bug when reading chunked datasets where the edge of the dataset
-      would be incorrectly detected and generate an assertion failure.
+    * Fixed bug where selection offset was being ignored for certain hyperslab
+      selections when optimized I/O was being performed.  QAK - 2002/04/02
+    * Added serial multi-gigabyte file size test.  "test/big -h" shows
+      the help page.  AKC - 2002/03/29
+    * Fixed bug where variable-length string type doesn't behave as
+      string.  SLU - 2002/03/28
+    * Fixed bug in H5Gget_objinfo() which was not setting the 'fileno'
+      of the H5G_stat_t struct.  QAK - 2002/03/27
+    * Fixed data corruption bug in hyperslab routines when contiguous
+      hyperslab that spans entire dimension and is larger than type
+      conversion buffer is attempted to be read.  QAK - 2002/03/26
+    * Fixed bug where non-zero fill-value was not being read correctly from
+      certain chunked datasets when using an "all" or contiguous hyperslab
+      selection.  QAK - 2002/02/14
+    * Fixed bug where a preempted chunk in the chunk data could still be
+      used by an internal pointer and cause an assertion failure or core
+      dump. QAK - 2002/02/13
+    * Fixed bug where raw data re-allocated from the free-list would sometimes
+      overlap with the metadata accumulator and get corrupted. QAK - 2002/01/23
+    * Fixed bug where variable-length datatypes for attributes was not working
+      correctly.
+    * Retired the DPSS virtual file driver (--with-gridstorage configure
+      option).
+    * Corrected behavior of H5Tinsert to not allow compound datatype fields to
+      be inserted past the end of the datatype.
+    * Fixed the internal macros used to encode & decode file metadata, to avoid
+      an unaligned access warning on IA64 machines.
+    * Fixed an off-by-one error in H5Sselect_valid when hyperslab selections
+      which would allow hyperslab selections which overlapped the edge of the
+      selection by one element as valid.
+    * Fixed a bug in internal B-tree code where a B-tree was not being copied
+      correctly.
+    * Fixed a bug in the 'big' test where quota limits weren't being detected
+      properly if they caused close() to fail.
+    * Fixed a bug where 'or'ing a hyperslab with a 'none' selection would
+      fail.  Now adds that hyperslab as the first hyperlab in the selection.
+    * Fixed a bug where appending a point selection to the current selection
+      would not actually append the point when there were no points defined
+      currently.
+    * Fixed a bug where reading or writing chunked data which needed datatype
+      conversion could result in data values getting corrupted.
     * Fixed a bug where reading an entire dataset wasn't being handled
       optimally when the dataset had unlimited dimensions.  Dataset is read
       in a single low-level I/O now, instead of being broken into separate
       pieces internally.
-    * Fixed a bug where reading or writing chunked data which needed datatype
-      conversion could result in data values getting corrupted.
-    * Fixed a bug where appending a point selection to the current selection
-      would not actually append the point when there were no points defined
-      currently.
-    * Fixed a bug where 'or'ing a hyperslab with a 'none' selection would
-      fail.  Now adds that hyperslab as the first hyperlab in the selection.
-    * Fixed a bug in the 'big' test where quota limits weren't being detected
-      properly if they caused close() to fail.
-    * Fixed a bug in internal B-tree code where a B-tree was not being copied
-      correctly.
-    * Fixed an off-by-one error in H5Sselect_valid when hyperslab selections
-      which would allow hyperslab selections which overlapped the edge of the
-      selection by one element as valid.
-    * Fixed the internal macros used to encode & decode file metadata, to avoid
-      an unaligned access warning on IA64 machines.
-    * Corrected behavior of H5Tinsert to not allow compound datatype fields to
-      be inserted past the end of the datatype.
-    * Retired the DPSS virtual file driver (--with-gridstorage configure
-      option).
-    * Fixed bug where variable-length datatypes for attributes was not working
-      correctly.
-    * Fixed bug where raw data re-allocated from the free-list would sometimes
-      overlap with the metadata accumulator and get corrupted. QAK - 1/23/02
-    * Fixed bug where a preempted chunk in the chunk data could still be
-      used by an internal pointer and cause an assertion failure or core
-      dump. QAK - 2/13/02
-    * Fixed bug where non-zero fill-value was not being read correctly from
-      certain chunked datasets when using an "all" or contiguous hyperslab
-      selection.  QAK - 2/14/02
-    * Fixed data corruption bug in hyperslab routines when contiguous
-        hyperslab that spans entire dimension and is larger than type
-        conversion buffer is attempted to be read.  QAK - 3/26/02
-    * Fixed bug in H5Gget_objinfo() which was not setting the 'fileno'
-        of the H5G_stat_t struct.  QAK - 3/27/02
-    * Fixed bug where variable-length string type doesn't behave as string.
-    * Added serial multi-gigabyte file size test.  "test/big -h" shows
-      the help page.  AKC - 2002/03/29
+    * Fixed a bug when reading chunked datasets where the edge of the dataset
+      would be incorrectly detected and generate an assertion failure.
+    * Added new parallel hdf5 tests in t_mpi.  The new test checks if the
+      filesystem or the MPI-IO can really handle greater than 2GB files.
+      If it fails, it prints information message only without failing the
+      test.
+    * Fixed a bug in H5FD_mpio_flush() that might result in negative file seek
+      if both MPIO and Split-file drivers are used together.
+    * Fixed H5FDmpio.h to be C++ friendly by making Parallel HDF5 API's to be
+      external to C++.
+    * Fixed a bug of H5pubconf.h causing repeated definitions if it is included
+      more than once.  hdf5.h now includes H5public.h which includes
+      H5pubconf.h.  Applications should #include hdf5.h which handles multiple
+      inclusion correctly.
+    * Tweaked a few API functions to use 'size_t' instead of 'unsigned' or
+      'hsize_t', which may cause errors in some cases.
+    * Changed behavior of H5Tget_member_type to correctly emulate HDF5 v1.2.x
+      when --enable-hdf5v1_2 configure flag is enabled.
+    * Removed limitation that the data transfer buffer size needed to be
+      set for datasets whose dimensions were too large for the 'all' selection
+      code to handle.  Any size dimensioned datasets should be handled
+      correctly now.
+    * The allocation by alignment (H5Pset_alignment) feature code somehow
+      got dropped in some 1.3.x version. Re-implemented it with "new and
+      improved" algorithm.  It keeps track of "wasted" file-fragment in
+      the free-list too.
+    * IMPORTANT: Fixed file metadata corruption bug which could cause metadata
+      data loss in certain situations.
+    * Fixed build on Linux systems with --enable-static-exec flag. It now
+      works correctly.
+    * Fixed bug with non-zero userblock sizes causing raw data to not write
+      correctly. 
+    * The RCSID string in H5public.h was causing the C++ compiling problem
+      because when it was included multiple times, C++ did not like multiple
+      definitions of the same static variable.  All occurance of RCSID
+      definition are removed since we have not used it consistently before.
+    * Fixed bug where non-aligned hyperslab I/O on chunked datasets was
+      causing errors during I/O
+    * Fixed bug with contiguous hyperslabs not being detected, causing
+      slower I/O than necessary.
 
 
 Configuration
 -------------
 
-    * Changed the default value of $NPROCS from 2 to 3 since 3 processes
-      have a much bigger chance catching parallel errors than just 2.
-    * Basic port to Compaq (nee DEC) Alpha OSF 5.
-    * Added --enable-linux-lfs flag to allow more control over whether to enable
-      or disable large file support on Linux.
+    * Can use just enable-threadsafe if the C compiler has builtin pthreads
+      support.
     * Require HDF (a.k.a. hdf4) software that consists of a newer version
       of zlib library which consists of the compress2() function. Versions
       HDF version 4.1r3 and newer meets this requirement.  The compress2
       uses a newer compression algorithm used by the HDF5 library.  Also,
       4.1r3 has an hdp tool that can handle "loops" in Vgroups.
-    * Can use just enable-threadsafe if the C compiler has builtin pthreads
-      support.
+    * Added --enable-linux-lfs flag to allow more control over whether to enable
+      or disable large file support on Linux.
+    * Basic port to Compaq (nee DEC) Alpha OSF 5.
+    * Changed the default value of $NPROCS from 2 to 3 since 3 processes
+      have a much bigger chance catching parallel errors than just 2.
 
 
 Tools
 -----
 
-    * Fixed segfault when "-v" flag was used with the h5dumper.
-    * Fixed so that the "-i" flag works correctly with the h5dumper.
     * Fixed limitation in h5dumper with object names which reached over 1024
       characters in length. We can now handle arbitrarily larger sizes for
-      object names. BW - 2/27/02
+      object names. BW - 2002/02/27
+    * Fixed so that the "-i" flag works correctly with the h5dumper.
+    * Fixed segfault when "-v" flag was used with the h5dumper.
 
 
 Documentation
@@ -153,9 +156,85 @@ Documentation
 New Features
 ============
 
-    * A helper script called ``h5cc'', which helps compilation of HDF5
-      programs, is now distributed with HDF5. See the reference manual
-      for information on how to use this feature.
+    * Improved performance of single hyperslab I/O when datatype conversion is
+      unneccessary.  QAK - 2002/04/02
+    * Added new "H5Sget_select_type" API function to determine which type of
+      selection is defined for a dataspace ("all", "none", "hyperslab" or
+      "point"). QAK - 2002/02/7
+    * Added support to read/write portions of chunks directly, if they are
+      uncompressed and too large to cache.  This should speed up I/O on chunked
+      datasets for a few more cases.  QAK - 2002/01/31
+    * Parallel HDF5 is now supported on HP-UX 11.00 platforms.
+    * Added H5Rget_obj_type() API function, which performs the same functionality
+      as H5Rget_object_type(), but requires the reference type as a parameter
+      in order to correctly handle dataset region references.  Moved
+      H5Rget_object_type() to be only compiled into the library when v1.4
+      compatibility is enabled.
+    * Changed internal error handling macros to reduce code size of library by
+      about 10-20%.
+    * Added a new file access property, file close degree, to control file 
+      close behavior.  It has four values, H5F_CLOSE_WEAK, H5F_CLOSE_SEMI,
+      H5F_CLOSE_STRONG, and H5F_CLOSE_DEFAULT.  Two correspont functions 
+      H5Pset_fclose_degree and H5Pget_fclose_degree are also provided.  Two 
+      new functions H5Fget_obj_count and H5Fget_obj_ids are offerted to assist
+      this new feature.  For full details, please refer to the reference 
+      manual under the description of H5Fcreate, H5Fopen, H5Fclose and the 
+      functions mentioned above. 
+    * Removed H5P(get|set)_hyper_cache API function, since the property is no
+      longer used.
+    * Improved performance of non-contiguous hyperslabs (built up with
+      several hyperslab selection calls).
+    * Improved performance of single, contiguous hyperslabs when reading or
+      writing.
+    * As part of the transition to using generic properties everywhere, the
+      parameter of H5Pcreate changed from H5P_class_t to hid_t, as well
+      the return type of H5Pget_class changed from H5P_class_t to hid_t.
+      Further changes are still necessary and will be documented here as they
+      are made.
+    * Added a new test to verify the information provided by the configure
+      command.
+    * The H5Pset_fapl_split() accepts raw and meta file names similar to the
+      syntax of H5Pset_fapl_multi() in addition to what it used to accept.
+    * Added perform programs to test the HDF5 library performance.  Programs
+      are installed in directory perform/.
+    * Added new checking in H5check_version() to verify the five HDF5 version
+      information macros (H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
+      H5_VERS_SUBRELEASE and H5_VERS_INFO) are consistent.
+    * Added a new public macro, H5_VERS_INFO, which is a string holding
+      the HDF5 library version information.  This string is also compiled
+      into all HDF5 binary code which helps to identify the version
+      information of the binary code.  One may use the Unix strings
+      command on the binary file and looks for the pattern "HDF5 library
+      version".
+    * Added a parallel HDF5 example examples/ph5example.c to illustrate
+      the basic way of using parallel HDF5.
+    * Added two simple parallel performance tests as mpi-perf.c (MPI
+      performance) and perf.c (PHDF5 performance) in testpar.
+    * Improved regular hyperslab I/O by about a factor of 6 or so.
+    * Modified the Pablo build procedure to permit building of the instrumented
+      library to link either with the Trace libraries as before or with the
+      Pablo Performance Caputure Facility.
+    * Verified correct operation of library on Solaris 2.8 in both 64-bit and
+      32-bit compilation modes.  See INSTALL document for instructions on
+      compiling the distribution with 64-bit support.
+    * Parallel HDF5 now runs on the HP V2500 and HP N4000 machines.
+    * H5 <-> GIF convertor has been added. This is available under 
+      tools/gifconv. The convertor supports the ability to create animated
+      gifs as well.
+    * Added a global string variable H5_lib_vers_info_g which holds the
+      HDF5 library version information.  This can be used to identify
+      an hdf5 library or hdf5 application binary.
+      Also added a verification of the consistency between H5_lib_vers_info_g
+      and other version information in the source code.
+    * File sizes greater than 2GB are now supported on Linux systems with
+      version 2.4.x or higher kernels.
+    * F90 APIs are available on HPUX 11.00 and IBM SP platforms.
+    * F90 static library is available on Windows platforms. See
+      INSTALL_Windows.txt for details.
+    * F90 API:
+        - Added aditional parameter "dims" to the h5dread/h5dwrite and
+          h5aread/h5awrite subroutines. This parameter is 1D array of size
+          7 and contains the sizes of the data buffer dimensions. 
     * C++ API:
         - Added two new member functions: Exception::getFuncName() and
           Exception::getCFuncName() to provide the name of the member
@@ -165,83 +244,9 @@ New Features
           implementation.  The new operator= functions invoke H5Tcopy,
           H5Scopy, and H5Pcopy to make a copy of a datatype, dataspace,
           and property list, respectively.
-    * F90 API:
-        - Added aditional parameter "dims" to the h5dread/h5dwrite and
-          h5aread/h5awrite subroutines. This parameter is 1D array of size
-          7 and contains the sizes of the data buffer dimensions. 
-    * F90 static library is available on Windows platforms. See
-      INSTALL_Windows.txt for details.
-    * F90 APIs are available on HPUX 11.00 and IBM SP platforms.
-    * File sizes greater than 2GB are now supported on Linux systems with
-      version 2.4.x or higher kernels.
-    * Added a global string variable H5_lib_vers_info_g which holds the
-      HDF5 library version information.  This can be used to identify
-      an hdf5 library or hdf5 application binary.
-      Also added a verification of the consistency between H5_lib_vers_info_g
-      and other version information in the source code.
-    * H5 <-> GIF convertor has been added. This is available under 
-      tools/gifconv. The convertor supports the ability to create animated
-      gifs as well.
-    * Parallel HDF5 now runs on the HP V2500 and HP N4000 machines.
-    * Verified correct operation of library on Solaris 2.8 in both 64-bit and
-      32-bit compilation modes.  See INSTALL document for instructions on
-      compiling the distribution with 64-bit support.
-    * Modified the Pablo build procedure to permit building of the instrumented
-      library to link either with the Trace libraries as before or with the
-      Pablo Performance Caputure Facility.
-    * Improved regular hyperslab I/O by about a factor of 6 or so.
-    * Added two simple parallel performance tests as mpi-perf.c (MPI
-      performance) and perf.c (PHDF5 performance) in testpar.
-    * Added a parallel HDF5 example examples/ph5example.c to illustrate
-      the basic way of using parallel HDF5.
-    * Added a new public macro, H5_VERS_INFO, which is a string holding
-      the HDF5 library version information.  This string is also compiled
-      into all HDF5 binary code which helps to identify the version
-      information of the binary code.  One may use the Unix strings
-      command on the binary file and looks for the pattern "HDF5 library
-      version".
-    * Added new checking in H5check_version() to verify the five HDF5 version
-      information macros (H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
-      H5_VERS_SUBRELEASE and H5_VERS_INFO) are consistent.
-    * Added perform programs to test the HDF5 library performance.  Programs
-      are installed in directory perform/.
-    * The H5Pset_fapl_split() accepts raw and meta file names similar to the
-      syntax of H5Pset_fapl_multi() in addition to what it used to accept.
-    * Added a new test to verify the information provided by the configure
-      command.
-    * As part of the transition to using generic properties everywhere, the
-      parameter of H5Pcreate changed from H5P_class_t to hid_t, as well
-      the return type of H5Pget_class changed from H5P_class_t to hid_t.
-      Further changes are still necessary and will be documented here as they
-      are made.
-    * Improved performance of single, contiguous hyperslabs when reading or
-      writing.
-    * Improved performance of non-contiguous hyperslabs (built up with
-      several hyperslab selection calls).
-    * Removed H5P(get|set)_hyper_cache API function, since the property is no
-      longer used.
-    * Added a new file access property, file close degree, to control file 
-      close behavior.  It has four values, H5F_CLOSE_WEAK, H5F_CLOSE_SEMI,
-      H5F_CLOSE_STRONG, and H5F_CLOSE_DEFAULT.  Two correspont functions 
-      H5Pset_fclose_degree and H5Pget_fclose_degree are also provided.  Two 
-      new functions H5Fget_obj_count and H5Fget_obj_ids are offerted to assist
-      this new feature.  For full details, please refer to the reference 
-      manual under the description of H5Fcreate, H5Fopen, H5Fclose and the 
-      functions mentioned above. 
-    * Changed internal error handling macros to reduce code size of library by
-      about 10-20%.
-    * Added H5Rget_obj_type() API function, which performs the same functionality
-      as H5Rget_object_type(), but requires the reference type as a parameter
-      in order to correctly handle dataset region references.  Moved
-      H5Rget_object_type() to be only compiled into the library when v1.4
-      compatibility is enabled.
-    * Parallel HDF5 is now supported on HP-UX 11.00 platforms.
-    * Added support to read/write portions of chunks directly, if they are
-      uncompressed and too large to cache.  This should speed up I/O on chunked
-      datasets for a few more cases.  -QAK, 1/31/02
-    * Added new "H5Sget_select_type" API function to determine which type of
-      selection is defined for a dataspace ("all", "none", "hyperslab" or
-      "point"). -QAK, 2/7/02
+    * A helper script called ``h5cc'', which helps compilation of HDF5
+      programs, is now distributed with HDF5. See the reference manual
+      for information on how to use this feature.
 
 
 Platforms Tested

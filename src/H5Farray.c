@@ -352,29 +352,20 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
         case H5D_CHUNKED:
             /*
-             * This method is unable to access external raw data files or to copy
-             * into a proper hyperslab.
+             * This method is unable to access external raw data files
              */
-            if (efl && efl->nused>0) {
-                HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
-                      "chunking and external files are mutually exclusive");
-            }
-            for (u=0; u<layout->ndims; u++) {
-                if (0!=mem_offset[u] || hslab_size[u]!=mem_size[u]) {
-                    HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
-                          "unable to copy into a proper hyperslab");
-                }
-            }
-            if (H5F_istore_read(f, dxpl_id, layout, pline, fill, file_offset,
-                         hslab_size, buf)<0) {
+            if (efl && efl->nused>0)
+                HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "chunking and external files are mutually exclusive");
+
+            /* Go get the data from the chunks */
+            if (H5F_istore_read(f, dxpl_id, layout, pline, fill, mem_size,
+                    mem_offset, file_offset, hslab_size, buf)<0)
                 HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "chunked read failed");
-            }
             break;
 
         default:
             assert("not implemented yet" && 0);
-            HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
-                  "unsupported storage layout");
+            HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
     }
 
     FUNC_LEAVE(SUCCEED);
@@ -628,30 +619,20 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 
         case H5D_CHUNKED:
             /*
-             * This method is unable to access external raw data files or to copy
-             * from a proper hyperslab.
+             * This method is unable to access external raw data files
              */
-            if (efl && efl->nused>0) {
-                HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
-                      "chunking and external files are mutually exclusive");
-            }
-            for (u=0; u<layout->ndims; u++) {
-                if (0!=mem_offset[u] || hslab_size[u]!=mem_size[u]) {
-                    HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
-                          "unable to copy from a proper hyperslab");
-                }
-            }
-            if (H5F_istore_write(f, dxpl_id, layout, pline, fill, file_offset,
-                         hslab_size, buf)<0) {
-                HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-                      "chunked write failed");
-            }
+            if (efl && efl->nused>0)
+                HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "chunking and external files are mutually exclusive");
+
+            /* Write the read to the chunks */
+            if (H5F_istore_write(f, dxpl_id, layout, pline, fill, mem_size,
+                    mem_offset, file_offset, hslab_size, buf)<0)
+                HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "chunked write failed");
             break;
 
         default:
             assert("not implemented yet" && 0);
-            HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
-                  "unsupported storage layout");
+            HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout");
     }
 
     FUNC_LEAVE (SUCCEED);

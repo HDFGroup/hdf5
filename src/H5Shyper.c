@@ -5935,6 +5935,84 @@ H5S_hyper_select_contiguous(const H5S_t *space)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_hyper_select_single
+ PURPOSE
+    Check if a hyperslab selection is a single block within the dataspace extent.
+ USAGE
+    htri_t H5S_select_single(space)
+        H5S_t *space;           IN: Dataspace pointer to check
+ RETURNS
+    TRUE/FALSE/FAIL
+ DESCRIPTION
+    Checks to see if the current selection in the dataspace is a single block.
+    This is primarily used for reading the entire selection in one swoop.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5S_hyper_select_single(const H5S_t *space)
+{
+    H5S_hyper_span_info_t *spans;   /* Hyperslab span info node */
+    H5S_hyper_span_t *span;         /* Hyperslab span node */
+    unsigned u;                     /* index variable */
+    htri_t ret_value=FALSE;         /* return value */
+
+    FUNC_ENTER (H5S_hyper_select_single, FAIL);
+
+    assert(space);
+
+    /* Check for a "regular" hyperslab selection */
+    if(space->select.sel_info.hslab.diminfo != NULL) {
+        /*
+         * For a regular hyperslab to be single, it must have only one
+         * block (i.e. count==1 in all dimensions)
+         */
+
+        /* Initialize flags */
+        ret_value=TRUE;	/* assume true and reset if the dimensions don't match */
+
+        /* Check for a single block */
+        for(u=0; u<space->extent.u.simple.rank; u++) {
+            if(space->select.sel_info.hslab.diminfo[u].count>1) {
+                ret_value=FALSE;
+                break;
+            } /* end if */
+        } /* end for */
+    } /* end if */
+    else {
+        /*
+         * For a region to be single, it must have only one block 
+         */
+        /* Initialize flags */
+        ret_value=TRUE;	/* assume true and reset if the dimensions don't match */
+
+        /* Get information for slowest changing information */
+        spans=space->select.sel_info.hslab.span_lst;
+
+        /* Cycle down the spans until we run out of down spans or find a non-contiguous span */
+        while(spans!=NULL) {
+            span=spans->head;
+
+            /* Check that this is the only span and it spans the entire dimension */
+            if(span->next!=NULL) {
+                ret_value=FALSE;
+                break;
+            } /* end if */
+            else {
+                /* Walk down to the next span */
+                spans=span->down;
+            } /* end else */
+        } /* end while */
+    } /* end else */
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_hyper_select_single() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_hyper_select_iterate_helper
  PURPOSE
     Internal routine to iterate over the elements of a span tree hyperslab selection

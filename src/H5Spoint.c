@@ -1086,6 +1086,7 @@ H5S_point_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_point_bounds() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1125,6 +1126,43 @@ H5S_point_select_contiguous(const H5S_t *space)
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_point_select_contiguous() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_point_select_single
+ PURPOSE
+    Check if a point selection is single within the dataspace extent.
+ USAGE
+    htri_t H5S_point_select_contiguous(space)
+        H5S_t *space;           IN: Dataspace pointer to check
+ RETURNS
+    TRUE/FALSE/FAIL
+ DESCRIPTION
+    Checks to see if the current selection in the dataspace is a single block.
+    This is primarily used for reading the entire selection in one swoop.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5S_point_select_single(const H5S_t *space)
+{
+    htri_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_point_select_single, FAIL);
+
+    assert(space);
+
+    /* One point is definitely contiguous */
+    if(space->select.num_elem==1)
+    	ret_value=TRUE;
+    else
+    	ret_value=FALSE;
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_point_select_single() */
 
 
 /*--------------------------------------------------------------------------

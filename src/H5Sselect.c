@@ -1316,3 +1316,56 @@ H5Sget_select_type(hid_t space_id)
     FUNC_LEAVE(space->select.type);
 }   /* end H5Sget_select_type() */
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_single
+ PURPOSE
+    Check if the selection is a single block within the dataspace extent.
+ USAGE
+    htri_t H5S_select_single(space)
+        H5S_t *space;           IN: Dataspace pointer to check
+ RETURNS
+    TRUE/FALSE/FAIL
+ DESCRIPTION
+    Checks to see if the current selection in the dataspace is a single block.
+    This is primarily used for reading the entire selection in one swoop.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5S_select_single(const H5S_t *space)
+{
+    htri_t ret_value=FAIL;  /* return value */
+
+    FUNC_ENTER (H5S_select_single, FAIL);
+
+    assert(space);
+
+    switch(space->select.type) {
+        case H5S_SEL_POINTS:         /* Sequence of points selected */
+            ret_value=H5S_point_select_single(space);
+            break;
+
+        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+            ret_value=H5S_hyper_select_single(space);
+            break;
+
+        case H5S_SEL_ALL:            /* Entire extent selected */
+            ret_value=TRUE;
+            break;
+
+        case H5S_SEL_NONE:           /* Nothing selected */
+            ret_value=FALSE;
+            break;
+
+        case H5S_SEL_ERROR:
+        case H5S_SEL_N:
+            break;
+    }
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_select_single() */
+

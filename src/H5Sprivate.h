@@ -219,6 +219,7 @@ __DLL__ hssize_t H5S_select_serial_size(const H5S_t *space);
 __DLL__ herr_t H5S_select_serialize(const H5S_t *space, uint8_t *buf);
 __DLL__ herr_t H5S_select_deserialize(H5S_t *space, const uint8_t *buf);
 __DLL__ htri_t H5S_select_contiguous(const H5S_t *space);
+__DLL__ htri_t H5S_select_single(const H5S_t *space);
 __DLL__ herr_t H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space,
 				  H5D_operator_t op, void *operator_data);
 __DLL__ herr_t H5S_sel_iter_release(const H5S_t *space,

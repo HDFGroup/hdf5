@@ -152,6 +152,7 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hsize_t file_offset;                /* Offset in dataset */
     hsize_t seq_len;                    /* Number of bytes to read */
     hsize_t	dset_dims[H5O_LAYOUT_NDIMS];	/* dataspace dimensions */
+    hssize_t    mem_offset[H5O_LAYOUT_NDIMS];	/* offset of hyperslab in memory buffer */
     hssize_t    coords[H5O_LAYOUT_NDIMS];	/* offset of hyperslab in dataspace */
     hsize_t	hslab_size[H5O_LAYOUT_NDIMS];	/* hyperslab size in dataspace*/
     hsize_t     down_size[H5O_LAYOUT_NDIMS];    /* Cumulative yperslab sizes (in elements) */
@@ -283,10 +284,13 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                 HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unable to retrieve dataspace dimensions");
             
             /* Build the array of cumulative hyperslab sizes */
+            /* (And set the memory offset to zero) */
             for(acc=1, i=(ndims-1); i>=0; i--) {
+                mem_offset[i]=0;
                 down_size[i]=acc;
                 acc*=dset_dims[i];
             } /* end for */
+            mem_offset[ndims]=0;
 
             /* Brute-force, stupid way to implement the vectors, but too complex to do other ways... */
             for(v=0; v<nseq; v++) {
@@ -336,8 +340,9 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                             hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                             /* Read in the partial hyperslab */
-                            if (H5F_istore_read(f, dxpl_id, layout, pline, fill, coords,
-                                         hslab_size, buf)<0) {
+                            if (H5F_istore_read(f, dxpl_id, layout, pline, fill,
+                                    hslab_size, mem_offset, coords, hslab_size,
+                                    buf)<0) {
                                 HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "chunked read failed");
                             }
 
@@ -396,8 +401,8 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                         hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                         /* Read the full hyperslab in */
-                        if (H5F_istore_read(f, dxpl_id, layout, pline, fill, coords,
-                                     hslab_size, buf)<0) {
+                        if (H5F_istore_read(f, dxpl_id, layout, pline, fill,
+                                hslab_size, mem_offset, coords, hslab_size, buf)<0) {
                             HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "chunked read failed");
                         }
 
@@ -443,8 +448,9 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                                 hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                                 /* Read in the partial hyperslab */
-                                if (H5F_istore_read(f, dxpl_id, layout, pline, fill, coords,
-                                             hslab_size, buf)<0) {
+                                if (H5F_istore_read(f, dxpl_id, layout, pline,
+                                        fill, hslab_size, mem_offset, coords,
+                                        hslab_size, buf)<0) {
                                     HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "chunked read failed");
                                 }
 
@@ -478,8 +484,9 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                             hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                             /* Read in the partial hyperslab */
-                            if (H5F_istore_read(f, dxpl_id, layout, pline, fill, coords,
-                                         hslab_size, buf)<0) {
+                            if (H5F_istore_read(f, dxpl_id, layout, pline, fill,
+                                    hslab_size, mem_offset, coords, hslab_size,
+                                    buf)<0) {
                                 HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "chunked read failed");
                             }
 
@@ -538,6 +545,7 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hsize_t file_offset;                /* Offset in dataset */
     hsize_t seq_len;                    /* Number of bytes to read */
     hsize_t	dset_dims[H5O_LAYOUT_NDIMS];	/* dataspace dimensions */
+    hssize_t    mem_offset[H5O_LAYOUT_NDIMS];	/* offset of hyperslab in memory buffer */
     hssize_t    coords[H5O_LAYOUT_NDIMS];	/* offset of hyperslab in dataspace */
     hsize_t	hslab_size[H5O_LAYOUT_NDIMS];	/* hyperslab size in dataspace*/
     hsize_t     down_size[H5O_LAYOUT_NDIMS];    /* Cumulative hyperslab sizes (in elements) */
@@ -671,10 +679,13 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                 HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unable to retrieve dataspace dimensions");
 
             /* Build the array of cumulative hyperslab sizes */
+            /* (And set the memory offset to zero) */
             for(acc=1, i=(ndims-1); i>=0; i--) {
+                mem_offset[i]=0;
                 down_size[i]=acc;
                 acc*=dset_dims[i];
             } /* end for */
+            mem_offset[ndims]=0;
 
             /* Brute-force, stupid way to implement the vectors, but too complex to do other ways... */
             for(v=0; v<nseq; v++) {
@@ -724,8 +735,9 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                             hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                             /* Write out the partial hyperslab */
-                            if (H5F_istore_write(f, dxpl_id, layout, pline, fill, coords,
-                                         hslab_size, buf)<0) {
+                            if (H5F_istore_write(f, dxpl_id, layout, pline, fill,
+                                    hslab_size, mem_offset,coords, hslab_size,
+                                    buf)<0) {
                                 HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "chunked write failed");
                             }
 
@@ -784,8 +796,8 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                         hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                         /* Write the full hyperslab in */
-                        if (H5F_istore_write(f, dxpl_id, layout, pline, fill, coords,
-                                     hslab_size, buf)<0) {
+                        if (H5F_istore_write(f, dxpl_id, layout, pline, fill,
+                                hslab_size, mem_offset, coords, hslab_size, buf)<0) {
                             HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "chunked write failed");
                         }
 
@@ -831,8 +843,9 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                                 hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                                 /* Write out the partial hyperslab */
-                                if (H5F_istore_write(f, dxpl_id, layout, pline, fill, coords,
-                                             hslab_size, buf)<0) {
+                                if (H5F_istore_write(f, dxpl_id, layout, pline,
+                                        fill, hslab_size, mem_offset, coords,
+                                        hslab_size, buf)<0) {
                                     HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "chunked write failed");
                                 }
 
@@ -866,8 +879,9 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                             hslab_size[ndims]=elmt_size;   /* basic hyperslab size is the element */
 
                             /* Write out the final partial hyperslab */
-                            if (H5F_istore_write(f, dxpl_id, layout, pline, fill, coords,
-                                         hslab_size, buf)<0) {
+                            if (H5F_istore_write(f, dxpl_id, layout, pline, fill,
+                                    hslab_size, mem_offset, coords, hslab_size,
+                                    buf)<0) {
                                 HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "chunked write failed");
                             }
 

@@ -1695,15 +1695,17 @@ H5F_istore_unlock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
  *		Robb Matzke, 1999-08-02
  *		The data transfer property list is passed as an object ID
  *		since that's how the virtual file layer wants it.
+ *
+ *              Quincey Koziol, 2002-04-02
+ *              Enable hyperslab I/O into memory buffer
  *-------------------------------------------------------------------------
  */
 herr_t
 H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 		const H5O_pline_t *pline, const H5O_fill_t *fill,
+                const hsize_t size_m[], const hssize_t offset_m[],
 		const hssize_t offset_f[], const hsize_t size[], void *buf)
 {
-    hssize_t		offset_m[H5O_LAYOUT_NDIMS];
-    hsize_t		size_m[H5O_LAYOUT_NDIMS];
     hsize_t		idx_cur[H5O_LAYOUT_NDIMS];
     hsize_t		idx_min[H5O_LAYOUT_NDIMS];
     hsize_t		idx_max[H5O_LAYOUT_NDIMS];
@@ -1726,19 +1728,15 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     assert(layout && H5D_CHUNKED==layout->type);
     assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
     assert(H5F_addr_defined(layout->addr));
+    assert(size_m);
+    assert(offset_m);
     assert(offset_f);
     assert(size);
     assert(buf);
 
-    /*
-     * For now, a hyperslab of the file must be read into an array in
-     * memory.We do not yet support reading into a hyperslab of memory.
-     */
-    for (u=0, chunk_size=1; u<layout->ndims; u++) {
-        offset_m[u] = 0;
-        size_m[u] = size[u];
+    /* Compute chunk size */
+    for (u=0, chunk_size=1; u<layout->ndims; u++)
         chunk_size *= layout->dim[u];
-    } /* end for */
     
 #ifndef NDEBUG
     for (u=0; u<layout->ndims; u++) {
@@ -1874,16 +1872,18 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
  *		Robb Matzke, 1999-08-02
  *		The data transfer property list is passed as an object ID
  *		since that's how the virtual file layer wants it.
+ *
+ *              Quincey Koziol, 2002-04-02
+ *              Enable hyperslab I/O into memory buffer
  *-------------------------------------------------------------------------
  */
 herr_t
 H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 		 const H5O_pline_t *pline, const H5O_fill_t *fill,
+                 const hsize_t size_m[], const hssize_t offset_m[],
 		 const hssize_t offset_f[], const hsize_t size[],
 		 const void *buf)
 {
-    hssize_t	offset_m[H5O_LAYOUT_NDIMS];
-    hsize_t		size_m[H5O_LAYOUT_NDIMS];
     int		i, carry;
     unsigned		u;
     hsize_t		idx_cur[H5O_LAYOUT_NDIMS];
@@ -1905,19 +1905,15 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     assert(layout && H5D_CHUNKED==layout->type);
     assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
     assert(H5F_addr_defined(layout->addr));
+    assert(size_m);
+    assert(offset_m);
     assert(offset_f);
     assert(size);
     assert(buf);
 
-    /*
-     * For now the source must not be a hyperslab.  It must be an entire
-     * memory buffer.
-     */
-    for (u=0, chunk_size=1; u<layout->ndims; u++) {
-        offset_m[u] = 0;
-        size_m[u] = size[u];
+    /* Compute chunk size */
+    for (u=0, chunk_size=1; u<layout->ndims; u++)
         chunk_size *= layout->dim[u];
-    } /* end for */
 
 #ifndef NDEBUG
     for (u=0; u<layout->ndims; u++) {

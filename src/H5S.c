@@ -1525,8 +1525,8 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
             /*
              * Initialize direct read/write functions
              */
-            c1=H5S_select_contiguous(file_space);
-            c2=H5S_select_contiguous(mem_space);
+            c1=H5S_select_single(file_space);
+            c2=H5S_select_single(mem_space);
             if(c1==FAIL || c2==FAIL)
                 HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
 
@@ -1563,8 +1563,8 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
     /*
      * Initialize direct read/write functions
      */
-    c1=H5S_select_contiguous(file_space);
-    c2=H5S_select_contiguous(mem_space);
+    c1=H5S_select_single(file_space);
+    c2=H5S_select_single(mem_space);
     if(c1==FAIL || c2==FAIL)
         HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for contiguous dataspace ");
 
