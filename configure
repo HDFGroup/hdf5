@@ -1032,7 +1032,7 @@ fi
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
    echo "yes"
-   if test -z $config_dirs; then
+   if test -z "$config_dirs"; then
       config_dirs=fortran
    else
       config_dirs=${config_dirs} fortran
@@ -1052,7 +1052,7 @@ fi
 
 if test "X$HDF_CXX" = "Xyes"; then
    echo "yes"
-   if test -z $config_dirs; then
+   if test -z "$config_dirs"; then
       config_dirs=c++
    else
       config_dirs=${config_dirs} c++
@@ -7527,17 +7527,17 @@ else
 fi
 
 
-case $withval in
-    yes)
-       echo "$ac_t""yes" 1>&6
-       cat >> confdefs.h <<\EOF
+case "$withval" in
+   yes)
+      echo "$ac_t""yes" 1>&6
+      cat >> confdefs.h <<\EOF
 #define HAVE_STREAM 1
 EOF
 
-    ;;
-    *)
-       echo "$ac_t""not configured" 1>&6
-    ;;
+      ;;
+   *)
+      echo "$ac_t""not configured" 1>&6
+      ;;
 esac
 
 
