@@ -28,7 +28,7 @@ static char		RcsId[] = "$Revision$";
 
 #include <hdf5.h>
 
-#define FILE   "tattr.h5"
+#define FILENAME   "tattr.h5"
 #define ATTR_NAME_LEN   16
 #define ATTR_MAX_DIMS   7
 
@@ -107,7 +107,7 @@ test_attr_basic_write(void)
     MESSAGE(5, ("Testing Basic Scalar Attribute Writing Functions\n"));
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -208,7 +208,7 @@ test_attr_basic_read(void)
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
 
     /* Create file */
-    fid1 = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
@@ -299,7 +299,7 @@ test_attr_compound_write(void)
     MESSAGE(5, ("Testing Multiple Attribute Functions\n"));
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -396,7 +396,7 @@ test_attr_compound_read(void)
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
 
     /* Open file */
-    fid1 = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
@@ -538,7 +538,7 @@ test_attr_scalar_write(void)
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -600,7 +600,7 @@ test_attr_scalar_read(void)
     MESSAGE(5, ("Testing Basic Scalar Attribute Reading Functions\n"));
 
     /* Create file */
-    fid1 = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
@@ -655,7 +655,7 @@ test_attr_mult_write(void)
     MESSAGE(5, ("Testing Multiple Attribute Functions\n"));
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for dataset */
@@ -781,7 +781,7 @@ test_attr_mult_read(void)
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
 
     /* Open file */
-    fid1 = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
@@ -1059,7 +1059,7 @@ test_attr_iterate(void)
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
 
     /* Open file */
-    file = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    file = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
 
     /* Open the dataset */
@@ -1103,7 +1103,7 @@ test_attr_delete(void)
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
 
     /* Open file */
-    fid1 = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
@@ -1250,6 +1250,6 @@ test_attr(void)
 void
 cleanup_attr(void)
 {
-    remove(FILE);
+    remove(FILENAME);
 }
 
