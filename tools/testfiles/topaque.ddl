@@ -5,8 +5,8 @@ HDF5 "topaque.h5" {
 GROUP "/" {
    DATASET "opaque test" {
       DATATYPE { 
-         H5T_OPAQUE
-         OPAQUE_TAG "test opaque type"
+         H5T_OPAQUE;
+         OPAQUE_TAG "test opaque type";
        } 
       DATASPACE { SIMPLE ( 2 ) / ( 2 ) } 
       DATA {
