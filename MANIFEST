@@ -1007,7 +1007,6 @@
 ./tools/h5dump/h5dumptst.c
 ./tools/h5dump/testh5dump.sh
 
-./tools/h5diff/Dependencies
 ./tools/h5diff/Makefile.in
 ./tools/h5diff/h5diff.c
 ./tools/h5diff/h5difftst.c
