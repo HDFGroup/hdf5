@@ -206,9 +206,6 @@ __DLLVAR__ size_t	H5T_NATIVE_UINT_LEAST64_ALIGN_g;
 __DLLVAR__ size_t	H5T_NATIVE_INT_FAST64_ALIGN_g;
 __DLLVAR__ size_t	H5T_NATIVE_UINT_FAST64_ALIGN_g;
 
-/* H5Tcopy support functions */
-__DLL__ int H5T_cmp_field_off(const void *_field1, const void *_field2);
-
 /* Conversion functions */
 __DLL__ herr_t H5T_conv_noop(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			     size_t nelmts, size_t stride, void *buf,

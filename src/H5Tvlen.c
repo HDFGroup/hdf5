@@ -506,7 +506,7 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc)
             size_t old_size;        /* Preview size of a field */
 
             /* Sort the fields based on offsets */
-            qsort(dt->u.compnd.memb, dt->u.compnd.nmembs, sizeof(H5T_cmemb_t), H5T_cmp_field_off);
+            H5T_sort_value(dt,NULL);
 	
             for (i=0; i<dt->u.compnd.nmembs; i++) {
                 /* Apply the accumulated size change to the offset of the field */
@@ -521,9 +521,14 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc)
                     if(H5T_vlen_mark(dt->u.compnd.memb[i].type,f,loc)<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                     
-                    /* If the field changed size, add that change to the accumulated size change */
-                    if(old_size != dt->u.compnd.memb[i].type->size)
+                    /* Check if the field changed size */
+                    if(old_size != dt->u.compnd.memb[i].type->size) {
+                        /* Adjust the size of the member */
+                        dt->u.compnd.memb[i].size = (dt->u.compnd.memb[i].size*dt->u.compnd.memb[i].type->size)/old_size;
+
+                        /* Add that change to the accumulated size change */
                         accum_change += (dt->u.compnd.memb[i].type->size - (int)old_size);
+                    } /* end if */
                 } /* end if */
             } /* end for */
 

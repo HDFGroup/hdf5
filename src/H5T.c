@@ -4698,36 +4698,6 @@ H5T_open_oid (H5G_entry_t *ent)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_cmp_field_off
- *
- * Purpose:	Compares field offsets for qsort
- *
- * Return:	<0, 0, or >0 if field1's offset is less than, equal to, or greater
- *          than field2's offset
- *
- * Programmer:	Quincey Koziol
- *		Thursday, July 15th, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-int
-H5T_cmp_field_off(const void *_field1, const void *_field2)
-{
-    const H5T_cmemb_t *field1=(const H5T_cmemb_t *)_field1,
-        *field2=(const H5T_cmemb_t *)_field2;
-    
-    if(field1->offset < field2->offset)
-        return(-1);
-    else if(field1->offset > field2->offset)
-        return(1);
-    else
-        return(0);
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5T_copy
  *
  * Purpose:	Copies datatype OLD_DT.	 The resulting data type is not
@@ -4836,12 +4806,13 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
             HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
                    "memory allocation failed");
         }
+
+        /* Sort the fields based on offsets */
+        H5T_sort_value(old_dt,NULL);
+	
         HDmemcpy(new_dt->u.compnd.memb, old_dt->u.compnd.memb,
              new_dt->u.compnd.nmembs * sizeof(H5T_cmemb_t));
 
-        /* Sort the fields based on offsets */
-        qsort(new_dt->u.compnd.memb, new_dt->u.compnd.nmembs, sizeof(H5T_cmemb_t), H5T_cmp_field_off);
-	
         for (i=0; i<new_dt->u.compnd.nmembs; i++) {
             s = new_dt->u.compnd.memb[i].name;
             new_dt->u.compnd.memb[i].name = H5MM_xstrdup(s);
@@ -4852,8 +4823,12 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
             new_dt->u.compnd.memb[i].offset += accum_change;
 
             /* If the field changed size, add that change to the accumulated size change */
-            if(new_dt->u.compnd.memb[i].type->size != old_dt->u.compnd.memb[i].type->size)
+            if(new_dt->u.compnd.memb[i].type->size != old_dt->u.compnd.memb[i].type->size) {
+                /* Adjust the size of the member */
+                new_dt->u.compnd.memb[i].size = (old_dt->u.compnd.memb[i].size*tmp->size)/old_dt->u.compnd.memb[i].type->size;
+
                 accum_change += (new_dt->u.compnd.memb[i].type->size - old_dt->u.compnd.memb[i].type->size);
+            } /* end if */
         }
 
         /* Apply the accumulated size change to the size of the compound struct */
