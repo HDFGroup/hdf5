@@ -29,11 +29,15 @@
 
 #define FFORMAT "%-15.10g %-15.10g %-15.10g\n"
 #define IFORMAT "%-15d %-15d %-15d\n"
+#define UIFORMAT "%-15u %-15u %-15u\n"
 #define LIFORMAT "%-15ld %-15ld %-15ld\n"
+#define ULIFORMAT "%-15lu %-15lu %-15lu\n"
 /* with -p option */
 #define FPFORMAT "%-15.10g %-15.10g %-15.10g %-14.10g\n"
 #define IPFORMAT "%-15d %-15d %-15d %-14d\n"
+#define UIPFORMAT "%-15u %-15u %-15u %-14u\n"
 #define LPIFORMAT "%-15ld %-15ld %-15ld %-14ld\n"
+#define ULPIFORMAT "%-15lu %-15lu %-15lu %-14lu\n"
 #define SPACES  "          "
 
 
@@ -1248,13 +1252,13 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
  
  /* Build default formats for long long types */
  sprintf(fmt_llong,  "%%%sd              %%%sd               %%%sd\n", 
-		H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
+  H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
  sprintf(fmt_ullong, "%%%su              %%%su               %%%su\n", 
-		H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
+  H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
  sprintf(fmt_llongp,  "%%%sd             %%%sd               %%%sd               %%%sd\n", 
-		H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
+  H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
  sprintf(fmt_ullongp, "%%%su             %%%su               %%%su               %%%su\n", 
-		H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
+  H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
 
 
  acc[rank-1]=1;
@@ -1713,7 +1717,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
       {
        print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
-       printf(IFORMAT,temp1_uint,temp2_uint,abs((int)(temp1_uint-temp2_uint)));
+       printf(UIFORMAT,temp1_uint,temp2_uint,abs((int)(temp1_uint-temp2_uint)));
       }
       nfound++;
      }
@@ -1729,7 +1733,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
-       printf(IPFORMAT,temp1_uint,temp2_uint,abs((int)(temp1_uint-temp2_uint)),
+       printf(UIPFORMAT,temp1_uint,temp2_uint,abs((int)(temp1_uint-temp2_uint)),
         abs((int)(1-temp2_uint/temp1_uint)));
       }
       nfound++;
@@ -1747,7 +1751,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
-       printf(IPFORMAT,temp1_uint,temp2_uint,abs((int)(temp1_uint-temp2_uint)),
+       printf(UIPFORMAT,temp1_uint,temp2_uint,abs((int)(temp1_uint-temp2_uint)),
         abs((int)(1-temp2_uint/temp1_uint)));
       }
       nfound++;
@@ -1761,7 +1765,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
      {
       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
-      printf(IFORMAT,temp1_uint,temp2_uint,abs((int)(temp1_uint-temp2_uint)));
+      printf(UIFORMAT,temp1_uint,temp2_uint,abs((int)(temp1_uint-temp2_uint)));
      }
      nfound++;
     }
@@ -1882,7 +1886,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
       {
        print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
-       printf(LIFORMAT,temp1_ulong,temp2_ulong,labs((long)(temp1_ulong-temp2_ulong)));
+       printf(ULIFORMAT,temp1_ulong,temp2_ulong,labs((long)(temp1_ulong-temp2_ulong)));
       }
       nfound++;
      }
@@ -1898,7 +1902,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
-       printf(LPIFORMAT,temp1_ulong,temp2_ulong,labs((long)(temp1_ulong-temp2_ulong)),
+       printf(ULPIFORMAT,temp1_ulong,temp2_ulong,labs((long)(temp1_ulong-temp2_ulong)),
         labs((long)(1-temp2_ulong/temp1_ulong)));
       }
       nfound++;
@@ -1916,7 +1920,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
       {
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
-       printf(LPIFORMAT,temp1_ulong,temp2_ulong,labs((long)(temp1_ulong-temp2_ulong)),
+       printf(ULPIFORMAT,temp1_ulong,temp2_ulong,labs((long)(temp1_ulong-temp2_ulong)),
         labs((long)(1-temp2_ulong/temp1_ulong)));
       }
       nfound++;
@@ -1930,7 +1934,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
      {
       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
-      printf(LIFORMAT,temp1_ulong,temp2_ulong,labs((long)(temp1_ulong-temp2_ulong)));
+      printf(ULIFORMAT,temp1_ulong,temp2_ulong,labs((long)(temp1_ulong-temp2_ulong)));
      }
      nfound++;
     }
@@ -2051,7 +2055,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
        print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(fmt_ullong,temp1_ullong,temp2_ullong,
-								(unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)));
+        (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)));
       }
       nfound++;
      }
@@ -2068,7 +2072,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(fmt_ullongp,temp1_ullong,temp2_ullong,
-								(unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)),
+        (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)),
         (unsigned long_long)labs((long)(1-temp2_ullong/temp1_ullong)));
       }
       nfound++;
@@ -2087,7 +2091,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
        print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(fmt_ullongp,temp1_ullong,temp2_ullong,
-								(unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)),
+        (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)),
         (unsigned long_long)labs((long)(1-temp2_ullong/temp1_ullong)));
       }
       nfound++;
@@ -2102,7 +2106,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
       printf(fmt_ullong,temp1_ullong,temp2_ullong,
-							(unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)));
+       (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)));
      }
      nfound++;
     }

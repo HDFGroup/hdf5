@@ -14,9 +14,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "hdf5.h"
 #include "H5private.h" 
 
+/*UINT_MAX Maximum value for a variable of type unsigned int. 4294967295 */
+#define UIMAX 4294967295u
 
 /* diff test*/
 static int do_test_1(const char *file1, const char *file2);
@@ -71,7 +74,7 @@ int write_dataset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
   
  /* Write the buf */
  if ( buf )
-  status = H5Dwrite(dataset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);
+ assert(H5Dwrite(dataset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)>=0);
 
  /* Close */
  status = H5Dclose(dataset_id);
@@ -676,6 +679,9 @@ int do_test_5(const char *file1, const char UNUSED *file2)
  long_long            buf8b[3][2] = {{1,1},{3,4},{5,6}};
  unsigned long_long   buf9a[3][2] = {{1,1},{1,1},{1,1}};
  unsigned long_long   buf9b[3][2] = {{1,1},{3,4},{5,6}};
+
+ unsigned int    buf10a[3][2] = {{UIMAX,1},{1,1},{1,1}};
+ unsigned int    buf10b[3][2] = {{UIMAX-1,1},{3,4},{5,6}};
  
  
 /*-------------------------------------------------------------------------
@@ -758,6 +764,14 @@ int do_test_5(const char *file1, const char UNUSED *file2)
 
  write_dataset(file1_id,2,dims,"dset9a",H5T_NATIVE_ULLONG,buf9a);
  write_dataset(file1_id,2,dims,"dset9b",H5T_NATIVE_ULLONG,buf9b);
+
+/*-------------------------------------------------------------------------
+ * H5T_NATIVE_INT
+ *-------------------------------------------------------------------------
+ */
+
+ write_dataset(file1_id,2,dims,"dset10a",H5T_NATIVE_UINT,buf10a);
+ write_dataset(file1_id,2,dims,"dset10b",H5T_NATIVE_UINT,buf10b);
 
 
 /*-------------------------------------------------------------------------
