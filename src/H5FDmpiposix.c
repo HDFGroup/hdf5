@@ -561,10 +561,6 @@ H5FD_mpiposix_fapl_copy(const void *_old_fa)
     int		mpi_code;	/* MPI return code */
     
     FUNC_ENTER_NOAPI(H5FD_mpiposix_fapl_copy, NULL);
-#ifdef H5FDmpio_DEBUG
-if (H5FD_mpio_Debug[(int)'t'])
-fprintf(stderr, "enter H5FD_mpiposix_fapl_copy\n");
-#endif
 
     if (NULL==(new_fa=H5MM_malloc(sizeof(H5FD_mpiposix_fapl_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -584,10 +580,6 @@ done:
 	    H5MM_xfree(new_fa);
     }
 
-#ifdef H5FDmpiposix_DEBUG
-if (H5FD_mpiposix_Debug[(int)'t'])
-fprintf(stderr, "leaving H5FD_mpiposix_fapl_copy\n");
-#endif
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_fapl_copy() */
 
@@ -615,10 +607,6 @@ H5FD_mpiposix_fapl_free(void *_fa)
     H5FD_mpiposix_fapl_t	*fa = (H5FD_mpiposix_fapl_t*)_fa;
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_fapl_free, FAIL);
-#ifdef H5FDmpiposix_DEBUG
-if (H5FD_mpiposix_Debug[(int)'t'])
-fprintf(stderr, "in H5FD_mpiposix_fapl_free\n");
-#endif
     assert(fa);
 
     /* Free the internal communicator */
@@ -627,10 +615,6 @@ fprintf(stderr, "in H5FD_mpiposix_fapl_free\n");
     H5MM_xfree(fa);
 
 done:
-#ifdef H5FDmpiposix_DEBUG
-if (H5FD_mpiposix_Debug[(int)'t'])
-fprintf(stderr, "leaving H5FD_mpiposix_fapl_free\n");
-#endif
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_fapl_free() */
 
