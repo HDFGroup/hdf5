@@ -142,6 +142,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed bug where "resurrecting" a dataset was failing.
+            QAK - 2004/07/14
         - Fixed bug where incorrect data could be read from a chunked dataset
             after it was extended.  QAK - 2004/07/12
         - Fixed failure to read data back from file of compound type with

@@ -1243,7 +1243,7 @@ H5O_link(const H5G_entry_t *ent, int adjust, hid_t dxpl_id)
             /* Check if the object is still open by the user */
             if(H5FO_opened(ent->file,ent->header)>=0) {
                 /* Flag the object to be deleted when it's closed */
-                if(H5FO_mark(ent->file,ent->header)<0)
+                if(H5FO_mark(ent->file,ent->header,TRUE)<0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't mark object for deletion");
             } /* end if */
             else {
@@ -1256,6 +1256,16 @@ H5O_link(const H5G_entry_t *ent, int adjust, hid_t dxpl_id)
             } /* end else */
         } /* end if */
     } else if (adjust>0) {
+        /* A new object, or one that will be deleted */
+        if(oh->nlink==0) {
+            /* Check if the object is current open, but marked for deletion */
+            if(H5FO_marked(ent->file,ent->header)>0) {
+                /* Remove "delete me" flag on the object */
+                if(H5FO_mark(ent->file,ent->header,FALSE)<0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't mark object for deletion");
+            } /* end if */
+        } /* end if */
+
 	oh->nlink += adjust;
 	oh->cache_info.is_dirty = TRUE;
     }
@@ -1974,8 +1984,6 @@ H5O_unprotect(H5G_entry_t *ent, H5O_t *oh, hid_t dxpl_id)
     if (H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
-    oh = NULL;
-
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_unprotect() */
@@ -2624,7 +2632,7 @@ H5O_alloc_extend_chunk(H5O_t *oh, unsigned chunkno, size_t size)
     /* try to extend a null message */
     for (idx=0; idx<oh->nmesgs; idx++) {
 	if (oh->mesg[idx].chunkno==chunkno) {
-            if ( H5O_NULL_ID == oh->mesg[idx].type->id &&
+            if (H5O_NULL_ID == oh->mesg[idx].type->id &&
                 (oh->mesg[idx].raw + oh->mesg[idx].raw_size ==
                  oh->chunk[chunkno].image + oh->chunk[chunkno].size)) {
 

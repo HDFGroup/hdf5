@@ -259,13 +259,11 @@ done:
     Mark an opened object for deletion from the file when it is closed.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
-    There is currently no way to "undelete" an opened object that is marked
-    for deletion.
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5FO_mark(const H5F_t *f, haddr_t addr)
+H5FO_mark(const H5F_t *f, haddr_t addr, hbool_t deleted)
 {
     H5TB_NODE *obj_node;        /* TBBT node holding open object */
     H5FO_open_obj_t *open_obj;  /* Information about open object */
@@ -283,13 +281,59 @@ H5FO_mark(const H5F_t *f, haddr_t addr)
     if((obj_node=H5TB_dfind(f->shared->open_objs,&addr,NULL))!=NULL) {
         open_obj=H5TB_NODE_DATA(obj_node);
         assert(open_obj);
-        open_obj->deleted=1;
+        open_obj->deleted=deleted;
     } /* end if */
     else
         ret_value=FAIL;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FO_mark() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5FO_marked
+ PURPOSE
+    Check if an object is marked to be deleted when it is closed
+ USAGE
+    htri_t H5FO_mark(f,addr)
+        const H5F_t *f;         IN: File opened object is in
+        haddr_t addr;           IN: Address of object to delete
+
+ RETURNS
+    Returns a TRUE/FALSE on success, negative on failure
+ DESCRIPTION
+    Checks if the object is currently in the "opened objects" tree and
+    whether its marks for deletion from the file when it is closed.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5FO_marked(const H5F_t *f, haddr_t addr)
+{
+    H5TB_NODE *obj_node;        /* TBBT node holding open object */
+    H5FO_open_obj_t *open_obj;  /* Information about open object */
+    htri_t ret_value=FAIL;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOFUNC(H5FO_marked)
+
+    /* Sanity check */
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->open_objs);
+    assert(H5F_addr_defined(addr));
+
+    /* Get the object node from the TBBT */
+    if((obj_node=H5TB_dfind(f->shared->open_objs,&addr,NULL))!=NULL) {
+        open_obj=H5TB_NODE_DATA(obj_node);
+        assert(open_obj);
+        ret_value=open_obj->deleted;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FO_marked() */
 
 
 /*--------------------------------------------------------------------------

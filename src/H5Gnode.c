@@ -1163,13 +1163,6 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
 		*rt_key_changed = TRUE;
 	    }
 	}
-
-        if (H5AC_unprotect(f, dxpl_id, H5AC_SNODE, *new_node_p, snrt, FALSE) != SUCCEED) {
-            snrt = NULL;
-            HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
-        }
-
-        snrt=NULL;      /* Make certain future references will be caught */
     } else {
 	/* Where to insert the new entry? */
 	ret_value = H5B_INS_NOOP;
@@ -1190,6 +1183,8 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
     insert_into->nsyms += 1;
 
 done:
+    if (snrt && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, *new_node_p, snrt, FALSE) < 0)
+	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
     if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
 
@@ -1903,8 +1898,7 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
     for (i = 0; i < sn->nsyms; i++) {
 	fprintf(stream, "%*sSymbol %d:\n", indent - 3, "", i);
 
-
-	if (H5F_addr_defined(heap)) {
+	if (heap>0 && H5F_addr_defined(heap)) {
             if (NULL == (heap_ptr = H5HL_protect(f, dxpl_id, heap)))
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name");
 
@@ -1917,6 +1911,8 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
                 HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name");
             heap_ptr=NULL; s=NULL;
 	}
+        else
+            fprintf(stream, "%*s%-*s\n", indent, "", fwidth, "Warning: Invalid heap address given, name not displayed!");
 
 	H5G_ent_debug(f, dxpl_id, sn->entry + i, stream, indent, fwidth, heap);
     }

@@ -29,6 +29,7 @@ const char *FILENAME[] = {
     "lunlink",
     "filespace",
     "slashes",
+    "resurrect",
     NULL
 };
 
@@ -1298,7 +1299,7 @@ static int test_create_unlink(const char *msg, hid_t fapl)
     return 0;
 
 error:
-    return -1;
+    return 1;
 } /* end test_create_unlink() */
 
 
@@ -1368,7 +1369,7 @@ test_link_slashes(void)
     return 0;
 
 error:
-    return -1;
+    return 1;
 } /* end test_link_slashes() */
 
 
@@ -1438,7 +1439,7 @@ test_unlink_slashes(void)
     return 0;
 
 error:
-    return -1;
+    return 1;
 } /* end test_unlink_slashes() */
 
 /*
@@ -1527,7 +1528,7 @@ test_unlink_rightleaf(hid_t fid)
     return 0;
 
 error:
-    return -1;
+    return 1;
 } /* end test_unlink_rightleaf() */
 
 
@@ -1588,7 +1589,7 @@ test_unlink_rightnode(hid_t fid)
     return 0;
 
 error:
-    return -1;
+    return 1;
 } /* end test_unlink_rightnode() */
 
 
@@ -1792,8 +1793,77 @@ test_unlink_middlenode(hid_t fid)
     return 0;
 
 error:
-    return -1;
+    return 1;
 } /* end test_unlink_middlenode() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_resurrect_dataset
+ *
+ * Purpose:     Tests deleting a dataset while its still open and then
+ *              "resurrecting" it by creating a link to it again.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              Wednesday, July 14, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_resurrect_dataset(void)
+{
+    hid_t       f, s, d, fapl;
+    char	filename[1024];
+
+    TESTING("Resurrecting dataset after deletion");
+
+    /* Create file */
+    fapl = h5_fileaccess();
+    h5_fixname(FILENAME[6], fapl, filename, sizeof filename);
+
+    /* Create the file */
+    if((f = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+    /* Create a dataset in the file */
+    if((s = H5Screate(H5S_SCALAR))<0) TEST_ERROR;
+    if((d = H5Dcreate(f, DATASETNAME, H5T_NATIVE_INT, s, H5P_DEFAULT))<0) TEST_ERROR;
+    if(H5Sclose(s)<0) TEST_ERROR;
+
+    /* Unlink the dataset while it's open (will mark it for deletion when closed) */
+    if(H5Gunlink(f, DATASETNAME)<0) TEST_ERROR;
+
+    /* Re-link the dataset to the group hierarchy (shouldn't get deleted now) */
+    if(H5Glink2(d, ".", H5G_LINK_HARD, f, DATASET2NAME)<0) TEST_ERROR;
+
+    /* Close things */
+    if(H5Dclose(d)<0) TEST_ERROR;
+    if(H5Fclose(f)<0) TEST_ERROR;
+
+    /* Re-open the file */
+    if((f=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) TEST_ERROR;
+
+    /* Attempt to open the dataset under the new name */
+    if((d=H5Dopen(f,DATASET2NAME))<0) TEST_ERROR;
+
+    /* Close things */
+    if(H5Dclose(d)<0) TEST_ERROR;
+    if(H5Fclose(f)<0) TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Sclose(s);
+	H5Dclose(d);
+	H5Fclose(f);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_resurrect_dataset() */
 
 
 /*-------------------------------------------------------------------------
@@ -1868,6 +1938,9 @@ main(void)
     nerrors += test_unlink_rightleaf(file);
     nerrors += test_unlink_rightnode(file);
     nerrors += test_unlink_middlenode(file);
+
+    /* Test "resurrecting" objects */
+    nerrors += test_resurrect_dataset();
  
     /* Close */
     if (H5Fclose(file)<0) TEST_ERROR;
@@ -1881,4 +1954,3 @@ main(void)
  error:
     return 1;
 }
-

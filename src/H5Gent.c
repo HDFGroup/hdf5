@@ -490,7 +490,7 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
             HDfprintf (stream, "%*s%-*s %lu\n", nested_indent, "", nested_fwidth,
                        "Link value offset:",
                        (unsigned long)(ent->cache.slink.lval_offset));
-            if (H5F_addr_defined(heap)) {
+            if (heap>0 && H5F_addr_defined(heap)) {
                 const H5HL_t *heap_ptr;
 
                 heap_ptr = H5HL_protect(ent->file, dxpl_id, heap);
@@ -500,6 +500,8 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
                            lval);
                 H5HL_unprotect(ent->file, dxpl_id, heap_ptr, heap);
             }
+            else
+                HDfprintf(stream, "%*s%-*s\n", nested_indent, "", nested_fwidth, "Warning: Invalid heap address given, name not displayed!");
             break;
             
         default:
