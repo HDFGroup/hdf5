@@ -146,6 +146,7 @@
 #define color_H5Gget_objname_by_idx "red"
 #define color_H5Gget_objtype_by_idx "red"
 
+#define color_H5Iget_file_id "red"
 #define color_H5Iget_type "red"
 #define color_H5Iget_name "red"
 
