@@ -120,6 +120,7 @@ void multiple_group_write(char *filename, int ngroups);
 void multiple_group_read(char *filename, int ngroups);
 void collective_group_write(char *filename, int ngroups);
 void independent_group_read(char *filename, int ngroups);
+void test_fapl_mpio_dup(void);
 void test_split_comm_access(char *filename);
 void dataset_writeInd(char *filename);
 void dataset_writeAll(char *filename);

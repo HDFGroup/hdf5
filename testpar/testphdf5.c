@@ -355,8 +355,8 @@ int main(int argc, char **argv)
 	goto finish;
     }
 
-    MPI_BANNER("test_comm_info_delete...");
-    test_comm_info_delete();
+    MPI_BANNER("test_fapl_mpio_dup...");
+    test_fapl_mpio_dup();
 
     if (ndatasets){
 	MPI_BANNER("multiple datasets write ...");

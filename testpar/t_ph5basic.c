@@ -21,10 +21,11 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_comm_info_delete
+ * Function:    test_fapl_mpio_dup
  *
- * Purpose:     Test if communicator and INFO object can be safely deleted
- *		after calling H5Pset_fapl_mpio.
+ * Purpose:     Test if fapl_mpio property list keeps a duplicate of the
+ * 		communicator and INFO objects given when set; and returns
+ * 		duplicates of its components when H5Pget_fapl_mpio is called.
  *
  * Return:      Success:        None
  *
@@ -37,7 +38,7 @@
  *-------------------------------------------------------------------------
  */
 void
-test_comm_info_delete(void)
+test_fapl_mpio_dup(void)
 {
     int mpi_size, mpi_rank;
     MPI_Comm comm, comm_tmp;
@@ -56,6 +57,8 @@ test_comm_info_delete(void)
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    if (verbose)
+	printf("rank/size of MPI_COMM_WORLD are %d/%d\n", mpi_rank, mpi_size);
 
     /* Create a new communicator that has the same processes as MPI_COMM_WORLD.
      * Use MPI_Comm_split because it is simplier than MPI_Comm_create
@@ -144,6 +147,7 @@ test_comm_info_delete(void)
     VRFY((ret >= 0), "H5Pget_fapl_mpio neither");
 
     /* now get both and check validity too. */
+    /* Donot free the returned objects which are used in the next case. */
     ret = H5Pget_fapl_mpio(acc_pl, &comm_tmp, &info_tmp);
     VRFY((ret >= 0), "H5Pget_fapl_mpio");
     MPI_Comm_size(comm_tmp,&mpi_size_tmp);
