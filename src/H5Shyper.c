@@ -2853,7 +2853,7 @@ H5S_hyper_select_deserialize (H5S_t *space, const uint8_t *buf)
             UINT32DECODE(buf, *tcount);
 
         /* Change the ending points into counts */
-        for(tcount=count,tstart=start,j=0; j<(unsigned)rank; j++,tcount++)
+        for(tcount=count,tstart=start,j=0; j<(unsigned)rank; j++,tcount++,tstart++)
             *tcount=(*tcount-*tstart)+1;
 
         /* Select or add the hyperslab to the current selection */
