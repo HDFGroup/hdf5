@@ -44,7 +44,9 @@
 #define H5AC_LHEAP_ID	2	/*local heap				     */
 #define H5AC_GHEAP_ID	3	/*global heap				     */
 #define H5AC_OHDR_ID	4	/*object header				     */
-#define H5AC_NTYPES	5	
+#define H5AC_BT2_HDR_ID	5	/*v2 B-tree header			     */
+#define H5AC_BT2_LEAF_ID 6	/*v2 B-tree leaf			     */
+#define H5AC_NTYPES	7	
 
 /* H5AC_DUMP_STATS_ON_CLOSE should always be FALSE when 
  * H5C_COLLECT_CACHE_STATS is FALSE.  

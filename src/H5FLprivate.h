@@ -41,6 +41,7 @@
 #define H5_NO_ARR_FREE_LISTS
 #define H5_NO_SEQ_FREE_LISTS
 #define H5_NO_BLK_FREE_LISTS
+#define H5_NO_FAC_FREE_LISTS
 #endif /* H5_NO_FREE_LISTS */
 
 /*
@@ -297,6 +298,35 @@ typedef struct H5FL_seq_head_t {
 #define H5FL_SEQ_REALLOC(t,obj,new_elem) H5MM_realloc(obj,(new_elem)*sizeof(t))
 #endif /* H5_NO_SEQ_FREE_LISTS */
 
+/* Data structure for free list block factory */
+typedef struct H5FL_fac_head_t {
+    H5FL_blk_head_t queue;      /* Priority queue of blocks */
+    size_t size;                /* Size of the blocks managed */
+} H5FL_fac_head_t;
+
+/*
+ * Macros for defining & using free list factories
+ *
+ * Factories are dynamically created free list managers for blocks of
+ *      a particular size.
+ *
+ */
+#ifndef H5_NO_FAC_FREE_LISTS
+/* Allocate a block from a factory */
+#define H5FL_FAC_MALLOC(t) H5FL_fac_malloc(t)
+
+/* Allocate a block from a factory and clear it to all zeros */
+#define H5FL_FAC_CALLOC(t) H5FL_fac_calloc(t)
+
+/* Return a block to a factory */
+#define H5FL_FAC_FREE(t,obj) H5FL_fac_free(t,obj)
+
+#else /* H5_NO_FAC_FREE_LISTS */
+#define H5FL_FAC_MALLOC(t) H5MM_malloc(t->size)
+#define H5FL_FAC_CALLOC(t) H5MM_calloc(t->size)
+#define H5FL_FAC_FREE(t,obj) H5MM_xfree(obj)
+#endif /* H5_NO_FAC_FREE_LISTS */
+
 /*
  * Library prototypes.
  */
@@ -316,6 +346,11 @@ H5_DLL void * H5FL_seq_malloc(H5FL_seq_head_t *head, size_t elem);
 H5_DLL void * H5FL_seq_calloc(H5FL_seq_head_t *head, size_t elem);
 H5_DLL void * H5FL_seq_free(H5FL_seq_head_t *head, void *obj);
 H5_DLL void * H5FL_seq_realloc(H5FL_seq_head_t *head, void *obj, size_t new_elem);
+H5_DLL H5FL_fac_head_t *H5FL_fac_init(size_t size);
+H5_DLL void * H5FL_fac_malloc(H5FL_fac_head_t *head);
+H5_DLL void * H5FL_fac_calloc(H5FL_fac_head_t *head);
+H5_DLL void * H5FL_fac_free(H5FL_fac_head_t *head, void *obj);
+H5_DLL herr_t H5FL_fac_term(H5FL_fac_head_t *head);
 H5_DLL herr_t H5FL_garbage_coll(void);
 H5_DLL herr_t H5FL_set_free_list_limits(int reg_global_lim, int reg_list_lim,
     int arr_global_lim, int arr_list_lim, int blk_global_lim, int blk_list_lim);

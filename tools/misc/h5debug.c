@@ -26,9 +26,11 @@
  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 
-#include "H5private.h"
+#include "H5private.h"		/* Generic Functions			*/
 #include "H5Bprivate.h"
+#include "H5B2pkg.h"		/* B-trees				*/
 #include "H5Dprivate.h"
 #include "H5Fpkg.h"
 #include "H5Gprivate.h"
@@ -75,7 +77,7 @@ main(int argc, char *argv[])
 
     if (argc == 1) {
 	fprintf(stderr,
-		"Usage: %s filename [signature addr [extra]]\n", argv[0]);
+		"Usage: %s filename [signature-addr [extra]]\n", argv[0]);
 	HDexit(1);
     }
 
@@ -172,6 +174,36 @@ main(int argc, char *argv[])
             fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
             HDexit(4);
         }
+
+    } else if (!HDmemcmp(sig, H5B2_HDR_MAGIC, H5B2_SIZEOF_MAGIC)) {
+        /*
+         * Debug a v2 B-tree.  B-trees are debugged through the B-tree
+         * subclass.  The subclass identifier is two bytes after the
+         * B-tree signature.
+         */
+        H5B2_subid_t subtype = (H5B_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
+	
+#ifdef NOT_YET
+        switch (subtype) {
+            case H5B_SNODE_ID:
+                status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
+                break;
+
+            case H5B_ISTORE_ID:
+                ndims = (unsigned)extra;
+                status = H5D_istore_debug (f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims);
+                break;
+
+            default:
+                fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
+                HDexit(4);
+        }
+#else /* NOT_YET */
+H5B2_class_t type={0,sizeof(hsize_t),NULL,NULL,NULL};            /* B-tree class information */
+
+fprintf(stderr,"B-tree subtype=%u\n",(unsigned)subtype);
+        status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, &type);
+#endif /* NOT_YET */
 
     } else if (sig[0] == H5O_VERSION) {
         /*

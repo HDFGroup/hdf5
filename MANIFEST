@@ -774,6 +774,11 @@
 ./src/H5Bpkg.h
 ./src/H5Bprivate.h
 ./src/H5Bpublic.h
+./src/H5B2.c
+./src/H5B2dbg.c
+./src/H5B2pkg.h
+./src/H5B2private.h
+./src/H5B2public.h
 ./src/H5C.c
 ./src/H5Cpkg.h
 ./src/H5Cprivate.h
@@ -969,6 +974,7 @@
 ./test/Makefile.in
 ./test/big.c
 ./test/bittests.c
+./test/btree2.c
 ./test/cache.c
 ./test/cmpd_dset.c
 ./test/createnoenc.c

@@ -39,7 +39,9 @@ MOSTLYCLEANFILES=H5detect.o H5detect.lo H5detect H5Tinit.o H5Tinit.lo H5Tinit.c
 DISTCLEAN=libhdf5.settings
 
 # library sources
-libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5C.c H5D.c H5Dcontig.c H5Dcompact.c \
+libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2dbg.c H5C.c H5D.c      \
+        H5Dcontig.c \
+        H5Dcompact.c \
         H5Defl.c H5Dio.c H5Distore.c H5Dmpio.c H5Dselect.c H5Dtest.c H5E.c H5F.c \
         H5Fdbg.c H5FD.c H5FDcore.c  \
         H5FDfamily.c H5FDfphdf5.c H5FDgass.c H5FDlog.c H5FDmpi.c H5FDmpio.c     \
@@ -61,7 +63,8 @@ libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5C.c H5D.c H5Dcontig.c H5Dcompact.c
 
 
 # Public headers
-include_HEADERS =H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Cpublic.h H5Dpublic.h  \
+include_HEADERS =H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5B2public.h \
+        H5Cpublic.h H5Dpublic.h  \
         H5Epubgen.h H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h H5FDfamily.h          \
         H5FDfphdf5.h H5FDgass.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
         H5FDmulti.h H5FDsec2.h H5FDsrb.h H5FDstdio.h H5FDstream.h H5FPpublic.h             \
@@ -70,7 +73,8 @@ include_HEADERS =H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Cpublic.h H5D
         H5Tpublic.h H5Zpublic.h H5pubconf.h hdf5.h H5api_adpt.h
 
 # Private headers
-#noinst_HEADERS =H5private.h H5Aprivate.h H5Apkg.h H5ACprivate.h H5Bprivate.h      \
+#noinst_HEADERS =H5private.h H5Aprivate.h H5Apkg.h H5ACprivate.h H5Bprivate.h  \
+#        H5B2private.h \
 #        H5Dprivate.h H5Eprivate.h H5Fprivate.h H5FDprivate.h H5FLprivate.h    \
 #        H5FOprivate.h H5FSprivate.h H5Gprivate.h H5Gpkg.h                     \
 #        H5HGprivate.h H5HLprivate.h H5HPprivate.h H5Iprivate.h H5MFprivate.h  \
