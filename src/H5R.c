@@ -82,7 +82,7 @@ H5R_init_interface(void)
     FUNC_ENTER(H5R_init_interface, FAIL);
 
     /* The atom group */
-    if ((ret_value=H5I_init_group(H5_RAGGED, H5I_RAGGED_HASHSIZE, 0,
+    if ((ret_value=H5I_init_group(H5I_RAGGED, H5I_RAGGED_HASHSIZE, 0,
 				  (herr_t(*)(void*))H5R_close))>=0) {
 	ret_value = H5_add_exit(H5R_term_interface);
     }
@@ -121,7 +121,7 @@ H5R_init_interface(void)
 static void
 H5R_term_interface(void)
 {
-    H5I_destroy_group(H5_RAGGED);
+    H5I_destroy_group(H5I_RAGGED);
     H5T_close(H5R_meta_type_g);
     H5R_meta_type_g = NULL;
 }
@@ -176,7 +176,7 @@ H5Rcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t plist_id)
     if (!name || !*name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
     }
-    if (H5_DATATYPE!=H5I_group(type_id) ||
+    if (H5I_DATATYPE!=H5I_get_type(type_id) ||
 	NULL==(type=H5I_object(type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
@@ -203,7 +203,7 @@ H5Rcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t plist_id)
     }
 
     /* Register the new dataset to get an ID for it */
-    if ((ret_value=H5I_register(H5_RAGGED, ra))<0) {
+    if ((ret_value=H5I_register(H5I_RAGGED, ra))<0) {
 	H5R_close(ra);
 	HRETURN_ERROR(H5E_RAGGED, H5E_CANTREGISTER, FAIL,
 		      "unable to register ragged array");
@@ -389,7 +389,7 @@ H5Ropen(hid_t loc_id, const char *name)
     }
 
     /* Turn it into an atom */
-    if ((ret_value=H5I_register(H5_RAGGED, ra))<0) {
+    if ((ret_value=H5I_register(H5I_RAGGED, ra))<0) {
 	H5R_close(ra);
 	HRETURN_ERROR(H5E_RAGGED, H5E_CANTREGISTER, FAIL,
 		      "unable to register ragged array");
@@ -489,7 +489,7 @@ H5Rclose(hid_t array_id)
     H5TRACE1("e","i",array_id);
 
     /* Check args */
-    if (H5_RAGGED!=H5I_group(array_id) ||
+    if (H5I_RAGGED!=H5I_get_type(array_id) ||
 	NULL==(ra=H5I_object(array_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a ragged array");
     }
@@ -574,11 +574,11 @@ H5Rwrite(hid_t array_id, hssize_t start_row, hsize_t nrows,
              buf);
 
     /* Check args */
-    if (H5_RAGGED!=H5I_group(array_id) ||
+    if (H5I_RAGGED!=H5I_get_type(array_id) ||
 	NULL==(ra=H5I_object(array_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a ragged array");
     }
-    if (H5_DATATYPE!=H5I_group(type_id) ||
+    if (H5I_DATATYPE!=H5I_get_type(type_id) ||
 	NULL==(type=H5I_object(type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
@@ -935,11 +935,11 @@ H5Rread(hid_t array_id, hssize_t start_row, hsize_t nrows,
              buf);
 
     /* Check args */
-    if (H5_RAGGED!=H5I_group(array_id) ||
+    if (H5I_RAGGED!=H5I_get_type(array_id) ||
 	NULL==(ra=H5I_object(array_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a ragged array");
     }
-    if (H5_DATATYPE!=H5I_group(type_id) ||
+    if (H5I_DATATYPE!=H5I_get_type(type_id) ||
 	NULL==(type=H5I_object(type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }

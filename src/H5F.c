@@ -150,7 +150,7 @@ H5F_init_interface(void)
 #endif
 
     /* Initialize the atom group for the file IDs */
-    if (H5I_init_group(H5_FILE, H5I_FILEID_HASHSIZE, 0,
+    if (H5I_init_group(H5I_FILE, H5I_FILEID_HASHSIZE, 0,
 		       (herr_t (*)(void*))H5F_close)<0 ||
 	H5_add_exit(H5F_term_interface)<0) {	
 	HRETURN_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL,
@@ -211,7 +211,7 @@ H5F_init_interface(void)
 static void
 H5F_term_interface(void)
 {
-    H5I_destroy_group(H5_FILE);
+    H5I_destroy_group(H5I_FILE);
 }
 
 
@@ -282,7 +282,7 @@ H5Fget_create_plist(hid_t file_id)
     H5TRACE1("i","i",file_id);
 
     /* check args */
-    if (H5_FILE != H5I_group(file_id) || NULL==(file=H5I_object(file_id))) {
+    if (H5I_FILE != H5I_get_type(file_id) || NULL==(file=H5I_object(file_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
     
@@ -332,7 +332,7 @@ H5Fget_access_plist(hid_t file_id)
     H5TRACE1("i","i",file_id);
 
     /* Check args */
-    if (H5_FILE!=H5I_group(file_id) || NULL==(f=H5I_object(file_id))) {
+    if (H5I_FILE!=H5I_get_type(file_id) || NULL==(f=H5I_object(file_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
 
@@ -803,7 +803,7 @@ H5F_open(const char *name, uintn flags,
 	    HRETURN_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
 			  "file is not writable");
 	}
-	if ((old = H5I_search(H5_FILE, H5F_compare_files, &search))) {
+	if ((old = H5I_search(H5I_FILE, H5F_compare_files, &search))) {
 	    if (flags & H5F_ACC_TRUNC) {
 		HRETURN_ERROR(H5E_FILE, H5E_FILEOPEN, NULL,
 			      "file already open - TRUNC failed");
@@ -1207,7 +1207,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t create_id,
     }
     
     /* Get an atom for the file */
-    if ((ret_value = H5I_register(H5_FILE, new_file)) < 0) {
+    if ((ret_value = H5I_register(H5I_FILE, new_file)) < 0) {
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		    "unable to atomize file");
     }
@@ -1293,7 +1293,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t access_id)
     }
 
     /* Get an atom for the file */
-    if ((ret_value = H5I_register(H5_FILE, new_file)) < 0) {
+    if ((ret_value = H5I_register(H5I_FILE, new_file)) < 0) {
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		    "unable to atomize file handle");
     }
@@ -1339,15 +1339,15 @@ H5Fflush(hid_t object_id)
     FUNC_ENTER(H5Fflush, FAIL);
     H5TRACE1("e","i",object_id);
 
-    switch (H5I_group(object_id)) {
-    case H5_FILE:
+    switch (H5I_get_type(object_id)) {
+    case H5I_FILE:
 	if (NULL==(f=H5I_object(object_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 			  "invalid file identifier");
 	}
 	break;
 
-    case H5_GROUP:
+    case H5I_GROUP:
 	if (NULL==(grp=H5I_object(object_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 			  "invalid group identifier");
@@ -1355,7 +1355,7 @@ H5Fflush(hid_t object_id)
 	ent = H5G_entof(grp);
 	break;
 
-    case H5_DATATYPE:
+    case H5I_DATATYPE:
 	if (NULL==(type=H5I_object(object_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 			  "invalid type identifier");
@@ -1363,7 +1363,7 @@ H5Fflush(hid_t object_id)
 	ent = H5T_entof(type);
 	break;
 
-    case H5_DATASET:
+    case H5I_DATASET:
 	if (NULL==(dset=H5I_object(object_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 			  "invalid dataset identifier");
@@ -1371,7 +1371,7 @@ H5Fflush(hid_t object_id)
 	ent = H5D_entof(dset);
 	break;
 
-    case H5_ATTR:
+    case H5I_ATTR:
 	if (NULL==(attr=H5I_object(object_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 			  "invalid attribute identifier");
@@ -1643,7 +1643,7 @@ H5Fclose(hid_t file_id)
     H5TRACE1("e","i",file_id);
 
     /* Check/fix arguments. */
-    if (H5_FILE != H5I_group(file_id)) {
+    if (H5I_FILE != H5I_get_type(file_id)) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file atom");
     }
     if (NULL == H5I_object(file_id)) {

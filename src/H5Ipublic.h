@@ -25,28 +25,28 @@
  * tracing output look better when hid_t values are large numbers.
  */
 typedef enum {
-    BADGROUP             = (-1),/*invalid Group                              */
-    H5_FILE              = 1,   /*group ID for File objects                  */
-    H5_TEMPLATE_0,              /*group ID for Template objects              */
-    H5_TEMPLATE_1,              /*group ID for Template objects              */
-    H5_TEMPLATE_2,              /*group ID for Template objects              */
-    H5_TEMPLATE_3,              /*group ID for Template objects              */
-    H5_TEMPLATE_4,              /*group ID for Template objects              */
-    H5_TEMPLATE_5,              /*group ID for Template objects              */
-    H5_TEMPLATE_6,              /*group ID for Template objects              */
-    H5_TEMPLATE_7,              /*group ID for Template objects              */
+    H5I_BADID           = (-1),/*invalid Group                              */
+    H5I_FILE            = 1,   /*group ID for File objects                  */
+    H5I_TEMPLATE_0,            /*group ID for Template objects              */
+    H5I_TEMPLATE_1,            /*group ID for Template objects              */
+    H5I_TEMPLATE_2,            /*group ID for Template objects              */
+    H5I_TEMPLATE_3,            /*group ID for Template objects              */
+    H5I_TEMPLATE_4,            /*group ID for Template objects              */
+    H5I_TEMPLATE_5,            /*group ID for Template objects              */
+    H5I_TEMPLATE_6,            /*group ID for Template objects              */
+    H5I_TEMPLATE_7,            /*group ID for Template objects              */
 #ifndef NDEBUG
-    H5_TEMPLATE_MAX,            /*not really a group ID                      */
+    H5I_TEMPLATE_MAX,          /*not really a group ID                      */
 #endif
-    H5_GROUP,                   /*group ID for Group objects                 */
-    H5_DATATYPE,                /*group ID for Datatype objects              */
-    H5_DATASPACE,               /*group ID for Dataspace objects             */
-    H5_DATASET,                 /*group ID for Dataset objects               */
-    H5_ATTR,                    /*group ID for Attribute objects             */
-    H5_TEMPBUF,                 /*group ID for Temporary buffer objects      */
-    H5_RAGGED,			/*group ID for Ragged array objects	     */
-    MAXGROUP               /*highest group in group_t (Invalid as true group)*/
-} H5I_group_t;
+    H5I_GROUP,                 /*group ID for Group objects                 */
+    H5I_DATATYPE,              /*group ID for Datatype objects              */
+    H5I_DATASPACE,             /*group ID for Dataspace objects             */
+    H5I_DATASET,               /*group ID for Dataset objects               */
+    H5I_ATTR,                  /*group ID for Attribute objects             */
+    H5I_TEMPBUF,               /*group ID for Temporary buffer objects      */
+    H5I_RAGGED,                /*group ID for Ragged array objects	     */
+    H5I_MAXID                  /*highest group in group_t (Invalid as true group)*/
+} H5I_type_t;
 
 /* Type of atoms to return to users */
 typedef int hid_t;

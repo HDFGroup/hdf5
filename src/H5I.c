@@ -41,7 +41,7 @@ static char		RcsId[] = "@(#)$Revision$";
    ID Functions:
    H5I_register	      - Register an object in a group and get an ID for it
    H5I_object	      - Get the object for an ID
-   H5I_group	      - Get the group for an ID
+   H5I_get_type	      - Get the group for an ID
    H5I_remove	      - Remove an ID from a group
    H5I_search	      - Search a group for a particular object
    ID Group Functions:
@@ -84,7 +84,7 @@ static herr_t H5I_init_interface(void);
 #  define ID_CACHE_SIZE 4             /*# of previous atoms cached         */
 #endif
 
-/* # of bits to use for Group ID in each atom (change if MAXGROUP>16) */
+/* # of bits to use for Group ID in each atom (change if H5I_MAXID>16) */
 #define GROUP_BITS  8
 #define GROUP_MASK  0xFF
 
@@ -93,7 +93,7 @@ static herr_t H5I_init_interface(void);
 #define ID_MASK   0x0FFFFFFF
 
 /* Map an atom to a Group number */
-#define H5I_GROUP(a)    ((H5I_group_t)					      \
+#define H5I_GROUP(a)    ((H5I_type_t)					      \
 			 ((((hid_t)(a))>>				      \
 			   ((sizeof(hid_t)*8)-GROUP_BITS))&GROUP_MASK))
 
@@ -121,7 +121,7 @@ static void *H5I_obj_cache[ID_CACHE_SIZE];
 #endif
 
 /* Array of pointers to atomic groups */
-static H5I_id_group_t *id_group_list[MAXGROUP];
+static H5I_id_group_t *id_group_list[H5I_MAXID];
 
 /* Pointer to the atom node free list */
 static H5I_id_info_t *id_free_list = NULL;
@@ -173,7 +173,7 @@ H5I_init_interface(void)
 
 ******************************************************************************/
 intn 
-H5I_init_group(H5I_group_t grp,	 /* IN: Group to initialize */
+H5I_init_group(H5I_type_t grp,	 /* IN: Group to initialize */
 	       size_t hash_size, /* IN: Minimum hash table size to use for group */
 	       uintn reserved,	 /* IN: Number of hash table entries to reserve */
 	       herr_t (*free_func) (void *)	/* IN: Function to call when releasing ref counted objects */
@@ -184,7 +184,7 @@ H5I_init_group(H5I_group_t grp,	 /* IN: Group to initialize */
 
     FUNC_ENTER(H5I_init_group, FAIL);
 
-    if ((grp <= BADGROUP || grp >= MAXGROUP) && hash_size > 0) {
+    if ((grp <= H5I_BADID || grp >= H5I_MAXID) && hash_size > 0) {
 	HGOTO_DONE(FAIL);
     }
 
@@ -275,7 +275,7 @@ H5I_init_group(H5I_group_t grp,	 /* IN: Group to initialize */
  *-------------------------------------------------------------------------
  */
 herr_t
-H5I_destroy_group(H5I_group_t grp)
+H5I_destroy_group(H5I_type_t grp)
 {
     H5I_id_group_t	*grp_ptr = NULL;	/* ptr to the atomic group */
     H5I_id_info_t	*cur=NULL, *next=NULL;
@@ -284,7 +284,7 @@ H5I_destroy_group(H5I_group_t grp)
 
     FUNC_ENTER(H5I_destroy_group, FAIL);
 
-    if (grp <= BADGROUP || grp >= MAXGROUP)
+    if (grp <= H5I_BADID || grp >= H5I_MAXID)
 	HGOTO_DONE(FAIL);
 
     grp_ptr = id_group_list[grp];
@@ -353,7 +353,7 @@ H5I_destroy_group(H5I_group_t grp)
 
 *******************************************************************************/
 hid_t 
-H5I_register(H5I_group_t grp,   /* IN: Group to register the object in */
+H5I_register(H5I_type_t grp,   /* IN: Group to register the object in */
 	     void *object     /* IN: Object to attach to atom */
 )
 {
@@ -365,7 +365,7 @@ H5I_register(H5I_group_t grp,   /* IN: Group to register the object in */
 
     FUNC_ENTER(H5I_register, FAIL);
 
-    if (grp <= BADGROUP || grp >= MAXGROUP)
+    if (grp <= H5I_BADID || grp >= H5I_MAXID)
 	HGOTO_DONE(FAIL);
 
     grp_ptr = id_group_list[grp];
@@ -453,7 +453,7 @@ H5I_register(H5I_group_t grp,   /* IN: Group to register the object in */
 hid_t
 H5I_inc_ref(hid_t id)
 {
-    H5I_group_t		grp = H5I_GROUP(id); /* object's group	*/
+    H5I_type_t		grp = H5I_GROUP(id); /* object's group	*/
     H5I_id_group_t	*grp_ptr = NULL;	/* ptr to the ID group*/
     H5I_id_info_t		*id_ptr = NULL;	/* ptr to the new ID 	*/
     hid_t		ret_value = FAIL;
@@ -535,25 +535,25 @@ H5I_object(hid_t id)
 
 /******************************************************************************
  NAME
-     H5I_group - Returns to the group for the ID 
+     H5I_get_type - Returns to the group for the ID 
 
  DESCRIPTION
     Retrieves the group which is associated with the ID.
 
  RETURNS
-    Returns group if successful and BADGROUP otherwise
+    Returns group if successful and H5I_BADID otherwise
 
 *******************************************************************************/
-H5I_group_t 
-H5I_group(hid_t id)
+H5I_type_t 
+H5I_get_type(hid_t id)
 {
-    H5I_group_t		ret_value = BADGROUP;
+    H5I_type_t		ret_value = H5I_BADID;
 
-    FUNC_ENTER(H5I_group, BADGROUP);
+    FUNC_ENTER(H5I_get_type, H5I_BADID);
 
     ret_value = H5I_GROUP(id);
-    if (ret_value <= BADGROUP || ret_value >= MAXGROUP) {
-	HGOTO_DONE(BADGROUP);
+    if (ret_value <= H5I_BADID || ret_value >= H5I_MAXID) {
+	HGOTO_DONE(H5I_BADID);
     }
     
 
@@ -578,7 +578,7 @@ H5I_remove(hid_t id)
     H5I_id_group_t	*grp_ptr = NULL;/* ptr to the atomic group	*/
     H5I_id_info_t		*curr_id,	/* ptr to the current atom 	*/
 			*last_id;	/* ptr to the last atom 	*/
-    H5I_group_t		grp;		/* atom's atomic group 		*/
+    H5I_type_t		grp;		/* atom's atomic group 		*/
     uintn		hash_loc;	/* atom's hash table location 	*/
 #ifdef IDS_ARE_CACHED
     uintn		i;		/* local counting variable 	*/
@@ -588,7 +588,7 @@ H5I_remove(hid_t id)
     FUNC_ENTER(H5I_remove, NULL);
 
     grp = H5I_GROUP(id);
-    if (grp <= BADGROUP || grp >= MAXGROUP) HGOTO_DONE(NULL);
+    if (grp <= H5I_BADID || grp >= H5I_MAXID) HGOTO_DONE(NULL);
 
     grp_ptr = id_group_list[grp];
     if (grp_ptr == NULL || grp_ptr->count <= 0) HGOTO_DONE(NULL);
@@ -664,7 +664,7 @@ H5I_remove(hid_t id)
 intn
 H5I_dec_ref(hid_t id)
 {
-    H5I_group_t		grp = H5I_GROUP(id); /* Group the object is in */
+    H5I_type_t		grp = H5I_GROUP(id); /* Group the object is in */
     H5I_id_group_t	*grp_ptr = NULL;     /* ptr to the group */
     H5I_id_info_t		*id_ptr = NULL;     /* ptr to the new ID */
     void *		obj;	    /* object to call 'free' function with */
@@ -715,7 +715,7 @@ H5I_dec_ref(hid_t id)
 
 *******************************************************************************/
 void *
-H5I_search(H5I_group_t grp,	    /* IN: Group to search for the object in */
+H5I_search(H5I_type_t grp,	    /* IN: Group to search for the object in */
 	   H5I_search_func_t func,   /* IN: Ptr to the comparison function */
 	   const void *key  /* IN: pointer to key to compare against */
 )
@@ -727,7 +727,7 @@ H5I_search(H5I_group_t grp,	    /* IN: Group to search for the object in */
 
     FUNC_ENTER(H5I_search, NULL);
 
-    if (grp <= BADGROUP || grp >= MAXGROUP)
+    if (grp <= H5I_BADID || grp >= H5I_MAXID)
 	HGOTO_DONE(NULL);
 
     grp_ptr = id_group_list[grp];
@@ -764,14 +764,14 @@ H5I_find_id(hid_t id)
 {
     H5I_id_group_t	   *grp_ptr = NULL;	/* ptr to the group */
     H5I_id_info_t		   *id_ptr = NULL;	/* ptr to the new ID */
-    H5I_group_t		    grp;	/* ID's group */
+    H5I_type_t		    grp;	/* ID's group */
     uintn		    hash_loc;	/* ID's hash table location */
     H5I_id_info_t		   *ret_value = NULL;
 
     FUNC_ENTER(H5I_find_id, NULL);
 
     grp = H5I_GROUP(id);
-    if (grp <= BADGROUP || grp >= MAXGROUP)
+    if (grp <= H5I_BADID || grp >= H5I_MAXID)
 	HGOTO_DONE(NULL);
 
     grp_ptr = id_group_list[grp];
@@ -885,7 +885,7 @@ H5I_term_interface(void)
     }
 
     /* Release all groups */
-    for (i = 0; i < (intn) MAXGROUP; i++) {
+    for (i = 0; i < (intn) H5I_MAXID; i++) {
 	if (id_group_list[i] != NULL) {
 	    HDfree(id_group_list[i]);
 	    id_group_list[i] = NULL;

@@ -84,7 +84,7 @@ H5TB_init_interface(void)
     FUNC_ENTER(H5TB_init_interface, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if ((ret_value = H5I_init_group(H5_TEMPBUF, H5I_TEMPBUFID_HASHSIZE,
+    if ((ret_value = H5I_init_group(H5I_TEMPBUF, H5I_TEMPBUFID_HASHSIZE,
             H5TB_RESERVED_ATOMS, NULL)) != FAIL) {
         ret_value = H5_add_exit(&H5TB_term_interface);
     }
@@ -116,7 +116,7 @@ H5TB_term_interface(void)
         *next;                          /* pointer to next temp. buffer */
 
     /* Destroy the atom group */
-    H5I_destroy_group(H5_TEMPBUF);
+    H5I_destroy_group(H5I_TEMPBUF);
 
     /* Step through the list and free the buffers */
     while(curr!=NULL) {
@@ -285,7 +285,7 @@ H5TB_get_buf(hsize_t size, hbool_t resize, void **ptr)
     } /* end if */
 
     /* Atomize */
-    if ((ret_value=H5I_register (H5_TEMPBUF, curr))<0) {
+    if ((ret_value=H5I_register (H5I_TEMPBUF, curr))<0) {
         HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register temp. buffer atom");
     }
 
@@ -324,7 +324,7 @@ H5TB_buf_ptr(hid_t tbuf_id)
 
     FUNC_ENTER (H5TB_buf_ptr, NULL);
 
-    if (H5_TEMPBUF != H5I_group(tbuf_id) ||
+    if (H5I_TEMPBUF != H5I_get_type(tbuf_id) ||
             NULL == (tbuf = H5I_object(tbuf_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a temp. buffer");
     }
@@ -367,7 +367,7 @@ H5TB_resize_buf(hid_t tbuf_id, hsize_t size)
 
     FUNC_ENTER (H5TB_resize_buf, FAIL);
 
-    if (H5_TEMPBUF != H5I_group(tbuf_id) ||
+    if (H5I_TEMPBUF != H5I_get_type(tbuf_id) ||
             NULL == (tbuf = H5I_object(tbuf_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a temp. buffer");
     }
@@ -522,7 +522,7 @@ H5TB_release_buf(hid_t tbuf_id)
 
     FUNC_ENTER (H5TB_release_buf, FAIL);
 
-    if (H5_TEMPBUF != H5I_group(tbuf_id) ||
+    if (H5I_TEMPBUF != H5I_get_type(tbuf_id) ||
             NULL == (tbuf = H5I_remove(tbuf_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a temp. buffer");
     }

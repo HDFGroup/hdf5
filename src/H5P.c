@@ -68,7 +68,7 @@ H5P_init_interface(void)
 		       "unable to initialize H5F and H5P interfaces");
     }
 
-    assert(H5P_NCLASSES <= H5_TEMPLATE_MAX - H5_TEMPLATE_0);
+    assert(H5P_NCLASSES <= H5I_TEMPLATE_MAX - H5I_TEMPLATE_0);
 
     /*
      * Initialize the mappings between property list classes and atom
@@ -76,7 +76,7 @@ H5P_init_interface(void)
      * publicly visible but atom groups aren't.
      */
     for (i = 0; i < H5P_NCLASSES; i++) {
-	status = H5I_init_group((H5I_group_t)(H5_TEMPLATE_0 +i),
+	status = H5I_init_group((H5I_type_t)(H5I_TEMPLATE_0 +i),
 				H5I_TEMPID_HASHSIZE, 0, NULL);
 	if (status < 0) ret_value = FAIL;
     }
@@ -119,7 +119,7 @@ H5P_term_interface(void)
     intn		    i;
 
     for (i = 0; i < H5P_NCLASSES; i++) {
-	H5I_destroy_group((H5I_group_t)(H5_TEMPLATE_0 + i));
+	H5I_destroy_group((H5I_type_t)(H5I_TEMPLATE_0 + i));
     }
 }
 
@@ -232,7 +232,7 @@ H5P_create(H5P_class_t type, void *plist)
     assert(plist);
 
     /* Atomize the new property list */
-    if ((ret_value=H5I_register((H5I_group_t)(H5_TEMPLATE_0+type), plist))<0) {
+    if ((ret_value=H5I_register((H5I_type_t)(H5I_TEMPLATE_0+type), plist))<0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
 		      "unable to register property list");
     }
@@ -385,21 +385,21 @@ H5P_close (H5P_class_t type, void *plist)
 H5P_class_t
 H5Pget_class(hid_t plist_id)
 {
-    H5I_group_t		    group;
+    H5I_type_t		    group;
     H5P_class_t		    ret_value = H5P_NO_CLASS;
 
     FUNC_ENTER(H5Pget_class, H5P_NO_CLASS);
     H5TRACE1("p","i",plist_id);
 
-    if ((group = H5I_group(plist_id)) < 0 ||
+    if ((group = H5I_get_type(plist_id)) < 0 ||
 #ifndef NDEBUG
-	group >= H5_TEMPLATE_MAX ||
+	group >= H5I_TEMPLATE_MAX ||
 #endif
-	group < H5_TEMPLATE_0) {
+	group < H5I_TEMPLATE_0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, H5P_NO_CLASS,
 		      "not a property list");
     }
-    ret_value = (H5P_class_t)(group - H5_TEMPLATE_0);
+    ret_value = (H5P_class_t)(group - H5I_TEMPLATE_0);
     FUNC_LEAVE(ret_value);
 }
 
@@ -423,20 +423,20 @@ H5Pget_class(hid_t plist_id)
 H5P_class_t
 H5P_get_class(hid_t plist_id)
 {
-    H5I_group_t		    group;
+    H5I_type_t		    group;
     H5P_class_t		    ret_value = H5P_NO_CLASS;
 
     FUNC_ENTER(H5P_get_class, H5P_NO_CLASS);
 
-    if ((group = H5I_group(plist_id)) < 0 ||
+    if ((group = H5I_get_type(plist_id)) < 0 ||
 #ifndef NDEBUG
-	group >= H5_TEMPLATE_MAX ||
+	group >= H5I_TEMPLATE_MAX ||
 #endif
-	group < H5_TEMPLATE_0) {
+	group < H5I_TEMPLATE_0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, H5P_NO_CLASS,
 		      "not a property list");
     }
-    ret_value = (H5P_class_t)(group - H5_TEMPLATE_0);
+    ret_value = (H5P_class_t)(group - H5I_TEMPLATE_0);
     FUNC_LEAVE(ret_value);
 }
     
@@ -2658,7 +2658,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset creation property list");
     }
-    if (H5_DATATYPE!=H5I_group(type_id) ||
+    if (H5I_DATATYPE!=H5I_get_type(type_id) ||
 	NULL==(type=H5I_object(type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
@@ -2726,7 +2726,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		    "not a dataset creation proprety list");
     }
-    if (H5_DATATYPE!=H5I_group(type_id) ||
+    if (H5I_DATATYPE!=H5I_get_type(type_id) ||
 	NULL==(type=H5I_object(type_id))) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
@@ -2751,7 +2751,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		    "unable to convert between src and dst data types");
     }
-    src_id = H5I_register(H5_DATATYPE,
+    src_id = H5I_register(H5I_DATATYPE,
 			  H5T_copy (plist->fill.type, H5T_COPY_TRANSIENT));
     if (src_id<0) {
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
@@ -3076,7 +3076,7 @@ H5Pcopy(hid_t plist_id)
     void		   *new_plist = NULL;
     H5P_class_t		    type;
     hid_t		    ret_value = FAIL;
-    H5I_group_t		    group;
+    H5I_type_t		    group;
 
     FUNC_ENTER(H5Pcopy, FAIL);
     H5TRACE1("i","i",plist_id);
@@ -3084,7 +3084,7 @@ H5Pcopy(hid_t plist_id)
     /* Check args */
     if (NULL == (plist = H5I_object(plist_id)) ||
 	(type = H5P_get_class(plist_id)) < 0 ||
-	(group = H5I_group(plist_id)) < 0) {
+	(group = H5I_get_type(plist_id)) < 0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL,
 		      "unable to unatomize property list");
     }

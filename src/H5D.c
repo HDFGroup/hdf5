@@ -121,7 +121,7 @@ H5D_init_interface(void)
     FUNC_ENTER(H5D_init_interface, FAIL);
 
     /* Initialize the atom group for the dataset IDs */
-    if ((ret_value = H5I_init_group(H5_DATASET, H5I_DATASETID_HASHSIZE,
+    if ((ret_value = H5I_init_group(H5I_DATASET, H5I_DATASETID_HASHSIZE,
 				    H5D_RESERVED_ATOMS,
 				    (herr_t (*)(void *)) H5D_close)) != FAIL) {
 	ret_value = H5_add_exit(H5D_term_interface);
@@ -150,7 +150,7 @@ H5D_init_interface(void)
 static void
 H5D_term_interface(void)
 {
-    H5I_destroy_group(H5_DATASET);
+    H5I_destroy_group(H5I_DATASET);
 }
 
 /*-------------------------------------------------------------------------
@@ -214,11 +214,11 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if (!name || !*name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
     }
-    if (H5_DATATYPE != H5I_group(type_id) ||
+    if (H5I_DATATYPE != H5I_get_type(type_id) ||
 	NULL == (type = H5I_object(type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type");
     }
-    if (H5_DATASPACE != H5I_group(space_id) ||
+    if (H5I_DATASPACE != H5I_get_type(space_id) ||
 	NULL == (space = H5I_object(space_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
@@ -237,7 +237,7 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 		      "unable to create dataset");
     }
     /* Register the new dataset to get an ID for it */
-    if ((ret_value = H5I_register(H5_DATASET, new_dset)) < 0) {
+    if ((ret_value = H5I_register(H5I_DATASET, new_dset)) < 0) {
 	H5D_close(new_dset);
 	HRETURN_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
 		      "unable to register dataset");
@@ -290,7 +290,7 @@ H5Dopen(hid_t loc_id, const char *name)
     }
     
     /* Create an atom for the dataset */
-    if ((ret_value = H5I_register(H5_DATASET, dataset)) < 0) {
+    if ((ret_value = H5I_register(H5I_DATASET, dataset)) < 0) {
 	H5D_close(dataset);
 	HRETURN_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
 		      "can't register dataset");
@@ -329,7 +329,7 @@ H5Dclose(hid_t dset_id)
     H5TRACE1("e","i",dset_id);
 
     /* Check args */
-    if (H5_DATASET != H5I_group(dset_id) ||
+    if (H5I_DATASET != H5I_get_type(dset_id) ||
 	NULL == (dset = H5I_object(dset_id)) ||
 	NULL == dset->ent.file) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
@@ -375,7 +375,7 @@ H5Dget_space(hid_t dset_id)
     H5TRACE1("i","i",dset_id);
 
     /* Check args */
-    if (H5_DATASET!=H5I_group (dset_id) ||
+    if (H5I_DATASET!=H5I_get_type (dset_id) ||
 	NULL==(dset=H5I_object (dset_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
@@ -387,7 +387,7 @@ H5Dget_space(hid_t dset_id)
     }
 
     /* Create an atom */
-    if ((ret_value=H5I_register (H5_DATASPACE, space))<0) {
+    if ((ret_value=H5I_register (H5I_DATASPACE, space))<0) {
 	H5S_close (space);
 	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		       "unable to register data space");
@@ -465,7 +465,7 @@ H5Dget_type(hid_t dset_id)
     H5TRACE1("i","i",dset_id);
 
     /* Check args */
-    if (H5_DATASET!=H5I_group (dset_id) ||
+    if (H5I_DATASET!=H5I_get_type (dset_id) ||
 	NULL==(dset=H5I_object (dset_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
@@ -482,7 +482,7 @@ H5Dget_type(hid_t dset_id)
     }
     
     /* Create an atom */
-    if ((ret_value=H5I_register (H5_DATATYPE, copied_type))<0) {
+    if ((ret_value=H5I_register (H5I_DATATYPE, copied_type))<0) {
 	H5T_close (copied_type);
 	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		       "unable to register data type");
@@ -521,7 +521,7 @@ H5Dget_create_plist(hid_t dset_id)
     H5TRACE1("i","i",dset_id);
 
     /* Check args */
-    if (H5_DATASET!=H5I_group (dset_id) ||
+    if (H5I_DATASET!=H5I_get_type (dset_id) ||
 	NULL==(dset=H5I_object (dset_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
@@ -542,7 +542,7 @@ H5Dget_create_plist(hid_t dset_id)
     }
     
     /* Create an atom */
-    if ((ret_value=H5I_register ((H5I_group_t)(H5_TEMPLATE_0+
+    if ((ret_value=H5I_register ((H5I_type_t)(H5I_TEMPLATE_0+
 					       H5P_DATASET_CREATE),
 				 copied_parms))<0) {
 	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
@@ -609,17 +609,17 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
              plist_id,buf);
 
     /* check arguments */
-    if (H5_DATASET != H5I_group(dset_id) ||
+    if (H5I_DATASET != H5I_get_type(dset_id) ||
 	NULL == (dset = H5I_object(dset_id)) ||
 	NULL == dset->ent.file) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
-    if (H5_DATATYPE != H5I_group(mem_type_id) ||
+    if (H5I_DATATYPE != H5I_get_type(mem_type_id) ||
 	NULL == (mem_type = H5I_object(mem_type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
     if (H5S_ALL != mem_space_id) {
-	if (H5_DATASPACE != H5I_group(mem_space_id) ||
+	if (H5I_DATASPACE != H5I_get_type(mem_space_id) ||
 	    NULL == (mem_space = H5I_object(mem_space_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
@@ -630,7 +630,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	}
     }
     if (H5S_ALL != file_space_id) {
-	if (H5_DATASPACE != H5I_group(file_space_id) ||
+	if (H5I_DATASPACE != H5I_get_type(file_space_id) ||
 	    NULL == (file_space = H5I_object(file_space_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
@@ -710,17 +710,17 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
              plist_id,buf);
 
     /* check arguments */
-    if (H5_DATASET != H5I_group(dset_id) ||
+    if (H5I_DATASET != H5I_get_type(dset_id) ||
 	NULL == (dset = H5I_object(dset_id)) ||
 	NULL == dset->ent.file) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
-    if (H5_DATATYPE != H5I_group(mem_type_id) ||
+    if (H5I_DATATYPE != H5I_get_type(mem_type_id) ||
 	NULL == (mem_type = H5I_object(mem_type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
     if (H5S_ALL != mem_space_id) {
-	if (H5_DATASPACE != H5I_group(mem_space_id) ||
+	if (H5I_DATASPACE != H5I_get_type(mem_space_id) ||
 	    NULL == (mem_space = H5I_object(mem_space_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
@@ -731,7 +731,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	}
     }
     if (H5S_ALL != file_space_id) {
-	if (H5_DATASPACE != H5I_group(file_space_id) ||
+	if (H5I_DATASPACE != H5I_get_type(file_space_id) ||
 	    NULL == (file_space = H5I_object(file_space_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 	}
@@ -786,7 +786,7 @@ H5Dextend(hid_t dset_id, const hsize_t *size)
     H5TRACE2("e","i*h",dset_id,size);
 
     /* Check args */
-    if (H5_DATASET!=H5I_group (dset_id) ||
+    if (H5I_DATASET!=H5I_get_type (dset_id) ||
 	NULL==(dset=H5I_object (dset_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
@@ -1394,9 +1394,9 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     } else if (H5T_conv_noop!=tconv_func) {
-        if ((src_id=H5I_register(H5_DATATYPE,
+        if ((src_id=H5I_register(H5I_DATATYPE,
 				 H5T_copy(dataset->type, H5T_COPY_ALL)))<0 ||
-	    (dst_id=H5I_register(H5_DATATYPE,
+	    (dst_id=H5I_register(H5I_DATATYPE,
 				 H5T_copy(mem_type, H5T_COPY_ALL)))<0) {
             HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
                 "unable to register types for conversion");
@@ -1763,9 +1763,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     } else if (H5T_conv_noop!=tconv_func) {
-	if ((src_id = H5I_register(H5_DATATYPE,
+	if ((src_id = H5I_register(H5I_DATATYPE,
 				   H5T_copy(mem_type, H5T_COPY_ALL)))<0 ||
-	    (dst_id = H5I_register(H5_DATATYPE,
+	    (dst_id = H5I_register(H5I_DATATYPE,
 				   H5T_copy(dataset->type, H5T_COPY_ALL)))<0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL,
 			"unable to register types for conversion");

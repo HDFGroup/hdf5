@@ -65,7 +65,7 @@ H5S_init_interface(void)
     FUNC_ENTER(H5S_init_interface, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if ((ret_value = H5I_init_group(H5_DATASPACE, H5I_DATASPACEID_HASHSIZE,
+    if ((ret_value = H5I_init_group(H5I_DATASPACE, H5I_DATASPACEID_HASHSIZE,
             H5S_RESERVED_ATOMS, (herr_t (*)(void *)) H5S_close)) != FAIL) {
         ret_value = H5_add_exit(&H5S_term_interface);
     }
@@ -199,7 +199,7 @@ H5S_term_interface(void)
 #endif
 
     /* Free data types */
-    H5I_destroy_group(H5_DATASPACE);
+    H5I_destroy_group(H5I_DATASPACE);
 
     /* Clear/free conversion table */
     HDmemset(H5S_fconv_g, 0, sizeof(H5S_fconv_g));
@@ -327,7 +327,7 @@ H5Screate(H5S_class_t type)
     }
 
     /* Atomize */
-    if ((ret_value=H5I_register (H5_DATASPACE, new_ds))<0) {
+    if ((ret_value=H5I_register (H5I_DATASPACE, new_ds))<0) {
         HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data space atom");
     }
 
@@ -449,7 +449,7 @@ H5Sclose(hid_t space_id)
     H5TRACE1("e","i",space_id);
 
     /* Check args */
-    if (H5_DATASPACE != H5I_group(space_id) ||
+    if (H5I_DATASPACE != H5I_get_type(space_id) ||
         NULL == H5I_object(space_id)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
@@ -519,7 +519,7 @@ H5Scopy(hid_t space_id)
     H5TRACE1("i","i",space_id);
 
     /* Check args */
-    if (H5_DATASPACE!=H5I_group (space_id) || NULL==(src=H5I_object (space_id))) {
+    if (H5I_DATASPACE!=H5I_get_type (space_id) || NULL==(src=H5I_object (space_id))) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
 
@@ -529,7 +529,7 @@ H5Scopy(hid_t space_id)
     }
 
     /* Atomize */
-    if ((ret_value=H5I_register (H5_DATASPACE, dst))<0) {
+    if ((ret_value=H5I_register (H5I_DATASPACE, dst))<0) {
         HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data space atom");
     }
 
@@ -562,10 +562,10 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
     H5TRACE2("e","ii",dst_id,src_id);
 
     /* Check args */
-    if (H5_DATASPACE!=H5I_group (src_id) || NULL==(src=H5I_object (src_id))) {
+    if (H5I_DATASPACE!=H5I_get_type (src_id) || NULL==(src=H5I_object (src_id))) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
-    if (H5_DATASPACE!=H5I_group (dst_id) || NULL==(dst=H5I_object (dst_id))) {
+    if (H5I_DATASPACE!=H5I_get_type (dst_id) || NULL==(dst=H5I_object (dst_id))) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
 
@@ -756,7 +756,7 @@ H5Sget_simple_extent_npoints(hid_t space_id)
     H5TRACE1("h","i",space_id);
 
     /* Check args */
-    if (H5_DATASPACE != H5I_group(space_id) || NULL == (ds = H5I_object(space_id))) {
+    if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == (ds = H5I_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
     }
     ret_value = H5S_get_simple_extent_npoints(ds);
@@ -858,7 +858,7 @@ H5Sget_simple_extent_ndims(hid_t space_id)
     H5TRACE1("Is","i",space_id);
 
     /* Check args */
-    if (H5_DATASPACE != H5I_group(space_id) ||
+    if (H5I_DATASPACE != H5I_get_type(space_id) ||
 	NULL == (ds = H5I_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
@@ -949,7 +949,7 @@ H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
     H5TRACE3("Is","ixx",space_id,dims,maxdims);
 
     /* Check args */
-    if (H5_DATASPACE != H5I_group(space_id) ||
+    if (H5I_DATASPACE != H5I_get_type(space_id) ||
 	NULL == (ds = H5I_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
     }
@@ -1634,7 +1634,7 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
     }
     
     /* Atomize */
-    if ((ret_value=H5I_register (H5_DATASPACE, space))<0) {
+    if ((ret_value=H5I_register (H5I_DATASPACE, space))<0) {
         HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		     "unable to register data space atom");
     }
@@ -1672,7 +1672,7 @@ H5Sget_simple_extent_type(hid_t sid)
     H5TRACE1("Sc","i",sid);
 
     /* Check arguments */
-    if (H5_DATASPACE != H5I_group(sid) || NULL == (space = H5I_object(sid))) {
+    if (H5I_DATASPACE != H5I_get_type(sid) || NULL == (space = H5I_object(sid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
     }
 
@@ -1705,7 +1705,7 @@ H5Sset_extent_none(hid_t space_id)
     H5TRACE1("e","i",space_id);
 
     /* Check args */
-    if (H5_DATASPACE != H5I_group(space_id) || NULL == (space = H5I_object(space_id))) {
+    if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == (space = H5I_object(space_id))) {
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     }
 
@@ -1743,7 +1743,7 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
     H5TRACE2("e","i*Hs",space_id,offset);
 
     /* Check args */
-    if (H5_DATASPACE != H5I_group(space_id) || NULL == (space = H5I_object(space_id))) {
+    if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == (space = H5I_object(space_id))) {
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     }
     if (offset == NULL) {

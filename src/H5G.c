@@ -148,7 +148,7 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
     if (NULL == (grp = H5G_create(loc, name, size_hint))) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group");
     }
-    if ((ret_value = H5I_register(H5_GROUP, grp)) < 0) {
+    if ((ret_value = H5I_register(H5I_GROUP, grp)) < 0) {
 	H5G_close(grp);
 	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		      "unable to register group");
@@ -199,7 +199,7 @@ H5Gopen(hid_t loc_id, const char *name)
 	HRETURN_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
     }
     /* Register an atom for the group */
-    if ((ret_value = H5I_register(H5_GROUP, grp)) < 0) {
+    if ((ret_value = H5I_register(H5I_GROUP, grp)) < 0) {
 	H5G_close(grp);
 	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		      "unable to register group");
@@ -232,7 +232,7 @@ H5Gclose(hid_t group_id)
     H5TRACE1("e","i",group_id);
 
     /* Check args */
-    if (H5_GROUP != H5I_group(group_id) ||
+    if (H5I_GROUP != H5I_get_type(group_id) ||
 	NULL == H5I_object(group_id)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
     }
@@ -481,7 +481,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
     if (NULL==(udata.group = H5G_open (loc, name))) {
 	HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to open group");
     }
-    if ((udata.group_id=H5I_register (H5_GROUP, udata.group))<0) {
+    if ((udata.group_id=H5I_register (H5I_GROUP, udata.group))<0) {
 	H5G_close (udata.group);
 	HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
 		       "unable to register group");
@@ -869,7 +869,7 @@ H5G_init_interface(void)
     FUNC_ENTER(H5G_init_interface, FAIL);
 
     /* Initialize the atom group for the group IDs */
-    if (H5I_init_group(H5_GROUP, H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS,
+    if (H5I_init_group(H5I_GROUP, H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS,
 		       (herr_t (*)(void *)) H5G_close) < 0 ||
 	H5_add_exit(H5G_term_interface) < 0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
@@ -896,7 +896,7 @@ H5G_init_interface(void)
 static void
 H5G_term_interface(void)
 {
-    H5I_destroy_group(H5_GROUP);
+    H5I_destroy_group(H5I_GROUP);
 }
 
 
@@ -1867,8 +1867,8 @@ H5G_loc (hid_t loc_id)
 
     FUNC_ENTER (H5G_loc, NULL);
 
-    switch (H5I_group(loc_id)) {
-    case H5_FILE:
+    switch (H5I_get_type(loc_id)) {
+    case H5I_FILE:
 	if (NULL==(f=H5I_object (loc_id))) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, NULL, "invalid file ID");
 	}
@@ -1882,22 +1882,22 @@ H5G_loc (hid_t loc_id)
 	}
 	break;
 
-    case H5_TEMPLATE_0:
-    case H5_TEMPLATE_1:
-    case H5_TEMPLATE_2:
-    case H5_TEMPLATE_3:
-    case H5_TEMPLATE_4:
-    case H5_TEMPLATE_5:
-    case H5_TEMPLATE_6:
-    case H5_TEMPLATE_7:
+    case H5I_TEMPLATE_0:
+    case H5I_TEMPLATE_1:
+    case H5I_TEMPLATE_2:
+    case H5I_TEMPLATE_3:
+    case H5I_TEMPLATE_4:
+    case H5I_TEMPLATE_5:
+    case H5I_TEMPLATE_6:
+    case H5I_TEMPLATE_7:
 #ifndef NDEBUG
-    case H5_TEMPLATE_MAX:
+    case H5I_TEMPLATE_MAX:
 #endif
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
 		      "unable to get symbol table entry of property list");
 	break;
 
-    case H5_GROUP:
+    case H5I_GROUP:
 	if (NULL==(group=H5I_object (loc_id))) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, NULL, "invalid group ID");
 	}
@@ -1907,7 +1907,7 @@ H5G_loc (hid_t loc_id)
 	}
 	break;
 
-    case H5_DATATYPE:
+    case H5I_DATATYPE:
 	if (NULL==(dt=H5I_object(loc_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid type ID");
 	}
@@ -1917,11 +1917,11 @@ H5G_loc (hid_t loc_id)
 	}
 	break;
 
-    case H5_DATASPACE:
+    case H5I_DATASPACE:
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
 		      "unable to get symbol table entry of data space");
 
-    case H5_DATASET:
+    case H5I_DATASET:
 	if (NULL==(dset=H5I_object(loc_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid data ID");
 	}
@@ -1931,7 +1931,7 @@ H5G_loc (hid_t loc_id)
 	}
 	break;
 
-    case H5_ATTR:
+    case H5I_ATTR:
 	if (NULL==(attr=H5I_object(loc_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
 			  "invalid attribute ID");
@@ -1942,11 +1942,11 @@ H5G_loc (hid_t loc_id)
 	}
 	break;
 	    
-    case H5_TEMPBUF:
+    case H5I_TEMPBUF:
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
 		      "unable to get symbol table entry of buffer");
     
-    case H5_RAGGED:
+    case H5I_RAGGED:
 	if (NULL==(ra=H5I_object(loc_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
 			  "invalid ragged array ID");
@@ -1957,8 +1957,8 @@ H5G_loc (hid_t loc_id)
 	}
 	break;
 	
-    case MAXGROUP:
-    case BADGROUP:
+    case H5I_MAXID:
+    case H5I_BADID:
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object ID");
     }
 

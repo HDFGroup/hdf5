@@ -70,7 +70,7 @@ H5A_init_interface(void)
     /*
      * Register cleanup function.
      */
-    if ((ret_value = H5I_init_group(H5_ATTR, H5I_ATTRID_HASHSIZE,
+    if ((ret_value = H5I_init_group(H5I_ATTR, H5I_ATTRID_HASHSIZE,
 				    H5A_RESERVED_ATOMS,
 				    (herr_t (*)(void *)) H5A_close)) == FAIL) {
         HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL,
@@ -106,7 +106,7 @@ H5A_init_interface(void)
 static void
 H5A_term_interface(void)
 {
-    H5I_destroy_group(H5_ATTR);
+    H5I_destroy_group(H5I_ATTR);
 }
 
 
@@ -162,8 +162,8 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5TRACE5("i","isiii",loc_id,name,type_id,space_id,plist_id);
 
     /* check arguments */
-    if (H5_FILE==H5I_group(loc_id) ||
-	H5_ATTR==H5I_group(loc_id)) {
+    if (H5I_FILE==H5I_get_type(loc_id) ||
+	H5I_ATTR==H5I_get_type(loc_id)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "location is not valid for an attribute");
     }
@@ -173,11 +173,11 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if (!name || !*name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
     }
-    if (H5_DATATYPE != H5I_group(type_id) ||
+    if (H5I_DATATYPE != H5I_get_type(type_id) ||
 	NULL == (type = H5I_object(type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type");
     }
-    if (H5_DATASPACE != H5I_group(space_id) ||
+    if (H5I_DATASPACE != H5I_get_type(space_id) ||
 	NULL == (space = H5I_object(space_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
@@ -282,7 +282,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
 		    "unable to update attribute header messages");
 
     /* Register the new attribute and get an ID for it */
-    if ((ret_value = H5I_register(H5_ATTR, attr)) < 0) {
+    if ((ret_value = H5I_register(H5I_ATTR, attr)) < 0) {
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		    "unable to register attribute for ID");
     }
@@ -394,8 +394,8 @@ H5Aopen_name(hid_t loc_id, const char *name)
     H5TRACE2("i","is",loc_id,name);
 
     /* check arguments */
-    if (H5_FILE==H5I_group(loc_id) ||
-	H5_ATTR==H5I_group(loc_id)) {
+    if (H5I_FILE==H5I_get_type(loc_id) ||
+	H5I_ATTR==H5I_get_type(loc_id)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "location is not valid for an attribute");
     }
@@ -457,8 +457,8 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
     H5TRACE2("i","iIu",loc_id,idx);
 
     /* check arguments */
-    if (H5_FILE==H5I_group(loc_id) ||
-	H5_ATTR==H5I_group(loc_id)) {
+    if (H5I_FILE==H5I_get_type(loc_id) ||
+	H5I_ATTR==H5I_get_type(loc_id)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "location is not valid for an attribute");
     }
@@ -522,7 +522,7 @@ H5A_open(H5G_entry_t *ent, unsigned idx)
     attr->ent_opened=1;
 
     /* Register the new attribute and get an ID for it */
-    if ((ret_value = H5I_register(H5_ATTR, attr)) < 0) {
+    if ((ret_value = H5I_register(H5I_ATTR, attr)) < 0) {
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		    "unable to register attribute for ID");
     }
@@ -566,11 +566,11 @@ H5Awrite(hid_t attr_id, hid_t type_id, void *buf)
     H5TRACE3("e","iix",attr_id,type_id,buf);
 
     /* check arguments */
-    if (H5_ATTR != H5I_group(attr_id) ||
+    if (H5I_ATTR != H5I_get_type(attr_id) ||
 	(NULL == (attr = H5I_object(attr_id)))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
     }
-    if (H5_DATATYPE != H5I_group(type_id) ||
+    if (H5I_DATATYPE != H5I_get_type(type_id) ||
 	NULL == (mem_type = H5I_object(type_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
@@ -653,9 +653,9 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf)
         HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     } else if (H5T_conv_noop!=tconv_func) {
-        if ((src_id = H5I_register(H5_DATATYPE,
+        if ((src_id = H5I_register(H5I_DATATYPE,
 				   H5T_copy(mem_type, H5T_COPY_ALL)))<0 ||
-	    (dst_id = H5I_register(H5_DATATYPE,
+	    (dst_id = H5I_register(H5I_DATATYPE,
 				   H5T_copy(attr->dt, H5T_COPY_ALL)))<0) {
             HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL,
 			"unable to register types for conversion");
@@ -737,11 +737,11 @@ H5Aread(hid_t attr_id, hid_t type_id, void *buf)
     H5TRACE3("e","iix",attr_id,type_id,buf);
 
     /* check arguments */
-    if (H5_ATTR != H5I_group(attr_id) ||
+    if (H5I_ATTR != H5I_get_type(attr_id) ||
 	(NULL == (attr = H5I_object(attr_id)))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
     }
-    if (H5_DATATYPE != H5I_group(type_id) ||
+    if (H5I_DATATYPE != H5I_get_type(type_id) ||
 	NULL == (mem_type = H5I_object(type_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
@@ -823,9 +823,9 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
         HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     } else if (H5T_conv_noop!=tconv_func) {
-        if ((src_id = H5I_register(H5_DATATYPE,
+        if ((src_id = H5I_register(H5I_DATATYPE,
 				   H5T_copy(attr->dt, H5T_COPY_ALL)))<0 ||
-	    (dst_id = H5I_register(H5_DATATYPE,
+	    (dst_id = H5I_register(H5I_DATATYPE,
 				   H5T_copy(mem_type, H5T_COPY_ALL)))<0) {
             HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL,
 			"unable to register types for conversion");
@@ -892,7 +892,7 @@ H5Aget_space(hid_t attr_id)
     H5TRACE1("i","i",attr_id);
 
     /* check arguments */
-    if (H5_ATTR != H5I_group(attr_id) ||
+    if (H5I_ATTR != H5I_get_type(attr_id) ||
 	(NULL == (attr = H5I_object(attr_id)))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
     }
@@ -904,7 +904,7 @@ H5Aget_space(hid_t attr_id)
     }
 
     /* Atomize */
-    if ((ret_value=H5I_register (H5_DATASPACE, dst))<0) {
+    if ((ret_value=H5I_register (H5I_DATASPACE, dst))<0) {
         HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		       "unable to register dataspace atom");
     }
@@ -949,7 +949,7 @@ H5Aget_type(hid_t attr_id)
     H5TRACE1("i","i",attr_id);
 
     /* check arguments */
-    if (H5_ATTR != H5I_group(attr_id) ||
+    if (H5I_ATTR != H5I_get_type(attr_id) ||
 	(NULL == (attr = H5I_object(attr_id)))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
     }
@@ -970,7 +970,7 @@ H5Aget_type(hid_t attr_id)
     }
     
     /* Atomize */
-    if ((ret_value=H5I_register (H5_DATATYPE, dst))<0) {
+    if ((ret_value=H5I_register (H5I_DATATYPE, dst))<0) {
 	H5T_close (dst);
         HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		       "unable to register datatype atom");
@@ -1014,7 +1014,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     H5TRACE3("z","izs",attr_id,buf_size,buf);
 
     /* check arguments */
-    if (H5_ATTR != H5I_group(attr_id) ||
+    if (H5I_ATTR != H5I_get_type(attr_id) ||
 	(NULL == (attr = H5I_object(attr_id)))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
     }
@@ -1070,25 +1070,25 @@ H5Aget_num_attrs(hid_t loc_id)
     H5TRACE1("Is","i",loc_id);
 
     /* check arguments */
-    if (H5_FILE==H5I_group(loc_id) ||
-	H5_ATTR==H5I_group(loc_id)) {
+    if (H5I_FILE==H5I_get_type(loc_id) ||
+	H5I_ATTR==H5I_get_type(loc_id)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "location is not valid for an attribute");
     }
     if(NULL == (obj = H5I_object(loc_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADATOM, FAIL, "illegal object atom");
     }
-    switch (H5I_group (loc_id)) {
-    case H5_DATASET:
+    switch (H5I_get_type (loc_id)) {
+    case H5I_DATASET:
 	ent = H5D_entof ((H5D_t*)obj);
 	break;
-    case H5_DATATYPE:
+    case H5I_DATATYPE:
 	if (NULL==(ent=H5T_entof ((H5T_t*)obj))) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 			   "target data type is not committed");
 	}
 	break;
-    case H5_GROUP:
+    case H5I_GROUP:
 	ent = H5G_entof ((H5G_t*)obj);
 	break;
     default:
@@ -1161,8 +1161,8 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
     H5TRACE4("Is","i*Iuxx",loc_id,attr_num,op,op_data);
 
     /* check arguments */
-    if (H5_FILE==H5I_group(loc_id) ||
-	H5_ATTR==H5I_group(loc_id)) {
+    if (H5I_FILE==H5I_get_type(loc_id) ||
+	H5I_ATTR==H5I_get_type(loc_id)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "location is not valid for an attribute");
     }
@@ -1232,8 +1232,8 @@ H5Adelete(hid_t loc_id, const char *name)
     H5TRACE2("e","is",loc_id,name);
 
     /* check arguments */
-    if (H5_FILE==H5I_group(loc_id) ||
-	H5_ATTR==H5I_group(loc_id)) {
+    if (H5I_FILE==H5I_get_type(loc_id) ||
+	H5I_ATTR==H5I_get_type(loc_id)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "location is not valid for an attribute");
     }
@@ -1298,7 +1298,7 @@ H5Aclose(hid_t attr_id)
     H5TRACE1("e","i",attr_id);
 
     /* check arguments */
-    if (H5_ATTR != H5I_group(attr_id) || NULL == H5I_object(attr_id)) {
+    if (H5I_ATTR != H5I_get_type(attr_id) || NULL == H5I_object(attr_id)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
     }
 

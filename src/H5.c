@@ -1530,36 +1530,36 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		} else if (FAIL==obj) {
 		    fprintf (out, "FAIL");
 		} else {
-		    switch (H5I_group (obj)) {
-		    case BADGROUP:
+		    switch (H5I_get_type (obj)) {
+		    case H5I_BADID:
 			fprintf (out, "%ld (error)", (long)obj);
 			break;
-		    case H5_FILE:
+		    case H5I_FILE:
 			fprintf(out, "%ld", (long)obj);
 			if (HDstrcmp (argname, "file")) {
 			    fprintf (out, " (file)");
 			}
 			break;
-		    case H5_TEMPLATE_0:
-		    case H5_TEMPLATE_1:
-		    case H5_TEMPLATE_2:
-		    case H5_TEMPLATE_3:
-		    case H5_TEMPLATE_4:
-		    case H5_TEMPLATE_5:
-		    case H5_TEMPLATE_6:
-		    case H5_TEMPLATE_7:
+		    case H5I_TEMPLATE_0:
+		    case H5I_TEMPLATE_1:
+		    case H5I_TEMPLATE_2:
+		    case H5I_TEMPLATE_3:
+		    case H5I_TEMPLATE_4:
+		    case H5I_TEMPLATE_5:
+		    case H5I_TEMPLATE_6:
+		    case H5I_TEMPLATE_7:
 			fprintf(out, "%ld", (long)obj);
 			if (HDstrcmp (argname, "plist")) {
 			    fprintf (out, " (plist)");
 			}
 			break;
-		    case H5_GROUP:
+		    case H5I_GROUP:
 			fprintf(out, "%ld", (long)obj);
 			if (HDstrcmp (argname, "group")) {
 			    fprintf (out, " (group)");
 			}
 			break;
-		    case H5_DATATYPE:
+		    case H5I_DATATYPE:
 			if (obj==H5T_NATIVE_CHAR_g) {
 			    fprintf(out, "H5T_NATIVE_CHAR");
 			} else if (obj==H5T_NATIVE_UCHAR_g) {
@@ -1653,7 +1653,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			    }
 			}
 			break;
-		    case H5_DATASPACE:
+		    case H5I_DATASPACE:
 			fprintf(out, "%ld", (long)obj);
 			if (HDstrcmp (argname, "space")) {
 			    fprintf (out, " (space)");
@@ -1666,25 +1666,25 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			    }
 			}
 			break;
-		    case H5_DATASET:
+		    case H5I_DATASET:
 			fprintf(out, "%ld", (long)obj);
 			if (HDstrcmp (argname, "dset")) {
 			    fprintf (out, " (dset)");
 			}
 			break;
-		    case H5_ATTR:
+		    case H5I_ATTR:
 			fprintf(out, "%ld", (long)obj);
 			if (HDstrcmp (argname, "attr")) {
 			    fprintf (out, " (attr)");
 			}
 			break;
-		    case H5_TEMPBUF:
+		    case H5I_TEMPBUF:
 			fprintf(out, "%ld", (long)obj);
 			if (HDstrcmp(argname, "tbuf")) {
 			    fprintf(out, " (tbuf");
 			}
 			break;
-		    case H5_RAGGED:
+		    case H5I_RAGGED:
 			fprintf(out, "%ld", (long)obj);
 			if (HDstrcmp(argname, "array")) {
 			    fprintf(out, " (array)");

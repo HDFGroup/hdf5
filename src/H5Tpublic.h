@@ -32,8 +32,9 @@ typedef enum H5T_class_t {
     H5T_BITFIELD         = 4,   /*bit field types                            */
     H5T_OPAQUE           = 5,   /*opaque types                               */
     H5T_COMPOUND         = 6,   /*compound types                             */
+    H5T_POINTER          = 7,   /*Pointer types                              */
 
-    H5T_NCLASSES         = 7    /*this must be last                          */
+    H5T_NCLASSES         = 8    /*this must be last                          */
 } H5T_class_t;
 
 /* Byte orders */
@@ -346,6 +347,7 @@ extern hid_t H5T_FORTRAN_S1_g;
 #define H5T_NATIVE_HSSIZE	(H5open(), H5T_NATIVE_HSSIZE_g)
 #define H5T_NATIVE_HERR		(H5open(), H5T_NATIVE_HERR_g)
 #define H5T_NATIVE_HBOOL	(H5open(), H5T_NATIVE_HBOOL_g)
+#define H5T_NATIVE_PTR_OBJ	(H5open(), H5T_NATIVE_PTR_OBJ_g)
 extern hid_t H5T_NATIVE_CHAR_g;
 extern hid_t H5T_NATIVE_UCHAR_g;
 extern hid_t H5T_NATIVE_SHORT_g;
@@ -368,6 +370,7 @@ extern hid_t H5T_NATIVE_HSIZE_g;
 extern hid_t H5T_NATIVE_HSSIZE_g;
 extern hid_t H5T_NATIVE_HERR_g;
 extern hid_t H5T_NATIVE_HBOOL_g;
+extern hid_t H5T_NATIVE_PTR_OBJ_g;
    
 /* Operations defined on all data types */
 hid_t H5Topen (hid_t loc_id, const char *name);

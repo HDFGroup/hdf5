@@ -2115,7 +2115,8 @@ H5S_hyper_clip (H5S_t *space, H5S_hyper_node_t *nodes, H5S_hyper_node_t **uniq,
     H5S_hyper_node_t *region,   /* Temp. hyperslab selection region pointer */
         *node,                  /* Temp. hyperslab node pointer */
         *next_node;             /* Pointer to next node in node list */
-    hsize_t *start, *end=NULL;  /* Temporary arrays of start & sizes (for splitting nodes) */
+    hssize_t *start;            /* Temporary arrays of start & sizes (for splitting nodes) */
+    hsize_t *end=NULL;          /* Temporary arrays of start & sizes (for splitting nodes) */
     intn rank;                  /* Cached copy of the rank of the dataspace */
     intn overlapped;            /* Flag for overlapping nodes */
     intn non_intersect;         /* Flag for non-intersecting nodes */
@@ -2131,7 +2132,7 @@ H5S_hyper_clip (H5S_t *space, H5S_hyper_node_t *nodes, H5S_hyper_node_t **uniq,
     assert (nodes);
 
     /* Allocate space for the temporary starts & sizes */
-    if((start = H5MM_malloc(sizeof(hsize_t)*space->extent.u.simple.rank))==NULL)
+    if((start = H5MM_malloc(sizeof(hssize_t)*space->extent.u.simple.rank))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab start array");
     if((end = H5MM_malloc(sizeof(hsize_t)*space->extent.u.simple.rank))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab size array");
@@ -2218,7 +2219,7 @@ H5S_hyper_clip (H5S_t *space, H5S_hyper_node_t *nodes, H5S_hyper_node_t **uniq,
                         /* Clip the existing non-overlapped portion off the current node */
                         node->start[i]=region->start[i];
                         /* Add the non-overlapping portion to the list of new nodes */
-                        if(H5S_hyper_node_add(&nodes,1,rank,(const hsize_t *)start,(const hsize_t *)end)<0)
+                        if(H5S_hyper_node_add(&nodes,1,rank,(const hssize_t *)start,(const hsize_t *)end)<0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslab");
                     } /* end if */
 
@@ -2230,7 +2231,7 @@ H5S_hyper_clip (H5S_t *space, H5S_hyper_node_t *nodes, H5S_hyper_node_t **uniq,
                         /* Clip the existing non-overlapped portion off the current node */
                         node->end[i]=region->end[i];
                         /* Add the non-overlapping portion to the list of new nodes */
-                        if(H5S_hyper_node_add(&nodes,1,rank,(const hsize_t *)start,(const hsize_t *)end)<0)
+                        if(H5S_hyper_node_add(&nodes,1,rank,(const hssize_t *)start,(const hsize_t *)end)<0)
                             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslab");
                     } /* end if */
 

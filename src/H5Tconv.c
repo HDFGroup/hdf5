@@ -109,9 +109,9 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     switch (cdata->command) {
     case H5T_CONV_INIT:
         /* Capability query */
-	if (H5_DATATYPE != H5I_group(src_id) ||
+	if (H5I_DATATYPE != H5I_get_type(src_id) ||
 	    NULL == (src = H5I_object(src_id)) ||
-	    H5_DATATYPE != H5I_group(dst_id) ||
+	    H5I_DATATYPE != H5I_get_type(dst_id) ||
 	    NULL == (dst = H5I_object(dst_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}
@@ -153,9 +153,9 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
     case H5T_CONV_CONV:
 	/* The conversion */
-	if (H5_DATATYPE != H5I_group(src_id) ||
+	if (H5I_DATATYPE != H5I_get_type(src_id) ||
 	    NULL == (src = H5I_object(src_id)) ||
-	    H5_DATATYPE != H5I_group(dst_id) ||
+	    H5I_DATATYPE != H5I_get_type(dst_id) ||
 	    NULL == (dst = H5I_object(dst_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}
@@ -257,13 +257,13 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 	    }
 	    if (priv->src2dst[i]>=0) {
 		type = H5T_copy (src->u.compnd.memb[i].type, H5T_COPY_ALL);
-		tid = H5I_register (H5_DATATYPE, type);
+		tid = H5I_register (H5I_DATATYPE, type);
 		assert (tid>=0);
 		priv->src_memb_id[priv->src2dst[i]] = tid;
 
 		type = H5T_copy (dst->u.compnd.memb[priv->src2dst[i]].type,
 				 H5T_COPY_ALL);
-		tid = H5I_register (H5_DATATYPE, type);
+		tid = H5I_register (H5I_DATATYPE, type);
 		assert (tid>=0);
 		priv->dst_memb_id[priv->src2dst[i]] = tid;
 	    }
@@ -405,9 +405,9 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	 * otherwise initialize the `priv' field of `cdata' with information
 	 * that remains (almost) constant for this conversion path.
 	 */
-	if (H5_DATATYPE != H5I_group(src_id) ||
+	if (H5I_DATATYPE != H5I_get_type(src_id) ||
 	    NULL == (src = H5I_object(src_id)) ||
-	    H5_DATATYPE != H5I_group(dst_id) ||
+	    H5I_DATATYPE != H5I_get_type(dst_id) ||
 	    NULL == (dst = H5I_object(dst_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}
@@ -437,9 +437,9 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	/*
 	 * Conversion.
 	 */
-	if (H5_DATATYPE != H5I_group(src_id) ||
+	if (H5I_DATATYPE != H5I_get_type(src_id) ||
 	    NULL == (src = H5I_object(src_id)) ||
-	    H5_DATATYPE != H5I_group(dst_id) ||
+	    H5I_DATATYPE != H5I_get_type(dst_id) ||
 	    NULL == (dst = H5I_object(dst_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}
@@ -599,9 +599,9 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     switch (cdata->command) {
     case H5T_CONV_INIT:
-	if (H5_DATATYPE!=H5I_group (src_id) ||
+	if (H5I_DATATYPE!=H5I_get_type (src_id) ||
 	    NULL==(src=H5I_object (src_id)) ||
-	    H5_DATATYPE!=H5I_group (dst_id) ||
+	    H5I_DATATYPE!=H5I_get_type (dst_id) ||
 	    NULL==(dst=H5I_object (dst_id))) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}
@@ -627,9 +627,9 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     case H5T_CONV_CONV:
 	/* Get the data types */
-	if (H5_DATATYPE!=H5I_group (src_id) ||
+	if (H5I_DATATYPE!=H5I_get_type (src_id) ||
 	    NULL==(src=H5I_object (src_id)) ||
-	    H5_DATATYPE!=H5I_group (dst_id) ||
+	    H5I_DATATYPE!=H5I_get_type (dst_id) ||
 	    NULL==(dst=H5I_object (dst_id))) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}
@@ -968,9 +968,9 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     switch (cdata->command) {
     case H5T_CONV_INIT:
-	if (H5_DATATYPE!=H5I_group (src_id) ||
+	if (H5I_DATATYPE!=H5I_get_type (src_id) ||
 	    NULL==(src_p=H5I_object (src_id)) ||
-	    H5_DATATYPE!=H5I_group (dst_id) ||
+	    H5I_DATATYPE!=H5I_get_type (dst_id) ||
 	    NULL==(dst_p=H5I_object (dst_id))) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}
@@ -1003,9 +1003,9 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     case H5T_CONV_CONV:
 	/* Get the data types */
-	if (H5_DATATYPE!=H5I_group (src_id) ||
+	if (H5I_DATATYPE!=H5I_get_type (src_id) ||
 	    NULL==(src_p=H5I_object (src_id)) ||
-	    H5_DATATYPE!=H5I_group (dst_id) ||
+	    H5I_DATATYPE!=H5I_get_type (dst_id) ||
 	    NULL==(dst_p=H5I_object (dst_id))) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}
@@ -1355,9 +1355,9 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
     switch (cdata->command) {
     case H5T_CONV_INIT:
-	if (H5_DATATYPE!=H5I_group(src_id) ||
+	if (H5I_DATATYPE!=H5I_get_type(src_id) ||
 	    NULL==(src=H5I_object(src_id)) ||
-	    H5_DATATYPE!=H5I_group(dst_id) ||
+	    H5I_DATATYPE!=H5I_get_type(dst_id) ||
 	    NULL==(dst=H5I_object(dst_id))) {
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}
@@ -1385,9 +1385,9 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
     case H5T_CONV_CONV:
 	/* Get the data types */
-	if (H5_DATATYPE!=H5I_group(src_id) ||
+	if (H5I_DATATYPE!=H5I_get_type(src_id) ||
 	    NULL==(src=H5I_object(src_id)) ||
-	    H5_DATATYPE!=H5I_group(dst_id) ||
+	    H5I_DATATYPE!=H5I_get_type(dst_id) ||
 	    NULL==(dst=H5I_object(dst_id))) {
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}
@@ -1716,9 +1716,9 @@ H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     case H5T_CONV_CONV:
 	/* The conversion */
-	if (H5_DATATYPE!=H5I_group (src_id) ||
+	if (H5I_DATATYPE!=H5I_get_type (src_id) ||
 	    NULL==(src=H5I_object (src_id)) ||
-	    H5_DATATYPE!=H5I_group (dst_id) ||
+	    H5I_DATATYPE!=H5I_get_type (dst_id) ||
 	    NULL==H5I_object (dst_id)) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}

@@ -409,7 +409,7 @@ H5T_init (void)\n\
 
         /* Atomize the type */
         printf("\
-   if ((H5T_NATIVE_%s_g = H5I_register (H5_DATATYPE, dt))<0) {\n\
+   if ((H5T_NATIVE_%s_g = H5I_register (H5I_DATATYPE, dt))<0) {\n\
       HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,\n\
                      \"can't initialize type system (atom registration \"\n\
                      \"failure\");\n\

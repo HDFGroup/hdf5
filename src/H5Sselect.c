@@ -250,7 +250,7 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
              count,_block);
 
     /* Check args */
-    if (H5_DATASPACE != H5I_group(space_id) ||
+    if (H5I_DATASPACE != H5I_get_type(space_id) ||
             NULL == (space=H5I_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
@@ -561,7 +561,7 @@ herr_t H5Sselect_elements (hid_t spaceid, H5S_seloper_t op, size_t num_elem,
     FUNC_ENTER (H5Sselect_elements, FAIL);
 
     /* Check args */
-    if (H5_DATASPACE != H5I_group(spaceid) ||
+    if (H5I_DATASPACE != H5I_get_type(spaceid) ||
             NULL == (space=H5I_object(spaceid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
@@ -639,7 +639,7 @@ herr_t H5Sselect_all (hid_t spaceid)
     FUNC_ENTER (H5Sselect_all, FAIL);
 
     /* Check args */
-    if (H5_DATASPACE != H5I_group(spaceid) ||
+    if (H5I_DATASPACE != H5I_get_type(spaceid) ||
             NULL == (space=H5I_object(spaceid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
@@ -683,7 +683,7 @@ herr_t H5Sselect_none (hid_t spaceid)
     FUNC_ENTER (H5Sselect_none, FAIL);
 
     /* Check args */
-    if (H5_DATASPACE != H5I_group(spaceid) ||
+    if (H5I_DATASPACE != H5I_get_type(spaceid) ||
             NULL == (space=H5I_object(spaceid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
@@ -729,7 +729,7 @@ H5Sget_select_npoints(hid_t spaceid)
     H5TRACE1("h","i",spaceid);
 
     /* Check args */
-    if (H5_DATASPACE != H5I_group(spaceid) ||
+    if (H5I_DATASPACE != H5I_get_type(spaceid) ||
             NULL == (space=H5I_object(spaceid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
     }
@@ -870,7 +870,7 @@ H5Sselect_valid(hid_t spaceid)
     H5TRACE1("b","i",spaceid);
 
     /* Check args */
-    if (H5_DATASPACE != H5I_group(spaceid) ||
+    if (H5I_DATASPACE != H5I_get_type(spaceid) ||
             NULL == (space=H5I_object(spaceid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
     }
