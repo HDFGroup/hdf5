@@ -27,8 +27,8 @@ int main(void)
 #else
 
 /*#define URL    "ftp://gass:gass12@which/tmp/gass/junk.w"*/
-#define URL    "http://paz.ncsa.uiuc.edu:8080/test/a.h5"
-
+/*#define URL    "http://paz.ncsa.uiuc.edu:8080/test/a.h5"*/
+#define URL    "http://hdf.ncsa.uiuc.edu/GLOBUS/a.h5"
 /* #define DATASETNAME "Int1Array"  */
 #define NX_SUB  3           /* hyperslab dimensions */ 
 #define NY_SUB  4 
