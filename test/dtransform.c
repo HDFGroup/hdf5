@@ -556,7 +556,7 @@ int test_set(void)
  
     H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
     TESTING("H5Pget_data_transform (get before set)")
-    if(H5Pget_data_transform(dxpl_id, ptrgetTest, strlen(str)) < 0)
+    if(H5Pget_data_transform(dxpl_id, ptrgetTest, strlen(str)+1) < 0)
     {
 	PASSED();
     }

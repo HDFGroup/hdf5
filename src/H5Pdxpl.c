@@ -133,8 +133,6 @@ ssize_t H5Pget_data_transform(hid_t plist_id, char* expression /*out*/, size_t s
     if(!pexp)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Failed to retrieve transform expression");
     
-    
-    
     len = HDstrlen(pexp);
     if(expression)
     {
@@ -143,7 +141,7 @@ ssize_t H5Pget_data_transform(hid_t plist_id, char* expression /*out*/, size_t s
             expression[size-1]='\0';
     }
     
-    ret_value = (ssize_t)len + 1;
+    ret_value = (ssize_t)len;
     
 done:
     if(ret_value<0) {

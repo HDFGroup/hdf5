@@ -167,8 +167,8 @@ main (void)
 
 /************** PART 4 **************/
     transform_size = H5Pget_data_transform(dxpl_id_f_to_c, NULL, 0);
-    transform = (char*) malloc(transform_size);
-    H5Pget_data_transform(dxpl_id_f_to_c, transform, transform_size);
+    transform = (char*) malloc(transform_size+1);
+    H5Pget_data_transform(dxpl_id_f_to_c, transform, transform_size+1);
     
     printf("\nTransform string (from dxpl_id_f_to_c) is: %s\n", transform);
     
