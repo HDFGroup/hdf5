@@ -1140,7 +1140,7 @@ H5FP_sap_handle_release_lock_request(H5FP_request_t *req)
     } *oids;
     unsigned list_size = 2; /* the size of the "oids" list */
     H5FP_status_t exit_state = H5FP_STATUS_LOCK_RELEASED;
-    herr_t ret_value;
+    herr_t ret_value = SUCCEED;
     unsigned i, j;
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_release_lock_request);

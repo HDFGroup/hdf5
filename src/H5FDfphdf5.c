@@ -1255,7 +1255,7 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
         H5FP_status_t   sap_status = H5FP_STATUS_OK;
 
         if (H5FP_request_read_metadata(_file, file->file_id, dxpl_id, mem_type,
-                                       mpi_off, size, (uint8_t**)&buf,
+                                       addr, size, (uint8_t**)&buf,
                                        &bytes_read, &req_id, &sap_status) != SUCCEED) {
             /* FIXME: The read failed, for some reason */
 HDfprintf(stderr, "%s:%d: Metadata cache read failed!\n", FUNC, __LINE__);
@@ -1347,7 +1347,6 @@ H5FD_fphdf5_write(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
                   haddr_t addr, size_t size, const void *buf)
 {
     H5FD_fphdf5_t  *file = (H5FD_fphdf5_t*)_file;
-    MPI_Offset      mpi_off;
     int             size_i;
     unsigned        dumping = 0;
     H5P_genplist_t *plist;
@@ -1365,42 +1364,13 @@ H5FD_fphdf5_write(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
     assert(H5P_isa_class(dxpl_id, H5P_DATASET_XFER) == TRUE);
 
     /* some numeric conversions */
-    if (H5FD_fphdf5_haddr_to_MPIOff(addr, &mpi_off) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
-
     size_i = (int)size;
-
     if ((hsize_t)size_i != size)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from size to size_i")
 
     /* Obtain the data transfer properties */
     if ((plist = H5I_object(dxpl_id)) == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-
-#if 0
-    /* Metadata specific actions */
-    if (mem_type != H5FD_MEM_DRAW) {
-        unsigned block_before_meta_write = 0;
-        int mrc;
-
-        /*
-         * Check if we need to syncronize all processes before attempting
-         * metadata write (Prevents race condition where the process
-         * writing the metadata goes ahead and writes the metadata to the
-         * file before all the processes have read the data,
-         * "transmitting" data from the "future" to the reading process.
-         * -QAK )
-         */
-        if (H5P_exist_plist(plist, H5AC_BLOCK_BEFORE_META_WRITE_NAME) > 0)
-            if (H5P_get(plist, H5AC_BLOCK_BEFORE_META_WRITE_NAME,
-                        &block_before_meta_write) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get H5AC property")
-
-        if (block_before_meta_write)
-            if ((mrc = MPI_Barrier(file->barrier_comm)) != MPI_SUCCESS)
-                HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mrc)
-    }
-#endif  /* 0 */
 
     if (H5P_exist_plist(plist, H5FD_FPHDF5_XFER_DUMPING_METADATA) > 0)
         if (H5P_get(plist, H5FD_FPHDF5_XFER_DUMPING_METADATA, &dumping) < 0)
@@ -1415,7 +1385,7 @@ H5FD_fphdf5_write(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
         H5FP_status_t   sap_status = H5FP_STATUS_OK;
 
         if (H5FP_request_write_metadata(_file, file->file_id, dxpl_id, mem_type,
-                                        mpi_off, size_i, buf, &req_id,
+                                        addr, size_i, buf, &req_id,
                                         &sap_status) != SUCCEED) {
             /* FIXME: Couldn't write metadata. This is bad... */
 HDfprintf(stderr, "%s:%d: Couldn't write metadata to SAP (%d)\n",
@@ -1442,7 +1412,7 @@ HDfprintf(stderr, "%s: Couldn't write metadata to SAP (%d)\n",
     }
 
     /* FIXME: Should I check this return value or just pass it on out? */
-    ret_value = H5FD_fphdf5_write_real(_file, dxpl_id, mpi_off, size_i, buf);
+    ret_value = H5FD_fphdf5_write_real(_file, dxpl_id, addr, size_i, buf);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1462,13 +1432,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, MPI_Offset mpi_off, int size,
+H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, int size,
                        const void *buf)
 {
     H5FD_fphdf5_t      *file = (H5FD_fphdf5_t*)_file;
     MPI_Status          status;
     MPI_Datatype        buf_type;
     MPI_Datatype        file_type;
+    MPI_Offset          mpi_off;
     int                 mrc;
     int                 bytes_written;
     unsigned            use_view_this_time = 0;
@@ -1489,6 +1460,10 @@ H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, MPI_Offset mpi_off, int siz
 
     /* Portably initialize MPI status variable */
     HDmemset(&status, 0, sizeof(MPI_Status));
+
+    /* some numeric conversions */
+    if (H5FD_fphdf5_haddr_to_MPIOff(addr, &mpi_off) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
 
     /* Obtain the data transfer properties */
     if ((plist = H5I_object(dxpl_id)) == NULL)

@@ -102,8 +102,6 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 
-#include "H5FPprivate.h"		/*FPHDF5                                  */
-
 /* Local macros */
 #define H5G_INIT_HEAP		8192
 #define H5G_RESERVED_ATOMS	0
@@ -1560,7 +1558,7 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     char		*linkval = NULL;	/*the copied link value	*/
     H5G_entry_t         tmp_grp_ent;            /* Temporary copy of group entry */
     H5RS_str_t          *tmp_user_path_r=NULL, *tmp_canon_path_r=NULL; /* Temporary pointer to object's user path & canonical path */
-    H5HL_t             *heap;
+    const H5HL_t        *heap;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_traverse_slink, FAIL);
@@ -2517,7 +2515,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
      */
     if (statbuf) {
 	if (H5G_CACHED_SLINK==obj_ent.type) {
-            H5HL_t *heap;
+            const H5HL_t *heap;
 
 	    /* Named object is a symbolic link */
 	    if (NULL == H5O_read(&grp_ent, H5O_STAB_ID, 0, &stab_mesg, dxpl_id))
@@ -2743,7 +2741,7 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/, 
     const char		*s = NULL;
     H5G_entry_t		grp_ent, obj_ent;
     H5O_stab_t		stab_mesg;
-    H5HL_t             *heap;
+    const H5HL_t        *heap;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_linkval, FAIL);

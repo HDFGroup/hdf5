@@ -1220,11 +1220,15 @@ done:
  */
 void *
 H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
-	     const void *udata1, void *udata2, H5AC_protect_t rw)
+	     const void *udata1, void *udata2, H5AC_protect_t
+#ifndef H5_HAVE_FPHDF5
+             UNUSED
+#endif /* H5_HAVE_FPHDF5 */
+             rw)
 {
     unsigned        idx;            /* Index in cache */
     void           *thing = NULL;
-    H5AC_t         *cache;
+    H5AC_t         *cache = NULL;
     H5AC_info_t   **info;
     void           *ret_value;      /* Return value */
 #ifdef H5_HAVE_FPHDF5
@@ -1449,7 +1453,6 @@ done:
     if (ret_value)
         ++cache->nprots;
 
-    rw = rw;    /* Remove compiler warning if no FPHDF5 used */
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -1492,7 +1495,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 {
     unsigned            idx;
     H5AC_flush_func_t   flush;
-    H5AC_t             *cache;
+    H5AC_t             *cache = NULL;
     H5AC_info_t       **info;
     herr_t              ret_value = SUCCEED;    /* Return value */
 #ifdef H5_HAVE_FPHDF5

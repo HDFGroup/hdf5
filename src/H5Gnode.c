@@ -61,6 +61,10 @@ typedef struct H5G_node_key_t {
 
 #define PABLO_MASK	H5G_node_mask
 
+/* PRIVATE PROTOTYPES */
+static herr_t H5G_node_serialize(H5F_t *f, H5G_node_t *sym, uint8_t *buf);
+static size_t H5G_node_size(H5F_t *f);
+
 /* Metadata cache callbacks */
 static H5G_node_t *H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
 				 void *_udata2);
@@ -70,8 +74,6 @@ static herr_t H5G_node_dest(H5F_t *f, H5G_node_t *sym);
 static herr_t H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy);
 
 /* B-tree callbacks */
-static herr_t H5G_node_serialize(H5F_t *f, H5G_node_t *sym, uint8_t *buf);
-static size_t H5G_node_size(H5F_t *f);
 static size_t H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
 static herr_t H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t op, void *_lt_key,
 			      void *_udata, void *_rt_key,
@@ -1187,7 +1189,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
 
     /* "Normal" removal of a single entry from the symbol table node */
     if(bt_udata->name!=NULL) {
-        size_t len;
+        size_t len=0;
 
         /* Get base address of heap */
         if (NULL == (heap = H5HL_protect(f, dxpl_id, bt_udata->heap_addr)))

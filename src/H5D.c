@@ -2843,7 +2843,7 @@ done:
 static haddr_t
 H5D_get_offset(const H5D_t *dset)
 {
-    haddr_t	ret_value;
+    haddr_t	ret_value=HADDR_UNDEF;
     haddr_t     base_addr;
     H5F_t       *f;
     
@@ -2854,7 +2854,6 @@ H5D_get_offset(const H5D_t *dset)
     switch(dset->layout.type) {
         case H5D_CHUNKED:
         case H5D_COMPACT:
-            ret_value = HADDR_UNDEF;
             break;
 
         case H5D_CONTIGUOUS:

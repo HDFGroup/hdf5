@@ -510,7 +510,7 @@ H5FP_request_flush_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
 
     HDmemset(&req, 0, sizeof(req));
 
-    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, &req.proc_rank)) != MPI_SUCCESS)
+    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, (int *)&req.proc_rank)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
 
     req.req_type = H5FP_REQ_FLUSH;

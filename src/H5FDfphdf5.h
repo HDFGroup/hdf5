@@ -115,7 +115,7 @@ H5_DLL hbool_t  H5FD_fphdf5_is_captain(H5FD_t *_file);
 H5_DLL hbool_t  H5FD_is_fphdf5_driver(H5FD_t *_file);
 
 H5_DLL herr_t   H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id,
-                                       MPI_Offset mpi_off, int size,
+                                       haddr_t addr, int size,
                                        const void *buf);
 
 #ifdef __cplusplus

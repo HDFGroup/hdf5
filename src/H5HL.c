@@ -839,14 +839,14 @@ H5HL_unprotect(H5F_t *f, hid_t dxpl_id, const H5HL_t *heap, haddr_t addr)
 {
     herr_t  ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5HL_peek, FAIL);
+    FUNC_ENTER_NOAPI(H5HL_unprotect, FAIL);
 
     /* check arguments */
     assert(f);
     assert(heap);
     assert(H5F_addr_defined(addr));
 
-    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE) != SUCCEED)
+    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, (void *)heap, FALSE) != SUCCEED)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
 done:
