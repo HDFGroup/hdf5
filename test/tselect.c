@@ -5210,6 +5210,62 @@ test_scalar_select(void)
 
 /****************************************************************
 **
+**  test_scalar_select2(): Tests selections on scalar dataspace,
+**	verify H5Shyperslab and H5Sselect_elements fails for 
+**	scalar dataspace.
+** 
+****************************************************************/
+static void 
+test_scalar_select2(void)
+{
+    hid_t	fid1;		/* HDF5 File IDs		*/
+    hid_t	dataset;	/* Dataset ID			*/
+    hid_t	sid;		/* Dataspace ID			*/
+    hsize_t	dims2[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hssize_t	coord1[1]; /* Coordinates for point selection */
+    hssize_t    start[1]; /* Hyperslab start */
+    hsize_t     count[1]; /* Hyperslab block count */
+    herr_t	ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(6, ("Testing Selections in Scalar Dataspaces\n"));
+
+    /* Create dataspace for dataset */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Select one element in memory with a point selection */
+    coord1[0]=0;
+    H5E_BEGIN_TRY {
+    	ret = H5Sselect_elements(sid,H5S_SELECT_SET,1,(const hssize_t **)&coord1);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sselect_elements");
+
+    /* Select one element in memory with a hyperslab selection */
+    start[0]=0;
+    count[0]=0;
+    H5E_BEGIN_TRY {
+    	ret = H5Sselect_hyperslab(sid,H5S_SELECT_SET,start,NULL,count,NULL);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Select no elements in memory & file with "none" selections */
+    ret = H5Sselect_none(sid);
+    CHECK(ret, FAIL, "H5Sselect_none");
+    
+    /* Select no elements in memory & file with "none" selections */
+    ret = H5Sselect_all(sid);
+    CHECK(ret, FAIL, "H5Sselect_none");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+}   /* test_scalar_select2() */
+
+
+
+/****************************************************************
+**
 **  test_select(): Main H5S selection testing routine.
 ** 
 ****************************************************************/
@@ -5335,6 +5391,8 @@ test_select(void)
 
     /* Test selections on scalar dataspaces */
     test_scalar_select();
+    test_scalar_select2();
+
 
 }   /* test_select() */
 
