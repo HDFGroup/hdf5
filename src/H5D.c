@@ -1845,7 +1845,6 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     const H5T_t         *type;                  /* Datatype for dataset */
     H5D_t		*new_dset = NULL;
     int		        i, ndims;
-    hsize_t 		comp_data_size;
     unsigned		u;
     hsize_t		max_dim[H5O_LAYOUT_NDIMS]={0};
     H5F_t		*file=NULL;
@@ -2041,11 +2040,16 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
             /* Set the dataset's chunk sizes from the property list's chunk sizes */
             for (u=0; u<new_dset->layout.ndims-1; u++)
                 new_dset->layout.dim[u] = chunk_size[u];
+
+            /* Compute the total size of a chunk */
+            for (u=0, new_dset->layout.chunk_size=1; u<new_dset->layout.ndims; u++)
+                new_dset->layout.chunk_size *= new_dset->layout.dim[u];
             break;
 
         case H5D_COMPACT:
             {
                 hssize_t tmp_size;      /* Temporary holder for raw data size */
+                hsize_t	comp_data_size;
 
                 /*
                  * Compact dataset is stored in dataset object header message of 
@@ -2060,10 +2064,8 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
                 comp_data_size=H5O_MAX_SIZE-H5O_layout_meta_size(file, &(new_dset->layout));
                 if(new_dset->layout.size > comp_data_size)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "compact dataset size is bigger than header message maximum size")
-                if ((ndims=H5S_get_simple_extent_dims(space, new_dset->layout.dim, max_dim))<0) 
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize dimension size of compact dataset storage")
-                /* remember to check if size is small enough to fit header message */
-
+                if (H5S_get_simple_extent_dims(space, new_dset->layout.dim, NULL)<0) 
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize dimension size of compact dataset storage");
             }
 
             break;
