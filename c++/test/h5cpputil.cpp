@@ -72,3 +72,25 @@ int test_report( int nerrors, const string& testname )
    }
 }
 
+/*-------------------------------------------------------------------------
+ * Function:	issue_fail_msg
+ *
+ * Purpose:	Displays that a function has failed with its location.
+ *
+ * Return:	None
+ *
+ * Programmer:	Binh-Minh Ribler (copied and modified macro CHECK from C)
+ *		Monday, December 20, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+void issue_fail_msg(const char* where, int line, const char* file_name)
+{
+    if (GetTestVerbosity()>=VERBO_HI)
+    {
+        cerr << "   Call to routine: " << where << " at line " << line
+             << " in " << file_name << "has failed" << endl;
+    }
+}
+
+

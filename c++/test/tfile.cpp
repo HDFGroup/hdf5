@@ -38,29 +38,29 @@
 using namespace H5;
 #endif
 
-#define F1_USERBLOCK_SIZE       (hsize_t)0
-#define F1_OFFSET_SIZE          sizeof(haddr_t)
-#define F1_LENGTH_SIZE          sizeof(hsize_t)
-#define F1_SYM_LEAF_K           4
-#define F1_SYM_INTERN_K         16
-const char*    FILE1 = "tfile1.h5";
+const int F1_USERBLOCK_SIZE = (hsize_t)0;
+const int F1_OFFSET_SIZE = sizeof(haddr_t);
+const int F1_LENGTH_SIZE = sizeof(hsize_t);
+const int F1_SYM_LEAF_K  = 4;
+const int F1_SYM_INTERN_K = 16;
+const string    FILE1("tfile1.h5");
 
-#define F2_USERBLOCK_SIZE       (hsize_t)512
-#define F2_OFFSET_SIZE          8
-#define F2_LENGTH_SIZE          8
-#define F2_SYM_LEAF_K           8
-#define F2_SYM_INTERN_K         32
-const char*    FILE2 = "tfile2.h5";
+const int F2_USERBLOCK_SIZE = (hsize_t)512;
+const int F2_OFFSET_SIZE = 8;
+const int F2_LENGTH_SIZE = 8;
+const int F2_SYM_LEAF_K  = 8;
+const int F2_SYM_INTERN_K = 32;
+const string    FILE2("tfile2.h5");
 
-#define F3_USERBLOCK_SIZE       (hsize_t)0
-#define F3_OFFSET_SIZE          F2_OFFSET_SIZE
-#define F3_LENGTH_SIZE          F2_LENGTH_SIZE
-#define F3_SYM_LEAF_K           F2_SYM_LEAF_K
-#define F3_SYM_INTERN_K         F2_SYM_INTERN_K
-const char*    FILE3 = "tfile3.h5";
+const int F3_USERBLOCK_SIZE = (hsize_t)0;
+const int F3_OFFSET_SIZE = F2_OFFSET_SIZE;
+const int F3_LENGTH_SIZE = F2_LENGTH_SIZE;
+const int F3_SYM_LEAF_K  = F2_SYM_LEAF_K;
+const int F3_SYM_INTERN_K = F2_SYM_INTERN_K;
+const string    FILE3("tfile3.h5");
 
-#define KB                      1024
-const char*    FILE4 = "tfile4.h5";
+const int KB =  1024;
+const string    FILE4("tfile4.h5");
 
 
 /*-------------------------------------------------------------------------
@@ -88,7 +88,7 @@ test_file_create(void)
 
     /* Create with H5F_ACC_EXCL */
     /* First ensure the file does not exist */
-    remove(FILE1);
+    remove(FILE1.c_str());
 
     try {
 	H5File* file1 = new H5File (FILE1, H5F_ACC_EXCL);
@@ -102,9 +102,9 @@ test_file_create(void)
 
 	    // Should FAIL but didn't - BMR (Note 1): a macro, with a diff 
 	    // name, that skips the comparison b/w the 1st & 2nd args would 
-	    // be more appropriate, but VERIFY can be used for now - Mar 13, 01
+	    // be more appropriate, but verify_val can be used for now;
 	    // also, more text about what is testing would be better.
-	    VERIFY(file2.getId(), FAIL, "H5File constructor"); 
+	    verify_val(file2.getId(), FAIL, "H5File constructor", __LINE__, __FILE__);
 	}
 	catch( FileIException E ) {} // do nothing, FAIL expected
 
@@ -118,7 +118,7 @@ test_file_create(void)
 	*/
 	try { 
 	    file1 = new H5File( FILE1, H5F_ACC_EXCL );  // should throw E
-	    VERIFY(file1->getId(), FAIL, "H5File constructor"); 
+	    verify_val(file1->getId(), FAIL, "H5File constructor", __LINE__, __FILE__);
 	}
 	catch( FileIException E ) {} // do nothing, FAIL expected
 
@@ -131,7 +131,7 @@ test_file_create(void)
      	*/
     	try {
 	    H5File file2 (FILE1, H5F_ACC_TRUNC);   // should throw E
-	    VERIFY(file2.getId(), FAIL, "H5File constructor"); 
+	    verify_val(file2.getId(), FAIL, "H5File constructor", __LINE__, __FILE__);
 	}
 	catch( FileIException E ) {} // do nothing, FAIL expected
 
@@ -141,7 +141,7 @@ test_file_create(void)
      	*/
     	try {
 	    H5File file3 (FILE1, H5F_ACC_EXCL);  // should throw E
-	    VERIFY(file3.getId(), FAIL, "H5File constructor"); 
+	    verify_val(file3.getId(), FAIL, "H5File constructor", __LINE__, __FILE__);
     	}
 	catch( FileIException E ) {} // do nothing, FAIL expected
 
@@ -149,12 +149,12 @@ test_file_create(void)
 	FileCreatPropList tmpl1 = file1->getCreatePlist();
 
 	hsize_t ublock = tmpl1.getUserblock();
-	VERIFY(ublock, F1_USERBLOCK_SIZE, "FileCreatPropList::getUserblock"); 
+	verify_val(ublock, F1_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
     	size_t  parm1, parm2;		/*file-creation parameters	*/
 	tmpl1.getSizes( parm1, parm2);
-    	VERIFY(parm1, F1_OFFSET_SIZE, "FileCreatPropList::getSizes");
-    	VERIFY(parm2, F1_LENGTH_SIZE, "FileCreatPropList::getSizes");
+	verify_val(parm1, F1_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+	verify_val(parm2, F1_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 
     	int  iparm1;		/*file-creation parameters	*/
 #ifdef H5_WANT_H5_V1_4_COMPAT
@@ -163,8 +163,8 @@ test_file_create(void)
     	unsigned  iparm2;	/*file-creation parameters	*/
 #endif /* H5_WANT_H5_V1_4_COMPAT */
     	tmpl1.getSymk( iparm1, iparm2);
-    	VERIFY(iparm1, F1_SYM_INTERN_K, "FileCreatPropList::getSymk");
-    	VERIFY(iparm2, F1_SYM_LEAF_K, "FileCreatPropList::getSymk");
+	verify_val(iparm1, F1_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+	verify_val(iparm2, F1_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
 
 	// tmpl1 is automatically closed; if error occurs, it'll be
 	// caught in the catch block
@@ -173,10 +173,10 @@ test_file_create(void)
 	delete file1;
     }
     catch( PropListIException E ) {
-	CHECK(FAIL, FAIL, E.getCFuncName());
+	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
     }
     catch( FileIException E ) {
-	CHECK(FAIL, FAIL, E.getCFuncName());
+	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
     }
 
     try
@@ -203,12 +203,12 @@ test_file_create(void)
 
 	/* Get the file-creation parameters */
 	hsize_t ublock = tmpl1->getUserblock();
-	VERIFY(ublock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock"); 
+	verify_val(ublock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
     	size_t  parm1, parm2;		/*file-creation parameters	*/
 	tmpl1->getSizes( parm1, parm2);
-    	VERIFY(parm1, F2_OFFSET_SIZE, "FileCreatPropList::getSizes");
-    	VERIFY(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes");
+	verify_val(parm1, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+	verify_val(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 
     	int  iparm1;		/*file-creation parameters	*/
 #ifdef H5_WANT_H5_V1_4_COMPAT
@@ -217,8 +217,8 @@ test_file_create(void)
     	unsigned  iparm2;	/*file-creation parameters	*/
 #endif /* H5_WANT_H5_V1_4_COMPAT */
     	tmpl1->getSymk( iparm1, iparm2);
-    	VERIFY(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk");
-    	VERIFY(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk");
+	verify_val(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+	verify_val(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
 
 	/* Clone the file-creation template */
 	FileCreatPropList tmpl2;
@@ -241,21 +241,21 @@ test_file_create(void)
 
 	/* Get the file-creation parameters */
 	ublock = tmpl1->getUserblock();
-	VERIFY(ublock, F3_USERBLOCK_SIZE, "FileCreatPropList::getUserblock"); 
+	verify_val(ublock, F3_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
 	tmpl1->getSizes( parm1, parm2);
-    	VERIFY(parm1, F3_OFFSET_SIZE, "FileCreatPropList::getSizes");
-    	VERIFY(parm2, F3_LENGTH_SIZE, "FileCreatPropList::getSizes");
+	verify_val(parm1, F3_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+	verify_val(parm2, F3_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 
     	tmpl1->getSymk( iparm1, iparm2);
-    	VERIFY(iparm1, F3_SYM_INTERN_K, "FileCreatPropList::getSymk");
-    	VERIFY(iparm2, F3_SYM_LEAF_K, "FileCreatPropList::getSymk");
+	verify_val(iparm1, F3_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+	verify_val(iparm2, F3_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
 
 	/* Dynamically release file-creation template */
 	delete tmpl1;
     }
     catch( PropListIException E ) {
-	CHECK(FAIL, FAIL, E.getCFuncName());
+	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
     }
 } /* test_file_create() */
 
@@ -290,12 +290,13 @@ test_file_open(void)
 
 	/* Get the file-creation parameters */
 	hsize_t ublock = tmpl1.getUserblock();
-	VERIFY(ublock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock");
+	verify_val(ublock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
+	verify_val(ublock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
     	size_t  parm1, parm2;		/*file-creation parameters	*/
 	tmpl1.getSizes( parm1, parm2);
-	VERIFY(parm1, F2_OFFSET_SIZE, "FileCreatPropList::getSizes");
-	VERIFY(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes");
+	verify_val(parm1, F2_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
+	verify_val(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 
 	int  iparm1;            /*file-creation parameters      */
 #ifdef H5_WANT_H5_V1_4_COMPAT
@@ -304,12 +305,12 @@ test_file_open(void)
 	unsigned  iparm2;       /*file-creation parameters      */
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 	tmpl1.getSymk( iparm1, iparm2);
-	VERIFY(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk");
-	VERIFY(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk");
+	verify_val(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+	verify_val(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
     }   // end of try block
 
     catch( Exception E ) {
-        CHECK(FAIL, FAIL, E.getCFuncName());
+        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
     }
 } /* test_file_open() */
 
@@ -355,11 +356,11 @@ test_file_size(void)
 
         // Check if file size is reasonable.  It's supposed to be 2KB now.
         if(file_size<1*KB || file_size>4*KB)
-            CHECK(FAIL, FAIL, "H5File::getFileSize");
+            issue_fail_msg("H5File::getFileSize", __LINE__, __FILE__);
     }   // end of try block
 
     catch( Exception E ) {
-        CHECK(FAIL, FAIL, E.getCFuncName());
+        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
     }
 
     // use C test utility routine to close property list.
@@ -451,7 +452,7 @@ test_file_name()
 	verify_val(file_name, FILE4, "CompType::getFileName", __LINE__, __FILE__);
     }   // end of try block
     catch (Exception E) {
-        CHECK(FAIL, FAIL, E.getCFuncName());
+        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
     }
 
 } /* test_file_name() */
@@ -500,8 +501,8 @@ test_file(void)
 void
 cleanup_file(void)
 {
-    remove(FILE1);
-    remove(FILE2);
-    remove(FILE3);
-    remove(FILE4);
+    remove(FILE1.c_str());
+    remove(FILE2.c_str());
+    remove(FILE3.c_str());
+    remove(FILE4.c_str());
 } /* cleanup_file */

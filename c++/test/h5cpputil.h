@@ -31,6 +31,8 @@ using std::endl;
 int test_report (int, const string&);
 #endif
 
+void issue_fail_msg(const char* where, int line, const char* file_name);
+
 template <class Type1, class Type2>
     void verify_val(Type1 x, Type2 value, const char* where, int line, const char* file_name)
 {
