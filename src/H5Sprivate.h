@@ -249,8 +249,10 @@ __DLL__ htri_t H5S_mpio_opt_possible(const H5S_t *mem_space,
                                      const H5S_t *file_space, const unsigned flags);
 
 #ifndef _H5S_IN_H5S_C
-/* Global var whose value comes from environment variable */
-__DLLVAR__ hbool_t		H5_mpi_opt_types_g;
+/* Global vars whose value comes from environment variable */
+/* (Defined in H5S.c) */
+__DLLVAR__ hbool_t		H5S_mpi_opt_types_g;
+__DLLVAR__ hbool_t		H5S_mpi_prefer_derived_types_g;
 #endif /* _H5S_IN_H5S_C */
 
 #endif /* H5_HAVE_PARALLEL */

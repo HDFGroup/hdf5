@@ -40,7 +40,7 @@
 static int             interface_initialize_g = 0;
 
 static herr_t
-H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
+H5S_mpio_all_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derived_types,
 		     /* out: */
 		     MPI_Datatype *new_type,
 		     size_t *count,
@@ -48,7 +48,7 @@ H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
 		     hbool_t *use_view,
 		     hbool_t *is_derived_type );
 static herr_t
-H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
+H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derived_types,
 		     /* out: */
 		     MPI_Datatype *new_type,
 		     size_t *count,
@@ -56,7 +56,7 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
 		     hbool_t *use_view,
 		     hbool_t *is_derived_type );
 static herr_t
-H5S_mpio_hyper_contig_type( const H5S_t *space, const size_t elmt_size,
+H5S_mpio_hyper_contig_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derived_types,
 		     /* out: */
 		     MPI_Datatype *new_type,
 		     size_t *count,
@@ -64,7 +64,7 @@ H5S_mpio_hyper_contig_type( const H5S_t *space, const size_t elmt_size,
 		     hbool_t *use_view,
 		     hbool_t *is_derived_type );
 static herr_t
-H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
+H5S_mpio_space_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derived_types,
 		     /* out: */
 		     MPI_Datatype *new_type,
 		     size_t *count,
@@ -74,7 +74,7 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
 static herr_t
 H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
-                     hid_t dxpl_id, void *buf/*out*/, const hbool_t do_write);
+                     hid_t dxpl_id, void *buf/*out*/, hbool_t do_write);
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_mpio_all_type
@@ -97,10 +97,14 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
  *      Quincey Koziol, June 18, 2002
  *      Added 'extra_offset' and 'use_view' parameters
  *
+ *      Quincey Koziol, June 19, 2002
+ *      Added 'prefer_derived_types' flag to choose whether MPI derived types
+ *      should be created or not.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
+H5S_mpio_all_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derived_types,
 		     /* out: */
 		     MPI_Datatype *new_type,
 		     size_t *count,
@@ -121,12 +125,25 @@ H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
     for (u=0; u<space->extent.u.simple.rank; ++u)
         total_bytes *= space->extent.u.simple.size[u];
 
-    /* fill in the return values */
-    *new_type = MPI_BYTE;
-    H5_ASSIGN_OVERFLOW(*count, total_bytes, hsize_t, size_t);
-    *extra_offset = 0;
-    *use_view = 0;
-    *is_derived_type = 0;
+    /* Check if we should prefer creating a derived type */
+    if(prefer_derived_types) {
+        /* fill in the return values */
+        H5_CHECK_OVERFLOW(total_bytes, hsize_t, int);
+        if (MPI_Type_contiguous( (int)total_bytes, MPI_BYTE, new_type ))
+            HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't create MPI contiguous type");
+        *count = 1;
+        *extra_offset = 0;
+        *use_view = 1;
+        *is_derived_type = 1;
+    } /* end if */
+    else {
+        /* fill in the return values */
+        *new_type = MPI_BYTE;
+        H5_ASSIGN_OVERFLOW(*count, total_bytes, hsize_t, size_t);
+        *extra_offset = 0;
+        *use_view = 0;
+        *is_derived_type = 0;
+    } /* end else */
 
 #ifdef H5Smpi_DEBUG
     HDfprintf(stdout, "Leave %s total_bytes=%Hu\n", FUNC, total_bytes );
@@ -162,10 +179,14 @@ H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
  *      Added 'extra_offset' and 'use_view' parameters.  Also accomodate
  *      selection offset in MPI type built.
  *
+ *      Quincey Koziol, June 19, 2002
+ *      Added 'prefer_derived_types' flag to choose whether MPI derived types
+ *      should be created or not.  (Ignored for this routine)
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
+H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size, hbool_t UNUSED prefer_derived_types,
 		     /* out: */
 		     MPI_Datatype *new_type,
 		     size_t *count,
@@ -491,10 +512,14 @@ done:
  *
  * Modifications:
  *
+ *      Quincey Koziol, June 19, 2002
+ *      Added 'prefer_derived_types' flag to choose whether MPI derived types
+ *      should be created or not.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_mpio_hyper_contig_type( const H5S_t *space, const size_t elmt_size,
+H5S_mpio_hyper_contig_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derived_types,
 		     /* out: */
 		     MPI_Datatype *new_type,
 		     size_t *count,
@@ -508,7 +533,7 @@ H5S_mpio_hyper_contig_type( const H5S_t *space, const size_t elmt_size,
     hsize_t	acc;	        /* Accumulator */
     hsize_t	slab[H5O_LAYOUT_NDIMS];         /* Hyperslab size */
     hssize_t    offset[H5O_LAYOUT_NDIMS];       /* Offset in selection */
-    int   	ndims;      /* Number of dimensions of dataset */
+    int   	ndims;          /* Number of dimensions of dataset */
     int         i;              /* Local index */
 
     FUNC_ENTER_NOINIT(H5S_mpio_hyper_contig_type);
@@ -540,12 +565,25 @@ H5S_mpio_hyper_contig_type( const H5S_t *space, const size_t elmt_size,
     for(i=0,byte_offset=0; i<ndims; i++)
         byte_offset+=offset[i]*slab[i];
 
-    /* fill in the return values */
-    *new_type = MPI_BYTE;
-    H5_ASSIGN_OVERFLOW(*count, total_bytes, hsize_t, size_t);
-    *extra_offset = byte_offset;
-    *use_view = 0;
-    *is_derived_type = 0;
+    /* Check if we should prefer creating a derived type */
+    if(prefer_derived_types) {
+        /* fill in the return values */
+        H5_CHECK_OVERFLOW(total_bytes, hsize_t, int);
+        if (MPI_Type_contiguous( (int)total_bytes, MPI_BYTE, new_type ))
+            HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't create MPI contiguous type");
+        *count = 1;
+        *extra_offset = byte_offset;
+        *use_view = 1;
+        *is_derived_type = 1;
+    } /* end if */
+    else {
+        /* fill in the return values */
+        *new_type = MPI_BYTE;
+        H5_ASSIGN_OVERFLOW(*count, total_bytes, hsize_t, size_t);
+        *extra_offset = byte_offset;
+        *use_view = 0;
+        *is_derived_type = 0;
+    } /* end else */
 
 #ifdef H5Smpi_DEBUG
     HDfprintf(stdout, "Leave %s total_bytes=%Hu\n", FUNC, total_bytes );
@@ -576,10 +614,14 @@ H5S_mpio_hyper_contig_type( const H5S_t *space, const size_t elmt_size,
  *      Quincey Koziol, June 18, 2002
  *      Added 'extra_offset' and 'use_view' parameters
  *
+ *      Quincey Koziol, June 19, 2002
+ *      Added 'prefer_derived_types' flag to choose whether MPI derived types
+ *      should be created or not.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
+H5S_mpio_space_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derived_types,
 		     /* out: */
 		     MPI_Datatype *new_type,
 		     size_t *count,
@@ -606,7 +648,7 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
             switch(space->select.type) {
                 case H5S_SEL_NONE:
                 case H5S_SEL_ALL:
-                    err = H5S_mpio_all_type( space, elmt_size,
+                    err = H5S_mpio_all_type( space, elmt_size, prefer_derived_types,
                         /* out: */ new_type, count, extra_offset, use_view, is_derived_type );
                     if (err<0)
                         HRETURN_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
@@ -619,11 +661,11 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
 
                 case H5S_SEL_HYPERSLABS:
                     if(H5S_select_contiguous(space)) {
-                        err = H5S_mpio_hyper_contig_type( space, elmt_size,
+                        err = H5S_mpio_hyper_contig_type( space, elmt_size, prefer_derived_types,
                             /* out: */ new_type, count, extra_offset, use_view, is_derived_type );
                     } /* end if */
                     else {
-                        err = H5S_mpio_hyper_type( space, elmt_size,
+                        err = H5S_mpio_hyper_type( space, elmt_size, prefer_derived_types,
                             /* out: */ new_type, count, extra_offset, use_view, is_derived_type );
                     } /* end else */
                     if (err<0)
@@ -691,13 +733,18 @@ H5S_mpio_space_type( const H5S_t *space, const size_t elmt_size,
  *      Removed 'dc_plist' parameter, since it was not used.  Also, switch to
  *      getting the 'use_view' and 'extra_offset' settings for each selection.
  *
+ *      Quincey Koziol, June 19, 2002
+ *      Use 'prefer_derived_types' flag (from HDF5_MPI_PREFER_DERIVED_TYPES
+ *      environment variable) to choose whether MPI derived types should be
+ *      preferred or not.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
 		     hid_t dxpl_id, void *_buf /*out*/,
-		     const hbool_t do_write )
+		     hbool_t do_write )
 {
     haddr_t	 addr;                  /* Address of dataset (or selection) within file */
     size_t	 mpi_buf_count, mpi_file_count;       /* Number of "objects" to transfer */
@@ -708,6 +755,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
     hbool_t	 mbt_is_derived=0,      /* Whether the buffer (memory) type is derived and needs to be free'd */
 		 mft_is_derived=0;      /* Whether the file type is derived and needs to be free'd */
     hbool_t	 plist_is_setup=0;      /* Whether the dxpl has been customized */
+    hbool_t	 prefer_derived_types=0;/* Whether to prefer MPI derived types or not */
     uint8_t	*buf=(uint8_t *)_buf;   /* Alias for pointer arithmetic */
     int		 err;                   /* Error detection value */
     herr_t	 ret_value = SUCCEED;   /* Return value */
@@ -725,8 +773,12 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
     assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
+    /* Get the preference for MPI derived types */
+    /* (Set via the "HDF5_MPI_PREFER_DERIVED_TYPES" environment variable for now) */
+    prefer_derived_types= H5S_mpi_prefer_derived_types_g;
+
     /* create the MPI buffer type */
-    err = H5S_mpio_space_type( mem_space, elmt_size,
+    err = H5S_mpio_space_type( mem_space, elmt_size, prefer_derived_types,
 			       /* out: */
 			       &mpi_buf_type,
 			       &mpi_buf_count,
@@ -737,7 +789,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
     	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI buf type");
 
     /* create the MPI file type */
-    err = H5S_mpio_space_type( file_space, elmt_size,
+    err = H5S_mpio_space_type( file_space, elmt_size, prefer_derived_types,
 			       /* out: */
 			       &mpi_file_type,
 			       &mpi_file_count,

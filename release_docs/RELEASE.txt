@@ -185,6 +185,13 @@ Documentation
 New Features
 ============
 
+    * Added environment variable flag to control whether creating MPI derived
+      typed is preferred or not.  This can affect performance, depending on
+      which way the MPI-I/O library is optimized for.  The default is set to
+      prefer MPI derived types for collective raw data transfers, setting the
+      HDF5_MPI_PREFER_DERIVED_TYPES environment variable to "0" (i.e.:
+      "setenv HDF5_MPI_PREFER_DERIVED_TYPES 0") changes the preference to avoid
+      using then whenever possible.  QAK - 2002/06/19
     * Changed MPI I/O routines to avoid creating MPI derived types (and thus
       needing to set the file view) for contiguous selections within datasets,
       which should result in some performance improvement for those types of

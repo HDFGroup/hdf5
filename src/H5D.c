@@ -2280,7 +2280,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPIO driver only");
 
     /* Set the "parallel I/O possible" flag, for H5S_find() */
-    if (H5_mpi_opt_types_g && IS_H5FD_MPIO(dataset->ent.file)) {
+    if (H5S_mpi_opt_types_g && IS_H5FD_MPIO(dataset->ent.file)) {
 	/* Only collective write should call this since it eventually
 	 * calls MPI_File_set_view which is a collective call.
 	 * See H5S_mpio_spaces_xfer() for details.
@@ -2715,7 +2715,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPIO driver only");
 
     /* Set the "parallel I/O possible" flag, for H5S_find() */
-    if (H5_mpi_opt_types_g && IS_H5FD_MPIO(dataset->ent.file)) {
+    if (H5S_mpi_opt_types_g && IS_H5FD_MPIO(dataset->ent.file)) {
 	/* Only collective write should call this since it eventually
 	 * calls MPI_File_set_view which is a collective call.
 	 * See H5S_mpio_spaces_xfer() for details.
