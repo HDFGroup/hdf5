@@ -2034,8 +2034,8 @@ TABLE.list TD { border:none; }
 	Disk Format: Level 2A - Data Object Headers</a></h3>
 
     <P>The header information of an object is designed to encompass
-      all the information about an object which would be desired to be
-      known, except for the data itself.  This information includes
+      all the information about an object, except for the data itself.
+      This information includes
       the dataspace, datatype, information about how the data
       is stored on disk (in external files, compressed, broken up in
       blocks, etc.), as well as other information used by the library
@@ -2207,8 +2207,8 @@ TABLE.list TD { border:none; }
                 </tr>
                 <tr>
                   <td align=center><code>1</code></td>
-                  <td>If set, the message is stored in the global heap and
-                    the Header Message Data field contains a Shared Object
+                  <td>If set, the message is stored in the global heap.
+                    The Header Message Data field contains a Shared Object
                     message and the Size of Header Message Data field
                     contains the size of that Shared Object message.
                   </td>
@@ -3509,8 +3509,13 @@ TABLE.list TD { border:none; }
       member definitions of the compound datatype.  The member
       definitions appear one after another with no intervening bytes.
       The member types are described with a recursive datatype
-      message.  Note that the property descriptions are different for different
-      versions of the datatype version.
+      message.
+
+    <P>Note that the property descriptions are different for different
+      versions of the datatype version.  Additionally note that the version
+      0 properties are deprecated and have been replaced with the version
+      1 properties in versions of the HDF5 library from the 1.4 release
+      onward.
 
     <br>
     <div align=center>
@@ -3749,7 +3754,7 @@ TABLE.list TD { border:none; }
                 <tr>
                   <td align=center><code>2</code></td>
                   <td>Internal Reference: A reference to a region within the
-                    current dataset.
+                    current dataset.  (Not currently implemented)
                   </td>
                 </tr>
 
@@ -4061,6 +4066,14 @@ TABLE.list TD { border:none; }
     <P>Class specific information for Array (Class 10):
 
     <P>There are no bit fields defined for the array class.
+    </P>
+
+    <P>Note that the dimension information defined in the property for this
+      datatype class is independent of dataspace information for a dataset.
+      The dimension information here describes the dimensionality of the
+      information within a data element (or a component of an element, if the
+      array datatype is nested within another datatype) and the dataspace for a
+      dataset describes the location of the elements in a dataset.
     </P>
 
     <br>
@@ -4773,16 +4786,22 @@ TABLE.list TD { border:none; }
     <b>Header Message Type:</b> 0x0009<BR>
     <b>Length:</b> N/A<BR>
     <b>Status:</b> N/A<BR>
-    <b>Purpose and Description:</b> N/A<BR>
-    <b>Format of Data:</b> N/A
+    <b>Format of Data:</b> N/A<BR>
+
+    <p><b>Purpose and Description:</b> This message type was skipped during
+      the initial specification of the file format and may be used in a
+      future expansion to the format.
 
     <hr>
     <h4><a name="ReservedMessage_000A">Name: Reserved - Not Assigned Yet</a></h4>
     <b>Header Message Type:</b> 0x000A<BR>
     <b>Length:</b> N/A<BR>
     <b>Status:</b> N/A<BR>
-    <b>Purpose and Description:</b> N/A<BR>
-    <b>Format of Data:</b> N/A
+    <b>Format of Data:</b> N/A<BR>
+
+    <p><b>Purpose and Description:</b> This message type was skipped during
+      the initial specification of the file format and may be used in a
+      future expansion to the format.
 
     <hr>
     <h4><a name="FilterMessage">Name: Data Storage - Filter Pipeline</a></h4>
@@ -4977,9 +4996,14 @@ TABLE.list TD { border:none; }
       as attributes, or "metadata" about the current object.  An
       attribute is a small dataset; it has a name, a datatype, a data
       space, and raw data.  Since attributes are stored in the object
-      header they must be relatively small (<64kb) and can be
+      header they must be relatively small (<64KB) and can be
       associated with any type of object which has an object header
       (groups, datasets, named types and spaces, etc.).
+
+    <p>Note: Attributes on an object must have unique names.  (The HDF5 library
+      currently enforces this by causing the creation of an attribute with
+      a duplicate name to fail)
+      Attributes on different objects may have the same name, however.
 
     <p>
     <center>
@@ -5493,14 +5517,14 @@ in a different machine format with the architecture-type information from the
 number-type header message.  This means that each architecture will need to
 [potentially] byte-swap data values into the internal representation for that
 particular machine.
-<P> Data with a "variable" sized number-type is stored in a data heap
-internal to the HDF5 file.  Global heap identifiers are stored in the 
+<P> Data with a variable-length datatype is stored in the global heap
+of the HDF5 file.  Global heap identifiers are stored in the 
 data object storage.
 <P>Data whose elements are composed of pointer number-types are stored in several
 different ways depending on the particular pointer type involved. Simple
 pointers are just stored as the dataset offset of the object being pointed to with the
 size of the pointer being the same number of bytes as offsets in the file.
-Partial-object pointers are stored as a heap-ID which points to the following
+Dataset region references are stored as a heap-ID which points to the following
 information within the file-heap: an offset of the object pointed to, number-type
 information (same format as header message), dimensionality information (same
 format as header message), sub-set start and end information (i.e. a coordinate
