@@ -59,6 +59,7 @@ New Features
    * A new h4toh5 uitlity, to convert HDF4 files to analogous HDF5 files.
    * Added a new array datatype to the datatypes which can be created.  Removed
      "array fields" from compound datatypes (use an array datatype instead).
+   * Parallel HDF5 works correctly with mpich-1.2.1 on Solaris, SGI, Linux.
 
 h4toh5 Utility 
 ==============
@@ -296,7 +297,7 @@ Platforms Tested
        library and tools were tested.
 
 
-  AIX 4.3.2 (IBM SP)            3.6.6
+  AIX 4.3.2 (IBM SP)            mpcc_r 3.6.6
   Cray T3E sn6711 2.0.539b      Cray Standard C Version 6.3.0.2
                                 Cray Fortran Version 3.4.0.2
   FreeBSD 4.2-STABLE            gcc 2.95.2
@@ -305,7 +306,8 @@ Platforms Tested
   HP-UX B.11.00                 HP C  HP92453-01 A.11.00.13
   IRIX 6.5                      MIPSpro cc 7.30
   IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
-                                mpt.1.3 (SGI MPI 3.2.0.0)
+                                mpt.1.4.0.2
+				mpich-1.2.1
   Linux 2.2.16-3smp             gcc-2.95.2
                                 g++ 2.95.2
                                 pgf90 3.1-3
@@ -346,8 +348,8 @@ Known Problems
 * The Stream VFD was not tested yet under Windows.
   It is not supported in the TFLOPS machine.
 
-* Shared library (--enable-shared) option does not work with Pacific
-  Blue, Mountain Blue.  It is not supported in the TFLOPS machine.
+* Shared library option is broken for IBM SP and some Origin 2000 platforms.
+  One needs to run ./configure with '--disable-shared'
 
 * The ./dsets tests failed in the TFLOPS machine if the test program,
   dsets.c, is compiled with the -O option.  The hdf5 library still works
