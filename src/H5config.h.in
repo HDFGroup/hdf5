@@ -86,6 +86,9 @@
 /* Define if the Grid Storage is defined */
 #undef HAVE_GRIDSTORAGE
 
+/* Define if the Stream VFD is defined */
+#undef HAVE_STREAM
+
 /* The number of bytes in a __int64.  */
 #undef SIZEOF___INT64
 
