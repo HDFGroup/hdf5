@@ -295,7 +295,7 @@ create or access function.
     <dd><em>int</em> <code>H5Giterate</code>(<em>hid_t</em> <code>loc_id</code>,
         <em>const char</em> <code>*name</code>,
         <em>int</em> <code>*idx</code>,
-        <em>H5G_operator_t</em> <code>operator</code>,
+        <em>H5G_iterate_t</em> <code>operator</code>,
         <em>void</em> <code>*operator_data</code>
     )
   <dt><strong>Purpose:</strong>
@@ -315,10 +315,11 @@ create or access function.
         cannot be restarted if one of the calls to its operator returns 
         non-zero.  
         <p>
-        The prototype for <code>H5G_operator_t</code> is:
+        The prototype for <code>H5G_iterate_t</code> is:
         <ul><dl>
-            <dd><code>typedef</code> <em>herr_t *</em>(<code>H5G_operator_t</code>)(<em>hid_t</em> <code>group_id</code>,
-                <em>const char *</em><code>member_name</code>, <em>void *</em><code>operator_data/*in,out*/</code>);
+            <dd><code>typedef</code> <em>herr_t </em>(*<code>H5G_iterate_t</code>)(<em>hid_t</em> <code>group_id</code>,
+                <em>const char *</em><code>member_name</code>, 
+                <em>void *</em><code>operator_data</code>);
         </dl></ul>
         <dd>The operation receives the group identifier for the group being 
         iterated over, <code>group_id</code>, the name of the current 
@@ -337,6 +338,11 @@ create or access function.
                 indicating failure.  The iterator can be restarted at the next
                 group member.
         </ul>
+        <p>
+        <code>H5Giterate</code> assumes that the membership of the group 
+        identified by <code>name</code> remains unchanged through the 
+        iteration.  If the membership changes during the iteration, 
+        the function's behavior is undefined.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
