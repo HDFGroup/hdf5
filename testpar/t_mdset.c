@@ -390,8 +390,7 @@ void write_attribute(hid_t obj_id, int this_type, int num)
         sprintf(attr_name, "Group Attribute %d", num);
         sid = H5Screate(H5S_SCALAR);
         aid = H5Acreate(obj_id, attr_name, H5T_NATIVE_INT, sid, H5P_DEFAULT);
-        if(MAINPROCESS) 
-	    H5Awrite(aid, H5T_NATIVE_INT,  &num);
+        H5Awrite(aid, H5T_NATIVE_INT,  &num);
         H5Aclose(aid);
         H5Sclose(sid);
     }
@@ -401,8 +400,7 @@ void write_attribute(hid_t obj_id, int this_type, int num)
             attr_data[i] = i;
         sid = H5Screate_simple(dspace_rank, dspace_dims, NULL);
         aid = H5Acreate(obj_id, attr_name, H5T_NATIVE_INT, sid, H5P_DEFAULT);
-        if(MAINPROCESS)
-            H5Awrite(aid, H5T_NATIVE_INT, attr_data);   
+        H5Awrite(aid, H5T_NATIVE_INT, attr_data);   
         H5Aclose(aid);
         H5Sclose(sid);
     }
