@@ -52,8 +52,7 @@
 
 /* Header message IDs */
 #define H5O_NULL_ID	0x0000          /* Null Message.  */
-#define H5O_SDSPACE_ID	0x0001          /* Simple Dataspace Message.(old) */
-#define H5O_SDSPACE_NEW_ID	0x0002  /* Simple Dataspace Message.(new) */
+#define H5O_SDSPACE_ID	0x0001          /* Extent Dataspace Message.*/
 /* Complex dataspace is/was planned for message 0x0002 */
 #define H5O_DTYPE_ID	0x0003          /* Datatype Message.  */
 #define H5O_FILL_ID     0x0004          /* Fill Value Message. (Old)  */
@@ -71,7 +70,6 @@
 #define H5O_CONT_ID	0x0010          /* Object header continuation message.  */
 #define H5O_STAB_ID	0x0011          /* Symbol table message.  */
 #define H5O_MTIME_NEW_ID 0x0012         /* Modification time message. (New)  */
-
 
 /*
  * Fill Value Message. (Old)

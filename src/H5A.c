@@ -267,7 +267,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     else
         attr->dt_size=H5O_raw_size(H5O_DTYPE_ID,attr->ent.file,type);
     assert(attr->dt_size>0);
-    attr->ds_size=H5O_raw_size(H5O_SDSPACE_ID,attr->ent.file,&(space->extent.u.simple));
+    attr->ds_size=H5O_raw_size(H5O_SDSPACE_ID,attr->ent.file,&(space->extent));
     assert(attr->ds_size>0);
     H5_ASSIGN_OVERFLOW(attr->data_size,H5S_get_simple_extent_npoints(attr->ds)*H5T_get_size(attr->dt),hssize_t,size_t);
 
@@ -1555,7 +1555,7 @@ H5A_close(H5A_t *attr)
     assert(attr);
 
     /* Check if the attribute has any data yet, if not, fill with zeroes */
-    if(attr->ent_opened && !attr->initialized) {
+    if(attr->ent_opened && !attr->initialized && attr->data_size) {
         uint8_t *tmp_buf=H5MM_calloc(attr->data_size);
         if (NULL == tmp_buf)
             HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed for attribute fill-value")
