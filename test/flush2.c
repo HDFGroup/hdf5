@@ -128,7 +128,12 @@ main(void)
 		the_data)<0) goto error;
     for (i=0; i<ds_size[0]; i++) {
 	for (j=0; j<ds_size[1]; j++) {
-	    error = fabs(the_data[i][j]-(double)i/((double)j+1));
+	    /*
+	     * The extra cast in the following statement is a bug workaround
+	     * for the Win32 version 5.0 compiler.
+	     * 1998-11-06 ptl
+	     */
+	    error = fabs(the_data[i][j]-(double)((hssize_t)(i/(j+1))));
 	    assert(error<0.0001);
 	}
     }
