@@ -37,7 +37,7 @@
 #define H5F_ACC_CREAT	(H5check(),0x0010u)	/*create non-existing files  */
 
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 /*
  * Use this constant string as the MPI_Info key to set H5Fmpio debug flags.
  * To turn on H5Fmpio debug flags, set the MPI_Info value with this key to

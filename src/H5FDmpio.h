@@ -13,7 +13,7 @@
 #include <H5FDpublic.h>
 #include <H5Ipublic.h>
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 #   define H5FD_MPIO	(H5FD_mpio_init())
 #else
 #   define H5FD_MPIO	(-1)
@@ -35,7 +35,7 @@ typedef struct H5FD_mpio_dxpl_t {
 } H5FD_mpio_dxpl_t;
     
 /* Function prototypes */
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 __DLL__ hid_t H5FD_mpio_init(void);
 __DLL__ herr_t H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 __DLL__ herr_t H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/,
@@ -49,6 +49,6 @@ __DLL__ herr_t H5FD_mpio_setup(H5FD_t *_file, MPI_Datatype btype, MPI_Datatype f
 __DLL__ herr_t H5FD_mpio_wait_for_left_neighbor(H5FD_t *file);
 __DLL__ herr_t H5FD_mpio_signal_right_neighbor(H5FD_t *file);
 
-#endif /*HAVE_PARALLEL*/
+#endif /*H5_HAVE_PARALLEL*/
 
 #endif
