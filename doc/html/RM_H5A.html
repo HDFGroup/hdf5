@@ -108,22 +108,28 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
     <dd>Creates a dataset as an attribute of another group, dataset, 
         or named datatype.
 <dt><strong>Description:</strong>
-    <dd><code>H5Acreate</code> creates an attribute which is attached 
-        to the object specified with <code>loc_id</code>.  
-        <code>loc_id</code> is an identifier of a group, dataset, 
-        or named datatype.  The name specified with <code>name</code>
-        for each attribute for an object must be unique for that object.  
+    <dd><code>H5Acreate</code> creates an attribute named <code>name</code>
+        and attached to the object specified with <code>loc_id</code>.  
+        <code>loc_id</code> is a group, dataset, or named datatype identifier.
+        <p>
+        The attribute name specified in <code>name</code> must be unique. 
+        Attempting to create an attribute with the same name as an already 
+        existing attribute will fail, leaving the pre-existing attribute 
+        in place.  To overwrite an existing attribute with a new attribute 
+        of the same name, first call <code>H5Adelete</code> then recreate 
+        the attribute with <code>H5Acreate</code>.
+        <p>
         The datatype and dataspace identifiers of the attribute, 
         <code>type_id</code> and <code>space_id</code>, respectively, 
         are created with the H5T and H5S interfaces, respectively.  
-        Currently only simple dataspaces are allowed for attribute
-        dataspaces.  The <code>create_plist_id</code> property list 
-        is currently unused, but will be used int the future for optional 
-        properties of attributes.  The attribute identifier returned from 
-        this function must be released with <code>H5Aclose</code> or 
-        resource leaks will develop.  Attempting to create an attribute 
-        with the same name as an already existing attribute will fail,
-        leaving the pre-existing attribute in place.
+        <p>
+        Currently only simple dataspaces are allowed for attribute dataspaces.
+        <p>
+        The <code>create_plist_id</code> property list is currently unused;
+        it will be used in the future for optional attribute properties.  
+        <p>
+        The attribute identifier returned from this function must be released 
+        with <code>H5Aclose</code> or resource leaks will develop.  
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
