@@ -21,7 +21,7 @@ AR=${AR:-xar}
 RANLIB=:
 
 # Additional libraries
-LDFLAGS="$LDFLAGS -lnoop_stubs"
+LIBS="$LIBS -lnoop_stubs"
 
 # How to run serial and parallel test programs
 RUNSERIAL="yod -sz 1"
