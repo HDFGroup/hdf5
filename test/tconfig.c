@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /***********************************************************
 *
 * Test program:  tconfig
@@ -26,12 +24,25 @@
 #include "testhdf5.h"
 
 /* macros definitions */
-/* verify C type sizes */
-#define vrfy_ctype(ctype, ctype_macro) \
-    if (sizeof(ctype) != ctype_macro){ \
-	TestErrPrintf("Error verifying %s expected: %d, got: %d\n", \
-	    #ctype_macro, ctype_macro, sizeof(ctype)); \
-    }
+/* verify C int type: verify the size of signed and unsigned int type
+ * with the macro size.
+ */
+#define vrfy_cint_type(ctype, uctype, ctype_macro) \
+    /* check signed type size */ \
+    vrfy_macrosize(ctype, ctype_macro, #ctype_macro);\
+    /* check unsigned type size */ \
+    vrfy_macrosize(uctype, ctype_macro, #ctype_macro);
+
+/* verify C type sizes: verify the sizeof type with the macro size. */
+#define vrfy_ctype(type, macro) \
+    vrfy_macrosize(type, macro, #macro);
+
+/* verify if the sizeof(type) matches size defined in macro. */
+/* Needs this extra step so that we can print the macro name. */
+#define vrfy_macrosize(type, macro, macroname) \
+    if (sizeof(type) != macro) \
+	TestErrPrintf("Error: sizeof(%s) is %d but %s is %d\n", \
+	    #type, sizeof(type), macroname, macro);
 
 /* local routine prototypes */
 void test_config_ctypes(void);
@@ -92,80 +103,84 @@ cleanup_configure(void)
  *              September 25, 2001
  *
  * Modifications:
+ *	Albert Cheng, 2004/10/14
+ *	Verified both signed and unsigned int types.
  *
  *-------------------------------------------------------------------------
  */
 void 
 test_config_ctypes(void)
 {
-    /* standard basic types */
+    /* standard C89 basic types */
+    /* char, signed char,  unsigned char are three distinct types. */
     vrfy_ctype(char, H5_SIZEOF_CHAR);
-    vrfy_ctype(int, H5_SIZEOF_INT);
-    vrfy_ctype(short, H5_SIZEOF_SHORT);
-    vrfy_ctype(long, H5_SIZEOF_LONG);
+    vrfy_cint_type(signed char, unsigned char, H5_SIZEOF_CHAR);
+    vrfy_cint_type(int, unsigned int, H5_SIZEOF_INT);
+    vrfy_cint_type(short, unsigned short, H5_SIZEOF_SHORT);
+    vrfy_cint_type(long, unsigned long, H5_SIZEOF_LONG);
     vrfy_ctype(float, H5_SIZEOF_FLOAT);
     vrfy_ctype(double, H5_SIZEOF_DOUBLE);
 
-    /* non-standard basic types */
-#if H5_SIZEOF_LONG_LONG > 0
-    vrfy_ctype(long_long, H5_SIZEOF_LONG_LONG);
-#endif
-
+    /* standard C99 basic types */
 #if H5_SIZEOF_LONG_DOUBLE > 0
     vrfy_ctype(long double, H5_SIZEOF_LONG_DOUBLE);
 #endif
 
-#if H5_SIZEOF_UINT8_T > 0
-    vrfy_ctype(uint8_t, H5_SIZEOF_UINT8_T);
+#if H5_SIZEOF_LONG_LONG > 0
+    vrfy_cint_type(long_long, unsigned long_long, H5_SIZEOF_LONG_LONG);
 #endif
 
-#if H5_SIZEOF_UINT16_T > 0
-    vrfy_ctype(uint16_t, H5_SIZEOF_UINT16_T);
+#if H5_SIZEOF_INT8_T > 0
+    vrfy_cint_type(int8_t, uint8_t, H5_SIZEOF_INT8_T);
 #endif
 
-#if H5_SIZEOF_UINT32_T > 0
-    vrfy_ctype(uint32_t, H5_SIZEOF_UINT32_T);
+#if H5_SIZEOF_INT16_T > 0
+    vrfy_cint_type(int16_t, uint16_t, H5_SIZEOF_INT16_T);
 #endif
 
-#if H5_SIZEOF_UINT64_T > 0
-    vrfy_ctype(uint64_t, H5_SIZEOF_UINT64_T);
+#if H5_SIZEOF_INT32_T > 0
+    vrfy_cint_type(int32_t, uint32_t, H5_SIZEOF_INT32_T);
 #endif
 
-#if H5_SIZEOF_UINT_FAST8_T > 0
-    vrfy_ctype(uint_fast8_t, H5_SIZEOF_UINT_FAST8_T);
+#if H5_SIZEOF_INT64_T > 0
+    vrfy_cint_type(int64_t, uint64_t, H5_SIZEOF_INT64_T);
 #endif
 
-#if H5_SIZEOF_UINT_FAST16_T > 0
-    vrfy_ctype(uint_fast16_t, H5_SIZEOF_UINT_FAST16_T);
+#if H5_SIZEOF_INT_FAST8_T > 0
+    vrfy_cint_type(int_fast8_t, uint_fast8_t, H5_SIZEOF_INT_FAST8_T);
 #endif
 
-#if H5_SIZEOF_UINT_FAST32_T > 0
-    vrfy_ctype(uint_fast32_t, H5_SIZEOF_UINT_FAST32_T);
+#if H5_SIZEOF_INT_FAST16_T > 0
+    vrfy_cint_type(int_fast16_t, int_fast16_t, H5_SIZEOF_INT_FAST16_T);
 #endif
 
-#if H5_SIZEOF_UINT_FAST64_T > 0
-    vrfy_ctype(uint_fast64_t, H5_SIZEOF_UINT_FAST64_T);
+#if H5_SIZEOF_INT_FAST32_T > 0
+    vrfy_cint_type(int_fast32_t, uint_fast32_t, H5_SIZEOF_INT_FAST32_T);
 #endif
 
-#if H5_SIZEOF_UINT_LEAST8_T > 0
-    vrfy_ctype(uint_least8_t, H5_SIZEOF_UINT_LEAST8_T);
+#if H5_SIZEOF_INT_FAST64_T > 0
+    vrfy_cint_type(int_fast64_t, uint_fast64_t, H5_SIZEOF_INT_FAST64_T);
 #endif
 
-#if H5_SIZEOF_UINT_LEAST16_T > 0
-    vrfy_ctype(uint_least16_t, H5_SIZEOF_UINT_LEAST16_T);
+#if H5_SIZEOF_INT_LEAST8_T > 0
+    vrfy_cint_type(int_least8_t, uint_least8_t, H5_SIZEOF_INT_LEAST8_T);
 #endif
 
-#if H5_SIZEOF_UINT_LEAST32_T > 0
-    vrfy_ctype(uint_least32_t, H5_SIZEOF_UINT_LEAST32_T);
+#if H5_SIZEOF_INT_LEAST16_T > 0
+    vrfy_cint_type(int_least16_t, uint_least16_t, H5_SIZEOF_INT_LEAST16_T);
 #endif
 
-#if H5_SIZEOF_UINT_LEAST64_T > 0
-    vrfy_ctype(uint_least64_t, H5_SIZEOF_UINT_LEAST64_T);
+#if H5_SIZEOF_INT_LEAST32_T > 0
+    vrfy_cint_type(int_least32_t, uint_least32_t, H5_SIZEOF_INT_LEAST32_T);
+#endif
+
+#if H5_SIZEOF_INT_LEAST64_T > 0
+    vrfy_cint_type(int_least64_t, uint_least64_t, H5_SIZEOF_INT_LEAST64_T);
 #endif
 
     /* pseudo standard basic types */
 #if H5_SIZEOF___INT64 > 0
-    vrfy_ctype(__int64, H5_SIZEOF___INT64);
+    vrfy_cint_type(__int64, unsigned __int64, H5_SIZEOF___INT64);
 #endif
 
 #if H5_SIZEOF_OFF_T > 0
