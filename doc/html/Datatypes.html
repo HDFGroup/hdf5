@@ -1447,7 +1447,7 @@ H5Tenum_insert(bits, "BLACK", (val=0x0010,&amp;val));
 short data[6] = {1, 4, 2, 0, 3, 5};
 
 /* Convert the data from one type to another */
-H5Tconvert(hdf_en_colors, bits, 5, data, NULL);
+H5Tconvert(hdf_en_colors, bits, 5, data, NULL, plist_id);
 
 /* Print the data */
 for (i=0; i&lt;6; i++) {
@@ -1518,7 +1518,7 @@ for (i=0; i&lt;n; i++) {
 }
 
 /* Convert integer values to new type */
-H5Tconvert(itype, H5T_NATIVE_INT, n, val, NULL);
+H5Tconvert(itype, H5T_NATIVE_INT, n, val, NULL, plist_id);
 
 /* Build a native type */
 hid_t native = H5Tenum_create(H5T_NATIVE_INT);
@@ -1554,7 +1554,7 @@ for (i=0; i&lt;5; i++) {
 }
 
 puts("Converting...");
-H5Tconvert(hdf_en_colors, reverse, 5, data, NULL);
+H5Tconvert(hdf_en_colors, reverse, 5, data, NULL, plist_id);
 
 /* Print data */
 for (i=0; i&lt;5; i++) {

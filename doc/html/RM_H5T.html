@@ -346,7 +346,8 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
         <em>hid_t</em> <code>dst_id</code>,
         <em>size_t</em> <code>nelmts</code>,
         <em>void *</em><code>buf</code>,
-        <em>void *</em><code>background</code>
+        <em>void *</em><code>background</code>,
+        <em>hid_t</em> <code>plist_id</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Converts data from between specified datatypes.
@@ -364,6 +365,11 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
         <code>b</code> fields already initialized and the conversion  
         of <code>buf</code> supplies the <code>c</code> and <code>d</code> 
         field values).
+        <p>
+        The parameter <code>plist_id</code> contains the dataset transfer 
+        property list identifier which is passed to the conversion functions.  
+        As of Release 1.2, this parameter is only used to pass along the 
+        variable-length datatype custom allocation information.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>src_id</code>
@@ -376,6 +382,8 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
             <dd>Array containing pre- and post-conversion values.
         <dt><em>void *</em><code>background</code>
             <dd>Optional background buffer.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Dataset transfer property list identifier.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -1164,10 +1172,11 @@ zero.
 <dt><strong>Name:</strong> <a name="Datatype-GetFields">H5Tget_fields</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Tget_fields</code>(<em>hid_t </em><code>type_id</code>,
-        <em>size_t *</em> <code>epos</code>,
-        <em>size_t *</em> <code>esize</code>,
-        <em>size_t *</em> <code>mpos</code>,
-        <em>size_t *</em> <code>msize</code>
+        <em>size_t *</em><code>spos</code>,
+        <em>size_t *</em><code>epos</code>,
+        <em>size_t *</em><code>esize</code>,
+        <em>size_t *</em><code>mpos</code>,
+        <em>size_t *</em><code>msize</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Retrieves floating point datatype bit field information.
@@ -1181,13 +1190,15 @@ zero.
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
             <dd>IN: Identifier of datatype to query.
-        <dt><em>size_t *</em> <code>epos</code>
+        <dt><em>size_t *</em><code>spos</code>
+            <dd>OUT: Pointer to location to return floating-point sign bit.
+        <dt><em>size_t *</em><code>epos</code>
             <dd>OUT: Pointer to location to return exponent bit-position.
-        <dt><em>size_t *</em> <code>esize</code>
+        <dt><em>size_t *</em><code>esize</code>
             <dd>OUT: Pointer to location to return size of exponent in bits.
-        <dt><em>size_t *</em> <code>mpos</code>
+        <dt><em>size_t *</em><code>mpos</code>
             <dd>OUT: Pointer to location to return mantissa bit-position.
-        <dt><em>size_t *</em> <code>msize</code>
+        <dt><em>size_t *</em><code>msize</code>
             <dd>OUT: Pointer to location to return size of mantissa in bits.
     </dl>
 <dt><strong>Returns:</strong>
@@ -1201,6 +1212,7 @@ zero.
 <dt><strong>Name:</strong> <a name="Datatype-SetFields">H5Tset_fields</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Tset_fields</code>(<em>hid_t </em><code>type_id</code>,
+        <em>size_t</em> <code>spos</code>,
         <em>size_t</em> <code>epos</code>,
         <em>size_t</em> <code>esize</code>,
         <em>size_t</em> <code>mpos</code>,
@@ -1209,8 +1221,8 @@ zero.
 <dt><strong>Purpose:</strong>
     <dd>Sets locations and sizes of floating point bit fields.  
 <dt><strong>Description:</strong>
-    <dd><code>H5Tset_fields</code> sets the locations and sizes of the various floating
-        point bit fields.  The field positions are bit positions in the
+    <dd><code>H5Tset_fields</code> sets the locations and sizes of the various
+        floating-point bit fields.  The field positions are bit positions in the
         significant region of the datatype.  Bits are numbered with the least
         significant bit number zero.
     
@@ -1220,6 +1232,9 @@ zero.
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
             <dd>Identifier of datatype to set.
+        <dt><em>size_t</em> <code>spos</code>
+            <dd>Sign position, i.e., the bit offset of the floating-point 
+                sign bit.
         <dt><em>size_t</em> <code>epos</code>
             <dd>Exponent bit position.
         <dt><em>size_t</em> <code>esize</code>
