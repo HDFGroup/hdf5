@@ -314,26 +314,9 @@ H5O_sdspace_copy(const void *mesg, void *dest)
     if (!dst && NULL==(dst = H5FL_MALLOC(H5S_extent_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    /* deep copy -- pointed-to values are copied also */
-    HDmemcpy(dst, src, sizeof(H5S_extent_t));
-    
-    if (src->u.simple.size) {
-	if (NULL==(dst->u.simple.size = H5FL_ARR_MALLOC(hsize_t,src->u.simple.rank)))
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-	HDmemcpy (dst->u.simple.size, src->u.simple.size, src->u.simple.rank*sizeof(src->u.simple.size[0]));
-    }
-    if (src->u.simple.max) {
-	if (NULL==(dst->u.simple.max=H5FL_ARR_MALLOC(hsize_t,src->u.simple.rank)))
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-	HDmemcpy (dst->u.simple.max, src->u.simple.max, src->u.simple.rank*sizeof(src->u.simple.max[0]));
-    }
-#ifdef LATER
-    if (src->u.simple.perm) {
-	if (NULL==(dst->u.simple.perm=H5FL_ARR_MALLOC(hsize_t,src->u.simple.rank)))
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-	HDmemcpy (dst->u.simple.perm, src->u.simple.perm, src->u.simple.rank*sizeof(src->u.simple.perm[0]));
-    }
-#endif
+    /* Copy extent information */
+    if(H5S_extent_copy(dst,src)<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent");
 
     /* Set return value */
     ret_value=dst;
@@ -400,8 +383,8 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *              Wednesday, March 31, 2004
+ * Programmer:	Robb Matzke
+ *              Thursday, April 30, 1998
  *
  * Modifications:
  *
@@ -429,8 +412,8 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *              Wednesday, March 31, 2004
+ * Programmer:	Quincey Koziol
+ *              Thursday, March 30, 2000
  *
  * Modifications:
  *

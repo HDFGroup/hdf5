@@ -1591,10 +1591,6 @@ H5A_close(H5A_t *attr)
         if(H5O_close(&(attr->ent))<0)
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release object header info")
 
-#ifndef LATER
-    /* Do something with the shared information? */
-#endif
-
     H5MM_xfree(attr);
     
 done:
