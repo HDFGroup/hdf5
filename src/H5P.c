@@ -5088,7 +5088,6 @@ herr_t H5Pset(hid_t plist_id, const char *name, void *value)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalied property value");
 
     /* Create the new property list class */
-printf("%s: name, value=%u\n",FUNC,name,*(size_t *)(value));
     if ((ret_value=H5P_set(plist_id,name,value))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to set value in plist");
 
