@@ -1059,8 +1059,7 @@ H5FP_sap_handle_lock_request(H5FP_request_t *req)
                 if (!H5TB_dins(oids[j].info->locks, (void *)lock, NULL)) {
                     H5FP_free_object_lock(lock);
                     exit_state = H5FP_STATUS_LOCK_FAILED;
-                    ret_value = FAIL;
-                    HCOMMON_ERROR(H5E_FPHDF5, H5E_CANTINSERT, "can't insert lock into tree");
+                    HDONE_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL, "can't insert lock into tree");
                     goto rollback;
                 }
 
@@ -1068,8 +1067,7 @@ H5FP_sap_handle_lock_request(H5FP_request_t *req)
             } else {
                 /* out of memory...ulp! */
                 exit_state = H5FP_STATUS_OOM;
-                ret_value = FAIL;
-                HCOMMON_ERROR(H5E_RESOURCE, H5E_NOSPACE, "out of memory");
+                HDONE_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory");
                 goto rollback;
             }
         }
