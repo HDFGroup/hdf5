@@ -1,4 +1,4 @@
-HDF5 version 1.7.24-fph5_alpha1 released on Thu May  6 09:30:47 CDT 2004
+HDF5 version 1.7.25 released on Sun May  9 04:09:54 CDT 2004
 ================================================================================
 
 
