@@ -646,7 +646,6 @@
 ./c++/src/H5RefCounter.h
 ./c++/src/H5StrType.cpp
 ./c++/src/H5StrType.h
-./c++/src/H5config.h.in
 ./c++/src/Makefile.in
 
 ./c++/test/Dependencies
