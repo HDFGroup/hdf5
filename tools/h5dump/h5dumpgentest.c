@@ -67,6 +67,7 @@
 #define FILE39  "tchar.h5"
 #define FILE40  "tattr2.h5"
 #define FILE41  "tcompound_complex.h5"
+#define FILE42  "tnamed_dtype_attr.h5"
 
 
 /* prototypes */
@@ -137,6 +138,12 @@ typedef struct s1_t {
 #define F41_ARRAY_DIMd1    5 
 #define F41_ARRAY_DIMd2    6 
 #define F41_ARRAY_DIMf     10 
+
+/* "File 42" macros */
+/* Name of dataset to create in datafile                              */
+#define F42_DSETNAME "Dataset"
+#define F42_TYPENAME "Datatype"
+#define F42_ATTRNAME "Attribute"
 
 static void gent_group(void)
 {
@@ -4180,6 +4187,66 @@ static void gent_compound_complex(void)
 }
 
 
+static void gent_named_dtype_attr(void)
+{
+   hid_t file_id;
+   hid_t dset_id;
+   hid_t space_id;
+   hid_t type_id;
+   hid_t attr_id;
+   int data=8;
+   herr_t ret;
+
+   /* Create a file */
+   file_id=H5Fcreate(FILE42, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+   assert(file_id>0);
+
+   /* Create a datatype to commit and use */
+   type_id=H5Tcopy(H5T_NATIVE_INT);
+   assert(type_id>0);
+
+   /* Commit datatype to file */
+   ret=H5Tcommit(file_id,F42_TYPENAME,type_id);
+   assert(ret>=0);
+
+   /* Create dataspace for dataset */
+   space_id=H5Screate(H5S_SCALAR);
+   assert(space_id>0);
+
+   /* Create dataset */
+   dset_id=H5Dcreate(file_id,F42_DSETNAME,type_id,space_id,H5P_DEFAULT);
+   assert(dset_id>0);
+
+   /* Create attribute on dataset */
+   attr_id=H5Acreate(dset_id,F42_ATTRNAME,type_id,space_id,H5P_DEFAULT);
+   assert(dset_id>0);
+
+   /* Write data into the attribute */
+   ret=H5Awrite(attr_id,H5T_NATIVE_INT,&data);
+   assert(ret>=0);
+
+   /* Close attribute */
+   ret=H5Aclose(attr_id);
+   assert(ret>=0);
+
+   /* Close dataset */
+   ret=H5Dclose(dset_id);
+   assert(ret>=0);
+
+   /* Close dataspace */
+   ret=H5Sclose(space_id);
+   assert(ret>=0);
+
+   /* Close datatype */
+   ret=H5Tclose(type_id);
+   assert(ret>=0);
+
+   /* Close file */
+   ret=H5Fclose(file_id);
+   assert(ret>=0);
+}
+
+
 /*-------------------------------------------------------------------------
  * Function: main
  *
@@ -4243,6 +4310,8 @@ int main(void)
     gent_attr_all();
 
     gent_compound_complex();
+
+    gent_named_dtype_attr();
 
     return 0;
 }
