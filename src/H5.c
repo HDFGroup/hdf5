@@ -1745,6 +1745,66 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		}
 		break;
 
+	    case 't':
+		if (ptr) {
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5I_type_t id_type = va_arg (ap, H5I_type_t);
+		    switch (id_type) {
+		    case H5I_BADID:
+			fprintf (out, "H5I_BADID");
+			break;
+		    case H5I_FILE:
+			fprintf (out, "H5I_FILE");
+			break;
+		    case H5I_TEMPLATE_0:
+		    case H5I_TEMPLATE_1:
+		    case H5I_TEMPLATE_2:
+		    case H5I_TEMPLATE_3:
+		    case H5I_TEMPLATE_4:
+		    case H5I_TEMPLATE_5:
+		    case H5I_TEMPLATE_6:
+		    case H5I_TEMPLATE_7:
+			fprintf (out, "H5I_TEMPLATE_%d",(int)(id_type-H5I_TEMPLATE_0));
+			break;
+		    case H5I_GROUP:
+			fprintf (out, "H5I_GROUP");
+			break;
+		    case H5I_DATATYPE:
+			fprintf (out, "H5I_DATATYPE");
+			break;
+		    case H5I_DATASPACE:
+			fprintf (out, "H5I_DATASPACE");
+			break;
+		    case H5I_DATASET:
+			fprintf (out, "H5I_DATASET");
+			break;
+		    case H5I_ATTR:
+			fprintf (out, "H5I_ATTR");
+			break;
+		    case H5I_TEMPBUF:
+			fprintf (out, "H5I_TEMPBUF");
+			break;
+		    case H5I_RAGGED:
+			fprintf (out, "H5I_RAGGED");
+			break;
+		    case H5I_REFERENCE:
+			fprintf (out, "H5I_REFERENCE");
+			break;
+		    case H5I_MAXID:
+			fprintf (out, "H5I_MAXID");
+			break;
+		    default:
+			fprintf (out, "%ld", (long)id_type);
+			break;
+		    }
+		}
+		break;
+
 	    default:
 		fprintf (out, "BADTYPE(I%c)", type[1]);
 		goto error;

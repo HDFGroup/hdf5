@@ -44,8 +44,10 @@ typedef enum {
     H5I_DATASET,               /*group ID for Dataset objects               */
     H5I_ATTR,                  /*group ID for Attribute objects             */
     H5I_TEMPBUF,               /*group ID for Temporary buffer objects      */
-    H5I_RAGGED,                /*group ID for Ragged array objects	     */
+    H5I_RAGGED,                /*group ID for Ragged array objects	        */
+    H5I_REFERENCE,             /*group ID for Reference objects	            */
     H5I_MAXID                  /*highest group in group_t (Invalid as true group)*/
+                                /* Change the GROUP_BITS in H5I.c if the MAXID gets larger than 32 */
 } H5I_type_t;
 
 /* Type of atoms to return to users */
@@ -54,6 +56,8 @@ typedef int hid_t;
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+H5I_type_t H5Iget_type(hid_t id);
 
 
 #ifdef __cplusplus

@@ -84,13 +84,13 @@ static herr_t H5I_init_interface(void);
 #  define ID_CACHE_SIZE 4             /*# of previous atoms cached         */
 #endif
 
-/* # of bits to use for Group ID in each atom (change if H5I_MAXID>16) */
-#define GROUP_BITS  8
-#define GROUP_MASK  0xFF
+/* # of bits to use for Group ID in each atom (change if H5I_MAXID>32) */
+#define GROUP_BITS  5
+#define GROUP_MASK  0x1F
 
 /* # of bits to use for the Atom index in each atom (assumes 8-bit bytes) */
 #define ID_BITS   ((sizeof(hid_t)*8)-GROUP_BITS)
-#define ID_MASK   0x0FFFFFFF
+#define ID_MASK   0x07FFFFFF
 
 /* Map an atom to a Group number */
 #define H5I_GROUP(a)    ((H5I_type_t)					      \
@@ -147,6 +147,9 @@ H5I_init_interface(void)
 {
     herr_t		    ret_value = SUCCEED;
     FUNC_ENTER(H5I_init_interface, FAIL);
+
+    /* Make certain the ID types don't overflow the number of bits allocated for them in an ID */
+    assert((int)H5I_MAXID<=(int)pow((double)2.0,(double)GROUP_BITS));
 
     /* Registers the cleanup routine with the exit chain */
     ret_value = H5_add_exit(&H5I_term_interface);
@@ -551,13 +554,38 @@ H5I_get_type(hid_t id)
 
     FUNC_ENTER(H5I_get_type, H5I_BADID);
 
-    ret_value = H5I_GROUP(id);
-    if (ret_value <= H5I_BADID || ret_value >= H5I_MAXID) {
-	HGOTO_DONE(H5I_BADID);
-    }
-    
+    assert(id>H5I_BADID && id<H5I_MAXID);
 
-  done:
+    ret_value = H5I_GROUP(id);
+
+    FUNC_LEAVE(ret_value);
+}
+
+/******************************************************************************
+ NAME
+     H5Iget_type - Returns the type of an ID 
+
+ DESCRIPTION
+    Retrieves the type of an ID.
+
+ RETURNS
+    Returns group if successful and H5I_BADID otherwise
+
+*******************************************************************************/
+H5I_type_t
+H5Iget_type(hid_t id)
+{
+    H5I_type_t		ret_value = H5I_BADID;
+
+    FUNC_ENTER(H5Iget_type, H5I_BADID);
+    H5TRACE1("It","i",id);
+
+    if (ret_value <= H5I_BADID || ret_value >= H5I_MAXID)
+        HGOTO_DONE(H5I_BADID);
+
+    ret_value = H5I_get_type(id);
+
+done:
     FUNC_LEAVE(ret_value);
 }
 
