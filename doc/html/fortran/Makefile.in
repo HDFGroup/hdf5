@@ -1,0 +1,26 @@
+# HDF5 Library Makefile(.in)
+#
+# Copyright (C) 2001 National Center for Supercomputing Applications.
+#                    All rights reserved.
+#
+# 
+top_srcdir=@top_srcdir@
+top_builddir=../../..
+srcdir=@srcdir@
+VPATH=.:@srcdir@
+@COMMENCE@
+
+# Subdirectories in build-order (not including `examples')
+SUBDIRS=
+DOCDIR=$(docdir)/hdf5/fortran
+
+# Public doc files (to be installed)...
+PUB_DOCS=F90UserNotes.html h5a_FORTRAN.html h5d_FORTRAN.html        \
+         h5e_FORTRAN.html h5f_FORTRAN.html h5g_FORTRAN.html         \
+         h5i_FORTRAN.html h5p_FORTRAN.html h5r_FORTRAN.html         \
+         h5s_FORTRAN.html h5t_FORTRAN.html 
+
+# Other doc files (not to be installed)...
+PRIVATE_DOCS=
+
+@CONCLUDE@
