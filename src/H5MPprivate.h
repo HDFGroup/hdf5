@@ -366,6 +366,7 @@
 #define color_H5Pset_filter_callback "red"
 #define color_H5Pset_type_conv_cb "red"
 #define color_H5Pget_type_conv_cb "red"
+#define color_H5Pset_data_transform "red"
 
 #define color_H5Screate "red"
 #define color_H5Screate_simple "red"

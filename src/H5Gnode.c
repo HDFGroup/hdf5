@@ -905,7 +905,7 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
 
     if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name");
-    heap=base=NULL;
+    heap=NULL; base=NULL;
 
     if (cmp)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found");
@@ -1021,7 +1021,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
 
             if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name");
-            heap=base=NULL;
+            heap=NULL; base=NULL;
 
 	    HGOTO_DONE(H5B_INS_ERROR);
         }
@@ -1036,7 +1036,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
 
     if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name");
-    heap=base=NULL;
+    heap=NULL; base=NULL;
 
     /*
      * Add the new name to the heap.
@@ -1216,7 +1216,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
 
         if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr) < 0)
             HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name");
-        heap=base=NULL;
+        heap=NULL; base=NULL;
 
         if (cmp)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "not found");
@@ -1236,7 +1236,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
 
             if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name");
-            heap=s=NULL;
+            heap=NULL; s=NULL;
 
             if (found)
                 H5HL_remove(f, dxpl_id, bt_udata->heap_addr, sn->entry[idx].cache.slink.lval_offset, len);
@@ -1264,7 +1264,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
 
         if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->heap_addr) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to unprotect symbol name");
-        heap=s=NULL;
+        heap=NULL; s=NULL;
 
         if (found)
             H5HL_remove(f, dxpl_id, bt_udata->heap_addr, sn->entry[idx].name_off, len);
@@ -1451,7 +1451,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
 
             if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->ent->cache.stab.heap_addr) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name");
-            heap = name = NULL;
+            heap=NULL; name=NULL;
 
             ret_value = (bt_udata->op)(bt_udata->group_id, s, bt_udata->op_data);
             if (s!=buf)
@@ -1578,7 +1578,7 @@ H5G_node_name(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
 
         if (H5HL_unprotect(f, dxpl_id, heap, bt_udata->ent->cache.stab.heap_addr) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_ITER_ERROR, "unable to unprotect symbol name");
-        heap=name=NULL;
+        heap=NULL; name=NULL;
 
         ret_value = H5B_ITER_STOP;
     } else {
@@ -1722,7 +1722,7 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 
             if (H5HL_unprotect(f, dxpl_id, heap_ptr, heap) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name");
-            heap_ptr=s=NULL;
+            heap_ptr=NULL; s=NULL;
 	}
 
 	H5G_ent_debug(f, dxpl_id, sn->entry + i, stream, indent, fwidth, heap);
