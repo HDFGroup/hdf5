@@ -30,6 +30,7 @@ static void dump_data (hid_t, int);
 static void dump_named_datatype (hid_t , const char *);
 static int search_obj (table_t, unsigned long *);
 void indentation(int);
+static void print_enum(hid_t type);
 
 extern int print_data(hid_t, hid_t, int);
 
@@ -326,8 +327,9 @@ H5G_stat_t statbuf;
 		printf("H5T_ENUM ");
 		super = H5Tget_super(type);
 		print_datatype(super);
-		printf(" {\n");
-	/*	print_enum(type);*/
+		printf(" {");
+		print_enum(type);
+		printf("\n");
 		indentation (indent + 3);
 		printf("}\n");
 		break;
@@ -788,6 +790,7 @@ size_t dims[H5DUMP_MAX_RANK];
          indentation (indent+COL);
 		 if (H5T_ENUM == H5Tget_class(type)) {
 			print_datatype(type);
+			break;
 		 }
 		 else {
 			print_datatype(mtype);
@@ -1587,3 +1590,97 @@ done:
     return status;
 
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    print_enum
+ *
+ * Purpose:     prints the enum data - 
+ *
+ * Return:      void
+ *
+ * Programmer:  Patrick Lu
+ *
+ * Modifications:
+ *
+ * NOTE: this function was taken from h5ls. should be moved into the toolslib
+ * 
+ *-----------------------------------------------------------------------*/
+static void print_enum(hid_t type){
+    char	**name=NULL;	/*member names				*/
+    unsigned char *value=NULL;	/*value array				*/
+    int		nmembs;		/*number of members			*/
+    int		nchars;		/*number of output characters		*/
+    hid_t	super;		/*enum base integer type		*/
+    hid_t	native=-1;	/*native integer data type		*/
+    size_t	dst_size;	/*destination value type size		*/
+    int		i;		/*miscellaneous counters		*/
+    size_t	j;	
+ 
+	nmembs =  H5Tget_nmembers(type);
+    super = H5Tget_super(type);
+	/*
+     * Determine what data type to use for the native values.  To simplify
+     * things we entertain three possibilities:
+     *  1. long_long -- the largest native signed integer
+     *	2. unsigned long_long -- the largest native unsigned integer
+     *	3. raw format
+     */
+    if (H5Tget_size(type)<=sizeof(long_long)) {
+	dst_size = sizeof(long_long);
+	if (H5T_SGN_NONE==H5Tget_sign(type)) {
+	    native = H5T_NATIVE_ULLONG;
+	} else {
+	    native = H5T_NATIVE_LLONG;
+	}
+    } else {
+	dst_size = H5Tget_size(type);
+    }
+
+    /* Get the names and raw values of all members */
+    name = calloc(nmembs, sizeof(char*));
+    value = calloc(nmembs, MAX(H5Tget_size(type), dst_size));
+    for (i=0; i<nmembs; i++) {
+	name[i] = H5Tget_member_name(type, i);
+	H5Tget_member_value(type, i, value+i*H5Tget_size(type));
+    }
+
+    /* Convert values to native data type */
+    if (native>0) H5Tconvert(super, native, nmembs, value, NULL);
+
+    /* Sort members by increasing value */
+    /*not implemented yet*/
+
+    /* Print members */
+    for (i=0; i<nmembs; i++) {
+	printf("\n%*s", indent+4, "");
+	nchars = printf("\"%s\"",name[i]);/*display_string(stdout, name[i], TRUE);*/
+	printf("%*s   ", MAX(0, 16-nchars), "");
+
+	if (native<0) {
+	    printf("0x");
+	    for (j=0; j<dst_size; j++) {
+		printf("%02x", value[i*dst_size+j]);
+	    }
+	} else if (H5T_SGN_NONE==H5Tget_sign(native)) {
+	    printf("%"PRINTF_LL_WIDTH"u",
+		   *((unsigned long_long*)(value+i*dst_size)));
+	} else {
+	    printf("%"PRINTF_LL_WIDTH"d",
+		   *((long_long*)(value+i*dst_size)));
+	}
+    }
+
+    /* Release resources */
+    for (i=0; i<nmembs; i++) free(name[i]);
+    free(name);
+    free(value);
+    H5Tclose(super);
+
+    if (0==nmembs) printf("\n%*s <empty>", indent+4, "");
+   /* printf("\n%*s}", indent, "");*/
+   /* return TRUE;*/
+}
+
+
+
