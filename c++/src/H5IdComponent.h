@@ -9,7 +9,7 @@
 namespace H5 {
 #endif
 
-class __DLLCPP__ IdComponent {
+class H5_DLLCPP IdComponent {
    public:
 	// Parent classes must reset the current IdComponent copy
 	// before setting new id to control reference count

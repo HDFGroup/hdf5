@@ -6,7 +6,7 @@
 namespace H5 {
 #endif
 
-class __DLLCPP__ StrType : public AtomType {
+class H5_DLLCPP StrType : public AtomType {
    public:
 	// default constructor 
 	StrType();

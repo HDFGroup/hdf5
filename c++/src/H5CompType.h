@@ -9,7 +9,7 @@
 namespace H5 {
 #endif
 
-class __DLLCPP__ CompType : public DataType {
+class H5_DLLCPP CompType : public DataType {
    public:
 	// Creates a new compound datatype, given the type's size
 	CompType( size_t size ); // H5Tcreate

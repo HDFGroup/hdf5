@@ -22,7 +22,7 @@ const bool  true  = 1;
 
 #endif
 
-class __DLLCPP__ RefCounter {
+class H5_DLLCPP RefCounter {
    public:
 	// Creates a reference counter to be used by an HDF5 object
 	RefCounter();

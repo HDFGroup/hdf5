@@ -6,7 +6,7 @@
 namespace H5 {
 #endif
 
-class __DLLCPP__ Attribute : public AbstractDs {
+class H5_DLLCPP Attribute : public AbstractDs {
    public:
 	// Writes data to this attribute.
 	void write(const DataType& mem_type, const void *buf ) const;

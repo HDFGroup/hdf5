@@ -7,7 +7,7 @@ namespace H5 {
 #endif
 
 // class for file access properties
-class __DLLCPP__ FileCreatPropList : public PropList {
+class H5_DLLCPP FileCreatPropList : public PropList {
    public:
 	static const FileCreatPropList DEFAULT;
 	

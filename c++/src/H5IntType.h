@@ -5,7 +5,7 @@
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
-class __DLLCPP__ IntType : public AtomType {
+class H5_DLLCPP IntType : public AtomType {
    public:
 
 	// default constructor

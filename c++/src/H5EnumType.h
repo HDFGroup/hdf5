@@ -6,7 +6,7 @@
 namespace H5 {
 #endif
 
-class __DLLCPP__ EnumType : public DataType {
+class H5_DLLCPP EnumType : public DataType {
 
    public:
 	// Creates an empty enumeration datatype based on a native signed 

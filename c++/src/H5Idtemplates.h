@@ -13,7 +13,7 @@ namespace H5 {
 // a member function so it can be template to work around that problem.
 
 template <class Type>
-__DLLCPP__ void resetIdComponent( 
+H5_DLLCPP void resetIdComponent( 
 	Type* obj )	// pointer to object to be reset
 {
    if( obj->noReference())  // ref count of this object is decremented here
