@@ -11,7 +11,7 @@
 
 include $(top_srcdir)/config/commence.am
 
-AM_CPPFLAGS=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src $(top_builddir)/hl/src
+AM_CPPFLAGS=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_builddir)/hl/src
 AM_FFLAGS=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src
 
 # Our main target, the high-level fortran library
