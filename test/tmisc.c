@@ -1343,10 +1343,10 @@ test_misc8(void)
     CHECK(ret, FAIL, "H5Pset_alloc_time"); 
 
     /* Use compression as well as chunking for these datasets */
-#ifdef H5_HAVE_COMPRESSION
+#ifdef H5_HAVE_FILTER_DEFLATE
     ret = H5Pset_deflate(dcpl,9);
     CHECK(ret, FAIL, "H5Pset_deflate"); 
-#endif /* end H5_HAVE_COMPRESSION */
+#endif /* end H5_HAVE_FILTER_DEFLATE */
 
     /* Create a chunked dataset, with space allocation early */
     did = H5Dcreate(fid, MISC8_DSETNAME8, H5T_NATIVE_INT, sid, dcpl);
@@ -1359,7 +1359,7 @@ test_misc8(void)
     /* Check the storage size after data is written */
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
-#ifdef H5_HAVE_COMPRESSION
+#ifdef H5_HAVE_FILTER_DEFLATE
     if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
         num_errs++;
         printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
@@ -1369,7 +1369,7 @@ test_misc8(void)
         num_errs++;
         printf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
     }
-#endif /* H5_HAVE_COMPRESSION */
+#endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Close dataset ID */
     ret = H5Dclose(did);
@@ -1395,7 +1395,7 @@ test_misc8(void)
     /* Check the storage size after only four chunks are written */
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
-#ifdef H5_HAVE_COMPRESSION
+#ifdef H5_HAVE_FILTER_DEFLATE
     if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
         num_errs++;
         printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
@@ -1405,7 +1405,7 @@ test_misc8(void)
         num_errs++;
         printf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
     }
-#endif /* H5_HAVE_COMPRESSION */
+#endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Write entire dataset */
     ret = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
@@ -1430,7 +1430,7 @@ test_misc8(void)
     /* Check the storage size after data is written */
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
-#ifdef H5_HAVE_COMPRESSION
+#ifdef H5_HAVE_FILTER_DEFLATE
     if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
         num_errs++;
         printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
@@ -1440,7 +1440,7 @@ test_misc8(void)
         num_errs++;
         printf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
     }
-#endif /*H5_HAVE_COMPRESSION*/
+#endif /*H5_HAVE_FILTER_DEFLATE*/
 
     /* Close dataset ID */
     ret = H5Dclose(did);
@@ -1465,7 +1465,7 @@ test_misc8(void)
     /* Check the storage size after only four chunks are written */
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
-#ifdef H5_HAVE_COMPRESSION
+#ifdef H5_HAVE_FILTER_DEFLATE
     if(storage_size>=(4*MISC8_CHUNK_DIM0*MISC8_CHUNK_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
         num_errs++;
         printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
@@ -1475,7 +1475,7 @@ test_misc8(void)
         num_errs++;
         printf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
     }
-#endif /* H5_HAVE_COMPRESSION */
+#endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Write entire dataset */
     ret = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
@@ -1500,7 +1500,7 @@ test_misc8(void)
     /* Check the storage size after data is written */
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
-#ifdef H5_HAVE_COMPRESSION
+#ifdef H5_HAVE_FILTER_DEFLATE
     if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
         num_errs++;
         printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
@@ -1510,7 +1510,7 @@ test_misc8(void)
         num_errs++;
         printf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
     }
-#endif /*H5_HAVE_COMPRESSION*/
+#endif /*H5_HAVE_FILTER_DEFLATE*/
 
     /* Close dataset ID */
     ret = H5Dclose(did);

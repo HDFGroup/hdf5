@@ -9,6 +9,7 @@
  */
 
 #include "h5test.h"
+#include "H5Zprivate.h"         /* Filter functions */
 
 const char *FILENAME[] = {
     "dataset",
@@ -16,15 +17,20 @@ const char *FILENAME[] = {
     NULL
 };
 
+#define FILE_DEFLATE_NAME       "deflate.h5"
+
 #define DSET_DEFAULT_NAME	"default"
 #define DSET_CHUNKED_NAME	"chunked"
 #define DSET_COMPACT_NAME       "compact"
 #define DSET_SIMPLE_IO_NAME	"simple_io"
 #define DSET_COMPACT_IO_NAME    "compact_io"
 #define DSET_TCONV_NAME		"tconv"
-#define DSET_COMPRESS_NAME	"compressed"
-#define DSET_ONEBYTE_SHUF_NAME   "onebyte_shuffle"
+#define DSET_DEFLATE_NAME	"deflate"
+#define DSET_SHUFFLE_NAME	"shuffle"
+#define DSET_SHUFFLE_DEFLATE_NAME	"shuffle+deflate"
 #define DSET_BOGUS_NAME		"bogus"
+#define DSET_MISSING_NAME	"missing"
+#define DSET_ONEBYTE_SHUF_NAME   "onebyte_shuffle"
 
 #define H5Z_BOGUS		305
 
@@ -489,7 +495,7 @@ bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_compression
+ * Function:	test_compression_internal
  *
  * Purpose:	Tests dataset compression. If compression is requested when
  *		it hasn't been compiled into the library (such as when
@@ -497,63 +503,46 @@ bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
  *		the file uncompressed but no errors are returned.
  *
  * Return:	Success:	0
- *
  *		Failure:	-1
  *
  * Programmer:	Robb Matzke
  *              Wednesday, April 15, 1998
  *
  * Modifications:
+ *              Moved out of main test_compression routine
+ *              Quincey Koziol, November 14, 2002
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_compression(hid_t file)
+test_compression_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset_size)
 {
-    hid_t		dataset, space, xfer, dc;
-    const hsize_t	size[2] = {100, 200};
-    const hsize_t	chunk_size[2] = {2, 25};
-    const hssize_t	hs_offset[2] = {7, 30};
-    const hsize_t	hs_size[2] = {4, 50};
-#ifndef H5_HAVE_COMPRESSION
-    const char		*not_supported;
-#endif
-    
-    hsize_t		i, j, n;
-    void		*tconv_buf = NULL;
+    hid_t		dataset;        /* Dataset ID */
+    hid_t		dxpl;           /* Dataset xfer property list ID */
+    hid_t		sid;            /* Dataspace ID */
+    const hsize_t	size[2] = {100, 200};           /* Dataspace dimensions */
+    const hssize_t	hs_offset[2] = {7, 30}; /* Hyperslab offset */
+    const hsize_t	hs_size[2] = {4, 50};   /* Hyperslab size */
+    void		*tconv_buf = NULL;      /* Temporary conversion buffer */
+    hsize_t		i, j, n;        /* Local index variables */
 
-#ifndef H5_HAVE_COMPRESSION
-    not_supported = "    Deflate compression is not supported.\n"
-		    "    The zlib was not found when hdf5 was configured.";
-#endif
-    
-    TESTING("compression (setup)");
-    
     /* Create the data space */
-    if ((space = H5Screate_simple(2, size, NULL))<0) goto error;
+    if ((sid = H5Screate_simple(2, size, NULL))<0) goto error;
 
     /*
      * Create a small conversion buffer to test strip mining. We
      * might as well test all we can!
      */
-    if ((xfer = H5Pcreate (H5P_DATASET_XFER))<0) goto error;
+    if ((dxpl = H5Pcreate (H5P_DATASET_XFER))<0) goto error;
     tconv_buf = malloc (1000);
-    if (H5Pset_buffer (xfer, 1000, tconv_buf, NULL)<0) goto error;
+    if (H5Pset_buffer (dxpl, 1000, tconv_buf, NULL)<0) goto error;
 
-    /* Use chunked storage with compression */
-    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
-    if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
-    if (H5Pset_deflate (dc, 6)<0) goto error;
-
+    TESTING("compression (setup)");
+    
     /* Create the dataset */
-    if ((dataset = H5Dcreate(file, DSET_COMPRESS_NAME, H5T_NATIVE_INT, space,
-			     dc))<0) goto error;
-#ifdef H5_HAVE_COMPRESSION
+    if ((dataset = H5Dcreate(fid, name, H5T_NATIVE_INT, sid,
+			     dcpl))<0) goto error;
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Read uninitialized data.  It should be zero.
@@ -561,7 +550,7 @@ test_compression(hid_t file)
      */
     TESTING("compression (uninitialized read)");
 
-    if (H5Dread (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, check)<0)
+    if (H5Dread (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
 	goto error;
     
     for (i=0; i<size[0]; i++) {
@@ -575,12 +564,7 @@ test_compression(hid_t file)
 	    }
 	}
     }
-#ifdef H5_HAVE_COMPRESSION
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Test compression by setting up a chunked dataset and writing
@@ -595,14 +579,9 @@ test_compression(hid_t file)
 	}
     }
 
-    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, points)<0)
+    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, points)<0)
 	goto error;
-#ifdef H5_HAVE_COMPRESSION
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 3: Try to read the data we just wrote.
@@ -611,7 +590,7 @@ test_compression(hid_t file)
     TESTING("compression (read)");
 
     /* Read the dataset back */
-    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, check)<0)
+    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
 	goto error;
 
     /* Check that the values read are the same as the values written */
@@ -626,12 +605,7 @@ test_compression(hid_t file)
 	    }
 	}
     }
-#ifdef H5_HAVE_COMPRESSION
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 4: Write new data over the top of the old data.  The new data is
@@ -647,11 +621,11 @@ test_compression(hid_t file)
 	    points[i][j] = rand ();
 	}
     }
-    if (H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, points)<0)
+    if (H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, points)<0)
 	goto error;
 
     /* Read the dataset back and check it */
-    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, check)<0)
+    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
 	goto error;
 
     /* Check that the values read are the same as the values written */
@@ -666,12 +640,7 @@ test_compression(hid_t file)
 	    }
 	}
     }
-#ifdef H5_HAVE_COMPRESSION
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 5: Close the dataset and then open it and read it again.  This
@@ -682,8 +651,8 @@ test_compression(hid_t file)
     TESTING("compression (re-open)");
     
     if (H5Dclose (dataset)<0) goto error;
-    if ((dataset = H5Dopen (file, DSET_COMPRESS_NAME))<0) goto error;
-    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, check)<0)
+    if ((dataset = H5Dopen (fid, name))<0) goto error;
+    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
 	goto error;
 
     /* Check that the values read are the same as the values written */
@@ -698,12 +667,7 @@ test_compression(hid_t file)
 	    }
 	}
     }
-#ifdef H5_HAVE_COMPRESSION
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
     
 
     /*----------------------------------------------------------------------
@@ -719,11 +683,11 @@ test_compression(hid_t file)
 	    points[hs_offset[0]+i][hs_offset[1]+j] = rand ();
 	}
     }
-    if (H5Sselect_hyperslab(space, H5S_SELECT_SET, hs_offset, NULL, hs_size,
+    if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size,
 			    NULL)<0) goto error;
-    if (H5Dwrite (dataset, H5T_NATIVE_INT, space, space, xfer, points)<0)
+    if (H5Dwrite (dataset, H5T_NATIVE_INT, sid, sid, dxpl, points)<0)
 	goto error;
-    if (H5Dread (dataset, H5T_NATIVE_INT, space, space, xfer, check)<0)
+    if (H5Dread (dataset, H5T_NATIVE_INT, sid, sid, dxpl, check)<0)
 	goto error;
     
     /* Check that the values read are the same as the values written */
@@ -744,59 +708,375 @@ test_compression(hid_t file)
 	    }
 	}
     }
-#ifdef H5_HAVE_COMPRESSION
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
-    /*----------------------------------------------------------------------
-     * STEP 7: Register an application-defined compression method and use it
-     * to write and then read the dataset.
-     *---------------------------------------------------------------------- 
-     */
-    TESTING("compression (app-defined method)");
+    /* Get the storage size of the dataset */
+    if((*dset_size=H5Dget_storage_size(dataset))==0) goto error;
 
+    /* Clean up objects used for this test */
+    if (H5Dclose (dataset)<0) goto error;
+    if (H5Sclose (sid)<0) goto error;
+    if (H5Pclose (dxpl)<0) goto error;
+    free (tconv_buf);
+
+    return(0);
+
+error:
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_compression
+ *
+ * Purpose:	Tests dataset compression.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 15, 1998
+ *
+ * Modifications:
+ *              Moved guts of compression testing out of main routine.
+ *              Also added tests for shuffle filter.
+ *              Quincey Koziol, November 14, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_compression(hid_t file)
+{
+    hid_t	dc;                 /* Dataset creation property list ID */
+    const hsize_t chunk_size[2] = {2, 25};  /* Chunk dimensions */
+    hsize_t     null_size;          /* Size of dataset with null filter */
+#ifdef H5_HAVE_FILTER_DEFLATE
+    hsize_t     deflate_size;       /* Size of dataset with deflate filter */
+#endif /* H5_HAVE_FILTER_DEFLATE */
+#ifdef H5_HAVE_FILTER_SHUFFLE
+    hsize_t     shuffle_size;       /* Size of dataset with shuffle filter */
+#endif /* H5_HAVE_FILTER_SHUFFLE */
+#if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE
+    hsize_t     shuff_def_size;     /* Size of dataset with shuffle+deflate filter */
+#endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE */
+    
+    /* Test null I/O filter (by itself) */
+    puts("Testing 'null' filter");
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
     if (H5Zregister (H5Z_BOGUS, "bogus", bogus)<0) goto error;
     if (H5Pset_filter (dc, H5Z_BOGUS, 0, 0, NULL)<0) goto error;
-    if (H5Dclose (dataset)<0) goto error;
-    if (H5Sclose (space)<0) goto error;
-    if ((space = H5Screate_simple (2, size, NULL))<0) goto error;
-    if ((dataset=H5Dcreate (file, DSET_BOGUS_NAME, H5T_NATIVE_INT, space,
-			    dc))<0) goto error;
 
-    if (H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, points)<0)
-	goto error;
-    if (H5Dread (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, check)<0)
-	goto error;
-    
-    for (i=0; i<size[0]; i++) {
-	for (j=0; j<size[1]; j++) {
-	    if (points[i][j] != check[i][j]) {
-		H5_FAILED();
-		printf("    Read different values than written.\n");
-		printf("    At index %lu,%lu\n",
-		       (unsigned long)i, (unsigned long)j);
-		goto error;
-	    }
-	}
-    }
-    PASSED();
-    
-			 
-  
-    /*----------------------------------------------------------------------
-     * Cleanup
-     *---------------------------------------------------------------------- 
-     */
-    if (H5Pclose (xfer)<0) goto error;
+    if(test_compression_internal(file,DSET_BOGUS_NAME,dc,&null_size)<0) goto error;
+
+    /* Clean up objects used for this test */
     if (H5Pclose (dc)<0) goto error;
-    if (H5Dclose(dataset)<0) goto error;
-    free (tconv_buf);
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+    /* Test deflate I/O filter (by itself) */
+    puts("Testing deflate filter");
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
+    if (H5Pset_deflate (dc, 6)<0) goto error;
+
+    if(test_compression_internal(file,DSET_DEFLATE_NAME,dc,&deflate_size)<0) goto error;
+    if(deflate_size>=null_size) {
+        H5_FAILED();
+        puts("    Deflated size greater than uncompressed size.");
+        goto error;
+    } /* end if */
+
+    /* Clean up objects used for this test */
+    if (H5Pclose (dc)<0) goto error;
+#else /* H5_HAVE_FILTER_DEFLATE */
+    TESTING("deflate filter");
+    SKIPPED();
+    puts("Deflate filter not enabled");
+#endif /* H5_HAVE_FILTER_DEFLATE */
+
+#ifdef H5_HAVE_FILTER_SHUFFLE
+    /* Test shuffle I/O filter (by itself) */
+    puts("Testing shuffle filter");
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
+    if (H5Pset_shuffle (dc, sizeof(int))<0) goto error;
+
+    if(test_compression_internal(file,DSET_SHUFFLE_NAME,dc,&shuffle_size)<0) goto error;
+    if(shuffle_size!=null_size) {
+        H5_FAILED();
+        puts("    Shuffled size not the same as uncompressed size.");
+        goto error;
+    } /* end if */
+
+    /* Clean up objects used for this test */
+    if (H5Pclose (dc)<0) goto error;
+#else /* H5_HAVE_FILTER_SHUFFLE */
+    TESTING("shuffle filter");
+    SKIPPED();
+    puts("Shuffle filter not enabled");
+#endif /* H5_HAVE_FILTER_SHUFFLE */
+
+#if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE
+    /* Test combination of deflate & shuffle I/O filters */
+    puts("Testing shuffle+deflate filters");
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
+    if (H5Pset_shuffle (dc, sizeof(int))<0) goto error;
+    if (H5Pset_deflate (dc, 6)<0) goto error;
+
+    if(test_compression_internal(file,DSET_SHUFFLE_DEFLATE_NAME,dc,&shuff_def_size)<0) goto error;
+    if(shuff_def_size>=deflate_size) {
+        H5_FAILED();
+        puts("    Shuffle+deflate size greater than plain deflated size.");
+        goto error;
+    } /* end if */
+
+    /* Clean up objects used for this test */
+    if (H5Pclose (dc)<0) goto error;
+#else /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE */
+    TESTING("shuffle+deflate filters");
+    SKIPPED();
+    puts("Deflate or shuffle filter not enabled");
+#endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE */
+
     return 0;
 
-  error:
+error:
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_missing_filter
+ *
+ * Purpose:	Tests library behavior when filter is missing
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November 14, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_missing_filter(hid_t file)
+{
+    hid_t       fid;            /* File ID */
+    hid_t       dsid;           /* Dataset ID */
+    hid_t       sid;            /* Dataspace ID */
+    hid_t       dcpl;           /* Dataspace creation property list ID */
+    const hsize_t dims[2] = {100, 200};         /* Dataspace dimensions */
+    const hsize_t chunk_dims[2] = {2, 25};      /* Chunk dimensions */
+    hsize_t     dset_size;      /* Dataset size */
+    hsize_t     i,j;            /* Local index variables */
+    herr_t      ret;            /* Generic return value */
+    char testfile[512]="";      /* Buffer to hold name of existing test file */
+    char *srcdir = HDgetenv("srcdir");    /* The source directory, if we are using the --srcdir configure option */
+
+    TESTING("dataset access with missing filter");
+
+    /* Unregister the deflate filter */
+#ifdef H5_HAVE_FILTER_DEFLATE
+        /* Verify deflate filter is registered currently */
+        if(H5Zfilter_avail(H5Z_FILTER_DEFLATE)!=TRUE) {
+            H5_FAILED();
+            printf("    Line %d: Deflate filter not available\n",__LINE__);
+            goto error;
+        } /* end if */
+
+        /* Unregister deflate filter (use internal function) */
+        if (H5Z_unregister(H5Z_FILTER_DEFLATE)<0) {
+            H5_FAILED();
+            printf("    Line %d: Can't unregister deflate filter\n",__LINE__);
+            goto error;
+        } /* end if */
+#endif /* H5_HAVE_FILTER_DEFLATE */
+        /* Verify deflate filter is not registered currently */
+        if(H5Zfilter_avail(H5Z_FILTER_DEFLATE)!=FALSE) {
+            H5_FAILED();
+            printf("    Line %d: Deflate filter available\n",__LINE__);
+            goto error;
+        } /* end if */
+
+    /* Create dcpl with deflate filter */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't create dcpl\n",__LINE__);
+        goto error;
+    } /* end if */
+    if(H5Pset_chunk(dcpl, 2, chunk_dims)<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set chunk sizes\n",__LINE__);
+        goto error;
+    } /* end if */
+    if(H5Pset_deflate(dcpl, 9)<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't set deflate filter\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Create the data space */
+    if ((sid = H5Screate_simple(2, dims, NULL))<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't open dataspace\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Create new dataset */
+    if ((dsid = H5Dcreate(file, DSET_MISSING_NAME, H5T_NATIVE_INT, sid, dcpl))<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't create dataset\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Write data */
+    if (H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points)<0) {
+        H5_FAILED();
+        printf("    Line %d: Error writing dataset data\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Flush the file (to clear the cache) */
+    if (H5Fflush(file, H5F_SCOPE_GLOBAL)<0) {
+        H5_FAILED();
+        printf("    Line %d: Error flushing file\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Query the dataset's size on disk */
+    if((dset_size=H5Dget_storage_size(dsid))==0) {
+        H5_FAILED();
+        printf("    Line %d: Error querying dataset size\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Verify that the size indicates data is uncompressed */
+    /* (i.e. the deflation filter we asked for was silently ignored) */
+    if((H5Tget_size(H5T_NATIVE_INT)*100*200)!=dset_size) {
+        H5_FAILED();
+        printf("    Line %d: Incorrect dataset size: %lu\n",__LINE__,(unsigned long)dset_size);
+        goto error;
+    } /* end if */
+
+    /* Read data */
+    if (H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check)<0) {
+        H5_FAILED();
+        printf("    Line %d: Error reading dataset data\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Compare data */
+    /* Check that the values read are the same as the values written */
+    for (i=0; i<dims[0]; i++) {
+	for (j=0; j<dims[1]; j++) {
+	    if (points[i][j] != check[i][j]) {
+		H5_FAILED();
+		printf("    Line %d: Read different values than written.\n",__LINE__);
+		printf("    At index %lu,%lu\n", (unsigned long)(i), (unsigned long)(j));
+		printf("    At original: %d\n",points[i][j]);
+		printf("    At returned: %d\n",check[i][j]);
+		goto error;
+	    } /* end if */
+	} /* end for */
+    } /* end for */
+
+    /* Close dataset */
+    if(H5Dclose(dsid)<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataset\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Close dataspace */
+    if(H5Sclose(sid)<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataspace\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Close dataset creation property list */
+    if(H5Pclose(dcpl)<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dcpl\n",__LINE__);
+        goto error;
+    } /* end if */
+
+
+    /* Try reading existing dataset with deflate filter */
+
+    /* Compose the name of the file to open, using the srcdir, if appropriate */
+    if (srcdir && ((HDstrlen(srcdir) + HDstrlen(FILE_DEFLATE_NAME) + 1) < sizeof(testfile))){
+	HDstrcpy(testfile, srcdir);
+	HDstrcat(testfile, "/");
+    }
+    HDstrcat(testfile, FILE_DEFLATE_NAME);
+
+    /* Open existing file */
+    if((fid=H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT))<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't open existing deflated file\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Open dataset */
+    if ((dsid = H5Dopen(fid, "Dataset1"))<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't open dataset\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Read data (should fail, since deflate filter is missing) */
+    H5E_BEGIN_TRY {
+        ret=H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check);
+    } H5E_END_TRY;
+    if (ret>=0) {
+        H5_FAILED();
+        printf("    Line %d: Error reading dataset data\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Close dataset */
+    if(H5Dclose(dsid)<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close dataset\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Close existing file */
+    if(H5Fclose(fid)<0) {
+        H5_FAILED();
+        printf("    Line %d: Can't close file\n",__LINE__);
+        goto error;
+    } /* end if */
+
+    /* Re-register the deflate filter */
+        /* Verify deflate filter is not registered currently */
+        if(H5Zfilter_avail(H5Z_FILTER_DEFLATE)!=FALSE) {
+            H5_FAILED();
+            printf("    Line %d: Deflate filter available\n",__LINE__);
+            goto error;
+        } /* end if */
+#ifdef H5_HAVE_FILTER_DEFLATE
+        /* Register deflate filter (use internal function) */
+        if(H5Z_register(H5Z_FILTER_DEFLATE, "deflate", H5Z_filter_deflate)<0) {
+            H5_FAILED();
+            printf("    Line %d: Can't unregister deflate filter\n",__LINE__);
+            goto error;
+        } /* end if */
+
+        /* Verify deflate filter is registered currently */
+        if(H5Zfilter_avail(H5Z_FILTER_DEFLATE)!=TRUE) {
+            H5_FAILED();
+            printf("    Line %d: Deflate filter not available\n",__LINE__);
+            goto error;
+        } /* end if */
+#endif /* H5_HAVE_FILTER_DEFLATE */
+
+    PASSED();
+    return 0;
+
+error:
     return -1;
 }
 
@@ -805,8 +1085,8 @@ test_compression(hid_t file)
  * Function:	test_onebyte_shuffle
  *
  * Purpose:	Tests the 8-bit array with shuffling algorithm.
-                The shuffled array  should be the same result as 
-		that before the shuffling.
+ *              The shuffled array  should be the same result as 
+ *              that before the shuffling.
  *
  * Return:	Success:	0
  *
@@ -1145,6 +1425,7 @@ main(void)
     nerrors += test_compact_io(fapl)<0  ?1:0;
     nerrors += test_tconv(file)<0	?1:0;
     nerrors += test_compression(file)<0	?1:0;
+    nerrors += test_missing_filter(file)<0	?1:0;
     nerrors += test_onebyte_shuffle(file)<0 ?1:0;
     nerrors += test_multiopen (file)<0	?1:0;
     nerrors += test_types(file)<0       ?1:0;
