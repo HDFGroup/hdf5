@@ -1453,9 +1453,6 @@ H5S_hyper_cmp_spans (H5S_hyper_span_info_t *span_info1, H5S_hyper_span_info_t *s
         } /* end else */
     } /* end else */
 
-#ifdef LATER
-done:
-#endif /* LATER */
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_cmp_spans() */
 
@@ -1582,6 +1579,8 @@ done:
 herr_t
 H5S_hyper_copy (H5S_t *dst, const H5S_t *src, hbool_t share_selection)
 {
+    H5S_hyper_sel_t *dst_hslab;         /* Pointer to destination hyperslab info */
+    const H5S_hyper_sel_t *src_hslab;   /* Pointer to source hyperslab info */
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_NOAPI(H5S_hyper_copy, FAIL);
@@ -1593,8 +1592,21 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src, hbool_t share_selection)
     if((dst->select.sel_info.hslab=H5FL_MALLOC(H5S_hyper_sel_t))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab info");
 
+    /* Set temporary pointers */
+    dst_hslab=dst->select.sel_info.hslab;
+    src_hslab=src->select.sel_info.hslab;
+
     /* Copy the hyperslab information */
-    HDmemcpy(dst->select.sel_info.hslab,src->select.sel_info.hslab,sizeof(H5S_hyper_sel_t));
+    dst_hslab->diminfo_valid=src_hslab->diminfo_valid;
+    if(src_hslab->diminfo_valid) {
+        size_t u;       /* Local index variable */
+
+        for(u=0; u<src->extent.rank; u++) {
+            dst_hslab->opt_diminfo[u]=src_hslab->opt_diminfo[u];
+            dst_hslab->app_diminfo[u]=src_hslab->app_diminfo[u];
+        } /* end for */
+    } /* end if */
+    dst->select.sel_info.hslab->span_lst=src->select.sel_info.hslab->span_lst;
 
     /* Check if there is hyperslab span information to copy */
     /* (Regular hyperslab information is copied with the selection structure) */
