@@ -153,12 +153,16 @@ PRINT_TRAILER()
 CHECK_RSH()
 {
     # Figure out how to use ping command in this host.
-    # Some hosts use "ping host count", some use "ping -c count host"
-    # Test "ping -c ..." style first because some '-c' machines treat
-    # the command 'ping localhost 3' means to ping host '3'.
+    # Some hosts use "ping host count", some use "ping -c count host".
+    # Test "ping -c 3 -w 5" since it has timeout feature.
+    # Test "ping -c ..." style before "ping host 3" because some machines
+    # that recognize -c treat 'ping localhost 3' as to ping host '3'.
     if [ -z "$PING" ]; then
 	if ping -c 3 -w 5 localhost >/dev/null 2>&1; then
 	    PING='ping -c 3 -w 5'
+	    PINGCOUNT=
+	elif ping -c 3 localhost >/dev/null 2>&1; then
+	    PING='ping -c 3'
 	    PINGCOUNT=
 	elif ping localhost 3 >/dev/null 2>&1; then
 	    PING=ping
