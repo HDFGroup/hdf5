@@ -338,8 +338,8 @@ END SUBROUTINE h5gcreate_f
     <dd>Retrieves comment for specified object.
   <dt><strong>Description:</strong>
     <dd><code>H5Gget_comment</code> retrieves the comment for the the
-        object <code>name</code>.  The comment is returned in the buffer 
-        <code>comment</code>.
+        object specified by <code>loc_id</code> and <code>name</code>.  
+        The comment is returned in the buffer <code>comment</code>.
         <p>
         At most <code>bufsize</code> characters, including a null 
         terminator, are copied.  The result is not null terminated 
@@ -350,9 +350,17 @@ END SUBROUTINE h5gcreate_f
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>IN: Identifier of the file or group.
+        <dd>IN: Identifier of a file, group, dataset, or named datatype.
       <dt><em>const char *</em><code>name</code>
-        <dd>IN: Name of the object whose comment is to be set or reset.
+        <dd>IN: Name of the object in <code>loc_id</code> whose comment 
+            is to be retreived.
+            <br>
+            <code>name</code> can be '.' (dot) if <code>loc_id</code> 
+            fully specifies the object for which the  associated comment 
+            is to be retrieved.
+            <br>
+            <code>name</code> is ignored if <code>loc_id</code> 
+            is a dataset or named datatype.
       <dt><em>size_t</em> <code>bufsize</code>
         <dd>IN: Anticipated size of the buffer required to hold 
             <code>comment</code>.
@@ -1428,7 +1436,7 @@ And in this document, the
 Describes HDF5 Release 1.6.2, February 2004
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 30 October 2003");
+document.writeln("Last modified: 21 May 2004");
 -->
 </SCRIPT>
  
