@@ -9640,7 +9640,7 @@ fi
 rm -f conftest core core.* *.core conftest.o conftest.c dummy.o $ac_clean_files
 
 
-H5_VERSION="`cut -d' ' -f3 $srcdir/README.txt | head -1`"
+H5_VERSION="`cut -d' ' -f3 $srcdir/../README.txt | head -1`"
 
 
  CONFIG_DATE="`date`"

@@ -966,7 +966,7 @@ dnl and installed with the libraries.
 dnl
 
 dnl HDF5 version from the first line of the README.txt file.
-H5_VERSION="`cut -d' ' -f3 $srcdir/README.txt | head -1`"
+H5_VERSION="`cut -d' ' -f3 $srcdir/../README.txt | head -1`"
 AC_SUBST(H5_VERSION)
 
 dnl Configuration date
