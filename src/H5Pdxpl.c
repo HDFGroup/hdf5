@@ -118,8 +118,8 @@ herr_t H5Pget_data_transform(hid_t plist_id, char** expression)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Error setting data transform expression");
 
     /* Get the data transform string */
-    *expression = H5Z_xform_extract_xform_str(data_xform_prop);
-
+    *expression = H5Z_xform_extract_xform_str(data_xform_prop); 
+    
 done:
     if(ret_value<0) {
 	if(data_xform_prop)
