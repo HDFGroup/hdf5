@@ -131,7 +131,7 @@ int HDFtraceFSETPOS( FILE *stream, const fpos_t *position ) ;
 void HDFtraceREWIND( FILE *stream ) ;
 ssize_t HDFtraceWRITE( int fd, const void *buf, size_t nbytes );
 size_t HDFtraceFWRITE( const void *, size_t , size_t , FILE * );
-int HDFtracePUTS( char *s ) ;
+int HDFtracePUTS( const char *s ) ;
 int HDFtraceFPUTC( int c, FILE *stream ) ;
 int HDFtraceFPUTS( const char *s, FILE *stream ) ;
 
@@ -293,6 +293,7 @@ void  HDFtraceIOEnd ( int, double, char * );
 
 #include "HDFmpioProtos.h"
 
+/*
 #ifdef MPI_File_open 		
 #undef MPI_File_open 		
 #endif
@@ -410,10 +411,13 @@ void  HDFtraceIOEnd ( int, double, char * );
 #define MPI_File_set_atomicity 	 HDF_MPI_File_set_atomicity
 #define MPI_File_get_atomicity 	 HDF_MPI_File_get_atomicity
 #define MPI_File_sync 		 HDF_MPI_File_sync
-#endif /* HAVE_PARALLEL */
-#endif /* HAVE_PARALLEL */
+#endif 
+*/
+#endif 
+#endif 
 #ifdef __cplusplus
 }
-#endif
+
+#endif /* HAVE_PARALLEL */
 
 #endif		/* HDFIOTRACE conditional */

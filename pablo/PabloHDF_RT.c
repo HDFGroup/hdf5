@@ -109,6 +109,7 @@
 //  printFileMappingsRT	   : print map of named identifiers		*
 //  _hdfNameDescriptor()   : writes SDDF descriptor packet for names	*
 //======================================================================*/
+#ifndef PCF_BUILD
 #ifdef _HDF5_
 #include "H5config.h"
 #endif
@@ -217,6 +218,7 @@ char *FileName;			/* Name of Trace file			*/
 HDFsetInfo openInfo;		/* Info about file opened		*/
 char openName[256];		/* Name of opened file			*/
 extern char *hdfRecordPointer;
+extern char HDFprocNames[][40];
 /*======================================================================*
 // NAME									*
 //     HDFinitTrace_RT-- initialize HDF real-time tracing		*
@@ -1584,7 +1586,8 @@ void _hdfDescriptorRT( char *recordName, char *recordDescription,
 //======================================================================*/
 void writeHDFRecDescrptrsRT( void ) 
 {
-	char HDFProcNames[][40] = {
+/*
+	char HDFprocNames[][40] = {
 	"noName",
 	"noName",
 	"noName",
@@ -1593,13 +1596,14 @@ void writeHDFRecDescrptrsRT( void )
 #	include "HDFentryNames.h"
 	"HDF_Last_Entry"
 	};
+*/
 	int j, FAMILY;
         char BUF1[256], BUF2[256] ;
 	_hdfNameDescriptor();	/* Descriptor for named identifiers	*/
         for ( j = 0; j < NumHDFProcs; ++j ) {
            if ( HDFQueues[j] != NULL ) {
               strcpy( BUF2, "HDF ");
-              strcat( BUF2, HDFProcNames[j] );
+              strcat( BUF2, HDFprocNames[j] );
               strcat( BUF2, " Procedure Summary");
               strcpy( BUF1, BUF2 );
               strcat( BUF1, " Trace");
@@ -1690,3 +1694,4 @@ void _hdfNameDescriptor( void )
 
     putBytes( recordBuffer, (unsigned) recordLength );
 }
+#endif /* PCF_BUILD */

@@ -9,6 +9,7 @@ top_builddir=..
 srcdir=@srcdir@
 @COMMENCE@
 TRACE=perl ../bin/trace
+.SUFFIXES: .c .o .lo .x
 ###############################################################################
 ## MODIFICATONS FOR CREATING THE PABLO INSTRUMENTED LIBRARY libhdf5-inst.a
 ## For Pablo instrumenation of parallel code, remove the # from in front of
@@ -19,7 +20,8 @@ TRACE=perl ../bin/trace
 ###############################################################################
 #PABLO_MPIO_FLAGS = -DH5_HAVE_PARALLEL -DH5_HAVE_MPIOTRACE	
 PABLO_INC = $(PABLO_TRACELIB)/include
-PABLO_FLAGS = -I. -I../src -I$(PABLO_INC) -DH5_HAVE_PABLO $(PABLO_MPIO_FLAGS)
+PABLO_FLAGS = -I../src -I$(PABLO_INC) -DH5_HAVE_PABLO $(PABLO_MPIO_FLAGS)
+CPPFLAGS=-I. -I. -I../src -DH5_DEBUG_API -DNDEBUG  $(PABLO_FLAGS) -D$(PABLO_BLD)_BUILD
 
 ## This is our main target:
 LIB=libhdf5-inst.a
@@ -45,17 +47,15 @@ LIB_SRC= \
     H5FDlog.c H5Gnode.c H5Olayout.c H5Spoint.c \
     H5FDmpio.c H5Gstab.c H5Omtime.c H5Sselect.c
 
-PABLO_OBJ = PabloHDF.o PabloHDF_RT.o PabloHDF_SDDF.o 
+PABLO_OBJ = PabloHDF.o PabloHDF_RT.o PabloHDF_SDDF.o PabloHDF_MPIO.o
 
-LIB_COBJ = $(LIB_SRC:.c=.o)
+LIB_XOBJ = $(LIB_SRC:.c=.x)
+LIB_COBJ = $(LIB_XOBJ:.x=.o)
 LIB_OBJ  = $(PABLO_OBJ) $(LIB_COBJ)
-lib_obj: $(LIB_OBJ)
 
-copy_src: 
-	cp ../src/*.c .
-	touch ../src/*.c
-	touch *.c
-	touch copy_src
+.c.x:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c ../src/$*.c -o $*.o
+	cp $*.o $@
 
 # 'vpath' directive is only supported in gmake, take out - QAK
 #vpath %.c   $(shell echo $(SRCDIRS) | sed 's/ /:/g')
@@ -74,8 +74,8 @@ PABLO_HDR = HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h \
 ## makefile.
 ##
 lib: $(LIB)
-$(LIB): $(LIB_OBJ) 
-	$(AR) -rc $@ *.o
+$(LIB): $(PABLO_OBJ) $(LIB_XOBJ) 
+	$(AR) -rc $@ $(LIB_OBJ)
 	$(RANLIB) $@
 ##
 ## Dummy this out so that there is no redundant make of the library
@@ -116,14 +116,14 @@ uninstall:
 ## remove things like object files but not libraries or executables.
 ##
 mostlyclean:
-	$(RM) $(LIB_OBJ) $(TEST_OBJ) $(PROG_OBJ) $(MOSTLYCLEAN)
+	$(RM) $(LIB_OBJ) $(LIB_XOBJ) $(TEST_OBJ) $(PROG_OBJ) $(MOSTLYCLEAN)
 
 ## Like `mostlyclean' except it also removes the final targets: things like
 ## libraries and executables.  This target doesn't remove any file that
 ## is part of the HDF5 distribution.
 ##
 clean: mostlyclean
-	$(RM) $(LIB) $(TESTS) $(PROGS) $(CLEAN) $(PABLO_CLEAN) H*.c copy_src
+	$(RM) $(LIB) $(TESTS) $(PROGS) $(CLEAN) $(PABLO_CLEAN) H*.c 
 
 ## Like `clean' except it also removes files that were created by running
 ## configure.  If you've unpacked the source and built HDF5 without creating
@@ -142,11 +142,9 @@ distclean: clean
 maintainer-clean: distclean
 	$(RM) *~ core core.* *.core *.bak *.contrib gmon.out
 
-.c.o:
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
 
 .c.lo:
-	@$(LT_COMPILE) $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
+	@$(LT_COMPILE) $(CFLAGS) $(CPPFLAGS) -c ../src/$*.c $<
 
 
 PABLO_INCLUDES = HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h \
@@ -188,14 +186,85 @@ ProcTrace.inc: HDFidList.h
 	echo "      parameter (NoTrace = 4)"  >> $@
 
 
-PabloHDF.o: PabloHDF.c $(PABLO_INCLUDES) copy_src
+PabloHDF.o: PabloHDF.c $(PABLO_INCLUDES) 
 	$(CC) -g $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
 
-PabloHDF_RT.o: PabloHDF_RT.c $(PABLO_INCLUDES) copy_src
+PabloHDF_RT.o: PabloHDF_RT.c $(PABLO_INCLUDES) 
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
 
-PabloHDF_SDDF.o: PabloHDF_SDDF.c $(PABLO_INCLUDES) copy_src
+PabloHDF_SDDF.o: PabloHDF_SDDF.c $(PABLO_INCLUDES) 
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
 
-PabloHDFff.o: PabloHDFff.f $(PABLO_INCLUDES) copy_src 
+PabloHDF_MPIO.o: PabloHDF_MPIO.c $(PABLO_INCLUDES) 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
+
+PabloHDFff.o: PabloHDFff.f $(PABLO_INCLUDES) 
 	$(F77) $(FFLAGS) -O -c PabloHDFff.f
+
+H5.c: ../src/H5.c
+H5A.c: ../src/H5A.c
+H5AC.c: ../src/H5AC.c
+H5B.c: ../src/H5B.c
+H5D.c: ../src/H5D.c
+H5E.c: ../src/H5E.c
+H5F.c: ../src/H5F.c
+H5FD.c: ../src/H5FD.c
+H5FDcore.c: ../src/H5FDcore.c
+H5FDdpss.c: ../src/H5FDdpss.c
+H5FDfamily.c: ../src/H5FDfamily.c
+H5FDgass.c: ../src/H5FDgass.c
+H5FDlog.c: ../src/H5FDlog.c
+H5FDmpio.c: ../src/H5FDmpio.c
+H5FDmulti.c: ../src/H5FDmulti.c
+H5FDsec2.c: ../src/H5FDsec2.c
+H5FDsrb.c: ../src/H5FDsrb.c
+H5FDstdio.c: ../src/H5FDstdio.c
+H5FDstream.c: ../src/H5FDstream.c
+H5FL.c: ../src/H5FL.c
+H5Farray.c: ../src/H5Farray.c
+H5Fcontig.c: ../src/H5Fcontig.c
+H5Fistore.c: ../src/H5Fistore.c
+H5Fseq.c: ../src/H5Fseq.c
+H5G.c: ../src/H5G.c
+H5Gent.c: ../src/H5Gent.c
+H5Gnode.c: ../src/H5Gnode.c
+H5Gstab.c: ../src/H5Gstab.c
+H5HG.c: ../src/H5HG.c
+H5HL.c: ../src/H5HL.c
+H5I.c: ../src/H5I.c
+H5MF.c: ../src/H5MF.c
+H5MM.c: ../src/H5MM.c
+H5O.c: ../src/H5O.c
+H5Oattr.c: ../src/H5Oattr.c
+H5Ocomp.c: ../src/H5Ocomp.c
+H5Ocont.c: ../src/H5Ocont.c
+H5Odtype.c: ../src/H5Odtype.c
+H5Oefl.c: ../src/H5Oefl.c
+H5Ofill.c: ../src/H5Ofill.c
+H5Olayout.c: ../src/H5Olayout.c
+H5Omtime.c: ../src/H5Omtime.c
+H5Oname.c: ../src/H5Oname.c
+H5Onull.c: ../src/H5Onull.c
+H5Osdspace.c: ../src/H5Osdspace.c
+H5Oshared.c: ../src/H5Oshared.c
+H5Ostab.c: ../src/H5Ostab.c
+H5P.c: ../src/H5P.c
+H5R.c: ../src/H5R.c
+H5S.c: ../src/H5S.c
+H5Sall.c: ../src/H5Sall.c
+H5Shyper.c: ../src/H5Shyper.c
+H5Smpio.c: ../src/H5Smpio.c
+H5Snone.c: ../src/H5Snone.c
+H5Spoint.c: ../src/H5Spoint.c
+H5Sselect.c: ../src/H5Sselect.c
+H5T.c: ../src/H5T.c
+H5TB.c: ../src/H5TB.c
+H5TS.c: ../src/H5TS.c
+H5Tbit.c: ../src/H5Tbit.c
+H5Tconv.c: ../src/H5Tconv.c
+H5Tinit.c: ../src/H5Tinit.c
+H5Tvlen.c: ../src/H5Tvlen.c
+H5V.c: ../src/H5V.c
+H5Z.c: ../src/H5Z.c
+H5Zdeflate.c: ../src/H5Zdeflate.c
+H5detect.c: ../src/H5detect.c

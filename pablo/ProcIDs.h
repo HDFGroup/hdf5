@@ -150,9 +150,16 @@ enum MPIeventIDs {
 #define ProcIndexForHDFExit( ID )  ProcIndexForHDFEntry(-ID)
 #define HDFIXtoEventID( ID ) ( (ID) + BEGIN_HDF )
 
+#ifdef PCF_BUILD
+#define TRACE_ON(mask, ID) \
+if ( procTrace[mask] || procTrace[ID] ) startHDFtraceEvent( ID )
+#define TRACE_OFF(mask, ID ) \
+if ( procTrace[mask] || procTrace[ID] ) endHDFtraceEvent( ID, 0, NULL, 0 )
+#else
 #define TRACE_ON(mask, ID) \
 if ( procTrace[mask] || procTrace[ID] ) startHDFtraceEvent( HDFIXtoEventID( ID ) )
 #define TRACE_OFF(mask, ID ) \
 if ( procTrace[mask] || procTrace[ID] ) endHDFtraceEvent(-HDFIXtoEventID(ID), 0, NULL, 0 )
+#endif /* PCF_BUILD */
  
 #endif /* PROCIDS_H */
