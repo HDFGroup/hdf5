@@ -43,6 +43,7 @@ static size_t H5S_all_mgath (const void *_buf, size_t elmt_size,
 static herr_t H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
 			     const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
 			     size_t nelmts, void *_buf/*out*/);
+static herr_t H5S_select_all(H5S_t *space);
 
 const H5S_fconv_t	H5S_ALL_FCONV[1] = {{
     "all", 					/*name			*/
@@ -548,7 +549,7 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
 	     const H5S_t *mem_space, const H5F_xfer_t *xfer_parms,
 	     void *buf/*out*/, hbool_t *must_convert/*out*/)
 {
-    H5S_hyper_node_t *file_node,*mem_node;     /* Hyperslab node */
+    H5S_hyper_node_t *file_node=NULL,*mem_node=NULL;     /* Hyperslab node */
     hsize_t	mem_size,file_size;
     hssize_t	file_off,mem_off;
     hsize_t	size[H5S_MAX_RANK];
@@ -650,7 +651,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
 	      const H5S_t *mem_space, const H5F_xfer_t *xfer_parms,
 	      const void *buf, hbool_t *must_convert/*out*/)
 {
-    H5S_hyper_node_t *file_node,*mem_node;     /* Hyperslab node */
+    H5S_hyper_node_t *file_node=NULL,*mem_node=NULL;     /* Hyperslab node */
     hsize_t	mem_size,file_size;
     hssize_t	file_off,mem_off;
     hsize_t	size[H5S_MAX_RANK];
@@ -919,6 +920,84 @@ H5S_all_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_select_all
+ PURPOSE
+    Specify the the entire extent is selected
+ USAGE
+    herr_t H5S_select_all(dsid)
+        hid_t dsid;             IN: Dataspace ID of selection to modify
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    This function selects the entire extent for a dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t H5S_select_all (H5S_t *space)
+{
+    herr_t ret_value=SUCCEED;  /* return value */
+
+    FUNC_ENTER (H5S_select_all, FAIL);
+
+    /* Check args */
+    assert(space);
+
+    /* Remove current selection first */
+    if(H5S_select_release(space)<0) {
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection");
+    } /* end if */
+
+    /* Set selection type */
+    space->select.type=H5S_SEL_ALL;
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5S_select_all() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sselect_all
+ PURPOSE
+    Specify the the entire extent is selected
+ USAGE
+    herr_t H5Sselect_all(dsid)
+        hid_t dsid;             IN: Dataspace ID of selection to modify
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    This function selects the entire extent for a dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t H5Sselect_all (hid_t spaceid)
+{
+    H5S_t	*space = NULL;  /* Dataspace to modify selection of */
+    herr_t ret_value=SUCCEED;  /* return value */
+
+    FUNC_ENTER (H5Sselect_all, FAIL);
+
+    /* Check args */
+    if (H5I_DATASPACE != H5I_get_type(spaceid) || NULL == (space=H5I_object(spaceid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    }
+
+    /* Remove current selection first */
+    if((ret_value=H5S_select_all(space))<0) {
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
+    } /* end if */
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5Sselect_all() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_all_select_iterate
  PURPOSE
     Iterate over a "all" selection, calling a user's function for each
@@ -960,7 +1039,7 @@ H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op
     hsize_t nelemts;            /* Number of elements to iterate through */
     void *tmp_buf;              /* temporary location of the element in the buffer */
     intn rank;              /* Dataspace rank */
-    intn index;             /* Index to increment */
+    intn indx;             /* Index to increment */
     herr_t ret_value=0;     /* return value */
 
     FUNC_ENTER (H5S_all_select_iterate, 0);
@@ -995,10 +1074,10 @@ H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op
         nelemts--;
 
         /* Advance the coordinate (currently in C memory order) */
-        index=rank-1; /* Leave the byte offset in the element alone */
-        while(index>=0 && ++mem_offset[index]==mem_size[index]) {
-            mem_offset[index]=0;
-            index--;
+        indx=rank-1; /* Leave the byte offset in the element alone */
+        while(indx>=0 && ++mem_offset[indx]==mem_size[indx]) {
+            mem_offset[indx]=0;
+            indx--;
           } /* end while */
       } /* end while */
 

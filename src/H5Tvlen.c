@@ -124,7 +124,7 @@ H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc)
 hsize_t H5T_vlen_mem_getlen(H5F_t UNUSED *f, void *vl_addr)
 {
     hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
-    hsize_t	ret_value = FAIL;	/*return value			*/
+    hsize_t	ret_value = (hsize_t)FAIL;	/*return value			*/
 
     FUNC_ENTER (H5T_vlen_mem_getlen, FAIL);
 
@@ -226,7 +226,7 @@ herr_t H5T_vlen_mem_write(const H5F_xfer_t *xfer_parms, H5F_t UNUSED *f, void *v
 hsize_t H5T_vlen_disk_getlen(H5F_t UNUSED *f, void *vl_addr)
 {
     uint8_t *vl=(uint8_t *)vl_addr;   /* Pointer to the disk VL information */
-    hsize_t	ret_value = FAIL;	/*return value			*/
+    hsize_t	ret_value = (hsize_t)FAIL;	/*return value			*/
 
     FUNC_ENTER (H5T_vlen_disk_getlen, FAIL);
 

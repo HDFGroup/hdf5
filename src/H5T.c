@@ -15,6 +15,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Dprivate.h>		/*datasets (for H5Tcopy)		  */
 #include <H5Iprivate.h>		/*ID functions		   		  */
 #include <H5Eprivate.h>		/*error handling			  */
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Gprivate.h>		/*groups				  */
 #include <H5HGprivate.h>	/*global heap				  */
 #include <H5MMprivate.h>	/*memory management			  */
@@ -195,7 +196,11 @@ static struct {
 /* The overflow handler */
 H5T_overflow_t H5T_overflow_g = NULL;
 
+/* Local static functions */
 static herr_t H5T_print_stats(H5T_path_t *path, intn *nprint/*in,out*/);
+
+/* Declare the free list for H5T_t's */
+H5FL_DEFINE(H5T_t);
 
 
 /*-------------------------------------------------------------------------
@@ -457,7 +462,7 @@ H5T_init_interface(void)
     dt->u.atomic.prec = 64;
     
     /* Opaque data */
-    if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
+    if (NULL==(dt = H5FL_ALLOC(H5T_t,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed");
     }
@@ -832,7 +837,7 @@ H5T_init_interface(void)
      */
 
     /* One-byte character string */
-    if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
+    if (NULL==(dt = H5FL_ALLOC(H5T_t,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed");
     }
@@ -858,7 +863,7 @@ H5T_init_interface(void)
      */
 
     /* One-byte character string */
-    if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
+    if (NULL==(dt = H5FL_ALLOC(H5T_t,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed");
     }
@@ -884,7 +889,7 @@ H5T_init_interface(void)
      */
 
     /* Object pointer (i.e. object header address in file) */
-    if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
+    if (NULL==(dt = H5FL_ALLOC(H5T_t,1))) {
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed");
     }
@@ -904,7 +909,7 @@ H5T_init_interface(void)
     }
     
     /* Dataset Region pointer (i.e. selection inside a dataset) */
-    if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
+    if (NULL==(dt = H5FL_ALLOC(H5T_t,1))) {
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed");
     }
@@ -1390,6 +1395,7 @@ H5T_term_interface(void)
 	/* Mark interface as closed */
 	interface_initialize_g = 0;
 	n = 1; /*H5I*/
+
     }
     return n;
 }
@@ -3601,7 +3607,7 @@ H5Tenum_create(hid_t parent_id)
     }
 
     /* Build new type */
-    if (NULL==(dt=H5MM_calloc(sizeof(H5T_t)))) {
+    if (NULL==(dt = H5FL_ALLOC(H5T_t,1))) {
 	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		      "memory allocation failed");
     }
@@ -3905,7 +3911,7 @@ H5Tvlen_create(hid_t base_id)
     }
 
     /* Build new type */
-    if (NULL==(dt=H5MM_calloc(sizeof(H5T_t)))) {
+    if (NULL==(dt = H5FL_ALLOC(H5T_t,1))) {
         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     }
     H5F_addr_undef (&(dt->ent.header));
@@ -4523,7 +4529,7 @@ H5T_create(H5T_class_t type, size_t size)
 
     case H5T_OPAQUE:
     case H5T_COMPOUND:
-	if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
+    if (NULL==(dt = H5FL_ALLOC(H5T_t,1))) {
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			   "memory allocation failed");
 	}
@@ -4545,14 +4551,14 @@ H5T_create(H5T_class_t type, size_t size)
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
 			  "no applicable native integer type");
 	}
-	if (NULL==(dt = H5MM_calloc(sizeof(H5T_t)))) {
+    if (NULL==(dt = H5FL_ALLOC(H5T_t,1))) {
 	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
 			  "memory allocation failed");
 	}
 	dt->type = type;
 	if (NULL==(dt->parent=H5T_copy(H5I_object(subtype),
 					      H5T_COPY_ALL))) {
-	    H5MM_xfree(dt);
+	    H5FL_FREE(H5T_t,dt);
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
 			  "unable to copy base data type");
 	}
@@ -4740,7 +4746,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     assert(old_dt);
 
     /* copy */
-    if (NULL==(new_dt = H5MM_calloc(sizeof(H5T_t)))) {
+    if (NULL==(new_dt = H5FL_ALLOC(H5T_t,0))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
@@ -4780,7 +4786,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 	 */
 	if (H5F_addr_defined (&(new_dt->ent.header))) {
 	    if (H5O_open (&(new_dt->ent))<0) {
-		H5MM_xfree (new_dt);
+		H5FL_FREE (H5T_t,new_dt);
 		HRETURN_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL,
 			       "unable to reopen named data type");
 	    }
@@ -5039,32 +5045,32 @@ H5T_close(H5T_t *dt)
 
     /* Close the datatype */
     switch (dt->type) {
-    case H5T_COMPOUND:
-	for (i=0; i<dt->u.compnd.nmembs; i++) {
-	    H5MM_xfree(dt->u.compnd.memb[i].name);
-	    H5T_close(dt->u.compnd.memb[i].type);
-	}
-	H5MM_xfree(dt->u.compnd.memb);
-	H5MM_xfree(dt);
-	break;
+        case H5T_COMPOUND:
+            for (i=0; i<dt->u.compnd.nmembs; i++) {
+                H5MM_xfree(dt->u.compnd.memb[i].name);
+                H5T_close(dt->u.compnd.memb[i].type);
+            }
+            H5MM_xfree(dt->u.compnd.memb);
+            break;
 
-    case H5T_ENUM:
-	for (i=0; i<dt->u.enumer.nmembs; i++) {
-	    H5MM_xfree(dt->u.enumer.name[i]);
-	}
-	H5MM_xfree(dt->u.enumer.name);
-	H5MM_xfree(dt->u.enumer.value);
-	H5MM_xfree(dt);
-	break;
+        case H5T_ENUM:
+            for (i=0; i<dt->u.enumer.nmembs; i++) {
+                H5MM_xfree(dt->u.enumer.name[i]);
+            }
+            H5MM_xfree(dt->u.enumer.name);
+            H5MM_xfree(dt->u.enumer.value);
+            break;
 
-    case H5T_OPAQUE:
-	H5MM_xfree(dt->u.opaque.tag);
-	H5MM_xfree(dt);
-	break;
+        case H5T_OPAQUE:
+            H5MM_xfree(dt->u.opaque.tag);
+            break;
 
-    default:
-	H5MM_xfree(dt);
+        default:
+            break;
     }
+
+    /* Free the datatype struct */
+    H5FL_FREE(H5T_t,dt);
 
     /* Close the parent */
     if (parent && H5T_close(parent)<0) {

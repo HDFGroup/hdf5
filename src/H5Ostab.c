@@ -40,6 +40,7 @@ const H5O_class_t H5O_STAB[1] = {{
     H5O_stab_copy,          	/*copy the native value         */
     H5O_stab_size,          	/*size of symbol table entry    */
     NULL,                   	/*default reset method          */
+    NULL,		            /*default free method			*/
     NULL,		    	/*get share method		*/
     NULL, 			/*set share method		*/
     H5O_stab_debug,         	/*debug the message             */

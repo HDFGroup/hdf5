@@ -48,6 +48,8 @@ static herr_t H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
 			       const H5S_t *mem_space,
 			       H5S_sel_iter_t *mem_iter, size_t nelmts,
 			       void *_buf/*out*/);
+static herr_t H5S_select_elements(H5S_t *space, H5S_seloper_t op,
+				   size_t num_elem, const hssize_t **coord);
 
 const H5S_fconv_t	H5S_POINT_FCONV[1] = {{
     "point", 				/*name				*/
@@ -1113,6 +1115,151 @@ H5S_point_select_contiguous(const H5S_t *space)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_select_elements
+ PURPOSE
+    Specify a series of elements in the dataspace to select
+ USAGE
+    herr_t H5S_select_elements(dsid, op, num_elem, coord)
+        hid_t dsid;             IN: Dataspace ID of selection to modify
+        H5S_seloper_t op;       IN: Operation to perform on current selection
+        size_t num_elem;        IN: Number of elements in COORD array.
+        const hssize_t **coord; IN: The location of each element selected
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    This function selects array elements to be included in the selection for
+    the dataspace.  The COORD array is a 2-D array of size <dataspace rank>
+    by NUM_ELEM (ie. a list of coordinates in the dataspace).  The order of
+    the element coordinates in the COORD array specifies the order that the
+    array elements are iterated through when I/O is performed.  Duplicate
+    coordinates are not checked for.  The selection operator, OP, determines
+    how the new selection is to be combined with the existing selection for
+    the dataspace.  Currently, only H5S_SELECT_SET is supported, which replaces
+    the existing selection with the one defined in this call.  When operators
+    other than H5S_SELECT_SET are used to combine a new selection with an
+    existing selection, the selection ordering is reset to 'C' array ordering.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
+    const hssize_t **coord)
+{
+    herr_t ret_value=SUCCEED;  /* return value */
+
+    FUNC_ENTER (H5S_select_elements, FAIL);
+
+    /* Check args */
+    assert(space);
+    assert(num_elem);
+    assert(coord);
+    assert(op==H5S_SELECT_SET);
+
+#ifdef QAK
+    printf("%s: check 1.0\n",FUNC);
+#endif /* QAK */
+    /* If we are setting a new selection, remove current selection first */
+    if(op==H5S_SELECT_SET) {
+        if(H5S_select_release(space)<0) {
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL,
+                "can't release hyperslab");
+        } /* end if */
+    } /* end if */
+
+#ifdef QAK
+    printf("%s: check 2.0\n",FUNC);
+#endif /* QAK */
+    /* Allocate space for the point selection information if necessary */
+    if(space->select.type!=H5S_SEL_POINTS || space->select.sel_info.pnt_lst==NULL) {
+        if((space->select.sel_info.pnt_lst = H5MM_calloc(sizeof(H5S_pnt_list_t)))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                "can't allocate element information");
+    } /* end if */
+
+#ifdef QAK
+    printf("%s: check 3.0\n",FUNC);
+#endif /* QAK */
+    /* Add points to selection */
+    if(H5S_point_add(space,num_elem,coord)<0) {
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL,
+            "can't insert elements");
+    }
+
+    /* Set selection type */
+    space->select.type=H5S_SEL_POINTS;
+#ifdef QAK
+    printf("%s: check 4.0\n",FUNC);
+#endif /* QAK */
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5Sselect_elements() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sselect_elements
+ PURPOSE
+    Specify a series of elements in the dataspace to select
+ USAGE
+    herr_t H5Sselect_elements(dsid, op, num_elem, coord)
+        hid_t dsid;             IN: Dataspace ID of selection to modify
+        H5S_seloper_t op;       IN: Operation to perform on current selection
+        size_t num_elem;        IN: Number of elements in COORD array.
+        const hssize_t **coord; IN: The location of each element selected
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    This function selects array elements to be included in the selection for
+    the dataspace.  The COORD array is a 2-D array of size <dataspace rank>
+    by NUM_ELEM (ie. a list of coordinates in the dataspace).  The order of
+    the element coordinates in the COORD array specifies the order that the
+    array elements are iterated through when I/O is performed.  Duplicate
+    coordinates are not checked for.  The selection operator, OP, determines
+    how the new selection is to be combined with the existing selection for
+    the dataspace.  Currently, only H5S_SELECT_SET is supported, which replaces
+    the existing selection with the one defined in this call.  When operators
+    other than H5S_SELECT_SET are used to combine a new selection with an
+    existing selection, the selection ordering is reset to 'C' array ordering.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t H5Sselect_elements (hid_t spaceid, H5S_seloper_t op, size_t num_elem,
+    const hssize_t **coord)
+{
+    H5S_t	*space = NULL;  /* Dataspace to modify selection of */
+    herr_t ret_value=SUCCEED;  /* return value */
+
+    FUNC_ENTER (H5Sselect_elements, FAIL);
+
+    /* Check args */
+    if (H5I_DATASPACE != H5I_get_type(spaceid) ||
+            NULL == (space=H5I_object(spaceid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    }
+    if(coord==NULL || num_elem==0) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "elements not specified");
+    } /* end if */
+    if(op!=H5S_SELECT_SET) {
+        HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL,
+            "operations other than H5S_SELECT_SET not supported currently");
+    } /* end if */
+
+    /* Call the real element selection routine */
+    if((ret_value=H5S_select_elements(space,op,num_elem,coord))<0) {
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't select elements");
+    } /* end if */
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5Sselect_elements() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_point_select_iterate
  PURPOSE
     Iterate over a point selection, calling a user's function for each
@@ -1149,7 +1296,7 @@ H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
         void *operator_data)
 {
     hsize_t	mem_size[H5O_LAYOUT_NDIMS]; /* Dataspace size */
-    hsize_t	mem_offset[H5O_LAYOUT_NDIMS];   /* Point offset */
+    hssize_t mem_offset[H5O_LAYOUT_NDIMS];   /* Point offset */
     hsize_t offset;             /* offset of region in buffer */
     void *tmp_buf;              /* temporary location of the element in the buffer */
     H5S_pnt_node_t *node;   /* Point node */

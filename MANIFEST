@@ -359,6 +359,9 @@
 ./src/H5Fsec2.c
 ./src/H5Fsplit.c
 ./src/H5Fstdio.c
+./src/H5FL.c
+./src/H5FLprivate.h
+./src/H5FLpublic.h
 ./src/H5G.c
 ./src/H5Gent.c
 ./src/H5Gnode.c
@@ -422,8 +425,6 @@
 ./src/H5Tprivate.h
 ./src/H5Tpublic.h
 ./src/H5Tvlen.c
-./src/H5TB.c
-./src/H5TBprivate.h
 ./src/H5V.c
 ./src/H5Vprivate.h
 ./src/H5Z.c

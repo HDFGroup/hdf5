@@ -12,10 +12,10 @@
 #define PABLO_MASK    H5Tconv_mask
 #include <H5Iprivate.h>
 #include <H5Eprivate.h>
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5MMprivate.h>
 #include <H5Pprivate.h>
 #include <H5Tpkg.h>
-#include <H5TBprivate.h>
 
 /* Conversion data for H5T_conv_struct() */
 typedef struct H5T_conv_struct_t {
@@ -42,6 +42,9 @@ typedef struct H5T_conv_hw_t {
 /* Interface initialization */
 static intn interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
+
+/* Declare a free list to manage pieces of vlen data */
+H5FL_BLK_DEFINE_STATIC(vlen_seq);
 
 /*
  * These macros are for the bodies of functions that convert buffers of one
@@ -1769,8 +1772,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     hsize_t 	seq_len;     /*the number of elements in the current sequence*/
     size_t	src_base_size, dst_base_size;/*source & destination base size*/
     size_t	src_size, dst_size;/*source & destination total size in bytes*/
-    hid_t 	conv_buf_id;		/*ID for comversion buffer	     */
-    void	*conv_buf_ptr;     	/*temporary conversion buffer 	     */
+    void	*conv_buf=NULL; /*temporary conversion buffer 	     */
     hsize_t	conv_buf_size;  	/*size of conversion buffer in bytes */
     uint8_t	dbuf[64],*dbuf_ptr=dbuf;/*temp destination buffer	     */
     intn	direction;		/*direction of traversal	     */
@@ -1865,8 +1867,9 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
             /* Get initial conversion buffer */
             conv_buf_size=MAX(src_base_size,dst_base_size);
-            if((conv_buf_id=H5TB_get_buf(conv_buf_size,FALSE,&conv_buf_ptr))==FAIL)
-                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
+            if ((conv_buf=H5FL_BLK_ALLOC(vlen_seq,conv_buf_size,0))==NULL)
+                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                     "memory allocation failed for type conversion");
 
             /* Set up conversion path for base elements */
             tpath = H5T_path_find(src->parent, dst->parent, NULL, NULL);
@@ -1891,20 +1894,20 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 /* Check if conversion buffer is large enough, resize if necessary */
                 if(conv_buf_size<MAX(src_size,dst_size)) {
                     conv_buf_size=MAX(src_size,dst_size);
-                    if(H5TB_resize_buf(conv_buf_id,conv_buf_size,&conv_buf_ptr)<0)
+                    if((conv_buf=H5FL_BLK_REALLOC(vlen_seq,conv_buf,conv_buf_size))==NULL)
                         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
                 } /* end if */
 
                 /* Read in VL sequence */
-                if((*(src->u.vlen.read))(src->u.vlen.f,s,conv_buf_ptr,src_size)<0)
+                if((*(src->u.vlen.read))(src->u.vlen.f,s,conv_buf,src_size)<0)
                     HRETURN_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL data");
 
                 /* Convert VL sequence */
-                if (H5T_convert(tpath, tsrc_id, tdst_id, seq_len, 0, conv_buf_ptr, NULL, dset_xfer_plist)<0)
+                if (H5T_convert(tpath, tsrc_id, tdst_id, seq_len, 0, conv_buf, NULL, dset_xfer_plist)<0)
                     HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed");
 
                 /* Write sequence to destination location */
-                if((*(dst->u.vlen.write))(xfer_parms,dst->u.vlen.f,d,conv_buf_ptr,seq_len,dst_base_size)<0)
+                if((*(dst->u.vlen.write))(xfer_parms,dst->u.vlen.f,d,conv_buf,seq_len,dst_base_size)<0)
                     HRETURN_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write VL data");
 
                 /*
@@ -1925,7 +1928,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             }
 
             /* Release the conversion buffer */
-            H5TB_release_buf(conv_buf_id);
+            H5FL_BLK_FREE(vlen_seq,conv_buf);
 
             /* Release the temporary datatype IDs used */
             if (tsrc_id >= 0) H5I_dec_ref(tsrc_id);

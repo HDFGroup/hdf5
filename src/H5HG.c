@@ -27,6 +27,7 @@
 #include <H5private.h>		/*library		  		*/
 #include <H5ACprivate.h>	/*caching				*/
 #include <H5Eprivate.h>		/*error handling			*/
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5HGprivate.h>	/*global heaps				*/
 #include <H5MFprivate.h>	/*file memory management		*/
 #include <H5MMprivate.h>	/*memory management			*/
@@ -66,6 +67,15 @@ static const H5AC_class_t H5AC_GHEAP[1] = {{
 /* Interface initialization */
 static intn interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
+
+/* Declare a free list to manage the H5HG_t struct */
+H5FL_DEFINE_STATIC(H5HG_heap_t);
+
+/* Declare a free list to manage arrays of H5HG_obj_t's */
+H5FL_ARR_DEFINE_STATIC(H5HG_obj_t,-1);
+
+/* Declare a PQ free list to manage heap chunks */
+H5FL_BLK_DEFINE_STATIC(heap_chunk);
 
 
 /*-------------------------------------------------------------------------
@@ -110,19 +120,19 @@ H5HG_create (H5F_t *f, size_t size)
 	HGOTO_ERROR (H5E_HEAP, H5E_CANTINIT, NULL,
 		     "unable to allocate file space for global heap");
     }
-    if (NULL==(heap = H5MM_calloc (sizeof(H5HG_heap_t)))) {
+    if (NULL==(heap = H5FL_ALLOC (H5HG_heap_t,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
     heap->addr = addr;
     heap->size = size;
     heap->dirty = TRUE;
-    if (NULL==(heap->chunk = H5MM_malloc (size))) {
+    if (NULL==(heap->chunk = H5FL_BLK_ALLOC (heap_chunk,size,0))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
     heap->nalloc = H5HG_NOBJS (f, size);
-    if (NULL==(heap->obj = H5MM_calloc (heap->nalloc*sizeof(H5HG_obj_t)))) {
+    if (NULL==(heap->obj = H5FL_ARR_ALLOC (H5HG_obj_t,heap->nalloc,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -181,9 +191,9 @@ H5HG_create (H5F_t *f, size_t size)
 
  done:
     if (!ret_value && heap) {
-	H5MM_xfree (heap->chunk);
-	H5MM_xfree (heap->obj);
-	H5MM_xfree (heap);
+	H5FL_BLK_FREE(heap_chunk,heap->chunk);
+	H5FL_ARR_FREE (H5HG_obj_t,heap->obj);
+	H5FL_FREE (H5HG_heap_t,heap);
     }
     FUNC_LEAVE (ret_value);
 }
@@ -224,12 +234,12 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void UNUSED *udata1,
     assert (!udata2);
 
     /* Read the initial 4k page */
-    if (NULL==(heap = H5MM_calloc (sizeof(H5HG_heap_t)))) {
+    if (NULL==(heap = H5FL_ALLOC (H5HG_heap_t,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
     heap->addr = *addr;
-    if (NULL==(heap->chunk = H5MM_malloc (H5HG_MINSIZE))) {
+    if (NULL==(heap->chunk = H5FL_BLK_ALLOC (heap_chunk,H5HG_MINSIZE,0))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -266,7 +276,7 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void UNUSED *udata1,
     if (heap->size > H5HG_MINSIZE) {
 	haddr_t next_addr = *addr;
 	H5F_addr_inc (&next_addr, (hsize_t)H5HG_MINSIZE);
-	if (NULL==(heap->chunk = H5MM_realloc (heap->chunk, heap->size))) {
+	if (NULL==(heap->chunk = H5FL_BLK_REALLOC (heap_chunk, heap->chunk, heap->size))) {
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			 "memory allocation failed");
 	}
@@ -280,7 +290,7 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void UNUSED *udata1,
     /* Decode each object */
     p = heap->chunk + H5HG_SIZEOF_HDR (f);
     nalloc = H5HG_NOBJS (f, heap->size);
-    if (NULL==(heap->obj = H5MM_calloc (nalloc*sizeof(H5HG_obj_t)))) {
+    if (NULL==(heap->obj = H5FL_ARR_ALLOC (H5HG_obj_t,nalloc,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -357,9 +367,9 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void UNUSED *udata1,
     
  done:
     if (!ret_value && heap) {
-	H5MM_xfree (heap->chunk);
-	H5MM_xfree (heap->obj);
-	H5MM_xfree (heap);
+	H5FL_BLK_FREE (heap_chunk,heap->chunk);
+	H5FL_ARR_FREE(H5HG_obj_t,heap->obj);
+	H5FL_FREE (H5HG_heap_t,heap);
     }
     FUNC_LEAVE (ret_value);
 }
@@ -411,9 +421,9 @@ H5HG_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5HG_heap_t *heap)
 		break;
 	    }
 	}
-	heap->chunk = H5MM_xfree (heap->chunk);
-	heap->obj = H5MM_xfree (heap->obj);
-	H5MM_xfree (heap);
+	heap->chunk = H5FL_BLK_FREE(heap_chunk,heap->chunk);
+	heap->obj = H5FL_ARR_FREE(H5HG_obj_t,heap->obj);
+	H5FL_FREE (H5HG_heap_t,heap);
     }
 
     FUNC_LEAVE (SUCCEED);

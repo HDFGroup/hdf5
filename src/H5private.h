@@ -961,7 +961,6 @@ __DLL__ intn H5P_term_interface(void);
 __DLL__ intn H5RA_term_interface(void);
 __DLL__ intn H5R_term_interface(void);
 __DLL__ intn H5S_term_interface(void);
-__DLL__ intn H5TB_term_interface(void);
 __DLL__ intn H5TN_term_interface(void);
 __DLL__ intn H5T_term_interface(void);
 __DLL__ intn H5Z_term_interface(void);

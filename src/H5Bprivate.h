@@ -138,4 +138,5 @@ __DLL__ herr_t H5B_remove(H5F_t *f, const H5B_class_t *type,
 			  const haddr_t *addr, void *udata);
 __DLL__ herr_t H5B_iterate (H5F_t *f, const H5B_class_t *type,
 			    const haddr_t *addr, void *udata);
+
 #endif

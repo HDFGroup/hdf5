@@ -22,6 +22,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Bprivate.h>		/* B-tree subclass names	  	*/
 #include <H5Dprivate.h>		/* Datasets				*/
 #include <H5Eprivate.h>		/* Error handling		  	*/
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5MMprivate.h>	/* Memory management			*/
 #include <H5Pprivate.h>		/* Property lists		  	*/
 
@@ -31,6 +32,21 @@ static char		RcsId[] = "@(#)$Revision$";
 static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT H5P_init_interface
 static herr_t		H5P_init_interface(void);
+
+/* Declare a free list to manage the H5F_create_t struct */
+H5FL_DEFINE_STATIC(H5F_create_t);
+
+/* Declare a free list to manage the H5F_access_t struct */
+H5FL_DEFINE_STATIC(H5F_access_t);
+
+/* Declare a free list to manage the H5D_create_t struct */
+H5FL_DEFINE_STATIC(H5D_create_t);
+
+/* Declare a free list to manage the H5F_xfer_t struct */
+H5FL_DEFINE_STATIC(H5F_xfer_t);
+
+/* Declare a free list to manage the H5F_mprop_t struct */
+H5FL_DEFINE_STATIC(H5F_mprop_t);
 
 /*--------------------------------------------------------------------------
 NAME
@@ -157,54 +173,54 @@ H5Pcreate(H5P_class_t type)
 
     /* Allocate a new property list and initialize it with default values */
     switch (type) {
-    case H5P_FILE_CREATE:
-	if (NULL==(plist = H5MM_malloc(sizeof(H5F_create_t)))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			   "memory allocation failed");
-	}
-	HDmemcpy(plist, &H5F_create_dflt, sizeof(H5F_create_t));
-	break;
+        case H5P_FILE_CREATE:
+            if (NULL==(plist = H5FL_ALLOC(H5F_create_t,0))) {
+                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                       "memory allocation failed");
+            }
+            HDmemcpy(plist, &H5F_create_dflt, sizeof(H5F_create_t));
+            break;
 
-    case H5P_FILE_ACCESS:
-	if (NULL==(plist = H5MM_malloc(sizeof(H5F_access_t)))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			   "memory allocation failed");
-	}
-	HDmemcpy(plist, &H5F_access_dflt, sizeof(H5F_access_t));
-	break;
+        case H5P_FILE_ACCESS:
+            if (NULL==(plist = H5FL_ALLOC(H5F_access_t,0))) {
+                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                       "memory allocation failed");
+            }
+            HDmemcpy(plist, &H5F_access_dflt, sizeof(H5F_access_t));
+            break;
 
-    case H5P_DATASET_CREATE:
-	if (NULL==(plist = H5MM_malloc(sizeof(H5D_create_t)))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			   "memory allocation failed");
-	}
-	HDmemcpy(plist, &H5D_create_dflt, sizeof(H5D_create_t));
-	break;
+        case H5P_DATASET_CREATE:
+            if (NULL==(plist = H5FL_ALLOC(H5D_create_t,0))) {
+                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                       "memory allocation failed");
+            }
+            HDmemcpy(plist, &H5D_create_dflt, sizeof(H5D_create_t));
+            break;
 
-    case H5P_DATASET_XFER:
-	if (NULL==(plist = H5MM_malloc(sizeof(H5F_xfer_t)))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			   "memory allocation failed");
-	}
-	HDmemcpy(plist, &H5F_xfer_dflt, sizeof(H5F_xfer_t));
-	break;
+        case H5P_DATASET_XFER:
+            if (NULL==(plist = H5FL_ALLOC(H5F_xfer_t,0))) {
+                HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                       "memory allocation failed");
+            }
+            HDmemcpy(plist, &H5F_xfer_dflt, sizeof(H5F_xfer_t));
+            break;
 
-    case H5P_MOUNT:
-	if (NULL==(plist = H5MM_malloc(sizeof(H5F_mprop_t)))) {
-	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			  "memory allocation failed");
-	}
-	HDmemcpy(plist, &H5F_mount_dflt, sizeof(H5F_mprop_t));
-	break;
+        case H5P_MOUNT:
+            if (NULL==(plist = H5FL_ALLOC(H5F_mprop_t,0))) {
+                HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                      "memory allocation failed");
+            }
+            HDmemcpy(plist, &H5F_mount_dflt, sizeof(H5F_mprop_t));
+            break;
 
-    default:
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "unknown property list class");
+        default:
+            HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                  "unknown property list class");
     }
 
     /* Atomize the new property list */
     if ((ret_value = H5P_create(type, plist)) < 0) {
-	HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
+        HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
 		      "unable to register property list");
     }
     FUNC_LEAVE(ret_value);
@@ -319,62 +335,63 @@ H5P_close(H5P_class_t type, void *plist)
 
     /* Some property lists may need to do special things */
     switch (type) {
-    case H5P_FILE_ACCESS:
-	switch (fa_list->driver) {
-	case H5F_LOW_ERROR:
-	case H5F_LOW_SEC2:
-	case H5F_LOW_STDIO:
-	case H5F_LOW_CORE:
-	    /* Nothing to do */
-	    break;
+        case H5P_FILE_ACCESS:
+            switch (fa_list->driver) {
+                case H5F_LOW_ERROR:
+                case H5F_LOW_SEC2:
+                case H5F_LOW_STDIO:
+                case H5F_LOW_CORE:
+                    /* Nothing to do */
+                    break;
 
-	case H5F_LOW_MPIO:
+                case H5F_LOW_MPIO:
 #ifdef LATER
-	    /* Need to free the COMM and INFO objects too. */
+                    /* Need to free the COMM and INFO objects too. */
 #endif
-	    break;
+                    break;
 
-	case H5F_LOW_SPLIT:
-	    /* Free member info */
-	    fa_list->driver = H5F_LOW_ERROR; /*prevent cycles*/
-	    H5P_close (H5P_FILE_ACCESS, fa_list->u.split.meta_access);
-	    H5P_close (H5P_FILE_ACCESS, fa_list->u.split.raw_access);
-	    H5MM_xfree (fa_list->u.split.meta_ext);
-	    H5MM_xfree (fa_list->u.split.raw_ext);
-	    break;
+                case H5F_LOW_SPLIT:
+                    /* Free member info */
+                    fa_list->driver = H5F_LOW_ERROR; /*prevent cycles*/
+                    H5P_close (H5P_FILE_ACCESS, fa_list->u.split.meta_access);
+                    H5P_close (H5P_FILE_ACCESS, fa_list->u.split.raw_access);
+                    H5MM_xfree (fa_list->u.split.meta_ext);
+                    H5MM_xfree (fa_list->u.split.raw_ext);
+                    break;
 
-	case H5F_LOW_FAMILY:
-	    /* Free member info */
-	    H5P_close (H5P_FILE_ACCESS, fa_list->u.fam.memb_access);
-	    break;
-	}
-	break;
-	
-    case H5P_FILE_CREATE:
-	/*nothing to do*/
-	break;
-	
-    case H5P_DATASET_CREATE:
-	H5O_reset(H5O_FILL, &(dc_list->fill));
-	H5O_reset(H5O_EFL, &(dc_list->efl));
-	H5O_reset(H5O_PLINE, &(dc_list->pline));
-	break;
+                case H5F_LOW_FAMILY:
+                    /* Free member info */
+                    H5P_close (H5P_FILE_ACCESS, fa_list->u.fam.memb_access);
+                    break;
+            }
+            H5FL_FREE(H5F_access_t,plist);
+            break;
+        
+        case H5P_FILE_CREATE:
+            H5FL_FREE(H5F_create_t,plist);
+            break;
+        
+        case H5P_DATASET_CREATE:
+            H5O_reset(H5O_FILL, &(dc_list->fill));
+            H5O_reset(H5O_EFL, &(dc_list->efl));
+            H5O_reset(H5O_PLINE, &(dc_list->pline));
+            H5FL_FREE(H5D_create_t,plist);
+            break;
 
-    case H5P_DATASET_XFER:
-	/*nothing to do*/
-	break;
+        case H5P_DATASET_XFER:
+            H5FL_FREE(H5F_xfer_t,plist);
+            break;
 
-    case H5P_MOUNT:
-	/*nothing to do*/
-	break;
+        case H5P_MOUNT:
+            H5FL_FREE(H5F_mprop_t,plist);
+            break;
 
-    default:
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "unknown property list class");
+        default:
+            HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+                       "unknown property list class");
     }
 
     /* Free the property list struct and return */
-    H5MM_xfree(plist);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3231,22 +3248,47 @@ H5P_copy (H5P_class_t type, const void *src)
     /* How big is the property list */
     switch (type) {
     case H5P_FILE_CREATE:
+    /* Create the new property list */
+    if (NULL==(dst = H5FL_ALLOC(H5F_create_t,0))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
 	size = sizeof(H5F_create_t);
 	break;
 
     case H5P_FILE_ACCESS:
+    /* Create the new property list */
+    if (NULL==(dst = H5FL_ALLOC(H5F_access_t,0))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
 	size = sizeof(H5F_access_t);
 	break;
 
     case H5P_DATASET_CREATE:
+    /* Create the new property list */
+    if (NULL==(dst = H5FL_ALLOC(H5D_create_t,0))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
 	size = sizeof(H5D_create_t);
 	break;
 
     case H5P_DATASET_XFER:
+    /* Create the new property list */
+    if (NULL==(dst = H5FL_ALLOC(H5F_xfer_t,0))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
 	size = sizeof(H5F_xfer_t);
 	break;
 
     case H5P_MOUNT:
+    /* Create the new property list */
+    if (NULL==(dst = H5FL_ALLOC(H5F_mprop_t,0))) {
+	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		       "memory allocation failed");
+    }
 	size = sizeof(H5F_mprop_t);
 	break;
 
@@ -3255,11 +3297,7 @@ H5P_copy (H5P_class_t type, const void *src)
 		      "unknown property list class");
     }
 
-    /* Create the new property list */
-    if (NULL==(dst = H5MM_malloc(size))) {
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-		       "memory allocation failed");
-    }
+    /* Copy into new object */
     HDmemcpy(dst, src, size);
 
     /* Deep-copy pointers */

@@ -257,14 +257,14 @@ H5F_term_interface(void)
     intn	n = 0;
 
     if (interface_initialize_g) {
-	if ((n=H5I_nmembers(H5I_FILE))) {
-	    H5F_close_all();
-	} else if (0==(n=H5I_nmembers(H5I_FILE_CLOSING))) {
-	    H5I_destroy_group(H5I_FILE);
-	    H5I_destroy_group(H5I_FILE_CLOSING);
-	    interface_initialize_g = 0;
-	    n = 1; /*H5I*/
-	}
+        if ((n=H5I_nmembers(H5I_FILE))) {
+            H5F_close_all();
+        } else if (0==(n=H5I_nmembers(H5I_FILE_CLOSING))) {
+            H5I_destroy_group(H5I_FILE);
+            H5I_destroy_group(H5I_FILE_CLOSING);
+            interface_initialize_g = 0;
+            n = 1; /*H5I*/
+        }
     }
     return n;
 }

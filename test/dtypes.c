@@ -13,6 +13,9 @@
 /* Number of times to run each test */
 #define NTESTS	1
 
+/* Number of elements in each test */
+#define NTESTELEM	100000
+
 /* Define if you want to see a count of overflows */
 #undef SHOW_OVERFLOWS
 
@@ -436,7 +439,7 @@ test_compound_2(void)
 	int e, d, c[4], b, a;
     } *d_ptr;
 
-    const int		nelmts = 200000;
+    const int		nelmts = NTESTELEM;
     const size_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
@@ -550,7 +553,7 @@ test_compound_3(void)
 	int a,    c[4],    e;
     } *d_ptr;
 
-    const int		nelmts = 200000;
+    const int		nelmts = NTESTELEM;
     const size_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
@@ -664,7 +667,7 @@ test_compound_4(void)
 	int e;
     } *d_ptr;
 
-    const int		nelmts = 200000;
+    const int		nelmts = NTESTELEM;
     const size_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
@@ -1361,7 +1364,7 @@ test_conv_str_2(void)
 {
     char		*buf=NULL, s[80];
     hid_t		c_type, f_type;
-    const size_t	nelmts = 200000, ntests=NTESTS;
+    const size_t	nelmts = NTESTELEM, ntests=NTESTS;
     size_t		i, j, nchars;
     int			ret_value = 1;
 
@@ -1421,7 +1424,7 @@ test_conv_str_2(void)
 static int
 test_conv_enum_1(void)
 {
-    const int	nelmts=200000, ntests=NTESTS;
+    const int	nelmts=NTESTELEM, ntests=NTESTS;
     int		i, val, *buf=NULL;
     hid_t	t1, t2;
     char	s[80];
@@ -1806,7 +1809,7 @@ static int
 test_conv_int_1(const char *name, hid_t src, hid_t dst)
 {
     const size_t	ntests=NTESTS;		/*number of tests	*/
-    const size_t	nelmts=200000;		/*num values per test	*/
+    const size_t	nelmts=NTESTELEM;		/*num values per test	*/
     const size_t	max_fails=8;		/*max number of failures*/
     size_t		fails_all_tests=0;	/*number of failures	*/
     size_t		fails_this_test;	/*fails for this test	*/
@@ -2962,7 +2965,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 {
     flt_t		src_type, dst_type;	/*data types		*/
     const size_t	ntests=NTESTS;		/*number of tests	*/
-    const size_t	nelmts=200000;		/*num values per test	*/
+    const size_t	nelmts=NTESTELEM;		/*num values per test	*/
     const size_t	max_fails=8;		/*max number of failures*/
     size_t		fails_all_tests=0;	/*number of failures	*/
     size_t		fails_this_test;	/*fails for this test	*/

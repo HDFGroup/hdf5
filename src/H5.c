@@ -21,12 +21,13 @@ static char             RcsId[] = "@(#)$Revision$";
 #include <H5ACprivate.h>        /*cache                           	*/
 #include <H5Bprivate.h>         /*B-link trees                    	*/
 #include <H5Eprivate.h>         /*error handling          		*/
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Iprivate.h>		/*atoms					*/
 #include <H5MMprivate.h>        /*memory management               	*/
 #include <H5Pprivate.h>		/*property lists			*/
 #include <H5Rpublic.h>		/*references				*/
 #include <H5Sprivate.h>		/*data spaces				*/
-#include <H5Tprivate.h>         /*data types                      	*/
+#include <H5Tprivate.h>     /*data types                      	*/
 #include <H5Zprivate.h>		/*filters				*/
 
 /* We need this on Irix64 even though we've included stdio.h as documented */
@@ -153,10 +154,10 @@ H5_term_library(void)
 	pending = 0;
 	pending += DOWN(F);
 	pending += DOWN(D);
-	pending += DOWN(TB);
 	pending += DOWN(Z);
 	pending += DOWN(RA);
 	pending += DOWN(G);
+	pending += DOWN(FL);
 	pending += DOWN(R);
 	pending += DOWN(S);
 	pending += DOWN(TN);
@@ -210,6 +211,42 @@ H5dont_atexit(void)
     H5_trace(TRUE, NULL, "e", SUCCEED);
     return(SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5garbage_collect
+ *
+ * Purpose:	Walks through all the garbage collection routines for the
+ *		library, which are supposed to free any unused memory they have
+ *		allocated.
+ *
+ *      These should probably be registered dynamicly in a linked list of
+ *          functions to call, but there aren't that many right now, so we
+ *          hard-wire them...
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, March 11, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5garbage_collect(void)
+{
+    herr_t                  ret_value = SUCCEED;
+
+    FUNC_ENTER(H5garbage_collect, FAIL);
+
+    /* Call the garbage collection routines in the library */
+    H5FL_garbage_coll();
+
+    FUNC_LEAVE(ret_value);
+}   /* end H5garbage_collect() */
 
 
 /*-------------------------------------------------------------------------

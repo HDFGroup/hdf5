@@ -92,6 +92,7 @@
 #include <H5Bprivate.h>		/*B-link trees			  */
 #include <H5Eprivate.h>		/*error handling	  */
 #include <H5Fprivate.h>		/*file access */
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5MFprivate.h>	/*File memory management  */
 #include <H5MMprivate.h>	/*Core memory management	  */
 
@@ -140,6 +141,21 @@ static const H5AC_class_t H5AC_BT[1] = {{
 /* Interface initialization? */
 #define INTERFACE_INIT NULL
 static intn interface_initialize_g = 0;
+
+/* Declare a free list to manage the page information */
+H5FL_BLK_DEFINE_STATIC(page);
+
+/* Declare a PQ free list to manage the native block information */
+H5FL_BLK_DEFINE_STATIC(native_block);
+
+/* Declare a free list to manage the H5B_key_t array information */
+H5FL_ARR_DEFINE_STATIC(H5B_key_t,-1);
+
+/* Declare a free list to manage the haddr_t array information */
+H5FL_ARR_DEFINE_STATIC(haddr_t,-1);
+
+/* Declare a free list to manage the H5B_t struct */
+H5FL_DEFINE_STATIC(H5B_t);
 
 
 /*-------------------------------------------------------------------------
@@ -190,7 +206,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		    "file allocation failed for B-tree root node");
     }
-    if (NULL==(bt = H5MM_calloc(sizeof(H5B_t)))) {
+    if (NULL==(bt = H5FL_ALLOC(H5B_t,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed for B-tree root node");
     }
@@ -203,10 +219,10 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
     H5F_addr_undef(&(bt->left));
     H5F_addr_undef(&(bt->right));
     bt->nchildren = 0;
-    if (NULL==(bt->page=H5MM_calloc(size)) ||
-        NULL==(bt->native=H5MM_malloc(total_native_keysize)) ||
-	NULL==(bt->child=H5MM_malloc(2*H5B_K(f,type)*sizeof(haddr_t))) ||
-	NULL==(bt->key=H5MM_malloc((2*H5B_K(f,type)+1)*sizeof(H5B_key_t)))) {
+    if (NULL==(bt->page=H5FL_BLK_ALLOC(page,size,1)) ||
+        NULL==(bt->native=H5FL_BLK_ALLOC(native_block,total_native_keysize,0)) ||
+	NULL==(bt->child=H5FL_ARR_ALLOC(haddr_t,2*H5B_K(f,type),0)) ||
+	NULL==(bt->key=H5FL_ARR_ALLOC(H5B_key_t,(2*H5B_K(f,type)+1),0))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed for B-tree root node");
     }
@@ -249,11 +265,11 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
     if (ret_value<0) {
 	H5MF_xfree (f, addr, (hsize_t)size);
 	if (bt) {
-	    H5MM_xfree (bt->page);
-	    H5MM_xfree (bt->native);
-	    H5MM_xfree (bt->child);
-	    H5MM_xfree (bt->key);
-	    H5MM_xfree (bt);
+	    H5FL_BLK_FREE (page,bt->page);
+	    H5FL_BLK_FREE (native_block,bt->native);
+	    H5FL_ARR_FREE (haddr_t,bt->child);
+	    H5FL_ARR_FREE (H5B_key_t,bt->key);
+	    H5FL_FREE (H5B_t,bt);
 	}
     }
     
@@ -296,7 +312,7 @@ H5B_load(H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
     assert(type);
     assert(type->get_sizeof_rkey);
 
-    if (NULL==(bt = H5MM_calloc(sizeof(H5B_t)))) {
+    if (NULL==(bt = H5FL_ALLOC(H5B_t,1))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -305,10 +321,10 @@ H5B_load(H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
     bt->type = type;
     bt->dirty = FALSE;
     bt->ndirty = 0;
-    if (NULL==(bt->page=H5MM_malloc(size)) ||
-	NULL==(bt->native=H5MM_malloc(total_nkey_size)) ||
-	NULL==(bt->key=H5MM_malloc((2*H5B_K(f,type)+1)*sizeof(H5B_key_t))) ||
-	NULL==(bt->child=H5MM_malloc(2*H5B_K(f,type)*sizeof(haddr_t)))) {
+    if (NULL==(bt->page=H5FL_BLK_ALLOC(page,size,0)) ||
+	NULL==(bt->native=H5FL_BLK_ALLOC(native_block,total_nkey_size,0)) ||
+	NULL==(bt->key=H5FL_ARR_ALLOC(H5B_key_t,(2*H5B_K(f,type)+1),0)) ||
+	NULL==(bt->child=H5FL_ARR_ALLOC(haddr_t,2*H5B_K(f,type),0))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -362,11 +378,11 @@ H5B_load(H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
 
   done:
     if (!ret_value && bt) {
-	H5MM_xfree(bt->child);
-	H5MM_xfree(bt->key);
-	H5MM_xfree(bt->page);
-	H5MM_xfree(bt->native);
-	H5MM_xfree(bt);
+	H5FL_ARR_FREE(haddr_t,bt->child);
+	H5FL_ARR_FREE(H5B_key_t,bt->key);
+	H5FL_BLK_FREE(page,bt->page);
+	H5FL_BLK_FREE(native_block,bt->native);
+	H5FL_FREE(H5B_t,bt);
     }
     FUNC_LEAVE(ret_value);
 }
@@ -466,11 +482,11 @@ H5B_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5B_t *bt)
 	bt->ndirty = 0;
     }
     if (destroy) {
-	H5MM_xfree(bt->child);
-	H5MM_xfree(bt->key);
-	H5MM_xfree(bt->page);
-	H5MM_xfree(bt->native);
-	H5MM_xfree(bt);
+	H5FL_ARR_FREE(haddr_t,bt->child);
+	H5FL_ARR_FREE(H5B_key_t,bt->key);
+	H5FL_BLK_FREE(page,bt->page);
+	H5FL_BLK_FREE(native_block,bt->native);
+	H5FL_FREE(H5B_t,bt);
     }
     FUNC_LEAVE(SUCCEED);
 }
@@ -1527,7 +1543,7 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 	 * We've reached the left-most leaf.  Now follow the right-sibling
 	 * pointer from leaf to leaf until we've processed all leaves.
 	 */
-	if (NULL==(child=H5MM_malloc(2*H5B_K(f,type)*sizeof(haddr_t))) ||
+	if (NULL==(child=H5FL_ARR_ALLOC(haddr_t,2*H5B_K(f,type),0)) ||
 	    NULL==(key=H5MM_malloc((2*H5B_K(f, type)+1)*type->sizeof_nkey))) {
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			 "memory allocation failed");
@@ -1573,7 +1589,7 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
     }
 
   done:
-    H5MM_xfree(child);
+    H5FL_ARR_FREE(haddr_t,child);
     H5MM_xfree(key);
     FUNC_LEAVE(ret_value);
 }

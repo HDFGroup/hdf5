@@ -722,6 +722,11 @@ __DLL__ uintn H5F_addr_hash(const haddr_t *, uintn mod);
 __DLL__ herr_t H5F_addr_pack(H5F_t *f, haddr_t *addr,
 			     const unsigned long objno[2]);
 
+/* Functions for allocation/releasing chunks */
+__DLL__ void * H5F_istore_chunk_alloc(size_t chunk_size);
+__DLL__ void * H5F_istore_chunk_free(void *chunk);
+__DLL__ void * H5F_istore_chunk_realloc(void *chunk, size_t new_size);
+
 /* Functions for MPI-IO */
 #ifdef HAVE_PARALLEL
 __DLL__ htri_t H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval);

@@ -387,19 +387,23 @@ main (void)
     if (sizeof(long_long)<8 || 0==GB8LL) {
 	puts("Test skipped because sizeof(long_long) is too small. This");
 	puts("hardware apparently doesn't support 64-bit integer types.");
+    h5_cleanup(fapl);
 	exit(0);
     }
     if (!is_sparse()) {
 	puts("Test skipped because file system does not support holes.");
+    h5_cleanup(fapl);
 	exit(0);
     }
     if (!enough_room(fapl)) {
 	puts("Test skipped because of quota (file size or num open files).");
+    h5_cleanup(fapl);
 	exit(0);
     }
     if (sizeof(hsize_t)<=4) {
 	puts("Test skipped because the hdf5 library was configured with the");
 	puts("--disable-hsizet flag in order to work around a compiler bug.");
+    h5_cleanup(fapl);
 	exit(0);
     }
     

@@ -29,6 +29,7 @@ const H5O_class_t H5O_NULL[1] = {{
     NULL,                   /*no copy method                */
     NULL,                   /*no size method                */
     NULL,                   /*no reset method               */
+    NULL,		            /*no free method			*/
     NULL,		    /*no get share method	    */
     NULL,	            /*no set share method	    */
     NULL,                   /*no debug method               */

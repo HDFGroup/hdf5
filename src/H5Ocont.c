@@ -40,6 +40,7 @@ const H5O_class_t H5O_CONT[1] = {{
     NULL,                   	/*no copy method                */
     NULL,                   	/*no size method                */
     NULL,                   	/*default reset method          */
+    NULL,		            /* default free method			*/
     NULL, 		    	/*get share method		*/
     NULL,		    	/*set share method		*/
     H5O_cont_debug,         	/*debugging                     */

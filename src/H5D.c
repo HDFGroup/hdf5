@@ -21,6 +21,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5ACprivate.h>	/* Cache			  	*/
 #include <H5Dprivate.h>		/* Dataset functions			*/
 #include <H5Eprivate.h>		/* Error handling		  	*/
+#include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Gprivate.h>		/* Group headers		  	*/
 #include <H5HLprivate.h>	/* Name heap				*/
 #include <H5MFprivate.h>	/* File space allocation header		*/
@@ -28,7 +29,6 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Oprivate.h>		/* Object headers		  	*/
 #include <H5Pprivate.h>		/* Property lists			*/
 #include <H5Sprivate.h>		/* Dataspace functions rky 980813       */
-#include <H5TBprivate.h>	/* Temporary buffers        		*/
 #include <H5Vprivate.h>		/* Vector and array functions		*/
 #include <H5Zprivate.h>		/* Data filters				*/
 
@@ -77,6 +77,18 @@ static intn interface_initialize_g = 0;
 static herr_t H5D_init_interface(void);
 static herr_t H5D_init_storage(H5D_t *dataset, const H5S_t *space);
 H5D_t * H5D_new(const H5D_create_t *create_parms);
+
+/* Declare a free list to manage the H5D_t struct */
+H5FL_DEFINE_STATIC(H5D_t);
+
+/* Declare a free list to manage blocks of type conversion data */
+H5FL_BLK_DEFINE_STATIC(type_conv);
+
+/* Declare a free list to manage blocks of background conversion data */
+H5FL_BLK_DEFINE_STATIC(bkgr_conv);
+
+/* Declare a free list to manage blocks of fill conversion data */
+H5FL_BLK_DEFINE_STATIC(fill_conv);
 
 
 /*--------------------------------------------------------------------------
@@ -809,7 +821,7 @@ H5D_new(const H5D_create_t *create_parms)
     /* check args */
     /* Nothing to check */
     
-    if (NULL==(ret_value = H5MM_calloc(sizeof(H5D_t)))) {
+    if (NULL==(ret_value = H5FL_ALLOC(H5D_t,1))) {
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
@@ -1092,7 +1104,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 	    H5O_close(&(new_dset->ent));
 	}
 	new_dset->ent.file = NULL;
-	H5MM_xfree(new_dset);
+	H5FL_FREE(H5D_t,new_dset);
     }
     FUNC_LEAVE(ret_value);
 }
@@ -1348,7 +1360,7 @@ done:
             H5P_close (H5P_DATASET_CREATE, dataset->create_parms);
         }
         dataset->ent.file = NULL;
-        H5MM_xfree(dataset);
+        H5FL_FREE(H5D_t,dataset);
     }
     FUNC_LEAVE(ret_value);
 }
@@ -1402,7 +1414,7 @@ H5D_close(H5D_t *dataset)
      * above).
      */
     dataset->ent.file = NULL;
-    H5MM_xfree(dataset);
+    H5FL_FREE(H5D_t,dataset);
 
     if (free_failed) {
 	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
@@ -1449,8 +1461,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     hssize_t    	nelmts;			/*number of elements	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
-    hid_t       	tconv_id=FAIL;		/*type conv buffer ID	*/
-    hid_t		bkg_id=FAIL;		/*background buffer ID	*/
     uint8_t		*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t		*bkg_buf = NULL;	/*background buffer	*/
     H5T_path_t		*tpath = NULL;		/*type conversion info	*/
@@ -1651,18 +1661,15 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
     }
     if (NULL==(tconv_buf=xfer_parms->tconv_buf)) {
         /* Allocate temporary buffer */
-        if ((tconv_id = H5TB_get_buf(target_size, 1, (void **)&tconv_buf))<0) {
+        if((tconv_buf=H5FL_BLK_ALLOC(type_conv,target_size,0))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                  "memory allocation failed for type conversion");
-        }
     }
     if (need_bkg && NULL==(bkg_buf=xfer_parms->bkg_buf)) {
         /* Allocate temporary buffer */
-        if ((bkg_id=H5TB_get_buf(request_nelmts*dst_type_size, 1,
-				 (void **)&bkg_buf))<0) {
+        if((bkg_buf=H5FL_BLK_ALLOC(bkgr_conv,request_nelmts*dst_type_size,0))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                 "memory allocation failed for type conversion");
-        }
+                 "memory allocation failed for background conversion");
     }
 
 #ifdef QAK
@@ -1813,8 +1820,10 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
 
     if (src_id >= 0) H5I_dec_ref(src_id);
     if (dst_id >= 0) H5I_dec_ref(dst_id);
-    if (tconv_buf && NULL==xfer_parms->tconv_buf) H5TB_release_buf(tconv_id);
-    if (bkg_buf && NULL==xfer_parms->bkg_buf) H5TB_release_buf (bkg_id);
+    if (tconv_buf && NULL==xfer_parms->tconv_buf)
+        H5FL_BLK_FREE(type_conv,tconv_buf);
+    if (bkg_buf && NULL==xfer_parms->bkg_buf)
+        H5FL_BLK_FREE(bkgr_conv,bkg_buf);
     if (free_this_space) H5S_close(free_this_space);
     FUNC_LEAVE(ret_value);
 }
@@ -1853,8 +1862,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     hssize_t		nelmts;			/*total number of elmts	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
-    hid_t       	tconv_id=FAIL;		/*type conv buffer ID	*/
-    hid_t		bkg_id=FAIL;   		/*background buffer ID	*/
     uint8_t		*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t		*bkg_buf = NULL;	/*background buffer	*/
     H5T_path_t		*tpath = NULL;		/*type conversion info	*/
@@ -2089,18 +2096,15 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     }
     if (NULL==(tconv_buf=xfer_parms->tconv_buf)) {
         /* Allocate temporary buffer */
-        if ((tconv_id=H5TB_get_buf(target_size, 1, (void **)&tconv_buf))<0) {
+        if((tconv_buf=H5FL_BLK_ALLOC(type_conv,target_size,0))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                  "memory allocation failed for type conversion");
-        }
     }
     if (need_bkg && NULL==(bkg_buf=xfer_parms->bkg_buf)) {
         /* Allocate temporary buffer */
-        if ((bkg_id=H5TB_get_buf(request_nelmts*dst_type_size, 1,
-				 (void **)&bkg_buf))<0) {
+        if((bkg_buf=H5FL_BLK_ALLOC(bkgr_conv,request_nelmts*dst_type_size,0))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                 "memory allocation failed for type conversion");
-        }
+                 "memory allocation failed for background conversion");
     }
 
 #ifdef QAK
@@ -2263,8 +2267,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
     if (src_id >= 0) H5I_dec_ref(src_id);
     if (dst_id >= 0) H5I_dec_ref(dst_id);
-    if (tconv_buf && NULL==xfer_parms->tconv_buf) H5TB_release_buf(tconv_id);
-    if (bkg_buf && NULL==xfer_parms->bkg_buf) H5TB_release_buf (bkg_id);
+    if (tconv_buf && NULL==xfer_parms->tconv_buf)
+        H5FL_BLK_FREE(type_conv,tconv_buf);
+    if (bkg_buf && NULL==xfer_parms->bkg_buf)
+        H5FL_BLK_FREE(bkgr_conv,bkg_buf);
     if (free_this_space) H5S_close(free_this_space);
     FUNC_LEAVE(ret_value);
 }
@@ -2453,7 +2459,6 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
     hsize_t		dim[H5O_LAYOUT_NDIMS];
     hssize_t    	npoints, ptsperbuf;
     size_t		size, bufsize=8*1024;
-    hid_t		buf_id = -1;
     haddr_t		addr;
     herr_t		ret_value = FAIL;
     void		*buf = NULL;
@@ -2480,16 +2485,18 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 	    ptsperbuf = (hssize_t)MAX(1,
 				      bufsize/dset->create_parms->fill.size);
 	    bufsize = ptsperbuf * dset->create_parms->fill.size;
-	    if ((buf_id=H5TB_get_buf(bufsize, TRUE, &buf))<0) {
-		HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-			    "unable to get buffer for fill value");
-	    }
+
+        /* Allocate temporary buffer */
+        if ((buf=H5FL_BLK_ALLOC(fill_conv,bufsize,0))==NULL)
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                 "memory allocation failed for fill buffer");
+
 	    H5V_array_fill(buf, dset->create_parms->fill.buf,
 			   dset->create_parms->fill.size, ptsperbuf);
 	    if (dset->create_parms->efl.nused) {
-		H5F_addr_reset(&addr);
+            H5F_addr_reset(&addr);
 	    } else {
-		addr = dset->layout.addr;
+            addr = dset->layout.addr;
 	    }
 	    
 	    while (npoints>0) {
@@ -2546,11 +2553,9 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
     }
     ret_value = SUCCEED;
 
- done:
-    if (buf_id>=0 && H5TB_release_buf(buf_id)<0) {
-	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-		      "unable to release fill value temporary buffer");
-    }
+done:
+    if (buf)
+        H5FL_BLK_FREE(fill_conv,buf);
     FUNC_LEAVE(ret_value);
 }
 

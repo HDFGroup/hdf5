@@ -395,11 +395,15 @@ print_results(int nd, detected_t *d)
 #include <H5private.h>\n\
 #include <H5Iprivate.h>\n\
 #include <H5Eprivate.h>\n\
+#include <H5FLprivate.h>\n\
 #include <H5MMprivate.h>\n\
 #include <H5Tpkg.h>\n\
 \n\
 static intn interface_initialize_g = 0;\n\
 #define INTERFACE_INIT NULL\n\
+/* Declare external the free list for H5T_t's */\n\
+H5FL_EXTERN(H5T_t);\n\
+\n\
 \n");
 
     /* The interface termination function */
@@ -429,7 +433,7 @@ H5TN_init_interface(void)\n\
 
 	/* The part common to fixed and floating types */
 	printf("\
-   if (NULL==(dt = H5MM_calloc (sizeof(H5T_t)))) {\n\
+   if (NULL==(dt = H5FL_ALLOC (H5T_t,1))) {\n\
       HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,\n\
 		     \"memory allocation failed\");\n\
    }\n\
