@@ -58,6 +58,7 @@ static haddr_t H5D_get_offset(const H5D_t *dset);
 static herr_t H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 static herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 static herr_t H5D_close(H5D_t *dataset);
+static herr_t H5D_init_type(H5F_t *file, H5D_t *dset, hid_t type_id, const H5T_t *type);
 static int H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t size);
 static int H5D_crt_ext_file_list_cmp(const void *value1, const void *value2, size_t size);
 static int H5D_crt_data_pipeline_cmp(const void *value1, const void *value2, size_t size);
@@ -1624,6 +1625,75 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_init_type
+ *
+ * Purpose:	Copy a datatype for a dataset's use, performing all the
+ *              necessary adjustments, etc.
+ *
+ * Return:	Success:    SUCCEED
+ *		Failure:    FAIL
+ *
+ * Errors:
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, June 24, 2004
+ *
+ * Modifications:
+ *	
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_init_type(H5F_t *file, H5D_t *dset, hid_t type_id, const H5T_t *type)
+{
+    htri_t relocatable;                 /* Flag whether the type is relocatable */
+    htri_t immutable;                   /* Flag whether the type is immutable */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5D_init_type, FAIL)
+
+    /* Sanity checking */
+    assert(file);
+    assert(dset);
+    assert(type);
+
+    /* Check whether the datatype is relocatable */
+    if((relocatable=H5T_is_relocatable(type))<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't check datatype?")
+
+    /* Check whether the datatype is immutable */
+    if((immutable=H5T_is_immutable(type))<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't check datatype?")
+
+    /* Copy the datatype if it's a custom datatype or if it'll change when it's location is changed */
+    if(!immutable || relocatable) {
+        /* Copy datatype for dataset */
+        if((dset->type = H5T_copy(type, H5T_COPY_ALL))==NULL)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "can't copy datatype")
+
+        /* Mark any datatypes as being on disk now */
+        if(H5T_vlen_mark(dset->type, file, H5T_VLEN_DISK)<0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
+
+        /* Get a datatype ID for the dataset's datatype */
+	if((dset->type_id = H5I_register(H5I_DATATYPE, dset->type))<0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register type")
+    } /* end if */
+    /* Not a custom datatype, just use it directly */
+    else {
+        if(H5I_inc_ref(type_id)<0)
+            HGOTO_ERROR (H5E_DATASET, H5E_CANTINC, FAIL, "Can't increment datatype ID")
+
+        /* Use existing datatype */
+        dset->type_id = type_id;
+        dset->type = (H5T_t *)type; /* (Cast away const OK - QAK) */
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_init_type() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_update_entry_info
  *
  * Purpose:	Create and fill an H5G_entry_t object for insertion into
@@ -1977,12 +2047,8 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to locate insertion point")
 
     /* Copy datatype for dataset */
-    if((new_dset->type = H5T_copy(type, H5T_COPY_ALL))==NULL)
+    if(H5D_init_type(file, new_dset, type_id, type)<0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy datatype")
-
-    /* Mark any VL datatypes as being on disk now */
-    if (H5T_vlen_mark(new_dset->type, file, H5T_VLEN_DISK)<0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location")
 
     /* Copy dataspace for dataset */
     if((new_dset->space = H5S_copy(space, FALSE))==NULL)
@@ -2176,7 +2242,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "compact dataset size is bigger than header message maximum size")
             } /* end case */
             break;
-            
+
         default:
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet")
     } /* end switch */
@@ -2211,7 +2277,7 @@ done:
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace")
         } /* end if */
         if (new_dset->type) {
-            if(H5T_close(new_dset->type)<0)
+            if(H5I_dec_ref(new_dset->type_id)<0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
         } /* end if */
         if (H5F_addr_defined(new_dset->ent.header)) {
@@ -2410,6 +2476,9 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
     /* Get the type and space */
     if (NULL==(dataset->type=H5O_read(&(dataset->ent), H5O_DTYPE_ID, 0, NULL, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to load type info from dataset header")
+    /* Get a datatype ID for the dataset's datatype */
+    if((dataset->type_id = H5I_register(H5I_DATATYPE, dataset->type))<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, NULL, "unable to register type")
 
     if (NULL==(dataset->space=H5S_read(&(dataset->ent),dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to load space info from dataset header")
@@ -2590,7 +2659,7 @@ done:
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace")
         } /* end if */
         if (dataset->type) {
-            if(H5T_close(dataset->type)<0)
+            if(H5I_dec_ref(dataset->type_id)<0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
         } /* end if */
         dataset->ent.file = NULL;
@@ -2677,7 +2746,7 @@ H5D_close(H5D_t *dataset)
      * Release datatype, dataspace and creation property list -- there isn't
      * much we can do if one of these fails, so we just continue.
      */
-    free_failed=(H5T_close(dataset->type)<0 || H5S_close(dataset->space)<0 ||
+    free_failed=(H5I_dec_ref(dataset->type_id)<0 || H5S_close(dataset->space)<0 ||
 			H5I_dec_ref(dataset->dcpl_id) < 0);
 
     /* Remove the dataset from the list of opened objects in the file */
@@ -2744,53 +2813,37 @@ H5D_extend (H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
     assert (dataset);
     assert (size);
 
-    /*
-     * NOTE: Restrictions on extensions were checked when the dataset was
-     *	     created.  All extensions are allowed here since none should be
-     *	     able to muck things up.
+    /* Check if the filters in the DCPL will need to encode, and if so, can they?
+     * Filters need encoding if fill value is defined and a fill policy is set that requires
+     * writing on an extend.
      */
-
     if(! dataset->checked_filters)
     {
-        /* Check if the filters in the DCPL will need to encode, and if so, can they?
-         * Filters need encoding if fill value is defined and a fill policy is set that requires
-         * writing on an extend.
-         */
         if(H5P_is_fill_value_defined(&(dataset->fill), &fill_status) < 0)
-        {
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Couldn't retrieve fill value from dataset.");
-        }
 
         if(fill_status == H5D_FILL_VALUE_DEFAULT || fill_status == H5D_FILL_VALUE_USER_DEFINED)
         {
             if( H5Pget_fill_time(dataset->dcpl_id, &fill_time) < 0)
-            {
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Couldn't retrieve fill time from dataset.");
-            }
 
             if(fill_time == H5D_FILL_TIME_ALLOC ||
                     (fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED) )
             {
                 /* Filters must have encoding enabled. Ensure that all filters can be applied */
-                hid_t type_id;
-
-                type_id = H5I_register(H5I_DATATYPE, dataset->type);
-                if(type_id < 0)
-                    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data type")
-
-                if(H5Z_can_apply(dataset->dcpl_id, type_id) <0)
-                {
-                    H5I_remove(type_id);
+                if(H5Z_can_apply(dataset->dcpl_id, dataset->type_id) <0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters")
-                }
 
-                if(H5I_remove(type_id) == NULL)
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL, "unable to release data type id")
-
-                dataset->checked_filters = TRUE;
+                dataset->checked_filters = TRUE; 
             }
         }
     }
+
+    /*
+     * NOTE: Restrictions on extensions were checked when the dataset was
+     *	     created.  All extensions are allowed here since none should be
+     *	     able to muck things up.
+     */
 
     /* Increase the size of the data space */
     space=dataset->space;

@@ -12,14 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*****************************************************************************
- *                                                                           *
- * MODIFICATIONS                                                             *
- *      Robb Matzke, 30 Aug 1997                                             *
- *      Added `ERRORS' fields to function prologues.                         *
- *                                                                           *  
- ****************************************************************************/
-
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Pablo information */
@@ -2222,7 +2214,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
         if(fc_degree!=H5F_CLOSE_DEFAULT && fc_degree != shared->fc_degree)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match")
     }
-        
+
     /* Success */
     ret_value = file;
 
@@ -2230,6 +2222,7 @@ done:
     if (!ret_value && file)
         if(H5F_dest(file, dxpl_id)<0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
+
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -4692,16 +4685,16 @@ H5Fget_filesize(hid_t file_id)
     H5F_t      *file=NULL;      /* File object for file ID */
     haddr_t    ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Fget_filesize, FAIL)
+    FUNC_ENTER_API(H5Fget_filesize, HADDR_UNDEF)
     H5TRACE1("a","i",file_id);
 
     /* Check args */
     if(NULL==(file=H5I_object_verify(file_id, H5I_FILE)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "not a file ID")
 
     /* Go get the actual file size */
-    if((ret_value = H5FDget_eof(file->shared->lf))<0)
-         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
+    if((ret_value = H5FDget_eof(file->shared->lf))==HADDR_UNDEF)
+         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, HADDR_UNDEF, "unable to get file size")
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -137,7 +137,7 @@ test_atomic_dtype(hid_t file)
     free(tmp);
     
     /* Convert to the integer type */
-    if(H5Tconvert(native_type, H5T_NATIVE_INT, (hsize_t)(DIM0*DIM1), icheck2, NULL, H5P_DEFAULT)<0)
+    if(H5Tconvert(native_type, H5T_NATIVE_INT, (DIM0*DIM1), icheck2, NULL, H5P_DEFAULT)<0)
         TEST_ERROR;
     
     /* Check that the values read are the same as the values written */
@@ -152,8 +152,9 @@ test_atomic_dtype(hid_t file)
 	}
     }
 
-    H5Dclose(dataset);
-    H5Tclose(dtype);
+    if(H5Dclose(dataset)<0) TEST_ERROR;
+    if(H5Tclose(native_type)<0) TEST_ERROR;
+    if(H5Tclose(dtype)<0) TEST_ERROR;
 
     /*------------------ Test different data types ----------------*/
 
@@ -175,6 +176,7 @@ test_atomic_dtype(hid_t file)
         TEST_ERROR;
         
     if(H5Dclose(dataset)<0) TEST_ERROR;
+    if(H5Tclose(native_type)<0) TEST_ERROR;
     if(H5Tclose(dtype)<0) TEST_ERROR;
 
 
@@ -196,6 +198,7 @@ test_atomic_dtype(hid_t file)
         TEST_ERROR;
         
     if(H5Dclose(dataset)<0) TEST_ERROR;
+    if(H5Tclose(native_type)<0) TEST_ERROR;
     if(H5Tclose(dtype)<0) TEST_ERROR;
     
     
@@ -217,6 +220,7 @@ test_atomic_dtype(hid_t file)
         TEST_ERROR;
         
     if(H5Dclose(dataset)<0) TEST_ERROR;
+    if(H5Tclose(native_type)<0) TEST_ERROR;
     if(H5Tclose(dtype)<0) TEST_ERROR;
        
        
@@ -238,6 +242,7 @@ test_atomic_dtype(hid_t file)
         TEST_ERROR;
         
     if(H5Dclose(dataset)<0) TEST_ERROR;
+    if(H5Tclose(native_type)<0) TEST_ERROR;
     if(H5Tclose(dtype)<0) TEST_ERROR;
     
     
@@ -456,7 +461,7 @@ test_compound_dtype2(hid_t file)
     memcpy(check, tmp, DIM0*DIM1*H5Tget_size(native_type));
     free(tmp);
 
-    if (H5Tconvert(native_type, tid_m, (hsize_t)(DIM0*DIM1), check, bkg, H5P_DEFAULT))
+    if (H5Tconvert(native_type, tid_m, (DIM0*DIM1), check, bkg, H5P_DEFAULT))
         TEST_ERROR;
 
     free(bkg);
@@ -638,7 +643,7 @@ test_compound_dtype(hid_t file)
     memcpy(check, tmp, DIM0*DIM1*H5Tget_size(native_type));
     free(tmp);
     
-    if (H5Tconvert(native_type, tid2, (hsize_t)(DIM0*DIM1), check, bkg, H5P_DEFAULT)<0)
+    if (H5Tconvert(native_type, tid2, (DIM0*DIM1), check, bkg, H5P_DEFAULT)<0)
         TEST_ERROR;
                 
     free(bkg);
@@ -832,7 +837,7 @@ test_compound_dtype3(hid_t file)
     memcpy(check, tmp, DIM0*DIM1*H5Tget_size(native_type));
     free(tmp);
 
-    if (H5Tconvert(native_type, tid_m, (hsize_t)(DIM0*DIM1), check, bkg, H5P_DEFAULT))
+    if (H5Tconvert(native_type, tid_m, (DIM0*DIM1), check, bkg, H5P_DEFAULT))
         TEST_ERROR;
 
     free(bkg);
@@ -1022,7 +1027,7 @@ test_compound_opaque(hid_t file)
     HDmemcpy(check, tmp, DIM0*DIM1*H5Tget_size(native_type));
     HDfree(tmp);
 
-    if (H5Tconvert(native_type, tid_m, (hsize_t)(DIM0*DIM1), check, bkg, H5P_DEFAULT))
+    if (H5Tconvert(native_type, tid_m, (DIM0*DIM1), check, bkg, H5P_DEFAULT))
         TEST_ERROR;
 
     HDfree(bkg);
@@ -1166,7 +1171,7 @@ test_enum_dtype(hid_t file)
     memcpy(scheck2, tmp, DIM0*DIM1*H5Tget_size(native_type));
     free(tmp);
    
-    if (H5Tconvert(native_type, tid_m, (hsize_t)(DIM0*DIM1), scheck2, NULL, H5P_DEFAULT)<0)
+    if (H5Tconvert(native_type, tid_m, (DIM0*DIM1), scheck2, NULL, H5P_DEFAULT)<0)
         TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
@@ -1305,7 +1310,7 @@ test_array_dtype(hid_t file)
     memcpy(check, tmp, DIM0*DIM1*H5Tget_size(native_type));
     free(tmp);
     
-    if (H5Tconvert(native_type, tid_m, (hsize_t)(DIM0*DIM1), check, NULL, H5P_DEFAULT)<0)
+    if (H5Tconvert(native_type, tid_m, (DIM0*DIM1), check, NULL, H5P_DEFAULT)<0)
         TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
@@ -1427,7 +1432,7 @@ test_array_dtype2(hid_t file)
     memcpy(icheck3, tmp, DIM0*DIM1*H5Tget_size(native_type));
     free(tmp);
 
-    if (H5Tconvert(native_type, tid_m, (hsize_t)(DIM0*DIM1), icheck3, NULL, H5P_DEFAULT)<0)
+    if (H5Tconvert(native_type, tid_m, (DIM0*DIM1), icheck3, NULL, H5P_DEFAULT)<0)
         TEST_ERROR;
 
     /* Check that the values read are the same as the values written */

@@ -2891,12 +2891,14 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
         case H5T_COPY_REOPEN:
             /*
              * Return a transient type (locked or unlocked) or an opened named
-             * type.
+             * type.  Immutable transient types are degraded to read-only.
              */
             if (H5F_addr_defined(new_dt->ent.header)) {
                 if (H5O_open (&(new_dt->ent))<0)
                     HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to reopen named data type");
                 new_dt->state = H5T_STATE_OPEN;
+            } else if (H5T_STATE_IMMUTABLE==new_dt->state) {
+                new_dt->state = H5T_STATE_RDONLY;
             }
             break;
     } /* end switch */
@@ -4249,7 +4251,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5T_is_immutable(H5T_t *dt)
+H5T_is_immutable(const H5T_t *dt)
 {
     htri_t ret_value = FALSE;
 
@@ -4282,7 +4284,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5T_is_named(H5T_t *dt)
+H5T_is_named(const H5T_t *dt)
 {
     htri_t ret_value = FALSE;
 
@@ -4387,6 +4389,45 @@ H5T_is_sensible(const H5T_t *dt)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_is_relocatable
+ *
+ * Purpose:     Check if a datatype will change between disk and memory.
+ *
+ * Notes:       Currently, only variable-length and object references change
+ *              between disk & memory (see cases where things are changed in
+ *              the H5T_set_loc() code above).
+ *
+ * Return:
+ *  One of two values on success:
+ *      TRUE - If the location of any vlen types changed
+ *      FALSE - If the location of any vlen types is the same
+ *  <0 is returned on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, June 24, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5T_is_relocatable(const H5T_t *dt)
+{
+    htri_t ret_value = FALSE;
+
+    FUNC_ENTER_NOAPI(H5T_is_relocatable, FAIL);
+
+    assert(dt);
+
+    if(H5T_detect_class(dt, H5T_VLEN))
+        ret_value = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5T_is_relocatable() */
 
 
 /*-------------------------------------------------------------------------
