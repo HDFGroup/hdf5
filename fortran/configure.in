@@ -606,13 +606,28 @@ dnl First the stamp1 file for H5config.h.in
 mkdir ./config >/dev/null 2>&1
 touch ./config/stamp1
 
+PARALLEL_MAKE=
+
+if test -n "$TESTPARALLEL"; then
+   PARALLEL_MAKE=$TESTPARALLEL/Makefile
+fi
+
 dnl Then the config.status file (but not makefiles)
 saved_no_create=$no_create
 no_create=yes
-AC_OUTPUT(config/depend1 config/depend2 config/depend3 config/depend4	\
-	  config/dependN config/commence config/conclude Makefile	\
-	  src/H5fortran_types.f90 src/Makefile test/Makefile		\
-	  testpar/Makefile examples/Makefile)
+AC_OUTPUT(config/depend1    
+          config/depend2
+          config/depend3
+          config/depend4
+	  config/dependN
+          config/commence
+          config/conclude
+          Makefile
+	  src/H5fortran_types.f90
+          src/Makefile
+          test/Makefile
+          $PARALLEL_MAKE
+          examples/Makefile)
 no_create=$saved_no_create
 
 dnl Then the stamp2 file for H5config.h
