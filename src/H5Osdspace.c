@@ -436,35 +436,37 @@ H5O_sdspace_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg,
 	    "Rank:",
 	    (unsigned long) (sdim->rank));
     
-    HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
-    for (u = 0; u < sdim->rank; u++)
-        HDfprintf (stream, "%s%Hu", u?", ":"", sdim->size[u]);
-    HDfprintf (stream, "}\n");
-    
-    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");
-    if (sdim->max) {
-        HDfprintf (stream, "{");
-        for (u = 0; u < sdim->rank; u++) {
-            if (H5S_UNLIMITED==sdim->max[u]) {
-                HDfprintf (stream, "%sINF", u?", ":"");
-            } else {
-                HDfprintf (stream, "%s%Hu", u?", ":"", sdim->max[u]);
-            }
-        }
+    if(sdim->rank>0) {
+        HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
+        for (u = 0; u < sdim->rank; u++)
+            HDfprintf (stream, "%s%Hu", u?", ":"", sdim->size[u]);
         HDfprintf (stream, "}\n");
-    } else {
-        HDfprintf (stream, "CONSTANT\n");
-    }
+        
+        HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");
+        if (sdim->max) {
+            HDfprintf (stream, "{");
+            for (u = 0; u < sdim->rank; u++) {
+                if (H5S_UNLIMITED==sdim->max[u]) {
+                    HDfprintf (stream, "%sINF", u?", ":"");
+                } else {
+                    HDfprintf (stream, "%s%Hu", u?", ":"", sdim->max[u]);
+                }
+            }
+            HDfprintf (stream, "}\n");
+        } else {
+            HDfprintf (stream, "CONSTANT\n");
+        }
 
 #ifdef LATER
-    if (sdim->perm) {
-        HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Perm:");
-        for (u = 0; u < sdim->rank; u++) {
-            HDfprintf (stream, "%s%lu", u?", ":"",
-                 (unsigned long) (sdim->perm[u]));
+        if (sdim->perm) {
+            HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Perm:");
+            for (u = 0; u < sdim->rank; u++) {
+                HDfprintf (stream, "%s%lu", u?", ":"",
+                     (unsigned long) (sdim->perm[u]));
+            }
         }
-    }
 #endif
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

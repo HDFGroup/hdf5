@@ -918,6 +918,9 @@ done:
 	This function returns the size of the raw simple datatype message on
     success.  (Not counting the message type or size fields, only the data
     portion of the message).  It doesn't take into account alignment.
+ NOTES
+        All datatype messages have a common 8 byte header, plus a variable-
+    sized "properties" field.
 --------------------------------------------------------------------------*/
 static size_t
 H5O_dtype_size(H5F_t *f, const void *mesg)
@@ -930,6 +933,7 @@ H5O_dtype_size(H5F_t *f, const void *mesg)
 
     assert(mesg);
 
+    /* Add in the property field length for each datatype class */
     switch (dt->type) {
         case H5T_INTEGER:
             ret_value += 4;
