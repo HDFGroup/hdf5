@@ -526,13 +526,16 @@ int conv_int_str(uint16 num, char* str_num) {
 
   /* the maximum reference number is 65536. */
 
+   
   if(str_num == NULL) {
     printf(" memory for str_num should be allocated.\n");
     return FAIL;
   }
 
-  sprintf(str_num,"%d",num);
+  /*  Adding this line will cause problems, investigating this later.
+h4toh5_ZeroMemory(str_num,strlen(str_num)+1);*/
 
+  sprintf(str_num,"%d",num);
   return SUCCEED;
 }
 

@@ -85,7 +85,10 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
   char*   h5csds_name;
 
   herr_t  ret;
+  /* zeroing out the memory for sdsname and sdslabel.*/
 
+  h4toh5_ZeroMemory(sdsname,MAX_NC_NAME);
+  h4toh5_ZeroMemory(sdslabel,MAX_NC_NAME);
   /* check whether the sds is empty. */
 
   if(SDcheckempty(sds_id,&sds_empty)== FAIL) {
@@ -417,7 +420,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup){
     return FAIL;
   }
 
-  if(sdsname != NULL) {
+  if(sdsname[0] != '\0') {
     if(h4_transpredattrs(h5dset,HDF4_OBJECT_NAME,sdsname)==FAIL){
       free(sds_start);
       free(sds_edge);

@@ -934,7 +934,7 @@ int h4toh5vgrings(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
 
        /* do nothing for those predefined attribute.*/
 
-      if(vgroup_class != NULL) {
+      if(vgroup_class[0] != '\0') {
 
 	 if(strcmp(vgroup_class,_HDF_ATTRIBUTE)==0) {
 	   ref_num = Vgetid(file_id,ref_num); 
@@ -979,7 +979,7 @@ int h4toh5vgrings(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
 	 }
        }
 
-       if(vgroup_name != NULL) {
+       if(vgroup_name[0] != '\0') {
 	 if(strcmp(vgroup_name,GR_NAME)==0) {
 	   ref_num = Vgetid(file_id,ref_num);
 	   Vdetach(vgroup_id);

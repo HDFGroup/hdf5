@@ -84,7 +84,13 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
   hsize_t  h5dims[2];
   herr_t   ret;
   hid_t    create_plist;
-  
+
+  /* zeroing out memory.*/
+
+  h4toh5_ZeroMemory(image_name,MAX_GR_NAME);
+  h4toh5_ZeroMemory(image_class,MAX_GR_NAME);
+  h4toh5_ZeroMemory(grlabel,MAX_GR_NAME);
+
   /* Obtain information of the image.*/  
 
   if(GRgetchunkinfo(ri_id,&c_def_out,&c_flags)==FAIL){

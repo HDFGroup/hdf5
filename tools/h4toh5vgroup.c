@@ -65,7 +65,7 @@ int Vgroup_h4_to_h5(int32 file_id,int32 vgroup_id,int32 sd_id,hid_t h5_group,hid
    int32   num_gobjects;
    int     i;
 
-   char    refstr[5];
+   char    refstr[MAXREF_LENGTH];
    char    vgroup_class[VGNAMELENMAX];
    char    vgroup_name[VGNAMELENMAX];
 
@@ -73,6 +73,10 @@ int Vgroup_h4_to_h5(int32 file_id,int32 vgroup_id,int32 sd_id,hid_t h5_group,hid
 
    int     check_vgname;
    hid_t   h5_pgroup;
+
+   /*zeroing out memory for vgroup_class and vgroup_name */
+   h4toh5_ZeroMemory(vgroup_class,VGNAMELENMAX);
+   h4toh5_ZeroMemory(vgroup_name,VGNAMELENMAX);
 
    vgroup_tag = VQuerytag(vgroup_id);
    if(vgroup_tag == FAIL) {
@@ -392,7 +396,7 @@ int convert_vdata(int32 file_id,int32 obj_ref,char * h5pgroup_name,
   int   check_vdata;
   int   check_vdname;
   int32 istat;
-  char  refstr[5];
+  char  refstr[MAXREF_LENGTH];
   char  cvdata_name[VGNAMELENMAX];
   char* cor_cvdataname;
   char* h5cvdata_name;
@@ -544,7 +548,7 @@ int convert_sds(int32 file_id,int32 sd_id,int32 obj_ref,char * h5pgroup_name,
   char* cor_sdsname;
   int   check_sds;
   int   check_sdsname;
-  char  refstr[5];
+  char  refstr[MAXREF_LENGTH];
   char* h5csds_name;
   char* h5lsds_name;
 
@@ -677,7 +681,7 @@ int convert_image(int32 file_id,int32 obj_ref,char * h5pgroup_name,
   int32   istat;
   char*   h5cimage_name;
   char*   h5limage_name;
-  char    refstr[5];
+  char    refstr[MAXREF_LENGTH];
   char    image_name[MAX_GR_NAME];
   char*   cor_imagename;
 
