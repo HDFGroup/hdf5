@@ -1149,7 +1149,7 @@ H5Aget_num_attrs(hid_t loc_id)
  *	attributes are processed.
  *	
 --------------------------------------------------------------------------*/
-int
+herr_t
 H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
 {
     H5G_entry_t		*ent = NULL;	/*symtab ent of object to attribute */

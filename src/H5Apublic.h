@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-typedef int (*H5A_operator_t)(hid_t location_id/*in*/,
+typedef herr_t (*H5A_operator_t)(hid_t location_id/*in*/,
     const char *attr_name/*in*/, void *operator_data/*in,out*/);
 
 /* Public function prototypes */
@@ -38,7 +38,7 @@ __DLL__ hid_t H5Aget_space(hid_t attr_id);
 __DLL__ hid_t H5Aget_type(hid_t attr_id);
 __DLL__ ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
 __DLL__ int H5Aget_num_attrs(hid_t loc_id);
-__DLL__ int H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op,
+__DLL__ herr_t H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op,
 		       void *op_data);
 __DLL__ herr_t H5Adelete(hid_t loc_id, const char *name);
 
