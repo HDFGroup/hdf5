@@ -1491,10 +1491,6 @@ UNUSED
     if (H5T_path_noop(tpath)) {
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
-
-        /* Get the number of elements selected in this chunk */
-        chunk_nelmts=H5S_get_select_npoints(fchunk_info->space);
-        assert(chunk_nelmts<=nelmts);
 #endif
   	/* Sanity check dataset, then read it */
         assert(dataset->layout.addr!=HADDR_UNDEF || dataset->efl.nused>0 || 
@@ -1518,6 +1514,12 @@ UNUSED
             /* Get the actual chunk information from the tree nodes */
             fchunk_info=fchunk_node->data;
             mchunk_info=mchunk_node->data;
+
+#ifdef H5S_DEBUG
+            /* Get the number of elements selected in this chunk */
+            chunk_nelmts=H5S_get_select_npoints(fchunk_info->space);
+            assert(chunk_nelmts<=nelmts);
+#endif /* H5S_DEBUG */
 
             /* Pass in chunk's coordinates in a union. */
             store.chunk_coords = fchunk_info->coords;
@@ -1544,7 +1546,7 @@ UNUSED
         
 #ifdef H5S_DEBUG
         H5_timer_end(&(sconv->stats[1].read_timer), &timer);
-        sconv->stats[1].read_nbytes += chunk_nelmts * H5T_get_size(dataset->type);
+        sconv->stats[1].read_nbytes += nelmts * H5T_get_size(dataset->type);
         sconv->stats[1].read_ncalls++;
 #endif
 
@@ -1846,10 +1848,6 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (H5T_path_noop(tpath)) {
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
-
-        /* Get the number of elements selected in this chunk */
-        chunk_nelmts=H5S_get_select_npoints(fchunk_info->space);
-        assert(chunk_nelmts<=nelmts);
 #endif
         /* Get first node in chunk trees */
         fchunk_node=H5TB_first(fm.fsel->root);
@@ -1869,6 +1867,12 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             /* Get the actual chunk information from the tree nodes */
             fchunk_info=fchunk_node->data;
             mchunk_info=mchunk_node->data;
+
+#ifdef H5S_DEBUG
+            /* Get the number of elements selected in this chunk */
+            chunk_nelmts=H5S_get_select_npoints(fchunk_info->space);
+            assert(chunk_nelmts<=nelmts);
+#endif /* H5S_DEBUG */
 
             /* Pass in chunk's coordinates in a union. */
             store.chunk_coords = fchunk_info->coords;
@@ -1895,7 +1899,7 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         
 #ifdef H5S_DEBUG
 	H5_timer_end(&(sconv->stats[0].write_timer), &timer);
-	sconv->stats[0].write_nbytes += chunk_nelmts * H5T_get_size(mem_type);
+	sconv->stats[0].write_nbytes += nelmts * H5T_get_size(mem_type);
 	sconv->stats[0].write_ncalls++;
 #endif
 
