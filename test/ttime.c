@@ -24,7 +24,7 @@
 
 #include <hdf5.h>
 
-#define FILE   "ttime.h5"
+#define DATAFILE   "ttime.h5"
 
 /****************************************************************
 **
@@ -41,7 +41,7 @@ test_time(void)
     MESSAGE(5, ("Testing Time Datatypes\n"));
 
     /* Create a new file using default properties. */
-    file_id = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file_id = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file_id, FAIL, "H5Fcreate");
  
     tid = H5Tcopy (H5T_UNIX_D32LE);
@@ -76,7 +76,7 @@ test_time(void)
     status = H5Fclose(file_id);
     CHECK(status, FAIL, "H5Fclose");
     
-    file_id = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    file_id = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(file_id, FAIL, "H5Fopen");
    
     tid = H5Topen(file_id, "Committed D32LE type");
@@ -146,6 +146,6 @@ test_time(void)
 void
 cleanup_time(void)
 {
-    remove(FILE);
+    remove(DATAFILE);
 }
 

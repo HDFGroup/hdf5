@@ -24,7 +24,7 @@
 
 #include <hdf5.h>
 
-#define FILE   "titerate.h5"
+#define DATAFILE   "titerate.h5"
 
 /* Number of datasets for group iteration test */
 #define NDATASETS 50
@@ -118,7 +118,7 @@ static void test_iter_group(void)
     MESSAGE(5, ("Testing Group Iteration Functionality\n"));
 
     /* Create the test file with the datasets */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fcreate");
 
     datatype = H5Tcopy(H5T_NATIVE_INT);
@@ -154,7 +154,7 @@ static void test_iter_group(void)
     qsort(dnames,NDATASETS,sizeof(char *),iter_strcmp);
 
     /* Iterate through the datasets in the root group in various ways */
-    file=H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file=H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
 
     /* Test all objects in group, when callback always returns 0 */
@@ -262,7 +262,7 @@ static void test_iter_attr(void)
     MESSAGE(5, ("Testing Attribute Iteration Functionality\n"));
 
     /* Create the test file with the datasets */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fcreate");
 
     datatype = H5Tcopy(H5T_NATIVE_INT);
@@ -301,7 +301,7 @@ static void test_iter_attr(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Iterate through the attributes on the dataset in various ways */
-    file=H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file=H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
 
     dataset=H5Dopen(file, "Dataset");
@@ -438,7 +438,7 @@ static void test_iter_group_large(void)
     MESSAGE(5, ("Testing Large Group Iteration Functionality\n"));
 
     /* Create file */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fcreate");
 
     /* Create dataspace for datasets */
@@ -555,6 +555,6 @@ test_iterate(void)
 void
 cleanup_iterate(void)
 {
-    remove(FILE);
+    remove(DATAFILE);
 }
 

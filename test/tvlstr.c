@@ -28,7 +28,7 @@
 
 #include <hdf5.h>
 
-#define FILE   "tvlstr.h5"
+#define DATAFILE   "tvlstr.h5"
 
 /* 1-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
@@ -131,7 +131,7 @@ test_vlstrings_basic(void)
     MESSAGE(5, ("Testing Basic VL String Functionality\n"));
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for datasets */
@@ -254,6 +254,6 @@ test_vlstrings(void)
 void
 cleanup_vlstrings(void)
 {
-    remove(FILE);
+    remove(DATAFILE);
 }
 

@@ -28,7 +28,7 @@
 #include <H5Pprivate.h>
 
 #define TESTFILE   "th5s.h5"
-#define FILE   "th5s1.h5"
+#define DATAFILE   "th5s1.h5"
 
 /* 3-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
@@ -213,7 +213,7 @@ test_h5s_scalar_write(void)
     MESSAGE(5, ("Testing Scalar Dataspace Manipulation during Writing\n"));
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create scalar dataspace */
@@ -276,7 +276,7 @@ test_h5s_scalar_read(void)
     MESSAGE(5, ("Testing Scalar Dataspace Manipulation during Reading\n"));
 
     /* Create file */
-    fid1 = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Create a dataset */
@@ -336,7 +336,7 @@ test_h5s_compound_scalar_write(void)
     MESSAGE(5, ("Testing Scalar Dataspace Manipulation for Writing Compound Datatypes\n"));
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create the compound datatype.  */
@@ -417,7 +417,7 @@ test_h5s_compound_scalar_read(void)
     MESSAGE(5, ("Testing Scalar Dataspace Manipulation for Reading Compound Datatypes\n"));
 
     /* Create file */
-    fid1 = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Create a dataset */
@@ -500,6 +500,6 @@ test_h5s(void)
 void
 cleanup_h5s(void)
 {
-    remove(FILE);
+    remove(DATAFILE);
 }
 
