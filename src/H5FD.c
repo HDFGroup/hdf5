@@ -1466,12 +1466,12 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
                         file->cur_meta_block_size+=file->def_meta_block_size;
                     } /* end if */
                     else {
-                        /*
-                         * Instead of just dropping the remainder of the block on the
-                         * floor and leaving the space in the file unused, we should
-                         * return this small piece of unused space to the free list
-                         * management. - QAK
-                         */
+                        /* Return the unused portion of the metadata block to a free list */
+                        if(file->eoma!=0)
+                            if(H5FD_free(file,H5FD_MEM_DEFAULT,file->eoma,file->cur_meta_block_size)<0)
+                                HRETURN_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "can't free metadata block");
+
+                        /* Point the metadata block at the newly allocated block */
                         file->eoma=new_meta;
                         file->cur_meta_block_size=file->def_meta_block_size;
                     } /* end else */
@@ -1535,12 +1535,12 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
                         file->cur_sdata_block_size+=file->def_sdata_block_size;
                     } /* end if */
                     else {
-                        /*
-                         * Instead of just dropping the remainder of the block on the
-                         * floor and leaving the space in the file unused, we should
-                         * return this small piece of unused space to the free list
-                         * management. - QAK
-                         */
+                        /* Return the unused portion of the "small data" block to a free list */
+                        if(file->eosda!=0)
+                            if(H5FD_free(file,H5FD_MEM_DRAW,file->eosda,file->cur_sdata_block_size)<0)
+                                HRETURN_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "can't free 'small data' block");
+
+                        /* Point the "small data" block at the newly allocated block */
                         file->eosda=new_data;
                         file->cur_sdata_block_size=file->def_sdata_block_size;
                     } /* end else */
@@ -2591,14 +2591,14 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
                     /* Check if we should shrink the accumulator buffer */
                     if(size<(file->accum_buf_size/H5FD_ACCUM_THROTTLE) &&
                             file->accum_buf_size>H5FD_ACCUM_THRESHOLD) {
-                        size_t new_size=(file->accum_buf_size/H5FD_ACCUM_THROTTLE); /* New size of accumulator buffer */
+                        size_t tmp_size=(file->accum_buf_size/H5FD_ACCUM_THROTTLE); /* New size of accumulator buffer */
 
                         /* Shrink the accumulator buffer */
-                        if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,new_size))==NULL)
+                        if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,tmp_size))==NULL)
                             HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
 
                         /* Note the new buffer size */
-                        file->accum_buf_size=new_size;
+                        file->accum_buf_size=tmp_size;
                     } /* end if */
                 } /* end else */
 
