@@ -685,17 +685,6 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                 } /* end if */
             } /* end if */
 
-#ifdef H5_HAVE_NOFILL
-            /* Disable writing fill values if asked */
-            if(parms->h5_no_fill) {
-                hrc = H5Pset_fill_time(h5dcpl, H5D_FILL_TIME_NEVER);
-                if (hrc < 0) {
-                    fprintf(stderr, "HDF5 Property List Set failed\n");
-                    GOTOERROR(FAIL);
-                } /* end if */
-            } /* end if */
-#endif
-
             sprintf(dname, "Dataset_%ld", ndset);
             h5ds_id = H5Dcreate(fd->h5fd, dname, ELMT_H5_TYPE,
                                 h5dset_space_id, h5dcpl);

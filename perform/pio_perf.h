@@ -45,7 +45,6 @@ typedef struct parameters_ {
     hsize_t 	h5_align;       /* HDF5 object alignment                */
     hsize_t 	h5_thresh;      /* HDF5 object alignment threshold      */
     int 	h5_use_chunks;  /* Make HDF5 dataset chunked            */
-    int    	h5_no_fill;     /* Disable HDF5 writing fill values     */
     int    	h5_write_only;  /* Perform the write tests only         */
     unsigned    h5_use_mpi_posix;   /* Use MPI-posix VFD for HDF5 I/O (instead of MPI-I/O VFD) */
     int 	verify;    	/* Verify data correctness              */

@@ -217,12 +217,6 @@ static struct long_options l_opts[] = {
     { "mpi-", no_arg, 'm' },
     { "mpi", no_arg, 'm' },
     { "mp", no_arg, 'm' },
-    { "no-fill", no_arg, 'n' },
-    { "no-fil", no_arg, 'n' },
-    { "no-fi", no_arg, 'n' },
-    { "no-f", no_arg, 'n' },
-    { "no-", no_arg, 'n' },
-    { "no", no_arg, 'n' },
     { "num-bytes", require_arg, 'e' },
     { "num-byte", require_arg, 'e' },
     { "num-byt", require_arg, 'e' },
@@ -291,7 +285,6 @@ struct options {
     off_t h5_alignment;         /* alignment in HDF5 file               */
     off_t h5_threshold;         /* threshold for alignment in HDF5 file */
     int h5_use_chunks;     	/* Make HDF5 dataset chunked            */
-    int h5_no_fill;        	/* Disable HDF5 writing fill values     */
     int h5_write_only;        	/* Perform the write tests only         */
     unsigned h5_use_mpi_posix;  /* Use MPI-posix VFD for HDF5 I/O (instead of MPI-I/O VFD) */
     int verify;        		/* Verify data correctness              */
@@ -433,7 +426,6 @@ run_test_loop(struct options *opts)
     parms.h5_align = opts->h5_alignment;
     parms.h5_thresh = opts->h5_threshold;
     parms.h5_use_chunks = opts->h5_use_chunks;
-    parms.h5_no_fill = opts->h5_no_fill;
     parms.h5_write_only = opts->h5_write_only;
     parms.h5_use_mpi_posix = opts->h5_use_mpi_posix;
     parms.verify = opts->verify;
@@ -1117,7 +1109,6 @@ parse_command_line(int argc, char *argv[])
     cl_opts->h5_alignment = 1;      /* No alignment for HDF5 objects by default */
     cl_opts->h5_threshold = 1;      /* No threshold for aligning HDF5 objects by default */
     cl_opts->h5_use_chunks = FALSE; /* Don't chunk the HDF5 dataset by default */
-    cl_opts->h5_no_fill = TRUE;    /* Write fill values by default */
     cl_opts->h5_write_only = FALSE; /* Do both read and write by default */
     cl_opts->h5_use_mpi_posix = FALSE; /* Don't use MPI-posix VFD for HDF5 I/O by default */
     cl_opts->verify = FALSE;        /* No Verify data correctness by default */
@@ -1252,15 +1243,6 @@ parse_command_line(int argc, char *argv[])
         case 'm':
             /* Turn on MPI-posix VFL driver for HDF5 I/O */
             cl_opts->h5_use_mpi_posix = TRUE;
-            break;
-        case 'n':       /* Turn off writing fill values */
-#ifdef H5_HAVE_NOFILL
-            cl_opts->h5_no_fill = TRUE;
-#else
-	    fprintf(stderr, "pio_perf: --no-fill not supported\n");
-            usage(progname);
-	    exit(EXIT_FAILURE);
-#endif
             break;
         case 'o':
             cl_opts->output_file = opt_arg;
@@ -1408,9 +1390,6 @@ usage(const char *prog)
         printf("                                 [default: Contiguous block I/O]\n");
         printf("     -m, --mpi-posix             Use MPI-posix driver for HDF5 I/O\n");
         printf("                                 [default: use MPI-I/O driver]\n");
-        printf("     -n, --no-fill               Don't write fill values to HDF5 dataset\n");
-        printf("                                 (Supported in HDF5 library v1.5 only)\n");
-        printf("                                 [default: off (i.e. write fill values)]\n");
         printf("     -o F, --output=F            Output raw data into file F [default: none]\n");
         printf("     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
         printf("     -P N, --max-num-processes=N Maximum number of processes to use\n");
