@@ -25,6 +25,12 @@
         printf("%s %s\n", (obj), (begin));
 
 #define end_obj(obj,end)                                        \
-    printf("%s %s\n", (end), (obj));
+    if(HDstrlen(end))                                           \
+        printf("%s", end);                                      \
+    if(HDstrlen(end) && HDstrlen(obj))                          \
+        printf(" ");                                            \
+    if(HDstrlen(obj))                                           \
+        printf("%s", obj);                                      \
+    printf("\n");
 
 #endif  /* !H5DUMP_H__ */

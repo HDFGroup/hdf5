@@ -100,6 +100,8 @@ TOOLTEST tattr-1.ddl tattr.h5
 TOOLTEST tattr-2.ddl -a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5
 # test for header and error messages
 TOOLTEST tattr-3.ddl --header -a /attr2 --attribute=/attr tattr.h5
+# test for displaying shared datatype in attribute
+TOOLTEST tnamed_dtype_attr.ddl -A tnamed_dtype_attr.h5
 
 # test for displaying soft links
 TOOLTEST tslink-1.ddl tslink.h5
@@ -118,7 +120,7 @@ TOOLTEST tcomp-1.ddl tcompound.h5
 # test for named data types
 TOOLTEST tcomp-2.ddl -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5
 # test for unamed type 
-TOOLTEST tcomp-3.ddl -t /#5992:0 -g /group2 tcompound.h5
+TOOLTEST tcomp-3.ddl -t /#6632:0 -g /group2 tcompound.h5
 # test complicated compound datatype
 TOOLTEST tcomp-4.ddl tcompound_complex.h5
 

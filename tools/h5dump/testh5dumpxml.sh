@@ -129,6 +129,7 @@ TOOLTEST tvldtypes3.h5.xml --xml tvldtypes3.h5
 TOOLTEST tvlstr.h5.xml --xml tvlstr.h5
 TOOLTEST tsaf.h5.xml --xml tsaf.h5
 TOOLTEST tempty.h5.xml --xml tempty.h5
+TOOLTEST tnamed_dtype_attr.h5.xml --xml tnamed_dtype_attr.h5
 
 # other options for xml
 

@@ -101,7 +101,7 @@ static h5dump_t         dataformat = {
     0,				/*str_repeat */
 
     "[ ",			/*arr_pre */
-    ", ",			/*arr_sep */
+    ",",			/*arr_sep */
     " ]",			/*arr_suf */
     1,				/*arr_linebreak */
 
@@ -111,7 +111,7 @@ static h5dump_t         dataformat = {
     "}",			/*cmpd_suf */
     "\n",			/*cmpd_end */
 
-    ",",			/*vlen_sep */
+    ", ",			/*vlen_sep */
     "(",			/*vlen_pre */
     ")",			/*vlen_suf */
     "",				/*vlen_end */
@@ -183,8 +183,8 @@ static h5dump_t         xml_dataformat = {
     0,				/*str_repeat */
 
     " ",			/*arr_pre */
-    " ",			/*arr_sep */
-    " ",			/*arr_suf */
+    "",				/*arr_sep */
+    "",				/*arr_suf */
     1,				/*arr_linebreak */
 
     "",				/*cmpd_name */
@@ -195,12 +195,12 @@ static h5dump_t         xml_dataformat = {
 
     " ",			/*vlen_sep */
     " ",			/*vlen_pre */
-    " ",			/*vlen_suf */
+    "",				/*vlen_suf */
     "",				/*vlen_end */
 
     "%s",			/*elmt_fmt */
-    " ",			/*elmt_suf1 */
-    "",				/*elmt_suf2 */
+    "",				/*elmt_suf1 */
+    " ",			/*elmt_suf2 */
 
     "",				/*idx_n_fmt */
     "",				/*idx_sep */
@@ -308,7 +308,7 @@ static const dump_header standardformat = {
  ** Added for XML **
  **/
 /* internal functions used by XML option */
-static void             xml_print_datatype(hid_t);
+static void             xml_print_datatype(hid_t, unsigned);
 static void             xml_print_enum(hid_t);
 static int              xml_print_refs(hid_t, int);
 static int              xml_print_strs(hid_t, int);
@@ -617,7 +617,7 @@ usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 static void
-print_datatype(hid_t type)
+print_datatype(hid_t type,unsigned in_group)
 {
     char       *fname;
     hid_t       nmembers, mtype, str_type;
@@ -631,301 +631,300 @@ print_datatype(hid_t type)
     hid_t       tmp_type;
     htri_t      is_vlstr=FALSE;
 
-    switch (H5Tget_class(type)) {
-    case H5T_INTEGER:
-	if (H5Tequal(type, H5T_STD_I8BE)) {
-	    printf("H5T_STD_I8BE");
-	} else if (H5Tequal(type, H5T_STD_I8LE)) {
-	    printf("H5T_STD_I8LE");
-	} else if (H5Tequal(type, H5T_STD_I16BE)) {
-	    printf("H5T_STD_I16BE");
-	} else if (H5Tequal(type, H5T_STD_I16LE)) {
-	    printf("H5T_STD_I16LE");
-	} else if (H5Tequal(type, H5T_STD_I32BE)) {
-	    printf("H5T_STD_I32BE");
-	} else if (H5Tequal(type, H5T_STD_I32LE)) {
-	    printf("H5T_STD_I32LE");
-	} else if (H5Tequal(type, H5T_STD_I64BE)) {
-	    printf("H5T_STD_I64BE");
-	} else if (H5Tequal(type, H5T_STD_I64LE)) {
-	    printf("H5T_STD_I64LE");
-	} else if (H5Tequal(type, H5T_STD_U8BE)) {
-	    printf("H5T_STD_U8BE");
-	} else if (H5Tequal(type, H5T_STD_U8LE)) {
-	    printf("H5T_STD_U8LE");
-	} else if (H5Tequal(type, H5T_STD_U16BE)) {
-	    printf("H5T_STD_U16BE");
-	} else if (H5Tequal(type, H5T_STD_U16LE)) {
-	    printf("H5T_STD_U16LE");
-	} else if (H5Tequal(type, H5T_STD_U32BE)) {
-	    printf("H5T_STD_U32BE");
-	} else if (H5Tequal(type, H5T_STD_U32LE)) {
-	    printf("H5T_STD_U32LE");
-	} else if (H5Tequal(type, H5T_STD_U64BE)) {
-	    printf("H5T_STD_U64BE");
-	} else if (H5Tequal(type, H5T_STD_U64LE)) {
-	    printf("H5T_STD_U64LE");
-	} else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
-	    printf("H5T_NATIVE_SCHAR");
-	} else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
-	    printf("H5T_NATIVE_UCHAR");
-	} else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
-	    printf("H5T_NATIVE_SHORT");
-	} else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
-	    printf("H5T_NATIVE_USHORT");
-	} else if (H5Tequal(type, H5T_NATIVE_INT)) {
-	    printf("H5T_NATIVE_INT");
-	} else if (H5Tequal(type, H5T_NATIVE_UINT)) {
-	    printf("H5T_NATIVE_UINT");
-	} else if (H5Tequal(type, H5T_NATIVE_LONG)) {
-	    printf("H5T_NATIVE_LONG");
-	} else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
-	    printf("H5T_NATIVE_ULONG");
-	} else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
-	    printf("H5T_NATIVE_LLONG");
-	} else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
-	    printf("H5T_NATIVE_ULLONG");
-	} else {
-	    printf("undefined integer");
-	    d_status = EXIT_FAILURE;
-	}
-	break;
+    if (!in_group && H5Tcommitted(type) > 0) {
+        H5Gget_objinfo(type, ".", TRUE, &statbuf);
+        i = search_obj(type_table, statbuf.objno);
 
-    case H5T_FLOAT:
-	if (H5Tequal(type, H5T_IEEE_F32BE)) {
-	    printf("H5T_IEEE_F32BE");
-	} else if (H5Tequal(type, H5T_IEEE_F32LE)) {
-	    printf("H5T_IEEE_F32LE");
-	} else if (H5Tequal(type, H5T_IEEE_F64BE)) {
-	    printf("H5T_IEEE_F64BE");
-	} else if (H5Tequal(type, H5T_IEEE_F64LE)) {
-	    printf("H5T_IEEE_F64LE");
-	} else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
-	    printf("H5T_NATIVE_FLOAT");
-	} else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
-	    printf("H5T_NATIVE_DOUBLE");
-	} else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
-	    printf("H5T_NATIVE_LDOUBLE");
-	} else {
-	    printf("undefined float");
-	    d_status = EXIT_FAILURE;
-	}
-	break;
+        if (i >= 0) {
+            if (!type_table->objs[i].recorded)
+                printf("\"/#%lu:%lu\"", type_table->objs[i].objno[0],
+                       type_table->objs[i].objno[1]);
+            else
+                printf("\"%s\"", type_table->objs[i].objname);
+        } else {
+            error_msg(progname, "unknown committed type.\n");
+            d_status = EXIT_FAILURE;
+        }
+    } else {
+        switch (H5Tget_class(type)) {
+        case H5T_INTEGER:
+            if (H5Tequal(type, H5T_STD_I8BE)) {
+                printf("H5T_STD_I8BE");
+            } else if (H5Tequal(type, H5T_STD_I8LE)) {
+                printf("H5T_STD_I8LE");
+            } else if (H5Tequal(type, H5T_STD_I16BE)) {
+                printf("H5T_STD_I16BE");
+            } else if (H5Tequal(type, H5T_STD_I16LE)) {
+                printf("H5T_STD_I16LE");
+            } else if (H5Tequal(type, H5T_STD_I32BE)) {
+                printf("H5T_STD_I32BE");
+            } else if (H5Tequal(type, H5T_STD_I32LE)) {
+                printf("H5T_STD_I32LE");
+            } else if (H5Tequal(type, H5T_STD_I64BE)) {
+                printf("H5T_STD_I64BE");
+            } else if (H5Tequal(type, H5T_STD_I64LE)) {
+                printf("H5T_STD_I64LE");
+            } else if (H5Tequal(type, H5T_STD_U8BE)) {
+                printf("H5T_STD_U8BE");
+            } else if (H5Tequal(type, H5T_STD_U8LE)) {
+                printf("H5T_STD_U8LE");
+            } else if (H5Tequal(type, H5T_STD_U16BE)) {
+                printf("H5T_STD_U16BE");
+            } else if (H5Tequal(type, H5T_STD_U16LE)) {
+                printf("H5T_STD_U16LE");
+            } else if (H5Tequal(type, H5T_STD_U32BE)) {
+                printf("H5T_STD_U32BE");
+            } else if (H5Tequal(type, H5T_STD_U32LE)) {
+                printf("H5T_STD_U32LE");
+            } else if (H5Tequal(type, H5T_STD_U64BE)) {
+                printf("H5T_STD_U64BE");
+            } else if (H5Tequal(type, H5T_STD_U64LE)) {
+                printf("H5T_STD_U64LE");
+            } else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
+                printf("H5T_NATIVE_SCHAR");
+            } else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
+                printf("H5T_NATIVE_UCHAR");
+            } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
+                printf("H5T_NATIVE_SHORT");
+            } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
+                printf("H5T_NATIVE_USHORT");
+            } else if (H5Tequal(type, H5T_NATIVE_INT)) {
+                printf("H5T_NATIVE_INT");
+            } else if (H5Tequal(type, H5T_NATIVE_UINT)) {
+                printf("H5T_NATIVE_UINT");
+            } else if (H5Tequal(type, H5T_NATIVE_LONG)) {
+                printf("H5T_NATIVE_LONG");
+            } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
+                printf("H5T_NATIVE_ULONG");
+            } else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
+                printf("H5T_NATIVE_LLONG");
+            } else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
+                printf("H5T_NATIVE_ULLONG");
+            } else {
+                printf("undefined integer");
+                d_status = EXIT_FAILURE;
+            }
+            break;
 
-    case H5T_TIME:
-	printf("H5T_TIME: not yet implemented");
-	break;
+        case H5T_FLOAT:
+            if (H5Tequal(type, H5T_IEEE_F32BE)) {
+                printf("H5T_IEEE_F32BE");
+            } else if (H5Tequal(type, H5T_IEEE_F32LE)) {
+                printf("H5T_IEEE_F32LE");
+            } else if (H5Tequal(type, H5T_IEEE_F64BE)) {
+                printf("H5T_IEEE_F64BE");
+            } else if (H5Tequal(type, H5T_IEEE_F64LE)) {
+                printf("H5T_IEEE_F64LE");
+            } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
+                printf("H5T_NATIVE_FLOAT");
+            } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
+                printf("H5T_NATIVE_DOUBLE");
+            } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
+                printf("H5T_NATIVE_LDOUBLE");
+            } else {
+                printf("undefined float");
+                d_status = EXIT_FAILURE;
+            }
+            break;
 
-    case H5T_STRING:
-        /* Make a copy of type in memory in case when TYPE is on disk, the size
-         * will be bigger than in memory.  This makes it easier to compare 
-         * types in memory. */
-        tmp_type = H5Tcopy(type);
-	size = H5Tget_size(tmp_type);
-	str_pad = H5Tget_strpad(tmp_type);
-	cset = H5Tget_cset(tmp_type);
-        is_vlstr = H5Tis_variable_str(tmp_type);
+        case H5T_TIME:
+            printf("H5T_TIME: not yet implemented");
+            break;
 
-	printf("H5T_STRING %s\n", dump_header_format->strblockbegin);
-	indent += COL;
+        case H5T_STRING:
+            /* Make a copy of type in memory in case when TYPE is on disk, the size
+             * will be bigger than in memory.  This makes it easier to compare 
+             * types in memory. */
+            tmp_type = H5Tcopy(type);
+            size = H5Tget_size(tmp_type);
+            str_pad = H5Tget_strpad(tmp_type);
+            cset = H5Tget_cset(tmp_type);
+            is_vlstr = H5Tis_variable_str(tmp_type);
 
-	indentation(indent + COL);
-        if(is_vlstr)
-            printf("%s H5T_VARIABLE;\n", STRSIZE);
-        else
-	    printf("%s %d;\n", STRSIZE, (int) size);
+            printf("H5T_STRING %s\n", dump_header_format->strblockbegin);
+            indent += COL;
 
-	indentation(indent + COL);
-	printf("%s ", STRPAD);
-	if (str_pad == H5T_STR_NULLTERM)
-	    printf("H5T_STR_NULLTERM;\n");
-	else if (str_pad == H5T_STR_NULLPAD)
-	    printf("H5T_STR_NULLPAD;\n");
-	else if (str_pad == H5T_STR_SPACEPAD)
-	    printf("H5T_STR_SPACEPAD;\n");
-	else
-	    printf("H5T_STR_ERROR;\n");
+            indentation(indent + COL);
+            if(is_vlstr)
+                printf("%s H5T_VARIABLE;\n", STRSIZE);
+            else
+                printf("%s %d;\n", STRSIZE, (int) size);
 
-	indentation(indent + COL);
-	printf("%s ", CSET);
+            indentation(indent + COL);
+            printf("%s ", STRPAD);
+            if (str_pad == H5T_STR_NULLTERM)
+                printf("H5T_STR_NULLTERM;\n");
+            else if (str_pad == H5T_STR_NULLPAD)
+                printf("H5T_STR_NULLPAD;\n");
+            else if (str_pad == H5T_STR_SPACEPAD)
+                printf("H5T_STR_SPACEPAD;\n");
+            else
+                printf("H5T_STR_ERROR;\n");
 
-	if (cset == H5T_CSET_ASCII)
-	    printf("H5T_CSET_ASCII;\n");
-	else
-	    printf("unknown_cset;\n");
+            indentation(indent + COL);
+            printf("%s ", CSET);
 
-	str_type = H5Tcopy(H5T_C_S1);
-        if(is_vlstr)
-            H5Tset_size(str_type, H5T_VARIABLE);
-        else
-	    H5Tset_size(str_type, size);
-	H5Tset_cset(str_type, cset);
-	H5Tset_strpad(str_type, str_pad);
+            if (cset == H5T_CSET_ASCII)
+                printf("H5T_CSET_ASCII;\n");
+            else
+                printf("unknown_cset;\n");
 
-	indentation(indent + COL);
-	printf("%s ", CTYPE);
+            str_type = H5Tcopy(H5T_C_S1);
+            if(is_vlstr)
+                H5Tset_size(str_type, H5T_VARIABLE);
+            else
+                H5Tset_size(str_type, size);
+            H5Tset_cset(str_type, cset);
+            H5Tset_strpad(str_type, str_pad);
 
-	if (H5Tequal(tmp_type, str_type)) {
-	    printf("H5T_C_S1;\n");
-	    H5Tclose(str_type);
-	} else {
-	    H5Tclose(str_type);
-	    str_type = H5Tcopy(H5T_FORTRAN_S1);
-	    H5Tset_cset(str_type, cset);
-	    H5Tset_size(str_type, size);
-	    H5Tset_strpad(str_type, str_pad);
+            indentation(indent + COL);
+            printf("%s ", CTYPE);
 
-	    if (H5Tequal(tmp_type, str_type)) {
-		printf("H5T_FORTRAN_S1;\n");
-	    } else {
-		printf("unknown_one_character_type;\n ");
-		d_status = EXIT_FAILURE;
-	    }
+            if (H5Tequal(tmp_type, str_type)) {
+                printf("H5T_C_S1;\n");
+                H5Tclose(str_type);
+            } else {
+                H5Tclose(str_type);
+                str_type = H5Tcopy(H5T_FORTRAN_S1);
+                H5Tset_cset(str_type, cset);
+                H5Tset_size(str_type, size);
+                H5Tset_strpad(str_type, str_pad);
 
-	    H5Tclose(str_type);
-	}
+                if (H5Tequal(tmp_type, str_type)) {
+                    printf("H5T_FORTRAN_S1;\n");
+                } else {
+                    printf("unknown_one_character_type;\n ");
+                    d_status = EXIT_FAILURE;
+                }
 
-        H5Tclose(tmp_type);
+                H5Tclose(str_type);
+            }
 
-	indent -= COL;
-	indentation(indent + COL);
-	printf("%s", dump_header_format->strblockend);
-	break;
+            H5Tclose(tmp_type);
 
-    case H5T_BITFIELD:
-	if (H5Tequal(type, H5T_STD_B8BE)) {
-	    printf("H5T_STD_B8BE");
-	} else if (H5Tequal(type, H5T_STD_B8LE)) {
-	    printf("H5T_STD_B8LE");
-	} else if (H5Tequal(type, H5T_STD_B16BE)) {
-	    printf("H5T_STD_B16BE");
-	} else if (H5Tequal(type, H5T_STD_B16LE)) {
-	    printf("H5T_STD_B16LE");
-	} else if (H5Tequal(type, H5T_STD_B32BE)) {
-	    printf("H5T_STD_B32BE");
-	} else if (H5Tequal(type, H5T_STD_B32LE)) {
-	    printf("H5T_STD_B32LE");
-	} else if (H5Tequal(type, H5T_STD_B64BE)) {
-	    printf("H5T_STD_B64BE");
-	} else if (H5Tequal(type, H5T_STD_B64LE)) {
-	    printf("H5T_STD_B64LE");
-	} else {
-	    printf("undefined bitfield");
-	    d_status = EXIT_FAILURE;
-	}
-	break;
+            indent -= COL;
+            indentation(indent + COL);
+            printf("%s", dump_header_format->strblockend);
+            break;
 
-    case H5T_OPAQUE:
-	printf("\n");
-	indentation(indent + COL);
-	printf("H5T_OPAQUE;\n");
-	indentation(indent + COL);
-	printf("OPAQUE_TAG \"%s\";\n", H5Tget_tag(type));
-	indentation(indent);
-	break;
+        case H5T_BITFIELD:
+            if (H5Tequal(type, H5T_STD_B8BE)) {
+                printf("H5T_STD_B8BE");
+            } else if (H5Tequal(type, H5T_STD_B8LE)) {
+                printf("H5T_STD_B8LE");
+            } else if (H5Tequal(type, H5T_STD_B16BE)) {
+                printf("H5T_STD_B16BE");
+            } else if (H5Tequal(type, H5T_STD_B16LE)) {
+                printf("H5T_STD_B16LE");
+            } else if (H5Tequal(type, H5T_STD_B32BE)) {
+                printf("H5T_STD_B32BE");
+            } else if (H5Tequal(type, H5T_STD_B32LE)) {
+                printf("H5T_STD_B32LE");
+            } else if (H5Tequal(type, H5T_STD_B64BE)) {
+                printf("H5T_STD_B64BE");
+            } else if (H5Tequal(type, H5T_STD_B64LE)) {
+                printf("H5T_STD_B64LE");
+            } else {
+                printf("undefined bitfield");
+                d_status = EXIT_FAILURE;
+            }
+            break;
 
-    case H5T_COMPOUND:
-	if (H5Tcommitted(type) > 0) {
-	    H5Gget_objinfo(type, ".", TRUE, &statbuf);
-	    i = search_obj(type_table, statbuf.objno);
+        case H5T_OPAQUE:
+            printf("\n");
+            indentation(indent + COL);
+            printf("H5T_OPAQUE;\n");
+            indentation(indent + COL);
+            printf("OPAQUE_TAG \"%s\";\n", H5Tget_tag(type));
+            indentation(indent);
+            break;
 
-	    if (i >= 0) {
-		if (!type_table->objs[i].recorded)
-		    printf("\"/#%lu:%lu\"\n", type_table->objs[i].objno[0],
-			   type_table->objs[i].objno[1]);
-		else
-		    printf("\"%s\"", type_table->objs[i].objname);
-	    } else {
-                error_msg(progname, "unknown committed type.\n");
-		d_status = EXIT_FAILURE;
-	    }
-	} else {
-	    nmembers = H5Tget_nmembers(type);
-	    printf("H5T_COMPOUND %s\n", dump_header_format->structblockbegin);
+        case H5T_COMPOUND:
+            nmembers = H5Tget_nmembers(type);
+            printf("H5T_COMPOUND %s\n", dump_header_format->structblockbegin);
 
-	    for (i = 0; i < nmembers; i++) {
-		fname = H5Tget_member_name(type, i);
-		mtype = H5Tget_member_type(type, i);
-		indentation(indent + COL);
+            for (i = 0; i < nmembers; i++) {
+                fname = H5Tget_member_name(type, i);
+                mtype = H5Tget_member_type(type, i);
+                indentation(indent + COL);
 
-		if (H5Tget_class(mtype) == H5T_COMPOUND)
-		    indent += COL;
+                if (H5Tget_class(mtype) == H5T_COMPOUND)
+                    indent += COL;
 
-		print_datatype(mtype);
+                print_datatype(mtype,0);
 
-		if (H5Tget_class(mtype) == H5T_COMPOUND)
-		    indent -= COL;
+                if (H5Tget_class(mtype) == H5T_COMPOUND)
+                    indent -= COL;
 
-		printf(" \"%s\";\n", fname);
-		free(fname);
-	    }
+                printf(" \"%s\";\n", fname);
+                free(fname);
+            }
 
-	    indentation(indent);
-	    printf("%s", dump_header_format->structblockend);
-	}
+            indentation(indent);
+            printf("%s", dump_header_format->structblockend);
+            break;
 
-	break;
+        case H5T_REFERENCE:
+            printf("H5T_REFERENCE");
+            break;
 
-    case H5T_REFERENCE:
-	printf("H5T_REFERENCE");
-	break;
+        case H5T_ENUM:
+            printf("H5T_ENUM %s\n", dump_header_format->enumblockbegin);
+            indent += COL;
+            indentation(indent + COL);
+            super = H5Tget_super(type);
+            print_datatype(super,0);
+            printf(";\n");
+            print_enum(type);
+            indent -= COL;
+            indentation(indent + COL);
+            printf("%s", dump_header_format->enumblockend);
+            break;
 
-    case H5T_ENUM:
-	printf("H5T_ENUM %s\n", dump_header_format->enumblockbegin);
-	indent += COL;
-	indentation(indent + COL);
-	super = H5Tget_super(type);
-	print_datatype(super);
-	printf(";\n");
-	print_enum(type);
-	indent -= COL;
-	indentation(indent + COL);
-	printf("%s", dump_header_format->enumblockend);
-	break;
+        case H5T_VLEN:
+            printf("H5T_VLEN %s ", dump_header_format->vlenblockbegin);
+            super = H5Tget_super(type);
+            print_datatype(super,0);
+            H5Tclose(super);
 
-    case H5T_VLEN:
-	printf("H5T_VLEN %s ", dump_header_format->vlenblockbegin);
-	super = H5Tget_super(type);
-	print_datatype(super);
-	H5Tclose(super);
+            /* Print closing */
+            printf("%s", dump_header_format->vlenblockend);
+            break;
 
-	/* Print closing */
-	printf("%s", dump_header_format->vlenblockend);
-	break;
+        case H5T_ARRAY:
+            /* Get array base type */
+            super = H5Tget_super(type);
 
-    case H5T_ARRAY:
-	/* Get array base type */
-	super = H5Tget_super(type);
+            /* Print lead-in */
+            printf("H5T_ARRAY { ");
 
-	/* Print lead-in */
-	printf("H5T_ARRAY { ");
+            /* Get array information */
+            ndims = H5Tget_array_ndims(type);
+            H5Tget_array_dims(type, dims, perm);
 
-	/* Get array information */
-	ndims = H5Tget_array_ndims(type);
-	H5Tget_array_dims(type, dims, perm);
+            /* Print array dimensions */
+            for (j = 0; j < ndims; j++)
+                printf("[%d]", (int) dims[j]);
 
-	/* Print array dimensions */
-	for (j = 0; j < ndims; j++)
-	    printf("[%d]", (int) dims[j]);
+            printf(" ");
 
-	printf(" ");
+            /* Print base type */
+            print_datatype(super,0);
 
-	/* Print base type */
-	print_datatype(super);
+            /* Close array base type */
+            H5Tclose(super);
 
-	/* Close array base type */
-	H5Tclose(super);
+            /* Print closing */
+            printf(" }");
 
-	/* Print closing */
-	printf(" }");
+            break;
 
-	break;
-
-    default:
-	printf("unknown data type");
-	d_status = EXIT_FAILURE;
-	break;
-    }
+        default:
+            printf("unknown data type");
+            d_status = EXIT_FAILURE;
+            break;
+        }
+    } /* end else */
 }
 
 /*-------------------------------------------------------------------------
@@ -971,13 +970,10 @@ dump_datatype(hid_t type)
     printf("%s %s ", dump_header_format->datatypebegin,
            dump_header_format->datatypeblockbegin);
 
-    print_datatype(type);
+    print_datatype(type,0);
 
-    if (H5Tget_class(type) == H5T_COMPOUND || H5Tget_class(type) == H5T_STRING)
-        indentation(indent);
-
-    printf(" %s %s\n", dump_header_format->datatypeblockend,
-           dump_header_format->datatypeend);
+    end_obj(dump_header_format->datatypeend,
+	    dump_header_format->datatypeblockend);
     indent -= COL;
 }
 
@@ -1009,7 +1005,7 @@ dump_dataspace(hid_t space)
     if (H5Sis_simple(space)) {
 	if (ndims == 0) {
 	    /* scalar dataspace */
-	    HDfprintf(stdout, "%s %s ",
+	    HDfprintf(stdout, "%s %s",
 		      dump_header_format->dataspacedescriptionbegin, SCALAR);
 	} else {
 	    /* simple dataspace */
@@ -1534,17 +1530,12 @@ dump_named_datatype(hid_t type, const char *name)
 	   dump_header_format->datatypeblockbegin);
 
     if (H5Tget_class(type) == H5T_COMPOUND) {
-	hid_t temp_type = H5Tcopy(type);
-
-	print_datatype(temp_type);
-	H5Tclose(temp_type);
+	print_datatype(type,1);
     } else {
 	indentation(indent + COL);
-	print_datatype(type);
+	print_datatype(type,1);
 	printf(";\n");
     }
-
-    indentation(indent);
     end_obj(dump_header_format->datatypeend,
 	    dump_header_format->datatypeblockend);
 }
@@ -3717,7 +3708,7 @@ xml_escape_the_string(const char *str, int slen)
  *-------------------------------------------------------------------------
  */
 static void
-xml_print_datatype(hid_t type)
+xml_print_datatype(hid_t type, unsigned in_group)
 {
     char                   *fname;
     hid_t                   nmembers, mtype;
@@ -3739,349 +3730,351 @@ xml_print_datatype(hid_t type)
     int                     nmembs;
     htri_t                  is_vlstr=FALSE;
     
-    switch (H5Tget_class(type)) {
-    case H5T_INTEGER:
-	indentation(indent);
-	printf("<%sAtomicType>\n",xmlnsprefix);
-	indent += COL;
-	/* <hdf5:IntegerType ByteOrder="bo" Sign="torf" Size="bytes"/> */
-	ord = H5Tget_order(type);
-	sgn = H5Tget_sign(type);
-	indentation(indent);
-	printf("<%sIntegerType ByteOrder=\"",xmlnsprefix);
-	switch (ord) {
-	case H5T_ORDER_LE:
-	    printf("LE");
-	    break;
-	case H5T_ORDER_BE:
-	    printf("BE");
-	    break;
-	case H5T_ORDER_VAX:
-	default:
-	    printf("ERROR_UNKNOWN");
-	}
-	printf("\" Sign=\"");
-	switch (sgn) {
-	case H5T_SGN_NONE:
-	    printf("false");
-	    break;
-	case H5T_SGN_2:
-	    printf("true");
-	    break;
-	default:
-	    printf("ERROR_UNKNOWN");
-	}
-	printf("\" Size=\"");
-	sz = H5Tget_size(type);
-	printf("%lu", (unsigned long)sz);
-	printf("\" />\n");
-	indent -= COL;
-	indentation(indent);
-	printf("</%sAtomicType>\n",xmlnsprefix);
-	break;
+    if (!in_group && H5Tcommitted(type) > 0) {
+        /* detect a shared datatype, output only once */
+        H5Gget_objinfo(type, ".", TRUE, &statbuf);
+        i = search_obj(type_table, statbuf.objno);
 
-    case H5T_FLOAT:
-	/* <hdf5:FloatType ByteOrder="bo" Size="bytes" 
-	   SignBitLocation="bytes"
-	   ExponentBits="eb" ExponentLocation="el" 
-	   MantissaBits="mb" MantissaLocation="ml" /> */
-	ord = H5Tget_order(type);
-	indentation(indent);
-	printf("<%sAtomicType>\n",xmlnsprefix);
-	indent += COL;
-	indentation(indent);
-	printf("<%sFloatType ByteOrder=\"",xmlnsprefix);
-	switch (ord) {
-	case H5T_ORDER_LE:
-	    printf("LE");
-	    break;
-	case H5T_ORDER_BE:
-	    printf("BE");
-	    break;
-	case H5T_ORDER_VAX:
-	default:
-	    printf("ERROR_UNKNOWN");
-	}
-	printf("\" Size=\"");
-	sz = H5Tget_size(type);
-	printf("%lu", (unsigned long)sz);
-	H5Tget_fields(type, &spos, &epos, &esize, &mpos, &msize);
-	printf("\" SignBitLocation=\"%lu\" ", (unsigned long)spos);
-	printf("ExponentBits=\"%lu\" ExponentLocation=\"%lu\" ", (unsigned long)esize, (unsigned long)epos);
-	printf("MantissaBits=\"%lu\" MantissaLocation=\"%lu\" />\n",
-	       (unsigned long)msize, (unsigned long)mpos);
-	indent -= COL;
-	indentation(indent);
-	printf("</%sAtomicType>\n",xmlnsprefix);
-	break;
+        if (i >= 0) {
+            /* This should be defined somewhere else */
+            /* These 2 cases are handled the same right now, but
+               probably will have something different eventually */
+            int res;
+            char * dtxid = malloc(100);
+            res = xml_name_to_XID(type_table->objs[i].objname,dtxid,100,1);
+            if (!type_table->objs[i].recorded) {
+                /* 'anonymous' NDT.  Use it's object num.
+                   as it's name.  */
+                printf("<%sNamedDataTypePtr OBJ-XID=\"/%s\"/>\n",
+                    xmlnsprefix,
+                    dtxid);
+            } else {
+                /* point to the NDT by name */
+                char *t_objname = xml_escape_the_name(type_table->objs[i].objname);
+                printf("<%sNamedDataTypePtr OBJ-XID=\"%s\" H5Path=\"%s\"/>\n",
+                    xmlnsprefix,
+                    dtxid,t_objname);
+                free(t_objname);
+            }
+            free(dtxid);
+        } else {
+            printf("<!-- h5dump error: unknown committed type. -->\n");
+            d_status = EXIT_FAILURE;
+        }
 
-    case H5T_TIME:
-	indentation(indent);
-	printf("<%sAtomicType>\n",xmlnsprefix);
-	indent += COL;
-	indentation(indent);
-	printf("<%sTimeType />\n",xmlnsprefix);
-	printf("<!-- H5T_TIME: not yet implemented -->");
-	indent -= COL;
-	indentation(indent);
-	printf("</%sAtomicType>\n",xmlnsprefix);
-	break;
-
-    case H5T_STRING:
-	/* <hdf5:StringType Cset="cs" StrSize="chars" StrPad="pad" /> */
-	size = H5Tget_size(type);
-	str_pad = H5Tget_strpad(type);
-	cset = H5Tget_cset(type);
-        is_vlstr = H5Tis_variable_str(type);
+    } else {
         
-	indentation(indent);
-	printf("<%sAtomicType>\n",xmlnsprefix);
-	indent += COL;
-	indentation(indent);
-	printf("<%sStringType Cset=\"",xmlnsprefix);
-	if (cset == H5T_CSET_ASCII) {
-	    printf("H5T_CSET_ASCII\" ");
-	} else {
-	    printf("unknown_cset\" ");
-	}
-        if(is_vlstr)
-            printf("StrSize=\"H5T_VARIABLE\" StrPad=\"");
-        else        
-            printf("StrSize=\"%d\" StrPad=\"", (int) size);
-	if (str_pad == H5T_STR_NULLTERM) {
-	    printf("H5T_STR_NULLTERM\"/>\n");
-	} else if (str_pad == H5T_STR_NULLPAD) {
-	    printf("H5T_STR_NULLPAD\"/>\n");
-	} else if (str_pad == H5T_STR_SPACEPAD) {
-	    printf("H5T_STR_SPACEPAD\"/>\n");
-	} else {
-	    printf("H5T_STR_ERROR\"/>\n");
-	}
-	indent -= COL;
-	indentation(indent);
-	printf("</%sAtomicType>\n",xmlnsprefix);
-	break;
+        switch (H5Tget_class(type)) {
+        case H5T_INTEGER:
+            indentation(indent);
+            printf("<%sAtomicType>\n",xmlnsprefix);
+            indent += COL;
+            /* <hdf5:IntegerType ByteOrder="bo" Sign="torf" Size="bytes"/> */
+            ord = H5Tget_order(type);
+            sgn = H5Tget_sign(type);
+            indentation(indent);
+            printf("<%sIntegerType ByteOrder=\"",xmlnsprefix);
+            switch (ord) {
+            case H5T_ORDER_LE:
+                printf("LE");
+                break;
+            case H5T_ORDER_BE:
+                printf("BE");
+                break;
+            case H5T_ORDER_VAX:
+            default:
+                printf("ERROR_UNKNOWN");
+            }
+            printf("\" Sign=\"");
+            switch (sgn) {
+            case H5T_SGN_NONE:
+                printf("false");
+                break;
+            case H5T_SGN_2:
+                printf("true");
+                break;
+            default:
+                printf("ERROR_UNKNOWN");
+            }
+            printf("\" Size=\"");
+            sz = H5Tget_size(type);
+            printf("%lu", (unsigned long)sz);
+            printf("\" />\n");
+            indent -= COL;
+            indentation(indent);
+            printf("</%sAtomicType>\n",xmlnsprefix);
+            break;
 
-    case H5T_BITFIELD:
-	/* <hdf5:BitfieldType ByteOrder="bo" Size="bytes"/> */
-	ord = H5Tget_order(type);
-	indentation(indent);
-	printf("<%sAtomicType>\n",xmlnsprefix);
-	indent += COL;
-	indentation(indent);
-	printf("<%sBitfieldType ByteOrder=\"",xmlnsprefix);
-	switch (ord) {
-	case H5T_ORDER_LE:
-	    printf("LE");
-	    break;
-	case H5T_ORDER_BE:
-	    printf("BE");
-	    break;
-	case H5T_ORDER_VAX:
-	default:
-	    printf("ERROR_UNKNOWN");
-	}
-	size = H5Tget_size(type);
-	printf("\" Size=\"%lu\"/>\n", (unsigned long)size);
-	indent -= COL;
-	indentation(indent);
-	printf("</%sAtomicType>\n",xmlnsprefix);
-	break;
+        case H5T_FLOAT:
+            /* <hdf5:FloatType ByteOrder="bo" Size="bytes" 
+               SignBitLocation="bytes"
+               ExponentBits="eb" ExponentLocation="el" 
+               MantissaBits="mb" MantissaLocation="ml" /> */
+            ord = H5Tget_order(type);
+            indentation(indent);
+            printf("<%sAtomicType>\n",xmlnsprefix);
+            indent += COL;
+            indentation(indent);
+            printf("<%sFloatType ByteOrder=\"",xmlnsprefix);
+            switch (ord) {
+            case H5T_ORDER_LE:
+                printf("LE");
+                break;
+            case H5T_ORDER_BE:
+                printf("BE");
+                break;
+            case H5T_ORDER_VAX:
+            default:
+                printf("ERROR_UNKNOWN");
+            }
+            printf("\" Size=\"");
+            sz = H5Tget_size(type);
+            printf("%lu", (unsigned long)sz);
+            H5Tget_fields(type, &spos, &epos, &esize, &mpos, &msize);
+            printf("\" SignBitLocation=\"%lu\" ", (unsigned long)spos);
+            printf("ExponentBits=\"%lu\" ExponentLocation=\"%lu\" ", (unsigned long)esize, (unsigned long)epos);
+            printf("MantissaBits=\"%lu\" MantissaLocation=\"%lu\" />\n",
+                   (unsigned long)msize, (unsigned long)mpos);
+            indent -= COL;
+            indentation(indent);
+            printf("</%sAtomicType>\n",xmlnsprefix);
+            break;
 
-    case H5T_OPAQUE:
-	/* <hdf5:OpaqueType Tag="tag" Size="bytes" /> */
-	indentation(indent);
-	printf("<%sAtomicType>\n",xmlnsprefix);
-	indent += COL;
-	indentation(indent);
-	printf("<%sOpaqueType Tag=\"%s\" ",xmlnsprefix, H5Tget_tag(type));
-	size = H5Tget_size(type);
-	printf("Size=\"%lu\"/>\n", (unsigned long)size);
-	indent -= COL;
-	indentation(indent);
-	printf("</%sAtomicType>\n",xmlnsprefix);
-	break;
+        case H5T_TIME:
+            indentation(indent);
+            printf("<%sAtomicType>\n",xmlnsprefix);
+            indent += COL;
+            indentation(indent);
+            printf("<%sTimeType />\n",xmlnsprefix);
+            printf("<!-- H5T_TIME: not yet implemented -->");
+            indent -= COL;
+            indentation(indent);
+            printf("</%sAtomicType>\n",xmlnsprefix);
+            break;
 
-    case H5T_COMPOUND:
-	/* recursively describe the components of a compound datatype */
-	if (H5Tcommitted(type) > 0) {
-	    /* detect a shared datatype, output only once */
-	    H5Gget_objinfo(type, ".", TRUE, &statbuf);
-	    i = search_obj(type_table, statbuf.objno);
+        case H5T_STRING:
+            /* <hdf5:StringType Cset="cs" StrSize="chars" StrPad="pad" /> */
+            size = H5Tget_size(type);
+            str_pad = H5Tget_strpad(type);
+            cset = H5Tget_cset(type);
+            is_vlstr = H5Tis_variable_str(type);
+            
+            indentation(indent);
+            printf("<%sAtomicType>\n",xmlnsprefix);
+            indent += COL;
+            indentation(indent);
+            printf("<%sStringType Cset=\"",xmlnsprefix);
+            if (cset == H5T_CSET_ASCII) {
+                printf("H5T_CSET_ASCII\" ");
+            } else {
+                printf("unknown_cset\" ");
+            }
+            if(is_vlstr)
+                printf("StrSize=\"H5T_VARIABLE\" StrPad=\"");
+            else        
+                printf("StrSize=\"%d\" StrPad=\"", (int) size);
+            if (str_pad == H5T_STR_NULLTERM) {
+                printf("H5T_STR_NULLTERM\"/>\n");
+            } else if (str_pad == H5T_STR_NULLPAD) {
+                printf("H5T_STR_NULLPAD\"/>\n");
+            } else if (str_pad == H5T_STR_SPACEPAD) {
+                printf("H5T_STR_SPACEPAD\"/>\n");
+            } else {
+                printf("H5T_STR_ERROR\"/>\n");
+            }
+            indent -= COL;
+            indentation(indent);
+            printf("</%sAtomicType>\n",xmlnsprefix);
+            break;
 
-	    if (i >= 0) {
-		/* This should be defined somewhere else */
-		/* These 2 cases are handled the same right now, but
-                   probably will have something different eventually */
-		int res;
-		char * dtxid = malloc(100);
-		res = xml_name_to_XID(type_table->objs[i].objname,dtxid,100,1);
-		if (!type_table->objs[i].recorded) {
-		    /* 'anonymous' NDT.  Use it's object num.
-		       as it's name.  */
-		    printf("<%sNamedDataTypePtr OBJ-XID=\"/%s\"/>\n",
-			xmlnsprefix,
-			dtxid);
-		} else {
-		    /* point to the NDT by name */
-                    char *t_objname = xml_escape_the_name(type_table->objs[i].objname);
-		    printf("<%sNamedDataTypePtr OBJ-XID=\"%s\" H5Path=\"%s\"/>\n",
-			xmlnsprefix,
-			dtxid,t_objname);
-		    free(t_objname);
-		}
-		free(dtxid);
-	    } else {
-		printf("<!-- h5dump error: unknown committed type. -->\n");
-		d_status = EXIT_FAILURE;
-	    }
+        case H5T_BITFIELD:
+            /* <hdf5:BitfieldType ByteOrder="bo" Size="bytes"/> */
+            ord = H5Tget_order(type);
+            indentation(indent);
+            printf("<%sAtomicType>\n",xmlnsprefix);
+            indent += COL;
+            indentation(indent);
+            printf("<%sBitfieldType ByteOrder=\"",xmlnsprefix);
+            switch (ord) {
+            case H5T_ORDER_LE:
+                printf("LE");
+                break;
+            case H5T_ORDER_BE:
+                printf("BE");
+                break;
+            case H5T_ORDER_VAX:
+            default:
+                printf("ERROR_UNKNOWN");
+            }
+            size = H5Tget_size(type);
+            printf("\" Size=\"%lu\"/>\n", (unsigned long)size);
+            indent -= COL;
+            indentation(indent);
+            printf("</%sAtomicType>\n",xmlnsprefix);
+            break;
 
-	} else {
-	    /* type of a dataset */
-	    nmembers = H5Tget_nmembers(type);
+        case H5T_OPAQUE:
+            /* <hdf5:OpaqueType Tag="tag" Size="bytes" /> */
+            indentation(indent);
+            printf("<%sAtomicType>\n",xmlnsprefix);
+            indent += COL;
+            indentation(indent);
+            printf("<%sOpaqueType Tag=\"%s\" ",xmlnsprefix, H5Tget_tag(type));
+            size = H5Tget_size(type);
+            printf("Size=\"%lu\"/>\n", (unsigned long)size);
+            indent -= COL;
+            indentation(indent);
+            printf("</%sAtomicType>\n",xmlnsprefix);
+            break;
 
-	    indentation(indent);
-	    printf("<%sCompoundType>\n",xmlnsprefix);
+        case H5T_COMPOUND:
+            /* recursively describe the components of a compound datatype */
 
-	    /* List each member Field of the type */
-	    /*   <hdf5:Field FieldName="name" > */
-	    /*   <hdf5:DataType > */
-	    indent += COL;
-	    for (i = 0; i < nmembers; i++) {
+            /* type of a dataset */
+            nmembers = H5Tget_nmembers(type);
+
+            indentation(indent);
+            printf("<%sCompoundType>\n",xmlnsprefix);
+
+            /* List each member Field of the type */
+            /*   <hdf5:Field FieldName="name" > */
+            /*   <hdf5:DataType > */
+            indent += COL;
+            for (i = 0; i < nmembers; i++) {
                 char *t_fname;
 
-		fname = H5Tget_member_name(type, i);
-		mtype = H5Tget_member_type(type, i);
-		indentation(indent);
+                fname = H5Tget_member_name(type, i);
+                mtype = H5Tget_member_type(type, i);
+                indentation(indent);
                 t_fname = xml_escape_the_name(fname);
-		printf("<%sField FieldName=\"%s\">\n",xmlnsprefix, t_fname);
+                printf("<%sField FieldName=\"%s\">\n",xmlnsprefix, t_fname);
 
-		free(fname);
-		free(t_fname);
-		indent += COL;
-		indentation(indent);
-		printf("<%sDataType>\n",xmlnsprefix);
-		indent += COL;
-		xml_print_datatype(mtype);
-		indent -= COL;
-		indentation(indent);
-		printf("</%sDataType>\n",xmlnsprefix);
-		indent -= COL;
+                free(fname);
+                free(t_fname);
+                indent += COL;
+                indentation(indent);
+                printf("<%sDataType>\n",xmlnsprefix);
+                indent += COL;
+                xml_print_datatype(mtype,0);
+                indent -= COL;
+                indentation(indent);
+                printf("</%sDataType>\n",xmlnsprefix);
+                indent -= COL;
 
-		indentation(indent);
-		printf("</%sField>\n",xmlnsprefix);
-	    }
-	    indent -= COL;
-	    indentation(indent);
-	    printf("</%sCompoundType>\n",xmlnsprefix);
-	}
-	break;
+                indentation(indent);
+                printf("</%sField>\n",xmlnsprefix);
+            }
+            indent -= COL;
+            indentation(indent);
+            printf("</%sCompoundType>\n",xmlnsprefix);
+            break;
 
-    case H5T_REFERENCE:
-	indentation(indent);
-	printf("<%sAtomicType>\n",xmlnsprefix);
-	indent += COL;
-	indentation(indent);
-	/*  Only Object references supported at this time */
-	printf("<%sReferenceType>\n",xmlnsprefix);
-	indentation(indent + COL);
-	printf("<%sObjectReferenceType />\n",xmlnsprefix);
-	indentation(indent);
-	printf("</%sReferenceType>\n",xmlnsprefix);
-	indent -= COL;
-	indentation(indent);
-	printf("</%sAtomicType>\n",xmlnsprefix);
-	break;
+        case H5T_REFERENCE:
+            indentation(indent);
+            printf("<%sAtomicType>\n",xmlnsprefix);
+            indent += COL;
+            indentation(indent);
+            /*  Only Object references supported at this time */
+            printf("<%sReferenceType>\n",xmlnsprefix);
+            indentation(indent + COL);
+            printf("<%sObjectReferenceType />\n",xmlnsprefix);
+            indentation(indent);
+            printf("</%sReferenceType>\n",xmlnsprefix);
+            indent -= COL;
+            indentation(indent);
+            printf("</%sAtomicType>\n",xmlnsprefix);
+            break;
 
-    case H5T_ENUM:
-	/*  <hdf5:EnumType Nelems="ne" >
-	   list Name, values of enum
-	 */
-	nmembs = H5Tget_nmembers(type);
-	indentation(indent);
-	printf("<%sAtomicType>\n",xmlnsprefix);
-	indent += COL;
-	indentation(indent);
-	printf("<%sEnumType Nelems=\"%d\">\n",xmlnsprefix, nmembs);
-	xml_print_enum(type);
-	indentation(indent);
-	printf("</%sEnumType>\n",xmlnsprefix);
-	indent -= COL;
-	indentation(indent);
-	printf("</%sAtomicType>\n",xmlnsprefix);
-	break;
+        case H5T_ENUM:
+            /*  <hdf5:EnumType Nelems="ne" >
+               list Name, values of enum
+             */
+            nmembs = H5Tget_nmembers(type);
+            indentation(indent);
+            printf("<%sAtomicType>\n",xmlnsprefix);
+            indent += COL;
+            indentation(indent);
+            printf("<%sEnumType Nelems=\"%d\">\n",xmlnsprefix, nmembs);
+            xml_print_enum(type);
+            indentation(indent);
+            printf("</%sEnumType>\n",xmlnsprefix);
+            indent -= COL;
+            indentation(indent);
+            printf("</%sAtomicType>\n",xmlnsprefix);
+            break;
 
-    case H5T_VLEN:
-	indentation(indent);
-	printf("<%sVLType>\n",xmlnsprefix);
-	super = H5Tget_super(type);
-	indent += COL;
-	indentation(indent);
-	printf("<%sDataType>\n",xmlnsprefix);
-	indent += COL;
-	xml_print_datatype(super);
-	indent -= COL;
-	indentation(indent);
-	printf("</%sDataType>\n",xmlnsprefix);
-	indent -= COL;
-	indentation(indent);
-	printf("</%sVLType>\n",xmlnsprefix);
-	H5Tclose(super);
+        case H5T_VLEN:
+            indentation(indent);
+            printf("<%sVLType>\n",xmlnsprefix);
+            super = H5Tget_super(type);
+            indent += COL;
+            indentation(indent);
+            printf("<%sDataType>\n",xmlnsprefix);
+            indent += COL;
+            xml_print_datatype(super,0);
+            indent -= COL;
+            indentation(indent);
+            printf("</%sDataType>\n",xmlnsprefix);
+            indent -= COL;
+            indentation(indent);
+            printf("</%sVLType>\n",xmlnsprefix);
+            H5Tclose(super);
 
-	break;
+            break;
 
-    case H5T_ARRAY:
-	/* Get array base type */
-	super = H5Tget_super(type);
+        case H5T_ARRAY:
+            /* Get array base type */
+            super = H5Tget_super(type);
 
-	/* Print lead-in */
-	indentation(indent);
-	printf("<%sArrayType Ndims=\"",xmlnsprefix);
-	ndims = H5Tget_array_ndims(type);
-	printf("%d\">\n", ndims);
+            /* Print lead-in */
+            indentation(indent);
+            printf("<%sArrayType Ndims=\"",xmlnsprefix);
+            ndims = H5Tget_array_ndims(type);
+            printf("%d\">\n", ndims);
 
-	/* Get array information */
-	H5Tget_array_dims(type, dims, perm);
+            /* Get array information */
+            H5Tget_array_dims(type, dims, perm);
 
-	/* list of dimensions */
-	indent += COL;
-	if (perm != NULL) {
-	    /* for each dimension, list */
-	    for (j = 0; j < ndims; j++) {
-		indentation(indent);
-		printf("<%sArrayDimension DimSize=\"%u\" DimPerm=\"%u\"/>\n",
-		       xmlnsprefix,(int) dims[j], (int) perm[j]);
-	    }
-	} else {
-	    for (j = 0; j < ndims; j++) {
-		indentation(indent);
-		printf("<%sArrayDimension DimSize=\"%u\" DimPerm=\"0\"/>\n",
-		       xmlnsprefix,
-		       (int) dims[j]);
-	    }
-	}
-	indent -= COL;
+            /* list of dimensions */
+            indent += COL;
+            if (perm != NULL) {
+                /* for each dimension, list */
+                for (j = 0; j < ndims; j++) {
+                    indentation(indent);
+                    printf("<%sArrayDimension DimSize=\"%u\" DimPerm=\"%u\"/>\n",
+                           xmlnsprefix,(int) dims[j], (int) perm[j]);
+                }
+            } else {
+                for (j = 0; j < ndims; j++) {
+                    indentation(indent);
+                    printf("<%sArrayDimension DimSize=\"%u\" DimPerm=\"0\"/>\n",
+                           xmlnsprefix,
+                           (int) dims[j]);
+                }
+            }
+            indent -= COL;
 
-	indent += COL;
-	indentation(indent);
-	printf("<%sDataType>\n",xmlnsprefix);
-	indent += COL;
-	xml_print_datatype(super);
-	indent -= COL;
-	indentation(indent);
-	printf("</%sDataType>\n",xmlnsprefix);
-	indent -= COL;
-	indentation(indent);
-	printf("</%sArrayType>\n",xmlnsprefix);
-	/* Close array base type */
-	H5Tclose(super);
-	break;
+            indent += COL;
+            indentation(indent);
+            printf("<%sDataType>\n",xmlnsprefix);
+            indent += COL;
+            xml_print_datatype(super,0);
+            indent -= COL;
+            indentation(indent);
+            printf("</%sDataType>\n",xmlnsprefix);
+            indent -= COL;
+            indentation(indent);
+            printf("</%sArrayType>\n",xmlnsprefix);
+            /* Close array base type */
+            H5Tclose(super);
+            break;
 
-    default:
-	printf("<!-- unknown data type -->");
-	d_status = EXIT_FAILURE;
-	break;
-    }
+        default:
+            printf("<!-- unknown data type -->");
+            d_status = EXIT_FAILURE;
+            break;
+        }
+    } /* end else */
 }
 
 /*-------------------------------------------------------------------------
@@ -4144,7 +4137,7 @@ xml_dump_datatype(hid_t type)
     }
     printf("<%sDataType>\n",xmlnsprefix);
     indent += COL;
-    xml_print_datatype(type);
+    xml_print_datatype(type,0);
     indent -= COL;
     indentation(indent);
     printf("</%sDataType>\n",xmlnsprefix);
@@ -4460,10 +4453,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 static void
 xml_dump_named_datatype(hid_t type, const char *name)
 {
-    int                     nmembers = 1, x;
     int res;
-    hid_t                   mtype;
-    char                   *fname;
     char                   *tmp;
     char * dtxid;
     char * parentxid;
@@ -4512,73 +4502,15 @@ xml_dump_named_datatype(hid_t type, const char *name)
     free(t_name);
 
     indent += COL;
+    indentation(indent);
+    printf("<%sDataType>\n",xmlnsprefix);
 
-    if (H5Tget_class(type) == H5T_COMPOUND) {
-	/* Dump this here for sure.  */
-	nmembers = H5Tget_nmembers(type);
+    indent += COL;
+    xml_print_datatype(type,1);
 
-	indentation(indent);
-	printf("<%sDataType>\n",xmlnsprefix);
-	indentation(indent);
-	printf("<%sCompoundType>\n",xmlnsprefix);
-
-	indent += COL;
-	for (x = 0; x < nmembers; x++) {
-            char *t_fname;
-
-	    fname = H5Tget_member_name(type, x);
-	    mtype = H5Tget_member_type(type, x);
-	    indentation(indent);
-            t_fname = xml_escape_the_name(fname);
-	    printf("<%sField FieldName=\"%s\">\n",xmlnsprefix, t_fname);
-	    free(fname);
-	    free(t_fname);
-
-	    if ((H5Tget_class(mtype) == H5T_COMPOUND)
-		|| (H5Tget_class(mtype) == H5T_VLEN)
-		|| (H5Tget_class(mtype) == H5T_ARRAY)) {
-		indent += COL;
-
-		/*  Nested compound type:  recur */
-		indentation(indent);
-		printf("<%sDataType>\n",xmlnsprefix);
-		indent += COL;
-		xml_print_datatype(mtype);
-		indent -= COL;
-		indentation(indent);
-		printf("</%sDataType>\n",xmlnsprefix);
-		indent -= COL;
-	    } else {
-		indent += COL;
-		indentation(indent);
-		printf("<%sDataType>\n",xmlnsprefix);
-		indent += COL;
-		xml_print_datatype(mtype);
-		indent -= COL;
-		indentation(indent);
-		printf("</%sDataType>\n",xmlnsprefix);
-		indent -= COL;
-	    }
-
-	    indentation(indent);
-	    printf("</%sField>\n",xmlnsprefix);
-	}
-
-	indent -= COL;
-	indentation(indent);
-	printf("</%sCompoundType>\n",xmlnsprefix);
-	indentation(indent);
-	printf("</%sDataType>\n",xmlnsprefix);
-    } else {
-	/* Other data types: call print_datatype */
-        indentation(indent);
-	printf("<%sDataType>\n",xmlnsprefix);
-	indent += COL;
-	xml_print_datatype(type);
-	indent -= COL;
-        indentation(indent);
-	printf("</%sDataType>\n",xmlnsprefix);
-    }
+    indent -= COL;
+    indentation(indent);
+    printf("</%sDataType>\n",xmlnsprefix);
 
     indent -= COL;
     indentation(indent);
@@ -5581,7 +5513,7 @@ xml_print_enum(hid_t type)
 
     indentation(indent);
     printf("<%sDataType>\n",xmlnsprefix);
-    xml_print_datatype(super);
+    xml_print_datatype(super,0);
     indentation(indent);
     printf("</%sDataType>\n",xmlnsprefix);
 
