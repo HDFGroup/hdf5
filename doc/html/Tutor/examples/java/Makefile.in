@@ -1,91 +1,34 @@
-# /*=======================================================================
-# UNIVERSITY OF ILLINOIS (UI), NATIONAL CENTER FOR SUPERCOMPUTING
-# APPLICATIONS (NCSA), Software Distribution Policy for Public Domain
-# Software
+# HDF5 Library Makefile(.in)
+#
+# Copyright (C) 2001 National Center for Supercomputing Applications.
+#                    All rights reserved.
+#
 # 
-# NCSA HDF Version 5 source code and documentation are in the public
-# domain, available without fee for education, research, non-commercial and
-# commercial purposes.  Users may distribute the binary or source code to
-# third parties provided that this statement appears on all copies and that
-# no charge is made for such copies.  
-# 
-# UI MAKES NO REPRESENTATIONS ABOUT THE SUITABILITY OF THE SOFTWARE FOR ANY
-# PURPOSE.  IT IS PROVIDED "AS IS" WITHOUT EXPRESS OR IMPLIED WARRANTY.  THE
-# UI SHALL NOT BE LIABLE FOR ANY DAMAGES SUFFERED BY THE USER OF THIS
-# SOFTWARE.  The software may have been developed under agreements between
-# the UI and the Federal Government which entitle the Government to certain
-# rights.
-# 
-# We ask, but do not require that the following message be include in all
-# derived works:
-# 
-#   Portions developed at the National Center for Supercomputing Applications
-#   at the University of Illinois at Urbana-Champaign.
-# 
-# By copying this program, you, the user, agree to abide by the conditions
-# and understandings with respect to any software which is marked with a
-# public domain notice.
-# 
-# =======================================================================*/
-# 
+top_srcdir=@top_srcdir@
+top_builddir=../../../../..
+srcdir=@srcdir@
+@COMMENCE@
 
+# Subdirectories in build-order (not including `examples')
+SUBDIRS=
+DOCDIR=$(docdir)/hdf5/Tutor/examples/java
 
-JAVAC           = @JAVAC@
-FIND            = @FIND@
+# Public doc files (to be installed)...
+PUB_DOCS=Compound.java Copy.java CreateAttribute.java CreateDataset.java   \
+	 CreateFile.java CreateFileInput.java CreateGroup.java             \
+	 CreateGroupAR.java CreateGroupDataset.java DatasetRdWt.java       \
+         HyperSlab.java Makefile.in.txt Makefile.txt README readme.html    \
+	 runCompound.sh runCompound.sh.in runCopy.sh runCopy.sh.in         \
+	 runCreateAttribute.sh runCreateAttribute.sh.in                    \
+	 runCreateDataset.sh runCreateDataset.sh.in runCreateFile.sh       \
+	 runCreateFile.sh.in runCreateFileInput.sh                         \
+	 runCreateFileInput.sh.in runCreateGroup.sh runCreateGroup.sh.in   \
+	 runCreateGroupAR.sh runCreateGroupAR.sh.in                        \
+	 runCreateGroupDataset.sh runCreateGroupDataset.sh.in              \
+	 runDatasetRdWt.sh runDatasetRdWt.sh.in runHyperSlab.sh            \
+	 runHyperSlab.sh.in
 
-CLASSPATH=@CLASSPATH@                                                         
+# Other doc files (not to be installed)...
+PRIVATE_DOCS=
 
-
-.SUFFIXES: .java .class
-
-.java.class:
-	$(JAVAC) -classpath $(CLASSPATH) $<
-
-tutorial: ./Compound.class  \
-	./Copy.class \
-	./CreateAttribute.class \
-	./CreateDataset.class \
-	./CreateFile.class \
-	./CreateFileInput.class \
-	./CreateGroup.class \
-	./CreateGroupAR.class \
-	./CreateGroupDataset.class \
-	./DatasetRdWt.class \
-	./HyperSlab.class
-	chmod u+x *.sh
-
-clean: clean-classes 
-
-distclean: clean-classes clean-data
-	rm config.cache config.status config.log 
-	rm -rf ./Makefile
-
-clean-classes:
-	$(FIND) . \( -name '#*' -o -name '*~' -o -name '*.class' \) -exec rm -f {} \; ;\
-
-clean-data:
-	rm -rf *.h5 
-
-Compound:	./Compound.class 
-Copy:	./Copy.class
-CreateAttribute:	./CreateAttribute.class
-CreateDataset:	./CreateDataset.class
-CreateFile:	./CreateFile.class
-CreateFileInput:	./CreateFileInput.class
-CreateGroup:	./CreateGroup.class
-CreateGroupAR:	./CreateGroupAR.class
-CreateGroupDataset:	./CreateGroupDataset.class
-DatasetRdWt:	./DatasetRdWt.class
-HyperSlab:	./HyperSlab.class
-
-CLASSES= ./Compound.class  \
-	./Copy.class \
-	./CreateAttribute.class \
-	./CreateDataset.class \
-	./CreateFileInput.class \
-	./CreateFile.class \
-	./CreateGroup.class \
-	./CreateGroupAR.class \
-	./CreateGroupDataset.class \
-	./DatasetRdWt.class \
-	./HyperSlab.class
+@CONCLUDE@
