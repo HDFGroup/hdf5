@@ -149,6 +149,7 @@ typedef struct H5S_conv_t {
     /* Read from file to application w/o intermediate scratch buffer */
     herr_t (*read)(H5F_t *f, const struct H5O_layout_t *layout,
 		   const struct H5O_pline_t *pline,
+		   const struct H5O_fill_t *fill,
 		   const struct H5O_efl_t *efl, size_t elmt_size,
 		   const H5S_t *file_space, const H5S_t *mem_space,
 		   hid_t dxpl_id, void *buf/*out*/,
@@ -157,11 +158,12 @@ typedef struct H5S_conv_t {
 
     /* Write directly from app buffer to file */
     herr_t (*write)(H5F_t *f, const struct H5O_layout_t *layout,
-		    const struct H5O_pline_t *pline,
-		    const struct H5O_efl_t *efl, size_t elmt_size,
-		    const H5S_t *file_space, const H5S_t *mem_space,
-		    hid_t dxpl_id, const void *buf,
-		    hbool_t *must_convert/*out*/);
+		   const struct H5O_pline_t *pline,
+		   const struct H5O_fill_t *fill,
+		   const struct H5O_efl_t *efl, size_t elmt_size,
+		   const H5S_t *file_space, const H5S_t *mem_space,
+		   hid_t dxpl_id, const void *buf,
+		   hbool_t *must_convert/*out*/);
     
 #ifdef H5S_DEBUG
     struct {
@@ -240,6 +242,7 @@ __DLL__ herr_t H5S_sel_iter_release(const H5S_t *space,
 __DLL__ herr_t H5S_mpio_spaces_read(H5F_t *f,
 				    const struct H5O_layout_t *layout,
 				    const struct H5O_pline_t *pline,
+		                    const struct H5O_fill_t *fill,
 				    const struct H5O_efl_t *efl,
 				    size_t elmt_size, const H5S_t *file_space,
 				    const H5S_t *mem_space, hid_t dxpl_id,
@@ -250,6 +253,7 @@ __DLL__ herr_t H5S_mpio_spaces_read(H5F_t *f,
 __DLL__ herr_t H5S_mpio_spaces_write(H5F_t *f,
 				     const struct H5O_layout_t *layout,
 				     const struct H5O_pline_t *pline,
+		                     const struct H5O_fill_t *fill,
 				     const struct H5O_efl_t *efl,
 				     size_t elmt_size, const H5S_t *file_space,
 				     const H5S_t *mem_space, hid_t dxpl_id,

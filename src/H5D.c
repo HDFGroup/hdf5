@@ -1712,6 +1712,7 @@ printf("%s: check 1.1, \n",FUNC);
 #endif
         status = (sconv->read)(dataset->ent.file, &(dataset->layout),
 			       &(dataset->create_parms->pline),
+			       &(dataset->create_parms->fill),
 			       &(dataset->create_parms->efl),
 			       H5T_get_size (dataset->type), file_space,
 			       mem_space, dxpl_id, buf/*out*/,
@@ -2194,6 +2195,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif
 	status = (sconv->write)(dataset->ent.file, &(dataset->layout),
 				&(dataset->create_parms->pline),
+			        &(dataset->create_parms->fill),
 				&(dataset->create_parms->efl),
 				H5T_get_size (dataset->type), file_space,
 				mem_space, dxpl_id, buf, &must_convert/*out*/);
