@@ -25,6 +25,7 @@
  */
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 
 /* Disable certain warnings in PC-Lint: */

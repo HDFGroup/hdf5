@@ -16,6 +16,7 @@
 #include "H5TB.h"
 
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #define TEST_FILE_BE "test_table_be.hdf5"

@@ -25,6 +25,7 @@
  */
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* Disable certain warnings in PC-Lint: */
 /*lint --emacro( {534, 830}, H5P_DEFAULT, H5P_FILE_ACCESS, H5P_DATASET_XFER) */

@@ -16,6 +16,7 @@
 #include "H5DS.h"
 #include "H5LT.h"
 #include <stdlib.h>
+#include <string.h>
 
 /* operator functions */
 static herr_t verifiy_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
