@@ -18,7 +18,7 @@ CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 RUNTEST=$(LT_RUN)
 TEST_PROGS=testhdf5 lheap ohdr stab gheap hyperslab istore bittests dtypes   \
       dsets cmpd_dset extend external links unlink big mtime fillval mount   \
-      flush1 flush2 enum gass_write gass_read gass_append
+      flush1 flush2 enum gass_write gass_read gass_append dpss_read dpss_write
 TIMINGS=iopipe chunk ragged overhead
 
 ## The libh5test.a library provides common support code for the tests. We link
@@ -57,7 +57,7 @@ TEST_SRC=big.c bittests.c chunk.c cmpd_dset.c dsets.c dtypes.c extend.c      \
          iopipe.c istore.c lheap.c links.c mount.c mtime.c ohdr.c overhead.c \
 	 ragged.c stab.c tattr.c testhdf5.c tfile.c th5s.c tmeta.c trefer.c  \
 	 tselect.c tvltypes.c tvlstr.c unlink.c enum.c gass_write.c gass_read.c \
-	 gass_append.c
+	 gass_append.c dpss_read.c dpss_write.c
 
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
@@ -163,5 +163,11 @@ gass_read: gass_read.lo
 
 gass_append: gass_append.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ gass_append.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+dpss_read: dpss_read.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ dpss_read.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+dpss_write: dpss_write.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ dpss_write.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

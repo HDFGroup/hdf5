@@ -355,7 +355,6 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
     if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_RDWR) && (flags & H5F_ACC_EXCL)) {
       if ((fd = globus_gass_open (filename, O_RDWR|O_TRUNC)) < 0)
         HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed");
-      
     }
     else if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_RDWR) && (flags & H5F_ACC_TRUNC)) {
       if ((fd = globus_gass_open (filename, O_RDWR|O_TRUNC)) < 0)

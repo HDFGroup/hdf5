@@ -143,6 +143,9 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
 #endif
+#ifdef COALESCE_READS
+    H5F_xfer_t *xfer_parms;                     /*transfer property list*/
+#endif
    
     FUNC_ENTER(H5F_arr_read, FAIL);
 
@@ -270,7 +273,21 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 	}
 #endif
 
+#ifdef COALESCE_READS
+        /* Get the dataset transfer property list */
+        if (H5P_DEFAULT == dxpl_id) {
+            xfer_parms = &H5F_xfer_dflt;
+        } else if (H5P_DATA_XFER != H5P_get_class (dxpl_id) ||
+               NULL == (xfer_parms = H5I_object (dxpl_id))) {
+            HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+        }
+
+	for (z=0, xfer_parms->gather_reads = nelmts - 1;
+             z<nelmts;
+             z++, xfer_parms->gather_reads--) {
+#else
 	for (z=0; z<nelmts; z++) {
+#endif
 
 	    /* Read from file */
 	    if (efl && efl->nused>0) {

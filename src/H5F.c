@@ -25,6 +25,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5FDfamily.h>		/*family of files			  */
 #include <H5FDmpio.h>		/*MPI-2 I/O				  */
 #include <H5FDgass.h>       /*GASS I/O                                */
+#include <H5FDdpss.h>           /*DPSS I/O                                */
 #include <H5FDmulti.h>		/*multiple files partitioned by mem usage */
 #include <H5FDsec2.h>		/*Posix unbuffered I/O			*/
 #include <H5FDstdio.h>		/* Standard C buffered I/O		*/
@@ -95,6 +96,10 @@ H5F_xfer_t	H5F_xfer_dflt = {
     NULL,                   	/*No information needed for free() calls    */
     -2,				/*See H5Pget_driver()			    */
     NULL,			/*No file driver-specific information yet   */
+#ifdef COALESCE_READS
+    0,                          /*coalesce single reads into a read         */
+                                /*transaction                               */
+#endif
 };
 
 /*
@@ -208,6 +213,9 @@ H5F_init_interface(void)
 	if ((status=H5FD_FAMILY)<0) goto end_registration;
 #ifdef H5_HAVE_GASS
 	if ((status=H5FD_GASS)<0) goto end_registration;
+#endif
+#ifdef HAVE_DPSS
+	if ((status=H5FD_DPSS)<0) goto end_registration;
 #endif
 	if ((status=H5FD_CORE)<0) goto end_registration;
 	if ((status=H5FD_MULTI)<0) goto end_registration;

@@ -274,6 +274,10 @@ typedef struct H5F_xfer_t {
     void		*free_info;	/*VL datatype free information	     */
     hid_t		driver_id;	/*File driver ID		     */
     void		*driver_info;	/*File driver specific information   */
+#ifdef COALESCE_READS
+    uintn               gather_reads;   /*coalesce single reads into a read  */
+                                        /*transaction                        */
+#endif
 } H5F_xfer_t;
 
 /* The raw data chunk cache */
