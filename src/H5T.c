@@ -7512,7 +7512,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5T_is_immutable
  *
- * Purpose:     Check is a datatype is immutable. 
+ * Purpose:     Check if a datatype is immutable. 
  *
  * Return:      TRUE 
  *
@@ -7522,6 +7522,9 @@ done:
  *              Friday, Dec 7, 2001 
  *
  * Modifications:
+	*              Pedro Vicente 
+ *              Tuesday, Sep 3, 2002
+	*              Added 'else'
  *
  *-------------------------------------------------------------------------
  */
@@ -7535,11 +7538,50 @@ H5T_is_immutable(H5T_t *dt)
     assert(dt);
 
     if(dt->state == H5T_STATE_IMMUTABLE)
-	ret_value = TRUE;
+	     ret_value = TRUE;
+				else
+					ret_value = FALSE;
 
 done:
     FUNC_LEAVE(ret_value);
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_is_named
+ *
+ * Purpose:     Check if a datatype is named. 
+ *
+ * Return:      TRUE 
+ *
+ *              FALSE 
+ *
+ * Programmer:  Pedro Vicente 
+ *              Tuesday, Sep 3, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+htri_t
+H5T_is_named(H5T_t *dt)
+{
+    htri_t ret_value = FALSE;
+
+    FUNC_ENTER_NOAPI(H5T_is_named, FAIL);
+
+    assert(dt);
+
+    if( dt->state == H5T_STATE_OPEN || dt->state == H5T_STATE_NAMED )
+	     ret_value = TRUE;
+				else
+					ret_value = FALSE;
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
 
 
 /*--------------------------------------------------------------------------

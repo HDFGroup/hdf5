@@ -2594,6 +2594,8 @@ done:
  *-------------------------------------------------------------------------
  */
 
+
+
 herr_t H5G_replace_name( int type, H5G_entry_t *loc, const char *src_name, 
                         const char *dst_name, int op )
 {
@@ -2774,15 +2776,15 @@ done:
   FUNC_ENTER_NOAPI(H5G_replace_ent, FAIL);
   
   assert(obj_ptr);
-  
+ 
   /* avoid no named datatypes */
-  if( names->obj_type==H5I_DATATYPE && H5T_is_immutable((H5T_t*)obj_ptr)) 
+  if( names->obj_type==H5I_DATATYPE && !H5T_is_named((H5T_t*)obj_ptr)) 
   {
    /* Do not exit loop */
    ret_value = SUCCEED;
    goto done;
   }
-  
+ 
   /* Get the symbol table entry */
   switch(names->obj_type) {
   case H5I_GROUP:
@@ -2800,9 +2802,8 @@ done:
     "unknown data object");
   }
 
-		if( !ent) 
-			goto done;
-  
+		assert( ent );
+ 
   
   /* Check if is a mounted file */
   if(ent->file->mtab.parent) {
