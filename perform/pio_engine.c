@@ -1285,7 +1285,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
         if (flags & (PIO_CREATE | PIO_WRITE)) {
             fd->h5fd = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
         } else {
-            fd->h5fd = H5Fopen(fname, H5P_DEFAULT, acc_tpl);
+            fd->h5fd = H5Fopen(fname, H5F_ACC_RDONLY, acc_tpl);
         }
 
         hrc = H5Pclose(acc_tpl);
