@@ -287,8 +287,7 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     assert(buf);
 
     /* check for writing past the end of file marker */
-    tmp_addr = addr;
-    H5F_addr_inc(&tmp_addr, (hsize_t)size);
+    tmp_addr = addr + (hsize_t)size;
     if (H5F_addr_gt(tmp_addr, lf->eof))
         HRETURN_ERROR(H5E_IO, H5E_OVERFLOW, ret_value, "write past end of logical file");
 
@@ -344,7 +343,7 @@ H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
     assert(lf && lf->type);
 
     /* Make sure the last block of the file has been allocated on disk */
-    H5F_addr_reset(&last_byte);
+    last_byte = 0;
     if (!lf->eof_written && H5F_addr_defined(lf->eof) &&
 	H5F_addr_gt(lf->eof, last_byte)) {
 	last_byte = lf->eof;
@@ -553,7 +552,7 @@ H5F_low_extend(H5F_low_t *lf, const H5F_access_t *access_parms, intn op,
 	}
     } else {
 	*addr_p = lf->eof;
-	H5F_addr_inc(&(lf->eof), size);
+	lf->eof += size;
     }
 
     FUNC_LEAVE(SUCCEED);
@@ -615,8 +614,7 @@ H5F_low_alloc (H5F_low_t *lf, intn op, hsize_t alignment, hsize_t threshold,
 	    ret_value = 1;
 	} else if (blk->size>wasted && blk->size-wasted>=size) {
 	    /* over-satisfied */
-	    *addr_p = blk->addr;
-	    H5F_addr_inc (addr_p, wasted);
+	    *addr_p = blk->addr + wasted;
 	    ret_value = 0;
 	}
     }
@@ -651,39 +649,6 @@ H5F_low_seteof(H5F_low_t *lf, haddr_t addr)
     lf->eof = addr;
 
     FUNC_LEAVE(SUCCEED);
-}
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_addr_cmp
- *
- * Purpose:	Compares two addresses.
- *
- * Return:	Success:	<0 if A1<A2
- *				=0 if A1=A2
- *				>0 if A1>A2
- *
- *		Failure:	never fails
- *
- * Programmer:	Robb Matzke
- *		Friday, November  7, 1997
- *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The A1 and A2 arguments are passed by value.
- *-------------------------------------------------------------------------
- */
-intn
-H5F_addr_cmp(haddr_t a1, haddr_t a2)
-{
-    FUNC_ENTER(H5F_addr_cmp, FAIL);
-
-    assert(H5F_addr_defined(a1));
-    assert(H5F_addr_defined(a2));
-
-    if (a1 < a2) HRETURN(-1);
-    if (a1 > a2) HRETURN(1);
-
-    FUNC_LEAVE(0);
 }
 
 
@@ -774,110 +739,7 @@ H5F_addr_decode(H5F_t *f, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*out*/)
 	    assert(0 == **pp);	/*overflow */
 	}
     }
-    if (all_zero) H5F_addr_undef(addr_p);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_addr_pow2
- *
- * Purpose:	Returns an address which is a power of two.
- *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *		Friday, November  7, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void
-H5F_addr_pow2(uintn n, haddr_t *addr_p/*out*/)
-{
-    assert(addr_p);
-    assert(n < 8*sizeof(haddr_t));
-
-    *addr_p = 1;
-    *addr_p <<= n;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_addr_inc
- *
- * Purpose:	Increments an address by some number of bytes.
- *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *		Friday, November  7, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void
-H5F_addr_inc(haddr_t *addr_p/*in,out*/, hsize_t inc)
-{
-    assert(addr_p && H5F_addr_defined(*addr_p));
-    assert(*addr_p <= *addr_p + inc);
-    
-    *addr_p += inc;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_addr_adj
- *
- * Purpose:	Adjusts an address by adding or subtracting some amount.
- *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *		Monday, April  6, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-void
-H5F_addr_adj(haddr_t *addr_p/*in,out */, hssize_t adj)
-{
-#ifndef NDEBUG
-    assert(addr_p && H5F_addr_defined(*addr_p));
-    if (adj>=0) {
-	assert(*addr_p <= *addr_p + adj);
-    } else {
-	assert (*addr_p > *addr_p + adj);
-    }
-#endif
-    
-    *addr_p += adj;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_addr_add
- *
- * Purpose:	Adds two addresses and puts the result in the first argument.
- *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *		Friday, November  7, 1997
- *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The A2 argument is passed by value.
- *-------------------------------------------------------------------------
- */
-void
-H5F_addr_add(haddr_t *a1/*in,out*/, haddr_t a2)
-{
-    assert(a1 && H5F_addr_defined(*a1));
-    assert(H5F_addr_defined(a2));
-    *a1 += a2;
+    if (all_zero) *addr_p = H5F_ADDR_UNDEF;
 }
 
 

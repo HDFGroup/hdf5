@@ -327,7 +327,6 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 
     member_size = lf->u.fam.memb_size;
     membno = H5F_FAM_MEMBNO(lf, addr);
-    H5F_addr_reset (&offset);
     offset = H5F_FAM_OFFSET(lf, addr);
     cur_addr = addr;
 
@@ -347,7 +346,7 @@ H5F_fam_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 	    buf += nbytes;
 	    size -= nbytes;
 	    membno++;
-	    H5F_addr_reset (&offset);
+	    offset = 0;
 	}
     }
 
@@ -404,7 +403,6 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     memb_type = H5F_low_class (access_parms->u.fam.memb_access->driver);
     member_size = lf->u.fam.memb_size;
     membno = H5F_FAM_MEMBNO(lf, addr);
-    H5F_addr_reset (&offset);
     offset = H5F_FAM_OFFSET(lf, addr);
     cur_addr = addr;
 
@@ -444,8 +442,7 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 		 * maximum possible value.
 		 */
 		if (i < membno) {
-		    H5F_addr_reset(&max_addr);
-		    H5F_addr_inc(&max_addr, member_size);
+		    max_addr = member_size;
 		    H5F_low_seteof(member, max_addr);
 		}
 		lf->u.fam.memb[lf->u.fam.nmemb++] = member;
@@ -456,8 +453,7 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	 * Make sure the logical eof is large enough to handle the request.
 	 * Do not decrease the EOF
 	 */
-	max_addr = cur_addr;
-	H5F_addr_inc(&max_addr, (hsize_t)nbytes);
+	max_addr = cur_addr + (hsize_t)nbytes;
 	if (H5F_addr_gt(max_addr, lf->u.fam.memb[membno]->eof)) {
 	    H5F_low_seteof(lf->u.fam.memb[membno], max_addr);
 	}
@@ -472,7 +468,7 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	buf += nbytes;
 	size -= nbytes;
 	membno++;
-	H5F_addr_reset (&offset);
+	offset = 0;
     }
 
     FUNC_LEAVE(SUCCEED);
@@ -514,11 +510,9 @@ H5F_fam_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
      * end of the member) and then writing it back.
      */
     max_offset = lf->u.fam.memb_size - 1;
-    H5F_addr_reset(&addr1);
-    H5F_addr_inc(&addr1, max_offset);
+    addr1 = max_offset;
     H5F_low_size(lf->u.fam.memb[0], &addr2/*out*/);/*remember logical eof */
-    addr3 = addr1;
-    H5F_addr_inc(&addr3, (hsize_t)1);
+    addr3 = addr1 + 1;
     H5F_low_seteof(lf->u.fam.memb[0], addr3);	/*prevent a warning */
     if (H5F_low_read(lf->u.fam.memb[0], access_parms->u.fam.memb_access,
 		     &H5F_xfer_dflt, addr1, 1, buf) < 0) {

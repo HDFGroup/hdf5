@@ -50,11 +50,10 @@ main(int argc, char *argv[])
 {
     hid_t	fid, plist=H5P_DEFAULT;
     H5F_t       *f;
-    haddr_t     addr;
+    haddr_t     addr=0, extra=0;
     uint8_t     sig[16];
     intn        i, ndims;
     herr_t      status = SUCCEED;
-    haddr_t     extra;
 
     /*
      * Open the file and get the file descriptor.
@@ -75,8 +74,6 @@ main(int argc, char *argv[])
     /*
      * Parse command arguments.
      */
-    H5F_addr_reset(&addr);
-    H5F_addr_reset(&extra);
     if (argc > 2) {
         printf("New address: %s\n", argv[2]);
         addr = HDstrtoll(argv[2], NULL, 0);

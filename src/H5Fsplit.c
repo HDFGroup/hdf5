@@ -515,8 +515,7 @@ H5F_split_alloc (H5F_low_t *lf, intn op, hsize_t alignment, hsize_t threshold,
 	ret_value = 1;
     } else if (blk->size>wasted && blk->size-wasted>=size) {
 	/* over-satisfied */
-	*addr_p = blk->addr;
-	H5F_addr_inc (addr_p, wasted);
+	*addr_p = blk->addr + wasted;
 	ret_value = 0;
     }
     

@@ -112,7 +112,7 @@ H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr_p/*out*/)
     /* allocate file version */
     total_size = H5HL_SIZEOF_HDR(f) + size_hint;
     if (H5MF_alloc(f, H5MF_META, (hsize_t)total_size, addr_p/*out*/) < 0) {
-	H5F_addr_undef(addr_p);
+	*addr_p = H5F_ADDR_UNDEF;
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		      "unable to allocate file memory");
     }
@@ -122,8 +122,7 @@ H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr_p/*out*/)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed");
     }
-    heap->addr = *addr_p;
-    H5F_addr_inc(&(heap->addr), (hsize_t)H5HL_SIZEOF_HDR(f));
+    heap->addr = *addr_p + (hsize_t)H5HL_SIZEOF_HDR(f);
     heap->disk_alloc = size_hint;
     heap->mem_alloc = size_hint;
     if (NULL==(heap->chunk = H5MM_calloc(H5HL_SIZEOF_HDR(f) + size_hint))) {
@@ -375,8 +374,7 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 	/*
 	 * Copy buffer to disk.
 	 */
-	hdr_end_addr = addr;
-	H5F_addr_inc(&hdr_end_addr, (hsize_t)H5HL_SIZEOF_HDR(f));
+	hdr_end_addr = addr + (hsize_t)H5HL_SIZEOF_HDR(f);
 	if (H5F_addr_eq(heap->addr, hdr_end_addr)) {
 	    /* The header and data are contiguous */
 #ifdef HAVE_PARALLEL

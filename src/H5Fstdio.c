@@ -109,13 +109,13 @@ H5F_stdio_open(const char *name, const H5F_access_t UNUSED *access_parms,
     lf->u.stdio.f = f;
     lf->u.stdio.op = H5F_OP_SEEK;
     lf->u.stdio.cur = 0;
-    H5F_addr_reset(&(lf->eof));
+    lf->eof = 0;
     if (HDfseek(lf->u.stdio.f, 0, SEEK_END) < 0) {
 	lf->u.stdio.op = H5F_OP_UNKNOWN;
     } else {
 	hssize_t x = HDftell (lf->u.stdio.f);
 	assert (x>=0);
-	H5F_addr_inc(&(lf->eof), (hsize_t)x);
+	lf->eof += (hsize_t)x;
     }
 
     /* The unique key */

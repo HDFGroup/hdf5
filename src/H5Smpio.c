@@ -571,15 +571,14 @@ H5S_mpio_spaces_xfer (H5F_t *f, const struct H5O_layout_t *layout,
     f->shared->access_parms->u.mpio.ftype = mpi_file_type;
 
     /* calculate the absolute base addr (i.e., the file view disp) */
-    disp = f->shared->base_addr;
-    H5F_addr_add(&disp, layout->addr);
+    disp = f->shared->base_addr + layout->addr;
     f->shared->access_parms->u.mpio.disp = disp;
 #ifdef H5Smpi_DEBUG
     fprintf(stdout, "spaces_xfer: disp=%Hu\n", disp.offset );
 #endif
 
     /* Effective address determined by base addr and the MPI file type */
-    H5F_addr_reset( &addr );	/* set to 0 */
+    addr = 0;
 
     /* request a dataspace xfer (instead of an elementary byteblock xfer) */
     f->shared->access_parms->u.mpio.use_types = 1;

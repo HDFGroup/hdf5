@@ -1010,7 +1010,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	*obj_ent = *loc_ent;
     }
     HDmemset(grp_ent, 0, sizeof(H5G_entry_t));
-    H5F_addr_undef(&(grp_ent->header));
+    grp_ent->header = H5F_ADDR_UNDEF;
 
     /* traverse the name */
     while ((name = H5G_component(name, &nchars)) && *name) {
@@ -1040,7 +1040,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	 */
 	*grp_ent = *obj_ent;
 	HDmemset(obj_ent, 0, sizeof(H5G_entry_t));
-	H5F_addr_undef(&(obj_ent->header));
+	obj_ent->header = H5F_ADDR_UNDEF;
 
 	if (H5G_stab_find(grp_ent, comp, obj_ent/*out*/)<0) {
 	    /*
@@ -1926,7 +1926,7 @@ H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
 	 * undefined and the cache contains the link-value offset.
 	 */
 	HDmemset (&cur_obj, 0, sizeof cur_obj);
-	H5F_addr_undef (&(cur_obj.header));
+	cur_obj.header = H5F_ADDR_UNDEF;
 	cur_obj.file = grp_ent.file;
 	cur_obj.type = H5G_CACHED_SLINK;
 	cur_obj.cache.slink.lval_offset = offset;

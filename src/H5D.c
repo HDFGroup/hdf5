@@ -819,7 +819,7 @@ H5D_new(const H5D_create_t *create_parms)
         ret_value->create_parms = H5P_copy (H5P_DATASET_CREATE,
 					    &H5D_create_dflt);
     }
-    H5F_addr_undef(&(ret_value->ent.header));
+    ret_value->ent.header = H5F_ADDR_UNDEF;
 
     /* Success */
 
@@ -1039,7 +1039,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 			"unable to initialize storage");
 	}
     } else {
-	H5F_addr_undef (&(new_dset->layout.addr));
+	new_dset->layout.addr = H5F_ADDR_UNDEF;
     }
 
     /* Update layout message */
@@ -1870,7 +1870,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* support parallel access of that yet */
     if (H5F_LOW_MPIO==dataset->ent.file->shared->access_parms->driver &&
             H5T_get_class(mem_type)==H5T_VLEN) {
-        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
+        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "Parallel IO does not support writing VL datatypes yet");
     }
 #endif
@@ -1881,7 +1881,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (H5F_LOW_MPIO==dataset->ent.file->shared->access_parms->driver &&
             H5T_get_class(mem_type)==H5T_REFERENCE &&
             H5T_get_ref_type(mem_type)==H5R_DATASET_REGION) {
-        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
+        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "Parallel IO does not support writing VL datatypes yet");
     }
 #endif
@@ -2443,7 +2443,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 	    H5V_array_fill(buf, dset->create_parms->fill.buf,
 			   dset->create_parms->fill.size, ptsperbuf);
 	    if (dset->create_parms->efl.nused) {
-		H5F_addr_reset(&addr);
+		addr = 0;
 	    } else {
 		addr = dset->layout.addr;
 	    }
@@ -2465,7 +2465,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 		    }
 		}
 		npoints -= MIN(ptsperbuf, npoints);
-		H5F_addr_inc(&addr, size);
+		addr += size;
 	    }
 	} else if (dset->create_parms->fill.buf) {
 	    /*

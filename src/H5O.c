@@ -169,8 +169,7 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
-    tmp_addr = ent->header;
-    H5F_addr_inc(&tmp_addr, (hsize_t)H5O_SIZEOF_HDR(f));
+    tmp_addr = ent->header + (hsize_t)H5O_SIZEOF_HDR(f);
     oh->chunk[0].dirty = TRUE;
     oh->chunk[0].addr = tmp_addr;
     oh->chunk[0].size = size_hint;
@@ -376,8 +375,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
     UINT32DECODE(p, oh->nlink);
 
     /* decode first chunk info */
-    chunk_addr = addr;
-    H5F_addr_inc(&chunk_addr, (hsize_t)H5O_SIZEOF_HDR(f));
+    chunk_addr = addr + (hsize_t)H5O_SIZEOF_HDR(f);
     UINT32DECODE(p, chunk_size);
 
     /* build the message array */
@@ -460,7 +458,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 	assert(p == oh->chunk[chunkno].image + chunk_size);
 
 	/* decode next object header continuation message */
-	for (H5F_addr_undef(&chunk_addr);
+	for (chunk_addr=H5F_ADDR_UNDEF;
 	     !H5F_addr_defined(chunk_addr) && curmesg < oh->nmesgs;
 	     curmesg++) {
 	    if (H5O_CONT_ID == oh->mesg[curmesg].type->id) {
@@ -1790,7 +1788,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
     }
     chunkno = oh->nchunks++;
     oh->chunk[chunkno].dirty = TRUE;
-    H5F_addr_undef(&(oh->chunk[chunkno].addr));
+    oh->chunk[chunkno].addr = H5F_ADDR_UNDEF;
     oh->chunk[chunkno].size = size;
     if (NULL==(oh->chunk[chunkno].image = p = H5MM_calloc(size))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
@@ -1873,7 +1871,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
-    H5F_addr_undef(&(cont->addr));
+    cont->addr = H5F_ADDR_UNDEF;
     cont->size = 0;
     cont->chunkno = chunkno;
     oh->mesg[found_null].native = cont;
@@ -2125,8 +2123,7 @@ H5O_debug(H5F_t *f, haddr_t addr, FILE *stream, intn indent, intn fwidth)
 	HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Address:", oh->chunk[i].addr);
 
-	tmp_addr = addr;
-	H5F_addr_inc(&tmp_addr, (hsize_t)H5O_SIZEOF_HDR(f));
+	tmp_addr = addr + (hsize_t)H5O_SIZEOF_HDR(f);
 	if (0 == i && H5F_addr_ne(oh->chunk[i].addr, tmp_addr)) {
 	    HDfprintf(stream, "*** WRONG ADDRESS!\n");
 	}

@@ -265,8 +265,7 @@ H5HG_load (H5F_t *f, haddr_t addr, const void UNUSED *udata1,
      * collection now.
      */
     if (heap->size > H5HG_MINSIZE) {
-	haddr_t next_addr = addr;
-	H5F_addr_inc (&next_addr, (hsize_t)H5HG_MINSIZE);
+	haddr_t next_addr = addr + (hsize_t)H5HG_MINSIZE;
 	if (NULL==(heap->chunk = H5MM_realloc (heap->chunk, heap->size))) {
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			 "memory allocation failed");

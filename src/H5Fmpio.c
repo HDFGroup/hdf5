@@ -384,7 +384,7 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
     }
     lf->u.mpio.f = fh;
     H5F_mpio_tas_allsame( lf, FALSE );          /* initialize */
-    H5F_addr_reset(&(lf->eof));
+    lf->eof = 0;
     mpierr = MPI_File_get_size( fh, &size );
     if (MPI_SUCCESS != mpierr) {
 	MPI_File_close( &(lf->u.mpio.f) );
@@ -397,7 +397,7 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
 	    HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL,
 			  "couldn't convert size to haddr_t" );
 	}
-        H5F_low_seteof( lf, &new_eof );
+        H5F_low_seteof(lf, new_eof);
     }
 
     /* The unique key */
@@ -561,7 +561,7 @@ H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
 	buf_type = access_parms->u.mpio.btype;
 	file_type = access_parms->u.mpio.ftype;
 	if (SUCCEED !=
-	    H5F_haddr_to_MPIOff(&(access_parms->u.mpio.disp), &mpi_disp)) {
+	    H5F_haddr_to_MPIOff(access_parms->u.mpio.disp, &mpi_disp)) {
 	    HRETURN_ERROR(H5E_IO, H5E_BADTYPE, FAIL,
 			  "couldn't convert addr to MPIOffset" );
 	}
@@ -793,8 +793,7 @@ H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
 	HRETURN_ERROR(H5E_IO, H5E_BADTYPE, FAIL,
 		      "couldn't convert addr to MPIOffset" );
     }
-    if (SUCCEED!=H5F_haddr_to_MPIOff(&(access_parms->u.mpio.disp),
-				     &mpi_disp)) {
+    if (SUCCEED!=H5F_haddr_to_MPIOff(access_parms->u.mpio.disp, &mpi_disp)) {
 	HRETURN_ERROR(H5E_IO, H5E_BADTYPE, FAIL,
 		      "couldn't convert addr to MPIOffset" );
     }
@@ -837,7 +836,7 @@ H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
 	buf_type = access_parms->u.mpio.btype;
 	file_type = access_parms->u.mpio.ftype;
 	if (SUCCEED !=
-	    H5F_haddr_to_MPIOff(&(access_parms->u.mpio.disp), &mpi_disp)) {
+	    H5F_haddr_to_MPIOff(access_parms->u.mpio.disp, &mpi_disp)) {
 	    HRETURN_ERROR(H5E_IO, H5E_BADTYPE, FAIL,
 			  "couldn't convert addr to MPIOffset" );
 	}

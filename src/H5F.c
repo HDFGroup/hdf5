@@ -216,7 +216,7 @@ H5F_init_interface(void)
     H5F_access_dflt.u.mpio.info = MPI_INFO_NULL;
     H5F_access_dflt.u.mpio.btype = MPI_DATATYPE_NULL;
     H5F_access_dflt.u.mpio.ftype = MPI_DATATYPE_NULL;
-    H5F_addr_reset(&(H5F_access_dflt.u.mpio.disp));
+    H5F_access_dflt.u.mpio.disp = 0;
     H5F_access_dflt.u.mpio.use_types = 0;
     H5F_access_dflt.u.mpio.old_use_types = 0;
 #elif (H5F_LOW_DFLT == H5F_LOW_SPLIT)
@@ -554,7 +554,7 @@ H5F_locate_signature(H5F_low_t *f_handle, const H5F_access_t *access_parms,
     FUNC_ENTER(H5F_locate_signature, FAIL);
 
     H5F_low_size(f_handle, &max_addr);
-    H5F_addr_reset(addr_p);
+    *addr_p = 0;
     while (H5F_addr_lt(*addr_p, max_addr)) {
         if (H5F_low_read(f_handle, access_parms, &H5F_xfer_dflt, *addr_p,
                  H5F_SIGNATURE_LEN, buf) < 0) {
@@ -564,7 +564,7 @@ H5F_locate_signature(H5F_low_t *f_handle, const H5F_access_t *access_parms,
             ret_value=SUCCEED;
             break;
         }
-        H5F_addr_pow2(n++, addr_p);
+	*addr_p = H5F_addr_pow2(n++);
     }
 
     FUNC_LEAVE(ret_value);
@@ -672,10 +672,10 @@ H5F_new(H5F_file_t *shared, const H5F_create_t *fcpl, const H5F_access_t *fapl)
 	f->shared = shared;
     } else {
 	f->shared = H5MM_calloc(sizeof(H5F_file_t));
-	H5F_addr_undef(&(f->shared->boot_addr));
-	H5F_addr_undef(&(f->shared->base_addr));
-	H5F_addr_undef(&(f->shared->freespace_addr));
-	H5F_addr_undef(&(f->shared->hdf5_eof));
+	f->shared->boot_addr = H5F_ADDR_UNDEF;
+	f->shared->base_addr = H5F_ADDR_UNDEF;
+	f->shared->freespace_addr = H5F_ADDR_UNDEF;
+	f->shared->hdf5_eof = H5F_ADDR_UNDEF;
     
 	/*
 	 * Deep-copy the file creation and file access property lists into the
@@ -1091,9 +1091,7 @@ H5F_open(const char *name, uintn flags,
 	 * insured is a proper size.  The base address is set to the same thing
 	 * as the boot block.
 	 */
-	H5F_addr_reset(&(f->shared->boot_addr));
-	H5F_addr_inc(&(f->shared->boot_addr),
-		     f->shared->create_parms->userblock_size);
+	f->shared->boot_addr = f->shared->create_parms->userblock_size;
 	f->shared->base_addr = f->shared->boot_addr;
 
 	f->shared->consist_flags = 0x03;
@@ -1189,8 +1187,7 @@ H5F_open(const char *name, uintn flags,
 			H5F_SIZEOF_ADDR(f) +	/*reserved address*/
 			H5G_SIZEOF_ENTRY(f);
 	assert(variable_size <= sizeof buf);
-	addr1 = f->shared->boot_addr;
-	H5F_addr_inc(&addr1/*in,out*/, (hsize_t)fixed_size);
+	addr1 = f->shared->boot_addr + (hsize_t)fixed_size;
 	if (H5F_low_read(f->shared->lf, access_parms, &H5F_xfer_dflt,
 			 addr1, variable_size, buf) < 0) {
 	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL,
@@ -1222,8 +1219,7 @@ H5F_open(const char *name, uintn flags,
      * address while H5F_low_size() returns an absolute address.
      */
     H5F_low_size(f->shared->lf, &addr1/*out*/);
-    addr2 = f->shared->hdf5_eof;
-    H5F_addr_add(&addr2/*in,out*/, f->shared->base_addr);
+    addr2 = f->shared->hdf5_eof + f->shared->base_addr;
     if (H5F_addr_lt(addr1, addr2)) {
 	/*
 	 * Truncated file? This might happen if one tries to open the first
@@ -1612,7 +1608,6 @@ static herr_t
 H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate)
 {
     uint8_t		buf[2048], *p = buf;
-    haddr_t		reserved_addr;
     uintn               firsttime_bootblock=0;
     uintn		nerrors=0, i;
     
@@ -1673,8 +1668,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate)
     H5F_addr_encode(f, &p, f->shared->base_addr);
     H5F_addr_encode(f, &p, f->shared->freespace_addr);
     H5F_addr_encode(f, &p, f->shared->hdf5_eof);
-    H5F_addr_undef(&reserved_addr);
-    H5F_addr_encode(f, &p, reserved_addr);
+    H5F_addr_encode(f, &p, H5F_ADDR_UNDEF);
     H5G_ent_encode(f, &p, H5G_entof(f->shared->root_grp));
 
     /* update file length if necessary */
@@ -1682,12 +1676,10 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate)
         haddr_t		t_addr;	/*temporary address		*/
 
         /* Set the HDF5 file size */
-        H5F_addr_reset(&(f->shared->hdf5_eof));
-        H5F_addr_inc(&(f->shared->hdf5_eof), (hsize_t)(p-buf));
+        f->shared->hdf5_eof = (hsize_t)(p-buf);
 
         /* Set the logical file size, including the userblock data */
-        t_addr = f->shared->hdf5_eof;
-        H5F_addr_add(&t_addr/*in,out*/, f->shared->base_addr);
+        t_addr = f->shared->hdf5_eof + f->shared->base_addr;
         H5F_low_seteof(f->shared->lf, t_addr);
 
         /* Indicate that the boot block needs to be flushed out */
@@ -2382,8 +2374,7 @@ H5F_block_read(H5F_t *f, haddr_t addr, hsize_t size,
     assert (size < SIZET_MAX);
 
     /* convert the relative address to an absolute address */
-    abs_addr = f->shared->base_addr;
-    H5F_addr_add(&abs_addr/*in,out*/, addr);
+    abs_addr = f->shared->base_addr + addr;
 
     /* Read the data */
     if (H5F_low_read(f->shared->lf, f->shared->access_parms, xfer_parms,
@@ -2433,8 +2424,7 @@ H5F_block_write(H5F_t *f, haddr_t addr, hsize_t size,
     }
 
     /* Convert the relative address to an absolute address */
-    abs_addr = f->shared->base_addr;
-    H5F_addr_add(&abs_addr/*in,out*/, addr);
+    abs_addr = f->shared->base_addr + addr;
 
     /* Write the data */
     if (H5F_low_write(f->shared->lf, f->shared->access_parms, xfer_parms,

@@ -434,7 +434,7 @@ H5TN_init_interface(void)\n\
 		     \"memory allocation failed\");\n\
    }\n\
    dt->state = H5T_STATE_IMMUTABLE;\n\
-   H5F_addr_undef (&(dt->ent.header));\n\
+   dt->ent.header = H5F_ADDR_UNDEF;\n\
    dt->type = H5T_%s;\n\
    dt->size = %d;\n\
    dt->u.atomic.order = H5T_ORDER_%s;\n\

@@ -188,7 +188,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
     sizeof_rkey = (type->get_sizeof_rkey) (f, udata);
     size = H5B_nodesize(f, type, &total_native_keysize, sizeof_rkey);
     if (H5MF_alloc(f, H5MF_META, (hsize_t)size, addr_p/*out*/) < 0) {
-	H5F_addr_undef(addr_p);
+	*addr_p = H5F_ADDR_UNDEF;
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		    "file allocation failed for B-tree root node");
     }
@@ -202,8 +202,8 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
     bt->ndirty = 0;
     bt->type = type;
     bt->level = 0;
-    H5F_addr_undef(&(bt->left));
-    H5F_addr_undef(&(bt->right));
+    bt->left = H5F_ADDR_UNDEF;
+    bt->right = H5F_ADDR_UNDEF;
     bt->nchildren = 0;
     if (NULL==(bt->page=H5MM_calloc(size)) ||
         NULL==(bt->native=H5MM_malloc(total_native_keysize)) ||
@@ -225,7 +225,7 @@ H5B_create(H5F_t *f, const H5B_class_t *type, void *udata,
 	bt->key[i].dirty = FALSE;
 	bt->key[i].rkey = bt->page + offset;
 	bt->key[i].nkey = NULL;
-	H5F_addr_undef(bt->child + i);
+	bt->child[i] = H5F_ADDR_UNDEF;
     }
 
     /*
@@ -353,7 +353,7 @@ H5B_load(H5F_t *f, haddr_t addr, const void *_type, void *udata)
 	if (i < bt->nchildren) {
 	    H5F_addr_decode(f, (const uint8_t **) &p, bt->child + i);
 	} else {
-	    H5F_addr_undef(bt->child + i);
+	    bt->child[i] = H5F_ADDR_UNDEF;
 	    p += H5F_SIZEOF_ADDR(f);
 	}
     }
@@ -960,8 +960,8 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr,
     }
     bt->dirty = TRUE;
     bt->ndirty = 0;
-    H5F_addr_undef(&(bt->left));
-    H5F_addr_undef(&(bt->right));
+    bt->left = H5F_ADDR_UNDEF;
+    bt->right = H5F_ADDR_UNDEF;
     bt->nchildren = 0;
 
     /* the new root */
@@ -1774,8 +1774,8 @@ H5B_remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type,
 		sibling->left = bt->left;
 		sibling->dirty = TRUE;
 	    }
-	    H5F_addr_undef(&(bt->left));
-	    H5F_addr_undef(&(bt->right));
+	    bt->left = H5F_ADDR_UNDEF;
+	    bt->right = H5F_ADDR_UNDEF;
 	    sizeof_rkey = (type->get_sizeof_rkey)(f, udata);
 	    sizeof_node = H5B_nodesize(f, type, NULL, sizeof_rkey);
 	    if (H5AC_unprotect(f, H5AC_BT, addr, bt)<0 ||

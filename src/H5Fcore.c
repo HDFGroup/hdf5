@@ -121,7 +121,7 @@ H5F_core_open(const char UNUSED *name,
     lf->u.core.mem = NULL;
     lf->u.core.alloc = 0;
     lf->u.core.size = 0;
-    H5F_addr_reset(&(lf->eof));
+    lf->eof = 0;
 
     if (key) {
 	key->dev = H5F_CORE_DEV;

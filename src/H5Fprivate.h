@@ -701,8 +701,8 @@ __DLL__ herr_t H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 
 /* Address-related macros and functions */
 #define H5F_ADDR_UNDEF ((uint64_t)(-1L))
-#define H5F_addr_defined(X)	(X!=H5F_ADDR_UNDEF)
 #define H5F_addr_hash(X,M)	((unsigned)((X)%(M)))
+#define H5F_addr_defined(X)	(X!=H5F_ADDR_UNDEF)
 #define H5F_addr_eq(X,Y)	((X)!=H5F_ADDR_UNDEF &&			      \
 				 (Y)!=H5F_ADDR_UNDEF &&			      \
 				 (X)==(Y))
@@ -719,17 +719,13 @@ __DLL__ herr_t H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 #define H5F_addr_ge(X,Y)	((X)!=H5F_ADDR_UNDEF &&			      \
 				 (Y)!=H5F_ADDR_UNDEF &&			      \
 				 (X)>=(Y))
-#define H5F_addr_undef(XP)	(*(XP)=H5F_ADDR_UNDEF)
-#define H5F_addr_reset(XP)	(*(XP)=0)
-#define H5F_addr_zerop(X)	((X)==0)
-__DLL__ void H5F_addr_inc(haddr_t *addr/*in,out*/, hsize_t inc);
+#define H5F_addr_cmp(X,Y)	(H5F_addr_eq(X,Y)?0:			      \
+				 (H5F_addr_lt(X, Y)?-1:1))
+#define H5F_addr_pow2(N)	((haddr_t)1<<(N))
+
 __DLL__ void H5F_addr_encode(H5F_t *, uint8_t**/*in,out*/, haddr_t);
 __DLL__ void H5F_addr_decode(H5F_t *, const uint8_t**/*in,out*/,
 			     haddr_t*/*out*/);
-__DLL__ void H5F_addr_pow2(uintn n, haddr_t *addr/*out*/);
-__DLL__ void H5F_addr_add(haddr_t *a1/*in,out*/, haddr_t a2);
-__DLL__ intn H5F_addr_cmp(haddr_t a1, haddr_t a2);
-__DLL__ void H5F_addr_adj(haddr_t *addr/*in,out */, hssize_t adj);
 __DLL__ herr_t H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
 			     const unsigned long objno[2]);
 

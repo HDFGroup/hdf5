@@ -51,7 +51,7 @@ H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
     /* check args */
     assert (f);
     assert (layout);
-    H5F_addr_undef(&(layout->addr)); /*just in case we fail*/
+    layout->addr = H5F_ADDR_UNDEF; /*just in case we fail*/
    
     switch (layout->type) {
     case H5D_CONTIGUOUS:
@@ -211,11 +211,11 @@ H5F_arr_read (H5F_t *f, const H5F_xfer_t *xfer,
 	H5V_vector_cpy (ndims, idx, hslab_size);
 	nelmts = H5V_vector_reduce_product (ndims, hslab_size);
 	if (efl && efl->nused>0) {
-	    H5F_addr_reset (&addr);
+	    addr = 0;
 	} else {
 	    addr = layout->addr;
 	}
-	H5F_addr_inc (&addr, file_start);
+	addr += file_start;
 	buf += mem_start;
 
 	/*
@@ -262,7 +262,7 @@ H5F_arr_read (H5F_t *f, const H5F_xfer_t *xfer,
 	    /* Decrement indices and advance pointers */
 	    for (j=ndims-1, carray=TRUE; j>=0 && carray; --j) {
 		
-		H5F_addr_adj(&addr, file_stride[j]);
+		addr += file_stride[j];
 		buf += mem_stride[j];
 
 		if (--idx[j]) carray = FALSE;
@@ -437,11 +437,11 @@ H5F_arr_write (H5F_t *f, const H5F_xfer_t *xfer,
 	H5V_vector_cpy (ndims, idx, hslab_size);
 	nelmts = H5V_vector_reduce_product (ndims, hslab_size);
 	if (efl && efl->nused>0) {
-	    H5F_addr_reset (&addr);
+	    addr = 0;
 	} else {
 	    addr = layout->addr;
 	}
-	H5F_addr_inc (&addr, file_start);
+	addr += file_start;
 	buf += mem_start;
 
 	/*
@@ -489,7 +489,7 @@ H5F_arr_write (H5F_t *f, const H5F_xfer_t *xfer,
 	    /* Decrement indices and advance pointers */
 	    for (j=ndims-1, carray=TRUE; j>=0 && carray; --j) {
 		
-		H5F_addr_adj (&addr, file_stride[j]);
+		addr += file_stride[j];
 		buf += mem_stride[j];
 		
 		if (--idx[j]) carray = FALSE;

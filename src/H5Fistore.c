@@ -848,7 +848,7 @@ H5F_istore_flush_entry (H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
     if (ent->dirty) {
 	udata.mesg = *(ent->layout);
 	udata.key.filter_mask = 0;
-	H5F_addr_undef(&(udata.addr));
+	udata.addr = H5F_ADDR_UNDEF;
 	udata.key.nbytes = ent->chunk_size;
 	for (i=0; i<ent->layout->ndims; i++) {
 	    udata.key.offset[i] = ent->offset[i];
@@ -1299,7 +1299,7 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	}
 	chunk_alloc = chunk_size;
 	udata.mesg = *layout;
-	H5F_addr_undef (&(udata.addr));
+	udata.addr = H5F_ADDR_UNDEF;
 	status = H5B_find (f, H5B_ISTORE, layout->addr, &udata);
 	H5E_clear ();
 	if (NULL==(chunk = H5MM_malloc (chunk_alloc))) {
@@ -2151,7 +2151,7 @@ H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
 	udata->key.offset[i] = offset[i];
     }
     udata->mesg = *layout;
-    H5F_addr_undef (&(udata->addr));
+    udata->addr = H5F_ADDR_UNDEF;
     status = H5B_find (f, H5B_ISTORE, layout->addr, udata);
     H5E_clear ();
     if (status>=0 && H5F_addr_defined(udata->addr))
