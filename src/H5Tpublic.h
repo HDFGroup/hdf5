@@ -156,6 +156,9 @@ typedef struct {
     void *p;    /* Pointer to VL data */
 } hvl_t;
 
+/* Variable Length String information */
+#define H5T_VARIABLE    ((size_t)(-1))  /* Indicate that a string is variable length (null-terminated in C, instead of fixed length) */
+
 /* All data type conversion functions are... */
 typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			      size_t nelmts, size_t stride, void *buf,
@@ -460,9 +463,9 @@ __DLL__ herr_t H5Tpack(hid_t type_id);
 /* Operations defined on enumeration data types */
 __DLL__ hid_t H5Tenum_create(hid_t base_id);
 __DLL__ herr_t H5Tenum_insert(hid_t type, const char *name, void *value);
-__DLL__ hid_t H5Tenum_nameof(hid_t type, void *value, char *name/*out*/,
+__DLL__ herr_t H5Tenum_nameof(hid_t type, void *value, char *name/*out*/,
 			     size_t size);
-__DLL__ hid_t H5Tenum_valueof(hid_t type, const char *name,
+__DLL__ herr_t H5Tenum_valueof(hid_t type, const char *name,
 			      void *value/*out*/);
 
 /* Operations defined on variable-length data types */

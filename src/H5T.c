@@ -1940,8 +1940,11 @@ H5Tset_size(hid_t type_id, size_t size)
     if (H5T_STATE_TRANSIENT!=dt->state) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
-    if (size <= 0) {
+    if (size <= 0 && size!=H5T_VARIABLE) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size must be positive");
+    }
+    if (size == H5T_VARIABLE && dt->type!=H5T_STRING) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "only strings may be variable length");
     }
     if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
@@ -3801,7 +3804,7 @@ H5Tget_member_value(hid_t type, int membno, void *value/*out*/)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+herr_t
 H5Tenum_nameof(hid_t type, void *value, char *name/*out*/, size_t size)
 {
     H5T_t	*dt = NULL;
@@ -3851,7 +3854,7 @@ H5Tenum_nameof(hid_t type, void *value, char *name/*out*/, size_t size)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+herr_t
 H5Tenum_valueof(hid_t type, const char *name, void *value/*out*/)
 {
     H5T_t	*dt = NULL;
