@@ -1658,7 +1658,7 @@ H5Tget_class(hid_t type_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type");
 
     /* Set return value */
-    ret_value= H5T_get_class(dt);
+    ret_value= H5T_get_class(dt, FALSE);
     
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1684,7 +1684,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_class_t
-H5T_get_class(const H5T_t *dt)
+H5T_get_class(const H5T_t *dt, htri_t internal)
 {
     H5T_class_t ret_value;
 
@@ -1692,11 +1692,15 @@ H5T_get_class(const H5T_t *dt)
 
     assert(dt);
     
-    /* Lie to the user if they have a VL string and tell them it's in the string class */
-    if(dt->shared->type==H5T_VLEN && dt->shared->u.vlen.type==H5T_VLEN_STRING)
-        ret_value=H5T_STRING;
-    else
+    /* Externally, a VL string is a string; internally, a VL string is a VL. */ 
+    if(internal) { 
         ret_value=dt->shared->type;
+    } else {
+        if(H5T_IS_VL_STRING(dt->shared))
+            ret_value=H5T_STRING;
+        else
+            ret_value=dt->shared->type;
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1733,8 +1737,11 @@ H5Tdetect_class(hid_t type, H5T_class_t cls)
     if (!(cls>H5T_NO_CLASS && cls<H5T_NCLASSES))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type class");
 
-    /* Set return value */
-    ret_value=H5T_detect_class(dt,cls);
+    /* Set return value.  Consider VL string as a string for API, as a VL for internal use. */
+    if(H5T_IS_VL_STRING(dt->shared))
+        ret_value = (H5T_STRING==cls);
+    else 
+        ret_value=H5T_detect_class(dt,cls);
 
 done:
     FUNC_LEAVE_API(ret_value);

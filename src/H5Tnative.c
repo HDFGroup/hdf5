@@ -167,7 +167,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
         
     assert(dtype); 
 
-    if((h5_class = H5T_get_class(dtype))==H5T_NO_CLASS)
+    if((h5_class = H5T_get_class(dtype, FALSE))==H5T_NO_CLASS)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class")
         
     if((size =  H5T_get_size(dtype))==0)
