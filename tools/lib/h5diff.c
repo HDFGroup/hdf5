@@ -412,7 +412,7 @@ hsize_t diff( hid_t      file1_id,
               hid_t      file2_id, 
               const char *path2, 
               diff_opt_t *options, 
-              H5G_obj_t1  type )
+              H5G_obj_t  type )
 {
  hid_t       type1_id;
  hid_t       type2_id;

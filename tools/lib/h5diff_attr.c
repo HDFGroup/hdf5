@@ -12,6 +12,7 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include "h5tools.h"
 #include "h5diff.h"
 #include "H5private.h" 
 
@@ -66,7 +67,6 @@ int diff_attr(hid_t      loc1_id,
  int        ret=0;
  hsize_t    nfound;
  int        cmp=1;
- H5T_class_t type_class;        /* Datatype class */
 
  if ((n1 = H5Aget_num_attrs(loc1_id))<0) 
   goto error;
@@ -162,25 +162,11 @@ int diff_attr(hid_t      loc1_id,
  for (j=0; j<rank1; j++) 
   nelmts1*=dims1[j];
  
- if((type_class = H5Tget_class(ftype1_id))<0)
-       goto error;
- if(type_class==H5T_BITFIELD) {
-       if((mtype1_id=H5Tcopy(ftype1_id))<0)
-           goto error;
- } else {
-       if ((mtype1_id=H5Tget_native_type(ftype1_id,H5T_DIR_DEFAULT))<0)
-            goto error;
- }
+ if ((mtype1_id=h5tools_get_native_type(ftype1_id))<0)
+    goto error;
 
- if((type_class = H5Tget_class(ftype2_id))<0)
-       goto error;
- if(type_class==H5T_BITFIELD) {
-       if((mtype2_id=H5Tcopy(ftype2_id))<0)
-           goto error;
- } else {
-       if ((mtype2_id=H5Tget_native_type(ftype2_id,H5T_DIR_DEFAULT))<0)
-            goto error;
- }
+ if ((mtype2_id=h5tools_get_native_type(ftype2_id))<0)
+    goto error;
 
  if ((msize1=H5Tget_size(mtype1_id))==0)
   goto error;

@@ -28,8 +28,6 @@
 #include "h5tools_str.h"        /*function prototypes       */
 #include "h5tools_ref.h"
 
-
-
 /*
  * If REPEAT_VERBOSE is defined then character strings will be printed so
  * that repeated character sequences like "AAAAAAAAAA" are displayed as
@@ -930,7 +928,6 @@ h5tools_str_sprint(h5tools_str_t *str, const h5dump_t *info, hid_t container,
                  if (!info->pindex)
                   h5tools_str_append(str, "%s", OPT(info->line_pre, ""));
                 }
-
 
                 for (x = 0; x < ctx->indent_level + 1; x++)
                     h5tools_str_append(str,"%s",OPT(info->line_indent,""));

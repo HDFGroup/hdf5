@@ -17,7 +17,7 @@
 #include "H5private.h" 
 
 /* local functions */
-static void    close_obj(H5G_obj_t1 obj_type, hid_t obj_id);
+static void    close_obj(H5G_obj_t obj_type, hid_t obj_id);
 static int     diff_region(hid_t region1_id, hid_t region2_id);
 static hbool_t is_zero(const void *_mem, size_t size);
 
@@ -202,8 +202,8 @@ hsize_t diff_datum(void       *_mem1,
  size_t        size;
  int           iszero1;
  int           iszero2;
- H5G_obj_t1    obj1_type;
- H5G_obj_t1    obj2_type;
+ H5G_obj_t     obj1_type;
+ H5G_obj_t     obj2_type;
  hid_t         obj1_id;
  hid_t         obj2_id;
  H5G_stat_t    sb1;
@@ -1659,7 +1659,7 @@ is_zero(const void *_mem, size_t size)
  */
 
 static 
-void close_obj(H5G_obj_t1 obj_type, hid_t obj_id)
+void close_obj(H5G_obj_t obj_type, hid_t obj_id)
 {
  
  switch (obj_type) {

@@ -25,7 +25,7 @@ int traverse( hid_t loc_id,
               int print);
 
 herr_t get_nnames( hid_t loc_id, 
-                     const char *group_name );
+                   const char *group_name );
 
 herr_t get_name_type( hid_t loc_id, 
                       const char *group_name, 
@@ -322,14 +322,12 @@ int traverse( hid_t loc_id,
  int           inserted_objs=0;
  int           i, j;
 
-
  /* get the number of names */
  if (( n_names = get_nnames( loc_id, group_name )) < 0 )
   return -1;
  
  for ( i = 0; i < n_names; i++) 
  {
- 
   if (get_name_type( loc_id, group_name, i, &name, &type ) < 0 )
    return -1;
  
@@ -406,7 +404,6 @@ int traverse( hid_t loc_id,
     }
 
    }
-   
    
    break;
 
@@ -511,7 +508,6 @@ int traverse( hid_t loc_id,
    }
    
    break;
-
 
     
   default:

@@ -5098,7 +5098,7 @@ static void gent_string(void)
  hid_t    str_tid;  /* datatype ID */
  hid_t    did;      /* dataset ID */
  char     buf1[]={"quote \"  backspace\b form feed\f new line\n tab\t new line\n carriage return\r"};
- char    *buf2[SPACE1_DIM1]= {
+ const char *buf2[SPACE1_DIM1]= {
         "Four score and seven\n years ago our forefathers brought forth on this continent a new nation,",
         "conceived in liberty\n and dedicated to the proposition that all men are created equal.",
         "Now we are engaged\n in a great civil war,",

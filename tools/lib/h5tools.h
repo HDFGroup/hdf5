@@ -315,10 +315,10 @@ typedef struct h5dump_t {
     const char *dset_ptformat_pre;
     const char *dset_ptformat;
 
-     /*print array indices in output matrix */
+    /*print array indices in output matrix */
     int pindex;
 
-     /*escape non printable characters */
+    /*escape non printable characters */
     int do_escape;
 
 } h5dump_t;
@@ -473,7 +473,6 @@ extern FILE   *rawdatastream;       /*output stream for raw data            */
 #define STRSIZE         "STRSIZE"
 #define STRPAD          "STRPAD"
 #define SUBSET          "SUBSET"
-
 #define FILTERS         "FILTERS"
 #define DEFLATE         "COMPRESSION DEFLATE"
 #define DEFLATE_LEVEL   "LEVEL"
@@ -502,6 +501,7 @@ extern int      h5tools_dump_dset(FILE *stream, const h5dump_t *info, hid_t dset
                                   hid_t p_typ, struct subset_t *sset, int indentlevel);
 extern int      h5tools_dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
                                  hid_t type, hid_t space, void *mem, int indentlevel);
+extern hid_t    h5tools_get_native_type(hid_t type);
 
 extern void     h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,
