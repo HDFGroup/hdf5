@@ -85,10 +85,8 @@ char *gen_name(int value)
 
 int main(int argc, char *argv[])
 {
-	int Summary = 0, CleanUp = 1;
-
         /* Initialize testing framework */
-        TestInit();
+        TestInit(argv[0], NULL, NULL);
 
 	/* Tests are generally arranged from least to most complexity... */
 	AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
@@ -100,17 +98,17 @@ int main(int argc, char *argv[])
         TestInfo(argv[0]);
 
         /* Parse command line arguments */
-        TestParseCmdLine(argc,argv,&Summary,&CleanUp,NULL);
+        TestParseCmdLine(argc,argv);
 
         /* Perform requested testing */
         PerformTests();
 
         /* Display test summary, if requested */
-	if (Summary)
+	if (GetTestSummary())
             TestSummary();
 
         /* Clean up test files, if allowed */
-	if (CleanUp && !getenv("HDF5_NOCLEANUP"))
+	if (GetTestCleanup() && !getenv("HDF5_NOCLEANUP"))
             TestCleanup();
 
 	return GetTestNumErrs();

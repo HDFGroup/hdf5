@@ -54,7 +54,7 @@ test_mpio_overlap_writes(char *filename)
     MPI_File	fh;
     int i;
     int vrfyerrs;
-    char  buf[4093];		/* use some prime number for size */
+    unsigned char  buf[4093];		/* use some prime number for size */
     int bufsize = sizeof(buf);
     MPI_Offset  stride;
     MPI_Offset  mpi_off;
@@ -97,7 +97,7 @@ test_mpio_overlap_writes(char *filename)
 
 	    /* set data to some trivial pattern for easy verification */
 	    for (i=0; i<stride; i++)
-		buf[i] = (char)(mpi_off+i);
+		buf[i] = (unsigned char)(mpi_off+i);
 	    mrc = MPI_File_write_at(fh, mpi_off, buf, (int)stride, MPI_BYTE,
 		    &mpi_stat);
 	    VRFY((mrc==MPI_SUCCESS), "");
@@ -143,12 +143,13 @@ test_mpio_overlap_writes(char *filename)
 	    VRFY((mrc==MPI_SUCCESS), "");
 	    vrfyerrs=0;
 	    for (i=0; i<stride; i++){
-		char expected;
-		expected = (char)(mpi_off+i);
-		if ((buf[i] != expected) &&
-		    (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED))
-			printf("proc %d: found data error at [%ld], expect %d, got %d\n",
+		unsigned char expected;
+		expected = (unsigned char)(mpi_off+i);
+		if ((expected != buf[i]) &&
+		    (vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED)) {
+			printf("proc %d: found data error at [%ld], expect %u, got %u\n",
 			    mpi_rank, (long)(mpi_off+i), expected, buf[i]);
+		}
 	    }
 	    if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
 		printf("proc %d: [more errors ...]\n", mpi_rank);
@@ -341,9 +342,10 @@ test_mpio_gb_file(char *filename)
 		vrfyerrs=0;
 		for (j=0; j<MB; j++){
 		    if ((*(buf+j) != expected) &&
-			(vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED))
+			(vrfyerrs++ < MAX_ERR_REPORT || VERBOSE_MED)){
 			    printf("proc %d: found data error at [%ld+%d], expect %d, got %d\n",
 				mpi_rank, (long)mpi_off, j, expected, *(buf+j));
+		    }
 		}
 		if (vrfyerrs > MAX_ERR_REPORT && !VERBOSE_MED)
 		    printf("proc %d: [more errors ...]\n", mpi_rank);
@@ -669,6 +671,7 @@ main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     H5open();
+    TestInit(argv[0], NULL, parse_options);
     if (parse_options(argc, argv) != 0){
 	if (MAINPROCESS)
 	    usage();
