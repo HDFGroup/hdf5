@@ -244,40 +244,14 @@ HDF5 is currently in Release 1.<i>x</i> (HDF5 Release 1.<i>x</i>).
 <p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
 
 
-<H3><A NAME="Intro-Limits">Limitations of the Current Release</A></H3>
-<FONT FACE="Times"><P>This release includes the basic functionality that was planned for the HDF5 library. However, the library does not implement all of the features detailed in the format and API specifications. Here is a listing of some of the limitations of the current release: 
-
-<UL>
-</FONT><LI>Data compression is supported, though only GZIP is implemented.  GZIP, or GNU Zip, is a compression function from the GNU Project.
-<LI>The library is not currently thread aware although we have planned for that possibility and intend eventually to implement it.
-</UL>
-
-
-<p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
-
-
 <H3><A NAME="Intro-Changes">Changes in the Current Release</A></H3>
-<P>A detailed list of changes in HDF5 since the last release,
-HDF5 Release 1.0, can be found in the file <CODE>hdf5/RELEASE</CODE> 
-in the source code installation.  At a higher level, those changes include:
-
-<UL>
-<li>Support for bitfield, opaque, enumeration, and variable-length datatypes
-<li>Support for object and dataset region pointers
-<li>Improved parallel performance and support for additional parallel platforms
-<li>Improved and expanded documentation
-<li>Enhancements to the <code>h5ls</code> and <code>h5dump</code> tools
-    and a new HDF5 to HDF4 conversion tool, <code>h5toh4</code>
-<li>Over 30 new API functions
-</UL>
-
-<P>The changes in bugfix releases, numbered Release 1.4.<i>x</i>, 
-will be listed in the <code>RELEASE</code>, <code>HISTORY</code>, and 
-<code>README</code> files distributed with the source code. 
-
-<P>The changes as HDF5 has evolved from the first Alpha release 
-to the present are summarized in the file <CODE>hdf5/HISTORY</CODE> 
-in the source code installation.  
+<P>A detailed list of changes in HDF5 between the current release and
+the preceding major release can be found in the 
+<a href="ADGuide/RELEASE.txt" target="ExtWin">RELEASE file</a>,
+with a summary in the document 
+<a href="ADGuide/Changes.html">HDF5 Software Changes from Release to Release</a>
+in the 
+<a href="ADGuide.html"><cite>HDF5 Application Developer's Guide</cite></a>.
 
 
 <p align=right><font size=-1><a href="#Intro-TOC">(Return to TOC)</a></font>
@@ -2155,12 +2129,11 @@ to allocate to store VL data while reading the data, the
 <code>H5Dget_vlen_size()</code> function is provided:
 <dl>
     <dd><em>herr_t</em> 
-        <code>H5Dget_vlen_buf_size</code>(<em>hid_t</em> <code>dataset_id</code>, 
+        <code>H5Dvlen_get_buf_size</code>(<em>hid_t</em> <code>dataset_id</code>, 
         <em>hid_t</em> <code>type_id</code>,
         <em>hid_t</em> <code>space_id</code>, 
         <em>hsize_t</em> *<code>size</code>) 
 </dl>
-        (This function is not implemented in Release 1.2.)
 
 <p>
 This routine checks the number of bytes required to store the VL data from
