@@ -21,7 +21,7 @@ dset                     Dataset {2/2}
         Data:  {1, 1}, {2, 2}
     Attribute: reference {2}
         Type:      object reference
-        Data:  DATASET-0:1:0:976, DATASET-0:1:0:976
+        Data:  DATASET-1:976, DATASET-1:976
     Attribute: enum      {2}
         Type:      enum 32-bit little-endian integer {
                    RED              = 0
@@ -41,7 +41,7 @@ dset                     Dataset {2/2}
     Attribute: float     {2}
         Type:      IEEE 32-bit little-endian float
         Data:  0, 0
-    Location:  0:1:0:976
+    Location:  1:976
     Links:     1
     Modified:  XXXX-XX-XX XX:XX:XX XXX
     Storage:   8 logical bytes, 0 allocated bytes

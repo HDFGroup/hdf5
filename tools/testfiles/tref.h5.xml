@@ -3,8 +3,8 @@ Expected output for 'h5dump --xml tref.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
 <hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
-<hdf5:RootGroup OBJ-XID="xid_696-0" H5Path="/">
-   <hdf5:Dataset Name="ZZZDataset3" OBJ-XID="xid_2612-0" H5Path= "/ZZZDataset3" Parents="xid_696-0" H5ParentPaths="/">
+<hdf5:RootGroup OBJ-XID="xid_696" H5Path="/">
+   <hdf5:Dataset Name="ZZZDataset3" OBJ-XID="xid_2612" H5Path= "/ZZZDataset3" Parents="xid_696" H5ParentPaths="/">
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
       </hdf5:StorageLayout>
@@ -33,8 +33,8 @@ Expected output for 'h5dump --xml tref.h5'
    </hdf5:DataFromFile>
    </hdf5:Data>
    </hdf5:Dataset>
-   <hdf5:Group Name="Group1" OBJ-XID="xid_1344-0" H5Path="/Group1" Parents="xid_696-0" H5ParentPaths="/" >
-      <hdf5:Dataset Name="Dataset1" OBJ-XID="xid_1720-0" H5Path= "/Group1/Dataset1" Parents="xid_1344-0" H5ParentPaths="/Group1">
+   <hdf5:Group Name="Group1" OBJ-XID="xid_1344" H5Path="/Group1" Parents="xid_696" H5ParentPaths="/" >
+      <hdf5:Dataset Name="Dataset1" OBJ-XID="xid_1720" H5Path= "/Group1/Dataset1" Parents="xid_1344" H5ParentPaths="/Group1">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -59,7 +59,7 @@ Expected output for 'h5dump --xml tref.h5'
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
-      <hdf5:Dataset Name="Dataset2" OBJ-XID="xid_2336-0" H5Path= "/Group1/Dataset2" Parents="xid_1344-0" H5ParentPaths="/Group1">
+      <hdf5:Dataset Name="Dataset2" OBJ-XID="xid_2336" H5Path= "/Group1/Dataset2" Parents="xid_1344" H5ParentPaths="/Group1">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>

@@ -3,8 +3,8 @@ Expected output for 'h5dump --xml tobjref.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
 <hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
-<hdf5:RootGroup OBJ-XID="xid_696-0" H5Path="/">
-   <hdf5:Dataset Name="Dataset3" OBJ-XID="xid_2348-0" H5Path= "/Dataset3" Parents="xid_696-0" H5ParentPaths="/">
+<hdf5:RootGroup OBJ-XID="xid_696" H5Path="/">
+   <hdf5:Dataset Name="Dataset3" OBJ-XID="xid_2348" H5Path= "/Dataset3" Parents="xid_696" H5ParentPaths="/">
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
       </hdf5:StorageLayout>
@@ -34,8 +34,8 @@ Expected output for 'h5dump --xml tobjref.h5'
    </hdf5:DataFromFile>
    </hdf5:Data>
    </hdf5:Dataset>
-   <hdf5:Group Name="Group1" OBJ-XID="xid_1320-0" H5Path="/Group1" Parents="xid_696-0" H5ParentPaths="/" >
-      <hdf5:NamedDataType Name="Datatype1" OBJ-XID="xid_2268-0" H5Path="/Group1/Datatype1" Parents="xid_1320-0" H5ParentPaths="/Group1">
+   <hdf5:Group Name="Group1" OBJ-XID="xid_1320" H5Path="/Group1" Parents="xid_696" H5ParentPaths="/" >
+      <hdf5:NamedDataType Name="Datatype1" OBJ-XID="xid_2268" H5Path="/Group1/Datatype1" Parents="xid_1320" H5ParentPaths="/Group1">
          <hdf5:DataType>
          <hdf5:CompoundType>
             <hdf5:Field FieldName="a">
@@ -62,7 +62,7 @@ Expected output for 'h5dump --xml tobjref.h5'
          </hdf5:CompoundType>
          </hdf5:DataType>
       </hdf5:NamedDataType>
-      <hdf5:Dataset Name="Dataset1" OBJ-XID="xid_1696-0" H5Path= "/Group1/Dataset1" Parents="xid_1320-0" H5ParentPaths="/Group1">
+      <hdf5:Dataset Name="Dataset1" OBJ-XID="xid_1696" H5Path= "/Group1/Dataset1" Parents="xid_1320" H5ParentPaths="/Group1">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -87,7 +87,7 @@ Expected output for 'h5dump --xml tobjref.h5'
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
-      <hdf5:Dataset Name="Dataset2" OBJ-XID="xid_2152-0" H5Path= "/Group1/Dataset2" Parents="xid_1320-0" H5ParentPaths="/Group1">
+      <hdf5:Dataset Name="Dataset2" OBJ-XID="xid_2152" H5Path= "/Group1/Dataset2" Parents="xid_1320" H5ParentPaths="/Group1">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>

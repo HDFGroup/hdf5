@@ -18,8 +18,8 @@ usage: h5dump [OPTIONS] file
      -o F, --output=F     Output raw data into file F
      -t P, --datatype=P   Print the specified named data type
      -w N, --width=N      Set the number of columns of output
-     -x, --xml            Output in XML using Schema (default)
-     -u, --use-dtd            Output in XML using DTD
+     -x, --xml            Output in XML using Schema
+     -u, --use-dtd        Output in XML using DTD
      -D U, --xml-dtd=U    Use the DTD or schema at U
      -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML
                           ":": no namespace, default: "hdf5:"

@@ -3,7 +3,7 @@ Expected output for 'h5dump --xml tname-amp.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
 <hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
-<hdf5:RootGroup OBJ-XID="xid_696-0" H5Path="/">
+<hdf5:RootGroup OBJ-XID="xid_696" H5Path="/">
    <hdf5:Attribute Name="attr1&amp;withamp">
       <hdf5:Dataspace>
          <hdf5:SimpleDataspace Ndims="1">
@@ -21,8 +21,8 @@ Expected output for 'h5dump --xml tname-amp.h5'
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Attribute>
-   <hdf5:Group Name="g1.1&amp;withamp" OBJ-XID="xid_1344-0" H5Path="/g1.1&amp;withamp" Parents="xid_696-0" H5ParentPaths="/" >
-      <hdf5:Dataset Name="dset1.1.1&amp;withamp" OBJ-XID="xid_1720-0" H5Path= "/g1.1&amp;withamp/dset1.1.1&amp;withamp" Parents="xid_1344-0" H5ParentPaths="/g1.1&amp;withamp">
+   <hdf5:Group Name="g1.1&amp;withamp" OBJ-XID="xid_1344" H5Path="/g1.1&amp;withamp" Parents="xid_696" H5ParentPaths="/" >
+      <hdf5:Dataset Name="dset1.1.1&amp;withamp" OBJ-XID="xid_1720" H5Path= "/g1.1&amp;withamp/dset1.1.1&amp;withamp" Parents="xid_1344" H5ParentPaths="/g1.1&amp;withamp">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>

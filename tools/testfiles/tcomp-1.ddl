@@ -3,7 +3,7 @@ Expected output for 'h5dump tcompound.h5'
 #############################
 HDF5 "tcompound.h5" {
 GROUP "/" {
-   DATATYPE "#6632:0" H5T_COMPOUND {
+   DATATYPE "#6632" H5T_COMPOUND {
       H5T_STD_I32BE "int";
       H5T_IEEE_F32BE "float";
    }    
@@ -252,7 +252,7 @@ GROUP "/" {
    } 
    GROUP "group2" {
       DATASET "dset5" {
-         DATATYPE  "/#6632:0"
+         DATATYPE  "/#6632"
            
          DATASPACE  SIMPLE { ( 5 ) / ( 5 ) } 
          DATA {

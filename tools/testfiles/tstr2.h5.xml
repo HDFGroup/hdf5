@@ -3,9 +3,9 @@ Expected output for 'h5dump --xml tstr2.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
 <hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
-<hdf5:RootGroup OBJ-XID="xid_696-0" H5Path="/">
-   <hdf5:Group Name="g1" OBJ-XID="xid_1344-0" H5Path="/g1" Parents="xid_696-0" H5ParentPaths="/" >
-      <hdf5:Dataset Name="dset1" OBJ-XID="xid_1720-0" H5Path= "/g1/dset1" Parents="xid_1344-0" H5ParentPaths="/g1">
+<hdf5:RootGroup OBJ-XID="xid_696" H5Path="/">
+   <hdf5:Group Name="g1" OBJ-XID="xid_1344" H5Path="/g1" Parents="xid_696" H5ParentPaths="/" >
+      <hdf5:Dataset Name="dset1" OBJ-XID="xid_1720" H5Path= "/g1/dset1" Parents="xid_1344" H5ParentPaths="/g1">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -59,8 +59,8 @@ Expected output for 'h5dump --xml tstr2.h5'
          </hdf5:Data>
       </hdf5:Dataset>
    </hdf5:Group>
-   <hdf5:Group Name="g2" OBJ-XID="xid_3260-0" H5Path="/g2" Parents="xid_696-0" H5ParentPaths="/" >
-      <hdf5:Dataset Name="dset2" OBJ-XID="xid_3308-0" H5Path= "/g2/dset2" Parents="xid_3260-0" H5ParentPaths="/g2">
+   <hdf5:Group Name="g2" OBJ-XID="xid_3260" H5Path="/g2" Parents="xid_696" H5ParentPaths="/" >
+      <hdf5:Dataset Name="dset2" OBJ-XID="xid_3308" H5Path= "/g2/dset2" Parents="xid_3260" H5ParentPaths="/g2">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -95,8 +95,8 @@ Expected output for 'h5dump --xml tstr2.h5'
          </hdf5:Data>
       </hdf5:Dataset>
    </hdf5:Group>
-   <hdf5:Group Name="g3" OBJ-XID="xid_4848-0" H5Path="/g3" Parents="xid_696-0" H5ParentPaths="/" >
-      <hdf5:Dataset Name="dset3" OBJ-XID="xid_4896-0" H5Path= "/g3/dset3" Parents="xid_4848-0" H5ParentPaths="/g3">
+   <hdf5:Group Name="g3" OBJ-XID="xid_4848" H5Path="/g3" Parents="xid_696" H5ParentPaths="/" >
+      <hdf5:Dataset Name="dset3" OBJ-XID="xid_4896" H5Path= "/g3/dset3" Parents="xid_4848" H5ParentPaths="/g3">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -131,8 +131,8 @@ Expected output for 'h5dump --xml tstr2.h5'
          </hdf5:Data>
       </hdf5:Dataset>
    </hdf5:Group>
-   <hdf5:Group Name="g4" OBJ-XID="xid_6436-0" H5Path="/g4" Parents="xid_696-0" H5ParentPaths="/" >
-      <hdf5:Dataset Name="dset4" OBJ-XID="xid_6484-0" H5Path= "/g4/dset4" Parents="xid_6436-0" H5ParentPaths="/g4">
+   <hdf5:Group Name="g4" OBJ-XID="xid_6436" H5Path="/g4" Parents="xid_696" H5ParentPaths="/" >
+      <hdf5:Dataset Name="dset4" OBJ-XID="xid_6484" H5Path= "/g4/dset4" Parents="xid_6436" H5ParentPaths="/g4">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -167,8 +167,8 @@ Expected output for 'h5dump --xml tstr2.h5'
          </hdf5:Data>
       </hdf5:Dataset>
    </hdf5:Group>
-   <hdf5:Group Name="g5" OBJ-XID="xid_8024-0" H5Path="/g5" Parents="xid_696-0" H5ParentPaths="/" >
-      <hdf5:Dataset Name="dset5" OBJ-XID="xid_8072-0" H5Path= "/g5/dset5" Parents="xid_8024-0" H5ParentPaths="/g5">
+   <hdf5:Group Name="g5" OBJ-XID="xid_8024" H5Path="/g5" Parents="xid_696" H5ParentPaths="/" >
+      <hdf5:Dataset Name="dset5" OBJ-XID="xid_8072" H5Path= "/g5/dset5" Parents="xid_8024" H5ParentPaths="/g5">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -203,8 +203,8 @@ Expected output for 'h5dump --xml tstr2.h5'
          </hdf5:Data>
       </hdf5:Dataset>
    </hdf5:Group>
-   <hdf5:Group Name="g6" OBJ-XID="xid_9612-0" H5Path="/g6" Parents="xid_696-0" H5ParentPaths="/" >
-      <hdf5:Dataset Name="dset6" OBJ-XID="xid_9660-0" H5Path= "/g6/dset6" Parents="xid_9612-0" H5ParentPaths="/g6">
+   <hdf5:Group Name="g6" OBJ-XID="xid_9612" H5Path="/g6" Parents="xid_696" H5ParentPaths="/" >
+      <hdf5:Dataset Name="dset6" OBJ-XID="xid_9660" H5Path= "/g6/dset6" Parents="xid_9612" H5ParentPaths="/g6">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>

@@ -3,9 +3,9 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
 <hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
-<hdf5:RootGroup OBJ-XID="xid_696-0" H5Path="/">
-   <hdf5:Group Name="Group1" OBJ-XID="xid_1344-0" H5Path="/Group1" Parents="xid_696-0" H5ParentPaths="/" >
-      <hdf5:Dataset Name="Dataset space" OBJ-XID="xid_3716-0" H5Path= "/Group1/Dataset space" Parents="xid_1344-0" H5ParentPaths="/Group1">
+<hdf5:RootGroup OBJ-XID="xid_696" H5Path="/">
+   <hdf5:Group Name="Group1" OBJ-XID="xid_1344" H5Path="/Group1" Parents="xid_696" H5ParentPaths="/" >
+      <hdf5:Dataset Name="Dataset space" OBJ-XID="xid_3716" H5Path= "/Group1/Dataset space" Parents="xid_1344" H5ParentPaths="/Group1">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -30,7 +30,7 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
-      <hdf5:Dataset Name="Dataset&quot;quote" OBJ-XID="xid_1720-0" H5Path= "/Group1/Dataset&quot;quote" Parents="xid_1344-0" H5ParentPaths="/Group1">
+      <hdf5:Dataset Name="Dataset&quot;quote" OBJ-XID="xid_1720" H5Path= "/Group1/Dataset&quot;quote" Parents="xid_1344" H5ParentPaths="/Group1">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -55,7 +55,7 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
-      <hdf5:Dataset Name="Dataset&amp;amp" OBJ-XID="xid_2612-0" H5Path= "/Group1/Dataset&amp;amp" Parents="xid_1344-0" H5ParentPaths="/Group1">
+      <hdf5:Dataset Name="Dataset&amp;amp" OBJ-XID="xid_2612" H5Path= "/Group1/Dataset&amp;amp" Parents="xid_1344" H5ParentPaths="/Group1">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -80,7 +80,7 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
-      <hdf5:Dataset Name="Dataset&apos;apos" OBJ-XID="xid_3440-0" H5Path= "/Group1/Dataset&apos;apos" Parents="xid_1344-0" H5ParentPaths="/Group1">
+      <hdf5:Dataset Name="Dataset&apos;apos" OBJ-XID="xid_3440" H5Path= "/Group1/Dataset&apos;apos" Parents="xid_1344" H5ParentPaths="/Group1">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -105,7 +105,7 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
-      <hdf5:Dataset Name="Dataset&lt;lt" OBJ-XID="xid_2888-0" H5Path= "/Group1/Dataset&lt;lt" Parents="xid_1344-0" H5ParentPaths="/Group1">
+      <hdf5:Dataset Name="Dataset&lt;lt" OBJ-XID="xid_2888" H5Path= "/Group1/Dataset&lt;lt" Parents="xid_1344" H5ParentPaths="/Group1">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -130,7 +130,7 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
-      <hdf5:Dataset Name="Dataset&gt;gt" OBJ-XID="xid_3164-0" H5Path= "/Group1/Dataset&gt;gt" Parents="xid_1344-0" H5ParentPaths="/Group1">
+      <hdf5:Dataset Name="Dataset&gt;gt" OBJ-XID="xid_3164" H5Path= "/Group1/Dataset&gt;gt" Parents="xid_1344" H5ParentPaths="/Group1">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -155,7 +155,7 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
-      <hdf5:Dataset Name="Dataset\slash" OBJ-XID="xid_2336-0" H5Path= "/Group1/Dataset\slash" Parents="xid_1344-0" H5ParentPaths="/Group1">
+      <hdf5:Dataset Name="Dataset\slash" OBJ-XID="xid_2336" H5Path= "/Group1/Dataset\slash" Parents="xid_1344" H5ParentPaths="/Group1">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -180,8 +180,8 @@ Expected output for 'h5dump --xml tref-escapes-at.h5'
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
-      <hdf5:Group Name="Group1.1" OBJ-XID="xid_4592-0" H5Path="/Group1/Group1.1" Parents="xid_1344-0" H5ParentPaths="/Group1" >
-         <hdf5:Dataset Name="Datasetrefs" OBJ-XID="xid_4640-0" H5Path= "/Group1/Group1.1/Datasetrefs" Parents="xid_4592-0" H5ParentPaths="/Group1/Group1.1">
+      <hdf5:Group Name="Group1.1" OBJ-XID="xid_4592" H5Path="/Group1/Group1.1" Parents="xid_1344" H5ParentPaths="/Group1" >
+         <hdf5:Dataset Name="Datasetrefs" OBJ-XID="xid_4640" H5Path= "/Group1/Group1.1/Datasetrefs" Parents="xid_4592" H5ParentPaths="/Group1/Group1.1">
             <hdf5:StorageLayout>
                <hdf5:ContiguousLayout/>
             </hdf5:StorageLayout>

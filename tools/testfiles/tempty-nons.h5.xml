@@ -3,8 +3,8 @@ Expected output for 'h5dump --xml -X : tempty.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
 <HDF5-File xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
-<RootGroup OBJ-XID="xid_928-0" H5Path="/">
-   <Dataset Name="Dataset1.0" OBJ-XID="xid_976-0" H5Path= "/Dataset1.0" Parents="xid_928-0" H5ParentPaths="/">
+<RootGroup OBJ-XID="xid_928" H5Path="/">
+   <Dataset Name="Dataset1.0" OBJ-XID="xid_976" H5Path= "/Dataset1.0" Parents="xid_928" H5ParentPaths="/">
       <StorageLayout>
          <ContiguousLayout/>
       </StorageLayout>
@@ -34,7 +34,7 @@ Expected output for 'h5dump --xml -X : tempty.h5'
          </DataFromFile>
       </Data>
    </Dataset>
-   <Dataset Name="Dataset2.0" OBJ-XID="xid_1576-0" H5Path= "/Dataset2.0" Parents="xid_928-0" H5ParentPaths="/">
+   <Dataset Name="Dataset2.0" OBJ-XID="xid_1576" H5Path= "/Dataset2.0" Parents="xid_928" H5ParentPaths="/">
       <StorageLayout>
          <ContiguousLayout/>
       </StorageLayout>
@@ -59,7 +59,7 @@ Expected output for 'h5dump --xml -X : tempty.h5'
          </DataFromFile>
       </Data>
    </Dataset>
-   <Dataset Name="Dataset3.0" OBJ-XID="xid_2128-0" H5Path= "/Dataset3.0" Parents="xid_928-0" H5ParentPaths="/">
+   <Dataset Name="Dataset3.0" OBJ-XID="xid_2128" H5Path= "/Dataset3.0" Parents="xid_928" H5ParentPaths="/">
       <StorageLayout>
          <ContiguousLayout/>
       </StorageLayout>
@@ -84,7 +84,7 @@ Expected output for 'h5dump --xml -X : tempty.h5'
          </DataFromFile>
       </Data>
    </Dataset>
-   <Dataset Name="Dataset4.0" OBJ-XID="xid_2400-0" H5Path= "/Dataset4.0" Parents="xid_928-0" H5ParentPaths="/">
+   <Dataset Name="Dataset4.0" OBJ-XID="xid_2400" H5Path= "/Dataset4.0" Parents="xid_928" H5ParentPaths="/">
       <StorageLayout>
          <ContiguousLayout/>
       </StorageLayout>
@@ -114,7 +114,7 @@ Expected output for 'h5dump --xml -X : tempty.h5'
          </DataFromFile>
       </Data>
    </Dataset>
-   <Dataset Name="Dataset5.0" OBJ-XID="xid_2672-0" H5Path= "/Dataset5.0" Parents="xid_928-0" H5ParentPaths="/">
+   <Dataset Name="Dataset5.0" OBJ-XID="xid_2672" H5Path= "/Dataset5.0" Parents="xid_928" H5ParentPaths="/">
       <StorageLayout>
          <ContiguousLayout/>
       </StorageLayout>
