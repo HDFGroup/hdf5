@@ -579,6 +579,9 @@ H5_DLL void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 #endif /* __MWERKS __ */
 #define HDexp(X)		exp(X)
 #define HDfabs(X)		fabs(X)
+/* use ABS() because fabsf() fabsl() are not common yet. */
+#define HDfabsf(X)		ABS(X)
+#define HDfabsl(X)		ABS(X)
 #define HDfclose(F)		fclose(F)
 /* fcntl() variable arguments */
 #define HDfdopen(N,S)		fdopen(N,S)

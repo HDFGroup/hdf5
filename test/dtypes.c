@@ -4984,7 +4984,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		if (FLT_FLOAT==dst_type) {
 		    hw_f = (float)(*((double*)aligned));
 		    hw = (unsigned char*)&hw_f;
-		    underflow = fabs(*((double*)aligned)) < FLT_MIN;
+		    underflow = HDfabs(*((double*)aligned)) < FLT_MIN;
 		} else if (FLT_DOUBLE==dst_type) {
 		    hw_d = *((double*)aligned);
 		    hw = (unsigned char*)&hw_d;
@@ -5000,11 +5000,11 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		if (FLT_FLOAT==dst_type) {
 		    hw_f = *((long double*)aligned); 
 		    hw = (unsigned char*)&hw_f;
-		    underflow = fabsl(*((long double*)aligned)) < FLT_MIN;
+		    underflow = HDfabsl(*((long double*)aligned)) < FLT_MIN;
 		} else if (FLT_DOUBLE==dst_type) {
 		    hw_d = *((long double*)aligned); 
 		    hw = (unsigned char*)&hw_d;
-		    underflow = fabsl(*((long double*)aligned)) < DBL_MIN;
+		    underflow = HDfabsl(*((long double*)aligned)) < DBL_MIN;
 		} else {
 		    hw_ld = *((long double*)aligned);
 		    hw = (unsigned char*)&hw_ld;
@@ -5069,7 +5069,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		    float x;
 		    HDmemcpy(&x, &buf[j*dst_size], sizeof(float));
 		    if (underflow &&
-			    fabsf(x) <= FLT_MIN && fabsf(hw_f) <= FLT_MIN)
+			    HDfabsf(x) <= FLT_MIN && HDfabsf(hw_f) <= FLT_MIN)
 			continue;	/* all underflowed, no error */
 		    check_mant[0] = HDfrexpf(x, check_expo+0);
 		    check_mant[1] = HDfrexpf(hw_f, check_expo+1);
@@ -5077,7 +5077,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		    double x;
 		    HDmemcpy(&x, &buf[j*dst_size], sizeof(double));
 		    if (underflow &&
-			    fabs(x) <= DBL_MIN && fabs(hw_d) <= DBL_MIN)
+			    HDfabs(x) <= DBL_MIN && HDfabs(hw_d) <= DBL_MIN)
 			continue;	/* all underflowed, no error */
 		    check_mant[0] = HDfrexp(x, check_expo+0);
 		    check_mant[1] = HDfrexp(hw_d, check_expo+1);
