@@ -4412,22 +4412,46 @@ test_select_combine(void)
     CHECK(error, FAIL, "H5Sclose");
 }   /* test_select_combine() */
 
+/*
+ * Typedef for iteration structure used in the fill value tests
+ */
+typedef struct {
+    unsigned short fill_value;  /* The fill value to check */
+    size_t curr_coord;          /* Current coordinate to examine */
+    hssize_t *coords;           /* Pointer to selection's coordinates */
+} fill_iter_info;
+
 /****************************************************************
 **
 **  test_select_hyper_iter3(): Iterator for checking hyperslab iteration
 ** 
 ****************************************************************/
 herr_t 
-test_select_hyper_iter3(void *_elem,hid_t UNUSED type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void *_operator_data)
+test_select_hyper_iter3(void *_elem,hid_t UNUSED type_id, hsize_t ndim, hssize_t *point, void *_operator_data)
 {
-    unsigned short *tbuf=(unsigned short *)_elem,     /* temporary buffer pointer */
-            *tbuf2=(unsigned short *)_operator_data; /* temporary buffer handle */
+    unsigned short *tbuf=(unsigned short *)_elem;     /* temporary buffer pointer */
+    fill_iter_info *iter_info=(fill_iter_info *)_operator_data; /* Get the pointer to the iterator information */
+    hssize_t *coord_ptr;        /* Pointer to the coordinate information for a point*/
 
-    /* Simple check to make certain the values in the selected points match */
-    if(*tbuf!=*tbuf2)
+    /* Check value in current buffer location */
+    if(*tbuf!=iter_info->fill_value)
         return(-1);
-    else
-        return(0);
+    else {
+        /* Check number of dimensions */
+        if(ndim!=SPACE7_RANK)
+            return(-1);
+        else {
+            /* Check Coordinates */
+            coord_ptr=iter_info->coords+(2*iter_info->curr_coord);
+            iter_info->curr_coord++;
+            if(coord_ptr[0]!=point[0])
+                return(-1);
+            else if(coord_ptr[1]!=point[1])
+                return(-1);
+            else
+                return(0);
+        } /* end else */
+    } /* end else */
 }   /* end test_select_hyper_iter3() */
 
 /****************************************************************
@@ -4442,6 +4466,8 @@ test_select_fill_all(void)
     hid_t	sid1;           /* Dataspace ID */
     hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
     int         fill_value;     /* Fill value */
+    fill_iter_info iter_info;   /* Iterator information structure */
+    hssize_t    points[SPACE7_DIM1*SPACE7_DIM2][SPACE7_RANK];   /* Coordinates of selection */
     unsigned short *wbuf,       /* buffer to write to disk */
                *tbuf;           /* temporary buffer pointer */
     int         i,j;            /* Counters */
@@ -4479,8 +4505,20 @@ test_select_fill_all(void)
                 printf("Error! j=%d, i=%d, *tbuf=%x, fill_value=%x\n",j,i,(unsigned)*tbuf,(unsigned)fill_value);
             } /* end if */
 
+    /* Set the coordinates of the selection */
+    for(i=0; i<SPACE7_DIM1; i++)
+        for(j=0; j<SPACE7_DIM2; j++) {
+            points[(i*SPACE7_DIM2)+j][0]=i;
+            points[(i*SPACE7_DIM2)+j][1]=j;
+        } /* end for */
+
+    /* Initialize the iterator structure */
+    iter_info.fill_value=SPACE7_FILL;
+    iter_info.curr_coord=0;
+    iter_info.coords=(hssize_t *)points;
+
     /* Iterate through selection, verifying correct data */
-    ret = H5Diterate(wbuf,H5T_NATIVE_USHORT,sid1,test_select_hyper_iter3,&fill_value);
+    ret = H5Diterate(wbuf,H5T_NATIVE_USHORT,sid1,test_select_hyper_iter3,&iter_info);
     CHECK(ret, FAIL, "H5Diterate");
 
     /* Close dataspace */
@@ -4506,6 +4544,7 @@ test_select_fill_point(hssize_t *offset)
     hssize_t    points[5][SPACE7_RANK] = {{2,4}, {3,8}, {8,4}, {7,5}, {7,7}};
     size_t      num_points=5;   /* Number of points selected */
     int         fill_value;     /* Fill value */
+    fill_iter_info iter_info;   /* Iterator information structure */
     unsigned short *wbuf,       /* buffer to write to disk */
                *tbuf;           /* temporary buffer pointer */
     int         i,j,k;          /* Counters */
@@ -4530,14 +4569,15 @@ test_select_fill_point(hssize_t *offset)
     ret = H5Sselect_elements(sid1, H5S_SELECT_SET,num_points,(const hssize_t **)points);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
-    if(offset!=NULL)
-        HDmemcpy(real_offset,offset,2*sizeof(hssize_t));
-    else
-        HDmemset(real_offset,0,2*sizeof(hssize_t));
+    if(offset!=NULL) {
+        HDmemcpy(real_offset,offset,SPACE7_RANK*sizeof(hssize_t));
 
-    /* Set offset */
-    ret = H5Soffset_simple(sid1,real_offset);
-    CHECK(ret, FAIL, "H5Soffset_simple");
+        /* Set offset, if provided */
+        ret = H5Soffset_simple(sid1,real_offset);
+        CHECK(ret, FAIL, "H5Soffset_simple");
+    } /* end if */
+    else
+        HDmemset(real_offset,0,SPACE7_RANK*sizeof(hssize_t));
 
     /* Set fill value */
     fill_value=SPACE7_FILL;
@@ -4564,9 +4604,20 @@ test_select_fill_point(hssize_t *offset)
             } /* end if */
         } /* end for */
 
-    /* Fill selection in memory */
-    ret=H5Dfill(&fill_value,H5T_NATIVE_INT,wbuf,H5T_NATIVE_USHORT,sid1);
-    CHECK(ret, FAIL, "H5Dfill");
+    /* Initialize the iterator structure */
+    iter_info.fill_value=SPACE7_FILL;
+    iter_info.curr_coord=0;
+    iter_info.coords=(hssize_t *)points;
+
+    /* Add in the offset */
+    for(i=0; i<(int)num_points; i++) {
+        points[i][0]+=real_offset[0];
+        points[i][1]+=real_offset[1];
+    } /* end for */
+
+    /* Iterate through selection, verifying correct data */
+    ret = H5Diterate(wbuf,H5T_NATIVE_USHORT,sid1,test_select_hyper_iter3,&iter_info);
+    CHECK(ret, FAIL, "H5Diterate");
 
     /* Close dataspace */
     ret = H5Sclose(sid1);
@@ -4590,7 +4641,10 @@ test_select_fill_hyper_simple(hssize_t *offset)
     hssize_t    real_offset[SPACE7_RANK];       /* Actual offset to use */
     hssize_t    start[SPACE7_RANK];     /* Hyperslab start */
     hsize_t     count[SPACE7_RANK];     /* Hyperslab block size */
+    size_t      num_points;     /* Number of points in selection */
+    hssize_t    points[16][SPACE7_RANK];        /* Coordinates selected */
     int         fill_value;     /* Fill value */
+    fill_iter_info iter_info;   /* Iterator information structure */
     unsigned short *wbuf,       /* buffer to write to disk */
                *tbuf;           /* temporary buffer pointer */
     int         i,j;            /* Counters */
@@ -4617,14 +4671,15 @@ test_select_fill_hyper_simple(hssize_t *offset)
     ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET,start,NULL,count,NULL);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    if(offset!=NULL)
-        HDmemcpy(real_offset,offset,2*sizeof(hssize_t));
-    else
-        HDmemset(real_offset,0,2*sizeof(hssize_t));
+    if(offset!=NULL) {
+        HDmemcpy(real_offset,offset,SPACE7_RANK*sizeof(hssize_t));
 
-    /* Set offset */
-    ret = H5Soffset_simple(sid1,real_offset);
-    CHECK(ret, FAIL, "H5Soffset_simple");
+        /* Set offset, if provided */
+        ret = H5Soffset_simple(sid1,real_offset);
+        CHECK(ret, FAIL, "H5Soffset_simple");
+    } /* end if */
+    else
+        HDmemset(real_offset,0,SPACE7_RANK*sizeof(hssize_t));
 
     /* Set fill value */
     fill_value=SPACE7_FILL;
@@ -4651,8 +4706,20 @@ test_select_fill_hyper_simple(hssize_t *offset)
             } /* end else */
         } /* end for */
 
+    /* Initialize the iterator structure */
+    iter_info.fill_value=SPACE7_FILL;
+    iter_info.curr_coord=0;
+    iter_info.coords=(hssize_t *)points;
+
+    /* Set the coordinates of the selection (with the offset) */
+    for(i=0, num_points=0; i<(int)count[0]; i++)
+        for(j=0; j<(int)count[1]; j++, num_points++) {
+            points[num_points][0]=i+start[0]+real_offset[0];
+            points[num_points][1]=j+start[1]+real_offset[1];
+        } /* end for */
+
     /* Iterate through selection, verifying correct data */
-    ret = H5Diterate(wbuf,H5T_NATIVE_USHORT,sid1,test_select_hyper_iter3,&fill_value);
+    ret = H5Diterate(wbuf,H5T_NATIVE_USHORT,sid1,test_select_hyper_iter3,&iter_info);
     CHECK(ret, FAIL, "H5Diterate");
 
     /* Close dataspace */
@@ -4680,13 +4747,14 @@ test_select_fill_hyper_regular(hssize_t *offset)
     hsize_t     count[SPACE7_RANK];     /* Hyperslab block count */
     hsize_t     block[SPACE7_RANK];     /* Hyperslab block size */
     hssize_t    points[16][SPACE7_RANK] = {
-        {2,2}, {2,3}, {3,2}, {3,3},
-        {2,6}, {2,7}, {3,6}, {3,7},
-        {6,2}, {6,3}, {7,2}, {7,3},
-        {6,6}, {6,7}, {7,6}, {7,7},
+        {2,2}, {2,3}, {2,6}, {2,7},
+        {3,2}, {3,3}, {3,6}, {3,7},
+        {6,2}, {6,3}, {6,6}, {6,7},
+        {7,2}, {7,3}, {7,6}, {7,7},
         };
     size_t      num_points=16;  /* Number of points selected */
     int         fill_value;     /* Fill value */
+    fill_iter_info iter_info;   /* Iterator information structure */
     unsigned short *wbuf,       /* buffer to write to disk */
                *tbuf;           /* temporary buffer pointer */
     int         i,j,k;          /* Counters */
@@ -4715,14 +4783,15 @@ test_select_fill_hyper_regular(hssize_t *offset)
     ret = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,stride,count,block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    if(offset!=NULL)
-        HDmemcpy(real_offset,offset,2*sizeof(hssize_t));
-    else
-        HDmemset(real_offset,0,2*sizeof(hssize_t));
+    if(offset!=NULL) {
+        HDmemcpy(real_offset,offset,SPACE7_RANK*sizeof(hssize_t));
 
-    /* Set offset */
-    ret = H5Soffset_simple(sid1,real_offset);
-    CHECK(ret, FAIL, "H5Soffset_simple");
+        /* Set offset, if provided */
+        ret = H5Soffset_simple(sid1,real_offset);
+        CHECK(ret, FAIL, "H5Soffset_simple");
+    } /* end if */
+    else
+        HDmemset(real_offset,0,SPACE7_RANK*sizeof(hssize_t));
 
     /* Set fill value */
     fill_value=SPACE7_FILL;
@@ -4749,8 +4818,19 @@ test_select_fill_hyper_regular(hssize_t *offset)
             } /* end if */
         } /* end for */
 
+    /* Initialize the iterator structure */
+    iter_info.fill_value=SPACE7_FILL;
+    iter_info.curr_coord=0;
+    iter_info.coords=(hssize_t *)points;
+
+    /* Add in the offset */
+    for(i=0; i<(int)num_points; i++) {
+        points[i][0]+=real_offset[0];
+        points[i][1]+=real_offset[1];
+    } /* end for */
+
     /* Iterate through selection, verifying correct data */
-    ret = H5Diterate(wbuf,H5T_NATIVE_USHORT,sid1,test_select_hyper_iter3,&fill_value);
+    ret = H5Diterate(wbuf,H5T_NATIVE_USHORT,sid1,test_select_hyper_iter3,&iter_info);
     CHECK(ret, FAIL, "H5Diterate");
 
     /* Close dataspace */
@@ -4785,8 +4865,18 @@ test_select_fill_hyper_irregular(hssize_t *offset)
         {6,4}, {6,5}, {6,6}, {6,7},
         {7,4}, {7,5}, {7,6}, {7,7},
         };
+    hssize_t    iter_points[28][SPACE7_RANK] = { /* Coordinates, as iterated through */
+        {2,2}, {2,3}, {2,4}, {2,5},
+        {3,2}, {3,3}, {3,4}, {3,5},
+        {4,2}, {4,3}, {4,4}, {4,5}, {4,6}, {4,7},
+        {5,2}, {5,3}, {5,4}, {5,5}, {5,6}, {5,7},
+        {6,4}, {6,5}, {6,6}, {6,7},
+        {7,4}, {7,5}, {7,6}, {7,7},
+        };
     size_t      num_points=32;  /* Number of points selected */
+    size_t      num_iter_points=28;  /* Number of resulting points */
     int         fill_value;     /* Fill value */
+    fill_iter_info iter_info;   /* Iterator information structure */
     unsigned short *wbuf,       /* buffer to write to disk */
                *tbuf;           /* temporary buffer pointer */
     int         i,j,k;          /* Counters */
@@ -4819,14 +4909,15 @@ test_select_fill_hyper_irregular(hssize_t *offset)
     ret = H5Sselect_hyperslab(sid1,H5S_SELECT_OR,start,NULL,count,NULL);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    if(offset!=NULL)
-        HDmemcpy(real_offset,offset,2*sizeof(hssize_t));
-    else
-        HDmemset(real_offset,0,2*sizeof(hssize_t));
+    if(offset!=NULL) {
+        HDmemcpy(real_offset,offset,SPACE7_RANK*sizeof(hssize_t));
 
-    /* Set offset */
-    ret = H5Soffset_simple(sid1,real_offset);
-    CHECK(ret, FAIL, "H5Soffset_simple");
+        /* Set offset, if provided */
+        ret = H5Soffset_simple(sid1,real_offset);
+        CHECK(ret, FAIL, "H5Soffset_simple");
+    } /* end if */
+    else
+        HDmemset(real_offset,0,SPACE7_RANK*sizeof(hssize_t));
 
     /* Set fill value */
     fill_value=SPACE7_FILL;
@@ -4853,8 +4944,19 @@ test_select_fill_hyper_irregular(hssize_t *offset)
             } /* end if */
         } /* end for */
 
+    /* Initialize the iterator structure */
+    iter_info.fill_value=SPACE7_FILL;
+    iter_info.curr_coord=0;
+    iter_info.coords=(hssize_t *)iter_points;
+
+    /* Add in the offset */
+    for(i=0; i<(int)num_iter_points; i++) {
+        iter_points[i][0]+=real_offset[0];
+        iter_points[i][1]+=real_offset[1];
+    } /* end for */
+
     /* Iterate through selection, verifying correct data */
-    ret = H5Diterate(wbuf,H5T_NATIVE_USHORT,sid1,test_select_hyper_iter3,&fill_value);
+    ret = H5Diterate(wbuf,H5T_NATIVE_USHORT,sid1,test_select_hyper_iter3,&iter_info);
     CHECK(ret, FAIL, "H5Diterate");
 
     /* Close dataspace */
