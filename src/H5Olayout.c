@@ -51,6 +51,7 @@ const H5O_class_t H5O_LAYOUT[1] = {{
     H5O_layout_reset,           /*reset method                  */
     H5O_layout_free,        	/*free the struct		*/
     H5O_layout_delete,	        /* file delete method		*/
+    NULL,			/* link method			*/
     NULL,		    	/*get share method		*/
     NULL,			/*set share method		*/
     H5O_layout_debug,       	/*debug the message             */

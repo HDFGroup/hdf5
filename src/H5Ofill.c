@@ -61,6 +61,7 @@ const H5O_class_t H5O_FILL[1] = {{
     H5O_fill_reset,             /*free internal memory                  */
     H5O_fill_free,		/* free method			*/
     NULL,		        /* file delete method		*/
+    NULL,			/* link method			*/
     NULL,                       /*get share method                      */
     NULL,                       /*set share method                      */
     H5O_fill_debug,             /*debug the message                     */
@@ -78,6 +79,7 @@ const H5O_class_t H5O_FILL_NEW[1] = {{
     H5O_fill_new_reset,		/*free internal memory			*/
     H5O_fill_new_free,		/* free method			*/
     NULL,		        /* file delete method		*/
+    NULL,			/* link method			*/
     NULL,			/*get share method			*/
     NULL,			/*set share method			*/
     H5O_fill_new_debug,		/*debug the message			*/

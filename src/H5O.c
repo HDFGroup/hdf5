@@ -49,15 +49,12 @@
 static herr_t H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint,
                        H5G_entry_t *ent/*out*/, haddr_t header);
 static herr_t H5O_reset_real(const H5O_class_t *type, void *native);
-static void * H5O_free_real(const H5O_class_t *type, void *mesg);
 static void * H5O_copy_real(const H5O_class_t *type, const void *mesg,
         void *dst);
 static int H5O_count_real (H5G_entry_t *ent, const H5O_class_t *type,
         hid_t dxpl_id);
 static htri_t H5O_exists_real(H5G_entry_t *ent, const H5O_class_t *type,
         int sequence, hid_t dxpl_id);
-static void * H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type,
-        int sequence, void *mesg, hid_t dxpl_id);
 #ifdef NOT_YET
 static herr_t H5O_share(H5F_t *f, hid_t dxpl_id, const H5O_class_t *type, const void *mesg,
 			 H5HG_t *hobj/*out*/);
@@ -76,6 +73,12 @@ static unsigned H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type,
 static unsigned H5O_alloc_extend_chunk(H5O_t *oh, unsigned chunkno, size_t size);
 static unsigned H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size);
 static herr_t H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
+static herr_t H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg);
+static unsigned H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags,
+    const H5O_class_t *orig_type, const void *orig_mesg, H5O_shared_t *sh_mesg,
+    const H5O_class_t **new_type, const void **new_mesg, hid_t dxpl_id);
+static herr_t H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_class_t *type,
+    const void *mesg, unsigned flags);
 
 /* Metadata cache callbacks */
 static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
@@ -119,7 +122,7 @@ static const H5O_class_t *const message_type_g[] = {
     H5O_ATTR,		/*0x000C Attribute list				*/
     H5O_NAME,		/*0x000D Object name				*/
     H5O_MTIME,		/*0x000E Object modification date and time	*/
-    NULL,		/*0x000F Shared header message			*/
+    H5O_SHARED,		/*0x000F Shared header message			*/
     H5O_CONT,		/*0x0010 Object header continuation		*/
     H5O_STAB,		/*0x0011 Symbol table				*/
     H5O_MTIME_NEW,	/*0x0012 New Object modification date and time  */
@@ -582,7 +585,8 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         /* decode next object header continuation message */
         for (chunk_addr = HADDR_UNDEF; !H5F_addr_defined(chunk_addr) && curmesg < oh->nmesgs; ++curmesg) {
             if (H5O_CONT_ID == oh->mesg[curmesg].type->id) {
-                H5O_cont_t *cont = NULL;
+                H5O_cont_t *cont;
+
                 cont = (H5O_CONT->decode) (f, dxpl_id, oh->mesg[curmesg].raw, NULL);
                 oh->mesg[curmesg].native = cont;
                 chunk_addr = cont->addr;
@@ -1003,8 +1007,7 @@ H5O_free (hid_t type_id, void *mesg)
     assert(type);
     
     /* Call the "real" free routine */
-    if((ret_value=H5O_free_real(type, mesg))==NULL)
-	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to free object header");
+    ret_value=H5O_free_real(type, mesg);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1028,7 +1031,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static void *
+void *
 H5O_free_real(const H5O_class_t *type, void *mesg)
 {
     void * ret_value=NULL;      /* Return value */
@@ -1156,7 +1159,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5O_link(H5G_entry_t *ent, int adjust, hid_t dxpl_id)
+H5O_link(const H5G_entry_t *ent, int adjust, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;
     hbool_t deleted=FALSE;      /* Whether the object was deleted as a result of this action */
@@ -1505,7 +1508,7 @@ done:
  *      actually destroys the object in the cache.
  *-------------------------------------------------------------------------
  */
-static void *
+void *
 H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mesg, hid_t dxpl_id)
 {
     H5O_t          *oh = NULL;
@@ -1548,28 +1551,9 @@ H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mes
 	 * message in the global heap or some other object header.
 	 */
 	H5O_shared_t *shared;
-	void *tmp_buf, *tmp_mesg;
 
 	shared = (H5O_shared_t *)(oh->mesg[idx].native);
-	if (shared->in_gh) {
-	    if (NULL==(tmp_buf = H5HG_read (ent->file, dxpl_id, &(shared->u.gh), NULL)))
-		HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL, "unable to read shared message from global heap");
-	    tmp_mesg = (type->decode)(ent->file, dxpl_id, tmp_buf, shared);
-	    tmp_buf = H5MM_xfree (tmp_buf);
-	    if (!tmp_mesg)
-		HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL, "unable to decode object header shared message");
-	    if (mesg) {
-		HDmemcpy (mesg, tmp_mesg, type->native_size);
-		H5MM_xfree (tmp_mesg);
-	    } else {
-		ret_value = tmp_mesg;
-	    }
-	} else {
-	    ret_value = H5O_read_real(&(shared->u.ent), type, 0, mesg, dxpl_id);
-	    if (type->set_share &&
-                    (type->set_share)(ent->file, ret_value, shared)<0)
-		HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, NULL, "unable to set sharing information");
-	}
+        ret_value=H5O_shared_read(ent->file,dxpl_id,shared,type,mesg);
     } else {
 	/*
 	 * The message is not shared, but rather exists in the object
@@ -1590,7 +1574,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_find_in_ohdr
+ * Function:	H5O_find_in_ohdr
  *
  * Purpose:     Find a message in the object header without consulting
  *              a symbol table entry.
@@ -1622,6 +1606,7 @@ H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t **type_p,
 
     /* Check args */
     assert(f);
+    assert(oh);
     assert(type_p);
 
     /* Scan through the messages looking for the right one */
@@ -1789,7 +1774,6 @@ H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
     int		        sequence;
     unsigned		idx;            /* Index of message to modify */
     H5O_mesg_t         *idx_msg;        /* Pointer to message to modify */
-    size_t		size=0;
     H5O_shared_t	sh_mesg;
     int		        ret_value;
 
@@ -1815,64 +1799,24 @@ H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
             continue;
 	if (++sequence == overwrite)
             break;
-    }
+    } /* end for */
 
     /* Was the right message found? */
-    if (overwrite >= 0 &&
-            (idx >= oh->nmesgs || sequence != overwrite)) {
-
+    if (overwrite >= 0 && (idx >= oh->nmesgs || sequence != overwrite)) {
 	/* But can we insert a new one with this sequence number? */
-	if (overwrite == sequence + 1) {
+	if (overwrite == sequence + 1)
 	    overwrite = -1;
-	} else {
+	else
 	    HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "message not found");
-	}
-    }
-    if (overwrite < 0) {
-	/* Allocate space for the new message */
-	if (flags & H5O_FLAG_SHARED) {
-	    HDmemset(&sh_mesg,0,sizeof(H5O_shared_t));
+    } /* end if */
 
-	    if (NULL==type->get_share)
-		HGOTO_ERROR (H5E_OHDR, H5E_UNSUPPORTED, FAIL, "message class is not sharable");
-	    if ((type->get_share)(ent->file, mesg, &sh_mesg/*out*/)<0) {
-		/*
-		 * If the message isn't shared then turn off the shared bit
-		 * and treat it as an unshared message.
-		 */
-		H5E_clear (NULL);
-		flags &= ~H5O_FLAG_SHARED;
-	    } else if (sh_mesg.in_gh) {
-		/*
-		 * The shared message is stored in the global heap.
-		 * Increment the reference count on the global heap message.
-		 */
-		if (H5HG_link (ent->file, dxpl_id, &(sh_mesg.u.gh), 1)<0)
-		    HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL, "unable to adjust shared object link count");
-		size = (H5O_SHARED->raw_size)(ent->file, &sh_mesg);
-	    } else {
-		/*
-		 * The shared message is stored in some other object header.
-		 * The other object header must be in the same file as the
-		 * new object header. Increment the reference count on that
-		 * object header.
-		 */
-		if (sh_mesg.u.ent.file->shared != ent->file->shared)
-		    HGOTO_ERROR(H5E_OHDR, H5E_LINK, FAIL, "interfile hard links are not allowed");
-		if (H5O_link (&(sh_mesg.u.ent), 1, dxpl_id)<0)
-		    HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL, "unable to adjust shared object link count");
-		size = (H5O_SHARED->raw_size)(ent->file, &sh_mesg);
-	    }
-	}
-        /* This can't be an 'else' statement due to the possibility of the shared bit getting turned off above */
-	if (0== (flags & H5O_FLAG_SHARED)) {
-	    size = (type->raw_size) (ent->file, mesg);
-	    if (size>=H5O_MAX_SIZE)
-		HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL, "object header message is too large (16k max)");
-	}
-	idx = H5O_alloc(ent->file, oh, type, size);
-	if (idx == UFAIL)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for message");
+    /* Check for creating new message */
+    if (overwrite < 0) {
+        /* Create a new message */
+        if((idx=H5O_new_mesg(ent->file,oh,&flags,type,mesg,&sh_mesg,&type,&mesg,dxpl_id))==UFAIL)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create new message");
+
+        /* Set the correct sequence number for the message created */
 	sequence++;
 	    
     } else if (oh->mesg[idx].flags & H5O_FLAG_CONSTANT) {
@@ -1881,30 +1825,14 @@ H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
 	HGOTO_ERROR (H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to modify shared (constant) message");
     }
     
-    /* Set pointer to the correct message */
-    idx_msg=&oh->mesg[idx];
-
-    /* Copy the native value into the object header */
-    if (flags & H5O_FLAG_SHARED) {
-        if (NULL==(idx_msg->native = H5MM_malloc (sizeof (H5O_shared_t))))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        HDmemcpy(idx_msg->native,&sh_mesg,sizeof(H5O_shared_t));
-    } else {
-	if (idx_msg->native)
-	    H5O_reset_real(idx_msg->type, idx_msg->native);
-	idx_msg->native = (type->copy) (mesg, idx_msg->native);
-	if (NULL == idx_msg->native)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy message to object header");
-    }
+    /* Write the information to the message */
+    if(H5O_write_mesg(oh,idx,type,mesg,flags)<0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to write message");
 
     /* Update the modification time message if any */
     if(update_time)
         H5O_touch_oh(ent->file, oh, FALSE);
     
-    idx_msg->flags = flags;
-    idx_msg->dirty = TRUE;
-    oh->cache_info.dirty = TRUE;
-
     /* Set return value */
     ret_value = sequence;
 
@@ -2007,13 +1935,6 @@ done:
  * Purpose:	Simplified version of H5O_modify, used when creating a new
  *              object header message (usually during object creation)
  *
- *              Modifies an existing message or creates a new message.
- *		The cache fields in that symbol table entry ENT are *not*
- *		updated, you must do that separately because they often
- *		depend on multiple object header messages.  Besides, we
- *		don't know which messages will be constant and which will
- *		not.
- *
  * Return:	Success:	The sequence number of the message that
  *				was created.
  *
@@ -2064,13 +1985,6 @@ done:
  * Purpose:	Simplified version of H5O_modify, used when creating a new
  *              object header message (usually during object creation)
  *
- *              Modifies an existing message or creates a new message.
- *		The cache fields in that symbol table entry ENT are *not*
- *		updated, you must do that separately because they often
- *		depend on multiple object header messages.  Besides, we
- *		don't know which messages will be constant and which will
- *		not.
- *
  * Return:	Success:	The sequence number of the message that
  *				was created.
  *
@@ -2089,8 +2003,6 @@ H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t *type,
     unsigned flags, const void *mesg)
 {
     unsigned		idx;            /* Index of message to modify */
-    H5O_mesg_t         *idx_msg;        /* Pointer to message to modify */
-    size_t		size=0;
     H5O_shared_t	sh_mesg;
     int		        ret_value = FAIL;
 
@@ -2103,69 +2015,13 @@ H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t *type,
     assert(0==(flags & ~H5O_FLAG_BITS));
     assert(mesg);
 
-    /* Allocate space for the new message */
-    if (flags & H5O_FLAG_SHARED) {
-        HDmemset(&sh_mesg,0,sizeof(H5O_shared_t));
+    /* Create a new message */
+    if((idx=H5O_new_mesg(f,oh,&flags,type,mesg,&sh_mesg,&type,&mesg,dxpl_id))==UFAIL)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create new message");
 
-        if (NULL==type->get_share)
-            HGOTO_ERROR (H5E_OHDR, H5E_UNSUPPORTED, FAIL, "message class is not sharable");
-        if ((type->get_share)(f, mesg, &sh_mesg/*out*/)<0) {
-            /*
-             * If the message isn't shared then turn off the shared bit
-             * and treat it as an unshared message.
-             */
-            H5E_clear (NULL);
-            flags &= ~H5O_FLAG_SHARED;
-        } else if (sh_mesg.in_gh) {
-            /*
-             * The shared message is stored in the global heap.
-             * Increment the reference count on the global heap message.
-             */
-            if (H5HG_link (f, dxpl_id, &(sh_mesg.u.gh), 1)<0)
-                HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL, "unable to adjust shared object link count");
-            size = (H5O_SHARED->raw_size)(f, &sh_mesg);
-        } else {
-            /*
-             * The shared message is stored in some other object header.
-             * The other object header must be in the same file as the
-             * new object header. Increment the reference count on that
-             * object header.
-             */
-            if (sh_mesg.u.ent.file->shared != f->shared)
-                HGOTO_ERROR(H5E_OHDR, H5E_LINK, FAIL, "interfile hard links are not allowed");
-            if (H5O_link (&(sh_mesg.u.ent), 1, dxpl_id)<0)
-                HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL, "unable to adjust shared object link count");
-            size = (H5O_SHARED->raw_size)(f, &sh_mesg);
-        }
-    }
-    /* This can't be an 'else' statement due to the possibility of the shared bit getting turned off above */
-    if (0== (flags & H5O_FLAG_SHARED)) {
-        size = (type->raw_size) (f, mesg);
-        if (size>=H5O_MAX_SIZE)
-            HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL, "object header message is too large (16k max)");
-    }
-    if ((idx = H5O_alloc(f, oh, type, size)) == UFAIL)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for message");
-        
-    /* Set pointer to the correct message */
-    idx_msg=&oh->mesg[idx];
-
-    /* Copy the native value into the object header */
-    if (flags & H5O_FLAG_SHARED) {
-        if (NULL==(idx_msg->native = H5MM_malloc (sizeof (H5O_shared_t))))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        HDmemcpy(idx_msg->native,&sh_mesg,sizeof(H5O_shared_t));
-    } else {
-	if (idx_msg->native)
-	    H5O_reset_real(idx_msg->type, idx_msg->native);
-	idx_msg->native = (type->copy) (mesg, idx_msg->native);
-	if (NULL == idx_msg->native)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy message to object header");
-    }
-    
-    idx_msg->flags = flags;
-    idx_msg->dirty = TRUE;
-    oh->cache_info.dirty = TRUE;
+    /* Write the information to the message */
+    if(H5O_write_mesg(oh,idx,type,mesg,flags)<0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to write message");
 
     /* Set return value */
     ret_value = idx;
@@ -2173,6 +2029,129 @@ H5O_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t *type,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_append_real () */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_new_mesg
+ *
+ * Purpose:	Create a new message in an object header
+ *
+ * Return:	Success:	Index of message
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, September  3, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+H5O_new_mesg(H5F_t *f, H5O_t *oh, unsigned *flags, const H5O_class_t *orig_type,
+    const void *orig_mesg, H5O_shared_t *sh_mesg, const H5O_class_t **new_type,
+    const void **new_mesg, hid_t dxpl_id)
+{
+    size_t	size;                   /* Size of space allocated for object header */
+    unsigned    ret_value=UFAIL;        /* Return value */
+
+    FUNC_ENTER_NOINIT(H5O_new_mesg);
+
+    /* check args */
+    assert(f);
+    assert(oh);
+    assert(flags);
+    assert(orig_type);
+    assert(orig_mesg);
+    assert(sh_mesg);
+    assert(new_mesg);
+    assert(new_type);
+
+    /* Check for shared message */
+    if (*flags & H5O_FLAG_SHARED) {
+        HDmemset(sh_mesg,0,sizeof(H5O_shared_t));
+
+        if (NULL==orig_type->get_share)
+            HGOTO_ERROR (H5E_OHDR, H5E_UNSUPPORTED, UFAIL, "message class is not sharable");
+        if ((orig_type->get_share)(f, orig_mesg, sh_mesg/*out*/)<0) {
+            /*
+             * If the message isn't shared then turn off the shared bit
+             * and treat it as an unshared message.
+             */
+            H5E_clear (NULL);
+            *flags &= ~H5O_FLAG_SHARED;
+        } else {
+            /* Change type & message to use shared information */
+            *new_type=H5O_SHARED;
+            *new_mesg=sh_mesg;
+        } /* end else */
+    } /* end if */
+    else {
+        *new_type=orig_type;
+        *new_mesg=orig_mesg;
+    } /* end else */
+
+    /* Compute the size needed to store the message on disk */
+    if ((size = ((*new_type)->raw_size) (f, *new_mesg)) >=H5O_MAX_SIZE)
+        HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, UFAIL, "object header message is too large (16k max)");
+
+    /* Allocate space in the object headed for the message */
+    if ((ret_value = H5O_alloc(f, oh, orig_type, size)) == UFAIL)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, UFAIL, "unable to allocate space for message");
+
+    /* Increment any links in message */
+    if((*new_type)->link && ((*new_type)->link)(f,dxpl_id,(*new_mesg))<0)
+        HGOTO_ERROR (H5E_OHDR, H5E_LINK, UFAIL, "unable to adjust shared object link count");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_new_mesg() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_write_mesg
+ *
+ * Purpose:	Write message to object header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, September  3, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_write_mesg(H5O_t *oh, unsigned idx, const H5O_class_t *type,
+    const void *mesg, unsigned flags)
+{
+    H5O_mesg_t         *idx_msg;        /* Pointer to message to modify */
+    herr_t      ret_value=SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOINIT(H5O_write_mesg);
+
+    /* check args */
+    assert(oh);
+    assert(type);
+    assert(mesg);
+
+    /* Set pointer to the correct message */
+    idx_msg=&oh->mesg[idx];
+
+    /* Reset existing native information */
+    H5O_reset_real(type, idx_msg->native);
+
+    /* Copy the native value for the message */
+    if (NULL == (idx_msg->native = (type->copy) (mesg, idx_msg->native)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy message to object header");
+
+    idx_msg->flags = flags;
+    idx_msg->dirty = TRUE;
+    oh->cache_info.dirty = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_write_mesg() */
 
 
 /*-------------------------------------------------------------------------
@@ -2478,10 +2457,10 @@ done:
 static herr_t
 H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t dxpl_id)
 {
-    H5O_t		*oh = NULL;
+    H5O_t	*oh = NULL;
+    H5O_mesg_t *curr_msg;       /* Pointer to current message being operated on */
     int		seq, nfailed = 0;
-    unsigned		u;
-    H5O_shared_t	*sh_mesg = NULL;
+    unsigned	u;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOINIT(H5O_remove_real);
@@ -2499,40 +2478,32 @@ H5O_remove_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, hid_t d
     if (NULL == (oh = H5AC_protect(ent->file, dxpl_id, H5AC_OHDR, ent->header, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header");
     
-    for (u = seq = 0; u < oh->nmesgs; u++) {
-	if (type->id != oh->mesg[u].type->id)
+    for (u = seq = 0, curr_msg=&oh->mesg[0]; u < oh->nmesgs; u++,curr_msg++) {
+	if (type->id != curr_msg->type->id)
             continue;
 	if (seq++ == sequence || H5O_ALL == sequence) {
+
 	    /*
 	     * Keep track of how many times we failed trying to remove constant
 	     * messages.
 	     */
-	    if (oh->mesg[u].flags & H5O_FLAG_CONSTANT) {
+	    if (curr_msg->flags & H5O_FLAG_CONSTANT) {
 		nfailed++;
 		continue;
-	    }
+	    } /* end if */
 
-	    if (oh->mesg[u].flags & H5O_FLAG_SHARED) {
-		if (NULL==oh->mesg[u].native) {
-		    sh_mesg = (H5O_SHARED->decode)(ent->file, dxpl_id, oh->mesg[u].raw,
-						   NULL);
-		    if (NULL==(oh->mesg[u].native = sh_mesg))
-			HGOTO_ERROR (H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode shared message info");
-		}
-		if (sh_mesg->in_gh) {
-		    if (H5HG_link (ent->file, dxpl_id, &(sh_mesg->u.gh), -1)<0)
-			HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL, "unable to decrement link count on shared message");
-		} else {
-		    if (H5O_link (&(sh_mesg->u.ent), -1, dxpl_id)<0)
-			HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL, "unable to decrement link count on shared message");
-		}
-	    }
+            /* Free any space referred to in the file from this message */
+            if(H5O_delete_mesg(ent->file,dxpl_id,curr_msg)<0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message");
 
 	    /* change message type to nil and zero it */
-	    oh->mesg[u].type = H5O_NULL;
-	    HDmemset(oh->mesg[u].raw, 0, oh->mesg[u].raw_size);
-	    oh->mesg[u].native = H5O_free_real(type, oh->mesg[u].native);
-	    oh->mesg[u].dirty = TRUE;
+	    curr_msg->type = H5O_NULL;
+	    HDmemset(curr_msg->raw, 0, curr_msg->raw_size);
+            if(curr_msg->flags & H5O_FLAG_SHARED)
+                curr_msg->native = H5O_free_real(H5O_SHARED, curr_msg->native);
+            else
+                curr_msg->native = H5O_free_real(type, curr_msg->native);
+	    curr_msg->dirty = TRUE;
 	    oh->cache_info.dirty = TRUE;
 	    H5O_touch_oh(ent->file, oh, FALSE);
 	}
@@ -3095,6 +3066,51 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_get_share
+ *
+ * Purpose:	Call the 'get_share' method for a
+ *              particular class of object header.
+ *
+ * Return:	Success:	Non-negative, and SHARE describes the shared
+ *				object.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Oct  2 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_get_share(hid_t type_id, H5F_t *f, const void *mesg, H5O_shared_t *share)
+{
+    const H5O_class_t *type;    /* Actual H5O class type for the ID */
+    herr_t ret_value;           /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5O_get_share,FAIL);
+
+    /* Check args */
+    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    assert (type);
+    assert (type->get_share);
+    assert (f);
+    assert (mesg);
+    assert (share);
+
+    /* Compute the raw data size for the mesg */
+    if ((ret_value = (type->get_share)(f, mesg, share))<0)
+        HGOTO_ERROR (H5E_OHDR, H5E_CANTGET, FAIL, "unable to retrieve shared message information");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_get_share() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_delete
  *
  * Purpose:	Delete an object header from a file.  This frees the file
@@ -3173,33 +3189,13 @@ H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     assert (f);
     assert (oh);
 
-    /* Walk through the list of object header messages, asking each on to
+    /* Walk through the list of object header messages, asking each one to
      * delete any file space used
      */
     for (u = 0, curr_msg=&oh->mesg[0]; u < oh->nmesgs; u++,curr_msg++) {
-        const H5O_class_t	*type = NULL;
-
-        /* Don't handle shared messages yet */
-        assert(!(curr_msg->flags & H5O_FLAG_SHARED));
-
-        /* Get the message's type */
-	type = curr_msg->type;
-
-        /* Check if there is a file space deletion callback for this type of message */
-        if(type->del) {
-            /*
-             * Decode the message if necessary.
-             */
-            if (NULL == curr_msg->native) {
-                assert(type->decode);
-                curr_msg->native = (type->decode) (f, dxpl_id, curr_msg->raw, NULL);
-                if (NULL == curr_msg->native)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message");
-            } /* end if */
-
-            if ((type->del)(f, dxpl_id, curr_msg->native)<0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message");
-        } /* end if */
+        /* Free any space referred to in the file from this message */
+        if(H5O_delete_mesg(f,dxpl_id,curr_msg)<0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message");
     } /* end for */
 
     /* Free all the chunks for the object header */
@@ -3224,6 +3220,62 @@ H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_delete_oh() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_delete_mesg
+ *
+ * Purpose:	Internal function to:
+ *              Delete an object header message from a file.  This frees the file
+ *              space used for anything referred to in the object header message.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		September 26 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg)
+{
+    const H5O_class_t	*type;  /* Type of object to free */
+    herr_t ret_value=SUCCEED;   /* Return value */
+    
+    FUNC_ENTER_NOINIT(H5O_delete_mesg);
+
+    /* Check args */
+    assert (f);
+    assert (mesg);
+
+    /* Get the message to free's type */
+    if(mesg->flags & H5O_FLAG_SHARED)
+        type=H5O_SHARED;
+    else
+        type = mesg->type;
+
+    /* Check if there is a file space deletion callback for this type of message */
+    if(type->del) {
+        /*
+         * Decode the message if necessary.
+         */
+        if (NULL == mesg->native) {
+            assert(type->decode);
+            mesg->native = (type->decode) (f, dxpl_id, mesg->raw, NULL);
+            if (NULL == mesg->native)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message");
+        } /* end if */
+
+        if ((type->del)(f, dxpl_id, mesg->native)<0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message");
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_delete_msg() */
 
 
 /*-------------------------------------------------------------------------
@@ -3410,7 +3462,7 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 	    decode = oh->mesg[i].type->decode;
 	    debug = oh->mesg[i].type->debug;
 	}
-	if (NULL==oh->mesg[i].native && oh->mesg[i].type->decode)
+	if (NULL==oh->mesg[i].native && decode)
 	    oh->mesg[i].native = (decode)(f, dxpl_id, oh->mesg[i].raw, NULL);
 	if (NULL==oh->mesg[i].native)
 	    debug = NULL;

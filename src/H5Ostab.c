@@ -59,6 +59,7 @@ const H5O_class_t H5O_STAB[1] = {{
     NULL,                   	/*default reset method          */
     H5O_stab_free,	        /* free method			*/
     H5O_stab_delete,	        /* file delete method		*/
+    NULL,			/* link method			*/
     NULL,		    	/*get share method		*/
     NULL, 			/*set share method		*/
     H5O_stab_debug,         	/*debug the message             */

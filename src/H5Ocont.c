@@ -55,6 +55,7 @@ const H5O_class_t H5O_CONT[1] = {{
     NULL,                   	/*reset method			*/
     NULL,		        /* free method			*/
     NULL,		        /* file delete method		*/
+    NULL,			/* link method			*/
     NULL, 		    	/*get share method		*/
     NULL,		    	/*set share method		*/
     H5O_cont_debug,         	/*debugging                     */
