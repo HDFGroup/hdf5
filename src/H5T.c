@@ -4808,7 +4808,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
         }
 
         /* Sort the fields based on offsets */
-        H5T_sort_value(old_dt,NULL);
+        H5T_sort_value((H5T_t *)old_dt,NULL);
 	
         HDmemcpy(new_dt->u.compnd.memb, old_dt->u.compnd.memb,
              new_dt->u.compnd.nmembs * sizeof(H5T_cmemb_t));

@@ -2719,7 +2719,7 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
     }
 
     /* Call H5Diterate with args, etc. */
-    ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,xfer_parms);
+    ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,(void *)xfer_parms);
 
     FUNC_LEAVE(ret_value);
 }   /* end H5Dvlen_reclaim() */
