@@ -91,13 +91,14 @@ H5D_mpio_opt_possible( const H5D_t *dset, const H5S_t *mem_space, const H5S_t *f
         HGOTO_DONE(FALSE);
 
     /* Check whether both selections are "regular" */
+#ifndef KYANG
     c1=H5S_SELECT_IS_REGULAR(file_space);
     c2=H5S_SELECT_IS_REGULAR(mem_space);
     if(c1==FAIL || c2==FAIL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for single selection blocks");
     if(c1==FALSE || c2==FALSE)
         HGOTO_DONE(FALSE);
-
+#endif
     /* Can't currently handle point selections */
     if (H5S_SEL_POINTS==H5S_GET_SELECT_TYPE(mem_space) || H5S_SEL_POINTS==H5S_GET_SELECT_TYPE(file_space))
         HGOTO_DONE(FALSE);
@@ -404,6 +405,15 @@ H5D_mpio_spaces_span_xfer(H5D_io_info_t *io_info, size_t elmt_size,
 
     printf("coming to span tree xfer \n");
     /* create the MPI buffer type */
+    if(H5S_SELECT_IS_REGULAR(mem_space)==TRUE){
+      if (H5S_mpio_space_type( mem_space, elmt_size,
+			       /* out: */
+			       &mpi_buf_type,
+			       &mpi_buf_count,
+			       &mpi_buf_offset,
+			       &mbt_is_derived )<0)
+    	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI buf type");}
+      else {
     if (H5S_mpio_space_span_type( mem_space, elmt_size,
 			       /* out: */
 			       &mpi_buf_type,
@@ -411,16 +421,28 @@ H5D_mpio_spaces_span_xfer(H5D_io_info_t *io_info, size_t elmt_size,
 			       &mpi_buf_offset,
 			       &mbt_is_derived )<0)
     	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI buf type");
-
+      }
+    printf("mpi_buf_count %d\n",mpi_buf_count);
     /* create the MPI file type */
-    if ( H5S_mpio_space_span_type( file_space, elmt_size,
+
+       if(H5S_SELECT_IS_REGULAR(file_space)== TRUE){ 
+ if ( H5S_mpio_space_type( file_space, elmt_size,
 			       /* out: */
 			       &mpi_file_type,
 			       &mpi_file_count,
 			       &mpi_file_offset,
 			       &mft_is_derived )<0)
     	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI file type");
-
+       }
+       else {
+	 if ( H5S_mpio_space_span_type( file_space, elmt_size,
+			       /* out: */
+			       &mpi_file_type,
+			       &mpi_file_count,
+			       &mpi_file_offset,
+			       &mft_is_derived )<0)
+    	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI file type");
+       }
     /* Get the base address of the contiguous dataset or the chunk */
     if(io_info->dset->shared->layout.type == H5D_CONTIGUOUS)
        addr = H5D_contig_get_addr(io_info->dset) + mpi_file_offset;
@@ -625,6 +647,7 @@ H5D_mpio_spaces_span_write(H5D_io_info_t *io_info,
     printf(" coming to spaces_span_write function\n");
     fflush(stdout);
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
+    printf("element size %d\n",elmt_size);
     ret_value = H5D_mpio_spaces_span_xfer(io_info, elmt_size, file_space,
         mem_space, (void*)buf, 1/*write*/);
 

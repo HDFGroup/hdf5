@@ -3307,26 +3307,27 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     /* Check if we can use the optimized parallel I/O routines */
     if(opt==TRUE) {
         /* Set the pointers to the MPI-specific routines */
+      if((H5S_SELECT_IS_REGULAR(file_space) == TRUE) &&
+	 (H5S_SELECT_IS_REGULAR(mem_space)  == TRUE)){
         io_info->ops.read = H5D_mpio_spaces_read;
         io_info->ops.write = H5D_mpio_spaces_write;
+      }
 
+     #ifdef KYANG
+      else {
+	io_info->ops.read = H5D_mpio_spaces_span_read;
+	io_info->ops.write = H5D_mpio_spaces_span_write;
+      }
+      #endif
         /* Indicate that the I/O will be parallel */
         *use_par_opt_io=TRUE;
     } /* end if */
     else {
         /* Indicate that the I/O will _NOT_ be parallel */
 
-#ifdef KYANG
-      printf("coming to span write \n");
-      io_info->ops.read = H5D_mpio_spaces_span_read;
-      io_info->ops.write = H5D_mpio_spaces_span_write;
-      *use_par_opt_io = TRUE;
-#else      
         *use_par_opt_io=FALSE;
         io_info->ops.read = H5D_select_read;
         io_info->ops.write = H5D_select_write;
-#endif
-
 
 
     } /* end else */
