@@ -195,7 +195,6 @@
 ./test/big.c
 ./test/cmpd_dset.c
 ./test/dsets.c
-./test/dspace.c
 ./test/dtypes.c
 ./test/extend.c
 ./test/external.c

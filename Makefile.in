@@ -81,6 +81,7 @@ distclean:
 	$(RM) config/commence config/conclude config/depend
 	$(RM) config.cache config.log config.status src/H5config.h
 	$(RM) Makefile
+	$(CP) Makefile.dist Makefile
 
 maintainer-clean:
 	@echo "This command is intented for maintainers to use;"

@@ -969,6 +969,14 @@ H5D_open(H5G_t *loc, const char *name)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "unable to load type or space info from dataset header");
     }
+
+    /* Get the optional compression message */
+    if (NULL==H5O_read (&(dataset->ent), H5O_COMPRESS, 0,
+			&(dataset->create_parms->compress))) {
+	H5E_clear ();
+	HDmemset (&(dataset->create_parms->compress), 0,
+		  sizeof(dataset->create_parms->compress));
+    }
     
     /*
      * Get the raw data layout info.  It's actually stored in two locations:

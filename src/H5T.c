@@ -3424,6 +3424,10 @@ H5T_find(const H5T_t *src, const H5T_t *dst, H5T_bkg_t need_bkg,
 
     FUNC_ENTER(H5T_find, NULL);
 
+    if (!noop_cdata.stats) {
+	noop_cdata.stats = H5MM_xcalloc (1, sizeof(H5T_stats_t));
+    }
+
     /* No-op case */
     if (need_bkg<H5T_BKG_YES && 0==H5T_cmp(src, dst)) {
 	*pcdata = &noop_cdata;

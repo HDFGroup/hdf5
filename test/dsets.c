@@ -36,6 +36,9 @@
 #define DSET_SIMPLE_IO_NAME	"simple_io"
 #define DSET_TCONV_NAME		"tconv"
 #define DSET_COMPRESS_NAME	"compressed"
+#define DSET_BOGUS_NAME		"bogus"
+
+#define H5Z_BOGUS		255
 
 
 /*-------------------------------------------------------------------------
@@ -353,6 +356,33 @@ test_tconv(hid_t file)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	bogus
+ *
+ * Purpose:	A bogus compression method.
+ *
+ * Return:	Success:	SRC_NBYTES, see compression documentation.
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, April 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static size_t
+bogus (unsigned int flags,
+       size_t cd_size, const void *client_data,
+       size_t src_nbytes, const void *src,
+       size_t dst_nbytes, void *dst/*out*/)
+{
+    memcpy (dst, src, src_nbytes);
+    return src_nbytes;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_compression
  *
  * Purpose:	Tests dataset compression.
@@ -374,48 +404,89 @@ test_compression(hid_t file)
     hid_t		dataset, space, xfer, dc;
     herr_t		status;
     int			points[100][200], check[100][200];
-    int			i, j, n;
-    hsize_t		dims[2], chunk_size[2];
+    const hsize_t	size[2] = {100, 200};
+    const hsize_t	chunk_size[2] = {2, 25};
+    const hssize_t	hs_offset[2] = {7, 30};
+    const hsize_t	hs_size[2] = {4, 50};
+    
+    hsize_t		i, j, n;
     void		*tconv_buf = NULL;
 
-    printf("%-70s", "Testing compression");
-    fflush (stdout);
+    printf ("%-70s", "Testing compression (setup)");
+    fflush (stderr);
     
-    /* Initialize the dataset */
-    for (i = n = 0; i < 100; i++) {
-	for (j = 0; j < 100; j++) {
-	    points[i][j] = n++;
-	}
-    }
-
     /* Create the data space */
-    dims[0] = 100;
-    dims[1] = 200;
-    space = H5Screate_simple(2, dims, NULL);
+    space = H5Screate_simple(2, size, NULL);
     assert(space>=0);
 
     /* Create a small conversion buffer to test strip mining */
-    tconv_buf = malloc (1000);
     xfer = H5Pcreate (H5P_DATASET_XFER);
     assert (xfer>=0);
+#if 0
+    tconv_buf = malloc (1000);
     status = H5Pset_buffer (xfer, 1000, tconv_buf, NULL);
     assert (status>=0);
+#endif
 
     /* Use chunked storage with compression */
     dc = H5Pcreate (H5P_DATASET_CREATE);
-    chunk_size[0] = 2;
-    chunk_size[1] = 25;
     H5Pset_chunk (dc, 2, chunk_size);
     H5Pset_deflate (dc, 6);
 
     /* Create the dataset */
     dataset = H5Dcreate(file, DSET_COMPRESS_NAME, H5T_NATIVE_INT, space, dc);
     assert(dataset >= 0);
+    puts (" PASSED");
 
-    /* Write the data to the dataset */
+    /*----------------------------------------------------------------------
+     * STEP 1: Read uninitialized data.  It should be zero.
+     *---------------------------------------------------------------------- 
+     */
+    printf ("%-70s", "Testing compression (uninitialized read)");
+    fflush (stdout);
+
+    status = H5Dread (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+		      xfer, check);
+    if (status<0) goto error;
+    
+    for (i=0; i<size[0]; i++) {
+	for (j=0; j<size[1]; j++) {
+	    if (0!=check[i][j]) {
+		puts("*FAILED*");
+		printf("   Read a non-zero value.\n");
+		printf("   At index %lu,%lu\n",
+		       (unsigned long)i, (unsigned long)j);
+		goto error;
+	    }
+	}
+    }
+    puts (" PASSED");
+
+    /*----------------------------------------------------------------------
+     * STEP 2: Test compression by setting up a chunked dataset and writing
+     * to it.
+     *---------------------------------------------------------------------- 
+     */
+    printf("%-70s", "Testing compression (write)");
+    fflush (stdout);
+    
+    for (i=n=0; i<size[0]; i++) {
+	for (j=0; j<size[1]; j++) {
+	    points[i][j] = n++;
+	}
+    }
+
     status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
 		      xfer, points);
     if (status<0) goto error;
+    puts (" PASSED");
+
+    /*----------------------------------------------------------------------
+     * STEP 3: Try to read the data we just wrote.
+     *---------------------------------------------------------------------- 
+     */
+    printf ("%-70s", "Testing compression (read)");
+    fflush (stdout);
 
     /* Read the dataset back */
     status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
@@ -423,23 +494,31 @@ test_compression(hid_t file)
     if (status<0) goto error;
 
     /* Check that the values read are the same as the values written */
-    for (i = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
+    for (i=0; i<size[0]; i++) {
+	for (j=0; j<size[1]; j++) {
 	    if (points[i][j] != check[i][j]) {
 		puts("*FAILED*");
 		printf("   Read different values than written.\n");
-		printf("   At index %d,%d\n", i, j);
+		printf("   At index %lu,%lu\n",
+		       (unsigned long)i, (unsigned long)j);
 		goto error;
 	    }
 	}
     }
+    puts (" PASSED");
 
-    /*
-     * Write some random data to the dataset, hopefully causing chunks to be
-     * reallocated as they grow.
+    /*----------------------------------------------------------------------
+     * STEP 4: Write new data over the top of the old data.  The new data is
+     * random thus not very compressible, and will cause the chunks to move
+     * around as they grow.  We only change values for the left half of the
+     * dataset although we rewrite the whole thing.
+     *---------------------------------------------------------------------- 
      */
-    for (i=0; i<100; i++) {
-	for (j=0; j<100; j++) {
+    printf ("%-70s", "Testing compression (modify)");
+    fflush (stdout);
+    
+    for (i=0; i<size[0]; i++) {
+	for (j=0; j<size[1]/2; j++) {
 	    points[i][j] = rand ();
 	}
     }
@@ -454,23 +533,129 @@ test_compression(hid_t file)
     if (status<0) goto error;
 
     /* Check that the values read are the same as the values written */
-    for (i = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
+    for (i=0; i<size[0]; i++) {
+	for (j=0; j<size[1]; j++) {
 	    if (points[i][j] != check[i][j]) {
 		puts("*FAILED*");
 		printf("   Read different values than written.\n");
-		printf("   At index %d,%d\n", i, j);
+		printf("   At index %lu,%lu\n",
+		       (unsigned long)i, (unsigned long)j);
 		goto error;
 	    }
 	}
     }
+    puts (" PASSED");
 
+    /*----------------------------------------------------------------------
+     * STEP 5: Close the dataset and then open it and read it again.  This
+     * insures that the compression message is picked up properly from the
+     * object header.
+     *---------------------------------------------------------------------- 
+     */
+    printf ("%-70s", "Testing compression (re-open)");
+    fflush (stdout);
     
-    
+    H5Dclose (dataset);
+    dataset = H5Dopen (file, DSET_COMPRESS_NAME);
+    status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+		     xfer, check);
+    if (status<0) goto error;
 
+    /* Check that the values read are the same as the values written */
+    for (i=0; i<size[0]; i++) {
+	for (j=0; j<size[1]; j++) {
+	    if (points[i][j] != check[i][j]) {
+		puts("*FAILED*");
+		printf("   Read different values than written.\n");
+		printf("   At index %lu,%lu\n",
+		       (unsigned long)i, (unsigned long)j);
+		goto error;
+	    }
+	}
+    }
+    puts (" PASSED");
+
+
+    /*----------------------------------------------------------------------
+     * STEP 6: Test partial I/O by writing to and then reading from a
+     * hyperslab of the dataset.  The hyperslab does not line up on chunk
+     * boundaries (we know that case already works from above tests).
+     *---------------------------------------------------------------------- 
+     */
+    printf ("%-70s", "Testing compression (partial I/O)");
+    fflush (stderr);
+
+    for (i=0; i<hs_size[0]; i++) {
+	for (j=0; j<hs_size[1]; j++) {
+	    points[hs_offset[0]+i][hs_offset[1]+j] = rand ();
+	}
+    }
+    H5Sset_hyperslab (space, hs_offset, hs_size, NULL);
+
+    status = H5Dwrite (dataset, H5T_NATIVE_INT, space, space, xfer, points);
+    if (status<0) goto error;
+    status = H5Dread (dataset, H5T_NATIVE_INT, space, space, xfer, check);
+    if (status<0) goto error;
+    
+    /* Check that the values read are the same as the values written */
+    for (i=0; i<hs_size[0]; i++) {
+	for (j=0; j<hs_size[1]; j++) {
+	    if (points[hs_offset[0]+i][hs_offset[1]+j] !=
+		check[hs_offset[0]+i][hs_offset[1]+j]) {
+		puts("*FAILED*");
+		printf("   Read different values than written.\n");
+		printf("   At index %lu,%lu\n",
+		       (unsigned long)(hs_offset[0]+i),
+		       (unsigned long)(hs_offset[1]+j));
+		goto error;
+	    }
+	}
+    }
+    puts (" PASSED");
+
+    /*----------------------------------------------------------------------
+     * STEP 7: Register an application-defined compression method and use it
+     * to write and then read the dataset.
+     *---------------------------------------------------------------------- 
+     */
+    printf ("%-70s", "Testing compression (app-defined method)");
+    fflush (stdout);
+
+    H5Zregister (H5Z_BOGUS, "bogus", bogus, bogus);
+    H5Pset_compression (dc, H5Z_BOGUS, 0, 0, NULL);
+    H5Dclose (dataset);
+    H5Sclose (space);
+    space = H5Screate_simple (2, size, NULL);
+    dataset = H5Dcreate (file, DSET_BOGUS_NAME, H5T_NATIVE_INT, space, dc);
+    assert (dataset>=0);
+
+    status = H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+		       xfer, points);
+    if (status<0) goto error;
+    status = H5Dread (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+		      xfer, check);
+    if (status<0) goto error;
+    
+    for (i=0; i<size[0]; i++) {
+	for (j=0; j<size[1]; j++) {
+	    if (points[i][j] != check[i][j]) {
+		puts("*FAILED*");
+		printf("   Read different values than written.\n");
+		printf("   At index %lu,%lu\n",
+		       (unsigned long)i, (unsigned long)j);
+		goto error;
+	    }
+	}
+    }
+    puts (" PASSED");
+    
+			 
+  
+    /*----------------------------------------------------------------------
+     * Cleanup
+     *---------------------------------------------------------------------- 
+     */
     H5Dclose(dataset);
-
-    puts(" PASSED");
     return 0;
 
   error:

@@ -1859,6 +1859,10 @@ H5Pget_preserve (hid_t plist_id)
  *		specific compression initialization functions like
  *		H5Pset_deflate().
  *
+ *		The FLAGS, CD_SIZE, and CLIENT_DATA are copied to the
+ *		property list and eventually to the file and passed to the
+ *		compression functions.
+ *
  * Return:	Success:	SUCCEED
  *
  *		Failure:	FAIL
@@ -1871,7 +1875,8 @@ H5Pget_preserve (hid_t plist_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_compression (hid_t plist_id, H5Z_method_t method)
+H5Pset_compression (hid_t plist_id, H5Z_method_t method, unsigned int flags,
+		    size_t cd_size, const void *client_data)
 {
     H5D_create_t	*plist = NULL;
     
@@ -1891,7 +1896,12 @@ H5Pset_compression (hid_t plist_id, H5Z_method_t method)
     /* Clear any previous compression method info, then set new value */
     H5O_reset (H5O_COMPRESS, &(plist->compress));
     plist->compress.method = method;
-
+    plist->compress.flags = flags;
+    plist->compress.cd_size = cd_size;
+    if (cd_size) {
+	plist->compress.client_data = H5MM_xmalloc (cd_size);
+	HDmemcpy (plist->compress.client_data, client_data, cd_size);
+    }
     FUNC_LEAVE (SUCCEED);
 }
 
@@ -1900,7 +1910,11 @@ H5Pset_compression (hid_t plist_id, H5Z_method_t method)
  * Function:	H5Pget_compression
  *
  * Purpose:	Gets the compression method information from a dataset
- *		creation property list.
+ *		creation property list.  The CLIENT_DATA buffer is initially
+ *		CD_SIZE bytes.  On return, CLIENT_DATA will be initialized
+ *		with at most that many bytes, and CD_SIZE will contain the
+ *		actual size of the client data, which might be larger than
+ *		its original value.
  *
  * Return:	Success:	Compression method.
  *
@@ -1914,7 +1928,8 @@ H5Pset_compression (hid_t plist_id, H5Z_method_t method)
  *-------------------------------------------------------------------------
  */
 H5Z_method_t
-H5Pget_compression (hid_t plist_id)
+H5Pget_compression (hid_t plist_id, unsigned int *flags/*out*/,
+		    size_t *cd_size/*in,out*/, void *client_data/*out*/)
 {
     H5D_create_t	*plist = NULL;
     
@@ -1925,6 +1940,16 @@ H5Pget_compression (hid_t plist_id)
 	NULL==(plist=H5I_object (plist_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset creation property list");
+    }
+
+    /* Output values */
+    if (flags) *flags = plist->compress.flags;
+    if (cd_size) {
+	if (*cd_size>0 && client_data) {
+	    HDmemcpy (client_data, plist->compress.client_data,
+		      MIN(plist->compress.cd_size, *cd_size));
+	}
+	*cd_size = plist->compress.cd_size;
     }
 
     FUNC_LEAVE (plist->compress.method);

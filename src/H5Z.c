@@ -268,7 +268,7 @@ H5Z_compress (const H5O_compress_t *comp, size_t nbytes, const void *src,
     } else if (ret_value>=nbytes) {
 	/* Output is not smaller than input */
 #ifdef H5Z_DEBUG
-	H5Z_g[method].comp.over += 1;
+	H5Z_g[method].comp.over += nbytes;
 	over = 1;
 #endif
 	HGOTO_DONE (0);

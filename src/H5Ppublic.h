@@ -88,8 +88,12 @@ herr_t H5Pset_buffer (hid_t plist_id, size_t size, void *tconv, void *bkg);
 size_t H5Pget_buffer (hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/);
 herr_t H5Pset_preserve (hid_t plist_id, hbool_t status);
 int H5Pget_preserve (hid_t plist_id);
-herr_t H5Pset_compression (hid_t plist_id, H5Z_method_t method);
-H5Z_method_t H5Pget_compression (hid_t plist_id);
+herr_t H5Pset_compression (hid_t plist_id, H5Z_method_t method,
+			   unsigned int flags, size_t cd_size,
+			   const void *client_data);
+H5Z_method_t H5Pget_compression (hid_t plist_id, unsigned int *flags/*out*/,
+				 size_t *cd_size/*in,out*/,
+				 void *client_data/*out*/);
 herr_t H5Pset_deflate (hid_t plist_id, int level);
 int H5Pget_deflate (hid_t plist_id);
 
