@@ -114,15 +114,19 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 ## Install the documents.
 ##
 install-doc: $(PUB_DOCS)
-	@if test -d $(DOCDIR) ; then                                          \
-	   :;                                                                 \
-	else                                                                  \
-	   mkdir $(DOCDIR) && chmod 755 $(DOCDIR);                            \
+	@if test -n "$(DOCDIR)"; then                                         \
+	    if test -d "$(DOCDIR)"; then                                      \
+	       :;                                                             \
+	    else                                                              \
+	       mkdir $(DOCDIR) && chmod 755 $(DOCDIR);                        \
+	    fi;                                                               \
 	fi
-	@if test -d $(SUBDOCDIR) ; then                                       \
-	   :;                                                                 \
-	else                                                                  \
-	   mkdir $(SUBDOCDIR) && chmod 755 $(SUBDOCDIR);                      \
+	@if test -n "$(SUBDOCDIR)"; then                                      \
+	    if test -d "$(SUBDOCDIR)" ; then                                  \
+	       :;                                                             \
+	    else                                                              \
+	       mkdir $(SUBDOCDIR) && chmod 755 $(SUBDOCDIR);                  \
+	    fi;                                                               \
 	fi
 	@for d in X $(SUBDIRS); do                                            \
 	   if test $$d != X; then                                             \
@@ -156,7 +160,7 @@ uninstall:
 	@for f in libhdf5.settings $(LIB); do				      \
             $(LT_UNINSTALL) $(libdir)/$$f;				      \
 	done
-	@if test "X$(PUB_HDR)" != "X"; then				      \
+	@if test -n "$(PUB_HDR)"; then                                        \
 	   set -x; cd $(includedir) && $(RM) $(PUB_HDR);		      \
 	fi
 	@for f in X $(PUB_PROGS); do					      \
@@ -173,7 +177,7 @@ uninstall-doc:
 	       (set -x; cd $$d && $(MAKE) $@) || exit 1;                      \
 	    fi;								      \
 	done
-	@if test "X$(PUB_DOCS)" != "X"; then				      \
+	@if test -n "$(PUB_DOCS)"; then 				      \
 	   set -x; cd $(DOCDIR) && $(RM) $(PUB_DOCS);			      \
 	fi
 
@@ -186,9 +190,15 @@ mostlyclean:
 	        (set -x; cd $$d; $(MAKE) $@) || exit 1;                       \
 	    fi;                                                               \
 	done
-	-$(RM) $(LIB_OBJ) $(LIB_OBJ:.lo=.o)
-	-$(RM) $(TEST_OBJ) $(TEST_OBJ:.lo=.o)
-	-$(RM) $(PROG_OBJ) $(PROG_OBJ:.lo=.o) $(MOSTLYCLEAN)
+	@if test -n "$(LIB_OBJ)"; then                                        \
+	    -$(RM) $(LIB_OBJ) $(LIB_OBJ:.lo=.o);                              \
+	fi
+	@if test -n "$(TEST_OBJ)"; then                                       \
+	    -$(RM) $(TEST_OBJ) $(TEST_OBJ:.lo=.o);                            \
+	fi
+	@if test -n "$(PROG_OBJ)" || test -n "$(MOSTLYCLEAN)"; then           \
+	    -$(RM) $(PROG_OBJ) $(PROG_OBJ:.lo=.o) $(MOSTLYCLEAN);             \
+	fi
 
 ## Like `mostlyclean' except it also removes the final targets: things like
 ## libraries and executables.  This target doesn't remove any file that
@@ -200,7 +210,9 @@ clean: mostlyclean
 	        (set -x; cd $$d; $(MAKE) $@) || exit 1;                       \
 	    fi;                                                               \
 	done
-	-$(RM) $(LIB) $(TEST_PROGS) $(PROGS) $(CLEAN)
+	@if test -n "$(LIB)" -o -n "$(TEST_PROGS)" -o -n "$(PROGS)" -o -n "$(CLEAN)"; then \
+	    -$(RM) $(LIB) $(TEST_PROGS) $(PROGS) $(CLEAN)                     \
+	fi;
 	-$(RM) -r .libs
 
 ## Like `clean' except it also removes files that were created by running
