@@ -56,8 +56,6 @@ typedef struct {
 } H5S_hyper_iter_info_t;
 
 /* Static function prototypes */
-static intn H5S_hyper_bsearch(hssize_t size, H5S_hyper_bound_t *barr,
-			      size_t count);
 static H5S_hyper_region_t * H5S_hyper_get_regions (size_t *num_regions,
                uintn rank, uintn dim, size_t bound_count,
                H5S_hyper_bound_t **lo_bounds, hssize_t *pos, hssize_t *offset);
@@ -1544,61 +1542,46 @@ H5S_hyper_mscat (const void *_tconv_buf, size_t elmt_size,
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_hyper_bsearch
+    H5S_hyper_bound_comp
  PURPOSE
-    Search for a boundary
+    Compare two hyperslab boundary elements (for qsort)
  USAGE
-    herr_t H5S_hyper_bsearch(key,barr,count)
-        hssize_t size;              IN: Key we are searching for
-        H5S_hyper_bount_t *barr;    IN: Pointer to the array of bounds
-        size_t count;               IN: Number of elements in the bound array
+    herr_t H5S_hyper_bound_comp(b1,b2)
+        const H5S_hyper_bound_t *b1;  IN: Pointer to the first boundary element
+        const H5S_hyper_bound_t *b2;  IN: Pointer to the first boundary element
  RETURNS
-    The element number to insert in front of on success (the value in the 'count'
-    parameter if the new bound should be added to end) or negative on failure.
+    <0 if b1 compares less than b2
+    0 if b1 compares equal to b2
+    >0 if b1 compares greater than b2
  DESCRIPTION
-    Finds the proper place to insert a boundary in a sorted boundary array.
-    Uses a binary search algorithm for the actual searching.
+    Callback routine for qsort to compary boundary elements.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static intn
-H5S_hyper_bsearch(hssize_t size, H5S_hyper_bound_t *barr, size_t count)
+intn
+H5S_hyper_bound_comp(const void *_b1, const void *_b2)
 {
-    size_t lo, mid, hi;       /* Indices for the search */
-    intn ret_value=-1;      /* Return value index */
+    const H5S_hyper_bound_t *b1=(const H5S_hyper_bound_t *)_b1; /* Ptr to first boundary element */
+    const H5S_hyper_bound_t *b2=(const H5S_hyper_bound_t *)_b2; /* Ptr to second boundary element */
 
+#ifdef LATER
     FUNC_ENTER (H5S_hyper_bsearch, FAIL);
+#endif /* LATER */
 
-    assert(barr);
-    assert(count>0);
+    assert(b1);
+    assert(b2);
 
-    /* Check bounds first */
-    if(size<barr[0].bound)
-        ret_value=0;
-    else if(size>barr[count-1].bound)
-        ret_value=(intn)count;
-    else {      /* must be in the middle somewhere, go get it */
-        lo=0;
-        hi=count-1;
-        do {
-            /* Calc. the mid-point */
-            mid=(hi+lo)/2;
+    if(b1->bound<b2->bound)
+        return(-1);
+    if(b1->bound>b2->bound)
+        return(1);
+    return(0);
 
-            /* check for bounds only seperated by one element */
-            if((hi-lo)<=1) {
-                ret_value=(intn)hi;
-                break;
-            } else {    /* Divide and conquer! */
-                if(size>barr[mid].bound)
-                    lo=mid;
-                else
-                    hi=mid;
-            } /* end else */
-        } while(lo!=hi);
-    } /* end else */
+#ifdef LATER
     FUNC_LEAVE (ret_value);
+#endif /* LATER */
 }   /* H5S_hyper_bsearch() */
 
 
@@ -1846,43 +1829,14 @@ H5S_hyper_add (H5S_t *space, H5S_hyper_node_t *piece_lst)
 #endif /* QAK */
         /* Insert each boundary of the hyperslab into the sorted lists of bounds */
         for(i=0; i<space->extent.u.simple.rank; i++) {
-            /* Check if this is the first hyperslab inserted */
-            if(space->select.sel_info.hslab.hyper_lst->count==0) {
 #ifdef QAK
-            printf("%s: check 4.1, start[%d]=%d, end[%d]=%d\n",
-               FUNC, i, (int)slab->start[i],i,(int)slab->end[i]);
-            printf("%s: check 4.1,.hslab.hyper_lst->count=%d\n",
-               FUNC,(int)space->select.sel_info.hslab.hyper_lst->count);
+        printf("%s: check 4.1, start[%d]=%d, end[%d]=%d\n",
+           FUNC, i, (int)slab->start[i],i,(int)slab->end[i]);
+        printf("%s: check 4.1,.hslab.hyper_lst->count=%d\n",
+           FUNC,(int)space->select.sel_info.hslab.hyper_lst->count);
 #endif /* QAK */
-                space->select.sel_info.hslab.hyper_lst->lo_bounds[i][0].bound=slab->start[i];
-                space->select.sel_info.hslab.hyper_lst->lo_bounds[i][0].node=slab;
-            } /* end if */
-            else {
-#ifdef QAK
-            printf("%s: check 4.3, start[%d]=%d, end[%d]=%d\n",
-               FUNC,i,(int)slab->start[i],i,(int)slab->end[i]);
-            printf("%s: check 4.3,.hslab.hyper_lst->count=%d\n",
-               FUNC,(int)space->select.sel_info.hslab.hyper_lst->count);
-#endif /* QAK */
-                /* Take care of the low boundary */
-                /* Find the location to insert in front of */
-                if((bound_loc=H5S_hyper_bsearch(slab->start[i],space->select.sel_info.hslab.hyper_lst->lo_bounds[i],
-                        space->select.sel_info.hslab.hyper_lst->count))<0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                        "can't find location to insert hyperslab boundary");
-
-#ifdef QAK
-            printf("%s: check 4.5, bound_loc=%d\n",FUNC,(int)bound_loc);
-#endif /* QAK */
-                /* Check if we need to move boundary elements */
-                if(bound_loc!=(intn)space->select.sel_info.hslab.hyper_lst->count) {
-                    HDmemmove(&space->select.sel_info.hslab.hyper_lst->lo_bounds[i][bound_loc+1],
-                        &space->select.sel_info.hslab.hyper_lst->lo_bounds[i][bound_loc],
-                        sizeof(H5S_hyper_bound_t)*(space->select.sel_info.hslab.hyper_lst->count-bound_loc));
-                } /* end if */
-                space->select.sel_info.hslab.hyper_lst->lo_bounds[i][bound_loc].bound=slab->start[i];
-                space->select.sel_info.hslab.hyper_lst->lo_bounds[i][bound_loc].node=slab;
-            } /* end else */
+            space->select.sel_info.hslab.hyper_lst->lo_bounds[i][space->select.sel_info.hslab.hyper_lst->count].bound=slab->start[i];
+            space->select.sel_info.hslab.hyper_lst->lo_bounds[i][space->select.sel_info.hslab.hyper_lst->count].node=slab;
         } /* end for */
 
         /* Increment the number of bounds in the array */
@@ -1912,6 +1866,10 @@ H5S_hyper_add (H5S_t *space, H5S_hyper_node_t *piece_lst)
         }
 #endif /* QAK */
     } /* end while */
+
+    /* Sort each dimension's array of bounds, now that they are all in the array */
+    for(i=0; i<space->extent.u.simple.rank; i++)
+        HDqsort(space->select.sel_info.hslab.hyper_lst->lo_bounds[i],space->select.sel_info.hslab.hyper_lst->count,sizeof(H5S_hyper_bound_t),H5S_hyper_bound_comp);
 
 done:
     FUNC_LEAVE (ret_value);
