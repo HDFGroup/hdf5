@@ -42,7 +42,10 @@ New Features
 
     Library:
     --------
-        - A new type of dataspace, null dataspace(dataspace without any 
+        - Added option that if $HDF5_DISABLE_VERSION_CHECK is set to 2,
+	    will suppress all library version mismatch warning messages.
+	    AKC - 2004/4/14
+	- A new type of dataspace, null dataspace(dataspace without any 
             element) was added.  SLU - 2004/3/24
         - Data type conversion(software) from integer to float was added.
             SLU - 2004/3/13 
