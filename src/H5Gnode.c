@@ -134,7 +134,7 @@ static int interface_initialize_g = 0;
 H5FL_DEFINE_STATIC(H5G_node_t);
 
 /* Declare a free list to manage arrays of H5G_entry_t's */
-H5FL_ARR_DEFINE_STATIC(H5G_entry_t,-1);
+H5FL_SEQ_DEFINE_STATIC(H5G_entry_t);
 
 /* Declare a free list to manage blocks of symbol node data */
 H5FL_BLK_DEFINE_STATIC(symbol_node);
@@ -352,7 +352,7 @@ H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED  *_udata1
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for symbol table node");
     p=buf;
     if (NULL==(sym = H5FL_CALLOC(H5G_node_t)) ||
-            NULL==(sym->entry=H5FL_ARR_CALLOC(H5G_entry_t,(2*H5F_SYM_LEAF_K(f)))))
+            NULL==(sym->entry=H5FL_SEQ_CALLOC(H5G_entry_t,(2*H5F_SYM_LEAF_K(f)))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     if (H5F_block_read(f, H5FD_MEM_BTREE, addr, size, dxpl_id, buf) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL, "unable to read symbol table node");
@@ -527,7 +527,7 @@ H5G_node_dest(H5F_t UNUSED *f, H5G_node_t *sym)
     assert (sym->cache_info.dirty==0);
 
     if(sym->entry)
-        sym->entry = H5FL_ARR_FREE(H5G_entry_t,sym->entry);
+        sym->entry = H5FL_SEQ_FREE(H5G_entry_t,sym->entry);
     H5FL_FREE(H5G_node_t,sym);
 
     FUNC_LEAVE_NOAPI(SUCCEED);
@@ -616,7 +616,7 @@ H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t UNUSED op, void *_lt_key,
     if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, size)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to allocate file space");
     sym->cache_info.dirty = TRUE;
-    sym->entry = H5FL_ARR_CALLOC(H5G_entry_t,(2*H5F_SYM_LEAF_K(f)));
+    sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t,(2*H5F_SYM_LEAF_K(f)));
     if (NULL==sym->entry)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     if (H5AC_set(f, dxpl_id, H5AC_SNODE, *addr_p, sym) < 0)
@@ -636,7 +636,7 @@ done:
     if(ret_value<0) {
         if(sym!=NULL) {
             if(sym->entry!=NULL)
-                H5FL_ARR_FREE(H5G_entry_t,sym->entry);
+                H5FL_SEQ_FREE(H5G_entry_t,sym->entry);
             H5FL_FREE(H5G_node_t,sym);
         } /* end if */
     } /* end if */

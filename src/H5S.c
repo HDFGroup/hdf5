@@ -60,7 +60,7 @@ H5FL_DEFINE(H5S_simple_t);
 H5FL_DEFINE(H5S_t);
 
 /* Declare a free list to manage the array's of hsize_t's */
-H5FL_ARR_DEFINE(hsize_t,-1);
+H5FL_ARR_DEFINE(hsize_t,H5S_MAX_RANK);
 
 /* Declare a free list to manage the array's of hssize_t's */
 H5FL_ARR_DEFINE(hssize_t,H5S_MAX_RANK);

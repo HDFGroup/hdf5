@@ -131,14 +131,14 @@ static H5AC_t          *current_cache_g = NULL;         /*for sorting */
 H5FL_DEFINE_STATIC(H5AC_t);
 
 /* Declare a PQ free list to manage the cache mapping array information */
-H5FL_ARR_DEFINE_STATIC(int,-1);
+H5FL_SEQ_DEFINE_STATIC(int);
 
 /* Declare a PQ free list to manage the cache slot array information */
-H5FL_ARR_DEFINE_STATIC(H5AC_info_ptr_t,-1);
+H5FL_SEQ_DEFINE_STATIC(H5AC_info_ptr_t);
 
 #ifdef H5AC_DEBUG
 /* Declare a PQ free list to manage the protected slot array information */
-H5FL_ARR_DEFINE_STATIC(H5AC_prot_t,-1);
+H5FL_SEQ_DEFINE_STATIC(H5AC_prot_t);
 #endif /* H5AC_DEBUG */
 
 
@@ -371,12 +371,12 @@ H5AC_create(H5F_t *f, int size_hint)
     if (NULL==(f->shared->cache = cache = H5FL_CALLOC(H5AC_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     cache->nslots = size_hint;
-    if (NULL==( cache->slot = H5FL_ARR_CALLOC(H5AC_info_ptr_t,cache->nslots)))
+    if (NULL==( cache->slot = H5FL_SEQ_CALLOC(H5AC_info_ptr_t,cache->nslots)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    if (NULL==( cache->dslot = H5FL_ARR_CALLOC(H5AC_info_ptr_t,cache->nslots)))
+    if (NULL==( cache->dslot = H5FL_SEQ_CALLOC(H5AC_info_ptr_t,cache->nslots)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 #ifdef H5AC_DEBUG
-    if ((cache->prot = H5FL_ARR_CALLOC(H5AC_prot_t,cache->nslots))==NULL)
+    if ((cache->prot = H5FL_SEQ_CALLOC(H5AC_prot_t,cache->nslots))==NULL)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 #endif /* H5AC_DEBUG */
 
@@ -387,12 +387,12 @@ done:
     if(ret_value<0) {
         if(cache!=NULL) {
             if(cache->dslot !=NULL)
-                cache->dslot = H5FL_ARR_FREE (H5AC_info_ptr_t,cache->dslot);
+                cache->dslot = H5FL_SEQ_FREE (H5AC_info_ptr_t,cache->dslot);
             if(cache->slot !=NULL)
-                cache->slot = H5FL_ARR_FREE (H5AC_info_ptr_t,cache->slot);
+                cache->slot = H5FL_SEQ_FREE (H5AC_info_ptr_t,cache->slot);
 #ifdef H5AC_DEBUG
             if(cache->prot !=NULL)
-                cache->prot = H5FL_ARR_FREE (H5AC_prot_t,cache->prot);
+                cache->prot = H5FL_SEQ_FREE (H5AC_prot_t,cache->prot);
 #endif /* H5AC_DEBUG */
             f->shared->cache = H5FL_FREE (H5AC_t,f->shared->cache);
         } /* end if */
@@ -442,12 +442,12 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
             cache->prot[i].aprots = 0;
             cache->prot[i].nprots = 0;
         }
-        cache->prot = H5FL_ARR_FREE(H5AC_prot_t,cache->prot);
+        cache->prot = H5FL_SEQ_FREE(H5AC_prot_t,cache->prot);
     }
 #endif
 
-    cache->dslot = H5FL_ARR_FREE(H5AC_info_ptr_t,cache->dslot);
-    cache->slot = H5FL_ARR_FREE(H5AC_info_ptr_t,cache->slot);
+    cache->dslot = H5FL_SEQ_FREE(H5AC_info_ptr_t,cache->dslot);
+    cache->slot = H5FL_SEQ_FREE(H5AC_info_ptr_t,cache->slot);
     cache->nslots = 0;
     f->shared->cache = cache = H5FL_FREE(H5AC_t,cache);
 
@@ -787,7 +787,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
          * Sort the cache entries by address since flushing them in
          * ascending order by address is much more efficient.
          */
-        if (NULL==(map=H5FL_ARR_MALLOC(int,cache->nslots)))
+        if (NULL==(map=H5FL_SEQ_MALLOC(int,cache->nslots)))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 #ifdef H5_HAVE_PARALLEL
         /* If MPIO, MPIPOSIX, or FPHDF5 is used, do special parallel I/O actions */
@@ -1004,7 +1004,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, unsi
 
 done:
     if(map!=NULL)
-        map = H5FL_ARR_FREE(int,map);
+        map = H5FL_SEQ_FREE(int,map);
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
