@@ -1946,6 +1946,9 @@ h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type,
                             indentlevel);
     }
 
+    /* Close the dataspace */
+    H5Sclose(f_space);
+
 done:
     if (p_type != _p_type)
         H5Tclose(p_type);
