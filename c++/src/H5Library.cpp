@@ -14,6 +14,7 @@
 
 #include <string>
 
+#include "H5CppDoc.h"	// included only for Doxygen to generate part of RM 
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5Library.h"
@@ -22,8 +23,10 @@
 namespace H5 {
 #endif
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 // This static variable will be set to true when dontAtExit is called
 bool H5Library::need_cleanup = false;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	H5Library::open

@@ -28,7 +28,9 @@ namespace H5 {
 
 class H5_DLLCPP H5Library {
    public:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	static bool need_cleanup; // indicates if H5close should be called
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Initializes the HDF5 library. 
 	static void open(); 

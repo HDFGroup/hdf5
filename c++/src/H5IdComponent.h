@@ -29,10 +29,6 @@ class H5_DLLCPP IdComponent {
 	// before setting new id to control reference count
 	void setId( hid_t new_id );
 
-	// Pure virtual function so appropriate close function can
-	// be called by subclasses' for the corresponding object
-	virtual void p_close() const = 0;
-
 	// Creates an object to hold an HDF5 identifier
 	IdComponent( const hid_t h5_id );
 
@@ -59,12 +55,20 @@ class H5_DLLCPP IdComponent {
 	IdComponent& operator=( const IdComponent& rhs );
 
 	void reset();
-	void resetId();
+
+	// Pure virtual function so appropriate close function can
+	// be called by subclasses' for the corresponding object
+	// This function will be obsolete because its functionality
+	// is recently handled by the C library layer.
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+	virtual void p_close() const = 0;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Destructor
 	virtual ~IdComponent();
 
    protected:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	hid_t id;	// HDF5 object id
 	RefCounter* ref_count; // used to keep track of the
 	                              // number of copies of an object
@@ -90,6 +94,7 @@ class H5_DLLCPP IdComponent {
 
         // Retrieves a dataspace with the region pointed to selected.
         hid_t p_get_region(void *ref, H5R_type_t ref_type) const;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 }; // end class IdComponent
 

@@ -83,8 +83,10 @@ class H5_DLLCPP PropList : public IdComponent {
 
 	PropList getClassParent() const;
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Used by the API to close the property list
 	void p_close() const;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	virtual ~PropList();
 };

@@ -82,8 +82,10 @@ class H5_DLLCPP DataSet : public AbstractDs {
 	// Creates a copy of an existing DataSet using its id.
 	DataSet(const hid_t existing_id);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Used by the API to appropriately close a dataset.
 	virtual void p_close() const;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Default constructor.
 	DataSet();

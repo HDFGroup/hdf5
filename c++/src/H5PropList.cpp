@@ -155,7 +155,16 @@ void PropList::copyProp( PropList& dest, PropList& src, const string& name ) con
    copyProp( dest, src, name.c_str());
 }
 
-// Closes the property list if it is not a default one
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:	PropList::p_close (private)
+// Purpose:	Closes the property list if it is not a default one.
+// Exception	H5::PropListIException
+// Description
+//		This function will be obsolete because its functionality
+//		is recently handled by the C library layer. - May, 2004
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void PropList::p_close() const
 {
    if( id != H5P_NO_CLASS ) // not a constant, should call H5Pclose
@@ -167,6 +176,7 @@ void PropList::p_close() const
       }
    }
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:    PropList::getClass

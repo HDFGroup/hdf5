@@ -103,8 +103,10 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	// or uses a default id to create a default dataspace object
 	DataSpace( const hid_t space_id );
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Used by the API to close the dataspace 
 	void p_close() const;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Default constructor
 	DataSpace();

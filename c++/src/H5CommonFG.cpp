@@ -757,7 +757,7 @@ hsize_t CommonFG::getNumObjs() const
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::getObjnameByIdx
-///\brief	Retrieves the name of an object in this group by giving the
+///\brief	Retrieves the name of an object in this group, given the
 ///		object's index.
 ///\param	idx  -     IN: Transient index of the object
 ///\param	name - IN/OUT: Retrieved name of the object
@@ -787,7 +787,7 @@ ssize_t CommonFG::getObjnameByIdx(hsize_t idx, string& name, size_t size) const
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::getObjTypeByIdx
-///\brief	Returns the type of an object in this group by giving the
+///\brief	Returns the type of an object in this group, given the
 ///		object's index.
 ///\param	idx - IN: Transient index of the object
 ///\return	Object type

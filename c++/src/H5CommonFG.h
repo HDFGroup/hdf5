@@ -53,7 +53,7 @@ class H5_DLLCPP CommonFG {
 	void unlink(const char* name) const;
 	void unlink(const string& name) const;
 
-	/// For subclasses to get the correct object id, i.e. file or group id.
+	/// For subclasses to return the correct object id, i.e. file or group id.
 	virtual hid_t getLocId() const = 0; 
 
 	// Renames an object at this location.
@@ -117,11 +117,11 @@ class H5_DLLCPP CommonFG {
 	// Returns the number of objects in this group.
 	hsize_t getNumObjs() const;
 
-	// Retrieves the name of an object in this group by giving the
+	// Retrieves the name of an object in this group, given the
 	// object's index.
 	ssize_t getObjnameByIdx(hsize_t idx, string& name, size_t size) const;
 
-	// Returns the type of an object in this group by giving the
+	// Returns the type of an object in this group, given the
 	// object's index.
 	H5G_obj_t getObjTypeByIdx(hsize_t idx) const;
 	H5G_obj_t getObjTypeByIdx(hsize_t idx, string& type_name) const;

@@ -84,8 +84,16 @@ void IdComponent::decRefCount() { ref_count->decrement(); }
 //--------------------------------------------------------------------------
 int IdComponent::getCounter() { return( ref_count->getCounter()); }
 
-// Decrements the reference counter then determines if there are no more
-// reference to this object
+//--------------------------------------------------------------------------
+// Function:	IdComponent::noReference
+///\brief	Determines whether this object has any references.
+///\return      \c true if there is no reference, and \c false, otherwise.
+///\note	This function will be obsolete in the next release.
+// Description
+//		Decrements the reference counter then determines if there 
+//		are no more reference to this object.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 bool IdComponent::noReference()
 {
    if( ref_count->getCounter() > 0 )
@@ -173,6 +181,42 @@ void IdComponent::reset ()
 }
 
 //--------------------------------------------------------------------------
+// Function:	IdComponent destructor
+///\brief	Noop destructor.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+IdComponent::~IdComponent() {
+
+/* uncomment this block and complete it when deciding to use dontAtExit 
+   unless the atexit/global destructor problem is fixed, then 
+   remove it- BMR 11/14/00
+
+   if( id == NOTATEXIT )
+   {
+      // Call H5Library::close to clean up - temporary solution to avoid the
+      // trouble of atexit/global destructors
+      try {
+         if( H5Library::need_cleanup == true )
+         {
+            H5Library::close();
+            H5Library::need_cleanup = false; // reset the boolean just in case
+         }
+      }
+      // catch failure caused by the H5Library operations
+      catch( LibraryIException error )
+      {
+         error.printError();
+      }
+   }
+*/
+}
+
+//
+// Implementation of protected functions
+// 
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
 // Function:	IdComponent::p_get_file_name
 // Purpose:	Gets the name of the file, in which this object belongs.
 // Exception:	H5::IdComponentException
@@ -210,41 +254,6 @@ string IdComponent::p_get_file_name() const
    delete name_C;
    return(file_name);
 }
-
-//--------------------------------------------------------------------------
-// Function:	IdComponent destructor
-///\brief	Noop destructor.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-IdComponent::~IdComponent() {
-
-/* uncomment this block and complete it when deciding to use dontAtExit 
-   unless the atexit/global destructor problem is fixed, then 
-   remove it- BMR 11/14/00
-
-   if( id == NOTATEXIT )
-   {
-      // Call H5Library::close to clean up - temporary solution to avoid the
-      // trouble of atexit/global destructors
-      try {
-         if( H5Library::need_cleanup == true )
-         {
-            H5Library::close();
-            H5Library::need_cleanup = false; // reset the boolean just in case
-         }
-      }
-      // catch failure caused by the H5Library operations
-      catch( LibraryIException error )
-      {
-         error.printError();
-      }
-   }
-*/
-}
-
-//
-// Implementation of protected functions for HDF5 Reference Interface.
-// 
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::p_reference (protected)
@@ -315,6 +324,7 @@ hid_t IdComponent::p_get_region(void *ref, H5R_type_t ref_type) const
    }
    return(space_id);
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef H5_NO_NAMESPACE
 }

@@ -62,10 +62,10 @@ void RefCounter::decrement()
 ///		that uses this counter.
 ///\return	true if there are no more reference to the object
 ///             that uses this counter, and false, otherwise.
+///\note	This function will be obsolete in the next release.
 // Description
 //		Decrements the reference counter then determines if there 
 //		are no more reference to the object that uses this counter.
-///\note	This function will be obsolete in the next release.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 bool RefCounter::noReference()

@@ -142,7 +142,17 @@ DataSpace Group::getRegion(void *ref, H5R_type_t ref_type) const
    DataSpace dataspace(p_get_region(ref, ref_type));
    return(dataspace);
 }
-// Calls the C API H5Gclose to close this group.  Used by IdComponent::reset
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:    Group::p_close (private)
+// Purpose:     Closes this group.
+// Exception    H5::GroupIException
+// Description
+//              This function will be obsolete because its functionality
+//              is recently handled by the C library layer. - May, 2004
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void Group::p_close() const
 {
    herr_t ret_value = H5Gclose( id );
@@ -151,10 +161,11 @@ void Group::p_close() const
       throw GroupIException(0, "H5Gclose failed");
    }
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	Group::throwException
-///\brief	Throws group exception - initially implemented for CommonFG
+///\brief	Throws H5::GroupIException.
 ///\param	func_name - Name of the function where failure occurs
 ///\param	msg       - Message describing the failure
 ///\exception	H5::GroupIException

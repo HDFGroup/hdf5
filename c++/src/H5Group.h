@@ -28,26 +28,28 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	// Copy constructor: makes a copy of the original object
 	Group( const Group& original );
 
-	// Creates a reference to a named Hdf5 object in this object.
-	void* Reference(const char* name) const;
-
 	// Creates a reference to a named Hdf5 object or to a dataset region
 	// in this object.
 	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+
+	// Creates a reference to a named Hdf5 object in this object.
+	void* Reference(const char* name) const;
 
 	// Retrieves the type of object that an object reference points to.
 	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type) const;
 
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
-	// for CommonFG to get the file id
+	// for CommonFG to get the file id.
 	virtual hid_t getLocId() const;
 
-        // Throw group exception
+        // Throw group exception.
         virtual void throwException(const string func_name, const string msg) const;
 
-	// Used by the API to appropriately close a group
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+	// Used by the API to appropriately close a group - will be obsolete.
 	void p_close() const;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Destructor
 	virtual ~Group();

@@ -34,6 +34,7 @@ typedef void (*attr_operator_t)( H5Object& loc/*in*/,
 				 const string attr_name/*in*/, 
 				 void *operator_data/*in,out*/);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 class UserData4Aiterate { // user data for attribute iteration
    public:
 	unsigned int* idx;
@@ -41,6 +42,7 @@ class UserData4Aiterate { // user data for attribute iteration
 	void* opData;
 	H5Object* object;
 };
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 // The above part is being moved into Iterator, but not completed
 

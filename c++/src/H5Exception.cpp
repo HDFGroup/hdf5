@@ -33,8 +33,8 @@ Exception::Exception() : detail_message(""), func_name("") {}
 
 //--------------------------------------------------------------------------
 // Function:	Exception overloaded constructor
-///\brief	Creates an exception with a function name where the failure
-///		occurs and an optional detailed message
+///\brief	Creates an exception with the name of the function, 
+///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 ///\exception	H5::DataTypeIException
@@ -64,11 +64,11 @@ Exception::Exception( const Exception& orig )
 ///		will be returned.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-string Exception::getMajorString( H5E_major_t major_num ) const
+string Exception::getMajorString(H5E_major_t err_major) const
 {
    // calls the C API routine to get the major string - Note: in the
    // failure case, the string "Invalid major error number" will be returned.
-   string major_str( H5Eget_major( major_num ));
+   string major_str(H5Eget_major(err_major));
    return( major_str );
 }
 
@@ -82,11 +82,11 @@ string Exception::getMajorString( H5E_major_t major_num ) const
 ///		will be returned.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-string Exception::getMinorString( H5E_minor_t minor_num ) const
+string Exception::getMinorString(H5E_minor_t err_minor) const
 {
    // calls the C API routine to get the minor string - Note: in the
    // failure case, the string "Invalid minor error number" will be returned.
-   string minor_str( H5Eget_minor( minor_num ));
+   string minor_str(H5Eget_minor(err_minor));
    return( minor_str );
 }
 
@@ -285,7 +285,7 @@ void Exception::printError( FILE* stream ) const
 Exception::~Exception() {}
 
 //--------------------------------------------------------------------------
-// Subclasses:	FileIException
+// Subclass:	FileIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
@@ -295,8 +295,8 @@ Exception::~Exception() {}
 FileIException::FileIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	FileIException overloaded constructor
-///\brief	Creates a FileIException with a function name where the failure 
-///		occurs and an optional detailed message.
+///\brief	Creates a FileIException with the name of the function, 
+///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
@@ -308,7 +308,7 @@ FileIException::FileIException(const string func_name, const string message) : E
 FileIException::~FileIException() {}
 
 //--------------------------------------------------------------------------
-// Subclasses:	GroupIException
+// Subclass:	GroupIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
@@ -318,8 +318,8 @@ FileIException::~FileIException() {}
 GroupIException::GroupIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	GroupIException overloaded constructor
-///\brief	Creates a GroupIException with a function name where the 
-///		failure occurs and an optional detailed message.
+///\brief	Creates a GroupIException with the name of the function, 
+///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
@@ -331,7 +331,7 @@ GroupIException::GroupIException(const string func_name, const string message) :
 GroupIException::~GroupIException() {}
 
 //--------------------------------------------------------------------------
-// Subclasses:	DataSpaceIException
+// Subclass:	DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
@@ -341,8 +341,8 @@ GroupIException::~GroupIException() {}
 DataSpaceIException::DataSpaceIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	DataSpaceIException overloaded constructor
-///\brief	Creates a DataSpaceIException with a function name where 
-///		the failure occurs and an optional detailed message.
+///\brief	Creates a DataSpaceIException with the name of the function, 
+///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
@@ -354,7 +354,7 @@ DataSpaceIException::DataSpaceIException(const string func_name, const string me
 DataSpaceIException::~DataSpaceIException() {}
 
 //--------------------------------------------------------------------------
-// Subclasses:	DataTypeIException
+// Subclass:	DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
@@ -364,8 +364,8 @@ DataSpaceIException::~DataSpaceIException() {}
 DataTypeIException::DataTypeIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	DataTypeIException overloaded constructor
-///\brief	Creates a DataTypeIException with a function name where the 
-///		failure occurs and an optional detailed message.
+///\brief	Creates a DataTypeIException with the name of the function, 
+///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
@@ -377,7 +377,7 @@ DataTypeIException::DataTypeIException(const string func_name, const string mess
 DataTypeIException::~DataTypeIException() {}
 
 //--------------------------------------------------------------------------
-// Subclasses:	PropListIException
+// Subclass:	PropListIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
@@ -387,8 +387,8 @@ DataTypeIException::~DataTypeIException() {}
 PropListIException::PropListIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	PropListIException overloaded constructor
-///\brief	Creates a PropListIException with a function name where 
-///		the failure occurs and an optional detailed message.
+///\brief	Creates a PropListIException with the name of the function, 
+///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
@@ -400,7 +400,7 @@ PropListIException::PropListIException(const string func_name, const string mess
 PropListIException::~PropListIException() {}
 
 //--------------------------------------------------------------------------
-// Subclasses:	DataSetIException
+// Subclass:	DataSetIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
@@ -410,8 +410,8 @@ PropListIException::~PropListIException() {}
 DataSetIException::DataSetIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	DataSetIException overloaded constructor
-///\brief	Creates a DataSetIException with a function name where 
-///		the failure occurs and an optional detailed message.
+///\brief	Creates a DataSetIException with the name of the function, 
+///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
@@ -423,7 +423,7 @@ DataSetIException::DataSetIException(const string func_name, const string messag
 DataSetIException::~DataSetIException() {}
 
 //--------------------------------------------------------------------------
-// Subclasses:	AttributeIException
+// Subclass:	AttributeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
@@ -433,8 +433,8 @@ DataSetIException::~DataSetIException() {}
 AttributeIException::AttributeIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	AttributeIException overloaded constructor
-///\brief	Creates a AttributeIException with a function name where 
-///		the failure occurs and an optional detailed message.
+///\brief	Creates an AttributeIException with the name of the function, 
+///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
@@ -446,7 +446,7 @@ AttributeIException::AttributeIException(const string func_name, const string me
 AttributeIException::~AttributeIException() {}
 
 //--------------------------------------------------------------------------
-// Subclasses:	ReferenceException
+// Subclass:	ReferenceException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
@@ -456,8 +456,8 @@ AttributeIException::~AttributeIException() {}
 ReferenceException::ReferenceException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	ReferenceException overloaded constructor
-///\brief	Creates a ReferenceException with a function name where 
-///		the failure occurs and an optional detailed message.
+///\brief	Creates a ReferenceException with the name of the function, 
+///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
@@ -469,7 +469,7 @@ ReferenceException::ReferenceException(const string func_name, const string mess
 ReferenceException::~ReferenceException() {}
 
 //--------------------------------------------------------------------------
-// Subclasses:	LibraryIException
+// Subclass:	LibraryIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
@@ -479,8 +479,8 @@ ReferenceException::~ReferenceException() {}
 LibraryIException::LibraryIException():Exception(){}
 //--------------------------------------------------------------------------
 // Function:	LibraryIException overloaded constructor
-///\brief	Creates a LibraryIException with a function name where 
-///		the failure occurs and an optional detailed message.
+///\brief	Creates a LibraryIException with the name of the function, 
+///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------
@@ -492,7 +492,7 @@ LibraryIException::LibraryIException(const string func_name, const string messag
 LibraryIException::~LibraryIException() {}
 
 //--------------------------------------------------------------------------
-// Subclasses:	IdComponentException
+// Subclass:	IdComponentException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
@@ -502,8 +502,8 @@ LibraryIException::~LibraryIException() {}
 IdComponentException::IdComponentException(): Exception() {}
 //--------------------------------------------------------------------------
 // Function:	IdComponentException overloaded constructor
-///\brief	Creates a IdComponentException with a function name where 
-///		the failure occurs and an optional detailed message.
+///\brief	Creates a IdComponentException with the name of the function, 
+///		in which the failure occurs, and an optional detailed message.
 ///\param	func_name - IN: Name of the function where failure occurs
 ///\param	message   - IN: Message on the failure
 //--------------------------------------------------------------------------

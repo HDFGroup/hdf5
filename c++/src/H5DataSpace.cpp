@@ -37,14 +37,14 @@ const DataSpace DataSpace::ALL( H5S_ALL );
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace default constructor
-///\brief	Default constructor: Creates a stub datatype
+///\brief	Default constructor: creates a stub dataspace instance.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DataSpace::DataSpace() : IdComponent() {}
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace overloaded constructor
-///\brief	Creates a dataspace given a dataspace type.
+///\brief	Creates a new dataspace given a dataspace type.
 ///\param	type - IN: Type of the dataspace to be created, which 
 ///		currently can be either \c H5S_SCALAR or \c H5S_SIMPLE
 ///\exception	H5::DataSpaceIException
@@ -61,7 +61,7 @@ DataSpace::DataSpace( H5S_class_t type ) : IdComponent()
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace overloaded constructor
-///\brief	Creates a new simple dataspace and opens it for access.
+///\brief	Creates a new simple dataspace.
 ///\param	rank - IN: Number of dimensions of dataspace. 
 ///\param	dims - IN: An array of the size of each dimension. 
 ///\param	maxdims - IN: An array of the maximum size of each dimension. 
@@ -124,7 +124,7 @@ void DataSpace::copy( const DataSpace& like_space )
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace::operator=
-///\brief	Assignment operator
+///\brief	Assignment operator.
 ///\param	rhs - IN: Reference to the existing dataspace
 ///\return	Reference to DataSpace instance
 ///\exception	H5::DataSpaceIException
@@ -142,7 +142,7 @@ DataSpace& DataSpace::operator=( const DataSpace& rhs )
 //--------------------------------------------------------------------------
 // Function:	DataSpace::isSimple
 ///\brief	Determines whether this dataspace is a simple dataspace.
-///\return	true if the dataspace is a simple dataspace, and false, 
+///\return	\c true if the dataspace is a simple dataspace, and \c false, 
 ///		otherwise
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
@@ -266,7 +266,7 @@ H5S_class_t DataSpace::getSimpleExtentType () const
 //--------------------------------------------------------------------------
 // Function:	DataSpace::extentCopy
 ///\brief	Copies the extent of a dataspace.
-///\param	dest_space  - IN: DataSpace to copy from
+///\param	dest_space  - IN: Dataspace to copy from
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -497,8 +497,8 @@ void DataSpace::selectNone () const
 // Function:	DataSpace::selectValid
 ///\brief	Verifies that the selection is within the extent of the 
 ///		dataspace.
-///\return	true if the selection is within the extent of the
-///		dataspace, and false, otherwise
+///\return	\c true if the selection is within the extent of the
+///		dataspace, and \c false, otherwise
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -527,8 +527,8 @@ bool DataSpace::selectValid () const
 ///\exception	H5::DataSpaceIException
 ///\par Description
 ///		For more information, please refer to the C layer Reference
-///		Manual at:
-/// http:
+///		Manual at: 
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5S.html#Dataspace-SelectHyperslab
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSpace::selectHyperslab( H5S_seloper_t op, const hsize_t *count, const hssize_t *start, const hsize_t *stride, const hsize_t *block ) const
@@ -542,7 +542,16 @@ void DataSpace::selectHyperslab( H5S_seloper_t op, const hsize_t *count, const h
    }
 }
 
-// Closes the dataspace if it is not a constant
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:	DataSpace::p_close (private)
+// Purpose:	Closes the dataspace if it is not a constant.
+// Exception	H5::DataSpaceIException
+// Description
+//		This function will be obsolete because its functionality
+//		is recently handled by the C library layer. - May, 2004
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void DataSpace::p_close() const
 {
    hid_t space_id = id;
@@ -555,6 +564,7 @@ void DataSpace::p_close() const
       }
    }
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace destructor

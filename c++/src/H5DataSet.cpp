@@ -480,13 +480,14 @@ DataSpace DataSet::getRegion(void *ref, H5R_type_t ref_type) const
    return(dataspace);
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    DataSet::p_close (private)
-///\brief       Closes this dataset.
-///\exception   H5::DataSetIException
-///\note
-///             This function will be obsolete because its functionality
-///             is recently handled by the C library layer.
+// Purpose:     Closes this dataset.
+// Exception    H5::DataSetIException
+// Description
+//              This function will be obsolete because its functionality
+//              is recently handled by the C library layer. - May, 2004
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSet::p_close() const
@@ -497,6 +498,7 @@ void DataSet::p_close() const
       throw DataSetIException(0, "H5Dclose failed");
    }
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	DataSet destructor

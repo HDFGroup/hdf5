@@ -519,13 +519,14 @@ hid_t H5File::getLocId() const
    return( getId() );
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    H5File::p_close (private)
-///\brief       Closes this H5 file.
-///\exception   H5::FileIException
-///\note
-///             This function will be obsolete because its functionality
-///             is recently handled by the C library layer.
+// Purpose:     Closes this HDF5 file.
+// Exception    H5::FileIException
+// Description
+//              This function will be obsolete because its functionality
+//              is recently handled by the C library layer. - May, 2004
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5File::p_close() const
@@ -536,6 +537,7 @@ void H5File::p_close() const
       throw FileIException(0, "H5Fclose failed");
    }
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	H5File::throwException

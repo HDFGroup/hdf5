@@ -265,9 +265,9 @@ void DSetMemXferPropList::getBtreeRatios( double& left, double& middle, double& 
 //--------------------------------------------------------------------------
 // Function:	DSetMemXferPropList::setVlenMemManager
 ///\brief	Sets the memory manager for variable-length datatype allocation.
-///\param       alloc      - IN: User's allocate routine
+///\param       alloc_func - IN: User's allocate routine
 ///\param	alloc_info - IN: User's allocation parameters
-///\param	free       - IN: User's free routine
+///\param	free_func  - IN: User's free routine
 ///\param	free_info  - IN: User's free parameters
 ///\exception	H5::PropListIException
 // Programmer:	Binh-Minh Ribler - 2000
@@ -298,9 +298,9 @@ void DSetMemXferPropList::setVlenMemManager() const
 //--------------------------------------------------------------------------
 // Function:	DSetMemXferPropList::getVlenMemManager
 ///\brief	Gets the memory manager for variable-length datatype allocation 
-///\param       alloc      - OUT: User's allocate routine
+///\param       alloc_func - OUT: User's allocate routine
 ///\param	alloc_info - OUT: User's allocation parameters
-///\param	free       - OUT: User's free routine
+///\param	free_func  - OUT: User's free routine
 ///\param	free_info  - OUT: User's free parameters
 ///\exception	H5::PropListIException
 // Programmer:	Binh-Minh Ribler - 2000

@@ -41,8 +41,10 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	// do not inherit iterateAttrs from H5Object
 	int iterateAttrs() { return 0; }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Used by the API to appropriately close an attribute
 	virtual void p_close() const;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
         // Creates a copy of an existing attribute using the attribute id
         Attribute( const hid_t attr_id );

@@ -245,9 +245,9 @@ H5D_fill_value_t DSetCreatPropList::isFillValueDefined()
 ///             during a \c DataSet::read() of the chunk.  If this bit is clear
 ///             and the filter fails then the entire I/O operation fails.
 //--------------------------------------------------------------------------
-void DSetCreatPropList::setFilter( H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[] ) const
+void DSetCreatPropList::setFilter( H5Z_filter_t filter_id, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[] ) const
 {
-   herr_t ret_value = H5Pset_filter( id, filter, flags, cd_nelmts, cd_values );
+   herr_t ret_value = H5Pset_filter( id, filter_id, flags, cd_nelmts, cd_values );
    if( ret_value < 0 )
    {
       throw PropListIException("DSetCreatPropList::setFilter",

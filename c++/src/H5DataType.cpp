@@ -613,8 +613,16 @@ DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
    return(dataspace);
 }
 
-// This private function calls the C API H5Tclose to close this datatype.
-// Used by H5Object::p_reset.
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:    DataType::p_close (private)
+// Purpose:     Closes the datatype if it is not a predefined type.
+// Exception    H5::DataTypeIException
+// Description
+//              This function will be obsolete because its functionality
+//              is recently handled by the C library layer. - May, 2004
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void DataType::p_close() const
 {
    // If this datatype is not a predefined type, call H5Tclose on it.
@@ -627,6 +635,7 @@ void DataType::p_close() const
       }
    }
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:    DataType destructor

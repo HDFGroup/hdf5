@@ -105,8 +105,11 @@ class H5_DLLCPP DataType : public H5Object {
 
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+	
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Used by the API to appropriately close a datatype
         void p_close() const;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Creates a copy of an existing DataType using its id 
 	DataType( const hid_t type_id, bool predtype = false );
