@@ -246,7 +246,7 @@
 	instance, to enable symbolic debugging of a production version 
 	of HDF5 one might say:
 
-	    $ CFLAGS=-g ./confgure --enable-production
+	    $ CFLAGS=-g ./configure --enable-production
 
 5.3.4. Compiling HDF5 wrapper libraries
 	One can optionally build the Fortran 90 and/or C++ interface to
@@ -406,6 +406,25 @@
 	The HDF5 library can be configured to use MPI and MPI-IO for
 	parallelizm on a distributed multi-processor system.  Read the
 	file INSTALL_parallel for detailed explanations.
+
+5.3.11. Threadsafe capability
+	The HDF5 library can be configured to be thread-safe (on a very
+    large scale) with the with the '--enable-threadsafe' flag to
+    configure.  Read the file doc/TechNotes/ThreadSafeLibrary.html
+    for further details.
+
+5.3.12. Backward compatibility
+    The 1.4 version of the HDF5 library can be configured to enable
+    access to functions that were present in the 1.2 version, but removed
+    from the current version with the '--enable-hdf5v1_2' configure
+    flag.
+
+5.3.13. Network stream capability
+    The HDF5 library can be configured with a network stream file
+    driver with the '--enable-stream-vfd' configure flag.  This option
+    compiles the "stream" Virtual File Driver into the main library.
+    See the documentation on the Virtual File Layer for more details
+    about the use of this driver.
 
 
 5.4. Building
