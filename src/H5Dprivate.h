@@ -17,7 +17,7 @@
 #define _H5Dprivate_H
 
 #include <H5Dpublic.h>
-
+#include <H5api_adpt.h>
 /* Private headers needed by this file */
 #include <H5private.h>
 #include <H5Fprivate.h>		/*for the H5F_t type			     */
@@ -64,7 +64,7 @@ typedef struct H5D_xfer_t {
 
 typedef struct H5D_t H5D_t;
 extern const H5D_create_t H5D_create_dflt;
-extern const H5D_xfer_t H5D_xfer_dflt;
+HDF5GLOBAL const H5D_xfer_t H5D_xfer_dflt;
 
 /* Functions defined in H5D.c */
 H5D_t *H5D_create (H5G_entry_t *loc, const char *name, const H5T_t *type,

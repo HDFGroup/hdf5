@@ -66,7 +66,7 @@ intn H5I_init_group (H5I_type_t grp, size_t hash_size, uintn reserved,
 		     herr_t (*free_func)(void *));
 herr_t H5I_destroy_group (H5I_type_t grp);
 hid_t H5I_register (H5I_type_t grp, void *object);
-void *H5I_object (hid_t id);
+HDF5API void *H5I_object (hid_t id);
 H5I_type_t H5I_get_type (hid_t id);
 void *H5I_remove (hid_t id);
 void *H5I_search (H5I_type_t grp, H5I_search_func_t func, const void *key);

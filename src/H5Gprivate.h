@@ -114,13 +114,13 @@ herr_t H5G_register_type(intn type, htri_t(*isa)(H5G_entry_t*),
 			 const char *desc);
 H5G_entry_t *H5G_loc (hid_t loc_id);
 herr_t H5G_mkroot (H5F_t *f, H5G_entry_t *root_entry);
-H5G_entry_t *H5G_entof (H5G_t *grp);
+HDF5API H5G_entry_t *H5G_entof (H5G_t *grp);
 H5F_t *H5G_fileof (H5G_t *grp);
 H5G_t *H5G_create (H5G_entry_t *loc, const char *name, size_t size_hint);
 H5G_t *H5G_open (H5G_entry_t *loc, const char *name);
 H5G_t *H5G_reopen (H5G_t *grp);
 herr_t H5G_close (H5G_t *grp);
-H5G_t *H5G_rootof(H5F_t *f);
+HDF5API H5G_t *H5G_rootof(H5F_t *f);
 htri_t H5G_isa(H5G_entry_t *ent);
 herr_t H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
 		 const char *new_name, uintn namei_flags);
@@ -132,7 +132,7 @@ herr_t H5G_linkval (H5G_entry_t *loc, const char *name, size_t size,
 herr_t H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf);
 intn H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize,
 		     char *buf);
-herr_t H5G_insert (H5G_entry_t *loc, const char *name, H5G_entry_t *ent);
+HDF5API herr_t H5G_insert (H5G_entry_t *loc, const char *name, H5G_entry_t *ent);
 herr_t H5G_move(H5G_entry_t *loc, const char *src_name, const char *dst_name);
 herr_t H5G_unlink(H5G_entry_t *loc, const char *name);
 herr_t H5G_find (H5G_entry_t *loc, const char *name,
@@ -147,7 +147,7 @@ herr_t H5G_ent_decode (H5F_t *f, const uint8_t **pp, H5G_entry_t *ent/*out*/);
 /*
  * These functions operate on symbol table nodes.
  */
-herr_t H5G_node_debug (H5F_t *f, const haddr_t *addr, FILE * stream,
+HDF5API herr_t H5G_node_debug (H5F_t *f, const haddr_t *addr, FILE * stream,
                        intn indent, intn fwidth, const haddr_t *heap);
 
 /*

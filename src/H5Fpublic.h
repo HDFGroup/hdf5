@@ -83,17 +83,17 @@ extern "C" {
 #endif
 
 /* Functions in H5F.c */
-htri_t H5Fis_hdf5 (const char *filename);
-hid_t H5Fcreate (const char *filename, unsigned flags, hid_t create_plist,
+HDF5API htri_t H5Fis_hdf5 (const char *filename);
+HDF5API hid_t H5Fcreate (const char *filename, unsigned flags, hid_t create_plist,
                  hid_t access_plist);
-hid_t H5Fopen (const char *filename, unsigned flags, hid_t access_plist);
-hid_t H5Freopen(hid_t file_id);
-herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
-herr_t H5Fclose (hid_t file_id);
-hid_t H5Fget_create_plist (hid_t file_id);
-hid_t H5Fget_access_plist (hid_t file_id);
-herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
-herr_t H5Funmount(hid_t loc, const char *name);
+HDF5API hid_t H5Fopen (const char *filename, unsigned flags, hid_t access_plist);
+HDF5API hid_t H5Freopen(hid_t file_id);
+HDF5API herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
+HDF5API herr_t H5Fclose (hid_t file_id);
+HDF5API hid_t H5Fget_create_plist (hid_t file_id);
+HDF5API hid_t H5Fget_access_plist (hid_t file_id);
+HDF5API herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
+HDF5API herr_t H5Funmount(hid_t loc, const char *name);
 
 #ifdef __cplusplus
 }

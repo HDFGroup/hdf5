@@ -113,7 +113,7 @@ void *H5AC_protect (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
 		    const void *udata1, void *udata2);
 herr_t H5AC_unprotect (H5F_t *f, const H5AC_class_t *type,
 		       const haddr_t *addr, void *thing);
-herr_t H5AC_flush (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
+HDF5API herr_t H5AC_flush (H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
 		   hbool_t destroy);
 herr_t H5AC_create (H5F_t *f, intn size_hint);
 herr_t H5AC_rename (H5F_t *f, const H5AC_class_t *type,

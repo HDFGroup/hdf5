@@ -175,14 +175,14 @@ typedef herr_t (*H5E_auto_t)(void *client_data);
 extern "C" {
 #endif
 
-herr_t H5Eset_auto (H5E_auto_t func, void *client_data);
-herr_t H5Eget_auto (H5E_auto_t *func, void **client_data);
-herr_t H5Eclear (void);
-herr_t H5Eprint (FILE *stream);
-herr_t H5Ewalk (H5E_direction_t direction, H5E_walk_t func, void *client_data);
-herr_t H5Ewalk_cb (int n, H5E_error_t *err_desc, void *client_data);
-const char *H5Eget_major (H5E_major_t major_number);
-const char *H5Eget_minor (H5E_minor_t minor_number);
+HDF5API herr_t H5Eset_auto (H5E_auto_t func, void *client_data);
+HDF5API herr_t H5Eget_auto (H5E_auto_t *func, void **client_data);
+HDF5API herr_t H5Eclear (void);
+HDF5API herr_t H5Eprint (FILE *stream);
+HDF5API herr_t H5Ewalk (H5E_direction_t direction, H5E_walk_t func, void *client_data);
+HDF5API herr_t H5Ewalk_cb (int n, H5E_error_t *err_desc, void *client_data);
+HDF5API const char *H5Eget_major (H5E_major_t major_number);
+HDF5API const char *H5Eget_minor (H5E_minor_t minor_number);
 
 #ifdef __cplusplus
 }
