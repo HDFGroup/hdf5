@@ -370,6 +370,9 @@ H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref)
             INT32DECODE(p,hobjid.idx);
 
             /* Get the dataset region from the heap (allocate inside routine) */
+printf("%s: hobjid.addr=",FUNC);
+H5F_addr_print(stdout,&hobjid.addr);
+printf(", hobjid.idx=%d\n", hobjid.idx);
             if((buf=H5HG_read(ent.file,&hobjid,NULL))==NULL)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, FAIL,
                   "Unable to read dataset region information");

@@ -4872,6 +4872,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 
 	    switch(dt1->u.atomic.u.r.rtype) {
             case H5R_OBJECT:
+            case H5R_DATASET_REGION:    /* Does this need more to distinguish it? -QAK 11/30/98 */
                 /*void */
                 break;
 
