@@ -136,6 +136,41 @@ hsize_t DataSet::getStorageSize() const
 }
 
 //--------------------------------------------------------------------------
+// Function:	DataSet::getOffset
+///\brief	Returns the address of this dataset in the file.
+///\return	Address of dataset
+///\exception	H5::DataSetIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+haddr_t DataSet::getOffset() const
+{
+   haddr_t ds_addr; // for address of dataset
+
+   ds_addr = H5Dget_offset(id);
+   if( ds_addr == HADDR_UNDEF )
+   {
+      throw DataSetIException("DataSet::getOffset", "H5Dget_offset returned HADDR_UNDEF");
+   }
+   return(ds_addr);
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataSet::getSpaceStatus
+///\brief	Determines whether space has been allocated for a dataset.
+///\param	status - OUT: Space allocation status
+///\exception	H5::DataSetIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void DataSet::getSpaceStatus(H5D_space_status_t& status) const
+{
+   herr_t ret_value = H5Dget_space_status(id, &status);
+   if( ret_value < 0 )
+   {
+      throw DataSetIException("DataSet::getSpaceStatus", "H5Dget_space_status failed");
+   }
+}
+
+//--------------------------------------------------------------------------
 // Function:	DataSet::getVlenBufSize
 ///\brief	Returns the number of bytes required to store VL data.
 ///\return	Amount of storage

@@ -33,6 +33,12 @@ class H5_DLLCPP DataSet : public AbstractDs {
 	// Gets the storage size of this dataset.
 	hsize_t getStorageSize() const;
 
+	// Returns the address of this dataset in the file.
+	haddr_t getOffset() const;
+	
+	// Determines whether space has been allocated for a dataset.
+	void getSpaceStatus(H5D_space_status_t& status) const;
+
 	// not yet implemented??
 	hsize_t getVlenBufSize( DataType& type, DataSpace& space ) const;
 	void vlenReclaim( DataType& type, DataSpace& space, DSetMemXferPropList& xfer_plist, void* buf ) const;
