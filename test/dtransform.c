@@ -268,6 +268,7 @@ int test_int(const hid_t dxpl_id_c_to_f, const hid_t dxpl_id_polynomial)
     {
 	H5_FAILED();
         fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
 	PASSED();
@@ -278,6 +279,7 @@ int test_int(const hid_t dxpl_id_c_to_f, const hid_t dxpl_id_polynomial)
          {   
 	     H5_FAILED();
              fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -288,6 +290,7 @@ int test_int(const hid_t dxpl_id_c_to_f, const hid_t dxpl_id_polynomial)
     {
 	H5_FAILED();	
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -329,6 +332,7 @@ int test_float(const hid_t dxpl_id_c_to_f, const hid_t dxpl_id_polynomial)
     {
 	H5_FAILED();	
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
       PASSED();
@@ -339,6 +343,7 @@ int test_float(const hid_t dxpl_id_c_to_f, const hid_t dxpl_id_polynomial)
          {   
 	H5_FAILED();	
              fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -349,6 +354,7 @@ int test_float(const hid_t dxpl_id_c_to_f, const hid_t dxpl_id_polynomial)
     {   
 	H5_FAILED();	
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -372,6 +378,7 @@ int test_uchar(const hid_t dxpl_id_utrans_inv)
     {   
 	H5_FAILED();
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -394,6 +401,7 @@ int test_schar(const hid_t dxpl_id_c_to_f)
     {   
 	H5_FAILED();
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -416,6 +424,7 @@ int test_char(const hid_t dxpl_id_c_to_f)
     {   
 	H5_FAILED();
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -441,6 +450,7 @@ int test_uint(const hid_t dxpl_id_utrans_inv)
     {   
 	H5_FAILED();
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -464,6 +474,7 @@ int test_ushort(const hid_t dxpl_id_utrans_inv)
     {   
 	H5_FAILED();
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -487,6 +498,7 @@ int test_short(const hid_t dxpl_id_c_to_f)
     {   
 	H5_FAILED();
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -512,6 +524,7 @@ int test_long(const hid_t dxpl_id_c_to_f)
     {   
 	H5_FAILED();
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -534,6 +547,7 @@ int test_ulong(const hid_t dxpl_id_utrans_inv)
     {   
 	H5_FAILED();
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -557,6 +571,7 @@ int test_llong(const hid_t dxpl_id_c_to_f)
     {   
 	H5_FAILED();
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -580,6 +595,7 @@ int test_ullong(const hid_t dxpl_id_utrans_inv)
     {   
 	H5_FAILED();
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -603,6 +619,7 @@ int test_double(const hid_t dxpl_id_c_to_f)
     {   
 	H5_FAILED();
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -625,6 +642,7 @@ int test_ldouble(const hid_t dxpl_id_c_to_f)
     {   
 	H5_FAILED();
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -667,6 +685,7 @@ int test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_co
     {   
 	H5_FAILED();	
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -677,6 +696,7 @@ int test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_co
     {   
 	H5_FAILED();	
 	fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
+	goto error;
     }
     else
        PASSED();
@@ -695,8 +715,6 @@ int test_trivial(const hid_t dxpl_id_simple)
     herr_t err;
     int row, col;
 
-    int failed = 0;
- 
     TESTING("data transform, trivial transform, without type conversion")
     if((err = H5Dread(dset_id_float, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_simple, windchillFfloatread))<0) TEST_ERROR;
     for(row = 0; row<ROWS; row++)
@@ -707,15 +725,11 @@ int test_trivial(const hid_t dxpl_id_simple)
 	    {
 		H5_FAILED();
 		fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
-		failed = 1;
-		break;
+		goto error;
 	    }
 	}
-	if(failed)
-	    break;
     }
-    if(!failed)
-	PASSED();
+    PASSED();
 
     TESTING("data transform, trivial transform, with type conversion")
     if((err = H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_simple, windchillFintread))<0) TEST_ERROR;
@@ -727,15 +741,11 @@ int test_trivial(const hid_t dxpl_id_simple)
 	    {
 		H5_FAILED();
 		fprintf(stderr, "    ERROR: Conversion failed to match computed data\n");
-		failed = 1;
-		break;
+		goto error;
 	    }
 	}
-	if(failed)
-	    break;
     }
-    if(!failed)
-	PASSED();
+    PASSED();
 
     return 0;
 error:
