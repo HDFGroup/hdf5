@@ -1144,13 +1144,13 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
    H5_API_LOCK
 
 /* Local variables for API routines */
-#define FUNC_ENTER_API_VARS                                                   \
+#define FUNC_ENTER_API_VARS(func_name)                                        \
     MPE_LOG_VARS(func_name)                                                   \
     H5TRACE_DECL
 
 /* Use this macro for all "normal" API functions */
 #define FUNC_ENTER_API(func_name,err) {{                                      \
-    FUNC_ENTER_API_VARS                                                       \
+    FUNC_ENTER_API_VARS(func_name)                                            \
     FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
     FUNC_ENTER_API_THREADSAFE;                                                \
     FUNC_ENTER_API_COMMON(func_name,INTERFACE_INIT,err);                      \
@@ -1163,7 +1163,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
  *      like H5Eprint and H5Ewalk.
  */
 #define FUNC_ENTER_API_NOCLEAR(func_name,err) {{                              \
-    FUNC_ENTER_API_VARS                                                       \
+    FUNC_ENTER_API_VARS(func_name)                                            \
     FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
     FUNC_ENTER_API_THREADSAFE;                                                \
     FUNC_ENTER_API_COMMON(func_name,INTERFACE_INIT,err);                      \
@@ -1175,7 +1175,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
  *      are: H5close, H5check_version, H5Eget_major, H5Eget_minor.
  */
 #define FUNC_ENTER_API_NOINIT(func_name) {{                                   \
-    FUNC_ENTER_API_VARS                                                       \
+    FUNC_ENTER_API_VARS(func_name)                                            \
     FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
     FUNC_ENTER_API_THREADSAFE;                                                \
     H5_PUSH_FUNC;                                                             \

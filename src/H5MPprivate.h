@@ -31,16 +31,13 @@
 /*
  * #define eventa(func_name)   h5_mpe_ ## func_name ## _a
  * #define eventb(func_name)   h5_mpe_ ## func_name ## _b
- * #define eventc(func_name)   h5_mpe_ ## func_name ## _counter
  */
 #define eventa(func_name)   h5_mpe_eventa
 #define eventb(func_name)   h5_mpe_eventb
-#define eventc(func_name)   h5_mpe_counter
 #define COLOR(func_name)    color_ ## func_name 
 #define MPE_LOG_VARS(func_name)                                               \
     static int eventa(func_name) = -1;                                        \
     static int eventb(func_name) = -1;                                        \
-/*    static int eventc(func_name) = 0; */                                    \
     char* p_end_funcname = #func_name;                                        \
     char* p_event_start = "start" #func_name;
 
@@ -64,8 +61,7 @@
  */
 #define FINISH_MPE_LOG                                                       \
     if (H5_MPEinit_g) {                                                      \
-        MPE_Log_event(eventb(func_name), 0, p_end_funcname);                         \
-/*     eventc(func_name)++          */                                      \
+        MPE_Log_event(eventb(func_name), 0, p_end_funcname);                 \
     }
 
 
@@ -312,10 +308,14 @@
 #define color_H5Pget_buffer "red"
 #define color_H5Pset_preserve "red"
 #define color_H5Pget_preserve "red"
+#define color_H5Pall_filters_avail "red"
 #define color_H5Pset_filter "red"
+#define color_H5Pmodify_filter "red"
 #define color_H5Pget_nfilters "red"
-#define color_H5Pget_fileter "red"
+#define color_H5Pget_filter "red"
+#define color_H5Pget_filter_by_id "red"
 #define color_H5Pset_deflate "red"
+#define color_H5Pset_fletcher32 "red"
 #define color_H5Pset_szip "red"
 #define color_H5Pset_cache "red"
 #define color_H5Pget_cache "red"
@@ -344,6 +344,9 @@
 #define color_H5Pget_hyper_vector_size "red"
 #define color_H5Pset_small_data_block_size "red"
 #define color_H5Pget_small_data_block_size "red"
+#define color_H5Pget_edc_check "red"
+#define color_H5Pset_edc_check "red"
+#define color_H5Pset_filter_callback "red"
 
 #define color_H5Screate "red"
 #define color_H5Screate_simple "red"
