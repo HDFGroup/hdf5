@@ -151,7 +151,6 @@ typedef struct H5F_istore_ud1_t {
                                /* of the smallest file format object written to the file.  */
 #define H5F_HASH(F,ADDR) H5F_addr_hash((ADDR/H5F_HASH_DIVISOR),(F)->shared->rdcc.nslots)
 
-
 /* Private prototypes */
 static haddr_t H5F_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     const hssize_t offset[], H5F_istore_ud1_t *_udata);
@@ -1349,6 +1348,7 @@ done:
 static void *
 H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, const H5O_layout_t *layout,
     const H5O_pline_t *pline, const H5O_fill_t *fill, H5D_fill_time_t fill_time,
+    H5F_istore_ud1_t *udata,
     const hssize_t offset[], hbool_t relax,
     unsigned *idx_hint/*in,out*/)
 {
@@ -1413,14 +1413,21 @@ H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, con
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk");
         
     } else {
-        H5F_istore_ud1_t udata;		/*B-tree pass-through	*/
+        H5F_istore_ud1_t tmp_udata;		/*B-tree pass-through	*/
         haddr_t chunk_addr;             /* Address of chunk on disk */
 
-        /*
-         * Not in the cache.  Read it from the file and count this as a miss
-         * if it's in the file or an init if it isn't.
-         */
-        chunk_addr = H5F_istore_get_addr(f, dxpl_id, layout, offset, &udata);
+        if(udata!=NULL)
+            chunk_addr=udata->addr;
+        else {
+            /* Point at temporary storage for B-tree pass through */
+            udata=&tmp_udata;
+
+            /*
+             * Not in the cache.  Read it from the file and count this as a miss
+             * if it's in the file or an init if it isn't.
+             */
+            chunk_addr = H5F_istore_get_addr(f, dxpl_id, layout, offset, udata);
+        } /* end else */
 
         if (H5F_addr_defined(chunk_addr)) {
             size_t		chunk_alloc=0;		/*allocated chunk size	*/
@@ -1430,13 +1437,13 @@ H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, con
              */
             /* Chunk size on disk isn't [likely] the same size as the final chunk
              * size in memory, so allocate memory big enough. */
-            chunk_alloc = udata.key.nbytes;
+            chunk_alloc = udata->key.nbytes;
             if (NULL==(chunk = H5F_istore_chunk_alloc (chunk_alloc,pline)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk");
-            if (H5F_block_read(f, H5FD_MEM_DRAW, chunk_addr, udata.key.nbytes, dxpl_id, chunk)<0)
+            if (H5F_block_read(f, H5FD_MEM_DRAW, chunk_addr, udata->key.nbytes, dxpl_id, chunk)<0)
                 HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk");
-            if (H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata.key.filter_mask), dxpl_cache->err_detect, 
-                     dxpl_cache->filter_cb, &(udata.key.nbytes), &chunk_alloc, &chunk)<0) {
+            if (H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata->key.filter_mask), dxpl_cache->err_detect, 
+                     dxpl_cache->filter_cb, &(udata->key.nbytes), &chunk_alloc, &chunk)<0) {
                 HGOTO_ERROR(H5E_PLINE, H5E_READERROR, NULL, "data pipeline read failed");
             }
             rdcc->nmisses++;
@@ -1695,6 +1702,7 @@ H5F_istore_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxp
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     void *buf)
 {
+    H5F_istore_ud1_t udata;		/*B-tree pass-through	*/
     haddr_t	        chunk_addr;     /* Chunk address on disk */
     size_t		u;              /* Local index variables */
     ssize_t             ret_value;      /* Return value */
@@ -1724,7 +1732,7 @@ HDfprintf(stderr,"%s: chunk_coords={",FUNC);
 for(u=0; u<layout->ndims; u++)
     HDfprintf(stderr,"%Hd%s",chunk_coords[u],(u<(layout->ndims-1) ? ", " : "}\n"));
 #endif /* QAK */
-    chunk_addr=H5F_istore_get_addr(f, dxpl_id, layout, chunk_coords, NULL);
+    chunk_addr=H5F_istore_get_addr(f, dxpl_id, layout, chunk_coords, &udata);
 #ifdef QAK
 HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Hu\n",FUNC,chunk_addr,layout->chunk_size);
 HDfprintf(stderr,"%s: chunk_len_arr[%Zu]=%Zu\n",FUNC,*chunk_curr_seq,chunk_len_arr[*chunk_curr_seq]);
@@ -1754,7 +1762,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
          * chunk.
          */
         if (NULL==(chunk=H5F_istore_lock(f, dxpl_cache, dxpl_id, layout, &dcpl_cache->pline, &dcpl_cache->fill, dcpl_cache->fill_time,
-                     chunk_coords, FALSE, &idx_hint)))
+                     &udata, chunk_coords, FALSE, &idx_hint)))
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk");
 
         /* Use the vectorized memory copy routine to do actual work */
@@ -1798,6 +1806,7 @@ H5F_istore_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     const void *buf)
 {
+    H5F_istore_ud1_t udata;		/*B-tree pass-through	*/
     haddr_t	        chunk_addr;     /* Chunk address on disk */
     size_t		u;              /* Local index variables */
     ssize_t             ret_value;      /* Return value */
@@ -1827,7 +1836,7 @@ HDfprintf(stderr,"%s: chunk_coords={",FUNC);
 for(u=0; u<layout->ndims; u++)
     HDfprintf(stderr,"%Hd%s",chunk_coords[u],(u<(layout->ndims-1) ? ", " : "}\n"));
 #endif /* QAK */
-    chunk_addr=H5F_istore_get_addr(f, dxpl_id, layout, chunk_coords, NULL);
+    chunk_addr=H5F_istore_get_addr(f, dxpl_id, layout, chunk_coords, &udata);
 #ifdef QAK
 HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Hu\n",FUNC,chunk_addr,layout->chunk_size);
 HDfprintf(stderr,"%s: chunk_len_arr[%Zu]=%Zu\n",FUNC,*chunk_curr_seq,chunk_len_arr[*chunk_curr_seq]);
@@ -1873,7 +1882,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
             relax = FALSE;
 
         if (NULL==(chunk=H5F_istore_lock(f, dxpl_cache, dxpl_id, layout, &dcpl_cache->pline, &dcpl_cache->fill, dcpl_cache->fill_time,
-                 chunk_coords, relax, &idx_hint)))
+                 &udata, chunk_coords, relax, &idx_hint)))
             HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to read raw data chunk");
 
         /* Use the vectorized memory copy routine to do actual work */
@@ -2028,7 +2037,7 @@ H5F_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     /* Go get the chunk information */
     if (H5B_find (f, dxpl_id, H5B_ISTORE, layout->addr, udata)<0) {
         H5E_clear(NULL);
-        
+
 	HGOTO_ERROR(H5E_BTREE,H5E_NOTFOUND,HADDR_UNDEF,"Can't locate chunk info");
     } /* end if */
 
@@ -2699,7 +2708,6 @@ H5F_istore_initialize_by_extent(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_ca
     unsigned                idx_hint = 0;	/*input value for H5F_istore_lock */
     hssize_t                chunk_offset[H5O_LAYOUT_NDIMS];	/*logical location of the chunks */
     hsize_t                 idx_cur[H5O_LAYOUT_NDIMS];	/*multi-dimensional counters */
-    hsize_t                 idx_min[H5O_LAYOUT_NDIMS];
     hsize_t                 idx_max[H5O_LAYOUT_NDIMS];
     hsize_t                 sub_size[H5O_LAYOUT_NDIMS];
     hsize_t                 naccessed;	/*bytes accessed in chunk */
@@ -2743,7 +2751,7 @@ H5F_istore_initialize_by_extent(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_ca
     /* Go get the rank & dimensions */
     if((srank = H5S_get_simple_extent_dims(space, curr_dims, NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions");
-    rank=srank;
+    H5_ASSIGN_OVERFLOW(rank,srank,int,unsigned);
 
     /* Copy current dimensions */
     for(u = 0; u < rank; u++)
@@ -2755,14 +2763,13 @@ H5F_istore_initialize_by_extent(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_ca
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
 
 /*
- * Set up multi-dimensional counters (idx_min, idx_max, and idx_cur) and
+ * Set up multi-dimensional counters (idx_max, and idx_cur) and
  * loop through the chunks copying each chunk from the application to the
  * chunk cache.
  */
     for(u = 0; u < layout->ndims; u++) {
-	idx_min[u] = 0;
 	idx_max[u] = (size[u] - 1) / layout->dim[u] + 1;
-	idx_cur[u] = idx_min[u];
+	idx_cur[u] = 0;
     } /* end for */
 
     /* Loop over all chunks */
@@ -2791,7 +2798,7 @@ H5F_istore_initialize_by_extent(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_ca
 	if(found) {
 
 	    if(NULL == (chunk = H5F_istore_lock(f, dxpl_cache, dxpl_id, layout, &pline, &fill, fill_time,
-			    chunk_offset, FALSE, &idx_hint)))
+			    NULL, chunk_offset, FALSE, &idx_hint)))
 		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to read raw data chunk");
 
 	    if(H5S_select_all(space_chunk,1) < 0)
@@ -2831,7 +2838,7 @@ H5F_istore_initialize_by_extent(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_ca
 	/* Increment indices */
 	for(i = layout->ndims - 1, carry = 1; i >= 0 && carry; --i) {
 	    if(++idx_cur[i] >= idx_max[i])
-		idx_cur[i] = idx_min[i];
+		idx_cur[i] = 0;
 	    else
 		carry = 0;
 	} /* end for */
