@@ -56,8 +56,8 @@ CLEAN=$(TIMINGS)
 TEST_SRC=big.c bittests.c chunk.c cmpd_dset.c dsets.c dtypes.c extend.c      \
 	 external.c fillval.c flush1.c flush2.c gheap.c h5test.c hyperslab.c \
 	 iopipe.c istore.c lheap.c links.c mount.c mtime.c ohdr.c overhead.c \
-	 ragged.c stab.c tattr.c testhdf5.c tfile.c th5s.c tmeta.c trefer.c  \
-	 tselect.c tvltypes.c tvlstr.c unlink.c enum.c gass_write.c \
+	 ragged.c stab.c tattr.c testhdf5.c tfile.c th5s.c titerate.c tmeta.c \
+     trefer.c tselect.c tvltypes.c tvlstr.c unlink.c enum.c gass_write.c \
 	 gass_read.c gass_append.c dpss_read.c dpss_write.c srb_read.c \
 	 srb_write.c srb_append.c
 
