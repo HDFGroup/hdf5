@@ -5675,9 +5675,8 @@ run_float_int_conv(const char *name)
 #endif
     
 #if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
-    /*nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_LLONG);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_LLONG);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_LLONG);
-    */
 #ifdef H5_FP_TO_ULLONG_RIGHT_MAXIMUM
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_ULLONG);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_ULLONG);
