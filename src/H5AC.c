@@ -831,7 +831,7 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_debug(H5F_t __unused__ *f)
+H5AC_debug(H5F_t UNUSED *f)
 {
 #ifdef H5AC_DEBUG
     H5AC_subid_t            i;

@@ -51,7 +51,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-h5_errors(void __unused__ *client_data)
+h5_errors(void UNUSED *client_data)
 {
     FAILED();
     H5Eprint (stdout);

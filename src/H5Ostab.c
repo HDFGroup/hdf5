@@ -68,7 +68,7 @@ static intn interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_stab_decode(H5F_t *f, const uint8_t *p, H5O_shared_t __unused__ *sh)
+H5O_stab_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5O_stab_t             *stab;
 
@@ -226,7 +226,7 @@ H5O_stab_copy(const void *_mesg, void *_dest)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_stab_size(H5F_t *f, const void __unused__ *_mesg)
+H5O_stab_size(H5F_t *f, const void UNUSED *_mesg)
 {
     FUNC_ENTER(H5O_stab_size, 0);
     FUNC_LEAVE(2 * H5F_SIZEOF_ADDR(f));
@@ -248,7 +248,7 @@ H5O_stab_size(H5F_t *f, const void __unused__ *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_stab_debug(H5F_t __unused__ *f, const void *_mesg, FILE * stream,
+H5O_stab_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
 	       intn indent, intn fwidth)
 {
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;

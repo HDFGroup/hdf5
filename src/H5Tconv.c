@@ -355,7 +355,7 @@ static intn interface_initialize_g = 0;
  * Purpose:	The no-op conversion.  The library knows about this
  *		conversion without it being registered.
  *
- * Return: Non-negative on success/Negative on failure
+ * Return: 	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January 14, 1998
@@ -365,9 +365,9 @@ static intn interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_noop(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-	      H5T_cdata_t *cdata, size_t __unused__ nelmts,
-	      void __unused__ *buf, void __unused__ *background)
+H5T_conv_noop(hid_t UNUSED src_id, hid_t UNUSED dst_id,
+	      H5T_cdata_t *cdata, size_t UNUSED nelmts,
+	      void UNUSED *buf, void UNUSED *background)
 {
     FUNC_ENTER(H5T_conv_noop, FAIL);
 
@@ -410,7 +410,7 @@ H5T_conv_noop(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  */
 herr_t
 H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
-	       void *_buf, void __unused__ *background)
+	       void *_buf, void UNUSED *background)
 {
     uint8_t	*buf = (uint8_t*)_buf;
     uint8_t	tmp;
@@ -1032,7 +1032,7 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
  */
 herr_t
 H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-	      size_t nelmts, void *_buf, void __unused__ *bkg)
+	      size_t nelmts, void *_buf, void UNUSED *bkg)
 {
     uint8_t	*buf = (uint8_t*)_buf;	/*cast for pointer arithmetic	*/
     H5T_t	*src=NULL, *dst=NULL;	/*src and dst data types	*/
@@ -1068,8 +1068,9 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     case H5T_CONV_FREE:
 #ifdef H5T_DEBUG
 	if (H5DEBUG(T)) {
-	    fprintf(H5DEBUG(T), "      Using %s mapping function (%s)\n",
-		    priv->length?"O(N)":"O(N log N)", "N==nelmts");
+	    fprintf(H5DEBUG(T), "      Using %s mapping function%s\n",
+		    priv->length?"O(1)":"O(log N)",
+		    priv->length?"":", where N is the number of enum members");
 	}
 #endif
 	if (priv) {
@@ -1195,7 +1196,7 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-	      size_t nelmts, void *buf, void __unused__ *bkg)
+	      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     H5T_t	*src = NULL;		/*source data type		*/
     H5T_t	*dst = NULL;		/*destination data type		*/
@@ -1551,7 +1552,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-	      size_t nelmts, void *buf, void __unused__ *bkg)
+	      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     /* Traversal-related variables */
     H5T_t	*src_p;			/*source data type		*/
@@ -1949,7 +1950,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
-	      void *buf, void __unused__ *bkg)
+	      void *buf, void UNUSED *bkg)
 {
     H5T_t	*src=NULL;		/*source data type		*/
     H5T_t	*dst=NULL;		/*destination data type		*/
@@ -2179,7 +2180,7 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
  */
 herr_t
 H5T_conv_schar_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_uchar, FAIL);
     H5T_CONV_su(SCHAR, UCHAR,
@@ -2206,7 +2207,7 @@ H5T_conv_schar_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uchar_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_schar, FAIL);
     H5T_CONV_us(UCHAR, SCHAR,
@@ -2234,7 +2235,7 @@ H5T_conv_uchar_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_schar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_short, FAIL);
     H5T_CONV_sS(SCHAR, SHORT,
@@ -2261,7 +2262,7 @@ H5T_conv_schar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_schar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_ushort, FAIL);
     H5T_CONV_sU(SCHAR, USHORT,
@@ -2288,7 +2289,7 @@ H5T_conv_schar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uchar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_short, FAIL);
     H5T_CONV_uS(UCHAR, SHORT,
@@ -2316,7 +2317,7 @@ H5T_conv_uchar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uchar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_ushort, FAIL);
     H5T_CONV_uU(UCHAR, USHORT,
@@ -2343,7 +2344,7 @@ H5T_conv_uchar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_schar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		   size_t nelmts, void *buf, void __unused__ *bkg)
+		   size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_int, FAIL);
     H5T_CONV_sS(SCHAR, INT,
@@ -2370,7 +2371,7 @@ H5T_conv_schar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_schar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_uint, FAIL);
     H5T_CONV_sU(SCHAR, UINT,
@@ -2397,7 +2398,7 @@ H5T_conv_schar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uchar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		   size_t nelmts, void *buf, void __unused__ *bkg)
+		   size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_int, FAIL);
     H5T_CONV_uS(UCHAR, INT,
@@ -2425,7 +2426,7 @@ H5T_conv_uchar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uchar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_uint, FAIL);
     H5T_CONV_uU(UCHAR, UINT,
@@ -2452,7 +2453,7 @@ H5T_conv_uchar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_schar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_long, FAIL);
     H5T_CONV_sS(SCHAR, LONG,
@@ -2479,7 +2480,7 @@ H5T_conv_schar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_schar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_ulong, FAIL);
     H5T_CONV_sU(SCHAR, ULONG,
@@ -2506,7 +2507,7 @@ H5T_conv_schar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uchar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_long, FAIL);
     H5T_CONV_uS(UCHAR, LONG,
@@ -2534,7 +2535,7 @@ H5T_conv_uchar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uchar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_ulong, FAIL);
     H5T_CONV_uU(UCHAR, ULONG,
@@ -2561,7 +2562,7 @@ H5T_conv_uchar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_schar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_llong, FAIL);
     H5T_CONV_sS(SCHAR, LLONG,
@@ -2588,7 +2589,7 @@ H5T_conv_schar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_schar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_ullong, FAIL);
     H5T_CONV_sU(SCHAR, ULLONG,
@@ -2615,7 +2616,7 @@ H5T_conv_schar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_llong, FAIL);
     H5T_CONV_uS(UCHAR, LLONG,
@@ -2643,7 +2644,7 @@ H5T_conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uchar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_ullong, FAIL);
     H5T_CONV_uU(UCHAR, ULLONG,
@@ -2670,7 +2671,7 @@ H5T_conv_uchar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_short_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_short_schar, FAIL);
     H5T_CONV_Ss(SHORT, SCHAR,
@@ -2698,7 +2699,7 @@ H5T_conv_short_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_short_uchar, FAIL);
     H5T_CONV_Su(SHORT, UCHAR,
@@ -2726,7 +2727,7 @@ H5T_conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ushort_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_schar, FAIL);
     H5T_CONV_Us(USHORT, SCHAR,
@@ -2754,7 +2755,7 @@ H5T_conv_ushort_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ushort_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_uchar, FAIL);
     H5T_CONV_Uu(USHORT, UCHAR,
@@ -2782,7 +2783,7 @@ H5T_conv_ushort_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_short_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_short_ushort, FAIL);
     H5T_CONV_su(SHORT, USHORT,
@@ -2809,7 +2810,7 @@ H5T_conv_short_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ushort_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_short, FAIL);
     H5T_CONV_us(USHORT, SHORT,
@@ -2837,7 +2838,7 @@ H5T_conv_ushort_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_short_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		   size_t nelmts, void *buf, void __unused__ *bkg)
+		   size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_short_int, FAIL);
     H5T_CONV_sS(SHORT, INT,
@@ -2864,7 +2865,7 @@ H5T_conv_short_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_short_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_short_uint, FAIL);
     H5T_CONV_sU(SHORT, UINT,
@@ -2891,7 +2892,7 @@ H5T_conv_short_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ushort_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_int, FAIL);
     H5T_CONV_uS(USHORT, INT,
@@ -2919,7 +2920,7 @@ H5T_conv_ushort_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ushort_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_uint, FAIL);
     H5T_CONV_uU(USHORT, UINT,
@@ -2946,7 +2947,7 @@ H5T_conv_ushort_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_short_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_short_long, FAIL);
     H5T_CONV_sS(SHORT, LONG,
@@ -2973,7 +2974,7 @@ H5T_conv_short_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_short_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_short_ulong, FAIL);
     H5T_CONV_sU(SHORT, ULONG,
@@ -3000,7 +3001,7 @@ H5T_conv_short_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ushort_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_long, FAIL);
     H5T_CONV_uS(USHORT, LONG,
@@ -3028,7 +3029,7 @@ H5T_conv_ushort_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ushort_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_ulong, FAIL);
     H5T_CONV_uU(USHORT, ULONG,
@@ -3055,7 +3056,7 @@ H5T_conv_ushort_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_short_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_short_llong, FAIL);
     H5T_CONV_sS(SHORT, LLONG,
@@ -3082,7 +3083,7 @@ H5T_conv_short_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_short_ullong, FAIL);
     H5T_CONV_sU(SHORT, ULLONG,
@@ -3109,7 +3110,7 @@ H5T_conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_llong, FAIL);
     H5T_CONV_uS(USHORT, LLONG,
@@ -3137,7 +3138,7 @@ H5T_conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ushort_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		       size_t nelmts, void *buf, void __unused__ *bkg)
+		       size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_ullong, FAIL);
     H5T_CONV_uU(USHORT, ULLONG,
@@ -3164,7 +3165,7 @@ H5T_conv_ushort_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_int_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		   size_t nelmts, void *buf, void __unused__ *bkg)
+		   size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_int_schar, FAIL);
     H5T_CONV_Ss(INT, SCHAR,
@@ -3192,7 +3193,7 @@ H5T_conv_int_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		   size_t nelmts, void *buf, void __unused__ *bkg)
+		   size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_int_uchar, FAIL);
     H5T_CONV_Su(INT, UCHAR,
@@ -3220,7 +3221,7 @@ H5T_conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uint_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_schar, FAIL);
     H5T_CONV_Us(UINT, SCHAR,
@@ -3248,7 +3249,7 @@ H5T_conv_uint_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uint_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_uchar, FAIL);
     H5T_CONV_Uu(UINT, UCHAR,
@@ -3276,7 +3277,7 @@ H5T_conv_uint_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_int_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		   size_t nelmts, void *buf, void __unused__ *bkg)
+		   size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_int_short, FAIL);
     H5T_CONV_Ss(INT, SHORT,
@@ -3304,7 +3305,7 @@ H5T_conv_int_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_int_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_int_ushort, FAIL);
     H5T_CONV_Su(INT, USHORT,
@@ -3332,7 +3333,7 @@ H5T_conv_int_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uint_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_short, FAIL);
     H5T_CONV_Us(UINT, SHORT,
@@ -3360,7 +3361,7 @@ H5T_conv_uint_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uint_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_ushort, FAIL);
     H5T_CONV_Uu(UINT, USHORT,
@@ -3388,7 +3389,7 @@ H5T_conv_uint_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_int_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		  size_t nelmts, void *buf, void __unused__ *bkg)
+		  size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_int_uint, FAIL);
     H5T_CONV_su(INT, UINT,
@@ -3415,7 +3416,7 @@ H5T_conv_int_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uint_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		  size_t nelmts, void *buf, void __unused__ *bkg)
+		  size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_int, FAIL);
     H5T_CONV_us(UINT, INT,
@@ -3443,7 +3444,7 @@ H5T_conv_uint_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_int_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		  size_t nelmts, void *buf, void __unused__ *bkg)
+		  size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_int_long, FAIL);
     H5T_CONV_sS(INT, LONG,
@@ -3470,7 +3471,7 @@ H5T_conv_int_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_int_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		   size_t nelmts, void *buf, void __unused__ *bkg)
+		   size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_int_ulong, FAIL);
     H5T_CONV_sU(INT, LONG,
@@ -3497,7 +3498,7 @@ H5T_conv_int_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uint_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		   size_t nelmts, void *buf, void __unused__ *bkg)
+		   size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_long, FAIL);
     H5T_CONV_uS(UINT, LONG,
@@ -3525,7 +3526,7 @@ H5T_conv_uint_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uint_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_ulong, FAIL);
     H5T_CONV_uU(UINT, ULONG,
@@ -3552,7 +3553,7 @@ H5T_conv_uint_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_int_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		   size_t nelmts, void *buf, void __unused__ *bkg)
+		   size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_int_llong, FAIL);
     H5T_CONV_sS(INT, LLONG,
@@ -3579,7 +3580,7 @@ H5T_conv_int_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_int_ullong, FAIL);
     H5T_CONV_sU(INT, ULLONG,
@@ -3606,7 +3607,7 @@ H5T_conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_llong, FAIL);
     H5T_CONV_uS(UINT, LLONG,
@@ -3634,7 +3635,7 @@ H5T_conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_uint_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_ullong, FAIL);
     H5T_CONV_uU(UINT, ULLONG,
@@ -3661,7 +3662,7 @@ H5T_conv_uint_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_long_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_long_schar, FAIL);
     H5T_CONV_Ss(LONG, SCHAR,
@@ -3689,7 +3690,7 @@ H5T_conv_long_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_long_uchar, FAIL);
     H5T_CONV_Su(LONG, UCHAR,
@@ -3717,7 +3718,7 @@ H5T_conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ulong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_schar, FAIL);
     H5T_CONV_Us(ULONG, SCHAR,
@@ -3745,7 +3746,7 @@ H5T_conv_ulong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ulong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_uchar, FAIL);
     H5T_CONV_Uu(ULONG, UCHAR,
@@ -3773,7 +3774,7 @@ H5T_conv_ulong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_long_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_long_short, FAIL);
     H5T_CONV_Ss(LONG, SHORT,
@@ -3801,7 +3802,7 @@ H5T_conv_long_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_long_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_long_ushort, FAIL);
     H5T_CONV_Su(LONG, USHORT,
@@ -3829,7 +3830,7 @@ H5T_conv_long_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ulong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_short, FAIL);
     H5T_CONV_Us(ULONG, SHORT,
@@ -3857,7 +3858,7 @@ H5T_conv_ulong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ulong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_ushort, FAIL);
     H5T_CONV_Uu(ULONG, USHORT,
@@ -3885,7 +3886,7 @@ H5T_conv_ulong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_long_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		  size_t nelmts, void *buf, void __unused__ *bkg)
+		  size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_long_int, FAIL);
     H5T_CONV_Ss(LONG, INT,
@@ -3913,7 +3914,7 @@ H5T_conv_long_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_long_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		   size_t nelmts, void *buf, void __unused__ *bkg)
+		   size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_long_uint, FAIL);
     H5T_CONV_Su(LONG, UINT,
@@ -3941,7 +3942,7 @@ H5T_conv_long_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ulong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		   size_t nelmts, void *buf, void __unused__ *bkg)
+		   size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_int, FAIL);
     H5T_CONV_Us(ULONG, INT,
@@ -3969,7 +3970,7 @@ H5T_conv_ulong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ulong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_uint, FAIL);
     H5T_CONV_Uu(ULONG, UINT,
@@ -3997,7 +3998,7 @@ H5T_conv_ulong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_long_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_long_ulong, FAIL);
     H5T_CONV_su(LONG, ULONG,
@@ -4024,7 +4025,7 @@ H5T_conv_long_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ulong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_long, FAIL);
     H5T_CONV_us(ULONG, LONG,
@@ -4052,7 +4053,7 @@ H5T_conv_ulong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_long_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_long_llong, FAIL);
     H5T_CONV_sS(LONG, LLONG,
@@ -4079,7 +4080,7 @@ H5T_conv_long_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_long_ullong, FAIL);
     H5T_CONV_sU(LONG, ULLONG,
@@ -4106,7 +4107,7 @@ H5T_conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_long_llong, FAIL);
     H5T_CONV_uS(ULONG, LLONG,
@@ -4134,7 +4135,7 @@ H5T_conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ulong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_ullong, FAIL);
     H5T_CONV_uU(ULONG, ULLONG,
@@ -4161,7 +4162,7 @@ H5T_conv_ulong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_llong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_schar, FAIL);
     H5T_CONV_Ss(LLONG, SCHAR,
@@ -4189,7 +4190,7 @@ H5T_conv_llong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_uchar, FAIL);
     H5T_CONV_Su(LLONG, UCHAR,
@@ -4217,7 +4218,7 @@ H5T_conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ullong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_schar, FAIL);
     H5T_CONV_Us(ULLONG, SCHAR,
@@ -4245,7 +4246,7 @@ H5T_conv_ullong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_uchar, FAIL);
     H5T_CONV_Uu(ULLONG, UCHAR,
@@ -4273,7 +4274,7 @@ H5T_conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_llong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_short, FAIL);
     H5T_CONV_Ss(LLONG, SHORT,
@@ -4301,7 +4302,7 @@ H5T_conv_llong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_ushort, FAIL);
     H5T_CONV_Su(LLONG, USHORT,
@@ -4329,7 +4330,7 @@ H5T_conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_short, FAIL);
     H5T_CONV_Us(ULLONG, SHORT,
@@ -4357,7 +4358,7 @@ H5T_conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		       size_t nelmts, void *buf, void __unused__ *bkg)
+		       size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_ushort, FAIL);
     H5T_CONV_Uu(ULLONG, USHORT,
@@ -4385,7 +4386,7 @@ H5T_conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_llong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		   size_t nelmts, void *buf, void __unused__ *bkg)
+		   size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_int, FAIL);
     H5T_CONV_Ss(LLONG, INT,
@@ -4413,7 +4414,7 @@ H5T_conv_llong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_uint, FAIL);
     H5T_CONV_Su(LLONG, UINT,
@@ -4441,7 +4442,7 @@ H5T_conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_int, FAIL);
     H5T_CONV_Us(ULLONG, INT,
@@ -4469,7 +4470,7 @@ H5T_conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_uint, FAIL);
     H5T_CONV_Uu(ULLONG, UINT,
@@ -4497,7 +4498,7 @@ H5T_conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_llong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+		    size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_long, FAIL);
     H5T_CONV_Ss(LLONG, LONG,
@@ -4525,7 +4526,7 @@ H5T_conv_llong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_ulong, FAIL);
     H5T_CONV_Su(LLONG, ULONG,
@@ -4553,7 +4554,7 @@ H5T_conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+		     size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_long, FAIL);
     H5T_CONV_Us(ULLONG, LONG,
@@ -4581,7 +4582,7 @@ H5T_conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_ulong, FAIL);
     H5T_CONV_Uu(ULLONG, ULONG,
@@ -4609,7 +4610,7 @@ H5T_conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_ullong, FAIL);
     H5T_CONV_su(LLONG, ULLONG,
@@ -4636,7 +4637,7 @@ H5T_conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_llong, FAIL);
     H5T_CONV_us(ULLONG, LLONG,
@@ -4663,7 +4664,7 @@ H5T_conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		       size_t nelmts, void *buf, void __unused__ *bkg)
+		       size_t nelmts, void *buf, void UNUSED *bkg)
 {
     size_t	elmtno;			/*element number		*/
     float	*src, *s;		/*source buffer			*/
@@ -4766,7 +4767,7 @@ H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		       size_t nelmts, void *buf, void __unused__ *bkg)
+		       size_t nelmts, void *buf, void UNUSED *bkg)
 {
     size_t	elmtno;			/*element number		*/
     double	*src, *s;		/*source buffer			*/
@@ -4879,7 +4880,7 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 herr_t
 H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		      size_t nelmts, void *buf, void __unused__ *bkg)
+		      size_t nelmts, void *buf, void UNUSED *bkg)
 {
     uint8_t	*s=NULL, *d=NULL;	/*src and dst buf pointers	*/
     uint8_t	tmp[8];			/*temporary destination buffer	*/
@@ -4930,11 +4931,11 @@ H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		break;
 	    case H5T_SGN_2:
 		if (s[3] & 0x80) {
-		    sign = 1 ;
+		    sign = 1;
 		    for (i=0,cin=1; i<4; i++,cin=cout) {
-			s[i] = ~s[i] ;
-			cout = ((unsigned)(s[i])+cin > 0xff) ? 1 : 0 ;
-			s[i] += cin ;
+			s[i] = ~s[i];
+			cout = ((unsigned)(s[i])+cin > 0xff) ? 1 : 0;
+			s[i] += cin;
 		    }
 		} else {
 		    sign = 0;
@@ -4950,240 +4951,240 @@ H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	     * this in a loop, but testing it this way might be faster.
 	     */
 	    if (s[3]) {
-		if (s[3] & 0x80) mbits = 32 ;
-		else if (s[3] & 0x40) mbits = 31 ;
-		else if (s[3] & 0x20) mbits = 30 ;
-		else if (s[3] & 0x10) mbits = 29 ;
-		else if (s[3] & 0x08) mbits = 28 ;
-		else if (s[3] & 0x04) mbits = 27 ;
-		else if (s[3] & 0x02) mbits = 26 ;
-		else if (s[3] & 0x01) mbits = 25 ;
+		if (s[3] & 0x80) mbits = 32;
+		else if (s[3] & 0x40) mbits = 31;
+		else if (s[3] & 0x20) mbits = 30;
+		else if (s[3] & 0x10) mbits = 29;
+		else if (s[3] & 0x08) mbits = 28;
+		else if (s[3] & 0x04) mbits = 27;
+		else if (s[3] & 0x02) mbits = 26;
+		else if (s[3] & 0x01) mbits = 25;
 	    } else if (s[2]) {
-		if (s[2] & 0x80) mbits = 24 ;
-		else if (s[2] & 0x40) mbits = 23 ;
-		else if (s[2] & 0x20) mbits = 22 ;
-		else if (s[2] & 0x10) mbits = 21 ;
-		else if (s[2] & 0x08) mbits = 20 ;
-		else if (s[2] & 0x04) mbits = 19 ;
-		else if (s[2] & 0x02) mbits = 18 ;
-		else if (s[2] & 0x01) mbits = 17 ;
+		if (s[2] & 0x80) mbits = 24;
+		else if (s[2] & 0x40) mbits = 23;
+		else if (s[2] & 0x20) mbits = 22;
+		else if (s[2] & 0x10) mbits = 21;
+		else if (s[2] & 0x08) mbits = 20;
+		else if (s[2] & 0x04) mbits = 19;
+		else if (s[2] & 0x02) mbits = 18;
+		else if (s[2] & 0x01) mbits = 17;
 	    } else if (s[1]) {
-		if (s[1] & 0x80) mbits = 16 ;
-		else if (s[1] & 0x40) mbits = 15 ;
-		else if (s[1] & 0x20) mbits = 14 ;
-		else if (s[1] & 0x10) mbits = 13 ;
-		else if (s[1] & 0x08) mbits = 12 ;
-		else if (s[1] & 0x04) mbits = 11 ;
-		else if (s[1] & 0x02) mbits = 10 ;
-		else if (s[1] & 0x01) mbits =  9 ;
+		if (s[1] & 0x80) mbits = 16;
+		else if (s[1] & 0x40) mbits = 15;
+		else if (s[1] & 0x20) mbits = 14;
+		else if (s[1] & 0x10) mbits = 13;
+		else if (s[1] & 0x08) mbits = 12;
+		else if (s[1] & 0x04) mbits = 11;
+		else if (s[1] & 0x02) mbits = 10;
+		else if (s[1] & 0x01) mbits =  9;
 	    } else if (s[0]) {
-		if (s[0] & 0x80) mbits = 8 ;
-		else if (s[0] & 0x40) mbits =  7 ;
-		else if (s[0] & 0x20) mbits =  6 ;
-		else if (s[0] & 0x10) mbits =  5 ;
-		else if (s[0] & 0x08) mbits =  4 ;
-		else if (s[0] & 0x04) mbits =  3 ;
-		else if (s[0] & 0x02) mbits =  2 ;
-		else if (s[0] & 0x01) mbits =  1 ;
+		if (s[0] & 0x80) mbits = 8;
+		else if (s[0] & 0x40) mbits =  7;
+		else if (s[0] & 0x20) mbits =  6;
+		else if (s[0] & 0x10) mbits =  5;
+		else if (s[0] & 0x08) mbits =  4;
+		else if (s[0] & 0x04) mbits =  3;
+		else if (s[0] & 0x02) mbits =  2;
+		else if (s[0] & 0x01) mbits =  1;
 	    } else {
 		/*zero*/
-		d[7] = d[6] = d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
-		continue ;
+		d[7] = d[6] = d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0;
+		continue;
 	    }
 
 	    /*
 	     * The sign and exponent.
 	     */
-	    exponent = (mbits - 1) + 1023 ;
-	    d[7] = (sign<<7) | ((exponent>>4) & 0x7f) ;
-	    d[6] = (exponent & 0x0f) << 4 ;
+	    exponent = (mbits - 1) + 1023;
+	    d[7] = (sign<<7) | ((exponent>>4) & 0x7f);
+	    d[6] = (exponent & 0x0f) << 4;
       
 	    /*
 	     * The mantissa.
 	     */
 	    switch (mbits) {
 	    case 32:
-		d[5] = d[4] = d[3] = d[1] = d[0] = 0 ;
-		break ;
+		d[5] = d[4] = d[3] = d[1] = d[0] = 0;
+		break;
 	    case 31:
-		d[6] |=	 0x0f	 & (s[3]>>2) ;
-		d[5] = (s[3]<<6) | (s[2]>>2) ;
-		d[4] = (s[2]<<6) | (s[1]>>2) ;
-		d[3] = (s[1]<<6) | (s[0]>>2) ;
-		d[2] = (s[0]<<6) ;
-		d[1] = d[0] = 0 ;
-		break ;
+		d[6] |=	 0x0f	 & (s[3]>>2);
+		d[5] = (s[3]<<6) | (s[2]>>2);
+		d[4] = (s[2]<<6) | (s[1]>>2);
+		d[3] = (s[1]<<6) | (s[0]>>2);
+		d[2] = (s[0]<<6);
+		d[1] = d[0] = 0;
+		break;
 	    case 30:
-		d[6] |=	 0x0f	 & (s[3]>>1) ;
-		d[5] = (s[3]<<7) | (s[2]>>1) ;
-		d[4] = (s[2]<<7) | (s[1]>>1) ;
-		d[3] = (s[1]<<7) | (s[0]>>1) ;
-		d[2] = (s[0]<<7) ;
-		d[1] = d[0] = 0 ;
-		break ;
+		d[6] |=	 0x0f	 & (s[3]>>1);
+		d[5] = (s[3]<<7) | (s[2]>>1);
+		d[4] = (s[2]<<7) | (s[1]>>1);
+		d[3] = (s[1]<<7) | (s[0]>>1);
+		d[2] = (s[0]<<7);
+		d[1] = d[0] = 0;
+		break;
 	    case 29:
-		d[6] |=	 0x0f	 & s[3] ;
-		d[5] = s[2] ;
-		d[4] = s[1] ;
-		d[3] = s[0] ;
-		d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |=	 0x0f	 & s[3];
+		d[5] = s[2];
+		d[4] = s[1];
+		d[3] = s[0];
+		d[2] = d[1] = d[0] = 0;
+		break;
 	    case 28:
-		d[6] |= ((s[3]<<1) | (s[2]>>7)) & 0x0f ;
-		d[5] =	 (s[2]<<1) | (s[1]>>7) ;
-		d[4] =	 (s[1]<<1) | (s[0]>>7) ;
-		d[3] =	 (s[0]<<1) ;
-		d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |= ((s[3]<<1) | (s[2]>>7)) & 0x0f;
+		d[5] =	 (s[2]<<1) | (s[1]>>7);
+		d[4] =	 (s[1]<<1) | (s[0]>>7);
+		d[3] =	 (s[0]<<1);
+		d[2] = d[1] = d[0] = 0;
+		break;
 	    case 27:
-		d[6] |= ((s[3]<<2) | (s[2]>>6)) & 0x0f ;
-		d[5] =	 (s[2]<<2) | (s[1]>>6) ;
-		d[4] =	 (s[1]<<2) | (s[0]>>6) ;
-		d[3] =	 (s[0]<<2) ;
-		d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |= ((s[3]<<2) | (s[2]>>6)) & 0x0f;
+		d[5] =	 (s[2]<<2) | (s[1]>>6);
+		d[4] =	 (s[1]<<2) | (s[0]>>6);
+		d[3] =	 (s[0]<<2);
+		d[2] = d[1] = d[0] = 0;
+		break;
 	    case 26:
-		d[6] |= ((s[3]<<3) | (s[2]>>5)) & 0x0f ;
-		d[5] =	 (s[2]<<3) | (s[1]>>5) ;
-		d[4] =	 (s[1]<<3) | (s[0]>>5) ;
-		d[3] =	 (s[0]<<3) ;
-		d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |= ((s[3]<<3) | (s[2]>>5)) & 0x0f;
+		d[5] =	 (s[2]<<3) | (s[1]>>5);
+		d[4] =	 (s[1]<<3) | (s[0]>>5);
+		d[3] =	 (s[0]<<3);
+		d[2] = d[1] = d[0] = 0;
+		break;
 	    case 25:
-		d[6] |=	  0x0f	 & (s[2]>>4) ;
-		d[5] = (s[2]<<4) | (s[1]>>4) ;
-		d[4] = (s[1]<<4) | (s[0]>>4) ;
-		d[3] = (s[0]<<4) ;
-		d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |=	  0x0f	 & (s[2]>>4);
+		d[5] = (s[2]<<4) | (s[1]>>4);
+		d[4] = (s[1]<<4) | (s[0]>>4);
+		d[3] = (s[0]<<4);
+		d[2] = d[1] = d[0] = 0;
+		break;
 	    case 24:
-		d[6] |=	  0x0f	 & (s[2]>>3) ;
-		d[5] = (s[2]<<5) | (s[1]>>3) ;
-		d[4] = (s[1]<<5) | (s[0]>>3) ;
-		d[3] = (s[0]<<5) ;
-		d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |=	  0x0f	 & (s[2]>>3);
+		d[5] = (s[2]<<5) | (s[1]>>3);
+		d[4] = (s[1]<<5) | (s[0]>>3);
+		d[3] = (s[0]<<5);
+		d[2] = d[1] = d[0] = 0;
+		break;
 	    case 23:
-		d[6] |=	  0x0f	 & (s[2]>>2) ;
-		d[5] = (s[2]<<6) | (s[1]>>2) ;
-		d[4] = (s[1]<<6) | (s[0]>>2) ;
-		d[3] = (s[0]<<6) ;
-		d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |=	  0x0f	 & (s[2]>>2);
+		d[5] = (s[2]<<6) | (s[1]>>2);
+		d[4] = (s[1]<<6) | (s[0]>>2);
+		d[3] = (s[0]<<6);
+		d[2] = d[1] = d[0] = 0;
+		break;
 	    case 22:
-		d[6] |=	  0x0f	 & (s[2]>>1) ;
-		d[5] = (s[2]<<7) | (s[1]>>1) ;
-		d[4] = (s[1]<<7) | (s[0]>>1) ;
-		d[3] = (s[0]<<7) ;
-		d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |=	  0x0f	 & (s[2]>>1);
+		d[5] = (s[2]<<7) | (s[1]>>1);
+		d[4] = (s[1]<<7) | (s[0]>>1);
+		d[3] = (s[0]<<7);
+		d[2] = d[1] = d[0] = 0;
+		break;
 	    case 21:
-		d[6] |= 0x0f & s[2] ;
-		d[5] = s[1] ;
-		d[4] = s[0] ;
-		d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |= 0x0f & s[2];
+		d[5] = s[1];
+		d[4] = s[0];
+		d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 20:
-		d[6] |= ((s[2]<<1) | (s[1]>>7)) & 0x0f ;
-		d[5] =	 (s[1]<<1) | (s[0]>>7) ;
-		d[4] =	 (s[0]<<1) ;
-		d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |= ((s[2]<<1) | (s[1]>>7)) & 0x0f;
+		d[5] =	 (s[1]<<1) | (s[0]>>7);
+		d[4] =	 (s[0]<<1);
+		d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 19:
-		d[6] |= ((s[2]<<2) | (s[1]>>6)) & 0x0f ;
-		d[5] =	 (s[1]<<2) | (s[0]>>6) ;
-		d[4] =	 (s[0]<<2) ;
-		d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |= ((s[2]<<2) | (s[1]>>6)) & 0x0f;
+		d[5] =	 (s[1]<<2) | (s[0]>>6);
+		d[4] =	 (s[0]<<2);
+		d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 18:
-		d[6] |= ((s[2]<<3) | (s[1]>>5)) & 0x0f ;
-		d[5] =	 (s[1]<<3) | (s[0]>>5) ;
-		d[4] =	 (s[0]<<3) ;
-		d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |= ((s[2]<<3) | (s[1]>>5)) & 0x0f;
+		d[5] =	 (s[1]<<3) | (s[0]>>5);
+		d[4] =	 (s[0]<<3);
+		d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 17:
-		d[6] |=	  0x0f	 & (s[1]>>4) ;
-		d[5] = (s[1]<<4) | (s[0]>>4) ;
-		d[4] = (s[0]<<4) ;
-		d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |=	  0x0f	 & (s[1]>>4);
+		d[5] = (s[1]<<4) | (s[0]>>4);
+		d[4] = (s[0]<<4);
+		d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 16:
-		d[6] |=	  0x0f	 & (s[1]>>3) ;
-		d[5] = (s[1]<<5) | (s[0]>>3) ;
-		d[4] = (s[0]<<5) ;
-		d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |=	  0x0f	 & (s[1]>>3);
+		d[5] = (s[1]<<5) | (s[0]>>3);
+		d[4] = (s[0]<<5);
+		d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 15:
-		d[6] |=	  0x0f	 & (s[1]>>2) ;
-		d[5] = (s[1]<<6) | (s[0]>>2) ;
-		d[4] = (s[0]<<6) ;
-		d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |=	  0x0f	 & (s[1]>>2);
+		d[5] = (s[1]<<6) | (s[0]>>2);
+		d[4] = (s[0]<<6);
+		d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 14:
-		d[6] |=	  0x0f	 & (s[1]>>1) ;
-		d[5] = (s[1]<<7) | (s[0]>>1) ;
-		d[4] = (s[0]<<7) ;
-		d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |=	  0x0f	 & (s[1]>>1);
+		d[5] = (s[1]<<7) | (s[0]>>1);
+		d[4] = (s[0]<<7);
+		d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 13:
-		d[6] |= 0x0f & s[1] ;
-		d[5] = s[0] ;
-		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |= 0x0f & s[1];
+		d[5] = s[0];
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 12:
-		d[6] |= ((s[1]<<1) | (s[0]>>7)) & 0x0f ;
-		d[5] =	 (s[0]<<1) ;
-		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |= ((s[1]<<1) | (s[0]>>7)) & 0x0f;
+		d[5] =	 (s[0]<<1);
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 11:
-		d[6] |= ((s[1]<<2) | (s[0]>>6)) & 0x0f ;
-		d[5] =	 (s[0]<<2) ;
-		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |= ((s[1]<<2) | (s[0]>>6)) & 0x0f;
+		d[5] =	 (s[0]<<2);
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 10:
-		d[6] |= ((s[1]<<3) | (s[0]>>5)) & 0x0f ;
-		d[5] =	 (s[0]<<3) ;
-		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |= ((s[1]<<3) | (s[0]>>5)) & 0x0f;
+		d[5] =	 (s[0]<<3);
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 9:
-		d[6] |=	  0x0f	 & (s[0]>>4) ;
-		d[5] = (s[0]<<4) ;
-		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |=	  0x0f	 & (s[0]>>4);
+		d[5] = (s[0]<<4);
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 8:
-		d[6] |=	  0x0f	 & (s[0]>>3) ;
-		d[5] = (s[0]<<5) ;
-		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |=	  0x0f	 & (s[0]>>3);
+		d[5] = (s[0]<<5);
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 7:
-		d[6] |=	  0x0f	 & (s[0]>>2) ;
-		d[5] = (s[0]<<6) ;
-		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |=	  0x0f	 & (s[0]>>2);
+		d[5] = (s[0]<<6);
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 6:
-		d[6] |=	  0x0f	 & (s[0]>>1) ;
-		d[5] = (s[0]<<7) ;
-		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |=	  0x0f	 & (s[0]>>1);
+		d[5] = (s[0]<<7);
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 5:
-		d[6] |= 0x0f & s[0] ;
-		d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |= 0x0f & s[0];
+		d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 4:
-		d[6] |= (s[0]<<1) & 0x0f ;
-		d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |= (s[0]<<1) & 0x0f;
+		d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 3:
-		d[6] |= (s[0]<<2) & 0x0f ;
-		d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |= (s[0]<<2) & 0x0f;
+		d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 2:
-		d[6] |= (s[0]<<3) & 0x0f ;
-		d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[6] |= (s[0]<<3) & 0x0f;
+		d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    case 1:
-		d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
-		break ;
+		d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0;
+		break;
 	    }
 
 	    /*

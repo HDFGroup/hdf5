@@ -206,8 +206,8 @@ H5HG_create (H5F_t *f, size_t size)
  *-------------------------------------------------------------------------
  */
 static H5HG_heap_t *
-H5HG_load (H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
-	   void __unused__ *udata2)
+H5HG_load (H5F_t *f, const haddr_t *addr, const void UNUSED *udata1,
+	   void UNUSED *udata2)
 {
     H5HG_heap_t	*heap = NULL;
     H5HG_heap_t	*ret_value = NULL;

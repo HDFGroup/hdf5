@@ -64,7 +64,7 @@ static intn interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_efl_decode(H5F_t *f, const uint8_t *p, H5O_shared_t __unused__ *sh)
+H5O_efl_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5O_efl_t		*mesg = NULL;
     intn		i, version;
@@ -405,7 +405,7 @@ H5O_efl_total_size (H5O_efl_t *efl)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_efl_read (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
+H5O_efl_read (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t *addr,
 	      hsize_t size, uint8_t *buf)
 {
     int		i, fd=-1;
@@ -489,7 +489,7 @@ H5O_efl_read (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_efl_write (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
+H5O_efl_write (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t *addr,
 	       hsize_t size, const uint8_t *buf)
 {
     int		i, fd=-1;
@@ -572,7 +572,7 @@ H5O_efl_write (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_efl_debug(H5F_t __unused__ *f, const void *_mesg, FILE * stream,
+H5O_efl_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
 	      intn indent, intn fwidth)
 {
     const H5O_efl_t	   *mesg = (const H5O_efl_t *) _mesg;

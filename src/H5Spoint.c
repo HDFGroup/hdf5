@@ -82,7 +82,7 @@ const H5S_mconv_t	H5S_POINT_MCONV[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_point_init (const struct H5O_layout_t __unused__ *layout,
+H5S_point_init (const struct H5O_layout_t UNUSED *layout,
 		const H5S_t *space, H5S_sel_iter_t *sel_iter)
 {
     FUNC_ENTER (H5S_point_init, FAIL);
@@ -220,7 +220,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5S_point_favail (const H5S_t __unused__ *space,
+H5S_point_favail (const H5S_t UNUSED *space,
 		  const H5S_sel_iter_t *sel_iter, size_t max)
 {
     FUNC_ENTER (H5S_point_favail, FAIL);

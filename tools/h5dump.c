@@ -472,7 +472,7 @@ dump_dataspace (hid_t space)
  *
  *-----------------------------------------------------------------------*/
 static herr_t
-dump_attr (hid_t attr, const char *attr_name, void __unused__ *op_data)
+dump_attr (hid_t attr, const char *attr_name, void UNUSED *op_data)
 {
 hid_t  attr_id, type, space;
 
@@ -646,7 +646,7 @@ H5G_stat_t statbuf;
  *
  *-----------------------------------------------------------------------*/
 static herr_t
-dump_all (hid_t group, const char *name, void __unused__ *op_data)
+dump_all (hid_t group, const char *name, void UNUSED *op_data)
 {
 hid_t obj;
 char *buf, *tmp;
@@ -1132,7 +1132,7 @@ int i;
  *
  *-----------------------------------------------------------------------*/
 static herr_t
-find_shared_objs(hid_t group, const char *name, void __unused__ *op_data)
+find_shared_objs(hid_t group, const char *name, void UNUSED *op_data)
 {
 hid_t obj, type;
 H5G_stat_t statbuf;
@@ -1271,7 +1271,7 @@ int i, index, curr_arg, display_bb=0, display_all=1;
 int nopts=0, *opts;
 char *buf, name[128], name1[128];
 H5G_stat_t statbuf;
-void __unused__ *op_data;
+void UNUSED *op_data;
 void *edata;
 hid_t (*func)(void*);
 

@@ -1003,7 +1003,7 @@ test_attr_mult_read(void)
 **  attr_op1(): Attribute operator
 ** 
 ****************************************************************/
-int attr_op1(hid_t __unused__ loc_id, const char *name, void *op_data)
+int attr_op1(hid_t UNUSED loc_id, const char *name, void *op_data)
 {
     int *count=(int *)op_data;
     int ret=0;

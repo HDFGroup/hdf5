@@ -380,7 +380,7 @@ H5Z_find(H5Z_filter_t id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_pipeline(H5F_t __unused__ *f, const H5O_pline_t *pline, uintn flags,
+H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, uintn flags,
 	     uintn *filter_mask/*in,out*/, size_t *nbytes/*in,out*/,
 	     size_t *buf_size/*in,out*/, void **buf/*in,out*/)
 {

@@ -560,8 +560,8 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_dtype_decode(H5F_t __unused__ *f, const uint8_t *p,
-		 H5O_shared_t __unused__ *sh)
+H5O_dtype_decode(H5F_t UNUSED *f, const uint8_t *p,
+		 H5O_shared_t UNUSED *sh)
 {
     H5T_t		   *dt = NULL;
 
@@ -602,7 +602,7 @@ H5O_dtype_decode(H5F_t __unused__ *f, const uint8_t *p,
     message in the "raw" disk form.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_dtype_encode(H5F_t __unused__ *f, uint8_t *p, const void *mesg)
+H5O_dtype_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
 {
     const H5T_t		   *dt = (const H5T_t *) mesg;
 
@@ -779,7 +779,7 @@ H5O_dtype_reset(void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_get_share (H5F_t __unused__ *f, const void *_mesg,
+H5O_dtype_get_share (H5F_t UNUSED *f, const void *_mesg,
 		     H5O_shared_t *sh/*out*/)
 {
     const H5T_t	*dt = (const H5T_t *)_mesg;
@@ -816,7 +816,7 @@ H5O_dtype_get_share (H5F_t __unused__ *f, const void *_mesg,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_set_share (H5F_t __unused__ *f, void *_mesg/*in,out*/,
+H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
 		     const H5O_shared_t *sh)
 {
     H5T_t	*dt = (H5T_t *)_mesg;

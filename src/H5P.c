@@ -1962,11 +1962,7 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
  *		If the buffer size is smaller than the entire amount of data
  *		being transfered between application and file, and a type
  *		conversion buffer or background buffer is required then
- *		strip mining will be used.  However, certain restrictions
- *		apply for the size of buffer which can be used for strip
- *		mining.  For instance, when strip mining a 100x200x300
- *		hyperslab of a simple data space the buffer must be large
- *		enough to hold a 1x200x300 slab.
+ *		strip mining will be used.
  *
  *		If TCONV and/or BKG are null pointers then buffers will be
  *		allocated and freed during the data transfer.

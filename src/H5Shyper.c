@@ -113,7 +113,7 @@ static const hssize_t	zero[H5O_LAYOUT_NDIMS]={0};		/* Array of zeros */
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_hyper_init (const struct H5O_layout_t __unused__ *layout,
+H5S_hyper_init (const struct H5O_layout_t UNUSED *layout,
 	       const H5S_t *space, H5S_sel_iter_t *sel_iter)
 {
     FUNC_ENTER (H5S_hyper_init, FAIL);
@@ -150,7 +150,7 @@ H5S_hyper_init (const struct H5O_layout_t __unused__ *layout,
  *-------------------------------------------------------------------------
  */
 static size_t
-H5S_hyper_favail (const H5S_t __unused__ *space,
+H5S_hyper_favail (const H5S_t UNUSED *space,
 		  const H5S_sel_iter_t *sel_iter, size_t max)
 {
     FUNC_ENTER (H5S_hyper_favail, FAIL);

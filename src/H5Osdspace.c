@@ -81,7 +81,7 @@ static intn interface_initialize_g = 0;
         Added a version number and reformatted the message for aligment.
 --------------------------------------------------------------------------*/
 static void *
-H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t __unused__ *sh)
+H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5S_simple_t	*sdim = NULL;/* New simple dimensionality structure */
     void		*ret_value = NULL;
@@ -379,7 +379,7 @@ H5O_sdspace_size(H5F_t *f, const void *mesg)
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_sdspace_debug(H5F_t __unused__ *f, const void *mesg,
+H5O_sdspace_debug(H5F_t UNUSED *f, const void *mesg,
 		  FILE * stream, intn indent, intn fwidth)
 {
     const H5S_simple_t	   *sdim = (const H5S_simple_t *) mesg;

@@ -109,7 +109,7 @@ void some_dummy_func(float x);
  *-------------------------------------------------------------------------
  */
 static void
-fpe_handler(int __unused__ signo)
+fpe_handler(int UNUSED signo)
 {
     SKIPPED();
     puts("    Test skipped due to SIGFPE.");
@@ -139,8 +139,8 @@ fpe_handler(int __unused__ signo)
  */
 #ifdef SHOW_OVERFLOWS
 static herr_t
-overflow_handler(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		 void __unused__ *src_buf, void __unused__ *dst_buf)
+overflow_handler(hid_t UNUSED src_id, hid_t UNUSED dst_id,
+		 void UNUSED *src_buf, void UNUSED *dst_buf)
 {
     noverflows_g++;
     return -1;

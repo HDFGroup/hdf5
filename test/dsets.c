@@ -313,9 +313,9 @@ test_tconv(hid_t file)
  *-------------------------------------------------------------------------
  */
 static size_t
-bogus(unsigned int __unused__ flags, size_t __unused__ cd_nelmts,
-      const unsigned int __unused__ cd_values[], size_t nbytes,
-      size_t __unused__ *buf_size, void __unused__ **buf)
+bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
+      const unsigned int UNUSED cd_values[], size_t nbytes,
+      size_t UNUSED *buf_size, void UNUSED **buf)
 {
     return nbytes;
 }

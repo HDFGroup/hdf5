@@ -528,7 +528,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5S_t *
-H5R_get_region(H5D_t *dset, H5R_type_t __unused__ ref_type, void *_ref)
+H5R_get_region(H5D_t *dset, H5R_type_t UNUSED ref_type, void *_ref)
 {
     H5D_t *dataset;             /* Pointer to dataset to open */
     H5G_entry_t ent;            /* Symbol table entry */

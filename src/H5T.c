@@ -1073,7 +1073,7 @@ H5T_init_interface(void)
  *-------------------------------------------------------------------------
  */
 static intn
-H5T_unlock_cb (void *_dt, const void __unused__ *key)
+H5T_unlock_cb (void *_dt, const void UNUSED *key)
 {
     H5T_t	*dt = (H5T_t *)_dt;
     
@@ -5108,9 +5108,10 @@ H5T_pack(H5T_t *dt)
     FUNC_ENTER(H5T_pack, FAIL);
 
     assert(dt);
-    assert(H5T_STATE_TRANSIENT==dt->state);
 
     if (H5T_COMPOUND == dt->type) {
+	assert(H5T_STATE_TRANSIENT==dt->state);
+	
 	/* Recursively pack the members */
 	for (i=0; i<dt->u.compnd.nmembs; i++) {
 	    if (H5T_pack(dt->u.compnd.memb[i].type) < 0) {
@@ -6266,7 +6267,7 @@ H5T_entof (H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_print_stats(H5T_path_t __unused__ *path, intn __unused__ *nprint/*in,out*/)
+H5T_print_stats(H5T_path_t UNUSED *path, intn UNUSED *nprint/*in,out*/)
 {
 #ifdef H5T_DEBUG
     hsize_t	nbytes;

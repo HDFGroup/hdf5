@@ -61,8 +61,8 @@ const H5O_class_t H5O_PLINE[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_pline_decode(H5F_t __unused__ *f, const uint8_t *p,
-		H5O_shared_t __unused__ *sh)
+H5O_pline_decode(H5F_t UNUSED *f, const uint8_t *p,
+		H5O_shared_t UNUSED *sh)
 {
     H5O_pline_t		*pline = NULL;
     void		*ret_value = NULL;
@@ -165,7 +165,7 @@ H5O_pline_decode(H5F_t __unused__ *f, const uint8_t *p,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_pline_encode (H5F_t __unused__ *f, uint8_t *p/*out*/, const void *mesg)
+H5O_pline_encode (H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
 {
     const H5O_pline_t	*pline = (const H5O_pline_t*)mesg;
     size_t		i, j, name_length;
@@ -317,7 +317,7 @@ H5O_pline_copy (const void *_src, void *_dst/*out*/)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_pline_size (H5F_t __unused__ *f, const void *mesg)
+H5O_pline_size (H5F_t UNUSED *f, const void *mesg)
 {
     const H5O_pline_t	*pline = (const H5O_pline_t*)mesg;
     size_t		i, size, name_len;
@@ -406,7 +406,7 @@ H5O_pline_reset (void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_pline_debug (H5F_t __unused__ *f, const void *mesg, FILE *stream,
+H5O_pline_debug (H5F_t UNUSED *f, const void *mesg, FILE *stream,
 		intn indent, intn fwidth)
 {
     const H5O_pline_t	*pline = (const H5O_pline_t *)mesg;

@@ -36,9 +36,9 @@
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
-#   define __unused__ /*void*/
+#   define UNUSED /*void*/
 #else
-#   define __unused__ __attribute__((unused))
+#   define UNUSED __attribute__((unused))
 #endif
 
 #define FILE_NAME_1	"overhead.h5"
@@ -146,7 +146,7 @@ cleanup (void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-display_error_cb (void __unused__ *client_data)
+display_error_cb (void UNUSED *client_data)
 {
     puts ("*FAILED*");
     H5Eprint (stdout);

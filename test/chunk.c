@@ -25,9 +25,9 @@
 #ifndef HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
-#   define __unused__ /*void*/
+#   define UNUSED /*void*/
 #else
-#   define __unused__ __attribute__((unused))
+#   define UNUSED __attribute__((unused))
 #endif
 
 #define FILE_NAME	"chunk.h5"
@@ -82,9 +82,9 @@ static hid_t	fapl_g = -1;
  *-------------------------------------------------------------------------
  */
 static size_t
-counter (unsigned __unused__ flags, size_t __unused__ cd_nelmts,
-	 const unsigned __unused__ *cd_values, size_t nbytes,
-	 size_t __unused__ *buf_size, void __unused__ **buf)
+counter (unsigned UNUSED flags, size_t UNUSED cd_nelmts,
+	 const unsigned UNUSED *cd_values, size_t nbytes,
+	 size_t UNUSED *buf_size, void UNUSED **buf)
 {
     nio_g += nbytes;
     return nbytes;

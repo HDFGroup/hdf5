@@ -150,10 +150,10 @@
  * we don't.
  */
 #ifdef HAVE_ATTRIBUTE
-#   define __unused__		__attribute__((unused))
+#   define UNUSED		__attribute__((unused))
 #else
 #   define __attribute__(X)	/*void*/
-#   define __unused__		/*void*/
+#   define UNUSED		/*void*/
 #endif
 
 /*

@@ -23,6 +23,7 @@ static hbool_t label_g = FALSE;		/*label compound values?	     */
 static hbool_t string_g = FALSE;	/*print 1-byte numbers as ASCII?     */
 static hbool_t fullname_g = FALSE;	/*print full path names		     */
 static hbool_t recursive_g = FALSE;	/*recursive descent listing	     */
+static hbool_t grp_literal_g = FALSE;	/*list group, not contents	     */
 
 /* Info to pass to the iteration functions */
 typedef struct iter_t {
@@ -84,6 +85,7 @@ usage: %s [OPTIONS] FILE [OBJECTS...]\n\
       -h, -?, --help   Print a usage message and exit\n\
       -d, --dump       Print the values of datasets\n\
       -f, --full       Print full path names instead of base names\n\
+      -g, --group      Show information about a group, not its contents\n\
       -l, --label      Label members of compound datasets\n\
       -r, --recursive  List all groups recursively, avoiding cycles\n\
       -s, --string     Print 1-byte integer datasets as ASCII\n\
@@ -269,7 +271,7 @@ display_string(FILE *stream, const char *s, hbool_t escape_spaces)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-display_native_type(hid_t type, int __unused__ indent)
+display_native_type(hid_t type, int UNUSED indent)
 {
     if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
 	printf("native signed char");
@@ -337,7 +339,7 @@ display_native_type(hid_t type, int __unused__ indent)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-display_ieee_type(hid_t type, int __unused__ indent)
+display_ieee_type(hid_t type, int UNUSED indent)
 {
     if (H5Tequal(type, H5T_IEEE_F32BE)) {
 	printf("IEEE 32-bit big-endian float");
@@ -809,7 +811,7 @@ display_enum_type(hid_t type, int indent)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-display_string_type(hid_t type, int __unused__ indent)
+display_string_type(hid_t type, int UNUSED indent)
 {
     H5T_str_t		pad;
     const char		*pad_s=NULL;
@@ -897,7 +899,7 @@ display_string_type(hid_t type, int __unused__ indent)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-display_reference_type(hid_t type, int __unused__ indent)
+display_reference_type(hid_t type, int UNUSED indent)
 {
     if (H5T_REFERENCE!=H5Tget_class(type)) return FALSE;
 
@@ -1028,7 +1030,7 @@ dump_dataset_values(hid_t dset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-list_attr (hid_t obj, const char *attr_name, void __unused__ *op_data)
+list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 {
     hid_t	attr, space, type, p_type;
     hsize_t	size[64], nelmts=1;
@@ -1170,7 +1172,7 @@ dataset_list1(hid_t dset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-dataset_list2(hid_t dset, const char __unused__ *name)
+dataset_list2(hid_t dset, const char UNUSED *name)
 {
     hid_t		dcpl;		/*dataset creation property list*/
     hid_t		type;		/*data type of dataset		*/
@@ -1331,7 +1333,7 @@ group_list2(hid_t grp, const char *name)
  *-------------------------------------------------------------------------
  */
 static herr_t
-datatype_list2(hid_t type, const char __unused__ *name)
+datatype_list2(hid_t type, const char UNUSED *name)
 {
     if (verbose_g>0) {
 	printf("    %-10s ", "Type:");
@@ -1360,7 +1362,7 @@ datatype_list2(hid_t type, const char __unused__ *name)
  *-------------------------------------------------------------------------
  */
 static herr_t
-ragged_list2(hid_t __unused__ ra, const char __unused__ *name)
+ragged_list2(hid_t UNUSED ra, const char UNUSED *name)
 {
     if (dump_g) {
 	puts("    Data:      Not implemented yet (see values of member");
@@ -1712,6 +1714,8 @@ main (int argc, char *argv[])
 	} else if (!strcmp(argv[argno], "--help")) {
 	    usage(progname);
 	    exit(0);
+	} else if (!strcmp(argv[argno], "--group")) {
+	    grp_literal_g = TRUE;
 	} else if (!strcmp(argv[argno], "--dump")) {
 	    dump_g = TRUE;
 	} else if (!strcmp(argv[argno], "--full")) {
@@ -1763,6 +1767,9 @@ main (int argc, char *argv[])
 		case 'f':	/* --full */
 		    fullname_g = TRUE;
 		    break;
+		case 'g':	/* --group */
+		    grp_literal_g = TRUE;
+		    break;
 		case 'l':	/* --label */
 		    label_g = TRUE;
 		    break;
@@ -1813,14 +1820,21 @@ main (int argc, char *argv[])
      * If there are no arguments then list `/'.
      */
     if (argno>=argc) {
-	H5Gget_objinfo(file, "/", TRUE, &sb);
-	sym_insert(&sb, "/");
-	iter.container = "/";
-	H5Giterate(file, "/", NULL, list, &iter);
+	if (grp_literal_g) {
+	    root = H5Gopen(file, "/");
+	    iter.container = "/";
+	    list(root, "/", &iter);
+	    H5Gclose(root);
+	} else {
+	    H5Gget_objinfo(file, "/", TRUE, &sb);
+	    sym_insert(&sb, "/");
+	    iter.container = "/";
+	    H5Giterate(file, "/", NULL, list, &iter);
+	}
     } else {
 	for (/*void*/; argno<argc; argno++) {
 	    if (H5Gget_objinfo(file, argv[argno], TRUE, &sb)>=0 &&
-		H5G_GROUP==sb.type) {
+		H5G_GROUP==sb.type && !grp_literal_g) {
 		/*
 		 * Specified name is a group. List the complete contents of
 		 * the group.

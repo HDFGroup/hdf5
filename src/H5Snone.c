@@ -79,7 +79,7 @@ H5S_none_select_serialize (const H5S_t *space, uint8_t *buf)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_none_select_deserialize (H5S_t *space, const uint8_t __unused__ *buf)
+H5S_none_select_deserialize (H5S_t *space, const uint8_t UNUSED *buf)
 {
     herr_t ret_value=FAIL;  /* return value */
 

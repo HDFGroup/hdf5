@@ -83,7 +83,7 @@ static intn		interface_initialize_g = 0;
  *	Added a version number at the beginning.
 --------------------------------------------------------------------------*/
 static void *
-H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t __unused__ *sh)
+H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5A_t		*attr = NULL;
     H5S_simple_t	*simple;	/*simple dimensionality information  */
@@ -313,7 +313,7 @@ H5O_attr_copy(const void *_src, void *_dst)
  *	Added padding between message parts for alignment.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_attr_size(H5F_t __unused__ *f, const void *mesg)
+H5O_attr_size(H5F_t UNUSED *f, const void *mesg)
 {
     size_t		ret_value = 0;
     size_t		name_len;

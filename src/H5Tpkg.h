@@ -164,7 +164,7 @@ __DLL__ herr_t H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 __DLL__ herr_t H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			       size_t nelmts, void *_buf, void *bkg);
 __DLL__ herr_t H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-			     size_t nelmts, void *buf, void __unused__ *bkg);
+			     size_t nelmts, void *buf, void *bkg);
 __DLL__ herr_t H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			    size_t nelmts, void *_buf, void *bkg);
 __DLL__ herr_t H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,

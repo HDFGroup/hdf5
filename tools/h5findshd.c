@@ -222,7 +222,7 @@ int i;
  *
  *-----------------------------------------------------------------------*/
 herr_t
-find_shared_objs(hid_t group, char *name, void __unused__ *op_data)
+find_shared_objs(hid_t group, char *name, void UNUSED *op_data)
 {
 hid_t obj, type;
 H5G_stat_t statbuf;
@@ -326,7 +326,7 @@ int i;
  *
  *-----------------------------------------------------------------------*/
 herr_t
-H5findobj_once(hid_t group, char *name, void __unused__ *op_data)
+H5findobj_once(hid_t group, char *name, void UNUSED *op_data)
 {
 hid_t obj, type;
 H5G_stat_t statbuf;

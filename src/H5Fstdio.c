@@ -70,7 +70,7 @@ const H5F_low_class_t H5F_LOW_STDIO_g[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5F_low_t *
-H5F_stdio_open(const char *name, const H5F_access_t __unused__ *access_parms,
+H5F_stdio_open(const char *name, const H5F_access_t UNUSED *access_parms,
 	       uintn flags, H5F_search_t *key/*out*/)
 {
     H5F_low_t		   *lf = NULL;
@@ -147,7 +147,7 @@ H5F_stdio_open(const char *name, const H5F_access_t __unused__ *access_parms,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_stdio_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
+H5F_stdio_close(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms)
 {
     FUNC_ENTER(H5F_stdio_close, FAIL);
 
@@ -182,8 +182,8 @@ H5F_stdio_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_stdio_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
-	       const H5D_transfer_t __unused__ xfer_mode,
+H5F_stdio_read(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms,
+	       const H5D_transfer_t UNUSED xfer_mode,
 	       const haddr_t *addr, size_t size, uint8_t *buf/*out*/)
 {
     size_t		n;
@@ -291,8 +291,8 @@ H5F_stdio_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_stdio_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
-	        const H5D_transfer_t __unused__ xfer_mode,
+H5F_stdio_write(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms,
+	        const H5D_transfer_t UNUSED xfer_mode,
 		const haddr_t *addr, size_t size, const uint8_t *buf)
 {
     uint64_t		mask;
@@ -376,7 +376,7 @@ H5F_stdio_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_stdio_flush(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
+H5F_stdio_flush(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms)
 {
     FUNC_ENTER(H5F_stdio_flush, FAIL);
 

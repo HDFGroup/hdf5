@@ -322,8 +322,8 @@ H5O_close(H5G_entry_t *obj_ent)
  *-------------------------------------------------------------------------
  */
 static H5O_t *
-H5O_load(H5F_t *f, const haddr_t *addr, const void __unused__ *_udata1,
-	 void __unused__ *_udata2)
+H5O_load(H5F_t *f, const haddr_t *addr, const void UNUSED *_udata1,
+	 void UNUSED *_udata2)
 {
     H5O_t	*oh = NULL;
     H5O_t	*ret_value = NULL;

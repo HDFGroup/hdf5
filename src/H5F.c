@@ -1807,7 +1807,6 @@ H5F_close(H5F_t *f)
     }
 #ifdef WIN32
     /*free up the memory for path*/
-
     free(f->shared->key.path);
 #endif
 
@@ -1896,7 +1895,7 @@ H5Fclose(hid_t file_id)
  */
 static herr_t
 H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
-	  const H5F_mprop_t __unused__ *plist)
+	  const H5F_mprop_t UNUSED *plist)
 {
     H5G_t	*mount_point = NULL;	/*mount point group		*/
     H5G_entry_t	*mp_ent = NULL;		/*mount point symbol table entry*/
@@ -2427,7 +2426,7 @@ H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_debug(H5F_t *f, const haddr_t __unused__ *addr, FILE * stream,
+H5F_debug(H5F_t *f, const haddr_t UNUSED *addr, FILE * stream,
 	  intn indent, intn fwidth)
 {
     FUNC_ENTER(H5F_debug, FAIL);

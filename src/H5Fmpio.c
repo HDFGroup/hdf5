@@ -429,7 +429,7 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_mpio_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
+H5F_mpio_close(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms)
 {
     int                     mpierr;
     char                    mpierrmsg[MPI_MAX_ERROR_STRING];
@@ -921,7 +921,7 @@ H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
+H5F_mpio_flush(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms)
 {
     int                     mpierr;
     char                    mpierrmsg[MPI_MAX_ERROR_STRING];

@@ -459,7 +459,7 @@ H5close (void)
  *-------------------------------------------------------------------------
  */
 int
-HDsnprintf(char *buf, size_t __unused__ size, const char *fmt, ...)
+HDsnprintf(char *buf, size_t UNUSED size, const char *fmt, ...)
 {
     int		n;
     va_list	ap;

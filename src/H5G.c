@@ -1426,7 +1426,8 @@ H5G_open_oid(H5G_entry_t *ent)
 
     /* Open the object, making sure it's a group */
     if (NULL==(grp = H5MM_calloc(sizeof(H5G_t)))) {
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
     }
 
     /* Copy over the symbol table information if it's provided */
@@ -1443,12 +1444,12 @@ H5G_open_oid(H5G_entry_t *ent)
     grp->nref = 1;
     ret_value = grp;
 
-done:
+ done:
     if (!ret_value && grp) {
         H5MM_xfree(grp);
     }
     FUNC_LEAVE(ret_value);
-}   /* end H5G_open_oid() */
+}
 
 
 /*-------------------------------------------------------------------------

@@ -80,7 +80,7 @@ static volatile sig_atomic_t timeout_g = 0;
  *-------------------------------------------------------------------------
  */
 static void
-catch_alarm(int __unused__ signum)
+catch_alarm(int UNUSED signum)
 {
     static int	ncalls=0;
 
@@ -110,7 +110,7 @@ catch_alarm(int __unused__ signum)
  *-------------------------------------------------------------------------
  */
 static herr_t
-display_error_cb (void __unused__ *client_data)
+display_error_cb (void UNUSED *client_data)
 {
     putchar('\n');
     H5Eprint (stdout);

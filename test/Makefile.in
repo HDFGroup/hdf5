@@ -30,6 +30,7 @@ LIBHDF5=../src/libhdf5.la
 LIB=libh5test.a
 LIB_SRC=h5test.c
 LIB_OBJ=$(LIB_SRC:.c=.o)
+PUB_LIB=
 
 # Temporary files.  These files are the ones created by setting the
 # HDF5_NOCLEANUP environment variable and running `make test' without

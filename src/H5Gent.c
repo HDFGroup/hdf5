@@ -331,7 +331,7 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_debug(H5F_t __unused__ *f, const H5G_entry_t *ent, FILE * stream,
+H5G_ent_debug(H5F_t UNUSED *f, const H5G_entry_t *ent, FILE * stream,
 	      intn indent, intn fwidth, const haddr_t *heap)
 {
     const char		*lval = NULL;

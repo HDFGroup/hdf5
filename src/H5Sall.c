@@ -75,7 +75,7 @@ const H5S_mconv_t	H5S_ALL_MCONV[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_all_init (const struct H5O_layout_t __unused__ *layout,
+H5S_all_init (const struct H5O_layout_t UNUSED *layout,
 	       const H5S_t *space, H5S_sel_iter_t *sel_iter)
 {
     FUNC_ENTER (H5S_all_init, FAIL);
@@ -519,7 +519,7 @@ H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_all_release (H5S_t __unused__ *space)
+H5S_all_release (H5S_t UNUSED *space)
 {
     FUNC_ENTER (H5S_all_release, FAIL);
 
@@ -624,7 +624,7 @@ H5S_all_select_serialize (const H5S_t *space, uint8_t *buf)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_all_select_deserialize (H5S_t *space, const uint8_t __unused__ *buf)
+H5S_all_select_deserialize (H5S_t *space, const uint8_t UNUSED *buf)
 {
     herr_t ret_value=FAIL;  /* return value */
 

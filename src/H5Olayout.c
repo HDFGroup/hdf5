@@ -64,7 +64,7 @@ static intn interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t __unused__ *sh)
+H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5O_layout_t           *mesg = NULL;
     intn                    i, version;
@@ -261,7 +261,7 @@ H5O_layout_size(H5F_t *f, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_debug(H5F_t __unused__ *f, const void *_mesg, FILE * stream,
+H5O_layout_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
 		 intn indent, intn fwidth)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;

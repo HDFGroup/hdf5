@@ -60,8 +60,8 @@ static intn interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_mtime_decode(H5F_t __unused__ *f, const uint8_t *p,
-		 H5O_shared_t __unused__ *sh)
+H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
+		 H5O_shared_t UNUSED *sh)
 {
     time_t	*mesg, the_time;
     intn	i;
@@ -175,7 +175,7 @@ H5O_mtime_decode(H5F_t __unused__ *f, const uint8_t *p,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_mtime_encode(H5F_t __unused__ *f, uint8_t *p, const void *_mesg)
+H5O_mtime_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 {
     const time_t	*mesg = (const time_t *) _mesg;
     struct tm		*tm;
@@ -258,7 +258,7 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_mtime_size(H5F_t __unused__ *f, const void __unused__ *mesg)
+H5O_mtime_size(H5F_t UNUSED *f, const void UNUSED *mesg)
 {
     FUNC_ENTER(H5O_mtime_size, 0);
 
@@ -286,7 +286,7 @@ H5O_mtime_size(H5F_t __unused__ *f, const void __unused__ *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_mtime_debug(H5F_t __unused__ *f, const void *_mesg, FILE *stream,
+H5O_mtime_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
 		intn indent, intn fwidth)
 {
     const time_t	*mesg = (const time_t *)_mesg;

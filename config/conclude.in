@@ -44,15 +44,23 @@ check test _test: tests
 	   fi;								      \
 	done;
 
+# Make installation directories directories if they don't exist.
+$(libdir):
+	mkdir $@ && chmod 755 $@
+
+$(includedir):
+	mkdir $@ && chmod 755 $@
+
+$(bindir):
+	mkdir $@ && chmod 755 $@
+
 # Install the library, the public header files, and programs.
-install: $(LIB) $(PUB_HDR) $(PROGS)
-	@test -d $(libdir) || mkdir $(libdir)
-	@for f in X $(LIB); do						      \
+install: $(PUB_LIB) $(PUB_HDR) $(PROGS) $(libdir) $(includedir) $(bindir)
+	@for f in X $(PUB_LIB); do					      \
 	   if test $$f != X; then					      \
 	      ($(LT_INSTALL_LIB) $$f $(libdir)/. || exit 1);		      \
 	   fi;								      \
 	done
-	@test -d $(includedir) || mkdir $(includedir)
 	@for f in X $(PUB_HDR); do					      \
 	   if test $$f != X; then					      \
 	      if test -f $$f; then					      \
@@ -63,7 +71,6 @@ install: $(LIB) $(PUB_HDR) $(PROGS)
 	      fi;							      \
 	   fi;								      \
 	done
-	@test -d $(bindir) || mkdir $(bindir)
 	@for f in X $(PROGS); do					      \
 	   if test $$f != X; then					      \
 	     ($(LT_INSTALL_PROG) $$f $(bindir)/. || exit 1);		      \

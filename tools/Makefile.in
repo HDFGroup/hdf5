@@ -26,9 +26,10 @@ LIB=libh5tools.a
 LIBHDF5=../src/libhdf5.la
 PROGS=h5debug h5import h5ls h5repart h5dump @H5TOH4@
 
-# Source and object files for the library.
+# Source and object files for the library; do not install
 LIB_SRC=h5tools.c h5findshd.c
 LIB_OBJ=$(LIB_SRC:.c=.o)
+PUB_LIB=
 
 # Source and object files for programs...
 PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c h5dumputil.c h5toh4.c

@@ -70,9 +70,9 @@ const H5F_low_class_t	H5F_LOW_CORE_g[1] = {{
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5F_core_access(const char __unused__*name,
-		const H5F_access_t __unused__ *access_parms,
-		int __unused__ mode, H5F_search_t __unused__ *key/*out*/)
+H5F_core_access(const char UNUSED*name,
+		const H5F_access_t UNUSED *access_parms,
+		int UNUSED mode, H5F_search_t UNUSED *key/*out*/)
 {
     FUNC_ENTER(H5F_core_access, FAIL);
     FUNC_LEAVE(FALSE);
@@ -101,8 +101,8 @@ H5F_core_access(const char __unused__*name,
  *-------------------------------------------------------------------------
  */
 static H5F_low_t *
-H5F_core_open(const char __unused__ *name,
-	      const H5F_access_t __unused__ *access_parms,
+H5F_core_open(const char UNUSED *name,
+	      const H5F_access_t UNUSED *access_parms,
 	      uintn flags, H5F_search_t *key/*out*/)
 {
     H5F_low_t		   *lf = NULL;
@@ -150,7 +150,7 @@ H5F_core_open(const char __unused__ *name,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_core_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
+H5F_core_close(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms)
 {
     FUNC_ENTER(H5F_core_close, FAIL);
 
@@ -183,8 +183,8 @@ H5F_core_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_core_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
-	      const H5D_transfer_t __unused__ xfer_mode,
+H5F_core_read(H5F_low_t *lf, const H5F_access_t UNUSED *access_parms,
+	      const H5D_transfer_t UNUSED xfer_mode,
 	      const haddr_t *addr, size_t size, uint8_t *buf)
 {
     size_t		n;
@@ -232,7 +232,7 @@ H5F_core_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
  */
 static herr_t
 H5F_core_write(H5F_low_t *lf, const H5F_access_t *access_parms,
-	       const H5D_transfer_t __unused__ xfer_mode,
+	       const H5D_transfer_t UNUSED xfer_mode,
 	       const haddr_t *addr, size_t size, const uint8_t *buf)
 {
     size_t		need_more, na;
