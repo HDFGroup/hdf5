@@ -2457,8 +2457,12 @@ EOF
       # "recompile" just before execution. -BW 20. April 2001
       case "$host" in
       *irix[56]*)
+        # Add in paths just for the HDF5 library stuff...
         pwd=`pwd`;
-	rpath="$rpath:$pwd/.libs:$pwd/../src/.libs";
+        rpath="$rpath:$pwd/.libs:$pwd/../src/.libs:$pwd/../../src";
+
+        # Modify the rpaths so that the compiler can handle the number
+        # of library paths
         finalize_rpath=`echo $rpath | sed -e "s#:# ${wl}-rpath ${wl}#g"`;
         compile_rpath=`echo $rpath | sed -e "s#:# ${wl}-rpath ${wl}#g"`;
         ;;
