@@ -112,6 +112,7 @@ H5Pcreate_simple(intn rank, size_t dims[])
 
     ds = H5MM_xcalloc(1, sizeof(H5P_t));
     ds->type = H5P_SIMPLE;
+    ds->hslab_def=FALSE;    /* no hyperslab defined currently */
 
     /* Initialize rank and dimensions */
     ds->u.simple.rank = rank;
@@ -273,6 +274,12 @@ H5P_close(H5P_t *ds)
         assert("unknown data space type" && 0);
         break;
     }
+    if(ds->hslab_def==TRUE)
+      {
+        H5MM_xfree(ds->h.start);
+        H5MM_xfree(ds->h.count);
+        H5MM_xfree(ds->h.stride);
+      } /* end if */
     H5MM_xfree(ds);
 
     FUNC_LEAVE(SUCCEED);
@@ -883,6 +890,7 @@ H5Pset_space(hid_t sid, intn rank, const size_t *dims)
 
     /* shift out of the previous state to a "simple" dataspace */
     switch (space->type) {
+    case H5P_SCALAR:
     case H5P_SIMPLE:
         /* do nothing */
         break;
@@ -901,6 +909,7 @@ H5Pset_space(hid_t sid, intn rank, const size_t *dims)
     space->type = H5P_SIMPLE;
 
     if (rank == 0) {            /* scalar variable */
+        space->type = H5P_SCALAR;
         space->u.simple.rank = 0;       /* set to scalar rank */
         space->u.simple.dim_flags = 0;  /* no maximum dimensions or dimension permutations */
         if (space->u.simple.size != NULL)
@@ -949,7 +958,93 @@ H5Pset_space(hid_t sid, intn rank, const size_t *dims)
     /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
 }
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pselect_hyperslab
+ PURPOSE
+    Select a hyperslab from a simple dataspace
+ USAGE
+    herr_t H5Pselect_hyperslab(sid, start, count, stride)
+        hid_t sid;            IN: Dataspace object to select hyperslab from
+        const size_t *start;  IN: Starting location for hyperslab to select
+        const size_t *count;  IN: Number of elements in hyperslab
+        const size_t *stride; IN: Packing of elements in hyperslab
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+        This function selects a hyperslab from a simple dataspace.  The stride
+    array may be used to sub-sample the hyperslab chosen, a value of 1 in each
+    position of the stride array selects contiguous elements in the array,
+    a value of 2 selects every other element, etc.  If the stride parameter is
+    set to NULL, a contiguous hyperslab is chosen.  The values in the start and
+    count arrays may be negative, to allow for selecting hyperslabs in chunked
+    datasets which extend in arbitrary directions.
+--------------------------------------------------------------------------*/
+herr_t
+H5Pselect_hyperslab(hid_t sid, const size_t *start, const size_t *count, const size_t *stride)
+{
+    H5P_t                  *space = NULL;       /* dataspace to modify */
+    size_t                 *tmp_stride=NULL;    /* temp. copy of stride */
+    intn                    u;  /* local counting variable */
+    herr_t                  ret_value = SUCCEED;
 
+    FUNC_ENTER(H5Pselect_hyperslab, FAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+
+    /* Get the object */
+    if (H5_DATASPACE != H5A_group(sid) || (space = H5A_object(sid)) == NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
+    if (start == NULL || count==NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid hyperslab selected");
+
+    /* We can't modify other types of dataspaces currently, so error out */
+    if (space->type!=H5P_SIMPLE)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,"unknown dataspace type");
+
+    /* Set up stride values for later use */
+    tmp_stride= H5MM_xmalloc(space->u.simple.rank*sizeof(size_t));
+    if(stride==NULL)
+        HDmemset(tmp_stride,1,space->u.simple.rank);
+    else
+        HDmemcpy(tmp_stride,stride,space->u.simple.rank);
+
+    /* Allocate space for the hyperslab information */
+    space->h.start= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
+    space->h.count= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
+    space->h.stride= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
+
+    /* Build hyperslab */
+    for(u=0; u<space->u.simple.rank; u++)
+      {
+        /* Range checking arguments */
+        if(start[u]+(count[u]*tmp_stride[u])<=0 || start[u]+(count[u]*tmp_stride[u])>=space->u.simple.size[u])
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,"hyperslab bounds out of range");
+        
+        /* copy "normalized" (i.e. strictly increasing) values for hyperslab parameters */
+        space->h.start[u]=MIN(start[u],start[u]+((ABS(count[u])-1)*tmp_stride[u]));
+        space->h.count[u]=ABS(count[u]);
+        space->h.stride[u]=ABS(tmp_stride[u]);
+      } /* end for */
+      space->hslab_def=TRUE;
+
+done:
+    if (ret_value == FAIL) {    /* Error condition cleanup */
+        /* Free hyperslab arrays if we encounter an error */
+        if(space->h.start!=NULL)
+            H5MM_xfree(space->h.start);
+        if(space->h.count!=NULL)
+            H5MM_xfree(space->h.count);
+        if(space->h.stride!=NULL)
+            H5MM_xfree(space->h.stride);
+    }                           /* end if */
+
+    /* Normal function cleanup */
+    H5MM_xfree(tmp_stride);
+    FUNC_LEAVE(ret_value);
+}
 
 /*-------------------------------------------------------------------------
  * Function:	H5P_find

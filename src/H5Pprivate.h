@@ -29,6 +29,12 @@
 #define H5P_VALID_MAX   0x01
 #define H5P_VALID_PERM  0x02
 
+typedef struct H5P_hyperslab_t {
+    size_t      *start;                 /* Location of start of hyperslab */
+    size_t      *count;                 /* Number of elements in hyperslab */
+    size_t      *stride;                /* Packing of values of hyperslab */
+} H5P_hyperslab_t;
+
 typedef struct H5P_simple_t {
     intn        rank;                   /*number of dimensions               */
     intn        dim_flags;              /*dimension flags                    */
@@ -42,6 +48,8 @@ typedef struct {
     union {
         H5P_simple_t    simple;         /*simple dimensionality information  */
     } u;
+    uintn hslab_def;                    /* Whether the hyperslab is defined */
+    H5P_hyperslab_t h;                  /* Hyperslab information */
 } H5P_t;
 
 /*
