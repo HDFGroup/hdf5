@@ -29,7 +29,7 @@
 #ifndef _H5ACprivate_H
 #define _H5ACprivate_H
 
-#include "H5ACpublic.h"		/*public prototypes			     */
+#include "H5ACpublic.h"		/*public prototypes			*/
 
 /* Pivate headers needed by this header */
 #include "H5private.h"		/* Generic Functions			*/
@@ -101,6 +101,20 @@ typedef struct H5AC_info_t {
 } H5AC_info_t;
 typedef H5AC_info_t *H5AC_info_ptr_t;   /* Typedef for free lists */
 
+/*===----------------------------------------------------------------------===
+ *                             Protect Types
+ *===----------------------------------------------------------------------===
+ *
+ * These are for the wrapper functions to H5AC_protect. They specify what
+ * type of operation you're planning on doing to the metadata. The
+ * Flexible Parallel HDF5 locking can then act accordingly.
+ */
+
+typedef enum H5AC_protect_t {
+    H5AC_WRITE,                 /* Protect object for writing                */
+    H5AC_READ                   /* Protect object for reading                */
+} H5AC_protect_t;
+
 /* Typedef for metadata cache (defined in H5AC.c) */
 typedef struct H5AC_t H5AC_t;
 
@@ -135,12 +149,11 @@ H5_DLL herr_t H5AC_init(void);
 H5_DLL herr_t H5AC_create(H5F_t *f, int size_hint);
 H5_DLL herr_t H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 			void *thing);
-H5_DLL void *H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
-			   const void *udata1, void *udata2);
+H5_DLL void *H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
+                          haddr_t addr, const void *udata1, void *udata2,
+                          H5AC_protect_t rw);
 H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 			      void *thing, hbool_t deleted);
-H5_DLL void *H5AC_find(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
-        haddr_t addr, const void *udata1, void *udata2);
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 			  unsigned flags);
 H5_DLL herr_t H5AC_rename(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,

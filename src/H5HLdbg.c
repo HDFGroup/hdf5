@@ -30,6 +30,10 @@
 #include "H5Iprivate.h"		/* ID Functions		                */
 #include "H5MMprivate.h"	/* Memory management			*/
 
+/* Interface initialization */
+static int interface_initialize_g = 0;
+#define INTERFACE_INIT NULL
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5HL_debug
@@ -73,7 +77,7 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
     fprintf(stream, "%*sLocal Heap...\n", indent, "");
     fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
 	    "Dirty:",
-	    (int) (h->cache_info.is_dirty));
+	    (int) (h->cache_info.dirty));
     fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Header size (in bytes):",
 	    (unsigned long) H5HL_SIZEOF_HDR(f));

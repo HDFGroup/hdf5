@@ -3415,7 +3415,6 @@ H5T_set_size(H5T_t *dt, size_t size)
                 if(size<dt->shared->size) {
                     int         num_membs;
                     unsigned    i, max_index=0;
-                    H5T_t       *memb_type;
                     size_t      memb_offset, max_offset=0;
                     size_t      max_size;
 
