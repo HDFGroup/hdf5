@@ -89,8 +89,9 @@ main(void)
     fflush(stdout);
     fflush(stderr);
     _exit(0);
+    return 0;
 
  error:
     _exit(1);
+    return 1;
 }
-
