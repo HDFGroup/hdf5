@@ -194,6 +194,7 @@ struct H5T_t {
     H5T_class_t		type;	/*which class of type is this?		     */
     size_t		size;	/*total size of an instance of this type     */
     hbool_t		force_conv;/* Set if this type always needs to be converted and H5T_conv_noop cannot be called */
+    hbool_t             packed; /*whether a compound type is packed          */
     struct H5T_t	*parent;/*parent type for derived datatypes	     */
     union {
         H5T_atomic_t	atomic; /* an atomic datatype              */

@@ -325,7 +325,9 @@ H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)
     /* Insert */
     if (H5T_insert(parent, name, offset, member) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "unable to insert member");
-    
+ 
+    parent->packed = FALSE;
+
 done:
     FUNC_LEAVE_API(ret_value);
 }
@@ -358,12 +360,18 @@ H5Tpack(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
+    /* If datatype has been packed, skip this step and go to done */
+    if(dt->packed == TRUE)
+        HGOTO_DONE(ret_value);
     if (H5T_STATE_TRANSIENT!=dt->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "data type is read-only");
 
     /* Pack */
     if (H5T_pack(dt) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack compound data type");
+   
+    /* Indicate datatype has been packed */ 
+    dt->packed = TRUE;
     
 done:
     FUNC_LEAVE_API(ret_value);
@@ -484,8 +492,6 @@ H5T_pack(H5T_t *dt)
     assert(dt);
 
     if (H5T_COMPOUND == dt->type) {
-	assert(H5T_STATE_TRANSIENT==dt->state);
-	
 	/* Recursively pack the members */
 	for (i=0; i<dt->u.compnd.nmembs; i++) {
 	    if (H5T_pack(dt->u.compnd.memb[i].type) < 0)
