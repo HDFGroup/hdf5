@@ -367,6 +367,8 @@ int main(int argc, char **argv)
     int mpi_size, mpi_rank;				/* mpi variables */
     H5Ptest_param_t ndsets_params, ngroups_params;
     H5Ptest_param_t collngroups_params;
+    int		Summary = 0;
+    int		CleanUp = 1;
 
     /* Un-buffer the stdout and stderr */
     setbuf(stderr, NULL);
@@ -383,28 +385,6 @@ int main(int argc, char **argv)
     }
     H5open();
     h5_show_hostname();
-
-    fapl = H5Pcreate (H5P_FILE_ACCESS);
-    H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
-
-    if (parse_options(argc, argv) != 0){
-	if (MAINPROCESS)
-	    usage();
-	goto finish;
-    }
-
-    if (facc_type == FACC_MPIPOSIX && MAINPROCESS){
-	printf("===================================\n"
-	       "   Using MPIPOSIX driver\n"
-	       "===================================\n");
-    }
-
-    {
-    int                     Summary = 0;
-    int                     CleanUp = 1;
-
-
-
 
     /* Initialize testing framework */
     TestInit();
@@ -483,16 +463,34 @@ int main(int argc, char **argv)
     AddTest("coll_chunked4", coll_chunk4,NULL,
 	    "collective to independent chunk io",filenames[12]);
 
+    /* Display testing information */
+    TestInfo(argv[0]);
+
+    /* setup file access property list */
+    fapl = H5Pcreate (H5P_FILE_ACCESS);
+    H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
+
+    /* Parse command line arguments */
+    TestParseCmdLine(argc, argv, &Summary, &CleanUp, parse_options);
+
+    /*
+    if (parse_options(argc, argv) != 0){
+	if (MAINPROCESS)
+	    usage();
+	goto finish;
+    }
+    */
+
+    if (facc_type == FACC_MPIPOSIX && MAINPROCESS){
+	printf("===================================\n"
+	       "   Using MPIPOSIX driver\n"
+	       "===================================\n");
+    }
+
     /* Argument requests */
     if (dobig && sizeof(MPI_Offset)>4){
 	SetTest("bigdataset", ONLYTEST);
     }
-
-    /* Display testing information */
-    TestInfo(argv[0]);
-
-    /* Parse command line arguments */
-/*    TestParseCmdLine(argc,argv,&Summary,&CleanUp); */
 
     /* Perform requested testing */
     PerformTests();
@@ -507,7 +505,6 @@ int main(int argc, char **argv)
 
     nerrors += GetTestNumErrs();
 
-    }
 
     if (!(dowrite || doread || ndatasets || ngroups || docompact || doindependent || dobig )){
 	usage();
