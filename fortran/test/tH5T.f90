@@ -65,7 +65,7 @@
      CHARACTER*256 :: member_name 
      INTEGER :: len ! Lenght of the name of the compound datatype member 
      LOGICAL :: flag
-     INTEGER(SIZE_T), DIMENSION(3) :: array_dims=(/2,3,4/)
+     INTEGER(HSIZE_T), DIMENSION(3) :: array_dims=(/2,3,4/)
      INTEGER :: elements = 24 ! number of elements in the array_dims array.
      INTEGER(SIZE_T) :: sizechar
      !
