@@ -28,7 +28,7 @@ LIBTOOLS=../tools/lib/libh5tools.la
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.
 TEST_PROGS_PARA=h5perf
-TEST_PROGS=iopipe chunk overhead zip_perf
+TEST_PROGS=iopipe chunk overhead zip_perf perf_meta
 
 PUB_PROGS=h5perf
 
@@ -44,7 +44,7 @@ PIO_PERF_OBJ=$(PIO_PERF_SRC:.c=.lo)
 
 TEST_SRC_PARA=$(PIO_PERF_SRC)
 
-TEST_SRC=iopipe.c chunk.c overhead.c zip_perf.c $(TEST_SRC_PARA)
+TEST_SRC=iopipe.c chunk.c overhead.c zip_perf.c perf_meta.c $(TEST_SRC_PARA)
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
 ## How to build the programs... they all depend on the hdf5 library
@@ -74,5 +74,9 @@ overhead: overhead.lo
 zip_perf: zip_perf.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ zip_perf.lo $(LIBH5TEST) \
 	$(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+perf_meta: perf_meta.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ perf_meta.lo $(LIBH5TEST) $(LIBHDF5) \
+	$(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

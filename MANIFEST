@@ -807,6 +807,7 @@
 ./perform/mpi-perf.c
 ./perform/overhead.c
 ./perform/perf.c
+./perform/perf_meta.c
 ./perform/pio_engine.c
 ./perform/pio_perf.c
 ./perform/pio_perf.h
