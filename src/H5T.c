@@ -6348,7 +6348,7 @@ char *
 H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/, size_t size)
 {
     int	lt, md, rt;		/*indices for binary search	*/
-    int	cmp;			/*comparison result		*/
+    int	cmp=0;			/*comparison result		*/
     
     FUNC_ENTER(H5T_enum_nameof, NULL);
 
@@ -6358,14 +6358,16 @@ H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/, size_t size)
     assert(name || 0==size);
     if (name && size>0) *name = '\0';
 
+    /* Sanity check */
+    if (dt->u.enumer.nmembs == 0) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL,
+		      "datatype has no members");
+    }
+
     /* Do a binary search over the values to find the correct one */
     H5T_sort_value(dt, NULL);
     lt = 0;
     rt = dt->u.enumer.nmembs;
-    if (rt == 0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL,
-		      "datatype has no members");
-    }
     md = -1;
 
     while (lt<rt) {
@@ -6423,7 +6425,7 @@ herr_t
 H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
 {
     int	lt, md, rt;		/*indices for binary search	*/
-    int	cmp;			/*comparison result		*/
+    int	cmp=0;			/*comparison result		*/
     
     FUNC_ENTER(H5T_enum_valueof, FAIL);
 
@@ -6432,14 +6434,16 @@ H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
     assert(name && *name);
     assert(value);
 
+    /* Sanity check */
+    if (dt->u.enumer.nmembs == 0) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL,
+		      "datatype has no members");
+    }
+
     /* Do a binary search over the names to find the correct one */
     H5T_sort_name(dt, NULL);
     lt = 0;
     rt = dt->u.enumer.nmembs;
-    if (rt == 0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL,
-		      "datatype has no members");
-    }
     md = -1;
 
     while (lt<rt) {

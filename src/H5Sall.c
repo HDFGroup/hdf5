@@ -201,7 +201,7 @@ H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
      */
     H5_CHECK_OVERFLOW(actual_bytes,hsize_t,size_t);
     if (H5F_seq_read(f, dxpl_id, layout, pline, fill, efl, file_space,
-            elmt_size, (size_t)actual_bytes, buf_off, buf/*out*/)<0) {
+            elmt_size, actual_bytes, buf_off, buf/*out*/)<0) {
         HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
     }
 
@@ -263,7 +263,7 @@ H5S_all_fscat (H5F_t *f, const struct H5O_layout_t *layout,
      */
     H5_CHECK_OVERFLOW(actual_bytes,hsize_t,size_t);
     if (H5F_seq_write(f, dxpl_id, layout, pline, fill, efl, file_space,
-            elmt_size, (size_t)actual_bytes, buf_off, buf/*out*/)<0) {
+            elmt_size, actual_bytes, buf_off, buf/*out*/)<0) {
         HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
     }
 

@@ -328,7 +328,7 @@ H5FL_reg_alloc(H5FL_reg_head_t *head, unsigned clear)
     } /* end if */
     /* Otherwise allocate a node */
     else {
-        if (NULL==(new_obj = H5FL_malloc(sizeof(H5FL_reg_node_t)+head->size)))
+        if (NULL==(new_obj = H5FL_malloc((hsize_t)(sizeof(H5FL_reg_node_t)+head->size))))
             HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
 #ifdef H5FL_DEBUG
@@ -599,7 +599,7 @@ H5FL_blk_find_list(H5FL_blk_node_t **head, hsize_t size)
  *-------------------------------------------------------------------------
  */
 static H5FL_blk_node_t *
-H5FL_blk_create_list(H5FL_blk_node_t **head, hsize_t size)
+H5FL_blk_create_list(H5FL_blk_node_t **head, size_t size)
 {
     H5FL_blk_node_t *temp;  /* Temp. pointer to node in the list */
     H5FL_blk_node_t *ret_value=NULL;
@@ -798,7 +798,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
     temp=(H5FL_blk_list_t *)((unsigned char *)block-sizeof(H5FL_blk_list_t));
 
     /* check if there is a free list for native blocks of this size */
-    if((free_list=H5FL_blk_find_list(&(head->head),temp->size))==NULL) {
+    if((free_list=H5FL_blk_find_list(&(head->head),(hsize_t)temp->size))==NULL) {
         /* No free list available, create a new list node and insert it to the queue */
         free_list=H5FL_blk_create_list(&(head->head),temp->size);
     } /* end if */

@@ -415,7 +415,7 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
             /* Free the object regardless of reference count */
             if (grp_ptr->free_func && (grp_ptr->free_func)(cur->obj_ptr)<0) {
                 if (force) {
-#if H5I_DEBUG
+#ifdef H5I_DEBUG
                     if (H5DEBUG(I)) {
                     fprintf(H5DEBUG(I), "H5I: free grp=%d obj=0x%08lx "
                         "failure ignored\n", (int)grp,

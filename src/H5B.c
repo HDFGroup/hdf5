@@ -2088,8 +2088,8 @@ H5B_copy(H5F_t *f, const H5B_t *old_bt)
 
     if (NULL==(ret_value->page=H5FL_BLK_ALLOC(page,size,0)) ||
             NULL==(ret_value->native=H5FL_BLK_ALLOC(native_block,total_native_keysize,0)) ||
-            NULL==(ret_value->child=H5FL_ARR_ALLOC(haddr_t,nkeys,0)) ||
-            NULL==(ret_value->key=H5FL_ARR_ALLOC(H5B_key_t,(nkeys+1),0))) {
+            NULL==(ret_value->child=H5FL_ARR_ALLOC(haddr_t,(hsize_t)nkeys,0)) ||
+            NULL==(ret_value->key=H5FL_ARR_ALLOC(H5B_key_t,(hsize_t)(nkeys+1),0))) {
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed for B-tree root node");
     }
