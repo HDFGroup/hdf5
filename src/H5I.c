@@ -760,44 +760,48 @@ H5I_remove(hid_t id)
 
     /* Check arguments */
     grp = H5I_GROUP(id);
-    if (grp <= H5I_BADID || grp >= H5I_NGROUPS) HGOTO_DONE(NULL);
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS)
+        HGOTO_DONE(NULL);
     grp_ptr = H5I_id_group_list_g[grp];
-    if (grp_ptr == NULL || grp_ptr->count <= 0) HGOTO_DONE(NULL);
+    if (grp_ptr == NULL || grp_ptr->count <= 0)
+        HGOTO_DONE(NULL);
 
     /* Get the bucket in which the ID is located */
     hash_loc = (uintn) H5I_LOC(id, grp_ptr->hash_size);
     curr_id = grp_ptr->id_list[hash_loc];
-    if (curr_id == NULL) HGOTO_DONE(NULL);
+    if (curr_id == NULL)
+        HGOTO_DONE(NULL);
 
     last_id = NULL;
     while (curr_id != NULL) {
-	if (curr_id->id == id) break;
-	last_id = curr_id;
-	curr_id = curr_id->next;
-    }
-
-    if (curr_id != NULL) {
-	if (last_id == NULL) {
-	    /* ID is the first in the chain */
-	    grp_ptr->id_list[hash_loc] = curr_id->next;
-	} else {
-	    last_id->next = curr_id->next;
-	}
-	ret_value = curr_id->obj_ptr;
-	H5FL_FREE(H5I_id_info_t,curr_id);
-    } else {
-	/* couldn't find the ID in the proper place */
-	HGOTO_DONE(NULL);
+        if (curr_id->id == id)
+            break;
+        last_id = curr_id;
+        curr_id = curr_id->next;
     }
 
 #ifdef IDS_ARE_CACHED
     /* Delete object from cache */
     for (i = 0; i < ID_CACHE_SIZE; i++)
-	if (H5I_cache_g[i] && H5I_cache_g[i]->id == id) {
-	    H5I_cache_g[i] = NULL;
-	    break; /* we assume there is only one instance in the cache */
-	}
+        if (H5I_cache_g[i] && H5I_cache_g[i]->id == id) {
+            H5I_cache_g[i] = NULL;
+            break; /* we assume there is only one instance in the cache */
+        }
 #endif /* IDS_ARE_CACHED */
+
+    if (curr_id != NULL) {
+        if (last_id == NULL) {
+            /* ID is the first in the chain */
+            grp_ptr->id_list[hash_loc] = curr_id->next;
+        } else {
+            last_id->next = curr_id->next;
+        }
+        ret_value = curr_id->obj_ptr;
+        H5FL_FREE(H5I_id_info_t,curr_id);
+    } else {
+        /* couldn't find the ID in the proper place */
+        HGOTO_DONE(NULL);
+    }
 
     /* Decrement the number of IDs in the group */
     (grp_ptr->ids)--;
