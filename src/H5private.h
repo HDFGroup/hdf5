@@ -600,6 +600,17 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDfree(M)		free(M)
 #define HDfreopen(S,M,F)	freopen(S,M,F)
 #define HDfrexp(X,N)		frexp(X,N)
+/* Check for Cray-specific 'frexpf()' and 'frexpl()' routines */
+#ifdef H5_HAVE_FREXPF
+#define HDfrexpf(X,N)		frexpf(X,N)
+#else /* H5_HAVE_FREXPF */
+#define HDfrexpf(X,N)		frexp(X,N)
+#endif /* H5_HAVE_FREXPF */
+#ifdef H5_HAVE_FREXPL
+#define HDfrexpl(X,N)		frexpl(X,N)
+#else /* H5_HAVE_FREXPL */
+#define HDfrexpl(X,N)		frexp(X,N)
+#endif /* H5_HAVE_FREXPL */
 /* fscanf() variable arguments */
 #define HDfseek(F,O,W)		fseek(F,O,W)
 #define HDfsetpos(F,P)		fsetpos(F,P)

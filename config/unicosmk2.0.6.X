@@ -136,3 +136,7 @@ esac
 # long'.  For instance, if the format would be `%lld' then set it to
 # `ll' or if the format would be `%qd' set it to `q'.
 #hdf5_cv_printf_ll=${hdf5_cv_printf_ll='ll'}
+
+# Hard set the flag to indicate that converting denormalized floating-point
+# values doesn't work.
+hdf5_cv_convert_denormal_float=${hdf5_cv_convert_denormal_float='no'}
