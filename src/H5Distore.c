@@ -914,7 +914,6 @@ H5F_istore_flush_entry(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache,
     hid_t dxpl_id, H5F_rdcc_ent_t *ent, hbool_t reset)
 {
     herr_t		ret_value=SUCCEED;	/*return value			*/
-    H5F_istore_ud1_t 	udata;		/*pass through B-tree		*/
     unsigned		u;		/*counters			*/
     void		*buf=NULL;	/*temporary buffer		*/
     size_t		alloc;		/*bytes allocated for BUF	*/
@@ -925,10 +924,11 @@ H5F_istore_flush_entry(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache,
     assert(f);
     assert(ent);
     assert(!ent->locked);
-    HDmemset(&udata, 0, sizeof(H5F_istore_ud1_t));
 
     buf = ent->chunk;
     if (ent->dirty) {
+        H5F_istore_ud1_t 	udata;		/*pass through B-tree		*/
+
         udata.mesg = *(ent->layout);
         udata.key.filter_mask = 0;
         udata.addr = HADDR_UNDEF;
@@ -1355,7 +1355,6 @@ H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, con
     H5F_rdcc_t		*rdcc = &(f->shared->rdcc);/*raw data chunk cache*/
     H5F_rdcc_ent_t	*ent = NULL;		/*cache entry		*/
     unsigned		u;			/*counters		*/
-    H5F_istore_ud1_t	udata;			/*B-tree pass-through	*/
     size_t		chunk_size=0;		/*size of a chunk	*/
     herr_t		status;			/*func return status	*/
     void		*chunk=NULL;		/*the file chunk	*/
@@ -1364,7 +1363,6 @@ H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, con
     FUNC_ENTER_NOAPI_NOINIT(H5F_istore_lock);
     
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
-    HDmemset(&udata, 0, sizeof(H5F_istore_ud1_t));
 
     if (rdcc->nslots>0) {
         for (u=0, temp_idx=0; u<layout->ndims; u++) {
@@ -1410,6 +1408,7 @@ H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, con
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk");
         
     } else {
+        H5F_istore_ud1_t	udata;			/*B-tree pass-through	*/
 
         /*
          * Not in the cache.  Read it from the file and count this as a miss
