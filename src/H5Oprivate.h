@@ -152,13 +152,7 @@ typedef struct H5O_bogus_t {
 typedef struct H5O_pline_t {
     size_t	nfilters;		/*num filters defined		     */
     size_t	nalloc;			/*num elements in `filter' array     */
-    struct {
-        H5Z_filter_t	id;		/*filter identification number	     */
-        unsigned	flags;		/*defn and invocation flags	     */
-        char		*name;		/*optional filter name		     */
-        size_t		cd_nelmts;	/*number of elements in cd_values[]  */
-        unsigned	*cd_values;	/*client data values		     */
-    } *filter;				/*array of filters		     */
+    H5Z_filter_info_t *filter;		/*array of filters		     */
 } H5O_pline_t;
 
 /*
