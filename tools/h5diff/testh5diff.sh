@@ -83,7 +83,6 @@ TOOLTEST() {
 #echo $pmode
     if test -n "$pmode"; then
 	RUNCMD=$RUNPARALLEL
-	sleep 2
     else
 	RUNCMD=$RUNSERIAL
     fi
