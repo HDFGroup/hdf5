@@ -156,17 +156,17 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_SLINK,		"Symbolic link error"},
 
     /* Datatype conversion errors */
-    {H5E_CANTCONVERT,		"Can't convert datatypes"},
-    {H5E_BADSIZE,		"Bad size for object"},
+    {H5E_CANTCONVERT,	"Can't convert datatypes"},
+    {H5E_BADSIZE,	"Bad size for object"},
 
     /* Dataspace errors */
-    {H5E_CANTCLIP,		"Can't clip hyperslab region"},
-    {H5E_CANTCOUNT,		"Can't count elements"},
+    {H5E_CANTCLIP,	"Can't clip hyperslab region"},
+    {H5E_CANTCOUNT,	"Can't count elements"},
 
     /* Property list errors */
-    {H5E_CANTGET,		"Can't get value"},
-    {H5E_CANTSET,		"Can't set value"},
-    {H5E_DUPCLASS,		"Duplicate class name in parent class"},
+    {H5E_CANTGET,	"Can't get value"},
+    {H5E_CANTSET,	"Can't set value"},
+    {H5E_DUPCLASS,	"Duplicate class name in parent class"},
 
     /* Parallel MPI errors */
     {H5E_MPI,		"Some MPI function failed"},
@@ -177,7 +177,14 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_CANTRECV,      "Can't receive messages from processes"},
     {H5E_CANTSENDMDATA, "Can't send metadata message"},
     {H5E_CANTCHANGE,    "Can't register change with server"},
-    {H5E_CANTALLOC,     "Can't allocate from file"}
+    {H5E_CANTALLOC,     "Can't allocate from file"},
+
+    /* I/O pipeline errors */
+    {H5E_NOFILTER,      "Requested filter is not available"},
+    {H5E_CALLBACK,      "Callback failed"},
+    {H5E_CANAPPLY,      "Error from filter \"can apply\" callback"},
+    {H5E_SETLOCAL,      "Error from filter \"set local\" callback"}
+
 };
 
 /* Interface initialization? */

@@ -208,7 +208,14 @@ typedef enum H5E_minor_t {
     H5E_CANTRECV,               /*can't receive messages from processes      */
     H5E_CANTSENDMDATA,          /*can't send metadata message                */
     H5E_CANTCHANGE,             /*can't register change on server            */
-    H5E_CANTALLOC               /*can't allocate from file                   */
+    H5E_CANTALLOC,              /*can't allocate from file                   */
+
+    /* I/O pipeline errors */
+    H5E_NOFILTER,               /*requested filter is not available          */
+    H5E_CALLBACK,               /*callback failed                            */
+    H5E_CANAPPLY,               /*error from filter "can apply" callback     */
+    H5E_SETLOCAL                /*error from filter "set local" callback     */
+
 } H5E_minor_t;
 
 /* Information about an error */
