@@ -3,7 +3,8 @@
 		    ----------------------
 
 
-I.    Introduction to OpenMP
+1. Introduction to OpenMP
+-------------------------
 
     - For shared-memory parallelism
     - A combination of library and directives
@@ -12,34 +13,57 @@ I.    Introduction to OpenMP
     - Information at http://www.openmp.org and 
       http://www.sgi.com/software/openmp
 
-II.   Programming(SGI MPISpro compiler and C language)
+2. Programming(SGI MPISpro compiler and C language)
+---------------------------------------------------
 
     - Turn on compiler '-mp' option
     - Include 'omp.h' library in program
     - Use library functions, directives and environment variables
 
 
-III.  Sample Programs
+3. Sample Programs
+------------------
 
-Attached are four OpenMP-HDF5 test programs.  The purpose of these tests is to 
-experience OpenMP parallelism with HDF5.  All the tests were run on modi4 with 
-SGI MPISpro compiler(cc) and make.   The first two are the working 
-program.  The two following only work occasionally.  I modify them directly 
-from hdf5/examples/h5_write.c.  If you want to try them out, the quickest way 
-is 
-  1.  have your hdf5 program compiled, 
-  2.  go to hdf5/examples directory,
-  3.  add -mp option to the end of the CFLAGS list in the Makefile.  If you 
+Appendix A contains four OpenMP-HDF5 test programs.  (They are derived from
+the hdf5/examples/h5_write.c).  The purpose of these program is to 
+test OpenMP parallelism with the HDF5 library.
+
+All tests were run on modi4 with SGI MPISpro compiler(cc) and make.
+Program 1 and Program 2 are the working programs.  Program 3 and Program 4
+work occasionally due to racing conditions.
+Follow the following steps to try the programs.
+
+  a.  have your hdf5 library compiled, 
+  b.  go to hdf5/examples directory,
+  c.  add -mp option to the end of the CFLAGS list in the Makefile.  If you 
       have the compiled program in another directory, you should go to the 
       examples in that directory.
-  4.  modify the hdf5/examples/h5_write.c according to the program attached 
+  d.  modify the hdf5/examples/h5_write.c according to the program attached 
       here.  
-  5.  use hdf5/tools/h5dump to examine the output file.
+  e.  use hdf5/tools/h5dump to examine the output file.
 
 
+4. Conclusion
+-------------
 
-                I.   First Program
--------------------------------------------------------------------------------
+It is not safe to invoke HDF5 library calls via multiple threads in an
+OpenMP program.  But if one serializes HDF5 calls as illustrated in Program 1,
+the HDF5 library works correctly with the OpenMP programs.
+
+The serialization of HDF5 calls will slow down the OpenMP program unnecessarily.
+Future study is needed to check possible ways to "un-seralize" the HDF5 calls.
+One possibility is that the HDF5 library has a beta-version of Thread-safe
+implmentation though it is for Pthreads environment.  One can check on the
+feasibility of running OpenMP programs with this version of HDF5 Thread-safe
+library.
+
+
+=======
+
+Appendix A
+-------------------------------------------------------------------------
+                Program 1
+-------------------------------------------------------------------------
 /*  
  *  This example writes 64 datasets to a HDF5 file, using multiple threads
  *  (OpenMP).  Each thread grab the lock while it tries to call HDF5 functions
@@ -169,8 +193,9 @@ void CalcWriteData(hid_t fid, hid_t dataspace, hid_t datatype)
 
 
 
-		II.  Second Program
--------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+		Program 2
+-------------------------------------------------------------------------
 /*  
  *  This example compute the element values of an array in parallel 
  *  by two threads.  Then write this dataset into HDF file.  This is
@@ -261,8 +286,9 @@ main (void)
 
 
 
-		III.  Third Program
--------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+		Program 3
+-------------------------------------------------------------------------
 /*  
  *  This example create two threads.  Each thread writes  a dataset to 
  *  the HDF5 file in parallel.  This program only works occasionally.
@@ -356,8 +382,9 @@ void writeData(int id, hid_t file, hid_t dataspace, hid_t datatype, char *dname)
 }
 
 
-		IV.  Fourth Program
--------------------------------------------------------------------------------
+-------------------------------------------------------------------------
+		Program 4
+-------------------------------------------------------------------------
 /*  
  * This example compute and write two datasets into HDF file in
  * parallel.  It also only works occasionally.      
@@ -437,6 +464,6 @@ main (void)
 }     
 
 ---
-Updated: 2000/10/31
+Updated: 2000/11/28
 Contact: hdfhelp@ncsa.uiuc.edu
 </pre>
