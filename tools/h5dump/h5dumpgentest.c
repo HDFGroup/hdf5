@@ -25,6 +25,7 @@
 
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5tools.h"
 
 #define FILE1 "tgroup.h5"
 #define FILE2 "tdset.h5"
