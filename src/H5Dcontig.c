@@ -120,7 +120,7 @@ H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxp
 
                     /* Make certain we don't read off the end of the file */
                     if (HADDR_UNDEF==(eoa=H5FD_get_eoa(f->shared->lf))) {
-                        HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+                        HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
                             "unable to determine file size");
                     }
                     f->shared->sieve_size=MIN(eoa-addr,f->shared->sieve_buf_size);
@@ -151,7 +151,7 @@ H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxp
             else {
                 /* Allocate room for the data sieve buffer */
                 if (NULL==(f->shared->sieve_buf=H5MM_malloc(f->shared->sieve_buf_size))) {
-                    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+                    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                           "memory allocation failed");
                 }
 
@@ -160,7 +160,7 @@ H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxp
 
                 /* Make certain we don't read off the end of the file */
                 if (HADDR_UNDEF==(eoa=H5FD_get_eoa(f->shared->lf))) {
-                    HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+                    HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
                         "unable to determine file size");
                 }
                 f->shared->sieve_size=MIN(eoa-addr,f->shared->sieve_buf_size);
@@ -290,7 +290,7 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
 
                     /* Make certain we don't read off the end of the file */
                     if (HADDR_UNDEF==(eoa=H5FD_get_eoa(f->shared->lf))) {
-                        HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+                        HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
                             "unable to determine file size");
                     }
                     f->shared->sieve_size=MIN(eoa-addr,f->shared->sieve_buf_size);
@@ -322,7 +322,7 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
             else {
                 /* Allocate room for the data sieve buffer */
                 if (NULL==(f->shared->sieve_buf=H5MM_malloc(f->shared->sieve_buf_size))) {
-                    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+                    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                           "memory allocation failed");
                 }
 
@@ -331,7 +331,7 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
 
                 /* Make certain we don't read off the end of the file */
                 if (HADDR_UNDEF==(eoa=H5FD_get_eoa(f->shared->lf))) {
-                    HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+                    HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
                         "unable to determine file size");
                 }
                 f->shared->sieve_size=MIN(eoa-addr,f->shared->sieve_buf_size);
