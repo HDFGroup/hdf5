@@ -72,6 +72,7 @@ documented below.
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
+    <li><a href="#File-GetVfdHandle">H5Fget_vfd_handle</a>
     <li><a href="#File-GetCreatePlist">H5Fget_create_plist</a>
     <li><a href="#File-GetAccessPlist">H5Fget_access_plist</a>
     <li><a href="#File-GetObjCount">H5Fget_obj_count</a>
@@ -112,6 +113,7 @@ facilitate moving easily between them.</i>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
+    <li><a href="#File-GetVfdHandle">h5fget_vfd_handle_f</a>
     <li><a href="#File-GetCreatePlist">h5fget_create_plist_f</a>
     <li><a href="#File-GetAccessPlist">h5fget_access_plist_f</a>
     <li><a href="#File-GetObjCount">h5fget_obj_count_f</a>
@@ -493,26 +495,64 @@ facilitate moving easily between them.</i>
 <dt><strong>Name:</strong> <a name="File-GetObjCount">H5Fget_obj_count</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Fget_obj_count</code>(<em>hid_t</em> <code>file_id</code>,
-	    <em>unsigned</em> <code>types</code>,
-		<em>unsigned *</em><code>obj_id_count</code>
-		)
+	    <em>unsigned int</em> <code>types</code>,
+            <em>unsigned int *</em><code>obj_id_count</code>
+            )
 <dt><strong>Purpose:</strong>
         <dd>Returns the number of open object identifiers for an open file.
 <dt><strong>Description:</strong>
-        <dd><code>H5Fget_obj_count</code> returns the 
-            number of open object identifiers for the open file specified by <code>file_id</code>.
-            <p>
-            See "File Access Properties" in 
-            <a href="RM_H5P.html">H5P: Property List Interface</a> 
-            in this reference manual and 
-            "File Access Property Lists" 
-            in <a href="Files.html"><cite>Files</cite></a> in the 
-            <cite>HDF5 User's Guide</cite> for 
-            additional information and related functions.
+    <dd>Given the identifier of an open file, <code>file_id</code>, 
+	and the desired object types, <code>types</code>,
+	<code>H5Fget_obj_count</code> returns the number of 
+        open object identifiers for the file.
+        <p>
+        To retrieve a count of open identifiers for open objects in 
+	all HDF5 application files that are currently open, 
+        pass the value <code>H5F_OBJ_ALL</code> in <code>file_id</code>.
+        <p>
+        The types of objects to be counted are specified 
+	in <code>types</code> as follows:
+	<center>
+        <table width=90% border=0>
+          <tr><td valign=top>
+            <code>H5F_OBJ_FILE</code>
+            </td><td valign=top>
+            Files only
+          </td></tr><tr><td valign=top>
+            <code>H5F_OBJ_DATASET</code>
+            </td><td valign=top>
+            Datasets only
+          </td></tr><tr><td valign=top>
+            <code>H5F_OBJ_GROUP</code>
+            </td><td valign=top>
+            Groups only
+          </td></tr><tr><td valign=top>
+            <code>H5F_OBJ_DATATYPE&nbsp;&nbsp;</code>
+            </td><td valign=top>
+            Named datatypes only
+          </td></tr><tr><td valign=top>
+            <code>H5F_OBJ_ALL</code>
+            </td><td valign=top>
+            All of the above
+	    <br>
+	    (I.e., <code>H5F_OBJ_FILE</code> | <code>H5F_OBJ_DATASET</code> | 
+	    <code>H5F_OBJ_GROUP</code> | <code>H5F_OBJ_DATATYPE</code> )
+          </td></tr>
+        </table>
+	</center>
+	Multiple object types can be combined with the 
+	logical <code>OR</code> operator (<code>|</code>).
+	For example, the expression <code>(H5F_OBJ_DATASET|H5F_OBJ_GROUP)</code> would call for 
+	datasets and groups.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>file_id</code>
-            <dd>IN: Identifier of file to get access property list of
+            <dd>IN: Identifier of a currently-open HDF5 file or 
+	        <code>H5F_OBJ_ALL</code> for all currently-open HDF5 files. 
+        <dt><em>unsigned int</em> <code>types</code>
+            <dd>IN: Type of object for which identifiers are to be returned. 
+        <dt><em>unsigned int *</em><code>obj_id_count</code>
+            <dd>OUT: Pointer to the returned list of open object identifiers. 
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a file access property list identifier if successful;
@@ -530,7 +570,99 @@ facilitate moving easily between them.</i>
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="File-GetObjIDs">H5Fget_obj_ids</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Fget_obj_ids</code>(<em>hid_t</em> <code>file_id</code>,
+            <em>unsigned int</em> <code>types</code>,
+            <em>hid_t *</em><code>obj_id_list</code>
+            )
+<dt><strong>Purpose:</strong>
+    <dd>Returns a list of open object identifiers.
+<dt><strong>Description:</strong>
+    <dd>Given the file identifier <code>file_id</code> and 
+        the type of objects to be identified, <code>types</code>,
+        <code>H5Fget_obj_ids</code> returns the list of identifiers 
+        for all open HDF5 objects fitting the specified criteria. 
+        <p>
+        To retrieve identifiers for open objects in all HDF5 application 
+        files that are currently open, pass the value 
+        <code>H5F_OBJ_ALL</code> in <code>file_id</code>.
+        <p>
+        The types of object identifiers to be retrieved are specified 
+	in <code>types</code> using the codes listed for the same 
+	parameter in <a href="#File-GetObjCount"><code>H5Fget_obj_count</code></a>
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>file_id</code>
+            <dd>IN: Identifier of a currently-open HDF5 file or 
+	        <code>H5F_OBJ_ALL</code> for all currently-open HDF5 files. 
+        <dt><em>unsigned int</em> <code>types</code>
+            <dd>IN: Type of object for which identifiers are to be returned. 
+        <dt><em>hid_t *</em><code>obj_id_list</code>
+            <dd>OUT: Pointer to the returned list of open object identifiers. 
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5fget_obj_ids_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
 
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-GetVfdHandle">H5Fget_vfd_handle</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Fget_vfd_handle</code>(<em>hid_t</em> <code>file_id</code>,
+                <em>hid_t</em> <code>fapl_id</code>,
+                <em>void *</em><code>file_handle</code>
+                )
+<dt><strong>Purpose:</strong>
+    <dd>Returns pointer to the file handle from the virtual file driver.
+<dt><strong>Description:</strong>
+    <dd>Given the file identifier <code>file_id</code> and 
+    the file access property list <code>fapl_id</code>, 
+    <code>H5Fget_vfd_handle</code> returns a pointer to the file handle 
+    from the low-level file driver currently being used by the 
+    HDF5 library for file I/O.
+<dt><strong>Notes:</strong>
+    <dd>Users are not supposed to modify any file through this file handle.
+    <p>
+    This file handle is dynamic and is valid only while the file remains
+    open; it will be invalid if the file is closed and reopened or 
+    opened during a subsequent session.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>file_id</code>
+            <dd>IN: Identifier of the file to be queried.
+        <dt><em>hid_t</em> <code>fapl_id</code>
+            <dd>IN: File access property list  identifier.
+	        For most drivers, the value will be <code>H5P_DEFAULT</code>. 
+		For the <code>FAMILY</code> or <code>MULTI</code> drivers,
+		this value should be defined through the property list
+		functions: 
+		<code>H5Pset_family_offset</code> for the <code>FAMILY</code> 
+		driver and <code>H5Pset_multi_type</code> for the 
+		<code>MULTI</code> driver.
+        <dt><em>void *</em><code>file_handle</code>
+            <dd>OUT: Pointer to the file handle being used by 
+	        the low-level virtual file driver.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5fget_vfd_handle_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->    <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
 </dl>
 
 
