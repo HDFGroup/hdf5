@@ -128,11 +128,14 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 #endif /* H5_WANT_H5_V1_2_COMPAT */
 
     if (!getenv("HDF5_NOCLEANUP")) {
-	for (i=0; base_name[i]; i++) {
-	    if (NULL==h5_fixname(base_name[i], fapl, filename,
-				 sizeof filename)) {
+        char *user, *login;
+
+        user = getenv("USER");
+        login = getenv("LOGIN");
+
+	for (i = 0; base_name[i]; i++) {
+	    if (h5_fixname(base_name[i], fapl, filename, sizeof(filename)) == NULL)
 		continue;
-	    }
 
 #ifdef H5_WANT_H5_V1_2_COMPAT
 	    switch (H5Pget_driver(fapl)) {
@@ -140,18 +143,22 @@ h5_cleanup(const char *base_name[], hid_t fapl)
                 break; /*nothing to remove*/
 		
             case H5F_LOW_SPLIT:
-                HDsnprintf(temp, sizeof temp, "%s.raw", filename);
+                HDsnprintf(temp, sizeof(temp), "%s.raw", filename);
                 remove(temp);
-                HDsnprintf(temp, sizeof temp, "%s.meta", filename);
+                HDsnprintf(temp, sizeof(temp), "%s.meta", filename);
                 remove(temp);
                 break;
 
             case H5F_LOW_FAMILY:
-                for (j=0; /*void*/; j++) {
-                    HDsnprintf(temp, sizeof temp, filename, j);
-                    if (access(temp, F_OK)<0) break;
+                for (j = 0; /*void*/; j++) {
+                    HDsnprintf(temp, sizeof(temp), filename, j);
+
+                    if (access(temp, F_OK) < 0)
+                        break;
+
                     remove(temp);
                 }
+
                 break;
 
             default:
@@ -159,19 +166,25 @@ h5_cleanup(const char *base_name[], hid_t fapl)
                 break;
 	    }
 #else /* H5_WANT_H5_V1_2_COMPAT */
+
 	    driver = H5Pget_driver(fapl);
-	    if (H5FD_FAMILY==driver) {
-		for (j=0; /*void*/; j++) {
+
+	    if (driver == H5FD_FAMILY) {
+		for (j = 0; /*void*/; j++) {
 		    HDsnprintf(temp, sizeof temp, filename, j);
-		    if (access(temp, F_OK)<0) break;
+
+		    if (access(temp, F_OK) < 0)
+                        break;
+
 		    remove(temp);
 		}
-	    } else if (H5FD_CORE==driver) {
+	    } else if (driver == H5FD_CORE) {
 		/*void*/
-	    } else if (H5FD_MULTI==driver) {
+	    } else if (driver == H5FD_MULTI) {
 		H5FD_mem_t mt;
 		assert(strlen(multi_letters)==H5FD_MEM_NTYPES);
-		for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt++) {
+
+		for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
 		    HDsnprintf(temp, sizeof temp, "%s-%c.h5",
 			       filename, multi_letters[mt]);
 		    remove(temp); /*don't care if it fails*/
@@ -180,9 +193,19 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 		remove(filename);
 	    }
 #endif /* H5_WANT_H5_V1_2_COMPAT */
+
+            if (user || login) {
+                strcpy(temp, "/tmp/");
+                strcat(temp, (user ? user : login));
+
+                if (!strncmp(filename, temp, strlen(temp)))
+                    remove(temp);
+            }
 	}
-	retval=1;
+
+	retval = 1;
     }
+
     H5Pclose(fapl);
     return retval;
 }
@@ -259,94 +282,153 @@ h5_reset(void)
 char *
 h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    const char	*prefix=NULL;
-    const char	*suffix=".h5";		/* suffix has default */
+    const char     *prefix = NULL;
+    const char     *suffix = ".h5"; /* suffix has default */
+    char           *ptr, last;
+    size_t          i, j;
 #ifdef H5_WANT_H5_V1_2_COMPAT
-    H5F_driver_t	driver;
+    H5F_driver_t    driver;
 #else /* H5_WANT_H5_V1_2_COMPAT */
-    hid_t	driver;
+    hid_t           driver;
 #endif /* H5_WANT_H5_V1_2_COMPAT */
     
-    if (!base_name || !fullname || size<1) return NULL;
+    if (!base_name || !fullname || size < 1)
+        return NULL;
+
+    /* If we have a prefix, then prepend that to fullname */
+    memset(fullname, 0, size);
 
 #ifdef H5_WANT_H5_V1_2_COMPAT
     /* figure out the suffix */
-    if (H5P_DEFAULT!=fapl){
-	if ((driver=H5Pget_driver(fapl))<0)
+    if (H5P_DEFAULT != fapl){
+	if ((driver = H5Pget_driver(fapl)) < 0)
             return NULL;
-	if (H5F_LOW_FAMILY==driver) {
+
+	if (H5F_LOW_FAMILY == driver) {
 	    suffix = "%05d.h5";
-	} else if (H5F_LOW_CORE==driver) {
+	} else if (H5F_LOW_CORE == driver) {
 	    suffix = NULL;
 	} 
     }
     
     /* Use different ones depending on parallel or serial driver used. */
-    if (H5P_DEFAULT!=fapl && H5F_LOW_MPIO==driver){
+    if (H5P_DEFAULT != fapl && H5F_LOW_MPIO == driver){
 	/* For parallel:
 	 * First use command line option, then the environment variable,
 	 * then try the constant
 	 */
 	prefix = (paraprefix ? paraprefix : getenv("HDF5_PARAPREFIX"));
+
 #ifdef HDF5_PARAPREFIX
-	if (!prefix) prefix = HDF5_PARAPREFIX;
-#endif
+	if (!prefix)
+            prefix = HDF5_PARAPREFIX;
+#endif  /* HDF5_PARAPREFIX */
     }else{
 	/* For serial:
 	 * First use the environment variable, then try the constant
 	 */
 	prefix = getenv("HDF5_PREFIX");
+
 #ifdef HDF5_PREFIX
-	if (!prefix) prefix = HDF5_PREFIX;
-#endif
+	if (!prefix)
+            prefix = HDF5_PREFIX;
+#endif  /* HDF5_PREFIX */
     }
 #else /* H5_WANT_H5_V1_2_COMPAT */
     /* figure out the suffix */
-    if (H5P_DEFAULT!=fapl){
-	if ((driver=H5Pget_driver(fapl))<0) return NULL;
-	if (H5FD_FAMILY==driver) {
+    if (H5P_DEFAULT != fapl){
+	if ((driver = H5Pget_driver(fapl)) < 0)
+            return NULL;
+
+	if (H5FD_FAMILY == driver)
 	    suffix = "%05d.h5";
-	} else if (H5FD_CORE==driver || H5FD_MULTI==driver) {
+	else if (H5FD_CORE == driver || H5FD_MULTI == driver)
 	    suffix = NULL;
-	} 
     }
     
     /* Use different ones depending on parallel or serial driver used. */
-    if (H5P_DEFAULT!=fapl && H5FD_MPIO==driver){
+    if (H5P_DEFAULT != fapl && H5FD_MPIO == driver){
 	/* For parallel:
 	 * First use command line option, then the environment variable,
 	 * then try the constant
 	 */
 	prefix = (paraprefix ? paraprefix : getenv("HDF5_PARAPREFIX"));
+
 #ifdef HDF5_PARAPREFIX
-	if (!prefix) prefix = HDF5_PARAPREFIX;
-#endif
+	if (!prefix)
+            prefix = HDF5_PARAPREFIX;
+#endif  /* HDF5_PARAPREFIX */
     }else{
 	/* For serial:
 	 * First use the environment variable, then try the constant
 	 */
 	prefix = getenv("HDF5_PREFIX");
-#ifdef HDF5_PREFIX
-	if (!prefix) prefix = HDF5_PREFIX;
-#endif
-    }
-#endif /* H5_WANT_H5_V1_2_COMPAT */
 
+#ifdef HDF5_PREFIX
+	if (!prefix)
+            prefix = HDF5_PREFIX;
+#endif  /* HDF5_PREFIX */
+    }
+#endif  /* H5_WANT_H5_V1_2_COMPAT */
 
     /* Prepend the prefix value to the base name */
     if (prefix && *prefix) {
-	if (HDsnprintf(fullname, size, "%s/%s", prefix, base_name)==(int)size) {
-	    return NULL; /*buffer is too small*/
-	}
-    } else if (strlen(base_name)>=size) {
-	return NULL; /*buffer is too small*/
+        char *subdir;
+
+        if (!strcmp(prefix, "/tmp")) {
+            /* If the prefix specifies the "/tmp" directory, then default to
+             * using the "/tmp/$USER" or "/tmp/$LOGIN" directory instead. */
+            char *user, *login;
+
+            user = getenv("USER");
+            login = getenv("LOGIN");
+            subdir = (user ? user : login);
+
+            if (subdir) {
+                for (i = 0; i < size && prefix[i]; i++)
+                    fullname[i] = prefix[i];
+
+                fullname[i++] = '/';
+
+                for (j = 0; i < size && subdir[j]; i++, j++)
+                    fullname[i] = subdir[j];
+            }
+        }
+
+        if (!fullname[0])
+            /* We didn't append the prefix yet */
+            strncpy(fullname, prefix, MIN(strlen(prefix), size));
+
+        if (strlen(fullname) + strlen(base_name) + 1 < size) {
+            /* Append the base_name with a slash first. Multiple slashes are
+             * handled below. */
+            struct stat buf;
+
+            if (stat(fullname, &buf) < 0)
+                /* The directory doesn't exist just yet */
+                if (mkdir(fullname, 0755) < 0 && errno != EEXIST)
+                    /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
+                     * Default to PREFIX's original prefix value. */
+                    strcpy(fullname, prefix);
+
+            strcat(fullname, "/");
+            strcat(fullname, base_name);
+        } else {
+	    /* Buffer is too small */
+            return NULL;
+        }
+    } else if (strlen(base_name) >= size) {
+	/* Buffer is too small */
+	return NULL;
     } else {
 	strcpy(fullname, base_name);
     }
 
 #ifdef H5_WANT_H5_V1_2_COMPAT
     /* Append a suffix */
-    if ((driver=H5Pget_driver(fapl))<0) return NULL;
+    if ((driver = H5Pget_driver(fapl)) < 0)
+        return NULL;
+
     switch (driver) {
     case H5F_LOW_SPLIT:
     case H5F_LOW_CORE:
@@ -360,10 +442,21 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 	break;
     }
 #endif /* H5_WANT_H5_V1_2_COMPAT */
+
     /* Append a suffix */
     if (suffix) {
-	if (strlen(fullname)+strlen(suffix)>=size) return NULL;
+	if (strlen(fullname) + strlen(suffix) >= size)
+            return NULL;
+
 	strcat(fullname, suffix);
+    }
+
+    /* Remove any double slashes in the filename */
+    for (ptr = fullname, i = j = 0; ptr && i < size; i++, ptr++) {
+        if (*ptr != '/' || last != '/')
+            fullname[j++] = *ptr;
+
+        last = *ptr;
     }
     
     return fullname;
