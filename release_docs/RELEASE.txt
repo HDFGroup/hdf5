@@ -214,7 +214,7 @@ Platforms Tested
                                   WorkShop Compilers 5.0 98/10/25 
                                   FORTRAN 90 2.0 Patch 107356-04 
     SunOS 5.8(32 and 64 bit)      Sun WorkShop 6 update 2 C 5.3
-     (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
+     (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 95 6.2
                                   Sun WorkShop 6 update 2 C++ 5.3
     TFLOPS r1.0.4 v4.4.4 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
                                           local modifications
