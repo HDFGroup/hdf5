@@ -1,4 +1,4 @@
-HDF5 version 1.5.46 released on Sat Feb  1 04:18:37 CST 2003
+HDF5 version 1.5.47 released on Sat Feb 15 06:18:59 CST 2003
 ================================================================================
 
 
@@ -35,6 +35,11 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Corrected metadata caching bug in parallel I/O which could cause hangs
+      when chunked datasets were accessed with independent transfer mode.
+      QAK - 2003/02/10
+    * Corrected memory/resource leaks in per-thread key information when
+      thread-safe operation was enabled.  QAK - 2003/02/07
     * H5Fopen without the H5F_ACC_CREAT flag should not succeed in creating
       a new file with the 'core' VFL driver.  QAK - 2003/01/24
     * Allow opening objects with unknown object header messages.
@@ -250,6 +255,8 @@ Documentation
 New Features
 ============
 
+    * Added Fletcher32 checksum as a filter in pipeline.  It only works in 
+      chunked dataset.  SLU - 2003/2/11
     * MPICH/MPE instrumentation feature added.  Use --enable-mpe to configure
       it.  AKC - 2003/1/3
     * New functions H5Gget_num_objs, H5Gget_objname_by_idx and H5Gget_objtype_by_idx 
