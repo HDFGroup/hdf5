@@ -20,7 +20,8 @@ Preconditions
        unpacked directory to hdf5.
 
     4. GNU zlib and szlib library should be installed on the machine. You may
-       find prebuilt binaries on the HDF ftp site (see ftp://ftp.ncsa.uiuc.edu/HDF/)
+       find prebuilt binaries on the HDF ftp site (see gzip/bin and szip/bin
+       directories on the HDF FTP server ftp://ftp.ncsa.uiuc.edu/)
        If you wish not to use zlib and/or szlib libraries, see Section V in the 
        INSTALL_Windows.txt how to disable external filters.
 Note:
