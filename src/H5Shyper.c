@@ -493,7 +493,8 @@ H5S_hyper_block_read (H5S_hyper_node_t *node, H5S_hyper_io_info_t *io_info, hsiz
      * offset
      */
     node->cinfo.rpos+=region_size*io_info->elmt_size;
-    node->cinfo.rleft-=region_size;
+    H5_ASSIGN_OVERFLOW(node->cinfo.rleft,node->cinfo.rleft-region_size,hsize_t,size_t);
+   /* node->cinfo.rleft-=region_size;*/
 
     /* If we've read in all the elements from the block, throw it away */
     if(node->cinfo.rleft==0 && (node->cinfo.wleft==0 || node->cinfo.wleft==node->cinfo.size)) {
@@ -547,6 +548,7 @@ H5S_hyper_block_write (H5S_hyper_node_t *node,
      * offset
      */
     node->cinfo.wpos+=region_size*io_info->elmt_size;
+    H5_ASSIGN_OVERFLOW(node->cinfo.wleft,node->cinfo.wleft-region_size,hsize_t,size_t);
     node->cinfo.wleft-=region_size;
 
     /* If we've read in all the elements from the block, throw it away */

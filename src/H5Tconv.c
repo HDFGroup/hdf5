@@ -1465,8 +1465,8 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 	    src_delta = src->size;
         bkg_stride = dst->size;
 	} else {
-	    src_delta = -(src->size);
-        bkg_stride = -(dst->size);
+	    src_delta = -(int)(src->size);/*overflow shouldn't be possible */
+            bkg_stride = -(int)(dst->size);/*overflow shouldn't be possible */
 	    xbuf += (nelmts-1) * src->size;
 	    xbkg += (nelmts-1) * dst->size;
 	}
