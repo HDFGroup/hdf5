@@ -1604,6 +1604,9 @@
 ./hl/test/image24pixel.txt
 ./hl/test/image24plane.txt
 ./hl/test/usa.wri
+./hl/test/dsdata.txt
+./hl/test/dslat.txt
+./hl/test/dslon.txt
 
 # hl fortran
 ./hl/fortran/src/H5f90i.h

@@ -29,6 +29,9 @@ static int test_errors(void);
 static int test_rank(void);
 static int test_types(void);
 static int test_iterators(void);
+static int test_data(void);
+static int read_data( const char* fname, int ndims, hsize_t *dims, float **buf );
+
 
 #define RANK          2
 #define DIM_DATA      12
@@ -60,6 +63,8 @@ static int test_iterators(void);
 #define FILE3          "test_ds3.h5"
 #define FILE4          "test_ds4.h5"
 #define FILE5          "test_ds5.h5"
+#define FILE6          "test_ds6.h5"
+
 
 
 /*-------------------------------------------------------------------------
@@ -68,13 +73,14 @@ static int test_iterators(void);
  */
 int main(void)
 {
- int	nerrors=0;
+ int nerrors=0;
 
- nerrors += test_simple()<0 	?1:0;
- nerrors += test_errors()<0 	?1:0;
- nerrors += test_rank()<0 	?1:0;
- nerrors += test_iterators()<0 	?1:0;
- nerrors += test_types()<0 	?1:0;
+ nerrors += test_simple()<0  ?1:0;
+ nerrors += test_errors()<0  ?1:0;
+ nerrors += test_rank()<0  ?1:0;
+ nerrors += test_iterators()<0  ?1:0;
+ nerrors += test_types()<0  ?1:0;
+ nerrors += test_data()<0  ?1:0;
 
  if (nerrors) goto error;
  printf("All dimension scales tests passed.\n");
@@ -143,7 +149,7 @@ static int test_simple(void)
  
   
  printf("Testing API functions\n");
- 	
+  
 /*-------------------------------------------------------------------------
  * create a file for the test
  *-------------------------------------------------------------------------
@@ -152,7 +158,7 @@ static int test_simple(void)
  /* create a file using default properties */
  if ((fid=H5Fcreate(FILE1,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   goto out;
-	
+ 
 /*-------------------------------------------------------------------------
  * create datasets: 1 "data" dataset and 4 dimension scales
  *-------------------------------------------------------------------------
@@ -182,7 +188,7 @@ static int test_simple(void)
  if (H5LTmake_dataset_int(fid,DS_22_NAME,rankds,s2_dim,s22_wbuf)<0)
   goto out;
 
-	
+ 
 /*-------------------------------------------------------------------------
  * test 1: attach scale
  *-------------------------------------------------------------------------
@@ -2487,7 +2493,7 @@ static int test_types(void)
  char           *s2_str = "ABCD";
    
  printf("Testing scales with several datatypes\n");
- 	
+  
 /*-------------------------------------------------------------------------
  * create a file for the test
  *-------------------------------------------------------------------------
@@ -2495,7 +2501,7 @@ static int test_types(void)
  /* create a file using default properties */
  if ((fid=H5Fcreate(FILE5,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   goto out;
-	
+ 
 /*-------------------------------------------------------------------------
  * create datasets: 1 "data" dataset and 2 dimension scales
  *-------------------------------------------------------------------------
@@ -2512,7 +2518,7 @@ static int test_types(void)
  /* make a DS dataset for the second dimension */
  if (H5LTmake_dataset(fid,DS_2_NAME,rankds,s2_dim,H5T_NATIVE_USHORT,s2_ushort)<0)
   goto out;
-	
+ 
 /*-------------------------------------------------------------------------
  * floating point and short scales
  *-------------------------------------------------------------------------
@@ -2558,7 +2564,7 @@ static int test_types(void)
   goto out;
 
  PASSED();
- 	
+  
 /*-------------------------------------------------------------------------
  * create datasets: 1 "data" dataset and 2 dimension scales
  *-------------------------------------------------------------------------
@@ -2575,7 +2581,7 @@ static int test_types(void)
  /* make a DS dataset for the second dimension */
  if (H5LTmake_dataset_string(fid,"ds_b_2",s2_str)<0)
   goto out;
-	
+ 
 /*-------------------------------------------------------------------------
  * floating point and short scales
  *-------------------------------------------------------------------------
@@ -2633,11 +2639,228 @@ static int test_types(void)
  /* error zone, gracefully close */
 out:
  H5E_BEGIN_TRY {
+  H5Dclose(did);
+  H5Dclose(dsid);
   H5Fclose(fid);
  } H5E_END_TRY;
  H5_FAILED();
  return FAIL;
 }
 
+/*-------------------------------------------------------------------------
+ * read realistic data and generate an HDF5 file with dimension scales
+ *-------------------------------------------------------------------------
+ */ 
+
+static int test_data(void)
+{
+ hid_t   fid;                         /* file ID */
+ hid_t   did;                         /* dataset ID */
+ hid_t   dsid;                        /* DS dataset ID */
+ hid_t   dcpl;                        /* dataset creation property list */
+ hid_t   sid;                         /* dataspace ID */
+ float   *vals=NULL;                  /* array to hold data values */
+ float   *latbuf=NULL;                /* array to hold the latitude values */
+ float   *lonbuf=NULL;                /* array to hold the longitude values */
+ hsize_t dims[2];                     /* array to hold dimensions */
+ hsize_t latdims[1];                  /* array to hold dimensions */
+ hsize_t londims[1];                  /* array to hold dimensions */
+ float   fill=-99;                    /* fill value */
+
+   
+ printf("Testing reading ASCII data and generate HDF5 data with scales\n");
+  
+/*-------------------------------------------------------------------------
+ * create a file for the test
+ *-------------------------------------------------------------------------
+ */  
+ /* create a file using default properties */
+ if ((fid=H5Fcreate(FILE6,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * read data
+ *-------------------------------------------------------------------------
+ */  
+
+ /* read ASCII bathymetry data */
+ if (read_data("dsdata.txt",2,dims,&vals)<0)
+  goto out;
+
+ /* read the latitude */
+ if (read_data("dslat.txt",1,latdims,&latbuf)<0)
+  goto out;
+
+ /* read the longitude */
+ if (read_data("dslon.txt",1,londims,&lonbuf)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * generating scales
+ *-------------------------------------------------------------------------
+ */  
+
+ TESTING2("generating scales");
+ 
+/*-------------------------------------------------------------------------
+ * create datasets: 1 "data" dataset and 2 dimension scales
+ *-------------------------------------------------------------------------
+ */  
+
+ /* make a DS dataset for the first dimension */
+ if (H5LTmake_dataset_float(fid,"lat",1,latdims,latbuf)<0)
+  goto out;
+
+ /* make a DS dataset for the second dimension */
+ if (H5LTmake_dataset_float(fid,"lon",1,londims,lonbuf)<0)
+  goto out;
+
+ /* make a dataset for the data. a fill value is set */
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+  goto out;
+ if (H5Pset_fill_value(dcpl,H5T_NATIVE_FLOAT,&fill)<0)
+  goto out;
+ if ((sid=H5Screate_simple(2,dims,NULL))<0)
+  goto out;
+ if ((did=H5Dcreate(fid,"data",H5T_NATIVE_FLOAT,sid,dcpl))<0)
+  goto out;
+ if (H5Dwrite(did,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,vals)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+ if (H5Pclose(dcpl)<0)
+  goto out;
+ if (H5Sclose(sid)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * attach 
+ *-------------------------------------------------------------------------
+ */  
+
+ /* get the dataset id for "data" */
+ if ((did = H5Dopen(fid,"data"))<0)
+  goto out;
+
+ /* get the DS dataset id */
+ if ((dsid = H5Dopen(fid,"lat"))<0)
+  goto out;
+ /* attach the DS_1_NAME dimension scale to "data" at dimension 0 */
+ if (H5DSattach_scale(did,dsid,DIM0)<0)
+  goto out;
+ /* set name */  
+ if (H5DSset_scale(dsid,SCALE_1_NAME)<0)
+  goto out;
+ /* close DS id */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ /* get the DS dataset id */
+ if ((dsid = H5Dopen(fid,"lon"))<0)
+  goto out;
+ /* attach the DS_2_NAME dimension scale to "data" at dimension 1 */
+ if (H5DSattach_scale(did,dsid,DIM1)<0)
+  goto out;
+ /* set name */  
+ if (H5DSset_scale(dsid,SCALE_2_NAME)<0)
+  goto out;
+ /* close DS id */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ /* set a label */
+ if (H5DSset_label(did,DIM0,DIM0_LABEL)<0)
+  goto out;
+ if (H5DSset_label(did,DIM1,DIM1_LABEL)<0)
+  goto out;
+ /* close */
+ if (H5Dclose(did)<0)
+  goto out;
+
+ PASSED();
+ 
+
+
+/*-------------------------------------------------------------------------
+ * close 
+ *-------------------------------------------------------------------------
+ */ 
+ if (H5Fclose(fid)<0)
+  goto out;
+
+ return 0;
+  
+ /* error zone, gracefully close */
+out:
+ H5E_BEGIN_TRY {
+  H5Dclose(did);
+  H5Dclose(dsid);
+  H5Fclose(fid);
+ } H5E_END_TRY;
+ H5_FAILED();
+ return FAIL;
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * read_data
+ * utility function to read ASCII data
+ * the files have a header of the type
+ *
+ *   dimension i
+ *   n
+ * 
+ * followed by the data
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static int read_data( const char* fname, int ndims, hsize_t *dims, float **buf )
+{
+ int      i, n;
+ unsigned j;
+ char     str[20];
+ size_t   nelms;
+ FILE     *f;
+ float    val;
+ char     *srcdir = getenv("srcdir");  /* the source directory */
+ char     data_file[512];              /* buffer to hold name of existing data file */
+
+ strcpy(data_file, "");
+ /* compose the name of the file to open, using the srcdir, if appropriate */
+ if (srcdir)
+ {
+  strcpy(data_file, srcdir);
+  strcat(data_file, "/");
+ }
+ /* read first data file */   
+ strcat(data_file,fname);
+
+ f = fopen(data_file, "r");
+ if ( f == NULL )
+ {
+  printf( "Could not open file %s\n", data_file );
+  return -1;
+ }
+
+ for (i=0, nelms=1; i < ndims; i++)
+ {
+  fscanf( f, "%s %d", str, &j);
+  fscanf( f, "%d",&n );
+  dims[i] = n;
+  nelms *= n;
+ }
+
+ *buf = (float*) malloc (nelms * sizeof( float ));
+
+ for (j = 0; j < nelms; j++)
+ {
+  fscanf( f, "%f",&val );
+  (*buf)[j] = val;
+ }
+ fclose(f);
+
+ return 1;
+
+}
 
 
