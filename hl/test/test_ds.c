@@ -1780,7 +1780,7 @@ static int test_rank(void)
  for (i=0; i<rank; i++) 
  {
   sprintf(name,"ds_a_%d",i);
-  if (H5LTmake_dataset_int(fid,name,rankds,&dims[i],NULL)<0)
+  if (H5LTmake_dataset_int(fid,name,(rank-i),&dims[i],NULL)<0)
    goto out;
  }
 
