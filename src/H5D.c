@@ -40,6 +40,10 @@
 
 #define PABLO_MASK	H5D_mask
 
+
+/* forward declarations */
+static herr_t H5D_update_chunk( H5D_t *dataset );
+
 /*
  * A dataset is the following struct.
  */
@@ -3687,10 +3691,6 @@ herr_t H5Dset_extend( hid_t dset_id, const hsize_t *size )
  *-------------------------------------------------------------------------
  */
 
-/* declaration*/
-static herr_t H5D_update_chunck( H5D_t *dataset );
-
-
 herr_t H5D_set_extend( H5D_t *dataset, const hsize_t *size )
 {
  herr_t changed;
@@ -3752,7 +3752,7 @@ herr_t H5D_set_extend( H5D_t *dataset, const hsize_t *size )
  if ( H5D_CHUNKED == dataset->layout.type )
  {
 
-		if ( H5D_update_chunck( dataset ) < 0 )
+		if ( H5D_update_chunk( dataset ) < 0 )
 			goto done;
 
 
@@ -3772,7 +3772,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5D_update_chunck
+ * Function: H5D_update_chunk
  *
  * Purpose: 
  *
@@ -3791,20 +3791,10 @@ done:
  *-------------------------------------------------------------------------
  */
 
-#if 1
-
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-#include "H5Fpkg.h"
-
-herr_t H5D_update_chunck( H5D_t *dset )
+herr_t H5D_update_chunk( H5D_t *dset )
 {
- herr_t status;
 
 	H5F_istore_dump_btree( dset->ent.file, stdout, dset->layout.ndims, dset->layout.addr );
-
-	status = H5F_istore_debug( dset->ent.file, dset->layout.addr, stdout, 0, 50, 
-		dset->layout.ndims );
-
 
  return 0;
 
@@ -3812,4 +3802,3 @@ herr_t H5D_update_chunck( H5D_t *dset )
 
 
 
-#endif
