@@ -47,6 +47,8 @@ Library
      correctly.
    * Error was fixed which was not allowing dataset region references to have
      their regions retrieved correctly.
+   * Added internal free-lists to reduce memory required by the library and
+     H5garbage_collect API function
 
 Configuration
 -------------

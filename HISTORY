@@ -50,11 +50,13 @@ Configuration
      later as before.  One can just do "./configure --enable-parallel"
      if the MPI library is in the system library.
 
-Dataset region references
--------------------------
+Library
+-------
 
     * Error was fixed which was not allowing dataset region references to have
       their regions retrieved correctly.
+    * Added internal free-lists to reduce memory required by the library and
+      H5garbage_collect API function
 
 Tools
 ------
