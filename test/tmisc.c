@@ -112,6 +112,13 @@ typedef struct
 #define MISC6_DSETNAME2         "dset2"
 #define MISC6_NUMATTR           16
 
+/* Definitions for misc. test #7 */
+#define MISC7_FILE              "tmisc7.h5"
+#define MISC7_DSETNAME1         "Dataset1"
+#define MISC7_DSETNAME2         "Dataset2"
+#define MISC7_TYPENAME1         "Datatype1"
+#define MISC7_TYPENAME2         "Datatype2"
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -905,6 +912,106 @@ test_misc6(void)
 
 /****************************************************************
 **
+**  test_misc7(): Test that datatypes are sensible to store on
+**      disk.  (i.e. not partially initialized)
+**
+****************************************************************/
+static void
+test_misc7(void)
+{
+    hid_t fid, did, tid, sid;
+    int enum_value=1;
+    herr_t ret;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing sensible datatype on disk code \n"));
+
+    /* Attempt to commit a non-sensible datatype */
+
+    /* Create the file */
+    fid=H5Fcreate(MISC7_FILE,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);
+    CHECK(fid,FAIL,"H5Fcreate");
+
+    /* Create the dataspace */
+    sid=H5Screate(H5S_SCALAR);
+    CHECK(sid,FAIL,"H5Screate");
+
+    /* Create the compound datatype to commit*/
+    tid=H5Tcreate(H5T_COMPOUND,32);
+    CHECK(tid,FAIL,"H5Tcreate");
+
+    /* Attempt to commit an empty compound datatype */
+    ret=H5Tcommit(fid,MISC7_TYPENAME1,tid);
+    VERIFY(ret,FAIL,"H5Tcommit");
+
+    /* Attempt to use empty compound datatype to create dataset */
+    did=H5Dcreate(fid,MISC7_DSETNAME1,tid,sid,H5P_DEFAULT);
+    VERIFY(ret,FAIL,"H5Dcreate");
+
+    /* Add a field to the compound datatype */
+    ret=H5Tinsert(tid,"a",0,H5T_NATIVE_INT);
+    CHECK(ret,FAIL,"H5Tinsert");
+
+    /* Attempt to commit the compound datatype now - should work */
+    ret=H5Tcommit(fid,MISC7_TYPENAME1,tid);
+    CHECK(ret,FAIL,"H5Tcommit");
+
+    /* Attempt to use compound datatype to create dataset now - should work */
+    did=H5Dcreate(fid,MISC7_DSETNAME1,tid,sid,H5P_DEFAULT);
+    CHECK(did,FAIL,"H5Dcreate");
+
+    /* Close dataset */
+    ret=H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close compound datatype */
+    ret=H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Create the enum datatype to commit*/
+    tid=H5Tenum_create(H5T_NATIVE_INT);
+    CHECK(tid,FAIL,"H5Tenum_create");
+
+    /* Attempt to commit an empty enum datatype */
+    ret=H5Tcommit(fid,MISC7_TYPENAME2,tid);
+    VERIFY(ret,FAIL,"H5Tcommit");
+
+    /* Attempt to use empty enum datatype to create dataset */
+    did=H5Dcreate(fid,MISC7_DSETNAME2,tid,sid,H5P_DEFAULT);
+    VERIFY(did,FAIL,"H5Dcreate");
+
+    /* Add a member to the enum datatype */
+    ret=H5Tenum_insert(tid,"a",&enum_value);
+    CHECK(ret,FAIL,"H5Tenum_insert");
+
+    /* Attempt to commit the enum datatype now - should work */
+    ret=H5Tcommit(fid,MISC7_TYPENAME2,tid);
+    CHECK(ret,FAIL,"H5Tcommit");
+
+    /* Attempt to use enum datatype to create dataset now - should work */
+    did=H5Dcreate(fid,MISC7_DSETNAME2,tid,sid,H5P_DEFAULT);
+    CHECK(did,FAIL,"H5Dcreate");
+
+    /* Close dataset */
+    ret=H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close enum datatype */
+    ret=H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close dataspace */
+    ret=H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close file */
+    ret=H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+} /* end test_misc7() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -919,7 +1026,8 @@ test_misc(void)
     test_misc3();       /* Test reading from chunked dataset with non-zero fill value */
     test_misc4();       /* Test retrieving the fileno for various objects with H5Gget_objinfo() */
     test_misc5();       /* Test several level deep nested compound & VL datatypes */
-    test_misc6();   /* Test object header continuation code */
+    test_misc6();       /* Test object header continuation code */
+    test_misc7();       /* Test for sensible datatypes stored on disk */
 
 } /* test_misc() */
 
@@ -949,4 +1057,5 @@ cleanup_misc(void)
     remove(MISC4_FILE_2);
     remove(MISC5_FILE);
     remove(MISC6_FILE);
+    remove(MISC7_FILE);
 }

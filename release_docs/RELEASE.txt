@@ -35,6 +35,9 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Fixed bug (#499) which allowed an "empty" compound or enumerated datatype
+      (one with no members) to be used to create a dataset or committed to a
+      file.  QAK - 2002/06/11
     * Fixed bug (#777) which allowed a compound datatype to be inserted into
       itself.  QAK - 2002/06/10
     * Fixed bug (#789) where creating 1-D dataset region reference caused the

@@ -5851,14 +5851,15 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type)
     
     FUNC_ENTER_NOAPI(H5T_commit, FAIL);
 
+    assert (loc);
+    assert (name && *name);
+    assert (type);
+
     /*
      * Check arguments.  We cannot commit an immutable type because H5Tclose()
      * normally fails on such types (try H5Tclose(H5T_NATIVE_INT)) but closing
      * a named type should always succeed.
      */
-    assert (loc);
-    assert (name && *name);
-    assert (type);
     if (H5T_STATE_NAMED==type->state || H5T_STATE_OPEN==type->state) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "data type is already committed");
@@ -5867,6 +5868,10 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type)
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "data type is immutable");
     }
+
+    /* Check for a "sensible" datatype to store on disk */
+    if(H5T_is_sensible(type)!=TRUE)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datatype is not sensible");
 
     /* Find the insertion file */
     if (NULL==(file=H5G_insertion_file(loc, name))) {
@@ -8086,6 +8091,59 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
 
     FUNC_LEAVE(ret_value);
 }   /* end H5Tget_array_dims */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_is_sensible
+ *
+ * Purpose:	Determines if a data type is sensible to store on disk
+ *              (i.e. not partially initialized)
+ *
+ * Return:	Success:	TRUE, FALSE
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, June 11, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5T_is_sensible(const H5T_t *dt)
+{
+    htri_t	ret_value = FAIL;
+    
+    FUNC_ENTER_NOAPI(H5T_is_sensible, FAIL);
+
+    assert(dt);
+
+    switch(dt->type) {
+        case H5T_COMPOUND:
+            /* Only allow compound datatypes with at least one member to be stored on disk */
+            if(dt->u.compnd.nmembs > 0)
+                ret_value=TRUE;
+            else
+                ret_value=FALSE;
+            break;
+
+        case H5T_ENUM:
+            /* Only allow enum datatypes with at least one member to be stored on disk */
+            if(dt->u.enumer.nmembs > 0)
+                ret_value=TRUE;
+            else
+                ret_value=FALSE;
+            break;
+
+        default:
+            /* Assume all other datatype are sensible to store on disk */
+            ret_value=TRUE;
+            break;
+    } /* end switch */
+
+    FUNC_LEAVE(ret_value);
+}
 
 
 /*-------------------------------------------------------------------------

@@ -1559,6 +1559,18 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     if(NULL == (new_dset = H5D_new(dcpl_id)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
+    /* Check if the datatype is "sensible" for use in a dataset */
+    if(H5T_is_sensible(type)!=TRUE)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "datatype is not sensible");
+
+    /* Copy datatype for dataset */
+    if((new_dset->type = H5T_copy(type, H5T_COPY_ALL))==NULL)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy datatype");
+
+    /* Mark any VL datatypes as being on disk now */
+    if (H5T_vlen_mark(new_dset->type, f, H5T_VLEN_DISK)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
+
     /* Get new dataset's property list object */
     if (NULL == (new_plist = H5I_object(new_dset->dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't get dataset creation property list");
@@ -1566,13 +1578,6 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     if(H5P_get(new_plist, H5D_CRT_CHUNK_DIM_NAME, &chunk_ndims) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve layout");
     
-    /* Copy datatype for dataset */
-    new_dset->type = H5T_copy(type, H5T_COPY_ALL);
-
-    /* Mark any VL datatypes as being on disk now */
-    if (H5T_vlen_mark(new_dset->type, f, H5T_VLEN_DISK)<0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
-
     if(H5P_get(new_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve external file list");
 
