@@ -143,7 +143,8 @@ H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     scanline=dims[ndims-1];
     
     /* Adjust scanline if it is smaller than number of pixels per block or 
-       if it is bigger than maximum pixels per scanline  */
+       if it is bigger than maximum pixels per scanline, or there are more than
+       SZ_MAX_BLOCKS_PER_SCANLINE blocks per scanline  */
 
     /* Check the pixels per block against the 'scanline' size */
     if(scanline<cd_values[H5Z_SZIP_PARM_PPB]) {
@@ -158,10 +159,9 @@ H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
         HGOTO_DONE(TRUE);
 
     }
-
-    /* Check the scanline's size against the maximum value and adjust 'scanline' 
-       size if necessary */
-    if(scanline > SZ_MAX_PIXELS_PER_SCANLINE)
+    if(scanline <= SZ_MAX_PIXELS_PER_SCANLINE)
+        scanline = MIN((cd_values[H5Z_SZIP_PARM_PPB] * SZ_MAX_BLOCKS_PER_SCANLINE), scanline);
+     else
        scanline = cd_values[H5Z_SZIP_PARM_PPB] * SZ_MAX_BLOCKS_PER_SCANLINE;
 
 done:
