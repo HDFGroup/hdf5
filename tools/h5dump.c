@@ -433,9 +433,9 @@ H5G_stat_t statbuf;
     case H5T_OPAQUE: 
         printf( "\n");
         indentation (indent+COL);	
-		printf("H5T_OPAQUE\n");
+		printf("H5T_OPAQUE;\n");
         indentation (indent+COL);	
-		printf("OPAQUE_TAG \"%s\"\n", H5Tget_tag(type));
+		printf("OPAQUE_TAG \"%s\";\n", H5Tget_tag(type));
         indentation (indent);
         break;
 
