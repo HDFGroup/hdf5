@@ -1,13 +1,14 @@
 This is the hdf-5.0.0a prototype release of the HDF5 library.
 
-This release is not fully functional for the entire API defined in the
+This release is almost fully functional for the entire API defined in the
 documentation, see the RELEASE file in this directory for information
 specific to this release of the library.  The INSTALL file contains
 instructions on compiling and installing the library.  The INSTALL_parallel
 file contains instructions on installing the parallel version of the
 library.
 
-Documentation for this release is in the html directory.
+Documentation for this release is in the html directory.  Start with the
+"index.html" in that dictectory.
 
 Three mailing lists are currently set up for use with the HDF5
 library.
