@@ -134,20 +134,8 @@
 
 #ifdef WIN32
 
-/*
- * we need this from <windows.h> 
- * HDF5 is currently supported on _X86_ 
- * including <windows.h> has the side effect of introducing thousands of Windows GUI
- * macros and type declarations to the compilation environment, so we don't include it
- */
-
-#if !defined(_68K_) && !defined(_MPPC_) && !defined(_PPC_) && !defined(_ALPHA_) && !defined(_MIPS_) && !defined(_X86_) && defined(_M_IX86)
-#define _X86_
-#endif
-
-#include <windef.h>
-#include <winbase.h>
-#include <io.h>
+#define VC_EXTRALEAN		/*Exclude rarely-used stuff from Windows headers */
+#include <windows.h>
 
 /* H5_inline */
 
@@ -157,8 +145,6 @@
 #endif
 
 /*
-The inline keywords allows the compiler to insert a copy of 
-the function body into each place the function is called
 inline is now in C but in the C99 standard and not the old C89 version so
 MS doesn't recognize it yet (as of April 2001)
 */
@@ -168,7 +154,9 @@ MS doesn't recognize it yet (as of April 2001)
 # define H5_inline 
 #endif
 
-#endif /*WIN32*/
+
+#endif 
+/*WIN32*/
 
 #ifndef F_OK
 #   define F_OK	00

@@ -24,15 +24,10 @@
 #endif
 
 #ifdef WIN32
-#if !defined(_68K_) && !defined(_MPPC_) && !defined(_PPC_) && !defined(_ALPHA_) && !defined(_MIPS_) && !defined(_X86_) && defined(_M_IX86)
-#define _X86_
-#endif
-#include <windef.h>
-#include <winbase.h>
-
+#include <windows.h>
 #include <io.h>
-
 #endif
+
 
 #ifdef MAX
 #undef MAX
