@@ -87,16 +87,16 @@ H5Tget_strpad(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_STR_ERROR, "not a datatype")
-    while (dt->parent && !H5T_IS_STRING(dt))
-        dt = dt->parent;  /*defer to parent*/
-    if (!H5T_IS_STRING(dt))
+    while (dt->shared->parent && !H5T_IS_STRING(dt->shared))
+        dt = dt->shared->parent;  /*defer to parent*/
+    if (!H5T_IS_STRING(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_STR_ERROR, "operation not defined for datatype class")
     
     /* result */
-    if(H5T_IS_FIXED_STRING(dt))
-        ret_value = dt->u.atomic.u.s.pad;
+    if(H5T_IS_FIXED_STRING(dt->shared))
+        ret_value = dt->shared->u.atomic.u.s.pad;
     else
-        ret_value = dt->u.vlen.pad;
+        ret_value = dt->shared->u.vlen.pad;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -144,20 +144,20 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-    if (H5T_STATE_TRANSIENT!=dt->state)
+    if (H5T_STATE_TRANSIENT!=dt->shared->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "datatype is read-only")
     if (strpad < 0 || strpad >= H5T_NSTR)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal string pad type")
-    while (dt->parent && !H5T_IS_STRING(dt))
-        dt = dt->parent;  /*defer to parent*/
-    if (!H5T_IS_STRING(dt))
+    while (dt->shared->parent && !H5T_IS_STRING(dt->shared))
+        dt = dt->shared->parent;  /*defer to parent*/
+    if (!H5T_IS_STRING(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class")
     
     /* Commit */
-    if(H5T_IS_FIXED_STRING(dt))
-        dt->u.atomic.u.s.pad = strpad;
+    if(H5T_IS_FIXED_STRING(dt->shared))
+        dt->shared->u.atomic.u.s.pad = strpad;
     else
-        dt->u.vlen.pad = strpad;
+        dt->shared->u.vlen.pad = strpad;
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -1564,7 +1564,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
                 } /* end if */
 
                 /* Free the memory for the root group */
-                H5FL_FREE(H5G_t,f->shared->root_grp);
+                H5G_free(f->shared->root_grp);
                 f->shared->root_grp=NULL;
             }
 	    if (H5AC_dest(f, dxpl_id)) {
@@ -3401,6 +3401,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     unsigned	lt, rt, md;		/*binary search indices		*/
     int		cmp;			/*binary search comparison value*/
     H5G_entry_t	*ent = NULL;		/*temporary symbol table entry	*/
+    H5G_entry_t  mp_open_ent;     /* entry of moint point to be opened */
     H5RS_str_t  *name_r;                /* Ref-counted version of name */
     herr_t	ret_value = SUCCEED;	/*return value			*/
     
@@ -3416,15 +3417,17 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
      * that the mount wouldn't introduce a cycle in the mount tree.
      */
     if (child->mtab.parent)
-	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "file is already mounted")
-    if (NULL==(mount_point=H5G_open(loc, name, dxpl_id)))
-	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found")
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "file is already mounted")
+    if (H5G_find(loc, name, NULL, &mp_open_ent/*out*/, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found");
+    if (NULL==(mount_point=H5G_open(&mp_open_ent, dxpl_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found")
 
     parent = H5G_fileof(mount_point);
     mp_ent = H5G_entof(mount_point);
     for (ancestor=parent; ancestor; ancestor=ancestor->mtab.parent) {
-	if (ancestor==child)
-	    HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount would introduce a cycle")
+        if (ancestor==child)
+            HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount would introduce a cycle")
     }
     
     /*
@@ -3436,29 +3439,29 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     rt=parent->mtab.nmounts;
     cmp = -1;
     while (lt<rt && cmp) {
-	md = (lt+rt)/2;
-	ent = H5G_entof(parent->mtab.child[md].group);
-	cmp = H5F_addr_cmp(mp_ent->header, ent->header);
-	if (cmp<0) {
-	    rt = md;
-	} else if (cmp>0) {
-	    lt = md+1;
-	}
+        md = (lt+rt)/2;
+        ent = H5G_entof(parent->mtab.child[md].group);
+        cmp = H5F_addr_cmp(mp_ent->header, ent->header);
+        if (cmp<0) {
+            rt = md;
+        } else if (cmp>0) {
+            lt = md+1;
+        }
     }
     if (cmp>0)
         md++;
     if (!cmp)
-	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point is already in use")
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point is already in use")
     
     /* Make room in the table */
     if (parent->mtab.nmounts>=parent->mtab.nalloc) {
-	unsigned n = MAX(16, 2*parent->mtab.nalloc);
-	H5F_mount_t *x = H5MM_realloc(parent->mtab.child,
+        unsigned n = MAX(16, 2*parent->mtab.nalloc);
+        H5F_mount_t *x = H5MM_realloc(parent->mtab.child,
 				      n*sizeof(parent->mtab.child[0]));
-	if (!x)
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for mount table")
-	parent->mtab.child = x;
-	parent->mtab.nalloc = n;
+        if (!x)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for mount table")
+        parent->mtab.child = x;
+        parent->mtab.nalloc = n;
     }
 
     /* Insert into table */
@@ -3475,9 +3478,9 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     name_r=H5RS_wrap(name);
     assert(name_r);
     if (H5G_replace_name( H5G_UNKNOWN, loc, name_r, NULL, NULL, NULL, OP_MOUNT )<0)
-	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name")
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name")
     if(H5RS_decr(name_r)<0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to decrement name string")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to decrement name string")
 
 done:
     if (ret_value<0 && mount_point)
@@ -3522,6 +3525,7 @@ H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
     H5F_t	*child = NULL;		/*mounted file			*/
     H5F_t	*parent = NULL;		/*file where mounted		*/
     H5G_entry_t	*ent = NULL;		/*temporary symbol table entry	*/
+    H5G_entry_t mnt_open_ent;       /* entry used to open mount point*/
     herr_t	ret_value = FAIL;	/*return value			*/
     unsigned	i;			/*coutners			*/
     unsigned	lt, rt, md=0;	        /*binary search indices		*/
@@ -3537,14 +3541,16 @@ H5F_unmount(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
      * If we get the root group and the file has a parent in the mount tree,
      * then we must have found the mount point.
      */
-    if (NULL==(mounted=H5G_open(loc, name, dxpl_id)))
-	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found")
+    if (H5G_find(loc, name, NULL, &mnt_open_ent/*out*/, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found");
+    if (NULL==(mounted=H5G_open(&mnt_open_ent, dxpl_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found")
     child = H5G_fileof(mounted);
     mnt_ent = H5G_entof(mounted);
     ent = H5G_entof(child->shared->root_grp);
 
     if (child->mtab.parent &&
-	H5F_addr_eq(mnt_ent->header, ent->header)) {
+        H5F_addr_eq(mnt_ent->header, ent->header)) {
 	/*
 	 * We've been given the root group of the child.  We do a reverse
 	 * lookup in the parent's mount table to find the correct entry.

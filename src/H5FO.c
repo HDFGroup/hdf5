@@ -38,7 +38,7 @@
 typedef struct H5FO_open_obj_t {
     haddr_t addr;                       /* Address of object header for object */
                                         /* THIS MUST BE FIRST FOR TBBT ROUTINES */
-    hid_t id;                           /* Current ID for object            */
+    void *obj;                          /* Pointer to the object            */
     hbool_t deleted;                    /* Flag to indicate that the object was deleted from the file */
 } H5FO_open_obj_t;
 
@@ -90,12 +90,12 @@ done:
  PURPOSE
     Checks if an object at an address is already open in the file.
  USAGE
-    hid_t H5FO_opened(f,addr)
+    void * H5FO_opened(f,addr)
         const H5F_t *f;         IN: File to check opened object info set
         haddr_t addr;           IN: Address of object to check
 
  RETURNS
-    Returns a non-negative ID for the object on success, negative on failure
+    Returns a pointer to the object on success, NULL on failure
  DESCRIPTION
     Check is an object at an address (the address of the object's object header)
     is already open in the file and return the ID for that object if it is open.
@@ -104,12 +104,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hid_t
+void *
 H5FO_opened(const H5F_t *f, haddr_t addr)
 {
     H5TB_NODE *obj_node;        /* TBBT node holding open object */
     H5FO_open_obj_t *open_obj;  /* Information about open object */
-    hid_t ret_value;            /* Return value */
+    void *ret_value;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOFUNC(H5FO_opened)
 
@@ -123,11 +123,11 @@ H5FO_opened(const H5F_t *f, haddr_t addr)
     if((obj_node=H5TB_dfind(f->shared->open_objs,&addr,NULL))!=NULL) {
         open_obj=H5TB_NODE_DATA(obj_node);
         assert(open_obj);
-        ret_value=open_obj->id;
+        ret_value=open_obj->obj;
         assert(ret_value>0);
     } /* end if */
     else
-        ret_value=FAIL;
+        ret_value=NULL;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FO_opened() */
@@ -137,12 +137,12 @@ H5FO_opened(const H5F_t *f, haddr_t addr)
  NAME
     H5FO_insert
  PURPOSE
-    Insert a newly opened object/ID pair into the opened object info set
+    Insert a newly opened object/pointer pair into the opened object info set
  USAGE
-    herr_t H5FO_insert(f,addr,id)
+    herr_t H5FO_insert(f,addr,obj)
         H5F_t *f;               IN/OUT: File's opened object info set
         haddr_t addr;           IN: Address of object to insert
-        hid_t id;               IN: ID of object to insert
+        void *obj;              IN: Pointer to object to insert
         int type;               IN: Type of object being inserted
 
  RETURNS
@@ -155,7 +155,7 @@ H5FO_opened(const H5F_t *f, haddr_t addr)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5FO_insert(const H5F_t *f, haddr_t addr, hid_t id)
+H5FO_insert(const H5F_t *f, haddr_t addr, void *obj)
 {
     H5FO_open_obj_t *open_obj;  /* Information about open object */
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -167,7 +167,7 @@ H5FO_insert(const H5F_t *f, haddr_t addr, hid_t id)
     assert(f->shared);
     assert(f->shared->open_objs);
     assert(H5F_addr_defined(addr));
-    assert(id>0);
+    assert(obj);
 
     /* Allocate new opened object information structure */
     if((open_obj=H5FL_MALLOC(H5FO_open_obj_t))==NULL)
@@ -175,7 +175,7 @@ H5FO_insert(const H5F_t *f, haddr_t addr, hid_t id)
 
     /* Assign information */
     open_obj->addr=addr;
-    open_obj->id=id;
+    open_obj->obj=obj;
     open_obj->deleted=0;
 
     /* Insert into TBBT */

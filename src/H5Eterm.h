@@ -20,7 +20,7 @@
 #define _H5Eterm_H
 
 /* Reset major error IDs */
-H5E_NONE_MAJOR_g=    
+    
 H5E_DATASET_g=    
 H5E_FUNC_g=    
 H5E_STORAGE_g=    
@@ -51,8 +51,6 @@ H5E_CACHE_g= (-1);
 
 /* Reset minor error IDs */
 
-/* No error */
-H5E_NONE_MINOR_g=
 
 /* Generic low-level file I/O errors */    
 H5E_SEEKERROR_g=    

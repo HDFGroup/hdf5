@@ -29,7 +29,9 @@ const char *FILENAME[] = {
     "lunlink",
     "filespace",
     "slashes",
-    "resurrect",
+    "resurrect_set",
+    "resurrect_type",
+    "resurrect_group",
     "unlink_chunked",
     NULL
 };
@@ -44,6 +46,7 @@ const char *FILENAME[] = {
 #define DATASET2NAME    "dataset2"
 #define ATTRNAME        "attribute"
 #define TYPENAME        "datatype"
+#define TYPE2NAME       "datatype2"
 #define FILESPACE_NDIMS 3
 #define FILESPACE_DIM0  20
 #define FILESPACE_DIM1  20
@@ -1837,6 +1840,9 @@ test_resurrect_dataset(void)
     /* Unlink the dataset while it's open (will mark it for deletion when closed) */
     if(H5Gunlink(f, DATASETNAME)<0) TEST_ERROR;
 
+    /* Check that dataset name is NULL */
+    if(H5Iget_name(d, NULL, 0) != 0) TEST_ERROR;
+
     /* Re-link the dataset to the group hierarchy (shouldn't get deleted now) */
     if(H5Glink2(d, ".", H5G_LINK_HARD, f, DATASET2NAME)<0) TEST_ERROR;
 
@@ -1867,6 +1873,145 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* end test_resurrect_dataset() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_resurrect_datatype
+ *
+ * Purpose:     Tests deleting a datatype while it's still open and then
+ *              "resurrecting" it by creating a link to it again.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  James Laird
+ *              Wednesday, July 28, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_resurrect_datatype(void)
+{
+    hid_t       file=-1, type=-1, fapl=-1, loc_id=-1;
+    char        filename[1024];
+
+    TESTING("Resurrecting datatype after deletion");
+
+    /* Create file */
+    fapl = h5_fileaccess();
+    h5_fixname(FILENAME[7], fapl, filename, sizeof filename);
+
+    /* Create the file */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+    /* Create a named datatype in the file */
+    if((type = H5Tcopy (H5T_NATIVE_INT))<0) TEST_ERROR;
+    if(H5Tcommit (file, TYPENAME, type)<0) TEST_ERROR;
+
+    /* Unlink the datatype while it's open (will mark it for deletion when closed) */
+    if(H5Gunlink(file, TYPENAME)<0) TEST_ERROR;
+
+    /* Check that datatype name is NULL */
+    if(H5Iget_name(type, NULL, 0) != 0) TEST_ERROR;
+
+    /* Re-link the datatype to the group hierarchy (shouldn't get deleted now) */
+    if(H5Glink2(type, ".", H5G_LINK_HARD, file, TYPE2NAME) < 0) TEST_ERROR;
+
+    /* Close things */
+    if(H5Tclose(type)<0) TEST_ERROR;
+    if(H5Fclose(file)<0) TEST_ERROR;
+
+    /* Re-open the file */
+    if((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) TEST_ERROR;
+
+    /* Attempt to open the datatype under the new name */
+    if((type=H5Topen(file,TYPE2NAME))<0) TEST_ERROR;
+
+    /* Close things */
+    if(H5Tclose(type)<0) TEST_ERROR;
+    if(H5Fclose(file)<0) TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Tclose(type);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_resurrect_datatype() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_resurrect_group
+ *
+ * Purpose:     Tests deleting a group while it's still open and then
+ *              "resurrecting" it by creating a link to it again.
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  James Laird
+ *              Wednesday, July 28, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_resurrect_group(void)
+{
+    hid_t       file=-1, group=-1, fapl=-1;
+    char        filename[1024];
+
+    TESTING("Resurrecting group after deletion");
+
+    /* Create file */
+    fapl = h5_fileaccess();
+    h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
+
+    /* Create the file */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+
+    /* Create a group in the file */
+    if((group = H5Gcreate (file, GROUPNAME, 0))<0) TEST_ERROR;
+
+    /* Unlink the group while it's open (will mark it for deletion when closed) */
+    if(H5Gunlink(file, GROUPNAME)<0) TEST_ERROR;
+
+    /* Check that group's name is NULL */
+    if(H5Iget_name(group, NULL, 0) != 0) TEST_ERROR;
+
+    /* Re-link the group into the group hierarchy (shouldn't get deleted now) */
+    if(H5Glink2(group, ".", H5G_LINK_HARD, file, GROUP2NAME)<0) TEST_ERROR;
+
+    /* Close things */
+    if(H5Gclose(group)<0) TEST_ERROR;
+    if(H5Fclose(file)<0) TEST_ERROR;
+
+    /* Re-open the file */
+    if((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) TEST_ERROR;
+
+    /* Attempt to open the datatype under the new name */
+    if((group=H5Gopen(file,GROUP2NAME))<0) TEST_ERROR;
+
+    /* Close things */
+    if(H5Gclose(group)<0) TEST_ERROR;
+    if(H5Fclose(file)<0) TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Gclose(group);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_resurrect_group() */
 
 
 /*-------------------------------------------------------------------------
@@ -2035,6 +2180,8 @@ main(void)
 
     /* Test "resurrecting" objects */
     nerrors += test_resurrect_dataset();
+    nerrors += test_resurrect_datatype();
+    nerrors += test_resurrect_group();
  
     /* Test unlinking chunked datasets */
     nerrors += test_unlink_chunked_dataset();

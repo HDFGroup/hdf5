@@ -23,7 +23,6 @@
 /* Major error codes */
 /*********************/
 
-#define H5E_NONE_MAJOR      (H5OPEN H5E_NONE_MAJOR_g)
 #define H5E_DATASET         (H5OPEN H5E_DATASET_g)
 #define H5E_FUNC            (H5OPEN H5E_FUNC_g)
 #define H5E_STORAGE         (H5OPEN H5E_STORAGE_g)
@@ -51,7 +50,6 @@
 #define H5E_ERROR           (H5OPEN H5E_ERROR_g)
 #define H5E_PLINE           (H5OPEN H5E_PLINE_g)
 #define H5E_CACHE           (H5OPEN H5E_CACHE_g)
-H5_DLLVAR hid_t H5E_NONE_MAJOR_g;   /* No error */
 H5_DLLVAR hid_t H5E_DATASET_g;      /* Dataset */
 H5_DLLVAR hid_t H5E_FUNC_g;         /* Function entry/exit */
 H5_DLLVAR hid_t H5E_STORAGE_g;      /* Data storage */
@@ -83,9 +81,6 @@ H5_DLLVAR hid_t H5E_CACHE_g;        /* Object cache */
 /*********************/
 /* Minor error codes */
 /*********************/
-/* No error */
-#define H5E_NONE_MINOR       (H5OPEN H5E_NONE_MINOR_g)
-H5_DLLVAR hid_t H5E_NONE_MINOR_g;    /* No error */
 
 /* Generic low-level file I/O errors */
 #define H5E_SEEKERROR       (H5OPEN H5E_SEEKERROR_g)

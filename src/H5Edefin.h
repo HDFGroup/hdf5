@@ -20,7 +20,6 @@
 #define _H5Edefin_H
 
 /* Major error IDs */
-hid_t H5E_NONE_MAJOR_g     = FAIL;      /* No error */
 hid_t H5E_DATASET_g        = FAIL;      /* Dataset */
 hid_t H5E_FUNC_g           = FAIL;      /* Function entry/exit */
 hid_t H5E_STORAGE_g        = FAIL;      /* Data storage */
@@ -50,8 +49,6 @@ hid_t H5E_PLINE_g          = FAIL;      /* Data filters */
 hid_t H5E_CACHE_g          = FAIL;      /* Object cache */
 
 /* Minor error IDs */
-
-hid_t H5E_NONE_MINOR_g     = FAIL;      /* No error */
 
 /* Generic low-level file I/O errors */
 hid_t H5E_SEEKERROR_g      = FAIL;      /* Seek failed */

@@ -24,6 +24,7 @@
 
 /* Private headers needed by this file */
 #include "H5private.h"
+#include "H5Fprivate.h"
 #include "H5TBprivate.h"	/* TBBTs	  		        */
 
 /* Typedefs */
@@ -35,8 +36,8 @@ typedef H5TB_TREE H5FO_t;       /* Currently, all open objects are stored in TBB
 
 /* Private routines */
 H5_DLL herr_t H5FO_create(const H5F_t *f);
-H5_DLL hid_t H5FO_opened(const H5F_t *f, haddr_t addr);
-H5_DLL herr_t H5FO_insert(const H5F_t *f, haddr_t addr, hid_t id);
+H5_DLL void  *H5FO_opened(const H5F_t *f, haddr_t addr);
+H5_DLL herr_t H5FO_insert(const H5F_t *f, haddr_t addr, void *obj);
 H5_DLL herr_t H5FO_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL herr_t H5FO_mark(const H5F_t *f, haddr_t addr, hbool_t deleted);
 H5_DLL htri_t H5FO_marked(const H5F_t *f, haddr_t addr);

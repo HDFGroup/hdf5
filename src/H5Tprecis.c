@@ -91,13 +91,13 @@ H5Tget_precision(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
-    while (dt->parent)
-        dt = dt->parent;	/*defer to parent*/
-    if (!H5T_IS_ATOMIC(dt))
+    while (dt->shared->parent)
+        dt = dt->shared->parent;	/*defer to parent*/
+    if (!H5T_IS_ATOMIC(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for specified datatype")
     
     /* Precision */
-    ret_value = dt->u.atomic.prec;
+    ret_value = dt->shared->u.atomic.prec;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -145,15 +145,15 @@ H5Tset_precision(hid_t type_id, size_t prec)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-    if (H5T_STATE_TRANSIENT!=dt->state)
+    if (H5T_STATE_TRANSIENT!=dt->shared->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is read-only")
     if (prec == 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "precision must be positive")
-    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
+    if (H5T_ENUM==dt->shared->type && dt->shared->u.enumer.nmembs>0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "operation not allowed after members are defined")
-    if (H5T_STRING==dt->type)
+    if (H5T_STRING==dt->shared->type)
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "precision for this type is read-only")
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type)
+    if (H5T_COMPOUND==dt->shared->type || H5T_OPAQUE==dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified datatype")
 
     /* Do the work */
@@ -205,25 +205,25 @@ H5T_set_precision(H5T_t *dt, size_t prec)
     /* Check args */
     assert(dt);
     assert(prec>0);
-    assert(H5T_OPAQUE!=dt->type);
-    assert(H5T_COMPOUND!=dt->type);
-    assert(H5T_STRING!=dt->type);
-    assert(!(H5T_ENUM==dt->type && 0==dt->u.enumer.nmembs));
+    assert(H5T_OPAQUE!=dt->shared->type);
+    assert(H5T_COMPOUND!=dt->shared->type);
+    assert(H5T_STRING!=dt->shared->type);
+    assert(!(H5T_ENUM==dt->shared->type && 0==dt->shared->u.enumer.nmembs));
 
-    if (dt->parent) {
-	if (H5T_set_precision(dt->parent, prec)<0)
+    if (dt->shared->parent) {
+	if (H5T_set_precision(dt->shared->parent, prec)<0)
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set precision for base type")
 
         /* Adjust size of datatype appropriately */
-        if(dt->type==H5T_ARRAY)
-            dt->size = dt->parent->size * dt->u.array.nelem;
-        else if(dt->type!=H5T_VLEN)
-            dt->size = dt->parent->size;
+        if(dt->shared->type==H5T_ARRAY)
+            dt->shared->size = dt->shared->parent->shared->size * dt->shared->u.array.nelem;
+        else if(dt->shared->type!=H5T_VLEN)
+            dt->shared->size = dt->shared->parent->shared->size;
     } else {
-        if (H5T_IS_ATOMIC(dt)) {
+        if (H5T_IS_ATOMIC(dt->shared)) {
 	    /* Adjust the offset and size */
-	    offset = dt->u.atomic.offset;
-	    size = dt->size;
+	    offset = dt->shared->u.atomic.offset;
+	    size = dt->shared->size;
 	    if (prec > 8*size)
                 offset = 0;
 	    else if (offset+prec > 8 * size)
@@ -232,7 +232,7 @@ H5T_set_precision(H5T_t *dt, size_t prec)
                 size = (prec+7) / 8;
 
 	    /* Check that things are still kosher */
-	    switch (dt->type) {
+	    switch (dt->shared->type) {
                 case H5T_INTEGER:
                 case H5T_TIME:
                 case H5T_BITFIELD:
@@ -245,9 +245,9 @@ H5T_set_precision(H5T_t *dt, size_t prec)
                      * first when decreasing the precision of a floating point
                      * type.
                      */
-                    if (dt->u.atomic.u.f.sign >= prec ||
-                            dt->u.atomic.u.f.epos + dt->u.atomic.u.f.esize > prec ||
-                            dt->u.atomic.u.f.mpos + dt->u.atomic.u.f.msize > prec)
+                    if (dt->shared->u.atomic.u.f.sign >= prec ||
+                            dt->shared->u.atomic.u.f.epos + dt->shared->u.atomic.u.f.esize > prec ||
+                            dt->shared->u.atomic.u.f.mpos + dt->shared->u.atomic.u.f.msize > prec)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "adjust sign, mantissa, and exponent fields first")
                     break;
 
@@ -257,9 +257,9 @@ H5T_set_precision(H5T_t *dt, size_t prec)
 	    } /* end switch */
 
 	    /* Commit */
-	    dt->size = size;
-            dt->u.atomic.offset = offset;
-            dt->u.atomic.prec = prec;
+	    dt->shared->size = size;
+            dt->shared->u.atomic.offset = offset;
+            dt->shared->u.atomic.prec = prec;
 	} /* end if */
         else
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified datatype")

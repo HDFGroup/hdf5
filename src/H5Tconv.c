@@ -440,7 +440,7 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 	if (NULL==(st=H5I_object(src_id)) || NULL==(dt=H5I_object(dst_id)))   \
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
 			  "unable to dereference datatype object ID")	      \
-	if (st->size!=sizeof(ST) || dt->size!=sizeof(DT))		      \
+	if (st->shared->size!=sizeof(ST) || dt->shared->size!=sizeof(DT))		      \
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
 			  "disagreement about datatype size")		      \
 	CI_ALLOC_PRIV	                                                      \
@@ -739,21 +739,21 @@ H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	if (NULL == (src = H5I_object(src_id)) ||
                 NULL == (dst = H5I_object(dst_id)))
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-	if (src->size != dst->size ||
-                0 != src->u.atomic.offset ||
-                0 != dst->u.atomic.offset)
+	if (src->shared->size != dst->shared->size ||
+                0 != src->shared->u.atomic.offset ||
+                0 != dst->shared->u.atomic.offset)
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "conversion not supported");
-        if((src->type==H5T_REFERENCE && dst->type!=H5T_REFERENCE) ||
-                (dst->type==H5T_REFERENCE && src->type!=H5T_REFERENCE))
+        if((src->shared->type==H5T_REFERENCE && dst->shared->type!=H5T_REFERENCE) ||
+                (dst->shared->type==H5T_REFERENCE && src->shared->type!=H5T_REFERENCE))
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "conversion not supported");
-        if(src->type!=H5T_REFERENCE &&
-                !((H5T_ORDER_BE == src->u.atomic.order && H5T_ORDER_LE == dst->u.atomic.order) ||
-                  (H5T_ORDER_LE == src->u.atomic.order && H5T_ORDER_BE == dst->u.atomic.order)))
+        if(src->shared->type!=H5T_REFERENCE &&
+                !((H5T_ORDER_BE == src->shared->u.atomic.order && H5T_ORDER_LE == dst->shared->u.atomic.order) ||
+                  (H5T_ORDER_LE == src->shared->u.atomic.order && H5T_ORDER_BE == dst->shared->u.atomic.order)))
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "conversion not supported");
-        if (src->size!=1 && src->size!=2 && src->size!=4 &&
-                src->size!=8 && src->size!=16)
+        if (src->shared->size!=1 && src->shared->size!=2 && src->shared->size!=4 &&
+                src->shared->size!=8 && src->shared->size!=16)
             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "conversion not supported");
-	switch (src->type) {
+	switch (src->shared->type) {
             case H5T_INTEGER:
             case H5T_BITFIELD:
             case H5T_REFERENCE:
@@ -761,14 +761,14 @@ H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                 break;
 
             case H5T_FLOAT:
-                if (src->u.atomic.u.f.sign != dst->u.atomic.u.f.sign ||
-                        src->u.atomic.u.f.epos != dst->u.atomic.u.f.epos ||
-                        src->u.atomic.u.f.esize != dst->u.atomic.u.f.esize ||
-                        src->u.atomic.u.f.ebias != dst->u.atomic.u.f.ebias ||
-                        src->u.atomic.u.f.mpos != dst->u.atomic.u.f.mpos ||
-                        src->u.atomic.u.f.msize != dst->u.atomic.u.f.msize ||
-                        src->u.atomic.u.f.norm != dst->u.atomic.u.f.norm ||
-                        src->u.atomic.u.f.pad != dst->u.atomic.u.f.pad)
+                if (src->shared->u.atomic.u.f.sign != dst->shared->u.atomic.u.f.sign ||
+                        src->shared->u.atomic.u.f.epos != dst->shared->u.atomic.u.f.epos ||
+                        src->shared->u.atomic.u.f.esize != dst->shared->u.atomic.u.f.esize ||
+                        src->shared->u.atomic.u.f.ebias != dst->shared->u.atomic.u.f.ebias ||
+                        src->shared->u.atomic.u.f.mpos != dst->shared->u.atomic.u.f.mpos ||
+                        src->shared->u.atomic.u.f.msize != dst->shared->u.atomic.u.f.msize ||
+                        src->shared->u.atomic.u.f.norm != dst->shared->u.atomic.u.f.norm ||
+                        src->shared->u.atomic.u.f.pad != dst->shared->u.atomic.u.f.pad)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "conversion not supported");
                 break;
 
@@ -785,9 +785,9 @@ H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
         /* Check for "no op" reference conversion */
-        if(src->type==H5T_REFERENCE) {
+        if(src->shared->type==H5T_REFERENCE) {
             /* Sanity check */
-            assert(dst->type==H5T_REFERENCE);
+            assert(dst->shared->type==H5T_REFERENCE);
 
             /* Check if we are on a little-endian machine (the order that
              * the addresses in the file must be) and just get out now, there
@@ -802,8 +802,8 @@ H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                 break;
         } /* end if */
 
-        buf_stride = buf_stride ? buf_stride : src->size;
-        switch (src->size) {
+        buf_stride = buf_stride ? buf_stride : src->shared->size;
+        switch (src->shared->size) {
         case 1:
             /*no-op*/
             break;
@@ -1145,28 +1145,28 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	if (NULL == (src = H5I_object(src_id)) ||
                 NULL == (dst = H5I_object(dst_id)))
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-	if (src->size != dst->size || 0 != src->u.atomic.offset ||
-                0 != dst->u.atomic.offset ||
-                !((H5T_ORDER_BE == src->u.atomic.order &&
-                   H5T_ORDER_LE == dst->u.atomic.order) ||
-                  (H5T_ORDER_LE == src->u.atomic.order &&
-                   H5T_ORDER_BE == dst->u.atomic.order)))
+	if (src->shared->size != dst->shared->size || 0 != src->shared->u.atomic.offset ||
+                0 != dst->shared->u.atomic.offset ||
+                !((H5T_ORDER_BE == src->shared->u.atomic.order &&
+                   H5T_ORDER_LE == dst->shared->u.atomic.order) ||
+                  (H5T_ORDER_LE == src->shared->u.atomic.order &&
+                   H5T_ORDER_BE == dst->shared->u.atomic.order)))
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "conversion not supported");
-	switch (src->type) {
+	switch (src->shared->type) {
             case H5T_INTEGER:
             case H5T_BITFIELD:
                 /* nothing to check */
                 break;
 
             case H5T_FLOAT:
-                if (src->u.atomic.u.f.sign != dst->u.atomic.u.f.sign ||
-                        src->u.atomic.u.f.epos != dst->u.atomic.u.f.epos ||
-                        src->u.atomic.u.f.esize != dst->u.atomic.u.f.esize ||
-                        src->u.atomic.u.f.ebias != dst->u.atomic.u.f.ebias ||
-                        src->u.atomic.u.f.mpos != dst->u.atomic.u.f.mpos ||
-                        src->u.atomic.u.f.msize != dst->u.atomic.u.f.msize ||
-                        src->u.atomic.u.f.norm != dst->u.atomic.u.f.norm ||
-                        src->u.atomic.u.f.pad != dst->u.atomic.u.f.pad) {
+                if (src->shared->u.atomic.u.f.sign != dst->shared->u.atomic.u.f.sign ||
+                        src->shared->u.atomic.u.f.epos != dst->shared->u.atomic.u.f.epos ||
+                        src->shared->u.atomic.u.f.esize != dst->shared->u.atomic.u.f.esize ||
+                        src->shared->u.atomic.u.f.ebias != dst->shared->u.atomic.u.f.ebias ||
+                        src->shared->u.atomic.u.f.mpos != dst->shared->u.atomic.u.f.mpos ||
+                        src->shared->u.atomic.u.f.msize != dst->shared->u.atomic.u.f.msize ||
+                        src->shared->u.atomic.u.f.norm != dst->shared->u.atomic.u.f.norm ||
+                        src->shared->u.atomic.u.f.pad != dst->shared->u.atomic.u.f.pad) {
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "conversion not supported");
                 }
                 break;
@@ -1183,11 +1183,11 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 NULL == (dst = H5I_object(dst_id)))
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
-        buf_stride = buf_stride ? buf_stride : src->size;
-        md = src->size / 2;
+        buf_stride = buf_stride ? buf_stride : src->shared->size;
+        md = src->shared->size / 2;
         for (i=0; i<nelmts; i++, buf+=buf_stride) {
             for (j=0; j<md; j++)
-                H5_SWAP_BYTES(buf, j, src->size-(j+1));
+                H5_SWAP_BYTES(buf, j, src->shared->size-(j+1));
         }
         break;
 
@@ -1252,11 +1252,11 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (NULL == (src = H5I_object(src_id)) ||
                     NULL == (dst = H5I_object(dst_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            if (H5T_ORDER_LE!=src->u.atomic.order &&
-                    H5T_ORDER_BE!=src->u.atomic.order)
+            if (H5T_ORDER_LE!=src->shared->u.atomic.order &&
+                    H5T_ORDER_BE!=src->shared->u.atomic.order)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
-            if (H5T_ORDER_LE!=dst->u.atomic.order &&
-                    H5T_ORDER_BE!=dst->u.atomic.order)
+            if (H5T_ORDER_LE!=dst->shared->u.atomic.order &&
+                    H5T_ORDER_BE!=dst->shared->u.atomic.order)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
             cdata->need_bkg = H5T_BKG_NO;
             break;
@@ -1275,23 +1275,23 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
              * how many of the elements have the source and destination areas
              * overlapping?
              */
-            if (src->size==dst->size || buf_stride) {
+            if (src->shared->size==dst->shared->size || buf_stride) {
                 sp = dp = (uint8_t*)buf;
                 direction = 1;
                 olap = nelmts;
-            } else if (src->size>=dst->size) {
-                double olap_d = HDceil((double)(dst->size)/
-                                       (double)(src->size-dst->size));
+            } else if (src->shared->size>=dst->shared->size) {
+                double olap_d = HDceil((double)(dst->shared->size)/
+                                       (double)(src->shared->size-dst->shared->size));
                 
                 olap = (size_t)olap_d;
                 sp = dp = (uint8_t*)buf;
                 direction = 1;
             } else {
-                double olap_d = HDceil((double)(src->size)/
-                                       (double)(dst->size-src->size));
+                double olap_d = HDceil((double)(src->shared->size)/
+                                       (double)(dst->shared->size-src->shared->size));
                 olap = (size_t)olap_d;
-                sp = (uint8_t*)buf + (nelmts-1) * src->size;
-                dp = (uint8_t*)buf + (nelmts-1) * dst->size;
+                sp = (uint8_t*)buf + (nelmts-1) * src->shared->size;
+                dp = (uint8_t*)buf + (nelmts-1) * dst->shared->size;
                 direction = -1;
             }
 
@@ -1304,7 +1304,7 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get conversion exception callback");
 
             /* Allocate space for order-reversed source buffer */
-            src_rev = (uint8_t*)H5MM_calloc(src->size);
+            src_rev = (uint8_t*)H5MM_calloc(src->shared->size);
             
             /* The conversion loop */
             for (elmtno=0; elmtno<nelmts; elmtno++) {
@@ -1323,11 +1323,11 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 #ifndef NDEBUG
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (d==dbuf) {
-                    assert ((dp>=sp && dp<sp+src->size) ||
-                            (sp>=dp && sp<dp+dst->size));
+                    assert ((dp>=sp && dp<sp+src->shared->size) ||
+                            (sp>=dp && sp<dp+dst->shared->size));
                 } else {
-                    assert ((dp<sp && dp+dst->size<=sp) ||
-                            (sp<dp && sp+src->size<=dp));
+                    assert ((dp<sp && dp+dst->shared->size<=sp) ||
+                            (sp<dp && sp+src->shared->size<=dp));
                 }
 #endif
                 
@@ -1336,11 +1336,11 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * complicated.  We'll do all the conversion stuff assuming
                  * little endian and then we'll fix the order at the end.
                  */
-                if (H5T_ORDER_BE==src->u.atomic.order) {
-                    half_size = src->size/2;
+                if (H5T_ORDER_BE==src->shared->u.atomic.order) {
+                    half_size = src->shared->size/2;
                     for (i=0; i<half_size; i++) {
-                        uint8_t tmp = s[src->size-(i+1)];
-                        s[src->size-(i+1)] = s[i];
+                        uint8_t tmp = s[src->shared->size-(i+1)];
+                        s[src->shared->size-(i+1)] = s[i];
                         s[i] = tmp;
                     }
                 }
@@ -1354,51 +1354,51 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * than the destination then invoke the overflow function or copy
                  * as many bits as possible. Zero extra bits in the destination.
                  */
-                if (src->u.atomic.prec>dst->u.atomic.prec) {
+                if (src->shared->u.atomic.prec>dst->shared->u.atomic.prec) {
                     /*overflow*/
                     if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                        H5T_reverse_order(src_rev, s, src->size, src->u.atomic.order); /*reverse order first*/
+                        H5T_reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
                         except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id, 
                                 src_rev, d, cb_struct.user_data);
                     }
                     
                     if(except_ret == H5T_CONV_UNHANDLED) { 
-                        H5T_bit_copy(d, dst->u.atomic.offset,
-                                     s, src->u.atomic.offset, dst->u.atomic.prec);
+                        H5T_bit_copy(d, dst->shared->u.atomic.offset,
+                                     s, src->shared->u.atomic.offset, dst->shared->u.atomic.prec);
                     } else if(except_ret == H5T_CONV_ABORT)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                     else if(except_ret == H5T_CONV_HANDLED)
                         /*Don't reverse because user handles it*/
                         reverse = FALSE;
                 } else {
-                    H5T_bit_copy(d, dst->u.atomic.offset,
-                                 s, src->u.atomic.offset,
-                                 src->u.atomic.prec);
-                    H5T_bit_set(d, dst->u.atomic.offset+src->u.atomic.prec,
-                                dst->u.atomic.prec-src->u.atomic.prec, FALSE);
+                    H5T_bit_copy(d, dst->shared->u.atomic.offset,
+                                 s, src->shared->u.atomic.offset,
+                                 src->shared->u.atomic.prec);
+                    H5T_bit_set(d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec,
+                                dst->shared->u.atomic.prec-src->shared->u.atomic.prec, FALSE);
                 }
 
                 /*
                  * Fill the destination padding areas.
                  */
-                switch (dst->u.atomic.lsb_pad) {
+                switch (dst->shared->u.atomic.lsb_pad) {
                     case H5T_PAD_ZERO:
-                        H5T_bit_set(d, 0, dst->u.atomic.offset, FALSE);
+                        H5T_bit_set(d, 0, dst->shared->u.atomic.offset, FALSE);
                         break;
                     case H5T_PAD_ONE:
-                        H5T_bit_set(d, 0, dst->u.atomic.offset, TRUE);
+                        H5T_bit_set(d, 0, dst->shared->u.atomic.offset, TRUE);
                         break;
                     default:
                         HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported LSB padding");
                 }
-                msb_pad_offset = dst->u.atomic.offset + dst->u.atomic.prec;
-                switch (dst->u.atomic.msb_pad) {
+                msb_pad_offset = dst->shared->u.atomic.offset + dst->shared->u.atomic.prec;
+                switch (dst->shared->u.atomic.msb_pad) {
                     case H5T_PAD_ZERO:
-                        H5T_bit_set(d, msb_pad_offset, 8*dst->size-msb_pad_offset,
+                        H5T_bit_set(d, msb_pad_offset, 8*dst->shared->size-msb_pad_offset,
                                     FALSE);
                         break;
                     case H5T_PAD_ONE:
-                        H5T_bit_set(d, msb_pad_offset, 8*dst->size-msb_pad_offset,
+                        H5T_bit_set(d, msb_pad_offset, 8*dst->shared->size-msb_pad_offset,
                                     TRUE);
                         break;
                     default:
@@ -1409,11 +1409,11 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * Put the destination in the correct byte order.  See note at
                  * beginning of loop.
                  */
-                if (H5T_ORDER_BE==dst->u.atomic.order && reverse) {
-                    half_size = dst->size/2;
+                if (H5T_ORDER_BE==dst->shared->u.atomic.order && reverse) {
+                    half_size = dst->shared->size/2;
                     for (i=0; i<half_size; i++) {
-                        uint8_t tmp = d[dst->size-(i+1)];
-                        d[dst->size-(i+1)] = d[i];
+                        uint8_t tmp = d[dst->shared->size-(i+1)];
+                        d[dst->shared->size-(i+1)] = d[i];
                         d[i] = tmp;
                     }
                 }
@@ -1422,13 +1422,13 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * If we had used a temporary buffer for the destination then we
                  * should copy the value to the true destination buffer.
                  */
-                if (d==dbuf) HDmemcpy (dp, d, dst->size);
+                if (d==dbuf) HDmemcpy (dp, d, dst->shared->size);
                 if (buf_stride) {
                     sp += direction * buf_stride;
                     dp += direction * buf_stride;
                 } else {
-                    sp += direction * src->size;
-                    dp += direction * dst->size;
+                    sp += direction * src->shared->size;
+                    dp += direction * dst->shared->size;
                 }
             }
             
@@ -1489,11 +1489,11 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
          * Allocate private data structure and arrays.
          */
         if (NULL==(priv=cdata->priv=H5MM_calloc(sizeof(H5T_conv_struct_t))) ||
-                NULL==(priv->src2dst=H5MM_malloc(src->u.compnd.nmembs *
+                NULL==(priv->src2dst=H5MM_malloc(src->shared->u.compnd.nmembs *
                                  sizeof(int))) ||
-                NULL==(priv->src_memb_id=H5MM_malloc(src->u.compnd.nmembs *
+                NULL==(priv->src_memb_id=H5MM_malloc(src->shared->u.compnd.nmembs *
                                     sizeof(hid_t))) ||
-                NULL==(priv->dst_memb_id=H5MM_malloc(dst->u.compnd.nmembs *
+                NULL==(priv->dst_memb_id=H5MM_malloc(dst->shared->u.compnd.nmembs *
                                     sizeof(hid_t))))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
         src2dst = priv->src2dst;
@@ -1511,22 +1511,22 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
          * source and destination member data type so we can look up the
          * member data type conversion functions later.
          */
-        for (i=0; i<src->u.compnd.nmembs; i++) {
+        for (i=0; i<src->shared->u.compnd.nmembs; i++) {
             src2dst[i] = -1;
-            for (j=0; j<dst->u.compnd.nmembs; j++) {
-                if (!HDstrcmp (src->u.compnd.memb[i].name,
-                       dst->u.compnd.memb[j].name)) {
+            for (j=0; j<dst->shared->u.compnd.nmembs; j++) {
+                if (!HDstrcmp (src->shared->u.compnd.memb[i].name,
+                       dst->shared->u.compnd.memb[j].name)) {
                     src2dst[i] = j;
                     break;
                 }
             }
             if (src2dst[i]>=0) {
-                type = H5T_copy (src->u.compnd.memb[i].type, H5T_COPY_ALL);
+                type = H5T_copy (src->shared->u.compnd.memb[i].type, H5T_COPY_ALL);
                 tid = H5I_register (H5I_DATATYPE, type);
                 assert (tid>=0);
                 priv->src_memb_id[i] = tid;
 
-                type = H5T_copy (dst->u.compnd.memb[src2dst[i]].type,
+                type = H5T_copy (dst->shared->u.compnd.memb[src2dst[i]].type,
                      H5T_COPY_ALL);
                 tid = H5I_register (H5I_DATATYPE, type);
                 assert (tid>=0);
@@ -1547,14 +1547,14 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
      */
     src2dst = priv->src2dst;
     H5MM_xfree(priv->memb_path);
-    if (NULL==(priv->memb_path=H5MM_malloc(src->u.compnd.nmembs *
+    if (NULL==(priv->memb_path=H5MM_malloc(src->shared->u.compnd.nmembs *
 					   sizeof(H5T_path_t*))))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-    for (i=0; i<src->u.compnd.nmembs; i++) {
+    for (i=0; i<src->shared->u.compnd.nmembs; i++) {
         if (src2dst[i]>=0) {
-            H5T_path_t *tpath = H5T_path_find(src->u.compnd.memb[i].type,
-                      dst->u.compnd.memb[src2dst[i]].type, NULL, NULL, dxpl_id);
+            H5T_path_t *tpath = H5T_path_find(src->shared->u.compnd.memb[i].type,
+                      dst->shared->u.compnd.memb[src2dst[i]].type, NULL, NULL, dxpl_id);
 
             if (NULL==(priv->memb_path[i] = tpath)) {
                 H5MM_xfree(priv->src2dst);
@@ -1652,8 +1652,8 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (NULL == (src = H5I_object(src_id)) ||
                     NULL == (dst = H5I_object(dst_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            assert (H5T_COMPOUND==src->type);
-            assert (H5T_COMPOUND==dst->type);
+            assert (H5T_COMPOUND==src->shared->type);
+            assert (H5T_COMPOUND==dst->shared->type);
 
             if (H5T_conv_struct_init (src, dst, cdata, dxpl_id)<0)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize conversion data");
@@ -1696,15 +1696,15 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (buf_stride) {
                 src_delta = buf_stride;
             if (!bkg_stride)
-                bkg_stride = dst->size;
-            } else if (dst->size <= src->size) {
-                src_delta = src->size;
-            bkg_stride = dst->size;
+                bkg_stride = dst->shared->size;
+            } else if (dst->shared->size <= src->shared->size) {
+                src_delta = src->shared->size;
+            bkg_stride = dst->shared->size;
             } else {
-                src_delta = -(int)src->size; /*overflow shouldn't be possible*/
-                bkg_stride = -(int)dst->size; /*overflow shouldn't be possible*/
-                xbuf += (nelmts-1) * src->size;
-                xbkg += (nelmts-1) * dst->size;
+                src_delta = -(int)src->shared->size; /*overflow shouldn't be possible*/
+                bkg_stride = -(int)dst->shared->size; /*overflow shouldn't be possible*/
+                xbuf += (nelmts-1) * src->shared->size;
+                xbkg += (nelmts-1) * dst->shared->size;
             }
 
             /* Conversion loop... */
@@ -1717,10 +1717,10 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * data point as small as possible with all the free space on the
                  * right side.
                  */
-                for (u=0, offset=0; u<src->u.compnd.nmembs; u++) {
+                for (u=0, offset=0; u<src->shared->u.compnd.nmembs; u++) {
                     if (src2dst[u]<0) continue; /*subsetting*/
-                    src_memb = src->u.compnd.memb + u;
-                    dst_memb = dst->u.compnd.memb + src2dst[u];
+                    src_memb = src->shared->u.compnd.memb + u;
+                    dst_memb = dst->shared->u.compnd.memb + src2dst[u];
 
                     if (dst_memb->size <= src_memb->size) {
                         if (H5T_convert(priv->memb_path[u], priv->src_memb_id[u],
@@ -1746,10 +1746,10 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * yet).  Then copy the member to the destination offset in the
                  * background buffer.
                  */
-                for (i=src->u.compnd.nmembs-1; i>=0; --i) {
+                for (i=src->shared->u.compnd.nmembs-1; i>=0; --i) {
                     if (src2dst[i]<0) continue; /*subsetting*/
-                    src_memb = src->u.compnd.memb + i;
-                    dst_memb = dst->u.compnd.memb + src2dst[i];
+                    src_memb = src->shared->u.compnd.memb + i;
+                    dst_memb = dst->shared->u.compnd.memb + src2dst[i];
 
                     if (dst_memb->size > src_memb->size) {
                         offset -= src_memb->size;
@@ -1773,17 +1773,17 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 xbkg += bkg_stride;
             }
 
-        /* If the bkg_stride was set to -(dst->size), make it positive now */
-        if(buf_stride==0 && dst->size>src->size)
-            bkg_stride=dst->size;
+        /* If the bkg_stride was set to -(dst->shared->size), make it positive now */
+        if(buf_stride==0 && dst->shared->size>src->shared->size)
+            bkg_stride=dst->shared->size;
 
             /*
              * Copy the background buffer back into the in-place conversion
              * buffer.
              */
             for (xbuf=buf, xbkg=bkg, elmtno=0; elmtno<nelmts; elmtno++) {
-                HDmemmove(xbuf, xbkg, dst->size);
-                xbuf += buf_stride ? buf_stride : dst->size;
+                HDmemmove(xbuf, xbkg, dst->shared->size);
+                xbuf += buf_stride ? buf_stride : dst->shared->size;
                 xbkg += bkg_stride;
             }
             break;
@@ -1885,8 +1885,8 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
             if (NULL == (src = H5I_object(src_id)) ||
                     NULL == (dst = H5I_object(dst_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            assert (H5T_COMPOUND==src->type);
-            assert (H5T_COMPOUND==dst->type);
+            assert (H5T_COMPOUND==src->shared->type);
+            assert (H5T_COMPOUND==dst->shared->type);
 
             /* Initialize data which is relatively constant */
             if (H5T_conv_struct_init (src, dst, cdata, dxpl_id)<0)
@@ -1904,23 +1904,23 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
              * of loops as in the actual conversion except it checks that there
              * is room for each conversion instead of actually doing anything.
              */
-            if (dst->size > src->size) {
-                for (u=0, offset=0; u<src->u.compnd.nmembs; u++) {
+            if (dst->shared->size > src->shared->size) {
+                for (u=0, offset=0; u<src->shared->u.compnd.nmembs; u++) {
                     if (src2dst[u]<0)
                         continue;
-                    src_memb = src->u.compnd.memb + u;
-                    dst_memb = dst->u.compnd.memb + src2dst[u];
+                    src_memb = src->shared->u.compnd.memb + u;
+                    dst_memb = dst->shared->u.compnd.memb + src2dst[u];
                     if (dst_memb->size > src_memb->size)
                         offset += src_memb->size;
                 }
-                for (i=src->u.compnd.nmembs-1; i>=0; --i) {
+                for (i=src->shared->u.compnd.nmembs-1; i>=0; --i) {
                     if (src2dst[i]<0)
                         continue;
-                    src_memb = src->u.compnd.memb + i;
-                    dst_memb = dst->u.compnd.memb + src2dst[i];
+                    src_memb = src->shared->u.compnd.memb + i;
+                    dst_memb = dst->shared->u.compnd.memb + src2dst[i];
                     if (dst_memb->size > src_memb->size) {
                         offset -= src_memb->size;
-                        if (dst_memb->size > src->size-offset) {
+                        if (dst_memb->size > src->shared->size-offset) {
                             H5MM_xfree(priv->src2dst);
                             H5MM_xfree(priv->src_memb_id);
                             H5MM_xfree(priv->dst_memb_id);
@@ -1972,12 +1972,12 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
              * data element at every BUF_STRIDE bytes through the main buffer
              * (BUF), leaving the result of each conversion at the same
              * location; otherwise assume the source and destination data are
-             * packed tightly based on src->size and dst->size.  Also, if
+             * packed tightly based on src->shared->size and dst->shared->size.  Also, if
              * BUF_STRIDE and BKG_STRIDE are both non-zero then place
              * background data into the BKG buffer at multiples of BKG_STRIDE;
              * otherwise assume BKG buffer is the packed destination datatype.
              */
-            if (!buf_stride || !bkg_stride) bkg_stride = dst->size;
+            if (!buf_stride || !bkg_stride) bkg_stride = dst->shared->size;
 
             /*
              * For each member where the destination is not larger than the
@@ -1986,10 +1986,10 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
              * destination in the bkg buffer. Otherwise move the element as far
              * left as possible in the buffer.
              */
-            for (u=0, offset=0; u<src->u.compnd.nmembs; u++) {
+            for (u=0, offset=0; u<src->shared->u.compnd.nmembs; u++) {
                 if (src2dst[u]<0) continue; /*subsetting*/
-                src_memb = src->u.compnd.memb + u;
-                dst_memb = dst->u.compnd.memb + src2dst[u];
+                src_memb = src->shared->u.compnd.memb + u;
+                dst_memb = dst->shared->u.compnd.memb + src2dst[u];
 
                 if (dst_memb->size <= src_memb->size) {
                     xbuf = buf + src_memb->offset;
@@ -1997,20 +1997,20 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                     if (H5T_convert(priv->memb_path[u],
                             priv->src_memb_id[u],
                             priv->dst_memb_id[src2dst[u]], nelmts,
-                            buf_stride ? buf_stride : src->size,
+                            buf_stride ? buf_stride : src->shared->size,
                             bkg_stride, xbuf, xbkg,
                             dxpl_id)<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert compound data type member");
                     for (elmtno=0; elmtno<nelmts; elmtno++) {
                         HDmemmove(xbkg, xbuf, dst_memb->size);
-                        xbuf += buf_stride ? buf_stride : src->size;
+                        xbuf += buf_stride ? buf_stride : src->shared->size;
                         xbkg += bkg_stride;
                     }
                 } else {
                     for (xbuf=buf, elmtno=0; elmtno<nelmts; elmtno++) {
                         HDmemmove(xbuf+offset, xbuf+src_memb->offset,
                                               src_memb->size);
-                        xbuf += buf_stride ? buf_stride : src->size;
+                        xbuf += buf_stride ? buf_stride : src->shared->size;
                     }
                     offset += src_memb->size;
                 }
@@ -2022,11 +2022,11 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
              * is larger than the source) and them to their final position in the
              * bkg buffer.
              */
-            for (i=src->u.compnd.nmembs-1; i>=0; --i) {
+            for (i=src->shared->u.compnd.nmembs-1; i>=0; --i) {
                 if (src2dst[i]<0)
                     continue;
-                src_memb = src->u.compnd.memb + i;
-                dst_memb = dst->u.compnd.memb + src2dst[i];
+                src_memb = src->shared->u.compnd.memb + i;
+                dst_memb = dst->shared->u.compnd.memb + src2dst[i];
 
                 if (dst_memb->size > src_memb->size) {
                     offset -= src_memb->size;
@@ -2035,13 +2035,13 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                     if (H5T_convert(priv->memb_path[i],
                                     priv->src_memb_id[i],
                                     priv->dst_memb_id[src2dst[i]], nelmts,
-                                    buf_stride ? buf_stride : src->size,
+                                    buf_stride ? buf_stride : src->shared->size,
                                     bkg_stride, xbuf, xbkg,
                                     dxpl_id)<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert compound data type member");
                     for (elmtno=0; elmtno<nelmts; elmtno++) {
                         HDmemmove(xbkg, xbuf, dst_memb->size);
-                        xbuf += buf_stride ? buf_stride : src->size;
+                        xbuf += buf_stride ? buf_stride : src->shared->size;
                         xbkg += bkg_stride;
                     }
                 }
@@ -2049,8 +2049,8 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
             /* Move background buffer into result buffer */
             for (xbuf=buf, xbkg=bkg, elmtno=0; elmtno<nelmts; elmtno++) {
-                HDmemmove(xbuf, xbkg, dst->size);
-                xbuf += buf_stride ? buf_stride : dst->size;
+                HDmemmove(xbuf, xbkg, dst->shared->size);
+                xbuf += buf_stride ? buf_stride : dst->shared->size;
                 xbkg += bkg_stride;
             }
             break;
@@ -2097,7 +2097,7 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     cdata->need_bkg = H5T_BKG_NO;
     if (NULL==(priv=cdata->priv=H5MM_calloc(sizeof(*priv))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    if (0==src->u.enumer.nmembs)
+    if (0==src->shared->u.enumer.nmembs)
 	HGOTO_DONE(SUCCEED);
 
     /*
@@ -2107,15 +2107,15 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
      */
     H5T_sort_name(src, NULL);
     H5T_sort_name(dst, NULL);
-    if (NULL==(priv->src2dst=H5MM_malloc(src->u.enumer.nmembs*sizeof(int))))
+    if (NULL==(priv->src2dst=H5MM_malloc(src->shared->u.enumer.nmembs*sizeof(int))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");;
     for (i=0, j=0;
-             i<src->u.enumer.nmembs && j<dst->u.enumer.nmembs;
+             i<src->shared->u.enumer.nmembs && j<dst->shared->u.enumer.nmembs;
              i++, j++) {
-	while (j<dst->u.enumer.nmembs &&
-	       HDstrcmp(src->u.enumer.name[i], dst->u.enumer.name[j]))
+	while (j<dst->shared->u.enumer.nmembs &&
+	       HDstrcmp(src->shared->u.enumer.name[i], dst->shared->u.enumer.name[j]))
             j++;
-	if (j>=dst->u.enumer.nmembs)
+	if (j>=dst->shared->u.enumer.nmembs)
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "source type is not a subset of destination type");
 	priv->src2dst[i] = j;
     }
@@ -2137,14 +2137,14 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
      * that array are the index numbers in the destination type or negative
      * if the entry is unused.
      */
-    if (1==src->size || sizeof(short)==src->size || sizeof(int)==src->size) {
-	for (i=0; i<src->u.enumer.nmembs; i++) {
-	    if (1==src->size) {
-		n = *((signed char*)(src->u.enumer.value+i));
-	    } else if (sizeof(short)==src->size) {
-		n = *((short*)(src->u.enumer.value+i*src->size));
+    if (1==src->shared->size || sizeof(short)==src->shared->size || sizeof(int)==src->shared->size) {
+	for (i=0; i<src->shared->u.enumer.nmembs; i++) {
+	    if (1==src->shared->size) {
+		n = *((signed char*)(src->shared->u.enumer.value+i));
+	    } else if (sizeof(short)==src->shared->size) {
+		n = *((short*)(src->shared->u.enumer.value+i*src->shared->size));
 	    } else {
-		n = *((int*)(src->u.enumer.value+i*src->size));
+		n = *((int*)(src->shared->u.enumer.value+i*src->shared->size));
 	    }
 	    if (0==i) {
 		domain[0] = domain[1] = n;
@@ -2155,21 +2155,21 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 	}
 
 	length = (domain[1]-domain[0])+1;
-	if (src->u.enumer.nmembs<2 ||
-	    (double)length/src->u.enumer.nmembs<1.2) {
+	if (src->shared->u.enumer.nmembs<2 ||
+	    (double)length/src->shared->u.enumer.nmembs<1.2) {
 	    priv->base = domain[0];
 	    priv->length = length;
 	    if (NULL==(map=H5MM_malloc(length*sizeof(int))))
 		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 	    for (i=0; i<length; i++)
                 map[i] = -1; /*entry unused*/
-	    for (i=0; i<src->u.enumer.nmembs; i++) {
-		if (1==src->size) {
-		    n = *((signed char*)(src->u.enumer.value+i));
-		} else if (sizeof(short)==src->size) {
-		    n = *((short*)(src->u.enumer.value+i*src->size));
+	    for (i=0; i<src->shared->u.enumer.nmembs; i++) {
+		if (1==src->shared->size) {
+		    n = *((signed char*)(src->shared->u.enumer.value+i));
+		} else if (sizeof(short)==src->shared->size) {
+		    n = *((short*)(src->shared->u.enumer.value+i*src->shared->size));
 		} else {
-		    n = *((int*)(src->u.enumer.value+i*src->size));
+		    n = *((int*)(src->shared->u.enumer.value+i*src->shared->size));
 		}
 		n -= priv->base;
 		assert(n>=0 && n<priv->length);
@@ -2251,8 +2251,8 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (NULL == (src = H5I_object(src_id)) ||
                     NULL == (dst = H5I_object(dst_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            assert (H5T_ENUM==src->type);
-            assert (H5T_ENUM==dst->type);
+            assert (H5T_ENUM==src->shared->type);
+            assert (H5T_ENUM==dst->shared->type);
             if (H5T_conv_enum_init(src, dst, cdata)<0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize private data");
             break;
@@ -2276,8 +2276,8 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (NULL == (src = H5I_object(src_id)) ||
                     NULL == (dst = H5I_object(dst_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            assert (H5T_ENUM==src->type);
-            assert (H5T_ENUM==dst->type);
+            assert (H5T_ENUM==src->shared->type);
+            assert (H5T_ENUM==dst->shared->type);
 
             /* priv->src2dst map was computed for certain sort keys. Make sure those same
              * sort keys are used here during conversion. See H5T_conv_enum_init(). But
@@ -2292,15 +2292,15 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (buf_stride) {
                 src_delta = dst_delta = (int)buf_stride;
                 s = d = buf;
-            } else if (dst->size <= src->size) {
-                src_delta = (int)src->size; /*overflow shouldn't be possible*/
-                dst_delta = (int)dst->size; /*overflow shouldn't be possible*/
+            } else if (dst->shared->size <= src->shared->size) {
+                src_delta = (int)src->shared->size; /*overflow shouldn't be possible*/
+                dst_delta = (int)dst->shared->size; /*overflow shouldn't be possible*/
                 s = d = buf;
             } else {
-                src_delta = -(int)src->size; /*overflow shouldn't be possible*/
-                dst_delta = -(int)dst->size; /*overflow shouldn't be possible*/
-                s = buf + (nelmts-1) * src->size;
-                d = buf + (nelmts-1) * dst->size;
+                src_delta = -(int)src->shared->size; /*overflow shouldn't be possible*/
+                dst_delta = -(int)dst->shared->size; /*overflow shouldn't be possible*/
+                s = buf + (nelmts-1) * src->shared->size;
+                d = buf + (nelmts-1) * dst->shared->size;
             }
             
             /* Get the plist structure */
@@ -2314,9 +2314,9 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             for (i=0; i<nelmts; i++, s+=src_delta, d+=dst_delta) {
                 if (priv->length) {
                     /* Use O(1) lookup */
-                    if (1==src->size) {
+                    if (1==src->shared->size) {
                         n = *((signed char*)s);
-                    } else if (sizeof(short)==src->size) {
+                    } else if (sizeof(short)==src->shared->size) {
                         n = *((short*)s);
                     } else {
                         n = *((int*)s);
@@ -2332,23 +2332,23 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         }
                         
                         if(except_ret == H5T_CONV_UNHANDLED) { 
-                            HDmemset(d, 0xff, dst->size);
+                            HDmemset(d, 0xff, dst->shared->size);
                         } else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                     } else {
                         HDmemcpy(d,
-                                 dst->u.enumer.value+priv->src2dst[n]*dst->size,
-                                 dst->size);
+                                 dst->shared->u.enumer.value+priv->src2dst[n]*dst->shared->size,
+                                 dst->shared->size);
                     }
                 } else {
                     /* Use O(log N) lookup */
                     int lt = 0;
-                    int rt = src->u.enumer.nmembs;
+                    int rt = src->shared->u.enumer.nmembs;
                     int md, cmp;
                     while (lt<rt) {
                         md = (lt+rt)/2;
-                        cmp = HDmemcmp(s, src->u.enumer.value+md*src->size,
-                                       src->size);
+                        cmp = HDmemcmp(s, src->shared->u.enumer.value+md*src->shared->size,
+                                       src->shared->size);
                         if (cmp<0) {
                             rt = md;
                         } else if (cmp>0) {
@@ -2365,13 +2365,13 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         }
                         
                         if(except_ret == H5T_CONV_UNHANDLED) { 
-                            HDmemset(d, 0xff, dst->size);
+                            HDmemset(d, 0xff, dst->shared->size);
                         } else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                     } else {
                         HDmemcpy(d,
-                                 dst->u.enumer.value+priv->src2dst[md]*dst->size,
-                                 dst->size);
+                                 dst->shared->u.enumer.value+priv->src2dst[md]*dst->shared->size,
+                                 dst->shared->size);
                     }
                 }
             }
@@ -2470,8 +2470,8 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (NULL == (src = H5I_object(src_id)) ||
                     NULL == (dst = H5I_object(dst_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            assert (H5T_VLEN==src->type);
-            assert (H5T_VLEN==dst->type);
+            assert (H5T_VLEN==src->shared->type);
+            assert (H5T_VLEN==dst->shared->type);
 
             /* Variable-length types don't need a background buffer */
             cdata->need_bkg = H5T_BKG_NO;
@@ -2492,12 +2492,12 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
             /* Initialize source & destination strides */
             if (buf_stride) {
-                assert(buf_stride>=src->size);
-                assert(buf_stride>=dst->size);
+                assert(buf_stride>=src->shared->size);
+                assert(buf_stride>=dst->shared->size);
                 s_stride = d_stride = buf_stride;
             } else {
-                s_stride = src->size;
-                d_stride = dst->size;
+                s_stride = src->shared->size;
+                d_stride = dst->shared->size;
             }
             if(bkg) {
                 if(bkg_stride)
@@ -2509,21 +2509,21 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 b_stride=0;
 
             /* Get the size of the base types in src & dst */
-            src_base_size=H5T_get_size(src->parent);
-            dst_base_size=H5T_get_size(dst->parent);
+            src_base_size=H5T_get_size(src->shared->parent);
+            dst_base_size=H5T_get_size(dst->shared->parent);
 
             /* Set up conversion path for base elements */
-            if (NULL==(tpath=H5T_path_find(src->parent, dst->parent, NULL, NULL, dxpl_id))) {
+            if (NULL==(tpath=H5T_path_find(src->shared->parent, dst->shared->parent, NULL, NULL, dxpl_id))) {
                 HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatypes");
             } else if (!H5T_path_noop(tpath)) {
-                if ((tsrc_id = H5I_register(H5I_DATATYPE, H5T_copy(src->parent, H5T_COPY_ALL)))<0 ||
-                        (tdst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->parent, H5T_COPY_ALL)))<0)
+                if ((tsrc_id = H5I_register(H5I_DATATYPE, H5T_copy(src->shared->parent, H5T_COPY_ALL)))<0 ||
+                        (tdst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->shared->parent, H5T_COPY_ALL)))<0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
             } else
                 noop_conv=TRUE;
 
             /* Check if we need a temporary buffer for this conversion */
-            parent_is_vlen=H5T_detect_class(dst->parent,H5T_VLEN);
+            parent_is_vlen=H5T_detect_class(dst->shared->parent,H5T_VLEN);
             if(tpath->cdata.need_bkg || parent_is_vlen) {
                 /* Set up initial background buffer */
                 tmp_buf_size=MAX(src_base_size,dst_base_size);
@@ -2536,7 +2536,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info");
 
             /* Set flags to indicate we are writing to or reading from the file */
-            if(dst->u.vlen.f!=NULL)
+            if(dst->shared->u.vlen.f!=NULL)
                 write_to_file=TRUE;
 
             /* Set the flag for nested VL case */
@@ -2580,20 +2580,20 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                 for (elmtno=0; elmtno<safe; elmtno++) {
                     /* Check for "nil" source sequence */
-                    if((*(src->u.vlen.isnull))(src->u.vlen.f,s)) {
+                    if((*(src->shared->u.vlen.isnull))(src->shared->u.vlen.f,s)) {
                         /* Write "nil" sequence to destination location */
-                        if((*(dst->u.vlen.setnull))(dst->u.vlen.f,dxpl_id,d,b)<0)
+                        if((*(dst->shared->u.vlen.setnull))(dst->shared->u.vlen.f,dxpl_id,d,b)<0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't set VL data to 'nil'");
                     } /* end if */
                     else {
                         /* Get length of element sequences */
-                        if((seq_len=(*(src->u.vlen.getlen))(s))<0)
+                        if((seq_len=(*(src->shared->u.vlen.getlen))(s))<0)
                             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "incorrect length");
 
                         /* If we are reading from memory and there is no conversion, just get the pointer to sequence */
                         if(write_to_file && noop_conv) {
                             /* Get direct pointer to sequence */
-                            if((conv_buf=(*(src->u.vlen.getptr))(s))==NULL)
+                            if((conv_buf=(*(src->shared->u.vlen.getptr))(s))==NULL)
                                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid source pointer");
                         } /* end if */
                         else {
@@ -2612,7 +2612,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             } /* end if */
 
                             /* Read in VL sequence */
-                            if((*(src->u.vlen.read))(src->u.vlen.f,dxpl_id,s,conv_buf,src_size)<0)
+                            if((*(src->shared->u.vlen.read))(src->shared->u.vlen.f,dxpl_id,s,conv_buf,src_size)<0)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL data");
                         } /* end else */
 
@@ -2638,9 +2638,9 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                         if((tmp_buf=H5FL_BLK_REALLOC(vlen_seq,tmp_buf, tmp_buf_size))==NULL)
                                             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
                                     }
-                                    H5F_addr_decode(dst->u.vlen.f, (const uint8_t **)&tmp, &(bg_hobjid.addr));
+                                    H5F_addr_decode(dst->shared->u.vlen.f, (const uint8_t **)&tmp, &(bg_hobjid.addr));
                                     INT32DECODE(tmp, bg_hobjid.idx);
-                                    if(H5HG_read(dst->u.vlen.f,dxpl_id,&bg_hobjid,tmp_buf)==NULL)
+                                    if(H5HG_read(dst->shared->u.vlen.f,dxpl_id,&bg_hobjid,tmp_buf)==NULL)
                                         HGOTO_ERROR (H5E_DATATYPE, H5E_READERROR, FAIL, "can't read VL sequence into background buffer");
                                 } /* end if */
 
@@ -2658,7 +2658,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         } /* end if */
 
                         /* Write sequence to destination location */
-                        if((*(dst->u.vlen.write))(dst->u.vlen.f,dxpl_id,vl_alloc_info,d,conv_buf, b, (size_t)seq_len, dst_base_size)<0)
+                        if((*(dst->shared->u.vlen.write))(dst->shared->u.vlen.f,dxpl_id,vl_alloc_info,d,conv_buf, b, (size_t)seq_len, dst_base_size)<0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write VL data");
 
                         if(!noop_conv) {
@@ -2673,9 +2673,9 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 for(u=0; u<(bg_seq_len-seq_len); u++) {
                                     UINT32DECODE(tmp_p, parent_seq_len);
                                     if(parent_seq_len>0) {
-                                        H5F_addr_decode(dst->u.vlen.f, (const uint8_t **)&tmp_p, &(parent_hobjid.addr));
+                                        H5F_addr_decode(dst->shared->u.vlen.f, (const uint8_t **)&tmp_p, &(parent_hobjid.addr));
                                         INT32DECODE(tmp_p, parent_hobjid.idx);
-                                        if(H5HG_remove(dst->u.vlen.f, dxpl_id,&parent_hobjid)<0)
+                                        if(H5HG_remove(dst->shared->u.vlen.f, dxpl_id,&parent_hobjid)<0)
                                             HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to remove heap object");
                                     }
                                 }
@@ -2766,18 +2766,18 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (NULL == (src = H5I_object(src_id)) ||
                     NULL == (dst = H5I_object(dst_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            assert (H5T_ARRAY==src->type);
-            assert (H5T_ARRAY==dst->type);
+            assert (H5T_ARRAY==src->shared->type);
+            assert (H5T_ARRAY==dst->shared->type);
 
             /* Check the number and sizes of the dimensions */
-            if(src->u.array.ndims!=dst->u.array.ndims)
+            if(src->shared->u.array.ndims!=dst->shared->u.array.ndims)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "array datatypes do not have the same number of dimensions");
-            for(i=0; i<src->u.array.ndims; i++)
-                if(src->u.array.dim[i]!=dst->u.array.dim[i])
+            for(i=0; i<src->shared->u.array.ndims; i++)
+                if(src->shared->u.array.dim[i]!=dst->shared->u.array.dim[i])
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "array datatypes do not have the same sizes of dimensions");
 #ifdef LATER
-            for(i=0; i<src->u.array.ndims; i++)
-                if(src->u.array.perm[i]!=dst->u.array.perm[i])
+            for(i=0; i<src->shared->u.array.ndims; i++)
+                if(src->shared->u.array.perm[i]!=dst->shared->u.array.perm[i])
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "array datatypes do not have the same dimension permutations");
 #endif /* LATER */
 
@@ -2803,36 +2803,36 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
              * versa? Also, how many of the elements have the source and
              * destination areas overlapping?
              */
-            if (src->size>=dst->size || buf_stride>0) {
+            if (src->shared->size>=dst->shared->size || buf_stride>0) {
                 sp = dp = (uint8_t*)_buf;
                 direction = 1;
             } else {
                 sp = (uint8_t*)_buf + (nelmts-1) *
-                     (buf_stride ? buf_stride : src->size);
+                     (buf_stride ? buf_stride : src->shared->size);
                 dp = (uint8_t*)_buf + (nelmts-1) *
-                     (buf_stride ? buf_stride : dst->size);
+                     (buf_stride ? buf_stride : dst->shared->size);
                 direction = -1;
             }
 
             /*
              * Direction & size of buffer traversal.
              */
-            src_delta = direction * (buf_stride ? buf_stride : src->size);
-            dst_delta = direction * (buf_stride ? buf_stride : dst->size);
+            src_delta = direction * (buf_stride ? buf_stride : src->shared->size);
+            dst_delta = direction * (buf_stride ? buf_stride : dst->shared->size);
 
             /* Set up conversion path for base elements */
-            if (NULL==(tpath=H5T_path_find(src->parent, dst->parent, NULL, NULL, dxpl_id))) {
+            if (NULL==(tpath=H5T_path_find(src->shared->parent, dst->shared->parent, NULL, NULL, dxpl_id))) {
                 HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatypes");
             } else if (!H5T_path_noop(tpath)) {
-                if ((tsrc_id = H5I_register(H5I_DATATYPE, H5T_copy(src->parent, H5T_COPY_ALL)))<0 ||
-                        (tdst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->parent, H5T_COPY_ALL)))<0)
+                if ((tsrc_id = H5I_register(H5I_DATATYPE, H5T_copy(src->shared->parent, H5T_COPY_ALL)))<0 ||
+                        (tdst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->shared->parent, H5T_COPY_ALL)))<0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
             }
 
             /* Check if we need a background buffer for this conversion */
             if(tpath->cdata.need_bkg) {
                 /* Allocate background buffer */
-                bkg_buf_size=src->u.array.nelem*MAX(src->size,dst->size);
+                bkg_buf_size=src->shared->u.array.nelem*MAX(src->shared->size,dst->shared->size);
                 if ((bkg_buf=H5FL_BLK_CALLOC(array_seq,bkg_buf_size))==NULL)
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
             } /* end if */
@@ -2840,10 +2840,10 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             /* Perform the actual conversion */
             for (elmtno=0; elmtno<nelmts; elmtno++) {
                 /* Copy the source array into the correct location for the destination */
-                HDmemmove(dp, sp, src->size);
+                HDmemmove(dp, sp, src->shared->size);
 
                 /* Convert array */
-                if (H5T_convert(tpath, tsrc_id, tdst_id, src->u.array.nelem, 0, bkg_stride, dp, bkg_buf, dxpl_id)<0)
+                if (H5T_convert(tpath, tsrc_id, tdst_id, src->shared->u.array.nelem, 0, bkg_stride, dp, bkg_buf, dxpl_id)<0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed");
 
                 /* Advance the source & destination pointers */
@@ -2929,13 +2929,13 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (NULL==(src=H5I_object(src_id)) ||
                     NULL==(dst=H5I_object(dst_id)))
                 HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            if (H5T_ORDER_LE!=src->u.atomic.order &&
-                    H5T_ORDER_BE!=src->u.atomic.order)
+            if (H5T_ORDER_LE!=src->shared->u.atomic.order &&
+                    H5T_ORDER_BE!=src->shared->u.atomic.order)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
-            if (H5T_ORDER_LE!=dst->u.atomic.order &&
-                    H5T_ORDER_BE!=dst->u.atomic.order)
+            if (H5T_ORDER_LE!=dst->shared->u.atomic.order &&
+                    H5T_ORDER_BE!=dst->shared->u.atomic.order)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
-            if (dst->size>sizeof dbuf)
+            if (dst->shared->size>sizeof dbuf)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "destination size is too large");
             cdata->need_bkg = H5T_BKG_NO;
             break;
@@ -2954,23 +2954,23 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
              * how many of the elements have the source and destination areas
              * overlapping?
              */
-            if (src->size==dst->size || buf_stride) {
+            if (src->shared->size==dst->shared->size || buf_stride) {
                 sp = dp = (uint8_t*)buf;
                 direction = 1;
                 olap = nelmts;
-            } else if (src->size>=dst->size) {
-                double olap_d = HDceil((double)(dst->size)/
-                                       (double)(src->size-dst->size));
+            } else if (src->shared->size>=dst->shared->size) {
+                double olap_d = HDceil((double)(dst->shared->size)/
+                                       (double)(src->shared->size-dst->shared->size));
                 
                 olap = (size_t)olap_d;
                 sp = dp = (uint8_t*)buf;
                 direction = 1;
             } else {
-                double olap_d = HDceil((double)(src->size)/
-                                       (double)(dst->size-src->size));
+                double olap_d = HDceil((double)(src->shared->size)/
+                                       (double)(dst->shared->size-src->shared->size));
                 olap = (size_t)olap_d;
-                sp = (uint8_t*)buf + (nelmts-1) * src->size;
-                dp = (uint8_t*)buf + (nelmts-1) * dst->size;
+                sp = (uint8_t*)buf + (nelmts-1) * src->shared->size;
+                dp = (uint8_t*)buf + (nelmts-1) * dst->shared->size;
                 direction = -1;
             }
 
@@ -2983,7 +2983,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get conversion exception callback");
 
             /* Allocate space for order-reversed source buffer */
-            src_rev = (uint8_t*)H5MM_calloc(src->size);
+            src_rev = (uint8_t*)H5MM_calloc(src->shared->size);
 
             /* The conversion loop */
             for (elmtno=0; elmtno<nelmts; elmtno++) {
@@ -3002,9 +3002,9 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 #ifndef NDEBUG
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (d==dbuf) {
-                    assert ((dp>=sp && dp<sp+src->size) || (sp>=dp && sp<dp+dst->size));
+                    assert ((dp>=sp && dp<sp+src->shared->size) || (sp>=dp && sp<dp+dst->shared->size));
                 } else {
-                    assert ((dp<sp && dp+dst->size<=sp) || (sp<dp && sp+src->size<=dp));
+                    assert ((dp<sp && dp+dst->shared->size<=sp) || (sp<dp && sp+src->shared->size<=dp));
                 }
 #endif
                 
@@ -3013,11 +3013,11 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * complicated.  We'll do all the conversion stuff assuming
                  * little endian and then we'll fix the order at the end.
                  */
-                if (H5T_ORDER_BE==src->u.atomic.order) {
-                    half_size = src->size/2;
+                if (H5T_ORDER_BE==src->shared->u.atomic.order) {
+                    half_size = src->shared->size/2;
                     for (i=0; i<half_size; i++) {
-                        uint8_t tmp = s[src->size-(i+1)];
-                        s[src->size-(i+1)] = s[i];
+                        uint8_t tmp = s[src->shared->size-(i+1)];
+                        s[src->shared->size-(i+1)] = s[i];
                         s[i] = tmp;
                     }
                 }
@@ -3026,7 +3026,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * What is the bit number for the msb bit of S which is set? The
                  * bit number is relative to the significant part of the number.
                  */
-                sfirst = H5T_bit_find (s, src->u.atomic.offset, src->u.atomic.prec,
+                sfirst = H5T_bit_find (s, src->shared->u.atomic.offset, src->shared->u.atomic.prec,
                                        H5T_BIT_MSB, TRUE);
                 first = (size_t)sfirst;
 
@@ -3039,43 +3039,43 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      * The source has no bits set and must therefore be zero.
                      * Set the destination to zero.
                      */
-                    H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec, FALSE);
+                    H5T_bit_set (d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec, FALSE);
                         
-                } else if (H5T_SGN_NONE==src->u.atomic.u.i.sign &&
-                           H5T_SGN_NONE==dst->u.atomic.u.i.sign) {
+                } else if (H5T_SGN_NONE==src->shared->u.atomic.u.i.sign &&
+                           H5T_SGN_NONE==dst->shared->u.atomic.u.i.sign) {
                     /*
                      * Source and destination are both unsigned, but if the
                      * source has more precision bits than the destination then
                      * it's possible to overflow.  When overflow occurs the
                      * destination will be set to the maximum possible value.
                      */
-                    if (src->u.atomic.prec <= dst->u.atomic.prec) {
-                        H5T_bit_copy (d, dst->u.atomic.offset, s, src->u.atomic.offset,
-                              src->u.atomic.prec);
-                        H5T_bit_set (d, dst->u.atomic.offset+src->u.atomic.prec,
-                             dst->u.atomic.prec-src->u.atomic.prec, FALSE);
-                    } else if (first>=dst->u.atomic.prec) {
+                    if (src->shared->u.atomic.prec <= dst->shared->u.atomic.prec) {
+                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                              src->shared->u.atomic.prec);
+                        H5T_bit_set (d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec,
+                             dst->shared->u.atomic.prec-src->shared->u.atomic.prec, FALSE);
+                    } else if (first>=dst->shared->u.atomic.prec) {
                         /*overflow*/
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src->size, src->u.atomic.order); /*reverse order first*/
+                            H5T_reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id, 
                                     src_rev, d, cb_struct.user_data);
                         }
                         
                         if(except_ret == H5T_CONV_UNHANDLED) { 
-                            H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec, TRUE);
+                            H5T_bit_set (d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec, TRUE);
                         } else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         else if(except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
                     } else {
-                        H5T_bit_copy (d, dst->u.atomic.offset, s, src->u.atomic.offset,
-                              dst->u.atomic.prec);
+                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                              dst->shared->u.atomic.prec);
                     }
                     
-                } else if (H5T_SGN_2==src->u.atomic.u.i.sign &&
-                           H5T_SGN_NONE==dst->u.atomic.u.i.sign) {
+                } else if (H5T_SGN_2==src->shared->u.atomic.u.i.sign &&
+                           H5T_SGN_NONE==dst->shared->u.atomic.u.i.sign) {
                     /*
                      * If the source is signed and the destination isn't then we
                      * can have overflow if the source contains more bits than
@@ -3083,79 +3083,79 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      * possible value) or overflow if the source is negative
                      * (destination is set to zero).
                      */
-                    if (first+1 == src->u.atomic.prec) {
+                    if (first+1 == src->shared->u.atomic.prec) {
                         /*overflow - source is negative*/
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src->size, src->u.atomic.order); /*reverse order first*/
+                            H5T_reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW, src_id, dst_id, 
                                     src_rev, d, cb_struct.user_data);
                         }
                         
                         if(except_ret == H5T_CONV_UNHANDLED) { 
-                            H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec, FALSE);
+                            H5T_bit_set (d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec, FALSE);
                         } else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         else if(except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
-                    } else if (src->u.atomic.prec < dst->u.atomic.prec) {
-                        H5T_bit_copy (d, dst->u.atomic.offset, s, src->u.atomic.offset,
-                              src->u.atomic.prec-1);
-                        H5T_bit_set (d, dst->u.atomic.offset+src->u.atomic.prec-1,
-                             (dst->u.atomic.prec-src->u.atomic.prec)+1, FALSE);
-                    } else if (first>=dst->u.atomic.prec) {
+                    } else if (src->shared->u.atomic.prec < dst->shared->u.atomic.prec) {
+                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                              src->shared->u.atomic.prec-1);
+                        H5T_bit_set (d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec-1,
+                             (dst->shared->u.atomic.prec-src->shared->u.atomic.prec)+1, FALSE);
+                    } else if (first>=dst->shared->u.atomic.prec) {
                         /*overflow - source is positive*/
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src->size, src->u.atomic.order); /*reverse order first*/
+                            H5T_reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id, 
                                     src_rev, d, cb_struct.user_data);
                         }
                         
                         if(except_ret == H5T_CONV_UNHANDLED)
-                            H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec, TRUE);
+                            H5T_bit_set (d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec, TRUE);
                         else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         else if(except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
                     } else {
-                        H5T_bit_copy (d, dst->u.atomic.offset, s, src->u.atomic.offset,
-                              dst->u.atomic.prec);
+                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                              dst->shared->u.atomic.prec);
                     }
                     
-                } else if (H5T_SGN_NONE==src->u.atomic.u.i.sign &&
-                           H5T_SGN_2==dst->u.atomic.u.i.sign) {
+                } else if (H5T_SGN_NONE==src->shared->u.atomic.u.i.sign &&
+                           H5T_SGN_2==dst->shared->u.atomic.u.i.sign) {
                     /*
                      * If the source is not signed but the destination is then
                      * overflow can occur in which case the destination is set to
                      * the largest possible value (all bits set except the msb).
                      */
-                    if (first+1 >= dst->u.atomic.prec) {
+                    if (first+1 >= dst->shared->u.atomic.prec) {
                         /*overflow*/
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src->size, src->u.atomic.order); /*reverse order first*/
+                            H5T_reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id, 
                                     src_rev, d, cb_struct.user_data);
                         }
                         
                         if(except_ret == H5T_CONV_UNHANDLED) { 
-                            H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec-1, TRUE);
-                            H5T_bit_set (d, (dst->u.atomic.offset + dst->u.atomic.prec-1), 1, FALSE);
+                            H5T_bit_set (d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec-1, TRUE);
+                            H5T_bit_set (d, (dst->shared->u.atomic.offset + dst->shared->u.atomic.prec-1), 1, FALSE);
                         } else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         else if(except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
-                    } else if (src->u.atomic.prec<dst->u.atomic.prec) {
-                        H5T_bit_copy (d, dst->u.atomic.offset, s, src->u.atomic.offset,
-                              src->u.atomic.prec);
-                        H5T_bit_set (d, dst->u.atomic.offset+src->u.atomic.prec,
-                             dst->u.atomic.prec-src->u.atomic.prec, FALSE);
+                    } else if (src->shared->u.atomic.prec<dst->shared->u.atomic.prec) {
+                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                              src->shared->u.atomic.prec);
+                        H5T_bit_set (d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec,
+                             dst->shared->u.atomic.prec-src->shared->u.atomic.prec, FALSE);
                     } else {
-                        H5T_bit_copy (d, dst->u.atomic.offset, s, src->u.atomic.offset,
-                              dst->u.atomic.prec);
+                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                              dst->shared->u.atomic.prec);
                     }
-                } else if (first+1 == src->u.atomic.prec) {
+                } else if (first+1 == src->shared->u.atomic.prec) {
                     /*
                      * Both the source and the destination are signed and the
                      * source value is negative.  We could experience overflow
@@ -3163,31 +3163,31 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      * destination is set to a negative number with the largest
                      * possible magnitude.
                      */
-                    ssize_t sfz = H5T_bit_find (s, src->u.atomic.offset,
-                                    src->u.atomic.prec-1, H5T_BIT_MSB, FALSE);
+                    ssize_t sfz = H5T_bit_find (s, src->shared->u.atomic.offset,
+                                    src->shared->u.atomic.prec-1, H5T_BIT_MSB, FALSE);
                     size_t fz = (size_t)sfz;
                     
-                    if (sfz>=0 && fz+1>=dst->u.atomic.prec) {
+                    if (sfz>=0 && fz+1>=dst->shared->u.atomic.prec) {
                         /*overflow*/
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src->size, src->u.atomic.order); /*reverse order first*/
+                            H5T_reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW, src_id, dst_id, 
                                     src_rev, d, cb_struct.user_data);
                         }
                         
                         if(except_ret == H5T_CONV_UNHANDLED) { 
-                            H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec-1, FALSE);
-                            H5T_bit_set (d, (dst->u.atomic.offset + dst->u.atomic.prec-1), 1, TRUE);
+                            H5T_bit_set (d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec-1, FALSE);
+                            H5T_bit_set (d, (dst->shared->u.atomic.offset + dst->shared->u.atomic.prec-1), 1, TRUE);
                         } else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         else if(except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
-                    } else if (src->u.atomic.prec<dst->u.atomic.prec) {
-                        H5T_bit_copy (d, dst->u.atomic.offset, s, src->u.atomic.offset, src->u.atomic.prec);
-                        H5T_bit_set (d, dst->u.atomic.offset+src->u.atomic.prec, dst->u.atomic.prec-src->u.atomic.prec, TRUE);
+                    } else if (src->shared->u.atomic.prec<dst->shared->u.atomic.prec) {
+                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset, src->shared->u.atomic.prec);
+                        H5T_bit_set (d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec, dst->shared->u.atomic.prec-src->shared->u.atomic.prec, TRUE);
                     } else {
-                        H5T_bit_copy (d, dst->u.atomic.offset, s, src->u.atomic.offset, dst->u.atomic.prec);
+                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset, dst->shared->u.atomic.prec);
                     }
                     
                 } else {
@@ -3197,56 +3197,56 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      * case the destination is set to the largest possible
                      * positive value.
                      */
-                    if (first+1>=dst->u.atomic.prec) {
+                    if (first+1>=dst->shared->u.atomic.prec) {
                         /*overflow*/
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src->size, src->u.atomic.order); /*reverse order first*/
+                            H5T_reverse_order(src_rev, s, src->shared->size, src->shared->u.atomic.order); /*reverse order first*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id, src_rev, d, 
                                     cb_struct.user_data);
                         }
                         
                         if(except_ret == H5T_CONV_UNHANDLED) { 
-                            H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec-1, TRUE);
-                            H5T_bit_set (d, (dst->u.atomic.offset + dst->u.atomic.prec-1), 1, FALSE);
+                            H5T_bit_set (d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec-1, TRUE);
+                            H5T_bit_set (d, (dst->shared->u.atomic.offset + dst->shared->u.atomic.prec-1), 1, FALSE);
                         } else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         else if(except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
-                    } else if (src->u.atomic.prec<dst->u.atomic.prec) {
-                        H5T_bit_copy (d, dst->u.atomic.offset, s, src->u.atomic.offset,
-                              src->u.atomic.prec);
-                        H5T_bit_set (d, dst->u.atomic.offset+src->u.atomic.prec,
-                             dst->u.atomic.prec-src->u.atomic.prec, FALSE);
+                    } else if (src->shared->u.atomic.prec<dst->shared->u.atomic.prec) {
+                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                              src->shared->u.atomic.prec);
+                        H5T_bit_set (d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec,
+                             dst->shared->u.atomic.prec-src->shared->u.atomic.prec, FALSE);
                     } else {
-                        H5T_bit_copy (d, dst->u.atomic.offset, s, src->u.atomic.offset,
-                              dst->u.atomic.prec);
+                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                              dst->shared->u.atomic.prec);
                     }
                 }
 
                 /*
                  * Set padding areas in destination.
                  */
-                if (dst->u.atomic.offset>0) {
-                    assert (H5T_PAD_ZERO==dst->u.atomic.lsb_pad || H5T_PAD_ONE==dst->u.atomic.lsb_pad);
-                    H5T_bit_set (d, 0, dst->u.atomic.offset, (hbool_t)(H5T_PAD_ONE==dst->u.atomic.lsb_pad));
+                if (dst->shared->u.atomic.offset>0) {
+                    assert (H5T_PAD_ZERO==dst->shared->u.atomic.lsb_pad || H5T_PAD_ONE==dst->shared->u.atomic.lsb_pad);
+                    H5T_bit_set (d, 0, dst->shared->u.atomic.offset, (hbool_t)(H5T_PAD_ONE==dst->shared->u.atomic.lsb_pad));
                 }
-                if (dst->u.atomic.offset+dst->u.atomic.prec!=8*dst->size) {
-                    assert (H5T_PAD_ZERO==dst->u.atomic.msb_pad || H5T_PAD_ONE==dst->u.atomic.msb_pad);
-                    H5T_bit_set (d, dst->u.atomic.offset+dst->u.atomic.prec,
-                                 8*dst->size - (dst->u.atomic.offset+ dst->u.atomic.prec),
-                                 (hbool_t)(H5T_PAD_ONE==dst->u.atomic.msb_pad));
+                if (dst->shared->u.atomic.offset+dst->shared->u.atomic.prec!=8*dst->shared->size) {
+                    assert (H5T_PAD_ZERO==dst->shared->u.atomic.msb_pad || H5T_PAD_ONE==dst->shared->u.atomic.msb_pad);
+                    H5T_bit_set (d, dst->shared->u.atomic.offset+dst->shared->u.atomic.prec,
+                                 8*dst->shared->size - (dst->shared->u.atomic.offset+ dst->shared->u.atomic.prec),
+                                 (hbool_t)(H5T_PAD_ONE==dst->shared->u.atomic.msb_pad));
                 }
 
                 /*
                  * Put the destination in the correct byte order.  See note at
                  * beginning of loop.
                  */
-                if (H5T_ORDER_BE==dst->u.atomic.order && reverse) {
-                    half_size = dst->size/2;
+                if (H5T_ORDER_BE==dst->shared->u.atomic.order && reverse) {
+                    half_size = dst->shared->size/2;
                     for (i=0; i<half_size; i++) {
-                        uint8_t tmp = d[dst->size-(i+1)];
-                        d[dst->size-(i+1)] = d[i];
+                        uint8_t tmp = d[dst->shared->size-(i+1)];
+                        d[dst->shared->size-(i+1)] = d[i];
                         d[i] = tmp;
                     }
                 }
@@ -3256,13 +3256,13 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * should copy the value to the true destination buffer.
                  */
                 if (d==dbuf)
-                    HDmemcpy (dp, d, dst->size);
+                    HDmemcpy (dp, d, dst->shared->size);
                 if (buf_stride) {
                     sp += direction * buf_stride;
                     dp += direction * buf_stride;
                 } else {
-                    sp += direction * src->size;
-                    dp += direction * dst->size;
+                    sp += direction * src->shared->size;
+                    dp += direction * dst->shared->size;
                 }
             }
             
@@ -3348,13 +3348,13 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (NULL==(src_p=H5I_object(src_id)) ||
                     NULL==(dst_p=H5I_object(dst_id)))
                 HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            src = src_p->u.atomic;
-            dst = dst_p->u.atomic;
+            src = src_p->shared->u.atomic;
+            dst = dst_p->shared->u.atomic;
             if (H5T_ORDER_LE!=src.order && H5T_ORDER_BE!=src.order)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
             if (H5T_ORDER_LE!=dst.order && H5T_ORDER_BE!=dst.order)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
-            if (dst_p->size>sizeof(dbuf))
+            if (dst_p->shared->size>sizeof(dbuf))
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "destination size is too large");
             if (8*sizeof(expo)-1<src.u.f.esize || 8*sizeof(expo)-1<dst.u.f.esize)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "exponent field is too large");
@@ -3369,8 +3369,8 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (NULL==(src_p=H5I_object(src_id)) ||
                     NULL==(dst_p=H5I_object(dst_id)))
                 HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            src = src_p->u.atomic;
-            dst = dst_p->u.atomic;
+            src = src_p->shared->u.atomic;
+            dst = dst_p->shared->u.atomic;
             expo_max = ((hssize_t)1 << dst.u.f.esize) - 1;
 
             /*
@@ -3378,22 +3378,22 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
              * how many of the elements have the source and destination areas
              * overlapping?
              */
-            if (src_p->size==dst_p->size || buf_stride) {
+            if (src_p->shared->size==dst_p->shared->size || buf_stride) {
                 sp = dp = (uint8_t*)buf;
                 direction = 1;
                 olap = nelmts;
-            } else if (src_p->size>=dst_p->size) {
-                double olap_d = HDceil((double)(dst_p->size)/
-                                       (double)(src_p->size-dst_p->size));
+            } else if (src_p->shared->size>=dst_p->shared->size) {
+                double olap_d = HDceil((double)(dst_p->shared->size)/
+                                       (double)(src_p->shared->size-dst_p->shared->size));
                 olap = (size_t)olap_d;
                 sp = dp = (uint8_t*)buf;
                 direction = 1;
             } else {
-                double olap_d = HDceil((double)(src_p->size)/
-                                       (double)(dst_p->size-src_p->size));
+                double olap_d = HDceil((double)(src_p->shared->size)/
+                                       (double)(dst_p->shared->size-src_p->shared->size));
                 olap = (size_t)olap_d;
-                sp = (uint8_t*)buf + (nelmts-1) * src_p->size;
-                dp = (uint8_t*)buf + (nelmts-1) * dst_p->size;
+                sp = (uint8_t*)buf + (nelmts-1) * src_p->shared->size;
+                dp = (uint8_t*)buf + (nelmts-1) * dst_p->shared->size;
                 direction = -1;
             }
 
@@ -3406,7 +3406,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get conversion exception callback");
 
             /* Allocate space for order-reversed source buffer */
-            src_rev = (uint8_t*)H5MM_calloc(src_p->size);
+            src_rev = (uint8_t*)H5MM_calloc(src_p->shared->size);
 
             /* The conversion loop */
             for (elmtno=0; elmtno<nelmts; elmtno++) {
@@ -3428,11 +3428,11 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 #ifndef NDEBUG
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (d==dbuf) {
-                    assert ((dp>=sp && dp<sp+src_p->size) ||
-                            (sp>=dp && sp<dp+dst_p->size));
+                    assert ((dp>=sp && dp<sp+src_p->shared->size) ||
+                            (sp>=dp && sp<dp+dst_p->shared->size));
                 } else {
-                    assert ((dp<sp && dp+dst_p->size<=sp) ||
-                            (sp<dp && sp+src_p->size<=dp));
+                    assert ((dp<sp && dp+dst_p->shared->size<=sp) ||
+                            (sp<dp && sp+src_p->shared->size<=dp));
                 }
 #endif
                 
@@ -3442,10 +3442,10 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * little endian and then we'll fix the order at the end.
                  */
                 if (H5T_ORDER_BE==src.order) {
-                    half_size = src_p->size/2;
+                    half_size = src_p->shared->size/2;
                     for (i=0; i<half_size; i++) {
-                        uint8_t tmp = s[src_p->size-(i+1)];
-                        s[src_p->size-(i+1)] = s[i];
+                        uint8_t tmp = s[src_p->shared->size-(i+1)];
+                        s[src_p->shared->size-(i+1)] = s[i];
                         s[i] = tmp;
                     }
                 }
@@ -3573,7 +3573,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      * original byte order.
                      */
                     if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                        H5T_reverse_order(src_rev, s, src_p->size, src_p->u.atomic.order); /*reverse order first*/
+                        H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
                         except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id, 
                                 src_rev, d, cb_struct.user_data);
                     }
@@ -3653,7 +3653,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                          * buffer we hand it is in the original byte order.
                          */
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src_p->size, src_p->u.atomic.order); /*reverse order first*/
+                            H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id, 
                                     src_rev, d, cb_struct.user_data);
                         }
@@ -3688,9 +3688,9 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     assert (H5T_PAD_ZERO==dst.lsb_pad || H5T_PAD_ONE==dst.lsb_pad);
                     H5T_bit_set (d, 0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
                 }
-                if (dst.offset+dst.prec!=8*dst_p->size) {
+                if (dst.offset+dst.prec!=8*dst_p->shared->size) {
                     assert (H5T_PAD_ZERO==dst.msb_pad || H5T_PAD_ONE==dst.msb_pad);
-                    H5T_bit_set (d, dst.offset+dst.prec, 8*dst_p->size - (dst.offset+dst.prec),
+                    H5T_bit_set (d, dst.offset+dst.prec, 8*dst_p->shared->size - (dst.offset+dst.prec),
                          (hbool_t)(H5T_PAD_ONE==dst.msb_pad));
                 }
 
@@ -3699,10 +3699,10 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * beginning of loop.
                  */
                 if (H5T_ORDER_BE==dst.order && reverse) {
-                    half_size = dst_p->size/2;
+                    half_size = dst_p->shared->size/2;
                     for (i=0; i<half_size; i++) {
-                        uint8_t tmp = d[dst_p->size-(i+1)];
-                        d[dst_p->size-(i+1)] = d[i];
+                        uint8_t tmp = d[dst_p->shared->size-(i+1)];
+                        d[dst_p->shared->size-(i+1)] = d[i];
                         d[i] = tmp;
                     }
                 }
@@ -3713,13 +3713,13 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  */
             /* next: */
                 if (d==dbuf)
-                    HDmemcpy (dp, d, dst_p->size);
+                    HDmemcpy (dp, d, dst_p->shared->size);
                 if (buf_stride) {
                     sp += direction * buf_stride;
                     dp += direction * buf_stride;
                 } else {
-                    sp += direction * src_p->size;
-                    dp += direction * dst_p->size;
+                    sp += direction * src_p->shared->size;
+                    dp += direction * dst_p->shared->size;
                 }
             }
             
@@ -3776,14 +3776,14 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (NULL==(src=H5I_object(src_id)) ||
                     NULL==(dst=H5I_object(dst_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            if (8*src->size != src->u.atomic.prec || 8*dst->size != dst->u.atomic.prec)
+            if (8*src->shared->size != src->shared->u.atomic.prec || 8*dst->shared->size != dst->shared->u.atomic.prec)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad precision");
-            if (0 != src->u.atomic.offset || 0 != dst->u.atomic.offset)
+            if (0 != src->shared->u.atomic.offset || 0 != dst->shared->u.atomic.offset)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad offset");
-            if (H5T_CSET_ASCII != src->u.atomic.u.s.cset || H5T_CSET_ASCII != dst->u.atomic.u.s.cset)
+            if (H5T_CSET_ASCII != src->shared->u.atomic.u.s.cset || H5T_CSET_ASCII != dst->shared->u.atomic.u.s.cset)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad character set");
-            if (src->u.atomic.u.s.pad<0 || src->u.atomic.u.s.pad>=H5T_NPAD ||
-                    dst->u.atomic.u.s.pad<0 || dst->u.atomic.u.s.pad>=H5T_NPAD)
+            if (src->shared->u.atomic.u.s.pad<0 || src->shared->u.atomic.u.s.pad>=H5T_NPAD ||
+                    dst->shared->u.atomic.u.s.pad<0 || dst->shared->u.atomic.u.s.pad>=H5T_NPAD)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad character padding");
             cdata->need_bkg = H5T_BKG_NO;
             break;
@@ -3802,7 +3802,7 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
              * how many of the elements have the source and destination areas
              * overlapping?
              */
-            if (src->size==dst->size || buf_stride) {
+            if (src->shared->size==dst->shared->size || buf_stride) {
                 /*
                  * When the source and destination are the same size we can do
                  * all the conversions in place.
@@ -3810,23 +3810,23 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 sp = dp = (uint8_t*)buf;
                 direction = 1;
                 olap = 0;
-            } else if (src->size>=dst->size) {
-                double olapd = HDceil((double)(dst->size)/
-                          (double)(src->size-dst->size));
+            } else if (src->shared->size>=dst->shared->size) {
+                double olapd = HDceil((double)(dst->shared->size)/
+                          (double)(src->shared->size-dst->shared->size));
                 olap = (size_t)olapd;
                 sp = dp = (uint8_t*)buf;
                 direction = 1;
             } else {
-                double olapd = HDceil((double)(src->size)/
-                          (double)(dst->size-src->size));
+                double olapd = HDceil((double)(src->shared->size)/
+                          (double)(dst->shared->size-src->shared->size));
                 olap = (size_t)olapd;
-                sp = (uint8_t*)buf + (nelmts-1) * src->size;
-                dp = (uint8_t*)buf + (nelmts-1) * dst->size;
+                sp = (uint8_t*)buf + (nelmts-1) * src->shared->size;
+                dp = (uint8_t*)buf + (nelmts-1) * dst->shared->size;
                 direction = -1;
             }
 
             /* Allocate the overlap buffer */
-            if (NULL==(dbuf=H5MM_malloc(dst->size)))
+            if (NULL==(dbuf=H5MM_malloc(dst->shared->size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for string conversion");
             
             /* The conversion loop. */
@@ -3845,22 +3845,22 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 }
 #ifndef NDEBUG
                 /* I don't quite trust the overlap calculations yet --rpm */
-                if (src->size==dst->size || buf_stride) {
+                if (src->shared->size==dst->shared->size || buf_stride) {
                     assert(s==d);
                 } else if (d==dbuf) {
-                    assert((dp>=sp && dp<sp+src->size) ||
-                       (sp>=dp && sp<dp+dst->size));
+                    assert((dp>=sp && dp<sp+src->shared->size) ||
+                       (sp>=dp && sp<dp+dst->shared->size));
                 } else {
-                    assert((dp<sp && dp+dst->size<=sp) ||
-                       (sp<dp && sp+src->size<=dp));
+                    assert((dp<sp && dp+dst->shared->size<=sp) ||
+                       (sp<dp && sp+src->shared->size<=dp));
                 }
 #endif
                 
                 /* Copy characters from source to destination */
-                switch (src->u.atomic.u.s.pad) {
+                switch (src->shared->u.atomic.u.s.pad) {
                     case H5T_STR_NULLTERM:
                         for (nchars=0;
-                             nchars<dst->size && nchars<src->size && s[nchars];
+                             nchars<dst->shared->size && nchars<src->shared->size && s[nchars];
                              nchars++) {
                             d[nchars] = s[nchars];
                         }
@@ -3868,17 +3868,17 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                     case H5T_STR_NULLPAD:
                         for (nchars=0;
-                             nchars<dst->size && nchars<src->size && s[nchars];
+                             nchars<dst->shared->size && nchars<src->shared->size && s[nchars];
                              nchars++) {
                             d[nchars] = s[nchars];
                         }
                         break;
 
                     case H5T_STR_SPACEPAD:
-                        nchars = src->size;
+                        nchars = src->shared->size;
                         while (nchars>0 && ' '==s[nchars-1])
                             --nchars;
-                        nchars = MIN(dst->size, nchars);
+                        nchars = MIN(dst->shared->size, nchars);
                         HDmemcpy(d, s, nchars);
                         break;
 
@@ -3900,20 +3900,20 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 }
 
                 /* Terminate or pad the destination */
-                switch (dst->u.atomic.u.s.pad) {
+                switch (dst->shared->u.atomic.u.s.pad) {
                     case H5T_STR_NULLTERM:
-                        while (nchars<dst->size)
+                        while (nchars<dst->shared->size)
                             d[nchars++] = '\0';
-                        d[dst->size-1] = '\0';
+                        d[dst->shared->size-1] = '\0';
                         break;
                     
                     case H5T_STR_NULLPAD:
-                        while (nchars<dst->size)
+                        while (nchars<dst->shared->size)
                             d[nchars++] = '\0';
                         break;
                     
                     case H5T_STR_SPACEPAD:
-                        while (nchars<dst->size)
+                        while (nchars<dst->shared->size)
                             d[nchars++] = ' ';
                         break;
 
@@ -3939,13 +3939,13 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * should copy the value to the true destination buffer.
                  */
                 if (d==dbuf)
-                    HDmemcpy(dp, d, dst->size);
+                    HDmemcpy(dp, d, dst->shared->size);
                 if (buf_stride) {
                     sp += direction * buf_stride;
                     dp += direction * buf_stride;
                 } else {
-                    sp += direction * src->size;
-                    dp += direction * dst->size;
+                    sp += direction * src->shared->size;
+                    dp += direction * dst->shared->size;
                 }
             }
             break;
@@ -8326,7 +8326,7 @@ H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                     d = tmp;
 
                 /* Convert the integer to a sign and magnitude */
-                switch (src->u.atomic.u.i.sign) {
+                switch (src->shared->u.atomic.u.i.sign) {
                     case H5T_SGN_NONE:
                         sign = 0;
                         break;
@@ -8711,11 +8711,11 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (NULL==(src_p=H5I_object(src_id)) ||
                     NULL==(dst_p=H5I_object(dst_id)))
                 HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            src = src_p->u.atomic;
-            dst = dst_p->u.atomic;
+            src = src_p->shared->u.atomic;
+            dst = dst_p->shared->u.atomic;
             if (H5T_ORDER_LE!=src.order && H5T_ORDER_BE!=src.order)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
-            if (dst_p->size>sizeof(dbuf))
+            if (dst_p->shared->size>sizeof(dbuf))
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "destination size is too large");
             if (8*sizeof(expo)-1<src.u.f.esize)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "exponent field is too large");
@@ -8730,30 +8730,30 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (NULL==(src_p=H5I_object(src_id)) ||
                     NULL==(dst_p=H5I_object(dst_id)))
                 HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            src = src_p->u.atomic;
-            dst = dst_p->u.atomic;
+            src = src_p->shared->u.atomic;
+            dst = dst_p->shared->u.atomic;
 
             /*
              * Do we process the values from beginning to end or vice versa? Also,
              * how many of the elements have the source and destination areas
              * overlapping?
              */
-            if (src_p->size==dst_p->size || buf_stride) {
+            if (src_p->shared->size==dst_p->shared->size || buf_stride) {
                 sp = dp = (uint8_t*)buf;
                 direction = 1;
                 olap = nelmts;
-            } else if (src_p->size>=dst_p->size) {
-                double olap_d = HDceil((double)(dst_p->size)/
-                                       (double)(src_p->size-dst_p->size));
+            } else if (src_p->shared->size>=dst_p->shared->size) {
+                double olap_d = HDceil((double)(dst_p->shared->size)/
+                                       (double)(src_p->shared->size-dst_p->shared->size));
                 olap = (size_t)olap_d;
                 sp = dp = (uint8_t*)buf;
                 direction = 1;
             } else {
-                double olap_d = HDceil((double)(src_p->size)/
-                                       (double)(dst_p->size-src_p->size));
+                double olap_d = HDceil((double)(src_p->shared->size)/
+                                       (double)(dst_p->shared->size-src_p->shared->size));
                 olap = (size_t)olap_d;
-                sp = (uint8_t*)buf + (nelmts-1) * src_p->size;
-                dp = (uint8_t*)buf + (nelmts-1) * dst_p->size;
+                sp = (uint8_t*)buf + (nelmts-1) * src_p->shared->size;
+                dp = (uint8_t*)buf + (nelmts-1) * dst_p->shared->size;
                 direction = -1;
             }
 
@@ -8772,7 +8772,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get conversion exception callback");
 
             /* Allocate space for order-reversed source buffer */
-            src_rev = (uint8_t*)H5MM_calloc(src_p->size);
+            src_rev = (uint8_t*)H5MM_calloc(src_p->shared->size);
 
             /* The conversion loop */
             for (elmtno=0; elmtno<nelmts; elmtno++) {
@@ -8795,11 +8795,11 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 #ifndef NDEBUG
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (d==dbuf) {
-                    assert ((dp>=sp && dp<sp+src_p->size) ||
-                            (sp>=dp && sp<dp+dst_p->size));
+                    assert ((dp>=sp && dp<sp+src_p->shared->size) ||
+                            (sp>=dp && sp<dp+dst_p->shared->size));
                 } else {
-                    assert ((dp<sp && dp+dst_p->size<=sp) ||
-                            (sp<dp && sp+src_p->size<=dp));
+                    assert ((dp<sp && dp+dst_p->shared->size<=sp) ||
+                            (sp<dp && sp+src_p->shared->size<=dp));
                 }
 #endif
                 /*
@@ -8808,10 +8808,10 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * little endian and then we'll fix the order at the end.
                  */
                 if (H5T_ORDER_BE==src.order) {
-                    half_size = src_p->size/2;
+                    half_size = src_p->shared->size/2;
                     for (i=0; i<half_size; i++) {
-                        uint8_t tmp = s[src_p->size-(i+1)];
-                        s[src_p->size-(i+1)] = s[i];
+                        uint8_t tmp = s[src_p->shared->size-(i+1)];
+                        s[src_p->shared->size-(i+1)] = s[i];
                         s[i] = tmp;
                     }
                 }
@@ -8944,7 +8944,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      */
                     if(sign) { /*source is negative*/
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                            H5T_reverse_order(src_rev, s, src_p->size, src_p->u.atomic.order); /*reverse order first*/
+                            H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW, 
                                     src_id, dst_id, src_rev, d, cb_struct.user_data);
                             if(except_ret == H5T_CONV_ABORT)
@@ -8957,7 +8957,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         if (first>=dst.prec) {
                             /*overflow*/
                             if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                                H5T_reverse_order(src_rev, s, src_p->size, src_p->u.atomic.order); /*reverse order first*/
+                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, 
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -8971,7 +8971,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         } else if (first <dst.prec) {
                             if(truncated && cb_struct.func) { /*If user's exception handler is present, use it*/
-                                H5T_reverse_order(src_rev, s, src_p->size, src_p->u.atomic.order); /*reverse order first*/
+                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_TRUNCATE, 
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -8990,7 +8990,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if(sign) { /*source is negative*/
                         if(first < dst.prec-1) {
                             if(truncated && cb_struct.func) { /*If user's exception handler is present, use it*/
-                                H5T_reverse_order(src_rev, s, src_p->size, src_p->u.atomic.order); /*reverse order first*/
+                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_TRUNCATE, 
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -9009,7 +9009,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                              * the sign bit because 0x80...00 is the biggest negative value.
                              */
                             if(cb_struct.func) { /*If user's exception handler is present, use it*/
-                                H5T_reverse_order(src_rev, s, src_p->size, src_p->u.atomic.order); /*reverse order first*/
+                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW, 
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -9026,7 +9026,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         if (first >= dst.prec-1) {
                             /*overflow*/
                             if(cb_struct.func) { /*If user's exception handler is present, use it*/ 
-                                H5T_reverse_order(src_rev, s, src_p->size, src_p->u.atomic.order); /*reverse order first*/
+                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, 
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -9040,7 +9040,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 reverse = FALSE;
                         } else if(first < dst.prec-1) {
                             if(truncated && cb_struct.func) { /*If user's exception handler is present, use it*/
-                                H5T_reverse_order(src_rev, s, src_p->size, src_p->u.atomic.order); /*reverse order first*/
+                                H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
                                 except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_TRUNCATE, 
                                         src_id, dst_id, src_rev, d, cb_struct.user_data);
                             }
@@ -9065,10 +9065,10 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     assert (H5T_PAD_ZERO==dst.lsb_pad || H5T_PAD_ONE==dst.lsb_pad);
                     H5T_bit_set (d, 0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
                 }
-                if (dst.offset+dst.prec!=8*dst_p->size) {
+                if (dst.offset+dst.prec!=8*dst_p->shared->size) {
                     assert (H5T_PAD_ZERO==dst.msb_pad || H5T_PAD_ONE==dst.msb_pad);
                     H5T_bit_set (d, dst.offset+dst.prec,
-                                 8*dst_p->size - (dst.offset+ dst.prec),
+                                 8*dst_p->shared->size - (dst.offset+ dst.prec),
                                  (hbool_t)(H5T_PAD_ONE==dst.msb_pad));
                 }
 
@@ -9077,10 +9077,10 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * beginning of loop.
                  */
                 if (H5T_ORDER_BE==dst.order && reverse) {
-                    half_size = dst_p->size/2;
+                    half_size = dst_p->shared->size/2;
                     for (i=0; i<half_size; i++) {
-                        uint8_t tmp = d[dst_p->size-(i+1)];
-                        d[dst_p->size-(i+1)] = d[i];
+                        uint8_t tmp = d[dst_p->shared->size-(i+1)];
+                        d[dst_p->shared->size-(i+1)] = d[i];
                         d[i] = tmp;
                     }
                 }
@@ -9090,13 +9090,13 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * should copy the value to the true destination buffer.
                  */
                 if (d==dbuf)
-                    HDmemcpy (dp, d, dst_p->size);
+                    HDmemcpy (dp, d, dst_p->shared->size);
                 if (buf_stride) {
                     sp += direction * buf_stride;
                     dp += direction * buf_stride;
                 } else {
-                    sp += direction * src_p->size;
-                    dp += direction * dst_p->size;
+                    sp += direction * src_p->shared->size;
+                    dp += direction * dst_p->shared->size;
                 }
 
                 HDmemset(int_buf, 0, buf_size);
@@ -9179,11 +9179,11 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (NULL==(src_p=H5I_object(src_id)) ||
                     NULL==(dst_p=H5I_object(dst_id)))
                 HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            src = src_p->u.atomic;
-            dst = dst_p->u.atomic;
+            src = src_p->shared->u.atomic;
+            dst = dst_p->shared->u.atomic;
             if (H5T_ORDER_LE!=dst.order && H5T_ORDER_BE!=dst.order)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
-            if (dst_p->size>sizeof(dbuf))
+            if (dst_p->shared->size>sizeof(dbuf))
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "destination size is too large");
             if (8*sizeof(expo)-1<src.u.f.esize)
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "exponent field is too large");
@@ -9198,30 +9198,30 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (NULL==(src_p=H5I_object(src_id)) ||
                     NULL==(dst_p=H5I_object(dst_id)))
                 HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-            src = src_p->u.atomic;
-            dst = dst_p->u.atomic;
+            src = src_p->shared->u.atomic;
+            dst = dst_p->shared->u.atomic;
 
             /*
              * Do we process the values from beginning to end or vice versa? Also,
              * how many of the elements have the source and destination areas
              * overlapping?
              */
-            if (src_p->size==dst_p->size || buf_stride) {
+            if (src_p->shared->size==dst_p->shared->size || buf_stride) {
                 sp = dp = (uint8_t*)buf;
                 direction = 1;
                 olap = nelmts;
-            } else if (src_p->size>=dst_p->size) {
-                double olap_d = HDceil((double)(dst_p->size)/
-                                       (double)(src_p->size-dst_p->size));
+            } else if (src_p->shared->size>=dst_p->shared->size) {
+                double olap_d = HDceil((double)(dst_p->shared->size)/
+                                       (double)(src_p->shared->size-dst_p->shared->size));
                 olap = (size_t)olap_d;
                 sp = dp = (uint8_t*)buf;
                 direction = 1;
             } else {
-                double olap_d = HDceil((double)(src_p->size)/
-                                       (double)(dst_p->size-src_p->size));
+                double olap_d = HDceil((double)(src_p->shared->size)/
+                                       (double)(dst_p->shared->size-src_p->shared->size));
                 olap = (size_t)olap_d;
-                sp = (uint8_t*)buf + (nelmts-1) * src_p->size;
-                dp = (uint8_t*)buf + (nelmts-1) * dst_p->size;
+                sp = (uint8_t*)buf + (nelmts-1) * src_p->shared->size;
+                dp = (uint8_t*)buf + (nelmts-1) * dst_p->shared->size;
                 direction = -1;
             }
 
@@ -9240,7 +9240,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get conversion exception callback");
 
             /* Allocate space for order-reversed source buffer */
-            src_rev = (uint8_t*)H5MM_calloc(src_p->size);
+            src_rev = (uint8_t*)H5MM_calloc(src_p->shared->size);
 
             /* The conversion loop */
             for (elmtno=0; elmtno<nelmts; elmtno++) {
@@ -9268,11 +9268,11 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 #ifndef NDEBUG
                 /* I don't quite trust the overlap calculations yet --rpm */
                 if (d==dbuf) {
-                    assert ((dp>=sp && dp<sp+src_p->size) ||
-                            (sp>=dp && sp<dp+dst_p->size));
+                    assert ((dp>=sp && dp<sp+src_p->shared->size) ||
+                            (sp>=dp && sp<dp+dst_p->shared->size));
                 } else {
-                    assert ((dp<sp && dp+dst_p->size<=sp) ||
-                            (sp<dp && sp+src_p->size<=dp));
+                    assert ((dp<sp && dp+dst_p->shared->size<=sp) ||
+                            (sp<dp && sp+src_p->shared->size<=dp));
                 }
 #endif
 
@@ -9282,10 +9282,10 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * little endian and then we'll fix the order at the end.
                  */
                 if (H5T_ORDER_BE==src.order) {
-                    half_size = src_p->size/2;
+                    half_size = src_p->shared->size/2;
                     for (i=0; i<half_size; i++) {
-                        uint8_t tmp = s[src_p->size-(i+1)];
-                        s[src_p->size-(i+1)] = s[i];
+                        uint8_t tmp = s[src_p->shared->size-(i+1)];
+                        s[src_p->shared->size-(i+1)] = s[i];
                         s[i] = tmp;
                     }
                 }
@@ -9374,7 +9374,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      * precision loss.  Let user's handler deal with the case if it's present 
                      */
                     if(cb_struct.func) { 
-                        H5T_reverse_order(src_rev, s, src_p->size, src_p->u.atomic.order); /*reverse order first*/
+                        H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
                         except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_PRECISION, src_id, dst_id, 
                                 src_rev, d, cb_struct.user_data);
                     }
@@ -9441,7 +9441,7 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                 if(expo > expo_max) {  /*overflows*/
                     if(cb_struct.func) { /*user's exception handler.  Reverse back source order*/
-                        H5T_reverse_order(src_rev, s, src_p->size, src_p->u.atomic.order); /*reverse order first*/
+                        H5T_reverse_order(src_rev, s, src_p->shared->size, src_p->shared->u.atomic.order); /*reverse order first*/
                         except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id, 
                                 src_rev, d, cb_struct.user_data);
 
@@ -9475,10 +9475,10 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     assert (H5T_PAD_ZERO==dst.lsb_pad || H5T_PAD_ONE==dst.lsb_pad);
                     H5T_bit_set (d, 0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
                 }
-                if (dst.offset+dst.prec!=8*dst_p->size) {
+                if (dst.offset+dst.prec!=8*dst_p->shared->size) {
                     assert (H5T_PAD_ZERO==dst.msb_pad || H5T_PAD_ONE==dst.msb_pad);
                     H5T_bit_set (d, dst.offset+dst.prec,
-                                 8*dst_p->size - (dst.offset+ dst.prec),
+                                 8*dst_p->shared->size - (dst.offset+ dst.prec),
                                  (hbool_t)(H5T_PAD_ONE==dst.msb_pad));
                 }
 
@@ -9487,10 +9487,10 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * beginning of loop.
                  */
                 if (H5T_ORDER_BE==dst.order && reverse) {
-                    half_size = dst_p->size/2;
+                    half_size = dst_p->shared->size/2;
                     for (i=0; i<half_size; i++) {
-                        uint8_t tmp = d[dst_p->size-(i+1)];
-                        d[dst_p->size-(i+1)] = d[i];
+                        uint8_t tmp = d[dst_p->shared->size-(i+1)];
+                        d[dst_p->shared->size-(i+1)] = d[i];
                         d[i] = tmp;
                     }
                 }
@@ -9500,13 +9500,13 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * should copy the value to the true destination buffer.
                  */
                 if (d==dbuf)
-                    HDmemcpy (dp, d, dst_p->size);
+                    HDmemcpy (dp, d, dst_p->shared->size);
                 if (buf_stride) {
                     sp += direction * buf_stride;
                     dp += direction * buf_stride;
                 } else {
-                    sp += direction * src_p->size;
-                    dp += direction * dst_p->size;
+                    sp += direction * src_p->shared->size;
+                    dp += direction * dst_p->shared->size;
                 }
 
                 HDmemset(int_buf, 0, buf_size);

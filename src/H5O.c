@@ -1244,7 +1244,7 @@ H5O_link(const H5G_entry_t *ent, int adjust, hid_t dxpl_id)
         /* Check if the object should be deleted */
         if(oh->nlink==0) {
             /* Check if the object is still open by the user */
-            if(H5FO_opened(ent->file,ent->header)>=0) {
+            if(H5FO_opened(ent->file,ent->header)!=NULL) {
                 /* Flag the object to be deleted when it's closed */
                 if(H5FO_mark(ent->file,ent->header,TRUE)<0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't mark object for deletion");

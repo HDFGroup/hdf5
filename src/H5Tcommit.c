@@ -28,6 +28,7 @@
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FOprivate.h"    /* File objects               */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Tpkg.h"		/* Datatypes				*/
@@ -132,9 +133,9 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
      * normally fails on such types (try H5Tclose(H5T_NATIVE_INT)) but closing
      * a named type should always succeed.
      */
-    if (H5T_STATE_NAMED==type->state || H5T_STATE_OPEN==type->state)
+    if (H5T_STATE_NAMED==type->shared->state || H5T_STATE_OPEN==type->shared->state)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "data type is already committed");
-    if (H5T_STATE_IMMUTABLE==type->state)
+    if (H5T_STATE_IMMUTABLE==type->shared->state)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "data type is immutable");
 
     /* Find the insertion file */
@@ -160,7 +161,12 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to update type header message");
     if (H5G_insert (loc, name, &(type->ent), dxpl_id)<0)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to name data type");
-    type->state = H5T_STATE_OPEN;
+    type->shared->state = H5T_STATE_OPEN;
+    type->shared->fo_count=1;
+
+    /* Add datatype to the list of open objects in the file */
+    if(H5FO_insert(type->ent.file, type->ent.header, type->shared)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "can't insert datatype into list of open objects")
 
     /* Mark datatype as being on memory now.  Since this datatype may still be used in memory
      * after committed to disk, change its size back as in memory. */
@@ -169,7 +175,7 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
 
 done:
     if (ret_value<0) {
-	if ((type->state==H5T_STATE_TRANSIENT || type->state==H5T_STATE_RDONLY) && H5F_addr_defined(type->ent.header)) {
+	if ((type->shared->state==H5T_STATE_TRANSIENT || type->shared->state==H5T_STATE_RDONLY) && H5F_addr_defined(type->ent.header)) {
 	    if(H5O_close(&(type->ent))<0)
                 HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header");
             if(H5O_delete(file, dxpl_id,type->ent.header)<0)
@@ -241,7 +247,7 @@ H5T_committed(H5T_t *type)
 
     assert (type);
 
-    FUNC_LEAVE_NOAPI(H5T_STATE_OPEN==type->state || H5T_STATE_NAMED==type->state);
+    FUNC_LEAVE_NOAPI(H5T_STATE_OPEN==type->shared->state || H5T_STATE_NAMED==type->shared->state);
 } /* end H5T_committed() */
 
 

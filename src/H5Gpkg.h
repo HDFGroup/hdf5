@@ -47,12 +47,19 @@ typedef struct H5G_node_t {
 } H5G_node_t;
 
 /*
+ * Reference count shared between all instances of an open group
+ */
+struct H5G_shared_t {
+    int fo_count;                   /* open file object count */
+};
+
+/*
  * A group handle passed around through layers of the library within and
  * above the H5G layer.
  */
 struct H5G_t {
-    int         nref;                   /*open reference count               */
-    H5G_entry_t ent;                    /*info about the group               */
+    H5G_shared_t* shared;               /*shared file object data */
+    H5G_entry_t ent;                    /*info about the group    */
 };
 
 /*

@@ -139,13 +139,13 @@ H5D_mpio_spaces_xfer(H5F_t *f, const H5D_t *dset, size_t elmt_size,
     	HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't create MPI file type");
 
     /* Get the base address of the contiguous dataset or the chunk */
-    if(dset->layout.type == H5D_CONTIGUOUS)
+    if(dset->shared->layout.type == H5D_CONTIGUOUS)
        addr = H5D_contig_get_addr(dset) + mpi_file_offset;
     else {
         haddr_t   chunk_addr; /* for collective chunk IO */
 
-        assert(dset->layout.type == H5D_CHUNKED); 
-        chunk_addr=H5D_istore_get_addr(f,dxpl_id,&(dset->layout),store->chunk.offset,NULL);
+        assert(dset->shared->layout.type == H5D_CHUNKED); 
+        chunk_addr=H5D_istore_get_addr(f,dxpl_id,&(dset->shared->layout),store->chunk.offset,NULL);
         addr = H5F_BASE_ADDR(f) + chunk_addr + mpi_file_offset;
     }
 

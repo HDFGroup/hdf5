@@ -65,7 +65,7 @@ int main( void )
  hid_t   group_id, group2_id, group3_id, group4_id, group5_id, group6_id, group7_id;
  hid_t   dataset_id, dataset2_id;
  hid_t   space_id;  
- hid_t   type_id;
+ hid_t   type_id, type2_id;
  hsize_t dims[1] = { 5 };
 
  /*buffer to hold name and its size */
@@ -1212,6 +1212,31 @@ int main( void )
  PASSED();
 
 
+ /*-------------------------------------------------------------------------
+ * Test H5Iget_name with objects that have two names
+ *-------------------------------------------------------------------------
+ */
+
+TESTING("H5Iget_name with datasets that have two names");
+
+/* Open dataset named "d"*/
+if ((dataset_id = H5Dopen( file_id, "/g17/d"))<0) goto out;
+
+/* Create link to dataset named "link" */
+if (H5Glink2(dataset_id,".",H5G_LINK_HARD,file_id,"/g17/link")<0) goto out;
+if ((dataset2_id = H5Dopen( file_id, "/g17/link"))<0) goto out;
+
+/* Make sure that the two IDs use two different names */
+if(H5Iget_name(dataset_id, name, size)<0) goto out;
+if(check_name(name, "/g17/d")!=0) goto out;
+
+if(H5Iget_name(dataset2_id, name, size)<0) goto out;
+if(check_name(name, "/g17/link")!=0) goto out;
+
+if(H5Dclose(dataset_id)<0) goto out;
+if(H5Dclose(dataset2_id)<0) goto out;
+
+PASSED();
 
 
 /*-------------------------------------------------------------------------
@@ -1418,6 +1443,14 @@ int main( void )
  if ((group_id = H5Gcreate( file_id, "/g18", 0 ))<0) goto out;
  if ((group2_id = H5Gcreate( file_id, "/g18/g2", 0 ))<0) goto out;
  
+ /* Also create a dataset and a datatype */
+ if ((space_id = H5Screate_simple( 1, dims, NULL ))<0) goto out;
+ if ((type_id = H5Tcopy(H5T_NATIVE_INT))<0) goto out;
+ if ((dataset_id = H5Dcreate( file_id, "g18/d2", type_id, space_id, 
+  H5P_DEFAULT ))<0) goto out;
+
+ if (H5Tcommit(file_id, "g18/t2", type_id) <0) goto out;
+
  /* Create second file and group "/g3/g4/g5" in it */
  file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
  if ((group3_id = H5Gcreate( file1_id, "/g3", 0 ))<0) goto out;
@@ -1427,39 +1460,70 @@ int main( void )
  /* Mount first file at "g3/g4" in the second file */
  if (H5Fmount(file1_id, "/g3/g4", file_id, H5P_DEFAULT)<0) goto out;
 
- /* Get name for the ID of the first file, should be "/g18/g2" still */
+ /* Get name for the group ID in the first file, should be "/g18/g2" still */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
-
- /* Verify */
  if (check_name( name, "/g18/g2" )!=0) goto out;
 
- /* Open the mounted group */
- if ((group6_id = H5Gopen( file_id, "/g3/g4/g18/g2" ))<0) goto out;
+  /* Get name for the dataset ID in the first file, should be "/g18/g2/d2" still */
+ if (H5Iget_name( dataset_id, name, size )<0) goto out;
+ if (check_name( name, "/g18/d2" )!=0) goto out;
 
- /* Get name */
+ /* Get name for the datatype ID in the first file, should be "/g18/g2/t2" still */
+ if (H5Iget_name( type_id, name, size )<0) goto out;
+ if (check_name( name, "/g18/t2" )!=0) goto out;
+
+ /* Open the mounted group, dataset, and datatype through their new names */
+ if ((group6_id = H5Gopen( file1_id, "/g3/g4/g18/g2" ))<0) goto out;
+ if ((dataset2_id = H5Dopen( file1_id, "/g3/g4/g18/d2" ))<0) goto out;
+ if ((type2_id = H5Topen( file1_id, "/g3/g4/g18/t2" ))<0) goto out;
+
+ /* Verify names */
  if (H5Iget_name( group6_id, name, size )<0) goto out;
-
- /* Verify */
  if (check_name( name, "/g3/g4/g18/g2" )!=0) goto out;
+
+ if (H5Iget_name( dataset2_id, name, size )<0) goto out;
+ if (check_name( name, "/g3/g4/g18/d2" )!=0) goto out;
+
+ if (H5Iget_name( type2_id, name, size )<0) goto out;
+ if (check_name( name, "/g3/g4/g18/t2" )!=0) goto out;
+
+ /* Verify that old IDs still refer to objects by their old names */
+ if (H5Iget_name( group2_id, name, size )<0) goto out;
+ if (check_name( name, "/g18/g2" )!=0) goto out;
+
+ if (H5Iget_name( dataset_id, name, size )<0) goto out;
+ if (check_name( name, "/g18/d2" )!=0) goto out;
+
+ if (H5Iget_name( type_id, name, size )<0) goto out;
+ if (check_name( name, "/g18/t2" )!=0) goto out;
 
  /* Unmount */
  if (H5Funmount(file1_id, "/g3/g4")<0) goto out;
 
- /* Get name for the ID of the first file, should be "/g18/g2" still */
+ /* Get name for the IDs of the first file, should be unchanged */
  if (H5Iget_name( group2_id, name, size )<0) goto out;
+ if (check_name( name, "/g18/g2" )!=0) goto out;
 
- /* Verify */
- if (check_name( name, "/g18/g2" )!=0)
-  goto out;
+ if (H5Iget_name( dataset_id, name, size )<0) goto out;
+ if (check_name( name, "/g18/d2" )!=0) goto out;
 
- /* Get name for the ID of the secondt file, should be "" */
+ if (H5Iget_name( type_id, name, size )<0) goto out;
+ if (check_name( name, "/g18/t2" )!=0) goto out;
+
+ /* Get name for the IDs of the second file, should be "" */
  if (H5Iget_name( group6_id, name, size )<0) goto out;
+ if (check_name( name, "" )!=0) goto out;
 
- /* Verify */
- if (check_name( name, "" )!=0)
-  goto out;
+ if (H5Iget_name( dataset2_id, name, size )<0) goto out;
+ if (check_name( name, "" )!=0) goto out;
 
- /* Close */
+ if (H5Iget_name( type2_id, name, size )<0) goto out;
+ if (check_name( name, "" )!=0) goto out;
+
+ H5Tclose( type_id );
+ H5Tclose( type2_id );
+ H5Dclose( dataset_id );
+ H5Dclose( dataset2_id );
  H5Gclose( group_id );
  H5Gclose( group2_id );
  H5Gclose( group3_id );

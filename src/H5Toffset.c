@@ -103,13 +103,13 @@ H5Tget_offset(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type")
-    while (dt->parent)
-        dt = dt->parent; /*defer to parent*/
-    if (!H5T_IS_ATOMIC(dt))
+    while (dt->shared->parent)
+        dt = dt->shared->parent; /*defer to parent*/
+    if (!H5T_IS_ATOMIC(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified data type")
     
     /* Offset */
-    ret_value = (int)dt->u.atomic.offset;
+    ret_value = (int)dt->shared->u.atomic.offset;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -167,13 +167,13 @@ H5Tset_offset(hid_t type_id, size_t offset)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type")
-    if (H5T_STATE_TRANSIENT!=dt->state)
+    if (H5T_STATE_TRANSIENT!=dt->shared->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only")
-    if (H5T_STRING == dt->type && offset != 0)
+    if (H5T_STRING == dt->shared->type && offset != 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offset must be zero for this type")
-    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
+    if (H5T_ENUM==dt->shared->type && dt->shared->u.enumer.nmembs>0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined")
-    if (H5T_COMPOUND==dt->type || H5T_REFERENCE==dt->type || H5T_OPAQUE==dt->type)
+    if (H5T_COMPOUND==dt->shared->type || H5T_REFERENCE==dt->shared->type || H5T_OPAQUE==dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for this datatype")
 
     /* Do the real work */
@@ -233,25 +233,25 @@ H5T_set_offset(H5T_t *dt, size_t offset)
 
     /* Check args */
     assert(dt);
-    assert(H5T_STRING!=dt->type || 0==offset);
-    assert(H5T_REFERENCE!=dt->type);
-    assert(H5T_OPAQUE!=dt->type);
-    assert(H5T_COMPOUND!=dt->type);
-    assert(!(H5T_ENUM==dt->type && 0==dt->u.enumer.nmembs));
+    assert(H5T_STRING!=dt->shared->type || 0==offset);
+    assert(H5T_REFERENCE!=dt->shared->type);
+    assert(H5T_OPAQUE!=dt->shared->type);
+    assert(H5T_COMPOUND!=dt->shared->type);
+    assert(!(H5T_ENUM==dt->shared->type && 0==dt->shared->u.enumer.nmembs));
 
-    if (dt->parent) {
-	if (H5T_set_offset(dt->parent, offset)<0)
+    if (dt->shared->parent) {
+	if (H5T_set_offset(dt->shared->parent, offset)<0)
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set offset for base type")
 
         /* Adjust size of datatype appropriately */
-        if(dt->type==H5T_ARRAY)
-            dt->size = dt->parent->size * dt->u.array.nelem;
-        else if(dt->type!=H5T_VLEN)
-            dt->size = dt->parent->size;
+        if(dt->shared->type==H5T_ARRAY)
+            dt->shared->size = dt->shared->parent->shared->size * dt->shared->u.array.nelem;
+        else if(dt->shared->type!=H5T_VLEN)
+            dt->shared->size = dt->shared->parent->shared->size;
     } else {
-        if (offset+dt->u.atomic.prec > 8*dt->size)
-            dt->size = (offset + dt->u.atomic.prec + 7) / 8;
-        dt->u.atomic.offset = offset;
+        if (offset+dt->shared->u.atomic.prec > 8*dt->shared->size)
+            dt->shared->size = (offset + dt->shared->u.atomic.prec + 7) / 8;
+        dt->shared->u.atomic.offset = offset;
     }
     
 done:

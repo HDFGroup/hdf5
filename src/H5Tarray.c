@@ -34,6 +34,7 @@
 
 /* Declare extern the free list for H5T_t's */
 H5FL_EXTERN(H5T_t);
+H5FL_EXTERN(H5T_shared_t);
 
 
 /*--------------------------------------------------------------------------
@@ -155,34 +156,37 @@ H5T_array_create(H5T_t *base, int ndims, const hsize_t dim[/* ndims */],
     /* Build new type */
     if (NULL==(ret_value = H5FL_CALLOC(H5T_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-
+    if (NULL==(ret_value->shared=H5FL_CALLOC(H5T_shared_t)))  {
+        H5FL_FREE(H5T_t, ret_value);
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    }
     ret_value->ent.header = HADDR_UNDEF;
-    ret_value->type = H5T_ARRAY;
+    ret_value->shared->type = H5T_ARRAY;
 
     /* Copy the base type of the array */
-    ret_value->parent = H5T_copy(base, H5T_COPY_ALL);
+    ret_value->shared->parent = H5T_copy(base, H5T_COPY_ALL);
 
     /* Set the array parameters */
-    ret_value->u.array.ndims = ndims;
+    ret_value->shared->u.array.ndims = ndims;
 
     /* Copy the array dimensions & compute the # of elements in the array */
-    for(i=0, ret_value->u.array.nelem=1; i<ndims; i++) {
-        H5_ASSIGN_OVERFLOW(ret_value->u.array.dim[i],dim[i],hsize_t,size_t);
-        ret_value->u.array.nelem *= (size_t)dim[i];
+    for(i=0, ret_value->shared->u.array.nelem=1; i<ndims; i++) {
+        H5_ASSIGN_OVERFLOW(ret_value->shared->u.array.dim[i],dim[i],hsize_t,size_t);
+        ret_value->shared->u.array.nelem *= (size_t)dim[i];
     } /* end for */
 
     /* Copy the dimension permutations */
     for(i=0; i<ndims; i++)
-        ret_value->u.array.perm[i] = perm ? perm[i] : i;
+        ret_value->shared->u.array.perm[i] = perm ? perm[i] : i;
 
     /* Set the array's size (number of elements * element datatype's size) */
-    ret_value->size = ret_value->parent->size * ret_value->u.array.nelem;
+    ret_value->shared->size = ret_value->shared->parent->shared->size * ret_value->shared->u.array.nelem;
 
     /*
      * Set the "force conversion" flag if the base datatype indicates
      */
-    if(base->force_conv==TRUE)
-        ret_value->force_conv=TRUE;
+    if(base->shared->force_conv==TRUE)
+        ret_value->shared->force_conv=TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -216,7 +220,7 @@ H5Tget_array_ndims(hid_t type_id)
     /* Check args */
     if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
-    if(dt->type!=H5T_ARRAY)
+    if(dt->shared->type!=H5T_ARRAY)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype");
 
     /* Retrieve the number of dimensions */
@@ -251,10 +255,10 @@ H5T_get_array_ndims(H5T_t *dt)
     FUNC_ENTER_NOAPI(H5T_get_array_ndims, FAIL);
 
     assert(dt);
-    assert(dt->type==H5T_ARRAY);
+    assert(dt->shared->type==H5T_ARRAY);
 
     /* Retrieve the number of dimensions */
-    ret_value=dt->u.array.ndims;
+    ret_value=dt->shared->u.array.ndims;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -288,7 +292,7 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
     /* Check args */
     if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
-    if(dt->type!=H5T_ARRAY)
+    if(dt->shared->type!=H5T_ARRAY)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype");
 
     /* Retrieve the sizes of the dimensions */
@@ -324,20 +328,20 @@ H5T_get_array_dims(H5T_t *dt, hsize_t dims[], int perm[])
     FUNC_ENTER_NOAPI(H5T_get_array_dims, FAIL);
 
     assert(dt);
-    assert(dt->type==H5T_ARRAY);
+    assert(dt->shared->type==H5T_ARRAY);
 
     /* Retrieve the sizes of the dimensions */
     if(dims) 
-        for(i=0; i<dt->u.array.ndims; i++)
-            dims[i]=dt->u.array.dim[i];
+        for(i=0; i<dt->shared->u.array.ndims; i++)
+            dims[i]=dt->shared->u.array.dim[i];
 
     /* Retrieve the dimension permutations */
     if(perm) 
-        for(i=0; i<dt->u.array.ndims; i++)
-            perm[i]=dt->u.array.perm[i];
+        for(i=0; i<dt->shared->u.array.ndims; i++)
+            perm[i]=dt->shared->u.array.perm[i];
 
     /* Pass along the array rank as the return value */
-    ret_value=dt->u.array.ndims;
+    ret_value=dt->shared->u.array.ndims;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

@@ -81,18 +81,18 @@ H5Tset_tag(hid_t type_id, const char *tag)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
-    if (H5T_STATE_TRANSIENT!=dt->state)
+    if (H5T_STATE_TRANSIENT!=dt->shared->state)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only")
-    while (dt->parent)
-        dt = dt->parent; /*defer to parent*/
-    if (H5T_OPAQUE!=dt->type)
+    while (dt->shared->parent)
+        dt = dt->shared->parent; /*defer to parent*/
+    if (H5T_OPAQUE!=dt->shared->type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an opaque data type")
     if (!tag)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no tag")
 
     /* Commit */
-    H5MM_xfree(dt->u.opaque.tag);
-    dt->u.opaque.tag = H5MM_strdup(tag);
+    H5MM_xfree(dt->shared->u.opaque.tag);
+    dt->shared->u.opaque.tag = H5MM_strdup(tag);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -125,13 +125,13 @@ H5Tget_tag(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type")
-    while (dt->parent)
-        dt = dt->parent; /*defer to parent*/
-    if (H5T_OPAQUE != dt->type)
+    while (dt->shared->parent)
+        dt = dt->shared->parent; /*defer to parent*/
+    if (H5T_OPAQUE != dt->shared->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "operation not defined for data type class")
     
     /* result */
-    if (NULL==(ret_value=H5MM_strdup(dt->u.opaque.tag)))
+    if (NULL==(ret_value=H5MM_strdup(dt->shared->u.opaque.tag)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
 done:
