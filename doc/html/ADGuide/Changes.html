@@ -53,7 +53,155 @@ This document is intended to assist application developers who must keep
 an application synchronized with the HDF5 library or related software.
 
 
-<h2>Release 1.6.1 (current release) versus Release 1.6.0</h2> 
+<h2>Release 1.6.2 (current release) versus Release 1.6.1</h2> 
+
+<dir>
+
+This section lists the API-level changes that have been made in the 
+transition from the HDF5 Release 1.6.1 to Release 1.6.2.
+
+
+    <h3>New Functions and Tools</h3>
+        <dl>
+	  <dt>C functions:
+          <dd>The following C functions are new for Release 1.6.2 and 
+              are documented in the
+              <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+	
+              <table border="0">
+              <tr>
+                <td align="left" valign="top"><code>H5Iget_ref</code>
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td align="left" valign="top"><em>int</em> <code>H5Iget_ref</code> 
+                    (<em>hid_t </em><code>obj_id</code>)<br>
+                    See <a href="../RM_H5I.html#Identify-GetRef">entry</a>.</td>
+              </tr>
+              <tr>
+                <td align="left" valign="top"><code>H5Iinc_ref</code>
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td align="left" valign="top"><em>int</em> <code>H5Iinc_ref</code> 
+                    (<em>hid_t </em><code>obj_id</code>)<br>
+                    See <a href="../RM_H5I.html#Identify-IncRef">entry</a>.</td>
+              </tr>
+              <tr>
+                <td align="left" valign="top"><code>H5Idec_ref</code>
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td align="left" valign="top"><em>int</em> <code>H5Idec_ref</code> 
+                    (<em>hid_t </em><code>obj_id</code>)<br>
+                    See <a href="../RM_H5I.html#Identify-DecRef">entry</a>.</td>
+              </tr>
+              </table>    
+	      
+          <dd>&nbsp;
+	  <dt>Fortran subroutines:
+          <dd>The following Fortran90 subroutines are new for Release 1.6.2 
+	      and are documented in the 
+              <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+              <table border="0">
+              <tr>
+                <td align="left" valign="top">Corresponding to the 
+                    new C functions listed above:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code>h5iget_ref_f</code><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code>h5iinc_ref_f</code><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code>h5idec_ref_f</code>
+                    </td>
+                <td align="left" valign="top"> 
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+              </tr>
+              </table>    
+	  
+          <dd>&nbsp;
+	  <dt>Tools:
+          <dd>The following tools are new for Release 1.6.2 and are 
+              documented on the <a href="../Tools.html">Tools page</a> of the
+              <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+              <dd><code>h5pcc</code> is designed to aid in the compilation 
+                  of C applications that employ the HDF5 Library.
+              <dd><code>h5pfc</code> is designed to aid in the compilation 
+                  of Fortran90 applications that employ the HDF5 Library.
+        </dl>
+
+
+    <h3>Deleted Functions</h3>
+
+        None.
+
+	<!--
+	The following functions are deprecated in HDF5 Release X.X.x.
+        A backward compatibility mode is provided in this release,
+        enabling these functions and other Release 1.4.x compatibility
+        features, but is available only when the HDF5 library is 
+        configured with the flag <code>H5_WANT_H5_V1_4_COMPAT</code>.
+        The backward compatibility mode is not enabled in the 
+        binaries distributed by NCSA.
+
+        <dir>
+        <table border=0>
+        <tr valign="top" align="left"><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>
+<code>function</code>
+</pre>
+        </td><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>
+<code>function</code>
+</pre>
+        </td><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>&nbsp;
+
+</pre>
+        </td></tr>
+        </table>
+        </dir>
+        <p>
+	The above functions will eventually be removed from the HDF5 
+        distribution and from the <cite>HDF5 Reference Manual</cite>.
+	-->
+
+
+    <h3>Functions with Changed Syntax</h3>
+
+        None.
+
+        <!--
+        The following functions have changed as noted.
+	
+        <dl>
+        <dt>C functions:
+        <dt><code>H5function?</code>
+          <dd>Change....
+	
+        <dd>&nbsp;
+        <dt>Fortran90 subroutines:
+        <dt><code>h5subroutine_f?</code>
+          <dd>Change...
+        </dl>
+        -->
+
+
+    <h3>Constants with Changed Values</h3>
+    
+        None.
+        
+
+    </dir>
+<p>&nbsp;
+
+
+
+
+
+
+
+
+
+
+<h2>Release 1.6.1 versus Release 1.6.0</h2> 
 
 <dir>
 
@@ -1180,7 +1328,7 @@ V1.4.0
 Describes HDF5 Release 1.6.1, October 2003
 </address><!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 16 October 2003 
+Last modified: 23 January 2004 
 <!-- hhmts end -->
 
 </body>
