@@ -607,7 +607,7 @@ H5FD_sec2_get_eof(H5FD_t *_file)
     H5FD_sec2_t	*file = (H5FD_sec2_t*)_file;
     haddr_t ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_get_get_eof, HADDR_UNDEF)
+    FUNC_ENTER_NOAPI(H5FD_sec2_get_eof, HADDR_UNDEF)
 
     /* Set return value */
     ret_value=MAX(file->eof, file->eoa);

@@ -5991,7 +5991,7 @@ H5T_conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_long_llong, FAIL);
+    FUNC_ENTER_NOAPI(H5T_conv_ulong_llong, FAIL);
 
     H5T_CONV_uS(ULONG, LLONG, unsigned long, long_long, -, LLONG_MAX);
 
@@ -6689,7 +6689,7 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_conv_float_double, FAIL);
+    FUNC_ENTER_NOAPI(H5T_conv_double_float, FAIL);
 
     H5T_CONV_Ff(DOUBLE, FLOAT, double, float, -FLT_MAX, FLT_MAX);
 
@@ -7970,7 +7970,7 @@ H5T_conv_double_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     herr_t      ret_value=SUCCEED;      /* Return value         */
     
-    FUNC_ENTER_NOAPI(H5T_conv_double_ulong, FAIL);
+    FUNC_ENTER_NOAPI(H5T_conv_double_ullong, FAIL);
 
     H5T_CONV_Fx(DOUBLE, ULLONG, double, unsigned long_long, 0, ULLONG_MAX);
 
@@ -8600,7 +8600,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                  * Shift mantissa part by exponent minus mantissa size(right shift), 
                  * or by mantissa size minus exponent(left shift).
                  */
-                H5T_bit_shift(int_buf, (expo-src.u.f.msize), buf_size);
+                H5T_bit_shift(int_buf, (ssize_t)(expo-src.u.f.msize), buf_size);
 
                 /* Convert to integer representation if negative. 
                  * equivalent to ~(value - 1).

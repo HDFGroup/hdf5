@@ -1990,7 +1990,7 @@ H5F_istore_allocated(H5F_t *f, hid_t dxpl_id, unsigned ndims, haddr_t addr)
     H5F_istore_ud1_t	udata;
     hsize_t      ret_value;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_istore_nchunks, 0);
+    FUNC_ENTER_NOAPI(H5F_istore_allocated, 0);
 
     HDmemset(&udata, 0, sizeof udata);
     udata.mesg.ndims = ndims;

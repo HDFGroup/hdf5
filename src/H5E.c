@@ -567,7 +567,7 @@ H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *key)
     H5E_cls_t   *cls = (H5E_cls_t*)key;
     herr_t      ret_value = SUCCEED;       /* Return value */
         
-    FUNC_ENTER_NOAPI(H5_close_msg_cb, FAIL)
+    FUNC_ENTER_NOAPI(H5E_close_msg_cb, FAIL)
   
     /* Check arguments */
     assert(err_msg);

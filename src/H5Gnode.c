@@ -1602,7 +1602,7 @@ H5G_node_type(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
     H5G_node_t		*sn = NULL;
     int                 ret_value = H5B_ITER_CONT;
 
-    FUNC_ENTER_NOAPI(H5G_node_name, H5B_ITER_ERROR);
+    FUNC_ENTER_NOAPI(H5G_node_type, H5B_ITER_ERROR);
 
     /* Check arguments. */
     assert(f);

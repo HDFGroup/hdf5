@@ -1144,11 +1144,23 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
 extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 #endif
 
+/* Check if the function name is correct (if the compiler supports __FUNCTION__) */
+#ifdef H5_HAVE_FUNCTION
+#define H5_CHECK_FUNCNAME(func_name) \
+    assert(func_name && !HDstrcmp(#func_name, __FUNCTION__))
+#else /* H5_HAVE_FUNCTION */
+#define H5_CHECK_FUNCNAME(func_name) \
+    assert(func_name)
+#endif /* H5_HAVE_FUNCTION */
+
 #define FUNC_ENTER_COMMON_NOFUNC(func_name,asrt)                              \
    PABLO_SAVE (ID_ ## func_name)  					      \
 									      \
    /* Check API status */               				      \
    assert(asrt);				                              \
+									      \
+   /* Check function name */               				      \
+   H5_CHECK_FUNCNAME(func_name);					      \
 									      \
    /* Start tracing */                  				      \
    PABLO_TRACE_ON (PABLO_MASK, pablo_func_id)

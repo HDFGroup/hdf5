@@ -376,7 +376,7 @@ H5FD_fphdf5_is_captain(H5FD_t *_file)
     H5FD_fphdf5_t  *file = (H5FD_fphdf5_t*)_file;
     hbool_t         ret_value = FALSE;
 
-    FUNC_ENTER_NOAPI(H5FD_fphdf5_is_sap, FALSE)
+    FUNC_ENTER_NOAPI(H5FD_fphdf5_is_captain, FALSE)
 
     /* check args */
     assert(file);

@@ -391,7 +391,7 @@ H5T_vlen_seq_mem_read(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void *bu
  */
 /* ARGSUSED */
 static herr_t
-H5T_vlen_seq_mem_write(H5F_t UNUSED *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void UNUSED *_bg, hsize_t seq_len, hsize_t base_size)
+H5T_vlen_seq_mem_write(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void UNUSED *_bg, hsize_t seq_len, hsize_t base_size)
 {
     hvl_t vl;                       /* Temporary hvl_t to use during operation */
     size_t len;
@@ -573,7 +573,7 @@ H5T_vlen_str_mem_read(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void *bu
  */
 /* ARGSUSED */
 static herr_t
-H5T_vlen_str_mem_write(H5F_t UNUSED *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void UNUSED *_bg, hsize_t seq_len, hsize_t base_size)
+H5T_vlen_str_mem_write(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void UNUSED *_bg, hsize_t seq_len, hsize_t base_size)
 {
     char *t;                        /* Pointer to temporary buffer allocated */
     size_t len;                     /* Maximum length of the string to copy */
@@ -627,7 +627,7 @@ H5T_vlen_str_mem_setnull(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void 
 {
     char *t=NULL;                   /* Pointer to temporary buffer allocated */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_str_mem_write)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_str_mem_setnull)
 
     /* Set pointer in user's buffer with memcpy, to avoid alignment issues */
     HDmemcpy(_vl,&t,sizeof(char *));
