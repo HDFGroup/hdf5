@@ -9866,6 +9866,7 @@ trap 'rm -fr `echo "src/libhdf5.settings
           doc/html/Tutor/Makefile
           doc/html/Tutor/Graphics/Makefile
           doc/html/Tutor/examples/Makefile
+          doc/html/Tutor/examples/java/Makefile
           doc/html/cpplus/Makefile
           doc/html/fortran/Makefile src/H5config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
@@ -10031,6 +10032,7 @@ CONFIG_FILES=\${CONFIG_FILES-"src/libhdf5.settings
           doc/html/Tutor/Makefile
           doc/html/Tutor/Graphics/Makefile
           doc/html/Tutor/examples/Makefile
+          doc/html/Tutor/examples/java/Makefile
           doc/html/cpplus/Makefile
           doc/html/fortran/Makefile"}
 EOF
