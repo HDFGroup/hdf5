@@ -2240,7 +2240,7 @@ H5Eget_auto(H5E_auto_t *func, void **client_data)
     herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_API(H5Eget_auto, FAIL)
-    H5TRACE2("e","*x*x",func,client_data);
+    H5TRACE2("e","*xx",func,client_data);
 
     /* Retieve default error stack */    
     if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
@@ -2284,7 +2284,7 @@ H5Eget_auto(hid_t estack_id, H5E_auto_t *func, void **client_data)
     herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER_API(H5Eget_auto, FAIL)
-    H5TRACE3("e","i*x*x",estack_id,func,client_data);
+    H5TRACE3("e","i*xx",estack_id,func,client_data);
     
     if(estack_id == H5E_DEFAULT) {
     	if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
