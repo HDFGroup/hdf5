@@ -273,7 +273,7 @@ test_mpio_gb_file(char *filename)
 		printf("proc %d: writing %d bytes at offset %lld\n",
 		    mpi_rank, MB, mpi_off);
 	    mrc = MPI_File_write_at(fh, mpi_off, buf, MB, MPI_BYTE, &mpi_stat);
-	    INFO((mrc==MPI_SUCCESS), "");
+	    INFO((mrc==MPI_SUCCESS), "GB size file write");
 	    if (mrc!=MPI_SUCCESS)
 		writerrs++;
 	}
@@ -306,7 +306,7 @@ test_mpio_gb_file(char *filename)
 		printf("proc %d: read from mpi_off=%016llx, %lld\n",
 		    mpi_rank, mpi_off, mpi_off);
 	    mrc = MPI_File_read_at(fh, mpi_off, buf, MB, MPI_BYTE, &mpi_stat);
-	    INFO((mrc==MPI_SUCCESS), "");
+	    INFO((mrc==MPI_SUCCESS), "GB size file read");
 	    expected = i*mpi_size + (mpi_size - mpi_rank - 1);
 	    vrfyerrs=0;
 	    for (j=0; j<MB; j++){
