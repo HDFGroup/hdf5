@@ -39,9 +39,9 @@ typedef enum H5C_class_t {
 typedef enum H5C_prop_t {
    
    /* File Creation Properties */
-   H5F_USERBLOCK_SIZE,	/* Size of the user block in the file in bytes	*/
-   H5F_OFFSET_SIZE,	/* Number of bytes for offsets			*/
-   H5F_LENGTH_SIZE,	/* Number of bytes for lengths			*/
+   H5F_SIZEOF_USERBLOCK,/* Size of the user block in the file in bytes	*/
+   H5F_SIZEOF_ADDR,	/* Number of bytes for addresses		*/
+   H5F_SIZEOF_SIZE,	/* Number of bytes for sizes			*/
    H5F_SYM_LEAF_K,	/* 1/2 rank for symbol table leaf nodes		*/
    H5F_SYM_INTERN_K,	/* 1/2 rank for symbol table internal nodes	*/
    H5F_ISTORE_K,	/* 1/2 rank for indexed storage nodes		*/
@@ -75,8 +75,9 @@ extern "C" {
 hid_t H5Ccreate (H5C_class_t type);
 herr_t H5Cclose (hid_t template);
 hid_t H5Ccopy (hid_t template);
-herr_t H5Cgetparm (hid_t template, H5C_prop_t prop, void *buf);
-herr_t H5Csetparm (hid_t template, H5C_prop_t prop, const void *buf);
+herr_t H5Cget_prop (hid_t template, H5C_prop_t prop, void *buf);
+herr_t H5Cset_prop (hid_t template, H5C_prop_t prop, ...);
+H5C_class_t H5Cget_class (hid_t template);
 
 #ifdef __cplusplus
 }

@@ -801,7 +801,8 @@ H5F_istore_read (H5F_t *f, const H5O_istore_t *istore,
  */
 herr_t
 H5F_istore_write (H5F_t *f, const H5O_istore_t *istore,
-		  const size_t offset[], const size_t size[], void *buf)
+		  const size_t offset[], const size_t size[],
+		  const void *buf)
 {
    FUNC_ENTER (H5F_istore_write, FAIL);
 
@@ -846,7 +847,7 @@ H5F_istore_write (H5F_t *f, const H5O_istore_t *istore,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_create (H5F_t *f, struct H5O_istore_t *istore,
+H5F_istore_create (H5F_t *f, struct H5O_istore_t *istore/*out*/,
 		   uintn ndims, const size_t alignment[])
 {
    H5F_istore_ud1_t	udata;

@@ -379,8 +379,192 @@ H5P_get_npoints (const H5P_t *ds)
       HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, 0);
 
    default:
-      /* unknown data space class */
+      assert ("unknown data space class" && 0);
       HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, 0);
+   }
+
+   FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_ndims
+ *
+ * Purpose:	Determines the dimensionality of a data space.
+ *
+ * Return:	Success:	The number of dimensions in a data space.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, December 11, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+intn
+H5Pget_ndims (hid_t space_id)
+{
+   H5P_t	*ds = NULL;
+   size_t	ret_value = 0;
+
+   FUNC_ENTER(H5Pget_ndims, FAIL);
+   H5ECLEAR;
+
+   /* check args */
+   if (H5_DATASPACE!=H5Aatom_group (space_id) ||
+       NULL==(ds=H5Aatom_object (space_id))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data space*/
+   }
+
+   ret_value = H5P_get_ndims (ds);
+
+   FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_get_ndims
+ *
+ * Purpose:	Returns the number of dimensions in a data space.
+ *
+ * Return:	Success:	Non-negative number of dimensions.  Zero
+ *				implies a scalar.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, December 11, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+intn
+H5P_get_ndims (const H5P_t *ds)
+{
+   intn		ret_value = FAIL;
+   
+   FUNC_ENTER (H5P_get_ndims, FAIL);
+
+   /* check args */
+   assert (ds);
+
+   switch (ds->type) {
+   case H5P_SCALAR:
+      ret_value = 0;
+      break;
+
+   case H5P_SIMPLE:
+      ret_value = ds->u.simple.rank;
+      break;
+
+   case H5P_COMPLEX:
+      /* complex data spaces are not supported yet */
+      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
+
+   default:
+      assert ("unknown data space class" && 0);
+      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
+   }
+
+   FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_dims
+ *
+ * Purpose:	Returns the size in each dimension of a data space DS through
+ *		the DIMS argument.
+ *
+ * Return:	Success:	Number of dimensions, the same value as
+ *				returned by H5Pget_ndims().
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, December 11, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+intn
+H5Pget_dims (hid_t space_id, size_t dims[]/*out*/)
+{
+   
+   H5P_t	*ds = NULL;
+   size_t	ret_value = 0;
+
+   FUNC_ENTER(H5Pget_dims, FAIL);
+   H5ECLEAR;
+
+   /* check args */
+   if (H5_DATASPACE!=H5Aatom_group (space_id) ||
+       NULL==(ds=H5Aatom_object (space_id))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data space*/
+   }
+   if (!dims) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL); /*no output buffer*/
+   }
+   
+
+   ret_value = H5P_get_dims (ds, dims);
+
+   FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_get_dims
+ *
+ * Purpose:	Returns the size in each dimension of a data space.  This
+ *		function may not be meaningful for all types of data spaces.
+ *
+ * Return:	Success:	Number of dimensions.  Zero implies scalar.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, December 11, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+intn
+H5P_get_dims (const H5P_t *ds, size_t dims[])
+{
+   intn		ret_value = FAIL;
+   intn		i;
+   
+   FUNC_ENTER (H5P_get_dims, FAIL);
+
+   /* check args */
+   assert (ds);
+   assert (dims);
+
+   switch (ds->type) {
+   case H5P_SCALAR:
+      ret_value = 0;
+      break;
+
+   case H5P_SIMPLE:
+      ret_value = ds->u.simple.rank;
+      for (i=0; i<ret_value; i++) {
+	 dims[i] = ds->u.simple.size[i];
+      }
+      break;
+
+   case H5P_COMPLEX:
+      /* complex data spaces are not supported yet */
+      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
+
+   default:
+      assert ("unknown data space class" && 0);
+      HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
    }
 
    FUNC_LEAVE (ret_value);
@@ -542,179 +726,6 @@ H5P_cmp (const H5P_t *ds1, const H5P_t *ds2)
    FUNC_LEAVE (0);
 }
 
-/*--------------------------------------------------------------------------
- NAME
-    H5P_get_lrank
- PURPOSE
-    Return the logical rank of a dataspace (internal)
- USAGE
-    intn H5P_get_lrank(sdim)
-        H5P_t *sdim;            IN: Pointer to dataspace object to query
- RETURNS
-    The logical rank of a dataspace on success, UFAIL on failure
- DESCRIPTION
-        This function determines the number of logical dimensions in a 
-    dataspace.  The logical rank is the actual number of dimensions of the
-    dataspace, not the dimensionality of the space its embedded in.
-    UFAIL is returned on an error, otherwise the rank is returned.
---------------------------------------------------------------------------*/
-intn
-H5P_get_lrank (const H5P_simple_t *sdim)
-{
-    intn ret_value = UFAIL;
-
-    FUNC_ENTER(H5P_get_lrank, UFAIL);
-
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-
-    assert(sdim);
-    ret_value=sdim->rank;
-
-#ifdef LATER
-done:
-#endif /* LATER */
-  if(ret_value == UFAIL)
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-}
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Pget_lrank
- PURPOSE
-    Return the logical rank of a dataspace
- USAGE
-    intn H5P_get_lrank(sid)
-        hid_t sid;            IN: ID of dataspace object to query
- RETURNS
-    The logical rank of a dataspace on success, UFAIL on failure
- DESCRIPTION
-        This function determines the number of logical dimensions in a 
-    dataspace.  The logical rank is the actual number of dimensions of the
-    dataspace, not the dimensionality of the space its embedded in.
-    UFAIL is returned on an error, otherwise the rank is returned.
---------------------------------------------------------------------------*/
-intn
-H5Pget_lrank (hid_t sid)
-{
-    H5P_t *space=NULL;      /* dataspace to modify */
-    intn        ret_value = UFAIL;
-
-    FUNC_ENTER(H5Pget_lrank, UFAIL);
-
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-
-    if((space=H5Aatom_object(sid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
-
-    ret_value=H5P_get_lrank(&(space->u.simple));
-
-done:
-  if(ret_value == UFAIL)
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-}
-
-/*--------------------------------------------------------------------------
- NAME
-    H5P_get_ldims
- PURPOSE
-    Return the logical dimensions of a dataspace (internal)
- USAGE
-    herr_t H5P_get_ldims(sdim, dims)
-        H5P_simple_t *sdim;            IN: Pointer to dataspace object to query
-        intn *dims;                OUT: Pointer to array to store dimensions in
- RETURNS
-    SUCCEED/FAIL
- DESCRIPTION
-        This function determines the sizes of the logical dimensions in a 
-    dataspace.  The logical dimensions are the actual sizes of the
-    dataspace, not the size of the space it is embedded in.
---------------------------------------------------------------------------*/
-herr_t
-H5P_get_ldims (const H5P_simple_t *sdim, intn *dims)
-{
-    herr_t ret_value = FAIL;
-
-    FUNC_ENTER(H5P_get_ldims, UFAIL);
-
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-
-    assert(sdim);
-    assert(dims);
-    HDmemcpy(dims, sdim->size,sdim->rank*sizeof(intn));
-    ret_value=SUCCEED;
-
-#ifdef LATER
-done:
-#endif /* LATER */
-  if(ret_value == FAIL)
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-}
-
-/*--------------------------------------------------------------------------
- NAME
-    H5P_get_ldims
- PURPOSE
-    Return the logical dimensions of a dataspace
- USAGE
-    herr_t H5P_get_ldims(sdim, dims)
-        hid_t sid;            IN: ID of dataspace object to query
-        intn *dims;         OUT: Pointer to array to store dimensions in
- RETURNS
-    SUCCEED/FAIL
- DESCRIPTION
-        This function determines the sizes of the logical dimensions in a 
-    dataspace.  The logical dimensions are the actual sizes of the
-    dataspace, not the size of the space it is embedded in.
---------------------------------------------------------------------------*/
-herr_t H5Pget_ldims(hid_t sid, intn *dims)
-{
-    H5P_t *space=NULL;      /* dataspace to modify */
-    intn        ret_value = UFAIL;
-
-    FUNC_ENTER(H5Pget_lrank, UFAIL);
-
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-
-    if((space=H5Aatom_object(sid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
-
-    if(dims==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL);
-
-    ret_value=H5P_get_ldims(&(space->u.simple),dims);
-
-done:
-  if(ret_value == FAIL)
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(ret_value);
-}
 
 /*--------------------------------------------------------------------------
  NAME

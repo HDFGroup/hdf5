@@ -25,23 +25,26 @@
 /* Declare an enumerated type which holds all the valid major HDF error codes */
 typedef enum
   {
-      H5E_NONE_MAJOR = 0,      /* special zero, no error */
-      H5E_ARGS,                /* Invalid arguments to routine */
-      H5E_RESOURCE,            /* Resource unavailable */
-      H5E_INTERNAL,            /* Internal error (too specific to document in detail) */
-      H5E_FILE,                /* File Accessability */
-      H5E_IO,                  /* Low-level I/O */
-      H5E_FUNC,                /* Function Entry/Exit */
-      H5E_ATOM,                /* Object Atom */
-      H5E_CACHE,	       /* Object Cache */
-      H5E_BTREE,	       /* B-Tree Node */
-      H5E_SYM,		       /* Symbol Table */
-      H5E_HEAP,		       /* Heap */
-      H5E_OHDR,		       /* Object Header */
-      H5E_DATATYPE,	       /* Datatype */
-      H5E_DATASPACE,           /* Dataspace */
-      H5E_DATASET,	       /* Dataset */
-      H5E_STORAGE              /* Data storage */
+      H5E_NONE_MAJOR = 0,       /* special zero, no error */
+      H5E_ARGS,                 /* Invalid arguments to routine */
+      H5E_RESOURCE,             /* Resource unavailable */
+      H5E_INTERNAL,             /* Internal error (too specific to document
+				 * in detail)			
+				 */
+      H5E_FILE,                 /* File Accessability */
+      H5E_IO,                   /* Low-level I/O */
+      H5E_FUNC,                 /* Function Entry/Exit */
+      H5E_ATOM,                 /* Object Atom */
+      H5E_CACHE,	        /* Object Cache */
+      H5E_BTREE,	        /* B-Tree Node */
+      H5E_SYM,		        /* Symbol Table */
+      H5E_HEAP,		        /* Heap */
+      H5E_OHDR,		        /* Object Header */
+      H5E_DATATYPE,	        /* Datatype */
+      H5E_DATASPACE,            /* Dataspace */
+      H5E_DATASET,	        /* Dataset */
+      H5E_STORAGE,              /* Data storage */
+      H5E_TEMPLATE		/* Templates */
   }
 hdf_maj_err_code_t;
 

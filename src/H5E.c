@@ -59,7 +59,8 @@ static const hdf_maj_error_messages_t hdf_maj_error_messages[] =
     {H5E_DATATYPE, 	"Datatype"},
     {H5E_DATASPACE,	"Dataspace"},
     {H5E_DATASET,  	"Dataset"},
-    {H5E_STORAGE, 	"Data Storage"}, 
+    {H5E_STORAGE, 	"Data Storage"},
+    {H5E_TEMPLATE, 	"Template"}, 
 };
 
 static const hdf_min_error_messages_t hdf_min_error_messages[] =

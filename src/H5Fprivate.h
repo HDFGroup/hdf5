@@ -213,16 +213,16 @@
  * File-creation template.
  */
 typedef struct H5F_create_t {
-   uintn userblock_size;	/* Size of the file user block in bytes	*/
-   uintn sym_leaf_k;		/* 1/2 rank for symbol table leaf nodes */
-   uintn btree_k[8];		/* 1/2 rank for btree internal nodes 	*/
-   uint8 sizeof_addr;          	/* Number of bytes in an address	*/
-   uint8 sizeof_size;          	/* Number of bytes for obj sizes	*/
-   uint8 bootblock_ver;        	/* Version # of the bootblock 		*/
-   uint8 smallobject_ver;      	/* Version # of the small-object heap 	*/
-   uint8 freespace_ver;        	/* Version # of the free-space information */
-   uint8 objectdir_ver;        	/* Version # of the object directory format */
-   uint8 sharedheader_ver;     	/* Version # of the shared header format */
+   size_t userblock_size;	/* Size of the file user block in bytes	*/
+   intn sym_leaf_k;		/* 1/2 rank for symbol table leaf nodes */
+   intn btree_k[8];		/* 1/2 rank for btree internal nodes 	*/
+   size_t sizeof_addr;         	/* Number of bytes in an address	*/
+   size_t sizeof_size;         	/* Number of bytes for obj sizes	*/
+   intn bootblock_ver;        	/* Version # of the bootblock 		*/
+   intn smallobject_ver;      	/* Version # of the small-object heap 	*/
+   intn freespace_ver;        	/* Version # of the free-space information */
+   intn objectdir_ver;        	/* Version # of the object directory format */
+   intn sharedheader_ver;     	/* Version # of the shared header format */
 } H5F_create_t;
 
 /*
@@ -416,7 +416,7 @@ herr_t H5F_istore_read (H5F_t *f, const struct H5O_istore_t *mesg,
 			void *buf);
 herr_t H5F_istore_write (H5F_t *f, const struct H5O_istore_t *mesg,
 			 const size_t offset[], const size_t size[],
-			 void *buf);
+			 const void *buf);
 
 /* Functions that operate on contiguous storage wrt boot block */
 herr_t H5F_block_read (H5F_t *f, const haddr_t *addr, size_t size, void *buf);

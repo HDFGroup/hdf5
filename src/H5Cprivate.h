@@ -25,6 +25,5 @@
 #include <H5Fprivate.h>
 
 hid_t H5C_create (H5C_class_t type, void *tmpl);
-H5C_class_t H5C_class (hid_t template);
 
 #endif

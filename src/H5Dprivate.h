@@ -36,6 +36,8 @@
 /* Dataset creation template */
 typedef struct H5D_create_t {
    H5D_layout_t		layout;
+   intn			chunk_ndims;
+   size_t		chunk_size[32];
 } H5D_create_t;
 
 /* Dataset transfer template */

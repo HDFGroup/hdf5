@@ -36,17 +36,25 @@ static char RcsId[] = "@(#)$Revision$";
  * A dataset is the following struct.
  */
 struct H5D_t {
-   H5F_t	*file;		/* File store for this object		*/
-   H5G_entry_t	*ent;		/* Cached object header stuff		*/
-   H5T_t	*type;		/* Datatype of this dataset		*/
-   H5P_t	*space;		/* Dataspace of this dataset		*/
-   H5D_create_t	create_parms;	/* Creation parameters			*/
-   haddr_t	data_addr;	/* Raw data storage address		*/
+   H5F_t		*file;		/*file store for this object	*/
+   H5G_entry_t		*ent;		/*cached object header stuff	*/
+   H5T_t		*type;		/*datatype of this dataset	*/
+   H5P_t		*space;		/*dataspace of this dataset	*/
+   H5D_create_t		create_parms;	/*creation parameters		*/
+   union {
+      H5O_cstore_t	cstore;		/*contiguous storage info	*/
+      H5O_istore_t	istore;		/*chunked storage info		*/
+   } storage;
 };
 
 /* Default dataset creation template */
 const H5D_create_t H5D_create_dflt = {
    H5D_CONTIGUOUS,		/* Layout				*/
+   1, 				/* Chunk dimensions			*/
+   {1, 1, 1, 1, 1, 1, 1, 1,	/* Chunk size.  These default values....*/
+    1, 1, 1, 1, 1, 1, 1, 1,	/*...are quite useless.  Larger chunks..*/
+    1, 1, 1, 1, 1, 1, 1, 1,	/*...produces fewer, but larger I/O.....*/
+    1, 1, 1, 1, 1, 1, 1, 1}, 	/*...requests.				*/
 };
 
 /* Default dataset transfer template */
@@ -185,7 +193,7 @@ H5Dcreate (hid_t file_id, const char *name, hid_t type_id, hid_t space_id,
       HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not a data space */
    }
    if (create_parms_id>=0) {
-      if (H5C_DATASET_CREATE!=H5C_class (create_parms_id) ||
+      if (H5C_DATASET_CREATE!=H5Cget_class (create_parms_id) ||
 	  NULL==(create_parms=H5Aatom_object (create_parms_id))) {
 	 /* Not a dataset creation template */
 	 HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL);
@@ -385,7 +393,7 @@ H5Dread (hid_t dataset_id, hid_t type_id, hid_t space_id,
    }
    if (H5C_DEFAULT==xfer_parms_id) {
       xfer_parms = &H5D_xfer_dflt;
-   } else if (H5C_DATASET_XFER!=H5C_class (xfer_parms_id) ||
+   } else if (H5C_DATASET_XFER!=H5Cget_class (xfer_parms_id) ||
 	      NULL==(xfer_parms=H5Aatom_object (xfer_parms_id))) {
       HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not xfer parms*/
    }
@@ -465,7 +473,7 @@ H5Dwrite (hid_t dataset_id, hid_t type_id, hid_t space_id,
    }
    if (H5C_DEFAULT==xfer_parms_id) {
       xfer_parms = &H5D_xfer_dflt;
-   } else if (H5C_DATASET_XFER!=H5C_class (xfer_parms_id) ||
+   } else if (H5C_DATASET_XFER!=H5Cget_class (xfer_parms_id) ||
 	      NULL==(xfer_parms=H5Aatom_object (xfer_parms_id))) {
       HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL); /*not xfer parms*/
    }
@@ -553,7 +561,8 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
 {
    H5D_t	*new_dset = NULL;
    H5D_t	*ret_value = NULL;
-   H5O_cstore_t	cstore;			/*contiguous storage message	*/
+   size_t	nbytes;
+   intn		ndims;
 
    FUNC_ENTER (H5D_create, NULL);
 
@@ -570,7 +579,6 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
    new_dset->type = H5T_copy (type);
    new_dset->space = H5P_copy (space);
    new_dset->create_parms = *create_parms;
-   H5F_addr_undef (&(new_dset->data_addr)); /* No data yet */
 
    /*
     * Open (and create) a new file object and update the object header
@@ -592,21 +600,52 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
       HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL);
    }
 
-   /* Update layout message */
+   /* Total raw data size */
+   nbytes = H5T_get_size (type) * H5P_get_npoints (space);
+
+   /* Initialize storage */
    switch (new_dset->create_parms.layout) {
    case H5D_CONTIGUOUS:
-      cstore.size = H5T_get_size (type) * H5P_get_npoints (space);
-      if (H5MF_alloc (f, H5MF_RAW, cstore.size, &(cstore.addr))<0) {
+      new_dset->storage.cstore.size = nbytes;
+      if (H5MF_alloc (f, H5MF_RAW, nbytes,
+		      &(new_dset->storage.cstore.addr))<0) {
 	 /* Can't allocate raw file storage */
 	 HGOTO_ERROR (H5E_DATASET, H5E_NOSPACE, NULL);
       }
-      if (H5O_modify (f, NO_ADDR, new_dset->ent, H5O_CSTORE, 0, &cstore)<0) {
+      if (H5O_modify (f, NO_ADDR, new_dset->ent, H5O_CSTORE, 0,
+		      &(new_dset->storage.cstore))<0) {
 	 /* Can't update dataset object header */
 	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL);
       }
-      new_dset->data_addr = cstore.addr;
       break;
 
+   case H5D_CHUNKED:
+      /*
+       * The dimensionality of the chunk should match the dimensionality of
+       * the data space.  We will add one more dimension here though, to
+       * describe the individual bytes of a data point.  Therefore, there
+       * must be room in the template for one more dimension size.
+       */
+      ndims = new_dset->create_parms.chunk_ndims;
+      if (ndims != H5P_get_ndims (space)) {
+	 /* Dimensionality of chunks doesn't match the data space */
+	 HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL);
+      }
+      assert (ndims<NELMTS (new_dset->create_parms.chunk_size));
+      new_dset->create_parms.chunk_size[ndims] = H5T_get_size (type);
+
+      if (H5F_istore_create (f, &(new_dset->storage.istore), ndims+1,
+			     new_dset->create_parms.chunk_size)<0) {
+	 /* Can't initialize chunked storage */
+	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL);
+      }
+      if (H5O_modify (f, NO_ADDR, new_dset->ent, H5O_ISTORE, 0,
+		      &(new_dset->storage.istore))<0) {
+	 /* Can't update dataset object header */
+	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL);
+      }
+      break;
+      
    default:
       assert ("not implemented yet" && 0);
       HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL);
@@ -653,7 +692,8 @@ H5D_open (H5F_t *f, const char *name)
 {
    H5D_t	*dataset = NULL;	/*the dataset which was found	*/
    H5D_t	*ret_value = NULL;	/*return value			*/
-   H5O_cstore_t cstore;	    		/*contiguous storage message	*/
+   H5O_istore_t	*istore = NULL;
+   intn		i;
 
    FUNC_ENTER (H5D_open, NULL);
 
@@ -663,6 +703,7 @@ H5D_open (H5F_t *f, const char *name)
 
    dataset = H5MM_xcalloc (1, sizeof(H5D_t));
    dataset->file = f;
+   dataset->create_parms = H5D_create_dflt;
     
    /* Open the dataset object */
    if (NULL==(dataset->ent=H5G_open (f, name))) {
@@ -676,32 +717,33 @@ H5D_open (H5F_t *f, const char *name)
       /* Can't load type of space info from dataset header */
       HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL);
    }
-   
-#if 0
-   if((type=HDcalloc(1,sizeof(H5T_t)))==NULL)
-      HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
-   if (NULL==H5O_read (dset->file, NO_ADDR, dset->ent, H5O_SIM_DTYPE, 0,
-		       type))
-      HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL);
-   if((dset->tid=H5Aregister_atom(H5_DATATYPE, (const VOIDP)type))==FAIL)
-      HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
-    
-   /* Get the dataset's dimensionality (currently only simple dataspaces) */
-   if((dim=HDcalloc(1,sizeof(H5P_t)))==NULL)
-      HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
-   dim->type=H5P_TYPE_SIMPLE;	  /* for now... */
-   if (NULL==(dim->s=H5O_read (dset->file, NO_ADDR, dset->ent,
-			       H5O_SDSPACE, 0, NULL)))
-      HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL);
-   if((dset->sid=H5Aregister_atom(H5_DATASPACE, (const VOIDP)dim))==FAIL)
-      HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
-#endif
 
-   /* Get the raw data storage info */
+   /*
+    * Get the raw data storage info.  It's actually stored in two locations:
+    * the storage message of the dataset (dataset->storage) and certain
+    * values are copied to the dataset create template so the user can query
+    * them.
+    */
    if (H5O_read (dataset->file, NO_ADDR, dataset->ent, H5O_CSTORE, 0,
-		 &cstore)) {
+		 &(dataset->storage.cstore))) {
+      /* Contiguous storage */
       dataset->create_parms.layout = H5D_CONTIGUOUS;
-      dataset->data_addr = cstore.addr;
+      
+   } else if (H5O_read (dataset->file, NO_ADDR, dataset->ent, H5O_ISTORE, 0,
+			&(dataset->storage.istore))) {
+      /*
+       * Chunked storage.  The creation template's dimension is one less than
+       * the chunk dimension because the chunk includes a dimension for the
+       * individual bytes of the data type.
+       */
+      istore = &(dataset->storage.istore);
+      dataset->create_parms.layout = H5D_CHUNKED;
+      dataset->create_parms.chunk_ndims = istore->ndims - 1;
+      assert (istore->ndims<=NELMTS (dataset->create_parms.chunk_size));
+      for (i=0; i<istore->ndims-1; i++) {
+	 dataset->create_parms.chunk_size[i] = istore->alignment[i];
+      }
+      
    } else {
       assert ("not implemented yet" && 0);
       HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL);
@@ -811,6 +853,9 @@ H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
 	  const H5D_xfer_t *xfer_parms, void *buf/*out*/)
 {
    size_t	nbytes;
+   size_t	offset[H5O_ISTORE_NDIMS];
+   size_t	size[H5O_ISTORE_NDIMS];
+   intn		i;
    
    FUNC_ENTER (H5D_read, FAIL);
 
@@ -836,9 +881,33 @@ H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
    /* Compute the size of the request */
    nbytes = H5T_get_size (dataset->type) * H5P_get_npoints (dataset->space);
 
-   /* Read the data from disk */
-   if (H5F_block_read (dataset->file, &(dataset->data_addr), nbytes, buf)<0) {
-      HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL); /*read failed*/
+   switch (dataset->create_parms.layout) {
+   case H5D_CONTIGUOUS:
+      /*
+       * Read a block of contiguous data.
+       */
+      if (H5F_block_read (dataset->file, &(dataset->storage.cstore.addr),
+			  nbytes, buf)<0) {
+	 HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL); /*read failed*/
+      }
+      break;
+
+   case H5D_CHUNKED:
+      /*
+       * Read one or more chunks from indexed storage.
+       */
+      for (i=0; i<dataset->storage.istore.ndims; i++) offset[i] = 0;
+      H5P_get_dims (dataset->space, size);
+      size[dataset->storage.istore.ndims-1] = H5T_get_size (dataset->type);
+      if (H5F_istore_read (dataset->file, &(dataset->storage.istore),
+			   offset, size, buf)<0) {
+	 HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL); /*read failed*/
+      }
+      break;
+
+   default:
+      assert ("not implemented yet" && 0);
+      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -872,6 +941,9 @@ H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
 	   const H5D_xfer_t *xfer_parms, const void *buf)
 {
    size_t	nbytes;
+   size_t	offset[H5O_ISTORE_NDIMS];
+   size_t	size[H5O_ISTORE_NDIMS];
+   intn		i;
    
    FUNC_ENTER (H5D_write, FAIL);
 
@@ -897,12 +969,36 @@ H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
    /* Compute the size of the request */
    nbytes = H5T_get_size (dataset->type) * H5P_get_npoints (dataset->space);
 
-    
-   /* Write the data out to disk */
-   if (H5F_block_write (dataset->file, &(dataset->data_addr), nbytes, buf)<0) {
-      HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL); /*write failed*/
-   }
 
+   switch (dataset->create_parms.layout) {
+   case H5D_CONTIGUOUS:
+      /*
+       * Write a contiguous chunk of data.
+       */
+      if (H5F_block_write (dataset->file, &(dataset->storage.cstore.addr),
+			   nbytes, buf)<0) {
+	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL); /*write failed*/
+      }
+      break;
+
+   case H5D_CHUNKED:
+      /*
+       * Write one or more chunks to indexed storage.
+       */
+      for (i=0; i<dataset->storage.istore.ndims; i++) offset[i] = 0;
+      H5P_get_dims (dataset->space, size);
+      size[dataset->storage.istore.ndims-1] = H5T_get_size (dataset->type);
+      if (H5F_istore_write (dataset->file, &(dataset->storage.istore),
+			    offset, size, buf)<0) {
+	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL); /*write failed*/
+      }
+      break;
+
+   default:
+      assert ("not implemented yet" && 0);
+      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
+   }
+   
    FUNC_LEAVE (SUCCEED);
 }
 
