@@ -110,6 +110,7 @@ fpe_handler(int __unused__ signo)
  *
  *-------------------------------------------------------------------------
  */
+#ifdef SHOW_OVERFLOWS
 static herr_t
 overflow_handler(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 		 void __unused__ *src_buf, void __unused__ *dst_buf)
@@ -117,6 +118,7 @@ overflow_handler(hid_t __unused__ src_id, hid_t __unused__ dst_id,
     noverflows_g++;
     return -1;
 }
+#endif
 
 
 /*-------------------------------------------------------------------------
