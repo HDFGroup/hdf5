@@ -44,9 +44,10 @@ uname -a
 # setup exit banner message
 trap EXIT_BANNER 0
 
-# The path isn't properly initialized on hawkwind -- /usr/local/bin is
-# either missing or is after /usr/bin when it should be before.
-PATH="/usr/local/bin:$PATH"
+# Dump environment variables
+echo ===Dumping environment variables===
+printenv | sort
+echo ===Done Dumping environment variables===
 
 # Where are the snapshots stored?
 ARCHIVES_default=/afs/ncsa/ftp/HDF/pub/outgoing/hdf5/snapshots
