@@ -11,7 +11,7 @@ static int unamedtype = 0;  /* shared data type with no name */
 static int prefix_len = 1024;
 static char *prefix;
 static table_t *group_table = NULL, *dset_table = NULL, *type_table = NULL;
-static dump_header *dump_header_format;
+static const dump_header *dump_header_format;
 
 
 static void dump_group (hid_t , const char* );
