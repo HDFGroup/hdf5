@@ -905,7 +905,7 @@ extern H5_debug_t		H5_debug_g;
  */
 #ifdef H5_DEBUG_API
 #define H5TRACE_DECL			   const char *RTYPE=NULL;                                      \
-                                           double CALLTIME
+                                           double CALLTIME;
 #define H5TRACE0(R,T)			   RTYPE=R;                                                     \
 					   CALLTIME=H5_trace(NULL,FUNC,T)
 #define H5TRACE1(R,T,A0)		   RTYPE=R;			                                \
@@ -1113,7 +1113,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 
 /* Use this macro for all "normal" API functions */
 #define FUNC_ENTER_API(func_name,err) {{                                      \
-    FUNC_ENTER_API_VARS;                                                      \
+    FUNC_ENTER_API_VARS                                                       \
     FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
     FUNC_ENTER_API_THREADSAFE;                                                \
     FUNC_ENTER_API_COMMON(func_name,INTERFACE_INIT,err);                      \
@@ -1126,7 +1126,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
  *      like H5Eprint and H5Ewalk.
  */
 #define FUNC_ENTER_API_NOCLEAR(func_name,err) {{                              \
-    FUNC_ENTER_API_VARS;                                                      \
+    FUNC_ENTER_API_VARS                                                       \
     FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
     FUNC_ENTER_API_THREADSAFE;                                                \
     FUNC_ENTER_API_COMMON(func_name,INTERFACE_INIT,err);                      \
@@ -1138,7 +1138,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
  *      are: H5close, H5check_version, H5Eget_major, H5Eget_minor.
  */
 #define FUNC_ENTER_API_NOINIT(func_name) {{                                   \
-    FUNC_ENTER_API_VARS;                                                      \
+    FUNC_ENTER_API_VARS                                                       \
     FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
     FUNC_ENTER_API_THREADSAFE;                                                \
     BEGIN_MPE_LOG(func_name);                                                 \
