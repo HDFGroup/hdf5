@@ -150,6 +150,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hbool_t	carray;				/*carry for subtraction	*/
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
+    H5P_genplist_t *plist=NULL;                 /* Property list */
 #endif
 #ifdef COALESCE_READS
     unsigned gather_reads;                         /* # of MPIO reads to gather */
@@ -178,14 +179,18 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 	H5FD_mpio_dxpl_t *dx;
         hid_t driver_id;            /* VFL driver ID */
 
+        /* Get the plist structure */
+        if(NULL == (plist = H5I_object(dxpl_id)))
+            HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+
         /* Get the driver ID */
-        if(H5P_get(dxpl_id, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
+        if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
             HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
 
         /* Check if we are using the MPIO driver */
         if(H5FD_MPIO==driver_id) {
             /* Get the driver information */
-            if(H5P_get(dxpl_id, H5D_XFER_VFL_INFO_NAME, &dx)<0)
+            if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &dx)<0)
                 HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
 
             /* Check if we are not using independent I/O */
@@ -195,11 +200,8 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     }
     
     /* Collective MPIO access is unsupported for non-contiguous datasets */
-    if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode) {
-	HRETURN_ERROR (H5E_DATASET, H5E_READERROR, FAIL,
-		       "collective access on non-contiguous datasets not "
-		       "supported yet");
-    }
+    if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode)
+	HRETURN_ERROR (H5E_DATASET, H5E_READERROR, FAIL, "collective access on non-contiguous datasets not supported yet");
 #endif
 #ifdef QAK
 {
@@ -306,10 +308,9 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 #endif /* QAK */
 #ifdef COALESCE_READS
             for (z=0, gather_reads = nelmts - 1; z<nelmts; z++, gather_reads--) {
-
-            /* Track the number of reads to gather */
-            if(H5P_set(dxpl_id, H5D_XFER_GATHER_READS_NAME, &gather_reads)<0)
-                HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve gather reads");
+                /* Track the number of reads to gather */
+                if(H5P_set(plist, H5D_XFER_GATHER_READS_NAME, &gather_reads)<0)
+                    HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve gather reads");
 
 #else
             for (z=0; z<nelmts; z++) {
@@ -440,6 +441,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hbool_t	carray;				/*carry for subtraction	*/
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
+    H5P_genplist_t *plist=NULL;                 /* Property list */
 #endif
    
     FUNC_ENTER(H5F_arr_write, FAIL);
@@ -465,14 +467,18 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 	H5FD_mpio_dxpl_t *dx;
         hid_t driver_id;            /* VFL driver ID */
 
+        /* Get the plist structure */
+        if(NULL == (plist = H5I_object(dxpl_id)))
+            HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+
         /* Get the driver ID */
-        if(H5P_get(dxpl_id, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
+        if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
             HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
 
         /* Check if we are using the MPIO driver */
         if(H5FD_MPIO==driver_id) {
             /* Get the driver information */
-            if(H5P_get(dxpl_id, H5D_XFER_VFL_INFO_NAME, &dx)<0)
+            if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &dx)<0)
                 HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
 
             /* Check if we are not using independent I/O */
@@ -481,11 +487,8 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
         } /* end if */
     }
     
-    if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode) {
-	HRETURN_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
-		       "collective access on non-contiguous datasets not "
-		       "supported yet");
-    }
+    if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode)
+	HRETURN_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "collective access on non-contiguous datasets not supported yet");
 #endif
     
 #ifdef QAK
