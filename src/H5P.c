@@ -12,17 +12,19 @@
 
 /* $Id$ */
 
+#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+
 /* Private header files */
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Bprivate.h"		/* B-tree subclass names	  	*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files		  	*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists	  */
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Pprivate.h"		/* Property lists		  	*/
+#include "H5Ppkg.h"		/* Property lists		  	*/
 
 /* Default file driver - see H5Pget_driver() */
 #include "H5FDsec2.h"		/* Posix unbuffered I/O	file driver	*/
@@ -177,6 +179,7 @@ H5P_init_interface(void)
     /* Create root property list class */
 
     /* Allocate the root class */
+    assert(H5P_CLS_NO_CLASS_g==(-1));
     if (NULL==(root_class = H5P_create_class (NULL,"none",H5P_NO_CLASS_HASH_SIZE,1,NULL,NULL,NULL,NULL,NULL,NULL)))
         HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
@@ -187,6 +190,7 @@ H5P_init_interface(void)
     /* Register the file creation and file access property classes */
 
     /* Allocate the file creation class */
+    assert(H5P_CLS_FILE_CREATE_g==(-1));
     if (NULL==(pclass = H5P_create_class (root_class,"file create",H5P_FILE_CREATE_HASH_SIZE,1,NULL,NULL,NULL,NULL,NULL,NULL)))
         HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
@@ -195,6 +199,7 @@ H5P_init_interface(void)
         HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
     /* Allocate the file access class */
+    assert(H5P_CLS_FILE_ACCESS_g==(-1));
     if (NULL==(pclass = H5P_create_class (root_class,"file access",H5P_FILE_ACCESS_HASH_SIZE,1,H5F_acs_create,NULL,H5F_acs_copy,NULL,H5F_acs_close,NULL)))
         HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
@@ -205,6 +210,7 @@ H5P_init_interface(void)
     /* Register the dataset creation and data xfer property classes */
 
     /* Allocate the dataset creation class */
+    assert(H5P_CLS_DATASET_CREATE_g==(-1));
     if (NULL==(pclass = H5P_create_class (root_class,"dataset create",H5P_DATASET_CREATE_HASH_SIZE,1,NULL,NULL,H5D_crt_copy,NULL,H5D_crt_close,NULL)))
         HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
@@ -213,6 +219,7 @@ H5P_init_interface(void)
         HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
     /* Allocate the data xfer class */
+    assert(H5P_CLS_DATASET_XFER_g==(-1));
     if (NULL==(pclass = H5P_create_class (root_class,"data xfer",H5P_DATASET_XFER_HASH_SIZE,1,H5D_xfer_create,NULL,H5D_xfer_copy,NULL,H5D_xfer_close,NULL)))
         HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
@@ -221,6 +228,7 @@ H5P_init_interface(void)
         HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
     /* Allocate the mount class */
+    assert(H5P_CLS_MOUNT_g==(-1));
     if (NULL==(pclass = H5P_create_class (root_class,"file mount",H5P_MOUNT_HASH_SIZE,1,NULL,NULL,NULL,NULL,NULL,NULL)))
         HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
@@ -251,23 +259,53 @@ H5P_init_interface(void)
 int
 H5P_term_interface(void)
 {
+    int	nlist=0;
+    int	nclass=0;
     int	n=0;
 
     if (interface_initialize_g) {
         /* Destroy HDF5 library property classes & lists */
 
         /* Check if there are any open property list classes or lists */
-        n += H5I_nmembers(H5I_GENPROP_CLS);
-        n += H5I_nmembers(H5I_GENPROP_LST);
+        nclass = H5I_nmembers(H5I_GENPROP_CLS);
+        nlist = H5I_nmembers(H5I_GENPROP_LST);
+        n=nclass+nlist;
 
         /* If there are any open classes or groups, attempt to get rid of them. */
         if (n) {
-            H5I_clear_group(H5I_GENPROP_CLS, FALSE);
-            H5I_clear_group(H5I_GENPROP_LST, FALSE);
+            /* Clear the lists */
+            if(nlist>0) {
+                H5I_clear_group(H5I_GENPROP_LST, FALSE);
+
+                /* Reset the default property lists, if they've been closed */
+                if(H5I_nmembers(H5I_GENPROP_LST)==0) {
+                    H5P_LST_NO_CLASS_g =
+                        H5P_LST_FILE_CREATE_g =
+                        H5P_LST_FILE_ACCESS_g =
+                        H5P_LST_DATASET_CREATE_g =
+                        H5P_LST_DATASET_XFER_g =
+                        H5P_LST_MOUNT_g = (-1);
+                } /* end if */
+            } /* end if */
+
+            /* Only attempt to close the classes after all the lists are closed */
+            if(nlist==0 && nclass>0) {
+                H5I_clear_group(H5I_GENPROP_CLS, FALSE);
+
+                /* Reset the default property lists, if they've been closed */
+                if(H5I_nmembers(H5I_GENPROP_CLS)==0) {
+                    H5P_CLS_NO_CLASS_g =
+                        H5P_CLS_FILE_CREATE_g =
+                        H5P_CLS_FILE_ACCESS_g =
+                        H5P_CLS_DATASET_CREATE_g =
+                        H5P_CLS_DATASET_XFER_g =
+                        H5P_CLS_MOUNT_g = (-1);
+                } /* end if */
+            } /* end if */
         } else {
-            H5I_destroy_group(H5I_GENPROP_CLS);
-            n++; /*H5I*/
             H5I_destroy_group(H5I_GENPROP_LST);
+            n++; /*H5I*/
+            H5I_destroy_group(H5I_GENPROP_CLS);
             n++; /*H5I*/
 
             interface_initialize_g = 0;
@@ -361,17 +399,17 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_copy
+    H5P_copy_plist
  PURPOSE
-    Internal routine to copy a generic property lists
+    Internal routine to copy a generic property list
  USAGE
-        hid_t H5P_copy(old_plist_id)
-        hid_t old_plist_id;             IN: Property list ID to copy
+        hid_t H5P_copy_plist(old_plist_id)
+            hid_t old_plist_id;             IN: Property list ID to copy
  RETURNS
     Success: valid property list ID on success (non-negative)
     Failure: negative
  DESCRIPTION
-    Copy a property list or class and return the ID.  This routine calls the
+    Copy a property list and return the ID.  This routine calls the
     class 'copy' callback after any property 'copy' callbacks are called
     (assuming all property 'copy' callbacks return successfully).
 
@@ -380,20 +418,17 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hid_t H5P_copy(hid_t old_plist_id)
+hid_t H5P_copy_plist(H5P_genplist_t *old_plist)
 {
-    H5P_genplist_t *new_plist;  /* New property list generated from copy */
-    H5P_genplist_t *old_plist;
+    H5P_genplist_t *new_plist=NULL;  /* New property list generated from copy */
     H5P_genprop_t *tprop;       /* Temporary pointer to properties */
     H5P_genprop_t *new_prop;    /* New property created for copy */
     hid_t new_plist_id;         /* Property list ID of new list created */
     unsigned u;                 /* Local index variable */
     hid_t ret_value=FAIL;       /* return value */
  
-    FUNC_ENTER (H5P_copy, FAIL);
+    FUNC_ENTER (H5P_copy_plist, FAIL);
 
-    if(NULL == (old_plist = (H5P_genplist_t*)H5I_object(old_plist_id)))
-        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist");
     assert(old_plist);
 
     /* 
@@ -452,7 +487,7 @@ hid_t H5P_copy(hid_t old_plist_id)
 
     /* Call the class callback (if it exists) now that we have the property list ID */
     if(new_plist->pclass->copy_func!=NULL) {
-        if((new_plist->pclass->copy_func)(new_plist_id,old_plist_id,old_plist->pclass->copy_data)<0) {
+        if((new_plist->pclass->copy_func)(new_plist_id,old_plist->plist_id,old_plist->pclass->copy_data)<0) {
             /* Delete ID, ignore return value */
             H5I_remove(new_plist_id);
             HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't initialize property");
@@ -470,7 +505,7 @@ done:
         H5P_close(new_plist);
 
     FUNC_LEAVE (ret_value);
-}   /* H5P_copy() */
+}   /* H5P_copy_plist() */
 
 
 /*--------------------------------------------------------------------------
@@ -502,7 +537,7 @@ hid_t H5Pcopy(hid_t id)
     FUNC_ENTER (H5Pcopy, FAIL);
 
     if (H5P_DEFAULT==id)
-        HRETURN(H5P_DEFAULT);
+        HGOTO_DONE(H5P_DEFAULT);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -512,7 +547,7 @@ hid_t H5Pcopy(hid_t id)
 
     /* Compare property lists */
     if(H5I_GENPROP_LST == H5I_get_type(id)) {
-        if((ret_value=H5P_copy(id))<0)
+        if((ret_value=H5P_copy_plist(obj))<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property list");
     } /* end if */
     /* Must be property classes */
@@ -559,34 +594,45 @@ herr_t
 H5Pget_version(hid_t plist_id, int *boot/*out*/, int *freelist/*out*/,
 	       int *stab/*out*/, int *shhdr/*out*/)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=FAIL;      /* return value */
 
     FUNC_ENTER(H5Pget_version, FAIL);
     H5TRACE5("e","ixxxx",plist_id,boot,freelist,stab,shhdr);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
     if (boot)
-        if(H5P_get(plist_id, H5F_CRT_BOOT_VERS_NAME, boot) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+        if(H5P_get(plist, H5F_CRT_BOOT_VERS_NAME, boot) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
                           "can't get boot version");
     if (freelist)
-        if(H5P_get(plist_id, H5F_CRT_FREESPACE_VERS_NAME, freelist) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+        if(H5P_get(plist, H5F_CRT_FREESPACE_VERS_NAME, freelist) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
                           "can't get free-space version");
     if (stab)
-        if(H5P_get(plist_id, H5F_CRT_OBJ_DIR_VERS_NAME, stab) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+        if(H5P_get(plist, H5F_CRT_OBJ_DIR_VERS_NAME, stab) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
                           "can't get object directory version");
     if (shhdr)
-        if(H5P_get(plist_id, H5F_CRT_SHARE_HEAD_VERS_NAME, shhdr) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+        if(H5P_get(plist, H5F_CRT_SHARE_HEAD_VERS_NAME, shhdr) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
                           "can't get shared-header version");
-  
-    FUNC_LEAVE(SUCCEED);
+
+    /* Set return value */
+    ret_value=SUCCEED;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_userblock
@@ -610,31 +656,38 @@ herr_t
 H5Pset_userblock(hid_t plist_id, hsize_t size)
 {
     unsigned		    i;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER(H5Pset_userblock, FAIL);
     H5TRACE2("e","ih",plist_id,size);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
+    /* Check that the userblock size is a power of two */
     for (i=8; i<8*sizeof(hsize_t); i++) {
         hsize_t p2 = 8==i ? 0 : ((hsize_t)1<<i);
+
         if (size == p2)
             break;
     }
+    if (i>=8*sizeof(hsize_t))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "userblock size is not valid");
 
-    if (i>=8*sizeof(hsize_t)) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "userblock size is not valid");
-    }
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set value */
-    if(H5P_set(plist_id, H5F_CRT_USER_BLOCK_NAME, &size) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set user block");
+    if(H5P_set(plist, H5F_CRT_USER_BLOCK_NAME, &size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set user block");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_userblock
@@ -659,20 +712,27 @@ H5Pset_userblock(hid_t plist_id, hsize_t size)
 herr_t
 H5Pget_userblock(hid_t plist_id, hsize_t *size)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER(H5Pget_userblock, FAIL);
     H5TRACE2("e","i*h",plist_id,size);
 
     /* Check args */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get value */
     if (size)
-        if(H5P_get(plist_id, H5F_CRT_USER_BLOCK_NAME, size) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,"can't get user block");
+        if(H5P_get(plist, H5F_CRT_USER_BLOCK_NAME, size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,"can't get user block");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -709,28 +769,30 @@ H5Pget_userblock(hid_t plist_id, hsize_t *size)
 herr_t
 H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignment)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
     
     FUNC_ENTER (H5Pset_alignment, FAIL);
     H5TRACE3("e","ihh",fapl_id,threshold,alignment);
 
     /* Check args */
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
-                      "not a file access property list");
-    
-    if (alignment<1) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "alignment must be positive");
-    }
+    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))     
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    if (alignment<1)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "alignment must be positive");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set values */
-    if(H5P_set(fapl_id, H5F_ACS_ALIGN_THRHD_NAME, &threshold) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set threshold");
-    if(H5P_set(fapl_id, H5F_ACS_ALIGN_NAME, &alignment) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set alignment");
+    if(H5P_set(plist, H5F_ACS_ALIGN_THRHD_NAME, &threshold) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set threshold");
+    if(H5P_set(plist, H5F_ACS_ALIGN_NAME, &alignment) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set alignment");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -759,24 +821,33 @@ herr_t
 H5Pget_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
 		  hsize_t *alignment/*out*/)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=FAIL;      /* return value */
+
     FUNC_ENTER (H5Pget_alignment, FAIL);
     H5TRACE3("e","ixx",fapl_id,threshold,alignment);
 
     /* Check args */
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
-                      "not a file access property list");
+    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))     
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
     if (threshold)
-        if(H5P_get(fapl_id, H5F_ACS_ALIGN_THRHD_NAME, threshold) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get threshold");
+        if(H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, threshold) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get threshold");
     if (alignment)
-        if(H5P_set(fapl_id, H5F_ACS_ALIGN_NAME, alignment) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get alignment");
+        if(H5P_get(plist, H5F_ACS_ALIGN_NAME, alignment) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get alignment");
 
-    FUNC_LEAVE (SUCCEED);
+    /* Set return value */
+    ret_value=SUCCEED;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -799,41 +870,43 @@ H5Pget_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
 herr_t
 H5Pset_sizes(hid_t plist_id, size_t sizeof_addr, size_t sizeof_size)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER(H5Pset_sizes, FAIL);
     H5TRACE3("e","izz",plist_id,sizeof_addr,sizeof_size);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     if (sizeof_addr) {
         if (sizeof_addr != 2 && sizeof_addr != 4 &&
-                sizeof_addr != 8 && sizeof_addr != 16) {
-            HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                  "file haddr_t size is not valid");
-        }
+                sizeof_addr != 8 && sizeof_addr != 16)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file haddr_t size is not valid");
     }
     if (sizeof_size) {
         if (sizeof_size != 2 && sizeof_size != 4 &&
-                sizeof_size != 8 && sizeof_size != 16) {
-            HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                  "file size_t size is not valid");
-        }
+                sizeof_size != 8 && sizeof_size != 16)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file size_t size is not valid");
     }
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set value */
     if (sizeof_addr)
-        if(H5P_set(plist_id, H5F_CRT_ADDR_BYTE_NUM_NAME, &sizeof_addr) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,
-                          "can't set byte number for an address");
+        if(H5P_set(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &sizeof_addr) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set byte number for an address");
     if (sizeof_size)
-        if(H5P_set(plist_id, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,
-                          "can't set byte number for object ");
+        if(H5P_set(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, &sizeof_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set byte number for object ");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_sizes
@@ -857,25 +930,32 @@ herr_t
 H5Pget_sizes(hid_t plist_id,
 	     size_t *sizeof_addr /*out */ , size_t *sizeof_size /*out */ )
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
     FUNC_ENTER(H5Pget_sizes, FAIL);
     H5TRACE3("e","ixx",plist_id,sizeof_addr,sizeof_size);
 
     /* Check args */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
     if (sizeof_addr)
-        if(H5P_get(plist_id, H5F_CRT_ADDR_BYTE_NUM_NAME, sizeof_addr) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
-                          "can't get byte number for an address");
+        if(H5P_get(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, sizeof_addr) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for an address");
     if (sizeof_size)
-        if(H5P_get(plist_id, H5F_CRT_OBJ_BYTE_NUM_NAME, sizeof_size) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
-                          "can't get byte number for object ");
+        if(H5P_get(plist, H5F_CRT_OBJ_BYTE_NUM_NAME, sizeof_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for object ");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_sym_k
@@ -911,31 +991,37 @@ herr_t
 H5Pset_sym_k(hid_t plist_id, int ik, unsigned lk)
 {
     int btree_k[H5B_NUM_BTREE_ID];
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=FAIL;      /* return value */
 
     FUNC_ENTER(H5Pset_sym_k, FAIL);
     H5TRACE3("e","iIsIu",plist_id,ik,lk);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
    
     /* Set values */
     if (ik > 0) {
-        if(H5P_get(plist_id, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
-                          "can't get rank for btree interanl nodes");
+        if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree interanl nodes");
         btree_k[H5B_SNODE_ID] = ik;
-        if(H5P_set(plist_id, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,
-                          "can't set rank for btree nodes");
+        if(H5P_set(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for btree nodes");
     }
     if (lk > 0)
-        if(H5P_set(plist_id, H5F_CRT_SYM_LEAF_NAME, &lk) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,
-                          "can't set rank for symbol table leaf nodes");
+        if(H5P_set(plist, H5F_CRT_SYM_LEAF_NAME, &lk) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for symbol table leaf nodes");
 
-    FUNC_LEAVE(SUCCEED);
+    /* Set return value */
+    ret_value=SUCCEED;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -963,27 +1049,35 @@ herr_t
 H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , unsigned *lk /*out */ )
 {
     int btree_k[H5B_NUM_BTREE_ID];
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=FAIL;      /* return value */
 
     FUNC_ENTER(H5Pget_sym_k, FAIL);
     H5TRACE3("e","ixx",plist_id,ik,lk);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get values */
     if (ik) {
-        if(H5P_get(plist_id, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
-                          "can't get rank for btree nodes");
+        if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree nodes");
         *ik = btree_k[H5B_SNODE_ID];
     }
     if (lk)
-        if(H5P_get(plist_id, H5F_CRT_SYM_LEAF_NAME, lk) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
-                          "can't get rank for symbol table leaf nodes");
+        if(H5P_get(plist, H5F_CRT_SYM_LEAF_NAME, lk) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for symbol table leaf nodes");
 
-    FUNC_LEAVE(SUCCEED);
+    /* Set return value */
+    ret_value=SUCCEED;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1010,30 +1104,36 @@ herr_t
 H5Pset_istore_k(hid_t plist_id, int ik)
 {
     int btree_k[H5B_NUM_BTREE_ID];
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=FAIL;      /* return value */
 
     FUNC_ENTER(H5Pset_istore_k, FAIL);
     H5TRACE2("e","iIs",plist_id,ik);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if (ik <= 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "istore IK value must be positive");
 
-    if (ik <= 0) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "istore IK value must be positive");
-    }
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set value */
-    if(H5P_get(plist_id, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
-                      "can't get rank for btree interanl nodes");
+    if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree interanl nodes");
     btree_k[H5B_ISTORE_ID] = ik;
-    if(H5P_set(plist_id, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,
-                          "can't set rank for btree interanl nodes");
+    if(H5P_set(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for btree interanl nodes");
 
-    FUNC_LEAVE(SUCCEED);
+    /* Set return value */
+    ret_value=SUCCEED;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_istore_k
@@ -1060,23 +1160,29 @@ herr_t
 H5Pget_istore_k(hid_t plist_id, int *ik /*out */ )
 {
     int btree_k[H5B_NUM_BTREE_ID];
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER(H5Pget_istore_k, FAIL);
     H5TRACE2("e","ix",plist_id,ik);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get value */
     if (ik) {
-        if(H5P_get(plist_id, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
-                          "can't get rank for btree interanl nodes");
+        if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree interanl nodes");
         *ik = btree_k[H5B_ISTORE_ID];
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1102,25 +1208,30 @@ H5Pget_istore_k(hid_t plist_id, int *ik /*out */ )
 herr_t
 H5Pset_layout(hid_t plist_id, H5D_layout_t layout)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
     FUNC_ENTER(H5Pset_layout, FAIL);
     H5TRACE2("e","iDl",plist_id,layout);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id)) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a dataset creation property list");
-    }
-    if (layout < 0 || layout >= H5D_NLAYOUTS) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-		      "raw data layout method is not valid");
-    }
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
+    if (layout < 0 || layout >= H5D_NLAYOUTS)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "raw data layout method is not valid");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set value */
-    if(H5P_set(plist_id, H5D_CRT_LAYOUT_NAME, &layout) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set layout");
+    if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set layout");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_layout
@@ -1146,21 +1257,28 @@ H5Pset_layout(hid_t plist_id, H5D_layout_t layout)
 H5D_layout_t
 H5Pget_layout(hid_t plist_id)
 {
-    H5D_layout_t           layout;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    H5D_layout_t   ret_value=H5D_LAYOUT_ERROR;
 
     FUNC_ENTER(H5Pget_layout, H5D_LAYOUT_ERROR);
     H5TRACE1("Dl","i",plist_id);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5D_LAYOUT_ERROR,
-		      "not a dataset creation property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5D_LAYOUT_ERROR, "not a dataset creation property list");
 
-    if(H5P_get(plist_id, H5D_CRT_LAYOUT_NAME, &layout) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, H5D_LAYOUT_ERROR, 
-                      "can't get layout");
-    FUNC_LEAVE(layout);
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5D_LAYOUT_ERROR, "can't find object for ID");
+
+    /* Get value */
+    if(H5P_get(plist, H5D_CRT_LAYOUT_NAME, &ret_value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5D_LAYOUT_ERROR, "can't get layout");
+
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_chunk
@@ -1192,48 +1310,46 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
     int			    i;
     hsize_t real_dims[H5O_LAYOUT_NDIMS]; /* Full-sized array to hold chunk dims */
     H5D_layout_t           layout;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER(H5Pset_chunk, FAIL);
     H5TRACE3("e","iIs*[a1]h",plist_id,ndims,dim);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a dataset creation property list");
-  
-    if (ndims <= 0) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-		      "chunk dimensionality must be positive");
-    }
-    if (ndims > H5S_MAX_RANK) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-		      "chunk dimensionality is too large");
-    }
-    if (!dim) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "no chunk dimensions specified");
-    }
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
+    if (ndims <= 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk dimensionality must be positive");
+    if (ndims > H5S_MAX_RANK)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk dimensionality is too large");
+    if (!dim)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no chunk dimensions specified");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
     /* Initialize chunk dims to 0s */
     HDmemset(real_dims,0,H5O_LAYOUT_NDIMS*sizeof(hsize_t));
     for (i=0; i<ndims; i++) {
-        if (dim[i] <= 0) {
-            HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-                  "all chunk dimensions must be positive");
-        }
+        if (dim[i] <= 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all chunk dimensions must be positive");
         real_dims[i]=dim[i]; /* Store user's chunk dimensions */
     }
 
     layout = H5D_CHUNKED;
-    if(H5P_set(plist_id, H5D_CRT_LAYOUT_NAME, &layout) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set layout");
-    if(H5P_set(plist_id, H5D_CRT_CHUNK_DIM_NAME, &ndims) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, 
-                      "can't set chunk dimensionanlity");
-    if(H5P_set(plist_id, H5D_CRT_CHUNK_SIZE_NAME, real_dims) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set chunk size");
+    if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set layout");
+    if(H5P_set(plist, H5D_CRT_CHUNK_DIM_NAME, &ndims) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set chunk dimensionanlity");
+    if(H5P_set(plist, H5D_CRT_CHUNK_SIZE_NAME, real_dims) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set chunk size");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_chunk
@@ -1266,31 +1382,39 @@ H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/)
     int                 ndims;
     H5D_layout_t        layout;
     hsize_t             chunk_size[32];
+    H5P_genplist_t *plist;      /* Property list pointer */
+    int                 ret_value;
 
     FUNC_ENTER(H5Pget_chunk, FAIL);
     H5TRACE3("Is","iIsx",plist_id,max_ndims,dim);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a dataset creation property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
    
-    if(H5P_get(plist_id, H5D_CRT_LAYOUT_NAME, &layout) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout"); 
-    if(H5D_CHUNKED != layout) 
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                      "not a chunked storage layout");
-   
-    if(H5P_get(plist_id, H5D_CRT_CHUNK_SIZE_NAME, chunk_size) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get chunk size");
-    if(H5P_get(plist_id, H5D_CRT_CHUNK_DIM_NAME, &ndims) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "can't get chunk dimensionality");
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
+    if(H5P_get(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout"); 
+    if(H5D_CHUNKED != layout) 
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a chunked storage layout");
+   
+    if(H5P_get(plist, H5D_CRT_CHUNK_SIZE_NAME, chunk_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get chunk size");
+    if(H5P_get(plist, H5D_CRT_CHUNK_DIM_NAME, &ndims) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get chunk dimensionality");
+
+    /* Get the dimension sizes */
     for (i=0; i<ndims && i<max_ndims && dim; i++)
         dim[i] = chunk_size[i];
 
-    FUNC_LEAVE(ndims);
+    /* Set the return value */
+    ret_value=ndims;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1330,39 +1454,36 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
     int			idx;
     size_t		total, tmp;
     H5O_efl_t           efl;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=FAIL;      /* return value */
 
     FUNC_ENTER(H5Pset_external, FAIL);
     H5TRACE4("e","isoh",plist_id,name,offset,size);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a dataset creation property list");
-   
-    if (!name || !*name) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
-    }
-    if (offset<0) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "negative external file offset");
-    }
-    if (size<=0) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "zero size");
-    }
-    if(H5P_get(plist_id, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "can't get external file list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
+    if (!name || !*name)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name given");
+    if (offset<0)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "negative external file offset");
+    if (size<=0)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "zero size");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list");
     if(efl.nused > 0 && H5O_EFL_UNLIMITED==efl.slot[efl.nused-1].size)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, 
-                      "previous file size is unlimited");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "previous file size is unlimited");
 
     if (H5O_EFL_UNLIMITED!=size) {
         for (idx=0, total=size; idx<efl.nused; idx++, total=tmp) {
             tmp = total + efl.slot[idx].size;
-            if (tmp <= total) {
-                HRETURN_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL,
-                               "total external data size overflowed");
-            }
+            if (tmp <= total)
+                HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL, "total external data size overflowed");
         }
     }
     
@@ -1370,13 +1491,10 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
     /* Add to the list */
     if (efl.nused >= efl.nalloc) {
         int na = efl.nalloc + H5O_EFL_ALLOC;
-        H5O_efl_entry_t *x = H5MM_realloc (efl.slot,
-                           na*sizeof(H5O_efl_entry_t));
+        H5O_efl_entry_t *x = H5MM_realloc (efl.slot, na*sizeof(H5O_efl_entry_t));
 
-        if (!x) {
-            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                           "memory allocation failed");
-        }
+        if (!x)
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
         efl.nalloc = na;
         efl.slot = x;
     }
@@ -1387,11 +1505,14 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
     efl.slot[idx].size = size;
     efl.nused++;
     
-    if(H5P_set(plist_id, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL,
-                       "can't set external file list");
+    if(H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set external file list");
 
-    FUNC_LEAVE(SUCCEED);
+    /* Set return value */
+    ret_value=SUCCEED;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1420,21 +1541,29 @@ int
 H5Pget_external_count(hid_t plist_id)
 {
     H5O_efl_t           efl;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    int ret_value=SUCCEED;      /* return value */
 
     FUNC_ENTER (H5Pget_external_count, FAIL);
     H5TRACE1("Is","i",plist_id);
     
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a dataset creation property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
 
-    if(H5P_get(plist_id, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "can't get external file list");
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Get value */
+    if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list");
     
-    /* Return */
-    FUNC_LEAVE (efl.nused);
+    /* Return value */
+    ret_value=efl.nused;
+    
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1474,23 +1603,26 @@ H5Pget_external(hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
 		 off_t *offset/*out*/, hsize_t *size/*out*/)
 {
     H5O_efl_t           efl;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER (H5Pget_external, FAIL);
     H5TRACE6("e","iIszxxx",plist_id,idx,name_size,name,offset,size);
     
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a dataset creation property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
    
-    if(H5P_get(plist_id, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                      "can't get external file list");
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Get value */
+    if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list");
     
-    if (idx<0 || idx>=efl.nused) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
-		       "external file index is out of range");
-    }
+    if (idx<0 || idx>=efl.nused)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL, "external file index is out of range");
 
     /* Return values */
     if (name_size>0 && name)
@@ -1500,8 +1632,111 @@ H5Pget_external(hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
     if (size)
         *size = efl.slot[idx].size;
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_set_driver
+ *
+ * Purpose:	Set the file driver (DRIVER_ID) for a file access or data
+ *		transfer property list (PLIST_ID) and supply an optional
+ *		struct containing the driver-specific properites
+ *		(DRIVER_INFO).  The driver properties will be copied into the
+ *		property list and the reference count on the driver will be
+ *		incremented, allowing the caller to close the driver ID but
+ *		still use the property list.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, August  3, 1999
+ *
+ * Modifications:
+ *
+ * 		Raymond Lu
+ * 		Tuesday, Oct 23, 2001
+ *		Changed the file access list design to the new generic 
+ *		property list.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_driver_info)
+{
+    hid_t driver_id;            /* VFL driver ID */
+    void *driver_info;          /* VFL driver info */
+    void *tmp_driver_info;      /* Temporary VFL driver info */
+    herr_t ret_value=SUCCEED;   /* Return value */
+    
+    FUNC_ENTER(H5P_set_driver, FAIL);
+
+    if (H5I_VFL!=H5I_get_type(new_driver_id) || NULL==H5I_object(new_driver_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID");
+
+    if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+        /* Remove old driver */
+        if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID");
+        if(H5P_get(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,"can't get driver info");
+        assert(driver_id>=0);
+        H5FD_fapl_free(driver_id, driver_info);
+        H5I_dec_ref(driver_id);
+
+        /* Add new driver */
+        H5I_inc_ref(new_driver_id);
+        driver_id   = new_driver_id;
+        driver_info = H5FD_fapl_copy(new_driver_id, new_driver_info);
+ 
+        if(H5P_set(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver ID");
+        if(H5P_set(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,"can't set driver info");
+        
+    } else if( TRUE == H5P_isa_class(plist->plist_id, H5P_DATASET_XFER) ) {
+        /* Get the current driver information */
+        if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
+        if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &driver_info)<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
+
+        /* Remove old driver */
+
+        /* Double-check value... */
+        assert(driver_id>=0);
+
+        /* Free any driver information stored */
+        H5FD_dxpl_free(driver_id, driver_info);
+
+        /* Decrement reference count for old driver */
+        H5I_dec_ref(driver_id);
+
+        /* Add new driver */
+
+        /* Increment reference count for new driver */
+        H5I_inc_ref(new_driver_id);
+
+        /* Make a copy of the driver information */
+        if((tmp_driver_info = H5FD_dxpl_copy(new_driver_id, new_driver_info))==NULL)
+            HGOTO_ERROR (H5E_DATASET, H5E_CANTCOPY, FAIL, "Can't copy VFL driver");
+
+        /* Set the driver info for the property list */
+        if(H5P_set(plist, H5D_XFER_VFL_ID_NAME, &new_driver_id)<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set VFL driver ID");
+        if(H5P_set(plist, H5D_XFER_VFL_INFO_NAME, &tmp_driver_info) < 0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set VFL driver info");
+        
+    } else {
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list");
+    }
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5P_set_driver() */
 
 
 /*-------------------------------------------------------------------------
@@ -1534,74 +1769,80 @@ H5Pget_external(hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
 herr_t
 H5Pset_driver(hid_t plist_id, hid_t new_driver_id, const void *new_driver_info)
 {
-    hid_t driver_id;            /* VFL driver ID */
-    void *driver_info;          /* VFL driver info */
-    void *tmp_driver_info;      /* Temporary VFL driver info */
+    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* Return value */
     
     FUNC_ENTER(H5Pset_driver, FAIL);
     H5TRACE3("e","iix",plist_id,new_driver_id,new_driver_info);
 
+    /* Check arguments */
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     if (H5I_VFL!=H5I_get_type(new_driver_id) || NULL==H5I_object(new_driver_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID");
 
-    if( TRUE == H5Pisa_class(plist_id, H5P_FILE_ACCESS) ) {
-        /* Remove old driver */
-        if(H5P_get(plist_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID");
-        if(H5P_get(plist_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,"can't get driver info");
-        assert(driver_id>=0);
-        H5FD_fapl_free(driver_id, driver_info);
-        H5I_dec_ref(driver_id);
+    /* Set the driver */
+    if(H5P_set_driver(plist,new_driver_id,new_driver_info)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info");
 
-        /* Add new driver */
-        H5I_inc_ref(new_driver_id);
-        driver_id   = new_driver_id;
-        driver_info = H5FD_fapl_copy(new_driver_id, new_driver_info);
- 
-        if(H5P_set(plist_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver ID");
-        if(H5P_set(plist_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,"can't set driver info");
-        
-    } else if( TRUE == H5Pisa_class(plist_id, H5P_DATASET_XFER) ) {
-        /* Get the current driver information */
-        if(H5P_get(plist_id, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5Pset_driver() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_get_driver
+ *
+ * Purpose:	Return the ID of the low-level file driver.  PLIST_ID should
+ *		be a file access property list or data transfer propert list.
+ *
+ * Return:	Success:	A low-level driver ID which is the same ID
+ *				used when the driver was set for the property
+ *				list. The driver ID is only valid as long as
+ *				the file driver remains registered.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, February 26, 1998
+ *
+ * Modifications:
+ *		Robb Matzke, 1999-08-03
+ *		Rewritten to use the virtual file layer.
+ *
+ * 		Robb Matzke, 1999-08-05
+ *		If the driver ID is H5FD_VFD_DEFAULT then substitute the 
+ *              current value of H5FD_SEC2.
+ *
+ * 		Quincey Koziol 2000-11-28
+ *		Added internal function..
+ *
+ *		Raymond Lu, 2001-10-23
+ *		Changed the file access list design to the new generic 
+ *		property list. 
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5P_get_driver(H5P_genplist_t *plist)
+{
+    hid_t	ret_value=-1;
+
+    FUNC_ENTER (H5P_get_driver, FAIL);
+
+    /* Get the current driver ID */
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+        if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &ret_value) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID");
+    } else if( TRUE == H5P_isa_class(plist->plist_id, H5P_DATASET_XFER) ) {
+        if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &ret_value)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
-        if(H5P_get(plist_id, H5D_XFER_VFL_INFO_NAME, &driver_info)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
-
-        /* Remove old driver */
-
-        /* Double-check value... */
-        assert(driver_id>=0);
-
-        /* Free any driver information stored */
-        H5FD_dxpl_free(driver_id, driver_info);
-
-        /* Decrement reference count for old driver */
-        H5I_dec_ref(driver_id);
-
-        /* Add new driver */
-
-        /* Increment reference count for new driver */
-        H5I_inc_ref(new_driver_id);
-
-        /* Make a copy of the driver information */
-        if((tmp_driver_info = H5FD_dxpl_copy(new_driver_id, new_driver_info))==NULL)
-            HGOTO_ERROR (H5E_DATASET, H5E_CANTCOPY, FAIL, "Can't copy VFL driver");
-
-        /* Set the driver info for the property list */
-        if(H5P_set(plist_id, H5D_XFER_VFL_ID_NAME, &new_driver_id)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set VFL driver ID");
-        if(H5P_set(plist_id, H5D_XFER_VFL_INFO_NAME, &tmp_driver_info) < 0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set VFL driver info");
-        
     } else {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file access or data transfer property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list");
     }
+
+    if (H5FD_VFD_DEFAULT==ret_value)
+        ret_value = H5FD_SEC2;
 
 done:
     FUNC_LEAVE(ret_value);
@@ -1639,77 +1880,68 @@ done:
 hid_t
 H5Pget_driver(hid_t plist_id)
 {
-    hid_t		ret_value=-1;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    hid_t	ret_value=-1;
 
     FUNC_ENTER (H5Pget_driver, FAIL);
     H5TRACE1("i","i",plist_id);
 
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-    ret_value = H5P_get_driver(plist_id);
+
+    ret_value = H5P_get_driver(plist);
 
     FUNC_LEAVE(ret_value);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5P_get_driver
+ * Function:	H5P_get_driver_info
  *
- * Purpose:	Return the ID of the low-level file driver.  PLIST_ID should
- *		be a file access property list or data transfer propert list.
+ * Purpose:	Returns a pointer directly to the file driver-specific
+ *		information of a file access or data transfer property list.
  *
- * Return:	Success:	A low-level driver ID which is the same ID
- *				used when the driver was set for the property
- *				list. The driver ID is only valid as long as
- *				the file driver remains registered.
+ * Return:	Success:	Ptr to *uncopied* driver specific data
+ *				structure if any.
  *
- *		Failure:	Negative
+ *		Failure:	NULL. Null is also returned if the driver has
+ *				not registered any driver-specific properties
+ *				although no error is pushed on the stack in
+ *				this case.
  *
  * Programmer:	Robb Matzke
- *		Thursday, February 26, 1998
+ *              Wednesday, August  4, 1999
  *
  * Modifications:
- *		Robb Matzke, 1999-08-03
- *		Rewritten to use the virtual file layer.
  *
- * 		Robb Matzke, 1999-08-05
- *		If the driver ID is H5FD_VFD_DEFAULT then substitute the 
- *              current value of H5FD_SEC2.
- *
- * 		Quincey Koziol 2000-11-28
- *		Added internal function..
- *
- *		Raymond Lu, 2001-10-23
+ *		Raymond Lu
+ *		Tuesday, Oct 23, 2001
  *		Changed the file access list design to the new generic 
- *		property list. 
- *
+ *		property list.
+ *	
  *-------------------------------------------------------------------------
  */
-hid_t
-H5P_get_driver(hid_t plist_id)
+void *
+H5P_get_driver_info(H5P_genplist_t *plist)
 {
-    hid_t		ret_value=-1;
+    void	*ret_value=NULL;
 
-    FUNC_ENTER (H5P_get_driver, FAIL);
-    H5TRACE1("i","i",plist_id);
+    FUNC_ENTER(H5P_get_driver_info, NULL);
 
-    if( TRUE == H5Pisa_class(plist_id, H5P_FILE_ACCESS) ) {
-        if(H5P_get(plist_id, H5F_ACS_FILE_DRV_ID_NAME, &ret_value) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID");
-    } else if( TRUE == H5Pisa_class(plist_id, H5P_DATASET_XFER) ) {
-        /* Get the current driver ID */
-        if(H5P_get(plist_id, H5D_XFER_VFL_ID_NAME, &ret_value)<0)
-            HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
+    /* Get the current driver info */
+    if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+        if(H5P_get(plist, H5F_ACS_FILE_DRV_INFO_NAME, &ret_value) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,NULL,"can't get driver info");
+    } else if( TRUE == H5P_isa_class(plist->plist_id, H5P_DATASET_XFER) ) {
+        if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &ret_value)<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, NULL, "Can't retrieve VFL driver ID");
     } else {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file access or data transfer property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access or data transfer property list");
     }
-
-    if (H5FD_VFD_DEFAULT==ret_value)
-        ret_value = H5FD_SEC2;
-
+    
+done:
     FUNC_LEAVE(ret_value);
-}
+} /* end H5P_get_driver_info() */
 
 
 /*-------------------------------------------------------------------------
@@ -1741,24 +1973,19 @@ H5P_get_driver(hid_t plist_id)
 void *
 H5Pget_driver_info(hid_t plist_id)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
     void		*ret_value=NULL;
 
     FUNC_ENTER(H5Pget_driver_info, NULL);
 
-    if( TRUE == H5Pisa_class(plist_id, H5P_FILE_ACCESS) ) {
-        if(H5P_get(plist_id, H5F_ACS_FILE_DRV_INFO_NAME, &ret_value) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET,NULL,"can't get driver info");
-    } else if( TRUE == H5Pisa_class(plist_id, H5P_DATASET_XFER) ) {
-        /* Get the current driver info */
-        if(H5P_get(plist_id, H5D_XFER_VFL_INFO_NAME, &ret_value)<0)
-            HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, NULL, "Can't retrieve VFL driver ID");
-    } else {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
-		      "not a file access or data transfer property list");
-    }
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list");
+
+    if((ret_value=H5P_get_driver_info(plist))==NULL)
+        HRETURN_ERROR(H5E_PLIST,H5E_CANTGET,NULL,"can't get driver info");
     
     FUNC_LEAVE(ret_value);
-}
+} /* end H5Pget_driver_info() */
 
 
 /*-------------------------------------------------------------------------
@@ -1793,39 +2020,36 @@ herr_t
 H5Pset_cache(hid_t plist_id, int mdc_nelmts,
 	     size_t rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
     
     FUNC_ENTER (H5Pset_cache, FAIL);
     H5TRACE5("e","iIszzd",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0);
 
     /* Check arguments */
-    if( H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-        TRUE != H5Pisa_class(plist_id, H5P_FILE_ACCESS) )
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) )
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    if (mdc_nelmts<0)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "meta data cache size must be non-negative");
+    if (rdcc_w0<0.0 || rdcc_w0>1.0)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "raw data cache w0 value must be between 0.0 and 1.0 inclusive");
 
-    if (mdc_nelmts<0) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "meta data cache size must be non-negative");
-    }
-    if (rdcc_w0<0.0 || rdcc_w0>1.0) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "raw data cache w0 value must be between 0.0 and 1.0 "
-		       "inclusive");
-    }
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set sizes */
-    if(H5P_set(plist_id, H5F_ACS_META_CACHE_SIZE_NAME, &mdc_nelmts) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,
-                      "can't set meta data cache size");
-    if(H5P_set(plist_id, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, &rdcc_nelmts) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,
-                      "can't set data cache element size");
-    if(H5P_set(plist_id, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &rdcc_nbytes) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,
-                      "can't set data cache byte size");
-    if(H5P_set(plist_id, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, &rdcc_w0) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,
-                      "can't set preempt read chunks");
+    if(H5P_set(plist, H5F_ACS_META_CACHE_SIZE_NAME, &mdc_nelmts) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set meta data cache size");
+    if(H5P_set(plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, &rdcc_nelmts) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data cache element size");
+    if(H5P_set(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &rdcc_nbytes) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data cache byte size");
+    if(H5P_set(plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, &rdcc_w0) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set preempt read chunks");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1856,35 +2080,36 @@ herr_t
 H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
 	     size_t *rdcc_nelmts, size_t *rdcc_nbytes, double *rdcc_w0)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
     
     FUNC_ENTER (H5Pget_cache, FAIL);
-    H5TRACE5("e","i*Is*z*z*d",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,
-             rdcc_w0);
+    H5TRACE5("e","i*Is*z*z*d",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-        TRUE != H5Pisa_class(plist_id, H5P_FILE_ACCESS))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get sizes */
     if (mdc_nelmts)
-        if(H5P_get(plist_id, H5F_ACS_META_CACHE_SIZE_NAME, mdc_nelmts) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,
-                      "can't get meta data cache size");
+        if(H5P_get(plist, H5F_ACS_META_CACHE_SIZE_NAME, mdc_nelmts) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get meta data cache size");
     if (rdcc_nelmts)
-        if(H5P_get(plist_id, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, rdcc_nelmts) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,
-                      "can't get data cache element size");
+        if(H5P_get(plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, rdcc_nelmts) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache element size");
     if (rdcc_nbytes)
-        if(H5P_get(plist_id, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, rdcc_nbytes) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,
-                      "can't get data cache byte size");
+        if(H5P_get(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, rdcc_nbytes) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache byte size");
     if (rdcc_w0)
-        if(H5P_get(plist_id, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, rdcc_w0) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,
-                      "can't get preempt read chunks");
+        if(H5P_get(plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, rdcc_w0) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get preempt read chunks");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1914,24 +2139,32 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
 herr_t
 H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
     FUNC_ENTER (H5Pset_buffer, FAIL);
     H5TRACE4("e","izxx",plist_id,size,tconv,bkg);
 
     /* Check arguments */
-    if (H5I_GENPROP_LST != H5I_get_type (plist_id))
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (size<=0)
-        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "buffer size must not be zero");
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "buffer size must not be zero");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Update property list */
-    if(H5P_set(plist_id, H5D_XFER_MAX_TEMP_BUF_NAME, &size)<0)
-        HRETURN_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set transfer buffer size");
-    if(H5P_set(plist_id, H5D_XFER_TCONV_BUF_NAME, &tconv)<0)
-        HRETURN_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set transfer type conversion buffer");
-    if(H5P_set(plist_id, H5D_XFER_BKGR_BUF_NAME, &bkg)<0)
-        HRETURN_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set background type conversion buffer");
+    if(H5P_set(plist, H5D_XFER_MAX_TEMP_BUF_NAME, &size)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set transfer buffer size");
+    if(H5P_set(plist, H5D_XFER_TCONV_BUF_NAME, &tconv)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set transfer type conversion buffer");
+    if(H5P_set(plist, H5D_XFER_BKGR_BUF_NAME, &bkg)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set background type conversion buffer");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -1954,6 +2187,7 @@ H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
 size_t
 H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
     size_t size;                /* Type conversion buffer size */
     size_t ret_value=0;         /* Type conversion buffer size */
 
@@ -1961,22 +2195,23 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
     H5TRACE3("z","ixx",plist_id,tconv,bkg);
 
     /* Check arguments */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
+    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
         HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, 0, "not a dataset transfer property list");
 
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, 0, "can't find object for ID");
+
     /* Return values */
-    if (tconv) {
-        if(H5P_get(plist_id, H5D_XFER_TCONV_BUF_NAME, tconv)<0)
+    if (tconv)
+        if(H5P_get(plist, H5D_XFER_TCONV_BUF_NAME, tconv)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, 0, "Can't get transfer type conversion buffer");
-    } /* end if */
-    if (bkg) {
-        if(H5P_get(plist_id, H5D_XFER_BKGR_BUF_NAME, bkg)<0)
+    if (bkg)
+        if(H5P_get(plist, H5D_XFER_BKGR_BUF_NAME, bkg)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, 0, "Can't get background type conversion buffer");
-    } /* end if */
 
     /* Get the size */
-    if(H5P_set(plist_id, H5D_XFER_MAX_TEMP_BUF_NAME, &size)<0)
+    if(H5P_get(plist, H5D_XFER_MAX_TEMP_BUF_NAME, &size)<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, 0, "Can't set transfer buffer size");
 
     /* Set the return value */
@@ -2013,21 +2248,25 @@ done:
 herr_t
 H5Pset_hyper_cache(hid_t plist_id, unsigned cache, unsigned limit)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;
 
     FUNC_ENTER (H5Pset_hyper_cache, FAIL);
     H5TRACE3("e","iIuIu",plist_id,cache,limit);
 
     /* Check arguments */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset tranxfer property list");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Update property list */
     cache = (cache>0) ? 1 : 0;
-    if (H5P_set(plist_id,H5D_XFER_HYPER_CACHE_NAME,&cache)<0)
+    if (H5P_set(plist,H5D_XFER_HYPER_CACHE_NAME,&cache)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to set value");
-    if (H5P_set(plist_id,H5D_XFER_HYPER_CACHE_LIM_NAME,&limit)<0)
+    if (H5P_set(plist,H5D_XFER_HYPER_CACHE_LIM_NAME,&limit)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to set value");
 
 done:
@@ -2053,25 +2292,30 @@ herr_t
 H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/,
 		   unsigned *limit/*out*/)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
     FUNC_ENTER (H5Pget_hyper_cache, FAIL);
     H5TRACE3("e","ixx",plist_id,cache,limit);
 
     /* Check arguments */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Return values */
-    if (cache) {
-        if (H5P_get(plist_id,H5D_XFER_HYPER_CACHE_NAME,cache)<0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
-    } /* end if */
-    if (limit) {
-        if (H5P_get(plist_id,H5D_XFER_HYPER_CACHE_LIM_NAME,limit)<0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
-    } /* end if */
+    if (cache)
+        if (H5P_get(plist,H5D_XFER_HYPER_CACHE_NAME,cache)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+    if (limit)
+        if (H5P_get(plist,H5D_XFER_HYPER_CACHE_LIM_NAME,limit)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2097,21 +2341,27 @@ herr_t
 H5Pset_preserve(hid_t plist_id, hbool_t status)
 {
     H5T_bkg_t need_bkg;         /* Value for background buffer type */
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
     
     FUNC_ENTER (H5Pset_preserve, FAIL);
     H5TRACE2("e","ib",plist_id,status);
 
     /* Check arguments */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Update property list */
     need_bkg = status ? H5T_BKG_YES : H5T_BKG_NO;
-    if (H5P_set(plist_id,H5D_XFER_BKGR_BUF_TYPE_NAME,&need_bkg)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+    if (H5P_set(plist,H5D_XFER_BKGR_BUF_TYPE_NAME,&need_bkg)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2134,21 +2384,30 @@ H5Pset_preserve(hid_t plist_id, hbool_t status)
 int
 H5Pget_preserve(hid_t plist_id)
 {
-    H5T_bkg_t need_bkg;      /* Return value */
+    H5T_bkg_t need_bkg;         /* Background value */
+    H5P_genplist_t *plist;      /* Property list pointer */
+    int ret_value;              /* return value */
     
     FUNC_ENTER (H5Pget_preserve, FAIL);
     H5TRACE1("Is","i",plist_id);
 
     /* Check arguments */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "not a dataset transfer property list");
+    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
 
-    if (H5P_get(plist_id,H5D_XFER_BKGR_BUF_NAME,&need_bkg)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    FUNC_LEAVE (need_bkg ? TRUE : FALSE);
+    /* Get value */
+    if (H5P_get(plist,H5D_XFER_BKGR_BUF_NAME,&need_bkg)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+
+    /* Set return value */
+    ret_value= need_bkg ? TRUE : FALSE;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2198,39 +2457,38 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
 	       size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
 {
     H5O_pline_t         pline;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER (H5Pset_filter, FAIL);
     H5TRACE5("e","iZfIuz*[a3]Iu",plist_id,filter,flags,cd_nelmts,cd_values);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "not a dataset creation property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
    
-    if(H5P_get(plist_id, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    if (filter<0 || filter>H5Z_FILTER_MAX) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "invalid filter identifier");
-    }
-    if (flags & ~((unsigned)H5Z_FLAG_DEFMASK)) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "invalid flags");
-    }
-    if (cd_nelmts>0 && !cd_values) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		      "no client data values supplied");
-    }
+    if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+
+    if (filter<0 || filter>H5Z_FILTER_MAX)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identifier");
+    if (flags & ~((unsigned)H5Z_FLAG_DEFMASK))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags");
+    if (cd_nelmts>0 && !cd_values)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no client data values supplied");
 
     /* Do it */
     if(H5Z_append(&pline, filter, flags, cd_nelmts, cd_values) < 0)
-        HRETURN_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, 
-                      "unable to add filter to pipeline");
-    if(H5P_set(plist_id, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline");
+    if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2262,18 +2520,29 @@ int
 H5Pget_nfilters(hid_t plist_id)
 {
     H5O_pline_t         pline;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    int ret_value;              /* return value */
 
     FUNC_ENTER(H5Pget_nfilters, FAIL);
     H5TRACE1("Is","i",plist_id);
 
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a dataset creation property list");
+    /* Check args */
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
    
-    if(H5P_get(plist_id, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    FUNC_LEAVE((int)(pline.nfilters));
+    /* Get value */
+    if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+
+    /* Set return value */
+    ret_value=(int)(pline.nfilters);
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2314,38 +2583,39 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
 {
     H5O_pline_t         pline;
     size_t		i;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    H5Z_filter_t ret_value;     /* return value */
     
     FUNC_ENTER (H5Pget_filter, H5Z_FILTER_ERROR);
     H5TRACE7("Zf","iIsx*zxzx",plist_id,idx,flags,cd_nelmts,cd_values,namelen,
              name);
     
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, H5Z_FILTER_ERROR,
-		       "not a dataset creation property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, H5Z_FILTER_ERROR, "not a dataset creation property list");
    
-    if(H5P_get(plist_id, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5Z_FILTER_ERROR, "can't find object for ID");
 
-    if (idx<0 || (size_t)idx>=pline.nfilters) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR,
-		      "filter number is invalid");
-    }
+    /* Get pipeline info */
+    if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get pipeline");
+
+    if (idx<0 || (size_t)idx>=pline.nfilters)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "filter number is invalid");
+
     if (cd_nelmts || cd_values) {
-        if (cd_nelmts && *cd_nelmts>256) {
+        if (cd_nelmts && *cd_nelmts>256)
             /*
              * It's likely that users forget to initialize this on input, so
              * we'll check that it has a reasonable value.  The actual number
              * is unimportant because the H5O layer will detect when a message
              * is too large.
              */
-            HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR,
-                  "probable uninitialized *cd_nelmts argument");
-        }
-        if (cd_nelmts && *cd_nelmts>0 && !cd_values) {
-            HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR,
-                  "client data values not supplied");
-        }
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "probable uninitialized *cd_nelmts argument");
+        if (cd_nelmts && *cd_nelmts>0 && !cd_values)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "client data values not supplied");
 
         /*
          * If cd_nelmts is null but cd_values is non-null then just ignore
@@ -2358,15 +2628,15 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
     if (flags)
         *flags = pline.filter[idx].flags;
     if (cd_values) {
-        for (i=0; i<pline.filter[idx].cd_nelmts && i<*cd_nelmts; i++) {
+        for (i=0; i<pline.filter[idx].cd_nelmts && i<*cd_nelmts; i++)
             cd_values[i] = pline.filter[idx].cd_values[i];
-        }
     }
     if (cd_nelmts)
         *cd_nelmts = pline.filter[idx].cd_nelmts;
 
     if (namelen>0 && name) {
         const char *s = pline.filter[idx].name;
+
         if (!s) {
             H5Z_class_t *cls = H5Z_find(pline.filter[idx].id);
 
@@ -2379,7 +2649,11 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
             name[0] = '\0';
     }
     
-    FUNC_LEAVE (pline.filter[idx].id);
+    /* Set return value */
+    ret_value=pline.filter[idx].id;
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2412,32 +2686,32 @@ herr_t
 H5Pset_deflate(hid_t plist_id, unsigned level)
 {
     H5O_pline_t         pline;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
     
     FUNC_ENTER (H5Pset_deflate, FAIL);
     H5TRACE2("e","iIu",plist_id,level);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "not a dataset creation property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
+    if (level>9)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid deflate level");
    
-    if (level>9) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		       "invalid deflate level");
-    }
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Add the filter */
-    if(H5P_get(plist_id, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
-    if (H5Z_append(&pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL,
-		   1, &level)<0) {
-        HRETURN_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL,
-	 	      "unable to add deflate filter to pipeline");
-    }
-    if(H5P_set(plist_id, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-        HRETURN_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to set pipeline");
+    if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+    if (H5Z_append(&pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, 1, &level)<0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add deflate filter to pipeline");
+    if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to set pipeline");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2463,18 +2737,23 @@ H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/, double *middle/*out*/,
 		    double *right/*out*/)
 {
     double btree_split_ratio[3];        /* B-tree node split ratios */
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER(H5Pget_btree_ratios, FAIL);
     H5TRACE4("e","ixxx",plist_id,left,middle,right);
 
     /* Check arguments */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Get the split ratios */
-    if (H5P_get(plist_id,H5D_XFER_BTREE_SPLIT_RATIO_NAME,&btree_split_ratio)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+    if (H5P_get(plist,H5D_XFER_BTREE_SPLIT_RATIO_NAME,&btree_split_ratio)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
     /* Get values */
     if (left)
@@ -2484,7 +2763,8 @@ H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/, double *middle/*out*/,
     if (right)
         *right = btree_split_ratio[2];
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2515,28 +2795,34 @@ H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
 		    double right)
 {
     double split_ratio[3];        /* B-tree node split ratios */
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER(H5Pset_btree_ratios, FAIL);
     H5TRACE4("e","iddd",plist_id,left,middle,right);
 
     /* Check arguments */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (left<0.0 || left>1.0 || middle<0.0 || middle>1.0 ||
             right<0.0 || right>1.0)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "split ratio must satisfy 0.0<=X<=1.0");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "split ratio must satisfy 0.0<=X<=1.0");
     
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
     /* Set values */
     split_ratio[0] = left;
     split_ratio[1] = middle;
     split_ratio[2] = right;
 
     /* Set the split ratios */
-    if (H5P_set(plist_id,H5D_XFER_BTREE_SPLIT_RATIO_NAME,&split_ratio)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+    if (H5P_set(plist,H5D_XFER_BTREE_SPLIT_RATIO_NAME,&split_ratio)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2568,43 +2854,42 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
 {
     H5O_fill_t          fill;
     H5T_t		*type = NULL;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
     
     FUNC_ENTER(H5Pset_fill_value, FAIL);
     H5TRACE3("e","iix",plist_id,type_id,value);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a dataset creation property list");
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
    
-    if(H5P_get(plist_id, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value");
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    if (H5I_DATATYPE!=H5I_get_type(type_id) ||
-            NULL==(type=H5I_object(type_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
-    if (!value) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no fill value specified");
-    }
+    if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value");
+
+    if (H5I_DATATYPE!=H5I_get_type(type_id) || NULL==(type=H5I_object(type_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    if (!value)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no fill value specified");
 
     /* Set the fill value */
     H5O_reset(H5O_FILL, &fill);
-    if (NULL==(fill.type=H5T_copy(type, H5T_COPY_TRANSIENT))) {
-        HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "unable to copy data type");
-    }
+    if (NULL==(fill.type=H5T_copy(type, H5T_COPY_TRANSIENT)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy data type");
     fill.size = H5T_get_size(type);
-    if (NULL==(fill.buf=H5MM_malloc(fill.size))) {
-        HRETURN_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL,
-		      "memory allocation failed for fill value");
-    }
+    if (NULL==(fill.buf=H5MM_malloc(fill.size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for fill value");
     HDmemcpy(fill.buf, value, fill.size);
 
-    if(H5P_set(plist_id, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set fill value");
+    if(H5P_set(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set fill value");
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2641,48 +2926,41 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     void		*bkg = NULL;		/*conversion buffer	*/
     hid_t		src_id = -1;		/*source data type id	*/
     herr_t		ret_value = FAIL;	/*return value		*/
+    H5P_genplist_t *plist;      /* Property list pointer */
     
     FUNC_ENTER(H5Pget_fill_value, FAIL);
     H5TRACE3("e","iix",plist_id,type_id,value);
 
     /* Check arguments */
-    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		    "not a dataset creation proprety list");
-    
-    if (H5I_DATATYPE!=H5I_get_type(type_id) ||
-            NULL==(type=H5I_object(type_id))) {
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation proprety list");
+    if (H5I_DATATYPE!=H5I_get_type(type_id) || NULL==(type=H5I_object(type_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    }
-    if (!value) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-		    "no fill value output buffer");
-    }
+    if (!value)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no fill value output buffer");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /*
      * If no fill value is defined then return an error.  We can't even
      * return zero because we don't know the data type of the dataset and
      * data type conversion might not have resulted in zero.
      */
-    if(H5P_get(plist_id, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+    if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value"); 
-    if(NULL == fill.buf) {
+    if(NULL == fill.buf)
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "no fill value defined");
-    }
 
     /*
      * Can we convert between the source and destination data types?
      */
-    if(NULL==(tpath=H5T_path_find(fill.type, type, NULL, NULL))) {
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		    "unable to convert between src and dst data types");
-    }
-    src_id = H5I_register(H5I_DATATYPE,
-                          H5T_copy (fill.type, H5T_COPY_TRANSIENT));
-    if (src_id<0) {
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		    "unable to copy/register data type");
-    }
+    if(NULL==(tpath=H5T_path_find(fill.type, type, NULL, NULL)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and dst data types");
+    src_id = H5I_register(H5I_DATATYPE, H5T_copy (fill.type, H5T_COPY_TRANSIENT));
+    if (src_id<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy/register data type");
 
     /*
      * Data type conversions are always done in place, so we need a buffer
@@ -2692,25 +2970,19 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     if (H5T_get_size(type)>=H5T_get_size(fill.type)) {    
         buf = value;
         if (tpath->cdata.need_bkg>=H5T_BKG_TEMP &&
-                NULL==(bkg=H5MM_malloc(H5T_get_size(type)))) {
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                "memory allocation failed for type conversion");
-        }
+                NULL==(bkg=H5MM_malloc(H5T_get_size(type))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
     } else {
-        if (NULL==(buf=H5MM_malloc(H5T_get_size(fill.type)))) {
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                "memory allocation failed for type conversion");
-        }
+        if (NULL==(buf=H5MM_malloc(H5T_get_size(fill.type))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
         if (tpath->cdata.need_bkg>=H5T_BKG_TEMP)
             bkg = value;
     }
     HDmemcpy(buf, fill.buf, H5T_get_size(fill.type));
         
     /* Do the conversion */
-    if (H5T_convert(tpath, src_id, type_id, (hsize_t)1, 0, 0, buf, bkg, H5P_DEFAULT)<0) {
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-            "data type conversion failed");
-    }
+    if (H5T_convert(tpath, src_id, type_id, (hsize_t)1, 0, 0, buf, bkg, H5P_DEFAULT)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
     if (buf!=value)
         HDmemcpy(value, buf, H5T_get_size(type));
     ret_value = SUCCEED;
@@ -2758,22 +3030,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref)
+H5Pset_gc_references(hid_t plist_id, unsigned gc_ref)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
     FUNC_ENTER(H5Pset_gc_references, FAIL);
-    H5TRACE2("e","iIu",fapl_id,gc_ref);
+    H5TRACE2("e","iIu",plist_id,gc_ref);
 
     /* Check args */
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");   
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");   
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set values */
-    if(H5P_set(fapl_id, H5F_ACS_GARBG_COLCT_REF_NAME, &gc_ref) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
-                      "can't set garbage collect reference");
+    if(H5P_set(plist, H5F_ACS_GARBG_COLCT_REF_NAME, &gc_ref) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set garbage collect reference");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2798,23 +3076,76 @@ H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_gc_references(hid_t fapl_id, unsigned *gc_ref/*out*/)
+H5Pget_gc_references(hid_t plist_id, unsigned *gc_ref/*out*/)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
     FUNC_ENTER(H5Pget_gc_references, FAIL);
-    H5TRACE2("e","ix",fapl_id,gc_ref);
+    H5TRACE2("e","ix",plist_id,gc_ref);
 
     /* Check args */
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
     /* Get values */
     if (gc_ref)
-        if(H5P_get(fapl_id, H5F_ACS_GARBG_COLCT_REF_NAME, gc_ref) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                          "can't get garbage collect reference");
+        if(H5P_get(plist, H5F_ACS_GARBG_COLCT_REF_NAME, gc_ref) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get garbage collect reference");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_set_vlen_mem_manager
+ *
+ * Purpose:	Sets the memory allocate/free pair for VL datatypes.  The
+ *		allocation routine is called when data is read into a new
+ *		array and the free routine is called when H5Dvlen_reclaim is
+ *		called.  The alloc_info and free_info are user parameters
+ *		which are passed to the allocation and freeing functions
+ *		respectively.  To reset the allocate/free functions to the
+ *		default setting of using the system's malloc/free functions,
+ *		call this routine with alloc_func and free_func set to NULL.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, July 1, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_set_vlen_mem_manager(H5P_genplist_t *plist, H5MM_allocate_t alloc_func,
+        void *alloc_info, H5MM_free_t free_func, void *free_info)
+{
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER(H5P_set_vlen_mem_manager, FAIL);
+
+    assert(plist);
+
+    /* Update property list */
+    if (H5P_set(plist,H5D_XFER_VLEN_ALLOC_NAME,&alloc_func)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+    if (H5P_set(plist,H5D_XFER_VLEN_ALLOC_INFO_NAME,&alloc_info)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+    if (H5P_set(plist,H5D_XFER_VLEN_FREE_NAME,&free_func)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+    if (H5P_set(plist,H5D_XFER_VLEN_FREE_INFO_NAME,&free_info)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5P_set_vlen_mem_manager() */
 
 
 /*-------------------------------------------------------------------------
@@ -2842,26 +3173,23 @@ herr_t
 H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func,
         void *alloc_info, H5MM_free_t free_func, void *free_info)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
     FUNC_ENTER(H5Pset_vlen_mem_manager, FAIL);
     H5TRACE5("e","ixxxx",plist_id,alloc_func,alloc_info,free_func,free_info);
 
     /* Check arguments */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+    if(TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER) || NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
 
     /* Update property list */
-    if (H5P_set(plist_id,H5D_XFER_VLEN_ALLOC_NAME,&alloc_func)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
-    if (H5P_set(plist_id,H5D_XFER_VLEN_ALLOC_INFO_NAME,&alloc_info)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
-    if (H5P_set(plist_id,H5D_XFER_VLEN_FREE_NAME,&free_func)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
-    if (H5P_set(plist_id,H5D_XFER_VLEN_FREE_INFO_NAME,&free_info)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+    if (H5P_set_vlen_mem_manager(plist,alloc_func,alloc_info,free_func,free_info)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set values");
 
-    FUNC_LEAVE (SUCCEED);
-}
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5Pset_vlen_mem_manager() */
 
 
 /*-------------------------------------------------------------------------
@@ -2884,32 +3212,35 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func/*out*/,
 			H5MM_free_t *free_func/*out*/,
 			void **free_info/*out*/)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
     FUNC_ENTER(H5Pget_vlen_mem_manager, FAIL);
     H5TRACE5("e","ixxxx",plist_id,alloc_func,alloc_info,free_func,free_info);
 
     /* Check arguments */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
 
-    if(alloc_func!=NULL) {
-        if (H5P_get(plist_id,H5D_XFER_VLEN_ALLOC_NAME,alloc_func)<0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
-    } /* end if */
-    if(alloc_info!=NULL) {
-        if (H5P_get(plist_id,H5D_XFER_VLEN_ALLOC_INFO_NAME,alloc_info)<0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
-    } /* end if */
-    if(free_func!=NULL) {
-        if (H5P_get(plist_id,H5D_XFER_VLEN_FREE_NAME,free_func)<0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
-    } /* end if */
-    if(free_info!=NULL) {
-        if (H5P_get(plist_id,H5D_XFER_VLEN_FREE_INFO_NAME,free_info)<0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
-    } /* end if */
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    FUNC_LEAVE (SUCCEED);
+    if(alloc_func!=NULL)
+        if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_NAME,alloc_func)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+    if(alloc_info!=NULL)
+        if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_INFO_NAME,alloc_info)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+    if(free_func!=NULL)
+        if (H5P_get(plist,H5D_XFER_VLEN_FREE_NAME,free_func)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+    if(free_info!=NULL)
+        if (H5P_get(plist,H5D_XFER_VLEN_FREE_INFO_NAME,free_info)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2943,21 +3274,28 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func/*out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_meta_block_size(hid_t fapl_id, size_t size)
+H5Pset_meta_block_size(hid_t plist_id, size_t size)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
     FUNC_ENTER (H5Pset_meta_block_size, FAIL);
-    H5TRACE2("e","iz",fapl_id,size);
+    H5TRACE2("e","iz",plist_id,size);
 
     /* Check args */
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
-    /* Set values */
-    if(H5P_set(fapl_id, H5F_ACS_META_BLOCK_SIZE_NAME, &size) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
-                      "can't set meta data block size");
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
 
-    FUNC_LEAVE (SUCCEED);
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Set values */
+    if(H5P_set(plist, H5F_ACS_META_BLOCK_SIZE_NAME, &size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set meta data block size");
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -2982,23 +3320,29 @@ H5Pset_meta_block_size(hid_t fapl_id, size_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_meta_block_size(hid_t fapl_id, size_t *size/*out*/)
+H5Pget_meta_block_size(hid_t plist_id, size_t *size/*out*/)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER (H5Pget_meta_block_size, FAIL);
-    H5TRACE2("e","ix",fapl_id,size);
+    H5TRACE2("e","ix",plist_id,size);
 
     /* Check args */
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
     /* Get values */
     if (size)
-        if(H5P_get(fapl_id, H5F_ACS_META_BLOCK_SIZE_NAME, size) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                          "can't get meta data block size");
+        if(H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get meta data block size");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3032,22 +3376,28 @@ H5Pget_meta_block_size(hid_t fapl_id, size_t *size/*out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_sieve_buf_size(hid_t fapl_id, size_t size)
+H5Pset_sieve_buf_size(hid_t plist_id, size_t size)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
     
     FUNC_ENTER (H5Pset_sieve_buf_size, FAIL);
-    H5TRACE2("e","iz",fapl_id,size);
+    H5TRACE2("e","iz",plist_id,size);
 
     /* Check args */
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
-    /* Set values */
-    if(H5P_set(fapl_id, H5F_ACS_SIEVE_BUF_SIZE_NAME, &size) < 0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
-                      "can't set sieve buffer size");
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
 
-    FUNC_LEAVE (SUCCEED);
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Set values */
+    if(H5P_set(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set sieve buffer size");
+
+done:
+    FUNC_LEAVE(ret_value);
 } /* end H5Pset_sieve_buf_size() */
 
 
@@ -3072,22 +3422,29 @@ H5Pset_sieve_buf_size(hid_t fapl_id, size_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sieve_buf_size(hid_t fapl_id, size_t *size/*out*/)
+H5Pget_sieve_buf_size(hid_t plist_id, size_t *size/*out*/)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
     FUNC_ENTER (H5Pget_sieve_buf_size, FAIL);
-    H5TRACE2("e","ix",fapl_id,size);
+    H5TRACE2("e","ix",plist_id,size);
 
     /* Check args */
-    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
+    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
     /* Get values */
     if (size)
-        if(H5P_get(fapl_id, H5F_ACS_SIEVE_BUF_SIZE_NAME, size) < 0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
-                          "can't get sieve buffer size");
+        if(H5P_get(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get sieve buffer size");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 } /* end H5Pget_sieve_buf_size() */
 
 
@@ -3117,22 +3474,28 @@ H5Pget_sieve_buf_size(hid_t fapl_id, size_t *size/*out*/)
 herr_t
 H5Pset_hyper_vector_size(hid_t plist_id, size_t vector_size)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
     FUNC_ENTER (H5Pset_hyper_vector_size, FAIL);
     H5TRACE2("e","iz",plist_id,vector_size);
 
     /* Check arguments */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
-
+    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if (vector_size<1)
-        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "vector size too small");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "vector size too small");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Update property list */
-    if (H5P_set(plist_id,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
-        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+    if (H5P_set(plist,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 } /* end H5Pset_hyper_vector_size() */
 
 
@@ -3153,21 +3516,27 @@ H5Pset_hyper_vector_size(hid_t plist_id, size_t vector_size)
 herr_t
 H5Pget_hyper_vector_size(hid_t plist_id, size_t *vector_size/*out*/)
 {
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
     FUNC_ENTER (H5Pget_hyper_vector_size, FAIL);
     H5TRACE2("e","ix",plist_id,vector_size);
 
     /* Check arguments */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) ||
-            TRUE!=H5Pisa_class(plist_id,H5P_DATASET_XFER))
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+    if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Return values */
-    if (vector_size) {
-        if (H5P_get(plist_id,H5D_XFER_HYPER_VECTOR_SIZE_NAME,vector_size)<0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
-    } /* end if */
+    if (vector_size)
+        if (H5P_get(plist,H5D_XFER_HYPER_VECTOR_SIZE_NAME,vector_size)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
-    FUNC_LEAVE (SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 } /* end H5Pget_hyper_vector_size() */
 
 
@@ -3832,7 +4201,7 @@ done:
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
         If this routine is called from a library routine other than
-    H5Pcreate_list, the calling routine is responsible for getting an ID for
+    H5P_c, the calling routine is responsible for getting an ID for
     the property list and calling the class 'create' callback (if one exists)
     and also setting the "class_init" flag.
  EXAMPLES
@@ -3946,12 +4315,12 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Pcreate
+    H5P_create_id
  PURPOSE
-    Routine to create a new property list of a property list class.
+    Internal routine to create a new property list of a property list class.
  USAGE
-    hid_t H5Pcreate(cls_id)
-        hid_t cls_id;       IN: Property list class create list from
+    hid_t H5P_create_id(pclass)
+        H5P_genclass_t *pclass;       IN: Property list class create list from
  RETURNS
     Returns a valid property list ID on success, FAIL on failure.
  DESCRIPTION
@@ -3966,18 +4335,15 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hid_t H5Pcreate(hid_t cls_id)
+hid_t H5P_create_id(H5P_genclass_t *pclass)
 {
-    H5P_genclass_t	*pclass;   /* Property list class to modify */
     H5P_genplist_t	*plist=NULL;    /* Property list created */
     hid_t plist_id=FAIL;       /* Property list ID */
     hid_t ret_value=FAIL;      /* return value */
 
-    FUNC_ENTER (H5Pcreate, FAIL);
+    FUNC_ENTER (H5P_create_id, FAIL);
 
-    /* Check arguments. */
-    if (H5I_GENPROP_CLS != H5I_get_type(cls_id) || NULL == (pclass = H5I_object(cls_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
+    assert(pclass);
 
     /* Create the new property list */
     if ((plist=H5P_create(pclass))==NULL)
@@ -4009,6 +4375,47 @@ done:
     if (ret_value<0 && plist)
         H5P_close(plist);
 
+    FUNC_LEAVE (ret_value);
+}   /* H5P_create_id() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pcreate
+ PURPOSE
+    Routine to create a new property list of a property list class.
+ USAGE
+    hid_t H5Pcreate(cls_id)
+        hid_t cls_id;       IN: Property list class create list from
+ RETURNS
+    Returns a valid property list ID on success, FAIL on failure.
+ DESCRIPTION
+        Creates a property list of a given class.  If a 'create' callback
+    exists for the property list class, it is called before the
+    property list is passed back to the user.  If 'create' callbacks exist for
+    any individual properties in the property list, they are called before the
+    class 'create' callback.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hid_t H5Pcreate(hid_t cls_id)
+{
+    H5P_genclass_t	*pclass;   /* Property list class to modify */
+    hid_t ret_value=FAIL;      /* return value */
+
+    FUNC_ENTER (H5Pcreate, FAIL);
+
+    /* Check arguments. */
+    if (H5I_GENPROP_CLS != H5I_get_type(cls_id) || NULL == (pclass = H5I_object(cls_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
+
+    /* Create the new property list */
+    if((ret_value=H5P_create_id(pclass))<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list");
+done:
     FUNC_LEAVE (ret_value);
 }   /* H5Pcreate() */
 
@@ -4678,7 +5085,7 @@ done:
     Internal routine to set a property's value in a property list.
  USAGE
     herr_t H5P_set(plist, name, value)
-        hid_t plist_id;         IN: Property list to find property in
+        H5P_genplist_t *plist;  IN: Property list to find property in
         const char *name;       IN: Name of property to set
         void *value;            IN: Pointer to the value for the property
  RETURNS
@@ -4702,20 +5109,16 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_set(hid_t plist_id, const char *name, const void *value)
+herr_t H5P_set(H5P_genplist_t *plist, const char *name, const void *value)
 {
-    H5P_genplist_t *plist;      /* Property list to modify */
     H5P_genprop_t *prop;        /* Temporary property pointer */
     herr_t ret_value=FAIL;      /* return value */
 
     FUNC_ENTER (H5P_set, FAIL);
 
+    assert(plist);
     assert(name);
     assert(value);
-
-    /* Argument checking */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Find property */
     if((prop=H5P_find_prop(plist->props,plist->pclass->hashsize,name))==NULL)
@@ -4731,12 +5134,12 @@ herr_t H5P_set(hid_t plist_id, const char *name, const void *value)
 
         /* Make a copy of the current value, in case the callback fails */
         if (NULL==(tmp_value=H5MM_malloc(prop->size)))
-            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed temporary property value");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed temporary property value");
         HDmemcpy(tmp_value,value,prop->size);
 
         /* Call user's callback */
-        if((*(prop->set))(plist_id,name,prop->size,tmp_value)<0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set property value");
+        if((*(prop->set))(plist->plist_id,name,prop->size,tmp_value)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set property value");
 
         /* Copy new [possibly unchanged] value into property value */
         HDmemcpy(prop->value,tmp_value,prop->size);
@@ -4789,20 +5192,21 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5Pset(hid_t plist_id, const char *name, void *value)
 {
-    herr_t ret_value=FAIL;     /* return value */
+    H5P_genplist_t *plist;      /* Property list to modify */
+    herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER (H5Pset, FAIL);
 
     /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id))
+    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
     if (value==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalied property value");
 
-    /* Create the new property list class */
-    if ((ret_value=H5P_set(plist_id,name,value))<0)
+    /* Go set the value */
+    if(H5P_set(plist,name,value)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to set value in plist");
 
 done:
@@ -4931,14 +5335,14 @@ htri_t H5Pexist(hid_t id, const char *name)
         if (NULL == (plist = H5I_object(id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
         if ((ret_value=H5P_exist_plist(plist,name))<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to existance of property in plist");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property does not exist in list");
     } /* end if */
     else 
         if(H5I_GENPROP_CLS == H5I_get_type(id)) {
             if (NULL == (pclass = H5I_object(id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
             if ((ret_value=H5P_exist_pclass(pclass,name))<0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to existance of property in pclass");
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property does not exist in class");
         } /* end if */
         else
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
@@ -5244,7 +5648,7 @@ static herr_t H5P_get_nprops_plist(H5P_genplist_t *plist, size_t *nprops)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops)
+herr_t H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops)
 {
     herr_t ret_value=SUCCEED;      /* return value */
 
@@ -5287,7 +5691,7 @@ herr_t H5Pget_nprops(hid_t id, size_t *nprops)
 {
     H5P_genplist_t	*plist;    /* Property list to query */
     H5P_genclass_t	*pclass;   /* Property class to query */
-    herr_t ret_value=FAIL;     /* return value */
+    herr_t ret_value=SUCCEED;      /* return value */
 
     FUNC_ENTER (H5Pget_nprops, FAIL);
 
@@ -5300,14 +5704,14 @@ herr_t H5Pget_nprops(hid_t id, size_t *nprops)
     if(H5I_GENPROP_LST == H5I_get_type(id)) {
         if (NULL == (plist = H5I_object(id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-        if ((ret_value=H5P_get_nprops_plist(plist,nprops))<0)
+        if (H5P_get_nprops_plist(plist,nprops)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to query # of properties in plist");
     } /* end if */
     else 
         if(H5I_GENPROP_CLS == H5I_get_type(id)) {
             if (NULL == (pclass = H5I_object(id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
-            if ((ret_value=H5P_get_nprops_pclass(pclass,nprops))<0)
+            if (H5P_get_nprops_pclass(pclass,nprops)<0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to query # of properties in pclass");
         } /* end if */
         else
@@ -5649,11 +6053,11 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_isa_class
+    H5P_isa_class_real
  PURPOSE
     Internal routine to query whether a property list is a certain class
  USAGE
-    htri_t H5P_isa_class(plist, pclass)
+    htri_t H5P_isa_class_real(plist, pclass)
         H5P_genplist_t *plist;    IN: Property list to check
         H5P_genclass_t *pclass;   IN: Property class to compare with
  RETURNS
@@ -5670,11 +6074,11 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static htri_t H5P_isa_class(H5P_genplist_t *plist, H5P_genclass_t *pclass)
+static htri_t H5P_isa_class_real(H5P_genplist_t *plist, H5P_genclass_t *pclass)
 {
     htri_t ret_value=FAIL;
 
-    FUNC_ENTER (H5P_isa_class, FAIL);
+    FUNC_ENTER (H5P_isa_class_real, FAIL);
 
     assert(plist);
     assert(pclass);
@@ -5685,6 +6089,57 @@ static htri_t H5P_isa_class(H5P_genplist_t *plist, H5P_genclass_t *pclass)
     } else {
         HGOTO_DONE(FALSE);
     } /* end else */
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5P_isa_class_real() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_isa_class
+ PURPOSE
+    Internal routine to query whether a property list is a certain class
+ USAGE
+    hid_t H5P_isa_class(plist_id, pclass_id)
+        hid_t plist_id;         IN: Property list to query
+        hid_t pclass_id;        IN: Property class to query
+ RETURNS
+    Success: TRUE (1) or FALSE (0)
+    Failure: negative
+ DESCRIPTION
+    This routine queries whether a property list is a member of the property
+    list class.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    What about returning a value indicating that the property class is further
+    up the class hierarchy?
+
+    This function is special in that it is an internal library function, but
+    accepts hid_t's as parameters.  Since it is used in basically the same way
+    as the H5I functions, this should be OK.  Don't make more library functions
+    which accept hid_t's without thorough discussion. -QAK
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t H5P_isa_class(hid_t plist_id, hid_t pclass_id)
+{
+    H5P_genplist_t	*plist;         /* Property list to query */
+    H5P_genclass_t	*pclass;        /* Property list class */
+    htri_t ret_value=FAIL;              /* return value */
+
+    FUNC_ENTER (H5P_isa_class, FAIL);
+
+    /* Check arguments. */
+    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if (H5I_GENPROP_CLS != H5I_get_type(pclass_id) || NULL == (pclass = H5I_object(pclass_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
+
+    /* Compare the property list's class against the other class */
+    if ((ret_value = H5P_isa_class_real(plist, pclass))<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to compare property list classes");
 
 done:
     FUNC_LEAVE (ret_value);
@@ -5708,28 +6163,26 @@ done:
     list class.
 
  GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
     What about returning a value indicating that the property class is further
     up the class hierarchy?
- COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
 htri_t H5Pisa_class(hid_t plist_id, hid_t pclass_id)
 {
-    H5P_genplist_t	*plist;         /* Property list to query */
-    H5P_genclass_t	*pclass=NULL;   /* Property list class */
     htri_t ret_value=FAIL;              /* return value */
 
     FUNC_ENTER (H5Pisa_class, FAIL);
 
     /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+    if (H5I_GENPROP_LST != H5I_get_type(plist_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-    if (H5I_GENPROP_CLS != H5I_get_type(pclass_id) || NULL == (pclass = H5I_object(pclass_id)))
+    if (H5I_GENPROP_CLS != H5I_get_type(pclass_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
 
     /* Compare the property list's class against the other class */
-    if ((ret_value = H5P_isa_class(plist, pclass))<0)
+    if ((ret_value = H5P_isa_class(plist_id, pclass_id))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to compare property list classes");
 
 done:
@@ -6066,8 +6519,8 @@ done:
  PURPOSE
     Internal routine to quickly retrieve the value of a property in a property list.
  USAGE
-    int H5P_peek_unsigned(plist_id, name)
-        hid_t plist_id;         IN: Property list to check
+    int H5P_peek_unsigned(plist, name)
+        H5P_genplist_t *plist;  IN: Property list to check
         const char *name;       IN: Name of property to query
  RETURNS
     Directly returns the value of the property in the list
@@ -6087,16 +6540,17 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-unsigned H5P_peek_unsigned(hid_t plist_id, const char *name)
+unsigned H5P_peek_unsigned(H5P_genplist_t *plist, const char *name)
 {
     unsigned ret_value;            /* return value */
 
     FUNC_ENTER (H5P_peek_unsigned, UFAIL);
 
+    assert(plist);
     assert(name);
 
     /* Get the value to return, don't worry about the return value, we can't return it */
-    H5P_get(plist_id,name,&ret_value);
+    H5P_get(plist,name,&ret_value);
 
     FUNC_LEAVE (ret_value);
 }   /* H5P_peek_unsigned() */
@@ -6108,8 +6562,8 @@ unsigned H5P_peek_unsigned(hid_t plist_id, const char *name)
  PURPOSE
     Internal routine to quickly retrieve the value of a property in a property list.
  USAGE
-    hid_t H5P_peek_hid_t(plist_id, name)
-        hid_t plist_id;         IN: Property list to check
+    hid_t H5P_peek_hid_t(plist, name)
+        H5P_genplist_t *plist;  IN: Property list to check
         const char *name;       IN: Name of property to query
  RETURNS
     Directly returns the value of the property in the list
@@ -6129,16 +6583,17 @@ unsigned H5P_peek_unsigned(hid_t plist_id, const char *name)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hid_t H5P_peek_hid_t(hid_t plist_id, const char *name)
+hid_t H5P_peek_hid_t(H5P_genplist_t *plist, const char *name)
 {
     hid_t ret_value;            /* return value */
 
     FUNC_ENTER (H5P_peek_hid_t, FAIL);
 
+    assert(plist);
     assert(name);
 
     /* Get the value to return, don't worry about the return value, we can't return it */
-    H5P_get(plist_id,name,&ret_value);
+    H5P_get(plist,name,&ret_value);
 
     FUNC_LEAVE (ret_value);
 }   /* H5P_peek_hid_t() */
@@ -6150,8 +6605,8 @@ hid_t H5P_peek_hid_t(hid_t plist_id, const char *name)
  PURPOSE
     Internal routine to quickly retrieve the value of a property in a property list.
  USAGE
-    void *H5P_peek_voidp(plist_id, name)
-        hid_t plist_id;         IN: Property list to check
+    void *H5P_peek_voidp(plist, name)
+        H5P_genplist_t *plist;  IN: Property list to check
         const char *name;       IN: Name of property to query
  RETURNS
     Directly returns the value of the property in the list
@@ -6171,16 +6626,17 @@ hid_t H5P_peek_hid_t(hid_t plist_id, const char *name)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-void *H5P_peek_voidp(hid_t plist_id, const char *name)
+void *H5P_peek_voidp(H5P_genplist_t *plist, const char *name)
 {
     void * ret_value;            /* return value */
 
     FUNC_ENTER (H5P_peek_voidp_t, NULL);
 
+    assert(plist);
     assert(name);
 
     /* Get the value to return, don't worry about the return value, we can't return it */
-    H5P_get(plist_id,name,&ret_value);
+    H5P_get(plist,name,&ret_value);
 
     FUNC_LEAVE (ret_value);
 }   /* H5P_peek_voidp() */
@@ -6192,8 +6648,8 @@ void *H5P_peek_voidp(hid_t plist_id, const char *name)
  PURPOSE
     Internal routine to quickly retrieve the value of a property in a property list.
  USAGE
-    hsize_t H5P_peek_hsize_t(plist_id, name)
-        hid_t plist_id;         IN: Property list to check
+    hsize_t H5P_peek_hsize_t(plist, name)
+        H5P_genplist_t *plist;  IN: Property list to check
         const char *name;       IN: Name of property to query
  RETURNS
     Directly returns the value of the property in the list
@@ -6213,16 +6669,17 @@ void *H5P_peek_voidp(hid_t plist_id, const char *name)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hsize_t H5P_peek_hsize_t(hid_t plist_id, const char *name)
+hsize_t H5P_peek_hsize_t(H5P_genplist_t *plist, const char *name)
 {
     hsize_t ret_value;            /* return value */
 
     FUNC_ENTER (H5P_peek_hsize_t, UFAIL);
 
+    assert(plist);
     assert(name);
 
     /* Get the value to return, don't worry about the return value, we can't return it */
-    H5P_get(plist_id,name,&ret_value);
+    H5P_get(plist,name,&ret_value);
 
     FUNC_LEAVE (ret_value);
 }   /* H5P_peek_hsize_t() */
@@ -6234,8 +6691,8 @@ hsize_t H5P_peek_hsize_t(hid_t plist_id, const char *name)
  PURPOSE
     Internal routine to quickly retrieve the value of a property in a property list.
  USAGE
-    hsize_t H5P_peek_size_t(plist_id, name)
-        hid_t plist_id;         IN: Property list to check
+    hsize_t H5P_peek_size_t(plist, name)
+        H5P_genplist_t *plist;  IN: Property list to check
         const char *name;       IN: Name of property to query
  RETURNS
     Directly returns the value of the property in the list
@@ -6255,16 +6712,17 @@ hsize_t H5P_peek_hsize_t(hid_t plist_id, const char *name)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-size_t H5P_peek_size_t(hid_t plist_id, const char *name)
+size_t H5P_peek_size_t(H5P_genplist_t *plist, const char *name)
 {
     size_t ret_value;            /* return value */
 
     FUNC_ENTER (H5P_peek_size_t, UFAIL);
 
+    assert(plist);
     assert(name);
 
     /* Get the value to return, don't worry about the return value, we can't return it */
-    H5P_get(plist_id,name,&ret_value);
+    H5P_get(plist,name,&ret_value);
 
     FUNC_LEAVE (ret_value);
 }   /* H5P_peek_size_t() */
@@ -6277,7 +6735,7 @@ size_t H5P_peek_size_t(hid_t plist_id, const char *name)
     Internal routine to query the value of a property in a property list.
  USAGE
     herr_t H5P_get(plist, name, value)
-        hid_t plist_id;         IN: Property list to check
+        H5P_genplist_t *plist;  IN: Property list to check
         const char *name;       IN: Name of property to query
         void *value;            OUT: Pointer to the buffer for the property value
  RETURNS
@@ -6298,20 +6756,16 @@ size_t H5P_peek_size_t(hid_t plist_id, const char *name)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_get(hid_t plist_id, const char *name, void *value)
+herr_t H5P_get(H5P_genplist_t *plist, const char *name, void *value)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
     H5P_genprop_t *prop;        /* Temporary property pointer */
     herr_t ret_value=FAIL;      /* return value */
 
     FUNC_ENTER (H5P_get, FAIL);
 
+    assert(plist);
     assert(name);
     assert(value);
-
-    /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Find property */
     if((prop=H5P_find_prop(plist->props,plist->pclass->hashsize,name))==NULL)
@@ -6327,12 +6781,12 @@ herr_t H5P_get(hid_t plist_id, const char *name, void *value)
 
         /* Make a copy of the current value, in case the callback fails */
         if (NULL==(tmp_value=H5MM_malloc(prop->size)))
-            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed temporary property value");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed temporary property value");
         HDmemcpy(tmp_value,prop->value,prop->size);
 
         /* Call user's callback */
-        if((*(prop->get))(plist_id,name,prop->size,tmp_value)<0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't get property value");
+        if((*(prop->get))(plist->plist_id,name,prop->size,tmp_value)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't get property value");
 
         /* Copy new [possibly unchanged] value into return value */
         HDmemcpy(value,tmp_value,prop->size);
@@ -6382,20 +6836,21 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5Pget(hid_t plist_id, const char *name, void * value)
 {
-    herr_t ret_value=FAIL;     /* return value */
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER (H5Pget, FAIL);
 
     /* Check arguments. */
-    if (H5I_GENPROP_LST != H5I_get_type(plist_id))
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
     if (value==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalied property value");
 
-    /* Create the new property list class */
-    if ((ret_value=H5P_get(plist_id,name,value))<0)
+    /* Go get the value */
+    if(H5P_get(plist,name,value)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query property value");
 
 done:
@@ -6449,7 +6904,7 @@ static herr_t H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name
     if(prop->del!=NULL) {
         /* Call user's callback */
         if((*(prop->del))(plist_id,name,prop->size,prop->value)<0)
-            HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't close property value");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't close property value");
     } /* end if */
 
     /* Get correct hash table location */
@@ -6944,7 +7399,7 @@ done:
 static herr_t H5P_close(void *_plist)
 {
     H5P_genplist_t *plist=(H5P_genplist_t *)_plist;
-    herr_t ret_value=FAIL;     /* return value */
+    herr_t ret_value=SUCCEED;     /* return value */
 
     FUNC_ENTER (H5P_close, FAIL);
 
@@ -6965,8 +7420,6 @@ static herr_t H5P_close(void *_plist)
 
     /* Destroy property list object */
     H5MM_xfree(plist);
-
-    ret_value=SUCCEED;     /* return value */
 
 done:
     FUNC_LEAVE (ret_value);
@@ -6997,19 +7450,19 @@ done:
 herr_t H5Pclose(hid_t plist_id)
 {
     H5P_genplist_t	*plist;    /* Property list created */
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t ret_value=SUCCEED;      /* return value */
 
     FUNC_ENTER (H5Pclose, FAIL);
 
     if (plist_id==H5P_DEFAULT)
-        HRETURN(SUCCEED);
+        HGOTO_DONE(SUCCEED);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Close the property list */
-    if ((ret_value=H5P_close(plist)) < 0)
+    if (H5P_close(plist) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
 
     /* Remove the property list from the ID manager now */
@@ -7028,7 +7481,7 @@ done:
     Internal routine to query the name of a generic property list class
  USAGE
     char *H5P_get_class_name(pclass)
-        H5P_genpclass_t *pclass;    IN: Property list to check
+        H5P_genclass_t *pclass;    IN: Property list to check
  RETURNS
     Success: Pointer to a malloc'ed string containing the class name
     Failure: NULL
@@ -7041,7 +7494,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static char *H5P_get_class_name(H5P_genclass_t *pclass)
+char *H5P_get_class_name(H5P_genclass_t *pclass)
 {
     char *ret_value=NULL;      /* return value */
 
@@ -7060,7 +7513,7 @@ static char *H5P_get_class_name(H5P_genclass_t *pclass)
  NAME
     H5Pget_class_name
  PURPOSE
-    Internal routine to query the name of a generic property list class
+    Routine to query the name of a generic property list class
  USAGE
     char *H5Pget_class_name(pclass_id)
         hid_t pclass_id;         IN: Property class to query
@@ -7087,7 +7540,7 @@ char *H5Pget_class_name(hid_t pclass_id)
     if (H5I_GENPROP_CLS != H5I_get_type(pclass_id) || NULL == (pclass = H5I_object(pclass_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property class");
 
-    /* Create the new property list class */
+    /* Get the property list class name */
     if ((ret_value=H5P_get_class_name(pclass))==NULL)
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "unable to query name of class");
 
@@ -7103,7 +7556,7 @@ done:
     Internal routine to query the parent class of a generic property class
  USAGE
     H5P_genclass_t *H5P_get_class_parent(pclass)
-        H5P_genpclass_t *pclass;    IN: Property class to check
+        H5P_genclass_t *pclass;    IN: Property class to check
  RETURNS
     Success: Pointer to the parent class of a property class
     Failure: NULL
