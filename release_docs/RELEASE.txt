@@ -83,6 +83,8 @@ Bug Fixes since HDF5-1.4.2 Release
       an unaligned access warning on IA64 machines.
     * Corrected behavior of H5Tinsert to not allow compound datatype fields to
       be inserted past the end of the datatype.
+    * Retired the DPSS virtual file driver (--with-gridstorage configure
+      option).
 
 
 Documentation
