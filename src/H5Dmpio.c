@@ -390,7 +390,7 @@ H5D_mpio_spaces_span_xfer(H5D_io_info_t *io_info, size_t elmt_size,
     int          mpi_code;              /* MPI return code */
     herr_t	 ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_mpio_spaces_xfer);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_mpio_spaces_span_xfer);
 
     /* Check args */
     assert (io_info);
@@ -402,6 +402,7 @@ H5D_mpio_spaces_span_xfer(H5D_io_info_t *io_info, size_t elmt_size,
     /* Make certain we have the correct type of property list */
     assert(TRUE==H5P_isa_class(io_info->dxpl_id,H5P_DATASET_XFER));
 
+    printf("coming to span tree xfer \n");
     /* create the MPI buffer type */
     if (H5S_mpio_space_span_type( mem_space, elmt_size,
 			       /* out: */
@@ -579,7 +580,7 @@ H5D_mpio_spaces_span_read(H5D_io_info_t *io_info,
 {
     herr_t ret_value;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5D_mpio_spaces_read);
+    FUNC_ENTER_NOAPI_NOFUNC(H5D_mpio_spaces_span_read);
 
     ret_value = H5D_mpio_spaces_span_xfer(io_info, elmt_size, file_space,
         mem_space, buf, 0/*read*/);
@@ -619,12 +620,14 @@ H5D_mpio_spaces_span_write(H5D_io_info_t *io_info,
 {
     herr_t ret_value;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5D_mpio_spaces_write);
+    FUNC_ENTER_NOAPI_NOFUNC(H5D_mpio_spaces_span_write);
 
+    printf(" coming to spaces_span_write function\n");
+    fflush(stdout);
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
     ret_value = H5D_mpio_spaces_span_xfer(io_info, elmt_size, file_space,
         mem_space, (void*)buf, 1/*write*/);
 
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5D_mpio_spaces_write() */
+} /* end H5D_mpio_spaces_span_write() */
 #endif  /* H5_HAVE_PARALLEL */

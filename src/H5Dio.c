@@ -3317,17 +3317,22 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
         /* Indicate that the I/O will _NOT_ be parallel */
 
 #ifdef KYANG
+      printf("coming to span write \n");
       io_info->ops.read = H5D_mpio_spaces_span_read;
       io_info->ops.write = H5D_mpio_spaces_span_write;
+      *use_par_opt_io = TRUE;
 #else      
         *use_par_opt_io=FALSE;
-#endif
-
-#endif /* H5_HAVE_PARALLEL */
         io_info->ops.read = H5D_select_read;
         io_info->ops.write = H5D_select_write;
-#ifdef H5_HAVE_PARALLEL
+#endif
+
+
+
     } /* end else */
+#else
+        io_info->ops.read = H5D_select_read;
+        io_info->ops.write = H5D_select_write;
 #endif /* H5_HAVE_PARALLEL */
 
 #ifdef H5S_DEBUG
