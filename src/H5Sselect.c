@@ -480,7 +480,7 @@ herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
     assert(space);
     assert(num_elem);
     assert(coord);
-    assert(op==H5S_SELECT_SET);
+    assert(op==H5S_SELECT_SET || op==H5S_SELECT_APPEND || op==H5S_SELECT_PREPEND);
 
 #ifdef QAK
     printf("%s: check 1.0\n",FUNC);
@@ -507,7 +507,7 @@ herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
     printf("%s: check 3.0\n",FUNC);
 #endif /* QAK */
     /* Add points to selection */
-    if(H5S_point_add(space,num_elem,coord)<0) {
+    if(H5S_point_add(space,op,num_elem,coord)<0) {
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL,
             "can't insert elements");
     }
@@ -568,7 +568,7 @@ herr_t H5Sselect_elements (hid_t spaceid, H5S_seloper_t op, size_t num_elem,
     if(coord==NULL || num_elem==0) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "elements not specified");
     } /* end if */
-    if(op!=H5S_SELECT_SET) {
+    if(!(op==H5S_SELECT_SET || op==H5S_SELECT_APPEND || op==H5S_SELECT_PREPEND)) {
         HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL,
             "operations other than H5S_SELECT_SET not supported currently");
     } /* end if */
@@ -1451,7 +1451,6 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoint
       } /* end while */
 
     /* Iterate through the node, copying each hyperslab's information */
-    node=space->select.sel_info.pnt_lst->head;
     while(node!=NULL && numpoints>0) {
         HDmemcpy(buf,node->pnt,sizeof(hsize_t)*rank);
         buf+=rank;

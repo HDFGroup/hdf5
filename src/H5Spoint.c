@@ -124,7 +124,7 @@ H5S_point_init (const struct H5O_layout_t UNUSED *layout,
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5S_point_add (H5S_t *space, size_t num_elem, const hssize_t **_coord)
+herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hssize_t **_coord)
 {
     H5S_pnt_node_t *top, *curr, *new; /* Point selection nodes */
     const hssize_t *coord=(const hssize_t *)_coord;     /* Pointer to the actual coordinates */
@@ -136,6 +136,7 @@ herr_t H5S_point_add (H5S_t *space, size_t num_elem, const hssize_t **_coord)
     assert(space);
     assert(num_elem>0);
     assert(coord);
+    assert(op==H5S_SELECT_SET || op==H5S_SELECT_APPEND || op==H5S_SELECT_PREPEND);
 
 #ifdef QAK
     printf("%s: check 1.0\n",FUNC);
@@ -186,12 +187,24 @@ herr_t H5S_point_add (H5S_t *space, size_t num_elem, const hssize_t **_coord)
     printf("%s: check 2.0\n",FUNC);
 #endif /* QAK */
 
-    /* Append current list, if there is one */
-    if(space->select.sel_info.pnt_lst->head!=NULL)
-        curr->next=space->select.sel_info.pnt_lst->head;
+    /* Insert the list of points selected in the proper place */
+    if(op==H5S_SELECT_SET || op==H5S_SELECT_PREPEND) {
+        /* Append current list, if there is one */
+        if(space->select.sel_info.pnt_lst->head!=NULL)
+            curr->next=space->select.sel_info.pnt_lst->head;
 
-    /* Put new list in point selection */
-    space->select.sel_info.pnt_lst->head=top;
+        /* Put new list in point selection */
+        space->select.sel_info.pnt_lst->head=top;
+    }
+    else {  /* op==H5S_SELECT_APPEND */
+        new=space->select.sel_info.pnt_lst->head;
+        if(new!=NULL)
+            while(new->next!=NULL)
+                new=new->next;
+
+        /* Append new list to point selection */
+        new->next=top;
+    }
 
     /* Add the number of elements in the new selection */
     space->select.num_elem+=num_elem;

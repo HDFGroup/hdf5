@@ -345,7 +345,7 @@ __DLL__ herr_t H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space,
 				  H5D_operator_t op, void *operator_data);
 
 /* Point select functions */
-__DLL__ herr_t H5S_point_add(H5S_t *space, size_t num_elemn,
+__DLL__ herr_t H5S_point_add(H5S_t *space, H5S_seloper_t op, size_t num_elem,
 			     const hssize_t **coord);
 __DLL__ herr_t H5S_point_release(H5S_t *space);
 __DLL__ hsize_t H5S_point_npoints(const H5S_t *space);
