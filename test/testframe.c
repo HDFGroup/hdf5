@@ -47,6 +47,7 @@ static int num_errs = 0;        /* Total number of errors during testing */
 static int Verbosity = VERBO_DEF;       /* Default Verbosity is Low */
 static TestStruct Test[MAXNUMOFTESTS];
 static int    Index = 0;
+static void *Test_parameters = NULL;
 
 
 /*
@@ -242,12 +243,14 @@ void PerformTests(void)
             MESSAGE(2, ("Testing  -- %s (%s) \n", Test[Loop].Description, Test[Loop].Name));
             MESSAGE(5, ("===============================================\n"));
             Test[Loop].NumErrors = num_errs;
+	    Test_parameters = Test[Loop].Parameters;
             Test[Loop].Call();
             Test[Loop].NumErrors = num_errs - Test[Loop].NumErrors;
             MESSAGE(5, ("===============================================\n"));
             MESSAGE(5, ("There were %d errors detected.\n\n", (int)Test[Loop].NumErrors));
         }
 
+    Test_parameters = NULL;     /* clear it. */
     MESSAGE(2, ("\n\n"))
 
     if (num_errs)
@@ -338,6 +341,15 @@ void ParseTestVerbosity(char *argv)
 int GetTestNumErrs(void)
 {
     return(num_errs);
+}
+
+
+/*
+ * Retrieve the current Test Parameters pointer.
+ */
+void *GetTestParameters(void)
+{
+    return(Test_parameters);
 }
 
 
