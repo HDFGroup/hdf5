@@ -3294,7 +3294,6 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
                     HDmemcpy(file->meta_accum+(addr-file->accum_loc),buf,size);
 
                     /* Set the new size & location of the metadata accumulator */
-                    file->accum_loc=addr;
                     file->accum_size=new_size;
 
                     /* Mark it as written to */
