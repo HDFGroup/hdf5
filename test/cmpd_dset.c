@@ -189,11 +189,11 @@ STEP  1: Initialize dataset `s1' and store it on disk in native order.\n");
 
     /* Create the memory data type */
     s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
-    H5Tinsert (s1_tid, "a", HPOFFSET(s1,a), H5T_NATIVE_INT);
-    H5Tinsert (s1_tid, "b", HPOFFSET(s1,b), H5T_NATIVE_INT);
-    H5Tinsert (s1_tid, "c", HPOFFSET(s1,c), H5T_NATIVE_INT);
-    H5Tinsert (s1_tid, "d", HPOFFSET(s1,d), H5T_NATIVE_INT);
-    H5Tinsert (s1_tid, "e", HPOFFSET(s1,e), H5T_NATIVE_INT);
+    H5Tinsert (s1_tid, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT);
+    H5Tinsert (s1_tid, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT);
+    H5Tinsert (s1_tid, "c", HOFFSET(s1_t,c), H5T_NATIVE_INT);
+    H5Tinsert (s1_tid, "d", HOFFSET(s1_t,d), H5T_NATIVE_INT);
+    H5Tinsert (s1_tid, "e", HOFFSET(s1_t,e), H5T_NATIVE_INT);
     assert (s1_tid>=0);
 
     /* Create the dataset */
@@ -218,11 +218,11 @@ STEP  2: Read the dataset from disk into a new memory buffer which has the\n\
 
     /* Create a data type for s2 */
     s2_tid = H5Tcreate (H5T_COMPOUND, sizeof(s2_t));
-    H5Tinsert (s2_tid, "a", HPOFFSET(s2,a), H5T_NATIVE_INT);
-    H5Tinsert (s2_tid, "b", HPOFFSET(s2,b), H5T_NATIVE_INT);
-    H5Tinsert (s2_tid, "c", HPOFFSET(s2,c), H5T_NATIVE_INT);
-    H5Tinsert (s2_tid, "d", HPOFFSET(s2,d), H5T_NATIVE_INT);
-    H5Tinsert (s2_tid, "e", HPOFFSET(s2,e), H5T_NATIVE_INT);
+    H5Tinsert (s2_tid, "a", HOFFSET(s2_t,a), H5T_NATIVE_INT);
+    H5Tinsert (s2_tid, "b", HOFFSET(s2_t,b), H5T_NATIVE_INT);
+    H5Tinsert (s2_tid, "c", HOFFSET(s2_t,c), H5T_NATIVE_INT);
+    H5Tinsert (s2_tid, "d", HOFFSET(s2_t,d), H5T_NATIVE_INT);
+    H5Tinsert (s2_tid, "e", HOFFSET(s2_t,e), H5T_NATIVE_INT);
     assert (s2_tid>=0);
     
     /* Read the data */
@@ -250,11 +250,11 @@ STEP  3: Read the dataset again with members in a different order.\n");
     
     /* Create a data type for s3 */
     s3_tid = H5Tcreate (H5T_COMPOUND, sizeof(s3_t));
-    H5Tinsert (s3_tid, "a", HPOFFSET(s3,a), H5T_NATIVE_INT);
-    H5Tinsert (s3_tid, "b", HPOFFSET(s3,b), H5T_NATIVE_INT);
-    H5Tinsert (s3_tid, "c", HPOFFSET(s3,c), H5T_NATIVE_INT);
-    H5Tinsert (s3_tid, "d", HPOFFSET(s3,d), H5T_NATIVE_INT);
-    H5Tinsert (s3_tid, "e", HPOFFSET(s3,e), H5T_NATIVE_INT);
+    H5Tinsert (s3_tid, "a", HOFFSET(s3_t,a), H5T_NATIVE_INT);
+    H5Tinsert (s3_tid, "b", HOFFSET(s3_t,b), H5T_NATIVE_INT);
+    H5Tinsert (s3_tid, "c", HOFFSET(s3_t,c), H5T_NATIVE_INT);
+    H5Tinsert (s3_tid, "d", HOFFSET(s3_t,d), H5T_NATIVE_INT);
+    H5Tinsert (s3_tid, "e", HOFFSET(s3_t,e), H5T_NATIVE_INT);
     assert (s3_tid>=0);
     
     /* Read the data */
@@ -281,8 +281,8 @@ STEP  4: Read a subset of the members.\n");
 
     /* Create a datatype for s4 */
     s4_tid = H5Tcreate (H5T_COMPOUND, sizeof(s4_t));
-    H5Tinsert (s4_tid, "b", HPOFFSET(s4,b), H5T_NATIVE_INT);
-    H5Tinsert (s4_tid, "d", HPOFFSET(s4,d), H5T_NATIVE_INT);
+    H5Tinsert (s4_tid, "b", HOFFSET(s4_t,b), H5T_NATIVE_INT);
+    H5Tinsert (s4_tid, "d", HOFFSET(s4_t,d), H5T_NATIVE_INT);
     assert (s4_tid>=0);
 
     /* Read the data */
@@ -314,11 +314,11 @@ STEP  5: Read members into a superset which is partially initialized.\n");
     
     /* Create a data type for s5 */
     s5_tid = H5Tcreate (H5T_COMPOUND, sizeof(s5_t));
-    H5Tinsert (s5_tid, "a", HPOFFSET(s5,a), H5T_NATIVE_INT);
-    H5Tinsert (s5_tid, "b", HPOFFSET(s5,b), H5T_NATIVE_INT);
-    H5Tinsert (s5_tid, "c", HPOFFSET(s5,c), H5T_NATIVE_INT);
-    H5Tinsert (s5_tid, "d", HPOFFSET(s5,d), H5T_NATIVE_INT);
-    H5Tinsert (s5_tid, "e", HPOFFSET(s5,e), H5T_NATIVE_INT);
+    H5Tinsert (s5_tid, "a", HOFFSET(s5_t,a), H5T_NATIVE_INT);
+    H5Tinsert (s5_tid, "b", HOFFSET(s5_t,b), H5T_NATIVE_INT);
+    H5Tinsert (s5_tid, "c", HOFFSET(s5_t,c), H5T_NATIVE_INT);
+    H5Tinsert (s5_tid, "d", HOFFSET(s5_t,d), H5T_NATIVE_INT);
+    H5Tinsert (s5_tid, "e", HOFFSET(s5_t,e), H5T_NATIVE_INT);
     assert (s5_tid>=0);
 	
     /* Read the data */

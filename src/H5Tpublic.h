@@ -21,7 +21,6 @@
 #include <H5Ipublic.h>
 
 #define HOFFSET(S,M)    (offsetof(S,M))
-#define HPOFFSET(P,M)   ((size_t)((const char*)&(P->M)-(const char*)P))
 
 /* These are the various classes of data types */
 typedef enum H5T_class_t {
@@ -119,7 +118,166 @@ typedef struct H5T_cdata_t {
 typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			      size_t nelmts, void *buf, void *bkg);
 
-/* The predefined native types */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*
+ * The IEEE floating point types in various byte orders.
+ */
+#define H5T_IEEE_F32BE		(H5open(), H5T_IEEE_F32BE_g)
+#define H5T_IEEE_F32LE		(H5open(), H5T_IEEE_F32LE_g)
+#define H5T_IEEE_F64BE		(H5open(), H5T_IEEE_F64BE_g)
+#define H5T_IEEE_F64LE		(H5open(), H5T_IEEE_F64LE_g)
+extern hid_t H5T_IEEE_F32BE_g;
+extern hid_t H5T_IEEE_F32LE_g;
+extern hid_t H5T_IEEE_F64BE_g;
+extern hid_t H5T_IEEE_F64LE_g;
+
+/*
+ * These are "standard" types.  For instance, signed (2's complement) and
+ * unsigned integers of various sizes and byte orders.
+ */
+#define H5T_STD_I8BE		(H5open(), H5T_STD_I8BE_g)
+#define H5T_STD_I8LE		(H5open(), H5T_STD_I8LE_g)
+#define H5T_STD_I16BE		(H5open(), H5T_STD_I16BE_g)
+#define H5T_STD_I16LE		(H5open(), H5T_STD_I16LE_g)
+#define H5T_STD_I32BE		(H5open(), H5T_STD_I32BE_g)
+#define H5T_STD_I32LE		(H5open(), H5T_STD_I32LE_g)
+#define H5T_STD_I64BE		(H5open(), H5T_STD_I64BE_g)
+#define H5T_STD_I64LE		(H5open(), H5T_STD_I64LE_g)
+#define H5T_STD_U8BE		(H5open(), H5T_STD_U8BE_g)
+#define H5T_STD_U8LE		(H5open(), H5T_STD_U8LE_g)
+#define H5T_STD_U16BE		(H5open(), H5T_STD_U16BE_g)
+#define H5T_STD_U16LE		(H5open(), H5T_STD_U16LE_g)
+#define H5T_STD_U32BE		(H5open(), H5T_STD_U32BE_g)
+#define H5T_STD_U32LE		(H5open(), H5T_STD_U32LE_g)
+#define H5T_STD_U64BE		(H5open(), H5T_STD_U64BE_g)
+#define H5T_STD_U64LE		(H5open(), H5T_STD_U64LE_g)
+#define H5T_STD_B8BE		(H5open(), H5T_STD_B8BE_g)
+#define H5T_STD_B8LE		(H5open(), H5T_STD_B8LE_g)
+#define H5T_STD_B16BE		(H5open(), H5T_STD_B16BE_g)
+#define H5T_STD_B16LE		(H5open(), H5T_STD_B16LE_g)
+#define H5T_STD_B32BE		(H5open(), H5T_STD_B32BE_g)
+#define H5T_STD_B32LE		(H5open(), H5T_STD_B32LE_g)
+#define H5T_STD_B64BE		(H5open(), H5T_STD_B64BE_g)
+#define H5T_STD_B64LE		(H5open(), H5T_STD_B64LE_g)
+extern hid_t H5T_STD_I8BE_g;
+extern hid_t H5T_STD_I8LE_g;
+extern hid_t H5T_STD_I16BE_g;
+extern hid_t H5T_STD_I16LE_g;
+extern hid_t H5T_STD_I32BE_g;
+extern hid_t H5T_STD_I32LE_g;
+extern hid_t H5T_STD_I64BE_g;
+extern hid_t H5T_STD_I64LE_g;
+extern hid_t H5T_STD_U8BE_g;
+extern hid_t H5T_STD_U8LE_g;
+extern hid_t H5T_STD_U16BE_g;
+extern hid_t H5T_STD_U16LE_g;
+extern hid_t H5T_STD_U32BE_g;
+extern hid_t H5T_STD_U32LE_g;
+extern hid_t H5T_STD_U64BE_g;
+extern hid_t H5T_STD_U64LE_g;
+extern hid_t H5T_STD_B8BE_g;
+extern hid_t H5T_STD_B8LE_g;
+extern hid_t H5T_STD_B16BE_g;
+extern hid_t H5T_STD_B16LE_g;
+extern hid_t H5T_STD_B32BE_g;
+extern hid_t H5T_STD_B32LE_g;
+extern hid_t H5T_STD_B64BE_g;
+extern hid_t H5T_STD_B64LE_g;
+
+/*
+ * Types which are particular to Unix.
+ */
+#define H5T_UNIX_D32BE		(H5open(), H5T_UNIX_D32BE_g)
+#define H5T_UNIX_D32LE		(H5open(), H5T_UNIX_D32LE_g)
+#define H5T_UNIX_D64BE		(H5open(), H5T_UNIX_D64BE_g)
+#define H5T_UNIX_D64LE		(H5open(), H5T_UNIX_D64LE_g)
+extern hid_t H5T_UNIX_D32BE_g;
+extern hid_t H5T_UNIX_D32LE_g;
+extern hid_t H5T_UNIX_D64BE_g;
+extern hid_t H5T_UNIX_D64LE_g;
+
+/*
+ * Types particular to the C language.  String types use `bytes' instead
+ * of `bits' as their size.
+ */
+#define H5T_C_S1		(H5open(), H5T_C_S1_g)
+extern hid_t H5T_C_S1_g;
+
+/*
+ * Types particular to Fortran.
+ */
+#define H5T_FORTRAN_S1		(H5open(), H5T_FORTRAN_S1_g)
+extern hid_t H5T_FORTRAN_S1_g;
+
+/*
+ * These types are for Intel CPU's.  They are little endian with IEEE
+ * floating point.
+ */
+#define H5T_INTEL_I8		H5T_STD_I8LE
+#define H5T_INTEL_I16		H5T_STD_I16LE
+#define H5T_INTEL_I32		H5T_STD_I32LE
+#define H5T_INTEL_I64		H5T_STD_I64LE
+#define H5T_INTEL_U8		H5T_STD_U8LE
+#define H5T_INTEL_U16		H5T_STD_U16LE
+#define H5T_INTEL_U32		H5T_STD_U32LE
+#define H5T_INTEL_U64		H5T_STD_U64LE
+#define H5T_INTEL_B8		H5T_STD_B8LE
+#define H5T_INTEL_B16		H5T_STD_B16LE
+#define H5T_INTEL_B32		H5T_STD_B32LE
+#define H5T_INTEL_B64		H5T_STD_B64LE
+#define H5T_INTEL_F32		H5T_IEEE_F32LE
+#define H5T_INTEL_F64		H5T_IEEE_F64LE
+
+/*
+ * These types are for DEC Alpha CPU's.  They are little endian with IEEE
+ * floating point.
+ */
+#define H5T_ALPHA_I8		H5T_STD_I8LE
+#define H5T_ALPHA_I16		H5T_STD_I16LE
+#define H5T_ALPHA_I32		H5T_STD_I32LE
+#define H5T_ALPHA_I64		H5T_STD_I64LE
+#define H5T_ALPHA_U8		H5T_STD_U8LE
+#define H5T_ALPHA_U16		H5T_STD_U16LE
+#define H5T_ALPHA_U32		H5T_STD_U32LE
+#define H5T_ALPHA_U64		H5T_STD_U64LE
+#define H5T_ALPHA_B8		H5T_STD_B8LE
+#define H5T_ALPHA_B16		H5T_STD_B16LE
+#define H5T_ALPHA_B32		H5T_STD_B32LE
+#define H5T_ALPHA_B64		H5T_STD_B64LE
+#define H5T_ALPHA_F32		H5T_IEEE_F32LE
+#define H5T_ALPHA_F64		H5T_IEEE_F64LE
+
+/*
+ * These types are for MIPS cpu's commonly used in SGI systems. They are big
+ * endian with IEEE floating point.
+ */
+#define H5T_MIPS_I8		H5T_STD_I8BE
+#define H5T_MIPS_I16		H5T_STD_I16BE
+#define H5T_MIPS_I32		H5T_STD_I32BE
+#define H5T_MIPS_I64		H5T_STD_I64BE
+#define H5T_MIPS_U8		H5T_STD_U8BE
+#define H5T_MIPS_U16		H5T_STD_U16BE
+#define H5T_MIPS_U32		H5T_STD_U32BE
+#define H5T_MIPS_U64		H5T_STD_U64BE
+#define H5T_MIPS_B8		H5T_STD_B8BE
+#define H5T_MIPS_B16		H5T_STD_B16BE
+#define H5T_MIPS_B32		H5T_STD_B32BE
+#define H5T_MIPS_B64		H5T_STD_B64BE
+#define H5T_MIPS_F32		H5T_IEEE_F32BE
+#define H5T_MIPS_F64		H5T_IEEE_F64BE
+
+/*
+ * The predefined native types. These are the types detected by H5detect and
+ * they violate the naming scheme a little.  Instead of a class name,
+ * precision and byte order as the last component, they have a C-like type
+ * name.  If the type begins with `U' then it is the unsigned version of the
+ * integer type; other integer types are signed.  The type LLONG corresponds
+ * to C's `long long' and LDOUBLE is `long double' (these types might be the
+ * same as `LONG' and `DOUBLE' respectively.
+ */
 #define H5T_NATIVE_CHAR         (H5open(), H5T_NATIVE_CHAR_g)
 #define H5T_NATIVE_UCHAR        (H5open(), H5T_NATIVE_UCHAR_g)
 #define H5T_NATIVE_SHORT        (H5open(), H5T_NATIVE_SHORT_g)
@@ -130,46 +288,14 @@ typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 #define H5T_NATIVE_ULONG        (H5open(), H5T_NATIVE_ULONG_g)
 #define H5T_NATIVE_LLONG        (H5open(), H5T_NATIVE_LLONG_g)
 #define H5T_NATIVE_ULLONG       (H5open(), H5T_NATIVE_ULLONG_g)
-#define H5T_NATIVE_HYPER        (H5open(), H5T_NATIVE_HYPER_g)
-#define H5T_NATIVE_UHYPER       (H5open(), H5T_NATIVE_UHYPER_g)
-#define H5T_NATIVE_INT8         (H5open(), H5T_NATIVE_INT8_g)
-#define H5T_NATIVE_UINT8        (H5open(), H5T_NATIVE_UINT8_g)
-#define H5T_NATIVE_INT16        (H5open(), H5T_NATIVE_INT16_g)
-#define H5T_NATIVE_UINT16       (H5open(), H5T_NATIVE_UINT16_g)
-#define H5T_NATIVE_INT32        (H5open(), H5T_NATIVE_INT32_g)
-#define H5T_NATIVE_UINT32       (H5open(), H5T_NATIVE_UINT32_g)
-#define H5T_NATIVE_INT64        (H5open(), H5T_NATIVE_INT64_g)
-#define H5T_NATIVE_UINT64       (H5open(), H5T_NATIVE_UINT64_g)
 #define H5T_NATIVE_FLOAT        (H5open(), H5T_NATIVE_FLOAT_g)
 #define H5T_NATIVE_DOUBLE       (H5open(), H5T_NATIVE_DOUBLE_g)
-#define H5T_NATIVE_TIME         (H5open(), H5T_NATIVE_TIME_g)
-#define H5T_NATIVE_STRING       (H5open(), H5T_NATIVE_STRING_g)
-#define H5T_NATIVE_BITFIELD     (H5open(), H5T_NATIVE_BITFIELD_g)
+#define H5T_NATIVE_LDOUBLE	(H5open(), H5T_NATIVE_LDOUBLE_g)
+#define H5T_NATIVE_B8		(H5open(), H5T_NATIVE_B8_g)
+#define H5T_NATIVE_B16		(H5open(), H5T_NATIVE_B16_g)
+#define H5T_NATIVE_B32		(H5open(), H5T_NATIVE_B32_g)
+#define H5T_NATIVE_B64		(H5open(), H5T_NATIVE_B64_g)
 #define H5T_NATIVE_OPAQUE       (H5open(), H5T_NATIVE_OPAQUE_g)
-
-/* The predefined standard types */
-#define H5T_IEEE_R32LE		(H5open(), H5T_IEEE_R32LE_g)
-#define H5T_IEEE_R32BE		(H5open(), H5T_IEEE_R32BE_g)
-#define H5T_IEEE_R64LE		(H5open(), H5T_IEEE_R64LE_g)
-#define H5T_IEEE_R64BE		(H5open(), H5T_IEEE_R64BE_g)
-#define H5T_IEEE_U16LE		(H5open(), H5T_IEEE_U16LE_g)
-#define H5T_IEEE_U16BE		(H5open(), H5T_IEEE_U16BE_g)
-#define H5T_IEEE_U32LE		(H5open(), H5T_IEEE_U32LE_g)
-#define H5T_IEEE_U32BE		(H5open(), H5T_IEEE_U32BE_g)
-#define H5T_IEEE_U64LE		(H5open(), H5T_IEEE_U64LE_g)
-#define H5T_IEEE_U64BE		(H5open(), H5T_IEEE_U64BE_g)
-#define H5T_IEEE_S16LE		(H5open(), H5T_IEEE_S16LE_g)
-#define H5T_IEEE_S16BE		(H5open(), H5T_IEEE_S16BE_g)
-#define H5T_IEEE_S32LE		(H5open(), H5T_IEEE_S32LE_g)
-#define H5T_IEEE_S32BE		(H5open(), H5T_IEEE_S32BE_g)
-#define H5T_IEEE_S64LE		(H5open(), H5T_IEEE_S64LE_g)
-#define H5T_IEEE_S64BE		(H5open(), H5T_IEEE_S64BE_g)
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* Native types */
 extern hid_t H5T_NATIVE_CHAR_g;
 extern hid_t H5T_NATIVE_UCHAR_g;
 extern hid_t H5T_NATIVE_SHORT_g;
@@ -177,44 +303,17 @@ extern hid_t H5T_NATIVE_USHORT_g;
 extern hid_t H5T_NATIVE_INT_g;
 extern hid_t H5T_NATIVE_UINT_g;
 extern hid_t H5T_NATIVE_LONG_g;
-extern hid_t H5T_NATIVE_INT8_g;
-extern hid_t H5T_NATIVE_UINT8_g;
-extern hid_t H5T_NATIVE_INT16_g;
-extern hid_t H5T_NATIVE_UINT16_g;
-extern hid_t H5T_NATIVE_INT32_g;
-extern hid_t H5T_NATIVE_UINT32_g;
-extern hid_t H5T_NATIVE_INT64_g;
-extern hid_t H5T_NATIVE_UINT64_g;
 extern hid_t H5T_NATIVE_ULONG_g;
 extern hid_t H5T_NATIVE_LLONG_g;
 extern hid_t H5T_NATIVE_ULLONG_g;
-extern hid_t H5T_NATIVE_HYPER_g;
-extern hid_t H5T_NATIVE_UHYPER_g;
 extern hid_t H5T_NATIVE_FLOAT_g;
 extern hid_t H5T_NATIVE_DOUBLE_g;
-extern hid_t H5T_NATIVE_TIME_g;
-extern hid_t H5T_NATIVE_STRING_g;
-extern hid_t H5T_NATIVE_BITFIELD_g;
+extern hid_t H5T_NATIVE_LDOUBLE_g;
+extern hid_t H5T_NATIVE_B8_g;
+extern hid_t H5T_NATIVE_B16_g;
+extern hid_t H5T_NATIVE_B32_g;
+extern hid_t H5T_NATIVE_B64_g;
 extern hid_t H5T_NATIVE_OPAQUE_g;
-
-/* Standard types */
-extern hid_t H5T_IEEE_R32LE_g;	/*IEEE 4-byte little-endian float	     */
-extern hid_t H5T_IEEE_R32BE_g;	/*IEEE 4-byte big-endian float		     */
-extern hid_t H5T_IEEE_R64LE_g;	/*IEEE 8-byte little-endian float	     */
-extern hid_t H5T_IEEE_R64BE_g;	/*IEEE 8-byte big endian float		     */
-extern hid_t H5T_IEEE_U16LE_g;	/*IEEE 2-byte little-endian unsigned int     */
-extern hid_t H5T_IEEE_U16BE_g;	/*IEEE 2-byte big-endian unsigned int	     */
-extern hid_t H5T_IEEE_U32LE_g;	/*IEEE 4-byte little-endian unsigned int     */
-extern hid_t H5T_IEEE_U32BE_g;	/*IEEE 4-byte big-endian unsigned int	     */
-extern hid_t H5T_IEEE_U64LE_g;	/*IEEE 8-byte little-endian unsigned int     */
-extern hid_t H5T_IEEE_U64BE_g;	/*IEEE 8-byte big-endian unsigned int	     */
-extern hid_t H5T_IEEE_S16LE_g;	/*IEEE 2-byte little-endian signed int       */
-extern hid_t H5T_IEEE_S16BE_g;	/*IEEE 2-byte big-endian signed int	     */
-extern hid_t H5T_IEEE_S32LE_g;	/*IEEE 4-byte little-endian signed int       */
-extern hid_t H5T_IEEE_S32BE_g;	/*IEEE 4-byte big-endian signed int	     */
-extern hid_t H5T_IEEE_S64LE_g;	/*IEEE 8-byte little-endian signed int       */
-extern hid_t H5T_IEEE_S64BE_g;	/*IEEE 8-byte big-endian signed int	     */
-
 
 
 /* Operations defined on all data types */

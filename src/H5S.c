@@ -677,7 +677,7 @@ H5S_get_ndims(const H5S_t *ds)
  *-------------------------------------------------------------------------
  */
 int
-H5Sget_dims(hid_t space_id, hsize_t dims[]/*out*/, hsize_t maxdims[]/*out*/)
+H5Sget_dims (hid_t space_id, hsize_t dims[]/*out*/, hsize_t maxdims[]/*out*/)
 {
     H5S_t		   *ds = NULL;
     intn		   ret_value = 0;

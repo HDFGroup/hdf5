@@ -30,7 +30,45 @@ static intn interface_initialize_g = FALSE;
 #define INTERFACE_INIT H5T_init_interface
 static void H5T_term_interface(void);
 
-/* Predefined native types */
+hid_t H5T_IEEE_F32BE_g = FAIL;
+hid_t H5T_IEEE_F32LE_g = FAIL;
+hid_t H5T_IEEE_F64BE_g = FAIL;
+hid_t H5T_IEEE_F64LE_g = FAIL;
+
+hid_t H5T_STD_I8BE_g = FAIL;
+hid_t H5T_STD_I8LE_g = FAIL;
+hid_t H5T_STD_I16BE_g = FAIL;
+hid_t H5T_STD_I16LE_g = FAIL;
+hid_t H5T_STD_I32BE_g = FAIL;
+hid_t H5T_STD_I32LE_g = FAIL;
+hid_t H5T_STD_I64BE_g = FAIL;
+hid_t H5T_STD_I64LE_g = FAIL;
+hid_t H5T_STD_U8BE_g = FAIL;
+hid_t H5T_STD_U8LE_g = FAIL;
+hid_t H5T_STD_U16BE_g = FAIL;
+hid_t H5T_STD_U16LE_g = FAIL;
+hid_t H5T_STD_U32BE_g = FAIL;
+hid_t H5T_STD_U32LE_g = FAIL;
+hid_t H5T_STD_U64BE_g = FAIL;
+hid_t H5T_STD_U64LE_g = FAIL;
+hid_t H5T_STD_B8BE_g = FAIL;
+hid_t H5T_STD_B8LE_g = FAIL;
+hid_t H5T_STD_B16BE_g = FAIL;
+hid_t H5T_STD_B16LE_g = FAIL;
+hid_t H5T_STD_B32BE_g = FAIL;
+hid_t H5T_STD_B32LE_g = FAIL;
+hid_t H5T_STD_B64BE_g = FAIL;
+hid_t H5T_STD_B64LE_g = FAIL;
+
+hid_t H5T_UNIX_D32BE_g = FAIL;
+hid_t H5T_UNIX_D32LE_g = FAIL;
+hid_t H5T_UNIX_D64BE_g = FAIL;
+hid_t H5T_UNIX_D64LE_g = FAIL;
+
+hid_t H5T_C_S1_g = FAIL;
+
+hid_t H5T_FORTRAN_S1_g = FAIL;
+
 hid_t H5T_NATIVE_CHAR_g = FAIL;
 hid_t H5T_NATIVE_UCHAR_g = FAIL;
 hid_t H5T_NATIVE_SHORT_g = FAIL;
@@ -38,43 +76,17 @@ hid_t H5T_NATIVE_USHORT_g = FAIL;
 hid_t H5T_NATIVE_INT_g = FAIL;
 hid_t H5T_NATIVE_UINT_g = FAIL;
 hid_t H5T_NATIVE_LONG_g = FAIL;
+hid_t H5T_NATIVE_ULONG_g = FAIL;
 hid_t H5T_NATIVE_LLONG_g = FAIL;
 hid_t H5T_NATIVE_ULLONG_g = FAIL;
-hid_t H5T_NATIVE_HYPER_g = FAIL;
-hid_t H5T_NATIVE_UHYPER_g = FAIL;
-hid_t H5T_NATIVE_INT8_g = FAIL;
-hid_t H5T_NATIVE_UINT8_g = FAIL;
-hid_t H5T_NATIVE_INT16_g = FAIL;
-hid_t H5T_NATIVE_UINT16_g = FAIL;
-hid_t H5T_NATIVE_INT32_g = FAIL;
-hid_t H5T_NATIVE_UINT32_g = FAIL;
-hid_t H5T_NATIVE_INT64_g = FAIL;
-hid_t H5T_NATIVE_UINT64_g = FAIL;
-hid_t H5T_NATIVE_ULONG_g = FAIL;
 hid_t H5T_NATIVE_FLOAT_g = FAIL;
 hid_t H5T_NATIVE_DOUBLE_g = FAIL;
-hid_t H5T_NATIVE_TIME_g = FAIL;
-hid_t H5T_NATIVE_STRING_g = FAIL;
-hid_t H5T_NATIVE_BITFIELD_g = FAIL;
+hid_t H5T_NATIVE_LDOUBLE_g = FAIL;
+hid_t H5T_NATIVE_B8_g = FAIL;
+hid_t H5T_NATIVE_B16_g = FAIL;
+hid_t H5T_NATIVE_B32_g = FAIL;
+hid_t H5T_NATIVE_B64_g = FAIL;
 hid_t H5T_NATIVE_OPAQUE_g = FAIL;
-
-/* Predefined standard types */
-hid_t H5T_IEEE_R32LE_g = FAIL;
-hid_t H5T_IEEE_R32BE_g = FAIL;
-hid_t H5T_IEEE_R64LE_g = FAIL;
-hid_t H5T_IEEE_R64BE_g = FAIL;
-hid_t H5T_IEEE_U16LE_g = FAIL;
-hid_t H5T_IEEE_U16BE_g = FAIL;
-hid_t H5T_IEEE_U32LE_g = FAIL;
-hid_t H5T_IEEE_U32BE_g = FAIL;
-hid_t H5T_IEEE_U64LE_g = FAIL;
-hid_t H5T_IEEE_U64BE_g = FAIL;
-hid_t H5T_IEEE_S16LE_g = FAIL;
-hid_t H5T_IEEE_S16BE_g = FAIL;
-hid_t H5T_IEEE_S32LE_g = FAIL;
-hid_t H5T_IEEE_S32BE_g = FAIL;
-hid_t H5T_IEEE_S64LE_g = FAIL;
-hid_t H5T_IEEE_S64BE_g = FAIL;
 
 
 /* The path database */
@@ -116,69 +128,67 @@ H5T_init_interface(void)
     }
 
     /*
-     * Initialize pre-defined data types that depend on the architecture.
+     * Initialize pre-defined native data types from code generated during
+     * the library configuration by H5detect.
      */
     ret_value = H5T_init();
 
-    /*
-     * Initialize pre-define data types that can be derived from
-     * architecture-dependent types.
+    /*------------------------------------------------------------
+     * Native types
+     *------------------------------------------------------------ 
      */
 
-    /* INT8 */
-    H5T_NATIVE_INT8_g = H5Tcopy(H5T_NATIVE_INT_g);
-    H5Tset_size(H5T_NATIVE_INT8_g, 1);
-    H5Tset_precision(H5T_NATIVE_INT8_g, 8);
-    H5Tlock(H5T_NATIVE_INT8_g);
-
-    /* UINT8 */
-    H5T_NATIVE_UINT8_g = H5Tcopy(H5T_NATIVE_UINT_g);
-    H5Tset_size(H5T_NATIVE_UINT8_g, 1);
-    H5Tset_precision(H5T_NATIVE_UINT8_g, 8);
-    H5Tlock(H5T_NATIVE_UINT8_g);
-
-    /* INT16 */
-    H5T_NATIVE_INT16_g = H5Tcopy(H5T_NATIVE_INT_g);
-    H5Tset_size(H5T_NATIVE_INT16_g, 2);
-    H5Tset_precision(H5T_NATIVE_INT16_g, 16);
-    H5Tlock(H5T_NATIVE_INT16_g);
-
-    /* UINT16 */
-    H5T_NATIVE_UINT16_g = H5Tcopy(H5T_NATIVE_UINT_g);
-    H5Tset_size(H5T_NATIVE_UINT16_g, 2);
-    H5Tset_precision(H5T_NATIVE_UINT16_g, 16);
-    H5Tlock(H5T_NATIVE_UINT16_g);
-
-    /* INT32 */
-    H5T_NATIVE_INT32_g = H5Tcopy(H5T_NATIVE_INT_g);
-    H5Tset_size(H5T_NATIVE_INT32_g, 4);
-    H5Tset_precision(H5T_NATIVE_INT32_g, 32);
-    H5Tlock(H5T_NATIVE_INT32_g);
-
-    /* UINT32 */
-    H5T_NATIVE_UINT32_g = H5Tcopy(H5T_NATIVE_UINT_g);
-    H5Tset_size(H5T_NATIVE_UINT32_g, 4);
-    H5Tset_precision(H5T_NATIVE_UINT32_g, 32);
-    H5Tlock(H5T_NATIVE_UINT32_g);
-
-    /* INT64 */
-    H5T_NATIVE_INT64_g = H5Tcopy(H5T_NATIVE_INT_g);
-    H5Tset_size(H5T_NATIVE_INT64_g, 8);
-    H5Tset_precision(H5T_NATIVE_INT64_g, 64);
-    H5Tlock(H5T_NATIVE_INT64_g);
-
-    /* UINT64 */
-    H5T_NATIVE_UINT64_g = H5Tcopy(H5T_NATIVE_UINT_g);
-    H5Tset_size(H5T_NATIVE_UINT64_g, 8);
-    H5Tset_precision(H5T_NATIVE_UINT64_g, 64);
-    H5Tlock(H5T_NATIVE_UINT64_g);
-
-    /*
-     * Standard data types in big and little endian flavors.
+    /* 1-byte bit field */
+    dt = H5I_object (H5T_NATIVE_B8_g = H5Tcopy (H5T_NATIVE_UINT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->type = H5T_BITFIELD;
+    dt->size = 1;
+    dt->u.atomic.prec = 8;
+    
+    /* 2-byte bit field */
+    dt = H5I_object (H5T_NATIVE_B16_g = H5Tcopy (H5T_NATIVE_UINT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->type = H5T_BITFIELD;
+    dt->size = 2;
+    dt->u.atomic.prec = 16;
+    
+    /* 4-byte bit field */
+    dt = H5I_object (H5T_NATIVE_B32_g = H5Tcopy (H5T_NATIVE_UINT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->type = H5T_BITFIELD;
+    dt->size = 4;
+    dt->u.atomic.prec = 32;
+    
+    /* 8-byte bit field */
+    dt = H5I_object (H5T_NATIVE_B64_g = H5Tcopy (H5T_NATIVE_UINT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->type = H5T_BITFIELD;
+    dt->size = 8;
+    dt->u.atomic.prec = 64;
+    
+    /* Opaque data */
+    dt = H5MM_xcalloc(1, sizeof(H5T_t));
+    dt->state = H5T_STATE_IMMUTABLE;
+    H5F_addr_undef (&(dt->ent.header));
+    dt->type = H5T_OPAQUE;
+    dt->size = 1;
+    dt->u.atomic.order = H5T_ORDER_NONE;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 8 * dt->size;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    if ((H5T_NATIVE_OPAQUE_g = H5I_register(H5_DATATYPE, dt)) < 0) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		      "unable to initialize H5T layer");
+    }
+    
+    /*------------------------------------------------------------
+     * IEEE Types
+     *------------------------------------------------------------ 
      */
 
     /* IEEE 4-byte little-endian float */
-    dt = H5I_object (H5T_IEEE_R32LE_g = H5Tcopy (H5T_NATIVE_DOUBLE));
+    dt = H5I_object (H5T_IEEE_F32LE_g = H5Tcopy (H5T_NATIVE_DOUBLE_g));
     dt->state = H5T_STATE_IMMUTABLE;
     dt->size = 4;
     dt->u.atomic.offset = 0;
@@ -196,7 +206,7 @@ H5T_init_interface(void)
     dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
 
     /* IEEE 4-byte big-endian float */
-    dt = H5I_object (H5T_IEEE_R32BE_g = H5Tcopy (H5T_NATIVE_DOUBLE));
+    dt = H5I_object (H5T_IEEE_F32BE_g = H5Tcopy (H5T_NATIVE_DOUBLE_g));
     dt->state = H5T_STATE_IMMUTABLE;
     dt->size = 4;
     dt->u.atomic.offset = 0;
@@ -214,7 +224,7 @@ H5T_init_interface(void)
     dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
 
     /* IEEE 8-byte little-endian float */
-    dt = H5I_object (H5T_IEEE_R64LE_g = H5Tcopy (H5T_NATIVE_DOUBLE));
+    dt = H5I_object (H5T_IEEE_F64LE_g = H5Tcopy (H5T_NATIVE_DOUBLE_g));
     dt->state = H5T_STATE_IMMUTABLE;
     dt->size = 8;
     dt->u.atomic.offset = 0;
@@ -232,7 +242,7 @@ H5T_init_interface(void)
     dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
 
     /* IEEE 8-byte big-endian float */
-    dt = H5I_object (H5T_IEEE_R64BE_g = H5Tcopy (H5T_NATIVE_DOUBLE));
+    dt = H5I_object (H5T_IEEE_F64BE_g = H5Tcopy (H5T_NATIVE_DOUBLE_g));
     dt->state = H5T_STATE_IMMUTABLE;
     dt->size = 8;
     dt->u.atomic.offset = 0;
@@ -249,160 +259,261 @@ H5T_init_interface(void)
     dt->u.atomic.u.f.norm = H5T_NORM_IMPLIED;
     dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
 
-    /* IEEE 2-byte little-endian signed integer */
-    dt = H5I_object (H5T_IEEE_S16LE_g = H5Tcopy (H5T_NATIVE_INT));
-    dt->state = H5T_STATE_IMMUTABLE;
-    dt->size = 2;
-    dt->u.atomic.offset = 0;
-    dt->u.atomic.prec = 16;
-    dt->u.atomic.order = H5T_ORDER_LE;
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.u.i.sign = H5T_SGN_2;
-    
-    /* IEEE 2-byte big-endian signed integer */
-    dt = H5I_object (H5T_IEEE_S16BE_g = H5Tcopy (H5T_NATIVE_INT));
-    dt->state = H5T_STATE_IMMUTABLE;
-    dt->size = 2;
-    dt->u.atomic.offset = 0;
-    dt->u.atomic.prec = 16;
-    dt->u.atomic.order = H5T_ORDER_BE;
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.u.i.sign = H5T_SGN_2;
-    
-    /* IEEE 4-byte little-endian signed integer */
-    dt = H5I_object (H5T_IEEE_S32LE_g = H5Tcopy (H5T_NATIVE_INT));
-    dt->state = H5T_STATE_IMMUTABLE;
-    dt->size = 4;
-    dt->u.atomic.offset = 0;
-    dt->u.atomic.prec = 32;
-    dt->u.atomic.order = H5T_ORDER_LE;
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.u.i.sign = H5T_SGN_2;
-    
-    /* IEEE 4-byte big-endian signed integer */
-    dt = H5I_object (H5T_IEEE_S32BE_g = H5Tcopy (H5T_NATIVE_INT));
-    dt->state = H5T_STATE_IMMUTABLE;
-    dt->size = 4;
-    dt->u.atomic.offset = 0;
-    dt->u.atomic.prec = 32;
-    dt->u.atomic.order = H5T_ORDER_BE;
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.u.i.sign = H5T_SGN_2;
-    
-    /* IEEE 8-byte little-endian signed integer */
-    dt = H5I_object (H5T_IEEE_S64LE_g = H5Tcopy (H5T_NATIVE_INT));
-    dt->state = H5T_STATE_IMMUTABLE;
-    dt->size = 8;
-    dt->u.atomic.offset = 0;
-    dt->u.atomic.prec = 64;
-    dt->u.atomic.order = H5T_ORDER_LE;
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.u.i.sign = H5T_SGN_2;
-    
-    /* IEEE 8-byte big-endian signed integer */
-    dt = H5I_object (H5T_IEEE_S64BE_g = H5Tcopy (H5T_NATIVE_INT));
-    dt->state = H5T_STATE_IMMUTABLE;
-    dt->size = 8;
-    dt->u.atomic.offset = 0;
-    dt->u.atomic.prec = 64;
-    dt->u.atomic.order = H5T_ORDER_BE;
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.u.i.sign = H5T_SGN_2;
-    
-    /* IEEE 2-byte little-endian unsigned integer */
-    dt = H5I_object (H5T_IEEE_U16LE_g = H5Tcopy (H5T_NATIVE_INT));
-    dt->state = H5T_STATE_IMMUTABLE;
-    dt->size = 2;
-    dt->u.atomic.offset = 0;
-    dt->u.atomic.prec = 16;
-    dt->u.atomic.order = H5T_ORDER_LE;
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
-    
-    /* IEEE 2-byte big-endian unsigned integer */
-    dt = H5I_object (H5T_IEEE_U16BE_g = H5Tcopy (H5T_NATIVE_INT));
-    dt->state = H5T_STATE_IMMUTABLE;
-    dt->size = 2;
-    dt->u.atomic.offset = 0;
-    dt->u.atomic.prec = 16;
-    dt->u.atomic.order = H5T_ORDER_BE;
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
-    
-    /* IEEE 4-byte little-endian unsigned integer */
-    dt = H5I_object (H5T_IEEE_U32LE_g = H5Tcopy (H5T_NATIVE_INT));
-    dt->state = H5T_STATE_IMMUTABLE;
-    dt->size = 4;
-    dt->u.atomic.offset = 0;
-    dt->u.atomic.prec = 32;
-    dt->u.atomic.order = H5T_ORDER_LE;
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
-    
-    /* IEEE 4-byte big-endian unsigned integer */
-    dt = H5I_object (H5T_IEEE_U32BE_g = H5Tcopy (H5T_NATIVE_INT));
-    dt->state = H5T_STATE_IMMUTABLE;
-    dt->size = 4;
-    dt->u.atomic.offset = 0;
-    dt->u.atomic.prec = 32;
-    dt->u.atomic.order = H5T_ORDER_BE;
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
-    
-    /* IEEE 8-byte little-endian unsigned integer */
-    dt = H5I_object (H5T_IEEE_U64LE_g = H5Tcopy (H5T_NATIVE_INT));
-    dt->state = H5T_STATE_IMMUTABLE;
-    dt->size = 8;
-    dt->u.atomic.offset = 0;
-    dt->u.atomic.prec = 64;
-    dt->u.atomic.order = H5T_ORDER_LE;
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
-    
-    /* IEEE 8-byte big-endian unsigned integer */
-    dt = H5I_object (H5T_IEEE_U64BE_g = H5Tcopy (H5T_NATIVE_INT));
-    dt->state = H5T_STATE_IMMUTABLE;
-    dt->size = 8;
-    dt->u.atomic.offset = 0;
-    dt->u.atomic.prec = 64;
-    dt->u.atomic.order = H5T_ORDER_BE;
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+    /*------------------------------------------------------------
+     * Other "standard" types
+     *------------------------------------------------------------ 
+     */
     
 
-    /*
-     * Initialize pre-defined data types that don't depend on architecture.
+    /* 1-byte little-endian (endianness is irrelevant) signed integer */
+    dt = H5I_object (H5T_STD_I8LE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 1;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 8;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_2;
+    
+    /* 1-byte big-endian (endianness is irrelevant) signed integer */
+    dt = H5I_object (H5T_STD_I8BE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 1;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 8;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_2;
+    
+    /* 2-byte little-endian signed integer */
+    dt = H5I_object (H5T_STD_I16LE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 2;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 16;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_2;
+    
+    /* 2-byte big-endian signed integer */
+    dt = H5I_object (H5T_STD_I16BE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 2;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 16;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_2;
+    
+    /* 4-byte little-endian signed integer */
+    dt = H5I_object (H5T_STD_I32LE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 4;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 32;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_2;
+    
+    /* 4-byte big-endian signed integer */
+    dt = H5I_object (H5T_STD_I32BE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 4;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 32;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_2;
+    
+    /* 8-byte little-endian signed integer */
+    dt = H5I_object (H5T_STD_I64LE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 8;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 64;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_2;
+    
+    /* 8-byte big-endian signed integer */
+    dt = H5I_object (H5T_STD_I64BE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 8;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 64;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_2;
+    
+    /* 1-byte little-endian (endianness is irrelevant) unsigned integer */
+    dt = H5I_object (H5T_STD_U8LE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 1;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 8;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+    
+    /* 1-byte big-endian (endianness is irrelevant) unsigned integer */
+    dt = H5I_object (H5T_STD_U8BE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 1;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 8;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+    
+    /* 2-byte little-endian unsigned integer */
+    dt = H5I_object (H5T_STD_U16LE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 2;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 16;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+    
+    /* 2-byte big-endian unsigned integer */
+    dt = H5I_object (H5T_STD_U16BE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 2;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 16;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+    
+    /* 4-byte little-endian unsigned integer */
+    dt = H5I_object (H5T_STD_U32LE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 4;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 32;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+    
+    /* 4-byte big-endian unsigned integer */
+    dt = H5I_object (H5T_STD_U32BE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 4;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 32;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+    
+    /* 8-byte little-endian unsigned integer */
+    dt = H5I_object (H5T_STD_U64LE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 8;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 64;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+    
+    /* 8-byte big-endian unsigned integer */
+    dt = H5I_object (H5T_STD_U64BE_g = H5Tcopy (H5T_NATIVE_INT_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 8;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 64;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+    
+    /* 1-byte big endian bit field (order is irrelevant) */
+    dt = H5I_object (H5T_STD_B8BE_g = H5Tcopy (H5T_STD_U8BE_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->type = H5T_BITFIELD;
+
+    /* 1-byte little-endian bit field (order is irrelevant) */
+    dt = H5I_object (H5T_STD_B8LE_g = H5Tcopy (H5T_STD_U8LE_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->type = H5T_BITFIELD;
+
+    /* 2-byte big endian bit field */
+    dt = H5I_object (H5T_STD_B16BE_g = H5Tcopy (H5T_STD_U16BE_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->type = H5T_BITFIELD;
+
+    /* 2-byte little-endian bit field */
+    dt = H5I_object (H5T_STD_B16LE_g = H5Tcopy (H5T_STD_U16LE_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->type = H5T_BITFIELD;
+
+    /* 4-byte big endian bit field */
+    dt = H5I_object (H5T_STD_B32BE_g = H5Tcopy (H5T_STD_U32BE_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->type = H5T_BITFIELD;
+
+    /* 4-byte little-endian bit field */
+    dt = H5I_object (H5T_STD_B32LE_g = H5Tcopy (H5T_STD_U32LE_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->type = H5T_BITFIELD;
+
+    /* 8-byte big endian bit field */
+    dt = H5I_object (H5T_STD_B64BE_g = H5Tcopy (H5T_STD_U64BE_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->type = H5T_BITFIELD;
+
+    /* 8-byte little-endian bit field */
+    dt = H5I_object (H5T_STD_B64LE_g = H5Tcopy (H5T_STD_U64LE_g));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->type = H5T_BITFIELD;
+
+
+
+    /*------------------------------------------------------------
+     * The Unix architecture for dates and times.
+     *------------------------------------------------------------ 
      */
 
-    /* TIME */
-    dt = H5MM_xcalloc(1, sizeof(H5T_t));
+    /* 4-byte time_t, big-endian */
+    dt = H5I_object (H5T_UNIX_D32BE_g = H5Tcopy (H5T_STD_U32BE));
     dt->state = H5T_STATE_IMMUTABLE;
-    H5F_addr_undef (&(dt->ent.header));
     dt->type = H5T_TIME;
-    dt->size = 1;
-    dt->u.atomic.order = H5Tget_order(H5T_NATIVE_INT_g);
-    dt->u.atomic.offset = 0;
-    dt->u.atomic.prec = 8 * dt->size;
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    if ((H5T_NATIVE_TIME_g = H5I_register(H5_DATATYPE, dt)) < 0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "can't initialize H5T layer");
-    }
+    
+    /* 4-byte time_t, little-endian */
+    dt = H5I_object (H5T_UNIX_D32LE_g = H5Tcopy (H5T_STD_U32LE));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->type = H5T_TIME;
+    
+    /* 8-byte time_t, big-endian */
+    dt = H5I_object (H5T_UNIX_D64BE_g = H5Tcopy (H5T_STD_U64BE));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->type = H5T_TIME;
+    
+    /* 8-byte time_t, little-endian */
+    dt = H5I_object (H5T_UNIX_D64LE_g = H5Tcopy (H5T_STD_U64LE));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->type = H5T_TIME;
+    
+    /*------------------------------------------------------------
+     * The `C' architecture
+     *------------------------------------------------------------ 
+     */
 
-    /* STRING */
+    /* One-byte character string */
     dt = H5MM_xcalloc(1, sizeof(H5T_t));
     dt->state = H5T_STATE_IMMUTABLE;
     H5F_addr_undef (&(dt->ent.header));
@@ -415,51 +526,33 @@ H5T_init_interface(void)
     dt->u.atomic.msb_pad = H5T_PAD_ZERO;
     dt->u.atomic.u.s.cset = H5T_CSET_ASCII;
     dt->u.atomic.u.s.pad = H5T_STR_NULL;
-    if ((H5T_NATIVE_STRING_g = H5I_register(H5_DATATYPE, dt)) < 0) {
+    if ((H5T_C_S1_g = H5I_register(H5_DATATYPE, dt)) < 0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "can't initialize H5T layer");
     }
 
-    /* BITFIELD */
-    dt = H5MM_xcalloc(1, sizeof(H5T_t));
-    dt->state = H5T_STATE_IMMUTABLE;
-    H5F_addr_undef (&(dt->ent.header));
-    dt->type = H5T_BITFIELD;
-    dt->size = 1;
-    dt->u.atomic.order = H5Tget_order(H5T_NATIVE_INT_g);
-    dt->u.atomic.offset = 0;
-    dt->u.atomic.prec = 8 * dt->size;
-    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
-    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    if ((H5T_NATIVE_BITFIELD_g = H5I_register(H5_DATATYPE, dt)) < 0) {
-	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "unable to initialize H5T layer");
-    }
+    /*------------------------------------------------------------
+     * The `Fortran' architecture
+     *------------------------------------------------------------ 
+     */
 
-    /* OPAQUE */
+    /* One-byte character string */
     dt = H5MM_xcalloc(1, sizeof(H5T_t));
     dt->state = H5T_STATE_IMMUTABLE;
     H5F_addr_undef (&(dt->ent.header));
-    dt->type = H5T_OPAQUE;
+    dt->type = H5T_STRING;
     dt->size = 1;
     dt->u.atomic.order = H5T_ORDER_NONE;
     dt->u.atomic.offset = 0;
     dt->u.atomic.prec = 8 * dt->size;
     dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
     dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    if ((H5T_NATIVE_OPAQUE_g = H5I_register(H5_DATATYPE, dt)) < 0) {
+    dt->u.atomic.u.s.cset = H5T_CSET_ASCII;
+    dt->u.atomic.u.s.pad = H5T_STR_SPACE;
+    if ((H5T_FORTRAN_S1_g = H5I_register(H5_DATATYPE, dt)) < 0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		      "unable to initialize H5T layer");
+		      "can't initialize H5T layer");
     }
-
-    /*
-     * Define aliases.
-     */
-    H5T_NATIVE_HYPER_g = H5Tcopy(H5T_NATIVE_LLONG_g);
-    H5Tlock(H5T_NATIVE_HYPER_g);
-
-    H5T_NATIVE_UHYPER_g = H5Tcopy(H5T_NATIVE_ULLONG_g);
-    H5Tlock(H5T_NATIVE_UHYPER_g);
 
     /*
      * Register conversion functions beginning with the most general and
@@ -485,13 +578,13 @@ H5T_init_interface(void)
 		       "unable to register conversion function");
     }
     
-    if (H5Tregister_hard ("i32le_r64le", H5T_IEEE_U32LE_g, H5T_IEEE_R64LE_g,
-			  H5T_conv_i32le_r64le)<0) {
+    if (H5Tregister_hard ("u32le_f64le", H5T_STD_U32LE_g, H5T_IEEE_F64LE_g,
+			  H5T_conv_i32le_f64le)<0) {
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		       "unable to register conversion function");
     }
-    if (H5Tregister_hard ("i32le_r64le", H5T_IEEE_S32LE_g, H5T_IEEE_R64LE_g,
-			  H5T_conv_i32le_r64le)<0) {
+    if (H5Tregister_hard ("i32le_f64le", H5T_STD_I32LE_g, H5T_IEEE_F64LE_g,
+			  H5T_conv_i32le_f64le)<0) {
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		       "unable to register conversion function");
     }

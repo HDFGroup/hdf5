@@ -54,7 +54,7 @@ H5T_conv_noop(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 
     switch (cdata->command) {
     case H5T_CONV_INIT:
-	/* Nothing to initialize */
+	cdata->need_bkg = H5T_BKG_NO;
 	break;
 
     case H5T_CONV_CONV:
@@ -147,6 +147,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
                           "conversion not supported");
         }
+	cdata->need_bkg = H5T_BKG_NO;
 	break;
 
     case H5T_CONV_CONV:
@@ -578,6 +579,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
 			   "destination size is too large");
 	}
+	cdata->need_bkg = H5T_BKG_NO;
 	break;
 	
     case H5T_CONV_FREE:
@@ -855,7 +857,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_i32le_r64le
+ * Function:	H5T_conv_i32le_f64le
  *
  * Purpose:	Converts 4-byte little-endian integers (signed or unsigned)
  *		to 8-byte litte-endian IEEE floating point.
@@ -872,7 +874,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_i32le_r64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     uint8	*s=NULL, *d=NULL;	/*src and dst buf pointers	*/
@@ -886,11 +888,12 @@ H5T_conv_i32le_r64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     uintn	exponent;		/*exponent			*/
     intn	i;			/*counter			*/
 
-    FUNC_ENTER (H5T_conv_i32le_r64le, FAIL);
+    FUNC_ENTER (H5T_conv_i32le_f64le, FAIL);
 
     switch (cdata->command) {
     case H5T_CONV_INIT:
 	assert (sizeof(intn)>=4);
+	cdata->need_bkg = H5T_BKG_NO;
 	break;
 
     case H5T_CONV_FREE:

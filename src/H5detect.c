@@ -45,6 +45,7 @@ static const char *FileHeader = "\n\
 
 #ifndef MIN
 #  define MIN(X,Y) ((X)<(Y)?(X):(Y))
+#  define MIN3(X,Y,Z) MIN(X,MIN(Y,Z))
 #endif
 
 /*
@@ -53,13 +54,14 @@ static const char *FileHeader = "\n\
  */
 typedef struct detected_t {
     const char          *varname;
-    int                 size;
-    int                 padding;
+    int                 size;		/*total byte size*/
+    int			precision;	/*meaningful bits*/
+    int			offset;		/*bit offset to meaningful bits*/
     int                 perm[32];
     int                 sign;
     int                 mpos, msize, imp;
     int                 epos, esize;
-    unsigned long	bias;
+    unsigned long       bias;
 } detected_t;
 
 static void print_results(int nd, detected_t *d);
@@ -68,10 +70,65 @@ static void print_known_formats(detected_t *);
 static int byte_cmp(int, void *, void *);
 static int bit_cmp(int, int *, void *, void *);
 static void fix_order(int, int, int, int *, const char **);
-static void fix_padding(detected_t *);
 static int imp_bit(int, int *, void *, void *);
 static unsigned long find_bias(int, int, int, int *, void *);
+static void precision (detected_t*);
 static void print_header(void);
+
+
+/*-------------------------------------------------------------------------
+ * Function:	precision
+ *
+ * Purpose:	Determine the precision and offset.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, June 18, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+precision (detected_t *d)
+{
+    int		n;
+    
+    if (0==d->msize) {
+	/*
+	 * An integer.  The permutation can have negative values at the
+	 * beginning or end which represent padding of bytes.  We must adjust
+	 * the precision and offset accordingly.
+	 */
+	if (d->perm[0] < 0) {
+	    /*
+	     * Lower addresses are padded.
+	     */
+	    for (n=0; n<d->size && d->perm[n]<0; n++) /*void*/;
+	    d->precision = 8*(d->size-n);
+	    d->offset = 0;
+	} else if (d->perm[d->size - 1] < 0) {
+	    /*
+	     * Higher addresses are padded.
+	     */
+	    for (n=0; n<d->size && d->perm[d->size-(n+1)]; n++) /*void*/;
+	    d->precision = 8*(d->size-n);
+	    d->offset = 8*n;
+	} else {
+	    /*
+	     * No padding.
+	     */
+	    d->precision = 8*d->size;
+	    d->offset = 0;
+	}
+    } else {
+	/* A floating point */
+	d->offset = MIN3 (d->mpos, d->epos, d->sign);
+	d->precision = d->msize + d->esize + 1;
+    }
+}
+
 
 /*-------------------------------------------------------------------------
  * For convenience, we place here in a table descriptions of all
@@ -98,31 +155,31 @@ static detected_t       Known[] =
 {
    /* Single-byte quantities */
     {"Byte addressable",
-     1, 0, LE_1, INTEGER},
+     1, 8, 0, LE_1, INTEGER},
 
    /* Little-endian integer */
     {"Little-endian",
-     2, 0, LE_2, INTEGER},
+     2, 16, 0, LE_2, INTEGER},
     {"Little-endian",
-     4, 0, LE_4, INTEGER},
+     4, 32, 0, LE_4, INTEGER},
 
    /* Big-endian integer */
     {"Big-endian",
-     2, 0, BE_2, INTEGER},
+     2, 16, 0, BE_2, INTEGER},
     {"Big-endian",
-     4, 0, BE_4, INTEGER},
+     4, 32, 0, BE_4, INTEGER},
 
    /* Little-endian IEEE floating-point */
     {"Little-endian IEEE",
-     4, 0, LE_4, 31, 0, 23, 1, 23, 8, 127},
+     4, 32, 0, LE_4, 31, 0, 23, 1, 23, 8, 127},
     {"Little-endian IEEE",
-     8, 0, LE_8, 63, 0, 52, 1, 52, 11, 1023},
+     8, 64, 0, LE_8, 63, 0, 52, 1, 52, 11, 1023},
 
    /* Big-endian IEEE floating-point */
     {"Big-endian IEEE",
-     4, 0, BE_4, 31, 0, 23, 1, 23, 8, 127},
+     4, 32, 0, BE_4, 31, 0, 23, 1, 23, 8, 127},
     {"Big-endian IEEE",
-     8, 0, BE_8, 63, 0, 52, 1, 52, 11, 1023},
+     8, 64, 0, BE_8, 63, 0, 52, 1, 52, 11, 1023},
 };
 
 /*-------------------------------------------------------------------------
@@ -167,8 +224,8 @@ static detected_t       Known[] =
       assert (_j<(signed)sizeof(TYPE));                                       \
       INFO.perm[_i] = _j;                                                     \
    }                                                                          \
-   fix_padding (&(INFO));                                                     \
    INFO.sign = ('U'!=*(#VAR));                                                \
+   precision (&(INFO));							      \
 }
 
 /*-------------------------------------------------------------------------
@@ -205,7 +262,6 @@ static detected_t       Known[] =
    memset (&INFO, 0, sizeof(INFO));                                           \
    INFO.varname = #VAR;                                                       \
    INFO.size = sizeof(TYPE);                                                  \
-   INFO.padding = 0;                                                          \
                                                                               \
    /* Byte Order */                                                           \
    for (_i=0,_v1=0.0,_v2=1.0; _i<(signed)sizeof(TYPE); _i++) {                \
@@ -245,6 +301,7 @@ static detected_t       Known[] =
                                                                               \
    _v1 = 1.0;                                                                 \
    INFO.bias = find_bias (INFO.epos, INFO.esize, INFO.imp, INFO.perm, &_v1);  \
+   precision (&(INFO));							      \
 }
 
 /*-------------------------------------------------------------------------
@@ -266,7 +323,7 @@ static void
 print_results(int nd, detected_t *d)
 {
 
-    int                     i;
+    int         i;
 
     /* Include files */
     printf("\
@@ -311,13 +368,15 @@ H5T_init (void)\n\
    dt->type = H5T_%s;\n\
    dt->size = %d;\n\
    dt->u.atomic.order = H5T_ORDER_%s;\n\
+   dt->u.atomic.offset = %d;\n\
    dt->u.atomic.prec = %d;\n\
    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;\n\
    dt->u.atomic.msb_pad = H5T_PAD_ZERO;\n",
-               d[i].msize ? "FLOAT" : "INTEGER",        /*class         */
-               d[i].size + abs(d[i].padding),   /*size          */
-               d[i].perm[0] ? "BE" : "LE",      /*byte order    */
-               8 * d[i].size);  /*precision     */
+               d[i].msize ? "FLOAT" : "INTEGER",/*class 	        */
+               d[i].size,   			/*size          	*/
+               d[i].perm[0] ? "BE" : "LE",      /*byte order    	*/
+	       d[i].offset, 			/*offset		*/
+               d[i].precision);  		/*precision     	*/
 
         if (0 == d[i].msize) {
             /* The part unique to fixed point types */
@@ -352,11 +411,11 @@ H5T_init (void)\n\
                      \"failure\");\n\
    }\n",
                d[i].varname);
-
     }
 
     printf("   FUNC_LEAVE (SUCCEED);\n}\n");
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    iprint
@@ -377,50 +436,45 @@ H5T_init (void)\n\
 static void
 iprint(detected_t *d)
 {
+    int         i, j, k, pass;
 
-    int                     i, j, k;
-
-    /*
-     * Print the byte ordering above the bit fields.
-     */
-    printf("    * ");
-    for (i = d->size - 1; i >= 0; --i) {
-        printf("%4d", d->perm[i]);
-        if (i > 0)
-            fputs("     ", stdout);
-        if (0 == i % 4)
-            putchar(' ');
-    }
-    putchar('\n');
-
-    /*
-     * Print the bit fields
-     */
-    printf("    * ");
-    for (i = d->size - 1, k = d->size * 8 - 1; i >= 0; --i) {
-        for (j = 7; j >= 0; --j) {
-            if (k == d->sign && d->msize) {
-                putchar('S');
-            } else if (k >= d->epos && k < d->epos + d->esize) {
-                putchar('E');
-            } else if (k >= d->mpos && k < d->mpos + d->msize) {
-                putchar('M');
-            } else if (d->msize) {
-                putchar('?');   /*unknown floating point bit */
-            } else if (d->sign) {
-                putchar('I');
-            } else {
-                putchar('U');
-            }
-            --k;
+    for (pass=(d->size-1)/4; pass>=0; --pass) {
+	/*
+	 * Print the byte ordering above the bit fields.
+	 */
+	printf("    * ");
+        for (i=MIN(pass*4+3,d->size-1); i>=pass*4; --i) {
+            printf ("%4d", d->perm[i]);
+            if (i>pass*4) fputs ("     ", stdout);
         }
-        if (i > 0) {
-            putchar(' ');
-            if (0 == i % 4)
-                putchar(' ');
-        }
+
+	/*
+	 * Print the bit fields
+	 */
+	printf("\n    * ");
+        for (i=MIN(pass*4+3,d->size-1),
+             k=MIN(pass*32+31,8*d->size-1);
+             i>=pass*4; --i) {
+            for (j=7; j>=0; --j) {
+		if (k==d->sign && d->msize) {
+		    putchar('S');
+		} else if (k>=d->epos && k<d->epos+d->esize) {
+		    putchar('E');
+		} else if (k>=d->mpos && k<d->mpos+d->msize) {
+		    putchar('M');
+		} else if (d->msize) {
+		    putchar('?');   /*unknown floating point bit */
+		} else if (d->sign) {
+		    putchar('I');
+		} else {
+		    putchar('U');
+		}
+		--k;
+	    }
+	    if (i>pass*4) putchar(' ');
+	}
+	putchar('\n');
     }
-    putchar('\n');
 
     /*
      * Is there an implicit bit in the mantissa.
@@ -429,6 +483,7 @@ iprint(detected_t *d)
         printf("    * Implicit bit? %s\n", d->imp ? "yes" : "no");
     }
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    print_known_formats
@@ -450,36 +505,30 @@ static void
 print_known_formats(detected_t *d)
 {
 
-    int                     i, j, diff;
-    int                     n = sizeof(Known) / sizeof(Known[0]);
+    int         i, j, diff;
+    int         n = sizeof(Known) / sizeof(Known[0]);
 
-    for (i = 0; i < n; i++) {
-        if (d->size != Known[i].size)
-            continue;
+    for (i=0; i<n; i++) {
+        if (d->size != Known[i].size) continue;
+	if (d->precision != Known[i].precision) continue;
+	if (d->offset != Known[i].offset) continue;
         for (j = diff = 0; !diff && j < d->size; j++) {
-            if (d->perm[j] != Known[i].perm[j])
-                diff = 1;
+            if (d->perm[j] != Known[i].perm[j]) diff = 1;
         }
-        if (diff)
-            continue;
+        if (diff) continue;
 
         /* if (d->sign  != Known[i].sign)  continue; */
-        if (d->mpos != Known[i].mpos)
-            continue;
-        if (d->msize != Known[i].msize)
-            continue;
-        if (d->imp != Known[i].imp)
-            continue;
-        if (d->epos != Known[i].epos)
-            continue;
-        if (d->esize != Known[i].esize)
-            continue;
-        if (d->bias != Known[i].bias)
-            continue;
+        if (d->mpos != Known[i].mpos) continue;
+        if (d->msize != Known[i].msize) continue;
+        if (d->imp != Known[i].imp) continue;
+        if (d->epos != Known[i].epos) continue;
+        if (d->esize != Known[i].esize) continue;
+        if (d->bias != Known[i].bias) continue;
 
         printf("    * %s\n", Known[i].varname);
     }
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    byte_cmp
@@ -503,16 +552,14 @@ print_known_formats(detected_t *d)
 static int
 byte_cmp(int n, void *_a, void *_b)
 {
+    register int        i;
+    unsigned char       *a = (unsigned char *) _a;
+    unsigned char       *b = (unsigned char *) _b;
 
-    register int            i;
-    unsigned char          *a = (unsigned char *) _a;
-    unsigned char          *b = (unsigned char *) _b;
-
-    for (i = 0; i < n; i++)
-        if (a[i] != b[i])
-            return i;
+    for (i = 0; i < n; i++) if (a[i] != b[i]) return i;
     return -1;
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    bit_cmp
@@ -537,24 +584,23 @@ byte_cmp(int n, void *_a, void *_b)
 static int
 bit_cmp(int nbytes, int *perm, void *_a, void *_b)
 {
-
-    int                     i, j;
-    unsigned char          *a = (unsigned char *) _a;
-    unsigned char          *b = (unsigned char *) _b;
-    unsigned char           aa, bb;
+    int                 i, j;
+    unsigned char       *a = (unsigned char *) _a;
+    unsigned char       *b = (unsigned char *) _b;
+    unsigned char       aa, bb;
 
     for (i = 0; i < nbytes; i++) {
         assert(perm[i] < nbytes);
         if ((aa = a[perm[i]]) != (bb = b[perm[i]])) {
             for (j = 0; j < 8; j++, aa >>= 1, bb >>= 1) {
-                if ((aa & 1) != (bb & 1))
-                    return i * 8 + j;
+                if ((aa & 1) != (bb & 1)) return i * 8 + j;
             }
             assert("INTERNAL ERROR" && 0);
         }
     }
     return -1;
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    fix_order
@@ -580,8 +626,7 @@ bit_cmp(int nbytes, int *perm, void *_a, void *_b)
 static void
 fix_order(int n, int first, int last, int *perm, const char **mesg)
 {
-
-    int                     i;
+    int         i;
 
     if (first + 1 < last) {
         /*
@@ -591,27 +636,22 @@ fix_order(int n, int first, int last, int *perm, const char **mesg)
             /*
              * Little endian.
              */
-            if (mesg)
-                *mesg = "Little-endian";
-            for (i = 0; i < n; i++)
-                perm[i] = i;
+            if (mesg) *mesg = "Little-endian";
+            for (i = 0; i < n; i++) perm[i] = i;
 
-        } else if (perm[last] > perm[last - 1] && perm[last - 1] > perm[last - 2]) {
+        } else if (perm[last] > perm[last-1] && perm[last-1] > perm[last-2]) {
             /*
              * Big endian.
              */
-            if (mesg)
-                *mesg = "Big-endian";
-            for (i = 0; i < n; i++)
-                perm[i] = (n - 1) - i;
+            if (mesg) *mesg = "Big-endian";
+            for (i = 0; i < n; i++) perm[i] = (n - 1) - i;
 
         } else {
             /*
              * Bi-endian machines like VAX.
              */
             assert(0 == n / 2);
-            if (mesg)
-                *mesg = "VAX";
+            if (mesg) *mesg = "VAX";
             for (i = 0; i < n; i += 2) {
                 perm[i] = (n - 2) - i;
                 perm[i + 1] = (n - 1) - i;
@@ -623,67 +663,7 @@ fix_order(int n, int first, int last, int *perm, const char **mesg)
         exit(1);
     }
 }
-
-/*-------------------------------------------------------------------------
- * Function:    fix_padding
- *
- * Purpose:     The permutation can have negative values at the beginning
- *              or end which represent zero padding.  The amount of padding
- *              is subtracted from the size, the negative values are removed
- *              from the permutation, and the `padding' field is set to an
- *              appropriate value.
- *
- *              If N bytes of padding appear to the left (lower address) of
- *              the value, then `padding=N'.  If N bytes of padding appear
- *              to the right of the value then `padding=(-N)'.
- *
- * Return:      void
- *
- * Programmer:  Robb Matzke
- *              matzke@llnl.gov
- *              Nov  4 1996
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void
-fix_padding(detected_t *d)
-{
 
-    int                     i, n;
-
-    if (d->perm[0] < 0) {
-        /*
-         * Left padding.
-         */
-        for (n = 0; n < d->size && d->perm[n] < 0; n++)         /*void */
-            ;
-        for (i = n; i < d->size; i++)
-            d->perm[i - n] = d->perm[i];
-        for (i = d->size - n; i < d->size; i++)
-            d->perm[i] = 0;
-        d->padding = n;
-        d->size -= n;
-
-    } else if (d->perm[d->size - 1] < 0) {
-        /*
-         * Right padding.
-         */
-        for (n = 0; n < d->size && d->perm[d->size - (n + 1)]; n++)     /*void */
-            ;
-        for (i = d->size - n; i < d->size; i++)
-            d->perm[i] = 0;
-        d->padding = -n;
-        d->size -= n;
-
-    } else {
-        /*
-         * No padding.
-         */
-        d->padding = 0;
-    }
-}
 
 /*-------------------------------------------------------------------------
  * Function:    imp_bit
@@ -724,11 +704,10 @@ fix_padding(detected_t *d)
 static int
 imp_bit(int n, int *perm, void *_a, void *_b)
 {
-
-    unsigned char          *a = (unsigned char *) _a;
-    unsigned char          *b = (unsigned char *) _b;
-    int                     changed, major, minor;
-    int                     msmb;       /*most significant mantissa bit */
+    unsigned char       *a = (unsigned char *) _a;
+    unsigned char       *b = (unsigned char *) _b;
+    int                 changed, major, minor;
+    int                 msmb;   /*most significant mantissa bit */
 
     /*
      * Look for the least significant bit that has changed between
@@ -748,6 +727,7 @@ imp_bit(int n, int *perm, void *_a, void *_b)
 
     return (a[perm[major]] >> minor) & 0x01 ? 0 : 1;
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    find_bias
@@ -774,10 +754,9 @@ imp_bit(int n, int *perm, void *_a, void *_b)
 static unsigned long
 find_bias(int epos, int esize, int imp, int *perm, void *_a)
 {
-
-    unsigned char          *a = (unsigned char *) _a;
-    unsigned char           mask;
-    unsigned long           b, shift = 0, nbits, bias = 0;
+    unsigned char       *a = (unsigned char *) _a;
+    unsigned char       mask;
+    unsigned long       b, shift = 0, nbits, bias = 0;
 
     while (esize > 0) {
         nbits = MIN(esize, (8 - epos % 8));
@@ -792,6 +771,7 @@ find_bias(int epos, int esize, int imp, int *perm, void *_a)
 
     return bias - (imp ? 0 : 1);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    print_header
@@ -866,20 +846,20 @@ bit.\n";
      */
 #ifdef HAVE_GETPWUID
     {
-	size_t n;
-	char *comma;
-	if ((pwd = getpwuid(getuid()))) {
-	    if ((comma = strchr(pwd->pw_gecos, ','))) {
-		n = MIN(sizeof(real_name)-1, (unsigned)(comma-pwd->pw_gecos));
-		strncpy(real_name, pwd->pw_gecos, n);
-		real_name[n] = '\0';
-	    } else {
-		strncpy(real_name, pwd->pw_gecos, sizeof(real_name));
-		real_name[sizeof(real_name) - 1] = '\0';
-	    }
-	} else {
-	    real_name[0] = '\0';
-	}
+        size_t n;
+        char *comma;
+        if ((pwd = getpwuid(getuid()))) {
+            if ((comma = strchr(pwd->pw_gecos, ','))) {
+                n = MIN(sizeof(real_name)-1, (unsigned)(comma-pwd->pw_gecos));
+                strncpy(real_name, pwd->pw_gecos, n);
+                real_name[n] = '\0';
+            } else {
+                strncpy(real_name, pwd->pw_gecos, sizeof(real_name));
+                real_name[sizeof(real_name) - 1] = '\0';
+            }
+        } else {
+            real_name[0] = '\0';
+        }
     }
 #else
     real_name[0] = '\0';
@@ -907,21 +887,16 @@ bit.\n";
            month_name[tm->tm_mon], tm->tm_mday, 1900 + tm->tm_year);
     if (pwd || real_name[0] || host_name[0]) {
         printf(" *\t\t\t");
-        if (real_name[0])
-            printf("%s <", real_name);
-        if (pwd)
-            fputs(pwd->pw_name, stdout);
-        if (host_name[0])
-            printf("@%s", host_name);
-        if (real_name[0])
-            printf(">");
+        if (real_name[0]) printf("%s <", real_name);
+        if (pwd) fputs(pwd->pw_name, stdout);
+        if (host_name[0]) printf("@%s", host_name);
+        if (real_name[0]) printf(">");
         putchar('\n');
     }
     printf(" *\n * Purpose:\t\t");
     for (s = purpose; *s; s++) {
         putchar(*s);
-        if ('\n' == *s && s[1])
-            printf(" *\t\t\t");
+        if ('\n' == *s && s[1]) printf(" *\t\t\t");
     }
 
     printf(" *\n * Modifications:\n *\n");
@@ -929,11 +904,11 @@ bit.\n";
     printf(" *\tIt was generated by code in `H5detect.c'.\n");
 
     printf(" *\n *");
-    for (i = 0; i < 73; i++)
-        putchar('-');
+    for (i = 0; i < 73; i++) putchar('-');
     printf("\n */\n\n");
 
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -955,36 +930,25 @@ bit.\n";
 int
 main(void)
 {
-    detected_t              d[MAXDETECT];
-    int                     nd = 0;
+    detected_t          d[MAXDETECT];
+    int                 nd = 0;
 
     print_header();
 
-    DETECT_I(signed char, CHAR, d[nd]);
-    nd++;
-    DETECT_I(unsigned char, UCHAR, d[nd]);
-    nd++;
-    DETECT_I(short, SHORT, d[nd]);
-    nd++;
-    DETECT_I(unsigned short, USHORT, d[nd]);
-    nd++;
-    DETECT_I(int, INT, d[nd]);
-    nd++;
-    DETECT_I(unsigned int, UINT, d[nd]);
-    nd++;
-    DETECT_I(long, LONG, d[nd]);
-    nd++;
-    DETECT_I(unsigned long, ULONG, d[nd]);
-    nd++;
-    DETECT_I(long long, LLONG, d[nd]);
-    nd++;
-    DETECT_I(unsigned long long, ULLONG, d[nd]);
-    nd++;
-    DETECT_F(float, FLOAT, d[nd]);
-    nd++;
-    DETECT_F(double, DOUBLE, d[nd]);
-    nd++;
+    DETECT_I (signed char,        CHAR,    d[nd]); nd++;
+    DETECT_I (unsigned char,      UCHAR,   d[nd]); nd++;
+    DETECT_I (short,              SHORT,   d[nd]); nd++;
+    DETECT_I (unsigned short,     USHORT,  d[nd]); nd++;
+    DETECT_I (int,                INT,     d[nd]); nd++;
+    DETECT_I (unsigned int,       UINT,    d[nd]); nd++;
+    DETECT_I (long,               LONG,    d[nd]); nd++;
+    DETECT_I (unsigned long,      ULONG,   d[nd]); nd++;
+    DETECT_I (long long,          LLONG,   d[nd]); nd++;
+    DETECT_I (unsigned long long, ULLONG,  d[nd]); nd++;
+    DETECT_F (float,              FLOAT,   d[nd]); nd++;
+    DETECT_F (double,             DOUBLE,  d[nd]); nd++;
+    DETECT_F (long double,        LDOUBLE, d[nd]); nd++;
 
-    print_results(nd, d);
+    print_results (nd, d);
     return 0;
 }

@@ -127,7 +127,7 @@ herr_t H5T_conv_struct (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			size_t nelmts, void *_buf, void *bkg);
 herr_t H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *_buf, void __unused__ *bkg);
-herr_t H5T_conv_i32le_r64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+herr_t H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			     size_t nelmts, void *_buf, void __unused__ *bkg);
 
 /* Bit twiddling functions */

@@ -51,7 +51,7 @@ static char		RcsId[] = "$Revision$";
 /* Scalar dataset with simple datatype */
 #define SPACE3_NAME  "Scalar1"
 #define SPACE3_RANK	0
-uint32 space3_data=65;
+unsigned space3_data=65;
 
 /* Scalar dataset with compound datatype */
 #define SPACE4_NAME  "Scalar2"
@@ -66,7 +66,7 @@ size_t space4_field3_off=0;
 size_t space4_field4_off=0;
 struct space4_struct {
     char c1;
-    uint32 u;
+    unsigned u;
     float f;
     char c2;
  } space4_data={'v',987123,-3.14,'g'}; /* Test data for 4th dataspace */
@@ -81,7 +81,7 @@ test_h5s_basic(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		sid1, sid2;	/* Dataspace ID			*/
-    uint32		rank;		/* Logical rank of dataspace	*/
+    unsigned		rank;		/* Logical rank of dataspace	*/
     hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2, SPACE2_DIM3,
 				   SPACE2_DIM4};
@@ -107,24 +107,27 @@ test_h5s_basic(void)
     CHECK(rank, UFAIL, "H5Sget_lrank");
     VERIFY(rank, SPACE1_RANK, "H5Sget_lrank");
 
-    ret = H5Sget_dims(sid1, tdims);
+    ret = H5Sget_dims(sid1, tdims, NULL);
     CHECK(ret, FAIL, "H5Sget_ldims");
-    VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(uint32)), 0, "H5Sget_ldims");
+    VERIFY(HDmemcmp(tdims, dims1, SPACE1_RANK * sizeof(unsigned)), 0,
+	   "H5Sget_ldims");
 
     sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
     CHECK(sid2, FAIL, "H5Screate_simple");
 
     n = H5Sget_npoints(sid2);
     CHECK(n, UFAIL, "H5Snelem");
-    VERIFY(n, SPACE2_DIM1 * SPACE2_DIM2 * SPACE2_DIM3 * SPACE2_DIM4, "H5Snelem");
+    VERIFY(n, SPACE2_DIM1 * SPACE2_DIM2 * SPACE2_DIM3 * SPACE2_DIM4,
+	   "H5Snelem");
 
     rank = H5Sget_ndims(sid2);
     CHECK(rank, UFAIL, "H5Sget_lrank");
     VERIFY(rank, SPACE2_RANK, "H5Sget_lrank");
 
-    ret = H5Sget_dims(sid2, tdims);
+    ret = H5Sget_dims(sid2, tdims, NULL);
     CHECK(ret, FAIL, "H5Sget_ldims");
-    VERIFY(HDmemcmp(tdims, dims2, SPACE2_RANK * sizeof(uint32)), 0, "H5Sget_ldims");
+    VERIFY(HDmemcmp(tdims, dims2, SPACE2_RANK * sizeof(unsigned)), 0,
+	   "H5Sget_ldims");
 
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
@@ -148,7 +151,7 @@ test_h5s_scalar_write(void)
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		sid1;	    /* Dataspace ID			*/
-    uint32		rank;		/* Logical rank of dataspace	*/
+    unsigned		rank;		/* Logical rank of dataspace	*/
     hsize_t		tdims[4];	/* Dimension array to test with */
     size_t		n;	 	/* Number of dataspace elements */
     herr_t		ret;		/* Generic return value		*/
@@ -172,14 +175,14 @@ test_h5s_scalar_write(void)
     CHECK(rank, UFAIL, "H5Sget_lrank");
     VERIFY(rank, SPACE3_RANK, "H5Sget_lrank");
 
-    ret = H5Sget_dims(sid1, tdims);
+    ret = H5Sget_dims(sid1, tdims, NULL);
     VERIFY(ret, 0, "H5Sget_dims");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UINT32,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UINT,sid1,H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
-    ret = H5Dwrite(dataset, H5T_NATIVE_UINT32, H5S_ALL, H5S_ALL, H5P_DEFAULT, &space3_data);
+    ret = H5Dwrite(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &space3_data);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close Dataset */
@@ -205,11 +208,11 @@ test_h5s_scalar_read(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1;	    /* Dataspace ID			*/
-    uint32		rank;		/* Logical rank of dataspace	*/
+    hid_t		sid1;	    	/* Dataspace ID			*/
+    unsigned		rank;		/* Logical rank of dataspace	*/
     hsize_t		tdims[4];	/* Dimension array to test with */
     size_t		n;	 	/* Number of dataspace elements */
-    uint32      rdata;      /* Scalar data read in */
+    unsigned      	rdata;      	/* Scalar data read in 		*/
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -234,10 +237,10 @@ test_h5s_scalar_read(void)
     CHECK(rank, UFAIL, "H5Sget_lrank");
     VERIFY(rank, SPACE3_RANK, "H5Sget_lrank");
 
-    ret = H5Sget_dims(sid1, tdims);
+    ret = H5Sget_dims(sid1, tdims, NULL);
     VERIFY(ret, 0, "H5Sget_dims");
 
-    ret = H5Dread(dataset, H5T_NATIVE_UINT32, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
+    ret = H5Dread(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
     VERIFY(rdata, space3_data, "H5Dread");
     
@@ -265,9 +268,9 @@ test_h5s_compound_scalar_write(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
-    hid_t       tid1;       /* Attribute datatype ID */
-    hid_t		sid1;	    /* Dataspace ID			*/
-    uint32		rank;		/* Logical rank of dataspace	*/
+    hid_t       	tid1;       	/* Attribute datatype ID	*/
+    hid_t		sid1;	    	/* Dataspace ID			*/
+    unsigned		rank;		/* Logical rank of dataspace	*/
     hsize_t		tdims[4];	/* Dimension array to test with */
     size_t		n;	 	/* Number of dataspace elements */
     herr_t		ret;		/* Generic return value		*/
@@ -283,16 +286,20 @@ test_h5s_compound_scalar_write(void)
     tid1 = H5Tcreate (H5T_COMPOUND, sizeof(struct space4_struct));
     CHECK(tid1, FAIL, "H5Tcreate");
     space4_field1_off=HOFFSET(struct space4_struct, c1);
-    ret = H5Tinsert(tid1, SPACE4_FIELDNAME1, space4_field1_off, H5T_NATIVE_CHAR);
+    ret = H5Tinsert(tid1, SPACE4_FIELDNAME1, space4_field1_off,
+		    H5T_NATIVE_CHAR);
     CHECK(ret, FAIL, "H5Tinsert");
     space4_field2_off=HOFFSET(struct space4_struct, u);
-    ret = H5Tinsert(tid1, SPACE4_FIELDNAME2, space4_field2_off, H5T_NATIVE_UINT32);
+    ret = H5Tinsert(tid1, SPACE4_FIELDNAME2, space4_field2_off,
+		    H5T_NATIVE_UINT);
     CHECK(ret, FAIL, "H5Tinsert");
     space4_field3_off=HOFFSET(struct space4_struct, f);
-    ret = H5Tinsert(tid1, SPACE4_FIELDNAME3, space4_field3_off, H5T_NATIVE_FLOAT);
+    ret = H5Tinsert(tid1, SPACE4_FIELDNAME3, space4_field3_off,
+		    H5T_NATIVE_FLOAT);
     CHECK(ret, FAIL, "H5Tinsert");
     space4_field4_off=HOFFSET(struct space4_struct, c2);
-    ret = H5Tinsert(tid1, SPACE4_FIELDNAME4, space4_field4_off, H5T_NATIVE_CHAR);
+    ret = H5Tinsert(tid1, SPACE4_FIELDNAME4, space4_field4_off,
+		    H5T_NATIVE_CHAR);
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Create scalar dataspace */
@@ -307,7 +314,7 @@ test_h5s_compound_scalar_write(void)
     CHECK(rank, UFAIL, "H5Sget_lrank");
     VERIFY(rank, SPACE3_RANK, "H5Sget_lrank");
 
-    ret = H5Sget_dims(sid1, tdims);
+    ret = H5Sget_dims(sid1, tdims, NULL);
     VERIFY(ret, 0, "H5Sget_dims");
 
     /* Create a dataset */
@@ -341,12 +348,12 @@ test_h5s_compound_scalar_read(void)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1;	    /* Dataspace ID			*/
-    hid_t       type;       /* Datatype             */
-    uint32		rank;		/* Logical rank of dataspace	*/
+    hid_t		sid1;	    	/* Dataspace ID			*/
+    hid_t       	type;       	/* Datatype             	*/
+    unsigned		rank;		/* Logical rank of dataspace	*/
     hsize_t		tdims[4];	/* Dimension array to test with */
     size_t		n;	 	/* Number of dataspace elements */
-    struct space4_struct rdata; /* Scalar data read in */
+    struct space4_struct rdata; 	/* Scalar data read in 		*/
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -371,7 +378,7 @@ test_h5s_compound_scalar_read(void)
     CHECK(rank, UFAIL, "H5Sget_lrank");
     VERIFY(rank, SPACE3_RANK, "H5Sget_lrank");
 
-    ret = H5Sget_dims(sid1, tdims);
+    ret = H5Sget_dims(sid1, tdims, NULL);
     VERIFY(ret, 0, "H5Sget_dims");
 
     type=H5Dget_type(dataset);

@@ -291,7 +291,7 @@ test_tconv(hid_t file)
     char	*out=NULL, *in=NULL;
     int		i;
     hsize_t	dims[1];
-    hid_t	space, dataset, type;
+    hid_t	space, dataset;
     herr_t	status;
 
     out = malloc (4*1000000);
@@ -316,31 +316,18 @@ test_tconv(hid_t file)
     assert(space >= 0);
 
     /* Create the data set */
-    dataset = H5Dcreate(file, DSET_TCONV_NAME, H5T_NATIVE_INT32, space,
+    dataset = H5Dcreate(file, DSET_TCONV_NAME, H5T_STD_I32LE, space,
 			H5P_DEFAULT);
     assert(dataset >= 0);
 
     /* Write the data to the dataset */
-    status = H5Dwrite(dataset, H5T_NATIVE_INT32, H5S_ALL, H5S_ALL,
+    status = H5Dwrite(dataset, H5T_STD_I32LE, H5S_ALL, H5S_ALL,
 		      H5P_DEFAULT, out);
     assert(status >= 0);
 
-    /* Create a new type with the opposite byte order */
-    type = H5Tcopy(H5T_NATIVE_INT32);
-    switch (H5Tget_order(type)) {
-    case H5T_ORDER_BE:
-	H5Tset_order(type, H5T_ORDER_LE);
-	break;
-    case H5T_ORDER_LE:
-	H5Tset_order(type, H5T_ORDER_BE);
-	break;
-    default:
-	assert("funny byte order" && 0);
-	break;
-    }
-
     /* Read data with byte order conversion */
-    status = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, in);
+    status = H5Dread(dataset, H5T_STD_I32BE, H5S_ALL, H5S_ALL,
+		     H5P_DEFAULT, in);
     assert(status >= 0);
 
     /* Check */
@@ -352,7 +339,6 @@ test_tconv(hid_t file)
     }
 
     H5Dclose(dataset);
-    H5Tclose(type);
     free (out);
     free (in);
 
@@ -716,7 +702,7 @@ test_multiopen (hid_t file)
 
     /* Get the size from the second handle */
     if ((space = H5Dget_space (dset2))<0) goto error;
-    if (H5Sget_dims (space, tmp_size)<0) goto error;
+    if (H5Sget_dims (space, tmp_size, NULL)<0) goto error;
     if (cur_size[0]!=tmp_size[0]) {
 	puts ("*FAILED*");
 	printf ("   Got %d instead of %d!\n",

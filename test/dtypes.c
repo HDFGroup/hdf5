@@ -534,7 +534,7 @@ test_conv_num (void)
     /* (unsigned)0x80000000 -> (unsigned)0xffff */
     byte[0] = byte[1] = byte[2] = 0;
     byte[3] = 0x80;
-    if (H5Tconvert (H5T_NATIVE_UINT32, H5T_NATIVE_UINT16, 1, byte, NULL)<0) {
+    if (H5Tconvert (H5T_STD_U32LE, H5T_STD_U16LE, 1, byte, NULL)<0) {
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0xff) {
@@ -545,7 +545,7 @@ test_conv_num (void)
 
     /* (unsigned)0xffffffff -> (signed)0x7fff */
     byte[0] = byte[1] = byte[2] = byte[3] = 0xff;
-    if (H5Tconvert (H5T_NATIVE_UINT32, H5T_NATIVE_INT16, 1, byte, NULL)<0) {
+    if (H5Tconvert (H5T_STD_U32LE, H5T_STD_I16LE, 1, byte, NULL)<0) {
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0x7f) {
@@ -556,7 +556,7 @@ test_conv_num (void)
 
     /* (signed)0xffffffff -> (unsigned)0x0000 */
     byte[0] = byte[1] = byte[2] = byte[3] = 0xff;
-    if (H5Tconvert (H5T_NATIVE_INT32, H5T_NATIVE_UINT16, 1, byte, NULL)<0) {
+    if (H5Tconvert (H5T_STD_I32LE, H5T_STD_U16LE, 1, byte, NULL)<0) {
 	goto error;
     }
     if (byte[0]!=0x00 || byte[1]!=0x00) {
@@ -568,7 +568,7 @@ test_conv_num (void)
     /* (signed)0x7fffffff -> (unsigned)0xffff */
     byte[0] = byte[1] = byte[2] = 0xff;
     byte[3] = 0x7f;
-    if (H5Tconvert (H5T_NATIVE_INT32, H5T_NATIVE_UINT16, 1, byte, NULL)<0) {
+    if (H5Tconvert (H5T_STD_I32LE, H5T_STD_U16LE, 1, byte, NULL)<0) {
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0xff) {
@@ -580,7 +580,7 @@ test_conv_num (void)
     /* (signed)0x7fffffff -> (signed)0x7fff */
     byte[0] = byte[1] = byte[2] = 0xff;
     byte[3] = 0x7f;
-    if (H5Tconvert (H5T_NATIVE_INT32, H5T_NATIVE_INT16, 1, byte, NULL)<0) {
+    if (H5Tconvert (H5T_STD_I32LE, H5T_STD_I16LE, 1, byte, NULL)<0) {
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0x7f) {
@@ -592,7 +592,7 @@ test_conv_num (void)
     /* (signed)0xbfffffff -> (signed)0x8000 */
     byte[0] = byte[1] = byte[2] = 0xff;
     byte[3] = 0xbf;
-    if (H5Tconvert (H5T_NATIVE_INT32, H5T_NATIVE_INT16, 1, byte, NULL)<0) {
+    if (H5Tconvert (H5T_STD_I32LE, H5T_STD_I16LE, 1, byte, NULL)<0) {
 	goto error;
     }
     if (byte[0]!=0x00 || byte[1]!=0x80) {
@@ -622,9 +622,9 @@ test_conv_num (void)
 	memcpy (saved, buf, nelmts*sizeof(int));
 
 	/* Convert there and back */
-	if (H5Tconvert (H5T_NATIVE_INT, H5T_IEEE_S64LE, nelmts, buf,
+	if (H5Tconvert (H5T_NATIVE_INT, H5T_STD_I64LE, nelmts, buf,
 			NULL)<0) goto error;
-	if (H5Tconvert (H5T_IEEE_S64LE, H5T_NATIVE_INT, nelmts, buf,
+	if (H5Tconvert (H5T_STD_I64LE, H5T_NATIVE_INT, nelmts, buf,
 			NULL)<0) goto error;
 
 	/* Check results */

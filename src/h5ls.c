@@ -55,7 +55,7 @@ list_attr (hid_t obj, const char *attr_name, void __unused__ *op_data)
     if ((attr = H5Aopen_name (obj, attr_name))) {
 	hid_t space = H5Aget_space (attr);
 	hsize_t size[64];
-	int ndims = H5Sget_dims (space, size);
+	int ndims = H5Sget_dims (space, size, NULL);
 	H5Sclose (space);
 	printf (" {");
 	for (i=0; i<ndims; i++) {
@@ -113,7 +113,7 @@ list (hid_t group, const char *name, void __unused__ *op_data)
     if ((obj=H5Dopen (group, name))>=0) {
 	hsize_t size[64];
 	hid_t space = H5Dget_space (obj);
-	int ndims = H5Sget_dims (space, size);
+	int ndims = H5Sget_dims (space, size, NULL);
 	printf ("Dataset {");
 	for (i=0; i<ndims; i++) {
 	    HDfprintf (stdout, "%s%Hu", i?", ":"", size[i]);

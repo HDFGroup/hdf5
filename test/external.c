@@ -157,7 +157,7 @@ test_1 (void)
 	assert (space>=0);
 
 	/* Create the dataset, the `dset1' name is used later too */
-	dset = H5Dcreate (file, "dset1", H5T_NATIVE_INT32, space, plist);
+	dset = H5Dcreate (file, "dset1", H5T_NATIVE_INT, space, plist);
 	if (dset<0) break;
 	H5Dclose (dset);
 	puts (" PASSED");
@@ -182,7 +182,7 @@ test_1 (void)
 
 	H5Eget_auto (&func, &client_data);
 	H5Eset_auto (NULL, NULL);
-	dset = H5Dcreate (file, "dset2", H5T_NATIVE_INT32, space, plist);
+	dset = H5Dcreate (file, "dset2", H5T_NATIVE_INT, space, plist);
 	H5Eset_auto (func, client_data);
 	
 	if (dset>=0) {
@@ -214,7 +214,7 @@ test_1 (void)
 	space = H5Screate_simple (1, size, max_size);
 	assert (space>=0);
 
-	dset = H5Dcreate (file, "dset3", H5T_NATIVE_INT32, space, plist);
+	dset = H5Dcreate (file, "dset3", H5T_NATIVE_INT, space, plist);
 	if (dset<0) break;
 	H5Dclose (dset);
 	puts (" PASSED");
@@ -243,7 +243,7 @@ test_1 (void)
 
 	H5Eget_auto (&func, &client_data);
 	H5Eset_auto (NULL, NULL);
-	dset = H5Dcreate (file, "dset4", H5T_NATIVE_INT32, space, plist);
+	dset = H5Dcreate (file, "dset4", H5T_NATIVE_INT, space, plist);
 	H5Eset_auto (func, client_data);
 	
 	if (dset>=0) {
@@ -275,7 +275,7 @@ test_1 (void)
 	assert (space>=0);
 
 	/* Create the dataset, the `dset5' name is used later too */
-	dset = H5Dcreate (file, "dset5", H5T_NATIVE_INT32, space, plist);
+	dset = H5Dcreate (file, "dset5", H5T_NATIVE_INT, space, plist);
 	if (dset<0) break;
 	H5Dclose (dset);
 	puts (" PASSED");
@@ -399,7 +399,7 @@ test_1 (void)
 	space = H5Screate_simple (1, size, max_size);
 	assert (space>=0);
 
-	dset = H5Dcreate (file, "dset6", H5T_NATIVE_INT32, space, plist);
+	dset = H5Dcreate (file, "dset6", H5T_NATIVE_INT, space, plist);
 	if (dset<0) break;
 	H5Dclose (dset);
 	puts (" PASSED");
