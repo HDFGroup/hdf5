@@ -1508,8 +1508,10 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     else
         p_nelmts = 1;
  
-    if (p_nelmts == 0)
+    if (p_nelmts == 0) {
+        H5Sclose(f_space);
         return 0; /*nothing to print*/
+    }
 
     ctx.size_last_dim = total_size[ctx.ndims - 1];
 
@@ -1560,8 +1562,12 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
         }
 
         /* Read the data */
-        if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) < 0)
+        if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) < 0) {
+            H5Sclose(f_space);
+            H5Sclose(sm_space);
+            free(sm_buf);
             return -1;
+        }
 
         /* Print the data */
         flags = (elmtno == 0) ? START_OF_DATA : 0;
@@ -2461,7 +2467,7 @@ h5dump_fopen(const char *fname, char *drivername, size_t drivername_size)
         hid_t		fapl;
     } driver[16];
     static int          ndrivers = 0;
-    hid_t               fid, fapl = H5P_DEFAULT;
+    hid_t               fid=(-1), fapl = H5P_DEFAULT;
     int                 drivernum;
 
     if (!ndrivers) {
