@@ -2413,7 +2413,7 @@ test_derived_flt(void)
 
     /*------------------------------------------------------------------------
      *                   1st floating-point type
-     * size=7 byte, precision=40 bits, offset=3 bits, mantissa size=31 bits, 
+     * size=7 byte, precision=42 bits, offset=3 bits, mantissa size=31 bits, 
      * mantissa position=3, exponent size=10 bits, exponent position=34, 
      * exponent bias=511.  It can be illustrated in little-endian order as 
      *
@@ -2510,9 +2510,9 @@ test_derived_flt(void)
 
     /*--------------------------------------------------------------------------
      *                   2nd floating-point type
-     * size=3 byte, precision=12 bits, offset=5 bits, mantissa size=8 bits, 
-     * mantissa position=5, exponent size=3 bits, exponent position=13, exponent 
-     * bias=3. It can be illustrated in little-endian order as
+     * size=3 byte, precision=24 bits, offset=0 bits, mantissa size=16 bits, 
+     * mantissa position=0, exponent size=7 bits, exponent position=16, exponent 
+     * bias=63. It can be illustrated in little-endian order as
      * 
      *          2       1       0
      *    SEEEEEEE MMMMMMMM MMMMMMMM
