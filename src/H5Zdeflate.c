@@ -12,6 +12,9 @@
 
 #ifdef HAVE_ZLIB_H
 #   include <zlib.h>
+#else
+/* Make sure compression is disabled too. */
+#undef HAVE_COMPRESS2
 #endif
 
 /* Interface initialization */
