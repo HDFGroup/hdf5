@@ -5196,6 +5196,7 @@ H5S_hyper_make_spans (unsigned rank, const hssize_t *start, const hsize_t *strid
     H5S_hyper_span_t *span;     /* New hyperslab span */
     H5S_hyper_span_t *last_span;/* Current position in hyperslab span list */
     H5S_hyper_span_t *head;     /* Head of new hyperslab span list */
+    hsize_t stride_iter;        /* Iterator over the stride values */
     int i;                     /* Counters */
     unsigned u;                    /* Counters */
     H5S_hyper_span_info_t *ret_value;
@@ -5217,13 +5218,13 @@ H5S_hyper_make_spans (unsigned rank, const hssize_t *start, const hsize_t *strid
         head=last_span=NULL;
 
         /* Generate all the spans segments for this dimension */
-        for(u=0; u<count[i]; u++) {
+        for(u=0, stride_iter=0; u<count[i]; u++,stride_iter+=stride[i]) {
             /* Allocate a span node */
             if((span = H5FL_MALLOC(H5S_hyper_span_t))==NULL)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab span");
 
             /* Set the span's basic information */
-            span->low=start[i]+(stride[i]*u);
+            span->low=start[i]+stride_iter;
             span->high=span->low+(block[i]-1);
             span->nelem=block[i];
             span->pstride=stride[i];
@@ -7297,7 +7298,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
     size_t elmt_size, size_t maxseq, size_t maxbytes, size_t *nseq, size_t *nbytes,
     hsize_t *off, size_t *len)
 {
-    hsize_t mem_size[H5O_LAYOUT_NDIMS]; /* Size of the source buffer */
+    hsize_t *mem_size;                  /* Size of the source buffer */
     hsize_t slab[H5O_LAYOUT_NDIMS];     /* Hyperslab size */
     hssize_t *sel_off;                  /* Selection offset in dataspace */
     hssize_t offset[H5O_LAYOUT_NDIMS];  /* Coordinate offset in dataspace */
@@ -7354,8 +7355,8 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
         /* Set the local copy of the selection offset */
         sel_off=iter->u.hyp.sel_off;
 
-        /* Set up the size of the memory space */
-        HDmemcpy(mem_size, iter->u.hyp.size, ndims*sizeof(hsize_t));
+        /* Set up the pointer to the size of the memory space */
+        mem_size=iter->u.hyp.size;
     } /* end if */
     else {
         /* Set the aliases for a few important dimension ranks */
@@ -7365,10 +7366,9 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
         /* Set the local copy of the selection offset */
         sel_off=space->select.offset;
 
-        /* Set up the size of the memory space */
-        HDmemcpy(mem_size, space->extent.u.simple.size, ndims*sizeof(hsize_t));
+        /* Set up the pointer to the size of the memory space */
+        mem_size=space->extent.u.simple.size;
     } /* end else */
-    mem_size[ndims]=elmt_size;
 
     /* initialize row sizes for each dimension */
     for(i=(ndims-1),acc=elmt_size; i>=0; i--) {
