@@ -27,7 +27,7 @@ ac_help="$ac_help
                           without the leading H5 or the word no.  The default
                           is most packages."
 ac_help="$ac_help
---enable-tracing          Cause the library to trace all API calls"
+--disable-trace           Disable API tracing capability"
 ac_help="$ac_help
 --enable-parallel=mpio    Enable parallel support with MPIO"
 
@@ -605,9 +605,9 @@ fi
 
 
 
-echo $ac_n "checking for site config file""... $ac_c" 1>&6
-echo "configure:610: checking for site config file" >&5
-site_config="none"
+echo $ac_n "checking for host config file""... $ac_c" 1>&6
+echo "configure:610: checking for host config file" >&5
+host_config="none"
 for f in $host \
          $host_vendor-$host_os \
          $host_cpu-$host_os \
@@ -616,13 +616,13 @@ for f in $host \
 	 $host_vendor \
 	 $host_cpu ; do
    if test -f config/$f; then
-      site_config=config/$f
+      host_config=config/$f
       break
    fi
 done
-echo "$ac_t""$site_config" 1>&6
-if test $site_config != "none"; then
-   . $site_config
+echo "$ac_t""$host_config" 1>&6
+if test $host_config != "none"; then
+   . $host_config
 fi
 
 
@@ -2245,16 +2245,20 @@ fi
 
 echo $ac_n "checking for API tracing""... $ac_c" 1>&6
 echo "configure:2248: checking for API tracing" >&5;
-# Check whether --enable-tracing or --disable-tracing was given.
-if test "${enable_tracing+set}" = set; then
-  enableval="$enable_tracing"
-  CPPFLAGS="$CPPFLAGS -DH5_DEBUG_API"
-  echo "$ac_t""yes" 1>&6
-else
-  CPPFLAGS="$CPPFLAGS -UH5_DEBUG_API"
-  echo "$ac_t""no" 1>&6
+# Check whether --enable-trace or --disable-trace was given.
+if test "${enable_trace+set}" = set; then
+  enableval="$enable_trace"
+  TRACE=$enableval
 fi
 
+
+if test X = "X$TRACE" -o Xyes = "X$TRACE"; then
+   echo "$ac_t""yes" 1>&6
+   CPPFLAGS="$CPPFLAGS -DH5_DEBUG_API"
+else
+   echo "$ac_t""no" 1>&6
+   CPPFLAGS="$CPPFLAGS -UH5_DEBUG_API"
+fi
 
 # Check whether --enable-parallel or --disable-parallel was given.
 if test "${enable_parallel+set}" = set; then
@@ -2263,7 +2267,7 @@ if test "${enable_parallel+set}" = set; then
 fi
 
 echo $ac_n "checking for parallel support""... $ac_c" 1>&6
-echo "configure:2267: checking for parallel support" >&5;
+echo "configure:2271: checking for parallel support" >&5;
 
 
 case "X-$PARALLEL" in
@@ -2288,7 +2292,7 @@ EOF
       CFLAGS="$CFLAGS $MPI_LIB"
       RUNTEST="$RUNTEST"
       echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:2292: checking for main in -lmpi" >&5
+echo "configure:2296: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -2296,14 +2300,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpi  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 2300 "configure"
+#line 2304 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:2307: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:2311: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -2330,7 +2334,7 @@ else
   echo "$ac_t""no" 1>&6
 fi
         echo $ac_n "checking for main in -lmpio""... $ac_c" 1>&6
-echo "configure:2334: checking for main in -lmpio" >&5
+echo "configure:2338: checking for main in -lmpio" >&5
 ac_lib_var=`echo mpio'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -2338,14 +2342,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpio  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 2342 "configure"
+#line 2346 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:2349: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:2353: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else

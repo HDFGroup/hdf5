@@ -1,8 +1,8 @@
 This file contains instructions for the installation of HDF5 on
 Unix-like systems.  First, one must obtain a tarball of the HDF5
-release from the ftp://hdf.ncsa.uiuc.edu/pub/dist/HDF5
-repository.  The files are available in uncompressed tar, gzip, bzip2,
-and compress formats.
+release from the ftp://hdf.ncsa.uiuc.edu/pub/dist/HDF5 repository.
+The files are available in uncompressed tar, gzip, bzip2, and compress
+formats.
 
 For those that like to live dangerously and don't like to read ;-) you
 can do the following:
@@ -33,15 +33,56 @@ Step 1. Unpack the source tree.
 	$ bunzip2 <hdf5-1.0.0a.tar.bz2 |tar xf -		OR
 	$ uncompress -c <hdf5-1.0.0a.tar.Z |tar xf -
 
-Step 2. Configure makefiles.
+Step 2. Configure.
 
     * HDF5 uses the GNU autoconf program for configuration.  Most
       installations can be configured by typing just (from the
       hdf5-1.0.0a directory)
 
-	$ ./configure
+	$ sh configure
 
-      Note: you may need to say `sh configure'.
+
+    * The configuration process can be controlled through environment
+      variables, command-line switches, and host configuration files.
+      For a complete list of switches say `sh configure --help'.
+
+    * Host configuration files are located in the `config' directory
+      and are based on architecture name, vendor name, and/or operating
+      system which are displayed near the beginning of the `configure'
+      output. Not all hosts require a host configuration file.
+
+    * The C compiler and flags, the `ar' and `ranlib' program names,
+      and the `make' program can be specified with environment
+      variables if configure doesn't properly detect them and they are 
+      not defined in a host config file.
+
+	CC	  Name of the C compiler.
+	CFLAGS	  Switches for the C compiler.
+	CPPFLAGS  Additional switches for the .c -> .o step.
+	AR	  Name of the `ar' program.
+	RANLIB	  Name of the `ranlib' program or `:' if none.
+	MAKE	  Name of the `make' program (GNU make is preferred)
+
+    * This version of HDF5 is normally built with various debugging
+      code enabled.  To turn it off add the `--disable-debug' switch
+      to the configure command.
+
+    * This version of HDF5 is normally built with support for symbolic 
+      debugging with dbx or gdb and without compiler optimization
+      switches.  To disable symbolic debugging and enable
+      optimizations add `--enable-production' to the configure
+      command.
+
+    * This version of HDF5 is normally built with the ability to print 
+      the names, arguments, and return values of all API functions
+      when they're called.  For more information refer to the
+      doc/html/tracing.html file.  To disable tracing support add
+      `--disable-trace' to the configure command.
+
+    * Old versions of gcc (<2.8.0) may experience register allocation
+      problems on some architectures.  If this happens then the
+      `--disable-hsizet' can be given but the resulting library will
+      be unable to handle datasets larger than 4GB.
 
     * By default libraries, include files, programs, and documentation
       are installed (when one says `make install') under
@@ -53,49 +94,8 @@ Step 2. Configure makefiles.
 
 	$ ./configure --prefix=/usr
 
-      Note: HDF5 can be used without installing it.
-
-    * Early releases of the library will be compiled with some
-      debugging features enabled (see output from configure).  The
-      debugging can be turned off by specifying `--disable-debug' as a
-      configure switch.  Also, to compile an optimized version of the
-      library one can say `--enable-production'.
-
-    * Old versions of gcc (<2.8.0) may experience register allocation
-      problems on some architectures.  If this happens then the
-      `--disable-hsizet' can be given but the resulting library will
-      be unable to handle datasets larger than 4GB.
-
-    * You can also override detection of certain things with
-      environment variables:
-
-        CC              Name of the C compiler to use.
-        CFLAGS          Alternate C compiler flags.
-        CPPFLAGS        Alternate C preprocessor flags.
-        MAKE            Name of the make(1) program.
-
-      For instance it is common to specify the name of the C compiler, 
-      C proprocessor flags, and compiler flags (add `env' to the
-      beginning of this command if you're running a csh-like shell)
-
-        $ CC=gcc CPPFLAGS=-DNDEBUG CFLAGS="-Wall -O3" ./configure
-
-    * Settings for compiler flags (and a few other things) can also be
-      specified in config files located in the config directory.  The
-      name of the file is the result of running ./bin/config.guess.
-      Use config/BlankForm as a template.
-
-    * The library can print the names, arguments and values, and
-      return value from all API functions.  The code that does this is 
-      enabled with the `--enable-tracing' configuration switch. In
-      order to actually see tracing output one should set the
-      environment variable HDF5_TRACE to a file descriptor number such 
-      as `2'.
-
-    * You can see a list of other configuration options by saying
-
-	$ ./configure --help
-
+      The library can be used directly from the source tree without
+      installing it.
 
 Step 3. Compile library, tests, and programs.
 
@@ -125,6 +125,10 @@ Step 4. Run confidence tests.
       date'. If this happens then run `make _test' instead or run
       `make test' from within the test directory.
 
+      Temporary files will be deleted by each test when it completes,
+      but may continue to exist in an incomplete state if the test
+      fails. To prevent deletion of the files define the
+      HDF5_NOCLEANUP environment variable.
 
 Step 5. Install public files.
 

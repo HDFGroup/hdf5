@@ -118,22 +118,27 @@ sub manifest () {
 sub release (@) {
    my @types = @_;
    my ($ver, $status, $created_symlink);
+   my ($batch) = 0;
    local $_;
+
+   if (@types>0 && $types[0] =~ /^-?-batch$/) {
+     $batch = 1;
+     shift @types;
+   }
 
    # Make sure no one forgot to update MANIFEST
    manifest;
 
    # Make sure the version number is correct.
-   print "Building an HDF release...\n";
-   print "HDF version to release [", ($ver=getver), "] ";
-   return "" unless defined ($_=<STDIN>);
-   chomp;
-   (setver ($ver=$_) or die "cannot set version") if /\S/;
-
-   # Clean the source tree, showing only errors.
-   print "Cleaning source tree...\n";
-   $status = system "make distclean >/dev/null";
-   die "cannot make distclean" if $status >> 8;
+   $ver = getver;
+   if ($batch) {
+     print "Releasing version $ver\n";
+   } else {
+     print "HDF version to release [$ver] ";
+     return "" unless defined ($_=<STDIN>);
+     chomp;
+     (setver ($ver=$_) or die "cannot set version") if /\S/;
+   }
 
    # Move default top-level makefile into place.
    $status = system "cp Makefile.dist Makefile";
@@ -197,27 +202,34 @@ sub release (@) {
    
 
    # Update version info
-   print <<EOF;
+   if ($batch) {
+     my ($v1,$v2,$v3,$v4) = $ver =~ /^(\d+)\.(\d+)\.(\d+)([a-z])$/;
+     $v3 += 1;
+     setver ($ver = "$v1.$v2.${v3}a") or die "cannot set version";
+     print "Development version set to $ver\n";
+   } else {
+     print <<EOF;
 
 If this is a real release then the version number for continued development
 should be incremented.  Otherwise just press return.
 
 EOF
-   print "Set development version to [", ($ver=getver), "] ";
-   return "" unless defined ($_ = <STDIN>);
-   chomp;
-   (setver ($ver=$_) or die "cannot set version") if /\S/;
+     print "Set development version to [", ($ver=getver), "] ";
+     return "" unless defined ($_ = <STDIN>);
+     chomp;
+     (setver ($ver=$_) or die "cannot set version") if /\S/;
 
-   if (-d "CVS") {
-      my $tag = $ver;
-      $tag =~ s/\./-/g;
-      print "Tag CVS sources with \"$tag\"? [n] ";
-      chomp ($_ = <STDIN>);
-      if ($_ eq 'y') {
+     if (-d "CVS") {
+       my $tag = $ver;
+       $tag =~ s/\./-/g;
+       print "Tag CVS sources with \"$tag\"? [n] ";
+       chomp ($_ = <STDIN>);
+       if ($_ eq 'y') {
 	 print "Tagging CVS sources...\n";
 	 my $status = system "cvs tag -R $tag";
 	 die "cvs tag failed" if $status >> 8;
-      }
+       }
+     }
    }
 
    return 1;

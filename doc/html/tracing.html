@@ -48,8 +48,9 @@ HDF5-DIAG: Error detected in thread 0.  Back trace follows.
     <p>This all happens with some magic in the configuration script,
       the makefiles, and macros.  First, from the end-user point of
       view, the library must be configured with the
-      <code>--enable-tracing</code> switch. This causes the library to 
-      include the support necessary for API tracing.
+      <code>--enable-trace</code> switch (the default;
+      `--disable-trace' is the alternative). This causes the library
+      to include the support necessary for API tracing.
 
     <p>
       <center>
@@ -59,7 +60,7 @@ HDF5-DIAG: Error detected in thread 0.  Back trace follows.
 	    <td>
 	      <code><pre>
 $ make distclean
-$ sh configure --enable-tracing
+$ sh configure --enable-trace
 $ make
 	      </pre></code>
 	    </td>
@@ -186,7 +187,7 @@ H5E.c:336: warning: trace info was not inserted
     <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- Created: Wed Jun 17 12:29:12 EDT 1998 -->
 <!-- hhmts start -->
-Last modified: Wed Jun 17 15:45:50 EDT 1998
+Last modified: Wed Jul  8 14:07:23 EDT 1998
 <!-- hhmts end -->
   </body>
 </html>

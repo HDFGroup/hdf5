@@ -416,7 +416,7 @@ H5Z_zlib_c (unsigned int flags, size_t __unused__ cd_size,
 	    const void *src, size_t dst_nbytes, void *dst/*out*/)
 {
     size_t	ret_value = 0;
-#ifdef HAVE_ZLIB_H
+#if defined(HAVE_LIBZ) && defined(HAVE_ZLIB_H)
     const Bytef	*z_src = (const Bytef*)src;
     Bytef	*z_dst = (Bytef*)dst;
     uLongf	z_dst_nbytes = (uLongf)dst_nbytes;
