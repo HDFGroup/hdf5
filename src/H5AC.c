@@ -1289,7 +1289,7 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
              * out of this function
              */
 HDfprintf(stderr, "Couldn't get lock for metadata at address %a\n", addr);
-            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTLOCK, NULL, "Can't lock data on SAP!")
+            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTLOCK, NULL, "can't lock data on SAP!")
         }
 
         /* Load a thing from the SAP. */
@@ -1298,7 +1298,7 @@ HDfprintf(stderr, "Couldn't get lock for metadata at address %a\n", addr);
 
             if (H5FP_request_release_lock(H5FD_fphdf5_file_id(lf), addr,
                                           TRUE, &req_id, &status) < 0)
-                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTUNLOCK, NULL, "Can't unlock data on SAP!")
+                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTUNLOCK, NULL, "can't unlock data on SAP!")
 
             HGOTO_DONE(NULL);
         }
@@ -1531,7 +1531,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
          */
         if (H5FP_request_release_lock(H5FD_fphdf5_file_id(lf), addr,
                                       TRUE, &req_id, &status) < 0)
-            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTUNLOCK, FAIL, "Can't unlock data on SAP!")
+            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTUNLOCK, FAIL, "can't unlock data on SAP!")
 
         /* Flush a thing to the SAP */
         if (thing) {
