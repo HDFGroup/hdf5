@@ -1,0 +1,20 @@
+#							-*- shell-script -*-
+#
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
+
+
+#----------------------------------------------------------------------------
+# Compiler flags. The CPPFLAGS values should not include package debug
+# flags like `-DH5G_DEBUG' since these are added with the
+# `--enable-debug' switch of configure.
+#----------------------------------------------------------------------------
+
+# Special setup to use pthread support if enable-threadsafe is on.
+# Works with static executable only.
+if test "X-" != "X-$enable_threadsafe"; then
+    CXXFLAGS="$CXXFLAGS -D_THREAD_SAFE" 
+    LDFLAGS="$LDFLAGS -pthread"
+#    enable_static_exec=yes
+fi
