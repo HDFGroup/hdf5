@@ -680,7 +680,6 @@
 ./c++/src/H5Group.h
 ./c++/src/H5IdComponent.cpp
 ./c++/src/H5IdComponent.h
-./c++/src/H5Idtemplates.h
 ./c++/src/H5Include.h
 ./c++/src/H5IntType.cpp
 ./c++/src/H5IntType.h
@@ -692,8 +691,6 @@
 ./c++/src/H5PredType.h
 ./c++/src/H5PropList.cpp
 ./c++/src/H5PropList.h
-./c++/src/H5RefCounter.cpp
-./c++/src/H5RefCounter.h
 ./c++/src/H5StrType.cpp
 ./c++/src/H5StrType.h
 ./c++/src/H5VarLenType.cpp
