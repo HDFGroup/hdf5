@@ -15,7 +15,7 @@ srcdir=@srcdir@
 @COMMENCE@
 
 # Subdirectories in build-order (not including `examples')
-SUBDIRS=src test tools @TESTPARALLEL@ @subdirs@
+SUBDIRS=src test tools @PABLO@ @TESTPARALLEL@ @subdirs@
 
 ##############################################################################
 ##		    T A R G E T S
@@ -126,13 +126,13 @@ H5Tinit.c:
 	mostlyclean distclean maintainer-clean
 
 clean mostlyclean:
-	@@SETX@; for d in $(SUBDIRS) doc perform examples pablo; do	      \
+	@@SETX@; for d in $(SUBDIRS) doc perform examples; do	      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) conftest conftest.c
 
 distclean:
-	@@SETX@; for d in $(SUBDIRS) doc perform examples pablo; do	      \
+	@@SETX@; for d in $(SUBDIRS) doc perform examples; do	      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) config/commence config/conclude
@@ -144,7 +144,7 @@ distclean:
 maintainer-clean:
 	@echo "This target is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
-	@@SETX@; for d in $(SUBDIRS) doc perform examples pablo; do	      \
+	@@SETX@; for d in $(SUBDIRS) doc perform examples; do	      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) config.cache config.log config.status src/H5config.h
