@@ -174,8 +174,8 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
             dt->u.compnd.memb[i].perm[1] = (perm_word >> 8) & 0xff;
             dt->u.compnd.memb[i].perm[2] = (perm_word >> 16) & 0xff;
             dt->u.compnd.memb[i].perm[3] = (perm_word >> 24) & 0xff;
-            if (H5O_dtype_decode_helper(pp, &(dt->u.compnd.memb[i].type)) < 0 ||
-                H5T_COMPOUND == dt->u.compnd.memb[i].type.type) {
+            if (H5O_dtype_decode_helper(pp, dt->u.compnd.memb[i].type) < 0 ||
+                H5T_COMPOUND == dt->u.compnd.memb[i].type->type) {
                 for (j = 0; j <= i; j++)
                     H5MM_xfree(dt->u.compnd.memb[i].name);
                 H5MM_xfree(dt->u.compnd.memb);
@@ -397,7 +397,7 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
                 perm_word |= dt->u.compnd.memb[i].perm[j] << (8 * j);
             }
             UINT32ENCODE(*pp, perm_word);
-            if (H5O_dtype_encode_helper(pp, &(dt->u.compnd.memb[i].type))<0) {
+            if (H5O_dtype_encode_helper(pp, dt->u.compnd.memb[i].type)<0) {
                 HRETURN_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL,
                               "can't encode member type");
             }
@@ -578,7 +578,7 @@ H5O_dtype_size(H5F_t *f, const void *mesg)
         for (i = 0; i < dt->u.compnd.nmembs; i++) {
             ret_value += ((HDstrlen(dt->u.compnd.memb[i].name) + 8) / 8) * 8;
             ret_value += 12 + dt->u.compnd.memb[i].ndims * 4;
-            ret_value += H5O_dtype_size(f, &(dt->u.compnd.memb[i].type));
+            ret_value += H5O_dtype_size(f, dt->u.compnd.memb[i].type);
         }
         break;
 

@@ -107,7 +107,7 @@ AC_TYPE_SIZE_T
 dnl ----------------------------------------------------------------------
 dnl Check for functions.
 dnl
-AC_CHECK_FUNCS(lseek64 fseek64)
+AC_CHECK_FUNCS(lseek64 fseek64 getpwuid gethostname)
 
 
 dnl ----------------------------------------------------------------------
@@ -161,13 +161,12 @@ case "X-$PARALLEL" in
       ;;
 
    X-mpio|X-yes)
-      # Use MPIO.  Define PHDF5 in src/H5config.h (comes from ./acconfig.h)
-      # and augment the include and library search paths (it doesn't hurt
-      # to have extra paths).  Then check for header files and libraries.
-      # Some extra source files are added to the list also so we don't have
-      # to ifdef out the whole file.
+      # Use MPIO.  Define HAVE_PARALLEL in src/H5config.h (comes from
+      # ./acconfig.h) and augment the include and library search paths
+      # (it doesn't hurt to have extra paths).  Then check for header
+      # files and libraries. Some extra source files are added to the
+      # list also so we don't have to ifdef out the whole file.
       AC_MSG_RESULT(mpio)
-      AC_DEFINE(PHDF5)	dnl THIS WILL GO AWAY SHORTLY!!!
       AC_DEFINE(HAVE_PARALLEL)
       PARALLEL_SRC='$(PARALLEL_SRC)'
       CPPFLAGS="$CPPFLAGS $MPI_INC"

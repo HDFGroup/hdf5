@@ -239,11 +239,28 @@ test_2(void)
     /*
      * File access property list.
      */
-#if 0
     access_plist = H5Pcreate (H5P_FILE_ACCESS);
-    H5Pset_core (access_plist, 3000000);
-#else
-    access_plist = H5P_DEFAULT;
+
+#if 0
+    /* Try temporary core files */
+    H5Cset_core (access_plist, 3000000);
+#elif 0
+    /* Try a default split file but with our own name extensions */
+    H5Cset_split (access_plist, ".XX1", H5C_DEFAULT, ".XX2", H5C_DEFAULT);
+#elif 0
+    {
+	/* Try a split file with an in-core meta data part */
+	hid_t meta_access = H5Ccreate (H5C_FILE_ACCESS);
+	H5Cset_core (meta_access, 1024*1024);
+	H5Cset_split (access_plist, NULL, meta_access, NULL, H5C_DEFAULT);
+    }
+#elif 0
+    {
+	/* Try a split file with an in-core raw data part */
+	hid_t raw_access = H5Ccreate (H5C_FILE_ACCESS);
+	H5Cset_core (raw_access, 1024*1024);
+	H5Cset_split (access_plist, NULL, H5C_DEFAULT, NULL, raw_access);
+    }
 #endif
 
     /* create the file */

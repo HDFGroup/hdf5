@@ -254,12 +254,12 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 		}
 	    }
 	    if (priv->src2dst[i]>=0) {
-		type = &(src->u.compnd.memb[i].type);
+		type = H5T_copy (src->u.compnd.memb[i].type);
 		tid = H5A_register (H5_DATATYPE, type);
 		assert (tid>=0);
 		priv->src_memb_id[priv->src2dst[i]] = tid;
 
-		type = &(dst->u.compnd.memb[priv->src2dst[i]].type);
+		type = H5T_copy (dst->u.compnd.memb[priv->src2dst[i]].type);
 		tid = H5A_register (H5_DATATYPE, type);
 		assert (tid>=0);
 		priv->dst_memb_id[priv->src2dst[i]] = tid;
@@ -469,7 +469,8 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		src_memb = src->u.compnd.memb + i;
 		dst_memb = dst->u.compnd.memb + src2dst[i];
 
-		if (dst_memb->type.size <= src_memb->type.size) {
+		if (H5T_get_size (dst_memb->type) <=
+		    H5T_get_size (src_memb->type)) {
 		    H5T_conv_t tconv_func = priv->memb_conv[src2dst[i]];
 		    H5T_cdata_t *memb_cdata = priv->memb_cdata[src2dst[i]];
 		    memb_cdata->command = H5T_CONV_CONV;
@@ -481,12 +482,12 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 				 bkg + dst_memb->offset);
 
 		    HDmemmove (buf + offset, buf + src_memb->offset,
-			       dst_memb->type.size);
-		    offset += dst_memb->type.size;
+			       H5T_get_size (dst_memb->type));
+		    offset += H5T_get_size (dst_memb->type);
 		} else {
 		    HDmemmove (buf + offset, buf + src_memb->offset,
-			       src_memb->type.size);
-		    offset += src_memb->type.size;
+			       H5T_get_size (src_memb->type));
+		    offset += H5T_get_size (src_memb->type);
 		}
 	    }
 
@@ -501,9 +502,10 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		if (src2dst[i]<0) continue;
 		src_memb = src->u.compnd.memb + i;
 		dst_memb = dst->u.compnd.memb + src2dst[i];
-		offset -= dst_memb->type.size;
+		offset -= H5T_get_size (dst_memb->type);
 
-		if (dst_memb->type.size > src_memb->type.size) {
+		if (H5T_get_size (dst_memb->type) >
+		    H5T_get_size (src_memb->type)) {
 		    H5T_conv_t tconv_func = priv->memb_conv[src2dst[i]];
 		    H5T_cdata_t *memb_cdata = priv->memb_cdata[src2dst[i]];
 		    memb_cdata->command = H5T_CONV_CONV;
@@ -512,7 +514,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 				 buf + offset, bkg + dst_memb->offset);
 		}
 		HDmemmove (bkg+dst_memb->offset, buf+offset,
-			   dst_memb->type.size);
+			   H5T_get_size (dst_memb->type));
 	    }
 	    assert (0==offset);
 

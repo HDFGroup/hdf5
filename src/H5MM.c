@@ -129,13 +129,12 @@ H5MM_xrealloc(void *mem, size_t size)
  *
  *-------------------------------------------------------------------------
  */
-char                   *
+char *
 H5MM_xstrdup(const char *s)
 {
     char                   *mem;
 
-    if (!s)
-        return NULL;
+    if (!s) return NULL;
     mem = H5MM_xmalloc(HDstrlen(s) + 1);
     HDstrcpy(mem, s);
     return mem;

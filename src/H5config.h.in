@@ -25,9 +25,6 @@
 /* Define if the compiler understands the __FUNCTION__ keyword. */
 #undef HAVE_FUNCTION
 
-/* Define if we have parallel support  THIS WILL GO AWAY SHORTLY!!! */
-#undef PHDF5
-
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL
 
@@ -51,6 +48,12 @@
 
 /* Define if you have the fseek64 function.  */
 #undef HAVE_FSEEK64
+
+/* Define if you have the gethostname function.  */
+#undef HAVE_GETHOSTNAME
+
+/* Define if you have the getpwuid function.  */
+#undef HAVE_GETPWUID
 
 /* Define if you have the lseek64 function.  */
 #undef HAVE_LSEEK64

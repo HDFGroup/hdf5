@@ -109,7 +109,7 @@ H5AC_dest(H5F_t *f)
     assert(f->shared->cache);
     cache = f->shared->cache;
 
-    if (H5AC_flush(f, NULL, NO_ADDR, TRUE) < 0) {
+    if (H5AC_flush(f, NULL, NULL, TRUE) < 0) {
         HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                       "unable to flush cache");
     }

@@ -76,7 +76,7 @@ typedef struct H5T_member_t {
     intn                ndims;          /*member dimensionality              */
     size_t              dim[4];         /*size in each dimension             */
     intn		perm[4];        /*index permutation                  */
-    struct H5T_t        type;           /*type of this member                */
+    struct H5T_t        *type;          /*type of this member                */
 } H5T_member_t;
 
 /* The data type conversion database */

@@ -1959,7 +1959,7 @@ H5Tget_member_type(hid_t type_id, int membno)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number");
     }
     /* Copy data type into an atom */
-    if (NULL == (memb_dt = H5T_copy(&(dt->u.compnd.memb[membno].type)))) {
+    if (NULL == (memb_dt = H5T_copy(dt->u.compnd.memb[membno].type))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to copy member data type");
     }
@@ -2464,10 +2464,10 @@ H5T_create(H5T_class_t type, size_t size)
  *
  *-------------------------------------------------------------------------
  */
-H5T_t		       *
+H5T_t *
 H5T_copy(const H5T_t *old_dt)
 {
-    H5T_t		   *new_dt = NULL;
+    H5T_t		   *new_dt=NULL, *tmp=NULL;
     intn		    i;
     char		   *s;
 
@@ -2482,13 +2482,21 @@ H5T_copy(const H5T_t *old_dt)
     new_dt->locked = FALSE;
 
     if (H5T_COMPOUND == new_dt->type) {
+	/*
+	 * Copy all member fields to new type, then overwrite the
+	 * name and type fields of each new member with copied values.
+	 * That is, H5T_copy() is a deep copy.
+	 */
 	new_dt->u.compnd.memb = H5MM_xmalloc(new_dt->u.compnd.nmembs *
 					     sizeof(H5T_member_t));
 	HDmemcpy(new_dt->u.compnd.memb, old_dt->u.compnd.memb,
 		 new_dt->u.compnd.nmembs * sizeof(H5T_member_t));
+	
 	for (i = 0; i < new_dt->u.compnd.nmembs; i++) {
 	    s = new_dt->u.compnd.memb[i].name;
 	    new_dt->u.compnd.memb[i].name = H5MM_xstrdup(s);
+	    tmp = H5T_copy (old_dt->u.compnd.memb[i].type);
+	    new_dt->u.compnd.memb[i].type = tmp;
 	}
     }
     FUNC_LEAVE(new_dt);
@@ -2497,7 +2505,8 @@ H5T_copy(const H5T_t *old_dt)
 /*-------------------------------------------------------------------------
  * Function:	H5T_close
  *
- * Purpose:	Frees a data type and all associated memory.
+ * Purpose:	Frees a data type and all associated memory.  If the data
+ *		type is locked then nothing happens.
  *
  * Return:	Success:	SUCCEED
  *
@@ -2513,23 +2522,25 @@ H5T_copy(const H5T_t *old_dt)
 herr_t
 H5T_close(H5T_t *dt)
 {
-    intn		    i;
+    intn	i;
 
     FUNC_ENTER(H5T_close, FAIL);
 
     assert(dt);
-    assert(!dt->locked);
 
-    if (dt && H5T_COMPOUND == dt->type) {
-	for (i = 0; i < dt->u.compnd.nmembs; i++) {
-	    H5MM_xfree(dt->u.compnd.memb[i].name);
+    if (!dt->locked) {
+	if (dt && H5T_COMPOUND == dt->type) {
+	    for (i = 0; i < dt->u.compnd.nmembs; i++) {
+		H5MM_xfree(dt->u.compnd.memb[i].name);
+	    }
+	    H5MM_xfree(dt->u.compnd.memb);
+	    H5MM_xfree(dt);
+
+	} else if (dt) {
+	    H5MM_xfree(dt);
 	}
-	H5MM_xfree(dt->u.compnd.memb);
-	H5MM_xfree(dt);
-
-    } else if (dt) {
-	H5MM_xfree(dt);
     }
+    
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2611,7 +2622,6 @@ herr_t
 H5T_insert(H5T_t *parent, const char *name, off_t offset, const H5T_t *member)
 {
     intn		    i;
-    H5T_t		   *tmp = NULL;
 
     FUNC_ENTER(H5T_insert, FAIL);
 
@@ -2635,7 +2645,7 @@ H5T_insert(H5T_t *parent, const char *name, off_t offset, const H5T_t *member)
 	     offset + member->size > parent->u.compnd.memb[i].offset) ||
 	    (parent->u.compnd.memb[i].offset < offset &&
 	     parent->u.compnd.memb[i].offset +
-	     parent->u.compnd.memb[i].type.size > offset)) {
+	     parent->u.compnd.memb[i].type->size > offset)) {
 	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL,
 			  "member overlaps with another member");
 	}
@@ -2648,15 +2658,13 @@ H5T_insert(H5T_t *parent, const char *name, off_t offset, const H5T_t *member)
 					      (parent->u.compnd.nalloc *
 					       sizeof(H5T_member_t)));
     }
+
     /* Add member to end of member array */
     i = parent->u.compnd.nmembs;
     parent->u.compnd.memb[i].name = H5MM_xstrdup(name);
     parent->u.compnd.memb[i].offset = offset;
     parent->u.compnd.memb[i].ndims = 0;		/*defaults to scalar */
-
-    tmp = H5T_copy(member);
-    parent->u.compnd.memb[i].type = *tmp;
-    H5MM_xfree(tmp);
+    parent->u.compnd.memb[i].type = H5T_copy (member);
 
     parent->u.compnd.nmembs++;
     FUNC_LEAVE(SUCCEED);
@@ -2693,7 +2701,7 @@ H5T_pack(H5T_t *dt)
     if (H5T_COMPOUND == dt->type) {
 	/* Recursively pack the members */
 	for (i = 0; i < dt->u.compnd.nmembs; i++) {
-	    if (H5T_pack(&(dt->u.compnd.memb[i].type)) < 0) {
+	    if (H5T_pack(dt->u.compnd.memb[i].type) < 0) {
 		HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 			      "unable to pack part of a compound data type");
 	    }
@@ -2703,7 +2711,7 @@ H5T_pack(H5T_t *dt)
 	H5T_sort_by_offset(dt);
 	for (i = 0, offset = 0; i < dt->u.compnd.nmembs; i++) {
 	    dt->u.compnd.memb[i].offset = offset;
-	    offset += dt->u.compnd.memb[i].type.size;
+	    offset += H5T_get_size (dt->u.compnd.memb[i].type);
 	}
 
 	/* Change total size */
@@ -2880,8 +2888,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 		    dt2->u.compnd.memb[idx2[i]].perm[j]) HGOTO_DONE(1);
 	    }
 
-	    tmp = H5T_cmp(&(dt1->u.compnd.memb[idx1[i]].type),
-			  &(dt2->u.compnd.memb[idx2[i]].type));
+	    tmp = H5T_cmp(dt1->u.compnd.memb[idx1[i]].type,
+			  dt2->u.compnd.memb[idx2[i]].type);
 	    if (tmp < 0) HGOTO_DONE(-1);
 	    if (tmp > 0) HGOTO_DONE(1);
 	}
@@ -3340,7 +3348,7 @@ H5T_debug(H5T_t *dt, FILE * stream)
 		fprintf(stream, "]");
 	    }
 	    fprintf(stream, " ");
-	    H5T_debug(&(dt->u.compnd.memb[i].type), stream);
+	    H5T_debug(dt->u.compnd.memb[i].type, stream);
 	}
 	fprintf(stream, "\n");
     }

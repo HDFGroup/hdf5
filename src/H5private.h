@@ -112,7 +112,28 @@ typedef struct {
     uint64                  offset;     /*offset within an HDF5 file    */
 } haddr_t;
 
-#define NO_ADDR         NULL
+/*
+ * We try to use lseek64() and fseek64() if they're available, but they're
+ * not Posix and thus take different arguments on different systems.  These
+ * macros attempt to overcome those problems.
+ */
+#ifdef HAVE_LSEEK64
+#   ifdef _MIPS_SZLONG
+        /* SGI systems */
+#       if (_MIPS_SZLONG == 64)
+#           define OFF64_SET(VAR,VAL) VAR=VAL
+#       elif defined(_LONGLONG)
+#           define OFF64_SET(VAR,VAL) VAR=VAL
+#       else
+#           define OFF64_SET(VAR,VAL) (VAR.hi32=VAL>>32,		      \
+				       VAR.lo32=(int)(VAL & 0xffffffff),      \
+				       VAL)
+#       endif
+#   else
+#       warn "HAVE_LSEEK64 has been turned off"
+#       undef HAVE_LSEEK64
+#   endif
+#endif
 
 /*
  * Some compilers have problems declaring auto variables that point

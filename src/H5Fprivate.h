@@ -243,6 +243,8 @@ typedef struct H5F_access_t {
 
 	/* Properties for the split driver */
 	struct {
+	    char	*meta_ext;	/*name extension for meta file	*/
+	    char	*raw_ext;	/*name extension for raw file	*/
 	    struct H5F_access_t *meta_access; /*plist for meta file	*/
 	    struct H5F_access_t *raw_access;  /*plist for raw data file	*/
 	} split;

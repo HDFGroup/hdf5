@@ -40,6 +40,8 @@ static const char *FileHeader = "\n\
 #include <time.h>
 #include <unistd.h>
 
+#include <H5config.h>
+
 #define MAXDETECT 16
 
 #ifndef MIN
@@ -812,11 +814,10 @@ print_header(void)
 
     time_t              now = time(NULL);
     struct tm           *tm = localtime(&now);
-    struct passwd       *pwd = getpwuid(getuid());
-    char                real_name[30], *comma;
+    struct passwd       *pwd = NULL;
+    char                real_name[30];
     char                host_name[256];
     int                 i;
-    size_t		n;
     const char          *s;
     static const char   *month_name[] =
     {
@@ -863,25 +864,38 @@ bit.\n";
     /*
      * The real name is the first item from the passwd gecos field.
      */
-    if (pwd) {
-        if ((comma = strchr(pwd->pw_gecos, ','))) {
-            n = MIN(sizeof(real_name) - 1, comma - pwd->pw_gecos);
-            strncpy(real_name, pwd->pw_gecos, n);
-            real_name[n] = '\0';
-        } else {
-            strncpy(real_name, pwd->pw_gecos, sizeof(real_name));
-            real_name[sizeof(real_name) - 1] = '\0';
-        }
-    } else {
-        real_name[0] = '\0';
+#ifdef HAVE_GETPWUID
+    {
+	size_t n;
+	char *comma;
+	if ((pwd = getpwuid(getuid()))) {
+	    if ((comma = strchr(pwd->pw_gecos, ','))) {
+		n = MIN(sizeof(real_name) - 1, comma - pwd->pw_gecos);
+		strncpy(real_name, pwd->pw_gecos, n);
+		real_name[n] = '\0';
+	    } else {
+		strncpy(real_name, pwd->pw_gecos, sizeof(real_name));
+		real_name[sizeof(real_name) - 1] = '\0';
+	    }
+	} else {
+	    real_name[0] = '\0';
+	}
     }
+#else
+    real_name[0] = '\0';
+#endif
 
     /*
      * The FQDM of this host or the empty string.
      */
-    if (gethostname(host_name, sizeof(host_name)) < 0)
+#ifdef HAVE_GETHOSTNAME
+    if (gethostname(host_name, sizeof(host_name)) < 0) {
         host_name[0] = '\0';
-
+    }
+#else
+    host_name[0] = '\0';
+#endif
+    
     /*
      * The file header: warning, copyright notice, build information.
      */

@@ -137,6 +137,7 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 	    }
 	}
     }
+
     /* Create the file descriptor */
     lf = H5MM_xcalloc(1, sizeof(H5F_low_t));
     lf->u.fam.name = H5MM_xstrdup(name);
@@ -186,8 +187,8 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 		if (size != mask) {
 		    size++;
 #ifdef H5F_DEBUG
-		    fprintf(stderr, "HDF5-DIAG: family member size was rounded up "
-			    "to a power of 2");
+		    fprintf(stderr, "HDF5-DIAG: family member size was "
+			    "rounded up to a power of 2");
 #endif
 		}
 		break;

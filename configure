@@ -1149,7 +1149,7 @@ fi
 
 
 
-for ac_func in lseek64 fseek64
+for ac_func in lseek64 fseek64 getpwuid gethostname
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:1156: checking for $ac_func" >&5
@@ -1720,16 +1720,13 @@ case "X-$PARALLEL" in
       ;;
 
    X-mpio|X-yes)
-      # Use MPIO.  Define PHDF5 in src/H5config.h (comes from ./acconfig.h)
-      # and augment the include and library search paths (it doesn't hurt
-      # to have extra paths).  Then check for header files and libraries.
-      # Some extra source files are added to the list also so we don't have
-      # to ifdef out the whole file.
+      # Use MPIO.  Define HAVE_PARALLEL in src/H5config.h (comes from
+      # ./acconfig.h) and augment the include and library search paths
+      # (it doesn't hurt to have extra paths).  Then check for header
+      # files and libraries. Some extra source files are added to the
+      # list also so we don't have to ifdef out the whole file.
       echo "$ac_t""mpio" 1>&6
       cat >> confdefs.h <<\EOF
-#define PHDF5 1
-EOF
-	      cat >> confdefs.h <<\EOF
 #define HAVE_PARALLEL 1
 EOF
 
@@ -1737,7 +1734,7 @@ EOF
       CPPFLAGS="$CPPFLAGS $MPI_INC"
       CFLAGS="$CFLAGS $MPI_LIB"
       echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:1741: checking for main in -lmpi" >&5
+echo "configure:1738: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1745,14 +1742,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpi  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1749 "configure"
+#line 1746 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:1756: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:1753: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -1779,7 +1776,7 @@ else
   echo "$ac_t""no" 1>&6
 fi
         echo $ac_n "checking for main in -lmpio""... $ac_c" 1>&6
-echo "configure:1783: checking for main in -lmpio" >&5
+echo "configure:1780: checking for main in -lmpio" >&5
 ac_lib_var=`echo mpio'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1787,14 +1784,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpio  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 1791 "configure"
+#line 1788 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:1798: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:1795: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
