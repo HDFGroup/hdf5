@@ -20,6 +20,11 @@
 
 include $(top_srcdir)/config/commence.am
 
+# Compile parallel fortran examples only if parallel is enabled
+if BUILD_PARALLEL_CONDITIONAL
+   TEST_PROG_PARA=
+endif
+
 # These are the programs that 'make all' or 'make tests' will build and
 # that 'make check' will run.  List them in the order in which they should
 # be run.
@@ -30,7 +35,7 @@ TEST_PROG=dsetexample fileexample rwdsetexample attrexample groupexample    \
        refregexample mountexample compound
 
 # Tell configure.in when to build examples
-EXTRA_PROG=$(TEST_PROG)
+EXTRA_PROG=$(TEST_PROG) $(TEST_PROG_PARA)
 EXAMPLE_PROG=$(EXTRA_PROG)
 
 # List files to be installed here
