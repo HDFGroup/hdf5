@@ -861,13 +861,13 @@ To build and test HDF5 Fortran example:
 
       In "Project configurations", select the active configuration
 
-          "allf90cppexamples -- Win32 Debug" to build debug versions of the
-                                             Fortran examples.
+          "allf90examples -- Win32 Debug" to build debug versions of the
+                                          Fortran examples.
 
-                                or
+                             or
 	
-          "allf90cppexamples -- Win32 Release" to build release versions the 
-                                               Fortran examples.
+          "allf90examples -- Win32 Release" to build release versions the 
+                                            Fortran examples.
 
       When the debug build or release build is done, there should be the 
       following subdirectories in c:\MyHDFstuff\hdf5\fortran\examples\
@@ -908,6 +908,9 @@ To build and test HDF5 Fortran example:
       f90examplesDBGDLL, in the c:\MyHDFstuff\fortran\examples directory
       and places all the executables in it.  Both the release and debug
       versions of the examples should be built before this step is done.
+
+   4. HDF5 Fortran examples test files will be provided in the coming
+      future.
 
 ************************************************************************
 
