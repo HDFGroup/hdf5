@@ -176,7 +176,7 @@ H5MM_xfree (const void *mem)
     * compiler warning, we cast it to a non-const arg first.  With
     * gcc, this results in a warning only if -Wcast-qual is turned on.
     */
-   void *non_const_mem = mem;
+   void *non_const_mem = (void *)mem;
    
    if (mem) HDfree (non_const_mem);
    return NULL;
