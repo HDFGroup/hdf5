@@ -859,14 +859,6 @@ facilitate moving easily between them.</i>
 	<img src="Graphics/Java.gif">
 	<img src="Graphics/C++.gif">
 	-->
-
-  <dt><strong>Edit or Delete -- Comments, Bugs, Assumptions:</strong>
-    <dd>I would like to say "the property list is not closed" when a _close_
-    routine fails, but I don't think that's possible due to other properties in
-    the list being successfully closed & removed from the property list.  I
-    suppose that it would be possible to just remove the properties which have
-    successful _close_ callbacks, but I'm not happy with the ramifications of
-    a mangled, un-closable property list hanging around... Any comments?
 </dl>
 
 
@@ -1017,8 +1009,19 @@ facilitate moving easily between them.</i>
     <code>set</code> routine returns an error value.  
     The <code>set</code> routine will not be called for the initial 
     value, only the <code>create</code> routine will be called.
-    </P>
+    <p>
+    <strong>Note:</strong> 
+    The <code>set</code> callback function may be useful 
+    to range check the value being set for the property 
+    or may perform some tranformation or translation of the
+    value set.  The <code>get</code> callback would then 
+    reverse the transformation or translation.  
+    A single <code>get</code> or <code>set</code> callback 
+    could handle multiple properties by 
+    performing different actions based on the
+    property name or other properties in the property list.
 
+    <p>
     The <code>get</code> routine is called when a value is retrieved 
     from a property value.  
     The <code>H5P_prp_get_func_t</code> callback function is defined 
@@ -1143,47 +1146,38 @@ facilitate moving easily between them.</i>
     If the <code>close</code> routine returns a negative value, 
     the property list close routine returns an error value but
     the property list is still closed.
-  <dt><strong>Parameters:</strong>
-    <ul><table>
-    <tr>
-        <td><code>hid_t</code> <em>class</em></td>
-        <td>IN: Property list class to register permanent property 
-		    within</td></tr>
-    <tr>
-        <td><code>const char *</code> <em>name</em></td>
-        <td>IN: Name of property to register</td></tr>
-    <tr>
-        <td><code>size_t</code> <em>size</em></td>
-        <td>IN: Size of property in bytes</td></tr>
-    <tr>
-        <td><code>void *</code> <em>default</em></td>
-        <td>IN: Default value for property in newly created property 
-		    lists</td></tr>
-    <tr>
-        <td><code>H5P_prp_create_func_t</code> <em>create</em></td>
-        <td>IN: Callback routine called when a property list is being 
-            created and the property value will be initialized</td></tr>
-    <tr>
-        <td><code>H5P_prp_set_func_t</code> <em>set</em></td>
-        <td>IN: Callback routine called before a new value is copied 
-            into the property's value</td></tr>
-    <tr>
-        <td><code>H5P_prp_get_func_t</code> <em>get</em></td>
-        <td>IN: Callback routine called when a property value is 
-            retrieved from the property</td></tr>
-    <tr>
-        <td><code>H5P_prp_delete_func_t</code> <em>delete</em></td>
-        <td>IN: Callback routine called when a property is deleted from
-            a property list</td></tr>
-    <tr>
-        <td><code>H5P_prp_copy_func_t</code> <em>copy</em></td>
-        <td>IN: Callback routine called when a property is copied from
-            a property list</td></tr>
-    <tr>
-        <td><code>H5P_prp_close_func_t</code> <em>close</em></td>
-        <td>IN: Callback routine called when a property list is being 
-            closed and the property value will be disposed of</td></tr>
-    </table></ul>
+	
+<dt><strong>Parameters:</strong>
+    <ul><dl>
+      <dt><code>hid_t</code> <em>class</em>
+        <dd>IN: Property list class to register permanent property 
+		    within
+      <dt><code>const char *</code> <em>name</em>
+        <dd>IN: Name of property to register
+      <dt><code>size_t</code> <em>size</em>
+        <dd>IN: Size of property in bytes
+      <dt><code>void *</code> <em>default</em>
+        <dd>IN: Default value for property in newly created property 
+		    lists
+      <dt><code>H5P_prp_create_func_t</code> <em>create</em>
+        <dd>IN: Callback routine called when a property list is being 
+            created and the property value will be initialized
+      <dt><code>H5P_prp_set_func_t</code> <em>set</em>
+        <dd>IN: Callback routine called before a new value is copied 
+            into the property's value
+      <dt><code>H5P_prp_get_func_t</code> <em>get</em>
+        <dd>IN: Callback routine called when a property value is 
+            retrieved from the property
+      <dt><code>H5P_prp_delete_func_t</code> <em>delete</em>
+        <dd>IN: Callback routine called when a property is deleted from
+            a property list
+      <dt><code>H5P_prp_copy_func_t</code> <em>copy</em>
+        <dd>IN: Callback routine called when a property is copied from
+            a property list
+      <dt><code>H5P_prp_close_func_t</code> <em>close</em>
+        <dd>IN: Callback routine called when a property list is being 
+            closed and the property value will be disposed of
+    </dl></ul>
 
 <dt><strong>Returns:</strong>
     <dd>Success: a non-negative value
@@ -1196,21 +1190,6 @@ facilitate moving easily between them.</i>
 	<img src="Graphics/Java.gif">
 	<img src="Graphics/C++.gif">
 	-->
-    
-  <dt><strong>Edit or Remove -- Comments, Bugs, Assumptions:</strong>
-    <dd>The <code>set</code> callback function may be useful to range check the value being
-    set for the property or may perform some tranformation/translation of the
-    value set.  The <code>get</code> callback would then [probably] reverse the
-    transformation, etc.  A single <code>get</code> or <code>set</code> callback could
-    handle multiple properties by performing different actions based on the
-    property name or other properties in the property list.
-
-    <P>I would like to say "the property list is not closed" when a <code>close</code>
-    routine fails, but I don't think that's possible due to other properties in
-    the list being successfully closed and removed from the property list.  I
-    suppose that it would be possible to just remove the properties which have
-    successful <code>close</code> callbacks, but I'm not happy with the ramifications
-    of a mangled, un-closable property list hanging around... Any comments?
 </dl>
 
 
@@ -1290,8 +1269,19 @@ facilitate moving easily between them.</i>
     property value is not copied into the property and the set routine 
     returns an error value.  
     The <code>set</code> routine will be called for the initial value.
-    </p>
+    <p>
+    <strong>Note:</strong> 
+    The <code>set</code> callback function may be useful 
+    to range check the value being set for the property 
+    or may perform some tranformation or translation of the
+    value set.  The <code>get</code> callback would then 
+    reverse the transformation or translation.  
+    A single <code>get</code> or <code>set</code> callback 
+    could handle multiple properties by 
+    performing different actions based on the
+    property name or other properties in the property list.
 
+    <p>
     The <code>get</code> routine is called when a value is retrieved 
     from a property value.  
     The <code>H5P_prp_get_func_t</code> callback functioin is defined 
@@ -1414,6 +1404,12 @@ facilitate moving easily between them.</i>
     property list close routine returns an error value but the property list 
     is still closed.
 
+    <p>
+    <strong>Note:</strong>
+    There is no <code>create</code> callback routine for temporary property 
+    list objects; the initial value is assumed to have any necessary setup 
+    already performed on it.
+
   <dt><strong>Parameters:</strong>
     <ul><table>
     <tr>
@@ -1462,29 +1458,6 @@ facilitate moving easily between them.</i>
 	<img src="Graphics/Java.gif">
 	<img src="Graphics/C++.gif">
 	-->
-    
-  <dt><strong>Edit or Remove -- Comments, Bugs, Assumptions:</strong>
-    <dd>The <code>set</code> callback function may be useful to range check 
-    the value being set for the property or may perform some 
-    tranformation/translation of the value set.  The <code>get</code> callback 
-    would then [probably] reverse the transformation, etc.  A single 
-    <code>get</code> or <code>set</code> callback could handle 
-    multiple properties by performing different actions based on the 
-    property name or other properties in the property list.
-
-    <P>
-    There is no <code>create</code> callback routine for temporary property 
-    list objects, the initial value is assumed to have any necessary setup 
-    already performed on it.
-
-    <P>
-    I would like to say "the property list is not closed" when a <code>close</code> 
-    routine fails, but I don't think that's possible due to other properties in 
-    the list being successfully closed and removed from the property list.  I 
-    suppose that it would be possible to just remove the properties which have 
-    successful <code>close</code> callbacks, but I'm not happy with the
-    ramifications of a mangled, un-closable property list hanging around... 
-    Any comments?
 </dl>
 
 
@@ -3083,6 +3056,8 @@ facilitate moving easily between them.</i>
 	write operations and can be important in tuning application 
 	performance.
 	<p>
+	See <a href="RM_H5D.html#Dataset-Create">H5Dcreate</a> for 
+	further cross-references.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist_id</code>
@@ -3203,6 +3178,8 @@ facilitate moving easily between them.</i>
 	concert with the dataset fill value properties functions 
 	<code>H5Pget_fill_value</code> and <code>H5Pget_fill_time</code>.
 	<p>
+	See <a href="RM_H5D.html#Dataset-Create">H5Dcreate</a> for 
+	further cross-references.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist_id</code>
@@ -3239,12 +3216,18 @@ facilitate moving easily between them.</i>
         <p>
 	Timing is specified in <code>fill_time</code> with one of the following values:
 	<table border=0 >
-           <tr valign="top"><td rowspan="2">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
-	     <code>H5D_FILL_TIME_ALLOC</code>&nbsp;&nbsp; 
+           <tr valign="top"><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+	     <code>H5D_FILL_TIME_IFSET</code>&nbsp;&nbsp; 
+             </td><td>
+	     Write fill values to the dataset when storage space is allocated 
+	     only if there is a user-defined fill value, i.e., one set with 
+	     <a href="#Property-SetFillValue">H5Pset_fill_value</a>.
+	     &nbsp;&nbsp;(Default)
+	   </td></tr><tr valign="top"><td>&nbsp;</td><td>
+	     <code>H5D_FILL_TIME_ALLOC</code>
              </td><td>
 	     Write fill values to the dataset when storage space is allocated.
-	     &nbsp;&nbsp;(Default)
-	   </td></tr><tr valign="top"><td>
+	   </td></tr><tr valign="top"><td>&nbsp;</td><td>
              <code>H5D_FILL_TIME_NEVER</code>
              </td><td>
              Never write fill values to the dataset.
@@ -3255,6 +3238,8 @@ facilitate moving easily between them.</i>
 	dataset storage allocation time properties, set with the functions 
 	<code>H5Pset_fill_value</code> and <code>H5Pset_alloc_time</code>.
 	<p>
+	See <a href="RM_H5D.html#Dataset-Create">H5Dcreate</a> for 
+	further cross-references.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist_id</code>
@@ -3381,6 +3366,9 @@ facilitate moving easily between them.</i>
 	set with the functions 
 	<code>H5Pset_fill_value</code> and <code>H5Pset_fill_time</code>.
 	<p>
+	<p>
+	See <a href="RM_H5D.html#Dataset-Create">H5Dcreate</a> for 
+	further cross-references.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist_id</code>
@@ -3767,10 +3755,8 @@ facilitate moving easily between them.</i>
     <dd><code>H5Pget_filter_by_id</code> returns information about the
         filter specified in <code>filter</code>, a filter identifier. 
 	<p>
-	If <code>plist_id</code> identifies a dataset creation property list,
-	<code>filter</code> will be in a permanent filter pipeline.
-	If <code>plist_id</code> identifies a data transfer property list,
-	<code>filter</code> will be in a transient filter pipeline.
+	<code>plist_id</code> must identify a dataset creation property list
+	and <code>filter</code> will be in a permanent filter pipeline.
 	<p>
 	The <code>filter</code> and <code>flags</code> parameters are used 
 	in the same manner as described in the discussion of
@@ -3842,10 +3828,8 @@ facilitate moving easily between them.</i>
   <dt><strong>Description:</strong>
     <dd><code>H5Pmodify_filter</code> modifies the specified 
         <code>filter</code> in the filter pipeline.
-        If <code>plist</code> is a dataset creation property list, 
-        the modified filter is in a permanent filter pipeline; 
-        if <code>plist</code> is a dataset transfer property list, 
-        the modified filter is in a transient filter pipeline.
+        <code>plist</code> must be a dataset creation property list 
+        and the modified filter will be in a permanent filter pipeline.
 	<p>
 	The <code>filter</code>, <code>flags</code> 
         <code>cd_nelmts[]</code>, and <code>cd_values</code> parameters 
@@ -3973,9 +3957,9 @@ facilitate moving easily between them.</i>
   <dt><strong>Purpose:</strong>
     <dd>Sets up use of the szip compression filter.
   <dt><strong>Description:</strong>
-    <dd><code>H5Pset_szip</code> sets the dataset compression method 
+    <dd><code>H5Pset_szip</code> sets a filter for the dataset 
         to szip compression, <code>H5Z_FILTER_SZIP</code>,
-	a compression designed for use with scientific data.
+	a compression method designed for use with scientific data.
 	<p>
 	Szip options are passed in an options mask, <code>options_mask</code>,
 	as follows.
@@ -4072,7 +4056,7 @@ facilitate moving easily between them.</i>
         <code>16</code>, and <code>32</code>.
 	The more pixel values vary, the smaller this number should be.
         For optimal performance, the number of pixels per scan line 
-        (i.e., the size of the fastest-changing dimension in the dataspace)
+        (i.e., the size of the fastest-changing dimension in the chunk)
         should be an even multiple of the number of pixels per block.
 	<p>
   <dt><strong>Notes:</strong>
@@ -4794,7 +4778,7 @@ facilitate moving easily between them.</i>
 	actual data.
         <p>
         The <em>I/O vectors</em> are hyperslab offset and length pairs 
-	and are set at the time of the definition of the hyperslab.
+	and are generated during hyperslab I/O.
         <p>
 	The number of I/O vectors is passed in <code>vector_size</code>
 	to be  set in the dataset transfer property list <code>dxpl_id</code>.
@@ -7623,7 +7607,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
  
-Last modified: 6 June 2003
+Last modified: 23 June 2003
  
 </body>
 </html>
