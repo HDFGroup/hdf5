@@ -34,13 +34,13 @@ typedef struct H5F_t H5F_t;
 /* For non-little-endian platforms, encode each byte by itself */
 #ifdef WORDS_BIGENDIAN
 #  define INT16ENCODE(p, i) {						      \
-   *(p) = (uint8_t)( (uintn)(i)	    & 0xff); (p)++;			      \
-   *(p) = (uint8_t)(((uintn)(i) >> 8) & 0xff); (p)++;			      \
+   *(p) = (uint8_t)( (unsigned)(i)	    & 0xff); (p)++;			      \
+   *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff); (p)++;			      \
 }
 
 #  define UINT16ENCODE(p, i) {						      \
    *(p) = (uint8_t)(	    (i)	    & 0xff); (p)++;			      \
-   *(p) = (uint8_t)(((uintn)(i) >> 8) & 0xff); (p)++;			      \
+   *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff); (p)++;			      \
 }
 
 #  define INT32ENCODE(p, i) {						      \
@@ -259,21 +259,21 @@ __DLL__ size_t H5F_sizeof_size(H5F_t *f);
  */
 typedef struct H5F_create_t {
     hsize_t	userblock_size;	/* Size of the file user block in bytes */
-    intn	sym_leaf_k;	/* 1/2 rank for symbol table leaf nodes */
-    intn	btree_k[8];	/* 1/2 rank for btree internal nodes	*/
+    int	sym_leaf_k;	/* 1/2 rank for symbol table leaf nodes */
+    int	btree_k[8];	/* 1/2 rank for btree internal nodes	*/
     size_t	sizeof_addr;	/* Number of bytes in an address	*/
     size_t	sizeof_size;	/* Number of bytes for obj sizes	*/
-    intn	bootblock_ver;	/* Version # of the bootblock		*/
-    intn	freespace_ver;	/* Version # of the free-space information*/
-    intn	objectdir_ver;	/* Version # of the object directory format*/
-    intn	sharedheader_ver;/* Version # of the shared header format */
+    int	bootblock_ver;	/* Version # of the bootblock		*/
+    int	freespace_ver;	/* Version # of the free-space information*/
+    int	objectdir_ver;	/* Version # of the object directory format*/
+    int	sharedheader_ver;/* Version # of the shared header format */
 } H5F_create_t;
 
 /*
  * File-access property list.
  */
 typedef struct H5F_access_t {
-    intn	mdc_nelmts;	/* Size of meta data cache (elements)	*/
+    int	mdc_nelmts;	/* Size of meta data cache (elements)	*/
     size_t	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
     double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
@@ -281,7 +281,7 @@ typedef struct H5F_access_t {
     hsize_t	alignment;	/* Alignment				*/
     size_t	meta_block_size;    /* Minimum metadata allocation block size (when aggregating metadata allocations) */
     size_t	sieve_buf_size;     /* Maximum sieve buffer size (when data sieving is allowed by file driver) */
-    uintn	gc_ref;		/* Garbage-collect references?		*/
+    unsigned	gc_ref;		/* Garbage-collect references?		*/
     hid_t	driver_id;	/* File driver ID			*/
     void	*driver_info;	/* File driver specific information	*/
 } H5F_access_t;
@@ -306,7 +306,7 @@ struct H5S_t;
 
 /* Private functions, not part of the publicly documented API */
 __DLL__ herr_t H5F_init(void);
-__DLL__ uintn H5F_get_intent(H5F_t *f);
+__DLL__ unsigned H5F_get_intent(H5F_t *f);
 __DLL__ hid_t H5F_get_driver_id(H5F_t *f);
 
 /* Functions that operate on array storage */
@@ -363,8 +363,8 @@ __DLL__ herr_t H5F_seq_writev(H5F_t *f, hid_t dxpl_id,
 
 
 /* Functions that operate on indexed storage */
-__DLL__ hsize_t H5F_istore_allocated(H5F_t *f, uintn ndims, haddr_t addr);
-__DLL__ herr_t H5F_istore_dump_btree(H5F_t *f, FILE *stream, uintn ndims,
+__DLL__ hsize_t H5F_istore_allocated(H5F_t *f, unsigned ndims, haddr_t addr);
+__DLL__ herr_t H5F_istore_dump_btree(H5F_t *f, FILE *stream, unsigned ndims,
 				     haddr_t addr);
 
 /* Functions for allocation/releasing chunks */

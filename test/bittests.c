@@ -37,7 +37,7 @@ static herr_t
 test_find (void)
 {
     uint8_t	v1[8];
-    intn	i;
+    int	i;
     ssize_t	n;
     
     TESTING("bit search operations");
@@ -157,7 +157,7 @@ test_copy (void)
 {
     uint8_t	v1[8], v2[8];
     size_t	s_offset, d_offset, size;
-    intn	i, j;
+    int	i, j;
     ssize_t	n;
     
     TESTING("bit copy operations");
@@ -172,13 +172,13 @@ test_copy (void)
 	
 	/* Copy some bits to v2 and make sure something was copied */
 	H5T_bit_copy (v2, d_offset, v1, s_offset, size);
-	for (j=0; j<(intn)sizeof(v2); j++) if (v2[j]) break;
-	if (size>0 && j>=(intn)sizeof(v2)) {
+	for (j=0; j<(int)sizeof(v2); j++) if (v2[j]) break;
+	if (size>0 && j>=(int)sizeof(v2)) {
 	    H5_FAILED();
 	    puts ("    Unabled to find copied region in destination");
 	    goto failed;
 	}
-	if (0==size && j<(intn)sizeof(v2)) {
+	if (0==size && j<(int)sizeof(v2)) {
 	    H5_FAILED();
 	    puts ("    Found copied bits when we shouldn't have");
 	    goto failed;
@@ -279,7 +279,7 @@ test_set (void)
 {
     uint8_t	v2[8];
     size_t	d_offset, size;
-    intn	i, j;
+    int	i, j;
     ssize_t	n;
     
     TESTING("bit set operations");
@@ -292,13 +292,13 @@ test_set (void)
 	
 	/* Set some bits in v2 */
 	H5T_bit_set (v2, d_offset, size, TRUE);
-	for (j=0; j<(intn)sizeof(v2); j++) if (v2[j]) break;
-	if (size>0 && j>=(intn)sizeof(v2)) {
+	for (j=0; j<(int)sizeof(v2); j++) if (v2[j]) break;
+	if (size>0 && j>=(int)sizeof(v2)) {
 	    H5_FAILED();
 	    puts ("    Unabled to find set region in buffer");
 	    goto failed;
 	}
-	if (0==size && j<(intn)sizeof(v2)) {
+	if (0==size && j<(int)sizeof(v2)) {
 	    H5_FAILED();
 	    puts ("    Found set bits when we shouldn't have");
 	    goto failed;
@@ -396,7 +396,7 @@ test_clear (void)
 {
     uint8_t	v2[8];
     size_t	d_offset, size;
-    intn	i, j;
+    int	i, j;
     ssize_t	n;
     
     TESTING("bit clear operations");
@@ -409,13 +409,13 @@ test_clear (void)
 	
 	/* Clear some bits in v2 */
 	H5T_bit_set (v2, d_offset, size, FALSE);
-	for (j=0; j<(intn)sizeof(v2); j++) if (0xff!=v2[j]) break;
-	if (size>0 && j>=(intn)sizeof(v2)) {
+	for (j=0; j<(int)sizeof(v2); j++) if (0xff!=v2[j]) break;
+	if (size>0 && j>=(int)sizeof(v2)) {
 	    H5_FAILED();
 	    puts ("    Unabled to find cleared region in buffer");
 	    goto failed;
 	}
-	if (0==size && j<(intn)sizeof(v2)) {
+	if (0==size && j<(int)sizeof(v2)) {
 	    H5_FAILED();
 	    puts ("    Found cleared bits when we shouldn't have");
 	    goto failed;
@@ -511,7 +511,7 @@ test_clear (void)
 int
 main (void)
 {
-    intn	nerrors=0;
+    int	nerrors=0;
 
     nerrors += test_find ()<0?1:0;
     nerrors += test_set  ()<0?1:0;

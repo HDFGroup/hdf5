@@ -21,7 +21,7 @@
 /* Interface initialization */
 #define PABLO_MASK      H5Spoint_mask
 #define INTERFACE_INIT  NULL
-static intn             interface_initialize_g = 0;
+static int             interface_initialize_g = 0;
 
 static herr_t H5S_point_init (const H5S_t *space, H5S_sel_iter_t *iter);
 static hsize_t H5S_point_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
@@ -129,7 +129,7 @@ herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hss
 {
     H5S_pnt_node_t *top, *curr, *new; /* Point selection nodes */
     const hssize_t *coord=(const hssize_t *)_coord;     /* Pointer to the actual coordinates */
-    uintn i;                 /* Counter */
+    unsigned i;                 /* Counter */
     herr_t ret_value=FAIL;  /* return value */
 
     FUNC_ENTER (H5S_point_add, FAIL);
@@ -165,7 +165,7 @@ herr_t H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hss
 #ifdef QAK
 	printf("%s: check 1.3\n",FUNC);
 	{
-	    intn j;
+	    int j;
 
 	    for(j=0; j<space->extent.u.simple.rank; j++) {
 		printf("%s: pnt[%d]=%d\n",FUNC,(int)j,(int)new->pnt[j]);
@@ -291,8 +291,8 @@ H5S_point_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
     hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
     uint8_t	*buf=(uint8_t *)_buf;   /* Alias for pointer arithmetic */
-    uintn   	ndims;          /* Number of dimensions of dataset */
-    uintn	    u;				/*counters		*/
+    unsigned   	ndims;          /* Number of dimensions of dataset */
+    unsigned	    u;				/*counters		*/
     hsize_t  	num_read;       /* number of elements read into buffer */
 
     FUNC_ENTER (H5S_point_fgath, 0);
@@ -394,8 +394,8 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
     hssize_t	zero[H5O_LAYOUT_NDIMS];		/*zero vector		*/
     const uint8_t *buf=(const uint8_t *)_buf;   /* Alias for pointer arithmetic */
-    uintn   ndims;          /* Number of dimensions of dataset */
-    uintn	u;				/*counters		*/
+    unsigned   ndims;          /* Number of dimensions of dataset */
+    unsigned	u;				/*counters		*/
     hsize_t  num_written;    /* number of elements written from buffer */
 
     FUNC_ENTER (H5S_point_fscat, FAIL);
@@ -502,8 +502,8 @@ H5S_point_mgath (const void *_buf, size_t elmt_size,
     uint8_t *tconv_buf=(uint8_t *)_tconv_buf;
     hsize_t	acc;				/* coordinate accumulator */
     hsize_t	off;				/* coordinate offset */
-    intn	space_ndims;			/*dimensionality of space*/
-    intn	i;				/*counters		*/
+    int	space_ndims;			/*dimensionality of space*/
+    int	i;				/*counters		*/
     hsize_t num_gath;        /* number of elements gathered */
 
     FUNC_ENTER (H5S_point_mgath, 0);
@@ -578,8 +578,8 @@ H5S_point_mscat (const void *_tconv_buf, size_t elmt_size,
     const uint8_t *tconv_buf=(const uint8_t *)_tconv_buf;
     hsize_t	acc;				/* coordinate accumulator */
     hsize_t	off;				/* coordinate offset */
-    intn	space_ndims;		/*dimensionality of space*/
-    intn	i;				/*counters		*/
+    int	space_ndims;		/*dimensionality of space*/
+    int	i;				/*counters		*/
     hsize_t num_scat;        /* Number of elements scattered */
 
     FUNC_ENTER (H5S_point_mscat, FAIL);
@@ -760,7 +760,7 @@ H5S_point_copy (H5S_t *dst, const H5S_t *src)
 #ifdef QAK
  printf("%s: check 5.0\n",FUNC);
     {
-        intn i;
+        int i;
         for(i=0; i<src->extent.u.simple.rank; i++)
             printf("%s: check 5.1, new->pnt[%d]=%d\n",FUNC,i,(int)new->pnt[i]);
     }
@@ -809,7 +809,7 @@ htri_t
 H5S_point_select_valid (const H5S_t *space)
 {
     H5S_pnt_node_t *curr;      /* Point information nodes */
-    uintn u;                   /* Counter */
+    unsigned u;                   /* Counter */
     htri_t ret_value=TRUE;     /* return value */
 
     FUNC_ENTER (H5S_point_select_valid, FAIL);
@@ -919,7 +919,7 @@ H5S_point_select_serialize (const H5S_t *space, uint8_t *buf)
     H5S_pnt_node_t *curr;   /* Point information nodes */
     uint8_t *lenp;          /* pointer to length location for later storage */
     uint32_t len=0;         /* number of bytes used */
-    uintn u;                /* local counting variable */
+    unsigned u;                /* local counting variable */
     herr_t ret_value=FAIL;  /* return value */
 
     FUNC_ENTER (H5S_point_select_serialize, FAIL);
@@ -989,7 +989,7 @@ H5S_point_select_deserialize (H5S_t *space, const uint8_t *buf)
     uint32_t rank;           /* Rank of points */
     size_t num_elem=0;      /* Number of elements in selection */
     hssize_t *coord=NULL, *tcoord;   /* Pointer to array of elements */
-    uintn i,j;              /* local counting variables */
+    unsigned i,j;              /* local counting variables */
     herr_t ret_value=FAIL;  /* return value */
 
     FUNC_ENTER (H5S_point_select_deserialize, FAIL);
@@ -1057,8 +1057,8 @@ herr_t
 H5S_point_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
 {
     H5S_pnt_node_t *node;       /* Point node */
-    intn rank;                  /* Dataspace rank */
-    intn i;                     /* index variable */
+    int rank;                  /* Dataspace rank */
+    int i;                     /* index variable */
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER (H5S_point_bounds, FAIL);
@@ -1312,7 +1312,7 @@ H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
     hsize_t offset;             /* offset of region in buffer */
     void *tmp_buf;              /* temporary location of the element in the buffer */
     H5S_pnt_node_t *node;   /* Point node */
-    uintn rank;             /* Dataspace rank */
+    unsigned rank;             /* Dataspace rank */
     herr_t ret_value=0;     /* return value */
 
     FUNC_ENTER (H5S_point_select_iterate, 0);

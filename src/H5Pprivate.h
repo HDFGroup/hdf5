@@ -39,7 +39,7 @@ typedef enum {
 /* Define structure to hold property information */
 typedef struct H5P_genprop_tag {
     /* Values for this property */
-    uintn xor_val;      /* XOR'ed version of the name, for faster comparisons */
+    unsigned xor_val;      /* XOR'ed version of the name, for faster comparisons */
     char *name;         /* Name of property */
     size_t size;        /* Size of property value */
     void *value;        /* Pointer to property value */
@@ -61,12 +61,12 @@ typedef struct H5P_genclass_tag {
     struct H5P_genclass_tag *parent;     /* Pointer to parent class */
     char *name;         /* Name of property list class */
     size_t  nprops;     /* Number of properties in class */
-    uintn   hashsize;   /* Hash table size */
-    uintn   plists;     /* Number of property lists that have been created since the last modification to the class */
-    uintn   classes;    /* Number of classes that have been derived since the last modification to the class */
-    uintn   ref_count;  /* Number of oustanding ID's open on this class object */
-    uintn   internal:1; /* Whether this class is internal to the library or not */
-    uintn   deleted:1;  /* Whether this class has been deleted and is waiting for dependent classes & proplists to close */
+    unsigned   hashsize;   /* Hash table size */
+    unsigned   plists;     /* Number of property lists that have been created since the last modification to the class */
+    unsigned   classes;    /* Number of classes that have been derived since the last modification to the class */
+    unsigned   ref_count;  /* Number of oustanding ID's open on this class object */
+    unsigned   internal:1; /* Whether this class is internal to the library or not */
+    unsigned   deleted:1;  /* Whether this class has been deleted and is waiting for dependent classes & proplists to close */
 
     /* Callback function pointers & info */
     H5P_cls_create_func_t create_func;  /* Function to call when a property list is created */
@@ -83,7 +83,7 @@ typedef struct H5P_genclass_tag {
 typedef struct H5P_genplist_tag {
     H5P_genclass_t *pclass; /* Pointer to class info */
     size_t  nprops;         /* Number of properties in class */
-    uintn   class_init:1;   /* Whether the class initialization callback finished successfully */
+    unsigned   class_init:1;   /* Whether the class initialization callback finished successfully */
 
     /* Hash size for a property list is same as class */
     H5P_genprop_t *props[1];  /* Hash table of pointers to properties in the list */
@@ -116,7 +116,7 @@ __DLL__ H5P_class_t H5P_get_class(hid_t tid);
 __DLL__ hid_t H5P_get_driver(hid_t plist_id);
 
 /* Private functions to "peek" at properties of a certain type */
-__DLL__ uintn H5P_peek_uintn(hid_t plist_id, const char *name);
+__DLL__ unsigned H5P_peek_unsigned(hid_t plist_id, const char *name);
 __DLL__ hid_t H5P_peek_hid_t(hid_t plist_id, const char *name);
 __DLL__ void *H5P_peek_voidp(hid_t plist_id, const char *name);
 __DLL__ hsize_t H5P_peek_hsize_t(hid_t plist_id, const char *name);

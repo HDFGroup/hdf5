@@ -16,7 +16,7 @@
 /* Interface initialization */
 #define PABLO_MASK	H5Z_mask
 #define INTERFACE_INIT H5Z_init_interface
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 static herr_t H5Z_init_interface (void);
 
 static size_t		H5Z_table_alloc_g = 0;
@@ -64,7 +64,7 @@ H5Z_init_interface (void)
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5Z_term_interface (void)
 {
     size_t	i;
@@ -252,7 +252,7 @@ H5Z_register (H5Z_filter_t id, const char *comment, H5Z_func_t func)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, uintn flags,
+H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
 	   size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
 {
     size_t	idx, i;
@@ -260,7 +260,7 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, uintn flags,
     FUNC_ENTER(H5Z_append, FAIL);
     assert(pline);
     assert(filter>=0 && filter<=H5Z_FILTER_MAX);
-    assert(0==(flags & ~((uintn)H5Z_FLAG_DEFMASK)));
+    assert(0==(flags & ~((unsigned)H5Z_FLAG_DEFMASK)));
     assert(0==cd_nelmts || cd_values);
 
     /*
@@ -292,7 +292,7 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, uintn flags,
     pline->filter[idx].name = NULL; /*we'll pick it up later*/
     pline->filter[idx].cd_nelmts = cd_nelmts;
     if (cd_nelmts>0) {
-	pline->filter[idx].cd_values = H5MM_malloc(cd_nelmts*sizeof(uintn));
+	pline->filter[idx].cd_values = H5MM_malloc(cd_nelmts*sizeof(unsigned));
 	if (NULL==pline->filter[idx].cd_values) {
 	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			  "memory allocation failed for filter");
@@ -372,13 +372,13 @@ H5Z_find(H5Z_filter_t id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, uintn flags,
-	     uintn *filter_mask/*in,out*/, size_t *nbytes/*in,out*/,
+H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, unsigned flags,
+	     unsigned *filter_mask/*in,out*/, size_t *nbytes/*in,out*/,
 	     size_t *buf_size/*in,out*/, void **buf/*in,out*/)
 {
     size_t	i, idx, new_nbytes;
     H5Z_class_t	*fclass=NULL;
-    uintn	failed = 0;
+    unsigned	failed = 0;
 #ifdef H5Z_DEBUG
     H5_timer_t	timer;
 #endif
@@ -386,7 +386,7 @@ H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, uintn flags,
     FUNC_ENTER(H5Z_pipeline, FAIL);
     
     assert(f);
-    assert(0==(flags & ~((uintn)H5Z_FLAG_INVMASK)));
+    assert(0==(flags & ~((unsigned)H5Z_FLAG_INVMASK)));
     assert(filter_mask);
     assert(nbytes && *nbytes>0);
     assert(buf_size && *buf_size>0);

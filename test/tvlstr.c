@@ -122,7 +122,7 @@ test_vlstrings_basic(void)
     hid_t       xfer_pid;   /* Dataset transfer property list ID */
     hsize_t		dims1[] = {SPACE1_DIM1};
     hsize_t     size;       /* Number of bytes which will be used */
-    uintn       i;          /* counting variable */
+    unsigned       i;          /* counting variable */
     int         str_used;   /* String data in memory */
     int         mem_used=0; /* Memory used during allocation */
     herr_t		ret;		/* Generic return value		*/

@@ -176,7 +176,7 @@ static const H5FD_class_t H5FD_sec2_g = {
 /* Interface initialization */
 #define PABLO_MASK	H5FD_sec2_mask
 #define INTERFACE_INIT	H5FD_sec2_init
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 
 /* Declare a free list to manage the H5FD_sec2_t struct */
 H5FL_DEFINE_STATIC(H5FD_sec2_t);

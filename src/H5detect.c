@@ -402,7 +402,7 @@ print_results(int nd, detected_t *d)
 #include \"H5MMprivate.h\"\n\
 #include \"H5Tpkg.h\"\n\
 \n\
-static intn interface_initialize_g = 0;\n\
+static int interface_initialize_g = 0;\n\
 #define INTERFACE_INIT NULL\n\
 \n\
 /* Declare external the free list for H5T_t's */\n\
@@ -412,7 +412,7 @@ H5FL_EXTERN(H5T_t);\n\
 
     /* The interface termination function */
     printf("\n\
-intn\n\
+int\n\
 H5TN_term_interface(void)\n\
 {\n\
     interface_initialize_g = 0;\n\

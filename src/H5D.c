@@ -74,7 +74,7 @@ const H5D_create_t	H5D_create_dflt = {
 };
 
 /* Interface initialization? */
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5D_init_interface
 static herr_t H5D_init_interface(void);
 static herr_t H5D_init_storage(H5D_t *dataset, const H5S_t *space);
@@ -145,8 +145,8 @@ H5D_init_interface(void)
     void *def_bkgr_buf=H5D_XFER_BKGR_BUF_DEF;        /* Default value for background buffer */
     H5T_bkg_t def_bkgr_buf_type=H5D_XFER_BKGR_BUF_TYPE_DEF;        /* Default value for background buffer type */
     double def_btree_split_ratio[3]=H5D_XFER_BTREE_SPLIT_RATIO_DEF;        /* Default value for B-tree node split ratios */
-    uintn def_hyper_cache=H5D_XFER_HYPER_CACHE_DEF;        /* Default value for hyperslab caching */
-    uintn def_hyper_cache_lim=H5D_XFER_HYPER_CACHE_LIM_DEF;        /* Default value for hyperslab cache limit */
+    unsigned def_hyper_cache=H5D_XFER_HYPER_CACHE_DEF;        /* Default value for hyperslab caching */
+    unsigned def_hyper_cache_lim=H5D_XFER_HYPER_CACHE_LIM_DEF;        /* Default value for hyperslab cache limit */
     H5MM_allocate_t def_vlen_alloc=H5D_XFER_VLEN_ALLOC_DEF;        /* Default value for vlen allocation function */
     void *def_vlen_alloc_info=H5D_XFER_VLEN_ALLOC_INFO_DEF;        /* Default value for vlen allocation information */
     H5MM_free_t def_vlen_free=H5D_XFER_VLEN_FREE_DEF;        /* Default value for vlen free function */
@@ -154,7 +154,7 @@ H5D_init_interface(void)
     hid_t def_vfl_id=H5D_XFER_VFL_ID_DEF;        /* Default value for file driver ID */
     void *def_vfl_info=H5D_XFER_VFL_INFO_DEF;        /* Default value for file driver info */
 #ifdef COALESCE_READS
-    uintn def_gather_reads=H5D_XFER_GATHER_READS_DEF;        /* Default value for 'gather reads' property */
+    unsigned def_gather_reads=H5D_XFER_GATHER_READS_DEF;        /* Default value for 'gather reads' property */
 #endif /* COALESCE_READS */
     size_t def_hyp_vec_size=H5D_XFER_HYPER_VECTOR_SIZE_DEF;          /* Default value for vector size */
     herr_t ret_value=SUCCEED;       /* Return value */
@@ -263,7 +263,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5D_term_interface(void)
 {
     int		n=0;
@@ -1118,8 +1118,8 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 {
     H5D_t		*new_dset = NULL;
     H5D_t		*ret_value = NULL;
-    intn		i, ndims;
-    uintn		u;
+    int		i, ndims;
+    unsigned		u;
     hsize_t		max_dim[H5O_LAYOUT_NDIMS]={0};
     H5O_efl_t		*efl = NULL;
     H5F_t		*f = NULL;
@@ -1517,7 +1517,7 @@ H5D_open_oid(H5G_entry_t *ent)
     H5D_t 	*dataset = NULL;	/*new dataset struct 		*/
     H5D_t 	*ret_value = NULL;	/*return value			*/
     H5S_t	*space = NULL;		/*data space			*/
-    uintn	u;
+    unsigned	u;
     
     FUNC_ENTER(H5D_open_oid, NULL);
 
@@ -1672,7 +1672,7 @@ done:
 herr_t
 H5D_close(H5D_t *dataset)
 {
-    uintn		    free_failed;
+    unsigned		    free_failed;
 
     FUNC_ENTER(H5D_close, FAIL);
 
@@ -2901,7 +2901,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
              */
             if (IS_H5FD_MPIO(dset->ent.file)) {
                 /* We only handle simple data spaces so far */
-                intn		ndims;
+                int		ndims;
                 hsize_t		dim[H5O_LAYOUT_NDIMS];
                 
                 if ((ndims=H5S_get_simple_extent_dims(space, dim, NULL))<0) {
@@ -2991,7 +2991,7 @@ hsize_t
 H5D_get_storage_size(H5D_t *dset)
 {
     hsize_t	size;
-    uintn		u;
+    unsigned		u;
     
     FUNC_ENTER(H5D_get_storage_size, 0);
 

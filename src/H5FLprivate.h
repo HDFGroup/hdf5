@@ -32,7 +32,7 @@
 typedef struct H5FL_reg_node_t {
     struct H5FL_reg_node_t *next;   /* Pointer to next block in free list */
 #ifdef H5FL_DEBUG
-    uintn inuse;                /* Indicate when object is in use */
+    unsigned inuse;                /* Indicate when object is in use */
 #endif /* H5FL_DEBUG */
     union {
         double unused1;         /* Unused normally, just here for aligment */
@@ -42,9 +42,9 @@ typedef struct H5FL_reg_node_t {
 
 /* Data structure for free list of blocks */
 typedef struct H5FL_reg_head_t {
-    uintn init;         /* Whether the free list has been initialized */
-    uintn allocated;    /* Number of blocks allocated */
-    uintn onlist;       /* Number of blocks on free list */
+    unsigned init;         /* Whether the free list has been initialized */
+    unsigned allocated;    /* Number of blocks allocated */
+    unsigned onlist;       /* Number of blocks on free list */
     size_t list_mem;    /* Amount of memory on free list */
     const char *name;   /* Name of the type */
     size_t size;        /* Size of the blocks in the list */
@@ -93,9 +93,9 @@ typedef struct H5FL_blk_node_t {
 
 /* Data structure for priority queue of native block free lists */
 typedef struct H5FL_blk_head_t {
-    uintn init;         /* Whether the free list has been initialized */
-    uintn allocated;    /* Number of blocks allocated */
-    uintn onlist;       /* Number of blocks on free list */
+    unsigned init;         /* Whether the free list has been initialized */
+    unsigned allocated;    /* Number of blocks allocated */
+    unsigned onlist;       /* Number of blocks on free list */
     size_t list_mem;    /* Amount of memory in block on free list */
     const char *name;   /* Name of the type */
     H5FL_blk_node_t *head;  /* Pointer to first free list in queue */
@@ -134,12 +134,12 @@ typedef struct H5FL_arr_node_t {
 
 /* Data structure for free list of array blocks */
 typedef struct H5FL_arr_head_t {
-    uintn init;         /* Whether the free list has been initialized */
-    uintn allocated;    /* Number of blocks allocated */
-    uintn *onlist;      /* Number of blocks on free list */
+    unsigned init;         /* Whether the free list has been initialized */
+    unsigned allocated;    /* Number of blocks allocated */
+    unsigned *onlist;      /* Number of blocks on free list */
     size_t list_mem;    /* Amount of memory in block on free list */
     const char *name;   /* Name of the type */
-    intn  maxelem;      /* Maximum number of elements in an array */
+    int  maxelem;      /* Maximum number of elements in an array */
     size_t size;        /* Size of the array elements in the list */
     union {
         H5FL_arr_node_t **list_arr;  /* Array of lists of free blocks */
@@ -171,17 +171,17 @@ typedef struct H5FL_arr_head_t {
 /*
  * Library prototypes.
  */
-__DLL__ void * H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, uintn clear);
+__DLL__ void * H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, unsigned clear);
 __DLL__ void * H5FL_blk_free(H5FL_blk_head_t *head, void *block);
 __DLL__ void * H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size);
-__DLL__ void * H5FL_reg_alloc(H5FL_reg_head_t *head, uintn clear);
+__DLL__ void * H5FL_reg_alloc(H5FL_reg_head_t *head, unsigned clear);
 __DLL__ void * H5FL_reg_free(H5FL_reg_head_t *head, void *obj);
-__DLL__ void * H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, uintn clear);
+__DLL__ void * H5FL_arr_alloc(H5FL_arr_head_t *head, size_t elem, unsigned clear);
 __DLL__ void * H5FL_arr_free(H5FL_arr_head_t *head, void *obj);
 __DLL__ void * H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem);
 __DLL__ herr_t H5FL_garbage_coll(void);
 __DLL__ herr_t H5FL_set_free_list_limits(int reg_global_lim, int reg_list_lim,
     int arr_global_lim, int arr_list_lim, int blk_global_lim, int blk_list_lim);
-__DLL__ intn   H5FL_term_interface(void);
+__DLL__ int   H5FL_term_interface(void);
 
 #endif

@@ -182,7 +182,7 @@ main(int argc, char *argv[])
 Comment out tests that are not done yet */
 
     Verbosity = 4;  /* Default Verbosity is Low */
-    uintn major, minor, release;
+    unsigned major, minor, release;
     H5Library::getLibVersion( major, minor, release);
 
     print_func("\nFor help use: testhdf5 -help\n");

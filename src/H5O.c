@@ -37,12 +37,12 @@
 static herr_t H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh);
 static H5O_t *H5O_load(H5F_t *f, haddr_t addr, const void *_udata1,
 		       void *_udata2);
-static uintn H5O_find_in_ohdr(H5F_t *f, haddr_t addr,
-			     const H5O_class_t **type_p, intn sequence);
-static uintn H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type,
+static unsigned H5O_find_in_ohdr(H5F_t *f, haddr_t addr,
+			     const H5O_class_t **type_p, int sequence);
+static unsigned H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type,
 		      size_t size);
-static uintn H5O_alloc_extend_chunk(H5O_t *oh, uintn chunkno, size_t size);
-static uintn H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size);
+static unsigned H5O_alloc_extend_chunk(H5O_t *oh, unsigned chunkno, size_t size);
+static unsigned H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size);
 static herr_t H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force);
 
 /* H5O inherits cache-like properties from H5AC */
@@ -53,7 +53,7 @@ static const H5AC_class_t H5AC_OHDR[1] = {{
 }};
 
 /* Interface initialization */
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT	H5O_init_interface
 static herr_t H5O_init_interface(void);
 
@@ -354,10 +354,10 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
     uint8_t	buf[16], *p;
     size_t	mesg_size;
     size_t	hdr_size;
-    uintn	id;
-    intn	mesgno;
-    uintn	curmesg = 0, nmesgs;
-    uintn	chunkno;
+    unsigned	id;
+    int	mesgno;
+    unsigned	curmesg = 0, nmesgs;
+    unsigned	chunkno;
     haddr_t	chunk_addr;
     size_t	chunk_size;
     H5O_cont_t	*cont = NULL;
@@ -417,7 +417,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 
 	/* increase chunk array size */
 	if (oh->nchunks >= oh->alloc_nchunks) {
-	    uintn na = oh->alloc_nchunks + H5O_NCHUNKS;
+	    unsigned na = oh->alloc_nchunks + H5O_NCHUNKS;
 	    H5O_chunk_t *x = H5FL_ARR_REALLOC (H5O_chunk_t, oh->chunk, na);
 
 	    if (!x) {
@@ -507,7 +507,7 @@ done:
         /*
          * Free resources.
          */
-        uintn u;
+        unsigned u;
 
         for (u = 0; u < oh->nchunks; u++)
             oh->chunk[u].image = H5FL_BLK_FREE(chunk_image,oh->chunk[u].image);
@@ -546,11 +546,11 @@ static herr_t
 H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 {
     uint8_t	buf[16], *p;
-    intn	id;
-    uintn	u;
+    int	id;
+    unsigned	u;
     H5O_cont_t	*cont = NULL;
     herr_t	(*encode)(H5F_t*, uint8_t*, const void*) = NULL;
-    uintn combine=0;        /* Whether to combine the object header prefix & the first chunk */
+    unsigned combine=0;        /* Whether to combine the object header prefix & the first chunk */
 
     FUNC_ENTER(H5O_flush, FAIL);
 
@@ -868,11 +868,11 @@ H5O_copy (const H5O_class_t *type, const void *mesg, void *dst)
  *
  *-------------------------------------------------------------------------
  */
-intn
-H5O_link(H5G_entry_t *ent, intn adjust)
+int
+H5O_link(H5G_entry_t *ent, int adjust)
 {
     H5O_t	*oh = NULL;
-    intn	ret_value = FAIL;
+    int	ret_value = FAIL;
 
     FUNC_ENTER(H5O_link, FAIL);
 
@@ -932,12 +932,12 @@ H5O_link(H5G_entry_t *ent, intn adjust)
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5O_count (H5G_entry_t *ent, const H5O_class_t *type)
 {
     H5O_t	*oh = NULL;
-    intn	acc;
-    uintn	u;
+    int	acc;
+    unsigned	u;
     
     FUNC_ENTER (H5O_count, FAIL);
 
@@ -983,10 +983,10 @@ H5O_count (H5G_entry_t *ent, const H5O_class_t *type)
  *-------------------------------------------------------------------------
  */
 htri_t
-H5O_exists(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
+H5O_exists(H5G_entry_t *ent, const H5O_class_t *type, int sequence)
 {
     H5O_t	*oh=NULL;
-    uintn	u;
+    unsigned	u;
     
     FUNC_ENTER(H5O_exists, FAIL);
     assert(ent);
@@ -1038,11 +1038,11 @@ H5O_exists(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
  *-------------------------------------------------------------------------
  */
 void *
-H5O_read(H5G_entry_t *ent, const H5O_class_t *type, intn sequence, void *mesg)
+H5O_read(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mesg)
 {
     H5O_t		*oh = NULL;
     void		*ret_value = NULL;
-    intn		idx;
+    int		idx;
     H5G_cache_t		*cache = NULL;
     H5G_type_t		cache_type;
 
@@ -1155,12 +1155,12 @@ H5O_read(H5G_entry_t *ent, const H5O_class_t *type, intn sequence, void *mesg)
  *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
-static uintn
+static unsigned
 H5O_find_in_ohdr(H5F_t *f, haddr_t addr, const H5O_class_t **type_p,
-		 intn sequence)
+		 int sequence)
 {
     H5O_t		*oh = NULL;
-    uintn		u;
+    unsigned		u;
     const H5O_class_t	*type = NULL;
 
     FUNC_ENTER(H5O_find_in_ohdr, UFAIL);
@@ -1252,14 +1252,14 @@ H5O_find_in_ohdr(H5F_t *f, haddr_t addr, const H5O_class_t **type_p,
  *
  *-------------------------------------------------------------------------
  */
-intn
-H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
-	   uintn flags, const void *mesg)
+int
+H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, int overwrite,
+	   unsigned flags, const void *mesg)
 {
     H5O_t		*oh = NULL;
-    intn		sequence;
-    uintn		idx;
-    intn		ret_value = FAIL;
+    int		sequence;
+    unsigned		idx;
+    int		ret_value = FAIL;
     size_t		size = 0;
     H5O_shared_t	sh_mesg = {0,{{0,0}}};
 
@@ -1422,7 +1422,7 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 static herr_t
 H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
 {
-    uintn	idx;
+    unsigned	idx;
     time_t	now = HDtime(NULL);
     size_t	size;
     
@@ -1545,11 +1545,11 @@ H5O_touch(H5G_entry_t *ent, hbool_t force)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
+H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, int sequence)
 {
     H5O_t		*oh = NULL;
-    intn		seq, nfailed = 0;
-    uintn		u;
+    int		seq, nfailed = 0;
+    unsigned		u;
     herr_t		ret_value = FAIL;
     H5O_shared_t	*sh_mesg = NULL;
 
@@ -1663,11 +1663,11 @@ H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
  *		memory.
  *-------------------------------------------------------------------------
  */
-static uintn
-H5O_alloc_extend_chunk(H5O_t *oh, uintn chunkno, size_t size)
+static unsigned
+H5O_alloc_extend_chunk(H5O_t *oh, unsigned chunkno, size_t size)
 {
-    uintn	u;
-    uintn	idx;
+    unsigned	u;
+    unsigned	idx;
     size_t	delta, old_size;
     size_t	aligned_size = H5O_ALIGN(size);
     uint8_t	*old_addr;
@@ -1722,7 +1722,7 @@ H5O_alloc_extend_chunk(H5O_t *oh, uintn chunkno, size_t size)
 
     /* create a new null message */
     if (oh->nmesgs >= oh->alloc_nmesgs) {
-        uintn na = oh->alloc_nmesgs + H5O_NMESGS;
+        unsigned na = oh->alloc_nmesgs + H5O_NMESGS;
         H5O_mesg_t *x = H5FL_ARR_REALLOC (H5O_mesg_t, oh->mesg, na);
 
         if (NULL==x) {
@@ -1796,17 +1796,17 @@ H5O_alloc_extend_chunk(H5O_t *oh, uintn chunkno, size_t size)
  *
  *-------------------------------------------------------------------------
  */
-static uintn
+static unsigned
 H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
 {
     size_t	cont_size;		/*continuation message size	*/
-    intn	found_null = (-1);	/*best fit null message		*/
-    intn	found_other = (-1);	/*best fit other message	*/
-    uintn	idx;		        /*message number return value	*/
+    int	found_null = (-1);	/*best fit null message		*/
+    int	found_other = (-1);	/*best fit other message	*/
+    unsigned	idx;		        /*message number return value	*/
     uint8_t	*p = NULL;		/*ptr into new chunk		*/
     H5O_cont_t	*cont = NULL;		/*native continuation message	*/
-    intn	chunkno;
-    uintn	u;
+    int	chunkno;
+    unsigned	u;
 
     FUNC_ENTER(H5O_alloc_new_chunk, UFAIL);
 
@@ -1863,7 +1863,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
      * Create the new chunk without giving it a file address.
      */
     if (oh->nchunks >= oh->alloc_nchunks) {
-        uintn na = oh->alloc_nchunks + H5O_NCHUNKS;
+        unsigned na = oh->alloc_nchunks + H5O_NCHUNKS;
         H5O_chunk_t *x = H5FL_ARR_REALLOC (H5O_chunk_t, oh->chunk, na);
 
         if (!x) {
@@ -1888,7 +1888,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
      */
     if (oh->nmesgs + 3 > oh->alloc_nmesgs) {
         int old_alloc=oh->alloc_nmesgs;
-        uintn na = oh->alloc_nmesgs + MAX (H5O_NMESGS, 3);
+        unsigned na = oh->alloc_nmesgs + MAX (H5O_NMESGS, 3);
         H5O_mesg_t *x = H5FL_ARR_REALLOC (H5O_mesg_t, oh->mesg, na);
 
         if (!x) {
@@ -1985,12 +1985,12 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
  *
  *-------------------------------------------------------------------------
  */
-static uintn
+static unsigned
 H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 {
-    uintn	chunkno;
-    uintn	idx;
-    uintn	null_idx;
+    unsigned	chunkno;
+    unsigned	idx;
+    unsigned	null_idx;
     size_t	aligned_size = H5O_ALIGN(size);
 
     FUNC_ENTER(H5O_alloc, UFAIL);
@@ -2046,7 +2046,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 
 	if (oh->nmesgs >= oh->alloc_nmesgs) {
 	    int old_alloc=oh->alloc_nmesgs;
-	    uintn na = oh->alloc_nmesgs + H5O_NMESGS;
+	    unsigned na = oh->alloc_nmesgs + H5O_NMESGS;
 	    H5O_mesg_t *x = H5FL_ARR_REALLOC (H5O_mesg_t, oh->mesg, na);
 
 	    if (!x) {
@@ -2156,16 +2156,16 @@ H5O_share (H5F_t *f, const H5O_class_t *type, const void *mesg,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_debug(H5F_t *f, haddr_t addr, FILE *stream, intn indent, intn fwidth)
+H5O_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
     H5O_t	*oh = NULL;
-    uintn	i, chunkno;
+    unsigned	i, chunkno;
     size_t	mesg_total = 0, chunk_total = 0;
     int		*sequence;
     haddr_t	tmp_addr;
     herr_t	ret_value = FAIL;
     void	*(*decode)(H5F_t*, const uint8_t*, H5O_shared_t*);
-    herr_t      (*debug)(H5F_t*, const void*, FILE*, intn, intn)=NULL;
+    herr_t      (*debug)(H5F_t*, const void*, FILE*, int, int)=NULL;
 
     FUNC_ENTER(H5O_debug, FAIL);
 
@@ -2235,7 +2235,7 @@ H5O_debug(H5F_t *f, haddr_t addr, FILE *stream, intn indent, intn fwidth)
 
 	/* check for bad message id */
 	if (oh->mesg[i].type->id < 0 ||
-	    oh->mesg[i].type->id >= (intn)NELMTS(message_type_g)) {
+	    oh->mesg[i].type->id >= (int)NELMTS(message_type_g)) {
 	    HDfprintf(stream, "*** BAD MESSAGE ID 0x%04x\n",
 		      oh->mesg[i].type->id);
 	    continue;

@@ -30,7 +30,7 @@
 #define PABLO_MASK	H5P_mask
 
 /* Is the interface initialized? */
-static intn		interface_initialize_g = 0;
+static int		interface_initialize_g = 0;
 #define INTERFACE_INIT H5P_init_interface
 static herr_t		H5P_init_interface(void);
 
@@ -58,7 +58,7 @@ hid_t H5P_LST_MOUNT_g               = FAIL;
 
 /* Local static functions */
 static H5P_genclass_t *H5P_create_class(H5P_genclass_t *par_class,
-     const char *name, uintn hashsize, uintn internal,
+     const char *name, unsigned hashsize, unsigned internal,
      H5P_cls_create_func_t cls_create, void *create_data,
      H5P_cls_copy_func_t cls_copy, void *copy_data,
      H5P_cls_close_func_t cls_close, void *close_data);
@@ -66,7 +66,7 @@ static herr_t H5P_close_list(void *_plist);
 static herr_t H5P_close_class(void *_pclass);
 static H5P_genprop_t *H5P_copy_prop(H5P_genprop_t *oprop);
 static herr_t H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod);
-static herr_t H5P_add_prop(H5P_genprop_t *hash[], uintn hashsize, H5P_genprop_t *prop);
+static herr_t H5P_add_prop(H5P_genprop_t *hash[], unsigned hashsize, H5P_genprop_t *prop);
 static herr_t H5P_free_prop(H5P_genprop_t *prop);
 
 /* Declare a free list to manage the H5P_t struct */
@@ -101,17 +101,17 @@ H5P_init(void)
 NAME
     H5P_xor_name -- Generate an xor'ed value for a string
 USAGE
-    uintn H5P_xor_name(s)
+    unsigned H5P_xor_name(s)
         const char *s;  IN: String to operate over
 RETURNS
     Always returns valid value
 DESCRIPTION
     Generates an xor'ed value for a string
 --------------------------------------------------------------------------*/
-static uintn
+static unsigned
 H5P_xor_name(const char *s)
 {
-    uintn ret=0;
+    unsigned ret=0;
     unsigned char temp;
 
     if(s!=NULL)
@@ -129,16 +129,16 @@ H5P_xor_name(const char *s)
 NAME
     H5P_hash_name -- Generate a hash value for a string
 USAGE
-    uintn H5P_hash_name(s, hashsize)
+    unsigned H5P_hash_name(s, hashsize)
         const char *s;  IN: String to operate over
-        uintn;          IN: Size of hash table to clip against
+        unsigned;          IN: Size of hash table to clip against
 RETURNS
     Always returns valid value
 DESCRIPTION
     Generates a hash location based on an xor'ed value for a string
 --------------------------------------------------------------------------*/
-static uintn
-H5P_hash_name(const char *s, uintn hashsize)
+static unsigned
+H5P_hash_name(const char *s, unsigned hashsize)
 {
     return(H5P_xor_name(s)%hashsize);
 }   /* end H5P_hash_name() */
@@ -161,7 +161,7 @@ H5P_init_interface(void)
     H5P_genclass_t  *root_class;    /* Pointer to root property list class created */
     H5P_genclass_t  *pclass;        /* Pointer to property list class to create */
     herr_t		    ret_value = SUCCEED;
-    intn		    i;
+    int		    i;
     herr_t		    status;
 
     FUNC_ENTER(H5P_init_interface, FAIL);
@@ -259,10 +259,10 @@ H5P_init_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-intn
+int
 H5P_term_interface(void)
 {
-    intn	i, n=0;
+    int	i, n=0;
 
     if (interface_initialize_g) {
         /* Destroy HDF5 library property classes & lists */
@@ -592,7 +592,7 @@ static hid_t H5P_copy_pclass(H5P_genclass_t *pclass)
     H5P_genclass_t *new_pclass = NULL;      /* Property list class copied */
     H5P_genprop_t *tmp;         /* Temporary pointer to parent class properties */
     H5P_genprop_t *pcopy;       /* Copy of property to insert into class */
-    uintn u;                    /* Local index variable */
+    unsigned u;                    /* Local index variable */
     hid_t ret_value=FAIL;       /* return value */
 
     FUNC_ENTER (H5P_copy_pclass, FAIL);
@@ -676,7 +676,7 @@ static hid_t H5P_copy_plist(H5P_genplist_t *plist)
     H5P_genprop_t *tprop;       /* Temporary pointer to properties */
     H5P_genprop_t *new_prop;    /* New property created for copy */
     hid_t plist_id;             /* Property list ID of new list created */
-    uintn u;                    /* Local index variable */
+    unsigned u;                    /* Local index variable */
     hid_t ret_value=FAIL;       /* return value */
 
     FUNC_ENTER (H5P_copy_plist, FAIL);
@@ -1069,7 +1069,7 @@ H5Pget_version(hid_t plist_id, int *boot/*out*/, int *freelist/*out*/,
 herr_t
 H5Pset_userblock(hid_t plist_id, hsize_t size)
 {
-    uintn		    i;
+    unsigned		    i;
     H5F_create_t	   *plist = NULL;
 
     FUNC_ENTER(H5Pset_userblock, FAIL);
@@ -1754,7 +1754,7 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
     
     /* Add to the list */
     if (plist->efl.nused>=plist->efl.nalloc) {
-        intn na = plist->efl.nalloc + H5O_EFL_ALLOC;
+        int na = plist->efl.nalloc + H5O_EFL_ALLOC;
         H5O_efl_entry_t *x = H5MM_realloc (plist->efl.slot,
                            na*sizeof(H5O_efl_entry_t));
 
@@ -3649,7 +3649,7 @@ done:
  USAGE
     herr_t H5P_add_prop(hash, hashsize, prop)
         H5P_gen_prop_t *hash[]; IN/OUT: Pointer to array of properties for hash table
-        uintn hashsize;         IN: Size of hash table
+        unsigned hashsize;         IN: Size of hash table
         H5P_genprop_t *prop;    IN: Pointer to property to insert
  RETURNS
     Returns non-negative on success, negative on failure.
@@ -3662,9 +3662,9 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_add_prop(H5P_genprop_t *hash[], uintn hashsize, H5P_genprop_t *prop)
+H5P_add_prop(H5P_genprop_t *hash[], unsigned hashsize, H5P_genprop_t *prop)
 {
-    uintn loc;                  /* Hash table location */
+    unsigned loc;                  /* Hash table location */
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER (H5P_add_prop, FAIL);
@@ -3695,7 +3695,7 @@ done:
  USAGE
     H5P_genprop_t *H5P_find_prop(hash, hashsize, name)
         H5P_genprop_t *hash[];  IN: Pointer to array of properties for hash table
-        uintn hashsize;         IN: Size of hash table
+        unsigned hashsize;         IN: Size of hash table
         const char *name;       IN: Name of property to check for
  RETURNS
     Returns pointer to property on success, NULL on failure.
@@ -3707,11 +3707,11 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5P_genprop_t *
-H5P_find_prop(H5P_genprop_t *hash[], uintn hashsize, const char *name)
+H5P_find_prop(H5P_genprop_t *hash[], unsigned hashsize, const char *name)
 {
     H5P_genprop_t *ret_value;   /* Property pointer return value */
-    uintn loc;                  /* Hash table location */
-    uintn xor_val;              /* XOR'ed value of the name to look for */
+    unsigned loc;                  /* Hash table location */
+    unsigned xor_val;              /* XOR'ed value of the name to look for */
 
     FUNC_ENTER (H5P_find_prop, NULL);
 
@@ -3792,8 +3792,8 @@ done:
  USAGE
     herr_t H5P_free_all_prop(hash, hashsize, make_cb)
         H5P_gen_prop_t *hash[]; IN/OUT: Pointer to array of properties for hash table
-        uintn hashsize;         IN: Size of hash table
-        uintn make_cb;          IN: Whether to make property callbacks or not
+        unsigned hashsize;         IN: Size of hash table
+        unsigned make_cb;          IN: Whether to make property callbacks or not
  RETURNS
     Returns non-negative on success, negative on failure.
  DESCRIPTION
@@ -3805,10 +3805,10 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_free_all_prop(H5P_genprop_t *hash[], uintn hashsize, uintn make_cb)
+H5P_free_all_prop(H5P_genprop_t *hash[], unsigned hashsize, unsigned make_cb)
 {
     H5P_genprop_t *tprop, *next;/* Temporary pointer to properties */
-    uintn u;                    /* Local index variable */
+    unsigned u;                    /* Local index variable */
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER (H5P_free_all_prop, FAIL);
@@ -3934,8 +3934,8 @@ done:
                 cls_create, create_data, cls_close, close_data)
         H5P_genclass_t *par_class;  IN: Pointer to parent class
         const char *name;       IN: Name of class we are creating
-        uintn hashsize; IN: Number of buckets in hash table
-        uintn internal; IN: Whether this is an internal class or not
+        unsigned hashsize; IN: Number of buckets in hash table
+        unsigned internal; IN: Whether this is an internal class or not
         H5P_cls_create_func_t;  IN: The callback function to call when each
                                     property list in this class is created.
         void *create_data;      IN: Pointer to user data to pass along to class
@@ -3959,7 +3959,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5P_genclass_t *
-H5P_create_class(H5P_genclass_t *par_class, const char *name, uintn hashsize, uintn internal,
+H5P_create_class(H5P_genclass_t *par_class, const char *name, unsigned hashsize, unsigned internal,
     H5P_cls_create_func_t cls_create, void *create_data,
     H5P_cls_copy_func_t cls_copy, void *copy_data,
     H5P_cls_close_func_t cls_close, void *close_data
@@ -4030,7 +4030,7 @@ done:
                 cls_close, close_data)
         hid_t parent;       IN: Property list class ID of parent class
         const char *name;   IN: Name of class we are creating
-        uintn hashsize;     IN: Number of buckets in hash table
+        unsigned hashsize;     IN: Number of buckets in hash table
         H5P_cls_create_func_t cls_create;   IN: The callback function to call
                                     when each property list in this class is
                                     created.
@@ -4134,7 +4134,7 @@ static H5P_genplist_t *H5P_create_list(H5P_genclass_t *pclass)
     H5P_genplist_t *ret_value=NULL;     /* return value */
     H5P_genprop_t *tmp;                 /* Temporary pointer to parent class properties */
     H5P_genprop_t *pcopy;               /* Copy of property to insert into class */
-    uintn u;                            /* Local index variable */
+    unsigned u;                            /* Local index variable */
 
     FUNC_ENTER (H5P_create_list, NULL);
 
@@ -4439,7 +4439,7 @@ herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
     H5P_genprop_t *tmp_prop;   /* Temporary property pointer */
     H5P_genprop_t *new_prop=NULL;   /* Temporary property pointer */
     H5P_genprop_t *pcopy;      /* Property copy */
-    uintn u;                   /* Local index variable */
+    unsigned u;                   /* Local index variable */
     herr_t ret_value=FAIL;     /* return value */
 
     FUNC_ENTER (H5P_register, FAIL);
@@ -4457,7 +4457,7 @@ herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
      */
     if(pclass->plists>0 || pclass->classes>0) {
         if((new_class=H5P_create_class(pclass->parent,pclass->name,pclass->hashsize,
-                (uintn)pclass->internal,pclass->create_func,pclass->create_data,
+                (unsigned)pclass->internal,pclass->create_func,pclass->create_data,
                 pclass->copy_func,pclass->copy_data,
                 pclass->close_func,pclass->close_data))==NULL)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy class");
@@ -5610,7 +5610,7 @@ done:
  PURPOSE
     Internal routine to compare two generic properties
  USAGE
-    intn H5P_cmp_prop(prop1, prop2)
+    int H5P_cmp_prop(prop1, prop2)
         H5P_genprop_t *prop1;    IN: 1st property to compare
         H5P_genprop_t *prop1;    IN: 2nd property to compare
  RETURNS
@@ -5626,10 +5626,10 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static intn H5P_cmp_prop(H5P_genprop_t *prop1, H5P_genprop_t *prop2)
+static int H5P_cmp_prop(H5P_genprop_t *prop1, H5P_genprop_t *prop2)
 {
-    intn cmp_value;             /* Value from comparison */
-    intn ret_value=0;         /* return value */
+    int cmp_value;             /* Value from comparison */
+    int ret_value=0;         /* return value */
 
     FUNC_ENTER (H5P_cmp_prop, FAIL);
 
@@ -5701,7 +5701,7 @@ done:
  PURPOSE
     Internal routine to compare two generic property classes 
  USAGE
-    intn H5P_cmp_class(pclass1, pclass2)
+    int H5P_cmp_class(pclass1, pclass2)
         H5P_genclass_t *pclass1;    IN: 1st property class to compare
         H5P_genclass_t *pclass2;    IN: 2nd property class to compare
  RETURNS
@@ -5717,12 +5717,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static intn H5P_cmp_class(H5P_genclass_t *pclass1, H5P_genclass_t *pclass2)
+static int H5P_cmp_class(H5P_genclass_t *pclass1, H5P_genclass_t *pclass2)
 {
     H5P_genprop_t *tprop1, *tprop2;/* Temporary pointer to properties */
-    uintn u;                    /* Local index variable */
-    intn cmp_value;             /* Value from comparison */
-    intn ret_value=0;         /* return value */
+    unsigned u;                    /* Local index variable */
+    int cmp_value;             /* Value from comparison */
+    int ret_value=0;         /* return value */
 
     FUNC_ENTER (H5P_cmp_class, FAIL);
 
@@ -5811,7 +5811,7 @@ done:
  PURPOSE
     Internal routine to compare two generic property lists 
  USAGE
-    intn H5P_cmp_plist(plist1, plist2)
+    int H5P_cmp_plist(plist1, plist2)
         H5P_genplist_t *plist1;    IN: 1st property list to compare
         H5P_genplist_t *plist2;    IN: 2nd property list to compare
  RETURNS
@@ -5827,12 +5827,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static intn H5P_cmp_plist(H5P_genplist_t *plist1, H5P_genplist_t *plist2)
+static int H5P_cmp_plist(H5P_genplist_t *plist1, H5P_genplist_t *plist2)
 {
     H5P_genprop_t *tprop1, *tprop2;/* Temporary pointer to properties */
-    uintn u;                    /* Local index variable */
-    intn cmp_value;             /* Value from comparison */
-    intn ret_value=0;         /* return value */
+    unsigned u;                    /* Local index variable */
+    int cmp_value;             /* Value from comparison */
+    int ret_value=0;         /* return value */
 
     FUNC_ENTER (H5P_cmp_plist, FAIL);
 
@@ -6032,7 +6032,7 @@ done:
     herr_t H5P_iterate_props(id, hash, hashsize, idx, iter_func, iter_data)
         hid_t id;                   IN: ID of property object iterating over
         H5P_gen_prop_t *hash[];     IN: Pointer to array of properties for hash table
-        uintn hashsize;             IN: Size of hash table
+        unsigned hashsize;             IN: Size of hash table
         int *idx;                   IN/OUT: Index of the property to begin with
         H5P_iterate_t iter_func;    IN: Function pointer to function to be
                                         called with each property iterated over.
@@ -6076,10 +6076,10 @@ iteration, the function's behavior is undefined.
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static int H5P_iterate_props(hid_t id, H5P_genprop_t *hash[], uintn hashsize, int *idx, H5P_iterate_t iter_func, void *iter_data)
+static int H5P_iterate_props(hid_t id, H5P_genprop_t *hash[], unsigned hashsize, int *idx, H5P_iterate_t iter_func, void *iter_data)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
-    uintn u;                    /* Local index variable */
+    unsigned u;                    /* Local index variable */
     int curr_idx=0;             /* Current iteration index */
     int ret_value=0;            /* Return value */
 
@@ -6348,11 +6348,11 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_peek_uintn
+    H5P_peek_unsigned
  PURPOSE
     Internal routine to quickly retrieve the value of a property in a property list.
  USAGE
-    intn H5P_peek_uintn(plist_id, name)
+    int H5P_peek_unsigned(plist_id, name)
         hid_t plist_id;         IN: Property list to check
         const char *name;       IN: Name of property to query
  RETURNS
@@ -6373,11 +6373,11 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-uintn H5P_peek_uintn(hid_t plist_id, const char *name)
+unsigned H5P_peek_unsigned(hid_t plist_id, const char *name)
 {
-    uintn ret_value;            /* return value */
+    unsigned ret_value;            /* return value */
 
-    FUNC_ENTER (H5P_peek_uintn, UFAIL);
+    FUNC_ENTER (H5P_peek_unsigned, UFAIL);
 
     assert(name);
 
@@ -6385,7 +6385,7 @@ uintn H5P_peek_uintn(hid_t plist_id, const char *name)
     H5P_get(plist_id,name,&ret_value);
 
     FUNC_LEAVE (ret_value);
-}   /* H5P_peek_uintn() */
+}   /* H5P_peek_unsigned() */
 
 
 /*--------------------------------------------------------------------------
@@ -6719,7 +6719,7 @@ static herr_t H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
     H5P_genprop_t *tprop, *prev;/* Temporary pointer to properties */
-    uintn loc;                  /* Hash table location */
+    unsigned loc;                  /* Hash table location */
     herr_t ret_value=FAIL;      /* return value */
 
     FUNC_ENTER (H5P_remove, FAIL);
@@ -6851,7 +6851,7 @@ static herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
     H5P_genprop_t *tprop, *prev;/* Temporary pointer to properties */
-    uintn loc;                  /* Hash table location */
+    unsigned loc;                  /* Hash table location */
     herr_t ret_value=FAIL;     /* return value */
 
     FUNC_ENTER (H5P_unregister, FAIL);

@@ -20,7 +20,7 @@
 /* Interface initialization */
 #define PABLO_MASK      H5Sall_mask
 #define INTERFACE_INIT  NULL
-static intn             interface_initialize_g = 0;
+static int             interface_initialize_g = 0;
 
 static herr_t H5S_all_init (const H5S_t *space, H5S_sel_iter_t *iter);
 static hsize_t H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
@@ -399,7 +399,7 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
     hsize_t	size[H5O_LAYOUT_NDIMS];
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];
     hssize_t	mem_offset[H5O_LAYOUT_NDIMS];
-    uintn	u;
+    unsigned	u;
 
     FUNC_ENTER(H5S_all_read, FAIL);
     *must_convert = TRUE;
@@ -563,7 +563,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
     hsize_t	size[H5O_LAYOUT_NDIMS];
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];
     hssize_t	mem_offset[H5O_LAYOUT_NDIMS];
-    uintn		u;
+    unsigned		u;
     
     FUNC_ENTER(H5S_all_write, FAIL);
     *must_convert = TRUE;
@@ -734,7 +734,7 @@ H5S_all_release (H5S_t UNUSED *space)
 hsize_t
 H5S_all_npoints (const H5S_t *space)
 {
-    uintn u;     /* Counters */
+    unsigned u;     /* Counters */
     hsize_t ret_value;
 
     FUNC_ENTER (H5S_all_npoints, 0);
@@ -856,8 +856,8 @@ done:
 herr_t
 H5S_all_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
 {
-    intn rank;                  /* Dataspace rank */
-    intn i;                     /* index variable */
+    int rank;                  /* Dataspace rank */
+    int i;                     /* index variable */
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER (H5S_all_bounds, FAIL);
@@ -999,8 +999,8 @@ H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op
     hsize_t offset;             /* offset of region in buffer */
     hsize_t nelemts;            /* Number of elements to iterate through */
     void *tmp_buf;              /* temporary location of the element in the buffer */
-    uintn rank;             /* Dataspace rank */
-    intn indx;              /* Index to increment */
+    unsigned rank;             /* Dataspace rank */
+    int indx;              /* Index to increment */
     herr_t ret_value=0;     /* return value */
 
     FUNC_ENTER (H5S_all_select_iterate, 0);

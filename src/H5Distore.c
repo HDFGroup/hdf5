@@ -74,14 +74,14 @@
 
 /* Interface initialization */
 #define PABLO_MASK	H5Fistore_mask
-static intn		interface_initialize_g = 0;
+static int		interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
 /*
  * Given a B-tree node return the dimensionality of the chunks pointed to by
  * that node.
  */
-#define H5F_ISTORE_NDIMS(X)	((intn)(((X)->sizeof_rkey-8)/8))
+#define H5F_ISTORE_NDIMS(X)	((int)(((X)->sizeof_rkey-8)/8))
 
 /* Raw data chunks are cached.  Each entry in the cache is: */
 typedef struct H5F_rdcc_ent_t {
@@ -96,7 +96,7 @@ typedef struct H5F_rdcc_ent_t {
     size_t	chunk_size;	/*size of a chunk			*/
     size_t	alloc_size;	/*amount allocated for the chunk	*/
     uint8_t	*chunk;		/*the unfiltered chunk data		*/
-    uintn	idx;		/*index in hash table			*/
+    unsigned	idx;		/*index in hash table			*/
     struct H5F_rdcc_ent_t *next;/*next item in doubly-linked list	*/
     struct H5F_rdcc_ent_t *prev;/*previous item in doubly-linked list	*/
 } H5F_rdcc_ent_t;
@@ -107,9 +107,9 @@ static size_t H5F_istore_sizeof_rkey(H5F_t *f, const void *_udata);
 static herr_t H5F_istore_new_node(H5F_t *f, H5B_ins_t, void *_lt_key,
 				  void *_udata, void *_rt_key,
 				  haddr_t*/*out*/);
-static intn H5F_istore_cmp2(H5F_t *f, void *_lt_key, void *_udata,
+static int H5F_istore_cmp2(H5F_t *f, void *_lt_key, void *_udata,
 			    void *_rt_key);
-static intn H5F_istore_cmp3(H5F_t *f, void *_lt_key, void *_udata,
+static int H5F_istore_cmp3(H5F_t *f, void *_lt_key, void *_udata,
 			    void *_rt_key);
 static herr_t H5F_istore_found(H5F_t *f, haddr_t addr, const void *_lt_key,
 			       void *_udata, const void *_rt_key);
@@ -124,7 +124,7 @@ static herr_t H5F_istore_decode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				    void *_key);
 static herr_t H5F_istore_encode_key(H5F_t *f, H5B_t *bt, uint8_t *raw,
 				    void *_key);
-static herr_t H5F_istore_debug_key(FILE *stream, intn indent, intn fwidth,
+static herr_t H5F_istore_debug_key(FILE *stream, int indent, int fwidth,
 				   const void *key, const void *udata);
 #ifdef H5_HAVE_PARALLEL
 static herr_t H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
@@ -149,7 +149,7 @@ static herr_t H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
 typedef struct H5F_istore_key_t {
     size_t	nbytes;				/*size of stored data	*/
     hssize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
-    uintn	filter_mask;			/*excluded filters	*/
+    unsigned	filter_mask;			/*excluded filters	*/
 } H5F_istore_key_t;
 
 typedef struct H5F_istore_ud1_t {
@@ -340,8 +340,8 @@ static herr_t
 H5F_istore_decode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
 {
     H5F_istore_key_t	*key = (H5F_istore_key_t *) _key;
-    intn		i;
-    intn		ndims = H5F_ISTORE_NDIMS(bt);
+    int		i;
+    int		ndims = H5F_ISTORE_NDIMS(bt);
 
     FUNC_ENTER(H5F_istore_decode_key, FAIL);
 
@@ -381,8 +381,8 @@ static herr_t
 H5F_istore_encode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
 {
     H5F_istore_key_t	*key = (H5F_istore_key_t *) _key;
-    intn		ndims = H5F_ISTORE_NDIMS(bt);
-    intn		i;
+    int		ndims = H5F_ISTORE_NDIMS(bt);
+    int		i;
 
     FUNC_ENTER(H5F_istore_encode_key, FAIL);
 
@@ -419,12 +419,12 @@ H5F_istore_encode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_debug_key (FILE *stream, intn indent, intn fwidth,
+H5F_istore_debug_key (FILE *stream, int indent, int fwidth,
 		      const void *_key, const void *_udata)
 {
     const H5F_istore_key_t	*key = (const H5F_istore_key_t *)_key;
     const H5F_istore_ud1_t	*udata = (const H5F_istore_ud1_t *)_udata;
-    uintn		u;
+    unsigned		u;
     
     FUNC_ENTER (H5F_istore_debug_key, FAIL);
     assert (key);
@@ -465,14 +465,14 @@ H5F_istore_debug_key (FILE *stream, intn indent, intn fwidth,
  *
  *-------------------------------------------------------------------------
  */
-static intn
+static int
 H5F_istore_cmp2(H5F_t UNUSED *f, void *_lt_key, void *_udata,
 		void *_rt_key)
 {
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
     H5F_istore_key_t	*rt_key = (H5F_istore_key_t *) _rt_key;
     H5F_istore_ud1_t	*udata = (H5F_istore_ud1_t *) _udata;
-    intn		cmp;
+    int		cmp;
 
     FUNC_ENTER(H5F_istore_cmp2, FAIL);
 
@@ -517,14 +517,14 @@ H5F_istore_cmp2(H5F_t UNUSED *f, void *_lt_key, void *_udata,
  *
  *-------------------------------------------------------------------------
  */
-static intn
+static int
 H5F_istore_cmp3(H5F_t UNUSED *f, void *_lt_key, void *_udata,
 		void *_rt_key)
 {
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
     H5F_istore_key_t	*rt_key = (H5F_istore_key_t *) _rt_key;
     H5F_istore_ud1_t	*udata = (H5F_istore_ud1_t *) _udata;
-    intn		cmp = 0;
+    int		cmp = 0;
 
     FUNC_ENTER(H5F_istore_cmp3, FAIL);
 
@@ -572,7 +572,7 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
     H5F_istore_key_t	*rt_key = (H5F_istore_key_t *) _rt_key;
     H5F_istore_ud1_t	*udata = (H5F_istore_ud1_t *) _udata;
-    uintn		u;
+    unsigned		u;
 
     FUNC_ENTER(H5F_istore_new_node, FAIL);
 #ifdef AKC
@@ -660,7 +660,7 @@ H5F_istore_found(H5F_t UNUSED *f, haddr_t addr, const void *_lt_key,
 {
     H5F_istore_ud1_t	   *udata = (H5F_istore_ud1_t *) _udata;
     const H5F_istore_key_t *lt_key = (const H5F_istore_key_t *) _lt_key;
-    uintn		u;
+    unsigned		u;
 
     FUNC_ENTER(H5F_istore_found, FAIL);
 
@@ -733,8 +733,8 @@ H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
     H5F_istore_key_t	*md_key = (H5F_istore_key_t *) _md_key;
     H5F_istore_key_t	*rt_key = (H5F_istore_key_t *) _rt_key;
     H5F_istore_ud1_t	*udata = (H5F_istore_ud1_t *) _udata;
-    intn		cmp;
-    uintn		u;
+    int		cmp;
+    unsigned		u;
     H5B_ins_t		ret_value = H5B_INS_ERROR;
 
     FUNC_ENTER(H5F_istore_insert, H5B_INS_ERROR);
@@ -855,7 +855,7 @@ H5F_istore_iterate (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
 {
     H5F_istore_ud1_t	*bt_udata = (H5F_istore_ud1_t *)_udata;
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *)_lt_key;
-    uintn		u;
+    unsigned		u;
 
     FUNC_ENTER(H5F_istore_iterate, FAIL);
 
@@ -939,7 +939,7 @@ H5F_istore_flush_entry(H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
 {
     herr_t		ret_value=FAIL;	/*return value			*/
     H5F_istore_ud1_t 	udata;		/*pass through B-tree		*/
-    uintn		u;		/*counters			*/
+    unsigned		u;		/*counters			*/
     void		*buf=NULL;	/*temporary buffer		*/
     size_t		alloc;		/*bytes allocated for BUF	*/
     hbool_t		point_of_no_return = FALSE;
@@ -1122,7 +1122,7 @@ herr_t
 H5F_istore_flush (H5F_t *f, hbool_t preempt)
 {
     H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
-    intn		nerrors=0;
+    int		nerrors=0;
     H5F_rdcc_ent_t	*ent=NULL, *next=NULL;
     
     FUNC_ENTER (H5F_istore_flush, FAIL);
@@ -1167,7 +1167,7 @@ herr_t
 H5F_istore_dest (H5F_t *f)
 {
     H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
-    intn		nerrors=0;
+    int		nerrors=0;
     H5F_rdcc_ent_t	*ent=NULL, *next=NULL;
     
     FUNC_ENTER (H5F_istore_dest, FAIL);
@@ -1212,11 +1212,11 @@ H5F_istore_dest (H5F_t *f)
 static herr_t
 H5F_istore_prune (H5F_t *f, size_t size)
 {
-    intn		i, j, nerrors=0;
+    int		i, j, nerrors=0;
     H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
     size_t		total = f->shared->rdcc_nbytes;
     const int		nmeth=2;	/*number of methods		*/
-    intn		w[1];		/*weighting as an interval	*/
+    int		w[1];		/*weighting as an interval	*/
     H5F_rdcc_ent_t	*p[2], *cur;	/*list pointers			*/
     H5F_rdcc_ent_t	*n[2];		/*list next pointers		*/
 
@@ -1334,14 +1334,14 @@ static void *
 H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 		const H5O_pline_t *pline, const H5O_fill_t *fill,
 		const hssize_t offset[], hbool_t relax,
-		uintn *idx_hint/*in,out*/)
+		unsigned *idx_hint/*in,out*/)
 {
-    intn		idx=0;			/*hash index number	*/
-    uintn		temp_idx=0;			/* temporary index number	*/
+    int		idx=0;			/*hash index number	*/
+    unsigned		temp_idx=0;			/* temporary index number	*/
     hbool_t		found = FALSE;		/*already in cache?	*/
     H5F_rdcc_t		*rdcc = &(f->shared->rdcc);/*raw data chunk cache*/
     H5F_rdcc_ent_t	*ent = NULL;		/*cache entry		*/
-    uintn		u;			/*counters		*/
+    unsigned		u;			/*counters		*/
     H5F_istore_ud1_t	udata;			/*B-tree pass-through	*/
     size_t		chunk_size=0;		/*size of a chunk	*/
     size_t		chunk_alloc=0;		/*allocated chunk size	*/
@@ -1357,7 +1357,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             temp_idx *= layout->dim[u];
             temp_idx += offset[u];
         }
-        temp_idx += (uintn)(layout->addr);
+        temp_idx += (unsigned)(layout->addr);
         idx=H5F_HASH(f,temp_idx);
         ent = rdcc->slot[idx];
         
@@ -1603,13 +1603,13 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 static herr_t
 H5F_istore_unlock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 		  const H5O_pline_t *pline, hbool_t dirty,
-		  const hssize_t offset[], uintn *idx_hint,
+		  const hssize_t offset[], unsigned *idx_hint,
 		  uint8_t *chunk, size_t naccessed)
 {
     H5F_rdcc_t		*rdcc = &(f->shared->rdcc);
     H5F_rdcc_ent_t	*ent = NULL;
-    intn		found = -1;
-    uintn		u;
+    int		found = -1;
+    unsigned		u;
     
     FUNC_ENTER (H5F_istore_unlock, FAIL);
 
@@ -1702,11 +1702,11 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     hssize_t		offset_wrt_chunk[H5O_LAYOUT_NDIMS];
     hssize_t		sub_offset_m[H5O_LAYOUT_NDIMS];
     hssize_t		chunk_offset[H5O_LAYOUT_NDIMS];
-    intn		i, carry;
-    uintn		u;
+    int		i, carry;
+    unsigned		u;
     size_t		naccessed;		/*bytes accessed in chnk*/
     uint8_t		*chunk=NULL;		/*ptr to a chunk buffer	*/
-    uintn		idx_hint=0;		/*cache index hint	*/
+    unsigned		idx_hint=0;		/*cache index hint	*/
 
     FUNC_ENTER(H5F_istore_read, FAIL);
 
@@ -1830,7 +1830,7 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 #endif
 
         /* Increment indices */
-        for (i=(intn)(layout->ndims-1), carry=1; i>=0 && carry; --i) {
+        for (i=(int)(layout->ndims-1), carry=1; i>=0 && carry; --i) {
             if (++idx_cur[i]>=idx_max[i])
                 idx_cur[i] = idx_min[i];
             else
@@ -1868,8 +1868,8 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 {
     hssize_t	offset_m[H5O_LAYOUT_NDIMS];
     hsize_t		size_m[H5O_LAYOUT_NDIMS];
-    intn		i, carry;
-    uintn		u;
+    int		i, carry;
+    unsigned		u;
     hsize_t		idx_cur[H5O_LAYOUT_NDIMS];
     hsize_t		idx_min[H5O_LAYOUT_NDIMS];
     hsize_t		idx_max[H5O_LAYOUT_NDIMS];
@@ -1878,7 +1878,7 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     hssize_t	offset_wrt_chunk[H5O_LAYOUT_NDIMS];
     hssize_t	sub_offset_m[H5O_LAYOUT_NDIMS];
     uint8_t		*chunk=NULL;
-    uintn		idx_hint=0;
+    unsigned		idx_hint=0;
     size_t		chunk_size, naccessed;
     
     FUNC_ENTER(H5F_istore_write, FAIL);
@@ -2047,7 +2047,7 @@ H5F_istore_create(H5F_t *f, H5O_layout_t *layout /*out */ )
 {
     H5F_istore_ud1_t	udata;
 #ifndef NDEBUG
-    uintn			u;
+    unsigned			u;
 #endif
 
     FUNC_ENTER(H5F_istore_create, FAIL);
@@ -2091,7 +2091,7 @@ H5F_istore_create(H5F_t *f, H5O_layout_t *layout /*out */ )
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5F_istore_allocated(H5F_t *f, uintn ndims, haddr_t addr)
+H5F_istore_allocated(H5F_t *f, unsigned ndims, haddr_t addr)
 {
     H5F_istore_ud1_t	udata;
 
@@ -2126,7 +2126,7 @@ H5F_istore_allocated(H5F_t *f, uintn ndims, haddr_t addr)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_dump_btree(H5F_t *f, FILE *stream, uintn ndims, haddr_t addr)
+H5F_istore_dump_btree(H5F_t *f, FILE *stream, unsigned ndims, haddr_t addr)
 {
     H5F_istore_ud1_t	udata;
 
@@ -2220,8 +2220,8 @@ H5F_istore_stats (H5F_t *f, hbool_t headers)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_istore_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent,
-		 intn fwidth, int ndims)
+H5F_istore_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent,
+		 int fwidth, int ndims)
 {
     H5F_istore_ud1_t	udata;
     
@@ -2258,7 +2258,7 @@ H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
 		    const hssize_t offset[], void *_udata/*out*/)
 {
     H5F_istore_ud1_t	*udata = _udata;
-    intn		i;
+    int		i;
     herr_t		status;			/*func return status	*/
     
     FUNC_ENTER (H5F_istore_get_addr, FAIL);
@@ -2321,11 +2321,11 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 		    const H5O_fill_t *fill)
 {
 
-    intn		i, carry;
-    uintn		u;
+    int		i, carry;
+    unsigned		u;
     hssize_t		chunk_offset[H5O_LAYOUT_NDIMS];
     uint8_t		*chunk=NULL;
-    uintn		idx_hint=0;
+    unsigned		idx_hint=0;
     size_t		chunk_size;
 #ifdef AKC
     H5F_istore_ud1_t	udata;

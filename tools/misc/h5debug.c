@@ -57,7 +57,7 @@ main(int argc, char *argv[])
     H5F_t       *f;
     haddr_t     addr=0, extra=0;
     uint8_t     sig[16];
-    intn        i, ndims;
+    int        i, ndims;
     herr_t      status = SUCCEED;
 
     if (argc == 1) {

@@ -135,7 +135,7 @@ __DLL__ herr_t H5G_stab_remove(H5G_entry_t *grp_ent, const char *name);
  * Functions that understand symbol table entries.
  */
 __DLL__ herr_t H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp,
-				  H5G_entry_t *ent, intn n);
+				  H5G_entry_t *ent, int n);
 __DLL__ herr_t H5G_ent_encode_vec(H5F_t *f, uint8_t **pp,
-				  const H5G_entry_t *ent, intn n);
+				  const H5G_entry_t *ent, int n);
 #endif

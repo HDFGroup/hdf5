@@ -21,7 +21,7 @@
 /* Interface initialization */
 #define PABLO_MASK      H5Sselect_mask
 #define INTERFACE_INIT  NULL
-static intn             interface_initialize_g = 0;
+static int             interface_initialize_g = 0;
 
 static hssize_t H5S_get_select_hyper_nblocks(H5S_t *space);
 static hssize_t H5S_get_select_elem_npoints(H5S_t *space);
@@ -591,7 +591,7 @@ static hssize_t
 H5S_get_select_hyper_nblocks(H5S_t *space)
 {
     hssize_t ret_value=FAIL;        /* return value */
-    uintn u;                    /* Counter */
+    unsigned u;                    /* Counter */
 
     FUNC_ENTER (H5S_get_select_hyper_nblocks, FAIL);
 
@@ -764,12 +764,12 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numbloc
     hssize_t offset[H5O_LAYOUT_NDIMS];      /* Offset of element in dataspace */
     hssize_t temp_off;            /* Offset in a given dimension */
     H5S_hyper_node_t *node;     /* Hyperslab node */
-    intn rank;                  /* Dataspace rank */
-    intn i;                     /* Counter */
-    intn fast_dim;      /* Rank of the fastest changing dimension for the dataspace */
-    intn temp_dim;      /* Temporary rank holder */
-    intn ndims;         /* Rank of the dataspace */
-    intn done;          /* Whether we are done with the iteration */
+    int rank;                  /* Dataspace rank */
+    int i;                     /* Counter */
+    int fast_dim;      /* Rank of the fastest changing dimension for the dataspace */
+    int temp_dim;      /* Temporary rank holder */
+    int ndims;         /* Rank of the dataspace */
+    int done;          /* Whether we are done with the iteration */
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER (H5S_get_select_hyper_blocklist, FAIL);
@@ -976,7 +976,7 @@ static herr_t
 H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoints, hsize_t *buf)
 {
     H5S_pnt_node_t *node;       /* Point node */
-    intn rank;                  /* Dataspace rank */
+    int rank;                  /* Dataspace rank */
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER (H5S_get_select_elem_pointlist, FAIL);
@@ -1090,8 +1090,8 @@ H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoint
 static herr_t
 H5S_get_select_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
 {
-    intn rank;                  /* Dataspace rank */
-    intn i;                     /* index variable */
+    int rank;                  /* Dataspace rank */
+    int i;                     /* index variable */
     herr_t ret_value=FAIL;   /* return value */
 
     FUNC_ENTER (H5S_get_select_bounds, FAIL);

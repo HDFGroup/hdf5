@@ -25,7 +25,7 @@
 #define H5T_COMPND_INC	64	/*typical max numb of members per struct */
 
 /* Interface initialization */
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5T_init_interface
 static herr_t H5T_init_interface(void);
 
@@ -183,11 +183,11 @@ size_t H5T_NATIVE_UINT_FAST64_ALIGN_g	= 0;
  * which is used as the key by which the `entries' array is sorted.
  */
 static struct {
-    intn	npaths;		/*number of paths defined		*/
-    intn	apaths;		/*number of paths allocated		*/
+    int	npaths;		/*number of paths defined		*/
+    int	apaths;		/*number of paths allocated		*/
     H5T_path_t	**path;		/*sorted array of path pointers		*/
-    intn	nsoft;		/*number of soft conversions defined	*/
-    intn	asoft;		/*number of soft conversions allocated	*/
+    int	nsoft;		/*number of soft conversions defined	*/
+    int	asoft;		/*number of soft conversions allocated	*/
     H5T_soft_t	*soft;		/*unsorted array of soft conversions	*/
 } H5T_g;
 
@@ -195,7 +195,7 @@ static struct {
 H5T_overflow_t H5T_overflow_g = NULL;
 
 /* Local static functions */
-static herr_t H5T_print_stats(H5T_path_t *path, intn *nprint/*in,out*/);
+static herr_t H5T_print_stats(H5T_path_t *path, int *nprint/*in,out*/);
 
 /* Declare the free list for H5T_t's */
 H5FL_DEFINE(H5T_t);
@@ -1327,7 +1327,7 @@ H5T_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-static intn
+static int
 H5T_unlock_cb (void *_dt, const void UNUSED *key)
 {
     H5T_t	*dt = (H5T_t *)_dt;
@@ -1361,10 +1361,10 @@ H5T_unlock_cb (void *_dt, const void UNUSED *key)
  *	called.
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5T_term_interface(void)
 {
-    intn	i, nprint=0, n=0;
+    int	i, nprint=0, n=0;
     H5T_path_t	*path = NULL;
 
     if (interface_initialize_g) {
@@ -1928,7 +1928,7 @@ H5Tdetect_class(hid_t type, H5T_class_t cls)
 htri_t
 H5T_detect_class (H5T_t *dt, H5T_class_t cls)
 {
-    intn		i;
+    int		i;
 
     FUNC_ENTER (H5T_detect_class, FAIL);
     
@@ -3273,7 +3273,7 @@ int
 H5Tget_nmembers(hid_t type_id)
 {
     H5T_t	*dt = NULL;
-    intn	ret_value = FAIL;
+    int	ret_value = FAIL;
 
     FUNC_ENTER(H5Tget_num_members, FAIL);
     H5TRACE1("Is","i",type_id);
@@ -4098,8 +4098,8 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
     H5T_path_t	*old_path=NULL;		/*existing conversion path	*/
     H5T_path_t	*new_path=NULL;		/*new conversion path		*/
     H5T_cdata_t	cdata;			/*temporary conversion data	*/
-    intn	nprint=0;		/*number of paths shut down	*/
-    intn	i;			/*counter			*/
+    int	nprint=0;		/*number of paths shut down	*/
+    int	i;			/*counter			*/
     herr_t	ret_value=FAIL;		/*return value			*/
 
     FUNC_ENTER(H5Tregister, FAIL);
@@ -4155,7 +4155,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                     "memory allocation failed");
             }
-            H5T_g.asoft = (intn)na;
+            H5T_g.asoft = (int)na;
             H5T_g.soft = x;
         }
         HDstrncpy (H5T_g.soft[H5T_g.nsoft].name, name, H5T_NAMELEN);
@@ -4285,8 +4285,8 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
 {
     H5T_path_t	*path = NULL;		/*conversion path		*/
     H5T_soft_t	*soft = NULL;		/*soft conversion information	*/
-    intn	nprint=0;		/*number of paths shut down	*/
-    intn	i;			/*counter			*/
+    int	nprint=0;		/*number of paths shut down	*/
+    int	i;			/*counter			*/
 
     FUNC_ENTER(H5T_unregister, FAIL);
 
@@ -4820,7 +4820,7 @@ H5T_t *
 H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 {
     H5T_t	*new_dt=NULL, *tmp=NULL;
-    intn	i;
+    int	i;
     char	*s;
 
     FUNC_ENTER(H5T_copy, NULL);
@@ -4883,7 +4883,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     switch(new_dt->type) {
         case H5T_COMPOUND:
             {
-            intn accum_change=0;    /* Amount of change in the offset of the fields */
+            int accum_change=0;    /* Amount of change in the offset of the fields */
 
             /*
              * Copy all member fields to new type, then overwrite the
@@ -4901,8 +4901,8 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                  new_dt->u.compnd.nmembs * sizeof(H5T_cmemb_t));
 
             for (i=0; i<new_dt->u.compnd.nmembs; i++) {
-                intn	j;
-                intn    old_match;
+                int	j;
+                int    old_match;
 
                 s = new_dt->u.compnd.memb[i].name;
                 new_dt->u.compnd.memb[i].name = H5MM_xstrdup(s);
@@ -5135,7 +5135,7 @@ H5T_lock (H5T_t *dt, hbool_t immutable)
 herr_t
 H5T_close(H5T_t *dt)
 {
-    intn	i;
+    int	i;
     H5T_t	*parent = dt->parent;
 
     FUNC_ENTER(H5T_close, FAIL);
@@ -5606,7 +5606,7 @@ H5T_set_offset(H5T_t *dt, size_t offset)
 herr_t
 H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 {
-    intn		idx, i;
+    int		idx, i;
     size_t		total_size;
     
     FUNC_ENTER(H5T_insert, FAIL);
@@ -5648,7 +5648,7 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
             HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                    "memory allocation failed");
         }
-        parent->u.compnd.nalloc = (intn)na;
+        parent->u.compnd.nalloc = (int)na;
         parent->u.compnd.memb = x;
     }
 
@@ -5989,7 +5989,7 @@ H5T_enum_insert(H5T_t *dt, const char *name, void *value)
 
     /* Increase table sizes */
     if (dt->u.enumer.nmembs >= dt->u.enumer.nalloc) {
-	intn n = MAX(32, 2*dt->u.enumer.nalloc);
+	int n = MAX(32, 2*dt->u.enumer.nalloc);
 	if (NULL==(names=H5MM_realloc(dt->u.enumer.name, n*sizeof(char*)))) {
 	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			  "memory allocation failed");
@@ -6042,8 +6042,8 @@ H5T_enum_insert(H5T_t *dt, const char *name, void *value)
 char *
 H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/, size_t size)
 {
-    intn	lt, md, rt;		/*indices for binary search	*/
-    intn	cmp;			/*comparison result		*/
+    int	lt, md, rt;		/*indices for binary search	*/
+    int	cmp;			/*comparison result		*/
     
     FUNC_ENTER(H5T_enum_nameof, NULL);
 
@@ -6111,8 +6111,8 @@ H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/, size_t size)
 herr_t
 H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
 {
-    intn	lt, md, rt;		/*indices for binary search	*/
-    intn	cmp;			/*comparison result		*/
+    int	lt, md, rt;		/*indices for binary search	*/
+    int	cmp;			/*comparison result		*/
     
     FUNC_ENTER(H5T_enum_nameof, FAIL);
 
@@ -6170,12 +6170,12 @@ H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
  *	Compares bitfields and opaque types.
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 {
-    intn	*idx1 = NULL, *idx2 = NULL;
-    intn	ret_value = 0;
-    intn	i, j, tmp;
+    int	*idx1 = NULL, *idx2 = NULL;
+    int	ret_value = 0;
+    int	i, j, tmp;
     hbool_t	swapped;
     size_t	base_size;
 
@@ -6212,8 +6212,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
                 HGOTO_DONE(1);
 
             /* Build an index for each type so the names are sorted */
-            if (NULL==(idx1 = H5MM_malloc(dt1->u.compnd.nmembs * sizeof(intn))) ||
-                NULL==(idx2 = H5MM_malloc(dt1->u.compnd.nmembs * sizeof(intn)))) {
+            if (NULL==(idx1 = H5MM_malloc(dt1->u.compnd.nmembs * sizeof(int))) ||
+                NULL==(idx2 = H5MM_malloc(dt1->u.compnd.nmembs * sizeof(int)))) {
                 HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, 0,
                        "memory allocation failed");
             }
@@ -6288,8 +6288,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
                 HGOTO_DONE(1);
 
             /* Build an index for each type so the names are sorted */
-            if (NULL==(idx1 = H5MM_malloc(dt1->u.enumer.nmembs * sizeof(intn))) ||
-                NULL==(idx2 = H5MM_malloc(dt1->u.enumer.nmembs * sizeof(intn)))) {
+            if (NULL==(idx1 = H5MM_malloc(dt1->u.enumer.nmembs * sizeof(int))) ||
+                NULL==(idx2 = H5MM_malloc(dt1->u.enumer.nmembs * sizeof(int)))) {
                 HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, 0,
                        "memory allocation failed");
             }
@@ -6573,15 +6573,15 @@ H5T_path_t *
 H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	      H5T_conv_t func)
 {
-    intn	lt, rt;			/*left and right edges		*/
-    intn	md;			/*middle			*/
-    intn	cmp;			/*comparison result		*/
+    int	lt, rt;			/*left and right edges		*/
+    int	md;			/*middle			*/
+    int	cmp;			/*comparison result		*/
     H5T_path_t	*table=NULL;		/*path existing in the table	*/
     H5T_path_t	*path=NULL;		/*new path			*/
     H5T_path_t	*ret_value=NULL;	/*return value			*/
     hid_t	src_id=-1, dst_id=-1;	/*src and dst type identifiers	*/
-    intn	i;			/*counter			*/
-    intn	nprint=0;		/*lines of output printed	*/
+    int	i;			/*counter			*/
+    int	nprint=0;		/*lines of output printed	*/
 
     FUNC_ENTER(H5T_path_find, NULL);
     assert((!src && !dst) || (src && dst));
@@ -6776,7 +6776,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			     "memory allocation failed");
             }
-            H5T_g.apaths = (intn)na;
+            H5T_g.apaths = (int)na;
             H5T_g.path = x;
         }
         if (cmp>0) md++;
@@ -6983,7 +6983,7 @@ H5Tarray_create(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
 {
     H5T_t	*base = NULL;		/* base data type	*/
     H5T_t	*dt = NULL;		    /* new array data type	*/
-    intn    i;                  /* local index variable */
+    int    i;                  /* local index variable */
     hid_t	ret_value = FAIL;	/* return value			*/
     
     FUNC_ENTER(H5Tarray_create, FAIL);
@@ -7038,7 +7038,7 @@ H5T_array_create(H5T_t *base, int ndims, const hsize_t dim[/* ndims */],
     const int perm[/* ndims */])
 {
     H5T_t	*ret_value = NULL;		/*new array data type	*/
-    intn    i;                  /* local index variable */
+    int    i;                  /* local index variable */
     
     FUNC_ENTER(H5T_array_create, NULL);
 
@@ -7140,7 +7140,7 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
 {
     H5T_t	*dt = NULL;		    /* pointer to array data type	*/
     herr_t	ret_value = SUCCEED;	/* return value			*/
-    intn    i;                  /* Local index variable */
+    int    i;                  /* Local index variable */
     
     FUNC_ENTER(H5Tget_array_dims, FAIL);
     H5TRACE3("e","i*h*Is",type_id,dims,perm);
@@ -7192,7 +7192,7 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_print_stats(H5T_path_t UNUSED *path, intn UNUSED *nprint/*in,out*/)
+H5T_print_stats(H5T_path_t UNUSED *path, int UNUSED *nprint/*in,out*/)
 {
 #ifdef H5T_DEBUG
     hsize_t	nbytes;

@@ -405,13 +405,6 @@ MS doesn't recognize it yet (as of April 2001)
 #endif
 
 /*
- * Define a type for generic integers.	Use this instead of `int' to
- * show that some thought went into the algorithm.
- */
-typedef int intn;
-typedef unsigned uintn;
-
-/*
  * Maximum and minimum values.	These should be defined in <limits.h> for the
  * most part.
  */
@@ -1069,7 +1062,7 @@ extern hbool_t H5_libinit_g;   /*good thing C's lazy about extern! */
  * through one of these two sets of macros.
  */
 #ifdef H5_HAVE_PABLO
-#  define PABLO_SAVE(func_id)	intn pablo_func_id = func_id;
+#  define PABLO_SAVE(func_id)	int pablo_func_id = func_id;
 #  define PABLO_TRACE_ON(m, f)	TRACE_ON(m,f)
 #  define PABLO_TRACE_OFF(m, f) TRACE_OFF(m,f)
 #else
@@ -1083,17 +1076,17 @@ __DLL__ herr_t H5_init_library(void);
 __DLL__ void H5_term_library(void);
 
 /* Functions to terminate interfaces */
-__DLL__ intn H5A_term_interface(void);
-__DLL__ intn H5D_term_interface(void);
-__DLL__ intn H5F_term_interface(void);
-__DLL__ intn H5G_term_interface(void);
-__DLL__ intn H5I_term_interface(void);
-__DLL__ intn H5P_term_interface(void);
-__DLL__ intn H5R_term_interface(void);
-__DLL__ intn H5S_term_interface(void);
-__DLL__ intn H5TN_term_interface(void);
-__DLL__ intn H5T_term_interface(void);
-__DLL__ intn H5Z_term_interface(void);
+__DLL__ int H5A_term_interface(void);
+__DLL__ int H5D_term_interface(void);
+__DLL__ int H5F_term_interface(void);
+__DLL__ int H5G_term_interface(void);
+__DLL__ int H5I_term_interface(void);
+__DLL__ int H5P_term_interface(void);
+__DLL__ int H5R_term_interface(void);
+__DLL__ int H5S_term_interface(void);
+__DLL__ int H5TN_term_interface(void);
+__DLL__ int H5T_term_interface(void);
+__DLL__ int H5Z_term_interface(void);
 
 
 #endif

@@ -798,7 +798,7 @@ int test_grtyp() {
   uint32 image_data321[Y_LENGTH][X_LENGTH];
   int16  image_data16[Y_LENGTH][X_LENGTH][3];
   int16  image_data161[Y_LENGTH][X_LENGTH];
-  intn i, j;
+  int i, j;
   int32 CUB_SIZE;
   int istat;
 
@@ -970,7 +970,7 @@ int  test_ras8() {
   int32 start[2], edges[2],dims[2];
   int8 image_data8[Y_LENGTH][X_LENGTH];
   uint8 image_datau8[Y_LENGTH][X_LENGTH];
-  intn i, j;
+  int i, j;
   int32 CUB_SIZE;
 
   CUB_SIZE = (X_LENGTH-1)*(Y_LENGTH-1);
@@ -1071,7 +1071,7 @@ int  test_ras24() {
   int32 start[2], edges[2],dims[2];
   int8 image_data24[Y_LENGTH][X_LENGTH][3];
   uint8 image_datau24[Y_LENGTH][X_LENGTH][3];
-  intn i, j;
+  int i, j;
   int32 CUB_SIZE;
 
 
@@ -1178,7 +1178,7 @@ int test_imageattr() {
 
   uint8 palette_data[NUM_COLORS * 3];
   int32 num_comp,num_entries;
-  intn i, j;
+  int i, j;
 
   /* Open the file. */
   file_id = Hopen(FILEGRPAL, DFACC_CREATE, 0);
@@ -1442,7 +1442,7 @@ int test_vgnameclash() {
   int32	  file_id, vgroupa_ref, vgroupa_id,vgroupb_ref,vgroupb_id;
   int32   vgroupc_id,vgroupc_ref;
   int32	  dim_sizes[TYP_RANK];
-  intn    i, j;
+  int    i, j;
   int32   sd_id,sds_id;
   int32   sds_ref;
   int32   array_data[X_LENGTH][Y_LENGTH];
@@ -1566,7 +1566,7 @@ int test_sdsnameclash() {
   int32	  file_id, vgroupa_ref, vgroupa_id,vgroupb_ref,vgroupb_id;
   int32	  dim_sizes[TYP_RANK];
   int32   vgroupc_ref,vgroupc_id;
-  intn    i, j,istat;
+  int    i, j,istat;
   int32   sd_id,sds_id;
   int32   sds_ref;
   int32   array_data[X_LENGTH][Y_LENGTH];
@@ -2904,7 +2904,7 @@ int test_vgall() {
   int32   vgroupd_ref, vgroupd_id,vgroupe_ref,vgroupe_id;
   int32   vdata_id,values[4]={32, 16, 32, 8};
 
-  intn    i, j,k;
+  int    i, j,k;
 
   uint8   *databuf, *pntr;
   int     bufsize, recsize;

@@ -12,7 +12,7 @@
 
 #define H5FD_has_cmp(id) (NULL!=H5FD_get_class(id)->cmp)
 
-__DLL__ intn H5FD_term_interface(void);
+__DLL__ int H5FD_term_interface(void);
 __DLL__ H5FD_class_t *H5FD_get_class(hid_t id);
 __DLL__ hsize_t H5FD_sb_size(H5FD_t *file);
 __DLL__ herr_t H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf);

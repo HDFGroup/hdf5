@@ -32,7 +32,7 @@
 /* Interface initialization */
 #define PABLO_MASK	H5Fseq_mask
 #define INTERFACE_INIT	NULL
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 
 
 /*-------------------------------------------------------------------------
@@ -156,12 +156,12 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hsize_t	hslab_size[H5O_LAYOUT_NDIMS];	/* hyperslab size in dataspace*/
     hsize_t     down_size[H5O_LAYOUT_NDIMS];    /* Cumulative yperslab sizes (in elements) */
     hsize_t     acc;    /* Accumulator for hyperslab sizes (in elements) */
-    intn ndims;
+    int ndims;
     hsize_t	max_data;    			/*bytes in dataset	*/
     haddr_t	addr=0;				/*address in file	*/
-    uintn	u;				/*counters		*/
+    unsigned	u;				/*counters		*/
     size_t      v;                              /*counters              */
-    intn	i,j;				/*counters		*/
+    int	i,j;				/*counters		*/
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
 #endif
@@ -530,12 +530,12 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hsize_t	hslab_size[H5O_LAYOUT_NDIMS];	/* hyperslab size in dataspace*/
     hsize_t     down_size[H5O_LAYOUT_NDIMS];    /* Cumulative hyperslab sizes (in elements) */
     hsize_t     acc;    /* Accumulator for hyperslab sizes (in elements) */
-    intn ndims;
+    int ndims;
     hsize_t	max_data;    			/*bytes in dataset	*/
     haddr_t	addr;				/*address in file	*/
-    uintn	u;				/*counters		*/
+    unsigned	u;				/*counters		*/
     size_t      v;                              /*counters              */
-    intn	i,j;				/*counters		*/
+    int	i,j;				/*counters		*/
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
 #endif

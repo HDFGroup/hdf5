@@ -26,7 +26,7 @@ static void *H5O_mtime_copy(const void *_mesg, void *_dest);
 static size_t H5O_mtime_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_mtime_free (void *_mesg);
 static herr_t H5O_mtime_debug(H5F_t *f, const void *_mesg, FILE *stream,
-			     intn indent, intn fwidth);
+			     int indent, int fwidth);
 
 /* This message derives from H5O */
 const H5O_class_t H5O_MTIME[1] = {{
@@ -45,7 +45,7 @@ const H5O_class_t H5O_MTIME[1] = {{
 }};
 
 /* Interface initialization */
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 
 /* Declare a free list to manage the time_t struct */
@@ -75,7 +75,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
 		 H5O_shared_t UNUSED *sh)
 {
     time_t	*mesg, the_time;
-    intn	i;
+    int	i;
     struct tm	tm;
     static int	ncalls=0;
 
@@ -336,7 +336,7 @@ H5O_mtime_free (void *mesg)
  */
 static herr_t
 H5O_mtime_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
-		intn indent, intn fwidth)
+		int indent, int fwidth)
 {
     const time_t	*mesg = (const time_t *)_mesg;
     struct tm		*tm;

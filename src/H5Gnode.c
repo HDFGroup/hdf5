@@ -51,9 +51,9 @@ static herr_t H5G_node_flush(H5F_t *f, hbool_t destroy, haddr_t addr,
 			     H5G_node_t *sym);
 static H5G_node_t *H5G_node_load(H5F_t *f, haddr_t addr, const void *_udata1,
 				 void *_udata2);
-static intn H5G_node_cmp2(H5F_t *f, void *_lt_key, void *_udata,
+static int H5G_node_cmp2(H5F_t *f, void *_lt_key, void *_udata,
 			  void *_rt_key);
-static intn H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata,
+static int H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata,
 			  void *_rt_key);
 static herr_t H5G_node_found(H5F_t *f, haddr_t addr, const void *_lt_key,
 			     void *_udata, const void *_rt_key);
@@ -96,7 +96,7 @@ H5B_class_t H5B_SNODE[1] = {{
 }};
 
 /* Interface initialization */
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 
 /* Declare a free list to manage the H5G_node_t struct */
@@ -509,14 +509,14 @@ H5G_node_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
  *
  *-------------------------------------------------------------------------
  */
-static intn
+static int
 H5G_node_cmp2(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
 {
     H5G_bt_ud1_t	   *udata = (H5G_bt_ud1_t *) _udata;
     H5G_node_key_t	   *lt_key = (H5G_node_key_t *) _lt_key;
     H5G_node_key_t	   *rt_key = (H5G_node_key_t *) _rt_key;
     const char		   *s1, *s2;
-    intn		    cmp;
+    int		    cmp;
 
     FUNC_ENTER(H5G_node_cmp2, FAIL);
 
@@ -565,7 +565,7 @@ H5G_node_cmp2(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
  *
  *-------------------------------------------------------------------------
  */
-static intn
+static int
 H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
 {
     H5G_bt_ud1_t	   *udata = (H5G_bt_ud1_t *) _udata;
@@ -630,7 +630,7 @@ H5G_node_found(H5F_t *f, haddr_t addr, const void UNUSED *_lt_key,
 {
     H5G_bt_ud1_t	*bt_udata = (H5G_bt_ud1_t *) _udata;
     H5G_node_t		*sn = NULL;
-    intn		lt = 0, idx = 0, rt, cmp = 1;
+    int		lt = 0, idx = 0, rt, cmp = 1;
     const char		*s;
     herr_t		ret_value = FAIL;
 
@@ -746,8 +746,8 @@ H5G_node_insert(H5F_t *f, haddr_t addr, void UNUSED *_lt_key,
     H5G_node_t		*sn = NULL, *snrt = NULL;
     size_t		offset;			/*offset of name in heap */
     const char		*s;
-    intn		idx = -1, cmp = 1;
-    intn		lt = 0, rt;		/*binary search cntrs	*/
+    int		idx = -1, cmp = 1;
+    int		lt = 0, rt;		/*binary search cntrs	*/
     H5B_ins_t		ret_value = H5B_INS_ERROR;
     H5G_node_t		*insert_into = NULL;	/*node that gets new entry*/
 
@@ -838,14 +838,14 @@ H5G_node_insert(H5F_t *f, haddr_t addr, void UNUSED *_lt_key,
 	md_key->offset = sn->entry[sn->nsyms - 1].name_off;
 
 	/* Where to insert the new entry? */
-	if (idx <= (intn)H5G_NODE_K(f)) {
+	if (idx <= (int)H5G_NODE_K(f)) {
 	    insert_into = sn;
-	    if (idx == (intn)H5G_NODE_K(f))
+	    if (idx == (int)H5G_NODE_K(f))
 		md_key->offset = offset;
 	} else {
 	    idx -= H5G_NODE_K(f);
 	    insert_into = snrt;
-	    if (idx == (intn)H5G_NODE_K (f)) {
+	    if (idx == (int)H5G_NODE_K (f)) {
 		rt_key->offset = offset;
 		*rt_key_changed = TRUE;
 	    }
@@ -913,7 +913,7 @@ H5G_node_remove(H5F_t *f, haddr_t addr, void *_lt_key/*in,out*/,
     H5G_bt_ud1_t	*bt_udata = (H5G_bt_ud1_t*)_udata;
     H5G_node_t		*sn = NULL;
     H5B_ins_t		ret_value = H5B_INS_ERROR;
-    intn		lt=0, rt, idx=0, cmp=1;
+    int		lt=0, rt, idx=0, cmp=1;
     const char		*s = NULL;
 
     FUNC_ENTER(H5G_node_remove, H5B_INS_ERROR);
@@ -1064,7 +1064,7 @@ H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
 {
     H5G_bt_ud2_t	*bt_udata = (H5G_bt_ud2_t *)_udata;
     H5G_node_t		*sn = NULL;
-    intn		i, nsyms;
+    int		i, nsyms;
     size_t		n, *name_off=NULL;
     const char		*name;
     char		buf[1024], *s;
@@ -1154,8 +1154,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_node_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent,
-	       intn fwidth, haddr_t heap)
+H5G_node_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent,
+	       int fwidth, haddr_t heap)
 {
     int			    i;
     H5G_node_t		   *sn = NULL;

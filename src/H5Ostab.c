@@ -30,7 +30,7 @@ static void *H5O_stab_copy(const void *_mesg, void *_dest);
 static size_t H5O_stab_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_stab_free (void *_mesg);
 static herr_t H5O_stab_debug(H5F_t *f, const void *_mesg,
-			     FILE * stream, intn indent, intn fwidth);
+			     FILE * stream, int indent, int fwidth);
 
 /* This message derives from H5O */
 const H5O_class_t H5O_STAB[1] = {{
@@ -49,7 +49,7 @@ const H5O_class_t H5O_STAB[1] = {{
 }};
 
 /* Interface initialization */
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
 
 /* Declare a free list to manage the H5O_stab_t struct */
@@ -284,7 +284,7 @@ H5O_stab_free (void *mesg)
  */
 static herr_t
 H5O_stab_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
-	       intn indent, intn fwidth)
+	       int indent, int fwidth)
 {
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
 

@@ -44,7 +44,7 @@
 /* Dataset creation property list */
 typedef struct H5D_create_t {
     H5D_layout_t	layout;		/*storage layout		     */
-    intn		chunk_ndims;	/*chunk dimensionality		     */
+    int		chunk_ndims;	/*chunk dimensionality		     */
     hsize_t		chunk_size[32];	/*chunk size if chunked storage	     */
     H5O_fill_t		fill;		/*fill value			     */
     H5O_efl_t		efl;		/*external file list		     */
@@ -74,7 +74,7 @@ typedef struct H5D_create_t {
 #define H5D_XFER_BTREE_SPLIT_RATIO_DEF      {0.1, 0.5, 0.9}
 /* Definitions for hyperslab caching property */
 #define H5D_XFER_HYPER_CACHE_NAME       "hyper_cache"
-#define H5D_XFER_HYPER_CACHE_SIZE       sizeof(uintn)
+#define H5D_XFER_HYPER_CACHE_SIZE       sizeof(unsigned)
 #ifndef H5_HAVE_PARALLEL
 #define H5D_XFER_HYPER_CACHE_DEF  1
 #else
@@ -82,11 +82,11 @@ typedef struct H5D_create_t {
 #endif
 /* Definitions for hyperslab cache limit property */
 #define H5D_XFER_HYPER_CACHE_LIM_NAME       "hyper_cache_limit"
-#define H5D_XFER_HYPER_CACHE_LIM_SIZE       sizeof(uintn)
+#define H5D_XFER_HYPER_CACHE_LIM_SIZE       sizeof(unsigned)
 #define H5D_XFER_HYPER_CACHE_LIM_DEF  0
 /* Definitions for hyperslab cache limit property */
 #define H5D_XFER_HYPER_CACHE_LIM_NAME       "hyper_cache_limit"
-#define H5D_XFER_HYPER_CACHE_LIM_SIZE       sizeof(uintn)
+#define H5D_XFER_HYPER_CACHE_LIM_SIZE       sizeof(unsigned)
 #define H5D_XFER_HYPER_CACHE_LIM_DEF  0
 /* Definitions for vlen allocation function property */
 #define H5D_XFER_VLEN_ALLOC_NAME       "vlen_alloc"
@@ -115,7 +115,7 @@ typedef struct H5D_create_t {
 #ifdef COALESCE_READS
 /* Definitions for 'gather reads' property */
 #define H5D_XFER_GATHER_READS_NAME       "gather_reads"
-#define H5D_XFER_GATHER_READS_SIZE       sizeof(uintn)
+#define H5D_XFER_GATHER_READS_SIZE       sizeof(unsigned)
 #define H5D_XFER_GATHER_READS_DEF  0
 #endif /* COALESCE_READS */
 /* Definitions for hyperslab vector size property */

@@ -146,7 +146,7 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
 };
 
 /* Interface initialization? */
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5E_init_interface
 static herr_t H5E_init_interface (void);
 const hbool_t H5E_clearable_g = TRUE;	/* DO NOT CHANGE */
@@ -502,7 +502,7 @@ H5Ewalk_cb(int n, H5E_error_t *err_desc, void *client_data)
 const char *
 H5Eget_major (H5E_major_t n)
 {
-    uintn	i;
+    unsigned	i;
     
     /*
      * WARNING: Do not call the FUNC_ENTER() or FUNC_LEAVE() macros since
@@ -541,7 +541,7 @@ H5Eget_major (H5E_major_t n)
 const char *
 H5Eget_minor (H5E_minor_t n)
 {
-    uintn	i;
+    unsigned	i;
     
     /*
      * WARNING: Do not call the FUNC_ENTER() or FUNC_LEAVE() macros since

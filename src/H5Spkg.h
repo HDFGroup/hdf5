@@ -23,7 +23,7 @@
  */
 /* Simple extent container */
 typedef struct H5S_simple_t {
-    uintn rank;         /* Number of dimensions */
+    unsigned rank;         /* Number of dimensions */
     hsize_t *size;      /* Current size of the dimensions */
     hsize_t *max;       /* Maximum size of the dimensions */
 #ifdef LATER
@@ -58,10 +58,10 @@ typedef struct H5S_hyper_node_tag {
     hssize_t *start;    /* Pointer to a corner of a hyperslab closest to the origin */
     hssize_t *end;      /* Pointer to a corner of a hyperslab furthest from the origin */
     struct {
-        uintn cached;   /* Flag to indicate that the block is cached (during I/O only) */
+        unsigned cached;   /* Flag to indicate that the block is cached (during I/O only) */
         size_t size;    /* Size of cached block (in elements) */
-        uintn rleft;    /* Read elements left to access in block */
-        uintn wleft;    /* Write elements left to access in block */
+        unsigned rleft;    /* Read elements left to access in block */
+        unsigned wleft;    /* Write elements left to access in block */
         uint8_t *block; /* Pointer into buffer for cache */
         uint8_t *rpos;  /* Pointer to current read location within block */
         uint8_t *wpos;  /* Pointer to current write location within block */
@@ -183,9 +183,9 @@ __DLL__ int H5S_hyper_compare_regions(const void *r1, const void *r2);
 __DLL__ int H5S_hyper_compare_bounds(const void *r1, const void *r2);
 __DLL__ herr_t H5S_hyper_copy(H5S_t *dst, const H5S_t *src);
 __DLL__ htri_t H5S_hyper_select_valid(const H5S_t *space);
-__DLL__ intn H5S_hyper_bound_comp(const void *_b1, const void *_b2);
-__DLL__ herr_t H5S_hyper_node_add(H5S_hyper_node_t **head, intn endflag,
-				  uintn rank, const hssize_t *start,
+__DLL__ int H5S_hyper_bound_comp(const void *_b1, const void *_b2);
+__DLL__ herr_t H5S_hyper_node_add(H5S_hyper_node_t **head, int endflag,
+				  unsigned rank, const hssize_t *start,
 				  const hsize_t *size);
 __DLL__ herr_t H5S_hyper_clip(H5S_t *space, H5S_hyper_node_t *nodes,
 			      H5S_hyper_node_t **uniq,

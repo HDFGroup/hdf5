@@ -32,7 +32,7 @@
 /* Interface initialization */
 #define PABLO_MASK	H5Farray_mask
 #define INTERFACE_INIT	NULL
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 
 
 
@@ -53,7 +53,7 @@ static intn interface_initialize_g = 0;
 herr_t
 H5F_arr_create (H5F_t *f, struct H5O_layout_t *layout/*in,out*/)
 {
-    uintn		u;
+    unsigned		u;
     hsize_t		nbytes;
    
     FUNC_ENTER (H5F_arr_create, FAIL);
@@ -143,16 +143,16 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hsize_t	max_data = 0;			/*bytes in dataset	*/
     hsize_t	elmt_size = 1;			/*bytes per element	*/
     size_t	nelmts, z;			/*number of elements	*/
-    uintn	ndims;				/*stride dimensionality	*/
+    unsigned	ndims;				/*stride dimensionality	*/
     haddr_t	addr;				/*address in file	*/
-    intn	j;				    /*counters		*/
-    uintn	u;				    /*counters		*/
+    int	j;				    /*counters		*/
+    unsigned	u;				    /*counters		*/
     hbool_t	carray;				/*carry for subtraction	*/
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
 #endif
 #ifdef COALESCE_READS
-    uintn gather_reads;                         /* # of MPIO reads to gather */
+    unsigned gather_reads;                         /* # of MPIO reads to gather */
 #endif
    
     FUNC_ENTER(H5F_arr_read, FAIL);
@@ -433,10 +433,10 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hsize_t	max_data = 0;			/*bytes in dataset	*/
     hsize_t	elmt_size = 1;			/*bytes per element	*/
     size_t	nelmts, z;			/*number of elements	*/
-    uintn	ndims;				/*dimensionality	*/
+    unsigned	ndims;				/*dimensionality	*/
     haddr_t	addr;				/*address in file	*/
-    intn	j;				    /*counters		*/
-    uintn	u;				    /*counters		*/
+    int	j;				    /*counters		*/
+    unsigned	u;				    /*counters		*/
     hbool_t	carray;				/*carry for subtraction	*/
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;

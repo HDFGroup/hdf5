@@ -22,7 +22,7 @@
 
 /* Interface initialization */
 #define PABLO_MASK	H5Fcontig_mask
-static intn		interface_initialize_g = 0;
+static int		interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
 
@@ -134,7 +134,7 @@ H5F_contig_readv(H5F_t *f, hsize_t _max_data, H5FD_mem_t type, haddr_t _addr,
     haddr_t temp_end;      /* Temporary end of buffer variable */
     size_t max_search;     /* Maximum number of sequences to search */
     size_t mask;           /* Bit mask */
-    intn bit_loc;          /* Bit location of the leftmost '1' in max_search */
+    int bit_loc;          /* Bit location of the leftmost '1' in max_search */
     size_t *size_arr_p;    /* Pointer into the size array */
     hsize_t *offset_arr_p; /* Pointer into the offset array */
 #endif /* SLOW_WAY */
@@ -245,7 +245,7 @@ H5F_contig_readv(H5F_t *f, hsize_t _max_data, H5FD_mem_t type, haddr_t _addr,
                         } /* end if */
                         else {
                             size_t lo,hi;           /* Low and high bounds for binary search */
-                            uintn found=0;          /* Flag to indicate bounds have been found */
+                            unsigned found=0;          /* Flag to indicate bounds have been found */
 
                             /* Binary search is faster */
 
@@ -574,7 +574,7 @@ H5F_contig_writev(H5F_t *f, hsize_t _max_data, H5FD_mem_t type, haddr_t _addr,
     haddr_t temp_end;      /* Temporary end of buffer variable */
     size_t max_search;     /* Maximum number of sequences to search */
     size_t mask;           /* Bit mask */
-    intn bit_loc;          /* Bit location of the leftmost '1' in max_search */
+    int bit_loc;          /* Bit location of the leftmost '1' in max_search */
     size_t *size_arr_p;    /* Pointer into the size array */
     hsize_t *offset_arr_p; /* Pointer into the offset array */
 #endif /* SLOW_WAY */
@@ -685,7 +685,7 @@ H5F_contig_writev(H5F_t *f, hsize_t _max_data, H5FD_mem_t type, haddr_t _addr,
                         } /* end if */
                         else {
                             size_t lo,hi;           /* Low and high bounds for binary search */
-                            uintn found=0;          /* Flag to indicate bounds have been found */
+                            unsigned found=0;          /* Flag to indicate bounds have been found */
 
                             /* Binary search is faster */
 

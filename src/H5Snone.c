@@ -20,7 +20,7 @@
 /* Interface initialization */
 #define PABLO_MASK      H5Snone_mask
 #define INTERFACE_INIT  NULL
-static intn             interface_initialize_g = 0;
+static int             interface_initialize_g = 0;
 
 static herr_t H5S_select_none(H5S_t *space);
 

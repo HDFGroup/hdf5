@@ -42,9 +42,9 @@
 
 #define RandInt(a,b) ((rand()%(((b)-(a))+1))+(a))
 
-intn tcompare (void * k1, void * k2, intn cmparg);
+int tcompare (void * k1, void * k2, int cmparg);
 
-static void swap_arr(int *arr, intn a, intn b)
+static void swap_arr(int *arr, int a, int b)
 {
     int       t;
 
@@ -56,27 +56,27 @@ static void swap_arr(int *arr, intn a, intn b)
       }     /* end if */
 }   /* end swap_arr() */
 
-intn
-tcompare(void * k1, void * k2, intn cmparg)
+int
+tcompare(void * k1, void * k2, int cmparg)
 {
     /* shut compiler up */
     cmparg=cmparg;
-    return ((intn) ((*(int *) k1) - (*(int *) k2)));
+    return ((int) ((*(int *) k1) - (*(int *) k2)));
 }
 
 void
 test_tbbt(void)
 {
-    intn        test_size;
-    intn        i, j;
+    int        test_size;
+    int        i, j;
     int       ins_arr[MAX_TEST_SIZE];
     int       rem_arr[MAX_TEST_SIZE];
-    intn        t;
+    int        t;
     H5TB_TREE  *tree;
     void *      *r;
 
-    t = (intn)time(NULL);
-    srand((uintn)t);
+    t = (int)time(NULL);
+    srand((unsigned)t);
 
     for (test_size = 3; test_size <= MAX_TEST_SIZE; test_size++)
       {

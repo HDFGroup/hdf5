@@ -34,45 +34,45 @@
 /* A null pointer is equivalent to a zero vector */
 #define H5V_ZERO        NULL
 
-__DLL__ hsize_t H5V_hyper_stride(uintn n, const hsize_t *size,
+__DLL__ hsize_t H5V_hyper_stride(unsigned n, const hsize_t *size,
 				 const hsize_t *total_size,
 				 const hssize_t *offset,
 				 hssize_t *stride);
-__DLL__ htri_t H5V_hyper_disjointp(uintn n, const hssize_t *offset1,
+__DLL__ htri_t H5V_hyper_disjointp(unsigned n, const hssize_t *offset1,
 				   const hsize_t *size1,
 				   const hssize_t *offset2,
 				   const hsize_t *size2);
-__DLL__ htri_t H5V_hyper_eq(intn n, const hssize_t *offset1,
+__DLL__ htri_t H5V_hyper_eq(int n, const hssize_t *offset1,
 			    const hsize_t *size1, const hssize_t *offset2,
 			    const hsize_t *size2);
-__DLL__ herr_t H5V_hyper_fill(uintn n, const hsize_t *_size,
+__DLL__ herr_t H5V_hyper_fill(unsigned n, const hsize_t *_size,
 			      const hsize_t *total_size,
 			      const hssize_t *offset, void *_dst,
-			      uintn fill_value);
-__DLL__ herr_t H5V_hyper_copy(uintn n, const hsize_t *size,
+			      unsigned fill_value);
+__DLL__ herr_t H5V_hyper_copy(unsigned n, const hsize_t *size,
 			      const hsize_t *dst_total_size,
 			      const hssize_t *dst_offset, void *_dst,
 			      const hsize_t *src_total_size,
 			      const hssize_t *src_offset, const void *_src);
-__DLL__ herr_t H5V_stride_fill(uintn n, hsize_t elmt_size, const hsize_t *size,
+__DLL__ herr_t H5V_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
 			       const hssize_t *stride, void *_dst,
-			       uintn fill_value);
-__DLL__ herr_t H5V_stride_copy(uintn n, hsize_t elmt_size, const hsize_t *_size,
+			       unsigned fill_value);
+__DLL__ herr_t H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *_size,
 			       const hssize_t *dst_stride, void *_dst,
 			       const hssize_t *src_stride, const void *_src);
-__DLL__ herr_t H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size, intn dst_n,
+__DLL__ herr_t H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size, int dst_n,
 				const hsize_t *dst_size,
 				const hssize_t *dst_stride, void *_dst,
-				intn src_n, const hsize_t *src_size,
+				int src_n, const hsize_t *src_size,
 				const hssize_t *src_stride, const void *_src);
-__DLL__ herr_t H5V_stride_optimize1(uintn *np, hsize_t *elmt_size,
+__DLL__ herr_t H5V_stride_optimize1(unsigned *np, hsize_t *elmt_size,
 				    hsize_t *size, hssize_t *stride1);
-__DLL__ herr_t H5V_stride_optimize2(uintn *np, hsize_t *elmt_size,
+__DLL__ herr_t H5V_stride_optimize2(unsigned *np, hsize_t *elmt_size,
 				    hsize_t *size, hssize_t *stride1,
 				    hssize_t *stride2);
 __DLL__ herr_t H5V_array_fill(void *_dst, const void *src, size_t size,
 			      size_t count);
-__DLL__ hsize_t H5V_array_offset(uintn n, const hsize_t *total_size,
+__DLL__ hsize_t H5V_array_offset(unsigned n, const hsize_t *total_size,
 				 const hssize_t *offset);
 
 
@@ -96,7 +96,7 @@ __DLL__ hsize_t H5V_array_offset(uintn n, const hsize_t *total_size,
  *-------------------------------------------------------------------------
  */
 static H5_inline hsize_t UNUSED
-H5V_vector_reduce_product(uintn n, const hsize_t *v)
+H5V_vector_reduce_product(unsigned n, const hsize_t *v)
 {
     size_t                  ans = 1;
 
@@ -123,7 +123,7 @@ H5V_vector_reduce_product(uintn n, const hsize_t *v)
  *-------------------------------------------------------------------------
  */
 static H5_inline htri_t UNUSED
-H5V_vector_zerop_u(intn n, const hsize_t *v)
+H5V_vector_zerop_u(int n, const hsize_t *v)
 {
     if (!v) return TRUE;
     while (n--) {
@@ -150,7 +150,7 @@ H5V_vector_zerop_u(intn n, const hsize_t *v)
  *-------------------------------------------------------------------------
  */
 static H5_inline htri_t UNUSED
-H5V_vector_zerop_s(intn n, const hssize_t *v)
+H5V_vector_zerop_s(int n, const hssize_t *v)
 {
     if (!v) return TRUE;
     while (n--) {
@@ -178,8 +178,8 @@ H5V_vector_zerop_s(intn n, const hssize_t *v)
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline intn UNUSED
-H5V_vector_cmp_u (intn n, const hsize_t *v1, const hsize_t *v2)
+static H5_inline int UNUSED
+H5V_vector_cmp_u (int n, const hsize_t *v1, const hsize_t *v2)
 {
     if (v1 == v2) return 0;
     while (n--) {
@@ -211,8 +211,8 @@ H5V_vector_cmp_u (intn n, const hsize_t *v1, const hsize_t *v2)
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline intn UNUSED
-H5V_vector_cmp_s (uintn n, const hssize_t *v1, const hssize_t *v2)
+static H5_inline int UNUSED
+H5V_vector_cmp_s (unsigned n, const hssize_t *v1, const hssize_t *v2)
 {
     if (v1 == v2) return 0;
     while (n--) {
@@ -240,7 +240,7 @@ H5V_vector_cmp_s (uintn n, const hssize_t *v1, const hssize_t *v2)
  *-------------------------------------------------------------------------
  */
 static H5_inline void UNUSED
-H5V_vector_inc(intn n, hsize_t *v1, const hsize_t *v2)
+H5V_vector_inc(int n, hsize_t *v1, const hsize_t *v2)
 {
     while (n--) *v1++ += *v2++;
 }

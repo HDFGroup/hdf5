@@ -71,24 +71,24 @@
 #define   Max(a,b)  ( (a) > (b) ? (a) : (b) )
 
 /* Local Function Prototypes */
-static H5TB_NODE * H5TB_end(H5TB_NODE * root, intn side);
-static H5TB_NODE *H5TB_ffind(H5TB_NODE * root, void * key, uintn fast_compare,
+static H5TB_NODE * H5TB_end(H5TB_NODE * root, int side);
+static H5TB_NODE *H5TB_ffind(H5TB_NODE * root, void * key, unsigned fast_compare,
     H5TB_NODE ** pp);
-static herr_t H5TB_balance(H5TB_NODE ** root, H5TB_NODE * ptr, intn side, intn added);
-static H5TB_NODE *H5TB_swapkid(H5TB_NODE ** root, H5TB_NODE * ptr, intn side);
-static H5TB_NODE *H5TB_nbr(H5TB_NODE * ptr, intn side);
+static herr_t H5TB_balance(H5TB_NODE ** root, H5TB_NODE * ptr, int side, int added);
+static H5TB_NODE *H5TB_swapkid(H5TB_NODE ** root, H5TB_NODE * ptr, int side);
+static H5TB_NODE *H5TB_nbr(H5TB_NODE * ptr, int side);
 
 #ifdef H5TB_DEBUG
 static herr_t H5TB_printNode(H5TB_NODE * node, void(*key_dump)(void *,void *));
 static herr_t H5TB_dumpNode(H5TB_NODE *node, void (*key_dump)(void *,void *),
-                          intn method);
+                          int method);
 #endif /* H5TB_DEBUG */
 
 /* Declare a free list to manage the H5TB_NODE struct */
 H5FL_DEFINE_STATIC(H5TB_NODE);
 
 #define PABLO_MASK	H5TB_mask
-static intn		interface_initialize_g = 0;
+static int		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 
 
@@ -167,7 +167,7 @@ static intn		interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 H5TB_TREE  *
-H5TB_dmake(H5TB_cmp_t cmp, intn arg, uintn fast_compare)
+H5TB_dmake(H5TB_cmp_t cmp, int arg, unsigned fast_compare)
 {
     H5TB_TREE  *tree;
 
@@ -257,12 +257,12 @@ H5TB_dfind(H5TB_TREE * tree, void * key, H5TB_NODE ** pp)
  */
 H5TB_NODE  *
 H5TB_find(H5TB_NODE * root, void * key,
-     H5TB_cmp_t compar, intn arg, H5TB_NODE ** pp)
+     H5TB_cmp_t compar, int arg, H5TB_NODE ** pp)
 {
     H5TB_NODE  *ptr = root;
     H5TB_NODE  *parent = NULL;
-    intn        cmp = 1;
-    intn        side;
+    int        cmp = 1;
+    int        side;
 
     FUNC_ENTER (H5TB_find, NULL);
 
@@ -347,12 +347,12 @@ H5TB_dless(H5TB_TREE * tree, void * key, H5TB_NODE ** pp)
  *-------------------------------------------------------------------------
  */
 H5TB_NODE  *
-H5TB_less(H5TB_NODE * root, void * key, H5TB_cmp_t compar, intn arg, H5TB_NODE ** pp)
+H5TB_less(H5TB_NODE * root, void * key, H5TB_cmp_t compar, int arg, H5TB_NODE ** pp)
 {
     H5TB_NODE  *ptr = root;
     H5TB_NODE  *parent = NULL;
-    intn        cmp = 1;
-    intn        side;
+    int        cmp = 1;
+    int        side;
 
     FUNC_ENTER(H5TB_less,NULL);
 
@@ -504,9 +504,9 @@ H5TB_dins(H5TB_TREE * tree, void * item, void * key)
  *-------------------------------------------------------------------------
  */
 H5TB_NODE  *
-H5TB_ins(H5TB_NODE ** root, void * item, void * key, H5TB_cmp_t compar, intn arg)
+H5TB_ins(H5TB_NODE ** root, void * item, void * key, H5TB_cmp_t compar, int arg)
 {
-    intn        cmp;
+    int        cmp;
     H5TB_NODE  *ptr, *parent;
 
     FUNC_ENTER(H5TB_ins,NULL);
@@ -585,7 +585,7 @@ H5TB_rem(H5TB_NODE ** root, H5TB_NODE * node, void * *kp)
     H5TB_NODE  *leaf;   /* Node with one or zero children */
     H5TB_NODE  *par;    /* Parent of `leaf' */
     H5TB_NODE  *next;   /* Next/prev node near `leaf' (`leaf's `side' thread) */
-    intn        side;   /* `leaf' is `side' child of `par' */
+    int        side;   /* `leaf' is `side' child of `par' */
     void *      data;   /* Saved pointer to data item of deleted node */
 
     FUNC_ENTER(H5TB_rem, NULL);
@@ -632,7 +632,7 @@ H5TB_rem(H5TB_NODE ** root, H5TB_NODE * node, void * *kp)
 
           /* Case 3: Remove root (of 1- or 2-node tree) */
           if (NULL == par) {
-                side = (intn) UnBal(node);  /* Which side root has a child on */
+                side = (int) UnBal(node);  /* Which side root has a child on */
 
                 /* Case 3a: Remove root of 2-node tree: */
                 if (side) {
@@ -988,7 +988,7 @@ H5TB_count(H5TB_TREE * tree)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5TB_dump(H5TB_TREE *tree, void (*key_dump)(void *,void *), intn method)
+H5TB_dump(H5TB_TREE *tree, void (*key_dump)(void *,void *), int method)
 {
     FUNC_ENTER(H5TB_dump,FAIL);
 
@@ -1058,7 +1058,7 @@ H5TB_printNode(H5TB_NODE * node, void(*key_dump)(void *,void *))
  */
 static herr_t
 H5TB_dumpNode(H5TB_NODE *node, void (*key_dump)(void *,void *),
-                        intn method)
+                        int method)
 {
     FUNC_ENTER(H5TB_dumpNode,FAIL);
 
@@ -1115,7 +1115,7 @@ H5TB_dumpNode(H5TB_NODE *node, void (*key_dump)(void *,void *),
  *-------------------------------------------------------------------------
  */
 static H5TB_NODE *
-H5TB_end(H5TB_NODE * root, intn side)
+H5TB_end(H5TB_NODE * root, int side)
 {
     FUNC_ENTER (H5TB_end, NULL);
 
@@ -1130,7 +1130,7 @@ H5TB_end(H5TB_NODE * root, intn side)
 
 /* Returns pointer to neighboring node (to LEFT or RIGHT): */
 static H5TB_NODE *
-H5TB_nbr(H5TB_NODE * ptr, intn side)
+H5TB_nbr(H5TB_NODE * ptr, int side)
 {
     FUNC_ENTER (H5TB_nbr, NULL);
 
@@ -1148,12 +1148,12 @@ H5TB_nbr(H5TB_NODE * ptr, intn side)
 /* This routine is based on tbbtfind (fix bugs in both places!) */
 /* Returns a pointer to the found node (or NULL) */
 static H5TB_NODE  *
-H5TB_ffind(H5TB_NODE * root, void * key, uintn fast_compare, H5TB_NODE ** pp)
+H5TB_ffind(H5TB_NODE * root, void * key, unsigned fast_compare, H5TB_NODE ** pp)
 {
     H5TB_NODE  *ptr = root;
     H5TB_NODE  *parent = NULL;
-    intn        side;
-    intn        cmp = 1;
+    int        side;
+    int        cmp = 1;
 
     FUNC_ENTER (H5TB_ffind, NULL);
 
@@ -1174,7 +1174,7 @@ H5TB_ffind(H5TB_NODE * root, void * key, uintn fast_compare, H5TB_NODE ** pp)
 
         case H5TB_FAST_INTN_COMPARE:
             if (ptr) {
-                while (0 != (cmp = (*(intn *)key - *(intn *)ptr->key))) {
+                while (0 != (cmp = (*(int *)key - *(int *)ptr->key))) {
                       parent = ptr;
                       side = (cmp < 0) ? LEFT : RIGHT;
                       if (!HasChild(ptr, side))
@@ -1214,10 +1214,10 @@ H5TB_ffind(H5TB_NODE * root, void * key, uintn fast_compare, H5TB_NODE ** pp)
  * pointers to children.
  */
 static H5TB_NODE *
-H5TB_swapkid(H5TB_NODE ** root, H5TB_NODE * ptr, intn side)
+H5TB_swapkid(H5TB_NODE ** root, H5TB_NODE * ptr, int side)
 {
     H5TB_NODE  *kid = ptr->link[side];  /* Sibling to be swapped with parent */
-    intn        deep[3];        /* Relative depths of three sub-trees involved. */
+    int        deep[3];        /* Relative depths of three sub-trees involved. */
     /* 0:ptr->link[Other(side)], 1:kid->link[Other(side)], 2:kid->link[side] */
     H5TB_flag   ptrflg;         /* New value for ptr->flags (ptr->flags used after set) */
     H5TB_leaf   plcnt, prcnt,   /* current values of the ptr's and kid's leaf count */
@@ -1319,11 +1319,11 @@ H5TB_swapkid(H5TB_NODE ** root, H5TB_NODE * ptr, intn side)
  * are usually required.
  */
 static      herr_t
-H5TB_balance(H5TB_NODE ** root, H5TB_NODE * ptr, intn side, intn added)
+H5TB_balance(H5TB_NODE ** root, H5TB_NODE * ptr, int side, int added)
 {
-    intn        deeper = added; /* 1 if sub-tree got longer; -1 if got shorter */
-    intn        odelta;
-    intn        obal;
+    int        deeper = added; /* 1 if sub-tree got longer; -1 if got shorter */
+    int        odelta;
+    int        obal;
 
     FUNC_ENTER(H5TB_balance,FAIL);
 

@@ -72,8 +72,8 @@ typedef struct H5B_class_t {
     size_t	sizeof_nkey;			/*size of native (memory) key*/
     size_t	(*get_sizeof_rkey)(H5F_t*, const void*);    /*raw key size   */
     herr_t	(*new_node)(H5F_t*, H5B_ins_t, void*, void*, void*, haddr_t*);
-    intn	(*cmp2)(H5F_t*, void*, void*, void*);	    /*compare 2 keys */
-    intn	(*cmp3)(H5F_t*, void*, void*, void*);	    /*compare 3 keys */
+    int	(*cmp2)(H5F_t*, void*, void*, void*);	    /*compare 2 keys */
+    int	(*cmp3)(H5F_t*, void*, void*, void*);	    /*compare 3 keys */
     herr_t	(*found)(H5F_t*, haddr_t, const void*, void*, const void*);
     
     /* insert new data */
@@ -94,7 +94,7 @@ typedef struct H5B_class_t {
     /* encode, decode, debug key values */
     herr_t	(*decode)(H5F_t*, struct H5B_t*, uint8_t*, void*);
     herr_t	(*encode)(H5F_t*, struct H5B_t*, uint8_t*, void*);
-    herr_t	(*debug_key)(FILE*, intn, intn, const void*, const void*);
+    herr_t	(*debug_key)(FILE*, int, int, const void*, const void*);
 } H5B_class_t;
 
 /*
@@ -112,11 +112,11 @@ typedef struct H5B_t {
     const H5B_class_t	*type;		/*type of tree			     */
     size_t		sizeof_rkey;	/*size of raw (disk) key	     */
     hbool_t		dirty;		/*something in the tree is dirty     */
-    intn		ndirty;		/*num child ptrs to emit	     */
-    intn		level;		/*node level			     */
+    int		ndirty;		/*num child ptrs to emit	     */
+    int		level;		/*node level			     */
     haddr_t		left;		/*address of left sibling	     */
     haddr_t		right;		/*address of right sibling	     */
-    intn		nchildren;	/*number of child pointers	     */
+    int		nchildren;	/*number of child pointers	     */
     uint8_t		*page;		/*disk page			     */
     uint8_t		*native;	/*array of keys in native format     */
     H5B_key_t		*key;		/*2k+1 key entries		     */
@@ -127,7 +127,7 @@ typedef struct H5B_t {
  * Library prototypes.
  */
 __DLL__ herr_t H5B_debug (H5F_t *f, haddr_t addr, FILE * stream,
-			  intn indent, intn fwidth, const H5B_class_t *type,
+			  int indent, int fwidth, const H5B_class_t *type,
 			  void *udata);
 __DLL__ herr_t H5B_create (H5F_t *f, const H5B_class_t *type, void *udata,
 			   haddr_t *addr_p/*out*/);

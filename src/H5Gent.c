@@ -16,7 +16,7 @@
 #include "H5MMprivate.h"
 
 #define PABLO_MASK      H5G_ent_mask
-static intn          	interface_initialize_g = 0;
+static int          	interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
 
 
@@ -103,9 +103,9 @@ H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, intn n)
+H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, int n)
 {
-    intn                    i;
+    int                    i;
 
     FUNC_ENTER(H5G_ent_decode_vec, FAIL);
 
@@ -215,9 +215,9 @@ H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_encode_vec(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, intn n)
+H5G_ent_encode_vec(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, int n)
 {
-    intn                    i;
+    int                    i;
 
     FUNC_ENTER(H5G_ent_encode_vec, FAIL);
 
@@ -332,7 +332,7 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
  */
 herr_t
 H5G_ent_debug(H5F_t UNUSED *f, const H5G_entry_t *ent, FILE * stream,
-	      intn indent, intn fwidth, haddr_t heap)
+	      int indent, int fwidth, haddr_t heap)
 {
     const char		*lval = NULL;
     

@@ -39,7 +39,7 @@
 #define PABLO_MASK	H5HG_mask
 
 typedef struct H5HG_obj_t {
-    intn		nrefs;		/*reference count		*/
+    int		nrefs;		/*reference count		*/
     size_t		size;		/*total size of object		*/
     uint8_t		*begin;		/*ptr to object into heap->chunk*/
 } H5HG_obj_t;
@@ -71,7 +71,7 @@ static const H5AC_class_t H5AC_GHEAP[1] = {{
 }};
 
 /* Interface initialization */
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
 /* Declare a free list to manage the H5HG_t struct */
@@ -236,7 +236,7 @@ H5HG_load (H5F_t *f, haddr_t addr, const void UNUSED *udata1,
     H5HG_heap_t	*heap = NULL;
     H5HG_heap_t	*ret_value = NULL;
     uint8_t	*p = NULL;
-    intn	i;
+    int	i;
     size_t	nalloc, need;
     
     FUNC_ENTER (H5HG_load, NULL);
@@ -319,7 +319,7 @@ H5HG_load (H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 	    heap->obj[0].begin = p;
 	    p += heap->obj[0].size;
 	} else {
-	    uintn idx;
+	    unsigned idx;
 	    uint8_t *begin = p;
 
 	    UINT16DECODE (p, idx);
@@ -465,10 +465,10 @@ H5HG_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5HG_heap_t *heap)
  *
  *-------------------------------------------------------------------------
  */
-static uintn
+static unsigned
 H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
 {
-    uintn	idx;
+    unsigned	idx;
     uint8_t	*p = NULL;
     size_t	need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
 
@@ -569,8 +569,8 @@ herr_t
 H5HG_insert (H5F_t *f, size_t size, void *obj, H5HG_t *hobj/*out*/)
 {
     size_t	need;		/*total space needed for object		*/
-    intn	cwfsno;
-    uintn	idx;
+    int	cwfsno;
+    unsigned	idx;
     H5HG_heap_t	*heap = NULL;
     
     FUNC_ENTER (H5HG_insert, FAIL);
@@ -668,7 +668,7 @@ H5HG_peek (H5F_t *f, H5HG_t *hobj)
 {
     H5HG_heap_t	*heap = NULL;
     void	*retval = NULL;
-    intn	i;
+    int	i;
     
     FUNC_ENTER (H5HG_peek, NULL);
 
@@ -727,7 +727,7 @@ void *
 H5HG_read (H5F_t *f, H5HG_t *hobj, void *object/*out*/)
 {
     H5HG_heap_t	*heap = NULL;
-    intn	i;
+    int	i;
     size_t	size;
     uint8_t	*p = NULL;
     
@@ -791,8 +791,8 @@ H5HG_read (H5F_t *f, H5HG_t *hobj, void *object/*out*/)
  *
  *-------------------------------------------------------------------------
  */
-intn
-H5HG_link (H5F_t *f, H5HG_t *hobj, intn adjust)
+int
+H5HG_link (H5F_t *f, H5HG_t *hobj, int adjust)
 {
     H5HG_heap_t *heap = NULL;
     
@@ -847,8 +847,8 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
     uint8_t	*p=NULL, *obj_start=NULL;
     H5HG_heap_t	*heap = NULL;
     size_t	need;
-    intn	i;
-    uintn	u;
+    int	i;
+    unsigned	u;
     
     FUNC_ENTER (H5HG_remove, FAIL);
 
@@ -947,11 +947,11 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, intn indent,
-	  intn fwidth)
+H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent,
+	  int fwidth)
 {
-    uintn		u, nused, maxobj;
-    uintn		j, k;
+    unsigned		u, nused, maxobj;
+    unsigned		j, k;
     H5HG_heap_t		*h = NULL;
     char		buf[64];
     size_t		size;
