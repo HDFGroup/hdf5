@@ -769,6 +769,30 @@ H5P_cmp(const H5P_t *ds1, const H5P_t *ds2)
                 HRETURN(1);
         }
 
+        /* Check if we should compare hyperslab definitions */
+        if(ds1->hslab_def==TRUE && ds2->hslab_def==TRUE)
+          {
+            for (i = 0; i < ds1->u.simple.rank; i++) {
+                if (ds1->h.start[i] < ds2->h.start[i])
+                    HRETURN(-1);
+                if (ds1->h.start[i] > ds2->h.start[i])
+                    HRETURN(1);
+                if (ds1->h.count[i] < ds2->h.count[i])
+                    HRETURN(-1);
+                if (ds1->h.count[i] > ds2->h.count[i])
+                    HRETURN(1);
+                if (ds1->h.stride[i] < ds2->h.stride[i])
+                    HRETURN(-1);
+                if (ds1->h.stride[i] > ds2->h.stride[i])
+                    HRETURN(1);
+            }
+          } /* end if */
+        else
+          {
+            if(ds1->hslab_def!=ds2->hslab_def)
+                HRETURN(ds1->hslab_def==TRUE ? 1 : -1);
+          } /* end else */
+
         break;
 
     default:
