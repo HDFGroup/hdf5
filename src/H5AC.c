@@ -343,7 +343,9 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "symbol table nodes",
     "local heaps",
     "global heaps",
-    "object headers"
+    "object headers",
+    "v2 B-tree headers",
+    "v2 B-tree leaf nodes"
 };
 
 herr_t
