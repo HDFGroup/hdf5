@@ -1,4 +1,4 @@
-HDF5 version 1.7.0 released on Sun Jul 27 03:21:43 CDT 2003
+HDF5 version 1.7.1 released on Sun Aug 24 03:40:13 CDT 2003
 ================================================================================
 
 
@@ -36,16 +36,32 @@ New Features
 
     Configuration:
     --------------
-      - prefix default is changed from /usr/local to `pwd`/hdf5.  AKC - 2003/07/09
+      - Prefix default is changed from /usr/local to `pwd`/hdf5.  AKC - 2003/07/09
 
     Library:
     --------
+      - Changed 'objno' field in H5G_stat_t structure from 'unsigned long[2]'
+        to 'haddr_t'.  QAK - 2003/08/08
+      - Changed 'fileno' field in H5G_stat_t structure from 'unsigned long[2]'
+        to 'unsigned long'.  QAK - 2003/08/08
+      - Changed 'hobj_ref_t' type from structure with array field to 'haddr_t'.
+        QAK - 2003/08/08
+      - Object references (hobj_ref_t) can now be compared with the 'objno'
+        field in the H5G_stat_t struct for testing if two objects are the same
+        within a file.  QAK - 2003/08/08
+      - Switched over to new error API. SLU - 2003/07/25
 
     Parallel Library:
     -----------------
 
     Tools:
     ------
+      - Changed output of "OID"s from h5dump from "<number>-<number>" to
+        "<number".  This affects both the "regular" and XML output.
+        QAK - 2003/08/08
+      - Changed output of file IDs and "OID"s from h5ls from
+        "<number>:<number>:<number>:<number>" to "<number>:<number>"
+        QAK - 2003/08/08
 
 
 Support for new platforms, languages and compilers.
@@ -57,15 +73,25 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+      - Corrected bugs in H5Gget_num_objs, H5Gget_objname_by_idx and
+        H5Gget_objtype_by_idx to allow them to accept location IDs, not just
+        group IDs.  QAK - 2003/08/21
+      - Corrected bug when using scalar dataspace for memory selection and
+        operating on chunked dataset.  QAK - 2003/08/18
+      - Corrected bugs with multiple '/' characters in names for H5Glink
+        and H5Gunlink.  QAK - 2003/08/16
+      - Corrected bug with user blocks that didn't allow a user block to
+        be inserted in front of a file after the file was created.
+        QAK - 2003/08/13
       - Corrected errors with using point selections to access data in
-          chunked datasets.  QAK - 2003/07/23
+        chunked datasets.  QAK - 2003/07/23
       - Corrected error with variable-length datatypes and chunked datasets
-          which caused H5Dwrite to fail sometimes.  QAK - 2003/07/19
+        caused H5Dwrite to fail sometimes.  QAK - 2003/07/19
       - Modified library and file format to support storing indexed storage
-          (chunked dataset) B-tree's with non-default internal 'K' values.
-          QAK - 2003/07/15
+        (chunked dataset) B-tree's with non-default internal 'K' values.
+        QAK - 2003/07/15
       - Returned H5T_BKG_TEMP support to library after it was accidentally
-          removed.  QAK - 2003/07/14
+        removed.  QAK - 2003/07/14
 
     Configuration
     -------------

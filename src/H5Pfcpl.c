@@ -74,7 +74,7 @@ H5Pget_version(hid_t plist_id, int *_super/*out*/, int *_freelist/*out*/,
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Pget_version, FAIL);
-    H5TRACE5("e","ixxxx",plist_id,super,freelist,stab,shhdr);
+    H5TRACE5("e","ixxxx",plist_id,_super,_freelist,_stab,_shhdr);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
