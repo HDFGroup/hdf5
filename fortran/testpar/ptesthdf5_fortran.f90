@@ -5,7 +5,7 @@
 
      USE HDF5 ! This module contains all necessary modules 
      USE THDF5
-     USE MPI
+!     USE MPI
         
      IMPLICIT NONE
      INTEGER :: error        ! Error flags

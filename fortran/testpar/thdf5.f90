@@ -1,6 +1,7 @@
          MODULE THDF5
          USE HDF5
-         USE MPI
+         include 'mpif.h'
+!         USE MPI
 
 !        Dataset dimensions
 
