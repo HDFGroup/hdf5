@@ -79,7 +79,7 @@ H5RA_init_interface(void)
 
     /* The atom group */
     if (H5I_init_group(H5I_RAGGED, H5I_RAGGED_HASHSIZE, 0,
-		       (herr_t(*)(void*))H5RA_close)<0) {
+		       (H5I_free_t)H5RA_close)<0) {
 	HRETURN_ERROR (H5E_RAGGED, H5E_CANTINIT, FAIL,
 		       "unable to initialize interface");
     }

@@ -183,7 +183,7 @@ H5T_init_interface(void)
 
     /* Initialize the atom group for the file IDs */
     if (H5I_init_group(H5I_DATATYPE, H5I_DATATYPEID_HASHSIZE,
-		       H5T_RESERVED_ATOMS, (herr_t (*)(void *))H5T_close)<0) {
+		       H5T_RESERVED_ATOMS, (H5I_free_t)H5T_close)<0) {
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		     "unable to initialize interface");
     }
@@ -4222,7 +4222,7 @@ H5T_open (H5G_entry_t *loc, const char *name)
 		       "unable to open named data type");
     }
     if (NULL==(dt=H5O_read (&ent, H5O_DTYPE, 0, NULL))) {
-	H5O_close (&ent);
+	H5O_close(&ent);
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL,
 		       "unable to load type message from object header");
     }
@@ -4443,7 +4443,7 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type)
  done:
     if (ret_value<0) {
 	if (H5F_addr_defined (&(type->ent.header))) {
-	    H5O_close (&(type->ent));
+	    H5O_close(&(type->ent));
 	    H5F_addr_undef (&(type->ent.header));
 	}
     }

@@ -306,7 +306,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
 	HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to open group");
     }
     if ((udata.group_id=H5I_register (H5I_GROUP, udata.group))<0) {
-	H5G_close (udata.group);
+	H5G_close(udata.group);
 	HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
 		       "unable to register group");
     }
@@ -682,7 +682,7 @@ H5G_init_interface(void)
 
     /* Initialize the atom group for the group IDs */
     if (H5I_init_group(H5I_GROUP, H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS,
-		       (herr_t (*)(void *)) H5G_close) < 0) {
+		       (H5I_free_t)H5G_close) < 0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 		      "unable to initialize interface");
     }
@@ -1189,7 +1189,7 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
 			   "unable to open root group");
 	}
 	if (NULL==H5O_read (ent, H5O_STAB, 0, &stab)) {
-	    H5O_close (ent);
+	    H5O_close(ent);
 	    HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
 			   "root object is not a group");
 	}
@@ -1377,7 +1377,7 @@ H5G_open(H5G_entry_t *loc, const char *name)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open group");
     }
     if (NULL==H5O_read (&(grp->ent), H5O_STAB, 0, &mesg)) {
-	H5O_close (&(grp->ent));
+	H5O_close(&(grp->ent));
 	HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, NULL, "not a group");
     }
     grp->nref = 1;
@@ -1767,8 +1767,9 @@ H5G_loc (hid_t loc_id)
 	}
 	break;
 	
-    case H5I_MAXID:
+    case H5I_NGROUPS:
     case H5I_BADID:
+    case H5I_FILE_CLOSING:
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object ID");
     }
 

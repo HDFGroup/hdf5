@@ -295,7 +295,7 @@ H5Pclose(hid_t plist_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_close (H5P_class_t type, void *plist)
+H5P_close(H5P_class_t type, void *plist)
 {
     H5F_access_t	*fa_list = (H5F_access_t*)plist;
     H5D_create_t	*dc_list = (H5D_create_t*)plist;

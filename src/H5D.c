@@ -117,7 +117,7 @@ H5D_init_interface(void)
 
     /* Initialize the atom group for the dataset IDs */
     if (H5I_init_group(H5I_DATASET, H5I_DATASETID_HASHSIZE, H5D_RESERVED_ATOMS,
-		       (herr_t (*)(void *)) H5D_close)<0) {
+		       (H5I_free_t)H5D_close)<0) {
         HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		      "unable to initialize interface");
     }
@@ -383,7 +383,7 @@ H5Dget_space(hid_t dset_id)
 
     /* Create an atom */
     if ((ret_value=H5I_register (H5I_DATASPACE, space))<0) {
-	H5S_close (space);
+	H5S_close(space);
 	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		       "unable to register data space");
     }
@@ -1340,7 +1340,7 @@ H5D_open_oid(H5G_entry_t *ent)
     ret_value = dataset;
 
 done:
-    if (space) H5S_close (space);
+    if (space) H5S_close(space);
     if (ret_value==NULL && dataset) {
         if (H5F_addr_defined(&(dataset->ent.header))) {
             H5O_close(&(dataset->ent));
@@ -1394,7 +1394,7 @@ H5D_close(H5D_t *dataset)
      * can do if one of these fails, so we just continue.
      */
     free_failed = (H5T_close(dataset->type) < 0 ||
-		   H5P_close (H5P_DATASET_CREATE, dataset->create_parms)); 
+		   H5P_close(H5P_DATASET_CREATE, dataset->create_parms)); 
 
     /* Close the dataset object */
     H5O_close(&(dataset->ent));
@@ -1764,7 +1764,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (dst_id >= 0) H5I_dec_ref(dst_id);
     if (tconv_buf && NULL==xfer_parms->tconv_buf) H5TB_release_buf(tconv_id);
     if (bkg_buf && NULL==xfer_parms->bkg_buf) H5TB_release_buf (bkg_id);
-    if (free_this_space) H5S_close (free_this_space);
+    if (free_this_space) H5S_close(free_this_space);
     FUNC_LEAVE(ret_value);
 }
 
@@ -2138,7 +2138,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (dst_id >= 0) H5I_dec_ref(dst_id);
     if (tconv_buf && NULL==xfer_parms->tconv_buf) H5TB_release_buf(tconv_id);
     if (bkg_buf && NULL==xfer_parms->bkg_buf) H5TB_release_buf (bkg_id);
-    if (free_this_space) H5S_close (free_this_space);
+    if (free_this_space) H5S_close(free_this_space);
     FUNC_LEAVE(ret_value);
 }
 
@@ -2222,7 +2222,7 @@ H5D_extend (H5D_t *dataset, const hsize_t *size)
     ret_value = SUCCEED;
 
  done:
-    H5S_close (space);
+    H5S_close(space);
     FUNC_LEAVE (ret_value);
 }
     

@@ -64,7 +64,7 @@ H5S_init_interface(void)
 
     /* Initialize the atom group for the file IDs */
     if (H5I_init_group(H5I_DATASPACE, H5I_DATASPACEID_HASHSIZE,
-		       H5S_RESERVED_ATOMS, (herr_t (*)(void *))H5S_close)<0) {
+		       H5S_RESERVED_ATOMS, (H5I_free_t)H5S_close)<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to initialize interface");
     }

@@ -59,7 +59,7 @@ H5R_init_interface(void)
 
     /* Initialize the atom group for the file IDs */
     if (H5I_init_group(H5I_REFERENCE, H5I_REFID_HASHSIZE, H5R_RESERVED_ATOMS,
-		       (herr_t (*)(void *)) NULL)<0) {
+		       (H5I_free_t)NULL)<0) {
 	HRETURN_ERROR (H5E_REFERENCE, H5E_CANTINIT, FAIL,
 		       "unable to initialize interface");
     }
@@ -370,9 +370,9 @@ H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref)
             INT32DECODE(p,hobjid.idx);
 
             /* Get the dataset region from the heap (allocate inside routine) */
-printf("%s: hobjid.addr=",FUNC);
-H5F_addr_print(stdout,&hobjid.addr);
-printf(", hobjid.idx=%d\n", hobjid.idx);
+	    printf("%s: hobjid.addr=",FUNC);
+	    H5F_addr_print(stdout,&hobjid.addr);
+	    printf(", hobjid.idx=%d\n", hobjid.idx);
             if((buf=H5HG_read(ent.file,&hobjid,NULL))==NULL)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, FAIL,
                   "Unable to read dataset region information");

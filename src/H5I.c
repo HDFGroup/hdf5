@@ -17,46 +17,23 @@ static char		RcsId[] = "@(#)$Revision$";
 /* $Id$ */
 
 /*
-   FILE
-   H5I.c - Internal storage routines for handling "IDs"
-
-   REMARKS
-   ID's which allow objects (void *'s currently) to be bundled into "groups"
-   for more general storage.
-
-   DESIGN
-   The groups are stored in an array of pointers to store each group in an
-   element. Each "group" node contains a link to a hash table to manage the IDs
-   in each group.  The allowed "groups" are stored in an enum (called group_t)
-   in H5Ipublic.h.
-
-   BUGS/LIMITATIONS
-   Can't interate over the IDs in a group.
-
-   LOCAL ROUTINES
-   H5I_find_id      - Returns a pointer to an HAI_id_info_t from an ID
-   H5I_get_id_node  - Gets an ID node (uses the ID free list)
-   H5I_release_id_node - Releases an ID node (uses the ID free list)
-   EXPORTED ROUTINES
-   ID Functions:
-   H5I_register	      - Register an object in a group and get an ID for it
-   H5I_object	      - Get the object for an ID
-   H5I_get_type	      - Get the group for an ID
-   H5I_remove	      - Remove an ID from a group
-   H5I_search	      - Search a group for a particular object
-   ID Group Functions:
-   H5I_init_group      - Initialize a group to store IDs in
-   H5I_destroy_group   - Destroy an ID group
-   ID Group Cleanup:
-   H5Ishutdown	      - Terminate various static buffers.
-
-   AUTHOR
-   Quincey Koziol
-
-   MODIFICATION HISTORY
-   1/3/96  - Starting writing specs & coding prototype
-   1/7/96  - Finished coding prototype
-   6/10/97 - Moved into HDF5 library
+ * FILE:	H5I.c - Internal storage routines for handling "IDs"
+ *     
+ * REMARKS:	ID's which allow objects (void *'s currently) to be bundled
+ *		into "groups" for more general storage.
+ * 
+ * DESIGN:	The groups are stored in an array of pointers to store each
+ *		group in an element. Each "group" node contains a link to a
+ *		hash table to manage the IDs in each group.  The allowed
+ *		"groups" are stored in an enum (called group_t) in
+ *		H5Ipublic.h.
+ *		
+ * AUTHOR:	Quincey Koziol
+ *
+ * MODIFICATIONS:
+ *	1/3/96	- Starting writing specs & coding prototype
+ *	1/7/96	- Finished coding prototype
+ *	6/10/97 - Moved into HDF5 library
  */
 #include <H5private.h>
 #include <H5Iprivate.h>
@@ -81,11 +58,11 @@ static herr_t H5I_init_interface(void);
 /*-------------------- Locally scoped variables -----------------------------*/
 
 #ifdef IDS_ARE_CACHED
-#  define ID_CACHE_SIZE 4             /*# of previous atoms cached         */
+#  define ID_CACHE_SIZE 4	      /*# of previous atoms cached	   */
 #endif
 
 /*
- * Number of bits to use for Group ID in each atom. Increase if H5I_MAXID
+ * Number of bits to use for Group ID in each atom. Increase if H5I_NGROUPS
  * becomes too large (an assertion would fail in H5I_init_interface). This is
  * the only number that must be changed since all other bit field sizes and
  * masks are calculated from GROUP_BITS.
@@ -118,37 +95,43 @@ static herr_t H5I_init_interface(void);
 #endif
 
 /* Combine a Group number and an atom index into an atom */
-#define H5I_MAKE(g,i)	((((hid_t)(g)&GROUP_MASK)<<ID_BITS)|      \
-                             ((hid_t)(i)&ID_MASK))
+#define H5I_MAKE(g,i)	((((hid_t)(g)&GROUP_MASK)<<ID_BITS)|	  \
+			     ((hid_t)(i)&ID_MASK))
 
 #ifdef IDS_ARE_CACHED
 /* Array of pointers to ID groups */
-static hid_t H5I_id_cache[ID_CACHE_SIZE] = {-1, -1, -1, -1};
-static void *H5I_obj_cache[ID_CACHE_SIZE];
+static hid_t H5I_id_cache_g[ID_CACHE_SIZE] = {-1, -1, -1, -1};
+static void *H5I_obj_cache_g[ID_CACHE_SIZE];
 #endif
 
 /* Array of pointers to atomic groups */
-static H5I_id_group_t *id_group_list[H5I_MAXID];
+static H5I_id_group_t *H5I_id_group_list_g[H5I_NGROUPS];
 
 /* Pointer to the atom node free list */
-static H5I_id_info_t *id_free_list = NULL;
+static H5I_id_info_t *H5I_id_free_list_g = NULL;
 
 /*--------------------- Local function prototypes ---------------------------*/
 static H5I_id_info_t *H5I_find_id(hid_t id);
 static H5I_id_info_t *H5I_get_id_node(void);
 static herr_t H5I_release_id_node(H5I_id_info_t *id);
+static herr_t H5I_debug(H5I_type_t grp);
 
 
-/*--------------------------------------------------------------------------
-NAME
-   H5I_init_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5I_init_interface()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:	H5I_init_interface
+ *
+ * Purpose:	Initialize interface-specific information.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 static herr_t 
 H5I_init_interface(void)
 {
@@ -159,45 +142,101 @@ H5I_init_interface(void)
      * Make certain the ID types don't overflow the number of bits allocated
      * for them in an ID.
      */
-    assert(H5I_MAXID<=(1<<GROUP_BITS));
+    assert(H5I_NGROUPS<=(1<<GROUP_BITS));
 
     FUNC_LEAVE(ret_value);
 }
 
 
-/******************************************************************************
- NAME
-     H5I_init_group - Initialize an ID group
-
- DESCRIPTION
-    Creates a global ID group to store IDs in.  If the group has already
-    been initialized, this routine just increments the count of # of
-    initializations and returns without trying to change the size of the hash
-    table.  A specific number of group entries may be reserved to enable
-    "constant" values to be handed out which are valid IDs in the group, but
-    which do not map to any data structures and are not allocated dynamicly
-    later.
-
- RETURNS
-    Non-negative on success/Negative on failure
-
-******************************************************************************/
-intn 
-H5I_init_group(H5I_type_t grp,	 /* IN: Group to initialize */
-	       size_t hash_size, /* IN: Minimum hash table size to use for group */
-	       uintn reserved,	 /* IN: Number of hash table entries to reserve */
-	       herr_t (*free_func) (void *)	/* IN: Function to call when releasing ref counted objects */
-)
+/*-------------------------------------------------------------------------
+ * Function:	H5I_term_interface
+ *
+ * Purpose:	Terminate the H5I interface: release all memory, reset all
+ *		global variables to initial values.
+ *
+ * Return:	void
+ *
+ * Programmer:	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void 
+H5I_term_interface(intn status)
 {
-    H5I_id_group_t	   *grp_ptr = NULL;	/* ptr to the atomic group */
-    intn		    ret_value = SUCCEED;
+    H5I_id_group_t	*grp_ptr;
+    H5I_id_info_t	*curr;
+    H5I_type_t		grp;
+
+    if (interface_initialize_g>0) {
+	for (grp=0; grp<H5I_NGROUPS; grp++) {
+	    /*
+	     * Destroy each group regardless of reference count. This removes
+	     * any objects which might still be defined in the group. Then
+	     * free the group header struct and zero the global group array.
+	     */
+	    if ((grp_ptr=H5I_id_group_list_g[grp])) {
+		grp_ptr->count = 1;
+		H5I_destroy_group(grp);
+		H5MM_xfree(grp_ptr);
+		H5I_id_group_list_g[grp] = NULL;
+	    }
+	}
+	
+
+	/* Release the global free list */
+	while (H5I_id_free_list_g) {
+	    curr = H5I_id_free_list_g;
+	    H5I_id_free_list_g = H5I_id_free_list_g->next;
+	    H5MM_xfree(curr);
+	}
+    }
+    
+    /* Indicate interface status */
+    interface_initialize_g = status;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_init_group
+ *
+ * Purpose:	Initialize an ID group whose ID number is specified by GRP,
+ *		If the group has already been initialized, this routine just
+ *		increments the count of number of initializations and returns
+ *		without trying to change the size of the hash table.  A
+ *		specific number (RESERVED) of group entries may be reserved
+ *		to enable "constant" values to be handed out which are valid
+ *		IDs in the group, but which do not map to any data structures
+ *		and are not allocated dynamicly later. HASH_SIZE is the
+ *		minimum hash table size to use for the group. FREE_FUNC is
+ *		called with an object pointer when the object is removed from
+ *		the group.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, February 19, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+intn 
+H5I_init_group(H5I_type_t grp, size_t hash_size, uintn reserved,
+	       H5I_free_t free_func)
+{
+    H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the atomic group*/
+    intn		ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER(H5I_init_group, FAIL);
 
-    if ((grp <= H5I_BADID || grp >= H5I_MAXID) && hash_size > 0) {
+    /* Check arguments */
+    if ((grp <= H5I_BADID || grp >= H5I_NGROUPS) && hash_size > 0) {
 	HGOTO_DONE(FAIL);
     }
-
 #ifdef HASH_SIZE_POWER_2
     /*
      * If anyone knows a faster test for a power of two, please change this
@@ -217,20 +256,20 @@ H5I_init_group(H5I_type_t grp,	 /* IN: Group to initialize */
 	HGOTO_DONE(FAIL);
 #endif /* HASH_SIZE_POWER_2 */
 
-    if (id_group_list[grp] == NULL) {
-	/* Allocate the group information */
+    if (H5I_id_group_list_g[grp] == NULL) {
+	/* Allocate the group information for new group */
 	if (NULL==(grp_ptr = H5MM_calloc(sizeof(H5I_id_group_t)))) {
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			 "memory allocation failed");
 	}
-	id_group_list[grp] = grp_ptr;
+	H5I_id_group_list_g[grp] = grp_ptr;
     } else {
 	/* Get the pointer to the existing group */
-	grp_ptr = id_group_list[grp];
+	grp_ptr = H5I_id_group_list_g[grp];
     }
 
     if (grp_ptr->count == 0) {
-	/* Initialize the ID group structure */
+	/* Initialize the ID group structure for new groups */
 	grp_ptr->hash_size = hash_size;
 	grp_ptr->reserved = reserved;
 	grp_ptr->wrapped = 0;
@@ -251,12 +290,11 @@ H5I_init_group(H5I_type_t grp,	 /* IN: Group to initialize */
     if (ret_value<0) {
 	/* Error condition cleanup */
 	if (grp_ptr != NULL) {
-	    H5MM_xfree (grp_ptr->id_list);
-	    H5MM_xfree (grp_ptr);
+	    H5MM_xfree(grp_ptr->id_list);
+	    H5MM_xfree(grp_ptr);
 	}
     }
-    
-    /* Normal function cleanup */
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -267,7 +305,7 @@ H5I_init_group(H5I_type_t grp,	 /* IN: Group to initialize */
  * Purpose:	Decrements the reference count on an entire group of IDs.
  *		If the group reference count becomes zero then the group is
  *		destroyed along with all atoms in that group regardless of
- *		their reference counts.  Destroying IDs involves calling
+ *		their reference counts.	 Destroying IDs involves calling
  *		the free-func for each ID's object and then adding the ID
  *		struct to the ID free list.
  *		
@@ -277,7 +315,7 @@ H5I_init_group(H5I_type_t grp,	 /* IN: Group to initialize */
  *
  * Modifications:
  *
- * 	Robb Matzke, 25 Feb 1998
+ *	Robb Matzke, 25 Feb 1998
  *	IDs are freed when a group is destroyed.
  *
  *-------------------------------------------------------------------------
@@ -292,52 +330,65 @@ H5I_destroy_group(H5I_type_t grp)
 
     FUNC_ENTER(H5I_destroy_group, FAIL);
 
-    if (grp <= H5I_BADID || grp >= H5I_MAXID)
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
 	HGOTO_DONE(FAIL);
-
-    grp_ptr = id_group_list[grp];
-    if (grp_ptr == NULL || grp_ptr->count <= 0)
+    }
+    
+    grp_ptr = H5I_id_group_list_g[grp];
+    if (grp_ptr == NULL || grp_ptr->count <= 0) {
 	HGOTO_DONE(FAIL);
+    }
 
     /*
      * Decrement the number of users of the atomic group.  If this is the
      * last user of the group then release all atoms from the group.  The
      * free function is invoked for each atom being freed.
      */
-    if ((--(grp_ptr->count)) == 0) {
-
+    if (1==grp_ptr->count) {
 #ifdef IDS_ARE_CACHED
 	/*
 	 * Remove atoms from the global atom cache.
 	 */
 	for (i=0; i<ID_CACHE_SIZE; i++) {
-	    if (H5I_GROUP(H5I_id_cache[i]) == grp) {
-		H5I_id_cache[i] = (-1);
-		H5I_obj_cache[i] = NULL;
+	    if (H5I_GROUP(H5I_id_cache_g[i]) == grp) {
+		H5I_id_cache_g[i] = (-1);
+		H5I_obj_cache_g[i] = NULL;
 	    }
 	}
 #endif /* IDS_ARE_CACHED */
 
 	/*
-	 * Free all objects.
+	 * Call free method for all objects in group regardless of there
+	 * reference counts. Ignore the return value from from the free
+	 * method and remove object from group regardless.
 	 */
 	if (grp_ptr->free_func) {
 	    for (i=0; i<grp_ptr->hash_size; i++) {
-            for (cur=grp_ptr->id_list[i]; cur; cur=next) {
-                /* Free the object */
-                (grp_ptr->free_func)(cur->obj_ptr);
-
-                /* Add ID struct to free list */
-                next = cur->next;
-                cur->next = id_free_list;
-                id_free_list = cur;
-            }
+		for (cur=grp_ptr->id_list[i]; cur; cur=next) {
+		    /* Free the object regardless of reference count */
+		    if ((grp_ptr->free_func)(cur->obj_ptr)<0) {
+#if H5I_DEBUG
+			if (H5DEBUG(I)) {
+			    fprintf(H5DEBUG(I), "H5I: free grp=%d obj=0x%08lx "
+				    "failure ignored\n", (int)grp,
+				    (unsigned long)(cur->obj_ptr));
+			}
+#endif /*H5I_DEBUG*/
+		    }
+		    
+		    /* Add ID struct to free list */
+		    next = cur->next;
+		    cur->next = H5I_id_free_list_g;
+		    H5I_id_free_list_g = cur;
+		}
 	    }
 	}
 
 	/* Free local cache and reset group */
 	H5MM_xfree(grp_ptr->id_list);
-	HDmemset (grp_ptr, 0, sizeof(grp_ptr));
+	HDmemset (grp_ptr, 0, sizeof(*grp_ptr));
+    } else {
+	--(grp_ptr->count);
     }
     
   done:
@@ -369,9 +420,9 @@ H5I_destroy_group(H5I_type_t grp)
 hid_t 
 H5I_register(H5I_type_t grp, void *object)
 {
-    H5I_id_group_t	*grp_ptr=NULL;	/*ptr to the group 		*/
+    H5I_id_group_t	*grp_ptr=NULL;	/*ptr to the group		*/
     H5I_id_info_t	*id_ptr=NULL;	/*ptr to the new ID information */
-    hid_t		new_id;		/*new ID 			*/
+    hid_t		new_id;		/*new ID			*/
     uintn		hash_loc;	/*new item's hash table location*/
     hid_t		next_id;	/*next ID to check		*/
     hid_t		ret_value=SUCCEED; /*return value		*/
@@ -380,15 +431,17 @@ H5I_register(H5I_type_t grp, void *object)
     
     FUNC_ENTER(H5I_register, FAIL);
 
-    if (grp <= H5I_BADID || grp >= H5I_MAXID)
+    /* Check arguments */
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
 	HGOTO_DONE(FAIL);
-
-    grp_ptr = id_group_list[grp];
-    if (grp_ptr == NULL || grp_ptr->count <= 0)
+    }
+    grp_ptr = H5I_id_group_list_g[grp];
+    if (grp_ptr == NULL || grp_ptr->count <= 0) {
 	HGOTO_DONE(FAIL);
-
-    if ((id_ptr = H5I_get_id_node()) == NULL)
+    }
+    if ((id_ptr = H5I_get_id_node()) == NULL) {
 	HGOTO_DONE(FAIL);
+    }
 
     /* Create the struct & it's ID */
     new_id = H5I_MAKE(grp, grp_ptr->nextid);
@@ -399,8 +452,9 @@ H5I_register(H5I_type_t grp, void *object)
 
     /* hash bucket already full, prepend to front of chain */
     hash_loc = grp_ptr->nextid % (uintn) grp_ptr->hash_size;
-    if (grp_ptr->id_list[hash_loc] != NULL)
+    if (grp_ptr->id_list[hash_loc] != NULL) {
 	id_ptr->next = grp_ptr->id_list[hash_loc];
+    }
 
     /* Insert into the group */
     grp_ptr->id_list[hash_loc] = id_ptr;
@@ -422,7 +476,6 @@ H5I_register(H5I_type_t grp, void *object)
      * handed out.
      */
     if (grp_ptr->wrapped) {
-
 	/*
 	 * Make sure we check all available ID's.  If we're about at the end
 	 * of the range then wrap around and check the beginning values.  If
@@ -430,7 +483,6 @@ H5I_register(H5I_type_t grp, void *object)
 	 * we can fail.
 	 */
 	for (i=grp_ptr->reserved; i<ID_MASK; i++) {
-
 	    /* Handle end of range by wrapping to beginning */
 	    if (grp_ptr->nextid>(uintn)ID_MASK) {
 		grp_ptr->nextid = grp_ptr->reserved;
@@ -461,61 +513,31 @@ H5I_register(H5I_type_t grp, void *object)
     FUNC_LEAVE(ret_value);
 }
 
-/******************************************************************************
- NAME
-     H5I_inc_ref - Adds a reference to a reference counted ID.
-	IN: ID to increment reference count for
- DESCRIPTION
-    Increments the number of references outstanding for an ID.  This will
-    fail if the group is not a reference counted group.
-
- RETURNS
-    ID/Negative
-
-*******************************************************************************/
-hid_t
-H5I_inc_ref(hid_t id)
-{
-    H5I_type_t		grp = H5I_GROUP(id); /* object's group	*/
-    H5I_id_group_t	*grp_ptr = NULL;	/* ptr to the ID group*/
-    H5I_id_info_t		*id_ptr = NULL;	/* ptr to the new ID 	*/
-    hid_t		ret_value = FAIL;
-
-    FUNC_ENTER(H5I_inc_ref, FAIL);
-
-    grp_ptr = id_group_list[grp];
-    if (grp_ptr == NULL || grp_ptr->count <= 0 || grp_ptr->free_func == NULL) {
-	HRETURN(FAIL);
-    }
-    
-    /* General lookup of the atom */
-    if (NULL!=(id_ptr = H5I_find_id(id))) {
-	id_ptr->count++;
-	ret_value = id;
-    }
-    
-    FUNC_LEAVE(ret_value);
-}
-
-/******************************************************************************
- NAME
-     H5I_object - Returns to the object ptr for the ID 
-
- DESCRIPTION
-    Retrieves the object ptr which is associated with the ID.
-
- RETURNS
-    Returns object ptr if successful and NULL otherwise
-
-*******************************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_object
+ *
+ * Purpose:	Find an object pointer for the specified ID.
+ *
+ * Return:	Success:	Non-null object pointer associated with the
+ *				specified ID.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 void * 
 H5I_object(hid_t id)
 {
+    H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new atom	*/
+    void		*ret_value = NULL;	/*return value		*/
 #ifdef IDS_ARE_CACHED
-    uintn		i;	/* local counter */
+    uintn		i;			/*local counter		*/
 #endif /* IDS_ARE_CACHED */
-    H5I_id_info_t		*id_ptr = NULL;	/* ptr to the new atom */
-    void 		*ret_value = NULL;
 
     FUNC_ENTER(H5I_object, NULL);
 
@@ -524,49 +546,58 @@ H5I_object(hid_t id)
      * Look for the ID in the cache first. Implement a simple "move
      * forward" caching scheme by swapping the found cache item with the
      * previous cache item.  This gradually migrates used cache items toward
-     * the front of the cache and unused items toward the end.  For instance,
+     * the front of the cache and unused items toward the end.	For instance,
      * finding `e' in the cache results in:
      *
      * Before: a b c d e f g h i j
-     *	       | | |  X  | | | | |
+     *	       | | |  X	 | | | | |
      * After:  a b c e d f g h i j
      */
     for (i=0; i<ID_CACHE_SIZE; i++)
-	if (H5I_id_cache[i] == id) {
-	    ret_value = H5I_obj_cache[i];
+	if (H5I_id_cache_g[i] == id) {
+	    ret_value = H5I_obj_cache_g[i];
 	    if (i > 0) {
-		hid_t t_id = H5I_id_cache[i-1];
-		void *t_obj = H5I_obj_cache[i-1];
-		H5I_id_cache[i-1] = H5I_id_cache[i];
-		H5I_obj_cache[i-1] = H5I_obj_cache[i];
-		H5I_id_cache[i] = t_id;
-		H5I_obj_cache[i] = t_obj;
+		hid_t t_id = H5I_id_cache_g[i-1];
+		void *t_obj = H5I_obj_cache_g[i-1];
+		H5I_id_cache_g[i-1] = H5I_id_cache_g[i];
+		H5I_obj_cache_g[i-1] = H5I_obj_cache_g[i];
+		H5I_id_cache_g[i] = t_id;
+		H5I_obj_cache_g[i] = t_obj;
 	    }
 	    HGOTO_DONE(ret_value);
 	}
 #endif /* IDS_ARE_CACHED */
 
     /* General lookup of the ID */
-    if ((id_ptr = H5I_find_id(id)) == NULL) HGOTO_DONE(NULL);
+    if (NULL==(id_ptr = H5I_find_id(id))) HGOTO_DONE(NULL);
 
     /* Check if we've found the correct ID */
-    if (id_ptr != NULL) ret_value = id_ptr->obj_ptr;
+    if (id_ptr) ret_value = id_ptr->obj_ptr;
 
   done:
     FUNC_LEAVE(ret_value);
 }
 
-/******************************************************************************
- NAME
-     H5I_get_type - Returns to the group for the ID 
-
- DESCRIPTION
-    Retrieves the group which is associated with the ID.
-
- RETURNS
-    Returns group if successful and H5I_BADID otherwise
-
-*******************************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_get_type
+ *
+ * Purpose:	Given an object ID return the group (type) to which it
+ *		belongs.  The ID need not be the ID of an object which
+ *		currently exists because the group number (type) is encoded
+ *		in the object ID.
+ *
+ * Return:	Success:	A valid group number (type)
+ *
+ *		Failure:	H5I_BADID, a negative value.
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, February 19, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 H5I_type_t 
 H5I_get_type(hid_t id)
 {
@@ -575,22 +606,30 @@ H5I_get_type(hid_t id)
     FUNC_ENTER(H5I_get_type, H5I_BADID);
 
     if (id>0) ret_value = H5I_GROUP(id);
-    assert(ret_value>=H5I_BADID && ret_value<H5I_MAXID);
+    assert(ret_value>=H5I_BADID && ret_value<H5I_NGROUPS);
 
     FUNC_LEAVE(ret_value);
 }
 
-/******************************************************************************
- NAME
-     H5Iget_type - Returns the type of an ID 
-
- DESCRIPTION
-    Retrieves the type of an ID.
-
- RETURNS
-    Returns group if successful and H5I_BADID otherwise
-
-*******************************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Iget_type
+ *
+ * Purpose:	The public version of H5I_get_type(), obtains a group number
+ *		(type) when given an ID.  The ID need not be the ID of an
+ *		object which currently exists because the group number is
+ *		encoded as part of the ID.
+ *
+ * Return:	Success:	Group number (type)
+ *
+ *		Failure:	H5I_BADID, a negative value
+ *
+ * Programmer:	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 H5I_type_t
 H5Iget_type(hid_t id)
 {
@@ -599,48 +638,55 @@ H5Iget_type(hid_t id)
     FUNC_ENTER(H5Iget_type, H5I_BADID);
     H5TRACE1("It","i",id);
 
-    if (ret_value <= H5I_BADID || ret_value >= H5I_MAXID)
-        HGOTO_DONE(H5I_BADID);
-
+    if (ret_value <= H5I_BADID || ret_value >= H5I_NGROUPS) {
+	HGOTO_DONE(H5I_BADID);
+    }
     ret_value = H5I_get_type(id);
 
 done:
     FUNC_LEAVE(ret_value);
 }
 
-/******************************************************************************
- NAME
-     H5I_remove - Removes an ID from a group
-
- DESCRIPTION
-    Removes an ID from a group.
-
- RETURNS
-    Returns ID's object if successful and NULL otherwise
-
-*******************************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_remove
+ *
+ * Purpose:	Removes the specified ID from its group.
+ *
+ * Return:	Success:	A pointer to the object that was removed, the
+ *				same pointer which would have been found by
+ *				calling H5I_object().
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 void * 
 H5I_remove(hid_t id)
 {
-    H5I_id_group_t	*grp_ptr = NULL;/* ptr to the atomic group	*/
-    H5I_id_info_t		*curr_id,	/* ptr to the current atom 	*/
-			*last_id;	/* ptr to the last atom 	*/
-    H5I_type_t		grp;		/* atom's atomic group 		*/
-    uintn		hash_loc;	/* atom's hash table location 	*/
+    H5I_id_group_t	*grp_ptr = NULL;/*ptr to the atomic group	*/
+    H5I_id_info_t	*curr_id;	/*ptr to the current atom	*/
+    H5I_id_info_t	*last_id;	/*ptr to the last atom		*/
+    H5I_type_t		grp;		/*atom's atomic group		*/
+    uintn		hash_loc;	/*atom's hash table location	*/
 #ifdef IDS_ARE_CACHED
-    uintn		i;		/* local counting variable 	*/
+    uintn		i;		/*local counting variable	*/
 #endif
-    void *	      ret_value = NULL;
+    void *	      ret_value = NULL;	/*return value			*/
 
     FUNC_ENTER(H5I_remove, NULL);
 
+    /* Check arguments */
     grp = H5I_GROUP(id);
-    if (grp <= H5I_BADID || grp >= H5I_MAXID) HGOTO_DONE(NULL);
-
-    grp_ptr = id_group_list[grp];
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS) HGOTO_DONE(NULL);
+    grp_ptr = H5I_id_group_list_g[grp];
     if (grp_ptr == NULL || grp_ptr->count <= 0) HGOTO_DONE(NULL);
 
-    /* Get the location in which the ID is located */
+    /* Get the bucket in which the ID is located */
     hash_loc = (uintn) H5I_LOC(id, grp_ptr->hash_size);
     curr_id = grp_ptr->id_list[hash_loc];
     if (curr_id == NULL) HGOTO_DONE(NULL);
@@ -654,7 +700,7 @@ H5I_remove(hid_t id)
 
     if (curr_id != NULL) {
 	if (last_id == NULL) {
-	    /* ID is the first the chain */
+	    /* ID is the first in the chain */
 	    grp_ptr->id_list[hash_loc] = curr_id->next;
 	} else {
 	    last_id->next = curr_id->next;
@@ -669,9 +715,9 @@ H5I_remove(hid_t id)
 #ifdef IDS_ARE_CACHED
     /* Delete object from cache */
     for (i = 0; i < ID_CACHE_SIZE; i++)
-	if (H5I_id_cache[i] == id) {
-	    H5I_id_cache[i] = (-1);
-	    H5I_obj_cache[i] = NULL;
+	if (H5I_id_cache_g[i] == id) {
+	    H5I_id_cache_g[i] = (-1);
+	    H5I_obj_cache_g[i] = NULL;
 	    break; /* we assume there is only one instance in the cache */
 	}
 #endif /* IDS_ARE_CACHED */
@@ -706,90 +752,112 @@ H5I_remove(hid_t id)
  *	zero and no `free' function has been defined.  The object is still
  *	removed from the list.
  *
- * 	Robb Matzke, 30 Dec 1998
+ *	Robb Matzke, 30 Dec 1998
  *	Fixed a bug where the return value was always zero instead of the new
  *	reference count.
+ *
+ *	Robb Matzke, 19 Feb 1999
+ *	If the free method is defined and fails then the object is not
+ *	removed from the group and its reference count is not decremented.
+ *	The group number is now passed to the free method.
  *
  *-------------------------------------------------------------------------
  */
 intn
 H5I_dec_ref(hid_t id)
 {
-    H5I_type_t		grp = H5I_GROUP(id); /* Group the object is in */
-    H5I_id_group_t	*grp_ptr = NULL;     /* ptr to the group */
-    H5I_id_info_t		*id_ptr = NULL;     /* ptr to the new ID */
-    void *		obj;	    /* object to call 'free' function with */
-    intn		ret_value = FAIL;
+    H5I_type_t		grp = H5I_GROUP(id);	/*group the object is in*/
+    H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
+    H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new ID	*/
+    intn		ret_value = FAIL;	/*return value		*/
 
     FUNC_ENTER(H5I_dec_ref, FAIL);
 
-    grp_ptr = id_group_list[grp];
+    /* Check arguments */
+    grp_ptr = H5I_id_group_list_g[grp];
     if (grp_ptr == NULL || grp_ptr->count <= 0) {
 	HRETURN(FAIL);
     }
     
     /* General lookup of the ID */
-    if ((id_ptr = H5I_find_id(id)) != NULL) {
-	/* Decrement the reference count */
-	ret_value = --(id_ptr->count);
-
-	/* If the reference count is zero, remove the object from the group */
-	if (0 == id_ptr->count && (obj = H5I_remove(id)) != NULL) {
-	    /*
-	     * call the user's 'free' function for the atom's information,
-	     * otherwise just leak memory.
-	     */
-	    if (grp_ptr->free_func) {
-		if ((grp_ptr->free_func)(obj)<0) {
-		    HRETURN_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL,
-				   "unable to free atom");
-		}
+    if ((id_ptr=H5I_find_id(id))) {
+	/*
+	 * If this is the last reference to the object then invoke the group's
+	 * free method on the object. If the free method is undefined or
+	 * successful then remove the object from the group; otherwise leave
+	 * the object in the group without decrementing the reference
+	 * count. If the reference count is more than one then decrement the
+	 * reference count without calling the free method.
+	 *
+	 * Beware: the free method may call other H5I functions.
+	 */
+	if (1==id_ptr->count) {
+	    if (!grp_ptr->free_func ||
+		(grp_ptr->free_func)(id_ptr->obj_ptr)>=0) {
+		H5I_remove(id);
+		ret_value = 0;
+	    } else {
+		ret_value = 1;
 	    }
+	} else {
+	    ret_value = --(id_ptr->count);
 	}
     }
     FUNC_LEAVE(ret_value);
 }
 
-/******************************************************************************
- NAME
-     H5I_search - Search for an object in a group and get it's pointer.
-
- DESCRIPTION
-    Searchs for an object in a group and returns the pointer to it.
-    This routine calls the function pointer passed in for each object in the
-    group until it finds a match.  Currently there is no way to resume a
-    search.
-
- RETURNS
-    Returns pointer an ID's object if successful and NULL otherwise
-
-*******************************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_search
+ *
+ * Purpose:	Apply function FUNC to each member of group GRP and return a
+ *		pointer to the first object for which FUNC returns non-zero.
+ *		The FUNC should take a pointer to the object and the KEY as
+ *		arguments and return non-zero to terminate the search (zero
+ *		to continue).
+ *
+ * Limitation:	Currently there is no way to start searching from where a
+ *		previous search left off.
+ *
+ * Return:	Success:	The first object in the group for which FUNC
+ *				returns non-zero. NULL if FUNC returned zero
+ *				for every object in the group.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, February 19, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 void *
-H5I_search(H5I_type_t grp,	    /* IN: Group to search for the object in */
-	   H5I_search_func_t func,   /* IN: Ptr to the comparison function */
-	   const void *key  /* IN: pointer to key to compare against */
-)
+H5I_search(H5I_type_t grp, H5I_search_func_t func, const void *key)
 {
-    H5I_id_group_t	   *grp_ptr = NULL;	/* ptr to the group */
-    H5I_id_info_t		   *id_ptr = NULL;	/* ptr to the new ID */
-    uintn		    i;	/* local counting variable */
-    void *	      ret_value = NULL;
+    H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
+    H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new ID	*/
+    uintn		i;			/*counter		*/
+    void		*ret_value = NULL;	/*return value		*/
 
     FUNC_ENTER(H5I_search, NULL);
 
-    if (grp <= H5I_BADID || grp >= H5I_MAXID)
+    /* Check arguments */
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
 	HGOTO_DONE(NULL);
-
-    grp_ptr = id_group_list[grp];
-    if (grp_ptr == NULL || grp_ptr->count <= 0)
+    }
+    grp_ptr = H5I_id_group_list_g[grp];
+    if (grp_ptr == NULL || grp_ptr->count <= 0) {
 	HGOTO_DONE(NULL);
+    }
 
     /* Start at the beginning of the array */
-    for (i = 0; i < grp_ptr->hash_size; i++) {
+    for (i=0; i<grp_ptr->hash_size; i++) {
 	id_ptr = grp_ptr->id_list[i];
-	while (id_ptr != NULL) {
-	    if ((*func) (id_ptr->obj_ptr, key))
-		HGOTO_DONE(id_ptr->obj_ptr);	/* found the item we are looking for */
+	while (id_ptr) {
+	    if ((*func)(id_ptr->obj_ptr, key)) {
+		HGOTO_DONE(id_ptr->obj_ptr);	/*found the item*/
+	    }
 	    id_ptr = id_ptr->next;
 	}
     }
@@ -798,79 +866,95 @@ H5I_search(H5I_type_t grp,	    /* IN: Group to search for the object in */
     FUNC_LEAVE(ret_value);
 }
 
-/******************************************************************************
- NAME
-     H5I_find_id - Finds a ID in a group
-
- DESCRIPTION
-    Retrieves the ID ptr which is associated with the ID.
-
- RETURNS
-    Returns ID ptr if successful and NULL otherwise
-
-*******************************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_find_id
+ *
+ * Purpose:	Given an object ID find the info struct that describes the
+ *		object.
+ *
+ * Return:	Success:	Ptr to the object's info struct.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 static H5I_id_info_t *
 H5I_find_id(hid_t id)
 {
-    H5I_id_group_t	   *grp_ptr = NULL;	/* ptr to the group */
-    H5I_id_info_t		   *id_ptr = NULL;	/* ptr to the new ID */
-    H5I_type_t		    grp;	/* ID's group */
-    uintn		    hash_loc;	/* ID's hash table location */
-    H5I_id_info_t		   *ret_value = NULL;
+    H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
+    H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new ID	*/
+    H5I_type_t		grp;			/*ID's group		*/
+    uintn		hash_loc;		/*bucket pointer	*/
+    H5I_id_info_t	*ret_value = NULL;	/*return value		*/
 
     FUNC_ENTER(H5I_find_id, NULL);
 
+    /* Check arguments */
     grp = H5I_GROUP(id);
-    if (grp <= H5I_BADID || grp >= H5I_MAXID)
+    if (grp <= H5I_BADID || grp >= H5I_NGROUPS) {
 	HGOTO_DONE(NULL);
-
-    grp_ptr = id_group_list[grp];
-    if (grp_ptr == NULL || grp_ptr->count <= 0)
+    }
+    grp_ptr = H5I_id_group_list_g[grp];
+    if (grp_ptr == NULL || grp_ptr->count <= 0) {
 	HGOTO_DONE(NULL);
+    }
 
-    /* Get the location in which the ID is located */
-    hash_loc = (uintn) H5I_LOC(id, grp_ptr->hash_size);
+    /* Get the bucket in which the ID is located */
+    hash_loc = (uintn)H5I_LOC(id, grp_ptr->hash_size);
     id_ptr = grp_ptr->id_list[hash_loc];
-    if (id_ptr == NULL)
+    if (id_ptr == NULL) {
 	HGOTO_DONE(NULL);
+    }
 
-    while (id_ptr != NULL) {
+    /* Scan the bucket's linked list for a match */
+    while (id_ptr) {
 	if (id_ptr->id == id) break;
 	id_ptr = id_ptr->next;
     }
     ret_value = id_ptr;
 
 #ifdef IDS_ARE_CACHED
-    H5I_id_cache[ID_CACHE_SIZE-1] = id;
-    H5I_obj_cache[ID_CACHE_SIZE-1] = id_ptr->obj_ptr;
+    /* Add id to the end of the cache */
+    H5I_id_cache_g[ID_CACHE_SIZE-1] = id;
+    H5I_obj_cache_g[ID_CACHE_SIZE-1] = id_ptr->obj_ptr;
 #endif /* IDS_ARE_CACHED */
 
   done:
     FUNC_LEAVE(ret_value);
 }
 
-/******************************************************************************
- NAME
-     H5I_get_idm_node - Gets an ID node
-
- DESCRIPTION
-    Either gets an ID node from the free list (if there is one available)
-    or allocate a node.
-
- RETURNS
-    Returns ID ptr if successful and NULL otherwise
-
-*******************************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_get_id_node
+ *
+ * Purpose:	Either gets an ID node from the free list (if there is one
+ *		available) or allocate a node.
+ *
+ * Return:	Success:	ID pointer
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 static H5I_id_info_t *
 H5I_get_id_node(void)
 {
-    H5I_id_info_t		   *ret_value = NULL;
+    H5I_id_info_t	*ret_value = NULL;
 
     FUNC_ENTER(H5I_get_id_node, NULL);
 
-    if (id_free_list != NULL) {
-	ret_value = id_free_list;
-	id_free_list = id_free_list->next;
+    if (H5I_id_free_list_g != NULL) {
+	ret_value = H5I_id_free_list_g;
+	H5I_id_free_list_g = H5I_id_free_list_g->next;
     } else if (NULL==(ret_value = H5MM_malloc(sizeof(H5I_id_info_t)))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
@@ -879,69 +963,95 @@ H5I_get_id_node(void)
     FUNC_LEAVE(ret_value);
 }
 
-/******************************************************************************
- NAME
-     H5I_release_id_node - Releases an ID node
-
- DESCRIPTION
-    Puts an ID node into the free list
-
- RETURNS
-    Non-negative on success/Negative on failure
-
-*******************************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_release_id_node
+ *
+ * Purpose:	Release an ID node and return it to the free list.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5I_release_id_node(H5I_id_info_t *id)
 {
     FUNC_ENTER(H5I_release_id_node, FAIL);
 
     /* Insert the ID at the beginning of the free list */
-    id->next = id_free_list;
-    id_free_list = id;
+    id->next = H5I_id_free_list_g;
+    H5I_id_free_list_g = id;
 
     FUNC_LEAVE(SUCCEED);
 }
 
-/*--------------------------------------------------------------------------
- NAME
-    H5I_term_interface
- PURPOSE
-    Terminate various static buffers.
- USAGE
-    intn H5I_term_interface()
- RETURNS
-    Non-negative on success/Negative on failure
- DESCRIPTION
-    Free various buffers allocated in the H5I routines.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-    Should only ever be called by the "atexit" function HDFend
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-void 
-H5I_term_interface(intn status)
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_debug
+ *
+ * Purpose:	Dump the contents of a group to stderr for debugging.
+ *
+ * Return:	Success:	Non-negative
+ *
+ * 		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, February 19, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5I_debug(H5I_type_t grp)
 {
-    H5I_id_info_t	*curr;
-    intn		i;
+    H5I_id_group_t	*grp_ptr;
+    H5I_id_info_t	*cur;
+    int			is, js;
+    unsigned int	iu;
 
-    if (interface_initialize_g>0) {
-	/* Release the free-list */
-	while (id_free_list) {
-	    curr = id_free_list;
-	    id_free_list = id_free_list->next;
-	    HDfree(curr);
-	}
+    FUNC_ENTER(H5I_debug, FAIL);
+    
+    fprintf(stderr, "Dumping group %d\n", (int)grp);
+    grp_ptr = H5I_id_group_list_g[grp];
 
-	/* Release all groups */
-	for (i = 0; i < (intn) H5I_MAXID; i++) {
-	    if (id_group_list[i] != NULL) {
-		HDfree(id_group_list[i]);
-		id_group_list[i] = NULL;
-	    }
+    /* Header */
+    fprintf(stderr, "	 count	   = %u\n", grp_ptr->count);
+    fprintf(stderr, "	 reserved  = %u\n", grp_ptr->reserved);
+    fprintf(stderr, "	 wrapped   = %u\n", grp_ptr->wrapped);
+    fprintf(stderr, "	 hash_size = %lu\n",
+	    (unsigned long)grp_ptr->hash_size);
+    fprintf(stderr, "	 ids	   = %u\n", grp_ptr->ids);
+    fprintf(stderr, "	 nextid	   = %u\n", grp_ptr->nextid);
+
+    /* Cache */
+    fprintf(stderr, "	 Cache:\n");
+    for (is=0; is<ID_CACHE_SIZE; is++) {
+	if (H5I_GROUP(H5I_id_cache_g[is])==grp) {
+	    fprintf(stderr, "	     Entry-%d, ID=%lu\n",
+		    is, (unsigned long)(H5I_id_cache_g[is]));
 	}
     }
-    
-    /* Indicate interface status */
-    interface_initialize_g = status;
+
+    /* List */
+    fprintf(stderr, "	 List:\n");
+    for (iu=0; iu<grp_ptr->hash_size; iu++) {
+	for (js=0, cur=grp_ptr->id_list[iu]; cur; cur=cur->next, js++) {
+	    fprintf(stderr, "	     #%u.%d\n", iu, js);
+	    fprintf(stderr, "		 id = %lu\n",
+		    (unsigned long)(cur->id));
+	    fprintf(stderr, "		 count = %u\n", cur->count);
+	    fprintf(stderr, "		 obj   = 0x%08lx\n",
+		    (unsigned long)(cur->obj_ptr));
+	}
+    }
+
+    FUNC_LEAVE(SUCCEED);
 }
+

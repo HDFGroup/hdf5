@@ -18,6 +18,7 @@
 #include <H5ACprivate.h>
 #include <H5Eprivate.h>
 #include <H5Fprivate.h>
+#include <H5Iprivate.h>
 #include <H5MFprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
@@ -274,10 +275,11 @@ H5O_close(H5G_entry_t *obj_ent)
 
     /*
      * If the file open-lock count has reached zero and the file has a close
-     * pending then close the file.
+     * pending then close the file and remove it from the H5I_FILE_CLOSING ID
+     * group.
      */
-    if (0 == obj_ent->file->nopen_objs && obj_ent->file->close_pending) {
-	H5F_close(obj_ent->file);
+    if (0==obj_ent->file->nopen_objs && obj_ent->file->closing) {
+	H5I_dec_ref(obj_ent->file->closing);
     }
 #ifdef H5O_DEBUG
     if (H5DEBUG(O)) {

@@ -336,6 +336,12 @@ typedef struct H5F_low_class_t {
 			 haddr_t *addr/*out*/);
 } H5F_low_class_t;
 
+/*
+ * One of these H5F_low_t structs is allocated for each H5F_file_t struct.
+ * This struct describes how to access the storage for the hdf5 address space,
+ * whether that storage is file, local memory, shared memory, network
+ * distributed global memory, etc.
+ */
 typedef struct H5F_low_t {
     const H5F_low_class_t *type;/* What type of file is this?		*/
     haddr_t		eof;	/* Address of logical end-of-file	*/
@@ -427,28 +433,12 @@ typedef struct H5F_rdcc_t {
     struct H5F_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
 } H5F_rdcc_t;
 
-/* Mount property list */
-typedef struct H5F_mprop_t {
-    hbool_t		local;	/* Are absolute symlinks local to file?	*/
-} H5F_mprop_t;
-
-/* A record of the mount table */
-typedef struct H5F_mount_t {
-    struct H5G_t	*group;	/* Mount point group held open		*/
-    struct H5F_t	*file;	/* File mounted at that point		*/
-} H5F_mount_t;
-    
-/* The mount table */
-typedef struct H5F_mtab_t {
-    struct H5F_t	*parent;/* Parent file				*/
-    uintn		nmounts;/* Number of children which are mounted	*/
-    uintn		nalloc;	/* Number of mount slots allocated	*/
-    H5F_mount_t		*child;	/* An array of mount records		*/
-} H5F_mtab_t;
-
 /*
  * Define the structure to store the file information for HDF5 files. One of
- * these structures is allocated per file, not per H5Fopen().
+ * these structures is allocated per file, not per H5Fopen(). That is, set of
+ * H5F_t structs can all point to the same H5F_file_t struct. The `nrefs'
+ * count in this struct indicates the number of H5F_t structs which are
+ * pointing to this struct.
  */
 typedef struct H5F_file_t {
     H5F_search_t key;		/* The key for looking up files		*/
@@ -471,10 +461,35 @@ typedef struct H5F_file_t {
     H5MF_free_t fl_free[H5MF_NFREE]; /*free block array			*/
 } H5F_file_t;
 
+/* Mount property list */
+typedef struct H5F_mprop_t {
+    hbool_t		local;	/* Are absolute symlinks local to file?	*/
+} H5F_mprop_t;
+
+/* A record of the mount table */
+typedef struct H5F_mount_t {
+    struct H5G_t	*group;	/* Mount point group held open		*/
+    struct H5F_t	*file;	/* File mounted at that point		*/
+} H5F_mount_t;
+    
+/*
+ * The mount table describes what files are attached to (mounted on) the file
+ * to which this table belongs.
+ */
+typedef struct H5F_mtab_t {
+    struct H5F_t	*parent;/* Parent file				*/
+    uintn		nmounts;/* Number of children which are mounted	*/
+    uintn		nalloc;	/* Number of mount slots allocated	*/
+    H5F_mount_t		*child;	/* An array of mount records		*/
+} H5F_mtab_t;
+
 /*
  * This is the top-level file descriptor.  One of these structures is
- * allocated every time H5Fopen() is called although they may contain
- * pointers to shared H5F_file_t structs.
+ * allocated every time H5Fopen() is called although they may contain pointers
+ * to shared H5F_file_t structs. The reference count (nrefs) indicates the
+ * number of times the file has been opened (the application can only open a
+ * file once explicitly, but the library can open the file a second time to
+ * indicate that the file is mounted on some other file).
  */
 typedef struct H5F_t {
     uintn		nrefs;		/* Reference count		*/
@@ -482,7 +497,7 @@ typedef struct H5F_t {
     char		*name;		/* Name used to open file	*/
     H5F_file_t		*shared;	/* The shared file info		*/
     uintn		nopen_objs;	/* Number of open object headers*/
-    hbool_t		close_pending;	/* File close is pending	*/
+    hid_t		closing;	/* H5I_FILE_CLOSING ID or zero	*/
     H5F_mtab_t		mtab;		/* File mount table		*/
 } H5F_t;
 
@@ -545,13 +560,14 @@ __DLLVAR__  hbool_t H5_mpi_1_metawrite_g;
 
 /* Private functions, not part of the publicly documented API */
 __DLL__ herr_t H5F_init(void);
-__DLL__ herr_t H5F_close_all(void);
 __DLL__ void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p,
 				       uint8_t *l);
 __DLL__ H5F_t *H5F_open(const char *name, uintn flags,
 			const H5F_create_t *create_parms,
 			const H5F_access_t *access_parms);
 __DLL__ herr_t H5F_close(H5F_t *f);
+__DLL__ herr_t H5F_close_all(void);
+__DLL__ herr_t H5F_flush_all(hbool_t invalidate);
 __DLL__ herr_t H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
 			 intn indent, intn fwidth);
 __DLL__ herr_t H5F_istore_debug(H5F_t *f, const haddr_t *addr, FILE * stream,

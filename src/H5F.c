@@ -20,22 +20,6 @@ static char		RcsId[] = "@(#)$Revision$";
 
 /* $Id$ */
 
-/*LINTLIBRARY */
-/*
-   FILE
-   hdf5file.c
-   HDF5 file I/O routines
-
-   EXPORTED ROUTINES
-   H5Fcreate	-- Create an HDF5 file
-   H5Fclose	-- Close an open HDF5 file
-
-   LIBRARY-SCOPED ROUTINES
-
-   LOCAL ROUTINES
-   H5F_init_interface	 -- initialize the H5F interface
- */
-
 /* Packages needed by this file... */
 #include <H5private.h>		/*library functions			  */
 #include <H5Aprivate.h>		/*attributes				  */
@@ -49,16 +33,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Pprivate.h>		/*property lists			  */
 #include <H5Tprivate.h>		/*data types				  */
 
-/*
- * Define the following if you want H5F_block_read() and H5F_block_write() to
- * keep track of the file position and attempt to minimize calls to the file
- * seek method.
- */
-/* #define H5F_OPT_SEEK */
-
 #define PABLO_MASK	H5F_mask
-
-/*-------------------- Locally scoped variables -----------------------------*/
 
 /*
  * Define the default file creation property list.
@@ -110,6 +85,7 @@ static herr_t H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate);
 static herr_t H5F_locate_signature(H5F_low_t *f_handle,
 				   const H5F_access_t *access_parms,
 				   haddr_t *addr/*out*/);
+static intn H5F_flush_all_cb(H5F_t *f, const void *_invalidate);
 
 
 /*-------------------------------------------------------------------------
@@ -154,8 +130,11 @@ H5F_init(void)
  *	Changed pablo mask from H5_mask to H5F_mask for the FUNC_LEAVE call.
  *	It was already H5F_mask for the PABLO_TRACE_ON call.
  *
- *  	rky 980816
+ *  	Kim Yates, 1998-08-16
  *	Added .disp, .btype, .ftype to H5F_access_t.
+ *
+ * 	Robb Matzke, 1999-02-19
+ *	Added initialization for the H5I_FILE_CLOSING ID group.
  *-------------------------------------------------------------------------
  */
 static herr_t 
@@ -175,9 +154,18 @@ H5F_init_interface(void)
     }
 #endif
 
-    /* Initialize the atom group for the file IDs */
+    /*
+     * Initialize the atom group for the file IDs. There are two groups:
+     * the H5I_FILE group contains all the ID's for files which are currently
+     * open at the public API level while the H5I_FILE_CLOSING group contains
+     * ID's for files for which the application has called H5Fclose() but
+     * which are pending completion because there are object headers still
+     * open within the file.
+     */
     if (H5I_init_group(H5I_FILE, H5I_FILEID_HASHSIZE, 0,
-		       (herr_t (*)(void*))H5F_close)<0) {
+		       (H5I_free_t)H5F_close)<0 ||
+	H5I_init_group(H5I_FILE_CLOSING, H5I_FILEID_HASHSIZE, 0,
+		       (H5I_free_t)H5F_close)<0) {
 	HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, FAIL,
 		       "unable to initialize interface");
     }
@@ -217,39 +205,63 @@ H5F_init_interface(void)
 }
 
 
-/*--------------------------------------------------------------------------
- NAME
-    H5F_term_interface
- PURPOSE
-    Terminate various H5F objects
- USAGE
-    void H5F_term_interface()
- RETURNS
-    Non-negative on success/Negative on failure
- DESCRIPTION
-    Release the atom group and any other resources allocated.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-     Can't report errors...
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:	H5F_term_interface
+ *
+ * Purpose:	Terminate this interface: free all memory and reset global
+ *		variables to their initial values.  Release all ID groups
+ *		associated with this interface.
+ *
+ * Return:	Success:	
+ *
+ *		Failure:	
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, February 19, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 void
 H5F_term_interface(intn status)
 {
     if (interface_initialize_g>0) {
 	H5I_destroy_group(H5I_FILE);
+	H5I_destroy_group(H5I_FILE_CLOSING);
     }
     interface_initialize_g = status;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_close_all
+ * Function:	H5F_flush_all_cb
  *
- * Purpose:	Closes all open files. If a file has open object headers then
- *		the underlying file is held open until all object headers are
- *		closed for the file (see H5O_close()).
+ * Purpose:	Callback function for H5F_flush_all().
+ *
+ * Return:	Always returns zero.
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, February 19, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static intn
+H5F_flush_all_cb(H5F_t *f, const void *_invalidate)
+{
+    hbool_t	invalidate = (hbool_t)_invalidate;
+    H5F_flush(f, H5F_SCOPE_LOCAL, invalidate);
+    return 0;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_flush_all
+ *
+ * Purpose:	Flush all open files. If INVALIDATE is true then also remove
+ *		everything from the cache.
  *
  * Return:	Success:	Non-negative
  *
@@ -263,23 +275,55 @@ H5F_term_interface(intn status)
  *-------------------------------------------------------------------------
  */
 herr_t
+H5F_flush_all(hbool_t invalidate)
+{
+    FUNC_ENTER(H5F_flush_all, FAIL);
+    H5I_search(H5I_FILE, (H5I_search_func_t)H5F_flush_all_cb,
+	       (void*)invalidate);
+    FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_close_all
+ *
+ * Purpose:	Close all open files.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, February 19, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
 H5F_close_all(void)
 {
     FUNC_ENTER(H5F_close_all, FAIL);
 
     /*
-     * There is no way to call H5F_close() on all items in the group and
-     * remove the items from the group without destroying the group, so we do
-     * it in two steps: first destroy the group, then create a new empty
-     * group.
+     * Close all normally open files. Any file which has open object headers
+     * will be moved to the H5I_FILE_CLOSING ID group.
      */
-    H5I_destroy_group(H5I_FILE);
-    if (H5I_init_group(H5I_FILE, H5I_FILEID_HASHSIZE, 0,
-		       (herr_t (*)(void*))H5F_close)<0) {
-	HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, FAIL,
-		       "unable to initialize file group");
+    if (H5I_destroy_group(H5I_FILE)<0) {
+	HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+		      "unable to destroy H5I_FILE ID group");
     }
 
+    /*
+     * Recreate the H5I_FILE group just in case someone wants to open or
+     * create another file later.
+     */
+    if (H5I_init_group(H5I_FILE, H5I_FILEID_HASHSIZE, 0,
+		       (H5I_free_t)H5F_close)<0) {
+	HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+		      "unable to recreate H5I_FILE ID group");
+    }
+    
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -647,6 +691,7 @@ H5F_new(H5F_file_t *shared, const H5F_create_t *fcpl, const H5F_access_t *fapl)
 	/* Create the chunk cache */
 	H5F_istore_init (f);
     }
+    
     f->shared->nrefs++;
     f->nrefs = 1;
     ret_value = f;
@@ -681,6 +726,11 @@ H5F_new(H5F_file_t *shared, const H5F_create_t *fcpl, const H5F_access_t *fapl)
  *	Nothing happens unless the reference count for the H5F_t goes to
  *	zero.  The reference counts are decremented here.
  *
+ * 	Robb Matzke, 1999-02-19
+ *	More careful about decrementing reference counts so they don't go
+ *	negative or wrap around to some huge value.  Nothing happens if a
+ *	reference count is already zero.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -690,8 +740,8 @@ H5F_dest(H5F_t *f)
     
     FUNC_ENTER(H5F_dest, FAIL);
 
-    if (f && 0 == --f->nrefs) {
-	if (0 == --f->shared->nrefs) {
+    if (f && 1==f->nrefs) {
+	if (1==f->shared->nrefs) {
 	    /*
 	     * Do not close the root group since we didn't count it, but free
 	     * the memory associated with it.
@@ -710,12 +760,27 @@ H5F_dest(H5F_t *f)
 	    H5P_close (H5P_FILE_CREATE, f->shared->create_parms);
 	    H5P_close (H5P_FILE_ACCESS, f->shared->access_parms);
 	    f->shared = H5MM_xfree(f->shared);
+	} else if (f->shared->nrefs>0) {
+	    /*
+	     * There are other references to the shared part of the file.
+	     * Only decrement the reference count.
+	     */
+	    --f->shared->nrefs;
 	}
+
+	/* Free the non-shared part of the file */
 	f->name = H5MM_xfree(f->name);
 	f->mtab.child = H5MM_xfree(f->mtab.child);
 	f->mtab.nalloc = 0;
 	H5MM_xfree(f);
+    } else if (f->nrefs>0) {
+	/*
+	 * There are other references to this file. Only decrement the
+	 * reference count.
+	 */
+	--f->nrefs;
     }
+    
     FUNC_LEAVE(ret_value);
 }
 
@@ -880,7 +945,8 @@ H5F_open(const char *name, uintn flags,
 	    HRETURN_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
 			  "file is not writable");
 	}
-	if ((old = H5I_search(H5I_FILE, H5F_compare_files, &search))) {
+	if ((old = H5I_search(H5I_FILE, H5F_compare_files, &search)) ||
+	    (old = H5I_search(H5I_FILE_CLOSING, H5F_compare_files, &search))) {
 	    if (flags & H5F_ACC_TRUNC) {
 		HRETURN_ERROR(H5E_FILE, H5E_FILEOPEN, NULL,
 			      "file already open - TRUNC failed");
@@ -1615,9 +1681,19 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate)
 /*-------------------------------------------------------------------------
  * Function:	H5F_close
  *
- * Purpose:	Closes an open HDF5 file.  From the API this function gets
- *		called when a file hid_t reference count gets to zero as a
- *		result of calling H5Fclose().
+ * Purpose:	Closes a file or causes the close operation to be pended.
+ *		This function is called two ways: from the API it gets called
+ *		by H5Fclose->H5I_dec_ref->H5F_close when H5I_dec_ref()
+ *		decrements the file ID reference count to zero.  The file ID
+ *		is removed from the H5I_FILE group by H5I_dec_ref() just
+ *		before H5F_close() is called. If there are open object
+ *		headers then the close is pended by moving the file to the
+ *		H5I_FILE_CLOSING ID group (the f->closing contains the ID
+ *		assigned to file).
+ *
+ *		This function is also called directly from H5O_close() when
+ *		the last object header is closed for the file and the file
+ *		has a pending close.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1639,10 +1715,11 @@ H5F_close(H5F_t *f)
     uintn	i;
 
     FUNC_ENTER(H5F_close, FAIL);
+    assert(f->nrefs>0);
 
     /*
-     * If the reference count is positive then just decrement the count and
-     * flush the file.
+     * If this file is referenced more than once then just decrement the
+     * count, flush the file, and return.
      */
     if (f->nrefs>1) {
 	if (H5F_flush(f, H5F_SCOPE_LOCAL, FALSE)<0) {
@@ -1668,7 +1745,8 @@ H5F_close(H5F_t *f)
      * If object headers are still open then delay deletion of resources until
      * they have all been closed.  Flush all caches and update the object
      * header anyway so that failing to close all objects isn't a major
-     * problem.
+     * problem. If the file is on the H5I_FILE list then move it to the
+     * H5I_FILE_CLOSING list instead.
      */
     if (f->nopen_objs>0) {
 	if (H5F_flush(f, H5F_SCOPE_LOCAL, FALSE)<0) {
@@ -1685,9 +1763,11 @@ H5F_close(H5F_t *f)
 		    1 == f->nopen_objs?"that header is":"those headers are");
 	}
 #endif
-	f->close_pending = TRUE;
+	if (!f->closing) {
+	    f->closing  = H5I_register(H5I_FILE_CLOSING, f);
+	}
 	HRETURN(SUCCEED);
-    } else if (f->close_pending) {
+    } else if (f->closing) {
 #ifdef H5F_DEBUG
 	if (H5DEBUG(F)) {
 	    fprintf(H5DEBUG(F), "H5F: H5F_close: operation completing\n");
@@ -1699,16 +1779,17 @@ H5F_close(H5F_t *f)
      * If this is the last reference to the shared part of the file then
      * close it also.
      */
-    if (1==f->nrefs && 1==f->shared->nrefs) {
+    assert(1==f->nrefs);
+    if (1==f->shared->nrefs) {
 	/* Flush and destroy all caches */
-	if (H5F_flush (f, H5F_SCOPE_LOCAL, TRUE)<0) {
-	    HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL,
-			   "unable to flush cache");
+	if (H5F_flush(f, H5F_SCOPE_LOCAL, TRUE)<0) {
+	    HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
+			  "unable to flush cache");
 	}
 
 	/* Dump debugging info */
 	H5AC_debug(f);
-	H5F_istore_stats (f, FALSE);
+	H5F_istore_stats(f, FALSE);
 
 	/* Close files and release resources */
 	H5F_low_close(f->shared->lf, f->shared->access_parms);
@@ -1723,7 +1804,12 @@ H5F_close(H5F_t *f)
 			  "unable to flush cache");
 	}
     }
-    
+
+    /*
+     * Destroy the H5F_t struct and decrement the reference count for the
+     * shared H5F_file_t struct. If the reference count for the H5F_file_t
+     * struct reaches zero then destroy it also.
+     */
     if (H5F_dest(f)<0) {
 	HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, FAIL,
 		       "problems closing file");
@@ -1732,42 +1818,31 @@ H5F_close(H5F_t *f)
 }
 
 
-/*--------------------------------------------------------------------------
- NAME
-    H5Fclose
-
- PURPOSE
-    Close an open HDF5 file.
-
- USAGE
-    herr_t H5Fclose(file_id)
-	int32_t file_id;	IN: File ID of file to close
-
- ERRORS
-    ARGS      BADTYPE	    Not a file atom. 
-    ATOM      BADATOM	    Can't remove atom. 
-    ATOM      BADATOM	    Can't unatomize file. 
-    CACHE     CANTFLUSH	    Can't flush cache. 
-
- RETURNS
-    Non-negative on success/Negative on failure
-
- DESCRIPTION
-	This function terminates access to an HDF5 file.  If this is the last
-    file ID open for a file and if access IDs are still in use, this function
-    will fail.
-
- MODIFICATIONS:
-    Robb Matzke, 18 Jul 1997
-    File struct destruction is through H5F_dest().
-
-    Robb Matzke, 29 Aug 1997
-    The file boot block is flushed to disk since it's contents may have
-    changed.
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:	H5Fclose
+ *
+ * Purpose:	This function closes the file specified by FILE_ID by
+ *		flushing all data to storage, and terminating access to the
+ *		file through FILE_ID.  If objects (e.g., datasets, groups,
+ *		etc.) are open in the file then the underlying storage is not
+ *		closed until those objects are closed; however, all data for
+ *		the file and the open objects is flushed.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Saturday, February 20, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Fclose(hid_t file_id)
 {
+    
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER(H5Fclose, FAIL);

@@ -68,7 +68,7 @@ H5A_init_interface(void)
      * Create attribute group.
      */
     if (H5I_init_group(H5I_ATTR, H5I_ATTRID_HASHSIZE, H5A_RESERVED_ATOMS,
-		       (herr_t (*)(void *)) H5A_close)<0) {
+		       (H5I_free_t)H5A_close)<0) {
         HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL,
 		      "unable to initialize interface");
     }
@@ -285,8 +285,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
 
 done:
     if (ret_value < 0) {
-        if(attr)
-            H5A_close(attr);
+        if(attr) H5A_close(attr);
     }
 
     FUNC_LEAVE(ret_value);
@@ -522,8 +521,7 @@ H5A_open(H5G_entry_t *ent, unsigned idx)
 
 done:
     if (ret_value < 0) {
-        if(attr)
-            H5A_close(attr);
+        if(attr) H5A_close(attr);
     }
 
     FUNC_LEAVE(ret_value);
@@ -928,21 +926,21 @@ H5Aget_type(hid_t attr_id)
      * reopen the type before returning it to the user. Make the type
      * read-only.
      */
-    if (NULL==(dst=H5T_copy (attr->dt, H5T_COPY_REOPEN))) {
-	HRETURN_ERROR (H5E_ATTR, H5E_CANTINIT, FAIL,
-		       "unable to copy datatype");
+    if (NULL==(dst=H5T_copy(attr->dt, H5T_COPY_REOPEN))) {
+	HRETURN_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL,
+		      "unable to copy datatype");
     }
-    if (H5T_lock (dst, FALSE)<0) {
-	H5T_close (dst);
-	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
-		       "unable to lock transient data type");
+    if (H5T_lock(dst, FALSE)<0) {
+	H5T_close(dst);
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		      "unable to lock transient data type");
     }
     
     /* Atomize */
-    if ((ret_value=H5I_register (H5I_DATATYPE, dst))<0) {
-	H5T_close (dst);
-        HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
-		       "unable to register datatype atom");
+    if ((ret_value=H5I_register(H5I_DATATYPE, dst))<0) {
+	H5T_close(dst);
+        HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
+		      "unable to register datatype atom");
     }
 
     FUNC_LEAVE(ret_value);
@@ -1377,16 +1375,12 @@ H5A_close(H5A_t *attr)
     /* Free dynamicly allocated items */
     if(attr->name)
         H5MM_xfree(attr->name);
-    if(attr->dt)
-        H5T_close(attr->dt);
-    if(attr->ds)
-        H5S_close(attr->ds);
-    if(attr->data)
-        H5MM_xfree(attr->data);
+    if(attr->dt) H5T_close(attr->dt);
+    if(attr->ds) H5S_close(attr->ds);
+    if(attr->data) H5MM_xfree(attr->data);
 
     /* Close the object's symbol-table entry */
-    if(attr->ent_opened)
-        H5O_close(&(attr->ent));
+    if(attr->ent_opened) H5O_close(&(attr->ent));
 
 #ifndef LATER
     /* Do something with the shared information? */

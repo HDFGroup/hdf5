@@ -150,9 +150,7 @@ H5_term_library(void)
      *	       (because H5F_close() can delay until all object headers are
      *	       closed). We handle this cycle by calling H5F_close() for all
      *	       files, which flushes the meta data caches and updates the file
-     *	       boot block but doesn't actually finalize the close until all
-     *	       open objects are closed by the H5*_term_interface() functions
-     *	       below. Once that happens we can close the H5F interface.
+     *	       boot block.
      */
     H5F_close_all();
 
@@ -168,7 +166,7 @@ H5_term_library(void)
     H5S_term_interface(-1);	/*					*/
     H5T_native_close(-1);	/* D RA					*/
     H5T_term_interface(-1);	/* D RA					*/
-    H5P_term_interface(-1);	/* D					*/
+    H5P_term_interface(-1);	/* D F					*/
     H5F_term_interface(-1); 	/* A D G S T				*/
     H5I_term_interface(-1);	/* A D F G P RA S T TB Z		*/
     /*------------------------- ---------------------------------	*/
@@ -1804,8 +1802,8 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		    case H5I_REFERENCE:
 			fprintf (out, "H5I_REFERENCE");
 			break;
-		    case H5I_MAXID:
-			fprintf (out, "H5I_MAXID");
+		    case H5I_NGROUPS:
+			fprintf (out, "H5I_NGROUPS");
 			break;
 		    default:
 			fprintf (out, "%ld", (long)id_type);

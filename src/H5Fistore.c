@@ -2002,8 +2002,8 @@ H5F_istore_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_istore_get_addr (H5F_t *f, const H5O_layout_t *layout,
-		 const hssize_t offset[], void *_udata/*out*/)
+H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
+		    const hssize_t offset[], void *_udata/*out*/)
 {
     H5F_istore_ud1_t	*udata = _udata;
     intn		i;
