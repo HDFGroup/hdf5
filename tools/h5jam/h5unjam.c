@@ -32,7 +32,7 @@ hsize_t write_pad( int , hsize_t );
 hsize_t compute_pad( hsize_t );
 hsize_t copy_to_file( int , int , ssize_t, ssize_t );
 
-const char  *progname = "unjam";
+const char  *progname = "h5unjam";
 int          d_status = EXIT_SUCCESS;
 int do_delete = FALSE;
 char *output_file = NULL;
