@@ -17,14 +17,12 @@ fi
 
 case $CC_BASENAME in
     ecc)
-	# CFLAGS must be set else configure set it to -g
-	CFLAGS="$CFLAGS"
-	DEBUG_CFLAGS="-g"
+	CFLAGS="$CFLAGS -std=c99 -w2 -Wall"
+	DEBUG_CFLAGS="-g -O0"
 	DEBUG_CPPFLAGS=
-	# ecc has -O2 as default
-	PROD_CFLAGS=""
+	PROD_CFLAGS=""		# ecc has -O2 as default
 	PROD_CPPFLAGS=
-	PROFILE_CFLAGS=""	# ecc has no profile option
+	PROFILE_CFLAGS="-p"
 	PROFILE_CPPFLAGS=
 	;;
 
