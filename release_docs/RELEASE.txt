@@ -87,6 +87,8 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+        - Fixed bug in H5Sset_extent_simple where setting maximum size to
+          non-zero, then to zero would cause an error.  JML - 2004/07/20
         - Allow NULL pointer for buffer parameter to H5Dread & H5Dwrite
           when not writing data ("none" selection or hyperslab or point
           selection with no elements defined).  QAK - 2004/07/20
