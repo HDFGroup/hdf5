@@ -1077,7 +1077,9 @@ H5Tget_overflow ()
          toward zero.  If the `offset' becomes zero and the significant
          bits of the datatype still hang over the edge of the new size, then
          the number of significant bits is decreased.
-         Adjusting the size of an H5T_STRING automatically sets the precision
+         The size set for a string should include space for the null-terminator
+         character, otherwise it will not be stored on (or retrieved from) disk.
+         Adjusting the size of an string automatically sets the precision
          to 8*size.  A compound datatype may increase in size, but may not
          shrink.  All datatypes must have a positive size.
 <dt><strong>Parameters:</strong>
