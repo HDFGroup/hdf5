@@ -137,11 +137,15 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     /* Datatype conversion errors */
     {H5E_CANTCONVERT,		"Can't convert datatypes"},
 
+    /* Dataspace errors */
+    {H5E_CANTCLIP,		"Can't clip hyperslab region"},
+    {H5E_CANTCOUNT,		"Can't count elements"},
+
     /* Property list errors */
     {H5E_CANTGET,		"Can't get value"},
     {H5E_CANTSET,		"Can't set value"},
 
-    /* Datatype conversion errors */
+    /* Parallel I/O errors */
     {H5E_MPI,		"Some MPI function failed"}
 };
 

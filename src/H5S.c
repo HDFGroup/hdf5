@@ -87,7 +87,7 @@ H5S_init_interface(void)
     /* Register space conversion functions */
     if (H5S_register(H5S_SEL_POINTS, H5S_POINT_FCONV, H5S_POINT_MCONV)<0 ||
 	H5S_register(H5S_SEL_ALL, H5S_ALL_FCONV, H5S_ALL_MCONV) <0 ||
-	H5S_register(H5S_SEL_HYPERSLABS, H5S_HYPER_FCONV, H5S_HYPER_MCONV)<0) {
+	H5S_register(H5S_SEL_HYPERSLABS, H5S_HYPER_FCONV, H5S_HYPER_MCONV) <0) {
 	HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		      "unable to register one or more conversion functions");
     }

@@ -235,25 +235,25 @@ H5S_get_select_npoints (const H5S_t *space)
     assert(space);
 
     switch(space->select.type) {
-    case H5S_SEL_POINTS:         /* Sequence of points selected */
-	ret_value=H5S_point_npoints(space);
-	break;
+        case H5S_SEL_POINTS:         /* Sequence of points selected */
+            ret_value=H5S_point_npoints(space);
+            break;
 
-    case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
-	ret_value=H5S_hyper_npoints(space);
-	break;
+        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+            ret_value=H5S_hyper_npoints(space);
+            break;
 
-    case H5S_SEL_ALL:            /* Entire extent selected */
-	ret_value=H5S_all_npoints(space);
-	break;
+        case H5S_SEL_ALL:            /* Entire extent selected */
+            ret_value=H5S_all_npoints(space);
+            break;
 
-    case H5S_SEL_NONE:           /* Nothing selected */
-	ret_value=0;
-	break;
+        case H5S_SEL_NONE:           /* Nothing selected */
+            ret_value=0;
+            break;
 
-    case H5S_SEL_ERROR:
-    case H5S_SEL_N:
-	break;
+        case H5S_SEL_ERROR:
+        case H5S_SEL_N:
+            break;
     }
 
     FUNC_LEAVE (ret_value);
@@ -379,22 +379,22 @@ H5S_select_valid (const H5S_t *space)
     assert(space);
 
     switch(space->select.type) {
-    case H5S_SEL_POINTS:         /* Sequence of points selected */
-	ret_value=H5S_point_select_valid(space);
-	break;
+        case H5S_SEL_POINTS:         /* Sequence of points selected */
+            ret_value=H5S_point_select_valid(space);
+            break;
 
-    case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
-	ret_value=H5S_hyper_select_valid(space);
-	break;
+        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+            ret_value=H5S_hyper_select_valid(space);
+            break;
 
-    case H5S_SEL_ALL:            /* Entire extent selected */
-    case H5S_SEL_NONE:           /* Nothing selected */
-	ret_value=TRUE;
-	break;
+        case H5S_SEL_ALL:            /* Entire extent selected */
+        case H5S_SEL_NONE:           /* Nothing selected */
+            ret_value=TRUE;
+            break;
 
-    case H5S_SEL_ERROR:
-    case H5S_SEL_N:
-	break;
+        case H5S_SEL_ERROR:
+        case H5S_SEL_N:
+            break;
     }
 
     FUNC_LEAVE (ret_value);
@@ -430,26 +430,27 @@ H5S_select_serial_size (const H5S_t *space)
     assert(space);
 
     switch(space->select.type) {
-    case H5S_SEL_POINTS:         /* Sequence of points selected */
-        ret_value=H5S_point_select_serial_size(space);
-        break;
+        case H5S_SEL_POINTS:         /* Sequence of points selected */
+            ret_value=H5S_point_select_serial_size(space);
+            break;
 
-    case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
-        ret_value=H5S_hyper_select_serial_size(space);
-        break;
+        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+            ret_value=H5S_hyper_select_serial_size(space);
+            break;
 
-    case H5S_SEL_ALL:            /* Entire extent selected */
-    case H5S_SEL_NONE:           /* Nothing selected */
-        ret_value=16;            /* replace with real function call at some point */
-        break;
+        case H5S_SEL_ALL:            /* Entire extent selected */
+        case H5S_SEL_NONE:           /* Nothing selected */
+            ret_value=16;            /* replace with real function call at some point */
+            break;
 
-    case H5S_SEL_ERROR:
-    case H5S_SEL_N:
-        break;
+        case H5S_SEL_ERROR:
+        case H5S_SEL_N:
+            break;
     }
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_select_serial_size() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -569,6 +570,7 @@ H5S_select_deserialize (H5S_t *space, const uint8_t *buf)
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_select_deserialize() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -599,23 +601,16 @@ H5S_get_select_hyper_nblocks(H5S_t *space)
 
     /* Check for a "regular" hyperslab selection */
     if(space->select.sel_info.hslab.diminfo != NULL) {
-
-#ifdef QAK
-{
-H5S_hyper_dim_t *diminfo=space->select.sel_info.hslab.diminfo;
-for(u=0; u<space->extent.u.simple.rank; u++)
-    printf("%s: (%u) start=%d, stride=%d, count=%d, block=%d\n",FUNC,u,(int)diminfo[u].start,(int)diminfo[u].stride,(int)diminfo[u].count,(int)diminfo[u].block);
-}
-#endif /*QAK */
         /* Check each dimension */
         for(ret_value=1,u=0; u<space->extent.u.simple.rank; u++)
             ret_value*=space->select.sel_info.hslab.app_diminfo[u].count;
     } /* end if */
-    else 
-        ret_value = (hssize_t)space->select.sel_info.hslab.hyper_lst->count;
+    else
+        ret_value = H5S_hyper_span_nblocks(space->select.sel_info.hslab.span_lst);
 
     FUNC_LEAVE (ret_value);
-}   /* H5Sget_select_hyper_nblocks() */
+}   /* H5S_get_select_hyper_nblocks() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -655,6 +650,7 @@ H5Sget_select_hyper_nblocks(hid_t spaceid)
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_select_hyper_nblocks() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -686,6 +682,7 @@ H5S_get_select_elem_npoints(H5S_t *space)
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_select_elem_npoints() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -725,6 +722,7 @@ H5Sget_select_elem_npoints(hid_t spaceid)
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_select_elem_npoints() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -732,7 +730,7 @@ H5Sget_select_elem_npoints(hid_t spaceid)
  PURPOSE
     Get the list of hyperslab blocks currently selected
  USAGE
-    herr_t H5S_get_select_hyper_blocklist(space, hsize_t *buf)
+    herr_t H5S_get_select_hyper_blocklist(space, startblock, numblocks, buf)
         H5S_t *space;           IN: Dataspace pointer of selection to query
         hsize_t startblock;     IN: Hyperslab block to start with
         hsize_t numblocks;      IN: Number of hyperslab blocks to get
@@ -743,7 +741,7 @@ H5Sget_select_elem_npoints(hid_t spaceid)
         Puts a list of the hyperslab blocks into the user's buffer.  The blocks
     start with the 'startblock'th block in the list of blocks and put
     'numblocks' number of blocks into the user's buffer (or until the end of
-    the list of blocks, whichever happen first)
+    the list of blocks, whichever happens first)
         The block coordinates have the same dimensionality (rank) as the
     dataspace they are located within.  The list of blocks is formatted as
     follows: <"start" coordinate> immediately followed by <"opposite" corner
@@ -762,9 +760,9 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numbloc
     H5S_hyper_dim_t *diminfo;               /* Alias for dataspace's diminfo information */
     hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary hyperslab counts */
     hssize_t offset[H5O_LAYOUT_NDIMS];      /* Offset of element in dataspace */
+    hssize_t start[H5O_LAYOUT_NDIMS];   /* Location of start of hyperslab */
+    hssize_t end[H5O_LAYOUT_NDIMS];     /* Location of end of hyperslab */
     hssize_t temp_off;            /* Offset in a given dimension */
-    H5S_hyper_node_t *node;     /* Hyperslab node */
-    int rank;                  /* Dataspace rank */
     int i;                     /* Counter */
     int fast_dim;      /* Rank of the fastest changing dimension for the dataspace */
     int temp_dim;      /* Temporary rank holder */
@@ -776,9 +774,6 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numbloc
 
     assert(space);
     assert(buf);
-
-    /* Get the dataspace extent rank */
-    rank=space->extent.u.simple.rank;
 
     /* Check for a "regular" hyperslab selection */
     if(space->select.sel_info.hslab.diminfo != NULL) {
@@ -859,35 +854,18 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numbloc
 
             /* Re-compute offset array */
             for(i=0; i<ndims; i++) {
-                temp_off=diminfo[i].start
-                    +diminfo[i].stride*(diminfo[i].count-tmp_count[i]);
+                temp_off=diminfo[i].start+diminfo[i].stride*(diminfo[i].count-tmp_count[i]);
                 offset[i]=temp_off;
             } /* end for */
         } /* end while */
     } /* end if */
     else {
-        /* Get the head of the hyperslab list */
-        node=space->select.sel_info.hslab.hyper_lst->head;
-
-        /* Get to the correct first node to give back to the user */
-        while(node!=NULL && startblock>0) {
-            startblock--;
-            node=node->next;
-          } /* end while */
-        
-        /* Iterate through the node, copying each hyperslab's information */
-        while(node!=NULL && numblocks>0) {
-            HDmemcpy(buf,node->start,sizeof(hsize_t)*rank);
-            buf+=rank;
-            HDmemcpy(buf,node->end,sizeof(hsize_t)*rank);
-            buf+=rank;
-            numblocks--;
-            node=node->next;
-          } /* end while */
+        ret_value=H5S_hyper_span_blocklist(space->select.sel_info.hslab.span_lst,start,end,(hsize_t)0,&startblock,&numblocks,&buf);
     } /* end else */
 
     FUNC_LEAVE (ret_value);
-}   /* H5Sget_select_hyper_blocklist() */
+}   /* H5S_get_select_hyper_blocklist() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -895,7 +873,7 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numbloc
  PURPOSE
     Get the list of hyperslab blocks currently selected
  USAGE
-    herr_t H5Sget_select_hyper_blocklist(dsid, hsize_t *buf)
+    herr_t H5Sget_select_hyper_blocklist(dsid, startblock, numblocks, buf)
         hid_t dsid;             IN: Dataspace ID of selection to query
         hsize_t startblock;     IN: Hyperslab block to start with
         hsize_t numblocks;      IN: Number of hyperslab blocks to get
@@ -938,10 +916,15 @@ H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numbloc
     if(space->select.type!=H5S_SEL_HYPERSLABS)
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection");
 
-    ret_value = H5S_get_select_hyper_blocklist(space,startblock,numblocks,buf);
+    /* Go get the correct number of blocks */
+    if(numblocks>0)
+        ret_value = H5S_get_select_hyper_blocklist(space,startblock,numblocks,buf);
+    else
+        ret_value=SUCCEED;      /* Successfully got 0 blocks... */
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_select_hyper_blocklist() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1006,6 +989,7 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoint
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_select_elem_pointlist() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1059,6 +1043,7 @@ H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoint
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_select_elem_pointlist() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1100,7 +1085,7 @@ H5S_get_select_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
     assert(start);
     assert(end);
 
-    /* Set all the start and end arrays up */
+    /* Set the start and end arrays up */
     rank=space->extent.u.simple.rank;
     for(i=0; i<rank; i++) {
         start[i]=UINT_MAX;
@@ -1128,6 +1113,7 @@ H5S_get_select_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_get_select_bounds() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1177,6 +1163,7 @@ H5Sget_select_bounds(hid_t spaceid, hsize_t *start, hsize_t *end)
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_select_bounds() */
+
 
 /*--------------------------------------------------------------------------
  NAME

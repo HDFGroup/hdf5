@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2000-2001 NCSA
- *		           All rights reserved.
+ * Copyright (C) 2000 NCSA
+ *		      All rights reserved.
  *
  * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
  *		Thursday, September 28, 2000
@@ -16,7 +16,7 @@
 #ifndef _H5Spkg_H
 #define _H5Spkg_H
 
-#include "H5Sprivate.h"
+#include <H5Sprivate.h>
 
 /* 
  * Dataspace extent information
@@ -53,41 +53,23 @@ typedef struct {
     H5S_pnt_node_t *head;   /* Pointer to head of point list */
 } H5S_pnt_list_t;
 
-/* Node in hyperslab selection list */
-typedef struct H5S_hyper_node_tag {
-    hssize_t *start;    /* Pointer to a corner of a hyperslab closest to the origin */
-    hssize_t *end;      /* Pointer to a corner of a hyperslab furthest from the origin */
-    struct {
-        unsigned cached;   /* Flag to indicate that the block is cached (during I/O only) */
-        size_t size;    /* Size of cached block (in elements) */
-        unsigned rleft;    /* Read elements left to access in block */
-        unsigned wleft;    /* Write elements left to access in block */
-        uint8_t *block; /* Pointer into buffer for cache */
-        uint8_t *rpos;  /* Pointer to current read location within block */
-        uint8_t *wpos;  /* Pointer to current write location within block */
-    } cinfo;
-    struct H5S_hyper_node_tag *next;  /* pointer to next hyperslab in list */
-} H5S_hyper_node_t;
+/* Information about new-style hyperslab spans */
 
-/* Region in dimension */
-typedef struct H5S_hyper_region_tag {
-    hssize_t start;    /* The low bound of a region in a dimension */
-    hssize_t end;      /* The high bound of a region in a dimension */
-    H5S_hyper_node_t *node; /* pointer to the node the region is in */
-} H5S_hyper_region_t;
+/* Information a particular hyperslab span */
+struct H5S_hyper_span_t {
+    hssize_t low, high;         /* Low & high bounds of span */
+    hsize_t nelem;              /* Number of elements in span (only needed during I/O) */
+    hsize_t pstride;            /* Pseudo-stride from start of previous span (only used during I/O) */
+    struct H5S_hyper_span_info_t *down;     /* Pointer to list of spans in next dimension down */
+    struct H5S_hyper_span_t *next;     /* Pointer to next span in list */
+};
 
-/* Information about hyperslab boundary and pointer to hyperslab node */
-typedef struct {
-    hssize_t bound;         /* Location of boundary */
-    H5S_hyper_node_t *node; /* Boundary's node */
-} H5S_hyper_bound_t;
-
-/* Information about hyperslab list */
-typedef struct {
-    size_t count;               /* Number of nodes in list */
-    H5S_hyper_node_t *head;     /* Pointer to head of hyperslab list */
-    H5S_hyper_bound_t **lo_bounds;    /* Lower (closest to the origin) bound array for each dimension */
-} H5S_hyper_list_t;
+/* Information about a list of hyperslab spans */
+struct H5S_hyper_span_info_t {
+    unsigned count;                    /* Ref. count of number of spans which share this span */
+    struct H5S_hyper_span_info_t *scratch;  /* Scratch pointer (used during copies & as mark during precomputes for I/O) */
+    struct H5S_hyper_span_t *head;  /* Pointer to list of spans in next dimension down */
+};
 
 /* Information about one dimension in a hyperslab selection */
 typedef struct {
@@ -97,7 +79,7 @@ typedef struct {
     hsize_t  block;
 } H5S_hyper_dim_t;
 
-/* Information about hyperslab selection */
+/* Information about new-style hyperslab selection */
 typedef struct {
     H5S_hyper_dim_t *diminfo;    /* ->[rank] of per-dim selection info */
 	/* diminfo only points to one array, which holds the information
@@ -106,12 +88,12 @@ typedef struct {
 	 * restriction to H5S_SELECT_SET is removed. */
     H5S_hyper_dim_t *app_diminfo;/* ->[rank] of per-dim selection info */
 	/* 'diminfo' points to a [potentially] optimized version of the user's
-     * hyperslab information.  'app_diminfo' points to the actual parameters
-     * that the application used for setting the hyperslab selection.  These
-     * are only used for re-gurgitating the original values used to set the
-     * hyperslab to the application when it queries the hyperslab selection
-     * information. */
-    H5S_hyper_list_t *hyper_lst; /* List of selected hyperslabs (order is not important) */
+         * hyperslab information.  'app_diminfo' points to the actual parameters
+         * that the application used for setting the hyperslab selection.  These
+         * are only used for re-gurgitating the original values used to set the
+         * hyperslab to the application when it queries the hyperslab selection
+         * information. */
+    H5S_hyper_span_info_t *span_lst; /* List of hyperslab span information */
 } H5S_hyper_sel_t;
 
 /* Selection information container */
@@ -122,7 +104,7 @@ typedef struct {
     hsize_t num_elem;   /* Number of elements in selection */
     union {
         H5S_pnt_list_t *pnt_lst; /* List of selected points (order is important) */
-        H5S_hyper_sel_t hslab;   /* Info about hyperslab selections */
+        H5S_hyper_sel_t hslab;   /* Info about new-style hyperslab selections */
     } sel_info;
 } H5S_select_t;
 
@@ -181,20 +163,13 @@ __DLL__ herr_t H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space,
 __DLL__ herr_t H5S_hyper_release(H5S_t *space);
 __DLL__ herr_t H5S_hyper_sel_iter_release(H5S_sel_iter_t *sel_iter);
 __DLL__ hsize_t H5S_hyper_npoints(const H5S_t *space);
-__DLL__ int H5S_hyper_compare_regions(const void *r1, const void *r2);
-__DLL__ int H5S_hyper_compare_bounds(const void *r1, const void *r2);
 __DLL__ herr_t H5S_hyper_copy(H5S_t *dst, const H5S_t *src);
 __DLL__ htri_t H5S_hyper_select_valid(const H5S_t *space);
-__DLL__ int H5S_hyper_bound_comp(const void *_b1, const void *_b2);
-__DLL__ herr_t H5S_hyper_node_add(H5S_hyper_node_t **head, int endflag,
-				  unsigned rank, const hssize_t *start,
-				  const hsize_t *size);
-__DLL__ herr_t H5S_hyper_clip(H5S_t *space, H5S_hyper_node_t *nodes,
-			      H5S_hyper_node_t **uniq,
-			      H5S_hyper_node_t **overlap);
 __DLL__ hssize_t H5S_hyper_select_serial_size(const H5S_t *space);
 __DLL__ herr_t H5S_hyper_select_serialize(const H5S_t *space, uint8_t *buf);
 __DLL__ herr_t H5S_hyper_select_deserialize(H5S_t *space, const uint8_t *buf);
+__DLL__ hssize_t H5S_hyper_span_nblocks(H5S_hyper_span_info_t *spans);
+__DLL__ herr_t H5S_hyper_span_blocklist(H5S_hyper_span_info_t *spans, hssize_t start[], hssize_t end[], hsize_t rank, hsize_t *startblock, hsize_t *numblocks, hsize_t **buf);
 __DLL__ herr_t H5S_hyper_bounds(H5S_t *space, hsize_t *start, hsize_t *end);
 __DLL__ htri_t H5S_hyper_select_contiguous(const H5S_t *space);
 __DLL__ herr_t H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space,

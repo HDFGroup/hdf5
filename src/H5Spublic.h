@@ -40,7 +40,34 @@ typedef enum H5S_seloper_t {
     H5S_SELECT_NOOP      = -1,  /* error                                     */
     H5S_SELECT_SET       = 0,   /* Select "set" operation 		     */
     H5S_SELECT_OR,              /* Binary "or" operation for hyperslabs
-                                 * (add new selection to existing selection)		
+                                 * (add new selection to existing selection)
+                                 * Original region:  AAAAAAAAAA
+                                 * New region:             BBBBBBBBBB
+                                 * A or B:           CCCCCCCCCCCCCCCC
+                                 */
+    H5S_SELECT_AND,             /* Binary "and" operation for hyperslabs
+                                 * (only leave overlapped regions in selection)
+                                 * Original region:  AAAAAAAAAA
+                                 * New region:             BBBBBBBBBB
+                                 * A and B:                CCCC
+                                 */
+    H5S_SELECT_XOR,             /* Binary "xor" operation for hyperslabs
+                                 * (only leave non-overlapped regions in selection)
+                                 * Original region:  AAAAAAAAAA
+                                 * New region:             BBBBBBBBBB
+                                 * A xor B:          CCCCCC    CCCCCC
+                                 */
+    H5S_SELECT_NOTB,            /* Binary "not" operation for hyperslabs
+                                 * (only leave non-overlapped regions in original selection)
+                                 * Original region:  AAAAAAAAAA
+                                 * New region:             BBBBBBBBBB
+                                 * A not B:          CCCCCC
+                                 */
+    H5S_SELECT_NOTA,            /* Binary "not" operation for hyperslabs
+                                 * (only leave non-overlapped regions in new selection)
+                                 * Original region:  AAAAAAAAAA
+                                 * New region:             BBBBBBBBBB
+                                 * B not A:                    CCCCCC
                                  */
     H5S_SELECT_APPEND,          /* Append elements to end of point selection */
     H5S_SELECT_PREPEND,         /* Prepend elements to beginning of point selection */
@@ -72,6 +99,17 @@ __DLL__ herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
 				   const hsize_t _stride[],
 				   const hsize_t count[],
 				   const hsize_t _block[]);
+#ifdef NEW_HYPERSLAB_API
+__DLL__ hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op,
+				   const hssize_t start[],
+				   const hsize_t _stride[],
+				   const hsize_t count[],
+				   const hsize_t _block[]);
+__DLL__ herr_t H5Sselect_select(hid_t space1_id, H5S_seloper_t op,
+                                  hid_t space2_id);
+__DLL__ hid_t H5Scombine_select(hid_t space1_id, H5S_seloper_t op,
+                                  hid_t space2_id);
+#endif /* OLD_WAY */
 __DLL__ herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op,
 				  size_t num_elemn,
 				  const hssize_t **coord);

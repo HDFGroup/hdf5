@@ -1505,7 +1505,7 @@ printf("H5FL_arr_term: head->name=%s, head->allocated=%d\n", H5FL_arr_gc_head.fi
         /* No maximum number of elements, use the PQ information */
         else {
 #ifdef H5FL_DEBUG
-printf("H5FL_arr_term: head->name=%s, head->allocated=%d\n", H5FL_arr_gc_head->list->name,(int)H5FL_arr_gc_head->list->u.queue.allocated);
+printf("H5FL_arr_term: head->name=%s, head->allocated=%d\n", H5FL_arr_gc_head.first->list->name,(int)H5FL_arr_gc_head.first->list->u.queue.allocated);
 #endif /* H5FL_DEBUG */
             /* Check if the list has allocations outstanding */
             if(H5FL_arr_gc_head.first->list->u.queue.allocated>0) {

@@ -22,7 +22,7 @@
 #define INTERFACE_INIT  NULL
 static int             interface_initialize_g = 0;
 
-static herr_t H5S_all_init (const H5S_t *space, H5S_sel_iter_t *iter);
+static herr_t H5S_all_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *iter);
 static hsize_t H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
 			      hsize_t max);
 static hsize_t H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
@@ -80,7 +80,7 @@ const H5S_mconv_t	H5S_ALL_MCONV[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S_all_init (const H5S_t *space, H5S_sel_iter_t *sel_iter)
+H5S_all_init (const H5S_t *space, size_t UNUSED elmt_size, H5S_sel_iter_t *sel_iter)
 {
     FUNC_ENTER (H5S_all_init, FAIL);
 
@@ -392,8 +392,8 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
 	     const H5S_t *mem_space, hid_t dxpl_id, void *_buf/*out*/,
 	     hbool_t *must_convert/*out*/)
 {
+    H5S_hyper_span_t *file_span=NULL,*mem_span=NULL;     /* Hyperslab span node */
     char       *buf=(char*)_buf;        /* Get pointer to buffer */
-    H5S_hyper_node_t *file_node=NULL,*mem_node=NULL;     /* Hyperslab node */
     hsize_t	mem_size,file_size;
     hssize_t	file_off,mem_off;
     hssize_t    count;              /* Regular hyperslab count */
@@ -433,9 +433,24 @@ printf("%s: check 1.0\n",FUNC);
                 goto fall_through;
         } /* end if */
         else {
-            if(mem_space->select.sel_info.hslab.hyper_lst->count>1)
-                goto fall_through;
-            mem_node=mem_space->select.sel_info.hslab.hyper_lst->head;
+            /* Get the pointer to the hyperslab spans to check */
+            mem_span=mem_space->select.sel_info.hslab.span_lst->head;
+
+            /* Spin through the spans, checking for more than one span in each dimension */
+            while(mem_span!=NULL) {
+                /* If there are more than one span in the dimension, we can't use this routine */
+                if(mem_span->next!=NULL)
+                    goto fall_through;
+                
+                /* Advance to the next span, if it's available */
+                if(mem_span->down==NULL)
+                    break;
+                else
+                    mem_span=mem_span->down->head;
+            } /* end while */
+
+            /* Get the pointer to the hyperslab spans to use */
+            mem_span=mem_space->select.sel_info.hslab.span_lst->head;
         } /* end else */
     } /* end if */
     else
@@ -454,9 +469,24 @@ printf("%s: check 1.0\n",FUNC);
                 goto fall_through;
         } /* end if */
         else {
-            if(file_space->select.sel_info.hslab.hyper_lst->count>1)
-                goto fall_through;
-            file_node=file_space->select.sel_info.hslab.hyper_lst->head;
+            /* Get the pointer to the hyperslab spans to check */
+            file_span=file_space->select.sel_info.hslab.span_lst->head;
+
+            /* Spin through the spans, checking for more than one span in each dimension */
+            while(file_span!=NULL) {
+                /* If there are more than one span in the dimension, we can't use this routine */
+                if(file_span->next!=NULL)
+                    goto fall_through;
+                
+                /* Advance to the next span, if it's available */
+                if(file_span->down==NULL)
+                    break;
+                else
+                    file_span=file_span->down->head;
+            } /* end while */
+
+            /* Get the pointer to the hyperslab spans to use */
+            file_span=file_space->select.sel_info.hslab.span_lst->head;
         } /* end else */
     } /* end if */
     else
@@ -472,8 +502,9 @@ printf("%s: check 1.0\n",FUNC);
                 mem_off=mem_space->select.sel_info.hslab.diminfo[u].start;
             } /* end if */
             else {
-                mem_size=(mem_node->end[u]-mem_node->start[u])+1;
-                mem_off=mem_node->start[u];
+                mem_size=(mem_span->high-mem_span->low)+1;
+                mem_off=mem_span->low;
+                mem_span=mem_span->down->head;
             } /* end else */
         } /* end if */
         else {
@@ -488,8 +519,9 @@ printf("%s: check 1.0\n",FUNC);
                 file_off=file_space->select.sel_info.hslab.diminfo[u].start;
             } /* end if */
             else {
-                file_size=(file_node->end[u]-file_node->start[u])+1;
-                file_off=file_node->start[u];
+                file_size=(file_span->high-file_span->low)+1;
+                file_off=file_span->low;
+                file_span=file_span->down->head;
             } /* end else */
         } /* end if */
         else {
@@ -628,8 +660,8 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
 	      const H5S_t *mem_space, hid_t dxpl_id, const void *_buf,
 	      hbool_t *must_convert/*out*/)
 {
+    H5S_hyper_span_t *file_span=NULL,*mem_span=NULL;     /* Hyperslab span node */
     const char *buf=(const char*)_buf;  /* Get pointer to buffer */
-    H5S_hyper_node_t *file_node=NULL,*mem_node=NULL;     /* Hyperslab node */
     hsize_t	mem_size,file_size;
     hssize_t	file_off,mem_off;
     hssize_t    count;              /* Regular hyperslab count */
@@ -666,9 +698,24 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
                 goto fall_through;
         } /* end if */
         else {
-            if(mem_space->select.sel_info.hslab.hyper_lst->count>1)
-                goto fall_through;
-            mem_node=mem_space->select.sel_info.hslab.hyper_lst->head;
+            /* Get the pointer to the hyperslab spans to check */
+            mem_span=mem_space->select.sel_info.hslab.span_lst->head;
+
+            /* Spin through the spans, checking for more than one span in each dimension */
+            while(mem_span!=NULL) {
+                /* If there are more than one span in the dimension, we can't use this routine */
+                if(mem_span->next!=NULL)
+                    goto fall_through;
+                
+                /* Advance to the next span, if it's available */
+                if(mem_span->down==NULL)
+                    break;
+                else
+                    mem_span=mem_span->down->head;
+            } /* end while */
+
+            /* Get the pointer to the hyperslab spans to use */
+            mem_span=mem_space->select.sel_info.hslab.span_lst->head;
         } /* end else */
     } /* end if */
     else
@@ -687,9 +734,24 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
                 goto fall_through;
         } /* end if */
         else {
-            if(file_space->select.sel_info.hslab.hyper_lst->count>1)
-                goto fall_through;
-            file_node=file_space->select.sel_info.hslab.hyper_lst->head;
+            /* Get the pointer to the hyperslab spans to check */
+            file_span=file_space->select.sel_info.hslab.span_lst->head;
+
+            /* Spin through the spans, checking for more than one span in each dimension */
+            while(file_span!=NULL) {
+                /* If there are more than one span in the dimension, we can't use this routine */
+                if(file_span->next!=NULL)
+                    goto fall_through;
+                
+                /* Advance to the next span, if it's available */
+                if(file_span->down==NULL)
+                    break;
+                else
+                    file_span=file_span->down->head;
+            } /* end while */
+
+            /* Get the pointer to the hyperslab spans to use */
+            file_span=file_space->select.sel_info.hslab.span_lst->head;
         } /* end else */
     } /* end if */
     else
@@ -705,8 +767,9 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
                 mem_off=mem_space->select.sel_info.hslab.diminfo[u].start;
             } /* end if */
             else {
-                mem_size=(mem_node->end[u]-mem_node->start[u])+1;
-                mem_off=mem_node->start[u];
+                mem_size=(mem_span->high-mem_span->low)+1;
+                mem_off=mem_span->low;
+                mem_span=mem_span->down->head;
             } /* end else */
         } /* end if */
         else {
@@ -721,8 +784,9 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
                 file_off=file_space->select.sel_info.hslab.diminfo[u].start;
             } /* end if */
             else {
-                file_size=(file_node->end[u]-file_node->start[u])+1;
-                file_off=file_node->start[u];
+                file_size=(file_span->high-file_span->low)+1;
+                file_off=file_span->low;
+                file_span=file_span->down->head;
             } /* end else */
         } /* end if */
         else {

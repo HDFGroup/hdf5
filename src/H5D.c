@@ -2098,7 +2098,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif
 
 #ifdef QAK
-printf("%s: check 1.0, nelmts=%d\n",FUNC,(int)nelmts);
+printf("%s: check 1.0, nelmts=%d, H5S_get_select_npoints(file_space)=%d\n",FUNC,(int)nelmts,(int)H5S_get_select_npoints(file_space));
 #endif /* QAK */
     /*
      * Locate the type conversion function and data space conversion
@@ -2222,28 +2222,31 @@ printf("%s: check 1.2, \n",FUNC);
     }
 #endif
     /*
-     * This is the general case.  Figure out the strip mine size.
+     * This is the general case.
      */
-    if ((sconv->f->init)(file_space, &file_iter)<0) {
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		     "unable to initialize file selection information");
-    } 
-    if ((sconv->m->init)(mem_space, &mem_iter)<0) {
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		     "unable to initialize memory selection information");
-    } 
-    if ((sconv->m->init)(mem_space, &bkg_iter)<0) {
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		     "unable to initialize background selection information");
-    } 
 
+    /* Compute element sizes and other parameters */
     src_type_size = H5T_get_size(dataset->type);
     dst_type_size = H5T_get_size(mem_type);
     target_size = H5P_peek_size_t(dxpl_id,H5D_XFER_MAX_TEMP_BUF_NAME);
 #ifdef QAK
-printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUNC,(int)src_type_size,(int)dst_type_size,(int)target_size);
+printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_elem_out=%d\n",FUNC,(int)src_type_size,(int)dst_type_size,(int)target_size,(int)min_elem_out);
 #endif /* QAK */
     request_nelmts = target_size / MAX(src_type_size, dst_type_size);
+
+    /* Figure out the strip mine size. */
+    if ((sconv->f->init)(file_space, src_type_size, &file_iter)<0) {
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		     "unable to initialize file selection information");
+    } 
+    if ((sconv->m->init)(mem_space, dst_type_size, &mem_iter)<0) {
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		     "unable to initialize memory selection information");
+    } 
+    if ((sconv->m->init)(mem_space, dst_type_size, &bkg_iter)<0) {
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		     "unable to initialize background selection information");
+    } 
 
 #ifdef QAK
     printf("%s: check 3.0, request_nelmts=%d\n",FUNC,(int)request_nelmts);
@@ -2731,21 +2734,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     }
 #endif
     /*
-     * This is the general case.  Figure out the strip mine size.
+     * This is the general case.
      */
-    if ((sconv->f->init)(file_space, &file_iter)<0) {
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		     "unable to initialize file selection information");
-    } 
-    if ((sconv->m->init)(mem_space, &mem_iter)<0) {
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		     "unable to initialize memory selection information");
-    } 
-    if ((sconv->f->init)(file_space, &bkg_iter)<0) {
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
-		     "unable to initialize memory selection information");
-    }
-     
+
+    /* Compute element sizes and other parameters */
     src_type_size = H5T_get_size(mem_type);
     dst_type_size = H5T_get_size(dataset->type);
     target_size = H5P_peek_size_t(dxpl_id,H5D_XFER_MAX_TEMP_BUF_NAME);
@@ -2753,7 +2745,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUNC,(int)src_type_size,(int)dst_type_size,(int)target_size);
 #endif /* QAK */
     request_nelmts = target_size / MAX (src_type_size, dst_type_size);
-
 #ifdef QAK
     printf("%s: check 3.0, request_nelmts=%d, tpath->cdata.need_bkg=%d\n",FUNC,(int)request_nelmts,(int)tpath->cdata.need_bkg);
 #endif
@@ -2762,6 +2753,20 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
 		     "temporary buffer max size is too small");
     }
 
+    /* Figure out the strip mine size. */
+    if ((sconv->f->init)(file_space, dst_type_size, &file_iter)<0) {
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		     "unable to initialize file selection information");
+    } 
+    if ((sconv->m->init)(mem_space, src_type_size, &mem_iter)<0) {
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		     "unable to initialize memory selection information");
+    } 
+    if ((sconv->f->init)(file_space, dst_type_size, &bkg_iter)<0) {
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		     "unable to initialize memory selection information");
+    }
+     
     /*
      * Get a temporary buffer for type conversion unless the app has already
      * supplied one through the xfer properties.  Instead of allocating a
@@ -2828,6 +2833,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
         }
 
 #ifdef QAK
+#ifdef QAK
 	{
 	    int i;
 	    uint16_t *b;
@@ -2841,6 +2847,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
 		printf("\n");
 	    }
 	}
+#endif /* QAK */
 	printf("%s: check 6.0, tconv_buf=%p, *tconv_buf=%p\n",FUNC,tconv_buf,*(char **)tconv_buf);
 #endif
 
