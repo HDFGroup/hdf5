@@ -128,11 +128,6 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 #endif /* H5_WANT_H5_V1_2_COMPAT */
 
     if (!getenv("HDF5_NOCLEANUP")) {
-        char *user, *login;
-
-        user = getenv("USER");
-        login = getenv("LOGIN");
-
 	for (i = 0; base_name[i]; i++) {
 	    if (h5_fixname(base_name[i], fapl, filename, sizeof(filename)) == NULL)
 		continue;
@@ -193,14 +188,6 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 		remove(filename);
 	    }
 #endif /* H5_WANT_H5_V1_2_COMPAT */
-
-            if (user || login) {
-                strcpy(temp, "/tmp/");
-                strcat(temp, (user ? user : login));
-
-                if (!strncmp(filename, temp, strlen(temp)))
-                    remove(temp);
-            }
 	}
 
 	retval = 1;
@@ -373,56 +360,68 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
     /* Prepend the prefix value to the base name */
     if (prefix && *prefix) {
-        char *subdir;
+#ifdef H5_WANT_H5_V1_2_COMPAT
+        if (H5P_DEFAULT != fapl && H5F_LOW_MPIO == driver) {
+#else
+        if (H5P_DEFAULT != fapl && H5FD_MPIO == driver) {
+#endif  /* H5_WANT_H5_V1_2_COMPAT */
+            /* This is a parallel system */
+            char *subdir;
 
-        if (!strcmp(prefix, "/tmp")) {
-            /* If the prefix specifies the "/tmp" directory, then default to
-             * using the "/tmp/$USER" or "/tmp/$LOGIN" directory instead. */
-            char *user, *login;
+            if (!strcmp(prefix, HDF5_PARAPREFIX)) {
+                /* If the prefix specifies the HDF5_PARAPREFIX directory, then
+                 * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
+                 * directory instead. */
+                char *user, *login;
 
-            user = getenv("USER");
-            login = getenv("LOGIN");
-            subdir = (user ? user : login);
+                user = getenv("USER");
+                login = getenv("LOGIN");
+                subdir = (user ? user : login);
 
-            if (subdir) {
-                for (i = 0; i < size && prefix[i]; i++)
-                    fullname[i] = prefix[i];
+                if (subdir) {
+                    for (i = 0; i < size && prefix[i]; i++)
+                        fullname[i] = prefix[i];
 
-                fullname[i++] = '/';
+                    fullname[i++] = '/';
 
-                for (j = 0; i < size && subdir[j]; i++, j++)
-                    fullname[i] = subdir[j];
+                    for (j = 0; i < size && subdir[j]; i++, j++)
+                        fullname[i] = subdir[j];
+                }
             }
-        }
 
-        if (!fullname[0])
-            /* We didn't append the prefix yet */
-            strncpy(fullname, prefix, MIN(strlen(prefix), size));
+            if (!fullname[0])
+                /* We didn't append the prefix yet */
+                strncpy(fullname, prefix, MIN(strlen(prefix), size));
 
-        if (strlen(fullname) + strlen(base_name) + 1 < size) {
-            /* Append the base_name with a slash first. Multiple slashes are
-             * handled below. */
-            struct stat buf;
+            if (strlen(fullname) + strlen(base_name) + 1 < size) {
+                /* Append the base_name with a slash first. Multiple slashes are
+                 * handled below. */
+                struct stat buf;
 
-            if (stat(fullname, &buf) < 0)
-                /* The directory doesn't exist just yet */
-                if (mkdir(fullname, 0755) < 0 && errno != EEXIST)
-                    /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
-                     * Default to PREFIX's original prefix value. */
-                    strcpy(fullname, prefix);
+                if (stat(fullname, &buf) < 0)
+                    /* The directory doesn't exist just yet */
+                    if (mkdir(fullname, 0755) < 0 && errno != EEXIST)
+                        /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
+                         * Default to PREFIX's original prefix value. */
+                        strcpy(fullname, prefix);
 
-            strcat(fullname, "/");
-            strcat(fullname, base_name);
+                strcat(fullname, "/");
+                strcat(fullname, base_name);
+            } else {
+                /* Buffer is too small */
+                return NULL;
+            }
         } else {
-	    /* Buffer is too small */
-            return NULL;
+            if (HDsnprintf(fullname, size, "%s/%s", prefix, base_name) == (int)size)
+                /* Buffer is too small */
+                return NULL;
         }
     } else if (strlen(base_name) >= size) {
 	/* Buffer is too small */
 	return NULL;
     } else {
 	strcpy(fullname, base_name);
-    }
+   }
 
 #ifdef H5_WANT_H5_V1_2_COMPAT
     /* Append a suffix */
