@@ -4,7 +4,7 @@
 #include <hdf5.h>
 
 #define BOOT_BLOCK	"BOOT_BLOCK"
-#define GROUP		"GROUP"
+#define GROUPNAME	"GROUP"
 #define DATASET		"DATASET"
 #define ATTRIBUTE	"ATTRIBUTE"
 #define	DATATYPE	"DATATYPE"

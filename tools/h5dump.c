@@ -772,7 +772,7 @@ int i;
 
 
     indentation (indent);
-    begin_obj(GROUP, name);
+    begin_obj(GROUPNAME, name);
     indent += col;
 
     if (!strcmp(name,"/") && unamedtype) { /* dump unamed type in root group */
@@ -1439,7 +1439,7 @@ H5Eset_auto (NULL, NULL);
                      curr_arg < ((i+1)==nopts?(argc-1):opts[i+1]); 
                      curr_arg++) {
                      if ((gid = H5Gopen (fid, argv[curr_arg])) < 0) {
-                         begin_obj (GROUP, argv[curr_arg]); 
+                         begin_obj (GROUPNAME, argv[curr_arg]); 
                          indentation (col);
                          fprintf (stdout, "h5dump error: unable to open %s\n", 
                                   argv[curr_arg]);
