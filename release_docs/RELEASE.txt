@@ -42,6 +42,8 @@ New Features
 
     Library:
     --------
+        - Added new H5Pdelete_filter routine to remove I/O pipeline filters
+            from dataset creation property lists.  PVN - 2004/01/26
         - Added new 'compare' callback parameter to H5Pregister & H5Pinsert
             routines.  QAK - 2004/01/07
         - Data type conversion between integers and floats was added.

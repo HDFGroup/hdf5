@@ -3237,3 +3237,36 @@ DONE:
      return ret_value;
 }
 
+/*----------------------------------------------------------------------------
+ * Name:        h5pdelete_filter_c
+ * Purpose:     Call H5Pdelete_filter to delete one or more filters
+ * Inputs:      prp_id - property list identifier 
+ *              filter - Filter to be deleted
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Quincey Koziol
+ *              January 27 2004
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5pdelete_filter_c (hid_t_f *prp_id, int_f* filter)
+{
+     int ret_value = -1;
+     hid_t c_prp_id;
+     herr_t ret;
+     H5Z_filter_t c_filter;
+     
+     c_filter = (H5Z_filter_t)*filter;
+     c_prp_id = (hid_t)*prp_id;
+
+     /*
+      * Call H5Pdelety_filter function.
+      */
+     ret = H5Pdelete_filter(c_prp_id, c_filter);
+
+     if (ret < 0) goto DONE;
+     ret_value = 0;
+
+DONE:
+     return ret_value;
+}
+

@@ -1640,33 +1640,33 @@ done:
 herr_t
 H5Pdelete_filter(hid_t plist_id, H5Z_filter_t filter)
 {
- H5P_genplist_t *plist;      /* Property list pointer */
- H5O_pline_t pline;          /* Filter pipeline */
- herr_t ret_value = SUCCEED; /* return value          */
- 
- FUNC_ENTER_API(H5Pdelete_filter, FAIL);
- H5TRACE2("e","iZf",plist_id,filter);
- 
- /* Get the property list structure */
- if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
-  HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
- 
- /* Get pipeline info */
- if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-  HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get pipeline");
+    H5P_genplist_t *plist;      /* Property list pointer */
+    H5O_pline_t pline;          /* Filter pipeline */
+    herr_t ret_value = SUCCEED; /* return value          */
 
- if (pline.filter) 
- {
-  /* Delete filter */
-  if(H5Z_delete(&pline, filter) < 0)
-   HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't delete filter");
-  
-  /* Put the I/O pipeline information back into the property list */
-  if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-   HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
- }
- 
+    FUNC_ENTER_API(H5Pdelete_filter, FAIL)
+    H5TRACE2("e","iZf",plist_id,filter);
+
+    /* Get the property list structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get pipeline info */
+    if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get pipeline")
+
+    /* Check if there are any filters */
+    if (pline.filter) {
+        /* Delete filter */
+        if(H5Z_delete(&pline, filter) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't delete filter")
+
+        /* Put the I/O pipeline information back into the property list */
+        if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
+    } /* end if */
+
 done:
- FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 

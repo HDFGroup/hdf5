@@ -57,6 +57,9 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 	// Adds a filter to the filter pipeline
 	void setFilter( H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[] ) const;
 
+	// Remove one or all filters from the filter pipeline
+	void deleteFilter( H5Z_filter_t filter) const;
+
 	// Returns the number of filters in the pipeline 
 	int getNfilters() const;
 

@@ -770,6 +770,7 @@ H5_DLL int_f nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag );
 #   define nh5pset_layout_c         FNAME(H5PSET_LAYOUT_C)
 #   define nh5pget_layout_c         FNAME(H5PGET_LAYOUT_C)
 #   define nh5pset_filter_c         FNAME(H5PSET_FILTER_C)
+#   define nh5pdelete_filter_c         FNAME(H5PDELETE_FILTER_C)
 #   define nh5pmodify_filter_c         FNAME(H5PMODIFY_FILTER_C)
 #   define nh5pget_nfilters_c         FNAME(H5PGET_NFILTERS_C)
 #   define nh5pget_filter_c         FNAME(H5PGET_FILTER_C)
@@ -876,6 +877,7 @@ H5_DLL int_f nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag );
 #   define nh5pset_layout_c         FNAME(h5pset_layout_c)
 #   define nh5pget_layout_c         FNAME(h5pget_layout_c)
 #   define nh5pset_filter_c         FNAME(h5pset_filter_c)
+#   define nh5pdelete_filter_c         FNAME(h5pdelete_filter_c)
 #   define nh5pmodify_filter_c         FNAME(h5pmodify_filter_c)
 #   define nh5pget_nfilters_c         FNAME(h5pget_nfilters_c)
 #   define nh5pget_filter_c         FNAME(h5pget_filter_c)
@@ -1033,6 +1035,8 @@ H5_DLL int_f
 nh5pget_layout_c (hid_t_f *prp_id, int_f* layout);
 H5_DLL int_f
 nh5pset_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values );
+H5_DLL int_f
+nh5pdelete_filter_c (hid_t_f *prp_id, int_f* filter);
 H5_DLL int_f
 nh5pmodify_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values );
 H5_DLL int_f

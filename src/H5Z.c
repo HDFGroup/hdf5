@@ -1104,63 +1104,56 @@ done:
 herr_t
 H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
 {
- size_t idx;               /* Index of filter in pipeline */
- herr_t ret_value=SUCCEED; /* Return value */
- size_t i, found=0;
- 
- FUNC_ENTER_NOAPI(H5Z_delete, FAIL)
-  
- /* Check args */
- assert(pline);
- assert(filter>=0 && filter<=H5Z_FILTER_MAX);
+    herr_t ret_value=SUCCEED; /* Return value */
 
- /* if the pipeline has no filters, just return */
- if(pline->nused==0)
-  HGOTO_DONE(FALSE)
- 
- /* Delete all filters */
- if (H5Z_FILTER_NONE==filter)
- {
-  if(H5O_reset(H5O_PLINE_ID, pline)<0)
-   HGOTO_ERROR(H5E_PLINE, H5E_CANTFREE, FAIL, "can't release pipeline info")
- }
- /* Delete filter */
- else
- {
-  /* Locate the filter in the pipeline */
-  for(idx=0; idx<pline->nused; idx++)
-  {
-   if(pline->filter[idx].id==filter)
-   {
-    found=1;
-    break;
-   }
-  }
-  /* filter was not found in the pipeline */
-  if (!found)
-   HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "filter not in pipeline")
-   
-  /* Free, reset */
-  H5MM_xfree(pline->filter[idx].name);
-  H5MM_xfree(pline->filter[idx].cd_values);
-  HDmemset(&pline->filter[idx], 0, sizeof (H5Z_filter_info_t));
-  
-  /* Reorder array */
-  if (idx+1<pline->nused)
-  {
-   for(i=idx; i<pline->nused; i++)
-   {
-    pline->filter[i] = pline->filter[i+1];
-   }
-  }
-  /* Decrement number of used filters */
-  pline->nused--;
-  
- }
- 
+    FUNC_ENTER_NOAPI(H5Z_delete, FAIL)
+
+    /* Check args */
+    assert(pline);
+    assert(filter>=0 && filter<=H5Z_FILTER_MAX);
+
+    /* if the pipeline has no filters, just return */
+    if(pline->nused==0)
+        HGOTO_DONE(SUCCEED)
+
+    /* Delete all filters */
+    if (H5Z_FILTER_NONE==filter) {
+        if(H5O_reset(H5O_PLINE_ID, pline)<0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTFREE, FAIL, "can't release pipeline info")
+    } /* end if */
+    /* Delete filter */
+    else {
+        size_t idx;             /* Index of filter in pipeline */
+        unsigned found=0;       /* Indicate filter was found in pipeline */
+
+        /* Locate the filter in the pipeline */
+        for(idx=0; idx<pline->nused; idx++)
+            if(pline->filter[idx].id==filter) {
+                found=1;
+                break;
+            }
+
+        /* filter was not found in the pipeline */
+        if (!found)
+            HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "filter not in pipeline")
+
+        /* Free information for deleted filter */
+        H5MM_xfree(pline->filter[idx].name);
+        H5MM_xfree(pline->filter[idx].cd_values);
+
+        /* Remove filter from pipeline array */
+        if((idx+1)<pline->nused)
+            HDmemcpy(&pline->filter[idx], &pline->filter[idx+1],
+                sizeof (H5Z_filter_info_t)*(pline->nused-(idx+1)));
+
+        /* Decrement number of used filters */
+        pline->nused--;
+
+        /* Reset information for previous last filter in pipeline */
+        HDmemset(&pline->filter[pline->nused], 0, sizeof (H5Z_filter_info_t));
+    } /* end else */
+
 done:
- FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } 
-
-
 
