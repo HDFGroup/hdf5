@@ -243,6 +243,15 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC21_CHUNK_DIM0       2048
 #define MISC21_CHUNK_DIM1       2048
 
+/* Definitions for misc. test #21 */
+#define MISC22_FILE             "tmisc22.h5"
+#define MISC22_DSET_NAME        "Dataset"
+#define MISC22_SPACE_RANK       2
+#define MISC22_CHUNK_DIM0       1024
+#define MISC22_CHUNK_DIM1       1024
+#define MISC22_SPACE_DIM0       1639
+#define MISC22_SPACE_DIM1       2308
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -3445,6 +3454,143 @@ test_misc21(void)
     
 /****************************************************************
 **
+**  test_misc22(): Test SZIP bits-per-pixel paramter.
+**                      This should be set according to the datatype. 
+**                      Tests for precision and offset combo's.
+**
+****************************************************************/
+#ifdef H5_HAVE_FILTER_SZIP
+#ifdef H5_SZIP_CAN_ENCODE
+static void
+test_misc22(void)
+{
+    hid_t fid, sid, dcpl, dsid, dcpl2;
+    char *buf;
+    hsize_t dims[2]={MISC22_SPACE_DIM0,MISC22_SPACE_DIM1},
+        chunk_size[2]={MISC22_CHUNK_DIM0,MISC22_CHUNK_DIM1};
+    herr_t ret;         /* Generic return value */
+    hid_t dtype;
+    /* should extend test to signed ints */
+    hid_t idts[4];
+/*  do the same for floats
+    hid_t fdts[2]={H5T_NATIVE_FLOAT32,  
+              H5T_NATIVE_FLOAT64}  
+*/
+    int prec[4] = {3,11,19,27};
+    int offsets[5] = {0,3,11,19,27};
+    int i,j,k;
+    unsigned int flags;
+    size_t cd_nelmts=32;
+    unsigned int cd_values[32];
+    int correct;
+
+    idts[0]=H5Tcopy(H5T_NATIVE_UINT8);
+    idts[0]=H5Tcopy(H5T_NATIVE_UINT16);
+    idts[0]=H5Tcopy(H5T_NATIVE_UINT32);
+    idts[0]=H5Tcopy(H5T_NATIVE_UINT64);
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing datatypes with SZIP filter\n"));
+
+    /* Allocate space for the buffer */
+    buf = (char *)HDcalloc(MISC22_SPACE_DIM0*MISC22_SPACE_DIM1,8);
+    CHECK(buf, NULL, "HDcalloc");
+
+    /* Create the file */
+    fid = H5Fcreate (MISC22_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create the dataspace for the dataset */
+    sid = H5Screate_simple (MISC22_SPACE_RANK, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 4; j++) {
+            if (prec[j] > (H5Tget_size(idts[i])*8)) continue; /* skip irrelevant combination */
+            for (k = 0; k < 5; k++) {
+                if (offsets[k] > (H5Tget_size(idts[i])*8)) continue; /* skip irrelevant combinations */
+                if ((prec[j]+offsets[k]) > (H5Tget_size(idts[i])*8)) continue;
+
+                MESSAGE(5, ("  Testing datatypes size=%d precision=%d offset=%d\n",H5Tget_size(idts[i]),prec[j],offsets[k]));
+
+                /* Create the DCPL */
+                dcpl = H5Pcreate (H5P_DATASET_CREATE);
+                CHECK(dcpl, FAIL, "H5Pcreate");
+            
+                /* Set DCPL properties */
+                ret = H5Pset_chunk (dcpl, MISC22_SPACE_RANK, chunk_size);
+                CHECK(ret, FAIL, "H5Pset_chunk");
+                /* Set custom DCPL properties */
+                ret = H5Pset_szip (dcpl, H5_SZIP_NN_OPTION_MASK, 32);  /* vary the PPB */
+                CHECK(ret, FAIL, "H5Pset_szip");
+            
+                /* set up the datatype according to the loop */
+                dtype = H5Tcopy(idts[i]);
+                CHECK(dtype, FAIL, "H5Tcopy");
+                ret = H5Tset_precision(dtype,prec[j]);
+                CHECK(ret, FAIL, "H5Tset_precision");
+                ret = H5Tset_offset(dtype,offsets[k]);
+                CHECK(ret, FAIL, "H5Tset_precision");
+
+                /* compute the correct PPB that should be set by SZIP */
+                if (offsets[k] == 0) {
+            	correct=prec[j];	
+                } else {
+                    correct=H5Tget_size(idts[i])*8;
+                }
+                if (correct > 24) {
+            	    if (correct < 32) correct=32;
+            	    else if (correct < 64) correct=32;
+                }
+            
+                /* Create the dataset */
+                dsid = H5Dcreate (fid, MISC22_DSET_NAME, dtype, sid, dcpl);
+                CHECK(dsid, FAIL, "H5Dwrite");
+            
+                /* Write out the whole dataset */
+                ret = H5Dwrite (dsid, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+                CHECK(ret, FAIL, "H5Dwrite");
+            
+                /* Close everything */
+                ret = H5Dclose (dsid);
+                CHECK(ret, FAIL, "H5Dclose");
+                ret = H5Tclose (dtype);
+                CHECK(ret, FAIL, "H5Tclose");
+                ret = H5Pclose (dcpl);
+                CHECK(ret, FAIL, "H5Pclose");
+            
+                dsid = H5Dopen (fid, MISC22_DSET_NAME);
+                CHECK(dsid, FAIL, "H5Topen");
+            
+                dcpl2 = H5Dget_create_plist(dsid);
+                CHECK(dcpl2, FAIL, "H5Dget_create_plist");
+            
+                ret= H5Pget_filter_by_id( dcpl2, H5Z_FILTER_SZIP, &flags, 
+                      &cd_nelmts, cd_values, 0, NULL );
+                CHECK(ret, FAIL, "H5Pget_filter_by_id");
+            
+                VERIFY(cd_values[2], correct, "SZIP filter returned value for precision");
+            
+                ret = H5Gunlink (fid, MISC22_DSET_NAME );
+                CHECK(ret, FAIL, "H5Dunlink");
+            
+                ret = H5Pclose (dcpl2);
+                CHECK(ret, FAIL, "H5Pclose");
+            }
+        }
+    }
+    ret = H5Sclose (sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Fclose (fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    HDfree(buf);
+} /* end test_misc22() */
+#endif /* H5_SZIP_CAN_ENCODE */
+#endif /* H5_HAVE_FILTER_SZIP */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -3476,6 +3622,9 @@ test_misc(void)
     test_misc20();      /* Test problems with truncated dimensions in version 2 of storage layout message */
 #ifdef H5_HAVE_FILTER_SZIP
     test_misc21();      /* Test that "late" allocation time is treated the same as "incremental", for chunked datasets w/a filters */
+#ifdef H5_SZIP_CAN_ENCODE
+    test_misc22();     /* check szip bits per pixel */
+#endif /* H5_SZIP_CAN_ENCODE */
 #endif /* H5_HAVE_FILTER_SZIP */
 
 } /* test_misc() */
@@ -3522,4 +3671,5 @@ cleanup_misc(void)
     HDremove(MISC19_FILE);
     HDremove(MISC20_FILE);
     HDremove(MISC21_FILE);
+    HDremove(MISC22_FILE);
 }
