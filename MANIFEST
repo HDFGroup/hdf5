@@ -1,5 +1,6 @@
 ./configure
 ./INSTALL
+./INSTALL.ibm.sp.parallel
 ./INSTALL_MAINT
 ./Makefile.dist
 ./Makefile.in
@@ -21,6 +22,8 @@
 ./config/irix6.2
 ./config/irix64
 ./config/linux
+./config/powerpc-ibm-aix4.2.1
+./config/rs6000-ibm-aix4.1.4.0
 ./config/solaris2.5
 ./configure.in
 ./examples/h5_compound.c
