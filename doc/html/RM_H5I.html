@@ -77,29 +77,29 @@ object names.
 <table border=0>
 <tr><td valign=top>
 <ul>
-    <li><a href="#Identify-IncRef">H5Iinc_ref</a>
+    <li><a href="#Identify-GetFileId">H5Iget_file_id</a>
     <li><a href="#Identify-GetName">H5Iget_name</a>
-    <li><a href="#Identify-ClearType">H5Iclear_type</a>
-    <li><a href="#Identify-GetTypeRef">H5Iget_type_ref</a>
+    <li><a href="#Identify-GetType">H5Iget_type</a>
     <li><a href="#Identify-ObjectVerify">H5Iobject_verify</a>
     <li><a href="#Identify-RemoveVerify">H5Iremove_verify</a>
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
-    <li><a href="#Identify-DecRef">H5Idec_ref</a>
-    <li><a href="#Identify-GetType">H5Iget_type</a>
-    <li><a href="#Identify-DecTypeRef">H5Idec_type_ref</a>
-    <li><a href="#Identify-IncTypeRef">H5Iinc_type_ref</a>
-    <li><a href="#Identify-Register">H5Iregister</a>
     <li><a href="#Identify-Search">H5Isearch</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
     <li><a href="#Identify-GetRef">H5Iget_ref</a>
-    <li><a href="#Identify-DestroyType">H5Idestroy_type</a>
-    <li><a href="#Identify-GetFileId">H5Iget_file_id</a>
-    <li><a href="#Identify-NMembers">H5Inmembers</a>
+    <li><a href="#Identify-IncRef">H5Iinc_ref</a>
+    <li><a href="#Identify-DecRef">H5Idec_ref</a>
+    <li><a href="#Identify-Register">H5Iregister</a>
     <li><a href="#Identify-RegisterType">H5Iregister_type</a>
+    <li><a href="#Identify-DestroyType">H5Idestroy_type</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Identify-GetTypeRef">H5Iget_type_ref</a>
+    <li><a href="#Identify-DecTypeRef">H5Idec_type_ref</a>
+    <li><a href="#Identify-IncTypeRef">H5Iinc_type_ref</a>
+    <li><a href="#Identify-ClearType">H5Iclear_type</a>
+    <li><a href="#Identify-NMembers">H5Inmembers</a>
 </ul>
 </td></tr>
 </table>
@@ -158,17 +158,17 @@ as the corresponding C function.
 <table border=0>
 <tr><td valign=top>
 <ul>
-    <li><a href="#Identify-IncRef">h5iinc_ref_f</a>
+    <li><a href="#Identify-GetType">h5iget_type_f</a>
     <li><a href="#Identify-GetName">h5iget_name_f</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    <li><a href="#Identify-DecRef">h5idec_ref_f</a>
-    <li><a href="#Identify-GetType">h5iget_type_f</a>
+    <li><a href="#Identify-GetRef">h5iget_ref_f</a>
+    <li><a href="#Identify-IncRef">h5iinc_ref_f</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    <li><a href="#Identify-GetRef">h5iget_ref_f</a>
+    <li><a href="#Identify-DecRef">h5idec_ref_f</a>
 </ul>
 </td></tr>
 </table>
@@ -390,33 +390,43 @@ END SUBROUTINE h5idec_ref_f
 <dt><strong>Signature:</strong>
     <dd><em>hid_t</em> <code>H5Iget_file_id</code>(<em>hid_t</em> <code>obj_id</code>)
 <dt><strong>Purpose:</strong>
-    <dd>Retrieves the ID of the file associated with the object referenced by <code>obj_id</code>.
+    <dd>Retrieves an identifier for the file containing the specified object.
 <dt><strong>Description:</strong>
-    <dd><code>H5Iget_file_id</code> returns the ID of the file associated with the 
-	    object referenced by <code>obj_id</code>.  The retrieved file ID must be closed 
-		using <code>H5Fclose</code>.
-
+    <dd><code>H5Iget_file_id</code> returns the identifier of the file 
+        associated with the object referenced by <code>obj_id</code>.  
         <p>
-        Currently, <code>obj_id</code> can be the ID of one of the following objects: 
-		a file, a named datatype, a group, a dataset, or an attribute.
+        <code>obj_id</code> can be a file, group, dataset, named datatype, 
+        or attribute identifier.
+        <p>
+        Note that the HDF5 Library permits an application to close a file
+        while objects within the file remain open.
+        If the file containing the object <code>obj_id</code> 
+        is still open, <code>H5Iget_file_id</code> will retrieve the 
+        existing file identifier.
+        If there is no existing file identifier for the file, 
+        i.e., the file has been closed, 
+        <code>H5Iget_file_id</code> will reopen the file and 
+        return a new file identifier.
+        In either case, the file identifier must eventually be released 
+        using <code>H5Fclose</code>.  
 <dt><strong>Parameters:</strong>
     <ul>
-	<table>
-	  <tr>
-	    <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-		<td valign="top">IN: Identifier of the object whose associated file ID will be returned.</td>
-	  </tr>
+    <table>
+      <tr>
+        <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code>
+</td>
+        <td valign="top">IN: Identifier of the object whose associated 
+            file identifier will be returned.</td>
+      </tr>
     </table>
-	</ul>
+    </ul>
 <dt><strong>Returns:</strong>
-        <dd>Returns the file ID on success, negative on failure.
+    <dd>Returns a file identifier on success, negative on failure.
 <dt><strong>Fortran90 Interface:</strong>
-        <dd>This function is currently not supported in FORTRAN 90.
+    <dd>This function is currently not supported in FORTRAN 90.
 
-                <!--<dt><strong>Non-C API(s):</strong>
-        <dd>
-
-
+<!--<dt><strong>Non-C API(s):</strong>
+    <dd>
         <img src="Graphics/Java.gif">
         <img src="Graphics/C++.gif">
         -->
@@ -783,7 +793,7 @@ END SUBROUTINE h5iinc_ref_f
 <!-- HEADER RIGHT "H5Inmembers" -->
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="#Identify-NMembers">H5Inmembers</a>
+<dt><strong>Name:</strong> <a name="Identify-NMembers">H5Inmembers</a>
 <dt><strong>Signature:</strong>
     <dd><em>int</em> <code>H5Inmembers</code>(<em>H5I_type_t</em> <code>type</code>)
 <dt><strong>Purpose:</strong>
@@ -1148,7 +1158,7 @@ And in this document, the
 Describes HDF5 Release 1.7, the unreleased development branch; working toward HDF5 Release 1.8.0
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 21 June 2004");
+document.writeln("Last modified: 24 August 2004");
 -->
 </SCRIPT>
 
