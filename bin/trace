@@ -30,6 +30,7 @@ $Source = "";
                "int"                       => "Is",
                "unsigned"                  => "Iu",
                "unsigned int"              => "Iu",
+               "H5I_type_t"                => "It",
                "MPI_Comm"                  => "Mc",
                "MPI_Info"                  => "Mi",
                "off_t"                     => "o",
