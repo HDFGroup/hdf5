@@ -1053,8 +1053,8 @@ char string4[3][20] = { "s1234567890123456789", "s1234567890123456789",
 
 hsize_t dims5[] = { 3, 6};
 typedef struct {
-  char s[12][32];
   int a[8][10];
+  char s[12][32];
 } compound_t;
 compound_t comp1[3][6];
 size_t mdims[2];
