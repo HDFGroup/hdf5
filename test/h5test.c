@@ -17,20 +17,41 @@
  * this test support library.  The environment variable is used in preference
  * to the cpp constant.  If neither is defined then use some default value.
  *
- * HDF5_PREFIX:		A string to add to the beginning of all file names.
- *			This can be used to tell MPIO what driver to use
- *			(e.g., "gfs:", "ufs:", or "nfs:") or to use a
- *			different file system (e.g., "/tmp" or "/usr/tmp").
- *			The prefix will be separated from the base file name
- *			by a slash. See h5_fixname() for details.
- *
  * HDF5_DRIVER:		This string describes what low level file driver to
  *			use for HDF5 file access.  The first word in the
  *			value is the name of the driver and subsequent data
  *			is interpreted according to the driver.  See
  *			h5_fileaccess() for details.
  *
+ * HDF5_PREFIX:		A string to add to the beginning of all serial test
+ *			file names.  This can be used to run tests in a
+ *			different file system (e.g., "/tmp" or "/tmp/myname").
+ *			The prefix will be separated from the base file name
+ *			by a slash. See h5_fixname() for details.
+ *
+ * HDF5_PARAPREFIX:	A string to add to the beginning of all parallel test
+ *			file names.  This can be used to tell MPIO what driver
+ *			to use (e.g., "gfs:", "ufs:", or "nfs:") or to use a
+ *			different file system (e.g., "/tmp" or "/tmp/myname").
+ *			The prefix will be separated from the base file name
+ *			by a slash. See h5_fixname() for details.
+ *
  */
+/*
+ * In a parallel machine, the filesystem suitable for compiling is
+ * unlikely a parallel file system that is suitable for parallel I/O.
+ * There is no standard pathname for the parallel file system.  /tmp
+ * is about the best guess.
+ */
+#ifndef HDF5_PARAPREFIX
+#ifdef __PUMAGON__
+/* For the PFS of TFLOPS */
+#define HDF5_PARAPREFIX "pfs:/pfs_grande/multi/tmp_1/"
+#else
+#define HDF5_PARAPREFIX "/tmp/"
+#endif
+#endif
+char	*paraprefix = NULL;	/* for command line option para-prefix */
 
 /*
  * These are the letters that are appended to the file name when generating
@@ -194,21 +215,50 @@ h5_reset(void)
  * Modifications:
  *		Robb Matzke, 1999-08-03
  *		Modified to use the virtual file layer.
+ *
+ *		Albert Cheng, 2000-01-25
+ *		Added prefix for parallel test files.
  *-------------------------------------------------------------------------
  */
 char *
 h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    const char	*prefix=NULL, *suffix=NULL;
+    const char	*prefix=NULL;
+    const char	*suffix=".h5";		/* suffix has default */
     hid_t	driver;
     
     if (!base_name || !fullname || size<1) return NULL;
 
-    /* First use the environment variable, then try the constant */
-    prefix = getenv("HDF5_PREFIX");
-#ifdef HDF5_PREFIX
-    if (!prefix) prefix = HDF5_PREFIX;
+    /* figure out the suffix */
+    if (H5P_DEFAULT!=fapl){
+	if ((driver=H5Pget_driver(fapl))<0) return NULL;
+	if (H5FD_FAMILY==driver) {
+	    suffix = "%05d.h5";
+	} else if (H5FD_CORE==driver || H5FD_MULTI==driver) {
+	    suffix = NULL;
+	} 
+    }
+    
+    /* Use different ones depending on parallel or serial driver used. */
+    if (H5P_DEFAULT!=fapl && H5FD_MPIO==driver){
+	/* For parallel:
+	 * First use command line option, then the environment variable,
+	 * then try the constant
+	 */
+	prefix = (paraprefix ? paraprefix : getenv("HDF5_PARAPREFIX"));
+#ifdef HDF5_PARAPREFIX
+	if (!prefix) prefix = HDF5_PARAPREFIX;
 #endif
+    }else{
+	/* For serial:
+	 * First use the environment variable, then try the constant
+	 */
+	prefix = getenv("HDF5_PREFIX");
+#ifdef HDF5_PREFIX
+	if (!prefix) prefix = HDF5_PREFIX;
+#endif
+    }
+
 
     /* Prepend the prefix value to the base name */
     if (prefix && *prefix) {
@@ -222,15 +272,6 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     }
 
     /* Append a suffix */
-    if ((driver=H5Pget_driver(fapl))<0) return NULL;
-    if (H5FD_FAMILY==driver) {
-	suffix = "%05d.h5";
-    } else if (H5FD_CORE==driver || H5FD_MULTI==driver) {
-	suffix = NULL;
-    } else {
-	suffix = ".h5";
-    }
-    
     if (suffix) {
 	if (strlen(fullname)+strlen(suffix)>=size) return NULL;
 	strcat(fullname, suffix);

@@ -30,6 +30,12 @@
 extern const char *FILENAME[];
 
 /*
+ * This contains the filename prefix specificied as command line option for
+ * the parallel test files. 
+ */
+extern char *paraprefix;
+
+/*
  * The name of the test is printed by saying TESTING("something") which will
  * result in the string `Testing something' being flushed to standard output.
  * If a test passes, fails, or is skipped then the PASSED(), FAILED(), or
