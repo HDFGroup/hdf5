@@ -173,7 +173,12 @@ CONFIGURE="./configure $HDF4LIB $OP_CONFIGURE"
 # Execute the requests
 snapshot=yes
 
-H5VERSION=hdf5_1_4
+if [ -f bin/snapshot_version ]; then
+    . bin/snapshot_version
+else
+    H5VERSION=hdf5
+fi
+
 BASEDIR=${HOME}/snapshots-${H5VERSION}
 CURRENT=${BASEDIR}/current
 PREVIOUS=${BASEDIR}/previous
