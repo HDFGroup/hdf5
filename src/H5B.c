@@ -2149,9 +2149,10 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, intn indent, intn fwidth,
     /*
      * Print the values.
      */
-    HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Tree type ID:",
-	      (int) (bt->type->id));
+	      ((bt->type->id)==H5B_SNODE_ID ? "H5B_SNODE_ID" :
+            ((bt->type->id)==H5B_ISTORE_ID ? "H5B_ISTORE_ID" : "Unknown!")));
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	      "Size of node:",
 	      (unsigned long) H5B_nodesize(f, bt->type, NULL, bt->sizeof_rkey));
