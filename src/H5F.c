@@ -2829,6 +2829,9 @@ done:
  *		Modified H5F_flush call to take one flag instead of
  *		several Boolean flags.
  *
+ *  Pedro Vicente, 2003-04-21
+ *		Changed do.while loop to while in the H5F_CLOSE_STRONG case.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2953,7 +2956,8 @@ H5F_close(H5F_t *f)
 
         case H5F_CLOSE_STRONG:
             /* Forcefully close all opened objects in file */
-            do {
+            while(f->nopen_objs > 0)
+            {
                 /* Allocate space for the IDs of objects still currently open */
                 if((oid_list = H5MM_malloc(f->nopen_objs*sizeof(hid_t)))==NULL)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
@@ -2970,7 +2974,7 @@ H5F_close(H5F_t *f)
                 /* Free the ID list */
                 if(oid_list != NULL)
                     H5MM_xfree(oid_list);
-            } while(f->nopen_objs > 0);
+            }
 
             /* Indicate that the file will be closing */
             closing=1;
