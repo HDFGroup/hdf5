@@ -3399,17 +3399,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
 
 
-      echo
-echo
-echo JAMES
-echo
-echo fflags ${FFLAGS}
-echo fcflags ${FCFLAGS}
-  FCFLAGS="${FCFLAGS} ${FFLAGS}"
-echo
-echo fflags ${FFLAGS}
-echo fcflags ${FCFLAGS}
-echo
+        FCFLAGS="${FCFLAGS} ${FFLAGS}"
   FC=${F9X}
 
 
@@ -3506,7 +3496,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:3509:" \
+echo "$as_me:3499:" \
      "checking for Fortran compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -3649,13 +3639,13 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-  echo "$as_me:$LINENO: checking what $FC does with modules" >&5
-echo $ECHO_N "checking what $FC does with modules... $ECHO_C" >&6
+  echo "$as_me:$LINENO: checking what $F9X does with modules" >&5
+echo $ECHO_N "checking what $F9X does with modules... $ECHO_C" >&6
 
 
 ac_ext=f90
-ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
-ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -3687,16 +3677,16 @@ done
 
 echo $modfiles 6>&1
 if test "$modfiles" = file.o; then
-  echo $ac_n "checking whether $FC -em is saner""... $ac_c" 1>&6
-  OLD_FCFLAGS=$FCFLAGS
-  FCFLAGS="$FCFLAGS -em"
+  echo $ac_n "checking whether $F9X -em is saner""... $ac_c" 1>&6
+  OLD_FFLAGS=$FFLAGS
+  FFLAGS="$FFLAGS -em"
   eval $ac_compile
   modfiles=""
   for f in file.o module.mod MODULE.mod module.M MODULE.M; do
     test -f $f && modfiles="$f"
   done
   if test "$modfiles" = "file.o"; then
-    FCFLAGS=$OLD_FCFLAGS
+    FFLAGS=$OLD_FFLAGS
     echo no 6>&1
   else
     echo yes 6>&1
@@ -3704,8 +3694,8 @@ if test "$modfiles" = file.o; then
 fi
 cd ..
 
-echo "$as_me:$LINENO: checking how $FC finds modules" >&5
-echo $ECHO_N "checking how $FC finds modules... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking how $F9X finds modules" >&5
+echo $ECHO_N "checking how $F9X finds modules... $ECHO_C" >&6
 
 for flag in "-I" "-M" "-p"; do
   cat >conftest.$ac_ext <<EOF
@@ -3714,7 +3704,7 @@ for flag in "-I" "-M" "-p"; do
       end program conftest
 EOF
 
-  ac_compile='${FC-f90} $FCFLAGS ${flag}conftestdir -c conftest.$ac_ext 1>&5'
+  ac_compile='${F9X-f90} $FFLAGS ${flag}conftestdir -c conftest.$ac_ext 1>&5'
 
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
@@ -3728,7 +3718,7 @@ done
 
 if test -n "$F9XMODFLAG"; then
   echo $F9XMODFLAG 1>&6
-  FCFLAGS="$F9XMODFLAG. $FCFLAGS"
+  FFLAGS="$F9XMODFLAG. $FFLAGS"
 else
   echo unknown 1>&6
 fi
@@ -3737,29 +3727,24 @@ fi
 rm -rf conftest*
 
 
-echo
-echo fflags ${FFLAGS}
-echo fcflags ${FCFLAGS}
-echo
-
         F77=$FC
 
     ac_ext=f90
-ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
-ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
         FCFLAGS_saved=$FCFLAGS
-  FCFLAGS="$FCFLAGS -I."
+  FCFLAGS="${FCFLAGS} -I."
 
   echo "$as_me:$LINENO: checking if compiler supports -I. option" >&5
 echo $ECHO_N "checking if compiler supports -I. option... $ECHO_C" >&6
 
 
 ac_ext=f90
-ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
-ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -5559,7 +5544,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5562 "configure"' > conftest.$ac_ext
+  echo '#line 5547 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -6673,7 +6658,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:6676:" \
+echo "$as_me:6661:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -7742,11 +7727,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7745: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7730: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7749: \$? = $ac_status" >&5
+   echo "$as_me:7734: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -7997,11 +7982,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8000: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7985: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8004: \$? = $ac_status" >&5
+   echo "$as_me:7989: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -8057,11 +8042,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8060: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8045: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8064: \$? = $ac_status" >&5
+   echo "$as_me:8049: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10257,7 +10242,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10260 "configure"
+#line 10245 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10355,7 +10340,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10358 "configure"
+#line 10343 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12575,11 +12560,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12578: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12563: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12582: \$? = $ac_status" >&5
+   echo "$as_me:12567: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -12635,11 +12620,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12638: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12623: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12642: \$? = $ac_status" >&5
+   echo "$as_me:12627: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13998,7 +13983,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 14001 "configure"
+#line 13986 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14096,7 +14081,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 14099 "configure"
+#line 14084 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14951,11 +14936,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14954: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14939: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14958: \$? = $ac_status" >&5
+   echo "$as_me:14943: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -15011,11 +14996,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15014: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14999: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15018: \$? = $ac_status" >&5
+   echo "$as_me:15003: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17067,11 +17052,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17070: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17055: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17074: \$? = $ac_status" >&5
+   echo "$as_me:17059: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -17322,11 +17307,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17325: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17310: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17329: \$? = $ac_status" >&5
+   echo "$as_me:17314: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings
@@ -17382,11 +17367,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17385: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17370: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17389: \$? = $ac_status" >&5
+   echo "$as_me:17374: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -19582,7 +19567,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 19585 "configure"
+#line 19570 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -19680,7 +19665,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 19683 "configure"
+#line 19668 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -45342,8 +45327,8 @@ esac
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
     ac_ext=f90
-ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
-ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -45661,16 +45646,16 @@ rm -f conftest.err conftest.$ac_objext \
 
     if test "X$HDF_FORTRAN" = "Xyes"; then
             ac_ext=f90
-ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
-ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
 
 
 ac_ext=f90
-ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
-ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -45703,8 +45688,8 @@ else
 
 
 ac_ext=f90
-ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
-ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -45753,8 +45738,8 @@ rm -rf conftest*
 
 
 ac_ext=f90
-ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
-ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
@@ -45787,8 +45772,8 @@ else
 
 
 ac_ext=f90
-ac_compile='${FC-f90} -c $FCFLAGS conftest.$ac_ext 1>&5'
-ac_link='${FC-f90} -o conftest${ac_exeext} $FCFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
