@@ -834,6 +834,92 @@ if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes" -a "x$HAVE_COMPRESS2"
             [Define if support for deflate filter is enabled])
 fi
 
+
+dnl ----------------------------------------------------------------------
+dnl Is the szlib present? It has a header file `szlib.h' and a library
+dnl `-lsz' and their locations might be specified with the `--with-szlib'
+dnl command-line switch. The value is an include path and/or a library path.
+dnl If the library path is specified then it must be preceded by a comma.
+dnl
+AC_ARG_WITH([szlib],
+            [AC_HELP_STRING([--with-szlib=DIR],
+                            [Use szlib compression [default=yes]])],,
+            withval=yes)
+
+case $withval in
+  yes)
+    HAVE_SZLIB="yes"
+    AC_CHECK_HEADERS([szlib.h], [HAVE_SZLIB_H="yes"])
+    AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],, [unset HAVE_SZLIB])
+ dnl Not including this function checking for the time being 
+ dnl   AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
+
+    if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find szlib library])
+    fi
+    ;;
+  no)
+    HAVE_SZLIB="no"
+    AC_MSG_CHECKING([for szlib])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_SZLIB="yes"
+    case "$withval" in
+      *,*)
+        szlib_inc="`echo $withval |cut -f1 -d,`"
+        szlib_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          szlib_inc="$withval/include"
+          szlib_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    dnl Trying to include -I/usr/include and -L/usr/lib is redundant and
+    dnl can mess some compilers up.
+    if test "X$szlib_inc" = "X/usr/include"; then
+      szlib_inc=""
+    fi
+    if test "X$szlib_lib" = "X/usr/lib"; then
+      szlib_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+
+    if test -n "$szlib_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$szlib_inc"
+    fi
+
+    AC_CHECK_HEADERS([szlib.h],
+                     [HAVE_SZLIB_H="yes"],
+                     [CPPFLAGS="$saved_CPPFLAGS"])
+
+    if test -n "$szlib_lib"; then
+      LDFLAGS="$LDFLAGS -L$szlib_lib"
+    fi
+
+    AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],,
+                 [LDFLAGS="$saved_LDFLAGS"; unset HAVE_SZLIB])
+dnl    AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
+
+    if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find szlib library])
+    fi
+    ;;
+esac
+
+dnl if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes" -a "x$HAVE_COMPRESS2" = "xyes"; then
+
+  if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
+
+  AC_DEFINE(HAVE_FILTER_SZIP, 1,
+            [Define if support for szip filter is enabled])
+fi
+
 dnl ----------------------------------------------------------------------
 dnl Pablo Configuration
 dnl
@@ -2365,3 +2451,6 @@ IF_ENABLED_DISABLED "$THREADSAFE"
 
 PRINT_N "               Zlib-compression"
 IF_YES_NO "$HAVE_ZLIB"
+
+PRINT_N "               SZlib-compression"
+IF_YES_NO "$HAVE_SZLIB"
