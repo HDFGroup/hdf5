@@ -6,6 +6,12 @@
 RM=rm -f
 CP=cp
 
+# Hardcode SHELL to be /bin/sh.  Most machines have this shell, and
+# on at least one machine configure fails to detect its existence (janus).
+# Also, when HDF5 is configured on one machine but run on another,
+# configure's automatic SHELL detection may not work on the build machine.
+SHELL=/bin/sh
+
 # Libraries to link to while building
 LIBHDF5=$(top_builddir)/src/libhdf5.la
 LIBH5TEST=$(top_builddir)/test/libh5test.la

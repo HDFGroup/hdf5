@@ -188,7 +188,12 @@ R_LARGE = @R_LARGE@
 SEARCH = @SEARCH@
 SETX = @SETX@
 SET_MAKE = @SET_MAKE@
-SHELL = @SHELL@
+
+# Hardcode SHELL to be /bin/sh.  Most machines have this shell, and
+# on at least one machine configure fails to detect its existence (janus).
+# Also, when HDF5 is configured on one machine but run on another,
+# configure's automatic SHELL detection may not work on the build machine.
+SHELL = /bin/sh
 SIZE_T = @SIZE_T@
 SRB = @SRB@
 STATIC_SHARED = @STATIC_SHARED@
