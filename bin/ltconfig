@@ -1277,7 +1277,21 @@ else
     ;;
 
   aix4*)
-    hardcode_libdir_flag_spec='${wl}-b ${wl}nolibpath ${wl}-b ${wl}libpath:$libdir:/usr/lib:/lib'
+    # This is a Major Hack(tm) to get HDF5 to compile on Pacific Blue.
+    # The ``-b nolibpath -b ...'' flags were messing with the mpicc
+    # compiler's already defined library paths and it wasn't able to find
+    # the libraries it needed to run....DOH!
+    hname="`hostname`"
+
+    case "$hname" in
+      *pacific.llnl.gov*)
+        hardcode_libdir_flag_spec=' '
+	;;
+      *)
+        hardcode_libdir_flag_spec='${wl}-b ${wl}nolibpath ${wl}-b ${wl}libpath:$libdir:/usr/lib:/lib'
+	;;
+    esac
+
     hardcode_libdir_separator=':'
     if test "$with_gcc" = yes; then
       collect2name=`${CC} -print-prog-name=collect2`
