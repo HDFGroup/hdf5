@@ -4780,7 +4780,6 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
     int                     status = -1;
     void                   *buf;
     hid_t                   space, type, p_type;
-    H5S_class_t             space_type;
     int                     ndims, i;
     hsize_t                 size[64], nelmts = 1;
     int                     depth;
@@ -4814,56 +4813,48 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
     } else {
 	/* Attribute data */
 	type = H5Aget_type(obj_id);
-	space = H5Aget_space(obj_id);
-        space_type = H5Sget_simple_extent_type(space);
 
-        if(space_type == H5S_NULL || space_type == H5S_NO_CLASS || space_type == H5S_COMPLEX) {
-            status = 2;
-        } else {
-            if (H5Tget_class(type) == H5T_REFERENCE) {
-                /* references are done differently than
-                   the standard output:
-                   XML dumps a path to the object
-                   referenced.
-                 */
-                status = xml_print_refs(obj_id, ATTRIBUTE_DATA);
-                H5Tclose(type);
-            } else if (H5Tget_class(type) == H5T_STRING) {
-                status = xml_print_strs(obj_id, ATTRIBUTE_DATA);
-            } else {
-                /* all other data */
-                p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
-                H5Tclose(type);
+	if (H5Tget_class(type) == H5T_REFERENCE) {
+	    /* references are done differently than
+	       the standard output:
+	       XML dumps a path to the object
+	       referenced.
+	     */
+	    status = xml_print_refs(obj_id, ATTRIBUTE_DATA);
+	    H5Tclose(type);
+	} else if (H5Tget_class(type) == H5T_STRING) {
+	    status = xml_print_strs(obj_id, ATTRIBUTE_DATA);
+	} else {
+	    /* all other data */
+	    p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
+	    H5Tclose(type);
 
-                ndims = H5Sget_simple_extent_dims(space, size, NULL);
+	    space = H5Aget_space(obj_id);
 
-                for (i = 0; i < ndims; i++)
-                    nelmts *= size[i];
+	    ndims = H5Sget_simple_extent_dims(space, size, NULL);
 
-                buf =
-                    malloc((size_t)(nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type))));
-                assert(buf);
+	    for (i = 0; i < ndims; i++)
+		nelmts *= size[i];
 
-                if (H5Aread(obj_id, p_type, buf) >= 0)
-                    status = h5tools_dump_mem(stdout, outputformat, obj_id,
-                                              p_type, space, buf, depth);
+	    buf =
+		malloc((size_t)(nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type))));
+	    assert(buf);
 
-                free(buf);
-                H5Tclose(p_type);
-                H5Sclose(space);
-                H5Tclose(type);
-            }
-        }
+	    if (H5Aread(obj_id, p_type, buf) >= 0)
+                status = h5tools_dump_mem(stdout, outputformat, obj_id,
+                                          p_type, space, buf, depth);
+
+	    free(buf);
+	    H5Tclose(p_type);
+	    H5Sclose(space);
+	    H5Tclose(type);
+	}
     }
 
     if (status == FAIL) {
-	indentation(indent + COL + COL);
+	indentation(indent + COL);
 	printf("Unable to print data.\n");
 	status = 1;
-    } else if (status == 2) { /* special value for H5S_NULL */
-	indentation(indent + COL + COL);
-	printf("<%sNoData/>\n",xmlnsprefix);
-        status = 1;
     }
 
     indentation(indent + COL);
@@ -4890,6 +4881,7 @@ static herr_t
 xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 {
     hid_t   attr_id, type, space;
+    H5S_class_t space_type;
     char   *t_aname = xml_escape_the_name(attr_name);
 
     indentation(indent);
@@ -4899,11 +4891,12 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
     if ((attr_id = H5Aopen_name(attr, attr_name)) >= 0) {
 	type = H5Aget_type(attr_id);
 	space = H5Aget_space(attr_id);
+        space_type = H5Sget_simple_extent_type(space);
 
 	dump_function_table->dump_dataspace_function(space);
 	dump_function_table->dump_datatype_function(type);
 
-	if (display_attr_data) {
+	if (display_attr_data && space_type!=H5S_NULL) {
 	    switch (H5Tget_class(type)) {
 	    case H5T_INTEGER:
 	    case H5T_FLOAT:
@@ -4969,12 +4962,13 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 		break;
 	    }
 	} else {
-	    /* The case of an attribute never yet written ?? */
-	    indentation(indent);
-	    printf("<%sData>\n",xmlnsprefix);
+	    /* The case of an attribute never yet written ?? 
+             * Or dataspace is H5S_NULL. */
 	    indentation(indent + COL);
+	    printf("<%sData>\n",xmlnsprefix);
+	    indentation(indent + COL + COL);
 	    printf("<%sNoData/>\n",xmlnsprefix);
-	    indentation(indent);
+	    indentation(indent + COL);
 	    printf("</%sData>\n",xmlnsprefix);
 	}
 
@@ -6018,11 +6012,11 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
 	}
     } else {
 	/* no data written */
-	indentation(indent);
-	printf("<%sData>\n",xmlnsprefix);
 	indentation(indent + COL);
+	printf("<%sData>\n",xmlnsprefix);
+	indentation(indent + COL + COL);
 	printf("<%sNoData/>\n",xmlnsprefix);
-	indentation(indent);
+	indentation(indent + COL);
 	printf("</%sData>\n",xmlnsprefix);
     }
 
