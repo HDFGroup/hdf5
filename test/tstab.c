@@ -242,6 +242,8 @@ test_2(void)
 #if 0
     access_plist = H5Ccreate (H5C_FILE_ACCESS);
     H5Cset_core (access_plist, 3000000);
+#else
+    access_plist = H5C_DEFAULT;
 #endif
 
     /* create the file */
