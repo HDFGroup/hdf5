@@ -685,6 +685,15 @@ int32 order_array[512];
     case H5T_INTEGER:
     case H5T_FLOAT:
         sd_id = op_data->sd_id;
+#define NEWWAY
+#ifdef NEWWAY
+	if (FAIL==h5atomic_type_to_h4type(type, &mem_type, &typesize, &h4_type)){
+		fprintf(stderr, "Error: Problems translating h5 type to h4 type\n");
+		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+		status = FAIL;
+		break;
+	}
+#else
 	if ((h4_type = h5type_to_h4type(type)) == FAIL ) {
 		fprintf(stderr, "Error: Problems translating h5 type to h4 type\n");
 		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
@@ -703,6 +712,7 @@ int32 order_array[512];
 		status = FAIL;
 		break;
 	}
+#endif
     	if ((buffer = HDmalloc(n_values*typesize)) == NULL) {
 		fprintf(stderr, "Error: Problems with HDmalloc of memory space\n");
 		DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
@@ -784,6 +794,14 @@ int32 order_array[512];
 				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
 				break;
 			}
+#ifdef NEWWAY
+			if (FAIL==h5atomic_type_to_h4type(fieldtype, &mem_type, &typesize, &h4_type)){
+				fprintf(stderr, "Error: Problems translating h5 type to h4 type\n");
+				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+				status = FAIL;
+				break;
+			}
+#else
 			if ((h4_type = h5type_to_h4type(fieldtype)) < 0 ) {
 				fprintf(stderr, "Error: Problems translating h5 type to h4 type\n");
 				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
@@ -800,6 +818,7 @@ int32 order_array[512];
 				status = FAIL;
 				break;
 			}
+#endif
 			order = 1;
 			if (ndimf > 0) {
 				order *= dimf[permf[0]];
@@ -1063,6 +1082,14 @@ H5T_str_t strpad;
 				return status;
 			}
 
+#ifdef NEWWAY
+			if (FAIL==h5atomic_type_to_h4type(type, &mem_type, &typesize, &h4_type)){
+				fprintf(stderr, "Error: Problems translating h5 type to h4 type\n");
+				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+				status = FAIL;
+				break;
+			}
+#else
 			if ((h4_type = h5type_to_h4type(type)) == FAIL ) {
 				fprintf(stderr, "Error: Problems translating h5 type to h4 type\n");
 				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_attr", __FILE__, __LINE__);
@@ -1083,6 +1110,7 @@ H5T_str_t strpad;
 				status = FAIL;
 				return status;
 			}
+#endif
 
 			if ((attr_values = HDmalloc(n_values*typesize)) == NULL) {
 				fprintf(stderr, "Error: Problems with HDmalloc of memory space\n");
@@ -2060,6 +2088,146 @@ H5T_str_t strpad;
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function:    h5atomic_type_to_h4type
+ *
+ * Purpose:     Match an H5 atomic type to an appropriate H4 type.
+ *              Assign an appropirate H5 memory type that matches the H4 type.
+ *              Return the H5 memory type, H4 type and sizeof H4 via pointers.
+ *
+ * Return:      SUCCEED on suceed, FAIL on failure.
+ *              When fail, pointer values of h5memtype, h5memsize and h4_type
+ *              may have changed and are undefined.
+ *
+ * Programmer:  Albert Cheng, March 2000
+ *
+ * Modifications:
+ *
+ *-----------------------------------------------------------------------*/
+herr_t h5atomic_type_to_h4type(const hid_t h5type, hid_t* h5memtype, size_t* h5memsize, int32* h4type)
+{
+    H5T_class_t class;
+    size_t h5typesize, h4typesize;
+    H5T_sign_t sign;
+    hid_t mem_datatype = FAIL;
+
+    if ((class = H5Tget_class(h5type)) < 0 ) {
+        fprintf(stderr,"Error: problem with getting type class\n");
+	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "h5atomic_type_to_h4type", __FILE__, __LINE__);
+        return FAIL;
+    }
+    
+    switch(class){
+    case H5T_INTEGER:
+	if ((h5typesize = H5Tget_size(h5type)) == 0 ) {
+	    fprintf(stderr,"Error: problem with getting type size\n");
+	    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "h5atomic_type_to_h4type", __FILE__, __LINE__);
+	    return FAIL;
+	}
+	if ((sign = H5Tget_sign(h5type)) == H5T_SGN_ERROR) {
+	    fprintf(stderr,"Error: problem with getting type sign\n");
+	    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "h5atomic_type_to_h4type", __FILE__, __LINE__);
+	    return FAIL;
+	}
+	/* deduce the proper HDF4 integer type to use according to the size of the HDF5 type. */
+	/* Current HDF4 types can be 8, 16, 32 bits (1, 2, 4 bytes). */
+	switch(h5typesize){
+	case 1:
+	    *h4type = (sign == H5T_SGN_2 ? DFNT_INT8 : DFNT_UINT8);
+	    h4typesize = sizeof(int8);
+	    if (h4typesize == H5Tget_size(H5T_NATIVE_CHAR)){
+		mem_datatype = (sign == H5T_SGN_2 ? H5T_NATIVE_SCHAR : H5T_NATIVE_UCHAR);
+	    }else if (h4typesize == H5Tget_size(H5T_NATIVE_SHORT)){
+		mem_datatype = (sign == H5T_SGN_2 ? H5T_NATIVE_SHORT : H5T_NATIVE_USHORT);
+	    }else if (h4typesize == H5Tget_size(H5T_NATIVE_INT)){
+		mem_datatype = (sign == H5T_SGN_2 ? H5T_NATIVE_INT : H5T_NATIVE_UINT);
+	    }else if (h4typesize == H5Tget_size(H5T_NATIVE_LONG)){
+		mem_datatype = (sign == H5T_SGN_2 ? H5T_NATIVE_LONG : H5T_NATIVE_ULONG);
+	    }else
+		return(FAIL);
+	    break;
+	case 2:
+	    *h4type = (sign == H5T_SGN_2 ? DFNT_INT16 : DFNT_UINT16);
+	    h4typesize = sizeof(int16);
+	    if (h4typesize == H5Tget_size(H5T_NATIVE_CHAR)){
+		mem_datatype = (sign == H5T_SGN_2 ? H5T_NATIVE_SCHAR : H5T_NATIVE_UCHAR);
+	    }else if (h4typesize == H5Tget_size(H5T_NATIVE_SHORT)){
+		mem_datatype = (sign == H5T_SGN_2 ? H5T_NATIVE_SHORT : H5T_NATIVE_USHORT);
+	    }else if (h4typesize == H5Tget_size(H5T_NATIVE_INT)){
+		mem_datatype = (sign == H5T_SGN_2 ? H5T_NATIVE_INT : H5T_NATIVE_UINT);
+	    }else if (h4typesize == H5Tget_size(H5T_NATIVE_LONG)){
+		mem_datatype = (sign == H5T_SGN_2 ? H5T_NATIVE_LONG : H5T_NATIVE_ULONG);
+	    }else
+		return(FAIL);
+	    break;
+	case 4:
+	    *h4type = (sign == H5T_SGN_2 ? DFNT_INT32 : DFNT_UINT32);
+	    h4typesize = sizeof(int32);
+	    if (h4typesize == H5Tget_size(H5T_NATIVE_CHAR)){
+		mem_datatype = (sign == H5T_SGN_2 ? H5T_NATIVE_SCHAR : H5T_NATIVE_UCHAR);
+	    }else if (h4typesize == H5Tget_size(H5T_NATIVE_SHORT)){
+		mem_datatype = (sign == H5T_SGN_2 ? H5T_NATIVE_SHORT : H5T_NATIVE_USHORT);
+	    }else if (h4typesize == H5Tget_size(H5T_NATIVE_INT)){
+		mem_datatype = (sign == H5T_SGN_2 ? H5T_NATIVE_INT : H5T_NATIVE_UINT);
+	    }else if (h4typesize == H5Tget_size(H5T_NATIVE_LONG)){
+		mem_datatype = (sign == H5T_SGN_2 ? H5T_NATIVE_LONG : H5T_NATIVE_ULONG);
+	    }else
+		return(FAIL);
+	    break;
+	default:
+	    fprintf(stderr,"Error: unmatchable integer type\n");
+	    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "h5atomic_type_to_h4type", __FILE__, __LINE__);
+	    return FAIL;
+	}
+	break;
+	/* end of case H5T_INTEGER */
+
+    case H5T_FLOAT:
+	if ((h5typesize = H5Tget_size(h5type)) == 0 ) {
+	    fprintf(stderr,"Error: problem with getting type size\n");
+	    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "h5atomic_type_to_h4type", __FILE__, __LINE__);
+	    return FAIL;
+	}
+	/* deduce the proper HDF4 floating point type to use according to the size of the HDF5 type. */
+	/* Current HDF4 types can be 32 or 64 bits (4 or 8 bytes). */
+	switch(h5typesize){
+	case 4:
+	    *h4type = DFNT_FLOAT32;
+	    h4typesize = sizeof(float32);
+	    if (h4typesize == H5Tget_size(H5T_NATIVE_FLOAT)){
+		mem_datatype = H5T_NATIVE_FLOAT;
+	    }else if (h4typesize == H5Tget_size(H5T_NATIVE_DOUBLE)){
+		mem_datatype = H5T_NATIVE_DOUBLE;
+	    }else
+		return(FAIL);
+	    break;
+	case 8:
+	    *h4type = DFNT_FLOAT64;
+	    h4typesize = sizeof(float64);
+	    if (h4typesize == H5Tget_size(H5T_NATIVE_FLOAT)){
+		mem_datatype = H5T_NATIVE_FLOAT;
+	    }else if (h4typesize == H5Tget_size(H5T_NATIVE_DOUBLE)){
+		mem_datatype = H5T_NATIVE_DOUBLE;
+	    }else
+		return(FAIL);
+	    break;
+	default:
+	    fprintf(stderr,"Error: unmatchable H5 float type\n");
+	    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "h5atomic_type_to_h4type", __FILE__, __LINE__);
+	    return FAIL;
+	}
+	break;
+	/* end of case H5T_FLOAT */
+
+    default:
+	return FAIL;
+    }
+
+    *h5memsize = h4typesize;
+    *h5memtype = mem_datatype;
+    return(SUCCEED);
+}
+#ifndef NEWWAY
 /*****************************************************************************
 
   Routine: h5type_to_h4type(h5type)
@@ -2247,6 +2415,7 @@ hid_t h4type_to_memtype(int32 h4_datatype)
 	return mem_datatype;
 
 }
+#endif
 
 
 /*****************************************************************************
