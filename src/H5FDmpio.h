@@ -44,7 +44,7 @@ typedef struct H5FD_mpio_dxpl_t {
 #endif
 
 #define IS_H5FD_MPIO(f)	/* (H5F_t *f) */				    \
-    (H5FD_MPIO==f->shared->lf->driver_id)
+    (H5FD_MPIO==H5F_get_driver_id(f))
 
 /* Function prototypes */
 __DLL__ hid_t H5FD_mpio_init(void);

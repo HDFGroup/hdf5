@@ -2507,6 +2507,33 @@ H5F_sizeof_size(H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_get_intent
+ *
+ * Purpose:	Quick and dirty routine to retrieve the file's 'driver_id' value
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	'driver_id' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *		October 10, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5F_get_driver_id(H5F_t *f)
+{
+    FUNC_ENTER(H5F_get_driver_id, 0);
+
+    assert(f);
+
+    FUNC_LEAVE(f->shared->lf->driver_id);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_block_read
  *
  * Purpose:	Reads some data from a file/server/etc into a buffer.
