@@ -1337,6 +1337,7 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 		case H5T_REFERENCE:
 			display_numeric_data(hs_nelmts, p_type, sm_buf, p_type_nbytes,
 				      p_nelmts, dim_n_size, elmtno, dset);
+			break;
 					  
 /*			display_reference_data(hs_nelmts, p_type, sm_buf, p_type_nbytes,
 				      p_nelmts, dim_n_size, elmtno, dset);*/
