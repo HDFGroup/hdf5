@@ -779,7 +779,6 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     if (mpi_rank == 0) {
       /* Get current file size */
       if (MPI_SUCCESS != MPI_File_get_size(fh, &size)) {
-          H5MM_xfree(file);
           MPI_File_close(&fh);
           HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, NULL, "MPI_File_get_size failed");
       }
