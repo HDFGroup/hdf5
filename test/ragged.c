@@ -207,7 +207,7 @@ ragged_write_all(hid_t ra, hsize_t rows_at_once)
 	    (unsigned long)rows_at_once);
     printf("%s...\n", testname);
     fflush(stdout);
-    timeout_g = 60;
+    timeout_g = TIME_LIMIT;
 
     /* Create the ragged array row in memory */
     if (NULL==(dd = malloc(max_width*sizeof(C_MTYPE))) ||
@@ -236,7 +236,7 @@ ragged_write_all(hid_t ra, hsize_t rows_at_once)
 	    interval_nelmts += size[i];
 	}
 	if (H5Rwrite(ra, row, i, H_MTYPE, size, buf)<0) goto error;
-	if (0==row || alarm_g) {
+	if (0==row || alarm_g || 0==timeout_g) {
 	    alarm_g = 0;
 	    H5_timer_end(&timer_total, &timer);
 	    H5_bandwidth(s, (double)interval_nelmts*sizeof(C_MTYPE),
@@ -309,7 +309,7 @@ ragged_read_all(hid_t ra, hsize_t rows_at_once)
 	    (unsigned long)rows_at_once);
     printf("%s...\n", testname);
     fflush(stdout);
-    timeout_g = 60;
+    timeout_g = TIME_LIMIT;
 
     /* Create the ragged array row in memory */
     if (NULL==(size = malloc(rows_at_once*sizeof(*size))) ||
@@ -358,7 +358,7 @@ ragged_read_all(hid_t ra, hsize_t rows_at_once)
 	}
 
 	/* Print statistics? */
-	if (0==row || alarm_g) {
+	if (0==row || alarm_g || 0==timeout_g) {
 	    alarm_g = 0;
 	    H5_timer_end(&timer_total, &timer);
 	    H5_bandwidth(s, (double)interval_nelmts*sizeof(C_MTYPE),
@@ -372,7 +372,9 @@ ragged_read_all(hid_t ra, hsize_t rows_at_once)
 	}
 	if (0==size[rows_at_once-1]) {
 	    /* Reached the end of the array */
-	    assert(total_nelmts>=MAX_NELMTS);
+	    if (total_nelmts<MAX_NELMTS) {
+		puts("   * Short read, previous write probably aborted");
+	    }
 	    row += i;
 	    break;
 	}
@@ -438,7 +440,7 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
 	    (unsigned long)rows_at_once);
     printf("%s...\n", testname);
     fflush(stdout);
-    timeout_g = 60;
+    timeout_g = TIME_LIMIT;
 
     /* Create the ragged array row in memory */
     if (NULL==(size = malloc(rows_at_once*sizeof(*size))) ||
@@ -502,7 +504,7 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
 	}
 
 	/* Print statistics? */
-	if (0==row || alarm_g) {
+	if (0==row || alarm_g || 0==timeout_g) {
 	    alarm_g = 0;
 	    H5_timer_end(&timer_total, &timer);
 	    H5_bandwidth(s, (double)interval_nelmts*sizeof(C_MTYPE),
@@ -516,7 +518,9 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
 	}
 	if (0==size[rows_at_once-1]) {
 	    /* Reached the end of the array */
-	    assert(total_nelmts>=MAX_NELMTS);
+	    if (total_nelmts<MAX_NELMTS) {
+		puts("   * Short read, previous write probably aborted");
+	    }
 	    row += i;
 	    break;
 	}
