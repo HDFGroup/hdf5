@@ -8,8 +8,9 @@
 #define FILE        "SDSextendible.h5"
 #define DATASETNAME "ExtendibleArray" 
 #define RANK         2
-#define NX     10
-#define NY     5 
+#define RANKC        1
+#define NX           10
+#define NY           5 
 
 main ()
 {
@@ -23,7 +24,7 @@ main ()
                                                stored in file */ 
    size_t      dims[2];                     /* dataset and chunk dimensions */ 
    size_t      chunk_dims[2];
-
+   size_t      col_dims[1];
    size_t      size[2];
    size_t      count[2];
    int         offset[2];
@@ -32,6 +33,7 @@ main ()
 
    int         data_out[NX][NY];  /* buffer for dataset to be read */
    int         chunk_out[2][5];   /* buffer for chunk to be read */
+   int         column[10];        /* buffer for column to be read */
    int         i, j, rank, rank_chunk;
 
  
@@ -100,6 +102,45 @@ for (j = 0; j < dims[0]; j++) {
             2 0 0 0 0 
             2 0 0 0 0 
             2 0 0 0 0 
+*/
+
+/*
+ * Read the third column from the dataset.
+ * First define memory dataspace, then define hyperslab
+ * and read it into column array.
+ */
+col_dims[0] = 10;
+memspace =  H5Pcreate_simple(RANKC, col_dims, NULL);
+
+/*
+ * Define the column (hyperslab) to read.
+ */
+offset[0] = 0;
+offset[1] = 2;
+count[0]  = 10;
+count[1]  = 1;
+status = H5Pset_hyperslab(filespace, offset, count, NULL);
+status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
+                 H5C_DEFAULT, column);
+printf("\n");
+printf("Third column: \n");
+for (i = 0; i < 10; i++) {
+     printf("%d \n", column[i]);
+}
+
+/*
+
+            Third column: 
+            1 
+            1 
+            1 
+            0 
+            0 
+            0 
+            0 
+            0 
+            0 
+            0 
 */
 
 /*
