@@ -33,8 +33,12 @@
 #include <H5FDstream.h>               /* Stream VFD header                   */
 
 #ifdef H5FD_STREAM_HAVE_UNIX_SOCKETS
+#ifdef H5_HAVE_SYS_TYPES_H
 #include <sys/types.h>                /* socket stuff                        */
+#endif
+#ifdef H5_HAVE_SYS_SOCKET_H
 #include <sys/socket.h>               /* socket stuff                        */
+#endif
 #include <netdb.h>                    /* gethostbyname                       */
 #include <netinet/in.h>               /* socket stuff                        */
 #ifdef HAVE_NETINET_TCP_H
@@ -42,6 +46,9 @@
 #endif
 #endif
 
+#ifndef HAVE_STRUCT_SOCKLEN_T
+typedef int socklen_t;
+#endif
 
 /* Some useful macros */
 #ifdef  MIN
@@ -534,7 +541,7 @@ static void H5FDstream_read_from_socket (H5FD_stream_t *stream,
     }
 
     /* now receive the next chunk of data */
-    size = recv (stream->socket, ptr, max_size, 0);
+    size = recv (stream->socket, ptr, (int) max_size, 0);
 
     if (size < 0 && (EINTR == errno || EAGAIN == errno || EWOULDBLOCK))
     {
@@ -775,9 +782,6 @@ static herr_t H5FD_stream_flush (H5FD_t *_stream)
   int on = 1;
   unsigned char *ptr;
   struct sockaddr from;
-#if !(defined(linux) || defined(sun))
-  typedef int socklen_t;
-#endif
   socklen_t fromlen;
   H5FD_STREAM_SOCKET_TYPE sock;
 
