@@ -28,6 +28,10 @@ class __DLLCPP__ PropList : public IdComponent {
 	// Make a copy of the given property list using assignment statement
 	PropList& operator=( const PropList& rhs );
 
+	// Copies a property from one property list or property class to another
+	void copyProp( PropList& dest, PropList& src, const string& name);
+	void copyProp( PropList& dest, PropList& src, const char* name);
+
 	// Gets the class of this property list, i.e. H5P_FILE_CREATE,
 	// H5P_FILE_ACCESS, ...
 	hid_t getClass() const;

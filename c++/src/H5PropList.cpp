@@ -77,15 +77,31 @@ PropList& PropList::operator=( const PropList& rhs )
    return(*this);
 }
 
+// Copies a property from one list or class to another
+void PropList::copyProp( PropList& dest, PropList& src, const string& name )
+{
+   copyProp( dest, src, name.c_str());
+}
+
+// Copies a property from one list or class to another
+void PropList::copyProp( PropList& dest, PropList& src, const char *name )
+{
+   hid_t dst_id = dest.getId();
+   hid_t src_id = src.getId();
+   herr_t ret_value = H5Pcopy_prop(dst_id, src_id, name);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("PropList::copyProp", "H5Pcopy_prop failed");
+   }
+
+}
+
 // Closes the property list if it is not a default one
 void PropList::p_close() const
 {
    if( id != H5P_NO_CLASS ) // not a constant, should call H5Pclose
    {
-      herr_t ret_value;
-
-      ret_value = H5Pclose( id );
-    
+      herr_t ret_value = H5Pclose( id );
       if( ret_value < 0 )
       {
          throw PropListIException(NULL, "property list close failed" );
