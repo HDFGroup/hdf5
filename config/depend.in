@@ -1,0 +1,35 @@
+#------------------------------------------------------------- -*- makefile -*-
+# The following section of this makefile comes from the
+# `./config/targets' file which was generated with config.status
+# from `./config/targets.in'.
+#------------------------------------------------------------------------------
+
+# We keep a list of dependencies in `.depend' for each of the source
+# files on which it depends.  When one of the source files is modified
+# we remove its record from .depend and regenerate its dependencies,
+# tacking them onto the end of .depend.  By including the .depend file
+# into the makefile, we're telling make that the makefile depends on
+# the dependency list in the .depend file.
+#
+# This is as fast as the `.d' method described in the GNU make manual
+# for automatic dependencies, but has the added advantage that all
+# dependencies are stored in one place.  The advantage over the
+# `makedepend' program is that only those files that are out of date
+# have dependency information rebuilt, and the Makefile is not
+# modified.
+#
+.PRECIOUS: .depend
+dep depend: .depend
+
+.depend: $(LIB_SRC) $(PROG_SRC)
+	@touch .depend
+	@for dep in $? dummy; do					      \
+	   if [ $$dep != "dummy" ]; then				      \
+	      echo Building dependencies for $$dep;			      \
+	      obj=`echo $$dep | sed 's/\.c/.o/'`;			      \
+	      sed "/$$obj/,/[^\\]$$/d" <$@ >$@- && mv $@- $@;		      \
+	      $(CC) -M -MG $(CPPFLAGS) $$dep >>$@;			      \
+	   fi;								      \
+	done
+
+-include .depend
