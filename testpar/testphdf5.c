@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /*
  * Main driver of the Parallel HDF5 tests
  */
@@ -433,6 +431,8 @@ int main(int argc, char **argv)
 	    "dataset collective write", filenames[1]);
     AddTest("indwriteext", extend_writeInd, NULL, 
 	    "extendible dataset independent write", filenames[2]);
+    AddTest("indwriteext2", extend_writeInd2, NULL, 
+	    "extendible dataset independent write #2", filenames[2]);
     AddTest("collwriteext", extend_writeAll, NULL, 
 	    "extendible dataset collective write", filenames[2]);
 
@@ -479,7 +479,7 @@ int main(int argc, char **argv)
     if (CleanUp && !getenv("HDF5_NOCLEANUP"))
         TestCleanup();
 
-    nerrors = GetTestNumErrs();
+    nerrors += GetTestNumErrs();
 
     }
 
@@ -522,6 +522,9 @@ int main(int argc, char **argv)
 
 	MPI_BANNER("extendible dataset independent write...");
 	extend_writeInd(filenames[2]);
+
+	MPI_BANNER("extendible dataset independent write #2...");
+	extend_writeInd2(filenames[2]);
 
 	MPI_BANNER("extendible dataset collective write...");
 	extend_writeAll(filenames[2]);
@@ -589,22 +592,28 @@ finish:
      * and exit.
      */
     MPI_Barrier(MPI_COMM_WORLD);
+
+    /* Gather errors from all processes */
+    {
+        int temp;
+        MPI_Reduce(&nerrors, &temp, 1, MPI_INT, MPI_MAX, 0, MPI_COMM_WORLD);
+        if(mpi_rank==0)
+            nerrors=temp;
+    }
+
     if (MAINPROCESS){		/* only process 0 reports */
 	printf("===================================\n");
-	if (nerrors){
+	if (nerrors)
 	    printf("***PHDF5 tests detected %d errors***\n", nerrors);
-	}
-	else{
+	else
 	    printf("PHDF5 tests finished with no errors\n");
-	}
 	printf("===================================\n");
     }
-    if (dowrite){
+    if (dowrite)
 	h5_cleanup(FILENAME, fapl);
-    } else {
+    else
 	/* h5_cleanup would have closed fapl.  Now must do it explicitedly */
 	H5Pclose(fapl);
-    }
 
     /* close HDF5 library */
     H5close();

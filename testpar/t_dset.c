@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /*
  * Parallel tests for datasets
  */
@@ -1303,6 +1301,174 @@ extend_writeInd(void)
 
     /* release data buffers */
     if (data_array1) free(data_array1);
+}
+
+/*
+ * Example of using the parallel HDF5 library to create an extendable dataset
+ * and perform I/O on it in a way that verifies that the chunk cache is
+ * bypassed for parallel I/O.
+ */
+
+void
+extend_writeInd2(void)
+{
+    char *filename;
+    hid_t fid;                  /* HDF5 file ID */
+    hid_t fapl;			/* File access templates */
+    hid_t fs;   		/* File dataspace ID */
+    hid_t ms;   		/* Memory dataspace ID */
+    hid_t dataset;		/* Dataset ID */
+    hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
+    hsize_t orig_size=10;   	/* Original dataset dim size */
+    hsize_t new_size=20;   	/* Extended dataset dim size */
+    hsize_t one=1;
+    hsize_t max_size = H5S_UNLIMITED;	/* dataset maximum dim size */
+    hsize_t chunk_size = 16384;	/* chunk size */
+    hid_t dcpl;	       		/* dataset create prop. list */
+    int   written[10],          /* Data to write */
+        retrieved[10];          /* Data read in */
+    int mpi_size, mpi_rank;     /* MPI settings */
+    int i;                      /* Local index variable */
+    herr_t ret;         	/* Generic return value */
+
+    filename = (char *) GetTestParameters();
+    if (VERBOSE_MED)
+	printf("Extend independent write test #2 on file %s\n", filename);
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* -------------------
+     * START AN HDF5 FILE
+     * -------------------*/
+    /* setup file access template */
+    fapl = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
+    VRFY((fapl >= 0), "create_faccess_plist succeeded");
+
+    /* create the file collectively */
+    fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
+    VRFY((fid >= 0), "H5Fcreate succeeded");
+
+    /* Release file-access template */
+    ret=H5Pclose(fapl);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+
+
+    /* --------------------------------------------------------------
+     * Define the dimensions of the overall datasets and create them.
+     * ------------------------------------------------------------- */
+
+    /* set up dataset storage chunk sizes and creation property list */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((dcpl >= 0), "H5Pcreate succeeded");
+    ret = H5Pset_chunk(dcpl, 1, &chunk_size);
+    VRFY((ret >= 0), "H5Pset_chunk succeeded");
+
+    /* setup dimensionality object */
+    fs = H5Screate_simple (1, &orig_size, &max_size);
+    VRFY((fs >= 0), "H5Screate_simple succeeded");
+
+    /* create an extendible dataset collectively */
+    dataset = H5Dcreate(fid, DATASETNAME1, H5T_NATIVE_INT, fs, dcpl);
+    VRFY((dataset >= 0), "H5Dcreate succeeded");
+
+    /* release resource */
+    ret=H5Pclose(dcpl);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+
+
+    /* -------------------------
+     * Test writing to dataset
+     * -------------------------*/
+    /* create a memory dataspace independently */
+    ms = H5Screate_simple(1, &orig_size, &max_size);
+    VRFY((ms >= 0), "H5Screate_simple succeeded");
+
+    /* put some trivial data in the data_array */
+    for (i=0; i<(int)orig_size; i++)
+        written[i] = i;
+    MESG("data array initialized");
+    if (VERBOSE_MED) {
+	MESG("writing at offset zero: ");
+        for (i=0; i<(int)orig_size; i++)
+            printf("%s%d", i?", ":"", written[i]);
+        printf("\n");
+    }
+    ret = H5Dwrite(dataset, H5T_NATIVE_INT, ms, fs, H5P_DEFAULT, written);
+    VRFY((ret >= 0), "H5Dwrite succeeded");
+
+    /* -------------------------
+     * Read initial data from dataset.
+     * -------------------------*/
+    ret = H5Dread(dataset, H5T_NATIVE_INT, ms, fs, H5P_DEFAULT, retrieved);
+    VRFY((ret >= 0), "H5Dread succeeded");
+    for (i=0; i<(int)orig_size; i++)
+        if(written[i]!=retrieved[i]) {
+            printf("Line #%d: written!=retrieved: written[%d]=%d, retrieved[%d]=%d\n",__LINE__,
+                i,written[i], i,retrieved[i]);
+            nerrors++;
+        }
+    if (VERBOSE_MED){
+	MESG("read at offset zero: ");
+        for (i=0; i<(int)orig_size; i++)
+            printf("%s%d", i?", ":"", retrieved[i]);
+        printf("\n");
+    }
+
+    /* -------------------------
+     * Extend the dataset & retrieve new dataspace
+     * -------------------------*/
+    ret =H5Dextend(dataset, &new_size);
+    VRFY((ret >= 0), "H5Dextend succeeded");
+    ret=H5Sclose(fs);
+    VRFY((ret >= 0), "H5Sclose succeeded");
+    fs = H5Dget_space(dataset);
+    VRFY((fs >= 0), "H5Dget_space succeeded");
+
+    /* -------------------------
+     * Write to the second half of the dataset
+     * -------------------------*/
+    for (i=0; i<(int)orig_size; i++)
+        written[i] = orig_size + i;
+    MESG("data array re-initialized");
+    if (VERBOSE_MED) {
+	MESG("writing at offset 10: ");
+        for (i=0; i<(int)orig_size; i++)
+            printf("%s%d", i?", ":"", written[i]);
+        printf("\n");
+    }
+    ret = H5Sselect_hyperslab(fs, H5S_SELECT_SET, (hssize_t *)&orig_size, NULL, &one, &orig_size);
+    VRFY((ret >= 0), "H5Sselect_hyperslab succeeded");
+    ret = H5Dwrite(dataset, H5T_NATIVE_INT, ms, fs, H5P_DEFAULT, written);
+    VRFY((ret >= 0), "H5Dwrite succeeded");
+
+    /* -------------------------
+     * Read the new data
+     * -------------------------*/
+    ret = H5Dread(dataset, H5T_NATIVE_INT, ms, fs, H5P_DEFAULT, retrieved);
+    VRFY((ret >= 0), "H5Dread succeeded");
+    for (i=0; i<(int)orig_size; i++)
+        if(written[i]!=retrieved[i]) {
+            printf("Line #%d: written!=retrieved: written[%d]=%d, retrieved[%d]=%d\n",__LINE__,
+                i,written[i], i,retrieved[i]);
+            nerrors++;
+        }
+    if (VERBOSE_MED){
+	MESG("read at offset 10: ");
+        for (i=0; i<(int)orig_size; i++)
+            printf("%s%d", i?", ":"", retrieved[i]);
+        printf("\n");
+    }
+
+
+    /* Close dataset collectively */
+    ret=H5Dclose(dataset);
+    VRFY((ret >= 0), "H5Dclose succeeded");
+
+    /* Close the file collectively */
+    ret = H5Fclose(fid);
+    VRFY((ret >= 0), "H5Fclose succeeded");
 }
 
 /* Example of using the parallel HDF5 library to read an extendible dataset */

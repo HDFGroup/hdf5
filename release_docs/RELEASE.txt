@@ -82,6 +82,8 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+        - Fixed bug where incorrect data could be read from a chunked dataset
+          after it was extended.  QAK - 2004/07/12
         - After compound datatype with variable-length string in the fields
           is committed to file, the size is messed up when it's read back.
           Fixed.  SLU - 2004/06/11
