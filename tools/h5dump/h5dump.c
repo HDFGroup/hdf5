@@ -56,22 +56,21 @@ static int              useschema = 1;
 static const char      *xml_dtd_uri = NULL;
 static const char      *xmlnsprefix="hdf5:";
 static hid_t            thefile = -1;
-struct ref_path_table_entry_t {
+typedef struct ref_path_table_entry {
     hid_t                 obj;
-    hobj_ref_t             *obj_ref;
     char                   *apath;
     H5G_stat_t  statbuf;
-    struct ref_path_table_entry_t *next;
-};
+    struct ref_path_table_entry *next;
+} ref_path_table_entry_t;
 /** end XML **/
 
 /* internal functions */
 static void      dump_oid(hid_t oid);
 static void      print_enum(hid_t type);
 static herr_t    dump_all(hid_t group, const char *name, void *op_data);
-static char     *lookup_ref_path(hobj_ref_t *);
+static char     *lookup_ref_path(hobj_ref_t );
 static void      check_compression(hid_t);
-static struct ref_path_table_entry_t *ref_path_table_lookup(const char *);
+static ref_path_table_entry_t *ref_path_table_lookup(const char *);
 static int xml_name_to_XID(const char *, char *, int , int );
 static int get_next_xid(void);
 static haddr_t get_fake_xid (void);
@@ -137,10 +136,10 @@ static h5dump_t         dataformat = {
     1,				/*skip_first */
 
     1,				/*obj_hidefileno */
-    " %lu:%lu",			/*obj_format */
+    " "H5_PRINTF_HADDR_FMT,	/*obj_format */
 
     1,				/*dset_hidefileno */
-    "DATASET %lu:%lu ",		/*dset_format */
+    "DATASET "H5_PRINTF_HADDR_FMT" ",		/*dset_format */
     "%s",			/*dset_blockformat_pre */
     "%s",			/*dset_ptformat_pre */
     "%s",			/*dset_ptformat */
@@ -219,10 +218,10 @@ static h5dump_t         xml_dataformat = {
     1,				/*skip_first */
 
     1,				/*obj_hidefileno */
-    " %lu:%lu",			/*obj_format */
+    " "H5_PRINTF_HADDR_FMT,	/*obj_format */
 
     1,				/*dset_hidefileno */
-    "DATASET %lu:%lu ",		/*dset_format */
+    "DATASET "H5_PRINTF_HADDR_FMT" ",		/*dset_format */
     "%s",			/*dset_blockformat_pre */
     "%s",			/*dset_ptformat_pre */
     "%s",			/*dset_ptformat */
@@ -312,8 +311,8 @@ static void             xml_print_datatype(hid_t);
 static void             xml_print_enum(hid_t);
 static int              xml_print_refs(hid_t, int);
 static int              xml_print_strs(hid_t, int);
-static hobj_ref_t      *ref_path_table_put(hid_t, const char *);
-static struct ref_path_table_entry_t *ref_path_table_gen_fake(const char *);
+static ref_path_table_entry_t *ref_path_table_put(hid_t, const char *);
+static ref_path_table_entry_t *ref_path_table_gen_fake(const char *);
 static char            *xml_escape_the_string(const char *, int);
 static char            *xml_escape_the_name(const char *);
 
@@ -559,8 +558,8 @@ usage(const char *prog)
     fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named data type\n");
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
-    fprintf(stdout, "     -x, --xml            Output in XML using Schema (default)\n");
-    fprintf(stdout, "     -u, --use-dtd            Output in XML using DTD\n");
+    fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
+    fprintf(stdout, "     -u, --use-dtd        Output in XML using DTD\n");
     fprintf(stdout, "     -D U, --xml-dtd=U    Use the DTD or schema at U\n");
     fprintf(stdout, "     -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML\n");
     fprintf(stdout, "                          \":\": no namespace, default: \"hdf5:\"\n");
@@ -831,8 +830,7 @@ print_datatype(hid_t type)
 
 	    if (i >= 0) {
 		if (!type_table->objs[i].recorded)
-		    printf("\"/#%lu:%lu\"\n", type_table->objs[i].objno[0],
-			   type_table->objs[i].objno[1]);
+		    HDfprintf(stdout,"\"/#%a\"\n", type_table->objs[i].objno);
 		else
 		    printf("\"%s\"", type_table->objs[i].objname);
 	    } else {
@@ -1596,9 +1594,7 @@ dump_group(hid_t gid, const char *name)
 	    if (!type_table->objs[i].recorded) {
 		dset = H5Dopen(gid, type_table->objs[i].objname);
 		type = H5Dget_type(dset);
-		sprintf(type_name, "#%lu:%lu",
-			type_table->objs[i].objno[0],
-			type_table->objs[i].objno[1]);
+                sprintf(type_name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[i].objno);
 		dump_named_datatype(type, type_name);
 		H5Tclose(type);
 		H5Dclose(dset);
@@ -1720,24 +1716,21 @@ dump_tables(void)
     printf("group_table: # of entries = %d\n", group_table->nobjs);
 
     for (i = 0; i < group_table->nobjs; i++)
-	printf("%lu %lu %s %d %d\n", group_table->objs[i].objno[0],
-	       group_table->objs[i].objno[1],
+	HDfprintf(stdout,"%a %s %d %d\n", group_table->objs[i].objno,
 	       group_table->objs[i].objname,
 	       group_table->objs[i].displayed, group_table->objs[i].recorded);
 
     printf("\ndset_table: # of entries = %d\n", dset_table->nobjs);
 
     for (i = 0; i < dset_table->nobjs; i++)
-	printf("%lu %lu %s %d %d\n", dset_table->objs[i].objno[0],
-	       dset_table->objs[i].objno[1],
+	HDfprintf(stdout,"%a %s %d %d\n", dset_table->objs[i].objno,
 	       dset_table->objs[i].objname,
 	       dset_table->objs[i].displayed, dset_table->objs[i].recorded);
 
     printf("\ntype_table: # of entries = %d\n", type_table->nobjs);
 
     for (i = 0; i < type_table->nobjs; i++)
-	printf("%lu %lu %s %d %d\n", type_table->objs[i].objno[0],
-	       type_table->objs[i].objno[1],
+	HDfprintf(stdout,"%a %s %d %d\n", type_table->objs[i].objno,
 	       type_table->objs[i].objname,
 	       type_table->objs[i].displayed, type_table->objs[i].recorded);
 #else
@@ -2401,16 +2394,11 @@ handle_datatypes(hid_t fid, char *type, void UNUSED * data)
 
             if (!type_table->objs[idx].recorded) {
                 /* unamed data type */
-                sprintf(name, "#%lu:%lu\n",
-                        type_table->objs[idx].objno[0], 
-                        type_table->objs[idx].objno[1]);
-                sprintf(name1, "/#%lu:%lu\n",
-                        type_table->objs[idx].objno[0], 
-                        type_table->objs[idx].objno[1]);
+                sprintf(name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[idx].objno);
+                sprintf(name1,"/%s",name);
 
-            if (!strncmp(name, type, strlen(type)) || 
-                !strncmp(name1, type, strlen(type)))
-                break;
+                if (!strncmp(name, type, strlen(type)) || !strncmp(name1, type, strlen(type)))
+                    break;
             } 
 
             idx++;
@@ -3119,8 +3107,7 @@ print_enum(hid_t type)
  */
 
 
-struct ref_path_table_entry_t *ref_path_table = NULL;	/* the table */
-int                     npte = 0;	/* number of entries in the table */
+ref_path_table_entry_t *ref_path_table = NULL;	/* the table */
 
 /*-------------------------------------------------------------------------
  * Function:    ref_path_table_lookup
@@ -3137,36 +3124,20 @@ int                     npte = 0;	/* number of entries in the table */
  *
  *-------------------------------------------------------------------------
  */
-static struct ref_path_table_entry_t *
+static ref_path_table_entry_t *
 ref_path_table_lookup(const char *thepath)
 {
-    int                     i;
-    hobj_ref_t             *ref;
-    herr_t                  status;
-    struct ref_path_table_entry_t *pte = ref_path_table;
+    H5G_stat_t              sb;
+    ref_path_table_entry_t *pte = ref_path_table;
 
-    if (ref_path_table == NULL)
-	return NULL;
-
-    ref = (hobj_ref_t *) malloc(sizeof(hobj_ref_t));
-
-    if (ref == NULL) {
+    if(H5Gget_objinfo(thefile, thepath, TRUE, &sb)<0) {
 	/*  fatal error ? */
 	return NULL;
     }
 
-    status = H5Rcreate(ref, thefile, thepath, H5R_OBJECT, -1);
-
-    if (status < 0) {
-	/*  fatal error ? */
-	return NULL;
-    }
-
-    for (i = 0; i < npte; i++) {
-	if (memcmp(ref, pte->obj_ref, sizeof(hobj_ref_t)) == 0) {
+    while(pte!=NULL) {
+	if (sb.objno==pte->statbuf.objno)
 	    return pte;
-	}
-
 	pte = pte->next;
     }
 
@@ -3189,64 +3160,38 @@ ref_path_table_lookup(const char *thepath)
  *
  *-------------------------------------------------------------------------
  */
-static hobj_ref_t *
+static ref_path_table_entry_t *
 ref_path_table_put(hid_t obj, const char *path)
 {
-    hobj_ref_t             *ref;
-    H5G_stat_t             *sb;
-    herr_t                  status;
-    struct ref_path_table_entry_t *pte;
+    ref_path_table_entry_t *pte;
 
     /* look up 'obj'.  If already in table, return */
     pte = ref_path_table_lookup(path);
     if (pte != NULL)
-	return pte->obj_ref;
+	return pte;
 
     /* if not found, then make new entry */
 
-    pte = (struct ref_path_table_entry_t *)
-	malloc(sizeof(struct ref_path_table_entry_t));
+    pte = (ref_path_table_entry_t *) malloc(sizeof(ref_path_table_entry_t));
     if (pte == NULL) {
 	/* fatal error? */
 	return NULL;
     }
 
     pte->obj = obj;
-    ref = (hobj_ref_t *) malloc(sizeof(hobj_ref_t));
-    if (ref == NULL) {
-	/* fatal error? */
-	free(pte);
-	return NULL;
-    }
-
-    status = H5Rcreate(ref, thefile, path, H5R_OBJECT, -1);
-    if (status < 0) {
-	/* fatal error? */
-	free(ref);
-	free(pte);
-	return NULL;
-    }
-
-    pte->obj_ref = ref;
 
     pte->apath = HDstrdup(path);
 
-    sb = (H5G_stat_t *) malloc(sizeof(H5G_stat_t));
-    if (sb == NULL) {
+    if(H5Gget_objinfo(thefile, path, TRUE, &pte->statbuf)<0) {
 	/* fatal error? */
 	free(pte);
 	return NULL;
     }
-    H5Gget_objinfo(thefile, path, TRUE, sb);
-
-    memcpy((char *)&(pte->statbuf),(char *)sb,sizeof(H5G_stat_t));
 
     pte->next = ref_path_table;
     ref_path_table = pte;
 
-    npte++;
-
-    return ref;
+    return pte;
 }
 
 /*
@@ -3275,17 +3220,10 @@ get_fake_xid () {
  * create a table entry with a fake object id as the key.
  */
 
-static struct ref_path_table_entry_t *
+static ref_path_table_entry_t *
 ref_path_table_gen_fake(const char *path)
 {
-	union {
-		hobj_ref_t             rr;
-		char cc[16];
-		unsigned long ll[2];
-	} uu;
-	hobj_ref_t             *ref;
-	H5G_stat_t             *sb;
-	struct ref_path_table_entry_t *pte;
+	ref_path_table_entry_t *pte;
 
     /* look up 'obj'.  If already in table, return */
     pte = ref_path_table_lookup(path);
@@ -3295,8 +3233,7 @@ ref_path_table_gen_fake(const char *path)
 
     /* if not found, then make new entry */
 
-    pte = (struct ref_path_table_entry_t *)
-	malloc(sizeof(struct ref_path_table_entry_t));
+    pte = (ref_path_table_entry_t *) malloc(sizeof(ref_path_table_entry_t));
     if (pte == NULL) {
 	/* fatal error? */
 	return NULL;
@@ -3304,36 +3241,13 @@ ref_path_table_gen_fake(const char *path)
 
     pte->obj = (hid_t)-1;
 
-    sb = (H5G_stat_t *) malloc(sizeof(H5G_stat_t));
-    if (sb == NULL) {
-	/* fatal error? */
-	free(pte);
-	return NULL;
-    }
-    sb->objno[0] = (unsigned long)get_fake_xid();
-    sb->objno[1] = (unsigned long)get_fake_xid();
-
-    memcpy((char *)&(pte->statbuf),(char *)sb,sizeof(H5G_stat_t));
-
-    ref = (hobj_ref_t *) malloc(sizeof(hobj_ref_t));
-    if (ref == NULL) {
-	free(pte);
-	return NULL;
-    }
-
-    uu.ll[0] = sb->objno[0];
-    uu.ll[1] = sb->objno[1];
-
-    memcpy((char *)ref,(char *)&uu.rr,sizeof(ref));
-
-    pte->obj_ref = ref;
+    memset(&pte->statbuf,0,sizeof(H5G_stat_t));
+    pte->statbuf.objno = get_fake_xid();
 
     pte->apath = HDstrdup(path);
 
     pte->next = ref_path_table;
     ref_path_table = pte;
-
-    npte++;
 
     return pte;
 }
@@ -3351,24 +3265,14 @@ ref_path_table_gen_fake(const char *path)
  *
  *-------------------------------------------------------------------------
  */
-static char                   *
-lookup_ref_path(hobj_ref_t * ref)
+static char *
+lookup_ref_path(hobj_ref_t ref)
 {
-    int                     i;
-    struct ref_path_table_entry_t *pte = NULL;
+    ref_path_table_entry_t *pte = ref_path_table;
 
-    if (ref_path_table == NULL)
-	return NULL;
-
-    pte = ref_path_table;
-    if (pte == NULL) {
-	/* fatal -- not initialized? */
-	return NULL;
-    }
-    for (i = 0; i < npte; i++) {
-	if (memcmp(ref, pte->obj_ref, sizeof(hobj_ref_t)) == 0) {
+    while(pte!=NULL) {
+	if (ref==pte->statbuf.objno)
 	    return pte->apath;
-	}
 	pte = pte->next;
     }
     return NULL;
@@ -3394,7 +3298,7 @@ fill_ref_path_table(hid_t group, const char *name, void UNUSED * op_data)
     hid_t                   obj;
     char                   *tmp;
     H5G_stat_t              statbuf;
-    struct ref_path_table_entry_t *pte;
+    ref_path_table_entry_t *pte;
     char                   *thepath;
 
     H5Gget_objinfo(group, name, FALSE, &statbuf);
@@ -3476,42 +3380,42 @@ fill_ref_path_table(hid_t group, const char *name, void UNUSED * op_data)
 int
 xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
 {
-	struct ref_path_table_entry_t *r;
-	char *os;
+    ref_path_table_entry_t *r;
+    char *os;
 
-	if (outlen < 22) return 1;
+    if (outlen < 22) return 1;
 
-	os = outstr;
+    os = outstr;
 
-	r = ref_path_table_lookup(str);
-	if (r == NULL) {
-		if (strlen(str) == 0) {
-		    r = ref_path_table_lookup("/");
-		    if (r == NULL) {
-			if (gen) {
-				sprintf(os," "); /* ?? */
-				r = ref_path_table_gen_fake(str);
-				sprintf(os,"xid_%lu-%lu",r->statbuf.objno[0],r->statbuf.objno[1]);
-				return 0;
-			} else {
-				return 1;
-			}
-		    }
-		} else {
-			if (gen) {
-				sprintf(os," "); /* ?? */
-				r = ref_path_table_gen_fake(str);
-				sprintf(os,"xid_%lu-%lu",r->statbuf.objno[0],r->statbuf.objno[1]);
-				return 0;
-			} else {
-				return 1;
-			}
-		}
-	}
+    r = ref_path_table_lookup(str);
+    if (r == NULL) {
+        if (strlen(str) == 0) {
+            r = ref_path_table_lookup("/");
+            if (r == NULL) {
+                if (gen) {
+                    sprintf(os," "); /* ?? */
+                    r = ref_path_table_gen_fake(str);
+                    sprintf(os, "xid_"H5_PRINTF_HADDR_FMT, r->statbuf.objno);
+                    return 0;
+                } else {
+                    return 1;
+                }
+            }
+        } else {
+            if (gen) {
+                sprintf(os," "); /* ?? */
+                r = ref_path_table_gen_fake(str);
+                sprintf(os, "xid_"H5_PRINTF_HADDR_FMT, r->statbuf.objno);
+                return 0;
+            } else {
+                return 1;
+            }
+        }
+    }
 
-	sprintf(os,"xid_%lu-%lu",r->statbuf.objno[0],r->statbuf.objno[1]);
+    sprintf(os, "xid_"H5_PRINTF_HADDR_FMT, r->statbuf.objno);
 
-	return(0);
+    return(0);
 }
 
 static const char      *quote = "&quot;";
@@ -4510,6 +4414,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
     free(t_tmp);
     free(t_prefix);
     free(t_name);
+    free(tmp);
 
     indent += COL;
 
@@ -4722,9 +4627,7 @@ xml_dump_group(hid_t gid, const char *name)
 		    if (!type_table->objs[i].recorded) {
 			dset = H5Dopen(gid, type_table->objs[i].objname);
 			type = H5Dget_type(dset);
-			sprintf(type_name, "#%lu:%lu",
-				type_table->objs[i].objno[0],
-				type_table->objs[i].objno[1]);
+                        sprintf(type_name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[i].objno);
 			dump_function_table->dump_named_datatype_function(type, type_name);
 			H5Tclose(type);
 			H5Dclose(dset);
@@ -4778,9 +4681,7 @@ xml_dump_group(hid_t gid, const char *name)
 		if (!type_table->objs[i].recorded) {
 		    dset = H5Dopen(gid, type_table->objs[i].objname);
 		    type = H5Dget_type(dset);
-		    sprintf(type_name, "#%lu:%lu",
-			    type_table->objs[i].objno[0],
-			    type_table->objs[i].objno[1]);
+                    sprintf(type_name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[i].objno);
 		    dump_function_table->dump_named_datatype_function(type, type_name);
 		    H5Tclose(type);
 		    H5Dclose(dset);
@@ -4888,7 +4789,7 @@ xml_print_refs(hid_t did, int source)
     ssiz = H5Sget_simple_extent_npoints(space);
 
     for (i = 0; i < ssiz; i++) {
-	path = lookup_ref_path(refbuf);
+	path = lookup_ref_path(*refbuf);
 	indentation(indent + COL);
 
 	if (!path) {
@@ -4902,6 +4803,8 @@ xml_print_refs(hid_t did, int source)
 
 	refbuf++;
     }
+
+    free(buf);
 
     return SUCCEED;
 }
@@ -5175,7 +5078,7 @@ char * name;
 	H5Pget_fill_value(dcpl, type, buf);
 
 	if (H5Tget_class(type) == H5T_REFERENCE) {
-	    path = lookup_ref_path(buf);
+	    path = lookup_ref_path(*(hobj_ref_t *)buf);
 
 	    indentation(indent);
 	    printf("<%sDataFromFile>\n",xmlnsprefix);
@@ -5268,8 +5171,8 @@ char * name;
 	    printf("<%sNoData/>\n",xmlnsprefix);
 	    break;
 	}
-	    free(buf);
 	}
+        free(buf);
 	indent -= COL;
 	indentation(indent);
 	printf("</%sData>\n",xmlnsprefix);
