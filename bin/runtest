@@ -637,9 +637,14 @@ if test x-$CMD = x-setup; then
     test $errcode -ne 0 && exit 1
     # create empty test hosts or configure files if non-existing
     for f in $ALLHOSTSFILE $SNAPTESTCFG; do
-	echo Creating $f
-	touch $f
+	if test ! -f $f; then
+	    echo Creating $f
+	    touch $f
+	fi
     done
+    # create or update the current source.
+    echo update current source
+    $SNAPSHOT checkout 
     # setup completed.  Exit.
     exit 0
 fi
