@@ -1321,5 +1321,10 @@
 ./tools/testfiles/tvldtypes3.h5.xml
 ./tools/testfiles/tvlstr.h5.xml
 
+#test files for h5diff
+./tools/testfiles/h5diff_test1.h5
+./tools/testfiles/h5diff_test2.h5
+./tools/testfiles/h5diff_1.txt
+
 ./windows/all.zip
 ./windows/all_withf90.zip
