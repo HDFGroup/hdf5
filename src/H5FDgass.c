@@ -213,7 +213,7 @@ H5Pset_fapl_gass(hid_t fapl_id, GASS_Info info)
     herr_t ret_value=FAIL;
     H5FD_gass_fapl_t	fa;
     
-    FUNC_ENTER(H5FD_set_fapl_gass, FAIL);
+    FUNC_ENTER(H5Pset_fapl_gass, FAIL);
     
     /* Check arguments */
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))

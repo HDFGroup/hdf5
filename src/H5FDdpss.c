@@ -224,7 +224,7 @@ H5Pset_fapl_dpss(hid_t fapl_id)
 {
     herr_t ret_value=FAIL;
 
-    FUNC_ENTER (H5FD_set_fapl_dpss, FAIL);
+    FUNC_ENTER (H5Pset_fapl_dpss, FAIL);
     H5TRACE1("e","i",fapl_id);
 
     /* Check arguments */

@@ -169,7 +169,7 @@ H5Pset_fapl_srb(hid_t fapl_id, SRB_Info info)
     H5FD_srb_fapl_t fa;
     int srb_status;   
 
-    FUNC_ENTER(h5FD_set_fapl_srb, FAIL);
+    FUNC_ENTER(H5Pset_fapl_srb, FAIL);
 
     if(H5P_FILE_ACCESS != H5Pget_class(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "Not a fapl");
