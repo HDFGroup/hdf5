@@ -27,6 +27,7 @@ prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 libdir="@libdir@"
 includedir="@includedir@"
+HL="@HL@"
 
 ############################################################################
 ##                                                                        ##
@@ -218,7 +219,12 @@ if test "x$do_link" = "xyes"; then
     fmodules="${F9XMODFLAG}${libdir}"
   fi
 
-  link_args="$link_args ${libdir}/libhdf5_fortran.a ${libdir}/libhdf5.a"
+  # conditionnaly link with the hl library  
+    if test "X$HL" = "Xhl"; then
+      link_args="$link_args ${libdir}/libhdf5_fortran.a ${libdir}/libhdf5.a ${libdir}/libhdf5hl_fortran.a ${libdir}/libhdf5_hl.a"
+     else
+      link_args="$link_args ${libdir}/libhdf5_fortran.a ${libdir}/libhdf5.a"
+    fi      
 
   link_args="$link_args $LIBS"
   $SHOW $FLINKER ${FFLAGS} ${F9XSUFFIXFLAG} ${fmodules} ${LDFLAGS} $link_objs $link_args
