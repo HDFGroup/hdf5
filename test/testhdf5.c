@@ -52,7 +52,7 @@ static char             RcsId[] = "@(#)$Revision$";
 static int              Index = 0;
 
 /* Global variables */
-int                     num_errs;
+int                     num_errs = 0;
 int                     Verbosity;
 
 /* ANY new test needs to have a prototype in tproto.h */
@@ -75,7 +75,7 @@ InitTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), co
 {
     if (Index >= MAXNUMOFTESTS) {
         print_func("Uh-oh, too many tests added, increase MAXNUMOFTEST!\n");
-        exit(0);
+        exit(-1);
     }                           /* end if */
     HDstrcpy(Test[Index].Description, TheDescr);
     HDstrcpy(Test[Index].Name, TheName);
@@ -294,6 +294,5 @@ main(int argc, char *argv[])
             if (!Test[Loop].SkipFlag && Test[Loop].Cleanup!=NULL)
                 (*Test[Loop].Cleanup) ();
     }
-    exit(0);
-    return (0);
+    return (num_errs);
 }                               /* end main() */
