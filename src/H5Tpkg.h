@@ -293,6 +293,13 @@ H5_DLLVAR size_t	H5T_NATIVE_UINT_LEAST64_ALIGN_g;
 H5_DLLVAR size_t	H5T_NATIVE_INT_FAST64_ALIGN_g;
 H5_DLLVAR size_t	H5T_NATIVE_UINT_FAST64_ALIGN_g;
 
+/* Useful floating-point values for conversion routines */
+/* (+/- Inf for all floating-point types) */
+H5_DLLVAR float H5T_NATIVE_FLOAT_POS_INF_g;
+H5_DLLVAR float H5T_NATIVE_FLOAT_NEG_INF_g;
+H5_DLLVAR double H5T_NATIVE_DOUBLE_POS_INF_g;
+H5_DLLVAR double H5T_NATIVE_DOUBLE_NEG_INF_g;
+
 /* Common functions */
 H5_DLL herr_t H5T_init_interface(void);
 H5_DLL H5T_t *H5T_create(H5T_class_t type, size_t size);

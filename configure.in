@@ -551,6 +551,14 @@ case "$host" in
     dnl many problems with including them.
     AC_CHECK_HEADERS([sys/sysinfo.h sys/proc.h])
     ;;
+  mips*-sgi*-irix*)
+    dnl The <sys/fpu.h> is needed on the SGI machines to turn off
+    dnl denormalized floating-point values going to zero.  We do *not*
+    dnl attempt to dnl locate these files on other systems because there
+    dnl may be problems with including them.
+    AC_CHECK_HEADERS([sys/fpu.h])
+    AC_CHECK_FUNCS([get_fpc_csr])
+    ;;
 esac
 
 dnl ----------------------------------------------------------------------

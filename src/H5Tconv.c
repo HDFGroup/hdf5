@@ -299,9 +299,23 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_xX, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)	      \
 }
 
+/* Same as H5T_CONV_Xx_CORE, except that instead of using D_MAX and D_MIN
+ * when an overflow occurs, use the 'float' infinity values.
+ */
+#define H5T_CONV_Ff_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S) > (DT)(D_MAX)) {					      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = (H5T_NATIVE_FLOAT_POS_INF_g);			      \
+    } else if (*((ST*)S) < (D_MIN)) {					      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = (H5T_NATIVE_FLOAT_NEG_INF_g);			      \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+
 #define H5T_CONV_Ff(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Xx, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)	      \
+    H5T_CONV(H5T_CONV_Ff, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)	      \
 }
 
 /* The main part of every integer hardware conversion macro */
@@ -3304,6 +3318,8 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 }
                     
                 /* Write the exponent */
+#ifdef OLD_WAY  
+/* It appears to be incorrect to increment the exponent when the carry is set -QAK */
                 if (carry) {
                     expo++;
                     if (expo>=expo_max) {
@@ -3332,6 +3348,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                         H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                     }
                 }
+#endif /* OLD_WAY */
                 H5_CHECK_OVERFLOW(expo,hssize_t,hsize_t);
                 H5T_bit_set_d(d, dst.u.f.epos, dst.u.f.esize, (hsize_t)expo);
 
@@ -6627,7 +6644,7 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_float_double, FAIL);
 
-    H5T_CONV_Ff(DOUBLE, FLOAT, double, float, FLT_MIN, FLT_MAX);
+    H5T_CONV_Ff(DOUBLE, FLOAT, double, float, -FLT_MAX, FLT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

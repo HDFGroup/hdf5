@@ -3894,9 +3894,8 @@ my_isnan(flt_t type, void *val)
 	} else {
 	    return 0;
 	}
-	if (!strstr(s, "NaN") || !strstr(s, "NAN") || !strstr(s, "nan")) {
+	if (strstr(s, "NaN") || strstr(s, "NAN") || strstr(s, "nan"))
 	    retval = 1;
-	}
     }
 
     return retval;
