@@ -37,7 +37,8 @@ typedef H5TB_TREE H5FO_t;       /* Currently, all open objects are stored in TBB
 H5_DLL herr_t H5FO_create(H5F_t *f);
 H5_DLL hid_t H5FO_opened(const H5F_t *f, haddr_t addr);
 H5_DLL herr_t H5FO_insert(H5F_t *f, haddr_t addr, hid_t id);
-H5_DLL herr_t H5FO_delete(H5F_t *f, haddr_t addr);
+H5_DLL herr_t H5FO_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
+H5_DLL herr_t H5FO_mark(const H5F_t *f, haddr_t addr);
 H5_DLL herr_t H5FO_dest(H5F_t *f);
 
 #endif /* _H5FOprivate_H */
