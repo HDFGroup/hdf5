@@ -73,6 +73,7 @@
 ./config/unicos
 ./config/unicosmk
 ./config/unicosmk2.0.X
+./config/unicosmk2.0.5.X
 
 ./config/site-specific/BlankForm
 
@@ -338,6 +339,7 @@
 ./fortran/config/unicos
 ./fortran/config/unicosmk
 ./fortran/config/unicosmk2.0.X
+./fortran/config/unicosmk2.0.5.X
 
 ./fortran/examples/Dependencies
 ./fortran/examples/Makefile.in
