@@ -23,6 +23,7 @@
      INTEGER, ALLOCATABLE :: data_out (:,:)  ! Buffer to store data
      INTEGER :: rank = 2 ! Dataset rank 
      INTEGER :: i, j
+     INTEGER :: dims(7)
 
      INTEGER :: total_error, error  ! Error flags
      !
@@ -85,6 +86,8 @@
      ! Initialize data buffer with trivial data.
      !
      ALLOCATE ( data(count(1),count(2)))
+     dims(1) = count(1)
+     dims(2) = count(2)
      data = mpi_rank + 10
      !
      ! Create property list for collective dataset write
@@ -97,7 +100,7 @@
      !
      ! Write the dataset collectively. 
      !
-     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, error, &
+     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, dims, error, &
                      file_space_id = filespace, mem_space_id = memspace, xfer_prp = plxfer_id)
           CALL check("h5dwrite_f", error, total_error)
      !
@@ -178,7 +181,7 @@
      !
      ! Write the dataset collectively. 
      !
-     CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, error, &
+     CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, dims, error, &
                      file_space_id = filespace, mem_space_id = memspace, xfer_prp = plxfer_id)
           CALL check("h5dread_f", error, total_error)
      do j = 1, count(2)
