@@ -120,6 +120,9 @@ TOOLTEST tloop-1.ddl tloop.h5
 # test for string 
 TOOLTEST tstr-1.ddl tstr.h5
 
+# test for file created by Lib SAF team
+TOOLTEST tsaf.ddl tsaf.h5
+
 if test $nerrors -eq 0 ; then
 	echo "All $h5tool tests passed."
 fi

@@ -111,6 +111,9 @@ TOOLTEST tloop-1.ls -r -d tloop.h5
 # test for string 
 TOOLTEST tstr-1.ls -r -d tstr.h5
 
+# test test file created from lib SAF team
+TOOLTEST tsaf.ls -r -d tsaf.h5
+
 if test $nerrors -eq 0 ; then
 	echo "All $h5tool tests passed."
 fi
