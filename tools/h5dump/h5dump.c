@@ -18,7 +18,6 @@
 #include "H5private.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
-#include <strings.h>
 
 /* module-scoped variables */
 static const char  *progname = "h5dump";
@@ -2913,7 +2912,7 @@ main(int argc, const char *argv[])
 			char * ns;
 			char *indx;
 			ns = strdup(xmlnsprefix);
-			indx = rindex(ns,(int)':');
+			indx = strrchr(ns,(int)':');
 			if (indx) *indx = '\0';
 			
 		printf("<%sHDF5-File xmlns:%s=\"http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File\" "
@@ -5162,7 +5161,6 @@ static void xml_dump_fill_value(hid_t dcpl, hid_t type)
 int sz;
 int i;
 hsize_t space;
-hid_t p_type;
 void * buf;
 char * path;
 char * name;
@@ -5271,7 +5269,6 @@ char * name;
 	    break;
 	}
 	    free(buf);
-	    H5Tclose(p_type);
 	}
 	indent -= COL;
 	indentation(indent);
