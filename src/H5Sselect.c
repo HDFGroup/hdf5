@@ -240,10 +240,11 @@ H5Sselect_hyperslab (hid_t space_id, H5S_seloper_t op,
         *block=NULL;        /* Block size array */
     hssize_t slab[H5O_LAYOUT_NDIMS]; /* Location of the block to add for strided selections */
     size_t slice[H5O_LAYOUT_NDIMS];	 /* Size of preceding dimension's slice */
-    uintn acc;              /* Accumulator for building slices */
-    uintn contig;           /* whether selection is contiguous or not */
-    int i,j;                /* Counters */
-    herr_t ret_value=FAIL;  /* return value */
+    uintn acc;                /* Accumulator for building slices */
+    uintn contig;             /* whether selection is contiguous or not */
+    int i,j;                  /* Counters */
+    H5S_hyper_dim_t *diminfo; /* per-dimension info for the selection */
+    herr_t ret_value=FAIL;    /* return value */
 
     FUNC_ENTER (H5Sselect_hyperslab, FAIL);
     H5TRACE6("e","iSs*[a0]Hs*[a0]h*[a0]h*[a0]h",space_id,op,start,_stride,
@@ -280,11 +281,24 @@ H5Sselect_hyperslab (hid_t space_id, H5S_seloper_t op,
 
         if((block = H5MM_malloc(sizeof(hssize_t)*space->extent.u.simple.rank))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                "can't allocate stride vector");
+                "can't allocate block vector");
         H5V_array_fill(block,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
     } else {
         block=(hsize_t *)_block;
     } /* end else */
+
+    /* Copy all the per-dimension selection info into the space descriptor */
+    if((diminfo = H5MM_malloc(sizeof(H5S_hyper_dim_t)*space->extent.u.simple.rank))==NULL) {
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                "can't allocate per-dimension vector");
+    } /* end if */
+    for(i=0; i<space->extent.u.simple.rank; i++) {
+	diminfo[i].start = start[i];
+	diminfo[i].stride = stride[i];
+	diminfo[i].count = count[i];
+	diminfo[i].block = block[i];
+    } /* end for */
+    space->select.sel_info.hyper.diminfo = diminfo;
 
     /*
      * Check for overlapping blocks (remove when real block-merging algorithm
@@ -326,17 +340,17 @@ H5Sselect_hyperslab (hid_t space_id, H5S_seloper_t op,
 #endif /* QAK */
     /* Allocate space for the hyperslab selection information if necessary */
     if(space->select.type!=H5S_SEL_HYPERSLABS ||
-       space->select.sel_info.hyper_lst==NULL) {
-        if((space->select.sel_info.hyper_lst =
+       space->select.sel_info.hyper.hyper_lst==NULL) {
+        if((space->select.sel_info.hyper.hyper_lst =
 	    H5MM_calloc(sizeof(H5S_hyper_list_t)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			"can't allocate hyperslab information");
-        if((space->select.sel_info.hyper_lst->lo_bounds =
+        if((space->select.sel_info.hyper.hyper_lst->lo_bounds =
 	    H5MM_calloc(space->extent.u.simple.rank*
 			sizeof(H5S_hyper_bound_t *)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			"can't allocate hyperslab lo bound information");
-        if((space->select.sel_info.hyper_lst->hi_bounds =
+        if((space->select.sel_info.hyper.hyper_lst->hi_bounds =
 	    H5MM_calloc(space->extent.u.simple.rank*
 			sizeof(H5S_hyper_bound_t *)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,

@@ -27,6 +27,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5MMprivate.h>	/* Memory management			*/
 #include <H5Oprivate.h>		/* Object headers		  	*/
 #include <H5Pprivate.h>		/* Property lists			*/
+#include <H5Sprivate.h>		/* Dataspace functions rky 980813       */
 #include <H5Zprivate.h>		/* Data filters				*/
 
 #ifdef QAK
@@ -1339,6 +1340,25 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "unable to convert from file to memory data space");
     }
+<<<<<<< H5D.c
+#ifdef QAK
+    printf("%s: check 1.0\n",FUNC);
+#endif /* QAK */
+	
+#ifdef HAVE_PARALLEL
+    /* rky 980813 This is a temporary KLUGE.
+     * The sconv functions should be set by H5S_find,
+     * or we should use a different way to call the MPI-IO
+     * mem-and-file-dataspace-xfer functions
+     * (the latter in case the arguments to sconv_funcs
+     * turn out to be inappropriate for MPI-IO).  */
+    if (dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO) {
+	sconv_func.read = H5S_mpio_spaces_read;
+    }
+#endif /*HAVE_PARALLEL*/
+    
+=======
+>>>>>>> 1.113
 
     /*
      * If there is no type conversion then try reading directly into the
@@ -1674,7 +1694,26 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "unable to convert from memory to file data space");
     }
+<<<<<<< H5D.c
+#ifdef QAK
+    printf("%s: check 1.0\n",FUNC);
+#endif /* QAK */
+    
+#ifdef HAVE_PARALLEL
+    /* rky 980813 This is a temporary KLUGE.
+     * The sconv functions should be set by H5S_find,
+     * or we should use a different way to call the MPI-IO
+     * mem-and-file-dataspace-xfer functions
+     * (the latter in case the arguments to sconv_funcs
+     * turn out to be inappropriate for MPI-IO).  */
+    if (dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO) {
+	sconv_func.write = H5S_mpio_spaces_write;
+    }
+#endif /*HAVE_PARALLEL*/
+    
+=======
 
+>>>>>>> 1.113
     /*
      * If there is no type conversion then try writing directly from
      * application buffer to file.

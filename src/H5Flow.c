@@ -269,6 +269,11 @@ H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  *		June 2, 1998	Albert Cheng
  *		Added xfer_mode argument
  *
+ *		rky 980816
+ *		Accommodate fancy MPI compound datatype writes.
+ *		Also, parallel writes now abort if writing beyond eof
+ *		(rather than just printing an error message
+ *		and continuing, as they used to).
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -279,19 +284,40 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     herr_t		ret_value = FAIL;
     haddr_t		tmp_addr;
 
+#ifdef HAVE_PARALLEL
+    int			use_types;
+#endif
+
     FUNC_ENTER(H5F_low_write, FAIL);
 
     assert(lf && lf->type);
     assert(addr && addr_defined(addr));
     assert(buf);
 
-    /* Extend the file eof marker if we write past it */
-    tmp_addr = *addr;
-    H5F_addr_inc(&tmp_addr, (hsize_t)size);
-    if (H5F_addr_gt(&tmp_addr, &(lf->eof))) {
-	fprintf(stderr, "H5F: extending file w/o allocation\n");
-	lf->eof = tmp_addr;
-    }
+    /* check for writing past the end of file marker */
+#ifdef HAVE_PARALLEL
+    if (H5F_LOW_MPIO==access_parms->driver
+    &&  access_parms->u.mpio.use_types) {
+	/* In the case of fancy use of MPI datatypes, the addr and size
+	 * parameters have a very peculiar interpretation.
+	 * It is logically possible, but quite complex, to calculate
+	 * the physical offset that the last byte to be written will have
+	 * (assuming the write doesn't fail partway thru, which it may).
+	 * Instead, we fix up the eof _after_ the write
+	 * (I really don't know if that's OK or not... rky 980816) */
+	use_types = access_parms->u.mpio.use_types;  /* check after write */
+    } else {
+#endif /* HAVE_PARALLEL */
+	/* writing a simple block of bytes; can check for writing beyond eof */
+	tmp_addr = *addr;
+	H5F_addr_inc(&tmp_addr, (hsize_t)size);
+	if (H5F_addr_gt(&tmp_addr, &(lf->eof))) {
+	    fprintf(stderr, "H5F: extending file w/o allocation\n");
+	    lf->eof = tmp_addr;
+	}
+#ifdef HAVE_PARALLEL
+    } /* end else */
+#endif /* HAVE_PARALLEL */
     
     /* Write the data */
     if (lf->type->write) {
@@ -302,6 +328,19 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     } else {
 	HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "no write method");
     }
+
+#ifdef HAVE_PARALLEL
+    /* fix up eof for MPI use_type writes */
+    if (H5F_LOW_MPIO==access_parms->driver && use_types) {
+	/* set logical eof to current physical eof
+	 * (ephemeral though it may be...) */
+	MPI_Offset size;
+	if (MPI_SUCCESS != MPI_File_get_size(lf->u.mpio.f,&size)) {
+	    HRETURN_ERROR(H5E_IO, H5E_MPI, NULL, "couldn't get file size" );
+	}
+	lf->eof.offset = size;
+    }
+#endif
 
     FUNC_LEAVE(ret_value);
 }
