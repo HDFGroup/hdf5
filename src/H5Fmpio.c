@@ -612,16 +612,14 @@ H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
 			"MPI_Get_count returned invalid count" );
     }
 
-    /* beyond end of file, pretend we're reading zeroes */
-    if (use_types_this_time) {
-	/* BUG rky 980816  Not implemented yet.  How to do it??? */
-	HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
+    /* This gives us zeroes beyond end of physical MPI file.
+     * What about reading past logical end of HDF5 file??? */
+    if ((n=(size_i-bytes_read)) > 0) {
+	if (use_types_this_time) {
+	    /* INCOMPLETE rky 980918  Not implemented yet.  What to do??? */
+	    HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
 		"haven't implemented reading zeroes beyond end of file" );
-    } else {
-	/* BUG??? rky 980816
-	 * This gives us zeroes beyond end of physical MPI file.
-	 * What about reading past logical end of HDF5 file??? */
-	if ((n=(size_i-bytes_read)) > 0) {
+	} else {
 	    HDmemset( buf+bytes_read, 0, (size_t)n );
 	}
     }
