@@ -112,5 +112,4 @@ Known Problems:
 o SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
   fail if library is compiled using optimization of any level.
 
-o h5dump does not display correctly committed copy of predefined types.
 
