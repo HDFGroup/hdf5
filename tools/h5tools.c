@@ -41,7 +41,7 @@ int compound_data=0;
 /*
 	this is the original value of the repeat_threshold in the h5dump_sprint function
 */
-#define DEFAULT_REPEAT_THRESHOLD 8
+#define H5DEFAULT_REPEAT_THRESHOLD 8
 /*
  * The output functions need a temporary buffer to hold a piece of the
  * dataset while it's being printed.  This constant sets the limit on the
@@ -849,7 +849,7 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info,
 	
 	/* Render the element */
 	h5dump_str_reset(&buffer);
-	h5dump_sprint(&buffer, info, type, mem+i*size, DEFAULT_REPEAT_THRESHOLD);
+	h5dump_sprint(&buffer, info, type, mem+i*size, H5DEFAULT_REPEAT_THRESHOLD);
 	if (i+1<nelmts || 0==(flags & END_OF_DATA)) {
 	    h5dump_str_append(&buffer, "%s", OPT(info->elmt_suf1, ","));
 	}
@@ -1157,11 +1157,11 @@ h5dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t type,
 hid_t
 h5dump_fixtype(hid_t f_type, hbool_t strDUAction)
 {
-    hid_t	m_type=-1, f_memb;
-    hid_t	*memb=NULL;
-    char	**name=NULL;
-    int		nmembs=0, i, j, *ndims=NULL;
-    size_t	size, offset, *dims=NULL, nelmts;
+    hid_t	m_type = FAIL, f_memb;
+    hid_t	*memb = NULL;
+    char	**name = NULL;
+    int		nmembs = 0, i, j, *ndims = NULL;
+    size_t	size, offset, *dims = NULL, nelmts;
     H5T_str_t strpad;
 
     size = H5Tget_size(f_type);
@@ -1203,7 +1203,6 @@ h5dump_fixtype(hid_t f_type, hbool_t strDUAction)
 	}
 	break;
 	
-	case H5T_TIME:
     case H5T_STRING:
 /*
 	this is needed because the function in dumputil.c is the
@@ -1286,6 +1285,7 @@ h5dump_fixtype(hid_t f_type, hbool_t strDUAction)
 	m_type = H5Tcopy(f_type);
 	break;
 
+	case H5T_TIME:
     case H5T_BITFIELD:
     case H5T_OPAQUE:
 	/*
@@ -1456,7 +1456,7 @@ struct h5dump_str_t tempstr;
     /* Set to all default values and then override */
     memset(&info, 0, sizeof info);
     info.idx_fmt = "(%s)";
-    info.line_ncols = 80;
+    info.line_ncols = NCOLS;
     info.line_multi_new = 1;
  
     /*
@@ -1559,13 +1559,15 @@ static void display_string
 	int free_space, long_string = 0;
 	char out_buf[NCOLS];
 	struct h5dump_str_t tempstr;
+	int temp;
+
 /******************************************************************************************/
     h5dump_t		info;
 
     /* Set to all default values and then override */
     memset(&info, 0, sizeof info);
     info.idx_fmt = "(%s)";
-    info.line_ncols = 80;
+    info.line_ncols = NCOLS;
     info.line_multi_new = 1;
  
     /*
@@ -1621,14 +1623,19 @@ static void display_string
                      out_buf[x] = '\0';
                      printf("%s\" //\n", out_buf);
                      first_row = 0;
+                     out_buf[0] = '\0';
                  } else {
                      indentation(indent+COL);     
 					 printf("%s\"", out_buf);
-                     strncpy(out_buf, tempstr.s, x);
+ //                    strncpy(out_buf, tempstr.s, x);
+					 memset(out_buf, '\0', NCOLS); 
+					 temp = copy_atomic_char(out_buf,tempstr.s,tempstr.len,x);
                      out_buf[x] = '\0';
 					 printf("%s\" //\n", out_buf);
+					 x = temp;
+//					 out_buf[0] = '\"';
+//					 strncpy(out_buf+1, tempstr.s + temp, tempstr.len - temp);
                  }
-                 out_buf[0] = '\0';
              }
 
              y = NCOLS - indent -COL - 5;
@@ -1701,7 +1708,8 @@ static void display_string
                      strcat(out_buf, "\",");
                      if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " "); 
                   } else {
-                     strcpy(out_buf, "\"");
+					 strcpy(out_buf, "\"");
+//					 strcat(out_buf, "\"");
                      strcat (out_buf, tempstr.s+x+j*y);
                      strcat(out_buf, "\",");
                      if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " "); 
@@ -2076,4 +2084,60 @@ void indentation(int x) {
 
   while (x>0) { printf(" "); x--; }
 
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    copy_atomic_char
+ *
+ * Purpose:     copies the atomic characters from 1 string to another
+ *              assumes there will be enough room in output for the input string
+ *
+ * Return:      returns the number of actual characters copied
+ *
+ * Programmer:  Patrick Lu
+ *
+ * Modifications:
+ *
+ *-----------------------------------------------------------------------*/
+int copy_atomic_char(char* output, char* input, int numchar, int freespace){
+
+	int x = 0;
+
+	while (freespace || (x == numchar)){
+		if (input[x] == '\\'){
+			if (freespace == 1){
+				break;				
+			}
+			else {
+				if ((input[x+1] == '"') || (input[x+1] == '\\') || 
+					(input[x+1] == 'b') || (input[x+1] == 'f') || 
+					(input[x+1] == 'n') || (input[x+1] == 'r') || 
+					(input[x+1] == 't')){ /*escape characters*/
+					strncat(output,input,2);
+					x += 2;
+					freespace - 2;
+				}
+				else { /* octal number */
+					if (freespace < 4){
+						break;
+					}
+					else {
+						strncat(output,input,4);
+						x += 4;
+						freespace - 4;
+					}
+				}
+			}
+		}
+		else {
+			strncat(output,input+x,1);
+			freespace = freespace - 1;
+			x++;
+		}
+	}
+
+	if (x == 0) x = FAIL;
+	return(x);
 }
