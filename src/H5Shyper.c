@@ -435,12 +435,11 @@ H5S_hyper_iter_block (const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end
 
     /* Check for a single "regular" hyperslab */
     if(iter->u.hyp.diminfo_valid) {
-        /* Copy the current iterator offset as the start */
-        HDmemcpy(start,iter->u.hyp.off,sizeof(hssize_t)*iter->rank);
-
         /* Compute the end of the block */
-        for(u=0; u<iter->rank; u++)
+        for(u=0; u<iter->rank; u++) {
+            start[u]=iter->u.hyp.off[u];
             end[u]=(start[u]+iter->u.hyp.diminfo[u].block)-1;
+        } /* end for */
     } /* end if */
     else {
         /* Copy the start of the block */
