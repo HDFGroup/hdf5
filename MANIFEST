@@ -1018,6 +1018,8 @@
 ./tools/testfiles/tall-1.ddl
 ./tools/testfiles/tall-2.ddl
 ./tools/testfiles/tall-3.ddl
+./tools/testfiles/tall-4s.ddl
+./tools/testfiles/tall-5s.ddl
 ./tools/testfiles/tall.h5
 ./tools/testfiles/tarray1.ddl
 ./tools/testfiles/tarray1.h5
@@ -1049,7 +1051,9 @@
 ./tools/testfiles/tdatareg.ddl 
 ./tools/testfiles/tdset-1.ddl
 ./tools/testfiles/tdset-2.ddl
+./tools/testfiles/tdset-3s.ddl
 ./tools/testfiles/tdset.h5
+./tools/testfiles/tdset2-1s.ddl
 ./tools/testfiles/tdset2.h5
 ./tools/testfiles/tempty.ddl
 ./tools/testfiles/tempty.h5
