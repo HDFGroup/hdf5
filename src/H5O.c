@@ -62,8 +62,8 @@ static void * H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type,
 static herr_t H5O_share(H5F_t *f, hid_t dxpl_id, const H5O_class_t *type, const void *mesg,
 			 H5HG_t *hobj/*out*/);
 #endif /* NOT_YET */
-static unsigned H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-			     const H5O_class_t **type_p, int sequence);
+static unsigned H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+                                 const H5O_class_t **type_p, int sequence);
 static int H5O_modify_real(H5G_entry_t *ent, const H5O_class_t *type,
     int overwrite, unsigned flags, unsigned update_time, const void *mesg,
     hid_t dxpl_id);
@@ -471,7 +471,6 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     unsigned	chunkno;
     haddr_t	chunk_addr;
     size_t	chunk_size;
-    H5O_cont_t	*cont = NULL;
     uint8_t	flags;
 
     FUNC_ENTER_NOAPI(H5O_load, NULL);
@@ -518,7 +517,6 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 
     /* read each chunk from disk */
     while (H5F_addr_defined(chunk_addr)) {
-
 	/* increase chunk array size */
 	if (oh->nchunks >= oh->alloc_nchunks) {
 	    unsigned na = oh->alloc_nchunks + H5O_NCHUNKS;
@@ -542,9 +540,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 	    HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header data");
 	
 	/* load messages from this chunk */
-	for (p = oh->chunk[chunkno].image;
-	     p < oh->chunk[chunkno].image + chunk_size;
-	     p += mesg_size) {
+	for (p = oh->chunk[chunkno].image; p < oh->chunk[chunkno].image + chunk_size; p += mesg_size) {
 	    UINT16DECODE(p, id);
 	    UINT16DECODE(p, mesg_size);
 	    assert (mesg_size==H5O_ALIGN (mesg_size));
@@ -580,22 +576,20 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 		oh->mesg[mesgno].chunkno = chunkno;
 	    }
 	}
-	assert(p == oh->chunk[chunkno].image + chunk_size);
 
-	/* decode next object header continuation message */
-	for (chunk_addr=HADDR_UNDEF;
-	     !H5F_addr_defined(chunk_addr) && curmesg < oh->nmesgs;
-	     curmesg++) {
-	    if (H5O_CONT_ID == oh->mesg[curmesg].type->id) {
-		uint8_t *p2 = oh->mesg[curmesg].raw;
+        assert(p == oh->chunk[chunkno].image + chunk_size);
 
-		cont = (H5O_CONT->decode) (f, dxpl_id, p2, NULL);
-		oh->mesg[curmesg].native = cont;
-		chunk_addr = cont->addr;
-		chunk_size = cont->size;
-		cont->chunkno = oh->nchunks;	/*the next chunk to allocate */
-	    }
-	}
+        /* decode next object header continuation message */
+        for (chunk_addr = HADDR_UNDEF; !H5F_addr_defined(chunk_addr) && curmesg < oh->nmesgs; ++curmesg) {
+            if (H5O_CONT_ID == oh->mesg[curmesg].type->id) {
+                H5O_cont_t *cont = NULL;
+                cont = (H5O_CONT->decode) (f, dxpl_id, oh->mesg[curmesg].raw, NULL);
+                oh->mesg[curmesg].native = cont;
+                chunk_addr = cont->addr;
+                chunk_size = cont->size;
+                cont->chunkno = oh->nchunks;	/*the next chunk to allocate */
+            }
+        }
     }
 
     /* Set return value */
@@ -1503,17 +1497,22 @@ done:
  *		Aug  6 1997
  *
  * Modifications:
- *
+ *      Bill Wendling, 2003-09-30
+ *      Protect the object header and pass it into the H5O_find_in_ohdr
+ *      function. This is done because the H5O_find_in_ohdr used to
+ *      protect the ohdr, find the message, and then unprotect it. This
+ *      saves time and also helps the FPHDF5 stuff, where unprotecting
+ *      actually destroys the object in the cache.
  *-------------------------------------------------------------------------
  */
 static void *
 H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mesg, hid_t dxpl_id)
 {
-    H5O_t		*oh = NULL;
-    int		idx;
-    H5G_cache_t		*cache = NULL;
-    H5G_type_t		cache_type;
-    void		*ret_value = NULL;
+    H5O_t          *oh = NULL;
+    int             idx;
+    H5G_cache_t    *cache = NULL;
+    H5G_type_t      cache_type;
+    void           *ret_value = NULL;
 
     FUNC_ENTER_NOINIT(H5O_read_real);
 
@@ -1526,6 +1525,7 @@ H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mes
 
     /* can we get it from the symbol table entry? */
     cache = H5G_ent_cache(ent, &cache_type);
+
     if (H5O_fast_g[cache_type]) {
 	ret_value = (H5O_fast_g[cache_type]) (cache, type, mesg);
 	if (ret_value)
@@ -1533,13 +1533,14 @@ H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type, int sequence, void *mes
 	H5E_clear(NULL); /*don't care, try reading from header */
     }
 
-    /* can we get it from the object header? */
-    if ((idx = H5O_find_in_ohdr(ent->file, dxpl_id, ent->header, &type, sequence)) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, NULL, "unable to find message in object header");
-
     /* copy the message to the user-supplied buffer */
     if (NULL == (oh = H5AC_protect(ent->file, dxpl_id, H5AC_OHDR, ent->header, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unable to load object header");
+
+    /* can we get it from the object header? */
+    if ((idx = H5O_find_in_ohdr(ent->file, dxpl_id, oh, &type, sequence)) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, NULL, "unable to find message in object header");
+
     if (oh->mesg[idx].flags & H5O_FLAG_SHARED) {
 	/*
 	 * If the message is shared then then the native pointer points to an
@@ -1589,29 +1590,30 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_find_in_ohdr
+ * Function:    H5O_find_in_ohdr
  *
- * Purpose:	Find a message in the object header without consulting
- *		a symbol table entry.
+ * Purpose:     Find a message in the object header without consulting
+ *              a symbol table entry.
  *
- * Return:	Success:	Index number of message.
+ * Return:      Success:    Index number of message.
+ *              Failure:    Negative
  *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug  6 1997
+ * Programmer:  Robb Matzke
+ *              matzke@llnl.gov
+ *              Aug  6 1997
  *
  * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
+ *      Robb Matzke, 1999-07-28
+ *      The ADDR argument is passed by value.
+ *
+ *      Bill Wendling, 2003-09-30
+ *      Modified so that the object header needs to be AC_protected
+ *      before calling this function.
  *-------------------------------------------------------------------------
  */
 static unsigned
-H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5O_class_t **type_p,
-		 int sequence)
+H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_class_t **type_p, int sequence)
 {
-    H5O_t		*oh = NULL;
     unsigned		u;
     const H5O_class_t	*type = NULL;
     unsigned		ret_value;
@@ -1620,12 +1622,7 @@ H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5O_class_t **type
 
     /* Check args */
     assert(f);
-    assert(H5F_addr_defined(addr));
     assert(type_p);
-
-    /* Load the object header */
-    if (NULL == (oh = H5AC_protect(f, dxpl_id, H5AC_OHDR, addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, UFAIL, "unable to load object header");
 
     /* Scan through the messages looking for the right one */
     for (u = 0; u < oh->nmesgs; u++) {
@@ -1634,6 +1631,7 @@ H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5O_class_t **type
 	if (--sequence < 0)
             break;
     }
+
     if (sequence >= 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, UFAIL, "unable to find object header message");
 
@@ -1646,6 +1644,7 @@ H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5O_class_t **type
     } else {
 	type = oh->mesg[u].type;
     }
+
     if (NULL == oh->mesg[u].native) {
 	assert(type->decode);
 	oh->mesg[u].native = (type->decode) (f, dxpl_id, oh->mesg[u].raw, NULL);
@@ -1663,9 +1662,6 @@ H5O_find_in_ohdr(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5O_class_t **type
     ret_value=u;
 
 done:
-    if (oh && H5AC_unprotect(f, dxpl_id, H5AC_OHDR, addr, oh, FALSE) != SUCCEED)
-        HDONE_ERROR(H5E_OHDR, H5E_PROTECT, UFAIL, "unable to release object header");
-
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
