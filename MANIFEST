@@ -58,6 +58,16 @@
 ./doc/html/Attributes.html
 ./doc/html/Big.html
 ./doc/html/Caching.html
+./doc/html/Chunking.html
+./doc/html/Chunk_f1.gif
+./doc/html/Chunk_f1.obj			_DO_NOT_DISTRIBUTE_
+./doc/html/Chunk_f2.gif
+./doc/html/Chunk_f2.obj			_DO_NOT_DISTRIBUTE_
+./doc/html/Chunk_f3.gif
+./doc/html/Chunk_f4.gif
+./doc/html/Chunk_f5.gif
+./doc/html/Chunk_f6.gif
+./doc/html/Chunk_f6.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/CodeReview.html		_DO_NOT_DISTRIBUTE_
 ./doc/html/Coding.html
 ./doc/html/Copyright.html
@@ -132,14 +142,6 @@
 ./doc/html/review1.html			_DO_NOT_DISTRIBUTE_
 ./doc/html/review1a.html		_DO_NOT_DISTRIBUTE_
 ./doc/html/storage.html			_DO_NOT_DISTRIBUTE_
-./doc/html/study.html			_DO_NOT_DISTRIBUTE_
-./doc/html/study_1000x1000.gif		_DO_NOT_DISTRIBUTE_
-./doc/html/study_250x250.gif		_DO_NOT_DISTRIBUTE_
-./doc/html/study_499x499.gif		_DO_NOT_DISTRIBUTE_
-./doc/html/study_5000x1000.gif		_DO_NOT_DISTRIBUTE_
-./doc/html/study_500x500.gif		_DO_NOT_DISTRIBUTE_
-./doc/html/study_p1.gif			_DO_NOT_DISTRIBUTE_
-./doc/html/study_p1.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/symtab			_DO_NOT_DISTRIBUTE_
 ./doc/html/version.gif
 ./doc/html/version.obj			_DO_NOT_DISTRIBUTE_
