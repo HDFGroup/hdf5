@@ -153,6 +153,10 @@ main(void)
  */
 herr_t file_info(hid_t loc_id, const char *name, void *opdata)
 {
+    /* avoid warnings */
+    loc_id = loc_id;
+    opdata = opdata;
+
     /*
      * Display group name. The name is passed to the function by 
      * the Library. Some magic :-)
@@ -177,6 +181,10 @@ herr_t group_info(hid_t loc_id, const char *name, void *opdata)
   hsize_t chunk_dims_out[2];
 
   int  rank_chunk;
+
+  /* avoid warnings */
+  opdata = opdata;
+
   /*
    * Open the datasets using their names.
    */

@@ -208,6 +208,10 @@ attr_info(hid_t loc_id, const char *name, void *opdata)
     int i;
     size_t npoints;             /* Number of elements in the array attribute. */ 
     float *float_array;         /* Pointer to the array attribute. */
+
+    /* avoid warnings */
+    opdata = opdata;
+
     /*
      * Open the attribute using its name.
      */    
