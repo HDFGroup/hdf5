@@ -30,7 +30,7 @@
 
 int options_table_init( pack_opttbl_t **tbl )
 {
- int i;
+ int i, j;
  pack_opttbl_t* table = (pack_opttbl_t*) malloc(sizeof(pack_opttbl_t));
  if (table==NULL) {
   printf("Error: not enough memory for options table\n");
@@ -45,11 +45,13 @@ int options_table_init( pack_opttbl_t **tbl )
   return -1;
  }
  
- for (i = 0; i < table->size; i++) {
+ for ( i=0; i<table->size; i++) {
    strcpy(table->objs[i].path,"\0");
-   table->objs[i].comp.info  = -1;
-   table->objs[i].comp.type  = -1;
+   table->objs[i].filter.filtn  = -1;
+   for ( j=0; j<CDVALUES; j++) 
+    table->objs[i].filter.cd_values[j] = -1;
    table->objs[i].chunk.rank = -1;
+   table->objs[i].refobj_id = -1;
   }
  
  *tbl = table;
@@ -101,9 +103,11 @@ int options_add_chunk( obj_list_t *obj_list,
   }
   for (i = table->nelems; i < table->size; i++) {
    strcpy(table->objs[i].path,"\0");
-   table->objs[i].comp.info  = -1;
-   table->objs[i].comp.type  = -1;
+   table->objs[i].filter.filtn  = -1;
+   for ( j=0; j<CDVALUES; j++) 
+    table->objs[i].filter.cd_values[j] = -1;
    table->objs[i].chunk.rank = -1;
+   table->objs[i].refobj_id = -1;
   }
  }
  
@@ -173,19 +177,19 @@ int options_add_chunk( obj_list_t *obj_list,
 
 
 /*-------------------------------------------------------------------------
- * Function: options_add_comp
+ * Function: options_add_filter
  *
- * Purpose: add a compression -t option to the option list
+ * Purpose: add a compression -f option to the option list
  *
  * Return: 0, ok, -1, fail
  *
  *-------------------------------------------------------------------------
  */
 
-int options_add_comp( obj_list_t *obj_list,
-                      int n_objs,
-                      comp_info_t comp,
-                      pack_opttbl_t *table )
+int options_add_filter(obj_list_t *obj_list,
+                       int n_objs,
+                       filter_info_t filt,
+                       pack_opttbl_t *table )
 {
  
  int i, j, I, added=0, found=0;
@@ -199,9 +203,11 @@ int options_add_comp( obj_list_t *obj_list,
   }
   for (i = table->nelems; i < table->size; i++) {
    strcpy(table->objs[i].path,"\0");
-   table->objs[i].comp.info  = -1;
-   table->objs[i].comp.type  = -1;
+   table->objs[i].filter.filtn  = -1;
+   for ( j=0; j<CDVALUES; j++) 
+    table->objs[i].filter.cd_values[j] = -1;
    table->objs[i].chunk.rank = -1;
+   table->objs[i].refobj_id = -1;
   }
  }
  
@@ -217,19 +223,11 @@ int options_add_comp( obj_list_t *obj_list,
     /*already on the table */
     if (strcmp(obj_list[j].obj,table->objs[i].path)==0)
     {
-     /* already COMP info inserted for this one; exit */
-     if (table->objs[i].comp.type>0)
-     {
-      printf("Input Error: compression information already inserted for <%s>\n",obj_list[j].obj);
-      exit(1);
-     }
-     /* insert the comp info */
-     else
-     {
-      table->objs[i].comp = comp;
-      found=1;
-      break;
-     }
+     /* insert */
+     
+     table->objs[i].filter = filt;
+     found=1;
+     break;
     } /* if */
    } /* i */
    
@@ -239,7 +237,7 @@ int options_add_comp( obj_list_t *obj_list,
     I = table->nelems + added;  
     added++;
     strcpy(table->objs[I].path,obj_list[j].obj);
-    table->objs[I].comp = comp;
+    table->objs[I].filter = filt;
    }
   } /* j */ 
  }
@@ -253,7 +251,7 @@ int options_add_comp( obj_list_t *obj_list,
    I = table->nelems + added;  
    added++;
    strcpy(table->objs[I].path,obj_list[j].obj);
-   table->objs[I].comp = comp;
+   table->objs[I].filter = filt;
   }
  }
  

@@ -51,7 +51,7 @@ int main(int argc, char **argv)
   else if (strcmp(argv[i], "-t") == 0) {  
    
    /* add the -t option */
-   h5repack_addcomp(argv[i+1],&options);
+   h5repack_addfilter(argv[i+1],&options);
 
    /* jump to next */
    ++i;

@@ -130,6 +130,8 @@ int do_copy_refobjs(hid_t fidin,
     hobj_ref_t  *refbuf;
     const char* refname;
     hobj_ref_t  *buf;
+    unsigned    u;
+
 
    /*-------------------------------------------------------------------------
     * read to memory
@@ -152,17 +154,17 @@ int do_copy_refobjs(hid_t fidin,
      printf( "cannot allocate memory\n" );
      goto error;
     }
-    for ( j=0; j<nelmts; j++)
+    for ( u=0; u<nelmts; u++)
     {
-     if ((refobj_id = H5Rdereference(dset_in,H5R_OBJECT,&buf[j]))<0)
+     if ((refobj_id = H5Rdereference(dset_in,H5R_OBJECT,&buf[u]))<0)
       goto error;
      
       /* get the name. a valid name could only occur in the 
      second traversal of the file */
-     if ((refname=MapIdToName(refobj_id,travt,options))!=NULL)
+     if ((refname=MapIdToName(refobj_id,travt))!=NULL)
      {
       /* create the reference */
-      if (H5Rcreate(&refbuf[j],fidout,refname,H5R_OBJECT,-1)<0)
+      if (H5Rcreate(&refbuf[u],fidout,refname,H5R_OBJECT,-1)<0)
        goto error;
       
       if (options->verbose)
@@ -412,7 +414,7 @@ int do_copy_refobjs_inattr(hid_t loc_in,
     H5G_obj_t   obj_type;
     hid_t       refobj_id;
     hobj_ref_t  *refbuf;
-    int         i;
+    unsigned    k;
     const char* refname;
     hobj_ref_t  *buf;
  
@@ -432,17 +434,17 @@ int do_copy_refobjs_inattr(hid_t loc_in,
      printf( "cannot allocate memory\n" );
      goto error;
     }
-    for ( i=0; i<nelmts; i++)
+    for ( k=0; k<nelmts; k++)
     {
-     if ((refobj_id = H5Rdereference(attr_id,H5R_OBJECT,&buf[i]))<0)
+     if ((refobj_id = H5Rdereference(attr_id,H5R_OBJECT,&buf[k]))<0)
       goto error;
      
       /* get the name. a valid name could only occur in the 
      second traversal of the file */
-     if ((refname=MapIdToName(refobj_id,travt,options))!=NULL)
+     if ((refname=MapIdToName(refobj_id,travt))!=NULL)
      {
       /* create the reference */
-      if (H5Rcreate(&refbuf[i],fidout,refname,H5R_OBJECT,-1)<0)
+      if (H5Rcreate(&refbuf[k],fidout,refname,H5R_OBJECT,-1)<0)
        goto error;
       
       if (options->verbose)
@@ -503,7 +505,7 @@ error:
  *-------------------------------------------------------------------------
  */
 
-static void close_obj(H5G_obj_t obj_type, hid_t obj_id)
+void close_obj(H5G_obj_t obj_type, hid_t obj_id)
 {
  
  switch (obj_type) {
@@ -531,8 +533,7 @@ static void close_obj(H5G_obj_t obj_type, hid_t obj_id)
  */
 
 const char* MapIdToName(hid_t refobj_id, 
-                        trav_table_t *travt,
-                        pack_opt_t  *options) /* repack options */
+                        trav_table_t *travt)
 {
  hid_t id;
  hid_t fid;

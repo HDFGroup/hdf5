@@ -20,15 +20,13 @@
 
 
 /*-------------------------------------------------------------------------
- * Function: parse_comp
+ * Function: parse_filter
  *
- * Purpose: read compression info
+ * Purpose: read filter information
  *
  * Return: a list of names, the number of names and its compression type
- *  NULL, on error
  *
  * Examples: 
- * "AA,B,CDE:RLE" 
  * "GZIP 6"
  * "A,B:NONE"
  *
@@ -40,9 +38,10 @@
  */
 
 
-obj_list_t* parse_comp(const char *str, 
-                       int *n_objs, 
-                       comp_info_t *comp)
+obj_list_t* parse_filter(const char *str, 
+                         int *n_objs, 
+                         filter_info_t *filt,
+                         pack_opt_t *options)
 {
  unsigned    i, u;
  char        c;
@@ -52,9 +51,10 @@ obj_list_t* parse_comp(const char *str,
  char        scomp[10];
  char        stype[5];
  obj_list_t* obj_list=NULL;
+ unsigned    pixels_per_block;
 
  /* initialize compression  info */
- memset(comp,0,sizeof(comp_info_t));
+ memset(filt,0,sizeof(filter_info_t));
 
  /* check for the end of object list and number of objects */
  for ( i=0, n=0; i<len; i++)
@@ -71,8 +71,8 @@ obj_list_t* parse_comp(const char *str,
  }
 
  if (end_obj==-1) { /* missing : */
-  printf("Input Error: Invalid compression input in <%s>\n",str);
-  exit(1);
+  /* apply to all objects */
+  options->all_filter=1;
  }
   
  n++;
@@ -107,9 +107,9 @@ obj_list_t* parse_comp(const char *str,
  }
 
 
- /* get compression type */
+ /* get filter additional parameters */
  m=0;
- for ( i=end_obj+1, k=0; i<len; i++,k++)
+ for ( i=end_obj+1, k=0, j=0; i<len; i++,k++)
  {
   c = str[i];
   scomp[k]=c;
@@ -129,7 +129,7 @@ obj_list_t* parse_comp(const char *str,
      stype[m]=c;
     }
     stype[m]='\0';
-    comp->info=atoi(stype);
+    filt->cd_values[j++]=atoi(stype);
     i+=m; /* jump */
    }
    else if (i==len-1) { /*no more parameters */
@@ -142,7 +142,7 @@ obj_list_t* parse_comp(const char *str,
  *-------------------------------------------------------------------------
  */
    if (strcmp(scomp,"NONE")==0)
-    comp->type=H5Z_FILTER_NONE;
+    filt->filtn=H5Z_FILTER_NONE;
 
 /*-------------------------------------------------------------------------
  * H5Z_FILTER_DEFLATE
@@ -150,7 +150,7 @@ obj_list_t* parse_comp(const char *str,
  */
    else if (strcmp(scomp,"GZIP")==0)
    {
-    comp->type=H5Z_FILTER_DEFLATE;
+    filt->filtn=H5Z_FILTER_DEFLATE;
     if (no_param) { /*no more parameters, GZIP must have parameter */
      if (obj_list) free(obj_list);
      printf("Input Error: Missing compression parameter in <%s>\n",str);
@@ -164,60 +164,108 @@ obj_list_t* parse_comp(const char *str,
  */
    else if (strcmp(scomp,"SZIP")==0)
    {
-    comp->type=H5Z_FILTER_SZIP;
-    if (m>0){ /*SZIP does not have parameter */
+    filt->filtn=H5Z_FILTER_SZIP;
+    if (no_param) { /*no more parameters, SZIP must have parameter */
      if (obj_list) free(obj_list);
-     printf("Input Error: Extra compression parameter in SZIP <%s>\n",str);
+     printf("Input Error: Missing compression parameter in <%s>\n",str);
+     exit(1);
+    }
+   }
+
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_SHUFFLE
+ *-------------------------------------------------------------------------
+ */
+   else if (strcmp(scomp,"SHUF")==0)
+   {
+    filt->filtn=H5Z_FILTER_SHUFFLE;
+    if (m>0){ /*shuffle does not have parameter */
+     if (obj_list) free(obj_list);
+     printf("Input Error: Extra parameter in SHUF <%s>\n",str);
+     exit(1);
+    }
+   }
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_FLETCHER32
+ *-------------------------------------------------------------------------
+ */
+   else if (strcmp(scomp,"FLET")==0)
+   {
+    filt->filtn=H5Z_FILTER_FLETCHER32;
+    if (m>0){ /*shuffle does not have parameter */
+     if (obj_list) free(obj_list);
+     printf("Input Error: Extra parameter in FLET <%s>\n",str);
      exit(1);
     }
    }
    else {
     if (obj_list) free(obj_list);
-    printf("Input Error: Invalid compression type in <%s>\n",str);
+    printf("Input Error: Invalid filter type in <%s>\n",str);
     exit(1);
    }
   }
  } /*i*/
 
+/*-------------------------------------------------------------------------
+ * check valid parameters
+ *-------------------------------------------------------------------------
+ */
 
- /* check valid parameters */
- switch (comp->type)
-  {
-  case H5Z_FILTER_DEFLATE:
-   if (comp->info<0 || comp->info>9 ){
-    if (obj_list) free(obj_list);
-    printf("Input Error: Invalid compression parameter in <%s>\n",str);
-    exit(1);
-   }
-   break;
-  case H5Z_FILTER_SZIP:
-   break;
-  };
+ switch (filt->filtn)
+ {
+  
+ case H5Z_FILTER_DEFLATE:
+  if (filt->cd_values[0]<0 || filt->cd_values[0]>9 ){
+   if (obj_list) free(obj_list);
+   printf("Input Error: Invalid compression parameter in <%s>\n",str);
+   exit(1);
+  }
+  break;
+  
+  
+ case H5Z_FILTER_SZIP:
+  pixels_per_block=filt->cd_values[0];
+  if ((pixels_per_block%2)==1) {
+   if (obj_list) free(obj_list);
+   printf("Input Error: pixels_per_block is not even in <%s>\n",str);
+   exit(1);
+  }
+  if (pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK) {
+   if (obj_list) free(obj_list);
+   printf("Input Error: pixels_per_block is too large in <%s>\n",str);
+   exit(1);
+  }
+  break;
+ };
 
  return obj_list;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function: get_scomp
+ * Function: get_sfilter
  *
- * Purpose: return the compression type as a string
+ * Purpose: return the filter as a string name
  *
  * Return: name of filter, exit on error
  *
  *-------------------------------------------------------------------------
  */
 
-const char* get_scomp(int code)
+const char* get_sfilter(H5Z_filter_t filtn)
 {
- if (code==H5Z_FILTER_NONE)
+ if (filtn==H5Z_FILTER_NONE)
   return "NONE";
- else if (code==H5Z_FILTER_DEFLATE)
+ else if (filtn==H5Z_FILTER_DEFLATE)
   return "GZIP";
- else if (code==H5Z_FILTER_SZIP)
+ else if (filtn==H5Z_FILTER_SZIP)
   return "SZIP";
+ else if (filtn==H5Z_FILTER_SHUFFLE)
+  return "SHUFFLE";
+ else if (filtn==H5Z_FILTER_FLETCHER32)
+  return "FLETCHERP";
  else {
-  printf("Input Error in compression type\n");
+  printf("Input error in filter type\n");
   exit(1);
  }
  return NULL;
@@ -247,7 +295,8 @@ const char* get_scomp(int code)
 obj_list_t* parse_chunk(const char *str, 
                         int *n_objs, 
                         hsize_t *chunk_lengths, 
-                        int *chunk_rank)
+                        int *chunk_rank,
+                        pack_opt_t *options)
 {
  obj_list_t* obj_list=NULL;
  unsigned    i;
@@ -271,9 +320,8 @@ obj_list_t* parse_chunk(const char *str,
   }
  }
 
- if (end_obj==-1) { /* missing : */
-  printf("Input Error: Invalid chunking input in <%s>\n",str);
-  exit(1);
+ if (end_obj==-1) { /* missing : chunk all */
+  options->all_chunk=1;
  }
   
  n++;

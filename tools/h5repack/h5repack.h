@@ -42,16 +42,21 @@ typedef struct {
 } obj_list_t;
 
 /* 
- the type of compression and additional parameter 
+ the type of filter and additional parameter 
  type can be one of the filters
- H5Z_FILTER_NONE    0,  uncompress if compressed
- H5Z_FILTER_DEFLATE	1 , deflation like gzip	   
- H5Z_FILTER_SZIP    4 , szip compression 
+ H5Z_FILTER_NONE       0,  uncompress if compressed
+ H5Z_FILTER_DEFLATE	   1 , deflation like gzip	   
+ H5Z_FILTER_SHUFFLE    2 , shuffle the data
+ H5Z_FILTER_FLETCHER32 3 , letcher32 checksum of EDC
+ H5Z_FILTER_SZIP       4 , szip compression 
 */
+
+#define CDVALUES 2
+
 typedef struct {
- int type;
- int info;
-} comp_info_t;
+ H5Z_filter_t filtn;               /* filter identification number */
+ int          cd_values[CDVALUES]; /* filter client data values */
+} filter_info_t;
 
 /* chunk lengths along each dimension and rank */
 typedef struct {
@@ -59,18 +64,18 @@ typedef struct {
  int     rank;
 } chunk_info_t;
 
-/* information for one object, contains PATH, CHUNK info and COMP info */
+/* information for one object, contains PATH, CHUNK info and FILTER info */
 typedef struct {
- char         path[MAX_NC_NAME];            /* name of object */
- comp_info_t  comp;                         /* compression information */
- chunk_info_t chunk;                        /* chunk information */
- hid_t        refobj_id;                    /* object ID */
+ char          path[MAX_NC_NAME]; /* name of object */
+ filter_info_t filter;            /* filter information */
+ chunk_info_t  chunk;             /* chunk information */
+ hid_t         refobj_id;         /* object ID, references */
 } pack_info_t;
 
 /* store a table of all objects */
 typedef struct {
- int        size;
- int        nelems;
+ int         size;
+ int         nelems;
  pack_info_t *objs;
 } pack_opttbl_t;
 
@@ -82,14 +87,13 @@ typedef struct {
 
 /* all the above, ready to go to the hrepack call */
 typedef struct {
- pack_opttbl_t   *op_tbl;     /*table with all -c and -t options */
- int             all_chunk;   /*chunk all objects, input of "*" */
- int             all_comp;    /*comp all objects, input of "*" */
- comp_info_t     comp_g;      /*global compress INFO for the ALL case */
+ pack_opttbl_t   *op_tbl;     /*table with all -c and -f options */
+ int             all_chunk;   /*chunk all objects */
+ int             all_filter;  /*filter all objects */
+ filter_info_t   filter_g;    /*global filter INFO for the ALL case */
  chunk_info_t    chunk_g;     /*global chunk INFO for the ALL case */
  int verbose;                 /*verbose mode */
 	int threshold;               /*minimum size to compress, in bytes */
- 
 } pack_opt_t;
 
 
@@ -103,11 +107,12 @@ typedef struct {
 extern "C" {
 #endif
 
-int h5repack         (const char* infile, const char* outfile, pack_opt_t *options);
-int h5repack_addcomp (const char* str, pack_opt_t *options);
-int h5repack_addchunk(const char* str, pack_opt_t *options);
-int h5repack_init    (pack_opt_t *options, int verbose);
-int h5repack_end     (pack_opt_t *options);
+int h5repack           (const char* infile, const char* outfile, pack_opt_t *options);
+int h5repack_addfilter (const char* str, pack_opt_t *options);
+int h5repack_addchunk  (const char* str, pack_opt_t *options);
+int h5repack_init      (pack_opt_t *options, int verbose);
+int h5repack_end       (pack_opt_t *options);
+int h5repack_verify    (const char *fname,pack_opt_t *options);
 
 #ifdef __cplusplus
 }
@@ -139,14 +144,11 @@ int do_copy_file(hid_t fidin,
 
 int copy_attr(hid_t loc_in, 
               hid_t loc_out, 
-              pack_opt_t *options,
-              trav_table_t *travt,
-              hid_t fidout         /* for saving references */
+              pack_opt_t *options
               );
 
 const char* MapIdToName(hid_t refobj_id, 
-                        trav_table_t *travt,
-                        pack_opt_t  *options) /* repack options */;
+                        trav_table_t *travt);
 
 int do_copy_refobjs(hid_t fidin, 
                     hid_t fidout, 
@@ -163,6 +165,34 @@ int do_copy_refobjs_inattr(hid_t loc_in,
 void read_info(const char *filename,pack_opt_t *options);
 void close_obj(H5G_obj_t obj_type, hid_t obj_id);
 
+
+/*-------------------------------------------------------------------------
+ * filters
+ *-------------------------------------------------------------------------
+ */
+
+int apply_filter(hid_t dcpl_id,
+                 size_t size,         /* size of datatype in bytes */
+                 pack_opt_t *options, /* repack options */
+                 pack_info_t *obj);   /* info about object to filter */
+
+int has_filter(hid_t dcpl_id,
+               H5Z_filter_t filtnin);
+
+int check_szip_params( unsigned bits_per_pixel, 
+                       unsigned pixels_per_block, 
+                       unsigned pixels_per_scanline, 
+                       hsize_t image_pixels);
+
+int check_szip(int rank,        /* chunk rank */
+               hsize_t *dims,   /* chunk dims */
+               size_t size,     /* size of datatype in bytes */
+               unsigned szip_options_mask,
+               unsigned szip_pixels_per_block);
+
+
+
+
 /*-------------------------------------------------------------------------
  * options table
  *-------------------------------------------------------------------------
@@ -174,9 +204,9 @@ int          options_add_chunk ( obj_list_t *obj_list,
                                  hsize_t *chunk_lengths,
                                  int chunk_rank,
                                  pack_opttbl_t *table );
-int          options_add_comp  ( obj_list_t *obj_list,
+int          options_add_filter ( obj_list_t *obj_list,
                                  int n_objs,
-                                 comp_info_t comp,
+                                 filter_info_t filt,
                                  pack_opttbl_t *table );
 pack_info_t* options_get_object( const char *path,
                                  pack_opttbl_t *table);
@@ -186,14 +216,16 @@ pack_info_t* options_get_object( const char *path,
  *-------------------------------------------------------------------------
  */
 
-obj_list_t* parse_comp  (const char *str, 
+obj_list_t* parse_filter(const char *str, 
                          int *n_objs, 
-                         comp_info_t *comp);
+                         filter_info_t *filt,
+                         pack_opt_t *options);
 obj_list_t* parse_chunk (const char *str, 
                          int *n_objs, 
                          hsize_t *chunk_lengths, 
-                         int *chunk_rank);
-const char* get_scomp   (int code);
+                         int *chunk_rank,
+                         pack_opt_t *options);
+const char* get_sfilter (H5Z_filter_t filtn);
 int         parse_number(char *str);
 
 /*-------------------------------------------------------------------------
@@ -211,9 +243,7 @@ int         parse_number(char *str);
 #define FNAME4OUT  "test4out.h5"
 
 int make_testfiles(void);
-int make_all_objects(hid_t fid);
-int make_attributes(hid_t fid);
-int make_special_objects(hid_t loc_id);
+
 int make_attr(hid_t fid);
 int write_dset( hid_t loc_id, 
                 int rank, 
@@ -235,6 +265,48 @@ void write_dset_in(hid_t loc_id,
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t file_id,
                    int make_diffs /* flag to modify data buffers */);
+
+int make_deflate(hid_t loc_id);
+int make_szip(hid_t loc_id);
+int make_nofilters(hid_t loc_id);
+
+
+
+/*-------------------------------------------------------------------------
+ * check SZIP parameters
+ *-------------------------------------------------------------------------
+ */
+
+typedef struct 
+{
+ int compression_mode;
+ int options_mask;
+ unsigned bits_per_pixel;
+ unsigned pixels_per_block;
+ unsigned pixels_per_scanline;
+ hsize_t pixels;
+
+}szip_comp_t;  
+
+/* for SZIP */
+#if !defined (NN_OPTION_MASK)
+#define NN_OPTION_MASK				 32
+#endif
+#if !defined (RAW_OPTION_MASK)
+#define RAW_OPTION_MASK				128
+#endif
+#if !defined (MAX_BLOCKS_PER_SCANLINE)
+#define MAX_BLOCKS_PER_SCANLINE		128
+#endif
+#if !defined (MAX_PIXELS_PER_BLOCK)
+#define MAX_PIXELS_PER_BLOCK	 	 32
+#endif
+#if !defined (MAX_PIXELS_PER_SCANLINE)
+#define MAX_PIXELS_PER_SCANLINE     (MAX_BLOCKS_PER_SCANLINE)*(MAX_PIXELS_PER_BLOCK)
+#endif
+#if !defined (NN_MODE)
+#define NN_MODE	1
+#endif
 
 
 

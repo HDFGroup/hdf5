@@ -97,7 +97,7 @@ int h5repack_end  (pack_opt_t *options)
 }
 
 /*-------------------------------------------------------------------------
- * Function: h5repack_addcomp
+ * Function: h5repack_addfilter
  *
  * Purpose: add a compression -t option to table 
  *   Example: -t "*:GZIP 6" , STR = "*:GZIP 6"
@@ -107,45 +107,34 @@ int h5repack_end  (pack_opt_t *options)
  *-------------------------------------------------------------------------
  */
 
-int h5repack_addcomp(const char* str, 
-                     pack_opt_t *options)
+int h5repack_addfilter(const char* str, 
+                       pack_opt_t *options)
 {
- obj_list_t      *obj_list=NULL; /*one object list for the -t and -c option entry */
- comp_info_t     comp;           /*compression info for the current -t option entry */
- int             n_objs;         /*number of objects in the current -t or -c option entry */
- int             i;
+ obj_list_t      *obj_list=NULL; /*one object list for the -f and -c option entry */
+ filter_info_t   filt;           /*filter info for the current -f option entry */
+ int             n_objs;         /*number of objects in the current -f or -c option entry */
 
- if (options->all_comp==1){
-  printf("Error: Invalid compression input: '*' is present with other objects <%s>\n",str);
+ if (options->all_filter==1){
+  printf("Error: Invalid compression input: all option is present \
+   with other objects <%s>\n",str);
   return -1;
  }
 
- /* parse the -t option */
- obj_list=parse_comp(str,&n_objs,&comp);
+ /* parse the -f option */
+ obj_list=parse_filter(str,&n_objs,&filt,options);
  if (obj_list==NULL)
-  return -1;
-
-  /* searh for the "*" all objects character */
- for (i = 0; i < n_objs; i++) 
  {
-  if (strcmp("*",obj_list[i].obj)==0)
-  {
-   /* if we are compressing all set the global comp type */
-   options->all_comp=1;
-   options->comp_g=comp;
-  }
- }
-
- if (i>1)
- {
-  printf("\nError: '*' cannot be with other objects, <%s>. Exiting...\n",str);
-  free(obj_list);
-  options_table_free(options->op_tbl);
   return -1;
  }
 
- if (options->all_comp==0)
-  options_add_comp(obj_list,n_objs,comp,options->op_tbl);
+ if (options->all_filter==1)
+ {
+  /* if we are compressing all set the global filter type */
+  options->filter_g=filt;
+ }
+
+ if (options->all_filter==0)
+  options_add_filter(obj_list,n_objs,filt,options->op_tbl);
 
  free(obj_list);
  return 0;
@@ -172,7 +161,7 @@ int h5repack_addchunk(const char* str,
  int         n_objs;             /*number of objects in the current -t or -c option entry */
  hsize_t     chunk_lengths[MAX_VAR_DIMS]; /* chunk lengths along each dimension */
  int         chunk_rank;         /*global rank for chunks */
- int         i, j;
+ int         j;
 
  if (options->all_chunk==1){
   printf("Error: Invalid chunking input: '*' is present with other objects <%s>\n",str);
@@ -180,29 +169,16 @@ int h5repack_addchunk(const char* str,
  }
  
  /* parse the -c option */
- obj_list=parse_chunk(str,&n_objs,chunk_lengths,&chunk_rank);
+ obj_list=parse_chunk(str,&n_objs,chunk_lengths,&chunk_rank,options);
  if (obj_list==NULL)
   return -1;
 
-  /* searh for the "*" all objects character */
- for (i = 0; i < n_objs; i++) 
+ if (options->all_chunk==1)
  {
-  if (strcmp("*",obj_list[i].obj)==0)
-  {
-   /* if we are chunking all set the global chunking type */
-   options->all_chunk=1;
-   options->chunk_g.rank=chunk_rank;
-   for (j = 0; j < chunk_rank; j++) 
-    options->chunk_g.chunk_lengths[j] = chunk_lengths[j];
-  }
- }
-
- if (i>1)
- {
-  printf("\nError: '*' cannot be with other objects, <%s>. Exiting...\n",str);
-  free(obj_list);
-  options_table_free(options->op_tbl);
-  return -1;
+  /* if we are chunking all set the global chunking type */
+  options->chunk_g.rank=chunk_rank;
+  for (j = 0; j < chunk_rank; j++) 
+   options->chunk_g.chunk_lengths[j] = chunk_lengths[j];
  }
 
  if (options->all_chunk==0)
@@ -230,6 +206,9 @@ static int check_options(pack_opt_t *options)
 {
  int   i, k, j, has_cp=0, has_ck=0;
 
+ unsigned szip_options_mask=H5_SZIP_NN_OPTION_MASK;
+ unsigned szip_pixels_per_block;
+
 /*-------------------------------------------------------------------------
  * objects to chunk
  *-------------------------------------------------------------------------
@@ -248,12 +227,12 @@ static int check_options(pack_opt_t *options)
 
  for ( i = 0; i < options->op_tbl->nelems; i++) 
  {
-  char* obj_name=options->op_tbl->objs[i].path;
+  char* name=options->op_tbl->objs[i].path;
   
   if (options->op_tbl->objs[i].chunk.rank>0)
   {
    if (options->verbose){
-    printf("\t<%s> with chunk size ",obj_name); 
+    printf("\t<%s> with chunk size ",name); 
     for ( k = 0; k < options->op_tbl->objs[i].chunk.rank; k++) 
      printf("%d ",(int)options->op_tbl->objs[i].chunk.chunk_lengths[k]);
     printf("\n");
@@ -263,13 +242,14 @@ static int check_options(pack_opt_t *options)
   else if (options->op_tbl->objs[i].chunk.rank==-2)
   {
    if (options->verbose)
-    printf("\t%s %s\n",obj_name,"NONE"); 
+    printf("\t%s %s\n",name,"NONE"); 
    has_ck=1;
   }
  }
  
  if (options->all_chunk==1 && has_ck){
-  printf("Error: Invalid chunking input: '*' is present with other objects\n");
+  printf("Error: Invalid chunking input: all option\
+   is present with other objects\n");
   return -1;
  }
  
@@ -280,23 +260,22 @@ static int check_options(pack_opt_t *options)
  
  if (options->verbose) 
  {
-  printf("Objects to compress are...\n");
-  if (options->all_comp==1) 
+  printf("Objects to filter are...\n");
+  if (options->all_filter==1) 
   {
-   switch (options->comp_g.type)
+   H5Z_filter_t filtn=options->filter_g.filtn;
+   switch (filtn)
    {
    case H5Z_FILTER_NONE:
-     printf("\tUncompress all %s\n",
-     get_scomp(options->comp_g.type));
+     printf("\tUncompress all %s\n",get_sfilter(filtn));
     break;
    case H5Z_FILTER_SZIP:
-     printf("\tCompress all with %s compression\n",
-     get_scomp(options->comp_g.type));
+     printf("\tCompress all with %s compression\n",get_sfilter(filtn));
     break;
    case H5Z_FILTER_DEFLATE:
      printf("\tCompress all with %s compression, parameter %d\n",
-     get_scomp(options->comp_g.type),
-     options->comp_g.info);
+      get_sfilter(filtn),
+      options->filter_g.cd_values[0]);
     break;
    };
   }
@@ -304,22 +283,54 @@ static int check_options(pack_opt_t *options)
 
  for ( i = 0; i < options->op_tbl->nelems; i++) 
  {
-  pack_info_t obj=options->op_tbl->objs[i];
-  if (obj.comp.type>0)
+  pack_info_t obj  = options->op_tbl->objs[i];
+  char*       name = obj.path;
+  if (obj.filter.filtn>0)
   {
-   char* obj_name=obj.path;
-   if (options->verbose) {
-    printf("\t<%s> with %s compression, parameter %d\n",
-     obj_name,
-     get_scomp(obj.comp.type),
-     obj.comp.info);
+   if (options->verbose) 
+   {
+    printf("\t<%s> with %s filter",
+     name,
+     get_sfilter(obj.filter.filtn));
    }
    has_cp=1;
-  }
- }
+   
+   /*check for invalid combination of options */
+   switch (obj.filter.filtn)
+   {
+   default:
+    break;
+   case H5Z_FILTER_SZIP:
+    
+    szip_pixels_per_block=obj.filter.cd_values[0];
+    
+    /* check szip parameters */
+    if (check_szip(obj.chunk.rank,
+     obj.chunk.chunk_lengths,
+     0, /* do not test size */
+     szip_options_mask,
+     szip_pixels_per_block)==0)
+    {
+     /* Return: 1=can apply the filter
+                0=cannot apply the filter 
+        Reset this object filter info 
+      */
+
+     options->op_tbl->objs[i].filter.filtn=-1;
+     options->op_tbl->objs[i].chunk.rank=-1;
+     printf("\tObject <%s> cannot be filtered\n",name);
+
+
+    }
+     
+    break;
+   } /* switch */
+  } /* filtn */
+ } /* i */
  
- if (options->all_comp==1 && has_cp){
-  printf("Error: Invalid compression input: * is present with other objects\n");
+ if (options->all_filter==1 && has_cp){
+  printf("Error: Invalid compression input: all option\
+   is present with other objects\n");
   return -1;
  }
  return 0;
@@ -342,6 +353,7 @@ static int check_options(pack_opt_t *options)
 void read_info(const char *filename,
                pack_opt_t *options) 
 {
+
  char stype[10];
  char comp_info[1024];
  FILE *fp;
@@ -383,7 +395,7 @@ void read_info(const char *filename,
    }
    comp_info[i-1]='\0'; /*cut the last " */    
 
-   if (h5repack_addcomp(comp_info,options)==-1){
+   if (h5repack_addfilter(comp_info,options)==-1){
     printf( "Could not add compression option. Exiting\n");
     exit(1);
    }
