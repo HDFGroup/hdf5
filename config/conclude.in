@@ -104,19 +104,19 @@ install-doc: $(PUB_DOCS) $(DOCDIR)
 
 # Removes those things that `make install' (would have) installed.
 uninstall:
-	@if test "X$(LIB)" != X; then					      \
-	   for f in $(LIB); do						      \
+	@for f in X $(LIB); do						      \
+	   if test $$f != X; then					      \
 	      $(LT_UNINSTALL) $(libdir)/$$f;				      \
-	   done;							      \
-	fi
+	   fi;								      \
+	done
 	@if test "X$(PUB_HDR)" != X; then				      \
 	   set -x; cd $(includedir) && $(RM) $(PUB_HDR);		      \
 	fi
-	@if test "X$(PROGS)" != X; then					      \
-	   for f in $(PROGS); do					      \
+	@for f in X $(PROGS); do					      \
+	   if test $$f != X; then					      \
 	      $(LT_UNINSTALL) $(bindir)/$$f;				      \
-	   done;							      \
-	fi
+	   fi;								      \
+	done
 
 # Removes those things that `make install-doc' (would have) installed.
 uninstall-doc:
