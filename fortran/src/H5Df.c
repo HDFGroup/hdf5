@@ -283,7 +283,7 @@ nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
      hid_t c_mem_space_id;
      hid_t c_file_space_id;
      hid_t c_xfer_prp;
-     hobj_ref_t *buf_c;
+     hobj_ref_t *buf_c = NULL;
      int i, n;
      n = (int)*dims;
 
@@ -343,7 +343,7 @@ nh5dwrite_ref_obj_c_b (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_spac
      hid_t c_mem_space_id;
      hid_t c_file_space_id;
      hid_t c_xfer_prp;
-     hobj_ref_t *buf_c;
+     hobj_ref_t *buf_c = NULL;
      int i, n;
      n = (int)*dims;
 
@@ -403,7 +403,7 @@ nh5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
      hid_t c_mem_space_id;
      hid_t c_file_space_id;
      hid_t c_xfer_prp;
-     hdset_reg_ref_t *buf_c;
+     hdset_reg_ref_t *buf_c = NULL;
      int i, n;
 
       n = (int)*dims;
@@ -464,7 +464,7 @@ nh5dwrite_ref_reg_c_b (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_spac
      hid_t c_mem_space_id;
      hid_t c_file_space_id;
      hid_t c_xfer_prp;
-     hdset_reg_ref_t *buf_c;
+     hdset_reg_ref_t *buf_c = NULL;
      int i, n;
 
       n = (int)*dims;
@@ -671,7 +671,7 @@ nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
      hid_t c_mem_space_id;
      hid_t c_file_space_id;
      hid_t c_xfer_prp;
-     hobj_ref_t *buf_c;
+     hobj_ref_t *buf_c = NULL;
      int i, n;
      n = (int)*dims;
      /*
@@ -730,7 +730,7 @@ nh5dread_ref_obj_c_b (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
      hid_t c_mem_space_id;
      hid_t c_file_space_id;
      hid_t c_xfer_prp;
-     hobj_ref_t *buf_c;
+     hobj_ref_t *buf_c = NULL;
      hsize_t i,n;
      n = (hsize_t)*dims;
      /*
@@ -789,7 +789,7 @@ nh5dread_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
      hid_t c_mem_space_id;
      hid_t c_file_space_id;
      hid_t c_xfer_prp;
-     hdset_reg_ref_t *buf_c;
+     hdset_reg_ref_t *buf_c = NULL;
      int i, n;
      n = (int)*dims;
      /*
@@ -848,7 +848,7 @@ nh5dread_ref_reg_c_b (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space
      hid_t c_mem_space_id;
      hid_t c_file_space_id;
      hid_t c_xfer_prp;
-     hdset_reg_ref_t *buf_c;
+     hdset_reg_ref_t *buf_c = NULL;
      hsize_t i, n;
      n = (hsize_t)*dims;
      /*
