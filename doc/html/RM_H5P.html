@@ -193,6 +193,7 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-GetFilter">H5Pget_filter</a>
     <li><a href="#Property-SetFletcher32">H5Pset_fletcher32</a>
     <li><a href="#Property-SetShuffle">H5Pset_shuffle</a>
+    <li><a href="#Property-SetSzip">H5Pset_szip</a>
     <li><a href="#Property-SetExternal">H5Pset_external</a>
     <li><a href="#Property-GetExternalCount">H5Pget_external_count</a>
     <li><a href="#Property-GetExternal">H5Pget_external</a>
@@ -335,6 +336,7 @@ facilitate moving easily between them.</i>
     <li><a href="#Property-GetFilter">h5pget_filter_f</a>
     <li><a href="#Property-SetFletcher32">h5pset_fletcher32_f</a>
     <li><a href="#Property-SetShuffle">h5pset_shuffle_f</a>
+<!--<li><a href="#Property-SetSzip">h5pset_szip_f</a>                     -->
     <li><a href="#Property-SetExternal">h5pset_external_f</a>
     <li><a href="#Property-GetExternalCount">h5pget_external_count_f</a>
     <li><a href="#Property-GetExternal">h5pget_external_f</a>
@@ -3607,6 +3609,7 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
+
 <hr>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-SetFletcher32">H5Pset_fletcher32</a>
@@ -3636,6 +3639,225 @@ facilitate moving easily between them.</i>
         <img src="Graphics/C++.gif">
         -->
 </dl>
+
+
+
+
+
+
+
+
+
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetSzip">H5Pset_szip</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_szip</code>(<em>hid_t</em> <code>plist</code>,
+                <em>unsigned int</em> <code>options_mask</code>,
+                <em>unsigned int</em> <code>pixels_per_block</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Sets up use of the szip compression filter.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_szip</code> sets the dataset compression method 
+        to szip compression, <code>H5Z_FILTER_SZIP</code>,
+	a compression designed for use with scientific data.
+	<p>
+	Szip options are passed in an options mask, <code>options_mask</code>,
+	as follows.
+        <center>
+        <table>
+        <tr valign=top align=left><td>
+            <hr>
+            <b>Option</b>
+            </td><td>
+            <hr>
+            <b>Description</b>
+            <br>
+            <font size=-1>(Paired options are mutually exclusive.)</font>
+        </td></tr>
+	
+        <tr valign=top align=left><td>
+            <hr>
+            <code>CHIP_OPTION_MASK&nbsp;&nbsp;</code> 
+            </td><td>
+            <hr>
+            Compresses exactly as in hardware. 
+        </td></tr>
+        <tr valign=top align=left><td>
+	    <code>ALLOW_K13_OPTION_MASK&nbsp;&nbsp;</code>
+            </td><td>
+            Allows k split = 13 compression mode.  (Default)
+        </td></tr>
+	
+        <tr valign=top align=left><td>
+            <hr>
+	    <code>EC_OPTION_MASK</code> 
+            </td><td>
+            <hr>
+            Selects entropy coding method.  (Default)
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>NN_OPTION_MASK</code> 
+            </td><td>
+            Selects nearest neighbor coding method. 
+        </td></tr>
+	
+        <tr valign=top align=left><td>
+            <hr>
+	    <code>LSB_OPTION_MASK</code> 
+            </td><td>
+            <hr>
+            Data format is least significant byte first.  (Default)
+        </td></tr>
+        <tr valign=top align=left><td>
+	    <code>MSB_OPTION_MASK</code> 
+            </td><td>
+            Data format is most significant byte first.
+        </td></tr>
+	
+        <tr valign=top align=left><td>
+            <hr>
+            <code>RAW_OPTION_MASK</code> 
+            </td><td>
+            <hr>
+            Do not output szip header.<br>
+            Not a default setting, but should always be set in HDF5.
+        </td></tr>
+
+        <tr valign=top align=left><td>
+            <hr>
+            </td><td>
+            <hr>
+        </td></tr>
+	</table>
+	</center>
+	Some typical usages are as follows:
+	<ul>
+	  <li>If the dataset employs more than 8 bits/pixel,
+	      one of <code>LSB_OPTION_MASK</code> or
+	      <code>MSB_OPTION_MASK</code> is specified.
+	  <li>One of the compression methods, 
+	      <code>EC_OPTION_MASK</code> or
+	      <code>NN_OPTION_MASK</code>, is specified.
+	  <li>The <code>RAW_OPTION_MASK</code> and
+	      <code>ALLOW_K13_OPTION_MASK</code> are used.
+	</ul>
+	<p>
+	Options are combined to create the options mask by means of
+	a logical <code>OR</code> operation.  For example, the 
+        option mask can be set as follows:
+	<br><br><code>&nbsp;&nbsp;&nbsp;&nbsp;
+    options_mask = MSB_OPTION_MASK | NN_OPTION_MASK | RAW_OPTION_MASK;
+	</code>
+	<p>
+        Szip compresses data block by block, with a user-tunable block size.  
+	This block size is passed in the parameter 
+        <code>pixels_per_block</code> and must be even, 
+        with typical values being <code>8</code>, <code>10</code>, 
+        <code>16</code>, and <code>32</code>.
+	The more pixel values vary, the smaller this number should be.
+        For optimal performance, the number of pixels per scan line 
+        (i.e., the size of the fastest-changing dimension in the dataspace)
+        should be an even multiple of the number of pixels per block.
+	<p>
+  <dt><strong>Notes:</strong>
+    <dd>Szip works only with datasets with 1 through 24 bits/pixel, 
+	32 pits/pixel, or 64 bits/pixel.
+	<p>
+	Szip typically requires that the user application also supply 
+        the number of pixels in the object to be compressed, 
+        the number of bits per pixel, and the number of pixels per scan line.  
+        These values need not be independently supplied in the HDF5 
+        environment as they are derived from the datatype and dataspace, 
+        which are already known.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Dataset creation or dataset transfer property list 
+                identifier.
+        <dt><em>unsigned int</em> <code>options_mask</code>
+            <dd>IN: A bit-mask conveying the desired szip options.
+        <dt><em>unsigned int</em> <code>pixels_per_block</code>
+            <dd>IN: The number of pixels or data elements in each data block.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_szip_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+
+    <p>
+  <dt><strong>References:</strong>
+    (This material will appear in a separate file in the final release documents.)
+    <ul>
+    <li>J. Venbrux, P.S. Yeh, G. Zweigle, J. Vesel, 
+        "A VLSI Chip Solution for Lossless Medical Imagery Compression,"
+        <cite>SPIE conference on Medical Imaging 1994</cite>. 
+        Vol. 2164, pp. 561-572, February 13-14, 1994, 
+        Newport Beach, California.
+
+    <li>J. Venbrux, J. Gambles, D. Wiseman, G. Zweigle, W.H. Miller, P.S. Yeh, 
+        "A VLSI Chip Set Development for Lossless Data Compression,"
+        <cite>AIAA Computing in Aerospace 9 Conference</cite>. 
+        October 1993, San Diego, California.
+
+    <li>J. Venbrux, G. Zweigle, J. Gambles, D.Wiseman, W. Miller, P. Yeh,
+        "An Adaptive, Lossless Data Compression Algorithm and VLSI 
+        Implementations,"
+        <cite>NASA Symposium on VLSI Design</cite>. 
+        Pp 1.2.1-1.2.16, November 1993.
+
+    <li>J. Venbrux, P.S. Yeh, and M. N. Liu,
+        "A VLSI Chip Set for High Speed Lossless Data Compression,"
+        <cite>IEEE Transactions on Circuits and Systems for Video 
+        Technology</cite>.
+        Pp. 381-391, December 1992.
+
+    <li>CCSDS 120.0-G-1. 
+        <cite>Lossless Data Compression</cite>. 
+        Green Book. Issue 1, May 1997.
+        This Report presents a summary of the key operational concepts and 
+        rationale underlying the requirements for the CCSDS Recommendation, 
+        Lossless Data Compression. Supporting performance information along 
+        with illustrations are also included. This Report also provides a 
+        broad tutorial overview of the CCSDS Lossless Data Compression 
+        algorithm and is aimed at helping first-time readers
+        to understand the Recommendation.
+        <br>
+        Appears In: CCSDS Publications TGannett 02/04/2003 387K Services 
+        Check Out View
+
+    <li>CCSDS 121.0-B-1. 
+        <cite>Lossless Data Compression</cite>. 
+        Blue Book. Issue 1, May 1997.
+        This Recommendation defines a source-coding data-compression 
+        algorithm and specifies how data compressed using the algorithm 
+        are inserted into source packets for retrieval and decoding.  
+        <br>
+        Appears In: CCSDS Publications
+
+    </ul>
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
 
 <hr>
 <dl>
@@ -3689,6 +3911,7 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
+
 <hr>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-GetEdcCheck">H5Pget_edc_check</a>
@@ -3717,6 +3940,7 @@ facilitate moving easily between them.</i>
         <img src="Graphics/C++.gif">
         -->
 </dl>
+
 
 <hr>
 <dl>
@@ -6704,7 +6928,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
  
-Last modified: 7 April 2003
+Last modified: 16 April 2003
  
 </body>
 </html>
