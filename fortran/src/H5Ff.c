@@ -15,6 +15,7 @@
 /* This files contains C stubs for H5F Fortran APIs */
 
 #include "H5f90.h"
+#include "H5Eprivate.h"
 
 /*----------------------------------------------------------------------------
  * Name:        h5fcreate_c
@@ -474,4 +475,73 @@ nh5fget_freespace_c ( hid_t_f *file_id , hssize_t_f *free_space)
   if ( (c_free_space=H5Fget_freespace(c_file_id)) < 0  ) ret_value = -1;
   *free_space=(hssize_t_f)c_free_space;
   return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5fget_name_c
+ * Purpose:     Call H5Fget_name to get file's name 
+ * Inputs:      obj_id - object identifier 
+ *              buflen -size of the buffer 
+ * Outputs:     buf - buffer to hold the name
+ *              size - size of the file's name
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Tuesday, July 6, 2004
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
+{
+    char *c_buf=NULL;           /* Buffer to hold C string */
+    ssize_t size_c;
+    int_f ret_value=0;          /* Return value */
+
+     /*
+      * Allocate buffer to hold name of an attribute
+      */
+     if ((c_buf = HDmalloc((size_t)*buflen +1)) == NULL)
+         HGOTO_DONE(FAIL);
+ 
+     /*
+      * Call H5Aget_name function
+      */
+     if ((size_c = (size_t_f)H5Fget_name((hid_t)*obj_id, c_buf, (size_t)*buflen)) < 0)
+         HGOTO_DONE(FAIL);
+
+     /*
+      * Convert C name to FORTRAN and place it in the given buffer
+      */
+      HD5packFstring(c_buf, _fcdtocp(buf), (size_t)*buflen);
+
+done:
+      *size = (size_t_f)size_c;
+      if(c_buf) HDfree(c_buf);
+      return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5fget_filesize_c
+ * Purpose:     Call H5Fget_filesize to get file size
+ * Inputs:      file_id - file identifier 
+ * Outputs:     size - size of the file
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, July 7, 2004
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5fget_filesize_c(hid_t_f *file_id, hsize_t_f *size)
+{
+    hsize_t size_c;
+    herr_t ret_value=0;          /* Return value */
+
+     /*
+      * Call H5Fget_filesize function
+      */
+     if ((ret_value = H5Fget_filesize((hid_t)*file_id, &size_c)) < 0)
+         HGOTO_DONE(FAIL);
+      *size = (hsize_t_f)size_c;
+
+done:
+      return ret_value;
 }

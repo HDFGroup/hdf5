@@ -854,4 +854,107 @@
             hdferr = h5fget_freespace_c(file_id, free_space)
 
           END SUBROUTINE h5fget_freespace_f
+
+!----------------------------------------------------------------------
+! Name:		h5fget_name_f 
+!
+! Purpose: 	Gets the name of the file from the object identifier
+!
+! Inputs:  
+!		obj_id		- object identifier
+! Inputs/Outputs:
+!		buf		- buffer to read name in
+! Outputs:  
+!		size		- actual size of the name
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!
+! Programmer:	Elena Pourmal
+!		July 6, 2004
+!
+!----------------------------------------------------------------------
+
+
+          SUBROUTINE h5fget_name_f(obj_id, buf, size, hdferr) 
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fget_name_f
+!DEC$endif
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: obj_id   ! Object identifier 
+            CHARACTER(LEN=*), INTENT(INOUT) :: buf   
+                                                   ! Buffer to hold file name
+            INTEGER(SIZE_T), INTENT(OUT) :: size   ! Size of the file name
+            INTEGER, INTENT(OUT) :: hdferr         ! Error code: 0 on success,
+                                                   ! -1 if fail
+            INTEGER(SIZE_T) :: buflen
+!            INTEGER, EXTERNAL :: h5fget_name_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5fget_name_c(obj_id, size, buf, buflen)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5FGET_NAME_C'::h5fget_name_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference :: buf
+              INTEGER(HID_T), INTENT(IN) :: obj_id
+              INTEGER(SIZE_T), INTENT(OUT) :: size
+              INTEGER(SIZE_T) :: buflen
+              CHARACTER(LEN=*), INTENT(OUT) :: buf
+              END FUNCTION h5fget_name_c
+            END INTERFACE
+            buflen = LEN(buf)
+            hdferr = h5fget_name_c(obj_id, size, buf, buflen)
+          END SUBROUTINE h5fget_name_f
+
+!----------------------------------------------------------------------
+! Name:		h5fget_filesize_f 
+!
+! Purpose: 	Retrieves the file size of the HDF5 file.
+!
+! Inputs:  
+!		file_id		- file identifier
+! Outputs:  
+!		size		- file size 
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!
+! Programmer:	Elena Pourmal
+!		July 7, 2004
+!
+!----------------------------------------------------------------------
+
+
+          SUBROUTINE h5fget_filesize_f(file_id, size, hdferr) 
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fget_filesize_f
+!DEC$endif
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: file_id  ! file identifier
+            INTEGER(HSIZE_T), INTENT(OUT) :: size  ! Size of the file 
+            INTEGER, INTENT(OUT) :: hdferr         ! Error code: 0 on success,
+                                                   ! -1 if fail
+!            INTEGER, EXTERNAL :: h5fget_filesize_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5fget_filesize_c(file_id, size)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5FGET_FILESIZE_C'::h5fget_filesize_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: file_id
+              INTEGER(HSIZE_T), INTENT(OUT) :: size
+              END FUNCTION h5fget_filesize_c
+            END INTERFACE
+            hdferr = h5fget_filesize_c(file_id, size)
+          END SUBROUTINE h5fget_filesize_f
+
+
       END MODULE H5F

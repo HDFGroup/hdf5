@@ -40,6 +40,9 @@ H5_DLL int HD5packFstring(char *src, char *dest, int len);
 #   define nh5fget_obj_count_c       FNAME(H5FGET_OBJ_COUNT_C)
 #   define nh5fget_obj_ids_c         FNAME(H5FGET_OBJ_IDS_C)
 #   define nh5fget_freespace_c       FNAME(H5FGET_FREESPACE_C)
+#   define nh5fget_name_c            FNAME(H5FGET_NAME_C)
+#   define nh5fget_filesize_c        FNAME(H5FGET_FILESIZE_C)
+
 #else                                              /* !DF_CAPFNAMES */
 #   define nh5fcreate_c            FNAME(h5fcreate_c)
 #   define nh5fflush_c             FNAME(h5fflush_c)
@@ -54,6 +57,8 @@ H5_DLL int HD5packFstring(char *src, char *dest, int len);
 #   define nh5fget_obj_count_c     FNAME(h5fget_obj_count_c)
 #   define nh5fget_obj_ids_c       FNAME(h5fget_obj_ids_c)
 #   define nh5fget_freespace_c     FNAME(h5fget_freespace_c)
+#   define nh5fget_name_c          FNAME(h5fget_name_c)
+#   define nh5fget_filesize_c      FNAME(h5fget_filesize_c)
 #endif                                             /* DF_CAPFNAMES */
 #endif                                             /* H5Ff90_FNAMES */
 
@@ -82,6 +87,10 @@ H5_DLL int_f nh5fget_obj_count_c (hid_t_f *file_id, int_f *obj_type, int_f *obj_
 H5_DLL int_f nh5fget_obj_ids_c (hid_t_f *file_id, int_f *obj_type, int_f *max_objs, int_f *obj_ids);
 H5_DLL int_f nh5fget_freespace_c (hid_t_f *file_id, hssize_t_f *free_space);
 H5_DLL int_f nh5fflush_c (hid_t_f *obj_id, int_f *scope);
+H5_DLL int_f nh5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen);
+H5_DLL int_f nh5fget_filesize_c(hid_t_f *file_id, hsize_t_f *size);
+
+
 
 /*
  * Functions from H5Sf.c

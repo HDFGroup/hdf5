@@ -65,6 +65,11 @@ New Features
     Tools:
     ------
 
+    F90 API:
+    --------
+        - added new h5fget_name_f and h5fget_filesize_f subroutines
+                                         EIP 2004/07/08
+
     C++ API:
     --------
 
