@@ -40,12 +40,10 @@ class H5_DLLCPP Exception {
 
 	// Returns the character string that describes an error specified by
 	// a major error number.
-	//string getMajorString( H5E_major_t major_num ) const;
 	string getMajorString( hid_t err_major_id ) const;
 
 	// Returns the character string that describes an error specified by
 	// a minor error number.
-	//string getMinorString( H5E_minor_t minor_num ) const;
 	string getMinorString( hid_t err_minor_id ) const;
 
 	// Returns the detailed message set at the time the exception is thrown
