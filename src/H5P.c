@@ -2650,7 +2650,7 @@ H5Pget_xfer(hid_t plist_id, H5D_transfer_t *data_xfer_mode)
 
     FUNC_LEAVE (SUCCEED);
 }
-#endif /*HAVE_PARALLEL*/
+#endif /* HAVE_PARALLEL */
 #endif /* WANT_H5_V1_2_COMPAT */
 
 
