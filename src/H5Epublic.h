@@ -19,8 +19,11 @@
 #ifndef _H5Epublic_H
 #define _H5Epublic_H
 
+#include <stdio.h>		/*FILE arg of H5Eprint()		*/
+
 /* Public headers needed by this file */
 #include <H5public.h>
+#include <H5Apublic.h>
 
 /*
  * Declare an enumerated type which holds all the valid major HDF error codes.
@@ -114,25 +117,18 @@ typedef enum H5E_minor_t {
    H5E_LINK			/* Link count failure			*/
 } H5E_minor_t;
 
-/* Function pointer to report errors through */
-typedef herr_t (*H5E_push_func_t)(int32 errid, H5E_major_t maj,
-				  H5E_minor_t min, const char *function_name,
-				  const char *file_name, intn line);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Functions in H5E.c */
-int32 H5Enew_err_stack (uintn initial_stack_size);
-intn H5Edelete_err_stack (int32 err_hand);
-#ifdef H5_ERROR_DEBUG
-H5E_push_func_t H5Eset_push (H5E_push_func_t func);
-#endif
-herr_t H5Epush (H5E_major_t maj, H5E_minor_t min, const char *function_name,
-		const char *file_name, intn line);
-herr_t H5Eclear(int32 err_hand);
-void H5E_term_interface(void);
+hid_t H5Ecreate (uintn initial_stack_nelmts);
+herr_t H5Eclose (hid_t estack_id);
+herr_t H5Epush (hid_t estack_id, H5E_major_t maj_num, H5E_minor_t min_num,
+		const char *function_name, const char *file_name, intn line,
+		const char *desc);
+herr_t H5Eclear (hid_t estack_id);
+herr_t H5Eprint (hid_t estack_id, FILE *file);
 
 #ifdef __cplusplus
 }

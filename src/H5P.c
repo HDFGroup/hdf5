@@ -268,19 +268,22 @@ H5P_copy (const H5P_t *src)
       
    case H5P_SIMPLE:
       if (dst->u.simple.size) {
-	 dst->u.simple.size = H5MM_xmalloc (dst->u.simple.rank * sizeof(intn));
+	 dst->u.simple.size = H5MM_xmalloc (dst->u.simple.rank *
+					    sizeof(dst->u.simple.size[0]));
 	 for (i=0; i<dst->u.simple.rank; i++) {
 	    dst->u.simple.size[i] = src->u.simple.size[i];
 	 }
       }
       if (dst->u.simple.max) {
-	 dst->u.simple.max = H5MM_xmalloc (dst->u.simple.rank * sizeof(intn));
+	 dst->u.simple.max = H5MM_xmalloc (dst->u.simple.rank *
+					   sizeof(dst->u.simple.max[0]));
 	 for (i=0; i<dst->u.simple.rank; i++) {
 	    dst->u.simple.max[i] = src->u.simple.max[i];
 	 }
       }
       if (dst->u.simple.perm) {
-	 dst->u.simple.perm = H5MM_xmalloc (dst->u.simple.rank * sizeof(intn));
+	 dst->u.simple.perm = H5MM_xmalloc (dst->u.simple.rank *
+					    sizeof(dst->u.simple.perm[0]));
 	 for (i=0; i<dst->u.simple.rank; i++) {
 	    dst->u.simple.perm[i] = src->u.simple.perm[i];
 	 }
@@ -811,7 +814,7 @@ done:
     herr_t H5Pset_space(sid, rank, dims)
         hid_t sid;            IN: Dataspace object to query
         intn rank;            IN: # of dimensions for the dataspace
-        const intn *dims;     IN: Size of each dimension for the dataspace
+        const size_t *dims;   IN: Size of each dimension for the dataspace
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -823,7 +826,8 @@ done:
     expand.  Currently, only the first dimension in the array (the slowest) may
     be unlimited in size.
 --------------------------------------------------------------------------*/
-herr_t H5Pset_space(hid_t sid, intn rank, const intn *dims)
+herr_t
+H5Pset_space (hid_t sid, intn rank, const size_t *dims)
 {
     H5P_t *space=NULL;      /* dataspace to modify */
     intn u;                    /* local counting variable */
@@ -886,8 +890,8 @@ herr_t H5Pset_space(hid_t sid, intn rank, const intn *dims)
 
         /* Set the rank and copy the dims */
         space->u.simple.rank=rank;
-        space->u.simple.size = H5MM_xcalloc (sizeof(intn), rank);
-        HDmemcpy(space->u.simple.size,dims,sizeof(intn)*rank);
+        space->u.simple.size = H5MM_xcalloc (rank, sizeof(size_t));
+        HDmemcpy(space->u.simple.size,dims,sizeof(size_t)*rank);
 
         /* check if there are unlimited dimensions and create the maximum dims array */
         for(u=0; u<rank; u++)
@@ -897,8 +901,8 @@ herr_t H5Pset_space(hid_t sid, intn rank, const intn *dims)
 		   HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, 
 			       "unlimited dimensions not in the lowest "
 			       "dimensionality");
-                space->u.simple.max = H5MM_xcalloc (sizeof(intn),rank);
-                HDmemcpy(space->u.simple.max,dims,sizeof(intn)*rank);
+                space->u.simple.max = H5MM_xcalloc (rank, sizeof(size_t));
+                HDmemcpy(space->u.simple.max,dims,sizeof(size_t)*rank);
                 space->u.simple.dim_flags|=H5P_VALID_MAX;
                 break;
               } /* end if */

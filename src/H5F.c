@@ -792,16 +792,6 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
       }
       
       /*
-       * All addresses are relative to a base address.  Eventually, the base
-       * address will be able to be set independently of the boot block
-       * address, but for now, all addresses are relative to the beginning of
-       * the boot block.  Anything before the base address is assumed to be
-       * user-defined data.
-       */
-      f->shared->base_addr = f->shared->boot_addr;
-      f->shared->create_parms.userblock_size=f->shared->base_addr.offset;
-      
-      /*
        * Decode the fixed size part of the boot block.  For each of the
        * version parameters, check that the library is able to handle that
        * version.
@@ -879,9 +869,10 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
       assert (p-buf == fixed_size);
 
       /* Read the variable length part of the boot block... */
-      variable_size = H5F_SIZEOF_ADDR (f) + /*global small obj heap*/
+      variable_size = H5F_SIZEOF_ADDR (f) + /*base address*/
+		      H5F_SIZEOF_ADDR (f) + /*global small obj heap*/
 		      H5F_SIZEOF_ADDR (f) + /*global free list addr*/
-		      H5F_SIZEOF_SIZE (f)   + /*logical file size*/
+		      H5F_SIZEOF_ADDR (f) + /*logical file size*/
 		      H5G_SIZEOF_ENTRY (f);
       assert (variable_size <= sizeof buf);
       addr1 = f->shared->boot_addr;
@@ -892,6 +883,7 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
       }
 	 
       p = buf;
+      H5F_addr_decode (f, &p, &(f->shared->base_addr));
       H5F_addr_decode (f, &p, &(f->shared->smallobj_addr));
       H5F_addr_decode (f, &p, &(f->shared->freespace_addr));
       H5F_addr_decode (f, &p, &(f->shared->hdf5_eof));
@@ -899,6 +891,12 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
 	 HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
 		      "can't read root symbol entry");
       }
+
+      /*
+       * The userdefined data is the area of the file before the base
+       * address.
+       */
+      f->shared->create_parms.userblock_size=f->shared->base_addr.offset;
    }
 
    /*
@@ -1205,6 +1203,7 @@ H5F_flush (H5F_t *f, hbool_t invalidate)
    UINT16ENCODE (p, f->shared->create_parms.sym_leaf_k);
    UINT16ENCODE (p, f->shared->create_parms.btree_k[H5B_SNODE_ID]);
    UINT32ENCODE (p, f->shared->consist_flags);
+   H5F_addr_encode (f, &p, &(f->shared->base_addr));
    H5F_addr_encode (f, &p, &(f->shared->smallobj_addr));
    H5F_addr_encode (f, &p, &(f->shared->freespace_addr));
    H5F_addr_encode (f, &p, &(f->shared->hdf5_eof));

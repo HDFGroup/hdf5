@@ -69,7 +69,7 @@ typedef enum H5T_cset_t {
 typedef enum H5T_str_t {
    H5T_STR_ERROR	=-1, 	/*error					*/
    H5T_STR_NULL		=0, 	/*pad with null term like in C		*/
-   H5T_STR_SPACE	=1, 	/*pad with spaces like in Fortran	*/
+   H5T_STR_SPACE	=1 	/*pad with spaces like in Fortran	*/
 } H5T_str_t;
 
 
@@ -101,7 +101,7 @@ hbool_t H5Tequal (hid_t type1_id, hid_t type2_id);
 
 H5T_class_t H5Tget_class (hid_t type_id);
 size_t H5Tget_size (hid_t type_id);
-intn H5Tget_num_members (hid_t type_id);
+intn H5Tget_nmembers (hid_t type_id);
 
 herr_t H5Tinsert_member (hid_t parent_id, const char *name, off_t offset,
 			 hid_t member_id);

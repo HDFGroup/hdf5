@@ -269,7 +269,10 @@ H5Cget_class (hid_t template)
    FUNC_ENTER (H5Cget_class, H5C_NO_CLASS);
    
    if ((group = H5Aatom_group (template))<0 ||
-       group<H5_TEMPLATE_0 || group>=H5_TEMPLATE_MAX) {
+#ifndef NDEBUG
+       group>=H5_TEMPLATE_MAX ||
+#endif
+       group<H5_TEMPLATE_0) {
       HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, H5C_NO_CLASS, "not a template");
    }
 

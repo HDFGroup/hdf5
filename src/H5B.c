@@ -762,7 +762,7 @@ herr_t
 H5B_insert (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 	    void *udata)
 {
-   uint8	lt_key[512], md_key[512], rt_key[512];
+   uint8	lt_key[1024], md_key[1024], rt_key[1024];
    hbool_t	lt_key_changed=FALSE, rt_key_changed=FALSE;
    haddr_t	child, old_root;
    intn		level;

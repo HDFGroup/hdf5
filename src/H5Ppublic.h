@@ -47,7 +47,7 @@ intn H5Pget_ndims (hid_t space_id);
 intn H5Pget_dims (hid_t space_id, size_t dims[]);
 
 hbool_t H5Pis_simple(hid_t space_id);
-herr_t H5Pset_space(hid_t space_id, intn rank, const intn *dims);
+herr_t H5Pset_space(hid_t space_id, intn rank, const size_t *dims);
 
 #ifdef __cplusplus
 }

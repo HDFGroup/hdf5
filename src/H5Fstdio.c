@@ -103,7 +103,7 @@ H5F_stdio_open (const char *name, uintn flags, H5F_search_t *key/*out*/)
    lf->u.stdio.op = H5F_OP_SEEK;
    lf->u.stdio.cur = 0;
    H5F_addr_reset (&(lf->eof));
-   if (fseek (lf->u.stdio.f, 0, SEEK_END)<=0) {
+   if (fseek (lf->u.stdio.f, 0, SEEK_END)<0) {
       lf->u.stdio.op = H5F_OP_UNKNOWN;
    } else {
       H5F_addr_inc (&(lf->eof), ftell (lf->u.stdio.f));

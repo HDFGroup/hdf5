@@ -189,7 +189,7 @@ herr_t H5_init_thread(void)
     FUNC_ENTER_INIT (H5_init_thread, NULL, FAIL);
 
     /* Create/initialize this thread's error stack */
-    if((thrderrid=H5Enew_err_stack(16))==FAIL)
+    if((H5E_thrdid_g=H5Ecreate(16))==FAIL)
        HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, FAIL,
 		      "unable to create thread error stack");
 
@@ -222,7 +222,7 @@ herr_t H5_init_thread(void)
 void
 H5_term_thread (void)
 {
-    H5Edelete_err_stack(thrderrid);
+    H5Eclose (H5E_thrdid_g);
 } /* end H5_term_thread() */
 
 /*--------------------------------------------------------------------------

@@ -139,74 +139,140 @@ H5Tcreate (H5T_class_t type, size_t size)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_create
+ * Function:	H5Tcopy
  *
- * Purpose:	Creates a new data type and initializes it to reasonable
- *		values.  The new data type is SIZE bytes and an instance of
- *		the class TYPE.
+ * Purpose:	Copies a data type.  The resulting data type is not locked.
+ *		The data type should be closed when no longer needed by
+ *		calling H5Tclose().
  *
- * Return:	Success:	Pointer to the new type.
+ * Return:	Success:	The ID of a new data type.
  *
- *		Failure:	NULL
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *              Friday, December  5, 1997
+ *              Tuesday, December  9, 1997
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-H5T_t *
-H5T_create (H5T_class_t type, size_t size)
+hid_t
+H5Tcopy (hid_t type_id)
 {
    H5T_t	*dt = NULL;
+   H5T_t	*new_dt = NULL;
+   hid_t	ret_value = FAIL;
    
-   FUNC_ENTER (H5T_create, NULL);
+   FUNC_ENTER (H5Tcopy, FAIL);
+   H5ECLEAR;
 
-   assert (size>0);
-
-   switch (type) {
-   case H5T_FIXED:
-      /* Default type is a native `int' */
-      if (NULL==(dt=H5T_copy (H5Aatom_object (H5T_NATIVE_INT)))) {
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL,
-			"can't derive type from native int");
-      }
-      break;
-
-   case H5T_FLOAT:
-      /* Default type is a native `double' */
-      if (NULL==(dt=H5T_copy (H5Aatom_object (H5T_NATIVE_DOUBLE)))) {
-	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL,
-			"can't derive type from native double");
-      }
-      break;
-
-   case H5T_DATE:
-   case H5T_STRING:
-   case H5T_BITFIELD:
-   case H5T_OPAQUE:
-      assert ("not implemented yet" && 0);
-      HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, NULL,
-		     "not implemented yet");
-
-   case H5T_COMPOUND:
-      dt = H5MM_xcalloc (1, sizeof(H5T_t));
-      dt->type = type;
-      break;
-
-   default:
-      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, NULL,
-		     "unknown data type class");
+   /* check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
    }
 
-   dt->size = size;
-   FUNC_LEAVE (dt);
+   /* copy */
+   if (NULL==(new_dt = H5T_copy (dt))) {
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't copy");
+   }
+
+   /* atomize result */
+   if ((ret_value=H5Aregister_atom (H5_DATATYPE, new_dt))<0) {
+      H5T_close (new_dt);
+      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+		     "can't register data type atom");
+   }
+
+   FUNC_LEAVE (ret_value);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tget_num_members
+ * Function:	H5Tclose
+ *
+ * Purpose:	Frees a data type and all associated memory.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, December  9, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tclose (hid_t type_id)
+{
+   H5T_t	*dt = NULL;
+   
+   FUNC_ENTER (H5Tclose, FAIL);
+   H5ECLEAR;
+
+   /* check args */
+   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
+       NULL==(dt=H5Aatom_object (type_id))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+   }
+   if (dt->locked) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "predefined data type");
+   }
+
+   /* When the reference count reaches zero the resources are freed */
+   if (H5A_dec_ref (type_id)<0) {
+      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id");
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tequal
+ *
+ * Purpose:	Determines if two data types are equal.
+ *
+ * Return:	Success:	TRUE if equal, FALSE if unequal
+ *
+ *		Failure:	FAIL
+ *
+ * Errors:
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, December 10, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5Tequal (hid_t type1_id, hid_t type2_id)
+{
+   const H5T_t	*dt1 = NULL;
+   const H5T_t	*dt2 = NULL;
+   hbool_t	ret_value = FAIL;
+   
+   FUNC_ENTER (H5Tequal, FAIL);
+
+   /* check args */
+   if (H5_DATATYPE!=H5Aatom_group (type1_id) ||
+       NULL==(dt1=H5Aatom_object (type1_id)) ||
+       H5_DATATYPE!=H5Aatom_group (type2_id) ||
+       NULL==(dt2=H5Aatom_object (type2_id))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+   }
+
+   ret_value = (0==H5T_cmp (dt1, dt2));
+
+   FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tget_nmembers
  *
  * Purpose:	Determines how many members compound data type TYPE_ID has.
  *
@@ -225,7 +291,7 @@ H5T_create (H5T_class_t type, size_t size)
  *-------------------------------------------------------------------------
  */
 intn
-H5Tget_num_members (hid_t type_id)
+H5Tget_nmembers (hid_t type_id)
 {
    
    H5T_t	*dt = NULL;
@@ -278,7 +344,6 @@ H5Tget_class (hid_t type_id)
    FUNC_LEAVE (dt->type);
 }
 
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_size
@@ -317,36 +382,6 @@ H5Tget_size (hid_t type_id)
    size = H5T_get_size (dt);
 
    FUNC_LEAVE (size);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5T_get_size
- *
- * Purpose:	Determines the total size of a data type in bytes.
- *
- * Return:	Success:	Size of the data type in bytes.  The size of
- *				the data type is the size of an instance of
- *				that data type.
- *
- *		Failure:	0 (valid data types are never zero size)
- *
- * Programmer:	Robb Matzke
- *              Tuesday, December  9, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-size_t
-H5T_get_size (const H5T_t *dt)
-{
-   FUNC_ENTER (H5T_get_size, 0);
-
-   /* check args */
-   assert (dt);
-
-   FUNC_LEAVE (dt->size);
 }
 
 
@@ -414,6 +449,205 @@ H5Tinsert_member (hid_t parent_id, const char *name, off_t offset,
    FUNC_LEAVE (SUCCEED);
 }
 
+
+
+/*-------------------------------------------------------------------------
+ * API functions are above; library-private functions are below...
+ *------------------------------------------------------------------------- 
+ */
+
+
+
+
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_create
+ *
+ * Purpose:	Creates a new data type and initializes it to reasonable
+ *		values.  The new data type is SIZE bytes and an instance of
+ *		the class TYPE.
+ *
+ * Return:	Success:	Pointer to the new type.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, December  5, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t *
+H5T_create (H5T_class_t type, size_t size)
+{
+   H5T_t	*dt = NULL;
+   
+   FUNC_ENTER (H5T_create, NULL);
+
+   assert (size>0);
+
+   switch (type) {
+   case H5T_FIXED:
+      /* Default type is a native `int' */
+      if (NULL==(dt=H5T_copy (H5Aatom_object (H5T_NATIVE_INT)))) {
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL,
+			"can't derive type from native int");
+      }
+      break;
+
+   case H5T_FLOAT:
+      /* Default type is a native `double' */
+      if (NULL==(dt=H5T_copy (H5Aatom_object (H5T_NATIVE_DOUBLE)))) {
+	 HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL,
+			"can't derive type from native double");
+      }
+      break;
+
+   case H5T_DATE:
+   case H5T_STRING:
+   case H5T_BITFIELD:
+   case H5T_OPAQUE:
+      assert ("not implemented yet" && 0);
+      HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, NULL,
+		     "not implemented yet");
+
+   case H5T_COMPOUND:
+      dt = H5MM_xcalloc (1, sizeof(H5T_t));
+      dt->type = type;
+      break;
+
+   default:
+      HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, NULL,
+		     "unknown data type class");
+   }
+
+   dt->size = size;
+   FUNC_LEAVE (dt);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_copy
+ *
+ * Purpose:	Copies datatype OLD_DT.  The resulting data type is not
+ *		locked.
+ *
+ * Return:	Success:	Pointer to a new copy of the OLD_DT argument.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, December  4, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t *
+H5T_copy (const H5T_t *old_dt)
+{
+   H5T_t	*new_dt = NULL;
+   intn		i;
+   char		*s;
+   
+   FUNC_ENTER (H5T_copy, NULL);
+
+   /* check args */
+   assert (old_dt);
+
+   /* copy */
+   new_dt = H5MM_xcalloc (1, sizeof(H5T_t));
+   *new_dt = *old_dt;
+   new_dt->locked = FALSE;
+   
+   if (H5T_COMPOUND==new_dt->type) {
+      new_dt->u.compnd.memb = H5MM_xmalloc (new_dt->u.compnd.nmembs *
+					    sizeof(H5T_member_t));
+      HDmemcpy (new_dt->u.compnd.memb, old_dt->u.compnd.memb,
+		new_dt->u.compnd.nmembs * sizeof(H5T_member_t));
+      for (i=0; i<new_dt->u.compnd.nmembs; i++) {
+	 s = new_dt->u.compnd.memb[i].name;
+	 new_dt->u.compnd.memb[i].name = H5MM_xstrdup (s);
+      }
+   }
+   
+   FUNC_LEAVE (new_dt);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_close
+ *
+ * Purpose:	Frees a data type and all associated memory.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, December  8, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_close (H5T_t *dt)
+{
+   intn		i;
+   
+   FUNC_ENTER (H5T_close, FAIL);
+
+   assert (dt);
+   assert (!dt->locked);
+
+   if (dt && H5T_COMPOUND==dt->type) {
+      for (i=0; i<dt->u.compnd.nmembs; i++) {
+	 H5MM_xfree (dt->u.compnd.memb[i].name);
+      }
+      H5MM_xfree (dt->u.compnd.memb);
+      H5MM_xfree (dt);
+      
+   } else if (dt) {
+      H5MM_xfree (dt);
+   }
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_get_size
+ *
+ * Purpose:	Determines the total size of a data type in bytes.
+ *
+ * Return:	Success:	Size of the data type in bytes.  The size of
+ *				the data type is the size of an instance of
+ *				that data type.
+ *
+ *		Failure:	0 (valid data types are never zero size)
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, December  9, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5T_get_size (const H5T_t *dt)
+{
+   FUNC_ENTER (H5T_get_size, 0);
+
+   /* check args */
+   assert (dt);
+
+   FUNC_LEAVE (dt->size);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_insert_member
@@ -476,228 +710,6 @@ H5T_insert_member (H5T_t *parent, const char *name, off_t offset,
    H5MM_xfree (tmp);
 
    FUNC_LEAVE (SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tcopy
- *
- * Purpose:	Copies a data type.  The resulting data type is not locked.
- *
- * Return:	Success:	The ID of a new data type.
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Tuesday, December  9, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5Tcopy (hid_t type_id)
-{
-   H5T_t	*dt = NULL;
-   H5T_t	*new_dt = NULL;
-   hid_t	ret_value = FAIL;
-   
-   FUNC_ENTER (H5Tcopy, FAIL);
-   H5ECLEAR;
-
-   /* check args */
-   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
-       NULL==(dt=H5Aatom_object (type_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-   }
-
-   /* copy */
-   if (NULL==(new_dt = H5T_copy (dt))) {
-      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't copy");
-   }
-
-   /* atomize result */
-   if ((ret_value=H5Aregister_atom (H5_DATATYPE, new_dt))<0) {
-      H5T_close (new_dt);
-      HRETURN_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
-		     "can't register data type atom");
-   }
-
-   FUNC_LEAVE (ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5T_copy
- *
- * Purpose:	Copies datatype OLD_DT.  The resulting data type is not
- *		locked.
- *
- * Return:	Success:	Pointer to a new copy of the OLD_DT argument.
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *              Thursday, December  4, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-H5T_t *
-H5T_copy (const H5T_t *old_dt)
-{
-   H5T_t	*new_dt = NULL;
-   intn		i;
-   char		*s;
-   
-   FUNC_ENTER (H5T_copy, NULL);
-
-   /* check args */
-   assert (old_dt);
-
-   /* copy */
-   new_dt = H5MM_xcalloc (1, sizeof(H5T_t));
-   *new_dt = *old_dt;
-   new_dt->locked = FALSE;
-   
-   if (H5T_COMPOUND==new_dt->type) {
-      new_dt->u.compnd.memb = H5MM_xmalloc (new_dt->u.compnd.nmembs *
-					    sizeof(H5T_member_t));
-      HDmemcpy (new_dt->u.compnd.memb, old_dt->u.compnd.memb,
-		new_dt->u.compnd.nmembs * sizeof(H5T_member_t));
-      for (i=0; i<new_dt->u.compnd.nmembs; i++) {
-	 s = new_dt->u.compnd.memb[i].name;
-	 new_dt->u.compnd.memb[i].name = H5MM_xstrdup (s);
-      }
-   }
-   
-   FUNC_LEAVE (new_dt);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tclose
- *
- * Purpose:	Frees a data type and all associated memory.
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Tuesday, December  9, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Tclose (hid_t type_id)
-{
-   H5T_t	*dt = NULL;
-   
-   FUNC_ENTER (H5Tclose, FAIL);
-   H5ECLEAR;
-
-   /* check args */
-   if (H5_DATATYPE!=H5Aatom_group (type_id) ||
-       NULL==(dt=H5Aatom_object (type_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-   }
-   if (dt->locked) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "predefined data type");
-   }
-
-   /* When the reference count reaches zero the resources are freed */
-   if (H5A_dec_ref (type_id)<0) {
-      HRETURN_ERROR (H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id");
-   }
-
-   FUNC_LEAVE (SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5T_close
- *
- * Purpose:	Frees a data type and all associated memory.
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Monday, December  8, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5T_close (H5T_t *dt)
-{
-   intn		i;
-   
-   FUNC_ENTER (H5T_close, FAIL);
-
-   assert (dt);
-   assert (!dt->locked);
-
-   if (dt && H5T_COMPOUND==dt->type) {
-      for (i=0; i<dt->u.compnd.nmembs; i++) {
-	 H5MM_xfree (dt->u.compnd.memb[i].name);
-      }
-      H5MM_xfree (dt->u.compnd.memb);
-      H5MM_xfree (dt);
-      
-   } else if (dt) {
-      H5MM_xfree (dt);
-   }
-
-   FUNC_LEAVE (SUCCEED);
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tequal
- *
- * Purpose:	Determines if two data types are equal.
- *
- * Return:	Success:	TRUE if equal, FALSE if unequal
- *
- *		Failure:	FAIL
- *
- * Errors:
- *
- * Programmer:	Robb Matzke
- *              Wednesday, December 10, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-hbool_t
-H5Tequal (hid_t type1_id, hid_t type2_id)
-{
-   const H5T_t	*dt1 = NULL;
-   const H5T_t	*dt2 = NULL;
-   hbool_t	ret_value = FAIL;
-   
-   FUNC_ENTER (H5Tequal, FAIL);
-
-   /* check args */
-   if (H5_DATATYPE!=H5Aatom_group (type1_id) ||
-       NULL==(dt1=H5Aatom_object (type1_id)) ||
-       H5_DATATYPE!=H5Aatom_group (type2_id) ||
-       NULL==(dt2=H5Aatom_object (type2_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-   }
-
-   ret_value = (0==H5T_cmp (dt1, dt2));
-
-   FUNC_LEAVE (ret_value);
 }
 
 
@@ -778,6 +790,7 @@ H5T_cmp (const H5T_t *dt1, const H5T_t *dt2)
       }
       
 #ifndef NDEBUG
+      /* I don't quite trust the code above yet :-)  --RPM */
       for (i=0; i<dt1->u.compnd.nmembs; i++) {
 	 assert (HDstrcmp (dt1->u.compnd.memb[idx1[i]].name,
 			   dt1->u.compnd.memb[idx1[i+1]].name));

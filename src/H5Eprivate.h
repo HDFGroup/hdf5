@@ -36,7 +36,8 @@
    Assume that func and file are both stored in static space, or at
    least be not corrupted in the meanwhile. */
 
-#define HERROR(maj, min, str) H5Epush(maj, min, FUNC, __FILE__, __LINE__)
+#define HERROR(maj, min, str) H5Epush (H5E_thrdid_g, maj, min,		      \
+				       FUNC, __FILE__, __LINE__, str)
 
 /* HRETURN_ERROR macro, used to facilitate error reporting.  Makes
    same assumptions as HERROR.  IN ADDITION, this macro causes
@@ -76,62 +77,67 @@
    This macro is just a wrapper to clear the error stack with the thread
    error ID */
 
-#define H5ECLEAR H5Eclear(thrderrid)
+#define H5ECLEAR H5Eclear(H5E_thrdid_g)
 
 /* Maximum length of function name to push onto error stack */
-#define MAX_FUNC_NAME_LEN   32
+#define MAX_FUNC_NAME	32
 
 /* 
  * error_messages is the list of error messages in the system, kept as
  * error_code-message pairs.  
  */
-typedef struct 
-  {
-      H5E_major_t error_code;
-      const char *str;
-  }
-hdf_maj_error_messages_t;
+typedef struct H5E_major_mesg_t {
+   H5E_major_t error_code;
+   const char *str;
+} H5E_major_mesg_t;
 
+typedef struct H5E_minor_mesg_t {
+   H5E_minor_t error_code;
+   const char *str;
+} H5E_minor_mesg_t;
 
-typedef struct 
-  {
-      H5E_minor_t error_code;
-      const char *str;
-  }
-hdf_min_error_messages_t;
+/* Function pointer to report errors through */
+struct H5E_t; /*forward decl*/
+typedef herr_t (*H5E_push_t)(struct H5E_t *estack, H5E_major_t maj_num,
+			     H5E_minor_t min_num, const char *function_name,
+			     const char *file_name, intn line,
+			     const char *desc);
 
-
-/* We use a stack to hold the errors plus we keep track of the function,
-   file and line where the error occurs. */
+/*
+ * We use a stack to hold the errors plus we keep track of the function, file
+ * and line where the error occurs.
+ */
 
 /* the structure of the error stack element */
-typedef struct error_t
-  {
-      H5E_major_t maj;    /* Major error number */
-      H5E_minor_t min;    /* Minor error number */
-      char function_name[MAX_FUNC_NAME_LEN];    /* function where error occur */
-      const char *file_name;    /* file where error occur */
-      intn        line;         /* line in file where error occurs */
-      char       *desc;         /* optional supplied description */
-  }
-H5E_error_t;
+typedef struct H5E_error_t {
+   H5E_major_t	maj_num;	/* Major error number			*/
+   H5E_minor_t	min_num;    	/* Minor error number			*/
+   char 	func_name[MAX_FUNC_NAME]; /* function where error occur */
+   const char	*file_name;    	/* file where error occur		*/
+   intn        	line;         	/* line in file where error occurs	*/
+   char       	*desc;         	/* optional supplied description	*/
+} H5E_error_t;
 
 /* Structure to store error information for a thread */
-typedef struct errstack_t
-  {
-      uintn stack_size;         /* Number of elements allocated in the stack */
-      uintn stack_top;          /* Offset of the next open stack element */
-      H5E_error_t *err_stack;   /* Pointer to the error stack */
-      H5E_push_func_t push;     /* Function to call when an error is to be reported */
-  } H5E_errstack_t;
-
-
+typedef struct H5E_t {
+   uintn	nelmts;         /* Num elements allocated in the stack	*/
+   uintn	top;          	/* Index of the next open stack element	*/
+   H5E_error_t	*stack;   	/* Pointer to the error stack		*/
+   H5E_push_t	push;		/* Func that pushes new error on stack	*/
+} H5E_t;
 
 /* Private global variables in H5E.c */
-extern int32 thrderrid;     	/* Thread-specific "global" error-handler ID */
+extern hid_t H5E_thrdid_g;     	/* Thread-specific "global" error-handler ID */
 extern hbool_t install_atexit;	/* Whether to install the atexit routine */
 
-/* Private functions in H5E.c */
-herr_t H5E_store(int32 errid, H5E_major_t maj, H5E_minor_t min, const char *function_name, const char *file_name, intn line);
+herr_t H5E_close (H5E_t *estack);
+herr_t H5E_clear (H5E_t *estack);
+herr_t H5E_print (H5E_t *estack, FILE *file);
+herr_t H5E_push (H5E_t *estack, H5E_major_t maj_num, H5E_minor_t min_num,
+		 const char *function_name, const char *file_name, intn line,
+		 const char *desc);
+
+
+
 
 #endif

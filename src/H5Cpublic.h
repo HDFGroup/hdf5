@@ -60,7 +60,7 @@ typedef enum H5C_prop_t {
    H5D_CHUNK_SIZE, 	/* Chunk size vector				*/
    H5D_COMPRESS, 	/* Raw data compression				*/
    H5D_PRE_OFFSET, 	/* Precompression offset			*/
-   H5D_PRE_SCALE, 	/* Precompression scale				*/
+   H5D_PRE_SCALE 	/* Precompression scale				*/
 
    /* Dataset Transfer Properties */
    /* None defined yet */
