@@ -169,6 +169,13 @@ BASEDIR=${HOME}/snapshots-${H5VERSION}
 CURRENT=${BASEDIR}/current
 PREVIOUS=${BASEDIR}/previous
 
+# Try finding a version of diff that supports the -I option too.
+DIFF=diff
+for d in `echo $PATH | sed -e 's/:/ /g'` ; do
+    test -x $d/diff && $d/diff -I XYZ /dev/null /dev/null > /dev/null 2>&1 &&
+	DIFF=$d/diff && break
+done
+
 #=============================
 # Run CVS checkout
 #=============================
@@ -215,10 +222,10 @@ if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
     # Compare it with the previous version.  Compare only files listed in
     # the MANIFEST plus the MANIFEST itself.
     if [ -d ${PREVIOUS} ]; then
-	if (diff -c ${PREVIOUS}/MANIFEST ${CURRENT}/MANIFEST); then
+	if (${DIFF} -c ${PREVIOUS}/MANIFEST ${CURRENT}/MANIFEST); then
 	    snapshot=no
 	    for src in `grep '^\.' ${CURRENT}/MANIFEST|expand|cut -f1 -d' '`; do
-		diff -I H5_VERS_RELEASE -I " released on " \
+		${DIFF} -I H5_VERS_RELEASE -I " released on " \
 		    -I " currently under development" \
 		    ${PREVIOUS}/$src ${CURRENT}/$src || \
 		    snapshot=yes
