@@ -110,6 +110,12 @@ typedef struct H5T_soft_t {
     H5T_conv_t	func;			/*the conversion function	     */
 } H5T_soft_t;
 
+/* Bit search direction */
+typedef enum H5T_sdir_t {
+    H5T_BIT_LSB,			/*search lsb toward msb		     */
+    H5T_BIT_MSB				/*search msb toward lsb		     */
+} H5T_sdir_t;
+
 /* Function prototypes for H5T package scope */
 H5T_path_t *H5T_path_find (const char *name, const H5T_t *src,
 			   const H5T_t *dst, hbool_t create, H5T_conv_t func);
@@ -119,6 +125,16 @@ herr_t H5T_conv_order (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, void *_buf, void *bkg);
 herr_t H5T_conv_struct (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			size_t nelmts, void *_buf, void *bkg);
+herr_t H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *_buf, void __unused__ *bkg);
+herr_t H5T_conv_i32le_r64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			     size_t nelmts, void *_buf, void __unused__ *bkg);
 
+/* Bit twiddling functions */
+void H5T_bit_copy (uint8 *dst, size_t dst_offset, const uint8 *src,
+		   size_t src_offset, size_t size);
+void H5T_bit_set (uint8 *buf, size_t offset, size_t size, hbool_t value);
+ssize_t H5T_bit_find (uint8 *buf, size_t offset, size_t size,
+		      H5T_sdir_t direction, hbool_t value);
 
 #endif

@@ -313,7 +313,7 @@ H5T_init (void)\n\
    dt->u.atomic.order = H5T_ORDER_%s;\n\
    dt->u.atomic.prec = %d;\n\
    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;\n\
-   dt->u.atomic.lsb_pad = H5T_PAD_ZERO;\n",
+   dt->u.atomic.msb_pad = H5T_PAD_ZERO;\n",
                d[i].msize ? "FLOAT" : "INTEGER",        /*class         */
                d[i].size + abs(d[i].padding),   /*size          */
                d[i].perm[0] ? "BE" : "LE",      /*byte order    */

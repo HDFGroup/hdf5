@@ -1182,14 +1182,15 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * Check if collective data transfer requested.
      */
     if (xfer_parms->xfer_mode == H5D_XFER_COLLECTIVE){
-	/* verify that the file can support collective access. */
-	/* The check may not be necessarily since collective access */
-	/* can always be simulated by independent access. */
-	/* Nevertheless, must check driver is MPIO before using those */
-	/* access_mode which exists only for MPIO case. */
+	/*
+	 * Verify that the file can support collective access. The check may
+	 * not be necessarily since collective access can always be simulated
+	 * by independent access.  Nevertheless, must check driver is MPIO
+	 * before using those access_mode which exists only for MPIO case.
+	 */
 	if (dataset->ent.file->shared->access_parms->driver != H5F_LOW_MPIO)
 	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		     "collective access not permissible");
+			 "collective access not permissible");
     }
 #endif /*HAVE_PARALLEL*/
 
@@ -1232,11 +1233,11 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	if (H5T_conv_noop==tconv_func &&
 	    NULL!=sconv_func->read) {
 	    status = (sconv_func->read)(dataset->ent.file, &(dataset->layout),
-					 &(dataset->create_parms->compress),
-					 &(dataset->create_parms->efl),
-					 H5T_get_size (dataset->type), file_space,
-					 mem_space, xfer_parms->xfer_mode,
-					 buf/*out*/);
+					&(dataset->create_parms->compress),
+					&(dataset->create_parms->efl),
+					H5T_get_size (dataset->type),
+					file_space, mem_space,
+					xfer_parms->xfer_mode, buf/*out*/);
 	    if (status>=0) goto succeed;
 	    HGOTO_ERROR (H5E_DATASET, H5E_READERROR, FAIL,
 		"collective read failed");
@@ -1469,14 +1470,15 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * Check if collective data transfer requested.
      */
     if (xfer_parms->xfer_mode == H5D_XFER_COLLECTIVE){
-	/* verify that the file can support collective access. */
-	/* The check may not be necessarily since collective access */
-	/* can always be simulated by independent access. */
-	/* Nevertheless, must check driver is MPIO before using those */
-	/* access_mode which exists only for MPIO case. */
+	/*
+	 * Verify that the file can support collective access.  The check may
+	 * not be necessarily since collective access can always be simulated
+	 * by independent access.  Nevertheless, must check driver is MPIO
+	 * before using those access_mode which exists only for MPIO case.
+	 */
 	if (dataset->ent.file->shared->access_parms->driver != H5F_LOW_MPIO)
 	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		     "collective access not permissible");
+			 "collective access not permissible");
     }
 #endif /*HAVE_PARALLEL*/
 
@@ -1518,14 +1520,16 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	    /* Supports only no conversion, type or space, for now. */
 	    if (H5T_conv_noop==tconv_func &&
 		NULL!=sconv_func->write) {
-		status = (sconv_func->write)(dataset->ent.file, &(dataset->layout),
+		status = (sconv_func->write)(dataset->ent.file,
+					     &(dataset->layout),
 				             &(dataset->create_parms->compress),
 					     &(dataset->create_parms->efl),
-					     H5T_get_size (dataset->type), file_space,
-                                             mem_space, xfer_parms->xfer_mode, buf);
+					     H5T_get_size (dataset->type),
+					     file_space, mem_space,
+					     xfer_parms->xfer_mode, buf);
 		if (status>=0) goto succeed;
 		HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
-		    "collective write failed");
+			     "collective write failed");
 	    }
     }
 #endif /*HAVE_PARALLEL*/

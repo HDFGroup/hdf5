@@ -119,7 +119,7 @@ typedef struct H5T_cdata_t {
 typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			      size_t nelmts, void *buf, void *bkg);
 
-/* The predefined types */
+/* The predefined native types */
 #define H5T_NATIVE_CHAR         (H5open(), H5T_NATIVE_CHAR_g)
 #define H5T_NATIVE_UCHAR        (H5open(), H5T_NATIVE_UCHAR_g)
 #define H5T_NATIVE_SHORT        (H5open(), H5T_NATIVE_SHORT_g)
@@ -147,9 +147,29 @@ typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 #define H5T_NATIVE_BITFIELD     (H5open(), H5T_NATIVE_BITFIELD_g)
 #define H5T_NATIVE_OPAQUE       (H5open(), H5T_NATIVE_OPAQUE_g)
 
+/* The predefined standard types */
+#define H5T_IEEE_R32LE		(H5open(), H5T_IEEE_R32LE_g)
+#define H5T_IEEE_R32BE		(H5open(), H5T_IEEE_R32BE_g)
+#define H5T_IEEE_R64LE		(H5open(), H5T_IEEE_R64LE_g)
+#define H5T_IEEE_R64BE		(H5open(), H5T_IEEE_R64BE_g)
+#define H5T_IEEE_U16LE		(H5open(), H5T_IEEE_U16LE_g)
+#define H5T_IEEE_U16BE		(H5open(), H5T_IEEE_U16BE_g)
+#define H5T_IEEE_U32LE		(H5open(), H5T_IEEE_U32LE_g)
+#define H5T_IEEE_U32BE		(H5open(), H5T_IEEE_U32BE_g)
+#define H5T_IEEE_U64LE		(H5open(), H5T_IEEE_U64LE_g)
+#define H5T_IEEE_U64BE		(H5open(), H5T_IEEE_U64BE_g)
+#define H5T_IEEE_S16LE		(H5open(), H5T_IEEE_S16LE_g)
+#define H5T_IEEE_S16BE		(H5open(), H5T_IEEE_S16BE_g)
+#define H5T_IEEE_S32LE		(H5open(), H5T_IEEE_S32LE_g)
+#define H5T_IEEE_S32BE		(H5open(), H5T_IEEE_S32BE_g)
+#define H5T_IEEE_S64LE		(H5open(), H5T_IEEE_S64LE_g)
+#define H5T_IEEE_S64BE		(H5open(), H5T_IEEE_S64BE_g)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Native types */
 extern hid_t H5T_NATIVE_CHAR_g;
 extern hid_t H5T_NATIVE_UCHAR_g;
 extern hid_t H5T_NATIVE_SHORT_g;
@@ -176,6 +196,26 @@ extern hid_t H5T_NATIVE_TIME_g;
 extern hid_t H5T_NATIVE_STRING_g;
 extern hid_t H5T_NATIVE_BITFIELD_g;
 extern hid_t H5T_NATIVE_OPAQUE_g;
+
+/* Standard types */
+extern hid_t H5T_IEEE_R32LE_g;	/*IEEE 4-byte little-endian float	     */
+extern hid_t H5T_IEEE_R32BE_g;	/*IEEE 4-byte big-endian float		     */
+extern hid_t H5T_IEEE_R64LE_g;	/*IEEE 8-byte little-endian float	     */
+extern hid_t H5T_IEEE_R64BE_g;	/*IEEE 8-byte big endian float		     */
+extern hid_t H5T_IEEE_U16LE_g;	/*IEEE 2-byte little-endian unsigned int     */
+extern hid_t H5T_IEEE_U16BE_g;	/*IEEE 2-byte big-endian unsigned int	     */
+extern hid_t H5T_IEEE_U32LE_g;	/*IEEE 4-byte little-endian unsigned int     */
+extern hid_t H5T_IEEE_U32BE_g;	/*IEEE 4-byte big-endian unsigned int	     */
+extern hid_t H5T_IEEE_U64LE_g;	/*IEEE 8-byte little-endian unsigned int     */
+extern hid_t H5T_IEEE_U64BE_g;	/*IEEE 8-byte big-endian unsigned int	     */
+extern hid_t H5T_IEEE_S16LE_g;	/*IEEE 2-byte little-endian signed int       */
+extern hid_t H5T_IEEE_S16BE_g;	/*IEEE 2-byte big-endian signed int	     */
+extern hid_t H5T_IEEE_S32LE_g;	/*IEEE 4-byte little-endian signed int       */
+extern hid_t H5T_IEEE_S32BE_g;	/*IEEE 4-byte big-endian signed int	     */
+extern hid_t H5T_IEEE_S64LE_g;	/*IEEE 8-byte little-endian signed int       */
+extern hid_t H5T_IEEE_S64BE_g;	/*IEEE 8-byte big-endian signed int	     */
+
+
 
 /* Operations defined on all data types */
 hid_t H5Topen (hid_t loc_id, const char *name);
@@ -238,6 +278,8 @@ herr_t H5Tregister_soft (const char *name, H5T_class_t src, H5T_class_t dst,
 			 H5T_conv_t func);
 herr_t H5Tunregister (H5T_conv_t func);
 H5T_conv_t H5Tfind (hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata);
+herr_t H5Tconvert (hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
+		   void *background);
 
 #ifdef __cplusplus
 }

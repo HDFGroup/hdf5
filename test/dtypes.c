@@ -499,6 +499,75 @@ test_named (void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_conv_num
+ *
+ * Purpose:	Test atomic number conversions.
+ *
+ * Return:	Success:	
+ *
+ *		Failure:	
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, June 10, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_conv_num (void)
+{
+    const size_t	ntests=1;
+    const size_t	nelmts=1;
+    
+    size_t		i, j;
+    void		*buf=NULL, *saved=NULL;
+
+    printf ("%-70s", "Testing atomic number conversions");
+
+    /* Allocate buffers */
+    buf = malloc (nelmts*8);
+    saved = malloc (nelmts*8);
+
+    for (i=0; i<ntests; i++) {
+
+	/* Start with NATIVE_INT */
+	for (j=0; j<nelmts; j++) ((int*)buf)[j] = rand();
+	memcpy (saved, buf, nelmts*sizeof(int));
+
+	/* Convert there and back */
+	if (H5Tconvert (H5T_NATIVE_INT, H5T_IEEE_S64LE, nelmts, buf,
+			NULL)<0) goto error;
+	if (H5Tconvert (H5T_IEEE_S64LE, H5T_NATIVE_INT, nelmts, buf,
+			NULL)<0) goto error;
+
+	/* Check results */
+	for (j=0; j<nelmts; j++) {
+	    if (((int*)buf)[j]!=((int*)saved)[j]) {
+		puts ("*FAILED*");
+		printf ("   Test %lu, elmt %lu, got %d instead of %d\n",
+			(unsigned long)i, (unsigned long)j,
+			((int*)buf)[j], ((int*)saved)[j]);
+		goto error;
+	    }
+	}
+    }
+
+    puts (" PASSED");
+    free (buf);
+    free (saved);
+    return 0;
+
+ error:
+    if (buf) free (buf);
+    if (saved) free (saved);
+    return -1;
+}
+
+	
+
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Test the data type interface.
@@ -528,7 +597,10 @@ main(void)
     nerrors += test_compound()<0 ? 1 : 0;
     nerrors += test_transient ()<0 ? 1 : 0;
     nerrors += test_named ()<0 ? 1 : 0;
-
+#if 0
+    nerrors += test_conv_num ()<0 ? 1 : 0;
+#endif
+    
     if (nerrors) {
         printf("***** %d DATA TYPE TEST%s FAILED! *****\n",
                nerrors, 1 == nerrors ? "" : "S");

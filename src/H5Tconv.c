@@ -7,12 +7,13 @@
  *
  * Purpose:     Data type conversions.
  */
-#define H5T_PACKAGE             /*suppress error about including H5Tpkg   */
+#define H5T_PACKAGE             /*suppress error about including H5Tpkg      */
 
 #include <H5Iprivate.h>
 #include <H5Eprivate.h>
 #include <H5MMprivate.h>
 #include <H5Tpkg.h>
+#include <math.h>		/*for ceil()				     */
 
 /* Conversion data for H5T_conv_struct() */
 typedef struct H5T_conv_struct_t {
@@ -518,3 +519,679 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     FUNC_LEAVE (SUCCEED);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_i_i
+ *
+ * Purpose:	Convert one integer type to another.  This is the catch-all
+ *		function for integer conversions and is probably not
+ *		particularly fast.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, June 10, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+	      size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    H5T_t	*src = NULL;		/*source data type		*/
+    H5T_t	*dst = NULL;		/*destination data type		*/
+    intn	direction;		/*direction of traversal	*/
+    size_t	elmtno;			/*element number		*/
+    size_t	half_size;		/*half the type size		*/
+    size_t	olap;			/*num overlapping elements	*/
+    uint8	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
+    uint8	dbuf[64];		/*temp destination buffer	*/
+    size_t	first;
+    ssize_t	sfirst;			/*a signed version of `first'	*/
+    size_t	i;
+    
+    FUNC_ENTER (H5T_conv_i_i, FAIL);
+
+    switch (cdata->command) {
+    case H5T_CONV_INIT:
+	if (H5_DATATYPE!=H5I_group (src_id) ||
+	    NULL==(src=H5I_object (src_id)) ||
+	    H5_DATATYPE!=H5I_group (dst_id) ||
+	    NULL==(dst=H5I_object (dst_id))) {
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	}
+	if (H5T_ORDER_LE!=src->u.atomic.order &&
+	    H5T_ORDER_BE!=src->u.atomic.order) {
+	    HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			   "unsupported byte order");
+	}
+	if (H5T_ORDER_LE!=dst->u.atomic.order &&
+	    H5T_ORDER_BE!=dst->u.atomic.order) {
+	    HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			   "unsupported byte order");
+	}
+	if (dst->size>sizeof dbuf) {
+	    HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			   "destination size is too large");
+	}
+	break;
+	
+    case H5T_CONV_FREE:
+	break;
+
+    case H5T_CONV_CONV:
+	/* Get the data types */
+	if (H5_DATATYPE!=H5I_group (src_id) ||
+	    NULL==(src=H5I_object (src_id)) ||
+	    H5_DATATYPE!=H5I_group (dst_id) ||
+	    NULL==(dst=H5I_object (dst_id))) {
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	}
+
+	/*
+	 * Do we process the values from beginning to end or vice versa? Also,
+	 * how many of the elements have the source and destination areas
+	 * overlapping?
+	 */
+	if (src->size==dst->size) {
+	    sp = dp = (uint8*)buf;
+	    direction = 1;
+	    olap = nelmts;
+	} else if (src->size>=dst->size) {
+	    sp = dp = (uint8*)buf;
+	    direction = 1;
+	    olap = ceil((double)(src->size)/(src->size-dst->size))-1;
+	} else {
+	    sp = (uint8*)buf + (nelmts-1) * src->size;
+	    dp = (uint8*)buf + (nelmts-1) * dst->size;
+	    direction = -1;
+	    olap = ceil((double)(dst->size)/(dst->size-src->size))-1;
+	}
+
+	/* The conversion loop */
+	for (elmtno=0; elmtno<nelmts; elmtno++) {
+
+	    /*
+	     * If the source and destination buffers overlap then use a
+	     * temporary buffer for the destination.
+	     */
+	    if (direction>0) {
+		s = sp;
+		d = elmtno<olap ? dbuf : dp;
+	    } else {
+		s = sp;
+		d = elmtno >= nelmts-olap ? dbuf : dp;
+	    }
+#ifndef NDEBUG
+	    /* I don't quite trust the overlap calculations yet --rpm */
+	    if (d==dbuf) {
+		assert ((dp>=sp && dp<sp+src->size) ||
+			(sp>=dp && sp<dp+dst->size));
+	    } else {
+		assert ((dp<sp && dp+dst->size<=sp) ||
+			(sp<dp && sp+src->size<=dp));
+	    }
+#endif
+	    
+	    /*
+	     * Put the data in little endian order so our loops aren't so
+	     * complicated.  We'll do all the conversion stuff assuming
+	     * little endian and then we'll fix the order at the end.
+	     */
+	    if (H5T_ORDER_BE==src->u.atomic.order) {
+		half_size = src->size/2;
+		for (i=0; i<half_size; i++) {
+		    uint8 tmp = s[src->size-(i+1)];
+		    s[src->size-(i+1)] = s[i];
+		    s[i] = tmp;
+		}
+	    }
+
+	    /*
+	     * What is the bit number for the msb bit of S which is set? The
+	     * bit number is relative to the significant part of the number.
+	     */
+	    sfirst = H5T_bit_find (s, src->u.atomic.offset, src->u.atomic.prec,
+				   H5T_BIT_MSB, TRUE);
+	    first = (size_t)first;
+
+	    if (sfirst<0) {
+		/*
+		 * The source has no bits set and must therefore be zero.
+		 * Set the destination to zero.
+		 */
+		H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec,
+			     FALSE);
+		
+	    } else if (H5T_SGN_NONE==src->u.atomic.u.i.sign &&
+		       H5T_SGN_NONE==dst->u.atomic.u.i.sign) {
+		/*
+		 * Source and destination are both unsigned, but if the
+		 * source has more precision bits than the destination then
+		 * it's possible to overflow.  When overflow occurs the
+		 * destination will be set to the maximum possible value.
+		 */
+		if (src->u.atomic.prec <= dst->u.atomic.prec) {
+		    H5T_bit_copy (d, dst->u.atomic.offset,
+				  s, src->u.atomic.offset,
+				  src->u.atomic.prec);
+		    H5T_bit_set (d, dst->u.atomic.offset+src->u.atomic.prec,
+				 dst->u.atomic.prec-src->u.atomic.prec, FALSE);
+		} else if (first>=dst->u.atomic.prec) {
+		    /*overflow*/
+		    H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec,
+				 TRUE);
+		} else {
+		    H5T_bit_copy (d, dst->u.atomic.offset,
+				  s, src->u.atomic.offset,
+				  dst->u.atomic.prec);
+		}
+		
+	    } else if (H5T_SGN_2==src->u.atomic.u.i.sign &&
+		       H5T_SGN_NONE==dst->u.atomic.u.i.sign) {
+		/*
+		 * If the source is signed and the destination isn't then we
+		 * can have overflow if the source contains more bits than
+		 * the destination (destination is set to the maximum
+		 * possible value) or underflow if the source is negative
+		 * (destination is set to zero).
+		 */
+		if (first+1 == src->u.atomic.prec) {
+		    /*underflow*/
+		    H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec,
+				 FALSE);
+		} else if (src->u.atomic.prec < dst->u.atomic.prec) {
+		    H5T_bit_copy (d, dst->u.atomic.offset,
+				  s, src->u.atomic.offset,
+				  src->u.atomic.prec-1);
+		    H5T_bit_set (d, dst->u.atomic.offset+src->u.atomic.prec-1,
+				 (dst->u.atomic.prec-src->u.atomic.prec)+1,
+				 FALSE);
+		} else if (first>=dst->u.atomic.prec) {
+		    /*overflow*/
+		    H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec,
+				 TRUE);
+		} else {
+		    H5T_bit_copy (d, dst->u.atomic.offset,
+				  s, src->u.atomic.offset,
+				  dst->u.atomic.prec);
+		}
+		
+	    } else if (H5T_SGN_NONE==src->u.atomic.u.i.sign &&
+		       H5T_SGN_2==dst->u.atomic.u.i.sign) {
+		/*
+		 * If the source is not signed but the destination is then
+		 * overflow can occur in which case the destination is set to
+		 * the largest possible value (all bits set except the msb).
+		 */
+		if (first+1 >= dst->u.atomic.prec) {
+		    /*overflow*/
+		    H5T_bit_set (d, dst->u.atomic.offset,
+				 dst->u.atomic.prec-1, TRUE);
+		    H5T_bit_set (d, dst->u.atomic.offset+dst->u.atomic.prec-1,
+				 1, FALSE);
+		} else if (src->u.atomic.prec<dst->u.atomic.prec) {
+		    H5T_bit_copy (d, dst->u.atomic.offset,
+				  s, src->u.atomic.offset,
+				  src->u.atomic.prec);
+		    H5T_bit_set (d, dst->u.atomic.offset+src->u.atomic.prec,
+				 dst->u.atomic.prec-src->u.atomic.prec, FALSE);
+		} else {
+		    H5T_bit_copy (d, dst->u.atomic.offset,
+				  s, src->u.atomic.offset,
+				  dst->u.atomic.prec);
+		}
+		
+	    } else if (first+1 == src->u.atomic.prec) {
+		/*
+		 * Both the source and the destination are signed and the
+		 * source value is negative.  We could experience underflow
+		 * if the destination isn't wide enough in which case the
+		 * destination is set to a negative number with the largest
+		 * possible magnitude.
+		 */
+		ssize_t sfz = H5T_bit_find (s, src->u.atomic.offset,
+					    src->u.atomic.prec-1, H5T_BIT_MSB,
+					    FALSE);
+		size_t fz = (size_t)sfz;
+		
+		if (sfz>=0 && fz+2>=dst->u.atomic.prec) {
+		    /*underflow*/
+		    H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec-1,
+				 FALSE);
+		    H5T_bit_set (d, dst->u.atomic.offset+dst->u.atomic.prec-1,
+				 1, TRUE);
+		} else if (src->u.atomic.prec<dst->u.atomic.prec) {
+		    H5T_bit_copy (d, dst->u.atomic.offset,
+				  s, src->u.atomic.offset,
+				  src->u.atomic.prec);
+		    H5T_bit_set (d, dst->u.atomic.offset+src->u.atomic.prec,
+				 dst->u.atomic.prec-src->u.atomic.prec, TRUE);
+		} else {
+		    H5T_bit_copy (d, dst->u.atomic.offset,
+				  s, src->u.atomic.offset,
+				  dst->u.atomic.prec);
+		}
+		
+	    } else {
+		/*
+		 * Source and destination are both signed but the source
+		 * value is positive.  We could have an overflow in which
+		 * case the destination is set to the largest possible
+		 * positive value.
+		 */
+		if (first+2>=dst->u.atomic.prec) {
+		    /*overflow*/
+		    H5T_bit_set (d, dst->u.atomic.offset, dst->u.atomic.prec-1,
+				 TRUE);
+		    H5T_bit_set (d, dst->u.atomic.offset+dst->u.atomic.prec-1,
+				 1, FALSE);
+		} else if (src->u.atomic.prec<dst->u.atomic.prec) {
+		    H5T_bit_copy (d, dst->u.atomic.offset,
+				  s, src->u.atomic.offset,
+				  src->u.atomic.prec);
+		    H5T_bit_set (d, dst->u.atomic.offset+src->u.atomic.prec,
+				 dst->u.atomic.prec-src->u.atomic.prec, FALSE);
+		}
+	    }
+
+	    /*
+	     * Set padding areas in destination.
+	     */
+	    if (dst->u.atomic.offset>0) {
+		assert (H5T_PAD_ZERO==dst->u.atomic.lsb_pad ||
+			H5T_PAD_ONE==dst->u.atomic.lsb_pad);
+		H5T_bit_set (d, 0, dst->u.atomic.offset,
+			     H5T_PAD_ONE==dst->u.atomic.lsb_pad);
+	    }
+	    if (dst->u.atomic.offset+dst->u.atomic.prec!=8*dst->size) {
+		assert (H5T_PAD_ZERO==dst->u.atomic.msb_pad ||
+			H5T_PAD_ONE==dst->u.atomic.msb_pad);
+		H5T_bit_set (d, dst->u.atomic.offset+dst->u.atomic.prec,
+			     8*dst->size - (dst->u.atomic.offset+
+					    dst->u.atomic.prec),
+			     H5T_PAD_ONE==dst->u.atomic.msb_pad);
+	    }
+
+	    /*
+	     * Put the destination in the correct byte order.  See note at
+	     * beginning of loop.
+	     */
+	    if (H5T_ORDER_BE==dst->u.atomic.order) {
+		half_size = dst->size/2;
+		for (i=0; i<half_size; i++) {
+		    uint8 tmp = d[dst->size-(i+1)];
+		    d[dst->size-(i+1)] = d[i];
+		    d[i] = tmp;
+		}
+	    }
+
+	    /*
+	     * If we had used a temporary buffer for the destination then we
+	     * should copy the value to the true destination buffer.
+	     */
+	    if (d==dbuf) HDmemcpy (dp, d, dst->size);
+		
+	next:
+	    sp += direction * src->size;
+	    dp += direction * dst->size;
+	}
+	
+	break;
+
+    default:
+	HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+		       "unknown conversion command");
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_i32le_r64le
+ *
+ * Purpose:	Converts 4-byte little-endian integers (signed or unsigned)
+ *		to 8-byte litte-endian IEEE floating point.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *		Wednesday, June 10, 1998
+ *
+ * Modifications:
+ * 
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_i32le_r64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		      size_t nelmts, void *buf, void __unused__ *bkg)
+{
+    uint8	*s=NULL, *d=NULL;	/*src and dst buf pointers	*/
+    uint8	tmp[8];			/*temporary destination buffer	*/
+    H5T_t	*src = NULL;		/*source data type		*/
+    H5T_t	*dst = NULL;		/*destination data type		*/
+    size_t	elmtno;			/*element counter		*/
+    uintn	sign;			/*sign bit			*/
+    uintn	cin, cout;		/*carry in/out			*/
+    uintn	mbits=0;		/*mantissa bits			*/
+    uintn	exponent;		/*exponent			*/
+    intn	i;			/*counter			*/
+
+    FUNC_ENTER (H5T_conv_i32le_r64le, FAIL);
+
+    switch (cdata->command) {
+    case H5T_CONV_INIT:
+	assert (sizeof(intn)>=4);
+	break;
+
+    case H5T_CONV_FREE:
+	/* Free private data */
+	break;
+
+    case H5T_CONV_CONV:
+	/* The conversion */
+	if (H5_DATATYPE!=H5I_group (src_id) ||
+	    NULL==(src=H5I_object (src_id)) ||
+	    H5_DATATYPE!=H5I_group (dst_id) ||
+	    NULL==(dst=H5I_object (dst_id))) {
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	}
+	
+	s = (uint8*)buf + 4*(nelmts-1);
+	d = (uint8*)buf + 8*(nelmts-1);
+	for (elmtno=0; elmtno<nelmts; elmtno++, s-=4, d-=8) {
+
+	    /*
+	     * If this is the last element to convert (that is, the first
+	     * element of the buffer) then the source and destination areas
+	     * overlap so we need to use a temp buf for the destination.
+	     */
+	    if (s==buf) d = tmp;
+
+	    /* Convert the integer to a sign and magnitude */
+	    switch (src->u.atomic.u.i.sign) {
+	    case H5T_SGN_NONE:
+		sign = 0;
+		break;
+	    case H5T_SGN_2:
+		if (s[3] & 0x80) {
+		    sign = 1 ;
+		    for (i=0,cin=1; i<4; i++,cin=cout) {
+			s[i] = ~s[i] ;
+			cout = ((unsigned)(s[i])+cin > 0xff) ? 1 : 0 ;
+			s[i] += cin ;
+		    }
+		} else {
+		    sign = 0;
+		}
+		break;
+	    default:
+		HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			       "unsupported integer sign method");
+	    }
+	    
+	    /*
+	     * Where is the most significant bit that is set?  We could do
+	     * this in a loop, but testing it this way might be faster.
+	     */
+	    if (s[3]) {
+		if (s[3] & 0x80) mbits = 32 ;
+		else if (s[3] & 0x40) mbits = 31 ;
+		else if (s[3] & 0x20) mbits = 30 ;
+		else if (s[3] & 0x10) mbits = 29 ;
+		else if (s[3] & 0x08) mbits = 28 ;
+		else if (s[3] & 0x04) mbits = 27 ;
+		else if (s[3] & 0x02) mbits = 26 ;
+		else if (s[3] & 0x01) mbits = 25 ;
+	    } else if (s[2]) {
+		if (s[2] & 0x80) mbits = 24 ;
+		else if (s[2] & 0x40) mbits = 23 ;
+		else if (s[2] & 0x20) mbits = 22 ;
+		else if (s[2] & 0x10) mbits = 21 ;
+		else if (s[2] & 0x08) mbits = 20 ;
+		else if (s[2] & 0x04) mbits = 19 ;
+		else if (s[2] & 0x02) mbits = 18 ;
+		else if (s[2] & 0x01) mbits = 17 ;
+	    } else if (s[1]) {
+		if (s[1] & 0x80) mbits = 16 ;
+		else if (s[1] & 0x40) mbits = 15 ;
+		else if (s[1] & 0x20) mbits = 14 ;
+		else if (s[1] & 0x10) mbits = 13 ;
+		else if (s[1] & 0x08) mbits = 12 ;
+		else if (s[1] & 0x04) mbits = 11 ;
+		else if (s[1] & 0x02) mbits = 10 ;
+		else if (s[1] & 0x01) mbits =  9 ;
+	    } else if (s[0]) {
+		if (s[0] & 0x80) mbits = 8 ;
+		else if (s[0] & 0x40) mbits =  7 ;
+		else if (s[0] & 0x20) mbits =  6 ;
+		else if (s[0] & 0x10) mbits =  5 ;
+		else if (s[0] & 0x08) mbits =  4 ;
+		else if (s[0] & 0x04) mbits =  3 ;
+		else if (s[0] & 0x02) mbits =  2 ;
+		else if (s[0] & 0x01) mbits =  1 ;
+	    } else {
+		/*zero*/
+		d[7] = d[6] = d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
+		continue ;
+	    }
+
+	    /*
+	     * The sign and exponent.
+	     */
+	    exponent = (mbits - 1) + 1023 ;
+	    d[7] = (sign<<7) | ((exponent>>4) & 0x7f) ;
+	    d[6] = (exponent & 0x0f) << 4 ;
+      
+	    /*
+	     * The mantissa.
+	     */
+	    switch (mbits) {
+	    case 32:
+		d[5] = d[4] = d[3] = d[1] = d[0] = 0 ;
+		break ;
+	    case 31:
+		d[6] |=  0x0f    & (s[3]>>2) ;
+		d[5] = (s[3]<<6) | (s[2]>>2) ;
+		d[4] = (s[2]<<6) | (s[1]>>2) ;
+		d[3] = (s[1]<<6) | (s[0]>>2) ;
+		d[2] = (s[0]<<6) ;
+		d[1] = d[0] = 0 ;
+		break ;
+	    case 30:
+		d[6] |=  0x0f    & (s[3]>>1) ;
+		d[5] = (s[3]<<7) | (s[2]>>1) ;
+		d[4] = (s[2]<<7) | (s[1]>>1) ;
+		d[3] = (s[1]<<7) | (s[0]>>1) ;
+		d[2] = (s[0]<<7) ;
+		d[1] = d[0] = 0 ;
+		break ;
+	    case 29:
+		d[6] |=  0x0f    & s[3] ;
+		d[5] = s[2] ;
+		d[4] = s[1] ;
+		d[3] = s[0] ;
+		d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 28:
+		d[6] |= ((s[3]<<1) | (s[2]>>7)) & 0x0f ;
+		d[5] =   (s[2]<<1) | (s[1]>>7) ;
+		d[4] =   (s[1]<<1) | (s[0]>>7) ;
+		d[3] =   (s[0]<<1) ;
+		d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 27:
+		d[6] |= ((s[3]<<2) | (s[2]>>6)) & 0x0f ;
+		d[5] =   (s[2]<<2) | (s[1]>>6) ;
+		d[4] =   (s[1]<<2) | (s[0]>>6) ;
+		d[3] =   (s[0]<<2) ;
+		d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 26:
+		d[6] |= ((s[3]<<3) | (s[2]>>5)) & 0x0f ;
+		d[5] =   (s[2]<<3) | (s[1]>>5) ;
+		d[4] =   (s[1]<<3) | (s[0]>>5) ;
+		d[3] =   (s[0]<<3) ;
+		d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 25:
+		d[6] |=   0x0f   & (s[2]>>4) ;
+		d[5] = (s[2]<<4) | (s[1]>>4) ;
+		d[4] = (s[1]<<4) | (s[0]>>4) ;
+		d[3] = (s[0]<<4) ;
+		d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 24:
+		d[6] |=   0x0f   & (s[2]>>3) ;
+		d[5] = (s[2]<<5) | (s[1]>>3) ;
+		d[4] = (s[1]<<5) | (s[0]>>3) ;
+		d[3] = (s[0]<<5) ;
+		d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 23:
+		d[6] |=   0x0f   & (s[2]>>2) ;
+		d[5] = (s[2]<<6) | (s[1]>>2) ;
+		d[4] = (s[1]<<6) | (s[0]>>2) ;
+		d[3] = (s[0]<<6) ;
+		d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 22:
+		d[6] |=   0x0f   & (s[2]>>1) ;
+		d[5] = (s[2]<<7) | (s[1]>>1) ;
+		d[4] = (s[1]<<7) | (s[0]>>1) ;
+		d[3] = (s[0]<<7) ;
+		d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 21:
+		d[6] |= 0x0f & s[2] ;
+		d[5] = s[1] ;
+		d[4] = s[0] ;
+		d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 20:
+		d[6] |= ((s[2]<<1) | (s[1]>>7)) & 0x0f ;
+		d[5] =   (s[1]<<1) | (s[0]>>7) ;
+		d[4] =   (s[0]<<1) ;
+		d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 19:
+		d[6] |= ((s[2]<<2) | (s[1]>>6)) & 0x0f ;
+		d[5] =   (s[1]<<2) | (s[0]>>6) ;
+		d[4] =   (s[0]<<2) ;
+		d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 18:
+		d[6] |= ((s[2]<<3) | (s[1]>>5)) & 0x0f ;
+		d[5] =   (s[1]<<3) | (s[0]>>5) ;
+		d[4] =   (s[0]<<3) ;
+		d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 17:
+		d[6] |=   0x0f   & (s[1]>>4) ;
+		d[5] = (s[1]<<4) | (s[0]>>4) ;
+		d[4] = (s[0]<<4) ;
+		d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 16:
+		d[6] |=   0x0f   & (s[1]>>3) ;
+		d[5] = (s[1]<<5) | (s[0]>>3) ;
+		d[4] = (s[0]<<5) ;
+		d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 15:
+		d[6] |=   0x0f   & (s[1]>>2) ;
+		d[5] = (s[1]<<6) | (s[0]>>2) ;
+		d[4] = (s[0]<<6) ;
+		d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 14:
+		d[6] |=   0x0f   & (s[1]>>1) ;
+		d[5] = (s[1]<<7) | (s[0]>>1) ;
+		d[4] = (s[0]<<7) ;
+		d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 13:
+		d[6] |= 0x0f & s[1] ;
+		d[5] = s[0] ;
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 12:
+		d[6] |= ((s[1]<<1) | (s[0]>>7)) & 0x0f ;
+		d[5] =   (s[0]<<1) ;
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 11:
+		d[6] |= ((s[1]<<2) | (s[0]>>6)) & 0x0f ;
+		d[5] =   (s[0]<<2) ;
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 10:
+		d[6] |= ((s[1]<<3) | (s[0]>>5)) & 0x0f ;
+		d[5] =   (s[0]<<3) ;
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 9:
+		d[6] |=   0x0f   & (s[0]>>4) ;
+		d[5] = (s[0]<<4) ;
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 8:
+		d[6] |=   0x0f   & (s[0]>>3) ;
+		d[5] = (s[0]<<5) ;
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 7:
+		d[6] |=   0x0f   & (s[0]>>2) ;
+		d[5] = (s[0]<<6) ;
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 6:
+		d[6] |=   0x0f   & (s[0]>>1) ;
+		d[5] = (s[0]<<7) ;
+		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 5:
+		d[6] |= 0x0f & s[0] ;
+		d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 4:
+		d[6] |= (s[0]<<1) & 0x0f ;
+		d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 3:
+		d[6] |= (s[0]<<2) & 0x0f ;
+		d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 2:
+		d[6] |= (s[0]<<3) & 0x0f ;
+		d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    case 1:
+		d[5] = d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
+		break ;
+	    }
+
+	    /*
+	     * Copy temp buffer to the destination.  This only happens for
+	     * the first value in the array, the last value processed. See
+	     * beginning of loop.
+	     */
+	    if (d==tmp) HDmemcpy (s, d, 8);
+	}
+	break;
+
+    default:
+	/* Some other command we don't know about yet.*/
+	HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+		       "unknown conversion command");
+    }
+    
+    FUNC_LEAVE (SUCCEED);
+}

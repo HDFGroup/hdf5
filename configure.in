@@ -125,6 +125,7 @@ esac
 dnl ----------------------------------------------------------------------
 dnl Check for libraries.  (none required yet)
 dnl
+AC_CHECK_LIB(m, ceil)
 AC_CHECK_LIB(coug, main)	dnl ...for ASCI/Red
 AC_CHECK_LIB(z, compress2)
 
@@ -266,7 +267,6 @@ AC_ARG_ENABLE(parallel,
   --enable-parallel=mpio    Enable parallel support with MPIO,
   PARALLEL=$enableval)
 AC_MSG_CHECKING(for parallel support);
-AC_SUBST(PARALLEL_SRC)
 AC_SUBST(RUNTEST)
 
 case "X-$PARALLEL" in
@@ -284,7 +284,6 @@ case "X-$PARALLEL" in
       # list also so we don't have to ifdef out the whole file.
       AC_MSG_RESULT(mpio)
       AC_DEFINE(HAVE_PARALLEL)
-      PARALLEL_SRC='$(PARALLEL_SRC)'
       CPPFLAGS="$CPPFLAGS $MPI_INC"
       CFLAGS="$CFLAGS $MPI_LIB"
       RUNTEST="$RUNTEST"

@@ -187,6 +187,7 @@
 ./src/H5Spublic.h
 ./src/H5Ssimp.c
 ./src/H5T.c
+./src/H5Tbit.c
 ./src/H5Tconv.c
 ./src/H5Tpkg.h
 ./src/H5Tprivate.h

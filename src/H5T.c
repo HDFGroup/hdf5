@@ -30,7 +30,7 @@ static intn interface_initialize_g = FALSE;
 #define INTERFACE_INIT H5T_init_interface
 static void H5T_term_interface(void);
 
-/* Predefined types */
+/* Predefined native types */
 hid_t H5T_NATIVE_CHAR_g = FAIL;
 hid_t H5T_NATIVE_UCHAR_g = FAIL;
 hid_t H5T_NATIVE_SHORT_g = FAIL;
@@ -58,10 +58,29 @@ hid_t H5T_NATIVE_STRING_g = FAIL;
 hid_t H5T_NATIVE_BITFIELD_g = FAIL;
 hid_t H5T_NATIVE_OPAQUE_g = FAIL;
 
+/* Predefined standard types */
+hid_t H5T_IEEE_R32LE_g = FAIL;
+hid_t H5T_IEEE_R32BE_g = FAIL;
+hid_t H5T_IEEE_R64LE_g = FAIL;
+hid_t H5T_IEEE_R64BE_g = FAIL;
+hid_t H5T_IEEE_U16LE_g = FAIL;
+hid_t H5T_IEEE_U16BE_g = FAIL;
+hid_t H5T_IEEE_U32LE_g = FAIL;
+hid_t H5T_IEEE_U32BE_g = FAIL;
+hid_t H5T_IEEE_U64LE_g = FAIL;
+hid_t H5T_IEEE_U64BE_g = FAIL;
+hid_t H5T_IEEE_S16LE_g = FAIL;
+hid_t H5T_IEEE_S16BE_g = FAIL;
+hid_t H5T_IEEE_S32LE_g = FAIL;
+hid_t H5T_IEEE_S32BE_g = FAIL;
+hid_t H5T_IEEE_S64LE_g = FAIL;
+hid_t H5T_IEEE_S64BE_g = FAIL;
+
+
 /* The path database */
 static intn H5T_npath_g = 0;			/*num paths defined	*/
 static intn H5T_apath_g = 0;			/*num slots allocated	*/
-static H5T_path_t *H5T_path_g = NULL;		/*path array		*/
+static H5T_path_t **H5T_path_g = NULL;		/*path array		*/
 
 /* The soft conversion function master list */
 static intn H5T_nsoft_g = 0;			/*num soft funcs defined */
@@ -155,6 +174,215 @@ H5T_init_interface(void)
     H5Tlock(H5T_NATIVE_UINT64_g);
 
     /*
+     * Standard data types in big and little endian flavors.
+     */
+
+    /* IEEE 4-byte little-endian float */
+    dt = H5I_object (H5T_IEEE_R32LE_g = H5Tcopy (H5T_NATIVE_DOUBLE));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 4;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 32;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.f.sign = 31;
+    dt->u.atomic.u.f.epos = 23;
+    dt->u.atomic.u.f.esize = 8;
+    dt->u.atomic.u.f.ebias = 0x7f;
+    dt->u.atomic.u.f.mpos = 0;
+    dt->u.atomic.u.f.msize = 23;
+    dt->u.atomic.u.f.norm = H5T_NORM_IMPLIED;
+    dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
+
+    /* IEEE 4-byte big-endian float */
+    dt = H5I_object (H5T_IEEE_R32BE_g = H5Tcopy (H5T_NATIVE_DOUBLE));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 4;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 32;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.f.sign = 31;
+    dt->u.atomic.u.f.epos = 23;
+    dt->u.atomic.u.f.esize = 8;
+    dt->u.atomic.u.f.ebias = 0x7f;
+    dt->u.atomic.u.f.mpos = 0;
+    dt->u.atomic.u.f.msize = 23;
+    dt->u.atomic.u.f.norm = H5T_NORM_IMPLIED;
+    dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
+
+    /* IEEE 8-byte little-endian float */
+    dt = H5I_object (H5T_IEEE_R64LE_g = H5Tcopy (H5T_NATIVE_DOUBLE));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 8;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 64;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.f.sign = 63;
+    dt->u.atomic.u.f.epos = 52;
+    dt->u.atomic.u.f.esize = 11;
+    dt->u.atomic.u.f.ebias = 0x03ff;
+    dt->u.atomic.u.f.mpos = 0;
+    dt->u.atomic.u.f.msize = 52;
+    dt->u.atomic.u.f.norm = H5T_NORM_IMPLIED;
+    dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
+
+    /* IEEE 8-byte big-endian float */
+    dt = H5I_object (H5T_IEEE_R64BE_g = H5Tcopy (H5T_NATIVE_DOUBLE));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 8;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 64;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.f.sign = 63;
+    dt->u.atomic.u.f.epos = 52;
+    dt->u.atomic.u.f.esize = 11;
+    dt->u.atomic.u.f.ebias = 0x03ff;
+    dt->u.atomic.u.f.mpos = 0;
+    dt->u.atomic.u.f.msize = 52;
+    dt->u.atomic.u.f.norm = H5T_NORM_IMPLIED;
+    dt->u.atomic.u.f.pad = H5T_PAD_ZERO;
+
+    /* IEEE 2-byte little-endian signed integer */
+    dt = H5I_object (H5T_IEEE_S16LE_g = H5Tcopy (H5T_NATIVE_INT));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 2;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 16;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_2;
+    
+    /* IEEE 2-byte big-endian signed integer */
+    dt = H5I_object (H5T_IEEE_S16BE_g = H5Tcopy (H5T_NATIVE_INT));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 2;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 16;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_2;
+    
+    /* IEEE 4-byte little-endian signed integer */
+    dt = H5I_object (H5T_IEEE_S32LE_g = H5Tcopy (H5T_NATIVE_INT));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 4;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 32;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_2;
+    
+    /* IEEE 4-byte big-endian signed integer */
+    dt = H5I_object (H5T_IEEE_S32BE_g = H5Tcopy (H5T_NATIVE_INT));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 4;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 32;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_2;
+    
+    /* IEEE 8-byte little-endian signed integer */
+    dt = H5I_object (H5T_IEEE_S64LE_g = H5Tcopy (H5T_NATIVE_INT));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 8;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 64;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_2;
+    
+    /* IEEE 8-byte big-endian signed integer */
+    dt = H5I_object (H5T_IEEE_S64BE_g = H5Tcopy (H5T_NATIVE_INT));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 8;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 64;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_2;
+    
+    /* IEEE 2-byte little-endian unsigned integer */
+    dt = H5I_object (H5T_IEEE_U16LE_g = H5Tcopy (H5T_NATIVE_INT));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 2;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 16;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+    
+    /* IEEE 2-byte big-endian unsigned integer */
+    dt = H5I_object (H5T_IEEE_U16BE_g = H5Tcopy (H5T_NATIVE_INT));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 2;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 16;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+    
+    /* IEEE 4-byte little-endian unsigned integer */
+    dt = H5I_object (H5T_IEEE_U32LE_g = H5Tcopy (H5T_NATIVE_INT));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 4;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 32;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+    
+    /* IEEE 4-byte big-endian unsigned integer */
+    dt = H5I_object (H5T_IEEE_U32BE_g = H5Tcopy (H5T_NATIVE_INT));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 4;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 32;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+    
+    /* IEEE 8-byte little-endian unsigned integer */
+    dt = H5I_object (H5T_IEEE_U64LE_g = H5Tcopy (H5T_NATIVE_INT));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 8;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 64;
+    dt->u.atomic.order = H5T_ORDER_LE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+    
+    /* IEEE 8-byte big-endian unsigned integer */
+    dt = H5I_object (H5T_IEEE_U64BE_g = H5Tcopy (H5T_NATIVE_INT));
+    dt->state = H5T_STATE_IMMUTABLE;
+    dt->size = 8;
+    dt->u.atomic.offset = 0;
+    dt->u.atomic.prec = 64;
+    dt->u.atomic.order = H5T_ORDER_BE;
+    dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+    dt->u.atomic.u.i.sign = H5T_SGN_NONE;
+    
+
+    /*
      * Initialize pre-defined data types that don't depend on architecture.
      */
 
@@ -237,6 +465,11 @@ H5T_init_interface(void)
      * Register conversion functions beginning with the most general and
      * ending with the most specific.
      */
+    if (H5Tregister_soft ("i_i", H5T_INTEGER, H5T_INTEGER,
+			  H5T_conv_i_i) < 0) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		       "unable to register conversion function");
+    }
     if (H5Tregister_soft("ibo", H5T_INTEGER, H5T_INTEGER,
 			 H5T_conv_order) < 0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
@@ -248,6 +481,17 @@ H5T_init_interface(void)
     }
     if (H5Tregister_soft ("struct", H5T_COMPOUND, H5T_COMPOUND,
 			  H5T_conv_struct)<0) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		       "unable to register conversion function");
+    }
+    
+    if (H5Tregister_hard ("i32le_r64le", H5T_IEEE_U32LE_g, H5T_IEEE_R64LE_g,
+			  H5T_conv_i32le_r64le)<0) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		       "unable to register conversion function");
+    }
+    if (H5Tregister_hard ("i32le_r64le", H5T_IEEE_S32LE_g, H5T_IEEE_R64LE_g,
+			  H5T_conv_i32le_r64le)<0) {
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		       "unable to register conversion function");
     }
@@ -304,6 +548,10 @@ H5T_unlock_cb (void *_dt, const void __unused__ *key)
      Can't report errors...
  EXAMPLES
  REVISION LOG
+ * 	Robb Matzke, 1998-06-11
+ *	Statistics are only printed for conversion functions that were
+ *	called.
+ *	
 --------------------------------------------------------------------------*/
 static void
 H5T_term_interface(void)
@@ -319,7 +567,8 @@ H5T_term_interface(void)
     
     /* Unregister all conversion functions */
     for (i=0; i<H5T_npath_g; i++) {
-	path = H5T_path_g + i;
+	path = H5T_path_g[i];
+	assert (path);
 
 	if (path->func) {
 	    path->cdata.command = H5T_CONV_FREE;
@@ -331,31 +580,37 @@ H5T_term_interface(void)
 		H5E_clear(); /*ignore the error*/
 	    }
 #ifdef H5T_DEBUG
-	    if (0==nprint++) {
-		HDfprintf (stderr, "H5T: type conversion statistics "
-			   "accumulated over life of library:\n");
-		HDfprintf (stderr, "   %-*s %8s/%-5s %8s %8s %8s %15s\n",
-			   H5T_NAMELEN-1, "Name", "Elmts", "Calls", "User",
-			   "System", "Elapsed", "Bandwidth");
-		HDfprintf (stderr, "   %-*s %8s-%-5s %8s %8s %8s %15s\n",
-			   H5T_NAMELEN-1, "----", "-----", "-----", "----",
-			   "------", "-------", "---------");
+	    if (path->cdata.stats->ncalls>0) {
+		if (0==nprint++) {
+		    HDfprintf (stderr, "H5T: type conversion statistics "
+			       "accumulated over life of library:\n");
+		    HDfprintf (stderr, "   %-*s %8s/%-5s %8s %8s %8s %15s\n",
+			       H5T_NAMELEN-1, "Name", "Elmts", "Calls", "User",
+			       "System", "Elapsed", "Bandwidth");
+		    HDfprintf (stderr, "   %-*s %8s-%-5s %8s %8s %8s %15s\n",
+			       H5T_NAMELEN-1, "----", "-----", "-----", "----",
+			       "------", "-------", "---------");
+		}
+		nbytes = MAX (H5T_get_size (path->src),
+			      H5T_get_size (path->dst));
+		nbytes *= path->cdata.stats->nelmts;
+		HDfprintf (stderr,
+			   "   %-*s %8Hd/%-5d %8.2f %8.2f %8.2f %15g\n",
+			   H5T_NAMELEN-1, path->name,
+			   path->cdata.stats->nelmts,
+			   path->cdata.stats->ncalls,
+			   path->cdata.stats->timer.utime, 
+			   path->cdata.stats->timer.stime, 
+			   path->cdata.stats->timer.etime,
+			   nbytes / path->cdata.stats->timer.etime);
 	    }
-	    nbytes = MAX (H5T_get_size (path->src), H5T_get_size (path->dst));
-	    nbytes *= path->cdata.stats->nelmts;
-	    HDfprintf (stderr, "   %-*s %8Hd/%-5d %8.2f %8.2f %8.2f %15g\n",
-		       H5T_NAMELEN-1, path->name,
-		       path->cdata.stats->nelmts,
-		       path->cdata.stats->ncalls,
-		       path->cdata.stats->timer.utime, 
-		       path->cdata.stats->timer.stime, 
-		       path->cdata.stats->timer.etime,
-		       nbytes / path->cdata.stats->timer.etime);
 #endif
 	    H5T_close (path->src);
 	    H5T_close (path->dst);
 	    H5MM_xfree (path->cdata.stats);
 	}
+	H5MM_xfree (path);
+	H5T_path_g[i] = NULL;
     }
 
     /* Clear conversion tables */
@@ -2424,8 +2679,8 @@ H5Tregister_hard(const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func)
      * recalculated to use the new function.
      */
     for (i=0; i<H5T_npath_g; i++) {
-	if (path != H5T_path_g+i) {
-	    H5T_path_g[i].cdata.recalc = TRUE;
+	if (path != H5T_path_g[i]) {
+	    H5T_path_g[i]->cdata.recalc = TRUE;
 	}
     }
 
@@ -2490,7 +2745,8 @@ H5Tregister_soft(const char *name, H5T_class_t src_cls, H5T_class_t dst_cls,
 
     /* Replace soft functions of all appropriate paths */
     for (i=0; i<H5T_npath_g; i++) {
-	H5T_path_t *path = H5T_path_g + i;
+	H5T_path_t *path = H5T_path_g[i];
+	assert (path);
 	path->cdata.recalc = TRUE;
 
 	if (path->is_hard ||
@@ -2590,7 +2846,8 @@ H5Tunregister(H5T_conv_t func)
 
     /* Remove function from all conversion paths */
     for (i=0; i<H5T_npath_g; i++) {
-	path = H5T_path_g + i;
+	path = H5T_path_g[i];
+	assert (path);
 
 	if (path->func == func) {
 	    path->func = NULL;
@@ -2707,6 +2964,65 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
     }
     
     FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tconvert
+ *
+ * Purpose:	Convert NELMTS elements from type SRC_ID to type DST_ID.  The
+ *		source elements are packed in BUF and on return the
+ *		destination will be packed in BUF.  That is, the conversion
+ *		is performed in place.  The optional background buffer is an
+ *		array of NELMTS values of destination type which are merged
+ *		with the converted values to fill in cracks (for instance,
+ *		BACKGROUND might be an array of structs with the `a' and `b'
+ *		fields already initialized and the conversion of BUF supplies
+ *		the `c' and `d' field values).
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, June 10, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tconvert (hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
+	    void *background)
+{
+    H5T_cdata_t		*cdata = NULL;		/*conversion data	*/
+    H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
+    herr_t		status;			/*func return status	*/
+#ifdef H5T_DEBUG
+    H5_timer_t		timer;			/*conversion timer	*/
+#endif
+    
+    FUNC_ENTER (H5Tconvert, FAIL);
+
+    if (NULL==(tconv_func=H5Tfind (src_id, dst_id, &cdata))) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		       "unable to convert between src and dst data types");
+    }
+    
+#ifdef H5T_DEBUG
+    H5T_timer_begin (&timer, cdata);
+#endif
+    cdata->command = H5T_CONV_CONV;
+    status = (tconv_func)(src_id, dst_id, cdata, nelmts, buf, background);
+#ifdef H5T_DEBUG
+    H5T_timer_end (&timer, cdata, nelmts);
+#endif
+    if (status<0) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		       "data type conversion failed");
+    }
+
+    FUNC_LEAVE (SUCCEED);
 }
 
 /*-------------------------------------------------------------------------
@@ -3682,16 +3998,17 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
     /* Binary search */
     while (lt < rt) {
 	md = (lt + rt) / 2;
+	assert (H5T_path_g[md]);
 
-	cmp = H5T_cmp(src, H5T_path_g[md].src);
-	if (0 == cmp) cmp = H5T_cmp(dst, H5T_path_g[md].dst);
+	cmp = H5T_cmp(src, H5T_path_g[md]->src);
+	if (0 == cmp) cmp = H5T_cmp(dst, H5T_path_g[md]->dst);
 
 	if (cmp < 0) {
 	    rt = md;
 	} else if (cmp > 0) {
 	    lt = md + 1;
 	} else {
-	    HRETURN(H5T_path_g + md);
+	    HRETURN(H5T_path_g[md]);
 	}
     }
 
@@ -3700,18 +4017,17 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
 	if (H5T_npath_g >= H5T_apath_g) {
 	    H5T_apath_g = MAX(64, 2 * H5T_apath_g);
 	    H5T_path_g = H5MM_xrealloc(H5T_path_g,
-				       H5T_apath_g * sizeof(H5T_path_t));
+				       H5T_apath_g * sizeof(H5T_path_t*));
 	}
 	if (cmp > 0) md++;
 
 	/* make room */
 	HDmemmove(H5T_path_g + md + 1, H5T_path_g + md,
-		  (H5T_npath_g - md) * sizeof(H5T_path_t));
+		  (H5T_npath_g - md) * sizeof(H5T_path_t*));
 	H5T_npath_g++;
 
 	/* insert */
-	path = H5T_path_g + md;
-	HDmemset(path, 0, sizeof(H5T_path_t));
+	path = H5T_path_g[md] = H5MM_xcalloc (1, sizeof(H5T_path_t));
 	path->src = H5T_copy(src, H5T_COPY_ALL);
 	path->dst = H5T_copy(dst, H5T_COPY_ALL);
 
