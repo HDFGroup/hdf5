@@ -4,6 +4,24 @@
       HDF5 File Format Specification
     </title>
 
+<STYLE TYPE="text/css">
+
+P { text-indent: 2em}
+
+TABLE.format { border:solid; border-collapse:collapse; caption-side:top; text-align:center; width:80%;}
+TABLE.format TH { border:ridge; padding:4px; width:25%;}
+TABLE.format TD { border:ridge; padding:4px; }
+TABLE.format CAPTION { font-weight:bold; font-size:larger;}
+
+TABLE.note {border:none; text-align:right; width:80%;}
+
+TABLE.desc { border:none; width:80%;}
+TABLE.desc TH { }
+TABLE.desc TR { }
+TABLE.desc TD { }
+
+</STYLE>
+       
 <!-- #BeginLibraryItem "/ed_libs/styles_Format.lbi" -->
 <!--
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -241,73 +259,71 @@
 
     <p>
     <center>
-      <table border align=center cellpadding=4 width="80%">
-	<caption align=top>
-	  <B>HDF5 Super Block Layout</B>
+      <table class=format>
+	<caption>
+	  HDF5 Super Block Layout
 	</caption>
 
-	<tr align=center>
-	  <th width="25%">byte</th>
-	  <th width="25%">byte</th>
-	  <th width="25%">byte</th>
-	  <th width="25%">byte</th>
+	<tr>
+	  <th>byte</th>
+	  <th>byte</th>
+	  <th>byte</th>
+	  <th>byte</th>
 	</tr>  
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4><br>HDF5 File Signature (8 bytes)<br><br></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td>Version # of Super Block</td>
 	  <td>Version # of Global Free-space Storage</td>
 	  <td>Version # of Root Group Symbol Table Entry</td>
 	  <td>Reserved (zero)</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td>Version # of Shared Header Message Format</td>
 	  <td>Size of Offsets</td>
 	  <td>Size of Lengths</td>
 	  <td>Reserved (zero)</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=2>Group Leaf Node K</td>
 	  <td colspan=2>Group Internal Node K</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>File Consistency Flags</td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Base Address<sup><font size="-2">O</font></sup></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Address of Global Free-space Heap<sup><font size="-2">O</font></sup></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>End of File Address<sup><font size="-2">O</font></sup></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Driver Information Block Address<sup><font size="-2">O</font></sup></td>
 	</tr>
 
-	<tr align=center>
+	<tr>
 	  <td colspan=4>Root Group Symbol Table Entry</td>
 	</tr>
       </table>
 
-      <table width="80%" border=0>
+      <table class=note>
         <tr><td>
-          <div align=right>
             (Items marked with an 'O' the above table are
             <br>
             of the size specified in "Size of Offsets.")
-          </div>
         </td></tr>
       </table>
     </center>
@@ -321,7 +337,7 @@
 	</tr>
 
 	<tr valign=top>
-	  <td>File Signature</td>
+	  <td>HDF5 File Signature</td>
 	  <td>This field contains a constant value and can be used to
 	    quickly identify a file as being an HDF5 file.  The
 	    constant value is designed to allow easy identification of
@@ -706,7 +722,7 @@
           <th width="25%">byte</th>
 
         <tr align=center>
-          <td colspan=4>Node Signature</td>
+          <td colspan=4>Signature</td>
 
         <tr align=center>
           <td>Node Type</td>
@@ -764,7 +780,7 @@
         </tr>
 
         <tr valign=top>
-          <td>Node Signature</td>
+          <td>Signature</td>
           <td>The ASCII character string "<code>TREE</code>" is 
             used to indicate the
             beginning of a B-link tree node.  This gives file
@@ -1004,7 +1020,7 @@
           <th width="25%">byte</th>
 
         <tr align=center>
-          <td colspan=4>Node Signature</td>
+          <td colspan=4>Signature</td>
 
         <tr align=center>
           <td>Version Number</td>
@@ -1025,7 +1041,7 @@
         </tr>
 
         <tr valign=top>
-          <td>Node Signature</td>
+          <td>Signature</td>
           <td>The ASCII character string "<code>SNOD</code>" is 
             used to indicate the
             beginning of a group node.  This gives file
@@ -1339,13 +1355,14 @@
         </tr>
 
         <tr align=center>
-          <td colspan=4>Heap Signature</td>
+          <td colspan=4>Signature</td>
         </tr>
 
         <tr align=center>
-          <td colspan=4>Reserved</td>
-        </tr>
-
+          <td>Version</td>
+          <td colspan=3>Reserved (zero)</td>
+        </td>
+          
         <tr align=center>
           <td colspan=4>Data Segment Size<sup><font size="-2">L</font></sup></td>
         </tr>
@@ -1386,8 +1403,8 @@
         </tr>
 
         <tr valign=top>
-          <td>Heap Signature</td>
-          <td>The ASCII character string <code>HEAP</code> 
+          <td>Signature</td>
+          <td>The ASCII character string "<code>HEAP</code>"
             is used to indicate the
             beginning of a heap.  This gives file consistency
             checking utilities a better chance of reconstructing a
@@ -1395,10 +1412,10 @@
         </tr>
 
         <tr valign=top>
-          <td>Reserved</td>
-          <td>These four bytes are present so that the data segment
-            size is aligned on an eight-byte boundary.  They are
-            always set to zero.</td>
+          <td>Version</td>
+          <td>Each local heap has its own version number so that new
+            heaps can be added to old files.  This document
+            describes version zero (0) of the local heap.
         </tr>
 
         <tr valign=top>
@@ -1449,10 +1466,10 @@
         <br><br>
       <li>Collections of related global heap objects should result in
         fewer and larger I/O requests.  For instance, a dataset of
-        void pointers will have a global heap object for each
-        pointer.  Reading the entire set of void pointer objects
+        object references will have a global heap object for each
+        reference.  Reading the entire set of object references
         should result in a few large I/O requests instead of one small
-        I/O request for each object.
+        I/O request for each reference.
 
         <br><br>
       <li>It should be possible to remove objects from the global heap
@@ -1485,12 +1502,12 @@
         </tr>
 
         <tr align=center>
-          <td colspan=4>Magic Number</td>
+          <td colspan=4>Signature</td>
         </tr>
           
         <tr align=center>
           <td>Version</td>
-          <td colspan=3>Reserved</td>
+          <td colspan=3>Reserved (zero)</td>
         </td>
           
         <tr align=center>
@@ -1498,8 +1515,7 @@
         </tr>
           
         <tr align=center>
-          <td colspan=4><br>Global Heap Object 1 
-             <i>(described below)</i><br><br></td>
+          <td colspan=4><br>Global Heap Object 1<br><br></td>
         </tr>
 
         <tr align=center>
@@ -1529,17 +1545,20 @@
         </tr>
 
         <tr valign=top>
-          <td>Magic Number</td>
-          <td>The magic number for global heap collections are the
-            four bytes <code>G</code>, <code>C</code>, <code>O</code>, 
-            and <code>L</code>.</td>
+          <td>Signature</td>
+          <td>The ASCII character string "<code>GCOL</code>"
+            is used to indicate the
+            beginning of a collection.  This gives file consistency
+            checking utilities a better chance of reconstructing a
+            damaged file.</td>
         </tr>
           
         <tr valign=top>
           <td>Version</td>
           <td>Each collection has its own version number so that new
             collections can be added to old files.  This document
-            describes version zero of the collections.
+            describes version one (1) of the collections (there is no
+            version zero (0)).
         </tr>
 
         <tr valign=top>
@@ -1552,14 +1571,14 @@
         </tr>
 
         <tr valign=top>
-          <td>Object 1 through <em>N</em></td> 
+          <td>Global Heap Object 1 through <em>N</em></td> 
           <td>The objects are stored in any order with no 
             intervening unused space.</td>
         </tr>
 
         <tr valign=top>
-          <td>Object 0</td>
-          <td>Object 0 (zero), when present, represents the free space in
+          <td>Global Heap Object 0</td>
+          <td>Global Heap Object 0 (zero), when present, represents the free space in
             the collection.  Free space always appears at the end of
             the collection.  If the free space is too small to store
             the header for Object 0 (described below) then the
@@ -1591,12 +1610,22 @@
         </tr>
 
         <tr align=center>
-          <td colspan=4>Object Data Size</td>
+          <td colspan=4>Object Data Size<sup><font size="-2">L</font></sup></td>
         </tr>
 
         <tr align=center>
           <td colspan=4><br>Object Data<br><br></td>
         </tr>
+      </table>
+
+      <table width="80%" border=0>
+        <tr><td>
+          <div align=right>
+            (Items marked with an 'L' the above table are
+            <br>
+            of the size specified in "Size of Lengths.")
+          </div>
+        </td></tr>
       </table>
     </center>
 
@@ -1649,15 +1678,15 @@
 
     <h3><a name="FreeSpaceIndex">Disk Format: Level 1F - Free-space Index</a></h3>
 
-    <p>The Free-space Index is a collection of blocks of data,
+    <p>The free-space index is a collection of blocks of data,
       dispersed throughout the file, which are currently not used by
       any file objects.  
 
     <p>The super block contains a pointer to root of the free-space description;
-      that pointer is currently required to be the undefined address
-      <code>0xfff...ff</code>.
+      that pointer is currently required to be the
+      <A href="#UndefinedAddress">undefined address</A>.
 
-    <p>The free-sapce index is not otherwise publicly defined at this time.
+    <p>The free-space index is not otherwise publicly defined at this time.
 
 <!--
     <p>The Free-space Index is a collection of blocks of data,
@@ -1683,7 +1712,7 @@
           <th width="25%">byte</th>
 
         <tr align=center>
-          <td colspan=4>Free-space Heap Signature</td>
+          <td colspan=4>Signature</td>
         <tr align=center>
           <td colspan=4>B-tree Left-link Offset</td>
         <tr align=center>
@@ -1708,7 +1737,7 @@
       <dt> The elements of the free-space heap page are described below:
       <dd>
         <dl>
-          <dt>Free-space Heap Signature: (4 bytes)
+          <dt>Signature: (4 bytes)
           <dd>The ASCII character string <code>FREE</code> 
             is used to indicate the
             beginning of a free-space heap B-tree page.  This gives
@@ -1770,13 +1799,14 @@
     <p>The header information of an object is designed to encompass
       all the information about an object which would be desired to be
       known, except for the data itself.  This information includes
-      the dimensionality, number-type, information about how the data
+      the dataspace, datatype, information about how the data
       is stored on disk (in external files, compressed, broken up in
       blocks, etc.), as well as other information used by the library
       to speed up access to the data objects or maintain a file's
-      integrity.  The header of each object is not necessarily located
-      immediately prior to the object's data in the file and in fact
-      may be located in any position in the file.
+      integrity.  Information stored by user applications as attributes
+      is also stored in the object's header.  The header of each object is
+      not necessarily located immediately prior to the object's data in the
+      file and in fact may be located in any position in the file.
 
     <p>
     <center>
@@ -1793,7 +1823,7 @@
 	</tr>
 
 	<tr align=center>
-	  <td colspan=1 width="25%">Version # of Object Header</td>
+	  <td colspan=1 width="25%">Version Number</td>
 	  <td colspan=1 width="25%">Reserved</td>
 	  <td colspan=2 width="50%">Number of Header Messages</td>
 	</tr>
@@ -1840,12 +1870,14 @@
 	</tr>
 
 	<tr valign=top>
-	  <td>Version number of the object header</td>
+	  <td>Version number</td>
 	  <td>This value is used to determine the format of the
 	    information in the object header.  When the format of the
 	    information in the object header is changed, the version number
 	    is incremented and can be used to determine how the
-	    information in the object header is formatted.</td>
+	    information in the object header is formatted.  This
+            document describes version one (1) (there was no version
+            zero (0)).</td>
 	</tr>
 
 	<tr valign=top>
