@@ -931,6 +931,17 @@ do_fopen(iotype iot, char *fname, file_descr *fd /*out*/, int flags)
             GOTOERROR(FAIL);
         }
 
+         
+        /* The perils of raw I/O in a parallel environment. The problem is:
+         *
+         *      - Process n opens a file with truncation and then starts
+         *        writing to the file.
+         *      - Process m also opens the file with truncation, but after
+         *        process n has already started to write to the file. Thus,
+         *        all of the stuff process n wrote is now lost.
+         */
+        MPI_Barrier(pio_comm_g);
+
         break;
 
     case MPIO:

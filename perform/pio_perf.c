@@ -583,8 +583,11 @@ run_test(FILE *output, iotype iot, parameters parms)
     output_report(output, "Average Throughput: %.2f MB/s\n",
                   total_mm.sum / total_mm.num);
 
+    /* clean up our mess */
     free(write_mm_table);
     free(read_mm_table);
+    free(write_gross_mm_table);
+    free(read_gross_mm_table);
     pio_time_destroy(res.timers);
     return ret_value;
 }
