@@ -117,16 +117,16 @@ esac
 
 host_config="none"
 for f in $host_cpu-$host_vendor-$host_os \
-	 $host_cpu-$host_vendor-$host_os_novers \
-	 $host_vendor-$host_os \
+         $host_cpu-$host_vendor-$host_os_novers \
+         $host_vendor-$host_os \
          $host_vendor-$host_os_novers \
-	 $host_cpu-$host_os \
+         $host_cpu-$host_os \
          $host_cpu-$host_os_novers \
          $host_cpu-$host_vendor \
-	 $host_os \
-	 $host_os_novers \
-	 $host_vendor \
-	 $host_cpu ; do
+         $host_os \
+         $host_os_novers \
+         $host_vendor \
+         $host_cpu ; do
   AC_MSG_CHECKING(for config $f)
   if test -f "$srcdir/config/$f"; then
     host_config=$srcdir/config/$f
@@ -260,7 +260,7 @@ esac
 AC_MSG_CHECKING(make)
 AC_SUBST_FILE(DEPEND)
 if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
-	sed -n 1p|cut -c1-8`" = "GNU Make"; then
+          sed -n 1p|cut -c1-8`" = "GNU Make"; then
   AC_MSG_RESULT(GNU make)
   GMAKE=yes
   if test "X$GCC" = "Xyes"; then
@@ -583,12 +583,12 @@ AC_TRY_COMPILE([
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-      ],
-      [dev_t d1, d2; if(d1==d2) return 0;],
-      AC_DEFINE(DEV_T_IS_SCALAR, 1,
-                [Define if \`dev_t' is a scalar])
-      AC_MSG_RESULT(yes),
-      AC_MSG_RESULT(no)
+  ],
+  [dev_t d1, d2; if(d1==d2) return 0;],
+  AC_DEFINE(DEV_T_IS_SCALAR, 1,
+            [Define if \`dev_t' is a scalar])
+  AC_MSG_RESULT(yes),
+  AC_MSG_RESULT(no)
 )
 
 dnl ----------------------------------------------------------------------
@@ -622,6 +622,10 @@ case $withval in
     HAVE_ZLIB="yes"
     AC_CHECK_HEADERS(zlib.h)
     AC_CHECK_LIB(z, compress2,, unset HAVE_ZLIB)
+
+    if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR(couldn't find zlib library)
+    fi
     ;;
   no)
     HAVE_ZLIB="no"
@@ -657,6 +661,10 @@ case $withval in
     fi
 
     AC_CHECK_LIB(z, compress2,, LDFLAGS="$saved_LDFLAGS"; unset HAVE_ZLIB)
+
+    if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR(couldn't find zlib library)
+    fi
     ;;
 esac
 
@@ -1750,40 +1758,42 @@ if test "$HAVE_PABLO" = "yes"; then
   fi
 fi
 
-AC_OUTPUT(src/libhdf5.settings
-          config/depend1
-          config/depend2
-          config/depend3
-          config/depend4
-          config/dependN
-          config/commence
-          config/conclude
-          Makefile
-          src/Makefile
-          $PABLO_MAKE
-          test/Makefile
-          $PARALLEL_MAKE
-          perform/Makefile
-          tools/Makefile
-          tools/h5dump/Makefile
-          tools/h5ls/Makefile
-          tools/lib/Makefile
-          tools/misc/Makefile
-          tools/misc/h5cc
-          tools/gifconv/Makefile
-          examples/Makefile
-          doc/Makefile
-          doc/html/Makefile
-          doc/html/ADGuide/Makefile
-          doc/html/Graphics/Makefile
-          doc/html/Intro/Makefile
-          doc/html/PSandPDF/Makefile
-          doc/html/TechNotes/Makefile
-          doc/html/Tutor/Makefile
-          doc/html/Tutor/Graphics/Makefile
-          doc/html/Tutor/examples/Makefile
-          doc/html/cpplus/Makefile
-          doc/html/fortran/Makefile)
+AC_CONFIG_FILES([src/libhdf5.settings
+                 config/depend1
+                 config/depend2
+                 config/depend3
+                 config/depend4
+                 config/dependN
+                 config/commence
+                 config/conclude
+                 Makefile
+                 src/Makefile
+                 $PABLO_MAKE
+                 test/Makefile
+                 $PARALLEL_MAKE
+                 perform/Makefile
+                 tools/Makefile
+                 tools/h5dump/Makefile
+                 tools/h5ls/Makefile
+                 tools/lib/Makefile
+                 tools/misc/Makefile
+                 tools/misc/h5cc
+                 tools/gifconv/Makefile
+                 examples/Makefile
+                 doc/Makefile
+                 doc/html/Makefile
+                 doc/html/ADGuide/Makefile
+                 doc/html/Graphics/Makefile
+                 doc/html/Intro/Makefile
+                 doc/html/PSandPDF/Makefile
+                 doc/html/TechNotes/Makefile
+                 doc/html/Tutor/Makefile
+                 doc/html/Tutor/Graphics/Makefile
+                 doc/html/Tutor/examples/Makefile
+                 doc/html/cpplus/Makefile
+                 doc/html/fortran/Makefile])
+
+AC_OUTPUT
 no_create=$saved_no_create
 
 # Then the stamp2 file for H5config.h

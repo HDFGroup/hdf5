@@ -1559,16 +1559,16 @@ esac
 
 host_config="none"
 for f in $host_cpu-$host_vendor-$host_os \
-	 $host_cpu-$host_vendor-$host_os_novers \
-	 $host_vendor-$host_os \
+         $host_cpu-$host_vendor-$host_os_novers \
+         $host_vendor-$host_os \
          $host_vendor-$host_os_novers \
-	 $host_cpu-$host_os \
+         $host_cpu-$host_os \
          $host_cpu-$host_os_novers \
          $host_cpu-$host_vendor \
-	 $host_os \
-	 $host_os_novers \
-	 $host_vendor \
-	 $host_cpu ; do
+         $host_os \
+         $host_os_novers \
+         $host_vendor \
+         $host_cpu ; do
   echo "$as_me:$LINENO: checking for config $f" >&5
 echo $ECHO_N "checking for config $f... $ECHO_C" >&6
   if test -f "$srcdir/config/$f"; then
@@ -7263,7 +7263,7 @@ echo "$as_me:$LINENO: checking make" >&5
 echo $ECHO_N "checking make... $ECHO_C" >&6
 
 if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
-	sed -n 1p|cut -c1-8`" = "GNU Make"; then
+          sed -n 1p|cut -c1-8`" = "GNU Make"; then
   echo "$as_me:$LINENO: result: GNU make" >&5
 echo "${ECHO_T}GNU make" >&6
   GMAKE=yes
@@ -22259,7 +22259,7 @@ cat >>confdefs.h <<\_ACEOF
 #define DEV_T_IS_SCALAR 1
 _ACEOF
 
-      echo "$as_me:$LINENO: result: yes" >&5
+  echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
 else
   echo "$as_me: failed program was:" >&5
@@ -22470,6 +22470,12 @@ else
   unset HAVE_ZLIB
 fi
 
+
+    if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      { { echo "$as_me:$LINENO: error: couldn't find zlib library" >&5
+echo "$as_me: error: couldn't find zlib library" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
     ;;
   no)
     HAVE_ZLIB="no"
@@ -22688,6 +22694,12 @@ else
   LDFLAGS="$saved_LDFLAGS"; unset HAVE_ZLIB
 fi
 
+
+    if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
+      { { echo "$as_me:$LINENO: error: couldn't find zlib library" >&5
+echo "$as_me: error: couldn't find zlib library" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
     ;;
 esac
 
@@ -29566,6 +29578,8 @@ if test "$HAVE_PABLO" = "yes"; then
 fi
 
 ac_config_files="$ac_config_files src/libhdf5.settings config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/Makefile $PABLO_MAKE test/Makefile $PARALLEL_MAKE perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/gifconv/Makefile examples/Makefile doc/Makefile doc/html/Makefile doc/html/ADGuide/Makefile doc/html/Graphics/Makefile doc/html/Intro/Makefile doc/html/PSandPDF/Makefile doc/html/TechNotes/Makefile doc/html/Tutor/Makefile doc/html/Tutor/Graphics/Makefile doc/html/Tutor/examples/Makefile doc/html/cpplus/Makefile doc/html/fortran/Makefile"
+
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
