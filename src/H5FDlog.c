@@ -30,7 +30,7 @@
 #endif /* MAX */
 
 /* The size of the buffer to track allocation requests */
-#define TRACK_BUFFER    15000000
+#define TRACK_BUFFER    38*(16*65536)
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_LOG_g = 0;
@@ -465,8 +465,11 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
     if(file->fa.verbosity>=0) {
         file->iosize=TRACK_BUFFER;   /* Default size for now */
         file->nread=H5MM_calloc(file->iosize);
+        assert(file->nread);
         file->nwrite=H5MM_calloc(file->iosize);
+        assert(file->nwrite);
         file->flavor=H5MM_calloc(file->iosize);
+        assert(file->flavor);
         if(fa->logfile)
             file->logfp=HDfopen(fa->logfile,"w");
         else
@@ -836,6 +839,11 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
         while(tmp_size-->0)
             file->nread[tmp_addr++]++;
 
+        /* Log information about the seek, if it's going to occur */
+        if(file->fa.verbosity>1 && (addr!=file->pos || OP_READ!=file->op))
+            HDfprintf(file->logfp,"Seek: From %10a To %10a\n",file->pos,addr);
+
+        /* Log information about the read */
         if(file->fa.verbosity>0)
             HDfprintf(file->logfp,"%10a-%10a (%10lu bytes) Read, flavor=%s\n",addr,addr+size-1,(unsigned long)size,flavors[file->flavor[addr]]);
     }
