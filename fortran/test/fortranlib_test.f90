@@ -306,7 +306,7 @@
      write(*, fmt = '(11a)', advance = 'no') ' Group test'     
      write(*, fmt = '(59x,a)', advance = 'no')  ' '
      write(*, fmt = e_format) error_string
-     total_error = total_error + identifier_total_error 
+     total_error = total_error + group_total_error 
 
      error_string = failure
      CALL error_report_test(cleanup, error_total_error)
