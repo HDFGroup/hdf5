@@ -334,9 +334,11 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 	/* Is alignment required for source or dest? */			      \
 	s_mv = H5T_NATIVE_##STYPE##_ALIGN_g>1 &&			      \
                ((size_t)buf%H5T_NATIVE_##STYPE##_ALIGN_g ||		      \
+     /* Cray */ ((size_t)((ST*)buf)!=(size_t)buf) ||			      \
 		s_stride%H5T_NATIVE_##STYPE##_ALIGN_g);			      \
 	d_mv = H5T_NATIVE_##DTYPE##_ALIGN_g>1 &&			      \
                ((size_t)buf%H5T_NATIVE_##DTYPE##_ALIGN_g ||		      \
+     /* Cray */ ((size_t)((DT*)buf)!=(size_t)buf) ||			      \
                 d_stride%H5T_NATIVE_##DTYPE##_ALIGN_g);			      \
     CI_INC_SRC(s_mv)                                     \
     CI_INC_DST(d_mv)                                     \
@@ -2550,7 +2552,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 {
     H5T_t	*src = NULL;		/*source data type		*/
     H5T_t	*dst = NULL;		/*destination data type		*/
-    int	direction;		/*direction of traversal	*/
+    int		direction;		/*direction of traversal	*/
     hsize_t	elmtno;			/*element number		*/
     size_t	half_size;		/*half the type size		*/
     hsize_t	olap;			/*num overlapping elements	*/
@@ -2558,7 +2560,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     uint8_t	dbuf[64];		/*temp destination buffer	*/
     size_t	first;
     ssize_t	sfirst;			/*a signed version of `first'	*/
-    size_t	i;
+    size_t	i;                      /* Local index variables        */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5T_conv_i_i, FAIL);
