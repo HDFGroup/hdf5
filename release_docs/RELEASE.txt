@@ -127,8 +127,8 @@ Platforms Tested
                                   gcc 2.95.2 with mpich 1.2.1
                                   g++ 2.95.2
                                   pgf90 3.2-4
-    OSF1 V4.0                     DEC-V5.2-040 on Digital UNIX V4.0 (Rev 564)
-                                  Digital Fortran 90 V4.1-270
+    OSF1 V5.1                     Compaq C V6.3-028         
+                                  Compaq Fortran V5.4-1283
     SunOS 5.6                     WorkShop Compilers 5.0 98/12/15 C 5.0 
      (Solaris 2.6)                WorkShop Compilers 5.0 98/10/25 FORTRAN 90 
                                           2.0 Patch 107356-04
@@ -177,12 +177,12 @@ Supported Configuration Features Summary
     HPUX10.20      y  n         y    n         n    y          y     y
     HPUX11.00      y  y         y    n         n    y          y     y
     HPUX11 SysV    y  y         y    n         n    y          y     y
-    DECOSF         y  n         y    n         n    y          y     y
+    DECOSF         y  n         y    n         y    y          y     y
     T3E            y  y         y    y         n    n          y     y
     SV1            y  n         y    n         n    n          y     y
     TFLOPS         y  y (1)     n    n         n    n          y     y (4)
     AIX-4.3 SP2    y  y         y    y         n    n          y     n
-    AIX-4.3 SP3    y  y         y    y         n    n          y     n
+    AIX-4.3 SP3    y  y         y    y         y    n          y     n
     Win2000        y  n         n    n         n    y          y     y
     Win98          y  n         y    n         n    y          y     y
     WinNT          y  n         y    n         n    y          y     y
