@@ -472,7 +472,7 @@ H5Eprint(FILE *stream)
 	    fprintf (stream, "thread 0.");
     }
 #elif defined(H5_HAVE_THREADSAFE)
-    fprintf (stream, "thread %d.", (int)pthread_self());
+    fprintf (stream, "thread %lu.", (unsigned long)pthread_self());
 #else
     fprintf (stream, "thread 0.");
 #endif
