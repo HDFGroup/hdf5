@@ -1079,7 +1079,7 @@
 ./test/tmisc.c
 ./test/tmtimen.h5
 ./test/tmtimeo.h5
-./test/tnullfile.h5
+./test/tnullspace.h5
 ./test/ttime.c
 ./test/trefer.c
 ./test/trefstr.c
