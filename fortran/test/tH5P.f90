@@ -272,9 +272,9 @@
           CALL h5fopen_f (fix_filename, H5F_ACC_RDWR_F, file_id, error, access_prp = fapl)
               CALL check("h5fopen_f", error, total_error)
           !
-          !It looks like a bug in the C Library 
-          !CALL h5fget_access_plist_f(file_id, fapl_1, error)
-          !    CALL check("h5fget_access_plist_f", error, total_error)
+          CALL h5fget_access_plist_f(file_id, fapl_1, error)
+              CALL check("h5fget_access_plist_f", error, total_error)
+          !It doesn't work on Windows.
           !CALL h5pget_fapl_multi_f(fapl_1, memb_map_out, memb_fapl_out, memb_name_out, &
           !                         memb_addr_out, relax_out, error)
           ! write(*,*)  memb_map_out
