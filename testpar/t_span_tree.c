@@ -14,14 +14,23 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* 
- *  This program shows how the H5Sselect_hyperslab and H5Sselect_elements
- *  functions are used to write selected data from memory to the file.
- *  Program takes 48 elements from the linear buffer and writes them into
- *  the matrix using 3x2 blocks, (4,3) stride and (2,4) count. 
- *  Then four elements  of the matrix are overwritten with the new values and 
- *  file is closed. Program reopens the file and selects the union of two 
- *  hyperslabs in the dataset in the file. Then it reads the selection into the
- *  memory dataset preserving the shape of the selection.
+   This program will test irregular hyperslab selections with collective write and read.
+   The way to test whether collective write and read works is to use independent IO
+   output to verify the collective output.
+
+   1) We will write two datasets with the same hyperslab selection settings;
+   one in independent mode,
+   one in collective mode,
+   2) We will read two datasets with the same hyperslab selection settings,
+      1.  independent read to read independent output,
+          independent read to read collecive   output,
+	  Compare the result, 
+	  If the result is the same, then collective write succeeds.
+      2.  collective read to read independent output,
+          independent read to read independent output,
+	  Compare the result,
+	  If the result is the same, then collective read succeeds.
+
  */ 
  
 #include "hdf5.h"
@@ -29,280 +38,555 @@
 #include "testphdf5.h"
 
 
-void t_span_tree()
+void coll_irregular_cont_write()
 {
 
-   char *filename;
-   hid_t   acc_plist,xfer_plist;
-   hid_t   file, dataset;           /* File and dataset identifiers */
-   hid_t   mid1, mid2, mid, fid;    /* Dataspace identifiers */
-   hid_t   plist;                   /* Dataset property list identifier */
+  char *filename;
+  hid_t   acc_plist,xfer_plist;
+  hid_t   file, datasetc,dataseti;           /* File and dataset identifiers */
+  hid_t   mspaceid1, mspaceid, fspaceid,fspaceid1; /* Dataspace identifiers */
+  hid_t   plist;                   /* Dataset property list identifier */
 
-   hsize_t dim1[] = {MSPACE1_DIM};  /* Dimension size of the first dataset 
-                                       (in memory) */ 
-   hsize_t dim2[] = {MSPACE2_DIM};  /* Dimension size of the second dataset
-                                       (in memory */ 
-   hsize_t fdim[] = {FSPACE_DIM1, FSPACE_DIM2}; 
-                                    /* Dimension sizes of the dataset (on disk) */
-   hsize_t mdim[] = {MSPACE_DIM1, MSPACE_DIM2}; /* Dimension sizes of the 
-                                                   dataset in memory when we
-                                                   read selection from the
-                                                   dataset on the disk */
+  hsize_t mdim1[] = {MSPACE1_DIM};  /* Dimension size of the first dataset 
+				      (in memory) */ 
+ 
+  hsize_t fsdim[] = {FSPACE_DIM1, FSPACE_DIM2}; 
+  /* Dimension sizes of the dataset (on disk) */
+  hsize_t mdim[] = {MSPACE_DIM1, MSPACE_DIM2}; /* Dimension sizes of the 
+						  dataset in memory when we
+						  read selection from the
+						  dataset on the disk */
 
-   hssize_t start[2]; /* Start of hyperslab */
-   hsize_t stride[2]; /* Stride of hyperslab */
-   hsize_t count[2];  /* Block count */
-   hsize_t block[2];  /* Block sizes */
-
-   hssize_t coord[NPOINTS][FSPACE_RANK]; /* Array to store selected points 
-                                            from the file dataspace */ 
-   herr_t ret;
-   unsigned i,j;
-   int fillvalue = 0;   /* Fill value for the dataset */
-
-   int    matrix_out[MSPACE_DIM1][MSPACE_DIM2]; /* Buffer to read from the 
-                                                   dataset */
-   int    vector[MSPACE1_DIM];
-   int    values[] = {53, 59, 61, 67};  /* New values to be written */
-
-   int    mpi_size,mpi_rank;
-   hsize_t testdims[2];
-   MPI_Comm comm = MPI_COMM_WORLD;
-   MPI_Info info = MPI_INFO_NULL;
-
-   /*set up MPI parameters */
-   MPI_Comm_size(comm,&mpi_size);
-   MPI_Comm_rank(comm,&mpi_rank);
-
-   printf("mpi_size %d\n",mpi_size);
-   printf("mpi_rank %d\n",mpi_rank);
-
-   /* Obtain file name */
-   filename = (char *) GetTestParameters();    
+  hssize_t start[2]; /* Start of hyperslab */
+  hsize_t  stride[2]; /* Stride of hyperslab */
+  hsize_t  count[2];  /* Block count */
+  hsize_t  block[2];  /* Block sizes */
 
 
-   /*
-    * Buffers' initialization.
-    */
-   vector[0] = vector[MSPACE1_DIM - 1] = -1;
-   for (i = 1; i < MSPACE1_DIM - 1; i++) vector[i] = i;
+  herr_t   ret;
+  unsigned i,j;
+  int fillvalue = 0;   /* Fill value for the dataset */
 
-   acc_plist = H5Pcreate(H5P_FILE_ACCESS);
-   ret       = H5Pset_fapl_mpio(acc_plist,comm,info);
+  int    matrix_out[MSPACE_DIM1][MSPACE_DIM2]; 
+  int    matrix_out1[MSPACE_DIM1][MSPACE_DIM2];   /* Buffer to read from the 
+						  dataset */
+  int    vector[MSPACE1_DIM];
+
+  int    mpi_size,mpi_rank;
+
+  MPI_Comm comm = MPI_COMM_WORLD;
+  MPI_Info info = MPI_INFO_NULL;
+
+  /*set up MPI parameters */
+  MPI_Comm_size(comm,&mpi_size);
+  MPI_Comm_rank(comm,&mpi_rank);
+
+
+  /* Obtain file name */
+  filename = (char *) GetTestParameters();    
+
+  /*
+   * Buffers' initialization.
+   */
+  vector[0] = vector[MSPACE1_DIM - 1] = -1;
+  for (i = 1; i < MSPACE1_DIM - 1; i++) vector[i] = i;
+
+  acc_plist = H5Pcreate(H5P_FILE_ACCESS);
+  VRFY((acc_plist >= 0),""); 
+
+  ret       = H5Pset_fapl_mpio(acc_plist,comm,info);
+  VRFY((ret >= 0),"MPIO creation property list succeeded");
    
-   /*
-    * Create a file.
-    */
-   file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, acc_plist);
+  /*
+   * Create a file.
+   */
+  file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, acc_plist);
+  VRFY((file >= 0),"H5Fcreate succeeded");
 
-   /*
-    * Create property list for a dataset and set up fill values.
-    */
-   plist = H5Pcreate(H5P_DATASET_CREATE);
-   ret   = H5Pset_fill_value(plist, H5T_NATIVE_INT, &fillvalue); 
+  /*
+   * Create property list for a dataset and set up fill values.
+   */
+  plist = H5Pcreate(H5P_DATASET_CREATE);
+  VRFY((acc_plist >= 0),"");
 
-    /* 
-     * Create dataspace for the dataset in the file.
-     */
-    fid = H5Screate_simple(FSPACE_RANK, fdim, NULL);
+  ret   = H5Pset_fill_value(plist, H5T_NATIVE_INT, &fillvalue); 
+  VRFY((ret >= 0),"Fill value creation property list succeeded");
+   
+  /* 
+   * Create dataspace for the dataset in the file.
+   */
+  fspaceid = H5Screate_simple(FSPACE_RANK, fsdim, NULL);
+  VRFY((fspaceid >= 0),"file dataspace created succeeded");
 
-    /*
-     * Create dataset in the file. Notice that creation
-     * property list plist is used.
-     */
-    dataset = H5Dcreate(file, "Matrix in file", H5T_NATIVE_INT, fid, plist);
+  /*
+   * Create dataset in the file. Notice that creation
+   * property list plist is used.
+   */
+  datasetc = H5Dcreate(file, "collect_write", H5T_NATIVE_INT, fspaceid, plist);
+  VRFY((datasetc >= 0),"dataset created succeeded");
+
+  dataseti = H5Dcreate(file, "independ_write", H5T_NATIVE_INT, fspaceid, plist);
+  VRFY((dataseti >= 0),"dataset created succeeded");
+  /*
+   * Select hyperslab for the dataset in the file, using 3x2 blocks, 
+   * (4,3) stride and (1,4) count starting at the position (0,1)
+   for the first selection
+  */
+
+  start[0]  = FHSTART0; 
+  start[1]  = FHSTART1+mpi_rank*FHSTRIDE1*FHCOUNT1/mpi_size;
+  stride[0] = FHSTRIDE0; 
+  stride[1] = FHSTRIDE1;
+  count[0]  = FHCOUNT0; 
+  count[1]  = FHCOUNT1/mpi_size;    
+  block[0]  = FHBLOCK0; 
+  block[1]  = FHBLOCK1;
+
+  ret = H5Sselect_hyperslab(fspaceid, H5S_SELECT_SET, start, stride, count, block);
+  VRFY((ret >= 0),"hyperslab selection succeeded");
+
+  /*
+   * Select hyperslab for the dataset in the file, using 3x2*4 blocks, 
+   * stride 1  and (1,1) count starting at the position (4,0).
+   */
+
+  start[0]  = SHSTART0; 
+  start[1]  = SHSTART1+SHCOUNT1*SHBLOCK1*mpi_rank/mpi_size;
+  stride[0] = SHSTRIDE0; 
+  stride[1] = SHSTRIDE1;
+  count[0]  = SHCOUNT0; 
+  count[1]  = SHCOUNT1;    
+  block[0]  = SHBLOCK0; 
+  block[1]  = SHBLOCK1/mpi_size;
+
+  ret = H5Sselect_hyperslab(fspaceid, H5S_SELECT_OR, start, stride, count, block);
+  VRFY((ret >= 0),"hyperslab selection succeeded");
+
+  /*
+   * Create dataspace for the first dataset.
+   */
+  mspaceid1 = H5Screate_simple(MSPACE1_RANK, mdim1, NULL);
+  VRFY((mspaceid1 >= 0),"memory dataspace created succeeded");
+
+  /*
+   * Select hyperslab. 
+   * We will use 48 elements of the vector buffer starting at the second element.
+   * Selected elements are 1 2 3 . . . 48
+   */
+  start[0]  = MHSTART0;
+  stride[0] = MHSTRIDE0;
+  count[0]  = MHCOUNT0/mpi_size;
+  block[0]  = MHBLOCK0;
+
+  ret = H5Sselect_hyperslab(mspaceid1, H5S_SELECT_SET, start, stride, count, block);
+  VRFY((ret >= 0),"hyperslab selection succeeded");
 
 
-    /*
-     * Select hyperslab for the dataset in the file, using 3x2 blocks, 
-     * (4,3) stride and (1,4) count starting at the position (0,1)
-       for the first selection
-     */
-    start[0]  = 0; start[1]  = 1;
-    stride[0] = 4; stride[1] = 3;
-    count[0]  = 1; count[1]  = 4;    
-    block[0]  = 3; block[1]  = 2;
-    ret = H5Sselect_hyperslab(fid, H5S_SELECT_SET, start, stride, count, block);
+  ret = H5Dwrite(dataseti, H5T_NATIVE_INT, mspaceid1, fspaceid, H5P_DEFAULT, vector);
+  VRFY((ret >= 0),"dataset independent write succeed");
+  xfer_plist = H5Pcreate(H5P_DATASET_XFER);
+  VRFY((xfer_plist >= 0),""); 
 
-    if(ret < 0) printf("hyperslab selection is wrong. \n");    
+  ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+  VRFY((ret >= 0),"MPIO data transfer property list succeed"); 
 
-    /*
-     * Select hyperslab for the dataset in the file, using 3x2*4 blocks, 
-     * stride 1  and (1,1) count starting at the position (4,0).
-     */
-    /*    start[0]  = 4; start[1]  = 0;
-    stride[0] = 1; stride[1] = 1;
-    count[0]  = 1; count[1]  = 1;    
-    block[0]  = 3; block[1]  = 8;*/
 
-    start[0]  = 4; start[1]  = 0;
-    stride[0] = 1; stride[1] = 1;
-    count[0]  = 1; count[1]  = 1;    
-    block[0]  = 3; block[1]  = 8;
-    ret = H5Sselect_hyperslab(fid, H5S_SELECT_OR, start, stride, count, block);
+  ret = H5Dwrite(datasetc, H5T_NATIVE_INT, mspaceid1, fspaceid, xfer_plist, vector);
+  VRFY((ret >= 0),"dataset collective write succeed"); 
+
+  ret = H5Sclose(mspaceid1);
+  VRFY((ret >= 0),"");
+
+  ret = H5Sclose(fspaceid); 
+  VRFY((ret >= 0),"");
  
-    if(ret < 0) printf("hyperslab selection is wrong with or selection. \n");
-    /*
-     * Create dataspace for the first dataset.
-     */
-    mid1 = H5Screate_simple(MSPACE1_RANK, dim1, NULL);
+  /*
+   * Close dataset.
+   */
+  ret = H5Dclose(datasetc);
+  VRFY((ret >= 0),"");
+  ret = H5Dclose(dataseti);
+  VRFY((ret >= 0),"");
+  
+  /*
+   * Close the file.
+   */
+  ret = H5Fclose(file);
+  VRFY((ret >= 0),"");
+  /*
+   * Close property list
+   */
 
-    /*
-     * Select hyperslab. 
-     * We will use 48 elements of the vector buffer starting at the second element.
-     * Selected elements are 1 2 3 . . . 48
-     */
-    start[0]  = 1;
-    stride[0] = 1;
-    count[0]  = 48;
-    block[0]  = 1;
-    ret = H5Sselect_hyperslab(mid1, H5S_SELECT_SET, start, stride, count, block);
- 
-    /*
-     * Write selection from the vector buffer to the dataset in the file.
-     *
-     * File dataset should look like this:       
-     *                    0  1  2  0  3  4  0  5  6  0  7  8 
-     *                    0  9 10  0 11 12  0 13 14  0 15 16
-     *                    0 17 18  0 19 20  0 21 22  0 23 24
-     *                    0  0  0  0  0  0  0  0  0  0  0  0
-     *                    0 25 26  0 27 28  0 29 30  0 31 32
-     *                    0 33 34  0 35 36  0 37 38  0 39 40
-     *                    0 41 42  0 43 44  0 45 46  0 47 48
-     *                    0  0  0  0  0  0  0  0  0  0  0  0
-     */
+  ret = H5Pclose(acc_plist);
+  VRFY((ret >= 0),"");
+  ret = H5Pclose(xfer_plist);
+  VRFY((ret >= 0),"");
+  ret = H5Pclose(plist);
+  VRFY((ret >= 0),"");
 
-     xfer_plist = H5Pcreate(H5P_DATASET_XFER);
+  /*
+   * Open the file.
+   */
 
-     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+  /*** For testing collective hyperslab selection write ***/
 
-    for (i = 0; i < MSPACE_DIM1; i++) {
-       for (j = 0; j < MSPACE_DIM2; j++)
-            matrix_out[i][j] = 3;
-    }
+  acc_plist = H5Pcreate(H5P_FILE_ACCESS);
+  VRFY((acc_plist >= 0),""); 
 
-    /* ret = H5Dwrite(dataset, H5T_NATIVE_INT, mid1, fid, xfer_plist, vector);*/
-    ret = H5Dwrite(dataset, H5T_NATIVE_INT, mid1, fid, xfer_plist, vector);
-    if(ret < 0) printf("failing to write data .\n");
+  ret       = H5Pset_fapl_mpio(acc_plist,comm,info);
+  VRFY((ret >= 0),"MPIO creation property list succeeded");
+   
+  file = H5Fopen(filename, H5F_ACC_RDONLY, acc_plist);
+  VRFY((file >= 0),"H5Fopen succeeded");
 
-    /* 
-     * Initialize data buffer.
-     */
-    for (i = 0; i < MSPACE_DIM1; i++) {
-       for (j = 0; j < MSPACE_DIM2; j++)
-            matrix_out[i][j] = 1;
-    }
-
-    for (i=0; i < MSPACE_DIM1; i++) {
-        for(j=0; j < MSPACE_DIM2; j++) printf("%3d  ", matrix_out[i][j]);
-        printf("\n");
-    }
+  /*
+   * Open the dataset.
+   */
+  datasetc = H5Dopen(file,"collect_write");
+  VRFY((datasetc >= 0),"H5Dopen succeeded");
+  dataseti = H5Dopen(file,"independ_write");
+  VRFY((dataseti >= 0),"H5Dopen succeeded");
     
+  /* 
+   * Get dataspace of the open dataset.
+   */
+  fspaceid = H5Dget_space(datasetc);
+  VRFY((fspaceid >= 0),"file dataspace obtained succeeded");
 
-#if 0
-
-    /* for dataset reading */
-    xfer_plist = H5Pcreate(H5P_DATASET_XFER);
-
-     ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
-    ret = H5Dread(dataset, H5T_NATIVE_INT, fid, fid,
-      xfer_plist, matrix_out);
+  fspaceid1 = H5Dget_space(dataseti);
+  VRFY((fspaceid1 >= 0),"file dataspace obtained succeeded");
 
 
-     /* ret = H5Dread(dataset, H5T_NATIVE_INT, fid, fid,
-	H5P_DEFAULT, matrix_out);*/
+ 
+  start[0]  = RFFHSTART0; 
+  start[1]  = RFFHSTART1+mpi_rank*RFFHCOUNT1/mpi_size;
+  block[0]  = RFFHBLOCK0; 
+  block[1]  = RFFHBLOCK1;
+  stride[0] = RFFHSTRIDE0; 
+  stride[1] = RFFHSTRIDE1;
+  count[0]  = RFFHCOUNT0; 
+  count[1]  = RFFHCOUNT1/mpi_size;  
+ 
 
-    if(ret < 0) printf("fail to read the dataset afterwards.\n");
-    for (i=0; i < MSPACE_DIM1; i++) {
-        for(j=0; j < MSPACE_DIM2; j++) printf("%3d  ", matrix_out[i][j]);
-        printf("\n");
+  ret = H5Sselect_hyperslab(fspaceid, H5S_SELECT_SET, start, stride, count, block);
+  VRFY((ret >= 0),"hyperslab selection succeeded");
+  ret = H5Sselect_hyperslab(fspaceid1, H5S_SELECT_SET, start, stride, count, block);
+  VRFY((ret >= 0),"hyperslab selection succeeded");
+
+  /*start[0] = RFSHSTART0+mpi_rank*RFSHCOUNT1/mpi_size; */
+  start[0] = RFSHSTART0;
+  start[1] = RFSHSTART1+RFSHCOUNT1*mpi_rank/mpi_size; 
+  block[0] = RFSHBLOCK0; 
+  block[1] = RFSHBLOCK1;  
+  stride[0] = RFSHSTRIDE0; 
+  stride[1] = RFSHSTRIDE0;
+  count[0]  = RFSHCOUNT0; 
+  count[1]  = RFSHCOUNT1/mpi_size;    
+  ret = H5Sselect_hyperslab(fspaceid, H5S_SELECT_OR, start, stride, count, block);
+  VRFY((ret >= 0),"hyperslab selection succeeded");
+  ret = H5Sselect_hyperslab(fspaceid1, H5S_SELECT_OR, start, stride, count, block);
+  VRFY((ret >= 0),"hyperslab selection succeeded");
+
+
+  /*
+   * Create memory dataspace.
+   */
+  mspaceid = H5Screate_simple(MSPACE_RANK, mdim, NULL);
+
+  /* 
+   * Select two hyperslabs in memory. Hyperslabs has the same
+   * size and shape as the selected hyperslabs for the file dataspace.
+   */
+
+
+  start[0]  = RMFHSTART0; 
+  start[1]  = RMFHSTART1+mpi_rank*RMFHCOUNT1/mpi_size;
+  block[0]  = RMFHBLOCK0; 
+  block[1]  = RMFHBLOCK1;
+  stride[0] = RMFHSTRIDE0; 
+  stride[1] = RMFHSTRIDE1;
+  count[0]  = RMFHCOUNT0; 
+  count[1]  = RMFHCOUNT1/mpi_size;  
+  ret = H5Sselect_hyperslab(mspaceid, H5S_SELECT_SET, start, stride, count, block);
+  VRFY((ret >= 0),"hyperslab selection succeeded");
+
+  start[0]  = RMSHSTART0; 
+  start[1]  = RMSHSTART1+mpi_rank*RMSHCOUNT1/mpi_size;
+  block[0]  = RMSHBLOCK0; 
+  block[1]  = RMSHBLOCK1;
+  stride[0] = RMSHSTRIDE0; 
+  stride[1] = RMSHSTRIDE1;
+  count[0]  = RMSHCOUNT0; 
+  count[1]  = RMSHCOUNT1/mpi_size;  
+
+ 
+  ret = H5Sselect_hyperslab(mspaceid, H5S_SELECT_OR, start, stride, count, block);
+  VRFY((ret >= 0),"hyperslab selection succeeded"); 
+
+  /* 
+   * Initialize data buffer.
+   */
+  for (i = 0; i < MSPACE_DIM1; i++) {
+    for (j = 0; j < MSPACE_DIM2; j++)
+      matrix_out[i][j] = 0;
+  }
+ 
+  /*
+   * Read data back to the buffer matrix_out.
+   */
+
+  ret = H5Dread(datasetc, H5T_NATIVE_INT, mspaceid, fspaceid,
+		H5P_DEFAULT, matrix_out);
+  VRFY((ret >= 0),"H5D independent read succeed"); 
+
+  
+  for (i = 0; i < MSPACE_DIM1; i++) {
+    for (j = 0; j < MSPACE_DIM2; j++)
+      matrix_out1[i][j] = 0;
+  }
+  ret = H5Dread(dataseti, H5T_NATIVE_INT, mspaceid, fspaceid,
+		H5P_DEFAULT, matrix_out1);
+  VRFY((ret >= 0),"H5D independent read succeed"); 
+
+  ret = 0;
+  for (i = 0; i < MSPACE_DIM1; i++){
+    for (j = 0; j < MSPACE_DIM2; j++){
+      if(matrix_out[i][j]!=matrix_out1[i][j]) ret = -1;
+      if(ret < 0) break;
     }
-#endif 
+  }
+  VRFY((ret >= 0),"H5D contiguous irregular collective write succeed"); 
+  
+  /*
+   * Close memory file and memory dataspaces.
+   */  
+  ret = H5Sclose(mspaceid);
+  VRFY((ret >= 0),""); 
+  ret = H5Sclose(fspaceid);
+  VRFY((ret >= 0),""); 
  
-    ret = H5Sclose(mid1);
-    ret = H5Sclose(fid); 
+  /*
+   * Close dataset.
+   */  
+  ret = H5Dclose(dataseti);
+  VRFY((ret >= 0),""); 
+
+  ret = H5Dclose(datasetc);
+  VRFY((ret >= 0),""); 
+  /*
+   * Close property list
+   */
+
+  ret = H5Pclose(acc_plist);
+  VRFY((ret >= 0),""); 
+
  
-    /*
-     * Close dataset.
-     */
-    ret = H5Dclose(dataset);
+  /*
+   * Close the file.
+   */  
+  ret = H5Fclose(file);
+  VRFY((ret >= 0),""); 
 
-    /*
-     * Close the file.
-     */
-    ret = H5Fclose(file);
+  return ;
+}
 
-    /*
-     * Close property list
-     */
 
-     ret = H5Pclose(acc_plist);
+void coll_irregular_cont_read()
+{
 
-    ret = H5Pclose(xfer_plist);
-    ret = H5Pclose(plist);
+  char *filename;
+  hid_t   acc_plist,xfer_plist;
+  hid_t   file, dataseti;           /* File and dataset identifiers */
+  hid_t   mspaceid, fspaceid1; /* Dataspace identifiers */
+ 
+  /* Dimension sizes of the dataset (on disk) */
+  hsize_t mdim[] = {MSPACE_DIM1, MSPACE_DIM2}; /* Dimension sizes of the 
+						  dataset in memory when we
+						  read selection from the
+						  dataset on the disk */
 
-#if 0
-    /*
-     * Open the file.
-     */
-    file = H5Fopen(filename, H5F_ACC_RDONLY, acc_plist);
-    if(file <0) printf("fail to open the file.\n");
+  hssize_t start[2]; /* Start of hyperslab */
+  hsize_t  stride[2]; /* Stride of hyperslab */
+  hsize_t  count[2];  /* Block count */
+  hsize_t  block[2];  /* Block sizes */
 
-    /*
-     * Open the dataset.
-     */
-    dataset = H5Dopen(file,"Matrix in file");
-    if(dataset < 0) printf("fail to open the dataset.\n");
+  herr_t   ret;
+  unsigned i,j;
+
+  int    matrix_out[MSPACE_DIM1][MSPACE_DIM2]; 
+  int    matrix_out1[MSPACE_DIM1][MSPACE_DIM2];   /* Buffer to read from the 
+						  dataset */
+
+  int    mpi_size,mpi_rank;
+
+  MPI_Comm comm = MPI_COMM_WORLD;
+  MPI_Info info = MPI_INFO_NULL;
+
+  /*set up MPI parameters */
+  MPI_Comm_size(comm,&mpi_size);
+  MPI_Comm_rank(comm,&mpi_rank);
+
+
+  /* Obtain file name */
+  filename = (char *) GetTestParameters();    
+
+  /*
+   * Buffers' initialization.
+   */
+
+  /*
+   * Open the file.
+   */
+
+  /*** For testing collective hyperslab selection read ***/
+
+  acc_plist = H5Pcreate(H5P_FILE_ACCESS);
+  VRFY((acc_plist >= 0),""); 
+
+  ret       = H5Pset_fapl_mpio(acc_plist,comm,info);
+  VRFY((ret >= 0),"MPIO creation property list succeeded");
+   
+  file = H5Fopen(filename, H5F_ACC_RDONLY, acc_plist);
+  VRFY((file >= 0),"H5Fopen succeeded");
+
+  /*
+   * Open the dataset.
+   */
+  dataseti = H5Dopen(file,"independ_write");
+  VRFY((dataseti >= 0),"H5Dopen succeeded");
     
-    /* 
-     * Get dataspace of the open dataset.
-     */
-    fid = H5Dget_space(dataset);
-    if(fid < 0) printf("cannot obtain the correct file space.\n");
-    H5Sget_simple_extent_dims(fid,testdims,NULL);
-    HDfprintf(stdout,"testdims[0] %Hu\n",testdims[0]);
-    HDfprintf(stdout, "testdims[1] %Hu\n",testdims[1]);
+  /* 
+   * Get dataspace of the open dataset.
+   */
 
-    /* 
-     * Initialize data buffer.
-     */
-    for (i = 0; i < MSPACE_DIM1; i++) {
-       for (j = 0; j < MSPACE_DIM2; j++)
-            matrix_out[i][j] = 1;
-    }
+  fspaceid1 = H5Dget_space(dataseti);
+  VRFY((fspaceid1 >= 0),"file dataspace obtained succeeded");
 
-    ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-                  H5P_DEFAULT, matrix_out);
-
-    if(ret < 0) printf("fail to read the dataset.\n");
-    for (i=0; i < MSPACE_DIM1; i++) {
-        for(j=0; j < MSPACE_DIM2; j++) printf("%3d  ", matrix_out[i][j]);
-        printf("\n");
-    }
-
-    /*
-     * Close memory file and memory dataspaces.
-     */  
-    ret = H5Sclose(mid);
-    ret = H5Sclose(fid);
+  start[0]  = RFFHSTART0; 
+  start[1]  = RFFHSTART1+mpi_rank*RFFHCOUNT1/mpi_size;
+  block[0]  = RFFHBLOCK0; 
+  block[1]  = RFFHBLOCK1;
+  stride[0] = RFFHSTRIDE0; 
+  stride[1] = RFFHSTRIDE1;
+  count[0]  = RFFHCOUNT0; 
+  count[1]  = RFFHCOUNT1/mpi_size;  
  
-    /*
-     * Close dataset.
-     */  
-    ret = H5Dclose(dataset);
+  ret = H5Sselect_hyperslab(fspaceid1, H5S_SELECT_SET, start, stride, count, block);
+  VRFY((ret >= 0),"hyperslab selection succeeded");
 
-    /*
-     * Close property list
-     */
-    ret = H5Pclose(plist);
-     ret = H5Pclose(acc_plist);
 
-    ret = H5Pclose(xfer_plist);
+  start[0] = RFSHSTART0;
+  start[1] = RFSHSTART1+RFSHCOUNT1*mpi_rank/mpi_size; 
+  block[0] = RFSHBLOCK0; 
+  block[1] = RFSHBLOCK1;  
+  stride[0] = RFSHSTRIDE0; 
+  stride[1] = RFSHSTRIDE0;
+  count[0]  = RFSHCOUNT0; 
+  count[1]  = RFSHCOUNT1/mpi_size;
+
+  ret = H5Sselect_hyperslab(fspaceid1, H5S_SELECT_OR, start, stride, count, block);
+  VRFY((ret >= 0),"hyperslab selection succeeded");
+
+
+  /*
+   * Create memory dataspace.
+   */
+  mspaceid = H5Screate_simple(MSPACE_RANK, mdim, NULL);
+
+  /* 
+   * Select two hyperslabs in memory. Hyperslabs has the same
+   * size and shape as the selected hyperslabs for the file dataspace.
+   */
+
+  start[0]  = RMFHSTART0; 
+  start[1]  = RMFHSTART1+mpi_rank*RMFHCOUNT1/mpi_size;
+  block[0]  = RMFHBLOCK0; 
+  block[1]  = RMFHBLOCK1;
+  stride[0] = RMFHSTRIDE0; 
+  stride[1] = RMFHSTRIDE1;
+  count[0]  = RMFHCOUNT0; 
+  count[1]  = RMFHCOUNT1/mpi_size; 
+  ret = H5Sselect_hyperslab(mspaceid, H5S_SELECT_SET, start, stride, count, block);
+  VRFY((ret >= 0),"hyperslab selection succeeded");
+
+  start[0]  = RMSHSTART0; 
+  start[1]  = RMSHSTART1+mpi_rank*RMSHCOUNT1/mpi_size;
+  block[0]  = RMSHBLOCK0; 
+  block[1]  = RMSHBLOCK1;
+  stride[0] = RMSHSTRIDE0; 
+  stride[1] = RMSHSTRIDE1;
+  count[0]  = RMSHCOUNT0; 
+  count[1]  = RMSHCOUNT1/mpi_size;  
+  ret = H5Sselect_hyperslab(mspaceid, H5S_SELECT_OR, start, stride, count, block);
+  VRFY((ret >= 0),"hyperslab selection succeeded"); 
+
+  /* 
+   * Initialize data buffer.
+   */
+  for (i = 0; i < MSPACE_DIM1; i++) {
+    for (j = 0; j < MSPACE_DIM2; j++)
+      matrix_out[i][j] = 0;
+  }
  
-    /*
-     * Close the file.
-     */  
-    ret = H5Fclose(file);
-#endif
-    return ;
+  /*
+   * Read data back to the buffer matrix_out.
+   */
+
+  xfer_plist = H5Pcreate(H5P_DATASET_XFER);
+  VRFY((xfer_plist >= 0),""); 
+
+  ret = H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+  VRFY((ret >= 0),"MPIO data transfer property list succeed"); 
+
+    ret = H5Dread(dataseti, H5T_NATIVE_INT, mspaceid, fspaceid1,
+		xfer_plist, matrix_out);
+		VRFY((ret >= 0),"H5D collecive read succeed"); 
+
+  ret = H5Pclose(xfer_plist);
+  VRFY((ret >= 0),""); 
+  
+  for (i = 0; i < MSPACE_DIM1; i++) {
+    for (j = 0; j < MSPACE_DIM2; j++)
+      matrix_out1[i][j] = 0;
+  }
+  ret = H5Dread(dataseti, H5T_NATIVE_INT, mspaceid, fspaceid1,
+		H5P_DEFAULT, matrix_out1);
+
+  VRFY((ret >= 0),"H5D independent read succeed"); 
+  ret = 0;
+  for (i = 0; i < MSPACE_DIM1; i++){
+    for (j = 0; j < MSPACE_DIM2; j++){
+      if(matrix_out[i][j]!=matrix_out1[i][j])ret = -1;
+      if(ret < 0) break;
+    }
+  }
+  VRFY((ret >= 0),"H5D contiguous irregular collective read succeed"); 
+
+  /*
+   * Close memory file and memory dataspaces.
+   */  
+  ret = H5Sclose(mspaceid);
+  VRFY((ret >= 0),""); 
+  ret = H5Sclose(fspaceid1);
+  VRFY((ret >= 0),""); 
+ 
+  /*
+   * Close dataset.
+   */  
+  ret = H5Dclose(dataseti);
+  VRFY((ret >= 0),""); 
+  /*
+   * Close property list
+   */
+  ret = H5Pclose(acc_plist);
+  VRFY((ret >= 0),""); 
+
+ 
+  /*
+   * Close the file.
+   */  
+  ret = H5Fclose(file);
+  VRFY((ret >= 0),""); 
+
+  return ;
 }

@@ -352,7 +352,6 @@ int main(int argc, char **argv)
     TestInit(argv[0], usage, parse_options);
 
     /* Tests are generally arranged from least to most complexity... */
-
     AddTest("mpiodup", test_fapl_mpio_dup, NULL, 
 	    "fapl_mpio duplicate", NULL);
     AddTest("posixdup", test_fapl_mpiposix_dup, NULL, 
@@ -434,11 +433,14 @@ int main(int argc, char **argv)
       AddTest("cchunk4", coll_chunk4,NULL,
 	      "collective to independent chunk io",PARATESTFILE);
     }
-
-#ifdef KYANG
-    AddTest("span_tree",t_span_tree,NULL,
-            "derived datatype test",PARATESTFILE);
+    /*#ifdef KYANG*/
+#ifdef KYANG 
+    AddTest("ccontw",coll_irregular_cont_write,NULL,
+            "collective irregular contiguous write",PARATESTFILE);
+    AddTest("ccontr",coll_irregular_cont_read,NULL,
+            "collective irregular contiguous read",PARATESTFILE);
 #endif
+
     AddTest("null", null_dataset, NULL, 
 	    "null dataset test", PARATESTFILE);
 
@@ -448,7 +450,6 @@ int main(int argc, char **argv)
     AddTest("I/Omodeconf", io_mode_confusion, NULL, 
 	    "I/O mode confusion test -- hangs quickly on failure", 
             &io_mode_confusion_params);
-
     /* Display testing information */
     TestInfo(argv[0]);
 
