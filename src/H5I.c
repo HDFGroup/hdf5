@@ -1168,7 +1168,7 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
     } /* end if */
 
     /* Set return value */
-    ret_value=len;
+    ret_value=(ssize_t)len;
 
 done:
     FUNC_LEAVE(ret_value);

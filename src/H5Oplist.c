@@ -370,7 +370,7 @@ H5O_plist_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
         }
     }
 
-    fprintf(stderr, "number of bytes == %d\n", p - old);
+    fprintf(stderr, "number of bytes == %u\n", (unsigned)(p - old));
 
 done:
     FUNC_LEAVE(ret_value);

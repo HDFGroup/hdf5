@@ -239,7 +239,6 @@ static void test_vlstring_type(void)
     H5T_cset_t          cset;
     H5T_str_t           pad;
     herr_t              ret;
-    size_t              size;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing VL String type\n"));
@@ -391,9 +390,6 @@ static void test_read_vl_string_attribute(void)
     hid_t type;
     herr_t ret;
     char *string_att_check;
-    hsize_t size[64];
-    hid_t   space;
-    int     ndims;
 
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
@@ -411,9 +407,6 @@ static void test_read_vl_string_attribute(void)
     att = H5Aopen_name(root, "test_scalar");
     CHECK(att, FAIL, "H5Aopen_name");
     
-    space = H5Aget_space(att);
-    ndims = H5Sget_simple_extent_dims(space, size, NULL);
-
     ret = H5Aread(att, type, &string_att_check);
     CHECK(ret, FAIL, "H5Aread");
 

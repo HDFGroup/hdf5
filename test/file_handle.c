@@ -270,7 +270,7 @@ test_multi(void)
     HDmemset(memb_addr, 0, sizeof memb_addr);
     HDmemset(sv, 0, sizeof sv);
 
-    for(mt=0; mt<H5FD_MEM_NTYPES; mt++)
+    for(mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt))
         memb_map[mt] = H5FD_MEM_SUPER;
     memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
 

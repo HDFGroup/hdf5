@@ -215,7 +215,7 @@ write_file(Bytef *source, uLongf sourceLen)
 
     /* destination buffer needs to be at least 0.1% larger than sourceLen
      * plus 12 bytes */
-    destLen = (uLongf)((double)sourceLen + (sourceLen * 0.1)) + 12;
+    destLen = (uLongf)((double)sourceLen + ((double)sourceLen * 0.1)) + 12;
     dest = (Bytef *)malloc(destLen);
 
     if (!dest)
@@ -231,7 +231,7 @@ write_file(Bytef *source, uLongf sourceLen)
                             ((double)timer_start.tv_usec) / MICROSECOND);
 
     if (report_once_flag) {
-        printf("\tCompression Ratio: %g\n", ((double)destLen) / sourceLen);
+        printf("\tCompression Ratio: %g\n", ((double)destLen) / (double)sourceLen);
         report_once_flag = 0;
     }
 
@@ -240,7 +240,7 @@ write_file(Bytef *source, uLongf sourceLen)
 
     /* loop to make sure we write everything out that we want to write */
     for (;;) {
-        int rc = write(output, d_ptr, (size_t)d_len);
+        int rc = (int)write(output, d_ptr, (size_t)d_len);
 
         if (rc == -1)
             error(strerror(errno));
@@ -462,7 +462,7 @@ fill_with_random_data(Bytef *src, uLongf src_len)
         printf("Using random() for random data\n");
 
         for (u = 0; u < src_len; ++u)
-            src[u] = 0xff & random();
+            src[u] = (Bytef)(0xff & random());
     }
 
     if (compress_percent) {
@@ -482,7 +482,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
     Bytef *src;
 
     for (src_len = min_buf_size; src_len <= max_buf_size; src_len <<= 1) {
-        register int i, iters;
+        register unsigned long i, iters;
 
         iters = file_size / src_len;
         src = (Bytef *)calloc(1, sizeof(Bytef) * src_len);
@@ -612,7 +612,7 @@ main(int argc, char **argv)
             min_buf_size = parse_size_directive(opt_arg);
             break;
         case 'c':
-            compress_percent = strtol(opt_arg, NULL, 10);
+            compress_percent = (int)strtol(opt_arg, NULL, 10);
 
             if (compress_percent < 0)
                 compress_percent = 0;

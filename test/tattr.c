@@ -188,7 +188,7 @@ test_attr_basic_write(void)
     if(attr_name_size>0)
         attr_name = (char*)HDcalloc((size_t)(attr_name_size+1), sizeof(char));
     
-    ret=H5Aget_name(attr, (size_t)(attr_name_size+1), attr_name);
+    ret=(herr_t)H5Aget_name(attr, (size_t)(attr_name_size+1), attr_name);
     CHECK(ret, FAIL, "H5Aget_name");
     ret=HDstrcmp(attr_name, ATTR_TMP_NAME);
     VERIFY(ret, 0, "HDstrcmp");
@@ -223,7 +223,7 @@ test_attr_basic_write(void)
     if(attr_name_size>0)
         attr_name = (char*)HDcalloc((size_t)(attr_name_size+1), sizeof(char));
     
-    ret=H5Aget_name(attr2, (size_t)(attr_name_size+1), attr_name);
+    ret=(herr_t)H5Aget_name(attr2, (size_t)(attr_name_size+1), attr_name);
     CHECK(ret, FAIL, "H5Aget_name");
     ret=HDstrcmp(attr_name, ATTR1A_NAME);
     VERIFY(ret, 0, "HDstrcmp");
