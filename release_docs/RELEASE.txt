@@ -103,6 +103,9 @@ Library
       correctly.
     * Fixed bug where raw data re-allocated from the free-list would sometimes
       overlap with the metadata accumulator and get corrupted. QAK - 1/23/02
+    * Fixed bug where a preempted chunk in the chunk data could still be
+      used by an internal pointer and cause an assertion failure or core
+      dump. QAK - 2/13/02
 
 Configuration
 -------------
