@@ -74,7 +74,7 @@ static int
 is_sparse(void)
 {
     int		fd;
-    struct stat	sb;
+    h5_stat_t	sb;
     
     if ((fd=open("x.h5", O_RDWR|O_TRUNC|O_CREAT, 0666))<0) return 0;
     if (lseek(fd, (off_t)(1024*1024), SEEK_SET)!=1024*1024) return 0;

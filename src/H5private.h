@@ -547,10 +547,13 @@ __DLL__ int HDfprintf (FILE *stream, const char *fmt, ...);
 /* fscanf() variable arguments */
 #define HDfseek(F,O,W)		fseek(F,O,W)
 #define HDfsetpos(F,P)		fsetpos(F,P)
+/* definitions related to the file stat utilities */
 #ifdef WIN32
-#define HDfstat(F,B)             _fstati64(F,B)
+#define HDfstat(F,B)            _fstati64(F,B)
+typedef	struct _stati64		h5_stat_t;
 #else
 #define HDfstat(F,B)		fstat(F,B)
+typedef struct stat             h5_stat_t;
 #endif
 #define HDftell(F)		ftell(F)
 #define HDfwrite(M,Z,N,F)	fwrite(M,Z,N,F)

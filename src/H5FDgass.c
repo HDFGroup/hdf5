@@ -307,11 +307,7 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_gass_t	*file=NULL;
     const H5FD_gass_fapl_t	*fa=NULL;
     H5FD_gass_fapl_t		_fa;
-#ifdef WIN32
-    struct _stati64 sb;
-#else
-    struct stat sb;
-#endif
+    h5_stat_t sb;
     char *filename = (char *) H5MM_malloc(80 * sizeof(char));
     
     FUNC_ENTER(H5FD_gass_open, NULL);

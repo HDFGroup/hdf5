@@ -269,13 +269,11 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     int		fd;
     H5FD_sec2_t	*file=NULL;
 #ifdef WIN32
-	HFILE filehandle;
-	struct _BY_HANDLE_FILE_INFORMATION fileinfo;
-	int results;   
-        struct _stati64 sb;
-#else
-        struct stat sb;
+    HFILE filehandle;
+    struct _BY_HANDLE_FILE_INFORMATION fileinfo;
+    int results;   
 #endif
+    h5_stat_t sb;
 
     FUNC_ENTER(H5FD_sec2_open, NULL);
 

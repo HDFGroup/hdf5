@@ -12,6 +12,8 @@
 #undef NDEBUG			/*override -DNDEBUG			*/
 
 #include "h5test.h"
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #ifdef WIN32
 #include <process.h>
@@ -390,7 +392,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
             if (strlen(fullname) + strlen(base_name) + 1 < size) {
                 /* Append the base_name with a slash first. Multiple slashes are
                  * handled below. */
-                struct stat buf;
+                h5_stat_t buf;
 
                 if (stat(fullname, &buf) < 0)
                     /* The directory doesn't exist just yet */
