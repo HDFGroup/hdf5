@@ -10,8 +10,20 @@ dnl ----------------------------------------------------------------------
 dnl Initialize configure.
 dnl
 AC_REVISION($Id$)
-AC_INIT(src/HDF5.f90)
-AC_CONFIG_AUX_DIR(../bin)
+
+dnl AC_INIT takes the name of the package, the version number, and an
+dnl email address to report bugs. AC_CONFIG_SRCDIR takes a unique file
+dnl as its argument.
+dnl
+dnl NOTE: Don't forget to change the version number here when we do a
+dnl release!!!
+dnl
+AC_INIT([HDF5 Fortran], [1.5], [hdfhelp@ncsa.uiuc.edu])
+AC_CONFIG_SRCDIR([src/HDF5.f90])
+AC_CONFIG_HEADER([src/H5config_fortran.h])
+
+AC_CONFIG_AUX_DIR([../bin])
+
 AC_CANONICAL_HOST
 AC_SUBST(CPPFLAGS)
 AC_SUBST(FFLAGS)
@@ -531,6 +543,35 @@ if test -n "$PARALLEL"; then
   fi
 
   ADD_PARALLEL_FILES="yes"
+
+  AC_MSG_CHECKING([for MPI_Comm_c2f and MPI_Comm_f2c functions])
+
+  dnl Change to the C language
+  AC_LANG_C
+
+  AC_TRY_COMPILE([
+#include <mpi.h>
+  ],
+    [MPI_Comm_c2f(); return 0;],
+    AC_DEFINE(HAVE_MPI_MULTI_LANG_Comm, 1,
+              [Define if \`MPI_Comm_c2f' and \`MPI_Comm_f2c' exists])
+    AC_MSG_RESULT(yes),
+    AC_MSG_RESULT(no)
+  )
+
+  AC_MSG_CHECKING([for MPI_Info_c2f and MPI_Info_f2c functions])
+  AC_TRY_COMPILE([
+#include <mpi.h>
+  ],
+    [MPI_Info_c2f(); return 0;],
+    AC_DEFINE(HAVE_MPI_MULTI_LANG_Info, 1,
+              [Define if \`MPI_Info_c2f' and \`MPI_Info_f2c' exists])
+    AC_MSG_RESULT(yes),
+    AC_MSG_RESULT(no)
+  )
+
+  dnl Change to the Fortran 90 language
+  AC_LANG_FORTRAN9X
 fi
 AC_SUBST(ADD_PARALLEL_FILES)
 
@@ -672,7 +713,7 @@ AC_CONFIG_FILES([config/depend1
 AC_OUTPUT
 no_create=$saved_no_create
 
-dnl Then the stamp2 file for H5config.h
+dnl Then the stamp2 file for H5config_fortran.h
 touch ./config/stamp2
 
 dnl Finally the makefiles

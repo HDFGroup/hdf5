@@ -546,6 +546,7 @@
 ./fortran/src/H5_ff.f90
 ./fortran/src/H5Af.c
 ./fortran/src/H5Aff.f90
+./fortran/src/H5config_fortran.h.in
 ./fortran/src/H5Df.c
 ./fortran/src/H5Dff.f90
 ./fortran/src/H5Ef.c

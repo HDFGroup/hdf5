@@ -8,8 +8,20 @@ dnl ----------------------------------------------------------------------
 dnl Initialize configure.
 dnl
 AC_REVISION($Id$)
-AC_INIT(src/H5.c)
-AC_CONFIG_HEADER(src/H5config.h)
+
+dnl AC_INIT takes the name of the package, the version number, and an
+dnl email address to report bugs. AC_CONFIG_SRCDIR takes a unique file
+dnl as its argument.
+dnl
+dnl NOTE: Don't forget to change the version number here when we do a
+dnl release!!!
+dnl
+AC_INIT([HDF5], [1.5], [hdfhelp@ncsa.uiuc.edu])
+AC_CONFIG_SRCDIR([src/H5.c])
+AC_CONFIG_HEADER([src/H5config.h])
+
+AC_CONFIG_AUX_DIR([bin])
+
 AC_OUTPUT_COMMANDS([
   echo "creating src/H5pubconf.h"
   sed 's/#define /#define H5_/' <src/H5config.h |\
@@ -23,7 +35,7 @@ AC_OUTPUT_COMMANDS([
     /bin/mv -f pubconf src/H5pubconf.h
   fi
 ])
-AC_CONFIG_AUX_DIR(bin)
+
 AC_CANONICAL_HOST
 AC_SUBST(CPPFLAGS)
 
