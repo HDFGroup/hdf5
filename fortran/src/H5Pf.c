@@ -3229,8 +3229,8 @@ nh5pget_filter_by_id_c(hid_t_f *prp_id, int_f* filter_id, int_f* flags, size_t_f
      herr_t status;
      c_cd_nelmts_in = (size_t)*cd_nelmts;
      c_cd_nelmts = (size_t)*cd_nelmts;
-     c_namelen = (size_t)*namelen;
-     c_name = (char*)malloc(sizeof(char)*c_namelen+1);
+     c_namelen = (size_t)*namelen + 1;
+     c_name = (char*)malloc(sizeof(char)*c_namelen);
      if (!c_name) return ret_value;
 
      c_cd_values = (unsigned int*)malloc(sizeof(unsigned int)*((int)c_cd_nelmts_in));
