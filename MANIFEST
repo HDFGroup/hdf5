@@ -873,10 +873,12 @@
 ./src/H5detect.c
 ./src/H5private.h
 ./src/H5public.h
-./src/H5Image.h
-./src/H5Image.c
-./src/H5Lite.h
-./src/H5Lite.c
+./src/H5IMimage.h
+./src/H5IMimage.c
+./src/H5IMpalette.h
+./src/H5IMpalette.c
+./src/H5lite.h
+./src/H5lite.c
 ./src/Makefile.in
 ./src/hdf5.h
 ./src/libhdf5.settings.in
