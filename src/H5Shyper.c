@@ -253,7 +253,11 @@ H5S_hyper_get_regions (size_t *num_regions, uintn rank, uintn dim,
 {
     H5S_hyper_region_t *ret_value=NULL;	/* Pointer to array of regions to return */
     H5S_hyper_region_t *reg=NULL;	    /* Pointer to array of regions */
+    H5S_hyper_bound_t *lo_bound_dim;    /* Pointer to the boundary nodes for a given dimension */
     H5S_hyper_node_t *node;             /* Region node for a given boundary */
+    hssize_t *node_start,*node_end;     /* Extra pointers to node's start & end arrays */
+    hssize_t *tmp_pos,*tmp_off;         /* Extra pointers into the position and offset arrays */
+    hssize_t pos_dim,off_dim;           /* The position & offset in the dimension passed in */
     size_t num_reg=0;                   /* Number of regions in array */
     intn curr_reg=-1;                   /* The current region we are working with */
     intn temp_dim;                      /* Temporary dim. holder */
@@ -276,15 +280,27 @@ H5S_hyper_get_regions (size_t *num_regions, uintn rank, uintn dim,
 #endif /* QAK */
 
     /* Iterate over the blocks which fit the position, or all of the blocks, if pos[dim]==-1 */
-    for(i=0; i<bound_count && (pos[dim]<0 || pos[dim]>=lo_bounds[dim][i].bound+offset[dim]); i++) {
+    lo_bound_dim=lo_bounds[dim];
+    pos_dim=pos[dim];
+    off_dim=offset[dim];
+    for(i=0; i<bound_count && (pos_dim<0 || pos_dim>=lo_bound_dim->bound+off_dim); i++,lo_bound_dim++) {
 #ifdef QAK
 printf("%s: check 1.2, i=%d, num_reg=%d, curr_reg=%d\n",FUNC,(int)i,(int)num_reg,(int)curr_reg);
 #endif /* QAK */
         /* Check if each boundary overlaps in the higher dimensions */
-        node=lo_bounds[dim][i].node;
+        node=lo_bound_dim->node;
         temp_dim=(dim-1);
-        while(temp_dim>=0 && pos[temp_dim]>=(node->start[temp_dim]+offset[temp_dim]) && pos[temp_dim]<=(node->end[temp_dim]+offset[temp_dim]))
+        node_start=node->start+temp_dim;
+        node_end=node->end+temp_dim;
+        tmp_pos=pos+temp_dim;
+        tmp_off=offset+temp_dim;
+        while(temp_dim>=0 && *tmp_pos>=(*node_start+*tmp_off) && *tmp_pos<=(*node_end+*tmp_off)) {
             temp_dim--;
+            node_start--;
+            node_end--;
+            tmp_pos--;
+            tmp_off--;
+        }
 
 #ifdef QAK
 printf("%s: check 1.3, i=%d, temp_dim=%d\n",FUNC,(int)i,(int)temp_dim);
@@ -293,8 +309,8 @@ printf("%s: check 1.3, i=%d, temp_dim=%d\n",FUNC,(int)i,(int)temp_dim);
         if(temp_dim<0) {
             /* Check if we've allocated the array yet */
             if(num_reg==0) {
-                /* Allocate temporary buffer */
-                reg=H5FL_ARR_ALLOC(H5S_hyper_region_t,1,0);
+                /* Allocate temporary buffer, big enough for worst case size */
+                reg=H5FL_ARR_ALLOC(H5S_hyper_region_t,bound_count,0);
 
                 /* Initialize with first region */
                 reg[num_reg].start=MAX(node->start[dim],pos[dim])+offset[dim];
@@ -309,9 +325,6 @@ printf("%s: check 1.3, i=%d, temp_dim=%d\n",FUNC,(int)i,(int)temp_dim);
                 if(dim<(rank-1) && (node->start[dim]+offset[dim])<=(reg[curr_reg].end+1)) {
                     reg[curr_reg].end=MAX(node->end[dim],reg[curr_reg].end)+offset[dim];
                 } else { /* no overlap with previous region, add new region */
-                    /* Enlarge array */
-                    reg=H5FL_ARR_REALLOC(H5S_hyper_region_t,reg,num_reg+1);
-
                     /* Initialize with new region */
                     reg[num_reg].start=node->start[dim]+offset[dim];
                     reg[num_reg].end=node->end[dim]+offset[dim];
