@@ -1220,7 +1220,7 @@ dump_dataset_values(hid_t dset)
      * Print all the values.
      */
     printf("    Data:\n");
-    if (h5dump_dset(stdout, &info, dset, -1, -1)<0) {
+    if (h5tools_dump_dset(stdout, &info, dset, -1, NULL, -1) < 0) {
 	printf("        Unable to print data.\n");
     }
 
@@ -1310,14 +1310,14 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 	if (hexdump_g) {
 	    p_type = H5Tcopy(type);
 	} else {
-	    p_type = h5dump_fixtype(type);
+	    p_type = h5tools_fixtype(type);
 	}
 	if (p_type>=0) {
 	    need = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
 	    buf = malloc(need);
 	    assert(buf);
 	    if (H5Aread(attr, p_type, buf)>=0) {
-		h5dump_mem(stdout, &info, attr, p_type, space, buf,-1);
+		h5tools_dump_mem(stdout, &info, attr, p_type, space, buf, -1);
 	    }
 	    free(buf);
 	    H5Tclose(p_type); 
@@ -2103,7 +2103,8 @@ main (int argc, char *argv[])
 	file = -1;
 
 	while (fname && *fname) {
-            file = h5dump_fopen(fname, drivername, sizeof drivername);
+            file = h5tools_fopen(fname, drivername, sizeof drivername);
+
 	    if (file>=0) {
 		if (verbose_g) {
 		    printf("Opened \"%s\" with %s driver.\n",

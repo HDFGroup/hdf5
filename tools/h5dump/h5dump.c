@@ -9,6 +9,7 @@
 #include "h5dump.h"
 #include "H5private.h"
 #include "h5tools.h"
+#include "h5tools_utils.h"
 
 /* module-scoped variables */
 static const char  *progname = "h5dump";
@@ -374,14 +375,6 @@ static int              xml_print_strs(hid_t, int);
 static hobj_ref_t      *ref_path_table_put(hid_t, const char *);
 static char            *xml_escape_the_string(const char *, int);
 static char            *xml_escape_the_name(const char *);
-
-/* a structure to hold the subsetting particulars for a dataset */
-struct subset_t {
-    hsize_t *start;
-    hsize_t *stride;
-    hsize_t *count;
-    hsize_t *block;
-};
 
 /* a structure for handling the order command-line parameters come in */
 struct handler_t {
@@ -1385,6 +1378,7 @@ dump_all(hid_t group, const char *name, void * op_data)
 		    goto done;
 		} else if (dset_table->objs[i].displayed) {
 		    indentation(indent);
+
 		    if (!doxml) {
 			begin_obj(dump_header_format->datasetbegin, name,
 				  dump_header_format->datasetblockbegin);
@@ -1683,6 +1677,94 @@ dump_tables(void)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    dump_dims
+ *
+ * Purpose:     Dump the dimensions handed to it in a comma separated list
+ *
+ * Return:      void
+ *
+ * Programmer:  Bill Wendling
+ *              Tuesday, 27. February 2001
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+dump_dims(hsize_t *s, int dims)
+{
+    register int i;
+
+    for (i = 0; i < dims; i++) {
+        printf("%u", s[i]);
+        
+        if (i + 1 != dims)
+            printf(", ");
+    }
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    dump_subsetting_header
+ *
+ * Purpose:     Dump the subsetting header like specified in the DDL.
+ *
+ * Return:      void
+ *
+ * Programmer:  Bill Wendling
+ *              Tuesday, 27. February 2001
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+dump_subsetting_header(struct subset_t *sset, int dims)
+{
+    indentation(indent);
+    printf("%s %s\n", dump_header_format->subsettingbegin,
+           dump_header_format->subsettingblockbegin);
+
+    indent += COL;
+    indentation(indent);
+    printf("%s %s ", dump_header_format->startbegin,
+           dump_header_format->startblockbegin);
+    dump_dims(sset->start, dims);
+    printf("%s %s\n", dump_header_format->startend,
+           dump_header_format->startblockend);
+
+    indentation(indent);
+    printf("%s %s ", dump_header_format->stridebegin,
+           dump_header_format->strideblockbegin);
+    dump_dims(sset->stride, dims);
+    printf("%s %s\n", dump_header_format->strideend,
+           dump_header_format->strideblockend);
+
+    indentation(indent);
+    printf("%s %s ", dump_header_format->countbegin,
+           dump_header_format->countblockbegin);
+
+    if (sset->count)
+        dump_dims(sset->count, dims);
+    else
+        printf("DEFAULT");
+
+    printf("%s %s\n", dump_header_format->countend,
+           dump_header_format->countblockend);
+
+    indentation(indent);
+    printf("%s %s ", dump_header_format->blockbegin,
+           dump_header_format->blockblockbegin);
+
+    if (sset->block)
+        dump_dims(sset->block, dims);
+    else
+        printf("DEFAULT");
+
+    printf("%s %s\n", dump_header_format->blockend,
+           dump_header_format->blockblockend);
+}
+
+/*-------------------------------------------------------------------------
  * Function:    dump_data
  *
  * Purpose:     Dump attribute or dataset data
@@ -1720,74 +1802,8 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset)
 
     if (sset && obj_data == DATASET_DATA) {
         hid_t f_space = H5Dget_space(obj_id);
-        int dims = H5Sget_simple_extent_ndims(f_space);
 
-        indentation(indent);
-        begin_obj(dump_header_format->subsettingbegin, (const char *)NULL,
-                  dump_header_format->subsettingblockbegin);
-        indent += COL;
-
-        indentation(indent);
-        printf("%s %s ", dump_header_format->startbegin,
-               dump_header_format->startblockbegin);
-
-        for (i = 0; i < dims; i++) {
-            printf("%u", sset->start[i]);
-            
-            if (i + 1 != dims)
-                printf(", ");
-        }
-
-        printf("%s %s\n", dump_header_format->startend,
-               dump_header_format->startblockend);
-
-        indentation(indent);
-        printf("%s %s ", dump_header_format->stridebegin,
-               dump_header_format->strideblockbegin);
-
-        for (i = 0; i < dims; i++) {
-            printf("%u", sset->stride[i]);
-            
-            if (i + 1 != dims)
-                printf(", ");
-        }
-
-        printf("%s %s\n", dump_header_format->strideend,
-               dump_header_format->strideblockend);
-
-        indentation(indent);
-        printf("%s %s ", dump_header_format->countbegin,
-               dump_header_format->countblockbegin);
-
-        if (sset->count)
-            for (i = 0; i < dims; i++) {
-                printf("%u", sset->count[i]);
-            
-                if (i + 1 != dims)
-                    printf(", ");
-            }
-        else
-            printf("DEFAULT");
-
-        printf("%s %s\n", dump_header_format->countend,
-               dump_header_format->countblockend);
-
-        indentation(indent);
-        printf("%s %s ", dump_header_format->blockbegin,
-               dump_header_format->blockblockbegin);
-
-        if (sset->block)
-            for (i = 0; i < dims; i++) {
-                printf("%u", sset->block[i]);
-            
-                if (i + 1 != dims)
-                    printf(", ");
-            }
-        else
-            printf("DEFAULT");
-
-        printf("%s %s\n", dump_header_format->blockend,
-               dump_header_format->blockblockend);
+        dump_subsetting_header(sset, H5Sget_simple_extent_ndims(f_space));
         H5Sclose(f_space);
 
         /* recalculate the depth of the data */
@@ -1800,11 +1816,11 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset)
 
     /* Print all the values. */
     if (obj_data == DATASET_DATA) {
-	status = h5dump_dset(stdout, outputformat, obj_id, -1, depth);
+	status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, sset, depth);
     } else {
-        /* need to call h5dump_mem for the attribute data */    
+        /* need to call h5tools_dump_mem for the attribute data */    
         type = H5Aget_type(obj_id);
-        p_type = h5dump_fixtype(type);
+        p_type = h5tools_fixtype(type);
         space = H5Aget_space(obj_id);
         ndims = H5Sget_simple_extent_dims(space, size, NULL);
 
@@ -1817,7 +1833,8 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset)
         assert(buf);
 
         if (H5Aread(obj_id, p_type, buf) >= 0)
-            status = h5dump_mem(stdout, outputformat, obj_id, p_type, space, buf, depth);
+            status = h5tools_dump_mem(stdout, outputformat, obj_id, p_type,
+                                      space, buf, depth);
 
         free(buf);
         H5Tclose(p_type); 
@@ -1825,7 +1842,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset)
         H5Tclose(type);
     }
 
-    if (status < 0) {
+    if (status == FAIL) {
         indentation(indent + COL);
         error_msg(progname, "unable to print data\n");
         d_status = EXIT_FAILURE;
@@ -2603,7 +2620,7 @@ main(int argc, const char *argv[])
     else
 	fname = argv[opt_ind];
 
-    fid = h5dump_fopen(fname, NULL, 0);
+    fid = h5tools_fopen(fname, NULL, 0);
 
     if (fid < 0) {
         error_msg(progname, "unable to open file \"%s\"\n", fname);
@@ -3837,7 +3854,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED *sset)
 	} else if (H5Tget_class(type) == H5T_STRING) {
 	    status = xml_print_strs(obj_id, DATASET_DATA);
 	} else {
-	    status = h5dump_dset(stdout, outputformat, obj_id, -1, depth);
+	    status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, NULL, depth);
 	}
     } else {
 	/* Attribute data */
@@ -3855,7 +3872,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED *sset)
 	    status = xml_print_strs(obj_id, ATTRIBUTE_DATA);
 	} else {
 	    /* all other data */
-	    p_type = h5dump_fixtype(type);
+	    p_type = h5tools_fixtype(type);
 	    H5Tclose(type);
 
 	    space = H5Aget_space(obj_id);
@@ -3869,11 +3886,10 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED *sset)
 		malloc((size_t)(nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type))));
 	    assert(buf);
 
-	    if (H5Aread(obj_id, p_type, buf) >= 0) {
-		status =
-		    h5dump_mem(stdout, outputformat, obj_id, p_type, space,
-			       buf, depth);
-	    }
+	    if (H5Aread(obj_id, p_type, buf) >= 0)
+                status = h5tools_dump_mem(stdout, outputformat, obj_id,
+                                          p_type, space, buf, depth);
+
 	    free(buf);
 	    H5Tclose(p_type);
 	    H5Sclose(space);
@@ -3881,7 +3897,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED *sset)
 	}
     }
 
-    if (status < 0) {
+    if (status == FAIL) {
 	indentation(indent + COL);
 	printf("Unable to print data.\n");
 	status = 1;
