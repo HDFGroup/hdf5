@@ -47,23 +47,6 @@
 #define H5F_MPIO_DEBUG_KEY "H5F_mpio_debug_key"
 #endif
 
-#if defined(WANT_H5_V1_2_COMPAT) || defined(H5_WANT_H5_V1_2_COMPAT)
-/*
- * Low-level file drivers.  These values are returned by H5Pget_file_driver()
- * and are set by the various H5Pset_...() functions that set file driver
- * properties.
- */
-typedef enum H5F_driver_t {
-    H5F_LOW_ERROR	= -1,	/*error return value			*/
-    H5F_LOW_STDIO	= 0,	/*use functions declared in stdio.h	*/
-    H5F_LOW_SEC2	= 1, 	/*use functions declared in unistd.h	*/
-    H5F_LOW_MPIO	= 2,	/*use indep or collective MPI-IO	*/
-    H5F_LOW_CORE	= 3,	/*use malloc() and free()		*/
-    H5F_LOW_SPLIT	= 4,	/*separate meta data from raw data	*/
-    H5F_LOW_FAMILY	= 5 	/*split addr space over many files	*/
-} H5F_driver_t;
-#endif /* WANT_H5_V1_2_COMPAT */
-
 /* The difference between a single file and a set of mounted files */
 typedef enum H5F_scope_t {
     H5F_SCOPE_LOCAL	= 0,	/*specified file handle only		*/

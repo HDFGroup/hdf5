@@ -126,44 +126,12 @@ h5_cleanup(const char *base_name[], hid_t fapl)
     char	temp[2048];
     int		i, j;
     int		retval=0;
-#ifndef H5_WANT_H5_V1_2_COMPAT
     hid_t	driver;
-#endif /* H5_WANT_H5_V1_2_COMPAT */
 
     if (!HDgetenv("HDF5_NOCLEANUP")) {
 	for (i = 0; base_name[i]; i++) {
 	    if (h5_fixname(base_name[i], fapl, filename, sizeof(filename)) == NULL)
 		continue;
-
-#ifdef H5_WANT_H5_V1_2_COMPAT
-	    switch (H5Pget_driver(fapl)) {
-            case H5F_LOW_CORE:
-                break; /*nothing to remove*/
-		
-            case H5F_LOW_SPLIT:
-                HDsnprintf(temp, sizeof(temp), "%s.raw", filename);
-                HDremove(temp);
-                HDsnprintf(temp, sizeof(temp), "%s.meta", filename);
-                HDremove(temp);
-                break;
-
-            case H5F_LOW_FAMILY:
-                for (j = 0; /*void*/; j++) {
-                    HDsnprintf(temp, sizeof(temp), filename, j);
-
-                    if (HDaccess(temp, F_OK) < 0)
-                        break;
-
-                    HDremove(temp);
-                }
-
-                break;
-
-            default:
-                HDremove(filename);
-                break;
-	    }
-#else /* H5_WANT_H5_V1_2_COMPAT */
 
 	    driver = H5Pget_driver(fapl);
 
@@ -190,7 +158,6 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 	    } else {
 		HDremove(filename);
 	    }
-#endif /* H5_WANT_H5_V1_2_COMPAT */
 	}
 
 	retval = 1;
@@ -276,54 +243,13 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     const char     *suffix = ".h5"; /* suffix has default */
     char           *ptr, last = '\0';
     size_t          i, j;
-#ifdef H5_WANT_H5_V1_2_COMPAT
-    H5F_driver_t    driver;
-#else
     hid_t           driver;
-#endif /* H5_WANT_H5_V1_2_COMPAT */
     
     if (!base_name || !fullname || size < 1)
         return NULL;
 
     memset(fullname, 0, size);
 
-#ifdef H5_WANT_H5_V1_2_COMPAT
-    /* figure out the suffix */
-    if (H5P_DEFAULT != fapl){
-	if ((driver = H5Pget_driver(fapl)) < 0)
-            return NULL;
-
-	if (H5F_LOW_FAMILY == driver) {
-	    suffix = "%05d.h5";
-	} else if (H5F_LOW_CORE == driver) {
-	    suffix = NULL;
-	} 
-    }
-    
-    /* Use different ones depending on parallel or serial driver used. */
-    if (H5P_DEFAULT != fapl && H5F_LOW_MPIO == driver){
-	/* For parallel:
-	 * First use command line option, then the environment variable,
-	 * then try the constant
-	 */
-	prefix = (paraprefix ? paraprefix : getenv("HDF5_PARAPREFIX"));
-
-#ifdef HDF5_PARAPREFIX
-	if (!prefix)
-            prefix = HDF5_PARAPREFIX;
-#endif  /* HDF5_PARAPREFIX */
-    }else{
-	/* For serial:
-	 * First use the environment variable, then try the constant
-	 */
-	prefix = HDgetenv("HDF5_PREFIX");
-
-#ifdef HDF5_PREFIX
-	if (!prefix)
-            prefix = HDF5_PREFIX;
-#endif  /* HDF5_PREFIX */
-    }
-#else /* H5_WANT_H5_V1_2_COMPAT */
     /* figure out the suffix */
     if (H5P_DEFAULT != fapl){
 	if ((driver = H5Pget_driver(fapl)) < 0)
@@ -358,15 +284,10 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
             prefix = HDF5_PREFIX;
 #endif  /* HDF5_PREFIX */
     }
-#endif  /* H5_WANT_H5_V1_2_COMPAT */
 
     /* Prepend the prefix value to the base name */
     if (prefix && *prefix) {
-#ifdef H5_WANT_H5_V1_2_COMPAT
-        if (H5P_DEFAULT != fapl && H5F_LOW_MPIO == driver) {
-#else
         if (H5P_DEFAULT != fapl && H5FD_MPIO == driver) {
-#endif  /* H5_WANT_H5_V1_2_COMPAT */
             /* This is a parallel system */
             char *subdir;
 
@@ -425,25 +346,6 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
     } else {
 	HDstrcpy(fullname, base_name);
    }
-
-#ifdef H5_WANT_H5_V1_2_COMPAT
-    /* Append a suffix */
-    if ((driver = H5Pget_driver(fapl)) < 0)
-        return NULL;
-
-    switch (driver) {
-        case H5F_LOW_SPLIT:
-        case H5F_LOW_CORE:
-            suffix = NULL;
-            break;
-        case H5F_LOW_FAMILY:
-            suffix = "%05d.h5";
-            break;
-        default:
-            suffix = ".h5";
-            break;
-    }
-#endif /* H5_WANT_H5_V1_2_COMPAT */
 
     /* Append a suffix */
     if (suffix) {

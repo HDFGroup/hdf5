@@ -107,32 +107,7 @@ STEP 1: Building hdf5 libraries and non-hdf4 related tools
        Then open the c:\myHDFstuff\hdf5\proj\all\all.dsw 
        workspace. 
 
-    3. If you don't want to build and test backward 
-       compatibility with hdf5 1.2, you may skip this part and
-       go to part 4.
-
-       To build and test backward compatibility with hdf5 1.2, 
-           a) go to "Project" and select "Settings"
-           b) A window called "Project Settings" should be 
-              popped up,on the upper-left corner is a small box 
-              "Settings For". Set the option to 
-              "Win32 Release".
-           c) Go to the the right side of "Project Settings" 
-              window,choose C/C++ on the menu.
-           d) Go to the "Category" box below menu bar, choose 
-              Preprocessor.
-           e) Go to "Preprocessor definitions" box below   
-              "Category". Inside the box, type 
-              "WANT_H5_V1_2_COMPAT". Note: don't type double 
-              quote for "WANT_H5_V1_2_COMPAT" and add a comma
-              between "WANT_H5_V1_2_COMPAT" and the last 
-              preprocessor definations(WIN32).
-           f) click OK at the bottom of "Project Settings" 
-              window.
-           g) repeat a)-f) and choose the option as 
-              "win32 Debug" on step b).
-             
-    4. Select "Build", then Select "Set Active Configuration".
+    3. Select "Build", then Select "Set Active Configuration".
 
        On Windows platform select as the active configuration
 
@@ -506,36 +481,11 @@ Step 1.
        Then open the c:\myHDFstuff\hdf5\proj\all\all.dsw 
        workspace. 
     
-    3. If you don't want to build and test backward 
-       compatibility with hdf5 1.2, you may skip this part and 
-       go to part 4.
-
-       To build and test backward compatibility with hdf5 1.2, 
-           a) go to "Project" and select "Settings"
-           b) A window called "Project Settings" should be 
-              popped up,on the upper-left corner is a small box 
-              "Settings For" Choose the option to
-              "Win32 Release".
-           c) Go to the the right side of "Project Settings" 
-              window, choose C/C++ on the menu.
-           d) Go to the "Category" box below menu bar, choose 
-              Preprocessor.
-           e) Go to "Preprocessor definitions" box below 
-              "Category". Inside the box, type 
-              "WANT_H5_V1_2_COMPAT". Note: don't type
-              double quote for "WANT_H5_V1_2_COMPAT" and add a 
-              comma between "WANT_H5_V1_2_COMPAT" and the last               
-              preprocessor defination(WIN32).
-           f) click OK at the bottom of "Project Settings" 
-              window.
-           g) repeat a)-f) and set the option to "win32 Debug" 
-              on step b).
-
-    4. This part is for users who are familar with handling 
+    3. This part is for users who are familar with handling 
        settings of VC++ project and store their hdf4 libraries 
        not under C:\hdf41r4. Other users can skip this part. 
         
-       4.1 Change the path where hdf4 library header files are 
+       3.1 Change the path where hdf4 library header files are 
        located
 
        a) On the View menu, click Workspace, you may see a 
@@ -580,8 +530,8 @@ Step 1.
              or vice versa.
        d) repeat step c) for the other three projects.
        
-	 4.2 Replace the user's hdf and mfhdf libraries, export 
-           libraries of hdf and mfhdf DLLs
+       3.2 Replace the user's hdf and mfhdf libraries, export 
+         libraries of hdf and mfhdf DLLs
 
 	 You also need to modify four projects: h4toh5,   
        h4toh5dll, h5toh4 and h5toh4dll:
@@ -616,9 +566,9 @@ Step 1.
           on the pop-up box, to insert your own hd414m.lib, 
           hd414md.lib,hm414m.lib and hd414m.lib. You must know 
           their paths at first.
-	 i) repeat a)-h) for h5toh4 and h5toh4dll.
+       i) repeat a)-h) for h5toh4 and h5toh4dll.
 
-    5. Select "Build", then Select "Set Active Configuration".
+    4. Select "Build", then Select "Set Active Configuration".
 
        On Windows platform select as the active configuration
 

@@ -13,8 +13,8 @@
 /* Define if it's safe to use `long long' for hsize_t and hssize_t */
 #undef HAVE_LARGE_HSIZET
 
-/* Define if the HDF5 v1.2 compatibility functions are to be compiled in */
-#undef WANT_H5_V1_2_COMPAT
+/* Define if the HDF5 v1.4 compatibility functions are to be compiled in */
+#undef WANT_H5_V1_4_COMPAT
 
 /* Width for printf() for type `long long' or `__int64', us. `ll' */
 #undef PRINTF_LL_WIDTH

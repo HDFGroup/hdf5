@@ -470,10 +470,8 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map/*out*/,
 
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
         H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1);
-#ifndef WANT_H5_V1_2_COMPAT
     if (H5FD_MULTI!=H5Pget_driver(fapl_id))
         H5Epush_ret(func, H5E_PLIST, H5E_BADVALUE, "incorrect VFL driver", -1);
-#endif /* WANT_H5_V1_2_COMPAT */
     if (NULL==(fa=H5Pget_driver_info(fapl_id)))
         H5Epush_ret(func, H5E_PLIST, H5E_BADVALUE, "bad VFL driver info", -1);
 
@@ -589,10 +587,8 @@ H5Pget_dxpl_multi(hid_t dxpl_id, hid_t *memb_dxpl/*out*/)
 
     if (H5P_FILE_ACCESS!=H5Pget_class(dxpl_id))
         H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1);
-#ifndef WANT_H5_V1_2_COMPAT
     if (H5FD_MULTI!=H5Pget_driver(dxpl_id))
         H5Epush_ret(func, H5E_PLIST, H5E_BADVALUE, "incorrect VFL driver", -1);
-#endif /* WANT_H5_V1_2_COMPAT */
     if (NULL==(dx=H5Pget_driver_info(dxpl_id)))
         H5Epush_ret(func, H5E_PLIST, H5E_BADVALUE, "bad VFL driver info", -1);
 

@@ -155,7 +155,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --enable-threadsafe     Enable thread safe capability"
 ac_help="$ac_help
-  --enable-hdf5v1_2       Compile the HDF5 v1.2 compatibility interface [default=no]"
+  --enable-hdf5v1_4       Compile the HDF5 v1.4 compatibility interface [default=no]"
 ac_help="$ac_help
   --enable-stream-vfd     Build the Stream Virtual File Driver. [default=no]"
 ac_help="$ac_help
@@ -8418,19 +8418,19 @@ EOF
 
 fi
 
-echo $ac_n "checking whether HDF5 v1.2 compatibility functions enabled""... $ac_c" 1>&6
-echo "configure:8423: checking whether HDF5 v1.2 compatibility functions enabled" >&5
-# Check whether --enable-hdf5v1_2 or --disable-hdf5v1_2 was given.
-if test "${enable_hdf5v1_2+set}" = set; then
-  enableval="$enable_hdf5v1_2"
-  HDF5_V1_2_COMPAT=$enableval
+echo $ac_n "checking whether HDF5 v1.4 compatibility functions enabled""... $ac_c" 1>&6
+echo "configure:8423: checking whether HDF5 v1.4 compatibility functions enabled" >&5
+# Check whether --enable-hdf5v1_4 or --disable-hdf5v1_4 was given.
+if test "${enable_hdf5v1_4+set}" = set; then
+  enableval="$enable_hdf5v1_4"
+  HDF5_V1_4_COMPAT=$enableval
 fi
 
 
-if test "X$HDF5_V1_2_COMPAT" = "Xyes"; then
+if test "X$HDF5_V1_4_COMPAT" = "Xyes"; then
    echo "$ac_t""yes" 1>&6
    cat >> confdefs.h <<\EOF
-#define WANT_H5_V1_2_COMPAT 1
+#define WANT_H5_V1_4_COMPAT 1
 EOF
 
 else
