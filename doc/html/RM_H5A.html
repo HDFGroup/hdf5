@@ -10,9 +10,9 @@ HDF5/H5A API Specification
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
+<a href="index.html">HDF5 documents and links</a>&nbsp;<br>
 <a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
-<a href="H5.user.html">HDF5 User Guide</a>&nbsp;<br>
-<a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
+<a href="H5.user.html">HDF5 User's Guide</a>&nbsp;<br>
 <!--
 <a href="Glossary.html">Glossary</a><br>
 -->
@@ -358,7 +358,7 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
         Up to <code>buf_size</code> characters are stored in 
         <code>buf</code> followed by a <code>\0</code> string
         terminator.  If the name of the attribute is longer than 
-        <code>buf_size</code> -1, the string terminator is stored in the
+        <code>(buf_size -1)</code>, the string terminator is stored in the
         last position of the buffer to properly terminate the string.
 <dt><strong>Parameters:</strong>
     <dl>
@@ -403,7 +403,7 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <dl>
 <dt><strong>Name:</strong> <a name="Annot-Iterate">H5Aiterate</a>
 <dt><strong>Signature:</strong>
-    <dd><em>int</em> <code>H5Aiterate</code>(<em>hid_t</em> <code>loc_id</code>,
+    <dd><em>herr_t</em> <code>H5Aiterate</code>(<em>hid_t</em> <code>loc_id</code>,
         <em>unsigned *</em> <code>idx</code>,
         <em>H5A_operator_t</em> <code>op</code>,
         <em>void *</em><code>op_data</code>
@@ -520,9 +520,9 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
+<a href="index.html">HDF5 documents and links</a>&nbsp;<br>
 <a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
-<a href="H5.user.html">HDF5 User Guide</a>&nbsp;<br>
-<a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
+<a href="H5.user.html">HDF5 User's Guide</a>&nbsp;<br>
 <!--
 <a href="Glossary.html">Glossary</a><br>
 -->
