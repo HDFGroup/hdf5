@@ -410,9 +410,9 @@ Known Problems
   fail if library is compiled using optimization of any level.
 
 * When building hdf5 tools and applications on windows platform, a linking
-warning: defaultlib "LIBC" conflicts with use of other libs will appear
-on debug version when running VC++6.0. This warning doesn't affect building
-and testing hdf5 applications. We are investigating this now.
+  warning: defaultlib "LIBC" conflicts with use of other libs will appear
+  on debug version when running VC++6.0. This warning doesn't affect building
+  and testing hdf5 applications. We are investigating this now.
 * The Stream VFD was not tested yet under Windows.
   It is not supported in the TFLOPS machine.
 
@@ -441,5 +441,3 @@ and testing hdf5 applications. We are investigating this now.
   in the top level directory with the Cray-specific files from the 
   ftp://hdf.ncsa.uiuc.edu/pub/ougoing/hdf5/hdf5-1.4.0-beta/F90_source_for_Crays
   directory.
-
-* The "stream_test" failed on IRIX64 6.5(n32 mode, modi4) with unknown reason.
