@@ -557,7 +557,8 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 
 	/* write the object header header */
 #ifdef H5_HAVE_PARALLEL
-	H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
+	if (IS_H5FD_MPIO(f))
+	    H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif /* H5_HAVE_PARALLEL */
 	if (H5F_block_write(f, addr, (hsize_t)H5O_SIZEOF_HDR(f), 
 			    H5P_DEFAULT, buf) < 0) {
@@ -633,6 +634,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 	    if (oh->chunk[i].dirty) {
 		assert(H5F_addr_defined(oh->chunk[i].addr));
 #ifdef H5_HAVE_PARALLEL
+	    if (IS_H5FD_MPIO(f))
 		H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 write*/
 #endif /* H5_HAVE_PARALLEL */
 		if (H5F_block_write(f, oh->chunk[i].addr,

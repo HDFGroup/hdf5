@@ -357,7 +357,8 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
 	HDmemset(p, 0, size - (p - buf));
 
 #ifdef H5_HAVE_PARALLEL
-	H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
+	if (IS_H5FD_MPIO(f))
+	    H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif /* H5_HAVE_PARALLEL */
 	status = H5F_block_write(f, addr, (hsize_t)size, H5P_DEFAULT, buf);
 	buf = H5MM_xfree(buf);

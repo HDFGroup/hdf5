@@ -424,6 +424,7 @@ H5FD_mpio_tas_allsame(H5FD_t *_file, hbool_t newval)
 #endif
 
     assert(file);
+    assert(H5FD_MPIO==file->pub.driver_id);
     oldval = file->allsame;
     file->allsame = newval;
 

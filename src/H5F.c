@@ -1735,7 +1735,8 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     } else {
 	/* Write superblock */
 #ifdef H5_HAVE_PARALLEL
-        H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
+	if (IS_H5FD_MPIO(f))
+	    H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif
 	if (H5FD_write(f->shared->lf, H5P_DEFAULT, f->shared->boot_addr,
 		       superblock_size, sbuf)<0) {
@@ -1746,7 +1747,8 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 	/* Write driver information block */
 	if (HADDR_UNDEF!=f->shared->driver_addr) {
 #ifdef H5_HAVE_PARALLEL
-	    H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
+	    if (IS_H5FD_MPIO(f))
+		H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif
 	    if (H5FD_write(f->shared->lf, H5P_DEFAULT,
 			   f->shared->base_addr+superblock_size, driver_size,

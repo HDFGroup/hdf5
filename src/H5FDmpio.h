@@ -34,8 +34,12 @@ typedef struct H5FD_mpio_dxpl_t {
     H5FD_mpio_xfer_t	xfer_mode;	/*collective or independent I/O	*/
 } H5FD_mpio_dxpl_t;
     
-/* Function prototypes */
 #ifdef H5_HAVE_PARALLEL
+/* Macros */
+#define IS_H5FD_MPIO(f)	/* (H5F_t *f) */				    \
+    (H5FD_MPIO==f->shared->lf->driver_id)
+
+/* Function prototypes */
 __DLL__ hid_t H5FD_mpio_init(void);
 __DLL__ herr_t H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 __DLL__ herr_t H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/,
