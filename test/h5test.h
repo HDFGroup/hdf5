@@ -133,7 +133,7 @@ H5TEST_DLL int  GetTestVerbosity(void);
 H5TEST_DLL int  SetTestVerbosity(int newval);
 H5TEST_DLL void ParseTestVerbosity(char *argv);
 H5TEST_DLL int  GetTestNumErrs(void);
-H5TEST_DLL void *GetTestParameters(void);
+H5TEST_DLL const void *GetTestParameters(void);
 H5TEST_DLL int  TestErrPrintf(const char *format, ...);
 H5TEST_DLL void SetTest(const char *testname, int action);
 

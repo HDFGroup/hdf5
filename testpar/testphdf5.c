@@ -462,9 +462,11 @@ int main(int argc, char **argv)
     AddTest("indngroupsread", independent_group_read, NULL, 
 	    "independent group and dataset read", &collngroups_params);
 
+    /* By default, do not run big dataset. */
+    AddTest("-bigdataset", big_dataset, NULL, 
+	    "big dataset test", filenames[7]);
     if (dobig && sizeof(MPI_Offset)>4){
-	AddTest("bigdataset", big_dataset, NULL, 
-		"big dataset test", filenames[7]);
+	SetTest("bigdataset", ONLYTEST);
     }
     AddTest("fillvalue", dataset_fillvalue, NULL, 
 	    "dataset fill value", filenames[8]);
