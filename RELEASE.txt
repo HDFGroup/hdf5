@@ -135,11 +135,10 @@ h4toh5 Utility
 
     5. Platforms
 
-    The h4toh5 utility requires HDF5.1.4 and HDF4r1.4
+    The h4toh5 utility requires HDF5-1.4.0 and HDF4r1.4
 
-    h4toh5 utility has been tested on Solaris 2.6, Solaris 2.5,
-    Irix 6.5, HPUX 11.0, DEC Unix, FreeBSD, Windows 2000(NT5.0),Windows NT 
-    and Windows 98.
+    h4toh5 utility has been tested on all platforms listed below ( see section
+    "Platforms Tested" ) except TFLOPS.
 
 F90 Support
 ===========
@@ -152,7 +151,7 @@ F90 Support
     Reference Manual for more details.
    
     F90 APIs are available for the Solaris 2.6 and 2.7, Linux, DEC UNIX, 
-    T3E, J90 and O2K (64 bit option only) platforms. The Parallel version of 
+    T3E, SV1 and O2K (64 bit option only) platforms. The Parallel version of 
     the HDF5 F90 Library is supported on the O2K and T3E platforms.
 
     Changes since the last prototype release (July 2000)
@@ -361,9 +360,6 @@ Bug Fixes since HDF5-1.4.0-beta2
 Platforms Tested
 ================
 
- Note: Due to the nature of the bug fixes, only static versions of the
-       library and tools were tested.
-
 
   AIX 4.3.2 (IBM SP)            mpcc_r 3.6.6
   Cray T3E sn6711 2.0.5.45      Cray Standard C Version 6.4.0.0
@@ -391,6 +387,8 @@ Platforms Tested
   (Solaris 2.7)                 WorkShop Compilers 5.0 99/10/25 Fortran 90
                                        2.0 Patch 107356-04
                                 Workshop Compilers 5.0 98/12/15 C++ 5.0
+  SunOS 5.5.1                   gcc-2.7.2 
+   (Solaris 2.5.1 (x86))
   TFLOPS 3.3                    mpich-1.2.0 with local changes
   Windows NT4.0, 2000 (NT5.0)   MSVC++ 6.0
   Windows 98                    MSVC++ 6.0
