@@ -20,7 +20,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src, test, and c++/src directories
-AM_CPPFLAGS=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/c++/src
+INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/c++/src
 
 # These are our main targets.  They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.

@@ -194,7 +194,7 @@ F9XMODEXT = @F9XMODEXT@
 F9XMODFLAG = @F9XMODFLAG@
 
 # Include src directory
-AM_CPPFLAGS = -I$(top_srcdir)/src
+INCLUDES = -I$(top_srcdir)/src
 
 # This is our main target
 lib_LTLIBRARIES = libhdf5_cpp.la
