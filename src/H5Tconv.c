@@ -1260,6 +1260,12 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    if (dst_memb_size > src_memb_size) {
 			offset -= src_memb_size;
 			if (dst_memb_size > src->size-offset) {
+                H5MM_xfree(priv->src2dst);
+                H5MM_xfree(priv->src_memb_id);
+                H5MM_xfree(priv->dst_memb_id);
+                H5MM_xfree(priv->memb_path);
+                H5MM_xfree(priv->memb_nelmts);
+                cdata->priv = priv = H5MM_xfree (priv);
 			    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
 					  "convertion is unsupported by this "
 					  "function");
