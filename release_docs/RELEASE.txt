@@ -166,6 +166,9 @@ Documentation
 New Features
 ============
 
+    * Improved internal metadata caching, which can reduce the number of actual
+      I/O calls made by a substantial amount, improving
+      performance.  QAK - 2002/06/03
     * Added 'closing' parameter to VFL 'flush' callback function and H5FDflush.
       This allows the library to indicate that the file will be closed
       immediately following the call to 'flush' and can be used to avoid actions

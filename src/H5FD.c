@@ -2082,7 +2082,7 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size
 
     /* Do the real work */
     if (H5FD_read(file, type, dxpl_id, addr, size, buf)<0)
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file read request failed");
+	HRETURN_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file read request failed");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -2127,76 +2127,111 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
 #endif
 
     /* Check if this information is in the metadata accumulator */
-    if((file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA) &&
-        H5F_addr_overlap(addr,size,file->accum_loc,file->accum_size)) {
-
-        unsigned char *read_buf=(unsigned char *)buf; /* Pointer to the buffer being read in */
-        size_t amount_read;         /* Amount to read at a time */
+    if((file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA) && type!=H5FD_MEM_DRAW) {
+        /* Current read overlaps with metadata accumulator */
+        if(H5F_addr_overlap(addr,size,file->accum_loc,file->accum_size)) {
+            unsigned char *read_buf=(unsigned char *)buf; /* Pointer to the buffer being read in */
+            size_t amount_read;         /* Amount to read at a time */
 #ifndef NDEBUG
-        hsize_t tempamount_read;         /* Amount to read at a time */
+            hsize_t tempamount_read;         /* Amount to read at a time */
 #endif /* NDEBUG */
-        hsize_t read_off;           /* Offset to read from */
+            hsize_t read_off;           /* Offset to read from */
 
-        /* Double check that we aren't reading raw data */
-        assert(type!=H5FD_MEM_DRAW);
+            /* Double check that we aren't reading raw data */
+            assert(type!=H5FD_MEM_DRAW);
 
-        /* Read the part before the metadata accumulator */
-        if(addr<file->accum_loc) {
-            /* Set the amount to read */
-            H5_ASSIGN_OVERFLOW(amount_read,file->accum_loc-addr,hsize_t,size_t);
+            /* Read the part before the metadata accumulator */
+            if(addr<file->accum_loc) {
+                /* Set the amount to read */
+                H5_ASSIGN_OVERFLOW(amount_read,file->accum_loc-addr,hsize_t,size_t);
 
-            /* Dispatch to driver */
-            if ((file->cls->read)(file, type, dxpl_id, addr, amount_read, read_buf)<0)
-                HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver read request failed");
+                /* Dispatch to driver */
+                if ((file->cls->read)(file, type, dxpl_id, addr, amount_read, read_buf)<0)
+                    HRETURN_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
 
-            /* Adjust the buffer, address & size */
-            read_buf+=amount_read;
-            addr+=amount_read;
-            size-=amount_read;
-        } /* end if */
+                /* Adjust the buffer, address & size */
+                read_buf+=amount_read;
+                addr+=amount_read;
+                size-=amount_read;
+            } /* end if */
 
-        /* Copy the part overlapping the metadata accumulator */
-        if(size>0 && (addr>=file->accum_loc && addr<(file->accum_loc+file->accum_size))) {
-            /* Set the offset to "read" from */
-            read_off=addr-file->accum_loc;
+            /* Copy the part overlapping the metadata accumulator */
+            if(size>0 && (addr>=file->accum_loc && addr<(file->accum_loc+file->accum_size))) {
+                /* Set the offset to "read" from */
+                read_off=addr-file->accum_loc;
 
-            /* Set the amount to "read" */
+                /* Set the amount to "read" */
 #ifndef NDEBUG
-            tempamount_read = file->accum_size-read_off;
-            H5_CHECK_OVERFLOW(tempamount_read,hsize_t,size_t);
-            amount_read = MIN(size, (size_t)tempamount_read);
+                tempamount_read = file->accum_size-read_off;
+                H5_CHECK_OVERFLOW(tempamount_read,hsize_t,size_t);
+                amount_read = MIN(size, (size_t)tempamount_read);
 #else /* NDEBUG */
-            amount_read = MIN(size, (size_t)(file->accum_size-read_off));
+                amount_read = MIN(size, (size_t)(file->accum_size-read_off));
 #endif /* NDEBUG */
 
-            /* Copy the data out of the buffer */
-            HDmemcpy(read_buf,file->meta_accum+read_off,amount_read);
+                /* Copy the data out of the buffer */
+                HDmemcpy(read_buf,file->meta_accum+read_off,amount_read);
 
-            /* Adjust the buffer, address & size */
-            read_buf+=amount_read;
-            addr+=amount_read;
-            size-=amount_read;
+                /* Adjust the buffer, address & size */
+                read_buf+=amount_read;
+                addr+=amount_read;
+                size-=amount_read;
+            } /* end if */
+
+            /* Read the part after the metadata accumulator */
+            if(size>0 && addr>=(file->accum_loc+file->accum_size)) {
+                /* Dispatch to driver */
+                if ((file->cls->read)(file, type, dxpl_id, addr, size, read_buf)<0)
+                    HRETURN_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
+
+                /* Adjust the buffer, address & size */
+                read_buf+=size;
+                addr+=size;
+                size-=size;
+            } /* end if */
+
+            /* Make certain we've read it all */
+            assert(size==0);
         } /* end if */
+        /* Current read doesn't overlap with metadata accumulator, read it into accumulator */
+        else {
+            /* Flush current contents, if dirty */
+            if(file->accum_dirty) {
+                if ((file->cls->write)(file, H5FD_MEM_DEFAULT, dxpl_id, file->accum_loc, file->accum_size, file->meta_accum)<0)
+                    HRETURN_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed");
 
-        /* Read the part after the metadata accumulator */
-        if(size>0 && addr>=(file->accum_loc+file->accum_size)) {
-            /* Dispatch to driver */
-            if ((file->cls->read)(file, type, dxpl_id, addr, size, read_buf)<0)
-                HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver read request failed");
+                /* Reset accumulator dirty flag */
+                file->accum_dirty=FALSE;
+            } /* end if */
 
-            /* Adjust the buffer, address & size */
-            read_buf+=size;
-            addr+=size;
-            size-=size;
-        } /* end if */
+            /* Cache the new piece of metadata */
+            /* Check if we need to reallocate the buffer */
+            if(size>file->accum_buf_size) {
+                /* Reallocate the metadata accumulator buffer */
+                if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,size))==NULL)
+                    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
 
-        /* Make certain we've read it all */
-        assert(size==0);
+                /* Note the new buffer size */
+                file->accum_buf_size=size;
+            } /* end if */
+
+            /* Update accumulator information */
+            file->accum_loc=addr;
+            file->accum_size=size;
+            file->accum_dirty=FALSE;
+
+            /* Read into accumulator */
+            if ((file->cls->read)(file, H5FD_MEM_DEFAULT, dxpl_id, file->accum_loc, file->accum_size, file->meta_accum)<0)
+                HRETURN_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
+
+            /* Copy into buffer */
+            HDmemcpy(buf,file->meta_accum,size);
+        } /* end else */
     } /* end if */
     else {
         /* Dispatch to driver */
         if ((file->cls->read)(file, type, dxpl_id, addr, size, buf)<0)
-            HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver read request failed");
+            HRETURN_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed");
     } /* end else */
 
     FUNC_LEAVE(SUCCEED);
@@ -2243,7 +2278,7 @@ H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
 
     /* The real work */
     if (H5FD_write(file, type, dxpl_id, addr, size, buf)<0)
-	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file write request failed");
+	HRETURN_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed");
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -2295,7 +2330,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
         /* Check if there is already metadata in the accumulator */
         if(file->accum_size>0) {
             /* Check if the piece of metadata being written adjoins or is inside the metadata accumulator */
-            if((addr>=file->accum_loc && addr <(file->accum_loc+file->accum_size))
+            if((addr>=file->accum_loc && addr<=(file->accum_loc+file->accum_size))
                 || ((addr+size)>file->accum_loc && (addr+size)<=(file->accum_loc+file->accum_size))
                 || (addr<file->accum_loc && (addr+size)>file->accum_loc)) {
 
@@ -2416,8 +2451,12 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
             /* New piece of metadata doesn't adjoin or overlap the existing accumulator */
             else {
                 /* Write out the existing metadata accumulator, with dispatch to driver */
-                if ((file->cls->write)(file, H5FD_MEM_DEFAULT, dxpl_id, file->accum_loc, file->accum_size, file->meta_accum)<0)
-                    HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver write request failed");
+                if(file->accum_dirty) {
+                    if ((file->cls->write)(file, H5FD_MEM_DEFAULT, dxpl_id, file->accum_loc, file->accum_size, file->meta_accum)<0)
+                        HRETURN_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed");
+                    /* Reset accumulator dirty flag */
+                    file->accum_dirty=FALSE;
+                } /* end if */
 
                 /* Cache the new piece of metadata */
                 /* Check if we need to reallocate the buffer */
@@ -2430,10 +2469,12 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
                     file->accum_buf_size=size;
                 } /* end if */
 
-                /* Store the piece of metadata in the accumulator */
+                /* Update the metadata accumulator information */
                 file->accum_loc=addr;
                 file->accum_size=size;
                 file->accum_dirty=TRUE;
+
+                /* Store the piece of metadata in the accumulator */
                 HDmemcpy(file->meta_accum,buf,size);
             } /* end else */
         } /* end if */
@@ -2449,17 +2490,19 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
                 file->accum_buf_size=size;
             } /* end if */
 
-            /* Store the piece of metadata in the accumulator */
+            /* Update the metadata accumulator information */
             file->accum_loc=addr;
             file->accum_size=size;
             file->accum_dirty=TRUE;
+
+            /* Store the piece of metadata in the accumulator */
             HDmemcpy(file->meta_accum,buf,size);
         } /* end else */
     } /* end if */
     else {
         /* Dispatch to driver */
         if ((file->cls->write)(file, type, dxpl_id, addr, size, buf)<0)
-            HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver write request failed");
+            HRETURN_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed");
     } /* end else */
 
     FUNC_LEAVE(SUCCEED);
