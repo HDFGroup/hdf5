@@ -104,16 +104,15 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-GetIstoreK">H5Pget_istore_k</a>
     </ul>
 
-
-
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-
-
     <i>File Close Properties</i>
     <ul>
     <li><a href="#Property-SetFcloseDegree">H5Pset_fclose_degree</a>
     <li><a href="#Property-GetfcloseDegree">H5Pget_fclose_degree</a>
 	</ul>
+
+
+
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 
     <p></p><i>File Access Properties</i>
     <ul>
@@ -154,6 +153,20 @@ which require many different parameters to be easily manipulated.
     -->
     </ul>
 
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;||&nbsp;&nbsp;
+  <i>Indicates functions <br> 
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  available only in the <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  parallel HDF5 library.</i>
+
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 
     <i>Dataset Creation Properties</i>
@@ -170,6 +183,11 @@ which require many different parameters to be easily manipulated.
 -->
     <li><a href="#Property-SetFillValue">H5Pset_fill_value</a>
     <li><a href="#Property-GetFillValue">H5Pget_fill_value</a>
+    <li><a href="#Property-FillValueDefined">H5Pfill_value_defined</a>
+    <li><a href="#Property-SetFillTime">H5Pset_fill_time</a>
+    <li><a href="#Property-GetFillTime">H5Pget_fill_time</a>
+    <li><a href="#Property-SetAllocTime">H5Pset_alloc_time</a>
+    <li><a href="#Property-GetAllocTime">H5Pget_alloc_time</a>
     <li><a href="#Property-SetFilter">H5Pset_filter</a>
     <li><a href="#Property-GetNFilters">H5Pget_nfilters</a>
     <li><a href="#Property-GetFilter">H5Pget_filter</a>
@@ -203,12 +221,6 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-SetSmallData">H5Pset_small_data_block_size</a>
     <li><a href="#Property-GetSmallData">H5Pget_small_data_block_size</a>
     </ul>
-
-<br>&nbsp;
-<br>
-||&nbsp;&nbsp;<i>Indicates functions <br> 
-  &nbsp;&nbsp;&nbsp;&nbsp;available only in the <br>
-  &nbsp;&nbsp;&nbsp;&nbsp;parallel HDF5 library.</i>
 
 </td></tr>
 
@@ -2835,35 +2847,57 @@ facilitate moving easily between them.</i>
         <em>const void *</em><code>value</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Sets a dataset fill value.
+    <dd>Sets the fill value for a dataset.
   <dt><strong>Description:</strong>
-    <dd><code>H5Pset_fill_value</code> sets the fill value for a
-        dataset creation property list.  
+    <dd><code>H5Pset_fill_value</code> sets the fill value for
+        a dataset in the dataset creation property list.  
         <p>
-        The <code>value</code> is interpreted as being of type 
-        <code>type_id</code>.  This need not be the same type 
-        as the dataset, but the library must be able to convert 
-        <code>value</code> to the dataset type when the dataset 
+        <code>value</code> is interpreted as being of datatype 
+        <code>type_id</code>.  This datatype may differ from that of 
+        the dataset, but the HDF5 library must be able to convert 
+        <code>value</code> to the dataset datatype when the dataset 
         is created. 
+	<p>
+	The default fill value is <code>0</code> (zero), which is
+	interpreted according to the actual dataset datatype.
+	<p>
+	Setting <code>value</code> to <code>NULL</code> indicates
+	that the fill value is to be undefined. 
   <dt><strong>Notes:</strong>
-    <dd>If a fill value is set for a dataset (even if the 
-        fill value is all zeros), the fill value will be written 
-        to the file. If no fill value is set, then HDF5 relies on 
-        the underlying file driver (usually a Unix file system) 
-        to initialize unwritten parts of the file to zeros.
-        <p>
-        Creating a contiguous dataset with a fill value can be a
-        very expensive operation since the optimization has not 
-        yet been implemented that would delay the writing of the 
-        fill values until after some data has been written.
+    <dd> Applications sometimes write data only to portions of 
+	an allcoated dataset.  It is often useful in such cases 
+	to fill the unused space with a known 
+	<span class="termEmphasis">fill value</span>.  
+	This function allows the user application to set that fill value;
+	the functions
+	<a href="RM_H5D.html#Dataset-Fill">H5Dfill</a> and
+	<a href="RM_H5P.html#Property-SetFillTime">H5Pset_fill_time</a>,
+	respectively, provide the ability  
+	to apply the fill value on demand or 
+	to set up its automatic application.
+	<p>
+	A fill value should be defined so that it is appropriate for 
+	the application.  While the HDF5 default fill value is 
+	<code>0</code> (zero), it is often appropriate to use another value.
+        It might be useful, for example, to use a value that is 
+	known to be impossible for the application to legitimately generate.
+	<p>
+        <code>H5Pset_fill_value</code> is designed to work in  
+	concert with <code>H5Pset_alloc_time</code> and 
+	<code>H5Pset_fill_time</code>.
+	<code>H5Pset_alloc_time</code> and <code>H5Pset_fill_time</code> 
+	govern the timing of dataset storage allocation and fill value 
+	write operations and can be important in tuning application 
+	performance.
+	<p>
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Property list identifier.
+            <dd>IN: Dataset creation property list identifier.
         <dt><em>hid_t</em> <code>type_id</code>,
-            <dd>IN: The datatype identifier of <code>value</code>.
+            <dd>IN: Datatype of <code>value</code>.
         <dt><em>const void *</em><code>value</code>
-            <dd>IN: The fill value.
+            <dd>IN: Pointer to buffer containing value to use as fill value.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -2889,24 +2923,42 @@ facilitate moving easily between them.</i>
   <dt><strong>Purpose:</strong>
     <dd>Retrieves a dataset fill value.
   <dt><strong>Description:</strong>
-    <dd><code>H5Pget_fill_value</code> queries the 
-        fill value property of a dataset creation property list.
+    <dd><code>H5Pget_fill_value</code> returns the dataset
+        fill value defined in the dataset creation property list
+        <code>plist_id</code>.
         <p>
-        The fill value is returned through the <code>value</code>
-        pointer.  
+	The fill value is returned through the <code>value</code>
+        pointer and will be converted to the datatype specified 
+        by <code>type_id</code>.  
+        This datatype may differ from the 
+        fill value datatype in the property list, 
+	but the HDF5 library must be able to convert between the 
+	two datatypes.  
         <p>
-        Memory is allocated by the caller.  
+        If the fill value is undefined, 
+	i.e., set to <code>NULL</code> in the property list,
+	<code>H5Pget_fill_value</code> will return an error.  
+	<code>H5Pfill_value_defined</code> should be used to 
+	check for this condition before 
+	<code>H5Pget_fill_value</code> is called.
         <p>
-        The fill value will be converted from its current 
-        data type to the type specified by <code>type_id</code>.  
+        Memory must be allocated by the calling application.  
+  <dt><strong>Note:</strong>
+    <dd><code>H5Pget_fill_value</code> is designed to coordinate  
+	with the dataset storage allocation time and 
+	fill value write time properties, which can be retrieved 
+	with the functions <code>H5Pget_alloc_time</code> 
+	and <code>H5Pget_fill_time</code>, respectively.
+	<p>
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>IN: Property list identifier.
+            <dd>IN: Dataset creation property list identifier.
         <dt><em>hid_t</em> <code>type_id</code>,
-            <dd>IN: The datatype identifier of <code>value</code>.
+            <dd>IN: Datatype identifier for the value passed 
+	        via <code>value</code>.
         <dt><em>const void *</em><code>value</code>
-            <dd>IN: The fill value.
+            <dd>OUT: Pointer to buffer to contain the returned fill value.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -2919,6 +2971,318 @@ facilitate moving easily between them.</i>
         <img src="Graphics/C++.gif">
         -->
 </dl>
+
+
+
+
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-FillValueDefined">H5Pfill_value_defined</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pfill_value_defined</code>(<em>hid_t</em> <code>plist_id</code>,
+            <em>H5D_fill_value_t *</em><code>status</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Determines whether fill value is defined.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pfill_value_defined</code> determines whether a fill value 
+        is defined in the dataset creation property list <code>plist_id</code>.
+        <p>
+	Valid values returnrd in <code>status</code> are as follows:
+	<table border=0 width="80%">
+           <tr valign="top"><td rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+	     <code>H5D_FILL_VALUE_UNDEFINED</code> 
+             </td><td>
+	     Fill value is undefined.
+	   </td></tr><tr valign="top"><td>
+             <code>H5D_FILL_VALUE_DEFAULT</code>
+             </td><td>
+             Fill value is the library default.
+	   </td></tr><tr valign="top"><td>
+             <code>H5D_FILL_VALUE_USER_DEFINED</code>&nbsp;&nbsp;
+             </td><td>
+             Fill value is defined by the application. 
+ 	</td></tr></table>
+  <dt><strong>Note:</strong>
+    <dd><code>H5Pfill_value_defined</code> is designed for use in  
+	concert with the dataset fill value properties functions 
+	<code>H5Pget_fill_value</code> and <code>H5Pget_fill_time</code>.
+	<p>
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>IN: Dataset creation property list identifier.
+        <dt><em>H5D_fill_value_t *</em><code>status</code>
+            <dd>OUT: Status of fill value in property list.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_layout_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+	-->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFillTime">H5Pset_fill_time</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pset_fill_time</code>(<em>hid_t</em> <code>plist_id</code>,
+            <em>H5D_fill_time_t</em> <code>fill_time</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the time when fill values are written to a dataset.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fill_time</code> sets up the timing for writing fill values 
+        to a dataset.  
+	This property is set in the dataset creation property list <code>plist_id</code>.
+        <p>
+	Timing is specified in <code>fill_time</code> with one of the following values:
+	<table border=0 >
+           <tr valign="top"><td rowspan="2">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+	     <code>H5D_FILL_TIME_ALLOC</code>&nbsp;&nbsp; 
+             </td><td>
+	     Write fill values to the dataset when storage space is allocated.
+	     &nbsp;&nbsp;(Default)
+	   </td></tr><tr valign="top"><td>
+             <code>H5D_FILL_TIME_NEVER</code>
+             </td><td>
+             Never write fill values to the dataset.
+ 	</td></tr></table>
+  <dt><strong>Note:</strong>
+    <dd><code>H5Pset_fill_time</code> is designed for coordination 
+        with the dataset fill value and 
+	dataset storage allocation time properties, set with the functions 
+	<code>H5Pset_fill_value</code> and <code>H5Pset_alloc_time</code>.
+	<p>
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>IN: Dataset creation property list identifier.
+        <dt><em>H5D_fill_time_t</em> <code>fill_time</code>
+            <dd>IN: When to write fill values to a dataset.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_layout_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+	-->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFillTime">H5Pget_fill_time</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pget_fill_time</code>(<em>hid_t</em> <code>plist_id</code>,
+            <em>H5D_fill_time_t *</em><code>fill_time</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves the time when fill value are written to a dataset.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_fill_time</code> examines the dataset creation  
+	property list <code>plist_id</code> to determine when fill values 
+        are to be written to a dataset.  
+        <p>
+	Valid values returned in <code>fill_time</code> are as follows:
+	<table border=0 >
+           <tr valign="top"><td rowspan="2">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+	     <code>H5D_FILL_TIME_ALLOC</code>&nbsp;&nbsp; 
+             </td><td>
+	     Fill values are written to the dataset when storage space is allocated.
+	     &nbsp;&nbsp;(Default)
+	   </td></tr><tr valign="top"><td>
+             <code>H5D_FILL_TIME_NEVER</code>
+             </td><td>
+             Fill values are never written to the dataset.
+ 	</td></tr></table>
+  <dt><strong>Note:</strong>
+    <dd><code>H5Pget_fill_time</code> is designed to work in coordination 
+        with the dataset fill value and 
+	dataset storage allocation time properties, retrieved with the functions 
+	<code>H5Pget_fill_value</code> and <code>H5Pget_alloc_time</code>.
+	<p>
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>IN: Dataset creation property list identifier.
+        <dt><em>H5D_fill_time_t *</em><code>fill_time</code>
+            <dd>OUT: Setting for the timing of writing fill values to the dataset.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_layout_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+	-->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetAllocTime">H5Pset_alloc_time</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pset_alloc_time</code>(<em>hid_t</em> <code>plist_id</code>,
+            <em>H5D_alloc_time_t</em> <code>alloc_time</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the timing for storage space allocation.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_alloc_time</code> sets up the timing for the allocation of
+        storage space for a dataset's raw data.  
+	This property is set in the dataset creation property list 
+	<code>plist_id</code>.
+        <p>
+	Timing is specified in <code>fill_time</code> with one of the 
+	following values:
+	<table border=0 >
+           <tr valign="top"><td rowspan="4">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+	     <code>H5D_ALLOC_TIME_DEFAULT</code>&nbsp;&nbsp; 
+             </td><td>
+	     Allocate dataset storage space at the default time.<br> 
+	     (Defaults differ by storage method.)
+	   </td></tr><tr valign="top"><td>
+             <code>H5D_ALLOC_TIME_EARLY</code>
+             </td><td>
+             Allocate all space when the dataset is created.<br>
+	     (Default for compact datasets.)
+	   </td></tr><tr valign="top"><td>
+	     <code>H5D_ALLOC_TIME_INCR</code>&nbsp;&nbsp; 
+             </td><td>
+	     Allocate space incrementally, as data is written to the dataset.<br>
+	     (Default for chunked storage datasets.)
+	       <li>Chunked datasets:  
+	         Storage space allocation for each chunk is deferred until data 
+                 is written to the chunk.  
+	       <li>Contiguous datasets: 
+	         Incremental storage space allocation for contiguous data    
+                 is treated as late allocation.
+	       <li>Compact datasets:  
+	         Incremental allocation is not allowed with compact datasets; 
+                 </em><code>H5Pset_alloc_time</code> will return an error.
+	   </td></tr><tr valign="top"><td>
+             <code>H5D_ALLOC_TIME_LATE</code>
+             </td><td>
+             Allocate all space when data is first written to the dataset.<br>
+	     (Default for contiguous datasets.)
+ 	</td></tr></table>
+  <dt><strong>Note:</strong>
+    <dd><code>H5Pset_alloc_time</code> is designed to work in concert  
+        with the dataset fill value and fill value write time properties, 
+	set with the functions 
+	<code>H5Pset_fill_value</code> and <code>H5Pset_fill_time</code>.
+	<p>
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>IN: Dataset creation property list identifier.
+        <dt><em>H5D_alloc_time_t</em> <code>alloc_time</code>
+            <dd>IN: When to allocate dataset storage space.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_layout_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+	-->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetAllocTime">H5Pget_alloc_time</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pget_alloc_time</code>(<em>hid_t</em> <code>plist_id</code>,
+            <em>H5D_alloc_time_t *</em><code>alloc_time</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves the timing for storage space allocation.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_alloc_time</code> retrieves the timing for allocating 
+        storage space for a dataset's raw data.  
+	This property is set in the dataset creation property list 
+	<code>plist_id</code>.
+        <p>
+	The timing setting is returned in <code>fill_time</code> as one of the 
+	following values:
+	<table border=0 >
+           <tr valign="top"><td rowspan="4">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+	     <code>H5D_ALLOC_TIME_DEFAULT</code>&nbsp;&nbsp; 
+             </td><td>
+	     Uses the default allocation time, based on the dataset storage method.<br>
+	     See the <code>fill_time</code> description in 
+	     <a href="#Property-SetAllocTime">H5Pset_alloc_time</a> for 
+	     default allocation times for various storage methods.
+	   </td></tr><tr valign="top"><td>
+             <code>H5D_ALLOC_TIME_EARLY</code>
+             </td><td>
+             All space is allocated when the dataset is created.
+	   </td></tr><tr valign="top"><td>
+	     <code>H5D_ALLOC_TIME_INCR</code>&nbsp;&nbsp; 
+             </td><td>
+	     Space is allocated incrementally as data is written to the dataset.
+	   </td></tr><tr valign="top"><td>
+             <code>H5D_ALLOC_TIME_LATE</code>
+             </td><td>
+             All space is allocated when data is first written to the dataset.
+ 	</td></tr></table>
+  <dt><strong>Note:</strong>
+    <dd><code>H5Pget_alloc_time</code> is designed to work in concert  
+        with the dataset fill value and fill value write time properties, 
+	set with the functions 
+	<code>H5Pget_fill_value</code> and <code>H5Pget_fill_time</code>.
+	<p>
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>IN: Dataset creation property list identifier.
+        <dt><em>H5D_alloc_time_t *</em><code>alloc_time</code>
+            <dd>IN: When to allocate dataset storage space.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_layout_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+	-->
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+
 
 
 
@@ -6307,7 +6671,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
  
-Last modified: 20 March 2003
+Last modified: 28 March 2003
  
 </body>
 </html>
