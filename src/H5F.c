@@ -345,9 +345,6 @@ H5F_new (void)
 {
    hdf5_file_t	*f = H5MM_xcalloc (1, sizeof(hdf5_file_t));
 
-   /* Create an error stack for errors with this file */
-   f->file_err = H5Enew_err_stack(HDF5_FILE_ERRSTACK);
-
    /* Create a cache */
    H5AC_new (f);
 
@@ -383,7 +380,6 @@ H5F_dest (hdf5_file_t *f)
 {
    if (f) {
       H5AC_dest (f);
-      if(f->file_err!=0) H5Edelete_err_stack (f->file_err);
       f->dir = H5MM_xfree (f->dir);
       f->filename = H5MM_xfree (f->filename);
       H5MM_xfree (f);

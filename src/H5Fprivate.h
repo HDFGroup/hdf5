@@ -32,26 +32,12 @@
 #define H5F_SIZEOF_OFFSET(F) ((F)->file_create_parms.offset_size)
 #define H5F_SIZEOF_SIZE(F)	((F)->file_create_parms.length_size)
 
-/* Size of the default error stack for file IDs */
-#define HDF5_FILE_ERRSTACK  16
-
-/*
- * If we're using POSIXUNBUFIO and lseek64() is available, then use
- * 64-bit file offsets.  Otherwise use whatever `off_t' is.
- */
-#if (FILELIB==POSIXUNBUFIO) && defined(H5_HAVE_OFF64_T) && defined(H5_HAVE_LSEEK64)
-typedef off64_t haddr_t;
-#else
-typedef off_t haddr_t;
-#endif
-
 /* Define the structure to store the file information for HDF5 files */
 typedef struct {
     char *dir;              /* Directory the file is located within */
     char *filename;         /* Filename of file */
     uintn acc_perm;         /* Access Permissions for file */
     hdf_file_t file_handle; /* File handle for actual I/O */
-    int32 file_err;         /* Error stack ID for this file */
     uintn ref_count;        /* Reference count for number of times file is opened */
     uint32 consist_flags;   /* File Consistency Flags */
     haddr_t smallobj_off;    /* Offset of small-object heap within the file */
