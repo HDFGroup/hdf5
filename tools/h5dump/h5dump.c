@@ -6,9 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if defined (__MWERKS__)
-#include <string.h>
-#endif
 
 #include "h5dump.h"
 #include "H5private.h"
