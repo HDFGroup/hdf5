@@ -295,7 +295,6 @@ extern ProgType programtype;
 #define CTYPE		"CTYPE"
 #define CONCATENATOR "//"
 #define DATASET "DATASET"
-#define TYPE "TYPE"
 #define BEGIN		"{"
 #define END		"}"
 #endif
