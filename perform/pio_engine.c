@@ -30,7 +30,7 @@
 /* Macro definitions */
 
 /* sizes of various items. these sizes won't change during program execution */
-#define ELMT_SIZE           sizeof(int)                 /* we're doing ints */
+#define ELMT_SIZE           ((int)sizeof(int))          /* we're doing ints */
 
 #define GOTOERROR(errcode)	{ ret_code = errcode; goto done; }
 #define GOTODONE		{ goto done; }
@@ -93,10 +93,6 @@ enum {
 };
 
 /* Global variables */
-MPI_Comm    pio_comm_g;         /* Communicator to run the PIO          */
-int         pio_mpi_rank_g;     /* MPI rank of pio_comm_g               */
-int	        pio_mpi_nprocs_g;   /* number of processes of pio_comm_g    */
-
 static int	clean_file_g = -1;	/*whether to cleanup temporary test     */
                                 /*files. -1 is not defined;             */
                                 /*0 is no cleanup; 1 is do cleanup      */
@@ -152,7 +148,6 @@ results
 do_pio(parameters param)
 {
     /* return codes */
-    int         rc;             /*routine return code                   */
     int         mrc;            /*MPI return code                       */
     herr_t      ret_code = 0;   /*return code                           */
     results     res;
@@ -164,17 +159,11 @@ do_pio(parameters param)
     int         maxprocs;
     int		nfiles, nf;
     long        ndsets, nelmts;
-    int         color;                  /*for communicator creation     */
     char        *buffer = NULL;         /*data buffer pointer           */
     long        buf_size;               /*data buffer size in bytes     */
 
     /* HDF5 variables */
     herr_t          hrc;                /*HDF5 return code              */
-
-    /* MPI variables */
-    int             myrank, nprocs = 1;
-
-    pio_comm_g = MPI_COMM_NULL;
 
     /* Sanity check parameters */
 
@@ -234,15 +223,6 @@ do_pio(parameters param)
         GOTOERROR(FAIL);
     }
 
-    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-
-    if (maxprocs > nprocs) {
-        fprintf(stderr,
-                "maximum number of process(%d) must be <= process in MPI_COMM_WORLD(%d)\n",
-                maxprocs, nprocs);
-        GOTOERROR(FAIL);
-    }
-
     if (buf_size <= 0 ){
         fprintf(stderr,
                 "buffer size must be > 0 (%ld)\n", buf_size);
@@ -264,33 +244,12 @@ buf_size=MIN(1024*1024, buf_size);
 /* DEBUG END */
 #endif
 
-    /* Create a sub communicator for this PIO run. Easier to use the first N
-     * processes. */
-    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
-    color = (myrank < maxprocs);
-    mrc = MPI_Comm_split(MPI_COMM_WORLD, color, myrank, &pio_comm_g);
-
-    if (mrc != MPI_SUCCESS) {
-        fprintf(stderr, "MPI_Comm_split failed\n");
-        GOTOERROR(FAIL);
-    }
-
-    if (!color){
-        /* not involved in this run */
-        mrc = MPI_Comm_free(&pio_comm_g);
-        GOTODONE;
-    }
-
-    /* determine the mpi rank of in the PIO communicator */
-    MPI_Comm_size(pio_comm_g, &pio_mpi_nprocs_g);
-    MPI_Comm_rank(pio_comm_g, &pio_mpi_rank_g);
-
     /* allocate data buffer */
-    buffer = malloc(buf_size);
+    buffer = malloc((size_t)buf_size);
 
     if (buffer == NULL){
         fprintf(stderr, "malloc for data buffer size (%ld) failed\n",
-	    buf_size);
+  	    buf_size);
         GOTOERROR(FAIL);
     }
 
@@ -307,15 +266,17 @@ buf_size=MIN(1024*1024, buf_size);
 fprintf(stderr, "filename=%s\n", fname);
 #endif
 
+        set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, START);
+
         set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
         hrc = do_fopen(iot, fname, &fd, PIO_CREATE | PIO_WRITE);
         set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
 
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
-        set_time(res.timers, HDF5_WRITE_FIXED_DIMS, START);
+        set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, START);
         hrc = do_write(&fd, iot, ndsets, nelmts, buf_size, buffer);
-        set_time(res.timers, HDF5_WRITE_FIXED_DIMS, STOP);
+        set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, STOP);
 
         VRFY((hrc == SUCCESS), "do_write failed");
 
@@ -324,21 +285,25 @@ fprintf(stderr, "filename=%s\n", fname);
         hrc = do_fclose(iot, &fd);
         set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
 
+        set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, STOP);
+
         VRFY((hrc == SUCCESS), "do_fclose failed");
 
 	/*
 	 * Read performance measurement
 	 */
         /* Open file for read */
+        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, START);
+
         set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
         hrc = do_fopen(iot, fname, &fd, PIO_READ);
         set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
 
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
-        set_time(res.timers, HDF5_READ_FIXED_DIMS, START);
+        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, START);
         hrc = do_read(&fd, iot, ndsets, nelmts, buf_size, buffer);
-        set_time(res.timers, HDF5_READ_FIXED_DIMS, STOP);
+        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, STOP);
 
         VRFY((hrc == SUCCESS), "do_read failed");
 
@@ -346,6 +311,8 @@ fprintf(stderr, "filename=%s\n", fname);
         set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
         hrc = do_fclose(iot, &fd);
         set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
+
+        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, STOP);
 
         VRFY((hrc == SUCCESS), "do_fclose failed");
 
@@ -371,16 +338,6 @@ done:
         if (fd.h5fd != -1)
             hrc = do_fclose(iot, &fd);
         break;
-    }
-
-    /* release MPI resources */
-    if (pio_comm_g != MPI_COMM_NULL){
-        mrc = MPI_Comm_free(&pio_comm_g);
-
-        if (mrc != MPI_SUCCESS) {
-            fprintf(stderr, "MPI_Comm_free failed\n");
-            ret_code = FAIL;
-        }
     }
 
     /* release generic resources */
@@ -637,8 +594,8 @@ fprintf(stderr, "proc %d: writes %ld bytes at file-offset %ld\n",
 
                 rc = RAWSEEK(fd->rawfd, file_offset);
                 VRFY((rc>=0), "RAWSEEK");
-                rc = RAWWRITE(fd->rawfd, buffer, nelmts_towrite*ELMT_SIZE);
-                VRFY((rc==(nelmts_towrite*ELMT_SIZE)), "RAWWRITE");
+                rc = RAWWRITE(fd->rawfd, buffer, (size_t)(nelmts_towrite * ELMT_SIZE));
+                VRFY((rc == (nelmts_towrite*ELMT_SIZE)), "RAWWRITE");
                 break;
 
             case MPIO:
@@ -735,7 +692,7 @@ done:
  */
 static herr_t
 do_read(file_descr *fd, iotype iot, long ndsets,
-         long nelmts, long buf_size, void *buffer /*out*/)
+        long nelmts, long buf_size, void *buffer /*out*/)
 {
     int         ret_code = SUCCESS;
     int         rc;             /*routine return code                   */
@@ -849,7 +806,7 @@ fprintf(stderr, "proc %d: read %ld bytes at file-offset %ld\n",
 
                 rc = RAWSEEK(fd->rawfd, file_offset);
                 VRFY((rc>=0), "RAWSEEK");
-                rc = RAWREAD(fd->rawfd, buffer, nelmts_toread*ELMT_SIZE);
+                rc = RAWREAD(fd->rawfd, buffer, (size_t)(nelmts_toread*ELMT_SIZE));
                 VRFY((rc==(nelmts_toread*ELMT_SIZE)), "RAWREAD");
                 break;
 
@@ -858,7 +815,7 @@ fprintf(stderr, "proc %d: read %ld bytes at file-offset %ld\n",
 
 #if AKCDEBUG
 fprintf(stderr, "proc %d: read %ld bytes at mpi-offset %ld\n",
-    pio_mpi_rank_g, nelmts_toread*ELMT_SIZE, mpi_offset);
+        pio_mpi_rank_g, nelmts_toread*ELMT_SIZE, mpi_offset);
 #endif
 
                 mrc = MPI_File_read_at(fd->mpifd, mpi_offset, buffer,
@@ -992,7 +949,7 @@ do_fopen(iotype iot, char *fname, file_descr *fd /*out*/, int flags)
 
             /*since MPI_File_open with MPI_MODE_CREATE does not truncate  */
             /*filesize , set size to 0 explicitedly.	*/
-            mrc = MPI_File_set_size(fd->mpifd, 0);
+            mrc = MPI_File_set_size(fd->mpifd, (MPI_Offset)0);
 
             if (mrc != MPI_SUCCESS) {
                 fprintf(stderr, "MPI_File_set_size failed\n");

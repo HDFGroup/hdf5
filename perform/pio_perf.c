@@ -50,6 +50,7 @@
  */
 
 /* system header files */
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -79,6 +80,12 @@
 
 #define MIN_HDF5_BUF_SIZE   (ONE_MB >> 1)
 #define MAX_HDF5_BUF_SIZE   (ONE_GB / 2)
+
+/* global variables */
+MPI_Comm    pio_comm_g;         /* Communicator to run the PIO          */
+int         pio_mpi_rank_g;     /* MPI rank of pio_comm_g               */
+int	        pio_mpi_nprocs_g;   /* number of processes of pio_comm_g    */
+
 
 /* local variables */
 static const char  *progname = "pio_perf";
@@ -196,11 +203,23 @@ struct options {
     long min_xfer_size;         /* minimum transfer buffer size         */
 };
 
+typedef struct _minmax {
+    double min;
+    double max;
+    double sum;
+    int num;
+} minmax;
+
 /* local functions */
 static long parse_size_directive(const char *size);
 static struct options *parse_command_line(int argc, char *argv[]);
 static void run_test_loop(FILE *output, struct options *options);
-static void run_test(FILE *output, iotype iot, parameters parms);
+static int run_test(FILE *output, iotype iot, parameters parms);
+static void get_minmax(minmax *mm);
+static minmax accumulate_minmax_stuff(minmax *mm, int count);
+static int create_comm_world(int num_procs);
+static int destroy_comm_world(void);
+static void output_report(FILE *output, const char *fmt, ...);
 static void print_indent(register FILE *output, register int indent);
 static void usage(const char *prog);
 
@@ -218,17 +237,7 @@ main(int argc, char **argv)
     int world_size, ret;
     int exit_value = EXIT_SUCCESS;
     FILE *output = stdout;
-    struct options *opts;
-
-    opts = parse_command_line(argc, argv);
-
-    if (opts->output_file) {
-        if ((output = fopen(opts->output_file, "w")) == NULL) {
-            fprintf(stderr, "%s: cannot open output file\n", progname);
-            perror(opts->output_file);
-            goto onions;
-        }
-    }
+    struct options *opts = NULL;
 
     /* initialize MPI and get the maximum num of processors we started with */
     MPI_Init(&argc, &argv);
@@ -243,15 +252,30 @@ main(int argc, char **argv)
             fprintf(stderr, "invalid argument\n");
 
         exit_value = EXIT_FAILURE;
-        goto cheese_and;
+        goto finish;
+    }
+
+    pio_comm_g = MPI_COMM_WORLD;
+
+    opts = parse_command_line(argc, argv);
+
+    if (!opts) {
+        exit_value = EXIT_FAILURE;
+        goto finish;
+    }
+
+    if (opts->output_file) {
+        if ((output = fopen(opts->output_file, "w")) == NULL) {
+            fprintf(stderr, "%s: cannot open output file\n", progname);
+            perror(opts->output_file);
+            goto finish;
+        }
     }
 
     run_test_loop(output, opts);
 
-cheese_and:
+finish:
     MPI_Finalize();
-
-onions:
     free(opts);
     return exit_value;
 }
@@ -301,24 +325,31 @@ run_test_loop(FILE *output, struct options *opts)
     parms.num_dsets = opts->num_dsets;
     parms.num_iters = opts->num_iters;
 
-    /* divide the maximum number of processors by 2 for each loop iter */
+    /* multiply the maximum number of processors by 2 for each loop iter */
     for (num_procs = opts->min_num_procs;
             num_procs <= opts->max_num_procs; num_procs <<= 1) {
-        register long j;
+        register long buf_size;
 
         parms.num_procs = num_procs;
-        fprintf(output, "Number of processors = %u\n", parms.num_procs);
 
-        for (j = opts->min_xfer_size; j <= opts->max_xfer_size; j <<= 1) {
-            parms.buf_size = j;
+        if (create_comm_world(parms.num_procs) != SUCCESS) {
+            /* do something harsh */
+        }
+
+        output_report(output, "Number of processors = %ld\n", parms.num_procs);
+
+        /* multiply the xfer buffer size by 2 for each loop iteration */
+        for (buf_size = opts->min_xfer_size;
+                buf_size <= opts->max_xfer_size; buf_size <<= 1) {
+            parms.buf_size = buf_size;
             parms.num_elmts = opts->file_size / (parms.num_dsets * sizeof(int));
 
             print_indent(output, TAB_SPACE * 1);
-            fprintf(output, "Transfer Buffer Size: %u\n", j);
+            output_report(output, "Transfer Buffer Size: %ld\n", buf_size);
             print_indent(output, TAB_SPACE * 1);
-            fprintf(output,
-                    "  # of files: %u, # of dsets: %lu, Elements per dset: %lu\n",
-                    parms.num_files, parms.num_dsets, parms.num_elmts);
+            output_report(output,
+                          "  # of files: %ld, # of dsets: %ld, # of elmts per dset: %ld\n",
+                          parms.num_files, parms.num_dsets, parms.num_elmts);
 
             if (io_runs & PIO_RAW)
                 run_test(output, RAW, parms);
@@ -328,6 +359,10 @@ run_test_loop(FILE *output, struct options *opts)
 
             if (io_runs & PIO_HDF5)
                 run_test(output, PHDF5, parms);
+        }
+
+        if (destroy_comm_world() != SUCCESS) {
+            /* do something harsh */
         }
     }
 }
@@ -339,41 +374,248 @@ run_test_loop(FILE *output, struct options *opts)
  * Programmer:  Bill Wendling, 18. December 2001
  * Modifications:
  */
-static void
+static int
 run_test(FILE *output, iotype iot, parameters parms)
 {
-    results res;
+    results         res;
+    register int    i, ret_value = SUCCESS;
+    int             comm_size;
+    minmax          total_mm;
+    minmax         *write_mm_table;
+    minmax         *read_mm_table;
+    minmax          write_mm = {0.0, 0.0, 0.0, 0};
+    minmax          read_mm = {0.0, 0.0, 0.0, 0};
 
     parms.io_type = iot;
     print_indent(output, TAB_SPACE * 2);
-    fprintf(output, "Type of IO = ");
+    output_report(output, "Type of IO = ");
 
     switch (iot) {
     case RAW:
-        fprintf(output, "Raw\n");
+        output_report(output, "Raw\n");
         break;
     case MPIO:
-        fprintf(output, "MPIO\n");
+        output_report(output, "MPIO\n");
         break;
     case PHDF5:
-        fprintf(output, "PHDF5\n");
+        output_report(output, "PHDF5\n");
         break;
     }
 
+    MPI_Comm_size(pio_comm_g, &comm_size);
+
+    write_mm_table = malloc(parms.num_iters * sizeof(minmax));
+    read_mm_table = malloc(parms.num_iters * sizeof(minmax));
+
+    for (i = 0; i < parms.num_iters; ++i) {
+        write_mm_table[i].min = 0.0;
+        write_mm_table[i].max = 0.0;
+        write_mm_table[i].sum = 0.0;
+        write_mm_table[i].num = 0;
+
+        read_mm_table[i].min = 0.0;
+        read_mm_table[i].max = 0.0;
+        read_mm_table[i].sum = 0.0;
+        read_mm_table[i].num = 0;
+    }
+
     /* call Albert's testing here */
-    res = do_pio(parms); 
+    for (i = 0; i < parms.num_iters; ++i) {
+        register int j;
+        double t;
+
+        MPI_Barrier(pio_comm_g);
+        res = do_pio(parms);
+
+        t = get_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS);
+        MPI_Send((void *)&t, 1, MPI_DOUBLE, 0, 0, pio_comm_g);
+
+        for (j = 0; j < comm_size; ++j)
+            get_minmax(&write_mm);
+
+        write_mm_table[i] = write_mm;
+
+        t = get_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS);
+        MPI_Send((void *)&t, 1, MPI_DOUBLE, 0, 0, pio_comm_g);
+
+        for (j = 0; j < comm_size; ++j)
+            get_minmax(&read_mm);
+
+        read_mm_table[i] = read_mm;
+    }
+
+    total_mm = accumulate_minmax_stuff(write_mm_table, parms.num_iters);
+
+printf("write metrics: min: %f, max: %f, avg: %f\n", total_mm.min,
+       total_mm.max, total_mm.sum / total_mm.num);
+
+    total_mm = accumulate_minmax_stuff(read_mm_table, parms.num_iters);
+
+printf("read metrics: min: %f, max: %f, avg: %f\n", total_mm.min,
+       total_mm.max, total_mm.sum / total_mm.num);
 
     print_indent(output, TAB_SPACE * 3);
-    fprintf(output, "Write Results = %.2f MB/s\n",
-            MB_PER_SEC(parms.num_dsets * parms.num_elmts * sizeof(int),
-                       get_time(res.timers, HDF5_WRITE_FIXED_DIMS)));
+    output_report(output, "Write Results = %.2f MB/s\n",
+                  MB_PER_SEC(parms.num_dsets * parms.num_elmts * sizeof(int),
+                             get_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS)));
 
     print_indent(output, TAB_SPACE * 3);
-    fprintf(output, "Read Results = %.2f MB/s\n",
-            MB_PER_SEC(parms.num_dsets * parms.num_elmts * sizeof(int),
-                       get_time(res.timers, HDF5_READ_FIXED_DIMS)));
+    output_report(output, "Read Results = %.2f MB/s\n",
+                  MB_PER_SEC(parms.num_dsets * parms.num_elmts * sizeof(int),
+                             get_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS)));
 
+    free(write_mm_table);
+    free(read_mm_table);
     pio_time_destroy(res.timers);
+    return ret_value;
+}
+
+static void
+get_minmax(minmax *mm)
+{
+    int myrank;
+
+    MPI_Comm_rank(pio_comm_g, &myrank);
+
+    if (myrank == 0) {
+        MPI_Status status = {0};
+        double t;
+
+        MPI_Recv((void *)&t, 1, MPI_DOUBLE, MPI_ANY_SOURCE,
+                 MPI_ANY_TAG, pio_comm_g, &status);
+
+        ++mm->num;
+        mm->sum += t;
+
+        if (t > mm->max)
+            mm->max = t;
+
+        if (t < mm->min || mm->min <= 0.0)
+            mm->min = t;
+    }
+}
+
+static minmax
+accumulate_minmax_stuff(minmax *mm, int count)
+{
+    register int i;
+    minmax total_mm = mm[0];
+
+    for (i = 1; i < count; ++i) {
+        total_mm.sum += mm[i].sum;
+        total_mm.num += mm[i].num;
+
+        if (mm[i].min < total_mm.min)
+            total_mm.min = mm[i].min;
+
+        if (mm[i].max > total_mm.max)
+            total_mm.max = mm[i].max;
+    }
+
+    return total_mm;
+}
+
+/*
+ * Function:    create_comm_world
+ * Purpose:     Create an MPI Comm world and store it in pio_comm_g, which
+ *              is a global variable.
+ * Return:      SUCCESS on success.
+ *              FAIL otherwise.
+ * Programmer:  Bill Wendling, 19. December 2001
+ * Modifications:
+ */
+static int
+create_comm_world(int num_procs)
+{
+    /* MPI variables */
+    int     mrc, ret_value;     /* return values                */
+    int     color;              /* for communicator creation    */
+    int     myrank, nprocs;
+
+    pio_comm_g = MPI_COMM_NULL;
+
+    /*
+     * Create a sub communicator for this PIO run. Easier to use the first N
+     * processes.
+     */
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+
+    if (num_procs > nprocs) {
+        fprintf(stderr,
+                "number of process(%d) must be <= number of processes in MPI_COMM_WORLD(%d)\n",
+                num_procs, nprocs);
+        goto error_done;
+    }
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+    color = (myrank < num_procs);
+    mrc = MPI_Comm_split(MPI_COMM_WORLD, color, myrank, &pio_comm_g);
+
+    if (mrc != MPI_SUCCESS) {
+        fprintf(stderr, "MPI_Comm_split failed\n");
+        goto error_done;
+    }
+
+    if (!color) {
+        /* not involved in this run */
+        mrc = destroy_comm_world();
+        goto done;
+    }
+
+    /* determine the MPI rank in the PIO communicator */
+    MPI_Comm_size(pio_comm_g, &pio_mpi_nprocs_g);
+    MPI_Comm_rank(pio_comm_g, &pio_mpi_rank_g);
+
+done:
+    return ret_value;
+
+error_done:
+    destroy_comm_world();
+    return FAIL;
+}
+
+/*
+ * Function:    destroy_comm_world
+ * Purpose:     Destroy the created MPI Comm world which is stored in the
+ *              pio_comm_g global variable.
+ * Return:      SUCCESS on success.
+ *              FAIL otherwise.
+ * Programmer:  Bill Wendling, 19. December 2001
+ * Modifications:
+ */
+static int
+destroy_comm_world(void)
+{
+    int     mrc = SUCCESS;      /* return code      */
+
+    /* release MPI resources */
+    if (pio_comm_g != MPI_COMM_NULL)
+        mrc = (MPI_Comm_free(&pio_comm_g) == MPI_SUCCESS ? SUCCESS : FAIL);
+
+    return mrc;
+}
+
+/*
+ * Function:    output_report
+ * Purpose:     Print a line of the report. Only do so if I'm the 0 process.
+ * Return:      Nothing
+ * Programmer:  Bill Wendling, 19. December 2001
+ * Modifications:
+ */
+static void
+output_report(FILE *output, const char *fmt, ...)
+{
+    int myrank;
+
+    MPI_Comm_rank(pio_comm_g, &myrank);
+
+    if (myrank == 0) {
+        va_list ap;
+
+        va_start(ap, fmt);
+        vfprintf(output, fmt, ap);
+        va_end(ap);
+    }
 }
 
 /*
@@ -465,13 +707,11 @@ parse_command_line(int argc, char *argv[])
             cl_opts->max_xfer_size = parse_size_directive(opt_arg);
             break;
         case 'h':
-            usage(progname);
-            exit(EXIT_SUCCESS);
         case '?':
         default:
-            /* there could be other command line options, such as MPI stuff 
-             * that gets passed to our program, for some reason */
-            break;
+            usage(progname);
+            free(cl_opts);
+            return NULL;
         }
     }
 
@@ -536,34 +776,40 @@ parse_size_directive(const char *size)
 static void
 usage(const char *prog)
 {
-    fflush(stdout);
-    fprintf(stdout, "usage: %s [OPTIONS]\n", prog);
-    fprintf(stdout, "  OPTIONS\n");
-    fprintf(stdout, "     -h, --help                  Print a usage message and exit\n");
-    fprintf(stdout, "     -d N, --num-dsets=N         Number of datasets per file [default:1]\n");
-    fprintf(stdout, "     -f S, --file-size=S         Size of a single file [default: 64M]\n");
-    fprintf(stdout, "     -F N, --num-files=N         Number of files [default: 1]\n");
-    fprintf(stdout, "     -H, --hdf5                  Run HDF5 performance test\n");
-    fprintf(stdout, "     -i, --num-iterations        Number of iterations to perform [default: 1]\n");
-    fprintf(stdout, "     -m, --mpiio                 Run MPI/IO performance test\n");
-    fprintf(stdout, "     -o F, --output=F            Output raw data into file F [default: none]\n");
-    fprintf(stdout, "     -P N, --max-num-processes=N Maximum number of processes to use [default: 1]\n");
-    fprintf(stdout, "     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
-    fprintf(stdout, "     -r, --raw                   Run raw (UNIX) performance test\n");
-    fprintf(stdout, "     -X S, --max-xfer-size=S     Maximum transfer buffer size [default: 1M]\n");
-    fprintf(stdout, "     -x S, --min-xfer-size=S     Minimum transfer buffer size [default: 1K]\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "  F - is a filename.\n");
-    fprintf(stdout, "  N - is an integer >=0.\n");
-    fprintf(stdout, "  S - is a size specifier, an integer >=0 followed by a size indicator:\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "          K - Kilobyte\n");
-    fprintf(stdout, "          M - Megabyte\n");
-    fprintf(stdout, "          G - Gigabyte\n");
-    fprintf(stdout, "\n");
-    fprintf(stdout, "      Example: 37M = 37 Megabytes\n");
-    fprintf(stdout, "\n");
-    fflush(stdout);
+    int myrank;
+
+    MPI_Comm_rank(pio_comm_g, &myrank);
+
+    if (myrank == 0) {
+        fflush(stdout);
+        fprintf(stdout, "usage: %s [OPTIONS]\n", prog);
+        fprintf(stdout, "  OPTIONS\n");
+        fprintf(stdout, "     -h, --help                  Print a usage message and exit\n");
+        fprintf(stdout, "     -d N, --num-dsets=N         Number of datasets per file [default:1]\n");
+        fprintf(stdout, "     -f S, --file-size=S         Size of a single file [default: 64M]\n");
+        fprintf(stdout, "     -F N, --num-files=N         Number of files [default: 1]\n");
+        fprintf(stdout, "     -H, --hdf5                  Run HDF5 performance test\n");
+        fprintf(stdout, "     -i, --num-iterations        Number of iterations to perform [default: 1]\n");
+        fprintf(stdout, "     -m, --mpiio                 Run MPI/IO performance test\n");
+        fprintf(stdout, "     -o F, --output=F            Output raw data into file F [default: none]\n");
+        fprintf(stdout, "     -P N, --max-num-processes=N Maximum number of processes to use [default: 1]\n");
+        fprintf(stdout, "     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
+        fprintf(stdout, "     -r, --raw                   Run raw (UNIX) performance test\n");
+        fprintf(stdout, "     -X S, --max-xfer-size=S     Maximum transfer buffer size [default: 1M]\n");
+        fprintf(stdout, "     -x S, --min-xfer-size=S     Minimum transfer buffer size [default: 1K]\n");
+        fprintf(stdout, "\n");
+        fprintf(stdout, "  F - is a filename.\n");
+        fprintf(stdout, "  N - is an integer >=0.\n");
+        fprintf(stdout, "  S - is a size specifier, an integer >=0 followed by a size indicator:\n");
+        fprintf(stdout, "\n");
+        fprintf(stdout, "          K - Kilobyte\n");
+        fprintf(stdout, "          M - Megabyte\n");
+        fprintf(stdout, "          G - Gigabyte\n");
+        fprintf(stdout, "\n");
+        fprintf(stdout, "      Example: 37M = 37 Megabytes\n");
+        fprintf(stdout, "\n");
+        fflush(stdout);
+    }
 }
 
 #else /* H5_HAVE_PARALLEL */

@@ -20,12 +20,12 @@
 
 /* The different types of timers we can have */
 typedef enum timer_type_ {
-    HDF5_MPI_OVERHEAD,
     HDF5_FILE_OPENCLOSE,
-    HDF5_GROUP_CREATE,
     HDF5_DATASET_CREATE,
-    HDF5_WRITE_FIXED_DIMS,
-    HDF5_READ_FIXED_DIMS,
+    HDF5_FINE_WRITE_FIXED_DIMS,
+    HDF5_FINE_READ_FIXED_DIMS,
+    HDF5_GROSS_WRITE_FIXED_DIMS,
+    HDF5_GROSS_READ_FIXED_DIMS,
     NUM_TIMERS
 } timer_type;
 

@@ -39,6 +39,10 @@ typedef struct results_ {
 #define FAIL        -1
 #endif  /* !FAIL */
 
+extern MPI_Comm pio_comm_g;         /* Communicator to run the PIO          */
+extern int      pio_mpi_rank_g;     /* MPI rank of pio_comm_g               */
+extern int	    pio_mpi_nprocs_g;   /* number of processes of pio_comm_g    */
+
 #ifdef __cplusplus
 extern "C" {
 #endif  /* __cplusplus */
