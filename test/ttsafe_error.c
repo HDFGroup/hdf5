@@ -57,10 +57,11 @@
 
 #ifdef H5_WANT_H5_V1_6_COMPAT
 static herr_t error_callback(void *);
+static herr_t walk_error_callback(int, H5E_error_t *, void *);
 #else /*H5_WANT_H5_V1_6_COMPAT*/
 static herr_t error_callback(hid_t, void *);
+static herr_t walk_error_callback(unsigned, const H5E_error_t *, void *);
 #endif /* H5_WANT_H5_V1_6_COMPAT */
-static herr_t walk_error_callback(unsigned, H5E_error_t *, void *);
 static void *tts_error_thread(void *);
 
 /* Global variables */
@@ -228,8 +229,13 @@ herr_t error_callback(hid_t estack, void *client_data)
 }
 #endif /* H5_WANT_H5_V1_6_COMPAT */
 
+#ifdef H5_WANT_H5_V1_6_COMPAT
 static
-herr_t walk_error_callback(unsigned n, H5E_error_t *err_desc, void UNUSED *client_data)
+herr_t walk_error_callback(int n, H5E_error_t *err_desc, void UNUSED *client_data)
+#else /* H5_WANT_H5_V1_6_COMPAT */
+static
+herr_t walk_error_callback(unsigned n, const H5E_error_t *err_desc, void UNUSED *client_data)
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
     hid_t maj_num, min_num;
 

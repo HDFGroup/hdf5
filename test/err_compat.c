@@ -41,7 +41,7 @@ int	ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
 #define DSET_NAME               "a_dataset"
 #define FAKE_ID                 -1 
 
-herr_t custom_print_cb(unsigned n, const H5E_error_t *err_desc, void* client_data);
+herr_t custom_print_cb(int n, H5E_error_t *err_desc, void* client_data);
 
 
 /*-------------------------------------------------------------------------
@@ -61,12 +61,10 @@ herr_t custom_print_cb(unsigned n, const H5E_error_t *err_desc, void* client_dat
  *
  *-------------------------------------------------------------------------
  */
-#ifndef TMP
 static herr_t
 test_error(hid_t file)
 {
     hid_t		dataset, space;
-    hid_t               estack_id;
     hsize_t		dims[2];
     const char          *FUNC_test_error="test_error";
     H5E_auto_t          old_func;
@@ -94,7 +92,6 @@ test_error(hid_t file)
     }
 
     /* Test enabling and disabling default printing */
-#ifndef TMP
     if (H5Eget_auto(&old_func, &old_data)<0)
 	TEST_ERROR;
     if (old_data != NULL) 
@@ -106,7 +103,6 @@ test_error(hid_t file)
 
     if(H5Eset_auto(NULL, NULL)<0)
         TEST_ERROR;
-#endif
 
     /* Make H5Dwrite fail, verify default print is disabled */
     if (H5Dwrite(FAKE_ID, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2)<0) {
@@ -124,31 +120,6 @@ test_error(hid_t file)
     TEST_ERROR; 
 
   error:
-    return -1;
-}
-#endif
-
-
-/*-------------------------------------------------------------------------
- * Function:	error_stack
- *
- * Purpose:     Dummy function.  Simply make it fail.	
- *
- * Return:	Success:	0
- *
- *		Failure:	-1
- *
- * Programmer:	Raymond Lu
- *		July 14, 2003
- *
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t 
-error_stack(void)
-{
     return -1;
 }
 
@@ -207,11 +178,11 @@ dump_error(void)
  *-------------------------------------------------------------------------
  */
 herr_t 
-custom_print_cb(unsigned n, const H5E_error_t *err_desc, void* client_data)
+custom_print_cb(int n, H5E_error_t *err_desc, void* client_data)
 {
     FILE		*stream  = (FILE *)client_data;
-    char                *maj;
-    char                *min;
+    const char          *maj;
+    const char          *min;
     const int		indent = 4;
 
     if((min = H5Eget_minor(err_desc->min_num))==NULL)
@@ -224,7 +195,9 @@ custom_print_cb(unsigned n, const H5E_error_t *err_desc, void* client_data)
 	     indent, "", n, err_desc->file_name,
 	     err_desc->func_name, err_desc->line);
     fprintf (stream, "%*smajor: %s\n", indent*2, "", maj);
+    HDfree(maj);
     fprintf (stream, "%*sminor: %s\n", indent*2, "", min);
+    HDfree(min);
 
     return 0;
 
@@ -251,8 +224,6 @@ main(void)
     hid_t		file, fapl;
     char		filename[1024];
     const char          *FUNC_main="main";
-    H5E_auto_t          old_func;
-    void                *old_data;
 
     fprintf(stderr, "   This program tests the Error API compatible with HDF5 v1.6.  There're supposed to be some error messages\n");
     /*h5_reset();*/
@@ -263,17 +234,16 @@ main(void)
 	TEST_ERROR ;
 
     /* Test error stack */ 
-    if(error_stack()<0) {
-        /* Push an error onto error stack */
-        H5Epush(__FILE__, FUNC_main, __LINE__, H5E_ERROR, H5E_BADVALUE, 
-                "Error test failed");
-        
-        /* Print out the errors on stack */
-        dump_error();
 
-        /* Empty error stack */
-        H5Eclear();
-    }
+    /* Push an error onto error stack */
+    H5Epush(__FILE__, FUNC_main, __LINE__, H5E_ERROR, H5E_BADVALUE, 
+            "Error test failed");
+    
+    /* Print out the errors on stack */
+    dump_error();
+
+    /* Empty error stack */
+    H5Eclear();
 
     /* Test error API */
     if(test_error(file)<0) {

@@ -168,7 +168,7 @@ display_error_cb (hid_t estack, void UNUSED *client_data)
 #ifdef H5_WANT_H5_V1_6_COMPAT
 	    H5Eprint(stdout);
 #else
-	    H5Eprint(H5E_DEFAULT, stdout);
+	    H5Eprint(estack, stdout);
 #endif /* H5_WANT_H5_V1_6_COMPAT */
 
     return 0;

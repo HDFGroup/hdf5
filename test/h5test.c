@@ -89,7 +89,11 @@ MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
  */
 static const char *multi_letters = "msbrglo";
 
+#ifdef H5_WANT_H5_V1_6_COMPAT
+static herr_t h5_errors(void *client_data);
+#else /* H5_WANT_H5_V1_6_COMPAT */
 static herr_t h5_errors(hid_t err_stack, void *client_data);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
 
 /*-------------------------------------------------------------------------
@@ -108,8 +112,13 @@ static herr_t h5_errors(hid_t err_stack, void *client_data);
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5_WANT_H5_V1_6_COMPAT
+static herr_t
+h5_errors(void UNUSED *client_data)
+#else
 static herr_t
 h5_errors(hid_t err_stack, void UNUSED *client_data)
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
     H5_FAILED();
 #ifdef H5_WANT_H5_V1_6_COMPAT

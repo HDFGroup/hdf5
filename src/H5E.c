@@ -114,7 +114,11 @@ static herr_t  H5E_clear_entries(H5E_t *estack, unsigned nentries);
 static herr_t  H5E_print(const H5E_t *estack, FILE *stream);
 static herr_t  H5E_walk (const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, 
                              void *client_data);
+#ifdef H5_WANT_H5_V1_6_COMPAT
+static herr_t  H5E_walk_cb(int n, H5E_error_t *err_desc, void *client_data);
+#else /* H5_WANT_H5_V1_6_COMPAT */
 static herr_t  H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 static herr_t  H5E_get_auto(const H5E_t *estack, H5E_auto_t *func, void **client_data);
 static herr_t  H5E_set_auto(H5E_t *estack, H5E_auto_t func, void *client_data);
 
@@ -777,7 +781,7 @@ H5Eget_major(H5E_major_t maj)
     /* Don't know who is going to free it */
     msg_str = (char*)HDmalloc((++size)*sizeof(char));
 
-    if(H5E_get_msg(msg, NULL, msg_str, size)<0)
+    if(H5E_get_msg(msg, NULL, msg_str, (size_t)size)<0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
 
     ret_value = msg_str;
@@ -827,7 +831,7 @@ H5Eget_minor(H5E_minor_t min)
     /* Don't know who is going to free it */
     msg_str = (char*)HDmalloc((++size)*sizeof(char));
 
-    if(H5E_get_msg(msg, NULL, msg_str, size)<0)
+    if(H5E_get_msg(msg, NULL, msg_str, (size_t)size)<0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get error message text")
 
     ret_value = msg_str;
@@ -835,8 +839,8 @@ H5Eget_minor(H5E_minor_t min)
 done:
     FUNC_LEAVE_API(ret_value)
 }
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
-#else
 
 /*-------------------------------------------------------------------------
  * Function:	H5Eget_msg
@@ -872,7 +876,6 @@ H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg_str, size_t size)
 done:
     FUNC_LEAVE_API(ret_value)
 }
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 
 
 /*-------------------------------------------------------------------------
@@ -1785,7 +1788,7 @@ done:
 herr_t
 H5Eprint(FILE *stream)
 {
-    H5E_t   *estack = NULL;            /* Error stack to operate on */
+    H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
     
     /* Don't clear the error stack! :-) */
@@ -2062,6 +2065,16 @@ H5E_walk (const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, void 
     /* Walk the stack if a callback function was given */
     if(func) {
         status=SUCCEED;
+#ifdef H5_WANT_H5_V1_6_COMPAT
+        if (H5E_WALK_UPWARD==direction) {
+            for (i=0; i<(int)estack->nused && status>=0; i++)
+                status = (func)(i, estack->slot+i, client_data);
+        } else {
+            H5_CHECK_OVERFLOW(estack->nused-1,size_t,int);
+            for (i=(int)(estack->nused-1); i>=0 && status>=0; i--)
+                status = (func)((int)estack->nused-(i+1), estack->slot+i, client_data);
+        }
+#else /* H5_WANT_H5_V1_6_COMPAT */
         if (H5E_WALK_UPWARD==direction) {
             for (i=0; i<(int)estack->nused && status>=0; i++)
                 status = (func)((unsigned)i, estack->slot+i, client_data);
@@ -2070,6 +2083,7 @@ H5E_walk (const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, void 
             for (i=(int)(estack->nused-1); i>=0 && status>=0; i--)
                 status = (func)(estack->nused-(size_t)(i+1), estack->slot+i, client_data);
         }
+#endif /* H5_WANT_H5_V1_6_COMPAT */
         if(status<0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
     } /* end if */
@@ -2112,8 +2126,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5_WANT_H5_V1_6_COMPAT
+static herr_t
+H5E_walk_cb(int n, H5E_error_t *err_desc, void *client_data)
+#else /* H5_WANT_H5_V1_6_COMPAT */
 static herr_t
 H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data)
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
     H5E_print_t         *eprint  = (H5E_print_t *)client_data;
     FILE		*stream;        /* I/O stream to print output to */
@@ -2177,10 +2196,17 @@ H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data)
         have_desc=0;
 
     /* Print error message */
-    fprintf (stream, "%*s#%03u: %s line %u in %s()%s%s\n",
+#ifdef H5_WANT_H5_V1_6_COMPAT
+    fprintf (stream, "%*s#%03d: %s line %u in %s()%s%s\n",
 	     H5E_INDENT, "", n, err_desc->file_name, err_desc->line,
 	     err_desc->func_name, (have_desc ? ": " : ""),
              (err_desc->desc ? err_desc->desc : ""));
+#else /* H5_WANT_H5_V1_6_COMPAT */
+    fprintf (stream, "%*s#%03u: %s line %u in %s()%s%s\n",
+	     H5E_INDENT, "", n, err_desc->file_name, err_desc->line,
+	     err_desc->func_name, (have_desc ? ": " : ""),
+             (have_desc ? err_desc->desc : ""));
+#endif /* H5_WANT_H5_V1_6_COMPAT */
     fprintf (stream, "%*smajor: %s\n", H5E_INDENT*2, "", maj_str);
     fprintf (stream, "%*sminor: %s\n", H5E_INDENT*2, "", min_str);
 

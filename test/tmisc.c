@@ -2648,7 +2648,7 @@ test_misc16(void)
     hid_t file;         /* File ID */
     herr_t ret;         /* Generic return value */
     const char wdata[MISC16_SPACE_DIM][MISC16_STR_SIZE] = 
-                        {"1234567", "1234567\0", "12345678", NULL};
+                        {"1234567", "1234567\0", "12345678", {NULL}};
     char rdata[MISC16_SPACE_DIM][MISC16_STR_SIZE];  /* Information read in */
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		sid;       /* Dataspace ID			*/
@@ -2729,7 +2729,7 @@ test_misc17(void)
     hid_t file;         /* File ID */
     herr_t ret;         /* Generic return value */
     const char wdata[MISC17_SPACE_DIM1][MISC17_SPACE_DIM2] = 
-                        {"1234567", "1234567\0", "12345678", NULL};
+                        {"1234567", "1234567\0", "12345678", {NULL}};
     char rdata[MISC17_SPACE_DIM1][MISC17_SPACE_DIM2];  /* Information read in */
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		sid;       /* Dataspace ID			*/

@@ -126,7 +126,7 @@ main(void)
 	goto error;
     }
     for (i=0; i<NOBJS; i++) {
-        H5HL_t *heap = NULL;
+        const H5HL_t *heap = NULL;
 
 	sprintf(buf, "%03d-", i);
         for (j=4; j<i; j++) buf[j] = '0' + j%10;
