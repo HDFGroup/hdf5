@@ -2268,10 +2268,12 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
          * Truncate it if this is true. */
         if(file->cls->get_eoa) {
             haddr_t     eoa;
+
             eoa = file->cls->get_eoa(file);
             if(eoa == (last->addr+last->size)) {
                 if(file->cls->set_eoa(file, last->addr) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "set end of space allocation request failed");
+
                 /* Remove this free block from the list */
                 file->fl[mapped_type] = last->next;
                 if(file->maxsize==last->size)
@@ -2984,7 +2986,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
             /* Check if the piece of metadata being written adjoins or is inside the metadata accumulator */
             if((addr>=file->accum_loc && addr<=(file->accum_loc+file->accum_size))
                 || ((addr+size)>file->accum_loc && (addr+size)<=(file->accum_loc+file->accum_size))
-                || (addr<file->accum_loc && (addr+size)>file->accum_loc)) {
+                || (addr<file->accum_loc && (addr+size)>=file->accum_loc)) {
 
                 /* Check if the new metadata adjoins the beginning of the current accumulator */
                 if((addr+size)==file->accum_loc) {
