@@ -36,6 +36,7 @@
 ./bin/locate_sw
 ./bin/ltmain.sh
 ./bin/mkdirs
+./bin/reconfigure.sh			_DO_NOT_DISTRIBUTE_
 ./bin/release
 ./bin/runtest				_DO_NOT_DISTRIBUTE_
 ./bin/snapshot
