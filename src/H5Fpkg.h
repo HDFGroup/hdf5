@@ -185,11 +185,13 @@ struct H5F_t {
     H5F_mtab_t		mtab;		/* File mount table		*/
 };
 
+#ifdef OLD_METADATA_WRITE
 #ifdef H5_HAVE_PARALLEL
 /* Whether a single process writes metadata */
 H5_DLLVAR  hbool_t H5_mpi_1_metawrite_g;
 H5_DLLVAR  hbool_t H5_mpiposix_1_metawrite_g;
 #endif /* H5_HAVE_PARALLEL */
+#endif /* OLD_METADATA_WRITE */
 
 /* Private functions, not part of the publicly documented API */
 #ifdef NOT_YET
