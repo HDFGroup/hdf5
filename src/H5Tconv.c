@@ -543,6 +543,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
         buf_stride = buf_stride ? buf_stride : src->size;
 
         /* Optimize for popular sizes */
+        if(nelmts>0) {
         switch(md) {
             case 1:     /* Swap 2-byte objects */
 #ifdef NO_DUFFS_DEVICE
@@ -1069,6 +1070,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 #endif /* NO_DUFFS_DEVICE */
                 break;
         } /* end switch */
+        } /* end if */
 	break;
 
     case H5T_CONV_FREE:
