@@ -146,21 +146,7 @@ do_pio(parameters param)
 
     /* debug */
     if (pio_debug_level>=4) {
-	if (pio_info_g==MPI_INFO_NULL){
-	    printf("INFO object is MPI_INFO_NULL\n");
-	}
-	else {
-	    char value[128];
-	    int  flag;
-	    MPI_Info_get(pio_info_g, "IBM_largeblock_io", 127, value, &flag);
-	    printf("after MPI_Info_get, flag=%d\n", flag);
-	    if (flag){
-		printf("found IBM_largeblock_io=%s, in info object\n", value);
-	    }else{
-		printf("could not find IBM_largeblock_io in info object\n");
-	    }
-
-	}
+	h5_dump_info_object(pio_info_g);
     }
 
     /* IO type */
@@ -1102,7 +1088,6 @@ do_cleanupfile(iotype iot, char *fname)
         }
     }
 }
-
 
 #ifndef TIME_MPI
 #define TIME_MPI

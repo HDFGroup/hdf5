@@ -26,6 +26,9 @@
  * the parallel test files. 
  */
 extern char *paraprefix;
+#ifdef H5_HAVE_PARALLEL
+extern MPI_Info pio_info_g;         /* MPI INFO object to run the PIO */
+#endif
 
 /*
  * The name of the test is printed by saying TESTING("something") which will
@@ -59,7 +62,11 @@ char *h5_fixname(const char *base_name, hid_t fapl, char *fullname,
 hid_t h5_fileaccess(void);
 void h5_no_hwconv(void);
 void h5_reset(void);
+#ifdef H5_HAVE_PARALLEL
 void h5_show_hostname(void);
+int h5_set_info_object(void);
+void h5_dump_info_object(MPI_Info info);
+#endif
 
 #ifdef __cplusplus
 }
