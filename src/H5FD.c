@@ -30,15 +30,15 @@
 #define PABLO_MASK	H5FD_mask
 
 /* Packages needed by this file */
-#include "H5private.h"		/*library functions			*/
-#include "H5Dprivate.h"		/*datasets      			*/
-#include "H5Eprivate.h"		/*error handling			*/
-#include "H5Fpkg.h"		/*files					*/
-#include "H5FDprivate.h"	/*virtual file driver			*/
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5Iprivate.h"		/*interface abstraction layer		*/
-#include "H5MMprivate.h"	/*memory management			*/
-#include "H5Pprivate.h"		/*property lists			*/
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"             /* File access				*/
+#include "H5FDprivate.h"	/* File drivers				*/
+#include "H5FLprivate.h"	/* Free lists                           */
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Pprivate.h"		/* Property lists			*/
 
 #ifdef H5_HAVE_FPHDF5
 #include "H5FDfphdf5.h"         /*Flexible Parallel HDF5 driver         */
