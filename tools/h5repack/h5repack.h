@@ -189,6 +189,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
                   hid_t dcpl_id,       /* dataset creation property list */
                   hid_t type_id,       /* datatype */
                   pack_opt_t *options, /* repack options */
+																		int has_layout,      /* input chunk */
                   pack_info_t *obj);   /* info about object to filter */
 
 int has_filter(hid_t dcpl_id,
