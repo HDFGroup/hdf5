@@ -649,7 +649,6 @@ H5S_hyper_fread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
 		   FUNC,i,(int)regions[i].start,(int)regions[i].end);
 #endif /* QAK */
         if((dim+2)==fhyper_info->space->extent.u.simple.rank) {
-
             /* perform I/O on data from regions */
             for(i=0; i<num_regions && fhyper_info->nelmts>0; i++) {
                 /* Compute the size of the region to read */
@@ -1705,6 +1704,102 @@ H5S_hyper_bsearch(hssize_t size, H5S_hyper_bound_t *barr, size_t count)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_hyper_node_add
+ PURPOSE
+    Add a new node to a list of hyperslab nodes
+ USAGE
+    herr_t H5S_hyper_node_add(head, start, size)
+        H5S_hyper_node_t *head;   IN: Pointer to head of hyperslab list
+        intn endflag;             IN: "size" array actually contains "end" array
+        intn rank;                IN: # of dimensions of the node
+        const hssize_t *start;    IN: Offset of block
+        const hsize_t *size;      IN: Size of block
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Adds a new hyperslab node to a list of them.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_hyper_node_add (H5S_hyper_node_t **head, intn endflag, intn rank, const hssize_t *start, const hsize_t *size)
+{
+    H5S_hyper_node_t *slab;     /* New hyperslab node to add */
+    intn i;     /* Counters */
+    herr_t ret_value=SUCCEED;
+
+    FUNC_ENTER (H5S_hyper_node_add, FAIL);
+
+    /* Check args */
+    assert (head);
+    assert (start);
+    assert (size);
+
+    /* Create new hyperslab node to insert */
+    if((slab = H5MM_malloc(sizeof(H5S_hyper_node_t)))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab node");
+    if((slab->start = H5MM_malloc(sizeof(hsize_t)* rank))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab start boundary");
+    if((slab->end = H5MM_malloc(sizeof(hsize_t)* rank))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab end boundary");
+
+    /* Set boundary on new node */
+    for(i=0; i<rank; i++) {
+        slab->start[i]=start[i];
+        if(endflag)
+            slab->end[i]=size[i];
+        else
+            slab->end[i]=start[i]+size[i]-1;
+    } /* end for */
+
+    /* Prepend on list of hyperslabs for this selection */
+    slab->next=*head;
+    *head=slab;
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5S_hyper_node_add() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_node_prepend
+ PURPOSE
+    Prepend an existing node to an existing list of hyperslab nodes
+ USAGE
+    herr_t H5S_hyper_node_prepend(head, node)
+        H5S_hyper_node_t **head;  IN: Pointer to pointer to head of hyperslab list
+        H5S_hyper_node_t *node;   IN: Pointer to node to prepend
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Prepends an existing hyperslab node to a list of them.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S_hyper_node_prepend (H5S_hyper_node_t **head, H5S_hyper_node_t *node)
+{
+    herr_t ret_value=SUCCEED;
+
+    FUNC_ENTER (H5S_hyper_node_prepend, FAIL);
+
+    /* Check args */
+    assert (head);
+    assert (node);
+
+    /* Prepend on list of hyperslabs for this selection */
+    node->next=*head;
+    *head=node;
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_hyper_node_prepend() */
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_hyper_add
  PURPOSE
     Add a block to hyperslab selection
@@ -1712,7 +1807,7 @@ H5S_hyper_bsearch(hssize_t size, H5S_hyper_bound_t *barr, size_t count)
     herr_t H5S_hyper_add(space, start, size)
         H5S_t *space;       	  IN: Pointer to dataspace
         const hssize_t *start;    IN: Offset of block
-        const hsize_t *size;      IN: Size of block
+        const hsize_t *end;       IN: Offset of end of block
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -1723,14 +1818,14 @@ H5S_hyper_bsearch(hssize_t size, H5S_hyper_bound_t *barr, size_t count)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *size)
+H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *end)
 {
     H5S_hyper_node_t *slab;     /* New hyperslab node to insert */
     H5S_hyper_bound_t *tmp;     /* Temporary pointer to an hyperslab bound array */
     intn bound_loc;             /* Boundary location to insert hyperslab */
     size_t elem_count;          /* Number of elements in hyperslab selection */
     intn i;     /* Counters */
-    herr_t ret_value=FAIL;
+    herr_t ret_value=SUCCEED;
 #ifdef QAK
     extern int qak_debug;
 #endif /* QAK */
@@ -1740,7 +1835,7 @@ H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *size)
     /* Check args */
     assert (space);
     assert (start);
-    assert (size);
+    assert (end);
 
 #ifdef QAK
     qak_debug=1;
@@ -1751,16 +1846,11 @@ H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *size)
 #endif /* QAK */
     /* Create new hyperslab node to insert */
     if((slab = H5MM_malloc(sizeof(H5S_hyper_node_t)))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-            "can't allocate hyperslab node");
-    if((slab->start = H5MM_malloc(sizeof(hsize_t)*
-				  space->extent.u.simple.rank))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-            "can't allocate hyperslab start boundary");
-    if((slab->end = H5MM_malloc(sizeof(hsize_t)*
-				space->extent.u.simple.rank))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-            "can't allocate hyperslab end boundary");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab node");
+    if((slab->start = H5MM_malloc(sizeof(hsize_t)*space->extent.u.simple.rank))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab start boundary");
+    if((slab->end = H5MM_malloc(sizeof(hsize_t)*space->extent.u.simple.rank))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab end boundary");
 
 #ifdef QAK
     printf("%s: check 2.0\n",FUNC);
@@ -1768,12 +1858,12 @@ H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *size)
     /* Set boundary on new node */
     for(i=0,elem_count=1; i<space->extent.u.simple.rank; i++) {
 #ifdef QAK
-	printf("%s: check 2.1, %d: start=%d, size=%d, elem_count=%d\n",
-	       FUNC,(int)i,(int)start[i],(int)size[i],(int)elem_count);
+	printf("%s: check 2.1, %d: start=%d, end=%d, elem_count=%d\n",
+	       FUNC,(int)i,(int)start[i],(int)end[i],(int)elem_count);
 #endif /* QAK */
         slab->start[i]=start[i];
-        slab->end[i]=start[i]+size[i]-1;
-        elem_count*=size[i];
+        slab->end[i]=end[i];
+        elem_count*=(end[i]-start[i])+1;
     } /* end for */
 
     /* Initialize caching parameters */
@@ -1885,12 +1975,12 @@ H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *size)
             space->select.sel_info.hyper.hyper_lst->hi_bounds[i][bound_loc].node=slab;
         } /* end else */
     } /* end for */
-#ifdef QAK
-    printf("%s: check 5.0\n",FUNC);
-#endif /* QAK */
 
     /* Increment the number of bounds in the array */
     space->select.sel_info.hyper.hyper_lst->count++;
+#ifdef QAK
+    printf("%s: check 5.0, count=%d\n",FUNC,(int)space->select.sel_info.hyper.hyper_lst->count);
+#endif /* QAK */
     
     /* Prepend on list of hyperslabs for this selection */
     slab->next=space->select.sel_info.hyper.hyper_lst->head;
@@ -1899,24 +1989,268 @@ H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *size)
     /* Increment the number of elements in the hyperslab selection */
     space->select.num_elem+=elem_count;
 #ifdef QAK
-    printf("%s: check 6.0\n",FUNC);
+    printf("%s: check 6.0, elem_count=%d\n",FUNC,(int)elem_count);
     {
         intn j;
         
         for(i=0; i<space->extent.u.simple.rank; i++) {
             for(j=0; j<(int)space->select.sel_info.hyper.hyper_lst->count; j++) {
-		printf("%s: lo_bound[%d][%d]=%d, hi_bound[%d][%d]=%d\n",
-		       FUNC,i,j,
-        (int)space->select.sel_info.hyper.hyper_lst->lo_bounds[i][j].bound,i,j,
-        (int)space->select.sel_info.hyper.hyper_lst->hi_bounds[i][j].bound);
+                printf("%s: lo_bound[%d][%d]=%d, hi_bound[%d][%d]=%d\n", FUNC,
+                    i,j,(int)space->select.sel_info.hyper.hyper_lst->lo_bounds[i][j].bound,
+                    i,j,(int)space->select.sel_info.hyper.hyper_lst->hi_bounds[i][j].bound);
             }
         }
     }
 #endif /* QAK */
 
 done:
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE (ret_value);
 }   /* H5S_hyper_add() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_clip
+ PURPOSE
+    Clip a list of nodes against the current selection
+ USAGE
+    herr_t H5S_hyper_add(space, nodes, uniq, overlap)
+        H5S_t *space;       	  IN: Pointer to dataspace
+        H5S_hyper_node_t *nodes;  IN: Pointer to list of nodes
+        H5S_hyper_node_t **uniq;  IN: Handle to list of non-overlapping nodes
+        H5S_hyper_node_t **overlap;  IN: Handle to list of overlapping nodes
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Clips a list of hyperslab nodes against the current hyperslab selection.
+    The list of non-overlapping and overlapping nodes which are generated from
+    this operation are returned in the 'uniq' and 'overlap' pointers.  If
+    either of those lists are not needed, they may be set to NULL and the
+    list will be released.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Clipping a multi-dimensional space against another multi-dimensional
+    space generates at most 1 overlapping region and 2*<rank> non-overlapping
+    regions, falling into the following categories in each dimension:
+        Case 1 - A overlaps B on both sides:
+            node            <----AAAAAAAA--->
+                clipped against:
+            existing        <-----BBBBB----->
+                generates:
+            overlapping     <-----CCCCC----->
+            non-overlapping <----D---------->
+            non-overlapping <----------EE--->
+
+        Case 2 - A overlaps B on one side: (need to check both sides!)
+            Case 2a:
+                node            <------AAAAAA--->
+                    clipped against:
+                existing        <-----BBBBB----->
+                    generates:
+                overlapping     <------CCCC----->
+                non-overlapping <----------EE--->
+            Case 2b:
+                node            <---AAAAA------->
+                    clipped against:
+                existing        <-----BBBBB----->
+                    generates:
+                overlapping     <-----CCC------->
+                non-overlapping <---EE---------->
+
+        Case 3 - A is entirely within B:
+            node            <------AA------->
+                clipped against:
+            existing        <-----BBBBB----->
+                generates:
+            overlapping     <------CC------->
+
+        Case 4 - A is entirely outside B: (doesn't matter which side)
+            node            <-----------AAA->
+                clipped against:
+            existing        <-----BBBBB----->
+                generates:
+            non-overlapping <-----------AAA->
+
+    This algorithm could be sped up by keeping track of the last (existing)
+    region the new node was compared against when it was split and resume
+    comparing against the region following that one when it's returned to
+    later (for non-overlapping blocks).
+
+    Another optimization is to build a n-tree (not certain about how many
+    times each dimension should be cut, but at least once) for the dataspace
+    and build a list of existing blocks which overlap each "n"-tant and only
+    compare the new nodes against existing node in the region of the n-tree
+    which the are located in.
+
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_hyper_clip (H5S_t *space, H5S_hyper_node_t *nodes, H5S_hyper_node_t **uniq,
+        H5S_hyper_node_t **overlap)
+{
+    H5S_hyper_node_t *region,   /* Temp. hyperslab selection region pointer */
+        *node,                  /* Temp. hyperslab node pointer */
+        *next_node;             /* Pointer to next node in node list */
+    hsize_t *start, *end=NULL;  /* Temporary arrays of start & sizes (for splitting nodes) */
+    intn rank;                  /* Cached copy of the rank of the dataspace */
+    intn overlapped;            /* Flag for overlapping nodes */
+    intn non_intersect;         /* Flag for non-intersecting nodes */
+    intn i;     /* Counters */
+    enum               /* Cases for edge overlaps */
+        {OVERLAP_BOTH,OVERLAP_LOWER,OVERLAP_UPPER,WITHIN,NO_OVERLAP} clip_case;
+    herr_t ret_value=SUCCEED;
+
+    FUNC_ENTER (H5S_hyper_clip, FAIL);
+
+    /* Check args */
+    assert (space);
+    assert (nodes);
+
+    /* Allocate space for the temporary starts & sizes */
+    if((start = H5MM_malloc(sizeof(hsize_t)*space->extent.u.simple.rank))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab start array");
+    if((end = H5MM_malloc(sizeof(hsize_t)*space->extent.u.simple.rank))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab size array");
+
+    /* Set up local variables */
+    rank=space->extent.u.simple.rank;
+
+    /*
+     * Cycle through all the hyperslab nodes, clipping them against the 
+     * existing hyperslab selection.
+     */
+    node=nodes;
+    while(node!=NULL) {
+        /* Remove current node from head of list to evaulate it */
+        next_node=node->next;   /* retain next node in list */
+        if(nodes==node)
+            nodes=nodes->next;  /* Move head of list */
+        node->next=NULL;    /* just to be safe */
+
+        overlapped=0;       /* Reset overlapped flag */
+        region=space->select.sel_info.hyper.hyper_lst->head;
+        while(region!=NULL && overlapped==0) {
+            /* Check for intersection */
+            for(i=0, non_intersect=0; i<rank && non_intersect==0; i++) {
+                if(node->end[i]<region->start[i] || node->start[i]>region->end[i])
+                    non_intersect=1;
+            } /* end for */
+
+            /* Only compare node with regions that actually intersect */
+            if(non_intersect==0) {
+                /* Compare the boundaries of the two objects in each dimension */
+                for(i=0; i<rank && overlapped==0; i++) {
+                    /* Find overlap case we are in */
+
+                    /* True if case 1, 4 or 2b */
+                    if(node->start[i]<region->start[i]) {
+                        /* Test for case 4 */
+                        /* NO_OVERLAP cases could be taken out, but are left in for clarity */
+                        if(node->end[i]<region->start[i]) {
+                            clip_case=NO_OVERLAP;
+                            assert("invalid clipping case" && 0);
+                        } /* end if */
+                        else {
+                            /* Test for case 2b */
+                            if(node->end[i]<=region->end[i]) {
+                                clip_case=OVERLAP_LOWER;
+                            } /* end if */
+                            /* Must be case 1 */
+                            else {
+                                clip_case=OVERLAP_BOTH;
+                            } /* end else */
+                        } /* end else */
+                    } /* end if */
+                    /* Case 2a, 3 or 4 (on the other side)*/
+                    else {
+                        /* Test for case 4 */
+                        if(node->start[i]>region->end[i]) {
+                            clip_case=NO_OVERLAP;
+                            assert("invalid clipping case" && 0);
+                        } /* end if */
+                        /* Case 2a or 3 */
+                        else {
+                            /* Test for case 2a */
+                            if(node->end[i]>region->end[i]) {
+                                clip_case=OVERLAP_UPPER;
+                            } /* end if */
+                            /* Must be case 3 */
+                            else {
+                                clip_case=WITHIN;
+                            } /* end else */
+                        } /* end else */
+                    } /* end else */
+                    
+                    if(clip_case!=WITHIN) {
+                        /* Copy all the dimensions start & end points */
+                        HDmemcpy(start,node->start,rank*sizeof(hssize_t));
+                        HDmemcpy(end,node->end,rank*sizeof(hssize_t));
+                    } /* end if */
+
+                    /* Work on upper overlapping block */
+                    if(clip_case==OVERLAP_BOTH || clip_case==OVERLAP_LOWER) {
+                        /* Modify the end point in the current dimension of the overlap */
+                        end[i]=region->start[i]-1;
+                        /* Clip the existing non-overlapped portion off the current node */
+                        node->start[i]=region->start[i];
+                        /* Add the non-overlapping portion to the list of new nodes */
+                        if(H5S_hyper_node_add(&nodes,1,rank,(const hsize_t *)start,(const hsize_t *)end)<0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslab");
+                    } /* end if */
+
+                    /* Work on lower overlapping block */
+                    if(clip_case==OVERLAP_BOTH || clip_case==OVERLAP_UPPER) {
+                        /* Modify the start & end point in the current dimension of the overlap */
+                        start[i]=region->end[i]+1;
+                        end[i]=node->end[i];
+                        /* Clip the existing non-overlapped portion off the current node */
+                        node->end[i]=region->end[i];
+                        /* Add the non-overlapping portion to the list of new nodes */
+                        if(H5S_hyper_node_add(&nodes,1,rank,(const hsize_t *)start,(const hsize_t *)end)<0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslab");
+                    } /* end if */
+
+                    /* Check if this is the last dimension */
+                    /* Add the block to the "overlapped" list, if so */
+                    /* Allow the algorithm to proceed to the next dimension otherwise */
+                    if(i==(rank-1)) {   
+                        if(overlap!=NULL) {
+                            if(H5S_hyper_node_prepend(overlap,node)<0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslab");
+                        }
+                        overlapped=1;   /* stop the algorithm for this block */
+                    } /* end if */
+                } /* end for */
+            } /* end if */
+
+            /* Advance to next hyperslab region */
+            region=region->next;
+        } /* end while */
+
+        /* Check whether we should add the node to the non-overlapping list */
+        if(!overlapped) {
+            if(uniq!=NULL) {
+                if(H5S_hyper_node_prepend(uniq,node)<0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslab");
+            }
+        } /* end if */
+
+        /* Advance to next hyperslab node */
+        node=next_node;
+
+        /* Check if we've added more nodes from splitting to the list */
+        if(node==NULL && nodes!=NULL)
+            node=nodes;
+    } /* end while */
+
+done:
+    if(start!=NULL)
+        H5MM_xfree(start);
+    if(end!=NULL)
+        H5MM_xfree(end);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_hyper_clip() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -2107,7 +2441,7 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
 {
     H5S_hyper_list_t *new_hyper;    /* New hyperslab selection */
     H5S_hyper_node_t *curr, *new, *new_head;    /* Hyperslab information nodes */
-    H5S_hyper_dim_t *new_diminfo;	/* New per-dimension info array[rank] */
+    H5S_hyper_dim_t *new_diminfo=NULL;	/* New per-dimension info array[rank] */
     intn i;                     /* Counters */
     size_t u;                   /* Counters */
     herr_t ret_value=SUCCEED;   /* return value */
@@ -2120,19 +2454,19 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
 #ifdef QAK
     printf("%s: check 3.0\n", FUNC);
 #endif /* QAK */
-    /* Create the per-dimension selection info */
-    if((new_diminfo = H5MM_malloc(sizeof(H5S_hyper_dim_t)*
-				  src->extent.u.simple.rank))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-            "can't allocate per-dimension array");
+    if(src->select.sel_info.hyper.diminfo!=NULL) {
+        /* Create the per-dimension selection info */
+        if((new_diminfo = H5MM_malloc(sizeof(H5S_hyper_dim_t)*src->extent.u.simple.rank))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate per-dimension array");
 
-    /* Copy the per-dimension selection info */
-    for(i=0; i<src->extent.u.simple.rank; i++) {
-    	new_diminfo[i].start = src->select.sel_info.hyper.diminfo[i].start;
-    	new_diminfo[i].stride = src->select.sel_info.hyper.diminfo[i].stride;
-    	new_diminfo[i].count = src->select.sel_info.hyper.diminfo[i].count;
-    	new_diminfo[i].block = src->select.sel_info.hyper.diminfo[i].block;
-    } /* end for */
+        /* Copy the per-dimension selection info */
+        for(i=0; i<src->extent.u.simple.rank; i++) {
+            new_diminfo[i].start = src->select.sel_info.hyper.diminfo[i].start;
+            new_diminfo[i].stride = src->select.sel_info.hyper.diminfo[i].stride;
+            new_diminfo[i].count = src->select.sel_info.hyper.diminfo[i].count;
+            new_diminfo[i].block = src->select.sel_info.hyper.diminfo[i].block;
+        } /* end for */
+    } /* end if */
     dst->select.sel_info.hyper.diminfo = new_diminfo;
 
     /* Create the new hyperslab information node */

@@ -34,8 +34,10 @@ typedef enum H5S_class_t {
 
 /* Different ways of combining selections */
 typedef enum H5S_seloper_t {
-    H5S_NOOP             = -1,  /*error                                      */
-    H5S_SELECT_SET       = 0    /* Select "set" operation */
+    H5S_SELECT_NOOP      = -1,  /* error                                     */
+    H5S_SELECT_SET       = 0,   /* Select "set" operation */
+    H5S_SELECT_OR,              /* Binary "or" operation (add new selection to existing selection) */
+    H5S_SELECT_INVALID          /* Invalid upper bound on selection operations */
 } H5S_seloper_t;
 
 #ifdef __cplusplus

@@ -335,8 +335,7 @@ herr_t H5S_all_release (H5S_t *space);
 hsize_t H5S_all_npoints (const H5S_t *space);
 
 /* Hyperslab selection functions */
-herr_t H5S_hyper_add (H5S_t *space, const hssize_t *start,
-		      const hsize_t *size);
+herr_t H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *end);
 herr_t H5S_hyper_release (H5S_t *space);
 herr_t H5S_hyper_sel_iter_release (H5S_sel_iter_t *sel_iter);
 hsize_t H5S_hyper_npoints (const H5S_t *space);
@@ -344,6 +343,8 @@ int H5S_hyper_compare_regions (const void *r1, const void *r2);
 int H5S_hyper_compare_bounds (const void *r1, const void *r2);
 herr_t H5S_hyper_copy (H5S_t *dst, const H5S_t *src);
 hbool_t H5S_hyper_select_valid (const H5S_t *space);
+herr_t H5S_hyper_node_add (H5S_hyper_node_t **head, intn endflag, intn rank, const hssize_t *start, const hsize_t *size);
+herr_t H5S_hyper_clip (H5S_t *space, H5S_hyper_node_t *nodes, H5S_hyper_node_t **uniq, H5S_hyper_node_t **overlap);
 
 #ifdef HAVE_PARALLEL
     /* MPI-IO function to read directly from app buffer to file rky980813 */

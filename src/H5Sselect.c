@@ -229,8 +229,8 @@ H5S_select_release (H5S_t *space)
     If the current selection is not a hyperslab, it is freed and the hyperslab
     parameters passed in are combined with the H5S_SEL_ALL hyperslab (ie. a
     selection composing the entire current extent).  Currently, only the
-    H5S_SELECT_SET operation is supported.  If STRIDE or BLOCK is NULL, they
-    are assumed to be set to all '1'.
+    H5S_SELECT_SET & H5S_SELECT_OR operations are supported.  If STRIDE or
+    BLOCK is NULL, they are assumed to be set to all '1'.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -256,14 +256,14 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
     }
     if(start==NULL || count==NULL) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified");
-    }
-    if(op!=H5S_SELECT_SET) {
-        HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL,
-            "operations other than H5S_SELECT_SET not supported currently");
-    }
+    } /* end if */
+
+    if(!(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID)) {
+        HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+    } /* end if */
 
     if (H5S_select_hyperslab(space, op, start, _stride, count, _block)<0) {
-	HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
+        HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		      "unable to set hyperslab selection");
     }
 
@@ -299,6 +299,9 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     hsize_t *_block=NULL;        /* Block size array */
     hssize_t slab[H5O_LAYOUT_NDIMS]; /* Location of the block to add for strided selections */
     size_t slice[H5O_LAYOUT_NDIMS];	 /* Size of preceding dimension's slice */
+    H5S_hyper_node_t *add=NULL, /* List of hyperslab nodes to add */
+        *uniq=NULL,         /* List of unique hyperslab nodes */
+        *tmp;               /* Temporary hyperslab node */
     uintn acc;                /* Accumulator for building slices */
     uintn contig;             /* whether selection is contiguous or not */
     int i,j;                  /* Counters */
@@ -311,7 +314,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     assert(space);
     assert(start);
     assert(count);
-    assert(H5S_SELECT_SET==op);
+    assert(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID);
     
     /* Fill in the correct stride values */
     if(stride==NULL) {
@@ -322,7 +325,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate stride vector");
         H5V_array_fill(_stride,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
-	stride = _stride;
+        stride = _stride;
     }
 
     /* Fill in the correct block values */
@@ -333,20 +336,20 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
                 "can't allocate block vector");
         H5V_array_fill(_block,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
-	block = _block;
+        block = _block;
     }
 
     /*
      * Check for overlapping blocks (remove when real block-merging algorithm
-     * is in place).
+     * is in place?).
      */
     if(op==H5S_SELECT_SET && block!=NULL) {
-	for(i=0; i<space->extent.u.simple.rank; i++) {
-	    if(stride[i]<block[i]) {
-		HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-			    "hyperslab blocks overlap");
-	    } /* end if */
-	} /* end for */
+        for(i=0; i<space->extent.u.simple.rank; i++) {
+            if(stride[i]<block[i]) {
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "hyperslab blocks overlap");
+            } /* end if */
+        } /* end for */
     } /* end if */
 
     /* Determine if selection is contiguous */
@@ -371,19 +374,6 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         } /* end if */
     } /* end if */
 
-    /* Copy all the per-dimension selection info into the space descriptor */
-    if((diminfo = H5MM_malloc(sizeof(H5S_hyper_dim_t)*space->extent.u.simple.rank))==NULL) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                "can't allocate per-dimension vector");
-    } /* end if */
-    for(i=0; i<space->extent.u.simple.rank; i++) {
-        diminfo[i].start = start[i];
-        diminfo[i].stride = stride[i];
-        diminfo[i].count = count[i];
-        diminfo[i].block = block[i];
-    } /* end for */
-    space->select.sel_info.hyper.diminfo = diminfo;
-
 #ifdef QAK
     printf("%s: check 2.0\n",FUNC);
 #endif /* QAK */
@@ -397,11 +387,93 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab lo bound information");
     } /* end if */
 
+#ifndef OLD_WAY
     /* Generate list of blocks to add/remove based on selection operation */
+    switch(op) {
+        case H5S_SELECT_SET:
+        case H5S_SELECT_OR:
+            /* Generate list of blocks to add to selection */
+            if(contig) { /* Check for trivial case */
+
+                /* Account for strides & blocks being equal, but larger than one */
+                /* (Why someone would torture us this way, I don't know... -QAK :-) */
+                for(i=0; i<space->extent.u.simple.rank; i++)
+                    slab[i]=count[i]*stride[i];
+
+                /* Add the contiguous hyperslab to the selection */
+                if(H5S_hyper_node_add(&add,0,space->extent.u.simple.rank,start,(const hsize_t *)slab)<0) {
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslab");
+                }
+            } else {
+                /* Build the slice sizes for each dimension */
+                for(i=0, acc=1; i<space->extent.u.simple.rank; i++) {
+                    slice[i]=acc;
+                    acc*=count[i];
+                } /* end for */
+
+                /* Step through all the blocks to add */
+                /* (reuse the count in ACC above) */
+                for(i=0; i<(int)acc; i++) {
+                    /* Build the location of the block */
+                    for(j=0; j<space->extent.u.simple.rank; j++)
+                        slab[j]=start[j]+((i/slice[j])%count[j])*stride[j];
+                    
+                    /* Add the block to the list of hyperslab selections */
+                    if(H5S_hyper_node_add(&add,0,space->extent.u.simple.rank,(const hssize_t *)slab, (const hsize_t *)block)<0) {
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslab");
+                    } /* end if */
+                } /* end for */
+            } /* end if */
+
+            /* Clip list of new blocks to add against current selection */
+            if(op==H5S_SELECT_OR) {
+                H5S_hyper_clip(space,add,&uniq,NULL);
+                add=uniq;
+            } /* end if */
+            else {
+                /* Copy all the per-dimension selection info into the space descriptor */
+                if((diminfo = H5MM_malloc(sizeof(H5S_hyper_dim_t)*space->extent.u.simple.rank))==NULL) {
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate per-dimension vector");
+                } /* end if */
+                for(i=0; i<space->extent.u.simple.rank; i++) {
+                    diminfo[i].start = start[i];
+                    diminfo[i].stride = stride[i];
+                    diminfo[i].count = count[i];
+                    diminfo[i].block = block[i];
+                } /* end for */
+                space->select.sel_info.hyper.diminfo = diminfo;
+            } /* end else */
+            break;
+
+        default:
+            HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+            break;
+    } /* end switch */
+
+    /* Add new blocks to current selection */
+    while(add!=NULL) {
+        tmp=add->next;
+
+        /* Add new block */
+        if(H5S_hyper_add(space,(const hssize_t *)add->start, (const hsize_t *)add->end)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslab");
+        
+        /* Free nodes in list */
+        H5MM_xfree(add->start);
+        H5MM_xfree(add->end);
+        H5MM_xfree(add);
+
+        /* Go to next node */
+        add=tmp;
+    } /* end while */
+
+    /* Merge blocks for better I/O performance */
+    /* Regenerate lo/hi bounds arrays? */
 
 #ifdef QAK
     printf("%s: check 3.0\n",FUNC);
 #endif /* QAK */
+#else /* OLD_WAY */
     /* Add hyperslab to selection */
     if(contig) { /* Check for trivial case */
 
@@ -412,8 +484,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 
         /* Add the contiguous hyperslab to the selection */
         if(H5S_hyper_add(space,start,(const hsize_t *)slab)<0) {
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL,
-                "can't insert hyperslab");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslab");
         }
     } else {
         /* Build the slice sizes for each dimension */
@@ -430,13 +501,12 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
                 slab[j]=start[j]+((i/slice[j])%count[j])*stride[j];
             
             /* Add the block to the list of hyperslab selections */
-            if(H5S_hyper_add(space,(const hssize_t *)slab,
-			     (const hsize_t *)block)<0) {
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL,
-			    "can't insert hyperslab");
+            if(H5S_hyper_add(space,(const hssize_t *)slab, (const hsize_t *)block)<0) {
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert hyperslab");
             } /* end if */
         } /* end for */
     } /* end if */
+#endif /* OLD_WAY */
 
     /* Set selection type */
     space->select.type=H5S_SEL_HYPERSLABS;

@@ -1872,11 +1872,14 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		} else {
 		    H5S_seloper_t so = va_arg(ap, H5S_seloper_t);
 		    switch (so) {
-		    case H5S_NOOP:
+		    case H5S_SELECT_NOOP:
 			fprintf(out, "H5S_NOOP");
 			break;
 		    case H5S_SELECT_SET:
 			fprintf(out, "H5S_SELECT_SET");
+			break;
+		    case H5S_SELECT_OR:
+			fprintf(out, "H5S_SELECT_OR");
 			break;
 		    default:
 			fprintf(out, "%ld", (long)so);
