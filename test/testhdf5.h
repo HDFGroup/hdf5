@@ -110,6 +110,7 @@ int print_func(const char *, ...);
 void test_metadata(void);
 void test_file(void);
 void test_heap (void);
+void test_ohdr (void);
 
 #endif /* HDF5TEST_H */
 

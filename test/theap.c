@@ -58,12 +58,11 @@ test_heap (void)
    CHECK (f, NULL, "H5Aatom_object");
 
    /* Create a new heap */
-   heap = H5H_new (f, 0);
+   heap = H5H_new (f, H5H_LOCAL, 0);
    CHECK_I (heap, "H5H_new");
 
    /* Add stuff to the heap */
    for (i=0; i<NOBJS; i++) {
-      fprintf (stderr, "%d\n", i);
       sprintf (buf, "%03d-", i);
       for (j=4; j<i; j++) buf[j] = '0' + j%10;
       if (j>4) buf[j] = '\0';
@@ -78,7 +77,7 @@ test_heap (void)
    /* Read the objects back out */
    for (i=0; i<NOBJS; i++) {
       s = H5H_peek (f, heap, obj[i]);
-      print_func ("object is `%s'\n", s);
+      MESSAGE (8, print_func ("object is `%s'\n", s););
    }
 
    /* Close the file */

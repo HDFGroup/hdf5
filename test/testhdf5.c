@@ -149,6 +149,7 @@ int main(int argc, char *argv[])
     InitTest("metadata", test_metadata, "Encode/decode metadata code");
     InitTest("file", test_file, "Low-Level File I/O");
     InitTest("heap", test_heap, "Object and Name Heaps");
+    InitTest("ohdr", test_ohdr, "Object Headers");
 
     Verbosity = 4;  /* Default Verbosity is Low */
     H5version(&major, &minor, &release, &patch);
