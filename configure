@@ -3774,7 +3774,7 @@ if test "${with_hdf4+set}" = set; then
   withval="$with_hdf4"
   :
 else
-  withval=yes
+  withval=/usr/ncsa/include,/usr/ncsa/lib
 fi
 
 case $withval in
